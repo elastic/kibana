@@ -85,9 +85,9 @@ export const declaresProperty = (
   key: string,
   document: OpenApiDocument
 ): boolean =>
-  findSubschema(schema, document, ({ properties }) =>
-    isRecord(properties) ? properties[key] : undefined
-  ) !== undefined;
+  collectParts(schema, document).some(
+    ({ properties }) => isRecord(properties) && Object.hasOwn(properties, key)
+  );
 
 /** Whether an object schema takes properties it doesn't declare. */
 export const allowsUndeclaredProperties = (schema: unknown, document: OpenApiDocument): boolean =>

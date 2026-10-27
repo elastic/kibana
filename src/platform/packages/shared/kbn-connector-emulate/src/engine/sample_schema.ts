@@ -282,7 +282,8 @@ export const sampleSchema = (
           }
           // Maps such as AWS tags may require entries (`minProperties`).
           const minProperties = numberOrUndefined(node.minProperties) ?? 0;
-          const names = new Set(sampled.map(([name]) => name));
+          // Declared names stay reserved even when the sample leaves them out.
+          const names = new Set([...Object.keys(properties), ...sampled.map(([name]) => name)]);
           for (let index = 1; sampled.length < minProperties; index++) {
             const name = `key${index}`;
             if (names.has(name)) {

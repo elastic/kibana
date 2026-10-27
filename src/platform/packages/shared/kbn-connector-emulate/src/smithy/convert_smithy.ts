@@ -23,6 +23,7 @@ import {
 
 const REST_JSON = 'aws.protocols#restJson1';
 const SIGV4 = 'aws.auth#sigv4';
+type ResponseHeaders = Record<string, Node & { readonly required: boolean }>;
 // `application/json` and structured suffixes such as `application/vnd.api+json`.
 const JSON_MEDIA_TYPE = /^application\/(?:[\w.-]+\+)?json$/i;
 // The scheme name and shape smithy-openapi uses for SigV4.
@@ -178,7 +179,7 @@ export const convertSmithy = (
     return { 'application/json': { schema: { $ref: `#/components/schemas/${componentName}` } } };
   };
 
-  const toHeaders = (members: Array<[string, MemberShape]>): Node =>
+  const toHeaders = (members: Array<[string, MemberShape]>): ResponseHeaders =>
     Object.fromEntries(
       members
         .filter(([, member]) => bindingOf(member) === 'smithy.api#httpHeader')
@@ -265,17 +266,29 @@ export const convertSmithy = (
     // match several of them. smithy-openapi keeps only the last one.
     const errorResponses = [...errors].map(([code, targets]) => {
       const schemas: JsonSchema[] = [];
-      let headers: Node = {};
+      let headers: ResponseHeaders = {};
+      const headersOf: ResponseHeaders[] = [];
       for (const target of targets) {
         const members = membersOf(model, target);
         const body = members.filter(([, member]) => bindingOf(member) === undefined);
-        headers = { ...headers, ...toHeaders(members) };
+        headersOf.push(toHeaders(members));
+        headers = { ...headers, ...headersOf[headersOf.length - 1] };
         if (body.length > 0) {
           const component = `${shapeName(target)}ResponseContent`;
           components[component] = converter.toObjectSchema(body);
           schemas.push({ $ref: `#/components/schemas/${component}` });
         }
       }
+      // A header is only mandatory when every alternative requires it.
+      headers = Object.fromEntries(
+        Object.entries(headers).map(([headerName, header]) => [
+          headerName,
+          {
+            ...header,
+            required: headersOf.every((own) => own[headerName]?.required === true),
+          },
+        ])
+      );
       return [
         code,
         {

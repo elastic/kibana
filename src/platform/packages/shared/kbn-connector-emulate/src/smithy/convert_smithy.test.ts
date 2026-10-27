@@ -230,7 +230,13 @@ const model: SmithyModel = {
     },
     [id('NotFoundException')]: {
       type: 'structure',
-      members: { message: { target: 'smithy.api#String' } },
+      members: {
+        message: { target: 'smithy.api#String' },
+        errorId: {
+          target: 'smithy.api#String',
+          traits: { ...required, 'smithy.api#httpHeader': 'x-error-id' },
+        },
+      },
       traits: { 'smithy.api#error': 'client', 'smithy.api#httpError': 404 },
     },
     [id('GoneException')]: {
@@ -401,6 +407,8 @@ describe('convertSmithy', () => {
     expect(paths['/buckets/{name}'].get.responses).toMatchObject({
       '404': {
         description: 'NotFoundException, GoneException 404 response',
+        // Only one of the alternatives defines the header, so it isn't mandatory.
+        headers: { 'x-error-id': { required: false, schema: { type: 'string' } } },
         content: {
           'application/json': {
             schema: {

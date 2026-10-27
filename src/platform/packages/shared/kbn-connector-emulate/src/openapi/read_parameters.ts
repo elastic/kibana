@@ -209,21 +209,31 @@ export const readParameters = (
   const isClaimed = (key: string): boolean =>
     claimedNames.has(key) ||
     (key.endsWith(']') && deepObjectPrefixes.some((prefix) => key.startsWith(prefix)));
-  // Form-exploded objects share the query string: a key goes to the object that declares it,
-  // else to the objects that take undeclared properties (maps), unless another declares it.
+  // Form-exploded objects share the query string: a key goes to the objects that declare it,
+  // else to the objects that take undeclared properties (maps).
   const spreading = parameters.filter((parameter) =>
     spreadsQueryKeys(parameter, getSchemaTypes(parameter.schema?.schema, document))
   );
   const declares = (parameter: OperationParameter, key: string): boolean =>
     declaresProperty(parameter.schema?.schema, key, document);
+  const allowsUndeclared = (parameter: OperationParameter): boolean =>
+    allowsUndeclaredProperties(parameter.schema?.schema, document);
   const takesKeyOf =
     (parameter: OperationParameter) =>
-    (key: string): boolean =>
-      key === parameter.name ||
-      (!isClaimed(key) &&
-        (declares(parameter, key) ||
-          (allowsUndeclaredProperties(parameter.schema?.schema, document) &&
-            !spreading.some((other) => other !== parameter && declares(other, key)))));
+    (key: string): boolean => {
+      if (key === parameter.name) {
+        return true;
+      }
+      if (isClaimed(key)) {
+        return false;
+      }
+      if (spreading.some((other) => declares(other, key))) {
+        return declares(parameter, key);
+      }
+      // A key nobody declares goes to the maps, or to every object when none takes it, so that
+      // validation rejects it.
+      return allowsUndeclared(parameter) || !spreading.some(allowsUndeclared);
+    };
   return parameters.map((parameter) => {
     const schema = parameter.schema?.schema;
     const types = getSchemaTypes(schema, document);

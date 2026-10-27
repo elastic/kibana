@@ -164,6 +164,24 @@ describe('readParameters', () => {
     });
   });
 
+  it('reads declared properties whatever their schema, and leaves unknown keys to validation', () => {
+    const parameters = [
+      {
+        name: 'filter',
+        in: 'query',
+        schema: {
+          type: 'object',
+          properties: { foo: true, color: { type: 'string' } },
+          additionalProperties: false,
+        },
+      },
+    ];
+
+    expect(read(parameters, { query: { foo: 'x', color: 'blue', typo: 'y' } })).toEqual({
+      'query.filter': { foo: 'x', color: 'blue', typo: 'y' },
+    });
+  });
+
   it('leaves the keys of deepObject parameters out of form-exploded maps', () => {
     const parameters = [
       {
