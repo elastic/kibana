@@ -2043,10 +2043,8 @@ describe('AgentExecutionService', () => {
     it("sets the active execution with the round's user message", async () => {
       await converse();
 
-      const activeExecution = appendedActiveExecution();
-      const [{ executionId, agentParams }] = mockExecutionClient.create.mock.calls[0];
-      const { roundId } = agentParams as { roundId?: string };
-      expect(activeExecution).toEqual({ executionId, triggerEventId: `${roundId}::user_message` });
+      const [{ executionId }] = mockExecutionClient.create.mock.calls[0];
+      expect(appendedActiveExecution()).toEqual({ executionId });
     });
 
     it('sets the active execution with an update without fields on a HITL resume', async () => {
@@ -2064,7 +2062,7 @@ describe('AgentExecutionService', () => {
           source: 'execution',
           access: 'converse',
           retryOnConflict: true,
-          activeExecution: { executionId, triggerEventId: 'round-1::user_message' },
+          activeExecution: { executionId },
         }
       );
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();

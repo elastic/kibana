@@ -25,12 +25,8 @@ export class ConversationBusySignal {
 }
 
 /** The `active_execution` stored for `update`, stamped with the current time. */
-export const toActiveExecution = ({
-  executionId,
-  triggerEventId,
-}: SetActiveExecution): ActiveExecution => ({
+export const toActiveExecution = ({ executionId }: SetActiveExecution): ActiveExecution => ({
   execution_id: executionId,
-  trigger_event_id: triggerEventId,
   started_at: new Date().toISOString(),
 });
 

@@ -18,14 +18,13 @@ const heldBy = (executionId: string, startedAt: string) =>
   ({
     active_execution: {
       execution_id: executionId,
-      trigger_event_id: `${executionId}-trigger`,
       started_at: startedAt,
     },
   } as NormalizedConversation);
 
 const free = {} as NormalizedConversation;
 
-const set = { executionId: 'e2', triggerEventId: 't2' };
+const set = { executionId: 'e2' };
 
 describe('applyActiveExecutionUpdate', () => {
   describe('setting', () => {
@@ -33,7 +32,6 @@ describe('applyActiveExecutionUpdate', () => {
       expect(applyActiveExecutionUpdate(free, set)).toEqual({
         active_execution: {
           execution_id: 'e2',
-          trigger_event_id: 't2',
           started_at: expect.any(String),
         },
       });

@@ -20,7 +20,6 @@ responses:
               # Present while an execution holds this conversation.
               active_execution:
                 execution_id: 3b0a8c1e-6f2d-4c57-9a43-1d8e5f7b2a90
-                trigger_event_id: 170ec3b2-0f5a-4538-8b60-549572386d2a
                 started_at: "2025-09-19T17:45:39.554Z"
               rounds:
               - id: 170ec3b2-0f5a-4538-8b60-549572386d2a

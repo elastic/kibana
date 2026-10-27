@@ -4179,7 +4179,7 @@ describe('ConversationClient', () => {
         {
           source: 'execution',
           access: 'converse',
-          activeExecution: { executionId: 'e1', triggerEventId: 't1' },
+          activeExecution: { executionId: 'e1' },
         }
       );
 
@@ -4195,7 +4195,7 @@ describe('ConversationClient', () => {
         {
           source: 'http_api',
           access: 'converse',
-          activeExecution: { executionId: 'e1', triggerEventId: 't1' },
+          activeExecution: { executionId: 'e1' },
         }
       );
 
@@ -5993,7 +5993,6 @@ describe('ConversationClient', () => {
 
     const activeExecution = (executionId: string, startedAt = STALE_STARTED_AT) => ({
       execution_id: executionId,
-      trigger_event_id: `${executionId}-trigger`,
       started_at: startedAt,
     });
 
@@ -6019,7 +6018,7 @@ describe('ConversationClient', () => {
           };
     };
 
-    const setActiveExecution = (executionId: string) => ({ executionId, triggerEventId: 't2' });
+    const setActiveExecution = (executionId: string) => ({ executionId });
 
     const indexedSource = (call = 0) =>
       (mockEsClient.index.mock.calls[call][0] as { document: Document['_source'] }).document;
@@ -6036,7 +6035,6 @@ describe('ConversationClient', () => {
 
       expect(indexedSource().active_execution).toEqual({
         execution_id: 'e2',
-        trigger_event_id: 't2',
         started_at: expect.any(String),
       });
     });
@@ -6060,7 +6058,6 @@ describe('ConversationClient', () => {
 
       expect(indexedSource().active_execution).toMatchObject({
         execution_id: 'e2',
-        trigger_event_id: 't2',
       });
     });
 
@@ -6105,7 +6102,6 @@ describe('ConversationClient', () => {
       const indexed = indexedSource();
       expect(indexed.active_execution).toEqual({
         execution_id: 'e2',
-        trigger_event_id: 't2',
         started_at: expect.any(String),
       });
       expect(indexed).not.toHaveProperty('activeExecution');
@@ -6129,7 +6125,6 @@ describe('ConversationClient', () => {
       expect(indexed.read_by).toEqual([{ userId: 'user-1' }]);
       expect(indexed.active_execution).toMatchObject({
         execution_id: 'e2',
-        trigger_event_id: 't2',
       });
     });
 

@@ -320,7 +320,6 @@ describe('conversations utils', () => {
 
     const activeExecution: SetActiveExecution = {
       executionId: 'exec-1',
-      triggerEventId: 'round-1::user_message',
     };
 
     it('passes the active execution to create on CREATE', async () => {

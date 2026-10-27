@@ -2655,7 +2655,6 @@ describe('conversation model converters', () => {
   describe('active_execution', () => {
     const activeExecution = {
       execution_id: 'execution-1',
-      trigger_event_id: 'trigger-1',
       started_at: creationDate,
     };
 

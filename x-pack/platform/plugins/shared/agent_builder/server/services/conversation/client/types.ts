@@ -54,7 +54,6 @@ export type ConversationCreateRequest = Omit<
 /** Makes an execution the conversation's active execution, unless another one holds it. */
 export interface SetActiveExecution {
   executionId: string;
-  triggerEventId: string;
 }
 
 /** Clears the conversation's active execution when this execution still holds it. */

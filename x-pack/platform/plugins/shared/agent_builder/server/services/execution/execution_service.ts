@@ -245,10 +245,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     if (conversationParams && conversation && conversationParams.storeConversation !== false) {
       const pendingResumeRound = getPendingResumeRound(conversation);
-      const activeExecution: SetActiveExecution = {
-        executionId,
-        triggerEventId: roundUserMessageEventId(pendingResumeRound?.id ?? roundId),
-      };
+      const activeExecution: SetActiveExecution = { executionId };
 
       try {
         if (pendingResumeRound) {
