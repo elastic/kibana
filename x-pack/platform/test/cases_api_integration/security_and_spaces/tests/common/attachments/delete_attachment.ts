@@ -182,7 +182,9 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 404,
         })) as Error;
 
-        expect(error.message).to.be(`This comment ${attachmentId} does not exist in fake-id.`);
+        expect(error.message).to.be(
+          `This attachment ${attachmentId} does not exist in case fake-id.`
+        );
       });
 
       it('404s when attachment is not there', async () => {
