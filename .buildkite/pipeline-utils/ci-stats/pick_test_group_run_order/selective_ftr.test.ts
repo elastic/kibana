@@ -12,6 +12,7 @@ import * as path from 'path';
 import * as JSON5 from 'json5';
 import { getKibanaDir } from '../../utils.ts';
 import { getModuleLookup } from '../../affected-packages/module_lookup.ts';
+import * as affectedPackages from '../../affected-packages/index.ts';
 import {
   FTR_EXCLUDED_MODULES,
   isPlatformOwnedFtrConfig,
@@ -213,7 +214,7 @@ describe('resolveAffectedFtrDomains', () => {
       resolveAffectedFtrDomains([
         'x-pack/solutions/security/plugins/security_solution/public/plugin.tsx',
       ])
-    ).toEqual({ solutions: new Set(['security']), platformAffected: false });
+    ).toEqual({ outcome: 'narrowed', solutions: ['security'], platformAffected: false });
   });
 
   it('collects every touched solution', () => {
@@ -222,7 +223,11 @@ describe('resolveAffectedFtrDomains', () => {
         'x-pack/solutions/security/plugins/security_solution/public/plugin.tsx',
         'x-pack/solutions/observability/plugins/apm/public/plugin.ts',
       ])
-    ).toEqual({ solutions: new Set(['security', 'observability']), platformAffected: false });
+    ).toEqual({
+      outcome: 'narrowed',
+      solutions: ['observability', 'security'],
+      platformAffected: false,
+    });
   });
 
   it('ignores irrelevant files and excluded modules next to a solution change', () => {
@@ -232,31 +237,49 @@ describe('resolveAffectedFtrDomains', () => {
         'x-pack/solutions/search/plugins/enterprise_search/README.md',
         'src/platform/packages/shared/kbn-scout/src/index.ts',
       ])
-    ).toEqual({ solutions: new Set(['search']), platformAffected: false });
+    ).toEqual({ outcome: 'narrowed', solutions: ['search'], platformAffected: false });
   });
 
   it('flags platform and keeps the solutions reached downstream of a platform module', () => {
-    const affected = resolveAffectedFtrDomains([
+    const { outcome, solutions, platformAffected } = resolveAffectedFtrDomains([
       'x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts',
     ]);
-    expect(affected?.platformAffected).toBe(true);
-    expect(affected?.solutions.has('observability')).toBe(true);
+    expect(outcome).toBe('narrowed');
+    expect(platformAffected).toBe(true);
+    expect(solutions).toContain('observability');
   });
 
   it.each([
-    ['a critical path', 'pnpm-lock.yaml'],
-    ['a file outside any module', 'some_random_root_script.sh'],
-  ])('returns null when %s changes', (_, file) => {
+    ['a critical path', 'pnpm-lock.yaml', 'critical-path'],
+    ['a file outside any module', 'some_random_root_script.sh', 'unmapped-module'],
+  ])('does not narrow when %s changes', (_, file, outcome) => {
     expect(
       resolveAffectedFtrDomains([
         'x-pack/solutions/security/plugins/security_solution/public/plugin.tsx',
         file,
       ])
-    ).toBeNull();
+    ).toEqual({ outcome, solutions: [], platformAffected: false });
   });
 
-  it('returns null when nothing relevant changed', () => {
-    expect(resolveAffectedFtrDomains(['docs/extend/testing.md'])).toBeNull();
+  it('does not narrow when resolution throws', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(affectedPackages, 'getModuleLookup').mockImplementation(() => {
+      throw new Error('boom');
+    });
+    expect(
+      resolveAffectedFtrDomains([
+        'x-pack/solutions/security/plugins/security_solution/public/plugin.tsx',
+      ])
+    ).toEqual({ outcome: 'error', solutions: [], platformAffected: false });
+    jest.restoreAllMocks();
+  });
+
+  it('does not narrow when nothing relevant changed', () => {
+    expect(resolveAffectedFtrDomains(['docs/extend/testing.md'])).toEqual({
+      outcome: 'no-relevant-modules',
+      solutions: [],
+      platformAffected: false,
+    });
   });
 });
 

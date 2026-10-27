@@ -30,7 +30,6 @@ import {
   resolveAffectedFtrDomains,
   shouldSkipFtrTests,
 } from './selective_ftr.ts';
-import type { AffectedFtrDomains } from './selective_ftr.ts';
 import { isScoutPathOnlyDiff } from './selective_scout.ts';
 import { resolveSelectiveTestingChanges } from './selective_changes.ts';
 import {
@@ -277,20 +276,14 @@ function narrowFtrToAffectedSolutions(
   changedFiles: string[],
   { ftrSolutionSelection, includeSharedFtr, narrowPlatformFtr }: RunOrderConfig
 ): void {
-  let affected: AffectedFtrDomains | null;
-  try {
-    affected = resolveAffectedFtrDomains(changedFiles);
-  } catch (error) {
-    console.error('FTR solution selection failed, running every domain', error);
+  const { outcome, solutions, platformAffected } = resolveAffectedFtrDomains(changedFiles);
+  if (outcome !== 'narrowed') {
+    console.log(
+      `FTR solution selection: diff cannot be narrowed (${outcome}), running every domain`
+    );
     return;
   }
 
-  if (affected === null) {
-    console.log('FTR solution selection: diff cannot be narrowed, running every domain');
-    return;
-  }
-
-  const { solutions, platformAffected } = affected;
   if (platformAffected && !narrowPlatformFtr) {
     console.log('FTR solution selection: diff affects platform, running every domain');
     return;

@@ -158,19 +158,36 @@ export function shouldSkipFtrTests(
   return false;
 }
 
+/** `narrowed` when the run can be limited to the listed domains; any other value means run every domain. */
+export type FtrNarrowingOutcome =
+  | 'narrowed'
+  | 'critical-path'
+  | 'unmapped-module'
+  | 'no-relevant-modules'
+  | 'error';
+
 export interface AffectedFtrDomains {
-  solutions: Set<string>;
+  outcome: FtrNarrowingOutcome;
+  solutions: (typeof FTR_SOLUTION_DOMAINS)[number][];
   platformAffected: boolean;
 }
 
 /**
  * Solution domains a diff can affect, and whether it affects platform modules, through the
- * downstream `kbn_references` closure. `null` when the run must not be narrowed: a critical
- * path changed, or a file outside any module or an ungrouped module is affected.
+ * downstream `kbn_references` closure.
  */
-export function resolveAffectedFtrDomains(changedFiles: string[]): AffectedFtrDomains | null {
+export function resolveAffectedFtrDomains(changedFiles: string[]): AffectedFtrDomains {
+  try {
+    return resolveFromModuleGraph(changedFiles);
+  } catch (error) {
+    console.error('FTR solution selection failed', error);
+    return notNarrowed('error');
+  }
+}
+
+function resolveFromModuleGraph(changedFiles: string[]): AffectedFtrDomains {
   if (touchedCriticalFiles(changedFiles, [...FTR_CRITICAL_PATHS])) {
-    return null;
+    return notNarrowed('critical-path');
   }
 
   const directlyAffected = getAffectedModulesGit({
@@ -192,14 +209,18 @@ export function resolveAffectedFtrDomains(changedFiles: string[]): AffectedFtrDo
     } else if (group !== undefined && FTR_SOLUTION_DOMAINS.includes(group)) {
       solutions.add(group);
     } else {
-      return null;
+      return notNarrowed('unmapped-module');
     }
   }
 
   if (!platformAffected && solutions.size === 0) {
-    return null;
+    return notNarrowed('no-relevant-modules');
   }
-  return { solutions, platformAffected };
+  return { outcome: 'narrowed', solutions: [...solutions].sort(), platformAffected };
+}
+
+function notNarrowed(outcome: Exclude<FtrNarrowingOutcome, 'narrowed'>): AffectedFtrDomains {
+  return { outcome, solutions: [], platformAffected: false };
 }
 
 /** True when the module owning an FTR config path is in the `platform` group, whichever manifest lists it. */
