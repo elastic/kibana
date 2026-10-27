@@ -703,6 +703,11 @@ function buildSuggestion({
   };
 
   const isIncomplete = yValues.length === 0;
+  // TODO: add number_range to the DataType union in types.ts. There are some implications to covered
+  const bucketTypes: Array<string | undefined> = [xValue, ...(splitBy ?? [])].map(
+    (col) => col?.operation.dataType
+  );
+  const isRangeOverTime = bucketTypes.includes('date') && bucketTypes.includes('number_range');
 
   return {
     title,
@@ -716,7 +721,9 @@ function buildSuggestion({
         // Don't advertise charts without y axis
         isIncomplete ||
         // Don't advertise charts without at least one split
-        (!xValue && !splitBy)),
+        (!xValue && !splitBy) ||
+        // Don't advertise a range bucket over time, a heatmap fits better
+        isRangeOverTime),
     state,
     incomplete: isIncomplete,
     previewIcon: getIconForSeries(seriesType),
