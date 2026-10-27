@@ -8,6 +8,7 @@
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import type { FocusedSignificantEventService } from '../chat/focused_significant_event_service';
 import type { NightshiftStartDependencies } from '../types';
 import { AppRoot } from './app_root';
 
@@ -16,11 +17,13 @@ export function renderApp({
   coreStart,
   pluginsStart,
   isServerless,
+  focusedSignificantEventService,
 }: {
   appMountParameters: AppMountParameters;
   coreStart: CoreStart;
   pluginsStart: NightshiftStartDependencies;
   isServerless: boolean;
+  focusedSignificantEventService: FocusedSignificantEventService;
 }) {
   const { element } = appMountParameters;
 
@@ -34,6 +37,7 @@ export function renderApp({
         coreStart={coreStart}
         pluginsStart={pluginsStart}
         isServerless={isServerless}
+        focusedSignificantEventService={focusedSignificantEventService}
       />
     ),
     element

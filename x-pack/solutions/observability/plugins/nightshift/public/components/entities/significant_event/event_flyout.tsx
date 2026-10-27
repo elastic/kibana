@@ -133,7 +133,8 @@ export interface EventFlyoutProps {
 export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactElement {
   const formatTimestamp = useFormatTimestamp();
   const { euiTheme } = useEuiTheme();
-  const { agentBuilder, application, http } = useKibana().services;
+  const { agentBuilder, application, focusedSignificantEventService, http } =
+    useKibana().services;
   const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [selectedDetectionId, setSelectedDetectionId] = useState<string>();
@@ -174,6 +175,11 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
     setSelectedDetectionId(undefined);
     setSelectedTabId(OVERVIEW_TAB_ID);
   }, [event.event_id]);
+
+  useEffect(() => {
+    focusedSignificantEventService.setFocusedEvent(event);
+    return () => focusedSignificantEventService.clearFocusedEvent(event.event_id);
+  }, [event, focusedSignificantEventService]);
 
   useEffect(() => {
     if (
@@ -220,7 +226,9 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   );
   const openNewChat = useCallback(() => {
     agentBuilder?.openChat(buildNewSignificantEventChatOptions(event));
-  }, [agentBuilder, event]);
+    // An open sidebar replaces its draft on openChat without a new conversation id, so re-stage the event.
+    focusedSignificantEventService.setFocusedEvent(event);
+  }, [agentBuilder, event, focusedSignificantEventService]);
   const openInvestigationChat = useCallback(() => {
     if (conversationId) {
       agentBuilder?.openChat(buildInvestigationConversationChatOptions(conversationId));

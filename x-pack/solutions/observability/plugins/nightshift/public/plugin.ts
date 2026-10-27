@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, type Subscription } from 'rxjs';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
 import { NightshiftSettingsLocatorDefinition } from '../common/locators';
+import { FocusedSignificantEventService } from './chat/focused_significant_event_service';
 import type {
   NightshiftPublicSetup,
   NightshiftPublicStart,
@@ -35,7 +36,8 @@ export class NightshiftPlugin
     >
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({ visibleIn: [] }));
-  private availabilitySubscription?: Subscription;
+  private readonly focusedSignificantEventService = new FocusedSignificantEventService();
+  private servicesSubscription?: Subscription;
   private stopped = false;
 
   constructor(private readonly context: PluginInitializerContext) {}
@@ -113,6 +115,7 @@ export class NightshiftPlugin
           coreStart,
           pluginsStart,
           isServerless: this.context.env.packageInfo.buildFlavor === 'serverless',
+          focusedSignificantEventService: this.focusedSignificantEventService,
         });
       },
     });
@@ -127,10 +130,12 @@ export class NightshiftPlugin
         if (this.stopped) {
           return;
         }
-        this.availabilitySubscription = startNightshiftServices({
+        this.servicesSubscription = startNightshiftServices({
           pluginsStart,
           appUpdater$: this.appUpdater$,
           context: this.context,
+          chrome: coreStart.chrome,
+          focusedSignificantEventService: this.focusedSignificantEventService,
         });
       })
       .catch((error) => {
@@ -142,6 +147,6 @@ export class NightshiftPlugin
 
   stop() {
     this.stopped = true;
-    this.availabilitySubscription?.unsubscribe();
+    this.servicesSubscription?.unsubscribe();
   }
 }
