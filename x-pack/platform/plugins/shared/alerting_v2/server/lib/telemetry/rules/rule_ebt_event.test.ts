@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { EventOrigin } from '../event_origin/origin_schemas';
-import { createRuleResponse } from '../test_utils';
+import type { EventOrigin } from '../../event_origin/origin_schemas';
+import type { RuleEventPayload } from '../../events/rule_event_publisher/events';
+import { createRuleResponse } from '../../test_utils';
 import {
   buildRuleChangedEventData,
   RULE_EBT_EVENT_TYPE_BY_OPERATION,
@@ -56,10 +57,16 @@ describe('rule change EBT events', () => {
 });
 
 describe('buildRuleChangedEventData', () => {
+  const payloadFor = (rule = createRuleResponse()): RuleEventPayload => ({
+    ruleId: rule.id,
+    spaceId: 'default',
+    rule,
+  });
+
   it('projects the required fields from the rule', () => {
     const rule = createRuleResponse({ id: 'rule-1', kind: 'signal', enabled: false });
 
-    expect(buildRuleChangedEventData(rule, apiUserOrigin, rule.id)).toEqual({
+    expect(buildRuleChangedEventData('rule.created', payloadFor(rule), apiUserOrigin)).toEqual({
       rule_id: 'rule-1',
       created_at: rule.created_at,
       kind: 'signal',
@@ -69,8 +76,7 @@ describe('buildRuleChangedEventData', () => {
   });
 
   it('omits template_id, builder_type, and origin.app when absent', () => {
-    const rule = createRuleResponse();
-    const data = buildRuleChangedEventData(rule, apiUserOrigin, rule.id);
+    const data = buildRuleChangedEventData('rule.created', payloadFor(), apiUserOrigin);
 
     expect(data).not.toHaveProperty('operation');
     expect(data).not.toHaveProperty('template_id');
@@ -80,30 +86,72 @@ describe('buildRuleChangedEventData', () => {
 
   it('nests the actor, channel, and app under origin', () => {
     expect(
-      buildRuleChangedEventData(
-        createRuleResponse(),
-        {
-          actor: 'internal',
-          channel: 'ui',
-          app: 'discover',
-        },
-        'rule-1'
-      ).origin
+      buildRuleChangedEventData('rule.created', payloadFor(), {
+        actor: 'internal',
+        channel: 'ui',
+        app: 'discover',
+      }).origin
     ).toEqual({ actor: 'internal', channel: 'ui', app: 'discover' });
   });
 
   it('reports only rule_id and origin when the domain rule is missing', () => {
-    expect(buildRuleChangedEventData(undefined, apiUserOrigin, 'rule-1')).toEqual({
+    expect(
+      buildRuleChangedEventData(
+        'rule.deleted',
+        { ruleId: 'rule-1', spaceId: 'default' },
+        apiUserOrigin
+      )
+    ).toEqual({
       rule_id: 'rule-1',
       origin: { actor: 'user', channel: 'api' },
     });
+  });
+
+  it('includes updated_fields on rule.updated', () => {
+    const data = buildRuleChangedEventData(
+      'rule.updated',
+      { ...payloadFor(), updatedFields: ['metadata.name', 'schedule'] },
+      apiUserOrigin
+    );
+
+    expect(data.updated_fields).toEqual(['metadata.name', 'schedule']);
+  });
+
+  it.each(['rule.created', 'rule.deleted', 'rule.enabled', 'rule.disabled'] as const)(
+    'omits updated_fields on %s',
+    (operation) => {
+      expect(
+        buildRuleChangedEventData(
+          operation,
+          { ...payloadFor(), updatedFields: ['metadata.name'] },
+          apiUserOrigin
+        )
+      ).not.toHaveProperty('updated_fields');
+    }
+  );
+
+  it('omits updated_fields when the list is absent or empty', () => {
+    expect(
+      buildRuleChangedEventData('rule.updated', payloadFor(), apiUserOrigin)
+    ).not.toHaveProperty('updated_fields');
+    expect(
+      buildRuleChangedEventData(
+        'rule.updated',
+        { ...payloadFor(), updatedFields: [] },
+        apiUserOrigin
+      )
+    ).not.toHaveProperty('updated_fields');
   });
 
   it('includes template_id and builder_type when present', () => {
     const rule = createRuleResponse({
       metadata: { builder: { type: 'threshold' } },
     });
-    const data = buildRuleChangedEventData(rule, apiUserOrigin, rule.id, 'template-1');
+    const data = buildRuleChangedEventData(
+      'rule.created',
+      { ...payloadFor(rule), templateId: 'template-1' },
+      apiUserOrigin
+    );
 
     expect(data).toEqual(
       expect.objectContaining({ template_id: 'template-1', builder_type: 'threshold' })

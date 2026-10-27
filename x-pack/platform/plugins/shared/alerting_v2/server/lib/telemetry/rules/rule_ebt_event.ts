@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { EventTypeOpts } from '@kbn/core/server';
-import type { EventOrigin } from '../event_origin/origin_schemas';
+import type { EventOrigin } from '../../event_origin/origin_schemas';
 import {
   RULE_CREATED_EBT_EVENT_TYPE,
   RULE_DELETED_EBT_EVENT_TYPE,
@@ -23,7 +22,8 @@ import {
   RULE_DISABLED_EVENT_TYPE,
   RULE_ENABLED_EVENT_TYPE,
   RULE_UPDATED_EVENT_TYPE,
-} from '../events/rule_event_publisher/events';
+  type RuleEventPayload,
+} from '../../events/rule_event_publisher/events';
 
 /** Domain operations reported as telemetry. Each one is its own EBT event type. */
 export const RULE_OPERATIONS = [
@@ -91,6 +91,20 @@ const ruleChangedEventSchema: EventTypeOpts<RuleChangedEbtData>['schema'] = {
       optional: true,
     },
   },
+  updated_fields: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A dotted path of a rule field whose value differs.',
+      },
+    },
+    _meta: {
+      description:
+        'Dotted paths of rule fields whose values differ on a rule update. A nested object is reported at the leaf that changed; an array is reported as one path. `version` and `updated_at` change on every write and are never reported. Omitted when none differ, and on create, delete, enable, and disable.',
+      optional: true,
+    },
+  },
   origin: {
     properties: {
       actor: {
@@ -132,19 +146,28 @@ export const ruleChangeTelemetryEvents: Array<EventTypeOpts<RuleChangedEbtData>>
     schema: ruleChangedEventSchema,
   }));
 
+const updatedFieldsPayload = (
+  operation: RuleOperation,
+  updatedFields: readonly string[] | undefined
+): Pick<RuleChangedEbtData, 'updated_fields'> =>
+  operation === RULE_UPDATED_EVENT_TYPE && updatedFields && updatedFields.length > 0
+    ? { updated_fields: [...updatedFields] }
+    : {};
+
 /**
- * Projects a rule-change telemetry payload. Rule fields are omitted when `rule`
- * is absent. `templateId` is passed separately because the public response no
- * longer carries `metadata.template`; the lifecycle event supplies it.
+ * Projects a rule-change telemetry payload from a lifecycle event. Rule fields
+ * are omitted when `rule` is absent, and `updated_fields` is only reported for
+ * `rule.updated`.
  */
 export const buildRuleChangedEventData = (
-  rule: RuleResponse | undefined,
-  origin: EventOrigin,
-  ruleId: string,
-  templateId?: string
+  operation: RuleOperation,
+  { ruleId, rule, templateId, updatedFields }: RuleEventPayload,
+  origin: EventOrigin
 ): RuleChangedEbtData => {
+  const fields = updatedFieldsPayload(operation, updatedFields);
+
   if (!rule) {
-    return { rule_id: ruleId, origin };
+    return { rule_id: ruleId, ...fields, origin };
   }
 
   const { kind, enabled, created_at: createdAt, metadata } = rule;
@@ -157,6 +180,7 @@ export const buildRuleChangedEventData = (
     kind,
     ...(builderType ? { builder_type: builderType } : {}),
     enabled,
+    ...fields,
     origin,
   };
 };

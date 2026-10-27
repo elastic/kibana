@@ -131,4 +131,27 @@ describe('RuleEventPublisher', () => {
       expect(eventBus.publish).not.toHaveBeenCalled();
     });
   });
+
+  it('copies updatedFields onto a rule.updated payload and drops an empty list', () => {
+    publisher.emitRuleUpdated(context, [
+      {
+        ruleId: 'rule-1',
+        spaceId: 'space-1',
+        updatedFields: ['metadata.name', 'schedule'],
+      },
+      {
+        ruleId: 'rule-2',
+        spaceId: 'space-1',
+        updatedFields: [],
+      },
+    ]);
+
+    const [firstEvent] = eventBus.publish.mock.calls[0];
+    const [secondEvent] = eventBus.publish.mock.calls[1];
+    expect((firstEvent.payload as RuleEventPayload).updatedFields).toEqual([
+      'metadata.name',
+      'schedule',
+    ]);
+    expect(secondEvent.payload as RuleEventPayload).not.toHaveProperty('updatedFields');
+  });
 });

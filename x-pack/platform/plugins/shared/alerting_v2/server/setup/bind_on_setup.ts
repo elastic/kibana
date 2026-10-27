@@ -30,7 +30,7 @@ import {
   ACTION_POLICY_EVENT_PROVIDER,
 } from '../lib/dispatcher/steps/constants';
 import { registerAlertingAdvancedSettings } from '../settings/advanced_settings';
-import { registerTelemetryEvents } from '../lib/telemetry/register_rule_ebt_events';
+import { registerTelemetryEvents } from '../lib/telemetry/rules/register_rule_ebt_events';
 
 /**
  * Core platform setup-phase registrations (feature privileges, saved objects,
