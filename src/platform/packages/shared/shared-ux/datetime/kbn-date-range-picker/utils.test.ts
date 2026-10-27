@@ -388,7 +388,7 @@ describe('getEndDate', () => {
     const selectedDate = new TZDate(2026, 1, 10, 'Japan');
 
     expect(getEndDate(selectedDate, 'Japan').getTime()).toBe(
-      Date.parse('2026-02-10T23:59:59.999+09:00')
+      Date.parse('2026-02-10T23:59:59.000+09:00')
     );
   });
 });

@@ -239,12 +239,10 @@ describe('CalendarPanel', () => {
 
       expect(mockCalendarTimeZoneSpy).toHaveBeenLastCalledWith('Japan');
 
-      expect(setText).toHaveBeenLastCalledWith(
-        'Feb 10, 2026, 00:00:00.000 to Feb 10, 2026, 23:59:59.999'
-      );
+      expect(setText).toHaveBeenLastCalledWith('Feb 10, 2026, 00:00:00 to Feb 10, 2026, 23:59:59');
 
       const expectedStart = new Date('2026-02-10T00:00:00.000+09:00');
-      const expectedEnd = new Date('2026-02-10T23:59:59.999+09:00');
+      const expectedEnd = new Date('2026-02-10T23:59:59.000+09:00');
 
       const { startDate, endDate } = mockUseDateRangePickerContext().timeRange;
 
@@ -264,7 +262,7 @@ describe('CalendarPanel', () => {
 
       expect(mockCalendarTimeZoneSpy).toHaveBeenLastCalledWith(undefined);
       expect(setText).toHaveBeenLastCalledWith(
-        formatInputDateRange(feb2026(10, 0, 0, 0, 0), feb2026(10, 23, 59, 59, 999))
+        formatInputDateRange(feb2026(10, 0, 0, 0, 0), feb2026(10, 23, 59, 59, 0))
       );
     });
   });

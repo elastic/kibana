@@ -364,7 +364,7 @@ export function getEndDate(date: Date, timeZone?: string): Date {
     return new TZDate(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 0, timeZone);
   }
 
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 0);
 }
 
 /**
