@@ -24,12 +24,17 @@ import { z } from '@kbn/zod/v4';
  * 3. takes a single {@link ACTION_WORKFLOW_INPUT} object, so a generic gate never
  *    needs to know an action's parameter names;
  * 4. ends in a `workflow.output` step, because `workflow.execute` cannot type a
- *    child's result.
+ *    child's result;
+ * 5. may fail with {@link ACTION_NON_RETRYABLE_ERROR_TYPE} when another attempt
+ *    cannot succeed, so the proposal gate settles instead of re-offering it.
  */
 export const ACTION_WORKFLOW_TAG = 'action' as const;
 
 /** The single input every action workflow accepts. */
 export const ACTION_WORKFLOW_INPUT = 'actionInput' as const;
+
+/** The `workflow.fail` type an action uses when retrying it cannot help. */
+export const ACTION_NON_RETRYABLE_ERROR_TYPE = 'NonRetryableError' as const;
 
 /**
  * Grouping axis for the decision queue an approved action feeds. Deliberately

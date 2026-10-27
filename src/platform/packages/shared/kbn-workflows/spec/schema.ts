@@ -1246,6 +1246,7 @@ export const WorkflowFailStepSchema = BaseStepSchema.extend({
     .object({
       message: z.string().optional(),
       reason: z.string().optional(),
+      type: z.string().optional(),
     })
     .optional(),
 });
