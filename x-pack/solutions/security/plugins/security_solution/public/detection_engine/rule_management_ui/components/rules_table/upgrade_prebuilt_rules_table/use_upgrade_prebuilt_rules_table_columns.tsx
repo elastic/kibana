@@ -9,11 +9,15 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n as i18nCore } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { RuleUpgradeEventTypes } from '../../../../../common/lib/telemetry/events/rule_upgrade/types';
 import { ThreeWayDiffConflict } from '../../../../../../common/api/detection_engine';
@@ -28,10 +32,18 @@ import { SeverityBadge } from '../../../../../common/components/severity_badge';
 import * as i18n from '../../../../common/translations';
 import type { Rule } from '../../../../rule_management/logic';
 import { getNormalizedSeverity } from '../helpers';
+import { buildMlLinkedJobUpgradeItems } from './use_ml_jobs_upgrade_modal/job_upgrade_items';
 import type { UpgradePrebuiltRulesTableActions } from './upgrade_prebuilt_rules_table_context';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+
+const ML_JOB_UPDATES_ROW_WARNING_TOOLTIP = i18nCore.translate(
+  'xpack.securitySolution.detectionEngine.rules.mlJobUpdatesRowWarningTooltip',
+  {
+    defaultMessage: 'This rule has associated ML jobs that also need to be updated.',
+  }
+);
 
 export type TableColumn = EuiBasicTableColumn<RuleUpgradeState>;
 
@@ -183,13 +195,41 @@ const CONFLICT_COLUMN: TableColumn = {
   truncateText: true,
 };
 
+const MlJobUpdateWarningIcon = ({ ruleId }: { ruleId: string }) => (
+  <EuiToolTip content={ML_JOB_UPDATES_ROW_WARNING_TOOLTIP}>
+    <EuiIcon
+      type="warning"
+      color="warning"
+      tabIndex={0}
+      data-test-subj={`upgradeRuleMlJobWarningIcon-${ruleId}`}
+      aria-label={ML_JOB_UPDATES_ROW_WARNING_TOOLTIP}
+    />
+  </EuiToolTip>
+);
+
+const withOptionalMlWarning = (ruleId: string, action: React.ReactNode, showWarning: boolean) => {
+  if (!showWarning) {
+    return action;
+  }
+
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center" responsive={false}>
+      <EuiFlexItem grow={false}>{action}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <MlJobUpdateWarningIcon ruleId={ruleId} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 const createUpgradeButtonColumn = (
   upgradeRules: UpgradePrebuiltRulesTableActions['upgradeRules'],
   openRulePreview: UpgradePrebuiltRulesTableActions['openRulePreview'],
   loadingRules: RuleSignatureId[],
   isDisabled: boolean,
   isPrebuiltRulesCustomizationEnabled: boolean,
-  telemetry: ReturnType<typeof useKibana>['services']['telemetry']
+  telemetry: ReturnType<typeof useKibana>['services']['telemetry'],
+  mlJobWarningRuleIds: Set<string>
 ): TableColumn => ({
   field: 'rule_id',
   name: <RulesTableEmptyColumnName name={i18n.UPDATE_RULE_BUTTON} />,
@@ -197,6 +237,7 @@ const createUpgradeButtonColumn = (
     const isRuleUpgrading = loadingRules.includes(ruleId);
     const isDisabledByConflicts =
       isPrebuiltRulesCustomizationEnabled && record.hasUnresolvedConflicts;
+    const showMlWarning = mlJobWarningRuleIds.has(ruleId);
     const isUpgradeButtonDisabled = isRuleUpgrading || isDisabled;
     const spinner = (
       <EuiLoadingSpinner
@@ -206,7 +247,7 @@ const createUpgradeButtonColumn = (
     );
 
     if (isDisabledByConflicts) {
-      return (
+      const reviewButton = (
         <EuiToolTip content={i18n.UPDATE_RULE_BUTTON_TOOLTIP_CONFLICTS}>
           <EuiButtonEmpty
             color="warning"
@@ -219,9 +260,11 @@ const createUpgradeButtonColumn = (
           </EuiButtonEmpty>
         </EuiToolTip>
       );
+
+      return withOptionalMlWarning(ruleId, reviewButton, showMlWarning);
     }
 
-    return (
+    const updateButton = (
       <EuiButtonEmpty
         size="s"
         disabled={isUpgradeButtonDisabled}
@@ -236,6 +279,8 @@ const createUpgradeButtonColumn = (
         {isRuleUpgrading ? spinner : i18n.UPDATE_RULE_BUTTON}
       </EuiButtonEmpty>
     );
+
+    return withOptionalMlWarning(ruleId, updateButton, showMlWarning);
   },
   width: '120px',
   align: 'center',
@@ -245,12 +290,27 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const {
-    state: { loadingRules, isRefetching, isInitializingPrebuiltRulesPackage },
+    state: {
+      loadingRules,
+      isRefetching,
+      isInitializingPrebuiltRulesPackage,
+      ruleUpgradeStates,
+    },
     actions: { upgradeRules, openRulePreview },
   } = useUpgradePrebuiltRulesTableContext();
   const isDisabled = isRefetching || isInitializingPrebuiltRulesPackage;
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
   const { telemetry } = useKibana().services;
+  // Prototype: only the first 5 ML-linked upgrade examples show the row warning icon.
+  const mlJobWarningRuleIds = useMemo(
+    () =>
+      new Set(
+        buildMlLinkedJobUpgradeItems(ruleUpgradeStates)
+          .slice(0, 5)
+          .map((item) => item.ruleId)
+      ),
+    [ruleUpgradeStates]
+  );
 
   return useMemo(
     () => [
@@ -288,7 +348,8 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
               loadingRules,
               isDisabled,
               isRulesCustomizationEnabled,
-              telemetry
+              telemetry,
+              mlJobWarningRuleIds
             ),
           ]
         : []),
@@ -302,6 +363,7 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
       loadingRules,
       isDisabled,
       telemetry,
+      mlJobWarningRuleIds,
     ]
   );
 };

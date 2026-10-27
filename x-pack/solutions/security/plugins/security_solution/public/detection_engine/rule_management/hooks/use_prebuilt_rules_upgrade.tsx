@@ -323,8 +323,8 @@ export function usePrebuiltRulesUpgrade({
     setLoadingRules((prev) => [...prev, ...upgradeableRules.map((rule) => rule.rule_id)]);
 
     try {
-      // Handle MLJobs modal
-      if (!(await confirmLegacyMLJobs())) {
+      // Tie ML job updates to rule upgrades when linked job IDs change.
+      if ((await confirmMlRuleJobUpgrade(upgradeableRules)) === false) {
         return;
       }
 
@@ -343,7 +343,7 @@ export function usePrebuiltRulesUpgrade({
       setLoadingRules([]);
     }
   }, [
-    confirmLegacyMLJobs,
+    confirmMlRuleJobUpgrade,
     filterOptions?.ruleIds,
     onUpgrade,
     performUpgradeFilter,

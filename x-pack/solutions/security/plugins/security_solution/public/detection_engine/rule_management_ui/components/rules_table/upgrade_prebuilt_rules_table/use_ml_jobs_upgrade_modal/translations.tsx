@@ -102,17 +102,24 @@ export const ML_RULE_JOB_UPGRADE_MODAL_CANCEL = i18n.translate(
   }
 );
 
-export const ML_RULE_JOB_UPGRADE_MODAL_RULES_ONLY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.rulesOnly',
+export const ML_RULE_JOB_UPGRADE_MODAL_REVIEW = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.review',
   {
-    defaultMessage: 'Update rules only',
+    defaultMessage: 'Review',
   }
 );
 
 export const ML_RULE_JOB_UPGRADE_MODAL_CONFIRM = i18n.translate(
   'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.confirm',
   {
-    defaultMessage: 'Update rules and jobs',
+    defaultMessage: 'Update',
+  }
+);
+
+export const ML_RULE_JOB_UPGRADE_MODAL_REVIEW_BACK = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.reviewBack',
+  {
+    defaultMessage: 'Back',
   }
 );
 

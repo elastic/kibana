@@ -13,7 +13,6 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiEmptyPrompt,
-  EuiIcon,
   EuiLink,
   EuiText,
 } from '@elastic/eui';
@@ -93,8 +92,7 @@ const JobName = ({
 };
 const getJobsTableColumns = (
   isLoading: boolean,
-  onJobStateChange: (job: SecurityJob, latestTimestampMs: number, enable: boolean) => Promise<void>,
-  mlNodesAvailable: boolean
+  onJobStateChange: (job: SecurityJob, latestTimestampMs: number, enable: boolean) => Promise<void>
 ) => [
   {
     name: i18n.COLUMN_JOB_NAME,
@@ -140,23 +138,13 @@ const getJobsTableColumns = (
 
   {
     name: i18n.COLUMN_RUN_JOB,
-    render: (job: SecurityJob) => {
-      // Show the on/off switch when ML nodes exist and the job can be run: either the
-      // module matches available data, the job is already installed (start/stop), or it
-      // is a Fleet integration job (compatibility is against package indices, not SIEM defaults).
-      const showSwitch =
-        mlNodesAvailable && (job.isCompatible || job.isInstalled || Boolean(job.isIntegrationJob));
-
-      return showSwitch ? (
-        <JobSwitch
-          job={job}
-          isSecurityJobsLoading={isLoading}
-          onJobStateChange={onJobStateChange}
-        />
-      ) : (
-        <EuiIcon aria-label="Warning" size="s" type="warning" color="warning" />
-      );
-    },
+    render: (job: SecurityJob) => (
+      <JobSwitch
+        job={job}
+        isSecurityJobsLoading={isLoading}
+        onJobStateChange={onJobStateChange}
+      />
+    ),
     align: CENTER_ALIGNMENT,
     width: '80px',
   } as const,
@@ -171,6 +159,7 @@ const getPaginatedItems = (
 export interface JobTableProps {
   isLoading: boolean;
   jobs: SecurityJob[];
+  /** Kept for call-site compatibility; Run job always renders the switch in this prototype. */
   mlNodesAvailable: boolean;
   onJobStateChange: (job: SecurityJob, latestTimestampMs: number, enable: boolean) => Promise<void>;
   noItemsMessage?: React.ReactNode;
@@ -180,7 +169,6 @@ export const JobsTableComponent = ({
   isLoading,
   jobs,
   onJobStateChange,
-  mlNodesAvailable,
   noItemsMessage,
 }: JobTableProps) => {
   const [pageIndex, setPageIndex] = useState(0);
@@ -201,7 +189,7 @@ export const JobsTableComponent = ({
     <EuiBasicTable
       data-test-subj="jobs-table"
       tableCaption={i18n.JOBS_TABLE_CAPTION}
-      columns={getJobsTableColumns(isLoading, onJobStateChange, mlNodesAvailable)}
+      columns={getJobsTableColumns(isLoading, onJobStateChange)}
       items={getPaginatedItems(jobs, pageIndex, pageSize)}
       loading={isLoading}
       noItemsMessage={noItemsMessage ?? <NoItemsMessage />}

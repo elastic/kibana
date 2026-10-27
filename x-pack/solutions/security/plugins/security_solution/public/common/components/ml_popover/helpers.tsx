@@ -8,12 +8,19 @@
 import type { SecurityJob } from './types';
 
 /**
+ * Packaged Elastic jobs: SIEM pre-built modules and Fleet integration modules (e.g. PAD).
+ * Custom jobs are user-created and have neither flag.
+ */
+export const isPackagedElasticJob = (job: SecurityJob): boolean =>
+  job.isElasticJob || Boolean(job.isIntegrationJob);
+
+/**
  * Returns a filtered array of Jobs according to JobsTableFilters selections
  *
  * @param jobs to filter
  * @param selectedGroups groups to filter on
  * @param showCustomJobs whether or not to show all Custom Jobs (Non-embedded Jobs in SIEM Group)
- * @param showElasticJobs whether or not to show Elastic Jobs (Embedded ConfigTemplate Jobs)
+ * @param showElasticJobs whether or not to show Elastic Jobs (pre-built + integration packages)
  * @param filterQuery user-provided search string to filter for occurrence in job names/description
  */
 export const filterJobs = ({
@@ -31,8 +38,8 @@ export const filterJobs = ({
 }): SecurityJob[] =>
   searchFilter(
     jobs
-      .filter((job) => !showCustomJobs || (showCustomJobs && !job.isElasticJob))
-      .filter((job) => !showElasticJobs || (showElasticJobs && job.isElasticJob))
+      .filter((job) => !showCustomJobs || (showCustomJobs && !isPackagedElasticJob(job)))
+      .filter((job) => !showElasticJobs || (showElasticJobs && isPackagedElasticJob(job)))
       .filter(
         (job) => selectedGroups.length === 0 || selectedGroups.some((g) => job.groups.includes(g))
       ),

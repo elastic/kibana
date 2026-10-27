@@ -14,6 +14,49 @@ export const ML_JOB_SETTINGS = i18n.translate(
   }
 );
 
+export const REVIEW_ML_JOB_UPDATE_TITLE = i18n.translate(
+  'xpack.securitySolution.components.mlPopup.reviewMlJobUpdateTitle',
+  {
+    defaultMessage: 'Review ML job update',
+  }
+);
+
+export const REVIEW_ML_JOB_UPDATE_INTRO = i18n.translate(
+  'xpack.securitySolution.components.mlPopup.reviewMlJobUpdateIntro',
+  {
+    defaultMessage:
+      'This job has customizations that will be overwritten by the update. Review what will be lost before proceeding.',
+  }
+);
+
+export const CUSTOMIZATIONS_THAT_WILL_BE_OVERWRITTEN = i18n.translate(
+  'xpack.securitySolution.components.mlPopup.customizationsThatWillBeOverwrittenTitle',
+  {
+    defaultMessage: 'Customizations that will be overwritten',
+  }
+);
+
+export const DUPLICATE_JOB_BEFORE_UPDATING = i18n.translate(
+  'xpack.securitySolution.components.mlPopup.duplicateJobBeforeUpdatingLabel',
+  {
+    defaultMessage: 'Duplicate job before updating',
+  }
+);
+
+export const CANCEL_JOB_UPDATE = i18n.translate(
+  'xpack.securitySolution.components.mlPopup.cancelJobUpdateButtonLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const CONFIRM_JOB_UPDATE = i18n.translate(
+  'xpack.securitySolution.components.mlPopup.confirmJobUpdateButtonLabel',
+  {
+    defaultMessage: 'Update',
+  }
+);
+
 export const UPGRADE_TITLE = i18n.translate(
   'xpack.securitySolution.components.mlPopup.upgradeTitle',
   {

@@ -24,6 +24,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { hasMlJobCustomization } from '../../../../../../common/components/ml_popover/jobs_table/ml_job_update_customization';
 import type { MlLinkedJobUpgradeItem } from './job_upgrade_items';
 import * as i18n from './translations';
 
@@ -36,26 +37,31 @@ interface MlRuleJobUpgradeModalProps {
   items: MlLinkedJobUpgradeItem[];
   onCancel: () => void;
   onConfirm: (result: MlRuleJobUpgradeConfirmResult) => void;
+  /** Opens the ML job settings review (second-level) when jobs have conflicts/customizations. */
+  onReview?: () => void;
 }
+
+const itemNeedsReview = (item: MlLinkedJobUpgradeItem): boolean =>
+  item.kind === 'breaking_job_change' ||
+  item.currentJobIds.some(hasMlJobCustomization) ||
+  item.targetJobIds.some(hasMlJobCustomization);
 
 export const MlRuleJobUpgradeModal = memo(function MlRuleJobUpgradeModal({
   items,
   onCancel,
   onConfirm,
+  onReview,
 }: MlRuleJobUpgradeModalProps): JSX.Element {
   const titleId = useGeneratedHtmlId();
   const duplicateCheckboxId = useGeneratedHtmlId({ prefix: 'duplicateOldMlJobs' });
   const [duplicateOldJobs, setDuplicateOldJobs] = useState(false);
 
   const hasBreaking = items.some((item) => item.kind === 'breaking_job_change');
+  const showReviewAction = items.some(itemNeedsReview);
 
   const handleConfirmWithJobs = useCallback(() => {
     onConfirm({ updateJobs: true, duplicateOldJobs });
   }, [duplicateOldJobs, onConfirm]);
-
-  const handleRulesOnly = useCallback(() => {
-    onConfirm({ updateJobs: false, duplicateOldJobs: false });
-  }, [onConfirm]);
 
   return (
     <EuiModal
@@ -155,14 +161,12 @@ export const MlRuleJobUpgradeModal = memo(function MlRuleJobUpgradeModal({
         <EuiButtonEmpty onClick={onCancel} data-test-subj="mlRuleJobUpgradeCancel">
           {i18n.ML_RULE_JOB_UPGRADE_MODAL_CANCEL}
         </EuiButtonEmpty>
-        <EuiButtonEmpty onClick={handleRulesOnly} data-test-subj="mlRuleJobUpgradeRulesOnly">
-          {i18n.ML_RULE_JOB_UPGRADE_MODAL_RULES_ONLY}
-        </EuiButtonEmpty>
-        <EuiButton
-          fill
-          onClick={handleConfirmWithJobs}
-          data-test-subj="mlRuleJobUpgradeConfirm"
-        >
+        {showReviewAction && onReview && (
+          <EuiButtonEmpty onClick={onReview} data-test-subj="mlRuleJobUpgradeReview">
+            {i18n.ML_RULE_JOB_UPGRADE_MODAL_REVIEW}
+          </EuiButtonEmpty>
+        )}
+        <EuiButton fill onClick={handleConfirmWithJobs} data-test-subj="mlRuleJobUpgradeConfirm">
           {i18n.ML_RULE_JOB_UPGRADE_MODAL_CONFIRM}
         </EuiButton>
       </EuiModalFooter>

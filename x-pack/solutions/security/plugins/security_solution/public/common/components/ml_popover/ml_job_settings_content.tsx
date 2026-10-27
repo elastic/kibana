@@ -41,6 +41,7 @@ export const MlJobSettingsContent = React.memo(() => {
     isMlAdmin,
     loading: isLoadingSecurityJobs,
     jobs,
+    integrationJobs,
     refetch: refreshJobs,
   } = useSecurityJobs();
 
@@ -63,15 +64,24 @@ export const MlJobSettingsContent = React.memo(() => {
     [refreshJobs, enableDatafeed, disableDatafeed]
   );
 
+  // Unified list: pre-built + Fleet integration jobs (e.g. PAD). Users distinguish via name/groups.
+  const allJobs = useMemo(() => {
+    const byId = new Map<string, SecurityJob>();
+    for (const job of [...jobs, ...integrationJobs]) {
+      byId.set(job.id, job);
+    }
+    return [...byId.values()];
+  }, [jobs, integrationJobs]);
+
   const filteredJobs = filterJobs({
-    jobs,
+    jobs: allJobs,
     ...filterProperties,
   });
 
-  const incompatibleJobCount = jobs.filter((j) => !j.isCompatible).length;
+  const incompatibleJobCount = allJobs.filter((j) => !j.isCompatible).length;
   const installedJobsIds = useMemo(
-    () => jobs.filter((j) => j.isInstalled).map((j) => j.id),
-    [jobs]
+    () => allJobs.filter((j) => j.isInstalled).map((j) => j.id),
+    [allJobs]
   );
 
   if (!isMlAdmin) {
@@ -84,7 +94,7 @@ export const MlJobSettingsContent = React.memo(() => {
 
       <EuiSpacer />
 
-      <JobsTableFilters securityJobs={jobs} onFilterChanged={setFilterProperties} />
+      <JobsTableFilters securityJobs={allJobs} onFilterChanged={setFilterProperties} />
 
       <ShowingCount filterResultsLength={filteredJobs.length} />
 
