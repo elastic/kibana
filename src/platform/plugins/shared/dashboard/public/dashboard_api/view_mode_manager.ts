@@ -45,7 +45,9 @@ export function initializeViewModeManager({
   });
 
   function getInitialViewMode() {
-    if (creationOptionsViewMode === 'non-interactive') return creationOptionsViewMode;
+    if (creationOptionsViewMode === 'non-interactive' || creationOptionsViewMode === 'print') {
+      return creationOptionsViewMode;
+    }
 
     if (isManaged || !getDashboardCapabilities().showWriteControls || !canUserEditDashboard) {
       return 'view';

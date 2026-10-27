@@ -15,7 +15,12 @@ import {
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { DetectAndReviewStepState } from '../../onboarding_flow_context';
 import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
-import { detectServiceVarsDrift, detectAuthDrift, detectAgentPoliciesDrift } from './detect_drift';
+import {
+  detectServiceVarsDrift,
+  detectGlobalNamespaceDrift,
+  detectAuthDrift,
+  detectAgentPoliciesDrift,
+} from './detect_drift';
 
 interface UseOnboardingDriftDetectionParams {
   onboardingDeploymentId: string | undefined;
@@ -149,7 +154,18 @@ export function useOnboardingDriftDetection({
           },
           { agentPolicyIds: item.agentPolicyIds }
         );
-        const dirty = dirtyVarIds.length > 0 || authDirty || agentPoliciesDirty;
+        // Instances are absent from a session that never went through Step 2's Next, and then
+        // every deployed instance is an original, since duplicates only exist as instances.
+        const namespaceDeployedIds = serviceSettings?.instances
+          ? deployedInstanceIds
+          : Object.keys(policyIdsByInstance ?? {});
+        const namespaceDirty = detectGlobalNamespaceDrift(
+          serviceSettings?.namespace,
+          item.namespace,
+          namespaceDeployedIds,
+          serviceSettings?.serviceVars
+        );
+        const dirty = dirtyVarIds.length > 0 || namespaceDirty || authDirty || agentPoliciesDirty;
         driftDirtyRef.current = dirty;
         // Merge with replace-form dirty: a clean SO result still clears isDirty when the form
         // hasn't been touched.
@@ -170,8 +186,8 @@ export function useOnboardingDriftDetection({
       cancelled = true;
     };
     // awsServicesMap is captured from the closure, standing in the deps as comparedManifestsSettled.
-    // serviceSettings.serviceVars and globalRegion are intentionally captured from the closure:
-    // service-var and region changes come from Step 2 navigation (full remount), not same-step
+    // serviceSettings.serviceVars, namespace and globalRegion are intentionally captured from the closure:
+    // service-var, namespace and region changes come from Step 2 navigation (full remount), not same-step
     // edits. Auth mutations (MI: connector swap; agent-based: credential method) and agent-based
     // mode changes (agentHostsMode, policy selection) happen in this component's lifetime.
     // eslint-disable-next-line react-hooks/exhaustive-deps
