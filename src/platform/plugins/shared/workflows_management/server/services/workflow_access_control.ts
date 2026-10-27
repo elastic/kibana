@@ -265,8 +265,11 @@ export class WorkflowAccessControlService {
     if (await this.isAdmin(request)) return undefined;
     const access = await this.scanWorkflowAccess(spaceId, await this.getProfileId(request));
     if (!access || access.hidden.length === 0) return undefined;
-    // Past this size the id list no longer fits in a request body, so the scope is dropped.
-    if (access.readable.length > READABLE_WORKFLOW_IDS_LIMIT) return undefined;
+    // Past this size the id list no longer fits in a request body. Dropping the scope would show
+    // the options of hidden workflows, so fail instead.
+    if (access.readable.length > READABLE_WORKFLOW_IDS_LIMIT) {
+      throw new Error('Too many readable workflows to scope the execution filters.');
+    }
     return [...access.readable, EPHEMERAL_WORKFLOW_ID, INTERNAL_TEST_WORKFLOW_ID];
   }
 

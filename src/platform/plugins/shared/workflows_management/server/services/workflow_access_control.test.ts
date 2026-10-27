@@ -931,7 +931,7 @@ describe('WorkflowAccessControlService', () => {
       await expect(service.readableWorkflowIds('default', request)).resolves.toBeUndefined();
     });
 
-    it('does not scope past the readable workflow limit', async () => {
+    it('fails past the readable workflow limit instead of dropping the scope', async () => {
       const readable = Array.from({ length: 10001 }, (_, index) => ({
         id: `workflow-${index}`,
         source: {},
@@ -949,7 +949,9 @@ describe('WorkflowAccessControlService', () => {
           return response;
         });
 
-      await expect(service.readableWorkflowIds('default', request)).resolves.toBeUndefined();
+      await expect(service.readableWorkflowIds('default', request)).rejects.toThrow(
+        'Too many readable workflows to scope the execution filters.'
+      );
     });
   });
 
