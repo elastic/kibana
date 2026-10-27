@@ -12,6 +12,7 @@ import {
   type DateRangePickerOnChangeProps,
   type DateRangePickerSettings,
 } from '@kbn/date-range-picker';
+import { useDateRangePickerPresets } from '@kbn/date-range-picker-presets';
 import { useMlKibana } from '../../../../contexts/kibana';
 
 const WIDTH = '512px';
@@ -33,7 +34,7 @@ interface Props {
 
 export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
   const {
-    services: { uiSettings, http },
+    services: { uiSettings, data, notifications, http },
   } = useMlKibana();
   const dateFormat: string = uiSettings.get('dateFormat');
   const timeZone: string = uiSettings.get('dateFormat:tz');
@@ -43,6 +44,12 @@ export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
   const [settings, setSettings] = useState<DateRangePickerSettings>(
     DEFAULT_DATE_RANGE_PICKER_SETTINGS
   );
+
+  const dateRangePickerPresets = useDateRangePickerPresets({
+    service: data.dateRangePickerPresets,
+    persistenceEnabled: true,
+    notifications,
+  });
 
   // The job needs absolute bounds, so the parent's epoch times are shown as an absolute range.
   const value = `${new Date(timeRange.start).toISOString()} to ${new Date(
@@ -72,6 +79,9 @@ export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
         isInvalid={isInvalid}
         width="full"
         compressed={false}
+        presets={dateRangePickerPresets.presets}
+        onPresetSave={dateRangePickerPresets.onPresetSave}
+        onPresetDelete={dateRangePickerPresets.onPresetDelete}
         settings={settings}
         onSettingsChange={setSettings}
         inputDateFormats={inputDateFormats}

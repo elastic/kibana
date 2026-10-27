@@ -14,10 +14,16 @@ jest.mock('@kbn/date-range-picker', () => ({
   DateRangePicker: jest.fn(() => null),
 }));
 
+jest.mock('@kbn/date-range-picker-presets', () => ({
+  useDateRangePickerPresets: jest.fn(() => ({ presets: [] })),
+}));
+
 jest.mock('../../../../contexts/kibana', () => ({
   useMlKibana: () => ({
     services: {
       uiSettings: { get: jest.fn((key: string) => (key === 'dateFormat' ? 'MMM D, YYYY' : 'UTC')) },
+      data: { dateRangePickerPresets: {} },
+      notifications: {},
       http: { basePath: { prepend: jest.fn((path: string) => path) } },
     },
   }),
