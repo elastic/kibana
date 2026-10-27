@@ -31,6 +31,8 @@ examples/locator_explorer @elastic/appex-sharedux
 examples/partial_results_example @elastic/kibana-discover
 examples/portable_dashboards_example @elastic/kibana-dashboards
 examples/preboot_example @elastic/kibana-security @elastic/kibana-core
+examples/pubsub_example @elastic/kibana-core
+examples/pubsub-example-topic @elastic/kibana-core
 examples/resizable_layout_examples @elastic/kibana-discover
 examples/response_stream @elastic/search-ml-ux
 examples/routing_example @elastic/kibana-core
@@ -293,6 +295,9 @@ src/core/packages/pricing/common @elastic/kibana-core
 src/core/packages/pricing/server @elastic/kibana-core
 src/core/packages/pricing/server-internal @elastic/kibana-core
 src/core/packages/pricing/server-mocks @elastic/kibana-core
+src/core/packages/pubsub/server @elastic/kibana-core
+src/core/packages/pubsub/server-internal @elastic/kibana-core
+src/core/packages/pubsub/server-mocks @elastic/kibana-core
 src/core/packages/rendering/browser @elastic/kibana-core
 src/core/packages/rendering/browser-internal @elastic/kibana-core
 src/core/packages/rendering/browser-mocks @elastic/kibana-core

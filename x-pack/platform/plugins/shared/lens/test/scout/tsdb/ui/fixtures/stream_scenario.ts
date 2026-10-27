@@ -6,14 +6,15 @@
  */
 
 import { randomUUID } from 'node:crypto';
+import moment from 'moment';
 import { expect } from '@kbn/scout/ui';
-import type { TsdbScenarioContext, TsdbScenarioIndex } from './tsdb_helpers';
+import type { TsdbScenarioContext, TsdbScenarioIndex, TsdbScenarioTimeRange } from './tsdb_helpers';
+import type { StreamChartBar } from './stream_chart_helpers';
 import {
   TSDB_SCENARIO_DOCUMENT_COUNT,
   createTsdbScenarioTimeRange,
   createTsdbStreamScenario,
   getDowngradeBoundaryData,
-  sumFirstNValues,
 } from './tsdb_helpers';
 import {
   getCountBars,
@@ -31,18 +32,14 @@ type StreamScenarioVariant =
 type ChartFixtures = Pick<TsdbScenarioContext, 'pageObjects'>;
 
 const assertDocumentCounts = (
-  bars: Array<{ y: number }>,
-  expectedDocumentCountBeforeRollover: number
+  bars: StreamChartBar[],
+  expectedDocumentCountBeforeRollover: number,
+  timeRange: TsdbScenarioTimeRange
 ): void => {
-  // Bucket boundaries vary with chart interval selection. A downsample target does not
-  // contribute additional documents beside its source stream.
-  const columnsToCheck = Math.floor(bars.length / 2);
-  expect
-    .soft(sumFirstNValues(columnsToCheck, bars))
-    .toBeGreaterThan(expectedDocumentCountBeforeRollover - 1);
-  expect
-    .soft(sumFirstNValues(columnsToCheck, [...bars].reverse()))
-    .toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
+  expect.soft(bars.filter(({ y }) => y > 0).map(({ x, y }) => ({ x, y }))).toStrictEqual([
+    { x: Date.parse(timeRange.beforeRollover), y: expectedDocumentCountBeforeRollover },
+    { x: Date.parse(timeRange.afterRollover), y: TSDB_SCENARIO_DOCUMENT_COUNT },
+  ]);
 };
 
 /** Creates isolated resources and shared assertions for one TSDB stream scenario spec. */
@@ -76,7 +73,12 @@ export const createStreamScenario = ({
       downsample: variant !== 'additional_tsdb_stream',
     });
   }
-  const timeRange = createTsdbScenarioTimeRange();
+  // Keep timestamps recent for TSDB while aligning raw and downsampled data to hourly buckets.
+  const timeRange = createTsdbScenarioTimeRange(moment.utc().startOf('hour').valueOf());
+  // The data view queries both the original stream and its separate downsample target.
+  const expectedBeforeCount =
+    (indexes.length + indexes.filter(({ downsample }) => downsample).length) *
+    TSDB_SCENARIO_DOCUMENT_COUNT;
   const scenario = createTsdbStreamScenario({
     baseStream,
     baseStreamKind: direction === 'upgrade' ? 'upgraded' : 'downgraded',
@@ -91,9 +93,9 @@ export const createStreamScenario = ({
   };
 
   const assertDowngradeCounts = async (fixtures: ChartFixtures): Promise<void> => {
-    const bars = await getCountBars(fixtures);
+    const bars = await getCountBars(fixtures, timeRange);
     expect(bars.length).toBeGreaterThan(0);
-    assertDocumentCounts(bars, scenario.expectedDocumentCountBeforeRollover);
+    assertDocumentCounts(bars, expectedBeforeCount, timeRange);
   };
 
   const assertDowngradeBoundary = async ({ pageObjects }: ChartFixtures): Promise<void> => {
@@ -112,12 +114,12 @@ export const createStreamScenario = ({
   };
 
   const assertUpgradeBoundary = async (fixtures: ChartFixtures): Promise<void> => {
-    const { counterBars, countBars } = await getUpgradeBoundarySeries(fixtures);
+    const { counterBars, countBars } = await getUpgradeBoundarySeries(fixtures, timeRange);
     expect(counterBars.length).toBeGreaterThan(0);
     expect(countBars.length).toBeGreaterThan(0);
     expect.soft(counterBars[0]?.y).toBe(5000);
     expect.soft(counterBars[counterBars.length - 1]?.y).toBe(5000);
-    assertDocumentCounts(countBars, scenario.expectedDocumentCountBeforeRollover);
+    assertDocumentCounts(countBars, expectedBeforeCount, timeRange);
   };
 
   return {
