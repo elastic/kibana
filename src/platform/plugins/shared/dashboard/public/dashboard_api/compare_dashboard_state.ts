@@ -8,7 +8,12 @@
  */
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import { apiComparesSerializedState, apiHasType } from '@kbn/presentation-publishing';
+import {
+  apiComparesSerializedState,
+  apiHasType,
+  logStateDiff,
+  shouldLogStateDiff,
+} from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { deserializeLayout } from './layout_manager/deserialize_layout';
 import { getLayoutChanges } from './layout_manager/get_layout_changes';
@@ -39,7 +44,11 @@ const diffLayout = (
     if (getRefId(baselinePanel) !== getRefId(currentPanel)) return true;
     const child = children?.[panelId];
     return apiComparesSerializedState(child) && apiHasType(child) && child.type === currentType
-      ? !child.compareSerializedState(baselinePanel, currentPanel)
+      ? !child.compareSerializedState(
+          baselinePanel,
+          currentPanel,
+          (key) => `panel: ${panelId}, key: ${key}`
+        )
       : !deepEqual(baselinePanel, currentPanel);
   };
 
@@ -48,6 +57,13 @@ const diffLayout = (
     currentLayout.layout,
     isPanelChanged
   );
+
+  if (shouldLogStateDiff()) {
+    if (hasPanelChanges) logStateDiff('dashboard panels', baseline.panels, current.panels);
+    if (hasPinnedPanelChanges) {
+      logStateDiff('dashboard pinned panels', baseline.pinned_panels, current.pinned_panels);
+    }
+  }
 
   return {
     ...(hasPanelChanges && { panels: current.panels ?? [] }),

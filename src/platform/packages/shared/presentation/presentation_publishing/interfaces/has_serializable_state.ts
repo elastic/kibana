@@ -52,7 +52,8 @@ export const apiHasSerializableState = (api: unknown | null): api is HasSerializ
 export interface ComparesSerializedState<SerializedState extends object = object> {
   compareSerializedState: (
     baseline: Partial<SerializedState> | undefined,
-    current: Partial<SerializedState> | undefined
+    current: Partial<SerializedState> | undefined,
+    getLogLabel?: (key: string) => string
   ) => boolean;
 }
 
