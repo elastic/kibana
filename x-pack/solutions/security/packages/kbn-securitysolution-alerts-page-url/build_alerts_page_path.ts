@@ -8,9 +8,15 @@
 import { encode } from '@kbn/rison';
 import { FilterStateStore } from '@kbn/es-query';
 import type { Filter } from '@kbn/es-query';
-import { formatPageFilterSearchParam } from '../../../../common/utils/format_page_filter_search_param';
-import { URL_PARAM_KEY } from '../../../common/hooks/constants';
-import { buildPageTimerange, encodePageParam } from '../grouped_attachments/page_url';
+import { formatPageFilterSearchParam } from './format_page_filter_search_param';
+import { buildPageTimerange, encodePageParam } from './page_url';
+
+/** The Security app's URL parameter names, as `URL_PARAM_KEY` in the security_solution plugin spells them. */
+const URL_PARAM_KEY = {
+  filters: 'filters',
+  timerange: 'timerange',
+  pageFilter: 'pageFilters',
+} as const;
 
 const buildIdsFilter = (ids: readonly string[]): Filter => ({
   meta: { alias: 'Alert Ids', negate: false, disabled: false, type: 'custom' },

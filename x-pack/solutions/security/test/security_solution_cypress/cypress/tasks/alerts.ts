@@ -7,7 +7,7 @@
 
 import { encode } from '@kbn/rison';
 import 'cypress-network-idle';
-import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
+import { formatPageFilterSearchParam } from '@kbn/securitysolution-alerts-page-url';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import {
   ACKNOWLDEGED_ALERTS_FILTER_BTN,
