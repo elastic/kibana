@@ -329,7 +329,7 @@ steps:
       # what it was asked to. Both incomplete kinds report `partial`, because
       # packaging reads this field to decide whether the absence of a finding is
       # a verdict about the environment, and neither kind supports that claim --
-      # `incomplete_retryable` left a transient gap and wrote no hunt evidence,
+      # `incomplete_retryable` left a transient gap and did not mark the report hunted,
       # `incomplete_final` left a gap that reproduces, so the report retires
       # having never been fully searched. Gating on `completed_successfully`
       # instead would call that second case a success, which is the same
@@ -361,8 +361,10 @@ steps:
         {%- elsif steps.read_hunt_result.output.data.state != 'completed' -%}
         Hunt coordinator did not finish before the hunt child stopped polling (60 reads, 10s apart); see hunt execution {{ execution.id }}.
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "complete" -%}
+        {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_retryable" and steps.read_hunt_result.output.data.result.has_confirmed_hit == true -%}
+        The confirmed hit was recorded on the report, but part of the hunt did not run ({{ steps.read_hunt_result.output.data.result.message }}), so this run is not a statement about everything the report describes.
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_retryable" -%}
-        The hunt was incomplete but retryable ({{ steps.read_hunt_result.output.data.result.message }}), so no hunt evidence was recorded and the report stays eligible for a later sweep.
+        The hunt was incomplete but retryable ({{ steps.read_hunt_result.output.data.result.message }}), so the report is not marked as hunted and stays eligible for a later sweep.
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_final" -%}
         The hunt left a gap a later run could not close ({{ steps.read_hunt_result.output.data.result.message }}), so the report is retired without having been fully searched and its evidence is recorded as incomplete rather than clean.
         {%- else -%}
