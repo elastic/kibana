@@ -9,10 +9,14 @@
 import type { CoreStart, Logger } from '@kbn/core/server';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { StartDeps } from './plugin';
 
 export let coreServices: CoreStart;
 export let embeddableService: EmbeddableStart;
+export let spacesService: SpacesServiceStart | undefined;
+export let securityService: SecurityPluginStart | undefined;
 export let taggingService: SavedObjectTaggingStart | undefined;
 export let logger: Logger;
 
@@ -20,5 +24,7 @@ export const setKibanaServices = (core: CoreStart, deps: StartDeps, _logger: Log
   coreServices = core;
   embeddableService = deps.embeddable;
   taggingService = deps.savedObjectsTagging;
+  securityService = deps.security;
+  spacesService = deps.spaces?.spacesService;
   logger = _logger;
 };

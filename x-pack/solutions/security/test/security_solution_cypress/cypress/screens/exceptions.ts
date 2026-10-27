@@ -187,24 +187,22 @@ export const CREATE_SHARED_EXCEPTION_LIST_BTN =
 
 // Exception List detail page
 
-export const EXCEPTIONS_LIST_MANAGEMENT_NAME =
-  '[data-test-subj="exceptionListManagementTitleText"]';
+export const EXCEPTIONS_LIST_MANAGEMENT_NAME = '[data-test-subj="appHeaderTitle"]';
 
 export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_NAME_BTN =
-  '[data-test-subj="exceptionListManagementTitleEditIcon"]';
+  '[data-test-subj="exceptionListManagementEditDetailsAction"]';
 
 export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_NAME_INPUT =
   '[data-test-subj="editModalNameTextField"]';
 export const EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION =
-  '[data-test-subj="exceptionListManagementDescriptionText"]';
+  '[data-test-subj="exceptionListManagementDescription"]';
 
 export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT =
   '[data-test-subj="editModalDescriptionTextField"]';
 
 export const EXCEPTIONS_LIST_EDIT_DETAILS_SAVE_BTN = '[data-test-subj="editModalSaveBtn"]';
 
-export const EXCEPTIONS_LIST_DETAILS_HEADER =
-  '[data-test-subj="exceptionListManagementPageHeader"]';
+export const EXCEPTIONS_LIST_DETAILS_HEADER = '[data-test-subj="appHeaderTitle"]';
 
 export const EXCEPTION_LIST_DETAILS_CARD_ITEM_NAME = '[data-test-subj="exceptionItemCardHeader"]';
 
@@ -234,10 +232,10 @@ export const LINKED_RULES_BADGE = '[data-test-subj="exceptionListCardLinkedRules
 export const MANAGE_RULES_SAVE = '[data-test-subj="manageListRulesSaveButton"]';
 
 export const EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU =
-  '[data-test-subj="exceptionListManagementRightSideMenuItemsLinkedRulesMenuEmptyButton"]';
+  '[data-test-subj="exceptionListManagementLinkedRulesMenu"]';
 
 export const EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM =
-  '[data-test-subj="exceptionListManagementRightSideMenuItemsLinkedRulesMenuMenuPanel"] .euiContextMenuItem';
+  '[data-test-subj^="exceptionListManagementLinkedRule"]:not([data-test-subj="exceptionListManagementLinkedRulesMenu"])';
 
 // Exception card in Shared List Detail Page
 export const EXCEPTION_ITEM_HEADER_ACTION_MENU =
