@@ -14,6 +14,8 @@ export interface ScoutTestConfig {
   projectType?: ServerlessProjectType;
   isCloud: boolean;
   cloudHostName?: string;
+  // Kibana SAML provider whose realm trusts the mock IdP, e.g. `qaf` on QAF ECH deployments
+  customSamlProviderName?: string;
   cloudUsersFilePath: string;
   license: string;
   hosts: {
