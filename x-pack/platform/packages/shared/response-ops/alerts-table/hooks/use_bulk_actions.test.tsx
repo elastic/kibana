@@ -7,7 +7,7 @@
 
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -20,8 +20,15 @@ import {
   useBulkMuteActions,
 } from './use_bulk_actions';
 import { createCasesServiceMock } from '../mocks/cases.mock';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../constants';
 import { BulkActionsVerbs, type PublicAlertsDataGridProps } from '../types';
-import type { AdditionalContext, OpenChatService, RenderContext, TimelineItem } from '../types';
+import type {
+  AdditionalContext,
+  BulkActionsState,
+  OpenChatService,
+  RenderContext,
+  TimelineItem,
+} from '../types';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import { createPartialObjectMock, testQueryClientConfig } from '../utils/test';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
@@ -31,15 +38,16 @@ jest.mock('../contexts/alerts_table_context');
 const mockCasesService = createCasesServiceMock();
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
-jest.mocked(useAlertsTableContext).mockReturnValue(
-  createPartialObjectMock<RenderContext<AdditionalContext>>({
-    bulkActionsStore: [{}, jest.fn()],
-    services: {
-      http,
-      notifications,
-    },
-  })
-);
+const mockAlertsTableContext = (bulkActionsState: Partial<BulkActionsState> = {}) =>
+  jest.mocked(useAlertsTableContext).mockReturnValue(
+    createPartialObjectMock<RenderContext<AdditionalContext>>({
+      bulkActionsStore: [bulkActionsState, jest.fn()],
+      services: {
+        http,
+        notifications,
+      },
+    })
+  );
 const application = applicationServiceMock.createStartContract();
 application.capabilities = { ...application.capabilities, infrastructure: { show: true } };
 const queryClient = new QueryClient(testQueryClientConfig);
@@ -60,6 +68,7 @@ const casesConfig: PublicAlertsDataGridProps['casesConfiguration'] = {
 describe('bulk action hooks', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAlertsTableContext();
   });
 
   const refresh = jest.fn();
@@ -739,7 +748,10 @@ describe('bulk action hooks', () => {
       expect(result.current.bulkActions[0].items?.map(({ key }) => key)).toEqual(initialKeys);
     });
 
-    it('passes the latest default action handlers after select all', () => {
+    it('untracks by query after select all', async () => {
+      const bulkActionsState: Partial<BulkActionsState> = { isAllSelected: false };
+      mockAlertsTableContext(bulkActionsState);
+      const query = {};
       const additionalBulkActions = [
         { id: 0, items: [{ label: 'test', key: 'test', disableOnQuery: true, onClick: () => {} }] },
       ];
@@ -747,7 +759,7 @@ describe('bulk action hooks', () => {
         () =>
           useBulkActions({
             alertsCount: 0,
-            query: {},
+            query,
             casesConfig,
             refresh,
             additionalBulkActions,
@@ -757,14 +769,22 @@ describe('bulk action hooks', () => {
           }),
         { wrapper }
       );
-      const findUntrack = () =>
-        result.current.bulkActions[0].items?.find(({ key }) => key === 'mark-as-untracked');
-      const initialUntrack = findUntrack();
-
-      result.current.updateBulkActionsState({ action: BulkActionsVerbs.selectAll });
+      bulkActionsState.isAllSelected = true;
       rerender();
 
-      expect(findUntrack()?.onClick).not.toBe(initialUntrack?.onClick);
+      const untrack = result.current.bulkActions[0].items?.find(
+        ({ key }) => key === 'mark-as-untracked'
+      );
+      await act(async () => {
+        untrack?.onClick?.([], true, setIsBulkActionsLoading, clearSelection, refresh);
+      });
+
+      await waitFor(() =>
+        expect(http.post).toHaveBeenCalledWith(
+          `${INTERNAL_BASE_ALERTING_API_PATH}/alerts/_bulk_untrack_by_query`,
+          expect.anything()
+        )
+      );
     });
 
     it('does not change the additional bulk actions passed in', () => {
