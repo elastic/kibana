@@ -44,6 +44,10 @@ const STATEFUL_ONLY = tags.stateful.classic;
 const AGENTS_PATH = `${API_AGENT_BUILDER}/agents`;
 const AGENT_PATH = (id: string) => `${AGENTS_PATH}/${encodeURIComponent(id)}`;
 const SERVICE_ACCOUNTS_PATH = '/internal/security/service_account';
+// Binding has no public API: owning plugins bind through the agent registry on the start
+// contract. The Scout test plugin exposes that call on this route, as the requesting user.
+const BIND_TEST_PATH = (id: string) =>
+  `/internal/agent_builder_test/agents/${encodeURIComponent(id)}/service_account`;
 const WORKLOADS_PATH = (serviceAccountId: string) =>
   `${SERVICE_ACCOUNTS_PATH}/${encodeURIComponent(serviceAccountId)}/workloads`;
 
@@ -94,6 +98,17 @@ apiTest.describe(
       apiClient.put(AGENT_PATH(agentId), {
         headers: { ...COMMON_HEADERS, ...headers },
         body,
+        responseType: 'json',
+      });
+
+    const bindAgent = (
+      apiClient: ApiClient,
+      headers: Record<string, string>,
+      serviceAccountId: string | null
+    ) =>
+      apiClient.put(BIND_TEST_PATH(agentId), {
+        headers: { ...COMMON_HEADERS, 'x-elastic-internal-origin': 'kibana', ...headers },
+        body: { service_account_id: serviceAccountId },
         responseType: 'json',
       });
 
@@ -225,11 +240,9 @@ apiTest.describe(
       });
       expect(created).toHaveStatusCode(200);
 
-      const bound = await updateAgent(apiClient, asBinder, {
-        service_account_id: serviceAccount.id,
-      });
+      const bound = await bindAgent(apiClient, asBinder, serviceAccount.id);
       expect(bound).toHaveStatusCode(200);
-      expect((bound.body as AgentDefinitionWithPermissions).service_account_id).toBe(
+      expect((bound.body as { service_account_id?: string }).service_account_id).toBe(
         serviceAccount.id
       );
     });
@@ -270,10 +283,10 @@ apiTest.describe(
     });
 
     apiTest('refuses to change the binding without manage_security', async ({ apiClient }) => {
-      const rebind = await updateAgent(apiClient, asEditor, { service_account_id: 'kibana/other' });
+      const rebind = await bindAgent(apiClient, asEditor, 'kibana/other');
       expect(rebind).toHaveStatusCode(403);
 
-      const unbind = await updateAgent(apiClient, asEditor, { service_account_id: null });
+      const unbind = await bindAgent(apiClient, asEditor, null);
       expect(unbind).toHaveStatusCode(403);
     });
 
@@ -361,9 +374,9 @@ apiTest.describe(
     });
 
     apiTest('unbinding restores the caller identity', async ({ apiClient, kbnClient }) => {
-      const unbound = await updateAgent(apiClient, asBinder, { service_account_id: null });
+      const unbound = await bindAgent(apiClient, asBinder, null);
       expect(unbound).toHaveStatusCode(200);
-      expect((unbound.body as AgentDefinitionWithPermissions).service_account_id).toBeUndefined();
+      expect((unbound.body as { service_account_id?: string }).service_account_id).toBeUndefined();
       expect(await boundWorkloads(kbnClient)).not.toContain(agentId);
 
       await setupAgentDirectAnswer({ proxy: llmProxy, response: 'as yourself' });

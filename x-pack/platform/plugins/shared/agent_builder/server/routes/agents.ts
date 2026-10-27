@@ -544,18 +544,6 @@ export function registerAgentRoutes({
                   meta: { description: 'Updated symbol/initials for the agent avatar.' },
                 })
               ),
-              service_account_id: schema.maybe(
-                schema.nullable(
-                  schema.string({
-                    minLength: 1,
-                    maxLength: 1024,
-                    meta: {
-                      description:
-                        'Service account the agent runs as for every conversation; null removes the binding. Requires the manage_security privilege.',
-                    },
-                  })
-                )
-              ),
               labels: schema.maybe(
                 schema.arrayOf(
                   schema.string({

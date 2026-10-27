@@ -19,7 +19,9 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-sml-plugin'
+  - '@kbn/config-schema'
   - '@kbn/features-plugin'
 tags:
   - plugin

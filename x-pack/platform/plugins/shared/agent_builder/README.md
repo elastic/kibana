@@ -195,12 +195,20 @@ Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and exa
 
 ### Running an agent as a service account
 
-Where service accounts are enabled, an agent can be bound to a service account through
-`service_account_id` on the update API. The agent editor shows the binding but does
-not manage it yet (interactive binding is tracked in
-[elastic/kibana#300118](https://github.com/elastic/kibana/issues/300118)). The agent then runs
-every conversation with that account's permissions, whoever started it; the conversation owner
-and round authors stay the caller.
+Where service accounts are enabled, an agent can be bound to a service account by the plugin
+that owns it, through the agent registry on the start contract:
+
+```ts
+const registry = await agentBuilder.agents.getRegistry({ request });
+await registry.update(agentId, { service_account_id: 'kibana/my-account' }); // `null` unbinds
+```
+
+The request must belong to a user with write access to the agent and the `manage_security`
+privilege, because Core creates the binding under that user. There is no HTTP API for binding
+until the UI manages it (tracked in
+[elastic/kibana#300118](https://github.com/elastic/kibana/issues/300118)); the agent editor shows
+the binding read-only. The agent then runs every conversation with that account's permissions,
+whoever started it; the conversation owner and round authors stay the caller.
 
 - Binding, replacing or removing the account needs write access to the agent and the
   Elasticsearch `manage_security` cluster privilege. Every edit of a bound agent, including its
