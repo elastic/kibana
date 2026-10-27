@@ -1,6 +1,6 @@
 in: query
 name: sortOrder
-description: Determines the sort order of the attachments by creation date.
+description: 'Sorts attachments by creation date: `asc` (oldest first) or `desc` (newest first).'
 required: false
 schema:
   type: string

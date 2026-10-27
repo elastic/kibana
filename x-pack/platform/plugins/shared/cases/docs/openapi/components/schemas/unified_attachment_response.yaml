@@ -32,6 +32,9 @@ properties:
     $ref: 'owner.yaml'
   pushed_at:
     type: string
+    description: >
+      When this attachment was last pushed to an external system, such as Jira. Is `null` if it
+      hasn't been pushed.
     format: date-time
     nullable: true
     example: null
@@ -48,5 +51,5 @@ properties:
     $ref: 'case_response_updated_by_properties.yaml'
   version:
     type: string
-    description: The attachment version. Use it to replace the attachment.
+    description: The attachment's current version. Include it when you replace the attachment.
     example: WzIwNDMxLDFd

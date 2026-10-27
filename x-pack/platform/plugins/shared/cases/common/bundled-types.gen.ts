@@ -2174,7 +2174,7 @@ export const AlertResponseProperties = lazySchema(() =>
 export type AlertResponseProperties = z.infer<typeof AlertResponseProperties>;
 
 /**
-  * The ID or IDs of the referenced entities, such as alert document IDs. Required for reference attachment types, such as alerts and events.
+  * The ID of the attached item, such as an alert or a dashboard. To attach several alerts, use an array. This isn't the attachment's own ID (`id`).
 
   */
 export const UnifiedAttachmentAttachmentId = lazySchema(() =>
@@ -2183,7 +2183,7 @@ export const UnifiedAttachmentAttachmentId = lazySchema(() =>
 export type UnifiedAttachmentAttachmentId = z.infer<typeof UnifiedAttachmentAttachmentId>;
 
 /**
-  * Type-specific content for the attachment. Required for value attachment types, such as comments. For the `comment` type, this is an object with a `content` string of up to 30,000 characters.
+  * The attachment's content. Required for comments, where `content` is the comment text (up to 30,000 characters).
 
   */
 export const UnifiedAttachmentData = lazySchema(() =>
@@ -2192,7 +2192,7 @@ export const UnifiedAttachmentData = lazySchema(() =>
 export type UnifiedAttachmentData = z.infer<typeof UnifiedAttachmentData>;
 
 /**
-  * Type-specific metadata for the attachment. For alert types, this includes the alert `index` and the `rule` that generated the alert.
+  * Extra details about the attachment. For alerts, this is the alert's index and rule. Required for some types, such as `dashboard`.
 
   */
 export const UnifiedAttachmentMetadata = lazySchema(() =>
@@ -2201,7 +2201,7 @@ export const UnifiedAttachmentMetadata = lazySchema(() =>
 export type UnifiedAttachmentMetadata = z.infer<typeof UnifiedAttachmentMetadata>;
 
 /**
-  * The attachment type. The type must be registered in Kibana and determines the accepted shape of `attachmentId`, `data`, and `metadata`. Common types include `comment`, `security.alert`, `observability.alert`, `stack.alert`, `security.event`, `file`, `lens`, and `dashboard`. Legacy attachment types such as `user` or `alert` are not accepted. You can read and delete `file` attachments, but you can't create or replace them with this API. To attach a file, use `POST /api/cases/{caseId}/files`.
+  * The attachment type, such as `comment`, `security.alert`, `observability.alert`, `stack.alert`, `security.event`, `lens`, `dashboard`, or `file`. `security.*` types only work on Security cases, `observability.*` on Observability cases, and `stack.*` on Stack Management cases. Use `comment` (not the legacy `user` type) and a `*.alert` type (not `alert`). You can't add or replace file attachments with this API. To add a file, use `POST /api/cases/{caseId}/files`.
 
   */
 export const UnifiedAttachmentType = lazySchema(() => z.string());
@@ -2219,15 +2219,25 @@ export const UnifiedAttachmentResponse = lazySchema(() =>
     id: z.string().describe('The attachment identifier.'),
     metadata: UnifiedAttachmentMetadata.optional(),
     owner: Owner,
-    pushed_at: isoDateTime().nullable(),
+    /**
+      * When this attachment was last pushed to an external system, such as Jira. Is `null` if it hasn't been pushed.
+
+      */
+    pushed_at: isoDateTime()
+      .nullable()
+      .describe(
+        "When this attachment was last pushed to an external system, such as Jira. Is `null` if it hasn't been pushed.\n"
+      ),
     pushed_by: CaseResponsePushedByProperties,
     type: UnifiedAttachmentType,
     updated_at: isoDateTime().nullable(),
     updated_by: CaseResponseUpdatedByProperties,
     /**
-     * The attachment version. Use it to replace the attachment.
+     * The attachment's current version. Include it when you replace the attachment.
      */
-    version: z.string().describe('The attachment version. Use it to replace the attachment.'),
+    version: z
+      .string()
+      .describe("The attachment's current version. Include it when you replace the attachment."),
   })
 );
 export type UnifiedAttachmentResponse = z.infer<typeof UnifiedAttachmentResponse>;
@@ -2247,14 +2257,14 @@ export const UnifiedAttachmentsFindResponse = lazySchema(() =>
      */
     per_page: z.number().int().describe('The number of items per page.'),
     /**
-      * The total number of attachments that match the query. It includes attachments that can't be read. Those are left out of `data`, so a page can have fewer items than `per_page`.
+      * The total number of matching attachments you can access. Attachments with invalid or unsupported data are counted but not returned, so a page can have fewer than `per_page` items.
 
       */
     total: z
       .number()
       .int()
       .describe(
-        "The total number of attachments that match the query. It includes attachments that can't be read. Those are left out of `data`, so a page can have fewer items than `per_page`.\n"
+        'The total number of matching attachments you can access. Attachments with invalid or unsupported data are counted but not returned, so a page can have fewer than `per_page` items.\n'
       ),
   })
 );

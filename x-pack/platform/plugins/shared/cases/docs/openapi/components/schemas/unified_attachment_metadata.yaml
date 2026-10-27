@@ -2,5 +2,5 @@ type: object
 nullable: true
 additionalProperties: true
 description: >
-  Type-specific metadata for the attachment. For alert types, this includes the alert `index`
-  and the `rule` that generated the alert.
+  Extra details about the attachment. For alerts, this is the alert's index and rule. Required
+  for some types, such as `dashboard`.

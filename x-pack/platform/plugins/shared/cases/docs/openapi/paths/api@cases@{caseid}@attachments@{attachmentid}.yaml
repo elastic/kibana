@@ -32,7 +32,7 @@ get:
             response401:
               $ref: '../components/examples/response_401.yaml'
     '403':
-      description: The user does not have the required privileges for the attachment owner.
+      description: You don't have the required privileges for this case.
       content:
         application/json:
           schema:
@@ -83,11 +83,13 @@ put:
             $ref: '../components/schemas/unified_attachment_response.yaml'
           examples:
             replaceAttachmentResponse:
-              $ref: '../components/examples/get_unified_attachment_response.yaml'
+              $ref: '../components/examples/replace_unified_attachment_response.yaml'
     '400':
-      description: >
-        The request body is invalid, the attachment type is `file`, or the body changes the
-        attachment type or owner.
+      description: |
+        The request failed for one of these reasons:
+        - The request body is invalid.
+        - The attachment type is `file`.
+        - The request changes the attachment type or owner.
       content:
         application/json:
           schema:
@@ -105,7 +107,7 @@ put:
             response401:
               $ref: '../components/examples/response_401.yaml'
     '403':
-      description: The user does not have the required privileges for the attachment owner.
+      description: You don't have the required privileges for this case.
       content:
         application/json:
           schema:
@@ -136,7 +138,9 @@ delete:
   summary: Delete a case attachment
   operationId: deleteCaseAttachmentDefaultSpace
   description: >
-    Deletes a single attachment from a case.
+    Deletes a single attachment from a case. If it's a file, the file is also deleted. If it's
+    an attack (`security.attack`), the alerts it added are also removed from the case, unless
+    they're attached separately or by another attack.
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
     feature privileges, depending on the owner of the case.
@@ -160,7 +164,7 @@ delete:
             response401:
               $ref: '../components/examples/response_401.yaml'
     '403':
-      description: The user does not have the required privileges for the attachment owner.
+      description: You don't have the required privileges for this case.
       content:
         application/json:
           schema:

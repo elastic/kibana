@@ -26,7 +26,9 @@ post:
             $ref: '../components/examples/create_unified_alert_attachment_request.yaml'
   responses:
     '201':
-      description: Indicates a successful call. Returns the created attachment.
+      description: >
+        Indicates a successful call. Returns the new attachment, or the existing one if the alert
+        or event was already attached.
       content:
         application/json:
           schema:
@@ -35,9 +37,12 @@ post:
             createAttachmentResponse:
               $ref: '../components/examples/get_unified_attachment_response.yaml'
     '400':
-      description: >
-        The request body is invalid, the attachment type is not registered or is `file`, the
-        owner does not match the case, or a case limit was exceeded.
+      description: |
+        The request failed for one of these reasons:
+        - The request body is invalid.
+        - The attachment type isn't registered, or is `file`.
+        - The owner doesn't match the case owner.
+        - A case limit was exceeded.
       content:
         application/json:
           schema:
@@ -55,7 +60,7 @@ post:
             response401:
               $ref: '../components/examples/response_401.yaml'
     '403':
-      description: The user does not have the required privileges for the case owner.
+      description: You don't have the required privileges for this case.
       content:
         application/json:
           schema:
@@ -124,7 +129,7 @@ delete:
   summary: Delete all case attachments
   operationId: deleteCaseAttachmentsDefaultSpace
   description: >
-    Deletes all attachments from a case.
+    Deletes all attachments from a case. Attached files are also deleted.
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
     feature privileges, depending on the owner of the case.
@@ -147,7 +152,7 @@ delete:
             response401:
               $ref: '../components/examples/response_401.yaml'
     '403':
-      description: The user does not have the required privileges for the case owner.
+      description: You don't have the required privileges for this case.
       content:
         application/json:
           schema:
@@ -156,7 +161,7 @@ delete:
             response403:
               $ref: '../components/examples/response_403.yaml'
     '404':
-      description: The case has no attachments.
+      description: The case doesn't exist or has no attachments.
       content:
         application/json:
           schema:

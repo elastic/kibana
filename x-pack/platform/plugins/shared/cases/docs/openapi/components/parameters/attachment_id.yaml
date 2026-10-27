@@ -1,7 +1,8 @@
 in: path
 name: attachmentId
 description: >
-  The identifier for the attachment. To retrieve attachment IDs, use the find case attachments API.
+  The ID of the attachment, which is its `id` field, not `attachmentId`. To get it, use the find
+  case attachments API.
 required: true
 schema:
   type: string

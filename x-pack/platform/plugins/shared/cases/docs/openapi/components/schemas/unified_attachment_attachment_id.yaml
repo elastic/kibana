@@ -1,6 +1,6 @@
 description: >
-  The ID or IDs of the referenced entities, such as alert document IDs. Required for reference
-  attachment types, such as alerts and events.
+  The ID of the attached item, such as an alert or a dashboard. To attach several alerts, use an
+  array. This isn't the attachment's own ID (`id`).
 oneOf:
   - type: string
   - type: array

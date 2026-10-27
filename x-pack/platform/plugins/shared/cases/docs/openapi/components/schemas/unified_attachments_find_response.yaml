@@ -22,6 +22,7 @@ properties:
   total:
     type: integer
     description: >
-      The total number of attachments that match the query. It includes attachments that can't
-      be read. Those are left out of `data`, so a page can have fewer items than `per_page`.
+      The total number of matching attachments you can access. Attachments with invalid or
+      unsupported data are counted but not returned, so a page can have fewer than `per_page`
+      items.
     example: 1

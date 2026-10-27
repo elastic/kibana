@@ -1,9 +1,8 @@
 type: string
 description: >
-  The attachment type. The type must be registered in Kibana and determines the accepted shape
-  of `attachmentId`, `data`, and `metadata`. Common types include `comment`, `security.alert`,
-  `observability.alert`, `stack.alert`, `security.event`, `file`, `lens`, and `dashboard`.
-  Legacy attachment types such as `user` or `alert` are not accepted. You can read and delete
-  `file` attachments, but you can't create or replace them with this API. To attach a file, use
-  `POST /api/cases/{caseId}/files`.
+  The attachment type, such as `comment`, `security.alert`, `observability.alert`, `stack.alert`,
+  `security.event`, `lens`, `dashboard`, or `file`. `security.*` types only work on Security
+  cases, `observability.*` on Observability cases, and `stack.*` on Stack Management cases. Use
+  `comment` (not the legacy `user` type) and a `*.alert` type (not `alert`). You can't add or
+  replace file attachments with this API. To add a file, use `POST /api/cases/{caseId}/files`.
 example: comment
