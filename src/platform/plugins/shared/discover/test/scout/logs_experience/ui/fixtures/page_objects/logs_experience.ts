@@ -32,7 +32,14 @@ const LOG_LEVEL_BADGE_PREFIX = 'logLevelBadgeCell-';
 const SERVICE_NAME_CELL = 'dataTableCellActionsPopover_service.name';
 const SUMMARY_MESSAGE_VALUE = 'discoverDataTableMessageValue';
 
+const DOC_TABLE = 'discoverDocTable';
+const SAMPLE_SIZE_FOOTER = 'unifiedDataTableFooter';
+const LOAD_MORE_LINK = 'dscGridSampleSizeFetchMoreLink';
+const ANCHOR_EXPAND_BUTTON = 'docTableExpandToggleColumnAnchor';
+const SINGLE_DOCUMENT = 'doc-hit';
 const ALERTS_MENU_BUTTON = 'discoverAlertsButton';
+const RULE_TYPE_NAME = 'ruleDefinitionHeaderRuleTypeName';
+const CREATE_SLO_FLYOUT_TITLE = 'addSLOFlyoutTitle';
 
 export class LogsExperiencePage {
   /** Header of the Log overview tab's content, rendered once that tab is selected. */
@@ -43,6 +50,10 @@ export class LogsExperiencePage {
   public readonly loadMoreLink: Locator;
 
   public readonly alertsMenuButton: Locator;
+
+  /** What the Alerts menu items open: the rule form's type name and the Create SLO flyout title. */
+  public readonly ruleTypeName: Locator;
+  public readonly createSloFlyoutTitle: Locator;
 
   /** Log overview accordion containers. Absent from the DOM while another tab is selected. */
   public readonly qualityIssuesSection: Locator;
@@ -74,9 +85,11 @@ export class LogsExperiencePage {
     private readonly appMenu: PageObjects['appMenu']
   ) {
     this.logsOverviewHeader = page.testSubj.locator(LOGS.LOGS_OVERVIEW_HEADER);
-    this.sampleSizeFooter = page.testSubj.locator('unifiedDataTableFooter');
-    this.loadMoreLink = page.testSubj.locator('dscGridSampleSizeFetchMoreLink');
+    this.sampleSizeFooter = page.testSubj.locator(SAMPLE_SIZE_FOOTER);
+    this.loadMoreLink = page.testSubj.locator(LOAD_MORE_LINK);
     this.alertsMenuButton = page.testSubj.locator(ALERTS_MENU_BUTTON);
+    this.ruleTypeName = page.testSubj.locator(RULE_TYPE_NAME);
+    this.createSloFlyoutTitle = page.testSubj.locator(CREATE_SLO_FLYOUT_TITLE);
     this.qualityIssuesSection = page.testSubj.locator(QUALITY_ISSUES_ACCORDION);
     this.stacktraceSection = page.testSubj.locator(STACKTRACE_ACCORDION);
     this.qualityIssuesAccordion = this.qualityIssuesSection.getByRole('button', {
@@ -159,7 +172,7 @@ export class LogsExperiencePage {
    * last row stays in view.
    */
   public async scrollGridToBottom() {
-    const grid = this.page.testSubj.locator('discoverDocTable').getByRole('grid');
+    const grid = this.page.testSubj.locator(DOC_TABLE).getByRole('grid');
 
     await expect(async () => {
       const rowCount = Number(await grid.getAttribute('aria-rowcount'));
@@ -182,7 +195,7 @@ export class LogsExperiencePage {
 
   /** Waits for the Single document page to render its document. */
   public async waitForSingleDocument() {
-    await this.page.testSubj.locator('doc-hit').waitFor({ state: 'visible' });
+    await this.page.testSubj.locator(SINGLE_DOCUMENT).waitFor({ state: 'visible' });
   }
 
   /** Opens the Alerts app menu and clicks one of its items. */
@@ -208,7 +221,7 @@ export class LogsExperiencePage {
    * carries its own test subject, so `dataGrid.openDocumentDetails` does not match it.
    */
   public async openAnchorDocumentDetails() {
-    const expandButton = this.page.testSubj.locator('docTableExpandToggleColumnAnchor');
+    const expandButton = this.page.testSubj.locator(ANCHOR_EXPAND_BUTTON);
     await expandButton.hover();
     await expandButton.click();
   }
