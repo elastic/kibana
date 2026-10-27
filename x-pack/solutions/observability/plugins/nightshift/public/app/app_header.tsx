@@ -127,7 +127,7 @@ export function NightshiftAppHeader({
   const menu = useMemo<AppMenuConfig>(
     () => ({
       items: [
-        // Landing: Automations and Detections buttons; Knowledge, Settings, Sandbox Secrets in overflow.
+        // Landing: Automations and Detections buttons; Knowledge and Settings in overflow.
         ...(isLandingPage && onAutomationsClick && automationsHref
           ? [
               {
@@ -186,18 +186,6 @@ export function NightshiftAppHeader({
                   void onSettingsClick();
                 },
                 testId: 'nightshiftSettingsLink',
-                overflow: true,
-              },
-            ]
-          : []),
-        ...(isLandingPage && onSandboxSecretsClick
-          ? [
-              {
-                id: 'nightshiftSandboxSecrets',
-                label: sandboxSecretsLabel,
-                iconType: 'lock',
-                run: () => onSandboxSecretsClick(),
-                testId: 'nightshiftSandboxSecretsLink',
                 overflow: true,
               },
             ]
