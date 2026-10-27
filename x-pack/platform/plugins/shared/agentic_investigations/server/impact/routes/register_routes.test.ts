@@ -147,33 +147,40 @@ describe('investigation impact routes', () => {
     });
 
     it('returns the proposal pills the service builds for the query', async () => {
-      const pills = [{ entityId: 'host-1', count: 2 }];
-      const forProposals = jest.fn().mockResolvedValue(pills);
+      const page = { pills: [{ entityId: 'host-1', count: 2 }], total: 1, remaining: 0 };
+      const forProposals = jest.fn().mockResolvedValue(page);
       const { gets } = registerAndCollect({}, undefined, undefined, { pills: { forProposals } });
       const response = httpServerMock.createResponseFactory();
       const request = httpServerMock.createKibanaRequest({
-        query: { origin: 'alertzero', categories: ['respond'], decidedWithinHours: 72 },
+        query: {
+          origin: 'alertzero',
+          categories: ['respond'],
+          decidedWithinHours: 72,
+          from: 0,
+          size: 10,
+        },
       });
 
       await findGet(gets, IMPACT_PROPOSAL_SUMMARY_URL)?.handler({}, request, response);
 
       expect(forProposals).toHaveBeenCalledWith(request, request.query);
-      expect(response.ok).toHaveBeenCalledWith({ body: { pills } });
+      expect(response.ok).toHaveBeenCalledWith({ body: page });
     });
 
     it('returns the escalation pills the service builds', async () => {
-      const pills = [{ entityId: 'user-1', count: 1 }];
-      const forEscalations = jest.fn().mockResolvedValue(pills);
+      const page = { pills: [{ entityId: 'user-1', count: 1 }], total: 1, remaining: 0 };
+      const forEscalations = jest.fn().mockResolvedValue(page);
       const { gets } = registerAndCollect({}, undefined, undefined, {
         pills: { forEscalations },
         escalationsEnabled: true,
       });
       const response = httpServerMock.createResponseFactory();
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({ query: { from: 0, size: 10 } });
 
       await findGet(gets, IMPACT_ESCALATION_SUMMARY_URL)?.handler({}, request, response);
 
-      expect(response.ok).toHaveBeenCalledWith({ body: { pills } });
+      expect(forEscalations).toHaveBeenCalledWith(request, request.query);
+      expect(response.ok).toHaveBeenCalledWith({ body: page });
     });
   });
 

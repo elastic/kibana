@@ -63,6 +63,8 @@ import {
   CloudOnboardingDeploymentSchemaV1,
   CloudOnboardingDeploymentSchemaV2,
   CloudOnboardingDeploymentSchemaV3,
+  CloudOnboardingDeploymentSchemaV4,
+  CloudOnboardingDeploymentSchemaV5,
   ProvisioningCallbackSchemaV1,
 } from '../types';
 
@@ -2187,8 +2189,8 @@ export const getSavedObjectTypes = (
           },
         },
         3: {
-          // pendingAgentlessPolicies: requests stored at Launch for the server to replay when the
-          // stack reports back. Not indexed, so no mappings_addition.
+          // Added integrationName + description. No mappings_addition — neither field is
+          // indexed (dynamic: false).
           changes: [],
           schemas: {
             forwardCompatibility: CloudOnboardingDeploymentSchemaV3.extends(
@@ -2196,6 +2198,29 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
             create: CloudOnboardingDeploymentSchemaV3,
+          },
+        },
+        4: {
+          // Added namespace. No mappings_addition — it is not indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV4.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV4,
+          },
+        },
+        5: {
+          // pendingAgentlessPolicies: requests stored at Launch for the server to replay when the
+          // stack reports back. Not indexed, so no mappings_addition.
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV5.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV5,
           },
         },
       },

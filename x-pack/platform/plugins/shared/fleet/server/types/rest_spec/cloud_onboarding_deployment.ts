@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { CreateAgentlessPolicyRequestSchema } from '../../../common/types/rest_spec/agentless_policy';
+import { CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH } from '../../../common/constants';
 
 // --- Shared primitives ---
 
@@ -135,6 +136,27 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       },
     })
   ),
+  integrationName: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Integration name as entered in the Service settings step, before any per-package suffix is applied.',
+      },
+    })
+  ),
+  description: schema.maybe(
+    schema.string({
+      meta: { description: 'Integration description from the Service settings step.' },
+    })
+  ),
+  namespace: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
+      },
+    })
+  ),
   dataFormat: schema.maybe(DataFormatSchema),
   authMethod: schema.maybe(
     schema.oneOf(
@@ -234,6 +256,30 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
         meta: { description: 'Global AWS region from the Service Settings step.' },
       })
     ),
+    integrationName: schema.maybe(
+      schema.string({
+        maxLength: CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
+        meta: {
+          description:
+            'Integration name as entered in the Service settings step, before any per-package suffix is applied.',
+        },
+      })
+    ),
+    description: schema.maybe(
+      schema.string({
+        maxLength: 2048,
+        meta: { description: 'Integration description from the Service settings step.' },
+      })
+    ),
+    namespace: schema.maybe(
+      schema.string({
+        maxLength: 100,
+        meta: {
+          description:
+            'Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
+        },
+      })
+    ),
     dataFormat: schema.maybe(DataFormatSchema),
     authMethod: schema.maybe(
       schema.oneOf(
@@ -324,6 +370,37 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
       })
     ),
     deploymentName: schema.maybe(schema.string({ maxLength: 255 })),
+    integrationName: schema.maybe(
+      schema.string({
+        maxLength: CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
+        meta: {
+          description:
+            'Integration name used by the last deploy, before any per-package suffix. Refreshed on each deploy because an unedited default name follows the service selection.',
+        },
+      })
+    ),
+    description: schema.maybe(
+      schema.nullable(
+        schema.string({
+          maxLength: 2048,
+          meta: {
+            description:
+              'Integration description from the Service settings step. Send null to clear it.',
+          },
+        })
+      )
+    ),
+    namespace: schema.maybe(
+      schema.nullable(
+        schema.string({
+          maxLength: 100,
+          meta: {
+            description:
+              'Global data stream namespace from the Service settings step. Omit it to keep the stored value, or send null to clear it. When none is set, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
+          },
+        })
+      )
+    ),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
     services: schema.maybe(
       schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {

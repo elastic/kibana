@@ -88,11 +88,10 @@ describe('deployProvisioningCallback', () => {
     mockedCallbacks.get.mockResolvedValue(RECORD);
     mockedCallbacks.updateDeployStage.mockResolvedValue(undefined);
     mockedDeployments.getById.mockResolvedValue(DEPLOYMENT);
-    mockedDeployments.update.mockImplementation(async (_, id, update) => ({
-      ...DEPLOYMENT,
-      ...update,
-      id,
-    }));
+    // The update input allows null to clear a field; the stored shape never holds null.
+    mockedDeployments.update.mockImplementation(
+      async (_, id, update) => ({ ...DEPLOYMENT, ...update, id } as CloudOnboardingDeployment)
+    );
     // A missing policy is a thrown not-found, as the real service behaves.
     mockedPackagePolicies.get.mockRejectedValue(
       SavedObjectsErrorHelpers.createGenericNotFoundError('fleet-agent-policies', 'pp-x')
@@ -154,7 +153,7 @@ describe('deployProvisioningCallback', () => {
     const order: string[] = [];
     mockedDeployments.update.mockImplementation(async (_, id, update) => {
       order.push(`deployment:${update.status}`);
-      return { ...DEPLOYMENT, ...update, id };
+      return { ...DEPLOYMENT, ...update, id } as CloudOnboardingDeployment;
     });
     mockedCallbacks.updateDeployStage.mockImplementation(async (_, __, stage) => {
       order.push(`record:${stage.deploy_status}`);

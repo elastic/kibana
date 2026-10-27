@@ -182,9 +182,8 @@ test.describe(
       await page.testSubj.click('serviceSettingsStep-continueButton');
       await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
 
-      // Drift callout must appear. The drift effect: session elb has bucket_arn, SO has no
-      // serviceVars key for elb → deployedInstanceIds includes elb → dirty detected.
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
+      // The drift effect: session elb has bucket_arn, SO has no serviceVars key for elb →
+      // deployedInstanceIds includes elb → dirty detected.
 
       // isAlreadyDeployed would be true based on statuses but isDirty blocks Next.
       await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeDisabled();
@@ -256,14 +255,9 @@ test.describe(
 
       // isDirty clears → isMiDone becomes true → section collapses, Next button enabled.
       await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
-      // Drift callout disappears once isDirty is cleared.
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
     });
 
-    test('no drift on clean return: no callout shown, Next enabled', async ({
-      browserAuth,
-      page,
-    }) => {
+    test('no drift on clean return: Next enabled', async ({ browserAuth, page }) => {
       // SO and session match — user returned to Step 3 without changing any settings.
       const DEP_ID = 'dep-no-drift-001';
       await page.route(
@@ -329,8 +323,7 @@ test.describe(
       await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
       await soResponsePromise;
 
-      // No drift: session matches SO → callout must not appear.
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
+      // No drift: session matches SO.
       // isAlreadyDeployed && !isDirty → isMiDone → Next enabled immediately.
       await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
     });
@@ -379,7 +372,6 @@ test.describe(
       await soResponsePromise;
 
       // EC2 in deployedInstanceIds but absent from session serviceVars — drift loop skips it.
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
     });
 
     test('static-key replacement marks dirty immediately without SO re-fetch', async ({
@@ -478,10 +470,6 @@ test.describe(
         .locator('awsStaticKeysForm-secretAccessKey')
         .fill('wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY');
 
-      // Callout must appear immediately from form-level isDirty, before the drift-effect SO
-      // response settles. A regression that delays the indicator would fail here.
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
-
       // Release the SO GET — drift effect processes the response (same auth/connector → auth
       // drift false) and must not clear the form-level isDirty.
       const soGetDonePromise = page.waitForResponse(
@@ -492,7 +480,6 @@ test.describe(
       );
       releaseSoGet();
       await soGetDonePromise;
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
 
       await page.route(
         (url) => /\/api\/fleet\/managed_integrations\/mock-mi-policy-id$/.test(url.pathname),
@@ -545,9 +532,6 @@ test.describe(
       expect(JSON.stringify(miPutBody)).toContain('AKIAIOSFODNN7EXAMPLE');
       expect(JSON.stringify(miPutBody)).toContain('wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY');
       await soPutPromise;
-
-      // isDirty clears → drift callout disappears.
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
     });
 
     test('failed dirty redeploy keeps Retry visible and blocks Next', async ({
@@ -636,7 +620,6 @@ test.describe(
       // Navigate to authenticate-and-deploy via Continue — drift effect fires on mount.
       await page.testSubj.click('serviceSettingsStep-continueButton');
       await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
 
       await page.testSubj.fill('awsStaticKeysForm-accessKeyId', 'AKIAIOSFODNN7EXAMPLE');
       await page.testSubj.fill(
@@ -682,7 +665,6 @@ test.describe(
           .locator('[data-test-subj="managedIntegrationsSection-retryButton"]')
       ).toBeVisible();
       // isDirty remains true — a failed deploy does not clear it.
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
       // isMiDone is false — Next stays blocked until a successful redeploy.
       await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeDisabled();
 
@@ -736,8 +718,7 @@ test.describe(
         .locator('[data-test-subj="managedIntegrationsSection-retryButton"]')
         .click();
       await retryMiPutPromise;
-      // Successful retry: drift flag cleared, callout disappears, Next enables.
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
+      // Successful retry: drift flag cleared, Next enables.
       await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
     });
   }

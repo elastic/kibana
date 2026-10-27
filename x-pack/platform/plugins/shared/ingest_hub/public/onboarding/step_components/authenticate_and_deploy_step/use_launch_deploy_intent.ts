@@ -16,6 +16,7 @@ import { buildAgentlessPolicyRequest } from './deploy_groups';
 import type { DeployGroup } from './deploy_groups';
 import { DEFAULT_NAMESPACE } from './deploy_group_helpers';
 import { toSOServiceVars } from './package_inputs';
+import { toSOSettings } from './so_settings';
 import { useOnboardingSO } from './use_onboarding_so';
 
 export interface UseLaunchDeployIntentParams {
@@ -74,6 +75,8 @@ export function useLaunchDeployIntent({
       return undefined;
     }
     const globalRegion = serviceSettings?.globalRegion ?? '';
+    const integrationName = serviceSettings?.integrationName?.trim() || undefined;
+    const description = serviceSettings?.description?.trim() || undefined;
     const storedServiceVars = serviceSettings?.serviceVars ?? {};
     const pendingAgentlessPolicies: PendingAgentlessPolicy[] = await Promise.all(
       deployGroups.map(async (group) => ({
@@ -84,6 +87,8 @@ export function useLaunchDeployIntent({
           namespace: DEFAULT_NAMESPACE,
           globalRegion,
           storedServiceVars,
+          integrationName,
+          description,
           // No connector yet: the stack creates it, and the server fills it in.
           authenticateAndDeployStep: {},
         }),
@@ -99,6 +104,7 @@ export function useLaunchDeployIntent({
         Record<string, unknown>
       >,
       globalRegion,
+      ...toSOSettings(serviceSettings),
       dataFormat: servicesStep.dataFormat,
       authMethod: 'identity_federation',
       pendingAgentlessPolicies,

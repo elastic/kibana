@@ -19,10 +19,7 @@ import { TI_REPORT_AWS_IAM_PREFIX, TI_REPORT_CANARY_ID } from './constants';
 
 /** Product surfaces the Worker's behavior is authored in, relative to the repo root. */
 export const LOCKDOWN_SCAN_PATHS = [
-  {
-    dir: 'src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero',
-    file: /^hunt[^/]*\.(ts|yaml)$/,
-  },
+  { dir: 'src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/hunt' },
   { dir: 'x-pack/solutions/security/plugins/alertzero/server/services/watches/hunt' },
   { dir: 'x-pack/solutions/security/plugins/alertzero/server/routes/hunt' },
 ] as const;
@@ -98,12 +95,11 @@ const listFiles = (dir: string): string[] =>
 
 /** Every scannable product file under `LOCKDOWN_SCAN_PATHS`, relative to the repo root. */
 export const listLockdownFiles = (): string[] =>
-  LOCKDOWN_SCAN_PATHS.flatMap(({ dir, ...scope }) => {
-    const filePattern = 'file' in scope ? scope.file : /\.(ts|yaml)$/;
-    return listFiles(Path.join(REPO_ROOT, dir))
-      .filter((file) => filePattern.test(Path.basename(file)) && !isTestFile(file))
-      .map((file) => Path.relative(REPO_ROOT, file));
-  });
+  LOCKDOWN_SCAN_PATHS.flatMap(({ dir }) =>
+    listFiles(Path.join(REPO_ROOT, dir))
+      .filter((file) => /\.(ts|yaml)$/.test(Path.basename(file)) && !isTestFile(file))
+      .map((file) => Path.relative(REPO_ROOT, file))
+  );
 
 /** Forbidden literals present in `text`, as the matched strings. */
 export const findForbiddenLiterals = (text: string): string[] =>

@@ -167,6 +167,36 @@ describe('useLaunchDeployIntent', () => {
       );
     });
 
+    it('stores the integration name and description with each request and on the deployment', async () => {
+      const { result } = render({
+        serviceSettings: {
+          ...serviceSettings,
+          integrationName: ' aws-production ',
+          description: 'Production AWS account',
+        },
+      });
+
+      await act(async () => {
+        await result.current.prepareLaunch();
+      });
+
+      // The server replays the requests as they are stored, so the policy name and description
+      // are settled at Launch, the way a deploy from the form would settle them.
+      expect(mockedBuildRequest).toHaveBeenCalledWith(
+        deployGroups[0],
+        expect.objectContaining({
+          integrationName: 'aws-production',
+          description: 'Production AWS account',
+        })
+      );
+      expect(createDeployment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          integrationName: 'aws-production',
+          description: 'Production AWS account',
+        })
+      );
+    });
+
     it('returns undefined when the deployment could not be created', async () => {
       createDeployment.mockResolvedValue(null);
       const { result } = render();
