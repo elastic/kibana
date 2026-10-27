@@ -376,6 +376,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     experimentalFeatures: {
       skills: false,
       aiIndices: false,
+      sml: false,
       relevantSkills: false,
       todos: false,
       bash: false,
@@ -451,6 +452,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
     experimentalFeatures: {
       skills: false,
       aiIndices: false,
+      sml: false,
       relevantSkills: false,
       todos: false,
       bash: false,
@@ -513,6 +515,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     experimentalFeatures: {
       skills: false,
       aiIndices: false,
+      sml: false,
       relevantSkills: false,
       todos: false,
       bash: false,
