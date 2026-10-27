@@ -148,31 +148,30 @@ export const SingleTabView = ({
   }
 
   if (currentTabInitializationState.initializationStatus === TabInitializationStatus.NoData) {
-    return (
-      <HideTabsBar customizationContext={customizationContext}>
-        <NoDataPage
-          {...appInitializationState}
-          onDataViewCreated={async (dataViewUnknown) => {
-            await dispatch(internalStateActions.loadDataViewList());
-            dispatch(
-              internalStateActions.setInitializationState({
-                hasESData: true,
-                hasDataView: true,
-              })
-            );
-            const dataView = dataViewUnknown as DataView;
-            initializeTab.current({
-              defaultUrlState: dataView.id
-                ? { dataSource: createDataViewDataSource({ dataViewId: dataView.id }) }
-                : undefined,
-            });
-          }}
-          onESQLNavigationComplete={() => {
-            initializeTab.current();
-          }}
-        />
-      </HideTabsBar>
+    const noDataPage = (
+      <NoDataPage
+        {...appInitializationState}
+        onDataViewCreated={async (dataViewUnknown) => {
+          await dispatch(internalStateActions.loadDataViewList());
+          dispatch(
+            internalStateActions.setInitializationState({
+              hasESData: true,
+              hasDataView: true,
+            })
+          );
+          const dataView = dataViewUnknown as DataView;
+          const defaultUrlState = dataView.id
+            ? { dataSource: createDataViewDataSource({ dataViewId: dataView.id }) }
+            : undefined;
+          initializeTab.current({ defaultUrlState });
+        }}
+        onESQLNavigationComplete={() => {
+          initializeTab.current();
+        }}
+      />
     );
+
+    return <HideTabsBar customizationContext={customizationContext}>{noDataPage}</HideTabsBar>;
   }
 
   if (!currentDataStateContainer || !currentCustomizationService || !currentDataSource) {

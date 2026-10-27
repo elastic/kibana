@@ -930,7 +930,7 @@ describe('tab_state actions', () => {
       jest.mocked(services.dataViews.hasData.hasDataView).mockReturnValueOnce(availability.promise);
       jest.mocked(services.dataViews.getIdsWithTitle).mockReturnValueOnce(catalog.promise);
       const availabilityRequest = internalState.dispatch(
-        internalStateActions.loadDataAvailabilityOnce()
+        internalStateActions.loadDataViewAvailabilityOnce()
       );
 
       const transition = internalState.dispatch(
@@ -1376,62 +1376,68 @@ describe('tab_state actions', () => {
     resolveSpy.mockRestore();
   });
 
-  it('resolves the opening ES|QL query before the first fetch', async () => {
-    const services = createDiscoverServicesMock();
-    const uiSettingsGet = services.uiSettings.get as jest.Mock;
-    const originalGet = uiSettingsGet.getMockImplementation();
-    uiSettingsGet.mockImplementation((key: string) => {
-      if (key === ENABLE_ESQL) {
-        return true;
+  it.each([
+    ['profile', 'FROM logs*,-logstash*,filebeat-*'],
+    ['data view', 'FROM logs*,-logstash*,filebeat-* | SORT @timestamp DESC'],
+  ])(
+    'resolves the opening ES|QL query from the %s before the first fetch',
+    async (querySource, openingQuery) => {
+      const services = createDiscoverServicesMock();
+      const uiSettingsGet = services.uiSettings.get as jest.Mock;
+      const originalGet = uiSettingsGet.getMockImplementation();
+      uiSettingsGet.mockImplementation((key: string) => {
+        if (key === ENABLE_ESQL) {
+          return true;
+        }
+        return originalGet?.(key);
+      });
+      services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+
+      const logsDataView = new DataView({
+        spec: {
+          id: 'logs-data-view',
+          title: 'logs*,-logstash*,filebeat-*',
+          timeFieldName: '@timestamp',
+        },
+        fieldFormats: {} as DataView['fieldFormats'],
+      });
+      const toolkit = getDiscoverInternalStateMock({
+        services,
+        persistedDataViews: [logsDataView],
+      });
+      jest.spyOn(toolkit.services.dataViews, 'getDefaultDataView').mockResolvedValue(logsDataView);
+
+      const resolved = await createResolvedMockEsqlSource();
+      const resolveSpy = jest
+        .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
+        .mockResolvedValue(resolved);
+      const loadDataViewSpy = jest.spyOn(resolveDataViewModule, 'loadAndResolveDataView');
+
+      await toolkit.initializeTabs();
+      if (querySource === 'profile') {
+        toolkit.internalState.dispatch(
+          internalStateActions.setDefaultProfileEsqlQuery({ query: openingQuery })
+        );
       }
-      return originalGet?.(key);
-    });
-    services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+      const tabId = toolkit.getCurrentTab().id;
+      await toolkit.initializeSingleTab({
+        tabId,
+        skipWaitForDataFetching: true,
+      });
 
-    const logsDataView = new DataView({
-      spec: {
-        id: 'logs-data-view',
-        title: 'logs*,-logstash*,filebeat-*',
-        timeFieldName: '@timestamp',
-      },
-      fieldFormats: {} as DataView['fieldFormats'],
-    });
-    const toolkit = getDiscoverInternalStateMock({
-      services,
-      persistedDataViews: [logsDataView],
-    });
-    jest.spyOn(toolkit.services.dataViews, 'getDefaultDataView').mockResolvedValue(logsDataView);
-
-    const openingQuery = 'FROM logs*,-logstash*,filebeat-*';
-    const resolved = await createResolvedMockEsqlSource();
-    const resolveSpy = jest
-      .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
-      .mockResolvedValue(resolved);
-    const loadDataViewSpy = jest.spyOn(resolveDataViewModule, 'loadAndResolveDataView');
-
-    await toolkit.initializeTabs();
-    toolkit.internalState.dispatch(
-      internalStateActions.setDefaultProfileEsqlQuery({ query: openingQuery })
-    );
-    const tabId = toolkit.getCurrentTab().id;
-    await toolkit.initializeSingleTab({
-      tabId,
-      skipWaitForDataFetching: true,
-    });
-
-    expect(selectTab(toolkit.internalState.getState(), tabId).appState.query).toEqual({
-      esql: openingQuery,
-    });
-    expect(resolveSpy).toHaveBeenCalledTimes(1);
-    expect(resolveSpy).toHaveBeenCalledWith(expect.objectContaining({ esql: openingQuery }));
-    // The profile provides the query, so no data view is loaded to derive it.
-    expect(loadDataViewSpy).not.toHaveBeenCalled();
-    expect(getTabDataView(selectTabRuntimeState(toolkit.runtimeStateManager, tabId))).toBe(
-      resolved.dataView
-    );
-    resolveSpy.mockRestore();
-    loadDataViewSpy.mockRestore();
-  });
+      expect(selectTab(toolkit.internalState.getState(), tabId).appState.query).toEqual({
+        esql: openingQuery,
+      });
+      expect(resolveSpy).toHaveBeenCalledTimes(1);
+      expect(resolveSpy).toHaveBeenCalledWith(expect.objectContaining({ esql: openingQuery }));
+      expect(loadDataViewSpy).toHaveBeenCalledTimes(querySource === 'profile' ? 0 : 1);
+      expect(getTabDataView(selectTabRuntimeState(toolkit.runtimeStateManager, tabId))).toBe(
+        resolved.dataView
+      );
+      resolveSpy.mockRestore();
+      loadDataViewSpy.mockRestore();
+    }
+  );
 
   it('opens a saved ES|QL tab without loading a data view', async () => {
     const services = createDiscoverServicesMock();
