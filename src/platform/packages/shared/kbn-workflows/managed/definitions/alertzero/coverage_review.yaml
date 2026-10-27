@@ -717,7 +717,8 @@ steps:
 
                   {{ steps.compose_evidence.output.summary_line }}
 
-                  {% if steps.fetch_prebuilt_rule.output.rules[0].severity != blank %}**Severity:** {{ steps.fetch_prebuilt_rule.output.rules[0].severity }}. **Risk score:** {{ steps.fetch_prebuilt_rule.output.rules[0].risk_score }}.
+                  {% if steps.fetch_prebuilt_rule.output.rules[0].severity != blank %}**Rule details**
+                  **Severity:** {{ steps.fetch_prebuilt_rule.output.rules[0].severity }}. **Risk score:** {{ steps.fetch_prebuilt_rule.output.rules[0].risk_score }}.
                   {% endif %}{% if steps.fetch_prebuilt_rule.output.rules[0].language != blank %}**Language:** {{ steps.fetch_prebuilt_rule.output.rules[0].language }}
                   {% endif %}
                   {% if steps.fetch_prebuilt_rule.output.rules[0].description != blank %}
