@@ -18,7 +18,7 @@ project:
   sourceRoot: x-pack/platform/packages/shared/kbn-proposals-ui
 dependsOn:
   - '@kbn/i18n'
-  - '@kbn/core-application-browser'
+  - '@kbn/core-http-browser'
   - '@kbn/core-spaces-common'
   - '@kbn/proposals-common'
   - '@kbn/i18n-react'
