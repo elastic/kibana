@@ -9,6 +9,10 @@ tags:
   - security
   - attack-discovery
 settings:
+  # Same 12h as `run_generation` below. Omitting this applies the engine's 6h
+  # default, which is parsed unrendered and fires before a slow scan finishes.
+  # A workflow timeout fails this run, so the review fan-out never starts.
+  timeout: '12h'
   # The space is in the key only so the group reads clearly in execution history:
   # concurrency is always checked within a single space.
   #
@@ -77,6 +81,14 @@ triggers:
             Schedule interval of the worker that launched this run (for example
             `24h`). Recorded for traceability only; no step reads it. Echoed in the
             output so a run's cadence is visible in its execution history.
+        max_alerts:
+          type: integer
+          minimum: 100
+          maximum: 10000
+          description: >-
+            How many alerts generation may retrieve. The per-space worker renders
+            this from its schedule interval (10,000 per 24h, at least 100, at most
+            10,000). Omit on a standalone run to retrieve a full day.
         parent_run_id:
           type: string
           maxLength: 128
@@ -131,22 +143,29 @@ steps:
   # here: `continue: true` would fan out over a partial result.
   - name: run_generation
     type: workflow.execute
-    # Bounds N pipelines, not one. No literal covers the worst case (100 batches
-    # at `concurrency: max 2` x 30m branch-timeout is ~50 waves); 4h is sized for
-    # a realistic 24h lookback while still bounding a wedged child. A single stuck
-    # batch is attributed by the child's per-branch timeout, not by this.
+    # Bounds the whole batched child, not one pipeline. A fast 10k scan (100
+    # batches, concurrency 2, about 5 minutes each) finishes in about 5h. A slow
+    # day, where batches run to the 10m generation timeout, takes about 8h20m.
+    # 12h covers that slow day and still returns before the next 24h schedule, so
+    # the review fan-out below can run. A timeout that fires skips every following
+    # step. A single stuck batch is still attributed by the child's 30m
+    # branch-timeout, not by this.
     #
-    # Must stay a literal: the engine hands `timeout` to the duration parser
-    # unrendered (elastic/kibana#290258).
-    timeout: '4h'
+    # A literal, not the schedule interval. `settings.timeout` is parsed
+    # unrendered, so templating only this step would still die at the 6h workflow
+    # default. Matching the interval would also race cancel-in-progress, and a
+    # step timeout does not leave time afterwards for review dispatch.
+    timeout: '12h'
     with:
       workflow-id: system-security-attack-discovery-batched-generation
       run-as-mode: inherit
       inputs:
         # `batch_size` and `lookback` are left at the child's defaults. Surfacing
         # them as Worker settings means threading new values through the Worker
-        # settings template, and is tracked separately.
+        # settings template, and is tracked separately. `max_alerts` defaults to a
+        # full day when this run was not launched by the per-space worker.
         connector_id: "{{ inputs.connector_id }}"
+        max_alerts: "${{ inputs.max_alerts | default: 10000 }}"
 
   # The fan-out list, resolved once so the batches, the parallel step, and the
   # summary agree on it. `| default: consts.no_discoveries` normalizes the three
