@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText, EuiTextColor } from '@elastic/eui';
 import { useBoostExplanation } from '../../hooks/use_boost_state';
 import { ProfileLink, RuleLink } from './boost_page_links';
-import { EditRuleFlyout } from './edit_rule_flyout';
+import { EditRuleFlyout, useCloseOnError } from './edit_rule_flyout';
 import {
   ExplanationError,
   LOADING_LABEL,
@@ -64,12 +64,15 @@ interface EditDataStreamRuleProps extends DataStreamBoostProps {
 
 /**
  * Edits the rule that applies to a data stream, from its details flyout's menu, in place of the
- * flyout. With no rule to edit, or none loaded, it closes again.
+ * flyout. When the rule can't load, it says so and closes again.
  */
 export const EditDataStreamRule = ({ dataStreamName, onClose }: EditDataStreamRuleProps) => {
-  const { data: explanation, isLoading } = useBoostExplanation(dataStreamName);
+  const { data: explanation, error } = useBoostExplanation(dataStreamName);
+  useCloseOnError(error, onClose);
   const [rule] = explanation?.matches ?? [];
-  const hasNothingToEdit = !isLoading && !rule;
+  // The default rules match every data stream that Index Management lists, as it leaves out system
+  // ones, which Elasticsearch doesn't boost. One opened some other way has nothing to edit.
+  const hasNothingToEdit = explanation !== undefined && !rule;
   useEffect(() => {
     if (hasNothingToEdit) {
       onClose();

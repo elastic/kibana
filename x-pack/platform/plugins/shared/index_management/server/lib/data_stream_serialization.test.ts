@@ -54,6 +54,7 @@ describe('deserializeDataStream', () => {
       manage: true,
     },
     hidden: false,
+    system: false,
     lifecycle: {
       data_retention: '7d',
       enabled: true,
@@ -122,6 +123,7 @@ describe('deserializeDataStream', () => {
           manage: true,
         },
         hidden: false,
+        system: false,
         lifecycle: {
           data_retention: '7d',
           enabled: true,

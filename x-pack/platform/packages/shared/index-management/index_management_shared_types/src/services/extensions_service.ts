@@ -60,11 +60,21 @@ export interface IndexOverviewCard {
   };
 }
 
+// what data stream extensions know of the data stream, such as to decide whether they apply
+export interface DataStreamAttributes {
+  name: string;
+  hidden: boolean;
+  // true for data streams that Elasticsearch manages for its own features
+  system?: boolean;
+}
+
 export interface DataStreamDetail {
   // identifies the detail, such as in its test subject
   id: string;
   name: string;
   toolTip?: string;
+  // whether the detail applies to the data stream; it always does without this
+  shouldRender?: (args: { dataStream: DataStreamAttributes }) => boolean;
   renderContent: (args: {
     dataStreamName: string;
     getUrlForApp: ApplicationStart['getUrlForApp'];
@@ -76,6 +86,8 @@ export interface DataStreamAction {
   id: string;
   name: string;
   icon: IconType;
+  // whether the action applies to the data stream; it always does without this
+  shouldRender?: (args: { dataStream: DataStreamAttributes }) => boolean;
   // what the action opens, such as a flyout, shown in place of the details flyout until it closes
   renderContent: (args: { dataStreamName: string; onClose: () => void }) => ReactNode;
 }

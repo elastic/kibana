@@ -65,6 +65,7 @@ export function deserializeDataStream(
     _meta,
     privileges,
     hidden,
+    system,
     lifecycle,
     global_max_retention: globalMaxRetention,
     next_generation_managed_by: nextGenerationManagedBy,
@@ -219,6 +220,7 @@ export function deserializeDataStream(
     _meta,
     privileges,
     hidden,
+    system,
     lifecycle: {
       ...lifecycle,
       globalMaxRetention,

@@ -92,6 +92,7 @@ export interface DataStream {
   _meta?: Metadata;
   privileges: Privileges;
   hidden: boolean;
+  system?: boolean;
   nextGenerationManagedBy: string;
   failureStoreSettings?: {
     enabled?: boolean;

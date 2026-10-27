@@ -217,6 +217,9 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
     }
 
     extensionsService.dataStreamActions.forEach((action) => {
+      if (dataStream && action.shouldRender?.({ dataStream }) === false) {
+        return;
+      }
       items.push({
         key: action.id,
         name: action.name,
@@ -250,13 +253,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         items,
       },
     ];
-  }, [
-    dataStream?.privileges?.delete_index,
-    dataStream?.privileges?.manage,
-    dataStream?.privileges?.manage_data_stream_lifecycle,
-    extensionsService.dataStreamActions,
-    openEditFlyout,
-  ]);
+  }, [dataStream, extensionsService.dataStreamActions, openEditFlyout]);
 
   const hasActions = !isLoading && !error && Boolean(panels[0].items?.length);
 

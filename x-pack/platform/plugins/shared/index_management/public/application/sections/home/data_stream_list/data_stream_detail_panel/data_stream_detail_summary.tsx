@@ -600,7 +600,10 @@ export const DataStreamDetailSummary: React.FunctionComponent<DataStreamDetailSu
     }
   );
 
-  extensionDetails.forEach(({ id, name, toolTip, renderContent }) => {
+  extensionDetails.forEach(({ id, name, toolTip, shouldRender, renderContent }) => {
+    if (shouldRender?.({ dataStream }) === false) {
+      return;
+    }
     defaultDetails.push({
       name,
       toolTip,

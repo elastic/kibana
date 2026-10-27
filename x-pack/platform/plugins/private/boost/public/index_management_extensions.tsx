@@ -8,7 +8,11 @@
 import React, { Suspense, lazy } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { Index, IndexManagementPluginStart } from '@kbn/index-management-shared-types';
+import type {
+  DataStreamAttributes,
+  Index,
+  IndexManagementPluginStart,
+} from '@kbn/index-management-shared-types';
 import { PLUGIN_ID } from '../common/constants';
 import { BOOST_INDEX_DETAILS_TAB_ID } from './components/index_management/constants';
 import type { IndexManagementPart } from './components/index_management/index_management_part';
@@ -24,6 +28,17 @@ const LazyIndexManagementPart = lazy(() =>
 
 // Elasticsearch doesn't boost system indices, which the boost server marks for Index Management.
 const isBoostable = ({ index }: { index: Index }) => index.isBoostable !== false;
+
+// Nor system data streams, which Elasticsearch marks itself.
+const isBoostableDataStream = ({ dataStream }: { dataStream: DataStreamAttributes }) =>
+  dataStream.system !== true;
+
+// The card and the data stream detail lead with the rule, which the profile is a detail of, as
+// Index Management names its details by what they show. The tab shows more, so it takes the app's
+// name.
+const BOOST_RULE_TITLE = i18n.translate('xpack.boost.indexManagement.ruleTitle', {
+  defaultMessage: 'Boost rule',
+});
 
 /**
  * Shows the boost rule and profile that apply to each index and data stream in Index Management: on
@@ -54,7 +69,7 @@ export const registerIndexManagementExtensions = (
 
   extensionsService.addIndexOverviewCard({
     id: 'boost',
-    title: BOOST_APP_TITLE,
+    title: BOOST_RULE_TITLE,
     shouldRenderCard: isBoostable,
     renderCard: ({ index: { name } }) => ({
       content: { left: renderPart('cardRule', name), right: renderPart('cardActions', name) },
@@ -77,11 +92,12 @@ export const registerIndexManagementExtensions = (
   // One detail, like the index overview card: the rule that applies, and the profile it uses.
   extensionsService.addDataStreamDetail({
     id: 'boost',
-    name: BOOST_APP_TITLE,
+    name: BOOST_RULE_TITLE,
     toolTip: i18n.translate('xpack.boost.dataStreamDetails.tip', {
       defaultMessage:
         "The highest-ranked boost rule that matches the data stream, and the boost profile it uses, which sets how the data stream's data is kept ready for search as it ages.",
     }),
+    shouldRender: isBoostableDataStream,
     renderContent: ({ dataStreamName }) => renderPart('dataStream', dataStreamName),
   });
 
@@ -94,6 +110,7 @@ export const registerIndexManagementExtensions = (
         defaultMessage: 'Edit boost rule',
       }),
       icon: 'chartGauge',
+      shouldRender: isBoostableDataStream,
       renderContent: ({ dataStreamName, onClose }) =>
         renderPart('dataStreamEditRule', dataStreamName, { onClose }),
     });

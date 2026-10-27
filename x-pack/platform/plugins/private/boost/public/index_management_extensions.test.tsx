@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -150,14 +150,14 @@ beforeEach(() => {
 });
 
 describe('Index Management extensions', () => {
-  it('adds a card, a tab after the overview, and a data stream detail and action, except for system indices', () => {
+  it('adds a card, a tab after the overview, and a data stream detail and action, except for system ones', () => {
     const { card, tab, details, actions } = setup();
 
-    expect(card.title).toBe('Search boost');
+    expect(card.title).toBe('Boost rule');
     expect([tab.id, tab.name, tab.order]).toEqual(['boost', 'Search boost', 15]);
     // The tab's dividers meet the tabs' own, as on the boost app's details pages.
     expect(tab.hasTopSpacing).toBe(false);
-    expect(details.map(({ name }) => name)).toEqual(['Search boost']);
+    expect(details.map(({ name }) => name)).toEqual(['Boost rule']);
     expect(actions.map(({ name, icon }) => [name, icon])).toEqual([
       ['Edit boost rule', 'chartGauge'],
     ]);
@@ -169,6 +169,13 @@ describe('Index Management extensions', () => {
     expect(card.shouldRenderCard?.({ index: { name: 'products', isBoostable: true } })).toBe(true);
     // Without the mark, such as when the server couldn't tell, both show.
     expect(tab.shouldRenderTab?.({ index: { name: 'products' } })).toBe(true);
+    // Elasticsearch marks system data streams itself. Hidden ones are boosted all the same.
+    const systemDataStream = { name: '.fleet-actions-results', hidden: true, system: true };
+    const hiddenDataStream = { name: '.alert-actions', hidden: true, system: false };
+    expect(details[0].shouldRender?.({ dataStream: systemDataStream })).toBe(false);
+    expect(actions[0].shouldRender?.({ dataStream: systemDataStream })).toBe(false);
+    expect(details[0].shouldRender?.({ dataStream: hiddenDataStream })).toBe(true);
+    expect(actions[0].shouldRender?.({ dataStream: hiddenDataStream })).toBe(true);
   });
 
   describe('overview card', () => {
@@ -326,6 +333,21 @@ describe('Index Management extensions', () => {
         within(screen.getByTestId('boostProjectDefaultPreset-_last-7-days')).getByRole('radio')
       ).toBeChecked();
       expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it("says why it closes when the data stream's rule can't load", async () => {
+      const {
+        core,
+        actions: [action],
+      } = setup();
+      const onClose = jest.fn();
+
+      renderInIntl(action.renderContent({ dataStreamName: 'missing', onClose }));
+
+      await waitFor(() => expect(onClose).toHaveBeenCalled());
+      expect(core.notifications.toasts.addError).toHaveBeenCalledWith(expect.any(Error), {
+        title: 'Unable to load search boost',
+      });
     });
 
     it("doesn't offer to edit the rule without the privilege to", () => {

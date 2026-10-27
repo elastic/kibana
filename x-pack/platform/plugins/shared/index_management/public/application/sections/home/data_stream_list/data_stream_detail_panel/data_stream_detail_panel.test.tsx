@@ -88,6 +88,8 @@ describe('DataStreamDetailPanel', () => {
   });
 
   describe('extension details', () => {
+    afterEach(() => mockAppContext.services.extensionsService.dataStreamDetails.splice(0));
+
     it('shows the details that other plugins add, after the built-in ones', async () => {
       mockAppContext.services.extensionsService.dataStreamDetails.push({
         id: 'test',
@@ -121,6 +123,29 @@ describe('DataStreamDetailPanel', () => {
         ({ textContent }) => textContent
       );
       expect(names[names.length - 1]).toMatch(/^Test detail/);
+    });
+
+    it("leaves out details that don't apply to the data stream", async () => {
+      mockAppContext.services.extensionsService.dataStreamDetails.push({
+        id: 'test',
+        name: 'Test detail',
+        shouldRender: ({ dataStream }) => !dataStream.system,
+        renderContent: () => 'Test content',
+      });
+      mockUseLoadDataStream.mockReturnValue({
+        data: createMockDataStream({ system: true }),
+        isLoading: false,
+        error: null,
+        resendRequest: jest.fn(),
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
+
+      const { getByTestId, queryByTestId } = renderWithI18n(
+        <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
+      );
+
+      await waitFor(() => expect(getByTestId('dataStreamDetailPanel')).toBeInTheDocument());
+      expect(queryByTestId('dataStreamDetail-test')).not.toBeInTheDocument();
     });
   });
 
@@ -173,6 +198,32 @@ describe('DataStreamDetailPanel', () => {
       await userEvent.click(getByRole('button', { name: 'Done' }));
       expect(queryByTestId('testActionContent')).not.toBeInTheDocument();
       expect(getByTestId('dataStreamDetailPanel')).toBeInTheDocument();
+    });
+
+    it("leaves out actions that don't apply to the data stream", async () => {
+      mockAppContext.services.extensionsService.dataStreamActions.push({
+        id: 'test',
+        name: 'Test action',
+        icon: 'gear',
+        shouldRender: ({ dataStream }) => !dataStream.system,
+        renderContent: () => null,
+      });
+      mockUseLoadDataStream.mockReturnValue({
+        data: createMockDataStream({ system: true }),
+        isLoading: false,
+        error: null,
+        resendRequest: jest.fn(),
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
+
+      const { getByTestId, queryByTestId } = renderWithI18n(
+        <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
+      );
+      await waitFor(() => expect(getByTestId('manageDataStreamButton')).toBeInTheDocument());
+      await userEvent.click(getByTestId('manageDataStreamButton'));
+
+      await waitFor(() => expect(getByTestId('deleteDataStreamButton')).toBeInTheDocument());
+      expect(queryByTestId('dataStreamAction-test')).not.toBeInTheDocument();
     });
   });
 

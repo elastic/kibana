@@ -5,17 +5,31 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import type { IHttpFetchError } from '@kbn/core/public';
 import { getDefaultRuleType } from '../../../common/presets';
 import type { BoostRule } from '../../../common/types';
+import { useBoostServices } from '../../hooks/use_boost_services';
 import { useBoostState } from '../../hooks/use_boost_state';
 import { ProjectDefaultFlyout } from '../project_defaults/project_default_flyout';
 import { RuleFlyout } from '../rules/rule_flyout';
+import { EXPLANATION_ERROR_LABEL } from './explanation_status';
 
 interface EditRuleFlyoutProps {
   rule: BoostRule;
   onClose: () => void;
 }
+
+/** Says why a flyout that couldn't load what it edits closes, and closes it. */
+export const useCloseOnError = (error: IHttpFetchError | null, onClose: () => void) => {
+  const { notifications } = useBoostServices();
+  useEffect(() => {
+    if (error) {
+      notifications.toasts.addError(error, { title: EXPLANATION_ERROR_LABEL });
+      onClose();
+    }
+  }, [error, notifications, onClose]);
+};
 
 /**
  * Edits a rule, or a default rule as its project default, as the boost app does. Each form starts
@@ -23,7 +37,8 @@ interface EditRuleFlyoutProps {
  * yet, so the form waits for it.
  */
 export const EditRuleFlyout = ({ rule, onClose }: EditRuleFlyoutProps) => {
-  const { data: state } = useBoostState();
+  const { data: state, error } = useBoostState();
+  useCloseOnError(error, onClose);
   if (!state) {
     return null;
   }
