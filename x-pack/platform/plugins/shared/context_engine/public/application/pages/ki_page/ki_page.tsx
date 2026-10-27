@@ -112,10 +112,7 @@ export const KiPage = () => {
     ),
   });
 
-  const kiTabQueryParams = useMemo(
-    () => (index.length > 0 ? { index } : undefined),
-    [index]
-  );
+  const kiTabQueryParams = useMemo(() => (index.length > 0 ? { index } : undefined), [index]);
   const detailsTabHref = useMemo(
     () => createContextEngineUrl(getViewKiPath(aiIndexId, kiId), kiTabQueryParams),
     [aiIndexId, createContextEngineUrl, kiId, kiTabQueryParams]
