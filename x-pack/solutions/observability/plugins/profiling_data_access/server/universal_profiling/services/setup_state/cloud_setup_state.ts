@@ -8,11 +8,7 @@
 import type { RecursivePartial } from '@elastic/eui';
 import type { CloudSetupState, ProfilingCloudSetupOptions } from '../../lib/cloud_setup';
 import { createDefaultCloudSetupState } from '../../lib/cloud_setup';
-import {
-  validateMaximumBuckets,
-  validateProfilingStatus,
-  validateResourceManagement,
-} from '../../lib/cluster_settings';
+import { validateProfilingStatus, validateResourceManagement } from '../../lib/cluster_settings';
 import {
   validateCollectorPackagePolicy,
   validateProfilingInApmPackagePolicy,
@@ -29,7 +25,6 @@ export async function cloudSetupState(
 
   const verifyFunctions = [
     validateProfilingStatus,
-    validateMaximumBuckets,
     validateResourceManagement,
     validateCollectorPackagePolicy,
     validateSymbolizerPackagePolicy,

@@ -10,6 +10,7 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { getEntityAnomalyOverview } from './get_anomaly_overview';
 import { getJobConfig, getSecurityMlJobIds } from '../ml_anomaly_detection';
+import type { RawAnomalyRecord } from '../ml_anomaly_detection/types';
 
 jest.mock('../ml_anomaly_detection', () => ({
   ...jest.requireActual('../ml_anomaly_detection'),
@@ -55,9 +56,9 @@ const TO_MS = FROM_MS + 7 * 24 * 60 * 60 * 1000; // 7 days later
 const mockEntityRecord = { entity: { id: 'entity-1' }, host: { name: 'entity-1' } };
 
 const baseParams = {
-  entityId: 'entity-1',
+  entityIds: ['entity-1'],
   entityType: 'host' as const,
-  entityRecord: mockEntityRecord,
+  entityRecords: [mockEntityRecord],
   fromMs: FROM_MS,
   toMs: TO_MS,
   logger: mockLogger,
@@ -84,8 +85,10 @@ interface RawHit {
   record_score: number;
   function?: string;
   actual?: number[];
+  causes?: RawAnomalyRecord['causes'];
   by_field_value?: string;
   field_name?: string;
+  matched_queries?: string[];
 }
 
 const makeSearchResponse = (
@@ -100,7 +103,11 @@ const makeSearchResponse = (
   rawHits: RawHit[] = []
 ) => ({
   hits: {
-    hits: rawHits.map(({ _id, ...source }) => ({ _id, _source: source })),
+    hits: rawHits.map(({ _id, matched_queries: matchedQueries, ...source }) => ({
+      _id,
+      _source: source,
+      ...(matchedQueries ? { matched_queries: matchedQueries } : {}),
+    })),
     total: { value: total },
   },
   aggregations: {
@@ -439,6 +446,200 @@ describe('getEntityAnomalyOverview', () => {
         timestamp: new Date(FROM_MS + 1000).toISOString(),
       });
     });
+
+    it('derives anomalousValue from the first cause on population-analysis records', async () => {
+      mockGetSecurityMlJobIds.mockResolvedValue([JOB]);
+      mockGetJobConfig.mockResolvedValue(
+        new Map([
+          [
+            JOB,
+            {
+              threatTactics: [],
+              threatTechniques: [],
+              detectors: [{ function: 'high_count', over_field_name: 'user.name' }],
+              jobName: 'Population Job',
+            },
+          ],
+        ])
+      );
+      mockMlAnomalySearch.mockResolvedValue(
+        makeSearchResponse(
+          [
+            {
+              key: FROM_MS + 1000,
+              doc_count: 1,
+              max_score: 60,
+              jobBuckets: [{ key: JOB, doc_count: 1 }],
+            },
+          ],
+          [JOB],
+          1,
+          [
+            {
+              _id: 'rec-pop',
+              job_id: JOB,
+              detector_index: 0,
+              timestamp: FROM_MS + 1000,
+              record_score: 60,
+              causes: [
+                {
+                  function: 'high_count',
+                  function_description: 'count',
+                  probability: 0.001,
+                  over_field_name: 'user.name',
+                  over_field_value: 'svc-backup',
+                  actual: [1423],
+                  typical: [12.5],
+                },
+              ],
+            },
+          ]
+        )
+      );
+
+      const result = await getEntityAnomalyOverview(baseParams);
+
+      expect(result.recentAnomalies[0]).toMatchObject({
+        recordId: 'rec-pop',
+        anomalousValue: '1423 events',
+      });
+    });
+
+    it("uses the entity's cause by_field_value for rare population records lacking it at the top level", async () => {
+      mockGetSecurityMlJobIds.mockResolvedValue([JOB]);
+      mockGetJobConfig.mockResolvedValue(
+        new Map([
+          [
+            JOB,
+            {
+              threatTactics: [],
+              threatTechniques: [],
+              detectors: [
+                { function: 'rare', by_field_name: 'process.name', over_field_name: 'host.name' },
+              ],
+              jobName: 'Rare Process Job',
+            },
+          ],
+        ])
+      );
+      mockMlAnomalySearch.mockResolvedValue(
+        makeSearchResponse(
+          [
+            {
+              key: FROM_MS + 1000,
+              doc_count: 1,
+              max_score: 60,
+              jobBuckets: [{ key: JOB, doc_count: 1 }],
+            },
+          ],
+          [JOB],
+          1,
+          [
+            {
+              _id: 'rec-rare-pop',
+              job_id: JOB,
+              detector_index: 0,
+              timestamp: FROM_MS + 1000,
+              record_score: 60,
+              causes: [
+                {
+                  function: 'rare',
+                  function_description: 'rare',
+                  probability: 0.001,
+                  by_field_name: 'process.name',
+                  by_field_value: 'mimikatz.exe',
+                  over_field_name: 'host.name',
+                  over_field_value: 'entity-1',
+                  actual: [1],
+                  typical: [0.001],
+                },
+              ],
+            },
+          ]
+        )
+      );
+
+      const result = await getEntityAnomalyOverview(baseParams);
+
+      expect(result.recentAnomalies[0]).toMatchObject({
+        recordId: 'rec-rare-pop',
+        anomalousValue: 'mimikatz.exe',
+      });
+    });
+
+    it('resolves causes against the group member each hit matched, not the whole group', async () => {
+      const henry = { entity: { id: 'user:henry' }, user: { name: 'henry.clark' } };
+      const olivia = { entity: { id: 'user:olivia' }, user: { name: 'olivia.perez' } };
+      mockGetSecurityMlJobIds.mockResolvedValue([JOB]);
+      mockGetJobConfig.mockResolvedValue(
+        new Map([
+          [
+            JOB,
+            {
+              threatTactics: [],
+              threatTechniques: [],
+              detectors: [
+                {
+                  function: 'time_of_day',
+                  by_field_name: 'user.name',
+                  over_field_name: 'source.geo.region_iso_code',
+                },
+              ],
+              jobName: 'Unusual Hour',
+            },
+          ],
+        ])
+      );
+      const timeCause = (byFieldValue: string, actual: number) => ({
+        function: 'time_of_day',
+        function_description: 'time_of_day',
+        probability: 0.001,
+        by_field_name: 'user.name',
+        by_field_value: byFieldValue,
+        over_field_name: 'source.geo.region_iso_code',
+        over_field_value: 'US-CA',
+        actual: [actual],
+        typical: [46800],
+      });
+      mockMlAnomalySearch.mockResolvedValue(
+        makeSearchResponse(
+          [
+            {
+              key: FROM_MS + 1000,
+              doc_count: 1,
+              max_score: 60,
+              jobBuckets: [{ key: JOB, doc_count: 1 }],
+            },
+          ],
+          [JOB],
+          1,
+          [
+            {
+              _id: 'rec-henry',
+              job_id: JOB,
+              detector_index: 0,
+              timestamp: FROM_MS + 1000,
+              record_score: 60,
+              // Olivia's cause comes first; the hit matched only Henry's named query.
+              causes: [timeCause('olivia.perez', 7200), timeCause('henry.clark', 11460)],
+              matched_queries: ['user:henry'],
+            },
+          ]
+        )
+      );
+
+      const result = await getEntityAnomalyOverview({
+        ...baseParams,
+        entityType: 'user',
+        entityIds: ['user:henry', 'user:olivia'],
+        entityRecords: [henry, olivia],
+      });
+
+      expect(result.recentAnomalies[0]).toMatchObject({
+        recordId: 'rec-henry',
+        anomalousValue: '03:11',
+      });
+    });
   });
 
   describe('tactic filtering', () => {
@@ -565,9 +766,9 @@ describe('getEntityAnomalyOverview', () => {
 
       const before = Date.now();
       const result = await getEntityAnomalyOverview({
-        entityId: 'entity-1',
+        entityIds: ['entity-1'],
         entityType: 'host' as const,
-        entityRecord: mockEntityRecord,
+        entityRecords: [mockEntityRecord],
         logger: mockLogger,
         ml: mockMl,
         request: mockRequest,

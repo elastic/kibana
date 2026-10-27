@@ -7,10 +7,9 @@
 
 import { useMemo } from 'react';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 import type { TimeRange, EntityFilters } from '../../entities_grid/common';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
-import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import {
   buildAlertBasedTilesSeriesQuery,
   severeAlertsSeriesColumn,
@@ -55,21 +54,19 @@ export const useAlertBasedTilesSeries = ({
   watchlistedTrend: number[] | undefined;
   isTrendLoading: boolean;
 } => {
-  const { data: resolvedIndex, isLoading: isIndexLoading } =
-    useResolvedLatestEntitiesIndexName(spaceId);
+  const {
+    data: resolvedIndex,
+    isLoading: isIndexLoading,
+    entityFilterClauses,
+  } = useTileQueryInputs(spaceId, entityFilters);
   const index = resolvedIndex?.indexName;
 
   const query = useMemo(
     () =>
       index
-        ? buildAlertBasedTilesSeriesQuery(
-            index,
-            spaceId,
-            timeRange,
-            buildEntityFilterClauses(entityFilters)
-          )
+        ? buildAlertBasedTilesSeriesQuery(index, spaceId, timeRange, entityFilterClauses)
         : null,
-    [index, spaceId, timeRange, entityFilters]
+    [index, spaceId, timeRange, entityFilterClauses]
   );
 
   const severeGate = getSeriesGate({ isReady, reachesBack, count: severeAlertsCount });

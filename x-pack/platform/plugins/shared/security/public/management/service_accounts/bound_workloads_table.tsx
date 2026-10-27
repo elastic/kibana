@@ -18,10 +18,9 @@ import {
 } from '@elastic/eui';
 import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 
+import type { ServiceAccountBoundWorkload } from '@kbn/core-security-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import type { ServiceAccountBoundWorkload } from '../../service_accounts';
 
 const WORKLOADS_PAGE_SIZE = 5;
 

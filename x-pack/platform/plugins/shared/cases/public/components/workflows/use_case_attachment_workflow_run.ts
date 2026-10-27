@@ -6,13 +6,14 @@
  */
 
 import { useMemo } from 'react';
-import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
+import type { RunWorkflowExecutor, RunWorkflowTelemetry } from '@kbn/workflows-ui';
 import type { CaseWorkflowRunOrigin } from '../../../common/types/api';
 import {
   ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
   ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/types/domain/user_action/workflow/constants';
 import { useCaseAttachmentWorkflowContext } from './case_attachment_workflow_context';
+import { getCaseWorkflowRunTelemetry } from '../../analytics/use_case_workflow_run_telemetry';
 
 /**
  * A row target (`attachmentId`) or a bulk target (`attachmentIds`, including a selection of one).
@@ -36,6 +37,8 @@ export interface UseCaseAttachmentWorkflowRunParams {
   attachmentType: string;
   /** Memoize it: a new object builds a new executor. */
   target: CaseAttachmentWorkflowTarget;
+  /** Telemetry the surface reports when the run is not routed through Cases. Memoize it. */
+  fallbackTelemetry?: RunWorkflowTelemetry;
 }
 
 export interface CaseAttachmentWorkflowRunProps {
@@ -43,6 +46,8 @@ export interface CaseAttachmentWorkflowRunProps {
   runWorkflow: RunWorkflowExecutor | undefined;
   /** Pass to `RunWorkflowPanel`. */
   showSuccessToast: boolean;
+  /** Pass to `RunWorkflowPanel`. The case attachment origin when routed through Cases, `fallbackTelemetry` outside a case, else `undefined`. */
+  telemetry: RunWorkflowTelemetry | undefined;
 }
 
 /**
@@ -61,15 +66,20 @@ export const useCaseAttachmentWorkflowRouting = (): CaseAttachmentWorkflowRoutin
 export const useCaseAttachmentWorkflowRun = ({
   attachmentType,
   target,
+  fallbackTelemetry,
 }: UseCaseAttachmentWorkflowRunParams): CaseAttachmentWorkflowRunProps => {
   const context = useCaseAttachmentWorkflowContext();
 
   return useMemo(() => {
-    if (context.status !== 'available') {
-      return { runWorkflow: undefined, showSuccessToast: true };
+    if (context.status === 'outside') {
+      return { runWorkflow: undefined, showSuccessToast: true, telemetry: fallbackTelemetry };
     }
 
-    const { caseId, createExecutor } = context;
+    if (context.status === 'unavailable') {
+      return { runWorkflow: undefined, showSuccessToast: true, telemetry: undefined };
+    }
+
+    const { caseId, createExecutor, owner } = context;
     const origin: CaseWorkflowRunOrigin =
       'attachmentId' in target
         ? {
@@ -85,6 +95,10 @@ export const useCaseAttachmentWorkflowRun = ({
             attachmentIds: [...target.attachmentIds],
           };
 
-    return { runWorkflow: createExecutor(origin), showSuccessToast: false };
-  }, [attachmentType, context, target]);
+    return {
+      runWorkflow: createExecutor(origin),
+      showSuccessToast: false,
+      telemetry: { ...getCaseWorkflowRunTelemetry(origin), owner },
+    };
+  }, [attachmentType, context, fallbackTelemetry, target]);
 };

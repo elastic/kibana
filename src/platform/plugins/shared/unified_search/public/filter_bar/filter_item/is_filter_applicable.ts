@@ -8,9 +8,9 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 
+import type { FilterableSource } from '@kbn/data-source';
 import { flattenFilters } from '../lib/flatten_filters';
 
 export const getFilterKeys = (filter: Filter): string[] => {
@@ -25,7 +25,7 @@ export const getFilterKeys = (filter: Filter): string[] => {
  * Checks if filter field exists in any of the index patterns provided,
  * Because if so, a filter for the wrong index pattern may still be applied.
  */
-export const isFilterApplicable = (filter: Filter, dataViews: DataView[]): boolean => {
+export const isFilterApplicable = (filter: Filter, dataViews: FilterableSource[]): boolean => {
   // Any filter is applicable if no data views were provided to FilterBar.
   if (!dataViews.length) return true;
 

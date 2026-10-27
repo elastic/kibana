@@ -44,6 +44,4 @@ fileGroups:
     - .storybook/**/*
     - test/scout*/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

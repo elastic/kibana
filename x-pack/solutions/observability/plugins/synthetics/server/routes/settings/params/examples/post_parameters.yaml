@@ -27,6 +27,7 @@ responses:
         schema:
           oneOf:
             - type: array
+              title: Multiple parameters
               items:
                 $ref: '../../../oas_schemas.yaml#/postParameterResponse'
             - $ref: '../../../oas_schemas.yaml#/postParameterResponse'
@@ -53,3 +54,16 @@ responses:
                 value: value2
   409:
     description: A parameter with the same key already exists in the space.
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/synthetics/params" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{"key":"your-key-name","value":"your-parameter-value","description":"Param to use in browser monitor","tags":["authentication","security"],"share_across_spaces":true}'
+  - lang: Console
+    source: |
+      POST kbn://api/synthetics/params
+      {"key":"your-key-name","value":"your-parameter-value","description":"Param to use in browser monitor","tags":["authentication","security"],"share_across_spaces":true}

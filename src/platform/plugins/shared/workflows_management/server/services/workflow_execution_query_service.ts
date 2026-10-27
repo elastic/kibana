@@ -13,7 +13,6 @@ import type {
   EsWorkflowStepExecution,
   ExecutionStatus,
   WorkflowExecutionDto,
-  WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
 } from '@kbn/workflows';
 import type { ChildWorkflowExecutionItem } from '@kbn/workflows/types/v1';
@@ -66,14 +65,6 @@ const PROCESSED_WAIT_FOR_INPUT_SHOULD: estypes.QueryDslQueryContainer[] = [
   { exists: { field: 'finishedAt' } },
   { exists: { field: 'hitl.respondedAt' } },
 ];
-
-/**
- * Extends EsWorkflowStepExecution with the legacy `endedAt` field
- * that may exist on older documents written before the rename to `finishedAt`.
- */
-interface StepExecutionWithLegacyFields extends EsWorkflowStepExecution {
-  endedAt?: string;
-}
 
 /**
  * Filters applied to processed wait-for-input step executions. Multi-value
@@ -357,40 +348,6 @@ export class WorkflowExecutionQueryService {
       size,
       page,
       collapse: params.collapse ? { field: params.collapse } : undefined,
-    });
-  }
-
-  async getWorkflowExecutionHistory(
-    executionId: string,
-    spaceId: string
-  ): Promise<WorkflowExecutionHistoryModel[]> {
-    const response = (await this.deps.stepExecutionsDataClient.search({
-      query: {
-        bool: {
-          must: [{ term: { executionId } }, { term: { spaceId } }],
-        },
-      },
-      sort: [{ timestamp: { order: 'asc' } }],
-    })) as estypes.SearchResponse<StepExecutionWithLegacyFields>;
-
-    return response.hits.hits.map((hit) => {
-      if (!hit._source) {
-        throw new Error('Missing _source in search result');
-      }
-      const source = hit._source;
-      const startedAt = source.startedAt;
-      const finishedAt = source.endedAt || source.finishedAt;
-
-      let duration = 0;
-      if (startedAt && finishedAt) {
-        duration = new Date(finishedAt).getTime() - new Date(startedAt).getTime();
-      }
-
-      return {
-        ...source,
-        finishedAt: finishedAt || '',
-        duration,
-      };
     });
   }
 

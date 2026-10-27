@@ -34,15 +34,17 @@ The **Search messages** action requires a user token and is not available when u
 
 ## Receive Slack events [slack-v2-inbound-events]
 ```{applies_to}
-serverless: unavailable
+serverless: preview
 stack: preview 9.6+
 ```
 
-The connector can start a workflow from a Slack Events API `event_callback`. A saved Slack connector does not receive events until **Receive events** is turned on for that connector.
+The connector can start a workflow from a Slack Events API `event_callback`. A saved Slack connector does not receive events until **Receive events** is turned on for that connector. After you save a new connector, {{kib}} shows the **Webhook URL** and the ingest token once, so copy them then. For an existing connector, save it, then select **Rotate ingest token**. A new token stops the previous one from working. This toggle appears when `xpack.actions.inboundEvents.enabled` is `true`.
+
+In {{kib}}, you need an Enterprise license and `server.publicBaseUrl` set to the host that Slack uses to reach {{kib}}. `xpack.actions.inboundEvents.enabled` defaults to `true`. Set it to `false` to turn receive events off.
 
 | Workflow event | Slack `event.type` | Fields |
 | --- | --- | --- |
-| `slack2.message` | `message` | `workspace`, `channel`, `messageId`, `threadId`, `sender`, `text`, `subtype`, `botId` |
+| `slack2.message` | `message` | `workspace`, `channel`, `messageId`, `threadId`, `sender`, `text`, `subtype`, `botId`, `appId`, `botName` |
 | `slack2.app_mention` | `app_mention` | `workspace`, `channel`, `messageId`, `threadId`, `sender`, `text` |
 | `slack2.reaction_added` | `reaction_added` | `channel`, `messageId`, `fileId`, `fileCommentId`, `itemType`, `user`, `reaction` |
 | `slack2.file_shared` | `file_shared` | `fileId`, `user`, `channel` |
@@ -51,7 +53,9 @@ The connector can start a workflow from a Slack Events API `event_callback`. A s
 | `slack2.team_join` | `team_join` | `userId`, `name`, `realName`, `displayName`, `email` |
 | `slack2.member_joined_channel` | `member_joined_channel` | `userId`, `channelId`, `inviter` |
 
-`threadId`, `sender`, `text`, `subtype`, and `botId` are present only when Slack sends them. The same applies to `channel` on a shared file, `userId` on a file made public, and `inviter` on a channel join. A reaction includes `channel` and `messageId` when it is on a message, and `fileId` or `fileCommentId` when it is on a file or file comment. An event type that is not in this table does not start a workflow.
+`threadId`, `sender`, `text`, `subtype`, `botId`, `appId`, and `botName` are present only when Slack sends them. The same applies to `channel` on a shared file, `userId` on a file made public, and `inviter` on a channel join. A reaction includes `channel` and `messageId` when it is on a message, and `fileId` or `fileCommentId` when it is on a file or file comment. An event type that is not in this table does not start a workflow.
+
+For `slack2.message`, `text` also includes the text of the message's blocks and legacy attachments that the message text does not already contain, one line each. A bot post that carries its content only in attachments still has a body, and a message filter on the text also matches that content. Button labels appear in brackets, such as `[Ack]`. Uploaded files are not read.
 
 Slack's Request URL check sends `url_verification`. The connector responds with HTTP 200 and `{ "challenge": "<value>" }` and does not start a workflow.
 

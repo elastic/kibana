@@ -6,7 +6,7 @@
  */
 
 import {
-  MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_TEXT_LENGTH,
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
   type SignificantEvent,
   type SignificantEventStatus,
@@ -23,8 +23,7 @@ export const EVENT_SEARCH_MAX_PER_PAGE = 50;
 export const EVENT_SEARCH_SIGNAL_PAGE_SIZE = 10;
 
 export const DESCRIPTION_TRUNCATION_SUFFIX = '… [truncated]';
-export const DESCRIPTION_CONTENT_LENGTH =
-  MAX_SIGNAL_DESCRIPTION_LENGTH - DESCRIPTION_TRUNCATION_SUFFIX.length;
+export const DESCRIPTION_CONTENT_LENGTH = MAX_TEXT_LENGTH - DESCRIPTION_TRUNCATION_SUFFIX.length;
 
 export type EventSearchView = 'compact' | 'full';
 
@@ -99,6 +98,7 @@ interface DetailedEventSearchItem
     SignificantEvent,
     | '@timestamp'
     | 'confidence'
+    | 'summary'
     | 'event_id'
     | 'severity'
     | 'status'
@@ -177,6 +177,7 @@ const toEventSearchItemBase = (
   SignificantEvent,
   | '@timestamp'
   | 'confidence'
+  | 'summary'
   | 'event_id'
   | 'severity'
   | 'status'
@@ -192,6 +193,7 @@ const toEventSearchItemBase = (
   severity: event.severity,
   confidence: event.confidence,
   source_ids: event.source_ids,
+  summary: event.summary,
 });
 
 const toCompactEvent = (event: SignificantEvent): CompactEventSearchItem => {
@@ -199,7 +201,6 @@ const toCompactEvent = (event: SignificantEvent): CompactEventSearchItem => {
   const { ruleUuids, signalCounts } = collectSignalMetadata(signals);
   return {
     ...toEventSearchItemBase(event),
-    summary: event.summary,
     signal_counts: signalCounts,
     signal_rule_uuids: [...ruleUuids].sort(),
     causal_features: event.causal_features,
@@ -208,7 +209,7 @@ const toCompactEvent = (event: SignificantEvent): CompactEventSearchItem => {
 };
 
 const truncateSignalDescription = (description: string | undefined): string | undefined =>
-  description !== undefined && description.length > MAX_SIGNAL_DESCRIPTION_LENGTH
+  description !== undefined && description.length > MAX_TEXT_LENGTH
     ? `${description.slice(0, DESCRIPTION_CONTENT_LENGTH)}${DESCRIPTION_TRUNCATION_SUFFIX}`
     : description;
 

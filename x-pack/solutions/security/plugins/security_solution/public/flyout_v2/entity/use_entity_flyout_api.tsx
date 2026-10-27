@@ -61,7 +61,7 @@ import {
   toEntityDescriptorMode,
   urlParamKeyForHistoryKey,
 } from '../shared/url_state/flyout_v2_url_param';
-import type { EntityViewMode } from '../../flyout/entity_details/shared/types';
+import type { EntityViewMode } from '../../../common/entity_analytics/entity_store/resolution_group';
 
 // Lazy-loaded so consumers of this hook don't statically pull the entity flyout graph into their
 // bundle; each chunk only loads when the corresponding flyout is actually opened.
@@ -726,12 +726,14 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   );
   const openEntityAnomalyInsights = useCallback(
     ({ title, origin, ...props }: OpenEntityAnomalyInsightsParams) => {
-      const { entityType, value, entityId } = props;
+      const { entityType, value, entityId, mode, scopeId } = props;
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.entityAnomalyInsights,
         entityType: entityType as string,
         value,
         entityId,
+        mode: toEntityDescriptorMode(mode),
+        scopeId,
       });
       const onClose = buildOnClose(null);
       open(
@@ -751,12 +753,14 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   );
   const openEntityAlertsInsights = useCallback(
     ({ title, origin, ...props }: OpenEntityAlertsInsightsParams) => {
-      const { entityType, value, entityId } = props;
+      const { entityType, value, entityId, mode, scopeId } = props;
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.entityAlertsInsights,
         entityType: entityType as string,
         value,
         entityId,
+        mode: toEntityDescriptorMode(mode),
+        scopeId,
       });
       const onClose = buildOnClose(null);
       open(
@@ -776,12 +780,13 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   );
   const openEntityMisconfigurationInsights = useCallback(
     ({ title, origin, ...props }: OpenEntityMisconfigurationInsightsParams) => {
-      const { entityType, value, entityId } = props;
+      const { entityType, value, entityId, mode } = props;
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.entityMisconfigurationInsights,
         entityType: entityType as string,
         value,
         entityId,
+        mode: toEntityDescriptorMode(mode),
       });
       const onClose = buildOnClose(null);
       open(
@@ -804,12 +809,13 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   );
   const openEntityVulnerabilityInsights = useCallback(
     ({ title, origin, ...props }: OpenEntityVulnerabilityInsightsParams) => {
-      const { value, entityId, entityType } = props;
+      const { value, entityId, entityType, mode } = props;
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.entityVulnerabilityInsights,
         value,
         entityId,
         entityType: entityType as string | undefined,
+        mode: toEntityDescriptorMode(mode),
       });
       const onClose = buildOnClose(null);
       open(
@@ -861,13 +867,14 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   );
   const openEntityResolution = useCallback(
     ({ title, origin, ...props }: OpenEntityResolutionParams) => {
-      const { entityId, entityType, entityName, scopeId } = props;
+      const { entityId, entityType, entityName, scopeId, mode } = props;
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.entityResolution,
         entityId,
         entityType: entityType as string,
         entityName,
         scopeId,
+        mode: toEntityDescriptorMode(mode),
       });
       const onClose = buildOnClose(null);
       open(

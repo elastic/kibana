@@ -40,18 +40,33 @@ const i18nStrings = {
 export interface RowActions {
   onInvestigateInTimeline: (row: Row) => void;
   onOpenEntityGraph: (row: Row) => void;
+  /** Absent when the agent chat is unavailable, which hides the item. */
+  onAddToChat?: (row: Row) => void;
 }
 
 interface RowActionsCellProps {
   onInvestigateInTimeline: () => void;
   onOpenEntityGraph: () => void;
+  onAddToChat?: () => void;
 }
 
 export const RowActionsCell: React.FC<RowActionsCellProps> = ({
   onInvestigateInTimeline,
   onOpenEntityGraph,
+  onAddToChat,
 }) => {
   const [isMoreActionsOpen, setIsMoreActionsOpen] = useState(false);
+  const moreActionsButton = (
+    <EuiToolTip content={i18nStrings.moreActions} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="boxesVertical"
+        aria-label={i18nStrings.moreActions}
+        color="text"
+        size="xs"
+        onClick={() => setIsMoreActionsOpen((prev) => !prev)}
+      />
+    </EuiToolTip>
+  );
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -77,34 +92,38 @@ export const RowActionsCell: React.FC<RowActionsCellProps> = ({
           />
         </EuiToolTip>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          aria-label={i18nStrings.moreActions}
-          button={
-            <EuiToolTip content={i18nStrings.moreActions} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="boxesVertical"
-                aria-label={i18nStrings.moreActions}
-                color="text"
-                size="xs"
-                onClick={() => setIsMoreActionsOpen((prev) => !prev)}
+      {onAddToChat && (
+        <EuiFlexItem grow={false}>
+          {/* Mounted only once opened: a mounted popover scans its button for focusables, too costly per row. */}
+          {isMoreActionsOpen ? (
+            <EuiPopover
+              aria-label={i18nStrings.moreActions}
+              button={moreActionsButton}
+              isOpen
+              closePopover={() => setIsMoreActionsOpen(false)}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+            >
+              <EuiContextMenuPanel
+                items={[
+                  <EuiContextMenuItem
+                    key="addToChat"
+                    icon="addToChat"
+                    onClick={() => {
+                      setIsMoreActionsOpen(false);
+                      onAddToChat();
+                    }}
+                  >
+                    {i18nStrings.addToChat}
+                  </EuiContextMenuItem>,
+                ]}
               />
-            </EuiToolTip>
-          }
-          isOpen={isMoreActionsOpen}
-          closePopover={() => setIsMoreActionsOpen(false)}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-        >
-          <EuiContextMenuPanel
-            items={[
-              <EuiContextMenuItem disabled key="addToChat">
-                {i18nStrings.addToChat}
-              </EuiContextMenuItem>,
-            ]}
-          />
-        </EuiPopover>
-      </EuiFlexItem>
+            </EuiPopover>
+          ) : (
+            moreActionsButton
+          )}
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

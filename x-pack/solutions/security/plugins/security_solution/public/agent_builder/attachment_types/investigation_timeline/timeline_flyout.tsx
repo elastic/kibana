@@ -21,7 +21,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TIMELINE_TITLE } from '../grouped_attachments';
-import type { InvestigationTimelineEvent } from './types';
+import { TimelineTimestamp } from './timeline_timestamp';
+import { TimelineWindowNote } from './timeline_window_note';
+import type { InvestigationTimelineEvent, InvestigationTimelineWindow } from './types';
 
 export const INVESTIGATION_TIMELINE_FLYOUT_TEST_ID = 'investigationTimelineFlyout';
 
@@ -35,22 +37,29 @@ const EVENT_ICON_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Event' }
 );
 
-/** ISO-8601 timestamps render with a space before the time, matching the flyout design. */
-const formatTimestamp = (timestamp: string): string => timestamp.replace('T', ' ');
-
 export interface InvestigationTimelineFlyoutProps {
   events: InvestigationTimelineEvent[];
+  window?: InvestigationTimelineWindow;
 }
 
 /** Vertical event list shown when an attack-timeline summary row is opened. */
-export const InvestigationTimelineFlyout = ({ events }: InvestigationTimelineFlyoutProps) => {
+export const InvestigationTimelineFlyout = ({
+  events,
+  window,
+}: InvestigationTimelineFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <EuiFlyoutBody data-test-subj={INVESTIGATION_TIMELINE_FLYOUT_TEST_ID}>
-      <EuiTitle size="s" css={css({ marginBottom: euiTheme.size.l })}>
+      <EuiTitle size="s" css={css({ marginBottom: window ? euiTheme.size.s : euiTheme.size.l })}>
         <h2>{TIMELINE_TITLE}</h2>
       </EuiTitle>
+
+      {window ? (
+        <div css={css({ marginBottom: euiTheme.size.l })}>
+          <TimelineWindowNote window={window} />
+        </div>
+      ) : null}
 
       {events.length === 0 ? (
         <EuiText size="xs" color="subdued">
@@ -84,9 +93,10 @@ export const InvestigationTimelineFlyout = ({ events }: InvestigationTimelineFly
                       color="subdued"
                       css={css({ fontFamily: euiTheme.font.familyCode })}
                     >
-                      <span data-test-subj="investigationTimelineEventTimestamp">
-                        {formatTimestamp(event.timestamp)}
-                      </span>
+                      <TimelineTimestamp
+                        value={event.timestamp}
+                        data-test-subj="investigationTimelineEventTimestamp"
+                      />
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>

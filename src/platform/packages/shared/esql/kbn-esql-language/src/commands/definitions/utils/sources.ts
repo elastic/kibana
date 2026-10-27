@@ -131,10 +131,10 @@ export const buildSourcesDefinitions = (
       asSnippet: isIntegration,
       kind,
       detail: isIntegration
-        ? i18n.translate('kbn-esql-language.esql.autocomplete.integrationDefinition', {
+        ? i18n.translate('esqlLanguage.esql.autocomplete.integrationDefinition', {
             defaultMessage: SOURCES_TYPES.INTEGRATION,
           })
-        : i18n.translate('kbn-esql-language.esql.autocomplete.sourceDefinition', {
+        : i18n.translate('esqlLanguage.esql.autocomplete.sourceDefinition', {
             defaultMessage: '{type}',
             values: {
               type: type ?? SOURCES_TYPES.INDEX,
@@ -160,7 +160,7 @@ export const buildViewsDefinitions = (
         label: name,
         text: getSafeInsertSourceText(name),
         kind: 'Issue',
-        detail: i18n.translate('kbn-esql-language.esql.autocomplete.viewDefinition', {
+        detail: i18n.translate('esqlLanguage.esql.autocomplete.viewDefinition', {
           defaultMessage: '{type}',
           values: { type: type ?? SOURCES_TYPES.VIEW },
         }),
@@ -183,7 +183,7 @@ export const buildDatasetsDefinitions = (
         label: name,
         text,
         kind: 'Issue',
-        detail: i18n.translate('kbn-esql-language.esql.autocomplete.datasetDefinition', {
+        detail: i18n.translate('esqlLanguage.esql.autocomplete.datasetDefinition', {
           defaultMessage: 'Dataset',
         }),
       });
@@ -372,7 +372,7 @@ export const specialIndicesToSuggestions = (
         label: index.name,
         text: index.name + ' ',
         kind: 'Issue',
-        detail: i18n.translate('kbn-esql-language.esql.autocomplete.sourceDefinition', {
+        detail: i18n.translate('esqlLanguage.esql.autocomplete.sourceDefinition', {
           defaultMessage: '{type}',
           values: {
             type: index.mode ?? SOURCES_TYPES.INDEX,
@@ -390,7 +390,7 @@ export const specialIndicesToSuggestions = (
             asSnippet: true,
             kind: 'Issue',
             detail: i18n.translate(
-              'kbn-esql-language.esql.autocomplete.specialIndexes.indexType.alias',
+              'esqlLanguage.esql.autocomplete.specialIndexes.indexType.alias',
               {
                 defaultMessage: 'Alias',
               }

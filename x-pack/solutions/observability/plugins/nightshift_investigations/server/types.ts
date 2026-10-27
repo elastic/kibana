@@ -8,6 +8,8 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type {
@@ -45,11 +47,14 @@ export interface NightshiftInvestigationsServerSetup {
 export interface NightshiftInvestigationsServerStart {
   getInvestigationsClient: (request: KibanaRequest) => NightshiftInvestigationsClient;
   isInvestigationAvailable: (request: KibanaRequest) => Promise<boolean>;
+  /** Whether the assistant agent is registered, which needs the sandbox. */
+  isAssistantEnabled: () => boolean;
 }
 
 export interface NightshiftInvestigationsSetupDeps {
   share: SharePluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
+  alerting?: AlertingServerSetup;
   /**
    * Stores investigations as conversations. Without it investigations are unavailable.
    */
@@ -67,6 +72,7 @@ export interface NightshiftInvestigationsStartDeps {
   actions?: ActionsPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   agenticInvestigations?: AgenticInvestigationsPluginStart;
+  alertingVTwo?: AlertingV2ServerStart;
   proposals?: ProposalsPluginStart;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
   inference?: InferenceServerStart;

@@ -137,6 +137,8 @@ describe('bulkScheduleWorkflow', () => {
     mockIsWorkflowEnabledRealtime.mockReset().mockResolvedValue(true);
     mockDiscardUnstartedExecution.mockReset().mockResolvedValue(undefined);
     taskManager = taskManagerMock.createStart();
+    taskManager.schedule.mockImplementation(async (task) => task as any);
+    taskManager.bulkSchedule.mockImplementation(async (tasks) => tasks as any);
     pluginStart = plugin.start(coreStart, {
       taskManager,
       actions: {} as any,

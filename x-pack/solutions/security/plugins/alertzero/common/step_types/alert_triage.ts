@@ -56,6 +56,9 @@ const planSweepInputSchema = z.object({
   budget_per_hour: z.number().int().min(1).max(100_000),
   interval_minutes: z.number().int().min(1).max(MAX_INTERVAL_MINUTES),
   lookback_hours: z.number().int().min(1).max(8760),
+  min_severity: z.enum(['low', 'medium', 'high', 'critical']),
+  exclude_building_blocks: z.boolean(),
+  excluded_rule_tags: z.array(z.string().min(1).max(256)).max(50),
   headroom: headroomSchema.describe('Output of the headroom step.'),
 });
 

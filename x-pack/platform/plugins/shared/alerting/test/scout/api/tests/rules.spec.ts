@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS } from '../fixtures/constants';
 import { waitForSuccessfulEventLogEntry } from '../lib/wait_for_successful_event_log';
@@ -24,11 +24,16 @@ const INDEX_THRESHOLD_PARAMS = {
 
 const RULE_NAME = 'scout-create-rule';
 
-// Failing: See https://github.com/elastic/kibana/issues/261886
-apiTest.describe.skip('Alerting Rule', { tag: tags.serverless.observability.complete }, () => {
+// Excluding MKI runs: the shared Cloud UIAM tenant hits its internal API key limit.
+// See https://github.com/elastic/kibana/issues/261886
+apiTest.describe('Alerting Rule', { tag: '@local-serverless-observability_complete' }, () => {
   let createdRuleId: string;
 
-  apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+  apiTest.beforeAll(async ({ apiClient, kbnClient, samlAuth }) => {
+    // Earlier specs in this config queue deployment-wide invalidation records and leave
+    // them for the invalidation task. Clear them so the counts below belong to this suite.
+    await kbnClient.savedObjects.clean({ types: ['api_key_pending_invalidation'] });
+
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
     const createResponse = await apiClient.post('api/alerting/rule', {

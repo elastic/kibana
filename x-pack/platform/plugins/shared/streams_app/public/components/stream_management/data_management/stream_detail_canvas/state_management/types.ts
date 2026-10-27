@@ -8,6 +8,7 @@
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { XYPosition } from '@xyflow/react';
+import type { StreamsUnit } from '@kbn/streams-schema';
 import type { Unit, UnitRepository } from '../../../../../services/unit_repository';
 import type { DestinationsActorRef } from '../../../../streams_layout/destinations/state_machines/destinations_state_machine';
 import type { SourcesActorRef } from '../../../../streams_layout/sources/state_machines/sources_state_machine';
@@ -17,7 +18,8 @@ import type { SourceEnvironmentLoader } from '../../../../streams_layout/sources
 /** Undo steps for a source or destination create, driven by the canvas save transitions. */
 export interface CanvasCreateHistoryHandlers {
   hold: () => void;
-  commit: () => void;
+  /** Clear the stack after a successful persist so undo cannot restore revoked keys. */
+  reset: () => void;
   discard: () => void;
 }
 
@@ -35,17 +37,24 @@ export interface CanvasStateServiceDeps {
   validateUnitDefinition?: (unit: Unit) => Promise<void>;
 }
 
+export type CanvasFlyoutKind = 'destination' | 'index';
+
 export interface CanvasUrlInput {
   flyoutName: string | null;
+  flyoutKind: CanvasFlyoutKind | null;
   flyoutTab: string | null;
   query: string | null;
 }
 
 export const defaultCanvasUrlState: CanvasUrlInput = {
   flyoutName: null,
+  flyoutKind: null,
   flyoutTab: null,
   query: null,
 };
+
+export type RouteEditModes = 'processing' | 'routing';
+export type RouteEdit = [string, RouteEditModes];
 
 export interface CanvasState {
   urlState: CanvasUrlInput;
@@ -55,6 +64,8 @@ export interface CanvasState {
   savingComponentIds?: string[];
   savingComponentKind?: 'source' | 'destination';
   savingComponentIntent?: 'create' | 'delete' | 'connect';
+  savingSecrets?: StreamsUnit.Secrets;
+  editingRoute: Partial<RouteEdit>;
   nodePositions: Record<string, XYPosition>;
   sourcesRef: SourcesActorRef;
   destinationsRef: DestinationsActorRef;
@@ -75,6 +86,7 @@ export type CanvasUrlEvent =
       unitDefinition: Unit;
       destinationIds: string[];
       intent: 'create' | 'delete';
+      secrets?: StreamsUnit.Secrets;
     }
   | {
       type: 'unit.changed';
@@ -94,7 +106,9 @@ export type CanvasUrlEvent =
       output: { unitDefinition: Unit };
     }
   | { type: 'xstate.error.actor.persistUnitDefinition'; error: unknown }
-  | { type: 'flyout.open'; flyoutName: string }
+  | { type: 'flyout.open'; flyoutName: string; flyoutKind?: CanvasFlyoutKind }
   | { type: 'flyout.tab'; flyoutTab: string }
   | { type: 'flyout.close' }
-  | { type: 'search.change'; query: string };
+  | { type: 'search.change'; query: string }
+  | { type: 'routing.edit.open'; edgeId: string; mode: RouteEditModes }
+  | { type: 'routing.edit.close' };

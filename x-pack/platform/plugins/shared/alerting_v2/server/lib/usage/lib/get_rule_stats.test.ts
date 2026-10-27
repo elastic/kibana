@@ -18,7 +18,6 @@ beforeEach(() => {
 function mockRuleSearchResponse({
   total = 20,
   countEnabled = 15,
-  countAgentBuilderAssisted = 7,
   kindBuckets = [
     { key: 'metric', doc_count: 12 },
     { key: 'log', doc_count: 8 },
@@ -50,7 +49,6 @@ function mockRuleSearchResponse({
 }: {
   total?: number;
   countEnabled?: number;
-  countAgentBuilderAssisted?: number;
   kindBuckets?: Array<{ key: string; doc_count: number }>;
   scheduleBuckets?: Array<{ key: string; doc_count: number }>;
   lookbackBuckets?: Array<{ key: string; doc_count: number }>;
@@ -71,7 +69,6 @@ function mockRuleSearchResponse({
     hits: { total: { value: total, relation: 'eq' }, max_score: null, hits: [] },
     aggregations: {
       count_enabled: { doc_count: countEnabled },
-      count_agent_builder_assisted: { doc_count: countAgentBuilderAssisted },
       count_by_kind: { buckets: kindBuckets },
       count_by_schedule: { buckets: scheduleBuckets },
       count_by_lookback: { buckets: lookbackBuckets },
@@ -100,7 +97,6 @@ describe('getRuleStats', () => {
     expect(result).toEqual({
       count_total: 20,
       count_enabled: 15,
-      count_agent_builder_assisted: 7,
       count_by_kind: { metric: 12, log: 8 },
       count_by_schedule: [
         { name: '1m', value: 10 },
@@ -123,7 +119,6 @@ describe('getRuleStats', () => {
     mockRuleSearchResponse({
       total: 0,
       countEnabled: 0,
-      countAgentBuilderAssisted: 0,
       kindBuckets: [],
       scheduleBuckets: [],
       lookbackBuckets: [],
@@ -143,7 +138,6 @@ describe('getRuleStats', () => {
     expect(result).toEqual({
       count_total: 0,
       count_enabled: 0,
-      count_agent_builder_assisted: 0,
       count_by_kind: {},
       count_by_schedule: [],
       count_by_lookback: [],
@@ -172,7 +166,6 @@ describe('getRuleStats', () => {
     expect(result).toEqual({
       count_total: 0,
       count_enabled: 0,
-      count_agent_builder_assisted: 0,
       count_by_kind: {},
       count_by_schedule: [],
       count_by_lookback: [],
@@ -196,7 +189,6 @@ describe('getRuleStats', () => {
       hits: { total: 3, max_score: null, hits: [] },
       aggregations: {
         count_enabled: { doc_count: 2 },
-        count_agent_builder_assisted: { doc_count: 1 },
         count_by_kind: { buckets: [] },
         count_by_schedule: { buckets: [] },
         count_by_lookback: { buckets: [] },

@@ -11,6 +11,7 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import { SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID } from '@kbn/alertzero-common';
@@ -19,7 +20,6 @@ import {
   THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
   THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { ThreatIntelSupplyWorkflowInstaller } from '../../types';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
@@ -33,6 +33,13 @@ import type {
   ThreatIntelSupplyStatus,
   ThreatIntelSupplyWorkflowStatus,
 } from './types';
+
+interface SupplyTarget {
+  workflowId: string;
+  workflowSpaceId: string;
+  /** `deployment` workflows are shared by every space; `space` workflows belong to the Hunt space. */
+  scope: 'deployment' | 'space';
+}
 
 const attributeWorkflowIdForSpace = (spaceId: string): string =>
   `${THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID}-${spaceId}`;
@@ -58,7 +65,8 @@ export interface ThreatIntelSupplyServiceDeps {
 
 /**
  * Orchestrates threat-intel supply enablement for Hunt Watch: ensure-on when
- * Continuous Threat Hunt enables, last-consumer teardown for globals, status
+ * Continuous Threat Hunt enables, last-consumer teardown for the default-space
+ * supply workflows, status
  * for the settings panel, and the ML/bootstrap hard-gate.
  */
 export class ThreatIntelSupplyService {
@@ -86,24 +94,30 @@ export class ThreatIntelSupplyService {
 
   /**
    * Turns on ingest, enrich and the space's attribute workflow. If any step throws,
-   * the flips this call made are undone (globals only when no other space hunts) so a failed
+   * the flips this call made are undone (deployment-scoped ones only when no other space hunts) so a failed
    * enable leaves supply as it was, then the original error is rethrown. The undo only applies
    * to the first enable: when Hunt is already on in this space, as on Restore, supply is left
    * as it is.
    */
   async ensureSupplyForSpace(spaceId: string, request: KibanaRequest): Promise<void> {
-    const targets = [
+    const targets: SupplyTarget[] = [
       {
         workflowId: THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
-        workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        workflowSpaceId: DEFAULT_SPACE_ID,
+        scope: 'deployment',
       },
       {
         workflowId: THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
-        workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        workflowSpaceId: DEFAULT_SPACE_ID,
+        scope: 'deployment',
       },
-      { workflowId: attributeWorkflowIdForSpace(spaceId), workflowSpaceId: spaceId },
+      {
+        workflowId: attributeWorkflowIdForSpace(spaceId),
+        workflowSpaceId: spaceId,
+        scope: 'space',
+      },
     ];
-    const flipped: typeof targets = [];
+    const flipped: SupplyTarget[] = [];
 
     try {
       for (const target of targets) {
@@ -125,7 +139,7 @@ export class ThreatIntelSupplyService {
   }
 
   private async undoEnsure(
-    flipped: ReadonlyArray<{ workflowId: string; workflowSpaceId: string }>,
+    flipped: readonly SupplyTarget[],
     spaceId: string,
     request: KibanaRequest
   ): Promise<void> {
@@ -149,8 +163,8 @@ export class ThreatIntelSupplyService {
       return;
     }
 
-    // A positive answer is cached: once another space hunts, no global is undone. A negative
-    // answer is rechecked before every global write, because another space can finish
+    // A positive answer is cached: once another space hunts, no deployment-scoped workflow is undone. A negative
+    // answer is rechecked before every deployment-scoped write, because another space can finish
     // enabling Hunt while an earlier undo is awaiting its update.
     let otherSpaceHunting = false;
     const isOtherSpaceHunting = async (): Promise<boolean> => {
@@ -160,10 +174,9 @@ export class ThreatIntelSupplyService {
       return otherSpaceHunting;
     };
 
-    for (const { workflowId, workflowSpaceId } of [...flipped].reverse()) {
+    for (const { workflowId, workflowSpaceId, scope } of [...flipped].reverse()) {
       try {
-        const isGlobal = workflowSpaceId === GLOBAL_WORKFLOW_SPACE_ID;
-        if (isGlobal && (await isOtherSpaceHunting())) {
+        if (scope === 'deployment' && (await isOtherSpaceHunting())) {
           continue;
         }
         await this.deps.management.updateWorkflow(
@@ -192,7 +205,7 @@ export class ThreatIntelSupplyService {
       installIfMissing: false,
     });
 
-    // Re-check immediately before touching globals so a concurrent Hunt enable in
+    // Re-check immediately before touching the supply workflows so a concurrent Hunt enable in
     // another space is less likely to lose ingest/enrich after its ensure ran.
     if (await this.isHuntEnabledInOtherSpace(spaceId)) {
       return;
@@ -200,7 +213,7 @@ export class ThreatIntelSupplyService {
 
     await this.setWorkflowEnabled({
       workflowId: THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
-      workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      workflowSpaceId: DEFAULT_SPACE_ID,
       enabled: false,
       request,
       huntSpaceId: spaceId,
@@ -208,7 +221,7 @@ export class ThreatIntelSupplyService {
     });
     await this.setWorkflowEnabled({
       workflowId: THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
-      workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      workflowSpaceId: DEFAULT_SPACE_ID,
       enabled: false,
       request,
       huntSpaceId: spaceId,
@@ -245,14 +258,14 @@ export class ThreatIntelSupplyService {
       this.isHuntEnabledInSpace(spaceId),
       this.readWorkflowStatus(
         THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
-        GLOBAL_WORKFLOW_SPACE_ID,
+        DEFAULT_SPACE_ID,
         'ingest',
         'deployment',
         request
       ),
       this.readWorkflowStatus(
         THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
-        GLOBAL_WORKFLOW_SPACE_ID,
+        DEFAULT_SPACE_ID,
         'enrich',
         'deployment',
         request

@@ -52,3 +52,12 @@ responses:
               url: https://fast.com
   404:
     description: If the monitor is not found, the API returns a 404 error.
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/synthetics/monitors/monitor-id" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/synthetics/monitors/monitor-id

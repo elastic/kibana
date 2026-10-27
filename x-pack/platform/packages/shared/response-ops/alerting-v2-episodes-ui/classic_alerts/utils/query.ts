@@ -7,6 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import dateMath from '@kbn/datemath';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import {
   ALERT_DURATION,
   ALERT_RULE_UUID,
@@ -115,7 +116,7 @@ export const buildClassicAlertsQuery = (
 
   const trimmedSearch = filterState?.queryString?.trim();
   if (trimmedSearch) {
-    filters.push({ query_string: { query: trimmedSearch } });
+    filters.push(toElasticsearchQuery(fromKueryExpression(trimmedSearch)));
   }
 
   if (filterState?.status?.length) {

@@ -59,11 +59,11 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
       }, 'isolate');
 
       submitCommand();
-      cy.contains('Action pending.').should('exist');
+      cy.contains('isolate is pending').should('exist');
       cy.wait('@isolate').then(() => {
         sendActionResponse(isolateRequestResponse);
       });
-      cy.contains('Action completed.', { timeout: 120000 }).should('exist');
+      cy.contains('isolate completed successfully', { timeout: 120000 }).should('exist');
       waitForEndpointListPageToBeLoaded(endpointHostname);
       checkEndpointIsIsolated(endpointHostname);
     });

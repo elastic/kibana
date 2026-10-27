@@ -12,7 +12,7 @@ import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { registerUiSettings } from './ui_settings';
 import { registerDataSetsRoutes } from './routes/register_routes';
 import { DataFederationServerPlugin } from './plugin';
-import type { DataFederationConfigType } from './config';
+import { DEFAULT_AWS_CLOUDFORMATION_TEMPLATE_URL, type DataFederationConfigType } from './config';
 
 jest.mock('./ui_settings', () => ({
   registerUiSettings: jest.fn(),
@@ -27,6 +27,7 @@ const baseConfig: DataFederationConfigType = {
   enableFederatedIdentityAuth: false,
   enableGoogleCloudStorageDataSourceType: false,
   enableAzureDataSourceType: false,
+  awsCloudFormationTemplateUrl: DEFAULT_AWS_CLOUDFORMATION_TEMPLATE_URL,
 };
 
 const setupPlugin = (config: DataFederationConfigType, { isServerless = false } = {}) => {

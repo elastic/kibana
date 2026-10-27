@@ -31,7 +31,7 @@ export const RiskScoreChangeCell = memo(({ value }: { value: unknown }) => {
         <EuiScreenReaderOnly>
           <span>{worse ? INCREASED_BY : DECREASED_BY}</span>
         </EuiScreenReaderOnly>
-        {` ${Math.abs(Math.round(delta))}%`}
+        {` ${Math.abs(Math.round(delta))}`}
       </EuiTextColor>
     </EuiText>
   );
