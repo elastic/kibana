@@ -18,6 +18,7 @@ export const ALERTING_TOOL_IDS = {
   manageRule: alertingTool('manage_rule'),
   manageActionPolicy: alertingTool('manage_action_policy'),
   findActionPolicies: alertingTool('find_action_policies'),
+  attachRule: alertingTool('attach_rule'),
 } as const;
 
 /**
