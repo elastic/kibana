@@ -361,7 +361,7 @@ describe('Elasticsearch connector', () => {
   // ============================================================================
 
   describe('SearchInputSchema', () => {
-    it('rejects index strings longer than the 4096-byte HTTP request line limit', () => {
+    it('rejects index strings longer than 4096 characters', () => {
       const longIndex = 'a'.repeat(4097);
       const result = SearchInputSchema.safeParse({ index: longIndex });
       expect(result.success).toBe(false);
@@ -379,11 +379,11 @@ describe('Elasticsearch connector', () => {
       expect(result.success).toBe(true);
     });
 
-    it('rejects comma-separated index names whose URL-encoded path exceeds the request line', () => {
-      // 16 x 255 characters + 15 commas is 4095 raw, but each comma encodes to %2C.
+    it('leaves the request line limit to the cluster, which can raise it above 4kb', () => {
+      // 16 x 255 characters + 15 commas is 4095 raw; each comma encodes to %2C.
       const indices = Array.from({ length: 16 }, (_, i) => `${i}`.padEnd(255, 'a'));
-      expect(SearchInputSchema.safeParse({ index: indices.join(',') }).success).toBe(false);
-      expect(SearchInputSchema.safeParse({ index: indices }).success).toBe(false);
+      expect(SearchInputSchema.safeParse({ index: indices.join(',') }).success).toBe(true);
+      expect(SearchInputSchema.safeParse({ index: indices }).success).toBe(true);
     });
 
     it('rejects arrays of more than 100 indices', () => {
@@ -466,30 +466,18 @@ describe('Elasticsearch connector', () => {
       expect(result.success).toBe(false);
     });
 
-    it('rejects query parameters that push the request line past 4096 bytes', () => {
-      const queryParams = { a: 'x'.repeat(2048), b: 'x'.repeat(2048) };
-      expect(RequestInputSchema.safeParse({ path: '/_cat/indices', queryParams }).success).toBe(
-        false
-      );
-      expect(
-        RequestInputSchema.safeParse({
-          path: '/_cat/indices',
-          queryParams: { a: 'x'.repeat(2048) },
-        }).success
-      ).toBe(true);
-    });
-
-    it('measures the path after percent-encoding, including an embedded query', () => {
+    it('leaves the request line limit to the cluster, which can raise it above 4kb', () => {
+      const queryParams = { q: 'x'.repeat(2048), filter_path: 'x'.repeat(2048) };
+      expect(RequestInputSchema.safeParse({ path: '/_search', queryParams }).success).toBe(true);
       // Each 'é' is sent as %C3%A9, six bytes on the wire.
-      expect(RequestInputSchema.safeParse({ path: `/_search?q=${'é'.repeat(600)}` }).success).toBe(
+      expect(RequestInputSchema.safeParse({ path: `/_search?q=${'é'.repeat(700)}` }).success).toBe(
         true
       );
-      expect(RequestInputSchema.safeParse({ path: `/_search?q=${'é'.repeat(700)}` }).success).toBe(
-        false
-      );
-      expect(RequestInputSchema.safeParse({ path: `/${'é'.repeat(700)}/_doc/1` }).success).toBe(
-        false
-      );
+    });
+
+    it('rejects paths longer than 4096 characters', () => {
+      expect(RequestInputSchema.safeParse({ path: `/${'a'.repeat(4095)}` }).success).toBe(true);
+      expect(RequestInputSchema.safeParse({ path: `/${'a'.repeat(4096)}` }).success).toBe(false);
     });
 
     it('rejects an unparsable path instead of throwing', () => {

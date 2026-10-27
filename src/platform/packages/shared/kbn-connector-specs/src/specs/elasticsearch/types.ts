@@ -9,11 +9,10 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-// Default `http.max_initial_line_length` (4kb, `HttpTransportSettings`); the request line
-// carries the path and query string.
-const HTTP_MAX_INITIAL_LINE_LENGTH = 4096;
-// The request line is `<METHOD> <request-target> HTTP/1.1`.
-const REQUEST_LINE_OVERHEAD = 'POST  HTTP/1.1'.length;
+// Guards against unbounded input only. The request line is limited by the cluster's
+// `http.max_initial_line_length`, 4kb by default but configurable, so it is left for
+// Elasticsearch to enforce.
+const MAX_URL_INPUT_LENGTH = 4096;
 // Default `index.max_result_window`. It is configurable per index, so from + size is left for
 // Elasticsearch to enforce; this only caps each value.
 // https://www.elastic.co/docs/reference/elasticsearch/index-settings/index-modules
@@ -25,10 +24,11 @@ const ESQL_MAX_QUERY_LENGTH = 1_000_000;
 const MAX_SEARCH_TARGETS = 100;
 const MAX_REQUEST_ITEMS = 1000;
 
-/** Input that cannot be encoded (lone surrogates, unparsable paths) does not fit. */
-const fitsRequestLine = (buildRequestTarget: () => string): boolean => {
+/** Whether input can be encoded into a request target (no lone surrogates, parsable paths). */
+const isEncodable = (buildRequestTarget: () => string): boolean => {
   try {
-    return buildRequestTarget().length + REQUEST_LINE_OVERHEAD <= HTTP_MAX_INITIAL_LINE_LENGTH;
+    buildRequestTarget();
+    return true;
   } catch {
     return false;
   }
@@ -64,11 +64,11 @@ export const SearchInputSchema = lazySchema(() =>
   z.object({
     index: z
       .union([
-        z.string().min(1).max(HTTP_MAX_INITIAL_LINE_LENGTH),
+        z.string().min(1).max(MAX_URL_INPUT_LENGTH),
         z.array(z.string().min(1).max(512)).min(1).max(MAX_SEARCH_TARGETS),
       ])
-      .refine((index) => fitsRequestLine(() => toSearchPath(index)), {
-        message: `The URL-encoded search targets must fit the ${HTTP_MAX_INITIAL_LINE_LENGTH}-byte HTTP request line.`,
+      .refine((index) => isEncodable(() => toSearchPath(index)), {
+        message: 'The search targets cannot be URL-encoded.',
       })
       .describe(
         'Index name, comma-separated index names, or an array of index names. Wildcards and aliases are supported.'
@@ -216,7 +216,7 @@ export const RequestInputSchema = lazySchema(() =>
       path: z
         .string()
         .min(1)
-        .max(HTTP_MAX_INITIAL_LINE_LENGTH)
+        .max(MAX_URL_INPUT_LENGTH)
         .regex(/^\//, 'Path must start with "/".')
         .describe(
           'ES REST API path, starting with /. E.g. "/my-index/_doc/abc123", "/_aliases", "/_cat/health?v". The base cluster URL is prepended automatically — do not repeat it here.'
@@ -229,8 +229,8 @@ export const RequestInputSchema = lazySchema(() =>
           'Query string parameters as key-value pairs, merged with any params in the path.'
         ),
     })
-    .refine(({ path, queryParams }) => fitsRequestLine(() => toRequestTarget(path, queryParams)), {
-      message: `The path and URL-encoded query parameters must fit the ${HTTP_MAX_INITIAL_LINE_LENGTH}-byte HTTP request line.`,
+    .refine(({ path, queryParams }) => isEncodable(() => toRequestTarget(path, queryParams)), {
+      message: 'The path and query parameters cannot be URL-encoded.',
       path: ['path'],
     })
 );
