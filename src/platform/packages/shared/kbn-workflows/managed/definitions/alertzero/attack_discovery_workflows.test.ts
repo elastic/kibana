@@ -239,12 +239,14 @@ describe('Attack Discovery worker chain', () => {
       expect(dispatch?.['on-failure']).toBeUndefined();
     });
 
-    // #19276 names all three settings. `scheduleInterval` has no behavioral use in the
-    // skeleton, so dropping it would be easy and would silently break the contract.
+    // #19276 names autonomy, settings version and the schedule interval. The interval
+    // string is traceability on the runner; the alert cap derived from it is forwarded
+    // separately. Dropping either would be easy and would silently break the contract.
     it.each([
       ['autonomy', 'consts.worker_settings.autonomy'],
       ['settings_version', 'consts.worker_settings.settingsVersion'],
       ['schedule_interval', 'consts.worker_settings.scheduleInterval'],
+      ['max_alerts', 'consts.worker_settings.maxAlerts'],
     ])('forwards the %s worker setting', (input, reference) => {
       expect(asInputs(dispatch)[input]).toContain(reference);
     });
@@ -252,6 +254,7 @@ describe('Attack Discovery worker chain', () => {
     it.each([
       ['autonomy', '${{ consts.worker_settings.autonomy }}'],
       ['schedule_interval', '${{ consts.worker_settings.scheduleInterval }}'],
+      ['max_alerts', '${{ consts.worker_settings.maxAlerts }}'],
     ])('forwards %s with a type-preserving template', (input, template) => {
       expect(asInputs(dispatch)[input]).toBe(template);
     });
@@ -309,8 +312,14 @@ describe('Attack Discovery worker chain', () => {
 
     // The child runs N pipelines, each with its own 30m branch-timeout, so this
     // bounds the whole batched run rather than a single pipeline's 30m budget.
+    // 12h covers a slow 10k scan (about 8h20m) and still returns before the next
+    // 24h schedule, so the review fan-out can run.
     it('sets a step timeout that bounds the whole batched child', () => {
-      expect(run?.timeout).toBe('4h');
+      expect(run?.timeout).toBe('12h');
+    });
+
+    it('caps retrieval at the prorated alert count, defaulting to a full day', () => {
+      expect(asInputs(run).max_alerts).toBe('${{ inputs.max_alerts | default: 10000 }}');
     });
 
     it('leaves failure propagation alone so a failed generation fails the run', () => {
@@ -2743,20 +2752,20 @@ describe('Attack Discovery worker chain', () => {
     expect(review.settings?.timeout).toBe('176h');
   });
 
-  // Neither the floor nor the runner sets `settings.timeout`, so both take the
-  // engine's 6h default — and that is correct only because neither one waits on a
-  // human. The runner's longest wait is the 4h generation step, and the floor's is the
-  // runner. Were either to park on the review's escalation gate instead, the same
-  // default would become a 6h guillotine: the timeout is wall-clock from `startedAt`,
-  // so a parked run burns it, and tripping it cancels the child it was waiting on.
+  // Generation of a full scan can run about 8h20m on a slow day. The engine default
+  // is 6h, and a workflow timeout cancels the child this run is waiting on, so review
+  // dispatch never starts. 12h covers that scan and still ends before the next 24h
+  // schedule. Reviews are dispatched detached, so this budget is not waiting on a
+  // person. Were either workflow to park on the review's escalation gate instead, 12h
+  // would become a guillotine: the timeout is wall-clock from `startedAt`.
   it.each([
     ['floor', floor],
     ['worker', worker],
-  ])('leaves the %s workflow-level timeout at its generous default', (_name, workflow) => {
-    expect(workflow.settings?.timeout).toBeUndefined();
+  ])('gives the %s workflow 12h so a slow scan can dispatch reviews', (_name, workflow) => {
+    expect(workflow.settings?.timeout).toBe('12h');
   });
 
-  // The invariant that default rests on, asserted directly rather than inferred from
+  // The invariant the 12h budget rests on, asserted directly rather than inferred from
   // the fan-out's step type. A `workflow.execute` to the review is the one way to
   // reintroduce the park, and it would regress silently: the YAML stays valid and
   // every other assertion here still passes.
@@ -3583,8 +3592,8 @@ describe('Attack Discovery worker chain', () => {
 
     describe('managed versions', () => {
       // Fixed `yaml` definitions roll out through the hash; the bump is the signal.
-      it('bumps the runner to version 11 so the billable flag reconciles', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(11);
+      it('bumps the runner to version 12 so the billable flag reconciles', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(12);
       });
 
       it('continues when fingerprint matching fails', () => {

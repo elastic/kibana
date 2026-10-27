@@ -50,13 +50,17 @@ export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID =
  *
  * Version 10 passes why a review is linked to an earlier Investigation, so the
  * journal can tell a built-in account from a closed false positive.
+ *
+ * Version 11 raises the generation budget to 12h and forwards the prorated alert
+ * cap. The YAML change already rolls out through `definitionHash`; the bump is
+ * the deliberate signal of that rollout.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
   billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 11,
+  version: 12,
   yaml: ATTACK_DISCOVERY_RUNNER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -134,15 +138,16 @@ export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW = {
  * each batch persist the replacements its discoveries use. Version 4 turns off the
  * run step's ground-truth gate, so false-positive triage happens only in the
  * review's FP/TP analysis. Version 5 skips alerts the review tagged
- * `az:ad_correlated`. Each bump is a deliberate rollout signal; the YAML change
- * alone already rolls out through `definitionHash`.
+ * `az:ad_correlated`. Version 6 gives the child a 12h workflow timeout and
+ * limits retrieval to the prorated alert cap. Each bump is a deliberate
+ * rollout signal; the YAML change alone already rolls out through `definitionHash`.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
   billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 6,
+  version: 7,
   yaml: ATTACK_DISCOVERY_BATCHED_GENERATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
