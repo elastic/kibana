@@ -54,7 +54,6 @@ import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/pub
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { CPSPluginStart } from '@kbn/cps/public';
-import type { EntityInventoryAppPublicStart } from '@kbn/entity-inventory-app-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type { InventoryViewsServiceStart } from './services/inventory_views';
 import type { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
@@ -118,7 +117,6 @@ export interface InfraClientStartDeps {
   licensing: LicensingPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
   fieldsMetadata: FieldsMetadataPublicStart;
-  entityInventoryApp?: EntityInventoryAppPublicStart;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;

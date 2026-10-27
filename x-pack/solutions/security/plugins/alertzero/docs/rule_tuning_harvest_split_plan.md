@@ -301,7 +301,7 @@ The Liquid pieces (`where_exp` with `contains` / `==` against positional rows,
 
 ## Code changes
 
-Managed version of the worker goes 30 → 31 so the installed copy is replaced.
+Managed version of the worker goes 31 → 32 so the installed copy is replaced.
 
 1. `rule_tuning_worker.yaml`: steps 0–2 above, `resolve_enabled_rules`,
    `resolve_screened_rules`, `resolve_totals`, `max_screened_rules` const;
@@ -426,10 +426,24 @@ All variants return the same 5 rules with the same counts (the top rule's
 while the current query runs for three minutes). The current query is 6× over
 Kibana's 30s default timeout at this size; the new pipeline is 60× faster, and
 the id list has no visible cost on the ES side. At thousands of rules the
-`_find` is the slowest step. The screen read 1.6M instead of 8.8M docs because
-the 148 synthetic rules were excluded by the `terms` filter; in a space where
-every alert-producing rule exists and is enabled, the screen reads the whole
-window as before (0.5s).
+`_find` is the slowest step.
+
+Why the docs-read columns differ (`documents_found` in the ES|QL response,
+which counts every pass over a document):
+
+- Current harvest, 16.5M: every alert in the window (8.2M at the time of that
+  run, 8.8M earlier) read twice. `INLINE STATS` scans the rows once to compute
+  the per-rule watermark and latest revision, then again to join them back,
+  before the FP condition is even evaluated.
+- Screen, 1.6M: one pass, and only over alerts whose rule uuid is in the
+  enabled `terms` filter. The other ~6.6M alerts in the window belong to the
+  148 synthetic rules with no rule object, which Lucene drops before ES|QL sees
+  them. In a space where every alert-producing rule exists and is enabled, the
+  screen reads the whole window once (8.8M, 0.5s).
+- Harvest, 910k: only the closed/false-positive alerts of the 5 screened rules
+  (455k, pushed down as `term` × `term` × `terms`), read twice by the same
+  `INLINE STATS`. The 2 passes cost nothing here because the input is 5% of
+  the window.
 
 Checks for #20315, from the same run:
 

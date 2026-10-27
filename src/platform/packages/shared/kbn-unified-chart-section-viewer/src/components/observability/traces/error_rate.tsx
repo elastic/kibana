@@ -11,6 +11,7 @@ import React, { useMemo } from 'react';
 import type { LensYBoundsConfig, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import { useTraceMetricsContext } from './context/trace_metrics_context';
 import { Chart } from '../../chart';
+import { buildXySeriesConfig } from '../../chart/build_xy_series_config';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { getErrorRateChart } from './trace_charts_definition';
 import { BREAKDOWN_LEGEND_CONFIG } from './constants';
@@ -69,11 +70,23 @@ const ErrorRateChartContent = ({
     [seriesType, color, unit, breakdownField]
   );
 
+  const lensConfig = useMemo(
+    () =>
+      buildXySeriesConfig({
+        query,
+        title,
+        chartLayers,
+        legend: breakdownField ? BREAKDOWN_LEGEND_CONFIG : undefined,
+        yBounds: ERROR_RATE_Y_BOUNDS,
+      }),
+    [query, title, chartLayers, breakdownField]
+  );
+
   return (
     <Chart
       id="errorRate"
       isSelected={false}
-      esqlQuery={query}
+      lensConfig={lensConfig}
       size="s"
       discoverFetch$={discoverFetch$}
       fetchParams={fetchParams}
@@ -81,11 +94,7 @@ const ErrorRateChartContent = ({
       onBrushEnd={onBrushEnd}
       onFilter={onFilter}
       onExploreInDiscoverTab={actions.openInNewTab}
-      title={title}
-      chartLayers={chartLayers}
-      legend={breakdownField ? BREAKDOWN_LEGEND_CONFIG : undefined}
       syncCursor
-      yBounds={ERROR_RATE_Y_BOUNDS}
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
       profileId={profileId}
     />

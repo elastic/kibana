@@ -13,7 +13,6 @@ disabled:
   - x-pack/platform/test/api_integration/config.ts
   - x-pack/platform/test/fleet_api_integration/config.base.ts
   - x-pack/platform/test/functional_basic/apps/ml/config.base.ts
-  - x-pack/platform/test/functional_basic/apps/transform/config.base.ts
   - x-pack/platform/test/api_integration_basic/config.basic_license.ts
   - x-pack/platform/test/ui_capabilities/common/config.ts
 
@@ -187,11 +186,6 @@ enabled:
   - x-pack/platform/test/fleet_tasks/config.ts
   - x-pack/platform/test/ftr_apis/security_and_spaces/config.ts
   - x-pack/platform/test/functional_basic/apps/ml/permissions/config.ts
-  - x-pack/platform/test/functional_basic/apps/transform/creation/index_pattern/config.ts
-  - x-pack/platform/test/functional_basic/apps/transform/actions/config.ts
-  - x-pack/platform/test/functional_basic/apps/transform/edit_clone/config.ts
-  - x-pack/platform/test/functional_basic/apps/transform/creation/runtime_mappings_saved_search/config.ts
-  - x-pack/platform/test/functional_basic/apps/transform/permissions/config.ts
   - x-pack/platform/test/functional_cors/config.ts
   - x-pack/platform/test/functional_embedded/config.ts
   - x-pack/platform/test/functional_execution_context/config.ts
@@ -225,8 +219,6 @@ enabled:
   - x-pack/platform/test/functional/apps/logstash/config.ts
   - x-pack/platform/test/functional/apps/managed_content/config.ts
   - x-pack/platform/test/functional/apps/maps/group1/config.ts
-  - x-pack/platform/test/functional/apps/maps/group2/config.ts
-  - x-pack/platform/test/functional/apps/maps/group3/config.ts
   - x-pack/platform/test/functional/apps/maps/group6/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group1/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group2/config.ts
@@ -244,11 +236,6 @@ enabled:
   - x-pack/platform/test/functional/apps/monitoring/config.group2.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/platform/test/functional/apps/status_page/config.ts
-  - x-pack/platform/test/functional/apps/transform/creation/index_pattern/config.ts
-  - x-pack/platform/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts
-  - x-pack/platform/test/functional/apps/transform/actions/config.ts
-  - x-pack/platform/test/functional/apps/transform/edit_clone/config.ts
-  - x-pack/platform/test/functional/apps/transform/permissions/config.ts
   - x-pack/platform/test/functional/apps/visualize/config.ts
   - x-pack/platform/test/functional/config_security_basic.ts
   - x-pack/platform/test/functional/config.ccs.ts

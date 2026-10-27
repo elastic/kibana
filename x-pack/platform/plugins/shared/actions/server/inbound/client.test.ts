@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { buildInboundEventsClient } from './client';
@@ -47,10 +47,7 @@ describe('buildInboundEventsClient', () => {
       connectorTypeId: '.slack',
       connectorId: 'c1',
       spaceId: DEFAULT_SPACE_ID,
-      headers: {},
-      query: {},
-      body: {},
-      remoteAddress: '203.0.113.5',
+      request: httpServerMock.createKibanaRequest(),
     });
 
     expect(ingestInboundEventMock).toHaveBeenCalledWith(expect.objectContaining({ rateLimiter }));
