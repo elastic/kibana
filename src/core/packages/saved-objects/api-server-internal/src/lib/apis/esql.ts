@@ -18,7 +18,6 @@ import type {
   SavedObjectsEsqlOptions,
   SavedObjectsEsqlResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { esql, Walker, SOURCE_COMMANDS } from '@elastic/esql';
 import type { ApiExecutionContext } from './types';
 import { getNamespacesBoolFilter } from '../search';
 
@@ -93,6 +92,10 @@ export async function performEsql(
   });
 
   const filter = mergeUserFilterWithNamespacesBool(esqlOptions.filter, namespacesBoolFilter);
+
+  // Loaded lazily so core doesn't load the ES|QL parser at boot (~6MB heap for core alone;
+  // plugins may load it anyway).
+  const { esql, Walker, SOURCE_COMMANDS } = await import('@elastic/esql');
 
   // Build the FROM clause using the composer for safe construction.
   // esql.from() parses indices and metadata through the ES|QL parser,

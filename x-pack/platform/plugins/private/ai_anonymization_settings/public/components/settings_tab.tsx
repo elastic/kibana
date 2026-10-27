@@ -36,7 +36,7 @@ const onFailureOptions = [
   {
     id: 'allow_unsafe' as const,
     label: i18n.translate('xpack.aiAnonymizationSettings.settingsTab.onFailure.allowUnsafe', {
-      defaultMessage: 'Allow the request through unmasked',
+      defaultMessage: 'Allow the request through without the patterns that cannot run',
     }),
   },
 ];
@@ -92,7 +92,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       <EuiText size="s" color="subdued">
         <FormattedMessage
           id="xpack.aiAnonymizationSettings.settingsTab.onFailureHelpText"
-          defaultMessage="Default: Block the request. Choose how AI requests are handled if a pattern fails to run."
+          defaultMessage="Default: Block the request. Choose how AI requests are handled if a pattern cannot run, for example because it does not compile or times out. When allowed through, a pattern that does not compile is skipped and the other patterns still apply; if the patterns fail while running, none of them is applied and the request is sent unmasked."
         />
       </EuiText>
       <EuiSpacer size="s" />

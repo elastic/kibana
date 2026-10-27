@@ -20,7 +20,6 @@ import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
-import { RULES_NOT_FOUND_DESCRIPTION } from './rule_response_descriptions';
 import { bulkGetRulesOasExamples } from './bulk_get_rules_oas_example';
 
 @injectable()
@@ -36,6 +35,8 @@ export class BulkGetRulesRoute extends BaseAlertingRoute {
     access: 'public' as const,
     availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Get rules in bulk',
+    description:
+      'Returns the requested rules. Ids that match no rule are reported per item in `errors` as `RULE_NOT_FOUND`. The request itself succeeds as long as it is valid.',
     oasOperationObject: bulkGetRulesOasExamples,
   } as const;
   static schemas = {
@@ -45,15 +46,12 @@ export class BulkGetRulesRoute extends BaseAlertingRoute {
     response: {
       200: {
         body: () => bulkGetRulesResponseSchema,
-        description: 'Returns the requested rules.',
+        description:
+          'Returns the rules that were found in `items` and a per-item error in `errors` for every id that matched no rule.',
       },
       400: {
         body: () => errorResponseSchema,
         description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
-      },
-      404: {
-        body: () => errorResponseSchema,
-        description: RULES_NOT_FOUND_DESCRIPTION,
       },
     },
   };
@@ -70,7 +68,7 @@ export class BulkGetRulesRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const items = await this.rulesClient.getRules(this.request.body.ids);
-    return this.ctx.response.ok({ body: { items } });
+    const body = await this.rulesClient.getRules(this.request.body.ids);
+    return this.ctx.response.ok({ body });
   }
 }
