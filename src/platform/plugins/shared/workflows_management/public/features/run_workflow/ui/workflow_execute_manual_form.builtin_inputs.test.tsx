@@ -177,6 +177,7 @@ describe('WorkflowExecuteManualForm built-in kibana input refs', () => {
                 space_id: 'default',
                 group_hash: 'hash-1',
                 alert_id: 'alert-1',
+                alert_url: 'https://kibana.example.com/app/r?l=ALERTING_V2_EPISODES_LOCATOR',
                 alert_status: 'active',
               },
             ],

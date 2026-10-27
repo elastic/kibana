@@ -42,7 +42,7 @@ import {
   AlertingV2ActionPoliciesLocatorDefinition,
   AlertingV2ExecutionHistoryLocatorDefinition,
   createAlertingV2HostApp,
-} from './locators';
+} from '../common/locators';
 
 const LazyCreateRuleOptionsFlyout = React.lazy(() =>
   import('./create_rule_options_flyout').then((m) => ({ default: m.CreateRuleOptionsFlyout }))
@@ -88,14 +88,14 @@ export type {
   PrivilegeCheck,
 } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
-export type { AlertingV2HostApp, CreateAlertingV2HostApp } from './locator_host';
+export type { AlertingV2HostApp, CreateAlertingV2HostApp } from '../common/locators';
 export type {
   AlertingV2RulesLocatorParams,
   AlertingV2RuleLibraryLocatorParams,
   AlertingV2EpisodesLocatorParams,
   AlertingV2ActionPoliciesLocatorParams,
   AlertingV2ExecutionHistoryLocatorParams,
-} from './locators';
+} from '../common/locators';
 export {
   useV2RulesTabNewBadge,
   V2_RULES_TAB_NEW_BADGE_VISITED_STORAGE_KEY,
