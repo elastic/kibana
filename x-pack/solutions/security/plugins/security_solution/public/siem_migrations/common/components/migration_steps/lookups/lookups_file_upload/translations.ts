@@ -48,7 +48,7 @@ export const referenceSetNameMismatchError = (name: string): string =>
     'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.referenceSetNameMismatchErrorMessage',
     {
       defaultMessage:
-        'Reference set "{name}" must match a name in the list above. The name comes from the export, or from the file name when the export has none.',
+        'Reference set "{name}" must match a name in the list above. See `name` field in reference set export.',
       values: { name },
     }
   );
