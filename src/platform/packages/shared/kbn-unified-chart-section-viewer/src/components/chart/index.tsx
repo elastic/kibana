@@ -9,16 +9,10 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type {
-  LensHeatmapConfig,
-  LensLegendConfig,
-  LensSeriesLayer,
-  LensYBoundsConfig,
-} from '@kbn/lens-embeddable-utils';
 import { useBoolean } from '@kbn/react-hooks';
 import React, { useCallback, useRef } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
-import { useLensProps } from './hooks/use_lens_props';
+import { useLensProps, type ChartLensConfig } from './hooks/use_lens_props';
 import type { LensWrapperProps } from './lens_wrapper';
 import { LensWrapper } from './lens_wrapper';
 import type { UnifiedMetricsGridProps } from '../../types';
@@ -33,15 +27,11 @@ export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
   Omit<LensWrapperProps, 'lensProps' | 'abortController'> & {
     size?: ChartSize;
     discoverFetch$: UnifiedMetricsGridProps['fetch$'];
-    esqlQuery: string;
-    title: string;
-    description?: string;
-    chartLayers: LensSeriesLayer[];
-    yBounds?: LensYBoundsConfig;
-    legend?: LensLegendConfig;
-    yAxisTitle?: string;
-    /** Lens heatmap. When set, the chart is not an XY series chart. */
-    heatmapConfig?: LensHeatmapConfig;
+    lensConfig: ChartLensConfig;
+    /**
+     * When true, a click does not create a filter. Brushing still uses onBrushEnd.
+     */
+    disableClickFilter?: boolean;
     isLoading?: boolean;
     error?: Error;
     userMessages?: EmbeddableComponentProps['userMessages'];
@@ -61,16 +51,10 @@ export const Chart = ({
   discoverFetch$,
   titleHighlight,
   size = 'm',
-  esqlQuery,
-  title,
-  description,
-  chartLayers,
+  lensConfig,
+  disableClickFilter = false,
   syncCursor,
   syncTooltips,
-  yBounds,
-  legend,
-  yAxisTitle,
-  heatmapConfig,
   extraDisabledActions,
   quickActionIds,
   isLoading = false,
@@ -88,18 +72,11 @@ export const Chart = ({
 
   const lensProps = useLensProps({
     chartId: id,
-    title,
-    description,
-    query: esqlQuery,
+    lensConfig,
     services,
     fetchParams,
     discoverFetch$,
     chartRef,
-    chartLayers,
-    yBounds,
-    legend,
-    yAxisTitle,
-    heatmapConfig,
     error,
     userMessages,
     profileId,
@@ -107,15 +84,13 @@ export const Chart = ({
 
   const handleFilter = useCallback<NonNullable<ChartProps['onFilter']>>(
     (event) => {
-      // A cell click would filter the histogram field by the bucket start, and ES|QL cannot
-      // compare a histogram to a number. Brushing still uses onBrushEnd.
-      if (heatmapConfig) {
+      if (disableClickFilter) {
         event.preventDefault();
         return;
       }
       onFilter?.(event);
     },
-    [heatmapConfig, onFilter]
+    [disableClickFilter, onFilter]
   );
 
   return (
