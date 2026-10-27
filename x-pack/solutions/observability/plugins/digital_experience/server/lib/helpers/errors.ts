@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-import { isBoom } from '@hapi/boom';
-import { isResponseError } from '@kbn/es-errors';
+import { forbidden, internal, isBoom } from '@hapi/boom';
+import { isRequestAbortedError, isResponseError } from '@kbn/es-errors';
+import { i18n } from '@kbn/i18n';
+
+const NO_ACCESS_MESSAGE = i18n.translate('xpack.digitalExperience.api.noAccess', {
+  defaultMessage: "You don't have read access to the application data.",
+});
+
+const LOAD_FAILED_MESSAGE = i18n.translate('xpack.digitalExperience.api.loadFailed', {
+  defaultMessage: 'Could not load the data. Check the Kibana server logs for details.',
+});
 
 /** Whether Elasticsearch or Kibana denied access (a 403). */
 export const isAccessDenied = (error: unknown): boolean => {
@@ -22,3 +31,14 @@ export const isAccessDenied = (error: unknown): boolean => {
 /** The message of an error of any shape, for the server logs. */
 export const describeError = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
+
+/**
+ * The error a route answers with, without the Elasticsearch details, which name the user, roles and
+ * indices; aborted requests and errors the route chose (Boom) are returned as they are.
+ */
+export const toClientError = (error: unknown): Error => {
+  if (isRequestAbortedError(error) || isBoom(error)) {
+    return error;
+  }
+  return isAccessDenied(error) ? forbidden(NO_ACCESS_MESSAGE) : internal(LOAD_FAILED_MESSAGE);
+};

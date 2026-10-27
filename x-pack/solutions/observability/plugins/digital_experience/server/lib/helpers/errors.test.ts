@@ -7,7 +7,7 @@
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { badRequest, forbidden } from '@hapi/boom';
-import { describeError, isAccessDenied } from './errors';
+import { describeError, isAccessDenied, toClientError } from './errors';
 
 const esError = (statusCode: number) =>
   new esErrors.ResponseError({
@@ -53,5 +53,34 @@ describe('describeError', () => {
     expect(describeError('timeout')).toBe('timeout');
     expect(describeError(42)).toBe('42');
     expect(describeError(undefined)).toBe('undefined');
+  });
+});
+
+describe('toClientError', () => {
+  it('answers 403 without the user or roles when access is denied', () => {
+    const error = toClientError(esError(403));
+
+    expect(error).toMatchObject({
+      isBoom: true,
+      output: { statusCode: 403 },
+      message: "You don't have read access to the application data.",
+    });
+    expect(error.message).not.toContain('someone');
+  });
+
+  it('answers 500 without the index names when a search fails', () => {
+    expect(toClientError(new Error('no such index [logs-generic.otel-default]'))).toMatchObject({
+      isBoom: true,
+      output: { statusCode: 500 },
+      message: 'Could not load the data. Check the Kibana server logs for details.',
+    });
+  });
+
+  it('keeps the errors a route chose and aborted requests as they are', () => {
+    const chosen = badRequest('bad');
+    const aborted = new esErrors.RequestAbortedError('aborted');
+
+    expect(toClientError(chosen)).toBe(chosen);
+    expect(toClientError(aborted)).toBe(aborted);
   });
 });
