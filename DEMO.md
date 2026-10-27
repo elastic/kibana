@@ -1,6 +1,6 @@
 # Isomer demo
 
-Demo only. This branch is never PR'd and never pushed to `elastic/kibana`. The plan behind it is the Isomer stack reset meta plan's "Demo lane".
+Demo only. The stack is shared as a draft PR on `elastic/kibana`, for experimentation and performance testing, and is never merged. The plan behind it is the Isomer stack reset meta plan's "Demo lane".
 
 **The demo:** export a Kibana dashboard as a PDF drawn by Isomer, from the Dashboard share menu, with no Alembic involved. The same composition also renders as a single-column mobile view.
 
@@ -29,7 +29,7 @@ To fix a layer, commit to its branch, then restack everything above it from a wo
 scripts/isomer_demo/rebuild.sh --bootstrap
 ```
 
-The script restacks the branches onto the PR lane head when it has moved, and each onto the branch below when that one changed. `rerere` is on, so a conflict resolved once stays resolved. Git can't rebase a branch checked out in another worktree, so check out only `isomer/demo/latest` while it runs. `--fork <remote>` then force-pushes every branch to your fork; the script refuses a remote that points at `elastic/kibana`.
+The script restacks the branches onto the PR lane head when it has moved, and each onto the branch below when that one changed. `rerere` is on, so a conflict resolved once stays resolved. Git can't rebase a branch checked out in another worktree, so check out only `isomer/demo/latest` while it runs. `--push upstream` then force-pushes `isomer/demo/latest`, with lease, which updates the draft PR. The layers below it stay local.
 
 ## Setup
 
