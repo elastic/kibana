@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/ebt-click'
   - '@kbn/i18n-react'
+  - '@kbn/kibana-react-plugin'
 tags:
   - plugin
   - prod

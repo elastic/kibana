@@ -11,15 +11,29 @@ import { analyticsSpeedAcceleration } from '@elastic/eui-illustrations';
 import { css } from '@emotion/react';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  OBSERVABILITY_ONBOARDING_LOCATOR,
+  type ObservabilityOnboardingLocatorParams,
+} from '@kbn/deeplinks-observability';
 import { ENTITY_INVENTORY_EBT_ELEMENTS } from '../ebt_constants';
-import type { EntityInventoryCategory } from '../pages';
+import { useKibana } from '../hooks/use_kibana';
+import type { EntityInventoryPage } from '../pages';
 
 interface NoDataProps {
-  addDataHref: string;
-  entityCategory: EntityInventoryCategory;
+  page: EntityInventoryPage;
 }
 
-export function NoData({ addDataHref, entityCategory }: NoDataProps) {
+export function NoData({ page }: NoDataProps) {
+  const {
+    services: { share, application },
+  } = useKibana();
+
+  const addDataHref =
+    share.url.locators
+      .get<ObservabilityOnboardingLocatorParams>(OBSERVABILITY_ONBOARDING_LOCATOR)
+      ?.getRedirectUrl(page.onboarding) ??
+    application.getUrlForApp('integrations', { path: '/browse' });
+
   return (
     <EuiEmptyPrompt
       data-test-subj="entityInventoryNoData"
@@ -57,7 +71,7 @@ export function NoData({ addDataHref, entityCategory }: NoDataProps) {
           {...getEbtProps({
             action: EBT_CLICK_ACTIONS.ADD_DATA,
             element: ENTITY_INVENTORY_EBT_ELEMENTS.NO_DATA,
-            detail: entityCategory,
+            detail: page.entityCategory,
           })}
         >
           <FormattedMessage

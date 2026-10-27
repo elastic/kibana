@@ -12,6 +12,6 @@
     "configPath": ["xpack", "entityInventoryApp"],
     "requiredPlugins": ["observabilityShared", "share"],
     "optionalPlugins": [],
-    "requiredBundles": []
+    "requiredBundles": ["kibanaReact"]
   }
 }
