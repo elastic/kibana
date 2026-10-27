@@ -62,6 +62,34 @@ const text = (value: unknown): string | undefined =>
 const number = (value: unknown): number | undefined =>
   typeof value === 'number' ? value : undefined;
 
+/**
+ * Whether the flaky-rule gate held this detection back: the `held_back` column of the row. A row
+ * without the column is not held back.
+ */
+export const isHeldBack = ({
+  columns,
+  row,
+}: {
+  columns: readonly string[];
+  row: readonly unknown[];
+}): boolean => row[columns.indexOf('held_back')] === true;
+
+/**
+ * When the agent last reviewed the row's rule: the `last_reviewed_at` column, in epoch milliseconds.
+ * Absent when the column is missing or does not hold a readable time.
+ */
+export const lastReviewedAt = ({
+  columns,
+  row,
+}: {
+  columns: readonly string[];
+  row: readonly unknown[];
+}): number | undefined => {
+  const value = row[columns.indexOf('last_reviewed_at')];
+  const time = typeof value === 'string' ? Date.parse(value) : NaN;
+  return Number.isNaN(time) ? undefined : time;
+};
+
 /** Names a detection row's cells, and keeps the fields the agent reads. */
 export const toBatchEntry = ({
   columns,

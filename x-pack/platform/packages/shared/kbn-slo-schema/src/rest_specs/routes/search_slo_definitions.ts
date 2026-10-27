@@ -4,19 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { z } from '@kbn/zod';
 
-const searchSLODefinitionsParamsSchema = t.partial({
-  query: t.partial({
-    search: t.string,
-    size: toNumberRt,
-    searchAfter: t.string,
-    remoteName: t.string,
-  }),
+const searchSLODefinitionsParamsSchema = z.object({
+  query: z
+    .object({
+      search: z.string().optional(),
+      size: z.coerce.number().optional(),
+      searchAfter: z.string().optional(),
+      remoteName: z.string().optional(),
+    })
+    .optional(),
 });
 
-type SearchSLODefinitionsParams = t.TypeOf<typeof searchSLODefinitionsParamsSchema.props.query>;
+type SearchSLODefinitionsParams = NonNullable<
+  z.output<typeof searchSLODefinitionsParamsSchema.shape.query>
+>;
 
 interface SearchSLODefinitionItem {
   id: string;

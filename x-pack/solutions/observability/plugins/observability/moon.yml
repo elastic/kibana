@@ -50,6 +50,7 @@ dependsOn:
   - '@kbn/core-ui-settings-browser-mocks'
   - '@kbn/alerts-ui-shared'
   - '@kbn/core-notifications-browser'
+  - '@kbn/core-rendering-browser-mocks'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/rule-registry-plugin'
   - '@kbn/alerts-grouping'
@@ -175,6 +176,8 @@ dependsOn:
   - '@kbn/alerting-v2-utils'
   - '@kbn/alerting-v2-constants'
   - '@kbn/agentic-investigations-plugin'
+  - '@kbn/shared-ux-ai-components'
+  - '@kbn/slo-constants'
 tags:
   - plugin
   - prod

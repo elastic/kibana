@@ -9,7 +9,8 @@ export class RelayRequestError extends Error {
   constructor(
     path: string,
     public readonly statusCode: number,
-    public readonly relayMessage?: string
+    public readonly relayMessage?: string,
+    public readonly reason?: string
   ) {
     super(
       `Relay request to ${path} failed with status ${statusCode}${
