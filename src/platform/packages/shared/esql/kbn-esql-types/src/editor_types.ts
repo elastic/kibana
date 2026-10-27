@@ -120,6 +120,12 @@ export interface ESQLFieldWithMetadata {
   isEcs?: boolean;
   hasConflict?: boolean;
   originalTypes?: string[];
+  /**
+   * Set when the server reports a cast that reconciles the conflicting types
+   * (e.g. `aggregate_metric_double` for a `double` / `aggregate_metric_double`
+   * conflict). The editor suppresses the type-conflict error in that case.
+   */
+  suggestedCast?: string;
   isUnmappedField?: boolean;
   fullTextMatch?: ESQLFullTextMatch;
   metadata?: {

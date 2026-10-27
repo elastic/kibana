@@ -120,15 +120,18 @@ export async function getESQLQueryColumnsRaw({
     const lookup = new Set(hasEmptyColumns ? table.columns?.map(({ name }) => name) || [] : []);
 
     const allColumns =
-      (table.all_columns ?? table.columns)?.map(({ name, type, original_types, _meta }) => {
-        return {
-          name,
-          type,
-          original_types,
-          isNull: hasEmptyColumns ? !lookup.has(name) : false,
-          ...(_meta !== undefined && { _meta }),
-        };
-      }) ?? [];
+      (table.all_columns ?? table.columns)?.map(
+        ({ name, type, original_types, suggested_cast, _meta }) => {
+          return {
+            name,
+            type,
+            original_types,
+            suggested_cast,
+            isNull: hasEmptyColumns ? !lookup.has(name) : false,
+            ...(_meta !== undefined && { _meta }),
+          };
+        }
+      ) ?? [];
 
     return allColumns ?? [];
   } catch (error) {

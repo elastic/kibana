@@ -138,12 +138,15 @@ export const registerGetSourceInfoRoute = (
         const allColumnsRaw: ESQLColumn[] =
           columnsResult.all_columns ?? columnsResult.columns ?? [];
 
-        const columns = allColumnsRaw.map(({ name, type, original_types, _meta }) => ({
-          name,
-          esType: type,
-          ...(original_types?.length ? { originalTypes: original_types } : {}),
-          ...(_meta !== undefined ? { columnMeta: _meta } : {}),
-        }));
+        const columns = allColumnsRaw.map(
+          ({ name, type, original_types, suggested_cast, _meta }) => ({
+            name,
+            esType: type,
+            ...(original_types?.length ? { originalTypes: original_types } : {}),
+            ...(suggested_cast !== undefined ? { suggestedCast: suggested_cast } : {}),
+            ...(_meta !== undefined ? { columnMeta: _meta } : {}),
+          })
+        );
 
         esqlRouteRequestCounter.add(1, {
           route: 'source_info',

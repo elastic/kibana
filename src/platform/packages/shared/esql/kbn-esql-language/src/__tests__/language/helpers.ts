@@ -52,6 +52,14 @@ export const conflictingFields: ESQLFieldWithMetadata[] = [
     originalTypes: ['text', 'keyword'],
     userDefined: false,
   },
+  {
+    name: 'resolvableConflictField',
+    type: 'unsupported',
+    hasConflict: true,
+    originalTypes: ['double', 'aggregate_metric_double'],
+    suggestedCast: 'aggregate_metric_double',
+    userDefined: false,
+  },
 ];
 
 export const indexes = [

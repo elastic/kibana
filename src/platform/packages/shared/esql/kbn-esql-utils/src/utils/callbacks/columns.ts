@@ -17,7 +17,8 @@ import { getESQLQueryVariables } from '../query_parsing_helpers';
 const toFieldWithMetadata = (
   name: string,
   type: string,
-  originalTypes: string[] | undefined
+  originalTypes: string[] | undefined,
+  suggestedCast: string | undefined
 ): ESQLFieldWithMetadata => {
   const hasConflict = type === 'unsupported' && (originalTypes?.length ?? 0) > 1;
   return {
@@ -25,6 +26,7 @@ const toFieldWithMetadata = (
     type: type as EsqlFieldType,
     hasConflict,
     originalTypes: hasConflict ? originalTypes : undefined,
+    suggestedCast,
     userDefined: false,
   };
 };
@@ -61,8 +63,9 @@ export const getEsqlColumns = async ({
         signal,
         timeRange,
       });
-      return columns.map(({ name, type, original_types: originalTypes }) =>
-        toFieldWithMetadata(name, type, originalTypes)
+      return columns.map(
+        ({ name, type, original_types: originalTypes, suggested_cast: suggestedCast }) =>
+          toFieldWithMetadata(name, type, originalTypes, suggestedCast)
       );
     } catch (error) {
       // Handle error
@@ -106,8 +109,8 @@ export const getEsqlSourceColumns = async ({
       esqlVariables: usedVariables,
       signal,
     });
-    return columns.map(({ name, esType, originalTypes }) =>
-      toFieldWithMetadata(name, esType, originalTypes)
+    return columns.map(({ name, esType, originalTypes, suggestedCast }) =>
+      toFieldWithMetadata(name, esType, originalTypes, suggestedCast)
     );
   } catch (error) {
     return [];

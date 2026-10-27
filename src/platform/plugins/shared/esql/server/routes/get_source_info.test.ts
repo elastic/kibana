@@ -189,6 +189,37 @@ describe('registerGetSourceInfoRoute', () => {
     });
   });
 
+  it('forwards original types and the suggested cast of conflicted columns', async () => {
+    const { router, handler, requestHandlerContext, response, context, esqlQuery } = buildMocks();
+    esqlQuery.mockResolvedValueOnce({
+      columns: [
+        {
+          name: 'metric',
+          type: 'unsupported',
+          original_types: ['double', 'aggregate_metric_double'],
+          suggested_cast: 'aggregate_metric_double',
+        },
+      ],
+      all_columns: undefined,
+    });
+    registerGetSourceInfoRoute(router, context);
+
+    await handler(requestHandlerContext, { body: { query: 'TS metrics-*' } }, response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        columns: [
+          {
+            name: 'metric',
+            esType: 'unsupported',
+            originalTypes: ['double', 'aggregate_metric_double'],
+            suggestedCast: 'aggregate_metric_double',
+          },
+        ],
+      },
+    });
+  });
+
   it('appends LIMIT 0 on a new line so a trailing // comment cannot swallow it', async () => {
     const { router, handler, requestHandlerContext, response, context, esqlQuery } = buildMocks();
     registerGetSourceInfoRoute(router, context);

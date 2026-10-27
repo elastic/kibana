@@ -100,6 +100,14 @@ export const runColumnExistenceValidationSuite = (setup: Setup) => {
       await expectErrors('from conflict_index | sort conflictingField', [message]);
     });
 
+    it('does not report a conflict the server can reconcile with a suggested cast', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors('from conflict_index | keep resolvableConflictField', [], []);
+      await expectErrors('from conflict_index | drop resolvableConflictField', [], []);
+      await expectErrors('from conflict_index | sort resolvableConflictField', []);
+    });
+
     it('returns one warning for each instance of the same unmapped column', async () => {
       const { expectErrors } = await setup();
       await expectErrors(

@@ -15,6 +15,7 @@ export interface ESQLSourceInfoColumn {
   name: string;
   esType: string;
   originalTypes?: string[];
+  suggestedCast?: string;
   columnMeta?: Record<string, unknown>;
 }
 

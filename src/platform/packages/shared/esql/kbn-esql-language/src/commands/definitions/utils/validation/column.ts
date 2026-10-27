@@ -57,6 +57,14 @@ export class ColumnValidator {
         const originalTypes = column.originalTypes ?? [];
 
         if (column.hasConflict && originalTypes.length > 1) {
+          // The server reports a cast that reconciles the conflicting types
+          // (e.g. `aggregate_metric_double` for a `double` /
+          // `aggregate_metric_double` conflict), so the query runs. Do not
+          // report a conflict; the column keeps its `unsupported` type, so
+          // function-signature checks still treat it conservatively.
+          if (column.suggestedCast) {
+            return [];
+          }
           return [
             errors.columnTypeConflict(
               this.column,

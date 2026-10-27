@@ -19,6 +19,12 @@ const createHttp = () =>
       columns: [
         { name: 'host', esType: 'keyword' },
         { name: 'bytes', esType: 'unsupported', originalTypes: ['long', 'keyword'] },
+        {
+          name: 'metric',
+          esType: 'unsupported',
+          originalTypes: ['double', 'aggregate_metric_double'],
+          suggestedCast: 'aggregate_metric_double',
+        },
       ],
     }),
   } as unknown as HttpStart & { post: jest.Mock });
@@ -40,6 +46,7 @@ describe('getEsqlSourceColumns', () => {
         type: 'keyword',
         hasConflict: false,
         originalTypes: undefined,
+        suggestedCast: undefined,
         userDefined: false,
       },
       {
@@ -47,6 +54,15 @@ describe('getEsqlSourceColumns', () => {
         type: 'unsupported',
         hasConflict: true,
         originalTypes: ['long', 'keyword'],
+        suggestedCast: undefined,
+        userDefined: false,
+      },
+      {
+        name: 'metric',
+        type: 'unsupported',
+        hasConflict: true,
+        originalTypes: ['double', 'aggregate_metric_double'],
+        suggestedCast: 'aggregate_metric_double',
         userDefined: false,
       },
     ]);
