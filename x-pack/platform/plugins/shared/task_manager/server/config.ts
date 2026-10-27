@@ -73,6 +73,23 @@ export const taskExecutionFailureThresholdSchema = schema.object(
   }
 );
 
+const eventLoopWatchdogSchema = schema.object({
+  /** Flags the task that blocks the event loop, sampled from a watchdog worker thread. */
+  enabled: schema.boolean({ defaultValue: true }),
+  /**
+   * Shortest event loop block (ms) that can flag a task. Sampling starts half a second into a
+   * block, so shorter blocks cannot be attributed.
+   */
+  flag_threshold_ms: schema.number({ defaultValue: 5000, min: 1000 }),
+  /**
+   * Minimum process CPU time over the block's wall time to flag a task, so a throttled or starved
+   * node is not blamed on a task. Also exempts blocking syscalls; 0 disables the gate.
+   */
+  min_cpu_ratio: schema.number({ defaultValue: 0.5, min: 0, max: 1 }),
+  /** How often (ms) a still ongoing block is written to stderr. */
+  live_report_interval_ms: schema.number({ defaultValue: 3000, min: 100 }),
+});
+
 const eventLoopDelaySchema = schema.object({
   monitor: schema.boolean({ defaultValue: true }),
   warn_threshold: schema.number({
@@ -139,6 +156,7 @@ export const configSchema = schema.object(
     /* Allows for old kibana config to start kibana without crashing since ephemeral tasks are deprecated*/
     ephemeral_tasks: schema.maybe(schema.any()),
     event_loop_delay: eventLoopDelaySchema,
+    event_loop_watchdog: eventLoopWatchdogSchema,
     invalidate_api_key_task: schema.object({
       interval: schema.string({ validate: validateDuration, defaultValue: '5m' }),
       removalDelay: schema.string({ validate: validateDuration, defaultValue: '1h' }),
@@ -248,3 +266,4 @@ export const configSchema = schema.object(
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
 export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;
+export type EventLoopWatchdogConfig = TypeOf<typeof eventLoopWatchdogSchema>;

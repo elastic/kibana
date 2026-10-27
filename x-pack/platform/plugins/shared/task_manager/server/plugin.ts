@@ -66,6 +66,7 @@ import {
 } from './usage';
 import { TASK_MANAGER_CLAIM_NUDGE_INDEX, TASK_MANAGER_INDEX } from './constants';
 import { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
+import { EventLoopWatchdog } from './event_loop_watchdog';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
 import type { Metrics } from './metrics';
@@ -179,6 +180,7 @@ export class TaskManagerPlugin
   private startContract?: TaskManagerStartContract;
   private enrichFakeRequest?: FakeRequestEnricher;
   private claimNudgeService?: TaskManagerClaimNudgeService;
+  private eventLoopWatchdog?: EventLoopWatchdog;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -352,6 +354,23 @@ export class TaskManagerPlugin
 
     this.enrichFakeRequest = core.security.acquireFakeRequestEnricher();
 
+    // PoC only, remove before merging: a task that blocks the event loop for 6s, to exercise the
+    // event loop watchdog on real environments.
+    this.definitions.registerTaskDefinitions({
+      'dev:block-event-loop': {
+        title: 'Dev: block the event loop',
+        createTaskRunner: () => ({
+          async run() {
+            const blockUntil = Date.now() + 6000;
+            while (Date.now() < blockUntil) {
+              // intentionally block the event loop
+            }
+            return { state: {} };
+          },
+        }),
+      },
+    });
+
     return {
       index: TASK_MANAGER_INDEX,
       addMiddleware: (middleware: Middleware) => {
@@ -483,6 +502,11 @@ export class TaskManagerPlugin
         kibanasPerPartition: this.config.kibanas_per_partition,
       });
 
+      this.eventLoopWatchdog = new EventLoopWatchdog({
+        logger: this.logger.get('event-loop-watchdog'),
+        config: this.config!.event_loop_watchdog,
+      });
+
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
@@ -499,7 +523,10 @@ export class TaskManagerPlugin
         eventLogger: this.taskEventLogger!,
         enrichFakeRequest,
         claimNudgeService: this.claimNudgeService,
+        eventLoopBlocks$: this.eventLoopWatchdog.blocks$,
+        eventLoopWatchdog: this.eventLoopWatchdog,
       });
+      this.eventLoopWatchdog.start();
     }
 
     createMonitoringStats({
@@ -542,6 +569,17 @@ export class TaskManagerPlugin
     ).catch(() => {});
     scheduleMarkRemovedTasksAsUnrecognizedDefinition(this.logger, taskScheduling).catch(() => {});
 
+    // PoC only, remove before merging: runs the blocking task above every minute.
+    taskScheduling
+      .ensureScheduled({
+        id: 'dev-block-event-loop',
+        taskType: 'dev:block-event-loop',
+        schedule: { interval: '1m' },
+        params: {},
+        state: {},
+      })
+      .catch((e) => this.logger.warn(`Could not schedule the dev blocking task: ${e}`));
+
     this.startContract = {
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
       aggregate: (opts: AggregationOpts): Promise<estypes.SearchResponse<ConcreteTaskInstance>> =>
@@ -580,6 +618,7 @@ export class TaskManagerPlugin
   public async stop() {
     this.licenseSubscriber?.cleanup();
     this.claimNudgeService?.stop();
+    this.eventLoopWatchdog?.stop();
 
     // Stop polling for tasks
     if (this.taskPollingLifecycle) {
