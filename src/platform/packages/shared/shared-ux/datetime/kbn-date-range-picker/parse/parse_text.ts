@@ -439,8 +439,13 @@ function buildRange(
   const startType = dateStringToType(start);
   const endType = dateStringToType(end);
   // Anchor both bounds to the same instant, rounded down to the time range resolution
-  // unless a bound uses a finer unit, where the extra precision is meaningful.
-  const resolution = getTimeRangeResolution(start, end);
+  // unless a bound uses a finer unit or an absolute bound carries milliseconds, where
+  // the extra precision is meaningful.
+  const hasAbsoluteMilliseconds = [
+    startType === DATE_TYPE_ABSOLUTE ? dateStringToDate(start, formats) : null,
+    endType === DATE_TYPE_ABSOLUTE ? dateStringToDate(end, formats) : null,
+  ].some((date) => date?.getMilliseconds());
+  const resolution = hasAbsoluteMilliseconds ? null : getTimeRangeResolution(start, end);
   const now = moment();
   const forceNow = (resolution ? now.startOf(resolution) : now).toDate();
   const endDate = dateStringToDate(end, formats, { roundUp: true, forceNow });

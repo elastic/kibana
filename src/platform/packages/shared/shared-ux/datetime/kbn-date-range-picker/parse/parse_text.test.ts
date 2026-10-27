@@ -799,6 +799,37 @@ describe('"now" anchoring', () => {
     expect(range.endDate?.toISOString()).toBe('2025-07-15T12:00:00.550Z');
   });
 
+  it('keeps milliseconds in "now" when an absolute start bound has milliseconds', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-07-15T12:00:00.750Z'));
+
+    const range = textToTimeRange('2025-07-15T12:00:00.500Z to now');
+
+    expect(range.startDate?.toISOString()).toBe('2025-07-15T12:00:00.500Z');
+    expect(range.endDate?.toISOString()).toBe('2025-07-15T12:00:00.750Z');
+    expect(range.isInvalid).toBe(false);
+  });
+
+  it('keeps milliseconds in "now" when an absolute end bound has milliseconds', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-07-15T12:00:00.250Z'));
+
+    const range = textToTimeRange('now to 2025-07-15T12:00:00.500Z');
+
+    expect(range.startDate?.toISOString()).toBe('2025-07-15T12:00:00.250Z');
+    expect(range.endDate?.toISOString()).toBe('2025-07-15T12:00:00.500Z');
+    expect(range.isInvalid).toBe(false);
+  });
+
+  it('still truncates "now" when absolute bounds are whole seconds', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-07-15T12:00:00.750Z'));
+
+    const range = textToTimeRange('2025-07-15T11:00:00.000Z to now');
+
+    expect(range.endDate?.toISOString()).toBe('2025-07-15T12:00:00.000Z');
+  });
+
   it('rounds the ms bound to the second when roundRelativeTime is on, leaving "now" un-truncated', () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2025-07-15T12:00:00.750Z'));
