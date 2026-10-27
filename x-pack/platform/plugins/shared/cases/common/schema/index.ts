@@ -176,7 +176,7 @@ export const mimeTypeString = z
   });
 
 /**
- * Zod equivalent of jsonValueRt — a recursive JSON value type.
+ * Recursive JSON value type.
  */
 export type JsonValue =
   | string

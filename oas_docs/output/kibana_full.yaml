@@ -152739,6 +152739,7 @@ components:
       in: query
       name: search
       schema:
+        maxLength: 30000
         type: string
     Cases_searchFields:
       description: The fields to perform the simple_query_string parsed query against.

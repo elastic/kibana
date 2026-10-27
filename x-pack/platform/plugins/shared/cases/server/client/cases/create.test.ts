@@ -1623,7 +1623,7 @@ describe('create', () => {
       const [[userActionArgs]] =
         clientArgs.services.userActionService.creator.createUserAction.mock.calls;
       // The create_case payload carries the expanded case defaults (severity here). It does NOT
-      // carry template / extended_fields — CreateCaseUserActionRt strips them — so those are
+      // carry template / extended_fields — CreateCaseUserActionSchema strips them — so those are
       // audited via dedicated user actions (asserted below), not on this payload.
       expect(userActionArgs.userAction.payload).toMatchObject({
         severity: CaseSeverity.HIGH,
