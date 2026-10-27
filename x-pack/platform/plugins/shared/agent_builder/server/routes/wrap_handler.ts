@@ -73,17 +73,21 @@ export const getHandlerWrapper =
           }
         }
         if (isAgentBuilderError(e)) {
+          const isBusy = isConversationBusyError(e);
+
           // A busy conversation is an expected refusal the caller retries, not a failure.
-          if (isConversationBusyError(e)) {
+          if (isBusy) {
             logger.warn(`Request refused: ${e.message}`);
           } else {
             logger.error(e);
           }
+
           return res.customError({
             body: {
               message: e.message,
               attributes: {
                 trace_id: e.meta?.traceId,
+                ...(isBusy && { active_execution_id: e.meta.activeExecutionId }),
               },
             },
             statusCode: e.meta?.statusCode ?? 500,

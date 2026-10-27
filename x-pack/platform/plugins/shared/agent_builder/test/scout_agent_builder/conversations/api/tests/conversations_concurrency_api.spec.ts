@@ -101,12 +101,22 @@ apiTest.describe(
           'local'
         );
 
-        // wrap_handler only serializes the message and trace id, so the error code and
-        // activeExecutionId are not part of the response body.
+        const { active_execution: activeExecution } = await getConversation(
+          apiClient,
+          adminCredentials.apiKeyHeader,
+          conversationId
+        );
+
+        const { message, attributes } = responseB.body as {
+          message: string;
+          attributes: { active_execution_id: string };
+        };
+
         expect(responseB).toHaveStatusCode(409);
-        expect((responseB.body as { message: string }).message).toContain(
+        expect(message).toContain(
           `Conversation ${conversationId} already has an execution in progress`
         );
+        expect(attributes.active_execution_id).toBe(activeExecution?.execution_id);
 
         await answerA.completeAfterIntercept();
 

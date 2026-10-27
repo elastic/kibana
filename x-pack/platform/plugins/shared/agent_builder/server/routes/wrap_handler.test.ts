@@ -96,7 +96,7 @@ describe('getHandlerWrapper', () => {
     });
   });
 
-  it('logs a conversationBusy refusal as a warning', async () => {
+  it('logs a conversationBusy refusal as a warning and returns the active execution id', async () => {
     const handler = wrapHandler(async () => {
       throw createConversationBusyError({
         conversationId: 'conversation-1',
@@ -107,6 +107,10 @@ describe('getHandlerWrapper', () => {
     const result: any = await handler(createCtx(), req, kibanaResponseFactory);
 
     expect(result.status).toBe(409);
+    expect(result.payload).toEqual({
+      message: 'Conversation conversation-1 already has an execution in progress',
+      attributes: { trace_id: undefined, active_execution_id: 'exec-1' },
+    });
     expect(logger.warn).toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
   });
