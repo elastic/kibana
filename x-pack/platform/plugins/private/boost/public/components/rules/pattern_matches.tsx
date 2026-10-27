@@ -12,7 +12,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiNotificationBadge,
   EuiPanel,
+  EuiTab,
+  EuiTabs,
   EuiText,
   useEuiOverflowScroll,
   useEuiTheme,
@@ -22,8 +25,7 @@ import { i18n } from '@kbn/i18n';
 import type { BoostDataSource, BoostProfileType } from '../../../common/types';
 import { formatHiddenNotShown } from '../hidden_data';
 import { SupersedingRule, TargetName } from './target_name';
-import { ALL_TARGETS_TAB_LABELS, TargetListMessage, TargetListTabs } from './target_list_tabs';
-import { TargetStatus } from './target_status';
+import { TargetListHeader } from './target_list_header';
 
 /** A data source an index pattern matches. */
 export interface TargetPreview {
@@ -52,7 +54,14 @@ const TAB_LABELS: Readonly<Record<MatchesTab, Readonly<Record<BoostProfileType, 
       defaultMessage: 'Matching data streams',
     }),
   },
-  all: ALL_TARGETS_TAB_LABELS,
+  all: {
+    indices: i18n.translate('xpack.boost.patternMatches.allIndicesTab', {
+      defaultMessage: 'All indices',
+    }),
+    data_streams: i18n.translate('xpack.boost.patternMatches.allDataStreamsTab', {
+      defaultMessage: 'All data streams',
+    }),
+  },
 };
 
 const NO_DATA_SOURCES: Readonly<Record<BoostProfileType, string>> = {
@@ -135,33 +144,6 @@ interface PatternMatchesProps {
   maxHeight: number;
 }
 
-interface PatternMatchStatusProps {
-  exactCount: number;
-  partialCount: number;
-}
-
-/** How well a pattern matches, for beside its label: exactly, partly, or not at all. */
-export const PatternMatchStatus = ({ exactCount, partialCount }: PatternMatchStatusProps) => (
-  <TargetStatus
-    label={
-      exactCount > 0
-        ? i18n.translate('xpack.boost.patternMatches.exactCount', {
-            defaultMessage: '{count, plural, one {# exact match} other {# exact matches}}',
-            values: { count: exactCount },
-          })
-        : partialCount > 0
-        ? i18n.translate('xpack.boost.patternMatches.partialCount', {
-            defaultMessage: '{count, plural, one {# partial match} other {# partial matches}}',
-            values: { count: partialCount },
-          })
-        : i18n.translate('xpack.boost.patternMatches.noMatchesCount', {
-            defaultMessage: '0 matches',
-          })
-    }
-    data-test-subj="boostRulePatternMatchCount"
-  />
-);
-
 /**
  * What an index pattern matches, or partly matches until it matches something, beside every data
  * source it could target, like the data view editor's preview. Hidden data sources are left out
@@ -198,8 +180,42 @@ export const PatternMatches = ({
   );
   const matchKind: MatchKind = hasExactMatches ? 'exact' : 'partial';
 
+  // How many the pattern matches, which only counts exact matches, hidden ones included, as the
+  // rule applies to them all the same, shown or not. And how many the list of every data source
+  // shows. EUI centers a tab's count on a larger font than the tab's, so it sits low; aligned to the
+  // top, its number shares the tab's baseline.
+  const tabCounts: Readonly<Record<MatchesTab, ReactNode>> = {
+    matching: (
+      <EuiNotificationBadge
+        color="subdued"
+        css={{ verticalAlign: 'top' }}
+        data-test-subj="boostRulePatternMatchCount"
+      >
+        {exactMatches.length}
+      </EuiNotificationBadge>
+    ),
+    all: (
+      <EuiNotificationBadge
+        color="subdued"
+        css={{ verticalAlign: 'top' }}
+        data-test-subj="boostRuleDataSourceCount"
+      >
+        {includesHidden ? dataSources.length : dataSources.filter(({ hidden }) => !hidden).length}
+      </EuiNotificationBadge>
+    ),
+  };
+
   const renderEmpty = (message: string) => (
-    <TargetListMessage message={message} data-test-subj="boostRulePatternMatchesEmpty" />
+    <EuiText
+      size="s"
+      color={euiTheme.colors.textDisabled}
+      textAlign="center"
+      // 24px from the tabs and the panel's bottom edge, after the space around the tab's content.
+      css={{ paddingBlock: euiTheme.size.base }}
+      data-test-subj="boostRulePatternMatchesEmpty"
+    >
+      <p>{message}</p>
+    </EuiText>
   );
 
   // How many hidden data sources a list leaves out, in a row after the rest, disabled, after the
@@ -402,21 +418,28 @@ export const PatternMatches = ({
     >
       {/* Off until a profile is selected, and the switch while there's nothing hidden to show,
         unless it's on already. */}
-      <TargetListTabs
-        tabs={TABS.map((id) => ({
-          id,
-          label: TAB_LABELS[id][targetType],
-          'data-test-subj': id === 'all' ? 'boostRuleAllTab' : 'boostRuleMatchingTab',
-        }))}
-        selectedTab={selectedTab}
-        onTabChange={setTab}
-        getTabId={getTabId}
-        panelId={panelId}
-        isDisabled={!type}
+      <TargetListHeader
         includesHidden={includesHidden}
         onIncludesHiddenChange={onIncludesHiddenChange}
-        isShowHiddenDisabled={!hasHidden && !includesHidden}
-      />
+        isShowHiddenDisabled={!type || (!hasHidden && !includesHidden)}
+      >
+        <EuiTabs size="s" bottomBorder={false}>
+          {TABS.map((id) => (
+            <EuiTab
+              key={id}
+              id={getTabId(id)}
+              aria-controls={panelId}
+              isSelected={selectedTab === id}
+              disabled={!type}
+              onClick={() => setTab(id)}
+              append={type && tabCounts[id]}
+              data-test-subj={id === 'all' ? 'boostRuleAllTab' : 'boostRuleMatchingTab'}
+            >
+              {TAB_LABELS[id][targetType]}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      </TargetListHeader>
       <div
         role="tabpanel"
         id={panelId}

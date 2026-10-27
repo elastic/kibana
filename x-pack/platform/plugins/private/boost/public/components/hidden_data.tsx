@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiSwitch, useEuiFontSize } from '@elastic/eui';
+import { EuiBadge, EuiSwitch, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoostProfileType } from '../../common/types';
 import { HIDDEN_BADGE_LABEL } from './badge_labels';
@@ -43,6 +43,8 @@ interface ShowHiddenSwitchProps {
   disabled?: boolean;
   /** The label's size, smaller beside small tabs. */
   labelSize?: 's' | 'xs';
+  /** Whether the label is subdued, as beside a list's tabs or heading. */
+  isSubdued?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -52,14 +54,19 @@ export const ShowHiddenSwitch = ({
   onChange,
   disabled = false,
   labelSize = 's',
+  isSubdued = false,
   'data-test-subj': dataTestSubj,
 }: ShowHiddenSwitchProps) => {
+  const { euiTheme } = useEuiTheme();
   const { fontSize } = useEuiFontSize(labelSize);
   return (
     <EuiSwitch
       compressed
       label={SHOW_HIDDEN_LABEL}
-      labelProps={{ css: { fontSize } }}
+      // A disabled label keeps EUI's disabled color.
+      labelProps={{
+        css: { fontSize, color: isSubdued && !disabled ? euiTheme.colors.textSubdued : undefined },
+      }}
       checked={checked}
       disabled={disabled}
       onChange={(event) => onChange(event.target.checked)}

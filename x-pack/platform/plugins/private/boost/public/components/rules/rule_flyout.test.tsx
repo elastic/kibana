@@ -523,7 +523,9 @@ describe('RuleFlyout pattern matches', () => {
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
 
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('1 exact match');
+    // Beside the tabs: how many match, and how many indices there are in all.
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^1$/);
+    expect(screen.getByTestId('boostRuleDataSourceCount')).toHaveTextContent(/^2$/);
     expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('catalog-fall');
     // No index is hidden, so there's nothing to show.
     expect(screen.getByTestId('boostRuleShowHidden')).toBeDisabled();
@@ -554,7 +556,8 @@ describe('RuleFlyout pattern matches', () => {
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat');
 
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('1 partial match');
+    // Only exact matches count.
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^0$/);
     expect(screen.getByRole('region', { name: 'Partial matches' })).toBeInTheDocument();
     const [partialMatch] = screen.getAllByTestId('boostRulePartialMatch');
     expect(partialMatch).toHaveTextContent('catalog-fall');
@@ -635,7 +638,7 @@ describe('RuleFlyout pattern matches', () => {
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'nothing-*');
 
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('0 matches');
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^0$/);
     expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('No matches detected');
   });
 
@@ -671,7 +674,7 @@ describe('RuleFlyout pattern matches', () => {
     expect(screen.getByTestId('boostRulePatternMatchesEmpty')).toHaveTextContent(
       'Enter an index pattern to see matches'
     );
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('0 matches');
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^0$/);
   });
 
   it('lists every index, highlighting the same matches', async () => {
@@ -730,6 +733,9 @@ describe('RuleFlyout pattern matches', () => {
     expect(matchingTab).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByTestId('boostRuleAllTab')).toBeDisabled();
     expect(screen.getByTestId('boostRuleShowHidden')).toBeDisabled();
+    // There's nothing to count until the type is known.
+    expect(screen.queryByTestId('boostRulePatternMatchCount')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('boostRuleDataSourceCount')).not.toBeInTheDocument();
   });
 
   it('explains why the pattern is disabled before a profile is selected', async () => {
@@ -819,12 +825,12 @@ describe('RuleFlyout superseded targets', () => {
     renderNewRule();
 
     await userEvent.click(screen.getByText('Select indices'));
-    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('0 selected');
+    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('Selected 0 of 2 indices');
 
     await userEvent.click(
       within(screen.getByTestId('boostRulePicker')).getByRole('option', { name: /products/ })
     );
-    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('1 selected');
+    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('Selected 1 of 2 indices');
   });
 });
 
@@ -853,7 +859,9 @@ describe('RuleFlyout hidden data sources', () => {
     await userEvent.type(screen.getByTestId('boostRulePattern'), '*');
 
     // The rule would apply to the hidden index all the same.
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('3 exact matches');
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^3$/);
+    // Every index counts only what it lists.
+    expect(screen.getByTestId('boostRuleDataSourceCount')).toHaveTextContent(/^2$/);
     const matches = within(screen.getByRole('region', { name: 'Exact matches' }));
     expect(matches.queryByText('.catalog-archive')).not.toBeInTheDocument();
     expect(matches.getByTestId('boostRuleHiddenNotShown')).toHaveTextContent(
@@ -865,6 +873,8 @@ describe('RuleFlyout hidden data sources', () => {
     expect(matches.getByText('.catalog-archive')).toBeInTheDocument();
     expect(matches.getByTestId('boostHiddenBadge')).toBeInTheDocument();
     expect(matches.queryByTestId('boostRuleHiddenNotShown')).not.toBeInTheDocument();
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^3$/);
+    expect(screen.getByTestId('boostRuleDataSourceCount')).toHaveTextContent(/^3$/);
   });
 
   it('only counts hidden matches among every index, as the matching list does', async () => {
@@ -888,7 +898,7 @@ describe('RuleFlyout hidden data sources', () => {
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), '.catalog-*');
 
-    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('1 exact match');
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^1$/);
     expect(screen.getByRole('region', { name: 'Exact matches' })).toHaveTextContent(
       /^1 hidden index not shown$/
     );
@@ -899,8 +909,11 @@ describe('RuleFlyout hidden data sources', () => {
     await userEvent.click(screen.getByText('Select indices'));
     const picker = within(screen.getByTestId('boostRulePicker'));
     expect(picker.queryByRole('option', { name: /\.catalog-archive/ })).not.toBeInTheDocument();
+    // It counts what it lists.
+    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('Selected 0 of 2 indices');
 
     await userEvent.click(screen.getByTestId('boostRuleShowHidden'));
+    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('Selected 0 of 3 indices');
     const option = picker.getByRole('option', { name: /\.catalog-archive/ });
     expect(within(option).getByTestId('boostHiddenBadge')).toBeInTheDocument();
     await userEvent.click(option);
@@ -908,45 +921,7 @@ describe('RuleFlyout hidden data sources', () => {
     // Selected, it stays in view once hidden ones are left out again.
     await userEvent.click(screen.getByTestId('boostRuleShowHidden'));
     expect(picker.getByRole('option', { name: /\.catalog-archive/ })).toBeInTheDocument();
-    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('1 selected');
-  });
-
-  it("lists what's selected in a tab of its own, hidden or not, keeping what's unselected there until the tab changes", async () => {
-    renderNewRule();
-    await userEvent.click(screen.getByText('Select indices'));
-    const picker = within(screen.getByTestId('boostRulePicker'));
-    const listedNames = () =>
-      picker
-        .getAllByRole('option')
-        .map(({ textContent }) => textContent)
-        .sort();
-
-    // It opens on every index, as there's nothing selected yet.
-    expect(screen.getByTestId('boostRuleAllPickTab')).toHaveAttribute('aria-selected', 'true');
-    await userEvent.click(screen.getByTestId('boostRuleSelectedTab'));
-    expect(screen.getByTestId('boostRuleNoneSelected')).toHaveTextContent('No indices selected');
-
-    await userEvent.click(screen.getByTestId('boostRuleAllPickTab'));
-    await userEvent.click(screen.getByTestId('boostRuleShowHidden'));
-    await userEvent.click(picker.getByRole('option', { name: /\.catalog-archive/ }));
-    await userEvent.click(picker.getByRole('option', { name: /products/ }));
-    await userEvent.click(screen.getByTestId('boostRuleShowHidden'));
-    await userEvent.click(screen.getByTestId('boostRuleSelectedTab'));
-    expect(listedNames()).toEqual([
-      expect.stringMatching(/^\.catalog-archive/),
-      expect.stringMatching(/^products/),
-    ]);
-    // It shows hidden ones regardless, so the switch has nothing more to show.
-    expect(screen.getByTestId('boostRuleShowHidden')).toBeDisabled();
-
-    await userEvent.click(picker.getByRole('option', { name: /products/ }));
-    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('1 selected');
-    expect(picker.getByRole('option', { name: /products/ })).toHaveAttribute(
-      'aria-checked',
-      'false'
-    );
-    await userEvent.click(screen.getByTestId('boostRuleAllPickTab'));
-    await userEvent.click(screen.getByTestId('boostRuleSelectedTab'));
-    expect(listedNames()).toEqual([expect.stringMatching(/^\.catalog-archive/)]);
+    // Still listed, so still counted.
+    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('Selected 1 of 3 indices');
   });
 });
