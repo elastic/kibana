@@ -53,11 +53,17 @@ import { PROVISIONING_NOTE } from '../../translations';
 import { getCopyName } from '../copy_name';
 import { CostEstimate } from '../cost_estimate';
 import { SupersedingRule, getSupersedingDescription } from './target_name';
+import {
+  ALL_TARGETS_TAB_LABELS,
+  TARGET_LIST_TABS_HEIGHT,
+  TargetListMessage,
+  TargetListTabs,
+} from './target_list_tabs';
 import { TargetStatus } from './target_status';
 import type { TargetPreview } from './pattern_matches';
 import { PatternMatchStatus, PatternMatches, getPartialPattern } from './pattern_matches';
 import { FLYOUT_WIDTH } from '../flyout_width';
-import { HiddenBadge, ShowHiddenSwitch } from '../hidden_data';
+import { HiddenBadge } from '../hidden_data';
 import { ProfileFlyoutContent } from '../profiles/profile_flyout';
 import { useBoostState, useCreateRule, useUpdateRule } from '../../hooks/use_boost_state';
 import { PROFILE_TYPE_LABELS } from '../format';
@@ -91,6 +97,39 @@ interface RuleFlyoutProps {
 }
 
 const PROFILE_TYPES: readonly BoostProfileType[] = ['indices', 'data_streams'];
+
+// The list to select from has a tab of what's selected, beside every data source, as the pattern's
+// matches do.
+type PickTab = 'selected' | 'all';
+
+const PICK_TABS: readonly PickTab[] = ['selected', 'all'];
+
+const SELECTED_TAB_LABELS: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.boost.ruleForm.selectedIndicesTab', {
+    defaultMessage: 'Selected indices',
+  }),
+  data_streams: i18n.translate('xpack.boost.ruleForm.selectedDataStreamsTab', {
+    defaultMessage: 'Selected data streams',
+  }),
+};
+
+const NONE_SELECTED_MESSAGES: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.boost.ruleForm.noIndicesSelected', {
+    defaultMessage: 'No indices selected',
+  }),
+  data_streams: i18n.translate('xpack.boost.ruleForm.noDataStreamsSelected', {
+    defaultMessage: 'No data streams selected',
+  }),
+};
+
+const SELECTED_SHOWS_HIDDEN_TIPS: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.boost.ruleForm.selectedShowsHiddenIndices', {
+    defaultMessage: 'This tab shows every selected index, hidden or not.',
+  }),
+  data_streams: i18n.translate('xpack.boost.ruleForm.selectedShowsHiddenDataStreams', {
+    defaultMessage: 'This tab shows every selected data stream, hidden or not.',
+  }),
+};
 
 const PICK_LABELS: Readonly<Record<BoostProfileType, string>> = {
   indices: i18n.translate('xpack.boost.ruleForm.pickIndicesMode', {
@@ -187,6 +226,12 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
   const [pickSearch, setPickSearch] = useState('');
   // Whether the pattern's matches and the list to select from show hidden data sources.
   const [includesHidden, setIncludesHidden] = useState(false);
+  // The list to select from opens on every data source, as there's nothing selected to begin with.
+  const [pickTab, setPickTab] = useState<PickTab>('all');
+  // What the selected tab lists: what was selected when it opened, so a name unselected there stays
+  // to be selected again.
+  const [selectedTabNames, setSelectedTabNames] = useState<readonly string[]>([]);
+  const pickTabsId = useGeneratedHtmlId({ prefix: 'pickTargets' });
   // Set when leaving the profile form, so the link that opened it gets focus back.
   const shouldFocusCreateProfileRef = useRef(false);
   const createProfileLinkRef = useCallback((element: HTMLElement | null) => {
@@ -432,9 +477,21 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
     return winner && winner !== targetingRule ? winner.name : undefined;
   };
 
+  // What the tabs list depends on the type, so they wait for a profile.
+  const shownPickTab = type ? pickTab : 'all';
+  const changePickTab = (tab: PickTab) => {
+    if (tab === 'selected') {
+      setSelectedTabNames(draft.picked);
+    }
+    setPickTab(tab);
+  };
   // Hidden data sources are left out until included, except selected ones, which stay in view.
   const pickOptions: Array<EuiSelectableOption<PickOptionData>> = typedDataSources
-    .filter(({ name, hidden }) => includesHidden || !hidden || draft.picked.includes(name))
+    .filter(({ name, hidden }) =>
+      shownPickTab === 'selected'
+        ? selectedTabNames.includes(name)
+        : includesHidden || !hidden || draft.picked.includes(name)
+    )
     .map((dataSource) => {
       const supersededBy = getSupersedingRule(dataSource);
       return {
@@ -459,8 +516,8 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
   const pickListHeight = Math.min(
     pickOptions.filter(({ label }) => label.toLowerCase().includes(searchedName)).length *
       PICK_ROW_HEIGHT,
-    // Less the panel's padding, top and bottom. Its border takes no space.
-    PREVIEW_MAX_HEIGHT - 2 * PICK_LIST_PADDING
+    // Less the tabs and the panel's padding, top and bottom. Its border takes no space.
+    PREVIEW_MAX_HEIGHT - TARGET_LIST_TABS_HEIGHT - 2 * PICK_LIST_PADDING
   );
 
   const modeToggle = (
@@ -840,25 +897,53 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
               >
                 {(list, search) => (
                   <>
-                    {/* The switch that shows hidden data sources, as at the end of the pattern
-                      preview's tabs. It shares their setting, as both list the same data sources. */}
-                    <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-                      <EuiFlexItem>{search}</EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <ShowHiddenSwitch
-                          checked={includesHidden}
-                          onChange={setIncludesHidden}
-                          disabled={!type || (!hasHidden && !includesHidden)}
-                          labelSize="xs"
-                          data-test-subj="boostRuleShowHidden"
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    {search}
                     <EuiSpacer size="s" />
-                    {/* A panel draws the border and padding, which the list would count in its
-                          own width. */}
-                    <EuiPanel hasBorder hasShadow={false} paddingSize="s">
-                      {list}
+                    <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+                      {/* Off until a profile is selected, as in the pattern's matches. The selected
+                        tab shows hidden data sources regardless, and the switch only while there's
+                        something hidden to show, unless it's on already. */}
+                      <TargetListTabs
+                        tabs={PICK_TABS.map((id) => ({
+                          id,
+                          label: (id === 'selected' ? SELECTED_TAB_LABELS : ALL_TARGETS_TAB_LABELS)[
+                            targetType
+                          ],
+                          'data-test-subj':
+                            id === 'selected' ? 'boostRuleSelectedTab' : 'boostRuleAllPickTab',
+                        }))}
+                        selectedTab={shownPickTab}
+                        onTabChange={changePickTab}
+                        getTabId={(id) => `${pickTabsId}-${id}`}
+                        panelId={`${pickTabsId}-panel`}
+                        isDisabled={!type}
+                        includesHidden={includesHidden}
+                        onIncludesHiddenChange={setIncludesHidden}
+                        isShowHiddenDisabled={
+                          shownPickTab === 'selected' || (!hasHidden && !includesHidden)
+                        }
+                        showHiddenDisabledTip={
+                          shownPickTab === 'selected'
+                            ? SELECTED_SHOWS_HIDDEN_TIPS[targetType]
+                            : undefined
+                        }
+                      />
+                      {/* Padding rather than the list's own, which it would count in its width. */}
+                      <div
+                        role="tabpanel"
+                        id={`${pickTabsId}-panel`}
+                        aria-labelledby={`${pickTabsId}-${shownPickTab}`}
+                        css={{ padding: PICK_LIST_PADDING }}
+                      >
+                        {shownPickTab === 'selected' && pickOptions.length === 0 ? (
+                          <TargetListMessage
+                            message={NONE_SELECTED_MESSAGES[targetType]}
+                            data-test-subj="boostRuleNoneSelected"
+                          />
+                        ) : (
+                          list
+                        )}
+                      </div>
                     </EuiPanel>
                   </>
                 )}

@@ -910,4 +910,43 @@ describe('RuleFlyout hidden data sources', () => {
     expect(picker.getByRole('option', { name: /\.catalog-archive/ })).toBeInTheDocument();
     expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('1 selected');
   });
+
+  it("lists what's selected in a tab of its own, hidden or not, keeping what's unselected there until the tab changes", async () => {
+    renderNewRule();
+    await userEvent.click(screen.getByText('Select indices'));
+    const picker = within(screen.getByTestId('boostRulePicker'));
+    const listedNames = () =>
+      picker
+        .getAllByRole('option')
+        .map(({ textContent }) => textContent)
+        .sort();
+
+    // It opens on every index, as there's nothing selected yet.
+    expect(screen.getByTestId('boostRuleAllPickTab')).toHaveAttribute('aria-selected', 'true');
+    await userEvent.click(screen.getByTestId('boostRuleSelectedTab'));
+    expect(screen.getByTestId('boostRuleNoneSelected')).toHaveTextContent('No indices selected');
+
+    await userEvent.click(screen.getByTestId('boostRuleAllPickTab'));
+    await userEvent.click(screen.getByTestId('boostRuleShowHidden'));
+    await userEvent.click(picker.getByRole('option', { name: /\.catalog-archive/ }));
+    await userEvent.click(picker.getByRole('option', { name: /products/ }));
+    await userEvent.click(screen.getByTestId('boostRuleShowHidden'));
+    await userEvent.click(screen.getByTestId('boostRuleSelectedTab'));
+    expect(listedNames()).toEqual([
+      expect.stringMatching(/^\.catalog-archive/),
+      expect.stringMatching(/^products/),
+    ]);
+    // It shows hidden ones regardless, so the switch has nothing more to show.
+    expect(screen.getByTestId('boostRuleShowHidden')).toBeDisabled();
+
+    await userEvent.click(picker.getByRole('option', { name: /products/ }));
+    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('1 selected');
+    expect(picker.getByRole('option', { name: /products/ })).toHaveAttribute(
+      'aria-checked',
+      'false'
+    );
+    await userEvent.click(screen.getByTestId('boostRuleAllPickTab'));
+    await userEvent.click(screen.getByTestId('boostRuleSelectedTab'));
+    expect(listedNames()).toEqual([expect.stringMatching(/^\.catalog-archive/)]);
+  });
 });

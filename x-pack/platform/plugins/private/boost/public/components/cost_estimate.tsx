@@ -362,12 +362,14 @@ const CostEstimateContent = ({
     >
       {/* Clipped at the divider, which doesn't move, so the estimate slides out from behind it and
           back in. The clip reaches a little past the sides, so the timeline's first age, centered
-          on its tick at the edge, shows in full. */}
+          on its tick at the edge, shows in full. Its overflow is clipped too, so a collapsed
+          estimate doesn't overflow the footer, which would let the flyout scroll past it. */}
       <div
         css={[
           fade,
           css`
             min-block-size: 0;
+            overflow: hidden;
             margin-inline: -${euiTheme.size.s};
             padding-inline: ${euiTheme.size.s};
             clip-path: inset(0 0 calc(${dividerGap} + ${euiTheme.border.width.thin}) 0);

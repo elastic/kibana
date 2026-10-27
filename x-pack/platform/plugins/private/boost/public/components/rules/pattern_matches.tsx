@@ -13,8 +13,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
-  EuiTab,
-  EuiTabs,
   EuiText,
   useEuiOverflowScroll,
   useEuiTheme,
@@ -22,8 +20,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoostDataSource, BoostProfileType } from '../../../common/types';
-import { ShowHiddenSwitch, formatHiddenNotShown } from '../hidden_data';
+import { formatHiddenNotShown } from '../hidden_data';
 import { SupersedingRule, TargetName } from './target_name';
+import { ALL_TARGETS_TAB_LABELS, TargetListMessage, TargetListTabs } from './target_list_tabs';
 import { TargetStatus } from './target_status';
 
 /** A data source an index pattern matches. */
@@ -53,14 +52,7 @@ const TAB_LABELS: Readonly<Record<MatchesTab, Readonly<Record<BoostProfileType, 
       defaultMessage: 'Matching data streams',
     }),
   },
-  all: {
-    indices: i18n.translate('xpack.boost.patternMatches.allIndicesTab', {
-      defaultMessage: 'All indices',
-    }),
-    data_streams: i18n.translate('xpack.boost.patternMatches.allDataStreamsTab', {
-      defaultMessage: 'All data streams',
-    }),
-  },
+  all: ALL_TARGETS_TAB_LABELS,
 };
 
 const NO_DATA_SOURCES: Readonly<Record<BoostProfileType, string>> = {
@@ -207,16 +199,7 @@ export const PatternMatches = ({
   const matchKind: MatchKind = hasExactMatches ? 'exact' : 'partial';
 
   const renderEmpty = (message: string) => (
-    <EuiText
-      size="s"
-      color={euiTheme.colors.textDisabled}
-      textAlign="center"
-      // 24px from the tabs and the panel's bottom edge, after the space around the tab's content.
-      css={{ paddingBlock: euiTheme.size.base }}
-      data-test-subj="boostRulePatternMatchesEmpty"
-    >
-      <p>{message}</p>
-    </EuiText>
+    <TargetListMessage message={message} data-test-subj="boostRulePatternMatchesEmpty" />
   );
 
   // How many hidden data sources a list leaves out, in a row after the rest, disabled, after the
@@ -417,44 +400,23 @@ export const PatternMatches = ({
       css={{ display: 'flex', flexDirection: 'column', maxBlockSize: maxHeight }}
       data-test-subj="boostRulePatternMatches"
     >
-      {/* The tabs, and the switch that shows hidden data sources at their end. The row draws the
-        tabs' border, as the tabs do, so it runs under the switch too. A margin rather than padding,
-        so the border stops at the panel's padding. */}
-      <div
-        css={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: euiTheme.size.m,
-          margin: `${euiTheme.size.s} ${euiTheme.size.base} 0`,
-          boxShadow: `inset 0 -${euiTheme.border.width.thin} 0 ${euiTheme.border.color}`,
-        }}
-      >
-        <EuiTabs size="s" bottomBorder={false}>
-          {TABS.map((id) => (
-            <EuiTab
-              key={id}
-              id={getTabId(id)}
-              aria-controls={panelId}
-              isSelected={selectedTab === id}
-              disabled={!type}
-              onClick={() => setTab(id)}
-              data-test-subj={id === 'all' ? 'boostRuleAllTab' : 'boostRuleMatchingTab'}
-            >
-              {TAB_LABELS[id][targetType]}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-        {/* Off until a profile is selected, like the tabs, and while there's nothing hidden to show,
-          unless it's on already. */}
-        <ShowHiddenSwitch
-          checked={includesHidden}
-          onChange={onIncludesHiddenChange}
-          disabled={!type || (!hasHidden && !includesHidden)}
-          labelSize="xs"
-          data-test-subj="boostRuleShowHidden"
-        />
-      </div>
+      {/* Off until a profile is selected, and the switch while there's nothing hidden to show,
+        unless it's on already. */}
+      <TargetListTabs
+        tabs={TABS.map((id) => ({
+          id,
+          label: TAB_LABELS[id][targetType],
+          'data-test-subj': id === 'all' ? 'boostRuleAllTab' : 'boostRuleMatchingTab',
+        }))}
+        selectedTab={selectedTab}
+        onTabChange={setTab}
+        getTabId={getTabId}
+        panelId={panelId}
+        isDisabled={!type}
+        includesHidden={includesHidden}
+        onIncludesHiddenChange={onIncludesHiddenChange}
+        isShowHiddenDisabled={!hasHidden && !includesHidden}
+      />
       <div
         role="tabpanel"
         id={panelId}
