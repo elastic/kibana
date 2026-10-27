@@ -30,7 +30,6 @@ import {
   TimelineEventType,
   createRequestAbortedError,
   isBadRequestError,
-  isForbiddenError,
 } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
 import type { AgentExecutionClient } from './persistence';
@@ -164,19 +163,10 @@ describe('AgentExecutionService', () => {
   });
   const resolveConversation = jest.spyOn(callbackDeliveryService, 'resolveConversation');
 
-  const checkPrivilegesAtSpace = jest.fn();
-  const securityPlugin = {
-    authz: {
-      checkPrivilegesWithRequest: jest.fn(() => ({ atSpace: checkPrivilegesAtSpace })),
-      actions: { api: { get: jest.fn((privilege: string) => `api:${privilege}`) } },
-    },
-  };
-
   const service = createAgentExecutionService({
     logger,
     elasticsearch,
     security: {} as any,
-    securityPlugin: securityPlugin as any,
     taskManager,
     inference,
     conversationService: conversationService as any,
@@ -204,10 +194,6 @@ describe('AgentExecutionService', () => {
           data: attachment.data,
         }))
     );
-    checkPrivilegesAtSpace.mockResolvedValue({ hasAllRequested: true });
-    securityPlugin.authz.checkPrivilegesWithRequest.mockReturnValue({
-      atSpace: checkPrivilegesAtSpace,
-    });
     mockExecutionClient.create.mockResolvedValue({
       executionId: 'test-id',
       '@timestamp': new Date().toISOString(),
@@ -1880,77 +1866,6 @@ describe('AgentExecutionService', () => {
         username: 'slack-bob',
         origin: { type: ConversationOriginType.Slack },
       });
-    });
-  });
-
-  describe('investigation posts', () => {
-    const request = httpServerMock.createKibanaRequest();
-    const investigation = createEmptyConversation({
-      id: 'conversation-1',
-      agent_id: 'agent-1',
-      template_id: 'investigation',
-    });
-
-    beforeEach(() => {
-      conversationClient.exists.mockResolvedValue(true);
-      conversationClient.get.mockResolvedValue(investigation);
-      conversationClient.appendEvents.mockResolvedValue(investigation);
-    });
-
-    const post = (triggerMode?: ChatTriggerMode) => {
-      const args = {
-        mode: AgentExecutionMode.conversation,
-        request,
-        params: {
-          agentId: 'agent-1',
-          conversationId: investigation.id,
-          nextInput: { message: 'hello' },
-          ...(triggerMode ? { triggerMode } : {}),
-        },
-        useTaskManager: false,
-      };
-      return triggerMode === ChatTriggerMode.Never
-        ? service.maybeExecuteAgent(args)
-        : service.executeAgent(args);
-    };
-
-    it.each([undefined, ChatTriggerMode.Never])(
-      'rejects a caller who cannot change the investigation (trigger %s)',
-      async (triggerMode) => {
-        checkPrivilegesAtSpace.mockResolvedValue({ hasAllRequested: false });
-
-        const error = await post(triggerMode).catch((thrown) => thrown);
-
-        expect(isForbiddenError(error)).toBe(true);
-        expect(error.message).toBe("You don't have permission to change this investigation.");
-        expect(mockExecutionClient.create).not.toHaveBeenCalled();
-        expect(conversationClient.appendEvents).not.toHaveBeenCalled();
-      }
-    );
-
-    it('lets a caller who can change the investigation post', async () => {
-      mockHandleAgentExecution.mockResolvedValue(of());
-      mockCollectAndWriteEvents.mockResolvedValue(undefined);
-
-      await post();
-
-      expect(checkPrivilegesAtSpace).toHaveBeenCalledWith(
-        'default',
-        expect.objectContaining({ kibana: ['api:manage_investigations'] })
-      );
-      expect(mockExecutionClient.create).toHaveBeenCalled();
-    });
-
-    it('does not check investigation privileges for another template', async () => {
-      conversationClient.get.mockResolvedValue(
-        createEmptyConversation({ id: 'conversation-1', agent_id: 'agent-1' })
-      );
-      mockHandleAgentExecution.mockResolvedValue(of());
-      mockCollectAndWriteEvents.mockResolvedValue(undefined);
-
-      await post();
-
-      expect(checkPrivilegesAtSpace).not.toHaveBeenCalled();
     });
   });
 });

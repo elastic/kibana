@@ -297,7 +297,6 @@ export class ServiceManager {
       logger: logger.get('execution'),
       elasticsearch,
       security,
-      securityPlugin,
       taskManager,
       spaces,
       inference,
