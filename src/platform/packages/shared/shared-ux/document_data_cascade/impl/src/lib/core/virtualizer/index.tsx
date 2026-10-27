@@ -247,7 +247,7 @@ export const useCascadeVirtualizerRangeExtractor = <G extends GroupNode>({
  */
 export const useAnchorVirtualizerToItemIndex = (
   virtualizer: UseVirtualizerReturnType,
-  itemIndex: number,
+  itemIndex: number | undefined,
   options?: {
     hasRestoredScrollPositionRef?: React.MutableRefObject<boolean>;
     hasStabilizedRef?: React.MutableRefObject<boolean>;
@@ -264,7 +264,7 @@ export const useAnchorVirtualizerToItemIndex = (
   const restoreScrollOffset = useCallback(() => {
     if (resolvedRef.current || !virtualizer || itemCount === 0) return;
 
-    if (!Boolean(itemIndex)) {
+    if (itemIndex === undefined) {
       resolvedRef.current = true;
       return;
     }
@@ -319,7 +319,7 @@ export const useAnchorVirtualizerToItemIndex = (
   // authority to another virtualizer (e.g. root yields to a child that has
   // a persisted scroll anchor, since both share the same scroll element).
   useEffect(() => {
-    if (skipCorrections || !Boolean(itemIndex)) {
+    if (skipCorrections || itemIndex === undefined) {
       stabilizedRef.current = true;
       return;
     }
@@ -447,7 +447,7 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
     // restoration, the virtualizer must measure enough items around the anchor
     // before the first `useLayoutEffect` fires so that initial position
     // estimates are as accurate as possible.
-    !isRoot || Boolean(initialAnchorItemIndex)
+    !isRoot || initialAnchorItemIndex !== undefined
   );
 
   const rangeExtractor = useCascadeVirtualizerRangeExtractor<G>({
@@ -544,7 +544,7 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
     return applyDeferredOverscan(virtualizerImpl);
   }, [applyDeferredOverscan, virtualizerImpl]);
 
-  useAnchorVirtualizerToItemIndex(virtualizerImpl, initialAnchorItemIndex ?? 0, {
+  useAnchorVirtualizerToItemIndex(virtualizerImpl, initialAnchorItemIndex, {
     hasRestoredScrollPositionRef,
     hasStabilizedRef,
     skipCorrections: hasPersistedChildAnchorsRef.current,
@@ -554,8 +554,8 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
     if (!childController || childController.isRootStable) return;
 
     // Root is stable when scroll position has been restored, or when
-    // there was no anchor to restore to (itemIndex 0 / undefined).
-    const needsRestore = Boolean(initialAnchorItemIndex);
+    // there was no anchor to restore to (undefined).
+    const needsRestore = initialAnchorItemIndex !== undefined;
     if (!needsRestore || hasRestoredScrollPositionRef.current) {
       childController.markRootStable();
     }
@@ -572,7 +572,7 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
   // Bridges the imperative hasStabilizedRef into reactive state by polling
   // with rAF. Adds at most one frame (~16ms) of latency after the rAF
   // correction loop converges, imperceptible while content is hidden.
-  const needsRestore = Boolean(initialAnchorItemIndex);
+  const needsRestore = initialAnchorItemIndex !== undefined;
   const [rootStabilized, setRootStabilized] = useState(!needsRestore);
 
   useEffect(() => {
