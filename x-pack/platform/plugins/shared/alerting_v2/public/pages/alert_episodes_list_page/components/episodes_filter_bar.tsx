@@ -163,7 +163,6 @@ export const EpisodesFilterBar = ({
   const onKueryChange = useCallback(
     (value: string) => {
       setQueryStringInput(value);
-      // An emptied input (e.g. the clear button) applies immediately instead of waiting for submit.
       if (appliedQueryString && !value.trim()) {
         onFilterChange(({ queryString: _queryString, ...rest }) => rest);
       }
