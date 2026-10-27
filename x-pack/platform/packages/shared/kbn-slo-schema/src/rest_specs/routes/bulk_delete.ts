@@ -6,7 +6,7 @@
  */
 import { z } from '@kbn/zod';
 
-import { sloIdSchema } from '../../schema/zod/slo';
+import { sloIdSchema } from '../../schema/slo';
 
 const bulkDeleteParamsSchema = z.object({
   body: z.object({

@@ -9,10 +9,10 @@
  * Upper bounds applied to request-facing strings and arrays (CodeQL
  * js/kibana/unbounded-string-in-schema). They must never be applied to a
  * schema that stored SLOs are read or written through (sloDefinitionSchema,
- * storedSloDefinitionSchema and everything they reach): the io-ts schemas
- * never bounded those fields, so a bound would reject SLOs stored before it
+ * storedSloDefinitionSchema and everything they reach): those fields were
+ * historically unbounded, so a bound would reject SLOs stored before it
  * existed. Only server-normalized values (dates, durations) and bounds shared
- * with io-ts via ../validation_constants.ts (SLO id, projectRoutings) apply there.
+ * via ./validation_constants.ts (SLO id, projectRoutings) apply there.
  */
 
 /** Free-form identifiers: names, field names, ids, urls. */
