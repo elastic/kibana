@@ -64,8 +64,8 @@ One Kibana feature, `agenticInvestigations`.
 
 | Feature privilege | API | UI |
 | ----------------- | --- | -- |
-| `all`             | `read_investigations` | —  |
-| `read`            | `read_investigations` | —  |
+| `all`             | `read_investigations` | `readInvestigations` |
+| `read`            | `read_investigations` | `readInvestigations` |
 
 The feature carries `minimumLicense: 'enterprise'`.
 
@@ -160,7 +160,7 @@ An **investigation** is an Agent Builder conversation on the `investigation` tem
 The public plugin registers the conversation template UI for `investigation` and `escalation` once in `start`, through `registerTemplate` in `public/conversation_templates/registry/register_template.ts`, with one `TemplateDefinition` per template in `public/conversation_templates/templates/<template>/register.ts`. Solutions do not register these templates themselves; Agent Builder throws on a second registration.
 
 - **Registration** depends only on Agent Builder being available. It does not read any solution setting or capability, so a user who reaches an investigation through any solution (for example Nightshift) gets the same flyout.
-- **Write actions** are registered unconditionally and decide at render time, inside their lazy chunks, whether the user may use them. Each check passes on this plugin's UI capability or, without it, on the matching API privilege, so a user who holds the privilege through another feature (AlertZero and Nightshift grant some) gets the same actions:
+- **Write actions** are registered unconditionally and decide at render time, inside their lazy chunks, whether the user may use them. Each check passes on this plugin's UI capability or, without it, on the matching API privilege, so a user who holds the privilege through another feature (Nightshift grants some) gets the same actions:
 
   | Action | UI capability | or API privilege |
   | ------ | ------------- | ---------------- |

@@ -35,16 +35,9 @@ import {
 } from '../common/constants';
 import type { AlertZeroConfig } from './config';
 
-// The investigation and escalation flyouts and AlertZero's queue use the shared
-// `agenticInvestigations` routes, which require these API privileges. Cross-plugin server imports
-// are forbidden, so they are spelled out here and pinned by the plugin tests.
-const INVESTIGATIONS_API_PRIVILEGE_READ = 'read_investigations';
-const INVESTIGATIONS_API_PRIVILEGE_MANAGE = 'manage_investigations';
-const ESCALATIONS_API_PRIVILEGE_READ = 'read_escalations';
-const ESCALATIONS_API_PRIVILEGE_MANAGE = 'manage_escalations';
-
 const INVESTIGATION_SUMMARY_PLUGIN_ID = 'agentic_investigations_summary';
 const PROPOSAL_READ_CONCURRENCY = 5;
+
 import type {
   AlertZeroRequestHandlerContext,
   AlertZeroPluginSetup,
@@ -267,24 +260,13 @@ export class AlertZeroPlugin
       privileges: {
         all: {
           app: ['kibana'],
-          api: [
-            ALERTZERO_API_PRIVILEGE_READ,
-            ALERTZERO_API_PRIVILEGE_WRITE,
-            INVESTIGATIONS_API_PRIVILEGE_READ,
-            INVESTIGATIONS_API_PRIVILEGE_MANAGE,
-            ESCALATIONS_API_PRIVILEGE_READ,
-            ESCALATIONS_API_PRIVILEGE_MANAGE,
-          ],
+          api: [ALERTZERO_API_PRIVILEGE_READ, ALERTZERO_API_PRIVILEGE_WRITE],
           savedObject: { all: [], read: [] },
           ui: ['show', 'write'],
         },
         read: {
           app: ['kibana'],
-          api: [
-            ALERTZERO_API_PRIVILEGE_READ,
-            INVESTIGATIONS_API_PRIVILEGE_READ,
-            ESCALATIONS_API_PRIVILEGE_READ,
-          ],
+          api: [ALERTZERO_API_PRIVILEGE_READ],
           savedObject: { all: [], read: [] },
           ui: ['show'],
         },
