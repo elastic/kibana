@@ -358,6 +358,30 @@ describe('buildHuntNarrative', () => {
     expect(narrative).toContain('- nothing searched: D');
   });
 
+  it('says a retryable run with no hit leaves the report unmarked and eligible', () => {
+    const narrative = buildHuntNarrative(
+      result({ completeness: 'incomplete_retryable', completed_successfully: false }),
+      ctx
+    );
+
+    expect(narrative).toContain('the report is not marked as hunted, stays eligible');
+  });
+
+  it('says a retryable run with a hit recorded the hit, and makes no eligibility claim', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        tier1: hitTier1(),
+        has_confirmed_hit: true,
+        completeness: 'incomplete_retryable',
+        completed_successfully: false,
+      }),
+      ctx
+    );
+
+    expect(narrative).toContain('The confirmed hit is recorded on the report');
+    expect(narrative).not.toContain('stays eligible');
+  });
+
   it('carries the Tier 2 failure message when Tier 2 threw', () => {
     const narrative = buildHuntNarrative(
       result({
