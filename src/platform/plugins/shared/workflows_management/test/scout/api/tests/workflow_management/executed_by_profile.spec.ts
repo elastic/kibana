@@ -12,6 +12,8 @@ import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { deleteTestExecutions } from '../../fixtures/delete_test_executions';
 
+const POLL_TIMEOUT_MS = 60000;
+
 // The user only holds the Workflows feature privilege, so it cannot call the user profile
 // `_bulk_get` API. The names it sees must therefore be resolved by the workflows routes.
 // A session (cookie) login is needed: only then is `executedBy` a profile uid, not a username.
@@ -77,10 +79,14 @@ steps:
   apiTest(
     'resolves the executor name for a user without bulkGetUserProfiles',
     async ({ apiClient }) => {
-      const bulkGet = await apiClient.post('internal/security/user_profile/_bulk_get', {
-        headers: userHeaders,
-        body: { uids: [profileUid] },
-      });
+      // Privileges are checked in the request's space, and the role only grants them in `spaceId`.
+      const bulkGet = await apiClient.post(
+        `s/${spaceId}/internal/security/user_profile/_bulk_get`,
+        {
+          headers: userHeaders,
+          body: { uids: [profileUid] },
+        }
+      );
       expect(bulkGet).toHaveStatusCode(403);
 
       const run = await apiClient.post(`s/${spaceId}/api/workflows/workflow/${workflowId}/run`, {
@@ -100,7 +106,7 @@ steps:
             );
             return execution.body.status;
           },
-          { timeout: 60000 }
+          { timeout: POLL_TIMEOUT_MS }
         )
         .toBe('completed');
 
@@ -113,12 +119,19 @@ steps:
       expect(execution.body.executedByProfile.uid).toBe(profileUid);
       expect(execution.body.executedByProfile.user.username).toBe(username);
 
-      const list = await apiClient.get(
-        `s/${spaceId}/api/workflows/workflow/${workflowId}/executions`,
-        { headers: userHeaders }
-      );
+      // The list is a search, so it can lag behind the real-time read above until the next refresh.
+      const listPath = `s/${spaceId}/api/workflows/workflow/${workflowId}/executions`;
+      await expect
+        .poll(
+          async () =>
+            (
+              await apiClient.get(listPath, { headers: userHeaders })
+            ).body.results?.length,
+          { timeout: POLL_TIMEOUT_MS }
+        )
+        .toBe(1);
+      const list = await apiClient.get(listPath, { headers: userHeaders });
       expect(list).toHaveStatusCode(200);
-      expect(list.body.results).toHaveLength(1);
       expect(list.body.results[0].executedByProfile.user.username).toBe(username);
     }
   );
