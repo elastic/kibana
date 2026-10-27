@@ -49,14 +49,23 @@ export const runCommandOnHost = async (
       exitCode: error.exitCode ?? 1,
     }));
 
-export const countEndpointAlertsForAgent = async (
+/**
+ * Endpoint alerts on `fileName` for `agentId`. The enrolled host is shared by every spec in
+ * the worker, so `agent.id` alone could match an alert another trigger raised.
+ */
+export const countEndpointAlertsForFile = async (
   esClient: EsClient,
-  agentId: string
+  agentId: string,
+  fileName: string
 ): Promise<number> => {
   const { count } = await esClient.count({
     index: ENDPOINT_ALERTS_INDEX,
     ignore_unavailable: true,
-    query: { term: { 'agent.id': agentId } },
+    query: {
+      bool: {
+        filter: [{ term: { 'agent.id': agentId } }, { term: { 'file.name': fileName } }],
+      },
+    },
   });
   return count;
 };
@@ -86,25 +95,28 @@ export const restartEndpointSecurityRule = async (kbnClient: KbnClient): Promise
   }
 };
 
-/** Detection Engine alerts created by the Endpoint Security rule for `agentId`. */
-export const getEndpointSecurityAlertsQuery = (agentId: string) => ({
+/** Detection Engine alerts the Endpoint Security rule created on `fileName` for `agentId`. */
+export const getEndpointSecurityAlertsQuery = (agentId: string, fileName: string) => ({
   bool: {
     filter: [
       { term: { 'agent.id': agentId } },
       { term: { 'agent.type': 'endpoint' } },
       { term: { 'kibana.alert.rule.rule_id': ELASTIC_SECURITY_RULE_ID } },
+      { term: { 'file.name': fileName } },
     ],
   },
 });
 
-export const deleteDetectionAlertsForAgent = async (
+/** Deletes only the alerts `getEndpointSecurityAlertsQuery` matches, so other specs' alerts stay. */
+export const deleteEndpointSecurityAlerts = async (
   esClient: EsClient,
-  agentId: string
+  agentId: string,
+  fileName: string
 ): Promise<void> => {
   await esClient.deleteByQuery({
     index: DETECTION_ALERTS_INDEX,
     ignore_unavailable: true,
-    query: { term: { 'agent.id': agentId } },
+    query: getEndpointSecurityAlertsQuery(agentId, fileName),
     conflicts: 'proceed',
     refresh: true,
   });
