@@ -333,6 +333,7 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
         } as any),
       workflowsExtensions: { getAllTriggerDefinitions: () => [] } as any,
       getTaskScheduler: () => null,
+      getInvalidateSubscriptionCache: () => null,
       executionQueryService: {
         getWorkflowExecutions: jest.fn().mockResolvedValue({ total: 0, results: [] }),
       } as unknown as WorkflowExecutionQueryService,
