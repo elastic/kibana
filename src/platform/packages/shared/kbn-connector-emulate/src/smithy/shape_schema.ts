@@ -58,7 +58,10 @@ const timestampSchema = (format: unknown): JsonSchema => {
   }
 };
 
-// The length of n bytes in padded base64.
+// The length of n bytes in padded base64. Lengths of 3k+1 and 3k+2 bytes share one encoded
+// length, so a bound that isn't a multiple of 3 also admits the longer value of that length
+// (`AAAA` for one byte). The bounds never reject a valid blob; telling the two apart takes a
+// padding pattern, which overflows the regex stack on megabyte blobs.
 const base64Length = (bytes: number): number => 4 * Math.ceil(bytes / 3);
 
 /**

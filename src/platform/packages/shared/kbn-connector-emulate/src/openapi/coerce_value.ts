@@ -69,6 +69,16 @@ const findSubschema = (
   pick: (node: SchemaNode) => unknown
 ): unknown => collectParts(schema, document).map(pick).find(isRecord);
 
+/** The schema a property of an object schema must satisfy: its own, else `additionalProperties`. */
+export const getPropertySchema = (
+  schema: unknown,
+  key: string,
+  document: OpenApiDocument
+): unknown =>
+  findSubschema(schema, document, ({ properties }) =>
+    isRecord(properties) ? properties[key] : undefined
+  ) ?? findSubschema(schema, document, ({ additionalProperties }) => additionalProperties);
+
 const matchesPattern = (pattern: string, value: string): boolean => {
   try {
     return new RegExp(pattern, 'u').test(value);
@@ -139,11 +149,7 @@ export const coerceValue = (
   if (isRecord(value)) {
     return Object.fromEntries(
       Object.entries(value).map(([key, item]) => {
-        const property =
-          findSubschema(schema, document, ({ properties }) =>
-            isRecord(properties) ? properties[key] : undefined
-          ) ?? findSubschema(schema, document, ({ additionalProperties }) => additionalProperties);
-        return [key, coerceValue(item, property, document)];
+        return [key, coerceValue(item, getPropertySchema(schema, key, document), document)];
       })
     );
   }

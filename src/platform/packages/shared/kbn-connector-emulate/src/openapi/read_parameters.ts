@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coerceValue, getSchemaTypes } from './coerce_value';
-import type { ContractOperation, OperationParameter } from './types';
+import { coerceValue, getPropertySchema, getSchemaTypes } from './coerce_value';
+import type { ContractOperation, OpenApiDocument, OperationParameter } from './types';
 
 /** The query parameter that selects the page in opaque next-page URLs the mock issues. */
 export const MOCK_PAGE_PARAM = 'contract-mock-page';
@@ -85,12 +85,24 @@ const readQuery = (
   parameter: OperationParameter,
   query: ParameterInput['query'],
   types: Set<string>,
-  claimed: ReadonlySet<string>
+  isClaimed: (key: string) => boolean,
+  document: OpenApiDocument
 ): unknown => {
   const { name, style, explode } = parameter;
   if (spreadsQueryKeys(parameter, types)) {
     // The parameter's name isn't sent; every query key no other parameter claims is a property.
-    const entries = Object.entries(query).filter(([key]) => key === name || !claimed.has(key));
+    // A lone value is a one-item array for a property that takes arrays (a map of string lists).
+    const entries = Object.entries(query)
+      .filter(([key]) => key === name || !isClaimed(key))
+      .map(([key, value]) => [
+        key,
+        typeof value === 'string' &&
+        getSchemaTypes(getPropertySchema(parameter.schema?.schema, key, document), document).has(
+          'array'
+        )
+          ? [value]
+          : value,
+      ]);
     return entries.length > 0 ? Object.fromEntries(entries) : undefined;
   }
   if (style === 'deepObject') {
@@ -137,11 +149,12 @@ const readRaw = (
   parameter: OperationParameter,
   input: ParameterInput,
   types: Set<string>,
-  claimed: ReadonlySet<string>
+  isClaimed: (key: string) => boolean,
+  document: OpenApiDocument
 ) => {
   const { name, in: location, explode } = parameter;
   if (location === 'query') {
-    return readQuery(parameter, input.query, types, claimed);
+    return readQuery(parameter, input.query, types, isClaimed, document);
   }
   if (location === 'path') {
     const value = input.pathParameters[name];
@@ -171,15 +184,22 @@ export const readParameters = (
     parameters,
     spec: { document },
   } = operation;
-  // Query keys with a meaning of their own, which form-exploded objects don't take.
-  const claimed = new Set([
+  // Query keys with a meaning of their own, which form-exploded objects don't take: other
+  // parameters' names, and the `name[key]` keys of `deepObject` parameters.
+  const claimedNames = new Set([
     ...nonParameterQueryKeys(operation),
     ...parameters.flatMap(({ in: location, name }) => (location === 'query' ? [name] : [])),
   ]);
+  const deepObjectPrefixes = parameters.flatMap(({ in: location, style, name }) =>
+    location === 'query' && style === 'deepObject' ? [`${name}[`] : []
+  );
+  const isClaimed = (key: string): boolean =>
+    claimedNames.has(key) ||
+    (key.endsWith(']') && deepObjectPrefixes.some((prefix) => key.startsWith(prefix)));
   return parameters.map((parameter) => {
     const schema = parameter.schema?.schema;
     const types = getSchemaTypes(schema, document);
-    const raw = readRaw(parameter, input, types, claimed);
+    const raw = readRaw(parameter, input, types, isClaimed, document);
     return { parameter, value: raw === undefined ? undefined : coerceValue(raw, schema, document) };
   });
 };

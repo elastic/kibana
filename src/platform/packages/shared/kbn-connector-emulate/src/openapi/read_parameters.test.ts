@@ -113,6 +113,44 @@ describe('readParameters', () => {
     });
   });
 
+  it('wraps lone values of form-exploded maps whose values are arrays', () => {
+    const parameters = [
+      {
+        name: 'tags',
+        in: 'query',
+        schema: {
+          type: 'object',
+          additionalProperties: { type: 'array', items: { type: 'string' } },
+        },
+      },
+    ];
+
+    expect(read(parameters, { query: { env: 'prod', team: ['a', 'b'] } })).toEqual({
+      'query.tags': { env: ['prod'], team: ['a', 'b'] },
+    });
+  });
+
+  it('leaves the keys of deepObject parameters out of form-exploded maps', () => {
+    const parameters = [
+      {
+        name: 'filter',
+        in: 'query',
+        style: 'deepObject',
+        schema: { type: 'object', properties: { name: { type: 'string' } } },
+      },
+      {
+        name: 'counts',
+        in: 'query',
+        schema: { type: 'object', additionalProperties: { type: 'integer' } },
+      },
+    ];
+
+    expect(read(parameters, { query: { 'filter[name]': 'logs', errors: '2' } })).toEqual({
+      'query.filter': { name: 'logs' },
+      'query.counts': { errors: 2 },
+    });
+  });
+
   it.each([
     ['simple', false, '3,4'],
     ['label', false, '.3,4'],
