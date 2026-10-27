@@ -1114,4 +1114,98 @@ describe('DateRangePickerControl', () => {
       expect(disabledOnRefresh).not.toHaveBeenCalled();
     });
   });
+
+  describe('re-resolving relative bounds', () => {
+    const initialNow = new Date('2026-06-04T12:00:00.000Z');
+
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(initialNow);
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const hoverTooltipText = () => {
+      fireEvent.mouseOver(screen.getByTestId('dateRangePickerControlButton'));
+      return screen.getByRole('tooltip').textContent;
+    };
+
+    const advanceClockBy = (minutes: number) => {
+      jest.setSystemTime(new Date(initialNow.getTime() + minutes * 60_000));
+    };
+
+    it('keeps the resolved bounds while nothing signals a refresh', () => {
+      const { rerender } = renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+      expect(hoverTooltipText()).toContain('12:00:00.000');
+
+      advanceClockBy(5);
+      rerender(
+        <EuiThemeProvider>
+          <DateRangePicker {...defaultProps} />
+        </EuiThemeProvider>
+      );
+
+      expect(hoverTooltipText()).toContain('12:00:00.000');
+    });
+
+    it('re-resolves the bounds when `resolveEpoch` increments', () => {
+      const { rerender } = renderWithEuiTheme(
+        <DateRangePicker {...defaultProps} resolveEpoch={0} />
+      );
+      expect(hoverTooltipText()).toContain('Jun 4, 2026, 11:40:00.000 → Jun 4, 2026, 12:00:00.000');
+
+      advanceClockBy(5);
+      rerender(
+        <EuiThemeProvider>
+          <DateRangePicker {...defaultProps} resolveEpoch={1} />
+        </EuiThemeProvider>
+      );
+
+      expect(hoverTooltipText()).toContain('Jun 4, 2026, 11:45:00.000 → Jun 4, 2026, 12:05:00.000');
+    });
+
+    it('re-resolves the bounds when `refreshEpoch` increments', () => {
+      const { rerender } = renderWithEuiTheme(
+        <DateRangePicker {...defaultProps} refreshEpoch={0} />
+      );
+      expect(hoverTooltipText()).toContain('12:00:00.000');
+
+      advanceClockBy(5);
+      rerender(
+        <EuiThemeProvider>
+          <DateRangePicker {...defaultProps} refreshEpoch={1} />
+        </EuiThemeProvider>
+      );
+
+      expect(hoverTooltipText()).toContain('12:05:00.000');
+    });
+
+    it('re-resolves the bounds when the auto-refresh timer fires', () => {
+      const onRefresh = jest.fn();
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          onRefresh={onRefresh}
+          settings={{
+            roundRelativeTime: false,
+            autoRefresh: {
+              isEnabled: true,
+              isPaused: false,
+              intervalMs: 60_000,
+              intervalDisplayUnit: 'm',
+            },
+          }}
+        />
+      );
+      expect(hoverTooltipText()).toContain('12:00:00.000');
+
+      act(() => {
+        jest.advanceTimersByTime(60_000);
+      });
+
+      expect(onRefresh).toHaveBeenCalledTimes(1);
+      expect(hoverTooltipText()).toContain('12:01:00.000');
+    });
+  });
 });

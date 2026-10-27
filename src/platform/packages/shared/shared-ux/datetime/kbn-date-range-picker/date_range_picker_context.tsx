@@ -23,6 +23,7 @@ import React, {
 import { useGeneratedHtmlId } from '@elastic/eui';
 
 import { useAutoRefresh } from './hooks/use_auto_refresh';
+import { useResolvedTimeRange } from './hooks/use_resolved_time_range';
 import type {
   TimeRangeBounds,
   TimeRangeBoundsOption,
@@ -196,6 +197,7 @@ export function DateRangePickerProvider({
   timeZone,
   onRefresh,
   refreshEpoch,
+  resolveEpoch,
   prependBasePath: prependBasePathProp,
   canAccessAdvancedSettings = false,
 }: PropsWithChildren<DateRangePickerProps>) {
@@ -225,9 +227,24 @@ export function DateRangePickerProvider({
   const [text, setText] = useState<string>(() =>
     prettifyValue(value ?? defaultValue ?? '', transformOptions)
   );
-  const timeRange: TimeRange = useMemo(
-    () => textToTimeRange(text, transformOptions),
-    [text, transformOptions]
+  // Relative bounds (e.g. `now-15m`) resolve against the clock, so the resolved dates (and the
+  // absolute dates displayed from them) go stale while `text` is unchanged. Re-resolve on every
+  // refresh: signalled by the host through `refreshEpoch` / `resolveEpoch`, or fired by the
+  // internal auto-refresh timer.
+  const [autoRefreshCount, setAutoRefreshCount] = useState(0);
+  const onAutoRefresh = useMemo(
+    () =>
+      onRefresh &&
+      (() => {
+        setAutoRefreshCount((count) => count + 1);
+        onRefresh();
+      }),
+    [onRefresh]
+  );
+  const timeRange = useResolvedTimeRange(
+    text,
+    transformOptions,
+    `${refreshEpoch ?? 0}:${resolveEpoch ?? 0}:${autoRefreshCount}`
   );
   const displayText = useMemo(
     () => timeRangeToDisplayText(timeRange, transformOptions),
@@ -291,7 +308,7 @@ export function DateRangePickerProvider({
   const { secondsRemaining: autoRefreshSecondsRemaining } = useAutoRefresh({
     isPaused: refreshTimerPaused,
     intervalMs: settings.autoRefresh?.isEnabled ? settings.autoRefresh.intervalMs : 0,
-    onRefresh,
+    onRefresh: onAutoRefresh,
     refreshEpoch,
   });
 
