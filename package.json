@@ -2289,7 +2289,7 @@
     "react-test-renderer": "18.2.0",
     "recast": "0.24.0",
     "resolve": "1.22.13",
-    "resolve.exports": "2.0.3",
+    "resolve.exports": "2.0.4",
     "rxjs-marbles": "7.0.1",
     "sass-embedded": "1.104.0",
     "sass-loader": "10.5.2",
