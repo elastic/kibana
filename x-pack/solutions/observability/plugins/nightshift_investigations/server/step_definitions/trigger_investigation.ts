@@ -33,7 +33,9 @@ import type {
 import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../lib/automations/types';
-import { consumeAutomationBudget } from '../lib/automations/automation_budget';
+import { createAutomationBudget } from '../lib/automations/automation_budget';
+import { AutomationDailyLimitReachedError, InvestigationQuotaDeniedError } from '../client/errors';
+import type { AutomationBudget } from '../types';
 
 const inputSchema = lazySchema(() =>
   z.object({
@@ -188,7 +190,7 @@ export const triggerInvestigationStepDefinition = (
     label: 'Trigger Nightshift Investigation',
     category: StepCategory.Ai,
     description:
-      'Start an investigation for a given subject (significant event, alert, or other entity). When the subject, or any alert in context.alerts, is already part of an open investigation, that investigation continues instead. Returns investigation_id for tracking, or skip_reason when the automation daily limit is reached.',
+      'Start an investigation for a given subject (significant event, alert, or other entity). When the subject, or any alert in context.alerts, is already part of an open investigation, that investigation continues instead. Returns investigation_id for tracking, or skip_reason when the automation daily limit or the deployment-wide investigation limit is reached.',
     inputSchema,
     outputSchema: z.object({
       investigation_id: z
@@ -196,7 +198,7 @@ export const triggerInvestigationStepDefinition = (
         .optional()
         .describe('The investigation (Agent Builder conversation) the start created or continued'),
       skip_reason: z
-        .literal('daily_limit')
+        .enum(['daily_limit', 'investigation_limit'])
         .optional()
         .describe('Why the investigation was not dispatched'),
       daily_limit: z
@@ -214,20 +216,22 @@ export const triggerInvestigationStepDefinition = (
       const spaceId = workflow.spaceId;
       const input = inputSchema.parse(context.input);
       const subjectId = toSubjectId(input);
+      let automationBudget: AutomationBudget | undefined;
       if (input.automation_id) {
         const soClient = getAutomationsSoClient(request, spaceId);
+        const automationId = input.automation_id;
         const automation = await soClient.get<NightshiftAutomationAttributes>(
           NIGHTSHIFT_AUTOMATION_SO_TYPE,
-          input.automation_id
+          automationId
         );
         if (automation.attributes.workflowId !== workflow.id) {
           throw new Error('The automation does not belong to this workflow.');
         }
-        const dailyLimit = automation.attributes.runtime.dailyDispatchLimit;
-        const allowed = await consumeAutomationBudget(soClient, input.automation_id, dailyLimit);
-        if (!allowed) {
-          return { output: { skip_reason: 'daily_limit' as const, daily_limit: dailyLimit } };
-        }
+        automationBudget = createAutomationBudget(
+          soClient,
+          automationId,
+          automation.attributes.runtime.dailyDispatchLimit
+        );
       }
       const client = getInvestigationsClient(request, spaceId);
       const alerts =
@@ -240,25 +244,44 @@ export const triggerInvestigationStepDefinition = (
               getEpisodeLookup,
             })
           : undefined;
-      const result = await client.start({
-        subject: {
-          type: input.subject_type,
-          id: subjectId,
-          summary: input.summary,
-        },
-        title: input.title,
-        trigger_type: input.trigger_type ?? 'automatic',
-        message: input.message,
-        source_ids: input.source_ids,
-        context: alerts
-          ? { alerts }
-          : input.scope_query && input.subject_type === 'manual'
-          ? { ...input.context, scope_query: input.scope_query }
-          : input.context,
-        timeout_seconds: input.timeout_seconds,
-        notificationDestinations: input.notificationDestinations,
-        slack_thread: input.slack_thread,
-      });
-      return { output: result };
+      try {
+        const result = await client.start(
+          {
+            subject: {
+              type: input.subject_type,
+              id: subjectId,
+              summary: input.summary,
+            },
+            title: input.title,
+            trigger_type: input.trigger_type ?? 'automatic',
+            message: input.message,
+            source_ids: input.source_ids,
+            context: alerts
+              ? { alerts }
+              : input.scope_query && input.subject_type === 'manual'
+              ? { ...input.context, scope_query: input.scope_query }
+              : input.context,
+            timeout_seconds: input.timeout_seconds,
+            notificationDestinations: input.notificationDestinations,
+            slack_thread: input.slack_thread,
+          },
+          { automationBudget }
+        );
+        return { output: result };
+      } catch (error) {
+        if (error instanceof AutomationDailyLimitReachedError) {
+          context.logger.info(
+            `Skipped investigation of ${input.subject_type}/${subjectId} for automation ${input.automation_id}: daily limit of ${error.limit} reached`
+          );
+          return { output: { skip_reason: 'daily_limit' as const, daily_limit: error.limit } };
+        }
+        if (error instanceof InvestigationQuotaDeniedError) {
+          context.logger.info(
+            `Skipped investigation of ${input.subject_type}/${subjectId}: global investigation limit reached`
+          );
+          return { output: { skip_reason: 'investigation_limit' as const } };
+        }
+        throw error;
+      }
     },
   });

@@ -40,7 +40,7 @@ import {
 import { investigationNotificationDestinationsSchema } from '../../common/schemas';
 import type { InvestigationNotificationDestination } from '../../common/schemas';
 import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
-import type { InvestigationQuotaCallback } from '../types';
+import type { AutomationBudget, InvestigationQuotaCallback } from '../types';
 import type {
   AlertInvestigationContext,
   InvestigationAlertSnapshot,
@@ -431,18 +431,21 @@ export class NightshiftInvestigationsClient {
     };
   }
 
-  async start({
-    subject,
-    title,
-    trigger_type,
-    message,
-    timeout_seconds,
-    source_ids,
-    connector_id,
-    context = {},
-    notificationDestinations,
-    slack_thread: slackThread,
-  }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
+  async start(
+    {
+      subject,
+      title,
+      trigger_type,
+      message,
+      timeout_seconds,
+      source_ids,
+      connector_id,
+      context = {},
+      notificationDestinations,
+      slack_thread: slackThread,
+    }: StartInvestigationRequest,
+    { automationBudget }: { automationBudget?: AutomationBudget } = {}
+  ): Promise<StartInvestigationResponse> {
     if (!(await this.checkInfrastructureAvailability())) {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
@@ -493,9 +496,12 @@ export class NightshiftInvestigationsClient {
       newInvestigationId,
       // Only a start that opens a new investigation counts against the daily automatic quota:
       // a follow-up adds a round to an investigation that was already paid for.
-      assertCanOpenNew: () => this.assertQuotaForNewInvestigation(trigger_type),
+      assertCanOpenNew: () => this.assertQuotaForNewInvestigation(trigger_type, automationBudget),
     });
     const isFollowUp = investigationId !== newInvestigationId;
+    if (isFollowUp) {
+      await this.releaseAutomationBudget(automationBudget);
+    }
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install stays because the run
@@ -590,6 +596,18 @@ export class NightshiftInvestigationsClient {
     }
   }
 
+  private async releaseAutomationBudget(automationBudget?: AutomationBudget): Promise<void> {
+    try {
+      await automationBudget?.release();
+    } catch (error) {
+      this.logger.warn(
+        `Could not release the automation budget: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
   private async getInvestigationWorkflow(spaceId: string): Promise<InstalledWorkflow> {
     const { workflowsManagement } = this.requireWriteDeps();
     const workflowId = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
@@ -632,19 +650,25 @@ export class NightshiftInvestigationsClient {
     );
   }
 
-  /** Charges the daily automatic quota for a start that opens a new investigation. */
+  /**
+   * Charges the automation budget, then the global quota. A global denial releases the automation
+   * budget, so a denied start never uses up the automation limit.
+   */
   private async assertQuotaForNewInvestigation(
-    triggerType: StartInvestigationRequest['trigger_type']
+    triggerType: StartInvestigationRequest['trigger_type'],
+    automationBudget?: AutomationBudget
   ): Promise<void> {
     switch (triggerType) {
       case 'manual':
         return;
       case 'automatic': {
+        await automationBudget?.consume();
         const { allowed } = await evaluateInvestigationQuota({
           callback: this.investigationQuotaCallback,
           logger: this.logger,
         });
         if (!allowed) {
+          await this.releaseAutomationBudget(automationBudget);
           throw new InvestigationQuotaDeniedError();
         }
         return;
@@ -722,8 +746,9 @@ export class NightshiftInvestigationsClient {
     }
 
     // Charged before the claim, so a denied start claims nothing. A start that then loses the
-    // claim to a concurrent one becomes a follow-up but stays charged; the quota callback has no
-    // refund, and the race needs two starts for the same new subject within moments.
+    // claim to a concurrent one becomes a follow-up and releases its automation budget, but the
+    // global quota stays charged; the quota callback has no refund, and the race needs two starts
+    // for the same new subject within moments.
     await assertCanOpenNew();
     const claim = await subjectsClient.claimSubjects({
       conversationId: newInvestigationId,

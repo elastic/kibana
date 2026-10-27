@@ -86,6 +86,23 @@ const labels = {
   }),
 };
 
+const getSkippedRunSummary = (
+  { skipReason, triggeredBy, dailyLimit }: Run,
+  fallbackSource: string
+) => {
+  const source = triggeredBy ?? fallbackSource;
+  if (skipReason === 'investigation_limit') {
+    return i18n.translate('xpack.nightshift.automations.detail.skippedInvestigationLimitSummary', {
+      defaultMessage: '{source} · Deployment-wide investigation limit reached',
+      values: { source },
+    });
+  }
+  return i18n.translate('xpack.nightshift.automations.detail.skippedRunSummary', {
+    defaultMessage: '{source} · Daily trigger limit of {limit} reached',
+    values: { source, limit: dailyLimit ?? '—' },
+  });
+};
+
 export const STATUSES: RunStatus[] = ['succeeded', 'running', 'failed', 'skipped'];
 const STATUS_VIS_COLOR = {
   succeeded: 'euiColorVisSuccess0',
@@ -560,16 +577,7 @@ export const RunHistory = ({
                       </EuiText>
                       <EuiText size="xs" color="subdued" className="eui-textTruncate">
                         {run.status === 'skipped'
-                          ? i18n.translate(
-                              'xpack.nightshift.automations.detail.skippedRunSummary',
-                              {
-                                defaultMessage: '{source} · Daily trigger limit of {limit} reached',
-                                values: {
-                                  source: run.triggeredBy ?? labels.trigger,
-                                  limit: run.dailyLimit ?? '—',
-                                },
-                              }
-                            )
+                          ? getSkippedRunSummary(run, labels.trigger)
                           : automationName}
                       </EuiText>
                     </button>
