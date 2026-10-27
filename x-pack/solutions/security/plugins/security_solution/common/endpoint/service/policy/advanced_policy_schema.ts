@@ -3030,4 +3030,147 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
     license: 'enterprise',
   },
+  {
+    key: 'linux.advanced.ai_auth_detection',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.ai_auth_detection',
+      {
+        defaultMessage:
+          'Enrich events with the account information of AI Agents, if found. Requires file events and AI data collection to be enabled. Not supported when linux.advanced.kernel.capture_mode uses kprobes When enabled, file modify events are also captured, which can increase CPU and IO usage on hosts with heavy write activity. Trusted processes are excluded. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.ai_auth_detection',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.ai_auth_detection',
+      {
+        defaultMessage:
+          'Enrich events with the account information of AI Agents, if found. Requires file events and AI data collection to be enabled. Trusted processes are excluded. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.ai_auth_detection',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ai_auth_detection',
+      {
+        defaultMessage:
+          'Enrich events with the account information of AI Agents, if found. Requires file events and AI data collection to be enabled. Trusted processes are excluded. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.enable_codex_spawning',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.enable_codex_spawning',
+      {
+        defaultMessage:
+          "Allow Elastic Defend to run the user's Codex app-server to look up the signed-in Codex account. Requires windows.advanced.ai_auth_detection. Default: false.",
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.enable_vscdb_lookup',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.enable_vscdb_lookup',
+      {
+        defaultMessage:
+          "Allow Elastic Defend to read the Cursor desktop app's SQLite state database to look up the signed-in Cursor account. Requires linux.advanced.ai_auth_detection. Default: false.",
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.enable_vscdb_lookup',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.enable_vscdb_lookup',
+      {
+        defaultMessage:
+          "Allow Elastic Defend to read the Cursor desktop app's SQLite state database to look up the signed-in Cursor account. Requires mac.advanced.ai_auth_detection. Default: false.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.enable_vscdb_lookup',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.enable_vscdb_lookup',
+      {
+        defaultMessage:
+          "Allow Elastic Defend to read the Cursor desktop app's SQLite state database to look up the signed-in Cursor account. Requires windows.advanced.ai_auth_detection. Default: false.",
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.ai_auth_cache_ttl_seconds',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.ai_auth_cache_ttl_seconds',
+      {
+        defaultMessage:
+          "How long, in seconds, to skip new lookups of an AI coding agent's account after a successful lookup. Account changes during this period are not detected until it ends. 0 disables caching. Default: 60.",
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.ai_auth_cache_ttl_seconds',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.ai_auth_cache_ttl_seconds',
+      {
+        defaultMessage:
+          "How long, in seconds, to skip new lookups of an AI coding agent's account after a successful lookup. Account changes during this period are not detected until it ends. 0 disables caching. Default: 60.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.ai_auth_cache_ttl_seconds',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ai_auth_cache_ttl_seconds',
+      {
+        defaultMessage:
+          "How long, in seconds, to skip new lookups of an AI coding agent's account after a successful lookup. Account changes during this period are not detected until it ends. 0 disables caching. Default: 60.",
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.ai_auth_recheck_interval_seconds',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.ai_auth_recheck_interval_seconds',
+      {
+        defaultMessage:
+          'How often, in seconds, to re-check the credential files of running AI coding agents for account changes that file events did not report. 0 disables the re-check. Default: 30.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.ai_auth_recheck_interval_seconds',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.ai_auth_recheck_interval_seconds',
+      {
+        defaultMessage:
+          'How often, in seconds, to re-check the credential files of running AI coding agents for account changes that file events did not report. 0 disables the re-check. Default: 30.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.ai_auth_recheck_interval_seconds',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ai_auth_recheck_interval_seconds',
+      {
+        defaultMessage:
+          'How often, in seconds, to re-check the credential files of running AI coding agents for account changes that file events did not report. 0 disables the re-check. Default: 30.',
+      }
+    ),
+  },
 ];
