@@ -319,8 +319,13 @@ importers:
         specifier: 2.0.10
         version: 2.0.10(react-router-dom@5.3.4(react@17.0.2))(react@17.0.2)
       '@elastic/charts':
+<<<<<<< HEAD
         specifier: 70.1.6
         version: 70.1.6(moment-timezone@0.6.0)(moment@2.31.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(reselect@4.1.8)
+=======
+        specifier: 73.3.2
+        version: 73.3.2(@types/react@18.2.79)(moment-timezone@0.6.2)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)
+>>>>>>> e170d42efc71 (Update dependency moment-timezone to v0.6.2 (main) (#268586))
       '@elastic/datemath':
         specifier: 5.0.3
         version: 5.0.3(moment@2.31.0)
@@ -3679,8 +3684,13 @@ importers:
         specifier: 2.3.2
         version: 2.3.2
       moment-timezone:
+<<<<<<< HEAD
         specifier: 0.6.0
         version: 0.6.0
+=======
+        specifier: 0.6.2
+        version: 0.6.2
+>>>>>>> e170d42efc71 (Update dependency moment-timezone to v0.6.2 (main) (#268586))
       monaco-editor:
         specifier: 0.44.0
         version: 0.44.0
@@ -19089,8 +19099,13 @@ packages:
   moment-duration-format@2.3.2:
     resolution: {integrity: sha512-cBMXjSW+fjOb4tyaVHuaVE/A5TqkukDWiOfxxAjY+PEqmmBQlLwn+8OzwPiG3brouXKY5Un4pBjAeB6UToXHaQ==}
 
+<<<<<<< HEAD
   moment-timezone@0.6.0:
     resolution: {integrity: sha512-ldA5lRNm3iJCWZcBCab4pnNL3HSZYXVb/3TYr75/1WCTWYuTqYUb5f/S384pncYjJ88lbO8Z4uPDvmoluHJc8Q==}
+=======
+  moment-timezone@0.6.2:
+    resolution: {integrity: sha512-lDsQv8FoGdBUdf0+TjGsq2orxKuXdwFlQ6Zw6TX3xIcTwTfEpCLyKqvEauvCHJ8iu3KBV8+uPhlv70YsNGdUBQ==}
+>>>>>>> e170d42efc71 (Update dependency moment-timezone to v0.6.2 (main) (#268586))
 
   moment@2.31.0:
     resolution: {integrity: sha512-0acOTfMiWOheYS4eoWb80yYMb/JLvVv9SHbs2PehaDzfUG0Bw855SKyk0IKTnPGa5+U2bmi3W68l1+sGLX/pvw==}
@@ -25006,7 +25021,11 @@ snapshots:
     dependencies:
       object-hash: 1.3.1
 
+<<<<<<< HEAD
   '@elastic/charts@70.1.6(moment-timezone@0.6.0)(moment@2.31.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(reselect@4.1.8)':
+=======
+  '@elastic/charts@73.3.2(@types/react@18.2.79)(moment-timezone@0.6.2)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)':
+>>>>>>> e170d42efc71 (Update dependency moment-timezone to v0.6.2 (main) (#268586))
     dependencies:
       '@popperjs/core': 2.11.8
       '@reduxjs/toolkit': 1.9.7(react-redux@7.2.8(react-dom@17.0.2(react@17.0.2))(react@17.0.2))(react@17.0.2)
@@ -25022,7 +25041,11 @@ snapshots:
       immer: 9.0.21
       luxon: 1.28.1
       moment: 2.31.0
+<<<<<<< HEAD
       moment-timezone: 0.6.0
+=======
+      moment-timezone: 0.6.2
+>>>>>>> e170d42efc71 (Update dependency moment-timezone to v0.6.2 (main) (#268586))
       prop-types: 15.8.1
       re-reselect: 4.0.1(reselect@4.1.8)
       react: 17.0.2
@@ -37034,7 +37057,11 @@ snapshots:
 
   moment-duration-format@2.3.2: {}
 
+<<<<<<< HEAD
   moment-timezone@0.6.0:
+=======
+  moment-timezone@0.6.2:
+>>>>>>> e170d42efc71 (Update dependency moment-timezone to v0.6.2 (main) (#268586))
     dependencies:
       moment: 2.31.0
 
