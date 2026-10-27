@@ -6,14 +6,14 @@
  */
 
 import { of } from 'rxjs';
-import type { CoreSetup } from '@kbn/core/server';
 import type { EsTestCluster } from '@kbn/test';
 import { createEsClientForTesting, createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
+import { coreMock } from '@kbn/core/server/mocks';
 import { NOTIFICATION_TYPES } from '../../common';
 import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
-import { buildForType, NotificationValidationError } from '../lib/submit';
-import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from '../types';
+import { NotificationSubmitService } from '../lib/submit';
+import { NotificationValidationError } from '../lib/notification_validation_error';
 
 const modelStatus = NOTIFICATION_TYPES.inference.modelStatus;
 
@@ -25,9 +25,9 @@ const content = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-describe('notificationCenter forType().submit() [integration]', () => {
+describe('NotificationSubmitService.submit [integration]', () => {
   let esServer: EsTestCluster;
-  let forType: ReturnType<typeof buildForType>;
+  let service: NotificationSubmitService;
   let esClient: ReturnType<typeof createEsClientForTesting>;
 
   const countById = async (notificationId: string) => {
@@ -53,14 +53,9 @@ describe('notificationCenter forType().submit() [integration]', () => {
       headers: { 'x-elastic-product-origin': 'kibana' },
     });
 
-    // submit resolves its client via core.getStartServices().elasticsearch, so mock the start
-    // service to hand back the test cluster's client.
-    const elasticsearch = { client: { asInternalUser: esClient } };
-    const featureFlags = { getBooleanValue$: () => of(true) };
-    const core = {
-      getStartServices: async () => [{ elasticsearch, featureFlags }],
-    } as unknown as CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>;
-    forType = buildForType(core);
+    const { featureFlags } = coreMock.createStart();
+    featureFlags.getBooleanValue$.mockReturnValue(of(true));
+    service = new NotificationSubmitService(esClient, featureFlags);
   });
 
   afterAll(async () => {
@@ -68,7 +63,7 @@ describe('notificationCenter forType().submit() [integration]', () => {
   });
 
   it('lands one document, building the id from the type + id parts and defaulting severity', async () => {
-    await forType(modelStatus).submit(content({ entity: 'endpoint-a' }));
+    await service.submit(modelStatus, content({ entity: 'endpoint-a' }));
 
     const notificationId = 'inference:modelStatus:endpoint-a:deprecated';
     const hits = await countById(notificationId);
@@ -82,15 +77,15 @@ describe('notificationCenter forType().submit() [integration]', () => {
   });
 
   it('appends a second document when the same state is re-pushed (no upsert)', async () => {
-    await forType(modelStatus).submit(content({ entity: 'endpoint-b' }));
-    await forType(modelStatus).submit(content({ entity: 'endpoint-b' }));
+    await service.submit(modelStatus, content({ entity: 'endpoint-b' }));
+    await service.submit(modelStatus, content({ entity: 'endpoint-b' }));
 
     expect(await countById('inference:modelStatus:endpoint-b:deprecated')).toHaveLength(2);
   });
 
   it('rejects invalid content and writes nothing', async () => {
     await expect(
-      forType(modelStatus).submit(content({ entity: 'endpoint-c', title: '' }))
+      service.submit(modelStatus, content({ entity: 'endpoint-c', title: '' }))
     ).rejects.toBeInstanceOf(NotificationValidationError);
 
     expect(await countById('inference:modelStatus:endpoint-c:deprecated')).toHaveLength(0);

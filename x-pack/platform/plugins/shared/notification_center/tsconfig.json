@@ -8,6 +8,9 @@
   "exclude": ["target/**/*", "scripts/*.js"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-di",
+    "@kbn/core-di-server",
+    "@kbn/core-di-mocks",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/dev-cli-errors",
     "@kbn/dev-cli-runner",
