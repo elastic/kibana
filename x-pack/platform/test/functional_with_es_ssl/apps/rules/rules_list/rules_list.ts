@@ -357,8 +357,12 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('deleteRule');
-      await testSubjects.exists('rulesDeleteIdsConfirmation');
-      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.existOrFail('rulesDeleteConfirmation');
+      // The modal animates in, so the first click can land before React is listening for it.
+      await retry.tryForTime(30000, async () => {
+        await testSubjects.click('rulesDeleteConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('rulesDeleteConfirmation', { timeout: 5000 });
+      });
 
       await retry.try(async () => {
         const toastTitle = await toasts.getTitleAndDismiss();
@@ -479,8 +483,12 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('bulkAction');
 
       await testSubjects.click('bulkDelete');
-      await testSubjects.exists('rulesDeleteIdsConfirmation');
-      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.existOrFail('rulesDeleteConfirmation');
+      // The modal animates in, so the first click can land before React is listening for it.
+      await retry.tryForTime(30000, async () => {
+        await testSubjects.click('rulesDeleteConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('rulesDeleteConfirmation', { timeout: 5000 });
+      });
 
       await retry.try(async () => {
         const toastTitle = await toasts.getTitleAndDismiss();
@@ -574,8 +582,11 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       expect(expandRulesErrorLink).to.have.length(0);
 
       await createFailingAlert({ supertest, objectRemover });
+      // The banner counts errors from an aggregation, but expanding reads the rules-list snapshot.
       await retry.try(async () => {
         await refreshAlertsList();
+        const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
+        expect(refreshResults.some((item: any) => item.status === 'Failed')).to.equal(true);
         expandRulesErrorLink = await find.allByCssSelector('[data-test-subj="expandRulesError"]');
         expect(expandRulesErrorLink).to.have.length(1);
       });

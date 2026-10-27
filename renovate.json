@@ -31,7 +31,6 @@
     {
       "groupName": "webpack",
       "matchDepNames": [
-        "autoprefixer",
         "clean-webpack-plugin",
         "css-loader",
         "file-loader",
@@ -42,7 +41,6 @@
         "webpack",
         "webpack-bundle-analyzer",
         "webpack-cli",
-        "webpack-dev-server",
         "webpack-merge",
         "webpack-sources",
         "@statoscope/webpack-plugin",
@@ -1155,7 +1153,7 @@
     },
     {
       "groupName": "postcss",
-      "matchDepNames": ["postcss", "postcss-scss", "postcss-loader"],
+      "matchDepNames": ["postcss", "postcss-scss"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
@@ -1412,17 +1410,8 @@
       "enabled": true
     },
     {
-      "groupName": "borc",
-      "matchDepNames": ["borc"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "cssnano",
-      "matchDepNames": ["cssnano", "cssnano-preset-default"],
+      "groupName": "cbor2",
+      "matchDepNames": ["cbor2"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
@@ -2074,7 +2063,7 @@
       "groupName": "storybook",
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main", "8.19"],
-      "matchDepNames": ["@pmmmwh/react-refresh-webpack-plugin", "fix-esm", "react-refresh"],
+      "matchDepNames": ["@pmmmwh/react-refresh-webpack-plugin", "react-refresh"],
       "matchDepPatterns": ["storybook"],
       "labels": ["Team:Operations", "release_note:skip", "ci:build-storybooks", "backport:skip"],
       "allowedVersions": "<9.0.0",
@@ -2562,15 +2551,6 @@
       "labels": ["release_note:skip", "team:obs-entities", "backport:all-open"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
-    },
-    {
-      "groupName": "dotenv",
-      "matchDepNames": ["dotenv"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "release_note:skip", "backport:all-open"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
     },
     {
       "groupName": "oxlint",
