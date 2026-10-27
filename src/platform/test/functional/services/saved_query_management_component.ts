@@ -16,6 +16,24 @@ export class SavedQueryManagementComponentService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly config = this.ctx.getService('config');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly browser = this.ctx.getService('browser');
+
+  private async clickMenuButtonByTestSubject(testSubj: string) {
+    const cssSelector = this.testSubjects.getCssSelector(testSubj);
+    await this.retry.try(async () => {
+      await this.closeSavedQueryManagementComponent();
+      await this.openSavedQueryManagementComponent();
+      const clicked = await this.browser.execute((sel: string) => {
+        const el = document.querySelector(sel) as HTMLElement | null;
+        if (!el) return false;
+        el.click();
+        return true;
+      }, cssSelector);
+      if (!clicked) {
+        throw new Error(`Menu button '${testSubj}' not found`);
+      }
+    });
+  }
 
   public async getCurrentlyLoadedQueryID() {
     await this.openSavedQueryManagementComponent();
@@ -84,8 +102,7 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   public async loadSavedQuery(title: string) {
-    await this.openSavedQueryManagementComponent();
-    await this.testSubjects.click('saved-query-management-load-button');
+    await this.clickMenuButtonByTestSubject('saved-query-management-load-button');
     await this.testSubjects.click(`~load-saved-query-${title}-button`);
     await this.testSubjects.click('saved-query-management-apply-changes-button');
     await this.retry.try(async () => {
@@ -100,13 +117,7 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   public async deleteSavedQuery(title: string) {
-    await this.openSavedQueryManagementComponent();
-    const shouldClickLoadMenu = await this.testSubjects.exists(
-      'saved-query-management-load-button'
-    );
-    if (shouldClickLoadMenu) {
-      await this.testSubjects.click('saved-query-management-load-button');
-    }
+    await this.clickMenuButtonByTestSubject('saved-query-management-load-button');
     await this.testSubjects.click(`~load-saved-query-${title}-button`);
     await this.retry.waitFor('delete saved query', async () => {
       await this.testSubjects.click(`delete-saved-query-button`);
@@ -167,22 +178,14 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   async savedQueryExist(title: string) {
-    await this.openSavedQueryManagementComponent();
-    await this.testSubjects.click('saved-query-management-load-button');
+    await this.clickMenuButtonByTestSubject('saved-query-management-load-button');
     const exists = await this.testSubjects.waitForExists(`~load-saved-query-${title}-button`);
     await this.closeSavedQueryManagementComponent();
     return exists;
   }
 
   async savedQueryExistOrFail(title: string) {
-    await this.retry.waitFor('load saved query', async () => {
-      await this.openSavedQueryManagementComponent();
-      const shouldClickLoadMenu = await this.testSubjects.exists(
-        'saved-query-management-load-button'
-      );
-      return shouldClickLoadMenu === true;
-    });
-    await this.testSubjects.click('saved-query-management-load-button');
+    await this.clickMenuButtonByTestSubject('saved-query-management-load-button');
     await this.testSubjects.existOrFail(`~load-saved-query-${title}-button`);
   }
 
@@ -201,21 +204,20 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   async openSavedQueryManagementComponent() {
-    const isOpenAlready = await this.testSubjects.waitForExists('queryBarMenuPanel', {
-      timeout: 500,
+    await this.retry.try(async () => {
+      if (!(await this.testSubjects.exists('queryBarMenuPanel'))) {
+        await this.testSubjects.click('showQueryBarMenu');
+      }
+      await this.testSubjects.existOrFail('queryBarMenuPanel');
     });
-    if (isOpenAlready) return;
-
-    await this.testSubjects.click('showQueryBarMenu');
-    await this.testSubjects.existOrFail('queryBarMenuPanel');
   }
 
   async closeSavedQueryManagementComponent() {
-    const isOpenAlready = await this.testSubjects.exists('queryBarMenuPanel');
-    if (!isOpenAlready) return;
-
+    // End on the panel being gone so the next open remounts the menu on its root panel
     await this.retry.try(async () => {
-      await this.testSubjects.click('showQueryBarMenu');
+      if (await this.testSubjects.exists('queryBarMenuPanel')) {
+        await this.testSubjects.click('showQueryBarMenu');
+      }
       await this.testSubjects.missingOrFail('queryBarMenuPanel');
     });
   }
