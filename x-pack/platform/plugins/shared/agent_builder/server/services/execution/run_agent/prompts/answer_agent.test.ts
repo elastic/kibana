@@ -10,6 +10,7 @@ import { getStructuredAnswerPrompt } from './answer_agent';
 import { prepareMessages } from '../utils/to_langchain_messages';
 
 jest.mock('../utils/to_langchain_messages', () => ({
+  ...jest.requireActual('../utils/to_langchain_messages'),
   prepareMessages: jest.fn().mockResolvedValue([['human', 'history']]),
 }));
 

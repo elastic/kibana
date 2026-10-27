@@ -22,6 +22,7 @@ import { DeepStrict, expectParseError, expectParseSuccess } from '@kbn/zod-helpe
 import { generateOpenApiDocument } from '@kbn/router-to-openapispec';
 import type { OpenAPIV3 } from 'openapi-types';
 import { Duration, DurationUnit } from '../../models/duration';
+import { getSnapshotParamsSchema } from '../../rest_specs/routes/snapshot';
 import { buildDomainSLO, buildWireSLO } from '../../test_helpers/fixtures';
 import { dateType } from './common';
 import { durationType } from './duration';
@@ -242,8 +243,8 @@ describe('OAS conversion × z.codec', () => {
     // `dateType` (and `durationType`) have a `z.instanceof(...)` output side.
     // The query/path parameter converter unwraps the codec to that output side
     // and throws because it is neither string-like nor coercible, so any route
-    // with a date/duration codec in `query`/`path` (e.g. the snapshot route's
-    // `at: dateType`) would break /api/oas generation. Requires the upstream
+    // with a date/duration codec in `query`/`path` would break /api/oas
+    // generation. Requires the upstream
     // kbn-router-to-openapispec fix agreed in plan decision #9. This test pins
     // the failure as evidence and will fail loudly once the platform is fixed.
     await expect(
@@ -258,5 +259,40 @@ describe('OAS conversion × z.codec', () => {
     ).rejects.toThrow(
       'Input parser key: "at" must be ZodString, ZodNumber, ZodBoolean, ZodBigInt or ZodDate'
     );
+  });
+
+  it('converts the snapshot route query schema', async () => {
+    const doc = await generate([
+      {
+        path: '/api/observability/slos/{id}/_snapshot',
+        method: 'get',
+        options: { access: 'public', summary: 'Get SLO snapshot' },
+        validationSchemas: {
+          request: {
+            params: getSnapshotParamsSchema.shape.path,
+            query: getSnapshotParamsSchema.shape.query,
+          },
+        },
+      },
+    ]);
+
+    const parameters = doc.paths['/api/observability/slos/{id}/_snapshot']?.get
+      ?.parameters as OpenAPIV3.ParameterObject[];
+    const at = parameters.find((param) => param.name === 'at');
+    expect(at?.required).toBe(true);
+    expect(at?.schema).toEqual(expect.objectContaining({ type: 'string', maxLength: 128 }));
+  });
+});
+
+describe('getSnapshotParamsSchema query', () => {
+  const { query } = getSnapshotParamsSchema.shape;
+
+  it('accepts any date string new Date() can parse', () => {
+    expectParseSuccess(query.safeParse({ at: '2024-01-01T00:00:00.000Z' }));
+    expectParseSuccess(query.safeParse({ at: '2024-01-01' }));
+  });
+
+  it('rejects an invalid date string', () => {
+    expectParseError(query.safeParse({ at: 'not-a-date' }));
   });
 });

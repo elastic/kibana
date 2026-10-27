@@ -31,6 +31,8 @@ examples/locator_explorer @elastic/appex-sharedux
 examples/partial_results_example @elastic/kibana-discover
 examples/portable_dashboards_example @elastic/kibana-dashboards
 examples/preboot_example @elastic/kibana-security @elastic/kibana-core
+examples/pubsub_example @elastic/kibana-core
+examples/pubsub-example-topic @elastic/kibana-core
 examples/resizable_layout_examples @elastic/kibana-discover
 examples/response_stream @elastic/search-ml-ux
 examples/routing_example @elastic/kibana-core
@@ -293,6 +295,9 @@ src/core/packages/pricing/common @elastic/kibana-core
 src/core/packages/pricing/server @elastic/kibana-core
 src/core/packages/pricing/server-internal @elastic/kibana-core
 src/core/packages/pricing/server-mocks @elastic/kibana-core
+src/core/packages/pubsub/server @elastic/kibana-core
+src/core/packages/pubsub/server-internal @elastic/kibana-core
+src/core/packages/pubsub/server-mocks @elastic/kibana-core
 src/core/packages/rendering/browser @elastic/kibana-core
 src/core/packages/rendering/browser-internal @elastic/kibana-core
 src/core/packages/rendering/browser-mocks @elastic/kibana-core
@@ -334,6 +339,7 @@ src/core/packages/theme/browser @elastic/kibana-core
 src/core/packages/theme/browser-internal @elastic/kibana-core
 src/core/packages/theme/browser-internal-types @elastic/kibana-core
 src/core/packages/theme/browser-mocks @elastic/kibana-core
+src/core/packages/threads/server-internal @elastic/kibana-core
 src/core/packages/ui-settings/browser @elastic/appex-sharedux
 src/core/packages/ui-settings/browser-internal @elastic/appex-sharedux
 src/core/packages/ui-settings/browser-mocks @elastic/appex-sharedux
@@ -417,6 +423,7 @@ src/platform/packages/private/kbn-jest-serializers @elastic/kibana-operations
 src/platform/packages/private/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-discover
 src/platform/packages/private/kbn-lens-formula-docs @elastic/kibana-dashboards
+src/platform/packages/private/kbn-logging-ecs @elastic/kibana-core
 src/platform/packages/private/kbn-managed-content-badge @elastic/kibana-dashboards
 src/platform/packages/private/kbn-mapbox-gl @elastic/kibana-dashboards
 src/platform/packages/private/kbn-migrator-test-kit @elastic/kibana-core
@@ -851,7 +858,7 @@ src/platform/packages/shared/shared-ux/router/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/storybook/mock @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/table_persist @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/toolbar_selector @elastic/obs-signals-metrics-team
-src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
+src/platform/plugins/private/advanced_settings @elastic/kibana-management
 src/platform/plugins/private/dev_comments @elastic/appex-sharedux
 src/platform/plugins/private/event_annotation @elastic/kibana-dashboards
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-dashboards
@@ -1136,6 +1143,7 @@ x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-ui @elastic/n
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-shared-components @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-significant-events-schema @elastic/nightshift
+x-pack/platform/packages/shared/kbn-slo-constants @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-streamlang @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-streamlang-tests @elastic/streams-ui
@@ -1456,7 +1464,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-lead-generation @elastic/secu
 x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance @elastic/security-solution
 x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage @elastic/security-threat-hunting
-x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
+x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/automatic-migrations
 x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps
@@ -1465,6 +1473,7 @@ x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic
 x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-security-evals-matrix @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-security-evals-workflow-traces @elastic/security-generative-ai
+x-pack/solutions/security/packages/kbn-securitysolution-alerts-page-url @elastic/security-solution
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components @elastic/security-detection-engineering
@@ -2142,11 +2151,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/functional/services/aiops @elastic/search-ml-ux
 
 # Transforms maintained by the Kibana Management team.
-/x-pack/platform/test/serverless/**/test_suites/management/transforms/ @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group2/transform.ts @elastic/kibana-management
-/x-pack/platform/test/functional/apps/transform/ @elastic/kibana-management
 /x-pack/platform/test/functional/services/transform @elastic/kibana-management
-/x-pack/platform/test/functional_basic/apps/transform/ @elastic/kibana-management
 
 /x-pack/dev-tools @elastic/kibana-operations
 /catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
@@ -2257,7 +2262,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/dev/performance @elastic/appex-qa
 /x-pack/platform/test/functional/config.*.* @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/test_suites/README.md @elastic/appex-qa
-/x-pack/platform/test/serverless/functional/test_suites/management/index.ts @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/page_objects/svl_common_page.ts @elastic/appex-qa
 /x-pack/platform/test/README.md @elastic/appex-qa
 /x-pack/platform/test/serverless/README.md @elastic/appex-qa
@@ -2636,7 +2640,7 @@ x-pack/platform/plugins/shared/actions/server/inbound/ @elastic/workflows-eng @e
 x-pack/platform/plugins/shared/connector_events_bridge/ @elastic/workflows-eng
 
 ## Relay
-x-pack/platform/plugins/shared/actions/server/lib/relay @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/actions/server/lib/relay @elastic/nightshift
 
 
 ## Bearer with TLS / Kubernetes auth
@@ -2785,13 +2789,9 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 # Management Experience - Deployment Management
 /src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-core @elastic/kibana-discover # Assigned per Scout saved_objects_management import suites
 /x-pack/platform/test/functional/services/ace_editor.ts @elastic/kibana-management
-/x-pack/platform/test/functional/page_objects/remote_clusters_page.ts @elastic/kibana-management
-/x-pack/platform/test/stack_functional_integration/apps/ccs @elastic/kibana-management
-/x-pack/platform/test/stack_functional_integration/apps/ccs/ccs_discover.ts @elastic/kibana-discover
+/x-pack/platform/test/stack_functional_integration/apps/ccs @elastic/kibana-discover
 /x-pack/platform/test/functional/services/data_stream.ts @elastic/kibana-dashboards
 /x-pack/platform/test/functional/page_objects/upgrade_assistant_page.ts @elastic/kibana-management
-/x-pack/platform/test/functional/page_objects/rollup_page.ts @elastic/kibana-management
-/x-pack/platform/test/functional/page_objects/cross_cluster_replication_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/index_management_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/index_lifecycle_management_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/tag_management_page.ts @elastic/appex-sharedux
@@ -2805,9 +2805,6 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 /src/platform/test/functional/apps/console/*.ts @elastic/kibana-management
 /src/platform/test/accessibility/apps/management.ts @elastic/kibana-discover
 /x-pack/platform/test/functional/services/grok_debugger.ts @elastic/kibana-management
-/x-pack/platform/test/serverless/functional/test_suites/management/advanced_settings.ts @elastic/kibana-management
-/x-pack/platform/test/serverless/functional/test_suites/management/disabled_uis.ts @elastic/kibana-management
-/x-pack/platform/test/serverless/functional/test_suites/management/landing_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/apps/rollup_job/ @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group1/advanced_settings.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/**/grok_debugger.ts @elastic/kibana-management
@@ -2991,6 +2988,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/test/scout @elastic/security-engineering-productivity
+/x-pack/solutions/security/plugins/security_solution/test/scout_security_audit/ @elastic/response-ops
 
 ## Security Solution sub teams - Security Investigations
 
@@ -3026,7 +3024,6 @@ x-pack/platform/plugins/shared/entity_store/common/domain/definitions/dynamic @e
 /x-pack/solutions/security/plugins/security_solution/common/api/tags @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/common/api/timeline @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/common/search_strategy/timeline @elastic/security-investigations
-/x-pack/solutions/security/plugins/security_solution/common/siem_migrations @elastic/security-threat-hunting
 
 /x-pack/solutions/security/plugins/security_solution/common/timelines @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/common/types/header_actions @elastic/security-investigations
@@ -3099,7 +3096,6 @@ x-pack/platform/plugins/shared/entity_store/common/domain/definitions/dynamic @e
 /x-pack/solutions/security/plugins/security_solution/public/one_discover @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/overview @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/resolver @elastic/security-investigations
-/x-pack/solutions/security/plugins/security_solution/public/siem_migrations @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/flyout_prev_next_nav @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/threat_intelligence @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/timelines @elastic/security-investigations
@@ -3116,10 +3112,8 @@ x-pack/platform/plugins/shared/entity_store/common/domain/definitions/dynamic @e
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/alert_analysis @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/alert_triage @elastic/security-investigations
 /x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/evals/security/alert_triage_skill @elastic/security-investigations
+/x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/evals/security/automatic_migration @elastic/automatic-migrations
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/threat_hunting @elastic/security-investigations
-/x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/siem_migration @elastic/security-threat-hunting
-/x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/siem_migrations @elastic/security-threat-hunting
-/x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/lib/timeline @elastic/security-investigations
 
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/cases @elastic/security-investigations
@@ -3130,7 +3124,6 @@ x-pack/platform/plugins/shared/entity_store/common/domain/definitions/dynamic @e
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/pagination @elastic/security-investigations
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/urls @elastic/security-investigations
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/investigations @elastic/security-investigations
-/x-pack/solutions/security/test/security_solution_cypress/cypress/fixtures/siem_migrations @elastic/security-threat-hunting
 
 /x-pack/solutions/security/test/security_solution_cypress/cypress/screens/expandable_flyout  @elastic/security-investigations
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/security-investigations
@@ -3139,7 +3132,6 @@ x-pack/platform/plugins/shared/entity_store/common/domain/definitions/dynamic @e
 /x-pack/platform/test/fixtures/es_archives/auditbeat/overview @elastic/security-investigations
 
 /x-pack/solutions/security/test/security_solution_api_integration/test_suites/investigation @elastic/security-investigations
-/x-pack/solutions/security/test/security_solution_api_integration/test_suites/siem_migrations @elastic/security-threat-hunting
 
 /x-pack/solutions/security/test/serverless/functional/test_suites/ftr/discover @elastic/security-investigations
 /x-pack/solutions/security/test/serverless/functional/configs/config.context_awareness.ts @elastic/security-investigations
@@ -3657,6 +3649,36 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/gen
 ## Security Solution sub teams - Automatic Import
 x-pack/platform/test/automatic_import_api_integration @elastic/siem-conduit
 
+## Security Solution sub teams - Automatic Migrations
+/x-pack/solutions/security/plugins/security_solution/common/siem_migrations @elastic/automatic-migrations
+
+/x-pack/solutions/security/plugins/security_solution/public/siem_migrations @elastic/automatic-migrations
+/x-pack/solutions/security/plugins/security_solution/public/onboarding/components/onboarding_body/cards/siem_migrations @elastic/automatic-migrations
+/x-pack/solutions/security/plugins/security_solution/public/common/icons/siem_migrations.tsx @elastic/automatic-migrations
+/x-pack/solutions/security/plugins/security_solution/public/common/mock/mock_siem_migrations_service.ts @elastic/automatic-migrations
+
+/x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations @elastic/automatic-migrations
+/x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/siem_migration @elastic/automatic-migrations
+/x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/siem_migrations @elastic/automatic-migrations
+/x-pack/solutions/security/plugins/security_solution/server/agent_builder/attachments/rule_migration_items.ts @elastic/automatic-migrations
+
+/x-pack/solutions/security/plugins/security_solution/docs/siem_migration @elastic/automatic-migrations
+
+/x-pack/solutions/security/packages/features/src/siem_migrations @elastic/automatic-migrations
+/x-pack/solutions/security/packages/upselling/**/siem_migration* @elastic/automatic-migrations
+/x-pack/solutions/security/plugins/security_solution_ess/public/upselling/**/siem_migration* @elastic/automatic-migrations
+/x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/**/siem_migration* @elastic/automatic-migrations
+
+/x-pack/solutions/security/test/security_solution_api_integration/test_suites/siem_migrations @elastic/automatic-migrations
+
+/x-pack/solutions/security/test/security_solution_cypress/es_archives/siem_migrations @elastic/automatic-migrations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/investigations/siem_migrations @elastic/automatic-migrations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/screens/siem_migrations.ts @elastic/automatic-migrations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/siem_migrations.ts @elastic/automatic-migrations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/api_calls/siem_migrations.ts @elastic/automatic-migrations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/fixtures/siem_migrations @elastic/automatic-migrations
+
+
 
 # Security Defend Workflows - OSQuery Ownership
 /x-pack/solutions/security/test/osquery_cypress @elastic/security-defend-workflows
@@ -3756,7 +3778,6 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/test/functional/page_objects/share_page.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846648444
 /src/platform/test/accessibility/apps/kibana_overview_* @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files/cab99bce5ac2082fa77222beebe3b61ff836b94b#r1846659920
 /x-pack/platform/test/functional/services/sample_data @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200142#discussion_r1846512756
-/src/platform/plugins/private/advanced_settings/test/scout/ui @elastic/appex-sharedux
 /src/platform/test/api_integration/apis/home/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077065
 /src/platform/test/functional/services/saved_objects_finder.ts @elastic/appex-sharedux
 /x-pack/platform/test/functional/services/user_menu.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/179270

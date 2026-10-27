@@ -242,7 +242,7 @@ suite config. Drop `KBN_EVALS_WEEKLY=1` to see the PR / on-demand fanout.
 
 ```bash
 CI=x-pack/platform/packages/shared/kbn-evals/scripts/ci
-export EVAL_SUITE_INFO="$(node $CI/get_suite_info.js significant-events)"
+export EVAL_SUITE_INFO="$(node $CI/get_suite_info.js nightshift-investigations)"
 export EVAL_MODEL_GROUPS="$(jq -r '.weeklyEisModelGroups | join(",")' <<<"$EVAL_SUITE_INFO")"
 export KIBANA_TESTING_INFERENCE_ENDPOINTS="$(jq -c '[.weeklyEisModelGroups[] | ltrimstr("eis/")]
   | map({ key: ("eis-" + gsub("[^a-zA-Z0-9]+"; "-")), value: { provider: "elastic", providerConfig: { model_id: . } } })
@@ -347,6 +347,10 @@ Give the suite its own Vault secret with `vaultSecret`, so rotating its credenti
 | `--profile dev-vault`        | `secret/kibana-issues/dev/kbn-evals/<vaultSecret>` in the dev Vault                           |
 | `--profile <file profile>`   | `config.<profile>.json`, which holds the suite's blocks next to the general keys              |
 | No `vaultSecret` (any place) | The general config (`--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI)                 |
+
+CI forwards the initial hook input as `KBN_EVALS_SCOUT_HOOK_CONFIG_B64`. The native `evals run`
+command reuses it when no datasets profile is selected, so both hook invocations see the same
+suite secret without another Vault read. Explicit profiles retain their own configuration.
 
 Manage the secret with the Vault scripts' `--suite` flag, which keeps the local copy in a gitignored `vault/config.json` next to the suite's `playwright.config.ts` (copy `vault/config.example.json` to start):
 

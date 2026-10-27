@@ -97,6 +97,8 @@ export const AlertTabContent: React.FC<CommonAttachmentListViewProps> = ({
           id={`case-details-alerts-${caseData.owner}`}
           onLoaded={onLoaded}
           query={alertIdsQuery}
+          additionalBulkActionItems={removeBulkActionItems}
+          onRemoveFromCase={removeActions?.onRemoveFromCase}
         />
       ) : (
         <AlertsTable

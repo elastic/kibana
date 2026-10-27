@@ -25,6 +25,12 @@ const setup = () => {
 };
 
 describe('<ProfilesInspectorView />', () => {
+  it('renders the info callout explaining the view', () => {
+    setup();
+    expect(screen.getByTestId('profilesInspectorViewCallout')).toBeVisible();
+    expect(screen.getByText('About Discover profiles')).toBeVisible();
+  });
+
   it('renders the root profile section', () => {
     setup();
     expect(screen.getByText('Root profile')).toBeVisible();
