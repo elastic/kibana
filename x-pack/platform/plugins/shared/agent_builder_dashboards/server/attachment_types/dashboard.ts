@@ -19,11 +19,15 @@ import {
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { withByRefPanels } from './by_ref_panels';
 
 interface CreateDashboardAttachmentTypeOptions {
   logger: Logger;
   getDashboardClient: () => Promise<DashboardPluginStart['client']>;
+  /** Reads by-reference panels' saved objects as the requesting user. */
+  getSavedObjectsClient?: (request: KibanaRequest) => Promise<SavedObjectsClientContract>;
 }
 
 const normalizeDashboardAttachmentData = (
@@ -38,6 +42,7 @@ const normalizeDashboardAttachmentData = (
 export const createDashboardAttachmentType = ({
   logger,
   getDashboardClient,
+  getSavedObjectsClient,
 }: CreateDashboardAttachmentTypeOptions): AttachmentTypeDefinition<
   typeof DASHBOARD_ATTACHMENT_TYPE,
   DashboardAttachmentData
@@ -55,13 +60,19 @@ export const createDashboardAttachmentType = ({
 
   return {
     id: DASHBOARD_ATTACHMENT_TYPE,
-    validate: (input) => {
+    validate: async (input, context) => {
       const parseResult = dashboardAttachmentDataSchema.safeParse(input);
-      if (parseResult.success) {
-        return { valid: true, data: parseResult.data };
-      } else {
+      if (!parseResult.success) {
         return { valid: false, error: parseResult.error.message };
       }
+      if (!context || !getSavedObjectsClient) {
+        return { valid: true, data: parseResult.data };
+      }
+      const savedObjectsClient = await getSavedObjectsClient(context.request);
+      return {
+        valid: true,
+        data: await withByRefPanels(parseResult.data, { savedObjectsClient, logger }),
+      };
     },
     resolve: async (
       origin: string,

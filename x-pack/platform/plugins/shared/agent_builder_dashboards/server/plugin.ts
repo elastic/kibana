@@ -63,6 +63,10 @@ export class AgentBuilderDashboardsPlugin
       createDashboardAttachmentType({
         logger: this.logger,
         getDashboardClient,
+        getSavedObjectsClient: async (request) => {
+          const [coreStart] = await coreSetup.getStartServices();
+          return coreStart.savedObjects.getScopedClient(request);
+        },
       }) as Parameters<typeof setupDeps.agentBuilder.attachments.registerType>[0]
     );
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));

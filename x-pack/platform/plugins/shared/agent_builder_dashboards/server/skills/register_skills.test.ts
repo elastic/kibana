@@ -46,6 +46,11 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('Do not query the data before generating');
   });
 
+  it('describes by-reference panels from their read-only summary in the skill body', () => {
+    expect(skill.content).toContain('`_derived.opaque_panels`');
+    expect(skill.content).toContain('never look the saved object up with other tools');
+  });
+
   it('inlines the dashboard design guidance directly in the skill body', () => {
     expect(skill.content).toContain('Dashboard Composition Guidelines');
     expect(skill.content).toContain('Panel Layout');

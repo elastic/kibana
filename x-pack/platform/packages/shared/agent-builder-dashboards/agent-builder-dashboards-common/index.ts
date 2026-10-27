@@ -12,6 +12,9 @@ export {
   sectionGridSchema,
   timeRangeSchema,
   dashboardAttachmentDataSchema,
+  OPAQUE_PANEL_LIMITS,
+  opaquePanelSummarySchema,
+  derivedContextSchema,
   isSection,
 } from './types';
 
@@ -19,6 +22,8 @@ export type {
   AttachmentPanel,
   DashboardSection,
   DashboardAttachmentData,
+  OpaquePanelSummary,
+  DerivedContext,
   DashboardAttachment,
   PendingDashboardAttachment,
 } from './types';

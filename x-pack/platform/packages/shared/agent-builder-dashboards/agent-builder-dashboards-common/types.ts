@@ -11,9 +11,14 @@ import type {
   DashboardAttachmentData,
   AttachmentPanel,
   DashboardSection,
+  OpaquePanelSummary,
+  DerivedContext,
 } from './dashboard_schema_types';
 import {
   dashboardAttachmentDataSchema,
+  OPAQUE_PANEL_LIMITS,
+  opaquePanelSummarySchema,
+  derivedContextSchema,
   panelGridSchema,
   sectionGridSchema,
   timeRangeSchema,
@@ -23,9 +28,18 @@ import {
 // Re-export dashboard schema types for convenience
 // NOTE: These types are temporary and should be replaced with types from @kbn/dashboard-plugin
 // once the dashboard plugin exports its schema types.
-export type { DashboardAttachmentData, AttachmentPanel, DashboardSection };
+export type {
+  DashboardAttachmentData,
+  AttachmentPanel,
+  DashboardSection,
+  OpaquePanelSummary,
+  DerivedContext,
+};
 export {
   dashboardAttachmentDataSchema,
+  OPAQUE_PANEL_LIMITS,
+  opaquePanelSummarySchema,
+  derivedContextSchema,
   panelGridSchema,
   sectionGridSchema,
   timeRangeSchema,

@@ -147,6 +147,47 @@ const pinnedControlSchema = z.record(z.string(), z.unknown());
 const pinnedPanelsSchema = z.array(pinnedControlSchema);
 
 // ============================================================================
+// Derived Agent Context Schema
+// ============================================================================
+
+/** Size limits of opaque panel summaries; the server truncates what it writes to fit them. */
+export const OPAQUE_PANEL_LIMITS = {
+  entries: 500,
+  textLength: 1000,
+  listItems: 20,
+} as const;
+
+const boundedTextSchema = z.string().max(OPAQUE_PANEL_LIMITS.textLength);
+
+/**
+ * Read-only summary of a panel whose config does not show what it displays, such as a by-reference
+ * panel that only references a saved object.
+ */
+export const opaquePanelSummarySchema = z.object({
+  panel_id: boundedTextSchema,
+  saved_object_id: boundedTextSchema,
+  resolved: z.boolean(),
+  error: boundedTextSchema.optional(),
+  title: boundedTextSchema.optional(),
+  chart_type: boundedTextSchema.optional(),
+  data_views: z.array(boundedTextSchema).max(OPAQUE_PANEL_LIMITS.listItems).optional(),
+  /** KQL or ES|QL query of the saved object. */
+  query: boundedTextSchema.optional(),
+});
+
+export type OpaquePanelSummary = z.infer<typeof opaquePanelSummarySchema>;
+
+/**
+ * Agent-only context the server derives from the dashboard on every validation.
+ * It is not part of the dashboard API, so it is never converted back to dashboard state.
+ */
+export const derivedContextSchema = z.object({
+  opaque_panels: z.array(opaquePanelSummarySchema).max(OPAQUE_PANEL_LIMITS.entries).optional(),
+});
+
+export type DerivedContext = z.infer<typeof derivedContextSchema>;
+
+// ============================================================================
 // Dashboard Attachment Data Schema (matches DashboardState)
 // ============================================================================
 
@@ -168,6 +209,7 @@ export const dashboardAttachmentDataSchema = z.object({
   access_control: accessControlSchema.optional(),
   project_routing: z.string().optional(),
   esql_approximation: z.boolean().optional(),
+  _derived: derivedContextSchema.optional(),
 });
 
 export type DashboardAttachmentData = z.infer<typeof dashboardAttachmentDataSchema>;

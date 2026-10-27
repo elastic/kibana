@@ -219,4 +219,104 @@ describe('createDashboardAttachmentType', () => {
 
     expect(isStale).toBe(false);
   });
+
+  it('isStale ignores derived agent context', async () => {
+    const dashboardClient = createDashboardClient();
+    const savedObjectsClient = createSavedObjectsClient();
+    const definition = createDashboardAttachmentType({
+      logger: createLogger(),
+      getDashboardClient: async () => dashboardClient,
+    });
+    const context = { request: {} as never, spaceId: 'default', savedObjectsClient };
+    const resolvedData = await definition.resolve?.('dashboard-1', context);
+
+    const isStale = await definition.isStale?.(
+      createAttachment({
+        ...resolvedData!,
+        _derived: {
+          opaque_panels: [{ panel_id: 'panel-1', saved_object_id: 'vis-1', resolved: true }],
+        },
+      }),
+      context
+    );
+
+    expect(isStale).toBe(false);
+  });
+
+  describe('validate', () => {
+    const byRefDashboard: DashboardAttachmentData = {
+      title: 'Web traffic',
+      panels: [
+        {
+          type: 'legacy_vis',
+          id: 'vega',
+          config: { savedObjectId: 'vis-1' },
+          grid: { x: 0, y: 0, w: 24, h: 10 },
+        },
+      ],
+    };
+
+    const createByRefClient = () =>
+      ({
+        bulkGet: jest.fn().mockResolvedValue({
+          saved_objects: [
+            {
+              type: 'visualization',
+              id: 'vis-1',
+              references: [],
+              attributes: {
+                title: 'Heatmap',
+                visState: JSON.stringify({ type: 'vega', params: { spec: '{}' } }),
+              },
+            },
+          ],
+        }),
+      } as unknown as SavedObjectsClientContract);
+
+    it('adds by-ref panel summaries read with the request-scoped client', async () => {
+      const savedObjectsClient = createByRefClient();
+      const request = { id: 'request' } as never;
+      const getSavedObjectsClient = jest.fn().mockResolvedValue(savedObjectsClient);
+      const definition = createDashboardAttachmentType({
+        logger: createLogger(),
+        getDashboardClient: async () => createDashboardClient(),
+        getSavedObjectsClient,
+      });
+
+      const result = await definition.validate(byRefDashboard, { request });
+
+      expect(getSavedObjectsClient).toHaveBeenCalledWith(request);
+      expect(result).toEqual({
+        valid: true,
+        data: {
+          ...byRefDashboard,
+          _derived: {
+            opaque_panels: [
+              {
+                panel_id: 'vega',
+                saved_object_id: 'vis-1',
+                resolved: true,
+                title: 'Heatmap',
+                chart_type: 'vega',
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    it('validates without summaries when there is no request', async () => {
+      const getSavedObjectsClient = jest.fn();
+      const definition = createDashboardAttachmentType({
+        logger: createLogger(),
+        getDashboardClient: async () => createDashboardClient(),
+        getSavedObjectsClient,
+      });
+
+      const result = await definition.validate(byRefDashboard);
+
+      expect(getSavedObjectsClient).not.toHaveBeenCalled();
+      expect(result).toEqual({ valid: true, data: byRefDashboard });
+    });
+  });
 });

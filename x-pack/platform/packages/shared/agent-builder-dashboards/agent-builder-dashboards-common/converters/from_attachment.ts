@@ -98,6 +98,7 @@ const normalizeWidgets = (widgets: AgentWidget[]): DashboardWidget[] =>
 /**
  * Converts a DashboardAttachment to a DashboardState.
  * Uses provided values from the attachment, falling back to defaults for missing fields.
+ * Derived agent context is not dashboard state, so it is left out.
  */
 export const attachmentDataToDashboardState = ({
   panels = [],
@@ -106,6 +107,7 @@ export const attachmentDataToDashboardState = ({
   pinned_panels,
   access_control,
   options,
+  _derived,
   ...rest
 }: DashboardAttachmentData): DashboardState => ({
   ...EMPTY_DASHBOARD_STATE,

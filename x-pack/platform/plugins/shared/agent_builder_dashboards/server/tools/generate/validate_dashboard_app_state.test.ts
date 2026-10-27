@@ -114,5 +114,17 @@ describe('createDashboardAppStateValidator', () => {
         } as DashboardAttachmentData)
       ).toEqual([{ path: ['title'], message: expect.any(String) }]);
     });
+
+    it('ignores derived agent context, which is not part of the dashboard schema', () => {
+      expect(
+        createValidator().validateDashboardFields({
+          title: 'Dashboard',
+          panels: [],
+          _derived: {
+            opaque_panels: [{ panel_id: 'panel', saved_object_id: 'vis-1', resolved: true }],
+          },
+        })
+      ).toEqual([]);
+    });
   });
 });
