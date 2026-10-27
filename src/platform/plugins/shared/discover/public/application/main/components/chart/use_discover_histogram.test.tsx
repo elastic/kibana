@@ -755,5 +755,35 @@ describe('useDiscoverHistogram', () => {
       );
       expect(modifiedAttributes).toEqual({ title: 'Modified title' });
     });
+
+    it('should pass breakdown color mappings from the profile', async () => {
+      const { toolkit } = await setup();
+      const dataStateContainer = toolkit.getCurrentTabDataStateContainer();
+      const scopedProfilesManager = selectTabRuntimeState(
+        toolkit.runtimeStateManager,
+        toolkit.getCurrentTab().id
+      ).scopedProfilesManager$.getValue();
+      await scopedProfilesManager.resolveDataSourceProfile({});
+      const { hook } = await renderUseDiscoverHistogram({ toolkit });
+
+      let breakdownColorMappings:
+        | UnifiedHistogramFetchParamsExternal['breakdownColorMappings']
+        | undefined;
+      const fetch$ = new Subject<DiscoverLatestFetchDetails>();
+      dataStateContainer.fetchChart$ = fetch$;
+      const api = createMockUnifiedHistogramApi();
+      api.fetch = jest.fn((params) => {
+        breakdownColorMappings = params.breakdownColorMappings;
+      });
+      act(() => {
+        hook.result.current.setUnifiedHistogramApi(api);
+      });
+      act(() => {
+        fetch$.next({});
+      });
+      expect(breakdownColorMappings).toEqual({
+        extension: expect.objectContaining({ valueOrder: ['css', 'js'] }),
+      });
+    });
   });
 });

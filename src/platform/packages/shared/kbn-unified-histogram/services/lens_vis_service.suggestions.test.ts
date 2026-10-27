@@ -631,4 +631,108 @@ describe('LensVisService suggestions', () => {
 
     expect(onLensSuggestionsApiCall).toHaveBeenCalledWith(expect.anything(), undefined);
   });
+
+  describe('breakdownColorMappings', () => {
+    const colorMapping = {
+      paletteId: 'default' as const,
+      colorMode: { type: 'categorical' as const },
+      assignments: [],
+      specialAssignments: [
+        { rules: [{ type: 'other' as const }], color: { type: 'loop' as const } },
+      ],
+    };
+    const timeRange = {
+      from: '2023-09-03T08:00:00.000Z',
+      to: '2023-09-04T08:56:28.274Z',
+    };
+    const getEsqlLensVis = ({
+      columnType,
+      breakdownColorMappings,
+      externalVisContext,
+    }: {
+      columnType: 'string' | 'number' | 'geo_point';
+      breakdownColorMappings?: Parameters<typeof getLensVisMock>[0]['breakdownColorMappings'];
+      externalVisContext?: UnifiedHistogramVisContext;
+    }) =>
+      getLensVisMock({
+        filters: [],
+        query: { esql: 'from the-data-view | limit 100' },
+        dataView: dataViewMock,
+        timeInterval: 'auto',
+        timeRange,
+        breakdownField: convertDatatableColumnToDataViewFieldSpec({
+          name: 'var0',
+          id: 'var0',
+          meta: { type: columnType },
+        }) as DataViewField,
+        columns: [{ id: 'var0', name: 'var0', meta: { type: columnType } }],
+        allSuggestions: [],
+        isTransformationalESQL: false,
+        breakdownColorMappings,
+        externalVisContext,
+      });
+
+    test('should order the histogram by the value order', async () => {
+      const lensVis = await getEsqlLensVis({
+        columnType: 'string',
+        breakdownColorMappings: {
+          var0: { colorMapping, valueOrder: ['error', 'info'] },
+        },
+      });
+
+      expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual({
+        esql: `from the-data-view | limit 100
+| STATS results = COUNT(*) BY \`var0\`, timestamp = BUCKET(@timestamp, 10 minute) | EVAL __unifiedHistogramSortIndex = CASE(\`var0\` == "error", 0, \`var0\` == "info", 1, 2) | SORT __unifiedHistogramSortIndex ASC, \`var0\` ASC | DROP __unifiedHistogramSortIndex
+| LIMIT 10000`,
+      });
+    });
+
+    test('should apply the color mapping and only use values matching the column type in the value order', async () => {
+      const lensVis = await getEsqlLensVis({
+        columnType: 'number',
+        breakdownColorMappings: {
+          var0: { colorMapping, valueOrder: [500, 'error', 200] },
+        },
+      });
+
+      expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toEqual({
+        esql: expect.stringContaining('CASE(`var0` == 500, 0, `var0` == 200, 1, 2)'),
+      });
+      expect(lensVis.visContext?.attributes.state.visualization).toHaveProperty('layers', [
+        expect.objectContaining({ splitAccessors: ['var0'], colorMapping }),
+      ]);
+    });
+
+    test('should not order a non-sortable column', async () => {
+      const lensVis = await getEsqlLensVis({
+        columnType: 'geo_point',
+        breakdownColorMappings: {
+          var0: { colorMapping, valueOrder: ['error'] },
+        },
+      });
+
+      expect(lensVis.currentSuggestionContext?.type).toBe(
+        UnifiedHistogramSuggestionType.histogramForESQL
+      );
+      expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toEqual({
+        esql: expect.not.stringContaining('SORT'),
+      });
+    });
+
+    test('should override an external vis built without the value order', async () => {
+      const lensVis = await getEsqlLensVis({ columnType: 'number' });
+      const lensVis2 = await getEsqlLensVis({
+        columnType: 'number',
+        externalVisContext: lensVis.visContext,
+        breakdownColorMappings: {
+          var0: { colorMapping, valueOrder: [500] },
+        },
+      });
+
+      expect(lensVis2.visContext).not.toBe(lensVis.visContext);
+      expect(lensVis2.visContext?.attributes.state.visualization).toHaveProperty('layers', [
+        expect.objectContaining({ colorMapping }),
+      ]);
+    });
+  });
 });

@@ -99,6 +99,7 @@ export {
   getEsQuerySort,
   getTieBreakerFieldName,
   severityOrder,
+  logLevelSynonyms,
   CHART_HIDDEN_KEY,
   TABLE_HIDDEN_KEY,
   HISTOGRAM_HEIGHT_KEY,

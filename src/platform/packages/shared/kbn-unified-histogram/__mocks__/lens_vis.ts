@@ -75,6 +75,7 @@ export const getLensVisMock = async ({
   table,
   externalVisContext,
   getModifiedVisAttributes,
+  breakdownColorMappings,
   onLensSuggestionsApiCall,
   onLensSuggestionsApiParams,
 }: {
@@ -92,6 +93,7 @@ export const getLensVisMock = async ({
   table?: Datatable;
   externalVisContext?: UnifiedHistogramVisContext;
   getModifiedVisAttributes?: Parameters<LensVisService['update']>[0]['getModifiedVisAttributes'];
+  breakdownColorMappings?: Parameters<LensVisService['update']>[0]['breakdownColorMappings'];
   onLensSuggestionsApiCall?: (
     preferredChartType: ChartType | undefined,
     preferredVisAttributes: unknown
@@ -150,6 +152,7 @@ export const getLensVisMock = async ({
     table,
     onSuggestionContextChange: () => {},
     getModifiedVisAttributes,
+    breakdownColorMappings,
   });
 
   return {

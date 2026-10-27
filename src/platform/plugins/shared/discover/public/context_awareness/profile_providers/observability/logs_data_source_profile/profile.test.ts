@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import {
+  buildDataTableRecord,
+  getLogLevelColor,
+  LogLevelCoalescedValue,
+} from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { EsqlSource } from '@kbn/data-source';
@@ -23,6 +27,8 @@ import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 import { RESOLUTION_MATCH } from './__mocks__/logs_data_source_resolution_match';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
+import type { BreakdownColorMapping } from '../../../types';
+import { LOG_LEVEL_FIELDS } from '../../../../../common/data_types/logs/constants';
 
 const mockServices = createProfileProviderSharedServicesMock();
 
@@ -159,6 +165,62 @@ describe('logsDataSourceProfileProvider', () => {
     spec: {
       title: VALID_IMPLICIT_DATA_INDEX_PATTERN,
     },
+  });
+
+  describe('getBreakdownColorMappings', () => {
+    const euiTheme = { colors: { mediumShade: '#98a2b3' } } as unknown as EuiThemeComputed;
+    const getBreakdownColorMappings = (prev = () => ({})) =>
+      logsDataSourceProfileProvider.profile.getBreakdownColorMappings?.(prev, {
+        context: RESOLUTION_MATCH.context,
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      })({ euiTheme });
+
+    const findColorForValue = (mapping: BreakdownColorMapping, value: string) =>
+      mapping.colorMapping.assignments.find((assignment) =>
+        assignment.rules.some((rule) => rule.type === 'raw' && rule.value === value)
+      )?.color;
+
+    it('should define a mapping for every log level field and keep previous mappings', () => {
+      const mappings = getBreakdownColorMappings(() => ({
+        other: {
+          colorMapping: { assignments: [] } as unknown as BreakdownColorMapping['colorMapping'],
+        },
+      }));
+
+      expect(Object.keys(mappings ?? {})).toEqual(['other', ...LOG_LEVEL_FIELDS]);
+    });
+
+    it('should color raw log level variants like the row indicator', () => {
+      const mapping = getBreakdownColorMappings()?.['log.level'];
+      const errorColor = {
+        type: 'colorCode',
+        colorCode: getLogLevelColor(LogLevelCoalescedValue.error, euiTheme),
+      };
+
+      expect(mapping).toBeDefined();
+      for (const value of ['error', 'ERROR', 'Error', 'err', 'ERR']) {
+        expect(findColorForValue(mapping!, value)).toEqual(errorColor);
+      }
+      expect(findColorForValue(mapping!, 'info')).toEqual({
+        type: 'colorCode',
+        colorCode: getLogLevelColor(LogLevelCoalescedValue.info, euiTheme),
+      });
+      expect(findColorForValue(mapping!, 'warning2')).toBeUndefined();
+      expect(mapping!.colorMapping.specialAssignments).toEqual([
+        { rules: [{ type: 'other' }], color: { type: 'loop' } },
+      ]);
+    });
+
+    it('should order values by severity, most severe first, without duplicates', () => {
+      const { valueOrder = [] } = getBreakdownColorMappings()!['log.level'];
+
+      expect(valueOrder[0]).toBe('emergency');
+      expect(valueOrder.indexOf('fatal')).toBeLessThan(valueOrder.indexOf('error'));
+      expect(valueOrder.indexOf('error')).toBeLessThan(valueOrder.indexOf('warn'));
+      expect(valueOrder.indexOf('warn')).toBeLessThan(valueOrder.indexOf('info'));
+      expect(valueOrder[valueOrder.length - 1]).toBe('Trac');
+      expect(new Set(valueOrder).size).toBe(valueOrder.length);
+    });
   });
 
   describe('getRowIndicator', () => {

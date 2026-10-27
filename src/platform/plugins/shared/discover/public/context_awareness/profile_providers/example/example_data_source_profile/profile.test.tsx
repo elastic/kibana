@@ -144,6 +144,32 @@ describe('createExampleDataSourceProfileProvider', () => {
     });
   });
 
+  describe('getBreakdownColorMappings', () => {
+    it('colors and orders the log.level breakdown values and keeps previous mappings', () => {
+      const provider = createExampleDataSourceProfileProvider();
+      const previousMappings = { 'service.name': { colorMapping: {} as never } };
+
+      // Non-null assertion: accessors are optional on the profile type, this one is implemented here.
+      const mappings = provider.profile.getBreakdownColorMappings!(
+        () => previousMappings,
+        {} as never
+      )({ euiTheme: {} as never });
+
+      expect(Object.keys(mappings)).toStrictEqual(['service.name', 'log.level']);
+      expect(mappings['log.level'].valueOrder).toStrictEqual(['error', 'info', 'debug']);
+      expect(
+        mappings['log.level'].colorMapping.assignments.map(({ rules, color }) => [
+          rules[0].type === 'raw' ? rules[0].value : undefined,
+          color.type === 'colorCode' ? color.colorCode : undefined,
+        ])
+      ).toStrictEqual([
+        ['error', '#bd271e'],
+        ['info', '#0077cc'],
+        ['debug', '#98a2b3'],
+      ]);
+    });
+  });
+
   describe('getDocViewer', () => {
     it('renders the record formatted by the formatter from the resolved context (ES|QL)', async () => {
       await renderExampleDocView(ESQL_PARAMS, buildRecord(ESQL_FLATTENED));

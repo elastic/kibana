@@ -109,6 +109,7 @@
     "@kbn/rison",
     "@kbn/unified-tabs",
     "@kbn/unified-histogram",
+    "@kbn/coloring",
     "@kbn/alerts-ui-shared",
     "@kbn/css-utils",
     "@kbn/restorable-state",

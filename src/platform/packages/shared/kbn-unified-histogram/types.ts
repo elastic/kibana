@@ -38,6 +38,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type { ColorMapping } from '@kbn/coloring';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-session-constants';
 
 /**
@@ -245,7 +246,35 @@ export interface UnifiedHistogramFetchParamsExternal {
   getModifiedVisAttributes?: (
     attributes: TypedLensByValueInput['attributes']
   ) => TypedLensByValueInput['attributes'];
+  /**
+   * Custom colour mappings (and optional value ordering) for breakdown field values, keyed by field name.
+   * Only applied to automatically created charts, never to a Lens vis the user customised.
+   */
+  breakdownColorMappings?: UnifiedHistogramBreakdownColorMappings;
 }
+
+/**
+ * Custom colouring and optional ordering for the values of a single breakdown field
+ */
+export interface UnifiedHistogramBreakdownColorMapping {
+  /**
+   * The Lens colour mapping applied to the chart's split series
+   */
+  colorMapping: ColorMapping.Config;
+  /**
+   * Raw breakdown values in the order their series and legend entries should appear.
+   * Values not listed are appended after the listed ones. Currently only honoured in ES|QL mode.
+   */
+  valueOrder?: Array<string | number>;
+}
+
+/**
+ * Breakdown colour mappings keyed by field name (data view field name or ES|QL column name)
+ */
+export type UnifiedHistogramBreakdownColorMappings = Record<
+  string,
+  UnifiedHistogramBreakdownColorMapping
+>;
 
 export type UnifiedHistogramFetchParams = Omit<
   UnifiedHistogramFetchParamsExternal,

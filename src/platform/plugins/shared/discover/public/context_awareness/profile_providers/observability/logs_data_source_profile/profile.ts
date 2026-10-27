@@ -20,6 +20,7 @@ import {
   getColumnsConfiguration,
   createRecommendedFields,
   getDeepAnalysisPlaybook,
+  getBreakdownColorMappings,
 } from './accessors';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 
@@ -58,6 +59,7 @@ export const createLogsDataSourceProfileProvider = (
     getColumnsConfiguration,
     getRecommendedFields: createRecommendedFields({}),
     getDeepAnalysisPlaybook,
+    getBreakdownColorMappings,
   },
   resolve: (params) => {
     if (params.rootContext.solutionType !== SolutionType.Observability) {

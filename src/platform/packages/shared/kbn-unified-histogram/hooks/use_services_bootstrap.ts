@@ -133,6 +133,7 @@ export const useServicesBootstrap = (
               ? undefined
               : nextFetchParams.timeInterval,
           breakdownField: nextFetchParams.breakdown?.field,
+          breakdownColorMappings: nextFetchParams.breakdownColorMappings,
           table: nextFetchParams.table,
           onVisContextChanged:
             nextFetchParams.dataSource.kind === 'esql' ? onVisContextChanged : undefined,

@@ -133,5 +133,22 @@ export const AUTO_ROW_HEIGHT = { value: 'Auto', lineCount: null } as const;
 /** Histogram breakdown selector, read through its `data-selected-value` — see {@link BREAKDOWN_FIELD}. */
 export const BREAKDOWN_SELECTOR = 'unifiedHistogramBreakdownSelectorButton';
 
+/**
+ * Chart `example-data-source-profile` renders in place of the default histogram through
+ * `getChartSectionConfiguration`; the Lens legend is rendered inside it.
+ */
+export const EXAMPLE_CHART = 'exampleHistogramChart';
+
+/**
+ * Legend entries of the `log.level` breakdown as `example-data-source-profile` colours them through
+ * `getBreakdownColorMappings`, in the order its `valueOrder` ranks them: by severity rather than
+ * alphabetically. Colours are the computed `rgb(...)` form of the profile's hex codes.
+ */
+export const LOGS_PROFILE_BREAKDOWN_LEGEND: Array<[string, string]> = [
+  ['error', 'rgb(189, 39, 30)'],
+  ['info', 'rgb(0, 119, 204)'],
+  ['debug', 'rgb(152, 162, 179)'],
+];
+
 /** Query the `example-root-profile` supplies through `getDefaultEsqlQuery`. */
 export const ROOT_PROFILE_DEFAULT_ESQL_QUERY = 'FROM my-example-* | LIMIT 10';

@@ -800,6 +800,108 @@ describe('LensVisService attributes', () => {
     );
   });
 
+  describe('breakdownColorMappings', () => {
+    const colorMapping = {
+      paletteId: 'default' as const,
+      colorMode: { type: 'categorical' as const },
+      assignments: [
+        {
+          rules: [{ type: 'raw' as const, value: 'css' }],
+          color: { type: 'colorCode' as const, colorCode: '#ff0000' },
+        },
+      ],
+      specialAssignments: [
+        { rules: [{ type: 'other' as const }], color: { type: 'loop' as const } },
+      ],
+    };
+    const breakdownField = dataView.fields.find((f) => f.name === 'extension');
+
+    const getLayers = (attributes: unknown) =>
+      (attributes as { state: { visualization: { layers: unknown[] } } }).state.visualization
+        .layers;
+
+    it('should apply the color mapping of the current breakdown field', async () => {
+      const lensVis = await getLensVisMock({
+        filters,
+        query,
+        dataView,
+        timeInterval,
+        breakdownField,
+        columns: [],
+        breakdownColorMappings: { extension: { colorMapping } },
+      });
+      expect(getLayers(lensVis.visContext?.attributes)).toEqual([
+        expect.objectContaining({ splitAccessors: ['breakdown_column'], colorMapping }),
+      ]);
+    });
+
+    it('should not apply a color mapping defined for another field', async () => {
+      const lensVis = await getLensVisMock({
+        filters,
+        query,
+        dataView,
+        timeInterval,
+        breakdownField,
+        columns: [],
+        breakdownColorMappings: { bytes: { colorMapping } },
+      });
+      expect(getLayers(lensVis.visContext?.attributes)[0]).not.toHaveProperty('colorMapping');
+    });
+
+    it('should not apply a color mapping without a breakdown field', async () => {
+      const lensVis = await getLensVisMock({
+        filters,
+        query,
+        dataView,
+        timeInterval,
+        breakdownField: undefined,
+        columns: [],
+        breakdownColorMappings: { extension: { colorMapping } },
+      });
+      expect(getLayers(lensVis.visContext?.attributes)[0]).not.toHaveProperty('colorMapping');
+    });
+
+    it('should apply the color mapping before getModifiedVisAttributes', async () => {
+      const getModifiedVisAttributes = jest.fn((attributes) => attributes);
+      await getLensVisMock({
+        filters,
+        query,
+        dataView,
+        timeInterval,
+        breakdownField,
+        columns: [],
+        breakdownColorMappings: { extension: { colorMapping } },
+        getModifiedVisAttributes,
+      });
+      expect(getLayers(getModifiedVisAttributes.mock.calls[0][0])[0]).toEqual(
+        expect.objectContaining({ colorMapping })
+      );
+    });
+
+    it('should not apply the color mapping if externalVisContext is applied', async () => {
+      const lensVis = await getLensVisMock({
+        filters,
+        query,
+        dataView,
+        timeInterval,
+        breakdownField,
+        columns: [],
+      });
+      const lensVis2 = await getLensVisMock({
+        filters,
+        query,
+        dataView,
+        timeInterval,
+        breakdownField,
+        columns: [],
+        externalVisContext: lensVis.visContext,
+        breakdownColorMappings: { extension: { colorMapping } },
+      });
+      expect(lensVis2.visContext).toBe(lensVis.visContext);
+      expect(getLayers(lensVis2.visContext?.attributes)[0]).not.toHaveProperty('colorMapping');
+    });
+  });
+
   it('should return suggestion title', async () => {
     const lensVis = await getLensVisMock({
       filters,

@@ -14,6 +14,8 @@ export type {
   UnifiedHistogramVisContext,
   UnifiedHistogramFetchParamsExternal,
   UnifiedHistogramLensActionsOptions,
+  UnifiedHistogramBreakdownColorMapping,
+  UnifiedHistogramBreakdownColorMappings,
 } from './types';
 export { UnifiedHistogramFetchStatus, UnifiedHistogramExternalVisContextStatus } from './types';
 

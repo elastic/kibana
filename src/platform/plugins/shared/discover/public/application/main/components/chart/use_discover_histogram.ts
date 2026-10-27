@@ -20,6 +20,7 @@ import {
   type UnifiedHistogramFetchParamsExternal,
 } from '@kbn/unified-histogram';
 import { intersection } from 'lodash';
+import { useEuiTheme } from '@elastic/eui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, pairwise, startWith } from 'rxjs';
@@ -242,6 +243,13 @@ export const useDiscoverHistogram = (
     [getModifiedVisAttributesAccessor]
   );
 
+  const { euiTheme } = useEuiTheme();
+  const getBreakdownColorMappingsAccessor = useProfileAccessor('getBreakdownColorMappings');
+  const breakdownColorMappings = useMemo(
+    () => getBreakdownColorMappingsAccessor(() => ({}))({ euiTheme }),
+    [getBreakdownColorMappingsAccessor, euiTheme]
+  );
+
   const collectedFetchParams: UnifiedHistogramFetchParamsExternal | undefined = useMemo(() => {
     return {
       searchSessionId,
@@ -259,8 +267,10 @@ export const useDiscoverHistogram = (
       // visContext should be in sync with current query
       externalVisContext: isEsqlMode && canImportVisContext(visContext) ? visContext : undefined,
       getModifiedVisAttributes,
+      breakdownColorMappings,
     } satisfies UnifiedHistogramFetchParamsExternal;
   }, [
+    breakdownColorMappings,
     breakdownField,
     timeInterval,
     currentTabControlState,

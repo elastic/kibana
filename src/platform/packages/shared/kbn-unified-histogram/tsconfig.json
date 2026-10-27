@@ -45,6 +45,7 @@
     "@kbn/i18n-react",
     "@kbn/data-source",
     "@kbn/discover-session-constants",
-    "@kbn/esql-browser"
+    "@kbn/esql-browser",
+    "@kbn/coloring"
   ]
 }

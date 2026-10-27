@@ -113,6 +113,23 @@ export const createContextAwarenessMocks = ({
         prevAttributes.title = 'Modified title';
         return prevAttributes;
       }),
+      getBreakdownColorMappings: jest.fn((prev) => (params) => ({
+        ...prev(params),
+        extension: {
+          colorMapping: {
+            paletteId: 'default',
+            colorMode: { type: 'categorical' },
+            assignments: [
+              {
+                rules: [{ type: 'raw', value: 'css' }],
+                color: { type: 'colorCode', colorCode: '#ff0000' },
+              },
+            ],
+            specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
+          },
+          valueOrder: ['css', 'js'],
+        },
+      })),
     },
     resolve: jest.fn(() => ({
       isMatch: true,

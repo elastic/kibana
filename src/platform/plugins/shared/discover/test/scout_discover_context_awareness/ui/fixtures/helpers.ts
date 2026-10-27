@@ -9,7 +9,7 @@
 
 import { euiSelectors } from '@kbn/scout';
 import kbnRison from '@kbn/rison';
-import type { DataGrid, ScoutPage } from '@kbn/scout';
+import type { DataGrid, Locator, ScoutPage } from '@kbn/scout';
 import type { DocViewer } from '@kbn/unified-doc-viewer/test/scout/ui/fixtures/page_objects';
 
 /**
@@ -193,4 +193,19 @@ export async function openSurroundingDocs(page: ScoutPage, dataGrid: DataGrid) {
   // Park the pointer so a hover left over from before the reload cannot leave a column tooltip
   // covering the first row.
   await page.mouse.move(0, 0);
+}
+
+/**
+ * Legend entries of the chart rendered inside `chart`, in display order, with the colour of each
+ * entry's swatch as the browser computes it (`rgb(...)`). The swatch is an SVG whose `color`
+ * attribute carries the series colour.
+ */
+export function getHistogramLegend(chart: Locator): Promise<Array<[string, string]>> {
+  return chart.locator('.echLegendItem').evaluateAll((items) =>
+    items.map((item): [string, string] => {
+      const label = item.querySelector('.echLegendItem__label')?.textContent?.trim() ?? '';
+      const swatch = item.querySelector('.echLegendItem__color svg');
+      return [label, swatch ? getComputedStyle(swatch).color : ''];
+    })
+  );
 }

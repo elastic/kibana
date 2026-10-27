@@ -90,7 +90,51 @@ columns: [
 
 **Implementation examples:**
 
-- [Metrics data source profile](profile_providers/common/metrics_data_source_profile/profile.ts)
+- No built-in profile implements this yet; see the [context awareness mocks](__mocks__/context_awareness.tsx) for a minimal implementation. To colour or order breakdown values, prefer `getBreakdownColorMappings` below.
+
+---
+
+### Breakdown colour mappings — `getBreakdownColorMappings`
+
+**Changes:** The colours of the histogram breakdown series and legend entries, and (in ES|QL mode) their order.
+
+**Use when:** Breakdown values carry a meaning users already associate with a colour or a rank, e.g. `log.level` severities.
+
+**Returns:** `Record<fieldName, { colorMapping: ColorMapping.Config; valueOrder?: Array<string | number> }>`
+
+A single profile can define mappings for several fields; the one matching the current breakdown field is applied. `colorMapping` is a Lens colour mapping (`@kbn/coloring`): use `raw` rules (or `match` rules with `matchEntireWord: true`) with `colorCode` colours, since only exact raw values are matched when rendering, and keep the `other` special assignment for unlisted values (the data view "Other" and missing buckets end up there too). `valueOrder` lists raw values in the order their series and legend entries should appear; unlisted values follow alphabetically.
+
+```ts
+getBreakdownColorMappings: (prev) => (params) => ({
+  ...prev(params),
+  'log.level': {
+    colorMapping: {
+      paletteId: 'default',
+      colorMode: { type: 'categorical' },
+      assignments: [
+        { rules: [{ type: 'raw', value: 'error' }], color: { type: 'colorCode', colorCode: '#bd271e' } },
+        { rules: [{ type: 'raw', value: 'info' }], color: { type: 'colorCode', colorCode: '#0077cc' } },
+      ],
+      specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
+    },
+    valueOrder: ['error', 'info'],
+  },
+}),
+```
+
+Limitations:
+
+- The mapping is applied to automatically created charts only; a chart the user customised in Lens is left untouched.
+- `valueOrder` is only honoured in ES|QL mode. Data view mode keeps the default count-descending order until Lens supports custom breakdown ordering ([#191988](https://github.com/elastic/kibana/issues/191988)).
+- `params.euiTheme` is the computed EUI theme, so colours can be derived from theme-aware helpers such as `getLogLevelColor` from `@kbn/discover-utils`.
+
+**Screenshot:**
+![Breakdown colour mappings example](./docs/extension_points/get_breakdown_color_mappings.png)
+
+**Implementation examples:**
+
+- [Logs data source profile](profile_providers/observability/logs_data_source_profile/accessors/get_breakdown_color_mappings.ts)
+- [Example data source profile](profile_providers/example/example_data_source_profile/profile.tsx)
 
 ---
 

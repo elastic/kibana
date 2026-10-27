@@ -12,6 +12,7 @@ export * from './constants';
 export {
   captureNextDialogMessage,
   getGridColumnIds,
+  getHistogramLegend,
   getProfileUrlState,
   getStoredTabs,
   openProfileStateDocView,

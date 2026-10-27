@@ -28,7 +28,10 @@ import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type {
   ChartSectionProps,
   UnifiedHistogramTopPanelHeightContext,
+  UnifiedHistogramBreakdownColorMapping,
+  UnifiedHistogramBreakdownColorMappings,
 } from '@kbn/unified-histogram/types';
+import type { EuiThemeComputed } from '@elastic/eui';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { DiscoverDataSource } from '../../common/data_sources';
@@ -279,6 +282,26 @@ export interface ModifiedVisAttributesExtensionParams {
 }
 
 /**
+ * Parameters passed to the breakdown colour mappings extension
+ */
+export interface BreakdownColorMappingsExtensionParams {
+  /**
+   * The computed EUI theme, for theme-aware colours (e.g. `getLogLevelColor`)
+   */
+  euiTheme: EuiThemeComputed;
+}
+
+/**
+ * Custom colouring and optional ordering for the values of a single breakdown field
+ */
+export type BreakdownColorMapping = UnifiedHistogramBreakdownColorMapping;
+
+/**
+ * Breakdown colour mappings keyed by field name
+ */
+export type BreakdownColorMappings = UnifiedHistogramBreakdownColorMappings;
+
+/**
  * Grid search result context for cell renderers that issue follow-up searches
  * (e.g. change-point Summary sparklines). Independent of the Discover chart section.
  */
@@ -517,6 +540,19 @@ export interface Profile {
   getModifiedVisAttributes: (
     params: ModifiedVisAttributesExtensionParams
   ) => TypedLensByValueInput['attributes'];
+
+  /**
+   * Gets custom colour mappings (and optional value ordering) for histogram breakdown fields, keyed by
+   * field name, so a single profile can cover multiple fields. Applied in data view and ES|QL mode to
+   * automatically created charts; a chart the user customized in Lens is left untouched.
+   * Only `raw` and whole-word `match` colour rules are matched when rendering, and `valueOrder` is
+   * currently only honoured in ES|QL mode (data view mode keeps the default count-descending order).
+   * @param params The breakdown colour mappings extension parameters
+   * @returns A map of breakdown field name to colour mapping
+   */
+  getBreakdownColorMappings: (
+    params: BreakdownColorMappingsExtensionParams
+  ) => BreakdownColorMappings;
 
   /**
    * Gets configuration for the Discover chart (UnifiedHistogram) section

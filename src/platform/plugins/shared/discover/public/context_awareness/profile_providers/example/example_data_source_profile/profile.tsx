@@ -449,6 +449,35 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       ],
       rowHeight: 5,
     }),
+    /**
+     * The `getBreakdownColorMappings` extension point lets a profile define the colours (and, in
+     * ES|QL mode, the order) of the histogram breakdown values for one or more fields.
+     */
+    getBreakdownColorMappings: (prev) => (params) => ({
+      ...prev(params),
+      'log.level': {
+        colorMapping: {
+          paletteId: 'default',
+          colorMode: { type: 'categorical' },
+          assignments: [
+            {
+              rules: [{ type: 'raw', value: 'error' }],
+              color: { type: 'colorCode', colorCode: '#bd271e' },
+            },
+            {
+              rules: [{ type: 'raw', value: 'info' }],
+              color: { type: 'colorCode', colorCode: '#0077cc' },
+            },
+            {
+              rules: [{ type: 'raw', value: 'debug' }],
+              color: { type: 'colorCode', colorCode: '#98a2b3' },
+            },
+          ],
+          specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
+        },
+        valueOrder: ['error', 'info', 'debug'],
+      },
+    }),
     getAdditionalCellActions: (prev) => () =>
       [
         ...prev(),
