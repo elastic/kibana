@@ -670,6 +670,29 @@ exports[`pull_request pipeline scenarios docs path on main 1`] = `
 ]
 `;
 
+exports[`pull_request pipeline scenarios docs step definition on main 1`] = `
+[
+  "build",
+  "quick_checks",
+  "checks",
+  "linting",
+  "linting_with_types",
+  "check_types",
+  "pick_test_group_run_order",
+  "build_scout_tests",
+  "ci_stats_ready",
+  "report_package_metrics",
+  "check",
+  "check_oas_snapshot",
+  "check_api_contracts",
+  "check_next_docs",
+  "check_saved_objects",
+  "warm_start_memory_bench",
+  "wait",
+  "Post-Build",
+]
+`;
+
 exports[`pull_request pipeline scenarios edr real fleet path 1`] = `
 [
   "build",
@@ -1252,6 +1275,29 @@ exports[`pull_request pipeline scenarios storybook lockfile path 1`] = `
 `;
 
 exports[`pull_request pipeline scenarios storybook path 1`] = `
+[
+  "build",
+  "quick_checks",
+  "checks",
+  "linting",
+  "linting_with_types",
+  "check_types",
+  "pick_test_group_run_order",
+  "build_scout_tests",
+  "ci_stats_ready",
+  "report_package_metrics",
+  "check",
+  "check_oas_snapshot",
+  "check_api_contracts",
+  "storybooks",
+  "check_saved_objects",
+  "warm_start_memory_bench",
+  "wait",
+  "Post-Build",
+]
+`;
+
+exports[`pull_request pipeline scenarios storybook step definition 1`] = `
 [
   "build",
   "quick_checks",

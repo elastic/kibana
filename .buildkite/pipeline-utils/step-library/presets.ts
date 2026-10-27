@@ -35,6 +35,7 @@ export type Zone =
 
 // Add a machine type here when a ported step first uses it.
 export type MachineType =
+  | 'c4d-standard-2'
   | 'n2-standard-2'
   | 'n2-standard-8'
   | 'n2d-custom-16-32768'

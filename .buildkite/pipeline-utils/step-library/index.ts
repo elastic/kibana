@@ -10,6 +10,14 @@
 export * from './helpers.ts';
 export * from './presets.ts';
 export * from './render.ts';
-export { prBaseEnv, prBaseSteps } from './steps/pull_request_base.ts';
+export { apiContracts } from './steps/api_contracts.ts';
+export { checkNextDocs } from './steps/check_next_docs.ts';
+export { checkOasSnapshot } from './steps/check_oas_snapshot.ts';
+export { checkSavedObjects } from './steps/check_saved_objects.ts';
+export { codeQuality } from './steps/code_quality.ts';
 export { cpsTests } from './steps/cps_testing.ts';
+export { localCheck } from './steps/local_check.ts';
+export { prBaseEnv, prBaseSteps } from './steps/pull_request_base.ts';
+export { storybooks } from './steps/storybooks.ts';
+export { verifyFipsEnabled } from './steps/verify_fips_enabled.ts';
 export type * from './types.ts';

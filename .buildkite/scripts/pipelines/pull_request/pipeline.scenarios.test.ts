@@ -166,12 +166,21 @@ const SCENARIOS: Scenario[] = [
     changedFiles: ['src/platform/plugins/shared/workflows_management/common/schema/index.ts'],
   },
   { name: 'storybook path', changedFiles: ['x-pack/example/button.stories.tsx'] },
+  {
+    name: 'storybook step definition',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/storybooks.ts'],
+  },
   { name: 'storybook lockfile path', changedFiles: ['pnpm-lock.yaml'] },
   { name: 'storybook toolchain package affected', affectedPackages: ['@kbn/storybook'] },
   {
     name: 'docs path on main',
     targetBranch: 'main',
     changedFiles: ['dev_docs/some_page.mdx'],
+  },
+  {
+    name: 'docs step definition on main',
+    targetBranch: 'main',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/check_next_docs.ts'],
   },
   {
     name: 'docs path off main',
