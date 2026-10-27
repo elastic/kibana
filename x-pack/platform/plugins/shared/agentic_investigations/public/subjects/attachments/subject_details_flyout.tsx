@@ -8,6 +8,7 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AlertEpisodeDetailsFlyout } from '@kbn/alerting-v2-episodes-ui/components/details/details_flyout';
+import { isUniversalAlertSnapshot } from '../../../common/subjects/subject';
 import { ClassicAlertDetailsFlyout } from './classic_alert_details_flyout';
 import type { SubjectFlyoutServices } from './subject_services';
 import { hasEpisodeFlyoutServices } from './subject_services';
@@ -15,8 +16,8 @@ import { hasEpisodeFlyoutServices } from './subject_services';
 export interface SubjectDetailsFlyoutProps {
   /** `kibana.alert.uuid` of a classic alert, or the episode id of an alerting v2 alert. */
   alertId: string;
-  /** `snapshot.alert_version`; `v2` is an alerting v2 episode. */
-  alertVersion?: string;
+  /** `snapshot.source`: set only on an alerting v2 alert, which opens the episode flyout. */
+  source?: string;
   /** The subject's details page, shown as the flyout's "View details" link. */
   detailsHref?: string;
   onClose: () => void;
@@ -36,7 +37,7 @@ const createQueryClient = (): QueryClient =>
  */
 export const SubjectDetailsFlyout = ({
   alertId,
-  alertVersion,
+  source,
   detailsHref,
   onClose,
   services,
@@ -44,7 +45,7 @@ export const SubjectDetailsFlyout = ({
   // Created once per mount; the flyout is unmounted when it closes.
   const [queryClient] = React.useState(createQueryClient);
 
-  if (alertVersion === 'v2') {
+  if (isUniversalAlertSnapshot({ source })) {
     if (!hasEpisodeFlyoutServices(services)) {
       return null;
     }

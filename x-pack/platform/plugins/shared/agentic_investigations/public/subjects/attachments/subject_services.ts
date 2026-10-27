@@ -19,6 +19,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
+import { isUniversalAlertSnapshot } from '../../../common/subjects/subject';
 
 /** The services a subject row reads. Every entry is optional: without one the row degrades. */
 export interface SubjectServices {
@@ -78,9 +79,11 @@ export const hasEpisodeFlyoutServices = (
   );
 
 /**
- * Whether an alert subject can open a flyout instead of navigating: an alerting v2 episode needs
+ * Whether an alert subject can open a flyout instead of navigating: an alerting v2 alert needs
  * the episode flyout's services, a classic alert only needs `http`. Lives here, not next to the
  * flyout, so a row can ask without loading the flyout's bundle.
  */
-export const canOpenSubjectFlyout = (services: SubjectServices, alertVersion?: string): boolean =>
-  alertVersion === 'v2' ? hasEpisodeFlyoutServices(services) : services.http !== undefined;
+export const canOpenSubjectFlyout = (services: SubjectServices, source?: string): boolean =>
+  isUniversalAlertSnapshot({ source })
+    ? hasEpisodeFlyoutServices(services)
+    : services.http !== undefined;

@@ -15,25 +15,23 @@ describe('getSubjectLocatorTarget', () => {
     });
   });
 
-  it("opens a classic alert's details page when the alert version is v1", () => {
-    expect(
-      getSubjectLocatorTarget({ type: 'alert', id: 'alert-uuid', alertVersion: 'v1' })
-    ).toEqual({
+  it("opens a classic alert's details page when the snapshot has no source", () => {
+    expect(getSubjectLocatorTarget({ type: 'alert', id: 'alert-uuid', source: '' })).toEqual({
       locatorId: 'ALERTS_LOCATOR',
       params: { alertId: 'alert-uuid' },
     });
   });
 
   it("opens an alerting v2 episode's details page in Observability Alerting", () => {
-    expect(getSubjectLocatorTarget({ type: 'alert', id: 'episode-1', alertVersion: 'v2' })).toEqual(
-      {
-        locatorId: 'ALERTING_V2_EPISODES_LOCATOR',
-        params: {
-          episodeId: 'episode-1',
-          host: { app: 'observabilityAlerting', pathPrefix: '/alerts' },
-        },
-      }
-    );
+    expect(
+      getSubjectLocatorTarget({ type: 'alert', id: 'episode-1', source: 'universal' })
+    ).toEqual({
+      locatorId: 'ALERTING_V2_EPISODES_LOCATOR',
+      params: {
+        episodeId: 'episode-1',
+        host: { app: 'observabilityAlerting', pathPrefix: '/alerts' },
+      },
+    });
   });
 
   it('has no page for significant events, questions and Slack threads', () => {

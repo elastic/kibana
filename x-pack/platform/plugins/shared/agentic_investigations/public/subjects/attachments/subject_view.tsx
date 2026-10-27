@@ -275,9 +275,9 @@ export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean 
   const { href, onClick: onLinkClick, isExternal } = useSubjectLink(subject);
   const { services } = useKibana<SubjectServices>();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-  const alertVersion = subject.snapshot?.alert_version;
+  const source = subject.snapshot?.source;
   // An alert opens next to the investigation; everything else keeps its link.
-  const opensFlyout = subject.type === 'alert' && canOpenSubjectFlyout(services, alertVersion);
+  const opensFlyout = subject.type === 'alert' && canOpenSubjectFlyout(services, source);
 
   const onRowClick = (event: React.MouseEvent) => {
     if (!opensFlyout) {
@@ -309,7 +309,7 @@ export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean 
         <React.Suspense fallback={null}>
           <LazySubjectDetailsFlyout
             alertId={subject.id}
-            alertVersion={alertVersion}
+            source={source}
             detailsHref={href}
             onClose={() => setIsFlyoutOpen(false)}
             services={services}

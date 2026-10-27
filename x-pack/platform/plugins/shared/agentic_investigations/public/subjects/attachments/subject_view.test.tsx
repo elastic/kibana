@@ -140,7 +140,7 @@ describe('SubjectView', () => {
         ...base,
         subjectType: 'alert',
         subjectId: 'episode-1',
-        snapshot: { alert_version: 'v2', rule_name: 'CPU high', rule_id: 'rule-1' },
+        snapshot: { source: 'universal', rule_name: 'CPU high', rule_id: 'rule-1' },
       },
       services
     );

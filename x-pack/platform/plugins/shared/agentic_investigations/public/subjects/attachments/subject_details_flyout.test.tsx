@@ -96,7 +96,7 @@ describe('SubjectDetailsFlyout', () => {
   });
 
   it('shows an alerting v2 alert in the shared episode flyout', () => {
-    renderFlyout({ alertId: 'episode-1', alertVersion: 'v2', services: episodeServices });
+    renderFlyout({ alertId: 'episode-1', source: 'universal', services: episodeServices });
 
     expect(screen.getByTestId('episodeFlyoutStub')).toHaveTextContent('episode-1');
     expect(fetchAlert).not.toHaveBeenCalled();
@@ -105,7 +105,7 @@ describe('SubjectDetailsFlyout', () => {
   it('renders nothing for a v2 alert when an episode flyout service is missing', () => {
     const { container } = renderFlyout({
       alertId: 'episode-1',
-      alertVersion: 'v2',
+      source: 'universal',
       services: { ...episodeServices, spaces: undefined },
     });
 

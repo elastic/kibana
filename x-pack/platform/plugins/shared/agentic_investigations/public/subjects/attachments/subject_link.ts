@@ -14,6 +14,7 @@ import {
 import { ALERTS_LOCATOR_ID, createObservabilityAlertingV2Host } from '@kbn/deeplinks-observability';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { isUniversalAlertSnapshot } from '../../../common/subjects/subject';
 import type { SubjectRowData } from './subject_title';
 import type { SubjectServices } from './subject_services';
 
@@ -29,8 +30,8 @@ const OBSERVABILITY_ALERTING_EPISODES_HOST = createObservabilityAlertingV2Host(
 
 /** The subject fields a locator target is built from. */
 export type SubjectLocatorInput = Pick<SubjectRowData, 'type' | 'id'> & {
-  /** `snapshot.alert_version` of an alert subject; `v2` is an alerting v2 episode. */
-  alertVersion?: string;
+  /** `snapshot.source` of an alert subject: set only on an alerting v2 alert. */
+  source?: string;
 };
 
 /**
@@ -41,9 +42,9 @@ export type SubjectLocatorInput = Pick<SubjectRowData, 'type' | 'id'> & {
 export const getSubjectLocatorTarget = ({
   type,
   id,
-  alertVersion,
+  source,
 }: SubjectLocatorInput): SubjectLocatorTarget | undefined => {
-  if (type === 'alert' && alertVersion === 'v2') {
+  if (type === 'alert' && isUniversalAlertSnapshot({ source })) {
     return {
       locatorId: ALERTING_V2_EPISODES_LOCATOR,
       params: { episodeId: id, host: OBSERVABILITY_ALERTING_EPISODES_HOST },
@@ -165,15 +166,14 @@ export interface SubjectLink {
 export const useSubjectLink = (subject: SubjectRowData | undefined): SubjectLink => {
   const subjectType = subject?.type;
   const subjectId = subject?.id;
-  const alertVersion = subject?.snapshot?.alert_version;
-  // Keyed on the type, id and alert version, so a re-render with an equal subject keeps the
-  // located URL.
+  const source = subject?.snapshot?.source;
+  // Keyed on the type, id and source, so a re-render with an equal subject keeps the located URL.
   const target = useMemo(
     () =>
       subjectType && subjectId
-        ? getSubjectLocatorTarget({ type: subjectType, id: subjectId, alertVersion })
+        ? getSubjectLocatorTarget({ type: subjectType, id: subjectId, source })
         : undefined,
-    [subjectType, subjectId, alertVersion]
+    [subjectType, subjectId, source]
   );
   const { href: locatedHref, onClick: onLocatorClick } = useLocatorLink(target);
 

@@ -34,13 +34,13 @@ describe('hasEpisodeFlyoutServices', () => {
 
 describe('canOpenSubjectFlyout', () => {
   it('needs the full episode services for an alerting v2 alert', () => {
-    expect(canOpenSubjectFlyout(episodeServices, 'v2')).toBe(true);
-    expect(canOpenSubjectFlyout({ http: present }, 'v2')).toBe(false);
+    expect(canOpenSubjectFlyout(episodeServices, 'universal')).toBe(true);
+    expect(canOpenSubjectFlyout({ http: present }, 'universal')).toBe(false);
   });
 
   it('needs only http for a classic alert', () => {
     expect(canOpenSubjectFlyout({ http: present })).toBe(true);
-    expect(canOpenSubjectFlyout({ http: present }, 'v1')).toBe(true);
+    expect(canOpenSubjectFlyout({ http: present }, '')).toBe(true);
     expect(canOpenSubjectFlyout({})).toBe(false);
   });
 });
