@@ -324,6 +324,66 @@ describe('cloudOnboardingDeploymentService', () => {
     });
   });
 
+  describe('instances', () => {
+    const original = {
+      instanceId: 'cloudtrail',
+      serviceId: 'cloudtrail',
+      name: 'AWS CloudTrail',
+      isDuplicate: false,
+    };
+    const duplicate = {
+      instanceId: 'cloudtrail__dup-1',
+      serviceId: 'cloudtrail',
+      name: 'CloudTrail prod',
+      isDuplicate: true,
+    };
+    const writtenAttributes = () =>
+      soClient.create.mock.calls.find((c) => c[2]?.overwrite)?.[1] as
+        | CloudOnboardingDeploymentSOAttributes
+        | undefined;
+
+    it('stores the instances given on create', async () => {
+      const input = {
+        provider: 'aws' as const,
+        mechanisms: ['agent_based' as const],
+        services: ['cloudtrail'],
+        instances: [original, duplicate],
+      };
+      soClient.create.mockResolvedValue(
+        makeSOResponse('deploy-1', makeAttributes({ connectorId: undefined, ...input }))
+      );
+
+      await cloudOnboardingDeploymentService.create(soClient, input);
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+        expect.objectContaining({ instances: [original, duplicate] })
+      );
+    });
+
+    it('replaces the stored instances on update, so a removed duplicate does not linger', async () => {
+      const initialAttrs = makeAttributes({ instances: [original, duplicate] });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', initialAttrs));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', initialAttrs));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+        instances: [original],
+      });
+
+      expect(writtenAttributes()?.instances).toEqual([original]);
+    });
+
+    it('keeps the stored instances when an update does not mention them', async () => {
+      const initialAttrs = makeAttributes({ instances: [original, duplicate] });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', initialAttrs));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', initialAttrs));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' });
+
+      expect(writtenAttributes()?.instances).toEqual([original, duplicate]);
+    });
+  });
+
   describe('update (status transitions)', () => {
     describe('status transitions', () => {
       function mockUpdateAndGet(id: string, attrs: CloudOnboardingDeploymentSOAttributes) {

@@ -20,9 +20,9 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../core/onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { reconcileInstances } from './instances';
+import { DUPLICATE_INSTANCE_ID_SEPARATOR, reconcileInstances } from './instances';
 import { useOnboardingSO } from '../authenticate_and_deploy_step/use_onboarding_so';
-import { toSOSettingsUpdate } from '../authenticate_and_deploy_step/so_settings';
+import { toSOMetadataUpdate } from '../authenticate_and_deploy_step/so_settings';
 import {
   getMissingSourceGroup,
   getRequiredTextFields,
@@ -98,7 +98,8 @@ export interface ServiceSettingsPersistedState {
 export const SERVICE_SETTINGS_SESSION_KEY = getOnboardingSessionKey('aws', 'serviceSettingsStep');
 
 /** Duplicate instance ids are `<serviceId>__dup-<n>`. */
-export const getDuplicateInstanceIdPrefix = (serviceId: string): string => `${serviceId}__dup-`;
+export const getDuplicateInstanceIdPrefix = (serviceId: string): string =>
+  `${serviceId}${DUPLICATE_INSTANCE_ID_SEPARATOR}`;
 
 export const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
   globalRegion: '',
@@ -517,7 +518,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     // again.
     const deploymentId = detectAndReviewStep?.onboardingDeploymentId;
     if (deploymentId) {
-      updateDeployment(deploymentId, toSOSettingsUpdate(persisted));
+      updateDeployment(deploymentId, toSOMetadataUpdate(persisted));
     }
     onContinue();
   }, [

@@ -984,6 +984,22 @@ describe('useServiceSettings — integration name and description', () => {
       expect(onContinue).toHaveBeenCalled();
     });
 
+    it('does not save the instances, which describe the last deploy and are saved only with one', async () => {
+      withDeployment('dep-1');
+      const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+      await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+      // A duplicate added in this step is not deployed yet: it must not come back on resume.
+      act(() => result.current.addDuplicate(policyService.id, 'svc_p [Duplicate]', {}, []));
+      expect(result.current.instances).toHaveLength(2);
+
+      act(() => result.current.handleNext());
+
+      expect(mockUpdateDeployment).toHaveBeenCalledWith('dep-1', {
+        integrationName: 'aws-1',
+        description: null,
+      });
+    });
+
     it('writes nothing before the first deploy has created the record', async () => {
       withDeployment(undefined);
       const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));

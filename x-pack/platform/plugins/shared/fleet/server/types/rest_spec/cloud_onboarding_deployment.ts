@@ -79,6 +79,29 @@ const RequestServiceVarsSchema = schema.recordOf(
   { meta: { description: 'Per-service config keyed by instance ID.' } }
 );
 
+const InstanceSchema = schema.object({
+  instanceId: schema.string({
+    minLength: 1,
+    maxLength: 255,
+    meta: {
+      description:
+        'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.',
+    },
+  }),
+  serviceId: schema.string({
+    minLength: 1,
+    maxLength: 255,
+    meta: { description: 'The service this instance belongs to.' },
+  }),
+  name: schema.string({ maxLength: 255, meta: { description: 'Display name of the instance.' } }),
+  isDuplicate: schema.boolean({
+    meta: { description: 'Whether the instance is a duplicate of another service.' },
+  }),
+});
+
+const InstancesSchema = (description: string) =>
+  schema.arrayOf(InstanceSchema, { maxSize: 1000, meta: { description } });
+
 const OnboardingDeploymentIdParamSchema = schema.object({
   id: schema.string({
     maxLength: 255,
@@ -147,6 +170,11 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
     schema.string({
       meta: { description: 'Integration description from the Service settings step.' },
     })
+  ),
+  instances: schema.maybe(
+    InstancesSchema(
+      'Service instances (originals and duplicates) of the last deploy. Hydrated into the Service settings step on resume.'
+    )
   ),
   dataFormat: schema.maybe(DataFormatSchema),
   authMethod: schema.maybe(
@@ -262,6 +290,11 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
         meta: { description: 'Integration description from the Service settings step.' },
       })
     ),
+    instances: schema.maybe(
+      InstancesSchema(
+        'Service instances (originals and duplicates) being deployed, so a resumed onboarding rebuilds the Service settings rows.'
+      )
+    ),
     dataFormat: schema.maybe(DataFormatSchema),
     authMethod: schema.maybe(
       schema.oneOf(
@@ -355,6 +388,11 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
       )
     ),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
+    instances: schema.maybe(
+      InstancesSchema(
+        'Service instances (originals and duplicates) of the last deploy. Replaces the stored list, so an instance removed since the last deploy is dropped.'
+      )
+    ),
     services: schema.maybe(
       schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {
         minSize: 1,

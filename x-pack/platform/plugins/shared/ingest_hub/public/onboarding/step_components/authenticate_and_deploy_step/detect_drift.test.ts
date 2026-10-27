@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { detectServiceVarsDrift, detectAuthDrift } from './detect_drift';
 
 const emptyServicesMap = new Map();
@@ -137,5 +138,78 @@ describe('detectAuthDrift', () => {
 
   it('returns true when SO has connector but session does not', () => {
     expect(detectAuthDrift({}, { connectorId: 'conn-a' })).toBe(true);
+  });
+});
+
+describe('detectServiceVarsDrift — duplicates with typed vars', () => {
+  // A service with a multi-value var: the session holds the raw comma-separated draft, the saved
+  // object the typed array.
+  const service = {
+    id: 'aws_billing',
+    dataStreams: ['billing'],
+    inputs: ['aws-s3'],
+    showInUI: true,
+    varDefsByInput: {
+      'aws-s3': { tags: { name: 'tags', type: 'text', show_user: true, multi: true } },
+    },
+  } as unknown as AwsServiceMatrixEntry;
+  const servicesMap = new Map([['aws_billing', service]]);
+  const sessionVars = (tags: string) => ({
+    enabledDataStreams: ['billing'],
+    varsByDataStream: {
+      billing: { enabledInputs: ['aws-s3'], varsByInput: { 'aws-s3': { tags } } },
+    },
+  });
+  const savedVars = (tags: string | string[]) =>
+    ({
+      enabledDataStreams: ['billing'],
+      varsByDataStream: {
+        billing: { enabledInputs: ['aws-s3'], varsByInput: { 'aws-s3': { tags } } },
+      },
+    } as Record<string, unknown>);
+
+  it('finds no drift for a duplicate whose saved vars are typed', () => {
+    const drift = detectServiceVarsDrift(
+      { 'aws_billing__dup-1': sessionVars('a, b') },
+      { 'aws_billing__dup-1': savedVars(['a', 'b']) },
+      servicesMap,
+      new Set(['aws_billing__dup-1'])
+    );
+
+    expect(drift).toEqual([]);
+  });
+
+  it('finds no drift for a duplicate saved untyped by older code', () => {
+    // Before duplicates were typed, their saved vars kept the raw string.
+    const drift = detectServiceVarsDrift(
+      { 'aws_billing__dup-1': sessionVars('a, b') },
+      { 'aws_billing__dup-1': savedVars('a, b') },
+      servicesMap,
+      new Set(['aws_billing__dup-1'])
+    );
+
+    expect(drift).toEqual([]);
+  });
+
+  it('still finds drift when the duplicate really changed', () => {
+    const drift = detectServiceVarsDrift(
+      { 'aws_billing__dup-1': sessionVars('a, b, c') },
+      { 'aws_billing__dup-1': savedVars('a, b') },
+      servicesMap,
+      new Set(['aws_billing__dup-1'])
+    );
+
+    expect(drift).toEqual(['aws_billing__dup-1']);
+  });
+
+  it('leaves saved entries without the expected shape alone', () => {
+    const drift = detectServiceVarsDrift(
+      { 'aws_billing__dup-1': sessionVars('a, b') },
+      { 'aws_billing__dup-1': { unexpected: true } },
+      servicesMap,
+      new Set(['aws_billing__dup-1'])
+    );
+
+    expect(drift).toEqual(['aws_billing__dup-1']);
   });
 });
