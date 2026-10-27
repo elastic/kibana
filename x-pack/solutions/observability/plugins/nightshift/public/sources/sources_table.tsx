@@ -172,7 +172,9 @@ export function SourcesTable({
           return <EuiLoadingSpinner size="m" />;
         }
 
-        if (onboardingResult === undefined) {
+        // An edit saved with onboarding off waits without a spinner. The status still on record is
+        // the one of the previous query.
+        if (awaitingRunSourceIds.includes(source.id) || onboardingResult === undefined) {
           return '-';
         }
 
