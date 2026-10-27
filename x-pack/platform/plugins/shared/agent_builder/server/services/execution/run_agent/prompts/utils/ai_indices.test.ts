@@ -29,8 +29,15 @@ describe('getAiIndicesInstructions', () => {
     expect(render({ enabled: false })).toBe('');
   });
 
-  it('renders nothing for an agent with an empty catalog', () => {
-    expect(render({ catalog: [] })).toBe('');
+  it('renders the section for an empty catalog, telling the agent to ask the user to assign some', () => {
+    const instructions = render({ catalog: [] });
+
+    expect(instructions).toContain('## AI INDICES');
+    expect(instructions).toContain('No AI Indices are assigned to this agent');
+    expect(instructions).toContain('Do not look for other AI Indices');
+    expect(instructions).toContain('ask the user to assign it to this agent');
+    expect(instructions).not.toContain('`ki-retrieval`');
+    expect(instructions).not.toContain('Available to this agent:');
   });
 
   it('explains what an AI Index is and how it is named', () => {

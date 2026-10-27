@@ -26,6 +26,7 @@ import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { ErrorPrompt } from './error_prompt';
 import { Threads } from './threads';
 import { DescriptionCallout } from './description_callout';
+import { ProfilingCpsCallout } from './profiling_cps_callout';
 import { ProfilingSchemaSelector } from './profiling_schema_selector';
 import { Popover } from '../common/popover';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
@@ -179,6 +180,7 @@ export function Profiling({ showSearchBar = true }: { showSearchBar?: boolean })
 
   return (
     <>
+      <ProfilingCpsCallout />
       {data && !hasUsableProfilingData(data) ? (
         <ProfilingEmptyState />
       ) : (

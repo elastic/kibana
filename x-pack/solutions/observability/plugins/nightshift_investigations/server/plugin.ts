@@ -52,6 +52,7 @@ import { sendNotificationsStepDefinition } from './step_definitions/send_notific
 import { handleInvestigationFailureStepDefinition } from './step_definitions/handle_investigation_failure';
 import { renderSlackMessageStepDefinition } from './step_definitions/render_slack_message';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
+import { followUpRecoveredAlertStepDefinition } from './step_definitions/follow_up_recovered_alert';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
 import { resolveModelStepDefinition } from './step_definitions/resolve_model';
@@ -371,6 +372,9 @@ export class NightshiftInvestigationsPlugin
             this.getAlertsClient,
             this.getEpisodeLookup
           )
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          followUpRecoveredAlertStepDefinition(this.getInvestigationsClient)
         );
         // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
         plugins.workflowsExtensions.registerStepDefinition(
