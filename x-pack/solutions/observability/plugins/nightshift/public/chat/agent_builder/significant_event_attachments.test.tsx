@@ -40,10 +40,7 @@ describe('registerNightshiftAgentBuilderAttachments', () => {
 
     cleanup();
 
-    expect(addAttachmentType).toHaveBeenCalledWith(
-      KI_FEATURE_ATTACHMENT_TYPE,
-      expect.any(Object)
-    );
+    expect(addAttachmentType).toHaveBeenCalledWith(KI_FEATURE_ATTACHMENT_TYPE, expect.any(Object));
     expect(addAttachmentType).toHaveBeenCalledWith(
       SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
       expect.any(Object)

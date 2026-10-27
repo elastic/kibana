@@ -85,8 +85,7 @@ export const createSignificantEventAttachmentDefinition = ({
     subtitle: labels.fallback,
     badges: [
       {
-        label:
-          SIGNIFICANT_EVENT_STATUS_LABELS[attachment.data.status] ?? attachment.data.status,
+        label: SIGNIFICANT_EVENT_STATUS_LABELS[attachment.data.status] ?? attachment.data.status,
         color: getStatusColor(attachment.data.status),
       },
     ],

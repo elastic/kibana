@@ -133,8 +133,7 @@ export interface EventFlyoutProps {
 export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactElement {
   const formatTimestamp = useFormatTimestamp();
   const { euiTheme } = useEuiTheme();
-  const { agentBuilder, application, focusedSignificantEventService, http } =
-    useKibana().services;
+  const { agentBuilder, application, focusedSignificantEventService, http } = useKibana().services;
   const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [selectedDetectionId, setSelectedDetectionId] = useState<string>();

@@ -76,7 +76,9 @@ test.describe(
       await expect(page.getByTestId('nightshiftRunLimitEnabledSwitch-investigation')).toBeVisible();
     });
 
-    test('opens Detections on Events and hides Signals outside developer mode', async ({ page }) => {
+    test('opens Detections on Events and hides Signals outside developer mode', async ({
+      page,
+    }) => {
       await page.gotoApp('nightshift/detections');
       await expect(page).toHaveURL(/\/app\/nightshift\/detections\/events/, {
         timeout: NIGHTSHIFT_PAGE_LOAD_TIMEOUT,

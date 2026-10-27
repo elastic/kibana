@@ -7,14 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { BasicPrettyPrinter, Parser } from '@elastic/esql';
-import {
-  EuiBadge,
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiText,
-} from '@elastic/eui';
+import { EuiBadge, EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
