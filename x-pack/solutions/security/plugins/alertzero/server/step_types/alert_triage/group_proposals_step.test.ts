@@ -53,6 +53,7 @@ const setup = ({
   gateStatus = ExecutionStatus.WAITING_FOR_INPUT as ExecutionStatus,
   investigationStatus = 'open',
   groupingEnabled = true,
+  source = ALERT as Record<string, unknown>,
   history = { falsePositive: 0, truePositive: 0 } as
     | { falsePositive: number; truePositive: number }
     | 'fails',
@@ -94,7 +95,7 @@ const setup = ({
           hits: (body.query.ids.values as string[]).map((id) => ({
             _id: id,
             _index: 'alerts',
-            _source: ALERT,
+            _source: source,
           })),
         },
       },
@@ -180,24 +181,46 @@ describe('triage group false positives step', () => {
     expect(service.revise).not.toHaveBeenCalled();
   });
 
-  it('names the entities of the alerts in no proposal, even for a batch with no candidates', async () => {
-    const { group } = setup({ heads: [] });
+  describe('the entities of the alerts in no proposal', () => {
+    const run = (source: Record<string, unknown>) => {
+      const { group } = setup({ heads: [], source });
+      return group({
+        ...baseInput,
+        fp_candidate_ids: [],
+        other_alert_ids: ['a1'],
+        impacted_entities: [
+          { id: 'host:h1', name: 'h1', type: 'host' },
+          { id: 'host:host-id-2', name: 'h2', type: 'host' },
+          { id: 'user:u1', name: 'u1', type: 'user' },
+        ],
+      });
+    };
 
-    const output = await group({
-      ...baseInput,
-      fp_candidate_ids: [],
-      other_alert_ids: ['a1'],
-      impacted_entities: [
-        { id: 'h1', name: 'h1', type: 'host' },
-        { id: 'host-2', name: 'host-2', type: 'host' },
-      ],
+    it('names them even for a batch with no candidates', async () => {
+      expect(await run({ host: { name: 'h1' }, user: { name: 'u1' } })).toEqual(
+        expect.objectContaining({
+          other_impacted_entities: [
+            { id: 'host:h1', name: 'h1', type: 'host' },
+            { id: 'user:u1', name: 'u1', type: 'user' },
+          ],
+        })
+      );
     });
 
-    expect(output).toEqual(
-      expect.objectContaining({
-        other_impacted_entities: [{ id: 'h1', name: 'h1', type: 'host' }],
-      })
-    );
+    // Alert Analysis names a host by host.id when it has one, so the id is what has to match.
+    it('matches a host by its id, which Alert Analysis prefers to the name', async () => {
+      expect(await run({ host: { id: 'host-id-2', name: 'h2' } })).toEqual(
+        expect.objectContaining({
+          other_impacted_entities: [{ id: 'host:host-id-2', name: 'h2', type: 'host' }],
+        })
+      );
+    });
+
+    it('does not mix up two hosts that share a display name', async () => {
+      expect(await run({ host: { id: 'another-id', name: 'h1' } })).toEqual(
+        expect.objectContaining({ other_impacted_entities: [] })
+      );
+    });
   });
 
   it('requires manage_proposals before it revises a proposal', async () => {

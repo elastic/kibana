@@ -191,14 +191,33 @@ const createRuntime = async (
   return { spaceId, groupingDeps };
 };
 
-/** The entities of the batch that the given alerts name, by host and user name. */
-const entitiesNamedBy = (
+/** Alert Analysis cuts the id after the prefix to this, so the prefixed id fits the 256 limit. */
+const ENTITY_ID_VALUE_LENGTH = 251;
+
+const nonEmpty = (value: unknown): string | undefined =>
+  typeof value === 'string' && value !== '' ? value : undefined;
+
+/**
+ * The ids Alert Analysis gives the entities of an alert: a host is `host:<host.id, else host.name>`
+ * and a user is `user:<user.name>`. Matching by this id, not by display name, keeps a host that has
+ * only `host.id`, and does not mix two hosts that share a name.
+ */
+const entityIdsOf = (doc: Record<string, unknown>): string[] => {
+  const host = nonEmpty(getField(doc, 'host.id')) ?? nonEmpty(getField(doc, 'host.name'));
+  const user = nonEmpty(getField(doc, 'user.name'));
+  return [
+    ...(host ? [`host:${host.slice(0, ENTITY_ID_VALUE_LENGTH)}`] : []),
+    ...(user ? [`user:${user.slice(0, ENTITY_ID_VALUE_LENGTH)}`] : []),
+  ];
+};
+
+/** The entities of the batch that the given alerts belong to. */
+const entitiesOfAlerts = (
   docs: ReadonlyArray<Record<string, unknown>>,
   entities: ReadonlyArray<{ id: string; name: string; type: 'host' | 'user' }>
 ) => {
-  const hosts = new Set(docs.map((doc) => getField(doc, 'host.name')));
-  const users = new Set(docs.map((doc) => getField(doc, 'user.name')));
-  return entities.filter(({ name, type }) => (type === 'host' ? hosts : users).has(name));
+  const ids = new Set(docs.flatMap(entityIdsOf));
+  return entities.filter(({ id }) => ids.has(id));
 };
 
 export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsStepDependencies) =>
@@ -217,7 +236,7 @@ export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsSte
               contextManager,
               input.other_alert_ids
             );
-            return entitiesNamedBy(otherDocs, input.impacted_entities);
+            return entitiesOfAlerts(otherDocs, input.impacted_entities);
           } catch (error) {
             deps.logger?.warn(`alert_triage grouping: could not read the other alerts: ${error}`);
             return [];
@@ -274,7 +293,7 @@ export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsSte
             const doc = byId.get(id);
             return doc ? [doc] : [];
           });
-          return entitiesNamedBy(docs, input.impacted_entities ?? []);
+          return entitiesOfAlerts(docs, input.impacted_entities ?? []);
         };
         const empty = {
           mints: [],
