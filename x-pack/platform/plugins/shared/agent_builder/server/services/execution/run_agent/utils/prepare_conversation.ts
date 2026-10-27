@@ -9,11 +9,11 @@ import type {
   ConversationEvent,
   ConversationRoundAuthor,
   ConverseInput,
-  RoundInput,
   MetadataFieldValue,
   SubagentEntry,
+  UserMessageEventData,
 } from '@kbn/agent-builder-common';
-import { TimelineEventType, isTimelineEvent } from '@kbn/agent-builder-common';
+import { TimelineEventType, isAttachmentEvent, isTimelineEvent } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { ProcessedAttachmentType, ProcessedRoundInput } from '@kbn/agent-builder-server';
@@ -25,20 +25,22 @@ import type {
 import type { AgentHandlerContext } from '@kbn/agent-builder-server/agents';
 
 import { mergeAttachmentInputs } from '../../../attachments/merge_attachment_inputs';
-import { mergeAttachmentRefs } from '../../../conversation/client/migrate_attachments';
 import { authorAndOrigin } from '../../../conversation/client/events_to_rounds';
+import { formatAttachmentEvent } from './attachment_event_presentation';
+import type { ResumeAnchors } from './attachment_placement';
 import { formatAttachmentsMetadata } from './attachment_presentation';
 import type {
   ContextTimelineEvent,
-  ProcessedCustomEvent,
+  ProcessedStandaloneEvent,
   ProcessedTimelineEvent,
   ProcessedUserMessageEvent,
 } from './context_timeline';
 import {
   groupTimelineRounds,
   groupTimelineEntries,
-  isTimelineCustomEvent,
+  isTimelineStandaloneEvent,
   isTimelineRound,
+  linkedInputEvents,
 } from './context_timeline';
 
 export interface ProcessedConversation {
@@ -49,6 +51,10 @@ export interface ProcessedConversation {
   timeline: ProcessedTimelineEvent[];
   nextInput: ProcessedRoundInput;
   attachmentTypes: ProcessedAttachmentType[];
+  /** Description of an attachment type, resolved when rendering (types can appear mid-run). */
+  describeAttachmentType?: (type: string) => string | undefined;
+  /** Where each resume's input attachments render: `prompt_response` id → the items its pause waited on. */
+  resumeAnchors?: ResumeAnchors;
   attachmentStateManager: AttachmentStateManager;
   /** Persistent sub-agent roster */
   subagentRosterFallback?: Record<string, SubagentEntry>;
@@ -75,6 +81,7 @@ export const prepareConversation = async ({
   metadata,
   templateId,
   includeAttachmentTypes = true,
+  resumeAnchors,
 }: {
   /** The conversation's normalized context timeline (see `eventsForContext`). */
   timeline: ContextTimelineEvent[];
@@ -88,6 +95,7 @@ export const prepareConversation = async ({
    * tools cannot act on the descriptions, so it leaves them out.
    */
   includeAttachmentTypes?: boolean;
+  resumeAnchors?: ResumeAnchors;
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;
   const resolveContext: AttachmentResolveContext = {
@@ -102,21 +110,26 @@ export const prepareConversation = async ({
   const effectiveRounds = groupTimelineRounds(timeline);
   const effectiveNextInput = nextInput;
 
-  // Process complete executions, independent messages and custom events in order so attachment
+  // Process complete executions, independent messages and standalone events in order so attachment
   // versions resolve consistently. Incomplete execution inputs remain outside the model history.
   const processedInputs: ProcessedRoundInput[] = [];
   const processedTimeline: ProcessedTimelineEvent[] = [];
   const includedRounds = new Set(effectiveRounds.map((round) => round.id));
   for (const round of groupTimelineEntries(timeline)) {
-    if (isTimelineCustomEvent(round)) {
-      const processedEvent = await processCustomEvent({ event: round.event, context });
+    if (isTimelineStandaloneEvent(round)) {
+      // Rendered unescaped, so never taken from the stored event.
+      const processedEvent = isAttachmentEvent(round.event)
+        ? {
+            ...round.event,
+            representation: { type: 'text' as const, value: formatAttachmentEvent(round.event) },
+          }
+        : await processCustomEvent({ event: round.event, context });
       if (processedEvent) {
         processedTimeline.push(processedEvent);
       }
       continue;
     }
     if (isTimelineRound(round) && !includedRounds.has(round.id)) continue;
-    attachmentStateManager.clearAccessTracking();
     const input = round.userMessage.data;
     if (input.attachments && input.attachments.length > 0) {
       await mergeAttachmentInputs({
@@ -127,23 +140,23 @@ export const prepareConversation = async ({
         validateContext,
       });
     }
-    const attachmentRefs = mergeAttachmentRefs(
-      input.attachment_refs,
-      attachmentStateManager.getAccessedRefs()
-    );
     const processedInput = prepareRoundInput({
-      input: { ...input, attachments: [], attachment_refs: attachmentRefs },
+      input: { ...input, attachments: [] },
       author: authorAndOrigin(round.userMessage).author,
       attachmentStateManager,
     });
     processedInputs.push(processedInput);
 
+    const inputEvents = linkedInputEvents(round.events, round.userMessage.id);
     const processedUserMessage: ProcessedUserMessageEvent = {
       ...round.userMessage,
-      data: processedInput,
+      data:
+        inputEvents.length > 0
+          ? { ...processedInput, attachment_events: inputEvents }
+          : processedInput,
     };
-    // A round carries its user message and its run; a standalone message only itself.
-    const events = isTimelineRound(round) ? round.events : [round.userMessage];
+    // A round carries its user message and its run; a standalone message itself and its inputs.
+    const events = isTimelineRound(round) ? round.events : [round.userMessage, ...round.events];
 
     for (const event of events) {
       if (event.id === round.userMessage.id) {
@@ -154,7 +167,6 @@ export const prepareConversation = async ({
     }
   }
 
-  attachmentStateManager.clearAccessTracking();
   // History re-migration above is idempotent bookkeeping, not a user action: drop its changes so
   // only the next input's attachments surface as chat_input attachment events.
   attachmentStateManager.clearChanges();
@@ -167,33 +179,22 @@ export const prepareConversation = async ({
     validateContext,
     updateOriginSnapshot: true,
   });
-  const nextInputAccessedRefs = attachmentStateManager.getAccessedRefs();
-  const mergedNextInputRefs = mergeAttachmentRefs(
-    effectiveNextInput.attachment_refs,
-    nextInputAccessedRefs
-  );
-
-  const strippedNextInput: ConverseInput = {
-    ...effectiveNextInput,
-    attachments: [],
-    ...(mergedNextInputRefs ? { attachment_refs: mergedNextInputRefs } : {}),
-  };
   const processedNextInput = prepareRoundInput({
-    input: strippedNextInput,
+    input: { message: effectiveNextInput.message ?? '' },
     author: nextInputAuthor,
     attachmentStateManager,
   });
 
-  const roundAttachmentTypes = [
-    ...(processedNextInput.attachment_refs ?? []),
-    ...processedInputs.flatMap((input) => input.attachment_refs ?? []),
-  ]
-    .map((ar) => ar.type)
+  const legacyRefTypes = processedInputs
+    .flatMap((input) => input.attachment_refs ?? [])
+    .map((ref) => ref.type)
     .filter((type): type is string => !!type);
-
+  const eventTypes = processedTimeline
+    .filter(isAttachmentEvent)
+    .map((event) => event.data.attachment_type);
   const conversationAttachmentTypes = attachmentStateManager.getActive().map((a) => a.type);
   const attachmentTypeIds = [
-    ...new Set<string>([...conversationAttachmentTypes, ...roundAttachmentTypes]),
+    ...new Set<string>([...conversationAttachmentTypes, ...legacyRefTypes, ...eventTypes]),
   ];
 
   const attachmentTypes = await Promise.all(
@@ -213,7 +214,10 @@ export const prepareConversation = async ({
     nextInput: processedNextInput,
     timeline: processedTimeline,
     attachmentTypes,
+    describeAttachmentType: (type) =>
+      attachmentsService.getTypeDefinition(type)?.getAgentDescription?.() ?? undefined,
     attachmentStateManager,
+    ...(resumeAnchors ? { resumeAnchors } : {}),
     ...(metadata !== undefined ? { metadata } : {}),
     ...(templateId !== undefined ? { template_id: templateId } : {}),
   };
@@ -230,7 +234,7 @@ const processCustomEvent = async ({
 }: {
   event: ConversationEvent;
   context: AgentHandlerContext;
-}): Promise<ProcessedCustomEvent | undefined> => {
+}): Promise<ProcessedStandaloneEvent | undefined> => {
   const definition = context.conversationEvents?.getDefinition(event.type);
   if (!definition) {
     context.logger.debug(
@@ -262,7 +266,7 @@ const prepareRoundInput = ({
   author,
   attachmentStateManager,
 }: {
-  input: RoundInput | ConverseInput;
+  input: UserMessageEventData;
   author?: ConversationRoundAuthor;
   attachmentStateManager: AttachmentStateManager;
 }): ProcessedRoundInput => {

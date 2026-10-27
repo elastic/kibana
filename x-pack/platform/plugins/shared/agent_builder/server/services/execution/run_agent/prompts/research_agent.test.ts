@@ -11,6 +11,7 @@ import { getResearchAgentPrompt } from './research_agent';
 import { prepareMessages } from '../utils/to_langchain_messages';
 
 jest.mock('../utils/to_langchain_messages', () => ({
+  ...jest.requireActual('../utils/to_langchain_messages'),
   prepareMessages: jest.fn().mockResolvedValue([['human', 'history']]),
 }));
 
@@ -220,14 +221,17 @@ describe('getResearchAgentPrompt', () => {
     expect(messages.map(asText).some((t) => t.includes(NOTICE_MARKER))).toBe(false);
   });
 
-  it('omits the AI Indices section when the agent declares no AI Indices', async () => {
+  it('renders the AI Indices section when the agent has none assigned', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
         experimentalFeatures: { aiIndices: true, bash: false, skills: false },
       })
     );
+    const system = asText(messages[0]);
 
-    expect(asText(messages[0])).not.toContain('## AI INDICES');
+    expect(system).toContain('## AI INDICES');
+    expect(system).toContain('No AI Indices are assigned to this agent');
+    expect(system).not.toContain('Available to this agent:');
   });
 
   it('omits the AI Indices section when AI Index instructions are disabled', async () => {
@@ -267,6 +271,67 @@ describe('getResearchAgentPrompt', () => {
     expect(system).toContain('ES|QL target: sml-main');
     expect(system).toContain('This conversation runs in the space `marketing`');
     expect(system.indexOf('## AI INDICES')).toBeLessThan(system.indexOf('## INSTRUCTIONS'));
+  });
+
+  it('omits the SML sections when experimental features are off', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        experimentalFeatures: {
+          aiIndices: true,
+          sml: false,
+          bash: false,
+          skills: false,
+        },
+      })
+    );
+    const system = asText(messages[0]);
+
+    expect(system).not.toContain("## SML '#' REFERENCES");
+    expect(system).not.toContain('## CONNECTOR DISCOVERY');
+    expect(system).not.toMatch(/^(<<<<<<<|=======|>>>>>>>)/m);
+  });
+
+  it('renders the SML sections with # references when SML is on', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        experimentalFeatures: {
+          aiIndices: true,
+          sml: true,
+          bash: false,
+          skills: false,
+        },
+      })
+    );
+    const system = asText(messages[0]);
+
+    expect(system).toContain("## SML '#' REFERENCES");
+    expect(system).toContain('`[#label](sml://ENTRY_ID)`');
+    expect(system).not.toMatch(/^(<<<<<<<|=======|>>>>>>>)/m);
+  });
+
+  it('keeps connector discovery on the agent-scoped sml_search when the elastic index is in the catalog', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        configuration: {
+          instructions: '',
+          aiIndices: ['elastic'],
+          aiIndexCatalog: [
+            { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
+          ],
+        },
+        experimentalFeatures: {
+          aiIndices: true,
+          sml: true,
+          bash: false,
+          skills: false,
+        },
+      })
+    );
+    const system = asText(messages[0]);
+    const discovery = system.slice(system.indexOf('## CONNECTOR DISCOVERY'));
+
+    expect(discovery).toContain('use `sml_search` with `types: ["connector"]`');
+    expect(discovery).not.toContain('`elastic` AI Index');
   });
 
   it('renders every catalog entry, including custom AI Indices', async () => {

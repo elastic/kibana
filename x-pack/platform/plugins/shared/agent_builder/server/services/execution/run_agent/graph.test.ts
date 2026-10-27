@@ -11,6 +11,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { ChatCompleteCacheControl, InferenceConnector } from '@kbn/inference-common';
 import { ChatCompletionErrorCode, InferenceTaskError } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { AttachmentTimelineEvent } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStepType,
   ToolCallInvocation,
@@ -25,6 +26,7 @@ import { createAgentGraph } from './graph';
 import type { CycleHookRuntime } from './cycle_hooks/cycle_hook_runtime';
 import { stepUpdates } from './step_state';
 import type { PromptFactory } from './prompts';
+import type { RunAttachmentEvents } from './run_attachment_events';
 import { RunTracker, type ToolExecutionBuffer } from './run_tracker';
 import type { StateType } from './state';
 import type { ProcessedConversation } from './utils/prepare_conversation';
@@ -55,6 +57,7 @@ const createTestGraph = ({
   sessionId,
   cacheControl,
   toolExecutionBuffer,
+  runAttachmentEvents,
   cycleHooks,
 }: {
   structuredOutput?: boolean;
@@ -62,6 +65,7 @@ const createTestGraph = ({
   sessionId?: string;
   cacheControl?: ChatCompleteCacheControl;
   toolExecutionBuffer?: ToolExecutionBuffer;
+  runAttachmentEvents?: RunAttachmentEvents;
   cycleHooks?: CycleHookRuntime;
 } = {}) => {
   const researchInvoke = jest.fn();
@@ -109,6 +113,7 @@ const createTestGraph = ({
     sessionId,
     cacheControl,
     toolExecutionBuffer,
+    runAttachmentEvents,
     cycleHooks,
     contextManagement: {
       connector: { connectorId: 'test-connector' } as InferenceConnector,
@@ -221,6 +226,30 @@ describe('createAgentGraph', () => {
     expect(result.toolRenderState.c1.content).toContain('"ok":true');
     expect(result.toolOutcome).toEqual({ type: 'completed' });
     expect(result.finalAnswer).toBe('done');
+  });
+
+  it('drains the attachment events of the executed tool calls into the run', async () => {
+    const event = { id: 'att-evt', type: 'attachment_added' } as unknown as AttachmentTimelineEvent;
+    const drainToolCalls = jest.fn(() => [event]);
+    const { graph, researchInvoke, promptFactory } = createTestGraph({
+      runAttachmentEvents: { drainToolCalls } as unknown as RunAttachmentEvents,
+    });
+    researchInvoke
+      .mockResolvedValueOnce(
+        new AIMessage({ content: '', tool_calls: [{ id: 'c1', name: 'my_tool', args: {} }] })
+      )
+      .mockResolvedValueOnce(new AIMessage({ content: 'done' }));
+    mockToolNodeOnce([
+      new ToolMessage({ tool_call_id: 'c1', content: '{}', artifact: { results: [] } }),
+    ]);
+
+    const result = await graph.invoke({ cycleLimit: 5 });
+
+    expect(drainToolCalls).toHaveBeenCalledWith(['c1']);
+    expect(result.attachmentEvents).toEqual([event]);
+    expect(promptFactory.getMainPrompt).toHaveBeenLastCalledWith({
+      run: expect.objectContaining({ attachmentEvents: [event] }),
+    });
   });
 
   it('lets the model repair an ask_user_question call whose arguments failed validation', async () => {

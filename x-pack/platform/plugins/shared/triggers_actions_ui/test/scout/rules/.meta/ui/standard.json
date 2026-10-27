@@ -1,5 +1,5 @@
 {
-  "sha1": "146c2cb484271aabf62cdd8c063c7f9584b971c1",
+  "sha1": "f82351aae3c1b2fa4e73b1bb31e10f098cd7ba8a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -430,11 +430,12 @@
       "title": "Rules page heading tabs - alerting v2 privileges hides the V2 rules tab when the user can read both surfaces",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_tabs_privileges.spec.ts",
-        "line": 32,
+        "line": 29,
         "column": 29
       }
     },
@@ -443,11 +444,12 @@
       "title": "Rules page heading tabs - alerting v2 privileges hides all heading tabs when the user cannot read Alerting v2 rules",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_page_tabs_privileges.spec.ts",
-        "line": 41,
+        "line": 38,
         "column": 11
       }
     },
@@ -466,8 +468,8 @@
       }
     },
     {
-      "id": "62e8d809df42e39-70e582e72ffdc19",
-      "title": "Rules settings flyout opens, shows configured values, and persists changes",
+      "id": "62e8d809df42e39-6d598720f2d75a8",
+      "title": "Rules settings page opens, shows configured values, and persists changes",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -475,7 +477,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_settings.spec.ts",
-        "line": 36,
+        "line": 35,
         "column": 65
       }
     },
