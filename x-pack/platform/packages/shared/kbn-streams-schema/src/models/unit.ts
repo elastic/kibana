@@ -347,4 +347,14 @@ export namespace StreamsUnit {
   export interface UiMetadataSavedObjectAttributes {
     metadata: UiMetadata;
   }
+  export type DiagnosticSeverity = 'error' | 'warning' | 'info';
+  /** A config-distributor finding about a unit, from `POST /v1/validate` or a rejected publish. */
+  export interface Diagnostic {
+    severity: DiagnosticSeverity;
+    code: string;
+    message: string;
+    /** Location in the validated unit, e.g. `pipelines > p-input > routes > 0`. */
+    path?: string;
+    line?: number;
+  }
 }
