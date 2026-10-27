@@ -100,10 +100,12 @@ export const reportExperimentLinks = (options: ReportExperimentLinksOptions): vo
   // items rather than table rows that would need a single header.
   const body = links.map((link) => toAnnotationRow(link, options)).join('');
   try {
+    // The body goes through stdin: as an argument, its leading `- ` would be
+    // parsed as a flag and the agent would reject the call.
     execFileSync(
       'buildkite-agent',
-      ['annotate', '--context', toAnnotationContext(suiteId), '--style', 'info', '--append', body],
-      { stdio: 'ignore' }
+      ['annotate', '--context', toAnnotationContext(suiteId), '--style', 'info', '--append'],
+      { input: body, stdio: ['pipe', 'ignore', 'ignore'] }
     );
   } catch (error) {
     log.warning(`Could not add experiment links to the Buildkite annotation: ${error}`);

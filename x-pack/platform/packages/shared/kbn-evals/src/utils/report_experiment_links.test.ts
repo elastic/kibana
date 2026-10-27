@@ -89,16 +89,11 @@ describe('reportExperimentLinks', () => {
     expect(infoSpy.mock.calls).toEqual([[`🔗 ${url}`]]);
     expect(execFileSyncMock).toHaveBeenCalledWith(
       'buildkite-agent',
-      [
-        'annotate',
-        '--context',
-        'kbn-evals-experiments-smoke-tests',
-        '--style',
-        'info',
-        '--append',
-        `- [View eval results](${url}) · **Smoke Tests** · model \`gpt\` · shard \`2\`\n`,
-      ],
-      { stdio: 'ignore' }
+      ['annotate', '--context', 'kbn-evals-experiments-smoke-tests', '--style', 'info', '--append'],
+      {
+        input: `- [View eval results](${url}) · **Smoke Tests** · model \`gpt\` · shard \`2\`\n`,
+        stdio: ['pipe', 'ignore', 'ignore'],
+      }
     );
   });
 
