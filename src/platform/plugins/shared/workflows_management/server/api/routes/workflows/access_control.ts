@@ -71,11 +71,14 @@ export const registerWorkflowAccessControlRoutes = ({
           return response.notFound({ body: { message: 'Workflow not found' } });
         }
         assertCanReadManagedWorkflow(request, workflow);
+        // Only private ACLs validate that each entry holds the Workflows privileges in this space.
+        // Public ACLs store any uid they are given, so resolving them would be an arbitrary lookup.
+        const entries =
+          workflow.access_control?.access_mode === 'private' ? workflow.access_control.entries : [];
         const uids = new Set(
-          [
-            workflow.owner_id,
-            ...(workflow.access_control?.entries ?? []).map(({ id }) => id),
-          ].filter((id): id is string => Boolean(id))
+          [workflow.owner_id, ...entries.map(({ id }) => id)].filter((id): id is string =>
+            Boolean(id)
+          )
         );
         if (uids.size === 0) return response.ok({ body: [] });
         const { userProfile } = await workflowsService.getCoreStart();

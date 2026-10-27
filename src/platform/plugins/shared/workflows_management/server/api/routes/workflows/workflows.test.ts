@@ -546,6 +546,23 @@ describe('Workflow routes', () => {
       expect(response.ok).toHaveBeenCalledWith({ body: profiles });
     });
 
+    it('does not resolve entries of a public workflow, which are stored without validation', async () => {
+      mockBulkGetProfiles.mockResolvedValue([]);
+      mockApi.getWorkflow.mockResolvedValue({
+        id: 'wf-1',
+        owner_id: 'owner',
+        access_control: { access_mode: 'public', entries: [{ id: 'any-uid', role: 'viewer' }] },
+      });
+      const response = mockResponse();
+
+      await routeHandlers[key].handler(createLicensingContext(), createRequest(), response);
+
+      expect(mockBulkGetProfiles).toHaveBeenCalledWith({
+        uids: new Set(['owner']),
+        dataPath: 'avatar',
+      });
+    });
+
     it('does not look up profiles when the caller is not shown the owner or entries', async () => {
       // `getWorkflow` strips them for callers who cannot manage the workflow.
       mockApi.getWorkflow.mockResolvedValue({ id: 'wf-1' });

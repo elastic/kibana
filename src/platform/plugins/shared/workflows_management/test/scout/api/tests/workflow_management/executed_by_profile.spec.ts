@@ -141,4 +141,61 @@ steps:
       expect(profiles.body[0].user.username).toBe(username);
     }
   );
+
+  apiTest(
+    'does not resolve the unvalidated entries of a public ACL for the access control modal',
+    async ({ apiClient, kbnClient, esClient }) => {
+      // A user with a profile but without any Workflows privilege. Basic auth is used because
+      // `samlAuth` custom roles are shared per worker, and would replace the owner's role.
+      const bystanderName = `workflow-bystander-${randomUUID()}`;
+      const bystanderPassword = randomUUID();
+      await kbnClient.request({
+        method: 'PUT',
+        path: `/api/security/role/${bystanderName}`,
+        body: {
+          elasticsearch: { cluster: [] },
+          kibana: [{ base: [], feature: { dashboard_v2: ['read'] }, spaces: [spaceId] }],
+        },
+      });
+      await esClient.security.putUser({
+        username: bystanderName,
+        password: bystanderPassword,
+        roles: [bystanderName],
+      });
+      try {
+        const bystanderProfile = await apiClient.get('internal/security/user_profile', {
+          headers: {
+            ...headers,
+            Authorization: `Basic ${Buffer.from(`${bystanderName}:${bystanderPassword}`).toString(
+              'base64'
+            )}`,
+          },
+        });
+        expect(bystanderProfile).toHaveStatusCode(200);
+        const entries = [{ type: 'user', id: bystanderProfile.body.uid, role: 'viewer' }];
+        const accessPath = `s/${spaceId}/internal/workflows/${workflowId}/access_control`;
+
+        // Public ACLs keep their entries without checking the users' Workflows privileges.
+        const makePublic = await apiClient.put(accessPath, {
+          headers: userHeaders,
+          body: { access_mode: 'public', entries },
+        });
+        expect(makePublic).toHaveStatusCode(200);
+        const profiles = await apiClient.get(`${accessPath}/_profiles`, { headers: userHeaders });
+
+        expect(profiles).toHaveStatusCode(200);
+        expect(profiles.body.map(({ uid }: { uid: string }) => uid)).toStrictEqual([profileUid]);
+
+        // Private ACLs only accept users who hold Workflows privileges in the space.
+        const makePrivate = await apiClient.put(accessPath, {
+          headers: userHeaders,
+          body: { access_mode: 'private', entries },
+        });
+        expect(makePrivate).toHaveStatusCode(400);
+      } finally {
+        await esClient.security.deleteUser({ username: bystanderName });
+        await kbnClient.request({ method: 'DELETE', path: `/api/security/role/${bystanderName}` });
+      }
+    }
+  );
 });
