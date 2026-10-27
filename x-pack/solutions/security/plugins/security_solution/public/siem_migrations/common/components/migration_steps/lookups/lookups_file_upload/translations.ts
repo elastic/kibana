@@ -42,3 +42,23 @@ export const lookupFileNameMismatchError = (fileName?: string): string => {
     }
   );
 };
+
+export const referenceSetNameMismatchError = (name: string): string =>
+  i18n.translate(
+    'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.referenceSetNameMismatchErrorMessage',
+    {
+      defaultMessage:
+        'Reference set "{name}" must match a name in the list above. The name is taken from the export, not the file name.',
+      values: { name },
+    }
+  );
+
+export const watchlistNameMismatchError = (name: string): string =>
+  i18n.translate(
+    'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.watchlistNameMismatchErrorMessage',
+    {
+      defaultMessage:
+        'Watchlist "{name}" must match a name in the list above. The name is taken from the watchlist alias, not the file name.',
+      values: { name },
+    }
+  );

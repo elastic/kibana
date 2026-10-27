@@ -105,7 +105,9 @@ describe('LookupsFileUpload', () => {
 
     await waitFor(() => {
       expect(
-        getByText('other_set: The file name must match one of the lookup names in the list above.')
+        getByText(
+          'Reference set "other_set" must match a name in the list above. The name is taken from the export, not the file name.'
+        )
       ).toBeVisible();
     });
     expect(getByTestId('uploadFileButton')).not.toBeDisabled();

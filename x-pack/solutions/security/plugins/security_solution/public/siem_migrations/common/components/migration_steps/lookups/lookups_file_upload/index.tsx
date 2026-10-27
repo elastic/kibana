@@ -152,7 +152,12 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
         const validLookups = lookups.flatMap((resource): SiemMigrationResourceData[] =>
           resource !== undefined ? [resource] : []
         );
-        const resourcesToStore = assertMissingLookups(validLookups, missingLookups, addError);
+        const resourcesToStore = assertMissingLookups(
+          validLookups,
+          missingLookups,
+          migrationSource,
+          addError
+        );
         setLookupResources((current) => [...current, ...resourcesToStore]);
       },
       [addError, migrationSource, missingLookups]
