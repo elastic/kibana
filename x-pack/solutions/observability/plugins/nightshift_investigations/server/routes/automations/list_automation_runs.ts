@@ -89,6 +89,7 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         'trigger_alert_investigation',
         'trigger_investigation_alert',
         'trigger_investigation_slack',
+        'follow_up_recovered_alert',
       ].map((stepId) =>
         workflowsManagement.management.searchStepExecutions(
           {
@@ -106,14 +107,17 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         )
       )
     );
-    const [defaultSteps, legacyAlertSteps, alertSteps, slackSteps] = stepExecutions.map(
-      ({ results }) => new Map(results.map((step) => [step.workflowRunId, step]))
-    );
+    const [defaultSteps, legacyAlertSteps, alertSteps, slackSteps, recoveredAlertSteps] =
+      stepExecutions.map(
+        ({ results }) => new Map(results.map((step) => [step.workflowRunId, step]))
+      );
 
     const runs = executions.results.map((exec) => {
       const step =
         (exec.triggeredBy === 'alerting.v1.alertStatusChanged'
-          ? alertSteps.get(exec.id) ?? legacyAlertSteps.get(exec.id)
+          ? alertSteps.get(exec.id) ??
+            legacyAlertSteps.get(exec.id) ??
+            recoveredAlertSteps.get(exec.id)
           : exec.triggeredBy === 'slack2.message'
           ? slackSteps.get(exec.id)
           : undefined) ?? defaultSteps.get(exec.id);
@@ -128,10 +132,14 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
       const getString = (value: unknown) => (typeof value === 'string' ? value : undefined);
 
       const dailyLimitReached = output['skip_reason'] === 'daily_limit';
+      const noOpenInvestigation = output['skip_reason'] === 'no_open_investigation';
 
       return {
         id: exec.id,
-        status: dailyLimitReached ? ('skipped' as const) : mapRunStatus(exec.status),
+        status:
+          dailyLimitReached || noOpenInvestigation
+            ? ('skipped' as const)
+            : mapRunStatus(exec.status),
         startedAt: exec.startedAt,
         finishedAt: exec.finishedAt,
         duration: exec.duration,
@@ -139,7 +147,11 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         title: getString(input['title']),
         message: getString(input['message']),
         investigationId: getString(output['investigation_id']),
-        skipReason: dailyLimitReached ? 'daily_limit' : null,
+        skipReason: dailyLimitReached
+          ? 'daily_limit'
+          : noOpenInvestigation
+          ? 'no_open_investigation'
+          : null,
         dailyLimit:
           typeof output['daily_limit'] === 'number'
             ? output['daily_limit']

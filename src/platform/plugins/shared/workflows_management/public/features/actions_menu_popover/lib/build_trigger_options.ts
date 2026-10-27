@@ -9,6 +9,7 @@
 
 import type { IconType, UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getTriggerName } from '@kbn/workflows';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import {
   DEFAULT_PUBLIC_TRIGGER_ICON,
@@ -82,9 +83,7 @@ export function buildBuiltInTriggerOptions(euiTheme: UseEuiTheme['euiTheme']): A
   return [
     {
       id: 'manual',
-      label: i18n.translate('workflows.actionsMenu.manual', {
-        defaultMessage: 'Manual',
-      }),
+      label: getTriggerName('manual'),
       description: i18n.translate('workflows.actionsMenu.manualDescription', {
         defaultMessage: 'Trigger - Manually start from the UI',
       }),
@@ -93,9 +92,7 @@ export function buildBuiltInTriggerOptions(euiTheme: UseEuiTheme['euiTheme']): A
     },
     {
       id: 'alert',
-      label: i18n.translate('workflows.actionsMenu.alert', {
-        defaultMessage: 'Alert',
-      }),
+      label: getTriggerName('alert'),
       description: i18n.translate('workflows.actionsMenu.alertDescription', {
         defaultMessage: 'Trigger - When an alert from rule is created',
       }),
@@ -104,9 +101,7 @@ export function buildBuiltInTriggerOptions(euiTheme: UseEuiTheme['euiTheme']): A
     },
     {
       id: 'scheduled',
-      label: i18n.translate('workflows.actionsMenu.schedule', {
-        defaultMessage: 'Schedule',
-      }),
+      label: getTriggerName('scheduled'),
       description: i18n.translate('workflows.actionsMenu.scheduleDescription', {
         defaultMessage: 'Trigger - On a schedule (e.g. every 10 minutes)',
       }),
