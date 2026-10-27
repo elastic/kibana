@@ -64,13 +64,13 @@ describe('createRuleAuthoringSkill', () => {
     expect(uiSettings.get).not.toHaveBeenCalled();
   });
 
-  it('exposes only the manage rule inline tool', async () => {
+  it('exposes only the draft custom rule inline tool', async () => {
     const skill = createRuleAuthoringSkill(createDeps());
 
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
     const inlineToolIds = inlineTools.map((tool) => tool.id);
 
-    expect(inlineToolIds).toEqual([ALERTING_TOOL_IDS.manageRule]);
+    expect(inlineToolIds).toEqual([ALERTING_TOOL_IDS.draftCustomRule]);
     expect(inlineToolIds).not.toContain(ALERTING_TOOL_IDS.manageActionPolicy);
   });
 

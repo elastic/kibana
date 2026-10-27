@@ -27,6 +27,7 @@ import {
   POLICY_MATCHER_TAG_MAX_LENGTH,
   MAX_KQL_LENGTH,
 } from '@kbn/alerting-v2-schemas';
+import { RULE_BUILDER_TYPES } from '@kbn/alerting-v2-rule-builders';
 import {
   ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
   builtinWorkflowInputDefinitions,
@@ -34,7 +35,7 @@ import {
 import {
   ruleOperationSchema,
   setStateTransitionOperationSchema,
-} from '../tools/manage_rule/operations';
+} from '../tools/draft_custom_rule/operations';
 import { actionPolicyOperationSchema } from '../tools/manage_action_policy/operations';
 
 type JsonSchemaNode = Record<string, unknown>;
@@ -452,7 +453,7 @@ export const generateRuleSchemaDoc = (): string =>
 
 /**
  * Generates markdown for a discriminated-union tool operations schema
- * (e.g. `manage_rule` / `manage_action_policy`).
+ * (e.g. `draft_custom_rule` / `manage_action_policy`).
  */
 export const generateOperationsDoc = ({
   title,
@@ -483,7 +484,7 @@ export const generateOperationsUsageList = ({
 };
 
 /**
- * Generates concise markdown documentation for the manage_rule tool operations.
+ * Generates concise markdown documentation for the draft_custom_rule tool operations.
  */
 export const generateRuleOperationsDoc = (): string =>
   generateOperationsDoc({
@@ -491,12 +492,22 @@ export const generateRuleOperationsDoc = (): string =>
     schema: ruleOperationSchema,
   });
 
-/** Operation `.describe()` list for the `manage_rule` tool description. */
+/** Operation `.describe()` list for the `draft_custom_rule` tool description. */
 export const generateRuleOperationsUsageList = (): string =>
   generateOperationsUsageList({
     title: 'Rule Operations Schema Reference',
     schema: ruleOperationSchema,
   });
+
+/** Positions `draft_custom_rule` as the fallback for requests no registered rule builder fits. */
+export const generateCustomRuleWhenToUse = (): string =>
+  [
+    'Use only when no rule builder fits the request. Check these builders first:',
+    ...Object.values(RULE_BUILDER_TYPES).map(
+      ({ toolName, title, whenToUse }) => `- \`${toolName}\` (${title}): ${whenToUse}`
+    ),
+    'Choose this tool when the rule needs ES|QL that no builder can express (e.g. joins, LOOKUP JOIN, multi-stage EVAL/STATS, custom severity CASE logic), when the user supplies a raw ES|QL query, or when an attached rule has no builder type or its builder params cannot be parsed.',
+  ].join('\n');
 
 export const getSeverityValues = (): string[] => alertEventSeveritySchema.options;
 
@@ -1026,14 +1037,14 @@ export const generateSingleRuleActionPolicyDoc = (): string =>
     '',
     '### 1. Add the routing tag to the rule',
     '',
-    'Call `manage_rule` → `set_metadata` with `routing_tags: [<all existing routing tags>, "notify-<rule-slug>"]`.',
+    'Call `draft_custom_rule` → `set_metadata` with `routing_tags: [<all existing routing tags>, "notify-<rule-slug>"]`.',
     '',
     '> **Routing tags are replaced wholesale.** Read the current routing tags off the rule',
     '> attachment first and re-send them alongside the new one. The routing tag cap is 20.',
     '> If the rule is already at the cap, ask the user which existing routing tag to drop.',
     '> Do not put the routing tag in `tags`; rule tags do not link policies.',
     '',
-    '> **Save reminder**: `manage_rule` only updates the in-memory rule attachment.',
+    '> **Save reminder**: `draft_custom_rule` only updates the in-memory rule attachment.',
     '> The routing tag only exists once the user saves the rule; until then, this policy',
     '> will not match any alerts (unless another saved rule already carries the tag).',
     '',

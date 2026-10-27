@@ -621,8 +621,8 @@ export const ALERTING_LOG_CODES = {
   /** Action policy attachment isStale check failed; returns false. */
   AGENT_BUILDER_ACTION_POLICY_STALENESS_CHECK_FAILED:
     'AGENT_BUILDER_ACTION_POLICY_STALENESS_CHECK_FAILED',
-  /** `manage_rule` tool failed; returns an error result. */
-  AGENT_BUILDER_MANAGE_RULE_FAILED: 'AGENT_BUILDER_MANAGE_RULE_FAILED',
+  /** `draft_custom_rule` tool failed; returns an error result. */
+  AGENT_BUILDER_DRAFT_CUSTOM_RULE_FAILED: 'AGENT_BUILDER_DRAFT_CUSTOM_RULE_FAILED',
   /** `manage_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
   /** Workflow validation service call failed while checking a destination workflow; diagnostics for that destination are skipped. */

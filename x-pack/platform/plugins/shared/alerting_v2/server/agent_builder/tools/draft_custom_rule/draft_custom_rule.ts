@@ -25,9 +25,12 @@ import {
 } from './operations';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
-import { generateRuleOperationsUsageList } from '../../skills/schema_to_skill_docs';
+import {
+  generateCustomRuleWhenToUse,
+  generateRuleOperationsUsageList,
+} from '../../skills/schema_to_skill_docs';
 
-const manageRuleSchema = lazySchema(() =>
+const draftCustomRuleSchema = lazySchema(() =>
   z.object({
     ruleAttachmentId: z
       .string()
@@ -39,16 +42,18 @@ const manageRuleSchema = lazySchema(() =>
   })
 );
 
-export interface ManageRuleToolDeps {
+export interface DraftCustomRuleToolDeps {
   logger: LoggerServiceContract;
 }
 
-export const manageRuleTool = ({
+export const draftCustomRuleTool = ({
   logger,
-}: ManageRuleToolDeps): BuiltinSkillBoundedTool<typeof manageRuleSchema> => ({
-  id: ALERTING_TOOL_IDS.manageRule,
+}: DraftCustomRuleToolDeps): BuiltinSkillBoundedTool<typeof draftCustomRuleSchema> => ({
+  id: ALERTING_TOOL_IDS.draftCustomRule,
   type: ToolType.builtin,
-  description: `Create or update an alerting V2 rule in the conversation.
+  description: `Create or update a custom ES|QL alerting V2 rule in the conversation.
+
+${generateCustomRuleWhenToUse()}
 
 This tool only mutates the rule attachment shown in the conversation. It does
 NOT create or modify the underlying Alerting V2 rule (saved object) — for that,
@@ -57,7 +62,7 @@ attachment.
 
 Use operations[] to:
 ${generateRuleOperationsUsageList()}`,
-  schema: manageRuleSchema,
+  schema: draftCustomRuleSchema,
   handler: async (
     { ruleAttachmentId: previousAttachmentId, operations },
     { attachments, esClient, spaceId, savedObjectsClient }
@@ -156,7 +161,7 @@ ${generateRuleOperationsUsageList()}`,
       const message = error instanceof Error ? error.message : String(error);
       if (error instanceof RuleOperationValidationError) {
         logger.debug({
-          message: 'Invalid manage_rule input',
+          message: 'Invalid draft_custom_rule input',
           labels: {
             space_id: spaceId,
             ...(ruleId != null ? { rule_id: ruleId } : {}),
@@ -164,8 +169,8 @@ ${generateRuleOperationsUsageList()}`,
         });
       } else {
         logger.warn({
-          message: 'Failed to manage rule',
-          code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_RULE_FAILED,
+          message: 'Failed to draft rule',
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_DRAFT_CUSTOM_RULE_FAILED,
           labels: {
             space_id: spaceId,
             ...(ruleId != null ? { rule_id: ruleId } : {}),
@@ -178,7 +183,7 @@ ${generateRuleOperationsUsageList()}`,
           {
             type: ToolResultType.error,
             data: {
-              message: `Failed to manage rule: ${message}`,
+              message: `Failed to draft rule: ${message}`,
               metadata: { ruleAttachmentId: previousAttachmentId, operations },
             },
           },

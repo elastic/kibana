@@ -14,7 +14,7 @@ import {
   agentChatTest as test,
   mockFinalAnswerRenderingRuleAttachment,
   mockLoadSkill,
-  mockManageRule,
+  mockDraftCustomRule,
   mockTitleGeneration,
   type AlertingPageObjects,
 } from '../fixtures';
@@ -142,7 +142,7 @@ test.describe(
       await pageObjects.agentChat.goto();
       mockTitleGeneration(llmProxy, ruleName);
       mockLoadSkill(llmProxy, RULE_AUTHORING_SKILL_ID);
-      mockManageRule(llmProxy, [
+      mockDraftCustomRule(llmProxy, [
         { operation: 'set_metadata', name: ruleName, description: RULE_DESCRIPTION },
         { operation: 'set_kind', kind: 'alert' },
         { operation: 'set_schedule', every: '1m', lookback: '5m' },

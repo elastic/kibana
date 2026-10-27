@@ -733,7 +733,7 @@ export const createRuleDataBaseSchema = lazySchema(() =>
     .strict()
 );
 
-/** Cross-field validation predicates — shared between the CRUD API and the manage_rule tool. */
+/** Cross-field validation predicates — shared between the CRUD API and the draft_custom_rule tool. */
 
 /**
  * The shape the predicates below read. Deliberately structural rather than

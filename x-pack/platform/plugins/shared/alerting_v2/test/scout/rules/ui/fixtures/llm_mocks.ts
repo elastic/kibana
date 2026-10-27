@@ -13,12 +13,14 @@ import {
   toLlmToolName,
 } from '../../../common/ui/fixtures/llm_mocks';
 
-const MANAGE_RULE_LLM_TOOL_NAME = toLlmToolName(ALERTING_TOOL_IDS.manageRule);
+const DRAFT_CUSTOM_RULE_LLM_TOOL_NAME = toLlmToolName(ALERTING_TOOL_IDS.draftCustomRule);
 
-/** Answers the next tool result with a `manage_rule` call applying `operations`. */
-export const mockManageRule = (proxy: LlmProxy, operations: Array<Record<string, unknown>>) =>
-  mockToolResultCall(proxy, 'agent:manage_rule', MANAGE_RULE_LLM_TOOL_NAME, { operations });
+/** Answers the next tool result with a `draft_custom_rule` call applying `operations`. */
+export const mockDraftCustomRule = (proxy: LlmProxy, operations: Array<Record<string, unknown>>) =>
+  mockToolResultCall(proxy, 'agent:draft_custom_rule', DRAFT_CUSTOM_RULE_LLM_TOOL_NAME, {
+    operations,
+  });
 
-/** Renders the rule attachment created by the preceding `manage_rule` tool result. */
+/** Renders the rule attachment created by the preceding `draft_custom_rule` tool result. */
 export const mockFinalAnswerRenderingRuleAttachment = (proxy: LlmProxy, answer: string) =>
   mockFinalAnswerRenderingAttachment(proxy, answer, 'ruleAttachment');

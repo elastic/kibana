@@ -77,7 +77,7 @@ describe('createActionPolicyAuthoringSkill', () => {
     const inlineToolIds = inlineTools.map((tool) => tool.id);
 
     expect(inlineToolIds).toEqual([ALERTING_TOOL_IDS.manageActionPolicy]);
-    expect(inlineToolIds).not.toContain(ALERTING_TOOL_IDS.manageRule);
+    expect(inlineToolIds).not.toContain(ALERTING_TOOL_IDS.draftCustomRule);
   });
 
   it('includes action policy discovery and default notification setup instructions', () => {

@@ -63,7 +63,7 @@ evaluate.describe(
               output: {
                 criteria: [
                   'The assistant treats this as a Security/SIEM detection-rule request (brute-force login attempts) rather than an Alerting V2 / Observability alert-rule request.',
-                  'The response progresses toward a Security detection rule and does not compose an Alerting V2 rule via manage_rule.',
+                  'The response progresses toward a Security detection rule and does not compose an Alerting V2 rule via draft_custom_rule.',
                 ],
                 expectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
                 notExpectedSkills: [RULE_AUTHORING_SKILL_ID],
@@ -105,12 +105,12 @@ evaluate.describe(
                     'The first-turn response is a guided setup question about what to monitor (data source, condition, or both) — not a composed rule and not a refusal.',
                     "The second-turn response uses the user's answer to compose the rule rather than re-asking for details the user already provided.",
                     'The breach ES|QL query filters for average system.cpu.total.norm.pct above 0.9 (or an equivalent 90% threshold expression), and the 5-minute duration is expressed via lookback/schedule or a state transition — not a WHERE on @timestamp.',
-                    'The set_query operation validates successfully against Elasticsearch, and the final manage_rule call ends with a validate operation.',
+                    'The set_query operation validates successfully against Elasticsearch, and the final draft_custom_rule call ends with a validate operation.',
                     'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
                   ],
                   expectedSkills: [RULE_AUTHORING_SKILL_ID],
                   notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
-                  expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
+                  expectedToolIds: [ALERTING_TOOL_IDS.draftCustomRule],
                   expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
                   expectAttachmentData: (attachments) => {
                     const attachment = getLatestAttachmentData<RuleAttachmentData>(
@@ -145,12 +145,12 @@ evaluate.describe(
                     'Composes in this turn rather than asking for details the user already gave (index, metric, threshold, grouping, and duration).',
                     'The breach ES|QL query filters for average system.cpu.total.norm.pct above 0.9 (or an equivalent 90% threshold expression).',
                     'The query does not embed an absolute time-range or @timestamp window filter for the 5-minute duration — the lookback/schedule (or a state transition) expresses the duration, not a WHERE on @timestamp.',
-                    'The set_query operation validates successfully against Elasticsearch (the index and fields exist), and the final manage_rule call ends with a validate operation.',
+                    'The set_query operation validates successfully against Elasticsearch (the index and fields exist), and the final draft_custom_rule call ends with a validate operation.',
                     'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
                   ],
                   expectedSkills: [RULE_AUTHORING_SKILL_ID],
                   notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
-                  expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
+                  expectedToolIds: [ALERTING_TOOL_IDS.draftCustomRule],
                   expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
                   expectAttachmentData: (attachments) => {
                     const attachment = getLatestAttachmentData<RuleAttachmentData>(
@@ -184,12 +184,12 @@ evaluate.describe(
                   criteria: [
                     'The breach ES|QL query includes a `severity` column (e.g. via EVAL severity = "critical") to set the alert severity.',
                     'The query filters for average system.cpu.total.norm.pct above 0.95 (or an equivalent threshold expression).',
-                    'The set_query operation validates successfully against Elasticsearch, and the final manage_rule call ends with a validate operation.',
+                    'The set_query operation validates successfully against Elasticsearch, and the final draft_custom_rule call ends with a validate operation.',
                     'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
                   ],
                   expectedSkills: [RULE_AUTHORING_SKILL_ID],
                   notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
-                  expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
+                  expectedToolIds: [ALERTING_TOOL_IDS.draftCustomRule],
                   expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
                   expectAttachmentData: (attachments) => {
                     const attachment = getLatestAttachmentData<RuleAttachmentData>(
@@ -221,12 +221,12 @@ evaluate.describe(
                   criteria: [
                     `The rule's ES|QL query targets ${adminConsoleIndex} (or an equivalent admin-console source), counts error events (e.g. filtering on log.level == "ERROR" or an equivalent error indicator present in the mappings), and fires when the count is greater than 3.`,
                     'The query does not embed an absolute @timestamp time-range filter for the 5-minute window — lookback expresses the duration.',
-                    'The set_query operation validates successfully against Elasticsearch, and the final manage_rule call ends with a validate operation.',
+                    'The set_query operation validates successfully against Elasticsearch, and the final draft_custom_rule call ends with a validate operation.',
                     'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
                   ],
                   expectedSkills: [RULE_AUTHORING_SKILL_ID],
                   notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
-                  expectedToolIds: [ALERTING_TOOL_IDS.manageRule, INDEX_MAPPING_TOOL_ID],
+                  expectedToolIds: [ALERTING_TOOL_IDS.draftCustomRule, INDEX_MAPPING_TOOL_ID],
                   expectedAnyOfToolIds: INDEX_DISCOVERY_TOOL_IDS,
                   expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
                   expectAttachmentData: (attachments) => {
@@ -277,12 +277,12 @@ evaluate.describe(
               output: {
                 criteria: [
                   'The rule query does not target the concrete backing index the user mentioned; it uses the data stream name or a wildcard pattern so the rule survives rollovers.',
-                  'The set_query operation validates successfully against Elasticsearch, and the final manage_rule call ends with a validate operation.',
+                  'The set_query operation validates successfully against Elasticsearch, and the final draft_custom_rule call ends with a validate operation.',
                   'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
                 ],
                 expectedSkills: [RULE_AUTHORING_SKILL_ID],
                 notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
-                expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
+                expectedToolIds: [ALERTING_TOOL_IDS.draftCustomRule],
                 expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
                 expectAttachmentData: (attachments) => {
                   const attachment = getLatestAttachmentData<RuleAttachmentData>(
@@ -309,12 +309,12 @@ evaluate.describe(
                 criteria: [
                   'The rule query targets the exact backing index the user asked for and the assistant does not silently replace it with a wildcard or the data stream name.',
                   'The assistant tells the user that a concrete backing index changes on rollover and the rule may stop matching new data.',
-                  'The set_query operation validates successfully against Elasticsearch, and the final manage_rule call ends with a validate operation.',
+                  'The set_query operation validates successfully against Elasticsearch, and the final draft_custom_rule call ends with a validate operation.',
                   'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
                 ],
                 expectedSkills: [RULE_AUTHORING_SKILL_ID],
                 notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
-                expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
+                expectedToolIds: [ALERTING_TOOL_IDS.draftCustomRule],
                 expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
                 expectAttachmentData: (attachments) => {
                   const attachment = getLatestAttachmentData<RuleAttachmentData>(
@@ -459,13 +459,13 @@ evaluate.describe(
               output: {
                 criteria: [
                   'The assistant composes the rule in this turn rather than asking for details the user already provided.',
-                  'The manage_rule call includes a set_runbook operation with markdown content describing investigation steps for high CPU usage.',
+                  'The draft_custom_rule call includes a set_runbook operation with markdown content describing investigation steps for high CPU usage.',
                   'The runbook content is meaningful and actionable — not a placeholder or stub — and is relevant to the high-CPU scenario the user described.',
                   'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
                 ],
                 expectedSkills: [RULE_AUTHORING_SKILL_ID],
                 notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
-                expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
+                expectedToolIds: [ALERTING_TOOL_IDS.draftCustomRule],
                 expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
                 expectAttachmentData: (attachments) => {
                   const attachment = getLatestAttachmentData<RuleAttachmentData>(
@@ -498,13 +498,13 @@ evaluate.describe(
               output: {
                 criteria: [
                   'The first-turn response composes the rule without a runbook.',
-                  'After the user requests a runbook on the second turn, the assistant calls manage_rule with a set_runbook operation containing markdown investigation steps.',
+                  'After the user requests a runbook on the second turn, the assistant calls draft_custom_rule with a set_runbook operation containing markdown investigation steps.',
                   'The runbook content is relevant to the high-CPU scenario and includes actionable triage or mitigation steps.',
                   'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
                 ],
                 expectedSkills: [RULE_AUTHORING_SKILL_ID],
                 notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
-                expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
+                expectedToolIds: [ALERTING_TOOL_IDS.draftCustomRule],
                 expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
                 expectAttachmentData: (attachments) => {
                   const attachment = getLatestAttachmentData<RuleAttachmentData>(

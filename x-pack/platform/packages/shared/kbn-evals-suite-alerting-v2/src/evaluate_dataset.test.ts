@@ -92,9 +92,9 @@ describe('collectScoredCriteria', () => {
   it('returns non-empty criteria', () => {
     expect(
       collectScoredCriteria({
-        criteria: ['loads skill', 'calls manage_rule', 'no @timestamp filter'],
+        criteria: ['loads skill', 'calls draft_custom_rule', 'no @timestamp filter'],
       })
-    ).toEqual(['loads skill', 'calls manage_rule', 'no @timestamp filter']);
+    ).toEqual(['loads skill', 'calls draft_custom_rule', 'no @timestamp filter']);
   });
 
   it('filters blank criteria strings', () => {

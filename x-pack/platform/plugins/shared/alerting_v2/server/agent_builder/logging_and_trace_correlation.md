@@ -19,7 +19,7 @@ Tool execution is wrapped in `withExecuteToolSpan` (`run_tool.ts`). Successful t
 are stringified onto the TOOL span as `gen_ai.tool.call.result` (when tool-details tracing
 is enabled).
 
-`manage_rule` / `manage_action_policy` already return the pre-assigned entity id in that
+`draft_custom_rule` / `manage_action_policy` already return the pre-assigned entity id in that
 payload (`ruleAttachment.ruleId` / `actionPolicyAttachment.policyId`). So for AB traces,
 draft creates are already correlatable via the tool result — without any log label work.
 

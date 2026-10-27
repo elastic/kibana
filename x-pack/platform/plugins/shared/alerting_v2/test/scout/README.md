@@ -75,7 +75,7 @@ Each namespace category has `playwright.config.ts` (`testDir: './tests'`) and a 
 
 Canvas specs use `agentChatTest`, which adds a worker-scoped LLM proxy and a `.gen-ai` connector pointing at it. The proxy listens on the test runner's loopback, which a Cloud Kibana cannot reach, so a canvas spec tags itself with `getPlaywrightTagsFor('stateful', 'classic', 'local')` and `getPlaywrightTagsFor('serverless', 'observability_complete', 'local')`.
 
-`common/ui/fixtures/llm_mocks.ts` scripts the Agent Builder turns shared by the rule and action-policy canvases (title, `load_skill`, a tool-result call, and `<render_attachment>`). A namespace adds only its tool and attachment key, as `rules/ui/fixtures/llm_mocks.ts` does for `manage_rule` / `ruleAttachment`. An action-policy canvas spec should add `action_policies/ui/fixtures/llm_mocks.ts` for `manage_action_policy` / `actionPolicyAttachment` and re-export it from that namespace's fixtures.
+`common/ui/fixtures/llm_mocks.ts` scripts the Agent Builder turns shared by the rule and action-policy canvases (title, `load_skill`, a tool-result call, and `<render_attachment>`). A namespace adds only its tool and attachment key, as `rules/ui/fixtures/llm_mocks.ts` does for `draft_custom_rule` / `ruleAttachment`. An action-policy canvas spec should add `action_policies/ui/fixtures/llm_mocks.ts` for `manage_action_policy` / `actionPolicyAttachment` and re-export it from that namespace's fixtures.
 
 These suites are sequential (`workers: 1`). Do not add a parallel API lane until cleanup is isolated — almost every spec calls cluster-wide `*.cleanUp()`.
 

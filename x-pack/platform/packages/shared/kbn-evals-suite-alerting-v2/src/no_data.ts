@@ -17,7 +17,7 @@ import {
   assertLatestHostCpuAlert,
   assertQueriedStyle,
   hostCpuCreateTurn,
-  MANAGE_RULE_SKILL_OUTPUT,
+  DRAFT_CUSTOM_RULE_SKILL_OUTPUT,
   PERSIST_VIA_ATTACHMENT_CRITERION,
   requireRuleVersions,
   type QueryStyle,
@@ -93,14 +93,14 @@ export const noDataExample = ({
       `The final rule sets \`no_data.strategy\` to \`${strategy}\`.`,
       ...(strategy !== 'ignore'
         ? [
-            'The no-data change is applied with manage_rule against the existing attachment (not a new rule), and the final manage_rule call ends with a validate operation.',
+            'The no-data change is applied with draft_custom_rule against the existing attachment (not a new rule), and the final draft_custom_rule call ends with a validate operation.',
           ]
         : [
-            'The assistant confirms that the requested no-data behavior (ignore) is already the default, OR re-applies it with a manage_rule call ending with validate.',
+            'The assistant confirms that the requested no-data behavior (ignore) is already the default, OR re-applies it with a draft_custom_rule call ending with validate.',
           ]),
       PERSIST_VIA_ATTACHMENT_CRITERION,
     ],
-    ...MANAGE_RULE_SKILL_OUTPUT,
+    ...DRAFT_CUSTOM_RULE_SKILL_OUTPUT,
     expectAttachmentData: (attachments) => {
       const versions = requireRuleVersions(attachments);
       assertQueriedStyle(versions, style);

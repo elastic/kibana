@@ -13,8 +13,8 @@ import {
   ALERTING_V2_ENABLED_SETTING_ID,
   RULE_AUTHORING_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
-import type { ManageRuleToolDeps } from '../tools/manage_rule';
-import { manageRuleTool } from '../tools/manage_rule';
+import type { DraftCustomRuleToolDeps } from '../tools/draft_custom_rule';
+import { draftCustomRuleTool } from '../tools/draft_custom_rule';
 import {
   generateRuleOperationsDoc,
   generateRuleKindDoc,
@@ -25,7 +25,7 @@ import {
   generateNotificationsOverviewDoc,
 } from './schema_to_skill_docs';
 
-type RuleAuthoringSkillDeps = ManageRuleToolDeps & { availability: AvailabilityConfig };
+type RuleAuthoringSkillDeps = DraftCustomRuleToolDeps & { availability: AvailabilityConfig };
 
 export const createRuleAuthoringSkill = (deps: RuleAuthoringSkillDeps) =>
   defineSkillType({
@@ -92,13 +92,13 @@ When a user asks about existing rules:
 - Do **not** attach rules by default when only listing or comparing.
 - To inspect or edit a saved rule, attach it with \`platform.core.sml_attach\` using the \`entry_id\` from the search result.
 - After attaching, use the returned \`attachment_id\` for subsequent ${
-      ALERTING_TOOL_IDS.manageRule
+      ALERTING_TOOL_IDS.draftCustomRule
     } calls.
 
 ## Composing and Modifying Rules
 
 Build the request for ${
-      ALERTING_TOOL_IDS.manageRule
+      ALERTING_TOOL_IDS.draftCustomRule
     } as an ordered \`operations\` array. Operations run in sequence.
 
 For a new rule, start with \`set_metadata\` (name required), then \`set_kind\`, \`set_schedule\`, \`set_query\`, \`set_recovery\`, and \`set_no_data\`.
@@ -136,13 +136,13 @@ ${generateRuleOperationsDoc()}
 ## Final Validation
 
 Always include \`{ operation: "validate" }\` as the **last operation** in the final ${
-      ALERTING_TOOL_IDS.manageRule
+      ALERTING_TOOL_IDS.draftCustomRule
     } call after all fields are set. This validates the accumulated rule against the API request schema and throws if the rule is not ready to save (missing required fields, invalid values, etc.). If validation fails, read the error issues, fix them with corrective operations, and retry with \`validate\` again.
 
 ## Rendering Attachments
 
 After calling ${
-      ALERTING_TOOL_IDS.manageRule
+      ALERTING_TOOL_IDS.draftCustomRule
     }, **always** render the rule attachment inline in your response using the \`<render_attachment>\` tag with the attachment ID and version from the tool result:
 
 \`\`\`
@@ -156,7 +156,7 @@ This displays the interactive rule card with Preview and Create/Update buttons.
 ## Persistence
 
 The ${
-      ALERTING_TOOL_IDS.manageRule
+      ALERTING_TOOL_IDS.draftCustomRule
     } tool only manages the **in-memory attachment** — it never writes to Elasticsearch.
 Always direct the user to the rendered attachment's action buttons for persistence:
 - **Create rule** — create a new universal alerting rule from the in-memory attachment.
@@ -168,7 +168,7 @@ Never attempt to create, update, delete, enable, or disable rules directly via A
 After composing or modifying a rule, always render it inline for user review:
 \`<render_attachment id="{attachmentId}" version="{version}"/>\`
 where \`attachmentId\` is \`ruleAttachment.id\` and \`version\` is \`version\` from the ${
-      ALERTING_TOOL_IDS.manageRule
+      ALERTING_TOOL_IDS.draftCustomRule
     } tool result.
 
 ---
@@ -204,5 +204,5 @@ When the user asks what happens if data stops arriving (missing metrics, heartbe
 
 ### Notifications
 When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md).`,
-    getInlineTools: () => [manageRuleTool(deps)],
+    getInlineTools: () => [draftCustomRuleTool(deps)],
   });

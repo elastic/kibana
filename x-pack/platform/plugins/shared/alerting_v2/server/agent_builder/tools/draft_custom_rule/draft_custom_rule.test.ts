@@ -14,7 +14,7 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
-import { manageRuleTool } from './manage_rule';
+import { draftCustomRuleTool } from './draft_custom_rule';
 
 const getEsqlQueryMock = (ctx: ToolHandlerContextMock) =>
   ctx.esClient.asCurrentUser.esql.query as unknown as jest.Mock;
@@ -62,13 +62,13 @@ const createLogger = (): jest.Mocked<
   forSubsystem: jest.fn(),
 });
 
-describe('manageRuleTool', () => {
+describe('draftCustomRuleTool', () => {
   let logger: ReturnType<typeof createLogger>;
-  let tool: ReturnType<typeof manageRuleTool>;
+  let tool: ReturnType<typeof draftCustomRuleTool>;
 
   beforeEach(() => {
     logger = createLogger();
-    tool = manageRuleTool({ logger: logger as unknown as LoggerServiceContract });
+    tool = draftCustomRuleTool({ logger: logger as unknown as LoggerServiceContract });
   });
 
   it('describes operations from the schema helpers', () => {
@@ -77,6 +77,11 @@ describe('manageRuleTool', () => {
     expect(tool.description).toContain('Use `set_runbook`');
     expect(tool.description).toContain('data: { dashboard_id }');
     expect(tool.description).not.toMatch(/1\. set_metadata/);
+  });
+
+  it('positions itself as the fallback for requests no rule builder fits', () => {
+    expect(tool.description).toContain('Use only when no rule builder fits the request.');
+    expect(tool.description).toContain('`draft_threshold_rule` (Threshold)');
   });
 
   describe('handler', () => {
@@ -542,7 +547,7 @@ describe('manageRuleTool', () => {
       await tool.handler({ operations: [{ operation: 'set_kind', kind: 'alert' }] }, ctx);
 
       expect(logger.debug).toHaveBeenCalledWith({
-        message: 'Invalid manage_rule input',
+        message: 'Invalid draft_custom_rule input',
         labels: { space_id: ctx.spaceId },
       });
       expect(logger.warn).not.toHaveBeenCalled();
@@ -561,8 +566,8 @@ describe('manageRuleTool', () => {
       );
 
       expect(logger.warn).toHaveBeenCalledWith({
-        message: 'Failed to manage rule',
-        code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_RULE_FAILED,
+        message: 'Failed to draft rule',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_DRAFT_CUSTOM_RULE_FAILED,
         labels: { space_id: ctx.spaceId, rule_id: expect.any(String) },
         error: expect.any(Error),
       });
@@ -594,8 +599,8 @@ describe('manageRuleTool', () => {
       );
 
       expect(logger.warn).toHaveBeenCalledWith({
-        message: 'Failed to manage rule',
-        code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_RULE_FAILED,
+        message: 'Failed to draft rule',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_DRAFT_CUSTOM_RULE_FAILED,
         labels: { space_id: ctx.spaceId, rule_id: 'rule-persisted-id' },
         error: expect.any(Error),
       });
@@ -625,8 +630,8 @@ describe('manageRuleTool', () => {
       );
 
       expect(logger.warn).toHaveBeenCalledWith({
-        message: 'Failed to manage rule',
-        code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_RULE_FAILED,
+        message: 'Failed to draft rule',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_DRAFT_CUSTOM_RULE_FAILED,
         labels: { space_id: ctx.spaceId, rule_id: 'rule-in-memory-id' },
         error: expect.any(Error),
       });
