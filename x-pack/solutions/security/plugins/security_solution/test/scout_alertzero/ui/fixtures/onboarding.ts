@@ -40,20 +40,20 @@ export interface OnboardingSpace {
 }
 
 /**
- * Creates an isolated space with the per-space gate on, optionally seeding the stub
- * model. Cleanup disables every enabled worker first (best-effort; the space deletion
- * is the hard isolation anyway), then removes the stub connector and the space.
+ * Shared lifecycle of `createOnboardingSpace` / `createUiOnboardingSpace`:
+ * creates the space, turns the per-space gate on, optionally seeds the stub
+ * model. Cleanup disables every enabled worker first (best-effort; the space
+ * deletion is the hard isolation anyway), then removes the stub connector and
+ * the space.
  */
-export const createOnboardingSpace = async (
-  apiClient: ApiClientFixture,
+const buildOnboardingSpace = async (
+  api: AlertZeroApi,
   spaces: SpacesService,
-  cookieHeader: Record<string, string>,
   { withStubModel = false }: { withStubModel?: boolean } = {}
 ): Promise<OnboardingSpace> => {
   const spaceId = `${NAMESPACE}-${randomSuffix()}`;
   await spaces.create({ id: spaceId, name: `Onboarding ${spaceId}` });
 
-  const api = createApi(apiClient, cookieHeader);
   // Worker routes 404 until the per-space gate is on; seeding and every later
   // spec depend on it.
   await setAlertZeroEnabledInSpace(api, spaceId, true);
@@ -83,46 +83,26 @@ export const createOnboardingSpace = async (
   };
 };
 
+/** API-suite factory: the API adapter is built from the spec's apiClient + SAML cookie. */
+export const createOnboardingSpace = async (
+  apiClient: ApiClientFixture,
+  spaces: SpacesService,
+  cookieHeader: Record<string, string>,
+  options: { withStubModel?: boolean } = {}
+): Promise<OnboardingSpace> =>
+  buildOnboardingSpace(createApi(apiClient, cookieHeader), spaces, options);
+
 /**
- * UI-suite twin of `createOnboardingSpace`: same space lifecycle, but on scout's
- * `kbnClient` (admin basic auth, auto xsrf/internal-origin headers) via
- * `createApiFromKbnClient`. `spaces` comes from the worker-scope `apiServices`.
+ * UI-suite factory: same space lifecycle, but on scout's `kbnClient` (admin
+ * basic auth, auto xsrf/internal-origin headers). `spaces` comes from the
+ * worker-scope `apiServices`.
  */
 export const createUiOnboardingSpace = async (
   kbnClient: KbnClient,
   spaces: SpacesService,
-  { withStubModel = false }: { withStubModel?: boolean } = {}
-): Promise<OnboardingSpace> => {
-  const api = createApiFromKbnClient(kbnClient);
-  const spaceId = `${NAMESPACE}-${randomSuffix()}`;
-  await spaces.create({ id: spaceId, name: `Onboarding ${spaceId}` });
-
-  await setAlertZeroEnabledInSpace(api, spaceId, true);
-  const stub = withStubModel ? await seedStubModel(api, spaceId) : undefined;
-
-  return {
-    spaceId,
-    api,
-    stub: stub ? { connectorId: stub.connectorId, cleanup: stub.cleanup } : undefined,
-    cleanup: async () => {
-      const failures: string[] = [];
-      const step = async (name: string, run: () => Promise<unknown>) => {
-        try {
-          await run();
-        } catch (error) {
-          failures.push(`${name}: ${error instanceof Error ? error.message : String(error)}`);
-        }
-      };
-      await step('disable workers', () => resetOnboardingState(api, spaceId));
-      await step('delete worker service accounts', () => deleteWorkerServiceAccounts(api, spaceId));
-      if (stub) await step('stub model cleanup', stub.cleanup);
-      await step(`delete space ${spaceId}`, () => spaces.delete(spaceId));
-      if (failures.length > 0) {
-        throw new Error(`Onboarding space cleanup failed:\n${failures.join('\n')}`);
-      }
-    },
-  };
-};
+  options: { withStubModel?: boolean } = {}
+): Promise<OnboardingSpace> =>
+  buildOnboardingSpace(createApiFromKbnClient(kbnClient), spaces, options);
 
 /**
  * Enables one worker through the same API shape the onboarding UI's save uses
