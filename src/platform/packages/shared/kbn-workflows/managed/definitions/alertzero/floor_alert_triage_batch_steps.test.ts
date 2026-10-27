@@ -558,7 +558,7 @@ describe('floor_alert_triage_batch — az: tags', () => {
   it('chunks each list at the size the closure review re-tags with', () => {
     // The re-tag loops, not the alert attachments, which are capped at 20 ids a call.
     const reviewChunkSize = Number(
-      /live_alert_ids \| chunk: (\d+)/.exec(FLOOR_ALERT_TRIAGE_REVIEW_YAML)?.[1]
+      /retag_alert_ids \| chunk: (\d+)/.exec(FLOOR_ALERT_TRIAGE_REVIEW_YAML)?.[1]
     );
     expect(reviewChunkSize).toBeGreaterThan(0);
     AZ_TAG_STEPS.forEach((step) => expect(chunkSizeOf(step)).toBe(reviewChunkSize));

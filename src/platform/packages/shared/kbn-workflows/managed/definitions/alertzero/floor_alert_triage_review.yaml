@@ -331,6 +331,15 @@ steps:
     with:
       fp_candidate_count: "${{ variables.live_alert_ids | size }}"
 
+  # What the re-tag covers: the live alerts plus the ones this review started with. An analyst can
+  # revise alerts out of the proposal, and the ones they removed are in no pending proposal but
+  # still carry az:false_positive, so a re-tag of the live list alone would leave them open and
+  # untriaged for good.
+  - name: resolve_retag_alerts
+    type: data.set
+    with:
+      retag_alert_ids: "${{ variables.live_alert_ids | concat: inputs.fp_candidate_ids | uniq }}"
+
   # Fetch proposal details for outcome comment attribution (decision, decidedBy,
   # dismissReason, rationale). handle_dismissed below must not derive the retag from a
   # failed read, so retry before continue: true takes over.
@@ -437,7 +446,7 @@ steps:
           # the first failure and skip the remaining chunks and the shortfall counters.
           - name: retag_dismissed_alerts
             type: foreach
-            foreach: "${{ variables.live_alert_ids | chunk: 500 | json }}"
+            foreach: "${{ variables.retag_alert_ids | chunk: 500 | json }}"
             steps:
               - name: retag_dismissed_chunk
                 type: kibana.SetAlertTags
@@ -517,7 +526,7 @@ steps:
         else:
           - name: retag_dismissed_read_failed
             type: foreach
-            foreach: "${{ variables.live_alert_ids | chunk: 500 | json }}"
+            foreach: "${{ variables.retag_alert_ids | chunk: 500 | json }}"
             steps:
               - name: retag_dismissed_read_failed_call
                 type: kibana.SetAlertTags
@@ -561,7 +570,7 @@ steps:
 
       - name: retag_expired_alerts
         type: foreach
-        foreach: "${{ variables.live_alert_ids | chunk: 500 | json }}"
+        foreach: "${{ variables.retag_alert_ids | chunk: 500 | json }}"
         steps:
           - name: retag_expired_alerts_call
             type: kibana.SetAlertTags
@@ -640,7 +649,7 @@ steps:
     steps:
       - name: retag_unknown_alerts
         type: foreach
-        foreach: "${{ variables.live_alert_ids | chunk: 500 | json }}"
+        foreach: "${{ variables.retag_alert_ids | chunk: 500 | json }}"
         steps:
           - name: retag_unknown_alerts_call
             type: kibana.SetAlertTags

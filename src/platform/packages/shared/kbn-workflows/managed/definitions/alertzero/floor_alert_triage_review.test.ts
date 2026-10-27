@@ -244,6 +244,17 @@ describe('floor_alert_triage_review — live revision', () => {
     expect(evalExpr(expr, { inputs, steps: { get_live_revision: {} } })).toEqual(['a']);
   });
 
+  it('re-tags the live alerts and the ones the review started with, so removed alerts are not stranded', () => {
+    const expr = stepByName('resolve_retag_alerts')?.with?.retag_alert_ids as string;
+    // a and b started the review, an analyst removed b, and c joined later
+    expect(
+      evalExpr(expr, {
+        inputs: { fp_candidate_ids: ['a', 'b'] },
+        variables: { live_alert_ids: ['a', 'c'] },
+      })
+    ).toEqual(['a', 'c', 'b']);
+  });
+
   it('counts the alerts of the live revision in every outcome comment', () => {
     const count = stepByName('count_live_alerts')?.with?.fp_candidate_count as string;
     expect(evalExpr(count, { variables: { live_alert_ids: ['a', 'b', 'c'] } })).toBe(3);
@@ -566,13 +577,13 @@ describe('floor_alert_triage_review — retag_dismissed_alerts chunking', () => 
   const renderChunks = (ids: string[]): string[][] =>
     JSON.parse(
       renderString((loop?.foreach ?? '').replace(/^\$\{\{/, '{{').trim(), {
-        variables: { live_alert_ids: ids },
+        variables: { retag_alert_ids: ids },
       })
     );
 
   it('iterates chunks of the candidate list rather than single ids', () => {
     expect(loop?.type).toBe('foreach');
-    expect(loop?.foreach).toContain('variables.live_alert_ids');
+    expect(loop?.foreach).toContain('variables.retag_alert_ids');
     expect(loop?.foreach).toContain('chunk: 500');
   });
 
@@ -702,7 +713,7 @@ describe('floor_alert_triage_review — proposal outcomes', () => {
     expect(retag?.foreach).toContain(
       name === 'retag_proposal_failed'
         ? 'inputs.fp_candidate_ids | chunk: 500'
-        : 'variables.live_alert_ids | chunk: 500'
+        : 'variables.retag_alert_ids | chunk: 500'
     );
     expect(retag?.steps?.[0].with?.tags).toEqual({
       tags_to_remove: ['az:false_positive'],
