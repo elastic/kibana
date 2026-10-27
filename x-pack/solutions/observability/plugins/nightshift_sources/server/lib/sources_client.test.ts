@@ -95,6 +95,7 @@ const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
     (namespace, type, id) => `${namespace ? `${namespace}:` : ''}${type}:${id}`
   );
   const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
+  const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
   const viewsClient: jest.Mocked<SourceViewsClient> = {
     putView: jest.fn().mockResolvedValue(undefined),
     getView: jest.fn().mockResolvedValue(undefined),
@@ -108,6 +109,7 @@ const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
     serializer,
     viewsClient,
     dataEsClient,
+    internalEsClient,
     logger,
     username: 'marco',
     spaceId,
@@ -117,8 +119,27 @@ const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
   soClient.find.mockResolvedValue(emptyFind);
   dataEsClient.esql.query.mockResponse(withColumns);
 
-  return { client, soClient, serializer, viewsClient, dataEsClient, logger, onChange };
+  return {
+    client,
+    soClient,
+    serializer,
+    viewsClient,
+    dataEsClient,
+    internalEsClient,
+    logger,
+    onChange,
+  };
 };
+
+const analyzed = (...tokens: string[]) => ({
+  tokens: tokens.map((token, position) => ({
+    token,
+    position,
+    start_offset: 0,
+    end_offset: 0,
+    type: '<ALPHANUM>',
+  })),
+});
 
 describe('SourcesClient', () => {
   describe('assertReadable', () => {
@@ -975,7 +996,8 @@ describe('SourcesClient', () => {
     });
 
     it('filters on the raw document ids of the space, next to search and enabled', async () => {
-      const { client, soClient, serializer } = setup({ spaceId: 'marketing' });
+      const { client, soClient, serializer, internalEsClient } = setup({ spaceId: 'marketing' });
+      internalEsClient.indices.analyze.mockResponse(analyzed('alp'));
 
       await client.list({
         page: 2,
@@ -1019,26 +1041,27 @@ describe('SourcesClient', () => {
       );
     });
 
-    it('searches the words of the title as the index tokenizes them, next to the enabled filter', async () => {
-      const { client, soClient } = setup();
+    it('searches the tokens of the title analyzer, next to the enabled filter', async () => {
+      const { client, soClient, internalEsClient } = setup();
       soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 25 });
+      internalEsClient.indices.analyze.mockResponse(analyzed('nginx', '東', '京', '都'));
 
-      await client.list({
-        page: 1,
-        perPage: 25,
-        search: '  nginx +|"*()~\\ checkout-prod ภาษาไทย 東京都 v1.2 foo_bar ',
-        enabled: true,
+      await client.list({ page: 1, perPage: 25, search: 'nginx 東京都', enabled: true });
+
+      expect(internalEsClient.indices.analyze).toHaveBeenCalledWith({
+        analyzer: 'standard',
+        text: 'nginx 東京都',
       });
-
       expect(soClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          search: 'nginx checkout prod ภาษาไทย 東京都 v1.2 foo_bar*',
+          search: 'nginx 東 京 都*',
           searchFields: ['title.text'],
           defaultSearchOperator: 'AND',
           filter: 'nightshift-source.attributes.enabled: true',
         })
       );
 
+      internalEsClient.indices.analyze.mockResponse(analyzed());
       await client.list({ page: 1, perPage: 25, search: ' - " ' });
 
       expect(soClient.find).toHaveBeenLastCalledWith(

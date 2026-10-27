@@ -62,6 +62,7 @@ const createSourcesClient = (
       internalEsClient: core.elasticsearch.client.asInternalUser,
     }),
     dataEsClient,
+    internalEsClient: core.elasticsearch.client.asInternalUser,
     logger,
     username: core.security.authc.getCurrentUser(request)?.username ?? '<system>',
     spaceId: request.spaceId,

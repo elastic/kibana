@@ -121,7 +121,8 @@ avoid. Engines that need to react right away subscribe through `setup.onSourceCh
 
 ## Elasticsearch privileges
 
-The plugin runs every Elasticsearch call as the current user. Kibana feature privileges are
+The plugin runs every Elasticsearch call as the current user, except that list tokenizes its
+`search` with `_analyze` as `kibana_system`, which reads no index. Kibana feature privileges are
 not enough on their own; users also need index privileges on the view names and on the data
 the query reads. ES|QL view operations are index privileges applied to the view name.
 

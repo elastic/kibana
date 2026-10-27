@@ -57,6 +57,8 @@ interface SourcesClientDependencies {
   serializer: ISavedObjectsSerializer;
   viewsClient: SourceViewsClient;
   dataEsClient: ElasticsearchClient;
+  /** Tokenizes title searches with `_analyze`, which reads no index. */
+  internalEsClient: ElasticsearchClient;
   logger: Logger;
   username: string;
   /** Request space; encoded in the view name so grants can be `$.nightshift.sources.<spaceId>.*`. */
@@ -64,21 +66,6 @@ interface SourcesClientDependencies {
   /** Called after every committed write, never after a rolled-back one. */
   onChange: (change: SourceChange) => Promise<void>;
 }
-
-// Splits on the same Unicode word boundaries as the `standard` analyzer that indexes `title.text`,
-// so every search word is one token of the index. The punctuation is dropped with the spaces, which
-// also leaves no `simple_query_string` operator (`+ | - " * ( ) ~ \`) in the words.
-// ICU also splits Thai, Chinese or Japanese text by dictionary, which `standard` does not: adjacent
-// word segments are joined back, and the analyzer splits them as it does in the index.
-const wordSegmenter = new Intl.Segmenter(undefined, { granularity: 'word' });
-
-const toSearchWords = (search: string): string[] =>
-  Array.from(wordSegmenter.segment(search), ({ segment, isWordLike }) =>
-    isWordLike ? segment : ' '
-  )
-    .join('')
-    .split(/\s+/)
-    .filter(Boolean);
 
 const toSource = (id: string, attributes: NightshiftSourceAttributes): NightshiftSource => ({
   id,
@@ -294,7 +281,7 @@ export class SourcesClient {
     enabled?: boolean;
     ids?: string[];
   }): Promise<ListSourcesResponse> {
-    const words = toSearchWords(search ?? '');
+    const tokens = await this.toTitleTokens(search);
 
     const filters: string[] = [];
     if (ids) {
@@ -313,12 +300,13 @@ export class SourcesClient {
     }
 
     // `search` rather than a KQL filter: KQL splits on whitespace, so it cannot match several words.
-    // Words are analyzed like the title, so `checkout-prod` is searched as `checkout` and `prod`
-    // and the order of the words does not matter. The trailing `*` makes the last word a prefix.
+    // The search is sent as the tokens of the index, so `checkout-prod` is searched as `checkout`
+    // and `prod` and the order of the words does not matter. The trailing `*` makes the last token
+    // a prefix; the saved-object client does not analyze a prefix term, so it must be one token.
     const titleSearch =
-      words.length > 0
+      tokens.length > 0
         ? {
-            search: `${words.join(' ')}*`,
+            search: `${tokens.join(' ')}*`,
             searchFields: ['title.text'],
             defaultSearchOperator: 'AND' as const,
           }
@@ -452,6 +440,21 @@ export class SourcesClient {
       return slug;
     }
     throw badRequest('Could not allocate a unique source view name');
+  }
+
+  /**
+   * Tokens of the search as `title.text` indexes them (it uses the `standard` analyzer). They hold
+   * no space or punctuation, so no `simple_query_string` operator (`+ | - " * ( ) ~ \`) either.
+   */
+  private async toTitleTokens(search: string | undefined): Promise<string[]> {
+    if (!search?.trim()) {
+      return [];
+    }
+    const { tokens = [] } = await this.deps.internalEsClient.indices.analyze({
+      analyzer: 'standard',
+      text: search,
+    });
+    return tokens.map(({ token }) => token);
   }
 
   /** Pages the current space's `view_name` values. Sequential finds: each page depends on the last. */

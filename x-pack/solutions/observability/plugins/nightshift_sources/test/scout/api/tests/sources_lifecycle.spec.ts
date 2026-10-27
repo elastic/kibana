@@ -305,13 +305,14 @@ apiTest.describe(
 
     apiTest('searches titles by their words, also among the given ids', async ({ apiClient }) => {
       const base = `${TITLE_PREFIX}-${suffix}`;
-      const [checkout, proxy, thai] = [
+      const [checkout, proxy, thai, tokyo] = [
         `${base} Checkout-prod nginx`,
         `${base} nginx proxy`,
         `${base} ภาษาไทย`,
+        `${base} 東京都 cdn`,
       ];
       const ids: string[] = [];
-      for (const title of [checkout, proxy, thai]) {
+      for (const title of [checkout, proxy, thai, tokyo]) {
         const created = await createSource(apiClient, manager.cookieHeader, {
           title,
           esql: `FROM ${index}`,
@@ -319,7 +320,7 @@ apiTest.describe(
         expect(created).toHaveStatusCode(200);
         ids.push(created.body.source.id);
       }
-      const [checkoutId, proxyId, thaiId] = ids;
+      const [checkoutId, proxyId, thaiId, tokyoId] = ids;
 
       const search = async (text: string, sourceIds: string[] = []) => {
         const query = [...sourceIds.map((id) => `ids=${id}`), `search=${encodeURIComponent(text)}`];
@@ -337,8 +338,11 @@ apiTest.describe(
       expect(await search(`${suffix} CHECKOUT ngi`)).toStrictEqual([checkoutId]);
       expect(await search(`${suffix} nginx`)).toStrictEqual([checkoutId, proxyId]);
       expect(await search(`${suffix} checkout proxy`)).toStrictEqual([]);
-      // Thai text has no spaces between words, and the index keeps it as one word.
+      // Thai and Chinese text have no spaces between words: the index keeps Thai as one word and
+      // splits Chinese into characters, and the search matches either, also as its last word.
       expect(await search(`ภาษาไทย ${suffix}`)).toStrictEqual([thaiId]);
+      expect(await search(`${suffix} ภาษาไทย`)).toStrictEqual([thaiId]);
+      expect(await search(`${suffix} cdn 東京都`)).toStrictEqual([tokyoId]);
 
       // `ids` narrows the list, and the search applies to the sources it names.
       expect(await search('nginx', [checkoutId, proxyId, randomUUID()])).toStrictEqual([
