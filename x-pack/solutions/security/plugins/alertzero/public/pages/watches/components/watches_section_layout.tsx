@@ -18,16 +18,6 @@ import {
 import { useAlertZeroDocumentationLink } from '../../../hooks/use_alertzero_documentation_link';
 import { AlertZeroWatchesNav, type WatchesSectionId } from './alertzero_watches_nav';
 
-/**
- * Height of `#app-main-scroll`. The shell fills that pane so the chrome scrollbar stays idle
- * and the settings section below the page header is the scroller.
- */
-const WATCHES_SHELL_HEIGHT = `calc(
-  var(--kbn-layout--application-height, 100vh) -
-    var(--kbn-layout--application-margin-top, 0px) -
-    var(--kbn-layout--application-margin-bottom, 0px)
-)`;
-
 interface WatchesSectionLayoutProps {
   active: WatchesSectionId;
   title: AppHeaderTitle;
@@ -70,30 +60,18 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
   return (
     <EuiPageTemplate
       offset={0}
-      grow={false}
-      minHeight={0}
       restrictWidth={false}
       data-test-subj="alertZeroWatchesSectionLayout"
-      css={css`
-        height: ${WATCHES_SHELL_HEIGHT};
-        max-height: ${WATCHES_SHELL_HEIGHT};
-        overflow: hidden;
-      `}
-      mainProps={{
-        // `style`, not `css`: EuiPageInner spreads `mainProps` after its own `css`, so a `css`
-        // prop would replace the panel, border, and flex styles.
-        style: { minHeight: 0, height: '100%', overflow: 'hidden' },
-      }}
     >
       {/**
        * `sticky` must be passed explicitly. The EUI docs claim `EuiPageTemplate` makes its sidebar
        * sticky by default and that you opt out with `sticky={false}`, but the template never sets
        * it and `EuiPageSidebar` defaults to `sticky = false`.
        *
-       * The settings column scrolls on its own, under the page header. The subnav stays full height
-       * and, when it is taller than the pane, scrolls on its own — `sticky` brings `overflow-y: auto`
-       * and a max-height with it. Nothing here may introduce an `overflow` ancestor between this
-       * sidebar and the chrome scroll container; see the note in `app_chrome_layout.tsx`.
+       * With it, the page scrolls as one inside the chrome's application scroll container while the
+       * subnav stays pinned, and a subnav taller than the viewport scrolls on its own — `sticky`
+       * brings `overflow-y: auto` and `max-height: calc(100vh - offset)` with it. Nothing here may
+       * introduce an `overflow` ancestor; see the note in `app_chrome_layout.tsx`.
        */}
       <EuiPageTemplate.Sidebar
         paddingSize="none"
@@ -116,7 +94,11 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
            *
            * !important is required because EUI applies this via an inline style.
            */
-          max-block-size: ${WATCHES_SHELL_HEIGHT} !important;
+          max-block-size: calc(
+            var(--kbn-layout--application-height, 100vh) -
+              var(--kbn-layout--application-margin-top, 0px) -
+              var(--kbn-layout--application-margin-bottom, 0px)
+          ) !important;
         `}
       >
         <AlertZeroWatchesNav active={active} />
@@ -125,7 +107,6 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
       <EuiPageTemplate.Section
         paddingSize="l"
         grow
-        style={{ minHeight: 0, overflowX: 'hidden', overflowY: 'auto' }}
         contentProps={{
           css: css`
             width: ${ALERTZERO_WATCH_SETTINGS_WIDTH}px;
