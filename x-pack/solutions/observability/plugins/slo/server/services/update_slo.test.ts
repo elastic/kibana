@@ -25,6 +25,8 @@ import {
   SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
 import type { SLODefinition } from '../domain/models';
+import type { SloTelemetryReporter } from '../lib/telemetry';
+import { createSloTelemetryReporterMock } from '../lib/telemetry/slo_telemetry_service.mock';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import {
   createAPMTransactionErrorRateIndicator,
@@ -49,11 +51,13 @@ describe('UpdateSLO', () => {
   let mockScopedClusterClient: ScopedClusterClientMock;
   let mockLogger: jest.Mocked<MockedLogger>;
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
+  let mockTelemetry: jest.Mocked<SloTelemetryReporter>;
   let updateSLO: UpdateSLO;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
+    mockTelemetry = createSloTelemetryReporterMock();
     mockLogger = loggingSystemMock.createLogger();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -65,7 +69,8 @@ describe('UpdateSLO', () => {
       mockLogger,
       'some-space',
       httpServiceMock.createStartContract().basePath,
-      'some-user-id'
+      'some-user-id',
+      mockTelemetry
     );
   });
 
@@ -83,6 +88,7 @@ describe('UpdateSLO', () => {
 
       expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).not.toHaveBeenCalled();
       expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).not.toHaveBeenCalled();
+      expect(mockTelemetry.report).not.toHaveBeenCalled();
     }
 
     beforeEach(() => {
@@ -216,6 +222,25 @@ describe('UpdateSLO', () => {
         expectNonBreakingChangeUpdatedResources();
       });
 
+      it('reports the slo_updated telemetry event without a revision bump', async () => {
+        const slo = createSLO();
+        mockRepository.findById.mockResolvedValueOnce(slo);
+
+        await updateSLO.execute(slo.id, { name: 'updated name', tags: ['new-tag'] });
+
+        expect(mockTelemetry.report).toHaveBeenCalledTimes(1);
+        expect(mockTelemetry.report).toHaveBeenCalledWith(
+          'slo_updated',
+          expect.objectContaining({
+            slo_id: slo.id,
+            revision: slo.revision,
+            tags_count: 1,
+            revision_bumped: false,
+            changed_fields: ['name', 'tags'],
+          })
+        );
+      });
+
       function expectNonBreakingChangeUpdatedResources() {
         expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).toHaveBeenCalled();
 
@@ -259,6 +284,25 @@ describe('UpdateSLO', () => {
         has_all_requested: true,
       } as SecurityHasPrivilegesResponse);
       mockSummaryTransformManager.getVersion.mockResolvedValue(SLO_RESOURCES_VERSION);
+    });
+
+    it('reports the slo_updated telemetry event with a revision bump', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+
+      await updateSLO.execute(slo.id, { groupBy: 'host.name' });
+
+      expect(mockTelemetry.report).toHaveBeenCalledTimes(1);
+      expect(mockTelemetry.report).toHaveBeenCalledWith(
+        'slo_updated',
+        expect.objectContaining({
+          slo_id: slo.id,
+          revision: slo.revision + 1,
+          group_by_count: 1,
+          revision_bumped: true,
+          changed_fields: ['groupBy'],
+        })
+      );
     });
 
     it('considers a settings change as a breaking change', async () => {
@@ -395,6 +439,10 @@ describe('UpdateSLO', () => {
   });
 
   describe('when error happens during the update', () => {
+    afterEach(() => {
+      expect(mockTelemetry.report).not.toHaveBeenCalled();
+    });
+
     beforeEach(() => {
       mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,

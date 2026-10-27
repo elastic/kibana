@@ -9,6 +9,7 @@ import { type CoreSetup, type Logger, type LoggerFactory } from '@kbn/core/serve
 import type { BulkDeleteParams, BulkDeleteStatusResponse } from '@kbn/slo-schema';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { IndicatorTypes } from '../../../domain/models';
+import type { EventOrigin, SloTelemetryService } from '../../../lib/telemetry';
 import type { SLOPluginStartDependencies } from '../../../types';
 import { DeleteSLO } from '../../delete_slo';
 import { DefaultSLODefinitionRepository } from '../../slo_definition_repository';
@@ -20,18 +21,25 @@ import { runBulkDelete } from './run_bulk_delete';
 
 export const TYPE = 'slo:bulk-delete-task';
 
+export interface BulkDeleteTaskParams extends BulkDeleteParams {
+  origin?: EventOrigin;
+}
+
 interface TaskSetupContract {
   core: CoreSetup<SLOPluginStartDependencies>;
   logFactory: LoggerFactory;
   taskManager: TaskManagerSetupContract;
+  telemetryService: SloTelemetryService;
 }
 
 export class BulkDeleteTask {
   private logger: Logger;
+  private telemetryService: SloTelemetryService;
 
   constructor(setupContract: TaskSetupContract) {
-    const { core, taskManager, logFactory } = setupContract;
+    const { core, taskManager, logFactory, telemetryService } = setupContract;
     this.logger = logFactory.get(TYPE);
+    this.telemetryService = telemetryService;
 
     this.logger.debug('Registering task with [10m] timeout');
 
@@ -77,6 +85,11 @@ export class BulkDeleteTask {
                 signal
               );
 
+              const params = taskInstance.params as BulkDeleteTaskParams;
+              const telemetry = this.telemetryService.getReporter(
+                params.origin ?? { actor: 'user', channel: 'system' }
+              );
+
               const deleteSLO = new DeleteSLO(
                 repository,
                 transformManager,
@@ -84,18 +97,18 @@ export class BulkDeleteTask {
                 scopedClusterClient,
                 rulesClient,
                 this.logger,
+                telemetry,
                 signal
               );
 
               try {
-                const params = taskInstance.params as BulkDeleteParams;
-
                 const results = await runBulkDelete(params, {
                   deleteSLO,
                   scopedClusterClient,
                   rulesClient,
                   logger: this.logger,
                   signal,
+                  telemetry,
                 });
 
                 return {

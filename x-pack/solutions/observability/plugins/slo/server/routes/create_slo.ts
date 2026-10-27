@@ -39,6 +39,7 @@ export const createSLORoute = createSloServerRoute({
       repository,
       transformManager,
       summaryTransformManager,
+      telemetry,
     } = await getScopedClients({ request, logger });
 
     const core = await context.core;
@@ -54,7 +55,8 @@ export const createSLORoute = createSloServerRoute({
       logger,
       spaceId,
       basePath,
-      userId
+      userId,
+      telemetry
     );
 
     return await createSLO.execute(params.body);

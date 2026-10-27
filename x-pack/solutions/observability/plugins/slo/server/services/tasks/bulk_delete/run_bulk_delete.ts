@@ -13,6 +13,8 @@ import {
   SLI_DESTINATION_INDEX_PATTERN,
   SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../../../common/constants';
+import type { SloTelemetryReporter } from '../../../lib/telemetry';
+import { SLO_BULK_DELETED_EBT_EVENT_TYPE } from '../../../lib/telemetry';
 import type { DeleteSLO } from '../../delete_slo';
 
 interface Dependencies {
@@ -21,13 +23,14 @@ interface Dependencies {
   deleteSLO: DeleteSLO;
   logger: Logger;
   signal: AbortSignal;
+  telemetry: SloTelemetryReporter;
 }
 
 export async function runBulkDelete(
   params: BulkDeleteParams,
   dependencies: Dependencies
 ): Promise<BulkDeleteResult[]> {
-  const { scopedClusterClient, rulesClient, deleteSLO, logger, signal } = dependencies;
+  const { scopedClusterClient, rulesClient, deleteSLO, logger, signal, telemetry } = dependencies;
 
   logger.debug(`Starting bulk deletion for SLO [${params.list.join(', ')}]`);
 
@@ -36,7 +39,11 @@ export async function runBulkDelete(
   const promises = params.list.map(async (sloId) => {
     return limiter(async () => {
       try {
-        await deleteSLO.execute(sloId, { skipRuleDeletion: true, skipDataDeletion: true });
+        await deleteSLO.execute(sloId, {
+          skipRuleDeletion: true,
+          skipDataDeletion: true,
+          bulk: true,
+        });
       } catch (err) {
         return {
           id: sloId,
@@ -54,6 +61,12 @@ export async function runBulkDelete(
   const itemsDeletedSuccessfully = results
     .filter((result) => result.success === true)
     .map((result) => result.id);
+
+  telemetry.report(SLO_BULK_DELETED_EBT_EVENT_TYPE, {
+    requested_count: params.list.length,
+    succeeded_count: itemsDeletedSuccessfully.length,
+    failed_count: results.length - itemsDeletedSuccessfully.length,
+  });
 
   try {
     await Promise.all([

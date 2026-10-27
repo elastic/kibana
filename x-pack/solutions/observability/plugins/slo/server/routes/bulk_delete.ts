@@ -7,6 +7,8 @@
 import type { BulkDeleteStatusResponse } from '@kbn/slo-schema';
 import { bulkDeleteParamsSchema, bulkDeleteStatusParamsSchema } from '@kbn/slo-schema';
 import { v4 } from 'uuid';
+import { toEventOrigin } from '../lib/telemetry';
+import type { BulkDeleteTaskParams } from '../services/tasks/bulk_delete/bulk_delete_task';
 import { TYPE } from '../services/tasks/bulk_delete/bulk_delete_task';
 import { createSloServerRoute } from './utils/create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
@@ -25,6 +27,10 @@ export const bulkDeleteSLORoute = createSloServerRoute({
     const taskManager = await plugins.taskManager.start();
 
     const taskId = v4();
+    const taskParams: BulkDeleteTaskParams = {
+      ...params.body,
+      origin: toEventOrigin('user', request),
+    };
     await taskManager.ensureScheduled(
       {
         id: taskId,
@@ -32,7 +38,7 @@ export const bulkDeleteSLORoute = createSloServerRoute({
         scope: ['observability', 'slo'],
         state: {},
         runAt: new Date(Date.now() + 3 * 1000),
-        params: params.body,
+        params: taskParams,
       },
       { request }
     );

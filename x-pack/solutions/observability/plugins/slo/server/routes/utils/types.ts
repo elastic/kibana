@@ -20,6 +20,7 @@ import type { CompositeSLORepository } from '../../services/composites/composite
 import type { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../../types';
 import type { SLOSettingsRepository } from '../../services/slo_settings_repository';
 import type { SLOTemplateRepository } from '../../services/slo_template_repository';
+import type { SloTelemetryReporter } from '../../lib/telemetry';
 
 export type GetScopedClients = ({
   request,
@@ -44,6 +45,7 @@ export interface RouteHandlerScopedClients {
   templateRepository: SLOTemplateRepository;
   transformManager: TransformManager;
   summaryTransformManager: TransformManager;
+  telemetry: SloTelemetryReporter;
 }
 
 export interface SLORoutesDependencies {

@@ -17,6 +17,8 @@ import {
   getCustomSLOWildcardPipelineId,
   getWildcardPipelineId,
 } from '../../common/constants';
+import type { SloTelemetryReporter } from '../lib/telemetry';
+import { SLO_DELETED_EBT_EVENT_TYPE, toSloDefinitionEbtData } from '../lib/telemetry';
 import { retryTransientEsErrors } from '../utils/retry';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { TransformManager } from './transform_manager';
@@ -25,6 +27,7 @@ import { getSloApmLabels } from './utils';
 interface Options {
   skipDataDeletion: boolean;
   skipRuleDeletion: boolean;
+  bulk?: boolean;
 }
 
 export class DeleteSLO {
@@ -35,6 +38,7 @@ export class DeleteSLO {
     private scopedClusterClient: IScopedClusterClient,
     private rulesClient: RulesClientApi,
     private logger: Logger,
+    private telemetry: SloTelemetryReporter,
     private signal: AbortSignal = new AbortController().signal
   ) {}
 
@@ -77,6 +81,11 @@ export class DeleteSLO {
       this.deleteSummaryData(slo.id, options.skipDataDeletion),
       this.deleteAssociatedRules(slo.id, options.skipRuleDeletion),
     ]);
+
+    this.telemetry.report(SLO_DELETED_EBT_EVENT_TYPE, {
+      ...toSloDefinitionEbtData(slo),
+      bulk: options.bulk ?? false,
+    });
   }
 
   private async deleteRollupData(sloId: string, skip: boolean): Promise<void> {

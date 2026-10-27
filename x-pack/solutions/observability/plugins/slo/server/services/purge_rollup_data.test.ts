@@ -11,12 +11,15 @@ import { Duration, DurationUnit } from '@kbn/slo-schema';
 import { createSLO, createSLOWithCalendarTimeWindow } from './fixtures/slo';
 import { createSLORepositoryMock } from './mocks';
 import type { SLODefinitionRepository } from './slo_definition_repository';
+import type { SloTelemetryReporter } from '../lib/telemetry';
+import { createSloTelemetryReporterMock } from '../lib/telemetry/slo_telemetry_service.mock';
 import { BulkPurgeRollupData } from './bulk_purge_rollup_data';
 import { monthlyCalendarAligned } from './fixtures/time_window';
 
 describe('purge rollup data', () => {
   let mockRepository: jest.Mocked<SLODefinitionRepository>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockTelemetry: jest.Mocked<SloTelemetryReporter>;
   let purgeRollupData: BulkPurgeRollupData;
 
   jest.useFakeTimers().setSystemTime(new Date('2025-04-24'));
@@ -24,7 +27,8 @@ describe('purge rollup data', () => {
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    purgeRollupData = new BulkPurgeRollupData(mockEsClient, mockRepository);
+    mockTelemetry = createSloTelemetryReporterMock();
+    purgeRollupData = new BulkPurgeRollupData(mockEsClient, mockRepository, mockTelemetry);
   });
 
   describe('happy path', () => {
@@ -105,9 +109,47 @@ describe('purge rollup data', () => {
 
       expect(mockEsClient.deleteByQuery).toMatchSnapshot();
     });
+
+    it('reports the slo_rollup_data_purged telemetry event', async () => {
+      mockRepository.findAllByIds.mockResolvedValueOnce([
+        createSLO({ id: 'test1' }),
+        createSLO({ id: 'test2' }),
+      ]);
+
+      await purgeRollupData.execute({
+        list: ['test1', 'test2'],
+        purgePolicy: { purgeType: 'fixed_time', timestamp: new Date('2025-03-01') },
+      });
+
+      expect(mockTelemetry.report).toHaveBeenCalledWith('slo_rollup_data_purged', {
+        slo_count: 2,
+        purge_policy_type: 'fixed_time',
+        force: false,
+      });
+    });
+
+    it('reports a forced purge', async () => {
+      mockRepository.findAllByIds.mockResolvedValueOnce([createSLO({ id: 'test1' })]);
+
+      await purgeRollupData.execute({
+        list: ['test1'],
+        purgePolicy: { purgeType: 'fixed_age', age: new Duration(1, DurationUnit.Day) },
+        force: true,
+      });
+
+      expect(mockTelemetry.report).toHaveBeenCalledWith('slo_rollup_data_purged', {
+        slo_count: 1,
+        purge_policy_type: 'fixed_age',
+        force: true,
+      });
+    });
   });
 
   describe('error path', () => {
+    afterEach(() => {
+      expect(mockTelemetry.report).not.toHaveBeenCalled();
+    });
+
     it('fails to make a query to remove SLI data older than 7 days', async () => {
       const slo = createSLO({
         id: 'test1',
