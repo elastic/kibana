@@ -166,6 +166,12 @@ export type { SignificantEventsWorkflowStatusResult } from './src/workflows';
 
 export { SignificantEventsWorkflowStatus } from './src/workflows';
 
+export {
+  type SourceWriteConflictReason,
+  isRetryableSourceWriteConflict,
+  isSourceWriteConflictReason,
+} from './src/source_write_conflict';
+
 export { NightshiftModelBlockedError } from './src/nightshift_model_blocked_error';
 export { NightshiftModelNotFoundError } from './src/nightshift_model_not_found_error';
 

@@ -21,6 +21,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { ProfilingCpsCallout } from '../../shared/profiling/cps_callout';
 import { ProfilingFlamegraph } from '../../shared/profiling/flamegraph';
 import { ProfilingSchemaSelector } from '../../shared/profiling/schema_selector';
 import { ProfilingTopNFunctions } from '../../shared/profiling/top_functions';
@@ -175,11 +176,17 @@ export function ProfilingOverview() {
   }
 
   if (isProfilingAvailable === false) {
-    return <ProfilingEmptyState />;
+    return (
+      <>
+        <ProfilingCpsCallout />
+        <ProfilingEmptyState />
+      </>
+    );
   }
 
   return (
     <>
+      <ProfilingCpsCallout />
       {!isJavaAgent && (
         <>
           <ProfilingHostsCallout serviceName={serviceName} />
