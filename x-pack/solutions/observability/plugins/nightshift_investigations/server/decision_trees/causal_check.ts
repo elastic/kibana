@@ -45,7 +45,7 @@ Respond with your structured analysis.`;
 
 export const CAUSAL_CHECK_QUESTION = `Based on the investigation transcript and the human feedback message above (and the causal analysis response if one follows the feedback):
 1. Is the human feedback message a root-cause correction or confirmation (i.e. the human is telling the agent what the real cause was) rather than a new investigation question?
-2. Does the agent's own investigation â the tool calls, data retrieved, and evidence gathered throughout the conversation â support the causal claim in the feedback, even if the agent drew the wrong conclusion from it? A causal relationship is confirmed when the investigation data is consistent with the feedback's root cause, regardless of whether the agent identified it.
+2. Does the agent's own investigation — the tool calls, data retrieved, and evidence gathered throughout the conversation — support the causal claim in the feedback, even if the agent drew the wrong conclusion from it? A causal relationship is confirmed when the investigation data is consistent with the feedback's root cause, regardless of whether the agent identified it.
 3. If confirmed: write a rich causal_summary that includes the correct root cause, the specific evidence in the investigation that supports it, what investigation steps the agent missed or skipped, what decision gate or threshold prevented the correct conclusion, and what structural change to the investigation tree would route future investigations to the correct root cause.`;
 
 export interface CausalConfirmation {

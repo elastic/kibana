@@ -10,7 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 
-export const TIME_CONVERTER_TOOL_ID = 'time_converter_tool';
+export const TIME_CONVERTER_TOOL_ID = 'nightshift_time_converter_tool';
 
 const MAX_TIME_INPUT_LENGTH = 200;
 

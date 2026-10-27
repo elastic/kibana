@@ -145,7 +145,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'nightshift_sandbox_write_file',
 
   // Nightshift – Investigation
-  'time_converter_tool',
+  'nightshift_time_converter_tool',
 
   // Nightshift – Decision trees
   'nightshift_submit_optimizer_result',

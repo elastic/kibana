@@ -133,7 +133,7 @@ describe('Nightshift investigation agent type', () => {
     expect(base.connector_ids).toEqual(['elasticsearch-telemetry']);
   });
 
-  it('offers only time_converter_tool when the sandbox is not configured', () => {
+  it('offers only nightshift_time_converter_tool when the sandbox is not configured', () => {
     const base = staticBase(
       getInvestigationAgentType({ sandboxEnabled: false, cortexEnabled: false })
     );
