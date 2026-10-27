@@ -15,9 +15,12 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/core-logging-common-internal",
     "@kbn/logging",
+    "@kbn/logging-ecs",
     "@kbn/logging-mocks",
     "@kbn/repo-info",
-    "@kbn/setup-node-env"
+    "@kbn/setup-node-env",
+    "@kbn/std"
   ]
 }
