@@ -376,7 +376,7 @@ describe('RuleEventsClient', () => {
       await client.findLatestByCurrentStatePaginated({ status: ['active'] });
 
       const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
-      expect(q).toContain('`alert.status` IN ("active")');
+      expect(q).toContain('COALESCE(`alert.status`, "active") IN ("active")');
       expect(q).not.toContain('alert_status');
     });
 
@@ -499,8 +499,8 @@ describe('RuleEventsClient', () => {
         'WHERE TO_LOWER(FIELD_EXTRACT(data, "title")) LIKE "*checkout*" OR TO_LOWER(FIELD_EXTRACT(data, "summary")) LIKE "*checkout*" OR TO_LOWER(FIELD_EXTRACT(data, "symptom_hypothesis")) LIKE "*checkout*" OR TO_LOWER(FIELD_EXTRACT(data, "event_id")) == TO_LOWER("checkout")',
         // Created before the range ends, and still active or updated after it starts.
         'WHERE created_at <= TO_DATETIME(?overlapToIso)',
-        'WHERE (`alert.status` IN ("active", "recovering")) OR @timestamp >= TO_DATETIME(?overlapFromIso)',
-        'WHERE `alert.status` IN ("inactive")',
+        'WHERE (COALESCE(`alert.status`, "active") IN ("active", "recovering")) OR @timestamp >= TO_DATETIME(?overlapFromIso)',
+        'WHERE COALESCE(`alert.status`, "active") IN ("inactive")',
         'EVAL data_json = JSON_EXTRACT(_source, "$.data")',
         'SORT @timestamp DESC, _id ASC',
         'LIMIT 25',
@@ -557,6 +557,19 @@ describe('RuleEventsClient', () => {
       expect(commands).toContainEqual('SORT sort_rank DESC, created_at DESC, _id ASC');
     });
 
+    it('sorts missing alert statuses as active', async () => {
+      const { client, query } = createClient(async (request) =>
+        request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
+      );
+
+      await client.findLatestByCurrentStatePaginated({ sortField: 'status', sortOrder: 'desc' });
+
+      const { commands } = getPageRequest(query);
+      expect(commands).toContainEqual(
+        'EVAL sort_rank = CASE(COALESCE(`alert.status`, "active") == "inactive", 1, COALESCE(`alert.status`, "active") == "recovering", 2, 3)'
+      );
+    });
+
     it('filters on the investigation state derived from the investigations entries', async () => {
       const { client, query } = createClient(async (request) =>
         request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
@@ -600,7 +613,7 @@ describe('RuleEventsClient', () => {
       const statusQuery = queries.find((q) => q.includes('BY event_status'));
       const investigationQuery = queries.find((q) => q.includes('BY investigation_state'));
       expect(severityQuery).not.toContain('severity IN');
-      expect(severityQuery).toContain('`alert.status` IN ("active")');
+      expect(severityQuery).toContain('COALESCE(`alert.status`, "active") IN ("active")');
       expect(statusQuery).not.toContain('`alert.status` IN');
       expect(investigationQuery).not.toContain('investigation_state IN');
       expect(investigationQuery).toContain('severity IN ("critical")');
@@ -627,6 +640,7 @@ describe('RuleEventsClient', () => {
       await client.findLatestActive({});
 
       const q = lastQuery(query);
+      expect(q).toContain('COALESCE(`alert.status`, "active") IN ("active", "recovering")');
       expect(q).not.toContain('status IN ("open")');
     });
 
