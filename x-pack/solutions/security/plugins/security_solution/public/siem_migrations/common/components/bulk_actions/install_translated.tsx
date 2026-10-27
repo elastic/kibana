@@ -6,11 +6,12 @@
  */
 
 import React, { useCallback, useMemo, memo } from 'react';
-import { EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import * as i18n from './translations';
 import type { BulkActionsItem } from './types';
 
 interface InstallTranslatedButtonProps {
+  isAuthorized: boolean;
   disableInstallTranslatedItemsButton: boolean;
   installTranslatedItems: () => void;
   installSelectedItem: () => void;
@@ -27,6 +28,7 @@ interface InstallTranslatedButtonProps {
 
 export const InstallTranslatedButton = memo(
   ({
+    isAuthorized,
     disableInstallTranslatedItemsButton,
     installTranslatedItems,
     installSelectedItem,
@@ -69,21 +71,20 @@ export const InstallTranslatedButton = memo(
     // When the user has a selection but none of the selected items can be installed, the action
     // would be a no-op on the server, so we disable the button.
     const hasSelectionButNoneInstallable = numberOfSelectedItems > 0 && !hasInstallableSelection;
-    const isDisabled = disableInstallTranslatedItemsButton || hasSelectionButNoneInstallable;
+    const isDisabled =
+      disableInstallTranslatedItemsButton || hasSelectionButNoneInstallable || !isAuthorized;
 
     return (
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          iconType="plusCircle"
-          onClick={onClick}
-          disabled={isDisabled}
-          isLoading={isLoading}
-          data-test-subj={dataTestSubj}
-          aria-label={ariaLabel}
-        >
-          {buttonText}
-        </EuiButton>
-      </EuiFlexItem>
+      <EuiButton
+        iconType="plusCircle"
+        onClick={onClick}
+        disabled={isDisabled}
+        isLoading={isLoading}
+        data-test-subj={dataTestSubj}
+        aria-label={ariaLabel}
+      >
+        {buttonText}
+      </EuiButton>
     );
   }
 );
