@@ -12,6 +12,13 @@ import type { Ping } from '../../../../common/runtime_types/ping/ping';
 import type { UMServerLibs } from '../../lib/lib';
 import type { RouteContext, UMRestApiRouteFactory, UptimeRouteContext } from '../types';
 import { API_URLS } from '../../../../common/constants';
+import {
+  MAX_ID_LENGTH,
+  MAX_LOCATION_NAME_LENGTH,
+  MAX_TIMESTAMP_LENGTH,
+  boundedString,
+  optionalBoundedString,
+} from '../schema_limits';
 import { getLastSuccessfulCheck } from '../../lib/requests/get_last_successful_check';
 
 export const createLastSuccessfulCheckRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
@@ -19,10 +26,10 @@ export const createLastSuccessfulCheckRoute: UMRestApiRouteFactory = (libs: UMSe
   path: API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
   validate: {
     query: schema.object({
-      monitorId: schema.string(),
+      monitorId: boundedString(MAX_ID_LENGTH),
       stepIndex: schema.number(),
-      timestamp: schema.string(),
-      location: schema.maybe(schema.string()),
+      timestamp: boundedString(MAX_TIMESTAMP_LENGTH),
+      location: optionalBoundedString(MAX_LOCATION_NAME_LENGTH),
     }),
   },
   handler: async (routeProps) => {

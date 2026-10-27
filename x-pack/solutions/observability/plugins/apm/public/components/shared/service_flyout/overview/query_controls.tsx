@@ -26,7 +26,6 @@ import { useServiceFlyoutContext } from '../service_flyout_context';
 import { useUnifiedEnvironmentsFetcher } from '../../../../hooks/use_unified_environments_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { TimePickerQuickRange } from '../../date_picker/typings';
 import { EnvironmentSelect } from '../../environment_select';
 import { APM_EBT_ACTIONS } from '../../../app/ebt_constants';
@@ -41,6 +40,8 @@ export function ServiceFlyoutQueryControls() {
       environment,
       rangeFrom,
       rangeTo,
+      start,
+      end,
       transactionType = '',
       setEnvironment,
       setRange,
@@ -50,8 +51,6 @@ export function ServiceFlyoutQueryControls() {
   } = useServiceFlyoutContext();
 
   const showTransactionTypeFilter = capabilities.overview?.transactionTypeFilter ?? false;
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const preferred = usePreferredDataSourceAndBucketSize({
     start,

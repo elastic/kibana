@@ -31,6 +31,8 @@
     "@kbn/workflows-yaml",
     "@kbn/react-query",
     "@kbn/agent-builder-workflow-gen",
-    "@kbn/security-plugin-types-server"
+    "@kbn/security-plugin-types-server",
+    "@kbn/workflows-extensions",
+    "@kbn/triggers-actions-ui-plugin"
   ]
 }

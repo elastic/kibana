@@ -29,7 +29,7 @@ export async function getAlertStats(esClient: ElasticsearchClient): Promise<Aler
           terms: { field: 'type', size: TERMS_SIZE },
         },
         episode_count: {
-          cardinality: { field: 'episode.id' },
+          cardinality: { field: 'alert.id' },
         },
         min_timestamp: {
           min: { field: '@timestamp', format: 'strict_date_time' },

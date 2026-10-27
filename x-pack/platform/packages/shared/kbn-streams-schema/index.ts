@@ -22,6 +22,16 @@ export {
   streamsUnitResponseSchema,
   streamsUnitSchema,
   streamsUnitSecretsSchema,
+  MAX_STREAMS_UNIT_STATS_COMPONENTS,
+  streamsUnitStatsComponentRefSchema,
+  streamsUnitStatsDestinationResultSchema,
+  streamsUnitStatsErrorSchema,
+  streamsUnitStatsFilterSchema,
+  streamsUnitStatsMetaSchema,
+  streamsUnitStatsProcessorResultSchema,
+  streamsUnitStatsRequestSchema,
+  streamsUnitStatsResponseSchema,
+  streamsUnitStatsSeriesSchema,
   streamsUnitUiMetadataSchema,
   streamsUnitUpsertRequestSchema,
 } from './src/models/unit';
@@ -108,7 +118,9 @@ export {
   extractReferencedColumns,
   extractStatsGroupColumns,
   extractWhereExpression,
+  findNonColumnFullTextArguments,
   findOverBroadMatchPredicates,
+  renderNonColumnFullTextArgumentError,
   renderOverBroadMatchError,
   getFromSources,
   getStatsQueryHints,
@@ -127,6 +139,8 @@ export {
   type SampleDocument,
   type FlattenRecord,
   flattenRecord,
+  boundedFlattenRecord,
+  boundedJsonValue,
   recursiveRecord,
 } from './src/shared/record_types';
 export { isSchema, createIsNarrowSchema, isRecord } from './src/shared/type_guards';
@@ -164,6 +178,8 @@ export {
   ALL_FIELD_DEFINITION_TYPES,
   fieldDefinitionConfigSchema,
   namedFieldDefinitionConfigSchema,
+  boundedFieldDefinitionConfigSchema,
+  boundedNamedFieldDefinitionSchema,
 } from './src/fields';
 
 export {
@@ -224,6 +240,8 @@ export {
   type StreamNameValidationResult,
   MAX_STREAM_NAME_LENGTH,
   INVALID_STREAM_NAME_CHARACTERS,
+  INVALID_STREAM_NAME_PREFIXES,
+  RESERVED_STREAM_NAMES,
 } from './src/helpers/stream_name_validation';
 
 export {

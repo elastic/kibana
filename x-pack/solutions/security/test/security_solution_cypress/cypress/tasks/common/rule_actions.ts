@@ -37,6 +37,7 @@ import { COMBO_BOX_SELECTION } from '../../screens/common/controls';
 import type { EmailConnector, IndexConnector } from '../../objects/connector';
 import { getEmailConnector, getIndexConnector } from '../../objects/connector';
 import { CLOUD_SERVERLESS } from '../../env_var_names_constants';
+import { setCodeEditorValue } from './monaco';
 
 export const addSlackRuleAction = (message: string) => {
   cy.get(SLACK_ACTION_BTN).click();
@@ -96,9 +97,7 @@ export const fillIndexConnectorForm = (connector: IndexConnector = getIndexConne
   cy.get(SAVE_ACTION_CONNECTOR_BTN).should('not.exist');
   cy.get(JSON_EDITOR).should('be.visible');
   cy.get(JSON_EDITOR).click();
-  cy.get(JSON_EDITOR).type(connector.document, {
-    parseSpecialCharSequences: false,
-  });
+  setCodeEditorValue(JSON_EDITOR, connector.document);
 };
 
 export interface RuleActionCustomFrequency {

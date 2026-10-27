@@ -21,10 +21,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     kbnTestServer: {
       ...baseConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...baseConfig.get('kbnTestServer.serverArgs'),
-        `--uiSettings.overrides.searchPlayground:searchModeEnabled=true`,
-      ],
+      serverArgs: [...baseConfig.get('kbnTestServer.serverArgs')],
     },
     // load tests in the index file
     testFiles: [require.resolve('./index.feature_flags.ts')],

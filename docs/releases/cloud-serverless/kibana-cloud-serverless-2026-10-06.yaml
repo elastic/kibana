@@ -1,0 +1,446 @@
+products:
+- product: cloud-serverless
+  target: 2026-10-06
+  lifecycle: ga
+  repo: kibana
+  owner: elastic
+release-date: 2026-10-06
+hide-features:
+- data-federation
+entries:
+- file:
+    name: 294604.yaml
+    checksum: a392fac29bfdd2f37fae80e81a5ee590e61f4226
+  type: bug-fix
+  title: Keep Sort by and Order selections when settings are opened in Single Metric Viewer
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: In the Single Metric Viewer, the field configuration popover no longer loses its **Sort by** and **Order** selections when you open the settings for a second split field.
+  prs:
+  - https://github.com/elastic/kibana/pull/294604
+  issues:
+  - https://github.com/elastic/kibana/issues/294601
+- file:
+    name: 293067.yaml
+    checksum: 5e6a308284a9ccd252f626bf084a362d2dc8ec3e
+  type: enhancement
+  title: Reduce the number of times the data recognizer calls the `recognize` API on page load
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/293067
+- file:
+    name: 289144.yaml
+    checksum: 7179d777bd90e164a64938fb6d217887df8c6b98
+  type: feature
+  title: Add Amazon EKS connector
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/289144
+  issues:
+  - https://github.com/elastic/security-team/issues/18374
+- file:
+    name: 291974.yaml
+    checksum: 17b916b624f61e89a9f3a8308c4512c1532a58a0
+  type: bug-fix
+  title: Fix `on-failure` being rejected on `waitForApproval`, `waitForInput`, and `workflow.execute` steps
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/291974
+  issues:
+  - https://github.com/elastic/security-team/issues/19315
+- file:
+    name: 292319.yaml
+    checksum: 28d35c0ec424860837ca871ffce4fe1c8109efbf
+  type: enhancement
+  title: Calculate histogram with a larger number of buckets
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/292319
+- file:
+    name: 285350.yaml
+    checksum: 9d0f291ba1084c3d9a8d5fe568f5fdff65407fd7
+  type: feature
+  title: Add multi-layer support for XY charts created with ES|QL queries
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds multi-layer support including annotation and reference line layers for XY charts created with ES|QL queries.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/285350
+  issues:
+  - https://github.com/elastic/kibana-team/issues/2767
+  - https://github.com/elastic/kibana-team/issues/4005
+- file:
+    name: 294767.yaml
+    checksum: b0b0db3d88fb84cc32f57cc77769903adf713c21
+  type: enhancement
+  title: Show a YAML or graph preview in the `workflow.yaml` attachment canvas
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/294767
+  issues:
+  - https://github.com/elastic/security-team/issues/18063
+- file:
+    name: 293692.yaml
+    checksum: cae44a38091fde363b95e35f8a0314db55014bcd
+  type: enhancement
+  title: Update the model card layout
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Improves Elastic Inference Service model cards so the provider, model name, and end-of-life date are easier to scan.
+  prs:
+  - https://github.com/elastic/kibana/pull/293692
+- file:
+    name: 290817.yaml
+    checksum: aac4ddb1c2133b10dd49a5e839699ffd0d8a8759
+  type: bug-fix
+  title: Continue suggest-automation conversation for the same AI index
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes **Suggest automation** on Context Engine AI index detail so reopening the action for the same index continues the previous Agent Builder conversation instead of always starting a new one.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/290817
+  issues:
+  - https://github.com/elastic/search-team/issues/15930
+- file:
+    name: 294439.yaml
+    checksum: 27dcd0326404fbb9f3b355b95ee9e3f12fcff8c8
+  type: bug-fix
+  title: Fix incorrect minimum agent version after bulk package policy upgrade
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/294439
+- file:
+    name: 292447.yaml
+    checksum: 28d87dbe7adc4a4230e9a68d952536ecc2594ad7
+  type: feature
+  title: Show `on-failure` fallback steps in the workflow graph
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/292447
+- file:
+    name: 292738.yaml
+    checksum: 503cbd0a572ddb1ece5ee2d29e1a495ccf285087
+  type: bug-fix
+  title: Disable "Use without saving" when a custom data view ID is set
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes an issue where two ad hoc (unsaved) data views could be created with the same custom ID, causing unpredictable behavior. Use without saving is now disabled when a custom data view ID is entered — save the data view instead to use a custom ID.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/292738
+  issues:
+  - https://github.com/elastic/kibana/issues/175645
+- file:
+    name: 293892.yaml
+    checksum: cd925d492bb70aa4db8bb5f5c4ac62679b3a4340
+  type: bug-fix
+  title: Do not block the next step on execution log writes
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/293892
+  issues:
+  - https://github.com/elastic/security-team/issues/19305
+- file:
+    name: 294584.yaml
+    checksum: f05aa25cf9f807bb328cab56307382c3dc388908
+  type: bug-fix
+  title: Retry a failed active-space fetch instead of stranding the space switcher
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the space switcher disappearing from the Kibana header when the request that loads the current space fails. Kibana now retries that request, so the switcher no longer stays hidden until the page is reloaded.
+  prs:
+  - https://github.com/elastic/kibana/pull/294584
+  issues:
+  - https://github.com/elastic/kibana/issues/281660
+- file:
+    name: 292581.yaml
+    checksum: 9a076fd72796bb931812ee473465e501a0f4b775
+  type: feature
+  title: Add Alert Triage Worker
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds an off-by-default Alert Triage Worker that classifies detection-rule alert batches, writes an Investigation with an impact summary, and closes false positives through a proposal that an analyst approves, or that is approved automatically at Supervised autonomy.
+  prs:
+  - https://github.com/elastic/kibana/pull/292581
+- file:
+    name: 293810.yaml
+    checksum: ccae482226f528a160a4862eb07370a9a24f3f28
+  type: bug-fix
+  title: Keep a pack query's schedule override in the pack's schedule mode
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/293810
+  issues:
+  - https://github.com/elastic/kibana/issues/272441
+- file:
+    name: 293914.yaml
+    checksum: 178d0a799d924a6b3bea16026dd71cdd4914f432
+  type: deprecation
+  title: Delete `search_notebooks` plugin
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/293914
+- file:
+    name: 294697.yaml
+    checksum: 135abd80f881985ab9b65f2ccb487fe5209b1704
+  type: bug-fix
+  title: Show Data federation plugin only for clusters with an Enterprise license
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/294697
+  issues:
+  - https://github.com/elastic/kibana/issues/293257
+- file:
+    name: 267922.yaml
+    checksum: 7605a5559bb84e01ccc3793434b10c3268c4c139
+  type: enhancement
+  title: Redesign the ES|QL editor
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Moves the time picker to the right, keeps the visor always visible at the top in Discover, removes the sources dropdown from the KQL visor, and adds a stop button for AI query generation.
+  prs:
+  - https://github.com/elastic/kibana/pull/267922
+- file:
+    name: 293464.yaml
+    checksum: 7b080218f998cb6553c9459154009676c5847b0e
+  type: enhancement
+  title: Support views filtering on dashboards
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/293464
+- file:
+    name: 294250.yaml
+    checksum: 6d869eb6a3dc46fce5b1e7ced8bef0f0a1257adb
+  type: feature
+  title: Add SharePoint Online `acl_sync_concurrency` native field
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: SharePoint Online connectors now expose a **Maximum concurrent access control requests** advanced setting in Fleet to tune parallel access control sync concurrency.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/294250
+- file:
+    name: 289161.yaml
+    checksum: d3f0fc88c96a724338776d12f16c1cb4af426abd
+  type: feature
+  title: Add Azure AKS connector
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/289161
+  issues:
+  - https://github.com/elastic/security-team/issues/18376
+- file:
+    name: 293281.yaml
+    checksum: 77c49414954130272466f186ef16a5d8a915e793
+  type: bug-fix
+  title: Give every `EuiFilePicker` an accessible name
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes missing accessible labels on file upload controls across Kibana, so screen reader users can identify their purpose.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/293281
+  issues:
+  - https://github.com/elastic/kibana/issues/292932
+- file:
+    name: 286656.yaml
+    checksum: 58312c4de31ef5b82644eeb8a61872d11d38e26d
+  type: enhancement
+  title: Add conversational guided anomaly detection creation flow inside Elastic AI Agent
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286656
+- file:
+    name: 288824.yaml
+    checksum: 5f45e7eb2534b30d1f2ece385a7813bc268704ad
+  type: feature
+  title: Add Bitbucket Cloud connector
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/288824
+  issues:
+  - https://github.com/elastic/security-team/issues/18429
+- file:
+    name: 294411.yaml
+    checksum: e1d0940cb4488f056c0e73e0e363931be3d63b9a
+  type: bug-fix
+  title: Fix managed package policy upgrades timing out with many package policies
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/294411
+- file:
+    name: 293784.yaml
+    checksum: 3619809c5a066f27df46c51ec559b1643cbb555a
+  type: enhancement
+  title: Add RESTART agent action in Fleet
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds an action to restart Elastic Agents directly from Fleet, available from the agent details page, agent list table, and bulk actions menu, with API support.
+  prs:
+  - https://github.com/elastic/kibana/pull/293784
+- file:
+    name: 294738.yaml
+    checksum: a1d05d634c5d06ee5d33b3601d31452589471f2b
+  type: feature
+  title: Enable template library by default in Workflows
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: The Workflow Template Library is now enabled by default where Workflows is available.
+  prs:
+  - https://github.com/elastic/kibana/pull/294738
+- file:
+    name: 294574.yaml
+    checksum: 295ea9c91a1561825b45d99a7166aee9abe78319
+  type: other
+  title: Rename the `dashboard-management` skill to `dashboards`
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: The built-in Agent Builder dashboards skill id changes from `dashboard-management` to `dashboards`. Custom agents that list `dashboard-management` no longer load that skill, and a custom skill with the id `dashboards` is shadowed by the built-in skill. The skills API is experimental.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/294574
+  issues:
+  - https://github.com/elastic/kibana/issues/294496
+- file:
+    name: 290872.yaml
+    checksum: 0588c038b35d523652c7587db8e3f25db907a988
+  type: bug-fix
+  title: Fix Re-run in the Workflows execution flyout starting a run without showing the inputs modal
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Re-run in the execution flyout now opens the inputs modal with the previous run's inputs prefilled, so you can review or change them before starting the run. The flyout switches to the new run after you submit, and closing the modal leaves the current execution open.
+  prs:
+  - https://github.com/elastic/kibana/pull/290872
+  issues:
+  - https://github.com/elastic/security-team/issues/19344
+- file:
+    name: 295021.yaml
+    checksum: 222b54bd122bf4575dba569717a69c39f602fd27
+  type: bug-fix
+  title: Announce query rule flyout tooltips when using VoiceOver in Google Chrome
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes the Rule ID, Metadata field, and Values tooltips on the Query Rules create rule page not being announced by screen readers in Chrome.
+  prs:
+  - https://github.com/elastic/kibana/pull/295021
+- file:
+    name: 291560.yaml
+    checksum: a9ef5d0f483884c0e15b22bdfdac12248927504e
+  type: enhancement
+  title: Improve performance of detection rule import with overwrite
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/291560
+- file:
+    name: 289111.yaml
+    checksum: 5ff630c16e7b3df569340a321f5211e1061f7504
+  type: feature
+  title: Add Google Kubernetes Engine connector
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/289111
+  issues:
+  - https://github.com/elastic/security-team/issues/18375
+- file:
+    name: 290170.yaml
+    checksum: d97f61a7286bdddf8fda253737286c6ecfe34062
+  type: feature
+  title: Add Alerting panel to Observability solution view
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/290170
+- file:
+    name: 293176.yaml
+    checksum: cf6b0320cac66f049b779b3f417cef0c45221ed2
+  type: bug-fix
+  title: Fix integration icons that render black after SVG sanitization
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/293176
+  issues:
+  - https://github.com/elastic/ingest-dev/issues/8985

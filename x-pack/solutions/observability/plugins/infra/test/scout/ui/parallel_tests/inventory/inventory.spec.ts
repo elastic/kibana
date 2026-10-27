@@ -112,6 +112,10 @@ test.describe(
         await inventoryPage.goToTime(DATE_WITH_POD_DATA);
         await inventoryPage.showPods();
         await expect(inventoryPage.inventorySwitcherButton).toContainText('Kubernetes Pods');
+        // Pods are schema-aware like Hosts: wait for ECS-only hydration before asserting tiles.
+        await expect(inventoryPage.schemaSelect).toContainText('Elastic System Integration', {
+          timeout: EXTENDED_TIMEOUT,
+        });
 
         const waffleNode = await inventoryPage.getWaffleNode(POD_NAME);
         await expect(waffleNode.container).toBeVisible();
@@ -138,6 +142,9 @@ test.describe(
         await inventoryPage.goToTime(DATE_WITH_POD_DATA);
         await inventoryPage.showPods();
         await expect(inventoryPage.inventorySwitcherButton).toContainText('Kubernetes Pods');
+        await expect(inventoryPage.schemaSelect).toContainText('Elastic System Integration', {
+          timeout: EXTENDED_TIMEOUT,
+        });
       });
 
       await test.step('open pod waffle context menu', async () => {
@@ -148,14 +155,18 @@ test.describe(
         await expect(inventoryPage.k8sPodWaffleContextMenu).toContainText(
           `View details for kubernetes.pod.uid ${POD_NAME}`
         );
+
+        // LOGS_LOCATOR compresses the kuery into `lz=`; identity is covered by
+        // the menu subtitle and the uncompressed APM link below.
+        await expect(inventoryPage.contextMenuLogsLink).toHaveAttribute('href', /LOGS_LOCATOR/);
+        await expect(inventoryPage.contextMenuApmLink).toHaveAttribute(
+          'href',
+          new RegExp(`kubernetes\\.pod\\.uid(%3A|:)(%22|")${POD_NAME}`)
+        );
       });
 
       await test.step('click pod details link and verify redirection', async () => {
-        await inventoryPage.k8sPodWaffleContextMenu
-          .getByRole('link', {
-            name: 'Kubernetes Pod metrics',
-          })
-          .click();
+        await inventoryPage.contextMenuMetricsLink.click();
 
         const url = new URL(page.url());
 

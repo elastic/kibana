@@ -333,19 +333,75 @@ describe('ImportJsonFlyoutContent', () => {
     expect(closeFlyout).toHaveBeenCalled();
   });
 
-  it('shows a danger toast when createFromJson fails', async () => {
-    const createFromJson = jest.fn().mockRejectedValue(new Error('create failed'));
-    const { services } = renderFlyout({ createFromJson });
-    await pickFile(VALID_FILE);
-    await waitFor(() => expect(screen.getByTestId('testImportButton')).toBeEnabled());
-    await act(async () => {
-      await userEvent.click(screen.getByTestId('testImportButton'));
+  describe('server errors', () => {
+    const createHttpError = (status: number, message: string) =>
+      Object.assign(new Error('Status text'), {
+        request: {},
+        response: { status },
+        body: { message },
+      });
+
+    const clickImport = async () => {
+      await pickFile(VALID_FILE);
+      await waitFor(() => expect(screen.getByTestId('testImportButton')).toBeEnabled());
+      await act(async () => {
+        await userEvent.click(screen.getByTestId('testImportButton'));
+      });
+    };
+
+    it('shows collapsible details for a 4xx sanitize error and clears them on a new file', async () => {
+      const user = userEvent.setup();
+      const sanitizeImportJson = jest
+        .fn()
+        .mockRejectedValueOnce(createHttpError(400, '[request body]: expected title'))
+        .mockResolvedValueOnce({ data: VALID_STATE, warnings: [] });
+      renderFlyout({ sanitizeImportJson });
+      await pickFile(VALID_FILE);
+      await waitFor(() => expect(screen.getByTestId('testServerError')).toBeInTheDocument());
+      expect(screen.queryByTestId('testServerErrorDetails')).not.toBeInTheDocument();
+
+      await user.click(
+        within(screen.getByTestId('testServerErrorDetailsAccordion')).getByRole('button')
+      );
+      expect(screen.getAllByText('[request body]: expected title')[0]).toBeInTheDocument();
+
+      await pickFile(new File([JSON.stringify(VALID_STATE)], 'another-object.json'));
+      await waitFor(() => expect(screen.getByTestId('testImportButton')).toBeEnabled());
+      expect(screen.queryByTestId('testServerErrorDetailsAccordion')).not.toBeInTheDocument();
     });
-    await waitFor(() =>
-      expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
-        title: 'Import object',
-        text: 'create failed',
-      })
-    );
+
+    it('does not show details for a 5xx sanitize error', async () => {
+      renderFlyout({
+        sanitizeImportJson: jest.fn().mockRejectedValue(createHttpError(500, 'internal detail')),
+      });
+      await pickFile(VALID_FILE);
+      await waitFor(() => expect(screen.getByTestId('testServerError')).toBeInTheDocument());
+      expect(screen.queryByTestId('testServerErrorDetailsAccordion')).not.toBeInTheDocument();
+      expect(screen.queryByText(/internal detail/)).not.toBeInTheDocument();
+    });
+
+    it('shows the server message in the toast for a 4xx create error', async () => {
+      const createFromJson = jest.fn().mockRejectedValue(createHttpError(409, 'Already exists'));
+      const { services } = renderFlyout({ createFromJson });
+      await clickImport();
+      await waitFor(() =>
+        expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
+          title: 'Import object',
+          text: 'Already exists',
+        })
+      );
+    });
+
+    it('shows a generic toast for a 5xx create error', async () => {
+      const createFromJson = jest.fn().mockRejectedValue(createHttpError(500, 'internal detail'));
+      const { services } = renderFlyout({ createFromJson });
+      await clickImport();
+      await waitFor(() =>
+        expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
+          title: 'Import object',
+          text: 'An unexpected error occurred. Try again later.',
+        })
+      );
+    });
   });
 });

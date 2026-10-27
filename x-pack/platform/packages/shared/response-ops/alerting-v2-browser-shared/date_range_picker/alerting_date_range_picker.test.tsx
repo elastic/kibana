@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -71,13 +70,9 @@ describe('AlertingDateRangePicker', () => {
     mockOnChange.mockClear();
     useNewDateRangePickerFlag = true;
     (data.query.timefilter.history.get as jest.Mock).mockReturnValue([]);
-    (core.featureFlags.getBooleanValue$ as jest.Mock).mockImplementation(
-      (key: string, fallback: boolean) => {
-        if (key === DATE_RANGE_PICKER_FEATURE_FLAG) {
-          return new BehaviorSubject(useNewDateRangePickerFlag);
-        }
-        return of(fallback);
-      }
+    (core.featureFlags.useBooleanValue as jest.Mock).mockImplementation(
+      (key: string, fallback: boolean) =>
+        key === DATE_RANGE_PICKER_FEATURE_FLAG ? useNewDateRangePickerFlag : fallback
     );
   });
 
@@ -175,9 +170,14 @@ describe('AlertingDateRangePicker', () => {
     expect(lastPickerProps?.settings.autoRefresh).toBeUndefined();
   });
 
-  it('forwards time zone, date format, and advanced settings access from uiSettings/http/application', () => {
-    (core.uiSettings.get as jest.Mock).mockImplementation((key: string) =>
-      key === 'dateFormat:tz' ? 'America/New_York' : 'MMM D, YYYY @ HH:mm:ss.SSS'
+  it('forwards time zone, week start day, date format, and advanced settings access from uiSettings/http/application', () => {
+    const uiSettingsValues = {
+      'dateFormat:tz': 'America/New_York',
+      'dateFormat:dow': 'Wednesday',
+      dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+    };
+    (core.uiSettings.get as jest.Mock).mockImplementation(
+      (key: keyof typeof uiSettingsValues) => uiSettingsValues[key]
     );
     core.application.capabilities = {
       ...core.application.capabilities,
@@ -194,6 +194,7 @@ describe('AlertingDateRangePicker', () => {
     );
 
     expect(lastPickerProps?.timeZone).toBe('America/New_York');
+    expect(lastPickerProps?.calendarOptions).toEqual({ firstDayOfWeek: 3 });
     expect(lastPickerProps?.inputDateFormats).toEqual(['MMM D, YYYY @ HH:mm:ss.SSS']);
     expect(lastPickerProps?.canAccessAdvancedSettings).toBe(true);
     expect(lastPickerProps?.prependBasePath).toBe(core.http.basePath.prepend);
@@ -264,6 +265,29 @@ describe('AlertingDateRangePicker', () => {
     expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 
+  it('uses a separate callback for manual refresh when provided', async () => {
+    const user = userEvent.setup();
+    const onRefresh = jest.fn();
+    const onManualRefresh = jest.fn();
+    render(
+      <AlertingDateRangePicker
+        from="now-15m"
+        to="now"
+        onChange={mockOnChange}
+        services={services}
+        onRefresh={onRefresh}
+        onManualRefresh={onManualRefresh}
+        data-test-subj="alertingDateRangePicker"
+      />
+    );
+
+    expect(lastPickerProps?.onRefresh).toBe(onRefresh);
+    await user.click(screen.getByTestId('alertingDateRangePicker-refresh'));
+
+    expect(onManualRefresh).toHaveBeenCalledTimes(1);
+    expect(onRefresh).not.toHaveBeenCalled();
+  });
+
   it('shows a loading spinner on the manual refresh button while isLoading', () => {
     const onRefresh = jest.fn();
     render(
@@ -280,6 +304,25 @@ describe('AlertingDateRangePicker', () => {
 
     const refreshButton = screen.getByTestId('alertingDateRangePicker-refresh');
     expect(refreshButton).toHaveAttribute('disabled');
+  });
+
+  it('shows and disables the update button when pending input is invalid', () => {
+    render(
+      <AlertingDateRangePicker
+        from="now-15m"
+        to="now"
+        onChange={mockOnChange}
+        services={services}
+        onRefresh={jest.fn()}
+        needsUpdate
+        isRefreshDisabled
+        refreshTooltip="Fix the query"
+        data-test-subj="alertingDateRangePicker"
+      />
+    );
+
+    expect(screen.getByTestId('alertingDateRangePicker-refresh')).toBeDisabled();
+    expect(screen.getByText('Update')).toBeInTheDocument();
   });
 
   it('shows the EuiSuperDatePicker update button only when onRefresh is provided (feature flag off)', () => {
@@ -316,6 +359,33 @@ describe('AlertingDateRangePicker', () => {
     );
   });
 
+  it('separates manual refresh from auto-refresh when the feature flag is off', async () => {
+    const user = userEvent.setup();
+    const onRefresh = jest.fn();
+    const onManualRefresh = jest.fn();
+    useNewDateRangePickerFlag = false;
+
+    render(
+      <AlertingDateRangePicker
+        from="now-15m"
+        to="now"
+        onChange={mockOnChange}
+        services={services}
+        onRefresh={onRefresh}
+        onManualRefresh={onManualRefresh}
+        data-test-subj="alertingDateRangePicker"
+      />
+    );
+
+    expect(mockSuperDatePicker).toHaveBeenLastCalledWith(
+      expect.objectContaining({ onRefresh, showUpdateButton: false })
+    );
+    await user.click(screen.getByTestId('alertingDateRangePicker-refresh'));
+
+    expect(onManualRefresh).toHaveBeenCalledTimes(1);
+    expect(onRefresh).not.toHaveBeenCalled();
+  });
+
   it('falls back to EuiSuperDatePicker when the feature flag is disabled', () => {
     useNewDateRangePickerFlag = false;
 
@@ -330,6 +400,7 @@ describe('AlertingDateRangePicker', () => {
     );
 
     expect(screen.getByTestId('alertingDateRangePicker')).toBeInTheDocument();
+    expect(lastPickerProps).toBeUndefined();
     expect(mockSuperDatePicker).toHaveBeenCalledWith(
       expect.objectContaining({
         start: 'now-15m',

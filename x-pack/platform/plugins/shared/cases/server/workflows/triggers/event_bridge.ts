@@ -15,12 +15,24 @@ import {
   CaseCreatedTriggerId,
   CaseUpdatedTriggerId,
   AttachmentsAddedTriggerId,
+  AttachmentsDeletedTriggerId,
   CommentsAddedTriggerId,
   CaseStatusUpdatedTriggerId,
   ExtendedFieldsUpdatedTriggerId,
   ObservablesAddedTriggerId,
 } from '../../../common/workflows/triggers';
 import { buildExtendedFieldsUpdatedPayload } from './extended_fields_updated_payload';
+
+// We want comment attachments to always be used with the `comment` type,
+// even for legacy `user` types
+const normalizeAttachmentType = (attachmentType: string): string =>
+  attachmentType === 'user' ? 'comment' : attachmentType;
+
+// `attachmentIds` is a deprecated alias of `ids` that saved workflows may still read.
+const withDeprecatedAttachmentIds = <Payload extends { ids: string[] }>(payload: Payload) => ({
+  ...payload,
+  attachmentIds: payload.ids,
+});
 
 /**
  * Registers bridge listeners that forward Cases domain events to workflows_extensions.
@@ -79,30 +91,38 @@ export function registerCasesWorkflowEventBridge(
   });
 
   casesEventBus.onAttachmentsAdded((event) => {
-    // We want comment attachments to always be used with the `comment` type,
-    // even for legacy `user` types
-    const enhancedAttachmentType =
-      event.payload.attachmentType === 'user' ? 'comment' : event.payload.attachmentType;
+    const enhancedAttachmentType = normalizeAttachmentType(event.payload.attachmentType);
     void forward(
       AttachmentsAddedTriggerId,
-      {
+      withDeprecatedAttachmentIds({
         ...event.payload,
         attachmentType: enhancedAttachmentType,
-      },
+      }),
       event.request
     );
 
     // if it's comments, also emit the comments added trigger
     if (enhancedAttachmentType === 'comment') {
-      const { attachmentType, attachmentIds, ...payload } = event.payload;
+      const { attachmentType, ids, ...payload } = event.payload;
       void forward(
         CommentsAddedTriggerId,
         {
           ...payload,
-          commentIds: attachmentIds,
+          commentIds: ids,
         },
         event.request
       );
     }
+  });
+
+  casesEventBus.onAttachmentsDeleted((event) => {
+    void forward(
+      AttachmentsDeletedTriggerId,
+      withDeprecatedAttachmentIds({
+        ...event.payload,
+        attachmentType: normalizeAttachmentType(event.payload.attachmentType),
+      }),
+      event.request
+    );
   });
 }

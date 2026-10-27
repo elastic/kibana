@@ -457,27 +457,59 @@ describe('createPersonaMatrixSkillInvokedEvaluator', () => {
     expect(result.label).toBe('unavailable');
   });
 
-  it('matches load_skill by skill ID while retaining the legacy SKILL.md path', async () => {
-    // `load_skill` accepts an ID or path. Current traces store {"skill":"<id>"};
-    // older traces may contain a SKILL.md path.
-    const query = jest.fn().mockResolvedValue({
-      columns: [{ name: 'total_tool_spans' }, { name: 'skill_invoked' }],
-      values: [[2, 1]],
-    });
-    const evaluator = createPersonaMatrixSkillInvokedEvaluator({
-      traceEsClient: { esql: { query } } as unknown as EsClient,
-      log: buildLog(),
+  describe('skill predicate against load_skill arguments', () => {
+    // Evaluates the LIKE patterns the evaluator emits against sample
+    // `gen_ai.tool.call.arguments` strings, so the test goes red when the
+    // predicate stops matching rather than asserting on query text.
+    const likeToRegExp = (pattern: string) =>
+      new RegExp(
+        `^${pattern
+          .split('*')
+          .map((part) => part.replace(/[.+?^${}()|[\]\\]/g, '\\$&'))
+          .join('[\\s\\S]*')}$`
+      );
+
+    const buildMatcher = async (metadata: PersonaMatrixExample['metadata']) => {
+      const query = jest.fn().mockResolvedValue({
+        columns: [{ name: 'total_tool_spans' }, { name: 'skill_invoked' }],
+        values: [[2, 1]],
+      });
+      const evaluator = createPersonaMatrixSkillInvokedEvaluator({
+        traceEsClient: { esql: { query } } as unknown as EsClient,
+        log: buildLog(),
+      });
+      await evaluator.evaluate(buildEvaluatorArgs(metadata, '0af7651916cd43dd8448eb211c80319c'));
+      const sent = query.mock.calls[0][0].query as string;
+      const patterns = [...sent.matchAll(/arguments LIKE "((?:[^"\\]|\\.)*)"/g)].map((m) =>
+        likeToRegExp(m[1].replace(/\\(.)/g, '$1'))
+      );
+      expect(patterns.length).toBeGreaterThan(0);
+      return (args: string) => patterns.some((re) => re.test(args));
+    };
+
+    const metadata = {
+      ...baseExample.metadata,
+      expectedSkill: 'alert-analysis',
+      allowSkills: ['threat-hunting'],
+    };
+
+    it('matches a bare-id load_skill argument', async () => {
+      const matches = await buildMatcher(metadata);
+      expect(matches('{"skill":"alert-analysis"}')).toBe(true);
+      expect(matches('{"skill":"threat-hunting"}')).toBe(true);
     });
 
-    await evaluator.evaluate(
-      buildEvaluatorArgs(baseExample.metadata, '0af7651916cd43dd8448eb211c80319c')
-    );
+    it('still matches the legacy SKILL.md path argument', async () => {
+      const matches = await buildMatcher(metadata);
+      expect(matches('{"skill":"/skills/security/alert-analysis/SKILL.md"}')).toBe(true);
+    });
 
-    const sent = query.mock.calls[0][0].query as string;
-    expect(sent).toContain('load_skill');
-    expect(sent).toContain('filestore.read');
-    expect(sent).toContain('*\\"skill\\":\\"alert-analysis\\"*');
-    expect(sent).toContain('*/alert-analysis/SKILL.md*');
+    it('does not match another skill or one that only shares a prefix', async () => {
+      const matches = await buildMatcher(metadata);
+      expect(matches('{"skill":"workflow-authoring"}')).toBe(false);
+      expect(matches('{"skill":"alert-analysis-v2"}')).toBe(false);
+      expect(matches('{"skill":"/skills/security/workflow-authoring/SKILL.md"}')).toBe(false);
+    });
   });
 });
 

@@ -8,6 +8,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout-oblt/api';
 import { formatKibanaNamespace } from '../../../../../common/formatters';
+import { DEFAULT_HTTP_ADVANCED_FIELDS } from '../../../../../common/constants/monitor_defaults';
+import { ConfigKey } from '../../../../../common/runtime_types';
 import {
   apiTest,
   mergeSyntheticsApiHeaders,
@@ -60,6 +62,37 @@ apiTest.describe(
         omitMonitorKeys(newMonitor)
       );
     });
+
+    apiTest(
+      'hydrates default kerberos/ntlm when omitted from the request',
+      async ({ apiClient }) => {
+        const {
+          [ConfigKey.KERBEROS]: _k,
+          [ConfigKey.NTLM]: _n,
+          ...withoutAuth
+        } = httpMonitorFixture;
+        const newMonitor = {
+          ...withoutAuth,
+          locations: [privateLocation],
+          name: `omit-auth-${uuidv4()}`,
+        };
+
+        const res = await addMonitor(apiClient, editorHeaders, newMonitor);
+        const body = parseMonitorResponse(res.body as Record<string, unknown>);
+
+        expect(body).toMatchObject({
+          [ConfigKey.KERBEROS]: DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.KERBEROS],
+          [ConfigKey.NTLM]: DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.NTLM],
+        });
+        expect(body).toStrictEqual(
+          omitMonitorKeys({
+            ...newMonitor,
+            [ConfigKey.KERBEROS]: DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.KERBEROS],
+            [ConfigKey.NTLM]: DEFAULT_HTTP_ADVANCED_FIELDS[ConfigKey.NTLM],
+          })
+        );
+      }
+    );
 
     apiTest(
       'sets namespace to Kibana space when not set to a custom namespace',

@@ -14,7 +14,12 @@ export type {
   AgentFormattedAttachment,
   AttachmentFormatContext,
   AttachmentResolveContext,
+  AttachmentOriginUpdatedContext,
   AttachmentValidateContext,
+  SurfaceComposition,
+  SurfaceNode,
+  AttachmentSurfaceCompositionContext,
+  MarkdownNode,
 } from './type_definition';
 export type {
   AttachmentBoundedTool,
@@ -35,10 +40,16 @@ export type { AttachmentChangesToEventsOptions } from './attachment_change_event
 export { attachmentChangesToEvents } from './attachment_change_events';
 export type {
   AttachmentPublicClient,
+  AttachmentWriteAccess,
   ListAttachmentsResult,
   CreateAttachmentArgs,
   GetAttachmentArgs,
   UpdateAttachmentArgs,
   DeleteAttachmentArgs,
+  RestoreAttachmentArgs,
   ListAttachmentsArgs,
+  BulkCreateAttachmentInput,
+  BulkCreateAttachmentError,
+  BulkCreateAttachmentsResult,
+  BulkCreateAttachmentsArgs,
 } from './public_client';

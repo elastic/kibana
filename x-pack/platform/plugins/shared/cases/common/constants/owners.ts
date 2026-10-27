@@ -27,7 +27,7 @@ export const SERVERLESS_PROJECT_TYPES = [
 
 export interface OwnerCaseFeatures {
   alerts: { sync: boolean };
-  observables: { enabled: boolean; autoExtract: boolean };
+  observables: { enabled: boolean; autoExtractDefault: boolean };
 }
 
 interface RouteInfo {
@@ -56,7 +56,7 @@ export const OWNER_INFO: Record<Owner, RouteInfo> = {
     casesBasePath: '/cases',
     features: {
       alerts: { sync: true },
-      observables: { enabled: true, autoExtract: true },
+      observables: { enabled: true, autoExtractDefault: true },
     },
     validRuleConsumers: [AlertConsumers.SIEM],
     serverlessProjectType: SECURITY_PROJECT_TYPE_ID,
@@ -71,7 +71,7 @@ export const OWNER_INFO: Record<Owner, RouteInfo> = {
     casesBasePath: '/cases',
     features: {
       alerts: { sync: false },
-      observables: { enabled: false, autoExtract: false },
+      observables: { enabled: false, autoExtractDefault: false },
     },
     validRuleConsumers: [
       // only valid in serverless
@@ -96,7 +96,7 @@ export const OWNER_INFO: Record<Owner, RouteInfo> = {
     casesBasePath: '/insightsAndAlerting/cases',
     features: {
       alerts: { sync: false },
-      observables: { enabled: true, autoExtract: false },
+      observables: { enabled: true, autoExtractDefault: false },
     },
     validRuleConsumers: [
       AlertConsumers.ML,

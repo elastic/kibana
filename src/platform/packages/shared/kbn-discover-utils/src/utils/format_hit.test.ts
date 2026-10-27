@@ -11,8 +11,8 @@ import {
   dataViewMock,
   createDataViewWithBytesField,
   createDataViewWithoutCustomField,
-  columnsMetaOverridingBytesType,
-  columnsMetaWithCustomField,
+  esqlSourceOverridingBytesType,
+  esqlSourceWithCustomField,
   createFormatFieldValueReactSpy,
   expectFieldCallToMatch,
 } from '../__mocks__';
@@ -20,6 +20,7 @@ import { formatHitReact } from './format_hit';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { DataTableRecord, EsHitRecord } from '../types';
 import { buildDataTableRecord } from './build_data_record';
+import { MAX_RENDERED_FIELD_VALUE_LENGTH } from './truncate_field_value';
 
 describe('formatHitReact', () => {
   let row: DataTableRecord;
@@ -124,6 +125,17 @@ describe('formatHitReact', () => {
       ['message', 'formatted:foobar', 'message'],
       ['and 3 more fields', '', null],
     ]);
+  });
+
+  it('passes the max display length to formatFieldValueReact', () => {
+    const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
+
+    formatHitReact(row, dataViewMock, () => true, 220, fieldFormatsMock, undefined);
+
+    expect(formatFieldValueReactSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ maxDisplayLength: MAX_RENDERED_FIELD_VALUE_LENGTH })
+    );
+    formatFieldValueReactSpy.mockRestore();
   });
 
   it('should not include fields not mentioned in fieldsToShow', () => {
@@ -259,7 +271,7 @@ describe('formatHitReact', () => {
     ]);
   });
 
-  describe('with columnsMeta', () => {
+  describe('with ES|QL columns', () => {
     let formatFieldValueReactSpy: jest.SpyInstance;
 
     beforeEach(() => {
@@ -270,7 +282,7 @@ describe('formatHitReact', () => {
       formatFieldValueReactSpy.mockRestore();
     });
 
-    it('should pass data view field to formatFieldValueReact when columnsMeta is undefined', () => {
+    it('should pass data view field to formatFieldValueReact without ES|QL columns', () => {
       const testDataView = createDataViewWithBytesField();
       const testHit = buildDataTableRecord(
         { _id: '1', _index: 'logs', fields: { bytes: [100] } },
@@ -282,7 +294,7 @@ describe('formatHitReact', () => {
       expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'number');
     });
 
-    it('should pass field with columnsMeta type to formatFieldValueReact when types differ', () => {
+    it('should pass field with the ES|QL column type to formatFieldValueReact when types differ', () => {
       const testDataView = createDataViewWithBytesField();
       const testHit = buildDataTableRecord(
         { _id: '1', _index: 'logs', fields: { bytes: ['100'] } },
@@ -295,13 +307,13 @@ describe('formatHitReact', () => {
         () => true,
         220,
         fieldFormatsMock,
-        columnsMetaOverridingBytesType
+        esqlSourceOverridingBytesType
       );
 
       expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
     });
 
-    it('should pass field created from columnsMeta to formatFieldValueReact for fields not in data view', () => {
+    it('should pass field created from the ES|QL column to formatFieldValueReact for fields not in data view', () => {
       const testDataView = createDataViewWithoutCustomField();
       const testHit = buildDataTableRecord(
         { _id: '1', _index: 'logs', fields: { custom_esql_field: [42] } },
@@ -314,7 +326,7 @@ describe('formatHitReact', () => {
         () => true,
         220,
         fieldFormatsMock,
-        columnsMetaWithCustomField
+        esqlSourceWithCustomField
       );
 
       expectFieldCallToMatch(formatFieldValueReactSpy, 'custom_esql_field', 'number', ['long']);

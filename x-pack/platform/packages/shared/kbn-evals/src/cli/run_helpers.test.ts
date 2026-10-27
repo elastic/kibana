@@ -5,9 +5,26 @@
  * 2.0.
  */
 
+import { FlagsReader, getFlags } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
-import type { FlagsReader } from '@kbn/dev-cli-runner';
-import { resolveEvaluationConnectorId, evalRunFlags } from './run_helpers';
+import {
+  buildEvalRunArgs,
+  buildEvalRunEnv,
+  evalRunFlags,
+  loadScoutHookConfig,
+  readConcurrencyFlag,
+  resolveEvaluationConnectorId,
+} from './run_helpers';
+import { loadVaultConfig, readSuiteSecretFromDevVault } from './profiles';
+
+jest.mock('./profiles', () => ({
+  ...jest.requireActual('./profiles'),
+  loadVaultConfig: jest.fn(),
+  readSuiteSecretFromDevVault: jest.fn(),
+}));
+
+const mockedLoadVaultConfig = jest.mocked(loadVaultConfig);
+const mockedReadSuiteSecret = jest.mocked(readSuiteSecretFromDevVault);
 
 const log = new ToolingLog();
 
@@ -120,5 +137,189 @@ describe('evalRunFlags', () => {
 
   it('aliases judge to evaluation-connector-id', () => {
     expect(evalRunFlags.alias).toMatchObject({ judge: 'evaluation-connector-id' });
+  });
+});
+
+const readFlags = (argv: string[]): FlagsReader => new FlagsReader(getFlags(argv, evalRunFlags));
+
+describe('loadScoutHookConfig', () => {
+  const originalCiHookConfig = process.env.KBN_EVALS_SCOUT_HOOK_CONFIG_B64;
+  const generalConfig = {
+    evaluationsKbn: { url: 'https://kbn.example' },
+    sandbox: { apiKey: 'from-general' },
+  };
+  const suiteSecret = { sandbox: { apiKey: 'from-suite-secret' } };
+
+  beforeEach(() => {
+    delete process.env.KBN_EVALS_SCOUT_HOOK_CONFIG_B64;
+    mockedLoadVaultConfig.mockReset().mockReturnValue(generalConfig);
+    mockedReadSuiteSecret.mockReset().mockReturnValue(suiteSecret);
+  });
+
+  afterEach(() => {
+    if (originalCiHookConfig === undefined) {
+      delete process.env.KBN_EVALS_SCOUT_HOOK_CONFIG_B64;
+    } else {
+      process.env.KBN_EVALS_SCOUT_HOOK_CONFIG_B64 = originalCiHookConfig;
+    }
+  });
+
+  it('reuses the suite config CI supplied to the initial hook when the CLI runs it again', () => {
+    const ciConfig = {
+      ...suiteSecret,
+      nightshiftOrcaEs: { url: 'https://orca.example', apiKey: 'orca-key' },
+    };
+    process.env.KBN_EVALS_SCOUT_HOOK_CONFIG_B64 = Buffer.from(JSON.stringify(ciConfig)).toString(
+      'base64'
+    );
+    mockedLoadVaultConfig.mockReturnValue(undefined);
+
+    expect(loadScoutHookConfig('/repo', undefined, { vaultSecret: 'nightshift' })).toEqual(
+      ciConfig
+    );
+    expect(mockedLoadVaultConfig).not.toHaveBeenCalled();
+    expect(mockedReadSuiteSecret).not.toHaveBeenCalled();
+  });
+
+  it.each(['not-json-with-private-value', '[]', 'null', '"private-value"'])(
+    'rejects an invalid CI hook config without exposing its contents (%s)',
+    (config) => {
+      process.env.KBN_EVALS_SCOUT_HOOK_CONFIG_B64 = Buffer.from(config).toString('base64');
+
+      expect(() => loadScoutHookConfig('/repo', undefined, {})).toThrow(
+        'CI scout-hook config must encode a JSON object'
+      );
+    }
+  );
+
+  it('keeps an explicit file profile ahead of the inherited CI hook config', () => {
+    process.env.KBN_EVALS_SCOUT_HOOK_CONFIG_B64 = Buffer.from(JSON.stringify(suiteSecret)).toString(
+      'base64'
+    );
+
+    expect(loadScoutHookConfig('/repo', 'local', { vaultSecret: 'nightshift' })).toBe(
+      generalConfig
+    );
+  });
+
+  it("gives the hook the suite's own secret with the dev-vault profile", () => {
+    expect(loadScoutHookConfig('/repo', 'dev-vault', { vaultSecret: 'nightshift' })).toBe(
+      suiteSecret
+    );
+    expect(mockedReadSuiteSecret).toHaveBeenCalledWith('nightshift');
+    expect(mockedLoadVaultConfig).not.toHaveBeenCalled();
+  });
+
+  it('gives the hook an empty config when the suite secret cannot be read', () => {
+    mockedReadSuiteSecret.mockReturnValue(undefined);
+
+    expect(loadScoutHookConfig('/repo', 'dev-vault', { vaultSecret: 'nightshift' })).toEqual({});
+    expect(mockedLoadVaultConfig).not.toHaveBeenCalled();
+  });
+
+  it('keeps passing the profile JSON for a file profile, even with a vaultSecret', () => {
+    expect(loadScoutHookConfig('/repo', 'local', { vaultSecret: 'nightshift' })).toBe(
+      generalConfig
+    );
+    expect(mockedLoadVaultConfig).toHaveBeenCalledWith('/repo', 'local');
+    expect(mockedReadSuiteSecret).not.toHaveBeenCalled();
+  });
+
+  it('passes the general dev-vault config to suites without a vaultSecret', () => {
+    expect(loadScoutHookConfig('/repo', 'dev-vault', {})).toBe(generalConfig);
+    expect(mockedLoadVaultConfig).toHaveBeenCalledWith('/repo', 'dev-vault');
+    expect(mockedReadSuiteSecret).not.toHaveBeenCalled();
+  });
+});
+
+describe('readConcurrencyFlag', () => {
+  it('is undefined when --concurrency is not passed', () => {
+    expect(readConcurrencyFlag(readFlags([]))).toBeUndefined();
+  });
+
+  it('reads a positive integer', () => {
+    expect(readConcurrencyFlag(readFlags(['--concurrency', '8']))).toBe('8');
+  });
+
+  it.each(['0', 'abc', '-2', '2.5'])('rejects --concurrency %s with a flag error', (value) => {
+    expect(() => readConcurrencyFlag(readFlags([`--concurrency=${value}`]))).toThrow(
+      expect.objectContaining({
+        message: `--concurrency must be a positive integer, got "${value}".`,
+        showHelp: true,
+      })
+    );
+  });
+});
+
+describe('readConcurrencyFlag with EVAL_CONCURRENCY', () => {
+  const previous = process.env.EVAL_CONCURRENCY;
+
+  afterEach(() => {
+    if (previous === undefined) {
+      delete process.env.EVAL_CONCURRENCY;
+    } else {
+      process.env.EVAL_CONCURRENCY = previous;
+    }
+  });
+
+  it('rejects an invalid EVAL_CONCURRENCY with a flag error when the flag is not passed', () => {
+    process.env.EVAL_CONCURRENCY = '0';
+    expect(() => readConcurrencyFlag(readFlags([]))).toThrow(
+      expect.objectContaining({
+        message: 'EVAL_CONCURRENCY must be a positive integer, got "0".',
+        showHelp: true,
+      })
+    );
+  });
+
+  it('leaves a valid EVAL_CONCURRENCY for the Playwright config to read', () => {
+    process.env.EVAL_CONCURRENCY = '8';
+    expect(readConcurrencyFlag(readFlags([]))).toBeUndefined();
+  });
+
+  it('lets the flag win over an invalid EVAL_CONCURRENCY', () => {
+    process.env.EVAL_CONCURRENCY = 'abc';
+    expect(readConcurrencyFlag(readFlags(['--concurrency', '4']))).toBe('4');
+  });
+});
+
+describe('--concurrency forwarding', () => {
+  it('sets EVAL_CONCURRENCY for the Playwright run', () => {
+    const env = buildEvalRunEnv({
+      evaluationConnectorId: 'judge',
+      requiresEisCcm: false,
+      skipServer: true,
+      profileEnvOverrides: {},
+      suiteScoutEnv: {},
+      flagsReader: readFlags(['--concurrency', '8']),
+      log,
+    });
+
+    expect(env.EVAL_CONCURRENCY).toBe('8');
+  });
+
+  it('leaves EVAL_CONCURRENCY unset when the flag is not passed', () => {
+    const env = buildEvalRunEnv({
+      evaluationConnectorId: 'judge',
+      requiresEisCcm: false,
+      skipServer: true,
+      profileEnvOverrides: {},
+      suiteScoutEnv: {},
+      flagsReader: readFlags([]),
+      log,
+    });
+
+    expect(env).not.toHaveProperty('EVAL_CONCURRENCY');
+  });
+
+  it('passes --concurrency on to the re-run args', () => {
+    const args = buildEvalRunArgs({
+      suiteId: 'agent-builder',
+      evaluationConnectorId: 'judge',
+      projects: [],
+      flagsReader: readFlags(['--concurrency', '8']),
+    });
+
+    expect(args).toEqual(expect.arrayContaining(['--concurrency', '8']));
   });
 });

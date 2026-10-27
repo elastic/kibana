@@ -117,7 +117,7 @@ describe('create', () => {
       const assignees = Array(MAX_ASSIGNEES_PER_CASE + 1).fill({ uid: 'foo' });
 
       await expect(create({ ...theCase, assignees }, clientArgs, casesClientMock)).rejects.toThrow(
-        `Failed to create case: Error: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_PER_CASE}.`
+        `Failed to create case: Error: assignees: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_PER_CASE}.`
       );
     });
 
@@ -278,7 +278,7 @@ describe('create', () => {
         // @ts-expect-error foo is an invalid field
         create({ ...theCase, foo: 'bar' }, clientArgs, casesClientMock)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: invalid keys \\"foo\\""`
+        `"Failed to create case: Error: Excess keys are not allowed"`
       );
     });
   });
@@ -309,20 +309,22 @@ describe('create', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        `Failed to create case: Error: The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
+        `Failed to create case: Error: title: The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
       );
     });
 
     it('should throw an error if the title is an empty string', async () => {
       await expect(create({ ...theCase, title: '' }, clientArgs, casesClientMock)).rejects.toThrow(
-        'Failed to create case: Error: The title field cannot be an empty string.'
+        'Failed to create case: Error: title: The title field cannot be an empty string.'
       );
     });
 
     it('should throw an error if the title is a string with empty characters', async () => {
       await expect(
         create({ ...theCase, title: '   ' }, clientArgs, casesClientMock)
-      ).rejects.toThrow('Failed to create case: Error: The title field cannot be an empty string.');
+      ).rejects.toThrow(
+        'Failed to create case: Error: title: The title field cannot be an empty string.'
+      );
     });
 
     it('should trim title', async () => {
@@ -364,7 +366,7 @@ describe('create', () => {
       await expect(
         create({ ...theCase, description }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        `Failed to create case: Error: The length of the description is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}.`
+        `Failed to create case: Error: description: The length of the description is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}.`
       );
     });
 
@@ -372,7 +374,7 @@ describe('create', () => {
       await expect(
         create({ ...theCase, description: '' }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to create case: Error: The description field cannot be an empty string.'
+        'Failed to create case: Error: description: The description field cannot be an empty string.'
       );
     });
 
@@ -380,7 +382,7 @@ describe('create', () => {
       await expect(
         create({ ...theCase, description: '   ' }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to create case: Error: The description field cannot be an empty string.'
+        'Failed to create case: Error: description: The description field cannot be an empty string.'
       );
     });
 
@@ -425,20 +427,22 @@ describe('create', () => {
       const tags = Array(MAX_TAGS_PER_CASE + 1).fill('foo');
 
       await expect(create({ ...theCase, tags }, clientArgs, casesClientMock)).rejects.toThrow(
-        `Failed to create case: Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_PER_CASE}.`
+        `Failed to create case: Error: tags: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_PER_CASE}.`
       );
     });
 
     it('should throw an error if the tags array has empty string', async () => {
       await expect(create({ ...theCase, tags: [''] }, clientArgs, casesClientMock)).rejects.toThrow(
-        'Failed to create case: Error: The tag field cannot be an empty string.'
+        'Failed to create case: Error: tags.0: The tag field cannot be an empty string.'
       );
     });
 
     it('should throw an error if the tags array has string with empty characters', async () => {
       await expect(
         create({ ...theCase, tags: ['  '] }, clientArgs, casesClientMock)
-      ).rejects.toThrow('Failed to create case: Error: The tag field cannot be an empty string.');
+      ).rejects.toThrow(
+        'Failed to create case: Error: tags.0: The tag field cannot be an empty string.'
+      );
     });
 
     it('should throw an error if the tag length is too long', async () => {
@@ -449,7 +453,7 @@ describe('create', () => {
       await expect(
         create({ ...theCase, tags: [tag] }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        `Failed to create case: Error: The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
+        `Failed to create case: Error: tags.0: The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
       );
     });
 
@@ -487,14 +491,16 @@ describe('create', () => {
           clientArgs,
           casesClientMock
         )
-      ).rejects.toThrow('Failed to create case: Error: The length of the category is too long.');
+      ).rejects.toThrow(
+        'Failed to create case: Error: category: The length of the category is too long.'
+      );
     });
 
     it('should throw an error if the category is an empty string', async () => {
       await expect(
         create({ ...theCase, category: '' }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to create case: Error: The category field cannot be an empty string.,Invalid value "" supplied to "category"'
+        'Failed to create case: Error: category: The category field cannot be an empty string.'
       );
     });
 
@@ -502,7 +508,7 @@ describe('create', () => {
       await expect(
         create({ ...theCase, category: '   ' }, clientArgs, casesClientMock)
       ).rejects.toThrow(
-        'Failed to create case: Error: The category field cannot be an empty string.,Invalid value "   " supplied to "category"'
+        'Failed to create case: Error: category: The category field cannot be an empty string.'
       );
     });
 
@@ -672,7 +678,7 @@ describe('create', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: The length of the field customFields is too long. Array must be of length <= 10."`
+        `"Failed to create case: Error: customFields: The length of the field customFields is too long. Array must be of length <= 10."`
       );
     });
 
@@ -823,7 +829,7 @@ describe('create', () => {
             ],
             description: 'testing sir',
             owner: 'securitySolution',
-            settings: { syncAlerts: true },
+            settings: { syncAlerts: true, extractObservables: true },
             severity: 'low',
             tags: [],
             title: 'My Case',
@@ -853,7 +859,7 @@ describe('create', () => {
             customFields: caseWithOptionalFields.customFields,
             description: 'testing sir',
             owner: 'securitySolution',
-            settings: { syncAlerts: true },
+            settings: { syncAlerts: true, extractObservables: true },
             severity: 'critical',
             tags: [],
             title: 'My Case',
@@ -2374,6 +2380,65 @@ describe('create', () => {
           ).rejects.toThrow('Field "risk_score" must be at most 3 characters');
         });
       });
+    });
+  });
+
+  describe('extractObservables defaulting from space configuration', () => {
+    const extractObservablesCasesClient = createCasesClientMock();
+
+    const createClientArgsWithConfig = (extractObservables: boolean) => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+      extractObservablesCasesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: theCase.owner,
+          customFields: [],
+          extractObservables,
+        },
+      ]);
+      return clientArgs;
+    };
+
+    it('inherits extractObservables from the space configuration when omitted', async () => {
+      const clientArgs = createClientArgsWithConfig(true);
+
+      await create(theCase, clientArgs, extractObservablesCasesClient);
+
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.extractObservables).toBe(true);
+    });
+
+    it('inherits extractObservables false from the space configuration', async () => {
+      const clientArgs = createClientArgsWithConfig(false);
+
+      await create(theCase, clientArgs, extractObservablesCasesClient);
+
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.extractObservables).toBe(false);
+    });
+
+    it('uses explicit extractObservables over space configuration', async () => {
+      const clientArgs = createClientArgsWithConfig(true);
+      const caseWithExplicitSetting = {
+        ...theCase,
+        settings: { syncAlerts: true, extractObservables: false },
+      };
+
+      await create(caseWithExplicitSetting, clientArgs, extractObservablesCasesClient);
+
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.extractObservables).toBe(false);
+    });
+
+    it('falls back to true when no space configuration exists', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+      extractObservablesCasesClient.configure.get = jest.fn().mockResolvedValue([]);
+
+      await create(theCase, clientArgs, extractObservablesCasesClient);
+
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.extractObservables).toBe(true);
     });
   });
 });

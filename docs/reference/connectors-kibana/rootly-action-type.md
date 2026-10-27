@@ -11,9 +11,11 @@ applies_to:
 
 The Rootly connector connects directly to the Rootly API. It lets a workflow or agent declare an incident, read and query incidents and alerts, drive an incident through its lifecycle (triage, mitigate, resolve, cancel), track follow-up work, and acknowledge or resolve alerts.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Overview
 
-This is a **custom connector** that uses Rootly's JSON:API-based REST API with Bearer token authentication.
+The Rootly connector uses Rootly's JSON:API-based REST API with Bearer token authentication.
 
 ## Create connectors in {{kib}} [define-rootly-ui]
 

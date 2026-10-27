@@ -26,6 +26,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-2.5-pro',
       },
@@ -57,6 +58,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-2.5-pro',
       },
@@ -88,6 +90,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-2.5-pro',
       },
@@ -119,6 +122,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-2.5-pro',
       },
@@ -150,6 +154,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-2.5-pro',
       },
@@ -181,6 +186,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-2.5-pro',
       },
@@ -212,6 +218,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'openai-gpt-5.5',
       },
@@ -243,6 +250,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'openai-gpt-5.5',
       },
@@ -274,6 +282,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'openai-gpt-5.5',
       },
@@ -305,6 +314,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'openai-gpt-5.5',
       },
@@ -336,6 +346,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'openai-gpt-5.5',
       },
@@ -367,6 +378,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'openai-gpt-5.5',
       },
@@ -398,6 +410,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.1-flash-lite',
       },
@@ -430,6 +443,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.1-flash-lite',
       },
@@ -462,6 +476,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.1-flash-lite',
       },
@@ -494,6 +509,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.1-flash-lite',
       },
@@ -526,6 +542,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.1-flash-lite',
       },
@@ -558,6 +575,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.1-flash-lite',
       },
@@ -590,6 +608,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.5-flash',
       },
@@ -621,6 +640,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.5-flash',
       },
@@ -652,6 +672,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.5-flash',
       },
@@ -683,6 +704,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.5-flash',
       },
@@ -714,6 +736,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.5-flash',
       },
@@ -745,6 +768,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.5-flash',
       },
@@ -776,6 +800,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'openai-gpt-5.4-mini',
       },
@@ -807,6 +832,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'openai-gpt-5.4-mini',
       },
@@ -838,6 +864,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'openai-gpt-5.4-mini',
       },
@@ -869,6 +896,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'openai-gpt-5.4-mini',
       },
@@ -900,6 +928,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'openai-gpt-5.4-mini',
       },
@@ -931,6 +960,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'openai-gpt-5.4-mini',
       },
@@ -962,6 +992,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.1-pro',
       },
@@ -993,6 +1024,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.1-pro',
       },
@@ -1024,6 +1056,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.1-pro',
       },
@@ -1055,6 +1088,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.1-pro',
       },
@@ -1086,6 +1120,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.1-pro',
       },
@@ -1117,6 +1152,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.1-pro',
       },
@@ -1148,6 +1184,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.0-flash',
       },
@@ -1179,6 +1216,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.0-flash',
       },
@@ -1210,6 +1248,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.0-flash',
       },
@@ -1241,6 +1280,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.0-flash',
       },
@@ -1272,6 +1312,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.0-flash',
       },
@@ -1303,6 +1344,7 @@ export const GOLDEN_SCORES_SAMPLE = [
       output: {},
     },
     task: {
+      repetition_index: 0,
       model: {
         id: 'google-gemini-3.0-flash',
       },

@@ -9,6 +9,7 @@ tags:
   - watch
   - watch-floor
 settings:
+  __WORKER_RUN_AS_LINE__:
   # This worker is installed per space, so the key needs no space component.
   #
   # `cancel-in-progress` with max 1: the newest discoveries are the ones worth
@@ -56,6 +57,9 @@ steps:
     type: workflow.execute
     with:
       workflow-id: system-security-attack-discovery-worker
+      # Runs the global runner, and every child it starts, as this worker's service
+      # account. Requires `run_as`; the worker cannot be enabled without one.
+      run-as-mode: inherit
       inputs:
         # All three worker settings are forwarded. `autonomy` decides how the child's
         # review handles a true-positive verdict; the other two are traceability only

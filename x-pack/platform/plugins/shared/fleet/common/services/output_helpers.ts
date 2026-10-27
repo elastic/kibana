@@ -95,7 +95,9 @@ export function getAllowedOutputTypesForAgentPolicy(agentPolicy: Partial<AgentPo
   }
 
   if (agentPolicy.supports_agentless) {
-    return AGENTLESS_ALLOWED_OUTPUT_TYPES;
+    return agentPolicyHasOnlyOtelInputs(agentPolicy)
+      ? [...AGENTLESS_ALLOWED_OUTPUT_TYPES, outputType.Otlp]
+      : AGENTLESS_ALLOWED_OUTPUT_TYPES;
   }
 
   // A policy with no package policies has no inputs to constrain the output; every type is valid.
@@ -124,7 +126,9 @@ export function getAllowedOutputTypesForPackagePolicy(
   }
 ): string[] {
   if (packagePolicy.supports_agentless) {
-    return AGENTLESS_ALLOWED_OUTPUT_TYPES;
+    return packagePolicyHasOnlyOtelInputs(packagePolicy.inputs)
+      ? [...AGENTLESS_ALLOWED_OUTPUT_TYPES, outputType.Otlp]
+      : AGENTLESS_ALLOWED_OUTPUT_TYPES;
   }
 
   if (packagePolicyHasOnlyOtelInputs(packagePolicy.inputs)) {
@@ -145,6 +149,13 @@ export function getAllowedOutputTypesForIntegration(packageName?: string): strin
 
   return Object.values(outputType);
 }
+
+/**
+ * Return allowed output types for the monitoring slot. Fleet only emits the beats-shaped
+ * `agent.monitoring` block and monitoring permissions are ES-only, so `otlp` is never valid.
+ */
+export const getAllowedOutputTypesForMonitoring = (): Array<ValueOf<OutputType>> =>
+  BEATS_OUTPUT_TYPES;
 
 export function outputYmlIncludesReservedPerformanceKey(
   configYml: string,

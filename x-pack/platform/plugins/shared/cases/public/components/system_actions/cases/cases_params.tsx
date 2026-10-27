@@ -38,11 +38,18 @@ import { getTimeUnitOptions } from './utils';
 import { useKibana } from '../../../common/lib/kibana';
 import { KibanaServices } from '../../../common/lib/kibana/services';
 import { TemplateSelector } from '../../create/templates';
-import { TemplateSelectorV2 } from './template_selector_v2';
+import { TemplateSelectorV2, findV2Template } from './template_selector_v2';
+import { useGetTemplates } from '../../templates_v2/hooks/use_get_templates';
+import {
+  getTemplateSettingsAndConnectorFromYaml,
+  normalizeTemplateConnector,
+} from '../../templates_v2/utils/template_settings_yaml';
 import type { CasesConfigurationUITemplate } from '../../../containers/types';
 import { getOwnerFromRuleConsumerProducer } from '../../../../common/utils/owner';
+import { canOverrideExtractObservables } from '../../../../common/utils/case_settings';
 import { getConfigurationByOwner } from '../../../containers/configure/utils';
 import { useGetAllCaseConfigurations } from '../../../containers/configure/use_get_all_case_configurations';
+import { useLicense } from '../../../common/use_license';
 import { OptionalFieldLabel } from '../../optional_field_label';
 
 const DEFAULT_EMPTY_TEMPLATE_KEY = 'defaultEmptyTemplateKey';
@@ -57,6 +64,8 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     uiSettings,
     notifications: { toasts },
   } = useKibana().services;
+
+  const { isAtLeastPlatinum } = useLicense();
 
   const serverlessProjectType = cloud?.isServerlessEnabled
     ? (cloud.serverless.projectType as ServerlessProjectType)
@@ -221,6 +230,32 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     [currentConfiguration.templates, templateId]
   );
   const selectedTemplateHasConnector = !!selectedTemplate?.caseFields?.connector;
+
+  const { data: v2TemplatesData, isLoading: isLoadingV2Templates } = useGetTemplates({
+    queryParams: { page: 1, perPage: 10000, owner: [owner], isEnabled: true },
+  });
+
+  const selectedV2TemplateHasConnector = useMemo(() => {
+    if (!isTemplatesV2Enabled || !templateId) return false;
+    const v2Template = findV2Template(
+      templateId,
+      v2TemplatesData?.templates ?? [],
+      currentConfiguration.templates
+    );
+    if (!v2Template?.definitionString) return false;
+    const { connector } = getTemplateSettingsAndConnectorFromYaml(v2Template.definitionString);
+    return !!normalizeTemplateConnector(connector);
+  }, [
+    isTemplatesV2Enabled,
+    templateId,
+    v2TemplatesData?.templates,
+    currentConfiguration.templates,
+  ]);
+
+  const showAutoPushCheckbox =
+    (!isTemplatesV2Enabled && selectedTemplateHasConnector) ||
+    (!isLoadingV2Templates && selectedV2TemplateHasConnector);
+
   const defaultTemplate = useMemo(() => {
     return {
       key: DEFAULT_EMPTY_TEMPLATE_KEY,
@@ -264,6 +299,49 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     [editSubActionProperty]
   );
 
+  const extractObservablesOptions = useMemo(
+    () => [
+      {
+        value: 'inherit',
+        // When a v2 template is selected the executor resolves its pinned version server-side
+        // (params.templateVersion), so the client-side latest copy may differ. Avoid showing a
+        // potentially wrong value; fall back to the unambiguous space-only label instead.
+        text:
+          isTemplatesV2Enabled && templateId
+            ? i18n.EXTRACT_OBSERVABLES_INHERIT_TEMPLATE
+            : i18n.EXTRACT_OBSERVABLES_INHERIT(currentConfiguration.extractObservables),
+      },
+      { value: 'on', text: i18n.EXTRACT_OBSERVABLES_ON },
+      { value: 'off', text: i18n.EXTRACT_OBSERVABLES_OFF },
+    ],
+    [isTemplatesV2Enabled, templateId, currentConfiguration.extractObservables]
+  );
+
+  const extractObservablesValue = useMemo(() => {
+    const raw = actionParams.subActionParams?.extractObservables;
+    if (raw === true) return 'on';
+    if (raw === false) return 'off';
+    return 'inherit';
+  }, [actionParams.subActionParams?.extractObservables]);
+
+  const onExtractObservablesChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const val = e.target.value;
+      editSubActionProperty(
+        'extractObservables',
+        val === 'on' ? true : val === 'off' ? false : null
+      );
+    },
+    [editSubActionProperty]
+  );
+
+  /**
+   * Hide the override when it would not be meaningful or the analyst cannot see the result: the
+   * owner does not auto-extract by default (e.g. Stack, Observability), or the license is below
+   * Platinum, which gates every observables surface.
+   */
+  const showExtractObservables = canOverrideExtractObservables(owner) && isAtLeastPlatinum();
+
   if (isAttackDiscoveryRuleType) {
     return (
       <EuiToolTip
@@ -272,8 +350,9 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       >
         {isTemplatesV2Enabled ? (
           <TemplateSelectorV2
-            owner={owner}
             templateId={templateId ?? null}
+            templates={v2TemplatesData?.templates ?? []}
+            isLoadingTemplates={isLoadingV2Templates}
             legacyTemplates={currentConfiguration.templates}
             isLoading={isLoadingCaseConfiguration}
             isDisabled={true}
@@ -375,8 +454,9 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
         <EuiFlexItem grow={true}>
           {isTemplatesV2Enabled ? (
             <TemplateSelectorV2
-              owner={owner}
               templateId={templateId ?? null}
+              templates={v2TemplatesData?.templates ?? []}
+              isLoadingTemplates={isLoadingV2Templates}
               legacyTemplates={currentConfiguration.templates}
               isLoading={isLoadingCaseConfiguration}
               onChange={onV2TemplateChange}
@@ -391,7 +471,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
             />
           )}
         </EuiFlexItem>
-        {!isTemplatesV2Enabled && selectedTemplateHasConnector ? (
+        {showAutoPushCheckbox ? (
           <EuiFlexItem grow={true}>
             <EuiCheckbox
               id={`auto-push-case-${index}`}
@@ -440,6 +520,24 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      {showExtractObservables ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow fullWidth label={i18n.EXTRACT_OBSERVABLES_LABEL}>
+                <EuiSelect
+                  fullWidth
+                  data-test-subj="extract-observables-select"
+                  value={extractObservablesValue}
+                  options={extractObservablesOptions}
+                  onChange={onExtractObservablesChange}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      ) : null}
     </>
   );
 };

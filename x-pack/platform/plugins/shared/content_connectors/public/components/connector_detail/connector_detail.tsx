@@ -252,7 +252,7 @@ export const ConnectorDetail: React.FC = () => {
         <EuiPageTemplate.EmptyPrompt
           title={
             <h1>
-              {i18n.translate('xpack.serverlessSearch.connectors.notFound', {
+              {i18n.translate('xpack.contentConnectors.connectors.notFound', {
                 defaultMessage: 'Could not find connector {connectorId}',
                 values: { connectorId },
               })}
@@ -265,7 +265,7 @@ export const ConnectorDetail: React.FC = () => {
               fill
               onClick={() => application?.navigateToUrl(`./`)}
             >
-              {i18n.translate('xpack.serverlessSearch.connectors.goBack', {
+              {i18n.translate('xpack.contentConnectors.connectors.goBack', {
                 defaultMessage: 'Go back',
               })}
             </EuiButton>

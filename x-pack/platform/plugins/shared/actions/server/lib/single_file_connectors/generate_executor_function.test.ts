@@ -110,6 +110,24 @@ describe('generateExecutorFunction', () => {
       expect(result).toEqual({ status: 'ok', data: { result: 'ok' }, actionId: connectorId });
     });
 
+    it('passes the connector type to the axios instance factory for auth metrics', async () => {
+      const executor = generateExecutorFunction({
+        connectorTypeId: '.test_connector',
+        actions: makeActions(mockHandler),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+      });
+
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+
+      expect(mockGetAxiosInstanceWithAuth).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorTypeId: '.test_connector' })
+      );
+    });
+
     it('passes subActionParams to the handler', async () => {
       const executor = makeExecutor();
 
@@ -174,6 +192,41 @@ describe('generateExecutorFunction', () => {
       await executor({ ...opts, secrets: { authType: 'bearer', token: 'secret' } });
 
       expect(mockHandler.mock.calls[0][0]).toHaveProperty('relay', undefined);
+    });
+
+    it('passes the connector JWT signer, and returns a signer failure as an action error', async () => {
+      const signJwt = jest.fn().mockRejectedValue(new Error('This connector has no signing key.'));
+      const getJwtSigner = jest.fn().mockReturnValue(signJwt);
+      const handler = jest.fn(async (ctx) => ctx.signJwt({ aud: 'receiver' }));
+      const executor = generateExecutorFunction({
+        actions: makeActions(handler),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+        getJwtSigner,
+      });
+
+      const result = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      );
+
+      expect(getJwtSigner).toHaveBeenCalledWith(connectorId);
+      expect(signJwt).toHaveBeenCalledWith({ aud: 'receiver' });
+      expect(result).toMatchObject({
+        status: 'error',
+        message: 'This connector has no signing key.',
+        actionId: connectorId,
+      });
+    });
+
+    it('leaves the JWT signer undefined when the spec does not publish keys', async () => {
+      const executor = makeExecutor();
+
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+
+      expect(mockHandler.mock.calls[0][0]).toHaveProperty('signJwt', undefined);
     });
 
     it('leaves the Relay client undefined when no Relay is configured', async () => {
@@ -756,6 +809,133 @@ describe('generateExecutorFunction', () => {
       });
     });
 
+    it('invalidates the exact pooled client once for a terminal operation error and does not retry', async () => {
+      const staleClient = { id: 'stale' };
+      const freshClient = { id: 'fresh' };
+      let buildCount = 0;
+      const terminate = jest.fn().mockResolvedValue(undefined);
+      const callTool = jest
+        .fn()
+        .mockRejectedValueOnce(
+          Object.assign(new Error('session gone'), { code: 'UND_ERR_CLOSED' })
+        );
+      const fakeClientType = {
+        id: 'mcp',
+        build: jest.fn(async () => {
+          buildCount++;
+          return buildCount === 1 ? staleClient : freshClient;
+        }),
+        terminate,
+        shouldInvalidateOnError: jest.fn((err: unknown) => {
+          return (
+            typeof err === 'object' &&
+            err !== null &&
+            'code' in err &&
+            (err as { code?: string }).code === 'UND_ERR_CLOSED'
+          );
+        }),
+      };
+      const pool = new LeasePool<unknown>();
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        const client = (await (ctx.getClient as unknown as GetClient)('mcp')) as { id: string };
+        await callTool(client);
+        return {};
+      });
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => pool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+        clientTypes: { mcp: fakeClientType },
+      });
+
+      const first = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      );
+      expect(first).toMatchObject({
+        status: 'error',
+        message: 'session gone',
+      });
+      expect(callTool).toHaveBeenCalledTimes(1);
+      expect(terminate).toHaveBeenCalledTimes(1);
+      expect(terminate).toHaveBeenCalledWith(staleClient);
+
+      const second = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      );
+      expect(second).toEqual({ status: 'ok', data: {}, actionId: connectorId });
+      expect(buildCount).toBe(2);
+      expect(callTool).toHaveBeenCalledTimes(2);
+      expect(callTool).toHaveBeenLastCalledWith(freshClient);
+    });
+
+    it('defers termination of an invalidated client until a concurrent execution finishes', async () => {
+      const sharedClient = { id: 'shared' };
+      let signalTerminated!: () => void;
+      const terminated = new Promise<void>((resolve) => {
+        signalTerminated = resolve;
+      });
+      const terminate = jest.fn(async () => signalTerminated());
+      let finishSlow!: () => void;
+      const slowCall = new Promise<void>((resolve) => {
+        finishSlow = resolve;
+      });
+      const fakeClientType = {
+        id: 'mcp',
+        build: jest.fn().mockResolvedValue(sharedClient),
+        terminate,
+        shouldInvalidateOnError: jest.fn(() => true),
+      };
+      const pool = new LeasePool<unknown>();
+      const executor = generateExecutorFunction({
+        actions: {
+          slowAction: {
+            isTool: true,
+            scope: 'read',
+            input: {} as never,
+            handler: jest.fn(async (ctx: ActionContext) => {
+              await (ctx.getClient as unknown as GetClient)('mcp');
+              await slowCall;
+              return {};
+            }),
+          },
+          failingAction: {
+            isTool: true,
+            scope: 'read',
+            input: {} as never,
+            handler: jest.fn(async (ctx: ActionContext) => {
+              await (ctx.getClient as unknown as GetClient)('mcp');
+              throw new Error('session gone');
+            }),
+          },
+        },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => pool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+        clientTypes: { mcp: fakeClientType },
+      });
+
+      const slow = executor(makeExecOptions({ subAction: 'slowAction', subActionParams: {} }));
+      await Promise.resolve();
+      const failed = await executor(
+        makeExecOptions({ subAction: 'failingAction', subActionParams: {} })
+      );
+
+      expect(failed).toMatchObject({ status: 'error', message: 'session gone' });
+      expect(terminate).not.toHaveBeenCalled();
+
+      finishSlow();
+      await slow;
+      await terminated;
+
+      expect(terminate).toHaveBeenCalledTimes(1);
+      expect(terminate).toHaveBeenCalledWith(sharedClient);
+    });
+
     it('surfaces a request for an unknown client type id as an error result', async () => {
       const pool = new LeasePool<unknown>();
       const handler = jest.fn(async (ctx: ActionContext) => {
@@ -1296,6 +1476,172 @@ describe('generateExecutorFunction', () => {
         message: 'connection failed',
         actionId: connectorId,
       });
+    });
+  });
+
+  describe('selectedActions enforcement', () => {
+    it('allows all actions when selectedActions is undefined (unset)', async () => {
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+      });
+
+      const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
+      const result = await executor({ ...opts, config: { selectedActions: undefined } });
+
+      expect(result.status).toBe('ok');
+      expect(mockHandler).toHaveBeenCalled();
+    });
+
+    it('allows non-isTool actions when selectedActions is undefined (unset)', async () => {
+      const hitlHandler = jest.fn().mockResolvedValue({ ok: true });
+      const executor = generateExecutorFunction({
+        actions: {
+          toolAction: {
+            isTool: true,
+            scope: 'read' as const,
+            input: {} as never,
+            handler: mockHandler,
+          },
+          hitlAction: {
+            isTool: false,
+            scope: 'read' as const,
+            input: {} as never,
+            handler: hitlHandler,
+          },
+        },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+      });
+
+      const opts = makeExecOptions({ subAction: 'hitlAction', subActionParams: {} });
+      const result = await executor({ ...opts, config: {} });
+
+      expect(result.status).toBe('ok');
+      expect(hitlHandler).toHaveBeenCalled();
+    });
+
+    it('allows execution when subAction is in selectedActions', async () => {
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+      });
+
+      const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
+      const result = await executor({ ...opts, config: { selectedActions: ['testAction'] } });
+
+      expect(result.status).toBe('ok');
+      expect(mockHandler).toHaveBeenCalled();
+    });
+
+    it('allows non-isTool actions when explicitly listed in selectedActions', async () => {
+      const hitlHandler = jest.fn().mockResolvedValue({ ok: true });
+      const executor = generateExecutorFunction({
+        actions: {
+          hitlAction: {
+            isTool: false,
+            scope: 'read' as const,
+            input: {} as never,
+            handler: hitlHandler,
+          },
+        },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+      });
+
+      const opts = makeExecOptions({ subAction: 'hitlAction', subActionParams: {} });
+      const result = await executor({ ...opts, config: { selectedActions: ['hitlAction'] } });
+
+      expect(result.status).toBe('ok');
+      expect(hitlHandler).toHaveBeenCalled();
+    });
+
+    it('throws and logs when subAction is not in selectedActions', async () => {
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+      });
+
+      const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
+      await expect(
+        executor({ ...opts, config: { selectedActions: ['otherAction'] } })
+      ).rejects.toThrow(
+        "[Action][ExternalService] Action 'testAction' is not enabled for this connector."
+      );
+
+      expect(logger.error).toHaveBeenCalledWith(
+        "[Action][ExternalService] Action 'testAction' is not enabled for this connector."
+      );
+      expect(mockHandler).not.toHaveBeenCalled();
+    });
+
+    it('throws when selectedActions is an empty array', async () => {
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+      });
+
+      const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
+      await expect(executor({ ...opts, config: { selectedActions: [] } })).rejects.toThrow(
+        "[Action][ExternalService] Action 'testAction' is not enabled for this connector."
+      );
+    });
+
+    it('allows _test even when selectedActions is a restricted allowlist', async () => {
+      const testHandler = jest.fn().mockResolvedValue({ connected: true });
+      const executor = generateExecutorFunction({
+        actions: {
+          testAction: {
+            isTool: true,
+            scope: 'read' as const,
+            input: {} as never,
+            handler: mockHandler,
+          },
+          [TEST_CONNECTOR_SUB_ACTION]: {
+            isTool: false,
+            scope: 'read' as const,
+            input: {} as never,
+            handler: testHandler,
+          },
+        },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+      });
+
+      const opts = makeExecOptions({
+        subAction: TEST_CONNECTOR_SUB_ACTION,
+        subActionParams: {},
+      });
+      const result = await executor({ ...opts, config: { selectedActions: ['testAction'] } });
+
+      expect(result.status).toBe('ok');
+      expect(testHandler).toHaveBeenCalled();
+      expect(mockHandler).not.toHaveBeenCalled();
     });
   });
 

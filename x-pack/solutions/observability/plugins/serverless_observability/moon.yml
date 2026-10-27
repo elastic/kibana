@@ -35,13 +35,15 @@ dependsOn:
   - '@kbn/deeplinks-management'
   - '@kbn/ai-assistant-common'
   - '@kbn/management-settings-ids'
-  - '@kbn/alerting-v2-utils'
   - '@kbn/deeplinks-workflows'
   - '@kbn/deeplinks-evals'
   - '@kbn/scout-oblt'
+  - '@kbn/alerting-v2-constants'
   - '@kbn/workflows-management-plugin'
   - '@kbn/significant-events-plugin'
+  - '@kbn/nightshift-shared'
   - '@kbn/navigation-plugin'
+  - '@kbn/profiling-plugin'
 tags:
   - plugin
   - prod
@@ -57,6 +59,4 @@ fileGroups:
     - server/**/*.ts
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -102,7 +102,7 @@ const buildMetadataItems = (rule: RuleResponse, dateFormat: string): DetailItem[
       title: i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.createdBy', {
         defaultMessage: 'Created by',
       }),
-      description: rule.created_by || EMPTY_VALUE,
+      description: rule.created_by?.profile_uid || EMPTY_VALUE,
     },
     {
       title: i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.createdDate', {
@@ -120,7 +120,7 @@ const buildMetadataItems = (rule: RuleResponse, dateFormat: string): DetailItem[
       title: i18n.translate('xpack.alertingV2.sourceRuleSummaryFlyout.updatedBy', {
         defaultMessage: 'Updated by',
       }),
-      description: rule.updated_by || EMPTY_VALUE,
+      description: rule.updated_by?.profile_uid || EMPTY_VALUE,
     },
   ];
 };
@@ -230,6 +230,14 @@ export const SourceRuleSummaryFlyout = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="hollow" data-test-subj="classicRulesBadge">
+                        {i18n.translate(
+                          'xpack.alertingV2.sourceRuleSummaryFlyout.classicRulesBadge',
+                          { defaultMessage: 'Classic' }
+                        )}
+                      </EuiBadge>
+                    </EuiFlexItem>
                     {statusBadge ? <EuiFlexItem grow={false}>{statusBadge}</EuiFlexItem> : null}
                     <TagsOverflowBadgeRow
                       tags={tags}

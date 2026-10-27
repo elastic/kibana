@@ -8,7 +8,7 @@
  */
 
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import { getDataViewFieldList, getEsqlQueryFieldList } from './get_field_list';
 
 export enum DiscoverSidebarReducerActionType {
@@ -21,9 +21,6 @@ export enum DiscoverSidebarReducerActionType {
 type DiscoverSidebarReducerAction =
   | {
       type: DiscoverSidebarReducerActionType.RESET;
-      payload: {
-        dataView: DataView | null | undefined;
-      };
     }
   | {
       type: DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED;
@@ -34,16 +31,19 @@ type DiscoverSidebarReducerAction =
   | {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING;
       payload: {
-        isEsqlMode: boolean;
+        dataSource: DataSource | undefined;
       };
     }
   | {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED;
       payload: {
+        dataSource: DataSource | undefined;
         fieldCounts: DiscoverSidebarReducerState['fieldCounts'];
-        esqlQueryColumns?: DatatableColumn[]; // from ES|QL searches
-        isEsqlMode: boolean;
-        dataView: DataView | null | undefined;
+        /**
+         * Classic fallback when `documents$` has no DataSource yet (error / first load).
+         * Not stored — UnifiedFieldList still receives `props.selectedDataView`.
+         */
+        fallbackDataView?: DataView | null;
       };
     };
 
@@ -54,19 +54,54 @@ export enum DiscoverSidebarReducerStatus {
 }
 
 export interface DiscoverSidebarReducerState {
-  dataView: DataView | null | undefined;
+  dataSource: DataSource | undefined;
   allFields: DataViewField[] | null;
   fieldCounts: Record<string, number> | null;
   status: DiscoverSidebarReducerStatus;
 }
 
-export function getInitialState(dataView?: DataView | null): DiscoverSidebarReducerState {
+export function getInitialState(): DiscoverSidebarReducerState {
   return {
-    dataView,
+    dataSource: undefined,
     allFields: null,
     fieldCounts: null,
     status: DiscoverSidebarReducerStatus.INITIAL,
   };
+}
+
+/**
+ * Field list after a fetch completes. ES|QL uses `resultColumns` (keeps `isNull`).
+ * Classic uses the DataView plus hit counts for unmapped fields.
+ */
+function getSidebarAllFields(
+  dataSource: DataSource | undefined,
+  fieldCounts: Record<string, number> | null,
+  fallbackDataView?: DataView | null
+): DataViewField[] | null {
+  if (dataSource?.kind === 'esql') {
+    return getEsqlQueryFieldList(dataSource.resultColumns);
+  }
+  const dataView =
+    dataSource?.kind === 'index-pattern' ? dataSource.getDataView() : fallbackDataView;
+  return getDataViewFieldList(dataView, fieldCounts);
+}
+
+/**
+ * Field list during fetch. Not the same as {@link getSidebarAllFields}: Classic
+ * `fieldCounts` are cleared on LOADING, so rebuilding would flash an empty sidebar.
+ */
+function getAllFieldsWhileLoading(
+  previous: DataSource | undefined,
+  next: DataSource | undefined,
+  previousAllFields: DataViewField[] | null
+): DataViewField[] | null {
+  if (next?.kind === 'esql') {
+    return getEsqlQueryFieldList(next.resultColumns);
+  }
+  if (next?.kind === 'index-pattern' && previous?.kind !== 'esql') {
+    return previousAllFields;
+  }
+  return null;
 }
 
 export function discoverSidebarReducer(
@@ -75,41 +110,52 @@ export function discoverSidebarReducer(
 ): DiscoverSidebarReducerState {
   switch (action.type) {
     case DiscoverSidebarReducerActionType.RESET:
-      return getInitialState(action.payload.dataView);
-    case DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED:
-      return state.dataView === action.payload.dataView
-        ? state // already updated in `DOCUMENTS_LOADED`
-        : {
-            ...state,
-            dataView: action.payload.dataView,
-            fieldCounts: null,
-            allFields: null,
-            status:
-              state.status === DiscoverSidebarReducerStatus.COMPLETED
-                ? DiscoverSidebarReducerStatus.INITIAL
-                : state.status,
-          };
-    case DiscoverSidebarReducerActionType.DOCUMENTS_LOADING:
+      return getInitialState();
+    case DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED: {
+      if (state.dataSource?.kind === 'esql') {
+        // Shim DataView registration after ES|QL fetch is not a user switch.
+        return state;
+      }
+      if (
+        state.dataSource?.kind === 'index-pattern' &&
+        state.dataSource.getDataView() === action.payload.dataView
+      ) {
+        return state;
+      }
       return {
         ...state,
         fieldCounts: null,
-        allFields: action.payload.isEsqlMode ? null : state.allFields,
-        status: DiscoverSidebarReducerStatus.PROCESSING,
+        allFields: null,
+        status:
+          state.status === DiscoverSidebarReducerStatus.COMPLETED
+            ? DiscoverSidebarReducerStatus.INITIAL
+            : state.status,
       };
-    case DiscoverSidebarReducerActionType.DOCUMENTS_LOADED:
-      const mappedAndUnmappedFields = action.payload.isEsqlMode
-        ? getEsqlQueryFieldList(action.payload.esqlQueryColumns)
-        : getDataViewFieldList(action.payload.dataView, action.payload.fieldCounts);
+    }
+    case DiscoverSidebarReducerActionType.DOCUMENTS_LOADING: {
+      const { dataSource } = action.payload;
       return {
         ...state,
-        dataView: action.payload.dataView,
-        fieldCounts: action.payload.fieldCounts,
-        allFields: mappedAndUnmappedFields,
+        dataSource,
+        fieldCounts: null,
+        allFields: getAllFieldsWhileLoading(state.dataSource, dataSource, state.allFields),
+        status: DiscoverSidebarReducerStatus.PROCESSING,
+      };
+    }
+    case DiscoverSidebarReducerActionType.DOCUMENTS_LOADED: {
+      const { dataSource, fieldCounts, fallbackDataView } = action.payload;
+      const allFields = getSidebarAllFields(dataSource, fieldCounts, fallbackDataView);
+      return {
+        ...state,
+        dataSource,
+        fieldCounts,
+        allFields,
         status:
-          mappedAndUnmappedFields === null
+          allFields === null
             ? DiscoverSidebarReducerStatus.PROCESSING
             : DiscoverSidebarReducerStatus.COMPLETED,
       };
+    }
   }
 
   return state;

@@ -161,6 +161,7 @@ export function convertStylingToStateFormat(
   seriesTypes: SeriesType[]
 ): XYLensAppearanceState {
   const layerPresence = getLayerPresence(seriesTypes);
+  const hasLinesOrAreas = layerPresence.hasLines || layerPresence.hasAreas;
 
   return stripUndefined<XYLensAppearanceState>({
     hideEndzones:
@@ -174,8 +175,12 @@ export function convertStylingToStateFormat(
           ? 'show'
           : 'hide'
         : undefined,
-    pointVisibility: pointVisibilityCompat.toState(config.points?.visibility),
-    curveType: curveTypeCompat.toState(config.interpolation),
+    pointVisibility: hasLinesOrAreas
+      ? pointVisibilityCompat.toState(config.points?.visibility ?? DEFAULT_POINTS_VISIBILITY)
+      : undefined,
+    curveType: hasLinesOrAreas
+      ? curveTypeCompat.toState(config.interpolation ?? DEFAULT_LINES_INTERPOLATION)
+      : undefined,
     minBarHeight: config.bars?.minimum_height,
     ...(layerPresence.hasAreas
       ? {

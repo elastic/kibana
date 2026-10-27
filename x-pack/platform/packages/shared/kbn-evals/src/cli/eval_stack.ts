@@ -6,12 +6,17 @@
  */
 
 import Fs from 'fs';
+import Https from 'https';
 import Path from 'path';
 import { spawn } from 'child_process';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { resolveCcmApiKey } from '@kbn/es';
 import { scoutEvalsArgs } from './prompts';
+import { DEFAULT_SCOUT_TARGET, formatScoutTarget, type ScoutTarget } from './scout_target';
+import { assertServerlessPortsFree } from './scout_ports';
 import {
+  isAlive,
   isServiceRunning,
   isScoutStale,
   isEdotStale,
@@ -30,14 +35,52 @@ const SCOUT_READY_POLL_INTERVAL_MS = 3000;
 // Overridable via SCOUT_READY_TIMEOUT_MS env: cold-boot rspack compile (303
 // bundles) can exceed the 180s default on loaded eval VMs.
 const SCOUT_READY_TIMEOUT_MS = Number(process.env.SCOUT_READY_TIMEOUT_MS) || 180_000;
+// Serverless starts three ES containers (and may pull the image) before Kibana boots.
+const SERVERLESS_SCOUT_READY_TIMEOUT_MS = 600_000;
+const PROBE_TIMEOUT_MS = 2000;
 
-const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<void> => {
+/**
+ * Probes the Scout ES. Serverless ES serves https with the dev CA, which `fetch` does not trust,
+ * so https URLs are probed with that CA. Any HTTP response (including 401) counts as reachable.
+ */
+const probeScoutEs = async (esUrl: string): Promise<boolean> => {
+  if (!esUrl.startsWith('https:')) {
+    return probeHttp(esUrl);
+  }
+  return new Promise((resolve) => {
+    const request = Https.get(
+      esUrl,
+      { ca: Fs.readFileSync(CA_CERT_PATH), timeout: PROBE_TIMEOUT_MS },
+      (response) => {
+        response.resume();
+        resolve(true);
+      }
+    );
+    request.on('timeout', () => request.destroy());
+    request.on('error', () => resolve(false));
+  });
+};
+
+const waitForScoutReady = async (
+  repoRoot: string,
+  log: ToolingLog,
+  scoutPid: number,
+  timeoutMs: number
+): Promise<void> => {
   const configPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
   const startTime = Date.now();
   let esUrl: string | undefined;
   let kbnUrl: string | undefined;
 
-  while (Date.now() - startTime < SCOUT_READY_TIMEOUT_MS) {
+  while (Date.now() - startTime < timeoutMs) {
+    // A config set that throws exits Scout immediately; its error
+    // is already streamed above by tailLog, so fail now rather than after the full timeout.
+    if (!isAlive(scoutPid)) {
+      throw new Error(
+        `Scout exited before becoming ready. See the log above or: node scripts/evals logs --service scout`
+      );
+    }
+
     if (!esUrl && Fs.existsSync(configPath)) {
       try {
         const raw = Fs.readFileSync(configPath, 'utf-8');
@@ -51,7 +94,7 @@ const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<voi
 
     if (esUrl && kbnUrl) {
       const [esOk, kbnOk] = await Promise.all([
-        probeHttp(esUrl),
+        probeScoutEs(esUrl),
         probeHttp(`${kbnUrl}/api/status`),
       ]);
       if (esOk && kbnOk) {
@@ -62,7 +105,7 @@ const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<voi
     await new Promise((r) => setTimeout(r, SCOUT_READY_POLL_INTERVAL_MS));
   }
 
-  throw new Error(`Scout did not become ready within ${SCOUT_READY_TIMEOUT_MS / 1000}s`);
+  throw new Error(`Scout did not become ready within ${timeoutMs / 1000}s`);
 };
 
 /**
@@ -86,7 +129,10 @@ const probeScoutHealth = async (repoRoot: string): Promise<{ ok: boolean; reason
       return { ok: false, reason: 'hosts missing from local config' };
     }
 
-    const [esOk, kbnOk] = await Promise.all([probeHttp(esUrl), probeHttp(`${kbnUrl}/api/status`)]);
+    const [esOk, kbnOk] = await Promise.all([
+      probeScoutEs(esUrl),
+      probeHttp(`${kbnUrl}/api/status`),
+    ]);
 
     if (!esOk && !kbnOk) {
       return { ok: false, reason: `ES (${esUrl}) and Kibana (${kbnUrl}) are unreachable` };
@@ -158,7 +204,10 @@ export interface EnsureScoutOptions {
   gcsCredentials: string | undefined;
   tracingExporters: string | undefined;
   agentBuilderTracingExporters?: string | undefined;
+  /** Env from the suite's `scoutHook`, forwarded to Scout (see `runScoutHook`). */
+  suiteScoutEnv?: Record<string, string>;
   serverConfigSet?: string;
+  scoutTarget?: ScoutTarget;
 }
 
 /**
@@ -171,9 +220,11 @@ export const ensureScout = async ({
   gcsCredentials,
   tracingExporters,
   agentBuilderTracingExporters,
+  suiteScoutEnv,
   serverConfigSet = 'evals_tracing',
+  scoutTarget = DEFAULT_SCOUT_TARGET,
 }: EnsureScoutOptions): Promise<void> => {
-  const scoutEnv: Record<string, string> = {};
+  const scoutEnv: Record<string, string> = { ...suiteScoutEnv };
   if (gcsCredentials) {
     scoutEnv.GCS_CREDENTIALS = gcsCredentials;
   }
@@ -186,7 +237,7 @@ export const ensureScout = async ({
 
   const scoutAlive = isServiceRunning(repoRoot, 'scout');
   const staleCheck = scoutAlive
-    ? isScoutStale(repoRoot, serverConfigSet, scoutEnv)
+    ? isScoutStale(repoRoot, serverConfigSet, scoutEnv, scoutTarget)
     : { stale: false };
 
   if (staleCheck.stale) {
@@ -210,22 +261,31 @@ export const ensureScout = async ({
     return;
   }
 
+  if (scoutTarget.arch === 'serverless') {
+    await assertServerlessPortsFree();
+  }
+
   const scoutConfigPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
   if (Fs.existsSync(scoutConfigPath)) {
     Fs.unlinkSync(scoutConfigPath);
   }
 
-  log.info(`[scout] Starting Scout server (backgrounded, stateful/classic, ${serverConfigSet})...`);
+  log.info(
+    `[scout] Starting Scout server (backgrounded, ${formatScoutTarget(
+      scoutTarget
+    )}, ${serverConfigSet})...`
+  );
 
-  startService(
+  const scoutPid = startService(
     repoRoot,
     'scout',
     'node',
-    ['scripts/scout.js', ...scoutEvalsArgs(serverConfigSet)],
+    ['scripts/scout.js', ...scoutEvalsArgs(serverConfigSet, scoutTarget)],
     log,
     {
       connectorsHash: connectorsHash(),
       serverConfigSet,
+      scoutTarget,
       envHash: scoutEnvHash(scoutEnv),
       env: Object.keys(scoutEnv).length > 0 ? scoutEnv : undefined,
     }
@@ -233,20 +293,33 @@ export const ensureScout = async ({
 
   const stopTail = tailLog(repoRoot, 'scout', log, { fromStart: true });
   log.info('[scout] Waiting for ES + Kibana to be ready...');
-  await waitForScoutReady(repoRoot, log);
-  stopTail();
+  try {
+    await waitForScoutReady(
+      repoRoot,
+      log,
+      scoutPid,
+      scoutTarget.arch === 'serverless' ? SERVERLESS_SCOUT_READY_TIMEOUT_MS : SCOUT_READY_TIMEOUT_MS
+    );
+  } finally {
+    stopTail();
+  }
   log.info('[scout] Scout server ready');
 };
 
 export interface EnsureEisCcmOptions {
   repoRoot: string;
   log: ToolingLog;
+  scoutTarget?: ScoutTarget;
 }
 
 /**
  * Enables EIS (Cloud Connected Mode).
  */
-export const ensureEisCcm = async ({ repoRoot, log }: EnsureEisCcmOptions): Promise<void> => {
+export const ensureEisCcm = async ({
+  repoRoot,
+  log,
+  scoutTarget = DEFAULT_SCOUT_TARGET,
+}: EnsureEisCcmOptions): Promise<void> => {
   log.info('[eis-ccm] Enabling EIS (Cloud Connected Mode)...');
   const ccmApiKey = await resolveCcmApiKey(log);
 
@@ -256,7 +329,12 @@ export const ensureEisCcm = async ({ repoRoot, log }: EnsureEisCcmOptions): Prom
     {
       cwd: repoRoot,
       stdio: 'inherit',
-      env: { ...process.env, KIBANA_EIS_CCM_API_KEY: ccmApiKey },
+      env: {
+        ...process.env,
+        KIBANA_EIS_CCM_API_KEY: ccmApiKey,
+        // Serverless Scout ES serves https with the dev CA.
+        ...(scoutTarget.arch === 'serverless' ? { NODE_EXTRA_CA_CERTS: CA_CERT_PATH } : {}),
+      },
     }
   );
 
@@ -278,7 +356,9 @@ export interface EnsureEvalStackOptions {
   repoRoot: string;
   log: ToolingLog;
   profileEnvOverrides: Record<string, string>;
+  suiteScoutEnv?: Record<string, string>;
   serverConfigSet?: string;
+  scoutTarget?: ScoutTarget;
   requiresEisCcm: boolean;
 }
 
@@ -290,7 +370,9 @@ export const ensureEvalStack = async ({
   repoRoot,
   log,
   profileEnvOverrides,
+  suiteScoutEnv,
   serverConfigSet = 'evals_tracing',
+  scoutTarget,
   requiresEisCcm,
 }: EnsureEvalStackOptions): Promise<void> => {
   await ensureEdot({ repoRoot, log, elasticsearchHost: profileEnvOverrides.TRACING_ES_URL });
@@ -301,11 +383,13 @@ export const ensureEvalStack = async ({
     gcsCredentials: profileEnvOverrides.GCS_CREDENTIALS,
     tracingExporters: profileEnvOverrides.TRACING_EXPORTERS,
     agentBuilderTracingExporters: profileEnvOverrides.AGENT_BUILDER_TRACING_EXPORTERS,
+    suiteScoutEnv,
     serverConfigSet,
+    scoutTarget,
   });
 
   if (requiresEisCcm) {
-    await ensureEisCcm({ repoRoot, log });
+    await ensureEisCcm({ repoRoot, log, scoutTarget });
   } else {
     log.info('[eis-ccm] Skipping EIS CCM (no eis- judge/models selected)');
   }

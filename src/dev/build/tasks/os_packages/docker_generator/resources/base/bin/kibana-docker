@@ -87,6 +87,7 @@ kibana_vars=(
     externalUrl.policy
     i18n.allowLocaleCookie
     i18n.defaultLocale
+    i18n.detectBrowserLocale
     i18n.locale
     i18n.locales
     interactiveSetup.enabled
@@ -429,6 +430,7 @@ kibana_vars=(
     xpack.security.loginHelp
     xpack.security.sameSiteCookies
     xpack.security.secureCookies
+    xpack.security.serviceAccounts.enabled
     xpack.security.serviceAccounts.requestLifetime
     xpack.security.session.cleanupInterval
     xpack.security.session.concurrentSessions.maxSessions
@@ -448,6 +450,7 @@ kibana_vars=(
     xpack.spaces.maxSpaces
     xpack.spaces.defaultSolution
     xpack.task_manager.capacity
+    xpack.task_manager.claim_nudge.enabled
     xpack.task_manager.claim_strategy
     xpack.task_manager.auto_calculate_default_ech_capacity
     xpack.task_manager.discovery.active_nodes_lookback

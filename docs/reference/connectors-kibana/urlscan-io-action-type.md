@@ -11,9 +11,11 @@ applies_to:
 
 The URLScan.io connector gives a workflow or agent a verdict on a suspicious URL, plus the full list of everything the page contacted. Point it at a domain and it returns prior sightings from a corpus of hundreds of millions of scans. Submit a URL and URLScan.io loads it in an instrumented browser, then reports whether it looks malicious, which brand it impersonates, and every domain, IP, ASN, and file hash it touched. This is the enrichment and detonation step behind phishing triage.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Overview
 
-This is a **custom connector** that calls the [URLScan.io API](https://urlscan.io/docs/api/) over HTTPS.
+The URLScan.io connector calls the [URLScan.io API](https://urlscan.io/docs/api/) over HTTPS.
 
 Reads are trimmed on purpose. A raw scan result runs into hundreds of kilobytes, because it embeds every HTTP transaction with its headers and timings; each action returns the verdict, page identity, contacted indicators, and file hashes instead, which is what an analyst or an agent reasons over.
 

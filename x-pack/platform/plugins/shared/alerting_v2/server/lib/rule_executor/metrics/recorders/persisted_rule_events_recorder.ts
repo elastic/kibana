@@ -8,7 +8,10 @@
 import { injectable } from 'inversify';
 import type { MetricCollectorWriter, MetricRecorder, MetricRecorderContext } from '../types';
 import { RULE_EXECUTION_COUNTERS } from '../counters';
-import { alertEventType, type AlertEvent } from '../../../../resources/datastreams/alert_events';
+import {
+  alertEventType,
+  type AlertEventDocument,
+} from '../../../../resources/datastreams/alert_events';
 
 /**
  * Domain-aware {@link MetricRecorder} that translates a bulk-write
@@ -22,12 +25,14 @@ import { alertEventType, type AlertEvent } from '../../../../resources/datastrea
  * - `newEpisodesGenerated` is the one metric that needs a second input: which
  *   episodes are *new* is the director's knowledge, not a property of the doc.
  *   `DirectorStep` threads the freshly-opened episode ids on
- *   `state.newEpisodeIds`; here we count the persisted docs whose `episode.id`
- *   is one of them. A new episode whose rule event failed to index is absent
- *   from `docs`, so it is correctly not counted.
+ *   `state.newEpisodeIds`; here we count the *distinct* new `episode.id`s that
+ *   landed in `docs`. Counting distinct ids (not docs) matters for single-series
+ *   (ungrouped) rules, where many rule events of one run share one new episode
+ *   id — that is one new episode, not one per row. A new episode whose rule
+ *   event failed to index is absent from `docs`, so it is correctly not counted.
  *
  * Observes only `store_alert_events`, so the docs array is always an
- * `AlertEvent[]` at runtime (the emission-meta type widens to
+ * `AlertEventDocument[]` at runtime (the emission-meta type widens to
  * `Record<string, unknown>` at the framework layer for reasons independent
  * of this recorder — see `EmissionObservations`). The narrow cast at
  * consumption is honest: the recorder's `observes` contract pins the
@@ -44,25 +49,33 @@ export class PersistedRuleEventsRecorder implements MetricRecorder {
       return;
     }
 
-    const persistedDocs = bulkIndexResult.docs as readonly AlertEvent[];
+    const persistedDocs = bulkIndexResult.docs as readonly AlertEventDocument[];
 
     collector.increment(RULE_EXECUTION_COUNTERS.ruleEventsGenerated, persistedDocs.length);
 
-    const newEpisodeIds = state.newEpisodeIds ? new Set(state.newEpisodeIds) : undefined;
-
     let signalsCount = 0;
-    let newEpisodesCount = 0;
+    const persistedEpisodeIds = new Set<string>();
     for (const doc of persistedDocs) {
       if (doc.type === alertEventType.signal) {
         signalsCount += 1;
       }
-      if (newEpisodeIds && doc.episode && newEpisodeIds.has(doc.episode.id)) {
-        newEpisodesCount += 1;
+      if (doc.alert) {
+        persistedEpisodeIds.add(doc.alert.id);
       }
     }
 
     if (signalsCount > 0) {
       collector.increment(RULE_EXECUTION_COUNTERS.signalsGenerated, signalsCount);
+    }
+
+    // Count episodes, not docs: a single-series rule writes many docs that share
+    // one new episode id, and that is one new episode. A new episode counts once
+    // if any of its docs landed, and not at all if they all failed to index.
+    let newEpisodesCount = 0;
+    for (const episodeId of new Set(state.newEpisodeIds)) {
+      if (persistedEpisodeIds.has(episodeId)) {
+        newEpisodesCount += 1;
+      }
     }
 
     if (newEpisodesCount > 0) {

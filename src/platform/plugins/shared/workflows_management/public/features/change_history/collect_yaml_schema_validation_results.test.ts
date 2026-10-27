@@ -8,6 +8,7 @@
  */
 
 import { monaco } from '@kbn/code-editor';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import {
   collectYamlSchemaValidationResults,
   mergeWorkflowYamlValidationResults,
@@ -15,7 +16,6 @@ import {
 import { getWorkflowZodSchema } from '../../../common/schema';
 import { performComputation } from '../../entities/workflows/store/workflow_detail/utils/computation';
 import { triggerSchemas } from '../../trigger_schemas';
-import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
 
 describe('collectYamlSchemaValidationResults', () => {
   const workflowZodSchema = getWorkflowZodSchema(

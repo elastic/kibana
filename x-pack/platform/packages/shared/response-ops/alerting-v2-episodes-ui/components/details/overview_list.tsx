@@ -12,6 +12,7 @@ import {
   EuiBadgeGroup,
   EuiDescriptionList,
   EuiLink,
+  EuiSkeletonText,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -21,15 +22,16 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
 import { AlertingEpisodeGroupingTags } from '../grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeAssigneeCell } from '../assignee_cell';
+import { UserProfileDisplay } from '../user_profile_display';
 import { EMPTY_VALUE } from '../../constants';
 import { formatDateTime } from '../../utils/format_date_time';
 import { isEpisodeSnoozed } from '../../utils/is_episode_snoozed';
 import * as i18n from './translations';
 
 /**
- * Controls the grouping row, which is derived from the rule.
+ * Controls the grouping row, which is derived from the rule and the alert data.
  */
-export type GroupingRowStatus = 'visible' | 'hidden' | 'error';
+export type GroupingRowStatus = 'visible' | 'hidden' | 'loading' | 'error';
 
 export interface AlertEpisodeOverviewListProps {
   groupingFields: string[];
@@ -61,9 +63,9 @@ export const AlertEpisodeOverviewList = ({
 }: AlertEpisodeOverviewListProps) => {
   const { euiTheme } = useEuiTheme();
   const isAcked = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
-  const isResolved = groupAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
-  const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozeExpiry);
-  const tags = groupAction?.tags ?? [];
+  const isResolved = episodeAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
+  const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozedUntil);
+  const tags = episodeAction?.tags ?? [];
   // Caller-controlled (data.alert_url from external ingest). Restrict to absolute
   // http(s) before putting into href — blocks javascript:/data: stored XSS.
   const rawAlertUrl =
@@ -100,6 +102,12 @@ export const AlertEpisodeOverviewList = ({
                     >
                       {i18n.METADATA_LIST_GROUPING_ERROR}
                     </EuiText>
+                  ) : groupingStatus === 'loading' ? (
+                    <EuiSkeletonText
+                      lines={1}
+                      size="s"
+                      data-test-subj="alertingV2EpisodeDetailsOverviewListGroupingLoading"
+                    />
                   ) : (
                     <AlertingEpisodeGroupingTags
                       fields={groupingFields}
@@ -166,8 +174,8 @@ export const AlertEpisodeOverviewList = ({
               {
                 title: i18n.ACTIONS_OVERVIEW_ACKNOWLEDGED_BY,
                 description: (
-                  <AlertEpisodeAssigneeCell
-                    assigneeUid={episodeAction?.lastAckActor}
+                  <UserProfileDisplay
+                    userProfileUid={episodeAction?.lastAckActor}
                     userProfile={userProfile}
                   />
                 ),
@@ -179,8 +187,8 @@ export const AlertEpisodeOverviewList = ({
               {
                 title: i18n.ACTIONS_OVERVIEW_RESOLVED_BY,
                 description: (
-                  <AlertEpisodeAssigneeCell
-                    assigneeUid={groupAction?.lastDeactivateActor}
+                  <UserProfileDisplay
+                    userProfileUid={episodeAction?.lastDeactivateActor}
                     userProfile={userProfile}
                   />
                 ),
@@ -192,16 +200,16 @@ export const AlertEpisodeOverviewList = ({
               {
                 title: i18n.ACTIONS_OVERVIEW_SNOOZED_BY,
                 description: (
-                  <AlertEpisodeAssigneeCell
-                    assigneeUid={groupAction?.lastSnoozeActor}
+                  <UserProfileDisplay
+                    userProfileUid={groupAction?.lastSnoozeActor}
                     userProfile={userProfile}
                   />
                 ),
               },
               {
                 title: i18n.ACTIONS_OVERVIEW_SNOOZED_UNTIL,
-                description: groupAction?.snoozeExpiry
-                  ? formatDateTime(groupAction.snoozeExpiry, dateFormat)
+                description: groupAction?.snoozedUntil
+                  ? formatDateTime(groupAction.snoozedUntil, dateFormat)
                   : EMPTY_VALUE,
               },
             ]

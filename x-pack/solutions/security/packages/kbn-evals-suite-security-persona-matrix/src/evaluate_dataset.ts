@@ -354,7 +354,9 @@ export const createPersonaMatrixSkillInvokedEvaluator = ({
 
     const skillPredicate = acceptedSkills
       .flatMap((skillName) => [
-        `attributes.gen_ai.tool.call.arguments LIKE "*\\\"skill\\\":\\\"${skillName}\\\"*"`,
+        // Current `load_skill` args: {"skill":"<id>"} (some models pass the bare id).
+        `attributes.gen_ai.tool.call.arguments LIKE "*\\"${skillName}\\"*"`,
+        // Legacy / path-style args: {"skill":"/skills/<category>/<id>/SKILL.md"}.
         `attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*"`,
       ])
       .join(' OR ');

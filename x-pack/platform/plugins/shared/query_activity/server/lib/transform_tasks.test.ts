@@ -204,6 +204,36 @@ describe('isQueryTaskCandidate', () => {
       )
     ).toBe(false);
   });
+
+  it('excludes child tasks when their parent is still in the task list', () => {
+    expect(
+      isQueryTaskCandidate(
+        { ...baseTask, parent_task_id: 'node1:99' },
+        DEFAULT_THRESHOLD_NANOS,
+        new Set(['node1:99'])
+      )
+    ).toBe(false);
+  });
+
+  it('includes orphaned child tasks when their parent is no longer in the task list', () => {
+    expect(
+      isQueryTaskCandidate(
+        { ...baseTask, parent_task_id: 'node1:99' },
+        DEFAULT_THRESHOLD_NANOS,
+        new Set(['node1:100'])
+      )
+    ).toBe(true);
+  });
+
+  it('includes orphaned child tasks when the active task set is empty', () => {
+    expect(
+      isQueryTaskCandidate(
+        { ...baseTask, parent_task_id: 'node1:99' },
+        DEFAULT_THRESHOLD_NANOS,
+        new Set()
+      )
+    ).toBe(true);
+  });
 });
 
 describe('transformTaskSummaries', () => {
@@ -267,9 +297,54 @@ describe('transformTasks', () => {
     });
   });
 
-  it('filters out child tasks', () => {
-    const child: TasksTaskInfo = { ...baseTask, parent_task_id: 'node1:50' };
-    expect(transformTasks([child], DEFAULT_THRESHOLD_NANOS)).toHaveLength(0);
+  it('filters out child tasks while their parent is still present', () => {
+    const parent: TasksTaskInfo = {
+      ...baseTask,
+      id: 50,
+      description:
+        'indices[test], search_type[QUERY_THEN_FETCH], source[{"query":{"match_all":{}}}]',
+    };
+    const child: TasksTaskInfo = {
+      ...baseTask,
+      id: 100,
+      parent_task_id: 'node1:50',
+      description:
+        'async_search{indices[logs-*], search_type[QUERY_THEN_FETCH], source[{"query":{"term":{"status":"ok"}}}]}',
+    };
+
+    const results = transformTasks([parent, child], DEFAULT_THRESHOLD_NANOS);
+    expect(results).toHaveLength(1);
+    expect(results[0].taskId).toBe('node1:50');
+  });
+
+  it('includes orphaned child tasks after their parent has finished', () => {
+    const orphanedChild: TasksTaskInfo = {
+      ...baseTask,
+      id: 100,
+      parent_task_id: 'node1:50',
+      description:
+        'async_search{indices[logs-*], search_type[QUERY_THEN_FETCH], source[{"query":{"term":{"status":"ok"}}}]}',
+      headers: {
+        'X-Opaque-Id':
+          'req;kibana:application:dashboards:system_otel;application:dashboards:system_otel',
+      },
+    };
+    const shardChild: TasksTaskInfo = {
+      ...baseTask,
+      id: 101,
+      parent_task_id: 'node1:100',
+      action: 'indices:data/read/search[phase/query]',
+      description: 'shardId[[logs-000001][0]]',
+    };
+
+    const results = transformTasks([orphanedChild, shardChild], DEFAULT_THRESHOLD_NANOS);
+    expect(results).toHaveLength(1);
+    expect(results[0]).toMatchObject({
+      taskId: 'node1:100',
+      queryType: 'DSL',
+      source: 'Dashboards',
+      query: '{"query":{"term":{"status":"ok"}}}',
+    });
   });
 
   it('handles an empty tasks array', () => {

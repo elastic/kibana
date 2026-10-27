@@ -9,16 +9,10 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
 import type { ExportJsonFlyoutContent } from '@kbn/as-code-export-flyout-component';
-import {
-  DISCOVER_SESSION_API_ACCESS,
-  DISCOVER_SESSION_API_BASE_PATH,
-  DISCOVER_SESSION_API_VERSION,
-} from '../../../../../../common/constants';
-import type {
-  DiscoverSessionApiData,
-  DiscoverSessionSanitizeRequest,
-} from '../../../../../../server';
+import { DISCOVER_SESSION_API_BASE_PATH } from '../../../../../../common/constants';
+import type { DiscoverSessionSanitizeRequest } from '../../../../../../server';
 import { ExportDiscoverSessionJsonFlyout } from './json_flyout';
 
 type MockExportJsonFlyoutContentProps = React.ComponentProps<typeof ExportJsonFlyoutContent>;
@@ -87,7 +81,6 @@ describe('Discover export JSON flyout', () => {
         objectType: 'Discover session',
         getExportJson: expect.any(Function),
         dataTestSubjPrefix: 'discover',
-        isTechnicalPreview: true,
       })
     );
 
@@ -125,11 +118,7 @@ describe('Discover export JSON flyout', () => {
       })
     );
 
-    // Remove `apiVersion` from the Console request when the API becomes public.
-    expect(DISCOVER_SESSION_API_ACCESS).toBe('internal');
-    expect(openInConsole?.getRequest('{}')).toBe(
-      `POST kbn:${DISCOVER_SESSION_API_BASE_PATH}?apiVersion=${DISCOVER_SESSION_API_VERSION}\n{}`
-    );
+    expect(openInConsole?.getRequest('{}')).toBe(`POST kbn:${DISCOVER_SESSION_API_BASE_PATH}\n{}`);
   });
 
   it('exports the whole session by default and can export only the current tab', () => {

@@ -74,7 +74,7 @@ const LogsApp: React.FC<{
   isLogsExplorerAccessible,
 }) => {
   const { logs } = core.application.capabilities;
-  const infraCPSEnabled = core.featureFlags.getBooleanValue(
+  const infraCPSEnabled = core.featureFlags.useBooleanValue(
     OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
     OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT
   );

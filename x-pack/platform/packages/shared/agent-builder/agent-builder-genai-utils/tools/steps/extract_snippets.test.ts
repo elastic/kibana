@@ -323,4 +323,39 @@ describe('extractSnippetsBatch', () => {
       expect(query).toContain('{"num_snippets": 5, "num_words": 200}');
     });
   });
+
+  describe('frozen tier', () => {
+    it('leaves the frozen tier exclusion to executeEsql by default', async () => {
+      executeEsqlMock.mockResolvedValue({ columns: [], values: [] });
+
+      await extractSnippetsBatch({
+        index: 'my-index',
+        docIds: ['doc1'],
+        term: 'test',
+        fields: [textField('title')],
+        config: defaultConfig,
+        esClient: createMockEsClient(),
+        logger: createMockLogger(),
+      });
+
+      expect(executeEsqlMock.mock.calls[0][0].includeFrozen).toBe(false);
+    });
+
+    it('forwards includeFrozen to executeEsql', async () => {
+      executeEsqlMock.mockResolvedValue({ columns: [], values: [] });
+
+      await extractSnippetsBatch({
+        index: 'my-index',
+        docIds: ['doc1'],
+        term: 'test',
+        fields: [textField('title')],
+        config: defaultConfig,
+        includeFrozen: true,
+        esClient: createMockEsClient(),
+        logger: createMockLogger(),
+      });
+
+      expect(executeEsqlMock.mock.calls[0][0].includeFrozen).toBe(true);
+    });
+  });
 });

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
@@ -12,7 +12,6 @@ import { Redirect } from 'react-router-dom';
 import { DisabledCallout } from '../management/disabled_callout';
 import { FilterGroup } from '../common/monitor_filters/filter_group';
 import { SelectedFilterPills } from '../common/monitor_filters/selected_filter_pills';
-import { OverviewAlerts } from './overview/overview_alerts';
 import { useEnablement } from '../../../hooks';
 import {
   selectOverviewPageState,
@@ -30,12 +29,21 @@ import { useOverviewStatus } from '../hooks/use_overview_status';
 import { useSyncOverviewDateRange } from '../common/use_sync_overview_date_range';
 import { useOverviewBreadcrumbs } from './use_breadcrumbs';
 import { OverviewGrid } from './overview/overview_grid';
-import { OverviewStatus } from './overview/overview_status';
+import {
+  DONUT_PANEL_MIN_WIDTH,
+  getStoredOverviewStatusView,
+  OverviewStatus,
+  STATS_PANEL_MIN_WIDTH,
+} from './overview/overview_status';
 import { QuickFilters } from './overview/quick_filters';
 import { SearchField } from '../common/search_field';
 import { NoMonitorsFound } from '../common/no_monitors_found';
-import { OverviewErrors } from './overview/overview_errors/overview_errors';
+import {
+  OverviewActivityChart,
+  useOverviewActivityStats,
+} from './overview/overview_activity_chart';
 import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
+import { BrowserCompleteAgentOverviewCallout } from '../../common/components/browser_complete_agent_overview_callout';
 import { useSyntheticsPageReady } from '../../../hooks/use_synthetics_page_ready';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../../common/constants/synthetics/client_defaults';
 import { LastRefreshed } from '../../common/components/last_refreshed';
@@ -58,6 +66,8 @@ export const OverviewPage: React.FC = () => {
   useSyncOverviewDateRange();
 
   const view = useSelector(selectOverviewView);
+  const activityStats = useOverviewActivityStats();
+  const [statusView, setStatusView] = useState(getStoredOverviewStatusView);
 
   const dispatch = useDispatch();
 
@@ -100,8 +110,14 @@ export const OverviewPage: React.FC = () => {
   // filter that excludes every monitor makes `allConfigs` empty even when monitors exist.
   // The date range is intentionally excluded: it scopes each monitor's status, not which
   // monitors exist, so it must not suppress the Getting Started redirect.
+  // Hiding autodiscovered monitors is a client filter, not a URL param. With only
+  // Heartbeat monitors it empties `allConfigs`, and the display-options toggle
+  // lives on the grid — treat it as active so we stay on Overview and can turn
+  // them back on.
+  const heartbeatMonitorsHidden = pageState.includeHeartbeatMonitors === false;
   const hasActiveOverviewFilter = Boolean(
-    pageState.query ||
+    heartbeatMonitorsHidden ||
+      pageState.query ||
       pageState.tags?.length ||
       pageState.locations?.length ||
       pageState.monitorTypes?.length ||
@@ -146,7 +162,8 @@ export const OverviewPage: React.FC = () => {
     return <Redirect to={MONITORS_ROUTE} />;
   }
 
-  const hasMonitors = !(monitorsLoaded && overviewLoaded && allConfigs?.length === 0);
+  const hasMonitors =
+    heartbeatMonitorsHidden || !(monitorsLoaded && overviewLoaded && allConfigs?.length === 0);
 
   return (
     <MonitorsListingPage
@@ -159,6 +176,7 @@ export const OverviewPage: React.FC = () => {
       }
     >
       <DisabledCallout total={absoluteTotal} />
+      <BrowserCompleteAgentOverviewCallout />
       <AlertingCallout />
       <EuiFlexGroup gutterSize="s" wrap={true}>
         <EuiFlexItem>
@@ -176,14 +194,20 @@ export const OverviewPage: React.FC = () => {
       {hasMonitors ? (
         <>
           <EuiFlexGroup gutterSize="m" wrap>
-            <EuiFlexItem grow={false}>
-              <OverviewStatus />
+            <EuiFlexItem
+              grow={false}
+              css={{
+                minWidth: statusView === 'donut' ? DONUT_PANEL_MIN_WIDTH : STATS_PANEL_MIN_WIDTH,
+              }}
+            >
+              <OverviewStatus
+                extraStats={activityStats}
+                areStatsClickable
+                onStatusViewChange={setStatusView}
+              />
             </EuiFlexItem>
-            <EuiFlexItem grow={3} css={{ minWidth: 300 }}>
-              <OverviewErrors />
-            </EuiFlexItem>
-            <EuiFlexItem grow={3} css={{ minWidth: 300 }}>
-              <OverviewAlerts />
+            <EuiFlexItem grow={1} css={{ minWidth: 500 }}>
+              <OverviewActivityChart />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />

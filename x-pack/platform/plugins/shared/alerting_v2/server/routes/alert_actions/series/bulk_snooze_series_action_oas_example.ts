@@ -8,11 +8,12 @@
 import type { BulkResponse, BulkSnoozeSeriesActionBody } from '@kbn/alerting-v2-schemas';
 import { buildOasOperation, invalidResponseExample } from '../../oas_utils';
 import type { AlertingOasOperationObject } from '../../oas_types';
+import { SAMPLE_OTHER_SERIES_ID, SAMPLE_SERIES_ID } from '../alert_oas_shared_examples';
 
 export const BULK_SNOOZE_SERIES_ACTION_REQUEST: BulkSnoozeSeriesActionBody = {
   items: [
-    { group_hash: 'group-hash-1', expiry: '2026-01-16T12:00:00.000Z' },
-    { group_hash: 'group-hash-2' },
+    { series_id: SAMPLE_SERIES_ID, snoozed_until: '2099-01-16T12:00:00.000Z' },
+    { series_id: SAMPLE_OTHER_SERIES_ID },
   ],
 };
 

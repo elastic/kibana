@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -21,11 +21,13 @@ import { hasRuleMigrationPrivileges } from '../common/privileges';
 import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
 import { SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID } from './tool_ids';
 
-const schema = z.object({
-  migration_id: NonEmptyString.describe(
-    'The id of the rule migration whose translation stats to retrieve.'
-  ),
-});
+const schema = lazySchema(() =>
+  z.object({
+    migration_id: NonEmptyString.describe(
+      'The id of the rule migration whose translation stats to retrieve.'
+    ),
+  })
+);
 
 const buildPath = (migrationId: string): string =>
   SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH.replace(
@@ -78,12 +80,13 @@ Returns { id, rules: { total, success: { total, result: { full, partial, untrans
 
 Field meanings:
 - \`result.full\` = fully translated (ready to install)
-- \`result.partial\` = partially translated (review needed)
+- \`result.partial\` = partially translated (review needed) which can be because of 2 reasons:
+  1. \`missing_index\` = query has a placeholder(\`[indexPattern]\`) for a missing index pattern
+  2. \`missing resources\` = query has a macro or a lookup placeholder for splunk which means resources are missing.
 - \`result.untranslatable\` = could not be translated
 - \`installable\` = successfully translated and installable
 - \`prebuilt\` = matched an Elastic prebuilt rule
-- \`missing_index\` = query has a placeholder for a missing index pattern
-- \`failed\` = translation errored
+- \`failed\` = translation errored for some error. Error available in migration stats -> last_execution -> error
 
 A migration with zero rule items returns the same shape with all counts 0 (204 No Content normalized to a stable shape).
 

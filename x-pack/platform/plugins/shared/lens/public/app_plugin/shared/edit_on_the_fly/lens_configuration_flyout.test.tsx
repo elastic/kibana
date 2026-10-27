@@ -24,6 +24,12 @@ import type { TypedLensSerializedState } from '@kbn/lens-common';
 import * as getApplicationUserMessagesModule from '../../get_application_user_messages';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
+import { trackCreateUiCounterEvents } from '../../../lens_ui_telemetry';
+
+jest.mock('../../../lens_ui_telemetry', () => ({
+  ...jest.requireActual('../../../lens_ui_telemetry'),
+  trackCreateUiCounterEvents: jest.fn(),
+}));
 
 const createAddContextMock = () => {
   return jest
@@ -34,6 +40,10 @@ const createAddContextMock = () => {
       </CoreEnvContextProvider>
     ));
 };
+
+jest.mock('../../../data_views_service/create_esql_ad_hoc_data_view', () => ({
+  createEsqlAdHocDataView: jest.fn().mockResolvedValue({}),
+}));
 
 jest.mock('@kbn/esql-utils', () => {
   return {
@@ -66,7 +76,6 @@ jest.mock('@kbn/esql-utils', () => {
       },
     }),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
-    getESQLAdHocDataview: jest.fn().mockResolvedValue({}),
     formatESQLColumns: jest.fn().mockReturnValue([
       {
         name: '@timestamp',
@@ -313,8 +322,8 @@ describe('LensEditConfigurationFlyout', () => {
       state: {
         ...lensAttributes.state,
         datasourceStates: {
-          formBased: mockFormBasedStateChanged,
-          textBased: mockTextBasedState,
+          formBased: mockFormBasedState,
+          textBased: mockTextBasedStateChanged,
         },
       },
     } as unknown as TypedLensSerializedState['attributes'];
@@ -326,13 +335,13 @@ describe('LensEditConfigurationFlyout', () => {
     await userEvent.click(screen.getByTestId('cancelFlyoutButton'));
 
     expect(updatePanelStateSpy).toHaveBeenCalledWith(
-      mockFormBasedStateChanged,
+      mockTextBasedStateChanged,
       expect.anything(),
       undefined,
-      'formBased',
+      'textBased',
       {
-        formBased: { isLoading: false, state: mockFormBasedStateChanged },
-        textBased: { isLoading: false, state: mockTextBasedState },
+        formBased: { isLoading: false, state: mockFormBasedState },
+        textBased: { isLoading: false, state: mockTextBasedStateChanged },
       }
     );
   });
@@ -386,13 +395,61 @@ describe('LensEditConfigurationFlyout', () => {
       title: 'test',
       visualizationType: 'testVis',
       state: {
-        datasourceStates: { formBased: mockFormBasedState, textBased: mockTextBasedState },
+        adHocDataViews: {},
+        internalReferences: [],
+        // the empty formBased state is dropped so consumers don't misdetect the
+        // chart's datasource from serialized attributes
+        datasourceStates: { textBased: mockTextBasedState },
         visualization: {},
         filters: [],
       },
       filters: [],
       query: { esql: 'from index1 | limit 10' },
-      references: [],
+      // references from non-adhoc data views are kept even in ES|QL mode so that
+      // form-based layers (reference lines, query annotations) keep their data view
+      references: [
+        { type: 'index-pattern', id: 'mockip', name: 'mockip' },
+        { type: 'index-pattern', id: 'mockip', name: 'mockip' },
+      ],
+    });
+  });
+
+  describe('create telemetry', () => {
+    beforeEach(() => {
+      jest.mocked(trackCreateUiCounterEvents).mockClear();
+    });
+
+    const dashboardParentApi = { executionContext: { type: 'dashboard' } };
+
+    it('should track an ES|QL creation when a new panel is applied', async () => {
+      await renderConfigFlyout(
+        { isNewPanel: true, parentApi: dashboardParentApi, attributes: esqlLensAttributes },
+        { esql: 'from index1 | limit 10' }
+      );
+      await userEvent.click(screen.getByTestId('applyFlyoutButton'));
+      expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
+      expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('esql', 'dashboards');
+    });
+
+    it('should track a DSL creation when a new form-based panel is applied', async () => {
+      await renderConfigFlyout({ isNewPanel: true, parentApi: dashboardParentApi }, undefined, {
+        datasourceStates: {
+          formBased: { isLoading: false, state: mockFormBasedStateChanged },
+          textBased: { isLoading: false, state: { layers: {} } },
+        },
+      });
+      await userEvent.click(screen.getByTestId('applyFlyoutButton'));
+      expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
+      expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl', 'dashboards');
+    });
+
+    it('should not track a creation when an existing panel is applied', async () => {
+      await renderConfigFlyout(
+        { attributes: esqlLensAttributes },
+        { esql: 'from index1 | limit 10' }
+      );
+      await userEvent.click(screen.getByTestId('applyFlyoutButton'));
+      expect(trackCreateUiCounterEvents).not.toHaveBeenCalled();
     });
   });
 
@@ -452,6 +509,61 @@ describe('LensEditConfigurationFlyout', () => {
     expect(screen.getByTestId('InlineEditingSuggestions')).toBeInTheDocument();
   });
 
+  // Suggestions are single-layer: applying one drops the other layers
+  // (annotations, reference lines), so the panel is hidden for multi-layer
+  // ES|QL charts edited via layer tabs.
+  it('should not display the suggestions for a multi-layer ES|QL chart', async () => {
+    const getLayerIdsMock = jest.mocked(visualizationMap.testVis.getLayerIds);
+    getLayerIdsMock.mockReturnValue(['layer1', 'layer2']);
+    try {
+      await renderConfigFlyout(
+        { attributes: esqlLensAttributes },
+        { esql: 'from index1 | limit 10' },
+        {
+          datasourceStates: {
+            formBased: { isLoading: false, state: mockFormBasedState },
+            textBased: { isLoading: false, state: { layers: {} } },
+          },
+          activeDatasourceId: 'textBased',
+        }
+      );
+      expect(screen.getByTestId('InlineEditingESQLEditor')).toBeInTheDocument();
+      expect(screen.queryByTestId('InlineEditingSuggestions')).toBeNull();
+    } finally {
+      getLayerIdsMock.mockImplementation(() => ['layer1']);
+    }
+  });
+
+  // Hidden layers (e.g. the metric trendline) do not render as tabs and must
+  // not hide the suggestions panel.
+  it('should display the suggestions for an ES|QL chart with an extra hidden layer', async () => {
+    const getLayerIdsMock = jest.mocked(visualizationMap.testVis.getLayerIds);
+    const getConfigurationMock = jest.mocked(visualizationMap.testVis.getConfiguration);
+    const originalGetConfiguration = getConfigurationMock.getMockImplementation();
+    getLayerIdsMock.mockReturnValue(['layer1', 'trendline']);
+    getConfigurationMock.mockImplementation((props) => ({
+      ...originalGetConfiguration!(props),
+      hidden: props.layerId === 'trendline',
+    }));
+    try {
+      await renderConfigFlyout(
+        { attributes: esqlLensAttributes },
+        { esql: 'from index1 | limit 10' },
+        {
+          datasourceStates: {
+            formBased: { isLoading: false, state: mockFormBasedState },
+            textBased: { isLoading: false, state: { layers: {} } },
+          },
+          activeDatasourceId: 'textBased',
+        }
+      );
+      expect(screen.getByTestId('InlineEditingSuggestions')).toBeInTheDocument();
+    } finally {
+      getLayerIdsMock.mockImplementation(() => ['layer1']);
+      getConfigurationMock.mockImplementation(originalGetConfiguration!);
+    }
+  });
+
   it('should display the ES|QL results table if hideTextBasedEditor is false and query is ES|QL', async () => {
     await renderConfigFlyout(
       { hideTextBasedEditor: false, attributes: esqlLensAttributes },
@@ -481,6 +593,65 @@ describe('LensEditConfigurationFlyout', () => {
     newProps.attributes.state.datasourceStates.formBased = mockFormBasedState;
     await renderConfigFlyout(newProps);
     expectToBeEUIAriaDisabledButton(screen.getByRole('button', { name: /apply and close/i }));
+  });
+
+  it('keeps apply disabled when an unchanged secondary datasource uses internal references', async () => {
+    const internalReference = {
+      type: 'index-pattern',
+      id: 'ad-hoc-data-view',
+      name: 'indexpattern-datasource-layer-reference-line',
+    };
+    const multiDatasourceAttributes = {
+      ...esqlLensAttributes,
+      state: {
+        ...esqlLensAttributes.state,
+        datasourceStates: {
+          textBased: mockTextBasedState,
+          formBased: mockFormBasedState,
+        },
+        internalReferences: [internalReference],
+      },
+    } as unknown as TypedLensSerializedState['attributes'];
+    datasourceMap.formBased.isEqual.mockImplementationOnce(
+      (previousState, previousReferences, currentState) =>
+        previousState === currentState && previousReferences.includes(internalReference)
+    );
+
+    await renderConfigFlyout({ attributes: multiDatasourceAttributes }, undefined, {
+      datasourceStates: {
+        textBased: { isLoading: false, state: mockTextBasedState },
+        formBased: { isLoading: false, state: mockFormBasedState },
+      },
+      activeDatasourceId: 'textBased',
+    });
+
+    expectToBeEUIAriaDisabledButton(screen.getByRole('button', { name: /apply and close/i }));
+  });
+
+  it('enables apply when a secondary form-based datasource changes on an ES|QL panel', async () => {
+    const multiDatasourceAttributes = {
+      ...esqlLensAttributes,
+      state: {
+        ...esqlLensAttributes.state,
+        datasourceStates: {
+          textBased: mockTextBasedState,
+          formBased: mockFormBasedState,
+        },
+      },
+    } as unknown as TypedLensSerializedState['attributes'];
+
+    await renderConfigFlyout({ attributes: multiDatasourceAttributes }, undefined, {
+      datasourceStates: {
+        textBased: { isLoading: false, state: mockTextBasedState },
+        formBased: { isLoading: false, state: mockFormBasedStateChanged },
+      },
+      activeDatasourceId: 'textBased',
+    });
+
+    expect(screen.getByRole('button', { name: /apply and close/i })).not.toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
   });
 
   it('save button should be disabled if expression cannot be generated', async () => {

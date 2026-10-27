@@ -9,6 +9,7 @@ import type { EuiDataGridObject, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import {
+  ALERTS_TABLE_EXPAND_COLUMN_ID,
   BIGGER_TIMEOUT,
   RULE_DETAILS_APP_PATH,
   RULE_DETAILS_TEST_SUBJECTS,
@@ -51,14 +52,6 @@ export class RuleDetailsPage {
     return this.page.testSubj.locator(RULE_DETAILS_TEST_SUBJECTS.ALERTS_TABLE_EMPTY_STATE);
   }
 
-  public get alertSummaryTotalCount() {
-    return this.page.testSubj.locator('totalAlertCount');
-  }
-
-  public get alertSummaryActiveCount() {
-    return this.page.testSubj.locator('activeAlertCount');
-  }
-
   async expectAlertsTabLoaded() {
     await expect(this.alertsSearchBarRow).toBeVisible({ timeout: SHORTER_TIMEOUT });
   }
@@ -67,9 +60,37 @@ export class RuleDetailsPage {
     await expect(this.alertsTableEmptyState).toBeVisible({ timeout: BIGGER_TIMEOUT });
   }
 
-  async filterAlertsByKql(query: string) {
-    await this.alertsQueryInput.fill(query);
+  async submitAlertsQuery() {
     await this.alertsQuerySubmitButton.click();
+  }
+
+  public get alertFlyout() {
+    return this.page.testSubj.locator(RULE_DETAILS_TEST_SUBJECTS.ALERT_FLYOUT);
+  }
+
+  public get alertFlyoutFieldsTablePanel() {
+    return this.page.testSubj.locator(RULE_DETAILS_TEST_SUBJECTS.FLYOUT_TABLE_TAB_PANEL);
+  }
+
+  /**
+   * Opens the alert details flyout for the row at `rowIndex` on its fields table tab,
+   * which lists every raw alert field regardless of which grid columns are rendered.
+   */
+  async openAlertFieldsTable(rowIndex = 0) {
+    await this.alertsTable
+      .cell(rowIndex, ALERTS_TABLE_EXPAND_COLUMN_ID)
+      .getByTestId(RULE_DETAILS_TEST_SUBJECTS.ROW_EXPAND)
+      .click();
+    await this.alertFlyout.waitFor({ state: 'visible' });
+    await this.page.testSubj.click(RULE_DETAILS_TEST_SUBJECTS.FLYOUT_TABLE_TAB);
+    await this.alertFlyoutFieldsTablePanel.waitFor({ state: 'visible' });
+  }
+
+  async filterAlertFieldsTable(query: string) {
+    await this.page.testSubj.fill(
+      RULE_DETAILS_TEST_SUBJECTS.FLYOUT_FIELDS_TABLE_FILTER_INPUT,
+      query
+    );
   }
 
   /**

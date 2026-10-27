@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 import {
   PackName,
@@ -22,9 +22,13 @@ import {
   ECSMappingArrayOrUndefined,
   ScheduleTypeOrUndefined,
   RRuleScheduleConfigOrUndefined,
+  QueryEnabled,
+  ResultType,
   EnabledOrUndefined,
   PolicyIdsOrUndefined,
   PackIntervalOrUndefined,
+  MinOsqueryVersion,
+  PackPlatform,
 } from '../model/schema/common_attributes.gen';
 
 /**
@@ -56,6 +60,8 @@ export const CopyPacksResponse = lazySchema(() =>
             ecs_mapping: ECSMappingArrayOrUndefined.optional(),
             schedule_type: ScheduleTypeOrUndefined.optional(),
             rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
+            enabled: QueryEnabled.optional(),
+            result_type: ResultType.optional(),
           })
         )
         .optional()
@@ -67,10 +73,10 @@ export const CopyPacksResponse = lazySchema(() =>
        */
       version: z.number().int().optional().describe('The pack version number.'),
       enabled: EnabledOrUndefined.optional(),
-      created_at: z.string().datetime().optional(),
+      created_at: isoDateTime().optional(),
       created_by: z.string().nullable().optional(),
       created_by_profile_uid: z.string().optional(),
-      updated_at: z.string().datetime().optional(),
+      updated_at: isoDateTime().optional(),
       updated_by: z.string().nullable().optional(),
       updated_by_profile_uid: z.string().optional(),
       policy_ids: PolicyIdsOrUndefined.optional(),
@@ -89,6 +95,9 @@ export const CopyPacksResponse = lazySchema(() =>
       schedule_type: ScheduleTypeOrUndefined.optional(),
       interval: PackIntervalOrUndefined.optional(),
       rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
+      min_osquery_version: MinOsqueryVersion.optional(),
+      result_type: ResultType.optional(),
+      platform: PackPlatform.optional(),
     }),
   })
 );

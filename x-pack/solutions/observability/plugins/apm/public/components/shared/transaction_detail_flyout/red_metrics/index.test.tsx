@@ -37,8 +37,23 @@ jest.mock('../../service_flyout/overview/chart_configs', () => ({
   ]),
 }));
 jest.mock('../../service_flyout/overview/lens_chart', () => ({
-  FlyoutLensChart: ({ id }: { id: string }) => (
-    <div data-test-subj={`transactionDetailFlyoutLensChart-${id}`} />
+  FlyoutLensChart: ({
+    id,
+    refreshToken,
+    rangeFrom,
+    rangeTo,
+  }: {
+    id: string;
+    refreshToken?: number;
+    rangeFrom: string;
+    rangeTo: string;
+  }) => (
+    <div
+      data-test-subj={`transactionDetailFlyoutLensChart-${id}`}
+      data-refresh-token={refreshToken}
+      data-range-from={rangeFrom}
+      data-range-to={rangeTo}
+    />
   ),
 }));
 
@@ -55,6 +70,8 @@ const FILTERS = {
   environment: 'oteldemo',
   rangeFrom: '2026-08-20T10:00:00.000Z',
   rangeTo: '2026-08-21T10:43:35.610Z',
+  start: '2026-08-20T10:00:00.000Z',
+  end: '2026-08-21T10:43:35.610Z',
 };
 
 const MOCK_INDICES = {
@@ -158,6 +175,7 @@ describe('TransactionDetailFlyoutRedMetrics', () => {
       mockedUseTransactionDetailFlyoutContext.mockReturnValue({
         deps: { core: { uiSettings: { get: () => 'UTC' } }, lens: LENS, dataViews: DATA_VIEWS },
         filters: FILTERS,
+        refreshToken: 42,
         preferDocumentBasedCharts: true,
         schema: 'ecs',
         indices: MOCK_INDICES,
@@ -166,7 +184,18 @@ describe('TransactionDetailFlyoutRedMetrics', () => {
       render(<TransactionDetailFlyoutRedMetrics />);
 
       expect(screen.getByTestId('transactionDetailFlyoutEsqlRedMetrics')).toBeInTheDocument();
-      expect(screen.getByTestId('transactionDetailFlyoutLensChart-latency')).toBeInTheDocument();
+      expect(screen.getByTestId('transactionDetailFlyoutLensChart-latency')).toHaveAttribute(
+        'data-refresh-token',
+        '42'
+      );
+      expect(screen.getByTestId('transactionDetailFlyoutLensChart-latency')).toHaveAttribute(
+        'data-range-from',
+        FILTERS.start
+      );
+      expect(screen.getByTestId('transactionDetailFlyoutLensChart-latency')).toHaveAttribute(
+        'data-range-to',
+        FILTERS.end
+      );
       expect(
         screen.getByTestId('transactionDetailFlyoutLensChart-failedTransactionRate')
       ).toBeInTheDocument();

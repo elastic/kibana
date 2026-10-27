@@ -96,8 +96,9 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
       container-name: ${CONTAINER_NAME};
     `,
 
-    panel: css`
+    grid: css`
       display: grid;
+      margin: 0;
 
       & > * {
         position: relative;
@@ -134,10 +135,6 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
       3: responsiveGrid(3),
       4: responsiveGrid(FLYOUT_MAX_GRID_COLUMNS),
     },
-
-    cell: css`
-      padding: ${euiTheme.size.m};
-    `,
   };
 };
 
@@ -147,23 +144,24 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
   maxColumns = 'auto',
   ...rest
 }) => {
-  const memoized = useEuiMemoizedStyles(styles);
+  const memoizedStyles = useEuiMemoizedStyles(styles);
   const columns = maxColumns === 'auto' ? resolveMaxColumns(items.length) : maxColumns;
 
   return (
-    <div css={memoized.wrapper}>
+    <div css={memoizedStyles.wrapper}>
       <EuiPanel
         paddingSize="none"
         hasShadow={false}
         hasBorder
-        css={[memoized.panel, memoized.grids[columns]]}
         data-test-subj={rest['data-test-subj'] ?? 'infoBlocks'}
       >
-        {items.map((item, index) => (
-          <div key={item.id ?? index} css={memoized.cell}>
-            <InfoBlock {...item} />
-          </div>
-        ))}
+        {/* The grid lives on the `dl` because each block is a `dt`/`dd` pair, which `dl` only
+            accepts wrapped in a single element — so that wrapper has to be the grid cell. */}
+        <dl css={[memoizedStyles.grid, memoizedStyles.grids[columns]]}>
+          {items.map((item, index) => (
+            <InfoBlock key={item.id ?? index} {...item} />
+          ))}
+        </dl>
       </EuiPanel>
     </div>
   );

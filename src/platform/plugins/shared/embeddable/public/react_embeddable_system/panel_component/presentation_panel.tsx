@@ -10,18 +10,14 @@
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { EuiErrorBoundary, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import { EuiErrorBoundary, EuiPanel, htmlIdGenerator, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
   PublishesFetchOnlyVisible,
   PublishesHideBorder,
   PublishesTitle,
 } from '@kbn/presentation-publishing';
-import {
-  apiHasParentApi,
-  apiPublishesViewMode,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import { getViewModeSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { BehaviorSubject } from 'rxjs';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
@@ -56,13 +52,13 @@ const PresentationPanelChrome = <
     setDragHandle: PresentationPanelHoverActionsProps['setDragHandle'];
   }
 >) => {
+  const { euiTheme } = useEuiTheme();
   const headerId = useMemo(() => htmlIdGenerator()(), []);
 
-  const viewModeSubject = useMemo(() => {
-    if (apiPublishesViewMode(componentApi)) return componentApi.viewMode$;
-    if (apiHasParentApi(componentApi) && apiPublishesViewMode(componentApi.parentApi))
-      return componentApi.parentApi.viewMode$;
-  }, [componentApi]);
+  const viewModeSubject = useMemo(
+    () => getViewModeSubject(componentApi) ?? new BehaviorSubject(undefined),
+    [componentApi]
+  );
 
   const [
     dataLoading,
@@ -84,7 +80,7 @@ const PresentationPanelChrome = <
     componentApi.description$ ?? new BehaviorSubject(undefined),
     componentApi.defaultTitle$ ?? new BehaviorSubject(undefined),
     componentApi.defaultDescription$ ?? new BehaviorSubject(undefined),
-    viewModeSubject ?? new BehaviorSubject(undefined),
+    viewModeSubject,
     (componentApi.parentApi as Partial<PublishesTitle>)?.hideTitle$ ?? new BehaviorSubject(false),
     componentApi.rendered$ ?? new BehaviorSubject(true),
     componentApi.renderCount$ ?? new BehaviorSubject(undefined)
@@ -148,12 +144,13 @@ const PresentationPanelChrome = <
         className={classNames('embPanel', {
           'embPanel--editing': viewMode === 'edit',
         })}
+        hasBorder={false}
         hasShadow={showShadow}
         aria-labelledby={headerId}
         data-test-subj="embeddablePanel"
         {...dataAttributes}
         panelRef={panelRef}
-        css={styles.embPanel}
+        css={[styles.embPanel, { borderRadius: euiTheme.border.radius.control }]}
       >
         {!hideHeader && (
           <PresentationPanelHeader

@@ -11,12 +11,16 @@ import type { PluginInitializerContext } from '@kbn/core/public';
 import { EsqlPlugin, type EsqlPluginSetup, type EsqlPluginStart } from './plugin';
 
 export { ESQLLangEditor } from './create_editor';
-export { ESQLMenu, EsqlEditorActionsProvider } from './lazy_esql_menu';
+export { QuickSearchVisor } from './lazy_quick_search_visor';
+export { ESQLMenu, EsqlEditorActionsProvider, EsqlEditorActionsRegister } from './lazy_esql_menu';
 export { useESQLQueryStats } from './hooks/use_esql_query_stats';
 export type {
   ESQLEditorProps,
+  ESQLEditorApi,
   DataErrorsControl,
+  QuickSearchVisorProps,
   RestorableStateProviderApi,
+  VisorNlResultHandler,
 } from '@kbn/esql-editor';
 export type { EsqlPluginSetup, EsqlPluginStart };
 

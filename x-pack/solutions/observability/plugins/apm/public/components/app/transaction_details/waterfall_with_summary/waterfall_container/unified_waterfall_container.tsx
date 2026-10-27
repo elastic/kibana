@@ -8,8 +8,9 @@
 import type { Error } from '@kbn/apm-types';
 import { TRACE_WATERFALL_EBT_ELEMENTS } from '@kbn/apm-ui-shared';
 import type { History } from 'history';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useTimeRangeId } from '../../../../../context/time_range_id/use_time_range_id';
 import type { TraceItem } from '../../../../../../common/waterfall/unified_trace_item';
 import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
 import { UnifiedWaterfallFlyout } from './unified_waterfall_flyout';
@@ -69,9 +70,29 @@ export function UnifiedWaterfallContainer({
   } = useKibana();
   const TraceWaterfall = useMemo(() => apmShared.TraceWaterfall, [apmShared.TraceWaterfall]);
   const history = useHistory();
-  const handleErrorClick = useErrorClickHandler(traceItems);
   const getServiceBadgeHref = useGetServiceBadgeHrefFromRouter();
   const getErrorMarkerHref = useGetErrorMarkerHrefFromRouter();
+  const { pauseAutoRefresh, resumeAutoRefresh } = useTimeRangeId();
+
+  // Mirror the same lookup UnifiedWaterfallFlyout performs so we only pause
+  // when the flyout is actually rendered (stale deep-links or items absent
+  // from the current fetch window must not leave auto-refresh suspended).
+  const traceItemsById = useMemo(
+    () => new Map(traceItems.map((item) => [item.id, item])),
+    [traceItems]
+  );
+  const flyoutVisible = waterfallItemId != null && traceItemsById.has(waterfallItemId);
+
+  useEffect(() => {
+    if (!flyoutVisible) return;
+    pauseAutoRefresh();
+    return resumeAutoRefresh;
+  }, [flyoutVisible, pauseAutoRefresh, resumeAutoRefresh]);
+
+  // Every error-badge click navigates to the service's Errors page. The page
+  // renders two sections ("APM errors" + "Errors from logs") scoped by the kuery
+  // that use_error_click_handler sets.
+  const handleErrorClick = useErrorClickHandler(traceItems);
 
   const handleNodeClick = (id: string, options?: { flyoutDetailTab?: string }) => {
     toggleFlyout({

@@ -42,6 +42,49 @@ describe('InfoBlocks', () => {
     expect(screen.getAllByTestId('infoBlock')).toHaveLength(3);
   });
 
+  it('associates each title with its value as a definition list', () => {
+    render(
+      <InfoBlocks
+        items={[
+          { title: 'Owner', value: 'Platform' },
+          { title: 'Throughput', value: '1.2k tpm' },
+        ]}
+      />
+    );
+
+    expect(screen.getAllByRole('term')).toHaveLength(2);
+    expect(screen.getAllByRole('definition')).toHaveLength(2);
+
+    // `term` and `definition` take no name from content, so the pairing a screen reader reads out
+    // is carried by adjacency alone.
+    const term = screen.getByText('Owner').closest('dt');
+    expect(term).not.toBeNull();
+    expect(term!.nextElementSibling?.tagName).toBe('DD');
+    expect(term!.nextElementSibling).toHaveTextContent('Platform');
+  });
+
+  it('wraps each pair in a single element, the only grouping a definition list allows', () => {
+    render(
+      <InfoBlocks
+        items={[
+          { title: 'A', value: '1' },
+          { title: 'B', value: '2' },
+        ]}
+      />
+    );
+
+    const list = screen.getByTestId('infoBlocks').querySelector('dl');
+    expect(list).not.toBeNull();
+
+    const groups = Array.from(list!.children);
+    expect(groups).toHaveLength(2);
+    for (const group of groups) {
+      expect(group.tagName).toBe('DIV');
+      expect(group.querySelectorAll(':scope > dt')).toHaveLength(1);
+      expect(group.querySelectorAll(':scope > dd')).toHaveLength(1);
+    }
+  });
+
   it('keeps the full string value available in the value element', () => {
     const resource = 'etcd-cspm-control-plane-8fO2b-1a2b3c4d5e6f7g8h9i0j-kube-system';
     render(<InfoBlocks items={[{ title: 'Resource', value: resource }]} />);

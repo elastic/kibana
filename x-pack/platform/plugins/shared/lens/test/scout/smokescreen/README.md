@@ -18,15 +18,6 @@ palette, a formula edge case, drag-and-drop mechanics, or anything that needs fe
 non-default server config. Those stay in the `core` namespace. The value of this namespace comes
 from staying small.
 
-## Environment tags
-
-The end state is `tags.deploymentAgnostic` from `@kbn/scout`, so a single spec runs on stateful and
-on serverless search / observability_complete / security_complete.
-
-For the first round of the FTR-to-Scout migration the specs are tagged `@local-stateful-classic`
-only. Serverless coverage is a follow-up: it needs each spec verified against a serverless
-project first, since the seeded archives, default data views and available UI differ there.
-
 ## Current contents
 
 | Spec | Covers | Migrated from |
@@ -45,6 +36,8 @@ cannot reproduce yet; they no longer run in the plain stateful FTR config.
 
 ## Running
 
+Stateful:
+
 ```bash
 node scripts/scout.js start-server --arch stateful --domain classic
 
@@ -52,4 +45,15 @@ node scripts/playwright test --project local \
   --config x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel.playwright.config.ts
 ```
 
-See [`../README.md`](../README.md) for the other Lens namespaces and for serverless instructions.
+Serverless, one project type at a time (`search`, `observability_complete` or `security_complete`).
+Pass the matching `--grep` tag so Playwright only picks the tests for the project you started:
+
+```bash
+node scripts/scout.js start-server --arch serverless --domain search
+
+node scripts/playwright test --project local \
+  --grep @local-serverless-search \
+  --config x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel.playwright.config.ts
+```
+
+See [`../README.md`](../README.md) for the other Lens namespaces.

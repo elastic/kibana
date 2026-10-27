@@ -7,7 +7,7 @@
 
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode, EpisodesSortState } from '../queries/episodes_query';
-import { mergeEpisodes } from './merge_episodes';
+import { mergeEpisodes, type SeverityRankResolver } from './merge_episodes';
 
 const makeEpisode = (overrides: Partial<AlertEpisode>): AlertEpisode => ({
   '@timestamp': '2024-01-01T00:00:00.000Z',
@@ -150,5 +150,68 @@ describe('mergeEpisodes', () => {
       'classic-older',
       'v2-older',
     ]);
+  });
+
+  it('sorts by severity using a custom rank resolver that includes extension severities', () => {
+    const customRankResolver: SeverityRankResolver = (severity) => {
+      const ranks: Record<string, number> = {
+        info: 0,
+        minor: 1,
+        low: 1,
+        warning: 2,
+        medium: 2,
+        major: 3,
+        high: 3,
+        critical: 4,
+      };
+      if (severity == null) return -1;
+      return ranks[severity.toLowerCase()] ?? -1;
+    };
+
+    const episodes = [
+      makeEpisode({ 'episode.id': 'warning-ep', severity: 'warning' }),
+      makeEpisode({ 'episode.id': 'critical-ep', severity: 'critical' }),
+      makeEpisode({ 'episode.id': 'minor-ep', severity: 'minor' }),
+      makeEpisode({ 'episode.id': 'major-ep', severity: 'major' }),
+    ];
+
+    const result = mergeEpisodes(
+      [episodes],
+      { sortField: 'severity', sortDirection: 'desc' },
+      10,
+      customRankResolver
+    );
+
+    expect(result[0]['episode.id']).toBe('critical-ep');
+    expect(result[1]['episode.id']).toBe('major-ep');
+    expect(result[result.length - 1]['episode.id']).toBe('minor-ep');
+  });
+
+  it('breaks severity rank ties by @timestamp', () => {
+    const rankResolver: SeverityRankResolver = (severity) => {
+      const ranks: Record<string, number> = { warning: 1, low: 1, medium: 2 };
+      if (severity == null) return -1;
+      return ranks[severity.toLowerCase()] ?? -1;
+    };
+
+    const olderLow = makeEpisode({
+      'episode.id': 'older-low',
+      severity: 'low',
+      '@timestamp': '2024-01-01T00:00:00.000Z',
+    });
+    const newerWarning = makeEpisode({
+      'episode.id': 'newer-warning',
+      severity: 'warning',
+      '@timestamp': '2024-01-01T02:00:00.000Z',
+    });
+
+    const result = mergeEpisodes(
+      [[olderLow], [newerWarning]],
+      { sortField: 'severity', sortDirection: 'desc' },
+      10,
+      rankResolver
+    );
+
+    expect(result.map((ep) => ep['episode.id'])).toEqual(['newer-warning', 'older-low']);
   });
 });

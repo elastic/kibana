@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
@@ -35,6 +36,7 @@ const csvPayload: JobParamsCSV = {
 
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
+  const es = getService('es');
 
   describe('List Scheduled Reports', () => {
     let report1Id: string;
@@ -162,6 +164,75 @@ export default function ({ getService }: FtrProviderContext) {
       for (const report of res.data) {
         expect(report.created_by).to.equal(reportingAPI.MANAGE_REPORTING_USER_USERNAME);
       }
+    });
+
+    it('returns a legacy report to its username owner and a reporting manager', async () => {
+      const report = await reportingAPI.schedulePdf(
+        reportingAPI.REPORTING_USER_USERNAME,
+        reportingAPI.REPORTING_USER_PASSWORD,
+        pdfPayload
+      );
+      expect(report.status).to.eql(200);
+      const legacyReportId = report.body.job.id;
+      scheduledReportIds.push(legacyReportId);
+
+      await es.update({
+        index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        id: `scheduled_report:${legacyReportId}`,
+        script: {
+          source:
+            "ctx._source.scheduled_report.remove('createdById'); ctx._source.scheduled_report.remove('createdByApiKeyId');",
+        },
+        refresh: true,
+      });
+
+      const userReports = await reportingAPI.listScheduledReports(
+        reportingAPI.REPORTING_USER_USERNAME,
+        reportingAPI.REPORTING_USER_PASSWORD
+      );
+      const userReportIds = userReports.data.map((item: { id: string }) => item.id);
+      expect(userReportIds).to.contain(legacyReportId);
+      expect(userReportIds).to.contain(report1Id);
+
+      const managerReports = await reportingAPI.listScheduledReports(
+        reportingAPI.MANAGE_REPORTING_USER_USERNAME,
+        reportingAPI.MANAGE_REPORTING_USER_PASSWORD
+      );
+      expect(managerReports.data.map((item: { id: string }) => item.id)).to.contain(legacyReportId);
+    });
+
+    it('does not return a report owned by the same username in another realm', async () => {
+      const report = await reportingAPI.schedulePdf(
+        reportingAPI.REPORTING_USER_USERNAME,
+        reportingAPI.REPORTING_USER_PASSWORD,
+        pdfPayload
+      );
+      expect(report.status).to.eql(200);
+      const foreignRealmReportId = report.body.job.id;
+      scheduledReportIds.push(foreignRealmReportId);
+
+      // The requester uses the native realm; this exercises real saved-object filter rewriting.
+      await es.update({
+        index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        id: `scheduled_report:${foreignRealmReportId}`,
+        doc: {
+          scheduled_report: {
+            createdById: [
+              `realm:["file","default_file","${reportingAPI.REPORTING_USER_USERNAME}"]`,
+            ],
+          },
+        },
+        refresh: true,
+      });
+
+      const res = await reportingAPI.listScheduledReports(
+        reportingAPI.REPORTING_USER_USERNAME,
+        reportingAPI.REPORTING_USER_PASSWORD
+      );
+
+      const returnedIds = res.data.map((r: { id: string }) => r.id);
+      expect(returnedIds).not.to.contain(foreignRealmReportId);
+      expect(returnedIds).to.contain(report1Id);
     });
   });
 }

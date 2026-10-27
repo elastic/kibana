@@ -93,14 +93,15 @@ const AllAssetsComponent = () => {
 
   return (
     <I18nProvider>
-      <AssetInventorySearchBar
-        query={urlQuery}
-        setQuery={setUrlQuery}
-        isLoading={isSearchBarLoading}
-      />
       <EuiPageTemplate.Section>
         <AssetInventoryTitle />
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
+        <AssetInventorySearchBar
+          query={urlQuery}
+          setQuery={setUrlQuery}
+          isLoading={isSearchBarLoading}
+        />
+        <EuiSpacer size="s" />
         <OnboardingSuccessCallout />
         <AssetInventoryFilters query={urlQuery} setQuery={setUrlQuery} />
         <EuiSpacer size="l" />

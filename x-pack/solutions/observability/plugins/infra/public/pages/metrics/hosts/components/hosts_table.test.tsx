@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { HostsTable } from './hosts_table';
@@ -27,6 +28,11 @@ jest.mock('../hooks/use_unified_search');
 jest.mock('../../../../hooks/use_time_range_metadata');
 jest.mock('./host_details_flyout/flyout_wrapper', () => ({
   FlyoutWrapper: () => null,
+}));
+jest.mock('../../../../hooks/use_kibana', () => ({
+  useKibanaContextForPlugin: () => ({
+    services: { telemetry: { reportSchemaSelectorInteraction: jest.fn() } },
+  }),
 }));
 
 const mockUseHostsTableContext = useHostsTableContext as jest.MockedFunction<
@@ -65,6 +71,8 @@ const tableContext = {
   filterSelectedHosts: jest.fn(),
 };
 
+const mockOnPreferredSchemaChange = jest.fn();
+
 const renderTable = () =>
   render(
     <EuiProvider>
@@ -90,7 +98,8 @@ describe('HostsTable', () => {
         preferredSchema: 'ecs',
         limit: 100,
       },
-    } as ReturnType<typeof useUnifiedSearchContext>);
+      onPreferredSchemaChange: mockOnPreferredSchemaChange,
+    } as unknown as ReturnType<typeof useUnifiedSearchContext>);
     mockUseTimeRangeMetadataContext.mockReturnValue({
       data: { schemas: ['ecs'] },
     } as ReturnType<typeof useTimeRangeMetadataContext>);
@@ -120,5 +129,40 @@ describe('HostsTable', () => {
 
     expect(screen.queryByTestId('hostsViewTableNoData')).not.toBeInTheDocument();
     expect(screen.getByText('host-0')).toBeInTheDocument();
+  });
+
+  describe('when hosts only exist on another schema', () => {
+    beforeEach(() => {
+      mockUseUnifiedSearchContext.mockReturnValue({
+        searchCriteria: {
+          dateRange: { from: 'now-15m', to: 'now' },
+          preferredSchema: 'semconv',
+          limit: 100,
+        },
+        onPreferredSchemaChange: mockOnPreferredSchemaChange,
+      } as unknown as ReturnType<typeof useUnifiedSearchContext>);
+      mockUseHostsTableContext.mockReturnValue({
+        ...tableContext,
+        items: [],
+        currentPage: [],
+      } as unknown as ReturnType<typeof useHostsTableContext>);
+    });
+
+    it('switches to the available schema when the call to action is clicked', async () => {
+      renderTable();
+
+      await userEvent.click(screen.getByTestId('infraHostsTableNoDataInSelectedSchema'));
+
+      expect(mockOnPreferredSchemaChange).toHaveBeenCalledWith('ecs');
+    });
+
+    it('links to the hosts schema documentation', () => {
+      renderTable();
+
+      expect(screen.getByTestId('infraHostsTableNoDataInSelectedSchemaLearnMore')).toHaveAttribute(
+        'href',
+        'https://ela.st/docs-otel-schema-selector-hosts'
+      );
+    });
   });
 });

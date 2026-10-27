@@ -323,6 +323,50 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
       slack_api:
         connector-id: my-slack-api-connector
         channels: ['C0123456789', '#alerts']`,
+        `- name: ask_by_email
+  type: waitForInput
+  with:
+    message: "Choose how to proceed"
+    channels:
+      email:
+        connector-id: my-email-connector
+        to: ['analyst@example.com']`,
+        `- name: ask_in_slack2
+  type: waitForInput
+  with:
+    message: "Choose how to proceed"
+    channels:
+      slack2:
+        connector-id: my-slack2-connector
+        channels: ['C0123456789']`,
+        `- name: ask_in_teams
+  type: waitForInput
+  with:
+    message: "Choose how to proceed"
+    channels:
+      teams:
+        connector-id: my-teams-connector
+        team-id: team-id
+        channel-id: channel-id`,
+        `- name: ask_in_servicenow
+  type: waitForInput
+  with:
+    message: "Choose how to proceed"
+    channels:
+      servicenow:
+        connector-id: my-servicenow-connector
+        table: incident
+        sys-id: abc123def456`,
+        `- name: ask_over_http
+  type: waitForInput
+  with:
+    message: "Choose how to proceed"
+    channels:
+      http:
+        url: https://hooks.example/hitl
+        method: POST
+        body: |
+          {"form":"{{ context.hitl.externalFormLink }}"}`,
       ],
     },
   },
@@ -351,7 +395,26 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
         connector-id: my-slack-webhook-connector
       slack_api:
         connector-id: my-slack-api-connector
-        channels: ['C0123456789', '#alerts']`,
+        channels: ['C0123456789', '#alerts']
+      email:
+        connector-id: my-email-connector
+        to: ['oncall@example.com']
+      slack2:
+        connector-id: my-slack2-connector
+        channels: ['C0123456789']
+      teams:
+        connector-id: my-teams-connector
+        team-id: team-id
+        channel-id: channel-id
+      servicenow:
+        connector-id: my-servicenow-connector
+        table: incident
+        sys-id: abc123def456
+      http:
+        url: https://hooks.example/hitl
+        method: POST
+        body: |
+          {"approve":"{{ context.hitl.externalApproveLink }}","reject":"{{ context.hitl.externalRejectLink }}"}`,
       ],
     },
   },

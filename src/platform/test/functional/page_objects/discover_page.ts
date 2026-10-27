@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import { getUrl } from '@kbn/test';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
@@ -41,7 +42,8 @@ export class DiscoverPageObject extends FtrService {
 
   public readonly APP_ID = 'discover';
 
-  public async navigateToApp() {
+  public async navigateToApp(opts: { queryMode: 'classic' | 'esql' }) {
+    await this.setQueryMode(opts.queryMode);
     await this.common.navigateToApp(this.APP_ID);
   }
 
@@ -65,7 +67,7 @@ export class DiscoverPageObject extends FtrService {
    * chrome has no breadcrumbs, so we rely on the new/open buttons, which are hidden only while editing.
    */
   private async isStandaloneDiscoverSession(): Promise<boolean> {
-    if (await this.globalNav.isNextProjectChrome()) {
+    if (await this.globalNav.isProjectChrome()) {
       return !(await this.isOnDashboardsEditMode());
     }
     return (await this.globalNav.getFirstBreadcrumb()) === 'Discover';
@@ -217,7 +219,7 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.click(`dashboard-picker-option-${existing}`);
     }
     await this.clickConfirmSavedSearch();
-    if (await this.testSubjects.exists('appLeaveConfirmModal', { timeout: 1000 })) {
+    if (await this.testSubjects.exists('appLeaveConfirmModal')) {
       await this.testSubjects.click('confirmModalConfirmButton');
     }
     await this.header.waitUntilLoadingHasFinished();
@@ -849,36 +851,48 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async selectTextBaseLang() {
-    // First check if the button is directly visible
-    if (await this.testSubjects.exists('select-text-based-language-btn')) {
-      await this.testSubjects.click('select-text-based-language-btn');
-      await this.header.waitUntilLoadingHasFinished();
-      await this.waitUntilSearchingHasFinished();
-      return;
-    }
+    // Button may be directly in toolbar or hidden in overflow menu; retry both paths.
+    await this.retry.tryForTime(10000, async () => {
+      if (await this.testSubjects.exists('select-classic-mode-btn')) return;
 
-    // If not visible, try the overflow menu
-    if (await this.testSubjects.exists('app-menu-overflow-button')) {
-      await this.retry.try(async () => {
+      // Check if the button is directly visible (with brief wait for page render)
+      if (
+        await this.testSubjects.waitForExists('select-text-based-language-btn', { timeout: 1000 })
+      ) {
+        await this.testSubjects.click('select-text-based-language-btn');
+        return;
+      }
+
+      // Try the overflow menu
+      if (await this.testSubjects.waitForExists('app-menu-overflow-button', { timeout: 1000 })) {
         try {
           await this.testSubjects.moveMouseTo('kbnQueryBar');
         } catch {
           // Ignore if query bar is not present
         }
         await this.testSubjects.click('app-menu-overflow-button');
-      });
+        await this.testSubjects.existOrFail('app-menu-popover', { timeout: 1000 });
 
-      if (await this.testSubjects.exists('select-text-based-language-btn')) {
-        await this.testSubjects.click('select-text-based-language-btn');
-        await this.header.waitUntilLoadingHasFinished();
-        await this.waitUntilSearchingHasFinished();
+        if (await this.testSubjects.exists('select-classic-mode-btn')) {
+          await this.testSubjects.click('app-menu-overflow-button');
+          return;
+        }
+
+        if (
+          await this.testSubjects.waitForExists('select-text-based-language-btn', { timeout: 2000 })
+        ) {
+          await this.testSubjects.click('select-text-based-language-btn');
+          return;
+        }
+
+        // Close the popover if button wasn't found
+        if (await this.testSubjects.exists('app-menu-popover')) {
+          await this.testSubjects.click('app-menu-overflow-button');
+        }
       }
 
-      // Close the popover if open
-      if (await this.testSubjects.exists('app-menu-popover')) {
-        await this.testSubjects.click('app-menu-overflow-button');
-      }
-    }
+      throw new Error('select-text-based-language-btn not found in toolbar or overflow menu');
+    });
   }
 
   private async clickSelectedTabMenuItem(menuItemTestSubj: string) {
@@ -1244,8 +1258,7 @@ export class DiscoverPageObject extends FtrService {
   private resetRequestCount = -1;
 
   public async expectRequestCount(endpointRegexp: RegExp, requestCount: number) {
-    await this.retry.tryWithRetries(
-      `expect the request to match count ${requestCount}`,
+    await this.retry.try(
       async () => {
         if (requestCount === this.resetRequestCount) {
           await this.browser.execute(async () => {
@@ -1271,7 +1284,7 @@ export class DiscoverPageObject extends FtrService {
           expect(count).to.be(requestCount);
         }
       },
-      { retryCount: 5, retryDelay: 500 }
+      { description: `expect the request to match count ${requestCount}`, retryDelay: 500 }
     );
   }
 
@@ -1321,11 +1334,15 @@ export class DiscoverPageObject extends FtrService {
   /**
    * Seeds the persisted query mode in localStorage. Discover ignores `currentMode`
    * unless `defaultMode` matches the resolved default (the `discover.isEsqlDefault`
-   * flag), so `defaultMode` defaults to `'classic'` to match today's default. When
-   * the flag is flipped to make ES|QL the default, update `defaultMode` or the seed
-   * is ignored.
+   * flag), so `defaultMode` defaults to `'esql'` to match the current application default.
    */
-  public setQueryMode(currentMode: string, defaultMode: string = 'classic') {
+  public async setQueryMode(currentMode: string, defaultMode: string = 'esql') {
+    const kibanaUrl = getUrl.noAuth(this.config.get('servers.kibana'), {});
+    const currentUrl = await this.browser.getCurrentUrl();
+    if (new URL(currentUrl).origin !== new URL(kibanaUrl).origin) {
+      await this.browser.get(kibanaUrl);
+    }
+
     return this.browser.setLocalStorageItem(
       DISCOVER_QUERY_MODE_KEY,
       JSON.stringify({ currentMode, defaultMode })

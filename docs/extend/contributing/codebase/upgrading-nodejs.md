@@ -16,7 +16,6 @@ Before making a PR to upgrade Node.js, we must first [generate the required cust
 
 The required version of Node.js is listed in several different files throughout the {{kib}} source code. These files must be updated when upgrading Node.js:
 
-* [`.node-version`](https://github.com/elastic/kibana/blob/master/.node-version)
 * [`.nvmrc`](https://github.com/elastic/kibana/blob/master/.nvmrc)
 * [`package.json`](https://github.com/elastic/kibana/blob/master/package.json) - The version is specified in the `engines.node` field (if possible, also upgrade `@types/node` to match the new version, both under `devDependencies` and `resolutions`).
 * [`WORKSPACE.bazel`](https://github.com/elastic/kibana/blob/master/WORKSPACE.bazel) - The version is specified in the `node_version` property. Besides this property, the list of files under `node_repositories` must be updated along with their respective SHA256 hashes. These can be found in the `SHASUMS256.txt` file inside the public `kibana-custom-node-artifacts` GCP bucket. Example for Node.js v20.15.1: [kibana-custom-node-artifacts/node-glibc-217/dist/v20.15.1/SHASUMS256.txt](https://storage.googleapis.com/kibana-custom-node-artifacts/node-glibc-217/dist/v20.15.1/SHASUMS256.txt)

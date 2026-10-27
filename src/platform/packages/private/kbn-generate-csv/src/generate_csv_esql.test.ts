@@ -583,6 +583,67 @@ describe('CsvESQLGenerator', () => {
       );
     });
 
+    it('passes params to the query when only the job names the time field', async () => {
+      const query = {
+        esql: 'FROM kibana_sample_data_logs | STATS count = COUNT() BY bucket = TBUCKET(100, ?_tstart, ?_tend)',
+      };
+      // The event.ingested range must be ignored, proving the job's time field picks the range
+      const filters = [
+        {
+          meta: {},
+          query: {
+            range: {
+              'event.ingested': {
+                format: 'strict_date_optional_time',
+                gte: '2025-06-01T00:00:00.000Z',
+                lte: '2025-06-02T00:00:00.000Z',
+              },
+            },
+          },
+        },
+        {
+          meta: {},
+          query: {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: '2026-01-01T00:00:00.000Z',
+                lte: '2026-01-02T00:00:00.000Z',
+              },
+            },
+          },
+        },
+      ];
+
+      const generateCsv = new CsvESQLGenerator(
+        createMockJob({ query, filters, timeFieldName: '@timestamp' }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream,
+        jobId
+      );
+      await generateCsv.generateData();
+
+      expect(mockDataClient.search).toHaveBeenCalledWith(
+        {
+          params: expect.objectContaining({
+            params: [
+              { _tstart: '2026-01-01T00:00:00.000Z' },
+              { _tend: '2026-01-02T00:00:00.000Z' },
+            ],
+          }),
+        },
+        expect.anything()
+      );
+    });
+
     it('passes user-defined variable params to the query', async () => {
       const query = {
         esql: 'FROM test_csv_tokens | WHERE TO_STRING(crew.id) == TO_STRING(?crew_id)',

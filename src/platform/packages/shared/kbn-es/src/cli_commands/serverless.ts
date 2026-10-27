@@ -80,6 +80,9 @@ export const serverless: Command = {
                           )}
       --uiam              Configure ES serverless with Universal Identity and Access Management (UIAM) support [default: true].
       --uiam-oauth        Start an additional UIAM OAuth container for OAuth flow support [default: false].
+      --uiam-ephemeral-token-expiration
+                          ISO-8601 lifetime of UIAM ephemeral tokens, such as service account exchange tokens.
+                          UIAM accepts PT1M to PT5M [UIAM default: PT5M].
       --eis               Enable EIS mode: sets the EIS inference URL, resolves and sets the CCM API key (implies --waitForReady)
 
       -E                  Additional key=value settings to pass to ES
@@ -117,9 +120,19 @@ export const serverless: Command = {
         esProjectType: ['projectType', 'project-type'], // ensure BWC: can still run with `--projectType`
         dataPath: 'data-path',
         uiamOAuth: 'uiam-oauth',
+        uiamEphemeralTokenExpiration: 'uiam-ephemeral-token-expiration',
       },
 
-      string: ['esProjectType', 'tag', 'image', 'basePath', 'resources', 'host', 'dataPath'],
+      string: [
+        'esProjectType',
+        'tag',
+        'image',
+        'basePath',
+        'resources',
+        'host',
+        'dataPath',
+        'uiamEphemeralTokenExpiration',
+      ],
       boolean: [
         'clean',
         'ssl',

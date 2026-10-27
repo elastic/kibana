@@ -9,7 +9,7 @@
 
 import React, { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
-import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
+import { connectorTypeIsInboundOnly } from '@kbn/connector-specs';
 import { monaco } from '@kbn/monaco';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { useFetchConnector } from '../../../entities/connectors/model/use_available_connectors';
@@ -71,10 +71,17 @@ export const WorkflowDetailConnectorFlyout = React.memo(
               insertConnectorId(createdConnector.id, insertPosition, editorRef.current);
             }
             loadConnectors();
-            // Inbound create stays open so the one-time ingest token can be copied.
-            if (!connectorTypeHasInboundEvents(createdConnector.actionTypeId)) {
+            // Inbound-only create stays open so the one-time ingest token can be copied.
+            // Dual create stays open only when inbound events were turned on.
+            if (
+              !connectorTypeIsInboundOnly(createdConnector.actionTypeId) &&
+              createdConnector.isInboundEventsEnabled !== true
+            ) {
               dispatch(closeConnectorFlyout());
             }
+          },
+          onConnectorUpdated: () => {
+            loadConnectors();
           },
         });
       }

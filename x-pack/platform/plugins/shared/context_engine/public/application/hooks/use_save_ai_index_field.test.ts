@@ -11,6 +11,7 @@ import { toProperties } from './use_save_ai_index_field';
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,
+  memory_enabled: true,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [{ type: 'esql', value: 'FROM logs-*' }],
@@ -26,6 +27,7 @@ describe('toProperties', () => {
   it('strips server-managed fields and derived trace queries', () => {
     expect(toProperties(aiIndex)).toEqual({
       dest: aiIndex.dest,
+      memory_enabled: true,
       automations: [],
       sources: [{ type: 'esql', value: 'FROM logs-*' }],
       traces: [

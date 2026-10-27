@@ -11,7 +11,7 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Case, CustomFieldsConfiguration, User } from '../../../common/types/domain';
 import { CaseSeverity, UserActionTypes } from '../../../common/types/domain';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 
 import { Operations } from '../../authorization';
 import { createCaseError, isSODecoratedError, isSOError } from '../../common/error';
@@ -19,12 +19,16 @@ import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { Owner } from '../../../common/constants/types';
+import { resolveExtractObservables } from '../../../common/utils/case_settings';
 import type {
   BulkCreateCasesRequest,
   BulkCreateCasesResponse,
   CasePostRequest,
 } from '../../../common/types/api';
-import { BulkCreateCasesResponseRt, BulkCreateCasesRequestRt } from '../../../common/types/api';
+import {
+  BulkCreateCasesResponseSchema,
+  BulkCreateCasesRequestSchema,
+} from '../../../common/types/api';
 import {
   validateCustomFieldsStructure,
   validateRequiredCustomFields,
@@ -120,11 +124,15 @@ export const bulkCreate = async (
   } = clientArgs;
 
   try {
-    const decodedData = decodeWithExcessOrThrow(BulkCreateCasesRequestRt)(data);
+    const decodedData = decodeWithExcessOrThrowZod(BulkCreateCasesRequestSchema)(data);
     const configurations = await casesClient.configure.get();
 
     const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
       configurations.map((conf) => [conf.owner, conf.customFields])
+    );
+
+    const extractObservablesMap: Map<string, boolean> = new Map(
+      configurations.map((conf) => [conf.owner, conf.extractObservables])
     );
 
     const casesWithIds = getCaseWithIds(decodedData);
@@ -183,6 +191,7 @@ export const bulkCreate = async (
         globalFieldsByOwner,
         templatesEnabled: clientArgs.config.templates.enabled,
         relaxRequiredFields: options.relaxRequiredFields === true,
+        spaceExtractObservables: extractObservablesMap.get(theCase.owner),
       });
       bulkCreateRequest.push(request);
     }
@@ -406,7 +415,9 @@ export const bulkCreate = async (
       })
     );
 
-    const createdCasesResponse = decodeOrThrow(BulkCreateCasesResponseRt)({ cases: res });
+    const createdCasesResponse = decodeOrThrowZod(BulkCreateCasesResponseSchema)({
+      cases: res,
+    });
 
     createdCasesResponse.cases.forEach((createdCase) => {
       clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
@@ -489,6 +500,7 @@ const createBulkCreateCaseRequest = async ({
   globalFieldsByOwner,
   templatesEnabled,
   relaxRequiredFields,
+  spaceExtractObservables,
 }: {
   theCase: { id: string } & BulkCreateCasesRequest['cases'][number];
   customFieldsConfiguration?: CustomFieldsConfiguration;
@@ -504,10 +516,13 @@ const createBulkCreateCaseRequest = async ({
   templatesEnabled: boolean;
   /** See {@link BulkCreateCasesClientOptions.relaxRequiredFields}. */
   relaxRequiredFields: boolean;
+  /** Space-level extractObservables default from the configuration saved object. */
+  spaceExtractObservables?: boolean;
 }): Promise<{
   request: BulkCreateCasesArgs['cases'][number];
 }> => {
-  const { id, ...caseWithoutId } = theCase;
+  const { id, ...caseWithoutIdRaw } = theCase;
+  let caseWithoutId = caseWithoutIdRaw;
 
   // Caller intent, captured before pairing/normalization can populate extended_fields from a
   // linked customFields value or a template default — mirrors create.ts's
@@ -534,11 +549,17 @@ const createBulkCreateCaseRequest = async ({
   // fields, one supplied via customFields and the other via extended_fields — a pre-pair check
   // only sees the latter and rejects the former as missing.
 
-  /**
-   * Trim title, category, description and tags
-   * and fill out missing custom fields
-   * before saving to ES
-   */
+  // Default extractObservables when the caller omitted it.
+  // Precedence: caller-explicit > space config > owner default > false.
+  if (caseWithoutId.settings.extractObservables === undefined) {
+    caseWithoutId = {
+      ...caseWithoutId,
+      settings: {
+        ...caseWithoutId.settings,
+        extractObservables: resolveExtractObservables(caseWithoutId.owner, spaceExtractObservables),
+      },
+    };
+  }
 
   const normalizedCase = normalizeCreateCaseRequest(caseWithoutId, customFieldsConfiguration);
 

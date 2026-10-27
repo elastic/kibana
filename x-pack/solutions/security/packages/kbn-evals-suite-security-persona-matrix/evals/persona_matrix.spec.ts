@@ -9,11 +9,14 @@ import { tags } from '@kbn/scout';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { evaluate } from '../src/evaluate';
 import { personaMatrixDataset } from '../src/datasets';
-import { seedChrysalisAlerts, cleanupChrysalisAlerts } from '../src/fixtures/chrysalis_seed';
+import {
+  seedChrysalisAlerts,
+  cleanupChrysalisAlerts,
+  seedProfile,
+} from '../src/fixtures/chrysalis_seed';
 import { seedPersonaMatrixEnvironment, cleanupEnvSeeds } from '../src/fixtures/env_seeds';
 import {
   seedPersonaMatrixTools,
-  attachPersonaMatrixToolsToAgent,
   cleanupPersonaMatrixTools,
 } from '../src/fixtures/persona_matrix_tools_seed';
 import { assertPersonaMatrixToolsRegistered } from '../src/fixtures/tool_registration_check';
@@ -32,11 +35,12 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
       log,
     });
     log.info('[persona-matrix] seeded environment-truth data (endpoint, labs, ti-mock, entity)');
-    await seedPersonaMatrixTools({ kbnClient, log });
-    // Registry creation alone leaves the tools invisible to the model — the
-    // default agent ships `tools: []` and only sees `defaultAgentToolIds`.
-    await attachPersonaMatrixToolsToAgent({ kbnClient, log });
-    log.info('[persona-matrix] seeded virustotal_lookup + on_call_lookup tools');
+    await seedPersonaMatrixTools({ kbnClient, log, parity: seedProfile === 'parity' });
+    log.info(
+      `[persona-matrix] seeded persona-matrix tools (profile: ${seedProfile}${
+        seedProfile === 'parity' ? ' incl. original-era shims' : ''
+      })`
+    );
   });
 
   evaluate.afterAll(async ({ esClient, kbnClient, log }) => {
@@ -50,7 +54,21 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
   });
 
   evaluate('all 21 examples', async ({ evaluateDataset, kbnClient, log }) => {
-    log.info(`Running persona matrix evaluation with ${personaMatrixDataset.length} examples`);
+    const examplesFilter = process.env.EVAL_EXAMPLES?.split(',')
+      .map((id) => id.trim())
+      .filter(Boolean);
+    const examples = examplesFilter
+      ? personaMatrixDataset.filter((ex) => examplesFilter.includes(ex.id))
+      : personaMatrixDataset;
+    if (examples.length === 0) {
+      throw new Error(`EVAL_EXAMPLES matched no examples: ${examplesFilter?.join(',')}`);
+    }
+
+    log.info(
+      `Running persona matrix evaluation with ${examples.length} examples${
+        examplesFilter ? ` (filtered: ${examplesFilter.join(',')})` : ''
+      }`
+    );
 
     // Pre-flight: fail fast if an expected custom tool isn't registered, rather
     // than silently scoring a tool that doesn't exist.
@@ -60,7 +78,7 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
       dataset: {
         name: DATASET_NAME,
         description: DATASET_DESCRIPTION,
-        examples: personaMatrixDataset,
+        examples,
       },
     });
 

@@ -15,12 +15,14 @@ import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_sum
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { EntityRiskScoresState } from '../../../entity_analytics/api/hooks/use_entity_risk_scores';
 import { EntityType } from '../../../../common/entity_analytics/types';
+import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import { ObservedEntity } from '../../../flyout_v2/entity/shared/components/observed_entity';
 import type { ObservedEntityData } from '../../../flyout_v2/entity/shared/components/observed_entity/types';
 import { useObservedServiceItems } from './hooks/use_observed_service_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
+import { useNewEntityAnalyticsPage } from '../../../entity_analytics/hooks/use_new_entity_analytics_page';
 import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 
 export const OBSERVED_SERVICE_QUERY_ID = 'observedServiceDetailsQuery';
@@ -38,6 +40,9 @@ interface ServicePanelContentProps {
   openDetailsPanel: (path: EntityDetailsPath) => void;
   entityRecord?: Entity;
   refetchEntityRecord?: () => void;
+  isEntityRecordLoading?: boolean;
+  /** When `true`, hide the legacy asset criticality accordion. Required so every call site wires it explicitly. */
+  entityStoreV2Enabled: boolean;
   entityStoreEntityId?: string;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.service>;
@@ -60,12 +65,23 @@ interface ServicePanelContentProps {
    * system flyout, where sections are opened via {@link openDetailsPanel} instead.
    */
   hideHeaderIcons?: boolean;
+  /**
+   * True when the flyout shows a resolution group (alias records were loaded for the open target).
+   * The risk summary then shows only the group's risk score. See {@link RiskSummaryProps.isGroupView}.
+   */
+  isGroupView?: boolean;
+  /**
+   * Entity view mode; `resolved` generates the AI summary for the whole resolution group.
+   * Only the v2 flyout passes this — the legacy flyout always renders single mode.
+   */
+  mode?: EntityViewMode;
 }
 
 export const ServicePanelContent = ({
   serviceName,
   entityRecord,
   refetchEntityRecord,
+  isEntityRecordLoading = false,
   observedService,
   riskScoreState,
   entityRiskScores,
@@ -75,14 +91,33 @@ export const ServicePanelContent = ({
   isPreviewMode,
   openDetailsPanel,
   onAssetCriticalityChange,
+  entityStoreV2Enabled,
   entityStoreEntityId,
   prefetchedResolutionRisk,
   onShowEntity,
   riskScoreQueryId,
   hideHeaderIcons = false,
+  isGroupView = false,
+  mode,
 }: ServicePanelContentProps) => {
   const observedFields = useObservedServiceItems(observedService);
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
+
+  const resolutionSection =
+    entityStoreEntityId && hasEntityResolutionLicense ? (
+      <>
+        <ResolutionSection
+          entityId={entityStoreEntityId}
+          entityType={EntityType.service}
+          scopeId={scopeId}
+          openDetailsPanel={openDetailsPanel}
+          onShowEntity={onShowEntity}
+          hideHeaderIcons={hideHeaderIcons}
+        />
+        <EuiHorizontalRule />
+      </>
+    ) : null;
 
   return (
     <>
@@ -91,6 +126,8 @@ export const ServicePanelContent = ({
         entityType={EntityType.service}
         entityRecord={entityRecord}
         refetchEntityRecord={refetchEntityRecord}
+        mode={mode}
+        isEntityRecordLoading={isEntityRecordLoading}
       />
       {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>
@@ -105,10 +142,13 @@ export const ServicePanelContent = ({
             entityId={entityRecord?.entity?.id}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
             hideHeaderIcon={hideHeaderIcons}
+            isGroupView={isGroupView}
+            scopeId={scopeId}
           />
           <EuiHorizontalRule />
         </>
       )}
+      {isNewEntityAnalyticsPage && resolutionSection}
       {entityStoreEntityId && (
         <>
           <VisualizationsSection
@@ -121,20 +161,8 @@ export const ServicePanelContent = ({
           <EuiHorizontalRule margin="m" />
         </>
       )}
-      {entityStoreEntityId && hasEntityResolutionLicense && (
-        <>
-          <ResolutionSection
-            entityId={entityStoreEntityId}
-            entityType={EntityType.service}
-            scopeId={scopeId}
-            openDetailsPanel={openDetailsPanel}
-            onShowEntity={onShowEntity}
-            hideHeaderIcons={hideHeaderIcons}
-          />
-          <EuiHorizontalRule />
-        </>
-      )}
-      {!entityRecord && (
+      {!isNewEntityAnalyticsPage && resolutionSection}
+      {!entityStoreV2Enabled && (
         <AssetCriticalityAccordion
           entity={{ name: serviceName, type: EntityType.service }}
           onChange={onAssetCriticalityChange}

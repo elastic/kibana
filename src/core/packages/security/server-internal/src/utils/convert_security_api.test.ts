@@ -22,6 +22,7 @@ describe('convertSecurityApi', () => {
     source = {
       authc: {
         getCurrentUser: jest.fn(),
+        getPrincipal: jest.fn(),
         getRedactedSessionId: jest.fn(),
         apiKeys: {
           areAPIKeysEnabled: jest.fn(),
@@ -38,6 +39,8 @@ describe('convertSecurityApi', () => {
             invalidate: jest.fn(),
             convert: jest.fn(),
             getInternalCallerAttestationHeaders: jest.fn(),
+            isOwnClientAuthentication: jest.fn(),
+            isExternalApiKey: jest.fn(),
           },
         },
       },
@@ -48,6 +51,7 @@ describe('convertSecurityApi', () => {
       serviceAccounts: {
         isEnabled: jest.fn(),
         create: jest.fn(),
+        delete: jest.fn(),
         bindWorkload: jest.fn(),
         unbindWorkload: jest.fn(),
         getWorkloadBinding: jest.fn(),
@@ -108,6 +112,18 @@ describe('convertSecurityApi', () => {
 
       expect(source.authc.getCurrentUser).toHaveBeenCalledTimes(1);
       expect(source.authc.getCurrentUser).toHaveBeenCalledWith(request);
+    });
+  });
+
+  describe('getPrincipal', () => {
+    it('delegates directly to the source', () => {
+      const output = convertSecurityApi(source, workloadTypes);
+      const request = httpServerMock.createKibanaRequest();
+
+      output.authc.getPrincipal(request);
+
+      expect(source.authc.getPrincipal).toHaveBeenCalledTimes(1);
+      expect(source.authc.getPrincipal).toHaveBeenCalledWith(request);
     });
   });
 });

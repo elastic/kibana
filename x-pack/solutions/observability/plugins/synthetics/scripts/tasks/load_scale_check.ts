@@ -288,7 +288,6 @@ const ensurePrivateLocation = async (label: string, agentPolicyId: string): Prom
     label,
     agentPolicyId,
     geo: { lat: 0, lon: 0 },
-    isAgentSharding: true,
   });
   if (res.status !== 200) {
     throw new Error(`Failed to create private location: ${JSON.stringify(res.body)}`);

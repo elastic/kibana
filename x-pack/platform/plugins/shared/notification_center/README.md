@@ -100,7 +100,7 @@ The structure of the notification document is defined in [`common/`](./common):
 
 - [`notification_schema.ts`](./common/notification_schema.ts) — the Zod
   `notificationSchema` for the document stored in the append-only
-  `.kibana-notification-center` data stream. We use Zod because the shape is shared across
+  `.kibana-notifications` data stream. We use Zod because the shape is shared across
   server and browser code.
 
 ### Severity
@@ -229,11 +229,74 @@ export const reportDeprecatedEndpoint = async (
 
 ### Checking it landed
 
-Read it back from ES (Dev Tools → Console, or `curl` against Elasticsearch):
+Read it back from ES:
 
 ```
-GET /.kibana-notification-center/_search
+GET /.kibana-notifications/_search
 ```
+
+`.kibana-notifications` is registered as a system data stream, so Elasticsearch only serves a
+direct read to a caller sending `x-elastic-product-origin: kibana`. Dev Tools does not send it,
+so use `curl`:
+
+```
+curl -u elastic:changeme -H 'x-elastic-product-origin: kibana' \
+  'http://localhost:9200/.kibana-notifications/_search'
+```
+
+## Seeding a local dev stack
+
+`./scripts/seed_notifications.js` appends a fixed chunk of notifications to the data stream, so
+the list route and the bell have something to show without waiting for a real producer.
+
+It is a dev script: it assumes Kibana is already running with
+`xpack.notificationCenter.enabled: true`, and that you pass it a matching pair of URLs. Point it
+somewhere else and it will happily seed somewhere else.
+
+```bash
+SEED=x-pack/platform/plugins/shared/notification_center/scripts/seed_notifications.js
+
+node $SEED --help
+
+# stateful
+node $SEED --kibana-url http://localhost:5611/kbn --es-url http://localhost:9201 \
+  --include-unregistered
+
+# serverless: its own Kibana credentials, and Elasticsearch on HTTPS
+node $SEED --kibana-url http://localhost:5601 --es-url https://localhost:9200 \
+  --kibana-username elastic_serverless
+
+node $SEED --kibana-url http://localhost:5611/kbn --es-url http://localhost:9201 --clean
+```
+
+`--kibana-url` must include the base path, which a dev Kibana mounts itself under. The script
+writes straight to Elasticsearch: `.kibana-notifications` resolves to the system data stream
+descriptor, so the first write creates the data stream from it and nothing has to touch Kibana
+first.
+
+Elasticsearch and Kibana take separate credentials because they need different users.
+
+`.kibana-notifications` is a system data stream, so the writes need a user holding
+`allow_restricted_indices`. `superuser` role grants that for reads only, so `elastic` cannot seed.
+`--es-username` therefore defaults to `system_indices_superuser`, the test-only role `kbn-es`
+creates for exactly this.
+
+The client also sends `x-elastic-product-origin: kibana`, which Elasticsearch requires before
+it serves the stream at all.
+
+`--kibana-username` is the user whose bell you will open, and defaults to `elastic`. Serverless
+needs `elastic_serverless`. SAML is only the default _UI_ provider there, and basic auth still
+works.
+
+The plugin's `notificationWriteSchema` rejects an unknown `namespace` or `type`. `--include-unregistered`
+writes those directly to the cluster to exercise the read path and the UI against a mixed feed.
+
+Every fixture is backdated, and a user's catch-up marker is stamped at `now` the first time they
+open the bell — which is always after seeding — so the whole chunk would otherwise arrive already
+read. The script therefore logs in as `--kibana-username` and backdates that marker to 30 days
+ago, leaving the newer fixtures unread. `--read-horizon` takes an age (`12h`) or a date
+(`2026-09-01`) instead, and `--clean` drops the marker and per-id overrides. Read state is per user
+profile: if you browse Kibana as somebody other than `--kibana-username`, their bell is unaffected.
 
 ## Running tests
 

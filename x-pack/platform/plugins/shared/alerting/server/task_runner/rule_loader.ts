@@ -33,7 +33,7 @@ import {
   type CredentialType,
 } from '../otel/uiam_telemetry';
 
-interface RuleData {
+export interface RuleData {
   rawRule: RawRule;
   version: string | undefined;
   references: SavedObjectReference[];

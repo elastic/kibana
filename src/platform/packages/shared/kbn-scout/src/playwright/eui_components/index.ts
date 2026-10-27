@@ -19,3 +19,10 @@ export {
   EuiBasicTableObject,
   EuiDraggableObject,
 } from '@elastic/eui-test-helpers';
+
+/**
+ * Stable EUI selectors, keyed like `page.components`, for when no Component Object method fits.
+ *
+ * @example page.locator(euiSelectors.basicTable.ROW_SELECTOR)
+ */
+export { selectors as euiSelectors } from '@elastic/eui-test-helpers';

@@ -15,6 +15,7 @@ jest.mock('@kbn/es-query', () => ({
   ),
   toKqlExpression: (...args: unknown[]) =>
     jest.requireActual('@kbn/es-query').toKqlExpression(...args),
+  KQLSyntaxError: jest.requireActual('@kbn/es-query').KQLSyntaxError,
 }));
 
 const fromKueryExpressionMock = fromKueryExpression as jest.Mock;
@@ -60,6 +61,24 @@ describe('buildRuleSoFilter', () => {
     it('maps metadata.tags to SO attributes path', () => {
       expect(buildRuleSoFilter('metadata.tags: "production"')).toBe(
         'alerting_rule.attributes.metadata.tags: "production"'
+      );
+    });
+
+    it('maps metadata.routing_tags to SO attributes path', () => {
+      expect(buildRuleSoFilter('metadata.routing_tags: "sre"')).toBe(
+        'alerting_rule.attributes.metadata.routing_tags: "sre"'
+      );
+    });
+
+    it('maps metadata.template.id to SO attributes path', () => {
+      expect(buildRuleSoFilter('metadata.template.id: "nginx-error-rate"')).toBe(
+        'alerting_rule.attributes.metadata.template.id: "nginx-error-rate"'
+      );
+    });
+
+    it('keeps template ids containing special characters quoted', () => {
+      expect(buildRuleSoFilter('metadata.template.id: "kubernetes_otel-1.2.0-pod: crash"')).toBe(
+        'alerting_rule.attributes.metadata.template.id: "kubernetes_otel-1.2.0-pod: crash"'
       );
     });
   });
@@ -136,6 +155,18 @@ describe('buildRuleSoFilter', () => {
             code: 'INVALID_FILTER_FIELD',
             details: expect.objectContaining({ field: 'unknown_field' }),
           }),
+        })
+      );
+    });
+  });
+
+  describe('syntax validation', () => {
+    it('rejects malformed KQL with INVALID_FILTER_SYNTAX', () => {
+      expect(() => buildRuleSoFilter('kind:')).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 400 }),
+          data: { code: 'INVALID_FILTER_SYNTAX' },
         })
       );
     });

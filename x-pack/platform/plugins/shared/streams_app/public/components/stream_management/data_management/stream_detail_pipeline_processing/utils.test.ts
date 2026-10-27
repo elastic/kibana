@@ -8,7 +8,7 @@
 import { GrokCollection } from '@kbn/grok-ui';
 import { type FlattenRecord } from '@kbn/streams-schema';
 import { omit } from 'lodash';
-import { getDefaultFormStateByType } from './utils';
+import { convertFormStateToProcessor, getDefaultFormStateByType } from './utils';
 
 let grokCollection: GrokCollection;
 
@@ -133,6 +133,52 @@ describe('utils', () => {
       } else {
         throw new Error('Result is not a grok processor');
       }
+    });
+  });
+
+  describe('convertFormStateToProcessor', () => {
+    it('keeps a trimmed freetext condition on the processor definition', () => {
+      const { processorDefinition } = convertFormStateToProcessor({
+        action: 'set',
+        field: 'host.name',
+        value: 'kibana',
+        if: "  ctx.level == 'debug' ",
+      });
+
+      expect(processorDefinition).toEqual({
+        action: 'set',
+        field: 'host.name',
+        value: 'kibana',
+        if: "ctx.level == 'debug'",
+      });
+    });
+
+    it('removes an empty freetext condition from the processor definition', () => {
+      const { processorDefinition } = convertFormStateToProcessor({
+        action: 'set',
+        field: 'host.name',
+        value: 'kibana',
+        if: '   ',
+      });
+
+      expect(processorDefinition).toEqual({
+        action: 'set',
+        field: 'host.name',
+        value: 'kibana',
+      });
+      expect(processorDefinition).not.toHaveProperty('if');
+    });
+
+    it('leaves script object conditions untouched', () => {
+      const scriptCondition = { source: 'ctx.level == params.level', params: { level: 'debug' } };
+      const { processorDefinition } = convertFormStateToProcessor({
+        action: 'set',
+        field: 'host.name',
+        value: 'kibana',
+        if: scriptCondition,
+      });
+
+      expect(processorDefinition.if).toBe(scriptCondition);
     });
   });
 });

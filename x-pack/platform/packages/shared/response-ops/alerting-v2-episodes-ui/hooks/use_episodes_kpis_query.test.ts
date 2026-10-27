@@ -55,14 +55,17 @@ const mockKpisRow = {
   snoozed: 0,
 };
 
-const createWrapper = (dataSource?: ReturnType<typeof createTestEpisodeSource>) => {
+const createWrapper = (
+  dataSource?: ReturnType<typeof createTestEpisodeSource>,
+  queryV2Source = true
+) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
   return ({ children }: { children: React.ReactNode }) => {
     const qcProvider = React.createElement(QueryClientProvider, { client: queryClient }, children);
-    return dataSource
-      ? React.createElement(EpisodeDataSourceProvider, { dataSource }, qcProvider)
+    return dataSource || !queryV2Source
+      ? React.createElement(EpisodeDataSourceProvider, { dataSource, queryV2Source }, qcProvider)
       : qcProvider;
   };
 };
@@ -327,6 +330,45 @@ describe('useEpisodesKpisQuery', () => {
       snoozed: 1,
     });
     expect(result.current.sourceErrors).toEqual([{ sourceId: 'v2', error: v2Error }]);
+  });
+
+  it('skips the v2 query and returns source-only KPIs when queryV2Source is false', async () => {
+    const { result } = renderHook(
+      () =>
+        useEpisodesKpisQuery({
+          services: mockServices,
+          filterState: {},
+          timeRange: mockTimeRange,
+        }),
+      {
+        wrapper: createWrapper(
+          sourceWithKpis(
+            jest.fn().mockResolvedValue({
+              alerts_count: 10,
+              firing_rules: 3,
+              assigned_to_me: 0,
+              unassigned: 10,
+              acknowledged: 2,
+              snoozed: 1,
+            })
+          ),
+          false
+        ),
+      }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+    expect(result.current.sourceErrors).toEqual([]);
+    expect(result.current.data).toEqual({
+      alertsCount: 10,
+      firingRules: 3,
+      assignedToMe: 0,
+      unassigned: 10,
+      acknowledged: 2,
+      snoozed: 1,
+    });
   });
 
   it('returns v2-only KPIs when a source does not implement KPIs', async () => {

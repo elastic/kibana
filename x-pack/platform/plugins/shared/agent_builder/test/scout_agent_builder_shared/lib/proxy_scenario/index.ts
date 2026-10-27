@@ -9,6 +9,8 @@ export {
   setupAgentDirectAnswer,
   setupAgentDirectError,
   setupAgentHangingAnswer,
+  setupAgentCallTool,
+  setupAgentCallToolThenAnswer,
   setupAgentCallSearchToolWithEsqlThenAnswer,
   setupAgentCallSearchToolWithNoIndexSelectedThenAnswer,
   setupAgentParallelToolCallsThenAnswer,

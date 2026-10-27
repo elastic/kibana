@@ -10,7 +10,12 @@ import { createHash } from 'crypto';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
-import { writeEntityIds, hashEntityId, matchExistingTargetIds } from './update_entities';
+import {
+  writeEntityIds,
+  hashEntityId,
+  matchExistingTargetIds,
+  TARGET_VALIDATION_CHUNK_SIZE,
+} from './update_entities';
 import type { EntityRelationshipRecord } from './types';
 
 const makeCrudClient = (errors: Array<{ status: number }> = []): EntityUpdateClient =>
@@ -422,6 +427,67 @@ describe('matchExistingTargetIds', () => {
     expect(call.index).toContain('acme');
     expect(call.query.terms['entity.id']).toEqual(['host:x']);
   });
+
+  describe('more candidates than one search may return', () => {
+    // One more than two full chunks, so the last chunk is a partial one.
+    const candidateCount = TARGET_VALIDATION_CHUNK_SIZE * 2 + 1;
+    const candidates = new Set(
+      Array.from({ length: candidateCount }, (_, i) => `user:u${i}@workday`)
+    );
+
+    // Echoes back every requested ID, as if all of them exist.
+    const makeEchoEsClient = (): ElasticsearchClient =>
+      ({
+        search: jest.fn(async ({ query }) => ({
+          hits: {
+            hits: (query.terms['entity.id'] as string[]).map((id) => ({
+              fields: { 'entity.id': [id] },
+            })),
+          },
+        })),
+      } as unknown as ElasticsearchClient);
+
+    it('never asks a single search for more hits than index.max_result_window allows', async () => {
+      const esClient = makeEchoEsClient();
+      await matchExistingTargetIds(esClient, 'default', candidates);
+
+      const calls = (esClient.search as jest.Mock).mock.calls;
+      expect(calls).toHaveLength(3);
+      for (const [request] of calls) {
+        expect(request.size).toBeLessThanOrEqual(10_000);
+        expect(request.size).toBe(request.query.terms['entity.id'].length);
+      }
+    });
+
+    it('checks every candidate exactly once and merges the results', async () => {
+      const esClient = makeEchoEsClient();
+      const result = await matchExistingTargetIds(esClient, 'default', candidates);
+
+      const requested = (esClient.search as jest.Mock).mock.calls.flatMap(
+        ([request]) => request.query.terms['entity.id']
+      );
+      expect(requested).toHaveLength(candidateCount);
+      expect(new Set(requested)).toEqual(candidates);
+      expect(result).toEqual(candidates);
+    });
+
+    it('rethrows a failed search with the failing chunk in the message and the original as cause', async () => {
+      const esClient = makeEchoEsClient();
+      const searchError = new Error('search_phase_execution_exception');
+      (esClient.search as jest.Mock)
+        .mockResolvedValueOnce({ hits: { hits: [] } })
+        .mockRejectedValueOnce(searchError);
+
+      const error = await matchExistingTargetIds(esClient, 'default', candidates).catch(
+        (err: Error) => err
+      );
+
+      expect(error).toBeInstanceOf(Error);
+      expect((error as Error).message).toContain('chunk 2/3');
+      expect((error as Error).message).toContain('search_phase_execution_exception');
+      expect((error as Error).cause).toBe(searchError);
+    });
+  });
 });
 
 describe('writeEntityIds — validateTargetIds', () => {
@@ -484,6 +550,34 @@ describe('writeEntityIds — validateTargetIds', () => {
 
     expect(result.targetIdsNotInStore).toBe(1);
     expect(result.updated).toBe(0);
+    expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
+  });
+
+  it('rethrows a target-validation search rejection without writing', async () => {
+    const crudClient = makeCrudClient();
+    const esClient = {
+      search: jest.fn().mockRejectedValue(new Error('validation boom')),
+    } as unknown as ElasticsearchClient;
+    const records: EntityRelationshipRecord[] = [
+      {
+        entityId: 'host:admin.corp.com',
+        entityType: 'host',
+        relationships: { administers: ['host:target.corp.com'] },
+      },
+    ];
+
+    await expect(
+      writeEntityIds(
+        crudClient,
+        loggerMock.create(),
+        records,
+        esClient,
+        'default',
+        true,
+        '[supervises][workday]'
+      )
+    ).rejects.toThrow(/Target ID validation failed on chunk 1\/1.*validation boom/);
+
     expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
   });
 

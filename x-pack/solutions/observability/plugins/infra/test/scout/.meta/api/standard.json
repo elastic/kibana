@@ -1,5 +1,5 @@
 {
-  "sha1": "cd91ae8babf97f579f5ae1ad5806ad5ed79bde43",
+  "sha1": "7117df751fa280f7d57b344d93b98076e18cc144",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -773,6 +773,54 @@
       }
     },
     {
+      "id": "090e74d0bdda817-7894f53cdf1cd76",
+      "title": "API /api/infra/metadata (semconv pods) returns kubeletstats metadata for an OpenTelemetry pod",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metadata_semconv_pods.spec.ts",
+        "line": 62,
+        "column": 13
+      }
+    },
+    {
+      "id": "090e74d0bdda817-9b23c6ce15f1a04",
+      "title": "API /api/infra/metadata (semconv pods) does not treat an OpenTelemetry pod as Elastic Common Schema",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metadata_semconv_pods.spec.ts",
+        "line": 80,
+        "column": 14
+      }
+    },
+    {
+      "id": "090e74d0bdda817-36648e4ab2a7a14",
+      "title": "API /api/infra/metadata (semconv pods) keeps an Elastic Common Schema pod on the default path",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metadata_semconv_pods.spec.ts",
+        "line": 98,
+        "column": 11
+      }
+    },
+    {
       "id": "a7b84fa3efec8bc-a9f97645fb67aba",
       "title": "API /api/infra/metadata returns host metadata for 7.0.0 archive",
       "expectedStatus": "passed",
@@ -784,7 +832,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metadata.spec.ts",
-        "line": 43,
+        "line": 42,
         "column": 32
       }
     },
@@ -800,7 +848,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metadata.spec.ts",
-        "line": 55,
+        "line": 54,
         "column": 21
       }
     },
@@ -816,7 +864,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metadata.spec.ts",
-        "line": 72,
+        "line": 71,
         "column": 16
       }
     },
@@ -832,7 +880,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metadata.spec.ts",
-        "line": 129,
+        "line": 128,
         "column": 20
       }
     },
@@ -848,7 +896,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metadata.spec.ts",
-        "line": 185,
+        "line": 184,
         "column": 23
       }
     },
@@ -864,7 +912,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metadata.spec.ts",
-        "line": 244,
+        "line": 243,
         "column": 9
       }
     },
@@ -1059,6 +1107,86 @@
       }
     },
     {
+      "id": "b1630f3ffad49cd-d197ccf9f62911d",
+      "title": "API /api/metrics/node_details (semconv pods) returns kubeletstats charts for an OpenTelemetry pod",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/node_details_semconv_pods.spec.ts",
+        "line": 103,
+        "column": 48
+      }
+    },
+    {
+      "id": "b1630f3ffad49cd-4fb85a9734ca9e5",
+      "title": "API /api/metrics/node_details (semconv pods) sums network traffic across interfaces for an OpenTelemetry pod",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/node_details_semconv_pods.spec.ts",
+        "line": 149,
+        "column": 16
+      }
+    },
+    {
+      "id": "b1630f3ffad49cd-3441cd6c112056e",
+      "title": "API /api/metrics/node_details (semconv pods) falls back to node utilization when a limit is absent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/node_details_semconv_pods.spec.ts",
+        "line": 177,
+        "column": 24
+      }
+    },
+    {
+      "id": "b1630f3ffad49cd-88a25938397c148",
+      "title": "API /api/metrics/node_details (semconv pods) does not find an OpenTelemetry pod on the default schema",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/node_details_semconv_pods.spec.ts",
+        "line": 189,
+        "column": 82
+      }
+    },
+    {
+      "id": "b1630f3ffad49cd-a7c63990daeb50a",
+      "title": "API /api/metrics/node_details (semconv pods) keeps an Elastic Common Schema pod on the default path",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/node_details_semconv_pods.spec.ts",
+        "line": 201,
+        "column": 80
+      }
+    },
+    {
       "id": "57a70e4c10c3397-987f7527a8b18b7",
       "title": "API /api/metrics/node_details should basically work",
       "expectedStatus": "passed",
@@ -1070,7 +1198,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/node_details.spec.ts",
-        "line": 57,
+        "line": 56,
         "column": 38
       }
     },
@@ -1086,7 +1214,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/node_details.spec.ts",
-        "line": 66,
+        "line": 65,
         "column": 62
       }
     },
@@ -1102,7 +1230,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/node_details.spec.ts",
-        "line": 76,
+        "line": 75,
         "column": 19
       }
     },
@@ -1118,7 +1246,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/node_details.spec.ts",
-        "line": 87,
+        "line": 86,
         "column": 28
       }
     },
@@ -1379,6 +1507,86 @@
       }
     },
     {
+      "id": "3eb243d5be70519-4075ede826e26ce",
+      "title": "API /api/metrics/snapshot (semconv pods) returns OTel pods when schema=semconv",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_semconv_pods.spec.ts",
+        "line": 75,
+        "column": 61
+      }
+    },
+    {
+      "id": "3eb243d5be70519-7944b4d427308cb",
+      "title": "API /api/metrics/snapshot (semconv pods) returns only ECS pods when schema is omitted on mixed data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_semconv_pods.spec.ts",
+        "line": 142,
+        "column": 13
+      }
+    },
+    {
+      "id": "3eb243d5be70519-1b9a44deee15410",
+      "title": "API /api/metrics/snapshot (semconv pods) returns only ECS pods when schema=ecs on mixed data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_semconv_pods.spec.ts",
+        "line": 165,
+        "column": 93
+      }
+    },
+    {
+      "id": "3eb243d5be70519-cc1f8aa5266c41b",
+      "title": "API /api/metrics/snapshot (semconv pods) groups SemConv pods by k8s.node.name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_semconv_pods.spec.ts",
+        "line": 190,
+        "column": 78
+      }
+    },
+    {
+      "id": "3eb243d5be70519-c7df8e5baea2750",
+      "title": "API /api/metrics/snapshot (semconv pods) includes timeseries rows for SemConv pod cpu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/snapshot_semconv_pods.spec.ts",
+        "line": 217,
+        "column": 86
+      }
+    },
+    {
       "id": "c438c686ebabc3c-5565529ec00c535",
       "title": "API /api/metrics/snapshot (semconv) returns OTel hosts when schema=semconv (cpu)",
       "expectedStatus": "passed",
@@ -1518,8 +1726,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
-        "line": 174,
-        "column": 24
+        "line": 179,
+        "column": 14
       }
     },
     {
@@ -1534,7 +1742,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
-        "line": 187,
+        "line": 194,
         "column": 5
       }
     },
@@ -1550,7 +1758,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
-        "line": 198,
+        "line": 205,
         "column": 16
       }
     }

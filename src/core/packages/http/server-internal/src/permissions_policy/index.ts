@@ -9,3 +9,4 @@
 
 export { permissionsPolicyConfig } from './config';
 export type { PermissionsPolicyConfigType } from './config';
+export { addReportToParameter } from './report_to_parameter';

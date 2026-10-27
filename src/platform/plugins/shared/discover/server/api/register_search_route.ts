@@ -13,7 +13,10 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { getRouteConfig } from './get_route_config';
-import { discoverSessionSearchParamsSchema, discoverSessionSearchResponseSchema } from './schema';
+import {
+  discoverSessionSearchRequestParamsSchema,
+  discoverSessionSearchResponseSchema,
+} from './schema';
 import { searchDiscoverSessions } from './session_search';
 
 export const registerSearchRoute = (
@@ -27,6 +30,7 @@ export const registerSearchRoute = (
     .get({
       path: basePath,
       summary: 'Search Discover sessions',
+      operationId: 'search-discover-sessions',
       description:
         'Returns a paginated summary list of Discover sessions. Use `GET /api/discover_sessions/{id}` for the full session state.',
       ...routeConfig,
@@ -34,9 +38,13 @@ export const registerSearchRoute = (
     .addVersion(
       {
         version: routeVersion,
+        options: {
+          oasOperationObject: async () =>
+            (await import('./oas_examples')).searchDiscoverSessionsOASOperationObject,
+        },
         validate: {
           request: {
-            query: discoverSessionSearchParamsSchema,
+            query: discoverSessionSearchRequestParamsSchema,
           },
           response: {
             200: {

@@ -1,0 +1,4 @@
+Task: merge this follow-up investigation into the existing decision tree (existing tree = Plan A, this turn = Plan B).
+No root cause has been confirmed, so do not mark branches as human-verified or causal.
+Collapse overlapping steps onto the existing nodes (duplicate notifications, repeat firings, and count/timestamp churn are almost always already represented); reuse their IDs and add only the genuinely unique decision/evidence/outcome nodes this turn introduces, preserving unrelated branches.
+When done, call {{submit_tool}} (with an empty symptom_trees list if the tree already covers this turn).

@@ -8,6 +8,7 @@
 import {
   ALERT_EPISODE_ACTION_TYPE,
   createDeactivateEpisodeActionBodySchema,
+  errorResponseSchema,
 } from '@kbn/alerting-v2-schemas';
 import { createDeactivateEpisodeActionOasExamples } from './create_deactivate_episode_action_oas_example';
 import { createEpisodeActionRouteForType } from './create_episode_action_route_for_type';
@@ -15,8 +16,16 @@ import { createEpisodeActionRouteForType } from './create_episode_action_route_f
 export const CreateDeactivateEpisodeActionRoute = createEpisodeActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
   pathSuffix: '_deactivate',
-  summary: 'Deactivate an alert episode',
+  summary: 'Deactivate an alert',
   bodySchema: createDeactivateEpisodeActionBodySchema,
   oasOperationObject: createDeactivateEpisodeActionOasExamples,
   access: 'public' as const,
+  availability: { stability: 'stable' as const, since: '9.6.0' },
+  additionalResponses: {
+    409: {
+      body: () => errorResponseSchema,
+      description:
+        'Indicates the alert has been superseded by a newer alert in its series, or is already in the requested state.',
+    },
+  },
 });

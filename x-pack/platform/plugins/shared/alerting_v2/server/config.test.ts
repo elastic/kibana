@@ -7,9 +7,18 @@
 
 import { configSchema, getQueryRowLimit } from './config';
 import {
-  ESQL_RESPONSE_FORMAT_NAMES,
+  findEsqlResponseFormat,
   NON_STREAMING_MAX_ROWS,
 } from './lib/services/query_service/formats';
+import type { EsqlResponseFormat } from './lib/services/query_service/formats';
+
+const formatByName = (name: string): EsqlResponseFormat => {
+  const format = findEsqlResponseFormat(name);
+  if (!format) {
+    throw new Error(`Test fixture references an unregistered ES|QL format: ${name}`);
+  }
+  return format;
+};
 
 describe('alerting_v2 config schema', () => {
   describe('enabled', () => {
@@ -126,29 +135,23 @@ describe('alerting_v2 config schema', () => {
 
   describe('getQueryRowLimit', () => {
     it('uses min(alerts.max, NON_STREAMING_MAX_ROWS) for the json response format', () => {
-      const config = configSchema.validate({ esql: { responseFormat: 'json' } });
-      expect(getQueryRowLimit(config)).toBe(NON_STREAMING_MAX_ROWS);
+      const config = configSchema.validate({});
+      expect(getQueryRowLimit(config, formatByName('json'))).toBe(NON_STREAMING_MAX_ROWS);
     });
 
     it('uses alerts.max for the arrow response format', () => {
-      const config = configSchema.validate({ esql: { responseFormat: 'arrow' } });
-      expect(getQueryRowLimit(config)).toBe(10000);
+      const config = configSchema.validate({});
+      expect(getQueryRowLimit(config, formatByName('arrow'))).toBe(10000);
     });
 
     it('honors a lower alerts.max on the json response format', () => {
-      const config = configSchema.validate({
-        esql: { responseFormat: 'json' },
-        rules: { run: { alerts: { max: 500 } } },
-      });
-      expect(getQueryRowLimit(config)).toBe(500);
+      const config = configSchema.validate({ rules: { run: { alerts: { max: 500 } } } });
+      expect(getQueryRowLimit(config, formatByName('json'))).toBe(500);
     });
 
     it('honors a lower alerts.max on the arrow response format', () => {
-      const config = configSchema.validate({
-        esql: { responseFormat: 'arrow' },
-        rules: { run: { alerts: { max: 500 } } },
-      });
-      expect(getQueryRowLimit(config)).toBe(500);
+      const config = configSchema.validate({ rules: { run: { alerts: { max: 500 } } } });
+      expect(getQueryRowLimit(config, formatByName('arrow'))).toBe(500);
     });
   });
 
@@ -185,6 +188,14 @@ describe('alerting_v2 config schema', () => {
         configSchema.validate({ rules: { run: { query: { maxResponseSize: 'ten megs' } } } })
       ).toThrow();
     });
+
+    it('rejects values above 200mb', () => {
+      expect(() =>
+        configSchema.validate({
+          rules: { run: { query: { maxResponseSize: '201mb' } } },
+        })
+      ).toThrow();
+    });
   });
 
   describe('rules.run.timeout', () => {
@@ -206,28 +217,88 @@ describe('alerting_v2 config schema', () => {
     });
   });
 
-  describe('esql.responseFormat', () => {
-    it('defaults to json', () => {
+  describe('retention.ruleEvents', () => {
+    it('is disabled with a 90d retention by default', () => {
       const config = configSchema.validate({});
-      expect(config.esql.responseFormat).toBe('json');
+      expect(config.retention.ruleEvents).toEqual({ enabled: false, dataRetention: '90d' });
     });
 
-    it('accepts arrow', () => {
-      expect(configSchema.validate({ esql: { responseFormat: 'arrow' } }).esql.responseFormat).toBe(
-        'arrow'
+    it('accepts a custom retention', () => {
+      expect(
+        configSchema.validate({
+          retention: { ruleEvents: { enabled: true, dataRetention: '45d' } },
+        }).retention.ruleEvents
+      ).toEqual({ enabled: true, dataRetention: '45d' });
+    });
+
+    it.each(['30d', '720h'])('accepts the 30d floor expressed as %s', (dataRetention) => {
+      expect(
+        configSchema.validate({ retention: { ruleEvents: { dataRetention } } }).retention.ruleEvents
+          .dataRetention
+      ).toBe(dataRetention);
+    });
+
+    it.each(['29d', '1h', '500ms'])('rejects %s, below the 30d floor', (dataRetention) => {
+      expect(() => configSchema.validate({ retention: { ruleEvents: { dataRetention } } })).toThrow(
+        /cannot be less than 30d/
       );
     });
 
-    it('rejects an unknown format', () => {
-      expect(() => configSchema.validate({ esql: { responseFormat: 'csv' } })).toThrow();
+    it('rejects weeks, which Elasticsearch does not accept', () => {
+      expect(() =>
+        configSchema.validate({ retention: { ruleEvents: { dataRetention: '13w' } } })
+      ).toThrow(/weeks are not supported/);
     });
 
-    it('accepts every name the format registry advertises', () => {
-      for (const name of ESQL_RESPONSE_FORMAT_NAMES) {
-        expect(configSchema.validate({ esql: { responseFormat: name } }).esql.responseFormat).toBe(
-          name
-        );
-      }
+    it('rejects a malformed duration', () => {
+      expect(() =>
+        configSchema.validate({ retention: { ruleEvents: { dataRetention: 'abc' } } })
+      ).toThrow(/Invalid duration/);
+    });
+  });
+
+  describe('retention.alertActions.dispatcher', () => {
+    it('is disabled with a 90d retention by default', () => {
+      const config = configSchema.validate({});
+      expect(config.retention.alertActions.dispatcher).toEqual({
+        enabled: false,
+        dataRetention: '90d',
+      });
+    });
+
+    it('accepts a custom retention', () => {
+      expect(
+        configSchema.validate({
+          retention: { alertActions: { dispatcher: { enabled: true, dataRetention: '7d' } } },
+        }).retention.alertActions.dispatcher
+      ).toEqual({ enabled: true, dataRetention: '7d' });
+    });
+
+    it.each(['1d', '24h', '2w'])('accepts %s', (dataRetention) => {
+      expect(
+        configSchema.validate({ retention: { alertActions: { dispatcher: { dataRetention } } } })
+          .retention.alertActions.dispatcher.dataRetention
+      ).toBe(dataRetention);
+    });
+
+    it.each(['23h', '1h', '500ms'])('rejects %s, below the 1d floor', (dataRetention) => {
+      expect(() =>
+        configSchema.validate({ retention: { alertActions: { dispatcher: { dataRetention } } } })
+      ).toThrow(/cannot be less than 1d/);
+    });
+
+    it('rejects a malformed duration', () => {
+      expect(() =>
+        configSchema.validate({
+          retention: { alertActions: { dispatcher: { dataRetention: 'abc' } } },
+        })
+      ).toThrow(/Invalid duration/);
+    });
+  });
+
+  describe('esql', () => {
+    it('no longer exposes a response format setting (it is the alertingV2.esqlResponseFormat feature flag)', () => {
+      expect(() => configSchema.validate({ esql: { responseFormat: 'arrow' } })).toThrow();
     });
   });
 });

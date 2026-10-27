@@ -12,6 +12,7 @@ import {
   accessControlRoleMeets,
   maxAccessControlRole,
   type AgentAccessControl,
+  type AgentAccessControlEntry,
   type CurrentUser,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
@@ -80,6 +81,23 @@ const accessControlModeRole = (
 };
 
 /**
+ * Matches an access-control entry against the current user: by stable `id` when the entry has one,
+ * otherwise by username for legacy name-only entries.
+ */
+export const matchesAccessControlEntry = (
+  entry: AgentAccessControlEntry,
+  user: UserIdAndName
+): boolean => {
+  if (entry.type !== 'user') {
+    return false;
+  }
+  if (entry.id !== undefined) {
+    return user.id !== undefined && entry.id === user.id;
+  }
+  return entry.name !== undefined && user.username !== undefined && entry.name === user.username;
+};
+
+/**
  * Returns the strongest explicit access-control entry that applies to the current user.
  */
 const accessControlRoleForUser = (
@@ -92,7 +110,7 @@ const accessControlRoleForUser = (
   // V1: only user-type entries. Role-type grants land in V2.
   let best: AgentAccessControlRole | undefined;
   for (const entry of accessControl.entries) {
-    if (entry.type === 'user' && currentUser.username && entry.name === currentUser.username) {
+    if (matchesAccessControlEntry(entry, currentUser)) {
       best = maxAccessControlRole(best, entry.role);
     }
   }
@@ -151,6 +169,21 @@ export const canChangeAgentAccessControl = (
     return false;
   }
   const role = getEffectiveAgentRole(args);
+  return role === 'admin' || role === 'owner' || role === AgentAccessControlRole.Manager;
+};
+
+/**
+ * Checks whether the caller can change the agent's auto-approved APIs.
+ *
+ * This requires admin, owner, or Manager access. Only admins can change them on the default agent.
+ */
+export const canConfigureAgentApprovals = (
+  args: AgentAuthzArgs & { agentId?: string }
+): boolean => {
+  const role = getEffectiveAgentRole(args);
+  if (args.agentId === agentBuilderDefaultAgentId) {
+    return role === 'admin';
+  }
   return role === 'admin' || role === 'owner' || role === AgentAccessControlRole.Manager;
 };
 

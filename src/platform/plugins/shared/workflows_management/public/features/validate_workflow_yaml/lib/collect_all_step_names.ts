@@ -8,8 +8,8 @@
  */
 
 import { type Document, isPair, isScalar, type LineCounter, visit } from 'yaml';
+import type { StepNameInfo } from '@kbn/workflows-yaml';
 import { getPathFromAncestors } from '../../../../common/lib/yaml';
-import type { StepNameInfo } from '../model/types';
 
 export function collectAllStepNames(
   yamlDocument: Document,

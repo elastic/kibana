@@ -62,10 +62,13 @@ export function createEsAggsIdMapEntry({
   ) {
     const sourceField = col.sourceField ? col.sourceField : indexPattern.timeFieldName ?? '';
     const { usedField } = getTimeZoneAndInterval({ ...col, sourceField }, indexPattern);
+    const isTimeField =
+      indexPattern.timeFieldName !== undefined &&
+      (indexPattern.timeFieldName === usedField?.name ||
+        indexPattern.timeFieldName === indexPattern.getFieldByName(sourceField)?.name);
 
     const dropPartials = Boolean(
-      col.params?.dropPartials &&
-        (indexPattern.timeFieldName === usedField?.name || !col.params?.ignoreTimeRange)
+      col.params?.dropPartials && (isTimeField || !col.params?.ignoreTimeRange)
     );
 
     return [

@@ -22,15 +22,20 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { ConversationTemplateTabDefinition } from '@kbn/agent-builder-browser';
-import { BUILTIN_TAB_IDS } from '@kbn/agent-builder-browser';
+import {
+  BUILTIN_TAB_IDS,
+  CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
+} from '@kbn/agent-builder-browser';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { useConversation } from '../application/hooks/use_conversation';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
+import { flyoutMenuRowStyles } from './flyout_menu_row_styles';
 
-const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.title', {
+export const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.title', {
   defaultMessage: 'Chat info',
 });
 
@@ -39,6 +44,8 @@ const ERROR_BODY = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.
 });
 
 const POLL_INTERVAL_MS = 5_000;
+
+const isNotFoundError = (error: IHttpFetchError | null): boolean => error?.response?.status === 404;
 
 type ResolvedTab = ConversationTemplateTabDefinition & { id: string };
 
@@ -196,6 +203,7 @@ export interface ConversationDetailsFlyoutSnapshotProps {
   conversationsService: ConversationsService;
   conversationTemplatesService: ConversationTemplatesService;
   titleId: string;
+  onNotFound?: () => void;
 }
 
 /**
@@ -208,16 +216,27 @@ export const ConversationDetailsFlyoutSnapshot = ({
   conversationsService,
   conversationTemplatesService,
   titleId,
+  onNotFound,
 }: ConversationDetailsFlyoutSnapshotProps) => {
   const {
     data: conversation,
+    error,
     isLoading,
     refetch,
-  } = useQuery({
+  } = useQuery<Conversation, IHttpFetchError>({
     queryKey: ['conversation-details-flyout-snapshot', conversationId],
     queryFn: () => conversationsService.get({ conversationId }),
-    refetchInterval: POLL_INTERVAL_MS,
+    retry: (failureCount, httpError) => !isNotFoundError(httpError) && failureCount < 3,
+    refetchInterval: (data, query) =>
+      isNotFoundError(query.state.error) ? false : POLL_INTERVAL_MS,
   });
+
+  const isNotFound = isNotFoundError(error);
+  useEffect(() => {
+    if (isNotFound) {
+      onNotFound?.();
+    }
+  }, [isNotFound, onNotFound]);
 
   const refetchConversation = useCallback(async () => {
     await refetch();
@@ -264,15 +283,27 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
   const { conversation, isLoading } = useConversation();
   const { conversationTemplatesService } = useAgentBuilderServices();
 
+  const trailingActions = useMemo(() => {
+    if (!conversation?.template_id) {
+      return undefined;
+    }
+    const definition = conversationTemplatesService.getTemplateUIDefinition(
+      conversation.template_id
+    );
+    return definition?.detailsFlyout?.trailingActions?.({ conversation });
+  }, [conversation, conversationTemplatesService]);
+
   return (
     <EuiFlyout
       onClose={onClose}
-      session="never"
+      session="start"
+      historyKey={CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY}
       flyoutMenuDisplayMode="always"
-      flyoutMenuProps={{}}
+      flyoutMenuProps={{ title: FLYOUT_TITLE, trailingActions }}
       size="s"
       type="push"
       paddingSize="m"
+      css={flyoutMenuRowStyles}
       role="region"
       aria-labelledby={titleId}
       data-test-subj="agentBuilderConversationDetailsFlyout-live"

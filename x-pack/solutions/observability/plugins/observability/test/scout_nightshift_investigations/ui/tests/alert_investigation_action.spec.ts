@@ -65,7 +65,7 @@ test.describe(
       });
     });
 
-    test('sends an investigation request from an alert row action', async ({
+    test('starts and views an investigation from an alert row action', async ({
       page,
       pageObjects,
     }) => {
@@ -87,11 +87,16 @@ test.describe(
       await pageObjects.alertsTablePage.clickInvestigate();
 
       expect((await requestPromise).postDataJSON()).toMatchObject({
-        subject: { type: 'alert', id: alertId },
+        subject: { type: 'alert', ids: [alertId] },
       });
+
+      await pageObjects.toasts.waitForToastWithText('Investigation started');
+      expect(await pageObjects.toasts.getMessageText()).toContain('You will find it in Nightshift');
+      await pageObjects.alertPage.viewStartedInvestigation();
+      await expect(page).toHaveURL(/\/app\/nightshift\?investigationId=investigation-1$/);
     });
 
-    test('sends an investigation request from the alert detail action menu', async ({
+    test('starts and views an investigation from the alert detail action menu', async ({
       page,
       pageObjects,
     }) => {
@@ -106,14 +111,20 @@ test.describe(
       await pageObjects.alertPage.clickInvestigate();
 
       expect((await requestPromise).postDataJSON()).toMatchObject({
-        subject: { type: 'alert', id: alertId },
+        subject: { type: 'alert', ids: [alertId] },
       });
+
+      await pageObjects.toasts.waitForToastWithText('Investigation started');
+      expect(await pageObjects.toasts.getMessageText()).toContain('You will find it in Nightshift');
+      await pageObjects.alertPage.viewStartedInvestigation();
+      await expect(page).toHaveURL(/\/app\/nightshift\?investigationId=investigation-1$/);
     });
 
     test('views a completed investigation from an alert row action', async ({
       page,
       pageObjects,
     }) => {
+      await mockInvestigationApi(page, { includeCompletedInvestigation: true });
       await pageObjects.alertsTablePage.gotoWithAppState({
         kuery: `kibana.alert.rule.uuid: "${ruleId}"`,
         rangeFrom: 'now-1h',
@@ -126,25 +137,30 @@ test.describe(
       await pageObjects.alertsTablePage.openActionsMenuForRow(0);
       await pageObjects.alertsTablePage.clickViewInvestigation();
 
+      // The Nightshift app opens the investigation's Agent Builder conversation details flyout for
+      // this link (covered by its unit tests); the serverless config set has no agentic
+      // investigations, which that flyout needs.
       await expect
         .poll(() => page.url())
         .toContain(`/app/nightshift?investigationId=investigation-1`);
-      await expect(page.testSubj.locator('nightshiftInvestigationDetailFlyout')).toBeVisible();
     });
 
     test('views a completed investigation from the alert detail action menu', async ({
       page,
       pageObjects,
     }) => {
+      await mockInvestigationApi(page, { includeCompletedInvestigation: true });
       await pageObjects.alertPage.goto(alertId);
       await pageObjects.alertPage.openActionsMenu();
 
       await pageObjects.alertPage.clickViewInvestigation();
 
+      // The Nightshift app opens the investigation's Agent Builder conversation details flyout for
+      // this link (covered by its unit tests); the serverless config set has no agentic
+      // investigations, which that flyout needs.
       await expect
         .poll(() => page.url())
         .toContain(`/app/nightshift?investigationId=investigation-1`);
-      await expect(page.testSubj.locator('nightshiftInvestigationDetailFlyout')).toBeVisible();
     });
   }
 );

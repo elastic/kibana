@@ -14,10 +14,7 @@ export type { WorkloadBindingAttributes, WorkloadBindingCoordinates } from './bi
 export { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './resolve_workload_binder';
 export { WorkloadBindingStore } from './workload_binding_store';
 export type { WorkloadBindingStoreOptions } from './workload_binding_store';
-export {
-  createNotImplementedWorkloadBindings,
-  ServiceAccountWorkloadBindings,
-} from './workload_bindings';
+export { ServiceAccountWorkloadBindings } from './workload_bindings';
 export type {
   ServiceAccountWorkloadBindingsApi,
   ServiceAccountWorkloadBindingsOptions,

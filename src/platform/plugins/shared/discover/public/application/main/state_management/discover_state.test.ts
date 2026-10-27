@@ -19,6 +19,8 @@ import {
   fromTabStateToSavedObjectTab,
   internalStateActions,
   selectHasUnsavedChanges,
+  getDataViewOfSource,
+  getTabDataView,
   selectTabRuntimeState,
   createRuntimeStateManager,
   selectTabSavedSearch,
@@ -37,6 +39,7 @@ import {
   savedSearchMockWithESQL,
 } from '../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { waitFor } from '@testing-library/react';
 import { FetchStatus } from '../../types';
@@ -73,12 +76,16 @@ import {
   type ProfileStateDefinition,
 } from '../../../../common/context_awareness';
 import type { DiscoverSessionApiClassicTab } from '@kbn/as-code-discover-schema';
-import type { DiscoverSessionApiResponse } from '../../../../server';
+import type { DiscoverSessionApiResponse, DiscoverSessionWarning } from '../../../../server';
+import {
+  discoverSessionInternalDataSchema,
+  type DiscoverSessionInternalResponse,
+} from '../../../../server/api/internal_schema';
 import { fromDiscoverSessionApiResponse } from '../../../session/session_conversions';
-import { createSessionService } from '../../../session/session_service';
+import { createDiscoverSessionService } from '../../../session/session_service';
 import type {
   DiscoverSessionClient,
-  DiscoverSessionRequestData,
+  DiscoverSessionClientRequestData,
 } from '../../../session/api_client';
 import { TABS_LOCAL_STORAGE_KEY } from './tabs_storage_manager';
 import { appLocatorGetLocationCommon } from '../../../../common/app_locator_get_location';
@@ -360,6 +367,39 @@ describe('Discover state', () => {
     });
   });
 
+  describe('Session load warnings', () => {
+    const warning: DiscoverSessionWarning = {
+      type: 'dropped_item',
+      tab_id: 'tab-1',
+      key: 'control_panels',
+      item_id: 'control-1',
+      message: 'Unable to transform control panel [control-1].',
+    };
+
+    test.each([
+      { warnings: [], toastCount: 0 },
+      { warnings: [warning], toastCount: 1 },
+    ])(
+      'shows $toastCount warning toasts when loading $warnings',
+      async ({ warnings, toastCount }) => {
+        const { internalState, services } = getDiscoverInternalStateMock();
+        const session = createDiscoverSessionMock({ id: 'test-session' });
+        jest
+          .spyOn(services.discoverSessionService, 'get')
+          .mockResolvedValueOnce({ session, warnings });
+
+        await internalState.dispatch(internalStateActions.loadDataViewList()).unwrap();
+        await internalState
+          .dispatch(internalStateActions.initializeTabs({ discoverSessionId: session.id }))
+          .unwrap();
+
+        expect(services.discoverSessionService.get).toHaveBeenCalledWith(session.id);
+        expect(internalState.getState().persistedDiscoverSession).toEqual(session);
+        expect(services.core.notifications.toasts.addWarning).toHaveBeenCalledTimes(toastCount);
+      }
+    );
+  });
+
   describe('Loading a session with an inline data view', () => {
     const storedFilters: Filter[] = [
       {
@@ -523,10 +563,9 @@ describe('Discover state', () => {
         }).hasUnsavedChanges
       ).toBe(false);
 
-      const dataViewBeforeRefresh = selectTabRuntimeState(
-        firstLoad.runtimeStateManager,
-        tabId
-      ).currentDataView$.getValue();
+      const dataViewBeforeRefresh = getTabDataView(
+        selectTabRuntimeState(firstLoad.runtimeStateManager, tabId)
+      );
       expect(dataViewBeforeRefresh?.id).toBeDefined();
       expectLoadedFilters(services, dataViewBeforeRefresh?.id);
 
@@ -559,9 +598,9 @@ describe('Discover state', () => {
       );
       await reloaded.initializeSingleTab({ tabId });
 
-      expect(
-        selectTabRuntimeState(reloaded.runtimeStateManager, tabId).currentDataView$.getValue()?.id
-      ).toBe(dataViewBeforeRefresh?.id);
+      expect(getTabDataView(selectTabRuntimeState(reloaded.runtimeStateManager, tabId))?.id).toBe(
+        dataViewBeforeRefresh?.id
+      );
       expectLoadedFilters(reloadedServices, dataViewBeforeRefresh?.id);
       expect(
         selectHasUnsavedChanges(reloaded.internalState.getState(), {
@@ -605,27 +644,25 @@ describe('Discover state', () => {
       });
       const firstTabId = state.getCurrentTab().id;
       await state.initializeSingleTab({ tabId: firstTabId });
-      const firstDataViewId = selectTabRuntimeState(
-        state.runtimeStateManager,
-        firstTabId
-      ).currentDataView$.getValue()?.id;
+      const firstDataViewId = getTabDataView(
+        selectTabRuntimeState(state.runtimeStateManager, firstTabId)
+      )?.id;
       expect(firstDataViewId).toEqual(expect.any(String));
       expectLoadedFilters(services, firstDataViewId);
 
       await state.initializeSingleTab({ tabId: secondTab.id });
-      const secondDataViewId = selectTabRuntimeState(
-        state.runtimeStateManager,
-        secondTab.id
-      ).currentDataView$.getValue()?.id;
+      const secondDataViewId = getTabDataView(
+        selectTabRuntimeState(state.runtimeStateManager, secondTab.id)
+      )?.id;
       expect(secondDataViewId).toEqual(expect.any(String));
       expect(firstDataViewId === secondDataViewId).toBe(sameId);
       expectLoadedFilters(services, secondDataViewId);
       expect(getUnsavedChanges()).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
 
       await state.switchToTab({ tabId: firstTabId });
-      expect(
-        selectTabRuntimeState(state.runtimeStateManager, firstTabId).currentDataView$.getValue()?.id
-      ).toBe(firstDataViewId);
+      expect(getTabDataView(selectTabRuntimeState(state.runtimeStateManager, firstTabId))?.id).toBe(
+        firstDataViewId
+      );
       expectLoadedFilters(services, firstDataViewId);
       expect(getUnsavedChanges()).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
 
@@ -644,8 +681,7 @@ describe('Discover state', () => {
 
       await state.switchToTab({ tabId: secondTab.id });
       expect(
-        selectTabRuntimeState(state.runtimeStateManager, secondTab.id).currentDataView$.getValue()
-          ?.id
+        getTabDataView(selectTabRuntimeState(state.runtimeStateManager, secondTab.id))?.id
       ).toBe(secondDataViewId);
       expectLoadedFilters(services, secondDataViewId);
       expect(getUnsavedChanges()).toEqual({
@@ -667,7 +703,7 @@ describe('Discover state', () => {
     it.each([
       { action: 'Save', copyOnSave: false, savedId: response.id, method: 'upsert' as const },
       { action: 'Save As', copyOnSave: true, savedId: 'copied-session', method: 'create' as const },
-    ])('keeps inline IDs after $action and refresh', async ({ copyOnSave, savedId, method }) => {
+    ])('restores inline IDs after $action', async ({ copyOnSave, savedId, method }) => {
       const services = createDiscoverServicesMock();
       services.storage = new Storage(localStorage);
       services.history = createMemoryHistory();
@@ -676,33 +712,36 @@ describe('Discover state', () => {
       const tabId = firstLoad.getCurrentTab().id;
       await firstLoad.initializeSingleTab({ tabId });
 
-      const savedResponse = cloneDeep(response);
+      const savedResponse: DiscoverSessionInternalResponse = cloneDeep(response);
       savedResponse.id = savedId;
-      const respondToSave = async (data: DiscoverSessionRequestData) => {
+      const respondToSave = async (data: DiscoverSessionClientRequestData) => {
         expect(data.tabs).toHaveLength(1);
         expect(data.tabs[0]).toMatchObject({
-          data_source: { type: 'data_view_spec', index_pattern: 'logs-*' },
-          filters: apiFilters,
+          data_source: {
+            type: 'data_view_spec',
+            index_pattern: 'logs-*',
+            id: expect.any(String),
+          },
+          filters: [{ ...apiFilters[0], data_view_id: expect.any(String) }, apiFilters[1]],
         });
-        expect(data.tabs[0].data_source).not.toHaveProperty('id');
-        // Save As assigns a new tab ID; the API still returns the inline spec without its ID.
-        savedResponse.data.tabs[0].id = data.tabs[0].id;
+        savedResponse.data = discoverSessionInternalDataSchema.parse(data);
         return cloneDeep(savedResponse);
       };
       const apiClient: jest.Mocked<DiscoverSessionClient> = {
         create: jest.fn(respondToSave),
-        upsert: jest.fn((_id: string, data: DiscoverSessionRequestData) => respondToSave(data)),
+        upsert: jest.fn((_id: string, data: DiscoverSessionClientRequestData) =>
+          respondToSave(data)
+        ),
         get: jest.fn(async (_id: string) => ({ ...cloneDeep(savedResponse), resolve: {} })),
       };
-      const sessionService = createSessionService({
+      const discoverSessionService = createDiscoverSessionService({
         apiClient,
         legacyClient: services.savedSearch,
         useHttpApi: true,
       });
-      // Exercise HTTP through the existing save boundary without connecting production callers.
       jest
-        .spyOn(services.savedSearch, 'saveDiscoverSession')
-        .mockImplementation((session, options = {}) => sessionService.save(session, options));
+        .spyOn(services.discoverSessionService, 'save')
+        .mockImplementation(discoverSessionService.save);
 
       await firstLoad.saveDiscoverSession({ newCopyOnSave: copyOnSave });
 
@@ -741,11 +780,11 @@ describe('Discover state', () => {
         internalStateActions.disconnectTab({ tabId: firstLoad.getCurrentTab().id })
       );
 
+      // No local tab state: the response must supply the saved identity.
       const reloadedServices = createDiscoverServicesMock();
-      reloadedServices.storage = services.storage;
       reloadedServices.history = createMemoryHistory({ initialEntries: [url] });
       const reloaded = createState(reloadedServices);
-      const loadedSession = await sessionService.get(savedId);
+      const loadedSession = await discoverSessionService.get(savedId);
       await reloaded.initializeTabs({ persistedDiscoverSession: loadedSession.session });
       const reloadedTabId = reloaded.getCurrentTab().id;
       await reloaded.initializeSingleTab({ tabId: reloadedTabId });
@@ -754,10 +793,7 @@ describe('Discover state', () => {
       expect(apiClient.get).toHaveBeenCalledWith(savedId);
       expect(reloadedTabId).toBe(savedTab?.id);
       expect(
-        selectTabRuntimeState(
-          reloaded.runtimeStateManager,
-          reloadedTabId
-        ).currentDataView$.getValue()?.id
+        getTabDataView(selectTabRuntimeState(reloaded.runtimeStateManager, reloadedTabId))?.id
       ).toBe(savedDataViewId);
       expectLoadedFilters(reloadedServices, savedDataViewId);
       expect(
@@ -799,9 +835,9 @@ describe('Discover state', () => {
       expect(initialTabState?.dataViewSpec).toEqual(dataViewSpec);
       await state.initializeSingleTab({ tabId, dataViewSpec: initialTabState?.dataViewSpec });
 
-      expect(
-        selectTabRuntimeState(state.runtimeStateManager, tabId).currentDataView$.getValue()?.id
-      ).toBe(dataViewSpec.id);
+      expect(getTabDataView(selectTabRuntimeState(state.runtimeStateManager, tabId))?.id).toBe(
+        dataViewSpec.id
+      );
       expectLoadedFilters(services, dataViewSpec.id);
       expect(
         selectHasUnsavedChanges(state.internalState.getState(), {
@@ -1284,11 +1320,11 @@ describe('Discover state', () => {
           },
         }
       `);
-      const { currentDataView$ } = selectTabRuntimeState(
+      const { currentDataSource$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       );
-      expect(currentDataView$.getValue()?.id).toEqual('the-data-view-id');
+      expect(getDataViewOfSource(currentDataSource$.getValue())?.id).toEqual('the-data-view-id');
       state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
 
@@ -1572,11 +1608,11 @@ describe('Discover state', () => {
           },
         })
       );
-      const { currentDataView$ } = selectTabRuntimeState(
+      const { currentDataSource$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       );
-      expect(currentDataView$.getValue()?.id).toBe('the-data-view-id');
+      expect(getDataViewOfSource(currentDataSource$.getValue())?.id).toBe('the-data-view-id');
       expect(services.toastNotifications.addWarning).toHaveBeenCalledWith(
         expect.objectContaining({
           'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
@@ -1624,11 +1660,11 @@ describe('Discover state', () => {
           },
         })
       );
-      const { currentDataView$ } = selectTabRuntimeState(
+      const { currentDataSource$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       );
-      expect(currentDataView$.getValue()?.id).toBe('the-data-view-id');
+      expect(getDataViewOfSource(currentDataSource$.getValue())?.id).toBe('the-data-view-id');
       expect(services.toastNotifications.addWarning).toHaveBeenCalledWith(
         expect.objectContaining({
           'data-test-subj': 'dscDataViewNotFoundShowSavedWarning',
@@ -1653,11 +1689,11 @@ describe('Discover state', () => {
           },
         })
       );
-      let { currentDataView$ } = selectTabRuntimeState(
+      let { currentDataSource$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       );
-      expect(currentDataView$.getValue()?.id).toBe('the-data-view-id');
+      expect(getDataViewOfSource(currentDataSource$.getValue())?.id).toBe('the-data-view-id');
       let { hasUnsavedChanges } = selectHasUnsavedChanges(state.internalState.getState(), {
         runtimeStateManager: state.runtimeStateManager,
         services: testServices,
@@ -1668,21 +1704,24 @@ describe('Discover state', () => {
       testServices.data.search.searchSource.create = jest
         .fn()
         .mockReturnValue(savedSearchWithTimeField.searchSource);
-      jest.spyOn(testServices.savedSearch, 'getDiscoverSession').mockResolvedValueOnce({
-        ...savedSearchWithTimeField,
-        id: savedSearchWithTimeField.id ?? '',
-        title: savedSearchWithTimeField.title ?? '',
-        description: savedSearchWithTimeField.description ?? '',
-        tabs: [
-          fromSavedSearchToSavedObjectTab({
-            tab: {
-              id: savedSearchWithTimeField.id ?? '',
-              label: savedSearchWithTimeField.title ?? '',
-            },
-            savedSearch: savedSearchWithTimeField,
-            services: testServices,
-          }),
-        ],
+      jest.spyOn(testServices.discoverSessionService, 'get').mockResolvedValueOnce({
+        session: {
+          ...savedSearchWithTimeField,
+          id: savedSearchWithTimeField.id ?? '',
+          title: savedSearchWithTimeField.title ?? '',
+          description: savedSearchWithTimeField.description ?? '',
+          tabs: [
+            fromSavedSearchToSavedObjectTab({
+              tab: {
+                id: savedSearchWithTimeField.id ?? '',
+                label: savedSearchWithTimeField.title ?? '',
+              },
+              savedSearch: savedSearchWithTimeField,
+              services: testServices,
+            }),
+          ],
+        },
+        warnings: [],
       });
       await state.internalState.dispatch(
         internalStateActions.initializeTabs({ discoverSessionId: savedSearchWithTimeField.id })
@@ -1699,11 +1738,13 @@ describe('Discover state', () => {
           },
         })
       );
-      ({ currentDataView$ } = selectTabRuntimeState(
+      ({ currentDataSource$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       ));
-      expect(currentDataView$.getValue()?.id).toBe('index-pattern-with-timefield-id');
+      expect(getDataViewOfSource(currentDataSource$.getValue())?.id).toBe(
+        'index-pattern-with-timefield-id'
+      );
       ({ hasUnsavedChanges } = selectHasUnsavedChanges(state.internalState.getState(), {
         runtimeStateManager: state.runtimeStateManager,
         services: testServices,
@@ -1713,21 +1754,24 @@ describe('Discover state', () => {
       testServices.data.search.searchSource.create = jest
         .fn()
         .mockReturnValue(savedSearchMock.searchSource);
-      jest.spyOn(testServices.savedSearch, 'getDiscoverSession').mockResolvedValueOnce({
-        ...savedSearchMock,
-        id: savedSearchMock.id ?? '',
-        title: savedSearchMock.title ?? '',
-        description: savedSearchMock.description ?? '',
-        tabs: [
-          fromSavedSearchToSavedObjectTab({
-            tab: {
-              id: savedSearchMock.id ?? '',
-              label: savedSearchMock.title ?? '',
-            },
-            savedSearch: savedSearchMock,
-            services: testServices,
-          }),
-        ],
+      jest.spyOn(testServices.discoverSessionService, 'get').mockResolvedValueOnce({
+        session: {
+          ...savedSearchMock,
+          id: savedSearchMock.id ?? '',
+          title: savedSearchMock.title ?? '',
+          description: savedSearchMock.description ?? '',
+          tabs: [
+            fromSavedSearchToSavedObjectTab({
+              tab: {
+                id: savedSearchMock.id ?? '',
+                label: savedSearchMock.title ?? '',
+              },
+              savedSearch: savedSearchMock,
+              services: testServices,
+            }),
+          ],
+        },
+        warnings: [],
       });
       await state.internalState.dispatch(
         internalStateActions.initializeTabs({ discoverSessionId: savedSearchMock.id })
@@ -1747,11 +1791,13 @@ describe('Discover state', () => {
           },
         })
       );
-      ({ currentDataView$ } = selectTabRuntimeState(
+      ({ currentDataSource$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       ));
-      expect(currentDataView$.getValue()?.id).toBe('index-pattern-with-timefield-id');
+      expect(getDataViewOfSource(currentDataSource$.getValue())?.id).toBe(
+        'index-pattern-with-timefield-id'
+      );
       ({ hasUnsavedChanges } = selectHasUnsavedChanges(state.internalState.getState(), {
         runtimeStateManager: state.runtimeStateManager,
         services: testServices,
@@ -1788,11 +1834,11 @@ describe('Discover state', () => {
         })
       );
       expect(state.internalState.getState().persistedDiscoverSession?.id).toEqual(undefined);
-      const { currentDataView$ } = selectTabRuntimeState(
+      const { currentDataSource$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       );
-      expect(currentDataView$.getValue()?.id).toEqual(dataViewSpecMock.id);
+      expect(getDataViewOfSource(currentDataSource$.getValue())?.id).toEqual(dataViewSpecMock.id);
       const currentSavedSearch = await selectTabSavedSearch({
         tabId: state.getCurrentTab().id,
         getState: state.internalState.getState,
@@ -1890,7 +1936,6 @@ describe('Discover state', () => {
     });
 
     test('loadSavedSearch with ES|QL, data view index is not overwritten by URL ', async () => {
-      const persistedDataViewId = savedSearchMockWithESQL.searchSource.getField('index')!.id;
       const url = "/#?_a=(dataSource:(dataViewId:'the-data-view-id',type:dataView))&_g=()";
       const { state, customizationService } = await getState(url, {
         savedSearch: savedSearchMockWithESQL,
@@ -1906,11 +1951,13 @@ describe('Discover state', () => {
           },
         })
       );
-      const { currentDataView$ } = selectTabRuntimeState(
+      const { currentDataSource$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       );
-      expect(persistedDataViewId).toBe(currentDataView$.getValue()?.id);
+      expect(getDataViewOfSource(currentDataSource$.getValue())).toEqual(
+        expect.objectContaining({ type: ESQL_TYPE, title: 'index-pattern-esql' })
+      );
     });
 
     test('onChangeDataView', async () => {
@@ -1931,7 +1978,7 @@ describe('Discover state', () => {
       );
 
       // Get dataStateContainer created by initializeSingleTab and set up spy
-      const { currentDataView$, dataStateContainer$ } = selectTabRuntimeState(
+      const { currentDataSource$, dataStateContainer$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       );
@@ -1940,7 +1987,7 @@ describe('Discover state', () => {
 
       await new Promise(process.nextTick);
       // test initial state
-      expect(currentDataView$.getValue()?.id).toBe(dataViewMock.id);
+      expect(getDataViewOfSource(currentDataSource$.getValue())?.id).toBe(dataViewMock.id);
       expect(getCurrentUrl()).toContain(dataViewMock.id);
 
       // change data view
@@ -1956,7 +2003,7 @@ describe('Discover state', () => {
       expect(state.getCurrentTab().appState.dataSource).toEqual(
         createDataViewDataSource({ dataViewId: dataViewComplexMock.id! })
       );
-      expect(currentDataView$.getValue()?.id).toBe(dataViewComplexMock.id);
+      expect(getDataViewOfSource(currentDataSource$.getValue())?.id).toBe(dataViewComplexMock.id);
       // check if the changed data view is reflected in the URL
       expect(getCurrentUrl()).toContain(dataViewComplexMock.id);
       state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
@@ -2067,7 +2114,7 @@ describe('Discover state', () => {
       expect(getCurrentUrl()).toBe(
         "/#?_tab=(tabId:the-saved-search-id)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),grid:(),hideChart:!f,hideTable:!f,interval:auto,query:(language:kuery,query:''),sort:!())"
       );
-      expect(tabRuntimeState.currentDataView$.getValue()?.id).toBe(dataViewMock.id);
+      expect(getTabDataView(tabRuntimeState)?.id).toBe(dataViewMock.id);
 
       // Change the data view, this should change the URL and trigger a fetch
       await state.internalState.dispatch(
@@ -2082,7 +2129,7 @@ describe('Discover state', () => {
       await waitFor(() => {
         expect(dataState.fetch).toHaveBeenCalledTimes(1);
       });
-      expect(tabRuntimeState.currentDataView$.getValue()?.id).toBe(dataViewComplexMock.id);
+      expect(getTabDataView(tabRuntimeState)?.id).toBe(dataViewComplexMock.id);
 
       // Undo all changes to the saved search, this should trigger a fetch, again
       await state.internalState.dispatch(internalStateActions.resetDiscoverSession());
@@ -2093,7 +2140,7 @@ describe('Discover state', () => {
       await waitFor(() => {
         expect(dataState.fetch).toHaveBeenCalledTimes(2);
       });
-      expect(tabRuntimeState.currentDataView$.getValue()?.id).toBe(dataViewMock.id);
+      expect(getTabDataView(tabRuntimeState)?.id).toBe(dataViewMock.id);
 
       state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });

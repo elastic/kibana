@@ -12,9 +12,11 @@ import {
   createStubDataView,
   stubLogstashDataView,
 } from '@kbn/data-views-plugin/common/data_view.stub';
+import { DataViewSource } from '@kbn/data-source';
 import { DataTableColumnHeader } from './data_table_column_header';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 const stubDataViewWithNested = createStubDataView({
   spec: {
@@ -71,12 +73,9 @@ describe('DataTableColumnHeader', () => {
     renderWithKibanaRenderContext(
       <DataTableColumnHeader
         columnDisplayName="bytesDisplayName"
-        columnsMeta={{
-          bytes: {
-            type: 'string',
-            esType: 'keyword',
-          },
-        }}
+        dataSource={createMockEsqlSource([
+          { name: 'bytes', type: 'string', esType: 'keyword', source: 'index' },
+        ])}
         columnName="bytes"
         dataView={stubLogstashDataView}
         showColumnTokens
@@ -85,6 +84,36 @@ describe('DataTableColumnHeader', () => {
 
     expect(await screen.findByText('Keyword')).toBeVisible();
     expect(screen.getByText('bytesDisplayName')).toBeVisible();
+  });
+
+  it('should render the counter token for an ES|QL counter column', async () => {
+    renderWithKibanaRenderContext(
+      <DataTableColumnHeader
+        columnDisplayName="requests"
+        dataSource={createMockEsqlSource([
+          { name: 'requests', type: 'number', esType: 'counter_long', source: 'index' },
+        ])}
+        columnName="requests"
+        dataView={stubLogstashDataView}
+        showColumnTokens
+      />
+    );
+
+    expect(await screen.findByText(/counter/i)).toBeVisible();
+  });
+
+  it('should render the data view token for a data view source', async () => {
+    renderWithKibanaRenderContext(
+      <DataTableColumnHeader
+        columnDisplayName="bytesDisplayName"
+        dataSource={new DataViewSource(stubLogstashDataView)}
+        columnName="bytes"
+        dataView={stubLogstashDataView}
+        showColumnTokens
+      />
+    );
+
+    expect(await screen.findByText('Number')).toBeVisible();
   });
 
   it('should not render a token for Document column', () => {

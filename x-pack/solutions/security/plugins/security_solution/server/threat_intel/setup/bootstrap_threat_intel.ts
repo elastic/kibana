@@ -7,6 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { REQUIRED_REPORT_SEMANTIC_FIELDS, getSemanticTextInferenceId } from '@kbn/alertzero-common';
 import {
   THREAT_REPORTS_INDEX,
   THREAT_INTEL_SOURCES_INDEX,
@@ -57,46 +58,43 @@ const withElasticsearchRetry = async <T>(
   throw lastError ?? new Error(`${label} failed`);
 };
 
-const REQUIRED_REPORT_SEMANTIC_FIELDS = ['title', 'body_text'] as const;
-
 /** Verifies the effective endpoints used by required report-content fields. */
 const checkReportSemanticTextEndpoints = async (
   esClient: ElasticsearchClient,
   log: Logger
 ): Promise<void> => {
-  let mappings: Awaited<ReturnType<typeof esClient.indices.getFieldMapping>>;
+  let mappings: Awaited<ReturnType<typeof esClient.indices.getMapping>>;
   try {
-    mappings = await esClient.indices.getFieldMapping({
-      index: THREAT_REPORTS_INDEX,
-      fields: REQUIRED_REPORT_SEMANTIC_FIELDS.map((field) => `content.${field}`),
-      include_defaults: true,
-    });
+    // `getMapping`, not `getFieldMapping`: the latter is unavailable (410) on serverless.
+    mappings = await esClient.indices.getMapping({ index: THREAT_REPORTS_INDEX });
   } catch (err) {
     const status = err instanceof errors.ResponseError ? err.statusCode : undefined;
     if (status === 404) {
-      // The index is created lazily on first ingest; the template is already
-      // installed. Skip the check rather than retrying forever on a fresh install.
+      // `installIndexTemplates` creates the companion index after putting the
+      // template, so this 404 is unexpected on the normal boot path. Skip rather
+      // than retry forever if the index was deleted or ensure has not run yet.
       log.debug(
         `Threat reports index does not exist yet; skipping semantic_text ` +
-          `endpoint check until first report is indexed`
+          `endpoint check until the companion index is present`
       );
       return;
     }
     throw err;
   }
-  const fieldMappings = mappings[THREAT_REPORTS_INDEX]?.mappings;
   const endpointIds = new Set<string>();
 
   for (const field of REQUIRED_REPORT_SEMANTIC_FIELDS) {
-    const fullName = `content.${field}`;
-    const fieldMapping = fieldMappings?.[fullName];
-    const mapping = fieldMapping?.mapping[field] ?? fieldMapping?.mapping[fullName];
-    if (mapping?.type !== 'semantic_text' || !mapping.inference_id) {
+    const inferenceId = getSemanticTextInferenceId(
+      mappings,
+      THREAT_REPORTS_INDEX,
+      `content.${field}`
+    );
+    if (!inferenceId) {
       throw new Error(
         `Required report field content.${field} did not resolve to a semantic_text inference endpoint`
       );
     }
-    endpointIds.add(mapping.inference_id);
+    endpointIds.add(inferenceId);
   }
 
   for (const endpointId of endpointIds) {
@@ -111,8 +109,8 @@ const checkReportSemanticTextEndpoints = async (
  * when a document is indexed rather than at template PUT, so a missing endpoint
  * only surfaces when `extract_diamond` first writes a `summary`.
  *
- * This is not the model that performs Diamond extraction — that one is resolved
- * per request from the `threat_intel_diamond` inference feature.
+ * This is not the chat model that performs Diamond extraction — that one is
+ * resolved per request through the AlertZero Frontier tier.
  */
 const checkDiamondSummaryEmbeddingEndpoint = async (
   esClient: ElasticsearchClient,

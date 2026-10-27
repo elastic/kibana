@@ -80,6 +80,7 @@ describe('concurrency queue recovery wiring', () => {
     const initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
       eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+      storage: { source: 'plain_index', dataRetention: '90d' },
     });
     const plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
     const coreSetup = coreMock.createSetup();
@@ -175,7 +176,7 @@ describe('concurrency queue recovery wiring', () => {
       expect.objectContaining({
         workflowRunId,
         spaceId,
-        fakeRequest: expect.anything(),
+        stepExecutionRepository: expect.anything(),
       })
     );
     expect(setCustomTaskRunEventFields).toHaveBeenCalledWith({

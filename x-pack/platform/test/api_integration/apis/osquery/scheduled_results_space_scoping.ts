@@ -20,6 +20,7 @@ interface ScheduledResultsRows {
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
+  const spaces = getService('spaces');
   const osqueryPublicApiVersion = '2023-10-31';
 
   const probeIndex = 'logs-osquery_manager.result_space_scoping_it';
@@ -31,6 +32,12 @@ export default function ({ getService }: FtrProviderContext) {
   const otherMarker = 'SPACE_B_MARKER';
   const otherSpaceId = 'space-scoping-it-b';
 
+  // No `action_data` documents here. Scheduled executions are delivered by the
+  // agent policy rather than a Fleet action, so they never produce an `action_data`
+  // blob and always carry the top-level `space_id`; the search strategy withholds
+  // the fallback from schedule-bound reads for that reason. Seeding one would
+  // assert a shape that cannot occur. Fleet-action coverage lives in
+  // action_results_space_scoping.ts.
   const recreateProbeIndex = async () => {
     await es.indices.delete({ index: probeIndex }, { ignore: [404] });
     await es.indices.putIndexTemplate({
@@ -95,10 +102,14 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Scheduled query results space scoping', () => {
     before(async () => {
+      await spaces.create({ id: otherSpaceId, name: otherSpaceId, disabledFeatures: [] });
       await recreateProbeIndex();
       await seedResults();
     });
-    after(deleteResults);
+    after(async () => {
+      await deleteResults();
+      await spaces.delete(otherSpaceId);
+    });
 
     it('results endpoint returns only rows from the active space', async () => {
       const { body } = await supertest
@@ -137,6 +148,24 @@ export default function ({ getService }: FtrProviderContext) {
       // The export is scoped to the active space, so the other-space row is absent.
       expect(exported).not.to.contain(otherMarker);
       expect(exported).not.to.contain(otherSpaceId);
+    });
+
+    // Read from the named space itself rather than only asserting the default space
+    // does not leak. A named space has no missing-field allowance, so this proves the
+    // row is matched on its own `space_id` term.
+    it('results endpoint returns named-space rows when read from that space', async () => {
+      const { body } = await supertest
+        .get(
+          `/s/${otherSpaceId}/api/osquery/scheduled_results/${scheduleId}/${executionCount}/results?page=0&pageSize=100`
+        )
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', osqueryPublicApiVersion)
+        .expect(200);
+
+      const serialized = JSON.stringify(body);
+
+      expect(serialized).to.contain(otherMarker);
+      expect(serialized).not.to.contain(defaultMarker);
     });
   });
 }

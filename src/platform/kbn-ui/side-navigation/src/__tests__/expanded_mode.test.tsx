@@ -31,6 +31,7 @@ const resultExplorerItemId = securityMock.navItems.primaryItems[11].sections?.[2
 const primaryItemId = (id: string) => `kbnChromeNav-primaryItem-${id}`;
 const secondaryItemId = (id: string) => `kbnChromeNav-secondaryItem-${id}`;
 const moreMenuId = 'kbnChromeNav-moreMenuTrigger';
+const primaryNavigationId = 'kbnChromeNav-primaryNavigation';
 const popoverId = (label: string) => `side-nav-popover-${label}`;
 const popoverItemId = (id: string) => `kbnChromeNav-popoverItem-${id}`;
 const nestedMenuItemId = (id: string) => `kbnChromeNav-nestedMenuItem-${id}`;
@@ -330,6 +331,23 @@ describe('Expanded mode', () => {
         const moreButton = await screen.findByTestId(moreMenuId);
 
         expect(moreButton).toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN not all primary menu items fit the menu height
+       * WHEN the navigation renders every item before measuring which ones fit
+       * THEN the primary menu only reports a measured overflow split once the items moved to "More"
+       */
+      it('should only report a measured overflow split once items moved to "More"', async () => {
+        render(<TestComponent isCollapsed={false} items={securityMock.navItems} />);
+
+        const primaryMenu = screen.getByTestId(primaryNavigationId);
+
+        expect(primaryMenu).toHaveAttribute('data-overflow-measured', 'false');
+
+        await screen.findByTestId(moreMenuId);
+
+        expect(primaryMenu).toHaveAttribute('data-overflow-measured', 'true');
       });
 
       /**

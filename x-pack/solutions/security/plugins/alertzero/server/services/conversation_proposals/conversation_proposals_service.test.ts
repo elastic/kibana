@@ -7,36 +7,38 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
+import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
+import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
+import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../common/proposals/origin';
 import { ConversationProposalsService } from './conversation_proposals_service';
 
 const makeProposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWithMetadata => ({
   id: 'p1',
   spaceId: 'default',
   conversationId: 'conv-1',
+  title: 'Do something',
   comment: 'do something',
   status: 'pending',
   impact: 'low',
   confidence: 'medium',
   category: 'investigate',
-  origin: 'worker',
+  origin: 'alertzero',
   createdAt: '2026-09-01T10:00:00.000Z',
-  expired: false,
   ...overrides,
 });
 
 const makeProposalsService = (
   proposals: ProposalWithMetadata[] = [],
   { total }: { total?: number } = {}
-): ReturnType<AgenticInvestigationsPluginStart['getProposalsService']> =>
+): ReturnType<ProposalsPluginStart['getProposalsService']> =>
   ({
     list: jest.fn().mockResolvedValue({
       proposals,
       total: total ?? proposals.length,
     }),
-  } as unknown as ReturnType<AgenticInvestigationsPluginStart['getProposalsService']>);
+  } as unknown as ReturnType<ProposalsPluginStart['getProposalsService']>);
 
 /**
  * Builds an Agent Builder mock whose scoped client exposes `bulkGet`.
@@ -48,11 +50,13 @@ const makeProposalsService = (
  *   present in the response, matching what `bulkGet`'s `_source` allowlist always returns.
  * @param assigneesById - Raw `metadata.assignees` per conversation. Omitted entries carry no
  *   `metadata` at all, which is the shape an unassigned conversation comes back as.
+ * @param statusById - Raw `metadata.status` per conversation.
  */
 const makeAgentBuilder = (
   titlesById?: Record<string, string>,
   agentIdsById?: Record<string, string>,
-  assigneesById?: Record<string, unknown>
+  assigneesById?: Record<string, unknown>,
+  statusById?: Record<string, unknown>
 ): AgentBuilderPluginStart =>
   ({
     conversations: {
@@ -66,10 +70,15 @@ const makeAgentBuilder = (
             const title = titlesById ? titlesById[id] : `Title for ${id}`;
             if (title !== undefined) {
               const assignees = assigneesById?.[id];
+              const status = statusById?.[id];
+              const metadata = {
+                ...(assignees !== undefined ? { assignees } : {}),
+                ...(status !== undefined ? { status } : {}),
+              };
               result.set(id, {
                 title,
                 agent_id: agentIdsById ? agentIdsById[id] : 'elastic-ai-agent',
-                ...(assignees !== undefined ? { metadata: { assignees } } : {}),
+                ...(Object.keys(metadata).length > 0 ? { metadata } : {}),
               });
             }
           }
@@ -79,7 +88,50 @@ const makeAgentBuilder = (
     },
   } as unknown as AgentBuilderPluginStart);
 
+const makeImpactClient = (
+  conversationIdsByEntity: Record<string, string[]> = {}
+): AgenticInvestigationsPluginStart['getImpactClient'] =>
+  jest.fn().mockReturnValue({
+    searchConversationIdsByEntityId: jest
+      .fn()
+      .mockImplementation(async (entityId: string) => conversationIdsByEntity[entityId] ?? []),
+    getEntitiesByConversationId: jest.fn(),
+  });
+
 describe('ConversationProposalsService', () => {
+  it.each([
+    [
+      'listByCategory',
+      (service: ConversationProposalsService) =>
+        service.listByCategory('respond', request, spaceId, { size: 10, from: 0 }),
+    ],
+    [
+      'listClosed',
+      (service: ConversationProposalsService) =>
+        service.listClosed(request, spaceId, { size: 10, from: 0 }),
+    ],
+  ])('%s shows only AlertZero-produced proposals', async (_name, run) => {
+    const proposalsService = makeProposalsService();
+
+    await run(
+      new ConversationProposalsService(
+        proposalsService,
+        makeAgentBuilder(),
+        logger,
+        makeImpactClient()
+      )
+    );
+
+    // The index is shared with every other solution's proposals, and this
+    // filter is the only thing keeping theirs out of an AlertZero queue.
+    expect(proposalsService.list).toHaveBeenCalledWith(
+      expect.objectContaining({ origin: ALERTZERO_PROPOSAL_ORIGIN }),
+      spaceId,
+      expect.anything(),
+      expect.anything()
+    );
+  });
+
   const logger = loggingSystemMock.createLogger();
   const request = httpServerMock.createKibanaRequest();
   const spaceId = 'default';
@@ -89,12 +141,13 @@ describe('ConversationProposalsService', () => {
   });
 
   describe('listByCategory', () => {
-    it('calls proposalsService.list with category, pending status, and createdAt-desc sort', async () => {
+    it('totally orders the category page, so an offset boundary cannot duplicate or skip a row', async () => {
       const proposalsService = makeProposalsService();
       const service = new ConversationProposalsService(
         proposalsService,
         makeAgentBuilder(),
-        logger
+        logger,
+        makeImpactClient()
       );
 
       await service.listByCategory('respond', request, spaceId, { size: 10, from: 0 });
@@ -102,13 +155,18 @@ describe('ConversationProposalsService', () => {
       expect(proposalsService.list).toHaveBeenCalledWith(
         expect.objectContaining({
           category: 'respond',
-          status: 'pending',
+          statuses: ['pending', 'executing'],
           excludeSuperseded: true,
           size: 10,
           from: 0,
         }),
         spaceId,
-        [{ createdAt: { order: 'desc' } }]
+        request,
+        [
+          { createdAt: { order: 'desc' } },
+          { rootProposalId: { order: 'asc' } },
+          { revision: { order: 'asc' } },
+        ]
       );
     });
 
@@ -118,7 +176,8 @@ describe('ConversationProposalsService', () => {
       const service = new ConversationProposalsService(
         makeProposalsService(proposals),
         makeAgentBuilder({ 'conv-abc': 'My investigation' }),
-        logger
+        logger,
+        makeImpactClient()
       );
 
       const result = await service.listByCategory('investigate', request, spaceId, {
@@ -135,7 +194,8 @@ describe('ConversationProposalsService', () => {
       const service = new ConversationProposalsService(
         makeProposalsService(proposals),
         makeAgentBuilder({ 'conv-xyz': 'My investigation' }, { 'conv-xyz': 'custom-agent' }),
-        logger
+        logger,
+        makeImpactClient()
       );
 
       const result = await service.listByCategory('investigate', request, spaceId, {
@@ -153,7 +213,8 @@ describe('ConversationProposalsService', () => {
       const service = new ConversationProposalsService(
         makeProposalsService(proposals),
         makeAgentBuilder({}),
-        logger
+        logger,
+        makeImpactClient()
       );
 
       const result = await service.listByCategory('investigate', request, spaceId, {
@@ -164,6 +225,41 @@ describe('ConversationProposalsService', () => {
       expect(result.proposals[0]).not.toHaveProperty('conversationAgentId');
     });
 
+    it.each([
+      ['closed', 'closed'],
+      ['open', 'open'],
+    ])('attaches the %s status from conversation metadata', async (raw, expected) => {
+      const service = new ConversationProposalsService(
+        makeProposalsService([makeProposal({ conversationId: 'conv-1' })]),
+        makeAgentBuilder(undefined, undefined, undefined, { 'conv-1': raw }),
+        logger,
+        makeImpactClient()
+      );
+
+      const result = await service.listByCategory('investigate', request, spaceId, {
+        size: 10,
+        from: 0,
+      });
+
+      expect(result.proposals[0].conversationStatus).toBe(expected);
+    });
+
+    it('omits the status when the metadata has none or an unknown one', async () => {
+      const service = new ConversationProposalsService(
+        makeProposalsService([makeProposal({ conversationId: 'conv-1' })]),
+        makeAgentBuilder(undefined, undefined, undefined, { 'conv-1': 'archived' }),
+        logger,
+        makeImpactClient()
+      );
+
+      const result = await service.listByCategory('investigate', request, spaceId, {
+        size: 10,
+        from: 0,
+      });
+
+      expect(result.proposals[0]).not.toHaveProperty('conversationStatus');
+    });
+
     it('attaches assignees from conversation metadata', async () => {
       const proposals = [makeProposal({ conversationId: 'conv-assigned' })];
 
@@ -172,7 +268,8 @@ describe('ConversationProposalsService', () => {
         makeAgentBuilder({ 'conv-assigned': 'Assigned investigation' }, undefined, {
           'conv-assigned': ['user-1', 'user-2'],
         }),
-        logger
+        logger,
+        makeImpactClient()
       );
 
       const result = await service.listByCategory('investigate', request, spaceId, {
@@ -195,7 +292,8 @@ describe('ConversationProposalsService', () => {
         makeAgentBuilder({ 'conv-flat': 'Flat metadata' }, undefined, {
           'conv-flat': 'sole.analyst',
         }),
-        logger
+        logger,
+        makeImpactClient()
       );
 
       const result = await service.listByCategory('investigate', request, spaceId, {
@@ -228,7 +326,8 @@ describe('ConversationProposalsService', () => {
       const service = new ConversationProposalsService(
         makeProposalsService(proposals),
         buildAgentBuilder(),
-        logger
+        logger,
+        makeImpactClient()
       );
 
       const result = await service.listByCategory('investigate', request, spaceId, {
@@ -254,7 +353,8 @@ describe('ConversationProposalsService', () => {
       const service = new ConversationProposalsService(
         makeProposalsService(proposals),
         agentBuilder,
-        logger
+        logger,
+        makeImpactClient()
       );
 
       await service.listByCategory('investigate', request, spaceId, { size: 10, from: 0 });
@@ -277,7 +377,8 @@ describe('ConversationProposalsService', () => {
       const service = new ConversationProposalsService(
         makeProposalsService(proposals),
         agentBuilder,
-        logger
+        logger,
+        makeImpactClient()
       );
 
       const result = await service.listByCategory('investigate', request, spaceId, {
@@ -293,7 +394,8 @@ describe('ConversationProposalsService', () => {
       const service = new ConversationProposalsService(
         makeProposalsService([makeProposal()], { total: 42 }),
         makeAgentBuilder(),
-        logger
+        logger,
+        makeImpactClient()
       );
 
       const result = await service.listByCategory('investigate', request, spaceId, {
@@ -303,15 +405,81 @@ describe('ConversationProposalsService', () => {
 
       expect(result.total).toBe(42);
     });
+
+    it('does not read the impact of the rows it lists', async () => {
+      const getEntitiesByConversationId = jest.fn();
+      const getImpactClient = jest.fn().mockReturnValue({ getEntitiesByConversationId });
+      const service = new ConversationProposalsService(
+        makeProposalsService([makeProposal()]),
+        makeAgentBuilder(),
+        logger,
+        getImpactClient
+      );
+
+      const result = await service.listByCategory('investigate', request, spaceId, {
+        size: 10,
+        from: 0,
+      });
+
+      expect(getEntitiesByConversationId).not.toHaveBeenCalled();
+      expect(result.proposals[0]).not.toHaveProperty('entityIds');
+      expect(result.proposals[0].conversationTitle).toBe('Title for conv-1');
+    });
   });
 
-  describe('listClosed', () => {
-    it('calls proposalsService.list with decidedWithinHours: 72 and decidedAt-desc sort', async () => {
+  describe.each([
+    [
+      'listByCategory',
+      (service: ConversationProposalsService, entity: string) =>
+        service.listByCategory('respond', request, spaceId, { size: 10, from: 0, entity }),
+    ],
+    [
+      'listClosed',
+      (service: ConversationProposalsService, entity: string) =>
+        service.listClosed(request, spaceId, { size: 10, from: 0, entity }),
+    ],
+  ])('%s with an entity filter', (_name, run) => {
+    it('restricts the proposals to the conversations impacting the entity', async () => {
       const proposalsService = makeProposalsService();
       const service = new ConversationProposalsService(
         proposalsService,
         makeAgentBuilder(),
-        logger
+        logger,
+        makeImpactClient({ 'host-1': ['conv-1', 'conv-2'] })
+      );
+
+      await run(service, 'host-1');
+
+      expect(proposalsService.list).toHaveBeenCalledWith(
+        expect.objectContaining({ conversationIds: ['conv-1', 'conv-2'] }),
+        spaceId,
+        request,
+        expect.anything()
+      );
+    });
+
+    it('returns an empty page without querying proposals when no conversation has the entity', async () => {
+      const proposalsService = makeProposalsService();
+      const service = new ConversationProposalsService(
+        proposalsService,
+        makeAgentBuilder(),
+        logger,
+        makeImpactClient()
+      );
+
+      expect(await run(service, 'unknown')).toEqual({ proposals: [], total: 0 });
+      expect(proposalsService.list).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('listClosed', () => {
+    it('totally orders the closed page, so an offset boundary cannot duplicate or skip a row', async () => {
+      const proposalsService = makeProposalsService();
+      const service = new ConversationProposalsService(
+        proposalsService,
+        makeAgentBuilder(),
+        logger,
+        makeImpactClient()
       );
 
       await service.listClosed(request, spaceId, { size: 25, from: 0 });
@@ -319,12 +487,19 @@ describe('ConversationProposalsService', () => {
       expect(proposalsService.list).toHaveBeenCalledWith(
         expect.objectContaining({
           decidedWithinHours: 72,
+          statuses: ['succeeded', 'failed', 'expired', 'no_action'],
           excludeSuperseded: true,
           size: 25,
           from: 0,
         }),
         spaceId,
-        [{ decidedAt: { order: 'desc' } }, { createdAt: { order: 'desc' } }]
+        request,
+        [
+          { decidedAt: { order: 'desc' } },
+          { createdAt: { order: 'desc' } },
+          { rootProposalId: { order: 'asc' } },
+          { revision: { order: 'asc' } },
+        ]
       );
     });
 
@@ -340,7 +515,8 @@ describe('ConversationProposalsService', () => {
       const service = new ConversationProposalsService(
         makeProposalsService(proposals),
         makeAgentBuilder({ 'conv-1': 'Closed investigation' }),
-        logger
+        logger,
+        makeImpactClient()
       );
 
       const result = await service.listClosed(request, spaceId, { size: 25, from: 0 });
@@ -361,7 +537,8 @@ describe('ConversationProposalsService', () => {
       const service = new ConversationProposalsService(
         makeProposalsService(proposals),
         agentBuilder,
-        logger
+        logger,
+        makeImpactClient()
       );
 
       const result = await service.listClosed(request, spaceId, { size: 25, from: 0 });
@@ -374,7 +551,8 @@ describe('ConversationProposalsService', () => {
       const service = new ConversationProposalsService(
         makeProposalsService([makeProposal()], { total: 100 }),
         makeAgentBuilder(),
-        logger
+        logger,
+        makeImpactClient()
       );
 
       const result = await service.listClosed(request, spaceId, { size: 25, from: 0 });

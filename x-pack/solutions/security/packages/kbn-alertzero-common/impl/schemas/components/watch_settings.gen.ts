@@ -46,6 +46,12 @@ export type WorkerRunStateEnum = typeof WorkerRunState.enum;
 export const WorkerRunStateEnum = WorkerRunState.enum;
 
 /**
+ * Why a Worker can't run in this space. `no_model`: the space has no AI model to run it on (no LLM connector and no Elastic Managed LLM, or "use only the default connector" is on with no default set). It applies to every Worker alike, and while it holds the Worker can't be switched on; switching it off is still allowed.
+ */
+export const WorkerBlockingReason = lazySchema(() => z.literal('no_model'));
+export type WorkerBlockingReason = z.infer<typeof WorkerBlockingReason>;
+
+/**
  * Worker-specific settings owned by the Worker's Watch team. The wire schema is open so the shared read/update path stays generic; each Worker declares a closed schema for its own extras (see the Watch-owned `*_watch_settings.schema.yaml` files) and the server validates against that declaration, rejecting unknown or missing fields by name.
  */
 export const WorkerSettingsExtras = lazySchema(() => z.object({}).catchall(z.unknown()));
@@ -66,6 +72,17 @@ export const WorkerSettings = lazySchema(() =>
         'Omitted for Workers that are not schedule-driven. Its presence is what tells the UI to render the interval control.'
       ),
       /**
+       * Service account this worker runs as. Omitted until one is selected. Already installed workers stay readable without it. Enabling the worker requires a non-empty id.
+       */
+      serviceAccountId: z
+        .string()
+        .min(1)
+        .max(1024)
+        .optional()
+        .describe(
+          'Service account this worker runs as. Omitted until one is selected. Already installed workers stay readable without it. Enabling the worker requires a non-empty id.'
+        ),
+      /**
        * Omitted for Workers that declare no Worker-specific settings.
        */
       extras: WorkerSettingsExtras.optional().describe(
@@ -84,6 +101,18 @@ export const WorkerSettingsWrite = lazySchema(() =>
     .object({
       autonomy: WatchAutonomyLevel.optional(),
       scheduleInterval: WorkerScheduleInterval.optional(),
+      /**
+       * Omitted keeps the stored account. A non-empty id sets it. Null clears it. Enabling a worker requires a non-empty id, including a save that leaves an already enabled worker on.
+       */
+      serviceAccountId: z
+        .string()
+        .min(1)
+        .max(1024)
+        .nullable()
+        .optional()
+        .describe(
+          'Omitted keeps the stored account. A non-empty id sets it. Null clears it. Enabling a worker requires a non-empty id, including a save that leaves an already enabled worker on.'
+        ),
       extras: WorkerSettingsExtras.optional(),
     })
     .strict()
@@ -119,6 +148,23 @@ export const Worker = lazySchema(() =>
       .nullable()
       .describe(
         'Logical workflow version for best-effort stale settings detection. Null when the per-space managed Worker has not been installed yet.'
+      ),
+    /**
+     * Id of this Worker's installed per-space workflow. Null when that workflow has not been installed yet. The client uses it to open the workflow's Executions tab and does not derive it from the Worker id.
+     */
+    workflowId: z
+      .string()
+      .nullable()
+      .describe(
+        "Id of this Worker's installed per-space workflow. Null when that workflow has not been installed yet. The client uses it to open the workflow's Executions tab and does not derive it from the Worker id."
+      ),
+    /**
+     * Why this Worker can't run; empty when nothing blocks it. A blocking reason never changes the stored `enabled` value.
+     */
+    blockingReasons: z
+      .array(WorkerBlockingReason)
+      .describe(
+        "Why this Worker can't run; empty when nothing blocks it. A blocking reason never changes the stored `enabled` value."
       ),
     skills: z.array(WatchCallableRef).optional(),
   })

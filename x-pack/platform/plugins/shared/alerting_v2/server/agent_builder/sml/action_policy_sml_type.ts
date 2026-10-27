@@ -77,7 +77,7 @@ export const createActionPolicySmlType = ({
       const name = attrs?.name ?? originId;
       const description = attrs?.description ?? '';
       const matcher = attrs?.matcher ? formatMatcher(attrs.matcher) : '';
-      const groupingMode = attrs?.groupingMode ?? '';
+      const groupingMode = attrs?.grouping?.mode ?? '';
       const destinations = attrs?.destinations?.map((d) => `${d.type}:${d.id}`).join(', ') ?? '';
 
       const contentParts = [name, description, matcher, groupingMode, destinations].filter(Boolean);

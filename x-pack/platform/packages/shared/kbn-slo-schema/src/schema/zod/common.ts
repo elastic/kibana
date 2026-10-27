@@ -8,14 +8,11 @@
 import { z } from '@kbn/zod';
 
 import { ALL_VALUE, SLO_STATUS } from '../../constants';
-import { MAX_ARRAY_LENGTH, MAX_DATE_STRING_LENGTH, MAX_KEYWORD_LENGTH } from './limits';
+import { MAX_DATE_STRING_LENGTH } from './limits';
 
-const allOrAnyString = z.union([z.literal(ALL_VALUE), z.string().max(MAX_KEYWORD_LENGTH)]);
+const allOrAnyString = z.union([z.literal(ALL_VALUE), z.string()]);
 
-const allOrAnyStringOrArray = z.union([
-  allOrAnyString,
-  z.array(allOrAnyString).max(MAX_ARRAY_LENGTH),
-]);
+const allOrAnyStringOrArray = z.union([allOrAnyString, z.array(allOrAnyString)]);
 
 /**
  * Codec between a wire-form date string and a `Date` instance.

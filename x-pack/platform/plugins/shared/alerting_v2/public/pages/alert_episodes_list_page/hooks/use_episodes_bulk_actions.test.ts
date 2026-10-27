@@ -8,6 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { useEpisodesBulkActions } from './use_episodes_bulk_actions';
 import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
+import { episodeSupportsActions } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 
 const stubEpisode = (overrides: Record<string, unknown> = {}) => ({
   '@timestamp': '2026-04-23T00:00:00Z',
@@ -33,7 +34,12 @@ describe('useEpisodesBulkActions', () => {
       useEpisodesBulkActions({ actions: [action], episodesData: [], onSuccess: jest.fn() })
     );
     expect(result.current).toEqual([
-      expect.objectContaining({ key: 'STUB', label: 'Stub', icon: 'star' }),
+      expect.objectContaining({
+        key: 'STUB',
+        'data-test-subj': 'episodesBulkAction-STUB',
+        label: 'Stub',
+        icon: 'star',
+      }),
     ]);
   });
 
@@ -78,42 +84,81 @@ describe('useEpisodesBulkActions', () => {
     expect(action.isCompatible).toHaveBeenCalledWith({ episodes: [] });
   });
 
-  it('excludes rows with supports_actions=false from bulk action episode resolution', () => {
-    const v2Episode = stubEpisode({ 'episode.id': 'v2-ep' });
-    const classicEpisode = stubEpisode({ 'episode.id': 'classic-ep', supports_actions: false });
-    const action = stubAction();
+  describe('actions a classic alert cannot take', () => {
+    const NOT_AVAILABLE = 'Not available for classic alerts';
+
+    const classicOnlyUnsupportedAction = (overrides: Partial<EpisodeAction> = {}) =>
+      stubAction({
+        getBulkDisabledReason: (episodes) =>
+          episodes.every(episodeSupportsActions) ? undefined : NOT_AVAILABLE,
+        ...overrides,
+      });
+
+    const universalEpisode = stubEpisode({ 'episode.id': 'universal-ep' });
+    const classicEpisode = stubEpisode({
+      'episode.id': 'classic-ep',
+      supports_actions: false,
+    });
+
+    const renderBulkActions = (action: EpisodeAction) =>
+      renderHook(() =>
+        useEpisodesBulkActions({
+          actions: [action],
+          episodesData: [universalEpisode, classicEpisode] as any,
+          onSuccess: jest.fn(),
+        })
+      ).result;
+
+    it.each([
+      ['mixed classic and universal', ['universal-ep', 'classic-ep'], NOT_AVAILABLE],
+      ['classic only', ['classic-ep'], NOT_AVAILABLE],
+      ['universal only', ['universal-ep'], undefined],
+    ])('reports the reason for a %s selection', (_name, selectedDocIds, expectedReason) => {
+      const result = renderBulkActions(classicOnlyUnsupportedAction());
+
+      expect(result.current[0].getDisabledReason!({ selectedDocIds } as any)).toBe(expectedReason);
+    });
+
+    it('reports no reason for an action that never declares one', () => {
+      const result = renderBulkActions(stubAction());
+
+      expect(
+        result.current[0].getDisabledReason!({
+          selectedDocIds: ['universal-ep', 'classic-ep'],
+        } as any)
+      ).toBeUndefined();
+    });
+
+    it('keeps an incompatible action in the menu while it has a reason', () => {
+      const result = renderBulkActions(
+        classicOnlyUnsupportedAction({ isCompatible: jest.fn(() => false) })
+      );
+
+      expect(result.current[0].isAvailable!({ selectedDocIds: ['classic-ep'] } as any)).toBe(true);
+    });
+
+    it('hides an incompatible action that has no reason', () => {
+      const result = renderBulkActions(stubAction({ isCompatible: jest.fn(() => false) }));
+
+      expect(result.current[0].isAvailable!({ selectedDocIds: ['universal-ep'] } as any)).toBe(
+        false
+      );
+    });
+  });
+
+  it('filters out actions with supportsBulk set to false', () => {
+    const bulkAction = stubAction({ id: 'BULK_ACTION' });
+    const singleOnlyAction = stubAction({ id: 'SINGLE_ONLY', supportsBulk: false });
 
     const { result } = renderHook(() =>
       useEpisodesBulkActions({
-        actions: [action],
-        episodesData: [v2Episode, classicEpisode] as any,
+        actions: [bulkAction, singleOnlyAction],
+        episodesData: [],
         onSuccess: jest.fn(),
       })
     );
 
-    result.current[0].isAvailable!({ selectedDocIds: ['0', '1'] } as any);
-    const compatibleCall = (action.isCompatible as jest.Mock).mock.calls[0][0];
-    const resolvedIds = compatibleCall.episodes.map((ep: any) => ep['episode.id']);
-    expect(resolvedIds).not.toContain('classic-ep');
-  });
-
-  it('onClick passes only actionable episodes when mixed rows are selected', () => {
-    const v2Episode = stubEpisode({ 'episode.id': 'v2-ep' });
-    const classicEpisode = stubEpisode({ 'episode.id': 'classic-ep', supports_actions: false });
-    const onSuccess = jest.fn();
-    const action = stubAction();
-
-    const { result } = renderHook(() =>
-      useEpisodesBulkActions({
-        actions: [action],
-        episodesData: [v2Episode, classicEpisode] as any,
-        onSuccess,
-      })
-    );
-
-    result.current[0].onClick!({ selectedDocIds: ['0', '1'] } as any);
-    const executeCall = (action.execute as jest.Mock).mock.calls[0][0];
-    const resolvedIds = executeCall.episodes.map((ep: any) => ep['episode.id']);
-    expect(resolvedIds).not.toContain('classic-ep');
+    expect(result.current).toHaveLength(1);
+    expect(result.current[0].key).toBe('BULK_ACTION');
   });
 });

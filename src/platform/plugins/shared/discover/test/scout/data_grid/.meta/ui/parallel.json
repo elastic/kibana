@@ -1,5 +1,5 @@
 {
-  "sha1": "e948a4977ae176529d5705a79c8742260861d856",
+  "sha1": "b08bf21958e9f3c928e025b84fbcb8f51f1df44d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,6 +13,32 @@
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/global.setup.ts",
         "line": 7,
         "column": 1
+      }
+    },
+    {
+      "id": "1fa5578f6918dbc-69819201797622b",
+      "title": "Discover data grid - accessibility has no automated a11y violations in the column actions menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_accessibility.spec.ts",
+        "line": 43,
+        "column": 23
+      }
+    },
+    {
+      "id": "1fa5578f6918dbc-e278f1f5535d6a5",
+      "title": "Discover data grid - accessibility has no automated a11y violations in the sort and display popovers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_accessibility.spec.ts",
+        "line": 54,
+        "column": 5
       }
     },
     {
@@ -255,7 +281,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_footer_date_nanos.spec.ts",
-        "line": 64,
+        "line": 66,
         "column": 25
       }
     },
@@ -325,6 +351,48 @@
       }
     },
     {
+      "id": "1d3349cce0898a5-2e4349122397505",
+      "title": "Discover data grid JSON view switches the documents between the table and JSON views",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_json_view.spec.ts",
+        "line": 36,
+        "column": 47
+      }
+    },
+    {
+      "id": "1d3349cce0898a5-ee14302afc56518",
+      "title": "Discover data grid JSON view persists the JSON view after reloading the page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_json_view.spec.ts",
+        "line": 83,
+        "column": 22
+      }
+    },
+    {
+      "id": "1d3349cce0898a5-72fa7c7d867509e",
+      "title": "Discover data grid JSON view filters the JSON to the selected columns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_json_view.spec.ts",
+        "line": 101,
+        "column": 4
+      }
+    },
+    {
       "id": "d6816a97e8bc61e-ecd16b6814c7ce1",
       "title": "Discover data grid new line support does not show new lines for the Document column",
       "expectedStatus": "passed",
@@ -373,7 +441,7 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_pagination_saved_search.spec.ts",
         "line": 89,
-        "column": 20
+        "column": 26
       }
     },
     {
@@ -697,7 +765,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid.spec.ts",
-        "line": 92,
+        "line": 97,
         "column": 22
       }
     },
@@ -710,8 +778,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid.spec.ts",
-        "line": 107,
-        "column": 24
+        "line": 119,
+        "column": 9
       }
     },
     {
@@ -827,8 +895,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
-        "line": 49,
-        "column": 15
+        "line": 56,
+        "column": 31
       }
     },
     {
@@ -840,8 +908,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
-        "line": 67,
-        "column": 60
+        "line": 76,
+        "column": 15
       }
     },
     {
@@ -853,8 +921,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
-        "line": 110,
-        "column": 15
+        "line": 117,
+        "column": 24
       }
     },
     {
@@ -866,8 +934,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
-        "line": 120,
-        "column": 60
+        "line": 129,
+        "column": 15
       }
     },
     {
@@ -879,8 +947,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
-        "line": 143,
-        "column": 58
+        "line": 151,
+        "column": 42
+      }
+    },
+    {
+      "id": "5e3d2b70d72b957-1271f9e3c5654a0",
+      "title": "Discover doc viewer flyout - accessibility has no automated a11y violations in the source tab or an expanded field cell",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
+        "line": 185,
+        "column": 22
       }
     },
     {

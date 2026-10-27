@@ -13,7 +13,7 @@ import type {
   Plugin as CorePlugin,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import { from, map } from 'rxjs';
+import { from, map, switchMap } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
@@ -86,7 +86,7 @@ import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { AlertRuleFromVisAction } from './common/alert_rule_from_vis_ui_action';
-import { getRulesAppUpdate } from './get_rules_app_update';
+import { getRulesAppUpdate, getRulesManagementVisibleIn$ } from './get_rules_app_update';
 
 import type {
   ActionTypeModel,
@@ -255,6 +255,7 @@ export class Plugin
       validateEmailAddresses: plugins.actions.validateEmailAddresses,
       enabledEmailServices: plugins.actions.enabledEmailServices,
       isWebhookSslWithPfxEnabled: plugins.actions.isWebhookSslWithPfxEnabled,
+      isInboundEventsEnabled: plugins.actions.isInboundEventsEnabled,
     };
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
@@ -350,6 +351,9 @@ export class Plugin
         title: featureTitle,
         capabilitiesId: TRIGGERS_ACTIONS_RULES_CAPABILITY_ID,
         order: 1,
+        visibleIn$: from(core.getStartServices()).pipe(
+          switchMap(([coreStart]) => getRulesManagementVisibleIn$(coreStart))
+        ),
         async mount(params: ManagementAppMountParams) {
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,

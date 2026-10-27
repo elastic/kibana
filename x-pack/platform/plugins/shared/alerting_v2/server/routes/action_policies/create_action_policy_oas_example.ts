@@ -7,6 +7,7 @@
 
 import type { AlertingOasOperationObject } from '../oas_types';
 import {
+  ACTION_POLICY_LICENSE_NOT_SUPPORTED_RESPONSE,
   CREATE_ACTION_POLICY_REQUEST,
   actionPolicyResponseExample,
   invalidActionPolicyDataResponse,
@@ -23,5 +24,6 @@ export const createActionPolicyOasExamples = (): AlertingOasOperationObject =>
     responses: {
       201: actionPolicyResponseExample('createActionPolicyResponse', 'Newly created action policy'),
       400: invalidActionPolicyDataResponse('create'),
+      403: ACTION_POLICY_LICENSE_NOT_SUPPORTED_RESPONSE,
     },
   });

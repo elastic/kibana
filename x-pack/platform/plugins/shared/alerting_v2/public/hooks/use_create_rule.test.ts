@@ -9,6 +9,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useCreateRule } from './use_create_rule';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { RulesApi } from '../services/rules_api';
+import { RuleTemplatesApi } from '../services/rule_templates_api';
 import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { createHookTestProviders, createMockLocators } from '../test_utils/test_providers';
 
@@ -16,6 +17,7 @@ const mockLocators = createMockLocators();
 
 jest.mock('@kbn/core-di-browser');
 jest.mock('../services/rules_api');
+jest.mock('../services/rule_templates_api');
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
 const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
@@ -24,18 +26,18 @@ const mockRuleResponse: RuleResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
+  version: 1,
   metadata: {
     name: 'My CPU Alert',
-    version: 1,
     description: '',
     tags: [],
   },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
-  created_by: 'test-user',
+  query: { base: 'FROM logs-*' },
+  created_by: { profile_uid: 'test-user' },
   created_at: '2026-01-01T00:00:00.000Z',
-  updated_by: 'test-user',
+  updated_by: { profile_uid: 'test-user' },
   updated_at: '2026-01-01T00:00:00.000Z',
 };
 
@@ -44,7 +46,7 @@ const mockCreatePayload: CreateRuleData = {
   metadata: { name: 'My CPU Alert' },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+  query: { base: 'FROM logs-*' },
 };
 
 const createWrapper = () => createHookTestProviders({ locators: mockLocators });
@@ -52,6 +54,7 @@ const createWrapper = () => createHookTestProviders({ locators: mockLocators });
 describe('useCreateRule', () => {
   const mockCreateRule = jest.fn();
   const mockDisableRule = jest.fn();
+  const mockInstallRuleTemplate = jest.fn();
   const mockAddSuccess = jest.fn();
   const mockAddError = jest.fn();
   const mockAddDanger = jest.fn();
@@ -66,6 +69,9 @@ describe('useCreateRule', () => {
     mockUseService.mockImplementation((service: unknown) => {
       if (service === RulesApi) {
         return { createRule: mockCreateRule, disableRule: mockDisableRule } as any;
+      }
+      if (service === RuleTemplatesApi) {
+        return { installRuleTemplate: mockInstallRuleTemplate } as any;
       }
       if (service === 'notifications') {
         return {
@@ -112,6 +118,38 @@ describe('useCreateRule', () => {
     toast.actionProps.primary.onClick({ preventDefault });
     expect(preventDefault).toHaveBeenCalled();
     expect(mockLocators.rulesLocators.navigateSync).toHaveBeenCalledWith({ ruleId: 'rule-1' });
+  });
+
+  it('should install from the rule template instead of creating when a template id is given', async () => {
+    mockInstallRuleTemplate.mockResolvedValue(mockRuleResponse);
+    const { result } = renderHook(() => useCreateRule(), { wrapper: createWrapper() });
+
+    result.current.mutate({ payload: mockCreatePayload, templateId: 'template-1' });
+
+    await waitFor(() => {
+      expect(mockInstallRuleTemplate).toHaveBeenCalledWith('template-1', mockCreatePayload);
+      expectSuccessToast();
+    });
+    expect(mockCreateRule).not.toHaveBeenCalled();
+    expect(mockDisableRule).not.toHaveBeenCalled();
+  });
+
+  it('should disable a rule installed from a template when it is not enabled', async () => {
+    mockInstallRuleTemplate.mockResolvedValue(mockRuleResponse);
+    mockDisableRule.mockResolvedValue({ ...mockRuleResponse, enabled: false });
+    const { result } = renderHook(() => useCreateRule(), { wrapper: createWrapper() });
+
+    result.current.mutate({
+      payload: mockCreatePayload,
+      enabled: false,
+      templateId: 'template-1',
+    });
+
+    await waitFor(() => {
+      expect(mockDisableRule).toHaveBeenCalledWith('rule-1');
+      expectSuccessToast();
+    });
+    expect(mockCreateRule).not.toHaveBeenCalled();
   });
 
   it('should disable the created rule before showing the success toast', async () => {

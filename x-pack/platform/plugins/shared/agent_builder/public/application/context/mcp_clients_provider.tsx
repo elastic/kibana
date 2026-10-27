@@ -13,6 +13,7 @@ import {
 } from '@kbn/agent-builder-browser';
 import { appPaths } from '../utils/app_paths';
 import { useNavigation } from '../hooks/use_navigation';
+import { useKibana } from '../hooks/use_kibana';
 import { DeleteMcpClientModal } from '../components/mcp_clients/delete_mcp_client_modal';
 import { RevokeMcpClientModal } from '../components/mcp_clients/revoke_mcp_client_modal';
 
@@ -47,6 +48,9 @@ interface ViewDetailsState {
 
 export const McpClientsProvider = ({ children }: { children: React.ReactNode }) => {
   const { navigateToAgentBuilderUrl } = useNavigation();
+  const {
+    services: { http },
+  } = useKibana();
 
   const [revokeState, setRevokeState] = useState<RevokeState | null>(null);
   const [deleteState, setDeleteState] = useState<DeleteState | null>(null);
@@ -122,6 +126,7 @@ export const McpClientsProvider = ({ children }: { children: React.ReactNode }) 
       {viewDetailsState && (
         <McpClientDetails
           clientDetails={viewDetailsState.clientDetails}
+          spaceId={http.spaceId}
           presentation={viewDetailsState.presentation}
           onClose={closeViewDetails}
         />

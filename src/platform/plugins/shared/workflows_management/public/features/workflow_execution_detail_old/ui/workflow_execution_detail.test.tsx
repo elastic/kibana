@@ -119,6 +119,12 @@ jest.mock('../../../entities/workflows/model/use_workflow_execution_polling', ()
   useWorkflowExecutionPolling: () => mockUseWorkflowExecutionPolling(),
 }));
 
+// The component reads the polled execution from the store; mirror the mocked poll result there.
+jest.mock('../../../entities/workflows/store/workflow_detail/selectors', () => ({
+  ...jest.requireActual('../../../entities/workflows/store/workflow_detail/selectors'),
+  selectExecution: () => mockUseWorkflowExecutionPolling().workflowExecution,
+}));
+
 const createMockExecution = (
   overrides: Partial<WorkflowExecutionDto> = {}
 ): WorkflowExecutionDto => ({
@@ -220,7 +226,7 @@ describe('WorkflowExecutionDetail', () => {
         </TestWrapper>
       );
 
-      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview');
+      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview', { replace: true });
     });
   });
 
@@ -430,6 +436,7 @@ describe('WorkflowExecutionDetail', () => {
 
       // The component should render without errors when finding child step
       expect(screen.getByTestId('step-details')).toBeInTheDocument();
+      expect(mockStepExecutionDetailsProps.current.resumeExecutionId).toBe('child-exec-1');
     });
   });
 
@@ -454,7 +461,7 @@ describe('WorkflowExecutionDetail', () => {
         </TestWrapper>
       );
 
-      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview');
+      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview', { replace: true });
     });
 
     it('should auto-select __overview when no step is selected and execution is terminal with no steps', () => {
@@ -471,7 +478,7 @@ describe('WorkflowExecutionDetail', () => {
         </TestWrapper>
       );
 
-      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview');
+      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview', { replace: true });
     });
   });
 });
@@ -823,6 +830,6 @@ describe('WorkflowExecutionDetail - auto-select overview on failed before steps'
       </TestWrapper>
     );
 
-    expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview');
+    expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview', { replace: true });
   });
 });

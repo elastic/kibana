@@ -1,0 +1,46 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
+    "@kbn/core-security-common",
+    "@kbn/core-security-server",
+    "@kbn/content-management-favorites-common",
+    "@kbn/content-management-favorites-public",
+    "@kbn/features-plugin",
+    "@kbn/share-plugin",
+    "@kbn/cloud",
+    "@kbn/cloud-plugin",
+    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-server",
+    "@kbn/search-agent",
+    "@kbn/react-query",
+    "@kbn/shared-components",
+    "@kbn/shared-ux-ai-components",
+    "@kbn/shared-ux-utility",
+    "@kbn/announcement-banner",
+    "@kbn/custom-icons",
+    "@kbn/deeplinks-analytics",
+    "@kbn/discover-plugin",
+    "@kbn/index-management-shared-types",
+    "@kbn/core-application-browser-mocks",
+    "@kbn/core-chrome-browser-mocks",
+    "@kbn/core-doc-links-browser-mocks",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-security-browser-mocks",
+    "@kbn/core-user-profile-browser-mocks"
+  ]
+}

@@ -14,7 +14,7 @@ export type {
 export {
   DEFAULT_ESQL_RESPONSE_FORMAT,
   ESQL_RESPONSE_FORMAT_NAMES,
-  getEsqlResponseFormat,
+  findEsqlResponseFormat,
   type EsqlResponseFormatName,
 } from './registry';
 export { JSON_STREAM_BATCH_SIZE, NON_STREAMING_MAX_ROWS } from './json_format';

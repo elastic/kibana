@@ -40,6 +40,7 @@ import {
   createIngestOutcome,
   recordIngestFailure,
 } from './utils/ingest_outcome';
+import { DEFAULT_EXPERIMENT_CONCURRENCY, getConcurrencyFromEnv } from './utils/concurrency';
 import { buildIngestRequest, toScoreModel } from './utils/build_ingest_request';
 import { buildModelFromConnector } from './utils/build_model_from_connector';
 import type {
@@ -291,6 +292,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         connector,
         evaluationConnector,
         repetitions,
+        concurrency,
         reportModelScore,
         workerExecutionId,
         workerExperimentId,
@@ -324,6 +326,8 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         model,
         executionId,
         repetitions,
+        concurrency,
+        requestedConcurrency: getConcurrencyFromEnv(),
         upsertDataset: async (dataset: EvaluationDataset) =>
           evalsClient.upsertDataset({
             name: dataset.name,
@@ -517,4 +521,5 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   connectorParam: [undefined, { option: true, scope: 'worker' }],
   evaluationConnectorParam: [undefined, { option: true, scope: 'worker' }],
   repetitions: [1, { option: true, scope: 'worker' }],
+  concurrency: [DEFAULT_EXPERIMENT_CONCURRENCY, { option: true, scope: 'worker' }],
 });

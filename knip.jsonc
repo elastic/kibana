@@ -22,12 +22,12 @@
     "^@elastic/",
     "^@babel/plugin-",
     "^babel-plugin-",
+    // babel-jest is a transitive dependency of eslint-jest-plugin
+    "babel-jest",
     "^eslint-plugin-",
     "@eslint-community/eslint-plugin-eslint-comments",
     // @types/d3-color is used by @elastic/kibana-d3-color; knip can't trace this.
     "@types/d3-color",
-    // watchpack has no type declarations; knip cannot associate this package with its import.
-    "@types/watchpack",
     // used by our FTR; knip can't trace this.
     "geckodriver",
     // these are used as Cypress reporters via reporter_config.json; knip can't trace the
@@ -77,7 +77,9 @@
     // mongodb and mongodb-connection-string-url are loaded via dynamic import() in
     // @kbn/connector-specs (the MongoDB connector); knip can't trace dynamic imports.
     "mongodb",
-    "mongodb-connection-string-url"
+    "mongodb-connection-string-url",
+    // Declared in package.json but consumed by quite a number of packages as a transitive dependency.
+    "terser-webpack-plugin"
   ],
   "workspaces": {
     ".": {
@@ -109,7 +111,6 @@
       },
       "webpack": {
         "config": [
-          "packages/kbn-optimizer/src/worker/webpack.config.ts",
           "src/platform/plugins/shared/console/packaging/webpack.config.js",
           "src/platform/packages/private/kbn-ui-shared-deps-npm/webpack.config.js",
           "src/platform/packages/private/kbn-ui-shared-deps-src/webpack.config.js",
@@ -122,12 +123,11 @@
       "entry": ["set.js", "setWith.js", "fp/*.js"]
     },
     "src/platform/packages/private/kbn-esql-scripts": {
-      // These are standalone CLI scripts invoked via ts-node from the package's shell scripts
-      // (definitions/make_defs.sh, documentation/make_docs.sh), not from an index/main entry.
-      // Declaring them as entries lets knip follow their imports.
-      "entry": ["definitions/generate_*.ts", "documentation/generate_*.ts"]
+      // generate.ts is a standalone CLI invoked via swc-register from the package's generate.sh,
+      // not from an index/main entry. Declaring it as an entry lets knip follow its imports.
+      "entry": ["generate.ts"]
     },
-    "src/platform/packages/shared/kbn-test": {
+    "src/platform/packages/shared/kbn-jest": {
       // Jest setup/polyfill/serializer files referenced from jest-preset.js via `<rootDir>/...`.
       // knip can't resolve `<rootDir>` inside a shared preset.
       "entry": ["**/*.{js,ts}"]

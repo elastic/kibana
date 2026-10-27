@@ -29,7 +29,7 @@ export interface CliArgs {
   watch: boolean;
   basePath: boolean;
   oss: boolean;
-  /** @deprecated use disableOptimizer to know if the @kbn/optimizer is disabled in development */
+  /** @deprecated use disableOptimizer to know if the @kbn/rspack-optimizer is disabled in development */
   optimize?: boolean;
   runExamples: boolean;
   disableOptimizer: boolean;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { euiSelectors } from '@kbn/scout';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
@@ -154,7 +155,7 @@ export class DataVisualizerTable {
 
   async ensureAllMenuPopoversClosed() {
     await this.page.keyboard.press('Escape');
-    await this.page.locator('.euiContextMenuPanel').waitFor({ state: 'hidden' });
+    await this.page.locator(euiSelectors.contextMenu.PANEL_SELECTOR).waitFor({ state: 'hidden' });
   }
 
   async ensureActionsMenuOpen(fieldName: string) {
@@ -162,7 +163,9 @@ export class DataVisualizerTable {
     await this.page.testSubj
       .locator(this.rowSelector(fieldName, 'euiCollapsedItemActionsButton'))
       .click();
-    await this.page.locator('.euiContextMenuPanel').waitFor({ state: 'visible', timeout: 30_000 });
+    await this.page
+      .locator(euiSelectors.contextMenu.PANEL_SELECTOR)
+      .waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async waitForActionsMenuClosed(_fieldName: string, action: string) {
@@ -171,7 +174,9 @@ export class DataVisualizerTable {
 
   isActionMenuViewInLensEnabled(_fieldName: string) {
     return this.page
-      .locator('.euiContextMenuItem[data-test-subj="dataVisualizerActionViewInLensButton"]')
+      .locator(
+        `${euiSelectors.contextMenu.ITEM_SELECTOR}[data-test-subj="dataVisualizerActionViewInLensButton"]`
+      )
       .isEnabled();
   }
 
@@ -186,7 +191,9 @@ export class DataVisualizerTable {
   async clickActionMenuDeleteIndexPatternFieldButton(fieldName: string) {
     const testSubj = 'dataVisualizerActionDeleteIndexPatternFieldButton';
     await this.ensureActionsMenuOpen(fieldName);
-    await this.page.locator(`.euiContextMenuItem[data-test-subj="${testSubj}"]`).click();
+    await this.page
+      .locator(`${euiSelectors.contextMenu.ITEM_SELECTOR}[data-test-subj="${testSubj}"]`)
+      .click();
     await this.waitForActionsMenuClosed(fieldName, testSubj);
     await this.page.testSubj
       .locator('runtimeFieldDeleteConfirmModal')

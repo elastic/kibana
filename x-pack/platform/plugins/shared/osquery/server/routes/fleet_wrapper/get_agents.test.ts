@@ -9,8 +9,11 @@ import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { isRight } from 'fp-ts/Either';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getAgentsRoute } from './get_agents';
+import { buildAgentSearchKuery } from '../../../common/utils/build_agent_search_kuery';
+import { getAgentsRequestQuerySchema } from '../../../common/api/fleet_wrapper/get_agents_route';
 
 jest.mock('../../utils/get_internal_saved_object_client', () => ({
   createInternalSavedObjectsClientForSpaceId: jest.fn().mockResolvedValue({}),
@@ -207,6 +210,48 @@ describe('getAgentsRoute', () => {
     expect(node.arguments).toHaveLength(2);
 
     // The scope must sit in a `filter`, not as one `should` branch among many.
+    const esQuery = toElasticsearchQuery(node) as { bool: { filter: unknown[] } };
+    expect(esQuery.bool.filter).toBeDefined();
+    expect(JSON.stringify(esQuery.bool.filter)).toContain('policy-1');
+  });
+
+  it('applies policy scope correctly when searching across host.name and host.hostname with case variations', async () => {
+    const mockResponse = httpServerMock.createResponseFactory();
+    await routeHandler(
+      {} as never,
+      createMockRequest(buildAgentSearchKuery('uppername')) as never,
+      mockResponse
+    );
+
+    expect(typeof receivedKueryString()).toBe('string');
+    const node = receivedKueryNode();
+    expect(node.function).toBe('and');
+    expect(node.arguments).toHaveLength(2);
+
+    const esQuery = toElasticsearchQuery(node) as { bool: { filter: unknown[] } };
+    expect(esQuery.bool.filter).toBeDefined();
+    expect(JSON.stringify(esQuery.bool.filter)).toContain('policy-1');
+  });
+
+  it('applies policy scope correctly for a 253-character FQDN search query without exceeding bounds', async () => {
+    const fqdn253 =
+      'a'.repeat(63) + '.' + 'b'.repeat(63) + '.' + 'c'.repeat(63) + '.' + 'd'.repeat(57) + '.com';
+    expect(fqdn253).toHaveLength(253);
+
+    const searchKuery = buildAgentSearchKuery(fqdn253);
+
+    // Verifies the 4096 schema bound against the real generated search kuery
+    expect(isRight(getAgentsRequestQuerySchema.decode({ kuery: searchKuery }))).toBe(true);
+    expect(searchKuery.length).toBeLessThanOrEqual(4096);
+
+    const mockResponse = httpServerMock.createResponseFactory();
+    await routeHandler({} as never, createMockRequest(searchKuery) as never, mockResponse);
+
+    expect(mockResponse.badRequest).not.toHaveBeenCalled();
+    const node = receivedKueryNode();
+    expect(node.function).toBe('and');
+    expect(node.arguments).toHaveLength(2);
+
     const esQuery = toElasticsearchQuery(node) as { bool: { filter: unknown[] } };
     expect(esQuery.bool.filter).toBeDefined();
     expect(JSON.stringify(esQuery.bool.filter)).toContain('policy-1');

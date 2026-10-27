@@ -8,24 +8,35 @@
 import { useCallback, useMemo } from 'react';
 import { useInfiniteQuery } from '@kbn/react-query';
 import type {
-  InvestigationStatus,
-  ListInvestigationItem,
+  InvestigationSeverityFilterValue,
+  InvestigationSummary,
   ListInvestigationsResponse,
-  Severity,
-} from '@kbn/nightshift-investigations-plugin/common';
+} from '@kbn/agentic-investigations-plugin/common';
 import { isHttpClientError } from '../common/http_error';
+import {
+  MAX_SHARED_INVESTIGATIONS,
+  SHARED_INVESTIGATIONS_API_VERSION,
+  SHARED_INVESTIGATIONS_URL,
+} from '../common/shared_investigations_api';
 import { useKibana } from './use_kibana';
 
-const NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY = ['nightshift.investigations'] as const;
+export const NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY = ['nightshift.investigations'] as const;
 
 const INVESTIGATIONS_PAGE_SIZE = 10;
+
+/**
+ * The shared list API cannot filter on `in_progress`, so the in-progress section reads this many
+ * of the newest open investigations and keeps the running ones.
+ */
+const IN_PROGRESS_CANDIDATES = 20;
 
 /** How long a section's pages stay fresh, which bounds how often a refocus can refetch it. */
 const SECTION_STALE_TIME_MS = 30_000;
 
 export interface FetchInvestigationsParams {
-  statuses: InvestigationStatus[];
-  severities?: Severity[];
+  /** True: only investigations an agent is working on; false: the rest. */
+  inProgress: boolean;
+  severities?: InvestigationSeverityFilterValue[];
   query?: string;
   /**
    * Poll interval in ms, or `false` to never poll. A refetch re-requests every page this
@@ -35,7 +46,7 @@ export interface FetchInvestigationsParams {
 }
 
 export interface FetchInvestigationsResult {
-  investigations: ListInvestigationItem[];
+  investigations: InvestigationSummary[];
   total: number;
   hasMore: boolean;
   isInitialLoading: boolean;
@@ -48,18 +59,16 @@ export interface FetchInvestigationsResult {
 }
 
 /** Offset pages over a live `created_at desc` window can repeat an id across boundaries. */
-const flattenInvestigationPages = (
-  pages: ListInvestigationsResponse[]
-): ListInvestigationItem[] => {
+const flattenInvestigationPages = (pages: ListInvestigationsResponse[]): InvestigationSummary[] => {
   const seen = new Set<string>();
-  const items: ListInvestigationItem[] = [];
+  const items: InvestigationSummary[] = [];
 
   for (const page of pages) {
     for (const item of page.results) {
-      if (seen.has(item.investigation_id)) {
+      if (seen.has(item.id)) {
         continue;
       }
-      seen.add(item.investigation_id);
+      seen.add(item.id);
       items.push(item);
     }
   }
@@ -67,22 +76,21 @@ const flattenInvestigationPages = (
   return items;
 };
 
-export const MAX_INVESTIGATIONS_PAGE = 100;
+export const getInvestigationsNextPageParam = ({
+  pagination: { page, per_page: perPage, total },
+}: ListInvestigationsResponse): number | undefined => {
+  const loaded = page * perPage;
+  return loaded < total && loaded + perPage <= MAX_SHARED_INVESTIGATIONS ? page + 1 : undefined;
+};
 
-export const getInvestigationsNextPageParam = (
-  lastPage: ListInvestigationsResponse
-): number | undefined =>
-  lastPage.page < MAX_INVESTIGATIONS_PAGE && lastPage.page * lastPage.size < lastPage.total
-    ? lastPage.page + 1
-    : undefined;
-
+/** One landing section's investigations from the shared investigations list API, page by page. */
 export const useFetchInvestigations = ({
-  statuses,
+  inProgress,
   severities,
   query,
   refetchInterval = false,
 }: FetchInvestigationsParams): FetchInvestigationsResult => {
-  const investigationsClient = useKibana().services.nightshiftInvestigations?.investigationsClient;
+  const { http, agenticInvestigations } = useKibana().services;
 
   const {
     data,
@@ -95,31 +103,27 @@ export const useFetchInvestigations = ({
     isPreviousData,
     refetch,
   } = useInfiniteQuery<ListInvestigationsResponse, Error>({
-    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'section', statuses, severities, query],
-    // investigationsClient is undefined when the plugin is unavailable (optional dep)
-    enabled: investigationsClient != null,
-    queryFn: async ({ pageParam, signal }) => {
-      if (!investigationsClient) {
-        // enabled guards this at runtime; TS cannot see that from inside the closure
-        throw new Error('Nightshift investigations plugin is unavailable');
-      }
-      const page = typeof pageParam === 'number' ? pageParam : 1;
-      return investigationsClient.fetch('GET /internal/nightshift/investigations', {
-        params: {
-          query: {
-            sort_field: 'created_at',
-            sort_order: 'desc',
-            page,
-            size: INVESTIGATIONS_PAGE_SIZE,
-            statuses,
-            ...(severities?.length ? { severities } : {}),
-            ...(query ? { query } : {}),
-          },
+    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'section', inProgress, severities, query],
+    // The list API belongs to agenticInvestigations, an optional dependency.
+    enabled: agenticInvestigations != null,
+    queryFn: async ({ pageParam, signal }) =>
+      http.get<ListInvestigationsResponse>(SHARED_INVESTIGATIONS_URL, {
+        version: SHARED_INVESTIGATIONS_API_VERSION,
+        query: {
+          sort_field: 'created_at',
+          sort_order: 'desc',
+          ...(inProgress
+            ? { page: 1, per_page: IN_PROGRESS_CANDIDATES, status: 'open' }
+            : {
+                page: typeof pageParam === 'number' ? pageParam : 1,
+                per_page: INVESTIGATIONS_PAGE_SIZE,
+              }),
+          ...(severities?.length ? { severity: severities } : {}),
+          ...(query ? { query } : {}),
         },
-        signal: signal ?? null,
-      });
-    },
-    getNextPageParam: getInvestigationsNextPageParam,
+        signal,
+      }),
+    getNextPageParam: inProgress ? () => undefined : getInvestigationsNextPageParam,
     refetchInterval,
     staleTime: SECTION_STALE_TIME_MS,
     refetchOnWindowFocus: true,
@@ -130,9 +134,15 @@ export const useFetchInvestigations = ({
     retry: (failureCount, err) => !isHttpClientError(err) && failureCount < 3,
   });
 
-  const investigations = useMemo(() => flattenInvestigationPages(data?.pages ?? []), [data?.pages]);
+  // The other sections keep running investigations: dropping them from a page could empty the
+  // section and hide the finished ones on later pages.
+  const investigations = useMemo(() => {
+    const loaded = flattenInvestigationPages(data?.pages ?? []);
+    return inProgress ? loaded.filter(({ in_progress: isRunning }) => isRunning) : loaded;
+  }, [data?.pages, inProgress]);
 
-  const total = data?.pages[data.pages.length - 1]?.total ?? 0;
+  const listedTotal = data?.pages[data.pages.length - 1]?.pagination.total ?? 0;
+  const total = inProgress ? investigations.length : listedTotal;
 
   const handleFetchNextPage = useCallback(() => {
     void fetchNextPage();

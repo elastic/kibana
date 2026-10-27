@@ -23,6 +23,7 @@ import type {
   SecuritySolutionServerlessPluginSetupDeps,
   SecuritySolutionServerlessPluginStartDeps,
 } from './types';
+import { isAlertZeroAvailable } from '../common/alertzero_availability';
 import { registerUpsellings } from './upselling';
 import { createServices } from './common/services/create_services';
 import { startNavigation } from './navigation';
@@ -79,6 +80,7 @@ export class SecuritySolutionServerlessPlugin
     const { productTypes } = this.config;
     const services = createServices(core, startDeps, this.experimentalFeatures);
 
+    startDeps.alertzero?.setServerlessTierAvailable(isAlertZeroAvailable(productTypes));
     registerUpsellings(productTypes, services);
 
     securitySolution.setComponents({

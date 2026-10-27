@@ -66,6 +66,12 @@ jest.mock('../../shared/components/share_url_icon_button', () => ({
   }) => (url ? <button type="button" data-test-subj={dataTestSubj} /> : null),
 }));
 
+jest.mock('../../shared/components/flyout_header_actions', () => ({
+  FlyoutHeaderActions: ({ children }: { children?: React.ReactNode }) => (
+    <div data-test-subj="mockFlyoutHeaderActions">{children}</div>
+  ),
+}));
+
 jest.mock('../../../flyout/attack_details/hooks/use_get_attack_flyout_link', () => ({
   useGetAttackFlyoutLink: jest.fn(),
 }));
@@ -114,6 +120,7 @@ describe('<Header />', () => {
     expect(getByTestId('mockAssignees')).toBeInTheDocument();
     expect(getByTestId('mockNotes')).toBeInTheDocument();
     expect(getByTestId(HEADER_SUMMARY_PANEL_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId('mockFlyoutHeaderActions')).toBeInTheDocument();
   });
 
   it('renders the share button when a link is available', () => {

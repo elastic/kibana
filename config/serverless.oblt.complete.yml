@@ -8,6 +8,10 @@ xpack.infra.enabled: true
 xpack.slo.enabled: true
 xpack.uptime.enabled: true
 xpack.significantEvents.enabled: true
+xpack.nightshiftSources.enabled: true
+xpack.nightshift_investigations.enabled: true
+xpack.agenticInvestigations.enabled: true
+xpack.proposals.enabled: true
 
 xpack.features.overrides:
   infrastructure.name: 'Infrastructure'
@@ -31,7 +35,13 @@ xpack.features.overrides:
   ### Context Engine should match Agent Builder for role management (avoid orphan Kibana category).
   contextEngine.category: 'observability'
   ### Agentic investigations should be moved from Analytics category to the Observability one.
-  # agenticInvestigations.category: 'observability' # TODO: uncomment when agentic investigations plugin is enabled
+  agenticInvestigations.category: 'observability'
+  ### Proposed Actions should match Agentic Investigations (avoid orphan Kibana category).
+  proposals.category: 'observability'
+  ### Both features only do something on projects onboarded to the Nightshift private preview, so
+  ### Role management flags them until Nightshift is generally available.
+  agenticInvestigations.description: 'Technical preview. Requires the Nightshift private preview to be enabled on this project.'
+  proposals.description: 'Technical preview. Requires the Nightshift private preview to be enabled on this project.'
   
 # Elastic Managed LLMs
 xpack.actions.preconfigured:

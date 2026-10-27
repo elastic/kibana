@@ -32,7 +32,14 @@ export const THREAT_INTEL_API_BASE = '/internal/threat_intel' as const;
 
 export const CREATE_THREAT_REPORT_API_PATH =
   `${THREAT_INTEL_API_BASE}/create_threat_report` as const;
+export const ATTRIBUTE_ALERTS_EVIDENCE_API_PATH =
+  `${THREAT_INTEL_API_BASE}/attribute_alerts_evidence` as const;
+export const PERSIST_REPORT_FIELDS_API_PATH =
+  `${THREAT_INTEL_API_BASE}/persist_report_fields` as const;
+export const INGEST_THREAT_REPORT_API_PATH =
+  `${THREAT_INTEL_API_BASE}/ingest_threat_report` as const;
 export const EXTRACT_IOCS_API_PATH = `${THREAT_INTEL_API_BASE}/extract_iocs` as const;
+export const ENRICH_REPORT_CORE_API_PATH = `${THREAT_INTEL_API_BASE}/enrich_report_core` as const;
 export const EXTRACT_DIAMOND_API_PATH = `${THREAT_INTEL_API_BASE}/extract_diamond` as const;
 export const ASSESS_RELEVANCE_API_PATH = `${THREAT_INTEL_API_BASE}/assess_relevance` as const;
 export const ENRICH_TAXONOMY_API_PATH = `${THREAT_INTEL_API_BASE}/enrich_taxonomy` as const;
@@ -48,19 +55,10 @@ export const READINESS_API_PATH = `${THREAT_INTEL_API_BASE}/readiness` as const;
 
 /**
  * Text-embedding endpoint backing the `semantic_text` Diamond summary fields in
- * the reports mapping. This is not the model that performs Diamond extraction —
- * that one is resolved per request through
- * `THREAT_INTEL_DIAMOND_INFERENCE_FEATURE_ID`.
+ * the reports mapping. This is not the chat model that performs Diamond
+ * extraction (that one resolves through the AlertZero Frontier tier).
  */
 export const DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID = '.jina-embeddings-v5-text-small' as const;
-
-/**
- * Inference feature registry ids. Operators pick the model for each of these in
- * Stack Management > Model Settings; the enrich routes resolve through them
- * instead of naming an endpoint themselves.
- */
-export const THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID = 'threat_intel_enrich' as const;
-export const THREAT_INTEL_DIAMOND_INFERENCE_FEATURE_ID = 'threat_intel_diamond' as const;
 
 /** Visible from every space (seed catalog). */
 export const GLOBAL_SPACE_ID = '*' as const;
@@ -72,26 +70,26 @@ export const GLOBAL_SPACE_ID = '*' as const;
  */
 export const MAX_URL_LENGTH = 2048;
 
-export const FETCH_ADAPTER_TYPES = ['rss', 'text_indicator_list', 'kev'] as const;
+export const FETCH_ADAPTER_TYPES = ['rss', 'kev'] as const;
 export type FetchAdapterType = (typeof FETCH_ADAPTER_TYPES)[number];
 
 /**
  * Stable document ids for the fixed, code-authoritative source catalog. Keep in
  * sync with `DEFAULT_SOURCES` in server setup seeding.
+ *
+ * CISA KEV is not in the MVP catalog: Continuous Threat Hunt has no Tier 1 path for
+ * pure vulnerability intel yet, so the feed would ingest reports nothing can hunt. The
+ * `kev` adapter stays registered so re-adding the id here (plus its URL and seed row)
+ * is the whole change when that hunt path lands.
  */
 export const APPROVED_CATALOG_SOURCE_IDS = [
-  'kev:cisa-known-exploited-vulnerabilities',
   'vendor_api:elastic-security-labs',
-  'rss:mandiant-research',
-  'rss:unit42',
-  'rss:talos',
-  'rss:crowdstrike',
   'rss:cisa-alerts',
-  'text_indicator_list:maltrail-cobaltstrike',
-  'rss:aws-security',
-  'rss:aws-security-bulletins',
-  'rss:fortiguard-advisories',
-  'rss:fortiguard-threat-signal',
+  'rss:uk-ncsc',
+  'rss:cert-fr-alerts',
+  'rss:cert-fr-threats',
+  'rss:cert-eu-advisories',
+  'rss:cert-eu-threat-intelligence',
 ] as const;
 
 export const APPROVED_SOURCE_IDS: ReadonlySet<string> = new Set(APPROVED_CATALOG_SOURCE_IDS);

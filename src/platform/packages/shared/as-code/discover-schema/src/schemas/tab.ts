@@ -14,7 +14,7 @@ import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { dataTableSchema, dataTableLimitsSchema } from './data_table';
 import { viewModeSchema } from './view_mode';
 
-export const classicTabSchema = z
+export const discoverSessionApiClassicTabBaseSchema = z
   .object({
     ...dataTableSchema.shape,
     ...dataTableLimitsSchema.shape,
@@ -22,12 +22,14 @@ export const classicTabSchema = z
     filters: z.array(asCodeFilterSchema).max(100).default([]).meta({
       description: 'List of filters to apply to the data in the tab.',
     }),
-    data_source: dataViewSchema,
+    data_source: dataViewSchema.meta({
+      description: 'The data view used by the tab, specified by reference or defined inline.',
+    }),
     view_mode: viewModeSchema,
   })
   .strict();
 
-export const esqlTabSchema = z
+export const discoverSessionApiEsqlTabBaseSchema = z
   .object({
     ...dataTableSchema.shape,
     ...dataTableLimitsSchema.shape,
@@ -38,4 +40,7 @@ export const esqlTabSchema = z
     description: 'ES|QL (Elasticsearch Query Language) data source.',
   });
 
-export const tabSchema = z.union([classicTabSchema, esqlTabSchema]);
+export const discoverSessionApiTabBaseSchema = z.union([
+  discoverSessionApiClassicTabBaseSchema,
+  discoverSessionApiEsqlTabBaseSchema,
+]);

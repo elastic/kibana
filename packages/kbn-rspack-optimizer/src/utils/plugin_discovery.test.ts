@@ -144,6 +144,27 @@ describe('plugin_discovery', () => {
       expect(pluginsWithTest.length).toBeGreaterThanOrEqual(pluginsWithoutTest.length);
     });
   });
+
+  describe('discoverPlugins with devOnly', () => {
+    it('omits mockIdpPlugin unless devOnly is true', async () => {
+      const [withDevOnly, withDefault] = await Promise.all([
+        discoverPlugins({
+          repoRoot: REPO_ROOT,
+          examples: false,
+          testPlugins: false,
+          devOnly: true,
+        }),
+        discoverPlugins({
+          repoRoot: REPO_ROOT,
+          examples: false,
+          testPlugins: false,
+        }),
+      ]);
+
+      expect(withDefault.some((p) => p.id === 'mockIdpPlugin')).toBe(false);
+      expect(withDevOnly.some((p) => p.id === 'mockIdpPlugin')).toBe(true);
+    }, 60000);
+  });
 });
 
 describe('discoverPlugins with explicit paths', () => {

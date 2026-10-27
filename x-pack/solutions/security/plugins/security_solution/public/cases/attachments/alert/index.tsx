@@ -7,6 +7,7 @@
 
 import React, { type ComponentType, lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   CommonAttachmentListViewProps,
   UnifiedReferenceAttachmentViewProps,
@@ -112,11 +113,35 @@ export const getSecurityAlertType = () =>
   defineAttachment({
     id: SECURITY_ALERT_ATTACHMENT_TYPE,
     getLabel: () => i18n.ALERT_DISPLAY_NAME,
+    getCountLabel: ({ count }) => i18n.ALERTS_COUNT(count),
     getIcon: () => 'bell',
     getCreationActivity,
     getRemovalActivity,
     getAttachmentList: () => ({
       children: AlertTabContentWrapper,
     }),
+    workflow: {
+      getActivityLabel: ({ workflowName, count }) => (
+        <FormattedMessage
+          id="xpack.securitySolution.cases.alertAttachment.workflowActivityLabel"
+          defaultMessage="ran {name} on {count, plural, =0 {an alert} one {# alert} other {# alerts}}"
+          values={{ name: workflowName, count: count ?? 0 }}
+        />
+      ),
+    },
+    getDocumentAction: ({ id, documentId, index }) => {
+      const documentIndex = getNonEmptyField(index);
+      return documentIndex
+        ? {
+            type: AttachmentActionType.CUSTOM as const,
+            isPrimary: true,
+            render: () => (
+              <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+                <ShowAlertButton id={id} alertId={documentId} index={documentIndex} />
+              </Suspense>
+            ),
+          }
+        : null;
+    },
     schema: SecurityAlertAttachmentPayloadSchema,
   });

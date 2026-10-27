@@ -5,19 +5,29 @@
  * 2.0.
  */
 
+import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { MetadataFieldValue } from '@kbn/agent-builder-common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
-import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
-import type { ProposalItem, ProposalsPageResponse } from '../../../common/proposals/list';
+import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
+import { OPEN_PROPOSAL_STATUSES, SETTLED_PROPOSAL_STATUSES } from '@kbn/proposals-common';
+import type { ProposalWithMetadata } from '@kbn/proposals-common';
+import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../common/proposals/origin';
+import {
+  CLOSED_DECIDED_WITHIN_HOURS,
+  type ProposalItem,
+  type ProposalsPageParams,
+  type ProposalsPageResponse,
+} from '../../../common/proposals/list';
 
-type ProposalsService = ReturnType<AgenticInvestigationsPluginStart['getProposalsService']>;
+type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
+type GetImpactClient = AgenticInvestigationsPluginStart['getImpactClient'];
 
 /** Conversation-derived fields merged onto a proposal on read. Absent when unreadable. */
 type ConversationDecoration = Pick<
   ProposalItem,
-  'conversationTitle' | 'conversationAgentId' | 'conversationAssignees'
+  'conversationTitle' | 'conversationAgentId' | 'conversationStatus' | 'conversationAssignees'
 >;
 
 /**
@@ -30,61 +40,110 @@ const readAssignees = (value: MetadataFieldValue | undefined): string[] => {
   return typeof value === 'string' ? [value] : [];
 };
 
-/** Fixed window for the closed-proposals queue: decisions older than this are not shown. */
-const CLOSED_DECIDED_WITHIN_HOURS = 72;
+const readStatus = (value: MetadataFieldValue | undefined): 'open' | 'closed' | undefined =>
+  value === 'open' || value === 'closed' ? value : undefined;
+
+/**
+ * Breaks every tie the timestamps leave, so a row cannot move between two offset
+ * pages and be shown twice or skipped. Unique per live proposal: `create` roots a
+ * chain at its own id, `revise` numbers it.
+ */
+const TIEBREAKER: SortCombinations[] = [
+  { rootProposalId: { order: 'asc' } },
+  { revision: { order: 'asc' } },
+];
+
+const EMPTY_PAGE: ProposalsPageResponse = { proposals: [], total: 0 };
 
 export class ConversationProposalsService {
   constructor(
     private readonly proposalsService: ProposalsService,
     private readonly agentBuilder: AgentBuilderPluginStart,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly getImpactClient: GetImpactClient
   ) {}
 
-  /** Returns pending proposals for a single action category, newest first. */
+  /** Returns the open proposals (pending or executing) of one category, newest first. */
   async listByCategory(
     category: string,
     request: KibanaRequest,
     spaceId: string,
-    { size, from }: { size: number; from: number }
+    { size, from, entity }: ProposalsPageParams
   ): Promise<ProposalsPageResponse> {
-    const { proposals, total } = await this.proposalsService.list(
-      { category, status: 'pending', excludeSuperseded: true, excludeExpired: false, size, from },
-      spaceId,
-      [{ createdAt: { order: 'desc' as const } }]
-    );
+    const entityFilter = await this.resolveEntityFilter(entity, request);
+    if (entityFilter.matchesNothing) return EMPTY_PAGE;
 
-    const conversations = await this.fetchConversations(
-      proposals.map((p) => p.conversationId),
-      request
-    );
-
-    return { proposals: this.enrichProposals(proposals, conversations), total };
-  }
-
-  /** Proposals that stopped awaiting a human in the last 72 h, newest decision first. */
-  async listClosed(
-    request: KibanaRequest,
-    spaceId: string,
-    { size, from }: { size: number; from: number }
-  ): Promise<ProposalsPageResponse> {
     const { proposals, total } = await this.proposalsService.list(
       {
-        decidedWithinHours: CLOSED_DECIDED_WITHIN_HOURS,
+        ...entityFilter.filter,
+        category,
+        origin: ALERTZERO_PROPOSAL_ORIGIN,
+        // The proposal stays here while its action runs. It leaves when the action settles.
+        statuses: OPEN_PROPOSAL_STATUSES,
         excludeSuperseded: true,
         excludeExpired: false,
         size,
         from,
       },
       spaceId,
-      [{ decidedAt: { order: 'desc' as const } }, { createdAt: { order: 'desc' as const } }]
+      request,
+      [{ createdAt: { order: 'desc' as const } }, ...TIEBREAKER]
     );
 
-    const conversations = await this.fetchConversations(
-      proposals.map((p) => p.conversationId),
-      request
+    return { proposals: await this.decorate(proposals, request), total };
+  }
+
+  /** Returns the proposals that settled in the last 72 hours, newest decision first. */
+  async listClosed(
+    request: KibanaRequest,
+    spaceId: string,
+    { size, from, entity }: ProposalsPageParams
+  ): Promise<ProposalsPageResponse> {
+    const entityFilter = await this.resolveEntityFilter(entity, request);
+    if (entityFilter.matchesNothing) return EMPTY_PAGE;
+
+    const { proposals, total } = await this.proposalsService.list(
+      {
+        ...entityFilter.filter,
+        decidedWithinHours: CLOSED_DECIDED_WITHIN_HOURS,
+        statuses: SETTLED_PROPOSAL_STATUSES,
+        // The index is shared with every other solution's proposals, and only
+        // this filter keeps theirs out of an AlertZero queue.
+        origin: ALERTZERO_PROPOSAL_ORIGIN,
+        // A failed attempt that a retry replaced is not shown: the retry carries its error
+        // as `previousExecutionError`. Earlier revisions go too, since settling one as
+        // `expired` stamps `decidedAt`, so the recency window alone would let it in.
+        excludeSuperseded: true,
+        excludeExpired: false,
+        size,
+        from,
+      },
+      spaceId,
+      request,
+      [
+        { decidedAt: { order: 'desc' as const } },
+        { createdAt: { order: 'desc' as const } },
+        ...TIEBREAKER,
+      ]
     );
 
-    return { proposals: this.enrichProposals(proposals, conversations), total };
+    return { proposals: await this.decorate(proposals, request), total };
+  }
+
+  /**
+   * Impact lives in its own index, so an entity filter becomes the conversations that carry the
+   * entity. None means nothing can match, which saves the proposals query.
+   */
+  private async resolveEntityFilter(
+    entity: string | undefined,
+    request: KibanaRequest
+  ): Promise<{ matchesNothing: boolean; filter: { conversationIds?: string[] } }> {
+    if (entity === undefined) return { matchesNothing: false, filter: {} };
+
+    const conversationIds = await this.getImpactClient(request).searchConversationIdsByEntityId(
+      entity
+    );
+    return { matchesNothing: conversationIds.length === 0, filter: { conversationIds } };
   }
 
   /** Returns an empty map if the read fails: enrichment is decoration, not load-bearing. */
@@ -105,6 +164,9 @@ export class ConversationProposalsService {
           {
             ...(title ? { conversationTitle: title } : {}),
             ...(agentId ? { conversationAgentId: agentId } : {}),
+            ...(readStatus(metadata?.status)
+              ? { conversationStatus: readStatus(metadata?.status) }
+              : {}),
             conversationAssignees: readAssignees(metadata?.assignees),
           },
         ])
@@ -113,6 +175,17 @@ export class ConversationProposalsService {
       this.logger.debug(`Could not resolve conversations: ${err}`);
       return new Map();
     }
+  }
+
+  private async decorate(
+    proposals: ProposalWithMetadata[],
+    request: KibanaRequest
+  ): Promise<ProposalItem[]> {
+    const conversations = await this.fetchConversations(
+      proposals.map((proposal) => proposal.conversationId),
+      request
+    );
+    return this.enrichProposals(proposals, conversations);
   }
 
   private enrichProposals(

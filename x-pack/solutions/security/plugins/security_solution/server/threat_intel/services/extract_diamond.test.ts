@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import { ChatCompletionErrorCode, InferenceTaskError } from '@kbn/inference-common';
 import { extractDiamond, extractDiamondLlmOutputSchema } from './extract_diamond';
 
 const NONE_VERTEX = { signal: 'NONE' as const, summary: '' };
@@ -116,6 +117,103 @@ describe('extractDiamond', () => {
 
     expect(result.extraction_mode).toBe('per_vertex_fallback');
     expect(result.signal_count).toBe(0);
+  });
+
+  it('retries the single call with degraded context on a typed context-length error', async () => {
+    const overflow = new InferenceTaskError(
+      ChatCompletionErrorCode.ContextLengthExceededError,
+      'context window exceeded',
+      {}
+    );
+    const text = `${'L'.repeat(200_000)}MIDDLE_DIAMOND${'R'.repeat(200_000)}`;
+    const { model, singleInvoke, vertexInvoke } = buildModel({
+      singleCall: jest
+        .fn()
+        .mockRejectedValueOnce(overflow)
+        .mockResolvedValueOnce({
+          raw: { response_metadata: {} },
+          parsed: {
+            adversary: HIGH_VERTEX,
+            capability: NONE_VERTEX,
+            infrastructure: NONE_VERTEX,
+            victim: NONE_VERTEX,
+          },
+        }),
+    });
+
+    const result = await extractDiamond(model, logger, { text });
+
+    expect(singleInvoke).toHaveBeenCalledTimes(2);
+    expect(vertexInvoke).not.toHaveBeenCalled();
+    expect(result.extraction_mode).toBe('single_call');
+    expect(result.context_mode).toBe('degraded_context');
+    expect(result.context_coverage).toBeLessThan(1);
+    expect(result.context_chars).toBeLessThanOrEqual(30_000);
+    expect(result.context_chars).toBeLessThan(result.source_chars);
+    expect(String(singleInvoke.mock.calls[1][0])).toContain('MIDDLE_DIAMOND');
+    expect(String(singleInvoke.mock.calls[1][0]).length).toBeLessThan(
+      String(singleInvoke.mock.calls[0][0]).length
+    );
+  });
+
+  it('bounds per-vertex fallback context after a non-overflow single-call failure', async () => {
+    const text = `${'L'.repeat(200_000)}MIDDLE_DIAMOND${'R'.repeat(200_000)}`;
+    const { model, singleInvoke, vertexInvoke } = buildModel({
+      singleCall: fail('structured output parse failed'),
+      perVertex: [ok(HIGH_VERTEX), ok(NONE_VERTEX), ok(NONE_VERTEX), ok(NONE_VERTEX)],
+    });
+
+    const result = await extractDiamond(model, logger, { text });
+
+    expect(singleInvoke).toHaveBeenCalledTimes(1);
+    expect(vertexInvoke).toHaveBeenCalled();
+    expect(result.extraction_mode).toBe('per_vertex_fallback');
+    expect(result.context_mode).toBe('degraded_context');
+    expect(String(vertexInvoke.mock.calls[0][0]).length).toBeLessThan(
+      String(singleInvoke.mock.calls[0][0]).length
+    );
+    expect(String(vertexInvoke.mock.calls[0][0])).toContain('MIDDLE_DIAMOND');
+    expect(result.adversary).toEqual(HIGH_VERTEX);
+  });
+
+  it('keeps the full short article for per-vertex fallback on a non-overflow failure', async () => {
+    // Well under any overflow budget: a forced shrink would needlessly halve
+    // it and could drop evidence from the second half.
+    const text = `LATE_DIAMOND_EVIDENCE sits ${'past filler. '.repeat(5)}at the end.`;
+    const { model, vertexInvoke } = buildModel({
+      singleCall: fail('structured output parse failed'),
+      perVertex: [ok(HIGH_VERTEX), ok(NONE_VERTEX), ok(NONE_VERTEX), ok(NONE_VERTEX)],
+    });
+
+    const result = await extractDiamond(model, logger, { text });
+
+    expect(result.context_mode).toBe('full');
+    expect(String(vertexInvoke.mock.calls[0][0])).toContain('LATE_DIAMOND_EVIDENCE');
+    expect(String(vertexInvoke.mock.calls[0][0])).toContain('at the end');
+  });
+
+  it('shrinks context again for per-vertex fallback after overflow retry fails', async () => {
+    const overflow = new InferenceTaskError(
+      ChatCompletionErrorCode.ContextLengthExceededError,
+      'context window exceeded',
+      {}
+    );
+    const text = `${'L'.repeat(200_000)}MIDDLE_DIAMOND${'R'.repeat(200_000)}`;
+    const { model, singleInvoke, vertexInvoke } = buildModel({
+      singleCall: jest.fn().mockRejectedValue(overflow),
+      perVertex: [ok(HIGH_VERTEX), ok(NONE_VERTEX), ok(NONE_VERTEX), ok(NONE_VERTEX)],
+    });
+
+    const result = await extractDiamond(model, logger, { text });
+
+    expect(singleInvoke).toHaveBeenCalledTimes(2);
+    expect(vertexInvoke).toHaveBeenCalled();
+    expect(result.extraction_mode).toBe('per_vertex_fallback');
+    expect(result.context_mode).toBe('degraded_context');
+    expect(String(vertexInvoke.mock.calls[0][0]).length).toBeLessThan(
+      String(singleInvoke.mock.calls[1][0]).length
+    );
+    expect(result.adversary).toEqual(HIGH_VERTEX);
   });
 });
 

@@ -9,6 +9,7 @@ import { ToolType } from '@kbn/agent-builder-common/tools';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import {
   classifySkill,
+  getModelsForTelemetry,
   normalizePluginIdForTelemetry,
   normalizeSkillIdForTelemetry,
   normalizeToolIdForTelemetry,
@@ -156,5 +157,36 @@ describe('classifySkill', () => {
       origin: 'builtin',
       solution_area: 'unknown',
     });
+  });
+});
+
+describe('getModelsForTelemetry', () => {
+  const usage = { connector_id: 'c1', llm_calls: 1, input_tokens: 1, output_tokens: 1 };
+  const connector = (connectorId: string, model?: string) => ({
+    connector_id: connectorId,
+    model,
+    llm_calls: 1,
+    input_tokens: 1,
+    output_tokens: 1,
+  });
+
+  it('returns the distinct models in order of appearance', () => {
+    expect(
+      getModelsForTelemetry({
+        ...usage,
+        connectors: [connector('a', 'm1'), connector('b', 'm2'), connector('c', 'm1')],
+      })
+    ).toEqual({ models: ['m1', 'm2'], models_count: 2 });
+  });
+
+  it('ignores connectors that report no model', () => {
+    expect(
+      getModelsForTelemetry({ ...usage, connectors: [connector('a'), connector('b', 'm1')] })
+    ).toEqual({ models: ['m1'], models_count: 1 });
+  });
+
+  it('returns nothing without a breakdown or without any model', () => {
+    expect(getModelsForTelemetry(usage)).toEqual({});
+    expect(getModelsForTelemetry({ ...usage, connectors: [connector('a')] })).toEqual({});
   });
 });

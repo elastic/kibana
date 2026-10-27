@@ -11,10 +11,12 @@
  *
  * info:
  *   title: Anomaly Summary API
- *   version: 2023-10-31
+ *   version: 1
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
+
+import { EntityViewMode } from '../common/common.gen';
 
 export const AnomalyScoreRange = lazySchema(() =>
   z.object({
@@ -37,6 +39,7 @@ export type AnomalyScoreRange = z.infer<typeof AnomalyScoreRange>;
 
 export const AnomalySummaryRequestBody = lazySchema(() =>
   z.object({
+    mode: EntityViewMode.optional().default('single'),
     /**
      * Page number (1-indexed)
      */
@@ -124,6 +127,15 @@ export const AnomalySummaryEntry = lazySchema(() =>
      * Elasticsearch document ID of the ML anomaly record
      */
     recordId: z.string().max(200).describe('Elasticsearch document ID of the ML anomaly record'),
+    /**
+     * Id of the Entity Store record this anomaly was matched to; in resolved mode this identifies which member of the resolution group it belongs to
+     */
+    entityId: z
+      .string()
+      .max(200)
+      .describe(
+        'Id of the Entity Store record this anomaly was matched to; in resolved mode this identifies which member of the resolution group it belongs to'
+      ),
     jobId: z.string().max(150),
     /**
      * Human-readable display name for the ML job (from custom_settings.security_app_display_name)
@@ -218,6 +230,7 @@ export type AnomalySummaryResponse = z.infer<typeof AnomalySummaryResponse>;
 
 export const AnomalyOverviewRequestBody = lazySchema(() =>
   z.object({
+    mode: EntityViewMode.optional().default('single'),
     /**
      * Start time as epoch milliseconds; defaults to now-30d when omitted
      */
@@ -376,7 +389,14 @@ export const GetAnomalyOverviewRequestParams = lazySchema(() =>
       .describe(
         'Entity type — determines which EUID runtime mapping is used when searching the anomalies index'
       ),
-    entity_id: z.string().min(1).max(1000),
+    /**
+     * Entity Store id (`entity.id`) of the target entity
+     */
+    entity_id: z
+      .string()
+      .min(1)
+      .max(1000)
+      .describe('Entity Store id (`entity.id`) of the target entity'),
   })
 );
 export type GetAnomalyOverviewRequestParams = z.infer<typeof GetAnomalyOverviewRequestParams>;
@@ -399,7 +419,14 @@ export const GetAnomalySummaryRequestParams = lazySchema(() =>
       .describe(
         'Entity type — determines which EUID runtime mapping is used when searching the anomalies index'
       ),
-    entity_id: z.string().min(1).max(1000),
+    /**
+     * Entity Store id (`entity.id`) of the target entity
+     */
+    entity_id: z
+      .string()
+      .min(1)
+      .max(1000)
+      .describe('Entity Store id (`entity.id`) of the target entity'),
   })
 );
 export type GetAnomalySummaryRequestParams = z.infer<typeof GetAnomalySummaryRequestParams>;

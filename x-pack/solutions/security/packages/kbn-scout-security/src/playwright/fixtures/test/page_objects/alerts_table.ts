@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { euiSelectors } from '@kbn/scout';
 import type { ScoutPage, Locator } from '@kbn/scout';
 import { expect } from '../../../../../ui';
 
@@ -29,7 +30,9 @@ export class AlertsTablePage {
   constructor(private readonly page: ScoutPage) {
     this.detectionsAlertsWrapper = this.page.testSubj.locator('alerts-by-rule-table');
     this.alertsTable = this.page.testSubj.locator('alertsTableIsLoaded'); // Search for loaded Alerts table
-    this.alertRow = this.page.testSubj.locator('alertsTableIsLoaded').locator('div.euiDataGridRow');
+    this.alertRow = this.page.testSubj
+      .locator('alertsTableIsLoaded')
+      .locator(euiSelectors.dataGrid.ROW_SELECTOR);
     this.contextMenuButton = this.page.testSubj.locator('timeline-context-menu-button');
     this.actionsContextMenu = this.page.testSubj.locator('actions-context-menu');
     this.runWorkflowMenuItem = this.page.testSubj.locator('run-workflow-action');
@@ -76,6 +79,21 @@ export class AlertsTablePage {
     const row = ruleNameCell.locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]');
 
     // 3. Click expand button in the row
+    await row.getByTestId('expand-event').click();
+  }
+
+  /**
+   * Opens the document flyout for the first alert whose rule-name cell matches.
+   * Use when one rule can emit multiple alerts (`expandAlertDetailsFlyout` requires exactly one).
+   */
+  async expandFirstAlertDetailsFlyout(ruleName: string, timeout = 60_000) {
+    await this.alertsTable.waitFor({ state: 'visible', timeout });
+    const matchingCells = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
+    // One rule can emit several alerts; open the first matching row.
+    // eslint-disable-next-line playwright/no-nth-methods
+    const firstCell = matchingCells.first();
+    await firstCell.waitFor({ state: 'visible', timeout });
+    const row = firstCell.locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]');
     await row.getByTestId('expand-event').click();
   }
 

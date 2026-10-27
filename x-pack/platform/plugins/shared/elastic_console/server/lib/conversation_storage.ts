@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ConversationRound, VersionedAttachment } from '@kbn/agent-builder-common';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
+import type { ConversationEvent } from './timeline';
 
 const CONVERSATION_INDEX_ALIAS = chatSystemIndex('conversations');
 
@@ -28,6 +29,8 @@ export interface ConversationDocument {
   conversation_rounds: ConversationRound[];
   attachments?: VersionedAttachment[];
   state?: Record<string, unknown>;
+  events?: ConversationEvent[];
+  schema_version?: number;
 }
 
 /**

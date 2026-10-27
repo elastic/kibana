@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
 import type { Locator } from 'playwright/test';
 import type { ScoutPage } from '..';
 
@@ -19,7 +20,7 @@ export class Chrome {
   public readonly searchInput: Locator;
   public readonly searchNoResults: Locator;
 
-  private readonly nextChromeHeader: Locator;
+  private readonly chromeHeader: Locator;
   private readonly searchButton: Locator;
 
   public readonly nav = {
@@ -44,12 +45,12 @@ export class Chrome {
     this.logo = page.testSubj.locator('nav-header-logo');
     this.searchInput = page.testSubj.locator('nav-search-input');
     this.searchNoResults = page.getByRole('status').getByTestId('nav-search-no-results');
-    this.nextChromeHeader = page.testSubj.locator('chromeNextGlobalHeader');
-    this.searchButton = page.testSubj.locator('chromeNextGlobalHeaderSearchButton');
+    this.chromeHeader = page.testSubj.locator(CHROME_HEADER_TEST_SUBJECTS.root);
+    this.searchButton = page.testSubj.locator(CHROME_HEADER_TEST_SUBJECTS.searchButton);
   }
 
-  async isNextChrome(): Promise<boolean> {
-    return this.nextChromeHeader.isVisible();
+  async isProjectChrome(): Promise<boolean> {
+    return this.chromeHeader.isVisible();
   }
 
   async clickLogo(): Promise<void> {
@@ -76,8 +77,8 @@ export class Chrome {
     const classicBadge = this.page
       .getByTestId('headerBadge')
       .and(this.page.locator(`[data-test-badge-label="${label}"]`));
-    const chromeNextBadge = this.page.getByTestId('appHeaderBadge').filter({ hasText: label });
+    const appHeaderBadge = this.page.getByTestId('appHeaderBadge').filter({ hasText: label });
 
-    return classicBadge.or(chromeNextBadge).filter({ visible: true });
+    return classicBadge.or(appHeaderBadge).filter({ visible: true });
   }
 }

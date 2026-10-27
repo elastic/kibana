@@ -67,6 +67,9 @@ export interface AttackDiscoveryAgentBuilderExpected extends Record<string, unkn
   expectedPassedAlertCount?: number | null;
   attackDiscoveries?: AttackDiscovery[];
   criteria?: string[];
+  forbiddenAlertIds?: string[];
+  maxDiscoveryCount?: number;
+  minValidatedDiscoveryCount?: number;
 }
 
 export interface AttackDiscoveryAgentBuilderMetadata extends Record<string, unknown> {
@@ -77,7 +80,8 @@ export interface AttackDiscoveryAgentBuilderMetadata extends Record<string, unkn
     | 'missing-alert-retrieval'
     | 'status-only'
     | 'multiple-alert-sets'
-    | 'scenario-registry';
+    | 'scenario-registry'
+    | 'full-profile';
   /**
    * Join key a rejudge uses to match a recorded score document back to this
    * example's ground truth. Required, not optional: golden documents carry
@@ -88,7 +92,7 @@ export interface AttackDiscoveryAgentBuilderMetadata extends Record<string, unkn
    * scenario's references.
    */
   scenarioKey: string;
-  seedProfile?: 'clean' | 'dense';
+  seedProfile?: 'clean' | 'dense' | 'full';
 }
 
 export type AttackDiscoveryAgentBuilderExample = Example<

@@ -12,13 +12,7 @@ import { badgePart } from './part';
 
 /** Declarative `FlyoutTemplate.Header.Badge`. */
 export const Badge = badgePart.createComponent<FlyoutHeaderBadgeProps>({
-  resolve: ({ children, color, iconType, iconSide, 'data-test-subj': dataTestSubj }) => ({
-    label: children,
-    color,
-    iconType,
-    iconSide,
-    'data-test-subj': dataTestSubj,
-  }),
+  resolve: ({ children, id, ...badgeProps }) => ({ ...badgeProps, label: children }),
 });
 
 Badge.displayName = 'FlyoutTemplate.Header.Badge';

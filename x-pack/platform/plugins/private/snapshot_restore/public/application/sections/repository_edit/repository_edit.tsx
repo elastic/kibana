@@ -6,10 +6,12 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { i18n as i18nLib } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { Repository, EmptyRepository } from '../../../../common/types';
 
@@ -18,12 +20,16 @@ import { PageError, SectionError } from '../../../shared_imports';
 import { ConfirmDefaultRepositoryModal, RepositoryForm, PageLoading } from '../../components';
 import type { Section } from '../../constants';
 import { BASE_PATH } from '../../constants';
-import { useServices, useToastNotifications } from '../../app_context';
-import { breadcrumbService, docTitleService } from '../../services/navigation';
+import { useCore, useServices, useToastNotifications } from '../../app_context';
+import { breadcrumbService, docTitleService, linkToRepositories } from '../../services/navigation';
 import { useCanSetDefaultRepository } from '../../services/authorization';
 import { editRepository, useLoadRepository } from '../../services/http';
 import { useDefaultRepository } from '../../services/use_default_repository';
 import { useDecodedParams } from '../../lib';
+
+const pageTitle = i18nLib.translate('xpack.snapshotRestore.editRepositoryTitle', {
+  defaultMessage: 'Edit repository',
+});
 
 interface MatchParams {
   name: string;
@@ -33,6 +39,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   history,
 }) => {
   const { i18n } = useServices();
+  const { docLinks } = useCore();
   const toastNotifications = useToastNotifications();
   const canSetDefaultRepository = useCanSetDefaultRepository();
   const { name } = useDecodedParams<MatchParams>();
@@ -86,6 +93,23 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   const onCancel = () => {
     history.push(`${BASE_PATH}/${encodeURIComponent(section)}`);
   };
+
+  const header = (
+    <>
+      <AppHeader
+        title={pageTitle}
+        back={{
+          href: history.createHref({ pathname: linkToRepositories() }),
+          label: i18nLib.translate('xpack.snapshotRestore.home.repositoriesTabTitle', {
+            defaultMessage: 'Repositories',
+          }),
+        }}
+        docLink={docLinks.links.snapshotRestore.guide}
+        spacing="bleed"
+      />
+      <EuiSpacer size="l" />
+    </>
+  );
 
   // Save repository
   const doSave = async (editedRepository: Repository | EmptyRepository) => {
@@ -179,11 +203,21 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   };
 
   if (loadingRepository || isLoadingDefaultRepository) {
-    return renderLoading();
+    return (
+      <>
+        {header}
+        {renderLoading()}
+      </>
+    );
   }
 
   if (repositoryError) {
-    return renderError();
+    return (
+      <>
+        {header}
+        {renderError()}
+      </>
+    );
   }
 
   const { isManagedRepository } = repositoryData;
@@ -207,61 +241,51 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   };
 
   return (
-    <EuiPageSection restrictWidth style={{ width: '100%' }}>
-      {canSetOrChangeDefaultRepository && pendingSave && normalizedDefaultRepository !== null && (
-        <ConfirmDefaultRepositoryModal
-          currentDefaultRepository={normalizedDefaultRepository}
-          newDefaultRepository={name}
-          onCancel={() => setPendingSave(null)}
-          onConfirm={() => {
-            void doSave(pendingSave);
-            setPendingSave(null);
-          }}
-        />
-      )}
-      <EuiPageHeader
-        pageTitle={
-          <span data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.snapshotRestore.editRepositoryTitle"
-              defaultMessage="Edit repository"
-            />
-          </span>
-        }
-      />
-
-      <EuiSpacer size="l" />
-
-      {isManagedRepository ? (
-        <>
-          <KbnWarningCallout
-            announceOnMount
-            size="m"
-            title={
-              <FormattedMessage
-                id="xpack.snapshotRestore.editRepository.managedRepositoryWarningTitle"
-                defaultMessage="This is a managed repository. Changing this repository might affect other systems that use it. Proceed with caution."
-              />
-            }
+    <>
+      {header}
+      <EuiPageSection restrictWidth style={{ width: '100%' }}>
+        {canSetOrChangeDefaultRepository && pendingSave && normalizedDefaultRepository !== null && (
+          <ConfirmDefaultRepositoryModal
+            currentDefaultRepository={normalizedDefaultRepository}
+            newDefaultRepository={name}
+            onCancel={() => setPendingSave(null)}
+            onConfirm={() => {
+              void doSave(pendingSave);
+              setPendingSave(null);
+            }}
           />
-          <EuiSpacer size="l" />
-        </>
-      ) : null}
+        )}
+        {isManagedRepository ? (
+          <>
+            <KbnWarningCallout
+              announceOnMount
+              size="m"
+              title={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.editRepository.managedRepositoryWarningTitle"
+                  defaultMessage="This is a managed repository. Changing this repository might affect other systems that use it. Proceed with caution."
+                />
+              }
+            />
+            <EuiSpacer size="l" />
+          </>
+        ) : null}
 
-      <RepositoryForm
-        repository={repository}
-        isManagedRepository={isManagedRepository}
-        isEditing={true}
-        isSaving={isSaving}
-        saveError={renderSaveError()}
-        clearSaveError={clearSaveError}
-        onSave={onSave}
-        onCancel={onCancel}
-        isAlreadyDefaultRepository={isAlreadyDefaultRepository}
-        isDefaultRepository={isAlreadyDefaultRepository ? true : isDefaultRepository}
-        isDefaultRepositoryFeatureAvailable={!defaultRepositoryLoadError}
-        onToggleDefault={canSetDefaultRepository ? setIsDefaultRepository : undefined}
-      />
-    </EuiPageSection>
+        <RepositoryForm
+          repository={repository}
+          isManagedRepository={isManagedRepository}
+          isEditing={true}
+          isSaving={isSaving}
+          saveError={renderSaveError()}
+          clearSaveError={clearSaveError}
+          onSave={onSave}
+          onCancel={onCancel}
+          isAlreadyDefaultRepository={isAlreadyDefaultRepository}
+          isDefaultRepository={isAlreadyDefaultRepository ? true : isDefaultRepository}
+          isDefaultRepositoryFeatureAvailable={!defaultRepositoryLoadError}
+          onToggleDefault={canSetDefaultRepository ? setIsDefaultRepository : undefined}
+        />
+      </EuiPageSection>
+    </>
   );
 };

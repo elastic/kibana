@@ -73,8 +73,7 @@ apiTest.describe('ScalablePrivateLocationPlacement', { tag: ['@local-stateful-cl
     await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
     await apiServices.syntheticsPrivateLocations.installSyntheticsPackage();
     privateLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(
-      'default',
-      { isAgentSharding: true }
+      'default'
     );
   });
 

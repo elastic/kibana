@@ -19,11 +19,13 @@ import {
   type StackConnectorDefinition,
 } from '../utils/eval_connector';
 import { resolveRepetitions } from './repetition_tiers';
+import { DEFAULT_EXPERIMENT_CONCURRENCY, getConcurrencyFromEnv } from '../utils/concurrency';
 
 export interface EvaluationTestOptions extends ScoutTestOptions {
   connectorParam: EvalConnector;
   evaluationConnectorParam: EvalConnector;
   repetitions: number;
+  concurrency: number;
   timeout?: number;
 }
 
@@ -34,6 +36,7 @@ export function createPlaywrightEvalsConfig({
   testDir,
   testIgnore,
   repetitions,
+  concurrency,
   timeout,
   runGlobalSetup,
   workers,
@@ -41,6 +44,8 @@ export function createPlaywrightEvalsConfig({
   testDir: string;
   testIgnore?: PlaywrightTestConfig['testIgnore'];
   repetitions?: number;
+  /** Examples each experiment runs at once, unless `EVAL_CONCURRENCY` or the spec sets it. */
+  concurrency?: number;
   timeout?: number;
   runGlobalSetup?: boolean;
   workers?: 1 | 2 | 3;
@@ -84,6 +89,9 @@ export function createPlaywrightEvalsConfig({
 
   const experimentRepetitions = resolveRepetitions(process.env, repetitions);
 
+  const experimentConcurrency =
+    getConcurrencyFromEnv() ?? concurrency ?? DEFAULT_EXPERIMENT_CONCURRENCY;
+
   // Pass through Scout's setup AND teardown hook projects unchanged. Scout's `setup-local`
   // references its teardown via Playwright's `teardown` field; dropping the `teardown-local`
   // project would leave a dangling reference and Playwright fails with "Project 'setup-local'
@@ -107,6 +115,7 @@ export function createPlaywrightEvalsConfig({
               connectorParam: connector,
               evaluationConnectorParam: evaluationConnector,
               repetitions: experimentRepetitions,
+              concurrency: experimentConcurrency,
             },
           };
         }) ?? []

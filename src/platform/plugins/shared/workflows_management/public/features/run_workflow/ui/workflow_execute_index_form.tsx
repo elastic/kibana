@@ -367,7 +367,6 @@ export const WorkflowExecuteIndexForm = ({
         dataView={selectedDataView}
         getNoCellActions={tableConfig.getNoCellActions}
         visibleTableColumns={tableConfig.visibleTableColumns}
-        columnsMeta={tableConfig.columnsMeta}
         dataTableRows={tableConfig.dataTableRows}
         rowsLength={hitSearch.hits.length}
         unifiedDataTableServices={tableConfig.unifiedDataTableServices}

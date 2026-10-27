@@ -68,25 +68,28 @@ export function registerExternalResumeExecutionPostRoute(deps: RouteDependencies
           },
         },
       },
-      withAvailabilityCheck(async (context, request, response) => {
-        try {
-          const { executionId, stepId } = request.params;
-          const { token } = resolveExternalResumeCredentials(request.query);
-          const spaceId = spaces.getSpaceId(request);
-          await api.resumeWorkflowExecutionExternallyWithInput({
-            token,
-            executionId,
-            stepId,
-            spaceId,
-            input: request.body as Record<string, unknown>,
-            request,
-          });
+      withAvailabilityCheck(
+        async (context, request, response) => {
+          try {
+            const { executionId, stepId } = request.params;
+            const { token } = resolveExternalResumeCredentials(request.query);
+            const spaceId = spaces.getSpaceId(request);
+            await api.resumeWorkflowExecutionExternallyWithInput({
+              token,
+              executionId,
+              stepId,
+              spaceId,
+              input: request.body as Record<string, unknown>,
+              request,
+            });
 
-          return htmlSuccess(response);
-        } catch (error) {
-          return handleExternalResumeError(response, error, logger);
-        }
-      })
+            return htmlSuccess(response);
+          } catch (error) {
+            return handleExternalResumeError(response, error, logger);
+          }
+        },
+        { bootstrapExecutionDataViews: false }
+      )
     );
 }
 
@@ -139,23 +142,26 @@ export function registerExternalResumeExecutionGetRoute(deps: RouteDependencies)
           },
         },
       },
-      withAvailabilityCheck(async (context, request, response) => {
-        try {
-          const { executionId, stepId } = request.params;
-          const { token } = resolveExternalResumeCredentials(request.query);
-          await api.resumeWorkflowExecutionExternallyViaGet({
-            token,
-            executionId,
-            stepId,
-            spaceId: spaces.getSpaceId(request),
-            query: request.query as Record<string, unknown>,
-            request,
-          });
+      withAvailabilityCheck(
+        async (context, request, response) => {
+          try {
+            const { executionId, stepId } = request.params;
+            const { token } = resolveExternalResumeCredentials(request.query);
+            await api.resumeWorkflowExecutionExternallyViaGet({
+              token,
+              executionId,
+              stepId,
+              spaceId: spaces.getSpaceId(request),
+              query: request.query as Record<string, unknown>,
+              request,
+            });
 
-          return htmlSuccess(response);
-        } catch (error) {
-          return handleExternalResumeError(response, error, logger);
-        }
-      })
+            return htmlSuccess(response);
+          } catch (error) {
+            return handleExternalResumeError(response, error, logger);
+          }
+        },
+        { bootstrapExecutionDataViews: false }
+      )
     );
 }

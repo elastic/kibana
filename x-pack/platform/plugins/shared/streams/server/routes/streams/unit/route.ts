@@ -5,31 +5,26 @@
  * 2.0.
  */
 
-import { notFound } from '@hapi/boom';
-import { OBSERVABILITY_STREAMS_ENABLE_CANVAS } from '@kbn/management-settings-ids';
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { streamsUnitIdentifierSchema, streamsUnitUpsertRequestSchema } from '@kbn/streams-schema';
+import { streamsUnitIdentifierSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { StreamsUnitService } from '../../../lib/saved_objects/streams_unit_service';
-import { validateUnitForWrite } from '../../../lib/unit_config/validate_unit';
+import { revokeRemovedComponentApiKeys } from '../../../lib/unit_config/revoke_removed_component_api_keys';
 import { createServerRoute } from '../../create_server_route';
+import { assertStreamsCanvasEnabled } from './assert_streams_canvas_enabled';
+import { indexMetadataRoute } from './index_metadata';
+import { assertUnitPutEnvelope, parseUnitPutBody } from './parse_unit_put_body';
+import { resolveUnitIndicesRoute } from './resolve_indices';
+import { unitStatsRoutes } from './stats_route';
+
+const UNIT_PUT_MAX_BYTES = 1_048_576;
 
 const unitPathSchema = z.object({
   path: z.object({
     id: streamsUnitIdentifierSchema.describe('The unit id.'),
   }),
 });
-
-const assertStreamsCanvasEnabled = async (uiSettingsClient: {
-  get: (key: string) => Promise<unknown>;
-}) => {
-  const canvasEnabled = await uiSettingsClient.get(OBSERVABILITY_STREAMS_ENABLE_CANVAS);
-
-  if (!canvasEnabled) {
-    throw notFound('Streams unit API is not enabled.');
-  }
-};
 
 export const getStreamsUnitRoute = createServerRoute({
   endpoint: 'GET /internal/streams/unit/{id}',
@@ -65,6 +60,22 @@ export const putStreamsUnitRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/unit/{id}',
   options: {
     access: 'internal',
+    body: {
+      accepts: [
+        'application/json',
+        'application/*+json',
+        'application/yaml',
+        'application/x-yaml',
+        'text/yaml',
+        'text/x-yaml',
+        'text/*',
+        'application/octet-stream',
+        'application/x-www-form-urlencoded',
+      ],
+      parse: false,
+      output: 'data',
+      maxBytes: UNIT_PUT_MAX_BYTES,
+    },
   },
   security: {
     authz: {
@@ -75,7 +86,10 @@ export const putStreamsUnitRoute = createServerRoute({
     path: z.object({
       id: streamsUnitIdentifierSchema.describe('The unit id.'),
     }),
-    body: streamsUnitUpsertRequestSchema,
+    // parse:false yields a Buffer. The check always succeeds so the route
+    // framework does not schema-validate the unit; the config distributor does.
+    // The generic keeps repository-client PUTs typed as StreamsUnit.UpsertRequest.
+    body: z.custom<StreamsUnit.UpsertRequest | Buffer>(() => true),
   }),
   handler: async ({
     params,
@@ -83,32 +97,67 @@ export const putStreamsUnitRoute = createServerRoute({
     getScopedClients,
     logger,
     unitConfigHooks,
-  }): Promise<{ acknowledged: true }> => {
-    const { soClient, uiSettingsClient, encryptedSavedObjectsClient, canEncrypt } =
-      await getScopedClients({ request });
+  }): Promise<{
+    acknowledged: true;
+    compiled_config?: string;
+    api_keys_may_remain?: true;
+    ui_metadata_not_persisted?: true;
+  }> => {
+    const {
+      soClient,
+      uiSettingsClient,
+      encryptedSavedObjectsClient,
+      canEncrypt,
+      scopedClusterClient,
+      isSecurityEnabled,
+    } = await getScopedClients({ request });
 
     await assertStreamsCanvasEnabled(uiSettingsClient);
 
-    const { unit, ui_metadata: uiMetadata, secrets } = params.body as StreamsUnit.UpsertRequest;
+    const parsed = parseUnitPutBody({
+      body: params.body,
+      contentType: request.headers['content-type'],
+    });
 
-    await validateUnitForWrite(unit, unitConfigHooks);
+    const { ui_metadata: uiMetadata, secrets } = assertUnitPutEnvelope(parsed);
 
     const streamsUnitService = new StreamsUnitService({
       soClient,
       logger,
+      validateUnit: unitConfigHooks.validate,
       publishUnit: unitConfigHooks.publish,
+      prepareCredentials: unitConfigHooks.prepareCredentials,
       encryptedSavedObjectsClient,
       canEncrypt,
     });
 
-    await streamsUnitService.upsertUnit({
-      unitId: params.path.id,
-      unit,
-      ui_metadata: uiMetadata,
-      secrets,
-    });
+    const { unit: previousUnit } = await streamsUnitService.getUnitOrEmpty(params.path.id);
 
-    return { acknowledged: true };
+    let apiKeysMayRemain = false;
+    const { compiled_config: compiledConfig, ui_metadata_not_persisted: uiMetadataNotPersisted } =
+      await streamsUnitService.upsertUnit({
+        unitId: params.path.id,
+        unit: parsed.unit,
+        ui_metadata: uiMetadata,
+        secrets,
+        onPublished: async () => {
+          ({ apiKeysMayRemain } = await revokeRemovedComponentApiKeys({
+            client: scopedClusterClient.asCurrentUser,
+            logger,
+            isSecurityEnabled,
+            previousUnit,
+            nextUnit: parsed.unit,
+            unitId: params.path.id,
+          }));
+        },
+      });
+
+    return {
+      acknowledged: true,
+      ...(compiledConfig !== undefined ? { compiled_config: compiledConfig } : {}),
+      ...(apiKeysMayRemain ? { api_keys_may_remain: true } : {}),
+      ...(uiMetadataNotPersisted ? { ui_metadata_not_persisted: true } : {}),
+    };
   },
 });
 
@@ -131,8 +180,9 @@ export const resetStreamsUnitRoute = createServerRoute({
     request,
     getScopedClients,
     logger,
-  }): Promise<{ acknowledged: true }> => {
-    const { soClient, uiSettingsClient } = await getScopedClients({ request });
+  }): Promise<{ acknowledged: true; api_keys_may_remain?: true }> => {
+    const { soClient, uiSettingsClient, scopedClusterClient, isSecurityEnabled } =
+      await getScopedClients({ request });
 
     await assertStreamsCanvasEnabled(uiSettingsClient);
 
@@ -141,9 +191,20 @@ export const resetStreamsUnitRoute = createServerRoute({
       logger,
     });
 
+    const { unit: previousUnit } = await streamsUnitService.getUnitOrEmpty(params.path.id);
+
     await streamsUnitService.resetUnit(params.path.id);
 
-    return { acknowledged: true };
+    const { apiKeysMayRemain } = await revokeRemovedComponentApiKeys({
+      client: scopedClusterClient.asCurrentUser,
+      logger,
+      isSecurityEnabled,
+      previousUnit,
+      nextUnit: {},
+      unitId: params.path.id,
+    });
+
+    return { acknowledged: true, ...(apiKeysMayRemain ? { api_keys_may_remain: true } : {}) };
   },
 });
 
@@ -151,4 +212,7 @@ export const unitRoutes = {
   ...getStreamsUnitRoute,
   ...putStreamsUnitRoute,
   ...resetStreamsUnitRoute,
+  ...resolveUnitIndicesRoute,
+  ...indexMetadataRoute,
+  ...unitStatsRoutes,
 };

@@ -48,6 +48,7 @@ for raw_suite in "${requested_suites[@]}"; do
       EVAL_GREP: "${EVAL_GREP:-}"
       EVAL_REPETITIONS: "${EVAL_REPETITIONS:-}"
       EVAL_REPETITION_TIER: "${EVAL_REPETITION_TIER:-}"
+      EVAL_CONCURRENCY: "${EVAL_CONCURRENCY:-}"
       KIBANA_BUILD_ID: "${KIBANA_BUILD_ID:-}"
     timeout_in_minutes: ${EVAL_STEP_TIMEOUT_IN_MINUTES:-120}
     agents:

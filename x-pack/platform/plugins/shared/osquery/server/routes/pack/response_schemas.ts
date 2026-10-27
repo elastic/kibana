@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { resultTypeConfigSchema } from '../../lib/result_type_config_schema';
 
 const ecsMappingItemSchema = schema.object(
   {
@@ -41,6 +42,9 @@ const packQuerySchema = schema.object(
     saved_query_id: schema.maybe(schema.nullable(schema.string())),
     name: schema.maybe(schema.string()),
     schedule_id: schema.maybe(schema.string()),
+    // V5: per-query enabled flag and result type override
+    enabled: schema.maybe(schema.nullable(schema.boolean())),
+    result_type: schema.maybe(schema.nullable(resultTypeConfigSchema)),
   },
   { unknowns: 'allow' }
 );
@@ -81,6 +85,10 @@ const packDataSchema = schema.object(
       )
     ),
     read_only: schema.maybe(schema.boolean()),
+    // V5: pack-level execution defaults
+    min_osquery_version: schema.maybe(schema.nullable(schema.string())),
+    platform: schema.maybe(schema.nullable(schema.string())),
+    result_type: schema.maybe(schema.nullable(resultTypeConfigSchema)),
   },
   { unknowns: 'allow' }
 );
@@ -116,6 +124,11 @@ export const readPackResponseSchema = schema.object({
       migrationVersion: schema.maybe(schema.recordOf(schema.string(), schema.string())),
       managed: schema.maybe(schema.boolean()),
       coreMigrationVersion: schema.maybe(schema.string()),
+      // V5: pack-level execution defaults. Handlers omit null, matching OAS
+      // optional non-null (absent when unset).
+      min_osquery_version: schema.maybe(schema.string()),
+      platform: schema.maybe(schema.string()),
+      result_type: schema.maybe(resultTypeConfigSchema),
     },
     { unknowns: 'allow' }
   ),

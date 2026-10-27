@@ -19,11 +19,9 @@ import * as commonI18n from '../../../../common/translations';
 import { getWorkflowNextExecutionTime } from '../../../lib/next_execution_time';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
+import { triggerSchemas } from '../../../trigger_schemas';
 import { PopoverItems } from '../../../widgets/worflows_triggers_list/popover_items';
-import {
-  getTriggerLabel,
-  TriggerIcon,
-} from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
+import { TriggerIcon } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
 import { getStepTypeLabel } from '../../../widgets/workflows_step_types_list/workflows_step_types_list';
 
 const ICON_SIZE = 16;
@@ -193,7 +191,7 @@ export const WorkflowTriggersAndSteps = ({ triggers, steps, history }: Props) =>
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiText size="s">{getTriggerLabel(trigger.type)}</EuiText>
+                    <EuiText size="s">{triggerSchemas.getTriggerName(trigger.type)}</EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               )}

@@ -6,15 +6,27 @@
  */
 
 export {
+  assertUiamCredential,
   getUiamAuthorizationHeaderFromRequest,
   getUiamCredentialsFromRequest,
 } from './get_uiam_credentials';
 export { KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE } from './project_type';
 export { isExternalApiKey } from './is_external_api_key';
+export {
+  getRequestSpacePrefix,
+  getProtectedResource,
+  getProtectedResourceMetadataUrl,
+  resolveProtectedResource,
+} from './oauth_protected_resource';
 export type {
   ServiceAccountAssumableBy,
-  ServiceAccountRoleAssignments,
+  UiamListServiceAccountsResponse,
+  UiamOrganizationRoleAssignment,
+  UiamProjectRoleAssignment,
+  UiamRoleAssignments,
   UiamServiceAccount,
+  UiamServiceAccountCreator,
+  UiamServiceAccountDetails,
 } from './service_account_types';
 export {
   UiamService,

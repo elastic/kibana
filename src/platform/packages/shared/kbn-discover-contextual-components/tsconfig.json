@@ -33,5 +33,6 @@
     "@kbn/data-views-plugin",
     "@kbn/data-view-utils",
     "@kbn/react-kibana-context-theme",
+    "@kbn/data-source",
   ]
 }

@@ -21,6 +21,7 @@ import { createActionPolicyOasExamples } from './create_action_policy_oas_exampl
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { ACTION_POLICY_LICENSE_FORBIDDEN_DESCRIPTION } from './action_policy_route_descriptions';
 
 @injectable()
 export class CreateActionPolicyRoute extends BaseAlertingRoute {
@@ -36,9 +37,10 @@ export class CreateActionPolicyRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Create an action policy',
     description:
-      'Creates an action policy with a server-generated identifier. To create or replace an action policy with a client-supplied identifier, use PUT /api/alerting/v2/action_policies/.',
+      'Creates an action policy with a server-generated identifier. To create or replace an action policy with a client-supplied identifier, use PUT /api/alerting/v2/action_policies/{id}/.',
     oasOperationObject: createActionPolicyOasExamples,
   } as const;
   static schemas = {
@@ -53,6 +55,10 @@ export class CreateActionPolicyRoute extends BaseAlertingRoute {
       400: {
         body: () => errorResponseSchema,
         description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+      },
+      403: {
+        body: () => errorResponseSchema,
+        description: ACTION_POLICY_LICENSE_FORBIDDEN_DESCRIPTION,
       },
     },
   };

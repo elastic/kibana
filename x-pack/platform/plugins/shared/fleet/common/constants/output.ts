@@ -72,6 +72,7 @@ export const kafkaAuthType = {
   Userpass: 'user_pass',
   Ssl: 'ssl',
   Kerberos: 'kerberos',
+  OAuth2: 'oauth2',
   None: 'none',
 } as const;
 
@@ -84,6 +85,30 @@ export const kafkaSaslMechanism = {
   Plain: 'PLAIN',
   ScramSha256: 'SCRAM-SHA-256',
   ScramSha512: 'SCRAM-SHA-512',
+} as const;
+
+// SASL mechanism sent to the agent for the OAuth2 authentication method. It is not part of
+// `kafkaSaslMechanism` because users never select it: it comes with `auth_type: oauth2`.
+export const KAFKA_OAUTHBEARER_SASL_MECHANISM = 'OAUTHBEARER';
+
+export const kafkaOAuth2GrantType = {
+  ClientCredentials: 'client_credentials',
+  JwtBearer: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+} as const;
+
+export const kafkaOAuth2SignatureAlgorithm = {
+  Rs256: 'RS256',
+  Rs384: 'RS384',
+  Rs512: 'RS512',
+} as const;
+
+// Elastic Agent supports OAUTHBEARER for the Kafka output from this version.
+export const KAFKA_OAUTH2_MINIMUM_FLEET_SERVER_VERSION = '9.6.0';
+
+// How the agent authenticates to the Kerberos server: with a keytab file or with a password.
+export const kafkaKerberosAuthType = {
+  Keytab: 'keytab',
+  Password: 'password',
 } as const;
 
 export const kafkaPartitionType = {
@@ -233,6 +258,26 @@ export const OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES: Array<ValueOf<OutputType>> = [
 ];
 
 export const OUTPUT_HEALTH_DATA_STREAM = 'logs-fleet_server.output_health-default';
+
+/**
+ * Recommended sending_queue settings for outputs pointed at the managed OTLP endpoint.
+ * Source: https://www.elastic.co/docs/reference/opentelemetry/managed-inputs/managed-otlp-endpoint#otlp-client-configuration
+ * Applied automatically at SO creation time when isManagedOtlpEndpoint() matches.
+ */
+export const MANAGED_OTLP_EXPORTER_DEFAULTS = {
+  sending_queue: {
+    enabled: true,
+    sizer: 'bytes' as const,
+    queue_size: 50_000_000,
+    block_on_overflow: true,
+    batch: {
+      flush_timeout: '1s',
+      min_size: 1_000_000,
+      max_size: 4_000_000,
+      sizer: 'bytes' as const,
+    },
+  },
+};
 
 export const LOGSTASH_API_KEY_CLUSTER_PERMISSIONS = ['monitor', 'manage_own_api_key'];
 

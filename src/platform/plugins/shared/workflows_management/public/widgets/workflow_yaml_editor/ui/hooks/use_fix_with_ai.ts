@@ -9,8 +9,8 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import type { monaco } from '@kbn/code-editor';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import type { OpenAgentChatOptions } from './use_agent_builder_integration';
-import type { YamlValidationResult } from '../../../../features/validate_workflow_yaml/model/types';
 import type { FixWithAiTarget } from '../../lib/register_fix_with_ai_code_action_provider';
 import { registerFixWithAiCodeActionProvider } from '../../lib/register_fix_with_ai_code_action_provider';
 import { navigateToErrorPosition } from '../../lib/utils';

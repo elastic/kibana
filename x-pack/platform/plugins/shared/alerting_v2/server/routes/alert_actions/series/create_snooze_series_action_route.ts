@@ -8,6 +8,7 @@
 import {
   ALERT_EPISODE_ACTION_TYPE,
   createSnoozeSeriesActionBodySchema,
+  errorResponseSchema,
 } from '@kbn/alerting-v2-schemas';
 import { createSnoozeSeriesActionOasExamples } from './create_snooze_series_action_oas_example';
 import { createSeriesActionRouteForType } from './create_series_action_route_for_type';
@@ -18,5 +19,12 @@ export const CreateSnoozeSeriesActionRoute = createSeriesActionRouteForType({
   summary: 'Snooze an alert episode series',
   bodySchema: createSnoozeSeriesActionBodySchema,
   oasOperationObject: createSnoozeSeriesActionOasExamples,
-  access: 'public' as const,
+  access: 'internal' as const,
+  additionalResponses: {
+    409: {
+      body: () => errorResponseSchema,
+      description:
+        'Indicates the alert episode series is already snoozed until the requested time.',
+    },
+  },
 });

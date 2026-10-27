@@ -14,6 +14,7 @@ import {
   DefaultPolicyRuleNotificationMessage,
   DefaultPolicyDeviceNotificationMessage,
   policyFactory,
+  policyFactoryWithoutPaidEnterpriseFeatures,
   policyFactoryWithoutPaidFeatures,
   policyFactoryWithSupportedFeatures,
 } from '../endpoint/models/policy_config';
@@ -32,6 +33,23 @@ describe('policy_config and licenses', () => {
     if (policy.mac.device_control) policy.mac.device_control.enabled = false;
     if (policy.windows.popup.device_control) policy.windows.popup.device_control.enabled = false;
     if (policy.mac.popup.device_control) policy.mac.popup.device_control.enabled = false;
+    policy.windows.memory_protection.custom_yara_signatures = false;
+    policy.mac.memory_protection.custom_yara_signatures = false;
+    policy.linux.memory_protection.custom_yara_signatures = false;
+    if (policy.windows.attack_surface_reduction.registry_credential_hardening) {
+      policy.windows.attack_surface_reduction.registry_credential_hardening.enabled = false;
+    }
+  };
+
+  const omitCustomYaraSignatures = (policy: PolicyConfig) => {
+    for (const os of ['windows', 'mac', 'linux'] as const) {
+      const memoryProtection: { custom_yara_signatures?: boolean } = policy[os].memory_protection;
+      delete memoryProtection.custom_yara_signatures;
+    }
+  };
+
+  const omitRegistryCredentialHardening = (policy: PolicyConfig) => {
+    delete policy.windows.attack_surface_reduction.registry_credential_hardening;
   };
 
   describe('isEndpointPolicyValidForLicense', () => {
@@ -44,6 +62,7 @@ describe('policy_config and licenses', () => {
     });
     it('blocks windows malware notification changes below Platinum licenses', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       policy.windows.popup.malware.enabled = false; // make policy change
       let valid = isEndpointPolicyValidForLicense(policy, Gold);
       expect(valid).toBeFalsy();
@@ -54,6 +73,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks mac malware notification changes below Platinum licenses', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       policy.mac.popup.malware.enabled = false; // make policy change
       let valid = isEndpointPolicyValidForLicense(policy, Gold);
       expect(valid).toBeFalsy();
@@ -71,6 +91,7 @@ describe('policy_config and licenses', () => {
     });
     it('blocks windows malware notification message changes below Platinum licenses', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       policy.windows.popup.malware.message = 'BOOM'; // make policy change
       let valid = isEndpointPolicyValidForLicense(policy, Gold);
       expect(valid).toBeFalsy();
@@ -80,6 +101,7 @@ describe('policy_config and licenses', () => {
     });
     it('blocks mac malware notification message changes below Platinum licenses', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       policy.mac.popup.malware.message = 'BOOM'; // make policy change
       let valid = isEndpointPolicyValidForLicense(policy, Gold);
       expect(valid).toBeFalsy();
@@ -95,6 +117,7 @@ describe('policy_config and licenses', () => {
       policy.windows.ransomware.supported = true;
       policy.mac.ransomware.mode = ProtectionModes.prevent;
       policy.mac.ransomware.supported = true;
+      policy.linux.ransomware = { mode: ProtectionModes.prevent, supported: true };
       // memory protection
       policy.windows.memory_protection.mode = ProtectionModes.prevent;
       policy.windows.memory_protection.supported = true;
@@ -121,6 +144,7 @@ describe('policy_config and licenses', () => {
       policy.windows.ransomware.supported = true;
       policy.mac.popup.ransomware.enabled = true;
       policy.mac.ransomware.supported = true;
+      policy.linux.ransomware = { mode: ProtectionModes.off, supported: true };
       // memory protection
       policy.windows.popup.memory_protection.enabled = true;
       policy.windows.memory_protection.supported = true;
@@ -149,6 +173,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks advanced rollback option when below Platinum', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       policy.windows.advanced = { alerts: { rollback: { self_healing: { enabled: true } } } }; // make policy change
       let valid = isEndpointPolicyValidForLicense(policy, Gold);
       expect(valid).toBeFalsy();
@@ -167,6 +192,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks credential hardening option when below Platinum', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       policy.windows.attack_surface_reduction.credential_hardening.enabled = true; // make policy change
       let valid = isEndpointPolicyValidForLicense(policy, Gold);
       expect(valid).toBeFalsy();
@@ -184,6 +210,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks protection updates custom date for Platinum and below license', () => {
       const policy = policyFactoryWithSupportedFeatures();
+      disableEnterpriseFeatures(policy);
       policy.global_manifest_version = '2022-01-10';
       [Platinum, Gold, Basic].forEach((license) => {
         const valid = isEndpointPolicyValidForLicense(policy, license);
@@ -214,6 +241,21 @@ describe('policy_config and licenses', () => {
         expect(valid).toBeFalsy();
       });
 
+      it('blocks the Linux ransomware notification to be turned on for Gold and below licenses', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        policy.linux.popup.ransomware = { message: '', enabled: true };
+
+        expect(isEndpointPolicyValidForLicense(policy, Gold)).toBeFalsy();
+        expect(isEndpointPolicyValidForLicense(policy, Basic)).toBeFalsy();
+      });
+
+      it('allows a policy without a Linux ransomware notification for Gold and below licenses', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        delete policy.linux.popup.ransomware;
+
+        expect(isEndpointPolicyValidForLicense(policy, Gold)).toBeTruthy();
+      });
+
       it('allows ransomware notification message changes with a Platinum license', () => {
         const policy = policyFactory();
         disableEnterpriseFeatures(policy);
@@ -224,6 +266,7 @@ describe('policy_config and licenses', () => {
       });
       it('blocks ransomware notification message changes for Gold and below licenses', () => {
         const policy = policyFactory();
+        disableEnterpriseFeatures(policy);
         policy.windows.popup.ransomware.message = 'BOOM';
         policy.mac.popup.ransomware.message = 'BOOM';
         let valid = isEndpointPolicyValidForLicense(policy, Gold);
@@ -231,6 +274,14 @@ describe('policy_config and licenses', () => {
 
         valid = isEndpointPolicyValidForLicense(policy, Basic);
         expect(valid).toBeFalsy();
+      });
+
+      it('blocks Linux ransomware notification message changes for Gold and below licenses', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        policy.linux.popup.ransomware = { message: 'BOOM', enabled: false };
+
+        expect(isEndpointPolicyValidForLicense(policy, Gold)).toBeFalsy();
+        expect(isEndpointPolicyValidForLicense(policy, Basic)).toBeFalsy();
       });
     });
 
@@ -272,6 +323,7 @@ describe('policy_config and licenses', () => {
 
       it('blocks memory_protection notification message changes for Gold and below licenses', () => {
         const policy = policyFactory();
+        disableEnterpriseFeatures(policy);
         policy.windows.popup.memory_protection.message = 'BOOM';
         policy.mac.popup.memory_protection.message = 'BOOM';
         policy.linux.popup.memory_protection.message = 'BOOM';
@@ -320,6 +372,7 @@ describe('policy_config and licenses', () => {
 
       it('blocks behavior_protection notification message changes for Gold and below licenses', () => {
         const policy = policyFactory();
+        disableEnterpriseFeatures(policy);
         policy.windows.popup.behavior_protection.message = 'BOOM';
         policy.mac.popup.behavior_protection.message = 'BOOM';
         policy.linux.popup.behavior_protection.message = 'BOOM';
@@ -470,6 +523,7 @@ describe('policy_config and licenses', () => {
       const popupMessage = 'WOOP WOOP';
       policy.windows.popup.ransomware.message = popupMessage;
       policy.mac.popup.ransomware.message = popupMessage;
+      policy.linux.popup.ransomware = { message: popupMessage, enabled: true };
 
       const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Gold);
 
@@ -481,6 +535,7 @@ describe('policy_config and licenses', () => {
       expect(retPolicy.mac.ransomware.mode).toEqual(defaults.mac.ransomware.mode);
       expect(retPolicy.mac.popup.ransomware.enabled).toEqual(defaults.mac.popup.ransomware.enabled);
       expect(retPolicy.mac.popup.ransomware.message).not.toEqual(popupMessage);
+      expect(retPolicy.linux.popup.ransomware).toEqual(defaults.linux.popup.ransomware);
 
       // need to invert the test, since it could be either value
       expect(['', DefaultPolicyNotificationMessage]).toContain(
@@ -742,6 +797,19 @@ describe('policy_config and licenses', () => {
         supported: true,
       });
     });
+
+    it('preserves custom_yara_signatures on memory_protection', () => {
+      const policy = policyFactory();
+      policy.windows.memory_protection.custom_yara_signatures = false;
+      policy.mac.memory_protection.custom_yara_signatures = true;
+      policy.linux.memory_protection.custom_yara_signatures = false;
+
+      const supported = policyFactoryWithSupportedFeatures(policy);
+
+      expect(supported.windows.memory_protection.custom_yara_signatures).toBe(false);
+      expect(supported.mac.memory_protection.custom_yara_signatures).toBe(true);
+      expect(supported.linux.memory_protection.custom_yara_signatures).toBe(false);
+    });
   });
 
   describe('isEndpointDeviceControlPolicyValidForLicense', () => {
@@ -769,6 +837,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks Windows device control when enabled with non-Enterprise license', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       if (policy.windows.device_control) {
         policy.windows.device_control.enabled = true;
       }
@@ -785,6 +854,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks Mac device control when enabled with non-Enterprise license', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       if (policy.mac.device_control) {
         policy.mac.device_control.enabled = true;
       }
@@ -801,6 +871,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks Windows popup device control when enabled with non-Enterprise license', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       if (policy.windows.popup.device_control) {
         policy.windows.popup.device_control.enabled = true;
       }
@@ -817,6 +888,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks Mac popup device control when enabled with non-Enterprise license', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       if (policy.mac.popup.device_control) {
         policy.mac.popup.device_control.enabled = true;
       }
@@ -833,6 +905,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks Windows popup device control custom message with non-Enterprise license', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       if (policy.windows.popup.device_control) {
         policy.windows.popup.device_control.enabled = false;
         policy.windows.popup.device_control.message = 'Custom message';
@@ -850,6 +923,7 @@ describe('policy_config and licenses', () => {
 
     it('blocks Mac popup device control custom message with non-Enterprise license', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       if (policy.mac.popup.device_control) {
         policy.mac.popup.device_control.enabled = false;
         policy.mac.popup.device_control.message = 'Custom message';
@@ -867,6 +941,7 @@ describe('policy_config and licenses', () => {
 
     it('allows Mac and Windows popup device control with empty message and disabled state for non-Enterprise license', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       if (policy.windows.device_control) {
         policy.windows.device_control.enabled = false;
       }
@@ -890,6 +965,7 @@ describe('policy_config and licenses', () => {
     it('allows Mac and Windows popup device control with default message and disabled state for non-Enterprise license', () => {
       const policy = policyFactory();
 
+      disableEnterpriseFeatures(policy);
       if (policy.windows.device_control) policy.windows.device_control.enabled = false;
       if (policy.windows.popup.device_control) {
         policy.windows.popup.device_control.enabled = false;
@@ -909,12 +985,403 @@ describe('policy_config and licenses', () => {
 
     it('blocks device control with null license when features are enabled', () => {
       const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
       if (policy.windows.device_control) {
         policy.windows.device_control.enabled = true;
       }
 
       const valid = isEndpointPolicyValidForLicense(policy, null);
       expect(valid).toBeFalsy();
+    });
+  });
+
+  describe('custom yara signatures license gating', () => {
+    it('allows custom_yara_signatures enabled with an Enterprise license', () => {
+      const policy = policyFactory();
+      expect(isEndpointPolicyValidForLicense(policy, Enterprise)).toBe(true);
+    });
+
+    it('allows a policy with custom_yara_signatures absent on all OSes below Enterprise', () => {
+      const platinumPolicy = policyFactory();
+      disableEnterpriseFeatures(platinumPolicy);
+      omitCustomYaraSignatures(platinumPolicy);
+      expect(isEndpointPolicyValidForLicense(platinumPolicy, Platinum)).toBe(true);
+
+      const unpaidPolicy = policyFactoryWithoutPaidFeatures();
+      omitCustomYaraSignatures(unpaidPolicy);
+      expect(isEndpointPolicyValidForLicense(unpaidPolicy, Gold)).toBe(true);
+      expect(isEndpointPolicyValidForLicense(unpaidPolicy, Basic)).toBe(true);
+    });
+
+    it.each(['windows', 'mac', 'linux'] as const)(
+      'is invalid below Enterprise when custom_yara_signatures is true on %s',
+      (os) => {
+        const platinumPolicy = policyFactory();
+        disableEnterpriseFeatures(platinumPolicy);
+        platinumPolicy[os].memory_protection.custom_yara_signatures = true;
+        expect(isEndpointPolicyValidForLicense(platinumPolicy, Platinum)).toBe(false);
+
+        const unpaidPolicy = policyFactoryWithoutPaidFeatures();
+        unpaidPolicy[os].memory_protection.custom_yara_signatures = true;
+        expect(isEndpointPolicyValidForLicense(unpaidPolicy, Gold)).toBe(false);
+        expect(isEndpointPolicyValidForLicense(unpaidPolicy, Basic)).toBe(false);
+      }
+    );
+
+    it('allows custom_yara_signatures disabled below Enterprise', () => {
+      const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
+      expect(isEndpointPolicyValidForLicense(policy, Platinum)).toBe(true);
+    });
+
+    it('turns custom_yara_signatures off below Enterprise and keeps it for Enterprise', () => {
+      const enterprisePolicy = unsetPolicyFeaturesAccordingToLicenseLevel(
+        policyFactory(),
+        Enterprise
+      );
+      expect(enterprisePolicy.windows.memory_protection.custom_yara_signatures).toBe(true);
+      expect(enterprisePolicy.mac.memory_protection.custom_yara_signatures).toBe(true);
+      expect(enterprisePolicy.linux.memory_protection.custom_yara_signatures).toBe(true);
+      expect(isEndpointPolicyValidForLicense(enterprisePolicy, Enterprise)).toBe(true);
+
+      for (const license of [Platinum, Gold, Basic]) {
+        const stripped = unsetPolicyFeaturesAccordingToLicenseLevel(policyFactory(), license);
+        expect(stripped.windows.memory_protection.custom_yara_signatures).toBe(false);
+        expect(stripped.mac.memory_protection.custom_yara_signatures).toBe(false);
+        expect(stripped.linux.memory_protection.custom_yara_signatures).toBe(false);
+        expect(isEndpointPolicyValidForLicense(stripped, license)).toBe(true);
+      }
+    });
+
+    it('leaves an absent custom_yara_signatures absent on every downgrade', () => {
+      for (const license of [Platinum, Gold, Basic]) {
+        const policy = policyFactory();
+        omitCustomYaraSignatures(policy);
+
+        const stripped = unsetPolicyFeaturesAccordingToLicenseLevel(policy, license);
+
+        for (const os of ['windows', 'mac', 'linux'] as const) {
+          expect(stripped[os].memory_protection).not.toHaveProperty('custom_yara_signatures');
+        }
+        expect(isEndpointPolicyValidForLicense(stripped, license)).toBe(true);
+      }
+    });
+
+    describe('advanced rescan interval', () => {
+      const osList = ['windows', 'mac', 'linux'] as const;
+
+      const setRescanInterval = (policy: PolicyConfig, os: (typeof osList)[number]) => {
+        const advanced = (policy[os].advanced ?? {}) as Record<string, unknown>;
+        advanced.memory_protection = {
+          ...((advanced.memory_protection as Record<string, unknown>) ?? {}),
+          user_yara_rescan_interval_seconds: 3600,
+        };
+        (policy[os] as { advanced?: unknown }).advanced = advanced;
+      };
+
+      it.each(osList)('is invalid below Enterprise when the rescan interval is set on %s', (os) => {
+        const platinumPolicy = policyFactory();
+        disableEnterpriseFeatures(platinumPolicy);
+        // The policy is otherwise valid on Platinum, so the interval is the only thing under test.
+        expect(isEndpointPolicyValidForLicense(platinumPolicy, Platinum)).toBe(true);
+
+        setRescanInterval(platinumPolicy, os);
+        expect(isEndpointPolicyValidForLicense(platinumPolicy, Platinum)).toBe(false);
+      });
+
+      it('allows the rescan interval with an Enterprise license', () => {
+        const policy = policyFactory();
+        setRescanInterval(policy, 'windows');
+        expect(isEndpointPolicyValidForLicense(policy, Enterprise)).toBe(true);
+      });
+
+      const policyWithIntervalEverywhere = () => {
+        const policy = policyFactory();
+        for (const os of osList) {
+          setRescanInterval(policy, os);
+        }
+        return policy;
+      };
+
+      it('strips the rescan interval below Enterprise so license_watch can converge', () => {
+        const stripped = unsetPolicyFeaturesAccordingToLicenseLevel(
+          policyWithIntervalEverywhere(),
+          Platinum
+        );
+
+        for (const os of osList) {
+          expect(stripped[os].advanced).not.toHaveProperty('memory_protection');
+        }
+        expect(isEndpointPolicyValidForLicense(stripped, Platinum)).toBe(true);
+      });
+
+      it.each([
+        ['Gold', Gold],
+        ['Basic', Basic],
+      ])('strips the rescan interval for %s', (_licenseName, license) => {
+        // Only the removal is asserted here. Below Platinum, any policy carrying an `advanced`
+        // object already fails `isEndpointAdvancedPolicyValidForLicense`, which compares the
+        // rollback setting against defaults whose `advanced` is `undefined`. That predates
+        // custom YARA signatures and is unrelated to this field.
+        const stripped = unsetPolicyFeaturesAccordingToLicenseLevel(
+          policyWithIntervalEverywhere(),
+          license
+        );
+
+        for (const os of osList) {
+          expect(stripped[os].advanced).not.toHaveProperty('memory_protection');
+        }
+      });
+    });
+  });
+
+  describe('macOS ransomware', () => {
+    it.each([
+      ['Platinum', Platinum],
+      ['Enterprise', Enterprise],
+    ])('allows absent macOS ransomware settings with a %s license', (_, license) => {
+      const policy = policyFactoryWithoutPaidEnterpriseFeatures();
+      Reflect.deleteProperty(policy.mac, 'ransomware');
+      Reflect.deleteProperty(policy.mac.popup, 'ransomware');
+
+      expect(isEndpointPolicyValidForLicense(policy, license)).toBe(true);
+    });
+
+    it.each([
+      ['Gold', Gold],
+      ['Basic', Basic],
+    ])('allows absent macOS ransomware settings with a %s license', (_, license) => {
+      const policy = policyFactoryWithoutPaidFeatures();
+      Reflect.deleteProperty(policy.mac, 'ransomware');
+      Reflect.deleteProperty(policy.mac.popup, 'ransomware');
+
+      expect(isEndpointPolicyValidForLicense(policy, license)).toBe(true);
+    });
+
+    it.each([
+      ['Platinum', Platinum, policyFactoryWithoutPaidEnterpriseFeatures],
+      ['Gold', Gold, policyFactoryWithoutPaidFeatures],
+    ])('blocks null macOS ransomware with a %s license', (_, license, createPolicy) => {
+      const policy = createPolicy();
+      Reflect.set(policy.mac, 'ransomware', null);
+
+      expect(isEndpointPolicyValidForLicense(policy, license)).toBe(false);
+    });
+  });
+
+  describe('Linux ransomware', () => {
+    const omitLinuxRansomware = (policy: PolicyConfig) => {
+      delete policy.linux.ransomware;
+    };
+
+    it('blocks Linux ransomware turned on below Platinum', () => {
+      const policy = policyFactoryWithoutPaidFeatures();
+      policy.linux.ransomware = { mode: ProtectionModes.prevent, supported: false };
+
+      expect(isEndpointPolicyValidForLicense(policy, Gold)).toBe(false);
+      expect(isEndpointPolicyValidForLicense(policy, Basic)).toBe(false);
+    });
+
+    it('blocks Linux ransomware marked supported below Platinum', () => {
+      const policy = policyFactoryWithoutPaidFeatures();
+      policy.linux.ransomware = { mode: ProtectionModes.off, supported: true };
+
+      expect(isEndpointPolicyValidForLicense(policy, Gold)).toBe(false);
+    });
+
+    it('blocks Linux ransomware marked unsupported with a Platinum license', () => {
+      const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
+      policy.linux.ransomware = { mode: ProtectionModes.prevent, supported: false };
+
+      expect(isEndpointPolicyValidForLicense(policy, Platinum)).toBe(false);
+    });
+
+    it('allows a policy without Linux ransomware at every license tier', () => {
+      const platinumPolicy = policyFactory();
+      disableEnterpriseFeatures(platinumPolicy);
+      omitLinuxRansomware(platinumPolicy);
+      const goldPolicy = policyFactoryWithoutPaidFeatures();
+      omitLinuxRansomware(goldPolicy);
+
+      expect(isEndpointPolicyValidForLicense(platinumPolicy, Platinum)).toBe(true);
+      expect(isEndpointPolicyValidForLicense(goldPolicy, Gold)).toBe(true);
+      expect(isEndpointPolicyValidForLicense(goldPolicy, Basic)).toBe(true);
+    });
+
+    it('turns Linux ransomware off and unsupported on downgrade so license_watch converges', () => {
+      for (const license of [Gold, Basic]) {
+        const stripped = unsetPolicyFeaturesAccordingToLicenseLevel(policyFactory(), license);
+
+        expect(stripped.linux.ransomware).toEqual({ mode: ProtectionModes.off, supported: false });
+        expect(isEndpointPolicyValidForLicense(stripped, license)).toBe(true);
+      }
+    });
+
+    it('marks Linux ransomware supported on upgrade to Platinum and keeps its mode', () => {
+      const policy = policyFactoryWithoutPaidFeatures();
+      policy.linux.ransomware = { mode: ProtectionModes.detect, supported: false };
+
+      const upgraded = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
+
+      expect(upgraded.linux.ransomware).toEqual({ mode: ProtectionModes.detect, supported: true });
+    });
+
+    it('leaves an absent Linux ransomware absent on every license change', () => {
+      for (const license of [Enterprise, Platinum, Gold, Basic]) {
+        const policy = policyFactory();
+        omitLinuxRansomware(policy);
+
+        const result = unsetPolicyFeaturesAccordingToLicenseLevel(policy, license);
+
+        expect(result.linux).not.toHaveProperty('ransomware');
+      }
+    });
+
+    describe('with a malformed or missing Linux branch', () => {
+      it.each([
+        ['Platinum', Platinum, policyFactoryWithoutPaidEnterpriseFeatures],
+        ['Gold', Gold, policyFactoryWithoutPaidFeatures],
+      ])('blocks a null Linux ransomware with a %s license', (_, license, createPolicy) => {
+        const policy = createPolicy();
+        Reflect.set(policy.linux, 'ransomware', null);
+
+        expect(isEndpointPolicyValidForLicense(policy, license)).toBe(false);
+      });
+
+      it.each([
+        ['Platinum', Platinum, policyFactoryWithoutPaidEnterpriseFeatures],
+        ['Gold', Gold, policyFactoryWithoutPaidFeatures],
+      ])(
+        'blocks a null Linux ransomware notification with a %s license',
+        (_, license, createPolicy) => {
+          const policy = createPolicy();
+          Reflect.set(policy.linux.popup, 'ransomware', null);
+
+          expect(isEndpointPolicyValidForLicense(policy, license)).toBe(false);
+        }
+      );
+
+      it('blocks memory protection for Gold when the Linux popup is missing', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        policy.windows.memory_protection.mode = ProtectionModes.prevent;
+        policy.windows.memory_protection.supported = true;
+        Reflect.deleteProperty(policy.linux, 'popup');
+
+        expect(isEndpointPolicyValidForLicense(policy, Gold)).toBe(false);
+      });
+
+      it('allows a Platinum-valid policy without Linux ransomware or a Linux popup', () => {
+        const policy = policyFactoryWithoutPaidEnterpriseFeatures();
+        omitLinuxRansomware(policy);
+        Reflect.deleteProperty(policy.linux, 'popup');
+
+        expect(isEndpointPolicyValidForLicense(policy, Platinum)).toBe(true);
+      });
+
+      it('blocks a Linux ransomware without `supported` with a Platinum license', () => {
+        const policy = policyFactoryWithoutPaidEnterpriseFeatures();
+        Reflect.set(policy.linux, 'ransomware', { mode: ProtectionModes.prevent });
+
+        expect(isEndpointPolicyValidForLicense(policy, Platinum)).toBe(false);
+      });
+
+      it('blocks a Linux ransomware without `supported` with a Gold license', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        Reflect.set(policy.linux, 'ransomware', { mode: ProtectionModes.off });
+
+        expect(isEndpointPolicyValidForLicense(policy, Gold)).toBe(false);
+      });
+
+      it('blocks a Linux ransomware notification without `message` with a Gold license', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        Reflect.set(policy.linux.popup, 'ransomware', { enabled: false });
+
+        expect(isEndpointPolicyValidForLicense(policy, Gold)).toBe(false);
+      });
+
+      it.each([
+        ['Platinum', Platinum, policyFactoryWithoutPaidEnterpriseFeatures],
+        ['Gold', Gold, policyFactoryWithoutPaidFeatures],
+      ])(
+        'allows a legacy policy without Linux ransomware or its notification with a %s license',
+        (_, license, createPolicy) => {
+          const policy = createPolicy();
+          omitLinuxRansomware(policy);
+          delete policy.linux.popup.ransomware;
+
+          expect(isEndpointPolicyValidForLicense(policy, license)).toBe(true);
+        }
+      );
+    });
+  });
+
+  describe('registry credential hardening license gating', () => {
+    it('allows a policy with registry_credential_hardening absent below Enterprise', () => {
+      const platinumPolicy = policyFactory();
+      disableEnterpriseFeatures(platinumPolicy);
+      omitRegistryCredentialHardening(platinumPolicy);
+      expect(isEndpointPolicyValidForLicense(platinumPolicy, Platinum)).toBe(true);
+
+      const unpaidPolicy = policyFactoryWithoutPaidFeatures();
+      omitRegistryCredentialHardening(unpaidPolicy);
+      expect(isEndpointPolicyValidForLicense(unpaidPolicy, Gold)).toBe(true);
+      expect(isEndpointPolicyValidForLicense(unpaidPolicy, Basic)).toBe(true);
+    });
+
+    it('is invalid below Enterprise when registry_credential_hardening is enabled', () => {
+      const platinumPolicy = policyFactory();
+      disableEnterpriseFeatures(platinumPolicy);
+      platinumPolicy.windows.attack_surface_reduction.registry_credential_hardening = {
+        enabled: true,
+      };
+      expect(isEndpointPolicyValidForLicense(platinumPolicy, Platinum)).toBe(false);
+
+      const unpaidPolicy = policyFactoryWithoutPaidFeatures();
+      unpaidPolicy.windows.attack_surface_reduction.registry_credential_hardening = {
+        enabled: true,
+      };
+      expect(isEndpointPolicyValidForLicense(unpaidPolicy, Gold)).toBe(false);
+      expect(isEndpointPolicyValidForLicense(unpaidPolicy, Basic)).toBe(false);
+    });
+
+    it('allows registry_credential_hardening disabled below Enterprise', () => {
+      const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
+      expect(isEndpointPolicyValidForLicense(policy, Platinum)).toBe(true);
+    });
+
+    it('turns registry_credential_hardening off below Enterprise and keeps it for Enterprise', () => {
+      const enterprisePolicy = unsetPolicyFeaturesAccordingToLicenseLevel(
+        policyFactory(),
+        Enterprise
+      );
+      expect(
+        enterprisePolicy.windows.attack_surface_reduction.registry_credential_hardening?.enabled
+      ).toBe(true);
+      expect(isEndpointPolicyValidForLicense(enterprisePolicy, Enterprise)).toBe(true);
+
+      for (const license of [Platinum, Gold, Basic]) {
+        const stripped = unsetPolicyFeaturesAccordingToLicenseLevel(policyFactory(), license);
+        expect(
+          stripped.windows.attack_surface_reduction.registry_credential_hardening?.enabled
+        ).toBe(false);
+        expect(isEndpointPolicyValidForLicense(stripped, license)).toBe(true);
+      }
+    });
+
+    it('leaves an absent registry_credential_hardening absent on every downgrade', () => {
+      for (const license of [Platinum, Gold, Basic]) {
+        const policy = policyFactory();
+        omitRegistryCredentialHardening(policy);
+
+        const stripped = unsetPolicyFeaturesAccordingToLicenseLevel(policy, license);
+
+        expect(stripped.windows.attack_surface_reduction).not.toHaveProperty(
+          'registry_credential_hardening'
+        );
+        expect(isEndpointPolicyValidForLicense(stripped, license)).toBe(true);
+      }
     });
   });
 });

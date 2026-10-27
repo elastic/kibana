@@ -5,61 +5,79 @@
  * 2.0.
  */
 
-import { EuiIcon, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { SuppressChromeBackButton } from '@kbn/app-header';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { ReactNode } from 'react';
-import React from 'react';
+import type {
+  AppHeaderBadge,
+  AppHeaderDescription,
+  AppHeaderMenu,
+  AppHeaderTab,
+} from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS, AppHeader } from '@kbn/app-header';
+import { i18n } from '@kbn/i18n';
+import type { MouseEventHandler } from 'react';
+import React, { useCallback } from 'react';
 
-export const CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ = 'contextEngineBackButton';
+export const CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ = APP_HEADER_TEST_SUBJECTS.back;
+
+/** AppHeader back control prefixes this with “Back to” for tooltip and aria-label. */
+export const contextEngineBackDestinationLabel = i18n.translate(
+  'xpack.contextEngine.navigation.backDestination',
+  {
+    defaultMessage: 'Context',
+  }
+);
+
+interface ContextEngineLandingHeaderProps {
+  pageTitle: string;
+  description: AppHeaderDescription;
+  menu?: AppHeaderMenu;
+  docLink?: string;
+}
+
+export const ContextEngineLandingHeader = ({
+  pageTitle,
+  description,
+  menu,
+  docLink,
+}: ContextEngineLandingHeaderProps) => (
+  <AppHeader title={pageTitle} description={description} menu={menu} docLink={docLink} />
+);
 
 interface ContextEngineSubPageHeaderProps {
-  backLabel: string;
+  backDestinationLabel: string;
   backHref: string;
-  onBackClick: (event: React.MouseEvent<HTMLAnchorElement>) => void;
-  pageTitle: ReactNode;
-  description?: ReactNode;
-  'data-test-subj'?: string;
+  onBackClick?: MouseEventHandler;
+  pageTitle: string;
+  description?: AppHeaderDescription;
+  badges?: AppHeaderBadge[];
+  tabs?: AppHeaderTab[];
+  menu?: AppHeaderMenu;
 }
 
 export const ContextEngineSubPageHeader = ({
-  backLabel,
+  backDestinationLabel,
   backHref,
   onBackClick,
   pageTitle,
   description,
-  'data-test-subj': dataTestSubj,
+  badges,
+  tabs,
+  menu,
 }: ContextEngineSubPageHeaderProps) => {
-  const { euiTheme } = useEuiTheme();
+  const handleBackClick = useCallback<MouseEventHandler>(
+    (event) => {
+      onBackClick?.(event);
+    },
+    [onBackClick]
+  );
 
   return (
-    <>
-      <SuppressChromeBackButton />
-      <KibanaPageTemplate.Header
-        data-test-subj={dataTestSubj}
-        pageTitle={pageTitle}
-        description={description}
-        restrictWidth
-        bottomBorder={false}
-        breadcrumbs={[
-          {
-            text: (
-              <>
-                <EuiIcon size="s" type="chevronSingleLeft" aria-hidden /> {backLabel}
-              </>
-            ),
-            href: backHref,
-            onClick: onBackClick,
-            color: 'primary',
-            'aria-current': false,
-            'data-test-subj': CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ,
-          },
-        ]}
-        css={css`
-          background-color: ${euiTheme.colors.backgroundBasePlain};
-        `}
-      />
-    </>
+    <AppHeader
+      title={pageTitle}
+      description={description}
+      badges={badges}
+      tabs={tabs}
+      menu={menu}
+      back={{ href: backHref, label: backDestinationLabel, onClick: handleBackClick }}
+    />
   );
 };

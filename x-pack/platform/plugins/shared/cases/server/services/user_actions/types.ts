@@ -41,6 +41,8 @@ import type {
   UserActionInternalFindRequest,
 } from '../../../common/types/api';
 import type { ObservablesActionType } from '../../../common/types/domain/user_action/observables/v1';
+import type { WorkflowUserActionPayload } from '../../../common/types/domain/user_action/workflow/v1';
+import type { BulkAttachmentsPayload } from '../../../common/types/domain/user_action/bulk_attachments/v1';
 import type {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
@@ -124,6 +126,14 @@ export interface BuilderParameters {
   };
   template: {
     parameters: { payload: { template: { id: string; version: number } | null } };
+  };
+  workflow: {
+    parameters: { payload: WorkflowUserActionPayload };
+  };
+  bulkAttachments: {
+    parameters: {
+      payload: { bulkAttachments: BulkAttachmentsPayload };
+    };
   };
 }
 
@@ -424,12 +434,28 @@ export interface BulkCreateAttachmentUserAction
   }>;
 }
 
+export interface BulkCreateAttachmentBulkDeletionUserAction
+  extends CommonUserActionArgs,
+    IndexRefresh {
+  deletions: Array<{
+    attachmentType: string;
+    count: number;
+    /** The deleted attachments, audited one by one like a single attachment deletion. */
+    attachments: Array<{ id: string; savedObjectType: string }>;
+  }>;
+}
+
 export type CreateUserActionArgs<T extends keyof BuilderParameters> = {
   userAction: CreateUserAction<T> & CommonUserActionArgs;
 } & IndexRefresh;
 
 export type BulkCreateUserActionArgs<T extends keyof BuilderParameters> = {
   userActions: Array<CreateUserAction<T> & CommonUserActionArgs>;
+  /**
+   * Throw when Saved Objects returns an error for any individual user action.
+   * Successful items are not rolled back.
+   */
+  throwOnItemError?: boolean;
 } & IndexRefresh;
 
 export interface CreateUserActionES<T> extends IndexRefresh {

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { toValue } from 'liquidjs';
 import type { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import { resolvePathValue } from './resolve_path_value';
@@ -45,7 +46,9 @@ export async function evaluateExpression(
 
     // Use LiquidJS to evaluate the expression
     // This handles filters automatically (e.g., "steps.search.output | json")
-    const result = await liquidEngine.evalValue(expression, enhancedContext);
+    // Unwrap Liquid literals (`nil`, `empty`, `blank`) as the server engine does, so the preview
+    // shows `null` rather than a Drop object.
+    const result = toValue(await liquidEngine.evalValue(expression, enhancedContext));
     return result as JsonValue;
   } catch (error) {
     // If liquid evaluation fails, try simple path resolution as fallback
@@ -147,7 +150,7 @@ function resolveForeachItems(
     if (openIdx !== -1 && closeIdx !== -1) {
       expression = expression.substring(openIdx + 2, closeIdx).trim();
     }
-    const result = liquidEngine.evalValueSync(expression, context);
+    const result = toValue(liquidEngine.evalValueSync(expression, context));
     if (Array.isArray(result)) {
       return result as JsonArray;
     }

@@ -22,14 +22,12 @@ import { css } from '@emotion/react';
 import type { Viewport } from '@xyflow/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
 import { isMac } from '@kbn/shared-ux-utility';
-import {
-  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
-  WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
-} from '@kbn/workflows';
+import { WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID } from '@kbn/workflows';
 import {
   ReactFlowProvider,
   useWorkflowsCapabilities,
@@ -46,6 +44,7 @@ import {
   selectIsExecutionsTab,
   selectIsSavingYaml,
   selectIsYamlSyntaxValid,
+  selectWorkflow,
   selectWorkflowId,
   selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -85,9 +84,23 @@ const WorkflowVisualEditor = React.lazy(() =>
 
 interface WorkflowDetailEditorProps {
   highlightDiff?: boolean;
+  onAgentProposalHeld?: () => void;
+  /** Prompt from the agentic-first landing, sent when the chat auto-opens. */
+  initialAgentMessage?: string;
+  /** Attachments of that prompt (e.g. pasted images). */
+  initialAgentAttachments?: ConversationAttachment[];
+  /** Opens the Agent Builder sidebar on mount for an unsaved workflow. */
+  autoOpenAgentChat?: boolean;
 }
 
-export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ highlightDiff }) => {
+export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props) => {
+  const {
+    highlightDiff,
+    onAgentProposalHeld,
+    initialAgentMessage,
+    initialAgentAttachments,
+    autoOpenAgentChat,
+  } = props;
   const styles = useMemoCss(componentStyles);
   const readOnlyBadgeShadow = useEuiShadow('xl');
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -116,6 +129,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
 
   const workflowYaml = useSelector(selectYamlString) ?? '';
   const workflowId = useSelector(selectWorkflowId);
+  const workflow = useSelector(selectWorkflow);
   const isExecutionsTab = useSelector(selectIsExecutionsTab);
   const isReadOnly = useWorkflowEditorReadOnly();
   const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
@@ -124,7 +138,9 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   const { runIndividualStep } = useWorkflowActions();
   const { notifications } = useKibana().services;
   const { setSelectedExecution } = useWorkflowUrlState();
-  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  const { canExecuteWorkflow: hasExecutePrivilege } = useWorkflowsCapabilities();
+  const canExecuteWorkflow = hasExecutePrivilege && workflow?.permissions?.execute !== false;
+  const canTestStep = canExecuteWorkflow && workflow?.permissions?.edit !== false;
 
   const handleStepRun = useCallback(
     async (params: { stepId: string; actionType: string }) => {
@@ -139,7 +155,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
         return;
       }
 
-      if (!canExecuteWorkflow) {
+      if (!canTestStep) {
         return;
       }
 
@@ -182,28 +198,22 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
       setSelectedExecution,
       dispatch,
       notifications.toasts,
-      canExecuteWorkflow,
+      canTestStep,
     ]
   );
 
-  const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
-    WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
-  );
   const isExecutionGraphEnabled = useWorkflowsExperimentalUiSetting(
     WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID
   );
 
   const { editorView, setEditorView, graphDirection, setGraphDirection } = useWorkflowUrlState();
-  const showGraph = isVisualEditorEnabled && editorView === 'graph';
+  const showGraph = editorView === 'graph';
 
   const focusedStepId = useSelector(selectFocusedStepId);
   const focusedTriggerId = useSelector(selectFocusedTriggerId);
 
   const handleEditorViewChange = useCallback(
     (next: 'yaml' | 'graph') => {
-      if (!isVisualEditorEnabled) {
-        return;
-      }
       // When switching to graph, focus it on whichever step or trigger block
       // the cursor is currently in — derived entirely from Redux state.
       if (next === 'graph') {
@@ -214,7 +224,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
       }
       setEditorView(next);
     },
-    [dispatch, focusedStepId, focusedTriggerId, isVisualEditorEnabled, setEditorView]
+    [dispatch, focusedStepId, focusedTriggerId, setEditorView]
   );
 
   const openTestModal = useCallback(() => {
@@ -229,10 +239,11 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
       getTestRunTooltipContent({
         isExecutionsTab,
         isValid: Boolean(isSyntaxValid),
-        canRunWorkflow: canExecuteWorkflow,
+        canRunWorkflow: hasExecutePrivilege,
+        hasWorkflowAccess: workflow?.permissions?.execute !== false,
         isSaving: Boolean(isSaving),
       }),
-    [isExecutionsTab, isSyntaxValid, canExecuteWorkflow, isSaving]
+    [isExecutionsTab, isSyntaxValid, hasExecutePrivilege, workflow, isSaving]
   );
 
   const runDisabled = isExecutionsTab || !canExecuteWorkflow || !isSyntaxValid || isSaving;
@@ -353,6 +364,8 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   // Keep the graph mounted for a moment after switching to YAML so the
   // cross-fade animation can play out before unmounting it.
   const [renderGraph, setRenderGraph] = useState(showGraph);
+  // The floating bottom bar would otherwise cover the validation panel docked under the YAML editor.
+  const [validationPanelHeight, setValidationPanelHeight] = useState(0);
   useEffect(() => {
     if (showGraph) {
       setRenderGraph(true);
@@ -384,13 +397,18 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
                 onStepRun={handleStepRun}
                 editorRef={editorRef}
                 isActive={!showGraph}
-                hideEditorTools={isVisualEditorEnabled}
+                hideEditorTools
+                onValidationPanelHeightChange={setValidationPanelHeight}
                 openActionsRef={openActionsRef}
                 onToggleEditorMode={() => handleEditorViewChange(showGraph ? 'yaml' : 'graph')}
+                onAgentProposalHeld={onAgentProposalHeld}
+                initialAgentMessage={initialAgentMessage}
+                initialAgentAttachments={initialAgentAttachments}
+                autoOpenAgentChat={autoOpenAgentChat}
               />
             </React.Suspense>
           </div>
-          {isVisualEditorEnabled && renderGraph && (
+          {renderGraph && (
             <div
               css={[styles.editorLayer, showGraph ? styles.layerVisible : styles.layerHidden]}
               {...(showGraph ? {} : { inert: '' })}
@@ -416,17 +434,16 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
               })}
             </EuiBadge>
           )}
-          {isVisualEditorEnabled && (
-            <WorkflowDetailBottomBar
-              editorView={editorView}
-              onEditorViewChange={handleEditorViewChange}
-              yamlActionsSlot={yamlActionsSlot}
-              toolsSlot={toolsSlot}
-              testWorkflowButton={testWorkflowButton}
-              testWorkflowButtonCompact={testWorkflowButtonCompact}
-              disableAutoCollapse={!hideControlsMenu}
-            />
-          )}
+          <WorkflowDetailBottomBar
+            editorView={editorView}
+            onEditorViewChange={handleEditorViewChange}
+            yamlActionsSlot={yamlActionsSlot}
+            toolsSlot={toolsSlot}
+            testWorkflowButton={testWorkflowButton}
+            testWorkflowButtonCompact={testWorkflowButtonCompact}
+            disableAutoCollapse={!hideControlsMenu}
+            bottomOffset={showGraph ? 0 : validationPanelHeight}
+          />
         </EuiFlexItem>
         {isExecutionGraphEnabled && (
           <EuiFlexItem css={styles.visualEditor}>

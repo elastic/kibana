@@ -18,11 +18,20 @@ import {
   useDataset,
   useDatasets,
   useDeleteDataset,
+  useExperimentDatasetExamples,
+  useExperimentExampleDetails,
 } from './use_evals_api';
 
 const DATASET_ID = 'dataset-1';
 const DATASET_URL = `/internal/evals/datasets/${DATASET_ID}`;
 const DATASETS_URL = '/internal/evals/datasets';
+const EXPERIMENT_ID = 'experiment/1';
+const EXECUTION_ID = 'execution-1';
+const EXAMPLE_ID = 'example/1';
+const REPETITION_INDEX = 2;
+const EXPERIMENT_DATASET_EXAMPLES_URL =
+  '/internal/evals/experiments/experiment%2F1/datasets/dataset-1/examples';
+const EXPERIMENT_EXAMPLE_DETAILS_URL = `${EXPERIMENT_DATASET_EXAMPLES_URL}/example%2F1/repetitions/${REPETITION_INDEX}`;
 
 const setup = () => {
   const http = httpServiceMock.createStartContract();
@@ -119,6 +128,109 @@ describe('useAddExamples', () => {
         body: JSON.stringify(body),
         version: '1',
       }
+    );
+  });
+});
+
+describe('useExperimentDatasetExamples', () => {
+  it('omits pagination and previews by default', async () => {
+    const { http, queryClient, wrapper } = setup();
+    const { result } = renderHook(
+      () => useExperimentDatasetExamples(EXPERIMENT_ID, DATASET_ID, EXECUTION_ID),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(http.get).toHaveBeenLastCalledWith(EXPERIMENT_DATASET_EXAMPLES_URL, {
+      query: { execution_id: EXECUTION_ID },
+      version: '1',
+    });
+    expect(
+      queryClient.getQueryData(
+        queryKeys.experiments.datasetExamples(EXPERIMENT_ID, DATASET_ID, EXECUTION_ID)
+      )
+    ).toBeDefined();
+  });
+
+  it('caches previews separately and never polls them', async () => {
+    const { http, queryClient, wrapper } = setup();
+    const { result, rerender } = renderHook(
+      () =>
+        useExperimentDatasetExamples(EXPERIMENT_ID, DATASET_ID, EXECUTION_ID, {
+          includePreviews: true,
+          refetchInterval: 3000,
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(http.get).toHaveBeenLastCalledWith(EXPERIMENT_DATASET_EXAMPLES_URL, {
+      query: { execution_id: EXECUTION_ID, include_previews: true },
+      version: '1',
+    });
+
+    rerender();
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(callsTo(http, EXPERIMENT_DATASET_EXAMPLES_URL)).toBe(1);
+
+    const previewQuery = queryClient
+      .getQueryCache()
+      .find(queryKeys.experiments.datasetExamples(EXPERIMENT_ID, DATASET_ID, EXECUTION_ID, true));
+    expect(previewQuery?.options).toEqual(
+      expect.objectContaining({ refetchInterval: false, staleTime: Infinity })
+    );
+    expect(
+      queryClient
+        .getQueryCache()
+        .find(queryKeys.experiments.datasetExamples(EXPERIMENT_ID, DATASET_ID, EXECUTION_ID, false))
+    ).toBeUndefined();
+  });
+});
+
+describe('useExperimentExampleDetails', () => {
+  it('waits for a full-content request and shares the cached detail without polling', async () => {
+    const { http, queryClient, wrapper } = setup();
+    const { result, rerender } = renderHook(
+      ({ viewInput, viewOutput }: { viewInput: boolean; viewOutput: boolean }) =>
+        useExperimentExampleDetails(
+          EXPERIMENT_ID,
+          DATASET_ID,
+          EXAMPLE_ID,
+          REPETITION_INDEX,
+          EXECUTION_ID,
+          { enabled: viewInput || viewOutput }
+        ),
+      { initialProps: { viewInput: false, viewOutput: false }, wrapper }
+    );
+
+    expect(callsTo(http, EXPERIMENT_EXAMPLE_DETAILS_URL)).toBe(0);
+
+    rerender({ viewInput: true, viewOutput: false });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(http.get).toHaveBeenCalledWith(EXPERIMENT_EXAMPLE_DETAILS_URL, {
+      query: { execution_id: EXECUTION_ID },
+      version: '1',
+    });
+
+    rerender({ viewInput: false, viewOutput: true });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(callsTo(http, EXPERIMENT_EXAMPLE_DETAILS_URL)).toBe(1);
+
+    const detailQuery = queryClient
+      .getQueryCache()
+      .find(
+        queryKeys.experiments.exampleDetails(
+          EXPERIMENT_ID,
+          DATASET_ID,
+          EXAMPLE_ID,
+          REPETITION_INDEX,
+          EXECUTION_ID
+        )
+      );
+    expect(detailQuery?.options).toEqual(
+      expect.objectContaining({ refetchInterval: false, staleTime: Infinity })
     );
   });
 });

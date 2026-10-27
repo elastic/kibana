@@ -10,7 +10,7 @@ import type { ILicense } from '@kbn/licensing-types';
 import moment from 'moment';
 import { policyFactory } from '../../../../../../common/endpoint/models/policy_config';
 import type { PolicyConfig } from '../../../../../../common/endpoint/types';
-import { DeviceControlAccessLevel } from '../../../../../../common/endpoint/types';
+import { DeviceControlAccessLevel, ProtectionModes } from '../../../../../../common/endpoint/types';
 import { buildEligibilityContext } from './build_eligibility_context';
 import { computePathEligibility } from './compute_path_eligibility';
 import type { EligibilityContext } from './policy_change_operation';
@@ -26,6 +26,12 @@ const eligibilityContext = (
     endpointPolicyProtections?: boolean;
     endpointTrustedDevices?: boolean;
     trustedDevicesExperimental?: boolean;
+    endpointCustomYaraSignatures?: boolean;
+    customYaraSignaturesExperimental?: boolean;
+    aiDataCollectionExperimental?: boolean;
+    linuxRansomwareProtection?: boolean;
+    endpointRegistryCredentialHardening?: boolean;
+    registryCredentialHardeningExperimental?: boolean;
     endpointProtectionUpdates?: boolean;
     serverless?: boolean;
   } = {}
@@ -36,6 +42,13 @@ const eligibilityContext = (
     endpointPolicyProtections: options.endpointPolicyProtections ?? true,
     endpointTrustedDevices: options.endpointTrustedDevices ?? true,
     trustedDevicesExperimental: options.trustedDevicesExperimental ?? true,
+    endpointCustomYaraSignatures: options.endpointCustomYaraSignatures ?? true,
+    customYaraSignaturesExperimental: options.customYaraSignaturesExperimental ?? true,
+    aiDataCollectionExperimental: options.aiDataCollectionExperimental ?? true,
+    linuxRansomwareProtection: options.linuxRansomwareProtection ?? true,
+    endpointRegistryCredentialHardening: options.endpointRegistryCredentialHardening ?? true,
+    registryCredentialHardeningExperimental:
+      options.registryCredentialHardeningExperimental ?? true,
     endpointProtectionUpdates: options.endpointProtectionUpdates ?? true,
     serverless: options.serverless ?? false,
   });
@@ -213,6 +226,147 @@ describe('computePathEligibility', () => {
       reason: 'trusted_devices_experimental_disabled',
     });
     expect(computePathEligibility('windows.malware.mode', context)).toEqual({ eligible: true });
+  });
+
+  it('marks custom_yara_signatures ineligible when the product feature is disabled', () => {
+    const context = eligibilityContext(policyFactory(), { endpointCustomYaraSignatures: false });
+
+    expect(
+      computePathEligibility('windows.memory_protection.custom_yara_signatures', context)
+    ).toEqual({
+      eligible: false,
+      reason: 'endpoint_custom_yara_signatures_disabled',
+    });
+    expect(computePathEligibility('windows.memory_protection.mode', context)).toEqual({
+      eligible: true,
+    });
+  });
+
+  it('marks custom_yara_signatures ineligible when the experimental flag is off', () => {
+    const context = eligibilityContext(policyFactory(), {
+      customYaraSignaturesExperimental: false,
+    });
+
+    for (const os of ['windows', 'mac', 'linux'] as const) {
+      expect(
+        computePathEligibility(`${os}.memory_protection.custom_yara_signatures`, context)
+      ).toEqual({
+        eligible: false,
+        reason: 'custom_yara_signatures_experimental_disabled',
+      });
+    }
+    expect(computePathEligibility('windows.malware.mode', context)).toEqual({ eligible: true });
+  });
+
+  it('marks linux.ransomware.mode ineligible when the linuxRansomwareProtection flag is off', () => {
+    const proposed = policyFactory();
+    proposed.linux.ransomware = { mode: ProtectionModes.prevent, supported: true };
+    const context = eligibilityContext(proposed, { linuxRansomwareProtection: false });
+
+    expect(computePathEligibility('linux.ransomware.mode', context)).toEqual({
+      eligible: false,
+      reason: 'linux_ransomware_protection_experimental_disabled',
+    });
+    expect(computePathEligibility('windows.ransomware.mode', context)).toEqual({
+      eligible: true,
+    });
+    expect(computePathEligibility('linux.malware.mode', context)).toEqual({ eligible: true });
+  });
+
+  it('keeps linux.ransomware.mode eligible when the linuxRansomwareProtection flag is on', () => {
+    const proposed = policyFactory();
+    proposed.linux.ransomware = { mode: ProtectionModes.prevent, supported: true };
+    const context = eligibilityContext(proposed, { linuxRansomwareProtection: true });
+
+    expect(computePathEligibility('linux.ransomware.mode', context)).toEqual({ eligible: true });
+  });
+
+  it('marks the Enterprise-gated rescan interval ineligible when custom YARA signatures are gated off', () => {
+    const proposed = policyFactory();
+    proposed.windows.advanced = {
+      memory_protection: { user_yara_rescan_interval_seconds: 3600 },
+    };
+    const context = eligibilityContext(proposed, { customYaraSignaturesExperimental: false });
+
+    expect(
+      computePathEligibility(
+        'windows.advanced.memory_protection.user_yara_rescan_interval_seconds',
+        context
+      )
+    ).toEqual({
+      eligible: false,
+      reason: 'custom_yara_signatures_experimental_disabled',
+    });
+  });
+
+  it('marks ai_data_collection ineligible on every OS when the experimental flag is off', () => {
+    const context = eligibilityContext(policyFactory(), { aiDataCollectionExperimental: false });
+
+    for (const os of ['windows', 'mac', 'linux'] as const) {
+      expect(computePathEligibility(`${os}.ai_data_collection.enabled`, context)).toEqual({
+        eligible: false,
+        reason: 'ai_data_collection_experimental_disabled',
+      });
+    }
+    expect(computePathEligibility('windows.malware.mode', context)).toEqual({ eligible: true });
+  });
+
+  it('marks ai_data_collection eligible when the experimental flag is on', () => {
+    const context = eligibilityContext(policyFactory(), { aiDataCollectionExperimental: true });
+
+    expect(computePathEligibility('windows.ai_data_collection.enabled', context)).toEqual({
+      eligible: true,
+    });
+  });
+
+  it('marks registry_credential_hardening ineligible when the product feature is disabled', () => {
+    const context = eligibilityContext(policyFactory(), {
+      endpointRegistryCredentialHardening: false,
+    });
+
+    expect(
+      computePathEligibility(
+        'windows.attack_surface_reduction.registry_credential_hardening.enabled',
+        context
+      )
+    ).toEqual({
+      eligible: false,
+      reason: 'endpoint_registry_credential_hardening_disabled',
+    });
+    expect(
+      computePathEligibility(
+        'windows.attack_surface_reduction.credential_hardening.enabled',
+        context
+      )
+    ).toEqual({ eligible: true });
+  });
+
+  it('marks registry_credential_hardening ineligible when the experimental flag is off', () => {
+    const context = eligibilityContext(policyFactory(), {
+      registryCredentialHardeningExperimental: false,
+    });
+
+    expect(
+      computePathEligibility(
+        'windows.attack_surface_reduction.registry_credential_hardening.enabled',
+        context
+      )
+    ).toEqual({
+      eligible: false,
+      reason: 'registry_credential_hardening_experimental_disabled',
+    });
+    expect(computePathEligibility('windows.malware.mode', context)).toEqual({ eligible: true });
+  });
+
+  it('marks registry_credential_hardening eligible when the product feature and experimental flag are both on', () => {
+    const context = eligibilityContext(policyFactory());
+
+    expect(
+      computePathEligibility(
+        'windows.attack_surface_reduction.registry_credential_hardening.enabled',
+        context
+      )
+    ).toEqual({ eligible: true });
   });
 
   it('marks platinum usb_storage read_only eligible when device_control is disabled', () => {

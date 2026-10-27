@@ -13,6 +13,7 @@ import type { OpenSidebarInternalOptions } from '../sidebar/types';
 import type { AgentService } from './agents';
 import type { AttachmentsService } from './attachments';
 import type { RenderersService } from './renderers';
+import type { ConversationEventsService } from './conversation_events';
 import type { ChatService } from './chat';
 import type { ConversationsService } from './conversations';
 import type { ConversationTemplatesService } from './conversation_templates';
@@ -31,6 +32,7 @@ export interface AgentBuilderInternalService {
   agentService: AgentService;
   attachmentsService: AttachmentsService;
   renderersService: RenderersService;
+  conversationEventsService: ConversationEventsService;
   chatService: ChatService;
   conversationsService: ConversationsService;
   conversationTemplatesService: ConversationTemplatesService;

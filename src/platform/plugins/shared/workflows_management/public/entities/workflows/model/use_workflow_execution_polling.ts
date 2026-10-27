@@ -7,12 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo } from 'react';
+import { useDispatch, useSelector, useStore } from 'react-redux-v7';
 import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows/types/latest';
-import { WORKFLOW_EXECUTION_POLL_INTERVAL_MS } from '../../../hooks/polling_constants';
-import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
+import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../common';
+import {
+  LARGE_WORKFLOW_EXECUTION_POLL_INTERVAL_MS,
+  WORKFLOW_EXECUTION_POLL_INTERVAL_MS,
+} from '../../../hooks/polling_constants';
 import { useSerialPolling } from '../../../hooks/use_serial_polling';
+import type { AppDispatch } from '../store/store';
+import type { RootState } from '../store/types';
+import { selectExecution, selectExecutionError } from '../store/workflow_detail/selectors';
+import { cancelExecutionLoading } from '../store/workflow_detail/slice';
 import { loadExecutionThunk } from '../store/workflow_detail/thunks/load_execution_thunk';
 
 export interface PollingState {
@@ -21,44 +29,45 @@ export interface PollingState {
   error: Error | null;
 }
 
-/**
- * Polls a single workflow execution serially: each request starts only after the previous
- * finishes, then waits WORKFLOW_EXECUTION_POLL_INTERVAL_MS before the next poll.
- */
+/** Polls the selected execution through the same Redux loader used by Show more. */
 export const useWorkflowExecutionPolling = (workflowExecutionId: string): PollingState => {
-  const [loadExecution, { result: workflowExecution, error }] =
-    useAsyncThunkState(loadExecutionThunk);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const workflowExecutionIdRef = useRef(workflowExecutionId);
-  workflowExecutionIdRef.current = workflowExecutionId;
-
-  const workflowExecutionRef = useRef(workflowExecution);
-  workflowExecutionRef.current = workflowExecution;
-
-  useEffect(() => {
-    setIsLoading(true);
-  }, [workflowExecutionId]);
+  const dispatch = useDispatch<AppDispatch>();
+  const store = useStore<RootState>();
+  const execution = useSelector(selectExecution);
+  const executionError = useSelector(selectExecutionError);
+  const workflowExecution = execution?.id === workflowExecutionId ? execution : undefined;
+  const error = useMemo(
+    () => (executionError?.id === workflowExecutionId ? new Error(executionError.message) : null),
+    [executionError, workflowExecutionId]
+  );
 
   useEffect(() => {
-    if (workflowExecution?.id === workflowExecutionId) {
-      setIsLoading(false);
-    }
-  }, [workflowExecution, workflowExecutionId]);
+    return () => {
+      dispatch(cancelExecutionLoading(workflowExecutionId));
+    };
+  }, [dispatch, workflowExecutionId]);
 
   useSerialPolling({
-    poll: () => loadExecution({ id: workflowExecutionId }),
+    poll: async () => {
+      await dispatch(loadExecutionThunk({ id: workflowExecutionId }));
+    },
     pollKey: workflowExecutionId,
-    intervalMs: WORKFLOW_EXECUTION_POLL_INTERVAL_MS,
+    intervalMs: () => {
+      const { execution: currentExecution, stepExecutionsTotal } = store.getState().detail;
+      return currentExecution?.id === workflowExecutionId &&
+        stepExecutionsTotal > WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE
+        ? LARGE_WORKFLOW_EXECUTION_POLL_INTERVAL_MS
+        : WORKFLOW_EXECUTION_POLL_INTERVAL_MS;
+    },
     shouldStop: () => {
-      const execution = workflowExecutionRef.current;
+      const { execution: currentExecution, executionRequest } = store.getState().detail;
       return (
-        execution !== undefined &&
-        execution.id === workflowExecutionIdRef.current &&
-        isTerminalStatus(execution.status)
+        !executionRequest &&
+        currentExecution?.id === workflowExecutionId &&
+        isTerminalStatus(currentExecution.status)
       );
     },
   });
 
-  return { workflowExecution, isLoading, error };
+  return { workflowExecution, isLoading: !workflowExecution && !error, error };
 };

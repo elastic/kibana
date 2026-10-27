@@ -10,10 +10,11 @@ import { act, renderHook } from '@testing-library/react';
 
 import { useCaseViewHeader } from './use_case_view_header';
 import { basicCase } from '../../../../../containers/mock';
-import { TestProviders } from '../../../../../common/mock';
+import { noUpdateCasesPermissions, TestProviders } from '../../../../../common/mock';
 import { useGetCaseConnectors } from '../../../../../containers/use_get_case_connectors';
 import { useDeleteCases } from '../../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../../actions/status/use_should_disable_status';
+import { useCasesConfig } from '../../../../../common/lib/kibana';
 import type { CaseUI } from '../../../../../../common';
 
 jest.mock('../../../../../containers/use_get_case_connectors');
@@ -22,6 +23,19 @@ jest.mock('../../../../actions/status/use_should_disable_status');
 jest.mock('../../../../../common/navigation/hooks');
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../use_on_refresh_case_view_page');
+
+const mockCanExecuteWorkflow = jest.fn(() => false);
+
+jest.mock('@kbn/workflows-ui', () => {
+  const actual = jest.requireActual('@kbn/workflows-ui');
+  return {
+    ...actual,
+    useWorkflowsCapabilities: () => ({
+      ...actual.useWorkflowsCapabilities(),
+      canExecuteWorkflow: mockCanExecuteWorkflow(),
+    }),
+  };
+});
 
 const mockDeleteCases = jest.fn();
 const mockOnStatusChanged = jest.fn();
@@ -404,5 +418,70 @@ describe('useCaseViewHeader', () => {
     });
 
     expect(mockOnSeverityChanged).toHaveBeenCalledWith('critical');
+  });
+
+  describe('run workflow menu item', () => {
+    const mockUseCasesConfig = useCasesConfig as jest.Mock;
+    const defaultCasesConfig = mockUseCasesConfig();
+
+    const findRunWorkflowItem = (menu: ReturnType<typeof useCaseViewHeader>['menu']) =>
+      menu.items!.find((item) => item.id === 'runWorkflow');
+
+    beforeEach(() => {
+      mockUseCasesConfig.mockReturnValue({ ...defaultCasesConfig, runWorkflowsEnabled: true });
+      mockCanExecuteWorkflow.mockReturnValue(true);
+    });
+
+    afterEach(() => {
+      mockUseCasesConfig.mockReturnValue(defaultCasesConfig);
+      mockCanExecuteWorkflow.mockReturnValue(false);
+    });
+
+    it('includes the run workflow menu item and opens the modal when triggered', () => {
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+
+      const runWorkflowItem = findRunWorkflowItem(result.current.menu);
+      expect(runWorkflowItem).toEqual(
+        expect.objectContaining({ testId: 'case-run-workflow-button' })
+      );
+      expect(result.current.runWorkflowModal).toBeNull();
+
+      act(() => {
+        runWorkflowItem?.run?.();
+      });
+
+      expect(result.current.runWorkflowModal).not.toBeNull();
+    });
+
+    it('omits the run workflow menu item when running workflows is disabled', () => {
+      mockUseCasesConfig.mockReturnValue(defaultCasesConfig);
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+
+      expect(findRunWorkflowItem(result.current.menu)).toBeUndefined();
+    });
+
+    it('omits the run workflow menu item without update permissions', () => {
+      const noUpdateWrapper = ({ children }: { children: React.ReactNode }) =>
+        React.createElement(
+          TestProviders,
+          { permissions: noUpdateCasesPermissions() } as React.ComponentProps<typeof TestProviders>,
+          children
+        );
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+        wrapper: noUpdateWrapper,
+      });
+
+      expect(findRunWorkflowItem(result.current.menu)).toBeUndefined();
+    });
+
+    it('omits the run workflow menu item when the user cannot execute workflows', () => {
+      mockCanExecuteWorkflow.mockReturnValue(false);
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+
+      expect(findRunWorkflowItem(result.current.menu)).toBeUndefined();
+    });
   });
 });

@@ -25,6 +25,7 @@
  */
 
 import { useCallback } from 'react';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { useApmRouter } from '../../../hooks/use_apm_router';
@@ -34,6 +35,8 @@ export type ServiceMapTab = 'alerts' | 'overview';
 /**
  * Returns a stable `(serviceName) => href` builder for a given service-detail
  * tab from the current map route. `kuery` is stripped — see module header.
+ * For the alerts tab, `rangeTo` is forced to `now` and status to active so the
+ * destination list matches currently-active badge counts.
  */
 export function useServiceMapTabHrefBuilder(tab: ServiceMapTab): (serviceName: string) => string {
   const apmRouter = useApmRouter();
@@ -48,7 +51,10 @@ export function useServiceMapTabHrefBuilder(tab: ServiceMapTab): (serviceName: s
 
   return useCallback(
     (serviceName: string) => {
-      const queryWithoutKuery = { ...query, kuery: '' };
+      const queryWithoutKuery =
+        tab === 'alerts'
+          ? { ...query, kuery: '', rangeTo: 'now', alertStatus: ALERT_STATUS_ACTIVE }
+          : { ...query, kuery: '' };
       const isMobileContext = String(routePath).includes('mobile-services');
       if (isMobileContext) {
         return apmRouter.link(`/mobile-services/{serviceName}/${tab}` as const, {

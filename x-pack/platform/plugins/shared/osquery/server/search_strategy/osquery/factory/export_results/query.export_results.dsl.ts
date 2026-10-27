@@ -14,6 +14,7 @@ import { getQueryFilter } from '../../../../utils/build_query';
 import { composeExportKuery } from '../../../../lib/compose_export_kuery';
 
 export const buildExportResultsQuery = ({
+  actionId,
   baseFilter,
   pit,
   kuery,
@@ -36,6 +37,10 @@ export const buildExportResultsQuery = ({
       ? buildQueryFromFilters(esFilters, undefined)
       : { filter: [], must_not: [] };
 
+  // The strategy omits the space filter only for a verified `actionId`, so the
+  // read must be bound to that id here rather than by the opaque `baseFilter`.
+  const actionIdFilter = actionId ? [{ term: { action_id: actionId } }] : [];
+
   // Shared with the export route handler's PIT so both scan the same namespace-
   // and CCS-resolved targets. Mirrors query.all_results.dsl.ts tolerance flags.
   const index = buildExportResultsIndex({
@@ -56,7 +61,11 @@ export const buildExportResultsQuery = ({
     query: {
       bool: {
         // Space scoping is enforced centrally in the search strategy (enforceSpaceScope).
-        filter: [kqlFilterClause, ...(esFilterClauses as Array<Record<string, unknown>>)],
+        filter: [
+          ...actionIdFilter,
+          kqlFilterClause,
+          ...(esFilterClauses as Array<Record<string, unknown>>),
+        ],
         ...(esFilterMustNotClauses.length > 0 ? { must_not: esFilterMustNotClauses } : {}),
       },
     },

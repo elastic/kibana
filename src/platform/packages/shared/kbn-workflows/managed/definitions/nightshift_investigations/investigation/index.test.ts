@@ -8,19 +8,37 @@
  */
 
 import { parse } from 'yaml';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW } from '.';
+import { NIGHTSHIFT_INVESTIGATION_WORKFLOW } from '.';
+import { createWorkflowLiquidEngine } from '../../../../common/utils/create_workflow_liquid_engine/create_workflow_liquid_engine';
+import { buildFieldsZodValidator } from '../../../../spec/lib/build_fields_zod_validator';
+import { getInputsFromDefinition } from '../../../../spec/lib/field_conversion';
+import { WorkflowSchema } from '../../../../spec/schema';
 
 interface WorkflowStep {
   name: string;
   type?: string;
   if?: string;
-  with?: { method?: string; path?: string; body?: { status?: string } };
+  'plugin-id'?: string;
+  'product-solution'?: string;
+  'product-feature'?: string;
+  'connector-id'?: string;
+  'connector-id-by-feature'?: string;
+  with?: Record<string, unknown> & {
+    method?: string;
+    path?: string;
+    message?: string;
+    body?: Record<string, unknown>;
+  };
   'on-failure'?: unknown;
   steps?: WorkflowStep[];
   else?: WorkflowStep[];
 }
 
-const investigation = parse(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.yaml) as {
+const investigation = parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml) as {
+  name: string;
+  triggers: Array<{
+    inputs: { properties: Record<string, { type: string; maxLength?: number }> };
+  }>;
   steps: WorkflowStep[];
 };
 
@@ -43,62 +61,213 @@ const collectStepsByType = (steps: WorkflowStep[], type: string): WorkflowStep[]
   return matches;
 };
 
-describe('investigation lifecycle contracts', () => {
-  it('emits lifecycle events and fails unsuccessful executions', () => {
-    expect(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.version).toBe(11);
-    expect(investigation.steps[0].name).toBe('ensure_investigation_agent');
+const workflow = parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml) as {
+  settings: { concurrency: { key: string; strategy: string; max: number } };
+  triggers: Array<{ inputs: { properties: Record<string, unknown>; required: string[] } }>;
+};
 
-    const expectedStatuses: Record<string, string> = {
-      emit_investigation_started: 'running',
-      emit_investigation_completed: 'completed',
-      emit_investigation_failed: 'failed',
-    };
-    for (const [stepName, status] of Object.entries(expectedStatuses)) {
-      const step = requireStep(stepName);
-      expect(step.type).toBe('kibana.request');
-      expect(step.with?.body).toEqual({ status });
+describe('Nightshift investigation workflow', () => {
+  it('records the investigation through the agent tools rather than persist steps', () => {
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.id).toBe('system-nightshift-investigation');
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(4);
+    expect(investigation.name).toBe('Nightshift Investigation');
+    expect(investigation.steps.map((step) => step.name)).toEqual([
+      'resolve_model',
+      'ensure_investigation_agent',
+      'persist_investigation_started',
+      'emit_investigation_started',
+      'notify_started',
+      'list_investigation_sources',
+      'resolve_investigation_sources',
+      'investigate',
+      'emit_investigation_completed',
+      'notify_completed',
+    ]);
+    expect(requireStep('investigate').with?.message).toContain('{{ inputs.context | json }}');
+  });
+
+  it('resolves the requested model before persistence and passes it to the agent', () => {
+    expect(investigation.triggers[0].inputs.properties.connector_id).toEqual(
+      expect.objectContaining({ type: 'string', maxLength: 500 })
+    );
+    expect(investigation.steps[0]).toMatchObject({
+      name: 'resolve_model',
+      type: 'nightshift.resolveModel',
+      with: {
+        step: 'investigation',
+        connector_id: '{{ inputs.connector_id }}',
+      },
+    });
+    expect(requireStep('resolve_model')).toBe(investigation.steps[0]);
+    expect(requireStep('investigate')['connector-id']).toBe(
+      '{{ steps.resolve_model.output.connector_id }}'
+    );
+    expect(requireStep('investigate')['connector-id-by-feature']).toBeUndefined();
+  });
+
+  it('runs one execution per investigation at a time, in arrival order', () => {
+    expect(workflow.settings.concurrency).toEqual({
+      key: 'investigation:{{ inputs.investigation_id | default: execution.id }}',
+      strategy: 'queue',
+      max: 1,
+    });
+  });
+
+  it('takes the investigation and its subjects as inputs, and no concurrency key', () => {
+    const [{ inputs }] = workflow.triggers;
+    expect(Object.keys(inputs.properties)).toEqual(
+      expect.arrayContaining(['investigation_id', 'subjects', 'context'])
+    );
+    expect(inputs.properties).not.toHaveProperty('concurrency_key');
+    // Agent Builder titles the investigation from its first round; `title` is still accepted.
+    expect(inputs.required).toEqual(['message']);
+    expect(inputs.properties).toHaveProperty('title');
+  });
+
+  it('lets the agent record its findings: no output schema, no conversation of its own', () => {
+    const investigate = requireStep('investigate') as WorkflowStep & Record<string, unknown>;
+    expect(investigate).not.toHaveProperty('create-conversation');
+    expect(investigate).not.toHaveProperty('public-conversation');
+    expect(investigate.with).not.toHaveProperty('schema');
+    expect(investigate.with).not.toHaveProperty('metadata');
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toMatch(/ai\.attachment\./);
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toContain('method: PATCH');
+  });
+
+  it('keeps delivery failures nonfatal and lets agent errors reach the workflow fallback', () => {
+    for (const phase of ['started', 'completed']) {
+      const notify = requireStep(`notify_${phase}`);
+      expect(notify.type).toBe('nightshift.sendNotifications');
+      expect(notify.with).toMatchObject({
+        investigation_id: '{{ inputs.investigation_id | default: execution.id }}',
+        phase,
+      });
+      expect(notify['on-failure']).toEqual({ continue: true });
     }
+    expect(requireStep('investigate')['on-failure']).toBeUndefined();
+    expect(requireStep('notify_completed').if).toBeUndefined();
+    expect(requireStep('investigate').with?.conversation_id).toBe(
+      '${{ steps.persist_investigation_started.output.conversation_id }}'
+    );
+  });
 
-    expect(investigation.steps[investigation.steps.length - 1]).toMatchObject({
-      name: 'fail_investigation',
-      type: 'workflow.fail',
-      if: '${{ steps.investigate.error != null }}',
+  it('handles terminal errors globally and after persistence retries, preserving the original error', () => {
+    const definition = parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml);
+    const globalFailure = definition.settings['on-failure'];
+    const persistenceFailure = requireStep('persist_investigation_started')['on-failure'] as {
+      retry: { 'max-attempts': number };
+      fallback: WorkflowStep[];
+      continue?: boolean;
+    };
+    expect(globalFailure.continue).toBeUndefined();
+    expect(persistenceFailure.continue).toBeUndefined();
+    expect(persistenceFailure.retry['max-attempts']).toBe(3);
+    for (const fallback of [globalFailure.fallback, persistenceFailure.fallback]) {
+      expect(fallback).toHaveLength(1);
+      expect(fallback[0]).toMatchObject({
+        type: 'nightshift.handleInvestigationFailure',
+        with: { investigation_id: '{{ inputs.investigation_id | default: execution.id }}' },
+        'on-failure': { continue: true },
+      });
+      const engine = createWorkflowLiquidEngine({ outputDelimiterLeft: '${{' });
+      expect(
+        engine.parseAndRenderSync(fallback[0].with.reason, {
+          error: { message: 'Failure detail '.repeat(2000) },
+          steps: {
+            persist_investigation_started: { error: { message: 'Failure detail '.repeat(2000) } },
+          },
+        })
+      ).toHaveLength(10000);
+      expect(engine.parseAndRenderSync(fallback[0].with.reason, {})).toBe('Investigation failed');
+    }
+  });
+
+  it('attributes agent calls to Nightshift under the shared investigation id', () => {
+    expect(requireStep('investigate')).toMatchObject({
+      'plugin-id': 'nightshift_investigation',
+      'aggregate-by': 'nightshift',
+      'product-solution': 'observability',
+      'product-feature': 'nightshift',
     });
   });
 
-  it('persists the investigation record before emit, retrying then failing the run', () => {
-    expect(investigation.steps[1].name).toBe('persist_investigation_started');
-    const persistStarted = requireStep('persist_investigation_started');
-
-    expect(persistStarted.type).toBe('kibana.request');
-    expect(persistStarted.with?.method).toBe('POST');
-    expect(persistStarted.with?.path).toBe(
-      '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/_ensure'
-    );
-    expect(persistStarted['on-failure']).toEqual({
-      retry: { 'max-attempts': 3, delay: '5s', strategy: 'exponential' },
-    });
+  it('loads every requested source on one page', () => {
+    expect(requireStep('list_investigation_sources').with?.path).toContain('per_page=100&');
   });
 
-  it('persists completed structured output including severity and trigger_feedback', () => {
-    const persistCompleted = requireStep('persist_investigation_completed');
-    expect(persistCompleted.with?.body).toEqual(
-      expect.objectContaining({
-        status: 'completed',
-        severity: '${{ steps.investigate.output.structured_output.severity }}',
-        trigger_feedback: '${{ steps.investigate.output.structured_output.trigger_feedback }}',
-      })
+  it('passes WorkflowSchema normalization', () => {
+    const result = WorkflowSchema.safeParse(parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml));
+    expect(result.success ? null : result.error.issues).toBeNull();
+  });
+
+  it('accepts generic destinations and leaves connector-specific validation to runtime', () => {
+    const validator = buildFieldsZodValidator(
+      getInputsFromDefinition(parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml))
     );
-    expect(investigation.steps.some((step) => step.name === 'attach_to_significant_event')).toBe(
-      false
+    const base = { message: 'Investigate', title: 'Test' };
+    const destination = {
+      type: 'slack',
+      connector_id: 'slack',
+      params: { channel: '#alerts', thread_ts: '1.2' },
+    };
+    expect(validator.safeParse({ ...base, notificationDestinations: [destination] }).success).toBe(
+      true
     );
+    expect(
+      validator.safeParse({
+        ...base,
+        notificationDestinations: [
+          { type: 'future-connector', connector_id: 'c', params: { recipient: 'user' } },
+        ],
+      }).success
+    ).toBe(true);
+    expect(
+      validator.safeParse({ ...base, notificationDestinations: [{ ...destination, params: {} }] })
+        .success
+    ).toBe(true);
+    expect(validator.safeParse(base).success).toBe(true);
+  });
+
+  it('enforces envelope bounds and rejects fields outside params', () => {
+    const validator = buildFieldsZodValidator(
+      getInputsFromDefinition(parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml))
+    );
+    const base = { message: 'Investigate', title: 'Test' };
+    const destination = { type: 'slack', connector_id: 'slack', params: { channel: '#alerts' } };
+    const valid = (notificationDestinations: object[]) =>
+      validator.safeParse({ ...base, notificationDestinations }).success;
+    for (const [field, limit] of [
+      ['type', 100],
+      ['connector_id', 500],
+    ] as const) {
+      for (const value of [undefined, '', 'x'.repeat(limit + 1)])
+        expect(valid([{ ...destination, [field]: value }])).toBe(false);
+      expect(valid([{ ...destination, [field]: 'x'.repeat(limit) }])).toBe(true);
+    }
+    for (const field of ['automation_id', 'automation_name']) {
+      expect(valid([{ ...destination, [field]: '' }])).toBe(true);
+      expect(valid([{ ...destination, [field]: 'x'.repeat(500) }])).toBe(true);
+      expect(valid([{ ...destination, [field]: 'x'.repeat(501) }])).toBe(false);
+    }
+    for (const params of [undefined, null, [], 'channel'])
+      expect(valid([{ ...destination, params }])).toBe(false);
+    for (const field of [
+      'destination_index',
+      'status',
+      'attempt_id',
+      'attempted_at',
+      'message_ts',
+      'error',
+      'sent_at',
+      'channel',
+      'thread_ts',
+    ])
+      expect(valid([{ ...destination, [field]: 'sent' }])).toBe(false);
+    expect(valid(Array(5).fill(destination))).toBe(true);
+    expect(valid(Array(6).fill(destination))).toBe(false);
   });
 
   it('space-scopes the path of every kibana.request step', () => {
-    // Only generated `kibana.*` connector steps get a space prefix from the engine; a raw
-    // `kibana.request` is sent verbatim, so an unprefixed path writes to the default space and
-    // still returns 200. Asserting over every request step, rather than the ones that exist
-    // today, keeps steps added later covered too.
     const requestSteps = collectStepsByType(investigation.steps, 'kibana.request');
     const unscoped = requestSteps.filter(
       ({ with: params }) => !params?.path?.startsWith('/s/{{ workflow.spaceId }}/')
@@ -106,5 +275,37 @@ describe('investigation lifecycle contracts', () => {
 
     expect(requestSteps.length).toBeGreaterThan(0);
     expect(unscoped.map(({ name, with: params }) => `${name}: ${params?.path}`)).toEqual([]);
+  });
+
+  it('addresses the investigation by its id rather than the run', () => {
+    // The source lookup lists sources by id and never touches the investigation document.
+    const requestSteps = collectStepsByType(investigation.steps, 'kibana.request').filter(
+      ({ name }) => name !== 'list_investigation_sources'
+    );
+
+    for (const { with: params } of requestSteps) {
+      expect(params?.path).toContain('{{ inputs.investigation_id | default: execution.id }}');
+    }
+    expect(requireStep('persist_investigation_started').with?.body).toEqual({
+      execution_id: '{{ execution.id }}',
+    });
+  });
+
+  it('continues the conversation _ensure resolves', () => {
+    expect(requireStep('investigate').with).toMatchObject({
+      conversation_id: '${{ steps.persist_investigation_started.output.conversation_id }}',
+    });
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toContain('inputs.conversation_id');
+  });
+
+  it('emits completion only on the success path and delegates failures to the hook', () => {
+    expect(requireStep('emit_investigation_completed').with?.body).toEqual({ status: 'completed' });
+    expect(requireStep('emit_investigation_completed').if).toBeUndefined();
+    expect(requireStep('investigate')['on-failure']).toBeUndefined();
+    expect(investigation.steps.some(({ type }) => type === 'workflow.fail')).toBe(false);
+  });
+
+  it('knows nothing about Slack', () => {
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toMatch(/slack/i);
   });
 });

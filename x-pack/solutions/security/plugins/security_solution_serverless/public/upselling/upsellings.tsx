@@ -12,12 +12,15 @@ import {
   UPGRADE_INVESTIGATION_GUIDE_INTERACTIONS,
   PREBUILT_RULE_CUSTOMIZATION,
   PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION,
+  ENDPOINT_CUSTOM_YARA_SIGNATURES,
+  ENDPOINT_REGISTRY_CREDENTIAL_HARDENING,
 } from '@kbn/security-solution-upselling/messages';
 import type {
   UpsellingMessageId,
   UpsellingSectionId,
 } from '@kbn/security-solution-upselling/service/types';
 import React from 'react';
+import { CloudDefendIntegrationPliBlockLazy } from './sections/cloud_defend';
 import { CloudSecurityPostureIntegrationPliBlockLazy } from './sections/cloud_security_posture';
 import {
   EndpointAgentTamperProtectionLazy,
@@ -138,6 +141,11 @@ export const upsellingSections: UpsellingSections = [
     component: EndpointProtectionUpdatesLazy,
   },
   {
+    id: 'cloud_defend_integration_installation',
+    pli: ProductFeatureKey.cloudDefend,
+    component: CloudDefendIntegrationPliBlockLazy,
+  },
+  {
     id: 'cloud_security_posture_integration_installation',
     pli: ProductFeatureKey.cloudSecurityPosture,
     component: CloudSecurityPostureIntegrationPliBlockLazy,
@@ -194,6 +202,20 @@ export const upsellingMessages: UpsellingMessages = [
     message: PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION(
       getProductTypeByPLI(ProductFeatureKey.prebuiltRuleCustomization) ?? '',
       'feature tier'
+    ),
+  },
+  {
+    id: 'endpoint_custom_yara_signatures',
+    pli: ProductFeatureKey.endpointCustomYaraSignatures,
+    message: ENDPOINT_CUSTOM_YARA_SIGNATURES(
+      getProductTypeByPLI(ProductFeatureKey.endpointCustomYaraSignatures) ?? ''
+    ),
+  },
+  {
+    id: 'endpoint_registry_credential_hardening',
+    pli: ProductFeatureKey.endpointRegistryCredentialHardening,
+    message: ENDPOINT_REGISTRY_CREDENTIAL_HARDENING(
+      getProductTypeByPLI(ProductFeatureKey.endpointRegistryCredentialHardening) ?? ''
     ),
   },
 ];

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import type { WorkflowFetcher } from '../get_workflow_health_check_tool';
 
@@ -90,9 +91,11 @@ const toNotFoundSummary = (runId: string): NotFoundSummary => ({
 const fetchAndSummarize = async (
   runId: string,
   spaceId: string,
-  fetcher: WorkflowExecutionFetcher
+  fetcher: WorkflowExecutionFetcher,
+  request: KibanaRequest
 ): Promise<ExecutionSummary | NotFoundSummary> => {
   const execution = await fetcher.getWorkflowExecution(runId, spaceId, {
+    request,
     includeInput: false,
     includeOutput: false,
   });
@@ -100,20 +103,22 @@ const fetchAndSummarize = async (
   return execution != null ? toExecutionSummary(execution) : toNotFoundSummary(runId);
 };
 
-const inputSchema = z.object({
-  alert_retrieval_run_ids: z
-    .array(
-      z.object({
-        workflow_id: z.string(),
-        workflow_run_id: z.string(),
-      })
-    )
-    .optional(),
-  generation_run_id: z.string().optional(),
-  generation_workflow_id: z.string().optional(),
-  validation_run_id: z.string().optional(),
-  validation_workflow_id: z.string().optional(),
-});
+const inputSchema = lazySchema(() =>
+  z.object({
+    alert_retrieval_run_ids: z
+      .array(
+        z.object({
+          workflow_id: z.string(),
+          workflow_run_id: z.string(),
+        })
+      )
+      .optional(),
+    generation_run_id: z.string().optional(),
+    generation_workflow_id: z.string().optional(),
+    validation_run_id: z.string().optional(),
+    validation_workflow_id: z.string().optional(),
+  })
+);
 
 export const getExecutionSummaryTool = (
   fetcher: WorkflowExecutionFetcher
@@ -122,19 +127,19 @@ export const getExecutionSummaryTool = (
     'Fetches workflow execution details and YAML for all Attack Discovery pipeline phases (alert retrieval, generation, validation) in a single call. Returns per-step status, errors, and timing without exposing step inputs or outputs.',
   handler: async (args, context) => {
     try {
-      const { spaceId } = context;
+      const { spaceId, request } = context;
 
       const alertRetrievalPromises = (args.alert_retrieval_run_ids ?? []).map(
-        ({ workflow_run_id }) => fetchAndSummarize(workflow_run_id, spaceId, fetcher)
+        ({ workflow_run_id }) => fetchAndSummarize(workflow_run_id, spaceId, fetcher, request)
       );
 
       const [alertRetrieval, generation, validation] = await Promise.all([
         Promise.all(alertRetrievalPromises),
         args.generation_run_id != null
-          ? fetchAndSummarize(args.generation_run_id, spaceId, fetcher)
+          ? fetchAndSummarize(args.generation_run_id, spaceId, fetcher, request)
           : null,
         args.validation_run_id != null
-          ? fetchAndSummarize(args.validation_run_id, spaceId, fetcher)
+          ? fetchAndSummarize(args.validation_run_id, spaceId, fetcher, request)
           : null,
       ]);
 

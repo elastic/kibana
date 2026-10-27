@@ -12,6 +12,7 @@ import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FlameGraph } from '../../../components/flamegraph';
+import { NoProfilingDataPrompt } from '../../../components/no_profiling_data_prompt';
 import { NormalizationMode } from '../../../components/normalization_menu';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
@@ -20,6 +21,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 import { FramesSummary } from '../../../components/frames_summary';
 import { AsyncStatus } from '../../../hooks/use_async';
+import { useProfilingSchema } from '../../../components/contexts/profiling_schema/use_profiling_schema';
 
 export function DifferentialFlameGraphsView() {
   const {
@@ -55,9 +57,13 @@ export function DifferentialFlameGraphsView() {
   } = useProfilingDependencies();
 
   const showErrorFrames = core.uiSettings.get<boolean>(profilingShowErrorFrames);
+  const { selectedSchema } = useProfilingSchema();
 
   const state = useTimeRangeAsync(
     ({ http }) => {
+      if (!selectedSchema) {
+        return undefined;
+      }
       return Promise.all([
         fetchElasticFlamechart({
           http,
@@ -65,6 +71,7 @@ export function DifferentialFlameGraphsView() {
           timeTo: new Date(timeRange.end).getTime(),
           kuery,
           showErrorFrames,
+          schema: selectedSchema,
         }),
         comparisonTimeRange.start && comparisonTimeRange.end
           ? fetchElasticFlamechart({
@@ -73,6 +80,7 @@ export function DifferentialFlameGraphsView() {
               timeTo: new Date(comparisonTimeRange.end).getTime(),
               kuery: comparisonKuery,
               showErrorFrames,
+              schema: selectedSchema,
             })
           : Promise.resolve(undefined),
       ]).then(([primaryFlamegraph, comparisonFlamegraph]) => {
@@ -91,6 +99,7 @@ export function DifferentialFlameGraphsView() {
       comparisonTimeRange.end,
       comparisonKuery,
       showErrorFrames,
+      selectedSchema,
     ]
   );
 
@@ -160,16 +169,21 @@ export function DifferentialFlameGraphsView() {
       </EuiFlexItem>
       <EuiFlexItem>
         <AsyncComponent {...state} style={{ height: '100%' }} size="xl">
-          <FlameGraph
-            id="flamechart"
-            primaryFlamegraph={data?.primaryFlamegraph}
-            comparisonFlamegraph={data?.comparisonFlamegraph}
-            comparisonMode={comparisonMode}
-            baseline={isNormalizedByTime ? baselineTime : baseline}
-            comparison={isNormalizedByTime ? comparisonTime : comparison}
-            searchText={searchText}
-            onChangeSearchText={handleSearchTextChange}
-          />
+          <NoProfilingDataPrompt
+            variant="baseline"
+            hasData={data?.primaryFlamegraph.TotalSamples !== 0}
+          >
+            <FlameGraph
+              id="flamechart"
+              primaryFlamegraph={data?.primaryFlamegraph}
+              comparisonFlamegraph={data?.comparisonFlamegraph}
+              comparisonMode={comparisonMode}
+              baseline={isNormalizedByTime ? baselineTime : baseline}
+              comparison={isNormalizedByTime ? comparisonTime : comparison}
+              searchText={searchText}
+              onChangeSearchText={handleSearchTextChange}
+            />
+          </NoProfilingDataPrompt>
         </AsyncComponent>
       </EuiFlexItem>
     </EuiFlexGroup>

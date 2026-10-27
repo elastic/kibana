@@ -11,6 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { PhaseEvent, PhaseEventType } from '@kbn/presentation-publishing';
 import { apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
+import type { AggregateQuery } from '@kbn/es-query';
 import { waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import type { PerformanceState } from './dashboard_load_telemetry';
@@ -227,6 +228,49 @@ describe('startTrackingDashboardLoadTelemetry', () => {
         value2: 2,
         key4: 'load_type',
         value4: 2, // dashboard subsequent load
+      })
+    );
+  });
+
+  it('reports approximationApplied false when no panels use approximation', async () => {
+    const children = {
+      panel1: {
+        phase$: new BehaviorSubject<PhaseEvent>({ status: 'loading', id: '', timeToEvent: 0 }),
+        esql$: new BehaviorSubject<AggregateQuery[]>([]),
+        approximationApplied$: new BehaviorSubject<boolean | undefined>(false),
+      },
+    };
+    const { dashboard, performanceState } = mockDashboard(children);
+    startTrackingDashboardLoadTelemetry(dashboard, performanceState);
+    setChildrenStatus(children, 'rendered');
+
+    expect(mockMetricEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        meta: { approximationApplied: false },
+      })
+    );
+  });
+
+  it('reports approximationApplied true when any panel has approximation applied', async () => {
+    const children = {
+      panel1: {
+        phase$: new BehaviorSubject<PhaseEvent>({ status: 'loading', id: '', timeToEvent: 0 }),
+        esql$: new BehaviorSubject<AggregateQuery[]>([]),
+        approximationApplied$: new BehaviorSubject<boolean | undefined>(true),
+      },
+      panel2: {
+        phase$: new BehaviorSubject<PhaseEvent>({ status: 'loading', id: '', timeToEvent: 0 }),
+        esql$: new BehaviorSubject<AggregateQuery[]>([]),
+        approximationApplied$: new BehaviorSubject<boolean | undefined>(false),
+      },
+    };
+    const { dashboard, performanceState } = mockDashboard(children);
+    startTrackingDashboardLoadTelemetry(dashboard, performanceState);
+    setChildrenStatus(children, 'rendered');
+
+    expect(mockMetricEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        meta: { approximationApplied: true },
       })
     );
   });

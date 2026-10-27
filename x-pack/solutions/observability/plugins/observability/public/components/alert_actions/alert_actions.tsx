@@ -9,6 +9,7 @@ import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
@@ -42,34 +43,58 @@ function InvestigateAlertActionItem({
 }) {
   const {
     showInvestigateAction,
+    showInvestigateButton,
+    showViewInvestigation,
     handleInvestigate,
     isInvestigating,
     investigateActionLabel,
+    investigateEbtProps,
     viewInvestigationUrl,
     viewInvestigationActionLabel,
+    viewInvestigationEbtProps,
+    markInvestigationViewed,
   } = useInvestigateAlert({
     alertId,
+    ebtElement: 'alertsTableRowActions',
     enabled,
     onInvestigate: onActionExecuted,
   });
 
-  if (!showInvestigateAction && !viewInvestigationUrl) return null;
+  if (!showInvestigateAction) return null;
+
+  if (isInvestigating) {
+    return (
+      <EuiContextMenuItem
+        data-test-subj="investigateAlert"
+        disabled
+        icon={<EuiLoadingSpinner size="m" />}
+      >
+        {investigateActionLabel}
+      </EuiContextMenuItem>
+    );
+  }
 
   return (
     <>
-      {viewInvestigationUrl && (
+      {showViewInvestigation && (
         <EuiContextMenuItem
           data-test-subj="viewAlertInvestigation"
+          {...viewInvestigationEbtProps}
           href={viewInvestigationUrl}
-          onClick={onActionExecuted}
+          icon="eye"
+          onClick={() => {
+            markInvestigationViewed();
+            onActionExecuted();
+          }}
         >
           {viewInvestigationActionLabel}
         </EuiContextMenuItem>
       )}
-      {showInvestigateAction && (
+      {showInvestigateButton && (
         <EuiContextMenuItem
           data-test-subj="investigateAlert"
-          disabled={isInvestigating}
+          {...investigateEbtProps}
+          icon="inspect"
           onClick={handleInvestigate}
         >
           {investigateActionLabel}
@@ -90,6 +115,7 @@ export function AlertActions(
     parentAlert,
     rowIndex,
     onExpandedAlertIndexChange,
+    onRemoveFromCase,
     services,
   } = props;
   const {
@@ -165,6 +191,22 @@ export function AlertActions(
 
   const actionsMenuItems = [
     ...caseAlertActionItems,
+
+    ...(onRemoveFromCase
+      ? [
+          <EuiContextMenuItem
+            key="removeFromCase"
+            data-test-subj="removeAlertFromCase"
+            icon="trash"
+            onClick={() => {
+              closeActionsPopover();
+              onRemoveFromCase(alert._id);
+            }}
+          >
+            {REMOVE_FROM_CASE}
+          </EuiContextMenuItem>,
+        ]
+      : []),
 
     <InvestigateAlertActionItem
       key="investigateAlert"
@@ -289,6 +331,10 @@ export default AlertActions;
 
 const VIEW_DETAILS = i18n.translate('xpack.observability.alertsTable.viewDetailsTextLabel', {
   defaultMessage: 'Alert details',
+});
+
+const REMOVE_FROM_CASE = i18n.translate('xpack.observability.alertsTable.removeFromCaseTextLabel', {
+  defaultMessage: 'Remove from case',
 });
 
 export type AlertActions = typeof AlertActions;

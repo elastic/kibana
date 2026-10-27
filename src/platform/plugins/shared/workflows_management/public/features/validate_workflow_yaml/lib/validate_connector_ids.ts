@@ -9,13 +9,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { ALL_CONNECTOR_IDS, type ConnectorTypeInfo } from '@kbn/workflows';
+import type { ConnectorIdItem, YamlValidationResult } from '@kbn/workflows-yaml';
 import { isTemplateReference } from './is_template_reference';
+import { getCachedInferenceConnectorInstances } from '../../../../common/schema';
 import {
   getActionTypeDisplayNameFromStepType,
   getActionTypeIdFromStepType,
 } from '../../../shared/lib/action_type_utils';
 import {
   getConnectorTypesFromStepType,
+  getCustomStepConnectorIdSelectionHandler,
   isCreateConnectorEnabledForStepType,
 } from '../../../shared/lib/connectors_utils';
 import { getConnectorInstancesForType } from '../../../widgets/workflow_yaml_editor/lib/autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';
@@ -23,11 +26,13 @@ import {
   getCreateConnectorHoverCommandLink,
   getEditConnectorHoverCommandLink,
 } from '../../../widgets/workflow_yaml_editor/lib/use_register_hover_commands';
-import type { ConnectorIdItem, YamlValidationResult } from '../model/types';
 
 const TRANSLATIONS = {
   manageConnector: i18n.translate('workflows.validateConnectorIds.manageConnectorMessage', {
     defaultMessage: 'Manage connectors',
+  }),
+  featureSettings: i18n.translate('workflows.validateConnectorIds.featureSettingsLinkText', {
+    defaultMessage: 'Feature Settings',
   }),
   createConnector: i18n.translate('workflows.validateConnectorIds.createConnectorMessage', {
     defaultMessage: 'Create connector',
@@ -50,7 +55,8 @@ const TRANSLATIONS = {
 export function validateConnectorIds(
   connectorIdItems: ConnectorIdItem[],
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
-  connectorsManagementUrl: string
+  connectorsManagementUrl: string,
+  modelSettingsUrl?: string
 ): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];
 
@@ -78,7 +84,14 @@ export function validateConnectorIds(
       const connectorType = dynamicConnectorTypes[stepType];
       const displayName =
         connectorType?.displayName ?? getActionTypeDisplayNameFromStepType(stepType);
-      const instances = getConnectorInstancesForType(stepType, dynamicConnectorTypes);
+      const instances = getConnectorInstancesForType(
+        stepType,
+        dynamicConnectorTypes,
+        getCachedInferenceConnectorInstances()
+      );
+      const isInferenceFeature = Boolean(
+        getCustomStepConnectorIdSelectionHandler(stepType)?.inferenceFeatureId
+      );
 
       const instance = instances.find((ins) => ins.id === connectorIdItem.key);
       // Create insert position at the start of the connector-id value
@@ -88,10 +101,17 @@ export function validateConnectorIds(
       };
 
       const manageConnectorLink = `[${TRANSLATIONS.manageConnector}](${connectorsManagementUrl})`;
+      const featureSettingsLink = modelSettingsUrl
+        ? `[${TRANSLATIONS.featureSettings}](${modelSettingsUrl})`
+        : undefined;
 
       if (!instance) {
         const actions: string[] = [];
-        if (isCreateConnectorEnabledForStepType(stepType)) {
+        if (isInferenceFeature) {
+          if (featureSettingsLink) {
+            actions.push(featureSettingsLink);
+          }
+        } else if (isCreateConnectorEnabledForStepType(stepType)) {
           const resolvedConnectorType = getConnectorTypesFromStepType(stepType)[0];
           const createConnectorLink = getCreateConnectorHoverCommandLink({
             text: TRANSLATIONS.createConnector,
@@ -100,16 +120,24 @@ export function validateConnectorIds(
           });
           actions.push(createConnectorLink);
         }
-        actions.push(manageConnectorLink);
+        if (!isInferenceFeature) {
+          actions.push(manageConnectorLink);
+        }
 
         const errorResult: YamlValidationResult = {
           id: connectorIdItem.id,
           severity: 'error',
-          message: i18n.translate('workflows.validateConnectorIds.connectorNotFoundMessage', {
-            defaultMessage:
-              '{displayName} connector UUID "{id}" not found.\nCreate a new connector or choose an existing one\n',
-            values: { displayName, id: connectorIdItem.key },
-          }),
+          message: isInferenceFeature
+            ? i18n.translate('workflows.validateConnectorIds.inferenceEndpointNotFoundMessage', {
+                defaultMessage:
+                  'Inference endpoint "{id}" not found.\nChoose an existing endpoint in Feature Settings\n',
+                values: { id: connectorIdItem.key },
+              })
+            : i18n.translate('workflows.validateConnectorIds.connectorNotFoundMessage', {
+                defaultMessage:
+                  '{displayName} connector UUID "{id}" not found.\nCreate a new connector or choose an existing one\n',
+                values: { displayName, id: connectorIdItem.key },
+              }),
           owner: 'connector-id-validation',
           ruleId: 'connectorNotFound',
           startLineNumber: connectorIdItem.startLineNumber,
@@ -122,23 +150,29 @@ export function validateConnectorIds(
         results.push(errorResult);
       } else {
         const actions: string[] = [];
-        actions.push(
-          getEditConnectorHoverCommandLink({
-            text: TRANSLATIONS.editConnector,
-            connectorType: instance.connectorType,
-            connectorId: instance.id,
-          })
-        );
-        if (isCreateConnectorEnabledForStepType(stepType)) {
+        if (instance.isInferenceEndpoint) {
+          if (featureSettingsLink) {
+            actions.push(featureSettingsLink);
+          }
+        } else {
           actions.push(
-            getCreateConnectorHoverCommandLink({
-              text: TRANSLATIONS.createConnector,
-              connectorType: instance.connectorType,
-              insertPosition,
+            getEditConnectorHoverCommandLink({
+              text: TRANSLATIONS.editConnector,
+              connectorType: instance.connectorType ?? getActionTypeIdFromStepType(stepType),
+              connectorId: instance.id,
             })
           );
+          if (isCreateConnectorEnabledForStepType(stepType)) {
+            actions.push(
+              getCreateConnectorHoverCommandLink({
+                text: TRANSLATIONS.createConnector,
+                connectorType: instance.connectorType ?? getActionTypeIdFromStepType(stepType),
+                insertPosition,
+              })
+            );
+          }
+          actions.push(manageConnectorLink);
         }
-        actions.push(manageConnectorLink);
 
         const connectedMessage = i18n.translate(
           'workflows.validateConnectorIds.connectorFoundMessage',

@@ -14,7 +14,9 @@ import type { FormFieldProps } from '../../form/types';
 import type { PlatformId } from './platforms';
 import { OS_OPTIONS, isPlatformId } from './platforms';
 
-type Props = Omit<FormFieldProps<string>, 'name' | 'label'>;
+type Props = Omit<FormFieldProps<string>, 'name' | 'label'> & {
+  label?: React.ReactNode;
+};
 
 const REQUIRED_ERROR_MESSAGE = i18n.translate(
   'xpack.osquery.pack.queryFlyoutForm.osRequiredError',
@@ -24,7 +26,7 @@ const REQUIRED_ERROR_MESSAGE = i18n.translate(
 );
 
 export const PlatformCheckBoxGroupField = (props: Props) => {
-  const { euiFieldProps = {}, idAria, helpText, ...rest } = props;
+  const { euiFieldProps = {}, idAria, helpText, label, required = true, ...rest } = props;
   const { isDisabled, ...restEuiFieldProps } = euiFieldProps;
   const {
     field: { onChange, value },
@@ -32,12 +34,14 @@ export const PlatformCheckBoxGroupField = (props: Props) => {
   } = useController<{ platform: string }>({
     name: 'platform',
     defaultValue: '',
-    rules: {
-      validate: (fieldValue) =>
-        typeof fieldValue === 'string' && fieldValue.trim().length > 0
-          ? true
-          : REQUIRED_ERROR_MESSAGE,
-    },
+    rules: required
+      ? {
+          validate: (fieldValue) =>
+            typeof fieldValue === 'string' && fieldValue.trim().length > 0
+              ? true
+              : REQUIRED_ERROR_MESSAGE,
+        }
+      : {},
   });
 
   const selectedOptions = useMemo(() => {
@@ -47,8 +51,8 @@ export const PlatformCheckBoxGroupField = (props: Props) => {
 
     const ids = value
       .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean);
+      .map((token) => token.trim())
+      .filter((token): token is PlatformId => isPlatformId(token));
 
     return OS_OPTIONS.filter((opt) => ids.includes(opt.key));
   }, [value]);
@@ -69,9 +73,12 @@ export const PlatformCheckBoxGroupField = (props: Props) => {
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.osFieldLabel', {
-        defaultMessage: 'Operating systems',
-      })}
+      label={
+        label ??
+        i18n.translate('xpack.osquery.pack.queryFlyoutForm.osFieldLabel', {
+          defaultMessage: 'Operating systems',
+        })
+      }
       helpText={typeof helpText === 'function' ? helpText() : helpText}
       error={error?.message}
       isInvalid={hasError}

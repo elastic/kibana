@@ -11,6 +11,7 @@ import type { EuiFlyoutProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { helpLabel } from '@kbn/esql-editor';
+import type { EsqlEditorActionsRegisterProps } from '@kbn/esql-editor';
 import { useKibanaServices } from './kibana_services';
 
 const LazyESQLMenu = React.lazy(async () => {
@@ -21,6 +22,11 @@ const LazyESQLMenu = React.lazy(async () => {
 const LazyEsqlEditorActionsProvider = React.lazy(async () => {
   const module = await import('@kbn/esql-editor');
   return { default: module.EsqlEditorActionsProvider };
+});
+
+const LazyEsqlEditorActionsRegister = React.lazy(async () => {
+  const module = await import('@kbn/esql-editor');
+  return { default: module.EsqlEditorActionsRegister };
 });
 
 const helpPopoverFallback = (
@@ -38,6 +44,8 @@ const helpPopoverFallback = (
 
 export const ESQLMenu: React.FC<{
   hideHistory?: boolean;
+  hideVisor?: boolean;
+  hideRecommendedQueries?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
   docsFlyoutSize?: EuiFlyoutProps['size'];
 }> = (props) => {
@@ -61,5 +69,11 @@ export const EsqlEditorActionsProvider: React.FC<{ children: React.ReactNode }> 
 }) => (
   <Suspense fallback={<>{children}</>}>
     <LazyEsqlEditorActionsProvider>{children}</LazyEsqlEditorActionsProvider>
+  </Suspense>
+);
+
+export const EsqlEditorActionsRegister: React.FC<EsqlEditorActionsRegisterProps> = (props) => (
+  <Suspense fallback={null}>
+    <LazyEsqlEditorActionsRegister {...props} />
   </Suspense>
 );

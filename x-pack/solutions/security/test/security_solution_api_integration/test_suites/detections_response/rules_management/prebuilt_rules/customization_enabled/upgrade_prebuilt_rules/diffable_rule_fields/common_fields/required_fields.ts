@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { ThreeWayDiffOutcome } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
+  ThreeWayDiffOutcome,
+  ThreeWayMergeOutcome,
+  UpgradeConflictResolutionEnum,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { FtrProviderContext } from '../../../../../../../../ftr_provider_context';
 import type { TestFieldRuleUpgradeAssets } from '../test_helpers';
 import {
@@ -401,7 +405,7 @@ export function requiredFieldsField({ getService }: FtrProviderContext): void {
       );
     });
 
-    describe('customized with an upgrade resulting in a conflict (ABC diff case, non-solvable conflict)', () => {
+    describe('customized with an upgrade resulting in a conflict (ABC diff case, solvable conflict)', () => {
       const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
         installed: {
           type: 'query',
@@ -437,7 +441,8 @@ export function requiredFieldsField({ getService }: FtrProviderContext): void {
           ruleUpgradeAssets,
           diffableRuleFieldName: 'required_fields',
           expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-          isSolvableConflict: false,
+          isSolvableConflict: true,
+          expectedMergeOutcome: ThreeWayMergeOutcome.Target,
           expectedFieldDiffValues: {
             base: [
               {
@@ -462,7 +467,25 @@ export function requiredFieldsField({ getService }: FtrProviderContext): void {
             ],
             merged: [
               {
-                name: 'fieldB',
+                name: 'fieldC',
+                type: 'string',
+                ecs: false,
+              },
+            ],
+          },
+        },
+        getService
+      );
+
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          onConflict: UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE,
+          diffableRuleFieldName: 'required_fields',
+          expectedFieldsAfterUpgrade: {
+            required_fields: [
+              {
+                name: 'fieldC',
                 type: 'string',
                 ecs: false,
               },
@@ -487,6 +510,186 @@ export function requiredFieldsField({ getService }: FtrProviderContext): void {
             required_fields: [
               {
                 name: 'resolved',
+                type: 'string',
+                ecs: false,
+              },
+            ],
+          },
+        },
+        getService
+      );
+    });
+
+    describe('reordered without an upgrade (AAA diff case)', () => {
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          required_fields: [
+            {
+              name: 'fieldA',
+              type: 'string',
+            },
+            {
+              name: 'fieldB',
+              type: 'string',
+            },
+          ],
+        },
+        patch: {
+          required_fields: [
+            {
+              name: 'fieldB',
+              type: 'string',
+              ecs: false,
+            },
+            {
+              name: 'fieldA',
+              type: 'string',
+              ecs: false,
+            },
+          ],
+        },
+        upgrade: {
+          type: 'query',
+          required_fields: [
+            {
+              name: 'fieldA',
+              type: 'string',
+            },
+            {
+              name: 'fieldB',
+              type: 'string',
+            },
+          ],
+        },
+      };
+
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'required_fields',
+          expectedDiffOutcome: ThreeWayDiffOutcome.StockValueNoUpdate,
+        },
+        getService
+      );
+    });
+
+    describe('reordered with an upgrade (AAB diff case)', () => {
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          required_fields: [
+            {
+              name: 'fieldA',
+              type: 'string',
+            },
+            {
+              name: 'fieldB',
+              type: 'string',
+            },
+          ],
+        },
+        patch: {
+          required_fields: [
+            {
+              name: 'fieldB',
+              type: 'string',
+              ecs: false,
+            },
+            {
+              name: 'fieldA',
+              type: 'string',
+              ecs: false,
+            },
+          ],
+        },
+        upgrade: {
+          type: 'query',
+          required_fields: [
+            {
+              name: 'fieldA',
+              type: 'string',
+            },
+            {
+              name: 'fieldC',
+              type: 'string',
+            },
+          ],
+        },
+      };
+
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'required_fields',
+          expectedDiffOutcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+          expectedFieldDiffValues: {
+            base: [
+              {
+                name: 'fieldA',
+                type: 'string',
+                ecs: false,
+              },
+              {
+                name: 'fieldB',
+                type: 'string',
+                ecs: false,
+              },
+            ],
+            current: [
+              {
+                name: 'fieldA',
+                type: 'string',
+                ecs: false,
+              },
+              {
+                name: 'fieldB',
+                type: 'string',
+                ecs: false,
+              },
+            ],
+            target: [
+              {
+                name: 'fieldA',
+                type: 'string',
+                ecs: false,
+              },
+              {
+                name: 'fieldC',
+                type: 'string',
+                ecs: false,
+              },
+            ],
+            merged: [
+              {
+                name: 'fieldA',
+                type: 'string',
+                ecs: false,
+              },
+              {
+                name: 'fieldC',
+                type: 'string',
+                ecs: false,
+              },
+            ],
+          },
+        },
+        getService
+      );
+
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'required_fields',
+          expectedFieldsAfterUpgrade: {
+            required_fields: [
+              {
+                name: 'fieldA',
+                type: 'string',
+                ecs: false,
+              },
+              {
+                name: 'fieldC',
                 type: 'string',
                 ecs: false,
               },

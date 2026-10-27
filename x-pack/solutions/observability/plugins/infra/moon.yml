@@ -99,7 +99,6 @@ dependsOn:
   - '@kbn/serverless'
   - '@kbn/elastic-agent-utils'
   - '@kbn/dashboard-plugin'
-  - '@kbn/shared-svg'
   - '@kbn/aiops-log-rate-analysis'
   - '@kbn/search-types'
   - '@kbn/alerting-comparators'
@@ -151,6 +150,7 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/es-query-constants'
   - '@kbn/cps'
+  - '@kbn/entity-inventory-app-plugin'
   - '@kbn/ml-cps-common'
   - '@kbn/core-spaces-common'
   - '@kbn/scout-oblt'
@@ -176,6 +176,4 @@ fileGroups:
     - test/scenarios/**/*
     - test/scout/api/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

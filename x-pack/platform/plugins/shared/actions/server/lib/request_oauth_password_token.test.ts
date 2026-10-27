@@ -59,11 +59,87 @@ describe('requestOAuthPasswordToken', () => {
     });
   });
 
-  test('throws and logs the error when the token request fails', async () => {
+  test('supports an email field, client ID, scope, and JSON body', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    axiosInstanceMock.mockResolvedValueOnce({
+      status: 200,
+      data: { token_type: 'Bearer', access_token: 'token', expires_in: 1000 },
+    });
+    await requestOAuthPasswordToken(
+      'https://test/api/token',
+      mockLogger,
+      {
+        username: 'user@example.com',
+        password: 'user-password',
+        clientId: 'api-password',
+        scope: 'read',
+        usernameField: 'email',
+        requestBodyFormat: 'json',
+      },
+      configurationUtilities
+    );
+
+    expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith('https://test/api/token');
+    expect(axiosInstanceMock).toHaveBeenCalledWith(
+      'https://test/api/token',
+      expect.objectContaining({
+        data: JSON.stringify({
+          email: 'user@example.com',
+          password: 'user-password',
+          client_id: 'api-password',
+          scope: 'read',
+          grant_type: 'password',
+        }),
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        maxRedirects: 0,
+      })
+    );
+  });
+
+  test.each([undefined, 'Bearer'])(
+    'uses token type override %s only when requested',
+    async (tokenType) => {
+      axiosInstanceMock.mockResolvedValueOnce({
+        status: 200,
+        data: { token_type: 'bearer', access_token: 'token' },
+      });
+      const result = await requestOAuthPasswordToken(
+        'https://test/api/token',
+        mockLogger,
+        { username: 'user', password: 'password', tokenType },
+        actionsConfigMock.create()
+      );
+      expect(result.tokenType).toBe(tokenType ?? 'bearer');
+      expect(new URLSearchParams(axiosInstanceMock.mock.calls[0][1].data).has('tokenType')).toBe(
+        false
+      );
+    }
+  );
+
+  test('checks the allowed host before sending credentials', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    configurationUtilities.ensureUriAllowed.mockImplementation(() => {
+      throw new Error('Host is not allowed');
+    });
+    await expect(
+      requestOAuthPasswordToken(
+        'https://blocked.example/api/token',
+        mockLogger,
+        {
+          username: 'user',
+          password: 'password',
+        },
+        configurationUtilities
+      )
+    ).rejects.toThrow('Host is not allowed');
+    expect(axiosInstanceMock).not.toHaveBeenCalled();
+  });
+
+  test('does not expose the token error response', async () => {
     const configurationUtilities = actionsConfigMock.create();
     axiosInstanceMock.mockReturnValueOnce({
       status: 401,
-      data: { error: 'invalid_grant' },
+      data: { error: 'invalid_grant', password: 'wrong-password', client_id: 'api-password' },
     });
 
     await expect(
@@ -73,10 +149,8 @@ describe('requestOAuthPasswordToken', () => {
         { username: 'my-user', password: 'wrong-password' },
         configurationUtilities
       )
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"{\\"error\\":\\"invalid_grant\\"}"`);
+    ).rejects.toThrow('OAuth password token request failed (HTTP 401).');
 
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      'error thrown getting the access token from https://test: {"error":"invalid_grant"}'
-    );
+    expect(mockLogger.warn).toHaveBeenCalledWith('OAuth password token request failed (HTTP 401).');
   });
 });

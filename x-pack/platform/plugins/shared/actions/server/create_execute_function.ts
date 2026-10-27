@@ -10,6 +10,7 @@ import type {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { TaskPriority, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { RawAction, ActionTypeRegistryContract, InMemoryConnector } from './types';
@@ -32,7 +33,7 @@ export interface ExecuteOptions
   extends Pick<ActionExecutorOptions, 'params' | 'source' | 'relatedSavedObjects' | 'consumer'> {
   id: string;
   uuid?: string;
-  spaceId: string;
+  spaceId: SpaceId;
   apiKeyId?: string;
   apiKey: string | null;
   /**
@@ -127,7 +128,7 @@ export function createBulkExecutionEnqueuerFunction({
     }
 
     const actionTypeIds: Record<string, string> = {};
-    const spaceIds: Record<string, string> = {};
+    const spaceIds: Record<string, SpaceId> = {};
     const connectorIsInMemory: Record<string, boolean> = {};
     const connectorIds = [...new Set(actionsToExecute.map((action) => action.id))];
     const connectors = await getConnectors(

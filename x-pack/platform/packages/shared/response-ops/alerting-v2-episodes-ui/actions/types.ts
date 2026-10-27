@@ -16,6 +16,13 @@ export interface EpisodeActionContext {
 export interface EpisodeActionMenuItemContext extends EpisodeActionContext {
   /** Closes the menu hosting the item, if the surface exposes a way to. */
   closeMenu?: () => void;
+  /** Surface hosting the menu: a table row menu or the details flyout footer menu. */
+  surface?: 'row_menu' | 'details_flyout';
+}
+
+export interface EpisodeActionInlineControlContext extends EpisodeActionContext {
+  /** Disables the control, for instance while the hosting surface is still loading. */
+  isDisabled?: boolean;
 }
 
 export interface EpisodeAction {
@@ -32,6 +39,34 @@ export interface EpisodeAction {
    * the data table's bulk menu — fall back to `execute`.
    */
   renderMenuItem?: (ctx: EpisodeActionMenuItemContext) => ReactNode;
+  /**
+   * Optional renderer for surfaces that host the action as a standalone control
+   * rather than a menu entry, such as an info block in the details flyout header.
+   * The action owns both the anchor and the editing surface, so it can apply the
+   * change in place instead of routing through the modal `execute` opens.
+   */
+  renderInlineControl?: (ctx: EpisodeActionInlineControlContext) => ReactNode;
   showWhenDisabled?: (ctx: EpisodeActionContext) => boolean;
   disabledTooltip?: string;
+  /**
+   * The reason why the action cannot run on the current bulk selection, or `undefined` when it
+   * can. Renders it disabled with the reason as its tooltip. A reason shows the action even when
+   * `isCompatible` is false, so return one only when the action is relevant to the selection.
+   */
+  getBulkDisabledReason?: (episodes: AlertEpisode[]) => string | undefined;
+  /**
+   * Whether this action is supported in multi-selection bulk contexts.
+   * Defaults to `true` when omitted.
+   */
+  supportsBulk?: boolean;
+  /**
+   * Whether this action is a workflow action grouped with lifecycle operations.
+   */
+  isWorkflowAction?: boolean;
+  /**
+   * Whether privileges for this action are enforced by the system it hands off
+   * to, so it stays visible without alerting write privilege. Defaults to
+   * `false` when omitted, which hides the action from read-only users.
+   */
+  enforcesOwnPrivileges?: boolean;
 }

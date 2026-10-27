@@ -10,8 +10,10 @@ import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiCheckableCard,
+  EuiHorizontalRule,
   EuiIcon,
   EuiText,
+  euiFontSize,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -22,6 +24,7 @@ import {
   workerNameForCards,
   supervisedWarnForWorker,
   type AutonomyLevelCard,
+  type AutonomyLevelCardsCopy,
   type LevelCardFactPart,
 } from './autonomy_level_cards_data';
 import * as i18n from '../settings_translations';
@@ -74,19 +77,28 @@ function FactParts({ parts }: { parts: LevelCardFactPart[] }) {
 const FACT_LABEL_GAP_PX = 12;
 
 function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
+  const factLabelFont = euiFontSize(euiThemeContext, 'xs');
   return (
     <div>
       <EuiText size="xs" color="subdued">
         <p
           data-test-subj="alertZeroAutonomyCardWho"
           css={css`
-            margin: 0 0 6px;
+            margin: 0;
           `}
         >
           {card.who}
         </p>
       </EuiText>
+      <EuiHorizontalRule
+        margin="none"
+        data-test-subj="alertZeroAutonomyCardDivider"
+        css={css`
+          margin-block: 10px;
+        `}
+      />
       {/*
         Label-left / value-right, on the same `SettingRow` grid the rest of the Worker's settings
         use, so a card's facts line up with the rows above and below it instead of stacking.
@@ -96,7 +108,7 @@ function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
           display: grid;
           grid-template-columns: max-content minmax(0, 1fr);
           column-gap: ${FACT_LABEL_GAP_PX}px;
-          row-gap: 2px;
+          row-gap: 8px;
           align-items: baseline;
           margin: 0;
         `}
@@ -112,7 +124,8 @@ function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
             <dt
               css={css`
                 margin: 0;
-                font-size: inherit;
+                font-size: ${factLabelFont.fontSize};
+                line-height: ${factLabelFont.lineHeight};
                 font-weight: ${euiTheme.font.weight.semiBold};
               `}
             >
@@ -133,6 +146,21 @@ function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
     </div>
   );
 }
+
+/**
+ * The single level a Worker offers, or null when it offers a choice. The server's projection is
+ * consulted before the card copy: the declaration is what decides whether there is a choice, and a
+ * Worker the copy map does not know still has one.
+ */
+const resolveFixedLevel = (
+  allowedAutonomyLevels: readonly WatchAutonomyLevel[] | undefined,
+  cards: AutonomyLevelCardsCopy | null
+): WatchAutonomyLevel | null => {
+  if (allowedAutonomyLevels?.length === 1) {
+    return allowedAutonomyLevels[0];
+  }
+  return cards?.levels.length === 1 ? cards.levels[0].level : null;
+};
 
 /**
  * Autonomy picker: EuiCheckableCard radios so level meanings stay visible before selection.
@@ -156,6 +184,36 @@ export const AutonomyLevelControl: React.FC<AutonomyLevelControlProps> = ({
     return levels.length > 0 ? { ...allCards, levels } : null;
   }, [allCards, allowedAutonomyLevels]);
 
+  // One allowed level is a fact about the Worker, not a choice — render it as a fixed value
+  // rather than a radio the analyst can click but never change.
+  const fixedLevel = resolveFixedLevel(allowedAutonomyLevels, cards);
+  if (fixedLevel) {
+    const fixedCard = cards?.levels.find(({ level }) => level === fixedLevel) ?? null;
+    return (
+      <div data-test-subj="alertZeroAutonomyLevelControl">
+        <EuiCheckableCard
+          id={`${groupName}-${fixedLevel}`}
+          name={groupName}
+          checkableType="radio"
+          label={i18n.autonomyLevelName(fixedLevel)}
+          labelProps={{ 'data-test-subj': 'alertZeroAutonomyFixedLevel' }}
+          // The only radio in its group, so it is checked and stays checked. React routes a
+          // radio's `onChange` off its click event, so clicking an already-checked one still calls
+          // the handler — hence the no-op rather than `onChange`, which would patch the Worker
+          // with the level it already has. Left enabled rather than disabled so the level reads at
+          // full contrast: it is the Worker's actual setting, not one withheld from the analyst.
+          checked={true}
+          disabled={true}
+          onChange={() => {}}
+          data-test-subj={`alertZeroAutonomyCard-${fixedLevel}`}
+        >
+          {/* The same explanation the level carries inside a choice. */}
+          {fixedCard ? <LevelCardBody card={fixedCard} /> : null}
+        </EuiCheckableCard>
+      </div>
+    );
+  }
+
   if (!cards) {
     return (
       <EuiText size="s" color="subdued">
@@ -166,20 +224,6 @@ export const AutonomyLevelControl: React.FC<AutonomyLevelControlProps> = ({
 
   const levels = cards.levels.map((card) => card.level);
   const selectedLevel = levels.includes(current) ? current : levels[0];
-
-  // One allowed level is a fact about the Worker, not a choice — render it as a fixed value
-  // rather than a radio the analyst can click but never change.
-  if (levels.length === 1) {
-    return (
-      <EuiText size="s" color="subdued">
-        <p data-test-subj="alertZeroAutonomyLevelControl">
-          <span data-test-subj="alertZeroAutonomyFixedLevel">
-            {i18n.autonomyLevelName(selectedLevel)}
-          </span>
-        </p>
-      </EuiText>
-    );
-  }
   const isHighest =
     levels.length > 1 &&
     selectedLevel === levels[levels.length - 1] &&

@@ -182,11 +182,17 @@ describe('list_sources routes', () => {
 
       const version = getRegisteredVersion(router, 'patch', SOURCE_BY_ID_API_PATH);
       const { context, esClient } = buildContext();
+      // Space-owned row in the default space (spaces plugin absent → 'default').
+      // Seeded global (`*`) catalog rows are immutable via this API.
       esClient.get.mockResolvedValue({
         _index: '.kibana-threat-intel-sources',
         _id: 'vendor_api:elastic-security-labs',
         found: true,
-        _source: { name: 'Elastic Security Labs', adapter_type: 'vendor_api' },
+        _source: {
+          name: 'Elastic Security Labs',
+          adapter_type: 'vendor_api',
+          space_id: 'default',
+        },
       });
       esClient.update.mockResolvedValue({
         _index: '.kibana-threat-intel-sources',
@@ -211,6 +217,35 @@ describe('list_sources routes', () => {
           body: { source_id: 'vendor_api:elastic-security-labs', updated: true },
         })
       );
+    });
+
+    it('returns 404 when updating a global catalog source', async () => {
+      const { router, getSpacesService, getBootstrapReady } = buildDeps();
+      registerUpdateSourceRoute({ router, logger, getSpacesService, getBootstrapReady } as never);
+
+      const version = getRegisteredVersion(router, 'patch', SOURCE_BY_ID_API_PATH);
+      const { context, esClient } = buildContext();
+      esClient.get.mockResolvedValue({
+        _index: '.kibana-threat-intel-sources',
+        _id: 'vendor_api:elastic-security-labs',
+        found: true,
+        _source: {
+          name: 'Elastic Security Labs',
+          adapter_type: 'vendor_api',
+          space_id: '*',
+        },
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        params: { sourceId: 'vendor_api:elastic-security-labs' },
+        body: { enabled: false },
+      });
+      const response = httpServerMock.createResponseFactory();
+
+      await version.handler({ core: Promise.resolve(context) } as never, request, response);
+
+      expect(response.notFound).toHaveBeenCalled();
+      expect(esClient.update).not.toHaveBeenCalled();
     });
 
     it('returns 404 when the source id is not in the approved catalog', async () => {
@@ -240,7 +275,11 @@ describe('list_sources routes', () => {
         _index: '.kibana-threat-intel-sources',
         _id: 'vendor_api:elastic-security-labs',
         found: true,
-        _source: { name: 'Elastic Security Labs', adapter_type: 'vendor_api' },
+        _source: {
+          name: 'Elastic Security Labs',
+          adapter_type: 'vendor_api',
+          space_id: 'default',
+        },
       });
       esClient.update.mockRejectedValue(new Error('write conflict'));
 
