@@ -98,17 +98,48 @@ describe('CollectionInstancesTable', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows one version per package with the package title in a tooltip', async () => {
-    renderTable([makeInstance()]);
+  it('shows the aws version for several packages, with every package version in a tooltip', async () => {
+    renderTable([
+      makeInstance({
+        packages: [
+          { name: 'aws_bedrock', title: 'Amazon Bedrock', version: '1.2.0' },
+          { name: 'aws', title: 'AWS', version: '8.11.0' },
+        ],
+      }),
+    ]);
 
     const row = screen.getByTestId('collectionInstancesTableRow');
     expect(within(row).getByText('8.11.0')).toBeInTheDocument();
-    expect(within(row).getByText('1.2.0')).toBeInTheDocument();
+    expect(within(row).queryByText('1.2.0')).not.toBeInTheDocument();
 
     await act(async () => {
-      within(row).getByText('1.2.0').focus();
+      within(row).getByText('8.11.0').focus();
     });
-    expect(await screen.findByText('Amazon Bedrock')).toBeInTheDocument();
+    expect(await screen.findByText('Amazon Bedrock: 1.2.0, AWS: 8.11.0')).toBeInTheDocument();
+  });
+
+  it('shows the first package version for several packages without aws', () => {
+    renderTable([
+      makeInstance({
+        packages: [
+          { name: 'aws_bedrock', title: 'Amazon Bedrock', version: '1.2.0' },
+          { name: 'aws_mq', title: 'Amazon MQ', version: '2.1.0' },
+        ],
+      }),
+    ]);
+
+    const row = screen.getByTestId('collectionInstancesTableRow');
+    expect(within(row).getByText('1.2.0')).toBeInTheDocument();
+    expect(within(row).queryByText('2.1.0')).not.toBeInTheDocument();
+  });
+
+  it('shows the version of a single package without a tooltip', () => {
+    renderTable([
+      makeInstance({ packages: [{ name: 'aws_mq', title: 'Amazon MQ', version: '2.1.0' }] }),
+    ]);
+
+    const row = screen.getByTestId('collectionInstancesTableRow');
+    expect(within(row).getByText('2.1.0')).not.toHaveAttribute('tabindex');
   });
 
   it('names up to 3 services in a tooltip and elides the rest', async () => {
