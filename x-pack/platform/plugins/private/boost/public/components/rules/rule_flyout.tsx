@@ -57,7 +57,7 @@ import { TargetStatus } from './target_status';
 import type { TargetPreview } from './pattern_matches';
 import { PatternMatchStatus, PatternMatches, getPartialPattern } from './pattern_matches';
 import { FLYOUT_WIDTH } from '../flyout_width';
-import { HiddenBadge, IncludeHiddenSwitch } from '../hidden_data';
+import { HiddenBadge, ShowHiddenSwitch } from '../hidden_data';
 import { ProfileFlyoutContent } from '../profiles/profile_flyout';
 import { useBoostState, useCreateRule, useUpdateRule } from '../../hooks/use_boost_state';
 import { PROFILE_TYPE_LABELS } from '../format';
@@ -185,7 +185,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
   const [isEditingEstimateInput, setIsEditingEstimateInput] = useState(false);
   // Text typed to search the list to select from, which sizes the list to what it shows.
   const [pickSearch, setPickSearch] = useState('');
-  // Whether the pattern's matches and the list to select from include hidden data sources.
+  // Whether the pattern's matches and the list to select from show hidden data sources.
   const [includesHidden, setIncludesHidden] = useState(false);
   // Set when leaving the profile form, so the link that opened it gets focus back.
   const shouldFocusCreateProfileRef = useRef(false);
@@ -764,7 +764,9 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                 exactMatches={patternPreview}
                 partialMatches={partialPreview}
                 dataSources={typedDataSources}
+                hasHidden={hasHidden}
                 includesHidden={includesHidden}
+                onIncludesHiddenChange={setIncludesHidden}
                 maxHeight={PREVIEW_MAX_HEIGHT}
               />
             </>
@@ -838,7 +840,19 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
               >
                 {(list, search) => (
                   <>
-                    {search}
+                    {/* The switch that shows hidden data sources, as at the end of the pattern
+                      preview's tabs. It shares their setting, as both list the same data sources. */}
+                    <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+                      <EuiFlexItem>{search}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <ShowHiddenSwitch
+                          checked={includesHidden}
+                          onChange={setIncludesHidden}
+                          disabled={!type || (!hasHidden && !includesHidden)}
+                          data-test-subj="boostRuleShowHidden"
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                     <EuiSpacer size="s" />
                     {/* A panel draws the border and padding, which the list would count in its
                           own width. */}
@@ -849,18 +863,6 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                 )}
               </EuiSelectable>
             </EuiFormRow>
-          )}
-          {/* Both ways of choosing targets list the same data sources, so one switch serves both. */}
-          {hasHidden && type && (
-            <>
-              <EuiSpacer size="m" />
-              <IncludeHiddenSwitch
-                type={type}
-                checked={includesHidden}
-                onChange={setIncludesHidden}
-                data-test-subj="boostRuleIncludeHidden"
-              />
-            </>
           )}
         </>
       </EuiFlyoutBody>

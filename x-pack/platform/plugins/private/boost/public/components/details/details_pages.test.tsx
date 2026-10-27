@@ -467,22 +467,21 @@ describe('RuleDetailsPage', () => {
 
     await userEvent.type(matched.getByRole('searchbox', { name: 'Search indices' }), 'products');
     expect(matched.getByText('No indices match your search or filter.')).toBeInTheDocument();
-    // Nothing the rule matches is hidden, so there's nothing to include.
-    expect(matched.queryByTestId('boostMatchedIncludeHidden')).not.toBeInTheDocument();
+    // Nothing the rule matches is hidden, so there's nothing to show.
+    expect(matched.getByTestId('boostMatchedShowHidden')).toBeDisabled();
   });
 
-  it('leaves hidden matches out until they are included, saying how many', async () => {
+  it('leaves hidden matches out until they are shown, counting them', async () => {
     renderAt(`/rules/${DEFAULT_INDICES_RULE_NAME}`);
     const matched = within(screen.getByTestId('boostRuleMatched'));
 
     // The rule applies to the hidden index all the same.
     expect(screen.getByTestId('boostRuleUsage')).toHaveTextContent('Applies to2 indices');
     expect(matched.queryByText('.catalog-archive')).not.toBeInTheDocument();
-    expect(matched.getByTestId('boostMatchedCount')).toHaveTextContent(
-      'Showing 1–3 of 3 indices (1 hidden not shown)'
-    );
+    expect(matched.getByTestId('boostMatchedCount')).toHaveTextContent('Showing 1–3 of 3 indices');
+    expect(matched.getByTestId('boostMatchedShowHidden')).toHaveTextContent('Show hidden1');
 
-    await userEvent.click(matched.getByTestId('boostMatchedIncludeHidden'));
+    await userEvent.click(matched.getByTestId('boostMatchedShowHidden'));
 
     const row = matched.getByText('.catalog-archive').closest('tr') as HTMLElement;
     expect(within(row).getByTestId('boostHiddenBadge')).toHaveTextContent('Hidden');
@@ -496,7 +495,7 @@ describe('RuleDetailsPage', () => {
     await userEvent.type(matched.getByRole('searchbox', { name: 'Search indices' }), 'archive');
 
     expect(
-      matched.getByText('Only hidden indices match. Include them to see them.')
+      matched.getByText('Only hidden indices match. Show hidden to see them.')
     ).toBeInTheDocument();
   });
 

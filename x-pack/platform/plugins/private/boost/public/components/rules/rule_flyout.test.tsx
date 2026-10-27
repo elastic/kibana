@@ -525,8 +525,8 @@ describe('RuleFlyout pattern matches', () => {
 
     expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('1 exact match');
     expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('catalog-fall');
-    // No index is hidden, so there's nothing to include.
-    expect(screen.queryByTestId('boostRuleIncludeHidden')).not.toBeInTheDocument();
+    // No index is hidden, so there's nothing to show.
+    expect(screen.getByTestId('boostRuleShowHidden')).toBeDisabled();
   });
 
   it('highlights the parts of each match that the pattern spells out', async () => {
@@ -715,7 +715,7 @@ describe('RuleFlyout pattern matches', () => {
     );
   });
 
-  it('disables both tabs until a profile is selected', () => {
+  it('disables both tabs, and the switch that shows hidden data sources, until a profile is selected', () => {
     render(
       <IntlProvider locale="en">
         <RuleFlyout onClose={jest.fn()} />
@@ -729,6 +729,7 @@ describe('RuleFlyout pattern matches', () => {
     expect(matchingTab).toBeDisabled();
     expect(matchingTab).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByTestId('boostRuleAllTab')).toBeDisabled();
+    expect(screen.getByTestId('boostRuleShowHidden')).toBeDisabled();
   });
 
   it('explains why the pattern is disabled before a profile is selected', async () => {
@@ -846,7 +847,7 @@ describe('RuleFlyout hidden data sources', () => {
       </IntlProvider>
     );
 
-  it('counts hidden matches, but only lists them once they are included', async () => {
+  it('counts hidden matches, but only lists them once they are shown', async () => {
     renderNewRule();
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), '*');
@@ -859,7 +860,7 @@ describe('RuleFlyout hidden data sources', () => {
       '1 hidden index not shown'
     );
 
-    await userEvent.click(screen.getByTestId('boostRuleIncludeHidden'));
+    await userEvent.click(screen.getByTestId('boostRuleShowHidden'));
 
     expect(matches.getByText('.catalog-archive')).toBeInTheDocument();
     expect(matches.getByTestId('boostHiddenBadge')).toBeInTheDocument();
@@ -872,24 +873,26 @@ describe('RuleFlyout hidden data sources', () => {
     await userEvent.type(screen.getByTestId('boostRulePattern'), '.catalog-*');
 
     expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('1 exact match');
-    expect(screen.getByRole('region', { name: 'Exact matches' })).toHaveTextContent(
+    // In place of the list, as the other empty messages are.
+    expect(screen.queryByRole('region', { name: 'Exact matches' })).not.toBeInTheDocument();
+    expect(screen.getByTestId('boostRuleHiddenNotShown')).toHaveTextContent(
       '1 hidden index not shown'
     );
   });
 
-  it('leaves hidden data sources out of the list to select from until included, except selected ones', async () => {
+  it('leaves hidden data sources out of the list to select from until shown, except selected ones', async () => {
     renderNewRule();
     await userEvent.click(screen.getByText('Select indices'));
     const picker = within(screen.getByTestId('boostRulePicker'));
     expect(picker.queryByRole('option', { name: /\.catalog-archive/ })).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('boostRuleIncludeHidden'));
+    await userEvent.click(screen.getByTestId('boostRuleShowHidden'));
     const option = picker.getByRole('option', { name: /\.catalog-archive/ });
     expect(within(option).getByTestId('boostHiddenBadge')).toBeInTheDocument();
     await userEvent.click(option);
 
     // Selected, it stays in view once hidden ones are left out again.
-    await userEvent.click(screen.getByTestId('boostRuleIncludeHidden'));
+    await userEvent.click(screen.getByTestId('boostRuleShowHidden'));
     expect(picker.getByRole('option', { name: /\.catalog-archive/ })).toBeInTheDocument();
     expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('1 selected');
   });

@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoostDataSource, BoostProfileType } from '../../../common/types';
-import { formatHiddenNotShown } from '../hidden_data';
+import { ShowHiddenSwitch, formatHiddenNotShown } from '../hidden_data';
 import { SupersedingRule, TargetName } from './target_name';
 import { TargetStatus } from './target_status';
 
@@ -73,6 +73,8 @@ const NO_DATA_SOURCES: Readonly<Record<BoostProfileType, string>> = {
 };
 
 type MatchKind = 'exact' | 'partial';
+
+const HIDDEN_NOTE_TEST_SUBJ = 'boostRuleHiddenNotShown';
 
 // Each row shows whether the pattern matches it exactly or partly.
 const MATCH_ICONS: Readonly<Record<MatchKind, { iconType: string; label: string }>> = {
@@ -131,8 +133,11 @@ interface PatternMatchesProps {
   partialMatches: readonly TargetPreview[];
   /** Every data source of the rule's type, in the order they're listed. */
   dataSources: ReadonlyArray<Pick<BoostDataSource, 'name' | 'hidden'>>;
-  /** Whether the lists include hidden data sources, which they otherwise count but don't show. */
+  /** Whether any data source of the rule's type is hidden, so there's anything to show. */
+  hasHidden: boolean;
+  /** Whether the lists show hidden data sources, which they otherwise count but leave out. */
   includesHidden: boolean;
+  onIncludesHiddenChange: (includesHidden: boolean) => void;
   /** The panel's tallest height, past which its list scrolls. */
   maxHeight: number;
 }
@@ -167,7 +172,8 @@ export const PatternMatchStatus = ({ exactCount, partialCount }: PatternMatchSta
 /**
  * What an index pattern matches, or partly matches until it matches something, beside every data
  * source it could target, like the data view editor's preview. Hidden data sources are left out
- * unless included, with a note of how many, so the lists add up to the pattern's match count.
+ * until a switch beside the tabs shows them, with a note of how many, so the lists add up to the
+ * pattern's match count.
  */
 export const PatternMatches = ({
   type,
@@ -176,7 +182,9 @@ export const PatternMatches = ({
   exactMatches,
   partialMatches,
   dataSources,
+  hasHidden,
   includesHidden,
+  onIncludesHiddenChange,
   maxHeight,
 }: PatternMatchesProps) => {
   const { euiTheme } = useEuiTheme();
@@ -197,30 +205,31 @@ export const PatternMatches = ({
   );
   const matchKind: MatchKind = hasExactMatches ? 'exact' : 'partial';
 
-  const renderEmpty = (message: string) => (
+  const renderEmpty = (message: string, testSubj = 'boostRulePatternMatchesEmpty') => (
     <EuiText
       size="s"
       color={euiTheme.colors.textDisabled}
       textAlign="center"
       // 24px from the tabs and the panel's bottom edge, after the space around the tab's content.
       css={{ paddingBlock: euiTheme.size.base }}
-      data-test-subj="boostRulePatternMatchesEmpty"
+      data-test-subj={testSubj}
     >
       <p>{message}</p>
     </EuiText>
   );
 
-  // Lined up with the names, after their match icons.
+  // Hidden data sources that a list leaves out, said as the empty messages are.
+  const getHiddenNote = (count: number) => formatHiddenNotShown(targetType, count);
   const renderHiddenNote = (count: number) =>
     count > 0 && (
       <EuiText
         key="hiddenNote"
-        size="xs"
-        color="subdued"
-        css={{ paddingInlineStart: euiTheme.size.l }}
-        data-test-subj="boostRuleHiddenNotShown"
+        size="s"
+        color={euiTheme.colors.textDisabled}
+        textAlign="center"
+        data-test-subj={HIDDEN_NOTE_TEST_SUBJ}
       >
-        {formatHiddenNotShown(targetType, count)}
+        <p>{getHiddenNote(count)}</p>
       </EuiText>
     );
 
@@ -299,15 +308,21 @@ export const PatternMatches = ({
   );
 
   // The list's label says how these match, so their icons don't repeat it to screen readers.
-  // Hidden ones are counted after the rest until they're included.
+  // Hidden ones are counted after the rest until they're shown, or instead of them if they're all
+  // hidden.
   const renderTargets = (
+    label: string,
     targets: readonly TargetPreview[],
     targetPattern: string,
     match: MatchKind,
     testSubj?: string
   ) => {
     const shown = includesHidden ? targets : targets.filter(({ isHidden }) => !isHidden);
-    return [
+    const hiddenCount = targets.length - shown.length;
+    if (shown.length === 0) {
+      return renderEmpty(getHiddenNote(hiddenCount), HIDDEN_NOTE_TEST_SUBJ);
+    }
+    return renderList(label, [
       ...shown.map(({ name, overriddenBy, isHidden }) =>
         renderRow({
           name,
@@ -319,8 +334,8 @@ export const PatternMatches = ({
           testSubj,
         })
       ),
-      renderHiddenNote(targets.length - shown.length),
-    ];
+      renderHiddenNote(hiddenCount),
+    ]);
   };
 
   const renderMatching = () => {
@@ -334,19 +349,24 @@ export const PatternMatches = ({
     // The count beside the pattern's label and each row's icon show how they match, so the lists
     // only name that for screen readers.
     if (hasExactMatches) {
-      return renderList(
+      return renderTargets(
         i18n.translate('xpack.boost.patternMatches.exactMatchesLabel', {
           defaultMessage: 'Exact matches',
         }),
-        renderTargets(exactMatches, pattern, 'exact')
+        exactMatches,
+        pattern,
+        'exact'
       );
     }
     if (partialMatches.length > 0) {
-      return renderList(
+      return renderTargets(
         i18n.translate('xpack.boost.patternMatches.partialMatchesLabel', {
           defaultMessage: 'Partial matches',
         }),
-        renderTargets(partialMatches, partialPattern, 'partial', 'boostRulePartialMatch')
+        partialMatches,
+        partialPattern,
+        'partial',
+        'boostRulePartialMatch'
       );
     }
     return renderEmpty(
@@ -361,6 +381,10 @@ export const PatternMatches = ({
       return renderEmpty(NO_DATA_SOURCES[targetType]);
     }
     const shown = includesHidden ? dataSources : dataSources.filter(({ hidden }) => !hidden);
+    const hiddenCount = dataSources.length - shown.length;
+    if (shown.length === 0) {
+      return renderEmpty(getHiddenNote(hiddenCount), HIDDEN_NOTE_TEST_SUBJ);
+    }
     return renderList(
       TAB_LABELS.all[targetType],
       // Matches are mixed with everything else here, so their icons say which they are, and each
@@ -378,7 +402,7 @@ export const PatternMatches = ({
             testSubj: 'boostRuleAvailableTarget',
           });
         }),
-        renderHiddenNote(dataSources.length - shown.length),
+        renderHiddenNote(hiddenCount),
       ]
     );
   };
@@ -392,22 +416,43 @@ export const PatternMatches = ({
       css={{ display: 'flex', flexDirection: 'column', maxBlockSize: maxHeight }}
       data-test-subj="boostRulePatternMatches"
     >
-      {/* A margin rather than padding, so the tabs' border stops at the panel's padding. */}
-      <EuiTabs size="s" css={{ margin: `${euiTheme.size.s} ${euiTheme.size.base} 0` }}>
-        {TABS.map((id) => (
-          <EuiTab
-            key={id}
-            id={getTabId(id)}
-            aria-controls={panelId}
-            isSelected={selectedTab === id}
-            disabled={!type}
-            onClick={() => setTab(id)}
-            data-test-subj={id === 'all' ? 'boostRuleAllTab' : 'boostRuleMatchingTab'}
-          >
-            {TAB_LABELS[id][targetType]}
-          </EuiTab>
-        ))}
-      </EuiTabs>
+      {/* The tabs, and the switch that shows hidden data sources at their end. The row draws the
+        tabs' border, as the tabs do, so it runs under the switch too. A margin rather than padding,
+        so the border stops at the panel's padding. */}
+      <div
+        css={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: euiTheme.size.m,
+          margin: `${euiTheme.size.s} ${euiTheme.size.base} 0`,
+          boxShadow: `inset 0 -${euiTheme.border.width.thin} 0 ${euiTheme.border.color}`,
+        }}
+      >
+        <EuiTabs size="s" bottomBorder={false}>
+          {TABS.map((id) => (
+            <EuiTab
+              key={id}
+              id={getTabId(id)}
+              aria-controls={panelId}
+              isSelected={selectedTab === id}
+              disabled={!type}
+              onClick={() => setTab(id)}
+              data-test-subj={id === 'all' ? 'boostRuleAllTab' : 'boostRuleMatchingTab'}
+            >
+              {TAB_LABELS[id][targetType]}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+        {/* Off until a profile is selected, like the tabs, and while there's nothing hidden to show,
+          unless it's on already. */}
+        <ShowHiddenSwitch
+          checked={includesHidden}
+          onChange={onIncludesHiddenChange}
+          disabled={!type || (!hasHidden && !includesHidden)}
+          data-test-subj="boostRuleShowHidden"
+        />
+      </div>
       <div
         role="tabpanel"
         id={panelId}

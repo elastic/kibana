@@ -11,20 +11,17 @@ import { i18n } from '@kbn/i18n';
 import type { BoostProfileType } from '../../common/types';
 import { HIDDEN_BADGE_LABEL } from './badge_labels';
 
-const INCLUDE_HIDDEN_LABELS: Readonly<Record<BoostProfileType, string>> = {
-  indices: i18n.translate('xpack.boost.hiddenData.includeHiddenIndices', {
-    defaultMessage: 'Include hidden indices',
-  }),
-  data_streams: i18n.translate('xpack.boost.hiddenData.includeHiddenDataStreams', {
-    defaultMessage: 'Include hidden data streams',
-  }),
-};
+/**
+ * Includes hidden indices or data streams in a list, which leaves them out until then. Boost rules
+ * apply to them all the same, so counts of what rules apply to include them either way.
+ */
+export const SHOW_HIDDEN_LABEL = i18n.translate('xpack.boost.hiddenData.showHidden', {
+  defaultMessage: 'Show hidden',
+});
 
-/** Marks a hidden index or data stream, as Index Management does. */
+/** Marks a hidden index or data stream. */
 export const HiddenBadge = () => (
-  <EuiBadge color="hollow" data-test-subj="boostHiddenBadge">
-    {HIDDEN_BADGE_LABEL}
-  </EuiBadge>
+  <EuiBadge data-test-subj="boostHiddenBadge">{HIDDEN_BADGE_LABEL}</EuiBadge>
 );
 
 /** How many hidden indices or data streams a list leaves out, such as "3 hidden indices not shown". */
@@ -40,28 +37,25 @@ export const formatHiddenNotShown = (type: BoostProfileType | undefined, count: 
         values: { count },
       });
 
-interface IncludeHiddenSwitchProps {
-  type: BoostProfileType;
+interface ShowHiddenSwitchProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
+  disabled?: boolean;
   'data-test-subj'?: string;
 }
 
-/**
- * Whether a list includes hidden indices or data streams, which it leaves out until asked, as Index
- * Management does. Boost rules apply to them all the same, so counts of what rules apply to include
- * them either way.
- */
-export const IncludeHiddenSwitch = ({
-  type,
+/** Whether a list shows hidden indices or data streams. */
+export const ShowHiddenSwitch = ({
   checked,
   onChange,
-  'data-test-subj': dataTestSubj = 'boostIncludeHidden',
-}: IncludeHiddenSwitchProps) => (
+  disabled = false,
+  'data-test-subj': dataTestSubj,
+}: ShowHiddenSwitchProps) => (
   <EuiSwitch
     compressed
-    label={INCLUDE_HIDDEN_LABELS[type]}
+    label={SHOW_HIDDEN_LABEL}
     checked={checked}
+    disabled={disabled}
     onChange={(event) => onChange(event.target.checked)}
     data-test-subj={dataTestSubj}
   />

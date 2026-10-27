@@ -17,7 +17,7 @@ export const DEFAULT_BADGE_LABEL = i18n.translate('xpack.boost.rulesTab.defaultB
   defaultMessage: 'Default',
 });
 
-/** Marks a hidden index or data stream, as Index Management does. */
+/** Marks a hidden index or data stream. */
 export const HIDDEN_BADGE_LABEL = i18n.translate('xpack.boost.hiddenBadge', {
   defaultMessage: 'Hidden',
 });
