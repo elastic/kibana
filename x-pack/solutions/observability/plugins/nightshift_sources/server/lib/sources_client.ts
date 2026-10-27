@@ -68,12 +68,17 @@ interface SourcesClientDependencies {
 // Splits on the same Unicode word boundaries as the `standard` analyzer that indexes `title.text`,
 // so every search word is one token of the index. The punctuation is dropped with the spaces, which
 // also leaves no `simple_query_string` operator (`+ | - " * ( ) ~ \`) in the words.
+// ICU also splits Thai, Chinese or Japanese text by dictionary, which `standard` does not: adjacent
+// word segments are joined back, and the analyzer splits them as it does in the index.
 const wordSegmenter = new Intl.Segmenter(undefined, { granularity: 'word' });
 
 const toSearchWords = (search: string): string[] =>
-  Array.from(wordSegmenter.segment(search))
-    .filter(({ isWordLike }) => isWordLike)
-    .map(({ segment }) => segment);
+  Array.from(wordSegmenter.segment(search), ({ segment, isWordLike }) =>
+    isWordLike ? segment : ' '
+  )
+    .join('')
+    .split(/\s+/)
+    .filter(Boolean);
 
 const toSource = (id: string, attributes: NightshiftSourceAttributes): NightshiftSource => ({
   id,

@@ -305,9 +305,13 @@ apiTest.describe(
 
     apiTest('searches titles by their words, also among the given ids', async ({ apiClient }) => {
       const base = `${TITLE_PREFIX}-${suffix}`;
-      const [checkout, proxy] = [`${base} Checkout-prod nginx`, `${base} nginx proxy`];
+      const [checkout, proxy, thai] = [
+        `${base} Checkout-prod nginx`,
+        `${base} nginx proxy`,
+        `${base} ภาษาไทย`,
+      ];
       const ids: string[] = [];
-      for (const title of [checkout, proxy]) {
+      for (const title of [checkout, proxy, thai]) {
         const created = await createSource(apiClient, manager.cookieHeader, {
           title,
           esql: `FROM ${index}`,
@@ -315,7 +319,7 @@ apiTest.describe(
         expect(created).toHaveStatusCode(200);
         ids.push(created.body.source.id);
       }
-      const [checkoutId, proxyId] = ids;
+      const [checkoutId, proxyId, thaiId] = ids;
 
       const search = async (text: string, sourceIds: string[] = []) => {
         const query = [...sourceIds.map((id) => `ids=${id}`), `search=${encodeURIComponent(text)}`];
@@ -333,6 +337,8 @@ apiTest.describe(
       expect(await search(`${suffix} CHECKOUT ngi`)).toStrictEqual([checkoutId]);
       expect(await search(`${suffix} nginx`)).toStrictEqual([checkoutId, proxyId]);
       expect(await search(`${suffix} checkout proxy`)).toStrictEqual([]);
+      // Thai text has no spaces between words, and the index keeps it as one word.
+      expect(await search(`ภาษาไทย ${suffix}`)).toStrictEqual([thaiId]);
 
       // `ids` narrows the list, and the search applies to the sources it names.
       expect(await search('nginx', [checkoutId, proxyId, randomUUID()])).toStrictEqual([

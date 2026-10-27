@@ -1026,13 +1026,13 @@ describe('SourcesClient', () => {
       await client.list({
         page: 1,
         perPage: 25,
-        search: '  nginx +|"*()~\\ checkout-prod v1.2 foo_bar ',
+        search: '  nginx +|"*()~\\ checkout-prod ภาษาไทย 東京都 v1.2 foo_bar ',
         enabled: true,
       });
 
       expect(soClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          search: 'nginx checkout prod v1.2 foo_bar*',
+          search: 'nginx checkout prod ภาษาไทย 東京都 v1.2 foo_bar*',
           searchFields: ['title.text'],
           defaultSearchOperator: 'AND',
           filter: 'nightshift-source.attributes.enabled: true',
