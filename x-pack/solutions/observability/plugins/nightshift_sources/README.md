@@ -18,10 +18,10 @@ gated by the Nightshift feature privileges: reads need `read_nightshift`, writes
 | Method | Path | Privilege | Notes |
 | --- | --- | --- | --- |
 | `GET` | `/internal/nightshift/sources?page&per_page&search&enabled` | read | Paginated catalog, sorted by title. Does not fetch views. |
-| `POST` | `/internal/nightshift/sources` | manage | Validates the query, derives `type`, writes the saved object, creates the view |
+| `POST` | `/internal/nightshift/sources` | manage | Validates the query, derives `type`, writes the saved object, creates the view. Takes `onboard_immediately` (see [Onboarding choice](#onboarding-choice)) |
 | `POST` | `/internal/nightshift/sources/_validate` | manage | Runs the create checks on `{ esql }` without writing; answers `{ valid: true, type, index_exists }` or `{ valid: false, error }` |
 | `GET` | `/internal/nightshift/sources/{sourceId}` | read | Source plus view health, including a `FROM <view> \| LIMIT 0` probe for `unresolvable` |
-| `PUT` | `/internal/nightshift/sources/{sourceId}` | manage | Full replace of `title`, `description`, `tags`, `esql`; always re-puts the view |
+| `PUT` | `/internal/nightshift/sources/{sourceId}` | manage | Full replace of `title`, `description`, `tags`, `esql`; always re-puts the view. Takes `onboard_immediately` |
 | `DELETE` | `/internal/nightshift/sources/{sourceId}` | manage | Deletes the view (404 ignored), then the saved object. The engine knowledge of the source is cleaned up asynchronously; a failed cleanup is logged and retried by the sync sweep, which does not run while maintenance is paused |
 | `POST` | `/internal/nightshift/sources/{sourceId}/_enable` | manage | Flips `enabled` only |
 | `POST` | `/internal/nightshift/sources/{sourceId}/_disable` | manage | Flips `enabled` only |
@@ -48,7 +48,8 @@ blank title still 400s.
 
 `setup.onSourceChange(listener)` subscribes an engine to every committed write: `created`,
 `updated` (with `previous`, which covers `_enable` and `_disable`) and `deleted`, each with the
-request that made it. The write awaits every listener before it returns, so an engine can
+request that made it. `created` and `updated` also carry `onboardImmediately`, the choice the
+writer made for that write (see [Onboarding choice](#onboarding-choice)). The write awaits every listener before it returns, so an engine can
 clean up after a deleted source before the caller refetches. A listener that throws is logged;
 the write already happened and is not undone. Rolled-back writes are not reported.
 
@@ -118,6 +119,21 @@ cancel onboarding, skip the source when picking candidates, re-onboard after a q
 The plugin cannot call engines directly without reintroducing the dependency cycle it exists to
 avoid. Engines that need to react right away subscribe through `setup.onSourceChange` (see
 [Engine access](#engine-access)); the reconcile stays as the safety net.
+
+## Onboarding choice
+
+`POST` and `PUT` accept `onboard_immediately` (boolean, default `true`): whether the engines may
+start onboarding the source because of this write. On `PUT` it only matters when the query
+changed, since that is the only edit that onboards a source again. The flag is not stored on the
+source and no read returns it. It travels with the `created` and `updated` events as
+`onboardImmediately`, so the engine skips the onboarding run of that one write and nothing else:
+a replaced query still resets the source's knowledge, and later writes, the sync sweep and
+continuous onboarding behave as before. `_enable` and `_disable` have no such option and report
+`onboardImmediately: true`.
+
+Reconciles are queued per source and each one reads the source as it is when it runs, not as it was
+when it was queued. A query change that opts out, made while an earlier write that did not opt out
+is still queued, can therefore be onboarded by that earlier run.
 
 ## Elasticsearch privileges
 

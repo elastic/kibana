@@ -13,6 +13,8 @@ import { SourceFlyout } from './source_flyout';
 import { SOURCE_QUERY_VALIDATION_DEBOUNCE_MS } from './use_source_query_validation';
 
 const mockFetch = jest.fn<Promise<ValidateSourceQueryResponse>, [string, unknown]>();
+const mockCreateSource = jest.fn();
+const mockUpdateSource = jest.fn();
 
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
@@ -24,8 +26,8 @@ jest.mock('../../hooks/use_kibana', () => ({
 }));
 jest.mock('../../data/sources/use_sources_api', () => ({
   useSourcesApi: () => ({
-    createSource: { mutateAsync: jest.fn() },
-    updateSource: { mutateAsync: jest.fn(), isLoading: false },
+    createSource: { mutateAsync: mockCreateSource },
+    updateSource: { mutateAsync: mockUpdateSource, isLoading: false },
   }),
 }));
 jest.mock('./source_preview', () => ({ SourcePreview: () => null }));
@@ -65,7 +67,7 @@ const source: NightshiftSource = {
   esql_updated_at: '2026-09-01T00:00:00.000Z',
 };
 
-const renderFlyout = (props: { source?: NightshiftSource } = {}) =>
+const renderFlyout = (props: { source?: NightshiftSource; readOnly?: boolean } = {}) =>
   render(
     <QueryClientProvider client={new QueryClient()}>
       <SourceFlyout {...props} onClose={jest.fn()} />
@@ -137,5 +139,99 @@ describe('SourceFlyout query validation', () => {
 
     expect(saveButton()).toBeEnabled();
     expect(mockFetch).not.toHaveBeenCalled();
+  });
+});
+
+describe('SourceFlyout onboard immediately', () => {
+  const ONBOARD_LABEL = 'Onboard source immediately';
+  // Generated ids are constant in Jest, so the label cannot be resolved through its `for` id.
+  const checkbox = () =>
+    screen.getByTestId('significantEventsAppSourceFlyoutOnboardImmediatelyCheckbox');
+  const queryCheckbox = () =>
+    screen.queryByTestId('significantEventsAppSourceFlyoutOnboardImmediatelyCheckbox');
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    mockFetch.mockReset();
+    mockCreateSource.mockReset();
+    mockUpdateSource.mockReset();
+    mockFetch.mockResolvedValue({ valid: true, type: 'logs', index_exists: true });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  const fillNewSource = async () => {
+    fireEvent.change(screen.getByTestId('significantEventsAppSourceFlyoutTitleInput'), {
+      target: { value: 'Nginx' },
+    });
+    typeQuery('FROM logs-nginx');
+    await waitOutDebounce();
+    await waitFor(() => expect(saveButton()).toBeEnabled());
+  };
+
+  it('is on by default and creates the source with onboarding requested', async () => {
+    renderFlyout();
+    expect(checkbox()).toBeChecked();
+    expect(screen.getByText(ONBOARD_LABEL)).toBeVisible();
+    expect(screen.getByText('Starts onboarding as soon as you save the source.')).toBeVisible();
+
+    await fillNewSource();
+    fireEvent.click(saveButton());
+
+    await waitFor(() =>
+      expect(mockCreateSource).toHaveBeenCalledWith({
+        title: 'Nginx',
+        description: undefined,
+        tags: [],
+        esql: 'FROM logs-nginx',
+        onboard_immediately: true,
+      })
+    );
+  });
+
+  it('creates the source without onboarding when the user clears it', async () => {
+    renderFlyout();
+    await fillNewSource();
+    fireEvent.click(checkbox());
+    expect(checkbox()).not.toBeChecked();
+    fireEvent.click(saveButton());
+
+    await waitFor(() =>
+      expect(mockCreateSource).toHaveBeenCalledWith(
+        expect.objectContaining({ onboard_immediately: false })
+      )
+    );
+  });
+
+  it('is only offered on an edit once the query changed, and starts on', () => {
+    renderFlyout({ source });
+    expect(queryCheckbox()).not.toBeInTheDocument();
+
+    typeQuery('FROM logs-other');
+    expect(checkbox()).toBeChecked();
+  });
+
+  it('saves a changed query without onboarding when the user clears it', async () => {
+    renderFlyout({ source });
+    typeQuery('FROM logs-other');
+    await waitOutDebounce();
+    await waitFor(() => expect(saveButton()).toBeEnabled());
+    fireEvent.click(checkbox());
+    fireEvent.click(saveButton());
+    fireEvent.click(await screen.findByText('Save and reset knowledge'));
+
+    await waitFor(() =>
+      expect(mockUpdateSource).toHaveBeenCalledWith({
+        sourceId: source.id,
+        body: expect.objectContaining({ esql: 'FROM logs-other', onboard_immediately: false }),
+      })
+    );
+  });
+
+  it('is hidden when the flyout is read only', () => {
+    renderFlyout({ source, readOnly: true });
+    expect(queryCheckbox()).not.toBeInTheDocument();
   });
 });

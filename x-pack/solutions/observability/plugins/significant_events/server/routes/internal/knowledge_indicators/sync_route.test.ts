@@ -82,8 +82,19 @@ describe('reconcileSourceRoute', () => {
   const makeReconcileParams = ({
     sources = [SOURCE],
     getDetectionClient,
-  }: { sources?: Array<typeof SOURCE>; getDetectionClient?: jest.Mock } = {}) => {
+    onboardImmediately = true,
+  }: {
+    sources?: Array<typeof SOURCE>;
+    getDetectionClient?: jest.Mock;
+    onboardImmediately?: boolean;
+  } = {}) => {
     const scheduleSourceOnboarding = jest.fn().mockResolvedValue(true);
+    const kiClient = {
+      setSourceRulesEnabled: jest.fn().mockResolvedValue(undefined),
+      deleteOwnedRules: jest.fn().mockResolvedValue(undefined),
+      deleteAllQueries: jest.fn().mockResolvedValue(undefined),
+      deleteIndicators: jest.fn().mockResolvedValue(undefined),
+    };
     const sourceKnowledgeState = {
       runExclusive: jest.fn(
         async ({ run }: { run: (state: object, checkpoint: jest.Mock) => Promise<unknown> }) =>
@@ -93,7 +104,10 @@ describe('reconcileSourceRoute', () => {
     };
     const logger = { error: jest.fn(), warn: jest.fn() };
     const handlerParams = {
-      params: { path: { sourceId: SOURCE.id }, body: { sourceSlug: SOURCE.slug } },
+      params: {
+        path: { sourceId: SOURCE.id },
+        body: { sourceSlug: SOURCE.slug, onboardImmediately },
+      },
       request: {},
       logger,
       getScopedClients: jest.fn().mockResolvedValue({
@@ -105,18 +119,13 @@ describe('reconcileSourceRoute', () => {
         sourceKnowledgeState,
         scheduleSourceOnboarding,
         getDetectionClient,
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
-          setSourceRulesEnabled: jest.fn().mockResolvedValue(undefined),
-          deleteOwnedRules: jest.fn().mockResolvedValue(undefined),
-          deleteAllQueries: jest.fn().mockResolvedValue(undefined),
-          deleteIndicators: jest.fn().mockResolvedValue(undefined),
-        }),
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
       }),
       workflowClients: {},
       maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
       server: {} as ReconcileParams['server'],
     } as unknown as ReconcileParams;
-    return { handlerParams, scheduleSourceOnboarding, sourceKnowledgeState, logger };
+    return { handlerParams, scheduleSourceOnboarding, sourceKnowledgeState, logger, kiClient };
   };
 
   it('schedules the new revision even when continuous onboarding is off', async () => {
@@ -127,6 +136,17 @@ describe('reconcileSourceRoute', () => {
     expect(scheduleSourceOnboarding).toHaveBeenCalledWith(SOURCE, {
       ignoreContinuousSetting: true,
     });
+  });
+
+  it('does not schedule onboarding when the writer opted out, but still resets replaced knowledge', async () => {
+    const { handlerParams, scheduleSourceOnboarding, kiClient } = makeReconcileParams({
+      onboardImmediately: false,
+    });
+
+    await expect(reconcileSource.handler(handlerParams)).resolves.toEqual({ reconciled: true });
+
+    expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+    expect(kiClient.deleteIndicators).toHaveBeenCalledWith(SOURCE.id);
   });
 
   it('marks the detections of a deleted source as processed', async () => {

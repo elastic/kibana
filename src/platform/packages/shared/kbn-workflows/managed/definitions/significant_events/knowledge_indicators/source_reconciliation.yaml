@@ -17,6 +17,10 @@ triggers:
       - name: sourceSlug
         type: string
         required: true
+      - name: onboardImmediately
+        type: boolean
+        default: true
+        description: "Start onboarding the current query once the change is applied."
 steps:
   - name: reconcile_source
     type: kibana.request
@@ -27,6 +31,7 @@ steps:
         x-elastic-internal-origin: "kibana"
       body:
         sourceSlug: "${{ inputs.sourceSlug }}"
+        onboardImmediately: "${{ inputs.onboardImmediately }}"
     on-failure:
       retry:
         max-attempts: 240

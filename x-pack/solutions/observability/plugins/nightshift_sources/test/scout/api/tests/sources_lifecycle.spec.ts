@@ -157,6 +157,38 @@ apiTest.describe(
     );
 
     apiTest(
+      'takes onboard_immediately on create and update without storing it',
+      async ({ apiClient }) => {
+        const body = {
+          title: `${TITLE_PREFIX}-${suffix}-onboard`,
+          tags: [],
+          esql: `FROM ${index}`,
+        };
+        const created = await createSource(apiClient, manager.cookieHeader, {
+          ...body,
+          onboard_immediately: false,
+        });
+        expect(created).toHaveStatusCode(200);
+        const { source } = created.body;
+        expect(source.onboard_immediately).toBeUndefined();
+
+        const updated = await updateSource(apiClient, manager.cookieHeader, source.id, {
+          ...body,
+          esql: `FROM ${index} | WHERE status >= 500`,
+          onboard_immediately: false,
+        });
+        expect(updated).toHaveStatusCode(200);
+        expect(updated.body.source.onboard_immediately).toBeUndefined();
+
+        const fetched = await getSource(apiClient, manager.cookieHeader, source.id);
+        expect(fetched).toHaveStatusCode(200);
+        expect(fetched.body.source.onboard_immediately).toBeUndefined();
+
+        await deleteSource(apiClient, manager.cookieHeader, source.id);
+      }
+    );
+
+    apiTest(
       'bumps esql_updated_at only when the query changes',
       async ({ apiClient, esClient }) => {
         const body = {

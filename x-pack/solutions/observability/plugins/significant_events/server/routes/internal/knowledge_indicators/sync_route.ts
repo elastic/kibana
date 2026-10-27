@@ -88,7 +88,15 @@ const reconcileSourceRoute = createServerRoute({
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
   params: z.object({
     path: z.object({ sourceId: z.string().min(1).max(255) }),
-    body: z.object({ sourceSlug: z.string().min(1).max(255) }),
+    body: z.object({
+      sourceSlug: z.string().min(1).max(255),
+      onboardImmediately: z
+        .boolean()
+        .default(true)
+        .describe(
+          'Whether this change may start an onboarding run. Knowledge of a replaced query is reset either way.'
+        ),
+    }),
   }),
   handler: async ({
     params,
@@ -147,9 +155,11 @@ const reconcileSourceRoute = createServerRoute({
       kiClient,
       onboardingClient,
       sourceKnowledgeState,
-      // A created or edited source gets its one-time onboarding even with continuous onboarding off.
-      scheduleSourceOnboarding: (scheduled) =>
-        scheduleSourceOnboarding(scheduled, { ignoreContinuousSetting: true }),
+      // A created or edited source gets its one-time onboarding even with continuous onboarding off,
+      // unless its writer opted out. Without a scheduler the revision is still applied.
+      scheduleSourceOnboarding: params.body.onboardImmediately
+        ? (scheduled) => scheduleSourceOnboarding(scheduled, { ignoreContinuousSetting: true })
+        : undefined,
       request,
     });
     await applySourceEnabled({

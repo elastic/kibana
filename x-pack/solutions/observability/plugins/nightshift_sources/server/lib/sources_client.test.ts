@@ -1147,7 +1147,22 @@ describe('SourcesClient', () => {
       const source = await client.create({ title: 'nginx errors', tags: [], esql: 'FROM logs-*' });
 
       expect(onChange).toHaveBeenCalledTimes(1);
-      expect(onChange).toHaveBeenCalledWith({ type: 'created', source });
+      expect(onChange).toHaveBeenCalledWith({ type: 'created', source, onboardImmediately: true });
+    });
+
+    it('reports a create that opted out of onboarding without storing the choice', async () => {
+      const { client, soClient, onChange } = setup();
+
+      const source = await client.create({
+        title: 'nginx errors',
+        tags: [],
+        esql: 'FROM logs-*',
+        onboard_immediately: false,
+      });
+
+      expect(onChange).toHaveBeenCalledWith({ type: 'created', source, onboardImmediately: false });
+      expect(source).not.toHaveProperty('onboard_immediately');
+      expect(soClient.create.mock.calls[0][1]).not.toHaveProperty('onboard_immediately');
     });
 
     it('does not report a create that was rolled back', async () => {
@@ -1175,7 +1190,29 @@ describe('SourcesClient', () => {
         type: 'updated',
         source,
         previous: makeSource(),
+        onboardImmediately: true,
       });
+    });
+
+    it('reports an update that opted out of onboarding without storing the choice', async () => {
+      const { client, soClient, onChange } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      const source = await client.update('source-1', {
+        title: 'nginx errors',
+        tags: ['nginx'],
+        esql: 'FROM logs-other-*',
+        onboard_immediately: false,
+      });
+
+      expect(onChange).toHaveBeenCalledWith({
+        type: 'updated',
+        source,
+        previous: makeSource(),
+        onboardImmediately: false,
+      });
+      expect(source).not.toHaveProperty('onboard_immediately');
+      expect(soClient.update.mock.calls[0][2]).not.toHaveProperty('onboard_immediately');
     });
 
     it('does not report an update that was restored', async () => {
@@ -1201,6 +1238,7 @@ describe('SourcesClient', () => {
         type: 'updated',
         source,
         previous: makeSource(),
+        onboardImmediately: true,
       });
     });
 

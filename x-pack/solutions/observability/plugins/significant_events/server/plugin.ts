@@ -532,7 +532,11 @@ export class SignificantEventsPlugin
     });
 
     const sourceReconciliation = plugins.workflowsManagement?.management
-      ? new WorkflowExecutionService<{ sourceId: string; sourceSlug: string }>({
+      ? new WorkflowExecutionService<{
+          sourceId: string;
+          sourceSlug: string;
+          onboardImmediately: boolean;
+        }>({
           managementApi: plugins.workflowsManagement.management,
           workflowId: SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID,
           workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
@@ -540,13 +544,13 @@ export class SignificantEventsPlugin
       : undefined;
     plugins.nightshiftSources.onSourceChange(
       createSourceChangeListener({
-        enqueueReconciliation: async ({ sourceId, sourceSlug, request }) => {
+        enqueueReconciliation: async ({ sourceId, sourceSlug, onboardImmediately, request }) => {
           if (!sourceReconciliation) {
             throw new Error('Workflows management is required to reconcile source knowledge');
           }
           await sourceReconciliation.execute({
             executionSpaceId: request.spaceId,
-            inputs: { sourceId, sourceSlug },
+            inputs: { sourceId, sourceSlug, onboardImmediately },
             request,
           });
         },

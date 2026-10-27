@@ -305,6 +305,8 @@ export const createSourceChangeListener =
     enqueueReconciliation: (args: {
       sourceId: string;
       sourceSlug: string;
+      /** Whether this change may start an onboarding run. A deleted source never does. */
+      onboardImmediately: boolean;
       request: KibanaRequest;
     }) => Promise<void>;
     ensurePeriodicReconciliation: (request: KibanaRequest) => Promise<void>;
@@ -321,6 +323,7 @@ export const createSourceChangeListener =
       enqueueReconciliation({
         sourceId: event.source.id,
         sourceSlug: event.source.slug,
+        onboardImmediately: event.type === 'deleted' || event.onboardImmediately,
         request: event.request,
       }),
       ensurePeriodicReconciliation(event.request),

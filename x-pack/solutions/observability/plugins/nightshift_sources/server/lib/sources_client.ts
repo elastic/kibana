@@ -108,7 +108,11 @@ export class SourcesClient {
 
   async create(input: CreateSourceRequest): Promise<NightshiftSource> {
     const { soClient, viewsClient, username } = this.deps;
-    const parsed = parseSourceWrite(createSourceRequestSchema, input);
+    // `onboard_immediately` is about this write, so it is kept out of the stored attributes.
+    const { onboard_immediately: onboardImmediately, ...parsed } = parseSourceWrite(
+      createSourceRequestSchema,
+      input
+    );
     const { type } = await this.validateQuery({ esql: parsed.esql });
 
     const slug = await this.allocateSlug(parsed.title);
@@ -146,13 +150,16 @@ export class SourcesClient {
     }
 
     const source = toSource(id, attributes);
-    await this.deps.onChange({ type: 'created', source });
+    await this.deps.onChange({ type: 'created', source, onboardImmediately });
     return source;
   }
 
   async update(id: string, input: UpdateSourceRequest): Promise<NightshiftSource> {
     const { soClient, viewsClient } = this.deps;
-    const parsed = parseSourceWrite(updateSourceRequestSchema, input);
+    const { onboard_immediately: onboardImmediately, ...parsed } = parseSourceWrite(
+      updateSourceRequestSchema,
+      input
+    );
     const so = await this.getSavedObject(id);
     const { attributes: previous } = so;
     const esqlChanged = !hasSameEsql(parsed.esql, previous.esql);
@@ -203,7 +210,12 @@ export class SourcesClient {
     }
 
     const source = toSource(id, attributes);
-    await this.deps.onChange({ type: 'updated', source, previous: toSource(id, previous) });
+    await this.deps.onChange({
+      type: 'updated',
+      source,
+      previous: toSource(id, previous),
+      onboardImmediately,
+    });
     return source;
   }
 
@@ -385,7 +397,12 @@ export class SourcesClient {
       version: so.version,
     });
     const source = toSource(id, attributes);
-    await this.deps.onChange({ type: 'updated', source, previous: toSource(id, so.attributes) });
+    await this.deps.onChange({
+      type: 'updated',
+      source,
+      previous: toSource(id, so.attributes),
+      onboardImmediately: true,
+    });
     return source;
   }
 
