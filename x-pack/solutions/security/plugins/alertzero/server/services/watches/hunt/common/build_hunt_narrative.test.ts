@@ -383,6 +383,41 @@ describe('buildHuntNarrative', () => {
     expect(narrative).not.toContain('stays eligible');
   });
 
+  it('lists the techniques still to be searched when the run is retryable, and says they are continued', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        completeness: 'incomplete_retryable',
+        completed_successfully: false,
+        tier2: tier2([], {
+          incomplete: [
+            { reason: 'generation_budget', detail: 'over budget', technique_id: 'T1059' },
+            { reason: 'execute_failed', detail: 'failed', technique_id: 'T1105' },
+            { reason: 'collapsed', detail: 'shared', technique_id: 'T1566' },
+          ],
+        }),
+      }),
+      ctx
+    );
+
+    expect(narrative).toContain('**Still to be searched (2):** `T1059` and `T1105`.');
+    expect(narrative).toContain('techniques this run already searched are not repeated');
+    expect(narrative).not.toContain('`T1566`.');
+  });
+
+  it('lists nothing to continue on a run that is not retryable', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        completeness: 'incomplete_final',
+        tier2: tier2([], {
+          incomplete: [{ reason: 'collapsed', detail: 'shared', technique_id: 'T1566' }],
+        }),
+      }),
+      ctx
+    );
+
+    expect(narrative).not.toContain('Still to be searched');
+  });
+
   it('carries the Tier 2 failure message when Tier 2 threw', () => {
     const narrative = buildHuntNarrative(
       result({
