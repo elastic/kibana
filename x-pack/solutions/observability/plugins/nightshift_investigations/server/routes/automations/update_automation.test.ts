@@ -156,7 +156,7 @@ describe('request validation', () => {
 
   it('rejects a Slack trigger row with no filters', () => {
     expect(() => parseRows([{ kind: 'slack', event: 'message' }])).toThrow(
-      'at least one of channels, users or messageFilter'
+      'at least one of channels, users, bots or messageFilter'
     );
   });
 

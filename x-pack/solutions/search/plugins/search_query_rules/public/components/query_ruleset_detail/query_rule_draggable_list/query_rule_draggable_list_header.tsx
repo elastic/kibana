@@ -35,7 +35,7 @@ export const QueryRuleDraggableListHeader: React.FC<QueryRuleDraggableListHeader
               <EuiText size="xs">
                 <b>
                   <FormattedMessage
-                    id="xpack.search.queryRulesetDetail.draggableList.ruleConditionsLabel"
+                    id="xpack.queryRules.queryRulesetDetail.draggableList.ruleConditionsLabel"
                     defaultMessage="Order"
                   />
                 </b>
@@ -47,7 +47,7 @@ export const QueryRuleDraggableListHeader: React.FC<QueryRuleDraggableListHeader
             <EuiText size="xs">
               <b>
                 <FormattedMessage
-                  id="xpack.search.queryRulesetDetail.draggableList.ruleConditionsLabel"
+                  id="xpack.queryRules.queryRulesetDetail.draggableList.ruleConditionsLabel"
                   defaultMessage="Rule Conditions"
                 />
               </b>
@@ -68,7 +68,7 @@ export const QueryRuleDraggableListHeader: React.FC<QueryRuleDraggableListHeader
             <EuiText size="xs">
               <b>
                 <FormattedMessage
-                  id="xpack.search.queryRulesetDetail.draggableList.actionLabel"
+                  id="xpack.queryRules.queryRulesetDetail.draggableList.actionLabel"
                   defaultMessage="Action"
                 />
               </b>
@@ -78,7 +78,7 @@ export const QueryRuleDraggableListHeader: React.FC<QueryRuleDraggableListHeader
             <EuiText size="xs">
               <b>
                 <FormattedMessage
-                  id="xpack.search.queryRulesetDetail.draggableList.documentCountLabel"
+                  id="xpack.queryRules.queryRulesetDetail.draggableList.documentCountLabel"
                   defaultMessage="Documents"
                 />
               </b>

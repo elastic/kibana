@@ -48,6 +48,8 @@ dependsOn:
   - '@kbn/cbor'
   - '@kbn/lazy-object'
   - '@kbn/core-http-server'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-http-browser-mocks'
 tags:
   - plugin
   - prod
@@ -61,6 +63,4 @@ fileGroups:
     - server/**/*
     - .storybook/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

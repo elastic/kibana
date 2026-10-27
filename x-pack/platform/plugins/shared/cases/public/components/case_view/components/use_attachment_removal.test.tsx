@@ -68,6 +68,69 @@ describe('useAttachmentRemoval', () => {
     );
   });
 
+  describe('when the type has related removals', () => {
+    const attackType = {
+      id: 'security.attack',
+      getCountLabel: ({ count }: { count: number }) => `${count} attacks`,
+      getRelatedRemoval: ({ count }: { count: number }) => ({
+        description: `Also remove the alerts of ${count} attacks?`,
+        removeOnlyLabel: 'Remove attacks only',
+        removeWithRelatedLabel: 'Remove attacks and alerts',
+      }),
+    };
+
+    const openModal = () => {
+      const { result } = renderRemoval();
+      act(() => {
+        result.current.onRemove(attackType)({ attachmentIds: ['attack-1', 'attack-2'] });
+      });
+      renderModal(result.current.modal);
+    };
+
+    it('asks whether to remove the related attachments too', () => {
+      openModal();
+
+      expect(screen.getByText('Remove 2 attacks?')).toBeInTheDocument();
+      expect(screen.getByTestId('remove-with-related-modal-description')).toHaveTextContent(
+        'Also remove the alerts of 2 attacks?'
+      );
+      expect(screen.queryByTestId('property-actions-confirm-modal')).toBeNull();
+    });
+
+    it('keeps the related attachments', async () => {
+      openModal();
+
+      await userEvent.click(screen.getByTestId('remove-with-related-modal-remove-only'));
+
+      expect(mutate).toHaveBeenCalledWith(
+        {
+          request: { type: 'security.attack', attachmentIds: ['attack-1', 'attack-2'] },
+          countLabel: '2 attacks',
+          includeRelated: false,
+        },
+        { onSuccess: undefined }
+      );
+    });
+
+    it('removes the related attachments too', async () => {
+      openModal();
+
+      await userEvent.click(screen.getByTestId('remove-with-related-modal-remove-with-related'));
+
+      expect(mutate).toHaveBeenCalledWith(expect.objectContaining({ includeRelated: true }), {
+        onSuccess: undefined,
+      });
+    });
+
+    it('removes nothing when the user cancels', async () => {
+      openModal();
+
+      await userEvent.click(screen.getByTestId('remove-with-related-modal-cancel'));
+
+      expect(mutate).not.toHaveBeenCalled();
+    });
+  });
+
   it('deletes saved objects by id without sending the type', async () => {
     const { result } = renderRemoval();
 

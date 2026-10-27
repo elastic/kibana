@@ -143,6 +143,7 @@ export const ServicePanelContent = ({
             prefetchedResolutionRisk={prefetchedResolutionRisk}
             hideHeaderIcon={hideHeaderIcons}
             isGroupView={isGroupView}
+            scopeId={scopeId}
           />
           <EuiHorizontalRule />
         </>
