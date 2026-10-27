@@ -41,6 +41,27 @@ interface EventTimelineProps {
   onEventClick: () => void;
 }
 
+const RevisionStatus = ({
+  label,
+  revision,
+}: {
+  label: string;
+  revision: SignificantEventResponse;
+}): React.ReactElement => (
+  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <EuiText size="xs" color="subdued">
+        {label}
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiBadge color={getStatusColor(revision.status)}>
+        {SIGNIFICANT_EVENT_STATUS_LABELS[revision.status]}
+      </EuiBadge>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 const RevisionDetails = ({
   revision,
 }: {
@@ -131,7 +152,10 @@ export const EventTimeline = ({
                 </EuiLink>
               </EuiText>
               <EuiText size="xs" color="subdued">
-                {getChangePointLabel(detection.change_point_type)}
+                {i18n.translate('xpack.nightshift.flyout.timelineDetectionLabel', {
+                  defaultMessage: 'Detection · {type}',
+                  values: { type: getChangePointLabel(detection.change_point_type) },
+                })}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -161,12 +185,23 @@ export const EventTimeline = ({
                 {event.title}
               </EuiLink>
             </EuiText>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.nightshift.flyout.timelineRaisedLabel', {
-                defaultMessage: 'Significant event raised',
-              })}
-            </EuiText>
-            {raisedRevision ? <RevisionDetails revision={raisedRevision} /> : null}
+            {raisedRevision ? (
+              <>
+                <RevisionStatus
+                  label={i18n.translate('xpack.nightshift.flyout.timelineRaisedLabel', {
+                    defaultMessage: 'Significant event raised',
+                  })}
+                  revision={raisedRevision}
+                />
+                <RevisionDetails revision={raisedRevision} />
+              </>
+            ) : (
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.nightshift.flyout.timelineRaisedLabel', {
+                  defaultMessage: 'Significant event raised',
+                })}
+              </EuiText>
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
@@ -178,30 +213,42 @@ export const EventTimeline = ({
     },
   });
   items.push(
-    ...revisions.slice(1).map((revision) => ({
-      timestamp: revision['@timestamp'],
-      item: {
-        icon: 'pencil',
-        verticalAlign: 'top' as const,
-        children: (
-          <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" responsive={false}>
-            <EuiFlexItem>
-              <EuiBadge color={getStatusColor(revision.status)}>
-                {SIGNIFICANT_EVENT_STATUS_LABELS[revision.status]}
-              </EuiBadge>
-              <RevisionDetails revision={revision} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                <time dateTime={revision['@timestamp']}>
-                  {formatTimelineTime(revision['@timestamp'])}
-                </time>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-      },
-    }))
+    ...revisions.slice(1).map((revision, index) => {
+      const statusChanged = revision.status !== revisions[index].status;
+      return {
+        timestamp: revision['@timestamp'],
+        item: {
+          icon: 'pencil',
+          verticalAlign: 'top' as const,
+          children: (
+            <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" responsive={false}>
+              <EuiFlexItem>
+                <RevisionStatus
+                  label={
+                    statusChanged
+                      ? i18n.translate('xpack.nightshift.flyout.timelineStatusChangedLabel', {
+                          defaultMessage: 'Status changed to',
+                        })
+                      : i18n.translate('xpack.nightshift.flyout.timelineEventUpdatedLabel', {
+                          defaultMessage: 'Significant event updated',
+                        })
+                  }
+                  revision={revision}
+                />
+                <RevisionDetails revision={revision} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  <time dateTime={revision['@timestamp']}>
+                    {formatTimelineTime(revision['@timestamp'])}
+                  </time>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+        },
+      };
+    })
   );
 
   items.sort((first, second) => Date.parse(first.timestamp) - Date.parse(second.timestamp));

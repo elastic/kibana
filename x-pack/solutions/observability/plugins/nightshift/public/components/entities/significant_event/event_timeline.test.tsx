@@ -68,6 +68,8 @@ describe('EventTimeline', () => {
     ]);
     expect(items[1].querySelector('time')).toHaveAttribute('dateTime', event.created_at);
     expect(screen.getAllByText('Significant event raised')).toHaveLength(1);
+    expect(screen.getByText('Detection · Spike')).toBeInTheDocument();
+    expect(screen.getByText('Detection · Dip')).toBeInTheDocument();
   });
 
   it('shows one raised entry and the inactive revision with its note', () => {
@@ -85,9 +87,28 @@ describe('EventTimeline', () => {
     });
 
     expect(screen.getAllByText('Significant event raised')).toHaveLength(1);
+    expect(screen.getByText('Status changed to')).toBeInTheDocument();
     expect(screen.getByText('Inactive')).toBeInTheDocument();
     expect(screen.getByText('Recovered after the rollback')).toBeInTheDocument();
     expect(screen.getAllByRole('listitem')).toHaveLength(4);
+  });
+
+  it('labels a same-status revision as an event update', () => {
+    renderTimeline({
+      ...lifecycle,
+      events: [
+        { ...event, '@timestamp': event.created_at },
+        {
+          ...event,
+          '@timestamp': '2026-07-10T13:00:00Z',
+          assessment_note: 'The latest check confirmed the event remains active',
+        },
+      ],
+    });
+
+    expect(screen.getByText('Significant event updated')).toBeInTheDocument();
+    expect(screen.queryByText('Status changed to')).not.toBeInTheDocument();
+    expect(screen.getAllByText('Active')).toHaveLength(2);
   });
 
   it('opens a detection through its click handler', () => {
