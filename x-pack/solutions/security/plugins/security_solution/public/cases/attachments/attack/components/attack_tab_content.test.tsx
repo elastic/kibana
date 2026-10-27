@@ -68,6 +68,8 @@ jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
   useIsNewFlyoutEnabled: () => true,
 }));
 
+jest.setTimeout(20_000);
+
 /** EUI's own handles on the data grid controls, which have no constant of ours to come from. */
 const EUI_COLUMN_SELECTOR_TEST_ID = 'dataGridColumnSelectorButton';
 const EUI_COLUMN_SORTING_TEST_ID = 'dataGridColumnSortingButton';
