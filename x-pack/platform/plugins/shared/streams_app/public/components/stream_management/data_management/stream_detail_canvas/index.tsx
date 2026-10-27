@@ -31,8 +31,7 @@ import {
 } from '@xyflow/react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import {
-  buildRoutingEdges,
-  buildUnitConnectionEdges,
+  buildUnitCanvasGraph,
   configuredDestinationNodeId,
   configuredRoutingNodeId,
   configuredSourceNodeId,
@@ -59,6 +58,7 @@ import { IndexInspectFlyout } from '../../../index_inspect/index_inspect_flyout'
 import type { IndexInspectTabId } from '../../../index_inspect/types';
 import {
   DESTINATION_NODE_TYPE,
+  PROCESSING_NODE_TYPE,
   ROUTING_NODE_TYPE,
   SOURCE_NODE_TYPE,
   type ClassicCanvasGraph,
@@ -82,6 +82,7 @@ import {
   useCanvasSourcesRef,
   useCanvasUrlRef,
   useCanvasRoutingFlyout,
+  useCanvasProcessingFlyout,
 } from './state_management';
 import {
   useSourceApiKeyGenerationDeps,
@@ -113,13 +114,15 @@ import {
 } from '../../../../services/unit_connections';
 import {
   canConnectOrigin,
+  canMoveOriginConnection,
   connectOrigin,
   disconnectOrigin,
   moveOriginConnection,
-  readConnectionOrigin,
-  readConnectionTarget,
+  readConnectionOrigin as readOrigin,
+  readConnectionTarget as readTarget,
   type ConnectionOrigin,
   type OriginConnectionMove,
+  type ProcessingRefsByNodeId,
   type RouteTarget,
 } from './connection_origin';
 import { getUnitRoutings } from '../../../streams_layout/routing/routing_models';
@@ -194,6 +197,7 @@ function StreamsCanvasInner() {
     updateNodePositions,
     saveUnit,
     changeUnitConnection,
+    openProcessingFlyout,
   } = useCanvasEvents();
   const unitDefinition = useCanvasUnitDefinition();
   const hasUnsavedChanges = useCanvasHasUnsavedChanges();
@@ -202,6 +206,7 @@ function StreamsCanvasInner() {
   const isUnitUnavailable = useCanvasIsUnitUnavailable();
   const nodePositions = useCanvasNodePositions();
   const [routingFlyout, mode] = useCanvasRoutingFlyout();
+  const processingFlyout = useCanvasProcessingFlyout();
   const nodePositionsRef = useRef(nodePositions);
   useEffect(() => {
     nodePositionsRef.current = nodePositions;
@@ -252,13 +257,15 @@ function StreamsCanvasInner() {
   );
 
   const graph = useMemo<ClassicCanvasGraph>(() => {
-    const sourceIds = sources.map((source) => source.id);
-    const destinationIds = destinations.map((destination) => destination.id);
-    const unitConnectionEdges = buildUnitConnectionEdges(unitDefinition, sourceIds, destinationIds);
     const routings = getUnitRoutings(unitDefinition);
-    const routingEdges = buildRoutingEdges(routings, sourceIds, destinationIds);
+    const { processingNodes, edges } = buildUnitCanvasGraph(
+      unitDefinition,
+      sources.map((source) => source.id),
+      destinations.map((destination) => destination.id),
+      routings
+    );
     const connectedDestinationIds = new Set(
-      [...unitConnectionEdges, ...routingEdges].flatMap((edge) => {
+      edges.flatMap((edge) => {
         const destinationId = readConfiguredDestinationId(edge.target);
         return destinationId ? [destinationId] : [];
       })
@@ -273,9 +280,12 @@ function StreamsCanvasInner() {
         resolvedIndicesByDestination[destination.id]?.map((index) => index.name) ?? []
       )
     );
-    const edges = [...unitConnectionEdges, ...routingEdges];
-    const routingNodes = routings.map(buildRoutingNode);
-    const graphNodes = [...configuredSourceNodes, ...configuredDestinationNodes, ...routingNodes];
+    const graphNodes = [
+      ...configuredSourceNodes,
+      ...processingNodes,
+      ...routings.map(buildRoutingNode),
+      ...configuredDestinationNodes,
+    ];
     return {
       nodes: applyLayout(graphNodes, edges),
       edges,
@@ -423,6 +433,34 @@ function StreamsCanvasInner() {
 
   const [connectionTargetIds, setConnectionTargetIds] = useState<ReadonlySet<string> | null>(null);
 
+  const processingRefsByNodeId = useMemo<ProcessingRefsByNodeId>(
+    () =>
+      new Map(
+        graph.nodes.flatMap((node) =>
+          node.type === PROCESSING_NODE_TYPE ? [[node.id, node.data.ref] as const] : []
+        )
+      ),
+    [graph.nodes]
+  );
+  const routingIds = useMemo(
+    () =>
+      new Set(
+        graph.nodes.flatMap((node) =>
+          node.type === ROUTING_NODE_TYPE ? [node.data.pipelineId] : []
+        )
+      ),
+    [graph.nodes]
+  );
+  const readConnectionOrigin = useCallback(
+    (nodeId: string | null | undefined, handleId: string | null | undefined) =>
+      readOrigin(nodeId, handleId, processingRefsByNodeId),
+    [processingRefsByNodeId]
+  );
+  const readConnectionTarget = useCallback(
+    (nodeId: string | null | undefined) => readTarget(nodeId, processingRefsByNodeId, routingIds),
+    [processingRefsByNodeId, routingIds]
+  );
+
   // The line being moved, if any. Drops are then checked as a move of that line,
   // so a source or rule can swap its one connection for another target.
   const reconnectingRef = useRef<Pick<
@@ -433,19 +471,24 @@ function StreamsCanvasInner() {
   const canDropConnection = useCallback(
     (origin: ConnectionOrigin, target: RouteTarget): boolean => {
       const reconnecting = reconnectingRef.current;
-      return reconnecting ? true : canConnectOrigin(unitDefinition, origin, target);
+      return reconnecting
+        ? canMoveOriginConnection(unitDefinition, { ...reconnecting, origin, target })
+        : canConnectOrigin(unitDefinition, origin, target);
     },
     [unitDefinition]
   );
 
   const onReconnectStart = useCallback<
     NonNullable<React.ComponentProps<typeof CanvasShell>['onReconnectStart']>
-  >((_event, edge) => {
-    const previousOrigin = readConnectionOrigin(edge.source, edge.sourceHandle);
-    const previousTarget = readConnectionTarget(edge.target);
-    reconnectingRef.current =
-      previousOrigin && previousTarget ? { previousOrigin, previousTarget } : null;
-  }, []);
+  >(
+    (_event, edge) => {
+      const previousOrigin = readConnectionOrigin(edge.source, edge.sourceHandle);
+      const previousTarget = readConnectionTarget(edge.target);
+      reconnectingRef.current =
+        previousOrigin && previousTarget ? { previousOrigin, previousTarget } : null;
+    },
+    [readConnectionOrigin, readConnectionTarget]
+  );
 
   const onConnect = useCallback<OnConnect>(
     (connection) => {
@@ -457,7 +500,7 @@ function StreamsCanvasInner() {
       record();
       changeUnitConnection(connectOrigin(unitDefinition, origin, target));
     },
-    [changeUnitConnection, record, unitDefinition]
+    [changeUnitConnection, readConnectionOrigin, readConnectionTarget, record, unitDefinition]
   );
 
   const onConnectStart = useCallback<OnConnectStart>(
@@ -478,7 +521,7 @@ function StreamsCanvasInner() {
         });
       setConnectionTargetIds(new Set(targets));
     },
-    [canDropConnection, graph.nodes]
+    [canDropConnection, graph.nodes, readConnectionOrigin, readConnectionTarget]
   );
 
   const clearConnectionTargets = useCallback(() => {
@@ -491,7 +534,7 @@ function StreamsCanvasInner() {
       const target = readConnectionTarget(connection.target);
       return origin !== undefined && target !== undefined && canDropConnection(origin, target);
     },
-    [canDropConnection]
+    [canDropConnection, readConnectionOrigin, readConnectionTarget]
   );
 
   const onReconnect = useCallback<OnReconnect>(
@@ -503,12 +546,20 @@ function StreamsCanvasInner() {
       if (!previousOrigin || !previousTarget || !origin || !target) {
         return;
       }
+      const next = moveOriginConnection(unitDefinition, {
+        previousOrigin,
+        previousTarget,
+        origin,
+        target,
+      });
+      // Dropping the line back where it started changes nothing, so it is not an undo step.
+      if (next === unitDefinition) {
+        return;
+      }
       record();
-      changeUnitConnection(
-        moveOriginConnection(unitDefinition, { previousOrigin, previousTarget, origin, target })
-      );
+      changeUnitConnection(next);
     },
-    [changeUnitConnection, record, unitDefinition]
+    [changeUnitConnection, readConnectionOrigin, readConnectionTarget, record, unitDefinition]
   );
 
   const onReconnectEnd = useCallback<
@@ -528,7 +579,7 @@ function StreamsCanvasInner() {
       record();
       changeUnitConnection(disconnectOrigin(unitDefinition, origin, target));
     },
-    [changeUnitConnection, record, unitDefinition]
+    [changeUnitConnection, readConnectionOrigin, readConnectionTarget, record, unitDefinition]
   );
 
   const onNodesDelete = useCallback<OnNodesDelete<ClassicCanvasNode>>(
@@ -563,6 +614,11 @@ function StreamsCanvasInner() {
       if (event.target instanceof Element && event.target.closest('.react-flow__handle')) {
         return;
       }
+      if (node.type === PROCESSING_NODE_TYPE && !event.shiftKey) {
+        event.preventDefault();
+        openProcessingFlyout(node.data.ref);
+        return;
+      }
       if (node.type === SOURCE_NODE_TYPE && node.data.sourceId && !event.shiftKey) {
         event.preventDefault();
         openSourceFlyout(node.data.sourceId);
@@ -573,7 +629,7 @@ function StreamsCanvasInner() {
         openDestinationFlyout(node.data.destinationId);
       }
     },
-    [openDestinationFlyout, openSourceFlyout]
+    [openDestinationFlyout, openProcessingFlyout, openSourceFlyout]
   );
 
   const reopenContextMenu = useCallback(
@@ -637,6 +693,9 @@ function StreamsCanvasInner() {
     // Disregard if more than one node is selected for whatever reason.
     if (selected.length === 1) {
       const selectedNode = selected[0];
+      if (selectedNode.type === PROCESSING_NODE_TYPE) {
+        openProcessingFlyout(selectedNode.data.ref);
+      }
       if (selectedNode.type === SOURCE_NODE_TYPE && selectedNode.data.sourceId) {
         openSourceFlyout(selectedNode.data.sourceId);
       }
@@ -644,7 +703,7 @@ function StreamsCanvasInner() {
         openDestinationFlyout(selectedNode.data.destinationId);
       }
     }
-  }, [nodes, openDestinationFlyout, openSourceFlyout]);
+  }, [nodes, openDestinationFlyout, openProcessingFlyout, openSourceFlyout]);
 
   useCanvasKeyboardShortcuts({ onUndo: handleUndo, onRedo: handleRedo, onEscape, onEnter });
 
@@ -800,8 +859,8 @@ function StreamsCanvasInner() {
             />
           )}
           {routingFlyout && mode === 'routing' ? <RoutingFlyout edge={routingFlyout} /> : null}
-          {routingFlyout && mode === 'processing' ? (
-            <ProcessingFlyout edge={routingFlyout} />
+          {processingFlyout ? (
+            <ProcessingFlyout key={processingFlyout.ref.sessionId} flyout={processingFlyout} />
           ) : null}
           <EuiScreenReaderOnly>
             <p id={KEYBOARD_INSTRUCTIONS_ID}>
@@ -867,52 +926,80 @@ const buildConfiguredSourceNode = (source: SourceViewModel, hasConnection: boole
   };
 };
 
-const buildConfiguredDestinationNode = (
+export const buildConfiguredDestinationNode = (
   destination: DestinationViewModel,
   hasConnectedSource: boolean,
   targetedIndexNames: string[]
-): DestinationNode => ({
-  id: configuredDestinationNodeId(destination.id),
-  type: DESTINATION_NODE_TYPE,
-  position: { x: 0, y: 0 },
-  deletable: true,
-  ariaLabel: hasConnectedSource
-    ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.ariaLabel', {
-        defaultMessage:
-          'Destination: {name}, {signal}, {indexCount, plural, one {# index} other {# indices}}',
-        values: {
-          name: destination.name,
-          signal: destination.signals.map((signal) => DESTINATION_SIGNAL_LABELS[signal]).join(', '),
-          indexCount: targetedIndexNames.length,
-        },
-      })
-    : i18n.translate('xpack.streams.canvas.configuredDestinationNode.noSourceAriaLabel', {
-        defaultMessage:
-          'Destination: {name}, {signal}, {indexCount, plural, one {# index} other {# indices}}, no source',
-        values: {
-          name: destination.name,
-          signal: destination.signals.map((signal) => DESTINATION_SIGNAL_LABELS[signal]).join(', '),
-          indexCount: targetedIndexNames.length,
-        },
-      }),
-  data: {
-    destinationId: destination.id,
-    signals: destination.signals,
-    streamName: destination.index,
-    indexCount: targetedIndexNames.length,
-    targetedIndexNames,
-    title: destination.name,
-    subtitle: !hasConnectedSource
-      ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.noSourceLabel', {
-          defaultMessage: 'No source',
+): DestinationNode => {
+  const signal = destination.signals.map((value) => DESTINATION_SIGNAL_LABELS[value]).join(', ');
+  const noSourceLabel = i18n.translate(
+    'xpack.streams.canvas.configuredDestinationNode.noSourceLabel',
+    { defaultMessage: 'No source' }
+  );
+  if (destination.type === 's3') {
+    return {
+      id: configuredDestinationNodeId(destination.id),
+      type: DESTINATION_NODE_TYPE,
+      position: { x: 0, y: 0 },
+      deletable: true,
+      ariaLabel: hasConnectedSource
+        ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.s3AriaLabel', {
+            defaultMessage: 'Destination: {name}, {signal}',
+            values: { name: destination.name, signal },
+          })
+        : i18n.translate('xpack.streams.canvas.configuredDestinationNode.s3NoSourceAriaLabel', {
+            defaultMessage: 'Destination: {name}, {signal}, no source',
+            values: { name: destination.name, signal },
+          }),
+      data: {
+        destinationId: destination.id,
+        signals: destination.signals,
+        title: destination.name,
+        subtitle: !hasConnectedSource ? noSourceLabel : destination.bucket,
+      },
+    };
+  }
+  return {
+    id: configuredDestinationNodeId(destination.id),
+    type: DESTINATION_NODE_TYPE,
+    position: { x: 0, y: 0 },
+    deletable: true,
+    ariaLabel: hasConnectedSource
+      ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.ariaLabel', {
+          defaultMessage:
+            'Destination: {name}, {signal}, {indexCount, plural, one {# index} other {# indices}}',
+          values: {
+            name: destination.name,
+            signal,
+            indexCount: targetedIndexNames.length,
+          },
         })
-      : destination.mode === 'auto'
-      ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.autoLabel', {
-          defaultMessage: 'Auto',
-        })
-      : destination.index,
-  },
-});
+      : i18n.translate('xpack.streams.canvas.configuredDestinationNode.noSourceAriaLabel', {
+          defaultMessage:
+            'Destination: {name}, {signal}, {indexCount, plural, one {# index} other {# indices}}, no source',
+          values: {
+            name: destination.name,
+            signal,
+            indexCount: targetedIndexNames.length,
+          },
+        }),
+    data: {
+      destinationId: destination.id,
+      signals: destination.signals,
+      streamName: destination.index,
+      indexCount: targetedIndexNames.length,
+      targetedIndexNames,
+      title: destination.name,
+      subtitle: !hasConnectedSource
+        ? noSourceLabel
+        : destination.mode === 'auto'
+        ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.autoLabel', {
+            defaultMessage: 'Auto',
+          })
+        : destination.index,
+    },
+  };
+};
 
 const buildRoutingNode = (routing: RoutingViewModel): RoutingNode => {
   const name = routing.name || routing.id;

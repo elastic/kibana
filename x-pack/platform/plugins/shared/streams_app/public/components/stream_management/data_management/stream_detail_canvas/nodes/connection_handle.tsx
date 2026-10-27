@@ -11,6 +11,8 @@ import { Handle, useNodeId } from '@xyflow/react';
 import { i18n } from '@kbn/i18n';
 
 export const CONNECTION_HANDLE_CLASS = 'streamsConnectionHandle';
+/** The open circle drawn at each side of a unit node. */
+export const NODE_HANDLE_CLASS = 'streamsNodeHandle';
 
 const ConnectionTargetsContext = createContext<ReadonlySet<string> | null>(null);
 
@@ -30,6 +32,8 @@ interface ConnectionHandleProps {
    * which stays movable.
    */
   isConnectableStart?: boolean;
+  /** Overrides the label of a handle that starts lines. */
+  connectAriaLabel?: string;
 }
 
 export function ConnectionHandle({
@@ -38,6 +42,7 @@ export function ConnectionHandle({
   position,
   isConnectable,
   isConnectableStart = isConnectable,
+  connectAriaLabel,
 }: ConnectionHandleProps) {
   const nodeId = useNodeId();
   const connectionTargets = useContext(ConnectionTargetsContext);
@@ -48,12 +53,13 @@ export function ConnectionHandle({
   const className = useMemo(
     () =>
       [
+        isConnectable ? NODE_HANDLE_CLASS : undefined,
         canTarget || canStart ? CONNECTION_HANDLE_CLASS : undefined,
         highlighted ? 'streamsConnectionTarget' : undefined,
       ]
         .filter((name) => name !== undefined)
         .join(' '),
-    [canTarget, canStart, highlighted]
+    [isConnectable, canTarget, canStart, highlighted]
   );
 
   return (
@@ -68,7 +74,8 @@ export function ConnectionHandle({
       aria-label={
         type === 'source'
           ? canStart
-            ? i18n.translate('xpack.streams.canvas.connectionHandle.connectAriaLabel', {
+            ? connectAriaLabel ??
+              i18n.translate('xpack.streams.canvas.connectionHandle.connectAriaLabel', {
                 defaultMessage: 'Drag to connect this source',
               })
             : undefined

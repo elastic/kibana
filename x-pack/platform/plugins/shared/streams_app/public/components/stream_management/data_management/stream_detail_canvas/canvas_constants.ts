@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { DESTINATION_NODE_TYPE, ROUTING_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
+import {
+  DESTINATION_NODE_TYPE,
+  PROCESSING_NODE_TYPE,
+  ROUTING_NODE_TYPE,
+  SOURCE_NODE_TYPE,
+} from './types';
 
 /**
  * Background dot grid spacing (px). Column/row gaps are multiples of this so
@@ -52,6 +57,7 @@ export const PAN_MARGIN = 500;
 export const SOURCE_NODE_WIDTH = 246;
 export const DESTINATION_NODE_WIDTH = 220;
 export const ROUTING_NODE_WIDTH = 220;
+export const PROCESSING_NODE_WIDTH = 140;
 
 /**
  * Revisit whenever a card gains or loses a content row.
@@ -60,11 +66,13 @@ export const SOURCE_NODE_HEIGHT = 74;
 export const DESTINATION_NODE_HEIGHT = 78;
 /** A routing card with a single rule. Each extra rule adds a row. */
 export const ROUTING_NODE_HEIGHT = 96;
+export const PROCESSING_NODE_HEIGHT = 44;
 
 export const NODE_HEIGHT_BY_TYPE: Readonly<Record<string, number>> = {
   [SOURCE_NODE_TYPE]: SOURCE_NODE_HEIGHT,
   [DESTINATION_NODE_TYPE]: DESTINATION_NODE_HEIGHT,
   [ROUTING_NODE_TYPE]: ROUTING_NODE_HEIGHT,
+  [PROCESSING_NODE_TYPE]: PROCESSING_NODE_HEIGHT,
 };
 
 /**

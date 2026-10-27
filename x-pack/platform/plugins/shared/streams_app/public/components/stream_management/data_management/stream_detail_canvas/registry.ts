@@ -8,24 +8,26 @@
 import type { EdgeTypes, NodeTypes } from '@xyflow/react';
 import { AnimatedEdge } from './edges/animated_edge';
 import { DestinationNode } from './nodes/destination_node';
+import { ProcessingNode } from './nodes/processing_node';
 import { SourceNode } from './nodes/source_node';
 import { RoutingNode } from './nodes/routing_node';
 import {
   ANIMATED_EDGE_TYPE,
   DESTINATION_NODE_TYPE,
+  PROCESSING_NODE_TYPE,
   ROUTING_NODE_TYPE,
   SOURCE_NODE_TYPE,
 } from './types';
 
 /**
  * Central registry mapping React Flow node/edge type identifiers to their
- * components. Adding a new kind (e.g. pipeline, routing) is a single line here
+ * components. Adding a new kind (e.g. routing) is a single line here
  */
 export const canvasNodeTypes: NodeTypes = {
   [SOURCE_NODE_TYPE]: SourceNode,
   [DESTINATION_NODE_TYPE]: DestinationNode,
+  [PROCESSING_NODE_TYPE]: ProcessingNode,
   [ROUTING_NODE_TYPE]: RoutingNode,
-  // future: [PIPELINE_NODE_TYPE]: PipelineNode,
 };
 
 export const canvasEdgeTypes: EdgeTypes = {
