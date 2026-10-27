@@ -203,6 +203,33 @@ const widen = ({ kind, values }: Condition): Condition => ({
       : values,
 });
 
+export interface PatternKeyDescription {
+  ruleId: string;
+  ruleRevision?: string | number;
+  detection: string;
+  /** Empty for a key with no condition (the wide key of an alert with no identifying field). */
+  kind: string;
+  values: Array<[field: string, value: string]>;
+}
+
+/** Reads back what `serialize` wrote, so a stored decision can say what it matches. */
+export const describePatternKey = (key: string): PatternKeyDescription => {
+  const [ruleId, revision, detection, kind, values] = JSON.parse(key) as [
+    string | null,
+    string | number | null,
+    string,
+    string,
+    Array<[string, string]>
+  ];
+  return {
+    ruleId: ruleId ?? '',
+    ...(revision === null ? {} : { ruleRevision: revision }),
+    detection,
+    kind,
+    values,
+  };
+};
+
 /** The strict and the wide key of an alert document, as stable strings (hash them to store them). */
 export const buildPatternKeys = (doc: AlertDocument): PatternKeys => {
   const condition = buildCondition(doc);

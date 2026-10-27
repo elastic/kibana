@@ -10,6 +10,7 @@ import { ALERT_FETCH_LIMIT, BATCH_ALERT_CAP, RULE_FETCH_LIMIT } from '../../aler
 import { LOADED_ALERT_FIELDS } from '../../alert_triage/loaded_alert_fields';
 import {
   fetchTriageAlerts,
+  findKeyTagsWithVerdicts,
   listLiveExecutionIds,
   loadAlertsByIds,
   readKeyHistory,
@@ -135,6 +136,56 @@ describe('listLiveExecutionIds', () => {
     await expect(listLiveExecutionIds({ callKibanaApi }, 'batch', logger)).resolves.toBeUndefined();
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('HTTP 403: Forbidden'));
+  });
+});
+
+describe('findKeyTagsWithVerdicts', () => {
+  const answer = (keys: string[]) => ({
+    status: 200,
+    headers: {},
+    body: { aggregations: { keys: { buckets: keys.map((key) => ({ key })) } } },
+  });
+
+  it('asks for alerts that carry a key tag and a verdict tag, and returns only the key tags', async () => {
+    const callKibanaApi = jest.fn().mockResolvedValue(answer(['k1']));
+
+    const found = await findKeyTagsWithVerdicts(
+      { callKibanaApi },
+      ['k1', 'k2'],
+      ['az:true_positive']
+    );
+
+    expect([...found]).toEqual(['k1']);
+    const { body } = callKibanaApi.mock.calls[0][0];
+    expect(body.query.bool.filter).toEqual([
+      { terms: { 'kibana.alert.workflow_tags': ['k1', 'k2'] } },
+      { terms: { 'kibana.alert.workflow_tags': ['az:true_positive'] } },
+    ]);
+    expect(body.aggs.keys.terms).toEqual(
+      expect.objectContaining({ include: ['k1', 'k2'], size: 2 })
+    );
+  });
+
+  it('searches many keys in chunks and joins the answers', async () => {
+    const keys = Array.from({ length: 1200 }, (_, index) => `k${index}`);
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValueOnce(answer(['k1']))
+      .mockResolvedValueOnce(answer(['k600']))
+      .mockResolvedValueOnce(answer([]));
+
+    const found = await findKeyTagsWithVerdicts({ callKibanaApi }, keys, ['az:inconclusive']);
+
+    expect(callKibanaApi).toHaveBeenCalledTimes(3);
+    expect([...found]).toEqual(['k1', 'k600']);
+  });
+
+  it('fails instead of reporting no verdicts when the response has no aggregation', async () => {
+    const callKibanaApi = jest.fn().mockResolvedValue({ status: 200, headers: {}, body: {} });
+
+    await expect(
+      findKeyTagsWithVerdicts({ callKibanaApi }, ['k1'], ['az:inconclusive'])
+    ).rejects.toThrow('Key verdicts missing');
   });
 });
 
