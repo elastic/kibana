@@ -13,6 +13,8 @@ const LLM_EVALUATORS_THAT_NEED_AN_EVENT = [
   'evidence_description_quality',
   'narrative_fields_quality',
   'signal_evidence_consistency',
+  'severity_calibration',
+  'confidence_calibration',
 ];
 
 describe('createDiscoveryEvaluators', () => {

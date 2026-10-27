@@ -12,6 +12,7 @@ import {
 } from '@kbn/significant-events-schema';
 import type { CreateScenarioCriteriaLlmEvaluatorOptions } from '../../scenario_criteria/evaluators';
 import { createScenarioCriteriaLlmEvaluator } from '../../scenario_criteria/evaluators';
+import { skipWhenNoSignificantEvents } from './evidence_quality';
 
 type CalibrationCriteriaFn = CreateScenarioCriteriaLlmEvaluatorOptions['criteriaFn'];
 
@@ -19,7 +20,13 @@ const createCalibrationEvaluator = (
   name: string,
   criteria: EvaluationCriterion[],
   criteriaFn: CalibrationCriteriaFn
-): Evaluator => createScenarioCriteriaLlmEvaluator({ name, criteria, criteriaFn });
+): Evaluator =>
+  createScenarioCriteriaLlmEvaluator({
+    name,
+    criteria,
+    criteriaFn,
+    skipWhen: skipWhenNoSignificantEvents,
+  });
 
 const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   {

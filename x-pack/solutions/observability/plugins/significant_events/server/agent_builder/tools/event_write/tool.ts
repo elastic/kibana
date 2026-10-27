@@ -357,7 +357,7 @@ export function createEventsWriteTool({
       \`{ "items": [] }\`. If that missing-items argument error occurs, submit the
       already-completed object once. Retry a populated payload rejected with
       \`tool_validation_error\` once, correcting only the listed fields; do not retry any other
-      rejection, including ownership. If a completed item returns \`unknown_event_id\`,
+      rejection. If a completed item returns \`unknown_event_id\`,
       do not retry that item in this run. Do not rerun routing, choose another event, reuse the
       rejected ID, or omit the ID to turn it into a new event. Discovery must leave its rules
       unprocessed so the next cycle routes them again from fresh search results.

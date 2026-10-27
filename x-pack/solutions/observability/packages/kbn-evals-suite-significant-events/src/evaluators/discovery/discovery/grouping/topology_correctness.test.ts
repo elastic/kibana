@@ -267,6 +267,15 @@ describe('scoreContinuationTopologyStability', () => {
     expect(scoreContinuationTopologyStability([establishing, followUp]).score).toBe(1);
   });
 
+  it('does not cap a continuation that adds more than two entries', () => {
+    const establishing = makeCycle([event('e1', [], ['svc-a'], ['dep-1'])]);
+    const followUp = makeCycle([
+      event('e1', [], ['svc-a', 'svc-b', 'svc-c', 'svc-d'], ['dep-1', 'dep-2', 'dep-3', 'dep-4']),
+    ]);
+
+    expect(scoreContinuationTopologyStability([establishing, followUp]).score).toBe(1);
+  });
+
   it('matches follow-up items to establishing items by event_id, not just index 0', () => {
     const est1 = event('e1', [], ['causal-1'], []);
     const est2 = event('e2', [], ['causal-2'], []);

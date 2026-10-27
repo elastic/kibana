@@ -133,7 +133,7 @@ A continuation item adds `"event_id": "{accepted active event_id}"`; a new-event
   "items": [
     {
       "title": "...", "symptom_hypothesis": "...", "summary": "...", "severity": "...",
-      "assessment_note": "...", "confidence": <number 0.0 to 1.0>, "slugs": ["..."],
+      "assessment_note": "...", "confidence": 0.0, "slugs": ["..."],
       "signals": [
         { "type": "detection", "source_id": "...", "description": "...", "verdict": "confirms", "evidence": { "esql_query": "...", "result": "found", "time_range": { "from": "...", "to": "..." } }, "metadata": { "detection_id": "...", "rule_uuid": "..." } }
       ],
@@ -234,8 +234,9 @@ Compare one current detection against one active event using that event's compac
      and target, and the outcome its quoted fields state for the operation (failing, completing, or
      handled), if any.
      A side with no grounded topology is read the same way: the services its description names,
-     hardest hit first, and the signatures its rows state are its evidence; a service marked `not in
-     the fetched KIs` is context, never evidence.
+     hardest hit first, and the signatures its rows state are its evidence; a service listed in
+     `knowledge_gaps` is context that supports a match only alongside KI topology or matching
+     signatures (`<grounding_evidence>`), never evidence alone.
    - Accept the pair when the observed signatures and the affected operations support the same
      incident correlation or root cause. For a confirmed topology dependency, accept different local
      error signatures when one side's observed impact is a compatible downstream consequence of the
@@ -289,19 +290,20 @@ the step that produces it.
    not demonstrably tolerate is independent grounding evidence: assess it as a separate incident
    candidate rather than dismissing it with the rule hypothesis.
 4. **Decide each detection's outcome once.** Apply `<eligibility>` to its verdict and record one of:
-   Write, Recovery, or Not written. Steps 2–4 and 6 use this outcome and never re-decide it;
-   only the Step 5 challenge may change it, once. A detection that is Not written takes no part in routing,
+   Write, Recovery candidate, or Not written. Steps 2–4 and 6 use this outcome and never re-decide it,
+   except that Step 2 settles whether a Recovery candidate has a live event to recover (otherwise it
+   is Not written); only the Step 5 challenge may otherwise change it, once. A detection that is Not written takes no part in routing,
    grouping or any item; its `rule_uuid` goes to `written_rule_uuids`.
 
    | Detection | Verdict | Outcome |
    |---|---|---|
    | rule-a | `confirms` | Write |
    | rule-b | `not_checked` | Not written |
-   | rule-c | `refutes`, and rule-c is in a live event | Recovery |
+   | rule-c | `refutes` | Recovery candidate |
 
 ### Step 2: Route detections
 
-For each detection whose outcome is Write or Recovery, determine whether it continues an existing
+For each detection whose outcome is Write or Recovery candidate, determine whether it continues an existing
 active event. An accepted continuation binds the matched `event_id` and the topology its item
 carries: this detection's grounded `causal_features` and `blast_radius`, else the matched event's
 stored ones from the compact search result. Both are required on the write payload.

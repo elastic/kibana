@@ -21,6 +21,15 @@ export interface TopologyScore {
 /** Entries beyond the expected set that score as recall only (the calling service, a dependency). */
 const MAX_UNPENALIZED_EXTRA_IDS = 2;
 
+interface ExtraIdsPolicy {
+  /**
+   * Cap the score by precision when entries beyond the expected set exceed
+   * `MAX_UNPENALIZED_EXTRA_IDS`. Ground truth caps; continuation stability never does, because a
+   * continued event may legitimately grow past the establishing cycle's topology.
+   */
+  capExtraIds: boolean;
+}
+
 const topologyExpectedEvents = (
   expectedEvents: Array<Partial<SignificantEvent>>
 ): Array<Partial<SignificantEvent>> =>
@@ -33,7 +42,8 @@ const scoreIdSet = ({
   eventLabel,
   actualIds,
   expectedIds,
-}: {
+  capExtraIds,
+}: ExtraIdsPolicy & {
   field: 'causal_features' | 'blast_radius';
   eventLabel: string;
   actualIds: string[];
@@ -41,7 +51,7 @@ const scoreIdSet = ({
 }): { score: number; explanation?: string } => {
   const { recall, precision } = setPrf(actualIds, expectedIds);
   const extras = new Set(actualIds.filter((id) => !expectedIds.includes(id))).size;
-  if (extras > MAX_UNPENALIZED_EXTRA_IDS) {
+  if (capExtraIds && extras > MAX_UNPENALIZED_EXTRA_IDS) {
     return {
       score: Math.min(recall, precision),
       explanation: `${field}[${eventLabel}]: ${extras} entries beyond the expected set (more than ${MAX_UNPENALIZED_EXTRA_IDS} are penalized) P=${precision.toFixed(
@@ -65,7 +75,8 @@ const scoreTopologyFields = ({
   actual,
   expected,
   eventLabel,
-}: {
+  capExtraIds,
+}: ExtraIdsPolicy & {
   actual: Partial<SignificantEvent>;
   expected: Partial<SignificantEvent>;
   eventLabel: string;
@@ -91,6 +102,7 @@ const scoreTopologyFields = ({
       eventLabel,
       expectedIds: expectedFeatures.map((f) => f.feature_id),
       actualIds: (actual[field] ?? []).map((f) => f.feature_id),
+      capExtraIds,
     });
     eventScores.push(result.score);
     if (result.explanation) {
@@ -148,6 +160,7 @@ export const scoreTopologyCorrectness = (
       actual: match,
       expected: exp,
       eventLabel: exp.event_id ?? '?',
+      capExtraIds: true,
     });
     if (eventScore === null) {
       continue;
@@ -231,6 +244,7 @@ export const scoreContinuationTopologyStability = (
         actual: followUp,
         expected: establishing,
         eventLabel: establishing.event_id ?? 'establishing-0',
+        capExtraIds: false,
       });
       if (result.score !== null) {
         cycleScores.push(result.score);

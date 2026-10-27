@@ -150,7 +150,7 @@ Copy classification verbatim from each fetched KI:
 
 <procedure>
 
-Run steps 1–5 in order for the whole batch; steps 3 and 4 run once per rule, as step 3 says.
+Run steps 1–5 in order for the whole batch; Confirm and Profile run once per rule, as the Confirm step says.
 
 ### 1. Retrieve: get the grounding context
 
@@ -212,7 +212,7 @@ invalid: the verdict is `not_checked`, not `inconclusive`.
 
 One sample per rule proves whether its failure is happening now. Apply `<query_rules>`, plus:
 
-- **Steps 3 and 4 run once per rule**, one rule at a time, in this order:
+- **Confirm and Profile run once per rule**, one rule at a time, in this order:
   1. Send the rule's sample query alone.
   2. When it returns, read it as `<reading_log_lines>` requires and write the rule's findings.
   3. When its sample shows a failure, send the rule's profile queries in one response.
@@ -262,9 +262,12 @@ profile unmeasured.
 Reading `baseline`:
 - `days_active` of `days`: the days with a failure, out of the days with any `lines`. A day with no
   lines is no data, not a quiet day.
-- `factor`: the last complete day's `count` over the median of the complete days before it. The first
-  day and today are partial and never compared. Work it out in your findings, in order:
-  1. Drop the first and the last row; the last row left is the last complete day.
+- `factor`: the last complete day's `count` over the median of the complete days before it. The day
+  that holds the window's start and the day that holds its end (today) are partial and never
+  compared; find them by each row's `day` against the query's `time_range`, since a day with no
+  lines has no row. Work it out in your findings, in order:
+  1. Drop the row whose `day` holds the window's start and the row whose `day` holds its end, where
+     they exist; the last row left is the last complete day.
   2. Write its `count` and the earlier complete days' counts, sorted, then their median (the middle
      value, or the mean of the two middle values).
   3. `factor` is the first count over that median, never over a single earlier day.
