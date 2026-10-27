@@ -287,12 +287,30 @@ steps:${steps}
     expect(() => assertActionPolicyWorkflowBranchesOnAlertStatus(workflow)).not.toThrow();
   });
 
-  it('rejects a notification step that runs for every alert status', () => {
+  it('rejects a notification step without a status condition', () => {
     const workflow = toWorkflow(
       emailStep('notify_active', activeCondition) + emailStep('send_email')
     );
     expect(() => assertActionPolicyWorkflowBranchesOnAlertStatus(workflow)).toThrow(
-      /every alert status from step\(s\): send_email/
+      /pending or recovering alerts from step\(s\): send_email/
+    );
+  });
+
+  it.each([
+    ['a negated status condition', 'not inputs.payload.alerts[0].alert_status: active'],
+    ['a pending status condition', 'inputs.payload.alerts[0].alert_status: pending'],
+    [
+      'a condition that also admits recovering alerts',
+      'inputs.payload.alerts[0].alert_status: (inactive or recovering)',
+    ],
+  ])('rejects a notification step gated by %s', (_label, condition) => {
+    const workflow = toWorkflow(
+      emailStep('notify_active', activeCondition) +
+        emailStep('notify_resolved', inactiveCondition) +
+        emailStep('notify_other', condition)
+    );
+    expect(() => assertActionPolicyWorkflowBranchesOnAlertStatus(workflow)).toThrow(
+      /pending or recovering alerts from step\(s\): notify_other/
     );
   });
 
@@ -304,7 +322,7 @@ steps:${steps}
     steps:${emailStep('notify_active').replace(/\n/g, '\n    ')}
     else:${emailStep('notify_resolved').replace(/\n/g, '\n    ')}`);
     expect(() => assertActionPolicyWorkflowBranchesOnAlertStatus(workflow)).toThrow(
-      /every alert status from step\(s\): notify_resolved/
+      /pending or recovering alerts from step\(s\): notify_resolved/
     );
   });
 

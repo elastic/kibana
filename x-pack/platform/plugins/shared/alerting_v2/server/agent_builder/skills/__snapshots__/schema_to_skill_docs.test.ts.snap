@@ -268,8 +268,10 @@ on the alert event). Columns depend on the rule query, so they are not in the sc
 
 ## Status Branching
 
-The action policy dispatches on every alert status change (\`pending\`, \`active\`, \`recovering\`,
-\`inactive\`). The notification workflow decides which statuses send a message:
+With \`per_alert\` grouping and the \`on_status_change\` throttle (the default policy), the action
+policy dispatches on every alert status change (\`pending\`, \`active\`, \`recovering\`, \`inactive\`).
+Other grouping and throttle combinations can suppress status changes that land inside the
+throttle interval. The notification workflow decides which statuses send a message:
 
 - \`active\`: send an alert email with the query columns from \`alert.data.*\`.
 - \`inactive\`: send a distinct \`[Resolved]\` email.
@@ -305,7 +307,7 @@ steps:
     with:
       to:
         - <user-provided-email>
-      subject: \\"[Active] {{ inputs.payload.rules[inputs.payload.alerts[0].rule_id].name | default: \\\\\\"<rule-name>\\\\\\" }}\\"
+      subject: \\"{% assign active_alert = inputs.payload.alerts | where: 'alert_status', 'active' | first %}[Active] {{ inputs.payload.rules[active_alert.rule_id].name | default: \\\\\\"<rule-name>\\\\\\" }}\\"
       message: |
         {% for alert in inputs.payload.alerts %}{% if alert.alert_status == 'active' %}
         - Rule: {{ inputs.payload.rules[alert.rule_id].name | default: \\"unknown\\" }}
@@ -320,7 +322,7 @@ steps:
     with:
       to:
         - <user-provided-email>
-      subject: \\"[Resolved] {{ inputs.payload.rules[inputs.payload.alerts[0].rule_id].name | default: \\\\\\"<rule-name>\\\\\\" }}\\"
+      subject: \\"{% assign resolved_alert = inputs.payload.alerts | where: 'alert_status', 'inactive' | first %}[Resolved] {{ inputs.payload.rules[resolved_alert.rule_id].name | default: \\\\\\"<rule-name>\\\\\\" }}\\"
       message: |
         {% for alert in inputs.payload.alerts %}{% if alert.alert_status == 'inactive' %}
         - Rule: {{ inputs.payload.rules[alert.rule_id].name | default: \\"unknown\\" }}

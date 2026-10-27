@@ -244,11 +244,23 @@ export const assertActionPolicyWorkflowLinksAlertDetails = (workflow: ParsedWork
 const ALERT_STATUS_PATTERN = /\balert_status\b/;
 const ACTIVE_STATUS_PATTERN = /\bactive\b/;
 const INACTIVE_STATUS_PATTERN = /\binactive\b/;
+const SILENT_STATUS_PATTERN = /\b(pending|recovering)\b/;
+const NEGATION_PATTERN = /\bnot\b|!=/;
 
 interface StatusBranches {
   conditions: string[];
+  gates: string[];
   ungatedConnectorSteps: string[];
 }
+
+/**
+ * A notification gate selects `active` or `inactive` alerts only: it does not negate the status
+ * or name `pending` / `recovering`, either of which would let those alerts through.
+ */
+const isNotificationGate = (condition: string): boolean =>
+  (ACTIVE_STATUS_PATTERN.test(condition) || INACTIVE_STATUS_PATTERN.test(condition)) &&
+  !SILENT_STATUS_PATTERN.test(condition) &&
+  !NEGATION_PATTERN.test(condition);
 
 const toRecord = (value: unknown): Record<string, unknown> | undefined =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -257,8 +269,8 @@ const toRecord = (value: unknown): Record<string, unknown> | undefined =>
 
 /**
  * Collects `alert_status` conditions from step-level `if` and `type: if` `condition`, and the
- * connector steps not nested under one. An `else` branch is not gated by its parent's condition,
- * because it also runs for every status the condition excludes.
+ * connector steps not nested under a notification gate. An `else` branch is not gated by its
+ * parent's condition, because it also runs for every status the condition excludes.
  */
 const collectStatusBranches = (steps: unknown, gated: boolean, branches: StatusBranches): void => {
   if (!Array.isArray(steps)) {
@@ -273,9 +285,11 @@ const collectStatusBranches = (steps: unknown, gated: boolean, branches: StatusB
       (condition): condition is string =>
         typeof condition === 'string' && ALERT_STATUS_PATTERN.test(condition)
     );
+    const gates = statusConditions.filter(isNotificationGate);
     branches.conditions.push(...statusConditions);
+    branches.gates.push(...gates);
 
-    const isGated = gated || statusConditions.length > 0;
+    const isGated = gated || gates.length > 0;
     if (step['connector-id'] !== undefined && !isGated) {
       branches.ungatedConnectorSteps.push(String(step.name));
     }
@@ -290,20 +304,20 @@ const isInterpolatedKqlCondition = (condition: string): boolean =>
 
 /**
  * Asserts that the notification workflow branches on `alert_status`: every connector step is
- * gated by an `alert_status` condition, one branch handles `active`, another `inactive`, and no
- * condition interpolates `{{ }}` into KQL.
+ * gated to `active` or `inactive` alerts, one gate handles each, and no condition interpolates
+ * `{{ }}` into KQL.
  */
 export const assertActionPolicyWorkflowBranchesOnAlertStatus = (workflow: ParsedWorkflow): void => {
-  const branches: StatusBranches = { conditions: [], ungatedConnectorSteps: [] };
+  const branches: StatusBranches = { conditions: [], gates: [], ungatedConnectorSteps: [] };
   collectStatusBranches(workflow.steps, false, branches);
-  const { conditions, ungatedConnectorSteps } = branches;
+  const { conditions, gates, ungatedConnectorSteps } = branches;
 
   if (ungatedConnectorSteps.length > 0) {
     throw new Error(
-      `Generated workflow sends notifications for every alert status from step(s): ${ungatedConnectorSteps.join(
+      `Generated workflow can notify on pending or recovering alerts from step(s): ${ungatedConnectorSteps.join(
         ', '
-      )}. Gate each notification step with an \`alert_status\` condition so pending and ` +
-        'recovering alerts send nothing.'
+      )}. Gate each notification step with a condition that selects only \`active\` or ` +
+        '`inactive` alerts.'
     );
   }
 
@@ -316,10 +330,8 @@ export const assertActionPolicyWorkflowBranchesOnAlertStatus = (workflow: Parsed
     );
   }
 
-  const branchesOnActive = conditions.some((condition) => ACTIVE_STATUS_PATTERN.test(condition));
-  const branchesOnInactive = conditions.some((condition) =>
-    INACTIVE_STATUS_PATTERN.test(condition)
-  );
+  const branchesOnActive = gates.some((gate) => ACTIVE_STATUS_PATTERN.test(gate));
+  const branchesOnInactive = gates.some((gate) => INACTIVE_STATUS_PATTERN.test(gate));
   if (!branchesOnActive || !branchesOnInactive) {
     throw new Error(
       'Generated workflow does not branch on both `active` and `inactive` alert statuses. ' +

@@ -219,7 +219,7 @@ Do not add this reminder for catch-all policies, for policies that route only by
 
 After creating the defaults, briefly mention:
 - They can use a different connector type (Slack, PagerDuty, etc.) — offer to use \`platform.workflows.get_connectors\` to explore.
-- They can also be notified on \`pending\` or \`recovering\` alerts — the policy dispatches every status change, so this only needs another branch in the workflow.
+- They can also be notified on \`pending\` or \`recovering\` alerts — with \`per_alert\` grouping and the \`on_status_change\` throttle, the policy dispatches every status change, so this only needs another branch in the workflow.
 - They can change throttle or grouping — consult the [action-policy-throttle-strategies reference](./references/action-policy-throttle-strategies.md) and the [action-policy-throttle-grouping-compatibility reference](./references/action-policy-throttle-grouping-compatibility.md).
 - They can share this policy with other rules instead of creating one policy per rule — consult the [multi-rule action policies reference](./references/action-policy-multi-rule.md).
 
