@@ -96,7 +96,7 @@ describe('getHandlerWrapper', () => {
     });
   });
 
-  it('logs a conversationBusy refusal as a warning and returns the active execution id', async () => {
+  it('logs a conversationBusy refusal at debug and returns the active execution id', async () => {
     const handler = wrapHandler(async () => {
       throw createConversationBusyError({
         conversationId: 'conversation-1',
@@ -111,7 +111,7 @@ describe('getHandlerWrapper', () => {
       message: 'Conversation conversation-1 already has an execution in progress',
       attributes: { trace_id: undefined, active_execution_id: 'exec-1' },
     });
-    expect(logger.warn).toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
   });
 
