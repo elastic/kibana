@@ -14,8 +14,6 @@ import { BoostRequestError } from './errors';
 const BYTES_PER_GB = 1e9;
 const MS_PER_HOUR = 3_600_000;
 
-const isUserFacing = (name: string) => !name.startsWith('.');
-
 /** Reads each index's dataset size, including data stream backing indices. */
 const getDatasetSizes = async (client: ElasticsearchClient): Promise<Map<string, number>> => {
   // Serverless keeps data in object storage, so the local store size is always 0; the dataset size
@@ -36,25 +34,27 @@ const getDatasetSizes = async (client: ElasticsearchClient): Promise<Map<string,
 interface DataStreamDetails {
   /** Its backing indices, in order with the write index last. */
   backingIndices: string[];
+  hidden: boolean;
   lifecycle?: BoostDataLifecycle;
 }
 
-/** Reads each data stream's backing indices and lifecycle. */
+/** Reads each data stream's backing indices, whether it's hidden, and its lifecycle. */
 const getDataStreamDetails = async (
   client: ElasticsearchClient
 ): Promise<Map<string, DataStreamDetails>> => {
   const { data_streams: dataStreams } = await client.indices.getDataStream({
     name: '*',
-    expand_wildcards: 'open',
+    expand_wildcards: ['open', 'hidden'],
   });
   return new Map(
-    dataStreams.map(({ name, indices, lifecycle }): [string, DataStreamDetails] => {
+    dataStreams.map(({ name, indices, hidden, lifecycle }): [string, DataStreamDetails] => {
       // The effective retention accounts for the project's default and maximum retention.
       const retention = lifecycle?.effective_retention ?? lifecycle?.data_retention;
       return [
         name,
         {
           backingIndices: indices.map(({ index_name: index }) => index),
+          hidden,
           lifecycle: lifecycle && {
             enabled: lifecycle.enabled !== false,
             data_retention: typeof retention === 'string' ? retention : undefined,
@@ -82,14 +82,15 @@ const getRolloverTimes = async (client: ElasticsearchClient): Promise<Map<string
 const orEmpty = <T>(promise: Promise<Map<string, T>>) => promise.catch(() => new Map<string, T>());
 
 /**
- * Lists the project's open, non-hidden regular indices and data streams, with their sizes, and each
- * data stream's lifecycle and data by age. Data stream backing indices are excluded, since boost
- * rules apply to the data stream as a whole.
+ * Lists the project's open regular indices and data streams that boost rules apply to, with their
+ * sizes, whether they're hidden, and each data stream's lifecycle and data by age. As in
+ * Elasticsearch, that's all but system ones, hidden or not. Data stream backing indices are
+ * excluded, since boost rules apply to the data stream as a whole.
  */
 export const getDataSources = async (client: ElasticsearchClient): Promise<BoostDataSource[]> => {
   const [{ indices, data_streams: dataStreams }, sizes, dataStreamDetails, rolloverTimes] =
     await Promise.all([
-      client.indices.resolveIndex({ name: '*', expand_wildcards: 'open' }),
+      client.indices.resolveIndex({ name: '*', expand_wildcards: ['open', 'hidden'] }),
       orEmpty(getDatasetSizes(client)),
       orEmpty(getDataStreamDetails(client)),
       orEmpty(getRolloverTimes(client)),
@@ -109,28 +110,44 @@ export const getDataSources = async (client: ElasticsearchClient): Promise<Boost
   const getSampleSize = (name: string) =>
     name in SAMPLE_DATA_SIZES_GB ? SAMPLE_DATA_SIZES_GB[name] * BYTES_PER_GB : undefined;
 
+  // A system data stream's backing indices are system indices, which the resolved data streams
+  // don't say of themselves.
+  const systemDataStreams = new Set(
+    indices.flatMap(({ data_stream: dataStream, attributes }) =>
+      dataStream && attributes.includes('system') ? [dataStream] : []
+    )
+  );
+
   return [
     ...indices
-      .filter(({ name, data_stream: dataStream }) => !dataStream && isUserFacing(name))
+      .filter(
+        ({ data_stream: dataStream, attributes }) => !dataStream && !attributes.includes('system')
+      )
       .map(
-        ({ name }): BoostDataSource => ({
+        ({ name, attributes }): BoostDataSource => ({
           name,
           type: 'index',
           size_in_bytes: getSampleSize(name) ?? sizes.get(name) ?? 0,
+          ...(attributes.includes('hidden') && { hidden: true }),
         })
       ),
     ...dataStreams
-      .filter(({ name }) => isUserFacing(name))
+      .filter(({ name }) => !systemDataStreams.has(name))
       .map(({ name }): BoostDataSource => {
+        const details = dataStreamDetails.get(name);
         const sampleSize = getSampleSize(name);
         const dataAges =
           sampleSize === undefined ? getDataAges(name) : getSampleDataAges(sampleSize);
+        // Without its details, a data stream is taken as hidden by the dot that hidden ones
+        // conventionally start with.
+        const isHidden = details?.hidden ?? name.startsWith('.');
         return {
           name,
           type: 'data_stream',
           size_in_bytes: dataAges.reduce((total, { size_in_bytes: bytes }) => total + bytes, 0),
-          lifecycle: dataStreamDetails.get(name)?.lifecycle,
+          lifecycle: details?.lifecycle,
           data_ages: dataAges,
+          ...(isHidden && { hidden: true }),
         };
       }),
   ].sort((a, b) => a.name.localeCompare(b.name));

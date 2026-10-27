@@ -74,7 +74,8 @@ export const BoostIndexDetails = ({ indexName, dataStream }: BoostIndexDetailsPr
   if (!rule || !profile) {
     return <EuiEmptyPrompt title={<h2>{NO_RULE_LABEL}</h2>} titleSize="xs" />;
   }
-  // The timeline needs the data stream's data by age, which the boost app has for user-facing ones.
+  // The timeline needs the data stream's data by age, which the boost app has for every data stream
+  // that rules apply to, hidden or not.
   const dataStreamSource = dataSources.find(
     ({ name, type }) => type === 'data_stream' && name === dataStream
   );

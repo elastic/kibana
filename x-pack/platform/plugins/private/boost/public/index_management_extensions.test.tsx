@@ -60,6 +60,13 @@ const state: BoostState = {
         { age_hours: 24 * 30, size_in_bytes: 2e9 },
       ],
     },
+    {
+      name: '.alert-actions',
+      type: 'data_stream',
+      size_in_bytes: 1e6,
+      hidden: true,
+      data_ages: [{ age_hours: 2, size_in_bytes: 1e6 }],
+    },
   ],
 };
 
@@ -266,6 +273,17 @@ describe('Index Management extensions', () => {
       // Elastic manages the profile, so only the rule can change.
       expect(screen.queryByTestId('boostIndexTabEditProfile')).not.toBeInTheDocument();
       expect(screen.getByTestId('boostIndexTabEditRule')).toBeInTheDocument();
+    });
+
+    it("shows a hidden data stream's timeline, as rules apply to it all the same", async () => {
+      const { tab } = setup();
+
+      renderTab(tab, { name: '.ds-.alert-actions-000001', data_stream: '.alert-actions' });
+
+      expect(await screen.findByTestId('boostIndexTabRule')).toHaveTextContent(
+        'Data stream.alert-actions'
+      );
+      expect(screen.getByTestId('boostAgeTimeline')).toBeInTheDocument();
     });
   });
 

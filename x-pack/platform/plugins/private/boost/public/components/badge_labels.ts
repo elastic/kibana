@@ -16,3 +16,8 @@ export const MANAGED_BADGE_LABEL = i18n.translate('xpack.boost.profilesTab.manag
 export const DEFAULT_BADGE_LABEL = i18n.translate('xpack.boost.rulesTab.defaultBadge', {
   defaultMessage: 'Default',
 });
+
+/** Marks a hidden index or data stream, as Index Management does. */
+export const HIDDEN_BADGE_LABEL = i18n.translate('xpack.boost.hiddenBadge', {
+  defaultMessage: 'Hidden',
+});

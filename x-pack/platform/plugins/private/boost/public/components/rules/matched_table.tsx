@@ -38,6 +38,7 @@ import { useTablePage } from '../use_table_page';
 import { useShowsEstimates } from '../../prototype/estimates_setting';
 import { EmptyCell } from '../empty_cell';
 import { formatDataSourceCount, formatMaxAge } from '../format';
+import { IncludeHiddenSwitch } from '../hidden_data';
 import { TargetName } from './target_name';
 
 /** Whether the rule applies to a match, or a higher-ranked rule outranks it. */
@@ -224,7 +225,8 @@ interface MatchedTableProps {
  * a data stream's retention, and each match's data and search cost at rest and at peak. Those a higher-ranked rule
  * applies to instead are struck through, with that rule in a column that only shows when there are
  * any. A search box filters them by name, and a filter group by whether the rule applies to them,
- * with how many of the search results each would show.
+ * with how many of the search results each would show. Hidden matches are left out, and counted as
+ * such, until a switch includes them.
  */
 export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTableProps) => {
   const { euiTheme } = useEuiTheme();
@@ -237,6 +239,7 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
   const showsSizeBars = tableWidth >= SIZE_BARS_MIN_TABLE_WIDTH;
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<MatchStatus>();
+  const [includesHidden, setIncludesHidden] = useState(false);
   const isDataStreams = type === 'data_streams';
 
   const rows = useMemo(
@@ -263,19 +266,25 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
   const hasOutranked = rows.some(({ outrankedBy }) => outrankedBy !== undefined);
   const getStatus = ({ outrankedBy }: MatchedRow): MatchStatus =>
     outrankedBy === undefined ? 'applied' : 'outranked';
+  // Whether to offer the switch that includes hidden matches, which the search doesn't change.
+  const hasHidden = rows.some(({ hidden }) => hidden);
   const normalizedQuery = query.trim().toLowerCase();
-  const searched = rows.filter(({ name }) => name.toLowerCase().includes(normalizedQuery));
+  const searchedAll = rows.filter(({ name }) => name.toLowerCase().includes(normalizedQuery));
+  const searched = includesHidden ? searchedAll : searchedAll.filter(({ hidden }) => !hidden);
   // Each filter counts what it would show with the current search.
   const counts: Record<MatchStatus, number> = { applied: 0, outranked: 0 };
   searched.forEach((dataSource) => counts[getStatus(dataSource)]++);
-  const items =
-    status === undefined
-      ? searched
-      : searched.filter((dataSource) => getStatus(dataSource) === status);
+  const isShownByStatus = (dataSource: MatchedRow) =>
+    status === undefined || getStatus(dataSource) === status;
+  const items = searched.filter(isShownByStatus);
+  // Hidden matches that the search and filter would show, but the switch leaves out.
+  const hiddenNotShown = includesHidden
+    ? 0
+    : searchedAll.filter((dataSource) => dataSource.hidden && isShownByStatus(dataSource)).length;
 
   // A new search or filter starts again at the first page.
   const { pageIndex, pageSize, pagination, onTableChange } = useTablePage<MatchedRow>(
-    `${query}|${status}`,
+    `${query}|${status}|${includesHidden}`,
     items.length
   );
 
@@ -296,8 +305,13 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
           })
         : i18n.translate('xpack.boost.matchedTable.indexColumn', { defaultMessage: 'Index' }),
       sortable: true,
-      render: (name: string, { type: dataSourceType, outrankedBy }: MatchedRow) => (
-        <TargetName name={name} supersededBy={outrankedBy} linkedAs={dataSourceType} />
+      render: (name: string, { type: dataSourceType, outrankedBy, hidden }: MatchedRow) => (
+        <TargetName
+          name={name}
+          supersededBy={outrankedBy}
+          linkedAs={dataSourceType}
+          isHidden={hidden}
+        />
       ),
     },
     // Only when a higher-ranked rule applies to any of the matches instead, which it names. Like
@@ -378,9 +392,10 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
       : []),
   ];
 
-  // Above the table: the search, and the filters whose counts follow it.
+  // Above the table: the search, the filters whose counts follow it, and the switch that includes
+  // hidden matches, when there are any.
   const toolbar = (
-    <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
       <EuiFlexItem css={{ minInlineSize: '12em' }}>
         <EuiFieldSearch
           compressed
@@ -413,8 +428,26 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
           ))}
         </EuiFilterGroup>
       </EuiFlexItem>
+      {hasHidden && type && (
+        <EuiFlexItem grow={false}>
+          <IncludeHiddenSwitch
+            type={type}
+            checked={includesHidden}
+            onChange={setIncludesHidden}
+            data-test-subj="boostMatchedIncludeHidden"
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
+
+  const formatTotal = (count: number) =>
+    hiddenNotShown > 0
+      ? i18n.translate('xpack.boost.matchedTable.totalWithHidden', {
+          defaultMessage: '{dataSources} ({hiddenCount} hidden not shown)',
+          values: { dataSources: formatDataSourceCount(type, count), hiddenCount: hiddenNotShown },
+        })
+      : formatDataSourceCount(type, count);
 
   return (
     <DetailsSection
@@ -437,7 +470,7 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
             pageIndex={pageIndex}
             pageSize={pageSize}
             total={items.length}
-            formatTotal={(count) => formatDataSourceCount(type, count)}
+            formatTotal={formatTotal}
             data-test-subj="boostMatchedCount"
           />
         </>
@@ -458,6 +491,14 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
               ? i18n.translate('xpack.boost.matchedTable.noMatches', {
                   defaultMessage: 'This rule matches nothing yet.',
                 })
+              : hiddenNotShown > 0
+              ? isDataStreams
+                ? i18n.translate('xpack.boost.matchedTable.onlyHiddenDataStreams', {
+                    defaultMessage: 'Only hidden data streams match. Include them to see them.',
+                  })
+                : i18n.translate('xpack.boost.matchedTable.onlyHiddenIndices', {
+                    defaultMessage: 'Only hidden indices match. Include them to see them.',
+                  })
               : isDataStreams
               ? i18n.translate('xpack.boost.matchedTable.noDataStreamsFound', {
                   defaultMessage: 'No data streams match your search or filter.',

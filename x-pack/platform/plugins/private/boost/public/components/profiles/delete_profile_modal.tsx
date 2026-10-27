@@ -16,6 +16,7 @@ import { formatDataSourceCount } from '../format';
 import { ChangeTable } from '../change_table';
 import { MODAL_WIDTH } from '../modal_width';
 import { RuleChangeList } from '../rule_change_list';
+import { TargetName } from '../rules/target_name';
 
 interface DeleteProfileModalProps {
   profile: BoostProfile;
@@ -29,6 +30,7 @@ interface DeleteProfileModalProps {
 
 interface AffectedDataSource {
   name: string;
+  isHidden?: boolean;
   /** The rule that applies once the deleted rules are gone, and its profile. */
   nextRule?: BoostRule;
 }
@@ -72,6 +74,7 @@ export const DeleteProfileModal = ({
         .filter((dataSource) => resolveRule(dataSource, rules, profilesByName)?.name === rule.name)
         .map((dataSource) => ({
           name: dataSource.name,
+          isHidden: dataSource.hidden,
           nextRule: resolveRule(dataSource, remainingRules, profilesByName),
         }))
         .sort((a, b) => a.name.localeCompare(b.name)),
@@ -186,9 +189,13 @@ export const DeleteProfileModal = ({
                       defaultMessage: 'New profile',
                     }),
                   ]}
-                  rows={affected.map(({ name: dataSourceName, nextRule }) => ({
+                  rows={affected.map(({ name: dataSourceName, isHidden, nextRule }) => ({
                     id: dataSourceName,
-                    cells: [dataSourceName, nextRule?.name, nextRule?.boost_profile],
+                    cells: [
+                      <TargetName key="name" name={dataSourceName} isHidden={isHidden} />,
+                      nextRule?.name,
+                      nextRule?.boost_profile,
+                    ],
                   }))}
                 />
               ),

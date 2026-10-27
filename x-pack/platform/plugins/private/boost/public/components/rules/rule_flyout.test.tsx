@@ -525,6 +525,8 @@ describe('RuleFlyout pattern matches', () => {
 
     expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('1 exact match');
     expect(screen.getByTestId('boostRulePatternMatches')).toHaveTextContent('catalog-fall');
+    // No index is hidden, so there's nothing to include.
+    expect(screen.queryByTestId('boostRuleIncludeHidden')).not.toBeInTheDocument();
   });
 
   it('highlights the parts of each match that the pattern spells out', async () => {
@@ -821,6 +823,74 @@ describe('RuleFlyout superseded targets', () => {
     await userEvent.click(
       within(screen.getByTestId('boostRulePicker')).getByRole('option', { name: /products/ })
     );
+    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('1 selected');
+  });
+});
+
+describe('RuleFlyout hidden data sources', () => {
+  const indices = state.data_sources;
+  beforeEach(() => {
+    state.data_sources = [
+      ...indices,
+      { name: '.catalog-archive', type: 'index', size_in_bytes: 1e9, hidden: true },
+    ];
+  });
+  afterEach(() => {
+    state.data_sources = indices;
+  });
+
+  const renderNewRule = () =>
+    render(
+      <IntlProvider locale="en">
+        <RuleFlyout initialProfileName="zeta-search" onClose={jest.fn()} />
+      </IntlProvider>
+    );
+
+  it('counts hidden matches, but only lists them once they are included', async () => {
+    renderNewRule();
+
+    await userEvent.type(screen.getByTestId('boostRulePattern'), '*');
+
+    // The rule would apply to the hidden index all the same.
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('3 exact matches');
+    const matches = within(screen.getByRole('region', { name: 'Exact matches' }));
+    expect(matches.queryByText('.catalog-archive')).not.toBeInTheDocument();
+    expect(matches.getByTestId('boostRuleHiddenNotShown')).toHaveTextContent(
+      '1 hidden index not shown'
+    );
+
+    await userEvent.click(screen.getByTestId('boostRuleIncludeHidden'));
+
+    expect(matches.getByText('.catalog-archive')).toBeInTheDocument();
+    expect(matches.getByTestId('boostHiddenBadge')).toBeInTheDocument();
+    expect(matches.queryByTestId('boostRuleHiddenNotShown')).not.toBeInTheDocument();
+  });
+
+  it('counts a pattern that only matches hidden data sources as matching', async () => {
+    renderNewRule();
+
+    await userEvent.type(screen.getByTestId('boostRulePattern'), '.catalog-*');
+
+    expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent('1 exact match');
+    expect(screen.getByRole('region', { name: 'Exact matches' })).toHaveTextContent(
+      '1 hidden index not shown'
+    );
+  });
+
+  it('leaves hidden data sources out of the list to select from until included, except selected ones', async () => {
+    renderNewRule();
+    await userEvent.click(screen.getByText('Select indices'));
+    const picker = within(screen.getByTestId('boostRulePicker'));
+    expect(picker.queryByRole('option', { name: /\.catalog-archive/ })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('boostRuleIncludeHidden'));
+    const option = picker.getByRole('option', { name: /\.catalog-archive/ });
+    expect(within(option).getByTestId('boostHiddenBadge')).toBeInTheDocument();
+    await userEvent.click(option);
+
+    // Selected, it stays in view once hidden ones are left out again.
+    await userEvent.click(screen.getByTestId('boostRuleIncludeHidden'));
+    expect(picker.getByRole('option', { name: /\.catalog-archive/ })).toBeInTheDocument();
     expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('1 selected');
   });
 });

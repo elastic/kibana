@@ -151,6 +151,8 @@ const mockState: BoostState = {
     { name: 'catalog-fall', type: 'index', size_in_bytes: 4e9 },
     { name: 'catalog-spring', type: 'index', size_in_bytes: 2e9 },
     { name: 'products', type: 'index', size_in_bytes: 1e9 },
+    // Only the default rule matches it.
+    { name: '.catalog-archive', type: 'index', size_in_bytes: 1e9, hidden: true },
     {
       name: 'logs-app',
       type: 'data_stream',
@@ -465,6 +467,37 @@ describe('RuleDetailsPage', () => {
 
     await userEvent.type(matched.getByRole('searchbox', { name: 'Search indices' }), 'products');
     expect(matched.getByText('No indices match your search or filter.')).toBeInTheDocument();
+    // Nothing the rule matches is hidden, so there's nothing to include.
+    expect(matched.queryByTestId('boostMatchedIncludeHidden')).not.toBeInTheDocument();
+  });
+
+  it('leaves hidden matches out until they are included, saying how many', async () => {
+    renderAt(`/rules/${DEFAULT_INDICES_RULE_NAME}`);
+    const matched = within(screen.getByTestId('boostRuleMatched'));
+
+    // The rule applies to the hidden index all the same.
+    expect(screen.getByTestId('boostRuleUsage')).toHaveTextContent('Applies to2 indices');
+    expect(matched.queryByText('.catalog-archive')).not.toBeInTheDocument();
+    expect(matched.getByTestId('boostMatchedCount')).toHaveTextContent(
+      'Showing 1–3 of 3 indices (1 hidden not shown)'
+    );
+
+    await userEvent.click(matched.getByTestId('boostMatchedIncludeHidden'));
+
+    const row = matched.getByText('.catalog-archive').closest('tr') as HTMLElement;
+    expect(within(row).getByTestId('boostHiddenBadge')).toHaveTextContent('Hidden');
+    expect(matched.getByTestId('boostMatchedCount')).toHaveTextContent('Showing 1–4 of 4 indices');
+  });
+
+  it('says when only hidden matches are left by the search', async () => {
+    renderAt(`/rules/${DEFAULT_INDICES_RULE_NAME}`);
+    const matched = within(screen.getByTestId('boostRuleMatched'));
+
+    await userEvent.type(matched.getByRole('searchbox', { name: 'Search indices' }), 'archive');
+
+    expect(
+      matched.getByText('Only hidden indices match. Include them to see them.')
+    ).toBeInTheDocument();
   });
 
   it("shows a data streams rule's data in each phase of its profile", () => {

@@ -50,7 +50,7 @@ const renderModal = (ruleName: string) =>
         profiles={BUILTIN_PROFILES}
         dataSources={[
           { name: 'catalog-fall', type: 'index', size_in_bytes: 1e9 },
-          { name: 'catalog-spring', type: 'index', size_in_bytes: 1e9 },
+          { name: 'catalog-spring', type: 'index', size_in_bytes: 1e9, hidden: true },
         ]}
         onClose={jest.fn()}
       />
@@ -77,7 +77,8 @@ describe('DeleteRuleModal', () => {
       )
     ).toEqual([
       ['catalog-fall', 'fall', BUILTIN_INDICES_PROFILE_NAMES.on_demand],
-      ['catalog-spring', DEFAULT_INDICES_RULE_NAME, DEFAULT_RULE_PROFILES.indices_profile],
+      // A hidden index falls back all the same, so it's listed, and marked.
+      ['catalog-springHidden', DEFAULT_INDICES_RULE_NAME, DEFAULT_RULE_PROFILES.indices_profile],
     ]);
   });
 

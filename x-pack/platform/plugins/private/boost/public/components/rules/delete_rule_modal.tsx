@@ -22,6 +22,7 @@ import { useDeleteRule } from '../../hooks/use_boost_state';
 import { ChangeTable } from '../change_table';
 import { formatDataSourceCount } from '../format';
 import { MODAL_WIDTH } from '../modal_width';
+import { TargetName } from './target_name';
 
 interface DeleteRuleModalProps {
   ruleName: string;
@@ -36,6 +37,7 @@ interface DeleteRuleModalProps {
 
 interface AffectedDataSource {
   name: string;
+  isHidden?: boolean;
   /** The rule that applies once this one is deleted. */
   nextRule?: BoostRule;
 }
@@ -68,6 +70,7 @@ export const DeleteRuleModal = ({
         .map(
           (dataSource): AffectedDataSource => ({
             name: dataSource.name,
+            isHidden: dataSource.hidden,
             nextRule: resolveRule(dataSource, remainingRules, profilesByName),
           })
         )
@@ -150,9 +153,13 @@ export const DeleteRuleModal = ({
                   defaultMessage: 'New profile',
                 }),
               ]}
-              rows={affected.map(({ name, nextRule }) => ({
+              rows={affected.map(({ name, isHidden, nextRule }) => ({
                 id: name,
-                cells: [name, nextRule?.name, nextRule?.boost_profile],
+                cells: [
+                  <TargetName key="name" name={name} isHidden={isHidden} />,
+                  nextRule?.name,
+                  nextRule?.boost_profile,
+                ],
               }))}
               // Long lists scroll, keeping the modal's buttons in view.
               maxHeight={euiTheme.base * 15}

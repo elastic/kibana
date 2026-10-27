@@ -57,6 +57,7 @@ import { TargetStatus } from './target_status';
 import type { TargetPreview } from './pattern_matches';
 import { PatternMatchStatus, PatternMatches, getPartialPattern } from './pattern_matches';
 import { FLYOUT_WIDTH } from '../flyout_width';
+import { HiddenBadge, IncludeHiddenSwitch } from '../hidden_data';
 import { ProfileFlyoutContent } from '../profiles/profile_flyout';
 import { useBoostState, useCreateRule, useUpdateRule } from '../../hooks/use_boost_state';
 import { PROFILE_TYPE_LABELS } from '../format';
@@ -137,6 +138,7 @@ const PROFILE_HELP_TEXT = i18n.translate('xpack.boost.ruleForm.profileDescriptio
 interface PickOptionData {
   /** A higher-ranked rule that keeps the data source if this rule targets it. */
   supersededBy?: string;
+  isHidden?: boolean;
 }
 
 const getInitialDraft = (
@@ -183,6 +185,8 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
   const [isEditingEstimateInput, setIsEditingEstimateInput] = useState(false);
   // Text typed to search the list to select from, which sizes the list to what it shows.
   const [pickSearch, setPickSearch] = useState('');
+  // Whether the pattern's matches and the list to select from include hidden data sources.
+  const [includesHidden, setIncludesHidden] = useState(false);
   // Set when leaving the profile form, so the link that opened it gets focus back.
   const shouldFocusCreateProfileRef = useRef(false);
   const createProfileLinkRef = useCallback((element: HTMLElement | null) => {
@@ -241,6 +245,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
         return {
           name: dataSource.name,
           overriddenBy: winner && winner !== previewRule ? winner.name : undefined,
+          isHidden: dataSource.hidden,
         };
       });
   };
@@ -427,13 +432,15 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
     return winner && winner !== targetingRule ? winner.name : undefined;
   };
 
-  const pickOptions: Array<EuiSelectableOption<PickOptionData>> = typedDataSources.map(
-    (dataSource) => {
+  // Hidden data sources are left out until included, except selected ones, which stay in view.
+  const pickOptions: Array<EuiSelectableOption<PickOptionData>> = typedDataSources
+    .filter(({ name, hidden }) => includesHidden || !hidden || draft.picked.includes(name))
+    .map((dataSource) => {
       const supersededBy = getSupersedingRule(dataSource);
       return {
         label: dataSource.name,
         checked: draft.picked.includes(dataSource.name) ? 'on' : undefined,
-        data: { supersededBy },
+        data: { supersededBy, isHidden: dataSource.hidden },
         // A list option can't hold a focusable tooltip, so the option shows the explanation in its
         // own, on hover and when it's reached with the keyboard. EUI places it to the left.
         append: supersededBy && (
@@ -443,8 +450,8 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
         ),
         toolTipContent: supersededBy && getSupersedingDescription(supersededBy),
       };
-    }
-  );
+    });
+  const hasHidden = typedDataSources.some(({ hidden }) => hidden);
 
   // The list grows with what the search shows, up to the same height as the pattern's matches.
   // EUI only sizes a list to its options up to seven of them, so the height is set here.
@@ -756,7 +763,8 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                 pattern={pattern}
                 exactMatches={patternPreview}
                 partialMatches={partialPreview}
-                names={typedDataSources.map(({ name }) => name)}
+                dataSources={typedDataSources}
+                includesHidden={includesHidden}
                 maxHeight={PREVIEW_MAX_HEIGHT}
               />
             </>
@@ -790,19 +798,32 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                 options={pickOptions}
                 // A name that a higher-ranked rule would keep is struck through and disabled,
                 // whether or not it's selected, until this rule's priority outranks that rule.
-                renderOption={({ label, supersededBy }, searchValue) => (
-                  <EuiHighlight
-                    search={searchValue}
-                    css={
-                      supersededBy
-                        ? { textDecoration: 'line-through', color: euiTheme.colors.textDisabled }
-                        : undefined
-                    }
-                    data-test-subj={supersededBy ? 'boostSupersededTarget' : undefined}
-                  >
-                    {label}
-                  </EuiHighlight>
-                )}
+                renderOption={({ label, supersededBy, isHidden }, searchValue) => {
+                  const name = (
+                    <EuiHighlight
+                      search={searchValue}
+                      css={
+                        supersededBy
+                          ? { textDecoration: 'line-through', color: euiTheme.colors.textDisabled }
+                          : undefined
+                      }
+                      data-test-subj={supersededBy ? 'boostSupersededTarget' : undefined}
+                    >
+                      {label}
+                    </EuiHighlight>
+                  );
+                  // Centered on the name, as hidden names are in the other lists.
+                  return isHidden ? (
+                    <span
+                      css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.s }}
+                    >
+                      {name}
+                      <HiddenBadge />
+                    </span>
+                  ) : (
+                    name
+                  );
+                }}
                 onChange={(options) =>
                   updateDraft({
                     picked: options
@@ -828,6 +849,18 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                 )}
               </EuiSelectable>
             </EuiFormRow>
+          )}
+          {/* Both ways of choosing targets list the same data sources, so one switch serves both. */}
+          {hasHidden && type && (
+            <>
+              <EuiSpacer size="m" />
+              <IncludeHiddenSwitch
+                type={type}
+                checked={includesHidden}
+                onChange={setIncludesHidden}
+                data-test-subj="boostRuleIncludeHidden"
+              />
+            </>
           )}
         </>
       </EuiFlyoutBody>

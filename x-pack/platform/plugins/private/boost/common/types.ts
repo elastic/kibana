@@ -100,6 +100,11 @@ export interface BoostDataSource {
   /** Dataset size, or 0 when Elasticsearch doesn't report one. */
   size_in_bytes: number;
   /**
+   * Whether it's hidden, such as Kibana's own data. Boost rules apply to it all the same, but lists
+   * leave it out unless asked to include hidden ones.
+   */
+  hidden?: boolean;
+  /**
    * A data stream's lifecycle, when it has one: whether it's on, and how long it keeps data, such as
    * `30d`. Without a retention, it keeps data indefinitely.
    */

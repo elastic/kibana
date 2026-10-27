@@ -21,7 +21,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { BoostProfileType } from '../../../common/types';
+import type { BoostDataSource, BoostProfileType } from '../../../common/types';
+import { formatHiddenNotShown } from '../hidden_data';
 import { SupersedingRule, TargetName } from './target_name';
 import { TargetStatus } from './target_status';
 
@@ -30,6 +31,7 @@ export interface TargetPreview {
   name: string;
   /** A higher-ranked rule that still applies to this target, if any. */
   overriddenBy?: string;
+  isHidden?: boolean;
 }
 
 /**
@@ -128,7 +130,9 @@ interface PatternMatchesProps {
   /** What contains the pattern, until it matches something. */
   partialMatches: readonly TargetPreview[];
   /** Every data source of the rule's type, in the order they're listed. */
-  names: readonly string[];
+  dataSources: ReadonlyArray<Pick<BoostDataSource, 'name' | 'hidden'>>;
+  /** Whether the lists include hidden data sources, which they otherwise count but don't show. */
+  includesHidden: boolean;
   /** The panel's tallest height, past which its list scrolls. */
   maxHeight: number;
 }
@@ -162,7 +166,8 @@ export const PatternMatchStatus = ({ exactCount, partialCount }: PatternMatchSta
 
 /**
  * What an index pattern matches, or partly matches until it matches something, beside every data
- * source it could target, like the data view editor's preview.
+ * source it could target, like the data view editor's preview. Hidden data sources are left out
+ * unless included, with a note of how many, so the lists add up to the pattern's match count.
  */
 export const PatternMatches = ({
   type,
@@ -170,7 +175,8 @@ export const PatternMatches = ({
   pattern,
   exactMatches,
   partialMatches,
-  names,
+  dataSources,
+  includesHidden,
   maxHeight,
 }: PatternMatchesProps) => {
   const { euiTheme } = useEuiTheme();
@@ -204,6 +210,20 @@ export const PatternMatches = ({
     </EuiText>
   );
 
+  // Lined up with the names, after their match icons.
+  const renderHiddenNote = (count: number) =>
+    count > 0 && (
+      <EuiText
+        key="hiddenNote"
+        size="xs"
+        color="subdued"
+        css={{ paddingInlineStart: euiTheme.size.l }}
+        data-test-subj="boostRuleHiddenNotShown"
+      >
+        {formatHiddenNotShown(targetType, count)}
+      </EuiText>
+    );
+
   // The scrolling area keeps 8px of padding, which its scroll mask fades.
   const renderList = (label: string, rows: ReactNode) => (
     <EuiText
@@ -232,6 +252,7 @@ export const PatternMatches = ({
     pattern: rowPattern,
     match,
     overriddenBy,
+    isHidden,
     isLabeled,
     testSubj,
   }: {
@@ -239,6 +260,7 @@ export const PatternMatches = ({
     pattern?: string;
     match?: MatchKind;
     overriddenBy?: string;
+    isHidden?: boolean;
     /** Whether the icon tells screen readers how the target matches. */
     isLabeled: boolean;
     testSubj?: string;
@@ -258,7 +280,12 @@ export const PatternMatches = ({
             isSuperseded={overriddenBy !== undefined}
             isLabeled={isLabeled}
           />
-          <TargetName name={name} pattern={rowPattern} supersededBy={overriddenBy} />
+          <TargetName
+            name={name}
+            pattern={rowPattern}
+            supersededBy={overriddenBy}
+            isHidden={isHidden}
+          />
         </span>
       </EuiFlexItem>
       {overriddenBy && (
@@ -272,15 +299,29 @@ export const PatternMatches = ({
   );
 
   // The list's label says how these match, so their icons don't repeat it to screen readers.
+  // Hidden ones are counted after the rest until they're included.
   const renderTargets = (
     targets: readonly TargetPreview[],
     targetPattern: string,
     match: MatchKind,
     testSubj?: string
-  ) =>
-    targets.map(({ name, overriddenBy }) =>
-      renderRow({ name, pattern: targetPattern, match, overriddenBy, isLabeled: false, testSubj })
-    );
+  ) => {
+    const shown = includesHidden ? targets : targets.filter(({ isHidden }) => !isHidden);
+    return [
+      ...shown.map(({ name, overriddenBy, isHidden }) =>
+        renderRow({
+          name,
+          pattern: targetPattern,
+          match,
+          overriddenBy,
+          isHidden,
+          isLabeled: false,
+          testSubj,
+        })
+      ),
+      renderHiddenNote(targets.length - shown.length),
+    ];
+  };
 
   const renderMatching = () => {
     if (!type || !pattern) {
@@ -315,25 +356,32 @@ export const PatternMatches = ({
     );
   };
 
-  const renderAll = () =>
-    names.length > 0
-      ? renderList(
-          TAB_LABELS.all[targetType],
-          // Matches are mixed with everything else here, so their icons say which they are, and
-          // each notes a higher-ranked rule that keeps it, as in the matching list.
-          names.map((name) => {
-            const target = matchesByName.get(name);
-            return renderRow({
-              name,
-              pattern: target && highlightPattern,
-              match: target && matchKind,
-              overriddenBy: target?.overriddenBy,
-              isLabeled: true,
-              testSubj: 'boostRuleAvailableTarget',
-            });
-          })
-        )
-      : renderEmpty(NO_DATA_SOURCES[targetType]);
+  const renderAll = () => {
+    if (dataSources.length === 0) {
+      return renderEmpty(NO_DATA_SOURCES[targetType]);
+    }
+    const shown = includesHidden ? dataSources : dataSources.filter(({ hidden }) => !hidden);
+    return renderList(
+      TAB_LABELS.all[targetType],
+      // Matches are mixed with everything else here, so their icons say which they are, and each
+      // notes a higher-ranked rule that keeps it, as in the matching list.
+      [
+        ...shown.map(({ name, hidden }) => {
+          const target = matchesByName.get(name);
+          return renderRow({
+            name,
+            pattern: target && highlightPattern,
+            match: target && matchKind,
+            overriddenBy: target?.overriddenBy,
+            isHidden: hidden,
+            isLabeled: true,
+            testSubj: 'boostRuleAvailableTarget',
+          });
+        }),
+        renderHiddenNote(dataSources.length - shown.length),
+      ]
+    );
+  };
 
   return (
     <EuiPanel

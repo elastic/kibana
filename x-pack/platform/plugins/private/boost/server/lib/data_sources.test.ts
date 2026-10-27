@@ -116,6 +116,43 @@ describe('getDataSources', () => {
     });
   });
 
+  it('lists hidden indices and data streams, marked as hidden, but not system ones, as Elasticsearch boosts them', async () => {
+    const client = createClient();
+    client.indices.resolveIndex.mockResolvedValue({
+      indices: [
+        { name: '.cases', attributes: ['open', 'hidden'] },
+        { name: '.kibana_1', attributes: ['open', 'hidden', 'system'] },
+        {
+          name: '.ds-.alert-actions-000001',
+          attributes: ['open', 'hidden'],
+          data_stream: '.alert-actions',
+        },
+        {
+          name: '.ds-.fleet-actions-results-000001',
+          attributes: ['open', 'hidden', 'system'],
+          data_stream: '.fleet-actions-results',
+        },
+      ],
+      aliases: [],
+      data_streams: [
+        { name: '.alert-actions', backing_indices: [], timestamp_field: '@timestamp' },
+        { name: '.fleet-actions-results', backing_indices: [], timestamp_field: '@timestamp' },
+      ],
+    });
+    client.indices.getDataStream.mockResolvedValue({
+      data_streams: [
+        { ...dataStream('.alert-actions', ['.ds-.alert-actions-000001']), hidden: true },
+      ],
+    });
+
+    const dataSources = await getDataSources(client);
+
+    expect(dataSources.map(({ name, type, hidden }) => ({ name, type, hidden }))).toEqual([
+      { name: '.alert-actions', type: 'data_stream', hidden: true },
+      { name: '.cases', type: 'index', hidden: true },
+    ]);
+  });
+
   it('counts backing indices as new when their lifecycle is unavailable', async () => {
     const dataSources = await getDataSources(createClient({ hasLifecycle: false }));
 

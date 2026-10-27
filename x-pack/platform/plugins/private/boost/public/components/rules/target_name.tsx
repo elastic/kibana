@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { splitByIndexPattern } from '../../../common/resolution';
 import type { DataSourceType } from '../../../common/types';
 import { DetailsLink } from '../details_link';
+import { HiddenBadge } from '../hidden_data';
 import { IndexManagementLink } from '../index_management_link';
 
 /** Marks a rule that ranks higher than another, so it applies instead. */
@@ -38,13 +39,21 @@ interface TargetNameProps {
    * would lose their changes.
    */
   linkedAs?: DataSourceType;
+  /** Marks a hidden index or data stream with a badge. */
+  isHidden?: boolean;
 }
 
 /**
  * A target's name, struck through and disabled when a higher-ranked rule applies to it instead, since
  * the rule targets it but doesn't apply.
  */
-export const TargetName = ({ name, pattern, supersededBy, linkedAs }: TargetNameProps) => {
+export const TargetName = ({
+  name,
+  pattern,
+  supersededBy,
+  linkedAs,
+  isHidden = false,
+}: TargetNameProps) => {
   const { euiTheme } = useEuiTheme();
   // A disabled name's highlight and link are disabled too.
   const inheritsColor = supersededBy ? { color: 'inherit' } : undefined;
@@ -65,7 +74,7 @@ export const TargetName = ({ name, pattern, supersededBy, linkedAs }: TargetName
           </Fragment>
         ));
 
-  return (
+  const nameElement = (
     <span
       css={
         supersededBy
@@ -82,6 +91,23 @@ export const TargetName = ({ name, pattern, supersededBy, linkedAs }: TargetName
         text
       )}
     </span>
+  );
+
+  // One element, so the badge stays beside the name in a flex box, such as a table cell.
+  return isHidden ? (
+    <span
+      css={{
+        display: 'inline-flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: euiTheme.size.s,
+      }}
+    >
+      {nameElement}
+      <HiddenBadge />
+    </span>
+  ) : (
+    nameElement
   );
 };
 
