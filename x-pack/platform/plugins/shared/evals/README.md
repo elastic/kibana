@@ -199,6 +199,22 @@ All routes are internal (`elastic-api-version: 1`). Read routes require the `rea
 
 For full request/response schemas, see the OpenAPI definitions in [`@kbn/evals-common/impl/schemas/`](../../packages/shared/kbn-evals-common/impl/schemas/).
 
+### Evaluating in-process
+
+Server plugins can grade a trace without HTTP through `evaluate()` on the evals start contract. It runs the same evaluator execution as `_evaluate` and takes the same `subject` and `evaluators`, held to the same bounds.
+
+```ts
+const results = await evals.evaluate?.({
+  request,
+  subject: { traces: [{ trace_id: traceId }] },
+  evaluators: [{ name: 'groundedness', connector_id: judgeConnectorId }],
+});
+```
+
+- Evaluators are resolved in `spaceId` when given, otherwise in the request's space.
+- Traces are read as the request's current user, and judges call their connector on behalf of the request.
+- Invalid input, an unknown evaluator, or a trace that is not ready throws `EvaluationExecutionError`. A failing evaluator does not throw; it is returned as an `error` result next to the others.
+
 ## Dataset tags and maturity
 
 Datasets carry two optional keyword fields for organization.

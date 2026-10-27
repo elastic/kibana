@@ -18,6 +18,7 @@ import type { DatasetService } from './storage/datasets/dataset_service';
 import type { EvaluatorDefinitionService } from './storage/evaluators/evaluator_definition_service';
 import type { EvaluationScoreService } from './storage/scores/evaluation_score_service';
 import type { EvaluatorOrigin, EvaluatorRegistry } from './evaluators/types';
+import type { EvaluateFn } from './evaluation/create_evaluate_contract';
 import type { OnlineScoreService } from './storage/scores/online_score_service';
 import type { EvalsTaskProvider } from './task_providers/types';
 
@@ -49,6 +50,12 @@ export interface EvalsPluginStart {
 
   listModelConnectors?: (request: KibanaRequest) => Promise<ModelConnectorSummary[]>;
   onlineScoreService?: OnlineScoreService;
+  /**
+   * Grades a subject in-process with the same evaluator execution as `_evaluate`. Throws
+   * `EvaluationExecutionError` when the input or trace rules out evaluating; failures of
+   * individual evaluators are returned as `error` results instead.
+   */
+  evaluate?: EvaluateFn;
 }
 
 export type EvalsWorkflowsManagementSetup = Pick<WorkflowsServerPluginSetup, 'management'>;
