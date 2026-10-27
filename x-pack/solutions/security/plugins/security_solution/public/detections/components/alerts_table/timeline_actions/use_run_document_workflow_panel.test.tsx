@@ -95,13 +95,7 @@ const useKibanaMock = jest.requireMock('@kbn/kibana-react-plugin/public').useKib
 
 const defaultProps: UseRunDocumentWorkflowPanelProps = {
   closePopover: jest.fn(),
-  documents: [
-    {
-      _id: 'doc-123',
-      _index: 'documents-index',
-      'host.name': 'test-host',
-    },
-  ],
+  documentIds: [{ _id: 'doc-123', _index: 'documents-index' }],
 };
 
 const createMockWorkflow = (id: string, triggerType: 'alert' | 'manual'): WorkflowListItemDto => ({
@@ -203,7 +197,7 @@ describe('useRunDocumentWorkflowPanel', () => {
         () =>
           useRunDocumentWorkflowPanel({
             ...defaultProps,
-            documents: [
+            documentIds: [
               { _id: 'doc-1', _index: 'documents-index' },
               { _id: 'doc-2', _index: 'documents-index' },
             ],
@@ -292,14 +286,14 @@ describe('useRunDocumentWorkflowPanel', () => {
       await waitFor(() =>
         expect(lastPanelProps()?.telemetry).toEqual({
           origin: 'document',
-          itemCount: defaultProps.documents.length,
+          itemCount: defaultProps.documentIds.length,
           owner: 'securitySolution',
         })
       );
     });
 
     it('reports a bulk action as a bulk document run over the selected documents', async () => {
-      renderPanel({ documents: twoDocuments, isBulk: true });
+      renderPanel({ documentIds: twoDocuments, isBulk: true });
 
       await waitFor(() =>
         expect(lastPanelProps()?.telemetry).toEqual({
@@ -323,7 +317,7 @@ describe('useRunDocumentWorkflowPanel', () => {
         telemetry: caseTelemetry,
       });
 
-      renderPanel({ documents: twoDocuments, isBulk: true });
+      renderPanel({ documentIds: twoDocuments, isBulk: true });
 
       await waitFor(() => expect(lastPanelProps()?.telemetry).toEqual(caseTelemetry));
     });
@@ -395,6 +389,16 @@ describe('useRunDocumentWorkflowPanel', () => {
       expect(result.current.runDocumentWorkflowPanel).toHaveLength(1);
     });
 
+    it('returns empty lists outside a case with no documents', () => {
+      const { result } = renderHook(
+        () => useRunDocumentWorkflowPanel({ ...defaultProps, documentIds: [] }),
+        { wrapper: TestProviders }
+      );
+
+      expect(result.current.runWorkflowMenuItem).toEqual([]);
+      expect(result.current.runDocumentWorkflowPanel).toEqual([]);
+    });
+
     it('returns the menu item inside a case with originEventId when Cases runs are available', () => {
       mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
 
@@ -422,7 +426,7 @@ describe('useRunDocumentWorkflowPanel', () => {
       mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
 
       const { result } = renderHook(
-        () => useRunDocumentWorkflowPanel({ ...defaultProps, documents: [] }),
+        () => useRunDocumentWorkflowPanel({ ...defaultProps, documentIds: [] }),
         { wrapper: TestProviders }
       );
 
@@ -464,7 +468,7 @@ describe('useRunDocumentWorkflowPanel', () => {
       expect(panelProps.inputs).toEqual({
         event: {
           triggerType: 'document',
-          documents: defaultProps.documents,
+          documentIds: defaultProps.documentIds,
         },
       });
       expect(panelProps.visibility).toBeUndefined();

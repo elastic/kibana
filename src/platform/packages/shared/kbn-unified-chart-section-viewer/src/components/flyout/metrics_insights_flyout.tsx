@@ -94,9 +94,6 @@ export const MetricInsightsFlyout = ({
       maxWidth={maxWidth}
       resizable={true}
       onResize={setFlyoutWidth}
-      css={{
-        maxWidth: `${isXlScreen ? `calc(100vw - ${defaultWidth}px)` : '90vw'} !important`,
-      }}
       paddingSize="m"
       {...a11yProps}
     >
