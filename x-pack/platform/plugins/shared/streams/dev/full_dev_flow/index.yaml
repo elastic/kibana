@@ -47,11 +47,12 @@ data:
           key_file: /secrets/kafka/tls.key
           server_name_override: warpstream.warpstream.svc.cluster.local
     exporters:
-      # Same hop as the hosted index collector: the native OTLP endpoint keeps counters and
-      # their delta temporality, which the stats queries (TS + RATE) need.
+      # Same hop as the hosted index collector: the native OTLP endpoint keeps counters, their
+      # delta temporality and exponential histograms, which the stats queries sum.
       otlphttp:
         endpoint: https://__TARGET_ID__.es.svc.cluster.local:9200/_otlp
         headers:
+          # The local dev user, elastic_serverless:changeme, base64 encoded.
           Authorization: Basic ZWxhc3RpY19zZXJ2ZXJsZXNzOmNoYW5nZW1l
         tls:
           insecure_skip_verify: true

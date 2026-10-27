@@ -12,13 +12,14 @@ import { MAX_STREAMS_UNIT_STATS_COMPONENTS, type StreamsUnit } from '@kbn/stream
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import { StatusError } from '../streams/errors/status_error';
 import { toEsqlRequest } from '../streams/helpers/esql';
-import { UNIT_STATS_DEFAULT_WINDOW_MS, UNIT_STATS_REQUEST_TIMEOUT_MS } from './constants';
-import { toSearchError } from './errors/search_errors';
 import {
-  mostActionableFailure,
-  STATS_ERROR_CODE,
-  type UnitStatsError,
-} from './errors/unit_stats_error';
+  ESQL_MAX_ROWS,
+  UNIT_METRICS_STREAM,
+  UNIT_STATS_DEFAULT_WINDOW_MS,
+  UNIT_STATS_REQUEST_TIMEOUT_MS,
+} from './constants';
+import { toSearchError } from './errors/search_errors';
+import { mostActionableFailure, STATS_ERROR_CODE, UnitStatsError } from './errors/unit_stats_error';
 import { toRows, type EsqlRow } from './mappers/esql_rows';
 import {
   joinDestinationRows,
@@ -182,8 +183,10 @@ export class UnitStatsClient {
   }
 
   /**
-   * False when the stream is missing (or not readable, which ES|QL reports the same way). Any
-   * other failure throws, so the caller can skip the queries and report why.
+   * False when the stream is missing, as it is until the unit reports its first metrics. ES|QL
+   * reports a stream the user cannot read the same way, so that case is told apart with a
+   * privilege check and fails as `forbidden`. Any other failure throws, so the caller can skip
+   * the queries and report why.
    */
   private async doesUnitMetricsStreamExist(): Promise<boolean> {
     const { esClient } = this.dependencies;
@@ -193,8 +196,14 @@ export class UnitStatsClient {
       });
       return true;
     } catch (error) {
-      if (isEsqlUnknownIndexError(error)) return false;
-      throw error;
+      if (!isEsqlUnknownIndexError(error)) throw error;
+
+      const { has_all_requested: canRead } = await esClient.security.hasPrivileges({
+        index: [{ names: [UNIT_METRICS_STREAM], privileges: ['read'] }],
+      });
+      if (!canRead) throw UnitStatsError.forbidden();
+
+      return false;
     }
   }
 
@@ -291,6 +300,14 @@ export class UnitStatsClient {
 
     try {
       const rows = await this.runQuery(buildProcessorSumsQuery({ ...baseParams, ids }));
+      // We expect this to be an unlikely state, but let's be aware of it: ES|QL cuts a result at
+      // its row limit without saying so.
+      if (rows.length >= ESQL_MAX_ROWS) {
+        this.dependencies.logger.warn(
+          `Unit stats ${what} for unit [${baseParams.unitId}] reached the ${ESQL_MAX_ROWS} row limit, so some instances are missing`
+        );
+      }
+
       const mapped = mapProcessorStatsRows({ rows });
 
       return {

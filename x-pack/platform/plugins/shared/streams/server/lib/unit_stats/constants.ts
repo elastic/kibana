@@ -14,7 +14,7 @@ import { MAX_STREAMS_UNIT_STATS_COMPONENTS } from '@kbn/streams-schema';
  * writes one metric per document.
  */
 
-/** The stats queries use the exact name. Only the existence probe uses a wildcard. */
+/** The stats queries and the existence probe both use the exact name. */
 export const UNIT_METRICS_STREAM = 'metrics-streams.otel-default';
 
 export const UNIT_STATS_DEFAULT_WINDOW_MS = 15 * 60 * 1000;

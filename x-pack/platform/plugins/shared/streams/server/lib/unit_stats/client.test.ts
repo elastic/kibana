@@ -126,6 +126,9 @@ const failWith = (error: Error) => () => {
 const statsQueries = (esql: jest.Mock): string[] =>
   esql.mock.calls.map(([{ query }]) => query).filter((query) => !isProbe(query));
 
+/** The privilege check of the client, allowed unless a test says otherwise. */
+const hasPrivileges = jest.fn();
+
 const run = (
   esql: jest.Mock,
   request: StreamsUnit.StatsRequest = {},
@@ -133,11 +136,18 @@ const run = (
   logger = loggingSystemMock.createLogger()
 ) =>
   new UnitStatsClient({
-    esClient: { esql: { query: esql } } as unknown as ElasticsearchClient,
+    esClient: {
+      esql: { query: esql },
+      security: { hasPrivileges },
+    } as unknown as ElasticsearchClient,
     logger,
   }).getStats({ unitId: 'default', unit: statsUnit, request, now });
 
 describe('UnitStatsClient.getStats', () => {
+  beforeEach(() => {
+    hasPrivileges.mockReset().mockResolvedValue({ has_all_requested: true });
+  });
+
   it('places a destination and a processor with their values', async () => {
     const response = await run(makeEsql());
 
@@ -331,17 +341,29 @@ describe('UnitStatsClient.getStats', () => {
       });
     });
 
-    it('probes the stream once and runs no stats query when the stream does not exist', async () => {
+    it('returns no data and no error, with one probe and no stats query, when the stream does not exist yet and the user can read it', async () => {
       const esql = makeEsql({ probe: failWith(unknownIndexError()) });
 
       const response = await run(esql);
 
       expect(esql).toHaveBeenCalledTimes(1);
+      expect(hasPrivileges).toHaveBeenCalledTimes(1);
+      expect(hasPrivileges).toHaveBeenCalledWith({
+        index: [{ names: ['metrics-streams.otel-default'], privileges: ['read'] }],
+      });
       expect(response.components.destinations['es-prod'].events.incoming.rate.value).toBeNull();
       expect(response.components.processors['uppercase-message'].instances).toEqual([]);
       expect(response.components.destinations['es-prod'].error).toBeUndefined();
       expect(response.components.destinations.dbg.error).toBeUndefined();
       expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
+    });
+
+    it('fails the request as forbidden, with no stats query, when the stream does not exist and the user cannot read it', async () => {
+      hasPrivileges.mockResolvedValue({ has_all_requested: false });
+      const esql = makeEsql({ probe: failWith(unknownIndexError()) });
+
+      await expect(run(esql)).rejects.toMatchObject({ code: 'forbidden', statusCode: 403 });
+      expect(statsQueries(esql)).toHaveLength(0);
     });
 
     it('runs no stats query and fails the request with the probe error when the probe fails', async () => {

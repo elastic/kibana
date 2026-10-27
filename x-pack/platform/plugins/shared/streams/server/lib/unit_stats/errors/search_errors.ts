@@ -13,6 +13,7 @@ import { UnitStatsError } from './unit_stats_error';
  * and a timeout is a TimeoutError. The original error is kept as the cause, for logging.
  */
 export const toSearchError = (error: unknown, what: string): UnitStatsError => {
+  if (error instanceof UnitStatsError) return error;
   if (error instanceof errors.TimeoutError) {
     return UnitStatsError.timeout(what, { cause: error });
   }
