@@ -205,7 +205,14 @@ export const linksOnlyByBuiltinAccount = (
   const rightPairs = right.entityPairs ?? [];
   if (leftPairs.length > 0 && rightPairs.length > 0) {
     const pairs = sharedValues(leftPairs, rightPairs);
-    return pairs.length > 0 && pairs.every((pair) => builtinAccount(pair));
+    // A local `bob@host` and a directory `bob` build the same raw pair. That pair
+    // is a named user only when a user id shared by both attacks belongs to it.
+    const sharedUsers = sharedValues(left.userEntityIds, right.userEntityIds);
+    const linkedPairs =
+      left.userEntityIds.length > 0 && right.userEntityIds.length > 0
+        ? pairs.filter((pair) => sharedUsers.some((userId) => userInPair(userId, pair)))
+        : pairs;
+    return linkedPairs.length > 0 && linkedPairs.every((pair) => builtinAccount(pair));
   }
   const users = sharedValues(left.userEntityIds, right.userEntityIds);
   return users.length > 0 && users.every((user) => builtinAccount(user));

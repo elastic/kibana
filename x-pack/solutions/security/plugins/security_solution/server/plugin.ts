@@ -930,8 +930,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
-    if (plugins.alertzero?.attackFingerprintWritesAllowed === false) {
-      setFingerprintCreateAllowed(false);
+    if (plugins.alertzero) {
+      const alertzero = plugins.alertzero;
+      setFingerprintCreateAllowed(() => alertzero.attackFingerprintWritesAllowed);
     }
 
     const { config, logger, productFeaturesService } = this;

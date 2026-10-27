@@ -20,17 +20,12 @@ import { FingerprintIndexUnscopedError } from './fingerprint_index_unscoped_erro
 import {
   FINGERPRINT_TTL_MS,
   STORED_ALERT_ID_CAP,
-  alertOverlap,
   bestStoredForGroup,
   chainSpan,
   clusterNewAttacks,
   disposition,
   fingerprintId,
   hostUserPair,
-  investigationStillPending,
-  journalAlertsRetired,
-  sameAttack,
-  tagCorrelatedAlerts,
   uniqueSorted,
 } from './cluster';
 
@@ -72,10 +67,10 @@ export interface MatchReview {
  * Set from AlertZero startup. False when the fingerprint template was not installed, so the
  * worker's first write must not auto-create the index from the generic template.
  */
-let fingerprintCreateAllowed = true;
+let fingerprintCreateAllowed = (): boolean => true;
 
-export const setFingerprintCreateAllowed = (allowed: boolean): void => {
-  fingerprintCreateAllowed = allowed;
+export const setFingerprintCreateAllowed = (allowed: boolean | (() => boolean)): void => {
+  fingerprintCreateAllowed = typeof allowed === 'function' ? allowed : () => allowed;
 };
 
 export interface MatchAttachment {
@@ -531,30 +526,6 @@ const createFingerprint = async (
   }
 };
 
-/**
- * A create conflict is the race for one fingerprint only when this run was about to
- * open a new review and the stored record still matches across runs. A closed false
- * positive with new alerts and a host-only repeat keep the decision `disposition`
- * already made. A missing Investigation is the same race while the fingerprint is
- * still new, and an orphan once that window has passed.
- */
-const canAdoptConflict = (
-  decision: Disposition,
-  stored: StoredFingerprint | undefined,
-  investigation: InvestigationMeta | undefined,
-  group: readonly AttackSignals[],
-  now: Date
-): stored is StoredFingerprint =>
-  decision.kind === 'review' &&
-  stored !== undefined &&
-  (investigation !== undefined || investigationStillPending(stored, now)) &&
-  !(
-    investigation?.status === 'closed' &&
-    investigation.closeReason === 'false_positive' &&
-    !group.some((member) => alertOverlap(member.alertIds, stored.alertIds))
-  ) &&
-  group.some((member) => sameAttack(member, stored, false));
-
 const extensionDoc = (current: StoredFingerprint, span: AttackSignals, now: Date) => {
   const lastMs = span.lastAlertAt === undefined ? Number.NaN : Date.parse(span.lastAlertAt);
   const expiresAt = new Date(
@@ -779,7 +750,7 @@ const assertFingerprintWritesAllowed = async (
       { signal: abortSignal }
     );
     if (exists !== true) {
-      if (!fingerprintCreateAllowed) {
+      if (!fingerprintCreateAllowed()) {
         throw new FingerprintIndexUnscopedError();
       }
       return;
@@ -952,17 +923,19 @@ export const matchAttackFingerprints = async ({
           conflicting === undefined
             ? undefined
             : await readInvestigation(contextManager, conflicting.investigationId, logger);
-        if (canAdoptConflict(decision, conflicting, meta, group, now)) {
-          decision = {
-            kind: 'attach',
-            investigationId: conflicting.investigationId,
-            relatedInvestigationId: '',
-            relatedLinkReason: '',
-            journalAlertsRetired: journalAlertsRetired(meta),
-            tagCorrelatedAlerts: tagCorrelatedAlerts(meta),
-          };
+        // Search can miss a fingerprint written moments earlier. Decide again from
+        // that document: a built-in account stays a linked review and is not adopted.
+        const adopted =
+          decision.kind === 'review' && conflicting !== undefined
+            ? disposition(span, conflicting, meta, group, now)
+            : decision;
+        if (adopted.kind === 'attach' && conflicting !== undefined) {
+          decision = adopted;
           await extendFingerprint(esClient, conflicting, group, now, abortSignal, logger);
         } else {
+          if (adopted.kind === 'review_linked') {
+            decision = adopted;
+          }
           await createFingerprint(
             esClient,
             group,

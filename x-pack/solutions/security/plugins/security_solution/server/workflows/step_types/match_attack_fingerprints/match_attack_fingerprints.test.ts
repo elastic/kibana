@@ -710,6 +710,54 @@ describe('matchAttackFingerprints', () => {
     expect(output.reviews).toHaveLength(1);
   });
 
+  it('keeps a linked review when a built-in fingerprint is created before search can see it', async () => {
+    getAlertEntitiesMock.mockResolvedValue({
+      entities: [
+        { id: 'host-1', name: 'host-1', type: 'host' },
+        { id: 'SYSTEM', name: 'SYSTEM', type: 'user' },
+      ],
+      total: 2,
+      truncated: false,
+    });
+    const index = jest
+      .fn()
+      .mockRejectedValueOnce({ statusCode: 409, message: 'conflict' })
+      .mockResolvedValue({ result: 'created' });
+    const { esClient, contextManager } = createHarness({
+      alertHits: [{ fields: { 'host.name': ['host-1'], 'user.name': ['SYSTEM'] } }],
+      index,
+      get: jest.fn().mockResolvedValue({
+        _id: 'stored-fp',
+        _source: {
+          id: 'stored-fp',
+          attributes: {
+            investigation_id: '11111111-1111-8111-8111-111111111111',
+            alert_ids: ['old-1', 'old-2'],
+            host_entity_ids: ['host-1'],
+            user_entity_ids: ['SYSTEM'],
+            entity_pairs: ['SYSTEM@host-1'],
+            mitre_attack_tactics: ['TA0008'],
+            first_alert_at: '2026-10-21T10:00:00.000Z',
+            last_alert_at: '2026-10-21T10:30:00.000Z',
+          },
+        },
+      }),
+      conversation: { metadata: { status: 'open', close_reason: '', verdict: '' } },
+    });
+
+    const output = await matchAttackFingerprints({
+      attacks: [attackDocument(ATTACK_ID, ['new-1', 'new-2'])],
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    expect(output.attachments).toEqual([]);
+    expect(output.reviews[0]?.related_link_reason).toBe('builtin_account');
+  });
+
   it('attaches when the winning run has not created the Investigation yet', async () => {
     const now = new Date('2026-10-21T12:00:00.000Z');
     const index = jest.fn().mockRejectedValue({ statusCode: 409, message: 'conflict' });

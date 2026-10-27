@@ -155,12 +155,21 @@ export class AlertZeroPlugin
     this.threatIntelSupplyWorkflowInstaller = installer;
   };
 
-  private readonly alertZeroStartContract = (
-    attackFingerprintWritesAllowed = true
-  ): AlertZeroPluginStart => ({
-    registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
-    attackFingerprintWritesAllowed,
-  });
+  /**
+   * False while the fingerprint template install is in flight, and after it fails.
+   * `start` cannot return a promise, so the matcher reads this as it changes.
+   */
+  private fingerprintWritesAllowed = true;
+
+  private readonly alertZeroStartContract = (): AlertZeroPluginStart => {
+    const plugin = this;
+    return {
+      registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
+      get attackFingerprintWritesAllowed() {
+        return plugin.fingerprintWritesAllowed;
+      },
+    };
+  };
 
   setup(
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPluginStart>,
@@ -332,7 +341,7 @@ export class AlertZeroPlugin
     return { isEnabled: true, setServerlessTierAvailable: this.setServerlessTierAvailable };
   }
 
-  async start(core: CoreStart, plugins: AlertZeroStartDependencies): Promise<AlertZeroPluginStart> {
+  start(core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
     this.taskManager = plugins.taskManager;
     this.coreStart = core;
@@ -347,11 +356,16 @@ export class AlertZeroPlugin
       return this.alertZeroStartContract();
     }
 
-    // Finish before this start resolves. Task manager does not run a worker until every
-    // plugin start has settled, so the first fingerprint write sees this template.
-    const attackFingerprintWritesAllowed = await ensureFingerprintIndexMapping(
-      core.elasticsearch.client.asInternalUser,
-      this.logger
+    // Plugin start cannot return a promise. Writes stay refused until this settles, so a
+    // worker that runs in that gap reviews every attack and does not auto-create the index.
+    this.fingerprintWritesAllowed = false;
+    void ensureFingerprintIndexMapping(core.elasticsearch.client.asInternalUser, this.logger).then(
+      (allowed) => {
+        this.fingerprintWritesAllowed = allowed;
+      },
+      () => {
+        this.fingerprintWritesAllowed = false;
+      }
     );
 
     this.serviceAccountsEnabled = core.security.serviceAccounts.isEnabled();
@@ -361,7 +375,7 @@ export class AlertZeroPlugin
     // Service accounts are required the same way: with the flag off the plugin stays mounted
     // for the unavailable screen and does not install or schedule workers.
     if (!agentBuilder || !proposals || !agenticInvestigations || !this.serviceAccountsEnabled) {
-      return this.alertZeroStartContract(attackFingerprintWritesAllowed);
+      return this.alertZeroStartContract();
     }
     void ensureAgentSafe({ agentBuilder, spaceId: DEFAULT_SPACE_ID, logger: this.logger });
 
@@ -447,7 +461,7 @@ export class AlertZeroPlugin
       mitreDataClient,
     };
 
-    return this.alertZeroStartContract(attackFingerprintWritesAllowed);
+    return this.alertZeroStartContract();
   }
 
   private requireStarted<T>(value: T | undefined, name: string): T {

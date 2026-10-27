@@ -136,14 +136,14 @@ export const ensureFingerprintIndexMapping = async (
   try {
     const exists = await esClient.indices.exists({ index: FINGERPRINT_INDEX });
     if (exists !== true) {
-      return;
+      return true;
     }
 
     const response = await esClient.indices.getMapping({ index: FINGERPRINT_INDEX });
     const current = Object.values(response)[0]?.mappings as Record<string, unknown> | undefined;
     const type = privilegesType(current);
     if (type === 'nested') {
-      return;
+      return true;
     }
 
     const detail =

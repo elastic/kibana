@@ -742,6 +742,26 @@ describe('disposition', () => {
     expect(decision.kind).toBe('attach');
   });
 
+  it('reviews a built-in match when the extra pair is a local and directory name collision', () => {
+    const later = attack({
+      alertIds: ['b1'],
+      userEntityIds: ['SYSTEM', 'bob@host-1'],
+      entityPairs: ['SYSTEM@host-1', 'bob@host-1'],
+    });
+    const decision = disposition(
+      later,
+      stored({
+        alertIds: ['a1', 'a2'],
+        userEntityIds: ['SYSTEM', 'bob'],
+        entityPairs: ['SYSTEM@host-1', 'bob@host-1'],
+      }),
+      { status: 'open', verdict: '' },
+      [later]
+    );
+
+    expect(decision.relatedLinkReason).toBe('builtin_account');
+  });
+
   it('attaches when a named user is shared alongside a built-in account', () => {
     const later = attack({
       alertIds: ['b1'],
