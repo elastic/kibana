@@ -53,6 +53,8 @@ import { handleInvestigationFailureStepDefinition } from './step_definitions/han
 import { renderSlackMessageStepDefinition } from './step_definitions/render_slack_message';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import { followUpRecoveredAlertStepDefinition } from './step_definitions/follow_up_recovered_alert';
+import { classifyOnlineEvalsRoundStepDefinition } from './step_definitions/classify_online_evals_round';
+import { createIsOnlineEvalsPaused } from './online_evals/is_online_evals_paused';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
 import { resolveModelStepDefinition } from './step_definitions/resolve_model';
@@ -125,6 +127,7 @@ export class NightshiftInvestigationsPlugin
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
   private agenticInvestigations?: NightshiftInvestigationsStartDeps['agenticInvestigations'];
   private proposals?: NightshiftInvestigationsStartDeps['proposals'];
+  private evals?: NightshiftInvestigationsStartDeps['evals'];
   private inference?: NightshiftInvestigationsStartDeps['inference'];
   private sandboxStart?: NightshiftInvestigationsStartDeps['sandbox'];
   private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
@@ -372,6 +375,13 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           followUpRecoveredAlertStepDefinition(this.getInvestigationsClient)
         );
+        plugins.workflowsExtensions.registerStepDefinition(
+          classifyOnlineEvalsRoundStepDefinition({
+            getAgentBuilder: () => this.agentBuilder,
+            isEvalsAvailable: () => this.evals !== undefined,
+            isPaused: createIsOnlineEvalsPaused(core.getStartServices),
+          })
+        );
         // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
         plugins.workflowsExtensions.registerStepDefinition(
           ensureInvestigationAgentStepDefinition({
@@ -582,6 +592,7 @@ export class NightshiftInvestigationsPlugin
     this.agentBuilder = plugins.agentBuilder;
     this.agenticInvestigations = plugins.agenticInvestigations;
     this.proposals = plugins.proposals;
+    this.evals = plugins.evals;
     this.inference = plugins.inference;
     this.sandboxStart = plugins.sandbox;
     this.ruleRegistry = plugins.ruleRegistry;

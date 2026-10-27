@@ -92,7 +92,7 @@ function asString(v: unknown): string | undefined {
 }
 
 /** `inputs.context.follow_up` of the investigation runs `followUpRecoveredAlert` starts. */
-const ALERT_RECOVERED_FOLLOW_UP = 'alert_recovered';
+export const ALERT_RECOVERED_FOLLOW_UP = 'alert_recovered';
 
 const isAlertRecoveredFollowUp = (inputs: Record<string, unknown> | undefined): boolean => {
   const context = inputs?.context;
