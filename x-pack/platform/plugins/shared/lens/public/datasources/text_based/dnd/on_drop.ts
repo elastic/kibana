@@ -45,7 +45,7 @@ export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPriva
     fieldName: sourceField?.variable ? `??${sourceField.variable}` : sourceField?.fieldName ?? '',
     meta: sourceField?.meta,
     variable: sourceField?.variable,
-    ...(target.isMetricDimension && { inMetricDimension: true }),
+    inMetricDimension: target.isMetricDimension ? true : undefined,
   };
   let columns: TextBasedLayerColumn[] | undefined;
 

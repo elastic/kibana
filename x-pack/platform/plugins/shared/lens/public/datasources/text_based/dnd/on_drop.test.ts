@@ -111,6 +111,44 @@ describe('onDrop', () => {
     );
   });
 
+  describe.each(['move_compatible', 'duplicate_compatible'] as const)('%s', (dropType) => {
+    it.each([
+      { sourceIsMetric: true, targetIsMetric: false },
+      { sourceIsMetric: false, targetIsMetric: true },
+    ])(
+      'uses destination metric placement when source=$sourceIsMetric and target=$targetIsMetric',
+      ({ sourceIsMetric, targetIsMetric }) => {
+        const sourceColumn = { ...column1, inMetricDimension: sourceIsMetric };
+        const result = onDrop({
+          ...defaultProps,
+          dropType,
+          state: {
+            ...defaultProps.state,
+            layers: {
+              ...defaultProps.state.layers,
+              first: {
+                ...defaultProps.state.layers.first,
+                columns: [sourceColumn, column2, column3],
+              },
+            },
+          },
+          target: { ...emptyDimensionTarget, isMetricDimension: targetIsMetric },
+        });
+
+        expect(result?.layers.first.columns).toEqual([
+          ...(dropType === 'duplicate_compatible' ? [sourceColumn] : []),
+          column2,
+          column3,
+          {
+            ...sourceColumn,
+            columnId: emptyDimensionTarget.columnId,
+            inMetricDimension: targetIsMetric ? true : undefined,
+          },
+        ]);
+      }
+    );
+  });
+
   it('should return false if dropType is not in the list', () => {
     const props = {
       ...defaultProps,
