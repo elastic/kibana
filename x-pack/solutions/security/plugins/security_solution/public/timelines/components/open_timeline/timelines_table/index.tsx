@@ -25,6 +25,7 @@ import type {
   OpenTimelineResult,
   EnableExportTimelineDownloader,
   OnOpenDeleteTimelineModal,
+  OnRemoveTimelineFromCase,
 } from '../types';
 import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
@@ -54,6 +55,7 @@ export const getTimelinesTableColumns = ({
   onCreateRuleFromEql,
   onOpenDeleteTimelineModal,
   onOpenTimeline,
+  onRemoveFromCase,
   onToggleShowNotes,
   showExtendedColumns,
   timelineType,
@@ -67,6 +69,7 @@ export const getTimelinesTableColumns = ({
   onCreateRuleFromEql?: OnCreateRuleFromTimeline;
   onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
+  onRemoveFromCase?: OnRemoveTimelineFromCase;
   onSelectionChange: OnSelectionChange;
   onToggleShowNotes: OnToggleShowNotes;
   showExtendedColumns: boolean;
@@ -92,6 +95,7 @@ export const getTimelinesTableColumns = ({
           enableExportTimelineDownloader,
           onOpenDeleteTimelineModal,
           onOpenTimeline,
+          onRemoveFromCase,
           hasCrudAccess,
         })
       : []),
@@ -109,6 +113,7 @@ export interface TimelinesTableProps {
   onCreateRuleFromEql?: OnCreateRuleFromTimeline;
   onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
+  onRemoveFromCase?: OnRemoveTimelineFromCase;
   onSelectionChange: OnSelectionChange;
   onTableChange: OnTableChange;
   onToggleShowNotes: OnToggleShowNotes;
@@ -139,6 +144,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     onCreateRuleFromEql,
     onOpenDeleteTimelineModal,
     onOpenTimeline,
+    onRemoveFromCase,
     onSelectionChange,
     onTableChange,
     onToggleShowNotes,
@@ -199,6 +205,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
           onCreateRuleFromEql,
           onOpenDeleteTimelineModal,
           onOpenTimeline,
+          onRemoveFromCase,
           onSelectionChange,
           onToggleShowNotes,
           showExtendedColumns,
@@ -214,6 +221,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
         onCreateRuleFromEql,
         onOpenDeleteTimelineModal,
         onOpenTimeline,
+        onRemoveFromCase,
         onSelectionChange,
         onToggleShowNotes,
         showExtendedColumns,

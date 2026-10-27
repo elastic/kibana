@@ -120,7 +120,7 @@ const resolveSortField = (sortField: string): string => {
  */
 export const addEpisodeAggregation = (query: ComposerQuery) => {
   /* This will be simplified when the `$.alerting-episodes` ES|QL view works.
-   * Matches `buildEpisodeEventDataQuery`.
+   * Matches `buildEpisodeDataRequest`.
    */
 
   // A single rule run can write many events with the same timestamp for one

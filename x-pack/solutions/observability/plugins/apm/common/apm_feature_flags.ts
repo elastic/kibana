@@ -57,3 +57,11 @@ export type ValueOfApmFeatureFlag<TApmFeatureFlagName extends ApmFeatureFlagName
 export function getApmFeatureFlags(): ApmFeatureFlags {
   return mapValues(apmFeatureFlagMap, (value, key) => value.default);
 }
+
+/**
+ * The constants below are for feature flags defined using the Feature Flags service
+ * (https://github.com/elastic/kibana/tree/main/src/core/packages/feature-flags#readme)
+ */
+
+// to be removed in https://github.com/elastic/kibana/issues/300607
+export const APM_SERVICE_MAP_GROUPING_ENABLED_FEATURE_FLAG_KEY = 'apm.serviceMapGroupingEnabled';

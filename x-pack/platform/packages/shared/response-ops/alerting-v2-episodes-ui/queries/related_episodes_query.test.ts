@@ -26,7 +26,7 @@ describe('buildRelatedBaseQuery', () => {
     const queryString = buildRelatedBaseQuery(SPACE_ID, RULE_SCOPE, 'episode-b').print('basic');
 
     expect(queryString).toContain(ALERT_EVENTS_DATA_STREAM);
-    expect(queryString).toContain('METADATA _source, _id');
+    expect(queryString).not.toContain('_source');
     expect(queryString).toContain('type == "alert"');
     expect(queryString).toContain('rule.id');
     expect(queryString).toContain('rule-a');
@@ -64,30 +64,23 @@ describe('buildRelatedBaseQuery', () => {
 });
 
 describe('finishRelatedEpisodesQuery', () => {
-  it('adds episode aggregation, sort, fixed limit, and keep columns', () => {
+  it('adds the episode summary stats, sort, fixed limit, and keep columns', () => {
     const queryString = finishRelatedEpisodesQuery(
       buildRelatedBaseQuery(SPACE_ID, RULE_SCOPE, 'episode-b')
     ).print('basic');
 
-    expect(queryString).toContain('MIN(@timestamp)');
-    expect(queryString).toContain('MAX(@timestamp)');
+    expect(queryString).not.toContain('INLINE STATS');
+    expect(queryString).not.toContain('JSON_EXTRACT');
+    expect(queryString).toContain('STATS last_timestamp = MAX(@timestamp)');
+    expect(queryString).toContain('first_timestamp = MIN(@timestamp)');
+    expect(queryString).toContain('BY `episode.id`');
+    expect(queryString.indexOf('LIMIT 5')).toBeGreaterThan(queryString.indexOf('STATS'));
     expect(queryString).toContain(TIME_FIELD);
     expect(queryString).toMatch(/sort.*desc/i);
     expect(queryString).toContain('LIMIT 5');
     for (const field of RELATED_EPISODE_FIELDS) {
       expect(queryString).toContain(field);
     }
-  });
-
-  it('keeps a single row per episode before sorting and limiting', () => {
-    const queryString = finishRelatedEpisodesQuery(
-      buildRelatedBaseQuery(SPACE_ID, RULE_SCOPE, 'episode-b')
-    ).print('basic');
-
-    expect(queryString).toContain('last_event_id = LAST(_id, @timestamp) BY episode.id');
-    expect(queryString.indexOf('WHERE _id == last_event_id')).toBeLessThan(
-      queryString.indexOf('LIMIT 5')
-    );
   });
 });
 
