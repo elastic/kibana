@@ -691,6 +691,8 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/solutions\/security\/plugins\/security_solution\/common\/endpoint/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/scripts\/endpoint/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/server\/lib\/detection_engine\/rule_response_actions/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/server\/fleet_integration\/fleet_integration\.ts/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/server\/lib\/detection_engine\/prebuilt_rules\/logic\/integrations\/install_endpoint_security_prebuilt_rule\.ts/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/detection_engine\/rule_response_actions/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/flyout_v2\/document\/tools\/response/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/flyout_v2\/document\/main\/components\/response_section/,
