@@ -50,6 +50,10 @@ import { InputActions } from './input_actions';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
 import { useImageUpload } from './use_image_upload';
+import {
+  getPocLeadingMention,
+  parsePocMentions,
+} from './message_editor/command_menu/menus/mentions';
 
 const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.container.label', {
   defaultMessage: 'Message input form',
@@ -140,8 +144,13 @@ const headerContentStyles = ({ euiTheme }: UseEuiTheme) => css`
 `;
 
 const InputContainer: React.FC<
-  PropsWithChildren<{ isDisabled: boolean; isCollapsed: boolean; triggerMode: ChatTriggerMode }>
-> = ({ children, isDisabled, isCollapsed, triggerMode }) => {
+  PropsWithChildren<{
+    isDisabled: boolean;
+    isCollapsed: boolean;
+    triggerMode: ChatTriggerMode;
+    headerLabel?: string;
+  }>
+> = ({ children, isDisabled, isCollapsed, triggerMode, headerLabel }) => {
   const showHeader = triggerMode === ChatTriggerMode.Never;
 
   return (
@@ -161,7 +170,7 @@ const InputContainer: React.FC<
         <div css={headerClipStyles}>
           <div css={headerContentStyles}>
             <EuiIcon type="megaphone" size="s" aria-hidden={true} />
-            <EuiText size="xs">{postToTeamLabel}</EuiText>
+            <EuiText size="xs">{headerLabel ?? postToTeamLabel}</EuiText>
           </div>
         </div>
       </div>
@@ -185,7 +194,9 @@ const InputContainer: React.FC<
  */
 const useTriggerMode = () => {
   const conversationId = useConversationId();
-  const isSelectable = useIsSharedConversation();
+  const isShared = useIsSharedConversation();
+  // POC: always offer the toggle so mentions can flip it, even in a private conversation
+  const isSelectable = isShared || true;
 
   const [choice, setChoice] = useState<{
     conversationId?: string;
@@ -212,7 +223,8 @@ const useTriggerMode = () => {
 interface ConversationInputProps {
   onSubmit?: () => void;
   onEditorFocus?: () => void;
-  onSubmitOverride?: (message: string) => void;
+  // POC: triggerMode lets the Storybook demo tell agent and teammate messages apart
+  onSubmitOverride?: (message: string, triggerMode?: ChatTriggerMode) => void;
 }
 
 const disabledPlaceholder = (agentId?: string) =>
@@ -278,10 +290,13 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   >(null);
   const saveDraftDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastEditorContentRef = useRef('');
+  // POC: set further down, once the trigger mode is known
+  const pocOnContentChangeRef = useRef<(content: string) => void>(() => {});
   const handleContentChange = useCallback(() => {
     try {
       const content = messageEditorControllerRef.current?.getContent() ?? '';
       lastEditorContentRef.current = content;
+      pocOnContentChangeRef.current(content);
       if (saveDraftDebounceRef.current) clearTimeout(saveDraftDebounceRef.current);
       saveDraftDebounceRef.current = setTimeout(() => {
         saveDraft(lastEditorContentRef.current);
@@ -327,6 +342,63 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   const { submitMessage, isCreatingConversation } = useSubmitMessage();
   const { triggerMode, setTriggerMode, isSelectable: isTriggerModeSelectable } = useTriggerMode();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
+
+  // POC: only a mention at the very start of the message switches the posting mode.
+  // It switches once per leading mention, so a manual toggle change afterwards sticks.
+  const pocLeadingMentionIdRef = useRef<string | undefined>(undefined);
+  const [pocMentionedUsers, setPocMentionedUsers] = useState('');
+  pocOnContentChangeRef.current = (content) => {
+    setPocMentionedUsers(
+      parsePocMentions(content)
+        .filter(({ kind }) => kind === 'user')
+        .map(({ name }) => name)
+        .filter((name, index, names) => names.indexOf(name) === index)
+        .join(', ')
+    );
+    const leadingMention = getPocLeadingMention(content);
+    if (leadingMention?.id === pocLeadingMentionIdRef.current) {
+      return;
+    }
+    pocLeadingMentionIdRef.current = leadingMention?.id;
+    if (!leadingMention) {
+      return;
+    }
+    setTriggerMode(leadingMention.kind === 'user' ? ChatTriggerMode.Never : ChatTriggerMode.Always);
+  };
+  const pocResetMentions = () => {
+    pocLeadingMentionIdRef.current = undefined;
+    setPocMentionedUsers('');
+  };
+  // POC: the @ button types "@" at the caret (or at the end), which opens the mentions menu
+  const pocInsertMentionTrigger = () => {
+    const editor = messageEditor.ref.current;
+    if (!editor) {
+      return;
+    }
+    const selection = window.getSelection();
+    if (!selection) {
+      return;
+    }
+    if (document.activeElement !== editor || selection.rangeCount === 0) {
+      editor.focus();
+      const range = document.createRange();
+      range.selectNodeContents(editor);
+      range.collapse(false);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+    const { anchorNode, anchorOffset } = selection;
+    const previousChar =
+      anchorNode?.nodeType === Node.TEXT_NODE
+        ? anchorNode.textContent?.[anchorOffset - 1]
+        : undefined;
+    const needsSpace = previousChar !== undefined && !/[\s\u200B]/.test(previousChar);
+    document.execCommand('insertText', false, needsSpace ? ' @' : '@');
+  };
+  const pocHeaderLabel =
+    triggerMode === ChatTriggerMode.Never && pocMentionedUsers
+      ? `Sending to ${pocMentionedUsers} - they will get a notification`
+      : undefined;
 
   const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
     useImageUpload({
@@ -475,6 +547,16 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       saveDraftDebounceRef.current = null;
     }
 
+    pocResetMentions();
+    // POC: Storybook has no server, so the override handles both modes
+    if (onSubmitOverride) {
+      lastEditorContentRef.current = '';
+      onSubmitOverride(content, triggerMode);
+      clearDraft();
+      messageEditorController.clear();
+      onSubmit?.();
+      return;
+    }
     if (triggerMode === ChatTriggerMode.Never) {
       sendUserMessage(content)
         .then(() => {
@@ -509,6 +591,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       isDisabled={isInputDisabled}
       isCollapsed={shouldCollapseInput}
       triggerMode={triggerMode}
+      headerLabel={pocHeaderLabel}
     >
       {(visibleAttachments.length > 0 || uploadingNames.size > 0) && (
         <EuiFlexItem grow={false}>
@@ -550,6 +633,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
           showTriggerModeSelector={isTriggerModeSelectable}
           triggerMode={triggerMode}
           onTriggerModeChange={setTriggerMode}
+          onMentionClick={pocInsertMentionTrigger}
         />
       )}
     </InputContainer>

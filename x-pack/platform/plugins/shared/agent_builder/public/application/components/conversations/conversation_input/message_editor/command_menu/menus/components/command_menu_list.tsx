@@ -60,6 +60,9 @@ interface CommandMenuListProps {
   readonly 'data-test-subj'?: string;
   /** When true, Space also selects the highlighted option, like Enter. */
   readonly spaceSelection?: boolean;
+  // POC: mentions menu shows max 7 rows and an Enter hint on the active row
+  readonly maxVisibleRows?: number;
+  readonly showEnterHint?: boolean;
 }
 
 export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProps>(
@@ -71,6 +74,8 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       width: menuWidth = MENU_WIDTH,
       'data-test-subj': dataTestSubj = 'commandMenuList',
       spaceSelection,
+      maxVisibleRows,
+      showEnterHint,
     },
     ref
   ) => {
@@ -155,7 +160,18 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       .euiSelectableListItem:nth-child(${activeIndex + 1}) {
         background-color: ${euiTheme.focus.backgroundColor};
       }
+      ${showEnterHint
+        ? `.euiSelectableListItem:nth-child(${
+            activeIndex + 1
+          }) .euiSelectableListItem__content::after {
+            content: '↩';
+            margin-left: auto;
+            color: ${euiTheme.colors.textSubdued};
+          }`
+        : ''}
     `;
+    // POC: EuiSelectable rows are 32px high by default
+    const listMaxHeight = maxVisibleRows ? maxVisibleRows * 32 : MENU_MAX_HEIGHT;
 
     if (isLoading) {
       return (
@@ -195,7 +211,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
             showIcons: false,
             bordered: false,
             css: css`
-              max-height: ${MENU_MAX_HEIGHT}px;
+              max-height: ${listMaxHeight}px;
             `,
           }}
           onChange={(_newOptions, _event, changedOption) => {

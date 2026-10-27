@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { ConversationActionButton } from './conversation_action_button';
@@ -26,6 +26,8 @@ interface InputActionsProps {
   showTriggerModeSelector: boolean;
   triggerMode: ChatTriggerMode;
   onTriggerModeChange: (mode: ChatTriggerMode) => void;
+  // POC: opens the mentions menu
+  onMentionClick?: () => void;
 }
 
 export const InputActions: React.FC<InputActionsProps> = ({
@@ -35,6 +37,7 @@ export const InputActions: React.FC<InputActionsProps> = ({
   showTriggerModeSelector,
   triggerMode,
   onTriggerModeChange,
+  onMentionClick,
 }) => {
   const showConnectorSelector = triggerMode !== ChatTriggerMode.Never;
 
@@ -44,13 +47,32 @@ export const InputActions: React.FC<InputActionsProps> = ({
         gutterSize="s"
         responsive={false}
         alignItems="center"
-        justifyContent={showConnectorSelector ? 'spaceBetween' : 'flexEnd'}
+        justifyContent="spaceBetween"
       >
-        {showConnectorSelector && (
-          <EuiFlexItem grow={false} css={connectorFlexItemStyles}>
-            <ConnectorSelector />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false} css={connectorFlexItemStyles}>
+          <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+            {onMentionClick && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content="Mention someone" disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="at"
+                    color="text"
+                    aria-label="Mention someone"
+                    data-test-subj="agentBuilderConversationInputMentionButton"
+                    // Keeps the editor focused, so "@" lands at the caret
+                    onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
+                    onClick={onMentionClick}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            {showConnectorSelector && (
+              <EuiFlexItem grow={false} css={connectorFlexItemStyles}>
+                <ConnectorSelector />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
             {showTriggerModeSelector && (

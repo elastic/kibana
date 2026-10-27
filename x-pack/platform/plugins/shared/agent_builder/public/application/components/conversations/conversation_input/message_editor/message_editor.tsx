@@ -241,7 +241,12 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
             messageEditor.dismissActionMenu();
             return;
           }
-          if (commandMatch.isActive && commandMenuRef.current?.isKeyDownEventHandled(event)) {
+          // POC: a hidden menu (no matches) must not swallow Enter, so the message can be sent
+          if (
+            commandMatch.isActive &&
+            commandMatch.hasVisibleContent &&
+            commandMenuRef.current?.isKeyDownEventHandled(event)
+          ) {
             commandMenuRef.current.handleKeyDown(event);
             event.preventDefault();
             return;

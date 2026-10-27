@@ -14,6 +14,8 @@ export enum CommandId {
   Attachment = 'attachment',
   Skill = 'skill',
   Sml = 'sml',
+  // POC: @user / @agent mentions
+  Mention = 'mention',
 }
 
 /**

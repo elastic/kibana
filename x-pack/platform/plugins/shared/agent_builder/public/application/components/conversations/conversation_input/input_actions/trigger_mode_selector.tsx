@@ -14,11 +14,12 @@ import { ChatTriggerMode } from '../../../../../../common/http_api/chat';
 const triggerModeLabels: Readonly<Record<ChatTriggerMode, string>> = {
   [ChatTriggerMode.Always]: i18n.translate(
     'xpack.agentBuilder.conversationInput.triggerModeSelector.includeAgent',
-    { defaultMessage: 'Include agent' }
+    // POC: labels from the Figma design
+    { defaultMessage: 'Ask agent' }
   ),
   [ChatTriggerMode.Never]: i18n.translate(
     'xpack.agentBuilder.conversationInput.triggerModeSelector.skipAgent',
-    { defaultMessage: 'Skip agent' }
+    { defaultMessage: 'Post to team' }
   ),
 };
 

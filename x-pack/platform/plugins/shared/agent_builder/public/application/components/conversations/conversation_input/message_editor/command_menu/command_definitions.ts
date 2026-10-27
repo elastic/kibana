@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Skills } from './menus/skills';
 import { Sml } from './menus/sml';
+import { Mentions } from './menus/mentions';
 import type { CommandDefinition } from './types';
 import { CommandId } from './types';
 import { useExperimentalFeatures } from '../../../../../hooks/use_experimental_features';
@@ -29,6 +30,14 @@ const COMMAND_DEFINITIONS: readonly CommandDefinition[] = [
     name: semanticKnowledgeCommandName,
     menuComponent: Sml,
     experimental: true,
+  },
+  // POC: mentions, fake data only
+  {
+    id: CommandId.Mention,
+    scheme: 'mention',
+    sequence: '@',
+    name: 'Mention',
+    menuComponent: Mentions,
   },
 ];
 
