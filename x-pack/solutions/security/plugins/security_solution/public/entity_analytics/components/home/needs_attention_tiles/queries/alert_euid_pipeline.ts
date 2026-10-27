@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { getEuidEsqlDocumentsContainsIdFilter } from '@kbn/entity-store/common/domain/euid';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
+import { ALLOWED_ENTITY_TYPES } from '../../entities_grid/common';
 import { indentForkBranch } from '../../entities_grid/queries/esql';
 import {
   buildPerTypeEuidEvals,
@@ -39,6 +42,19 @@ const KEEP_COLUMNS = '_ea_entity_id, `kibana.alert.severity`';
 /** The column that holds the bucket of an alert when `bucketExpression` is given. */
 export const ALERT_BUCKET_COLUMN = 'bucket';
 
+/**
+ * Alerts that carry an identity field of any allowed type. The fields are not cast: the alerts and
+ * the entity index map them the same way, and a cast would keep ES|QL from pushing the filter
+ * down to Lucene.
+ */
+const buildAnyEntityIdentityCondition = (): string =>
+  ALLOWED_ENTITY_TYPES.map(
+    (entityType) =>
+      `(${getEuidEsqlDocumentsContainsIdFilter(getBuiltInEntityDefinition(entityType), {
+        castFields: false,
+      })})`
+  ).join(' OR ');
+
 export interface AlertEuidPipelineOptions {
   /**
    * Condition both alert branches add, when the FROM also reads the entity index. Rows of the other
@@ -60,7 +76,12 @@ export const buildAlertEuidPipeline = (
   const keepColumns = bucketExpression ? `${KEEP_COLUMNS}, @timestamp` : KEEP_COLUMNS;
   const guard = alertBranchCondition ? [`(${alertBranchCondition})`] : [];
   const derivedSteps = [
-    `WHERE ${[...guard, '`kibana.alert.entity.id` IS NULL'].join(' AND ')}`,
+    // Its own conjunct, so ES|QL can push it down and skip alerts with no identity before the EVALs.
+    `WHERE ${[
+      ...guard,
+      '`kibana.alert.entity.id` IS NULL',
+      `(${buildAnyEntityIdentityCondition()})`,
+    ].join(' AND ')}`,
     ...buildPerTypeEuidEvals(),
     evalGuardedTypedEuids('_ea_entity_id'),
     `| KEEP ${keepColumns}`,

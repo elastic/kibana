@@ -10,7 +10,7 @@ FROM .alerts-security.alerts-default, .entities.v2.latest.default-00001 METADATA
     | KEEP _ea_entity_id, \`kibana.alert.severity\`
   )
   (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NULL
+    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NULL AND (((event.outcome IS NULL OR event.outcome != \\"failure\\") AND (user.email IS NOT NULL AND user.email != \\"\\" OR user.id IS NOT NULL AND user.id != \\"\\" OR user.name IS NOT NULL AND user.name != \\"\\")) OR (host.id IS NOT NULL AND host.id != \\"\\" OR host.name IS NOT NULL AND host.name != \\"\\" OR host.hostname IS NOT NULL AND host.hostname != \\"\\") OR ((service.name IS NOT NULL AND service.name != \\"\\")))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -243,7 +243,7 @@ FROM .alerts-security.alerts-default, .entities.v2.latest.default-00001 METADATA
     | KEEP _ea_entity_id, \`kibana.alert.severity\`
   )
   (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NULL
+    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NULL AND (((event.outcome IS NULL OR event.outcome != \\"failure\\") AND (user.email IS NOT NULL AND user.email != \\"\\" OR user.id IS NOT NULL AND user.id != \\"\\" OR user.name IS NOT NULL AND user.name != \\"\\")) OR (host.id IS NOT NULL AND host.id != \\"\\" OR host.name IS NOT NULL AND host.name != \\"\\" OR host.hostname IS NOT NULL AND host.hostname != \\"\\") OR ((service.name IS NOT NULL AND service.name != \\"\\")))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
