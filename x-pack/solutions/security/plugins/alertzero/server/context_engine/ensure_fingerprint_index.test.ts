@@ -19,6 +19,7 @@ const baseTemplate = {
     index_patterns: ['ai-index-idx-*'],
     priority: 500,
     composed_of: ['ai-index@mappings', 'ai-index@custom'],
+    ignore_missing_component_templates: ['ai-index@custom'],
     template: {
       settings: { number_of_shards: 1 },
       mappings: { properties: { title: { type: 'text' } } },
@@ -55,6 +56,7 @@ describe('ensureFingerprintIndexMapping', () => {
       index_patterns: ['ai-index-idx-security-attack-fingerprints'],
       priority: 501,
       composed_of: ['ai-index@mappings', 'ai-index@custom'],
+      ignore_missing_component_templates: ['ai-index@custom'],
       template: {
         settings: { number_of_shards: 1 },
         mappings: {
@@ -163,6 +165,65 @@ describe('ensureFingerprintIndexMapping', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       'Attack fingerprint index template was not installed: security_exception'
     );
+  });
+
+  it('accepts the optional component list when Elasticsearch returns one name', async () => {
+    const esClient = createClient();
+    esClient.indices.getIndexTemplate.mockResolvedValue({
+      index_templates: [
+        {
+          ...baseTemplate,
+          index_template: {
+            ...baseTemplate.index_template,
+            ignore_missing_component_templates: 'ai-index@custom',
+          },
+        },
+      ],
+    });
+
+    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ignore_missing_component_templates: ['ai-index@custom'],
+      })
+    );
+  });
+
+  it('keeps the required mapping component when the base template lists none', async () => {
+    const esClient = createClient();
+    esClient.indices.getIndexTemplate.mockResolvedValue({
+      index_templates: [
+        {
+          ...baseTemplate,
+          index_template: {
+            ...baseTemplate.index_template,
+            composed_of: [],
+            ignore_missing_component_templates: ['', 'ai-index@custom'],
+          },
+        },
+      ],
+    });
+
+    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        composed_of: ['ai-index@mappings'],
+        ignore_missing_component_templates: ['ai-index@custom'],
+      })
+    );
+  });
+
+  it('does not mark components optional when the base template cannot be read', async () => {
+    const esClient = createClient();
+    esClient.indices.getIndexTemplate.mockRejectedValue(new Error('not found'));
+
+    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+
+    expect(
+      esClient.indices.putIndexTemplate.mock.calls[0][0].ignore_missing_component_templates
+    ).toBeUndefined();
   });
 
   it('uses the known AI index mapping when the base template cannot be read', async () => {

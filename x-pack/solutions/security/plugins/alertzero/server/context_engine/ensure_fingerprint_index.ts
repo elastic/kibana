@@ -71,13 +71,21 @@ const errorText = (error: unknown): string =>
 interface BaseTemplate {
   priority: number;
   composedOf: string[];
+  /** Component templates the base template allows to be absent, such as `ai-index@custom`. */
+  ignoreMissingComponentTemplates: string[];
   settings?: IndicesIndexSettings;
   properties?: MappingTypeMapping['properties'];
 }
 
+const componentNames = (value: string | readonly string[] | undefined): string[] => {
+  const names = typeof value === 'string' ? [value] : value ?? [];
+  return names.filter((name) => name.length > 0);
+};
+
 const fallbackBaseTemplate = (): BaseTemplate => ({
   priority: FALLBACK_TEMPLATE_PRIORITY,
   composedOf: [...FALLBACK_COMPOSED_OF],
+  ignoreMissingComponentTemplates: [],
 });
 
 const readBaseTemplate = async (esClient: ElasticsearchClient): Promise<BaseTemplate> => {
@@ -88,9 +96,11 @@ const readBaseTemplate = async (esClient: ElasticsearchClient): Promise<BaseTemp
       return fallbackBaseTemplate();
     }
     const template = found.index_template;
+    const composedOf = template.composed_of ?? [];
     return {
       priority: (template.priority ?? FALLBACK_TEMPLATE_PRIORITY - 1) + 1,
-      composedOf: template.composed_of ?? [...FALLBACK_COMPOSED_OF],
+      composedOf: composedOf.length > 0 ? [...composedOf] : [...FALLBACK_COMPOSED_OF],
+      ignoreMissingComponentTemplates: componentNames(template.ignore_missing_component_templates),
       settings: template.template?.settings,
       properties: template.template?.mappings?.properties,
     };
@@ -123,6 +133,11 @@ export const ensureFingerprintIndexMapping = async (
       index_patterns: [FINGERPRINT_INDEX],
       priority: base.priority,
       composed_of: base.composedOf,
+      // `ai-index@custom` is optional. Without the base template's ignore list,
+      // Elasticsearch rejects this template on a cluster that has not installed it.
+      ...(base.ignoreMissingComponentTemplates.length === 0
+        ? {}
+        : { ignore_missing_component_templates: base.ignoreMissingComponentTemplates }),
       template: {
         ...(base.settings === undefined ? {} : { settings: base.settings }),
         mappings: fingerprintMappings(base.properties),
