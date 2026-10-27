@@ -1,0 +1,17 @@
+# Reduced plugin set for a lower-memory classic Kibana ("bare-bones": Discover,
+# Dashboard, Visualize, alerting/stack management stay on). Disabling a plugin
+# transitively disables plugins that depend on it. Only keys whose plugins
+# expose an unconditional `enabled` flag in classic mode are listed; most
+# stack-management plugins (ilm, ccr, watcher, rollup, ...) can only be
+# disabled in serverless. Use with:
+#   node scripts/kibana --dev -c config/kibana.yml -c config/kibana.lite.yml
+
+xpack.securitySolution.enabled: false
+xpack.canvas.enabled: false
+monitoring.enabled: false
+xpack.cases.enabled: false
+xpack.agentBuilder.enabled: false
+xpack.automatic_import.enabled: false
+workflowsManagement.enabled: false
+newsfeed.enabled: false
+interactiveSetup.enabled: false

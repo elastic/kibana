@@ -80,6 +80,7 @@ disabledPlugins
 webpackstats.json
 /config/*
 !/config/kibana.yml
+!/config/kibana.lite.yml
 !/config/README.md
 !/config/serverless.yml
 !/config/serverless.es.yml
