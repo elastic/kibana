@@ -26550,7 +26550,6 @@
     "xpack.infra.hostsViewPage.table.nameColumnHeader": "Name",
     "xpack.infra.hostsViewPage.table.nameTooltip": "{providerName}: {name}",
     "xpack.infra.hostsViewPage.table.normalizedLoad1mColumnHeader": "Normalisierte Last (durchschnittlich)",
-    "xpack.infra.hostsViewPage.table.openHostDetailsLink.ariaLabel": "Host-Details öffnen {hostName}",
     "xpack.infra.hostsViewPage.table.rx.screenReaderOnlyLabel": "Netzwerk-Eingang",
     "xpack.infra.hostsViewPage.table.rxColumnHeader": "RX (Durchschn.)",
     "xpack.infra.hostsViewPage.table.selectedHostsButton": "Ausgewählte {selectedHostsCount} {selectedHostsCount, plural, =1 {host} other {Hosts}}",

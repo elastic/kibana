@@ -26633,7 +26633,6 @@
     "xpack.infra.hostsViewPage.table.nameColumnHeader": "名前",
     "xpack.infra.hostsViewPage.table.nameTooltip": "{providerName}：{name}",
     "xpack.infra.hostsViewPage.table.normalizedLoad1mColumnHeader": "正規化された負荷（平均）",
-    "xpack.infra.hostsViewPage.table.openHostDetailsLink.ariaLabel": "ホストの詳細{hostName}を開く",
     "xpack.infra.hostsViewPage.table.rx.screenReaderOnlyLabel": "ネットワークインバウンド",
     "xpack.infra.hostsViewPage.table.rxColumnHeader": "RX（平均）",
     "xpack.infra.hostsViewPage.table.selectedHostsButton": "選択された{selectedHostsCount} {selectedHostsCount, plural, =1 {host} other {ホスト}}",

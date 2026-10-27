@@ -26639,7 +26639,6 @@
     "xpack.infra.hostsViewPage.table.nameColumnHeader": "名称",
     "xpack.infra.hostsViewPage.table.nameTooltip": "{providerName}：{name}",
     "xpack.infra.hostsViewPage.table.normalizedLoad1mColumnHeader": "标准化负载（平均值）",
-    "xpack.infra.hostsViewPage.table.openHostDetailsLink.ariaLabel": "打开主机详情 {hostName}",
     "xpack.infra.hostsViewPage.table.rx.screenReaderOnlyLabel": "网络入站",
     "xpack.infra.hostsViewPage.table.rxColumnHeader": "RX（平均值）",
     "xpack.infra.hostsViewPage.table.selectedHostsButton": "已选 {selectedHostsCount} {selectedHostsCount, plural, =1 {host} other {主机}}",
