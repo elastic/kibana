@@ -35,12 +35,17 @@ interface KIBulkExcludeOperation {
 interface KIBulkRestoreOperation {
   restore: { id: string };
 }
+/** Re-indexes a feature with no `expires_at` (durable) or a fresh TTL (expiring). */
+interface KIBulkDurabilityOperation {
+  durability: { id: string; durable: boolean };
+}
 export type KIBulkOperation =
   | KIBulkIndexFeatureOperation
   | KIBulkIndexQueryOperation
   | KIBulkDeleteOperation
   | KIBulkExcludeOperation
-  | KIBulkRestoreOperation;
+  | KIBulkRestoreOperation
+  | KIBulkDurabilityOperation;
 
 export interface KnowledgeIndicatorClientDeps {
   dataStreamClient: KnowledgeIndicatorDataStreamClient;

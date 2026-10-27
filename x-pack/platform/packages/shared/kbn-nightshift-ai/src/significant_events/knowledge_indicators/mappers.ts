@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { Feature, QueryLink } from '@kbn/significant-events-schema';
+import type { AggregatedFeature, QueryLink } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicatorFeature, KnowledgeIndicatorQuery } from './types';
 
-export const featureToKnowledgeIndicatorFeature = (feature: Feature): KnowledgeIndicatorFeature => {
+export const featureToKnowledgeIndicatorFeature = (
+  feature: AggregatedFeature
+): KnowledgeIndicatorFeature => {
   return {
     kind: 'feature',
     feature,

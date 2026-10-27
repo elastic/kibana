@@ -78,9 +78,11 @@ export function useKnowledgeIndicatorsBulkDelete({
       let conflicts = 0;
 
       if (featuresSettled.status === 'fulfilled') {
-        succeeded += featuresSettled.value.succeededCount;
-        failed += featuresSettled.value.failedCount;
-        conflicts += featuresSettled.value.conflictCount;
+        const { succeededCount, failedCount, conflictCount } = featuresSettled.value;
+        // Counts are per instance; report rows when every instance went through.
+        succeeded += failedCount === 0 && conflictCount === 0 ? features.length : succeededCount;
+        failed += failedCount;
+        conflicts += conflictCount;
       } else {
         failed += features.length;
       }

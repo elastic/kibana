@@ -13,6 +13,8 @@ import {
   MAX_TEXT_LENGTH,
   baseFeatureSchema,
   featureUpsertSchema,
+  groupFeaturesAcrossSources,
+  type AggregatedFeature,
   type Feature,
 } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
@@ -30,6 +32,13 @@ import type { KIBulkOperation } from '../../../../lib/knowledge_indicators';
 const MAX_INPUT_STRING_LENGTH = 255;
 // Each source write can wait for its lease, so sources run in parallel to keep the request short.
 const BULK_SOURCE_CONCURRENCY = 3;
+
+const durabilityOperationSchema = z.object({
+  durability: z.object({
+    id: z.string().max(MAX_INPUT_STRING_LENGTH),
+    durable: z.boolean(),
+  }),
+});
 
 const upsertFeatureRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{sourceId}/features',
@@ -221,7 +230,7 @@ export const listAllFeaturesRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-  }): Promise<{ features: Feature[] }> => {
+  }): Promise<{ features: AggregatedFeature[] }> => {
     const scopedClients = await getScopedClients({
       request,
     });
@@ -247,7 +256,7 @@ export const listAllFeaturesRoute = createServerRoute({
       ? await kiClient.findFeatures(sourceIds, query, { searchMode, includeExcluded })
       : await kiClient.getFeatures(sourceIds, { includeExcluded });
 
-    return { features };
+    return { features: groupFeaturesAcrossSources(features) };
   },
 });
 
@@ -288,6 +297,7 @@ const bulkFeaturesRoute = createServerRoute({
               id: z.string().max(MAX_INPUT_STRING_LENGTH),
             }),
           }),
+          durabilityOperationSchema,
         ])
       ),
     }),
@@ -342,7 +352,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     access: 'internal',
     summary: 'Bulk feature operations across sources',
     description:
-      'Performs bulk delete / exclude / restore operations on features across multiple sources in a single request. Client sends flat operations keyed by feature UUID; the server resolves which source owns each feature and applies the operations per source.',
+      'Performs bulk delete / exclude / restore / durability operations on features across multiple sources in a single request. Client sends flat operations keyed by feature UUID; the server resolves which source owns each feature and applies the operations per source.',
   },
   security: {
     authz: {
@@ -357,6 +367,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
             z.object({ delete: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
             z.object({ exclude: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
             z.object({ restore: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
+            durabilityOperationSchema,
           ])
         )
         .min(1),
@@ -383,7 +394,14 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     // pattern, which uses getQueryLinks for the same purpose).
     const opsByUuid = new Map<string, KIBulkOperation>();
     for (const op of params.body.operations) {
-      const id = 'delete' in op ? op.delete.id : 'exclude' in op ? op.exclude.id : op.restore.id;
+      const id =
+        'delete' in op
+          ? op.delete.id
+          : 'exclude' in op
+          ? op.exclude.id
+          : 'restore' in op
+          ? op.restore.id
+          : op.durability.id;
       const kiOp: KIBulkOperation =
         'delete' in op ? { delete: { type: 'feature', id: op.delete.id } } : op;
       opsByUuid.set(id, kiOp);

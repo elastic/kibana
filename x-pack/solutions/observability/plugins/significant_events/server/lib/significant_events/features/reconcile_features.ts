@@ -66,6 +66,12 @@ interface FeatureCandidate {
   feature: BaseFeature;
   origin: 'known' | 'new';
   updatedAt?: string;
+  stored?: Feature;
+}
+
+export interface RetiredFeature {
+  feature: Feature;
+  replacedBy: string;
 }
 
 interface FeatureCandidateIndexes {
@@ -207,12 +213,17 @@ function filterExcluded(
   return { nonExcluded, codeIgnoredCount };
 }
 
+/**
+ * A fuzzy match keeps the stored slug unless the raw slug is authoritative (entity identity or a
+ * similarity-tool suggestion): then the stored feature is retired so slugs converge across sources.
+ */
 export function reconcileInferredFeatures({
   rawFeatures,
   allKnownFeatures,
   discoveredFeatures,
   ignoredFeatures,
   excludedFeatures,
+  authoritativeSlugs = new Set(),
   runId,
   logger,
 }: {
@@ -221,17 +232,20 @@ export function reconcileInferredFeatures({
   discoveredFeatures: ReadonlyArray<Feature>;
   ignoredFeatures: IgnoredFeature[];
   excludedFeatures: ReadonlyArray<Feature>;
+  authoritativeSlugs?: ReadonlySet<string>;
   runId: string;
   logger: Logger;
 }): {
   newFeatures: FeatureUpsert[];
   updatedFeatures: FeatureUpsert[];
+  retiredFeatures: RetiredFeature[];
   codeIgnoredCount: number;
   remappedCount: number;
 } {
   const metadata = createFeatureMetadata({ runId });
   const newFeaturesById = new Map<string, FeatureUpsert>();
   const updatedFeaturesById = new Map<string, FeatureUpsert>();
+  const retiredFeatures: RetiredFeature[] = [];
   let remappedCount = 0;
 
   for (const ignored of ignoredFeatures) {
@@ -251,6 +265,7 @@ export function reconcileInferredFeatures({
     feature: toBaseFeature(feature),
     origin: 'known',
     updatedAt: feature.updated_at,
+    stored: feature,
   }));
   const indexes: FeatureCandidateIndexes = {
     byExactId: new Map(),
@@ -263,9 +278,34 @@ export function reconcileInferredFeatures({
   for (const raw of nonExcluded) {
     const match = findFeatureMatch(raw, candidates, indexes);
 
+    const rawSlug = normalizeFeatureSlug(raw.id);
+    if (
+      match &&
+      match.tier !== 'exact' &&
+      authoritativeSlugs.has(rawSlug) &&
+      normalizeFeatureSlug(match.candidate.feature.id) !== rawSlug
+    ) {
+      remappedCount++;
+      const { candidate } = match;
+      const previousSlug = normalizeFeatureSlug(candidate.feature.id);
+      const merged = { ...mergeFeature(candidate.feature, raw), id: raw.id };
+      if (candidate.origin === 'known' && candidate.stored) {
+        retiredFeatures.push({ feature: candidate.stored, replacedBy: rawSlug });
+        updatedFeaturesById.delete(previousSlug);
+      } else {
+        newFeaturesById.delete(previousSlug);
+      }
+      candidate.feature = merged;
+      candidate.origin = 'new';
+      candidate.stored = undefined;
+      indexFeatureCandidate(candidate, indexes);
+      newFeaturesById.set(rawSlug, { ...merged, ...metadata });
+      continue;
+    }
+
     if (match) {
       // Remap = stored id differs from what the model wrote (fuzzy tiers + rerouted exact hits).
-      if (normalizeFeatureSlug(match.candidate.feature.id) !== normalizeFeatureSlug(raw.id)) {
+      if (normalizeFeatureSlug(match.candidate.feature.id) !== rawSlug) {
         remappedCount++;
       }
 
@@ -284,17 +324,17 @@ export function reconcileInferredFeatures({
         }
       }
     } else {
-      const featureId = normalizeFeatureSlug(raw.id);
       const candidate: FeatureCandidate = { feature: raw, origin: 'new' };
       candidates.push(candidate);
       indexFeatureCandidate(candidate, indexes);
-      newFeaturesById.set(featureId, { ...raw, ...metadata });
+      newFeaturesById.set(rawSlug, { ...raw, ...metadata });
     }
   }
 
   return {
     newFeatures: Array.from(newFeaturesById.values()),
     updatedFeatures: Array.from(updatedFeaturesById.values()),
+    retiredFeatures,
     codeIgnoredCount,
     remappedCount,
   };

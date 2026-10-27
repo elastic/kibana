@@ -80,6 +80,7 @@ export interface SimilarFeatureHit {
   subtype?: string;
   properties: Record<string, unknown>;
   confidence: number;
+  /** Slugs of every source holding the feature. */
   sources: string[];
 }
 

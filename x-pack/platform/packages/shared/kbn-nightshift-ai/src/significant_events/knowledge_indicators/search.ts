@@ -6,7 +6,11 @@
  */
 
 import { compact, intersection, isString, uniq } from 'lodash';
-import type { Feature, QueryLink } from '@kbn/significant-events-schema';
+import {
+  groupFeaturesAcrossSources,
+  type Feature,
+  type QueryLink,
+} from '@kbn/significant-events-schema';
 import type {
   KnowledgeIndicator,
   KnowledgeIndicatorFeature,
@@ -88,6 +92,10 @@ const compareFeatures = (
   const byConfidence = (next.feature.confidence ?? 0) - (current.feature.confidence ?? 0);
   if (byConfidence !== 0) {
     return byConfidence;
+  }
+  const bySourceCount = next.feature.sources.length - current.feature.sources.length;
+  if (bySourceCount !== 0) {
+    return bySourceCount;
   }
   const bySource = sourceSortKey(current.feature.source_id).localeCompare(
     sourceSortKey(next.feature.source_id)
@@ -176,16 +184,16 @@ async function fetchFeatureIndicators({
     sourceIds.map((sourceId) => getFeatures(sourceId, { searchText, featureTypes, featureIds }))
   );
 
-  const indicators: KnowledgeIndicatorFeature[] = [];
+  const features: Feature[] = [];
   results.forEach((result, index) => {
     if (result.status === 'rejected') {
       onFeatureFetchError?.(sourceIds[index], result.reason);
       return;
     }
-    result.value.forEach((feature) => indicators.push(featureToKnowledgeIndicatorFeature(feature)));
+    features.push(...result.value);
   });
 
-  return indicators;
+  return groupFeaturesAcrossSources(features).map(featureToKnowledgeIndicatorFeature);
 }
 
 async function fetchQueryIndicators(

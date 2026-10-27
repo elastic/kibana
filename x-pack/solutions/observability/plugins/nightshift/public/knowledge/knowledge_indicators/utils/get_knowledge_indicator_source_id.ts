@@ -7,8 +7,14 @@
 
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 
-/** Id of the source a knowledge indicator belongs to. */
+/** Id of the representative source. */
 export const getKnowledgeIndicatorSourceId = (knowledgeIndicator: KnowledgeIndicator): string =>
   knowledgeIndicator.kind === 'feature'
     ? knowledgeIndicator.feature.source_id
     : knowledgeIndicator.source_id;
+
+/** Ids of every source a knowledge indicator was found in. */
+export const getKnowledgeIndicatorSourceIds = (knowledgeIndicator: KnowledgeIndicator): string[] =>
+  knowledgeIndicator.kind === 'feature'
+    ? knowledgeIndicator.feature.sources
+    : [knowledgeIndicator.source_id];

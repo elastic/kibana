@@ -75,6 +75,8 @@ export {
   toBaseFeature,
 } from './src/feature';
 
+export { type AggregatedFeature, groupFeaturesAcrossSources } from './src/feature_aggregation';
+
 export { FeatureAccumulator } from './src/feature_accumulator';
 
 export type { IterationResult } from './src/api/features';

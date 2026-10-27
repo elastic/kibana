@@ -41,6 +41,8 @@ export type StrippedFeatureKeys = keyof Pick<
 >;
 
 export type CompactFeature = Omit<Feature, StrippedFeatureKeys> & {
+  /** Slugs of every source holding this feature. */
+  sources: string[];
   evidence_count?: number;
   tags_count?: number;
   meta_keys_omitted?: number;
@@ -176,8 +178,17 @@ function boundArray<T>(values: T[] | undefined): BoundedArray<T> {
 }
 
 function toCompactFeatureKI(ki: KnowledgeIndicatorFeature): CompactKnowledgeIndicatorFeature {
-  const { uuid, run_id, updated_at, expires_at, confidence, evidence_doc_ids, filter, ...rest } =
-    ki.feature;
+  const {
+    uuid,
+    run_id,
+    updated_at,
+    expires_at,
+    confidence,
+    evidence_doc_ids,
+    filter,
+    instances,
+    ...rest
+  } = ki.feature;
 
   const properties = isComputedFeatureType(rest.type)
     ? truncateComputedProperties(rest.type, rest.properties)
@@ -212,11 +223,17 @@ function toCompactFeatureKI(ki: KnowledgeIndicatorFeature): CompactKnowledgeIndi
 
 function presentIndicator<T extends KnowledgeIndicator>(catalog: SourceCatalog, indicator: T): T {
   if (indicator.kind === 'feature') {
+    const { feature } = indicator;
     return {
       ...indicator,
       feature: {
-        ...indicator.feature,
-        source_id: presentSlug(catalog, indicator.feature.source_id),
+        ...feature,
+        source_id: presentSlug(catalog, feature.source_id),
+        sources: feature.sources.map((sourceId) => presentSlug(catalog, sourceId)),
+        instances: feature.instances.map((instance) => ({
+          ...instance,
+          source_id: presentSlug(catalog, instance.source_id),
+        })),
       },
     };
   }
@@ -227,8 +244,8 @@ function presentIndicator<T extends KnowledgeIndicator>(catalog: SourceCatalog, 
   };
 }
 
-function storedSourceIdOf(indicator: KnowledgeIndicator): string {
-  return indicator.kind === 'feature' ? indicator.feature.source_id : indicator.source_id;
+function storedSourceIdsOf(indicator: KnowledgeIndicator): string[] {
+  return indicator.kind === 'feature' ? indicator.feature.sources : [indicator.source_id];
 }
 
 /**
@@ -240,7 +257,7 @@ function sourcesInResults(
   catalog: SourceCatalog,
   indicators: readonly KnowledgeIndicator[]
 ): NightshiftSource[] {
-  const storedIds = new Set(indicators.map(storedSourceIdOf));
+  const storedIds = new Set(indicators.flatMap(storedSourceIdsOf));
   return [...storedIds].flatMap((storedId) => {
     const source = catalog.byId.get(storedId);
     return source ? [source] : [];

@@ -427,4 +427,47 @@ describe('searchKnowledgeIndicators', () => {
     expect(res.knowledge_indicators).toHaveLength(1);
     expect(res.knowledge_indicators[0].kind).toBe('feature');
   });
+
+  it('folds a feature held by several sources into one indicator', async () => {
+    const res = await searchKnowledgeIndicators({
+      params: { kind: ['feature'] },
+      getSourceIds: async () => ['src-a', 'src-b'],
+      getFeatures: async (sourceId) => [
+        makeFeature({
+          id: 'redis',
+          uuid: `${sourceId}:redis`,
+          source_id: sourceId,
+          type: 'technology',
+          confidence: sourceId === 'src-a' ? 70 : 90,
+        }),
+      ],
+      getQueries: async () => [],
+    });
+
+    expect(res.total).toBe(1);
+    const [indicator] = res.knowledge_indicators;
+    expect(indicator).toMatchObject({
+      kind: 'feature',
+      feature: { source_id: 'src-b', sources: ['src-a', 'src-b'] },
+    });
+  });
+
+  it('ranks the feature held by more sources first on a confidence tie', async () => {
+    const res = await searchKnowledgeIndicators({
+      params: { kind: ['feature'] },
+      getSourceIds: async () => ['src-a', 'src-b'],
+      getFeatures: async (sourceId) =>
+        [
+          makeFeature({ id: 'shared', uuid: `${sourceId}:shared`, source_id: sourceId }),
+          makeFeature({ id: 'aaa-local', uuid: 'local', source_id: 'src-a' }),
+        ]
+          .filter((feature) => feature.source_id === sourceId)
+          .map((feature) => ({ ...feature, type: 'technology' })),
+      getQueries: async () => [],
+    });
+
+    expect(
+      res.knowledge_indicators.map((ki) => (ki.kind === 'feature' ? ki.feature.id : ki.query.id))
+    ).toEqual(['shared', 'aaa-local']);
+  });
 });

@@ -208,6 +208,7 @@ export class IndicatorReader {
     return { hits };
   }
 
+  /** Sources holding an active feature per slug; exact, unlike what a ranking window contains. */
   async getFeatureSourcesBySlug(
     sourceIds: string[],
     featureType: string,

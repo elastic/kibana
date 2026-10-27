@@ -27,8 +27,24 @@ function makeFeature(overrides: Partial<Feature> = {}): Feature {
   };
 }
 
-function makeFeatureKI(overrides: Partial<Feature> = {}): KnowledgeIndicator {
-  return { kind: 'feature', feature: makeFeature(overrides) };
+function makeFeatureKI(
+  overrides: Partial<Feature> = {},
+  otherSourceIds: string[] = []
+): KnowledgeIndicator {
+  const feature = makeFeature(overrides);
+  const instances = [feature.source_id, ...otherSourceIds].map((sourceId, index) => ({
+    source_id: sourceId,
+    uuid: `${feature.uuid}-${index}`,
+    confidence: feature.confidence,
+  }));
+  return {
+    kind: 'feature',
+    feature: {
+      ...feature,
+      sources: instances.map(({ source_id: sourceId }) => sourceId).sort(),
+      instances,
+    },
+  };
 }
 
 function makeQueryKI(
@@ -221,6 +237,27 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
         expect(screen.getByText('entity')).toBeInTheDocument();
       });
       expect(screen.queryByText('match_query')).not.toBeInTheDocument();
+    });
+
+    it('counts a KI under each value when getValue returns several', async () => {
+      const kis = [
+        makeFeatureKI({ id: 'f1', source_id: 'logs.a' }, ['logs.b']),
+        makeFeatureKI({ id: 'f2', source_id: 'logs.a' }),
+      ];
+
+      await renderFilter({
+        knowledgeIndicators: kis,
+        getValue: (ki) => (ki.kind === 'feature' ? ki.feature.sources : ki.source_id),
+      });
+
+      expect(screen.getByRole('button', { name: /Test Filter/ })).toHaveTextContent('2');
+
+      fireEvent.click(screen.getByRole('button', { name: /Test Filter/ }));
+
+      await waitFor(() => {
+        expect(screen.getByRole('option', { name: /logs\.a/ })).toHaveTextContent('logs.a2');
+      });
+      expect(screen.getByRole('option', { name: /logs\.b/ })).toHaveTextContent('logs.b1');
     });
   });
 

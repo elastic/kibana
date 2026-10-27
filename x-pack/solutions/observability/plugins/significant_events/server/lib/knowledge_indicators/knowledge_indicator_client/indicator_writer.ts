@@ -38,6 +38,11 @@ import { StatusError } from '../../errors/status_error';
 import type { RevisionReader } from './revision_reader';
 import type { KIBulkOperation, KnowledgeIndicatorDataStreamClient } from './types';
 
+interface DurabilityChange {
+  latest: StoredFeatureKnowledgeIndicator;
+  durable: boolean;
+}
+
 export class IndicatorWriter {
   constructor(
     private readonly dataStreamClient: KnowledgeIndicatorDataStreamClient,
@@ -63,16 +68,22 @@ export class IndicatorWriter {
       { excludableLatest, skipped: excludeSkipped },
       { restorableLatest, skipped: restoreSkipped },
       { deletableOps, skipped: deleteSkipped },
+      { durabilityChanges, skipped: durabilitySkipped },
     ] = await Promise.all([
       this.prepareExcludes(sourceId, operations),
       this.prepareRestores(sourceId, operations),
       this.prepareDeletes(sourceId, operations),
+      this.prepareDurability(sourceId, operations),
     ]);
 
     const indexOpsCount = operations.filter((op) => 'index' in op).length;
     const totalApplied =
-      indexOpsCount + excludableLatest.length + restorableLatest.length + deletableOps.length;
-    const totalSkipped = excludeSkipped + restoreSkipped + deleteSkipped;
+      indexOpsCount +
+      excludableLatest.length +
+      restorableLatest.length +
+      deletableOps.length +
+      durabilityChanges.length;
+    const totalSkipped = excludeSkipped + restoreSkipped + deleteSkipped + durabilitySkipped;
 
     if (totalApplied === 0) {
       return { applied: 0, skipped: totalSkipped };
@@ -86,6 +97,7 @@ export class IndicatorWriter {
           excludableLatest,
           restorableLatest,
           deletableOps,
+          durabilityChanges,
           includeEmbedding,
           now,
         }) as Array<StoredKnowledgeIndicator & Record<string, unknown>>,
@@ -192,6 +204,36 @@ export class IndicatorWriter {
     return { restorableLatest, skipped };
   }
 
+  /** Durability requires a pre-read: the full feature payload is re-indexed with the new expiry. */
+  private async prepareDurability(
+    sourceId: string,
+    operations: KIBulkOperation[]
+  ): Promise<{ durabilityChanges: DurabilityChange[]; skipped: number }> {
+    const durableById = new Map(
+      operations.flatMap((op) =>
+        'durability' in op ? [[op.durability.id, op.durability.durable] as const] : []
+      )
+    );
+    if (durableById.size === 0) {
+      return { durabilityChanges: [], skipped: 0 };
+    }
+
+    const latestDocs = await this.revisionReader.fetchLatestFeatures(sourceId, [
+      ...durableById.keys(),
+    ]);
+    const durabilityChanges: DurabilityChange[] = [];
+    let skipped = 0;
+    for (const [id, durable] of durableById) {
+      const latest = latestDocs.find((doc) => doc.id === id);
+      if (!latest || isComputedFeature(fromStoredFeature(latest))) {
+        skipped += 1;
+        continue;
+      }
+      durabilityChanges.push({ latest, durable });
+    }
+    return { durabilityChanges, skipped };
+  }
+
   /**
    * Delete requires a pre-read so we can skip unknown/non-existent ids
    * rather than writing tombstones for them (which would count as applied).
@@ -245,12 +287,14 @@ export class IndicatorWriter {
       excludableLatest,
       restorableLatest,
       deletableOps,
+      durabilityChanges,
       includeEmbedding,
       now,
     }: {
       excludableLatest: StoredFeatureKnowledgeIndicator[];
       restorableLatest: StoredFeatureKnowledgeIndicator[];
       deletableOps: Array<Extract<KIBulkOperation, { delete: unknown }>>;
+      durabilityChanges: DurabilityChange[];
       includeEmbedding: boolean;
       now: string;
     }
@@ -301,6 +345,16 @@ export class IndicatorWriter {
           feature: { ...feature, excluded: undefined },
           includeEmbedding,
           expiresAt,
+        })
+      );
+    }
+    for (const { latest, durable } of durabilityChanges) {
+      docs.push(
+        toStoredFeature({
+          sourceId,
+          feature: fromStoredFeature(latest),
+          includeEmbedding,
+          expiresAt: durable ? undefined : computeExpiresAt(now, this.ttlDays),
         })
       );
     }

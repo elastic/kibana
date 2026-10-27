@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Feature } from '@kbn/significant-events-schema';
+import type { BaseFeature, Feature } from '@kbn/significant-events-schema';
 import { loggerMock } from '@kbn/logging-mocks';
 import { executeFeatureIdentificationAgent } from './identify_features_via_agent';
 import {
@@ -165,6 +165,7 @@ describe('identifyInferredFeatures', () => {
     mockExecuteFeatureIdentificationAgent.mockResolvedValue({
       features: [],
       ignoredFeatures: [],
+      suggestedSlugs: [],
       tokensUsed: { prompt: 0, completion: 0, total: 0 },
     });
 
@@ -196,5 +197,85 @@ describe('identifyInferredFeatures', () => {
     expect(mockExecuteFeatureIdentificationAgent).toHaveBeenCalledWith(
       expect.objectContaining({ interactionId: 'run-1' })
     );
+  });
+
+  describe('when an authoritative slug replaces a divergent local feature', () => {
+    const DEFAULT_EXPIRES_AT = '2026-12-01T00:00:00.000Z';
+    const local = createFeature({
+      id: 'checkout-svc',
+      type: 'entity',
+      subtype: 'service',
+      properties: { service: 'checkout' },
+    });
+    const raw: BaseFeature = {
+      ...local,
+      id: 'checkout-api',
+      filter: { field: 'service.name', eq: 'Checkout API' },
+    };
+
+    const run = async (
+      stored: Feature,
+      { suggestedSlugs = [] as string[], feature = raw } = {}
+    ) => {
+      mockExecuteFeatureIdentificationAgent.mockResolvedValue({
+        features: [feature],
+        ignoredFeatures: [],
+        suggestedSlugs,
+        tokensUsed: { prompt: 0, completion: 0, total: 0 },
+      });
+      const kiClient = {
+        getFeatures: jest.fn().mockResolvedValue({ hits: [stored] }),
+        getExcludedFeatures: jest.fn().mockResolvedValue({ hits: [] }),
+        bulk: jest.fn(),
+        getDefaultExpiresAt: jest.fn().mockReturnValue(DEFAULT_EXPIRES_AT),
+      };
+
+      await identifyInferredFeatures({
+        kiClient,
+        agentBuilder: {},
+        connectorId: 'connector-1',
+        logger: loggerMock.create(),
+        signal: new AbortController().signal,
+        sourceId: 'logs.test',
+        runId: 'run-1',
+        documents: [{ _id: 'doc-1', fields: { message: 'hello' } }],
+        totalFilters: 0,
+        filtersCapped: false,
+        hasFilteredDocuments: false,
+      } as unknown as Parameters<typeof identifyInferredFeatures>[0]);
+
+      return kiClient.bulk.mock.calls[0][1];
+    };
+
+    it('indexes the canonical slug and tombstones the local feature', async () => {
+      const operations = await run({ ...local, expires_at: '2026-11-01T00:00:00.000Z' });
+
+      expect(operations).toEqual([
+        {
+          index: {
+            feature: expect.objectContaining({
+              id: 'checkout-api',
+              expires_at: DEFAULT_EXPIRES_AT,
+            }),
+          },
+        },
+        { delete: { type: 'feature', id: local.uuid } },
+      ]);
+    });
+
+    it('keeps the replacement durable when the retired feature was durable', async () => {
+      const operations = await run(local);
+
+      expect(operations[0].index.feature.expires_at).toBeUndefined();
+    });
+
+    it('treats a slug the similarity tool returned as authoritative', async () => {
+      const operations = await run(
+        { ...local, expires_at: '2026-11-01T00:00:00.000Z' },
+        { suggestedSlugs: ['checkout-api'], feature: { ...raw, filter: undefined } }
+      );
+
+      expect(operations).toContainEqual({ delete: { type: 'feature', id: local.uuid } });
+    });
   });
 });

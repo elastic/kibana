@@ -32,7 +32,9 @@ import {
   reconcileInferredFeatures,
   toFeatureSummary,
   toFeatureProjection,
+  type RetiredFeature,
 } from './reconcile_features';
+import { canonicalizeEntitySlugs } from './canonicalize_entity_slugs';
 import { executeFeatureIdentificationAgent } from './identify_features_via_agent';
 import { FeatureNotEnabledError } from '../../errors/feature_not_enabled_error';
 
@@ -278,6 +280,7 @@ interface InferredIterationResult {
         tokensUsed: ChatCompletionTokenCount;
         newFeatures: FeatureUpsert[];
         updatedFeatures: FeatureUpsert[];
+        retiredFeatures: RetiredFeature[];
         ignoredFeatures: IgnoredFeature[];
         codeIgnoredCount: number;
         remappedCount: number;
@@ -330,6 +333,7 @@ async function runInferredIteration({
 
   let rawFeatures: BaseFeature[];
   let ignoredFeatures: IgnoredFeature[];
+  let suggestedSlugs: string[];
   let tokensUsed: ChatCompletionTokenCount;
 
   try {
@@ -348,6 +352,7 @@ async function runInferredIteration({
     });
     rawFeatures = result.features;
     ignoredFeatures = result.ignoredFeatures;
+    suggestedSlugs = result.suggestedSlugs;
     tokensUsed = result.tokensUsed;
   } catch (error) {
     if (signal.aborted) {
@@ -365,13 +370,15 @@ async function runInferredIteration({
     };
   }
 
-  const { newFeatures, updatedFeatures, codeIgnoredCount, remappedCount } =
+  const { features: canonicalFeatures, canonicalSlugs } = canonicalizeEntitySlugs(rawFeatures);
+  const { newFeatures, updatedFeatures, retiredFeatures, codeIgnoredCount, remappedCount } =
     reconcileInferredFeatures({
-      rawFeatures,
+      rawFeatures: canonicalFeatures,
       allKnownFeatures,
       discoveredFeatures,
       ignoredFeatures,
       excludedFeatures,
+      authoritativeSlugs: new Set([...canonicalSlugs, ...suggestedSlugs]),
       runId,
       logger,
     });
@@ -387,6 +394,7 @@ async function runInferredIteration({
       tokensUsed,
       newFeatures,
       updatedFeatures,
+      retiredFeatures,
       ignoredFeatures,
       codeIgnoredCount,
       remappedCount,
@@ -520,25 +528,35 @@ export async function identifyInferredFeatures({
     tokensUsed,
     newFeatures,
     updatedFeatures,
+    retiredFeatures,
     ignoredFeatures,
     codeIgnoredCount,
     remappedCount,
   } = outcome;
 
   const allChanged = [...newFeatures, ...updatedFeatures];
-  if (allChanged.length > 0) {
+  if (allChanged.length > 0 || retiredFeatures.length > 0) {
+    // A replacement inherits the durability of the feature it retires.
     const priorBySlug = new Map(allFeatures.map((f) => [normalizeFeatureSlug(f.id), f]));
-    await kiClient.bulk(
-      sourceId,
-      allChanged.map((feature) => {
+    for (const { feature, replacedBy } of retiredFeatures) {
+      if (!priorBySlug.has(replacedBy)) priorBySlug.set(replacedBy, feature);
+    }
+    await kiClient.bulk(sourceId, [
+      ...allChanged.map((feature) => {
         const prior = priorBySlug.get(normalizeFeatureSlug(feature.id));
         const expiresAt = !prior || prior.expires_at ? kiClient.getDefaultExpiresAt() : undefined;
         return { index: { feature: { ...feature, expires_at: expiresAt } } };
-      })
-    );
+      }),
+      ...retiredFeatures.map(({ feature }) => ({
+        delete: { type: 'feature' as const, id: feature.uuid },
+      })),
+    ]);
   }
 
-  const discoveredMap = new Map<string, FeatureUpsert>(discoveredFeatures.map((f) => [f.id, f]));
+  const retiredIds = new Set(retiredFeatures.map(({ feature }) => feature.id));
+  const discoveredMap = new Map<string, FeatureUpsert>(
+    discoveredFeatures.filter((f) => !retiredIds.has(f.id)).map((f) => [f.id, f])
+  );
   for (const feature of allChanged) {
     discoveredMap.set(feature.id, feature);
   }
