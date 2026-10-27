@@ -37,10 +37,12 @@ components:
         - extraction_pending
       description: >-
         Why a hunt could not corroborate part of what it was asked to look at, or
-        could not show what it found. Nine are transient, named rather than
+        could not show what it found. Ten are transient, named rather than
         counted so this list stays honest as reasons are added:
         `search_partial`, `index_unavailable`, `generation_failed`,
-        `execute_failed`, `extraction_pending` (the report's enrichment has not
+        `execute_failed`, `generation_budget` (the run's budget of generated
+        queries ran out before this technique; a later run skips the techniques
+        already searched, so the budget reaches it), `extraction_pending` (the report's enrichment has not
         finished, so a later sweep will have terms this one did not),
         `catalog_unavailable` (the managed ATT&CK data was
         unavailable, so a later run can extract and verify the report's techniques), and the three that mean a model's output was refused —

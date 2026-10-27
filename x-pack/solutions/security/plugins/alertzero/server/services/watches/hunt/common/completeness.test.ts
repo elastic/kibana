@@ -24,6 +24,7 @@ describe('huntCompletenessOf', () => {
     'index_unavailable',
     'generation_failed',
     'execute_failed',
+    'generation_budget',
     'catalog_unavailable',
     'extraction_pending',
   ])('treats %s as retryable, so the report stays eligible', (reason) => {
@@ -42,7 +43,6 @@ describe('huntCompletenessOf', () => {
   );
 
   it.each<HuntIncompleteReason>([
-    'generation_budget',
     'collapsed',
     'unknown_technique_id',
     'rows_unclassifiable',
@@ -89,7 +89,7 @@ describe('huntCompletenessOf', () => {
   it('lets a retryable gap win over a deterministic one', () => {
     // Retrying still gains something: the next run closes the transient half and
     // reports the rest as final, so the report settles instead of cycling forever.
-    expect(huntCompletenessOf([gap('generation_budget'), gap('execute_failed')])).toBe(
+    expect(huntCompletenessOf([gap('nothing_searched'), gap('execute_failed')])).toBe(
       'incomplete_retryable'
     );
   });
