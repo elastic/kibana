@@ -27,7 +27,7 @@ import {
 import { RULE_EDIT_ERROR_TEXT, RULE_EDIT_SUCCESS_TEXT } from './translations';
 import {
   getAvailableRuleTypes,
-  getMissingEditPrivilege,
+  getEditRulePermissions,
   parseRuleCircuitBreakerErrorMessage,
 } from './utils';
 import type { RuleFormStepId } from './constants';
@@ -125,19 +125,6 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     [id, mutate]
   );
 
-  const missingEditPrivilege = useMemo(() => {
-    if (!ruleType || !fetchedFormData) {
-      return undefined;
-    }
-
-    return getMissingEditPrivilege({
-      ruleType,
-      consumer: fetchedFormData.consumer,
-      hasActions: fetchedFormData.actions.length > 0,
-      canExecuteActions: !!application.capabilities.actions?.execute,
-    });
-  }, [ruleType, fetchedFormData, application]);
-
   const computedInitialMetadata = useMemo(() => {
     // Injecting isEdit only for esquery rules to enable this feature: https://github.com/elastic/kibana/issues/226839
     // to minimize possible changes to other ruletypes
@@ -182,7 +169,14 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     );
   }
 
-  if (missingEditPrivilege === 'rule') {
+  const { canEditRule, canEditActions } = getEditRulePermissions({
+    ruleType,
+    consumer: fetchedFormData.consumer,
+    hasActions: fetchedFormData.actions.length > 0,
+    canExecuteActions: !!application.capabilities.actions?.execute,
+  });
+
+  if (!canEditRule) {
     return (
       <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
         <RuleFormRulePermissionError />
@@ -190,7 +184,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     );
   }
 
-  if (missingEditPrivilege === 'actions') {
+  if (!canEditActions) {
     return (
       <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
         <RuleFormActionPermissionError />
