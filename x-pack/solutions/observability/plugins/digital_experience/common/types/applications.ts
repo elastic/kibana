@@ -42,6 +42,15 @@ export interface WebVitals {
   ttfb: DurationVital;
 }
 
+/** The HTTP requests the browser made. */
+export interface HttpRequests {
+  /** Requests with a known outcome. */
+  count: number;
+  failedCount: number;
+  /** `failedCount / count` between 0 and 1, `null` without requests. */
+  failedRatio: number | null;
+}
+
 /** One application of one source, over the requested time range and environment. */
 export interface ApplicationSummary {
   serviceName: string;
@@ -55,13 +64,7 @@ export interface ApplicationSummary {
     /** Errors per page load, `null` without page loads. */
     perPageLoad: number | null;
   };
-  httpRequests: {
-    /** Requests with a known outcome. */
-    count: number;
-    failedCount: number;
-    /** `failedCount / count` between 0 and 1, `null` without requests. */
-    failedRatio: number | null;
-  };
+  httpRequests: HttpRequests;
   /** Time of the latest document in the range (ISO 8601), `null` when unknown. */
   lastSeen: string | null;
 }

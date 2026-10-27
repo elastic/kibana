@@ -11,8 +11,7 @@ import { OTEL_EVENT_NAME, SERVICE_NAME } from '@kbn/apm-types';
 import { CORE_WEB_VITAL } from '../../../../common/core_web_vitals';
 import { LAST_SEEN_AGGREGATION } from '../../../lib/helpers/aggregations';
 import { dateHistogram } from '../../../lib/helpers/time_series';
-import { environmentFilter, environmentNotDefinedFilter } from '../../../lib/helpers/environment';
-import { MAX_ENVIRONMENTS } from '../../../lib/constants';
+import { environmentFilter } from '../../../lib/helpers/environment';
 import {
   EVENT_EXCEPTION,
   EVENT_NAVIGATION_TIMING,
@@ -23,10 +22,12 @@ import {
 import {
   ENVIRONMENT_FIELDS,
   browserDocuments,
+  byEnvironment,
   environmentTerms,
   eventCount,
   failedRequests,
   httpRequestDocuments,
+  otelSearchDefaults,
   requestsWithOutcome,
   webVital,
 } from '../../../lib/otel/queries';
@@ -44,27 +45,9 @@ export interface SpansSearchParams extends SearchParams {
   serviceNames: string[];
 }
 
-/** The applications in the selected environment, and every environment so the picker lists all. */
-const applicationsByEnvironment = (
-  environment: string | undefined,
-  aggs: { applications: estypes.AggregationsAggregationContainer } & Record<
-    string,
-    estypes.AggregationsAggregationContainer
-  >
-) => ({
-  ...environmentTerms(MAX_ENVIRONMENTS),
-  environmentNotDefined: { filter: environmentNotDefinedFilter(ENVIRONMENT_FIELDS) },
-  inEnvironment: { filter: environmentFilter(ENVIRONMENT_FIELDS, environment), aggs },
-});
-
 /** Page loads, JS errors and web vitals per application, from the logs. */
 export const logsSearch = ({ start, end, environment }: SearchParams): estypes.SearchRequest => ({
-  index: OTEL_LOGS_INDEX,
-  size: 0,
-  track_total_hits: false,
-  ignore_unavailable: true,
-  // A shard that fails fails the search, so the source is reported as unavailable, not incomplete.
-  allow_partial_search_results: false,
+  ...otelSearchDefaults(OTEL_LOGS_INDEX),
   query: {
     bool: {
       filter: [
@@ -74,7 +57,7 @@ export const logsSearch = ({ start, end, environment }: SearchParams): estypes.S
       ],
     },
   },
-  aggs: applicationsByEnvironment(environment, {
+  aggs: byEnvironment(environment, {
     applications: {
       terms: {
         field: SERVICE_NAME,
@@ -110,11 +93,7 @@ export const spansSearch = ({
   environment,
   serviceNames,
 }: SpansSearchParams): estypes.SearchRequest => ({
-  index: OTEL_TRACES_INDEX,
-  size: 0,
-  track_total_hits: false,
-  ignore_unavailable: true,
-  allow_partial_search_results: false,
+  ...otelSearchDefaults(OTEL_TRACES_INDEX),
   query: {
     bool: {
       filter: [...browserDocuments(start, end), ...httpRequestDocuments()],
