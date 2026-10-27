@@ -166,7 +166,10 @@ export class LogsExperiencePage {
       // The shortcut is only handled while a cell has focus; the sticky header is always mounted.
       await this.colorIndicatorHeader.focus();
       await this.page.keyboard.press('Control+End');
-      await expect(this.dataGrid.getCell(rowCount - 1, COLOR_INDICATOR_COLUMN_ID)).toBeInViewport();
+      // The whole row, not one cell: Ctrl+End also scrolls horizontally to the last column.
+      await expect(
+        grid.locator(`[data-grid-visible-row-index="${rowCount - 1}"]`)
+      ).toBeInViewport();
     }).toPass();
   }
 
