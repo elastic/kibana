@@ -25,7 +25,7 @@ const LazyDashboardPreview = lazy(async () => {
 
 type PreviewProps = Parameters<ChangeHistoryPreviewRenderFn>[0];
 
-export interface DashboardChangeHistoryPreviewProps {
+export interface DashboardChangeHistoryViewProps {
   previewProps: PreviewProps;
   setPreviewTitle: (title: string) => void;
   inheritedTimeRange: DashboardState['time_range'];
@@ -34,12 +34,12 @@ export interface DashboardChangeHistoryPreviewProps {
 }
 
 /** Switches between the rendered dashboard preview and the JSON comparison of a change. */
-export const DashboardChangeHistoryPreview = ({
+export const DashboardChangeHistoryView = ({
   previewProps,
   setPreviewTitle,
   inheritedTimeRange,
   comparisonChangeId,
-}: DashboardChangeHistoryPreviewProps): JSX.Element => {
+}: DashboardChangeHistoryViewProps): JSX.Element => {
   const { compareSpec, diffTelemetry, change } = previewProps;
 
   const isComparison = comparisonChangeId && comparisonChangeId === change?.id && compareSpec;

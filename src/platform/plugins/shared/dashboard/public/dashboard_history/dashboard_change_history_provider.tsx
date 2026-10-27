@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 
-import type { ChangeHistoryListItem, ChangeHistoryProviderProps } from '@kbn/change-history-ui';
+import type { ChangeHistoryProviderProps } from '@kbn/change-history-ui';
 import { ChangeHistoryModal, ChangeHistoryProvider } from '@kbn/change-history-ui';
 import { i18n } from '@kbn/i18n';
 
@@ -19,7 +19,7 @@ import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { coreServices } from '../services/kibana_services';
 import { createDashboardChangeHistoryAdapter } from './dashboard_change_history_adapter';
 import { renderDashboardChangeHistoryBadge } from './dashboard_change_history_badge';
-import { DashboardChangeHistoryPreview } from './dashboard_change_history_preview';
+import { DashboardChangeHistoryView } from './dashboard_change_history_view';
 
 export interface DashboardChangeHistoryProviderProps {
   children: React.ReactNode;
@@ -78,9 +78,7 @@ export const DashboardChangeHistoryProvider = ({
           data-test-subj="changeHistoryItemChanges"
           size={'xs'}
           flush={'both'}
-          onClick={(e: React.MouseEvent) => {
-            console.log('CLICK N CHANGES', item);
-            // e.stopPropagation(); // prevent bubbling up to `onSelectChange`
+          onClick={() => {
             setComparisonChangeId(item.id);
           }}
         >
@@ -92,7 +90,7 @@ export const DashboardChangeHistoryProvider = ({
 
   const renderPreview = useCallback<NonNullable<ChangeHistoryProviderProps['renderPreview']>>(
     (props) => (
-      <DashboardChangeHistoryPreview
+      <DashboardChangeHistoryView
         previewProps={props}
         setPreviewTitle={setPreviewTitle}
         comparisonChangeId={comparisonChangeId}
