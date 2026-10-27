@@ -94,13 +94,22 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
   }
 
   public emitEpisodeActions(request: KibanaRequest, actions: readonly AlertActionDocument[]): void {
-    // `user` matches the default event-origin actor. A fake request sets the
-    // channel to `system`; it does not make the actor `internal`.
-    const context: AlertingPublisherContext = { request, origin: toEventOrigin('user', request) };
+    // A fake request is Kibana acting without a user, so the actor is
+    // `internal` and the channel is `system`. Any other request stays `user`.
+    const actor = request.isFakeRequest ? 'internal' : 'user';
+    const context: AlertingPublisherContext = { request, origin: toEventOrigin(actor, request) };
     for (const action of actions) {
-      const event = this.buildEvent(action);
-      if (event) {
-        this.eventBus.publish(event, context);
+      try {
+        const event = this.buildEvent(action);
+        if (event) {
+          this.eventBus.publish(event, context);
+        }
+      } catch (error) {
+        this.logger.error({
+          message: () => 'Failed to publish alert action domain event',
+          error,
+          code: ALERTING_LOG_CODES.EVENTS_ALERT_ACTION_PUBLISH_FAILED,
+        });
       }
     }
 

@@ -51,10 +51,8 @@ const executionContextHeader = (context: object) => encodeURIComponent(JSON.stri
 const createRequest = (
   headers: Record<string, string> = {},
   { isFakeRequest = false }: { isFakeRequest?: boolean } = {}
-): KibanaRequest => ({
-  ...httpServerMock.createKibanaRequest({ headers }),
-  isFakeRequest,
-});
+): KibanaRequest =>
+  Object.assign(httpServerMock.createKibanaRequest({ headers }), { isFakeRequest });
 
 const baseEnvelope = {
   occurredAt: '2025-02-02T12:34:56.000Z',
@@ -468,14 +466,34 @@ describe('AlertActionEventPublisher', () => {
       expect(payload.origin).toEqual({ actor: 'user', channel: 'ui' });
     });
 
-    it('reports a fake request as a user on the system channel', () => {
+    it('reports a fake request as internal on the system channel', () => {
       publisher.emitEpisodeActions(createRequest({}, { isFakeRequest: true }), [
         createAction({ action_type: 'ack' }),
       ]);
 
       expect(ebtService.reportEvent).toHaveBeenCalledWith(
         ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE.ack,
-        expect.objectContaining({ origin: { actor: 'user', channel: 'system' } })
+        expect.objectContaining({ origin: { actor: 'internal', channel: 'system' } })
+      );
+    });
+
+    it('still reports telemetry when publishing a domain event throws', () => {
+      eventBus.publish.mockImplementation(() => {
+        throw new Error('bus down');
+      });
+
+      expect(() =>
+        publisher.emitEpisodeActions(request, [createAction({ action_type: 'ack' })])
+      ).not.toThrow();
+
+      expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Failed to publish alert action domain event',
+        expect.objectContaining({
+          labels: expect.objectContaining({
+            code: ALERTING_LOG_CODES.EVENTS_ALERT_ACTION_PUBLISH_FAILED,
+          }),
+        })
       );
     });
 

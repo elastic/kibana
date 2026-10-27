@@ -140,6 +140,10 @@ const isReportedActionType = (actionType: string): actionType is AlertEpisodeAct
  * reports one event per rule, and `alert_count` is that group's size, so
  * `rule_id` stays the rule that produced those alerts. Assign and
  * clear-assignee share `assign`.
+ *
+ * Action types outside {@link REPORTED_ALERT_ACTION_TYPES} are omitted. The
+ * publisher already warns for those, and leaving them out keeps `alert_count`
+ * equal to the reported actions rather than every persisted document.
  */
 const groupAppliedAlertActions = (
   actions: readonly AppliedAlertAction[]
@@ -151,10 +155,11 @@ const groupAppliedAlertActions = (
       continue;
     }
 
-    const key = JSON.stringify([action.actionType, action.spaceId, action.ruleId]);
+    // Action types, space ids, and rule ids cannot contain NUL.
+    const key = `${action.actionType}\0${action.spaceId}\0${action.ruleId ?? ''}`;
     const existing = groups.get(key);
     if (existing) {
-      groups.set(key, { ...existing, alertCount: existing.alertCount + 1 });
+      existing.alertCount += 1;
       continue;
     }
 

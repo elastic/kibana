@@ -52,7 +52,11 @@ export type AlertActionEbtEventType = z.infer<typeof alertActionEbtEventTypeTele
 const SPACE_ID_MAX_LENGTH = 1024;
 const SPACE_ID_PATTERN = /^[a-z0-9_-]+$/;
 
-/** Payload shared by every alert-action telemetry event. */
+/**
+ * Test contract for the shared payload. Core registers the `EventTypeOpts`
+ * schema in `alert_action_ebt_event.ts` and does not parse this zod schema
+ * before `reportEvent`, matching rule-change EBT.
+ */
 export const alertActionAppliedTelemetryDataSchema = lazySchema(() =>
   z.object({
     space_id: z

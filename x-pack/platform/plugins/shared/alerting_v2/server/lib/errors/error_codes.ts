@@ -350,6 +350,12 @@ export const ALERTING_LOG_CODES = {
    * the action-type vocabulary grows ahead of the publisher's mapping.
    */
   EVENTS_ALERT_ACTION_TYPE_UNMAPPED: 'EVENTS_ALERT_ACTION_TYPE_UNMAPPED',
+  /**
+   * Publishing one alert-action domain event failed. The action is already
+   * persisted, so the publisher logs the failure and continues with the rest
+   * of the batch, including telemetry.
+   */
+  EVENTS_ALERT_ACTION_PUBLISH_FAILED: 'EVENTS_ALERT_ACTION_PUBLISH_FAILED',
 
   // ───────────────────── Event-based telemetry (EBT) ─────────────────────
   /**
