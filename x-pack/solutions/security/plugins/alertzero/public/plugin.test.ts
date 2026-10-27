@@ -11,6 +11,9 @@ import { AppStatus, type AppUpdater } from '@kbn/core/public';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { SolutionView } from '@kbn/spaces-plugin/common';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import {
   BehaviorSubject,
   EMPTY,
@@ -32,6 +35,19 @@ const createLicensing = () => ({
     licensingMock.createLicense({ license: { type: 'enterprise', status: 'active' } })
   ),
 });
+
+const createSpaces = (solution?: SolutionView) => {
+  const spaces = spacesPluginMock.createStartContract();
+  spaces.getActiveSpace.mockResolvedValue({
+    id: DEFAULT_SPACE_ID,
+    name: 'Default',
+    disabledFeatures: [],
+    ...(solution && { solution }),
+  });
+  return spaces;
+};
+
+const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 const createConfig = (overrides: Partial<AlertZeroClientConfig> = {}): AlertZeroClientConfig => ({
   enabled: false,
@@ -120,6 +136,7 @@ describe('AlertZeroPublicPlugin app registration', () => {
       coreStart as never,
       {
         licensing: createLicensing(),
+        spaces: createSpaces('security'),
         agenticInvestigations: {},
         proposals: {},
         agentBuilder: agentBuilderMocks.createStart(),
@@ -148,7 +165,7 @@ describe('AlertZeroPublicPlugin app registration', () => {
       const { updater$ } = coreSetup.application.register.mock.calls[0][0];
       if (!updater$) throw new Error('Missing application updater');
       const nextUpdate = firstValueFrom(updater$.pipe(map((update) => update({} as never))));
-      plugin.start(coreStart, { licensing: createLicensing() });
+      plugin.start(coreStart, { licensing: createLicensing(), spaces: createSpaces('security') });
       const update = await nextUpdate;
       expect(update?.status).toBe(AppStatus.accessible);
       expect(update?.visibleIn).toEqual(canRead ? ['projectSideNav', 'globalSearch'] : []);
@@ -157,14 +174,18 @@ describe('AlertZeroPublicPlugin app registration', () => {
     }
   );
 
-  it('hides navigation until a valid Enterprise license arrives and on later downgrades', () => {
+  it('hides navigation until a valid Enterprise license arrives and on later downgrades', async () => {
     const { coreSetup, plugin, coreStart } = setupPlugin(new BehaviorSubject(true));
     const { updater$ } = coreSetup.application.register.mock.calls[0][0];
     if (!updater$) throw new Error('Missing application updater');
     const onUpdate = jest.fn();
     const subscription = updater$.pipe(map((update) => update({} as never))).subscribe(onUpdate);
     const license$ = new Subject<ReturnType<typeof licensingMock.createLicense>>();
-    plugin.start(coreStart, { licensing: { ...createLicensing(), license$ } });
+    plugin.start(coreStart, {
+      licensing: { ...createLicensing(), license$ },
+      spaces: createSpaces('security'),
+    });
+    await flushPromises();
 
     expect(onUpdate).toHaveBeenLastCalledWith({
       status: AppStatus.accessible,
@@ -200,7 +221,10 @@ describe('AlertZeroPublicPlugin app registration', () => {
     if (!updater$) throw new Error('Missing application updater');
     const onUpdate = jest.fn();
     const subscription = updater$.pipe(map((update) => update({} as never))).subscribe(onUpdate);
-    const contract = plugin.start(coreStart, { licensing: createLicensing() });
+    const contract = plugin.start(coreStart, {
+      licensing: createLicensing(),
+      spaces: createSpaces('security'),
+    });
 
     expect(onUpdate).toHaveBeenLastCalledWith({
       status: AppStatus.accessible,
@@ -237,15 +261,76 @@ describe('AlertZeroPublicPlugin app registration', () => {
       coreStart as never,
       {
         licensing: createLicensing(),
+        spaces: createSpaces('security'),
         agenticInvestigations: {},
         proposals: {},
         agentBuilder: agentBuilderMocks.createStart(),
       } as never
     );
+    await flushPromises();
     setting$.next(true);
     subscription.unsubscribe();
 
     expect(statuses).toEqual([AppStatus.inaccessible, AppStatus.accessible]);
+  });
+
+  describe('in a Classic space', () => {
+    const startWithSpace = async (spaces: ReturnType<typeof createSpaces>) => {
+      const { coreSetup, plugin, coreStart } = setupPlugin(new BehaviorSubject(true));
+      const { updater$ } = coreSetup.application.register.mock.calls[0][0];
+      if (!updater$) throw new Error('Missing application updater');
+      const onUpdate = jest.fn();
+      const subscription = updater$.pipe(map((update) => update({} as never))).subscribe(onUpdate);
+      plugin.start(coreStart, { licensing: createLicensing(), spaces });
+      await flushPromises();
+      return { onUpdate, plugin, subscription };
+    };
+
+    it.each([[createSpaces('classic')], [createSpaces()]])(
+      'keeps the app accessible but hides navigation when the setting is on',
+      async (spaces) => {
+        const { onUpdate, plugin, subscription } = await startWithSpace(spaces);
+
+        expect(onUpdate).toHaveBeenLastCalledWith({
+          status: AppStatus.accessible,
+          visibleIn: [],
+          deepLinks: [],
+        });
+        subscription.unsubscribe();
+        plugin.stop();
+      }
+    );
+
+    it('keeps the app accessible but hides navigation when the space cannot be read', async () => {
+      const spaces = createSpaces();
+      spaces.getActiveSpace.mockRejectedValue(new Error('space not found'));
+      const { onUpdate, plugin, subscription } = await startWithSpace(spaces);
+
+      expect(onUpdate).toHaveBeenLastCalledWith({
+        status: AppStatus.accessible,
+        visibleIn: [],
+        deepLinks: [],
+      });
+      subscription.unsubscribe();
+      plugin.stop();
+    });
+
+    it('does not register the attachment UI', async () => {
+      const plugin = new AlertZeroPublicPlugin(createContext(createConfig({ enabled: true })));
+      const agentBuilder = agentBuilderMocks.createStart();
+
+      plugin.start(withSetting(coreMock.createStart(), new BehaviorSubject(true)), {
+        licensing: createLicensing(),
+        spaces: createSpaces('classic'),
+        agenticInvestigations: {},
+        proposals: {},
+        agentBuilder,
+      } as never);
+      await flushPromises();
+
+      expect(agentBuilder.attachments.addAttachmentType).not.toHaveBeenCalled();
+      plugin.stop();
+    });
   });
 });
 
@@ -339,6 +424,7 @@ describe('AlertZeroPublicPlugin conversation template UI registration', () => {
 
     plugin.start(withSetting(coreMock.createStart(), new BehaviorSubject(true)), {
       licensing: createLicensing(),
+      spaces: createSpaces('security'),
       agenticInvestigations: {},
       proposals: {},
       agentBuilder,
@@ -410,6 +496,7 @@ describe('AlertZeroPublicPlugin attachment UI registration', () => {
 
     plugin.start(core, {
       licensing: createLicensing(),
+      spaces: createSpaces('security'),
       agenticInvestigations: {},
       proposals: {},
       agentBuilder,
