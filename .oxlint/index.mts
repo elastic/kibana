@@ -47,6 +47,7 @@ import { playwrightOverrides, playwrightSettings } from './playwright.mts';
 import { testingLibraryOverrides } from './testing_library.mts';
 import { unusedVarsOverrides } from './unused_vars.mts';
 import { importPluginOverrides } from './import_plugin.mts';
+import { restrictedImportsOverrides } from './restricted_imports.mts';
 import { nestedConfigOverrides, teamOverrides } from './team_overrides.mts';
 
 const movedFromEslintOverrides: OxlintOverride[] = [
@@ -54,6 +55,7 @@ const movedFromEslintOverrides: OxlintOverride[] = [
   ...typescriptOverrides,
   ...jestOverrides,
   ...teamOverrides,
+  ...restrictedImportsOverrides,
   ...nestedConfigOverrides,
 ];
 

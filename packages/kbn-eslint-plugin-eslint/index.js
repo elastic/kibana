@@ -25,6 +25,7 @@ module.exports = eslintCompatPlugin({
     no_unsafe_dynamic_http_path: require('./rules/no_unsafe_dynamic_http_path'),
     no_unsafe_console: require('./rules/no_unsafe_console'),
     no_unsafe_hash: require('./rules/no_unsafe_hash'),
+    no_deprecated_imports: require('./rules/no_deprecated_imports'),
     require_kibana_feature_privileges_naming: require('./rules/require_kibana_feature_privileges_naming'),
     deployment_agnostic_test_context: require('./rules/deployment_agnostic_test_context'),
     scout_no_describe_configure: require('./rules/scout_no_describe_configure'),
