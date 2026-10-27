@@ -14,6 +14,7 @@ import { parse } from 'yaml';
 interface PipelineStep {
   key?: string;
   depends_on?: string | string[];
+  agents?: { provider?: string };
 }
 
 const loadSteps = (file: string): PipelineStep[] =>
@@ -37,5 +38,30 @@ describe('on_merge static checks fragment', () => {
     expect(steps.map(({ depends_on: dependsOn }) => dependsOn)).toEqual(
       steps.map(() => 'pre_build')
     );
+  });
+});
+
+describe('on_merge.yml', () => {
+  const steps = loadSteps('../on_merge.yml');
+
+  it('no longer defines the static steps', () => {
+    const keys = steps.map(({ key }) => key);
+
+    for (const key of [
+      'quick_checks',
+      'checks',
+      'linting',
+      'linting_with_types',
+      'check_types',
+      'check_oas_snapshot',
+    ]) {
+      expect(keys).not.toContain(key);
+    }
+  });
+
+  it('defines the picker step on a k8s agent', () => {
+    const picker = steps.find(({ key }) => key === 'pick_static_checks');
+
+    expect(picker?.agents?.provider).toBe('k8s');
   });
 });
