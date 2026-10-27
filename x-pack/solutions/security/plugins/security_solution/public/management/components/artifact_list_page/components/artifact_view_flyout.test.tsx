@@ -368,15 +368,36 @@ describe('ArtifactViewFlyout', () => {
     expect(policy).not.toHaveAttribute('href');
   });
 
-  it('shows the policy id when the policy is not in the policies map', () => {
+  it('shows the policy id as not accessible when the policy is not in the policies map', async () => {
     item.tags = [buildPerPolicyTag('policy-unknown')];
     useGetArtifactMock.mockReturnValue({ data: item, error: null, refetch: refetchArtifact });
 
     render();
 
-    expect(
-      renderResult.getByTestId('viewFlyout-policyAssignment-policy-policy-unknown')
-    ).toHaveTextContent('policy-unknown');
+    const policy = renderResult.getByTestId('viewFlyout-policyAssignment-policy-policy-unknown');
+    expect(policy).toHaveTextContent('policy-unknown');
+    expect(policy).not.toHaveAttribute('href');
+    expect(policy.style.color).not.toBe('');
+
+    fireEvent.mouseOver(policy);
+
+    await waitFor(() => {
+      expect(
+        renderResult.getByText('Policy is not accessible from the current space')
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('does not show the policy as not accessible while policies are loading', () => {
+    item.tags = [buildPerPolicyTag('policy-1')];
+    useGetArtifactMock.mockReturnValue({ data: item, error: null, refetch: refetchArtifact });
+    useArtifactAssignedPoliciesMock.mockReturnValue({ policies: {}, isLoading: true });
+
+    render();
+
+    const policy = renderResult.getByTestId('viewFlyout-policyAssignment-policy-policy-1');
+    expect(policy).toHaveTextContent('policy-1');
+    expect(policy.style.color).toBe('');
   });
 
   it('opens edit and delete from the take action menu', () => {
