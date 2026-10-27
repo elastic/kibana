@@ -18,7 +18,10 @@ import {
   ENTITY_HEALTH_METRIC_ID,
   effectiveStatForMetric,
   getStatLabel,
+  inventoryGridStatForMetric,
   isCustomMetricId,
+  METRIC_COLUMN_OMIT_STAT_SUFFIX,
+  METRIC_LAST_STAT_ONLY,
   type MetricDescriptor,
   type StatId,
 } from './bucket_metrics';
@@ -82,18 +85,18 @@ export const healthColumnDescription = (): string =>
     defaultMessage: 'Overall health of this resource: Healthy, At risk, or Unhealthy.',
   });
 
-/** Data-grid alerts badge: active count, or "No alert set up". */
+/** Data-grid alerts badge: active count, "0 active alerts", or "No alert set up". */
 export const alertsGridColumnDescription = (): string =>
   i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.alertsGrid', {
     defaultMessage:
-      'Alert rules firing right now. The badge is how many are active. "No alert set up" means this resource has no alert rules.',
+      'Active alerts on this resource. Grey means no alert rules are set up.',
   });
 
-/** Classic list badge: "Alerting (active/total)" or N/A. */
+/** Classic list badge: "Alerting (active/total)", OK, or N/A. */
 export const alertsListColumnDescription = (): string =>
   i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.alertsList', {
     defaultMessage:
-      'Alert rules for this resource. The badge shows firing rules over configured rules, such as Alerting (1/3). N/A means no rules are configured.',
+      'Alert rules on this resource. Red shows firing rules (active/total). Green means none firing. Grey (N/A) means no rules are configured.',
   });
 
 export const lastHealthChangeColumnDescription = (): string =>
@@ -109,7 +112,7 @@ export const uptimeColumnDescription = (): string =>
 export const anomalyDetectionColumnDescription = (): string =>
   i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.anomalyDetection', {
     defaultMessage:
-      'Latest anomaly insight for this resource. "No anomalies detected" means nothing stood out in the selected time range.',
+      'Anomaly insight for this resource. "No anomalies detected" means nothing stood out. Last value in the selected time range.',
   });
 
 export const firstSeenColumnDescription = (): string =>
@@ -124,335 +127,277 @@ export const lastSeenColumnDescription = (): string =>
 
 const defaultCategoricalDescription = (): string =>
   i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.categoricalDefault', {
-    defaultMessage: 'Latest observed value in the selected time range.',
+    defaultMessage: 'Last value in the selected time range.',
   });
+
+/** Categorical metric cells: enum or state at the end of the range. */
+const categoricalLastValueDescription = (definition: string): string =>
+  i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.categoricalLastValue', {
+    defaultMessage: '{definition}. Last value in the selected time range.',
+    values: { definition },
+  });
+
+/** Numeric metric cells: `last` stat plus a sparkline of the same series. */
+const numericSparklineColumnDescription = (
+  definition: string,
+  { notAggregate = false }: { notAggregate?: boolean } = {}
+): string => {
+  if (notAggregate) {
+    return i18n.translate(
+      'xpack.streams.entityCentricLab.entities.columnHelp.numericWithSparkline.notAggregate',
+      {
+        defaultMessage:
+          '{definition}. The number is the last value in the selected time range, not an average, minimum, or maximum. The sparkline charts this metric over that range; the rightmost point is the number shown.',
+        values: { definition },
+      }
+    );
+  }
+  return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.numericWithSparkline', {
+    defaultMessage:
+      '{definition}. The number is the last value in the selected time range. The sparkline charts this metric over that range; the rightmost point is the number shown.',
+    values: { definition },
+  });
+};
 
 const defaultNumericDescription = (label: string): string =>
-  i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.numericDefault', {
-    defaultMessage:
-      '{label}. The number is the latest value in the selected time range, not an average, minimum, or maximum. The sparkline is this metric over that range, and the rightmost point is the number shown.',
-    values: { label },
-  });
+  numericSparklineColumnDescription(label, { notAggregate: true });
 
-const customMetricDescription = (label: string): string =>
-  i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.customMetric', {
-    defaultMessage:
-      '{label}. The number is the latest value in the selected time range. The sparkline is this metric over that range, and the rightmost point is the number shown.',
-    values: { label },
-  });
+const customMetricDescription = (label: string): string => numericSparklineColumnDescription(label);
 
 /**
  * What a metric column cell shows. Numeric cells are the `last` stat
  * (not min / max / average) plus a sparkline of that same series.
  */
+export const alertsMetricColumnDescription = (): string =>
+  i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.alertsMetric', {
+    defaultMessage:
+      'Active alerts on this resource. Red means active alerts; green means none; grey means no alert rules are set up.',
+  });
+
 export const metricColumnDescription = (metric: MetricDescriptor): string => {
   if (isCustomMetricId(metric.id)) {
     return customMetricDescription(metric.label);
   }
+  if (metric.id === ENTITY_ALERTS_METRIC_ID) {
+    return alertsMetricColumnDescription();
+  }
   switch (metric.id) {
     case 'status':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.status', {
-        defaultMessage:
-          'Latest status in the selected time range: Running, Degraded, Down, or Unknown.',
-      });
+      return categoricalLastValueDescription(
+        'Status: Running, Degraded, Down, or Unknown'
+      );
     case 'phase':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.phase', {
-        defaultMessage:
-          'Latest pod phase in the selected time range: Running, Succeeded, Pending, Failed, or Unknown.',
-      });
+      return categoricalLastValueDescription(
+        'Pod phase: Running, Succeeded, Pending, Failed, or Unknown'
+      );
     case 'condition':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.condition', {
-        defaultMessage:
-          'Latest node condition in the selected time range: Ready, Memory pressure, Disk pressure, PID pressure, or Not ready.',
-      });
+      return categoricalLastValueDescription(
+        'Node condition: Ready, Memory pressure, Disk pressure, PID pressure, or Not ready'
+      );
     case 'rollout':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.rollout', {
-        defaultMessage:
-          'Latest rollout state in the selected time range: Available, Rolling out, Degraded, or Unavailable.',
-      });
+      return categoricalLastValueDescription(
+        'Rollout state: Available, Rolling out, Degraded, or Unavailable'
+      );
     case 'instance-state':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.instanceState', {
-        defaultMessage:
-          'Latest instance state in the selected time range: Running, Pending, Stopping, Stopped, or Terminated.',
-      });
+      return categoricalLastValueDescription(
+        'Instance state: Running, Pending, Stopping, Stopped, or Terminated'
+      );
     case 'region-status':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.regionStatus', {
-        defaultMessage:
-          'Latest AWS health status in the selected time range: OK, Service event, or Outage.',
-      });
+      return categoricalLastValueDescription(
+        'AWS health status: OK, Service event, or Outage'
+      );
     case 'schedule-status':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.scheduleStatus', {
-        defaultMessage:
-          'Whether a pod is scheduled on every node: All scheduled, Partial, or None scheduled. This is the latest state in the selected time range.',
-      });
+      return categoricalLastValueDescription(
+        'Pod scheduling on nodes: All scheduled, Partial, or None scheduled'
+      );
     case 'last-status':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.lastStatus', {
-        defaultMessage: 'Outcome of the most recent run: Succeeded, Running, Failed, or Suspended.',
-      });
+      return categoricalLastValueDescription(
+        'Most recent run outcome: Succeeded, Running, Failed, or Suspended'
+      );
     case 'cpu-util':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.cpuUtil', {
-        defaultMessage:
-          'CPU utilization as a percentage of capacity. Shows the latest value in the selected time range, with the trend charted over that range.',
-      });
+      return numericSparklineColumnDescription(
+        'CPU utilization as a percentage of capacity'
+      );
     case 'memory-util':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.memoryUtil', {
-        defaultMessage:
-          'Memory utilization as a percentage of capacity. Shows the latest value in the selected time range, with the trend charted over that range.',
-      });
+      return numericSparklineColumnDescription(
+        'Memory utilization as a percentage of capacity'
+      );
     case 'disk-util':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.diskUtil', {
-        defaultMessage:
-          'Disk utilization as a percentage of capacity. Shows the latest value in the selected time range, with the trend charted over that range.',
-      });
+      return numericSparklineColumnDescription(
+        'Disk utilization as a percentage of capacity'
+      );
     case 'load-1m':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.loadAvg', {
-        defaultMessage:
-          'One-minute load average. The number is the latest sample in the selected time range. The sparkline is the load average over that range, and the rightmost point is the number shown.',
-      });
+      return numericSparklineColumnDescription('One-minute load average');
     case 'error-rate':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.errorRate', {
-        defaultMessage:
-          'Share of requests that errored, as a percentage. The number is the latest sample in the selected time range, not an average across the whole range. The sparkline is the error rate over that range, and the rightmost point is the number shown.',
-      });
+      return numericSparklineColumnDescription(
+        'Share of requests that errored, as a percentage',
+        { notAggregate: true }
+      );
     case 'latency-p95':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.latencyP95', {
-        defaultMessage:
-          'The response time that 95 out of 100 requests stay under, in milliseconds. Shows the latest value in the selected time range, with the trend charted over that range.',
-      });
+      return numericSparklineColumnDescription(
+        'Response time that 95 out of 100 requests stay under, in milliseconds'
+      );
     case 'throughput':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.throughput', {
-        defaultMessage:
-          'Request throughput, in requests per minute. The number is the latest rate in the selected time range. The sparkline is throughput over that range, and the rightmost point is the number shown.',
-      });
+      return numericSparklineColumnDescription(
+        'Request throughput, in requests per minute'
+      );
     case 'connection-saturation':
-      return i18n.translate(
-        'xpack.streams.entityCentricLab.entities.columnHelp.connectionSaturation',
-        {
-          defaultMessage:
-            'Open connections as a percentage of the connection limit. The number is the latest sample in the selected time range, not an average. The sparkline is connection saturation over that range, and the rightmost point is the number shown.',
-        }
+      return numericSparklineColumnDescription(
+        'Open connections as a percentage of the connection limit',
+        { notAggregate: true }
       );
     case 'query-latency':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.queryLatency', {
-        defaultMessage:
-          'The query time that 95 out of 100 queries stay under, in milliseconds. Shows the latest value in the selected time range, with the trend charted over that range.',
-      });
-    case 'replication-lag':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.replicationLag', {
-        defaultMessage:
-          'Delay between the primary and its replica, in seconds. The number is the latest sample in the selected time range. The sparkline is replication lag over that range, and the rightmost point is the number shown.',
-      });
-    case 'quota-util':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.quotaUtil', {
-        defaultMessage:
-          'Quota used, as a percentage of the limit. The number is the latest sample in the selected time range, not an average. The sparkline is quota utilization over that range, and the rightmost point is the number shown.',
-      });
-    case 'cost-trend':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.costTrend', {
-        defaultMessage:
-          'Percent change in cost over the last 7 days. The number is the latest reading of that change. The sparkline is the 7-day cost change across the selected time range, and the rightmost point is the number shown.',
-      });
-    case 'api-success':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.apiSuccess', {
-        defaultMessage:
-          'Share of API calls that succeeded, as a percentage. The number is the latest sample in the selected time range. The sparkline is the success rate over that range, and the rightmost point is the number shown.',
-      });
-    case 'throttle-rate':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.throttleRate', {
-        defaultMessage:
-          'Share of requests that were throttled, as a percentage. The number is the latest sample in the selected time range. The sparkline is the throttling rate over that range, and the rightmost point is the number shown.',
-      });
-    case 'spend-mtd':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.spendMtd', {
-        defaultMessage:
-          'Cloud spend so far this month, in dollars. The number is the latest month-to-date total, not a rate. The sparkline shows how that total moved over the selected time range, and the rightmost point is the number shown.',
-      });
-    case 'network-out':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.networkOut', {
-        defaultMessage:
-          'Outbound network throughput, in megabytes per second. The number is the latest rate in the selected time range. The sparkline is network out over that range, and the rightmost point is the number shown.',
-      });
-    case 'status-checks':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.statusChecks', {
-        defaultMessage:
-          'Number of failing instance status checks. The number is the latest count in the selected time range. The sparkline is that count over the range, and the rightmost point is the number shown.',
-      });
-    case 'invocations':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.invocations', {
-        defaultMessage:
-          'Function invocations per minute. The number is the latest rate in the selected time range. The sparkline is the invocation rate over that range, and the rightmost point is the number shown.',
-      });
-    case 'p99-duration':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.p99Duration', {
-        defaultMessage:
-          'The run time that 99 out of 100 function runs stay under, in milliseconds. Shows the latest value in the selected time range, with the trend charted over that range.',
-      });
-    case 'cold-starts':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.coldStarts', {
-        defaultMessage:
-          'Share of invocations that were cold starts, as a percentage. The number is the latest sample in the selected time range. The sparkline is the cold-start rate over that range, and the rightmost point is the number shown.',
-      });
-    case 'throttles':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.throttles', {
-        defaultMessage:
-          'Number of throttled invocations. The number is the latest count in the selected time range. The sparkline is that count over the range, and the rightmost point is the number shown.',
-      });
-    case 'concurrent-executions':
-      return i18n.translate(
-        'xpack.streams.entityCentricLab.entities.columnHelp.concurrentExecutions',
-        {
-          defaultMessage:
-            'Executions running at the same time. The number is the latest count in the selected time range. The sparkline is concurrent executions over that range, and the rightmost point is the number shown.',
-        }
+      return numericSparklineColumnDescription(
+        'Query time that 95 out of 100 queries stay under, in milliseconds'
       );
+    case 'replication-lag':
+      return numericSparklineColumnDescription(
+        'Delay between the primary and its replica, in seconds'
+      );
+    case 'quota-util':
+      return numericSparklineColumnDescription(
+        'Quota used, as a percentage of the limit',
+        { notAggregate: true }
+      );
+    case 'cost-trend':
+      return numericSparklineColumnDescription(
+        'Percent change in cost over the last 7 days'
+      );
+    case 'api-success':
+      return numericSparklineColumnDescription(
+        'Share of API calls that succeeded, as a percentage'
+      );
+    case 'throttle-rate':
+      return numericSparklineColumnDescription(
+        'Share of requests that were throttled, as a percentage'
+      );
+    case 'spend-mtd':
+      return numericSparklineColumnDescription(
+        'Cloud spend so far this month, in dollars (month-to-date total, not a rate)'
+      );
+    case 'network-out':
+      return numericSparklineColumnDescription(
+        'Outbound network throughput, in megabytes per second'
+      );
+    case 'status-checks':
+      return numericSparklineColumnDescription(
+        'Number of failing instance status checks'
+      );
+    case 'invocations':
+      return numericSparklineColumnDescription(
+        'Function invocations per minute'
+      );
+    case 'p99-duration':
+      return numericSparklineColumnDescription(
+        'Run time that 99 out of 100 function runs stay under, in milliseconds'
+      );
+    case 'cold-starts':
+      return numericSparklineColumnDescription(
+        'Share of invocations that were cold starts, as a percentage'
+      );
+    case 'throttles':
+      return numericSparklineColumnDescription('Number of throttled invocations');
+    case 'concurrent-executions':
+      return numericSparklineColumnDescription('Executions running at the same time');
     case 'provisioned-concurrency-util':
-      return i18n.translate(
-        'xpack.streams.entityCentricLab.entities.columnHelp.provisionedConcurrencyUtil',
-        {
-          defaultMessage:
-            'Provisioned concurrency in use, as a percentage of the concurrency configured. The number is the latest sample in the selected time range, not an average. The sparkline is that utilization over the range, and the rightmost point is the number shown.',
-        }
+      return numericSparklineColumnDescription(
+        'Provisioned concurrency in use, as a percentage of the concurrency configured',
+        { notAggregate: true }
       );
     case 'request-rate':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.requestRate', {
-        defaultMessage:
-          'Requests per second. The number is the latest rate in the selected time range. The sparkline is the request rate over that range, and the rightmost point is the number shown.',
-      });
+      return numericSparklineColumnDescription('Requests per second');
     case 's3-4xx':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.s3Errors4xx', {
-        defaultMessage:
-          'Share of requests that returned a 4xx status, as a percentage. The number is the latest sample in the selected time range. The sparkline is the 4xx ratio over that range, and the rightmost point is the number shown.',
-      });
-    case 's3-5xx':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.s3Errors5xx', {
-        defaultMessage:
-          'Share of requests that returned a 5xx status, as a percentage. The number is the latest sample in the selected time range. The sparkline is the 5xx ratio over that range, and the rightmost point is the number shown.',
-      });
-    case 'first-byte':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.firstByte', {
-        defaultMessage:
-          'Time until the first byte of the response, in milliseconds. The number is the latest sample in the selected time range. The sparkline is first-byte latency over that range, and the rightmost point is the number shown.',
-      });
-    case 'bucket-size':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.bucketSize', {
-        defaultMessage:
-          'Amount of data stored, in gigabytes. The number is the latest size, not a rate. The sparkline shows how the size changed over the selected time range, and the rightmost point is the number shown.',
-      });
-    case 'object-count':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.objectCount', {
-        defaultMessage:
-          'Number of stored objects, in thousands. The number is the latest count. The sparkline shows how the count changed over the selected time range, and the rightmost point is the number shown.',
-      });
-    case 'get-put-ratio':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.getPutRatio', {
-        defaultMessage:
-          'GET requests divided by PUT requests. The number is the latest ratio in the selected time range. The sparkline is that ratio over the range, and the rightmost point is the number shown.',
-      });
-    case 'active-connections':
-      return i18n.translate(
-        'xpack.streams.entityCentricLab.entities.columnHelp.activeConnections',
-        {
-          defaultMessage:
-            'Connections open right now. The number is the latest count in the selected time range. The sparkline is active connections over that range, and the rightmost point is the number shown.',
-        }
+      return numericSparklineColumnDescription(
+        'Share of requests that returned a 4xx status, as a percentage'
       );
+    case 's3-5xx':
+      return numericSparklineColumnDescription(
+        'Share of requests that returned a 5xx status, as a percentage'
+      );
+    case 'first-byte':
+      return numericSparklineColumnDescription(
+        'Time until the first byte of the response, in milliseconds'
+      );
+    case 'bucket-size':
+      return numericSparklineColumnDescription(
+        'Amount of data stored, in gigabytes (stored size, not a rate)'
+      );
+    case 'object-count':
+      return numericSparklineColumnDescription(
+        'Number of stored objects, in thousands'
+      );
+    case 'get-put-ratio':
+      return numericSparklineColumnDescription('GET requests divided by PUT requests');
+    case 'active-connections':
+      return numericSparklineColumnDescription('Connections open right now');
     case 'queue-depth':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.queueDepth', {
-        defaultMessage:
-          'Messages waiting to be consumed. The number is the latest count in the selected time range. The sparkline is queue depth over that range, and the rightmost point is the number shown.',
-      });
+      return numericSparklineColumnDescription('Messages waiting to be consumed');
     case 'consumer-lag':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.consumerLag', {
-        defaultMessage:
-          'How far consumers are behind the latest message, in seconds. The number is the latest lag in the selected time range. The sparkline is consumer lag over that range, and the rightmost point is the number shown.',
-      });
+      return numericSparklineColumnDescription(
+        'How far consumers are behind the latest message, in seconds'
+      );
     case 'token-spend':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.tokenSpend', {
-        defaultMessage:
-          'Model spend over the last hour, in dollars. The number is the latest one-hour total. The sparkline is that hourly spend across the selected time range, and the rightmost point is the number shown.',
-      });
+      return numericSparklineColumnDescription(
+        'Model spend over the last hour, in dollars (rolling one-hour total)'
+      );
     case 'api-latency':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.apiLatency', {
-        defaultMessage:
-          'API server response time, in milliseconds. The number is the latest sample in the selected time range, not an average. The sparkline is API server latency over that range, and the rightmost point is the number shown.',
-      });
+      return numericSparklineColumnDescription(
+        'API server response time, in milliseconds',
+        { notAggregate: true }
+      );
     case 'node-count':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.nodeCount', {
-        defaultMessage:
-          'Nodes in this cluster. The number is the latest count in the selected time range. The sparkline is the node count over that range, and the rightmost point is the number shown.',
-      });
+      return numericSparklineColumnDescription('Nodes in this cluster');
     case 'pod-count':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.podCount', {
-        defaultMessage:
-          'Pods on this node. The number is the latest count in the selected time range. The sparkline is the pod count over that range, and the rightmost point is the number shown.',
-      });
+      return numericSparklineColumnDescription('Pods on this node');
     case 'cpu-usage':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.cpuUsage', {
-        defaultMessage:
-          'CPU utilization as a percentage. Shows the latest value in the selected time range, with the trend charted over that range.',
-      });
+      return numericSparklineColumnDescription('CPU utilization as a percentage');
     case 'memory-usage':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.memoryUsage', {
-        defaultMessage:
-          'Memory utilization as a percentage. Shows the latest value in the selected time range, with the trend charted over that range.',
-      });
+      return numericSparklineColumnDescription('Memory utilization as a percentage');
     case 'restarts':
       return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.restarts', {
         defaultMessage:
-          'Restarts in the last hour. The number is the latest count for that one-hour window, not a lifetime total. The sparkline shows how that hourly count changed over the selected time range, and the rightmost point is the number shown.',
+          'Restarts in the rolling last hour (window total, not a lifetime counter). The number is the last reading of that 1-hour count in the selected time range, not the sum across the whole range. The sparkline charts this metric over that range; the rightmost point is the number shown.',
       });
     case 'cpu-limit-util':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.cpuLimitUtil', {
-        defaultMessage:
-          'CPU utilization as a percentage of the CPU limit. It can exceed 100% when utilization is above the limit. Shows the latest value in the selected time range, with the trend charted over that range.',
-      });
+      return numericSparklineColumnDescription(
+        'CPU utilization as a percentage of the CPU limit (can exceed 100% when above the limit)'
+      );
     case 'memory-limit-util':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.memoryLimitUtil', {
-        defaultMessage:
-          'Memory utilization as a percentage of the memory limit. It can exceed 100% when utilization is above the limit. Shows the latest value in the selected time range, with the trend charted over that range.',
-      });
+      return numericSparklineColumnDescription(
+        'Memory utilization as a percentage of the memory limit (can exceed 100% when above the limit)'
+      );
     case 'available-replicas':
-      return i18n.translate(
-        'xpack.streams.entityCentricLab.entities.columnHelp.availableReplicas',
-        {
-          defaultMessage:
-            'Available replicas as a percentage of the desired count. The number is the latest percentage in the selected time range. The sparkline is available replicas over that range, and the rightmost point is the number shown.',
-        }
+      return numericSparklineColumnDescription(
+        'Available replicas as a percentage of the desired count'
       );
     case 'ready-replicas':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.readyReplicas', {
-        defaultMessage:
-          'Ready replicas as a percentage of the desired count. The number is the latest percentage in the selected time range. The sparkline is ready replicas over that range, and the rightmost point is the number shown.',
-      });
+      return numericSparklineColumnDescription(
+        'Ready replicas as a percentage of the desired count'
+      );
     case 'replica-count':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.replicaCount', {
-        defaultMessage:
-          'Current number of replicas. The number is the latest count in the selected time range. The sparkline is the replica count over that range, and the rightmost point is the number shown.',
-      });
+      return numericSparklineColumnDescription('Current number of replicas');
     case 'volume-util':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.volumeUtil', {
-        defaultMessage:
-          'Persistent volume used, as a percentage of capacity. The number is the latest sample in the selected time range, not an average. The sparkline is volume utilization over that range, and the rightmost point is the number shown.',
-      });
+      return numericSparklineColumnDescription(
+        'Persistent volume used, as a percentage of capacity',
+        { notAggregate: true }
+      );
     case 'available-pct':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.availablePct', {
-        defaultMessage:
-          'DaemonSet pods available, as a percentage of the desired count. The number is the latest percentage in the selected time range. The sparkline is availability over that range, and the rightmost point is the number shown.',
-      });
+      return numericSparklineColumnDescription(
+        'DaemonSet pods available, as a percentage of the desired count'
+      );
     case 'misscheduled':
-      return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.misscheduled', {
-        defaultMessage:
-          'Pods running on nodes they are not supposed to run on. The number is the latest count in the selected time range. The sparkline is the misscheduled count over that range, and the rightmost point is the number shown.',
-      });
+      return numericSparklineColumnDescription(
+        'Pods running on nodes they are not supposed to run on'
+      );
     case 'failures-24h':
       return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.failures24h', {
         defaultMessage:
-          'Failed runs in the last 24 hours. The number is the latest count for that window, not a lifetime total. The sparkline shows how that 24-hour count changed over the selected time range, and the rightmost point is the number shown.',
+          'Failed runs in the rolling last 24 hours (window total). The number is the last reading of that 24-hour count in the selected time range, not the sum across the whole range. The sparkline charts this metric over that range; the rightmost point is the number shown.',
       });
     case 'avg-duration':
       return i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.avgDuration', {
         defaultMessage:
-          'Average duration of recent runs, in seconds. The number is the latest average, not a single run. The sparkline is that average over the selected time range, and the rightmost point is the number shown.',
+          'Average duration of recent runs, in seconds. The number is the average value in the selected time range, not a single run. The sparkline charts this metric over that range; the rightmost point is the number shown.',
       });
     default:
       return metric.kind === 'categorical'
@@ -477,18 +422,42 @@ const hexMapLegendStatLabel = (statId: StatId): string => {
   return getStatLabel(statId);
 };
 
-export const hexMapLegendMetricLabel = (metric: MetricDescriptor, statId: StatId): string => {
-  if (metric.kind !== 'numeric') {
+const metricLabelWithStatSuffix = (
+  metric: MetricDescriptor,
+  statId: StatId
+): string => {
+  const effectiveStat = effectiveStatForMetric(metric, statId);
+  return i18n.translate(
+    'xpack.streams.entityCentricLab.entities.columnHelp.metricLabelWithStat',
+    {
+      defaultMessage: '{metricLabel} ({statLabel})',
+      values: {
+        metricLabel: metric.label,
+        statLabel: hexMapLegendStatLabel(effectiveStat),
+      },
+    }
+  );
+};
+
+/** List inventory metric column title (fixed stat per metric). */
+const omitStatSuffixInColumnHeader = (metric: MetricDescriptor): boolean =>
+  metric.kind !== 'numeric' ||
+  METRIC_COLUMN_OMIT_STAT_SUFFIX.has(metric.id) ||
+  METRIC_LAST_STAT_ONLY.has(metric.id);
+
+export const metricColumnHeaderLabel = (metric: MetricDescriptor): string => {
+  if (omitStatSuffixInColumnHeader(metric)) {
     return metric.label;
   }
-  const effectiveStat = effectiveStatForMetric(metric, statId);
-  return i18n.translate('xpack.streams.entityCentricLab.entities.hexMapLegend.metricLabelWithStat', {
-    defaultMessage: '{metricLabel} ({statLabel})',
-    values: {
-      metricLabel: metric.label,
-      statLabel: hexMapLegendStatLabel(effectiveStat),
-    },
-  });
+  return metricLabelWithStatSuffix(metric, inventoryGridStatForMetric(metric));
+};
+
+/** Hex map Color-by legend (honors the user's stat picker). */
+export const hexMapLegendMetricLabel = (metric: MetricDescriptor, statId: StatId): string => {
+  if (omitStatSuffixInColumnHeader(metric)) {
+    return metric.label;
+  }
+  return metricLabelWithStatSuffix(metric, statId);
 };
 
 const hexMapStatPhrase = (statId: StatId): string => {
@@ -516,7 +485,7 @@ const hexMapStatPhrase = (statId: StatId): string => {
     case 'last':
     default:
       return i18n.translate('xpack.streams.entityCentricLab.entities.hexMapLegend.statPhrase.last', {
-        defaultMessage: 'the latest value in the selected time range',
+        defaultMessage: 'the last value in the selected time range',
       });
   }
 };
@@ -526,7 +495,7 @@ const hexMapMetricConcept = (metric: MetricDescriptor): string => {
   if (metric.id === ENTITY_ALERTS_METRIC_ID) {
     return i18n.translate('xpack.streams.entityCentricLab.entities.hexMapLegend.concept.alerts', {
       defaultMessage:
-        'Whether alert rules are firing on each resource right now. Red means active alerts; green means none; grey means no alert rules are set up.',
+        'Active alerts on each resource. Red means active alerts; green means none; grey means no alert rules are set up.',
     });
   }
   if (metric.id === ENTITY_HEALTH_METRIC_ID) {
@@ -537,25 +506,26 @@ const hexMapMetricConcept = (metric: MetricDescriptor): string => {
   switch (metric.id) {
     case 'status':
       return i18n.translate('xpack.streams.entityCentricLab.entities.hexMapLegend.concept.status', {
-        defaultMessage: 'Latest status of each resource: Running, Degraded, Down, or Unknown.',
+        defaultMessage:
+          'Status of each resource: Running, Degraded, Down, or Unknown. Last value in the selected time range.',
       });
     case 'condition':
       return i18n.translate(
         'xpack.streams.entityCentricLab.entities.hexMapLegend.concept.condition',
         {
           defaultMessage:
-            'Latest node condition: Ready, Memory pressure, Disk pressure, PID pressure, or Not ready.',
+            'Node condition of each resource: Ready, Memory pressure, Disk pressure, PID pressure, or Not ready. Last value in the selected time range.',
         }
       );
     case 'phase':
       return i18n.translate('xpack.streams.entityCentricLab.entities.hexMapLegend.concept.phase', {
         defaultMessage:
-          'Latest pod phase: Running, Succeeded, Pending, Failed, or Unknown.',
+          'Pod phase of each resource: Running, Succeeded, Pending, Failed, or Unknown. Last value in the selected time range.',
       });
     case 'rollout':
       return i18n.translate('xpack.streams.entityCentricLab.entities.hexMapLegend.concept.rollout', {
         defaultMessage:
-          'Latest rollout state: Available, Rolling out, Degraded, or Unavailable.',
+          'Rollout state of each resource: Available, Rolling out, Degraded, or Unavailable. Last value in the selected time range.',
       });
     case 'cpu-util':
     case 'cpu-usage':
@@ -605,7 +575,7 @@ const hexMapMetricConcept = (metric: MetricDescriptor): string => {
         ? i18n.translate(
             'xpack.streams.entityCentricLab.entities.hexMapLegend.concept.categoricalDefault',
             {
-              defaultMessage: 'Latest observed category for each resource in the selected time range.',
+              defaultMessage: 'Last value in the selected time range for each resource.',
             }
           )
         : i18n.translate(

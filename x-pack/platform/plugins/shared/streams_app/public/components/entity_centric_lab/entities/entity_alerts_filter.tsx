@@ -35,19 +35,19 @@ const ALERTS_FILTER_OPTIONS: readonly { readonly id: Exclude<AlertsFilterId, 'al
     {
       id: 'active',
       label: i18n.translate('xpack.streams.entityCentricLab.entities.alertsFilter.active', {
-        defaultMessage: 'With active alerts',
+        defaultMessage: 'Active alerts',
       }),
     },
     {
       id: 'no_setup',
       label: i18n.translate('xpack.streams.entityCentricLab.entities.alertsFilter.noSetup', {
-        defaultMessage: 'With no alert set up',
+        defaultMessage: 'No alert set up',
       }),
     },
     {
       id: 'no_active',
       label: i18n.translate('xpack.streams.entityCentricLab.entities.alertsFilter.noActive', {
-        defaultMessage: 'With no active alerts',
+        defaultMessage: 'No active alerts',
       }),
     },
   ];
@@ -73,7 +73,7 @@ interface Props {
  */
 export const EntityAlertsFilter = ({ value, onChange }: Props) => {
   const allLabel = i18n.translate('xpack.streams.entityCentricLab.entities.alertsFilter.all', {
-    defaultMessage: 'With all types of alerts',
+    defaultMessage: 'All alerts',
   });
 
   const options = useMemo<EuiComboBoxOptionOption[]>(
@@ -88,7 +88,7 @@ export const EntityAlertsFilter = ({ value, onChange }: Props) => {
   const selectedOptions = useMemo<EuiComboBoxOptionOption[]>(() => {
     if (value === ALERTS_FILTER_ALL) return [];
     const match = ALERTS_FILTER_OPTIONS.find((option) => option.id === value);
-    return match ? [{ label: `Alerts: ${match.label}`, value: match.id }] : [];
+    return match ? [{ label: match.label, value: match.id }] : [];
   }, [value]);
 
   const handleChange = useCallback(

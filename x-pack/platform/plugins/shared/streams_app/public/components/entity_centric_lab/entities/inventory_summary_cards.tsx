@@ -205,12 +205,19 @@ const SummaryMetricCard = ({
 
   const a11yLabel = filterHint ? `${label}. ${filterHint}` : label;
 
+  const infoTipContent = filterHint
+    ? i18n.translate('xpack.streams.entityCentricLab.entities.summaryCards.infoWithFilter', {
+        defaultMessage: '{info} {filterHint}.',
+        values: { info: infoTooltip, filterHint },
+      })
+    : infoTooltip;
+
   const datum: MetricDatum = neutralTile
     ? buildNeutralMetricDatum({
         label,
         count,
         trend,
-        infoTooltip,
+        infoTooltip: infoTipContent,
         emptyShade: euiTheme.colors.emptyShade,
         textColor: euiTheme.colors.text,
       })
@@ -222,7 +229,7 @@ const SummaryMetricCard = ({
         trend,
         trendShape: MetricTrendShape.Area,
         trendA11yTitle: label,
-        trendA11yDescription: infoTooltip,
+        trendA11yDescription: infoTipContent,
       };
 
   const tile = (
@@ -305,8 +312,8 @@ const SummaryMetricCard = ({
           size="s"
           color="subdued"
           position="top"
-          content={infoTooltip}
-          aria-label={infoTooltip}
+          content={infoTipContent}
+          aria-label={infoTipContent}
         />
       </span>
     </div>

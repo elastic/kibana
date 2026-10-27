@@ -63,6 +63,7 @@ import {
   getEntityTypeLabels,
   getKubernetesClusterNames,
   getTypeGroupForSubType,
+  kubernetesSubTypeDisplayLabel,
   type KubernetesResourceType,
 } from './kubernetes_cluster_filter';
 
@@ -1004,7 +1005,7 @@ export const EntitiesListView = ({
             result.push({
               kind: 'panel',
               category: 'kubernetes',
-              subTypeLabel,
+              subTypeLabel: kubernetesSubTypeDisplayLabel(subTypeLabel),
               nested: true,
               rows: subRows,
             });

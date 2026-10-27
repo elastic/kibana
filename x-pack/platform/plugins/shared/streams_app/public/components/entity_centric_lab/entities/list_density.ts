@@ -10,7 +10,7 @@ import type { EuiDataGridStyle } from '@elastic/eui';
 /** Page-level density for inventory list tables and hex map cards. */
 export type ListDensity = 'compact' | 'normal' | 'expanded';
 
-export const DEFAULT_LIST_DENSITY: ListDensity = 'compact';
+export const DEFAULT_LIST_DENSITY: ListDensity = 'normal';
 
 export const isListDensity = (value: unknown): value is ListDensity =>
   value === 'compact' || value === 'normal' || value === 'expanded';

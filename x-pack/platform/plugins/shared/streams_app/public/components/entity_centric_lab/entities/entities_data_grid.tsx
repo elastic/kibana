@@ -45,7 +45,7 @@ import type { Entity, EntityCategoryId, EntityHealth } from './fake_entities';
 import { HEALTH_RANK, getCategoryDescriptor } from './fake_entities';
 import { useVariation } from './variation_context';
 import type { PhaseVariation } from './variation_registry';
-import { readPageSizeForTable, hasStoredPageSize, writePageSizeForTable } from './storage_keys';
+import { readPageSizeForTable, writePageSizeForTable } from './storage_keys';
 import {
   DEFAULT_LIST_DENSITY,
   getListGridStyle,
@@ -73,6 +73,7 @@ import {
   bucketKeyFor,
   findMetric,
   getBucketMetrics,
+  inventoryGridStatForMetric,
   resolveMetricReading,
   resolveMetricSparkline,
   setMetricRefreshSalt,
@@ -93,6 +94,7 @@ import {
   lastHealthChangeColumnDescription,
   lastSeenColumnDescription,
   metricColumnDescription,
+  metricColumnHeaderLabel,
   uptimeColumnDescription,
 } from './column_header_info';
 
@@ -387,6 +389,32 @@ const withUptimeLast = (ids: readonly string[]): string[] => {
   return [...ids.filter((id) => id !== UPTIME_COLUMN_ID), UPTIME_COLUMN_ID];
 };
 
+/**
+ * Column picker lists fields in `columns` definition order. Put this table's
+ * default visible set first (same top-to-bottom order as default left-to-right),
+ * then every other optional column in catalog order.
+ */
+const orderCatalogLikeDefaultTable = (
+  columns: readonly CatalogColumn[],
+  defaultVisibleIds: readonly string[]
+): CatalogColumn[] => {
+  const byId = new Map(columns.map((column) => [column.id, column]));
+  const ordered: CatalogColumn[] = [];
+  for (const id of defaultVisibleIds) {
+    const column = byId.get(id);
+    if (column) {
+      ordered.push(column);
+      byId.delete(id);
+    }
+  }
+  for (const column of columns) {
+    if (byId.has(column.id)) {
+      ordered.push(column);
+    }
+  }
+  return ordered;
+};
+
 const defaultVisibleIdsFor = (bucketKey: string, isHomogeneous: boolean): string[] => {
   const base = [...DEFAULT_VISIBLE_IDS];
   if (!isHomogeneous) {
@@ -429,9 +457,6 @@ const isHomogeneousTypeGroup = (category: EntityCategoryId, rows: readonly Entit
   const first = rowBucketKey(category, rows[0]);
   return rows.every((entity) => rowBucketKey(category, entity) === first);
 };
-
-/** Default page size for new tables; cap at 25 (headers are not sticky on scroll). */
-const smartDefaultPageSize = (rowCount: number): number => (rowCount <= 10 ? 10 : 25);
 
 const PROVIDER_LABEL: Record<string, string> = Object.fromEntries(
   CLOUD_PROVIDERS.map((provider) => [provider.id, provider.label])
@@ -754,10 +779,11 @@ const sortValueFor = (entity: Entity, columnId: string, bucketKey: BucketKey): s
   if (columnId.startsWith(METRIC_PREFIX)) {
     const metric = findMetric(bucketKey, columnId.slice(METRIC_PREFIX.length));
     if (!metric) return '';
+    const statId = inventoryGridStatForMetric(metric);
     const reading = resolveMetricReading(
       entity.name,
       metric,
-      'last',
+      statId,
       entity.health,
       alertHintFromEntity(entity.alerts)
     );
@@ -899,7 +925,7 @@ export const EntityDataGridSection = ({
             )
             .map((metric) => ({
               id: `${METRIC_PREFIX}${metric.id}`,
-              label: metric.label,
+              label: metricColumnHeaderLabel(metric),
               description: metricColumnDescription(metric),
             }))
         : [],
@@ -926,10 +952,11 @@ export const EntityDataGridSection = ({
       ...BASE_HIDDEN_COLUMNS,
       ...metricColumns,
     ];
-    return isPhase1
+    const filtered = isPhase1
       ? allColumns.filter((col) => !PHASE1_HIDDEN_COLUMN_IDS.has(col.id))
       : allColumns;
-  }, [k8sContext, metricColumns, isPhase1]);
+    return orderCatalogLikeDefaultTable(filtered, defaultVisibleIds);
+  }, [k8sContext, metricColumns, isPhase1, defaultVisibleIds]);
   const catalogIds = useMemo(() => catalog.map((column) => column.id), [catalog]);
 
   const { visibleColumns, setVisibleColumns, reset } = useColumnConfig(
@@ -1017,9 +1044,7 @@ export const EntityDataGridSection = ({
 
   const tableKey = bucketKey ?? category;
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(() =>
-    hasStoredPageSize(tableKey) ? readPageSizeForTable(tableKey) : smartDefaultPageSize(rows.length)
-  );
+  const [pageSize, setPageSize] = useState(() => readPageSizeForTable(tableKey));
   const pageCount = Math.max(1, Math.ceil(sortedRows.length / pageSize));
   const safePageIndex = Math.min(pageIndex, pageCount - 1);
 
@@ -1091,10 +1116,11 @@ export const EntityDataGridSection = ({
       if (columnId.startsWith(METRIC_PREFIX)) {
         const metric = findMetric(bucketKey, columnId.slice(METRIC_PREFIX.length));
         if (!metric) return '—';
+        const statId = inventoryGridStatForMetric(metric);
         const reading = resolveMetricReading(
           entity.name,
           metric,
-          'last',
+          statId,
           entity.health,
           alertHintFromEntity(entity.alerts)
         );
@@ -1102,7 +1128,7 @@ export const EntityDataGridSection = ({
         return (
           <NumericMetricCell
             displayValue={reading.displayValue}
-            series={resolveMetricSparkline(entity.name, metric, 'last', entity.health)}
+            series={resolveMetricSparkline(entity.name, metric, statId, entity.health)}
             color={euiTheme.colors.primary}
           />
         );

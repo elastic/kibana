@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.13';
+export const PROTOTYPE_VERSION = '1.15';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-10-27',
+    summary:
+      'Inventory defaults: Normal display density (not Compact) and 10 rows per table page; K8s list/hex type order and K8s Cluster-style labels aligned.',
+    details:
+      'Display options and page-size picker still offer Compact / Normal / Expanded and 10 / 25 / 50; choices persist in localStorage and saved views. Bump to v1.15.',
+  },
   {
     date: '2026-10-22',
     summary:

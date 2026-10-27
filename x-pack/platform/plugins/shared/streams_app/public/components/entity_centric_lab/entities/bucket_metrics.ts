@@ -188,8 +188,52 @@ export const getStatLabel = (statId: StatId): string =>
  * Color-by from a categorical back to a numeric metric restores the
  * user's previous numeric stat choice.
  */
-export const effectiveStatForMetric = (metric: MetricDescriptor, statId: StatId): StatId =>
-  metric.kind === 'categorical' ? 'last' : statId;
+/**
+ * Instantaneous counts and levels (nodes, pods, queue depth, …). Hex map and
+ * readings use the last value in the range — min / avg / percentiles mislead.
+ */
+export const METRIC_LAST_STAT_ONLY = new Set<string>([
+  'node-count',
+  'pod-count',
+  'replica-count',
+  'queue-depth',
+  'active-connections',
+  'concurrent-executions',
+  'object-count',
+  'status-checks',
+  'throttles',
+  'misscheduled',
+]);
+
+export const metricStatSelectionLocked = (metric: MetricDescriptor): boolean =>
+  metric.kind === 'categorical' || METRIC_LAST_STAT_ONLY.has(metric.id);
+
+export const effectiveStatForMetric = (metric: MetricDescriptor, statId: StatId): StatId => {
+  if (metricStatSelectionLocked(metric)) {
+    return 'last';
+  }
+  return statId;
+};
+
+/**
+ * List inventory numeric columns where the header already encodes the rollup
+ * (1h, 24h, 7d, MTD, …). Appending "(Last)" reads like the wrong aggregation.
+ */
+export const METRIC_COLUMN_OMIT_STAT_SUFFIX = new Set<string>([
+  'restarts',
+  'failures-24h',
+  'spend-mtd',
+  'token-spend',
+  'cost-trend',
+]);
+
+/** Stat used for the list grid cell value, sparkline, and header suffix. */
+export const inventoryGridStatForMetric = (metric: MetricDescriptor): StatId => {
+  if (metric.id === 'avg-duration') {
+    return 'avg';
+  }
+  return 'last';
+};
 
 // ---------------------------------------------------------------------------
 // Metric descriptors
@@ -331,14 +375,14 @@ const ENTITY_ALERTS_VALUES: readonly CategoricalValue[] = [
   {
     id: 'clear',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.alerts.clear', {
-      defaultMessage: 'With no active alerts',
+      defaultMessage: 'No active alerts',
     }),
     tone: 'good',
   },
   {
     id: 'na',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.alerts.na', {
-      defaultMessage: 'With no alert set up',
+      defaultMessage: 'No alert set up',
     }),
     tone: 'neutral',
   },
@@ -2263,6 +2307,14 @@ export const resolveMetricSparkline = (
         value = finalUnit + (posSeed1 - 0.5) * 0.01;
         break;
       }
+    }
+
+    // Pull the series toward the displayed value near the end so the stroke
+    // visually meets the number (spike shapes can otherwise end on a misleading tangent).
+    const convergeStart = 0.72;
+    if (t >= convergeStart) {
+      const blend = (t - convergeStart) / (1 - convergeStart);
+      value = value * (1 - blend) + finalUnit * blend;
     }
 
     // Tiny jitter for organic feel — amplitude varies per entity.

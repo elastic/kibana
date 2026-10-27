@@ -26,8 +26,8 @@ export const PAGE_SIZES_STORAGE_KEY = 'entityCentricLab.entitiesPageSizes.v1';
 export const PAGE_SIZE_CHANGE_EVENT = 'entity-centric-lab:page-size-changed';
 const VALID_PAGE_SIZES = [10, 25, 50] as const;
 
-/** First-visit / unset per-table page size (user can still pick 50). */
-export const DEFAULT_TABLE_PAGE_SIZE = VALID_PAGE_SIZES[1];
+/** First-visit / unset per-table page size (user can still pick 25 or 50). */
+export const DEFAULT_TABLE_PAGE_SIZE = VALID_PAGE_SIZES[0];
 
 const DEFAULT_PAGE_SIZE = DEFAULT_TABLE_PAGE_SIZE;
 

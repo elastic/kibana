@@ -41,7 +41,8 @@ import { DEFAULT_LIST_DENSITY, type ListDensity } from './list_density';
 import type { GroupByFieldDef } from './entity_group_by';
 import {
   KUBERNETES_FILTER_ALL,
-  KUBERNETES_SUB_TYPE_ORDER,
+  KUBERNETES_TYPE_CANONICAL_ORDER,
+  kubernetesSubTypeDisplayLabel,
   KubernetesClusterFilter,
   KubernetesDeploymentFilter,
   KubernetesNamespaceFilter,
@@ -119,23 +120,10 @@ const buildBuckets = (
  * Handles both `subType` labels ("Pods") and `entity.type` labels ("K8s pod").
  */
 const sortByK8sOrder = (buckets: GroupBucket[]): GroupBucket[] => {
-  const subTypeOrder = new Map(KUBERNETES_SUB_TYPE_ORDER.map((label, idx) => [label, idx]));
-  const typeOrder = new Map<string, number>([
-    ['K8s cluster', 0],
-    ['K8s node', 1],
-    ['K8s namespace', 2],
-    ['K8s pod', 3],
-    ['K8s container', 4],
-    ['K8s deployment', 5],
-    ['K8s replicaset', 6],
-    ['K8s statefulset', 7],
-    ['K8s daemonset', 8],
-    ['K8s cronjob', 9],
-  ]);
-  const fallback = subTypeOrder.size;
+  const fallback = KUBERNETES_TYPE_CANONICAL_ORDER.size;
   return [...buckets].sort((a, b) => {
-    const posA = subTypeOrder.get(a.label) ?? typeOrder.get(a.label) ?? fallback;
-    const posB = subTypeOrder.get(b.label) ?? typeOrder.get(b.label) ?? fallback;
+    const posA = KUBERNETES_TYPE_CANONICAL_ORDER.get(a.label) ?? fallback;
+    const posB = KUBERNETES_TYPE_CANONICAL_ORDER.get(b.label) ?? fallback;
     if (posA !== posB) return posA - posB;
     return a.label.localeCompare(b.label);
   });
@@ -430,7 +418,7 @@ const GroupAccordion = ({
     const rebuilt = [...childMap.entries()]
       .sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]))
       .map(([label, ents]) => ({
-        label,
+        label: isK8s ? kubernetesSubTypeDisplayLabel(label) : label,
         entities: ents,
         alertingCount: ents.filter((e) => e.alerts && e.alerts.active > 0).length,
         category: ents[0]?.category ?? ('kubernetes' as EntityCategoryId),

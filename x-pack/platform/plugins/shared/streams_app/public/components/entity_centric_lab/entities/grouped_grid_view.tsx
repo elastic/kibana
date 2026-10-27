@@ -80,6 +80,7 @@ import {
   alertHintFromEntity,
   bucketKeyFor,
   effectiveStatForMetric,
+  metricStatSelectionLocked,
   ENTITY_ALERTS_METRIC,
   AGGREGATION_TYPES,
   CUSTOM_METRIC_PREFIX,
@@ -156,6 +157,7 @@ import {
   getKubernetesClusterNames,
   filterKubernetesEntities,
   groupKubernetesEntities,
+  kubernetesSubTypeDisplayLabel,
   type KubernetesGroupBy,
   type KubernetesResourceType,
 } from './kubernetes_cluster_filter';
@@ -2051,6 +2053,7 @@ const BucketMetricControlsFlyout = ({
 
   const draftMetric = findMetric(bucketKey, draftMetricId) ?? metrics[0];
   const isCategorical = draftMetric.kind === 'categorical';
+  const statSelectionLocked = metricStatSelectionLocked(draftMetric);
   // The value-ramp options only make sense for numeric metrics and only
   // when ElasticOn is on; categorical metrics always colour by their
   // fixed semantic values.
@@ -2221,22 +2224,27 @@ const BucketMetricControlsFlyout = ({
                       defaultMessage: 'Categorical metrics are always shown using the last value.',
                     }
                   )
-                : undefined
+                : statSelectionLocked
+                  ? i18n.translate(
+                      'xpack.streams.entityCentricLab.entities.bucket.controls.statCountTooltip',
+                      {
+                        defaultMessage:
+                          'Count metrics use the last value in the selected time range.',
+                      }
+                    )
+                  : undefined
             }
           >
             {/*
-              Categorical metrics (Phase, Status, Rollout, …) only make
-              sense as "Last" — avg/min/max/p95/p99 of an enum is meaningless.
-              Force the display to `last` and disable the control; the
-              help text explains the lock-in. The stored numeric
-              preference is preserved so switching back to a numeric
-              metric restores the user's last choice.
+              Categorical metrics (Phase, Status, …) and instantaneous counts
+              (node count, queue depth, …) only make sense as Last. Disable
+              the control; stored stat preference is kept for other numerics.
             */}
             <EuiSelect
               fullWidth
-              disabled={isCategorical}
+              disabled={statSelectionLocked}
               options={statOptions}
-              value={isCategorical ? 'last' : draftStatId}
+              value={statSelectionLocked ? 'last' : draftStatId}
               onChange={(event) => setDraftStatId(event.target.value as StatId)}
               aria-label={i18n.translate(
                 'xpack.streams.entityCentricLab.entities.bucket.controls.statAriaLabel',
@@ -2919,7 +2927,7 @@ const KubernetesCard = ({
           ) : null}
           <SubTypeRow
             bucketKey={bucketKeyFor('kubernetes', group.label)}
-            label={group.label}
+            label={kubernetesSubTypeDisplayLabel(group.label)}
             entities={group.rows}
             onSelectEntity={onSelectEntity}
           />
@@ -2944,7 +2952,7 @@ const KubernetesCard = ({
             <HexPanel>
               <SubTypeRow
                 bucketKey={bucketKeyFor('kubernetes', group.label)}
-                label={group.label}
+                label={kubernetesSubTypeDisplayLabel(group.label)}
                 entities={group.rows}
                 onSelectEntity={onSelectEntity}
               />

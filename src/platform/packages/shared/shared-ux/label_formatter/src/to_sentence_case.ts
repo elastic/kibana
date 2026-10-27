@@ -71,9 +71,17 @@ const TITLE_CASE_MAP = new Map(TITLE_CASE_GLOSSARY.map((entry) => [entry.toLower
  * toSentenceCase('machine learning') // 'Machine Learning' - Glossary term
  * toSentenceCase('settings') // 'Settings' - First letter capitalized
  */
+/** Inventory nav titles append inventoried totals, e.g. "AI/ML (303)". */
+const NAV_COUNT_SUFFIX = /(\s\([\d,.]+\))$/;
+
 export function toSentenceCase(label: string): string {
   if (!label || typeof label !== 'string') {
     return label;
+  }
+
+  const countSuffix = label.match(NAV_COUNT_SUFFIX);
+  if (countSuffix) {
+    return toSentenceCase(label.slice(0, -countSuffix[0].length)) + countSuffix[0];
   }
 
   const normalized = label.toLowerCase().trim();

@@ -52,7 +52,7 @@ export const KUBERNETES_TYPE_GROUPS: readonly KubernetesTypeGroup[] = [
   {
     id: 'workloadManagement',
     label: 'Workload Management',
-    members: ['Deployments', 'ReplicaSets', 'StatefulSets', 'DaemonSets', 'CronJobs'],
+    members: ['Deployments', 'CronJobs', 'ReplicaSets', 'StatefulSets', 'DaemonSets'],
   },
 ];
 
@@ -75,7 +75,7 @@ export const isTypeGroupMember = (subTypeLabel: string): boolean =>
  * Canonical sub-type ordering. Infrastructure-first (Clusters → Nodes →
  * Namespaces) then workloads (Pods → Containers), followed by type-group
  * members in the group's own order (Workload Management: Deployments →
- * ReplicaSets → StatefulSets → DaemonSets → CronJobs).
+ * CronJobs → ReplicaSets → StatefulSets → DaemonSets).
  *
  * Shared so the Grouped grid and List view stay in lock-step.
  */
@@ -85,8 +85,56 @@ export const KUBERNETES_SUB_TYPE_ORDER: readonly string[] = [
   'Namespaces',
   'Pods',
   'Containers',
-  ...KUBERNETES_TYPE_GROUPS.flatMap((g) => g.members),
+  'Deployments',
+  'CronJobs',
+  'ReplicaSets',
+  'StatefulSets',
+  'DaemonSets',
 ];
+
+/** Shared section titles for list + hex map (internal keys stay {@link KUBERNETES_SUB_TYPE_ORDER}). */
+export const KUBERNETES_SUB_TYPE_DISPLAY_LABEL: Readonly<Record<string, string>> = {
+  Clusters: 'K8s Cluster',
+  Nodes: 'K8s Node',
+  Namespaces: 'K8s Namespace',
+  Pods: 'K8s Pod',
+  Containers: 'K8s Container',
+  Deployments: 'K8s Deployment',
+  CronJobs: 'K8s CronJob',
+  ReplicaSets: 'K8s ReplicaSet',
+  StatefulSets: 'K8s StatefulSet',
+  DaemonSets: 'K8s DaemonSet',
+};
+
+/** Legacy `entity.type` strings on seeded K8s rows — kept for sort / group-by fallbacks. */
+const KUBERNETES_LEGACY_TYPE_LABEL: Readonly<Record<string, string>> = {
+  Clusters: 'K8s cluster',
+  Nodes: 'K8s node',
+  Namespaces: 'K8s namespace',
+  Pods: 'K8s pod',
+  Containers: 'K8s container',
+  Deployments: 'K8s deployment',
+  CronJobs: 'K8s cronjob',
+  ReplicaSets: 'K8s replicaset',
+  StatefulSets: 'K8s statefulset',
+  DaemonSets: 'K8s daemonset',
+};
+
+export const kubernetesSubTypeDisplayLabel = (subType: string): string =>
+  KUBERNETES_SUB_TYPE_DISPLAY_LABEL[subType] ?? subType;
+
+/** Sort keys for Group by → Type and security grouping (display + legacy type labels). */
+export const KUBERNETES_TYPE_CANONICAL_ORDER: ReadonlyMap<string, number> = new Map(
+  KUBERNETES_SUB_TYPE_ORDER.flatMap((subType, index) => {
+    const entries: Array<[string, number]> = [
+      [kubernetesSubTypeDisplayLabel(subType), index],
+    ];
+    const legacy = KUBERNETES_LEGACY_TYPE_LABEL[subType];
+    if (legacy) entries.push([legacy, index]);
+    entries.push([subType, index]);
+    return entries;
+  })
+);
 
 /**
  * Polynomial hash. Pure arithmetic to keep `no-bitwise` happy;
@@ -427,13 +475,16 @@ interface KubernetesResourceTypeFilterProps {
 const buildResourceTypeOptions = (): EuiComboBoxOptionOption[] => {
   const topLevel = KUBERNETES_SUB_TYPE_ORDER.filter((s) => !isTypeGroupMember(s));
   const flat: EuiComboBoxOptionOption[] = topLevel.map((subType) => ({
-    label: subType,
+    label: kubernetesSubTypeDisplayLabel(subType),
     value: subType,
   }));
   const groups: EuiComboBoxOptionOption[] = KUBERNETES_TYPE_GROUPS.map((group) => ({
     label: group.label,
     value: group.id,
-    options: group.members.map((member) => ({ label: member, value: member })),
+    options: group.members.map((member) => ({
+      label: kubernetesSubTypeDisplayLabel(member),
+      value: member,
+    })),
   }));
   return [...flat, ...groups];
 };

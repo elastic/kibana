@@ -18,6 +18,10 @@
 import { i18n } from '@kbn/i18n';
 import type { Entity, EntityCategoryId } from './fake_entities';
 import {
+  KUBERNETES_TYPE_CANONICAL_ORDER,
+  kubernetesSubTypeDisplayLabel,
+} from './kubernetes_cluster_filter';
+import {
   ENTITY_CATEGORIES,
   TAG_KEY_LABEL,
   getCategoryDescriptor,
@@ -85,21 +89,6 @@ const CATEGORY_CANONICAL_ORDER: ReadonlyMap<string, number> = new Map(
   ENTITY_CATEGORIES.map((cat, idx) => [cat.label, idx])
 );
 
-/**
- * Canonical display order for entity types — ensures K8s sub-types
- * render in the same Clusters → Nodes → Namespaces → Deployments →
- * Pods → Containers order everywhere. Types not listed here fall back
- * to count-descending (the default).
- */
-const TYPE_CANONICAL_ORDER: ReadonlyMap<string, number> = new Map([
-  ['K8s cluster', 0],
-  ['K8s node', 1],
-  ['K8s namespace', 2],
-  ['K8s deployment', 3],
-  ['K8s pod', 4],
-  ['K8s container', 5],
-]);
-
 const ALERT_GROUP_LABELS = {
   firing: i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.alerts.firing', {
     defaultMessage: 'Resources with active alerts',
@@ -148,8 +137,13 @@ const CORE_FIELDS: readonly GroupByFieldDef[] = [
     label: i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.field.type', {
       defaultMessage: 'Type',
     }),
-    valueOf: (entity) => entity.type || UNKNOWN,
-    canonicalOrder: TYPE_CANONICAL_ORDER,
+    valueOf: (entity) => {
+      if (entity.category === 'kubernetes' && entity.subType) {
+        return kubernetesSubTypeDisplayLabel(entity.subType);
+      }
+      return entity.type || UNKNOWN;
+    },
+    canonicalOrder: KUBERNETES_TYPE_CANONICAL_ORDER,
   },
   {
     id: 'health',
