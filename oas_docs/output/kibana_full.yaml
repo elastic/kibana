@@ -51546,6 +51546,36 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            serviceConfigs:
+                              description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
+                              items:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  bucketArns:
+                                    items:
+                                      maxLength: 2048
+                                      minLength: 1
+                                      type: string
+                                    maxItems: 1000
+                                    type: array
+                                  logGroupArns:
+                                    items:
+                                      maxLength: 2048
+                                      minLength: 1
+                                      type: string
+                                    maxItems: 1000
+                                    type: array
+                                  serviceId:
+                                    maxLength: 128
+                                    minLength: 1
+                                    type: string
+                                required:
+                                  - serviceId
+                                  - bucketArns
+                                  - logGroupArns
+                              maxItems: 1000
+                              type: array
                             serviceIds:
                               description: Service IDs active when the stack was last launched or updated.
                               items:
@@ -51902,6 +51932,36 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            serviceConfigs:
+                              description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
+                              items:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  bucketArns:
+                                    items:
+                                      maxLength: 2048
+                                      minLength: 1
+                                      type: string
+                                    maxItems: 1000
+                                    type: array
+                                  logGroupArns:
+                                    items:
+                                      maxLength: 2048
+                                      minLength: 1
+                                      type: string
+                                    maxItems: 1000
+                                    type: array
+                                  serviceId:
+                                    maxLength: 128
+                                    minLength: 1
+                                    type: string
+                                required:
+                                  - serviceId
+                                  - bucketArns
+                                  - logGroupArns
+                              maxItems: 1000
+                              type: array
                             serviceIds:
                               description: Service IDs active when the stack was last launched or updated.
                               items:
@@ -52153,6 +52213,36 @@ paths:
                           - otel
                           - crowdstrike
                         type: string
+                      serviceConfigs:
+                        description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            bucketArns:
+                              items:
+                                maxLength: 2048
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            logGroupArns:
+                              items:
+                                maxLength: 2048
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            serviceId:
+                              maxLength: 128
+                              minLength: 1
+                              type: string
+                          required:
+                            - serviceId
+                            - bucketArns
+                            - logGroupArns
+                        maxItems: 1000
+                        type: array
                       serviceIds:
                         description: Service IDs active when the stack was last launched or updated.
                         items:
@@ -52332,6 +52422,36 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            serviceConfigs:
+                              description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
+                              items:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  bucketArns:
+                                    items:
+                                      maxLength: 2048
+                                      minLength: 1
+                                      type: string
+                                    maxItems: 1000
+                                    type: array
+                                  logGroupArns:
+                                    items:
+                                      maxLength: 2048
+                                      minLength: 1
+                                      type: string
+                                    maxItems: 1000
+                                    type: array
+                                  serviceId:
+                                    maxLength: 128
+                                    minLength: 1
+                                    type: string
+                                required:
+                                  - serviceId
+                                  - bucketArns
+                                  - logGroupArns
+                              maxItems: 1000
+                              type: array
                             serviceIds:
                               description: Service IDs active when the stack was last launched or updated.
                               items:
@@ -52615,6 +52735,36 @@ paths:
                                   - otel
                                   - crowdstrike
                                 type: string
+                              serviceConfigs:
+                                description: Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.
+                                items:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    bucketArns:
+                                      items:
+                                        maxLength: 2048
+                                        minLength: 1
+                                        type: string
+                                      maxItems: 1000
+                                      type: array
+                                    logGroupArns:
+                                      items:
+                                        maxLength: 2048
+                                        minLength: 1
+                                        type: string
+                                      maxItems: 1000
+                                      type: array
+                                    serviceId:
+                                      maxLength: 128
+                                      minLength: 1
+                                      type: string
+                                  required:
+                                    - serviceId
+                                    - bucketArns
+                                    - logGroupArns
+                                maxItems: 1000
+                                type: array
                               serviceIds:
                                 description: Service IDs active when the stack was last launched or updated.
                                 items:
