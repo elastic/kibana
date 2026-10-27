@@ -19,7 +19,11 @@ import type {
 import { DataGridDensity } from '@kbn/discover-session-constants';
 import type { TimeRange } from '@kbn/es-query';
 import { omit } from 'lodash';
-import { toSearchEmbeddableByValueState } from '../../common/agent_builder/to_search_embeddable_by_value_state';
+import { isDiscoverSessionEsqlTab } from '../../common/session/type_guards';
+import {
+  fromStoredSearchEmbeddableByValue,
+  toStoredSearchEmbeddableByValue,
+} from '../../common/embeddable/transform_utils';
 import { NEW_TAB_ID } from '../../common/constants';
 import type { DiscoverAppLocatorParams, DiscoverSessionEmbeddableByValueState } from '../../common';
 import type { SearchEmbeddableInputState } from '../embeddable/types';
@@ -36,6 +40,44 @@ export const getDiscoverSessionSeedTimeRange = ({
   mappedTimeRange?: TimeRange;
   screenContextTimeRange?: TimeRange;
 }): TimeRange => mappedTimeRange ?? screenContextTimeRange ?? DEFAULT_DISCOVER_SESSION_TIME_RANGE;
+
+/**
+ * Projects Discover session API data into as-code by-value search embeddable state.
+ * Extra session tabs are ignored: embeddable by-value currently supports one tab.
+ */
+export const toSearchEmbeddableByValueState = (
+  data: DiscoverSessionApiData
+): DiscoverSessionEmbeddableByValueState => {
+  const [tab] = data.tabs;
+  const { state: storedState, references } = toStoredSearchEmbeddableByValue({
+    title: data.title,
+    tabs: [tab],
+  });
+  const { tabs } = fromStoredSearchEmbeddableByValue(storedState, references);
+  const [embeddableTab] = tabs;
+
+  // Sample_size was already exposed for ES|QL in the GA embeddable API.
+  // Preserve chat's existing Classic-only behavior.
+  if (isDiscoverSessionEsqlTab(tab)) {
+    delete embeddableTab.sample_size;
+  }
+
+  const state: DiscoverSessionEmbeddableByValueState = {
+    title: data.title,
+    tabs,
+  };
+
+  if (data.description) {
+    state.description = data.description;
+  }
+
+  // Chat has no global timefilter, so copy the tab time range onto the panel.
+  if (tab.time_range) {
+    state.time_range = tab.time_range;
+  }
+
+  return state;
+};
 
 export const buildDiscoverSessionEmbeddableInput = (
   data: DiscoverSessionApiData,

@@ -69,7 +69,23 @@ describe('discover session inline state', () => {
 
   describe('buildDiscoverSessionEmbeddableInput', () => {
     it('adds overlay document viewer display options and the local time range', () => {
-      const data = createSession({ title: 'Nginx errors', tabs: [esqlTab] });
+      const data = createSession({
+        title: 'Nginx errors',
+        tabs: [
+          {
+            ...esqlTab,
+            type: DiscoverTabType.Metrics,
+            dimensions: ['service.name'],
+            search_term: 'cpu',
+            counter_aggregation: 'sum',
+            gauge_aggregation: 'avg',
+            histogram_percentile: 'p95',
+            histogram_visualization: 'lnsHeatmap',
+            grid_sort_field: 'recency',
+            grid_sort_direction: 'desc',
+          },
+        ],
+      });
       const originalTab = { ...data.tabs[0] };
       const result = buildDiscoverSessionEmbeddableInput(data, { from: 'now-15m', to: 'now' });
 
@@ -79,6 +95,9 @@ describe('discover session inline state', () => {
           density: DataGridDensity.COMPACT,
           row_height: 1,
           header_row_height: 1,
+          histogram_visualization: 'lnsHeatmap',
+          grid_sort_field: 'recency',
+          grid_sort_direction: 'desc',
         })
       );
       expect(result.nonPersistedDisplayOptions).toEqual({
