@@ -44,6 +44,7 @@ import { createRound } from '../../../test_utils';
 import { buildPinnedFilter } from '../access_control/query';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
+import type { ConversationClaim } from './types';
 import { roundToEvents } from './rounds_to_events';
 import type { ConversationEventsServiceStart } from '../../conversation_events';
 import { describeConversationWrite } from '../../../workflows/triggers/describe_conversation_write';
@@ -4170,6 +4171,37 @@ describe('ConversationClient', () => {
       });
     });
 
+    it('a lock-only update emits nothing', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+
+      await clientWithCb.update(
+        { id: 'conversation-1' },
+        {
+          source: 'execution',
+          access: 'converse',
+          claim: { executionId: 'e1', triggerEventId: 't1' },
+        }
+      );
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+      expect(emitConversationUpdated).not.toHaveBeenCalled();
+    });
+
+    it('an update with fields and a claim still emits', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+
+      await clientWithCb.update(
+        { id: 'conversation-1', title: 'Renamed' },
+        {
+          source: 'http_api',
+          access: 'converse',
+          claim: { executionId: 'e1', triggerEventId: 't1' },
+        }
+      );
+
+      expect(emitted()).toMatchObject({ conversationId: 'conversation-1', source: 'http_api' });
+    });
+
     it('appendEvents with only already-stored events emits nothing', async () => {
       const stored = userMessage('evt-1');
       mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [stored] }));
@@ -6069,12 +6101,17 @@ describe('ConversationClient', () => {
       expect(result.active_execution).toMatchObject({ execution_id: 'e2' });
     });
 
-    it('claimActiveExecution writes only active_execution', async () => {
+    const lockOnlyUpdate = (options: { claim?: ConversationClaim; releaseExecutionId?: string }) =>
+      client.update(
+        { id: 'conversation-1' },
+        { source: 'execution', access: 'converse', retryOnConflict: true, ...options }
+      );
+
+    it('a lock-only update with a claim writes only active_execution', async () => {
       const stored = documentWithHolder(undefined, { readBy: [{ userId: 'user-1' }] });
       mockGetDocumentResponse(stored);
-      const claim = createClaim('e2');
 
-      await client.claimActiveExecution({ id: 'conversation-1', claim });
+      await lockOnlyUpdate({ claim: createClaim('e2') });
 
       const indexed = indexedSource();
       expect(indexed.events).toEqual(stored._source.events);
@@ -6083,28 +6120,39 @@ describe('ConversationClient', () => {
         execution_id: 'e2',
         trigger_event_id: 't2',
       });
-      expect(describeConversationWriteMock).not.toHaveBeenCalled();
     });
 
-    it('releaseActiveExecution clears only its own claim', async () => {
+    it('a lock-only update with releaseExecutionId clears only its own claim', async () => {
       const stored = documentWithHolder('e1', { readBy: [{ userId: 'user-1' }] });
       mockGetDocumentResponse(stored);
 
-      await client.releaseActiveExecution({ id: 'conversation-1', executionId: 'e1' });
+      await lockOnlyUpdate({ releaseExecutionId: 'e1' });
 
       const indexed = indexedSource();
       expect(indexed.active_execution).toBeUndefined();
       expect(indexed.events).toEqual(stored._source.events);
       expect(indexed.read_by).toEqual([{ userId: 'user-1' }]);
-      expect(describeConversationWriteMock).not.toHaveBeenCalled();
     });
 
-    it('releaseActiveExecution leaves a newer holder without writing', async () => {
+    it('a lock-only update with releaseExecutionId leaves a newer holder without writing', async () => {
       mockGetDocumentResponse(documentWithHolder('e2'));
 
-      await client.releaseActiveExecution({ id: 'conversation-1', executionId: 'e1' });
+      await lockOnlyUpdate({ releaseExecutionId: 'e1' });
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('an update with fields and releaseExecutionId releases in the same write', async () => {
+      mockGetDocumentResponse(documentWithHolder('e1'));
+
+      await client.update(
+        { id: 'conversation-1', title: 'Renamed' },
+        { source: 'http_api', releaseExecutionId: 'e1' }
+      );
+
+      const indexed = indexedSource();
+      expect(indexed.title).toBe('Renamed');
+      expect(indexed.active_execution).toBeUndefined();
     });
 
     it('replaceRoundEvents with releaseExecutionId clears its own claim', async () => {

@@ -1905,7 +1905,7 @@ describe('AgentExecutionService', () => {
       conversationClient.exists.mockResolvedValue(true);
       conversationClient.appendEvents.mockResolvedValue(conversation);
       conversationClient.create.mockResolvedValue(conversation);
-      conversationClient.claimActiveExecution.mockResolvedValue(conversation);
+      conversationClient.update.mockResolvedValue(conversation);
     });
 
     it('refuses with conversationBusy, deletes its execution record and schedules nothing', async () => {
@@ -1971,16 +1971,21 @@ describe('AgentExecutionService', () => {
 
       expect(error).toBe(scheduleError);
       const [{ executionId }] = mockExecutionClient.create.mock.calls[0];
-      expect(conversationClient.releaseActiveExecution).toHaveBeenCalledWith({
-        id: 'conversation-1',
-        executionId,
-      });
+      expect(conversationClient.update).toHaveBeenCalledWith(
+        { id: 'conversation-1' },
+        {
+          source: 'execution',
+          access: 'converse',
+          retryOnConflict: true,
+          releaseExecutionId: executionId,
+        }
+      );
     });
 
     it('rethrows the scheduling error when releasing the claim fails', async () => {
       const scheduleError = new Error('task manager unavailable');
       mockTaskManagerEnsureScheduled.mockRejectedValueOnce(scheduleError);
-      conversationClient.releaseActiveExecution.mockRejectedValueOnce(new Error('ES unavailable'));
+      conversationClient.update.mockRejectedValueOnce(new Error('ES unavailable'));
 
       const error = await converse().catch((thrown) => thrown);
 
@@ -1993,7 +1998,7 @@ describe('AgentExecutionService', () => {
 
       await converse({ storeConversation: false }).catch(() => undefined);
 
-      expect(conversationClient.releaseActiveExecution).not.toHaveBeenCalled();
+      expect(conversationClient.update).not.toHaveBeenCalled();
     });
 
     it('a keyed redelivery runs normally once the holder is free', async () => {
@@ -2044,7 +2049,7 @@ describe('AgentExecutionService', () => {
       expect(claim).toEqual({ executionId, triggerEventId: `${roundId}::user_message` });
     });
 
-    it('claims with claimActiveExecution on a HITL resume', async () => {
+    it('claims with a lock-only update on a HITL resume', async () => {
       conversationClient.get.mockResolvedValue({
         ...conversation,
         rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.awaitingPrompt })],
@@ -2053,13 +2058,15 @@ describe('AgentExecutionService', () => {
       await converse();
 
       const [{ executionId }] = mockExecutionClient.create.mock.calls[0];
-      expect(conversationClient.claimActiveExecution).toHaveBeenCalledWith({
-        id: 'conversation-1',
-        claim: expect.objectContaining({
-          executionId,
-          triggerEventId: 'round-1::user_message',
-        }),
-      });
+      expect(conversationClient.update).toHaveBeenCalledWith(
+        { id: 'conversation-1' },
+        {
+          source: 'execution',
+          access: 'converse',
+          retryOnConflict: true,
+          claim: { executionId, triggerEventId: 'round-1::user_message' },
+        }
+      );
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     });
 
@@ -2079,7 +2086,7 @@ describe('AgentExecutionService', () => {
 
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
       expect(conversationClient.create).not.toHaveBeenCalled();
-      expect(conversationClient.claimActiveExecution).not.toHaveBeenCalled();
+      expect(conversationClient.update).not.toHaveBeenCalled();
     });
 
     it('still returns the existing execution on an idempotent replay without claiming', async () => {
@@ -2101,7 +2108,7 @@ describe('AgentExecutionService', () => {
       expect(result.executionId).toBe('exec-1');
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
       expect(conversationClient.create).not.toHaveBeenCalled();
-      expect(conversationClient.claimActiveExecution).not.toHaveBeenCalled();
+      expect(conversationClient.update).not.toHaveBeenCalled();
       expect(mockExecutionClient.delete).not.toHaveBeenCalled();
     });
 
@@ -2125,7 +2132,7 @@ describe('AgentExecutionService', () => {
 
       expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
       expect(appendedClaim()).toBeUndefined();
-      expect(conversationClient.claimActiveExecution).not.toHaveBeenCalled();
+      expect(conversationClient.update).not.toHaveBeenCalled();
     });
   });
 });

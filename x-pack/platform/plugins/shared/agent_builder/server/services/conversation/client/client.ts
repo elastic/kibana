@@ -178,6 +178,10 @@ export interface ConversationClient {
       access?: ConversationAccess;
       retryOnConflict?: boolean;
       activity?: ActivityContext;
+      /** Claims the run lock in the same write. */
+      claim?: ConversationClaim;
+      /** Releases the run lock in the same write when this execution still holds it. */
+      releaseExecutionId?: string;
     }
   ): Promise<Conversation>;
   appendEvents(
@@ -196,16 +200,6 @@ export interface ConversationClient {
     request: ReplaceRoundEventsRequest,
     options: ConversationWriteOptions & { access?: ConversationAccess }
   ): Promise<Conversation>;
-  /**
-   * Claims the run lock for an execution without touching anything else on the conversation,
-   * failing with `conversationBusy` while another live execution holds it.
-   */
-  claimActiveExecution(request: { id: string; claim: ConversationClaim }): Promise<Conversation>;
-  /**
-   * Releases the run lock when `executionId` still holds it, without touching anything else on
-   * the conversation.
-   */
-  releaseActiveExecution(request: { id: string; executionId: string }): Promise<Conversation>;
   markRead(conversationId: string, read: boolean): Promise<Conversation>;
   setPinned(conversationId: string, pinned: boolean): Promise<Conversation>;
   updateRoundFeedback(
@@ -420,7 +414,7 @@ const takeActiveExecution = (
 };
 
 /** Clears the run lock when `releaseExecutionId` still holds it; leaves a newer holder alone. */
-const releaseActiveExecution = (
+const releaseIfHeldBy = (
   current: NormalizedConversation,
   releaseExecutionId: string | undefined
 ): Pick<ConversationUpdatableFields, 'active_execution'> =>
@@ -1060,21 +1054,37 @@ class ConversationClientImpl implements ConversationClient {
       retryOnConflict = false,
       source,
       activity,
+      claim,
+      releaseExecutionId,
     }: ConversationWriteOptions & {
       access?: ConversationAccess;
       retryOnConflict?: boolean;
       activity?: ActivityContext;
+      claim?: ConversationClaim;
+      releaseExecutionId?: string;
     }
   ): Promise<Conversation> {
     const { id: conversationId, ...fields } = conversationUpdate;
     const envelope = this.activityEnvelope(activity);
 
+    // The run lock is bookkeeping, not conversation content: a lock-only update emits no
+    // `ai.conversation.updated`.
+    const isLockOnly = Object.keys(fields).length === 0;
+    const emission: ConversationWriteEmission = isLockOnly ? { emit: false } : { source };
+
     const result = await this.writeConversation({
       conversationId,
       access,
-      source,
+      ...emission,
       ...(retryOnConflict ? {} : { maxRetries: 0 }),
+      claim,
       fields: (current) => {
+        const release = releaseIfHeldBy(current, releaseExecutionId);
+
+        if (isLockOnly && !claim && !('active_execution' in release)) {
+          throw skipWrite(current);
+        }
+
         const bounded = withBoundedTitle(fields);
         const activityEvents: ActivityEvent[] = [
           ...(bounded.title !== undefined
@@ -1090,7 +1100,7 @@ class ConversationClientImpl implements ConversationClient {
               )
             : []),
         ];
-        return { ...bounded, ...withActivityEvents(current, activityEvents) };
+        return { ...bounded, ...withActivityEvents(current, activityEvents), ...release };
       },
     });
 
@@ -1187,7 +1197,7 @@ class ConversationClientImpl implements ConversationClient {
               }
             : {}),
           ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
-          ...releaseActiveExecution(current, releaseExecutionId),
+          ...releaseIfHeldBy(current, releaseExecutionId),
           read_by: [],
           read: false,
         };
@@ -1270,7 +1280,7 @@ class ConversationClientImpl implements ConversationClient {
               }
             : {}),
           ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
-          ...releaseActiveExecution(current, releaseExecutionId),
+          ...releaseIfHeldBy(current, releaseExecutionId),
           read_by: [],
           read: false,
         };
@@ -1279,45 +1289,6 @@ class ConversationClientImpl implements ConversationClient {
 
     this.notifyAttachmentEvents(result.id, writtenEvents);
     return result;
-  }
-
-  async claimActiveExecution({
-    id: conversationId,
-    claim,
-  }: {
-    id: string;
-    claim: ConversationClaim;
-  }): Promise<Conversation> {
-    // The lock is bookkeeping, not conversation content: no `ai.conversation.updated`, and
-    // `read`/`read_by` stay as they are.
-    return this.writeConversation({
-      conversationId,
-      access: 'converse',
-      emit: false,
-      claim,
-      fields: () => ({}),
-    });
-  }
-
-  async releaseActiveExecution({
-    id: conversationId,
-    executionId,
-  }: {
-    id: string;
-    executionId: string;
-  }): Promise<Conversation> {
-    return this.writeConversation({
-      conversationId,
-      access: 'converse',
-      emit: false,
-      fields: (current) => {
-        if (current.active_execution?.execution_id !== executionId) {
-          throw skipWrite(current);
-        }
-
-        return releaseActiveExecution(current, executionId);
-      },
-    });
   }
 
   async markRead(conversationId: string, read: boolean): Promise<Conversation> {

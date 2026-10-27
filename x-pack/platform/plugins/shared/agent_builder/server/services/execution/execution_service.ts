@@ -252,7 +252,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
       try {
         if (pendingResumeRound) {
-          await conversationClient.claimActiveExecution({ id: conversation.id, claim });
+          await conversationClient.update(
+            { id: conversation.id },
+            { source: 'execution', access: 'converse', retryOnConflict: true, claim }
+          );
         } else {
           await this.writeUserMessage({
             conversation,
@@ -335,10 +338,15 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       // A run that never got dispatched would otherwise hold the lock until it goes stale.
       if (claimedConversationId) {
         try {
-          await conversationClient.releaseActiveExecution({
-            id: claimedConversationId,
-            executionId,
-          });
+          await conversationClient.update(
+            { id: claimedConversationId },
+            {
+              source: 'execution',
+              access: 'converse',
+              retryOnConflict: true,
+              releaseExecutionId: executionId,
+            }
+          );
         } catch (releaseErr) {
           this.logger.warn(
             `Failed to release conversation ${claimedConversationId} after execution ${executionId} failed to start: ${releaseErr.message}`
