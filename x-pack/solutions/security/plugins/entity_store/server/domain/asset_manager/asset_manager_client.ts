@@ -507,13 +507,19 @@ export class AssetManagerClient {
     };
   }
 
+  // Component probes run as the internal user: the status must describe the cluster, not what the
+  // requesting user is allowed to see (a 403 would otherwise read as "not installed").
   private async getIndexTemplateComponents(): Promise<EngineComponentStatus[]> {
     const resource = 'index_template';
     const latestId = getLatestIndexTemplateId(this.namespace);
     const updatesId = getUpdatesIndexTemplateId(this.namespace);
     const [latestExists, updatesExists] = await Promise.all([
-      this.tryAsBoolean(this.esClient.indices.getIndexTemplate({ name: latestId })),
-      this.tryAsBoolean(this.esClient.indices.getIndexTemplate({ name: updatesId })),
+      this.existsOrFalseOnNotFound(
+        this.internalEsClient.indices.getIndexTemplate({ name: latestId })
+      ),
+      this.existsOrFalseOnNotFound(
+        this.internalEsClient.indices.getIndexTemplate({ name: updatesId })
+      ),
     ]);
     return [
       { id: latestId, installed: latestExists, resource },
@@ -526,8 +532,10 @@ export class AssetManagerClient {
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
     const updatesDataStreamName = getUpdatesEntitiesDataStreamName(this.namespace);
     const [latestExists, updatesExists] = await Promise.all([
-      this.esClient.indices.exists({ index: latestIndex }),
-      this.tryAsBoolean(this.esClient.indices.getDataStream({ name: updatesDataStreamName })),
+      this.internalEsClient.indices.exists({ index: latestIndex }),
+      this.existsOrFalseOnNotFound(
+        this.internalEsClient.indices.getDataStream({ name: updatesDataStreamName })
+      ),
     ]);
     return [
       { id: latestIndex, installed: latestExists, resource },
@@ -542,8 +550,12 @@ export class AssetManagerClient {
     const latestName = getComponentTemplateName(definition.type, this.namespace);
     const updatesName = getUpdatesComponentTemplateName(definition.type, this.namespace);
     const [latestExists, updatesExists] = await Promise.all([
-      this.tryAsBoolean(this.esClient.cluster.getComponentTemplate({ name: latestName })),
-      this.tryAsBoolean(this.esClient.cluster.getComponentTemplate({ name: updatesName })),
+      this.existsOrFalseOnNotFound(
+        this.internalEsClient.cluster.getComponentTemplate({ name: latestName })
+      ),
+      this.existsOrFalseOnNotFound(
+        this.internalEsClient.cluster.getComponentTemplate({ name: updatesName })
+      ),
     ]);
     return [
       { id: latestName, installed: latestExists, resource },
@@ -631,6 +643,19 @@ export class AssetManagerClient {
       namespace: this.namespace,
     });
     return true;
+  }
+
+  private async existsOrFalseOnNotFound(promise: Promise<unknown>): Promise<boolean> {
+    try {
+      await promise;
+      return true;
+    } catch (error) {
+      const { statusCode, meta } = error as { statusCode?: number; meta?: { statusCode?: number } };
+      if ((meta?.statusCode ?? statusCode) === 404) {
+        return false;
+      }
+      throw error;
+    }
   }
 
   /**
