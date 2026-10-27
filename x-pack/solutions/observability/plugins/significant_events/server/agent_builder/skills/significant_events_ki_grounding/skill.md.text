@@ -212,11 +212,13 @@ invalid: the verdict is `not_checked`, not `inconclusive`.
 
 One sample per rule proves whether its failure is happening now. Apply `<query_rules>`, plus:
 
-- **Confirm and Profile run once per rule**, one rule at a time, in this order:
-  1. Send the rule's sample query alone.
-  2. When it returns, read it as `<reading_log_lines>` requires and write the rule's findings.
-  3. When its sample shows a failure, send the rule's profile queries in one response.
-  4. Only then start the next rule.
+- **Confirm and Profile run once per rule, one sample per response.** A sample is the large result and
+  profile results are small, so each response carries at most one sample query. In this order:
+  1. Send the first rule's sample query alone.
+  2. When a sample returns, read it as `<reading_log_lines>` requires and write the rule's findings.
+  3. In one response, send that rule's profile queries (when its sample shows a failure) together
+     with the next rule's sample query. After the last rule, send its profile queries alone.
+  4. Repeat from step 2 until every rule has been sampled and profiled.
 - **FROM target.** If the KI's `query.esql.query` starts with `FROM $.{name}`, copy that `FROM`
   verbatim. Otherwise copy the `view_name` of the response `sources` entry whose `slug` equals the
   KI's `source_id`. Do not assemble view names or strip `$.`.
@@ -247,7 +249,7 @@ variant below that matches whether `{scope}` isolates the operation), the `trend
 and the `baseline` query, under `<query_rules>`, built from `{scope}` and `{failure}`.
 Every qualifying rule is profiled, whatever the batch size. A figure is unmeasured only when its
 query returned no rows or failed, never because the query was not run.
-A rule's profile queries go out after its findings are written, and before the next rule's sample.
+A rule's profile queries go out after its findings are written, in the same response as the next rule's sample.
 
 For an `off_topic` signal, `{failure}` measures the observed error, so use a condition that
 isolates it (an exact field value seen in its sample row). With no such condition, leave its
