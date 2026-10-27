@@ -260,17 +260,21 @@ export class WorkflowAccessControlService {
    */
   async readableWorkflowIds(
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    { includeManaged }: { includeManaged: boolean }
   ): Promise<string[] | undefined> {
     if (await this.isAdmin(request)) return undefined;
     const access = await this.scanWorkflowAccess(spaceId, await this.getProfileId(request));
     if (!access || access.hidden.length === 0) return undefined;
+    const readableIds = access.readable
+      .filter(({ managed }) => includeManaged || !managed)
+      .map(({ id }) => id);
     // Past this size the id list no longer fits in a request body. Dropping the scope would show
     // the options of hidden workflows, so fail instead.
-    if (access.readable.length > READABLE_WORKFLOW_IDS_LIMIT) {
+    if (readableIds.length > READABLE_WORKFLOW_IDS_LIMIT) {
       throw new Error('Too many readable workflows to scope the execution filters.');
     }
-    return [...access.readable, EPHEMERAL_WORKFLOW_ID, INTERNAL_TEST_WORKFLOW_ID];
+    return [...readableIds, EPHEMERAL_WORKFLOW_ID, INTERNAL_TEST_WORKFLOW_ID];
   }
 
   private async buildExecutionFilter(
@@ -292,7 +296,7 @@ export class WorkflowAccessControlService {
   private async scanWorkflowAccess(
     spaceId: string,
     profileId: string | undefined
-  ): Promise<{ readable: string[]; hidden: string[] } | undefined> {
+  ): Promise<{ readable: Array<{ id: string; managed: boolean }>; hidden: string[] } | undefined> {
     const client = this.core.elasticsearch.client.asInternalUser;
     let pitId: string;
     try {
@@ -307,16 +311,16 @@ export class WorkflowAccessControlService {
       if (isIndexNotFoundError(error)) return undefined;
       throw error;
     }
-    const readableIds: string[] = [];
+    const readable: Array<{ id: string; managed: boolean }> = [];
     const hiddenIds: string[] = [];
     let searchAfter: estypes.SortResults | undefined;
     try {
       while (true) {
-        const response = await client.search<WorkflowAccessSubject>({
+        const response = await client.search<WorkflowAccessSubject & { managed?: boolean }>({
           pit: { id: pitId, keep_alive: '1m' },
           allow_partial_search_results: false,
           size: 1000,
-          _source: ['owner_id', 'access_control'],
+          _source: ['owner_id', 'access_control', 'managed'],
           sort: ['_shard_doc'],
           ...(searchAfter ? { search_after: searchAfter } : {}),
           query: { terms: { spaceId: [spaceId, GLOBAL_WORKFLOW_SPACE_ID] } },
@@ -332,7 +336,11 @@ export class WorkflowAccessControlService {
             { owner_id: source.owner_id, access_control: accessControl },
             profileId
           );
-          (read ? readableIds : hiddenIds).push(id);
+          if (read) {
+            readable.push({ id, managed: source.managed === true });
+          } else {
+            hiddenIds.push(id);
+          }
         }
         if (response.hits.hits.length < 1000) break;
         searchAfter = response.hits.hits.at(-1)?.sort;
@@ -341,7 +349,7 @@ export class WorkflowAccessControlService {
     } finally {
       await client.closePointInTime({ id: pitId });
     }
-    return { readable: readableIds, hidden: hiddenIds };
+    return { readable, hidden: hiddenIds };
   }
 
   async update(

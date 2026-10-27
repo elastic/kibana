@@ -11,7 +11,7 @@ import React, { useMemo } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useQuery } from '@kbn/react-query';
-import { useWorkflowsApi } from '@kbn/workflows-ui';
+import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import {
   WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
   WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC,
@@ -21,6 +21,7 @@ import {
   EXECUTION_FILTERS_STORAGE_KEY,
 } from './workflow_executions_page_constants';
 import {
+  buildExcludeManagedExecutionsFilter,
   buildExcludeStepRunsFilter,
   buildReadableWorkflowsFilter,
 } from './workflow_executions_scope_filters';
@@ -55,6 +56,7 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
     const { dataViews } = useKibana().services;
     const spaceId = useSpaceId();
     const api = useWorkflowsApi();
+    const { canReadManagedWorkflowExecution } = useWorkflowsCapabilities();
 
     // The options lists read the execution data as the current user, which ignores workflow access
     // control, so they are scoped to the workflows the user can read until that data enforces it.
@@ -70,9 +72,10 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
     const parentFilters = useMemo(
       () => [
         buildExcludeStepRunsFilter(),
+        ...(canReadManagedWorkflowExecution ? [] : [buildExcludeManagedExecutionsFilter()]),
         ...(readableWorkflowIds ? [buildReadableWorkflowsFilter(readableWorkflowIds)] : []),
       ],
-      [readableWorkflowIds]
+      [canReadManagedWorkflowExecution, readableWorkflowIds]
     );
 
     const dataViewSpec = useMemo(

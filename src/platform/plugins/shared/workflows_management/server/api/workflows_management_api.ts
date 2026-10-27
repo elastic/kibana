@@ -1152,10 +1152,11 @@ export class WorkflowsManagementApi {
   /** Workflow ids the caller can read, or `undefined` when no workflow is hidden from them. */
   public async getReadableWorkflowIds(
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options: { includeManaged: boolean }
   ): Promise<string[] | undefined> {
     const access = await this.workflowsService.getAccessControl();
-    return access.readableWorkflowIds(spaceId, request);
+    return access.readableWorkflowIds(spaceId, request, options);
   }
 
   public async getWorkflowExecution(

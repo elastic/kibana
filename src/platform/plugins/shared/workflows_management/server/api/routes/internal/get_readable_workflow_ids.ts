@@ -10,7 +10,10 @@
 import type { RouteDependencies } from '../types';
 import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
+import {
+  canReadManagedWorkflowExecutions,
+  WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
+} from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerGetReadableWorkflowIdsRoute({ router, api, spaces }: RouteDependencies) {
@@ -18,7 +21,7 @@ export function registerGetReadableWorkflowIdsRoute({ router, api, spaces }: Rou
     .get({
       path: '/internal/workflows/readable_workflow_ids',
       access: 'internal',
-      security: WORKFLOW_EXECUTION_READ_SECURITY,
+      security: WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
     })
     .addVersion(
       {
@@ -27,7 +30,13 @@ export function registerGetReadableWorkflowIdsRoute({ router, api, spaces }: Rou
       },
       withAvailabilityCheck(async (_context, request, response) => {
         try {
-          const workflowIds = await api.getReadableWorkflowIds(spaces.getSpaceId(request), request);
+          const workflowIds = await api.getReadableWorkflowIds(
+            spaces.getSpaceId(request),
+            request,
+            {
+              includeManaged: canReadManagedWorkflowExecutions(request),
+            }
+          );
           return response.ok({ body: { workflowIds } });
         } catch (error) {
           return handleRouteError(response, error);

@@ -9,9 +9,10 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { useWorkflowsApi } from '@kbn/workflows-ui';
+import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowExecutionsFilters } from './workflow_executions_filters';
 import {
+  buildExcludeManagedExecutionsFilter,
   buildExcludeStepRunsFilter,
   buildReadableWorkflowsFilter,
 } from './workflow_executions_scope_filters';
@@ -21,6 +22,7 @@ import { FilterControls } from '../../shared/ui/filter_controls';
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsApi: jest.fn(),
+  useWorkflowsCapabilities: jest.fn(),
 }));
 jest.mock('../../hooks/use_space_id', () => ({ useSpaceId: () => 'default' }));
 jest.mock('../../shared/ui/filter_controls', () => ({
@@ -28,6 +30,9 @@ jest.mock('../../shared/ui/filter_controls', () => ({
 }));
 
 const mockUseWorkflowsApi = useWorkflowsApi as jest.MockedFunction<typeof useWorkflowsApi>;
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+  typeof useWorkflowsCapabilities
+>;
 const mockFilterControls = FilterControls as jest.MockedFunction<typeof FilterControls>;
 
 const renderFilters = () =>
@@ -47,6 +52,9 @@ describe('WorkflowExecutionsFilters', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getReadableWorkflowIds = jest.fn();
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      canReadManagedWorkflowExecution: true,
+    } as ReturnType<typeof useWorkflowsCapabilities>);
     mockUseWorkflowsApi.mockReturnValue({ getReadableWorkflowIds } as unknown as ReturnType<
       typeof useWorkflowsApi
     >);
@@ -69,6 +77,21 @@ describe('WorkflowExecutionsFilters', () => {
     await waitFor(() => expect(screen.getByTestId('filterControls')).toBeInTheDocument());
     expect(mockFilterControls.mock.calls[0][0].parentFilters).toEqual([
       buildExcludeStepRunsFilter(),
+    ]);
+  });
+
+  it('excludes managed executions when the user cannot read them', async () => {
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      canReadManagedWorkflowExecution: false,
+    } as ReturnType<typeof useWorkflowsCapabilities>);
+    getReadableWorkflowIds.mockResolvedValue({});
+
+    renderFilters();
+
+    await waitFor(() => expect(screen.getByTestId('filterControls')).toBeInTheDocument());
+    expect(mockFilterControls.mock.calls[0][0].parentFilters).toEqual([
+      buildExcludeStepRunsFilter(),
+      buildExcludeManagedExecutionsFilter(),
     ]);
   });
 

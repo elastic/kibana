@@ -10,6 +10,7 @@
 import type { Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { KQLSyntaxError } from '@kbn/es-query';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { SearchTriggerEventLogResult } from '@kbn/workflows-ui';
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
@@ -221,8 +222,32 @@ describe('Internal Routes', () => {
       response
     );
 
-    expect(mockApi.getReadableWorkflowIds).toHaveBeenCalledWith('default', request);
+    expect(mockApi.getReadableWorkflowIds).toHaveBeenCalledWith('default', request, {
+      includeManaged: false,
+    });
     expect(response.ok).toHaveBeenCalledWith({ body: { workflowIds: ['a', 'b'] } });
+  });
+
+  it('includes managed workflows for callers who can read managed executions', async () => {
+    mockApi.getReadableWorkflowIds.mockResolvedValue(['a']);
+
+    const response = httpServerMock.createResponseFactory();
+    const request = Object.assign(httpServerMock.createKibanaRequest(), {
+      authzResult: {
+        [WorkflowsManagementApiActions.readExecution]: true,
+        [WorkflowsManagementApiActions.readManagedExecution]: true,
+      },
+    });
+
+    await routeHandlers['GET:/internal/workflows/readable_workflow_ids'].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockApi.getReadableWorkflowIds).toHaveBeenCalledWith('default', request, {
+      includeManaged: true,
+    });
   });
 
   it('should register the disable route handler', () => {

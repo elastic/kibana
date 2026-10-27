@@ -859,7 +859,7 @@ describe('WorkflowAccessControlService', () => {
       });
       expect(client.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          _source: ['owner_id', 'access_control'],
+          _source: ['owner_id', 'access_control', 'managed'],
           query: { terms: { spaceId: ['default', '*'] } },
         })
       );
@@ -883,6 +883,8 @@ describe('WorkflowAccessControlService', () => {
       });
     });
 
+    const includeManaged = { includeManaged: true };
+
     it('lists the readable workflows and the unsaved-run ids when some are hidden', async () => {
       jest.mocked(core.elasticsearch.client.asInternalUser.search).mockResolvedValue(
         searchResponse([
@@ -892,20 +894,39 @@ describe('WorkflowAccessControlService', () => {
         ])
       );
 
-      await expect(service.readableWorkflowIds('default', request)).resolves.toEqual([
-        'legacy',
-        'public',
-        EPHEMERAL_WORKFLOW_ID,
-        INTERNAL_TEST_WORKFLOW_ID,
-      ]);
+      await expect(
+        service.readableWorkflowIds('default', request, includeManaged)
+      ).resolves.toEqual(['legacy', 'public', EPHEMERAL_WORKFLOW_ID, INTERNAL_TEST_WORKFLOW_ID]);
     });
+
+    it.each([
+      { includeManaged: false, expected: ['legacy'] },
+      { includeManaged: true, expected: ['legacy', 'managed'] },
+    ])(
+      'lists managed workflows only with managed access: includeManaged=$includeManaged',
+      async ({ includeManaged: allowed, expected }) => {
+        jest.mocked(core.elasticsearch.client.asInternalUser.search).mockResolvedValue(
+          searchResponse([
+            { id: 'legacy', source: {} },
+            { id: 'managed', source: { managed: true } },
+            { id: 'hidden', source: { ...document, owner_id: 'another-owner' } },
+          ])
+        );
+
+        await expect(
+          service.readableWorkflowIds('default', request, { includeManaged: allowed })
+        ).resolves.toEqual([...expected, EPHEMERAL_WORKFLOW_ID, INTERNAL_TEST_WORKFLOW_ID]);
+      }
+    );
 
     it('does not scope when no workflow is hidden', async () => {
       jest
         .mocked(core.elasticsearch.client.asInternalUser.search)
         .mockResolvedValue(searchResponse([{ id: 'legacy', source: {} }]));
 
-      await expect(service.readableWorkflowIds('default', request)).resolves.toBeUndefined();
+      await expect(
+        service.readableWorkflowIds('default', request, includeManaged)
+      ).resolves.toBeUndefined();
     });
 
     it('does not scope an administrator', async () => {
@@ -913,7 +934,9 @@ describe('WorkflowAccessControlService', () => {
         .spyOn(core.security.authc, 'getCurrentUser')
         .mockReturnValue(securityServiceMock.createMockAuthenticatedUser({ roles: ['superuser'] }));
 
-      await expect(service.readableWorkflowIds('default', request)).resolves.toBeUndefined();
+      await expect(
+        service.readableWorkflowIds('default', request, includeManaged)
+      ).resolves.toBeUndefined();
       expect(core.elasticsearch.client.asInternalUser.openPointInTime).not.toHaveBeenCalled();
     });
 
@@ -928,7 +951,9 @@ describe('WorkflowAccessControlService', () => {
         })
       );
 
-      await expect(service.readableWorkflowIds('default', request)).resolves.toBeUndefined();
+      await expect(
+        service.readableWorkflowIds('default', request, includeManaged)
+      ).resolves.toBeUndefined();
     });
 
     it('fails past the readable workflow limit instead of dropping the scope', async () => {
@@ -949,7 +974,7 @@ describe('WorkflowAccessControlService', () => {
           return response;
         });
 
-      await expect(service.readableWorkflowIds('default', request)).rejects.toThrow(
+      await expect(service.readableWorkflowIds('default', request, includeManaged)).rejects.toThrow(
         'Too many readable workflows to scope the execution filters.'
       );
     });

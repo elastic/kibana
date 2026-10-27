@@ -8,10 +8,14 @@
  */
 
 import {
+  buildExcludeManagedExecutionsFilter,
   buildExcludeStepRunsFilter,
   buildReadableWorkflowsFilter,
 } from './workflow_executions_scope_filters';
-import { buildWorkflowExecutionsSearchQuery } from '../../../server/api/lib/build_workflow_executions_search_query';
+import {
+  buildManagedWorkflowExecutionsFilter,
+  buildWorkflowExecutionsSearchQuery,
+} from '../../../server/api/lib/build_workflow_executions_search_query';
 
 describe('workflow executions scope filters', () => {
   it('excludes step runs like the executions list query', () => {
@@ -20,6 +24,16 @@ describe('workflow executions scope filters', () => {
 
     expect(listQuery?.bool?.must_not).toContainEqual(stepRunsClause);
     expect(buildExcludeStepRunsFilter().query).toEqual({ bool: { must_not: stepRunsClause } });
+  });
+
+  it('excludes managed executions like the executions list query', () => {
+    const managedClause = buildManagedWorkflowExecutionsFilter();
+    const listQuery = buildWorkflowExecutionsSearchQuery(undefined, 'my-space');
+
+    expect(listQuery?.bool?.must_not).toContainEqual(managedClause);
+    expect(buildExcludeManagedExecutionsFilter().query).toEqual({
+      bool: { must_not: managedClause },
+    });
   });
 
   it('limits the workflows to the given ids', () => {
