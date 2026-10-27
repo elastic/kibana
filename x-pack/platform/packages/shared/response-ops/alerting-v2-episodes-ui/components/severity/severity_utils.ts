@@ -9,6 +9,15 @@ import type { HeatmapElementEvent } from '@elastic/charts';
 import type { EuiBadgeProps, EuiThemeComputed } from '@elastic/eui';
 import { first, get } from 'lodash';
 import {
+  ALERT_SEVERITY_CRITICAL,
+  ALERT_SEVERITY_HIGH,
+  ALERT_SEVERITY_INFO,
+  ALERT_SEVERITY_LOW,
+  ALERT_SEVERITY_MEDIUM,
+  ALERT_SEVERITY_VALUES,
+  type AlertSeverity,
+} from '@kbn/rule-data-utils';
+import {
   EpisodeSeverity,
   EPISODE_SEVERITIES,
   EPISODE_SEVERITY_CHART_VALUE,
@@ -54,18 +63,22 @@ export const EPISODE_SEVERITY_BADGE_COLORS: Record<
   [EpisodeSeverity.Info]: 'default',
 };
 
+/** Ascending sort rank of a severity on the shared highest-to-lowest `ALERT_SEVERITY_VALUES` scale. */
+export const getSeveritySortRank = (severity: AlertSeverity): number =>
+  ALERT_SEVERITY_VALUES.length - 1 - ALERT_SEVERITY_VALUES.indexOf(severity);
+
 /**
- * Display and table-sort rank, lowest to highest. Leaves gaps for classic
- * Major / Minor / Warning so the merged filter and sort share one scale.
+ * Display and table-sort rank, lowest to highest, shared with classic severity
+ * extensions so the merged filter and sort use one scale.
  * Distinct from {@link EPISODE_SEVERITY_CHART_VALUE}, which stays on the
  * five-level chart axis.
  */
 export const EPISODE_SEVERITY_SORT_RANK: Record<EpisodeSeverity, number> = {
-  [EpisodeSeverity.Info]: 0,
-  [EpisodeSeverity.Low]: 1,
-  [EpisodeSeverity.Medium]: 3,
-  [EpisodeSeverity.High]: 5,
-  [EpisodeSeverity.Critical]: 7,
+  [EpisodeSeverity.Info]: getSeveritySortRank(ALERT_SEVERITY_INFO),
+  [EpisodeSeverity.Low]: getSeveritySortRank(ALERT_SEVERITY_LOW),
+  [EpisodeSeverity.Medium]: getSeveritySortRank(ALERT_SEVERITY_MEDIUM),
+  [EpisodeSeverity.High]: getSeveritySortRank(ALERT_SEVERITY_HIGH),
+  [EpisodeSeverity.Critical]: getSeveritySortRank(ALERT_SEVERITY_CRITICAL),
 };
 
 /** Heatmap and timeline fills aligned with the same color family as the severity badge. */

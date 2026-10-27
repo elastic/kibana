@@ -126,10 +126,10 @@ describe('classic alerts query builders', () => {
         'critical',
         'major',
         'high',
-        'warning',
         'medium',
         'minor',
         'low',
+        'warning',
         'info',
         null,
       ]);
@@ -153,10 +153,10 @@ describe('classic alerts query builders', () => {
       expect(severities).toEqual([
         null,
         'info',
+        'warning',
         'low',
         'minor',
         'medium',
-        'warning',
         'high',
         'major',
         'critical',
