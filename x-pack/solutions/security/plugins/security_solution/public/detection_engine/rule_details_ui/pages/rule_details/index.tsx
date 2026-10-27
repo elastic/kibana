@@ -39,7 +39,6 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import { PageScope } from '../../../../data_view_manager/constants';
-import { DataViewPicker } from '../../../../data_view_manager/components/data_view_picker';
 import { RuleCustomizationsContextProvider } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
@@ -131,9 +130,6 @@ import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useDeprecatedRuleDetailsCallout } from '../../../rule_management/components/rule_deprecation';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-
-// Module-level so the search bar keeps a stable prop reference between renders.
-const ALERTS_DATA_VIEW_PICKER = <DataViewPicker scope={PageScope.alerts} disabled />;
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -703,11 +699,7 @@ export const RuleDetailsPage = connector(
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                       <>
                         <FiltersGlobal>
-                          <SiemSearchBar
-                            dataView={dataView}
-                            id={InputsModelId.global}
-                            dataViewPickerOverride={ALERTS_DATA_VIEW_PICKER}
-                          />
+                          <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
                         </FiltersGlobal>
                         <EuiSpacer />
                         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
