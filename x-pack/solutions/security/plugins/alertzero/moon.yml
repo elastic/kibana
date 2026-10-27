@@ -87,6 +87,7 @@ dependsOn:
   - '@kbn/task-manager-plugin'
   - '@kbn/unsaved-changes-prompt'
   - '@kbn/telemetry-plugin'
+  - '@kbn/core-elasticsearch-server'
 tags:
   - plugin
   - prod
