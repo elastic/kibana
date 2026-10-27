@@ -1,8 +1,9 @@
 name: Changelog PR comments
 on:
   workflow_run:
-    # Must match the `name:` field of workflows in this repo that upload a
-    # changelog-decision artifact. Edit this list if you rename a workflow.
+    # Must match the `name:` field of release-notes.yml, which uploads the
+    # changelog-decision artifact. workflow_run matches by name only, not by
+    # file path. release-notes.yml carries the same warning next to its name.
     workflows: ["release-notes"]
     types: [completed]
 permissions:
