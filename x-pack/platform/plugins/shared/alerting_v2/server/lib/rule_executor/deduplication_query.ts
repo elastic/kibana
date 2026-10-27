@@ -6,7 +6,14 @@
  */
 
 import type { ESQLAstCommand, ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
-import { Parser, isColumn, isFunctionExpression, mutate } from '@elastic/esql';
+import {
+  Parser,
+  Walker,
+  isColumn,
+  isFunctionExpression,
+  isStringLiteral,
+  mutate,
+} from '@elastic/esql';
 
 /**
  * Source-document metadata columns that identify a rule event for
@@ -55,12 +62,17 @@ const NOT_ELIGIBLE: DeduplicationPlan = { eligible: false, mvExpandFields: [] };
  *
  * - its source is `FROM` and it declares every column in
  *   {@link DEDUPLICATION_METADATA_FIELDS} in its `METADATA` clause;
- * - it does not aggregate (`STATS`) — rows are not documents, and authors
- *   are not expected to group by `_id` / `_index` / `_version`;
+ * - it does not aggregate (`STATS` or `INLINE STATS`) — rows are not
+ *   documents, and authors are not expected to group by `_id` / `_index` /
+ *   `_version`;
+ * - it does not `FORK` — branches are nested sub-pipelines whose rows share
+ *   the source document's identity, and a branch could itself rewrite a
+ *   metadata column;
  * - no command manipulates a metadata column — `DROP` (including any
- *   wildcard, see {@link hasColumnMatching}), `RENAME`, or `EVAL` assignment —
- *   because the column would no longer be the source document's value and
- *   hashing it could silently merge distinct documents;
+ *   wildcard, see {@link hasColumnMatching}), `RENAME`, or any command that
+ *   writes to it (see {@link writesColumn}) — because the column would no
+ *   longer be the source document's value and hashing it could silently
+ *   merge distinct documents;
  * - every `KEEP` lists the metadata columns (or uses a wildcard, see
  *   {@link keepsField}), so the identity is not projected away;
  * - no command after an `MV_EXPAND` manipulates the expanded column, for
@@ -76,11 +88,14 @@ const NOT_ELIGIBLE: DeduplicationPlan = { eligible: false, mvExpandFields: [] };
  * that row.
  *
  * `MV_EXPAND` is the only fan-out command whose rows receive a distinct
- * identity, matching the detection engine. A one-to-many `LOOKUP JOIN` (or
- * `FORK`) still qualifies, and its rows share the source document's
- * identity, so only the first is persisted and the rest are counted as
- * deduplicated. Handling those requires a row identity ES|QL does not expose
- * today and is a known, documented limitation rather than an oversight.
+ * identity, matching the detection engine. A one-to-many `LOOKUP JOIN`
+ * still qualifies, and its rows share the source document's identity, so
+ * only the first is persisted and the rest are counted as deduplicated. A
+ * `LOOKUP JOIN` whose lookup index carries a column named `_id` would also
+ * overwrite the metadata, which cannot be seen from the query. Handling
+ * those requires a row identity and lookup-index mappings ES|QL does not
+ * expose to the planner today and is a known, documented limitation rather
+ * than an oversight.
  *
  * Never throws for a parseable query; the parser is error-tolerant, and an
  * unparseable query simply fails the `FROM` check.
@@ -89,7 +104,7 @@ export const planDeduplication = (query: string): DeduplicationPlan => {
   const { root } = Parser.parse(query);
   const { commands } = root;
 
-  if (commands[0]?.name !== 'from' || isAggregating(commands)) {
+  if (commands[0]?.name !== 'from' || isAggregating(commands) || hasFork(commands)) {
     return NOT_ELIGIBLE;
   }
 
@@ -120,11 +135,25 @@ export const planDeduplication = (query: string): DeduplicationPlan => {
 };
 
 /**
- * Whether the pipeline aggregates its rows with `STATS`. Aggregated rows are
- * not source documents, so there is no document identity to deduplicate on.
+ * Whether the pipeline aggregates its rows with `STATS` or `INLINE STATS`.
+ * Aggregated rows are not source documents, so there is no document identity
+ * to deduplicate on. `INLINE STATS` keeps the source rows, but its aggregate
+ * columns are assigned the same way as `STATS` and it is treated
+ * conservatively alongside it rather than special-cased.
  */
 const isAggregating = (commands: readonly ESQLAstCommand[]): boolean =>
-  commands.some((command) => command.name === 'stats');
+  commands.some((command) => command.name === 'stats' || command.name === 'inline stats');
+
+/**
+ * Whether the pipeline contains a `FORK`. Each branch is a nested
+ * sub-pipeline, so a top-level scan of `commands` would not see a branch that
+ * drops, renames or reassigns a metadata column. Rather than inspect branches
+ * recursively, the whole query is treated as ineligible: `FORK` also fans one
+ * document into one row per branch, and those rows have no per-row identity
+ * to fold into the id the way `MV_EXPAND` values are.
+ */
+const hasFork = (commands: readonly ESQLAstCommand[]): boolean =>
+  commands.some((command) => command.name === 'fork');
 
 /**
  * Column names expanded by `MV_EXPAND` commands, in pipeline order.
@@ -155,7 +184,7 @@ const getExpandedField = (command: ESQLAstCommand): string | undefined => {
 const invalidatesField = (command: ESQLAstCommand, field: string): boolean =>
   (command.name === 'drop' && hasColumnMatching(command.args, field)) ||
   (command.name === 'rename' && hasRenameOf(command.args, field)) ||
-  (command.name === 'eval' && hasAssignmentTo(command.args, field));
+  writesColumn(command, field);
 
 /**
  * Whether a `KEEP` projects `field` away, which makes the query ineligible:
@@ -209,22 +238,73 @@ const hasRenameOf = (args: readonly ESQLAstItem[], field: string): boolean =>
       referencesColumn(arg, field)
   );
 
+/** Commands whose output columns are named inside a string pattern. */
+const PATTERN_COMMANDS: ReadonlySet<string> = new Set(['dissect', 'grok']);
+
 /**
- * Whether an `EVAL` assigns to `field` (`field = …`).
+ * Whether `command` writes a column named `field`, anywhere in its syntax.
  *
- * Unlike {@link hasRenameOf} this stays positional on purpose: the
- * assignment target is always `args[0]`, and an `EVAL` that merely *reads*
- * the field (`EVAL x = _id`) leaves it intact and must not make the query
- * ineligible.
+ * This is deliberately not a list of commands. Any command that produces a
+ * column does so in one of three shapes, and all three are checked by
+ * walking the command's full AST so that a new or unanticipated command is
+ * covered as long as it uses the same grammar:
+ *
+ * - an assignment `field = …`: `EVAL`, `ENRICH … WITH`, `COMPLETION`,
+ *   `RERANK`, `INLINE STATS`. The target is always the first argument, and a
+ *   command that merely *reads* the field (`EVAL x = _id`) leaves it intact
+ *   and must not make the query ineligible, so this stays positional;
+ * - an `AS` option naming output columns: `CHANGE_POINT … AS type, pvalue`;
+ * - a `DISSECT` / `GROK` pattern string: `"%{_id}"`, `"%{WORD:_id}"`. The
+ *   column names are not AST nodes, so the pattern text is scanned for the
+ *   field name as a whole token (see {@link patternNamesColumn}).
+ *
+ * `RENAME`'s `old = new` form puts the source column first, so it is checked
+ * separately by {@link hasRenameOf}, which is why `RENAME doc_id = _id` is
+ * still ineligible even though this check would not flag it.
  */
-const hasAssignmentTo = (args: readonly ESQLAstItem[], field: string): boolean =>
-  args.some(
-    (arg) =>
-      isFunctionExpression(arg) &&
-      arg.name === '=' &&
-      isColumn(arg.args[0]) &&
-      arg.args[0].name === field
-  );
+const writesColumn = (command: ESQLAstCommand, field: string): boolean => {
+  let written = false;
+  const found = (walker: { abort: () => void }) => {
+    written = true;
+    walker.abort();
+  };
+
+  Walker.walk(command, {
+    visitFunction: (fn, _parent, walker) => {
+      if (fn.name === '=' && isColumn(fn.args[0]) && fn.args[0].name === field) {
+        found(walker);
+      }
+    },
+    visitCommandOption: (option, _parent, walker) => {
+      if (option.name === 'as' && option.args.some((arg) => isColumn(arg) && arg.name === field)) {
+        found(walker);
+      }
+    },
+    visitLiteral: (literal, _parent, walker) => {
+      if (
+        PATTERN_COMMANDS.has(command.name) &&
+        isStringLiteral(literal) &&
+        patternNamesColumn(literal.valueUnquoted, field)
+      ) {
+        found(walker);
+      }
+    },
+  });
+
+  return written;
+};
+
+/**
+ * Whether a `DISSECT` / `GROK` pattern mentions `field` as a whole token:
+ * `%{_id}`, `%{+_id}`, `%{_id->}`, `%{WORD:_id}` or `%{WORD:_id:int}` all
+ * match, while `%{message_id}` and `%{host._id}` do not. Scanning the text
+ * rather than parsing the pattern grammar errs toward ineligibility, which
+ * at worst costs the rule deduplication, never correctness.
+ */
+const patternNamesColumn = (pattern: string, field: string): boolean =>
+  new RegExp(`(^|[^\\w.])${escapeRegExp(field)}(?![\\w.])`).test(pattern);
+
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /** Whether any direct argument of `fn` is the column `columnName`. */
 const referencesColumn = (fn: ESQLFunction, columnName: string): boolean =>

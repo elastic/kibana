@@ -25,6 +25,23 @@ describe('planDeduplication', () => {
       ['a wildcard KEEP', `FROM logs-* ${METADATA} | KEEP _*, host.name`],
       ['an EVAL that only reads a metadata field', `FROM logs-* ${METADATA} | EVAL doc = _id`],
       ['a non-wildcard DROP of an unrelated column', `FROM logs-* ${METADATA} | DROP message`],
+      [
+        'an ENRICH that writes unrelated columns',
+        `FROM logs-* ${METADATA} | ENRICH policy ON user_id WITH user_name = name`,
+      ],
+      [
+        'a CHANGE_POINT whose output columns are unrelated',
+        `FROM logs-* ${METADATA} | CHANGE_POINT value ON ts AS cp_type, cp_pvalue`,
+      ],
+      [
+        'a DISSECT pattern that only resembles a metadata column',
+        `FROM logs-* ${METADATA} | DISSECT message "%{message_id} %{host._id}"`,
+      ],
+      [
+        'a GROK pattern naming unrelated columns',
+        `FROM logs-* ${METADATA} | GROK message "%{IP:client_ip}"`,
+      ],
+      ['a LOOKUP JOIN', `FROM logs-* ${METADATA} | LOOKUP JOIN threats ON host.name`],
     ])('is eligible with %s', (_name, query) => {
       expect(planDeduplication(query)).toEqual(ELIGIBLE);
     });
@@ -51,6 +68,7 @@ describe('planDeduplication', () => {
       ['RENAME', `FROM logs-* ${METADATA} | MV_EXPAND tags | RENAME tags AS tag`],
       ['DROP', `FROM logs-* ${METADATA} | MV_EXPAND tags | DROP tags`],
       ['EVAL assignment', `FROM logs-* ${METADATA} | MV_EXPAND tags | EVAL tags = TO_UPPER(tags)`],
+      ['DISSECT', `FROM logs-* ${METADATA} | MV_EXPAND tags | DISSECT message "%{tags}"`],
     ])('is not eligible when the expanded column is later changed by %s', (_name, query) => {
       expect(planDeduplication(query)).toEqual(NOT_ELIGIBLE);
     });
@@ -82,6 +100,45 @@ describe('planDeduplication', () => {
       ['RENAME overwriting _id', `FROM logs-* ${METADATA} | RENAME host.name AS _id`],
       ['EVAL _version = …', `FROM logs-* ${METADATA} | EVAL _version = 1`],
       ['EVAL _id = …', `FROM logs-* ${METADATA} | EVAL _id = "fixed"`],
+      ['INLINE STATS', `FROM logs-* ${METADATA} | INLINE STATS c = COUNT(*) BY host.name`],
+      ['INLINESTATS', `FROM logs-* ${METADATA} | INLINESTATS c = COUNT(*) BY host.name`],
+      [
+        'a FORK whose branch reassigns _id',
+        `FROM logs-* ${METADATA} | FORK (EVAL _id = "fixed") (WHERE x > 1)`,
+      ],
+      [
+        'a FORK that leaves the identity alone',
+        `FROM logs-* ${METADATA} | FORK (WHERE x > 1) (WHERE y > 1)`,
+      ],
+      [
+        'ENRICH … WITH _id = …',
+        `FROM logs-* ${METADATA} | ENRICH policy ON user_id WITH _id = user_id`,
+      ],
+      [
+        'COMPLETION writing _index',
+        `FROM logs-* ${METADATA} | COMPLETION _index = "prompt" WITH { "inference_id": "x" }`,
+      ],
+      [
+        'RERANK writing _version',
+        `FROM logs-* ${METADATA} | RERANK _version = "q" ON message WITH { "inference_id": "x" }`,
+      ],
+      [
+        'CHANGE_POINT … AS _id',
+        `FROM logs-* ${METADATA} | CHANGE_POINT value ON ts AS _id, pvalue`,
+      ],
+      [
+        'a DISSECT pattern naming _id',
+        `FROM logs-* ${METADATA} | DISSECT message "%{_id} %{rest}"`,
+      ],
+      [
+        'a DISSECT pattern naming _id with modifiers',
+        `FROM logs-* ${METADATA} | DISSECT message "%{+_id->} %{rest}"`,
+      ],
+      ['a GROK pattern naming _id', `FROM logs-* ${METADATA} | GROK message "%{WORD:_id}"`],
+      [
+        'a typed GROK pattern naming _version',
+        `FROM logs-* ${METADATA} | GROK message "%{NUMBER:_version:int}"`,
+      ],
       ['a KEEP that omits the identity', `FROM logs-* ${METADATA} | KEEP host.name, message`],
       [
         'a KEEP that lists only part of the identity',
