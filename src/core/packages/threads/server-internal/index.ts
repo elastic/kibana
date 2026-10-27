@@ -8,6 +8,8 @@
  */
 
 export { createManagedWorker } from './src/managed_worker';
+export { createWorkerLogger } from './src/worker_logger';
+export type { WorkerLogger, WorkerLoggingConfig } from './src/worker_logger';
 export type {
   ManagedWorker,
   ManagedWorkerExitInfo,
