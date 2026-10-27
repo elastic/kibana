@@ -7,40 +7,174 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import {
-  ensureFingerprintIndexMapping,
-  FINGERPRINT_INDEX_MAPPINGS,
-} from './ensure_fingerprint_index';
+import { ensureFingerprintIndexMapping } from './ensure_fingerprint_index';
 
 const logger = {
   warn: jest.fn(),
 } as unknown as Logger;
 
-const privileges = (
-  FINGERPRINT_INDEX_MAPPINGS.properties?.permissions as {
-    properties: { kibana: { properties: { privileges: { type: string } } } };
-  }
-).properties.kibana.properties.privileges;
+const baseTemplate = {
+  name: 'ai-index-idx',
+  index_template: {
+    index_patterns: ['ai-index-idx-*'],
+    priority: 500,
+    composed_of: ['ai-index@mappings', 'ai-index@custom'],
+    template: {
+      settings: { number_of_shards: 1 },
+      mappings: { properties: { title: { type: 'text' } } },
+    },
+  },
+};
+
+const createClient = () => {
+  const esClient = {
+    indices: {
+      getIndexTemplate: jest.fn().mockResolvedValue({ index_templates: [baseTemplate] }),
+      putIndexTemplate: jest.fn().mockResolvedValue({ acknowledged: true }),
+      exists: jest.fn().mockResolvedValue(false),
+      getMapping: jest.fn(),
+      create: jest.fn(),
+      putMapping: jest.fn(),
+    },
+  };
+  return esClient;
+};
 
 describe('ensureFingerprintIndexMapping', () => {
-  it('creates the index with a nested space privilege', async () => {
-    const create = jest.fn().mockResolvedValue({ acknowledged: true });
-    const esClient = {
-      indices: {
-        exists: jest.fn().mockResolvedValue(false),
-        create,
-        getMapping: jest.fn(),
-        putMapping: jest.fn(),
+  beforeEach(() => {
+    jest.mocked(logger.warn).mockClear();
+  });
+
+  it('installs a higher-priority template with the nested space privilege', async () => {
+    const esClient = createClient();
+
+    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith({
+      name: 'security-attack-fingerprint',
+      index_patterns: ['ai-index-idx-security-attack-fingerprints'],
+      priority: 501,
+      composed_of: ['ai-index@mappings', 'ai-index@custom'],
+      template: {
+        settings: { number_of_shards: 1 },
+        mappings: {
+          properties: {
+            title: { type: 'text' },
+            permissions: {
+              type: 'object',
+              properties: {
+                kibana: {
+                  type: 'object',
+                  properties: {
+                    privileges: {
+                      type: 'nested',
+                      properties: {
+                        name: { type: 'keyword' },
+                        space: { type: 'keyword' },
+                        count: { type: 'long' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
-    } as unknown as ElasticsearchClient;
+    });
+  });
 
-    await ensureFingerprintIndexMapping(esClient, logger);
+  it('does not create the index', async () => {
+    const esClient = createClient();
 
-    expect(privileges.type).toBe('nested');
-    expect(create).toHaveBeenCalledWith(
+    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+
+    expect(esClient.indices.create).not.toHaveBeenCalled();
+  });
+
+  it('does not change an existing mapping', async () => {
+    const esClient = createClient();
+    esClient.indices.exists.mockResolvedValue(true);
+    esClient.indices.getMapping.mockResolvedValue({
+      'ai-index-idx-security-attack-fingerprints': {
+        mappings: {
+          properties: {
+            permissions: {
+              properties: { kibana: { properties: { privileges: { type: 'object' } } } },
+            },
+          },
+        },
+      },
+    });
+
+    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+
+    expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+  });
+
+  it('warns when an existing index is not nested', async () => {
+    const esClient = createClient();
+    esClient.indices.exists.mockResolvedValue(true);
+    esClient.indices.getMapping.mockResolvedValue({
+      'ai-index-idx-security-attack-fingerprints': {
+        mappings: {
+          properties: {
+            permissions: {
+              properties: { kibana: { properties: { privileges: { type: 'object' } } } },
+            },
+          },
+        },
+      },
+    });
+
+    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('until the index is recreated')
+    );
+  });
+
+  it('does not warn when the existing privilege is nested', async () => {
+    const esClient = createClient();
+    esClient.indices.exists.mockResolvedValue(true);
+    esClient.indices.getMapping.mockResolvedValue({
+      'ai-index-idx-security-attack-fingerprints': {
+        mappings: {
+          properties: {
+            permissions: {
+              properties: { kibana: { properties: { privileges: { type: 'nested' } } } },
+            },
+          },
+        },
+      },
+    });
+
+    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('warns when the template cannot be installed', async () => {
+    const esClient = createClient();
+    esClient.indices.putIndexTemplate.mockRejectedValue(new Error('security_exception'));
+
+    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Attack fingerprint index template was not installed: security_exception'
+    );
+  });
+
+  it('uses the known AI index mapping when the base template cannot be read', async () => {
+    const esClient = createClient();
+    esClient.indices.getIndexTemplate.mockRejectedValue(new Error('not found'));
+
+    await ensureFingerprintIndexMapping(esClient as unknown as ElasticsearchClient, logger);
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: 'ai-index-idx-security-attack-fingerprints',
-        mappings: FINGERPRINT_INDEX_MAPPINGS,
+        priority: 501,
+        composed_of: ['ai-index@mappings'],
       })
     );
   });
