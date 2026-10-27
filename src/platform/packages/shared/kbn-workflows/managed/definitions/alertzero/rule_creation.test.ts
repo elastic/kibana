@@ -112,38 +112,23 @@ describe('Detection Rule Creation worker', () => {
       );
       const create = action.steps.find((step) => step.name === 'create_rule');
       expect(create?.type).toBe('security.createRule');
-      expect(create?.with?.rule).toBe('${{ inputs.actionInput }}');
+      const rule = create?.with?.rule as Record<string, unknown>;
+      for (const field of Object.keys(props.actionInput.properties ?? {})) {
+        expect(rule[field]).toBe(`\${{ inputs.actionInput.${field} }}`);
+      }
     });
 
-    // The approval closes the gap only if the rule runs. `security.createRule`
-    // always creates disabled, so the action enables the rule it created and the
-    // proposal tells the analyst that is what approving does.
-    it('enables the created rule and says so in the proposal', () => {
-      const enable = action.steps.find((step) => step.name === 'enable_rule');
-      expect(enable?.type).toBe('security.enableRule');
-      expect(enable?.with?.ids).toEqual(['{{ steps.create_rule.output.id }}']);
+    // The approval closes the gap only if the rule runs, so the action creates
+    // the rule enabled and the proposal tells the analyst that is what approving
+    // does.
+    it('creates the rule enabled and says so in the proposal', () => {
+      const create = action.steps.find((step) => step.name === 'create_rule');
+      expect((create?.with?.rule as Record<string, unknown>).enabled).toBe(true);
+      expect(action.steps.map((step) => step.type)).not.toContain('security.enableRule');
 
       const comment = String(inputsOf(stepByName('propose_creation')).comment);
       expect(comment).toContain('creates and enables the rule');
       expect(comment).not.toContain('disabled');
-    });
-
-    // A rule created but not enabled settles the proposal as failed without a
-    // re-offer, so the only place the analyst learns what happened is this note.
-    it('journals a creation the gate settled as failed on the investigation', () => {
-      const note = stepByName('journal_creation_failure');
-      expect(note?.type).toBe('workflow.execute');
-      expect(note?.with?.['workflow-id']).toBe('system-alertzero-journal-note');
-      expect(note?.if).toBe("${{ steps.propose_creation.output.status == 'failed' }}");
-      expect(note?.['on-failure']?.continue).toBe(true);
-      expect(inputsOf(note).conversation_id).toBe('{{ inputs.investigation_id }}');
-      expect(String(inputsOf(note).message)).toContain('steps.propose_creation.output.error');
-
-      const names = worker.steps.map(({ name }) => name);
-      expect(names.indexOf('propose_creation')).toBeLessThan(
-        names.indexOf('journal_creation_failure')
-      );
-      expect(names.indexOf('journal_creation_failure')).toBeLessThan(names.indexOf('emit_result'));
     });
 
     // A draft is reviewable only with a query, a name, a description and an attachment.
@@ -293,16 +278,8 @@ describe('Detection Rule Creation worker', () => {
 
     it('declares every output the coverage review reads', () => {
       expect(worker.outputs?.map(({ name }) => name)).toEqual(
-        expect.arrayContaining([
-          'created',
-          'reviewed',
-          'decision',
-          'rule_name',
-          'skip_reason',
-          'error',
-        ])
+        expect.arrayContaining(['created', 'reviewed', 'decision', 'rule_name', 'skip_reason'])
       );
-      expect(emit.error).toBe('{{ steps.propose_creation.output.error }}');
     });
 
     // The model's reason lives in the structured output, not only in its conversation,

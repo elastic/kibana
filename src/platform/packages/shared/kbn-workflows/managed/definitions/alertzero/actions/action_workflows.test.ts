@@ -110,70 +110,39 @@ describe('AlertZero action workflows', () => {
 
   describe('create rule', () => {
     const yaml = parsed(ALERTZERO_ACTION_CREATE_RULE_WORKFLOW.yaml);
+    const create = stepByName(yaml, 'create_rule');
+    const rule = create?.with?.rule as Record<string, unknown>;
 
-    // `security.createRule` always creates the rule disabled, and an approved
-    // proposal is meant to close the coverage gap, so the action has to turn the
-    // new rule on itself.
-    it('enables the rule it created, by the returned saved-object id', () => {
-      const create = stepByName(yaml, 'create_rule');
-      const enable = stepByName(yaml, 'enable_rule');
+    // An approved proposal is meant to close the coverage gap, and a disabled
+    // rule detects nothing, so the rule is created enabled in the one call that
+    // creates it. A separate enable step would leave a disabled rule behind when
+    // it failed, and the gate's retry would then create a second copy.
+    it('creates the rule enabled, with no separate enable step', () => {
       expect(create?.type).toBe('security.createRule');
-      expect(enable?.type).toBe('security.enableRule');
-      expect(enable?.with?.ids).toEqual(['{{ steps.create_rule.output.id }}']);
-      expect(enable?.with).not.toHaveProperty('query');
-      // An unconditional step: a created rule that stays disabled is not a success.
-      expect(enable?.if).toBeUndefined();
-
-      const names = yaml.steps.map(({ name }) => name);
-      expect(names.indexOf('create_rule')).toBeLessThan(names.indexOf('enable_rule'));
-      expect(names.indexOf('enable_rule')).toBeLessThan(names.indexOf('emit_result'));
+      expect(rule.enabled).toBe(true);
+      expect(yaml.steps.map(({ type }) => type)).not.toContain('security.enableRule');
     });
 
-    it('reports the created rule as enabled, including when it was already on', () => {
+    // The action owns `enabled`, and `actionInput` rejects unknown fields, so the
+    // body is spelled out. Every drafted field must reach the engine, and nothing
+    // the draft cannot carry may be invented here.
+    it('forwards every actionInput field to the create step', () => {
+      const trigger = yaml.triggers?.find(({ type }) => type === 'manual');
+      const drafted = Object.keys(trigger?.inputs?.properties?.actionInput?.properties ?? {});
+      expect(drafted.length).toBeGreaterThan(0);
+      expect(drafted).not.toContain('enabled');
+      for (const field of drafted) {
+        expect(rule[field]).toBe(`\${{ inputs.actionInput.${field} }}`);
+      }
+      expect(Object.keys(rule).sort()).toEqual([...drafted, 'enabled'].sort());
+    });
+
+    it('reports the created rule and whether it is enabled', () => {
       const emit = stepByName(yaml, 'emit_result')?.with as Record<string, string>;
-      const outcome = stepByName(yaml, 'outcome')?.with as Record<string, string>;
       expect(emit.ruleId).toBe('{{ steps.create_rule.output.id }}');
-      expect(emit.enabled).toBe('${{ steps.outcome.output.enabled }}');
-      const enabled = (output?: Record<string, number>) =>
-        evaluateExpression(outcome.enabled, { steps: { enable_rule: { output } } });
-      expect(enabled({ succeeded: 1, skipped: 0 })).toBe(true);
-      expect(enabled({ succeeded: 0, skipped: 1 })).toBe(true);
-      expect(enabled({ succeeded: 0, skipped: 0 })).toBe(false);
-      // A failed enable step has no output at all.
-      expect(enabled(undefined)).toBe(false);
-    });
-
-    // Failing the action would make the gate re-offer the proposal, and a second
-    // approval would create a second rule: the create step keeps no identity
-    // across attempts. So a rule that was created but not enabled is reported as
-    // a terminal `failure` the gate records without re-offering, and the message
-    // tells the analyst what to do instead.
-    it('reports a created-but-not-enabled rule as a terminal failure, not a failed action', () => {
-      const enable = stepByName(yaml, 'enable_rule') as YamlStep & {
-        'on-failure'?: { continue?: boolean };
-      };
-      expect(enable['on-failure']?.continue).toBe(true);
-      expect(yaml.steps.map(({ type }) => type)).not.toContain('workflow.fail');
-      expect(yaml.outputs?.map(({ name }) => name)).toContain('failure');
-
-      const emit = stepByName(yaml, 'emit_result')?.with as Record<string, string>;
-      const render = (enableStep: Record<string, unknown>) =>
-        createWorkflowLiquidEngine()
-          .parseAndRenderSync(emit.failure, {
-            steps: {
-              create_rule: { output: { id: 'rule-1', name: 'Rare locale check' } },
-              enable_rule: enableStep,
-            },
-          })
-          .trim();
-
-      expect(render({ output: { succeeded: 1, skipped: 0 } })).toBe('');
-
-      const failure = render({ error: { message: 'HTTP 403: Forbidden' } });
-      expect(failure).toContain('"Rare locale check"');
-      expect(failure).toContain('could not be enabled: HTTP 403: Forbidden');
-      expect(failure).toContain('rule-1');
-      expect(failure).toContain('Do not approve this proposal again');
+      expect(emit.ruleName).toBe('{{ steps.create_rule.output.name }}');
+      expect(emit.enabled).toBe('${{ steps.create_rule.output.enabled }}');
+      expect(yaml.outputs?.map(({ name }) => name)).toEqual(['ruleId', 'ruleName', 'enabled']);
     });
   });
 

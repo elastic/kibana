@@ -61,10 +61,6 @@ outputs:
     type: string
   - name: skip_reason
     type: string
-  # Why an approved creation did not fully apply, from the gate. Empty unless the
-  # gate settled the proposal as failed.
-  - name: error
-    type: string
 consts:
   # Temporary: service accounts have no display name, so the chat would show the raw account
   # id. Remove once they carry one (elastic/security-team#20422).
@@ -302,36 +298,15 @@ steps:
         # Creating a rule always waits for an analyst; matches the action's approvalPolicy.
         autoApprove: false
 
-  # The action can land halfway: the rule created but not enabled. The gate then
-  # settles the proposal as failed without re-offering it, since approving again
-  # would create a second rule, and nothing else tells the analyst. This note puts
-  # the failure and what to do about it on the investigation. A failed note does
-  # not fail the run: the gate's record carries the same message.
-  - name: journal_creation_failure
-    type: workflow.execute
-    if: "${{ steps.propose_creation.output.status == 'failed' }}"
-    with:
-      workflow-id: system-alertzero-journal-note
-      run-as-mode: inherit
-      inputs:
-        author_name: "{{ consts.author_name }}"
-        conversation_id: "{{ inputs.investigation_id }}"
-        message: >-
-          The approved rule creation did not fully apply.
-          {{ steps.propose_creation.output.error | default: 'The create action failed.' }}
-    on-failure:
-      continue: true
-
   - name: emit_result
     type: workflow.output
     status: completed
     with:
-      # `succeeded` means the create action completed inside the gate with the rule
-      # created and enabled. A create that fails fails the action, and the gate
-      # re-parks a fresh proposal rather than reporting success; a rule created but
-      # not enabled settles the proposal as `failed` and is not re-offered. Either way
-      # the status is the mutation evidence here. Re-finding the rule by name would
-      # only add a read that can fail and make the caller propose a duplicate.
+      # `succeeded` means the create action completed inside the gate. A create that
+      # fails fails the action, and the gate re-parks a fresh proposal rather than
+      # reporting success, so the status is the mutation evidence here. Re-finding the
+      # rule by name would only add a read that can fail and make the caller propose a
+      # duplicate.
       created: "${{ steps.propose_creation.output.status == 'succeeded' }}"
       # A decision either way. An expired gate is neither, and a draft that never
       # reached the gate was reviewed by nobody; both leave the caller's gap open.
@@ -342,7 +317,5 @@ steps:
       rule_name: "{{ steps.draft_creation.output.structured_output.rule.name }}"
       # Why nothing was proposed, so a gap that keeps coming back can be explained
       # without opening the agent conversation. Empty when the draft reached the gate.
-      # The gate's own failure message, when the approved action did not fully apply.
-      error: "{{ steps.propose_creation.output.error }}"
       skip_reason: >-
         {% if steps.draft_ready.output.ok != true %}{% if steps.draft_creation.output.structured_output.reason != null and steps.draft_creation.output.structured_output.reason != '' %}{{ steps.draft_creation.output.structured_output.reason }}{% else %}The draft is incomplete: it needs a query, a name, a description and an attachment.{% endif %}{% elsif steps.attach_draft.error != null %}The draft could not be attached to the investigation: {{ steps.attach_draft.error.message }}{% endif %}

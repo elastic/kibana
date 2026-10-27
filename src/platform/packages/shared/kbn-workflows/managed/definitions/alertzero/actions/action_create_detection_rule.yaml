@@ -98,55 +98,42 @@ outputs:
     type: string
   - name: enabled
     type: boolean
-  - name: failure
-    type: string
 steps:
-  # `security.createRule` always creates the rule disabled and ignores
-  # `rule.enabled`, so the rule is turned on in a second step below.
+  # The approval is meant to close the coverage gap, and a disabled rule detects
+  # nothing, so the rule is created enabled and starts running on its first
+  # scheduled interval as the approver. Creating it enabled is a single API call:
+  # the engine checks privileges and mints the API key before the rule is saved,
+  # and deletes the rule again if scheduling it fails, so an approver who may not
+  # enable rules gets one error and no rule is left behind. The gate then
+  # re-offers the proposal as it does for any failed action.
+  #
+  # Spelled out field by field, because the action owns `enabled` and the drafted
+  # body cannot carry it (`actionInput` rejects unknown fields). An optional field
+  # the draft omits renders as undefined and is dropped from the request.
   - name: create_rule
     type: security.createRule
     with:
-      rule: "${{ inputs.actionInput }}"
-
-  # The approval is meant to close the coverage gap, and a disabled rule detects
-  # nothing, so the new rule is enabled as the approver. The rule is addressed by
-  # the saved-object id the create step returned, never by a query. The bulk
-  # action succeeds when the rule was enabled or was already enabled (skipped),
-  # and fails outright when the id matches nothing.
-  #
-  # `continue` rather than failing the action: a failed action makes the gate
-  # re-offer the proposal, and approving that again would create a second rule,
-  # since the create step keeps no identity across attempts. The rule exists by
-  # now, so this is reported below as a terminal `failure` instead. The gate
-  # records it as failed without re-offering, and the analyst is told to enable
-  # the rule by hand.
-  - name: enable_rule
-    type: security.enableRule
-    on-failure:
-      continue: true
-    with:
-      ids:
-        - "{{ steps.create_rule.output.id }}"
-
-  # Liquid has no operator precedence, so the flag mixes no `and` with `or`. A
-  # failed enable step has no output, which leaves both counts undefined and the
-  # flag false.
-  - name: outcome
-    type: data.set
-    with:
-      enabled: "${{ steps.enable_rule.output.succeeded > 0 or steps.enable_rule.output.skipped > 0 }}"
+      rule:
+        type: "${{ inputs.actionInput.type }}"
+        language: "${{ inputs.actionInput.language }}"
+        name: "${{ inputs.actionInput.name }}"
+        description: "${{ inputs.actionInput.description }}"
+        query: "${{ inputs.actionInput.query }}"
+        interval: "${{ inputs.actionInput.interval }}"
+        from: "${{ inputs.actionInput.from }}"
+        to: "${{ inputs.actionInput.to }}"
+        severity: "${{ inputs.actionInput.severity }}"
+        risk_score: "${{ inputs.actionInput.risk_score }}"
+        threat: "${{ inputs.actionInput.threat }}"
+        tags: "${{ inputs.actionInput.tags }}"
+        enabled: true
 
   # `workflow.execute` declares its output as unknown, so the parent falls back
   # to a heuristic read of the last step unless the child emits explicitly.
-  #
-  # `failure` is the proposal gate's terminal-failure contract: non-empty means
-  # the action did not fully apply and must not be re-offered. Empty otherwise.
   - name: emit_result
     type: workflow.output
     status: completed
     with:
       ruleId: "{{ steps.create_rule.output.id }}"
       ruleName: "{{ steps.create_rule.output.name }}"
-      enabled: "${{ steps.outcome.output.enabled }}"
-      failure: >-
-        {% if steps.enable_rule.error != nil %}The rule "{{ steps.create_rule.output.name }}" was created but could not be enabled: {{ steps.enable_rule.error.message }}. It is disabled and detects nothing until enabled. Enable it from the rules page (rule id {{ steps.create_rule.output.id }}). Do not approve this proposal again: that would create a second copy of the rule.{% endif %}
+      enabled: "${{ steps.create_rule.output.enabled }}"

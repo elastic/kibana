@@ -22,8 +22,10 @@ export const createRuleStepDefinition = createServerStepDefinition({
       const { body } = await context.contextManager.callKibanaApi<CreateRuleOutput>({
         method: 'POST',
         path: DETECTION_ENGINE_RULES_URL,
-        // Always create the rule disabled, overriding any "enabled" in the input.
-        body: { ...rule, enabled: false },
+        // Disabled unless the caller asks for an enabled rule. Creating an
+        // enabled rule is all or nothing: the API mints the API key before the
+        // rule is saved and removes the rule again if scheduling it fails.
+        body: { ...rule, enabled: rule.enabled ?? false },
       });
       return { output: body };
     } catch (error) {
