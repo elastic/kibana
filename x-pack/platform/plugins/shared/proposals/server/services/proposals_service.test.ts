@@ -2279,24 +2279,66 @@ describe('ProposalsService', () => {
   });
 
   describe('a revision racing a release', () => {
-    /** Versions every write and refuses a stale one, the way Elasticsearch does. */
+    /**
+     * Versions every write and refuses a stale one, the way Elasticsearch does.
+     * A chain read honours the release sort and otherwise returns the highest
+     * revision first: Elasticsearch promises no order, and that is the one that
+     * would adopt a successor still waiting to be retired.
+     */
     const createVersionedStorage = (original: ProposalDocument) => {
       const storage = createStorage();
       const records = new Map([['proposal-1', { document: original, seqNo: 7 }]]);
       let nextSeqNo = 8;
+      /** Runs once, right after the next create lands. */
+      const hooks: { afterCreate?: () => Promise<void> } = {};
       storage.search.mockImplementation(
         async ({
           query,
+          sort = [],
         }: {
-          query: { bool: { filter: Array<{ ids?: { values: string[] } }> } };
+          query: {
+            bool: {
+              filter: Array<{ ids?: { values: string[] }; term?: { rootProposalId?: string } }>;
+            };
+          };
+          sort?: Array<Record<string, unknown>>;
         }) => {
-          const id = query.bool.filter.find((clause) => clause.ids)?.ids?.values[0];
-          const record = id === undefined ? undefined : records.get(id);
-          const hits =
-            record && id ? [{ ...searchHit(record.document, id), _seq_no: record.seqNo }] : [];
+          const { filter } = query.bool;
+          const id = filter.find((clause) => clause.ids)?.ids?.values[0];
+          if (id !== undefined) {
+            const record = records.get(id);
+            const hits = record
+              ? [{ ...searchHit(record.document, id), _seq_no: record.seqNo }]
+              : [];
+            return { hits: { hits } };
+          }
+          const rootProposalId = filter.find((clause) => clause.term?.rootProposalId)?.term
+            ?.rootProposalId;
+          const releasedFirst = sort.some((clause) => 'gateReleasedAt' in clause);
+          const unreleased = ({ gateReleasedAt }: ProposalDocument) =>
+            gateReleasedAt === undefined ? 1 : 0;
+          const hits = [...records.entries()]
+            .filter(
+              ([, { document }]) =>
+                document.rootProposalId === rootProposalId && document.supersededBy === undefined
+            )
+            .sort(
+              ([, a], [, b]) =>
+                (releasedFirst ? unreleased(a.document) - unreleased(b.document) : 0) ||
+                b.document.revision - a.document.revision
+            )
+            .slice(0, 1)
+            .map(([liveId, { document, seqNo }]) => ({
+              ...searchHit(document, liveId),
+              _seq_no: seqNo,
+            }));
           return { hits: { hits } };
         }
       );
+      storage.delete.mockImplementation(async ({ id }: { id: string }) => {
+        records.delete(id);
+        return { acknowledged: true, result: 'deleted' };
+      });
       storage.index.mockImplementation(
         async ({
           id,
@@ -2318,10 +2360,15 @@ describe('ProposalsService', () => {
           }
           const seqNo = nextSeqNo++;
           records.set(id, { document, seqNo });
+          if (opType === 'create') {
+            const { afterCreate } = hooks;
+            hooks.afterCreate = undefined;
+            await afterCreate?.();
+          }
           return { _id: id, _seq_no: seqNo, _primary_term: 1 };
         }
       );
-      return { storage, records };
+      return { storage, records, hooks };
     };
 
     it('refuses a revision once the gate is released, so the gate executes what was approved', async () => {
@@ -2350,6 +2397,36 @@ describe('ProposalsService', () => {
         actionInput: { name: 'Suspicious PowerShell' },
       });
       expect(head?.supersededBy).toBeUndefined();
+    });
+
+    it('adopts the released revision over a losing revise successor not yet retired', async () => {
+      const { storage, records, hooks } = createVersionedStorage(baseDocument());
+      const { service } = createService(storage);
+      let adopted: Awaited<ReturnType<ProposalsService['getLatestRevision']>> | undefined;
+      // The revise passed its checks before the mark and has created its
+      // successor. The release lands now, and the gate adopts the head before
+      // the revise's predecessor write fails and its successor is retired.
+      hooks.afterCreate = async () => {
+        await service.releaseGate(
+          'proposal-1',
+          releaseParams({ actionInput: { name: 'Suspicious PowerShell' } })
+        );
+        adopted = await service.getLatestRevision('proposal-1', SPACE_ID);
+      };
+
+      await expect(
+        service.revise(
+          { id: 'proposal-1', actionInput: { name: 'Something else' } },
+          SPACE_ID,
+          request
+        )
+      ).rejects.toBeInstanceOf(ProposalConflictError);
+
+      expect(adopted).toMatchObject({
+        proposalId: 'proposal-1',
+        actionInput: { name: 'Suspicious PowerShell' },
+      });
+      expect(records.size).toBe(1);
     });
 
     it('refuses the release when a revision lands between its read and its mark', async () => {

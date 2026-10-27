@@ -1148,6 +1148,11 @@ export class ProposalsService {
           must_not: [{ exists: { field: 'supersededBy' } }],
         },
       },
+      // A released revision wins. A revision that lost its race to the release
+      // stays live until its cleanup lands, and an unsorted read could adopt it.
+      // `revise()` refuses a released row, so at most one live row in a chain
+      // carries the mark, and it is the revision the approver answered.
+      sort: [{ gateReleasedAt: { order: 'desc', missing: '_last', unmapped_type: 'date' } }],
     });
 
     const hit = response.hits.hits[0];

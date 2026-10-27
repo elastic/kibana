@@ -176,7 +176,11 @@ the resume and that write would be the one executed. `releaseGate` therefore
 stamps `gateReleasedAt` before it resumes, under the sequence number it loaded
 the proposal with, and `revise()` refuses a proposal carrying it. Whichever of
 the two writes second conflicts: a revision that lands first makes the release
-refuse, and one that lands after is refused itself. The mark is lifted only when
+refuse, and one that lands after is refused itself. A `revise()` that passed its
+checks just before the mark has already created its successor, which stays live
+until its lost predecessor write retires it; `getLatestRevision` sorts the
+released row first, so the gate cannot adopt that successor in the meantime.
+The mark is lifted only when
 the engine turns the resume away; any other resume failure leaves it, holding
 revisions back until the proposal is decided or expires, because lifting it
 under a resume that did land would reopen the window. A retry cloned from a
