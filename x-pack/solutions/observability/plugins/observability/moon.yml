@@ -176,6 +176,7 @@ dependsOn:
   - '@kbn/alerting-v2-utils'
   - '@kbn/alerting-v2-constants'
   - '@kbn/agentic-investigations-plugin'
+  - '@kbn/shared-ux-ai-components'
   - '@kbn/slo-constants'
 tags:
   - plugin
