@@ -286,7 +286,7 @@ make kind-delete    # from either repo
 | Script sits on `PUT .../unit/default` | The PUT itself is usually done in a few seconds. The script then waits for `spec.artifact` (not Ready). Ctrl-C and re-run if it exceeds ~90s. |
 | `es serverless` bind error on 8443 | Distributor must use `-- --port 18443`. |
 | `es serverless` bind error on 8081 | Another process holds 8081, which local serverless ES needs. Stop it. |
-| ES red, logs show `failed to recover from translog` / `EOFException` | ES data was corrupted when the container was killed (often out of memory). Restart with `--clean`, then re-run `seed`. |
+| ES red, logs show `failed to recover from translog` / `EOFException` | ES data was corrupted when the container was killed (often out of memory). Restart ES with `--clean`, then run `reset` followed by `seed` to discard cached credentials and mint new keys. |
 | Tilt: `containerd image snapshotter is disabled` | Tilt is pointed at Docker Desktop's Kubernetes. Start both Tilts with `--context kind-streams`. Do not change the containerd setting. |
 | cert-manager: `selectableFields: field not declared in schema` | kind is too old. Upgrade kind, then `make kind-delete && make kind`. |
 | kind API server TLS handshake timeouts, `streamunit-watch` dies | Docker Desktop is out of memory. Raise it to 16 GB. |
