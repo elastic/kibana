@@ -282,9 +282,14 @@ export const sampleSchema = (
           }
           // Maps such as AWS tags may require entries (`minProperties`).
           const minProperties = numberOrUndefined(node.minProperties) ?? 0;
-          for (let index = sampled.length; index < minProperties; index++) {
+          const names = new Set(sampled.map(([name]) => name));
+          for (let index = 1; sampled.length < minProperties; index++) {
+            const name = `key${index}`;
+            if (names.has(name)) {
+              continue;
+            }
             sampled.push([
-              `key${index + 1}`,
+              name,
               isRecord(additionalProperties)
                 ? child(additionalProperties, 'additionalProperties')
                 : 'value',

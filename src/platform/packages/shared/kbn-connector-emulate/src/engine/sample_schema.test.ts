@@ -103,6 +103,16 @@ describe('sampleSchema', () => {
     expect(
       sample({ type: 'object', minProperties: 2, additionalProperties: { type: 'string' } })
     ).toEqual({ key1: 'string', key2: 'string' });
+    // Generated names skip the declared ones.
+    expect(
+      sample({
+        type: 'object',
+        minProperties: 2,
+        properties: { key2: { type: 'integer' } },
+        required: ['key2'],
+        additionalProperties: { type: 'string' },
+      })
+    ).toEqual({ key2: 0, key1: 'string' });
     expect(sample({ type: 'object', minProperties: 1 })).toEqual({ key1: 'value' });
     expect(sample({ type: 'object', minProperties: 1, additionalProperties: false })).toEqual({});
   });

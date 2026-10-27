@@ -92,7 +92,7 @@ const model: SmithyModel = {
         bucket: { target: id('BucketDetail'), traits: required },
         requestId: {
           target: 'smithy.api#String',
-          traits: { 'smithy.api#httpHeader': 'x-request-id' },
+          traits: { ...required, 'smithy.api#httpHeader': 'x-request-id' },
         },
       },
     },
@@ -353,7 +353,8 @@ describe('convertSmithy', () => {
     expect(paths['/buckets/{name}/objects/{key}'].put).toMatchObject({
       requestBody: {
         required: true,
-        content: { 'application/json': { schema: { type: 'string', format: 'binary' } } },
+        // A JSON body is parsed before validation, so its blob schema takes any value.
+        content: { 'application/json': { schema: {} } },
       },
       responses: { '201': { description: 'PutObject 201 response' } },
     });
@@ -376,7 +377,7 @@ describe('convertSmithy', () => {
     });
     expect(paths['/buckets/{name}'].get.responses).toMatchObject({
       '200': {
-        headers: { 'x-request-id': { schema: { type: 'string' } } },
+        headers: { 'x-request-id': { required: true, schema: { type: 'string' } } },
         content: {
           'application/json': { schema: { $ref: '#/components/schemas/GetBucketResponseContent' } },
         },
@@ -413,7 +414,7 @@ describe('convertSmithy', () => {
       },
       '400': {
         description: 'ThrottlingException 400 response',
-        headers: { 'Retry-After': { schema: { type: 'string' } } },
+        headers: { 'Retry-After': { required: false, schema: { type: 'string' } } },
         content: {
           'application/json': {
             schema: { $ref: '#/components/schemas/ThrottlingExceptionResponseContent' },
@@ -537,6 +538,7 @@ describe('convertSmithy', () => {
           operation: { method: 'get', path: '/buckets/{name}' },
           response: {
             status: 200,
+            headers: { 'x-request-id': 'req-1' },
             body: { bucket: { name: 'logs', checksum: 'AA==', snapshots: [null, { size: 1 }] } },
           },
         },

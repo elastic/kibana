@@ -79,6 +79,22 @@ export const getPropertySchema = (
     isRecord(properties) ? properties[key] : undefined
   ) ?? findSubschema(schema, document, ({ additionalProperties }) => additionalProperties);
 
+/** Whether an object schema declares the property itself, not only through `additionalProperties`. */
+export const declaresProperty = (
+  schema: unknown,
+  key: string,
+  document: OpenApiDocument
+): boolean =>
+  findSubschema(schema, document, ({ properties }) =>
+    isRecord(properties) ? properties[key] : undefined
+  ) !== undefined;
+
+/** Whether an object schema takes properties it doesn't declare. */
+export const allowsUndeclaredProperties = (schema: unknown, document: OpenApiDocument): boolean =>
+  collectParts(schema, document).every(
+    ({ additionalProperties }) => additionalProperties !== false
+  );
+
 const matchesPattern = (pattern: string, value: string): boolean => {
   try {
     return new RegExp(pattern, 'u').test(value);

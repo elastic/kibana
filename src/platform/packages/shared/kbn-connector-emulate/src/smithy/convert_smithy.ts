@@ -23,6 +23,8 @@ import {
 
 const REST_JSON = 'aws.protocols#restJson1';
 const SIGV4 = 'aws.auth#sigv4';
+// `application/json` and structured suffixes such as `application/vnd.api+json`.
+const JSON_MEDIA_TYPE = /^application\/(?:[\w.-]+\+)?json$/i;
 // The scheme name and shape smithy-openapi uses for SigV4.
 const SIGV4_SCHEME = 'aws.auth.sigv4';
 
@@ -147,7 +149,11 @@ export const convertSmithy = (
     if (target?.type === 'blob' || target?.type === 'string') {
       return {
         [typeof mediaType === 'string' ? mediaType : 'text/plain']: {
-          schema: converter.toSchema(member.target, 'payload', member.traits),
+          // JSON bodies are parsed before validation, so the text they hold can be any value.
+          schema:
+            typeof mediaType === 'string' && JSON_MEDIA_TYPE.test(mediaType)
+              ? {}
+              : converter.toSchema(member.target, 'payload', member.traits),
         },
       };
     }
@@ -180,6 +186,7 @@ export const convertSmithy = (
           String(member.traits?.['smithy.api#httpHeader']),
           {
             ...documentationOf(member),
+            required: isRequired(member),
             schema: converter.toSchema(member.target, 'header', member.traits),
           },
         ])

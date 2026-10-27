@@ -130,6 +130,40 @@ describe('readParameters', () => {
     });
   });
 
+  it('gives each form-exploded object the keys it declares', () => {
+    const parameters = [
+      {
+        name: 'color',
+        in: 'query',
+        schema: {
+          type: 'object',
+          properties: { color: { type: 'string' } },
+          additionalProperties: false,
+        },
+      },
+      {
+        name: 'size',
+        in: 'query',
+        schema: {
+          type: 'object',
+          properties: { size: { type: 'integer' } },
+          additionalProperties: false,
+        },
+      },
+      {
+        name: 'labels',
+        in: 'query',
+        schema: { type: 'object', additionalProperties: { type: 'string' } },
+      },
+    ];
+
+    expect(read(parameters, { query: { color: 'blue', size: '1', env: 'prod' } })).toEqual({
+      'query.color': { color: 'blue' },
+      'query.size': { size: 1 },
+      'query.labels': { env: 'prod' },
+    });
+  });
+
   it('leaves the keys of deepObject parameters out of form-exploded maps', () => {
     const parameters = [
       {
