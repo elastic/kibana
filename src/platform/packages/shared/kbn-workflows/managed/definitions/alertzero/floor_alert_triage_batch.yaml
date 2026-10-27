@@ -614,6 +614,7 @@ steps:
       group_mints: []
       group_joins: []
       mint_conversation_ids: []
+      no_conversation_ids: [""]
       home_conversation_id: ""
       batch_conversation_created: false
       failed_review_count: 0
@@ -722,8 +723,17 @@ steps:
     type: foreach
     foreach: "${{ variables.group_mints | json }}"
     steps:
+      # A failed create must not fail the run: every candidate already carries az:false_positive and
+      # its claim is gone, so aborting here would strand the mints that have no review yet. The
+      # mint keeps its place in `mint_conversation_ids` as an empty id, and `start_reviews` re-tags
+      # its alerts instead of starting a review that has no Investigation.
       - name: create_proposal_investigation
         type: ai.conversation.create
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+          continue: true
         with:
           template_id: investigation
           title: "Alert Triage — {{ inputs.rule_name }}"
@@ -738,87 +748,101 @@ steps:
 
       - name: wrap_mint_conversation_id
         type: data.set
+        if: "${{ steps.create_proposal_investigation.error == blank }}"
         with:
           new_conversation_ids: "${{ steps.create_proposal_investigation.output.conversation_id | split: ',' }}"
 
       - name: record_mint_conversation
         type: data.set
+        if: "${{ steps.create_proposal_investigation.error == blank }}"
         with:
           mint_conversation_ids: "${{ variables.mint_conversation_ids | concat: variables.new_conversation_ids }}"
 
-      - name: attach_mint_alerts
-        type: foreach
-        foreach: "${{ steps.process_mints.item.alert_ids | chunk: 20 | json }}"
-        steps:
-          - name: attach_mint_alert_chunk
-            type: ai.attachment.add
-            on-failure:
-              retry:
-                max-attempts: 3
-                delay: 5s
-              continue: true
-            with:
-              conversation_id: "{{ steps.create_proposal_investigation.output.conversation_id }}"
-              type: security.alerts
-              render_inline: false  # security.alerts has no inline renderer: inline it draws an empty block
-              data:
-                alertIds: "${{ foreach.item }}"
-              description: "Alerts in this closure proposal"
-
-      # First message of the Investigation. It describes only this proposal's alerts. The batch counts
-      # and the model summary cover other alerts too, which made the numbers disagree.
-      - name: post_comment_mint_analysis
-        type: ai.conversation.add_user_message
-        on-failure:
-          continue: true
+      - name: record_mint_without_conversation
+        type: data.set
+        if: "${{ steps.create_proposal_investigation.error != blank }}"
         with:
-          author_name: "{{ consts.author_name }}"
-          conversation_id: "{{ steps.create_proposal_investigation.output.conversation_id }}"
-          message: |-
-            Proposing to close **{{ steps.process_mints.item.alert_ids.size }} alert{% if steps.process_mints.item.alert_ids.size != 1 %}s{% endif %}** out of {{ variables.alert_count }} analyzed from rule **{{ inputs.rule_name }}** as false positives.
+          mint_conversation_ids: "${{ variables.mint_conversation_ids | concat: variables.no_conversation_ids }}"
 
-            Verdicts across the batch: {{ steps.classify_alerts.output.false_positive_count }} false positive, {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.{% if steps.classify_alerts.output.inconclusive_count > 0 and steps.group_fp_candidates_call.output.inconclusive_alerts_page_query != blank %} [View the inconclusive alerts](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.group_fp_candidates_call.output.inconclusive_alerts_page_query }}){% endif %}
-
-            Every one was classified as a false positive with confidence of at least {{ inputs.confidence_floor }}{% if steps.process_mints.item.kind == 'keyed' or steps.process_mints.item.kind == 'overflow' or steps.process_mints.item.kind == 'failed_join' %}, and they share one pattern{% else %}. They do not necessarily share a pattern{% endif %}.
-            {%- assign shown = 0 -%}
-            {%- for v in steps.classify_alerts.output.verdicts -%}{%- if shown < 1 and steps.process_mints.item.alert_ids contains v.alert_id %}
-
-            **Why:** {{ v.rationale }}
-            {%- assign shown = shown | plus: 1 -%}{%- endif -%}{%- endfor %}
-
-            {% if steps.process_mints.item.kind == 'keyed' %}If more alerts match this pattern while the proposal is open, they are added here and noted in a separate message.{% endif %}
-
-            [View execution]({{ execution.url }})
-
-      - name: attach_mint_impact_gate
+      # Everything below needs the Investigation. Without it the mint has nothing to attach to, and
+      # its alerts are re-tagged in `start_reviews` instead.
+      - name: fill_mint_investigation
         type: if
-        condition: "${{ steps.process_mints.item.impacted_entities.size > 0 }}"
+        condition: "${{ steps.create_proposal_investigation.error == blank }}"
         steps:
-          - name: attach_mint_impact
-            type: investigations.attachImpact
-            on-failure:
-              continue: true
-            with:
-              conversationId: "{{ steps.create_proposal_investigation.output.conversation_id }}"
-              entities: "${{ steps.process_mints.item.impacted_entities }}"
+          - name: attach_mint_alerts
+            type: foreach
+            foreach: "${{ steps.process_mints.item.alert_ids | chunk: 20 | json }}"
+            steps:
+              - name: attach_mint_alert_chunk
+                type: ai.attachment.add
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: 5s
+                  continue: true
+                with:
+                  conversation_id: "{{ steps.create_proposal_investigation.output.conversation_id }}"
+                  type: security.alerts
+                  render_inline: false  # security.alerts has no inline renderer: inline it draws an empty block
+                  data:
+                    alertIds: "${{ foreach.item }}"
+                  description: "Alerts in this closure proposal"
 
-      - name: tag_mint_alerts
-        type: foreach
-        foreach: "${{ steps.process_mints.item.alert_ids | chunk: 500 | json }}"
-        steps:
-          - name: tag_mint_alert_chunk
-            type: kibana.SetAlertTags
+          # First message of the Investigation. It describes only this proposal's alerts. The batch counts
+          # and the model summary cover other alerts too, which made the numbers disagree.
+          - name: post_comment_mint_analysis
+            type: ai.conversation.add_user_message
             on-failure:
-              retry:
-                max-attempts: 3
-                delay: 5s
               continue: true
             with:
-              ids: "${{ foreach.item }}"
-              tags:
-                tags_to_add:
-                  - "az:proposal:{{ steps.process_mints.item.proposal_id }}"
-                tags_to_remove: []
+              author_name: "{{ consts.author_name }}"
+              conversation_id: "{{ steps.create_proposal_investigation.output.conversation_id }}"
+              message: |-
+                Proposing to close **{{ steps.process_mints.item.alert_ids.size }} alert{% if steps.process_mints.item.alert_ids.size != 1 %}s{% endif %}** out of {{ variables.alert_count }} analyzed from rule **{{ inputs.rule_name }}** as false positives.
+
+                Verdicts across the batch: {{ steps.classify_alerts.output.false_positive_count }} false positive, {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.{% if steps.classify_alerts.output.inconclusive_count > 0 and steps.group_fp_candidates_call.output.inconclusive_alerts_page_query != blank %} [View the inconclusive alerts](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.group_fp_candidates_call.output.inconclusive_alerts_page_query }}){% endif %}
+
+                Every one was classified as a false positive with confidence of at least {{ inputs.confidence_floor }}{% if steps.process_mints.item.kind == 'keyed' or steps.process_mints.item.kind == 'overflow' or steps.process_mints.item.kind == 'failed_join' %}, and they share one pattern{% else %}. They do not necessarily share a pattern{% endif %}.
+                {%- assign shown = 0 -%}
+                {%- for v in steps.classify_alerts.output.verdicts -%}{%- if shown < 1 and steps.process_mints.item.alert_ids contains v.alert_id %}
+
+                **Why:** {{ v.rationale }}
+                {%- assign shown = shown | plus: 1 -%}{%- endif -%}{%- endfor %}
+
+                {% if steps.process_mints.item.kind == 'keyed' %}If more alerts match this pattern while the proposal is open, they are added here and noted in a separate message.{% endif %}
+
+                [View execution]({{ execution.url }})
+
+          - name: attach_mint_impact_gate
+            type: if
+            condition: "${{ steps.process_mints.item.impacted_entities.size > 0 }}"
+            steps:
+              - name: attach_mint_impact
+                type: investigations.attachImpact
+                on-failure:
+                  continue: true
+                with:
+                  conversationId: "{{ steps.create_proposal_investigation.output.conversation_id }}"
+                  entities: "${{ steps.process_mints.item.impacted_entities }}"
+
+          - name: tag_mint_alerts
+            type: foreach
+            foreach: "${{ steps.process_mints.item.alert_ids | chunk: 500 | json }}"
+            steps:
+              - name: tag_mint_alert_chunk
+                type: kibana.SetAlertTags
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: 5s
+                  continue: true
+                with:
+                  ids: "${{ foreach.item }}"
+                  tags:
+                    tags_to_add:
+                      - "az:proposal:{{ steps.process_mints.item.proposal_id }}"
+                    tags_to_remove: []
 
   # Alerts added to an open proposal go into its Investigation, which already has its review.
   - name: process_joins
@@ -1213,8 +1237,14 @@ steps:
     type: foreach
     foreach: "${{ variables.group_mints | json }}"
     steps:
+      - name: resolve_mint_conversation
+        type: data.set
+        with:
+          mint_conversation_id: "{{ variables.mint_conversation_ids[steps.start_reviews.index] }}"
+
       - name: start_fp_review
         type: workflow.executeAsync
+        if: "${{ variables.mint_conversation_id != '' }}"
         # Reached only when the review could not be started at all. A review that was started
         # and then skipped or failed is handled from its reported status below.
         # `continue: true` keeps the loop going, and `failed_review_count` fails the run at the end.
@@ -1277,7 +1307,32 @@ steps:
         type: data.set
         with:
           review_dispatch: >-
-            {% if steps.start_fp_review.error %}not_started{% elsif steps.start_fp_review.output.status == 'skipped' or steps.start_fp_review.output.status == 'failed' or steps.start_fp_review.output.status == 'cancelled' or steps.start_fp_review.output.status == 'timed_out' %}failed{% else %}started{% endif %}
+            {% if variables.mint_conversation_id == '' %}no_investigation{% elsif steps.start_fp_review.error %}not_started{% elsif steps.start_fp_review.output.status == 'skipped' or steps.start_fp_review.output.status == 'failed' or steps.start_fp_review.output.status == 'cancelled' or steps.start_fp_review.output.status == 'timed_out' %}failed{% else %}started{% endif %}
+
+      # The Investigation could not be created, so there is no review to start and no proposal. The
+      # alerts leave az:false_positive like every other outcome without a proposal.
+      - name: handle_no_investigation
+        type: if
+        condition: "${{ variables.review_dispatch == 'no_investigation' }}"
+        steps:
+          - name: retag_no_investigation
+            type: foreach
+            foreach: "${{ steps.start_reviews.item.alert_ids | chunk: 500 | json }}"
+            steps:
+              - name: retag_no_investigation_call
+                type: kibana.SetAlertTags
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: 5s
+                  continue: true
+                with:
+                  ids: "${{ foreach.item }}"
+                  tags:
+                    tags_to_remove:
+                      - "az:false_positive"
+                    tags_to_add:
+                      - "az:inconclusive"
 
       - name: handle_review_started
         type: if

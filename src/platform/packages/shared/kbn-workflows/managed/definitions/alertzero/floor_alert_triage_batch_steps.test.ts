@@ -1398,6 +1398,73 @@ describe('floor_alert_triage_batch — grouping', () => {
     ).toEqual(['conv-0', 'conv-1']);
   });
 
+  describe('when the Investigation of a proposal cannot be created', () => {
+    it('retries the create and carries on, so the other proposals still get their review', () => {
+      const create = stepByName('create_proposal_investigation');
+      expect(create?.['on-failure']).toEqual({
+        retry: { 'max-attempts': 3, delay: '5s' },
+        continue: true,
+      });
+    });
+
+    it('keeps the position of the failed proposal with an empty conversation id', () => {
+      const record = stepByName('record_mint_without_conversation');
+      expect(record?.if).toBe('${{ steps.create_proposal_investigation.error != blank }}');
+      expect(
+        evalExpr((record?.with as Record<string, string>).mint_conversation_ids, {
+          variables: { mint_conversation_ids: ['conv-0'], no_conversation_ids: [''] },
+        })
+      ).toEqual(['conv-0', '']);
+      expect(stepByName('record_mint_conversation')?.if).toBe(
+        '${{ steps.create_proposal_investigation.error == blank }}'
+      );
+    });
+
+    it('attaches nothing and tags nothing to an Investigation that does not exist', () => {
+      const fill = stepByName('fill_mint_investigation');
+      expect(fill?.condition).toBe('${{ steps.create_proposal_investigation.error == blank }}');
+      expect(flatten(fill?.steps ?? []).map((step) => step.name)).toEqual(
+        expect.arrayContaining([
+          'attach_mint_alert_chunk',
+          'post_comment_mint_analysis',
+          'attach_mint_impact',
+          'tag_mint_alert_chunk',
+        ])
+      );
+    });
+
+    it('starts no review for it and re-tags its alerts, while the others go on', () => {
+      expect(stepByName('start_fp_review')?.if).toBe("${{ variables.mint_conversation_id != '' }}");
+      const template = stepByName('resolve_review_dispatch')?.with?.review_dispatch as string;
+      expect(
+        renderString(template, { variables: { mint_conversation_id: '' }, steps: {} }).trim()
+      ).toBe('no_investigation');
+      expect(
+        renderString(template, {
+          variables: { mint_conversation_id: 'conv-1' },
+          steps: { start_fp_review: { output: { status: 'pending' } } },
+        }).trim()
+      ).toBe('started');
+      expect(stepByName('handle_no_investigation')?.condition).toBe(
+        "${{ variables.review_dispatch == 'no_investigation' }}"
+      );
+      const retag = stepByName('retag_no_investigation');
+      expect(retag?.foreach).toContain('steps.start_reviews.item.alert_ids | chunk: 500');
+      expect(retag?.steps?.[0].with?.tags).toEqual({
+        tags_to_remove: ['az:false_positive'],
+        tags_to_add: ['az:inconclusive'],
+      });
+    });
+
+    it('counts it as a failed review, so the run still reports the failure', () => {
+      expect(
+        evalExpr(stepByName('count_failed_review')?.if as string, {
+          variables: { review_dispatch: 'no_investigation' },
+        })
+      ).toBe(true);
+    });
+  });
+
   it('adds the joined alerts to the owner, tags them with its root id and links just those alerts there', () => {
     const loop = stepByName('process_joins');
     expect(loop?.foreach).toBe('${{ variables.group_joins | json }}');
