@@ -40,6 +40,7 @@ import {
 } from '../constants';
 import type { ObservabilityAlertingCases } from '../types';
 import { createInvestigateEpisodeAction } from '../actions/investigate_episode_action';
+import { useInvestigateEpisodeHeaderMenuItems } from '../actions/use_investigate_episode_header_menu_items';
 import {
   getObservabilityRulesTabVisibility,
   hasObservabilityAlertingCapabilities,
@@ -235,6 +236,7 @@ export const ObservabilityAlertingApp = ({
               hostApp={hostApp}
               privilegeCheck={privilegeCheck}
               createActions={createActions}
+              useAdditionalEpisodeDetailsHeaderMenuItems={useInvestigateEpisodeHeaderMenuItems}
               manageRulesHref={manageRulesHref}
             />
             <Route exact path={OBSERVABILITY_ALERTING_ALERTS_PATH}>
