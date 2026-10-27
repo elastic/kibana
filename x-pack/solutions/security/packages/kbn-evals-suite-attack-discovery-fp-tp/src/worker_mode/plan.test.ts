@@ -175,6 +175,10 @@ describe('buildWorkerModePlan', () => {
     expect(plan.entityReadAlias).toBe('entities-latest-qa-fp');
   });
 
+  it('returns a classic plan without the serverless flag', () => {
+    expect(plan.serverless).toBe(false);
+  });
+
   it('returns the host of every alert and event', () => {
     const hostIds = [...plan.world.alerts, ...plan.world.events].map(
       ({ source }) => (source.host as { id: string }).id
@@ -289,6 +293,52 @@ describe('buildWorkerModePlan for the truncated-events example', () => {
   });
 });
 
+describe('buildWorkerModePlan on serverless', () => {
+  const classic = buildWorkerModePlan({
+    space: 'qa-fp',
+    exampleId: 'encoded-powershell.fp',
+    now: NOW,
+    suffix: 'run1',
+  });
+  const plan = buildWorkerModePlan({
+    space: 'qa-fp',
+    exampleId: 'encoded-powershell.fp',
+    now: NOW,
+    suffix: 'run1',
+    serverless: true,
+  });
+
+  it('flags the plan as serverless', () => {
+    expect(plan.serverless).toBe(true);
+  });
+
+  it('rewrites every event index into the seeder-owned namespace', () => {
+    expect(plan.events.length).toBe(classic.events.length);
+    expect(
+      plan.events.filter(
+        ({ index }) => index.startsWith('logs-endpoint.events.fp-tp-') && index.endsWith('-qa-fp')
+      )
+    ).toEqual(plan.events);
+  });
+
+  it('keeps every event id and rescopes data_stream.namespace to the space', () => {
+    expect(plan.events.map(({ id }) => id)).toEqual(classic.events.map(({ id }) => id));
+    expect(
+      new Set(
+        plan.world.events.map(
+          ({ source }) => (source.data_stream as { namespace: string }).namespace
+        )
+      )
+    ).toEqual(new Set(['qa-fp']));
+  });
+
+  it('leaves alerts, entities and hosts as the classic plan', () => {
+    expect(plan.alertOperations).toEqual(classic.alertOperations);
+    expect(plan.entityReadAlias).toBe(classic.entityReadAlias);
+    expect([...plan.hostIds].sort()).toEqual([...classic.hostIds].sort());
+  });
+});
+
 describe('workerModeCleanupTargets', () => {
   const targets = workerModeCleanupTargets('qa-fp');
 
@@ -308,6 +358,13 @@ describe('workerModeCleanupTargets', () => {
 
   it('returns raw events in every namespace', () => {
     expect(targets.eventsIndexPattern).toBe('logs-endpoint.events.*');
+  });
+
+  it('keeps serverless cleanup inside the seeder-owned namespace', () => {
+    expect(workerModeCleanupTargets('qa-fp', true).eventsIndexPattern).toBe(
+      'logs-endpoint.events.fp-tp-*'
+    );
+    expect(workerModeCleanupTargets('qa-fp').eventsIndexPattern).toBe('logs-endpoint.events.*');
   });
 
   it('returns the space entity alias', () => {

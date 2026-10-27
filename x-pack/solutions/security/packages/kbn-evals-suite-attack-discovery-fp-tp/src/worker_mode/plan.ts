@@ -17,6 +17,7 @@ import {
   shiftTwinToNow,
   toEntityCrudRequest,
   toRunMarker,
+  toServerlessEventIndex,
   type FpTpEntityCrudRequest,
   type FpTpWorld,
 } from '../world';
@@ -24,6 +25,7 @@ import {
   RAW_EVENTS_INDEX_PATTERN,
   WORKER_MODE_DEFAULT_EXAMPLES,
   WORKER_MODE_LAST_ALERT_OFFSET_MS,
+  WORKER_MODE_SERVERLESS_EVENTS_PATTERN,
   type WorkerModeOutcome,
 } from './constants';
 
@@ -97,6 +99,8 @@ export interface WorkerModeSeedPlan {
   readonly scenarioKey: string;
   readonly expectedOutcome: FpTpOutcome;
   readonly runMarker: string;
+  /** Serverless seeds events into seeder-owned streams through the raw-event store. */
+  readonly serverless: boolean;
   readonly alertsIndex: string;
   readonly entityReadAlias: string;
   readonly alertIds: readonly string[];
@@ -138,11 +142,13 @@ export const buildWorkerModePlan = ({
   exampleId,
   now = new Date(),
   suffix = createWorkerModeSuffix(now),
+  serverless = false,
 }: {
   space: string;
   exampleId: string;
   now?: Date;
   suffix?: string;
+  serverless?: boolean;
 }): WorkerModeSeedPlan => {
   assertWorkerModeSpace(space);
   const example = WORKER_MODE_EXAMPLES.find(({ id }) => id === exampleId);
@@ -156,6 +162,19 @@ export const buildWorkerModePlan = ({
     { ...authored, attack: undefined },
     now.getTime() - WORKER_MODE_LAST_ALERT_OFFSET_MS - lastAlertMs
   );
+  // On serverless the seeder does not own logs-endpoint.events.<kind>-default:
+  // those names are product-managed data streams, so events are rewritten to the
+  // seeder-owned fp-tp namespace (mirroring buildServerlessPlan in seed_live.ts).
+  const events = serverless
+    ? shifted.events.map(({ index, id, source }) => ({
+        index: toServerlessEventIndex(index, space),
+        id,
+        source: {
+          ...source,
+          data_stream: { ...(source.data_stream as object | undefined), namespace: space },
+        },
+      }))
+    : shifted.events;
   const world: FpTpWorld = {
     ...shifted,
     // Entities are authored as of the base time, the twin's "now", so they move to the
@@ -165,6 +184,7 @@ export const buildWorkerModePlan = ({
       ...alert,
       source: { ...alert.source, 'kibana.space_ids': [space] },
     })),
+    events,
   };
 
   const alertsIndex = fpTpAlertsIndexForSpace(space);
@@ -183,6 +203,7 @@ export const buildWorkerModePlan = ({
     scenarioKey: example.scenarioKey,
     expectedOutcome: example.expectedOutcome,
     runMarker: toRunMarker(suffix),
+    serverless,
     alertsIndex,
     entityReadAlias: fpTpEntityReadAliasForSpace(space),
     alertIds: world.alerts.map(({ id }) => id),
@@ -220,9 +241,12 @@ export interface WorkerModeCleanupTargets {
 }
 
 /** Where an earlier worker-mode seed in `space` left documents. */
-export const workerModeCleanupTargets = (space: string): WorkerModeCleanupTargets => ({
+export const workerModeCleanupTargets = (
+  space: string,
+  serverless = false
+): WorkerModeCleanupTargets => ({
   alertsIndex: fpTpAlertsIndexForSpace(space),
   seededAlertsQuery: { prefix: { tags: FP_TP_TWIN_SEED_LABEL } },
-  eventsIndexPattern: RAW_EVENTS_INDEX_PATTERN,
+  eventsIndexPattern: serverless ? WORKER_MODE_SERVERLESS_EVENTS_PATTERN : RAW_EVENTS_INDEX_PATTERN,
   entityReadAlias: fpTpEntityReadAliasForSpace(space),
 });

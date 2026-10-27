@@ -152,7 +152,7 @@ node x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp/s
   --reasoningConnectorId .anthropic-claude-5-opus-chat_completion
 ```
 
-Serverless is not supported yet for the Worker seeder: [#297538](https://github.com/elastic/kibana/pull/297538) adds the space-scoped serverless path for the twin seeder (`createLiveKbnRequest` and the space index helpers here come from it).
+Serverless projects are supported with `--serverless` (ApiKey auth and a dedicated non-default `--space`, as above): the alerts go to the space's `.alerts-security.alerts-<space>` data stream (bootstrapped by the same no-match rule), and the raw events go to the same seeder-owned `logs-endpoint.events.fp-tp-<kind>-<space>` data streams the twin seeder uses — installed through the same composable template and ingest pipeline, and kept inside them on cleanup. The seeder provisions everything except the Worker run itself; verify AlertZero (Watches → Triage Watch) works on the project before relying on it for QA. The API key needs the cluster privileges the twin seeder's serverless path documents (`manage_index_templates`, `manage_ingest_pipelines`) plus the `logs-endpoint.events.fp-tp-*` streams.
 
 ## Reproducibility
 

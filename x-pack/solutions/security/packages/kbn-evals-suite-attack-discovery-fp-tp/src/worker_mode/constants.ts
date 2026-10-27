@@ -6,6 +6,7 @@
  */
 
 import type { FpTpVerdict } from '../constants';
+import { FP_TP_RAW_EVENT_INDEX_PREFIX } from '../world';
 
 /**
  * Routes and settings are inlined rather than imported from the AlertZero and
@@ -52,3 +53,11 @@ export const WORKER_MODE_LAST_ALERT_OFFSET_MS = 5 * 60 * 1000;
 
 /** Raw endpoint events the analysis reads, across every namespace. */
 export const RAW_EVENTS_INDEX_PATTERN = 'logs-endpoint.events.*';
+
+/**
+ * Raw-event streams the serverless seed owns. The plain pattern above would
+ * sweep product-managed data streams there (a `deleteByQuery` against
+ * `logs-endpoint.events.*` matches them too), so serverless cleanup stays
+ * inside the seeder-owned `fp-tp-` namespace.
+ */
+export const WORKER_MODE_SERVERLESS_EVENTS_PATTERN = `${FP_TP_RAW_EVENT_INDEX_PREFIX}*`;

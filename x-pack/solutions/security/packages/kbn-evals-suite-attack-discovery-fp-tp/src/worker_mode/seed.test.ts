@@ -91,6 +91,30 @@ describe('cleanupWorkerModeSpace', () => {
     });
     expect(esClient.deleteByQuery).not.toHaveBeenCalled();
   });
+
+  it('on serverless sweeps the seeder-owned streams by seed label', async () => {
+    const stream = 'logs-endpoint.events.fp-tp-process-qa-fp';
+    const esClient = {
+      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+      deleteByQuery: jest.fn().mockResolvedValue({}),
+      indices: { getDataStream: jest.fn().mockResolvedValue({ data_streams: [{ name: stream }] }) },
+    };
+    await cleanupWorkerModeSpace({
+      esClient: esClient as unknown as EsClient,
+      kbnRequest: okKbnRequest(),
+      space: 'qa-fp',
+      serverless: true,
+    });
+    expect(esClient.indices.getDataStream).toHaveBeenCalledWith({
+      name: 'logs-endpoint.events.fp-tp-*',
+    });
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: stream,
+        query: { term: { 'labels.ad_portable_seed': 'ad-fp-tp-twins-2026-09' } },
+      })
+    );
+  });
 });
 
 describe('seedWorkerModePlan', () => {
@@ -113,6 +137,9 @@ describe('seedWorkerModePlan', () => {
       plan.alertOperations,
       plan.eventOperations,
     ]);
+    expect(esClient.bulk).not.toHaveBeenCalledWith(
+      expect.objectContaining({ pipeline: expect.anything() })
+    );
     expect(
       kbnRequest.mock.calls.filter(([{ method }]) => method === 'POST').map(([{ path }]) => path)
     ).toEqual(
@@ -145,6 +172,49 @@ describe('seedWorkerModePlan', () => {
         query: { ids: { values: plan.alertIds } },
       })
     );
+  });
+
+  it('on serverless provisions the raw-event store and attaches the pipeline', async () => {
+    const serverlessPlan = buildWorkerModePlan({
+      space: 'qa-fp',
+      exampleId: 'encoded-powershell.fp',
+      now: new Date('2026-10-14T12:00:00.000Z'),
+      suffix: 'run1',
+      serverless: true,
+    });
+    const store = {
+      putIndexTemplate: jest.fn().mockResolvedValue({ acknowledged: true }),
+      createDataStream: jest.fn().mockResolvedValue({ acknowledged: true }),
+      putPipeline: jest.fn().mockResolvedValue({ acknowledged: true }),
+    };
+    const esClient = {
+      bulk: jest.fn().mockResolvedValue({ errors: false }),
+      updateByQuery: jest.fn().mockResolvedValue({ updated: 1 }),
+      indices: store,
+      ingest: { putPipeline: store.putPipeline },
+    };
+    const kbnRequest = okKbnRequest();
+    await seedWorkerModePlan({
+      esClient: esClient as unknown as EsClient,
+      kbnRequest,
+      plan: serverlessPlan,
+    });
+
+    const eventBulk = esClient.bulk.mock.calls.find(
+      ([{ operations }]) => operations === serverlessPlan.eventOperations
+    )?.[0];
+    expect(eventBulk).toEqual(
+      expect.objectContaining({
+        pipeline: 'alertzero-fp-tp-raw-events',
+        refresh: 'wait_for',
+      })
+    );
+    expect(store.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'alertzero-fp-tp-raw-events' })
+    );
+    for (const name of new Set(serverlessPlan.events.map(({ index }) => index))) {
+      expect(store.createDataStream).toHaveBeenCalledWith({ name });
+    }
   });
 });
 
