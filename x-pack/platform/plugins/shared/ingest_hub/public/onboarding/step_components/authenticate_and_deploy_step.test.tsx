@@ -191,6 +191,7 @@ function makeEcfReturn(
         otel: false,
         crowdstrike: false,
       },
+      staleReasonByFamily: { unified: undefined, otel: undefined, crowdstrike: undefined },
       isUpdateOpenedByFamily: {},
       onLaunch: jest.fn(),
       onUpdateOpened: jest.fn(),
