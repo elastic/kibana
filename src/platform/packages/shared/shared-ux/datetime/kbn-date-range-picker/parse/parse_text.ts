@@ -426,6 +426,19 @@ function dateStringToDate(
 }
 
 /**
+ * Resolution `now` is truncated to for a range, or `null` to keep full precision.
+ * `getTimeRangeResolution` only understands ISO absolute bounds, so absolute bounds in
+ * any other accepted format are normalized to ISO first.
+ */
+function getAnchorResolution(start: DateString, end: DateString, formats: string[]) {
+  const toIso = (bound: DateString) =>
+    dateStringToType(bound) === DATE_TYPE_ABSOLUTE
+      ? dateStringToDate(bound, formats)?.toISOString() ?? bound
+      : bound;
+  return getTimeRangeResolution(toIso(start), toIso(end));
+}
+
+/**
  * Builds a complete {@link TimeRange} from start/end datemath strings,
  * resolving dates, types, and offsets automatically.
  */
@@ -439,13 +452,8 @@ function buildRange(
   const startType = dateStringToType(start);
   const endType = dateStringToType(end);
   // Anchor both bounds to the same instant, rounded down to the time range resolution
-  // unless a bound uses a finer unit or an absolute bound carries milliseconds, where
-  // the extra precision is meaningful.
-  const hasAbsoluteMilliseconds = [
-    startType === DATE_TYPE_ABSOLUTE ? dateStringToDate(start, formats) : null,
-    endType === DATE_TYPE_ABSOLUTE ? dateStringToDate(end, formats) : null,
-  ].some((date) => date?.getMilliseconds());
-  const resolution = hasAbsoluteMilliseconds ? null : getTimeRangeResolution(start, end);
+  // unless a bound carries finer precision, where the extra precision is meaningful.
+  const resolution = getAnchorResolution(start, end, formats);
   const now = moment();
   const forceNow = (resolution ? now.startOf(resolution) : now).toDate();
   const endDate = dateStringToDate(end, formats, { roundUp: true, forceNow });

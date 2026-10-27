@@ -382,10 +382,10 @@ describe('dateMath', function () {
 });
 
 describe('getTimeRangeResolution', function () {
-  const { TIME_RANGE_RESOLUTION, getTimeRangeResolution } = dateMath;
+  const { getTimeRangeResolution } = dateMath;
 
-  it('defaults to TIME_RANGE_RESOLUTION', function () {
-    expect(getTimeRangeResolution('now-15m', 'now')).toBe(TIME_RANGE_RESOLUTION);
+  it('defaults to second resolution', function () {
+    expect(getTimeRangeResolution('now-15m', 'now')).toBe('s');
   });
 
   it('returns the resolution when bounds use equal or coarser units', function () {
@@ -406,9 +406,14 @@ describe('getTimeRangeResolution', function () {
     expect(getTimeRangeResolution('now-1m', 'now', 'd')).toBeNull();
   });
 
-  it('ignores absolute bounds', function () {
-    expect(
-      getTimeRangeResolution('2026-10-21T01:02:03.456Z', '2026-10-21T04:05:06.789Z', 's')
-    ).toBe('s');
+  it('returns the resolution when absolute bounds are whole units', function () {
+    expect(getTimeRangeResolution('2026-10-21T01:02:03.000Z', 'now', 's')).toBe('s');
+    expect(getTimeRangeResolution('2026-10-21T01:02:00.000Z', 'now', 'm')).toBe('m');
+  });
+
+  it('returns null when an absolute bound has finer precision', function () {
+    expect(getTimeRangeResolution('2026-10-21T01:02:03.456Z', 'now', 's')).toBeNull();
+    expect(getTimeRangeResolution('now', '2026-10-21T01:02:03.456Z', 's')).toBeNull();
+    expect(getTimeRangeResolution('2026-10-21T01:02:03.000Z', 'now', 'm')).toBeNull();
   });
 });

@@ -168,7 +168,7 @@ function parseDateMath(mathString: string, time: moment.Moment, roundUp: boolean
 }
 
 /** Unit that resolved relative time ranges are rounded down to. */
-export const TIME_RANGE_RESOLUTION: Unit = 's';
+const TIME_RANGE_RESOLUTION: Unit = 's';
 
 const isUnit = (token: string): token is Unit => Object.hasOwn(unitsMap, token);
 
@@ -178,11 +178,19 @@ const getRelativeUnits = (value: string): Unit[] => {
   return tokens.filter(isUnit);
 };
 
+/** Whether an absolute ISO bound carries precision finer than `resolution`. */
+const isAbsoluteFinerThan = (value: string, resolution: Unit): boolean => {
+  if (typeof value !== 'string' || value.startsWith('now')) return false;
+  const parsed = moment(value, moment.ISO_8601, true);
+  return parsed.isValid() && !parsed.isSame(parsed.clone().startOf(resolution));
+};
+
 /**
  * Returns the unit a time range should be rounded to: `now` is truncated to it and
  * rounded-up relative ends (e.g. `now/d`) end on the last whole unit. Returns `null`
- * when a relative bound uses a finer unit (e.g. `now-500ms` at second resolution),
- * so the range keeps full precision.
+ * when a relative bound uses a finer unit (e.g. `now-500ms` at second resolution) or an
+ * absolute ISO bound carries finer precision (e.g. `2025-07-15T12:00:00.500Z`), so the
+ * range keeps full precision.
  */
 export function getTimeRangeResolution(
   from: string,
@@ -193,7 +201,8 @@ export function getTimeRangeResolution(
   const usesFinerUnit = [...getRelativeUnits(from), ...getRelativeUnits(to)].some(
     (unit) => unitsMap[unit].weight < weight
   );
-  return usesFinerUnit ? null : resolution;
+  const hasFinerAbsoluteBound = [from, to].some((bound) => isAbsoluteFinerThan(bound, resolution));
+  return usesFinerUnit || hasFinerAbsoluteBound ? null : resolution;
 }
 
 // eslint-disable-next-line import/no-default-export

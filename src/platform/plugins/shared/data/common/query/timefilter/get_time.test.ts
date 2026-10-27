@@ -238,6 +238,15 @@ describe('get_time', () => {
       expect(max?.toISOString()).toBe('2026-10-21T04:05:06.789Z');
     });
 
+    test('keeps milliseconds in "now" when an absolute bound has milliseconds', () => {
+      const { min, max } = calculateBounds(
+        { from: '2026-10-22T12:34:56.456Z', to: 'now' },
+        { forceNow }
+      );
+      expect(min?.toISOString()).toBe('2026-10-22T12:34:56.456Z');
+      expect(max?.toISOString()).toBe('2026-10-22T12:34:56.789Z');
+    });
+
     test('rounds the clock time when forceNow is omitted', () => {
       const clock = sinon.useFakeTimers(forceNow.valueOf());
       const { max } = calculateBounds({ from: 'now-15m', to: 'now' });
