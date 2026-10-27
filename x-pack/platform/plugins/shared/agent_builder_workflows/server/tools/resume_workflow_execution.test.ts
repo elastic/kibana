@@ -30,12 +30,13 @@ describe('resumeWorkflowExecutionTool', () => {
 
   const getSecurity = () => undefined;
 
-  // No live user by default, so the legacy cases keep the pre-confirmation behaviour.
+  // No live user and a direct API call by default, so the legacy cases resume without a prompt.
   const mockContext = {
     spaceId: 'default',
     request: {} as KibanaRequest,
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: false },
+    callContext: { toolCallId: 'tc-1', callSource: 'user' as const },
   };
 
   const buildInteractiveContext = (
@@ -296,6 +297,40 @@ describe('resumeWorkflowExecutionTool', () => {
 
       expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
       expect(wm.management.resumeWorkflowExecution).toHaveBeenCalled();
+    });
+  });
+  describe('with no live user', () => {
+    const agentContext = (autoApprovedApis?: Array<{ target: 'kibana'; api: string }>) => ({
+      ...mockContext,
+      interactivity: { enabled: false, auto_approved_apis: autoApprovedApis },
+      callContext: { toolCallId: 'tc-1', callSource: 'agent' as const },
+      prompts: { checkConfirmationStatus: jest.fn(), askForConfirmation: jest.fn() },
+    });
+
+    it('refuses an agent call that the run did not pre-approve', async () => {
+      const workflowsManagement = createWorkflowsManagement();
+      const tool = resumeWorkflowExecutionTool({ workflowsManagement, getSecurity } as any);
+
+      const result = (await tool.handler(
+        { executionId: 'exec-1', input: { approved: true } } as never,
+        agentContext() as never
+      )) as any;
+
+      expect(workflowsManagement.management.resumeWorkflowExecution).not.toHaveBeenCalled();
+      expect(result.results[0].type).toBe('error');
+      expect(JSON.stringify(result.results[0])).toContain('approvals.auto_approved_apis');
+    });
+
+    it('resumes an agent call when the run pre-approved workflows.*', async () => {
+      const workflowsManagement = createWorkflowsManagement();
+      const tool = resumeWorkflowExecutionTool({ workflowsManagement, getSecurity } as any);
+
+      await tool.handler(
+        { executionId: 'exec-1', input: { approved: true } } as never,
+        agentContext([{ target: 'kibana', api: 'workflows.*' }]) as never
+      );
+
+      expect(workflowsManagement.management.resumeWorkflowExecution).toHaveBeenCalled();
     });
   });
 });

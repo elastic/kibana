@@ -11,6 +11,9 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { AgentExecutionMode } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server';
+
+type ToolCallSource = ToolHandlerContext['callContext']['callSource'];
 import { executeWorkflowTool } from './execute_workflow';
 
 jest.mock('@kbn/agent-builder-tools-base/workflows', () => {
@@ -52,6 +55,7 @@ describe('executeWorkflowTool', () => {
       interactive: boolean;
       promptStatus: ConfirmationStatus;
       autoApprovedApis: Array<{ target: 'kibana'; api: string }>;
+      callSource: ToolCallSource;
     }> = {}
   ) =>
     ({
@@ -66,7 +70,7 @@ describe('executeWorkflowTool', () => {
         enabled: overrides.interactive ?? false,
         auto_approved_apis: overrides.autoApprovedApis,
       },
-      callContext: { toolCallId: 'tc-1' },
+      callContext: { toolCallId: 'tc-1', callSource: overrides.callSource ?? 'user' },
       prompts: {
         checkConfirmationStatus: jest
           .fn()
@@ -394,10 +398,49 @@ steps:
       expect(result.results[0].type).toBe('error');
     });
 
-    it('keeps running without a prompt when no user is present', async () => {
+    it('refuses an agent run with unsafe steps when no user is present', async () => {
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
+      const context = buildContext({ interactive: false, callSource: 'agent' });
+
+      const result = await invokeHandler(tool, { yaml: UNSAFE_YAML }, context);
+
+      expect(executeWorkflowMock).not.toHaveBeenCalled();
+      expect(result.results[0].type).toBe('error');
+      expect(JSON.stringify(result.results[0])).toContain('workflows.post-workflows-test');
+    });
+
+    it('runs an agent run with only safe steps when no user is present', async () => {
       executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
       const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
-      const context = buildContext({ interactive: false });
+
+      await tool.handler(
+        { yaml: SAFE_YAML } as never,
+        buildContext({ interactive: false, callSource: 'agent' })
+      );
+
+      expect(executeWorkflowMock).toHaveBeenCalled();
+    });
+
+    it('runs an agent run with unsafe steps that pre-approved workflows.*', async () => {
+      executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
+
+      await tool.handler(
+        { yaml: UNSAFE_YAML } as never,
+        buildContext({
+          interactive: false,
+          callSource: 'agent',
+          autoApprovedApis: [{ target: 'kibana', api: 'workflows.*' }],
+        })
+      );
+
+      expect(executeWorkflowMock).toHaveBeenCalled();
+    });
+
+    it('keeps running a call from an MCP client without a prompt', async () => {
+      executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
+      const context = buildContext({ interactive: false, callSource: 'mcp' });
 
       await tool.handler({ yaml: UNSAFE_YAML } as never, context);
 

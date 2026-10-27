@@ -215,7 +215,7 @@ Use this tool when:
 — The user asks to run, trigger or execute a workflow.
 — You need to run a workflow you just generated (e.g. via \`generate_workflow\`).
 
-**This tool can perform destructive and irreversible operations** — workflows may include steps that delete Elasticsearch indices or documents, post messages to Slack, make arbitrary HTTP requests, or perform other actions with external side effects. Always review the workflow steps before executing. In a conversation, the user confirms runs that include such steps; if they decline, do not retry.
+**This tool can perform destructive and irreversible operations** — workflows may include steps that delete Elasticsearch indices or documents, post messages to Slack, make arbitrary HTTP requests, or perform other actions with external side effects. Always review the workflow steps before executing. In a conversation, the user confirms runs that include such steps; if they decline, do not retry. With no user to confirm (for example in an \`ai.agent\` workflow step), such runs are refused unless the run pre-approved the workflows API.
 
 ## Source — exactly one must be provided
 

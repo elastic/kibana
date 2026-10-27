@@ -130,7 +130,7 @@ export const resumeWorkflowExecutionTool = ({
     Use this tool when a workflow execution returned with status "waiting_for_input".
     The execution's "waiting_input" field describes what input is expected (message and optional schema).
     Provide the executionId and the required input object to resume the workflow.
-    In a conversation, the user confirms the input before the workflow resumes; if they decline, do not retry.
+    In a conversation, the user confirms the input before the workflow resumes; if they decline, do not retry. With no user to confirm (for example in an \`ai.agent\` workflow step), resuming is refused unless the run pre-approved the workflows API.
 
     **Important - read after resume:** a successful call means resume was **accepted and scheduled** in the engine.
     The execution record can **lag**: you may still briefly see the same "waiting_for_input" and the same form right after this tool returns. **Do not** tell the user there is another HITL step, a loop or a second approval round unless you have **confirmed** a genuinely new pause (clear evidence such as a new step, changed context, or repeated status checks that rule out a stale snapshot).

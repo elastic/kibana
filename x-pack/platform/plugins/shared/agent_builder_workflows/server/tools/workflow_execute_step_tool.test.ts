@@ -15,7 +15,7 @@ import {
   ConfirmationStatus,
   isConfirmationPrompt,
 } from '@kbn/agent-builder-common/agents/prompts';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition, ToolHandlerContext } from '@kbn/agent-builder-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type {
   ToolHandlerPromptReturn,
@@ -148,8 +148,8 @@ const createMockContext = (yaml?: string, options: MockContextOptions = {}) => {
   return {
     spaceId: 'default',
     request: { headers: {} },
-    // Default to standalone: no user to ask, so unsafe steps run. Override with
-    // conversation mode to exercise the confirmation prompt.
+    // Default to a standalone agent run: no user to ask, so unsafe steps are refused.
+    // Override with conversation mode to exercise the confirmation prompt.
     executionMode: options.executionMode ?? AgentExecutionMode.standalone,
     interactivity: {
       enabled:
@@ -161,7 +161,7 @@ const createMockContext = (yaml?: string, options: MockContextOptions = {}) => {
     callContext: {
       toolId: WORKFLOW_EXECUTE_STEP_TOOL_ID,
       toolCallId: options.toolCallId ?? 'tc_default',
-      callSource: 'agent' as const,
+      callSource: 'agent' as ToolHandlerContext['callContext']['callSource'],
     },
     prompts: {
       checkConfirmationStatus,
@@ -771,7 +771,20 @@ steps:
       expect(result.prompt.title).toContain('elasticsearch.indices.delete');
     });
 
-    it('runs without prompting when interactivity is off (ai.agent step), like execute_workflow', async () => {
+    it('refuses an unsafe step in an ai.agent run that did not pre-approve it', async () => {
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+        interactive: false,
+      });
+      const result = await invokeHandler(registeredTool, { stepName: 'send_slack' }, context);
+
+      expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
+      expect(mockApi.testStep).not.toHaveBeenCalled();
+      expect(result.results[0].type).toBe('error');
+      expect(JSON.stringify(result.results[0])).toContain('workflows.post-workflows-step-test');
+    });
+
+    it('runs an unsafe step in an ai.agent run that pre-approved workflows.*', async () => {
       jest.useRealTimers();
       mockApi.testStep.mockResolvedValue('exec-run');
       mockApi.getWorkflowExecution.mockResolvedValue({
@@ -783,10 +796,10 @@ steps:
       const context = createMockContext(VALID_WORKFLOW_YAML, {
         executionMode: AgentExecutionMode.conversation,
         interactive: false,
+        autoApprovedApis: [{ target: 'kibana', api: 'workflows.*' }],
       });
       await registeredTool.handler({ stepName: 'send_slack' } as never, context as never);
 
-      expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
       expect(mockApi.testStep).toHaveBeenCalled();
     });
 
@@ -980,7 +993,7 @@ steps:
       expect(mockApi.testStep).not.toHaveBeenCalled();
     });
 
-    it('runs without prompting in standalone mode', async () => {
+    it('runs an unsafe step called over MCP, where the MCP client confirms', async () => {
       jest.useRealTimers();
       mockApi.testStep.mockResolvedValue('exec-run');
       mockApi.getWorkflowExecution.mockResolvedValue({
@@ -992,6 +1005,7 @@ steps:
       const context = createMockContext(VALID_WORKFLOW_YAML, {
         executionMode: AgentExecutionMode.standalone,
       });
+      context.callContext.callSource = 'mcp';
       await registeredTool.handler({ stepName: 'send_slack' } as never, context as never);
 
       expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();

@@ -21,14 +21,23 @@ import { errorResult } from '@kbn/agent-builder-genai-utils/tools/utils/results'
 export const hasLiveUser = ({ executionMode, interactivity }: ToolHandlerContext): boolean =>
   executionMode !== AgentExecutionMode.standalone && interactivity.enabled;
 
+const getRefusedMessage = (api: string): string =>
+  `This call needs a user to confirm it, and no user can confirm it in this run, so it was not made. ` +
+  `To allow it, pre-approve the Kibana API "${api}" (or "workflows.*") in auto_approved_apis; ` +
+  `in a workflow, set approvals.auto_approved_apis.kibana on the ai.agent step.`;
+
 /** Short hash of the definition a prompt shows, for `confirmToolCall`'s `getPromptKey`. */
 export const hashDefinition = (definition: string): string =>
   createHash('sha256').update(definition).digest('hex').slice(0, 16);
 
 /**
  * Asks the user to confirm a tool call. Returns undefined when the call can go
- * ahead: no live user, an `auto_approved_apis` match on `api`, an accepted prompt,
- * or no prompt from `getPrompt`.
+ * ahead: an `auto_approved_apis` match on `api`, an accepted prompt, no prompt
+ * from `getPrompt`, or no live user when the call does not come from an agent.
+ *
+ * With no live user, an agent call that needs confirmation is refused, as
+ * `execute_api` does: an `ai.agent` step must grant `api` to allow it. MCP clients
+ * and direct API calls are not refused; their caller confirms the call.
  */
 export const confirmToolCall = async ({
   context,
@@ -51,8 +60,15 @@ export const confirmToolCall = async ({
   getPrompt: () => Promise<Omit<ConfirmPromptDefinition, 'id'> | undefined>;
 }): Promise<ToolHandlerReturn | undefined> => {
   const { interactivity, prompts, callContext } = context;
-  if (!hasLiveUser(context) || isApiAutoApproved({ interactivity, target: 'kibana', api })) {
+  if (isApiAutoApproved({ interactivity, target: 'kibana', api })) {
     return undefined;
+  }
+  if (!hasLiveUser(context)) {
+    if (callContext.callSource !== 'agent') {
+      return undefined;
+    }
+    const prompt = await getPrompt();
+    return prompt && { results: [errorResult(getRefusedMessage(api))] };
   }
 
   const promptKey = await getPromptKey?.();
