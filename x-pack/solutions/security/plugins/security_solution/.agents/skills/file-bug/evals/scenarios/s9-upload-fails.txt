@@ -1,0 +1,3 @@
+(Context: you showed a draft for a new issue in elastic/kibana (title "[Detection Engineering] [Bug] Alerts table shows 0 results although 12 alerts exist in the time range"; labels bug, triage_needed, Team:Detection Engineering, v9.3.0; body file $FIXTURES/s6-body.md; one screenshot, $FIXTURES/shot-clean.png, confirmed clean). The user replied "yes, file it".)
+
+Test override: you ran the upload step and `python3 "$FILE_BUG" upload --repo elastic/kibana --file $FIXTURES/shot-clean.png` exited 1 and printed {"error": "upload rejected (HTTP 422)"}. Nothing else has been run. Continue from here exactly as the skill says.

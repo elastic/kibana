@@ -836,6 +836,16 @@ export const runFunctionsValidationSuite = (setup: Setup) => {
         ]);
         await expectErrors('FROM a_index | STATS TSDB_INCOMPATIBLE_AGG()', []);
       });
+
+      it('accepts a bare counter in a TS STATS aggregate via the implicit conversion', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors('TS a_index | STATS AVG(counterDoubleField)', []);
+        await expectErrors('TS a_index | STATS AVG(LAST_OVER_TIME(counterDoubleField))', []);
+        await expectErrors('FROM a_index | STATS AVG(counterDoubleField)', [
+          getNoValidCallSignatureError('avg', ['counter_double']),
+        ]);
+      });
     });
 
     it('should flag nested aggregation functions', async () => {

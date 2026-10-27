@@ -2,6 +2,43 @@
 
 This plugin provides the domain API for starting and reading investigations, independent of which entity (significant event, alert, etc.) triggers them.
 
+## Scheduled automations
+
+Hourly, daily and weekly automation presets generate calendar-based workflow triggers. Daily and
+weekly times, and inclusive hourly windows, use the saved IANA timezone and follow daylight saving
+time. Custom cron execution is deferred. Unsupported schedules are ignored when loading the form
+and rejected by the API.
+
+Schedule rows store structured presets and generate RRULE directly. Daily and weekly presets use
+`time` in `HH:mm` format; weekly presets also require `daysOfWeek` (0 for Sunday through 6 for
+Saturday). Hourly presets optionally use `hourWindow: { start, end }` with inclusive whole hours.
+All presets accept an IANA `timezone`, defaulting to UTC.
+
+Scheduled automations require nonempty instructions (at most 5,000 characters). Each tick starts a
+fresh investigation using a `manual` question subject with an `automatic` trigger type, so normal
+automatic-investigation quotas apply. An assessment that finds no issues still creates a conversation.
+The Investigate/Ask selector does not select a different execution path.
+
+`runtime.dailyDispatchLimit` caps dispatch attempts across all triggers of an automation, per space
+and UTC day. The investigation step reserves a slot atomically before calling the investigation
+client; overlapping runs across Kibana instances cannot exceed the limit. Admitted attempts count
+even if starting or running the investigation fails, or continues an existing investigation. Excess
+attempts create no investigation and appear as skipped with reason `daily_limit` in automation
+history. Skipped attempts do not increase today's usage. An omitted limit allows unlimited dispatches;
+a limit of zero blocks all dispatches. Changing the limit takes effect on the next dispatch. The
+budget is separate from the global automatic-investigation quota.
+
+The API-only `scopeQuery` field is forwarded as `scope_query` guidance in the investigation context.
+It guides the agent's telemetry filters; it is not an enforced data-access boundary. The optional
+`runtime.timeoutSeconds` bounds the investigation workflow started by that run. When set, the generated
+automation workflow gets an additional 60 seconds for setup and returning the investigation result.
+The stored managed investigation definition and its default timeout are unchanged.
+
+Only one schedule row is supported per automation. It can coexist with alert rows; each source has a
+separate guarded investigation step. Alert publication opt-in and alert snapshot resolution are
+separate work. Existing saved schedules activate on their next valid save or enable action, with no
+automatic workflow rewrite at deployment.
+
 ## Requirements
 
 Nightshift investigations are being moved onto the shared `agenticInvestigations` plugin (an investigation is an Agent Builder conversation) and its proposed actions onto the `proposals` plugin. Both are optional dependencies and disabled by default:
@@ -74,7 +111,7 @@ Investigations are public conversations, and Agent Builder lets anyone who can c
 
 ### Slack threads
 
-`POST /internal/nightshift/investigations/_slack_thread` finds a thread's investigation by its `slack_thread` subject, keyed `team:<T>/channel:<C>/thread:<ts>`. It does not set or read the Agent Builder conversation origin: Agent Builder sets that when the Slack relay calls its callback converse API, and a relay chat about the same thread may carry it.
+`POST /internal/nightshift/investigations/_slack_thread` finds a thread's investigation by its `slack_thread` subject, keyed by the Relay's thread key `slack:<T>:<C>:<ts>`. A Slack-trigger automation records the same subject for the message that started it, taking the key from the event's `externalConversationId`. It does not set or read the Agent Builder conversation origin: Agent Builder sets that when the Slack relay calls its callback converse API, and a relay chat about the same thread may carry it.
 
 With `create`, the route creates the investigation as the identity that runs the Slack workflow. The new investigation has the thread as its subject, claimed so that concurrent creates for one thread agree on one investigation. The thread's status message is recorded on that subject as `slack.status_message_ts`.
 
@@ -100,10 +137,28 @@ The automation UI's Channel action uses the Elastic Slack app by default. A save
 }
 ```
 
-Destinations and delivery history live in a hidden, readonly `nightshift.notification_routing` attachment backed by its own index. Endpoints are deduplicated by type, connector ID, and canonical parameters while retaining automation attribution. The 5-association limit applies to retained endpoints and automation identities, not execution or attempt history. The started phase adds destinations and freezes each execution's participants; explicit follow-up executions notify all retained destinations.
+Destinations and delivery history live in a hidden, readonly `nightshift.notification_routing` attachment backed by its own index. Endpoints are deduplicated by type, connector ID, and canonical parameters while retaining automation attribution. The 5-association limit applies to retained endpoints and automation identities, not execution or attempt history. The started phase, or an early failed phase, adds destinations and freezes each execution's participants; explicit follow-up executions notify all retained destinations.
 
-The investigation workflow sends a started message, stores its confirmed Slack thread reference, and replies with completion or failure. Later executions reuse that thread. An explicitly supplied parent timestamp is also supported. Terminal delivery requires an initialized execution and persists one terminal phase, preventing contradictory completion and failure messages.
+The investigation workflow sends a started message, stores its confirmed Slack thread reference, and replies with completion or failure. Later executions reuse that thread. An explicitly supplied parent timestamp is also supported. Failure delivery initializes routing even before the started step runs. A failure without an existing or explicit thread posts directly to the configured channel and stores its confirmed thread reference. Terminal delivery selects one persisted outcome, preventing contradictory completion and failure messages.
 
 Each execution, destination, and phase is claimed as `unconfirmed` before connector execution. The shared attachment factory handles versioned writes, and the connector executes once using workflow authentication, the investigation's space, and the abort signal. A confirmed message timestamp produces `sent`; connector error responses produce `failed`; exceptions, cancellation after claiming, and missing timestamps remain `unconfirmed`. Replay skips all existing attempts. An uncertain root blocks automatic root recreation across later executions; a definitely failed root may be attempted again by a later execution.
 
-The `nightshift.sendNotifications` step validates the persisted workflow execution and its investigation binding, and reads the investigation (title, severity, summary, impact, first pending proposed action) through the shared query API. Until Agent Builder titles the investigation, messages use the run's `title` input. Investigation and execution IDs may differ for explicit continuation. It returns persisted `sent`, `failed`, and `unconfirmed` counts for the requested execution and phase; full diagnostics are available through authorized attachment reads. Notification-step failures continue the investigation workflow, while persistence failures stop further posts within that step. There is no automatic claim expiry, resend, or routing-document cleanup on investigation or space deletion. Outbound thread references do not register incoming Slack-thread continuation.
+The `nightshift.sendNotifications` step validates the persisted workflow execution and its investigation binding, and reads the investigation (title, severity, summary, impact, first pending proposed action) through the shared query API. Until Agent Builder titles the investigation, messages use the run's `title` input. Investigation and execution IDs may differ for explicit continuation. It returns persisted `sent`, `failed`, and `unconfirmed` counts for the requested execution and phase; full diagnostics are available through authorized attachment reads. Notification-step failures continue the investigation workflow, while persistence failures stop further posts within that step. There is no automatic claim expiry, resend, or routing-document cleanup on investigation or space deletion. A confirmed root post from the Elastic Slack app claims its thread as a `slack_thread` subject using the thread key the Relay returns, so a mention or reply in it continues the investigation. Posts through a custom Slack connector and replies under a caller-named message register nothing here; a thread another investigation holds stays with it.
+
+### Workflow failures
+
+The managed investigation workflow uses `settings.on-failure.fallback` to invoke
+`nightshift.handleInvestigationFailure` for model resolution, agent setup, agent pre-execution,
+agent execution, and step timeout errors. Persistence has the same fallback after its explicit
+retries are exhausted because step-level error handling overrides workflow-level handling.
+The handler records the validated execution and subjects, creates a missing investigation conversation,
+and preserves an existing conversation's open/closed state. It emits the existing failed lifecycle
+trigger and uses the same notification routing and delivery claims as `nightshift.sendNotifications`.
+Notification errors do not replace the original workflow error. Lifecycle trigger emission remains
+best effort; Slack delivery claims suppress replayed sends.
+
+Workflow-level timeout, cancellation, Task Manager interruption, and resume-scheduling failure bypass
+these fallbacks. Reporting those outcomes needs a durable Workflows terminal-outcome mechanism,
+coordinated with recovery (#1677), before #1820 can be closed. Future intentional-cancellation messages
+should say "Investigation stopped". The separate Slack follow-up workflow's status-message editor is
+unchanged; consolidating it with investigation-owned notifications remains follow-up work.

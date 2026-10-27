@@ -15,10 +15,17 @@ interface ListKiBodyProps {
   aiIndexId: string;
   kis: KiListItem[];
   isLoading: boolean;
+  isRefetching?: boolean;
   error?: Error;
 }
 
-export const ListKiBody = ({ aiIndexId, kis, isLoading, error }: ListKiBodyProps) => {
+export const ListKiBody = ({
+  aiIndexId,
+  kis,
+  isLoading,
+  isRefetching = false,
+  error,
+}: ListKiBodyProps) => {
   if (isLoading && kis.length === 0) {
     return <EuiSkeletonText lines={4} data-test-subj="contextListKiLoading" />;
   }
@@ -54,7 +61,7 @@ export const ListKiBody = ({ aiIndexId, kis, isLoading, error }: ListKiBodyProps
 
   return (
     <div data-test-subj="contextListKiRows">
-      <ListKiTable aiIndexId={aiIndexId} kis={kis} />
+      <ListKiTable aiIndexId={aiIndexId} kis={kis} isRefetching={isRefetching} />
     </div>
   );
 };

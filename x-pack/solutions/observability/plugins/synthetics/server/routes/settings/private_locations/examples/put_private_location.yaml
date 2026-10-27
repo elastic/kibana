@@ -6,6 +6,10 @@ requestBody:
           description: Update a private location's label.
           value:
             label: Updated Private Location Name
+        putPrivateLocationRequestExample2:
+          description: Move a private location to another agent policy.
+          value:
+            agentPolicyId: new-agent-policy-id
 responses:
   200:
     description: A successful response.
@@ -27,6 +31,20 @@ responses:
                 lon: -122.4194
               spaces: ['*']
   400:
-    description: If the `label` is shorter than 1 character, the API returns a 400 Bad Request response with a corresponding error message.
+    description: >
+      If the `label` is shorter than 1 character, or the `agentPolicyId` is not available in the current space, does not cover all spaces of the private location, or is already used by another private location, the API returns a 400 Bad Request response with a corresponding error message.
   404:
     description: If the private location with the specified ID does not exist, the API returns a 404 Not Found response.
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X PUT "${KIBANA_URL}/api/synthetics/private_locations/location-id" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{"label":"Updated Private Location Name"}'
+  - lang: Console
+    source: |
+      PUT kbn://api/synthetics/private_locations/location-id
+      {"label":"Updated Private Location Name"}

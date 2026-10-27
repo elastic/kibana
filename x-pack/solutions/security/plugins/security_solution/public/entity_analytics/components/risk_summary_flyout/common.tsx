@@ -24,18 +24,23 @@ interface EntityData {
   risk: RiskStats;
 }
 
+const formatContribution = (score: number): string =>
+  `${score > 0 ? '+' : ''}${formatRiskScore(score)}`;
+
 export const columnsArray: Array<EuiBasicTableColumn<TableItem>> = [
   {
     field: 'category',
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.entityDetails.categoryColumnLabel"
-        defaultMessage="Category"
+        id="xpack.securitySolution.flyout.entityDetails.riskInputColumnLabel"
+        defaultMessage="Risk input"
       />
     ),
     truncateText: false,
     mobileOptions: { show: true },
     sortable: true,
+    render: (category: string, { count }: TableItem) =>
+      count === undefined ? category : `${category} (${count})`,
     footer: (
       <FormattedMessage
         id="xpack.securitySolution.flyout.entityDetails.categoryColumnFooterLabel"
@@ -47,8 +52,8 @@ export const columnsArray: Array<EuiBasicTableColumn<TableItem>> = [
     field: 'score',
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.entityDetails.scoreColumnLabel"
-        defaultMessage="Score"
+        id="xpack.securitySolution.flyout.entityDetails.contributionColumnLabel"
+        defaultMessage="Contribution"
       />
     ),
     truncateText: false,
@@ -56,29 +61,10 @@ export const columnsArray: Array<EuiBasicTableColumn<TableItem>> = [
     sortable: true,
     dataType: 'number',
     align: 'right',
-    render: formatRiskScore,
+    render: formatContribution,
     footer: (props) => (
       <span data-test-subj="risk-summary-result-score">
         {formatRiskScore(sumBy((i) => i.score, props.items))}
-      </span>
-    ),
-  },
-  {
-    field: 'count',
-    name: (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.entityDetails.inputsColumnLabel"
-        defaultMessage="Inputs"
-      />
-    ),
-    truncateText: false,
-    mobileOptions: { show: true },
-    sortable: true,
-    dataType: 'number',
-    align: 'right',
-    footer: (props) => (
-      <span data-test-subj="risk-summary-result-count">
-        {sumBy((i) => i.count ?? 0, props.items)}
       </span>
     ),
   },
@@ -125,7 +111,7 @@ export const getItems: (
           }
         ),
         score: watchlistModifiers.reduce((sum, mod) => sum + mod.contribution, 0),
-        count: undefined,
+        count: watchlistModifiers.length,
       });
     } else {
       items.push({

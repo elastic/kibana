@@ -16,7 +16,6 @@ const investigation: Investigation = {
   template_id: 'investigation',
   title: 'Suspicious login',
   createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
   worker_execution_ids: ['exec-1'],
   recordId: 'CASE-1',
   assignee: undefined,
@@ -53,6 +52,26 @@ describe('ConversationDetailsFlyoutHeader', () => {
       />
     );
     expect(screen.getByRole('button', { name: 'Toggle status' })).toBeInTheDocument();
+  });
+
+  it('renders a severity tile and no severity badge under the title when severityNode is provided', () => {
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutHeader
+        investigation={{ ...investigation, severity: 'high' }}
+        severityNode={<button>Pick severity</button>}
+      />
+    );
+    expect(screen.getByText('Severity')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Pick severity' })).toBeInTheDocument();
+    expect(screen.queryByTestId('investigationFlyoutSeverity')).not.toBeInTheDocument();
+  });
+
+  it('shows the severity badge under the title and no severity tile without severityNode', () => {
+    renderWithKibanaRenderContext(
+      <ConversationDetailsFlyoutHeader investigation={{ ...investigation, severity: 'high' }} />
+    );
+    expect(screen.getByTestId('investigationFlyoutSeverity')).toHaveTextContent('High');
+    expect(screen.queryByText('Severity')).not.toBeInTheDocument();
   });
 
   it('falls back to a read-only status badge when statusNode is absent', () => {

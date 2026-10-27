@@ -24,7 +24,6 @@ function setup({
   const router = httpServiceMock.createRouter();
   const getSelfManagedSetupState = jest.fn().mockResolvedValue({
     resource_management: { enabled: true },
-    settings: { configured: true },
   });
   const getCloudSetupState = jest.fn();
   const getStatus = jest.fn().mockResolvedValue({

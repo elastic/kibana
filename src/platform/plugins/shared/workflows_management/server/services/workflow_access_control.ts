@@ -210,9 +210,12 @@ export class WorkflowAccessControlService {
     request?: KibanaRequest,
     options?: { allowAdminOverride?: boolean; auditOverride?: boolean }
   ): Promise<void> {
-    if (!(await this.checkAccess(workflow, operation, request, options))) {
-      throw new WorkflowAccessDeniedError();
+    if (await this.checkAccess(workflow, operation, request, options)) return;
+    // A caller who cannot read the workflow must not learn that it exists.
+    if ((await this.decisions(workflow, request)).read === 'denied') {
+      throw new WorkflowNotFoundError(workflow.id);
     }
+    throw new WorkflowAccessDeniedError();
   }
 
   async readFilter(request?: KibanaRequest) {
@@ -324,9 +327,7 @@ export class WorkflowAccessControlService {
       logWorkflowAccess('denied', 'manage', { core: this.core, request, id, spaceId });
       throw new WorkflowAccessDeniedError();
     }
-    if (!(await this.checkAccess({ ...existing, id, spaceId }, 'manage', request))) {
-      throw new WorkflowAccessDeniedError();
-    }
+    await this.assertAccess({ ...existing, id, spaceId }, 'manage', request);
     if (access_mode === 'private') {
       await Promise.all(
         WORKFLOW_ACCESS_CONTROL_ROLES.map(async (role) => {

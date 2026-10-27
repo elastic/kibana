@@ -180,8 +180,6 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
       '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
       '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects,
-      // explicitly disable internal API restriction. See https://github.com/elastic/kibana/issues/163654
-      '--server.restrictInternalApis=false',
       // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
       `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
       // x-pack/platform/test/api_integration/config.ts
@@ -233,10 +231,10 @@ export const defaultConfig: ScoutServerConfig = {
       })}`,
       `--server.publicBaseUrl=${kbnUrl}`,
       // Synthetics service config — matches the FTR deployment-agnostic base
-      '--xpack.uptime.service.password=test',
-      '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
-      '--xpack.uptime.service.devUrl=mockDevUrl',
-      '--xpack.uptime.service.manifestUrl=mockDevUrl',
+      '--xpack.synthetics.service.password=test',
+      '--xpack.synthetics.service.username=localKibanaIntegrationTestsUser',
+      '--xpack.synthetics.service.devUrl=mockDevUrl',
+      '--xpack.synthetics.service.manifestUrl=mockDevUrl',
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
     ],

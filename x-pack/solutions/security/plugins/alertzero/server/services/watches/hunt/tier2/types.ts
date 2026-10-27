@@ -39,6 +39,8 @@ export interface HuntBehaviorParams {
   report_id?: string;
   llm_confidence_threshold?: number;
   iocs?: HuntBehaviorIoc[];
+  /** Adjudicated-out IOCs the run must not search. */
+  excluded_iocs?: HuntBehaviorIoc[];
   article_context?: HuntBehaviorArticleContext;
   /**
    * Hunt window. When present (and dry-run passed), grounded queries execute

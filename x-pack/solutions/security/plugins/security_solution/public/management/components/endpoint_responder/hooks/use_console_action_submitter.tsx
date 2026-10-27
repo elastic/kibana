@@ -11,10 +11,9 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { i18n } from '@kbn/i18n';
+import { ResponseActionResults } from '../../response_action';
 import type { BaseActionRequestBody } from '../../../../../common/api/endpoint/actions/common/base';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { ActionSuccess } from '../components/action_success';
-import { ActionError } from '../components/action_error';
 import { FormattedError } from '../../formatted_error';
 import { useGetActionDetails } from '../../../hooks/response_actions/use_get_action_details';
 import { ACTION_DETAILS_REFRESH_INTERVAL } from '../lib/constants';
@@ -24,6 +23,7 @@ import type {
   ResponseActionApiResponse,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
+  ImmutableObject,
 } from '../../../../../common/endpoint/types';
 import type { CommandExecutionComponentProps } from '../../console';
 
@@ -76,11 +76,6 @@ export interface UseConsoleActionSubmitterOptions<
   actionRequestBody: TReqBody | undefined;
 
   dataTestSubj?: string;
-
-  /**  */
-  pendingMessage?: string;
-
-  successMessage?: string;
 }
 
 /**
@@ -96,8 +91,6 @@ export interface UseConsoleActionSubmitterOptions<
  * @param store
  * @param ResultComponent
  * @param dataTestSubj
- * @param pendingMessage
- * @param successMessage
  */
 export const useConsoleActionSubmitter = <
   TReqBody extends BaseActionRequestBody = BaseActionRequestBody,
@@ -112,8 +105,6 @@ export const useConsoleActionSubmitter = <
   store,
   ResultComponent,
   dataTestSubj,
-  pendingMessage,
-  successMessage,
 }: UseConsoleActionSubmitterOptions<TReqBody, TOutputContent, TParameters>): ConsoleActionSubmitter<
   TOutputContent,
   TParameters
@@ -169,6 +160,7 @@ export const useConsoleActionSubmitter = <
         ).request,
         sent: true,
       };
+      let createdAction: ImmutableObject<ActionDetails<TOutputContent, TParameters>> | undefined;
 
       setStatus('creating');
 
@@ -182,6 +174,7 @@ export const useConsoleActionSubmitter = <
       actionCreator
         .mutateAsync(actionRequestBody)
         .then((response) => {
+          createdAction = response.data as typeof createdAction;
           updatedRequestState.actionId = response.data.id;
 
           if (isMounted()) {
@@ -203,6 +196,7 @@ export const useConsoleActionSubmitter = <
                 ...prevState,
                 actionApiState: {
                   ...(prevState.actionApiState ?? currentActionState),
+                  actionDetails: createdAction,
                   request: { ...updatedRequestState },
                 },
               };
@@ -279,6 +273,21 @@ export const useConsoleActionSubmitter = <
           // reporting a type error for the `content` property, although the types seem to line up.
         } as typeof prevState;
       });
+    } else if (
+      isPending &&
+      apiActionDetailsResponse?.data &&
+      currentActionState.actionDetails !== apiActionDetailsResponse?.data
+    ) {
+      // if still pending, then just update the action details to console state so that the UI can show the latest state
+      setStore((prevState) => {
+        return {
+          ...prevState,
+          actionApiState: {
+            ...(prevState.actionApiState ?? currentActionState),
+            actionDetails: apiActionDetailsResponse.data,
+          },
+        } as typeof prevState;
+      });
     }
   }, [apiActionDetailsResponse, currentActionState, isPending, setStatus, setStore]);
 
@@ -297,17 +306,7 @@ export const useConsoleActionSubmitter = <
       );
     }
 
-    if (isPending) {
-      return (
-        <ResultComponent showAs="pending" data-test-subj={getTestId('pending')}>
-          {pendingMessage}
-        </ResultComponent>
-      );
-    }
-
-    const apiError = actionRequestError || actionDetailsError;
-
-    if (apiError) {
+    if (actionRequestError) {
       return (
         <ResultComponent
           showAs="failure"
@@ -325,34 +324,66 @@ export const useConsoleActionSubmitter = <
             id="xpack.securitySolution.endpointResponseActions.actionSubmitter.apiErrorDetails"
             defaultMessage="The following error was encountered:"
           />
-          <FormattedError error={apiError} data-test-subj={getTestId('apiErrorDetails')} />
+          <FormattedError
+            error={actionRequestError}
+            data-test-subj={getTestId('apiErrorDetails')}
+          />
+        </ResultComponent>
+      );
+    }
+
+    // If there was an error retrieving the ActionDetails (maybe user does not have Authz), then
+    // show error while also still showing pending (since we don't know the actual status of the action)
+    if (actionDetailsError) {
+      return (
+        <ResultComponent showAs="pending" data-test-subj={getTestId('pending')}>
+          <FormattedMessage
+            id="xpack.securitySolution.endpointResponseActions.actionSubmitter.actionDetailsError"
+            defaultMessage="Unable to check on status of submitted action:"
+          />
+          <FormattedError
+            error={actionDetailsError}
+            data-test-subj={getTestId('apiErrorDetails')}
+          />
         </ResultComponent>
       );
     }
 
     if (actionDetails) {
-      // Response action failures
-      if (actionDetails.errors) {
+      const actionResult = (
+        <ResponseActionResults action={actionDetails} data-test-subj={getTestId('actionResult')} />
+      );
+
+      // Action still pending
+      if (isPending) {
         return (
-          <ActionError
-            ResultComponent={ResultComponent}
-            action={actionDetails}
-            dataTestSubj={getTestId('actionFailure')}
-          />
+          <ResultComponent showAs="pending" data-test-subj={getTestId('pending')}>
+            {actionResult}
+          </ResultComponent>
+        );
+      }
+
+      // Response action failures
+      if (!actionDetails.wasSuccessful) {
+        return (
+          <ResultComponent
+            showAs={actionDetails.wasCanceled ? 'canceled' : 'failure'}
+            data-test-subj={getTestId('actionFailure')}
+            showTitle={false}
+          >
+            {actionResult}
+          </ResultComponent>
         );
       }
 
       return (
-        <ActionSuccess
-          ResultComponent={ResultComponent}
-          action={actionDetails}
-          data-test-subj={getTestId('success')}
-          title={successMessage}
-        />
+        <ResultComponent showAs="success" data-test-subj={getTestId('success')} showTitle={false}>
+          {actionResult}
+        </ResultComponent>
       );
     }
 
-    return <></>;
+    return <ResultComponent showAs="pending" data-test-subj={getTestId('pending')} />;
   }, [
     isPending,
     isCreating,
@@ -361,8 +392,6 @@ export const useConsoleActionSubmitter = <
     actionDetails,
     ResultComponent,
     getTestId,
-    pendingMessage,
-    successMessage,
   ]);
 
   return {

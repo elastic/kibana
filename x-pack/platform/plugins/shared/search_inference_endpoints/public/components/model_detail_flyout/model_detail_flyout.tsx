@@ -48,7 +48,7 @@ import {
   getProviderKeyForCreator,
   getRegionOptions,
 } from '../../utils/eis_utils';
-import { isModelUnavailableUnderRegionPolicy } from '../../utils/is_model_unavailable_under_region_policy';
+import { isModelUnavailableUnderRegionPolicy } from '../../utils/is_unavailable_under_region_policy';
 import { ModelEolCallout } from './model_eol_callout';
 import { ModelInfoCallout } from './model_info_callout';
 import { ModelUnavailableCallout } from './model_unavailable_callout';
@@ -113,8 +113,8 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           }),
       modelStatus: getModelStatus(endpointModelMetadata),
       modelMetadata: endpointModelMetadata,
-      modelReleaseDate: getModelReleaseDate(endpointModelMetadata)?.format('l') ?? '--',
-      modelEOLDate: getModelEOLDate(endpointModelMetadata)?.format('l') ?? '--',
+      modelReleaseDate: getModelReleaseDate(endpointModelMetadata)?.format('YYYY-MM-DD') ?? '--',
+      modelEOLDate: getModelEOLDate(endpointModelMetadata)?.format('YYYY-MM-DD') ?? '--',
       regionOptions: getRegionOptions(filtered),
     };
   }, [allEndpoints, modelId]);

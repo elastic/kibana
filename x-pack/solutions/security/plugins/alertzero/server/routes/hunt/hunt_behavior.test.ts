@@ -99,33 +99,30 @@ describe('registerHuntBehaviorRoute', () => {
     expect(routeConfig.access).toBe('internal');
   });
 
-  it('resolves the frontier and balanced tiers rather than the deployment default', async () => {
+  it('resolves the frontier tier rather than the deployment default', async () => {
     const { handler, context } = makeDeps();
 
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
 
     const featureIds = resolveScopedModelMock.mock.calls.map(([{ featureId }]) => featureId);
-    expect(featureIds).toEqual([
-      ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
-      ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
-    ]);
+    expect(featureIds).toEqual([ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID]);
   });
 
-  it('hands extraction the frontier model and ES|QL generation the balanced one', async () => {
+  it('hands both extraction and ES|QL generation the frontier model', async () => {
     const frontier = { connector: { id: 'opus' } } as unknown as ScopedModel;
-    const balanced = { connector: { id: 'sonnet' } } as unknown as ScopedModel;
-    resolveScopedModelMock.mockImplementation(async ({ featureId }) => ({
-      ok: true,
-      model: featureId === ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID ? frontier : balanced,
-    }));
+    resolveScopedModelMock.mockImplementation(async ({ featureId }) =>
+      featureId === ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID
+        ? { ok: true, model: frontier }
+        : { ok: false, reason: 'no_connector', message: 'not a Tier 2 tier' }
+    );
     const { handler, context } = makeDeps();
 
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
 
-    expect(huntBehaviorMock.mock.calls[0][0]).toEqual({ extraction: frontier, esql: balanced });
+    expect(huntBehaviorMock.mock.calls[0][0]).toEqual({ extraction: frontier, esql: frontier });
   });
 
-  it('never resolves the efficient tier, which Tier 2 has no consumer for', async () => {
+  it('never resolves the efficient or balanced tiers, which Tier 2 has no consumer for', async () => {
     const { handler, context } = makeDeps();
 
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
@@ -133,27 +130,9 @@ describe('registerHuntBehaviorRoute', () => {
     expect(resolveScopedModelMock).not.toHaveBeenCalledWith(
       expect.objectContaining({ featureId: ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID })
     );
-  });
-
-  it('fails with 400 when only the balanced tier is unavailable, rather than running half of Tier 2', async () => {
-    resolveScopedModelMock.mockImplementation(async ({ featureId }) =>
-      featureId === ALERTZERO_BALANCED_INFERENCE_FEATURE_ID
-        ? { ok: false, reason: 'no_connector', message: 'no balanced connector' }
-        : { ok: true, model }
+    expect(resolveScopedModelMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ featureId: ALERTZERO_BALANCED_INFERENCE_FEATURE_ID })
     );
-    const { handler, context } = makeDeps();
-    const response = httpServerMock.createResponseFactory();
-
-    await handler(context, requestFor(), response);
-
-    expect(huntBehaviorMock).not.toHaveBeenCalled();
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 400,
-      body: {
-        message: 'no balanced connector',
-        attributes: { tier2_skipped_reason: 'no_connector', unavailable_model_tiers: ['balanced'] },
-      },
-    });
   });
 
   it('runs as the current user so the caller index privileges bound generated ES|QL', async () => {
@@ -195,7 +174,7 @@ describe('registerHuntBehaviorRoute', () => {
         message: 'inference is not installed',
         attributes: {
           tier2_skipped_reason: 'no_inference_plugin',
-          unavailable_model_tiers: ['balanced', 'frontier'],
+          unavailable_model_tiers: ['frontier'],
         },
       },
     });
@@ -219,7 +198,7 @@ describe('registerHuntBehaviorRoute', () => {
         message: 'no connector configured',
         attributes: {
           tier2_skipped_reason: 'no_connector',
-          unavailable_model_tiers: ['balanced', 'frontier'],
+          unavailable_model_tiers: ['frontier'],
         },
       },
     });
@@ -239,7 +218,7 @@ describe('registerHuntBehaviorRoute', () => {
         message: 'connector store unavailable',
         attributes: {
           tier2_skipped_reason: 'resolution_error',
-          unavailable_model_tiers: ['balanced', 'frontier'],
+          unavailable_model_tiers: ['frontier'],
         },
       },
     });
@@ -263,7 +242,7 @@ describe('registerHuntBehaviorRoute', () => {
         message: 'connector store unavailable',
         attributes: {
           tier2_skipped_reason: 'resolution_error',
-          unavailable_model_tiers: ['balanced', 'frontier'],
+          unavailable_model_tiers: ['frontier'],
         },
       },
     });
@@ -305,6 +284,25 @@ describe('registerHuntBehaviorRoute', () => {
         llm_confidence_threshold: 0.8,
         iocs: [{ type: 'ip', value: '1.2.3.4' }],
       }),
+      expect.anything(),
+      mitreDataClient
+    );
+  });
+
+  it('forwards excluded_iocs to the service when present', async () => {
+    const { handler, context } = makeDeps();
+    const excluded = [{ type: 'ip', value: '169.254.169.254' }];
+
+    await handler(
+      context,
+      requestFor({ iocs: [{ type: 'hash', value: 'abc' }], excluded_iocs: excluded }),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(huntBehaviorMock).toHaveBeenCalledWith(
+      { extraction: model, esql: model },
+      expect.anything(),
+      expect.objectContaining({ excluded_iocs: excluded }),
       expect.anything(),
       mitreDataClient
     );

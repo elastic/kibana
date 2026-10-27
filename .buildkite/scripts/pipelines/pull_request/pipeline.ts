@@ -35,6 +35,7 @@ import {
   doAllChangesMatch,
   isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
+import { cpsTests, renderSteps } from '#pipeline-utils/step-library';
 
 const prConfigs =
   loadBuildkiteJson<typeof import('../../../pull_requests.json')>('pull_requests.json');
@@ -42,6 +43,7 @@ const prConfigs =
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;
 const cancelable: GetPipelineOptions = { cancelOnGateFailure: true };
+const cancelOnGate = { cancelOnGateFailure: true } as const;
 
 if (!prConfig) {
   console.error(`'kibana-pull-request' pipeline not found in .buildkite/pull_requests.json`);
@@ -689,6 +691,8 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/solutions\/security\/plugins\/security_solution\/common\/endpoint/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/scripts\/endpoint/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/server\/lib\/detection_engine\/rule_response_actions/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/server\/fleet_integration\/fleet_integration\.ts/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/server\/lib\/detection_engine\/prebuilt_rules\/logic\/integrations\/install_endpoint_security_prebuilt_rule\.ts/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/detection_engine\/rule_response_actions/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/flyout_v2\/document\/tools\/response/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/flyout_v2\/document\/main\/components\/response_section/,
@@ -794,7 +798,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     if (GITHUB_PR_LABELS.includes('ci:cps-test')) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/cps_testing.yml', cancelable));
+      pipeline.push(renderSteps(cpsTests(), cancelOnGate));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:bench-jest')) {

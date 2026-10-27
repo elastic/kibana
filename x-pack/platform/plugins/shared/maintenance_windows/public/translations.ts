@@ -514,25 +514,54 @@ export const SEARCH_PLACEHOLDER = i18n.translate('xpack.maintenanceWindows.searc
   defaultMessage: 'Search',
 });
 
-export const SAVE_WITHOUT_FILTERS_MODAL_TITLE = i18n.translate(
-  'xpack.maintenanceWindows.saveWithoutFiltersModal.title',
+export const SAVE_WITHOUT_SCOPES_MODAL_TITLE = i18n.translate(
+  'xpack.maintenanceWindows.saveWithoutScopesModal.title',
   {
     defaultMessage: 'Save maintenance window without a scope?',
   }
 );
 
-export const SAVE_WITHOUT_FILTERS_MODAL_SUBTITLE = i18n.translate(
-  'xpack.maintenanceWindows.saveWithoutFiltersModal.subtitle',
+export const SAVE_WITHOUT_SCOPES_MODAL_SUBTITLE = i18n.translate(
+  'xpack.maintenanceWindows.saveWithoutScopesModal.subtitle',
   {
     defaultMessage:
       'No scope is selected, so this maintenance window will not suppress any notifications. Enable at least one scope to start suppressing alerts or episodes.',
   }
 );
 
-export const SAVE_WITHOUT_FILTERS_MODAL_CONFIRM = i18n.translate(
-  'xpack.maintenanceWindows.saveWithoutFiltersModal.confirm',
+export const SAVE_WITHOUT_SCOPES_MODAL_CONFIRM = i18n.translate(
+  'xpack.maintenanceWindows.saveWithoutScopesModal.confirm',
   {
     defaultMessage: 'Save without scope',
+  }
+);
+
+export const APPLY_TO_ALL_ALERTS_MODAL_TITLE = i18n.translate(
+  'xpack.maintenanceWindows.applyToAllAlertsModal.title',
+  {
+    defaultMessage: 'Apply this maintenance window to all alerts?',
+  }
+);
+
+export const APPLY_TO_ALL_ALERTS_MODAL_BODY = i18n.translate(
+  'xpack.maintenanceWindows.applyToAllAlertsModal.body',
+  {
+    defaultMessage: 'This maintenance window has no alert filters, so it will apply to all alerts.',
+  }
+);
+
+export const APPLY_TO_ALL_ALERTS_SCOPED_MODAL_BODY = i18n.translate(
+  'xpack.maintenanceWindows.applyToAllAlertsModal.scopedBody',
+  {
+    defaultMessage:
+      'One of the selected scopes has no alert filters, so it will apply to all of its alerts.',
+  }
+);
+
+export const APPLY_TO_ALL_ALERTS_MODAL_CONFIRM = i18n.translate(
+  'xpack.maintenanceWindows.applyToAllAlertsModal.confirm',
+  {
+    defaultMessage: 'Apply to all alerts',
   }
 );
 
@@ -554,12 +583,12 @@ export const TABLE_SCOPE = i18n.translate('xpack.maintenanceWindows.table.scope'
   defaultMessage: 'Scope',
 });
 
-export const TABLE_SCOPE_BADGE_ALERTS = i18n.translate(
-  'xpack.maintenanceWindows.table.scopeBadgeAlerts',
-  { defaultMessage: 'Alerts' }
+export const TABLE_SCOPE_BADGE_CLASSIC_ALERTING = i18n.translate(
+  'xpack.maintenanceWindows.table.scopeBadgeClassicAlerting',
+  { defaultMessage: 'Classic Alerting' }
 );
 
-export const TABLE_SCOPE_BADGE_EPISODES = i18n.translate(
-  'xpack.maintenanceWindows.table.scopeBadgeEpisodes',
-  { defaultMessage: 'Episodes' }
+export const TABLE_SCOPE_BADGE_UNIVERSAL_ALERTING = i18n.translate(
+  'xpack.maintenanceWindows.table.scopeBadgeUniversalAlerting',
+  { defaultMessage: 'Universal Alerting' }
 );

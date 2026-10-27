@@ -26,48 +26,27 @@ export const countModulesByType = (
   return { plugins, packages };
 };
 
-/**
- * Determines deployment type for ECH (stateful) based on group
- * - 'platform' => 'classic'
- * - Other groups => solution name from group (e.g., 'search' => 'elasticsearch')
- */
-const getTargetDomainForEch = (group: string): ScoutTargetDomain => {
-  if (group === 'platform') {
-    return 'classic';
-  }
-  // Map group to solution name
-  if (group === 'search') {
-    return 'search';
-  }
-  if (group === 'security') {
-    return 'security_complete';
-  }
-  if (group === 'observability') {
-    return 'observability_complete';
-  }
-
-  throw new Error(`Unknown group '${group}' for ECH deployment type`);
+const TARGET_DOMAIN_BY_SERVER_RUN_FLAG: Record<string, ScoutTargetDomain> = {
+  '--arch stateful --domain classic': 'classic',
+  '--arch serverless --domain search': 'search',
+  '--arch serverless --domain observability_complete': 'observability_complete',
+  '--arch serverless --domain observability_logs_essentials': 'observability_logs_essentials',
+  '--arch serverless --domain security_complete': 'security_complete',
+  '--arch serverless --domain security_essentials': 'security_essentials',
+  '--arch serverless --domain security_ease': 'security_ease',
+  '--arch serverless --domain vectordb': 'vectordb',
 };
 
 /**
- * Determines deployment type for MKI (serverless) based on serverRunFlag
+ * Cloud runners create a deployment for `testTarget.domain` and grep tests by its tag, so the
+ * domain must follow the tag-derived serverRunFlag, not the module group.
  */
-const getTargetDomainForMki = (serverRunFlag: string): ScoutTargetDomain => {
-  const mappings: Record<string, ScoutTargetDomain> = {
-    '--arch serverless --domain search': 'search',
-    '--arch serverless --domain observability_complete': 'observability_complete',
-    '--arch serverless --domain observability_logs_essentials': 'observability_logs_essentials',
-    '--arch serverless --domain security_complete': 'security_complete',
-    '--arch serverless --domain security_essentials': 'security_essentials',
-    '--arch serverless --domain security_ease': 'security_ease',
-    '--arch serverless --domain vectordb': 'vectordb',
-  };
-
-  if (!(serverRunFlag in mappings)) {
-    throw new Error(`Unknown serverRunFlag '${serverRunFlag}' for MKI deployment type`);
+const getTargetDomain = (serverRunFlag: string): ScoutTargetDomain => {
+  const domain = TARGET_DOMAIN_BY_SERVER_RUN_FLAG[serverRunFlag];
+  if (!domain) {
+    throw new Error(`Unknown serverRunFlag '${serverRunFlag}' for Cloud deployment type`);
   }
-
-  return mappings[serverRunFlag];
+  return domain;
 };
 
 /**
@@ -100,16 +79,10 @@ export const flattenModulesByServerRunFlag = (
         // Get or create group
         let group = groupsMap.get(key);
         if (!group) {
-          // Determine deployment type based on mode (ECH/stateful vs MKI/serverless)
-          const domain =
-            arch === 'stateful'
-              ? getTargetDomainForEch(module.group)
-              : getTargetDomainForMki(serverRunFlag);
-
           group = {
             testTarget: {
               arch,
-              domain,
+              domain: getTargetDomain(serverRunFlag),
             },
             group: module.group,
             scoutCommand: buildScoutCommand(serverRunFlag),

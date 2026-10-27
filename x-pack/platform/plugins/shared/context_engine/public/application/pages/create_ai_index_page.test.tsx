@@ -31,20 +31,6 @@ jest.mock('../hooks/use_data_connectors', () => ({
   }),
 }));
 
-jest.mock('../hooks/use_agent_builder_agents', () => ({
-  useAgentBuilderAgents: () => ({
-    agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
-    isLoading: false,
-    error: undefined,
-  }),
-}));
-
-const mockUseIndices = jest.fn();
-
-jest.mock('../hooks/use_indices', () => ({
-  useIndices: (args: { search: string; enabled: boolean }) => mockUseIndices(args),
-}));
-
 jest.mock('../hooks/use_memory_enabled', () => ({
   useMemoryEnabled: jest.fn(),
 }));
@@ -88,7 +74,6 @@ const VALID_ID = 'support-ticket-triage';
 
 describe('CreateAiIndexPage', () => {
   beforeEach(() => {
-    mockUseIndices.mockReturnValue({ indexNames: [], isFetching: false });
     mockUseMemoryEnabled.mockReturnValue(false);
   });
 
@@ -242,88 +227,6 @@ describe('CreateAiIndexPage', () => {
             automations: [],
             sources: [],
             traces: [],
-          }),
-        })
-      );
-    });
-  });
-
-  it('includes a selected trace in the create request', async () => {
-    const services = coreMock.createStart();
-    services.http.post.mockResolvedValue({});
-
-    renderWithProviders(services);
-
-    typeId(VALID_ID);
-    fireEvent.change(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')!, {
-      target: { value: 'Loyalty' },
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('Loyalty Support Agent')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText('Loyalty Support Agent'));
-    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
-
-    await waitFor(() => {
-      expect(services.http.post).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index',
-        expect.objectContaining({
-          body: JSON.stringify({
-            id: VALID_ID,
-            dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
-            automations: [],
-            sources: [],
-            traces: [{ type: 'elastic_agent', value: 'agent-1' }],
-          }),
-        })
-      );
-    });
-  });
-
-  it('includes a selected data stream trace in the create request', async () => {
-    const services = coreMock.createStart();
-    services.http.post.mockResolvedValue({});
-    mockUseIndices.mockReturnValue({
-      indexNames: ['logs-genai-default'],
-      isFetching: false,
-    });
-
-    renderWithProviders(services);
-
-    typeId(VALID_ID);
-    fireEvent.click(screen.getByTestId('contextTraceToggle-index'));
-
-    const comboBox = screen.getByTestId('contextTraceDataStreamComboBox');
-    const input = comboBox.querySelector('input')!;
-    fireEvent.click(comboBox);
-    fireEvent.focus(input);
-    fireEvent.change(input, { target: { value: 'lo' } });
-
-    await waitFor(() => {
-      expect(mockUseIndices).toHaveBeenCalledWith(
-        expect.objectContaining({ search: 'lo', enabled: true })
-      );
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('logs-genai-default')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText('logs-genai-default'));
-    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
-
-    await waitFor(() => {
-      expect(services.http.post).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index',
-        expect.objectContaining({
-          body: JSON.stringify({
-            id: VALID_ID,
-            dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
-            automations: [],
-            sources: [],
-            traces: [{ type: 'index', value: 'logs-genai-default' }],
           }),
         })
       );

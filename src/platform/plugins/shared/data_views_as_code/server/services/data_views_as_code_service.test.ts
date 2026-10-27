@@ -127,7 +127,7 @@ describe('DataViewsAsCodeService', () => {
             meta: {
               managed: true,
               version: '2',
-              namespaces: ['default', 'space-1'],
+              spaces: ['default', 'space-1'],
             },
           },
           {
@@ -140,7 +140,7 @@ describe('DataViewsAsCodeService', () => {
             meta: {
               managed: false,
               version: '1',
-              namespaces: ['default'],
+              spaces: ['default'],
             },
           },
         ],
@@ -218,7 +218,7 @@ describe('DataViewsAsCodeService', () => {
         meta: {
           managed: true,
           version: '2',
-          namespaces: ['default', 'space-1'],
+          spaces: ['default', 'space-1'],
         },
       });
     });
@@ -252,7 +252,7 @@ describe('DataViewsAsCodeService', () => {
         meta: {
           managed: false,
           version: '1',
-          namespaces: [],
+          spaces: [],
         },
       });
     });
@@ -274,7 +274,7 @@ describe('DataViewsAsCodeService', () => {
         meta: {
           managed: false,
           version: '1',
-          namespaces: ['default'],
+          spaces: ['default'],
         },
       });
     });
@@ -354,7 +354,7 @@ describe('DataViewsAsCodeService', () => {
         meta: {
           managed: false,
           version: '1',
-          namespaces: ['default'],
+          spaces: ['default'],
         },
       });
     });
@@ -411,7 +411,7 @@ describe('DataViewsAsCodeService', () => {
       expect(result.meta).toEqual({
         managed: true,
         version: '3',
-        namespaces: ['default', 'space-a'],
+        spaces: ['default', 'space-a'],
       });
     });
 
@@ -514,7 +514,7 @@ describe('DataViewsAsCodeService', () => {
           meta: {
             managed: true,
             version: '2',
-            namespaces: ['default', 'space-1'],
+            spaces: ['default', 'space-1'],
           },
         },
       });
@@ -550,7 +550,7 @@ describe('DataViewsAsCodeService', () => {
           meta: {
             managed: false,
             version: '1',
-            namespaces: ['default'],
+            spaces: ['default'],
           },
         },
       });

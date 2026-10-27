@@ -87,6 +87,9 @@ describe('triage plan sweep step', () => {
     budget_per_hour: 600,
     interval_minutes: 10,
     lookback_hours: 24,
+    min_severity: 'low' as const,
+    exclude_building_blocks: false,
+    excluded_rule_tags: [],
   };
 
   it('starts nothing and touches no alert when headroom is behind', async () => {
