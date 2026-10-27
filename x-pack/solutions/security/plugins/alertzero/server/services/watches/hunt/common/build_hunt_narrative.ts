@@ -12,6 +12,7 @@ import type {
 } from '../hunt_coordinator';
 import type { HuntModelTier } from '../types';
 import type { ValidatedBehavior } from '../tier2/types';
+import { isRetryableIncompleteReason } from './completeness';
 import { TIER2_MODEL_TIERS, describeModelTiers } from './hunt_model_tiers';
 import type { Tier2TargetSource } from './resolve_tier2_targets';
 
@@ -304,6 +305,25 @@ const describeCoverage = (result: HuntCoordinatorCoreResult): string[] => {
     if (seen.has(key)) continue;
     seen.add(key);
     lines.push(`- ${gap.reason.replace(/_/g, ' ')}: ${gap.detail}`);
+  }
+  // Name what a later run will pick up, so an analyst reading a recorded hit knows which part of
+  // the report is still unsearched. Only retryable gaps: a final one is never searched.
+  const stillToSearch = [
+    ...new Set(
+      gaps
+        .filter(
+          ({ reason, technique_id: techniqueId }) =>
+            techniqueId && isRetryableIncompleteReason(reason)
+        )
+        .map(({ technique_id: techniqueId }) => techniqueId as string)
+    ),
+  ];
+  if (result.completeness === 'incomplete_retryable' && stillToSearch.length > 0) {
+    lines.push(
+      `**Still to be searched (${stillToSearch.length}):** ${codeList(
+        stillToSearch
+      )}. A later sweep continues with these; techniques this run already searched are not repeated.`
+    );
   }
   return lines;
 };
