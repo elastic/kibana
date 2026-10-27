@@ -95,6 +95,11 @@ export const reconcileQueryColumns = (
 ): TextBasedLayerColumn[] => {
   const staticColumns = existingColumns.filter(isStaticValueColumn);
   existingColumns = existingColumns.filter((column) => !isStaticValueColumn(column));
+  const allocatedColumnIds = new Set([
+    ...staticColumns.map(({ columnId }) => columnId),
+    ...existingColumns.map(({ columnId }) => columnId),
+  ]);
+  const queryColumnIds = new Set(columnsFromQuery.map(({ id }) => id));
   const usedColumnIds = new Set<string>();
   const findPreferredFirst = (
     predicate: (column: TextBasedLayerColumn) => boolean
@@ -146,8 +151,17 @@ export const reconcileQueryColumns = (
     const existingColumn = exactMatch ?? compatiblePositionalMatch ?? compatibleMatch;
 
     if (!existingColumn) {
+      let columnId = queryColumn.id;
+      let suffix = 1;
+      while (
+        allocatedColumnIds.has(columnId) ||
+        (columnId !== queryColumn.id && queryColumnIds.has(columnId))
+      ) {
+        columnId = `${queryColumn.id}_${suffix++}`;
+      }
+      allocatedColumnIds.add(columnId);
       return {
-        columnId: queryColumn.id,
+        columnId,
         fieldName: queryFieldName,
         label: queryColumn.name,
         meta: queryColumn.meta,

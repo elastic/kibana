@@ -95,6 +95,35 @@ describe('Text based languages utils', () => {
       ]);
     });
 
+    it('allocates fresh IDs without colliding with reserved bindings or other query outputs', () => {
+      const existingColumns: TextBasedLayerColumn[] = [
+        { columnId: 'lower', fieldName: 'upper', meta: { type: 'number' } },
+        {
+          columnId: 'lower_2',
+          fieldName: '42',
+          meta: { type: 'number' },
+          operationType: 'static_value',
+          params: { value: '42' },
+        },
+      ];
+      const queryColumns: DatatableColumn[] = ['lower', 'upper', 'lower_1'].map((id) => ({
+        id,
+        name: id,
+        meta: { type: 'number' },
+      }));
+
+      const result = reconcileQueryColumns(existingColumns, queryColumns);
+
+      expect(result.map(({ columnId }) => columnId)).toEqual([
+        'lower_2',
+        'lower_3',
+        'lower',
+        'lower_1',
+      ]);
+      expect(result.find(({ columnId }) => columnId === 'lower')?.fieldName).toBe('upper');
+      expect(new Set(result.map(({ columnId }) => columnId)).size).toBe(result.length);
+    });
+
     it('preserves configured column IDs when compatible query fields change', () => {
       const existingColumns: TextBasedLayerColumn[] = [
         {
