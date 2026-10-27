@@ -9,12 +9,11 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { AgentWithPermissions } from '@kbn/agent-builder-browser';
-import { AgentBuilderConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '@kbn/nightshift-investigations-plugin/common';
 import { isHttpClientError } from '../common/http_error';
 import { useKibana } from '../hooks/use_kibana';
-import { useRefreshSandboxConnectors } from './use_fetch_sandbox_connectors';
 import { ConnectorLibraryFlyout } from './connector_library_flyout';
+import { ConnectorTypePickerFlyout } from './connector_type_picker_flyout';
 
 export const INVESTIGATION_AGENT_QUERY_KEY = ['nightshift.investigationAgent'] as const;
 
@@ -45,10 +44,9 @@ export function useAgentConnectors(): {
   openCreate: () => void;
   flyouts: React.ReactNode;
 } {
-  const { agentBuilder, application, notifications, triggersActionsUi } = useKibana().services;
+  const { agentBuilder, application, notifications } = useKibana().services;
   const agents = agentBuilder?.agents;
   const queryClient = useQueryClient();
-  const refresh = useRefreshSandboxConnectors();
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
@@ -114,21 +112,6 @@ export function useAgentConnectors(): {
     [mutate]
   );
 
-  const createFlyout = useMemo(
-    () =>
-      isCreating && triggersActionsUi
-        ? triggersActionsUi.getAddConnectorFlyout({
-            onClose: () => {
-              setIsCreating(false);
-              refresh();
-            },
-            onConnectorCreated: assign,
-            featureId: AgentBuilderConnectorFeatureId,
-          })
-        : null,
-    [assign, isCreating, refresh, triggersActionsUi]
-  );
-
   return {
     assignedIds,
     isLoading: agents != null && agent.isLoading,
@@ -144,7 +127,12 @@ export function useAgentConnectors(): {
     flyouts: (
       <>
         {isLibraryOpen && <ConnectorLibraryFlyout onClose={() => setIsLibraryOpen(false)} />}
-        {createFlyout}
+        {isCreating && (
+          <ConnectorTypePickerFlyout
+            onClose={() => setIsCreating(false)}
+            onConnectorCreated={assign}
+          />
+        )}
       </>
     ),
   };

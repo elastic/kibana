@@ -12,18 +12,11 @@ import type {
   ConnectorLibraryPanelProps,
 } from '../../application/components/agents/connectors/connector_library_panel';
 
-export type { ConnectorsCustomizeEmptyStateProps } from '../../application/components/agents/connectors/connectors_customize_empty_state';
 export type { AddConnectorMenuProps } from '../../application/components/agents/connectors/add_connector_menu';
 export type {
   ConnectorLibraryConnector,
   ConnectorLibraryPanelProps,
 } from '../../application/components/agents/connectors/connector_library_panel';
-
-export const ConnectorsCustomizeEmptyState = dynamic(() =>
-  import('../../application/components/agents/connectors/connectors_customize_empty_state').then(
-    (m) => ({ default: m.ConnectorsCustomizeEmptyState })
-  )
-);
 
 export const AddConnectorMenu = dynamic(() =>
   import('../../application/components/agents/connectors/add_connector_menu').then((m) => ({

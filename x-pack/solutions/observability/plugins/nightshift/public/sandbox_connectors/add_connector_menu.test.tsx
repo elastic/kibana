@@ -15,6 +15,21 @@ import { useKibana } from '../hooks/use_kibana';
 import { InvestigationAgentAddConnectorMenu } from './add_connector_menu';
 
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_connector_types', () => ({
+  fetchConnectorTypes: jest.fn().mockResolvedValue([
+    {
+      id: '.http',
+      name: 'HTTP',
+      enabled: true,
+      enabledInConfig: true,
+      enabledInLicense: true,
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: [],
+      isSystemActionType: false,
+      isDeprecated: false,
+    },
+  ]),
+}));
 
 const mockUseKibana = useKibana as jest.Mock;
 
@@ -148,16 +163,20 @@ describe('InvestigationAgentAddConnectorMenu', () => {
     );
   });
 
-  it('creates a new connector from the menu and assigns it', async () => {
+  it('picks a sandbox connector type, creates the connector and assigns it', async () => {
     const { agents, getAddConnectorFlyout } = setup({ connectors: [] });
 
     fireEvent.click(await screen.findByTestId('nightshiftAddConnectorButton'));
     fireEvent.click(await screen.findByTestId('agentConnectorsCreateNewMenuItem'));
 
+    fireEvent.click(await screen.findByTestId('.http-select'));
+
     expect(await screen.findByTestId('addConnectorFlyoutStub')).toBeInTheDocument();
     const props = (getAddConnectorFlyout.mock.calls as unknown as Array<[unknown]>)[0][0] as {
+      initialConnector: { actionTypeId: string };
       onConnectorCreated: (connector: { id: string; name: string }) => void;
     };
+    expect(props.initialConnector).toEqual({ actionTypeId: '.http' });
     props.onConnectorCreated({ id: 'new', name: 'New' });
     await waitFor(() => expect(agents.addConnectorToAgent).toHaveBeenCalledWith(agentCall('new')));
   });

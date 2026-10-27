@@ -7,10 +7,13 @@
 
 import { css } from '@emotion/react';
 
-/** Two equal columns of source cards, 16px apart, cards stretched to the row height. */
-export const sourceGridStyles = css`
+const gridStyles = (columns: number) => css`
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(${columns}, minmax(0, 1fr));
   gap: 16px;
   align-items: stretch;
 `;
+
+export const sourceGridStyles = gridStyles(2);
+
+export const sourceGridThreeColumnsStyles = gridStyles(3);

@@ -19,7 +19,7 @@ import {
   type IconType,
 } from '@elastic/eui';
 
-export interface SourceCardAction {
+interface SourceCardAction {
   label: string;
   icon: IconType;
   onClick: () => void;

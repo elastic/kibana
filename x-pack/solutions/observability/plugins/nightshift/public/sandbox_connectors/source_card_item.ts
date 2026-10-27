@@ -12,7 +12,7 @@ import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-action
 
 type ActionTypeRegistry = TriggersAndActionsUIPublicPluginStart['actionTypeRegistry'];
 
-export interface SourceCardItem {
+interface SourceCardItem {
   iconClass: IconType;
   name: string;
   description: string;

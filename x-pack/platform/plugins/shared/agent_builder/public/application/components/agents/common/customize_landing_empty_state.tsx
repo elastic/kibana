@@ -40,7 +40,6 @@ export interface CustomizeLandingEmptyStateProps {
   secondaryAction?: React.ReactNode;
   footer?: React.ReactNode;
   dataTestSubj?: string;
-  layout?: 'page' | 'inline';
 }
 
 export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProps> = ({
@@ -56,20 +55,15 @@ export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProp
   secondaryAction,
   footer,
   dataTestSubj = 'customizeLandingEmptyState',
-  layout = 'page',
 }) => {
   const { euiTheme } = useEuiTheme();
 
   const centerShellLayout = css`
     box-sizing: border-box;
     width: 100%;
-    ${layout === 'page'
-      ? `
     min-height: var(--kbn-application--content-height, 100vh);
     padding-block: ${euiTheme.size.xl};
     padding-inline: ${euiTheme.size.l};
-    `
-      : ''}
   `;
 
   const responsiveStack = css`

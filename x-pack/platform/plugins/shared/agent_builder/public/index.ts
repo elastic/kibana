@@ -33,11 +33,9 @@ export type { ConversationInputShellProps } from '@kbn/agent-builder-browser';
 export {
   AddConnectorMenu,
   ConnectorLibraryPanel,
-  ConnectorsCustomizeEmptyState,
   type AddConnectorMenuProps,
   type ConnectorLibraryConnector,
   type ConnectorLibraryPanelProps,
-  type ConnectorsCustomizeEmptyStateProps,
 } from './components/agent_connectors';
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,

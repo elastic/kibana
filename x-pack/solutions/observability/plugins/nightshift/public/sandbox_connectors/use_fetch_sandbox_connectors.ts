@@ -11,7 +11,7 @@ import type { GetSandboxConnectorsResponse } from '@kbn/nightshift-investigation
 import { isHttpClientError } from '../common/http_error';
 import { useKibana } from '../hooks/use_kibana';
 
-export const NIGHTSHIFT_SANDBOX_CONNECTORS_QUERY_KEY = ['nightshift.sandboxConnectors'] as const;
+const NIGHTSHIFT_SANDBOX_CONNECTORS_QUERY_KEY = ['nightshift.sandboxConnectors'] as const;
 
 /** The connectors the investigation agent can use from its sandbox in the current space. */
 export const useFetchSandboxConnectors = ({

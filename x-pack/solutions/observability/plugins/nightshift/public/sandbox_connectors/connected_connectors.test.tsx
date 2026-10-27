@@ -19,6 +19,21 @@ jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_connector', () => ({
   fetchConnector: jest.fn(),
 }));
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_connector_types', () => ({
+  fetchConnectorTypes: jest.fn().mockResolvedValue([
+    {
+      id: '.http',
+      name: 'HTTP',
+      enabled: true,
+      enabledInConfig: true,
+      enabledInLicense: true,
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: [],
+      isSystemActionType: false,
+      isDeprecated: false,
+    },
+  ]),
+}));
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockFetchConnector = fetchConnector as jest.Mock;
@@ -135,32 +150,24 @@ describe('ConnectedConnectors', () => {
     const card = screen.getByTestId('nightshiftConnectedConnectorCard-github');
     expect(card).toHaveTextContent('Connector github');
     expect(card).toHaveTextContent('GitHub');
+    expect(screen.getByTestId('nightshiftAddConnectorButton')).toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftConnectedConnectorCard-other')).not.toBeInTheDocument();
   });
 
   describe('with nothing assigned to the agent', () => {
-    it('opens on the Agent Builder empty state with a zero count', async () => {
+    it('opens on the add button with a zero count', async () => {
       setup({ connectors: [connector('github')], assigned: [] });
 
-      const emptyState = await screen.findByTestId('agentConnectorsCustomizeEmptyState');
+      expect(await screen.findByTestId('nightshiftConnectedConnectorsActions')).toBeVisible();
       expect(screen.getByTestId('nightshiftConnectedConnectorsCount')).toHaveTextContent('0');
-      expect(emptyState).toBeVisible();
-      expect(emptyState).toHaveTextContent('No connectors assigned yet');
-      expect(screen.getByTestId('agentConnectorsCustomizeEmptyStateLearnMoreLink')).toHaveAttribute(
-        'href',
-        'https://docs.example/connectors'
-      );
-      expect(screen.getByRole('link', { name: 'Manage all connectors' })).toHaveAttribute(
-        'href',
-        '/app/agent_builder/manage/connectors'
-      );
+      expect(screen.getByTestId('nightshiftAddConnectorButton')).toBeVisible();
+      expect(screen.queryByText('No connectors assigned yet')).not.toBeInTheDocument();
     });
 
     it('assigns a connector from the library and shows its card, section still open', async () => {
       const { agents } = setup({ connectors: [connector('github')], assigned: [] });
 
-      fireEvent.click(await screen.findByTestId('agentConnectorsCustomizeEmptyStateAddButton'));
-      fireEvent.click(await screen.findByTestId('agentConnectorsAddFromLibraryMenuItem'));
+      fireEvent.click(await screen.findByTestId('nightshiftAddConnectorButton'));
       await screen.findByTestId('agentConnectorLibraryFlyout');
       fireEvent.click(await screen.findByRole('switch', { name: 'Connector github' }));
 
@@ -171,30 +178,11 @@ describe('ConnectedConnectors', () => {
       expect(screen.getByRole('switch', { name: 'Connector github' })).toBeChecked();
     });
 
-    it('creates a new connector and assigns it from the empty state', async () => {
-      const { agents, getAddConnectorFlyout } = setup({ connectors: [], assigned: [] });
-
-      fireEvent.click(await screen.findByTestId('agentConnectorsCustomizeEmptyStateAddButton'));
-      fireEvent.click(await screen.findByTestId('agentConnectorsCreateNewMenuItem'));
-
-      expect(await screen.findByTestId('addConnectorFlyoutStub')).toBeInTheDocument();
-      const props = (getAddConnectorFlyout.mock.calls as unknown as Array<[unknown]>)[0][0] as {
-        featureId?: string;
-        onConnectorCreated: (connector: { id: string; name: string }) => void;
-      };
-      expect(props.featureId).toBe('agentBuilder');
-      props.onConnectorCreated({ id: 'new', name: 'New' });
-      await expectAdded(agents, 'new');
-    });
-
     it('offers no Add connector when the user cannot edit the agent', async () => {
       setup({ connectors: [connector('github')], assigned: [], canUpdateAgent: false });
 
-      await screen.findByTestId('agentConnectorsCustomizeEmptyState');
-      expect(
-        screen.queryByTestId('agentConnectorsCustomizeEmptyStateAddButton')
-      ).not.toBeInTheDocument();
-      expect(screen.getByRole('link', { name: 'Manage all connectors' })).toBeInTheDocument();
+      await screen.findByTestId('nightshiftConnectedConnectors');
+      expect(screen.queryByTestId('nightshiftAddConnectorButton')).not.toBeInTheDocument();
     });
   });
 

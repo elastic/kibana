@@ -11,9 +11,7 @@ import { fetchConnectorTypes } from '@kbn/alerts-ui-shared/src/common/apis/fetch
 import { isHttpClientError } from '../common/http_error';
 import { useKibana } from '../hooks/use_kibana';
 
-export const NIGHTSHIFT_SANDBOX_CONNECTOR_TYPES_QUERY_KEY = [
-  'nightshift.sandboxConnectorTypes',
-] as const;
+const NIGHTSHIFT_SANDBOX_CONNECTOR_TYPES_QUERY_KEY = ['nightshift.sandboxConnectorTypes'] as const;
 
 export const useFetchSandboxConnectorTypes = (): UseQueryResult<ActionType[], Error> => {
   const { http } = useKibana().services;

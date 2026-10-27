@@ -9,6 +9,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -17,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
-import { ConnectorsCustomizeEmptyState } from '@kbn/agent-builder-plugin/public';
 import { useKibana } from '../hooks/use_kibana';
 import { useFetchSandboxConnectors } from './use_fetch_sandbox_connectors';
 import { useAgentConnectors } from './use_agent_connectors';
@@ -25,7 +25,7 @@ import { useEditConnector } from './use_edit_connector';
 import { SandboxConnectorsError } from './sandbox_connectors_error';
 import { preconfiguredTooltip } from './sandbox_connectors';
 import { SourceCard } from './source_card';
-import { sourceGridStyles } from './source_grid_styles';
+import { sourceGridThreeColumnsStyles } from './source_grid_styles';
 
 const noPermissionTooltip = i18n.translate('xpack.nightshift.connectedConnectors.noPermission', {
   defaultMessage: 'You need permission to edit connectors.',
@@ -92,22 +92,37 @@ export function ConnectedConnectors({
       data-test-subj="nightshiftConnectedConnectors"
     >
       <EuiSpacer size="m" />
-      {isEmpty ? (
-        <ConnectorsCustomizeEmptyState
-          layout="inline"
-          canEditAgent={agent.canEditAgent}
-          hasAllPrivileges={agent.hasConnectorsAllPrivileges}
-          onAddFromLibrary={agent.openLibrary}
-          onCreateNew={agent.openCreate}
-        />
-      ) : (
-        <div css={sourceGridStyles} role="list">
-          {connected.map((connector) => (
-            <ConnectedConnectorCard key={connector.id} connector={connector} />
-          ))}
-        </div>
+      {!isEmpty && (
+        <>
+          <div css={sourceGridThreeColumnsStyles} role="list">
+            {connected.map((connector) => (
+              <ConnectedConnectorCard key={connector.id} connector={connector} />
+            ))}
+          </div>
+          <EuiSpacer size="m" />
+        </>
       )}
-      {/* Outside the branches: the library stays open while the first connector arrives. */}
+      {agent.hasConnectorsAllPrivileges && agent.canEditAgent && (
+        <EuiFlexGroup
+          gutterSize="m"
+          alignItems="center"
+          responsive={false}
+          data-test-subj="nightshiftConnectedConnectorsActions"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              iconType="plusCircle"
+              onClick={agent.openLibrary}
+              data-test-subj="nightshiftAddConnectorButton"
+            >
+              {i18n.translate('xpack.nightshift.connectedConnectors.addButton', {
+                defaultMessage: 'Add connector',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       {agent.flyouts}
     </EuiAccordion>
   );
