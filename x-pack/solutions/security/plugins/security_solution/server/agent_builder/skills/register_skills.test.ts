@@ -89,3 +89,50 @@ describe('registerSkills - endpoint response actions', () => {
     expect(isAllowedBuiltinSkill(ENDPOINT_RESPONSE_ACTIONS_SKILL_ID)).toBe(true);
   });
 });
+
+const SIEM_READINESS_SKILL_ID = 'siem-readiness';
+
+describe('registerSkills - siem-readiness gating', () => {
+  const buildOpts = (
+    agentBuilder: ReturnType<typeof createAllowListEnforcingAgentBuilder>,
+    siemReadinessAgentBuilder: boolean
+  ) => ({
+    agentBuilder,
+    experimentalFeatures: {
+      ...allowedExperimentalValues,
+      siemReadinessAgentBuilder,
+    },
+    getStartServices: coreMock.createSetup().getStartServices,
+    kibanaVersion: '9.0.0',
+    logger: loggerMock.create(),
+    ml: undefined,
+    options: { endpointAppContextService: createMockEndpointAppContext().service },
+  });
+
+  /**
+   * The SIEM Readiness eval suite's criteria name the `siem-readiness` skill and
+   * the four `security.siem_readiness.get_*` tools it documents, so every one of
+   * its cells is a false failure unless the tree under measurement registers the
+   * skill. The gate used to be a hardcoded `false` constant that no runtime flag
+   * could reach; this test pins the precondition the suite depends on.
+   */
+  it('registers the siem-readiness skill the eval criteria name when the flag is enabled', async () => {
+    const agentBuilder = createAllowListEnforcingAgentBuilder();
+
+    await expect(registerSkills(buildOpts(agentBuilder, true))).resolves.toBeUndefined();
+
+    expect(registeredSkillIds(agentBuilder)).toContain(SIEM_READINESS_SKILL_ID);
+  });
+
+  it('does not register the siem-readiness skill when the flag is disabled', async () => {
+    const agentBuilder = createAllowListEnforcingAgentBuilder();
+
+    await expect(registerSkills(buildOpts(agentBuilder, false))).resolves.toBeUndefined();
+
+    expect(registeredSkillIds(agentBuilder)).not.toContain(SIEM_READINESS_SKILL_ID);
+  });
+
+  it('uses a skill id that is on the agent-builder built-in allow-list', () => {
+    expect(isAllowedBuiltinSkill(SIEM_READINESS_SKILL_ID)).toBe(true);
+  });
+});
