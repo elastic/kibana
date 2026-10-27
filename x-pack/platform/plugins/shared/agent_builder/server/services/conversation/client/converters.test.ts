@@ -2701,14 +2701,14 @@ describe('conversation model converters', () => {
       ).not.toHaveProperty('active_execution');
     });
 
-    it('is stripped from responses', () => {
+    it('is kept on responses', () => {
       const response = toConversationResponseFromDocument({
         document: documentWith({ active_execution: activeExecution }),
         user: requestingUser,
         resolveTemplate: () => undefined,
       });
 
-      expect(response).not.toHaveProperty('active_execution');
+      expect(response.active_execution).toEqual(activeExecution);
     });
 
     it('createRequestToEs writes active_execution when present', () => {

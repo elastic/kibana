@@ -739,17 +739,11 @@ class ConversationClientImpl implements ConversationClient {
 
   async get(conversationId: string): Promise<ConversationWithPermissions> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
-    const response = await toResponseConversation({
+    const conversation = await toResponseConversation({
       document,
       user: this.getUser(),
       resolveTemplate: getTemplate,
     });
-
-    const { active_execution: activeExecution } = document._source;
-    const conversation = activeExecution
-      ? { ...response, active_execution: activeExecution }
-      : response;
-
     const isOwner = hasConversationOwnerAccess({ conversation, user: this.getUser() });
     if (!isOwner) {
       const { feedback: _feedback, ...conversationWithoutFeedback } = conversation;

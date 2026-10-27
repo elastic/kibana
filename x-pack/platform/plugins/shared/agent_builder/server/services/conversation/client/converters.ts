@@ -336,7 +336,6 @@ const stripInternalFields = (conversation: NormalizedConversation): Conversation
   const {
     read_by: _readBy,
     pinned_by: _pinnedBy,
-    active_execution: _activeExecution,
     ...conversationWithoutInternalFields
   } = conversation;
 
