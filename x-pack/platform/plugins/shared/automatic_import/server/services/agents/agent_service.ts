@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import { SpanKind } from '@opentelemetry/api';
 import type { ElasticsearchClient, LoggerFactory, Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import {
+  ElasticGenAIAttributes,
+  GenAISemanticConventions,
+  withActiveInferenceSpan,
+} from '@kbn/inference-tracing';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { HumanMessage } from '@langchain/core/messages';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server';
@@ -154,14 +160,32 @@ ${ecsRootFieldsSummary}
       current_pipeline: BOILERPLATE_PIPELINE,
     };
 
-    const result = await automaticImportAgent.invoke(
-      invokeInput as Parameters<typeof automaticImportAgent.invoke>[0],
+    // Without an enclosing inference span, every LLM call is exported as its own trace.
+    const result = await withActiveInferenceSpan(
+      'invoke_agent automatic_import_agent',
       {
-        callbacks: [...langSmithTracers, ...(phaseCallbackHandler ? [phaseCallbackHandler] : [])],
-        runName: 'automatic_import_agent',
-        tags: ['automatic_import_agent'],
-        signal: abortSignal,
-      }
+        kind: SpanKind.INTERNAL,
+        attributes: {
+          [ElasticGenAIAttributes.InferenceSpanKind]: 'AGENT',
+          [GenAISemanticConventions.GenAIOperationName]: 'invoke_agent',
+          [GenAISemanticConventions.GenAIAgentName]: 'automatic_import_agent',
+          'automatic_import.integration_id': integrationId,
+          'automatic_import.data_stream_id': dataStreamId,
+        },
+      },
+      () =>
+        automaticImportAgent.invoke(
+          invokeInput as Parameters<typeof automaticImportAgent.invoke>[0],
+          {
+            callbacks: [
+              ...langSmithTracers,
+              ...(phaseCallbackHandler ? [phaseCallbackHandler] : []),
+            ],
+            runName: 'automatic_import_agent',
+            tags: ['automatic_import_agent'],
+            signal: abortSignal,
+          }
+        )
     );
 
     if (phaseCallbackHandler) {
