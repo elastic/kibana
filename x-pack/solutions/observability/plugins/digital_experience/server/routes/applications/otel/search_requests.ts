@@ -123,7 +123,9 @@ export const logsSearch = ({ start, end, environment }: SearchParams): estypes.S
       terms: {
         field: SERVICE_NAME,
         size: MAX_APPLICATIONS_PER_SOURCE,
-        // The cap keeps the applications with the most page loads.
+        // The cap keeps the applications with the most page loads. Ordering by a
+        // sub-aggregation is approximate across shards, so past the cap the cut-off
+        // may not be exact.
         order: { pageLoads: 'desc' },
       },
       aggs: {

@@ -57,4 +57,11 @@ describe('ColumnSelector', () => {
 
     expect(onChange).toHaveBeenCalledWith(['fcp']);
   });
+
+  it('keeps the column id off the DOM', () => {
+    renderSelector(['lcp']);
+    fireEvent.click(screen.getByTestId('digitalExperienceColumnSelector'));
+
+    expect(option('lcp')).not.toHaveAttribute('columnid');
+  });
 });

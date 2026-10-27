@@ -16,7 +16,7 @@ export const SEARCH_SPAN_NAMES: Record<ApplicationSource, string> = {
 /** Maximum number of applications returned per source. */
 export const MAX_APPLICATIONS_PER_SOURCE = 1000;
 
-/** Maximum number of environments listed for the picker. */
+/** Maximum number of environments listed for the picker, per environment field of each source. */
 export const MAX_ENVIRONMENTS = 100;
 
 /**

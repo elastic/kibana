@@ -28,6 +28,11 @@ const COLUMNS_LABEL = i18n.translate('xpack.digitalExperience.columnSelector.lab
 
 const listCss = css({ inlineSize: 240 });
 
+/** In `data`, which EuiSelectable keeps off the DOM, unlike other option keys. */
+interface ColumnOptionData<TColumnId extends string> {
+  data: { columnId: TColumnId };
+}
+
 /** A "Columns 6/9" button that opens a list to show or hide the table's optional columns. */
 export function ColumnSelector<TColumnId extends string>({
   columns,
@@ -41,11 +46,11 @@ export function ColumnSelector<TColumnId extends string>({
   const [isOpen, setIsOpen] = useState(false);
   const popoverId = useGeneratedHtmlId({ prefix: 'digitalExperienceColumnSelector' });
 
-  const options: Array<EuiSelectableOption<{ columnId: TColumnId }>> = columns.map(
+  const options: Array<EuiSelectableOption<ColumnOptionData<TColumnId>>> = columns.map(
     ({ id, label }) => ({
       key: id,
-      columnId: id,
       label,
+      data: { columnId: id },
       checked: visibleColumns.has(id) ? 'on' : undefined,
       'data-test-subj': `digitalExperienceColumnSelectorOption-${id}`,
     })
@@ -78,13 +83,13 @@ export function ColumnSelector<TColumnId extends string>({
         </EuiButtonEmpty>
       }
     >
-      <EuiSelectable<{ columnId: TColumnId }>
+      <EuiSelectable<ColumnOptionData<TColumnId>>
         data-test-subj="digitalExperienceColumnSelectorList"
         aria-label={COLUMNS_LABEL}
         options={options}
         onChange={(newOptions) =>
           onChange(
-            newOptions.filter(({ checked }) => checked === 'on').map(({ columnId }) => columnId)
+            newOptions.filter(({ checked }) => checked === 'on').map(({ data }) => data.columnId)
           )
         }
         listProps={{ isVirtualized: false }}

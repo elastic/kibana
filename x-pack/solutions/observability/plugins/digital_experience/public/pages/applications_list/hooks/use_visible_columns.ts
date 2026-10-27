@@ -9,8 +9,8 @@ import { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 /**
- * The columns the user chose to show, kept in local storage under `storageKey`: every column but
- * `hiddenByDefault` until they choose, ignoring saved ids of columns that no longer exist.
+ * The columns to show. Local storage keeps the ones the user hid, under `storageKey`, so a column
+ * added later shows up for them too; `hiddenByDefault` applies until they choose.
  */
 export const useVisibleColumns = <TColumnId extends string>({
   storageKey,
@@ -21,17 +21,15 @@ export const useVisibleColumns = <TColumnId extends string>({
   columnIds: readonly TColumnId[];
   hiddenByDefault: readonly TColumnId[];
 }) => {
-  const [saved, setSaved] = useLocalStorage<string[]>(storageKey);
+  const [savedHidden, setSavedHidden] = useLocalStorage<string[]>(storageKey);
 
-  const visibleColumns = useMemo(
-    () =>
-      new Set(
-        saved
-          ? columnIds.filter((id) => saved.includes(id))
-          : columnIds.filter((id) => !hiddenByDefault.includes(id))
-      ),
-    [saved, columnIds, hiddenByDefault]
-  );
+  const visibleColumns = useMemo(() => {
+    const hidden: readonly string[] = savedHidden ?? hiddenByDefault;
+    return new Set(columnIds.filter((id) => !hidden.includes(id)));
+  }, [savedHidden, columnIds, hiddenByDefault]);
 
-  return { visibleColumns, setVisibleColumns: (ids: TColumnId[]) => setSaved(ids) };
+  const setVisibleColumns = (ids: TColumnId[]) =>
+    setSavedHidden(columnIds.filter((id) => !ids.includes(id)));
+
+  return { visibleColumns, setVisibleColumns };
 };

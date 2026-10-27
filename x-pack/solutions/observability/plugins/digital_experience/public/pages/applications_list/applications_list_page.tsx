@@ -447,7 +447,7 @@ const OPTIONAL_COLUMN_IDS = OPTIONAL_COLUMNS.map(({ id }) => id);
 
 const HIDDEN_BY_DEFAULT: OptionalColumnId[] = ['fcp', 'ttfb', 'jsErrors'];
 
-const VISIBLE_COLUMNS_STORAGE_KEY = 'xpack.digitalExperience.applications.visibleColumns';
+const HIDDEN_COLUMNS_STORAGE_KEY = 'xpack.digitalExperience.applications.hiddenColumns';
 
 const NO_PAGE_LOADS: PageLoadsOverTime = { otel: [], classic: [] };
 
@@ -530,7 +530,7 @@ export function ApplicationsListPage() {
   const unavailableSources = response?.unavailableSources ?? [];
 
   const { visibleColumns, setVisibleColumns } = useVisibleColumns({
-    storageKey: VISIBLE_COLUMNS_STORAGE_KEY,
+    storageKey: HIDDEN_COLUMNS_STORAGE_KEY,
     columnIds: OPTIONAL_COLUMN_IDS,
     hiddenByDefault: HIDDEN_BY_DEFAULT,
   });

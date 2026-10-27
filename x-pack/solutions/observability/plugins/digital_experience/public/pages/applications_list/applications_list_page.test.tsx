@@ -328,8 +328,18 @@ describe('ApplicationsListPage', () => {
 
   it('always shows the page loads, which the table is sorted by', async () => {
     window.localStorage.setItem(
-      'xpack.digitalExperience.applications.visibleColumns',
-      JSON.stringify([])
+      'xpack.digitalExperience.applications.hiddenColumns',
+      JSON.stringify([
+        'errorRate',
+        'lcp',
+        'inp',
+        'cls',
+        'fcp',
+        'ttfb',
+        'jsErrors',
+        'failedHttp',
+        'lastSeen',
+      ])
     );
     respondWith([app()]);
     renderPage();
