@@ -40,6 +40,11 @@ export {
   replaceSandboxSecrets,
 } from './sandbox_secrets';
 export { ensureNightshiftServiceAccountRoles } from '../../../../common';
+export {
+  getNightshiftServiceAccountStatus,
+  setUpNightshiftServiceAccount,
+  SERVICE_ACCOUNT_PATH,
+} from './service_account';
 export { getCustomContext, putCustomContext, replaceCustomContext } from './custom_context';
 export {
   archiveMemoryPage,

@@ -469,7 +469,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     ).resolves.toEqual({ investigation_id: 'inv-new' });
   });
 
-  it('applies a per-run timeout without mutating the installed investigation workflow', async () => {
+  it('passes a per-run timeout as an input, leaving the bound definition untouched', async () => {
     const workflow = {
       id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
       enabled: true,
@@ -486,15 +486,12 @@ describe('NightshiftInvestigationsClient.start()', () => {
       message: 'Review errors.',
       timeout_seconds: 20,
     });
+    // A bound workflow only runs its saved definition, so the run carries the timeout as an
+    // input and the entry point applies it to its investigation step.
     expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({
-        definition: {
-          steps: [],
-          settings: { run_as: 'kibana/nightshift_agent', timeout: '20s', concurrency: { max: 1 } },
-        },
-      }),
+      workflow,
       SPACE_ID,
-      expect.anything(),
+      expect.objectContaining({ timeout_seconds: 20 }),
       mockRequest,
       'nightshift-investigations'
     );
