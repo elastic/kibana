@@ -2393,10 +2393,10 @@ describe('NightshiftInvestigationsClient.followUpRecoveredAlert()', () => {
 
   beforeEach(() => {
     mockManagement.getWorkflow.mockResolvedValue({
-      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      id: BOUND_WORKFLOW_ID,
       enabled: true,
       valid: true,
-      definition: { steps: [] },
+      definition: { steps: [], settings: { run_as: 'kibana/nightshift_agent' } },
     });
     mockManagement.runWorkflow.mockResolvedValue('exec-rec-1');
   });
@@ -2438,7 +2438,7 @@ describe('NightshiftInvestigationsClient.followUpRecoveredAlert()', () => {
       { type: 'alert', id: 'alert-1' },
     ]);
     expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({ id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID }),
+      expect.objectContaining({ id: BOUND_WORKFLOW_ID }),
       SPACE_ID,
       {
         investigation_id: 'inv-1',
@@ -2510,12 +2510,12 @@ describe('NightshiftInvestigationsClient.followUpRecoveredAlert()', () => {
     expect(message).not.toContain('Reason:');
   });
 
-  it('runs the stored investigation workflow as it is, without a timeout override', async () => {
+  it("runs the space's entry point as it is stored, without a timeout override", async () => {
     const stored = {
-      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      id: BOUND_WORKFLOW_ID,
       enabled: true,
       valid: true,
-      definition: { steps: [], settings: { timeout: '60m' } },
+      definition: { steps: [], settings: { run_as: 'kibana/nightshift_agent', timeout: '60m' } },
     };
     mockManagement.getWorkflow.mockResolvedValue(stored);
     agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
@@ -2524,7 +2524,7 @@ describe('NightshiftInvestigationsClient.followUpRecoveredAlert()', () => {
     await makeClient().followUpRecoveredAlert(RECOVERY);
 
     expect(mockManagement.getWorkflow).toHaveBeenCalledWith(
-      NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      BOUND_WORKFLOW_ID,
       SPACE_ID,
       mockRequest
     );

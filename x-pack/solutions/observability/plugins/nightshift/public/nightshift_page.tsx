@@ -176,22 +176,6 @@ export function NightshiftPage(): React.ReactElement | null {
   const isSetupPending = requiresSetup && serviceAccount.isLoading;
   const needsSetup =
     requiresSetup && serviceAccount.isSuccess && !isNightshiftSetUp(serviceAccount.data);
-  // The landing page owns the start investigation panel so the header's primary action can toggle it.
-  const [isStartInvestigationOpen, setIsStartInvestigationOpen] = useState(false);
-  const toggleStartInvestigation = useCallback(
-    () => setIsStartInvestigationOpen((isOpen) => !isOpen),
-    []
-  );
-  const closeStartInvestigation = useCallback(() => setIsStartInvestigationOpen(false), []);
-  useEffect(() => {
-    setIsStartInvestigationOpen(false);
-  }, [pathname]);
-  const isLandingContent = !canUseAutomationsPage && !isOnboarding && !onboarding.isLoading;
-  // Starting an investigation only needs the investigations client, so the action and its modal
-  // don't depend on what the landing list renders.
-  const canStartInvestigation =
-    canManage && isLandingContent && nightshiftInvestigations?.investigationsClient != null;
-
   useBreadcrumbs(
     [
       {
@@ -257,12 +241,8 @@ export function NightshiftPage(): React.ReactElement | null {
         restrictWidth={false}
         pageSectionProps={{ paddingSize: 'none' }}
       >
-        {/* Nothing behind the other header actions works before setup. */}
-        <NightshiftAppHeader
-          page="landing"
-          onManagementClick={navigateToManagement}
-          managementHref={managementHref}
-        />
+        {/* Nothing behind the header actions works before setup, so the header carries none. */}
+        <NightshiftAppHeader page="landing" />
         <EuiPageTemplate.Section component="div" restrictWidth={ONBOARDING_MAX_WIDTH}>
           <NightshiftSetupOnboarding status={serviceAccount.data} isLoading={isSetupPending} />
         </EuiPageTemplate.Section>

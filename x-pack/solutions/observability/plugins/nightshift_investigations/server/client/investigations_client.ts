@@ -501,24 +501,6 @@ export class NightshiftInvestigationsClient {
     const spaceId = this.getSpaceId();
     this.warnOnSpaceMismatch(spaceId);
 
-    // Investigations only run as the Nightshift service account, through the entry point an admin
-    // binds in each space. There is no fallback that runs as the caller.
-    if (!this.isServiceAccountExecutionEnabled()) {
-      throw new InvestigationUnavailableError(SERVICE_ACCOUNT_REQUIRED_MESSAGE);
-    }
-    const workflowId = getBoundInvestigationWorkflowId(spaceId);
-    const workflow = await workflowsManagement.management.getWorkflow(
-      workflowId,
-      spaceId,
-      this.request
-    );
-
-    if (!workflow?.definition || !isEntryPointReady(workflow)) {
-      this.logger.warn(
-        `Investigation workflow "${workflowId}" is not set up in space "${spaceId}"; an admin must enable the Nightshift service account`
-      );
-      throw new InvestigationUnavailableError(SERVICE_ACCOUNT_REQUIRED_MESSAGE);
-    }
     const workflow = await this.getInvestigationWorkflow(spaceId);
 
     const { alerts } = prepared;
@@ -570,9 +552,6 @@ export class NightshiftInvestigationsClient {
       ...(source_ids?.length ? { source_ids } : {}),
       ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
       investigation_id: investigationId,
-      // The entry point caps its investigation step with this, rather than the run overriding
-      // `settings.timeout`: a workflow bound to a service account only runs its saved definition.
-      ...(timeout_seconds === undefined ? {} : { timeout_seconds }),
       subjects: newSubjects,
       ...(parsedNotificationDestinations?.length
         ? { notificationDestinations: parsedNotificationDestinations }
@@ -586,15 +565,6 @@ export class NightshiftInvestigationsClient {
       },
     };
 
-    const executionId = await workflowsManagement.management.runWorkflow(
-      // Runs the entry point exactly as it is stored: a workflow bound to a service account only
-      // runs its saved definition, so the per-run timeout travels as an input instead.
-      { ...workflow, definition: workflow.definition },
-      spaceId,
-      inputs,
-      this.request,
-      // The entry point refuses runs without it.
-      NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE
     const executionId = await this.runInvestigationWorkflow(
       workflow,
       spaceId,
@@ -650,23 +620,35 @@ export class NightshiftInvestigationsClient {
     }
   }
 
+  /**
+   * The space's investigation entry point, which runs as the Nightshift agent service account.
+   * Investigations only run through it: there is no fallback that runs as the caller.
+   */
   private async getInvestigationWorkflow(spaceId: string): Promise<InstalledWorkflow> {
     const { workflowsManagement } = this.requireWriteDeps();
-    const workflowId = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
+    if (!this.isServiceAccountExecutionEnabled()) {
+      throw new InvestigationUnavailableError(SERVICE_ACCOUNT_REQUIRED_MESSAGE);
+    }
+    const workflowId = getBoundInvestigationWorkflowId(spaceId);
     const workflow = await workflowsManagement.management.getWorkflow(
       workflowId,
       spaceId,
       this.request
     );
-    if (!workflow?.definition) {
-      this.logger.error(
-        `Investigation workflow "${workflowId}" is not installed in space "${spaceId}"`
+    if (!workflow?.definition || !isEntryPointReady(workflow)) {
+      this.logger.warn(
+        `Investigation workflow "${workflowId}" is not set up in space "${spaceId}"; an admin must enable the Nightshift service account`
       );
-      throw new InvestigationUnavailableError('Investigations are not configured in this space');
+      throw new InvestigationUnavailableError(SERVICE_ACCOUNT_REQUIRED_MESSAGE);
     }
     return { ...workflow, definition: workflow.definition };
   }
 
+  /**
+   * Runs the space's entry point exactly as it is stored: a workflow bound to a service account
+   * only runs its saved definition, so a caller's timeout travels as an input, which the entry
+   * point applies to the step that runs the investigation.
+   */
   private async runInvestigationWorkflow(
     workflow: InstalledWorkflow,
     spaceId: string,
@@ -675,20 +657,12 @@ export class NightshiftInvestigationsClient {
   ): Promise<string> {
     const { workflowsManagement } = this.requireWriteDeps();
     return workflowsManagement.management.runWorkflow(
-      {
-        ...workflow,
-        definition:
-          timeoutSeconds === undefined
-            ? workflow.definition
-            : {
-                ...workflow.definition,
-                settings: { ...workflow.definition.settings, timeout: `${timeoutSeconds}s` },
-              },
-      },
+      workflow,
       spaceId,
-      inputs,
+      timeoutSeconds === undefined ? inputs : { ...inputs, timeout_seconds: timeoutSeconds },
       this.request,
-      'nightshift-investigations'
+      // The entry point refuses runs it did not start.
+      NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE
     );
   }
 
