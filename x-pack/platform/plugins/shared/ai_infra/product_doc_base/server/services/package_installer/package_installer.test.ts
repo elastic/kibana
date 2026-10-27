@@ -857,7 +857,7 @@ describe('PackageInstaller', () => {
       });
     });
 
-    it('reports an update when a same stack version zip is uploaded after an install with no stored zip date', async () => {
+    it('does not infer an update from updatedAt when an install has no stored zip date', async () => {
       fetchArtifactVersionsMock.mockResolvedValue({
         versions: { kibana: ['8.16'] },
         lastModifiedByProductVersion: {
@@ -868,7 +868,36 @@ describe('PackageInstaller', () => {
         kibana: {
           status: 'installed',
           version: '8.16',
+          // SO updated_at is any write, not the install time, so it must not drive the result.
           updatedAt: '2026-09-17T16:05:00.000Z',
+        },
+      } as never);
+
+      await expect(
+        packageInstaller.isProductDocUpdateAvailable({
+          inferenceId: defaultInferenceEndpoints.ELSER,
+        })
+      ).resolves.toEqual({
+        isUpdateAvailable: false,
+        installedArtifactLastModifiedByProduct: {
+          kibana: '2026-10-13T14:40:44.000Z',
+        },
+      });
+    });
+
+    it('compares LastModified again once a reinstall stored the zip date', async () => {
+      fetchArtifactVersionsMock.mockResolvedValue({
+        versions: { kibana: ['8.16'] },
+        lastModifiedByProductVersion: {
+          kibana: { '8.16': '2026-10-13T14:40:44.000Z' },
+        },
+      });
+      productDocClient.getInstallationStatusOrThrow.mockResolvedValue({
+        kibana: {
+          status: 'installed',
+          version: '8.16',
+          updatedAt: '2026-10-20T00:00:00.000Z',
+          artifactLastModified: '2026-09-17T16:05:00.000Z',
         },
       } as never);
 

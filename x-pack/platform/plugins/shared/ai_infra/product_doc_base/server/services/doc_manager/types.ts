@@ -145,6 +145,10 @@ export interface DocInstallOptions {
    */
   wait?: boolean;
   /**
+   * Upper bound, in ms, on how long `wait` blocks. Defaults to the install task wait timeout.
+   */
+  waitTimeoutMs?: number;
+  /**
    * If provided, the docs will be installed with the model indicated by Inference ID
    */
   inferenceId: string;
@@ -190,6 +194,10 @@ export interface DocUpdateOptions {
    * Defaults to `false`
    */
   wait?: boolean;
+  /**
+   * Upper bound, in ms, on how long `wait` blocks. Defaults to the install task wait timeout.
+   */
+  waitTimeoutMs?: number;
   /**
    * If provided, the docs will be updated with the model indicated by Inference ID
    */

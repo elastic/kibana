@@ -300,23 +300,10 @@ export class PackageInstaller {
           continue;
         }
 
-        // No stored zip date. A repository object modified after this install is a newer upload
-        // of the same stack version. Leave that date off the installed version so it is not
-        // shown as both installed and available.
-        if (
-          !installedLastModified &&
-          gcsLastModified &&
-          productState.updatedAt &&
-          toSecondPrecisionMs(productState.updatedAt) < toSecondPrecisionMs(gcsLastModified)
-        ) {
-          isUpdateAvailable = true;
-          availableArtifact = preferAvailableArtifact(availableArtifact, {
-            version: installableVersion,
-            lastModified: gcsLastModified,
-          });
-          continue;
-        }
-
+        // No stored zip date (install predates `artifact_last_modified`): whether the repository
+        // object changed is unknown, and SO `updated_at` is not a reliable install time. The next
+        // successful install stores the date (see setInstallationSuccessful), after which the
+        // LastModified comparison above applies.
         rememberInstalledZipDate(
           installedArtifactLastModifiedByProduct,
           productName,

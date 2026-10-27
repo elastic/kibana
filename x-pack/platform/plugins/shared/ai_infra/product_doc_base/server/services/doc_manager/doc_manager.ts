@@ -93,7 +93,12 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async install(options: DocInstallOptions): Promise<void> {
-    const { request, force = false, wait = false } = options;
+    const {
+      request,
+      force = false,
+      wait = false,
+      waitTimeoutMs = INSTALL_TASK_WAIT_TIMEOUT_MS,
+    } = options;
     const inferenceId = options.inferenceId ?? defaultInferenceEndpoints.ELSER;
 
     const { status: previousStatus } = await this.getStatus({ inferenceId });
@@ -135,7 +140,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
     await waitUntilTaskCompleted({
       taskManager: this.taskManager,
       taskId,
-      timeout: INSTALL_TASK_WAIT_TIMEOUT_MS,
+      timeout: waitTimeoutMs,
     });
     const { status } = await this.getStatus({ inferenceId });
     // A failed install must not delete the previous model's documentation.
@@ -146,7 +151,13 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async update(options: DocUpdateOptions): Promise<void> {
-    const { request, wait = false, inferenceId, forceUpdate } = options;
+    const {
+      request,
+      wait = false,
+      waitTimeoutMs = INSTALL_TASK_WAIT_TIMEOUT_MS,
+      inferenceId,
+      forceUpdate,
+    } = options;
 
     const taskId = await scheduleEnsureUpToDateTask({
       taskManager: this.taskManager,
@@ -173,7 +184,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
       await waitUntilTaskCompleted({
         taskManager: this.taskManager,
         taskId,
-        timeout: INSTALL_TASK_WAIT_TIMEOUT_MS,
+        timeout: waitTimeoutMs,
       });
     }
   }
@@ -232,15 +243,16 @@ export class DocumentationManager implements DocumentationManagerAPI {
         })
       : undefined;
 
+    // One budget for every wait below, so the whole call stays under the route's idle socket.
+    const deadline = Date.now() + INSTALL_TASK_WAIT_TIMEOUT_MS;
+    const remainingWaitMs = () => Math.max(deadline - Date.now(), 0);
+
     let idsToUpdate = requestedIds;
     if (migration) {
       const supersededKeys = new Set(
         migration.supersededInferenceIds.map((inferenceId) =>
           getDefaultInferenceIndexKey(inferenceId)
         )
-      );
-      idsToUpdate = requestedIds.filter(
-        (inferenceId) => !supersededKeys.has(getDefaultInferenceIndexKey(inferenceId))
       );
       const currentKey = getDefaultInferenceIndexKey(migration.currentDefaultInferenceId);
       const includesCurrent = () =>
@@ -251,6 +263,10 @@ export class DocumentationManager implements DocumentationManagerAPI {
         );
       };
 
+      // The previous default is only dropped from the update list once the switch succeeded.
+      // Otherwise it keeps being updated, so a failed or skipped switch never leaves stale docs.
+      let switched = false;
+
       // Some (not all) products of the current default may be installed, or its install may still
       // be running. Only delete the previous default once the current one is fully installed.
       const currentStatus = migration.installCurrentDefault
@@ -259,8 +275,12 @@ export class DocumentationManager implements DocumentationManagerAPI {
       if (currentStatus === 'uninstalled' || currentStatus === 'error') {
         const license = await this.licensing.getLicense();
         if (!checkLicense(license)) {
-          this.logger.debug(
-            `Skipping product documentation inference switch to [${migration.currentDefaultInferenceId}]: invalid license`
+          this.logger.warn(
+            `Skipping product documentation inference switch to [${
+              migration.currentDefaultInferenceId
+            }]: invalid license. Documentation for [${migration.supersededInferenceIds.join(
+              ', '
+            )}] is kept`
           );
         } else {
           // Wait so the previous default is removed only after the new documentation is installed.
@@ -268,9 +288,24 @@ export class DocumentationManager implements DocumentationManagerAPI {
             inferenceId: migration.currentDefaultInferenceId,
             request,
             wait: true,
+            waitTimeoutMs: remainingWaitMs(),
           });
-          // install() already wrote this model. The update loop below would install it again.
-          withoutCurrent();
+          const { status } = await this.getStatus({
+            inferenceId: migration.currentDefaultInferenceId,
+          });
+          switched = status === 'installed';
+          if (switched) {
+            // install() already wrote this model. The update loop below would install it again.
+            withoutCurrent();
+          } else {
+            this.logger.warn(
+              `Product documentation for [${
+                migration.currentDefaultInferenceId
+              }] is not installed (status [${status}]); documentation for [${migration.supersededInferenceIds.join(
+                ', '
+              )}] is kept`
+            );
+          }
         }
       } else if (currentStatus === 'installed') {
         this.logger.info(
@@ -279,6 +314,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
           }]; removing product documentation for [${migration.supersededInferenceIds.join(', ')}]`
         );
         await this.uninstallInferenceIds(migration.supersededInferenceIds, request);
+        switched = true;
         if (forceUpdate) {
           if (!includesCurrent()) {
             idsToUpdate = [...idsToUpdate, migration.currentDefaultInferenceId];
@@ -290,13 +326,27 @@ export class DocumentationManager implements DocumentationManagerAPI {
       } else if (!includesCurrent()) {
         idsToUpdate = [...idsToUpdate, migration.currentDefaultInferenceId];
       }
+
+      if (switched) {
+        idsToUpdate = idsToUpdate.filter(
+          (inferenceId) => !supersededKeys.has(getDefaultInferenceIndexKey(inferenceId))
+        );
+      }
     }
 
     this.logger.info(
       `Updating product documentation to latest version for Inference IDs: ${idsToUpdate}`
     );
     await Promise.all(
-      idsToUpdate.map((inferenceId) => this.update({ inferenceId, forceUpdate, request, wait }))
+      idsToUpdate.map((inferenceId) =>
+        this.update({
+          inferenceId,
+          forceUpdate,
+          request,
+          wait,
+          waitTimeoutMs: remainingWaitMs(),
+        })
+      )
     );
     return {
       inferenceIds: idsToUpdate,
@@ -508,7 +558,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
 
   /**
    * Installs Security Labs for the new default and deletes the previous default.
-   * Returns false when the new default cannot be installed, leaving the previous content in place.
+   * Returns false when the new default is not installed afterwards, leaving the previous content in place.
    */
   private async replaceSecurityLabsInference(migration: {
     currentDefaultInferenceId: string;
@@ -523,12 +573,26 @@ export class DocumentationManager implements DocumentationManagerAPI {
     if (migration.installCurrentDefault) {
       const license = await this.licensing.getLicense();
       if (!checkLicense(license)) {
-        this.logger.debug(
+        this.logger.warn(
           `Skipping Security Labs inference switch to [${migration.currentDefaultInferenceId}]: invalid license`
         );
         return false;
       }
       await this.installDefaultSecurityLabs(migration.currentDefaultInferenceId);
+    }
+    // A failed install must not delete the previous model's content.
+    const { status } = await this.getSecurityLabsStatus({
+      inferenceId: migration.currentDefaultInferenceId,
+    });
+    if (status !== 'installed') {
+      this.logger.warn(
+        `Security Labs content for [${
+          migration.currentDefaultInferenceId
+        }] is not installed (status [${status}]); content for [${migration.supersededInferenceIds.join(
+          ', '
+        )}] is kept`
+      );
+      return false;
     }
     for (const inferenceId of migration.supersededInferenceIds) {
       await this.uninstallSecurityLabs({ inferenceId });
