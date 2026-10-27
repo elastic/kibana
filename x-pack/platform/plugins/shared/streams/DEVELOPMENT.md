@@ -17,16 +17,20 @@ Two layers of flags exist. **Kibana config** (`kibana.dev.yml`) is evaluated at 
 # Restart Kibana after changing it.
 xpack.streams.canvas.enabled: true
 
+# Required: unit PUT returns 503 without a distributor. The distributor Tilt
+# writes these to streams-config-distributor/.tilt/kibana/kibana.dev.yml.snippet.
 xpack.streams.distributor.url: "https://localhost:18443"
-xpack.streams.distributor.ssl.certificate: /tmp/certs/kibana.crt
-xpack.streams.distributor.ssl.key: /tmp/certs/kibana.key
-xpack.streams.distributor.ssl.certificateAuthorities: /tmp/certs/server-ca.crt
+xpack.streams.distributor.ssl.certificate: /path/to/streams-config-distributor/.tilt/kibana/client.crt
+xpack.streams.distributor.ssl.key: /path/to/streams-config-distributor/.tilt/kibana/client.key
+xpack.streams.distributor.ssl.certificateAuthorities: /path/to/streams-config-distributor/.tilt/kibana/ca.crt
 # Needed only to publish units with secrets. See "Credentials".
 xpack.streams.encryptionKey.path: /tmp/streams-encryption-key
 
 uiSettings.overrides:
   observability:streamsEnableCanvas: true
 ```
+
+To run the distributor and the rest of the backend locally, follow [dev/full_dev_flow/README.md](./dev/full_dev_flow/README.md).
 
 `xpack.streams.canvas.enabled` and `observability:streamsEnableCanvas` are **not** interchangeable:
 
@@ -64,7 +68,7 @@ Important consequences:
 - v1 uses a single unit id: `default` (`STREAMS_DEFAULT_UNIT_ID`).
 - Unit PUT order: seal credentials → distributor validate → configuration SO → distributor publish → UI metadata. A validation failure writes nothing. A publish failure rolls back the configuration SO (including decrypted `secrets` and `sealed_credentials`).
 - `streams:republish-units` re-sends every stored unit every 30 minutes and re-seals after a key rotation. See "Republish and key rotation".
-- Without `xpack.streams.distributor.url`, validate and publish are no-ops.
+- Without `xpack.streams.distributor.url`, unit PUT fails with a 503 ("streams-config-distributor URL is not configured"). There is no offline mode.
 - PUT requires `xpack.encryptedSavedObjects.encryptionKey` (`canEncrypt`). Dev mode configures a static key automatically.
 
 ### Credentials

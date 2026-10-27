@@ -70,6 +70,13 @@ pnpm kbn bootstrap
 
 Docker Desktop must be running. Collector pods reach ES via `host.docker.internal`.
 
+- Give Docker Desktop at least 16 GB of memory (Settings -> Resources). At 8 GB
+  the kind API server stops responding and ES can be killed mid-write.
+- Turn off Docker Desktop's own Kubernetes (Settings -> Kubernetes). When it is
+  on, every Docker restart switches the current kube context to `docker-desktop`.
+- Use a recent kind. Old kind releases create a Kubernetes version that
+  cert-manager rejects (see Troubleshooting).
+
 ## 1. Create the kind cluster
 
 From **either** `streams-controller` or `streams-config-distributor`:
@@ -277,6 +284,13 @@ make kind-delete    # from either repo
 | Unit PUT 503 | Distributor Tilt is down, or `kibana.dev.yml` snippet is missing. |
 | Script sits on `PUT .../unit/default` | The PUT itself is usually done in a few seconds. The script then waits for `spec.artifact` (not Ready). Ctrl-C and re-run if it exceeds ~90s. |
 | `es serverless` bind error on 8443 | Distributor must use `-- --port 18443`. |
+| `es serverless` bind error on 8081 | Another process holds 8081, which local serverless ES needs. Stop it. |
+| ES red, logs show `failed to recover from translog` / `EOFException` | ES data was corrupted when the container was killed (often out of memory). Restart with `--clean`, then re-run `seed`. |
+| Tilt: `containerd image snapshotter is disabled` | Tilt is pointed at Docker Desktop's Kubernetes. Start both Tilts with `--context kind-streams`. Do not change the containerd setting. |
+| cert-manager: `selectableFields: field not declared in schema` | kind is too old. Upgrade kind, then `make kind-delete && make kind`. |
+| kind API server TLS handshake timeouts, `streamunit-watch` dies | Docker Desktop is out of memory. Raise it to 16 GB. |
+| Map: "Unable to get streams-configuration" | You logged in with a role that cannot read the Map saved objects. Log in as `elastic_serverless`. |
+| Map: add-source form lists no source types | `xpack.cloud.managed_otlp.url` is missing. Run `setup` and restart Kibana. |
 | Collector `unknown type: "otlp_http"` | Collector image is too old for user-facing telemetry. Use a newer `STREAMS_COLLECTOR_TAG` from `streams-controller` helm values. |
 | Motel `ImagePullBackOff` / `:latest: not found` | These CI images have no `latest` tag. Re-run this script (it now keeps the motel image already on the cluster). |
 | Collector `x509` / unknown authority | Saving Map republishes the unit and drops the local TLS patch. Re-run `seed` or `test_ui_flow` (they re-apply it). |
