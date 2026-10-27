@@ -339,7 +339,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     }),
     resultStore: resultStore.asReadonly(),
     skillsStore: skillsStore.asReadonly(),
-    attachments: attachmentStateManager,
+    attachments: attachmentStateManager.forToolCall(toolCallId),
     skills: await createSkillsService({
       skillServiceStart,
       toolsServiceStart: toolsService,

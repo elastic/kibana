@@ -32,16 +32,8 @@ import { DetectionFlyout } from './detection_flyout';
 import { FindSignificantEventsButton } from '../shared/find_significant_events_button';
 import { SignificantEventsSearchBar } from '../../../../components/search_bar';
 import { formatTimestamp } from '../../../../util/formatters';
+import { DetectionDiscoveryStatus } from './detection_discovery_status';
 import { CHANGE_TYPE_LABELS } from '../shared/translations';
-
-const DISCOVERY_STATUS_LABELS = {
-  processed: i18n.translate('xpack.significantEventsApp.detectionsTab.statusProcessed', {
-    defaultMessage: 'Processed',
-  }),
-  pending: i18n.translate('xpack.significantEventsApp.detectionsTab.statusPending', {
-    defaultMessage: 'Pending',
-  }),
-};
 
 const DISCOVERY_STATUS_TOOLTIP = i18n.translate(
   'xpack.significantEventsApp.detectionsTab.discoveryTooltip',
@@ -179,10 +171,7 @@ export const DetectionsTab = () => {
         ),
         width: '100px',
         render: (detection: Detection) => {
-          if (detection.processed) {
-            return <EuiBadge color="success">{DISCOVERY_STATUS_LABELS.processed}</EuiBadge>;
-          }
-          return <EuiBadge color="hollow">{DISCOVERY_STATUS_LABELS.pending}</EuiBadge>;
+          return <DetectionDiscoveryStatus detection={detection} />;
         },
       },
     ],
