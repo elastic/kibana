@@ -597,10 +597,38 @@ steps:
   # can be backtested the same way a query change is below. Only the entries matter here;
   # eligibility to actually run the backtest is decided by can_preview_query_change, same
   # gate the query arm uses, since both reuse the same preview mechanism.
+  # The agent schema carries no maxItems (Gemini rejects the schema with either
+  # cap present, see the note above exception_entries), so a recommendation can
+  # exceed the platform bounds. Entries are ANDed, so an over-cap entry list or a
+  # sliced is_not_one_of values list would silently broaden the exception: the
+  # dropped constraints would make entities the recommendation excluded eligible
+  # for suppression. An oversized exception therefore fails the run (fail-closed,
+  # see reject_oversized_exception below) instead of being truncated.
+  - name: check_exception_entries
+    type: data.set
+    if: >-
+      ${{ steps.fetch_rule.error == null
+        and steps.fetch_rule.output.enabled == true
+        and steps.diagnose_rule.output.structured_output.change_type == 'exception' }}
+    with:
+      # Renders "true" when the recommendation exceeds either platform bound.
+      overflow: >-
+        {% if steps.diagnose_rule.output.structured_output.exception_entries.size > consts.max_exception_entries %}true{% endif %}{% for entry in steps.diagnose_rule.output.structured_output.exception_entries %}{% if entry.values != nil and entry.values.size > consts.max_exception_values %}true{% endif %}{% endfor %}
+
+  # Fail-closed: an oversized exception must never reach the filter step, the
+  # attachment, the proposal text or the action. The run fails before
+  # bound_exception_entries runs, so no truncated variant of the recommendation
+  # is proposed or persisted. The failing run leaves the alerts unreviewed (the
+  # tag steps are skipped), so the next sweep retries the rule.
+  - name: reject_oversized_exception
+    type: workflow.fail
+    if: "${{ steps.check_exception_entries.output.overflow == 'true' }}"
+    with:
+      message: "diagnose_rule proposed an exception exceeding the platform bounds (more than {{ consts.max_exception_entries }} entries or more than {{ consts.max_exception_values }} values in one entry); refusing to truncate it into a broader exception"
+
   # Caps the agent's exception entries (and each entry's values) to the platform
-  # bounds. The agent schema carries no maxItems, so an oversized recommendation is
-  # truncated here, before the filter step, the attachment, the proposal text and
-  # the action see it. Entries beyond the cap are dropped, never passed through.
+  # bounds. Reached only when check_exception_entries reported no overflow, so
+  # the caps never drop a constraint; they exist to normalize, not to truncate.
   - name: bound_exception_entries
     type: data.set
     if: >-
