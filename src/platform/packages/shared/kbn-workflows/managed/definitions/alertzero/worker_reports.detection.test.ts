@@ -88,8 +88,8 @@ describe('Rule Tuning outcome reports', () => {
 
     describeReportStep(steps, 'report_worker_run_completed', 'worker_run_completed', 'emit_result');
 
-    /** A harvest row; the rule's `id@revision` key is its seventh column. */
-    const harvestRow = (ruleKey: string): unknown[] => [0, 0, 0, 0, 0, 0, ruleKey];
+    /** A harvest row; the rule's `id@revision` key is its fifth column. */
+    const harvestRow = (ruleKey: string): unknown[] => [0, 0, 0, 0, ruleKey];
 
     const sweepContext = ({
       activeReviews = 0,
@@ -99,41 +99,50 @@ describe('Rule Tuning outcome reports', () => {
       lookupFailed = false,
       requested = 0,
       rulesLookupFailed = false,
+      screenFailed = false,
     }: {
       activeReviews?: number;
       /** Harvested rules that are still enabled, at the revision their alerts came from. */
       eligible?: number;
       harvestFailed?: boolean;
-      /** Harvested rules disabled or edited since their alerts. */
+      /** Harvested rules edited since their alerts. */
       ineligible?: number;
       lookupFailed?: boolean;
       requested?: number;
       rulesLookupFailed?: boolean;
+      screenFailed?: boolean;
     }): Record<string, unknown> => {
       const eligibleKeys = Array.from({ length: eligible }, (_, index) => `rule-${index}@1`);
       const ineligibleKeys = Array.from({ length: ineligible }, (_, index) => `stale-${index}@1`);
+      const harvested =
+        rulesLookupFailed || screenFailed ? [] : [...eligibleKeys, ...ineligibleKeys];
       return {
         consts: { no_rows: [] },
         steps: {
           collect_active_rules: { output: { expected: activeReviews } },
           harvest_fp_alerts_by_rule: harvestFailed
             ? { error: { message: 'search_phase_execution_exception' } }
-            : { output: { values: [...eligibleKeys, ...ineligibleKeys].map(harvestRow) } },
+            : { output: { values: harvested.map(harvestRow) } },
           list_active_reviews: lookupFailed
             ? { error: { message: 'HTTP 500' } }
             : { output: { results: [] } },
-          list_enabled_candidates: rulesLookupFailed
+          list_enabled_rules: rulesLookupFailed
             ? { error: { message: 'HTTP 500' } }
             : { output: { data: [] } },
-          // Rendered from `list_enabled_candidates`, so a failed lookup leaves no key.
-          resolve_current_revisions: {
-            output: {
-              rule_revision_keys: rulesLookupFailed ? ',' : `,${eligibleKeys.join(',')},`,
-            },
-          },
+          // Skipped after a failed lookup, so its keys are unset.
+          ...(rulesLookupFailed
+            ? {}
+            : {
+                resolve_enabled_rules: {
+                  output: { rule_revision_keys: `,${eligibleKeys.join(',')},` },
+                },
+              }),
           resolve_fanout_rows: {
             output: { rows: Array.from({ length: requested }, (_, index) => [`rule-${index}`]) },
           },
+          screen_rule_fp_rates: screenFailed
+            ? { error: { message: 'search_phase_execution_exception' } }
+            : { output: { values: [] } },
         },
       };
     };
@@ -194,9 +203,22 @@ describe('Rule Tuning outcome reports', () => {
         },
       ],
       [
-        // Without the enabled rules, no harvested rule can be confirmed eligible.
-        'a failed rules lookup after a harvest that worked, which empties the fan-out',
+        // Without the enabled rules the screen and the harvest are skipped.
+        'a failed rules lookup, which skips the screen and the harvest',
         { eligible: 3, rulesLookupFailed: true },
+        {
+          candidates_found: 0,
+          degraded_reason: 'dependency_unavailable',
+          items_dispatched: 0,
+          items_in_flight: '0',
+          lookup_failed: false,
+          run_outcome: 'failed_source_unavailable',
+          source_read_failed: true,
+        },
+      ],
+      [
+        'a failed screen, which skips the harvest',
+        { eligible: 3, screenFailed: true },
         {
           candidates_found: 0,
           degraded_reason: 'dependency_unavailable',
@@ -999,7 +1021,7 @@ describe('Rule Coverage outcome reports', () => {
 
 describe('Rule Tuning and Rule Coverage managed versions', () => {
   it.each([
-    [ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.id, ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.version, 30],
+    [ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.id, ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.version, 31],
     [ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.id, ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.version, 32],
     [ALERTZERO_COVERAGE_WORKER_WORKFLOW.id, ALERTZERO_COVERAGE_WORKER_WORKFLOW.version, 5],
     [ALERTZERO_COVERAGE_REVIEW_WORKFLOW.id, ALERTZERO_COVERAGE_REVIEW_WORKFLOW.version, 6],

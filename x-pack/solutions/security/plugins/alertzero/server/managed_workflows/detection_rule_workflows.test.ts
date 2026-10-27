@@ -583,6 +583,8 @@ describe('detection rule workflows', () => {
       ) as WorkflowYaml;
       const tuningSteps = flattenSteps(tuning.steps as unknown as NestedStep[]);
       const reviewSteps = flattenSteps(review.steps as unknown as NestedStep[]);
+      const screen = tuningSteps.find(({ name }) => name === 'screen_rule_fp_rates')!;
+      const screenQuery = String(screen.with?.query);
       const harvest = tuningSteps.find(({ name }) => name === 'harvest_fp_alerts_by_rule')!;
       const harvestQuery = String(harvest.with?.query);
       const reviewedTag = (tuning.consts as Record<string, string>).reviewed_tag;
@@ -602,9 +604,62 @@ describe('detection rule workflows', () => {
         );
       });
 
+      // Security alerts are indexed with `_id = kibana.alert.uuid`; reading the uuid
+      // from doc values avoids the stored-fields loader `METADATA _id` needs, which
+      // dominated the harvest's run time.
+      it('keys the recency sort on the alert uuid instead of _id', () => {
+        expect(harvestQuery).not.toContain('METADATA _id');
+        expect(harvestQuery).toContain(
+          'fp_recency_key = CONCAT(DATE_FORMAT("yyyyMMddHHmmssSSS", @timestamp), "|", `kibana.alert.uuid`)'
+        );
+      });
+
+      // The rate is measured over every alert of the rule in the window, in a plain
+      // STATS over doc values; the harvest then reads only the FPs of the rules that
+      // passed, so the unreviewed queue never dilutes or inflates the rate.
       it('measures FP rate independently from the unreviewed work queue', () => {
-        expect(harvestQuery).toContain('fp_rate_count = COUNT(*) WHERE is_fp');
-        expect(harvestQuery).toContain('fp_rate_count * 100 >= total_count');
+        expect(screenQuery).toContain('fp_rate_count = COUNT(*) WHERE is_fp');
+        expect(screenQuery).toContain('fp_rate_count * 100 >= total_count');
+        expect(screenQuery).not.toContain('INLINE STATS');
+        expect(harvestQuery).not.toContain('total_count');
+
+        const filter = JSON.stringify(harvest.with?.filter);
+        expect(filter).toContain('"term":{"kibana.alert.workflow_status":"closed"}');
+        expect(filter).toContain('"term":{"kibana.alert.workflow_reason":"false_positive"}');
+        expect(filter).toContain(
+          '"terms":{"kibana.alert.rule.uuid":"${{ steps.resolve_screened_rules.output.rows | map: \'0\' }}"'
+        );
+      });
+
+      // fp_rate_count counts every FP, reviewed or not, so it bounds the unreviewed
+      // count from above: the screen's min_fp_count check can only let through rules
+      // the harvest then rejects, never drop a real candidate.
+      it('pre-filters on the FP count without replacing the harvest gate', () => {
+        expect(screenQuery).toContain(
+          'WHERE fp_rate_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}'
+        );
+        expect(harvestQuery).toContain(
+          'WHERE fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}'
+        );
+        expect(harvestQuery).not.toContain('fp_rate_count');
+      });
+
+      it('screens only when there are enabled rules and harvests only screened rules', () => {
+        const resolveEnabled = tuningSteps.find(({ name }) => name === 'resolve_enabled_rules')!;
+        const resolveScreened = tuningSteps.find(({ name }) => name === 'resolve_screened_rules')!;
+
+        expect(String(resolveEnabled.if)).toContain('steps.list_enabled_rules.error == null');
+        expect(String(screen.if)).toContain('steps.resolve_enabled_rules.output.count > 0');
+        expect(String(harvest.if)).toContain('steps.resolve_screened_rules.output.count > 0');
+        expect(screen['on-failure']).toEqual({ continue: true });
+
+        const filter = JSON.stringify(screen.with?.filter);
+        expect(filter).toContain(
+          '"terms":{"kibana.alert.rule.uuid":"${{ steps.resolve_enabled_rules.output.rule_uuids }}"'
+        );
+        expect(String(resolveScreened.with?.count)).toContain(
+          "where_exp: 'row', 'steps.resolve_enabled_rules.output.rule_revision_keys contains row[3]' | size"
+        );
       });
 
       // A review can outlive its sweep (cancelled sweep, manual run). Its rule must
@@ -636,51 +691,54 @@ describe('detection rule workflows', () => {
           'parsed_count == steps.collect_active_rules.output.expected'
         );
 
-        const filter = JSON.stringify(harvest.with?.filter);
+        const filter = JSON.stringify(screen.with?.filter);
         expect(filter).toContain('must_not');
         expect(filter).toContain(
           '"kibana.alert.rule.uuid":"${{ steps.resolve_active_rules.output.rule_uuids | default: consts.no_rows }}"'
         );
       });
 
-      // `kibana.alert.rule.enabled` on an alert is a creation-time snapshot, so a rule
-      // disabled after alerting keeps harvesting until its FPs age out of the window.
-      // The sweep checks live enabled status for the harvested candidates only and
-      // drops disabled rules from the fan-out source (a parallel branch body cannot
-      // carry a step-level `if`).
-      it('skips reviews for rules that are no longer enabled', () => {
-        const collect = tuningSteps.find(({ name }) => name === 'collect_candidates')!;
-        const lookup = tuningSteps.find(({ name }) => name === 'list_enabled_candidates')!;
+      // `kibana.alert.rule.enabled` on an alert is a creation-time snapshot, and a
+      // deleted rule's alerts outlive it, so both kinds would keep taking harvest
+      // slots until their FPs age out of the window. The sweep lists the space's
+      // enabled rules first and scopes the screen to them, so only live rules compete.
+      it('screens only rules that are enabled right now', () => {
+        const lookup = tuningSteps.find(({ name }) => name === 'list_enabled_rules')!;
+        const resolveEnabled = tuningSteps.find(({ name }) => name === 'resolve_enabled_rules')!;
         const rows = tuningSteps.find(({ name }) => name === 'resolve_fanout_rows')!;
+        const resolveScreened = tuningSteps.find(({ name }) => name === 'resolve_screened_rules')!;
         const fanOut = tuningSteps.find(({ name }) => name === 'run_reviews')!;
 
-        const filterKql = String(collect.with?.filter_kql);
-        expect(filterKql).toContain('alert.attributes.enabled: true');
-        expect(filterKql).toContain('alert.id: ("alert:{{ row[0] }}")');
-
         const path = String(lookup.with?.path);
-        expect(path).toContain('/api/detection_engine/rules/_find?');
-        expect(path).toContain('per_page={{ consts.max_candidate_rules }}');
-        expect(path).toContain('{{ steps.collect_candidates.output.filter_kql | url_encode }}');
-        expect(String(lookup.if)).toContain('steps.collect_candidates.output.count > 0');
+        // The alerting _find honours `fields`; the detection engine one returns 500.
+        expect(path).toContain('/api/alerting/rules/_find?');
+        expect(path).toContain(
+          "{{ 'alert.attributes.enabled: true and alert.attributes.consumer: siem' | url_encode }}"
+        );
+        expect(path).toContain('per_page=10000');
+        expect(path).toContain('fields=revision');
         expect(lookup['on-failure']).toEqual({ continue: true });
+        expect(String(resolveEnabled.with?.rule_uuids)).toContain(
+          "steps.list_enabled_rules.output.data | default: consts.no_rows | map: 'id'"
+        );
 
         const rowsExpr = String(rows.with?.rows);
         expect(rowsExpr).toContain(
-          "where_exp: 'row', 'steps.resolve_current_revisions.output.rule_revision_keys contains row[6]'"
+          "where_exp: 'row', 'steps.resolve_enabled_rules.output.rule_revision_keys contains row[4]'"
         );
         // No `default` after where_exp: an empty filtered array is legitimate and a
         // default would resurrect every disabled candidate.
         expect(rowsExpr).not.toMatch(/where_exp:.*\| default:/);
+        expect(String(resolveScreened.with?.rows)).not.toMatch(/where_exp:.*\| default:/);
         // The engine's rehydration planner cannot see step paths inside the quoted
         // where_exp argument. This direct reference keeps the keys resident.
         expect(String(rows.with?.rule_revision_keys)).toContain(
-          '${{ steps.resolve_current_revisions.output.rule_revision_keys }}'
+          '${{ steps.resolve_enabled_rules.output.rule_revision_keys }}'
         );
         // Slice after the enabled filter: the pool overscans the launch cap so
         // disabled candidates cannot starve enabled rules ranked below them.
-        expect(rowsExpr).toContain('| slice: 0, steps.collect_candidates.output.fanout_limit');
-        expect(String(collect.with?.fanout_limit)).toContain(
+        expect(rowsExpr).toContain('| slice: 0, steps.resolve_screened_rules.output.fanout_limit');
+        expect(String(resolveScreened.with?.fanout_limit)).toContain(
           'inputs.max_rules_per_sweep | default: consts.max_rules_per_sweep'
         );
 
@@ -692,18 +750,18 @@ describe('detection rule workflows', () => {
       // Rule A was edited after its false positives, so they came from an older
       // version. Rule B was not edited. Only rule B should be reviewed.
       it('reviews a rule only on false positives from its current version', () => {
-        const resolveVersions = tuningSteps.find(
-          ({ name }) => name === 'resolve_current_revisions'
-        )!;
+        const resolveEnabled = tuningSteps.find(({ name }) => name === 'resolve_enabled_rules')!;
+        const resolveScreened = tuningSteps.find(({ name }) => name === 'resolve_screened_rules')!;
         const rows = tuningSteps.find(({ name }) => name === 'resolve_fanout_rows')!;
 
+        expect(screenQuery).toContain('BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`');
         expect(harvestQuery).toContain('BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`');
 
         const currentVersions = createWorkflowLiquidEngine().parseAndRenderSync(
-          String(resolveVersions.with?.rule_revision_keys),
+          String(resolveEnabled.with?.rule_revision_keys),
           {
             steps: {
-              list_enabled_candidates: {
+              list_enabled_rules: {
                 output: {
                   data: [
                     { id: 'rule-a', revision: 2 },
@@ -714,39 +772,76 @@ describe('detection rule workflows', () => {
             },
           }
         );
+        const steps = {
+          resolve_enabled_rules: { output: { rule_revision_keys: currentVersions } },
+          resolve_screened_rules: { output: { fanout_limit: 10 } },
+        };
 
-        // The last column is the "rule@version" key the harvest query adds to each row.
-        const ruleAOldVersion = [
-          'rule-a',
-          12,
-          '2026-10-01T00:00:00.000Z',
-          ['a1'],
-          20,
-          12,
-          ',rule-a@1,',
-        ];
+        // The last column is the "rule@version" key both queries add to each row.
+        const screenedRows = resolveExpression(resolveScreened.with?.rows, {
+          consts: tuning.consts,
+          steps: {
+            ...steps,
+            screen_rule_fp_rates: {
+              output: {
+                values: [
+                  ['rule-a', 20, 12, ',rule-a@1,'],
+                  ['rule-b', 20, 15, ',rule-b@5,'],
+                ],
+              },
+            },
+          },
+        });
+        expect(screenedRows).toEqual([['rule-b', 20, 15, ',rule-b@5,']]);
+
+        const ruleAOldVersion = ['rule-a', 12, '2026-10-01T00:00:00.000Z', ['a1'], ',rule-a@1,'];
         const ruleBCurrentVersion = [
           'rule-b',
           15,
           '2026-10-01T00:00:00.000Z',
           ['b1'],
-          20,
-          15,
           ',rule-b@5,',
         ];
-
         const reviewedRows = resolveExpression(rows.with?.rows, {
           consts: tuning.consts,
           steps: {
+            ...steps,
             harvest_fp_alerts_by_rule: {
               output: { values: [ruleAOldVersion, ruleBCurrentVersion] },
             },
-            resolve_current_revisions: { output: { rule_revision_keys: currentVersions } },
-            collect_candidates: { output: { fanout_limit: 10 } },
+          },
+        });
+        expect(reviewedRows).toEqual([ruleBCurrentVersion]);
+      });
+
+      // The harvest no longer carries the rule's totals; the review gets them from
+      // the screen row with the same rule@revision key.
+      it('hands each review the totals of its own screen row', () => {
+        const resolveTotals = tuningSteps.find(({ name }) => name === 'resolve_totals')!;
+        const launch = tuningSteps.find(({ name }) => name === 'run_review')!;
+        const launchInputs = launch.with?.inputs as Record<string, string>;
+
+        const row = resolveExpression(resolveTotals.with?.row, {
+          foreach: { item: ['rule-b', 15, '2026-10-01T00:00:00.000Z', ['b1'], ',rule-b@5,'] },
+          steps: {
+            resolve_screened_rules: {
+              output: {
+                rows: [
+                  ['rule-a', 20, 12, ',rule-a@1,'],
+                  ['rule-b', 20, 15, ',rule-b@5,'],
+                ],
+              },
+            },
           },
         });
 
-        expect(reviewedRows).toEqual([ruleBCurrentVersion]);
+        expect(row).toEqual(['rule-b', 20, 15, ',rule-b@5,']);
+        expect(launchInputs.total_alert_count).toBe(
+          '${{ steps.resolve_totals.output.row.1 | default: 0 }}'
+        );
+        expect(launchInputs.total_fp_count).toBe(
+          '${{ steps.resolve_totals.output.row.2 | default: 0 }}'
+        );
       });
 
       describe('expiring stale tuning proposals', () => {
@@ -839,6 +934,8 @@ describe('detection rule workflows', () => {
         expect(consts.max_candidate_rules).toBe(20);
         expect(consts.max_rules_per_sweep).toBe(10);
         expect(consts.max_candidate_rules).toBeGreaterThan(consts.max_rules_per_sweep);
+        expect(consts.max_screened_rules).toBeGreaterThanOrEqual(consts.max_candidate_rules);
+        expect(screenQuery).toContain('LIMIT {{ consts.max_screened_rules }}');
         expect(harvestQuery).toContain('LIMIT {{ consts.max_candidate_rules }}');
 
         const trigger = (
@@ -855,33 +952,37 @@ describe('detection rule workflows', () => {
       });
 
       it('does not split one rule history when its name changes', () => {
-        const groupClause = harvestQuery
-          .split('\n')
-          .find((line) => line.trimStart().startsWith('BY '));
+        for (const query of [screenQuery, harvestQuery]) {
+          const groupClause = query.split('\n').find((line) => line.trimStart().startsWith('BY '));
 
-        expect(groupClause).not.toContain('kibana.alert.rule.name');
+          expect(groupClause).not.toContain('kibana.alert.rule.name');
+        }
       });
 
       // The per-document exclusions live in the DSL filter so Lucene drops the rows
       // before ES|QL sees them.
       it('excludes EQL sequence members and bounds the window in the filter', () => {
-        const filter = JSON.stringify(harvest.with?.filter);
+        for (const step of [screen, harvest]) {
+          const filter = JSON.stringify(step.with?.filter);
 
-        expect(filter).toContain('"exists":{"field":"kibana.alert.group.index"}');
-        expect(filter).toContain(
-          '"range":{"@timestamp":{"gte":"now-{{ inputs.analysis_window_days | default: consts.analysis_window_days }}d"}}'
-        );
+          expect(filter).toContain('"exists":{"field":"kibana.alert.group.index"}');
+          expect(filter).toContain(
+            '"range":{"@timestamp":{"gte":"now-{{ inputs.analysis_window_days | default: consts.analysis_window_days }}d"}}'
+          );
+        }
       });
 
       // The tag API writes to the alerts index of the space it runs in, so anything the
       // harvest reads outside that space could never be marked.
       it('harvests only the space it can tag in', () => {
+        expect(screenQuery).toContain('FROM .alerts-security.alerts-{{ workflow.spaceId }}');
         expect(harvestQuery).toContain('FROM .alerts-security.alerts-{{ workflow.spaceId }}');
       });
 
       // A partial aggregation returns a short alert_ids list, so alerts that drove an
       // approved change would stay untagged and come back on the next sweep.
       it('refuses partial harvest results', () => {
+        expect(screen.with?.allow_partial_results).toBe(false);
         expect(harvest.with?.allow_partial_results).toBe(false);
       });
 
@@ -1664,7 +1765,7 @@ describe('detection rule workflows', () => {
       // the diagnosis and, once tagged, places the reviewed watermark.
       it('keeps only the newest false positives as alert ids', () => {
         expect(harvestQuery).toContain(
-          'fp_recency_key = CONCAT(DATE_FORMAT("yyyyMMddHHmmssSSS", @timestamp), "|", _id)'
+          'fp_recency_key = CONCAT(DATE_FORMAT("yyyyMMddHHmmssSSS", @timestamp), "|", `kibana.alert.uuid`)'
         );
         expect(harvestQuery).toContain('recent_keys = TOP(fp_recency_key');
         expect(harvestQuery).toContain('MV_EXPAND recent_keys');
@@ -1723,6 +1824,8 @@ describe('detection rule workflows', () => {
         ]);
         expect(outputs.reviews_requested).toContain('steps.resolve_fanout_rows.output.rows');
         expect(outputs.reviews_in_flight).toContain('steps.collect_active_rules.output.expected');
+        expect(outputs.harvest_failed).toContain('steps.list_enabled_rules.error != null');
+        expect(outputs.harvest_failed).toContain('steps.screen_rule_fp_rates.error != null');
         expect(outputs.harvest_failed).toContain('steps.harvest_fp_alerts_by_rule.error != null');
         expect(outputs.lookup_failed).toContain('steps.list_active_reviews.error != null');
       });

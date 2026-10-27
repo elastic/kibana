@@ -34,3 +34,4 @@ export {
   type SupplyStatusBody,
 } from './helpers';
 export { type SupplyWorkflowKey } from './supply_workflow_ids';
+export { findStepOutput, runWorkflow, waitForExecution } from './workflow_runs';
