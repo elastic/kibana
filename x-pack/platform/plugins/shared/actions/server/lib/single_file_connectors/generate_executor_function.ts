@@ -7,6 +7,7 @@
 
 import type { ConnectorSpec, ConnectorSpecStackCompat } from '@kbn/connector-specs';
 import {
+  TEST_CONNECTOR_SUB_ACTION,
   authTypeUsesRelay,
   getAuthModeForAuthTypeId,
   getConnectorActionErrorMeta,
@@ -15,6 +16,7 @@ import {
   isSelectedActionEnabled,
   type SelectedActions,
 } from '@kbn/connector-specs';
+import { z } from '@kbn/zod/v4';
 import { clientTypes as defaultClientTypes } from '@kbn/connector-specs/server';
 import type {
   ActionContext,
@@ -79,6 +81,21 @@ const getErrorMeta = ({
   return Object.keys(errorMeta).length > 0 ? errorMeta : undefined;
 };
 
+const DEFAULT_ISOLATED_SUB_ACTIONS = ['test', TEST_CONNECTOR_SUB_ACTION];
+
+const legacyClientBuildConfig = (
+  config: RecordUnknown,
+  connectorId: string
+): RecordUnknown => ({
+  ...config,
+  // Legacy MCP names the client after the connector id. Only the MCP client type
+  // reads `clientName`; other client types ignore the extra field.
+  clientName:
+    typeof config.clientName === 'string' && config.clientName !== ''
+      ? config.clientName
+      : `kibana-mcp-connector-${connectorId}`,
+});
+
 const isClientUserError = (error: unknown, clientType: ClientTypeSpec<unknown>): boolean => {
   return (
     error instanceof AllowlistDeniedError ||
@@ -99,8 +116,10 @@ export const generateExecutorFunction = ({
   clientTypes = defaultClientTypes,
   getJwtSigner,
   stackCompat,
+  connectorName,
 }: {
   connectorTypeId?: string;
+  connectorName?: string;
   actions: ConnectorSpec['actions'];
   getJwtSigner?: (connectorId: string) => ActionContext['signJwt'];
   getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
@@ -114,7 +133,13 @@ export const generateExecutorFunction = ({
    * Legacy stack connector path. Builds pooled-client credentials from
    * `getAuthHeaders`, skips per-user lease checks, and rethrows handler errors.
    */
-  stackCompat?: Pick<ConnectorSpecStackCompat, 'getAuthHeaders' | 'classifyError'>;
+  stackCompat?: Pick<
+    ConnectorSpecStackCompat,
+    | 'getAuthHeaders'
+    | 'classifyError'
+    | 'isolatedClientSubActions'
+    | 'formatIsolatedTerminateFailure'
+  >;
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
@@ -136,6 +161,10 @@ export const generateExecutorFunction = ({
     const { subAction, subActionParams, fetchOptions } = params as ExecutorParams & {
       fetchOptions?: FetchOptions;
     };
+    const isolatedSubActions = new Set(
+      stackCompat ? stackCompat.isolatedClientSubActions ?? DEFAULT_ISOLATED_SUB_ACTIONS : []
+    );
+    const isolateClient = isolatedSubActions.has(subAction);
 
     const axiosInstance = await getAxiosInstanceWithAuth({
       connectorId,
@@ -152,16 +181,44 @@ export const generateExecutorFunction = ({
     });
 
     if (!actions[subAction]) {
+      if (stackCompat) {
+        throw new Error(
+          `Sub action "${subAction}" is not registered. Connector id: ${connectorId}. Connector name: ${
+            connectorName ?? ''
+          }. Connector type: ${connectorTypeId ?? ''}`
+        );
+      }
       const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
       logger.error(errorMessage);
       throw new Error(errorMessage);
     }
 
+    // Legacy stack connectors do not have selectedActions. Skip the gate so a stored
+    // value cannot reject an action the previous executor would run.
     const selectedActions = config.selectedActions as SelectedActions;
-    if (!isSelectedActionEnabled(subAction, selectedActions)) {
+    if (!stackCompat && !isSelectedActionEnabled(subAction, selectedActions)) {
       const errorMessage = `[Action][ExternalService] Action '${subAction}' is not enabled for this connector.`;
       logger.error(errorMessage);
       throw new Error(errorMessage);
+    }
+
+    let parsedSubActionParams: unknown = subActionParams;
+    if (stackCompat && actions[subAction].input) {
+      try {
+        parsedSubActionParams = actions[subAction].input.parse(subActionParams);
+      } catch (reqValidationError) {
+        let errMessage =
+          reqValidationError instanceof Error
+            ? reqValidationError.message
+            : String(reqValidationError);
+        if (reqValidationError instanceof z.ZodError) {
+          errMessage = z.prettifyError(reqValidationError);
+        }
+        throw createTaskRunError(
+          new Error(`Request validation failed (${errMessage})`),
+          TaskErrorSource.USER
+        );
+      }
     }
 
     const pool = getClientLeasePool();
@@ -171,10 +228,30 @@ export const generateExecutorFunction = ({
       promise: Promise<unknown>;
       release: () => void;
     }> = [];
+    const isolatedClients: Array<{
+      clientType: ClientTypeSpec<unknown>;
+      client: unknown;
+    }> = [];
 
     // Release before invalidating: termination waits for every active use, including ours.
     const releaseAcquiredClients = (): void => {
       acquiredClients.forEach(({ release }) => release());
+    };
+
+    const terminateIsolatedClients = async (): Promise<void> => {
+      await Promise.all(
+        isolatedClients.splice(0).map(async ({ clientType, client }) => {
+          try {
+            await clientType.terminate(client);
+          } catch (err) {
+            const detail = err instanceof Error ? err.message : String(err);
+            logger.debug(
+              stackCompat?.formatIsolatedTerminateFailure?.(err) ??
+                `Isolated client terminate failed: ${detail}`
+            );
+          }
+        })
+      );
     };
 
     const invalidateAcquiredClientsForError = async (error: unknown): Promise<void> => {
@@ -224,10 +301,42 @@ export const generateExecutorFunction = ({
           TaskErrorSource.USER
         );
       }
+      const buildConfig = stackCompat ? legacyClientBuildConfig(config, connectorId) : config;
+      const buildClient = () =>
+        clientType.build({
+          logger,
+          config: buildConfig,
+          networkSettings,
+          platform,
+          credential: stackCompat
+            ? { getAuthHeaders: () => stackCompat.getAuthHeaders(config, secrets) }
+            : getCredential({
+                connectorId,
+                connectorTypeId,
+                secrets,
+                connectorTokenClient,
+                authMode,
+                profileUid,
+              }),
+        });
+
       try {
         if (!connectorVersion) {
-          throw new Error(`Missing saved-object version for persisted connector "${connectorId}".`);
+          const message = stackCompat
+            ? `Missing saved-object version for connector "${connectorId}".`
+            : `Missing saved-object version for persisted connector "${connectorId}".`;
+          throw stackCompat
+            ? createTaskRunError(new Error(message), TaskErrorSource.FRAMEWORK)
+            : new Error(message);
         }
+
+        // `test` and `_test` stay outside the pool: build, use, always terminate.
+        if (isolateClient) {
+          const client = await buildClient();
+          isolatedClients.push({ clientType, client });
+          return client;
+        }
+
         const key = buildClientLeaseKey({
           connectorId,
           clientTypeId: id,
@@ -235,41 +344,15 @@ export const generateExecutorFunction = ({
           profileUid,
           connectorVersion,
         });
-        const buildConfig = stackCompat
-          ? {
-              ...config,
-              // Legacy MCP names the pooled client after the connector id. Only the MCP
-              // client type reads `clientName`; other client types ignore the extra field.
-              clientName:
-                typeof config.clientName === 'string' && config.clientName !== ''
-                  ? config.clientName
-                  : `kibana-mcp-connector-${connectorId}`,
-            }
-          : config;
-        const { promise, release } = pool.acquire(
-          key,
-          () =>
-            clientType.build({
-              logger,
-              config: buildConfig,
-              networkSettings,
-              platform,
-              credential: stackCompat
-                ? { getAuthHeaders: () => stackCompat.getAuthHeaders(config, secrets) }
-                : getCredential({
-                    connectorId,
-                    connectorTypeId,
-                    secrets,
-                    connectorTokenClient,
-                    authMode,
-                    profileUid,
-                  }),
-            }),
-          (client) => clientType.terminate(client)
+        const { promise, release } = pool.acquire(key, buildClient, (client) =>
+          clientType.terminate(client)
         );
         acquiredClients.push({ clientType, key, promise, release });
         return await promise;
       } catch (err) {
+        if (stackCompat) {
+          throw err;
+        }
         const isUser = isClientUserError(err, clientType);
         const error = err instanceof Error ? err : new Error(String(err));
         throw createTaskRunError(error, isUser ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK);
@@ -290,7 +373,7 @@ export const generateExecutorFunction = ({
 
     try {
       let data = {};
-      const res = await actions[subAction].handler(actionContext, subActionParams);
+      const res = await actions[subAction].handler(actionContext, parsedSubActionParams);
 
       if (res != null) {
         data = res as Record<string, unknown>;
@@ -331,5 +414,6 @@ export const generateExecutorFunction = ({
       };
     } finally {
       releaseAcquiredClients();
+      await terminateIsolatedClients();
     }
   };

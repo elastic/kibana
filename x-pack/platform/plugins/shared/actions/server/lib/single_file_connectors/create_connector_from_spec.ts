@@ -22,7 +22,7 @@ import type {
 } from '../../types';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '../../plugin';
 
-import { generateParamsSchema } from './generate_params_schema';
+import { generateCompatParamsSchema, generateParamsSchema } from './generate_params_schema';
 import { generateCompatSecretsSchema, generateSecretsSchema } from './generate_secrets_schema';
 import { generateExecutorFunction } from './generate_executor_function';
 import { generateCompatConfigSchema, generateConfigSchema } from './generate_config_schema';
@@ -117,7 +117,9 @@ export const createConnectorTypeFromSpec = (
         getRelayClient: actions.getRelayClient,
         networkSettings,
         platform,
-        ...(stackCompat ? { stackCompat } : {}),
+        ...(stackCompat
+          ? { stackCompat, connectorName: spec.metadata.displayName }
+          : {}),
         ...(signingKey
           ? {
               getJwtSigner: (connectorId: string) =>
@@ -131,7 +133,9 @@ export const createConnectorTypeFromSpec = (
   // graph on first use so it can be collected after the validation call returns.
   const actionNames = Object.keys(spec.actions ?? {});
   const paramsValidator = hasExecutableActions
-    ? lazyImmutableGCableObject(() => generateParamsSchema(executableActions))
+    ? lazyImmutableGCableObject(() =>
+        stackCompat ? generateCompatParamsSchema() : generateParamsSchema(executableActions)
+      )
     : undefined;
 
   return {
@@ -142,7 +146,7 @@ export const createConnectorTypeFromSpec = (
     validate: {
       config: lazyImmutableGCableObject(() =>
         stackCompat
-          ? generateCompatConfigSchema(stackCompat.configSchema)
+          ? generateCompatConfigSchema(stackCompat.configSchema, stackCompat.allowedHostsKeys)
           : generateConfigSchema(schemaForConfig, actionNames)
       ),
       secrets: lazyImmutableGCableObject(() =>
@@ -156,8 +160,13 @@ export const createConnectorTypeFromSpec = (
     globalAuthHeaders: spec.auth?.headers,
     source: stackCompat ? ACTION_TYPE_SOURCES.stack : ACTION_TYPE_SOURCES.spec,
     spec,
-    description: spec.metadata.description,
-    isExperimental: spec.metadata.isTechnicalPreview,
+    // Legacy stack registration does not set these. Keep them off the public type.
+    ...(stackCompat
+      ? {}
+      : {
+          description: spec.metadata.description,
+          isExperimental: spec.metadata.isTechnicalPreview,
+        }),
     isTestable: Boolean(spec.test.enabled),
     sandboxSupportedAuthTypes: stackCompat ? [] : getSandboxSupportedAuthTypeIds(spec.auth),
   };

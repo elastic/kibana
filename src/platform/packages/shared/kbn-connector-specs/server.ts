@@ -26,3 +26,4 @@ export const authTypeSpecs = {
 };
 
 export { clientTypes } from './src/lib/clients';
+export { mcpConnectorSpec } from './src/specs/mcp';

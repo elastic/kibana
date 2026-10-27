@@ -6,6 +6,8 @@
  */
 
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
+import { createConnectorTypeFromSpec } from '@kbn/actions-plugin/server/lib';
+import { mcpConnectorSpec } from '@kbn/connector-specs/server';
 
 import { getJiraServiceManagementConnectorType } from './jira-service-management';
 import { getMicrosoftDefenderEndpointConnectorType } from './microsoft_defender_endpoint';
@@ -44,7 +46,6 @@ import {
 import { getOpsgenieConnectorType } from './opsgenie';
 import { getSentinelOneConnectorType } from './sentinelone';
 import { getCrowdstrikeConnectorType } from './crowdstrike';
-import { getMcpConnectorType } from './mcp';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 
 export { getConnectorType as getSwimlaneConnectorType } from './swimlane';
@@ -93,9 +94,7 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getResilientConnectorType());
   actions.registerSubActionConnectorType(getTheHiveConnectorType());
   actions.registerSubActionConnectorType(getXSOARConnectorType());
-  actions.registerSubActionConnectorType(
-    getMcpConnectorType({ getClientLeasePool: actions.getClientLeasePool })
-  );
+  actions.registerType(createConnectorTypeFromSpec(mcpConnectorSpec, actions));
 
   if (experimentalFeatures.sentinelOneConnectorOn) {
     actions.registerSubActionConnectorType(getSentinelOneConnectorType());

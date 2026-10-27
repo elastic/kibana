@@ -394,15 +394,27 @@ export interface ConnectorSigningKey {
 /**
  * Stack compatibility mode for a legacy stack connector served by the spec executor.
  *
- * Compat mode means `source: 'stack'`, no reserved `_test` sub-action, and handler
- * errors rethrown the same way the sub-action framework does.
+ * Compat mode means `source: 'stack'`, the legacy loose params schema (no reserved
+ * `_test` action), and handler errors rethrown the same way the sub-action framework does.
  */
 export interface ConnectorSpecStackCompat {
   /** Legacy config schema, used as-is. Not extended with `authType` or `selectedActions`. */
   configSchema: z.ZodObject;
   /** Legacy secrets schema, used as-is. Not wrapped in an auth-type union. */
   secretsSchema: z.ZodObject;
-  /** Auth headers for pooled native clients, built from legacy config and secrets. */
+  /**
+   * Config fields checked with the legacy URL allow-list validator.
+   * Kept off the schema so the public config JSON schema does not change.
+   */
+  allowedHostsKeys?: readonly string[];
+  /**
+   * Sub-actions that build a client outside the lease pool and always terminate it.
+   * Defaults to `test` and `_test`.
+   */
+  isolatedClientSubActions?: readonly string[];
+  /** Debug line when an isolated client fails to terminate. */
+  formatIsolatedTerminateFailure?(err: unknown): string;
+  /** Auth headers for native clients, built from legacy config and secrets. */
   getAuthHeaders(
     config: Record<string, unknown>,
     secrets: Record<string, unknown>

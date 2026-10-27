@@ -9,25 +9,31 @@ import type { ConnectorSpec } from '@kbn/connector-specs';
 import { z } from '@kbn/zod/v4';
 
 import type { ActionTypeConfig, ValidatorType } from '../../types';
+import { urlAllowListValidator } from '../../sub_action_framework/helpers';
 import { getAllowedHostsKeysFromShape, validateAllowedHostsKeys } from './allowed_hosts_validation';
 
 /**
  * Config validator for stack-compat specs. The schema is used as-is: no `authType`
- * or `selectedActions` extension. Allowed-hosts checks still run for tagged URL fields.
+ * or `selectedActions` extension. Tagged URL fields use the spec allow-list check.
+ * `legacyAllowedHostsKeys` use the sub-action URL validator so the error text matches.
  */
 export const generateCompatConfigSchema = (
-  schema: z.ZodObject
+  schema: z.ZodObject,
+  legacyAllowedHostsKeys: readonly string[] = []
 ): ValidatorType<ActionTypeConfig> => {
   const allowedHostsKeys = getAllowedHostsKeysFromShape(schema.shape);
 
   return {
     schema,
-    customValidator: (config, { configurationUtilities }) => {
+    customValidator: (config, validatorServices) => {
       validateAllowedHostsKeys(
         config as Record<string, unknown>,
         allowedHostsKeys,
-        configurationUtilities
+        validatorServices.configurationUtilities
       );
+      for (const key of legacyAllowedHostsKeys) {
+        urlAllowListValidator(key)(config, validatorServices);
+      }
     },
   };
 };

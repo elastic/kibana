@@ -854,21 +854,34 @@ describe('createConnectorTypeFromSpec', () => {
       });
     });
 
-    it('does not add the reserved _test sub-action to the params schema', () => {
+    it('keeps the legacy loose params schema and does not register _test', () => {
       const connectorType = createConnectorTypeFromSpec(createCompatSpec(), mockActionsPlugin);
 
-      expect(() =>
+      expect(
         connectorType.validate.params!.schema.parse({
           subAction: 'testAction',
           subActionParams: { test: 'ok' },
         })
-      ).not.toThrow();
-      expect(() =>
+      ).toEqual({
+        subAction: 'testAction',
+        subActionParams: { test: 'ok' },
+      });
+      // The public schema accepts any subAction string. The executor rejects unknown ones.
+      expect(
         connectorType.validate.params!.schema.parse({
           subAction: TEST_CONNECTOR_SUB_ACTION,
           subActionParams: {},
         })
-      ).toThrow();
+      ).toEqual({
+        subAction: TEST_CONNECTOR_SUB_ACTION,
+        subActionParams: {},
+      });
+      expect(connectorType.validate.params!.schema.parse({ subAction: 'listTools' })).toEqual({
+        subAction: 'listTools',
+        subActionParams: {},
+      });
+      expect(connectorType.description).toBeUndefined();
+      expect(connectorType.isExperimental).toBeUndefined();
     });
 
     it.each([

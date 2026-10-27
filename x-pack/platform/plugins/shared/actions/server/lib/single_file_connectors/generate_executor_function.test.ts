@@ -9,6 +9,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { generateExecutorFunction } from './generate_executor_function';
 import { setConnectorActionErrorMeta, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
+import { z } from '@kbn/zod/v4';
 import type {
   ActionContext,
   BuildContext,
@@ -1701,7 +1702,14 @@ describe('generateExecutorFunction', () => {
       }
     ) =>
       generateExecutorFunction({
-        actions: { testAction: { isTool: true, scope: 'read', input: {} as never, handler } },
+        actions: {
+          testAction: {
+            isTool: true,
+            scope: 'read',
+            input: z.object({}).passthrough(),
+            handler,
+          },
+        },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
@@ -1869,6 +1877,83 @@ describe('generateExecutorFunction', () => {
 
       expect(order[0]).toBe('release');
       expect(order).toContain('terminate');
+    });
+
+    it('builds test and _test clients outside the pool and always terminates them', async () => {
+      const fakeClientType = {
+        id: 'mcp',
+        build: jest.fn().mockResolvedValue({ id: 'isolated' }),
+        terminate: jest.fn().mockRejectedValue(new Error('already closed')),
+      };
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        await (ctx.getClient as unknown as (id: string) => Promise<unknown>)('mcp');
+        return { connected: true };
+      });
+      const executor = generateExecutorFunction({
+        connectorTypeId: '.mcp',
+        connectorName: 'MCP',
+        actions: {
+          test: { scope: 'read', input: z.object({}).strict(), handler },
+          [TEST_CONNECTOR_SUB_ACTION]: {
+            scope: 'read',
+            input: z.unknown().optional(),
+            handler,
+          },
+        },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+        clientTypes: { mcp: fakeClientType },
+        stackCompat: {
+          getAuthHeaders,
+          formatIsolatedTerminateFailure: (err) =>
+            `MCP test client terminate failed: ${err instanceof Error ? err.message : String(err)}`,
+        },
+      });
+      const acquire = jest.spyOn(fakeLeasePool, 'acquire');
+
+      await executor(makeExecOptions({ subAction: 'test', subActionParams: {} }));
+      await executor(makeExecOptions({ subAction: TEST_CONNECTOR_SUB_ACTION, subActionParams: {} }));
+
+      expect(acquire).not.toHaveBeenCalled();
+      expect(fakeClientType.build).toHaveBeenCalledTimes(2);
+      expect(fakeClientType.terminate).toHaveBeenCalledTimes(2);
+      expect(logger.debug).toHaveBeenCalledWith('MCP test client terminate failed: already closed');
+    });
+
+    it('rejects unknown sub-actions and invalid params with legacy messages', async () => {
+      const executor = generateExecutorFunction({
+        connectorTypeId: '.mcp',
+        connectorName: 'MCP',
+        actions: {
+          callTool: {
+            scope: 'write',
+            input: z.object({ name: z.string() }),
+            handler: jest.fn(),
+          },
+        },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+        stackCompat: { getAuthHeaders },
+      });
+
+      const unknown = await executor(
+        makeExecOptions({ subAction: 'missing', subActionParams: {} })
+      ).catch((err) => err);
+      expect(unknown.message).toBe(
+        'Sub action "missing" is not registered. Connector id: test-connector-id. Connector name: MCP. Connector type: .mcp'
+      );
+
+      const invalid = await executor(
+        makeExecOptions({ subAction: 'callTool', subActionParams: {} })
+      ).catch((err) => err);
+      expect(invalid.message).toContain('Request validation failed');
+      expect(getErrorSource(invalid)).toBe(TaskErrorSource.USER);
     });
   });
 });
