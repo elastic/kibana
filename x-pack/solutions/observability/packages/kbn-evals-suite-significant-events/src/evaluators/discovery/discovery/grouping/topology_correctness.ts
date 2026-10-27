@@ -25,11 +25,51 @@ const topologyExpectedEvents = (
     (event) => (event.causal_features?.length ?? 0) > 0 || (event.blast_radius?.length ?? 0) > 0
   );
 
-const scoreTopologyFields = (
-  actual: Partial<SignificantEvent>,
-  expected: Partial<SignificantEvent>,
-  eventLabel: string
-): { score: number | null; explanations: string[] } => {
+interface TopologyFieldsInput {
+  actual: Partial<SignificantEvent>;
+  expected: Partial<SignificantEvent>;
+  eventLabel: string;
+  /** Score recall only: IDs added beyond `expected` are not penalized. */
+  allowAdditions?: boolean;
+}
+
+const scoreIdSet = ({
+  field,
+  eventLabel,
+  actualIds,
+  expectedIds,
+  allowAdditions,
+}: {
+  field: 'causal_features' | 'blast_radius';
+  eventLabel: string;
+  actualIds: string[];
+  expectedIds: string[];
+  allowAdditions: boolean;
+}): { score: number; explanation?: string } => {
+  const { score: f1, precision, recall } = setPrf(actualIds, expectedIds);
+  const score = allowAdditions ? recall : f1;
+  if (score >= 1) {
+    return { score };
+  }
+  const missing = expectedIds.filter((id) => !actualIds.includes(id));
+  return {
+    score,
+    explanation: allowAdditions
+      ? `${field}[${eventLabel}]: R=${recall.toFixed(2)} missing=[${missing.join(
+          ','
+        )}] expected=[${expectedIds.join(',')}] got=[${actualIds.join(',')}]`
+      : `${field}[${eventLabel}]: P=${precision.toFixed(2)} R=${recall.toFixed(
+          2
+        )} expected=[${expectedIds.join(',')}] got=[${actualIds.join(',')}]`,
+  };
+};
+
+const scoreTopologyFields = ({
+  actual,
+  expected,
+  eventLabel,
+  allowAdditions = false,
+}: TopologyFieldsInput): { score: number | null; explanations: string[] } => {
   const hasExpectedTopology =
     (expected.causal_features?.length ?? 0) > 0 || (expected.blast_radius?.length ?? 0) > 0;
 
@@ -40,31 +80,22 @@ const scoreTopologyFields = (
   const explanations: string[] = [];
   const eventScores: number[] = [];
 
-  if (expected.causal_features?.length) {
-    const expectedIds = expected.causal_features.map((f) => f.feature_id);
-    const actualIds = (actual.causal_features ?? []).map((f) => f.feature_id);
-    const { score, precision, recall } = setPrf(actualIds, expectedIds);
-    eventScores.push(score);
-    if (score < 1) {
-      explanations.push(
-        `causal_features[${eventLabel}]: P=${precision.toFixed(2)} R=${recall.toFixed(
-          2
-        )} expected=[${expectedIds.join(',')}] got=[${actualIds.join(',')}]`
-      );
+  const fields = ['causal_features', 'blast_radius'] as const;
+  for (const field of fields) {
+    const expectedFeatures = expected[field] ?? [];
+    if (expectedFeatures.length === 0) {
+      continue;
     }
-  }
-
-  if (expected.blast_radius?.length) {
-    const expectedIds = expected.blast_radius.map((f) => f.feature_id);
-    const actualIds = (actual.blast_radius ?? []).map((f) => f.feature_id);
-    const { score, precision, recall } = setPrf(actualIds, expectedIds);
-    eventScores.push(score);
-    if (score < 1) {
-      explanations.push(
-        `blast_radius[${eventLabel}]: P=${precision.toFixed(2)} R=${recall.toFixed(
-          2
-        )} expected=[${expectedIds.join(',')}] got=[${actualIds.join(',')}]`
-      );
+    const result = scoreIdSet({
+      field,
+      eventLabel,
+      expectedIds: expectedFeatures.map((f) => f.feature_id),
+      actualIds: (actual[field] ?? []).map((f) => f.feature_id),
+      allowAdditions,
+    });
+    eventScores.push(result.score);
+    if (result.explanation) {
+      explanations.push(result.explanation);
     }
   }
 
@@ -75,7 +106,8 @@ const scoreTopologyFields = (
 };
 
 /**
- * Precision/recall F1 over causal_features and blast_radius feature IDs.
+ * Recall over the expected causal_features and blast_radius feature IDs: an entry the agent adds
+ * beyond the expected set (for example the calling service) is not penalized.
  * Each expected event is matched to the actual event with the highest rule UUID overlap in signals.
  * Each actual event can only be claimed by one expected event (no double-counting).
  */
@@ -111,11 +143,12 @@ export const scoreTopologyCorrectness = (
       continue;
     }
 
-    const { score: eventScore, explanations: fieldExplanations } = scoreTopologyFields(
-      match,
-      exp,
-      exp.event_id ?? '?'
-    );
+    const { score: eventScore, explanations: fieldExplanations } = scoreTopologyFields({
+      actual: match,
+      expected: exp,
+      eventLabel: exp.event_id ?? '?',
+      allowAdditions: true,
+    });
     if (eventScore === null) {
       continue;
     }
@@ -143,7 +176,8 @@ export interface ContinuationTopologyCycle {
 
 /**
  * Score continuation writes against the establishing cycle's emitted topology.
- * Each follow-up cycle with `expectReuse !== false` must preserve that topology in events_write.
+ * Each follow-up cycle with `expectReuse !== false` must preserve that topology in events_write;
+ * a follow-up may add entries (a continued event can grow), so only dropped entries are penalized.
  * Measures topology stability (follow-up vs. establishing), not ground-truth correctness.
  * Follow-up items are matched to establishing items by event_id; falls back to index 0.
  */
@@ -193,11 +227,12 @@ export const scoreContinuationTopologyStability = (
         (followUp.event_id
           ? establishingItems.find((e) => e.event_id === followUp.event_id)
           : undefined) ?? establishingItems[0];
-      const result = scoreTopologyFields(
-        followUp,
-        establishing,
-        establishing.event_id ?? 'establishing-0'
-      );
+      const result = scoreTopologyFields({
+        actual: followUp,
+        expected: establishing,
+        eventLabel: establishing.event_id ?? 'establishing-0',
+        allowAdditions: true,
+      });
       if (result.score !== null) {
         cycleScores.push(result.score);
         if (result.score < 1) {
@@ -242,7 +277,7 @@ export const scoreContinuationTopologyStability = (
 };
 
 /**
- * CODE evaluator: precision/recall F1 over causal_features and blast_radius feature IDs against
+ * CODE evaluator: recall over causal_features and blast_radius feature IDs against
  * expected_significant_events. Only scores events that declare at least one topology field.
  * Each expected event is matched to the actual event with the highest rule UUID overlap in signals.
  */

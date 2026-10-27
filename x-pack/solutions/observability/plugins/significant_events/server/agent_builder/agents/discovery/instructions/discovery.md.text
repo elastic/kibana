@@ -92,8 +92,9 @@ on the given path (never `list_files`, never re-run the query). Before emitting,
 signal's evidence, verdict, and topology must come from a result you have read in this run.
 
 - `significant-events-ki-grounding` (via `load_skill`) — loads `platform_sig_events_ki_search` and
-  `platform_core_execute_esql` for grounding. Run `load_skill` alone in its own tool-call batch and
-  wait for the response; never batch it with KI search or ES|QL. Do not re-run queries after grouping.
+  `platform_core_execute_esql` for grounding. Load it once per run, alone in its own tool-call batch,
+  and wait for the response; never batch it with KI search or ES|QL. Run the KI searches once per run
+  and do not re-run queries after grouping.
 - `platform_sig_events_event_search` — retrieves active events for routing.
 - `platform_sig_events_events_write` — writes events once per run, when emitting. `<field_rules>` covers the rest of the payload contract.
 
@@ -132,9 +133,9 @@ A continuation item adds `"event_id": "{accepted active event_id}"`; a new-event
   "items": [
     {
       "title": "...", "symptom_hypothesis": "...", "summary": "...", "severity": "...",
-      "assessment_note": "...", "confidence": "...", "slugs": ["..."],
+      "assessment_note": "...", "confidence": <number 0.0 to 1.0>, "slugs": ["..."],
       "signals": [
-        { "type": "detection", "source_id": "...", "description": "...", "verdict": "confirms", "evidence": { "esql_query": "...", "result": "found", "time_range": { "from": "...", "to": "..." } }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "spike", "p_value": 0.0001 } }
+        { "type": "detection", "source_id": "...", "description": "...", "verdict": "confirms", "evidence": { "esql_query": "...", "result": "found", "time_range": { "from": "...", "to": "..." } }, "metadata": { "detection_id": "...", "rule_uuid": "..." } }
       ],
       "causal_features": [
         { "feature_id": "...", "type": "entity", "subtype": "service", "name": "...", "source_id": "..." }
@@ -287,11 +288,23 @@ the step that produces it.
    grounding: copy them, do not rewrite them. An off-topic row with a concrete error the system does
    not demonstrably tolerate is independent grounding evidence: assess it as a separate incident
    candidate rather than dismissing it with the rule hypothesis.
+4. **Decide each detection's outcome once.** Apply `<eligibility>` to its verdict and record one of:
+   Write, Recovery, or Not written. Steps 2–6 use this outcome and never re-decide it. A detection
+   that is Not written takes no part in routing, grouping or any item; its `rule_uuid` goes to
+   `written_rule_uuids`.
+
+   | Detection | Verdict | Outcome |
+   |---|---|---|
+   | rule-a | `confirms` | Write |
+   | rule-b | `not_checked` | Not written |
+   | rule-c | `refutes`, and rule-c is in a live event | Recovery |
 
 ### Step 2: Route detections
 
-For each detection, determine whether it continues an existing active event. An accepted
-continuation binds the matched `event_id` to this detection's topology from grounding.
+For each detection whose outcome is Write or Recovery, determine whether it continues an existing
+active event. An accepted continuation binds the matched `event_id` and the topology its item
+carries: this detection's grounded `causal_features` and `blast_radius`, else the matched event's
+stored ones from the compact search result. Both are required on the write payload.
 
 **`platform_sig_events_event_search` instructions**
 - Use `platform_sig_events_event_search` with `status: "active"`, `view: "compact"`, and
@@ -376,8 +389,7 @@ until both searches have returned.
 
    A different title or `symptom_hypothesis` wording for the same `rule_uuid` is never, by itself,
    sufficient to reject — evaluate the underlying target and mechanism, not how the symptom is
-   phrased. On accept, bind this detection's grounded `causal_features` and `blast_radius` for emit
-   — both are required on the write payload even when stored topology from `event_search` is empty.
+   phrased. On accept, bind as stated at the top of this step.
 
 **Topology Match**
 
@@ -393,20 +405,19 @@ Match never skips it, and a Topology hit is not waiting for a rule-uuid match.
      returned topology and compact summary context (`title`, `summary`, `symptom_hypothesis`).
      Compact search has no per-signal prose. Reuse that `event_id`. Compact `signal_rule_uuids` need
      not contain the new rule.
-   - Reject when `<incident_matching>` rejects. On accept, bind topology as in Rule Match.
+   - Reject when `<incident_matching>` rejects. On accept, bind as stated at the top of this step.
 
 Every continuation item must carry its recorded exact `event_id`.
 
 ### Step 3: Group remaining detections into new events
 
-Only detections whose `rule_uuid` is not in `continued_rule_uuids` enter new-event grouping. If
-every detection was accepted as a continuation, this step produces no groups and the flow continues to
-Step 4.
+Only detections with outcome Write whose `rule_uuid` is not in `continued_rule_uuids` enter new-event
+grouping. If every detection was accepted as a continuation or is Not written, this step produces no
+groups and the flow continues to Step 4.
 
 1. Build the grouping graph before any ownership, titles, or narratives:
-   - One node per detection not excluded by `<incident_matching>` pre-check rule 2, and not a new
-     candidate that `<eligibility>` does not write; a concrete off-topic observed error remains its
-     own candidate. Other excluded detections never enter the graph or any later assignment.
+   - One node per such detection, after the `<incident_matching>` pre-check; a concrete off-topic
+     observed error is its own node.
    - **Index first.** List each confirmed detection with the `features[].id` values of its matched
      query KI and the services its signal names. A `features[].id` counts only when the Step 1
      feature search returned it; any other id never does, so a rule that lists only those, or whose
@@ -447,6 +458,10 @@ Step 4.
    callers, or confirmed chains even when one detection's evidence alone does not name every hop.
    Close the topology: a grounded dependency path whose endpoint is already on the map belongs on
    the map. `causal_features` includes every service whose signal in this component is `confirms`.
+
+Step 3 produces the groups. Write each in your message as its rule names, the edge or bridge that
+joins them, and its finalized topology; the step ends when every Write detection not continued is in
+exactly one group.
 
 ### Step 4: Form the hypothesis
 
@@ -539,21 +554,14 @@ rules were written.
 
 1. **Build the items.** Follow the `platform_sig_events_events_write` field descriptions and apply
    `<field_rules>`. One item per new event and one continuation item per distinct accepted `event_id`, holding every
-   rule bound to it; no two items share an `event_id`. Each `rule_uuid`
-   appears in exactly one item's signals, exactly once. Only new-event items omit `event_id`;
+   rule bound to it; no two items share an `event_id`. Each detection with outcome Write or
+   Recovery appears in exactly one item's signals, exactly once; a Not written detection is in no
+   item. Only new-event items omit `event_id`;
    continuations carry the accepted `event_id` and this cycle's grounded signals only.
-2. **Copy the topology.** Write the finalized `causal_features` and `blast_radius` on every item; do
-   not re-derive them at emit time.
-3. **Check before write.** The write is validated against the tool schema before it runs; fix every
-   item here, because a failed attempt costs a full regeneration.
-   - Each `rule_uuid` appears once in the whole request, including within an item.
-   - A `confirms` item contains no `not_checked` signal; leave those detections out of the write.
-   - Each new-event item has a `confirms` or observed-error `off_topic` signal (`<eligibility>`);
-     otherwise drop it and add its `rule_uuid`s to `written_rule_uuids`. Do not split a Topology Match continuation to satisfy the pre-check.
-   - No two items carry the same `event_id`; merge continuations bound to one event into one item.
-   - Each continuation has at least one signal, and its `event_id` equals the recorded accepted
-     event's `event_id` and matches an active event from this run's `event_search` results,
-     character for character.
+2. **Copy the topology.** Write the topology finalized in Step 3, or bound at routing for a
+   continuation, on every item; do not re-derive it at emit time.
+3. **Check before write.** The tool schema validates structure, eligibility and `event_id`s and names
+   the field paths to fix. Check what it cannot:
    - Every text field you write (`title`, `symptom_hypothesis`, `summary`, `assessment_note`) meets
      its field description in the tool schema (sentence budget, slots, and what belongs in another
      field). Signal `description`s are copied from grounding as written.

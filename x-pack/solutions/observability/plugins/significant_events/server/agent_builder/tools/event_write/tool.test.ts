@@ -144,14 +144,19 @@ describe('events_write tool', () => {
       items: [{ ...input, signals: [signal, signal] }],
     });
 
-    [duplicateAcrossItems, duplicateWithinItem].forEach((result) => {
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues.at(-1)?.message).toBe(
-          'Each detection rule UUID may appear exactly once in the complete write, including within a single event item. Correct ownership before the single write; never retry with an empty placeholder.'
-        );
-      }
-    });
+    expect(duplicateAcrossItems.success).toBe(false);
+    if (!duplicateAcrossItems.success) {
+      expect(duplicateAcrossItems.error.issues.at(-1)?.message).toContain(
+        'Rule UUID rule-1 is in items 0 and 1'
+      );
+      expect(duplicateAcrossItems.error.issues.at(-1)?.message).toContain('merge those items');
+    }
+    expect(duplicateWithinItem.success).toBe(false);
+    if (!duplicateWithinItem.success) {
+      expect(duplicateWithinItem.error.issues.at(-1)?.message).toBe(
+        'Rule UUID rule-1 appears twice in item 0. List each rule once per item, then call again with the complete request.'
+      );
+    }
   });
 
   describe('breaching signal invariant', () => {
@@ -682,6 +687,29 @@ describe('events_write tool', () => {
             ],
           }),
         ],
+      })
+    );
+  });
+
+  it('accepts a blast radius entry without a source_id and writes it as sent', async () => {
+    getFeatures.mockResolvedValue({ hits: [] });
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_uuid: 'u', event_id: 'e', status: 'open', written: true },
+    ]);
+    const blastRadius = [{ type: 'entity' as const, feature_id: 'checkout-api', name: 'Checkout' }];
+
+    expect(eventsWriteItemSchema.safeParse({ ...input, blast_radius: blastRadius }).success).toBe(
+      true
+    );
+    await invokeHandler(
+      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      { items: [{ ...input, blast_radius: blastRadius }] },
+      createMockToolContext()
+    );
+
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        inputs: [expect.objectContaining({ blast_radius: blastRadius })],
       })
     );
   });

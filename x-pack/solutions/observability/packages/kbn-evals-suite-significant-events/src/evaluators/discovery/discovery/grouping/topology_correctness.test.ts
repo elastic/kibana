@@ -160,6 +160,15 @@ describe('scoreTopologyCorrectness', () => {
     expect(result.explanation).toMatch(/no matching actual event/);
   });
 
+  it('does not penalize entries added beyond the expected topology', () => {
+    const actual = [
+      event('e1', ['uuid-1'], ['svc-a', 'frontend'], ['dep-1', 'frontend']),
+    ] as unknown as SignificantEvent[];
+    const expected = [event('e1', ['uuid-1'], ['svc-a'], ['dep-1'])];
+
+    expect(scoreTopologyCorrectness(actual, expected).score).toBe(1);
+  });
+
   it('does not deflate precision for duplicate feature IDs in actual', () => {
     // actual has ['svc-a', 'svc-a'] (duplicate) — with raw array length as denominator
     // precision would be 0.5 even though the unique set is exactly right.
@@ -233,13 +242,20 @@ describe('scoreContinuationTopologyStability', () => {
     expect(result.score).toBe(1);
   });
 
-  it('scores topology drift below 1.0', () => {
+  it('scores dropped topology below 1.0', () => {
     const establishing = makeCycle([event('e1', [], ['svc-a', 'svc-b'], [])]);
     const followUp = makeCycle([event('e1', [], ['svc-a'], [])]);
 
     const result = scoreContinuationTopologyStability([establishing, followUp]);
-    expect(result.score).toBeGreaterThan(0);
-    expect(result.score).toBeLessThan(1);
+    expect(result.score).toBe(0.5);
+    expect(result.explanation).toContain('missing=[svc-b]');
+  });
+
+  it('does not penalize entries added by a follow-up', () => {
+    const establishing = makeCycle([event('e1', [], ['svc-a'], ['dep-1'])]);
+    const followUp = makeCycle([event('e1', [], ['svc-a', 'frontend'], ['dep-1', 'dep-2'])]);
+
+    expect(scoreContinuationTopologyStability([establishing, followUp]).score).toBe(1);
   });
 
   it('matches follow-up items to establishing items by event_id, not just index 0', () => {

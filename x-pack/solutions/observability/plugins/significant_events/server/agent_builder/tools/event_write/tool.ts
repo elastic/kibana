@@ -155,25 +155,32 @@ const eventsWriteItemsSchema = lazySchema(() =>
     .array(eventsWriteItemSchema, { error: ITEMS_REQUIRED_MESSAGE })
     .min(1, { error: ITEMS_REQUIRED_MESSAGE })
     .max(MAX_BULK_WRITE_ITEMS)
-    .refine(
-      (items) => {
-        const ruleUuids = items.flatMap((item) =>
-          (item.signals ?? [])
-            .filter((signal) => signal.type === 'detection')
-            .map((signal) => signal.metadata?.rule_uuid)
-            .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid))
-        );
-        return new Set(ruleUuids).size === ruleUuids.length;
-      },
-      {
-        message:
-          'Each detection rule UUID may appear exactly once in the complete write, including within a single event item. Correct ownership before the single write; never retry with an empty placeholder.',
-      }
-    )
+    .superRefine((items, ctx) => {
+      const owners = new Map<string, number>();
+      items.forEach((item, itemIndex) => {
+        (item.signals ?? []).forEach((signal) => {
+          const ruleUuid = signal.type === 'detection' ? signal.metadata?.rule_uuid : undefined;
+          if (!ruleUuid) return;
+          const firstIndex = owners.get(ruleUuid);
+          if (firstIndex === undefined) {
+            owners.set(ruleUuid, itemIndex);
+            return;
+          }
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [itemIndex],
+            message:
+              firstIndex === itemIndex
+                ? `Rule UUID ${ruleUuid} appears twice in item ${itemIndex}. List each rule once per item, then call again with the complete request.`
+                : `Rule UUID ${ruleUuid} is in items ${firstIndex} and ${itemIndex}. A rule belongs to exactly one item: merge those items into one (a rule shared by two groups joins them), then call again with the complete request. Never retry with an empty placeholder.`,
+          });
+        });
+      });
+    })
     .describe(
       i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
         defaultMessage:
-          'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals. A new event must carry a confirms signal (or an off_topic signal with an observed error); a continuation may carry any verdict, including refutes for a rule that turned healthy. Status is not an input: it follows from the verdicts.',
+          'Non-empty array of event objects. One call assigns every written batch detection; a detection that is not written belongs in no item. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals. A new event must carry a confirms signal (or an off_topic signal with an observed error); a continuation may carry any verdict, including refutes for a rule that turned healthy. Status is not an input: it follows from the verdicts.',
       })
     )
 );

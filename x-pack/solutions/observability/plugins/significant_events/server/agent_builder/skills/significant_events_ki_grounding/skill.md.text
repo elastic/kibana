@@ -6,8 +6,8 @@ the failure is still happening.
 <reading_log_lines>
 
 Every verdict and every description is built from the rows that `platform_core_execute_esql`
-returns, so read them first. When a round's sample queries return, read each rule's result, one rule
-at a time, before sending its profile queries or anything else.
+returns, so read them first. When a rule's sample returns, read it before sending its profile queries
+or anything else.
 
 1. Read the whole result. An empty or errored result is a finding: say which.
 2. Read each row as a set of named fields: pair every value with its field name, nested attribute
@@ -139,6 +139,9 @@ use `off_topic` only when it matches neither.
 
 `feature_id` is the fetched KI's `feature.id` (or a matched query's `features[].id`), copied exactly. If a
 feature name is provided, use it only to locate the fetched feature, then copy that feature's `id`.
+`source_id` is the `source_id` the search returned on that fetched KI: a KI belongs to one source, and
+the write finds it by `feature_id` in that source. Omit it on an entry whose KI returned none. It is
+never the detection's batch `source_id`.
 Copy classification verbatim from each fetched KI:
 `subtype` on every entry and `type` on cause entries. Blast-radius `type` remains the row-shape label listed above.
 
@@ -146,7 +149,7 @@ Copy classification verbatim from each fetched KI:
 
 <procedure>
 
-Run steps 1–5 in order for the whole batch; steps 3 and 4 repeat per round of rules, as step 3 says.
+Run steps 1–5 in order for the whole batch; steps 3 and 4 run once per rule, as step 3 says.
 
 ### 1. Retrieve: get the grounding context
 
@@ -208,12 +211,11 @@ invalid: the verdict is `not_checked`, not `inconclusive`.
 
 One sample per rule proves whether its failure is happening now. Apply `<query_rules>`, plus:
 
-- **Steps 3 and 4 run once per round of 2 rules** (the last round may hold 1), in this order:
-  1. Send the sample queries for the round's rules in one response.
-  2. When they return, read them as `<reading_log_lines>` requires and write the round's findings.
-  3. Send the profile queries for the round's rules whose sample shows a failure, in one
-     response.
-  4. Only then start the next round.
+- **Steps 3 and 4 run once per rule**, one rule at a time, in this order:
+  1. Send the rule's sample query alone.
+  2. When it returns, read it as `<reading_log_lines>` requires and write the rule's findings.
+  3. When its sample shows a failure, send the rule's profile queries in one response.
+  4. Only then start the next rule.
 - **FROM target.** If the KI's `query.esql.query` starts with `FROM $.{name}`, copy that `FROM`
   verbatim. Otherwise copy the `view_name` of the response `sources` entry whose `slug` equals the
   KI's `source_id`. Do not assemble view names or strip `$.`.
@@ -244,7 +246,7 @@ variant below that matches whether `{scope}` isolates the operation), the `trend
 and the `baseline` query, under `<query_rules>`, built from `{scope}` and `{failure}`.
 Every qualifying rule is profiled, whatever the batch size. A figure is unmeasured only when its
 query returned no rows or failed, never because the query was not run.
-A round's profile queries go out after its findings are written, and before the next round's samples.
+A rule's profile queries go out after its findings are written, and before the next rule's sample.
 
 For an `off_topic` signal, `{failure}` measures the observed error, so use a condition that
 isolates it (an exact field value seen in its sample row). With no such condition, leave its
@@ -364,8 +366,11 @@ Each entry:
   states nor depends on the verdict.
   1. **What the rows state.** The signature and the target, then, for each dimension the rows carry,
      `field = value`, any row that differs, and the correlations, all from your
-     `<reading_log_lines>` findings. The reader cannot see the rows. Sensitive data (PII, PCI, SSN,
-     credentials, secrets, tokens) and identifiers are named by field and type and never quoted.
+     `<reading_log_lines>` findings. The reader cannot see the rows. Quote the fields that state what the
+     rows record (signature, operation, target, service, endpoint, status, level, counts). A field whose
+     value only identifies an instance (trace, span, request, session, user, host, pod, container
+     or node ID) and sensitive data (PII, PCI, SSN, credentials, secrets, tokens) are named by field
+     and what they distinguish, for example `host.name`: one pod, and their values are never quoted.
   2. **How much and how widely**, from the Profile step's numbers. Give each count as `N of M (P%)` with its
      unit (log lines, or attempts when the scope isolates one line per attempt), scope and period,
      where P is N/M × 100 rounded to one decimal place (for example `0.1%`, `37.5%`, `100.0%`), so
