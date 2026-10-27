@@ -27,8 +27,6 @@ export function initializeApproximationManager(initialState: DashboardState) {
     }
   }
 
-  const comparators = approximationComparators;
-
   const getState = (): Pick<DashboardState, 'esql_approximation'> => ({
     esql_approximation: isApproximate$.value,
   });
@@ -53,14 +51,14 @@ export function initializeApproximationManager(initialState: DashboardState) {
           combineLatestWith(lastSavedState$),
           map(([latestState, lastSavedState]) => {
             return diffComparators(
-              comparators,
+              approximationComparators,
               { esql_approximation: lastSavedState.esql_approximation ?? false },
               latestState
             );
           })
         );
       },
-      comparators,
+      comparators: approximationComparators,
       getState,
       reset: (lastSavedState: DashboardState) => {
         setEsqlApproximation(lastSavedState.esql_approximation ?? false);
