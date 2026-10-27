@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { escapeKuery } from '@kbn/es-query';
+import type {
+  ElasticsearchClient,
+  ISavedObjectsSerializer,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
 import { hasSameEsql } from '@kbn/streams-schema';
 import {
   createSourceRequestSchema,
@@ -26,7 +30,7 @@ import {
   type UpdateSourceRequest,
 } from '@kbn/nightshift-shared';
 import { z } from '@kbn/zod/v4';
-import { badRequest, boomify, forbidden, notFound } from '@hapi/boom';
+import { badRequest, forbidden, notFound } from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
 import {
   NIGHTSHIFT_SOURCE_SO_TYPE,
@@ -49,6 +53,8 @@ const VIEW_NAME_CATALOG_PAGE_SIZE = 1000;
 
 interface SourcesClientDependencies {
   soClient: SavedObjectsClientContract;
+  /** Builds the raw document `_id` that the saved-object filter on `id` compares against. */
+  serializer: ISavedObjectsSerializer;
   viewsClient: SourceViewsClient;
   dataEsClient: ElasticsearchClient;
   logger: Logger;
@@ -59,10 +65,16 @@ interface SourcesClientDependencies {
   onChange: (change: SourceChange) => Promise<void>;
 }
 
+// Characters `simple_query_string` reads as operators: AND/OR/NOT, phrase, prefix, grouping, fuzziness.
+const SIMPLE_QUERY_STRING_OPERATORS = /[+|\-"*()~\\]/g;
+
 const toSource = (id: string, attributes: NightshiftSourceAttributes): NightshiftSource => ({
   id,
   ...attributes,
 });
+
+/** Quoted, so the value is matched as it is: no operator, wildcard or whitespace is read in it. */
+const quoteKqlValue = (value: string): string => `"${value.replace(/["\\]/g, '\\$&')}"`;
 
 // HTTP Zod never runs for `getSourcesClient()`. Parse here so engines cannot persist a blank
 // title (or other wire-invalid attributes) that PUT repair would then refuse.
@@ -254,7 +266,8 @@ export class SourcesClient {
 
   /**
    * Saved-object catalog. View health is `get()`; list does not fetch views.
-   * `ids` looks those sources up directly. Search, enabled, and paging then apply to the ones that exist.
+   * Search, `ids`, enabled and paging all run in Elasticsearch, so `ids` that match no source
+   * are left out, and `total` counts only the sources that match every filter.
    */
   async list({
     page,
@@ -270,17 +283,33 @@ export class SourcesClient {
     ids?: string[];
   }): Promise<ListSourcesResponse> {
     const term = search?.trim() || undefined;
-    if (ids) {
-      return this.listByIds({ ids, page, perPage, search: term, enabled });
-    }
 
     const filters: string[] = [];
-    if (term) {
-      filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.title: ${escapeKuery(term)}*`);
+    if (ids) {
+      const { serializer, spaceId } = this.deps;
+      const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
+      const idFilters = ids.map(
+        (id) =>
+          `${NIGHTSHIFT_SOURCE_SO_TYPE}.id: ${quoteKqlValue(
+            serializer.generateRawId(namespace, NIGHTSHIFT_SOURCE_SO_TYPE, id)
+          )}`
+      );
+      filters.push(`(${idFilters.join(' OR ')})`);
     }
     if (enabled !== undefined) {
       filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.enabled: ${enabled}`);
     }
+
+    // `search` rather than a KQL filter: KQL splits on whitespace, so it cannot match several words.
+    // The trailing `*` makes the last word a prefix and turns on the saved-object client's
+    // phrase-prefix clause, which is what finds hyphenated titles.
+    const titleSearch = term
+      ? {
+          search: `${term.replace(SIMPLE_QUERY_STRING_OPERATORS, '\\$&')}*`,
+          searchFields: ['title.text'],
+          defaultSearchOperator: 'AND' as const,
+        }
+      : {};
 
     const response = await this.deps.soClient.find<NightshiftSourceAttributes>({
       type: NIGHTSHIFT_SOURCE_SO_TYPE,
@@ -289,6 +318,7 @@ export class SourcesClient {
       sortField: 'title',
       sortOrder: 'asc',
       filter: filters.length > 0 ? filters.join(' AND ') : undefined,
+      ...titleSearch,
     });
 
     return {
@@ -296,60 +326,6 @@ export class SourcesClient {
         toSource(savedObject.id, savedObject.attributes)
       ),
       total: response.total,
-      page,
-      per_page: perPage,
-    };
-  }
-
-  /**
-   * Ids that match no source are left out, so a deleted source never fails the whole lookup.
-   * Any other bulkGet failure is thrown: a 403 or 5xx is not "this source does not exist".
-   */
-  private async listByIds({
-    ids,
-    page,
-    perPage,
-    search,
-    enabled,
-  }: {
-    ids: string[];
-    page: number;
-    perPage: number;
-    search?: string;
-    enabled?: boolean;
-  }): Promise<ListSourcesResponse> {
-    const uniqueIds = [...new Set(ids)];
-    const { saved_objects: savedObjects } =
-      await this.deps.soClient.bulkGet<NightshiftSourceAttributes>(
-        uniqueIds.map((id) => ({ type: NIGHTSHIFT_SOURCE_SO_TYPE, id }))
-      );
-    const sources = savedObjects
-      .flatMap((savedObject) => {
-        if (!isSavedObjectErrorResult(savedObject)) {
-          return [toSource(savedObject.id, savedObject.attributes)];
-        }
-        if (savedObject.error.statusCode === 404) {
-          return [];
-        }
-        throw boomify(new Error(savedObject.error.message), {
-          statusCode: savedObject.error.statusCode,
-        });
-      })
-      .filter((source) => {
-        if (enabled !== undefined && source.enabled !== enabled) {
-          return false;
-        }
-        if (search !== undefined && !source.title.startsWith(search)) {
-          return false;
-        }
-        return true;
-      })
-      .sort((a, b) => a.title.localeCompare(b.title));
-
-    const start = (page - 1) * perPage;
-    return {
-      sources: sources.slice(start, start + perPage),
-      total: sources.length,
       page,
       per_page: perPage,
     };

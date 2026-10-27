@@ -12,8 +12,8 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
+  savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
-import { escapeKuery } from '@kbn/es-query';
 import { getNightshiftSourceViewName, type NightshiftSource } from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_SOURCE_SO_TYPE,
@@ -90,6 +90,10 @@ const emptyFind = {
 
 const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
   const soClient = savedObjectsClientMock.create();
+  const serializer = savedObjectsServiceMock.createSerializer();
+  serializer.generateRawId.mockImplementation(
+    (namespace, type, id) => `${namespace ? `${namespace}:` : ''}${type}:${id}`
+  );
   const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
   const viewsClient: jest.Mocked<SourceViewsClient> = {
     putView: jest.fn().mockResolvedValue(undefined),
@@ -101,6 +105,7 @@ const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
 
   const client = new SourcesClient({
     soClient,
+    serializer,
     viewsClient,
     dataEsClient,
     logger,
@@ -112,7 +117,7 @@ const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
   soClient.find.mockResolvedValue(emptyFind);
   dataEsClient.esql.query.mockResponse(withColumns);
 
-  return { client, soClient, viewsClient, dataEsClient, logger, onChange };
+  return { client, soClient, serializer, viewsClient, dataEsClient, logger, onChange };
 };
 
 describe('SourcesClient', () => {
@@ -969,102 +974,70 @@ describe('SourcesClient', () => {
       expect(soClient.find).toHaveBeenCalledWith(expect.objectContaining({ filter: undefined }));
     });
 
-    it('looks ids up directly, drops missing sources, and then applies search and paging', async () => {
-      const { client, soClient } = setup();
-      soClient.bulkGet.mockResolvedValue({
-        saved_objects: [
-          makeSavedObject(makeAttributes({ title: 'zeta' }), 'zeta'),
-          {
-            id: 'missing',
-            type: NIGHTSHIFT_SOURCE_SO_TYPE,
-            error: { statusCode: 404, error: 'Not Found', message: 'missing' },
-          },
-          makeSavedObject(
-            makeAttributes({ title: 'alpha', slug: 'alpha', view_name: NGINX_VIEW_NAME_2 }),
-            'alpha'
-          ),
-          makeSavedObject(
-            makeAttributes({ title: 'alpine', slug: 'alpine', view_name: TITLE_T_VIEW_NAME }),
-            'alpine'
-          ),
-        ],
-      } as never);
+    it('filters on the raw document ids of the space, next to search and enabled', async () => {
+      const { client, soClient, serializer } = setup({ spaceId: 'marketing' });
 
-      const response = await client.list({
+      await client.list({
         page: 2,
         perPage: 1,
+        ids: ['alpha', 'we"ird\\ id'],
         search: 'alp',
-        ids: ['zeta', 'missing', 'alpha', 'alpine', 'zeta'],
+        enabled: true,
       });
-
-      expect(soClient.find).not.toHaveBeenCalled();
-      expect(soClient.bulkGet).toHaveBeenCalledWith([
-        { type: NIGHTSHIFT_SOURCE_SO_TYPE, id: 'zeta' },
-        { type: NIGHTSHIFT_SOURCE_SO_TYPE, id: 'missing' },
-        { type: NIGHTSHIFT_SOURCE_SO_TYPE, id: 'alpha' },
-        { type: NIGHTSHIFT_SOURCE_SO_TYPE, id: 'alpine' },
-      ]);
-      expect(response.total).toBe(2);
-      expect(response.page).toBe(2);
-      expect(response.per_page).toBe(1);
-      expect(response.sources.map((source) => source.id)).toEqual(['alpine']);
-    });
-
-    it('keeps the enabled filter when looking sources up by id', async () => {
-      const { client, soClient } = setup();
-      soClient.bulkGet.mockResolvedValue({
-        saved_objects: [
-          makeSavedObject(makeAttributes({ title: 'alpha', enabled: true }), 'alpha'),
-          makeSavedObject(makeAttributes({ title: 'alpine', enabled: false }), 'alpine'),
-        ],
-      } as never);
-
-      const response = await client.list({
-        page: 1,
-        perPage: 10,
-        enabled: false,
-        ids: ['alpha', 'alpine'],
-      });
-
-      expect(response.sources.map((source) => source.id)).toEqual(['alpine']);
-      expect(response.total).toBe(1);
-    });
-
-    it('throws when a bulk get failure is not a missing source', async () => {
-      const { client, soClient } = setup();
-      soClient.bulkGet.mockResolvedValue({
-        saved_objects: [
-          {
-            id: 'hidden',
-            type: NIGHTSHIFT_SOURCE_SO_TYPE,
-            error: { statusCode: 403, error: 'Forbidden', message: 'no access' },
-          },
-        ],
-      } as never);
-
-      await expect(client.list({ page: 1, perPage: 10, ids: ['hidden'] })).rejects.toMatchObject({
-        output: { statusCode: 403 },
-      });
-    });
-
-    it('trims the search and escapes KQL metacharacters in the title prefix filter', async () => {
-      const { client, soClient } = setup();
-      soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 25 });
-
-      await client.list({ page: 1, perPage: 25, search: '  foo AND "bar"  ', enabled: true });
 
       expect(soClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          filter: `nightshift-source.attributes.title: ${escapeKuery(
-            'foo AND "bar"'
-          )}* AND nightshift-source.attributes.enabled: true`,
+          page: 2,
+          perPage: 1,
+          search: 'alp*',
+          searchFields: ['title.text'],
+          filter:
+            '(nightshift-source.id: "marketing:nightshift-source:alpha" OR ' +
+            'nightshift-source.id: "marketing:nightshift-source:we\\"ird\\\\ id") AND ' +
+            'nightshift-source.attributes.enabled: true',
+        })
+      );
+      expect(serializer.generateRawId).toHaveBeenCalledWith(
+        'marketing',
+        NIGHTSHIFT_SOURCE_SO_TYPE,
+        'alpha'
+      );
+    });
+
+    it('builds the raw document ids without a namespace in the default space', async () => {
+      const { client, soClient, serializer } = setup();
+
+      await client.list({ page: 1, perPage: 10, ids: ['alpha'] });
+
+      expect(serializer.generateRawId).toHaveBeenCalledWith(
+        undefined,
+        NIGHTSHIFT_SOURCE_SO_TYPE,
+        'alpha'
+      );
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: '(nightshift-source.id: "nightshift-source:alpha")' })
+      );
+    });
+
+    it('searches every word of the title as plain text, next to the enabled filter', async () => {
+      const { client, soClient } = setup();
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 25 });
+
+      await client.list({ page: 1, perPage: 25, search: '  foo +|-"*()~\\ bar  ', enabled: true });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: 'foo \\+\\|\\-\\"\\*\\(\\)\\~\\\\ bar*',
+          searchFields: ['title.text'],
+          defaultSearchOperator: 'AND',
+          filter: 'nightshift-source.attributes.enabled: true',
         })
       );
 
       await client.list({ page: 1, perPage: 25, search: '   ' });
 
       expect(soClient.find).toHaveBeenLastCalledWith(
-        expect.objectContaining({ filter: undefined })
+        expect.not.objectContaining({ search: expect.anything() })
       );
     });
   });

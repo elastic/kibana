@@ -56,6 +56,7 @@ const createSourcesClient = (
 
   return new SourcesClient({
     soClient,
+    serializer: core.savedObjects.createSerializer(),
     viewsClient: new EsqlViewsClient({
       userEsClient: userViewsEsClient,
       internalEsClient: core.elasticsearch.client.asInternalUser,

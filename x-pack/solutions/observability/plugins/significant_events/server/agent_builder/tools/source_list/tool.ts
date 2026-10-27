@@ -24,7 +24,9 @@ const sourceListSchema = lazySchema(() =>
       .string()
       .max(MAX_SOURCE_TITLE_LENGTH)
       .optional()
-      .describe('Optional. Return only sources whose title starts with this text.'),
+      .describe(
+        'Optional. Return only sources whose title contains all of these words, in any order, ignoring case. The last word may be a partial word. Characters such as `-` or `"` are plain text, not search operators.'
+      ),
     enabled: z
       .boolean()
       .optional()
