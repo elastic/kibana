@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
-  EuiAccordion,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCode,
   EuiCopy,
@@ -15,9 +15,9 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
+  EuiPopover,
   EuiText,
   EuiToolTip,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -130,40 +130,56 @@ const QueryReference: React.FC<{ reference: EvidenceQueryReference }> = ({
   </EuiFlexGroup>
 );
 
+const REFERENCES_POPOVER_MAX_WIDTH = 400;
+
 export interface EvidenceReferencesProps {
   references: EvidenceReference[];
 }
 
 /**
- * The links and queries behind a piece of evidence, behind a small collapsed "N references" toggle.
- * Links open in a new tab, with an icon for well-known hosts; queries have a copy button.
+ * The links and queries behind a piece of evidence, in a popover opened from a small, subdued
+ * "N references" button. Links open in a new tab, with an icon for well-known hosts; queries have
+ * a copy button.
  */
 export const EvidenceReferences: React.FC<EvidenceReferencesProps> = ({ references }) => {
-  const { euiTheme } = useEuiTheme();
-  const accordionId = useGeneratedHtmlId({ prefix: 'investigationEvidenceReferences' });
+  const popoverId = useGeneratedHtmlId({ prefix: 'investigationEvidenceReferences' });
+  const [isOpen, setIsOpen] = useState(false);
+  const togglePopover = useCallback(() => setIsOpen((open) => !open), []);
+  const closePopover = useCallback(() => setIsOpen(false), []);
   if (references.length === 0) {
     return null;
   }
   return (
-    <EuiAccordion
-      id={accordionId}
-      arrowProps={{ size: 's', color: 'text' }}
-      buttonContent={
-        <EuiText size="xs" color="subdued">
-          {referencesToggleLabel(references.length)}
-        </EuiText>
-      }
-      data-test-subj="investigationEvidenceReferences"
-    >
-      <EuiText size="xs">
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="m"
-          role="list"
-          css={css`
-            padding: ${euiTheme.size.s} 0 0 ${euiTheme.size.l};
-          `}
+    <EuiPopover
+      id={popoverId}
+      isOpen={isOpen}
+      closePopover={closePopover}
+      anchorPosition="downLeft"
+      aria-label={referencesToggleLabel(references.length)}
+      panelPaddingSize="s"
+      button={
+        <EuiButtonEmpty
+          size="xs"
+          color="text"
+          flush="left"
+          iconType="chevronSingleDown"
+          iconSide="right"
+          onClick={togglePopover}
+          data-test-subj="investigationEvidenceReferences"
         >
+          <EuiText size="xs" color="subdued">
+            {referencesToggleLabel(references.length)}
+          </EuiText>
+        </EuiButtonEmpty>
+      }
+    >
+      <EuiText
+        size="xs"
+        css={css`
+          max-width: ${REFERENCES_POPOVER_MAX_WIDTH}px;
+        `}
+      >
+        <EuiFlexGroup direction="column" gutterSize="m" role="list">
           {references.map((reference, index) => (
             <EuiFlexItem key={index} grow={false} role="listitem">
               {isEvidenceLinkReference(reference) ? (
@@ -175,6 +191,6 @@ export const EvidenceReferences: React.FC<EvidenceReferencesProps> = ({ referenc
           ))}
         </EuiFlexGroup>
       </EuiText>
-    </EuiAccordion>
+    </EuiPopover>
   );
 };

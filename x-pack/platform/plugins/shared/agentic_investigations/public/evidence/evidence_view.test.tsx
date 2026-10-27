@@ -27,7 +27,8 @@ const chart: EvidenceChart = {
 };
 
 describe('EvidenceView', () => {
-  const expandReferences = () => fireEvent.click(screen.getByRole('button', { name: /reference/ }));
+  const openReferences = () =>
+    fireEvent.click(screen.getByTestId('investigationEvidenceReferences'));
 
   it('renders the chart followed by the Markdown description', () => {
     render(
@@ -44,7 +45,7 @@ describe('EvidenceView', () => {
     expect(screen.queryByTestId('investigationEvidenceReferences')).not.toBeInTheDocument();
   });
 
-  it('keeps the description visible and the references collapsed by default', () => {
+  it('keeps the description visible and the references in a closed popover by default', () => {
     render(
       <EuiProvider>
         <EvidenceView
@@ -57,14 +58,13 @@ describe('EvidenceView', () => {
     );
 
     expect(screen.getByText('Errors spiked.')).toBeVisible();
-    const toggle = screen.getByRole('button', { name: '2 references' });
-    expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.getByTestId('evidenceReferenceQuery')).not.toBeVisible();
+    expect(screen.getByTestId('investigationEvidenceReferences')).toHaveTextContent('2 references');
+    expect(screen.queryByTestId('evidenceReferenceQuery')).not.toBeInTheDocument();
 
-    expandReferences();
+    openReferences();
 
-    expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByTestId('evidenceReferenceQuery')).toBeVisible();
+    expect(screen.getByTestId('evidenceReferenceQuery')).toBeInTheDocument();
+    expect(screen.getByTestId('evidenceReferenceLink')).toBeInTheDocument();
   });
 
   it('renders links in a new tab, with an icon for GitHub, and copyable queries', () => {
@@ -81,7 +81,7 @@ describe('EvidenceView', () => {
         />
       </EuiProvider>
     );
-    expandReferences();
+    openReferences();
 
     const [github, other] = screen.getAllByTestId('evidenceReferenceLink');
     expect(github).toHaveAttribute('href', 'https://github.com/elastic/kibana/pull/1');
