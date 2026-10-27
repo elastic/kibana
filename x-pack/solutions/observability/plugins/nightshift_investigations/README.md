@@ -21,7 +21,7 @@ The Investigate/Ask selector does not select a different execution path.
 
 `runtime.dailyDispatchLimit` caps the new investigations an automation opens, per space and UTC day.
 Attempts that continue an open investigation and starts with the `manual` trigger type do not count
-and are never blocked, even at a limit of zero. For an automatic attempt that would open a new
+and are never blocked, even when the limit is reached. For an automatic attempt that would open a new
 investigation, the investigation client charges the automation budget, then the global
 automatic-investigation quota. Each charge is the check: the budget slot is reserved atomically, so
 overlapping runs across Kibana instances cannot exceed the limit. An attempt denied by either limit
@@ -34,8 +34,9 @@ investigation instead; the global quota has no refund, so that case still counts
 attempt that fails after claiming its subjects keeps its slot: the claim stays live for two minutes,
 and an attempt that joins it in that window continues the claimed investigation and gives back only
 its own slot, so the investigation counts once. A failure while the investigation runs does not give
-back either slot. An omitted limit allows unlimited new investigations; a limit of zero
-blocks all new investigations. Changing the limit takes effect on the next attempt.
+back either slot. The limit is at least 1, and an omitted limit allows unlimited new investigations.
+To stop an automation from opening investigations, disable it. Changing the limit takes effect on
+the next attempt.
 
 The API-only `scopeQuery` field is forwarded as `scope_query` guidance in the investigation context.
 It guides the agent's telemetry filters; it is not an enforced data-access boundary. The optional
