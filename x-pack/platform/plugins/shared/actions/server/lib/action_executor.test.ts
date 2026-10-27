@@ -2872,9 +2872,11 @@ describe('execute() - EARS structured logging', () => {
     authMode,
     authType,
     executorResult = { status: 'ok', actionId: CONNECTOR_ID },
+    secrets = { baz: true },
   }: {
     authMode?: 'per-user' | 'shared';
     authType?: string;
+    secrets?: Record<string, unknown> | null;
     executorResult?: Awaited<ReturnType<NonNullable<ConnectorType['executor']>>>;
   }) => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
@@ -2885,7 +2887,7 @@ describe('execute() - EARS structured logging', () => {
         actionTypeId: 'test-ears',
         authMode,
         config: { bar: true, ...(authType ? { authType } : {}) },
-        secrets: { baz: true },
+        secrets,
         isMissingSecrets: false,
       },
       references: [],
@@ -2910,6 +2912,15 @@ describe('execute() - EARS structured logging', () => {
         { tags: ['ears', 'execute', 'success'] },
       ],
     ]);
+  });
+
+  test('executes a per-user connector that has no secrets without throwing', async () => {
+    setup({ authMode: 'per-user', secrets: null });
+
+    await expect(actionExecutor.execute(executeParams)).resolves.toEqual(
+      expect.objectContaining({ status: 'ok' })
+    );
+    expect(earsLines()).toEqual([]);
   });
 
   test('logs a failure line when the connector execution errors', async () => {

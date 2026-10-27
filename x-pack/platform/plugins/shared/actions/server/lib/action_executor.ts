@@ -601,8 +601,11 @@ export class ActionExecutor {
           return err.result;
         }
 
-        const authType = validatedSecrets.authType ?? validatedConfig.authType;
-        const isEarsPerUserExecution = authMode === 'per-user' && authType === EARS_AUTH_ID;
+        // secrets (and config) can be undefined for connectors without them, so read via the null-safe helper
+        const isEarsPerUserExecution =
+          authMode === 'per-user' &&
+          getConnectorAuthType({ config: validatedConfig, secrets: validatedSecrets }) ===
+            EARS_AUTH_ID;
 
         let rawResult: ActionTypeExecutorRawResult<unknown>;
         let errorType: ConnectorExecuteErrorType = 'other';

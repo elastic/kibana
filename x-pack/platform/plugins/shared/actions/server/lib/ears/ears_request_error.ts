@@ -6,6 +6,7 @@
  */
 
 const EARS_REQUEST_ID_HEADER = 'x-cloud-request-id';
+const MAX_EARS_REQUEST_ID_LENGTH = 128;
 
 /**
  * Reads the request id the ingress proxy assigns to each request to EARS and echoes back
@@ -17,7 +18,7 @@ export const getEarsRequestId = (headers: unknown): string | undefined => {
     return undefined;
   }
   const lastValue = value.split(',').pop()?.trim();
-  return lastValue || undefined;
+  return lastValue ? lastValue.slice(0, MAX_EARS_REQUEST_ID_LENGTH) : undefined;
 };
 
 /**

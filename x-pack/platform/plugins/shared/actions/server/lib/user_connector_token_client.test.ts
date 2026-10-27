@@ -751,7 +751,7 @@ describe('UserConnectorTokenClient', () => {
         expect.stringContaining('Failed to revoke EARS OAuth token')
       );
       expect(logger.warn).toHaveBeenCalledWith(
-        'EARS revoke failure: connectorId=123 provider=test-provider profileUid=user-1 earsRequestId=req-a reason=provider timeout',
+        'EARS revoke failure: connectorId=123 provider=test-provider profileUid=user-1 earsRequestId=req-a reason="provider timeout"',
         { tags: ['ears', 'revoke', 'failure'] }
       );
     });

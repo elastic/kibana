@@ -721,9 +721,10 @@ export const oauthCallbackRoute = (
             profileUid,
           });
 
-          logEarsTokenExchange({ outcome: 'success', earsRequestId });
-
           await oauthStateClient.delete(oauthState.id);
+
+          // after the delete, so a failure there is logged once, as a failure
+          logEarsTokenExchange({ outcome: 'success', earsRequestId });
 
           recordConnectorAuth({
             phase: 'authorize',

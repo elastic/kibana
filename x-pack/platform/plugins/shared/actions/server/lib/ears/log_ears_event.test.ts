@@ -66,6 +66,39 @@ describe('logEarsEvent', () => {
   });
 });
 
+describe('logEarsEvent value sanitization', () => {
+  const logger = loggerMock.create();
+
+  beforeEach(() => jest.clearAllMocks());
+
+  const loggedMessage = (extra: Record<string, string>) => {
+    logEarsEvent(logger, { step: 'token_refresh', outcome: 'failure', connectorId: 'c1', extra });
+    return (logger.warn as jest.Mock).mock.calls[0][0] as string;
+  };
+
+  it('quotes values that could forge extra fields', () => {
+    expect(loggedMessage({ reason: 'timeout profileUid=attacker' })).toBe(
+      'EARS token_refresh failure: connectorId=c1 reason="timeout profileUid=attacker"'
+    );
+  });
+
+  it('replaces newlines and other control characters', () => {
+    const message = loggedMessage({ reason: 'first\nsecond\u0000third' });
+    expect(message).not.toMatch(/[\n\u0000]/);
+    expect(message).toContain('reason="first second third"');
+  });
+
+  it('truncates long values', () => {
+    const message = loggedMessage({ reason: 'x'.repeat(1000) });
+    expect(message.length).toBeLessThan(300);
+    expect(message).toContain('…');
+  });
+
+  it('quotes empty values', () => {
+    expect(loggedMessage({ reason: '' })).toContain('reason=""');
+  });
+});
+
 describe('getEarsErrorLogFields', () => {
   it('returns status and request id for an EARS response error', () => {
     expect(

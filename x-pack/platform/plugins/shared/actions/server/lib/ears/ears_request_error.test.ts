@@ -18,6 +18,10 @@ describe('getEarsRequestId', () => {
     );
   });
 
+  it('caps the id length', () => {
+    expect(getEarsRequestId({ 'x-cloud-request-id': 'a'.repeat(500) })).toHaveLength(128);
+  });
+
   it.each([
     [undefined],
     [null],

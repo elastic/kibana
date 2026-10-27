@@ -495,7 +495,7 @@ describe('getEarsAccessToken', () => {
         ConnectorAuthorizationError
       );
 
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('reason=socket hang up'), {
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('reason="socket hang up"'), {
         tags: ['ears', 'token_refresh', 'failure'],
       });
     });

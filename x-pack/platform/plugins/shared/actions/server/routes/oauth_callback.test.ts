@@ -605,8 +605,54 @@ describe('oauthCallbackRoute', () => {
     await handler(createMockContext(), req, httpServerMock.createResponseFactory());
 
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      'EARS token_exchange failure: connectorId=connector-1 provider=test-provider profileUid=test-profile-uid spaceId=default state=valid-state earsRequestId=req-1 reason=storage failed',
+      'EARS token_exchange failure: connectorId=connector-1 provider=test-provider profileUid=test-profile-uid spaceId=default state=valid-state earsRequestId=req-1 reason="storage failed"',
       { tags: ['ears', 'token_exchange', 'failure'] }
+    );
+  });
+
+  it('logs only a failure line when deleting the OAuth state fails after the token was stored', async () => {
+    mockOAuthStateClientInstance.get.mockResolvedValue({
+      id: 'state-id',
+      state: 'valid-state',
+      codeVerifier: 'test-verifier',
+      connectorId: 'connector-1',
+      kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
+      spaceId: asSpaceId('default'),
+      createdAt: '2025-01-01T00:00:00.000Z',
+      expiresAt: '2025-01-01T00:10:00.000Z',
+      createdBy: 'test-profile-uid',
+    });
+    mockEncryptedSavedObjectsClient.getClient.mockReturnValue({
+      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+        attributes: {
+          config: { authType: 'ears' },
+          secrets: { provider: 'test-provider' },
+        },
+      }),
+    });
+    mockRequestEarsToken.mockResolvedValue({
+      tokenType: 'Bearer',
+      accessToken: 'ears-token',
+      expiresIn: 3600,
+      refreshToken: 'ears-refresh',
+      refreshTokenExpiresIn: 7200,
+      earsRequestId: 'req-1',
+    });
+    mockOAuthStateClientInstance.delete.mockRejectedValueOnce(new Error('delete failed'));
+
+    const [, handler] = registerRoute();
+    const req = httpServerMock.createKibanaRequest({
+      query: { code: 'auth-code', state: 'valid-state' },
+    });
+    await handler(createMockContext(), req, httpServerMock.createResponseFactory());
+
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'EARS token_exchange failure: connectorId=connector-1 provider=test-provider profileUid=test-profile-uid spaceId=default state=valid-state earsRequestId=req-1 reason="delete failed"',
+      { tags: ['ears', 'token_exchange', 'failure'] }
+    );
+    expect(mockLogger.info).not.toHaveBeenCalledWith(
+      expect.stringContaining('EARS token_exchange success'),
+      expect.anything()
     );
   });
 

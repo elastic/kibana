@@ -25,6 +25,20 @@ export interface EarsLogEvent {
   extra?: Record<string, string | number | boolean | undefined>;
 }
 
+const MAX_VALUE_LENGTH = 200;
+
+/**
+ * Some values come from outside Kibana (EARS response headers, error messages), so strip control
+ * characters, cap the length, and quote anything that could be read as extra `key=value` pairs.
+ */
+const formatValue = (value: string | number | boolean): string => {
+  const text = String(value)
+    .replace(/\p{Cc}/gu, ' ')
+    .trim();
+  const bounded = text.length > MAX_VALUE_LENGTH ? `${text.slice(0, MAX_VALUE_LENGTH)}…` : text;
+  return bounded === '' || /[\s="]/.test(bounded) ? JSON.stringify(bounded) : bounded;
+};
+
 /**
  * Logs one EARS auth event with a consistent set of fields. The `ears` tag is what ties these lines
  * together, since they come from different loggers (routes, auth strategy, executor).
@@ -36,7 +50,7 @@ export const logEarsEvent = (logger: Logger, event: EarsLogEvent): void => {
   const { step, outcome, extra, ...fields } = event;
   const details = Object.entries({ ...fields, ...extra })
     .filter(([, value]) => value !== undefined)
-    .map(([key, value]) => `${key}=${value}`)
+    .map(([key, value]) => `${key}=${formatValue(value as string | number | boolean)}`)
     .join(' ');
 
   logger[outcome === 'success' ? 'info' : 'warn'](
