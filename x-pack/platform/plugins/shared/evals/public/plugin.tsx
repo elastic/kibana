@@ -91,6 +91,7 @@ export class EvalsPublicPlugin
   }
 
   start(core: CoreStart, _plugins: EvalsStartDependencies): EvalsPublicStart {
+    // Runtime mode registers no `evals` feature server-side, so this capability is absent there.
     const canAddToDataset =
       !!core.application.capabilities?.[PLUGIN_ID]?.[EVALS_UI_PRIVILEGES.manage];
 
