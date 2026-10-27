@@ -5,43 +5,10 @@
  * 2.0.
  */
 
-interface MemoryReference {
-  uri: string;
-  relation?: string;
-  description?: string;
-}
-
-interface MemoryWriter {
-  uri: string;
-  metadata: Record<string, string | number>;
-}
-
-type MemoryLifecycleStatus = 'active' | 'deleted';
-
-interface MemoryGovernance {
-  provenance?: {
-    created_by?: MemoryWriter;
-    updated_by?: MemoryWriter;
-  };
-  lifecycle?: {
-    status?: MemoryLifecycleStatus;
-  };
-}
-
-export interface StoredMemoryDocument {
-  '@timestamp': string;
-  id: string;
-  type: string;
-  title: string;
-  description: string;
-  content: string;
-  tags?: string[];
-  expires_at?: string;
-  updated_at: string;
-  references?: MemoryReference[];
-  attributes?: Record<string, string | number | boolean | string[]>;
-  governance?: MemoryGovernance;
-}
+import type {
+  MemoryReference,
+  MemoryWriter,
+} from '@kbn/context-engine-plugin/server/memory/memory_document';
 
 export const createMemoryWriter = ({
   toolId,
@@ -74,17 +41,3 @@ export const createConversationReferences = (
     },
   ];
 };
-
-export const updateMemoryProvenance = (
-  governance: MemoryGovernance | undefined,
-  writer: MemoryWriter,
-  recordCreation: boolean
-): MemoryGovernance => ({
-  ...governance,
-  provenance: {
-    ...governance?.provenance,
-    ...(recordCreation &&
-      governance?.provenance?.created_by === undefined && { created_by: writer }),
-    updated_by: writer,
-  },
-});

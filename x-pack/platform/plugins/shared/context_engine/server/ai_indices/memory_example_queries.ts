@@ -27,3 +27,35 @@ export const buildMemoryExampleQueries = (target: string): MemoryExampleQueries 
     '| LIMIT 10',
   ].join('\n'),
 });
+
+const LIVE_MEMORY_CONDITIONS = [
+  '  AND (governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted")',
+  '  AND (expires_at IS NULL OR expires_at > NOW())',
+];
+
+/** ES|QL example for recalling live facts, entities and procedures from the long-term memory index. */
+export const buildLongTermMemoryExampleQuery = (target: string): string =>
+  [
+    `FROM ${target} METADATA _id, _score`,
+    '| WHERE type IN ("memory.fact", "memory.entity", "memory.procedure")',
+    ...LIVE_MEMORY_CONDITIONS,
+    '| FORK',
+    '    ( WHERE content:"<query>" OR title:"<query>" OR description:"<query>" | SORT _score DESC | LIMIT 20 )',
+    '    ( WHERE content.semantic:"<query>" OR title.semantic:"<query>" OR description.semantic:"<query>" | SORT _score DESC | LIMIT 20 )',
+    '| FUSE',
+    '| SORT _score DESC, _id ASC',
+    '| KEEP id, title, description, content, type, tags, updated_at, references.uri, references.relation',
+    '| LIMIT 10',
+  ].join('\n');
+
+/** ES|QL example for listing the live relationships of one long-term memory. */
+export const buildLongTermLinksExampleQuery = (target: string): string =>
+  [
+    `FROM ${target}`,
+    '| WHERE type == "memory.relationship"',
+    '  AND references.uri == "ki://long-term-memory/<id>"',
+    ...LIVE_MEMORY_CONDITIONS,
+    '| SORT updated_at DESC',
+    '| KEEP id, title, description, references.uri',
+    '| LIMIT 50',
+  ].join('\n');

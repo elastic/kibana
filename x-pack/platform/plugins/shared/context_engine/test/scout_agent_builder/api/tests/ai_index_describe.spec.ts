@@ -308,7 +308,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
   });
 
   apiTest(
-    'describes memory capability and excludes stored memory from ordinary counts',
+    'omits the Memory section for ordinary AI indices and excludes stored memory from counts',
     async ({ apiClient }) => {
       const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
         headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
@@ -317,15 +317,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
 
       expect(response).toHaveStatusCode(200);
       const block = blockOf(response.body);
-      expect(sectionLines(block, 'Memory')).toStrictEqual(
-        expect.arrayContaining([
-          'Memory writes are enabled for this AI-index registry entry.',
-          'memory.session',
-          'memory.session_fact',
-          'Use platform.context_engine.remember to write memory.',
-          'Use platform.context_engine.forget with a memory id to tombstone memory.',
-        ])
-      );
+      expect(sectionLines(block, 'Memory')).toStrictEqual([]);
       expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([
         '"document": 2',
         '"detection": 1',

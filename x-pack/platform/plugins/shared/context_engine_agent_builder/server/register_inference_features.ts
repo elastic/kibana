@@ -6,6 +6,7 @@
  */
 
 import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
+import { CONTEXT_ENGINE_MEMORY_INFERENCE_FEATURE_ID } from '@kbn/context-engine-plugin/common/memory';
 
 const CONTEXT_ENGINE_PARENT_FEATURE_ID = 'context_engine';
 const CONTEXT_ENGINE_PROMPT_FEATURE_ID = 'context_engine_prompt';
@@ -34,5 +35,15 @@ export const registerContextEngineInferenceFeatures = (
     taskType: 'chat_completion',
     recommendedEndpoints: CONTEXT_ENGINE_PROMPT_RECOMMENDED_ENDPOINTS,
     ignoreGlobalDefault: true,
+  });
+
+  searchInferenceEndpoints.features.register({
+    parentFeatureId: CONTEXT_ENGINE_PARENT_FEATURE_ID,
+    featureId: CONTEXT_ENGINE_MEMORY_INFERENCE_FEATURE_ID,
+    featureName: 'Context Engine Memory',
+    featureDescription:
+      'AI model used by memory dreaming to turn short-term memories into long-term memories, such as facts.',
+    taskType: 'chat_completion',
+    recommendedEndpoints: [],
   });
 };

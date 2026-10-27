@@ -81,6 +81,9 @@
     "@kbn/react-hooks",
     "@kbn/datemath",
     "@kbn/esql-utils",
-    "@kbn/ebt-click"
+    "@kbn/ebt-click",
+    "@kbn/inference-plugin",
+    "@kbn/inference-common",
+    "@kbn/search-inference-endpoints"
   ]
 }

@@ -18,7 +18,6 @@ describe('registerInvestigationsAiIndex', () => {
       'security-investigations',
       expect.objectContaining({
         dest: { type: 'index', value: 'ai-index-idx-security-investigations' },
-        memory_enabled: false,
       })
     );
   });

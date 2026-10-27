@@ -19,9 +19,11 @@ import {
 } from './components/ai_index_list';
 import { useAiIndexListMode } from './hooks/use_ai_index_list_mode';
 import { useContextEngineBreadcrumbs } from './hooks/use_context_engine_breadcrumbs';
+import { useLandingTabs } from './hooks/use_landing_tabs';
 import { useListAiIndices } from './hooks/use_list_ai_indices';
 import { useNavigation } from './hooks/use_navigation';
 import { useKibana } from './hooks/use_kibana';
+import { landingDescriptionText, landingTitle } from './layout/context_engine_landing_labels';
 import { ContextEngineLandingHeader } from './layout/context_engine_page_header';
 import {
   ContextEnginePageSection,
@@ -36,15 +38,6 @@ import {
 
 const AiIndexOwnerFilter = createFilterControl(aiIndexOwnerFilter, {
   'data-test-subj': 'contextAiIndexListOwnerFilter',
-});
-
-const landingTitle = i18n.translate('xpack.contextEngine.landing.title', {
-  defaultMessage: 'Context',
-});
-
-const landingDescriptionText = i18n.translate('xpack.contextEngine.landing.descriptionText', {
-  defaultMessage:
-    'Turn raw source data into distilled context agents can use to solve problems faster.',
 });
 
 const createAiIndexButtonLabel = i18n.translate('xpack.contextEngine.createAiIndexButton', {
@@ -62,6 +55,7 @@ const ContextLandingPageContent = ({
   const { createContextEngineUrl } = useNavigation();
   const contextEngineLinks = services.docLinks.links.contextEngine;
   const { mode, error } = useAiIndexListMode(hasCustomAiIndices, isLoading);
+  const tabs = useLandingTabs();
 
   useContextEngineBreadcrumbs();
 
@@ -102,6 +96,7 @@ const ContextLandingPageContent = ({
         description={headerDescription}
         menu={headerMenu}
         docLink={contextEngineLinks.overview}
+        tabs={tabs}
       />
       <ContextEnginePageSection>
         {error ? (

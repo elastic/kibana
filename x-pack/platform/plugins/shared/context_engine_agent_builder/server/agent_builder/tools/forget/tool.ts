@@ -10,26 +10,15 @@ import { contextEngineMemoryTools } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
-import { aiIndexIdFieldSchema } from '@kbn/context-engine-plugin/common/ai_index_schemas';
 import { MAX_KI_ID_LENGTH } from '@kbn/context-engine-plugin/common/step_types/ki';
-import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
+import type { ContextEnginePluginStart } from '@kbn/context-engine-plugin/server';
 import type { CoreStart } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 import { createMemoryToolsAvailability } from '../ai_index_tools_availability';
-import { getWritableMemoryAiIndex } from '../get_writable_memory_ai_index';
-import {
-  createMemoryWriter,
-  type StoredMemoryDocument,
-  updateMemoryProvenance,
-} from '../memory_document';
+import { createMemoryWriter } from '../memory_document';
 
 const forgetSchema = z.object({
-  aiIndexId: aiIndexIdFieldSchema.describe(
-    'The Context Engine AI-index registry ID containing the memory. Use the ID from the agent AI INDICES configuration, not the backing Elasticsearch index or data stream name.'
-  ),
   id: z
     .string()
     .min(1)
@@ -38,13 +27,11 @@ const forgetSchema = z.object({
 });
 
 export const createForgetTool = ({
-  getAiIndexService,
+  getContextEngineStart,
   getCoreStart,
-  getSecurityStart,
 }: {
-  getAiIndexService: () => Promise<AiIndexService>;
+  getContextEngineStart: () => Promise<ContextEnginePluginStart>;
   getCoreStart: () => Promise<CoreStart>;
-  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
 }): BuiltinToolDefinition<typeof forgetSchema> => ({
   id: contextEngineMemoryTools.forget,
   type: ToolType.builtin,
@@ -58,122 +45,30 @@ export const createForgetTool = ({
     openWorldHint: false,
   },
   description: dedent`
-    Mark a memory as deleted in a memory-enabled Context Engine AI index so it is no longer
-    recalled. Provide the id returned by the remember tool. The memory remains stored as a
-    lifecycle tombstone.
+    Mark a short-term memory in this space as deleted so it is no longer recalled. Provide the id
+    returned by the remember tool. The memory remains stored as a lifecycle tombstone.
   `,
   schema: forgetSchema,
-  handler: async (params, context) => {
-    const { request, spaceId, esClient, runContext, logger } = context;
+  handler: async ({ id }, context) => {
+    const { request, runContext, logger } = context;
 
     try {
-      await assertContextEngineWriteAccess({
-        request,
-        spaceId,
-        getCoreStart,
-        getSecurityStart,
-      });
-
-      const aiIndex = await getWritableMemoryAiIndex({
-        aiIndexId: params.aiIndexId,
-        spaceId,
-        request,
-        getAiIndexService,
-        getCoreStart,
-      });
-
-      const currentUserClient = esClient.asCurrentUser;
-      const searchResponse = await currentUserClient.search<StoredMemoryDocument>({
-        index: aiIndex.dest.value,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        ...(aiIndex.dest.type === 'data_stream'
-          ? {
-              query: { term: { id: params.id } },
-              sort: [{ '@timestamp': 'desc' as const }],
-              size: 1,
-            }
-          : {
-              query: { ids: { values: [params.id] } },
-              seq_no_primary_term: true,
-              size: 2,
-            }),
-      });
-
-      if (aiIndex.dest.type === 'index' && searchResponse.hits.hits.length > 1) {
-        throw new Error(
-          `Memory '${params.id}' exists in multiple indices matched by AI index '${params.aiIndexId}'.`
-        );
-      }
-
-      const [existingHit] = searchResponse.hits.hits;
-      if (!existingHit?._source) {
-        throw new Error(`Memory '${params.id}' was not found in AI index '${params.aiIndexId}'.`);
-      }
-      if (
-        existingHit._source.type !== 'memory.session' &&
-        existingHit._source.type !== 'memory.session_fact'
-      ) {
-        throw new Error(
-          `Document '${params.id}' in AI index '${params.aiIndexId}' is not a memory.`
-        );
-      }
-
-      if (existingHit._source.governance?.lifecycle?.status === 'deleted') {
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: { id: params.id },
-            },
-          ],
-        };
-      }
-
-      const now = new Date().toISOString();
       const agent = getAgentFromRunContext(runContext);
-      const writer = createMemoryWriter({
-        toolId: contextEngineMemoryTools.forget,
-        runId: runContext.runId,
-        agentId: agent?.agentId,
-      });
-      const tombstoneDocument: StoredMemoryDocument = {
-        ...existingHit._source,
-        '@timestamp': aiIndex.dest.type === 'data_stream' ? now : existingHit._source['@timestamp'],
-        updated_at: now,
-        governance: {
-          ...updateMemoryProvenance(existingHit._source.governance, writer, false),
-          lifecycle: {
-            ...existingHit._source.governance?.lifecycle,
-            status: 'deleted',
-          },
-        },
-      };
-
-      if (
-        aiIndex.dest.type === 'index' &&
-        (existingHit._seq_no === undefined || existingHit._primary_term === undefined)
-      ) {
-        throw new Error(`Memory '${params.id}' is missing concurrency metadata.`);
-      }
-
-      await currentUserClient.index({
-        index: aiIndex.dest.type === 'index' ? existingHit._index : aiIndex.dest.value,
-        ...(aiIndex.dest.type === 'index' && {
-          id: params.id,
-          if_seq_no: existingHit._seq_no,
-          if_primary_term: existingHit._primary_term,
+      const memoryService = (await getContextEngineStart()).getMemoryService({ request });
+      const result = await memoryService.forget({
+        id,
+        writer: createMemoryWriter({
+          toolId: contextEngineMemoryTools.forget,
+          runId: runContext.runId,
+          agentId: agent?.agentId,
         }),
-        document: tombstoneDocument,
-        ...(aiIndex.dest.type === 'data_stream' && { op_type: 'create' as const }),
-        refresh: 'wait_for',
       });
 
       return {
         results: [
           {
             type: ToolResultType.other,
-            data: { id: params.id },
+            data: { id: result.id },
           },
         ],
       };

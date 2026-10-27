@@ -64,6 +64,7 @@ export interface UsageStats {
   'agentBuilder:deductiveEndpoint': string;
   'agentBuilder:deductiveApiKey': string;
   'contextEngine:enabled': boolean;
+  'contextEngine:memoryDreamingInterval': string;
   'agentBuilder:tracing:enabled': boolean;
   'agentBuilder:tracing:includeLlmResponses': boolean;
   'agentBuilder:tracing:includeRealIds': boolean;

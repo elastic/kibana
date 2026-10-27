@@ -33,6 +33,8 @@ export interface DescribeAiIndexAggregationsParams {
   dest: AiIndexDest;
   spaceId: string;
   fields: AiIndexField[];
+  /** Leave out memory KI types; defaults to true. */
+  excludeMemory?: boolean;
 }
 
 const NO_COUNTS: AiIndexAggregationsDescription = { kiTypeCounts: [], tagCounts: [] };
@@ -83,6 +85,7 @@ export const describeAiIndexAggregations = async ({
   dest,
   spaceId,
   fields,
+  excludeMemory = true,
 }: DescribeAiIndexAggregationsParams): Promise<AiIndexAggregationsDescription> => {
   const hasType = isAggregatableKeyword(fields, KI_TYPE_FIELD);
   const hasTags = isAggregatableKeyword(fields, KI_TAGS_FIELD);
@@ -95,14 +98,19 @@ export const describeAiIndexAggregations = async ({
       ? runCounts(
           esClient,
           spaceId,
-          countsQuery(dest, KI_TYPE_FIELD, MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS, true)
+          countsQuery(dest, KI_TYPE_FIELD, MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS, excludeMemory)
         )
       : [],
     hasTags
       ? runCounts(
           esClient,
           spaceId,
-          countsQuery(dest, KI_TAGS_FIELD, MAX_AI_INDEX_DESCRIBE_TAG_COUNTS, hasType)
+          countsQuery(
+            dest,
+            KI_TAGS_FIELD,
+            MAX_AI_INDEX_DESCRIBE_TAG_COUNTS,
+            excludeMemory && hasType
+          )
         )
       : [],
   ]);

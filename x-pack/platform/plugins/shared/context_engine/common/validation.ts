@@ -15,6 +15,7 @@ import {
   MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES,
 } from './constants';
 import type { QueryAiIndicesRequest } from './http_api/ai_indices';
+import { MIN_MEMORY_DREAMING_INTERVAL_MINUTES } from './memory';
 
 // Starts with a lowercase letter or number, then lowercase letters, numbers, hyphens, or underscores.
 export const AI_INDEX_ID_PATTERN = /^[a-z0-9][a-z0-9_-]*$/;
@@ -61,6 +62,24 @@ export const validateFeedbackAnalysisInterval = (value: string): string | undefi
     return i18n.translate('xpack.contextEngine.feedbackAnalysis.error.intervalBelowFloor', {
       defaultMessage: 'Must be at least {minMinutes} minutes.',
       values: { minMinutes: MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES },
+    });
+  }
+  return undefined;
+};
+
+/** Returns an error message for an invalid dreaming interval, or `undefined` when valid. */
+export const validateMemoryDreamingInterval = (value: string): string | undefined => {
+  const minutes = parseIntervalMinutes(value);
+  if (minutes === undefined) {
+    return i18n.translate('xpack.contextEngine.memoryDreaming.error.invalidInterval', {
+      defaultMessage:
+        'Must be a positive number followed by m (minutes), h (hours), or d (days), for example 12h or 1d.',
+    });
+  }
+  if (minutes < MIN_MEMORY_DREAMING_INTERVAL_MINUTES) {
+    return i18n.translate('xpack.contextEngine.memoryDreaming.error.intervalBelowFloor', {
+      defaultMessage: 'Must be at least {minMinutes} minutes.',
+      values: { minMinutes: MIN_MEMORY_DREAMING_INTERVAL_MINUTES },
     });
   }
   return undefined;

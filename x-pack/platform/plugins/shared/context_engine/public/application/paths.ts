@@ -7,6 +7,7 @@
 
 export const CONTEXT_ENGINE_PATHS = {
   landing: '/',
+  memory: '/memory',
   create: '/ai_index/create',
   detail: '/ai_index/:id',
   detailKnowledgeIndicators: '/ai_index/:id/knowledge_indicators',

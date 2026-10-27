@@ -21,6 +21,7 @@ import type {
   AgentRegistry,
   AgentAvailabilityConfig,
   AiIndexResolver,
+  DefaultAiIndexProvider,
 } from './agents';
 import type { RunToolFn, ModelProvider } from './runner';
 import type { RunAgentFn } from './agents';
@@ -146,6 +147,11 @@ export interface AgentsSetup {
    * agent configurations.
    */
   registerAiIndexResolver: (resolver: AiIndexResolver) => void;
+  /**
+   * Register the provider of AI indices that every agent may use, in addition to the ones in its
+   * configuration.
+   */
+  registerDefaultAiIndexProvider: (provider: DefaultAiIndexProvider) => void;
 }
 
 export interface AgentsStart {

@@ -22,6 +22,7 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
       register: jest.fn(),
       registerType: jest.fn(),
       registerAiIndexResolver: jest.fn(),
+      registerDefaultAiIndexProvider: jest.fn(),
     },
     tools: {
       register: jest.fn(),

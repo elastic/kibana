@@ -7,7 +7,15 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AgentBuilderPluginSetup, AiIndexResolver } from '@kbn/agent-builder-server';
+import type {
+  AgentBuilderPluginSetup,
+  AiIndexResolver,
+  DefaultAiIndexProvider,
+} from '@kbn/agent-builder-server';
+import {
+  LONG_TERM_MEMORY_AI_INDEX_ID,
+  SHORT_TERM_MEMORY_AI_INDEX_ID,
+} from '@kbn/context-engine-plugin/common/memory';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
 import { CONTEXT_ENGINE_SETUP_AGENT_ID } from './agent/context_engine_agent';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
@@ -37,8 +45,10 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
   const setup = ({
     aiIndices,
     authorized = true,
+    memoryEnabled = false,
   }: {
     aiIndices: unknown[];
+    memoryEnabled?: boolean;
     /** Outcome of the privilege check: granted, denied, or the error it rejects with. */
     authorized?: boolean | Error;
   }) => {
@@ -57,11 +67,12 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     const getAiIndexDataReadService = jest.fn().mockReturnValue({ list });
     const asCurrentUser = {};
     const asScoped = jest.fn().mockReturnValue({ asCurrentUser });
+    const isMemoryEnabled = jest.fn().mockResolvedValue(memoryEnabled);
     const coreSetup = {
       getStartServices: jest.fn().mockResolvedValue([
         { elasticsearch: { client: { asScoped } } },
         {
-          contextEngine: { getAiIndexDataReadService },
+          contextEngine: { getAiIndexDataReadService, isMemoryEnabled },
           security,
         },
         {},
@@ -72,6 +83,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     >;
 
     let resolver: AiIndexResolver | undefined;
+    let defaultAiIndexProvider: DefaultAiIndexProvider | undefined;
     const register = jest.fn();
     const agentBuilder = {
       agents: {
@@ -79,6 +91,9 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
         registerType: jest.fn(),
         registerAiIndexResolver: jest.fn((registered: AiIndexResolver) => {
           resolver = registered;
+        }),
+        registerDefaultAiIndexProvider: jest.fn((registered: DefaultAiIndexProvider) => {
+          defaultAiIndexProvider = registered;
         }),
       },
     } as unknown as AgentBuilderPluginSetup;
@@ -89,11 +104,12 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
       workflowsManagement: {} as any,
     });
 
-    if (!resolver) {
-      throw new Error('Expected an AI Index resolver to be registered');
+    if (!resolver || !defaultAiIndexProvider) {
+      throw new Error('Expected an AI Index resolver and default provider to be registered');
     }
     return {
       resolver,
+      defaultAiIndexProvider,
       register,
       list,
       getAiIndexDataReadService,
@@ -110,7 +126,9 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
 
     const [{ getContextEngineStart }] = registerAgentBuilderTools.mock.calls.at(-1);
 
-    await expect(getContextEngineStart()).resolves.toEqual({ getAiIndexDataReadService });
+    await expect(getContextEngineStart()).resolves.toEqual(
+      expect.objectContaining({ getAiIndexDataReadService })
+    );
   });
 
   it('reads readable AI Indices as the requesting user through the data read service', async () => {
@@ -131,7 +149,6 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
           id: 'my-custom',
           dest: { type: 'index', value: 'ai-index-idx-custom' },
           description: 'Support tickets.',
-          memory_enabled: true,
         },
       ],
     });
@@ -141,9 +158,49 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
         id: 'my-custom',
         esqlTarget: 'ai-index-idx-custom',
         description: 'Support tickets.',
-        memoryEnabled: true,
+        memoryEnabled: false,
       },
     ]);
+  });
+
+  it('marks only the short-term memory store as memory-enabled', async () => {
+    const { resolver } = setup({
+      aiIndices: [
+        {
+          id: SHORT_TERM_MEMORY_AI_INDEX_ID,
+          dest: { type: 'data_stream', value: '.ai-index-ds-short-term-memory' },
+        },
+        {
+          id: LONG_TERM_MEMORY_AI_INDEX_ID,
+          dest: { type: 'index', value: '.ai-index-idx-long-term-memory' },
+        },
+      ],
+    });
+
+    const details = await resolver({
+      ids: [SHORT_TERM_MEMORY_AI_INDEX_ID, LONG_TERM_MEMORY_AI_INDEX_ID],
+      request,
+    });
+
+    expect(details.map(({ id, memoryEnabled }) => ({ id, memoryEnabled }))).toEqual([
+      { id: SHORT_TERM_MEMORY_AI_INDEX_ID, memoryEnabled: true },
+      { id: LONG_TERM_MEMORY_AI_INDEX_ID, memoryEnabled: false },
+    ]);
+  });
+
+  it('provides both memory stores as default AI indices when memory is enabled', async () => {
+    const { defaultAiIndexProvider } = setup({ aiIndices: [], memoryEnabled: true });
+
+    expect(await defaultAiIndexProvider({ request })).toEqual([
+      SHORT_TERM_MEMORY_AI_INDEX_ID,
+      LONG_TERM_MEMORY_AI_INDEX_ID,
+    ]);
+  });
+
+  it('provides no default AI indices when memory is disabled', async () => {
+    const { defaultAiIndexProvider } = setup({ aiIndices: [] });
+
+    expect(await defaultAiIndexProvider({ request })).toEqual([]);
   });
 
   it('asks the service for the requested ids only, so just those are probed', async () => {
@@ -152,7 +209,6 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
         {
           id: 'wanted',
           dest: { type: 'index', value: 'idx-wanted' },
-          memory_enabled: false,
         },
       ],
     });

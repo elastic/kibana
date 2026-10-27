@@ -16,7 +16,7 @@ export interface AiIndexDetail {
   /** May be a concrete index name, a pattern, or a comma-separated list. */
   esqlTarget: string;
   description?: string;
-  /** Whether this AI Index accepts memory writes. Absent entries fail closed for memory tools. */
+  /** Whether memory tools write to this AI Index. Absent entries fail closed for memory tools. */
   memoryEnabled?: boolean;
 }
 
@@ -29,3 +29,6 @@ export type AiIndexResolver = (params: {
   ids: string[];
   request: KibanaRequest;
 }) => Promise<AiIndexDetail[]>;
+
+/** Returns AI Index ids every agent may use in the request space, on top of its configured ones. */
+export type DefaultAiIndexProvider = (params: { request: KibanaRequest }) => Promise<string[]>;

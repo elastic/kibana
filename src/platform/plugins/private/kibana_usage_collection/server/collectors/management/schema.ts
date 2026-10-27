@@ -603,6 +603,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Whether the Context Engine is enabled.' },
   },
+  'contextEngine:memoryDreamingInterval': {
+    type: 'keyword',
+    _meta: { description: 'How often Context Engine memory dreaming runs.' },
+  },
   'agentBuilder:tracing:enabled': {
     type: 'boolean',
     _meta: {

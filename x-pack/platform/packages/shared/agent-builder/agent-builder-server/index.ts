@@ -166,6 +166,7 @@ export type {
   AgentRegistry,
   AiIndexDetail,
   AiIndexResolver,
+  DefaultAiIndexProvider,
 } from './agents';
 export type { SkillRegistry } from './skills';
 export type { RendererTypeDefinition } from './renderers';
@@ -238,3 +239,5 @@ export {
   getAgentConnectorDetail,
   resolveAllowedConnectorIds,
 } from './agent_connectors';
+export type { StableUserIdAuthUser } from './users';
+export { toStableUserId, resolveApiKeyOwnerProfileUid } from './users';

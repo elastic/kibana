@@ -20,6 +20,14 @@ export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{a
 export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;
 export const AI_INDEX_KI_BY_ID_PATH = `${AI_INDEX_KI_LIST_PATH}/{kiId}`;
 
+export const MEMORY_PATH = `${PUBLIC_API_PATH}/memory`;
+export const MEMORY_REMEMBER_PATH = `${MEMORY_PATH}/_remember`;
+export const MEMORY_FORGET_PATH = `${MEMORY_PATH}/_forget`;
+export const MEMORY_DREAMING_PATH = `${INTERNAL_API_PATH}/memory/dreaming`;
+export const MEMORY_DREAMING_ENABLE_PATH = `${MEMORY_DREAMING_PATH}/_enable`;
+export const MEMORY_DREAMING_DISABLE_PATH = `${MEMORY_DREAMING_PATH}/_disable`;
+export const MEMORY_DREAMING_RUN_PATH = `${MEMORY_DREAMING_PATH}/_run`;
+
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;
 export const MAX_KI_PAGE_SIZE = 100;

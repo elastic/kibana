@@ -8,6 +8,10 @@
 import type { CoreSetup } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import {
+  MEMORY_AI_INDEX_IDS,
+  SHORT_TERM_MEMORY_AI_INDEX_ID,
+} from '@kbn/context-engine-plugin/common/memory';
 import { hasContextEngineReadPrivilege } from './agent_builder/has_context_engine_read_privilege';
 import { registerAgentBuilderTools } from './agent_builder/tools';
 import { registerAttachmentTypes } from './attachment_types';
@@ -53,8 +57,13 @@ export const registerContextEngineAgentBuilderIntegration = ({
       id: aiIndex.id,
       esqlTarget: aiIndex.dest.value,
       description: aiIndex.description,
-      memoryEnabled: aiIndex.memory_enabled,
+      memoryEnabled: aiIndex.id === SHORT_TERM_MEMORY_AI_INDEX_ID,
     }));
+  });
+
+  agentBuilder.agents.registerDefaultAiIndexProvider(async () => {
+    const [, { contextEngine }] = await coreSetup.getStartServices();
+    return (await contextEngine.isMemoryEnabled()) ? [...MEMORY_AI_INDEX_IDS] : [];
   });
 
   registerAgentBuilderTools({

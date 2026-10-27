@@ -26,7 +26,6 @@ interface CreatedAiIndex {
 export interface CreateAiIndexArgs {
   id: string;
   description: string;
-  memoryEnabled?: boolean;
   sources: SelectedSource[];
   trace?: EditableAiIndexTrace;
 }
@@ -38,10 +37,9 @@ export const useCreateAiIndex = () => {
   const queryClient = useQueryClient();
 
   const { mutateAsync, isLoading } = useMutation<CreatedAiIndex, Error, CreateAiIndexArgs>({
-    mutationFn: async ({ id, description, memoryEnabled, sources, trace }) => {
+    mutationFn: async ({ id, description, sources, trace }) => {
       const properties: AiIndexProperties = {
         description: description.trim() || undefined,
-        memory_enabled: memoryEnabled,
         dest: getAiIndexDest(DEFAULT_AI_INDEX_TYPE, id),
         automations: [],
         sources: toAiIndexSources(sources),

@@ -11,6 +11,12 @@ import { describeAiIndex } from './describe';
 import { describeAiIndexAggregations } from './describe_aggregations';
 import { describeAiIndexFields } from './describe_fields';
 import { buildExampleQueries } from './example_queries';
+import {
+  LONG_TERM_MEMORY_AI_INDEX_ID,
+  LONG_TERM_MEMORY_INDEX,
+  SHORT_TERM_MEMORY_AI_INDEX_ID,
+  SHORT_TERM_MEMORY_DATA_STREAM,
+} from '../../common/memory';
 
 jest.mock('./describe_fields');
 jest.mock('./describe_aggregations');
@@ -23,7 +29,6 @@ const aiIndex: AiIndexHttpItem = {
   description: 'Support KIs',
   dest: { type: 'index', value: 'ai-index-idx-support*' },
   managed: false,
-  memory_enabled: false,
   automations: [],
   sources: [],
   traces: [],
@@ -86,6 +91,7 @@ describe('describeAiIndex', () => {
       dest: aiIndex.dest,
       spaceId: 'marketing',
       fields,
+      excludeMemory: true,
     });
     expect(response).toBe(
       [
@@ -174,66 +180,130 @@ describe('describeAiIndex', () => {
     expect(response.endsWith(exampleQueriesBlock)).toBe(true);
   });
 
-  it('renders memory capability without treating document counts as logical memory counts', async () => {
-    describeAiIndexAggregationsMock.mockResolvedValue({
-      kiTypeCounts: [
-        { type: 'memory.session', count: 2 },
-        { type: 'memory.session_fact', count: 7 },
-        { type: 'document', count: 3 },
-      ],
-      tagCounts: [],
-    });
-
-    const response = await describeAiIndex({
-      ...params,
-      aiIndex: { ...aiIndex, memory_enabled: true },
-      includeMemory: true,
-    });
-
-    expect(response).toContain('\nMemory\nMemory writes are enabled');
-    expect(response).toContain('\nKnowledge item types\n"document": 3\n');
-    expect(response).not.toContain('"memory.session": 2');
-    expect(response).not.toContain('"memory.session_fact": 7');
-    expect(response).toContain(
-      '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")'
-    );
-    expect(response).toContain(
+  describe('memory', () => {
+    const shortTermStore: AiIndexHttpItem = {
+      ...aiIndex,
+      id: SHORT_TERM_MEMORY_AI_INDEX_ID,
+      managed: true,
+      dest: { type: 'data_stream', value: SHORT_TERM_MEMORY_DATA_STREAM },
+    };
+    const longTermStore: AiIndexHttpItem = {
+      ...aiIndex,
+      id: LONG_TERM_MEMORY_AI_INDEX_ID,
+      managed: true,
+      dest: { type: 'index', value: LONG_TERM_MEMORY_INDEX },
+    };
+    const exampleQueriesFor = ({ dest }: AiIndexHttpItem) =>
       [
-        'For cross-session recall, search granular facts with hybrid retrieval:',
-        'FROM ai-index-idx-support* METADATA _id, _index, _score',
-        '| WHERE type == "memory.session_fact"',
-        '| INLINE STATS latest_at = MAX(@timestamp) BY id',
-        '| WHERE @timestamp == latest_at',
-        '  AND (governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted")',
-        '  AND (expires_at IS NULL OR expires_at > NOW())',
-        '| FORK',
-      ].join('\n')
-    );
-    expect(response).toContain('| FUSE\n| SORT _score DESC, _id ASC');
-    expect(response).not.toContain('For recall from the current Agent Builder conversation:');
-    expect(response).toContain('references.uri, references.relation, references.description');
-    expect(response).toContain(
-      'Select the latest revision before filtering deleted or expired memories'
-    );
-    expect(response.endsWith(memoryAwareExampleQueriesBlock)).toBe(true);
-  });
+        'Example queries (adapt field names for non-canonical indices)',
+        ...buildExampleQueries(dest).flatMap(({ title, esql }) => ['', title, esql]),
+      ].join('\n');
 
-  it('omits memory capability when memory writes are disabled', async () => {
-    const response = await describeAiIndex(params);
-
-    expect(response).not.toContain('\nMemory\n');
-    expect(response).not.toContain('platform.context_engine.remember');
-  });
-
-  it('omits memory capability when the memory feature flag is disabled', async () => {
-    const response = await describeAiIndex({
-      ...params,
-      aiIndex: { ...aiIndex, memory_enabled: true },
+    beforeEach(() => {
+      describeAiIndexAggregationsMock.mockResolvedValue({
+        kiTypeCounts: [
+          { type: 'memory.session', count: 2 },
+          { type: 'memory.session_fact', count: 7 },
+          { type: 'document', count: 3 },
+        ],
+        tagCounts: [],
+      });
     });
 
-    expect(response).not.toContain('\nMemory\n');
-    expect(response).not.toContain('platform.context_engine.remember');
-    expect(response).not.toContain('memory.session');
-    expect(response.endsWith(exampleQueriesBlock)).toBe(true);
+    it('hides memory types from ordinary AI indices without a Memory section', async () => {
+      const response = await describeAiIndex({ ...params, includeMemory: true });
+
+      expect(response).not.toContain('\nMemory\n');
+      expect(response).not.toContain('platform.context_engine.remember');
+      expect(response).toContain('\nKnowledge item types\n"document": 3\n');
+      expect(response).not.toContain('"memory.session": 2');
+      expect(response.endsWith(memoryAwareExampleQueriesBlock)).toBe(true);
+    });
+
+    it('describes the short-term memory store', async () => {
+      const response = await describeAiIndex({
+        ...params,
+        aiIndex: shortTermStore,
+        includeMemory: true,
+      });
+
+      expect(response).toContain(
+        [
+          'Memory',
+          'This is the short-term memory store for this space.',
+          'Available memory types',
+          'memory.session',
+          'memory.session_fact',
+          'Use platform.context_engine.remember to write memory.',
+          'Use platform.context_engine.forget with a memory id to tombstone memory.',
+          'For cross-session recall, search granular facts with hybrid retrieval:',
+          `FROM ${SHORT_TERM_MEMORY_DATA_STREAM} METADATA _id, _index, _score`,
+          '| WHERE type == "memory.session_fact"',
+          '| INLINE STATS latest_at = MAX(@timestamp) BY id',
+        ].join('\n')
+      );
+      expect(response).toContain(
+        'Select the latest revision before filtering deleted or expired memories'
+      );
+      expect(describeAiIndexAggregationsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ excludeMemory: false })
+      );
+      expect(response).toContain('"memory.session": 2');
+      expect(response).toContain('"memory.session_fact": 7');
+      expect(response.endsWith(exampleQueriesFor(shortTermStore))).toBe(true);
+    });
+
+    it('describes the long-term memory store as read-only memories of every long-term type', async () => {
+      const response = await describeAiIndex({
+        ...params,
+        aiIndex: longTermStore,
+        includeMemory: true,
+      });
+
+      expect(response).toContain(
+        [
+          'Memory',
+          'This is the long-term memory store for this space. Dreaming writes it from short-term memory; agents only read it.',
+          'Available memory types',
+          'memory.fact: a statement about this environment that stays true.',
+        ].join('\n')
+      );
+      expect(response).toContain('memory.entity: ');
+      expect(response).toContain('memory.procedure: ');
+      expect(response).toContain('memory.relationship: ');
+      expect(response).toContain(
+        [
+          `FROM ${LONG_TERM_MEMORY_INDEX} METADATA _id, _score`,
+          '| WHERE type IN ("memory.fact", "memory.entity", "memory.procedure")',
+        ].join('\n')
+      );
+      expect(response).toContain(
+        [
+          `FROM ${LONG_TERM_MEMORY_INDEX}`,
+          '| WHERE type == "memory.relationship"',
+          '  AND references.uri == "ki://long-term-memory/<id>"',
+        ].join('\n')
+      );
+      expect(response).not.toContain('platform.context_engine.remember');
+      expect(response.endsWith(exampleQueriesFor(longTermStore))).toBe(true);
+    });
+
+    it('omits the Memory section for a user-created AI index that reuses a memory store id', async () => {
+      const response = await describeAiIndex({
+        ...params,
+        aiIndex: { ...shortTermStore, managed: false },
+        includeMemory: true,
+      });
+
+      expect(response).not.toContain('\nMemory\n');
+      expect(response).not.toContain('"memory.session": 2');
+    });
+
+    it('omits memory capability when the memory feature flag is disabled', async () => {
+      const response = await describeAiIndex({ ...params, aiIndex: shortTermStore });
+
+      expect(response).not.toContain('\nMemory\n');
+      expect(response).not.toContain('platform.context_engine.remember');
+    });
   });
 });

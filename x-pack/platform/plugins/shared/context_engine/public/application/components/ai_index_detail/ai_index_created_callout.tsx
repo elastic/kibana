@@ -14,10 +14,9 @@ import { useKibana } from '../../hooks/use_kibana';
 
 interface AiIndexCreatedCalloutProps {
   onDismiss: () => void;
-  showMemory: boolean;
 }
 
-export const AiIndexCreatedCallout = ({ onDismiss, showMemory }: AiIndexCreatedCalloutProps) => {
+export const AiIndexCreatedCallout = ({ onDismiss }: AiIndexCreatedCalloutProps) => {
   const {
     services: { docLinks },
   } = useKibana();
@@ -49,19 +48,11 @@ export const AiIndexCreatedCallout = ({ onDismiss, showMemory }: AiIndexCreatedC
           defaultMessage: 'Your AI index is ready',
         })}
         text={
-          showMemory ? (
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.createdCallout.body"
-              defaultMessage="Add sources to build agent context from your data, or use it to store agent memory. Refer to {documentationLink} to learn more."
-              values={{ documentationLink }}
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.createdCallout.bodyWithoutMemory"
-              defaultMessage="Add sources to build agent context from your data. Refer to {documentationLink} to learn more."
-              values={{ documentationLink }}
-            />
-          )
+          <FormattedMessage
+            id="xpack.contextEngine.aiIndexDetail.createdCallout.bodyWithoutMemory"
+            defaultMessage="Add sources to build agent context from your data. Refer to {documentationLink} to learn more."
+            values={{ documentationLink }}
+          />
         }
       />
       <EuiSpacer size="m" />

@@ -239,6 +239,132 @@ Agent Builder chat, it is the agent's space. Over MCP, it is the space in the
 URL the MCP server is served from: `/api/agent_builder/mcp` is the default
 space and `/s/{spaceId}/api/agent_builder/mcp` is another space.
 
+## Memory
+
+Memory is experimental and off by default. The global advanced setting
+`contextEngine:memoryEnabled` turns it on for every space.
+
+Memories live in two managed AI indices, shared by all spaces. Each memory is
+scoped to its space through `permissions.kibana.privileges`:
+
+| AI index id         | Backing store                    | Types                                   | Written by     |
+| ------------------- | -------------------------------- | --------------------------------------- | -------------- |
+| `short-term-memory` | `.ai-index-ds-short-term-memory` | `memory.session`, `memory.session_fact` | users, agents  |
+| `long-term-memory`  | `.ai-index-idx-long-term-memory` | `memory.fact`, `memory.entity`, `memory.procedure`, `memory.relationship` | dreaming |
+
+Both are hidden from the AI index list and from `GET` while memory is off.
+While it is on, Agent Builder adds both to every agent's AI indices. Their
+`_describe` output has a Memory section that explains the types and how to
+recall them. Other AI indices no longer take memory writes; the old per-index
+`memory_enabled` field is gone, and memories already stored there stay readable.
+
+### Writing short-term memory
+
+| Route                                      | Body                                                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------------------- |
+| `POST /api/context_engine/memory/_remember` | `{ id?, session_id?, type, title, description, content, tags?, expires_at? }`         |
+| `POST /api/context_engine/memory/_forget`   | `{ id }`                                                                              |
+
+Both need Context Engine's `write` privilege. Kibana checks the privilege and
+then writes as its internal user, so callers need no Elasticsearch privileges
+on the store. Rules:
+
+- `expires_at` defaults to 90 days from now and may not be later than that.
+- `session_id` groups memories from one session. When omitted, a new one is
+  generated and returned.
+- Passing `id` revises a memory: a new revision is appended to the data stream.
+  The type must match, and a forgotten memory cannot be revised.
+- `_forget` appends a tombstone revision. Forgetting twice succeeds.
+- The writer is `user://<stable user id>`, with the username and space in its
+  metadata.
+
+The Agent Builder `platform.context_engine.remember` and `forget` tools call the
+same service. They keep their `tool://` writer, add the user id, and use the
+conversation id as the session id.
+
+### Dreaming
+
+Dreaming is a per-space background task (`contextEngine:memoryDreaming:<space>`)
+that turns short-term memories into long-term ones. Each run:
+
+1. Reads the short-term memories written since the oldest long-term type's
+   cursor, oldest first, up to 1,000 memories. Each type keeps its own cursor,
+   so one type failing does not make the others re-read the same memories.
+2. For each long-term type (three at a time), splits that type's new memories
+   into time-ordered batches of about 30k estimated tokens. A batch never ends
+   between memories with the same timestamp. Relationships run after facts,
+   entities and procedures, and only up to the oldest of their cursors, so they
+   never link memories that weren't processed yet.
+3. For each batch, in order: finds related live long-term memories with one
+   hybrid search per short-term memory (`msearch`, merged by rank, top 50, then
+   trimmed to about 20k tokens), asks the model which operations to apply,
+   applies them, and moves the type's cursor to the end of the batch. Later
+   batches see what earlier ones wrote.
+
+A failed batch stops its type at the last batch that succeeded; the other types
+carry on and the run is `partial`. A run stops starting batches after 10 minutes
+or 20 batches per type, because Task Manager drops the state of a run that
+times out at 15 minutes. When a type is left behind, the next run starts a
+minute later, until it has caught up. A long-term type added later starts from
+the time it is first seen, without a backfill.
+
+Every type supports `create`, `reinforce`, `supersede` and `outdate`. Long-term
+memories cite the short-term memories they came from as `derived_from`
+references. Per type:
+
+| Type                  | Holds                                                         | Key                              | Extra operations      |
+| --------------------- | ------------------------------------------------------------- | -------------------------------- | --------------------- |
+| `memory.fact`         | A statement about the environment that stays true             | Chosen by the model              | `confirm`, `refute`   |
+| `memory.entity`       | A named person, team, system, service, project or data set    | `<kind>:<slug of the name>`      | `add_aliases`         |
+| `memory.procedure`    | Numbered steps for a recurring task                           | Chosen by the model              | `confirm`, `refute`   |
+| `memory.relationship` | A link between two entities, facts or procedures              | `<from id>\|<relation>\|<to id>` | none                  |
+
+Entities about people hold work context only (name, role, team, what they own).
+Type-specific fields live in the flattened `attributes`: `entity.kind`,
+`entity.aliases`, `fact.verification.*`, `procedure.verification.*`, and
+`relationship.from_id`, `relationship.to_id`, `relationship.relation`. A
+relationship also points at its two ends with `relates_to` references
+(`description` is `from` or `to`), so agents can find a memory's links in ES|QL
+with `references.uri`. Its title reads as a sentence, such as "Team Search owns
+Context Engine".
+
+Relationships follow their ends: when an end is superseded, its live
+relationships move to the new memory; when an end is outdated or refuted, they
+are outdated too. Neither needs a model call.
+
+Dreaming is turned on and off from the Memory tab of the Context Engine page,
+which calls these internal routes:
+
+| Route                                                    | Effect                                                                         |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `GET /internal/context_engine/memory/dreaming`           | Status, schedule, and the last run and its counts                              |
+| `POST /internal/context_engine/memory/dreaming/_enable`  | Schedules the task with an API key for the caller; `{ "scheduled": false }` for manual runs only |
+| `POST /internal/context_engine/memory/dreaming/_disable` | Disables the task and drops its API key, keeping the run history              |
+| `POST /internal/context_engine/memory/dreaming/_run`     | Starts a dream now ("Dream now"); 409 while dreaming is off or a dream runs   |
+
+The task calls the model as the user who last turned dreaming on or changed its
+schedule. It uses the model picked for **Context Engine → Memory dreaming** in
+the model settings (inference feature `context_engine_memory`), or the default
+connector. On a schedule, it runs every `contextEngine:memoryDreamingInterval`
+(space setting, default `24h`, at least `1h`). For manual runs only, the task
+waits with a far-future run time until "Dream now" calls `runSoon`, and parks
+itself again after each run, unless it is catching up. A run records, per type,
+how many short-term memories it read, in how many batches, and how many proposed
+changes it made and skipped. The Dreaming panel shows the totals with a line per
+type, and "Catching up" with about how many memories are left.
+
+Turning dreaming off, on, or switching between scheduled and manual keeps the
+run history, so the next dream starts where the last one stopped instead of
+re-reading every short-term memory. Both are refused with a 409 while a dream
+runs.
+
+For testing, `_enable` also takes `{ "rebuild": true }` (the "Rebuild from all
+short-term memories" switch). While it's on, every dream that isn't catching up
+deletes the space's long-term memories and reads every short-term memory again;
+catch-up runs carry on from where the rebuild got to. If a dream fails once the
+delete has started, the cursors are dropped, so the next dream reads everything again even
+with the switch off. This is temporary and goes away once the types settle.
+
 ## Feedback analysis configuration
 
 Signal *generation* is global — one background task, one advanced setting.

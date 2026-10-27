@@ -85,6 +85,8 @@ export const ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID =
 // Context engine settings
 export const CONTEXT_ENGINE_ENABLED_SETTING_ID = 'contextEngine:enabled';
 export const CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID = 'contextEngine:memoryEnabled';
+export const CONTEXT_ENGINE_MEMORY_DREAMING_INTERVAL_SETTING_ID =
+  'contextEngine:memoryDreamingInterval';
 
 // Data federation settings
 export const DATA_FEDERATION_ENABLED_SETTING_ID = 'dataFederation:enabled';

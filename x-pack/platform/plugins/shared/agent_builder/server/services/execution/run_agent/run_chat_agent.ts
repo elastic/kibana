@@ -191,6 +191,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       aiIndicesEnabled: experimentalFeatures.aiIndices,
       request,
       resolver: context.aiIndexResolver,
+      defaultAiIndexProvider: context.defaultAiIndexProvider,
       logger,
     }),
     experimentalFeatures.relevantSkills ? modelProvider.hasFastModel() : false,
@@ -204,7 +205,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const filteredSkills = await selectSkills({
     skills,
     skillsStore,
-    agentConfiguration,
+    agentConfiguration: { ...agentConfiguration, ai_indices: resolvedConfiguration.aiIndices },
     additionalSkillIds: filteredPluginSkillIds,
   });
 

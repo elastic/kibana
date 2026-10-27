@@ -17,10 +17,15 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  CONTEXT_ENGINE_MEMORY_DREAMING_INTERVAL_SETTING_ID,
+  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '../common/constants';
 import { apiPrivileges } from '../common/features';
+import { DEFAULT_MEMORY_DREAMING_INTERVAL, SHORT_TERM_MEMORY_AI_INDEX_ID } from '../common/memory';
+import { validateMemoryDreamingInterval } from '../common/validation';
 import type {
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
@@ -33,6 +38,15 @@ import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
 import { registerSignalRoutes } from './routes/signals';
+import { registerMemoryRoutes } from './routes/memory';
+import { getMemoryUser } from './memory/current_user';
+import { createMemoryDreamingScheduler } from './memory/dreaming/schedule';
+import type { MemoryDreamingScheduler } from './memory/dreaming/schedule';
+import { registerMemoryDreamingTaskDefinition } from './memory/dreaming/task';
+import { registerContextEngineInferenceFeatures } from './memory/dreaming/inference_features';
+import { registerMemoryStores } from './memory/register_memory_stores';
+import { MemoryService } from './memory/service';
+import type { MemoryServiceApi } from './memory/service';
 import type {
   FeedbackAnalysisScheduleService,
   WorkflowEnablementApi,
@@ -80,6 +94,10 @@ export class ContextEnginePlugin
   /** Captured at setup because the schedule service, built at start, enables workflows with it. */
   private workflowsManagement?: WorkflowEnablementApi;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
+  /** Reads the global memory flag as the internal user, for work that has no request. */
+  private isMemoryEnabledInternal: () => Promise<boolean> = async () => false;
+  private createMemoryService?: (request: KibanaRequest) => MemoryServiceApi;
+  private dreamingScheduler?: MemoryDreamingScheduler;
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private analyticsService?: ContextEngineAnalyticsService;
   private workflowsManagementApiPromise: Promise<
@@ -95,6 +113,12 @@ export class ContextEnginePlugin
     setupDeps: ContextEngineSetupDependencies
   ): ContextEnginePluginSetup {
     registerFeatures({ features: setupDeps.features });
+    if (setupDeps.searchInferenceEndpoints) {
+      registerContextEngineInferenceFeatures({
+        searchInferenceEndpoints: setupDeps.searchInferenceEndpoints,
+        logger: this.logger,
+      });
+    }
     this.setupWorkflowsManagement(coreSetup);
 
     this.workflowsManagement = setupDeps.workflowsManagement?.management;
@@ -161,7 +185,8 @@ export class ContextEnginePlugin
           defaultMessage: 'Context Engine memory',
         }),
         description: i18n.translate('xpack.contextEngine.uiSettings.memory.description', {
-          defaultMessage: 'Enables memory capabilities for Context Engine AI indices.',
+          defaultMessage:
+            'Turns on Context Engine memory in every space: the short-term and long-term memory stores, the remember and forget tools, and dreaming.',
         }),
         schema: schema.boolean(),
         value: false,
@@ -169,6 +194,62 @@ export class ContextEnginePlugin
         requiresPageReload: false,
         readonly: false,
       },
+    });
+
+    coreSetup.uiSettings.register({
+      [CONTEXT_ENGINE_MEMORY_DREAMING_INTERVAL_SETTING_ID]: {
+        name: i18n.translate('xpack.contextEngine.uiSettings.memoryDreamingInterval.name', {
+          defaultMessage: 'Context Engine memory dreaming interval',
+        }),
+        description: i18n.translate(
+          'xpack.contextEngine.uiSettings.memoryDreamingInterval.description',
+          {
+            defaultMessage:
+              'How often dreaming turns the short-term memories in this space into long-term memories, for example 12h or 1d. Must be at least 60 minutes.',
+          }
+        ),
+        schema: schema.string({ maxLength: 16, validate: validateMemoryDreamingInterval }),
+        value: DEFAULT_MEMORY_DREAMING_INTERVAL,
+        experimental: true,
+        requiresPageReload: false,
+        readonly: false,
+      },
+    });
+
+    registerMemoryStores({
+      registry: this.aiIndexRegistry,
+      isMemoryEnabled: () => this.isMemoryEnabledInternal(),
+    });
+
+    registerMemoryDreamingTaskDefinition({
+      taskManager: setupDeps.taskManager,
+      getDeps: async () => {
+        const [coreStart, startDeps] = await coreSetup.getStartServices();
+        return {
+          esClient: coreStart.elasticsearch.client.asInternalUser,
+          inference: startDeps.inference,
+          searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
+          isMemoryEnabled: () => this.isMemoryEnabledInternal(),
+          isContextEngineEnabled: (spaceId) =>
+            isContextEngineEnabledInSpace({
+              savedObjects: coreStart.savedObjects,
+              uiSettings: coreStart.uiSettings,
+              spaceId,
+            }),
+          getInterval: async (spaceId) => {
+            const soClient = coreStart.savedObjects
+              .getUnsafeInternalClient()
+              .asScopedToNamespace(spaceId);
+            const interval = await coreStart.uiSettings
+              .asScopedToClient(soClient)
+              .get<string>(CONTEXT_ENGINE_MEMORY_DREAMING_INTERVAL_SETTING_ID);
+            return interval && validateMemoryDreamingInterval(interval) === undefined
+              ? interval
+              : DEFAULT_MEMORY_DREAMING_INTERVAL;
+          },
+        };
+      },
+      logger: this.logger.get('memory_dreaming'),
     });
 
     registerSignalGeneratorTaskDefinition({
@@ -228,7 +309,6 @@ export class ContextEnginePlugin
       getAiIndexService,
       getImprovementsService,
       getScheduleService,
-      isMemoryEnabled,
       getAiIndexDataReadService: (params) => {
         if (!this.createAiIndexDataReadService) {
           throw new Error('AI index read service not available — plugin has not started');
@@ -310,6 +390,37 @@ export class ContextEnginePlugin
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
     });
 
+    registerMemoryRoutes({
+      router,
+      logger: this.logger.get('memory'),
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+      getMemoryService: async ({ request }) => {
+        await coreSetup.getStartServices();
+        if (!this.createMemoryService) {
+          throw new Error('Memory service not available — plugin has not started');
+        }
+        return this.createMemoryService(request);
+      },
+      getDreamingScheduler: () => {
+        if (!this.dreamingScheduler) {
+          throw new Error('Dreaming scheduler not available — plugin has not started');
+        }
+        return this.dreamingScheduler;
+      },
+      getMemoryUser: async (request) => {
+        const [coreStart] = await coreSetup.getStartServices();
+        return getMemoryUser({
+          request,
+          security: coreStart.security,
+          esClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+        });
+      },
+      isMemoryEnabled,
+    });
+
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
     };
@@ -367,6 +478,7 @@ export class ContextEnginePlugin
         getManagedIds: () => this.aiIndexRegistry.getManagedIds(),
         getRegistration: (id) => this.aiIndexRegistry.get(id),
         ensure: ensureAiIndex,
+        getUnavailableIds: () => this.aiIndexRegistry.getUnavailableIds(),
       },
     });
     const aiIndexService = this.aiIndexService;
@@ -425,6 +537,59 @@ export class ContextEnginePlugin
     this.isFeedbackLoopEnabled = async () =>
       (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID)) ??
       false;
+    this.isMemoryEnabledInternal = async () =>
+      (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)) ?? false;
+
+    const memoryLogger = this.logger.get('memory');
+    const internalEsClient = this.esClient;
+    this.createMemoryService = (request) => {
+      const spaceId = resolveSpaceId(startDeps.spaces, request);
+      return new MemoryService({
+        spaceId,
+        esClient: internalEsClient,
+        logger: memoryLogger,
+        isContextEngineEnabled: () =>
+          isContextEngineEnabledInSpace({
+            savedObjects: coreStart.savedObjects,
+            uiSettings: coreStart.uiSettings,
+            spaceId,
+          }),
+        isMemoryEnabled: async () => {
+          const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+          return (
+            (await coreStart.uiSettings
+              .globalAsScopedToClient(savedObjectsClient)
+              .get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)) ?? false
+          );
+        },
+        hasWritePrivilege: async () => {
+          const { security } = startDeps;
+          if (!security) {
+            return true;
+          }
+          const { hasAllRequested } = await security.authz
+            .checkPrivilegesWithRequest(request)
+            .atSpace(spaceId, {
+              kibana: [security.authz.actions.api.get(apiPrivileges.writeContextEngine)],
+            });
+          return hasAllRequested;
+        },
+        getCurrentUser: () =>
+          getMemoryUser({
+            request,
+            security: coreStart.security,
+            esClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+          }),
+        ensureStore: async () => {
+          await ensureAiIndex(SHORT_TERM_MEMORY_AI_INDEX_ID, spaceId);
+        },
+      });
+    };
+    const createMemoryService = this.createMemoryService;
+
+    this.dreamingScheduler = createMemoryDreamingScheduler({
+      getTaskManager: async () => startDeps.taskManager,
+    });
 
     scheduleSignalGenerator({ taskManager: startDeps.taskManager }).catch((err) => {
       this.logger.warn(
@@ -442,6 +607,8 @@ export class ContextEnginePlugin
       getAiIndexDataReadService: (params) => createAiIndexDataReadService(params),
       getSignalsService: () => signalsService,
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
+      getMemoryService: ({ request }) => createMemoryService(request),
+      isMemoryEnabled: () => this.isMemoryEnabledInternal(),
     };
   }
 

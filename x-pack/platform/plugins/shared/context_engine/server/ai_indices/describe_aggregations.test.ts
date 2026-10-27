@@ -33,7 +33,7 @@ const esResponseError = (statusCode: number, type: string) =>
 const LIFECYCLE =
   '| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n| WHERE expires_at IS NULL OR expires_at > NOW()';
 const MEMORY_EXCLUSION =
-  '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")';
+  '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND type != "memory.fact" AND type != "memory.entity" AND type != "memory.procedure" AND type != "memory.relationship")';
 
 const emptyResponse = { columns: [], values: [] };
 
@@ -128,6 +128,18 @@ describe('describeAiIndexAggregations', () => {
     expect(query).toContain('| INLINE STATS latest = MAX(@timestamp) BY id\n');
     expect(query.indexOf('INLINE STATS')).toBeLessThan(query.indexOf('governance.lifecycle'));
     expect(Parser.parse(query).errors).toEqual([]);
+  });
+
+  it('keeps memory types when asked not to exclude them', async () => {
+    await describeAiIndexAggregations({
+      ...params,
+      fields: [field('type', true), field('tags', true)],
+      excludeMemory: false,
+    });
+
+    for (const query of queries()) {
+      expect(query).not.toContain(MEMORY_EXCLUSION);
+    }
   });
 
   it('only counts the fields that are aggregatable', async () => {

@@ -51,7 +51,7 @@ import type { ExecutionConversationOrigin } from '../execution/types';
 import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
-import type { AiIndexResolver } from './ai_index_resolver';
+import type { AiIndexResolver, DefaultAiIndexProvider } from './ai_index_resolver';
 import type { AgentRegistry } from './registry';
 
 /**
@@ -411,6 +411,8 @@ export interface AgentHandlerContext {
    * non-default AI indices are omitted from the prompt.
    */
   aiIndexResolver?: AiIndexResolver;
+  /** Provides AI indices every agent may use. Absent when no provider is registered. */
+  defaultAiIndexProvider?: DefaultAiIndexProvider;
 }
 
 /**

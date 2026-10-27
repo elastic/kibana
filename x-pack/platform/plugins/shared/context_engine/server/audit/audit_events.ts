@@ -92,6 +92,59 @@ export const improvementAuditEvent = ({
   },
 });
 
+export enum MemoryAuditAction {
+  REMEMBER = 'context_engine_memory_remember',
+  FORGET = 'context_engine_memory_forget',
+  DREAMING_ENABLE = 'context_engine_memory_dreaming_enable',
+  DREAMING_DISABLE = 'context_engine_memory_dreaming_disable',
+  DREAMING_RUN = 'context_engine_memory_dreaming_run',
+}
+
+const memoryEventMessages: Record<MemoryAuditAction, [string, string]> = {
+  context_engine_memory_remember: ['remember a memory', 'remembered a memory'],
+  context_engine_memory_forget: ['forget a memory', 'forgotten a memory'],
+  context_engine_memory_dreaming_enable: ['turn on memory dreaming', 'turned on memory dreaming'],
+  context_engine_memory_dreaming_disable: [
+    'turn off memory dreaming',
+    'turned off memory dreaming',
+  ],
+  context_engine_memory_dreaming_run: ['start a memory dream', 'started a memory dream'],
+};
+
+const memoryEventTypes: Record<MemoryAuditAction, string> = {
+  context_engine_memory_remember: 'creation',
+  context_engine_memory_forget: 'deletion',
+  context_engine_memory_dreaming_enable: 'change',
+  context_engine_memory_dreaming_disable: 'change',
+  context_engine_memory_dreaming_run: 'start',
+};
+
+export const memoryAuditEvent = ({
+  action,
+  id,
+  error,
+}: {
+  action: MemoryAuditAction;
+  id?: string;
+  error?: Error;
+}): AuditEvent => {
+  const [present, past] = memoryEventMessages[action];
+  const target = id ? ` [id=${id}]` : '';
+  return {
+    message: error ? `Failed attempt to ${present}${target}` : `User has ${past}${target}`,
+    event: {
+      action,
+      category: ['database'],
+      type: [memoryEventTypes[action]],
+      outcome: error ? 'failure' : 'success',
+    },
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+};
+
 export const aiIndexAuditEvent = ({
   action,
   id,

@@ -35,6 +35,21 @@ describe('AiIndexRegistry', () => {
     logger = loggingSystemMock.createLogger();
   });
 
+  describe('getUnavailableIds()', () => {
+    it('lists entries whose availability check resolves to false or throws', async () => {
+      registry.register('always', makeProperties());
+      registry.register('available', makeProperties(), { isAvailable: async () => true });
+      registry.register('hidden', makeProperties(), { isAvailable: async () => false });
+      registry.register('broken', makeProperties(), {
+        isAvailable: async () => {
+          throw new Error('boom');
+        },
+      });
+
+      expect(await registry.getUnavailableIds()).toEqual(new Set(['hidden', 'broken']));
+    });
+  });
+
   describe('register()', () => {
     it('buffers a registration before freeze is called', () => {
       registry.register('test', makeProperties());

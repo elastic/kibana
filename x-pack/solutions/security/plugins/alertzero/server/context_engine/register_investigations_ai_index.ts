@@ -27,7 +27,6 @@ export const registerInvestigationsAiIndex = ({
     description:
       'Security knowledge indicators that AlertZero Watches hand to each other, such as ' +
       'detection coverage gaps and forensics handoffs.',
-    memory_enabled: false,
     dest: HUNT_COVERAGE_AI_INDEX_DEST,
     automations: [],
     sources: [],

@@ -45,10 +45,6 @@ const toAiIndexDocument = (source: StoredAiIndexDocument, docId: string): AiInde
   space: source.space ?? DEFAULT_SPACE_ID,
 });
 
-const resolveMemoryEnabled = (
-  document: Pick<AiIndexDocument, 'managed' | 'memory_enabled'>
-): boolean => document.memory_enabled ?? !document.managed;
-
 const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
   id: document.id,
   ...(document.description !== undefined && { description: document.description }),
@@ -56,7 +52,6 @@ const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
     feedback_analysis: document.feedback_analysis,
   }),
   managed: document.managed ?? false,
-  memory_enabled: resolveMemoryEnabled(document),
   dest: document.dest,
   automations: document.automations,
   sources: document.sources,
@@ -81,6 +76,8 @@ export interface AiIndexManagedBootstrap {
   getManagedIds: () => string[];
   getRegistration: (id: string) => AiIndexProperties | undefined;
   ensure: (id: string, spaceId: string) => Promise<boolean>;
+  /** Managed ids hidden from reads, such as the memory stores while memory is off. */
+  getUnavailableIds?: () => Promise<Set<string>>;
 }
 
 type AiIndexAutomationTarget = Pick<AiIndexDocument, 'managed' | 'automations'>;
@@ -209,7 +206,6 @@ export class AiIndexService {
         id: aiIndexId,
         space: spaceId,
         managed: true,
-        memory_enabled: properties.memory_enabled ?? false,
       },
       existing,
       { docId: buildManagedAiIndexDocId(spaceId, aiIndexId) }
@@ -226,7 +222,6 @@ export class AiIndexService {
     const now = new Date().toISOString();
     const fullDocument: AiIndexDocument = {
       ...document,
-      memory_enabled: document.memory_enabled ?? true,
       date_created: existing?.document.date_created ?? now,
       date_modified: now,
     };
@@ -294,7 +289,6 @@ export class AiIndexService {
       spaceId,
       {
         ...existing.document,
-        memory_enabled: resolveMemoryEnabled(existing.document),
         feedback_analysis: feedbackAnalysis,
       },
       existing
@@ -304,6 +298,10 @@ export class AiIndexService {
   }
 
   async get(aiIndexId: string, spaceId: string): Promise<AiIndexHttpItem> {
+    const unavailableIds = await this.getUnavailableManagedIds();
+    if (unavailableIds.has(aiIndexId)) {
+      throw new AiIndexNotFoundError(aiIndexId);
+    }
     const existing = await this.findDocument(aiIndexId, spaceId);
     if (existing) {
       return this.toItem(existing.document);
@@ -383,11 +381,16 @@ export class AiIndexService {
   }
 
   async list(spaceId: string): Promise<AiIndexHttpItem[]> {
-    const items = await this.searchSpace(spaceId);
+    const unavailableIds = await this.getUnavailableManagedIds();
+    const searchAvailable = async () =>
+      (await this.searchSpace(spaceId)).filter(
+        (item) => !(item.managed && unavailableIds.has(item.id))
+      );
+    const items = await searchAvailable();
     const missingManagedIds =
       this.managedBootstrap
         ?.getManagedIds()
-        .filter((id) => !items.some((item) => item.id === id)) ?? [];
+        .filter((id) => !unavailableIds.has(id) && !items.some((item) => item.id === id)) ?? [];
     if (missingManagedIds.length === 0) {
       return items;
     }
@@ -407,7 +410,11 @@ export class AiIndexService {
         }
       })
     );
-    return this.searchSpace(spaceId);
+    return searchAvailable();
+  }
+
+  private async getUnavailableManagedIds(): Promise<Set<string>> {
+    return (await this.managedBootstrap?.getUnavailableIds?.()) ?? new Set();
   }
 
   /**

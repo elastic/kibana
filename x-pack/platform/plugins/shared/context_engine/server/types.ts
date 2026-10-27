@@ -8,6 +8,11 @@
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
@@ -23,6 +28,7 @@ import type { AiIndexProperties } from '../common/http_api/ai_indices';
 import type { AiIndexDataReadServiceApi } from './ai_indices/data_read_service';
 import type { AiIndexService } from './ai_indices/service';
 import type { ImprovementsServiceApi } from './improvements/service';
+import type { MemoryServiceApi } from './memory/service';
 import type { SignalsServiceApi } from './signals/service';
 
 export interface ContextEnginePluginSetup {
@@ -50,6 +56,10 @@ export interface ContextEnginePluginStart {
     esClient: ElasticsearchClient,
     spaceId: string
   ) => ImprovementsServiceApi;
+  /** Short-term memory writes for one request, in that request's space. */
+  getMemoryService: (params: { request: KibanaRequest }) => MemoryServiceApi;
+  /** Whether the global `contextEngine:memoryEnabled` setting is on. */
+  isMemoryEnabled: () => Promise<boolean>;
 }
 
 /** Duck-typed so Context Engine does not depend on `@kbn/workflows-management-plugin` (Moon cycle). */
@@ -68,12 +78,15 @@ export interface ContextEngineSetupDependencies {
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
   /** Optional in the manifest; without it a feedback analysis schedule cannot be enabled. */
   workflowsManagement?: { management: WorkflowEnablementApi };
 }
 
 export interface ContextEngineStartDependencies {
   actions: ActionsPluginStart;
+  inference: InferenceServerStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   taskManager: TaskManagerStartContract;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;

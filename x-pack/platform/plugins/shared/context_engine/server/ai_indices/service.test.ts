@@ -95,12 +95,8 @@ const aiIndexDocument: AiIndexDocument = {
 };
 
 const toHttpItem = (document: AiIndexDocument) => {
-  const { space: _space, ...item } = document;
-  return {
-    ...item,
-    memory_enabled:
-      document.memory_enabled !== undefined ? document.memory_enabled : document.managed !== true,
-  };
+  const { space: _space, memory_enabled: _memoryEnabled, ...item } = document;
+  return item;
 };
 
 const storedHit = (
@@ -192,14 +188,11 @@ describe('AiIndexService', () => {
       expect(storageClient.index.mock.calls[0][0]).not.toHaveProperty('op_type');
     });
 
-    it('defaults memory_enabled to true', async () => {
+    it('does not write memory_enabled', async () => {
       await service.create('customer_support', DEFAULT_SPACE, properties);
 
-      expect(storageClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({ memory_enabled: true }),
-        })
-      );
+      const [indexArgs] = storageClient.index.mock.calls[0];
+      expect(indexArgs.document).not.toHaveProperty('memory_enabled');
     });
 
     it('throws AiIndexAlreadyExistsError when the id already exists', async () => {
@@ -310,17 +303,6 @@ describe('AiIndexService', () => {
         enabled: true,
         agent_id: 'my-analysis-agent',
       });
-    });
-
-    it('persists memory_enabled when updating an existing AI index', async () => {
-      mockSearchHits(storedHit(aiIndexDocument, { seqNo: 7, primaryTerm: 2 }));
-
-      await expect(
-        service.put('customer_support', DEFAULT_SPACE, { ...properties, memory_enabled: true })
-      ).resolves.toBe('updated');
-
-      const [indexArgs] = storageClient.index.mock.calls[0];
-      expect(indexArgs.document?.memory_enabled).toBe(true);
     });
 
     it('throws AiIndexConflictError when a concurrent create wins (409)', async () => {
@@ -643,27 +625,8 @@ describe('AiIndexService', () => {
           id: 'elastic',
           space: DEFAULT_SPACE,
           managed: true,
-          memory_enabled: false,
         }),
       });
-    });
-
-    it('persists an explicit memory opt-in for a managed AI index', async () => {
-      mockValidIndexDest();
-
-      await service.putManaged('elastic', DEFAULT_SPACE, {
-        ...managedProperties,
-        memory_enabled: true,
-      });
-
-      expect(storageClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({
-            managed: true,
-            memory_enabled: true,
-          }),
-        })
-      );
     });
 
     it('overwrites an existing managed entry (idempotent upsert)', async () => {
@@ -798,15 +761,6 @@ describe('AiIndexService', () => {
       expect(indexArgs.document?.managed).toBe(true);
     });
 
-    it('preserves the disabled fallback for a legacy managed AI index', async () => {
-      mockStored({ ...aiIndexDocument, managed: true });
-
-      await service.setFeedbackAnalysis('customer_support', DEFAULT_SPACE, feedbackAnalysis);
-
-      const [indexArgs] = storageClient.index.mock.calls[0];
-      expect(indexArgs.document?.memory_enabled).toBe(false);
-    });
-
     it('replaces the previous block rather than merging into it', async () => {
       mockStored({
         ...aiIndexDocument,
@@ -853,27 +807,11 @@ describe('AiIndexService', () => {
       );
     });
 
-    it('defaults memory_enabled to true for legacy user-created documents', async () => {
-      mockSearchHits(storedHit(aiIndexDocument));
-
-      await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
-        expect.objectContaining({ id: 'customer_support', memory_enabled: true })
-      );
-    });
-
-    it('defaults memory_enabled to false for legacy managed documents', async () => {
-      mockSearchHits(storedHit({ ...aiIndexDocument, managed: true }));
-
-      await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
-        expect.objectContaining({ id: 'customer_support', memory_enabled: false })
-      );
-    });
-
-    it('round-trips memory_enabled from the stored document to the item', async () => {
+    it('omits memory_enabled from items stored before it was retired', async () => {
       mockSearchHits(storedHit({ ...aiIndexDocument, memory_enabled: true }));
 
-      await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
-        expect.objectContaining({ id: 'customer_support', memory_enabled: true })
+      await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.not.toHaveProperty(
+        'memory_enabled'
       );
     });
 
@@ -1186,6 +1124,39 @@ describe('AiIndexService', () => {
       await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([toHttpItem(managedDocument)]);
       expect(ensure).toHaveBeenCalledWith('elastic', DEFAULT_SPACE);
       expect(storageClient.search).toHaveBeenCalledTimes(2);
+    });
+
+    it('hides unavailable managed AI indices without bootstrapping them', async () => {
+      const hiddenDocument: AiIndexDocument = {
+        ...aiIndexDocument,
+        id: 'short-term-memory',
+        managed: true,
+      };
+      const userDocument: AiIndexDocument = { ...aiIndexDocument, id: 'short-term-memory-copy' };
+      const ensure = jest.fn();
+      mockSearchHits(
+        storedHit(hiddenDocument, {
+          id: buildManagedAiIndexDocId(DEFAULT_SPACE, 'short-term-memory'),
+        }),
+        storedHit(userDocument)
+      );
+      service = new AiIndexService({
+        esClient,
+        logger: loggingSystemMock.createLogger(),
+        managedBootstrap: {
+          isManaged: (id) => id === 'short-term-memory',
+          getManagedIds: () => ['short-term-memory'],
+          getRegistration: () => undefined,
+          getUnavailableIds: async () => new Set(['short-term-memory']),
+          ensure,
+        },
+      });
+
+      await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([toHttpItem(userDocument)]);
+      await expect(service.get('short-term-memory', DEFAULT_SPACE)).rejects.toThrow(
+        AiIndexNotFoundError
+      );
+      expect(ensure).not.toHaveBeenCalled();
     });
 
     it('resolves managed AI indices against their registration, leaving user-owned ones as stored', async () => {

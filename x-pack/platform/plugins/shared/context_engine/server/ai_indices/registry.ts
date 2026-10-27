@@ -10,11 +10,17 @@ import type { AiIndexProperties } from '../../common/http_api/ai_indices';
 import type { AiIndexService } from './service';
 import { AiIndexConflictError } from './errors';
 
+export interface AiIndexRegistrationOptions {
+  /** Hides the entry from reads while it resolves to `false`. */
+  isAvailable?: () => Promise<boolean>;
+}
+
 export class AiIndexRegistry {
   private readonly entries = new Map<string, AiIndexProperties>();
+  private readonly availabilityChecks = new Map<string, () => Promise<boolean>>();
   private frozen = false;
 
-  register(id: string, properties: AiIndexProperties): void {
+  register(id: string, properties: AiIndexProperties, options?: AiIndexRegistrationOptions): void {
     if (this.frozen) {
       throw new Error('registerAiIndex called after plugin setup');
     }
@@ -22,6 +28,19 @@ export class AiIndexRegistry {
       throw new Error(`AI index '${id}' is already registered`);
     }
     this.entries.set(id, properties);
+    if (options?.isAvailable) {
+      this.availabilityChecks.set(id, options.isAvailable);
+    }
+  }
+
+  /** Ids of managed AI indices that are currently hidden. */
+  async getUnavailableIds(): Promise<Set<string>> {
+    const results = await Promise.all(
+      [...this.availabilityChecks].map(async ([id, isAvailable]) =>
+        (await isAvailable().catch(() => false)) ? undefined : id
+      )
+    );
+    return new Set(results.filter((id): id is string => id !== undefined));
   }
 
   /** Marks setup complete; further `register()` calls are rejected. */

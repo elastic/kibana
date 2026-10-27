@@ -15,7 +15,6 @@ import {
 const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
   id: 'my-ai-index',
   managed: false,
-  memory_enabled: false,
   dest: { type: 'index', value: 'ai-index-my-ai-index' },
   automations: [],
   sources: [],
