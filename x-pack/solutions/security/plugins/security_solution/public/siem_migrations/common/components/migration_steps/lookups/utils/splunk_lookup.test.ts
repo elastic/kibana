@@ -5,28 +5,11 @@
  * 2.0.
  */
 
-import { findCanonicalLookupName, lookupNameFromFileName } from './splunk_lookup';
-
-const missingLookups = ['threat_intel_ip'];
+import { lookupNameFromFileName } from './splunk_lookup';
 
 describe('lookupNameFromFileName', () => {
   it('strips one extension', () => {
     expect(lookupNameFromFileName('threat_intel_ip.csv')).toBe('threat_intel_ip');
     expect(lookupNameFromFileName('rules_export.xml')).toBe('rules_export');
-  });
-});
-
-describe('findCanonicalLookupName', () => {
-  it('matches a lookup file name to the list and keeps the list spelling', () => {
-    expect(
-      findCanonicalLookupName(lookupNameFromFileName('threat_intel_ip.csv'), missingLookups)
-    ).toBe('threat_intel_ip');
-    expect(findCanonicalLookupName('Threat_Intel_IP', missingLookups)).toBe('threat_intel_ip');
-  });
-
-  it('does not match a file name that is not in the list', () => {
-    expect(
-      findCanonicalLookupName(lookupNameFromFileName('rules_export.xml'), missingLookups)
-    ).toBeUndefined();
   });
 });

@@ -71,20 +71,49 @@ describe('LookupsFileUpload', () => {
     expect(props.createResources).not.toHaveBeenCalled();
   });
 
-  it('uploads a matching lookup using the name from the list', async () => {
-    const content = 'ip\n1.1.1.1\n';
-    const file = new File([content], 'Threat_Intel_IP.csv', { type: 'text/csv' });
-    const { getByTestId } = render(<LookupsFileUpload {...props} />);
+  it('rejects a lookup whose name differs only by case and keeps upload disabled', async () => {
+    const file = new File(['ip\n1.1.1.1\n'], 'Threat_Intel_IP.csv', { type: 'text/csv' });
+    const { getByTestId, getByText } = render(<LookupsFileUpload {...props} />);
 
     await selectFiles(getByTestId('lookupsFilePicker'), [file]);
+
     await waitFor(() => {
-      expect(getByTestId('uploadFileButton')).not.toBeDisabled();
+      expect(
+        getByText('The file name must match one of the lookup names in the list above.')
+      ).toBeVisible();
     });
+    expect(getByTestId('uploadFileButton')).toBeDisabled();
+    expect(props.createResources).not.toHaveBeenCalled();
+  });
+
+  it('uploads a QRadar reference set whose parsed name is in the list and skips one that is not', async () => {
+    const matchingContent = JSON.stringify({
+      name: 'threat_intel_ip',
+      data: [{ value: '1.1.1.1' }],
+    });
+    const otherContent = JSON.stringify({
+      name: 'other_set',
+      data: [{ value: '2.2.2.2' }],
+    });
+    const matchingFile = new File([matchingContent], 'export.json', { type: 'application/json' });
+    const otherFile = new File([otherContent], 'other.json', { type: 'application/json' });
+    const { getByTestId, getByText } = render(
+      <LookupsFileUpload {...props} migrationSource={MigrationSource.QRADAR} />
+    );
+
+    await selectFiles(getByTestId('referenceSetsFilePicker'), [matchingFile, otherFile]);
+
+    await waitFor(() => {
+      expect(
+        getByText('other_set: The file name must match one of the lookup names in the list above.')
+      ).toBeVisible();
+    });
+    expect(getByTestId('uploadFileButton')).not.toBeDisabled();
 
     fireEvent.click(getByTestId('uploadFileButton'));
 
     expect(props.createResources).toHaveBeenCalledWith([
-      { type: 'lookup', name: 'threat_intel_ip', content },
+      { type: 'lookup', name: 'threat_intel_ip', content: 'value\r\n1.1.1.1' },
     ]);
   });
 

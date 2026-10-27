@@ -20,9 +20,9 @@ import { FILE_UPLOAD_ERROR } from '../../../../translations/file_upload_error';
 import type { SiemMigrationResourceData } from '../../../../../../../common/siem_migrations/model/common.gen';
 import * as i18n from './translations';
 import {
+  assertMissingLookups,
   convertQradarReferenceSetToLookup,
   convertSentinelWatchlistToResource,
-  findCanonicalLookupName,
   lookupNameFromFileName,
 } from '../utils';
 import { MigrationSource } from '../../../../types';
@@ -33,8 +33,8 @@ export interface LookupsFileUploadProps {
   apiError?: string;
   isLoading?: boolean;
   migrationSource: MigrationSource;
-  /** Lookup names from the list above. Splunk uploads must match one of these. */
-  missingLookups?: readonly string[];
+  /** Lookup names from the list above. Uploaded names must match one of these. */
+  missingLookups: readonly string[];
   onSkip?: () => void;
 }
 
@@ -152,10 +152,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
         const validLookups = lookups.flatMap((resource): SiemMigrationResourceData[] =>
           resource !== undefined ? [resource] : []
         );
-        const resourcesToStore =
-          migrationSource === MigrationSource.SPLUNK
-            ? acceptMatchingSplunkLookups(validLookups, missingLookups ?? [], addError)
-            : validLookups;
+        const resourcesToStore = assertMissingLookups(validLookups, missingLookups, addError);
         setLookupResources((current) => [...current, ...resourcesToStore]);
       },
       [addError, migrationSource, missingLookups]
@@ -236,19 +233,3 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
   }
 );
 LookupsFileUpload.displayName = 'LookupsFileUpload';
-
-const acceptMatchingSplunkLookups = (
-  resources: SiemMigrationResourceData[],
-  missingLookups: readonly string[],
-  addError: (error: string) => void
-): SiemMigrationResourceData[] => {
-  const includeFileName = resources.length > 1;
-  return resources.flatMap((resource) => {
-    const canonicalName = findCanonicalLookupName(resource.name, missingLookups);
-    if (canonicalName == null) {
-      addError(i18n.lookupFileNameMismatchError(includeFileName ? resource.name : undefined));
-      return [];
-    }
-    return [{ ...resource, name: canonicalName }];
-  });
-};
