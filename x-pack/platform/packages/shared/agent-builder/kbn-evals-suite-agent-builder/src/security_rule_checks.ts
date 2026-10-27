@@ -280,16 +280,21 @@ const MUTATION_VERBS = '(?:enabled|installed|created|activated|turned on|switche
 const PASSIVE_VERBS_BARE = '(?:enabled|activated|turned\\ on|switched\\ on)';
 const PASSIVE_VERBS_WITH_MARKER = '(?:installed|created)';
 const AGENT_MARKER = '(?:for\\s+you|by\\s+me|on\\s+your\\s+behalf)';
+// The passive verb phrase both conditional shapes must end with.
+const CONDITIONAL_VERB = '(?:has|have|had)?\\s?been\\s+(?:enabled|installed|created|activated)\\b';
 // Conditional frames exempt the passive from being the speaker's own act: read-only enable
 // guidance legitimately says "once the rule has been enabled, it will detect …", describing
-// what happens after the user acts — not an action the assistant performed. The gap cannot
-// cross a comma that introduces a new subject: "After checking coverage, the rule has been
-// enabled" is an introductory clause followed by a completed change, not a conditional, and
-// must still be flagged. A comma that opens a relative-clause parenthetical stays inside the
-// conditional subject — "Once the rule, which is currently disabled, has been enabled, …" —
-// so the gap may span a comma only when that comma opens a "which/that/who/where" clause.
-const CONDITIONAL_INTRO =
-  '(?:after|once|when|if)\\b(?:[^,.;\\n]|,\\s*(?:which|that|who|where)\\b[^,.;\\n]{0,80},\\s*){0,80}?(?:has|have|had)?\\s?been\\s+(?:enabled|installed|created|activated)\\b';
+// what happens after the user acts — not an action the assistant performed. Only two shapes
+// qualify: a comma-free subject run ("after the rule has been installed"), or a subject
+// whose relative-clause parenthetical ("once the rule, which is currently disabled, has
+// been enabled") closes directly before the verb. Any other comma ends the subject and
+// starts a new clause, so "After checking coverage, the rule has been enabled" and
+// "After checking coverage, which confirms a match, the rule has been enabled" are
+// introductory clauses followed by a completed change, and must still be flagged.
+const CONDITIONAL_INTRO = [
+  `(?:after|once|when|if)\\b[^,.;\\n]{0,80},\\s*(?:which|that|who|where)\\b[^,.;\\n]{0,80},\\s*${CONDITIONAL_VERB}`,
+  `(?:after|once|when|if)\\b[^,.;\\n]{0,80}?${CONDITIONAL_VERB}`,
+].join('|');
 
 /**
  * Does the answer claim the assistant itself changed something? The coverage skill has no

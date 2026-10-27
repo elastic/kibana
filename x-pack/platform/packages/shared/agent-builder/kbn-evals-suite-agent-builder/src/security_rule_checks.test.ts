@@ -350,6 +350,17 @@ describe('claimsMutation', () => {
       true
     );
   });
+
+  it('still flags a completed change when the introductory clause carries a parenthetical', () => {
+    // The parenthetical exemption spans only the conditional subject. When a new subject
+    // follows the closing comma ("…, which confirms an exact match, the rule has been
+    // enabled"), the passive is a completed change claim, not enable guidance.
+    expect(
+      claimsMutation(
+        'After checking coverage, which confirms an exact match, the rule has been enabled for you.'
+      )
+    ).toBe(true);
+  });
 });
 
 describe('givesRulePageRoute', () => {
