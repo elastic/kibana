@@ -14,7 +14,11 @@ import {
   DECISION_TREE_SUBMIT_TOOL_ID,
 } from '../tools/decision_tree';
 import { SANDBOX_BASH_TOOL_ID } from '../tools/sandbox_bash/tool';
-import { agentTraceId, decisionTreeReinforceStepDefinition } from './decision_tree_reinforce';
+import {
+  agentTraceId,
+  decisionTreeReinforceStepDefinition,
+  lastSubmitRejected,
+} from './decision_tree_reinforce';
 
 describe('decisionTreeReinforceStepDefinition', () => {
   const fakeRequest = { headers: {} };
@@ -126,6 +130,30 @@ describe('decisionTreeReinforceStepDefinition', () => {
         ]),
       })
     );
+  });
+
+  it('reports a rejected submit so a completed step is not a successful reinforcement', async () => {
+    runAgent.mockResolvedValue({
+      result: {
+        round: {
+          response: { message: 'Could not save the tree' },
+          steps: [
+            {
+              type: ConversationRoundStepType.toolCall,
+              tool_id: DECISION_TREE_SUBMIT_TOOL_ID,
+              tool_call_id: 'toolu_submit',
+              params: { symptom_trees: [], traversals: [] },
+              results: [{ type: ToolResultType.error, data: { message: 'rejected' } }],
+            },
+          ],
+        },
+      },
+    });
+
+    const output = await run({});
+
+    expect(output.output).toEqual(expect.objectContaining({ submit_rejected: true }));
+    expect(lastSubmitRejected([])).toBe(false);
   });
 
   it('returns the reinforcement conversation and its Agent Builder trace', async () => {

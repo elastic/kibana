@@ -521,6 +521,28 @@ describe('counts', () => {
     ]);
   });
 
+  it('retries the version document without applying the counts a second time', async () => {
+    const esClient = createEsClient();
+    esClient.get.mockResolvedValue(storedHead({ counts: visited }));
+    esClient.index
+      .mockResolvedValueOnce({})
+      .mockRejectedValueOnce(new Error('version shard unavailable'))
+      .mockResolvedValueOnce({});
+    const updateCounts = jest.fn().mockReturnValue(visited);
+
+    await createStore(esClient).commit(commitInput(updateCounts));
+
+    expect(updateCounts).toHaveBeenCalledTimes(1);
+    const versionWrites = esClient.index.mock.calls.filter(
+      ([request]) => request.document.type === 'decision_tree_version'
+    );
+    expect(versionWrites).toHaveLength(2);
+    expect(versionWrites.map(([request]) => request.id)).toEqual([
+      'default:dtree_checkout-high-latency_v2',
+      'default:dtree_checkout-high-latency_v2',
+    ]);
+  });
+
   it('gives up after repeated conflicts without writing a version', async () => {
     const esClient = createEsClient();
     esClient.get.mockResolvedValue(storedHead());

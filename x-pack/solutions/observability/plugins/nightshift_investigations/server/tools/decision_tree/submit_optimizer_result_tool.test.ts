@@ -9,6 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { countsForTree, parseMermaidDecisionTree } from '@kbn/nightshift-decision-trees';
 import type { DecisionTreeStore, DecisionTreeDetail } from '../../decision_trees/store';
+import { DecisionTreeVersionWriteError } from '../../decision_trees/store';
 import { createSubmitOptimizerResultTool } from './submit_optimizer_result_tool';
 
 const TREE_ID = 'symptom:checkout-high-latency';
@@ -678,6 +679,185 @@ describe('nightshift_submit_optimizer_result counts', () => {
     expect('results' in first && first.results[0].type).toBe(ToolResultType.error);
     expect('results' in second && second.results[0].type).toBe(ToolResultType.other);
     expect(store.updateCounts).toHaveBeenCalledTimes(1);
+    expect(store.commit).toHaveBeenCalledTimes(1);
+  });
+
+  it('counts a traversal added on the retry of an edit that had none', async () => {
+    const store = createStore(stored(FULL_TREE));
+    const readFiles = jest
+      .fn()
+      .mockResolvedValueOnce([{ success: true, content: Buffer.from(markdownFor(FULL_TREE)) }])
+      .mockResolvedValueOnce([{ success: false, content: Buffer.from('') }])
+      .mockResolvedValue([{ success: true, content: Buffer.from(markdownFor(FULL_TREE)) }]);
+    const tool = createSubmitOptimizerResultTool({
+      getSandboxStart: (() => ({ getSession: () => ({ readFiles }) })) as never,
+      getStore: () => store,
+      getSpaceId: () => 'default',
+      logger: loggerMock.create(),
+    });
+    const otherTreeId = 'symptom:checkout-errors';
+    const otherPath = 'decision-trees/decision_tree_checkout-errors.md';
+
+    const first = await tool.handler(
+      {
+        symptom_trees: [
+          {
+            tree_id: TREE_ID,
+            file_path: FILE_PATH,
+            evidence_gatherer_metadata: [],
+            merged_nodes: [],
+          },
+          {
+            tree_id: otherTreeId,
+            file_path: otherPath,
+            evidence_gatherer_metadata: [],
+            merged_nodes: [],
+          },
+        ],
+        traversals: [],
+        summary: '',
+      },
+      createContext() as never
+    );
+    const second = await tool.handler(
+      {
+        symptom_trees: [
+          {
+            tree_id: TREE_ID,
+            file_path: FILE_PATH,
+            evidence_gatherer_metadata: [],
+            merged_nodes: [],
+          },
+          {
+            tree_id: otherTreeId,
+            file_path: otherPath,
+            evidence_gatherer_metadata: [],
+            merged_nodes: [],
+          },
+        ],
+        traversals: [traversal()],
+        summary: '',
+      },
+      createContext() as never
+    );
+
+    expect('results' in first && first.results[0].type).toBe(ToolResultType.error);
+    expect('results' in second && second.results[0].type).toBe(ToolResultType.other);
+    expect(store.commit).toHaveBeenCalledTimes(2);
+    expect(store.updateCounts).toHaveBeenCalledTimes(1);
+    const [[{ update }]] = store.updateCounts.mock.calls;
+    expect(nodeVisits(update({ tree: fullTree, counts: countsForTree(fullTree) })).X1).toBe(1);
+  });
+
+  it('does not replay a merge that was already saved when another tree is retried', async () => {
+    const otherTreeId = 'symptom:checkout-errors';
+    const otherPath = 'decision-trees/decision_tree_checkout-errors.md';
+    const merged = FULL_TREE.replace('D1 -->|no| E3[Profile queries]', 'D1 -->|no| E2').replace(
+      'E3 --> X2((Slow query))',
+      'E2 --> X2((Slow query))'
+    );
+    const store = createStore(stored(FULL_TREE));
+    store.get.mockImplementation(async (treeId: string) =>
+      treeId === TREE_ID
+        ? stored(store.commit.mock.calls.length > 0 ? merged : FULL_TREE)
+        : undefined
+    );
+    const readFiles = jest
+      .fn()
+      .mockResolvedValueOnce([{ success: true, content: Buffer.from(markdownFor(merged)) }])
+      .mockResolvedValueOnce([{ success: false, content: Buffer.from('') }])
+      .mockResolvedValueOnce([{ success: true, content: Buffer.from(markdownFor(FULL_TREE)) }]);
+    const tool = createSubmitOptimizerResultTool({
+      getSandboxStart: (() => ({ getSession: () => ({ readFiles }) })) as never,
+      getStore: () => store,
+      getSpaceId: () => 'default',
+      logger: loggerMock.create(),
+    });
+    const submission = {
+      tree_id: TREE_ID,
+      file_path: FILE_PATH,
+      evidence_gatherer_metadata: [] as string[],
+      merged_nodes: [{ from: ['E3'], into: 'E2' }],
+    };
+    const other = {
+      tree_id: otherTreeId,
+      file_path: otherPath,
+      evidence_gatherer_metadata: [] as string[],
+      merged_nodes: [] as Array<{ from: string[]; into: string }>,
+    };
+
+    const first = await tool.handler(
+      { symptom_trees: [submission, other], traversals: [], summary: '' },
+      createContext() as never
+    );
+    const second = await tool.handler(
+      { symptom_trees: [submission, other], traversals: [], summary: '' },
+      createContext() as never
+    );
+
+    expect('results' in first && first.results[0].type).toBe(ToolResultType.error);
+    expect('results' in second && second.results[0].type).toBe(ToolResultType.other);
+    expect(store.commit.mock.calls.map(([input]) => input.treeId)).toEqual([TREE_ID, otherTreeId]);
+  });
+
+  it('keeps learnings for a tree that this submit does not edit or traverse', async () => {
+    const otherTreeId = 'symptom:checkout-errors';
+    const store = createStore(stored(FULL_TREE));
+    const learning = {
+      kind: 'system' as const,
+      tree_id: otherTreeId,
+      category: 'architecture',
+      content: 'Errors come from the gateway.',
+      keywords: [],
+    };
+    const tool = createSubmitOptimizerResultTool({
+      getSandboxStart: createSandboxStart('').getSandboxStart as never,
+      getStore: () => store,
+      getSpaceId: () => 'default',
+      peekLearnings: () => [learning],
+      drainLearnings: jest.fn(),
+      logger: loggerMock.create(),
+    });
+
+    const result = await tool.handler(
+      { symptom_trees: [], traversals: [traversal()], summary: 'Traversal plus a learning.' },
+      createContext() as never
+    );
+
+    expect('results' in result && result.results[0].type).toBe(ToolResultType.other);
+    expect(store.commit).toHaveBeenCalledWith(
+      expect.objectContaining({ treeId: otherTreeId, learnings: [learning] })
+    );
+    expect(store.updateCounts).toHaveBeenCalledWith(expect.objectContaining({ treeId: TREE_ID }));
+  });
+
+  it('does not rewrite a tree whose version write failed after the head was saved', async () => {
+    const store = createStore(stored(FULL_TREE));
+    store.commit.mockRejectedValueOnce(new DecisionTreeVersionWriteError(TREE_ID));
+    const tool = createSubmitOptimizerResultTool({
+      getSandboxStart: createSandboxStart(markdownFor(FULL_TREE)).getSandboxStart as never,
+      getStore: () => store,
+      getSpaceId: () => 'default',
+      logger: loggerMock.create(),
+    });
+    const params = {
+      symptom_trees: [
+        {
+          tree_id: TREE_ID,
+          file_path: FILE_PATH,
+          evidence_gatherer_metadata: [],
+          merged_nodes: [],
+        },
+      ],
+      traversals: [],
+      summary: '',
+    };
+
+    const first = await tool.handler(params, createContext() as never);
+    const second = await tool.handler(params, createContext() as never);
+
+    expect('results' in first && first.results[0].type).toBe(ToolResultType.error);
+    expect('results' in second && second.results[0].type).toBe(ToolResultType.other);
     expect(store.commit).toHaveBeenCalledTimes(1);
   });
 

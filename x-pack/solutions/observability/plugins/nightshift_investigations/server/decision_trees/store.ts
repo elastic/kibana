@@ -44,6 +44,17 @@ const MAX_WRITE_ATTEMPTS = 5;
 const RETRY_DELAY_MS = 50;
 
 /**
+ * The head was saved and its counts already include this commit. The version document still needs
+ * to be written; a later commit must not apply the same counts again.
+ */
+export class DecisionTreeVersionWriteError extends Error {
+  constructor(treeId: string) {
+    super(`Saved ${treeId} but its version history write failed`);
+    this.name = 'DecisionTreeVersionWriteError';
+  }
+}
+
+/**
  * Structured fields live under `attributes` so they inherit the AI-index template's flattened
  * mapping, the same way Cortex stores `status` / `slug` / `space_id`. The backing index is
  * auto-created on first write from that template; we never call `indices.create`.
@@ -330,6 +341,33 @@ export const createDecisionTreeStore = ({
    * Writes the head only if it is unchanged since `readAt` was read, or only if it still does not
    * exist when there was none, so a concurrent writer surfaces as a 409 instead of a lost update.
    */
+  const writeVersion = async (
+    symptom: string,
+    version: number,
+    document: DecisionTreeVersionSource
+  ): Promise<void> => {
+    for (let attemptNumber = 1; ; attemptNumber++) {
+      try {
+        await esClient.index(
+          {
+            index: DECISION_TREE_AI_INDEX_DEST,
+            id: versionDocId(spaceId, symptom, version),
+            document,
+            // The last write of a commit, so version history is searchable as soon as it returns.
+            refresh: 'wait_for',
+          },
+          { signal }
+        );
+        return;
+      } catch {
+        if (attemptNumber >= MAX_WRITE_ATTEMPTS) {
+          throw new DecisionTreeVersionWriteError(symptomTreeId(symptom));
+        }
+        await delay(RETRY_DELAY_MS * attemptNumber);
+      }
+    }
+  };
+
   const writeHead = async (
     symptom: string,
     document: DecisionTreeHeadSource,
@@ -442,16 +480,9 @@ export const createDecisionTreeStore = ({
         return { headDoc: head, versionDoc: versionSource, version: nextVersion };
       });
 
-      await esClient.index(
-        {
-          index: DECISION_TREE_AI_INDEX_DEST,
-          id: versionDocId(spaceId, symptom, version),
-          document: versionDoc,
-          // The last write of a commit, so version history is searchable as soon as it returns.
-          refresh: 'wait_for',
-        },
-        { signal }
-      );
+      // The head already holds this version and its counts. Retry only this document: running the
+      // commit again would increment the visit and reinforcement counts a second time.
+      await writeVersion(symptom, version, versionDoc);
 
       logger.debug(`Committed decision tree ${fullTreeId} v${version}`);
       return headToDetail(headDoc);

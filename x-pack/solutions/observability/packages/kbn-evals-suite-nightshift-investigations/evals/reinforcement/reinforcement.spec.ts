@@ -36,6 +36,7 @@ const assertReinforcementScores = async ({
   log,
   judgeCount,
   caseIds,
+  repetitions,
 }: {
   experiment: {
     id: string;
@@ -58,9 +59,10 @@ const assertReinforcementScores = async ({
   log: { info: (message: string) => void };
   judgeCount: number;
   caseIds: string[];
+  repetitions: number;
 }) => {
   const runs = Object.values(experiment.runs);
-  expect(runs).toHaveLength(caseIds.length);
+  expect(runs).toHaveLength(caseIds.length * repetitions);
   expect(new Set(runs.map(({ metadata }) => metadata?.case_id))).toEqual(new Set(caseIds));
   await expect
     .poll(async () => (await evalsClient.getExperimentScores(experiment.id)).length, {
@@ -116,6 +118,7 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
       log,
       inferenceClient,
       evaluationConnector,
+      repetitions,
     }) => {
       const judges = [
         submitArgumentsEvaluator,
@@ -133,7 +136,7 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
         const dataset = reinforcementDataset(
           tracesFile ? loadReinforcementExamples(tracesFile) : reinforcementExamples
         );
-        evaluate.setTimeout(dataset.examples.length * 22 * 60_000 + 5 * 60_000);
+        evaluate.setTimeout(dataset.examples.length * repetitions * 22 * 60_000 + 5 * 60_000);
         const [experiment] = await executorClient.runExperiment(
           {
             name: 'Nightshift reinforcement micro-eval',
@@ -155,6 +158,7 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
           log,
           judgeCount: judges.length,
           caseIds: dataset.examples.map(({ metadata }) => metadata.case_id),
+          repetitions,
         });
         return;
       }
@@ -163,7 +167,7 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
       await replaceCustomContext(fetch, getDatasetCustomContext(liveDataset));
       // The investigation stays in progress until its post-execution reinforcement run finishes.
       evaluate.setTimeout(
-        dataset.examples.length * (CUSTOMER0_REINFORCEMENT_TIMEOUT_MS + 5 * 60_000)
+        dataset.examples.length * repetitions * (CUSTOMER0_REINFORCEMENT_TIMEOUT_MS + 5 * 60_000)
       );
       const [experiment] = await executorClient.runExperiment(
         {
@@ -186,6 +190,7 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
         log,
         judgeCount: judges.length,
         caseIds: dataset.examples.map(({ metadata }) => metadata.case_id),
+        repetitions,
       });
     }
   );

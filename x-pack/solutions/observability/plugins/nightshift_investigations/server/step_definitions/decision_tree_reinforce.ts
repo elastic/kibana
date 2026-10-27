@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { isToolCallStep } from '@kbn/agent-builder-common';
+import { isToolCallStep, ToolResultType } from '@kbn/agent-builder-common';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { MAX_KEYWORD_LENGTH } from '../../common';
@@ -34,6 +34,17 @@ export const agentTraceId = (traceId: string | string[] | undefined): string | u
     (id) => id.length > 0
   );
   return ids.at(-1);
+};
+
+/** True when the last submit call returned a tool error. A completed step can still have been rejected. */
+export const lastSubmitRejected = (
+  steps: readonly ConversationRoundStep[] | undefined
+): boolean => {
+  const submits = (steps ?? [])
+    .filter(isToolCallStep)
+    .filter((step) => step.tool_id === DECISION_TREE_SUBMIT_TOOL_ID);
+  const last = submits.at(-1);
+  return last?.results.some((result) => result.type === ToolResultType.error) ?? false;
 };
 
 /** Arguments of each submit call, so a micro-eval can grade them without a persisted conversation. */
@@ -92,6 +103,10 @@ export const decisionTreeReinforceStepDefinition = ({
         .max(MAX_KEYWORD_LENGTH)
         .optional()
         .describe('Agent Builder trace of this reinforcement run, when tracing recorded one.'),
+      submit_rejected: z
+        .boolean()
+        .optional()
+        .describe('True when the last submit call returned a tool error.'),
       submissions_json: z
         .string()
         .describe(
@@ -182,11 +197,13 @@ export const decisionTreeReinforceStepDefinition = ({
       });
 
       const traceId = agentTraceId(result.round.trace_id);
+      const submitRejected = lastSubmitRejected(result.round.steps);
       return {
         output: {
           message: result.round.response.message,
           conversation_id: conversationId,
           ...(traceId ? { trace_id: traceId } : {}),
+          ...(submitRejected ? { submit_rejected: true } : {}),
           submissions_json: submitArgumentsJson(result.round.steps),
         },
       };
