@@ -1464,7 +1464,7 @@
     "@opentelemetry/sdk-logs": "0.223.0",
     "@opentelemetry/semantic-conventions": "1.43.0",
     "@reduxjs/toolkit": "2.12.0",
-    "@slack/webhook": "7.0.6",
+    "@slack/webhook": "8.0.2",
     "@smithy/eventstream-codec": "4.5.2",
     "@smithy/eventstream-serde-node": "4.5.2",
     "@smithy/middleware-stack": "4.5.2",
