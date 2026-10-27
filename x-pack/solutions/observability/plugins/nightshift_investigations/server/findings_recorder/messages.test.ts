@@ -127,6 +127,29 @@ describe('buildRecorderMessages', () => {
     expect(messages.at(-1)).toMatchObject({ content: LIVE_INSTRUCTION });
   });
 
+  it("gives the final pass the agent's final message, just before the instruction", () => {
+    const messages = buildRecorderMessages({
+      steps,
+      turns: [],
+      final: true,
+      answer: 'Severity: medium. The deploy doubled DB latency.',
+    });
+
+    expect(messages.at(-2)).toEqual({
+      role: 'assistant',
+      content: 'Severity: medium. The deploy doubled DB latency.',
+    });
+    expect(messages.at(-1)).toMatchObject({ content: FINAL_INSTRUCTION });
+  });
+
+  it('does not add the final message to a live pass', () => {
+    const messages = buildRecorderMessages({ steps, turns: [], final: false, answer: 'x' });
+
+    expect(messages.some(({ role, content }) => role === 'assistant' && content === 'x')).toBe(
+      false
+    );
+  });
+
   it('slots an earlier recorder answer in after the agent turns that preceded it', () => {
     const earlier: RecorderTurn = {
       atGroups: 1,

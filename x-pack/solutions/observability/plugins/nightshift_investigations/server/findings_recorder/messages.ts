@@ -130,12 +130,15 @@ export const buildRecorderMessages = ({
   steps,
   turns: earlier,
   final,
+  answer,
   notices = [],
 }: {
   question?: string;
   steps: readonly ConversationRoundStep[];
   turns: readonly RecorderTurn[];
   final: boolean;
+  /** The agent's final message, which is not one of its steps. Given to the final pass as the last thing the agent said. */
+  answer?: string;
   /** What people did to the investigation outside the agent's steps, such as changing its severity. */
   notices?: readonly string[];
 }): Message[] => {
@@ -175,6 +178,11 @@ export const buildRecorderMessages = ({
     );
   });
   for (; cursor < agentTurns.length; cursor++) messages.push(...turnMessages(agentTurns[cursor]));
+  // The final message is not a step, so without this the recorder rates from the steps alone and
+  // can disagree with what the agent told the user.
+  if (final && answer) {
+    messages.push({ role: MessageRole.Assistant, content: clip(answer, ANSWER_MAX_CHARS) });
+  }
   // Placed after the part of the conversation that is kept between passes, so they never move it.
   notices.forEach((notice) => messages.push({ role: MessageRole.User, content: notice }));
   messages.push({ role: MessageRole.User, content: final ? FINAL_INSTRUCTION : LIVE_INSTRUCTION });

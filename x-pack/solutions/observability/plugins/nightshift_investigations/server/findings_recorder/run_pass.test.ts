@@ -197,6 +197,21 @@ describe('runFindingsPass', () => {
     expect(memory.remember).toHaveBeenCalledTimes(1);
   });
 
+  it("shows the final pass the agent's own answer, so the record cannot drift from it", async () => {
+    const { deps, chatComplete, memory } = setup();
+
+    await run(deps, memory, { answer: 'Severity: medium. Root cause: the deploy.' });
+
+    const sent = chatComplete.mock.calls[0][0].messages as Array<{
+      role: string;
+      content: unknown;
+    }>;
+    expect(sent.at(-2)).toEqual({
+      role: 'assistant',
+      content: 'Severity: medium. Root cause: the deploy.',
+    });
+  });
+
   it('writes the evidence the recorder read from the conversation', async () => {
     const evidence = {
       description: 'Errors jumped after 01:11.',

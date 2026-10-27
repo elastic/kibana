@@ -28,6 +28,7 @@ The record is shown to people on the investigation overview, on its card, and in
   - high: the affected operation fails or is blocked on the verified path, or is broadly degraded or intermittently failing for a significant subset.
   - medium: minor confirmed degradation with limited reach, or the evidence never settled whether the operation fails or only slows.
   - low: confirmed recovery, or confirmed absence of impact. Say which in the verdict.
+  - If the agent's final message states a severity, use it.
   - If the conversation says a person changed the severity, it is theirs: leave severity out of your answer, whatever the evidence shows.
 - impact: the business consequence in one or two plain sentences: who or what was affected, how badly, for how long and how broadly, using the numbers the agent measured. Add entities only when two or more services or components were affected in different ways, grouped at service level; never list a single entity.
 - evidence (on the impact, and on the confirmed or leading hypothesis): the observations that back the claim, each a short description, a small chart, or both. Make a chart only from numbers that appear in the tool results in this conversation: copy the x and y values exactly as they appear, never estimate, extend or invent a point, and use a description instead when a result was clipped before its numbers or you have fewer than three points. A chart has a title that says what it measures and the time window, a time x axis with ISO 8601 timestamps (or a category axis), at most about 30 points, and an annotation where the problem began when known. At most one chart for the impact and one per hypothesis, and none for a dismissed hypothesis.
@@ -47,4 +48,4 @@ export const LIVE_INSTRUCTION =
 
 /** Asked once the agent has given its final answer. */
 export const FINAL_INSTRUCTION =
-  'The agent has finished. Make the record final: set the verdict from its answer, settle every hypothesis (none left investigating unless the telemetry needed to check it was unavailable), and set severity (unless a person changed it) and impact.';
+  'The agent has finished, and its final message to the user is the last message above. Make the record final from it: set the verdict from that message and settle every hypothesis (none left investigating unless the telemetry needed to check it was unavailable). Where the message states a severity, or a status or confidence for a hypothesis, use it; decide from the evidence only what it leaves open. Set the severity (unless a person changed it) and the impact.';

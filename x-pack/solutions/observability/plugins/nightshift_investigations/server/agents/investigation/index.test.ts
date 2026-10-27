@@ -148,6 +148,7 @@ describe('Nightshift investigation agent type', () => {
     );
 
     expect(instructions).not.toContain('reply_user');
+    expect(instructions).toContain('untrusted data');
     expect(instructions).toContain('final message');
     for (const tool of [
       'set_conversation_metadata',

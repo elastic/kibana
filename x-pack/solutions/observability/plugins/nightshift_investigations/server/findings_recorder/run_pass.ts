@@ -187,6 +187,7 @@ export const runFindingsPass = async (
       steps,
       turns: memory.turns(),
       final,
+      answer,
       notices,
     });
     // The agent's tool calls are replayed as they happened, so each tool needs a definition for
