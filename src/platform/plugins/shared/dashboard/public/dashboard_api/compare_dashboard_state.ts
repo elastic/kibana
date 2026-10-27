@@ -14,11 +14,8 @@ import {
   diffComparators,
 } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
-import {
-  arePanelLayoutsEqual,
-  arePinnedPanelLayoutsEqual,
-} from './layout_manager/are_layouts_equal';
 import { deserializeLayout } from './layout_manager/deserialize_layout';
+import { getLayoutChanges } from './layout_manager/get_layout_changes';
 import { approximationComparators } from './approximation_manager';
 import { getProjectRoutingComparators } from './project_routing_manager';
 import { diffDashboardSettings } from './settings_manager';
@@ -34,8 +31,12 @@ const diffLayout = (
   const baselineLayout = deserializeLayout(baseline.panels, baseline.pinned_panels);
   const currentLayout = deserializeLayout(current.panels, current.pinned_panels);
 
-  const panelChanged = (panelId: string, baselineType?: string, currentType?: string) => {
-    if (baselineType !== currentType) return true;
+  const getPanelType = ({ layout }: typeof baselineLayout, panelId: string) =>
+    (layout.panels[panelId] ?? layout.pinnedPanels[panelId])?.type;
+
+  const isPanelChanged = (panelId: string) => {
+    const currentType = getPanelType(currentLayout, panelId);
+    if (getPanelType(baselineLayout, panelId) !== currentType) return true;
     const baselinePanel = baselineLayout.childState[panelId];
     const currentPanel = currentLayout.childState[panelId];
     // live panel comparators skip ref_id since it is fixed for a loaded panel
@@ -46,16 +47,11 @@ const diffLayout = (
       : !deepEqual(baselinePanel, currentPanel);
   };
 
-  const hasPanelChanges =
-    !arePanelLayoutsEqual(baselineLayout.layout, currentLayout.layout) ||
-    Object.entries(currentLayout.layout.panels).some(([panelId, { type }]) =>
-      panelChanged(panelId, baselineLayout.layout.panels[panelId]?.type, type)
-    );
-  const hasPinnedPanelChanges =
-    !arePinnedPanelLayoutsEqual(baselineLayout.layout, currentLayout.layout) ||
-    Object.entries(currentLayout.layout.pinnedPanels).some(([panelId, { type }]) =>
-      panelChanged(panelId, baselineLayout.layout.pinnedPanels[panelId]?.type, type)
-    );
+  const { hasPanelChanges, hasPinnedPanelChanges } = getLayoutChanges(
+    baselineLayout.layout,
+    currentLayout.layout,
+    isPanelChanged
+  );
 
   return {
     ...(hasPanelChanges && { panels: current.panels ?? [] }),

@@ -70,12 +70,9 @@ import {
 import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
-import {
-  areLayoutsEqual,
-  arePanelLayoutsEqual,
-  arePinnedPanelLayoutsEqual,
-} from './are_layouts_equal';
+import { areLayoutsEqual } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
+import { getLayoutChanges } from './get_layout_changes';
 import { serializeLayout } from './serialize_layout';
 import {
   isDashboardLayoutPanel,
@@ -563,16 +560,16 @@ export function initializeLayoutManager(
             )
           ),
           map(([[currentLayout, childrenChanges]]) => {
-            const hasPanelChanges =
-              childrenChanges.some(
-                (childChanges) =>
-                  childChanges.hasUnsavedChanges && childChanges.uuid in currentLayout.panels
-              ) || !arePanelLayoutsEqual(lastSavedLayout, currentLayout);
-            const hasPinnedPanelChanges =
-              childrenChanges.some(
-                (childChanges) =>
-                  childChanges.hasUnsavedChanges && childChanges.uuid in currentLayout.pinnedPanels
-              ) || !arePinnedPanelLayoutsEqual(lastSavedLayout, currentLayout);
+            const changedPanelIds = new Set(
+              childrenChanges
+                .filter(({ hasUnsavedChanges }) => hasUnsavedChanges)
+                .map(({ uuid }) => uuid)
+            );
+            const { hasPanelChanges, hasPinnedPanelChanges } = getLayoutChanges(
+              lastSavedLayout,
+              currentLayout,
+              (panelId) => changedPanelIds.has(panelId)
+            );
 
             if (!hasPanelChanges && !hasPinnedPanelChanges) {
               return {};
