@@ -133,7 +133,7 @@ const CREATE_REFUSALS: Record<string, string> = {
   [UIAM_ERROR_CODES.ALREADY_DOWNSCOPED]:
     'the credential making this request is itself downscoped, and an account cannot be downscoped ' +
     'twice. Make the request from a user session',
-  [UIAM_ERROR_CODES.CREATE_SA_SERVICE_ACCOUNT_NOT_SUPPORTED]:
+  [UIAM_ERROR_CODES.SA_SERVICE_ACCOUNT_NOT_SUPPORTED]:
     'a service account cannot create service accounts. Make the request from a user session',
 };
 

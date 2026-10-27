@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { UIAM_ERROR_CODES } from '@kbn/core-security-common';
 import type { InvalidateAPIKeyResult } from '../authentication/api_keys/api_keys';
-import { UIAM_ERROR_CODES } from './error_codes';
 
 /**
  * Checks whether the UIAM invalidation response indicates the API key no longer exists.
