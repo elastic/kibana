@@ -177,7 +177,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem css={styles.cellWrapper} tabIndex={0}>
+      <EuiFlexItem css={styles.cellWrapper} data-cascade-row-loading={!isReady} tabIndex={0}>
         <EuiSkeletonText lines={3} size={size === 'l' ? 'm' : size} isLoading={!isReady}>
           <div css={styles.cellInner}>{memoizedChild}</div>
         </EuiSkeletonText>

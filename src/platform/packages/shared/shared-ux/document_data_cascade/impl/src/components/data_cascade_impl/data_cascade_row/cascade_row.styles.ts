@@ -272,7 +272,7 @@ export const styles = (
       backgroundColor:
         rowDepth % 2 === 1 ? colors.backgroundBaseSubdued : colors.backgroundBasePlain,
       flexShrink: 0,
-      [`[data-active-sticky="true"] &`]: {
+      [`[data-active-sticky="true"]:not(:has([data-cascade-row-loading="true"])) &`]: {
         boxShadow: `0 ${border.width.thin} 0 ${border.color}`,
       },
     }),
