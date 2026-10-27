@@ -37,6 +37,7 @@ export class NightshiftPlugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({ visibleIn: [] }));
   private availabilitySubscription?: Subscription;
   private stopped = false;
+  private ebtEventsRegistered = false;
 
   constructor(private readonly context: PluginInitializerContext) {}
 
@@ -94,10 +95,19 @@ export class NightshiftPlugin
       ],
       updater$: this.appUpdater$,
       mount: async (appMountParameters: AppMountParameters) => {
-        const [[coreStart, pluginsStart], { renderApp }] = await Promise.all([
-          startServicesPromise,
-          import('./application/render_app'),
-        ]);
+        // Registered here rather than in setup so the event schemas stay out of the page load
+        // bundle: only the app reports them, and it cannot render before this resolves.
+        const [[coreStart, pluginsStart], { renderApp }, { registerNightshiftEbtEvents }] =
+          await Promise.all([
+            startServicesPromise,
+            import('./application/render_app'),
+            import('./common/ebt_events'),
+          ]);
+
+        if (!this.ebtEventsRegistered) {
+          this.ebtEventsRegistered = true;
+          registerNightshiftEbtEvents(coreSetup.analytics);
+        }
 
         return renderApp({
           appMountParameters,
