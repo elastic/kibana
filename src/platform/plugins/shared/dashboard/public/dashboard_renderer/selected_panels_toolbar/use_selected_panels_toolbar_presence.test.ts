@@ -40,10 +40,10 @@ describe('useSelectedPanelsToolbarPresence', () => {
     expect(result.current.animateHintBarIn).toBe(false);
   });
 
-  test('holding a modifier for Shift+click still counts as a pointer interaction', () => {
+  test('holding a modifier for Cmd+click still counts as a pointer interaction', () => {
     const { result, rerender } = setup(selected);
     fireEvent.pointerDown(document);
-    fireEvent.keyDown(document, { key: 'Shift' });
+    fireEvent.keyDown(document, { key: 'Meta' });
     rerender({ ids: none });
     expect(result.current.animateHintBarIn).toBe(true);
   });

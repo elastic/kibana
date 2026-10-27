@@ -33,13 +33,15 @@ const strings = {
     i18n.translate('dashboard.hintBar.ariaLabel', {
       defaultMessage: 'Dashboard shortcuts',
     }),
-  getShiftClick: () =>
-    i18n.translate('dashboard.hintBar.shiftClick', {
-      defaultMessage: 'Shift + Click',
+  getModifierClick: (modifier: string) =>
+    i18n.translate('dashboard.hintBar.modifierClick', {
+      defaultMessage: '{modifier} + Click',
+      values: { modifier },
     }),
-  getShiftDrag: () =>
-    i18n.translate('dashboard.hintBar.shiftDrag', {
-      defaultMessage: 'Shift + Drag',
+  getModifierDrag: (modifier: string) =>
+    i18n.translate('dashboard.hintBar.modifierDrag', {
+      defaultMessage: '{modifier} + Drag',
+      values: { modifier },
     }),
   getSelect: () => i18n.translate('dashboard.hintBar.select', { defaultMessage: 'Select' }),
   getAreaSelect: () =>
@@ -109,8 +111,8 @@ export const DashboardHintBar = ({ skipEntrance }: DashboardHintBarProps) => {
         )}
         <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false} css={styles.mainHints}>
-            <Hint keys={strings.getShiftClick()}>{strings.getSelect()}</Hint>
-            <Hint keys={strings.getShiftDrag()}>{strings.getAreaSelect()}</Hint>
+            <Hint keys={strings.getModifierClick(modifier)}>{strings.getSelect()}</Hint>
+            <Hint keys={strings.getModifierDrag(modifier)}>{strings.getAreaSelect()}</Hint>
           </EuiFlexItem>
           <div css={shared.separator} aria-hidden />
           <EuiFlexItem grow={false}>

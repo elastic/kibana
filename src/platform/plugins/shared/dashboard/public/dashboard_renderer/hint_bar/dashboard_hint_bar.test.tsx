@@ -29,11 +29,12 @@ describe('DashboardHintBar', () => {
     if (originalPlatform) Object.defineProperty(Navigator.prototype, 'platform', originalPlatform);
   });
 
-  test('shows how to select panels when collapsed', () => {
+  test('shows how to select panels when collapsed, with Cmd on macOS', () => {
+    setPlatform('MacIntel');
     renderHintBar();
     const bar = screen.getByTestId('dashboardHintBar');
-    expect(bar).toHaveTextContent('Shift + ClickSelect');
-    expect(bar).toHaveTextContent('Shift + DragArea select');
+    expect(bar).toHaveTextContent('Cmd + ClickSelect');
+    expect(bar).toHaveTextContent('Cmd + DragArea select');
     expect(screen.queryByTestId('dashboardHintBarMore')).not.toBeInTheDocument();
   });
 
@@ -51,6 +52,7 @@ describe('DashboardHintBar', () => {
   test('uses Ctrl on other platforms', () => {
     setPlatform('Win32');
     renderHintBar();
+    expect(screen.getByTestId('dashboardHintBar')).toHaveTextContent('Ctrl + ClickSelect');
     fireEvent.click(screen.getByTestId('dashboardHintBarToggleMore'));
     expect(screen.getByTestId('dashboardHintBarMore')).toHaveTextContent('Ctrl + CCopy');
   });

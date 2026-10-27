@@ -188,13 +188,14 @@ export const SelectedPanelsToolbar = ({
       .filter((id) => hasColorMapping(children[id]))
       .map((id) => {
         const title = getPanelTitle(children[id]);
-        const { description } = describePanel(children[id]);
+        const { description, breakdown } = describePanel(children[id]);
         // every option has the same shape: a name (or "Untitled") with what it shows below
         return {
           id,
           label: title ?? strings.getUntitled(),
           isUntitled: !title,
           description,
+          breakdown,
           miniChart: getPanelMiniChart(children[id]),
         };
       });

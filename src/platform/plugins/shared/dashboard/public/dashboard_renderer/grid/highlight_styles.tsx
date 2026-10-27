@@ -110,7 +110,7 @@ export const getHighlightStyles = (context: UseEuiTheme) => {
         animation: `${shineKeyframes} ${highlightAnimationDuration}ms ease-out`,
       },
 
-      // Shift+click selected panels: 2px solid blue border
+      // Cmd+click selected panels: 2px solid blue border
       '&.dshDashboardGrid__item--selected .embPanel': {
         outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.borderStrongPrimary}`,
       },

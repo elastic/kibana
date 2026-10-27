@@ -38,7 +38,7 @@ export const useSelectedPanelsToolbarPresence = (selectedPanelIds: Set<string>) 
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      // holding a modifier for Shift+click is still a pointer interaction
+      // holding a modifier for Cmd+click is still a pointer interaction
       if (!MODIFIER_KEYS.has(e.key)) lastInputRef.current = 'keyboard';
     };
     const onPointerDown = () => (lastInputRef.current = 'pointer');

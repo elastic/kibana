@@ -15,6 +15,8 @@ import { KbnPalette, type KbnPaletteId } from '@kbn/palettes';
 
 /** Minimal shape of the Lens attributes read here; everything is optional and best-effort */
 interface LensColumn {
+  /** ES|QL (text based) columns carry their id; form based ones are keyed by it */
+  columnId?: string;
   label?: string;
   customLabel?: boolean;
   isBucketed?: boolean;
@@ -40,6 +42,8 @@ interface LensAttributes {
         xAccessor?: string;
         accessors?: string[];
         splitAccessors?: string[];
+        /** pie, donut, treemap… breakdowns */
+        primaryGroups?: string[];
         palette?: { name?: KbnPaletteId };
         colorMapping?: ColorMapping.Config;
       }>;
@@ -178,12 +182,32 @@ const getChartKind = (attributes: LensAttributes): ChartKind => {
   }
 };
 
-const getColumns = (attributes: LensAttributes): LensColumn[] =>
-  Object.values(attributes.state?.datasourceStates ?? {}).flatMap((datasource) =>
-    Object.values(datasource?.layers ?? {}).flatMap((layer) =>
-      Array.isArray(layer?.columns) ? layer.columns : Object.values(layer?.columns ?? {})
+const getColumnsById = (attributes: LensAttributes): Map<string, LensColumn> =>
+  new Map(
+    Object.values(attributes.state?.datasourceStates ?? {}).flatMap((datasource) =>
+      Object.values(datasource?.layers ?? {}).flatMap((layer) =>
+        Array.isArray(layer?.columns)
+          ? layer.columns.map((column, index): [string, LensColumn] => [
+              column.columnId ?? String(index),
+              column,
+            ])
+          : Object.entries(layer?.columns ?? {})
+      )
     )
   );
+
+/**
+ * The column the visualization breaks down by, as configured in the chart itself. This is the
+ * only reliable way for ES|QL charts, whose columns don't say whether they're bucketed.
+ */
+const getConfiguredBreakdown = (
+  attributes: LensAttributes,
+  columnsById: Map<string, LensColumn>
+): LensColumn | undefined =>
+  (attributes.state?.visualization?.layers ?? [])
+    .flatMap((layer) => [...(layer.splitAccessors ?? []), ...(layer.primaryGroups ?? [])])
+    .map((columnId) => columnsById.get(columnId))
+    .find((column): column is LensColumn => Boolean(column));
 
 const isDateColumn = (column: LensColumn) =>
   column.dataType === 'date' || column.meta?.type === 'date';
@@ -197,17 +221,25 @@ const getBreakdownLabel = (column: LensColumn) =>
  * Describes what a Lens panel shows, so panels can be told apart even without a title:
  * e.g. "Median of bytes by machine.os.keyword".
  */
-export const describePanel = (api: unknown): { description: string; icon: IconType } => {
+export const describePanel = (
+  api: unknown
+): { description: string; icon: IconType; breakdown?: string } => {
   const attributes =
     (api as { getFullAttributes?: () => LensAttributes | undefined })?.getFullAttributes?.() ?? {};
   const kind = getChartKind(attributes);
-  const columns = getColumns(attributes);
+  const columnsById = getColumnsById(attributes);
+  const columns = Array.from(columnsById.values());
 
-  const metric = columns.find((column) => !column.isBucketed && getMetricLabel(column));
-  // prefer a real breakdown (terms, filters…) over the time axis
+  // prefer the breakdown the chart is configured with, then a real breakdown (terms, filters…)
+  // over the time axis
   const breakdown =
+    getConfiguredBreakdown(attributes, columnsById) ??
     columns.find((column) => column.isBucketed && !isDateColumn(column)) ??
     columns.find((column) => column.isBucketed);
+  const metric = columns.find(
+    (column) =>
+      column !== breakdown && !column.isBucketed && !isDateColumn(column) && getMetricLabel(column)
+  );
 
   const metricLabel = metric && getMetricLabel(metric);
   const breakdownLabel = breakdown && !isDateColumn(breakdown) && getBreakdownLabel(breakdown);
@@ -224,6 +256,7 @@ export const describePanel = (api: unknown): { description: string; icon: IconTy
   return {
     description: details ?? kind.name,
     icon: kind.icon,
+    breakdown: breakdownLabel || undefined,
   };
 };
 

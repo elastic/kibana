@@ -29,6 +29,7 @@ import {
   DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
 } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
+import { isSelectionModifierPressed } from './selection_modifier';
 import {
   PanelContextMenu,
   PanelContextMenuContext,
@@ -130,7 +131,7 @@ export const DashboardGrid = () => {
     [viewMode, selectedPanelIds, dashboardApi]
   );
 
-  // The click that ends a selection drag must not reach the panel, or its Shift+click handler
+  // The click that ends a selection drag must not reach the panel, or its Cmd+click handler
   // would immediately toggle off the panel the drag just selected
   const handleGridClickCapture = useCallback((e: React.MouseEvent) => {
     if (!justDidSelectionDragRef.current) return;
@@ -140,10 +141,10 @@ export const DashboardGrid = () => {
 
   const handleGridMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      if (viewMode !== 'edit' || !e.shiftKey) return;
-      // keep native Shift+click behavior (extending the text selection) inside editable fields
+      if (viewMode !== 'edit' || !isSelectionModifierPressed(e)) return;
+      // keep native modifier+click behavior inside editable fields
       if ((e.target as HTMLElement).closest('input, textarea, [contenteditable="true"]')) return;
-      // prevent the browser from extending the text selection across the page
+      // prevent the browser from selecting text across the page while dragging
       e.preventDefault();
       window.getSelection()?.removeAllRanges();
       justDidSelectionDragRef.current = false;
@@ -162,8 +163,7 @@ export const DashboardGrid = () => {
         }
         const dx = moveEvent.clientX - start.x;
         const dy = moveEvent.clientY - start.y;
-        const hasDragged =
-          Math.abs(dx) >= DRAG_THRESHOLD_PX || Math.abs(dy) >= DRAG_THRESHOLD_PX;
+        const hasDragged = Math.abs(dx) >= DRAG_THRESHOLD_PX || Math.abs(dy) >= DRAG_THRESHOLD_PX;
         if (hasDragged) {
           dragStateRef.current = {
             start: { ...start },
@@ -382,6 +382,8 @@ export const DashboardGrid = () => {
       <SelectionPreviewContext.Provider value={previewSelectedPanelIds}>
         <div
           ref={layoutRef}
+          // pointer-only selection gestures; keyboard users select through the panel context menu
+          role="presentation"
           className={classNames({
             'dshLayout--editing': viewMode === 'edit',
             'dshLayout-withoutMargins': !useMargins,
