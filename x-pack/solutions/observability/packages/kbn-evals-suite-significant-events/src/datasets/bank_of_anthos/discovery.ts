@@ -45,12 +45,11 @@ const LEDGER_DB_CASCADE_EVENT_ID = 'transactionhistory__frontend-transactionhist
 const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
   status: 'active',
   event_id: LEDGER_DB_CASCADE_EVENT_ID,
-  title:
-    'Ledger services — database connection errors and read timeouts across balance, history, and payment paths',
+  title: 'Ledger services — connection refused across balance, history, and payment paths',
   symptom_hypothesis:
-    'SQLState 08001 (unable to establish a database connection) from transactionhistory is blocking ledger reads and cascading to frontend balance, history, payment, and deposit paths.',
+    'SQLState 08001 connection refused from transactionhistory to PostgreSQL is blocking ledger reads and cascading to frontend balance, history, payment, and deposit paths.',
   summary:
-    'Frontend requests to transactionhistory, balancereader, and ledgerwriter time out (read timeout=4) on the observed paths. Cache errors affect balance and transaction-history lookups, while transactionhistory also reports SQLState 08001. Users cannot view account balances or transaction history and cannot submit payments or deposits. Onset ~14:30 UTC with no sign of recovery.',
+    'Frontend requests to transactionhistory, balancereader, and ledgerwriter fail with connection refused on the observed paths. Cache errors affect balance and transaction-history lookups, while transactionhistory also reports SQLState 08001. Users cannot view account balances or transaction history and cannot submit payments or deposits. Onset ~14:30 UTC with no sign of recovery.',
   severity: 'critical',
   confidence: 0.82,
   source_ids: ['logs'],
@@ -60,7 +59,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
       source_id: 'logs',
       verdict: 'confirms',
       description:
-        'Found: SQLState 08001 database connection error from transactionhistory. Impact: transaction-history reads blocked.',
+        'Found: SQLState 08001 connection refused from transactionhistory. Impact: transaction-history reads blocked.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "SQLState: 08001") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -79,7 +78,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
       source_id: 'logs',
       verdict: 'confirms',
       description:
-        'Found: read timeouts (read timeout=4) calling transactionhistory:8080 on /transactions. Impact: users cannot view transaction history.',
+        'Found: connection refused to transactionhistory:8080 on /transactions. Impact: users cannot view transaction history.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error getting transaction_list") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -98,7 +97,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
       source_id: 'logs',
       verdict: 'confirms',
       description:
-        'Found: read timeouts (read timeout=4) calling balancereader:8080 on /balances. Impact: users cannot view account balances.',
+        'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error getting balance") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -155,7 +154,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
       source_id: 'logs',
       verdict: 'confirms',
       description:
-        'Found: read timeouts (read timeout=4) calling ledgerwriter:8080 on deposit /transactions. Impact: users cannot complete deposits.',
+        'Found: connection refused to ledgerwriter:8080 on deposit /transactions. Impact: users cannot complete deposits.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error submitting deposit") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -174,7 +173,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
       source_id: 'logs',
       verdict: 'confirms',
       description:
-        'Found: read timeouts (read timeout=4) calling ledgerwriter:8080 on payment /transactions. Impact: users cannot complete payments.',
+        'Found: connection refused to ledgerwriter:8080 on payment /transactions. Impact: users cannot complete payments.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error submitting payment") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -325,9 +324,9 @@ const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
   event_id: 'frontend__balancereader-connection-refused',
   title: 'Balance reader — account balance lookup connectivity failure',
   symptom_hypothesis:
-    'Account balance reads fail because balancereader does not answer the frontend within the 4 s read timeout on its balance endpoint.',
+    'Account balance reads fail because the frontend cannot reach balancereader on its balance endpoint.',
   summary:
-    'The frontend reports read timeouts (read timeout=4) calling balancereader:8080 on /balances. Users who reach this path cannot view account balances. Evidence is confined to this lookup path rather than a multi-service cascade.',
+    'The frontend returns connection-refused errors to balancereader:8080 on /balances. Users who reach this path cannot view account balances. Evidence is confined to this lookup path rather than a multi-service cascade.',
   severity: 'high',
   confidence: 0.68,
   source_ids: ['logs'],
@@ -337,7 +336,7 @@ const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
       source_id: 'logs',
       verdict: 'confirms',
       description:
-        'Found: read timeouts (read timeout=4) calling balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
+        'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error getting balance") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -384,7 +383,7 @@ const BALANCE_READER_WEAK_DETECTION_EVENT: Partial<SignificantEvent> = {
       source_id: 'logs',
       verdict: 'confirms',
       description:
-        'Found: read timeouts (read timeout=4) calling balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
+        'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
       evidence: BALANCE_READER_ISOLATED_EVENT.signals?.[0]?.evidence,
       metadata: {
         detection_id: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a-det-weak',
@@ -553,9 +552,6 @@ export const discovery: DatasetConfig['discovery'] = [
     // replays one rule per cycle. Each chain legitimately continues ONE event, so the agent
     // should reuse a single event_id. `cascade` = upstream → downstreams across services, linked
     // by dependency topology.
-    // The same-rule and closed-event paths do not depend on the scenario; the weak-detection
-    // scenario already replays them.
-    continuationPaths: ['cascade'],
     continuationChains: {
       cascade: [
         'Transaction History Database SQL Connection Error',
@@ -564,7 +560,7 @@ export const discovery: DatasetConfig['discovery'] = [
     },
     output: {
       expected_ground_truth:
-        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter linked by SQLState 08001, cache errors, and frontend read-timeout failures)]; unbacked authentication detections do not shape the cascade narrative',
+        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter linked by SQLState 08001, cache errors, and frontend connection-refused failures)]; unbacked authentication detections do not shape the cascade narrative',
       expected_confirmed_rule_uuids: {
         [LEDGER_DB_CASCADE_EVENT_ID]: LEDGER_DB_CASCADE_RULE_UUIDS,
       },
@@ -572,7 +568,7 @@ export const discovery: DatasetConfig['discovery'] = [
       criteria: [
         {
           id: 'symptom-hypothesis-sql-connection',
-          text: 'States a symptom_hypothesis that connects every grouped detection through the evidenced database/connectivity cascade — SQLState 08001 or JDBC connection failures, cache errors, and frontend read timeouts across transactionhistory, balancereader, and ledgerwriter. Uses confirming query rows and compatible KI context for sparse rows, without presenting KI context as proof of current activity or inventing dependency edges absent from grounding.',
+          text: 'States one sentence connecting every grouped detection through the evidenced database/connectivity cascade — SQLState 08001 or JDBC connection failures, cache errors, and frontend connection refusals/timeouts across transactionhistory, balancereader, and ledgerwriter. Uses confirming query rows and compatible KI context for sparse rows, without presenting KI context as proof of current activity or inventing dependency edges absent from grounding.',
           score: 3,
         },
         {
@@ -592,7 +588,7 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'error-signatures',
-          text: 'Cites observed error signatures (SQLState 08001, cache error, read timed out) rather than generic phrasing.',
+          text: 'Cites observed error signatures (SQLState 08001, cache error, connection refused) rather than generic phrasing.',
           score: 1,
         },
         {
@@ -637,7 +633,7 @@ export const discovery: DatasetConfig['discovery'] = [
     },
     output: {
       expected_ground_truth:
-        'active high event for confirmed balance-lookup read timeouts despite weak p_value and stationary change_point_type',
+        'active high event for confirmed balance-lookup connection refused despite weak p_value and stationary change_point_type',
       expected_confirmed_rule_uuids: {
         [BALANCE_READER_WEAK_DETECTION_EVENT.event_id!]: ['3c4bf4f9-9ed9-567f-be35-332eb79ee76a'],
       },
@@ -645,7 +641,7 @@ export const discovery: DatasetConfig['discovery'] = [
       criteria: [
         {
           id: 'weak-detection-strong-severity',
-          text: 'Sets severity=high because grounding confirms read-timeout errors fail account-balance lookups. Weak p_value and stationary change_point_type must not cap severity at medium or low.',
+          text: 'Sets severity=high because grounding confirms connection-refused errors block account-balance lookups. Weak p_value and stationary change_point_type must not cap severity at medium or low.',
           score: 3,
         },
         {
