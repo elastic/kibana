@@ -208,7 +208,7 @@ export class SavedQueryManagementComponentService extends FtrService {
       if (!(await this.testSubjects.exists('queryBarMenuPanel'))) {
         await this.testSubjects.click('showQueryBarMenu');
       }
-      await this.testSubjects.existOrFail('queryBarMenuPanel');
+      await this.testSubjects.existOrFail('queryBarMenuPanel', { timeout: 2500 });
     });
   }
 
