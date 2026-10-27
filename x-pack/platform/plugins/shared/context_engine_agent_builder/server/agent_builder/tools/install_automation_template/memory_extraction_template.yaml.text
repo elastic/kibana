@@ -1,0 +1,294 @@
+version: "1"
+# Structured memory extraction — reads each configured source (users' short-term memories, or the
+# rows of an ES|QL query over long-term memory, KIs, traces or any other data) and extracts the
+# configured kinds of facts, entities and relationships into long-term memory, merging them with
+# what long-term memory already holds.
+#
+# This is a working workflow, not a sketch. Edit the `consts` block and it runs as it stands.
+#
+# Installed by platform.context_engine.install_automation_template. The tool fills the consts and
+# builds the `extract` output schema from the extraction configuration; to add or rename a kind,
+# reinstall rather than editing the schema by hand. `extraction_config` and each source's
+# `description` and `query` may be edited in place.
+#
+# Every extracted item is one KI with a stable id (`memory/<category>/<kind>/<key>`), shared by
+# every memory automation, so the same service or person mentioned in many records is one KI that
+# each run updates. Relationships are their own KIs whose references point at both ends.
+#
+# Sources run one after another, each with its own model call:
+# - `short_term_memory` reads pending short-term memories and marks each one promoted or rejected,
+#   so it is read once. Short-term memory is private to one user; reading every user's requires
+#   the workflow to run as an administrator, so install and enable it as one. Use either this
+#   template or memory_promotion on an AI index: both decide the same pending memories.
+# - `query` runs its ES|QL as the workflow owner through the AI index query step: a registered AI
+#   index only yields current, active, unexpired KIs of the workflow space. Nothing marks a row as
+#   read, so a query with `lookback_hours` re-reads the last window each run; stable KI ids make a
+#   re-read rewrite rather than duplicate.
+name: Memory extraction
+description: >
+  Extracts configured facts, entities and relationships from short-term memories and other sources
+  into long-term memory in a Context Engine AI index.
+enabled: true
+
+settings:
+  timeout: 45m
+  concurrency:
+    key: "memory-extraction-__AI_INDEX_ID_RAW__"
+    strategy: drop
+    max: 1
+
+consts:
+  # The Context Engine AI index long-term memory is written into.
+  ai_index_id: __AI_INDEX_ID__
+  # Agents whose users' short-term memories are read. Empty reads every agent in the space.
+  agent_ids: __AGENT_IDS__
+  # How many short-term memories one run decides.
+  batch_size: __BATCH_SIZE__
+  # Where records come from. `query` is the final ES|QL, filters included; `id_column` is the
+  # column that identifies a record and `uri_prefix` turns it into a provenance reference.
+  sources: __SOURCES__
+  # Characters of records sent to the prompt per source.
+  max_record_chars: 60000
+  # What to extract, as configured at install. The model reads it as written.
+  extraction_config: __EXTRACTION_CONFIG__
+  # Each kind's KI type and KI id prefix.
+  node_kinds: __NODE_KINDS__
+  # Each relationship kind's allowed source and target kinds.
+  relationship_kinds: __RELATIONSHIP_KINDS__
+  # LiquidJS has no array literal, so `| default: []` does not produce an empty array.
+  no_items: []
+
+tags:
+  - memory
+  - __TEMPLATE_TAG__
+
+triggers:
+  - type: scheduled
+    with:
+      every: __INTERVAL__
+  - type: manual
+
+steps:
+  - name: ai_index
+    type: context-engine.getAiIndex
+    with:
+      ai_index_id: "{{ consts.ai_index_id }}"
+
+  # The facts and entities long-term memory already holds, so extraction merges into them.
+  - name: existing_nodes
+    type: context-engine.queryAiIndex
+    with:
+      query: 'FROM {{ steps.ai_index.output.dest.value }} | WHERE type LIKE "memory.*" AND type NOT LIKE "memory.relationship.*" AND type NOT LIKE "memory.session*" | SORT updated_at DESC | KEEP id, type, title, description, content'
+      limit: 300
+
+  - name: loop_sources
+    type: foreach
+    foreach: "{{ consts.sources | json }}"
+    steps:
+      - name: source_context
+        type: data.set
+        with:
+          type: "{{ foreach.item.type }}"
+          description: "{{ foreach.item.description }}"
+          id_column: "{{ foreach.item.id_column }}"
+          uri_prefix: "{{ foreach.item.uri_prefix }}"
+
+      # Oldest first, so a memory that has waited longest is decided first.
+      - name: list_pending
+        type: ai.memory.short_term.list
+        if: 'foreach.item.type : "short_term_memory"'
+        with:
+          agent_ids: "${{ consts.agent_ids }}"
+          limit: "${{ consts.batch_size }}"
+
+      - name: read_query
+        type: context-engine.queryAiIndex
+        if: 'foreach.item.type : "query"'
+        # A source that cannot be read (bad query, missing index, no privilege) skips to the next.
+        on-failure:
+          continue: true
+        with:
+          query: "{{ foreach.item.query }}"
+          limit: "${{ foreach.item.max_records }}"
+
+      # Only the step matching this source's type ran in this iteration, so only it is read.
+      - name: records
+        type: data.set
+        with:
+          records_json: "{% if foreach.item.type == 'short_term_memory' %}{{ steps.list_pending.output.memories | default: consts.no_items | json }}{% else %}{{ steps.read_query.output.rows | default: consts.no_items | json }}{% endif %}"
+          count: "{% if foreach.item.type == 'short_term_memory' %}{{ steps.list_pending.output.memories.size | default: 0 }}{% else %}{{ steps.read_query.output.rows.size | default: 0 }}{% endif %}"
+
+      - name: extract_source
+        type: if
+        condition: '${{ steps.records.output.count != "0" }}'
+        steps:
+          - name: extract
+            type: ai.prompt
+            connector-id-by-feature: context_engine_prompt
+            with:
+              prompt: |
+                You maintain the long-term memory of an AI assistant as a small knowledge graph.
+                Long-term memory is shared with every user and agent that can read this knowledge
+                base.
+
+                Extraction configuration. `instructions` are the team's own rules; follow them.
+                The node kinds are listed under `facts`, `entities` or `types`, each with its
+                meaning and its attributes; `relationships` lists the edge kinds with their allowed
+                `source` and `target` kinds:
+                {{ consts.extraction_config | json }}
+
+                Records to extract from ({{ steps.source_context.output.description }}). Each
+                record is identified by its `{{ steps.source_context.output.id_column }}` field
+                (JSON, possibly truncated):
+                {{ steps.records.output.records_json | slice: 0, consts.max_record_chars }}
+
+                Nodes long-term memory already holds (id, type, title, description, content). A
+                node's `key` is the last segment of its id:
+                {{ steps.existing_nodes.output.rows | json }}
+
+                Rules:
+                - Extract only the configured kinds, only what the records state. Never invent
+                  attribute values; leave an attribute out when the records do not give it.
+                - `key` identifies a node: a short lowercase slug of its identity, such as
+                  "checkout-service" or "jane-doe" for an entity, or a slug of what happened for a
+                  fact. Reuse the key of an existing node that is the same thing, and write the
+                  merged, corrected node in full: everything still true from the existing node,
+                  plus what the records add.
+                - `title` is the node's name or headline, `description` one sentence, `content` the
+                  full knowledge including its attributes in plain text.
+                - `mentions` lists the other nodes a node refers to. Every node a relationship or a
+                  mention refers to must exist: already in long-term memory, or extracted in this
+                  answer.
+                - A relationship must use its kind's allowed source and target kinds.
+                - `source_ids` lists the identifiers of the records a node or relationship is drawn
+                  from.
+                - Only when the records are short-term memories (source type
+                  "{{ steps.source_context.output.type }}" is "short_term_memory"), decide every
+                  record exactly once, by its id: `extracted` when anything was drawn from it,
+                  `rejected` when it holds nothing worth sharing (small talk, personal or sensitive
+                  details, or anything the instructions say to ignore), `wait` when it might matter
+                  but one memory is not enough evidence yet. For any other source, return an empty
+                  `decisions` list.
+              schema: __OUTPUT_SCHEMA__
+
+          - name: write_nodes
+            type: parallel
+            foreach: "{{ steps.extract.output.content.nodes | default: consts.no_items | json }}"
+            concurrency: 5
+            # One node that fails to write should not cost the rest.
+            mode: settled
+            steps:
+              - name: node
+                type: data.set
+                with:
+                  ki_id: "{{ consts.node_kinds[foreach.item.type].id_prefix }}{{ foreach.item.key | downcase | replace: ' ', '-' | replace: '/', '-' }}"
+                  ki_type: "{{ consts.node_kinds[foreach.item.type].ki_type }}"
+                  references_json: >-
+                    {%- capture refs -%}
+                    {%- for mention in foreach.item.mentions -%}
+                    {%- assign mention_key = mention.key | downcase | replace: ' ', '-' | replace: '/', '-' -%}
+                    {%- assign mention_uri = 'ki://' | append: consts.node_kinds[mention.type].id_prefix | append: mention_key -%}
+                    {"uri": {{ mention_uri | json }}, "relation": "relates_to"},
+                    {%- endfor -%}
+                    {%- for source_id in foreach.item.source_ids -%}
+                    {%- assign source_uri = steps.source_context.output.uri_prefix | append: source_id -%}
+                    {"uri": {{ source_uri | json }}, "relation": "derived_from"},
+                    {%- endfor -%}
+                    {%- endcapture -%}
+                    [{{ refs | remove_last: ',' }}]
+
+              - name: write_node
+                type: context-engine.createKi
+                with:
+                  ai_index_id: "{{ consts.ai_index_id }}"
+                  ki_id: "{{ steps.node.output.ki_id }}"
+                  ki:
+                    type: "{{ steps.node.output.ki_type }}"
+                    title: "{{ foreach.item.title }}"
+                    description: "{{ foreach.item.description }}"
+                    content: "{{ foreach.item.content }}"
+                    tags:
+                      - "{{ foreach.item.type }}"
+                    references: "${{ steps.node.output.references_json | json_parse }}"
+                    attributes: "${{ foreach.item.attributes | default: nil }}"
+
+          # Sequential so the step-level `if` can drop a relationship between kinds the
+          # configuration does not allow.
+          - name: write_relationships
+            type: foreach
+            foreach: "{{ steps.extract.output.content.relationships | default: consts.no_items | json }}"
+            steps:
+              - name: relationship
+                type: data.set
+                with:
+                  allowed: "{% if consts.relationship_kinds[foreach.item.type].source == foreach.item.source.type and consts.relationship_kinds[foreach.item.type].target == foreach.item.target.type %}true{% else %}false{% endif %}"
+                  source_id: "{{ consts.node_kinds[foreach.item.source.type].id_prefix }}{{ foreach.item.source.key | downcase | replace: ' ', '-' | replace: '/', '-' }}"
+                  target_id: "{{ consts.node_kinds[foreach.item.target.type].id_prefix }}{{ foreach.item.target.key | downcase | replace: ' ', '-' | replace: '/', '-' }}"
+                  references_json: >-
+                    {%- assign source_key = foreach.item.source.key | downcase | replace: ' ', '-' | replace: '/', '-' -%}
+                    {%- assign target_key = foreach.item.target.key | downcase | replace: ' ', '-' | replace: '/', '-' -%}
+                    {%- assign source_uri = 'ki://' | append: consts.node_kinds[foreach.item.source.type].id_prefix | append: source_key -%}
+                    {%- assign target_uri = 'ki://' | append: consts.node_kinds[foreach.item.target.type].id_prefix | append: target_key -%}
+                    {%- capture refs -%}
+                    {"uri": {{ source_uri | json }}, "relation": "relates_to"},
+                    {"uri": {{ target_uri | json }}, "relation": "relates_to"},
+                    {%- for source_id in foreach.item.source_ids -%}
+                    {%- assign record_uri = steps.source_context.output.uri_prefix | append: source_id -%}
+                    {"uri": {{ record_uri | json }}, "relation": "derived_from"},
+                    {%- endfor -%}
+                    {%- endcapture -%}
+                    [{{ refs | remove_last: ',' }}]
+
+              - name: write_relationship
+                type: context-engine.createKi
+                if: 'steps.relationship.output.allowed : "true"'
+                # A relationship that fails to write should not cost the rest.
+                on-failure:
+                  continue: true
+                with:
+                  ai_index_id: "{{ consts.ai_index_id }}"
+                  ki_id: "memory/relationship/{{ foreach.item.type }}/{{ steps.relationship.output.source_id | replace: '/', ':' }}/{{ steps.relationship.output.target_id | replace: '/', ':' }}"
+                  ki:
+                    type: "memory.relationship.{{ foreach.item.type }}"
+                    title: "{{ foreach.item.source.key }} {{ foreach.item.type }} {{ foreach.item.target.key }}"
+                    description: "{{ foreach.item.description }}"
+                    tags:
+                      - "{{ foreach.item.type }}"
+                    references: "${{ steps.relationship.output.references_json | json_parse }}"
+                    attributes:
+                      source: "{{ steps.relationship.output.source_id }}"
+                      target: "{{ steps.relationship.output.target_id }}"
+
+          # Short-term memories are marked so the next run does not read them again.
+          - name: mark_short_term_memories
+            type: if
+            condition: '${{ steps.source_context.output.type == "short_term_memory" }}'
+            steps:
+              - name: mark_extracted
+                type: parallel
+                foreach: "{{ steps.extract.output.content.decisions | default: consts.no_items | where: 'decision', 'extracted' | json }}"
+                concurrency: 5
+                mode: settled
+                steps:
+                  - name: set_extracted
+                    type: ai.memory.short_term.set_promotion
+                    with:
+                      ids:
+                        - "{{ foreach.item.id }}"
+                      status: promoted
+                      ai_index_id: "{{ consts.ai_index_id }}"
+                      reason: "{{ foreach.item.reason }}"
+
+              - name: mark_rejected
+                type: parallel
+                foreach: "{{ steps.extract.output.content.decisions | default: consts.no_items | where: 'decision', 'rejected' | json }}"
+                concurrency: 5
+                mode: settled
+                steps:
+                  - name: set_rejected
+                    type: ai.memory.short_term.set_promotion
+                    with:
+                      ids:
+                        - "{{ foreach.item.id }}"
+                      status: rejected
+                      reason: "{{ foreach.item.reason }}"

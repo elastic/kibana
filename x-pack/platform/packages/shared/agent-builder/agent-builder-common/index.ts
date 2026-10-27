@@ -563,6 +563,16 @@ export {
 } from './plugins';
 export type { RendererDefinition, RendererPayloadOf } from './renderers';
 export type { WorkspaceFileContent } from './workspaces';
+export {
+  SHORT_TERM_MEMORY_TYPES,
+  SHORT_TERM_MEMORY_PROMOTION_STATUSES,
+  SHORT_TERM_MEMORY_LIMITS,
+  DEFAULT_SHORT_TERM_MEMORY_TTL_MS,
+  type ShortTermMemoryType,
+  type ShortTermMemoryPromotionStatus,
+  type ShortTermMemoryPromotion,
+  type ShortTermMemory,
+} from './memory';
 export { EffortLevels, type EffortLevel } from './model_provider';
 export {
   type OAuthClient,

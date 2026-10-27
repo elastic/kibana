@@ -106,6 +106,10 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
       get: jest.fn(),
       list: jest.fn(),
     },
+    memory: {
+      getScopedClient: jest.fn(),
+      getSystemClient: jest.fn(),
+    },
   };
 };
 

@@ -28,6 +28,7 @@ import type { AnalyticsService, TrackingService } from '../../../telemetry';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
 import type { ConversationTemplatesServiceStart } from '../../conversation/templates';
+import type { MemoryService } from '../../memory';
 import type { DeploymentInfo } from '../../../utils/deployment_info';
 
 export interface RunnerFactoryDeps {
@@ -59,6 +60,7 @@ export interface RunnerFactoryDeps {
   /** Lazy getter for the execution service (breaks circular dep with runner). */
   getExecutionService: () => AgentExecutionService;
   conversationTemplates: ConversationTemplatesServiceStart;
+  memoryService: MemoryService;
   deploymentInfo: DeploymentInfo;
   /** `xpack.agentBuilder.deductive.register` for this deployment. */
   deductiveRegister: boolean;

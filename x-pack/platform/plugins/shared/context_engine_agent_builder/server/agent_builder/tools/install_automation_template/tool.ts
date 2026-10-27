@@ -17,6 +17,15 @@ import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indice
 import { CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID } from '../../../../common/agent_builder_tools';
 import { getSaveAutomationErrorMessage } from '../save_automation/handler';
 import { installAutomationTemplateHandler, type InstallAutomationTemplateParams } from './handler';
+import { SCHEDULE_INTERVAL_PATTERN } from './render';
+import {
+  extractionSourcesSchema,
+  memoryCustomExtractionConfigSchema,
+  memoryExtractionConfigSchema,
+} from './memory_extraction';
+
+/** Matches the `ai.memory.short_term.list` step limit the promotion template passes it to. */
+const MAX_SHORT_TERM_MEMORY_STEP_IDS = 200;
 
 const MAX_SOURCE_INDEX_LENGTH = 1024;
 const MAX_FIELD_NAME_LENGTH = 256;
@@ -37,7 +46,34 @@ const TEMPLATE_FIELDS = {
   index_metadata: ['categoryField', 'sources'],
   unit_profile: ['unitKey', 'activityField', 'breakdownField', 'metricFields', 'maxUnits'],
   targeted_ki_writer: ['kis'],
+  memory_promotion: [],
+  trace_memory_extraction: ['lookbackHours', 'maxRows'],
+  memory_distillation: ['maxMemories', 'purgeAfterDays'],
+  memory_extraction: ['extraction'],
+  memory_custom_extraction: ['customExtraction'],
+  memory_maintenance: ['unusedDays', 'maxOwners', 'maxMemoriesPerOwner'],
 } as const;
+
+/** Fields several templates share, checked on their own rather than through `TEMPLATE_FIELDS`. */
+const MEMORY_TEMPLATES: readonly string[] = [
+  'memory_promotion',
+  'trace_memory_extraction',
+  'memory_distillation',
+  'memory_extraction',
+  'memory_custom_extraction',
+  'memory_maintenance',
+];
+const SHORT_TERM_MEMORY_TEMPLATES: readonly string[] = [
+  'memory_promotion',
+  'memory_extraction',
+  'memory_custom_extraction',
+];
+const AGENT_SCOPED_TEMPLATES: readonly string[] = [
+  ...SHORT_TERM_MEMORY_TEMPLATES,
+  'memory_maintenance',
+];
+const MAX_MEMORY_AGENT_IDS = 50;
+const MAX_AGENT_ID_LENGTH = 512;
 
 const MAX_METRIC_FIELDS = 10;
 
@@ -47,6 +83,12 @@ const REQUIRED_TEMPLATE_FIELDS = {
   index_metadata: [],
   unit_profile: ['unitKey', 'activityField', 'breakdownField', 'sourceIndex'],
   targeted_ki_writer: ['kis'],
+  memory_promotion: [],
+  trace_memory_extraction: [],
+  memory_distillation: [],
+  memory_extraction: ['extraction'],
+  memory_custom_extraction: ['customExtraction'],
+  memory_maintenance: [],
 } as const;
 
 const findDuplicate = (values: readonly string[]): string | undefined =>
@@ -55,14 +97,31 @@ const findDuplicate = (values: readonly string[]): string | undefined =>
 const installAutomationTemplateSchema = z
   .object({
     template: z
-      .enum(['document_orchestration', 'index_metadata', 'unit_profile', 'targeted_ki_writer'])
+      .enum([
+        'document_orchestration',
+        'index_metadata',
+        'unit_profile',
+        'targeted_ki_writer',
+        'memory_promotion',
+        'trace_memory_extraction',
+        'memory_distillation',
+        'memory_extraction',
+        'memory_custom_extraction',
+        'memory_maintenance',
+      ])
       .describe(
         dedent`
           Which automation to install. Required fields per template:
-          document_orchestration → name, sourceIndex, titleField, bodyField
-          index_metadata         → name, sources  (or sourceIndex + categoryField for one index)
-          unit_profile           → name, sourceIndex, unitKey, activityField, breakdownField
-          targeted_ki_writer     → name, kis  (no sourceIndex)
+          document_orchestration   → name, sourceIndex, titleField, bodyField
+          index_metadata           → name, sources  (or sourceIndex + categoryField for one index)
+          unit_profile             → name, sourceIndex, unitKey, activityField, breakdownField
+          targeted_ki_writer       → name, kis  (no sourceIndex)
+          memory_promotion         → name  (optional agentIds, batchSize, interval)
+          trace_memory_extraction  → name  (optional lookbackHours, maxRows, interval)
+          memory_distillation      → name  (optional maxMemories, purgeAfterDays, interval)
+          memory_extraction        → name, extraction  (optional memorySources, agentIds, batchSize, interval)
+          memory_custom_extraction → name, customExtraction  (optional memorySources, agentIds, batchSize, interval)
+          memory_maintenance       → name  (optional agentIds, unusedDays, maxOwners, maxMemoriesPerOwner, interval; Elastic AI index only)
         `
       ),
     name: z
@@ -160,6 +219,128 @@ const installAutomationTemplateSchema = z
           with no runnable query — never pass an empty list. Use trace://, conversation://, and
           index:// URIs in references. Never invent an id.
         `
+      ),
+    agentIds: z
+      .array(z.string().min(1).max(MAX_AGENT_ID_LENGTH))
+      .max(MAX_MEMORY_AGENT_IDS)
+      .optional()
+      .describe(
+        "Optional. memory_promotion, memory_extraction and memory_custom_extraction: agents whose users' short-term memories feed this AI index. memory_maintenance: agents whose users' short-term memories are maintained. Defaults to every agent in the space."
+      ),
+    batchSize: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_SHORT_TERM_MEMORY_STEP_IDS)
+      .optional()
+      .describe(
+        'Optional. memory_promotion, memory_extraction and memory_custom_extraction. Short-term memories decided per run, in one model call. Defaults to 50.'
+      ),
+    extraction: memoryExtractionConfigSchema.optional().describe(
+      dedent`
+          REQUIRED for memory_extraction. What to extract from short-term memories into long-term
+          memory: optional "instructions" (the team's rules, such as "'checkout' means
+          checkout-service. Ignore small talk."), "facts" and "entities" (each kind a lowercase
+          "type", a "description", and for entities usually "attributes" mapping attribute name to
+          its meaning), and "relationships" (a "type", a "description", and the "source" and
+          "target" fact or entity kinds it connects). Kinds and attribute names are lowercase
+          snake_case.
+        `
+    ),
+    memorySources: extractionSourcesSchema.optional().describe(
+      dedent`
+          Optional. memory_extraction and memory_custom_extraction. Where to read records from,
+          each run, one model call per source. Defaults to [{ "type": "short_term_memory" }]: the
+          pending short-term memories of the agentIds' users, each marked once decided. A
+          { "type": "query" } source runs its ES|QL "query" as the workflow owner: long-term
+          memory and KIs of an AI index (only current, active, unexpired ones of this space),
+          traces such as "FROM traces-agent_builder.otel-default", or any other readable index.
+          Optional per query source: "description" (what the rows are), "lookbackHours" (only the
+          last N hours of @timestamp; nothing else marks a row as read, so set it to about the
+          interval), "idColumn" and "uriPrefix" (how a row is cited, defaulting to id + ki:// for
+          AI indices, trace_id + trace:// for traces, id + record:// otherwise), "excludeMemory"
+          (leave memory.* KIs out; defaults to true when the query reads an AI index) and
+          "maxRecords" (default 200, at most 1000).
+        `
+    ),
+    customExtraction: memoryCustomExtractionConfigSchema.optional().describe(
+      dedent`
+          REQUIRED for memory_custom_extraction. Free-form extraction: "instructions" saying what to
+          extract, and "types", each a lowercase "type", a "description" and optional
+          "attributes" mapping attribute name to a JSON Schema ({ "type": "string" | "number" |
+          "boolean" } or { "type": "array", "items": { "type": "string" } }, each with an optional
+          "description"; strings may have an "enum").
+        `
+    ),
+    lookbackHours: z
+      .number()
+      .int()
+      .min(1)
+      .max(24 * 30)
+      .optional()
+      .describe(
+        'Optional. trace_memory_extraction only. Hours of traces each run reads; keep it at least the interval. Defaults to 24.'
+      ),
+    maxRows: z
+      .number()
+      .int()
+      .min(1)
+      .max(500)
+      .optional()
+      .describe(
+        'Optional. trace_memory_extraction only. Trace rows read per trace source per run. Defaults to 50.'
+      ),
+    maxMemories: z
+      .number()
+      .int()
+      .min(2)
+      .max(1000)
+      .optional()
+      .describe(
+        'Optional. memory_distillation only. Long-term memories read per run, newest first. Defaults to 200.'
+      ),
+    purgeAfterDays: z
+      .number()
+      .int()
+      .min(0)
+      .max(3650)
+      .optional()
+      .describe(
+        'Optional. memory_distillation only. Days after which deleted and expired memories are permanently removed. Defaults to 30.'
+      ),
+    unusedDays: z
+      .number()
+      .int()
+      .min(1)
+      .max(3650)
+      .optional()
+      .describe(
+        'Optional. memory_maintenance only. Short-term memories neither written nor recalled or shown to an agent for this many days are forgotten. Memories written without an expiry are kept. Defaults to 14.'
+      ),
+    maxOwners: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe(
+        'Optional. memory_maintenance only. User and agent pairs deduplicated per run, one model call each. Defaults to 20.'
+      ),
+    maxMemoriesPerOwner: z
+      .number()
+      .int()
+      .min(2)
+      .max(100)
+      .optional()
+      .describe(
+        'Optional. memory_maintenance only. Memories read per user and agent pair, newest first. Defaults to 50.'
+      ),
+    interval: z
+      .string()
+      .regex(SCHEDULE_INTERVAL_PATTERN)
+      .optional()
+      .describe(
+        'Optional. Memory templates only. How often the automation runs, such as "1h" or "1d". Defaults to 1h for memory_promotion and the extraction templates, and 1d for the others.'
       ),
     corpusFilter: z
       .string()
@@ -273,6 +454,50 @@ const installAutomationTemplateSchema = z
       });
     }
 
+    if (
+      value.memorySources !== undefined &&
+      value.template !== 'memory_extraction' &&
+      value.template !== 'memory_custom_extraction'
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'memorySources is only valid for memory_extraction and memory_custom_extraction.',
+        path: ['memorySources'],
+      });
+    }
+
+    if (value.agentIds !== undefined && !AGENT_SCOPED_TEMPLATES.includes(value.template)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `agentIds is only valid for ${AGENT_SCOPED_TEMPLATES.join(', ')}.`,
+        path: ['agentIds'],
+      });
+    }
+
+    if (value.batchSize !== undefined && !SHORT_TERM_MEMORY_TEMPLATES.includes(value.template)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `batchSize is only valid for ${SHORT_TERM_MEMORY_TEMPLATES.join(', ')}.`,
+        path: ['batchSize'],
+      });
+    }
+
+    if (value.interval !== undefined && !MEMORY_TEMPLATES.includes(value.template)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'interval is only valid for the memory templates.',
+        path: ['interval'],
+      });
+    }
+
+    if (MEMORY_TEMPLATES.includes(value.template) && value.sourceIndex !== undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `sourceIndex is not valid for ${value.template}.`,
+        path: ['sourceIndex'],
+      });
+    }
+
     if (value.template === 'targeted_ki_writer' && value.sourceIndex !== undefined) {
       ctx.addIssue({
         code: 'custom',
@@ -294,6 +519,78 @@ const toInstallParams = (
       throw new Error('kis is required for targeted_ki_writer.');
     }
     return { template: 'targeted_ki_writer', kis: input.kis, name };
+  }
+
+  if (input.template === 'memory_promotion') {
+    return {
+      template: 'memory_promotion',
+      agentIds: input.agentIds ?? [],
+      batchSize: input.batchSize ?? 50,
+      interval: input.interval ?? '1h',
+      name,
+    };
+  }
+
+  if (input.template === 'trace_memory_extraction') {
+    return {
+      template: 'trace_memory_extraction',
+      lookbackHours: input.lookbackHours ?? 24,
+      maxRows: input.maxRows ?? 50,
+      interval: input.interval ?? '1d',
+      name,
+    };
+  }
+
+  if (input.template === 'memory_distillation') {
+    return {
+      template: 'memory_distillation',
+      maxMemories: input.maxMemories ?? 200,
+      purgeAfterDays: input.purgeAfterDays ?? 30,
+      interval: input.interval ?? '1d',
+      name,
+    };
+  }
+
+  if (input.template === 'memory_maintenance') {
+    return {
+      template: 'memory_maintenance',
+      agentIds: input.agentIds ?? [],
+      unusedDays: input.unusedDays ?? 14,
+      maxOwners: input.maxOwners ?? 20,
+      maxMemories: input.maxMemoriesPerOwner ?? 50,
+      interval: input.interval ?? '1d',
+      name,
+    };
+  }
+
+  if (input.template === 'memory_extraction') {
+    if (!input.extraction) {
+      throw new Error('extraction is required for memory_extraction.');
+    }
+    return {
+      template: 'memory_extraction',
+      config: input.extraction,
+      ...(input.memorySources !== undefined && { sources: input.memorySources }),
+      agentIds: input.agentIds ?? [],
+      batchSize: input.batchSize ?? 50,
+      interval: input.interval ?? '1h',
+      name,
+    };
+  }
+
+  if (input.template === 'memory_custom_extraction') {
+    if (!input.customExtraction) {
+      throw new Error('customExtraction is required for memory_custom_extraction.');
+    }
+    return {
+      template: 'memory_custom_extraction',
+      config: input.customExtraction,
+      ...(input.memorySources !== undefined && { sources: input.memorySources }),
+      agentIds: input.agentIds ?? [],
+      batchSize: input.batchSize ?? 50,
+      interval: input.interval ?? '1h',
+      name,
+    };
   }
 
   if (input.template === 'document_orchestration') {
@@ -384,6 +681,7 @@ export const createInstallAutomationTemplateTool = ({
       index_metadata         → name, sources  (or sourceIndex + categoryField for one index)
       unit_profile           → name, sourceIndex, unitKey, activityField, breakdownField
       targeted_ki_writer     → name, kis  (no sourceIndex)
+      memory_promotion, trace_memory_extraction, memory_distillation, memory_maintenance → name
 
     name is always required. It identifies this automation within the AI index. Same template and
     name → replaces the existing automation in-place. Different name → installs an additional copy.
@@ -396,6 +694,24 @@ export const createInstallAutomationTemplateTool = ({
     aggregations plus the averages of any metricFields.
     targeted_ki_writer takes no dynamic parameters beyond name and kis. It writes KIs verbatim from
     the kis YAML you supply, then the workflow can be run with platform.core.execute_workflow.
+
+    The memory templates maintain the AI index's long-term memory on a schedule:
+    memory_promotion promotes generally useful short-term memories of the agentIds' users into it
+    (it reads every user's private memories, so it must be installed by an administrator);
+    trace_memory_extraction extracts durable facts from the AI index's configured traces;
+    memory_distillation merges, synthesizes and retires memories, then purges deleted and expired
+    ones. memory_extraction is the structured alternative to memory_promotion: it extracts the
+    configured facts, entities and relationships from short-term memories into a knowledge graph
+    of long-term memory; memory_custom_extraction does the same for free-form types with typed
+    attributes. Install either memory_promotion or one extraction template on an AI index, not
+    both: they decide the same pending memories. Install them only on an AI index with memory
+    enabled.
+
+    memory_maintenance maintains users' short-term memory itself and installs only on the Elastic
+    AI index ("elastic"), where short-term memories live: it forgets expired memories and ones not
+    recalled or shown to an agent for unusedDays, then merges duplicates and removes contradicted
+    memories within each user's memories of an agent. It reads and changes every user's private
+    memories, so it must be installed by an administrator.
   `,
   schema: installAutomationTemplateSchema,
   handler: async (params, { request, spaceId, attachments, logger }) => {

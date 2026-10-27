@@ -100,4 +100,8 @@ export const queryKeys = {
   spaceSettings: {
     all: ['spaceSettings'] as const,
   },
+  memory: {
+    all: ['shortTermMemory'] as const,
+    byAgent: (agentId: string) => ['shortTermMemory', agentId] as const,
+  },
 };

@@ -317,13 +317,12 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
 
       expect(response).toHaveStatusCode(200);
       const block = blockOf(response.body);
-      expect(sectionLines(block, 'Memory')).toStrictEqual(
+      expect(sectionLines(block, 'Long-term memory')).toStrictEqual(
         expect.arrayContaining([
-          'Memory writes are enabled for this AI-index registry entry.',
-          'memory.session',
-          'memory.session_fact',
-          'Use platform.context_engine.remember to write memory.',
-          'Use platform.context_engine.forget with a memory id to tombstone memory.',
+          "This AI index holds long-term memory shared with everyone who can read it: memories promoted from users' short-term memory, extracted from traces, and distilled by the memory automations.",
+          'memory.session, memory.session_fact: promoted and synthesized session memories',
+          'memory.entity.<kind>: a named thing, such as a service or a person; its attributes are in content',
+          "Agents do not write here directly: platform.context_engine.remember writes the user's private short-term memory, and automations decide what becomes long-term memory.",
         ])
       );
       expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([
@@ -351,7 +350,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
         `FROM ${INDEX_A} METADATA _id, _index, _score\n` +
           '| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n' +
           '| WHERE expires_at IS NULL OR expires_at > NOW()\n' +
-          '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")\n' +
+          '| WHERE type IS NULL OR type NOT LIKE "memory.*"\n' +
           '| FORK\n'
       )
     ).toBe(true);

@@ -220,6 +220,10 @@ const getAuthorizedPrivileges = async ({
  * enumeration aggregation, the authz filter, and the indexer's space-scoped delete.
  */
 const PRIVILEGES_PATH = 'permissions.kibana.privileges' as const;
+
+/** Agent Builder memories live in the same index under `memory.*` types; SML never returns them. */
+const EXCLUDE_MEMORY_TYPES_ESQL = 'type IS NULL OR type NOT LIKE "memory.*"';
+const EXCLUDE_MEMORY_TYPES_DSL = { prefix: { type: 'memory.' } };
 const PERM_NAME_FIELD = `${PRIVILEGES_PATH}.name` as const;
 const PERM_SPACE_FIELD = `${PRIVILEGES_PATH}.space` as const;
 const PERM_COUNT_FIELD = `${PRIVILEGES_PATH}.count` as const;
@@ -669,6 +673,9 @@ const buildSmlEsqlQuery = ({
   const params: unknown[] = [];
   // METADATA is required for FUSE (which needs _id, _index, _score to compute RRF).
   const lines: string[] = [`FROM ${smlIndexName} METADATA _id, _index, _score`];
+
+  // The Elastic AI index also holds Agent Builder memories, which are not Kibana resources.
+  lines.push(`| WHERE ${EXCLUDE_MEMORY_TYPES_ESQL}`);
 
   lines.push('| EVAL origin_uri = CONCAT(type, "://", SUBSTRING(id, LENGTH(type) + 2))');
 
@@ -1141,6 +1148,7 @@ const autocompleteSml = async ({
         bool: {
           must: [smlQuery],
           filter: filterClauses,
+          must_not: [EXCLUDE_MEMORY_TYPES_DSL],
         },
       },
       // Every hit scores the same; sort keys make the order stable.

@@ -51,6 +51,7 @@ import type { ExecutionConversationOrigin } from '../execution/types';
 import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
+import type { ScopedShortTermMemoryClient } from '../memory';
 import type { AiIndexResolver } from './ai_index_resolver';
 import type { AgentRegistry } from './registry';
 
@@ -169,6 +170,8 @@ export interface ExperimentalFeatures {
   skills: boolean;
   /** Whether AI index instructions are enabled by Context Engine and Agent Builder settings */
   aiIndices: boolean;
+  /** Whether short-term memory (tools and prompt section) is enabled: `aiIndices` and the memory setting */
+  memory: boolean;
   /** Whether context-aware skill filtering is enabled */
   relevantSkills: boolean;
   /** Whether the todo list tool and task-management prompt are enabled */
@@ -416,6 +419,12 @@ export interface AgentHandlerContext {
    * non-default AI indices are omitted from the prompt.
    */
   aiIndexResolver?: AiIndexResolver;
+  /**
+   * Short-term memory of the user the run acts for: the conversation owner when the run belongs
+   * to a conversation, otherwise the caller. Rejects with `ShortTermMemoryIdentityError` when that
+   * user has no stable id.
+   */
+  getShortTermMemoryClient?: () => Promise<ScopedShortTermMemoryClient>;
 }
 
 /**

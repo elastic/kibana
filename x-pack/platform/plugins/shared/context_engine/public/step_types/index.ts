@@ -33,4 +33,13 @@ export const registerStepDefinitions = ({
   workflowsExtensions.registerStepDefinition(async () =>
     (await isEnabled()) ? (await loadDefinitions()).deleteKiStepDefinition : undefined
   );
+  workflowsExtensions.registerStepDefinition(async () =>
+    (await isEnabled()) ? (await loadDefinitions()).getAiIndexStepDefinition : undefined
+  );
+  workflowsExtensions.registerStepDefinition(async () =>
+    (await isEnabled()) ? (await loadDefinitions()).queryAiIndexStepDefinition : undefined
+  );
+  workflowsExtensions.registerStepDefinition(async () =>
+    (await isEnabled()) ? (await loadDefinitions()).purgeKisStepDefinition : undefined
+  );
 };

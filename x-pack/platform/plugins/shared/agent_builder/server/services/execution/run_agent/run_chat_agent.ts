@@ -51,6 +51,7 @@ import {
   type RelevantSkillSelection,
 } from './utils/relevant_skills/select_relevant_skills';
 import { resolveConfiguration } from './utils/configuration';
+import { loadRecentShortTermMemories } from './utils/load_short_term_memories';
 import { ensureValidInput } from './utils/preflight_checks';
 import { buildResumeInitialization } from './utils/resume_initialization';
 import { DEFAULT_MAX_TOOL_RESULT_TOKENS } from './utils/tool_result_guardrail';
@@ -318,8 +319,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       skills,
       toolProvider,
       agentConfiguration,
-      aiIndexCatalog: resolvedConfiguration.aiIndexCatalog,
-      aiIndicesEnabled: experimentalFeatures.aiIndices,
+      memoryEnabled: experimentalFeatures.memory,
       attachmentsService: attachments,
       request,
       spaceId: context.spaceId,
@@ -406,8 +406,17 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       logger,
     });
 
+    const shortTermMemories = experimentalFeatures.memory
+      ? await loadRecentShortTermMemories({
+          getClient: context.getShortTermMemoryClient,
+          agentId: agentId ?? conversation?.agent_id,
+          logger,
+        })
+      : undefined;
+
     const promptFactory = createPromptFactory({
       configuration: resolvedConfiguration,
+      shortTermMemories,
       spaceId: context.spaceId,
       deployment: context.deployment,
       skills: filteredSkills,

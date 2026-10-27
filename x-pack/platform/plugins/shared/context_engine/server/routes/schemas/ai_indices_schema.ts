@@ -266,7 +266,8 @@ const aiIndexPropertiesSchema = {
   memory_enabled: schema.maybe(
     schema.boolean({
       meta: {
-        description: 'Whether this AI index accepts memory writes. Defaults to true when omitted.',
+        description:
+          'Whether this AI index holds long-term memory written by the memory automations. Defaults to true when omitted.',
       },
     })
   ),
@@ -544,7 +545,7 @@ export const aiIndexHttpItemResponseSchema = () =>
       },
     }),
     memory_enabled: schema.boolean({
-      meta: { description: 'Whether this AI Index accepts memory writes.' },
+      meta: { description: 'Whether this AI Index holds long-term memory.' },
     }),
     date_created: schema.string({
       meta: { description: 'ISO 8601 timestamp of when the AI Index was created.' },

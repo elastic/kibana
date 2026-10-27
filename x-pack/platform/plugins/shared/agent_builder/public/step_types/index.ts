@@ -41,6 +41,22 @@ export function registerWorkflowSteps(
   );
 
   workflowsExtensions.registerStepDefinition(() =>
+    import('./short_term_memory').then((m) => m.listShortTermMemoriesStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./short_term_memory').then((m) => m.setShortTermMemoryPromotionStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./short_term_memory').then((m) => m.listShortTermMemoriesByOwnerStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./short_term_memory').then((m) => m.consolidateShortTermMemoriesStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./short_term_memory').then((m) => m.decayShortTermMemoriesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
     import('./attachments').then((m) => m.addAttachmentStepDefinition)
   );
   workflowsExtensions.registerStepDefinition(() =>

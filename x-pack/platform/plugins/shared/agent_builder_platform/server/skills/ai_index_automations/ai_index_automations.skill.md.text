@@ -397,6 +397,79 @@ handful of documents, set thresholds above the observed baseline with margin, an
 per signal rather than emitting near-duplicate conditions. Derive `query_type` by parsing the ES|QL
 for a `STATS` command rather than asking the model for it.
 
+## Memory automations
+
+Long-term memory is the `memory.session` and `memory.session_fact` KIs of an AI index with memory
+enabled. Agents never write it directly: the remember tool writes the user's private short-term
+memory, and three templates turn short-term memory and traces into long-term memory on a
+schedule. Install each with `platform.context_engine.install_automation_template`; all
+three take only `name`, plus the optional fields below, and are safe to install together.
+
+- `template: memory_promotion` — decides the pending short-term memories of the `agentIds` users
+  (default: every agent) and promotes the generally useful ones, rewritten without personal
+  details, into long-term memory; the rest are rejected or left pending. Optional `batchSize`
+  (default 50) and `interval` (default `1h`). It reads every user's private memories, so it fails
+  unless the person installing and enabling it is an administrator.
+- `template: trace_memory_extraction` — reads the last `lookbackHours` (default 24) of every trace
+  source configured on the AI index, at most `maxRows` (default 50) rows each, and extracts
+  durable facts into long-term memory. Optional `interval` (default `1d`). An AI index with no
+  trace sources makes it a no-op; configure traces first.
+- `template: memory_distillation` — the "dreaming" pass: merges duplicate memories, synthesizes
+  related ones, retires contradicted ones, then permanently purges memories deleted or expired more
+  than `purgeAfterDays` (default 30) ago. Optional `maxMemories` (default 200) and `interval`
+  (default `1d`).
+
+- `template: memory_extraction` — the structured alternative to `memory_promotion`: extracts the
+  kinds in `extraction` from the pending short-term memories into a small knowledge graph, merged
+  with what long-term memory already holds. `extraction` has optional `instructions` (the team's
+  rules), `facts` and `entities` (each a lowercase `type`, a `description`, and optional
+  `attributes` mapping name to meaning), and `relationships` (a `type`, a `description`, and the
+  `source` and `target` kinds it connects). Each fact is a `memory.fact.<type>` KI, each entity a
+  `memory.entity.<type>` KI with a stable id per name, so many mentions update one KI, and each
+  relationship a `memory.relationship.<type>` KI whose references point at both ends. Optional
+  `agentIds`, `batchSize`, `interval` as for promotion.
+- `template: memory_custom_extraction` — the same, for free-form kinds: `customExtraction` has
+  `instructions` and `types`, each a lowercase `type`, a `description` and optional `attributes`
+  mapping name to a JSON Schema (string, number, boolean, or array of strings). Each item is a
+  `memory.<type>` KI.
+
+Both extraction templates take optional `memorySources`, one model call per source per run. The
+default `[{ "type": "short_term_memory" }]` reads pending short-term memories and marks each one
+decided. A `{ "type": "query", "query": "<ES|QL>" }` source reads anything the installer can read
+instead: an AI index's KIs and long-term memory (only current, active, unexpired ones of this
+space, `memory.*` left out by default), traces (`FROM traces-agent_builder.otel-<space>`), or any
+other index. Nothing marks a query row as read, so give it `lookbackHours` of about the interval.
+`description` tells the model what the rows are; `idColumn` and `uriPrefix` say how a row is cited
+(defaults: `id` + `ki://` for AI indices, `trace_id` + `trace://` for traces).
+
+Install either `memory_promotion` or one extraction template that reads short-term memory on an AI
+index: both decide the same pending short-term memories. Ask the user what kinds to extract before installing an extraction
+template; the kinds become part of the template.
+
+- `template: memory_maintenance` — maintains users' short-term memory itself, so it installs only
+  on the Elastic AI index (`elastic`), where short-term memories live. Each run forgets expired
+  memories and ones neither written nor recalled or shown to an agent for `unusedDays` (default 14;
+  memories written without an expiry are kept), then, for each user and agent whose memories
+  changed within twice the interval, merges duplicates and removes memories a newer one
+  contradicts. A user's memories are only ever compared with that user's other memories of the same
+  agent, and deletion is permanent. Optional `agentIds`, `maxOwners` (default 20, one model call
+  each), `maxMemoriesPerOwner` (default 50) and `interval` (default `1d`). It reads and changes
+  every user's private memories, so it fails unless the person installing and enabling it is an
+  administrator.
+
+They use three more `context-engine` steps, also invisible to step discovery:
+
+- **`context-engine.getAiIndex`** (`ai_index_id`) outputs the AI index definition: `dest`
+  (`dest.value` is the `FROM` target), `memory_enabled`, and `traces`, each with the ES|QL `query`
+  that reads it.
+- **`context-engine.queryAiIndex`** (`query`, optional `params`, `limit` ≤ 1000) runs ES|QL like
+  the AI index query API: only current, active, unexpired KIs of a registered AI index come back.
+  Outputs `columns`, `values`, and `rows` (objects keyed by column).
+- **`context-engine.purgeKis`** (`ai_index_id`, optional `types` where a trailing `*` matches a
+  prefix and the default is `memory.*`, `states` from `deleted`, `expired`, `verification_failed`,
+  `older_than_days` default 30, `dry_run`) permanently deletes every revision of the matching KIs
+  and outputs `ids`, `deleted` and `truncated`.
+
 ## Authoring: delegate the build-and-test loop to a subagent
 
 A workflow that has never run is a guess. It can parse, name only step types that exist, resolve

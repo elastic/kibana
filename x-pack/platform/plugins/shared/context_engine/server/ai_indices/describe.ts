@@ -7,14 +7,12 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AiIndexHttpItem, KiTypeCount } from '../../common/http_api/ai_indices';
-import { MEMORY_KI_TYPES } from '../../common/memory';
+import { isMemoryKiType } from '../../common/memory';
 import { describeAiIndexAggregations } from './describe_aggregations';
 import { describeAiIndexFields } from './describe_fields';
 import { buildExampleQueries, EXCLUDE_MEMORY_KI_TYPES_FILTER } from './example_queries';
 import { buildMemoryExampleQueries } from './memory_example_queries';
 import type { AiIndexField, AiIndexTagCount } from './types';
-
-const MEMORY_KI_TYPE_SET: ReadonlySet<string> = new Set(MEMORY_KI_TYPES);
 
 export interface DescribeAiIndexParams {
   esClient: ElasticsearchClient;
@@ -56,9 +54,7 @@ const countsSection = (heading: string, counts: Array<[key: string, count: numbe
 const kiTypeCountsSection = (counts: KiTypeCount[]): string[] =>
   countsSection(
     'Knowledge item types',
-    counts
-      .filter(({ type }) => !MEMORY_KI_TYPE_SET.has(type))
-      .map(({ type, count }) => [type, count])
+    counts.filter(({ type }) => !isMemoryKiType(type)).map(({ type, count }) => [type, count])
   );
 
 const tagCountsSection = (counts: AiIndexTagCount[]): string[] =>
@@ -75,22 +71,27 @@ const memorySection = (
     return [];
   }
 
-  const { crossSession } = buildMemoryExampleQueries(target);
+  const { crossSession, entityLookup, relationships } = buildMemoryExampleQueries(target);
 
   return [
-    'Memory',
-    'Memory writes are enabled for this AI-index registry entry.',
-    'Available memory types',
-    'memory.session',
-    'memory.session_fact',
-    'Use platform.context_engine.remember to write memory.',
-    'Use platform.context_engine.forget with a memory id to tombstone memory.',
+    'Long-term memory',
+    "This AI index holds long-term memory shared with everyone who can read it: memories promoted from users' short-term memory, extracted from traces, and distilled by the memory automations.",
+    'Memory types (every memory type starts with "memory.")',
+    'memory.session, memory.session_fact: promoted and synthesized session memories',
+    'memory.fact.<kind>: an extracted fact, such as an incident or a preference',
+    'memory.entity.<kind>: a named thing, such as a service or a person; its attributes are in content',
+    'memory.relationship.<kind>: an edge between two facts or entities; references.uri names both ends as ki://<id>',
+    "Agents do not write here directly: platform.context_engine.remember writes the user's private short-term memory, and automations decide what becomes long-term memory.",
     'Unless the task specifically calls for memory, exclude memory types from ordinary KI retrieval:',
     EXCLUDE_MEMORY_KI_TYPES_FILTER,
     'For cross-session recall, search granular facts with hybrid retrieval:',
     crossSession,
+    'To look up an entity or fact by name (?query):',
+    entityLookup,
+    'To follow relationships from a memory id (?uri is ki://<id>):',
+    relationships,
     'Select the latest revision before filtering deleted or expired memories, or an older active data-stream revision can reappear.',
-    'References identify the source conversations.',
+    'References identify the source conversations and memories.',
   ];
 };
 

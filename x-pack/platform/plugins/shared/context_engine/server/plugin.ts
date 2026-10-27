@@ -274,7 +274,11 @@ export class ContextEnginePlugin
       });
     };
 
-    const checkWritePrivilege = async (request: KibanaRequest, spaceId: string) => {
+    const checkApiPrivilege = async (
+      request: KibanaRequest,
+      spaceId: string,
+      privilege: string
+    ) => {
       const [, startDeps] = await coreSetup.getStartServices();
       const { security } = startDeps;
       if (!security) {
@@ -283,10 +287,14 @@ export class ContextEnginePlugin
       const { hasAllRequested } = await security.authz
         .checkPrivilegesWithRequest(request)
         .atSpace(spaceId, {
-          kibana: [security.authz.actions.api.get(apiPrivileges.writeContextEngine)],
+          kibana: [security.authz.actions.api.get(privilege)],
         });
       return hasAllRequested;
     };
+    const checkWritePrivilege = (request: KibanaRequest, spaceId: string) =>
+      checkApiPrivilege(request, spaceId, apiPrivileges.writeContextEngine);
+    const checkReadPrivilege = (request: KibanaRequest, spaceId: string) =>
+      checkApiPrivilege(request, spaceId, apiPrivileges.readContextEngine);
 
     registerStepDefinitions({
       workflowsExtensions: setupDeps.workflowsExtensions,
@@ -307,6 +315,18 @@ export class ContextEnginePlugin
         isFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
         checkWritePrivilege,
         logger: this.logger.get('feedback_analysis'),
+      },
+      aiIndexSteps: {
+        getAiIndexService,
+        getAiIndexDataReadService: (params) => {
+          if (!this.createAiIndexDataReadService) {
+            throw new Error('AI index read service not available — plugin has not started');
+          }
+          return this.createAiIndexDataReadService(params);
+        },
+        isContextEngineEnabled,
+        checkReadPrivilege,
+        checkWritePrivilege,
       },
     });
 
@@ -393,10 +413,10 @@ export class ContextEnginePlugin
       new ImprovementsService({ esClient, logger: improvementsLogger, space: spaceId });
     const createImprovementsService = this.createImprovementsService;
 
-    this.createAiIndexDataReadService = ({ esClient, request }) =>
+    this.createAiIndexDataReadService = ({ esClient, request, spaceId }) =>
       new AiIndexDataReadService({
         esClient,
-        spaceId: resolveSpaceId(startDeps.spaces, request),
+        spaceId: spaceId ?? resolveSpaceId(startDeps.spaces, request),
         auditLogger: coreStart.security.audit.asScoped(request),
         aiIndexService,
         logger: this.logger,

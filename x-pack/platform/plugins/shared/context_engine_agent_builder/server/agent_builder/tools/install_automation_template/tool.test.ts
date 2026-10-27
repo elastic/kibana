@@ -474,3 +474,141 @@ describe('install_automation_template handler arguments', () => {
     });
   });
 });
+
+describe('install_automation_template memory extraction', () => {
+  const schema = createTool().schema;
+  const extraction = {
+    instructions: "We are an SRE team. 'checkout' means checkout-service. Ignore small talk.",
+    entities: [
+      {
+        type: 'service',
+        description: 'A deployed software service.',
+        attributes: { owner: 'The team that owns the service.' },
+      },
+    ],
+  };
+
+  it('accepts a structured extraction with the short-term memory options', () => {
+    expect(
+      schema.safeParse({
+        template: 'memory_extraction',
+        name: 'sre-memory',
+        extraction,
+        agentIds: ['sre-agent'],
+        batchSize: 20,
+        interval: '30m',
+      }).success
+    ).toBe(true);
+  });
+
+  it('requires the configuration of the chosen extraction template only', () => {
+    expect(schema.safeParse({ template: 'memory_extraction', name: 'sre' }).success).toBe(false);
+    expect(
+      schema.safeParse({ template: 'memory_custom_extraction', name: 'sre', extraction }).success
+    ).toBe(false);
+  });
+
+  it('rejects the short-term memory options on other templates', () => {
+    expect(
+      schema.safeParse({ template: 'memory_distillation', name: 'dreaming', agentIds: ['a'] })
+        .success
+    ).toBe(false);
+  });
+
+  it('passes the configuration through to the installer', async () => {
+    const handler = createTool().handler;
+    if (!handler) {
+      throw new Error('Expected a tool handler');
+    }
+
+    await handler({ template: 'memory_extraction', name: 'sre-memory', extraction }, {
+      request: httpServerMock.createKibanaRequest(),
+      spaceId: 'default',
+      attachments: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    expect(installHandlerMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        params: {
+          template: 'memory_extraction',
+          name: 'sre-memory',
+          config: extraction,
+          agentIds: [],
+          batchSize: 50,
+          interval: '1h',
+        },
+      })
+    );
+  });
+});
+
+describe('install_automation_template memory_maintenance', () => {
+  const schema = createTool().schema;
+
+  it('takes agentIds and its own options, and nothing of the other memory templates', () => {
+    expect(
+      schema.safeParse({
+        template: 'memory_maintenance',
+        name: 'stm-maintenance',
+        agentIds: ['elastic-ai-agent'],
+        unusedDays: 7,
+        maxOwners: 10,
+        maxMemoriesPerOwner: 30,
+        interval: '12h',
+      }).success
+    ).toBe(true);
+    expect(
+      schema.safeParse({ template: 'memory_maintenance', name: 'x', batchSize: 10 }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({ template: 'memory_distillation', name: 'x', unusedDays: 7 }).success
+    ).toBe(false);
+  });
+
+  it('fills the defaults', async () => {
+    const handler = createTool().handler;
+    if (!handler) {
+      throw new Error('Expected a tool handler');
+    }
+
+    await handler({ template: 'memory_maintenance', name: 'stm-maintenance' }, {
+      request: httpServerMock.createKibanaRequest(),
+      spaceId: 'default',
+      attachments: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    expect(installHandlerMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        params: {
+          template: 'memory_maintenance',
+          name: 'stm-maintenance',
+          agentIds: [],
+          unusedDays: 14,
+          maxOwners: 20,
+          maxMemories: 50,
+          interval: '1d',
+        },
+      })
+    );
+  });
+});
+
+describe('install_automation_template memory sources', () => {
+  const schema = createTool().schema;
+  const extraction = { facts: [{ type: 'incident', description: 'Something failed.' }] };
+
+  it('takes memorySources on extraction templates only', () => {
+    const memorySources = [
+      { type: 'query', query: 'FROM traces-agent_builder.otel-default', lookbackHours: 24 },
+    ];
+    expect(
+      schema.safeParse({ template: 'memory_extraction', name: 'x', extraction, memorySources })
+        .success
+    ).toBe(true);
+    expect(
+      schema.safeParse({ template: 'memory_promotion', name: 'x', memorySources }).success
+    ).toBe(false);
+  });
+});

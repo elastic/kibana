@@ -7,6 +7,7 @@
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AiIndexService } from '../ai_indices/service';
+import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import { registerStepDefinitions } from '.';
 import { mockKiStepTelemetry } from './test_utils';
@@ -35,6 +36,13 @@ describe('registerStepDefinitions', () => {
         checkWritePrivilege: async () => true,
         logger: telemetry.logger,
       },
+      aiIndexSteps: {
+        getAiIndexService: () => ({} as AiIndexService),
+        getAiIndexDataReadService: () => ({} as AiIndexDataReadServiceApi),
+        isContextEngineEnabled: async () => true,
+        checkReadPrivilege: async () => true,
+        checkWritePrivilege: async () => true,
+      },
     });
 
     expect(definitions.map((definition) => definition.id)).toEqual([
@@ -43,6 +51,9 @@ describe('registerStepDefinitions', () => {
       'context-engine.deleteKi',
       'context-engine.getFeedbackContext',
       'context-engine.recordImprovements',
+      'context-engine.getAiIndex',
+      'context-engine.queryAiIndex',
+      'context-engine.purgeKis',
     ]);
   });
 });

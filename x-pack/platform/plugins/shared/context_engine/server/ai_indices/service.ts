@@ -83,17 +83,18 @@ export interface AiIndexManagedBootstrap {
   ensure: (id: string, spaceId: string) => Promise<boolean>;
 }
 
-type AiIndexAutomationTarget = Pick<AiIndexDocument, 'managed' | 'automations'>;
+type AiIndexAutomationTarget = Pick<AiIndexDocument, 'automations'>;
 
+/**
+ * Managed entries accept automations too. Like feedback analysis, which automations maintain an
+ * index is operator preference rather than part of the definition the registering plugin owns, and
+ * the managed bootstrap never rewrites an existing entry, so attached automations survive it.
+ */
 const assertAiIndexAcceptsAutomation = (
   aiIndexId: string,
   index: AiIndexAutomationTarget,
   automation?: { type: 'workflow'; value: string }
 ): { alreadyAttached: boolean } => {
-  if (index.managed) {
-    throw new AiIndexManagedError(aiIndexId);
-  }
-
   const alreadyAttached =
     automation !== undefined &&
     index.automations.some(

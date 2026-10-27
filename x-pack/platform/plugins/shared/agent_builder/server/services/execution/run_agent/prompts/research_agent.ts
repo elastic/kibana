@@ -16,6 +16,7 @@ import { structuredOutputDescription } from './utils/custom_instructions';
 import { getFileSystemInstructions } from './utils/filestore';
 import { getDynamicToolsInstructions } from './utils/dynamic_tools';
 import { getAiIndicesInstructions } from './utils/ai_indices';
+import { getMemoryInstructions } from './utils/memory';
 import { getDeploymentInstructions } from './utils/deployment';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 import { renderRenderersPrompt } from './utils/renderers';
@@ -108,6 +109,7 @@ const getAgentSystemMessage = async ({
   processedConversation,
   conversationTemplates,
   conversationMetadataWritable,
+  shortTermMemories,
 }: ResearchAgentPromptParams): Promise<string> => {
   const conversationTemplateId = processedConversation.template_id;
   const conversationMetadata = processedConversation.metadata as
@@ -194,6 +196,11 @@ ${getAiIndicesInstructions({
   enabled: experimentalFeatures.aiIndices,
   catalog: aiIndexCatalog ?? [],
   spaceId,
+})}
+
+${getMemoryInstructions({
+  enabled: experimentalFeatures.memory && shortTermMemories !== undefined,
+  memories: shortTermMemories ?? [],
 })}
 
 ## INSTRUCTIONS

@@ -1,0 +1,191 @@
+version: "1"
+# Short-term memory promotion — reads the short-term memories users recorded with the selected
+# agents, decides for each whether it is durable knowledge worth sharing with everyone who reads
+# this AI index, and promotes those into long-term memory (`memory.*` KIs). The rest are rejected,
+# or left pending until there is more evidence.
+#
+# This is a working workflow, not a sketch. Edit the `consts` block and it runs as it stands.
+#
+# Installed by platform.context_engine.install_automation_template. The tool fills the consts.
+# Do not save this YAML yourself.
+#
+# Privacy: short-term memory is private to one user; long-term memory is visible to everyone who
+# can read the AI index. The prompt rewrites a promoted memory without personal details and
+# rejects anything personal. Reading other users' memories requires the workflow to run as an
+# administrator, so install and enable it as one.
+name: Memory promotion
+description: >
+  Promotes generally useful short-term memories of the selected agents into long-term memory in a
+  Context Engine AI index.
+enabled: true
+
+settings:
+  timeout: 30m
+  concurrency:
+    key: "memory-promotion-__AI_INDEX_ID_RAW__"
+    strategy: drop
+    max: 1
+
+consts:
+  # The Context Engine AI index long-term memory is written into.
+  ai_index_id: __AI_INDEX_ID__
+  # The human-readable name of this automation instance. Prefixes every KI ID it writes.
+  automation_name: __AUTOMATION_NAME__
+  # Agents whose users' memories feed this AI index. Empty reads every agent in the space.
+  agent_ids: __AGENT_IDS__
+  # How many short-term memories one run decides. One model call decides them all.
+  batch_size: __BATCH_SIZE__
+  # LiquidJS has no array literal, so `| default: []` does not produce an empty array.
+  no_tags: []
+
+tags:
+  - memory
+  - ce-template:memory_promotion
+
+triggers:
+  - type: scheduled
+    with:
+      every: __INTERVAL__
+  - type: manual
+
+steps:
+  # Oldest first, so a memory that has waited longest is decided first.
+  - name: list_pending
+    type: ai.memory.short_term.list
+    with:
+      agent_ids: "${{ consts.agent_ids }}"
+      limit: "${{ consts.batch_size }}"
+
+  - name: promote_pending
+    type: if
+    condition: "${{ steps.list_pending.output.memories.size > 0 }}"
+    steps:
+      - name: ai_index
+        type: context-engine.getAiIndex
+        with:
+          ai_index_id: "{{ consts.ai_index_id }}"
+
+      # What long-term memory already holds, so a promotion revises an existing memory instead
+      # of adding a near-duplicate.
+      - name: existing_memory
+        type: context-engine.queryAiIndex
+        with:
+          query: 'FROM {{ steps.ai_index.output.dest.value }} | WHERE type LIKE "memory.*" | SORT updated_at DESC | KEEP id, type, title, description'
+          limit: 300
+
+      - name: decide
+        type: ai.prompt
+        connector-id-by-feature: context_engine_prompt
+        with:
+          prompt: |
+            You curate the long-term memory of an AI assistant. Long-term memory is shared with
+            every user and agent that can read this knowledge base, so it must hold durable,
+            generally useful knowledge about this organization's systems and work, never anything
+            about one person.
+
+            Candidate short-term memories, each recorded by one user with one agent:
+            {{ steps.list_pending.output.memories | json }}
+
+            Long-term memories that already exist (id, type, title, description):
+            {{ steps.existing_memory.output.rows | json }}
+
+            Decide every candidate exactly once, by its `id`:
+            - promote: a durable fact, convention, workaround or lesson that other users of this
+              knowledge base would benefit from (for example "duration_ms is a keyword and must
+              be cast before numeric comparisons"). Rewrite it so it reads as general knowledge:
+              drop names, personal preferences, greetings, and anything that identifies the user.
+              When it repeats or corrects an existing long-term memory, set `existing_id` to that
+              memory's id and write the merged, corrected version.
+            - reject: personal (how one user likes answers, details about a person), ephemeral
+              (true only for that session), sensitive (credentials, secrets, personal data), or
+              wrong. Give a short reason the user can read.
+            - wait: plausibly durable, but one session is not enough evidence yet. Prefer wait
+              over a guess.
+          schema:
+            type: object
+            properties:
+              decisions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    decision:
+                      type: string
+                      enum: [promote, reject, wait]
+                    reason:
+                      type: string
+                    existing_id:
+                      type: string
+                    type:
+                      type: string
+                      enum: [memory.session, memory.session_fact]
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    content:
+                      type: string
+                    tags:
+                      type: array
+                      items:
+                        type: string
+                  required: [id, decision, reason]
+            required: [decisions]
+
+      # `existing_id` revises that memory in place; otherwise the KI id is derived from the
+      # short-term memory, so a re-run of the same decision replaces rather than duplicates.
+      - name: promote
+        type: parallel
+        foreach: "{{ steps.decide.output.content.decisions | where: 'decision', 'promote' | json }}"
+        concurrency: 5
+        # One memory that fails to write should not cost the rest.
+        mode: settled
+        steps:
+          - name: promoted_ki_id
+            type: data.set
+            with:
+              ki_id: "{% if foreach.item.existing_id %}{{ foreach.item.existing_id }}{% else %}{{ consts.automation_name }}/stm/{{ foreach.item.id }}{% endif %}"
+
+          - name: write_memory
+            type: context-engine.createKi
+            with:
+              ai_index_id: "{{ consts.ai_index_id }}"
+              ki_id: "{{ steps.promoted_ki_id.output.ki_id }}"
+              ki:
+                type: "{{ foreach.item.type | default: 'memory.session_fact' }}"
+                title: "{{ foreach.item.title }}"
+                description: "{{ foreach.item.description }}"
+                content: "{{ foreach.item.content }}"
+                tags: "${{ foreach.item.tags | default: consts.no_tags }}"
+                # Where the memory came from. Who wrote it is stamped by `createKi` itself.
+                references:
+                  - uri: "stm://{{ foreach.item.id }}"
+                    relation: derived_from
+                attributes:
+                  memory.promotion_reason: "{{ foreach.item.reason }}"
+
+          - name: mark_promoted
+            type: ai.memory.short_term.set_promotion
+            with:
+              ids:
+                - "{{ foreach.item.id }}"
+              status: promoted
+              ai_index_id: "{{ consts.ai_index_id }}"
+              ki_id: "{{ steps.promoted_ki_id.output.ki_id }}"
+              reason: "{{ foreach.item.reason }}"
+
+      - name: reject
+        type: parallel
+        foreach: "{{ steps.decide.output.content.decisions | where: 'decision', 'reject' | json }}"
+        concurrency: 5
+        mode: settled
+        steps:
+          - name: mark_rejected
+            type: ai.memory.short_term.set_promotion
+            with:
+              ids:
+                - "{{ foreach.item.id }}"
+              status: rejected
+              reason: "{{ foreach.item.reason }}"

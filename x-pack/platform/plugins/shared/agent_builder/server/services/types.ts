@@ -38,6 +38,7 @@ import type { RunnerFactory } from './execution/runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
 import type { WorkspaceService } from './workspaces';
+import type { MemoryService } from './memory';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
 import type { RendererServiceSetup, RendererServiceStart } from './renderers';
 import type {
@@ -82,6 +83,7 @@ export interface InternalStartServices {
   skills: SkillServiceStart;
   conversations: ConversationService;
   workspaces: WorkspaceService;
+  memory: MemoryService;
   runnerFactory: RunnerFactory;
   hooks: HooksServiceStart;
   auditLogService: AuditLogService;

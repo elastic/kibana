@@ -7,7 +7,7 @@
 
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { kiLifecyclePipeline } from './ki_lifecycle';
-import { MEMORY_KI_TYPES } from '../../common/memory';
+import { MEMORY_KI_TYPE_PATTERN } from '../../common/memory';
 
 export interface AiIndexExampleQuery {
   title: string;
@@ -16,9 +16,7 @@ export interface AiIndexExampleQuery {
 }
 
 const KEEP = '| KEEP title, description, content, type, tags';
-export const EXCLUDE_MEMORY_KI_TYPES_CONDITION = `type IS NULL OR (${MEMORY_KI_TYPES.map(
-  (type) => `type != "${type}"`
-).join(' AND ')})`;
+export const EXCLUDE_MEMORY_KI_TYPES_CONDITION = `type IS NULL OR type NOT LIKE "${MEMORY_KI_TYPE_PATTERN}"`;
 export const EXCLUDE_MEMORY_KI_TYPES_FILTER = `| WHERE ${EXCLUDE_MEMORY_KI_TYPES_CONDITION}`;
 
 /**

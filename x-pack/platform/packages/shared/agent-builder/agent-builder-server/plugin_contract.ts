@@ -27,6 +27,7 @@ import type { RunToolFn, ModelProvider } from './runner';
 import type { RunAgentFn } from './agents';
 import type { HooksServiceSetup } from './hooks/types';
 import type { BuiltInPluginDefinition, PluginRegistry } from './plugins';
+import type { MemoryStart } from './memory';
 import type {
   ExecuteAgentParams,
   ExecuteAgentResult,
@@ -394,4 +395,8 @@ export interface AgentBuilderPluginStart {
    * Conversation templates service, to look up registered templates.
    */
   conversationTemplates: ConversationTemplatesStart;
+  /**
+   * Short-term memory service: per-user, per-agent memories written by the memory tools.
+   */
+  memory: MemoryStart;
 }

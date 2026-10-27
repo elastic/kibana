@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { agentBuilderDefaultAiIndexId } from '@kbn/agent-builder-common';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { CoreStart, Logger } from '@kbn/core/server';
@@ -28,12 +29,24 @@ import {
   AUTOMATION_TEMPLATE_TAGS,
   renderDocumentOrchestrationTemplate,
   renderIndexMetadataTemplate,
+  renderMemoryCustomExtractionTemplate,
+  renderMemoryDistillationTemplate,
+  renderMemoryExtractionTemplate,
+  renderMemoryMaintenanceTemplate,
+  renderMemoryPromotionTemplate,
   renderTargetedKiWriterTemplate,
+  renderTraceMemoryExtractionTemplate,
   renderUnitProfileTemplate,
   type AutomationTemplateId,
   type DocumentOrchestrationTemplateValues,
   type IndexMetadataTemplateValues,
+  type MemoryCustomExtractionTemplateValues,
+  type MemoryDistillationTemplateValues,
+  type MemoryExtractionTemplateValues,
+  type MemoryMaintenanceTemplateValues,
+  type MemoryPromotionTemplateValues,
   type TargetedKiWriterTemplateValues,
+  type TraceMemoryExtractionTemplateValues,
   type UnitProfileTemplateValues,
 } from './render';
 
@@ -61,6 +74,30 @@ export type InstallAutomationTemplateParams =
     > &
       WithName)
   | ({ template: 'targeted_ki_writer' } & Omit<TargetedKiWriterTemplateValues, 'aiIndexId'> &
+      WithName)
+  | ({ template: 'memory_promotion' } & Omit<
+      MemoryPromotionTemplateValues,
+      'aiIndexId' | 'automationName'
+    > &
+      WithName)
+  | ({ template: 'trace_memory_extraction' } & Omit<
+      TraceMemoryExtractionTemplateValues,
+      'aiIndexId' | 'automationName'
+    > &
+      WithName)
+  | ({ template: 'memory_distillation' } & Omit<
+      MemoryDistillationTemplateValues,
+      'aiIndexId' | 'automationName'
+    > &
+      WithName)
+  | ({ template: 'memory_extraction' } & Omit<MemoryExtractionTemplateValues, 'aiIndexId'> &
+      WithName)
+  | ({ template: 'memory_custom_extraction' } & Omit<
+      MemoryCustomExtractionTemplateValues,
+      'aiIndexId'
+    > &
+      WithName)
+  | ({ template: 'memory_maintenance' } & Omit<MemoryMaintenanceTemplateValues, 'aiIndexId'> &
       WithName);
 
 const aiIndexIdFromAttachments = (attachments: AttachmentStateManager): string => {
@@ -98,6 +135,34 @@ const renderTemplate = (params: InstallAutomationTemplateParams, aiIndexId: stri
   }
   if (params.template === 'targeted_ki_writer') {
     return renderTargetedKiWriterTemplate({ aiIndexId, kis: params.kis });
+  }
+  if (params.template === 'memory_promotion') {
+    return renderMemoryPromotionTemplate({ ...params, aiIndexId, automationName: params.name });
+  }
+  if (params.template === 'trace_memory_extraction') {
+    return renderTraceMemoryExtractionTemplate({
+      ...params,
+      aiIndexId,
+      automationName: params.name,
+    });
+  }
+  if (params.template === 'memory_distillation') {
+    return renderMemoryDistillationTemplate({ ...params, aiIndexId, automationName: params.name });
+  }
+  if (params.template === 'memory_extraction') {
+    return renderMemoryExtractionTemplate({ ...params, aiIndexId });
+  }
+  if (params.template === 'memory_custom_extraction') {
+    return renderMemoryCustomExtractionTemplate({ ...params, aiIndexId });
+  }
+  if (params.template === 'memory_maintenance') {
+    // Short-term memories live in the Elastic AI index whichever index this is attached to.
+    if (aiIndexId !== agentBuilderDefaultAiIndexId) {
+      throw new Error(
+        `memory_maintenance maintains short-term memory, which lives in the "${agentBuilderDefaultAiIndexId}" AI index. Attach that AI index and install it there.`
+      );
+    }
+    return renderMemoryMaintenanceTemplate({ ...params, aiIndexId });
   }
   return renderIndexMetadataTemplate({ ...params, aiIndexId, automationName: params.name });
 };

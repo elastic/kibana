@@ -214,6 +214,11 @@ const defaultServices: AgentBuilderInternalService = {
     get: () => Promise.resolve({ default_agent_id: null }),
     set: (defaultAgentId: string | null) => Promise.resolve({ default_agent_id: defaultAgentId }),
   } as never,
+  memoryService: {
+    list: () => Promise.resolve({ results: [] }),
+    delete: ({ id }: { id: string }) => Promise.resolve({ id }),
+    deleteAll: () => Promise.resolve({ deleted: 0 }),
+  } as never,
   pluginsService: {} as never,
   oauthClientsService: {} as never,
   startDependencies: { data: { search: { search: () => EMPTY } } } as never,

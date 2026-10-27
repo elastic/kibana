@@ -58,6 +58,7 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
     experimentalFeatures: {
       skills: false,
       aiIndices: false,
+      memory: false,
       relevantSkills: false,
       todos: false,
       bash: false,
@@ -199,6 +200,7 @@ describe('registerInternalTools - execute_dynamic_tool', () => {
       experimentalFeatures: {
         skills: false,
         aiIndices: false,
+        memory: false,
         relevantSkills: false,
         todos: false,
         bash: false,

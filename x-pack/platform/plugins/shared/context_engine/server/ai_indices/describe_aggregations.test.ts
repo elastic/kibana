@@ -32,8 +32,7 @@ const esResponseError = (statusCode: number, type: string) =>
 
 const LIFECYCLE =
   '| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n| WHERE expires_at IS NULL OR expires_at > NOW()';
-const MEMORY_EXCLUSION =
-  '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")';
+const MEMORY_EXCLUSION = '| WHERE type IS NULL OR type NOT LIKE "memory.*"';
 
 const emptyResponse = { columns: [], values: [] };
 

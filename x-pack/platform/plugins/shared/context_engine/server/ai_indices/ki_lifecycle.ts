@@ -34,6 +34,13 @@ const LATEST_REVISION = [
 export const kiLifecyclePipeline = (type: AiIndexDest['type']): string[] =>
   type === 'data_stream' ? [...LATEST_REVISION, ...LIFECYCLE_FILTERS] : LIFECYCLE_FILTERS;
 
+/**
+ * The commands after `FROM` that select the current revision of every KI, whatever its lifecycle
+ * state, with `id` set on every row. Needs `METADATA _id`.
+ */
+export const kiCurrentRevisionPipeline = (type: AiIndexDest['type']): string[] =>
+  type === 'data_stream' ? LATEST_REVISION : ['EVAL id = COALESCE(id, _id)'];
+
 const globToRegExp = (pattern: string): RegExp =>
   new RegExp(
     `^${pattern

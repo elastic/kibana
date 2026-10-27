@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import type { ToolManager, ToolResultStore } from '@kbn/agent-builder-server/runner';
 import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
 import type { DeploymentContext, ExperimentalFeatures } from '@kbn/agent-builder-server';
+import type { ShortTermMemory } from '@kbn/agent-builder-common';
 import type { RendererTypeDefinition } from '@kbn/agent-builder-server/renderers';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ResolvedConfiguration } from '../types';
@@ -57,6 +58,8 @@ export interface PromptFactoryParams {
   conversationTemplates: ConversationTemplatesService;
   /** Whether the run can write the conversation's metadata (`set_conversation_metadata` is registered). */
   conversationMetadataWritable: boolean;
+  /** The user's most recent short-term memories with this agent, newest first. */
+  shortTermMemories?: ShortTermMemory[];
 }
 
 export interface HandoverParams {

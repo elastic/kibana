@@ -1334,7 +1334,7 @@ describe('AiIndexService', () => {
       ).rejects.toBeInstanceOf(AiIndexNotFoundError);
     });
 
-    it('throws AiIndexManagedError when the entry is managed', async () => {
+    it('accepts an automation on a managed entry', async () => {
       mockSearchHits(
         storedHit({ ...aiIndexDocument, managed: true }, { seqNo: 1, primaryTerm: 1 })
       );
@@ -1344,7 +1344,7 @@ describe('AiIndexService', () => {
           type: 'workflow',
           value: 'wf-new',
         })
-      ).rejects.toBeInstanceOf(AiIndexManagedError);
+      ).resolves.toBeUndefined();
     });
 
     it('rejects when the automation limit is reached', async () => {
@@ -1474,7 +1474,7 @@ describe('AiIndexService', () => {
       expect(storageClient.index).toHaveBeenCalledTimes(2);
     });
 
-    it('throws AiIndexManagedError when the entry is managed', async () => {
+    it('attaches an automation to a managed entry and keeps it managed', async () => {
       mockSearchHits(
         storedHit({ ...aiIndexDocument, managed: true }, { seqNo: 1, primaryTerm: 1 })
       );
@@ -1484,7 +1484,15 @@ describe('AiIndexService', () => {
           type: 'workflow',
           value: 'wf-new',
         })
-      ).rejects.toBeInstanceOf(AiIndexManagedError);
+      ).resolves.toBe('attached');
+      expect(storageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            managed: true,
+            automations: expect.arrayContaining([{ type: 'workflow', value: 'wf-new' }]),
+          }),
+        })
+      );
     });
 
     it('rejects when the automation limit is reached', async () => {

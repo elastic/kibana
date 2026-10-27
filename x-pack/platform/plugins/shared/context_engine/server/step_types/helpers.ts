@@ -20,6 +20,8 @@ import {
   AiIndexNotFoundError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service';
+import type { GetAiIndexDataReadServiceParams } from '../types';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import type { KiVerificationSummary } from '../ki_verification';
 import { WORKFLOW_VERIFIER_ID_PREFIX } from '../ki_verification';
@@ -35,6 +37,16 @@ export interface KiStepDependencies {
   checkWritePrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>;
   analyticsService: ContextEngineAnalyticsService;
   logger: Logger;
+}
+
+/** Dependencies injected into the AI index read and maintenance step definition factories. */
+export interface AiIndexStepDependencies {
+  getAiIndexService: () => AiIndexService;
+  getAiIndexDataReadService: (params: GetAiIndexDataReadServiceParams) => AiIndexDataReadServiceApi;
+  isContextEngineEnabled: (spaceId: string) => Promise<boolean>;
+  /** Whether the request has the Context Engine read API privilege in this space. */
+  checkReadPrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>;
+  checkWritePrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>;
 }
 
 /** Dependencies injected into the feedback analysis step definition factories. */
@@ -192,6 +204,20 @@ export const assertKiWritePrivilege = async (
     throw new ExecutionError({
       type: 'PermissionError',
       message: 'Insufficient privileges to modify knowledge indicators in AI indices',
+    });
+  }
+};
+
+/** Fails the step when the workflow user lacks the Context Engine read API privilege. */
+export const assertKiReadPrivilege = async (
+  checkReadPrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>,
+  request: KibanaRequest,
+  spaceId: string
+): Promise<void> => {
+  if (!(await checkReadPrivilege(request, spaceId))) {
+    throw new ExecutionError({
+      type: 'PermissionError',
+      message: 'Insufficient privileges to read AI indices',
     });
   }
 };

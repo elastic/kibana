@@ -1,0 +1,146 @@
+version: "1"
+# Short-term memory maintenance — keeps every user's short-term memory small and correct:
+# forgets memories that are expired or no longer used, then, for each user and agent whose memories
+# changed recently, merges duplicates and drops memories a newer one contradicts.
+#
+# This is a working workflow, not a sketch. Edit the `consts` block and it runs as it stands.
+#
+# Installed by platform.context_engine.install_automation_template on the Elastic AI index, where
+# short-term memories live. The tool fills the consts. Do not save this YAML yourself.
+#
+# It reads and changes every user's private memories, so it must run as an administrator. A user's
+# memories are only ever compared with that user's other memories of the same agent. Deletion is
+# permanent: short-term memory has no soft delete.
+name: Short-term memory maintenance
+description: >
+  Forgets expired and unused short-term memories, then merges duplicates and removes contradicted
+  memories within each user's memories of an agent.
+enabled: true
+
+settings:
+  timeout: 45m
+  concurrency:
+    key: "memory-maintenance-__AI_INDEX_ID_RAW__"
+    strategy: drop
+    max: 1
+
+consts:
+  # Agents whose users' memories are maintained. Empty maintains every agent's.
+  agent_ids: __AGENT_IDS__
+  # Memories neither written nor recalled or shown to an agent for this many days are forgotten.
+  # Memories written without an expiry are kept.
+  unused_days: __UNUSED_DAYS__
+  # Only users whose memories changed in this window are deduplicated, so a run revisits only what
+  # changed. Keep it longer than the schedule interval.
+  lookback_hours: __LOOKBACK_HOURS__
+  # User and agent pairs deduplicated per run, one model call each.
+  max_owners: __MAX_OWNERS__
+  # Memories read per user and agent pair, newest first.
+  max_memories: __MAX_MEMORIES__
+  no_items: []
+
+tags:
+  - memory
+  - ce-template:memory_maintenance
+
+triggers:
+  - type: scheduled
+    with:
+      every: __INTERVAL__
+  - type: manual
+
+steps:
+  - name: decay
+    type: ai.memory.short_term.decay
+    with:
+      agent_ids: "${{ consts.agent_ids }}"
+      unused_days: "${{ consts.unused_days }}"
+
+  - name: owners
+    type: ai.memory.short_term.list_by_owner
+    with:
+      agent_ids: "${{ consts.agent_ids }}"
+      changed_within_hours: "${{ consts.lookback_hours }}"
+      max_owners: "${{ consts.max_owners }}"
+      max_memories: "${{ consts.max_memories }}"
+
+  - name: per_owner
+    type: foreach
+    foreach: "{{ steps.owners.output.owners | json }}"
+    steps:
+      - name: has_several
+        type: if
+        condition: "${{ foreach.item.memories.size > 1 }}"
+        steps:
+          - name: plan
+            type: ai.prompt
+            connector-id-by-feature: context_engine_prompt
+            # One owner's failure does not stop the others.
+            on-failure:
+              continue: true
+            with:
+              prompt: |
+                You maintain the short-term memory one user has with one AI agent. The agent reads
+                these memories before every task, so they must be few, non-redundant and correct.
+
+                The user's memories (newest first; last_used_at is when the agent last used one):
+                {{ foreach.item.memories | json }}
+
+                Propose:
+                - merges: memories that say the same thing, or overlap so much they read better as
+                  one. keep_id is the memory that takes the merged text (prefer the newest);
+                  source_ids lists the other memories merged into it, never keep_id itself. Write
+                  the merged memory in full and keep every concrete detail (names, fields, queries,
+                  values) the memories agree on. Where they disagree, keep the newer statement.
+                - remove: memories that a newer memory contradicts or replaces, and that are not
+                  part of a merge. Give a short reason.
+                Leave a memory alone when in doubt: an unnecessary merge or removal loses what the
+                user told the agent. Never use a memory in more than one merge, and never remove a
+                memory that is part of a merge. Return empty lists when nothing needs to change.
+              schema:
+                type: object
+                properties:
+                  merges:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        keep_id:
+                          type: string
+                        source_ids:
+                          type: array
+                          minItems: 1
+                          items:
+                            type: string
+                        title:
+                          type: string
+                        description:
+                          type: string
+                        content:
+                          type: string
+                        tags:
+                          type: array
+                          items:
+                            type: string
+                      required: [keep_id, source_ids, title, description, content]
+                  remove:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        reason:
+                          type: string
+                      required: [id, reason]
+                required: [merges, remove]
+
+          - name: consolidate
+            type: ai.memory.short_term.consolidate
+            on-failure:
+              continue: true
+            with:
+              user_id: "{{ foreach.item.user_id }}"
+              agent_id: "{{ foreach.item.agent_id }}"
+              merges: "${{ steps.plan.output.content.merges | default: consts.no_items }}"
+              remove: "${{ steps.plan.output.content.remove | default: consts.no_items }}"

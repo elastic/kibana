@@ -1,0 +1,180 @@
+version: "1"
+# Trace memory extraction — reads the recent traces of every trace source configured on this AI
+# index (its `traces`), and extracts durable facts the traces support into long-term memory
+# (`memory.session_fact` KIs).
+#
+# This is a working workflow, not a sketch. Edit the `consts` block and it runs as it stands.
+#
+# Installed by platform.context_engine.install_automation_template. The tool fills the consts.
+# Do not save this YAML yourself.
+#
+# The trace sources are read from the AI index on every run, so adding or removing a trace source
+# needs no reinstall. Each run reads the last `lookback_hours` of each source; keep it equal to the
+# schedule interval or a little longer, since overlapping windows are de-duplicated by `key`.
+#
+# Privacy: traces hold other users' conversations, and what is extracted is visible to everyone
+# who can read the AI index. The prompt keeps only facts about the systems, never about people.
+# The workflow owner needs read access to the trace indices.
+name: Trace memory extraction
+description: >
+  Extracts durable facts from the traces configured on a Context Engine AI index into long-term
+  memory.
+enabled: true
+
+settings:
+  timeout: 45m
+  concurrency:
+    key: "trace-memory-extraction-__AI_INDEX_ID_RAW__"
+    strategy: drop
+    max: 1
+
+consts:
+  # The Context Engine AI index whose traces are read and whose long-term memory is written.
+  ai_index_id: __AI_INDEX_ID__
+  # The human-readable name of this automation instance. Prefixes every KI ID it writes.
+  automation_name: __AUTOMATION_NAME__
+  # How far back each run reads.
+  lookback_hours: __LOOKBACK_HOURS__
+  # Trace rows read per source per run. They all go into one prompt, so keep this small.
+  max_rows: __MAX_ROWS__
+  # Characters of trace rows sent to the prompt per source.
+  max_trace_chars: 60000
+  no_tags: []
+
+tags:
+  - memory
+  - ce-template:trace_memory_extraction
+
+triggers:
+  - type: scheduled
+    with:
+      every: __INTERVAL__
+  - type: manual
+
+steps:
+  - name: ai_index
+    type: context-engine.getAiIndex
+    with:
+      ai_index_id: "{{ consts.ai_index_id }}"
+
+  - name: extract_from_sources
+    type: if
+    condition: "${{ steps.ai_index.output.traces.size > 0 }}"
+    steps:
+      # What long-term memory already holds, so extraction skips facts it already has.
+      - name: existing_memory
+        type: context-engine.queryAiIndex
+        with:
+          query: 'FROM {{ steps.ai_index.output.dest.value }} | WHERE type LIKE "memory.*" | SORT updated_at DESC | KEEP id, title, description'
+          limit: 300
+
+      # One source at a time: each costs a model call, and sources are few.
+      - name: loop_sources
+        type: foreach
+        foreach: "{{ steps.ai_index.output.traces | json }}"
+        steps:
+          - name: trace_source
+            type: data.set
+            with:
+              type: "{{ foreach.item.type }}"
+              value: "{{ foreach.item.value }}"
+              query: "{{ foreach.item.query }}"
+
+          - name: read_traces
+            type: context-engine.queryAiIndex
+            # A source that cannot be read (missing index, no privilege) skips to the next one.
+            on-failure:
+              continue: true
+            with:
+              query: |
+                {{ steps.trace_source.output.query }}
+                | WHERE @timestamp >= NOW() - {{ consts.lookback_hours }} hours
+                | SORT @timestamp DESC
+              limit: "${{ consts.max_rows }}"
+
+          - name: extract
+            type: ai.prompt
+            connector-id-by-feature: context_engine_prompt
+            on-failure:
+              continue: true
+            with:
+              prompt: |
+                You maintain the long-term memory of an AI assistant that works in one
+                organization's environment. Below are recent traces of agent runs from the source
+                "{{ steps.trace_source.output.value }}" ({{ steps.trace_source.output.type }}).
+
+                Trace rows (JSON, possibly truncated):
+                {{ steps.read_traces.output.rows | json | slice: 0, consts.max_trace_chars }}
+
+                Long-term memories that already exist (id, title, description):
+                {{ steps.existing_memory.output.rows | json }}
+
+                Extract at most 10 durable facts that a future run of a similar, but not identical,
+                task in this environment would want to know ahead of time: field types and quirks,
+                which index holds what, queries that work, errors and their workarounds, naming
+                conventions. Rules:
+                - Only facts a tool result in the traces shows. Never infer, never generalise from
+                  one failed attempt.
+                - Nothing about people: no user names, preferences, or personal data. No secrets.
+                - Skip anything public knowledge or in the existing long-term memories, unless the
+                  traces correct it; then reuse that memory's `id` as `key`.
+                - `key` is a short, stable slug for the fact (for example
+                  "logs-orders-duration-ms-is-keyword"), so the same fact always gets the same key.
+                - `trace_ids` lists the trace_id values the fact is drawn from.
+                Return an empty list when nothing qualifies.
+              schema:
+                type: object
+                properties:
+                  memories:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          type: string
+                        title:
+                          type: string
+                        description:
+                          type: string
+                        content:
+                          type: string
+                        tags:
+                          type: array
+                          items:
+                            type: string
+                        trace_ids:
+                          type: array
+                          items:
+                            type: string
+                      required: [key, title, description, content]
+                required: [memories]
+
+          - name: write_memories
+            type: parallel
+            foreach: "{{ steps.extract.output.content.memories | default: consts.no_tags | json }}"
+            concurrency: 5
+            mode: settled
+            steps:
+              # `key` is either an existing memory id (a correction) or a slug under this
+              # automation, so a fact extracted twice replaces itself.
+              - name: memory_ki_id
+                type: data.set
+                with:
+                  ki_id: "{% if foreach.item.key contains '/' %}{{ foreach.item.key }}{% else %}{{ consts.automation_name }}/{{ foreach.item.key }}{% endif %}"
+
+              - name: write_memory
+                type: context-engine.createKi
+                with:
+                  ai_index_id: "{{ consts.ai_index_id }}"
+                  ki_id: "{{ steps.memory_ki_id.output.ki_id }}"
+                  ki:
+                    type: memory.session_fact
+                    title: "{{ foreach.item.title }}"
+                    description: "{{ foreach.item.description }}"
+                    content: "{{ foreach.item.content }}"
+                    tags: "${{ foreach.item.tags | default: consts.no_tags }}"
+                    references:
+                      - uri: "trace-source://{{ steps.trace_source.output.type }}/{{ steps.trace_source.output.value }}"
+                        relation: derived_from
+                    attributes:
+                      memory.trace_ids: "${{ foreach.item.trace_ids | default: nil }}"

@@ -1,0 +1,191 @@
+version: "1"
+# Memory distillation ("dreaming") — reads the long-term memory of this AI index and keeps it
+# small and correct: merges duplicates, synthesizes related facts into one memory, retires memories
+# that are stale or contradicted, then permanently removes memories that were deleted or expired
+# long enough ago.
+#
+# This is a working workflow, not a sketch. Edit the `consts` block and it runs as it stands.
+#
+# Installed by platform.context_engine.install_automation_template. The tool fills the consts.
+# Do not save this YAML yourself.
+#
+# Merged and retired memories are soft-deleted first, so a bad run can be undone with the KI
+# restore action until the purge removes them `purge_after_days` later.
+name: Memory distillation
+description: >
+  Merges, synthesizes and retires long-term memories in a Context Engine AI index, then purges
+  deleted and expired ones.
+enabled: true
+
+settings:
+  timeout: 45m
+  concurrency:
+    key: "memory-distillation-__AI_INDEX_ID_RAW__"
+    strategy: drop
+    max: 1
+
+consts:
+  # The Context Engine AI index whose long-term memory is distilled.
+  ai_index_id: __AI_INDEX_ID__
+  # The human-readable name of this automation instance. Prefixes every KI ID it writes.
+  automation_name: __AUTOMATION_NAME__
+  # How many memories one run reads, newest first. They all go into one prompt.
+  max_memories: __MAX_MEMORIES__
+  # Deleted and expired memories are purged this many days after their last write.
+  purge_after_days: __PURGE_AFTER_DAYS__
+  no_items: []
+
+tags:
+  - memory
+  - ce-template:memory_distillation
+
+triggers:
+  - type: scheduled
+    with:
+      every: __INTERVAL__
+  - type: manual
+
+steps:
+  - name: ai_index
+    type: context-engine.getAiIndex
+    with:
+      ai_index_id: "{{ consts.ai_index_id }}"
+
+  # Current, active, unexpired session memories only: the query step applies the KI lifecycle
+  # filters. Structured facts, entities and relationships keep their own ids and are merged by the
+  # extraction automations, so distillation leaves them alone.
+  - name: memories
+    type: context-engine.queryAiIndex
+    with:
+      query: 'FROM {{ steps.ai_index.output.dest.value }} | WHERE type == "memory.session" OR type == "memory.session_fact" | SORT updated_at DESC | KEEP id, type, title, description, content, tags, updated_at'
+      limit: "${{ consts.max_memories }}"
+
+  - name: distill
+    type: if
+    condition: "${{ steps.memories.output.rows.size > 1 }}"
+    steps:
+      - name: plan
+        type: ai.prompt
+        connector-id-by-feature: context_engine_prompt
+        with:
+          prompt: |
+            You maintain the long-term memory of an AI assistant. Memory is read before every
+            task, so it must be small, non-redundant and correct.
+
+            Current long-term memories (newest first):
+            {{ steps.memories.output.rows | json }}
+
+            Propose:
+            - syntheses: one new memory that replaces two or more memories saying the same thing,
+              or several related facts that read better as one. Write the merged memory in full,
+              keep every concrete detail (field names, queries, values) the sources agree on, and
+              keep the newer one where they disagree. `source_ids` lists the memories it replaces.
+              Use type memory.session for a synthesis of what was tried and what worked across
+              sessions, otherwise memory.session_fact. `key` is a short stable slug for the topic.
+            - retire: memories that are contradicted by a newer memory, or obviously no longer
+              true. Give a short reason.
+            Leave a memory alone when in doubt; an unnecessary merge loses information. Never put
+            a memory in more than one synthesis, and never retire a memory that is a source of a
+            synthesis.
+          schema:
+            type: object
+            properties:
+              syntheses:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    key:
+                      type: string
+                    type:
+                      type: string
+                      enum: [memory.session, memory.session_fact]
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    content:
+                      type: string
+                    tags:
+                      type: array
+                      items:
+                        type: string
+                    source_ids:
+                      type: array
+                      items:
+                        type: string
+                  required: [key, type, title, description, content, source_ids]
+              retire:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    reason:
+                      type: string
+                  required: [id, reason]
+            required: [syntheses, retire]
+
+      # One synthesis at a time: its sources are retired right after it is written, and a source
+      # must never be the synthesis itself.
+      - name: apply_syntheses
+        type: foreach
+        foreach: "{{ steps.plan.output.content.syntheses | default: consts.no_items | json }}"
+        steps:
+          - name: synthesis
+            type: data.set
+            with:
+              ki_id: "{{ consts.automation_name }}/{{ foreach.item.key }}"
+              source_ids: "${{ foreach.item.source_ids }}"
+
+          - name: write_synthesis
+            type: context-engine.createKi
+            with:
+              ai_index_id: "{{ consts.ai_index_id }}"
+              ki_id: "{{ steps.synthesis.output.ki_id }}"
+              refresh: true
+              ki:
+                type: "{{ foreach.item.type }}"
+                title: "{{ foreach.item.title }}"
+                description: "{{ foreach.item.description }}"
+                content: "{{ foreach.item.content }}"
+                tags: "${{ foreach.item.tags | default: consts.no_items }}"
+                attributes:
+                  memory.supersedes: "${{ foreach.item.source_ids }}"
+
+          - name: retire_sources
+            type: foreach
+            foreach: "{{ steps.synthesis.output.source_ids | json }}"
+            steps:
+              - name: retire_source
+                type: context-engine.deleteKi
+                if: "not foreach.item : \"{{ steps.synthesis.output.ki_id }}\""
+                # A source already gone does not fail the run.
+                on-failure:
+                  continue: true
+                with:
+                  ai_index_id: "{{ consts.ai_index_id }}"
+                  ki_id: "{{ foreach.item }}"
+
+      - name: retire_stale
+        type: parallel
+        foreach: "{{ steps.plan.output.content.retire | default: consts.no_items | json }}"
+        concurrency: 5
+        mode: settled
+        steps:
+          - name: retire_memory
+            type: context-engine.deleteKi
+            with:
+              ai_index_id: "{{ consts.ai_index_id }}"
+              ki_id: "{{ foreach.item.id }}"
+
+  # Soft-deleted and expired memories stay on disk until they are purged.
+  - name: purge
+    type: context-engine.purgeKis
+    with:
+      ai_index_id: "{{ consts.ai_index_id }}"
+      states:
+        - deleted
+        - expired
+      older_than_days: "${{ consts.purge_after_days }}"

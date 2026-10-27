@@ -26,6 +26,7 @@ import type { OAuthClientsService } from './oauth_clients';
 import type { NavigationService } from './navigation';
 import type { EventsService } from './events';
 import type { SpaceSettingsService } from './space_settings';
+import type { MemoryService } from './memory';
 
 export interface AgentBuilderInternalService {
   filesClient: ScopedFilesClient;
@@ -44,6 +45,7 @@ export interface AgentBuilderInternalService {
   pluginsService: PluginsService;
   oauthClientsService: OAuthClientsService;
   spaceSettingsService: SpaceSettingsService;
+  memoryService: MemoryService;
   startDependencies: AgentBuilderStartDependencies;
   usageCollection?: UsageCollectionSetup;
   accessChecker: AgentBuilderAccessChecker;

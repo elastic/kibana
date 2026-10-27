@@ -9,6 +9,10 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import { conversationStepRegistry, type ConversationStepDeps } from './registry';
 import { attachmentStepRegistry, type AttachmentStepDeps } from './attachment_registry';
 import {
+  shortTermMemoryStepRegistry,
+  type ShortTermMemoryStepDeps,
+} from './steps/short_term_memory';
+import {
   conversationMetadataUpdatedTriggerCommonDefinition,
   conversationUpdatedTriggerCommonDefinition,
   attachmentTriggerCommonDefinitions,
@@ -25,6 +29,15 @@ export function registerConversationWorkflowSteps(
   }
 
   for (const factory of conversationStepRegistry) {
+    workflowsExtensions.registerStepDefinition(factory(deps));
+  }
+}
+
+export function registerShortTermMemoryWorkflowSteps(
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
+  deps: ShortTermMemoryStepDeps
+) {
+  for (const factory of shortTermMemoryStepRegistry) {
     workflowsExtensions.registerStepDefinition(factory(deps));
   }
 }

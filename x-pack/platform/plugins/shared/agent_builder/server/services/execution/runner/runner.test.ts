@@ -36,12 +36,13 @@ import { createAgentHandler } from '../run_agent/create_handler';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
 import { HookLifecycle } from '@kbn/agent-builder-common';
-import type { AutoApprovedApi, InteractivityConfig } from '@kbn/agent-builder-common';
+import type { AutoApprovedApi, Conversation, InteractivityConfig } from '@kbn/agent-builder-common';
 import {
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
   AGENT_BUILDER_API_DISCOVERY_SETTING_ID,
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
+  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
 
 jest.mock('../run_agent/create_handler');
@@ -412,6 +413,86 @@ describe('AgentBuilder runner', () => {
         );
       }
     );
+
+    it.each([
+      { aiIndicesEnabled: true, memorySettingEnabled: true, expectedMemory: true },
+      { aiIndicesEnabled: true, memorySettingEnabled: false, expectedMemory: false },
+      { aiIndicesEnabled: false, memorySettingEnabled: true, expectedMemory: false },
+    ])(
+      'sets memory to $expectedMemory when AI indices=$aiIndicesEnabled and the global memory setting=$memorySettingEnabled',
+      async ({ aiIndicesEnabled, memorySettingEnabled, expectedMemory }) => {
+        const runnerDeps = createRunnerDepsMock();
+        runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
+        (runnerDeps.uiSettings.asScopedToClient as jest.Mock).mockReturnValue({
+          get: jest.fn((settingId: string) =>
+            Promise.resolve(
+              (settingId === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID ||
+                settingId === CONTEXT_ENGINE_ENABLED_SETTING_ID) &&
+                aiIndicesEnabled
+            )
+          ),
+        } as any);
+        (runnerDeps.uiSettings.globalAsScopedToClient as jest.Mock).mockReturnValue({
+          get: jest.fn((settingId: string) =>
+            Promise.resolve(
+              settingId === CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID && memorySettingEnabled
+            )
+          ),
+        } as any);
+
+        const runner = createRunner(runnerDeps);
+        await runner.runAgent({
+          agentId: 'test-tool',
+          agentParams: { nextInput: { message: 'dolly' } },
+          request: scopedRunnerDeps.request,
+        });
+
+        expect(agentHandler).toHaveBeenCalledWith(
+          expect.any(Object),
+          expect.objectContaining({
+            experimentalFeatures: expect.objectContaining({ memory: expectedMemory }),
+          })
+        );
+      }
+    );
+
+    describe('short-term memory', () => {
+      const getShortTermMemoryClient = async (conversation?: Conversation) => {
+        const runnerDeps = createRunnerDepsMock();
+        runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
+        await createRunner(runnerDeps).runAgent({
+          agentId: 'test-tool',
+          agentParams: { nextInput: { message: 'dolly' }, conversation },
+          request: scopedRunnerDeps.request,
+        });
+        const context = agentHandler.mock.calls[0][1] as AgentHandlerContext;
+        await context.getShortTermMemoryClient?.();
+        return runnerDeps.memoryService;
+      };
+
+      it("acts for the conversation's owner rather than the request's identity", async () => {
+        const owner = { id: 'owner-profile-uid', username: 'owner' };
+        const memoryService = await getShortTermMemoryClient({
+          ...createEmptyConversation({ id: 'conversation-1' }),
+          user: owner,
+        });
+
+        expect(memoryService.getScopedClientAsUser).toHaveBeenCalledWith({
+          request: scopedRunnerDeps.request,
+          user: owner,
+        });
+        expect(memoryService.getScopedClient).not.toHaveBeenCalled();
+      });
+
+      it('acts for the caller when the run has no conversation owner', async () => {
+        const memoryService = await getShortTermMemoryClient();
+
+        expect(memoryService.getScopedClient).toHaveBeenCalledWith({
+          request: scopedRunnerDeps.request,
+        });
+        expect(memoryService.getScopedClientAsUser).not.toHaveBeenCalled();
+      });
+    });
 
     it.each([
       { experimentalEnabled: false, apiDiscoveryEnabled: false },

@@ -51,8 +51,8 @@ export const MemorySettingsPanel = ({
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              id="xpack.contextEngine.memorySettings.memoryDescription"
-              defaultMessage="Allow agents to save memories in this AI index."
+              id="xpack.contextEngine.memorySettings.longTermMemoryDescription"
+              defaultMessage="Use this AI index as long-term memory. Agents keep each user's memories private in short-term memory; the memory automations promote generally useful ones, extract facts from traces, and distill them here, where everyone who can read the AI index can recall them."
             />
           </p>
         </EuiText>

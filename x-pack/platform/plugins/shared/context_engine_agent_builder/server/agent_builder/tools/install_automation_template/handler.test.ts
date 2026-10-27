@@ -75,6 +75,48 @@ describe('installAutomationTemplateHandler', () => {
     jest.clearAllMocks();
   });
 
+  describe('memory_maintenance', () => {
+    const maintenanceParams = {
+      template: 'memory_maintenance' as const,
+      name: 'stm-maintenance',
+      agentIds: [],
+      unusedDays: 14,
+      maxOwners: 20,
+      maxMemories: 50,
+      interval: '1d',
+    };
+    const attachedTo = (aiIndexId: string) =>
+      ({
+        getAll: () => [
+          {
+            id: 'ai-index-attachment',
+            type: AI_INDEX_ATTACHMENT_TYPE,
+            current_version: 1,
+            versions: [{ version: 1, data: { id: aiIndexId } }],
+          },
+        ],
+      } as never);
+
+    it('installs on the Elastic AI index', async () => {
+      await installAutomationTemplateHandler({
+        params: maintenanceParams,
+        ...createDeps([]),
+        attachments: attachedTo('elastic'),
+      });
+
+      const { params } = saveAutomationHandlerMock.mock.calls[0][0];
+      expect(params.aiIndexId).toBe('elastic');
+      expect(params.workflowYaml).toContain(AUTOMATION_TEMPLATE_TAGS.memory_maintenance);
+    });
+
+    it('refuses any other AI index, since short-term memory does not live there', async () => {
+      await expect(
+        installAutomationTemplateHandler({ params: maintenanceParams, ...createDeps([]) })
+      ).rejects.toThrow(/lives in the "elastic" AI index/);
+      expect(saveAutomationHandlerMock).not.toHaveBeenCalled();
+    });
+  });
+
   it('saves a new workflow when the template is not attached', async () => {
     const result = await installAutomationTemplateHandler({
       params: documentParams,

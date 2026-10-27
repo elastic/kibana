@@ -8,3 +8,8 @@
 export { createKiStepDefinition } from './create_ki';
 export { updateKiStepDefinition } from './update_ki';
 export { deleteKiStepDefinition } from './delete_ki';
+export {
+  getAiIndexStepDefinition,
+  queryAiIndexStepDefinition,
+  purgeKisStepDefinition,
+} from './ai_index_steps';

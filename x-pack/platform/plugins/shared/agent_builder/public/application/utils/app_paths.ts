@@ -20,6 +20,7 @@ export const appPaths = {
     plugins: ({ agentId }: { agentId: string }) => `/agents/${agentId}/plugins`,
     tools: ({ agentId }: { agentId: string }) => `/agents/${agentId}/tools`,
     connectors: ({ agentId }: { agentId: string }) => `/agents/${agentId}/connectors`,
+    memory: ({ agentId }: { agentId: string }) => `/agents/${agentId}/memory`,
     overview: ({ agentId }: { agentId: string }) => `/agents/${agentId}/overview`,
   },
 

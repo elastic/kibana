@@ -19,6 +19,7 @@ import { AgentBuilderAgentOverviewPage } from './pages/agent_overview';
 import { AgentBuilderAgentSkillsPage } from './pages/agent_skills';
 import { AgentBuilderAgentPluginsPage } from './pages/agent_plugins';
 import { AgentBuilderAgentToolsPage } from './pages/agent_tools';
+import { AgentBuilderAgentMemoryPage } from './pages/agent_memory';
 import { AgentBuilderToolsPage } from './pages/tools';
 import { AgentBuilderToolCreatePage } from './pages/tool_create';
 import { AgentBuilderToolDetailsPage } from './pages/tool_details';
@@ -76,6 +77,9 @@ const navLabels = {
   connectors: i18n.translate('xpack.agentBuilder.routeConfig.connectors', {
     defaultMessage: 'Connectors',
   }),
+  memory: i18n.translate('xpack.agentBuilder.routeConfig.memory', {
+    defaultMessage: 'Memory',
+  }),
   agents: i18n.translate('xpack.agentBuilder.routeConfig.agents', {
     defaultMessage: 'Agents',
   }),
@@ -124,6 +128,14 @@ export const agentRoutes: RouteDefinition[] = [
     sidebarView: 'conversation',
     navLabel: navLabels.tools,
     element: <AgentBuilderAgentToolsPage />,
+  },
+  {
+    path: '/agents/:agentId/memory',
+    viewId: agentBuilderViewIds.agentMemory,
+    sidebarView: 'conversation',
+    isExperimental: true,
+    navLabel: navLabels.memory,
+    element: <AgentBuilderAgentMemoryPage />,
   },
   // Catch-all for agent root - must be last
   {

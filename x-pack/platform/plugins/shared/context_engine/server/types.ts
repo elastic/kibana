@@ -35,6 +35,11 @@ export interface GetAiIndexDataReadServiceParams {
   esClient: ElasticsearchClient;
   /** Space and audit scope are resolved from this request. */
   request: KibanaRequest;
+  /**
+   * Overrides the space resolved from `request`. Workflow steps pass the workflow's space, since a
+   * fake request does not carry it in its URL.
+   */
+  spaceId?: string;
 }
 
 export interface ContextEnginePluginStart {

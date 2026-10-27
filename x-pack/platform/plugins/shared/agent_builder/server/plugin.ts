@@ -49,7 +49,11 @@ import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
 import { createConversationEventBus } from './workflows/triggers/conversation_event_bus';
-import { registerAttachmentWorkflowSteps, registerConversationWorkflowSteps } from './workflows';
+import {
+  registerAttachmentWorkflowSteps,
+  registerConversationWorkflowSteps,
+  registerShortTermMemoryWorkflowSteps,
+} from './workflows';
 import { registerConversationWorkflowEventBridge } from './workflows/triggers/event_bridge';
 import { apiPrivileges } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
@@ -217,6 +221,16 @@ export class AgentBuilderPlugin
           spaces: startDeps.spaces,
           source: 'workflow',
         });
+      },
+    });
+
+    registerShortTermMemoryWorkflowSteps(setupDeps.workflowsExtensions, {
+      getSystemClient: () => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Memory service not available — plugin has not started');
+        }
+        return services.memory.getSystemClient();
       },
     });
 
@@ -406,6 +420,7 @@ export class AgentBuilderPlugin
       conversations,
       conversationTemplates,
       attachments,
+      memory,
     } = startServices;
     const runner = runnerFactory.getRunner();
 
@@ -474,6 +489,7 @@ export class AgentBuilderPlugin
           }),
       },
       conversationTemplates,
+      memory,
     };
   }
 

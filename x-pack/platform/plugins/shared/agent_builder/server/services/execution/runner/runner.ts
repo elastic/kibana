@@ -41,6 +41,7 @@ import type {
   RunToolReturn,
   ScopedRunner,
   ScopedRunnerRunAgentParams,
+  ScopedShortTermMemoryClient,
   SubAgentExecutor,
   WritableToolResultStore,
   ExecutionConversationAccess,
@@ -50,6 +51,7 @@ import {
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
   AGENT_BUILDER_API_DISCOVERY_SETTING_ID,
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
+  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import type { DeductiveRuntimeConfig } from '@kbn/agent-builder-server/agents';
 import type {
@@ -89,6 +91,7 @@ import { createSkillsStore } from './store/volumes/skills/skills_store';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
 import type { ConversationTemplatesServiceStart } from '../../conversation/templates';
+import type { MemoryService } from '../../memory';
 import type { DeploymentInfo } from '../../../utils/deployment_info';
 
 export interface CreateScopedRunnerDeps {
@@ -111,6 +114,9 @@ export interface CreateScopedRunnerDeps {
   renderersService: RendererServiceStart;
   conversationEventsService: ConversationEventsServiceStart;
   conversationTemplates: ConversationTemplatesServiceStart;
+  memoryService: MemoryService;
+  /** Short-term memory of the user this run acts for. */
+  getShortTermMemoryClient: () => Promise<ScopedShortTermMemoryClient>;
   promptManager: PromptManager;
   stateManager: ConversationStateManager;
   trackingService?: TrackingService;
@@ -183,6 +189,7 @@ export type CreateRunnerDeps = Omit<
   | 'attachmentStateManager'
   | 'todoStateManager'
   | 'modelProvider'
+  | 'getShortTermMemoryClient'
   | 'promptManager'
   | 'stateManager'
   | 'toolManager'
@@ -347,15 +354,25 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       workflowExecutionId,
     });
 
-    const uiSettingsClient = runnerDeps.uiSettings.asScopedToClient(
-      runnerDeps.savedObjects.getScopedClient(request)
-    );
+    // A conversation run acts for the conversation's owner, which a Task Manager run's API key
+    // does not identify. A run that stores no conversation has no owner and acts for the caller.
+    const memoryOwner = conversation?.user.id !== undefined ? conversation.user : undefined;
+    const getShortTermMemoryClient = async (): Promise<ScopedShortTermMemoryClient> =>
+      memoryOwner
+        ? runnerDeps.memoryService.getScopedClientAsUser({ request, user: memoryOwner })
+        : runnerDeps.memoryService.getScopedClient({ request });
+
+    const scopedSavedObjectsClient = runnerDeps.savedObjects.getScopedClient(request);
+    const uiSettingsClient = runnerDeps.uiSettings.asScopedToClient(scopedSavedObjectsClient);
+    const globalUiSettingsClient =
+      runnerDeps.uiSettings.globalAsScopedToClient(scopedSavedObjectsClient);
     const [
       experimentalEnabled,
       bashEnabled,
       apiDiscoveryEnabled,
       contextEngineEnabled,
       dynamicToolsEnabled,
+      memoryEnabled,
     ] = await Promise.all([
       uiSettingsClient
         .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
@@ -367,10 +384,15 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         .get<boolean | undefined>(AGENT_BUILDER_DYNAMIC_TOOLS_SETTING_ID)
         .then((value) => !!value)
         .catch(() => false),
+      globalUiSettingsClient
+        .get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)
+        .catch(() => false),
     ]);
+    const aiIndicesEnabled = experimentalEnabled && contextEngineEnabled;
     const experimentalFeatures: ExperimentalFeatures = {
       skills: true,
-      aiIndices: experimentalEnabled && contextEngineEnabled,
+      aiIndices: aiIndicesEnabled,
+      memory: aiIndicesEnabled && memoryEnabled,
       relevantSkills: experimentalEnabled,
       todos: experimentalEnabled,
       // forcefully disabled until the UI is implemented
@@ -396,6 +418,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     const allDeps = {
       ...runnerDeps,
       modelProvider,
+      getShortTermMemoryClient,
       request,
       defaultConnectorId,
       projectRouting,

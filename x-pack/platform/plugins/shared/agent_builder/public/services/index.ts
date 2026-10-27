@@ -22,4 +22,5 @@ export { PluginsService } from './plugins/plugins_service';
 export { OAuthClientsService } from './oauth_clients';
 export { EventsService } from './events';
 export { SpaceSettingsService } from './space_settings';
+export { MemoryService } from './memory';
 export type { AgentBuilderInternalService } from './types';

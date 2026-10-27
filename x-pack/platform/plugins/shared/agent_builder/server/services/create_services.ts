@@ -20,6 +20,7 @@ import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './execution/runner';
 import { ConversationServiceImpl } from './conversation';
 import { createWorkspaceService } from './workspaces';
+import { createMemoryService } from './memory';
 import { type AttachmentService, createAttachmentService } from './attachments';
 import { type RendererService, createRendererService } from './renderers';
 import {
@@ -231,8 +232,16 @@ export class ServiceManager {
       analyticsService,
     });
 
+    const memory = createMemoryService({
+      logger: logger.get('memory'),
+      elasticsearch,
+      security,
+      spaces,
+    });
+
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
+      memoryService: memory,
       security,
       elasticsearch,
       http,
@@ -326,6 +335,7 @@ export class ServiceManager {
       skills: skillsServiceStart,
       conversations,
       workspaces,
+      memory,
       runnerFactory,
       auditLogService,
       execution: executionService,

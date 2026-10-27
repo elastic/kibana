@@ -23,7 +23,6 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import { getLatestVersion, toAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
-import type { AiIndexCatalogEntry } from '../types';
 import type { ProcessedConversation } from './prepare_conversation';
 
 export interface SelectToolsResult {
@@ -39,8 +38,7 @@ export const selectTools = async ({
   request,
   toolProvider,
   agentConfiguration,
-  aiIndexCatalog,
-  aiIndicesEnabled,
+  memoryEnabled,
   attachmentsService,
   spaceId,
   runner,
@@ -53,8 +51,8 @@ export const selectTools = async ({
   toolProvider: ToolProvider;
   attachmentsService: AttachmentsService;
   agentConfiguration: AgentConfiguration;
-  aiIndexCatalog?: AiIndexCatalogEntry[];
-  aiIndicesEnabled: boolean;
+  /** Whether short-term memory is on for this run (`experimentalFeatures.memory`). */
+  memoryEnabled: boolean;
   spaceId: string;
   runner: ScopedRunner;
 }): Promise<SelectToolsResult> => {
@@ -81,9 +79,8 @@ export const selectTools = async ({
   });
 
   // The read tools come from the `ki-retrieval` skill, which carries the guidance for using them.
-  // Memory tools have no skill of their own, so they stay static.
-  const hasMemoryEnabledAiIndex =
-    aiIndexCatalog?.some(({ memoryEnabled }) => memoryEnabled) ?? false;
+  // Short-term memory tools have no skill of their own, so they stay static. Memory is per user
+  // and agent, so it no longer depends on which AI indices the agent is configured with.
 
   // pick tools from provider (from agent config and attachment-type tools)
   const staticRegistryTools = await pickTools({
@@ -93,9 +90,7 @@ export const selectTools = async ({
       ...(agentConfiguration.enable_elastic_capabilities
         ? [{ tool_ids: defaultAgentToolIds }]
         : []),
-      ...(aiIndicesEnabled && hasMemoryEnabledAiIndex
-        ? [{ tool_ids: Object.values(contextEngineMemoryTools) }]
-        : []),
+      ...(memoryEnabled ? [{ tool_ids: Object.values(contextEngineMemoryTools) }] : []),
     ],
     toolProvider,
     request,

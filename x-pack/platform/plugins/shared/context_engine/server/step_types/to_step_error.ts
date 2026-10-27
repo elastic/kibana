@@ -7,6 +7,8 @@
 
 import { ExecutionError } from '@kbn/workflows/server';
 import {
+  AiIndexNotFoundError,
+  InvalidAiIndexQueryError,
   KiConflictError,
   KiDeletedError,
   KiNotFoundError,
@@ -15,9 +17,11 @@ import {
 
 const ERROR_TYPES: ReadonlyArray<[new (...args: never[]) => Error, string]> = [
   [KiNotFoundError, 'NotFoundError'],
+  [AiIndexNotFoundError, 'NotFoundError'],
   [KiConflictError, 'ConflictError'],
   [KiDeletedError, 'ConflictError'],
   [KiValidationError, 'ValidationError'],
+  [InvalidAiIndexQueryError, 'ValidationError'],
 ];
 
 export const toStepError = (error: unknown, fallbackMessage: string): ExecutionError => {

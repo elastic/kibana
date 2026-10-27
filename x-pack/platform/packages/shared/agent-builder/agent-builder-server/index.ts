@@ -138,6 +138,28 @@ export {
 } from './hooks/apply_result';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';
 export type {
+  MemoryStart,
+  ScopedShortTermMemoryClient,
+  ShortTermMemoryConsolidateParams,
+  ShortTermMemoryConsolidateResult,
+  ShortTermMemoryContent,
+  ShortTermMemoryCreateParams,
+  ShortTermMemoryDecayParams,
+  ShortTermMemoryDecayResult,
+  ShortTermMemoryListParams,
+  ShortTermMemoryMerge,
+  ShortTermMemoryOwnerGroup,
+  ShortTermMemoryOwnerListParams,
+  ShortTermMemoryPromotionListParams,
+  ShortTermMemorySearchParams,
+  ShortTermMemorySystemClient,
+} from './memory';
+export {
+  ShortTermMemoryIdentityError,
+  ShortTermMemoryNotFoundError,
+  isShortTermMemoryError,
+} from './memory';
+export type {
   AgentBuilderAnalytics,
   AgentBuilderTracking,
   CompactionTriggeredEvent,

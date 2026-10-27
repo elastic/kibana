@@ -16,9 +16,132 @@ import {
   AUTOMATION_TEMPLATE_TAGS,
   renderDocumentOrchestrationTemplate,
   renderIndexMetadataTemplate,
+  maintenanceLookbackHours,
+  renderMemoryDistillationTemplate,
+  renderMemoryMaintenanceTemplate,
+  renderMemoryPromotionTemplate,
   renderTargetedKiWriterTemplate,
+  renderTraceMemoryExtractionTemplate,
   renderUnitProfileTemplate,
 } from './render';
+
+const memoryPromotionValues = {
+  aiIndexId: 'support',
+  automationName: 'support-memory-promotion',
+  agentIds: ['elastic-ai-agent'],
+  batchSize: 50,
+  interval: '1h',
+};
+
+const traceMemoryExtractionValues = {
+  aiIndexId: 'support',
+  automationName: 'support-trace-memory',
+  lookbackHours: 24,
+  maxRows: 50,
+  interval: '1d',
+};
+
+const memoryDistillationValues = {
+  aiIndexId: 'support',
+  automationName: 'support-dreaming',
+  maxMemories: 200,
+  purgeAfterDays: 30,
+  interval: '1d',
+};
+
+const memoryMaintenanceValues = {
+  aiIndexId: 'elastic',
+  agentIds: [],
+  unusedDays: 14,
+  maxOwners: 20,
+  maxMemories: 50,
+  interval: '1d',
+};
+
+describe('memory templates', () => {
+  it('fills the promotion consts, tag and concurrency key', () => {
+    const definition = parse(renderMemoryPromotionTemplate(memoryPromotionValues));
+
+    expect(definition.consts).toMatchObject({
+      ai_index_id: 'support',
+      automation_name: 'support-memory-promotion',
+      agent_ids: ['elastic-ai-agent'],
+      batch_size: 50,
+    });
+    expect(definition.tags).toContain(AUTOMATION_TEMPLATE_TAGS.memory_promotion);
+    expect(definition.settings.concurrency).toEqual({
+      key: 'memory-promotion-support',
+      strategy: 'drop',
+      max: 1,
+    });
+    expect(definition.triggers).toContainEqual({ type: 'scheduled', with: { every: '1h' } });
+  });
+
+  it('renders an empty agent list as every agent', () => {
+    const definition = parse(
+      renderMemoryPromotionTemplate({ ...memoryPromotionValues, agentIds: [] })
+    );
+
+    expect(definition.consts.agent_ids).toEqual([]);
+  });
+
+  it('fills the maintenance consts, with a lookback of twice the interval', () => {
+    const definition = parse(renderMemoryMaintenanceTemplate(memoryMaintenanceValues));
+
+    expect(definition.consts).toMatchObject({
+      agent_ids: [],
+      unused_days: 14,
+      lookback_hours: 48,
+      max_owners: 20,
+      max_memories: 50,
+    });
+    expect(definition.tags).toContain(AUTOMATION_TEMPLATE_TAGS.memory_maintenance);
+    expect(definition.settings.concurrency.key).toBe('memory-maintenance-elastic');
+    expect(definition.steps.map(({ type }: { type: string }) => type)).toEqual([
+      'ai.memory.short_term.decay',
+      'ai.memory.short_term.list_by_owner',
+      'foreach',
+    ]);
+  });
+
+  it.each([
+    ['30m', 1],
+    ['6h', 12],
+    ['7d', 336],
+  ])('derives a %s interval into a %i hour lookback', (interval, hours) => {
+    expect(maintenanceLookbackHours(interval)).toBe(hours);
+  });
+
+  it('rejects a malformed schedule interval', () => {
+    expect(() =>
+      renderMemoryDistillationTemplate({ ...memoryDistillationValues, interval: '1 day' })
+    ).toThrow(/number of minutes, hours or days/);
+  });
+
+  it('rejects an AI index id that cannot sit in a concurrency key', () => {
+    expect(() =>
+      renderTraceMemoryExtractionTemplate({
+        ...traceMemoryExtractionValues,
+        aiIndexId: 'support"\nkey: x',
+      })
+    ).toThrow(/concurrency key/);
+  });
+
+  it('appends a time window to every trace query', () => {
+    const definition = parse(renderTraceMemoryExtractionTemplate(traceMemoryExtractionValues));
+    const query = createWorkflowLiquidEngine().parseAndRenderSync(
+      findStep(definition.steps, 'read_traces')?.with?.query ?? '',
+      {
+        consts: definition.consts,
+        steps: { trace_source: { output: { query: 'FROM traces-agent_builder.otel-default' } } },
+      }
+    );
+
+    expect(query).toBe(
+      'FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= NOW() - 24 hours\n| SORT @timestamp DESC\n'
+    );
+  });
+});
 
 const unitValues = {
   aiIndexId: 'airline-loyalty',
@@ -547,6 +670,13 @@ describe('automation template rendering', () => {
           kis: '- ki_id: test\n  ki:\n    type: constraint\n    title: "T"\n    content: "c"',
         }),
     ],
+    ['memory_promotion', () => renderMemoryPromotionTemplate(memoryPromotionValues)],
+    [
+      'trace_memory_extraction',
+      () => renderTraceMemoryExtractionTemplate(traceMemoryExtractionValues),
+    ],
+    ['memory_distillation', () => renderMemoryDistillationTemplate(memoryDistillationValues)],
+    ['memory_maintenance', () => renderMemoryMaintenanceTemplate(memoryMaintenanceValues)],
   ])(
     'renders %s into a definition the workflow schema accepts and the engine can build',
     (_template, render) => {

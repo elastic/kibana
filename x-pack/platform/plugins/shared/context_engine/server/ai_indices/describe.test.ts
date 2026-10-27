@@ -190,13 +190,12 @@ describe('describeAiIndex', () => {
       includeMemory: true,
     });
 
-    expect(response).toContain('\nMemory\nMemory writes are enabled');
+    expect(response).toContain('\nLong-term memory\nThis AI index holds long-term memory');
+    expect(response).toContain('Agents do not write here directly');
     expect(response).toContain('\nKnowledge item types\n"document": 3\n');
     expect(response).not.toContain('"memory.session": 2');
     expect(response).not.toContain('"memory.session_fact": 7');
-    expect(response).toContain(
-      '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")'
-    );
+    expect(response).toContain('| WHERE type IS NULL OR type NOT LIKE "memory.*"');
     expect(response).toContain(
       [
         'For cross-session recall, search granular facts with hybrid retrieval:',
@@ -221,7 +220,7 @@ describe('describeAiIndex', () => {
   it('omits memory capability when memory writes are disabled', async () => {
     const response = await describeAiIndex(params);
 
-    expect(response).not.toContain('\nMemory\n');
+    expect(response).not.toContain('\nLong-term memory\n');
     expect(response).not.toContain('platform.context_engine.remember');
   });
 
@@ -231,7 +230,7 @@ describe('describeAiIndex', () => {
       aiIndex: { ...aiIndex, memory_enabled: true },
     });
 
-    expect(response).not.toContain('\nMemory\n');
+    expect(response).not.toContain('\nLong-term memory\n');
     expect(response).not.toContain('platform.context_engine.remember');
     expect(response).not.toContain('memory.session');
     expect(response.endsWith(exampleQueriesBlock)).toBe(true);

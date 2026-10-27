@@ -23,6 +23,7 @@ import {
   MemoryPanel,
   SignalsPanel,
   SourcesPanel,
+  TracesPanel,
 } from '../components/ai_index_detail';
 import { ListKiPanel } from '../components/ki';
 import { useAiIndex } from '../hooks/use_ai_index';
@@ -253,6 +254,19 @@ export const AiIndexDetailPage = () => {
         <>
           <EuiSpacer size="m" />
           <MemoryPanel isLoading={isLoading} aiIndex={aiIndex} onSaved={refetch} />
+        </>
+      )}
+      {/* Only on memory indices, where trace memory extraction reads them: on other indices a
+          configured trace breaks Suggest automation, which cannot load the traces skill. */}
+      {isMemoryEnabled && aiIndex?.memory_enabled === true && (
+        <>
+          <EuiSpacer size="m" />
+          <TracesPanel
+            isLoading={isLoading}
+            aiIndex={aiIndex}
+            onSaved={refetch}
+            isManaged={!!aiIndex?.managed}
+          />
         </>
       )}
       <EuiSpacer size="m" />

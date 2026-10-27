@@ -15,6 +15,7 @@ import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentExecutionMode, InteractivityConfig } from '@kbn/agent-builder-common';
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { ExperimentalFeatures } from '../agents/provider';
+import type { ScopedShortTermMemoryClient } from '../memory/types';
 import type {
   ToolEventEmitter,
   ModelProvider,
@@ -164,6 +165,12 @@ export interface ToolHandlerContext {
    * The current execution context, including the agent/tool call stack.
    */
   runContext: RunContext;
+  /**
+   * Short-term memory of the user the run acts for: the conversation owner when the run belongs
+   * to a conversation, otherwise the caller. Rejects with `ShortTermMemoryIdentityError` when that
+   * user has no stable id.
+   */
+  getShortTermMemoryClient?: () => Promise<ScopedShortTermMemoryClient>;
   /**
    * The execution mode for the current agent run.
    * When 'standalone', the execution is non-interactive (HITL disabled).

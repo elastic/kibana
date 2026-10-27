@@ -17,6 +17,7 @@ export const agentBuilderViewIds = {
   agentPlugins: 'agent_builder_agent_plugins',
   agentConnectors: 'agent_builder_agent_connectors',
   agentTools: 'agent_builder_agent_tools',
+  agentMemory: 'agent_builder_agent_memory',
   manageAgents: 'agent_builder_manage_agents',
   manageAgentCreate: 'agent_builder_manage_agents_create',
   manageAgentEdit: 'agent_builder_manage_agents_edit',

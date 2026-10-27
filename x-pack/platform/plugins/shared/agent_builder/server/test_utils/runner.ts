@@ -375,6 +375,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     experimentalFeatures: {
       skills: false,
       aiIndices: false,
+      memory: false,
       relevantSkills: false,
       todos: false,
       bash: false,
@@ -450,6 +451,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
     experimentalFeatures: {
       skills: false,
       aiIndices: false,
+      memory: false,
       relevantSkills: false,
       todos: false,
       bash: false,
@@ -477,13 +479,28 @@ export const createHooksServiceStartMock = (): jest.Mocked<HooksServiceStart> =>
   };
 };
 
+const createMemoryServiceMock = () => ({
+  getScopedClient: jest.fn(),
+  getScopedClientAsUser: jest.fn(),
+  getSystemClient: jest.fn(),
+});
+
+/** Core UI settings start mock whose global client reads every setting as off. */
+const createUiSettingsStartMock = () => {
+  const uiSettings = uiSettingsServiceMock.createStartContract();
+  uiSettings.globalAsScopedToClient.mockReturnValue({
+    get: jest.fn().mockResolvedValue(false),
+  } as unknown as ReturnType<typeof uiSettings.globalAsScopedToClient>);
+  return uiSettings;
+};
+
 export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
     http: httpServiceMock.createStartContract(),
     security: securityServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
-    uiSettings: uiSettingsServiceMock.createStartContract(),
+    uiSettings: createUiSettingsStartMock(),
     deductiveRegister: false,
     deploymentInfo: createDeploymentInfoMock(),
     spaces: spacesMock.createStart(),
@@ -503,6 +520,8 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     renderersService: { getRegisteredRenderers: () => [], getRenderer: () => undefined },
     conversationEventsService: createConversationEventTypesServiceMock(),
     conversationTemplates: createInMemoryConversationTemplates(),
+    memoryService: createMemoryServiceMock(),
+    getShortTermMemoryClient: jest.fn(),
     promptManager: createPromptManagerMock(),
     stateManager: createStateManagerMock(),
     hooks: createHooksServiceStartMock(),
@@ -512,6 +531,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     experimentalFeatures: {
       skills: false,
       aiIndices: false,
+      memory: false,
       relevantSkills: false,
       todos: false,
       bash: false,
@@ -538,7 +558,7 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     http: httpServiceMock.createStartContract(),
     security: securityServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
-    uiSettings: uiSettingsServiceMock.createStartContract(),
+    uiSettings: createUiSettingsStartMock(),
     deductiveRegister: false,
     deploymentInfo: createDeploymentInfoMock(),
     spaces: spacesMock.createStart(),
@@ -553,6 +573,7 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     renderersService: { getRegisteredRenderers: () => [], getRenderer: () => undefined },
     conversationEventsService: createConversationEventTypesServiceMock(),
     conversationTemplates: createInMemoryConversationTemplates(),
+    memoryService: createMemoryServiceMock(),
     hooks: createHooksServiceStartMock(),
     skillServiceStart: createSkillServiceStartMock(),
     pluginsServiceStart: createPluginsServiceStartMock(),

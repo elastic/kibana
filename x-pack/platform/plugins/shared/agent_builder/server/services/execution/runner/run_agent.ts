@@ -153,6 +153,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     filesystemService,
     bashService,
     aiIndexResolver: manager.deps.agentsService.getAiIndexResolver(),
+    getShortTermMemoryClient: manager.deps.getShortTermMemoryClient,
   };
 };
 

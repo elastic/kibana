@@ -963,6 +963,8 @@ describe('SmlService', () => {
             },
           ],
           filter: [expectedVisibilityFilter({})],
+          // Agent Builder memories share the index and are never SML results.
+          must_not: [{ prefix: { type: 'memory.' } }],
         },
       });
       expect(call._source).toEqual(['id', 'type', 'title', 'references']);
