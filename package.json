@@ -1178,6 +1178,7 @@
     "@kbn/security-solution-upselling": "workspace:*",
     "@kbn/security-test-endpoints-plugin": "workspace:*",
     "@kbn/security-ui-components": "workspace:*",
+    "@kbn/securitysolution-alerts-page-url": "workspace:*",
     "@kbn/securitysolution-autocomplete": "workspace:*",
     "@kbn/securitysolution-data-table": "workspace:*",
     "@kbn/securitysolution-ecs": "workspace:*",
