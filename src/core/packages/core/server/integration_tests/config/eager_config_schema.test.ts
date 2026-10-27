@@ -50,4 +50,8 @@ if (getFips() === 0) {
       await expect(root.setup()).resolves.toBeDefined();
     });
   });
+} else {
+  it('is running in FIPS mode, skipping the eager config-schema boot test', () => {
+    expect(getFips()).toBe(1);
+  });
 }
