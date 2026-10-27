@@ -1445,8 +1445,13 @@
     "minimatch": "10.2.4",
     "moment": "2.31.0",
     "moment-duration-format": "2.3.2",
+<<<<<<< HEAD
     "moment-timezone": "0.6.1",
     "monaco-editor": "0.44.0",
+=======
+    "moment-timezone": "0.6.2",
+    "monaco-editor": "0.56.0",
+>>>>>>> e170d42efc71 (Update dependency moment-timezone to v0.6.2 (main) (#268586))
     "monaco-promql": "1.8.0",
     "monaco-yaml": "5.1.0",
     "murmurhash": "2.0.1",
