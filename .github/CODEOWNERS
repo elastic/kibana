@@ -31,6 +31,8 @@ examples/locator_explorer @elastic/appex-sharedux
 examples/partial_results_example @elastic/kibana-discover
 examples/portable_dashboards_example @elastic/kibana-dashboards
 examples/preboot_example @elastic/kibana-security @elastic/kibana-core
+examples/pubsub_example @elastic/kibana-core
+examples/pubsub-example-topic @elastic/kibana-core
 examples/resizable_layout_examples @elastic/kibana-discover
 examples/response_stream @elastic/search-ml-ux
 examples/routing_example @elastic/kibana-core
@@ -2148,11 +2150,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/functional/services/aiops @elastic/search-ml-ux
 
 # Transforms maintained by the Kibana Management team.
-/x-pack/platform/test/serverless/**/test_suites/management/transforms/ @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group2/transform.ts @elastic/kibana-management
-/x-pack/platform/test/functional/apps/transform/ @elastic/kibana-management
 /x-pack/platform/test/functional/services/transform @elastic/kibana-management
-/x-pack/platform/test/functional_basic/apps/transform/ @elastic/kibana-management
 
 /x-pack/dev-tools @elastic/kibana-operations
 /catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
@@ -2263,7 +2261,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/dev/performance @elastic/appex-qa
 /x-pack/platform/test/functional/config.*.* @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/test_suites/README.md @elastic/appex-qa
-/x-pack/platform/test/serverless/functional/test_suites/management/index.ts @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/page_objects/svl_common_page.ts @elastic/appex-qa
 /x-pack/platform/test/README.md @elastic/appex-qa
 /x-pack/platform/test/serverless/README.md @elastic/appex-qa

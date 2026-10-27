@@ -400,10 +400,12 @@ const boundSampleEvents = (events: string[], maxChars: number): string[] => {
 const buildGenerationContext = ({
   text,
   iocs,
+  excludedIocs,
   articleContext,
 }: {
   text: string;
   iocs?: HuntBehaviorIoc[];
+  excludedIocs?: HuntBehaviorIoc[];
   articleContext?: HuntBehaviorArticleContext;
 }): string => {
   const sections: string[] = [];
@@ -415,6 +417,14 @@ const buildGenerationContext = ({
     sections.push(
       `--- SAMPLE MATCHED ENVIRONMENT EVENTS ---\n${boundedEvents
         .map((evt) => `- ${evt}`)
+        .join('\n')}`
+    );
+  }
+  if (excludedIocs?.length) {
+    sections.push(
+      `--- ADJUDICATED OUT (do not hunt these values) ---\n${excludedIocs
+        .slice(0, MAX_ESQL_PROMPT_IOCS)
+        .map((ioc) => `- ${ioc.type}: ${ioc.value}`)
         .join('\n')}`
     );
   }
@@ -461,6 +471,7 @@ const generateGroundedEsql = async ({
   behaviors,
   text,
   iocs,
+  excludedIocs,
   articleContext,
   allowedIndices,
   rowLimit,
@@ -471,17 +482,19 @@ const generateGroundedEsql = async ({
   behaviors: ValidatedBehavior[];
   text: string;
   iocs?: HuntBehaviorIoc[];
+  excludedIocs?: HuntBehaviorIoc[];
   articleContext?: HuntBehaviorArticleContext;
   allowedIndices: string[];
   rowLimit: number;
 }): Promise<{ generated: Map<string, string>; ungrounded: Map<string, string> }> => {
   const index = resolveGenerationIndex(allowedIndices);
-  const additionalContext = buildGenerationContext({ text, iocs, articleContext });
+  const additionalContext = buildGenerationContext({ text, iocs, excludedIocs, articleContext });
   // The schema probe runs the model's FROM before the publish/execute scope gate, so gate the
   // client it runs on with the same allowlist — an out-of-scope probe is refused before it
   // reaches Elasticsearch, and generation falls back to the non-executable placeholder.
   const probeClient = scopedEsqlProbeClient(esClient, allowedIndices);
   const iocValues = (iocs ?? []).map((ioc) => ioc.value);
+  const excludedIocValues = (excludedIocs ?? []).map((ioc) => ioc.value);
 
   const entries = await pMap(
     behaviors,
@@ -530,7 +543,11 @@ const generateGroundedEsql = async ({
           return { outcome: 'generated', techniqueId: behavior.technique_id, esql };
         }
         // Raw `query.trim()`, the same input the outer grounding gate uses today.
-        const grounded = assertEsqlGroundedInReport(esql, { reportText: text, iocValues });
+        const grounded = assertEsqlGroundedInReport(esql, {
+          reportText: text,
+          iocValues,
+          excludedIocValues,
+        });
         if (grounded.ok) {
           return { outcome: 'generated', techniqueId: behavior.technique_id, esql };
         }
@@ -572,6 +589,7 @@ const generateGroundedEsql = async ({
           const retryGrounded = assertEsqlGroundedInReport(retryEsql, {
             reportText: text,
             iocValues,
+            excludedIocValues,
           });
           if (retryGrounded.ok) {
             return { outcome: 'generated', techniqueId: behavior.technique_id, esql: retryEsql };
@@ -677,6 +695,7 @@ export const huntBehavior = async (
     report_id: reportId,
     llm_confidence_threshold: llmThreshold = 0.5,
     iocs,
+    excluded_iocs: excludedIocs,
     article_context: articleContext,
     window,
     size,
@@ -966,6 +985,7 @@ export const huntBehavior = async (
       const groundedInReport = assertEsqlGroundedInReport(esql, {
         reportText: text,
         iocValues: (iocs ?? []).map((ioc) => ioc.value),
+        excludedIocValues: (excludedIocs ?? []).map((ioc) => ioc.value),
       });
       if (!groundedInReport.ok) {
         logger.warn(
@@ -1020,6 +1040,7 @@ export const huntBehavior = async (
       behaviors: generationTargets,
       text,
       iocs,
+      excludedIocs,
       articleContext,
       allowedIndices,
       rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
@@ -1094,6 +1115,7 @@ export const huntBehavior = async (
         behaviors: secondWave,
         text,
         iocs,
+        excludedIocs,
         articleContext,
         allowedIndices,
         rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
