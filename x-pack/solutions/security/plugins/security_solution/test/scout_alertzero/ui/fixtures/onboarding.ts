@@ -71,9 +71,7 @@ export const createOnboardingSpace = async (
         }
       };
       await step('disable workers', () => resetOnboardingState(api, spaceId));
-      await step('delete worker service accounts', () =>
-        deleteWorkerServiceAccounts(api, spaceId)
-      );
+      await step('delete worker service accounts', () => deleteWorkerServiceAccounts(api, spaceId));
       if (stub) await step('stub model cleanup', stub.cleanup);
       await step(`delete space ${spaceId}`, () => spaces.delete(spaceId));
       if (failures.length > 0) {
@@ -114,9 +112,7 @@ export const createUiOnboardingSpace = async (
         }
       };
       await step('disable workers', () => resetOnboardingState(api, spaceId));
-      await step('delete worker service accounts', () =>
-        deleteWorkerServiceAccounts(api, spaceId)
-      );
+      await step('delete worker service accounts', () => deleteWorkerServiceAccounts(api, spaceId));
       if (stub) await step('stub model cleanup', stub.cleanup);
       await step(`delete space ${spaceId}`, () => spaces.delete(spaceId));
       if (failures.length > 0) {
@@ -141,9 +137,7 @@ export const resetOnboardingState = async (api: AlertZeroApi, spaceId: string): 
     if (worker.enabled) {
       const result = await patchWorker(api, spaceId, worker.id, { enabled: false });
       if (result.statusCode !== 200 && result.statusCode !== 404) {
-        failures.push(
-          `disable ${worker.id}: ${result.statusCode} ${JSON.stringify(result.body)}`
-        );
+        failures.push(`disable ${worker.id}: ${result.statusCode} ${JSON.stringify(result.body)}`);
       }
     }
   }
@@ -151,7 +145,6 @@ export const resetOnboardingState = async (api: AlertZeroApi, spaceId: string): 
     throw new Error(`Reset of ${spaceId} failed:\n${failures.join('\n')}`);
   }
 };
-
 
 /**
  * Deletes the service accounts referenced by this space's workers. Service
@@ -161,10 +154,7 @@ export const resetOnboardingState = async (api: AlertZeroApi, spaceId: string): 
  * so any account a worker references here was created by this run — deleting by
  * the referenced IDs can never touch a pre-existing account.
  */
-const deleteWorkerServiceAccounts = async (
-  api: AlertZeroApi,
-  spaceId: string
-): Promise<void> => {
+const deleteWorkerServiceAccounts = async (api: AlertZeroApi, spaceId: string): Promise<void> => {
   const workers = await listWorkers(api, spaceId);
   const accountIds = [
     ...new Set(
@@ -175,10 +165,7 @@ const deleteWorkerServiceAccounts = async (
   ];
   const failures: string[] = [];
   for (const accountId of accountIds) {
-    const deleted = await api.internal(
-      'DELETE',
-      `${buildServiceAccountUrl(accountId)}?force=true`
-    );
+    const deleted = await api.internal('DELETE', `${buildServiceAccountUrl(accountId)}?force=true`);
     // 404 = another run (or the spec's own account cleanup) already removed it.
     if (deleted.statusCode !== 200 && deleted.statusCode !== 204 && deleted.statusCode !== 404) {
       failures.push(
