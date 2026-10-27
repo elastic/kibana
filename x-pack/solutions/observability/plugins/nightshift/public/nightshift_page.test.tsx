@@ -106,11 +106,10 @@ jest.mock('./hooks/use_significant_events_availability');
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseSignificantEventsAvailability = useSignificantEventsAvailability as jest.Mock;
 const mockUseOnboardingVisibility = useOnboardingVisibility as jest.Mock;
-/** Mirrors the registered `appRoute` for significantEvents (`/app/significant_events`). */
-const getUrlForApp = jest.fn((appId: string, { path }: { path: string }) => {
-  const base = appId === 'significantEvents' ? '/app/significant_events' : `/app/${appId}`;
-  return `${base}${path.startsWith('/') ? path : `/${path}`}`;
-});
+const getUrlForApp = jest.fn(
+  (appId: string, { path }: { path: string }) =>
+    `/app/${appId}${path.startsWith('/') ? path : `/${path}`}`
+);
 const navigateToUrl = jest.fn();
 const navigateToApp = jest.fn();
 const featureFlags = { useBooleanValue: jest.fn() };

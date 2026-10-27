@@ -1616,7 +1616,6 @@ packages:
   - 'x-pack/solutions/observability/plugins/profiling_data_access'
   - 'x-pack/solutions/observability/plugins/serverless_observability'
   - 'x-pack/solutions/observability/plugins/significant_events'
-  - 'x-pack/solutions/observability/plugins/significant_events_app'
   - 'x-pack/solutions/observability/plugins/slo'
   - 'x-pack/solutions/observability/plugins/synthetics'
   - 'x-pack/solutions/observability/plugins/uptime'

@@ -3731,9 +3731,6 @@ importers:
       '@kbn/siem-readiness':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/siem-readiness
-      '@kbn/significant-events-app-plugin':
-        specifier: workspace:*
-        version: link:x-pack/solutions/observability/plugins/significant_events_app
       '@kbn/significant-events-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/significant_events
@@ -9720,8 +9717,6 @@ importers:
   x-pack/solutions/observability/plugins/serverless_observability: {}
 
   x-pack/solutions/observability/plugins/significant_events: {}
-
-  x-pack/solutions/observability/plugins/significant_events_app: {}
 
   x-pack/solutions/observability/plugins/slo: {}
 

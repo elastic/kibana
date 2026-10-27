@@ -100,7 +100,6 @@ plugins:
     - serverless_vectordb
     - share
     - significant_events
-    - significant_events_app
     - slo
     - snapshot_restore
     - spaces

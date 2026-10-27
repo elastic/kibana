@@ -14,7 +14,6 @@ export * from './observability_alerting';
 export * from './observability_logs_explorer';
 export * from './observability_onboarding';
 export * from './nightshift';
-export * from './significant_events';
 export * from './slo';
 export * from './streams';
 export * from './uptime';
