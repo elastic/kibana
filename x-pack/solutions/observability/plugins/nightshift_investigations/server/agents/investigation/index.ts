@@ -125,6 +125,7 @@ export const buildNightshiftAgentConfiguration = ({
   sandboxEnabled,
   cortexEnabled,
   memoryEnabled = false,
+  decisionTreesEnabled = false,
   investigationToolsEnabled,
   proposalsEnabled,
   telemetryConnectorId,
@@ -132,6 +133,7 @@ export const buildNightshiftAgentConfiguration = ({
   logger,
 }: NightshiftAgentTypeOptions & {
   instructions: string;
+  decisionTreesEnabled?: boolean;
 }): AgentTypeDefinition['baseConfiguration'] => {
   const baseConfiguration = {
     instructions: agentInstructions,
@@ -196,6 +198,7 @@ export const getInvestigationAgentType = ({
   avatar_icon: 'logoElastic',
   baseConfiguration: buildNightshiftAgentConfiguration({
     ...options,
+    decisionTreesEnabled,
     instructions: fillContextInstructions({
       includeDecisionTrees: options.sandboxEnabled && decisionTreesEnabled,
       includeMemory: options.sandboxEnabled && (options.memoryEnabled ?? false),
