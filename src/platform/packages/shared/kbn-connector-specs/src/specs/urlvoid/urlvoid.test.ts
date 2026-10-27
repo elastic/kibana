@@ -257,4 +257,18 @@ describe('URLVoidConnector', () => {
       await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
+
+  describe('checkUrl input bounds', () => {
+    const prefix = 'https://example.com/';
+    it.each([
+      [8192, true],
+      [8193, false],
+    ])('url of %d characters valid=%s', (length, expected) => {
+      expect(
+        URLVoidConnector.actions.checkUrl.input.safeParse({
+          url: `${prefix}${'a'.repeat(length - prefix.length)}`,
+        }).success
+      ).toBe(expected);
+    });
+  });
 });
