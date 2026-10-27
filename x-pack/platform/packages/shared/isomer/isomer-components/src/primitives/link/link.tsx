@@ -19,6 +19,13 @@ import { linkSlackRenderer } from './link_slack';
 import { appLinkPath, reactLinkHref, staticLinkUrl } from './resolve_link';
 
 const ABSOLUTE_HTTP = /^https?:\/\//i;
+// Browsers and `sanitizeNavigationHref` drop C0 controls and DEL, so a path could pass the check
+// below and still navigate elsewhere once they're gone.
+const hasControlCharacter = (value: string): boolean =>
+  Array.from(value).some((character) => {
+    const code = character.charCodeAt(0);
+    return code < 0x20 || code === 0x7f;
+  });
 // A path that climbs out of its app can only climb back into one fixed route, so it can't stay
 // inside two different apps.
 const PROBE_APPS = ['probe-a', 'probe-b'] as const;
@@ -41,6 +48,9 @@ const pathSchema = z
   .max(2000)
   .refine((value) => /^[/?#]/.test(value) && !value.startsWith('//') && !value.includes('\\'), {
     error: 'must start with /, ? or #, and not with //',
+  })
+  .refine((value) => !hasControlCharacter(value), {
+    error: 'must not contain control characters',
   })
   .refine(staysInApp, { error: 'must not leave the app with ..' });
 

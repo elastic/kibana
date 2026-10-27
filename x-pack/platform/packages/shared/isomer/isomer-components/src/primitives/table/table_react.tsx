@@ -102,7 +102,12 @@ interface TableProps {
   sortable: boolean;
 }
 
-const Table = ({ node, context, view: { columns, rows, cells, note }, sortable }: TableProps) => {
+const Table = ({
+  node,
+  context,
+  view: { columns, rows, cells, sourceIndexes, note },
+  sortable,
+}: TableProps) => {
   const sorted = nodeSort(node);
   return (
     <div {...nodeAnchor(context, node)} className={classNames(context, handles.root)}>
@@ -139,7 +144,10 @@ const Table = ({ node, context, view: { columns, rows, cells, note }, sortable }
         </thead>
         <tbody>
           {rows.map((row, rowIndex) => (
-            <tr key={rowIndex} {...(sortable ? data(TABLE_SORT_ATTRIBUTES.row, rowIndex) : {})}>
+            <tr
+              key={rowIndex}
+              {...(sortable ? data(TABLE_SORT_ATTRIBUTES.row, sourceIndexes[rowIndex]) : {})}
+            >
               {row.map((text, index) => {
                 const cell = cells[rowIndex][index];
                 return (

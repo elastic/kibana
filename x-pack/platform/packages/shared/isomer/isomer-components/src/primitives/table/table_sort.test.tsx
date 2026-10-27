@@ -133,6 +133,24 @@ describe('tableSort', () => {
     expect(column(0)).toEqual(['checkout', 'payments', 'cart', 'host-10', 'search']);
   });
 
+  it('breaks ties by source order, as the server does, whatever the node’s sort', () => {
+    const node: TableNode = {
+      type: 'table',
+      columns: [{ label: 'Name' }, { label: 'Count' }],
+      rows: [
+        ['b', 1],
+        ['a', 1],
+      ],
+    };
+    const { click, column } = mount({ ...node, sort: { column: 0 } });
+    click('Count');
+    const clicked = column(0);
+    document.body.replaceChildren();
+
+    expect(clicked).toEqual(['b', 'a']);
+    expect(mount({ ...node, sort: { column: 1 } }).column(0)).toEqual(clicked);
+  });
+
   it('sorts text naturally, and moves aria-sort and the arrow to the clicked column', () => {
     const { click, column, ariaSort, headings } = mount({
       ...services,

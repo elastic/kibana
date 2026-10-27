@@ -48,8 +48,8 @@ describe('fields', () => {
       {
         type: 'section',
         fields: [
-          { type: 'mrkdwn', text: '*App*\nDiscover' },
-          { type: 'mrkdwn', text: '*A &amp; &lt;b&gt;*\nx &gt; y' },
+          { type: 'mrkdwn', text: '*App*\nDiscover', verbatim: true },
+          { type: 'mrkdwn', text: '*A &amp; &lt;b&gt;*\nx &gt; y', verbatim: true },
         ],
       },
     ]);

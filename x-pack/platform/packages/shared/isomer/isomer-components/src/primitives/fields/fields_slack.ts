@@ -23,6 +23,8 @@ export const fieldsSlackRenderer = (node: FieldsNode): SlackSectionBlock => ({
         value,
         SLACK_LIMITS.sectionFieldChars - heading.length
       )}`,
+      // Plain text must not trigger Slack's automatic `@here`/`#channel` parsing.
+      verbatim: true,
     };
   }),
 });

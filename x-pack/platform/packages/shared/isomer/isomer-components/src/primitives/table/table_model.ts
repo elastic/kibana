@@ -20,6 +20,8 @@ export interface TableView {
   rows: ReadonlyArray<readonly string[]>;
   /** Each shown row's unformatted cells, in the same order as `rows`, for sorting in the browser. */
   cells: ReadonlyArray<readonly Cell[]>;
+  /** Each shown row's index in the node's `rows`, in the same order as `rows`, to break sort ties. */
+  sourceIndexes: readonly number[];
   /** "Showing N of M rows", when fewer rows are shown than the source had. */
   note?: string;
 }
@@ -76,8 +78,8 @@ export const sortOrder = (
     .map(({ index }) => index);
 };
 
-const sortedRows = ({ rows, sort }: TableNode): ReadonlyArray<readonly Cell[]> =>
-  sort ? sortOrder(rows, sort.column, sort.direction).map((index) => rows[index]) : rows;
+const sortedIndexes = ({ rows, sort }: TableNode): number[] =>
+  sort ? sortOrder(rows, sort.column, sort.direction) : rows.map((_row, index) => index);
 
 const defaultAlign = (
   { format }: TableNode['columns'][number],
@@ -113,8 +115,8 @@ export const noRowsNote = (): string =>
 /** `node` sorted, capped at `maxRows` and at `limit`, and formatted. */
 export const tableView = (node: TableNode, limit = Infinity): TableView => {
   const { columns, maxRows, totalRows } = node;
-  const sorted = sortedRows(node);
-  const shown = sorted.slice(0, Math.min(maxRows ?? Infinity, limit));
+  const sourceIndexes = sortedIndexes(node).slice(0, Math.min(maxRows ?? Infinity, limit));
+  const shown = sourceIndexes.map((index) => node.rows[index]);
   const total = Math.max(totalRows ?? 0, node.rows.length);
   return {
     columns: columns.map((column, index) => ({
@@ -130,6 +132,7 @@ export const tableView = (node: TableNode, limit = Infinity): TableView => {
       columns.map((column, index) => formatCell(row[index] ?? null, column))
     ),
     cells: shown.map((row) => columns.map((_column, index) => row[index] ?? null)),
+    sourceIndexes,
     ...(shown.length < total ? { note: rowsNote(shown.length, total) } : {}),
   };
 };

@@ -56,6 +56,8 @@ describe('link', () => {
     expect(view({ app: 'discover', path: '/%2E%2E' })).toBe(false);
     expect(view({ app: 'discover', path: '/.%2e/management?x' })).toBe(false);
     expect(view({ app: 'discover', path: '/.\t./management' })).toBe(false);
+    expect(view({ app: 'discover', path: '/.\u0000./management' })).toBe(false);
+    expect(view({ app: 'discover', path: '/view\u007f' })).toBe(false);
     expect(view({ app: 'discover', path: '/../app' })).toBe(false);
     expect(view({ app: 'discover', path: '/../discover/x' })).toBe(false);
     expect(view({ app: 'discover', path: '/%2e%2e/discover' })).toBe(false);
