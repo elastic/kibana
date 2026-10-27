@@ -18124,10 +18124,6 @@ packages:
     resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
     engines: {node: '>=12'}
 
-  dotenv@17.2.4:
-    resolution: {integrity: sha512-mudtfb4zRB4bVvdj0xRo+e6duH1csJRM8IukBqfTRvHotn9+LBXB8ynAidP9zHqoRC/fsllXgk4kCKlR21fIhw==}
-    engines: {node: '>=12'}
-
   dotenv@17.4.2:
     resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
     engines: {node: '>=12'}
@@ -34822,7 +34818,7 @@ snapshots:
       chokidar: 3.5.3
       confbox: 0.2.4
       defu: 6.1.7
-      dotenv: 17.2.4
+      dotenv: 17.4.2
       exsolve: 1.1.1
       giget: 2.0.0
       jiti: 2.7.0
@@ -36410,8 +36406,6 @@ snapshots:
       type-fest: 4.41.0
 
   dotenv@16.6.1: {}
-
-  dotenv@17.2.4: {}
 
   dotenv@17.4.2: {}
 
