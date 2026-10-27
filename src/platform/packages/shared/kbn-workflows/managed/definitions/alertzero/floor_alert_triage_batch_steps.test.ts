@@ -967,6 +967,38 @@ describe('floor_alert_triage_batch — where the alerts in no proposal go', () =
   });
 });
 
+describe('floor_alert_triage_batch — a failed batch Investigation', () => {
+  it('retries the create and then continues, so the planned reviews still start', () => {
+    expect(stepByName('create_batch_investigation')?.['on-failure']).toEqual({
+      retry: { 'max-attempts': 3, delay: '5s' },
+      continue: true,
+    });
+  });
+
+  it('only records the alerts in an Investigation that exists', () => {
+    const gate = stepByName('record_other_alerts') as {
+      condition: string;
+      steps: Array<{ name: string }>;
+    };
+    expect(evalExpr(gate.condition, { variables: { home_conversation_id: '' } })).toBe(false);
+    expect(evalExpr(gate.condition, { variables: { home_conversation_id: 'conv-1' } })).toBe(true);
+    expect(gate.steps.map((step) => step.name)).toEqual([
+      'attach_other_alerts',
+      'post_comment_other_alerts',
+      'close_batch_investigation',
+      'report_batch_investigation_closed',
+    ]);
+  });
+
+  it('does not take the new home when the create failed', () => {
+    const set = stepByName('set_home_from_batch_investigation') as { if: string };
+    expect(
+      evalExpr(set.if, { steps: { create_batch_investigation: { error: { message: 'x' } } } })
+    ).toBe(false);
+    expect(evalExpr(set.if, { steps: { create_batch_investigation: { output: {} } } })).toBe(true);
+  });
+});
+
 describe('floor_alert_triage_batch — ai.conversation.metadata.patch failure handling', () => {
   // The reviews close theirs and a failure Investigation stays open for follow-up. The batch closes
   // only the Investigation it made for a batch with no proposal, and a failed close must not fail the run.

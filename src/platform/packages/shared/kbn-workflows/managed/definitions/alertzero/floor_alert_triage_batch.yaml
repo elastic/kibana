@@ -939,8 +939,16 @@ steps:
         type: if
         condition: "${{ variables.home_conversation_id == '' }}"
         steps:
+          # A failed create must not fail the run: the candidates are already tagged and their
+          # reviews start after this, so failing here would strand them without a proposal. The alerts
+          # then keep their verdict tags and notes, and the notes carry no Investigation link.
           - name: create_batch_investigation
             type: ai.conversation.create
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+              continue: true
             with:
               template_id: investigation
               title: "Alert Triage — {{ inputs.rule_name }}"
@@ -954,64 +962,70 @@ steps:
                 workflow_execution_ids: ["{{ execution.id }}"]
           - name: set_home_from_batch_investigation
             type: data.set
+            if: "${{ steps.create_batch_investigation.error == blank }}"
             with:
               home_conversation_id: "{{ steps.create_batch_investigation.output.conversation_id }}"
               batch_conversation_created: true
 
-      - name: attach_other_alerts
-        type: foreach
-        foreach: "${{ variables.other_alert_ids | chunk: 20 | json }}"
+      # Nothing to record when the batch Investigation could not be created.
+      - name: record_other_alerts
+        type: if
+        condition: "${{ variables.home_conversation_id != '' }}"
         steps:
-          - name: attach_other_alert_chunk
-            type: ai.attachment.add
+          - name: attach_other_alerts
+            type: foreach
+            foreach: "${{ variables.other_alert_ids | chunk: 20 | json }}"
+            steps:
+              - name: attach_other_alert_chunk
+                type: ai.attachment.add
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: 5s
+                  continue: true
+                with:
+                  conversation_id: "{{ variables.home_conversation_id }}"
+                  type: security.alerts
+                  render_inline: false
+                  data:
+                    alertIds: "${{ foreach.item }}"
+                  description: "Alerts analysed in this triage run that are not in a closure proposal"
+
+          - name: post_comment_other_alerts
+            type: ai.conversation.add_user_message
             on-failure:
-              retry:
-                max-attempts: 3
-                delay: 5s
+              continue: true
+            with:
+              author_name: "{{ consts.author_name }}"
+              conversation_id: "{{ variables.home_conversation_id }}"
+              message: |-
+                {% if variables.batch_conversation_created and variables.proposal_count == 0 %}Triage of rule **{{ inputs.rule_name }}** is complete. No closure proposal was needed.{% elsif variables.batch_conversation_created %}Triage of rule **{{ inputs.rule_name }}** is complete. The alerts in this Investigation are in none of the {{ variables.proposal_count }} closure proposals of this batch, each of which has its own Investigation.{% else %}This batch also held alerts that are in no closure proposal.{% endif %}
+
+                {{ variables.other_alert_count }} of the {{ variables.alert_count }} analyzed alert{% if variables.alert_count != 1 %}s{% endif %} {% if variables.other_alert_count == 1 %}is{% else %}are{% endif %} in no closure proposal: {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.inconclusive_count }} inconclusive, {{ variables.other_alert_count | minus: steps.classify_alerts.output.true_positive_count | minus: steps.classify_alerts.output.inconclusive_count | at_least: 0 }} false positive below the {{ inputs.confidence_floor }} confidence floor.{% if steps.classify_alerts.output.inconclusive_count > 0 and steps.group_fp_candidates_call.output.inconclusive_alerts_page_query != blank %} [View the inconclusive alerts](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.group_fp_candidates_call.output.inconclusive_alerts_page_query }}){% endif %}
+
+                [View execution]({{ execution.url }})
+
+          # Nothing is left to decide, so the Investigation of a batch without a proposal is closed.
+          # The patch errors when `agentBuilder:experimentalFeatures` is off, which must not fail the run.
+          - name: close_batch_investigation
+            type: ai.conversation.metadata.patch
+            if: "${{ variables.batch_conversation_created }}"
+            on-failure:
               continue: true
             with:
               conversation_id: "{{ variables.home_conversation_id }}"
-              type: security.alerts
-              render_inline: false
-              data:
-                alertIds: "${{ foreach.item }}"
-              description: "Alerts analysed in this triage run that are not in a closure proposal"
+              updates:
+                status: closed
 
-      - name: post_comment_other_alerts
-        type: ai.conversation.add_user_message
-        on-failure:
-          continue: true
-        with:
-          author_name: "{{ consts.author_name }}"
-          conversation_id: "{{ variables.home_conversation_id }}"
-          message: |-
-            {% if variables.batch_conversation_created and variables.proposal_count == 0 %}Triage of rule **{{ inputs.rule_name }}** is complete. No closure proposal was needed.{% elsif variables.batch_conversation_created %}Triage of rule **{{ inputs.rule_name }}** is complete. The alerts in this Investigation are in none of the {{ variables.proposal_count }} closure proposals of this batch, each of which has its own Investigation.{% else %}This batch also held alerts that are in no closure proposal.{% endif %}
-
-            {{ variables.other_alert_count }} of the {{ variables.alert_count }} analyzed alert{% if variables.alert_count != 1 %}s{% endif %} {% if variables.other_alert_count == 1 %}is{% else %}are{% endif %} in no closure proposal: {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.inconclusive_count }} inconclusive, {{ variables.other_alert_count | minus: steps.classify_alerts.output.true_positive_count | minus: steps.classify_alerts.output.inconclusive_count | at_least: 0 }} false positive below the {{ inputs.confidence_floor }} confidence floor.{% if steps.classify_alerts.output.inconclusive_count > 0 and steps.group_fp_candidates_call.output.inconclusive_alerts_page_query != blank %} [View the inconclusive alerts](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.group_fp_candidates_call.output.inconclusive_alerts_page_query }}){% endif %}
-
-            [View execution]({{ execution.url }})
-
-      # Nothing is left to decide, so the Investigation of a batch without a proposal is closed.
-      # The patch errors when `agentBuilder:experimentalFeatures` is off, which must not fail the run.
-      - name: close_batch_investigation
-        type: ai.conversation.metadata.patch
-        if: "${{ variables.batch_conversation_created }}"
-        on-failure:
-          continue: true
-        with:
-          conversation_id: "{{ variables.home_conversation_id }}"
-          updates:
-            status: closed
-
-      - name: report_batch_investigation_closed
-        type: alertzero.reportWorkerOutcome
-        if: "${{ steps.close_batch_investigation.error == blank and steps.close_batch_investigation.output.changed_fields contains 'status' }}"
-        on-failure:
-          continue: true
-        with:
-          event: worker_investigation_closed
-          investigation_id: "{{ variables.home_conversation_id }}"
-          close_reason: other
+          - name: report_batch_investigation_closed
+            type: alertzero.reportWorkerOutcome
+            if: "${{ steps.close_batch_investigation.error == blank and steps.close_batch_investigation.output.changed_fields contains 'status' }}"
+            on-failure:
+              continue: true
+            with:
+              event: worker_investigation_closed
+              investigation_id: "{{ variables.home_conversation_id }}"
+              close_reason: other
 
   # ---------------------------------------------------------------------------
   # 8. Write a verdict note to each alert referencing the Investigation (R4, R13).
