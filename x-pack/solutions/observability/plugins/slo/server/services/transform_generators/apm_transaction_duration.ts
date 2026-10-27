@@ -10,11 +10,7 @@ import type {
   TransformPutTransformRequest,
   AggregationsAggregationContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import {
-  ALL_VALUE,
-  apmTransactionDurationIndicatorSchema,
-  timeslicesBudgetingMethodSchema,
-} from '@kbn/slo-schema';
+import { ALL_VALUE, is, apmTransactionDurationIndicatorSchemaZod } from '@kbn/slo-schema';
 import { TransformGenerator, getElasticsearchQueryOrThrow } from '.';
 import {
   SLI_DESTINATION_INDEX_NAME,
@@ -28,7 +24,7 @@ import { getFilterRange, getTimesliceTargetComparator, parseIndex } from './comm
 
 export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
-    if (!apmTransactionDurationIndicatorSchema.is(slo.indicator)) {
+    if (!is(apmTransactionDurationIndicatorSchemaZod, slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
@@ -170,7 +166,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
           field: 'transaction.duration.histogram',
         },
       },
-      ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+      ...(slo.budgetingMethod === 'timeslices' && {
         'slo.isGoodSlice': {
           bucket_script: {
             buckets_path: {
