@@ -3037,7 +3037,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.ai_auth_detection',
       {
         defaultMessage:
-          'Enrich events with the account information of AI Agents, if it is found. Requires file events and AI data collection to be enabled. Not supported when linux.advanced.kernel.capture_mode uses kprobes When enabled, file modify events are also captured, which can increase CPU and IO usage on hosts with heavy write activity. Trusted processes are excluded. Default: true.',
+          'Enrich events with the account information of AI Agents, if found. Requires file events and AI data collection to be enabled. Not supported when linux.advanced.kernel.capture_mode uses kprobes When enabled, file modify events are also captured, which can increase CPU and IO usage on hosts with heavy write activity. Trusted processes are excluded. Default: true.',
       }
     ),
   },
@@ -3048,7 +3048,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.ai_auth_detection',
       {
         defaultMessage:
-          'Enrich events with the account information of AI Agents, if it is found. Requires file events and AI data collection to be enabled. Trusted processes are excluded. Default: true.',
+          'Enrich events with the account information of AI Agents, if found. Requires file events and AI data collection to be enabled. Trusted processes are excluded. Default: true.',
       }
     ),
   },
@@ -3059,7 +3059,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ai_auth_detection',
       {
         defaultMessage:
-          'Enrich events with the account information of AI Agents, if it is found. Requires file events and AI data collection to be enabled. Trusted processes are excluded. Default: true.',
+          'Enrich events with the account information of AI Agents, if found. Requires file events and AI data collection to be enabled. Trusted processes are excluded. Default: true.',
       }
     ),
   },
