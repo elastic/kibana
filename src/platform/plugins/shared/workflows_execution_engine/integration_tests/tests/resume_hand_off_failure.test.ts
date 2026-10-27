@@ -107,5 +107,55 @@ steps:
         expect.objectContaining({ response: appliedResponse, respondedBy: 'analyst' })
       );
     });
+
+    it('is not applied by a runner that loaded it before it was taken back', async () => {
+      const repository = fixture.workflowExecutionRepositoryMock;
+      const previousContext = execution().context;
+      await respond(firstResponse, async () => {});
+      const { resumedBy, resumedAt } = execution().context;
+
+      // The failing request takes its response back after the runner loaded it, before the take.
+      const take = repository.tryTakeResumeInput.bind(repository);
+      jest.spyOn(repository, 'tryTakeResumeInput').mockImplementationOnce(async (ref) => {
+        await expect(
+          repository.tryRevertResumeContext({
+            workflowExecutionId: 'fake_workflow_execution_id',
+            spaceId: 'fake_space_id',
+            resumedBy,
+            resumedAt,
+            previousContext,
+          })
+        ).resolves.toBe('reverted');
+        return take(ref);
+      });
+
+      expect(await fixture.resumeWorkflow()).toEqual({ retryAt: expect.any(Date) });
+      expect(gateStep()?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(execution().context?.resumeInput).toBeNull();
+
+      await respond(secondResponse, async () => {});
+      await fixture.resumeWorkflow();
+
+      expect(execution().status).toBe(ExecutionStatus.COMPLETED);
+      expect(gateStep()?.output).toEqual(expect.objectContaining({ response: appliedResponse }));
+    });
+
+    it('cannot be taken back once a runner has taken it', async () => {
+      const previousContext = execution().context;
+      await respond(firstResponse, async () => {});
+      const { resumedBy, resumedAt } = execution().context;
+      await fixture.resumeWorkflow();
+
+      await expect(
+        fixture.workflowExecutionRepositoryMock.tryRevertResumeContext({
+          workflowExecutionId: 'fake_workflow_execution_id',
+          spaceId: 'fake_space_id',
+          resumedBy,
+          resumedAt,
+          previousContext,
+        })
+      ).resolves.toBe('consumed');
+      expect(execution().status).toBe(ExecutionStatus.COMPLETED);
+    });
   }
 );

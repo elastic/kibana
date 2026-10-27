@@ -16,6 +16,8 @@ import {
 } from '@kbn/workflows';
 import {
   getResumeContextRevert,
+  getResumeInputTake,
+  type ResumeResponseRef,
   type RevertResumeContextParams,
   type RevertResumeContextResult,
 } from '../../server/repositories/resume_context_revert';
@@ -375,6 +377,22 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
       context: { ...existing.context, ...revert.context },
     });
     return 'reverted';
+  }
+
+  public async tryTakeResumeInput(ref: ResumeResponseRef): Promise<boolean> {
+    const existing = this.workflowExecutions.get(ref.workflowExecutionId);
+    if (!existing) {
+      return false;
+    }
+    const take = getResumeInputTake(existing, ref);
+    if (take.context) {
+      // Elasticsearch merges a partial `context`; this in-memory update replaces it, so merge here.
+      await this.updateWorkflowExecution({
+        id: existing.id,
+        context: { ...existing.context, ...take.context },
+      });
+    }
+    return take.outcome === 'taken';
   }
 
   public async bulkUpdateWorkflowExecutions(

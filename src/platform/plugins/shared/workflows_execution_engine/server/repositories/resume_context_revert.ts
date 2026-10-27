@@ -22,15 +22,51 @@ export type RevertResumeContextResult =
   | 'not_found'
   | 'conflict';
 
-export interface RevertResumeContextParams {
+/** Identifies one stored resume response: the stamp written with it tells it apart from others. */
+export interface ResumeResponseRef {
   workflowExecutionId: string;
   spaceId: string;
-  /** The stamp written with the response; it tells this request's response apart. */
   resumedBy: string;
   resumedAt: string;
+}
+
+export interface RevertResumeContextParams extends ResumeResponseRef {
   /** The context as read before the response was written. */
   previousContext: Record<string, unknown> | undefined;
 }
+
+/**
+ * Context key a runner sets, to the `resumedAt` of the response it is applying, before it applies
+ * it. Reverting and taking check the same stamp in one conditional update each, so a response is
+ * either taken back by the request that wrote it or applied by a runner, never both.
+ */
+export const RESUME_INPUT_TAKEN_FOR_KEY = 'resumeInputTakenFor';
+
+const isResponse = (
+  current: Pick<EsWorkflowExecution, 'spaceId' | 'context'>,
+  { spaceId, resumedBy, resumedAt }: Omit<ResumeResponseRef, 'workflowExecutionId'>
+): boolean =>
+  current.spaceId === spaceId &&
+  current.context?.resumedBy === resumedBy &&
+  current.context?.resumedAt === resumedAt;
+
+/**
+ * Decides whether a runner may apply the response it loaded: `taken` when it is still stored (it is
+ * marked by the returned patch, or was already marked by an earlier run), `gone` when it was taken
+ * back or replaced.
+ */
+export const getResumeInputTake = (
+  current: Pick<EsWorkflowExecution, 'spaceId' | 'context'>,
+  ref: ResumeResponseRef
+): { outcome: 'taken' | 'gone'; context?: Record<string, unknown> } => {
+  if (!isResponse(current, ref) || current.context?.resumeInput == null) {
+    return { outcome: 'gone' };
+  }
+  if (current.context?.[RESUME_INPUT_TAKEN_FOR_KEY] === ref.resumedAt) {
+    return { outcome: 'taken' };
+  }
+  return { outcome: 'taken', context: { [RESUME_INPUT_TAKEN_FOR_KEY]: ref.resumedAt } };
+};
 
 /** Decides whether a resume response can be taken back, and the context patch that does it. */
 export const getResumeContextRevert = (
@@ -40,15 +76,12 @@ export const getResumeContextRevert = (
   | { skip: Exclude<RevertResumeContextResult, 'reverted' | 'not_found'> }
   | { context: Record<string, unknown> } => {
   const context: Record<string, unknown> = current.context ?? {};
-  if (
-    current.spaceId !== spaceId ||
-    context.resumedBy !== resumedBy ||
-    context.resumedAt !== resumedAt
-  ) {
+  if (!isResponse(current, { spaceId, resumedBy, resumedAt })) {
     return { skip: 'not_pending' };
   }
-  // A runner takes the response by clearing `resumeInput`, and keeps the stamp.
-  if (context.resumeInput == null) {
+  // A runner marks the response before applying it, and clears `resumeInput` (keeping the stamp)
+  // once applied.
+  if (context.resumeInput == null || context[RESUME_INPUT_TAKEN_FOR_KEY] === resumedAt) {
     return { skip: 'consumed' };
   }
   if (

@@ -18,6 +18,8 @@ import type { WorkflowExecutionsDataClient } from './data_access_layer';
 import { getBulkUpdaterWriteResult } from './data_access_layer/lib/bulk/bulk_updater_write_result';
 import {
   getResumeContextRevert,
+  getResumeInputTake,
+  type ResumeResponseRef,
   type RevertResumeContextParams,
   type RevertResumeContextResult,
 } from './resume_context_revert';
@@ -654,6 +656,40 @@ export class WorkflowExecutionRepository {
     if (writeResult === 'updated') return 'reverted';
     if (writeResult === 'noop') return outcome.skip ?? 'not_pending';
     return writeResult;
+  }
+
+  /**
+   * CAS: marks a stored resume response as taken by the runner about to apply it. Returns false when
+   * the response is no longer stored (taken back or replaced), in which case it must not be applied.
+   */
+  public async tryTakeResumeInput(ref: ResumeResponseRef): Promise<boolean> {
+    // Set by the updater, which re-runs after a version conflict; the last run decides.
+    const outcome: { taken?: boolean } = {};
+    const { items } = await this.workflowExecutionsDataClient.bulk({
+      refresh: false,
+      items: [
+        {
+          operation: 'update',
+          documentId: ref.workflowExecutionId,
+          sourceFields: ['spaceId', 'context'] as const,
+          retryOnConflict: UPDATE_RETRY_ON_CONFLICT,
+          updater: (current) => {
+            const take = getResumeInputTake(current, ref);
+            outcome.taken = take.outcome === 'taken';
+            return take.context ? { context: take.context } : 'noop';
+          },
+        },
+      ],
+    });
+
+    const writeResult = getBulkUpdaterWriteResult(items[0]);
+    if (writeResult === 'conflict') {
+      // Unknown whether the mark landed; failing lets the task retry with a fresh read.
+      throw new Error(
+        `Version conflict taking the resume input of workflow execution ${ref.workflowExecutionId}`
+      );
+    }
+    return writeResult === 'updated' || (writeResult === 'noop' && outcome.taken === true);
   }
 
   /**
