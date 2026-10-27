@@ -9,6 +9,7 @@ import type { TelemetryEvent } from '../types';
 import { endpointAllowlistFields } from './endpoint_alerts';
 import { exceptionListAllowlistFields } from './exception_lists';
 import { prebuiltRuleAllowlistFields } from './prebuilt_rules_alerts';
+import { detectionAlertsInfluencerAllowlist } from './detection_alerts_influencer_allowlist';
 
 /**
  * Filters out Key/Values not required for downstream analysis
@@ -24,7 +25,7 @@ export function copyAllowlistedFields(
       if (allowValue === true) {
         return { ...newEvent, [allowKey]: eventValue };
       } else if (typeof allowValue === 'object' && Array.isArray(eventValue)) {
-        const subValues = eventValue.filter((v) => typeof v === 'object');
+        const subValues = eventValue.filter((v) => typeof v === 'object' && v !== null);
         return {
           ...newEvent,
           [allowKey]: subValues.map((v) => copyAllowlistedFields(allowValue, v as TelemetryEvent)),
@@ -45,6 +46,7 @@ export class FilterList {
   private _endpointAlerts = endpointAllowlistFields;
   private _exceptionLists = exceptionListAllowlistFields;
   private _prebuiltRulesAlerts = prebuiltRuleAllowlistFields;
+  private _detectionAlertsInfluencerAllowlist = detectionAlertsInfluencerAllowlist;
 
   public get endpointAlerts(): AllowlistFields {
     return this._endpointAlerts;
@@ -70,10 +72,19 @@ export class FilterList {
     this._prebuiltRulesAlerts = list;
   }
 
+  public get detectionAlertsInfluencerAllowlist(): AllowlistFields {
+    return this._detectionAlertsInfluencerAllowlist;
+  }
+
+  public set detectionAlertsInfluencerAllowlist(list: AllowlistFields) {
+    this._detectionAlertsInfluencerAllowlist = list;
+  }
+
   public resetAllToDefault() {
     this._endpointAlerts = endpointAllowlistFields;
     this._exceptionLists = exceptionListAllowlistFields;
     this._prebuiltRulesAlerts = prebuiltRuleAllowlistFields;
+    this._detectionAlertsInfluencerAllowlist = detectionAlertsInfluencerAllowlist;
   }
 }
 
