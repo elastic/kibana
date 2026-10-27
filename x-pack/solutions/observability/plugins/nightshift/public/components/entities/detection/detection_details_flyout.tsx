@@ -28,10 +28,7 @@ import { useDetectionHistory } from '../../../data/detections/use_detection_hist
 import { ChangePointLensChart } from './change_point_lens_chart';
 import { formatPValue, getChangePointLabel } from '../../../common/change_point';
 import { useOpenDetectionInChat } from './use_open_detection_in_chat';
-import {
-  DetectionDiscoveryStatus,
-  getDetectionDiscoveryBadge,
-} from './detection_discovery_status';
+import { DetectionDiscoveryStatus, getDetectionDiscoveryBadge } from './detection_discovery_status';
 import { SkippedDetectionReason } from './skipped_detection';
 
 const ACTIONS_LABEL = i18n.translate('xpack.nightshift.detectionDetailsFlyout.actionsLabel', {

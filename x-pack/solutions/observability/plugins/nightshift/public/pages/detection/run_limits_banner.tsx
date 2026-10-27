@@ -15,19 +15,12 @@ import { useBlocksNewActivity } from '../../data/maintenance/use_significant_eve
 import { useRunQuotas } from '../../data/run_quotas/use_significant_events_run_quotas';
 import { useKibana } from '../../hooks/use_kibana';
 
-const RUN_QUOTA_GROUPS: readonly RunQuotaGroup[] = [
-  'detection',
-  'investigation',
-  'ki_extraction',
-];
+const RUN_QUOTA_GROUPS: readonly RunQuotaGroup[] = ['detection', 'investigation', 'ki_extraction'];
 
 const RUN_QUOTA_GROUP_LABELS: Record<RunQuotaGroup, string> = {
-  detection: i18n.translate(
-    'xpack.nightshift.detectionPage.runLimitsBanner.groupLabel.detection',
-    {
-      defaultMessage: 'Discovery',
-    }
-  ),
+  detection: i18n.translate('xpack.nightshift.detectionPage.runLimitsBanner.groupLabel.detection', {
+    defaultMessage: 'Discovery',
+  }),
   investigation: i18n.translate(
     'xpack.nightshift.detectionPage.runLimitsBanner.groupLabel.investigation',
     { defaultMessage: 'Investigation' }
@@ -84,35 +77,26 @@ export const RunLimitsBanner = (): React.ReactElement | null => {
   const reached = i18n.formatList(
     'conjunction',
     exhaustedGroups.map((group) =>
-      i18n.translate(
-        'xpack.nightshift.detectionPage.runLimitsBanner.reachedGroupDetail',
-        {
-          defaultMessage: '{group}: {count} counted scheduled admissions, daily limit {limit}',
-          values: {
-            group: RUN_QUOTA_GROUP_LABELS[group],
-            count: data.counts[group],
-            limit: data.limits[group],
-          },
-        }
-      )
+      i18n.translate('xpack.nightshift.detectionPage.runLimitsBanner.reachedGroupDetail', {
+        defaultMessage: '{group}: {count} counted scheduled admissions, daily limit {limit}',
+        values: {
+          group: RUN_QUOTA_GROUP_LABELS[group],
+          count: data.counts[group],
+          limit: data.limits[group],
+        },
+      })
     )
   );
-  const description = i18n.translate(
-    'xpack.nightshift.detectionPage.runLimitsBanner.description',
-    {
-      defaultMessage:
-        'Reached limits: {reached}. New scheduled admissions in these categories can be denied until the UTC day resets. Manual runs are not limited.',
-      values: { reached },
-    }
-  );
+  const description = i18n.translate('xpack.nightshift.detectionPage.runLimitsBanner.description', {
+    defaultMessage:
+      'Reached limits: {reached}. New scheduled admissions in these categories can be denied until the UTC day resets. Manual runs are not limited.',
+    values: { reached },
+  });
   const readOnlyDescription = !data.canManage
-    ? i18n.translate(
-        'xpack.nightshift.detectionPage.runLimitsBanner.readOnlyDescription',
-        {
-          defaultMessage:
-            'An administrator with the Nightshift Manage engines privilege can change these limits.',
-        }
-      )
+    ? i18n.translate('xpack.nightshift.detectionPage.runLimitsBanner.readOnlyDescription', {
+        defaultMessage:
+          'An administrator with the Nightshift Manage engines privilege can change these limits.',
+      })
     : undefined;
 
   return (

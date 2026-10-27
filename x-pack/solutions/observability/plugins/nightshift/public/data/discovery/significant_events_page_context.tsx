@@ -206,9 +206,7 @@ export function SignificantEventsPageProvider({
 
     const invalidateAll = () =>
       void Promise.all(
-        COMPLETION_INVALIDATED_KEYS.map((queryKey) =>
-          queryClient.invalidateQueries({ queryKey })
-        )
+        COMPLETION_INVALIDATED_KEYS.map((queryKey) => queryClient.invalidateQueries({ queryKey }))
       );
 
     if (status === SignificantEventsWorkflowStatus.Completed) {

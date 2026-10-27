@@ -48,8 +48,7 @@ describe('RunLimitsBanner', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
-          getUrlForApp: (appId: string, { path }: { path: string }) =>
-            `/app/${appId}${path}`,
+          getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
         },
       },
     } as never);

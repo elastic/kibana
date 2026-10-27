@@ -57,21 +57,18 @@ const renderTimeline = (
   );
 
 describe('EventTimeline', () => {
-  it(
-    'interleaves detections and the raised entry by time, falling back to the event when the lineage is empty',
-    () => {
-      renderTimeline();
+  it('interleaves detections and the raised entry by time, falling back to the event when the lineage is empty', () => {
+    renderTimeline();
 
-      const items = screen.getAllByRole('listitem');
-      expect(items.map((item) => within(item).getByRole('button').textContent)).toEqual([
-        'Earlier detection',
-        event.title,
-        'Later detection',
-      ]);
-      expect(items[1].querySelector('time')).toHaveAttribute('dateTime', event.created_at);
-      expect(screen.getAllByText('Significant event raised')).toHaveLength(1);
-    }
-  );
+    const items = screen.getAllByRole('listitem');
+    expect(items.map((item) => within(item).getByRole('button').textContent)).toEqual([
+      'Earlier detection',
+      event.title,
+      'Later detection',
+    ]);
+    expect(items[1].querySelector('time')).toHaveAttribute('dateTime', event.created_at);
+    expect(screen.getAllByText('Significant event raised')).toHaveLength(1);
+  });
 
   it('shows one raised entry and the inactive revision with its note', () => {
     renderTimeline({

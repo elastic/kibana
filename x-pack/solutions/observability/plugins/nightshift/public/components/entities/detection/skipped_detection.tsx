@@ -11,10 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { describeSkip, type DetectionSkip } from '@kbn/significant-events-schema';
 import { useFormatTimestamp } from '../../../common/format_timestamp';
 
-export const SKIPPED_DETECTION_LABEL = i18n.translate(
-  'xpack.nightshift.skippedDetection.badge',
-  { defaultMessage: 'Skipped' }
-);
+export const SKIPPED_DETECTION_LABEL = i18n.translate('xpack.nightshift.skippedDetection.badge', {
+  defaultMessage: 'Skipped',
+});
 
 export const SkippedDetectionReason = ({ skip }: { skip: DetectionSkip }) => {
   const formatTimestamp = useFormatTimestamp();

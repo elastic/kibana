@@ -13,10 +13,9 @@ import { SKIPPED_DETECTION_LABEL, SkippedDetectionBadge } from './skipped_detect
 
 type DiscoveryStatusInput = Pick<Detection, 'processed' | 'skip'>;
 
-const PROCESSED_LABEL = i18n.translate(
-  'xpack.nightshift.detectionDiscoveryStatus.processed',
-  { defaultMessage: 'Processed' }
-);
+const PROCESSED_LABEL = i18n.translate('xpack.nightshift.detectionDiscoveryStatus.processed', {
+  defaultMessage: 'Processed',
+});
 const PENDING_LABEL = i18n.translate('xpack.nightshift.detectionDiscoveryStatus.pending', {
   defaultMessage: 'Pending',
 });

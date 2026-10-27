@@ -178,11 +178,7 @@ export const RulesTab = ({
     <>
       {isCpsMultiProject ? (
         <>
-          <EuiText
-            size="xs"
-            color="subdued"
-            data-test-subj="nightshiftDetectionRulesScopeHelpText"
-          >
+          <EuiText size="xs" color="subdued" data-test-subj="nightshiftDetectionRulesScopeHelpText">
             <p>{DETECTION_SCOPE_HELP_TEXT}</p>
           </EuiText>
           <EuiSpacer size="s" />
