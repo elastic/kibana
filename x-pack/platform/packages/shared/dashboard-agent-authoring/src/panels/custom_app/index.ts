@@ -28,16 +28,15 @@ const customAppPanelConfigSchema = z.object({
   ),
 });
 
-const customAppPanelConfigInputSchema = z.object({
+/**
+ * The custom app variant of `config`-source panel content, discriminated by `type: 'custom_app'`.
+ * It creates a panel, or edits one by its key, in which case the app is replaced as a whole.
+ */
+const customAppPanelContentSchema = z.object({
   source: z.literal('config'),
   type: z.literal('custom_app'),
-  config: customAppPanelConfigSchema.describe('Custom app panel config: { title?, document }.'),
-});
-
-const editCustomAppPanelConfigInputSchema = customAppPanelConfigInputSchema.extend({
-  panelId: z.string().max(256).describe('Existing custom app panel id to update.'),
   config: customAppPanelConfigSchema.describe(
-    'New custom app panel config. Fully replaces the existing app, so pass the whole document.'
+    'Custom app panel config: { title?, document }. On an existing panel, fully replaces the app, so pass the whole document.'
   ),
 });
 
@@ -45,7 +44,6 @@ export const customAppPanelKind = defineConfigPanelKind({
   type: 'custom_app',
   embeddableType: CUSTOM_APP_EMBEDDABLE_TYPE,
   label: 'custom app',
-  addInputSchema: customAppPanelConfigInputSchema,
-  editInputSchema: editCustomAppPanelConfigInputSchema,
+  contentSchema: customAppPanelContentSchema,
   toEmbeddableConfig: (config) => ({ ...config, version: CUSTOM_APP_STATE_VERSION }),
 });

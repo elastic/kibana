@@ -62,3 +62,8 @@ export function useWorkflowsUiServices(): WorkflowsUiServices {
   }
   return services;
 }
+
+/** Services when a provider is present. Graph code uses this so a missing provider keeps the built-in labels. */
+export function useOptionalWorkflowsUiServices(): WorkflowsUiServices | null {
+  return useContext(WorkflowsUiServicesContext);
+}

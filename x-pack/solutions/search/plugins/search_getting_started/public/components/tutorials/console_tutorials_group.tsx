@@ -128,6 +128,21 @@ export const ConsoleTutorialsGroup = () => {
         request: consoleTutorials.vectorDatabase,
         publishedAt: new Date('2026-04-01'),
       },
+      {
+        title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.promqlTitle', {
+          defaultMessage: 'PromQL and Prometheus remote write',
+        }),
+        dataTestSubj: 'console_tutorials_promql',
+        description: i18n.translate(
+          'xpack.searchGettingStarted.consoleTutorials.promqlDescription',
+          {
+            defaultMessage:
+              'Send Prometheus metrics with remote write and query them with PromQL, in Console and ES|QL.',
+          }
+        ),
+        request: consoleTutorials.promql,
+        publishedAt: new Date('2026-10-21'),
+      },
     ],
     []
   );

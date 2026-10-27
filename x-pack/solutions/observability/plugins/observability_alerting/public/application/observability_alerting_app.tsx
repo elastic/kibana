@@ -40,7 +40,10 @@ import {
 } from '../constants';
 import type { ObservabilityAlertingCases } from '../types';
 import { createInvestigateEpisodeAction } from '../actions/investigate_episode_action';
-import { hasObservabilityAlertingCapabilities } from './has_observability_alerting_privilege';
+import {
+  getObservabilityRulesTabVisibility,
+  hasObservabilityAlertingCapabilities,
+} from './has_observability_alerting_privilege';
 
 const createObservabilityEpisodeActions = (
   cases: ObservabilityAlertingCases | undefined,
@@ -120,12 +123,14 @@ const ClassicRulesV1Route = ({
   history,
   setBreadcrumbs,
   tabs,
+  showClassicBadge,
 }: {
   coreStart: CoreStart;
   getClassicRulesPage: TriggersAndActionsUIPublicPluginStart['getClassicRulesPage'];
   history: ScopedHistory;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   tabs: AppHeaderTab[];
+  showClassicBadge?: boolean;
 }) => {
   const classicRulesHistory = useMemo(
     () => history.createSubHistory(OBSERVABILITY_ALERTING_RULES_V1_PATH),
@@ -142,6 +147,7 @@ const ClassicRulesV1Route = ({
       pathPrefix: OBSERVABILITY_ALERTING_RULES_V1_PATH,
     },
     tabs,
+    showClassicBadge,
   });
 };
 
@@ -170,11 +176,8 @@ export const ObservabilityAlertingApp = ({
   const hostApp = useObservabilityHostApp(createHost);
   const prepend = coreStart.http.basePath.prepend;
   const { pathname } = useLocation();
-  const { v1: hasV1Rules, v2: hasV2Rules } = hasObservabilityAlertingCapabilities(
-    coreStart.application.capabilities,
-    'rules'
-  );
-  const rulesTabVisibility = { showV1: hasV1Rules, showV2: hasV2Rules };
+  const rulesTabVisibility = getObservabilityRulesTabVisibility(coreStart.application.capabilities);
+  const { showV2: hasV2Rules } = rulesTabVisibility;
   const isUniversalSelected = pathname.includes(OBSERVABILITY_ALERTING_RULES_V2_PATH);
   // Stable host shell: persist on leave/unmount of Observability Alerting, not list-header churn.
   const v2RulesTabNewBadge = useV2RulesTabNewBadge(isUniversalSelected, {
@@ -247,6 +250,7 @@ export const ObservabilityAlertingApp = ({
               history={history}
               setBreadcrumbs={setBreadcrumbs}
               tabs={rulesV1Tabs}
+              showClassicBadge={hasV2Rules}
             />
           </EuiPageSection>
         </Route>
