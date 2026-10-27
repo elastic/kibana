@@ -12,7 +12,10 @@ import { fireEvent, render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { MetricsGridProps } from './metrics_grid';
 import { MetricsGrid } from './metrics_grid';
-import { Chart } from '../../chart';
+import { ACTION_INSPECT_PANEL } from '@kbn/embeddable-plugin/public';
+import { DEFAULT_QUICK_ACTIONS } from '@kbn/embeddable-plugin/public/react_embeddable_system/embeddable_renderer_context';
+import { Chart, type ChartProps } from '../../chart';
+import { DEFAULT_DISABLED_ACTIONS } from '../../chart/lens_wrapper';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
@@ -20,7 +23,13 @@ import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/publ
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { createESQLQuery, getMetricUniqueKey } from '../../../common/utils';
-import { FEATURE_FLAGS } from '../../../common/constants';
+import {
+  ACTION_COPY_TO_DASHBOARD,
+  ACTION_EXPLORE_IN_DISCOVER_TAB,
+  ACTION_OPEN_IN_DISCOVER,
+  ACTION_VIEW_DETAILS,
+  FEATURE_FLAGS,
+} from '../../../common/constants';
 import { useFeatureFlag } from '../../../hooks/use_feature_flag';
 import { dismissAllFlyoutsExceptFor, METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
 import {
@@ -1538,6 +1547,48 @@ describe('MetricsGrid', () => {
         }),
         expect.anything()
       );
+    });
+  });
+
+  describe('panel actions', () => {
+    it('classifies every default panel view action as shown, disabled, or incompatible', () => {
+      // These default panel actions cannot become compatible with a Lens metric panel.
+      const incompatibleWithMetricPanels = [
+        'clearControl',
+        'ACTION_SHOW_CONFIG_PANEL',
+        'ACTION_VIEW_SAVED_SEARCH',
+        'togglePanel',
+      ];
+
+      renderMetricsGrid();
+
+      const chartProps = (Chart as jest.Mock).mock.calls[0][0] as ChartProps;
+      expect(chartProps.quickActionIds).toEqual([
+        ACTION_EXPLORE_IN_DISCOVER_TAB,
+        ACTION_INSPECT_PANEL,
+        ACTION_VIEW_DETAILS,
+        ACTION_COPY_TO_DASHBOARD,
+      ]);
+      expect(chartProps.extraDisabledActions).toEqual([ACTION_OPEN_IN_DISCOVER]);
+
+      const defaultViewActionIds = (DEFAULT_QUICK_ACTIONS.view ?? []).filter((id): id is string =>
+        Boolean(id)
+      );
+      const visibleOrDisabled = new Set<string>([
+        ...(chartProps.quickActionIds ?? []).filter((id): id is string => Boolean(id)),
+        ...DEFAULT_DISABLED_ACTIONS,
+        ...(chartProps.extraDisabledActions ?? []),
+      ]);
+
+      const staleExceptions = incompatibleWithMetricPanels.filter(
+        (id) => !defaultViewActionIds.includes(id)
+      );
+      expect(staleExceptions).toEqual([]);
+
+      const unaccounted = defaultViewActionIds.filter(
+        (id) => !visibleOrDisabled.has(id) && !incompatibleWithMetricPanels.includes(id)
+      );
+      expect(unaccounted).toEqual([]);
     });
   });
 });
