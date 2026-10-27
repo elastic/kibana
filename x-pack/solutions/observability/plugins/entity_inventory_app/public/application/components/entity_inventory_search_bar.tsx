@@ -53,6 +53,7 @@ export const EntityInventorySearchBar = () => {
           enableDateRangePicker={false}
           showDatePicker
           showFilterBar
+          hiddenFilterPanelOptions={['pinFilter']}
           showQueryInput
           showQueryMenu
           showSubmitButton

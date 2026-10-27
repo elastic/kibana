@@ -68,6 +68,7 @@ describe('EntityInventorySearchBar', () => {
         useDefaultBehaviors: false,
         showDatePicker: true,
         showFilterBar: true,
+        hiddenFilterPanelOptions: ['pinFilter'],
         showQueryInput: true,
         showQueryMenu: true,
         showSavedQueryControls: false,
