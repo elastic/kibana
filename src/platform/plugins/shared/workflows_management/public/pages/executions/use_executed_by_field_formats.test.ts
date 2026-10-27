@@ -37,7 +37,7 @@ jest.mock('@kbn/react-query', () => ({
     React.useEffect(() => {
       queryFn().then(setData);
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
-    return { data, isLoading: data === undefined };
+    return { data, isFetching: data === undefined };
   },
 }));
 
@@ -60,8 +60,16 @@ describe('useExecutedByFieldFormats', () => {
     );
     mockUseUserProfilesByUid.mockReturnValue({
       data: new Map([['u_1', { uid: 'u_1', user: { username: 'elastic' } }]]),
-      isLoading: false,
+      isFetching: false,
     });
+  });
+
+  it('is ready when there are no executors, even if the profile query is idle', async () => {
+    mockSearch.mockReturnValue(of({ rawResponse: { aggregations: {} } }));
+    mockUseUserProfilesByUid.mockReturnValue({ data: undefined, isFetching: false });
+    const { result } = renderHook(() => useExecutedByFieldFormats({ spaceId: 'default' }));
+
+    await waitFor(() => expect(result.current.isReady).toBe(true));
   });
 
   it('maps profile UIDs to display names and falls back to the raw value when unresolved', async () => {

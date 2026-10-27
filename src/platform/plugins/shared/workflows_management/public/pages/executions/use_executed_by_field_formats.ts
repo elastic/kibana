@@ -57,7 +57,7 @@ export const useExecutedByFieldFormats = ({
   const showExecutor = useUiSetting<boolean>(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID, true);
   const showUnresolvedExecutors = !cloud?.isServerlessEnabled;
 
-  const { data: uids, isLoading: isLoadingUids } = useQuery<string[]>(
+  const { data: uids, isFetching: isFetchingUids } = useQuery<string[]>(
     ['workflows', 'executions', 'executedByValues', spaceId],
     async () => {
       const response = await lastValueFrom(
@@ -80,7 +80,8 @@ export const useExecutedByFieldFormats = ({
     { enabled: Boolean(spaceId), refetchOnWindowFocus: false, retry: false }
   );
 
-  const { data: profiles, isLoading: isLoadingProfiles } = useUserProfilesByUid({
+  const hasUids = (uids?.length ?? 0) > 0;
+  const { data: profiles, isFetching: isFetchingProfiles } = useUserProfilesByUid({
     enabled: showExecutor,
     uids: uids ?? [],
   });
@@ -115,6 +116,7 @@ export const useExecutedByFieldFormats = ({
 
   return {
     fieldFormats: stableFieldFormatsRef.current,
-    isReady: !isLoadingUids && !(showExecutor && isLoadingProfiles),
+    // A disabled query without data reports `isLoading`, so only wait for queries that are fetching.
+    isReady: !isFetchingUids && !(showExecutor && hasUids && isFetchingProfiles),
   };
 };
