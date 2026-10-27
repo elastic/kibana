@@ -219,10 +219,13 @@ steps:
   # a cross-space harvest would keep rediagnosing alerts it can never mark.
   # `total_count` spans every alert the rule produced in the window. `fp_rate_count`
   # includes reviewed false positives so processing a batch does not dilute the rule's
-  # measured FP rate. `untagged_fp_count` is an upper bound on the unreviewed count
-  # the harvest measures (every unreviewed FP is untagged), so the min_fp_count check
-  # here is a pre-filter, not the gate; ranking on it keeps rules reviewed earlier in
-  # the window from holding screen slots that unreviewed rules need.
+  # measured FP rate. A rule reviewed earlier in the window would otherwise keep
+  # passing both gates and hold a screen slot an unreviewed rule needs, so the screen
+  # drops rules whose newest FP is not newer than their newest reviewed alert (the
+  # harvest's watermark, computed here in the same pass) and ranks the rest on
+  # `untagged_fp_count`, an upper bound on the unreviewed count the harvest measures
+  # (every unreviewed FP is untagged). The min_fp_count check on it is a pre-filter,
+  # not the gate.
   # The DSL filter carries every per-document exclusion (window, EQL sequence
   # members, enabled rules, in-flight rules), pushed down to Lucene before ES|QL sees
   # a row. Skipping an in-flight rule here, before STATS/LIMIT, frees its slot for
@@ -253,9 +256,12 @@ steps:
             AND `kibana.alert.workflow_reason` == "false_positive"
         | STATS total_count = COUNT(*),
             fp_rate_count = COUNT(*) WHERE is_fp,
-            untagged_fp_count = COUNT(*) WHERE is_fp AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
+            untagged_fp_count = COUNT(*) WHERE is_fp AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}"),
+            last_fp_at = MAX(@timestamp) WHERE is_fp,
+            reviewed_watermark = MAX(@timestamp) WHERE MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
           BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`
-        | WHERE untagged_fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}
+        | WHERE (reviewed_watermark IS NULL OR last_fp_at > reviewed_watermark)
+          AND untagged_fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}
           AND fp_rate_count * 100 >= total_count * {{ inputs.min_fp_rate_pct | default: consts.min_fp_rate_pct }}
         | SORT untagged_fp_count DESC
         | LIMIT {{ consts.max_screened_rules }}

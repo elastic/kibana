@@ -260,7 +260,7 @@ apiTest.describe.serial(
     });
 
     apiTest(
-      'launches a review for each rule that passes both gates',
+      'starts a review only for enabled rules with enough unreviewed false positives at a high enough rate',
       async ({ apiClient, esClient }) => {
         apiTest.setTimeout(TEST_TIMEOUT_MS);
         const allFp = await newRule(apiClient, 'all-fp');
@@ -367,34 +367,52 @@ apiTest.describe.serial(
         const launched = launchedRules(execution);
         const launchedFor = (id: string) => launched.find(({ uuid }) => uuid === id);
 
-        await apiTest.step('the sweep read its sources', async () => {
-          expect(findStepOutput(execution, 'emit_result')).toMatchObject({
-            harvest_failed: false,
-          });
-        });
-
-        await apiTest.step('all-fp: 12 FPs at 100% is launched with fp 12', async () => {
-          expect(launchedFor(allFp.id)).toStrictEqual({ uuid: allFp.id, fpCount: 12 });
-        });
-
-        await apiTest.step('mixed: 20 FPs of 30 alerts is launched with fp 20', async () => {
-          expect(launchedFor(mixed.id)).toStrictEqual({ uuid: mixed.id, fpCount: 20 });
-        });
-
-        await apiTest.step('low-rate: 20 FPs of 60 alerts misses the rate gate', async () => {
-          expect(launchedFor(lowRate.id)).toBeUndefined();
-        });
-
-        await apiTest.step('few-fp: 5 FPs misses the count gate', async () => {
-          expect(launchedFor(fewFp.id)).toBeUndefined();
-        });
-
-        await apiTest.step('reviewed: 12 tagged FPs leave nothing to review', async () => {
-          expect(launchedFor(reviewed.id)).toBeUndefined();
-        });
+        await apiTest.step(
+          'the sweep finished without a failed lookup, screen or harvest',
+          async () => {
+            expect(findStepOutput(execution, 'emit_result')).toMatchObject({
+              harvest_failed: false,
+            });
+          }
+        );
 
         await apiTest.step(
-          'partly-reviewed: only the 11 FPs newer than the watermark count',
+          'a rule whose 12 alerts were all closed as false positives gets a review for 12',
+          async () => {
+            expect(launchedFor(allFp.id)).toStrictEqual({ uuid: allFp.id, fpCount: 12 });
+          }
+        );
+
+        await apiTest.step(
+          'a rule with 20 false positives and 10 open alerts (67%) gets a review for 20',
+          async () => {
+            expect(launchedFor(mixed.id)).toStrictEqual({ uuid: mixed.id, fpCount: 20 });
+          }
+        );
+
+        await apiTest.step(
+          'a rule with 20 false positives and 40 open alerts (33%) is below the 50% rate and gets no review',
+          async () => {
+            expect(launchedFor(lowRate.id)).toBeUndefined();
+          }
+        );
+
+        await apiTest.step(
+          'a rule with only 5 false positives is below the minimum of 10 and gets no review',
+          async () => {
+            expect(launchedFor(fewFp.id)).toBeUndefined();
+          }
+        );
+
+        await apiTest.step(
+          'a rule whose 12 false positives were all reviewed already gets no review',
+          async () => {
+            expect(launchedFor(reviewed.id)).toBeUndefined();
+          }
+        );
+
+        await apiTest.step(
+          'a rule with 12 reviewed false positives and 11 newer unreviewed ones gets a review for the 11',
           async () => {
             expect(launchedFor(partlyReviewed.id)).toStrictEqual({
               uuid: partlyReviewed.id,
@@ -403,21 +421,27 @@ apiTest.describe.serial(
           }
         );
 
-        await apiTest.step('disabled: 30 FPs of a disabled rule are ignored', async () => {
+        await apiTest.step('a disabled rule with 30 false positives gets no review', async () => {
           expect(launchedFor(disabled.id)).toBeUndefined();
         });
 
-        await apiTest.step('edited: 30 FPs from an older revision are ignored', async () => {
-          expect(launchedFor(edited.id)).toBeUndefined();
-        });
+        await apiTest.step(
+          'a rule edited since its 30 false positives gets no review for the old version',
+          async () => {
+            expect(launchedFor(edited.id)).toBeUndefined();
+          }
+        );
 
-        await apiTest.step('launches the noisiest rules first and nothing else', async () => {
-          expect(launched).toStrictEqual([
-            { uuid: mixed.id, fpCount: 20 },
-            { uuid: allFp.id, fpCount: 12 },
-            { uuid: partlyReviewed.id, fpCount: 11 },
-          ]);
-        });
+        await apiTest.step(
+          'exactly those three rules get a review, the one with most false positives first',
+          async () => {
+            expect(launched).toStrictEqual([
+              { uuid: mixed.id, fpCount: 20 },
+              { uuid: allFp.id, fpCount: 12 },
+              { uuid: partlyReviewed.id, fpCount: 11 },
+            ]);
+          }
+        );
       }
     );
 
@@ -430,21 +454,16 @@ apiTest.describe.serial(
       esClient: EsClient,
       kind: string,
       noisyRuleIds: string[],
-      noisyReviewed = false
+      noisyAlerts = (ruleId: string, ruleName: string): AlertSpec[] => [
+        { ruleId, ruleName, count: 25, falsePositive: true, hoursAgo: 2 },
+      ]
     ) => {
       const enabled = [
         await newRule(apiClient, `${kind}-a`),
         await newRule(apiClient, `${kind}-b`),
       ];
       await seedAlerts(esClient, [
-        ...noisyRuleIds.map((ruleId, i) => ({
-          ruleId,
-          ruleName: `${namePrefix}-${kind}-${i}`,
-          count: 25,
-          falsePositive: true,
-          reviewed: noisyReviewed,
-          hoursAgo: 2,
-        })),
+        ...noisyRuleIds.flatMap((ruleId, i) => noisyAlerts(ruleId, `${namePrefix}-${kind}-${i}`)),
         ...enabled.map(({ id }, i) => ({
           ruleId: id,
           ruleName: `${namePrefix}-${kind}-${i === 0 ? 'a' : 'b'}`,
@@ -456,57 +475,74 @@ apiTest.describe.serial(
       return enabled.map(({ id }) => id).sort();
     };
 
-    apiTest('ignores alerts of rules that no longer exist', async ({ apiClient, esClient }) => {
-      apiTest.setTimeout(TEST_TIMEOUT_MS);
-      const deleted = Array.from({ length: 20 }, () => randomUUID());
-      const enabled = await seedStarvation(apiClient, esClient, 'deleted', deleted);
+    apiTest(
+      '20 deleted rules with more false positives than two enabled rules do not crowd them out',
+      async ({ apiClient, esClient }) => {
+        apiTest.setTimeout(TEST_TIMEOUT_MS);
+        const deleted = Array.from({ length: 20 }, () => randomUUID());
+        const enabled = await seedStarvation(apiClient, esClient, 'deleted', deleted);
 
-      const execution = await sweep(apiClient);
-      const launched = launchedRules(execution).map(({ uuid }) => uuid);
+        const execution = await sweep(apiClient);
+        const launched = launchedRules(execution).map(({ uuid }) => uuid);
 
-      await apiTest.step('no deleted rule takes a slot', async () => {
-        expect(launched.filter((uuid) => deleted.includes(uuid))).toStrictEqual([]);
-      });
+        await apiTest.step('none of the deleted rules gets a review', async () => {
+          expect(launched.filter((uuid) => deleted.includes(uuid))).toStrictEqual([]);
+        });
 
-      await apiTest.step('both enabled rules are launched', async () => {
-        expect(launched.sort()).toStrictEqual(enabled);
-      });
-    });
-
-    apiTest('ignores alerts of rules that are disabled', async ({ apiClient, esClient }) => {
-      apiTest.setTimeout(TEST_TIMEOUT_MS);
-      const disabled: string[] = [];
-      for (let i = 0; i < 20; i++) {
-        const rule = await newRule(apiClient, `disabled-${i}`);
-        await patchRule(apiClient, adminHeaders, { id: rule.id, enabled: false });
-        disabled.push(rule.id);
+        await apiTest.step('both enabled rules get a review', async () => {
+          expect(launched.sort()).toStrictEqual(enabled);
+        });
       }
-      const enabled = await seedStarvation(apiClient, esClient, 'disabled', disabled);
+    );
 
-      const execution = await sweep(apiClient);
-      const launched = launchedRules(execution).map(({ uuid }) => uuid);
+    apiTest(
+      '20 disabled rules with more false positives than two enabled rules do not crowd them out',
+      async ({ apiClient, esClient }) => {
+        apiTest.setTimeout(TEST_TIMEOUT_MS);
+        const disabled: string[] = [];
+        for (let i = 0; i < 20; i++) {
+          const rule = await newRule(apiClient, `disabled-${i}`);
+          await patchRule(apiClient, adminHeaders, { id: rule.id, enabled: false });
+          disabled.push(rule.id);
+        }
+        const enabled = await seedStarvation(apiClient, esClient, 'disabled', disabled);
 
-      await apiTest.step('no disabled rule takes a slot', async () => {
-        expect(launched.filter((uuid) => disabled.includes(uuid))).toStrictEqual([]);
-      });
+        const execution = await sweep(apiClient);
+        const launched = launchedRules(execution).map(({ uuid }) => uuid);
 
-      await apiTest.step('both enabled rules are launched', async () => {
-        expect(launched.sort()).toStrictEqual(enabled);
-      });
-    });
+        await apiTest.step('none of the disabled rules gets a review', async () => {
+          expect(launched.filter((uuid) => disabled.includes(uuid))).toStrictEqual([]);
+        });
+
+        await apiTest.step('both enabled rules get a review', async () => {
+          expect(launched.sort()).toStrictEqual(enabled);
+        });
+      }
+    );
 
     // A reviewed rule keeps its tagged FPs in the window, so it would pass the FP-rate
-    // gate and outrank unreviewed rules for the screen's slots. The screen ranks on
-    // untagged FPs instead, so reviewed rules never reach its rows.
+    // gate and outrank unreviewed rules for the screen's slots. The review tags only
+    // the newest 100 ids and the watermark retires the older ones, so each reviewed
+    // rule here also has 50 older untagged FPs: an untagged count alone would keep it
+    // in the screen; only the watermark comparison drops it.
     apiTest(
-      'ignores rules whose false positives are all reviewed',
+      '20 already reviewed rules with 150 false positives each do not crowd out two unreviewed rules',
       async ({ apiClient, esClient }) => {
         apiTest.setTimeout(TEST_TIMEOUT_MS);
         const reviewed: string[] = [];
         for (let i = 0; i < 20; i++) {
           reviewed.push((await newRule(apiClient, `reviewed-${i}`)).id);
         }
-        const enabled = await seedStarvation(apiClient, esClient, 'reviewed', reviewed, true);
+        const enabled = await seedStarvation(
+          apiClient,
+          esClient,
+          'reviewed',
+          reviewed,
+          (ruleId, ruleName) => [
+            { ruleId, ruleName, count: 100, falsePositive: true, reviewed: true, hoursAgo: 2 },
+            { ruleId, ruleName, count: 50, falsePositive: true, hoursAgo: 3 },
+          ]
+        );
 
         const execution = await sweep(apiClient);
         const launched = launchedRules(execution).map(({ uuid }) => uuid);
@@ -515,11 +551,11 @@ apiTest.describe.serial(
           []
         ).map((row) => row[0] as string);
 
-        await apiTest.step('no reviewed rule takes a screen slot', async () => {
+        await apiTest.step('the screen step returns only the two unreviewed rules', async () => {
           expect(screened.sort()).toStrictEqual(enabled);
         });
 
-        await apiTest.step('both unreviewed rules are launched', async () => {
+        await apiTest.step('both unreviewed rules get a review', async () => {
           expect(launched.sort()).toStrictEqual(enabled);
         });
       }

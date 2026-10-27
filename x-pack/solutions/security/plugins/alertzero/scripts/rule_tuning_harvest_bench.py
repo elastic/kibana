@@ -39,8 +39,8 @@ def build_queries(min_fp, min_rate):
 
     screen = f"""FROM {INDEX}
 | EVAL is_fp = `kibana.alert.workflow_status` == "closed" AND `kibana.alert.workflow_reason` == "false_positive"
-| STATS total_count = COUNT(*), fp_rate_count = COUNT(*) WHERE is_fp, untagged_fp_count = COUNT(*) WHERE is_fp AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{TAG}") BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`
-| WHERE untagged_fp_count >= {min_fp} AND fp_rate_count * 100 >= total_count * {min_rate}
+| STATS total_count = COUNT(*), fp_rate_count = COUNT(*) WHERE is_fp, untagged_fp_count = COUNT(*) WHERE is_fp AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{TAG}"), last_fp_at = MAX(@timestamp) WHERE is_fp, reviewed_watermark = MAX(@timestamp) WHERE MV_CONTAINS(`kibana.alert.workflow_tags`, "{TAG}") BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`
+| WHERE (reviewed_watermark IS NULL OR last_fp_at > reviewed_watermark) AND untagged_fp_count >= {min_fp} AND fp_rate_count * 100 >= total_count * {min_rate}
 | SORT untagged_fp_count DESC
 | LIMIT {SCREEN_LIMIT}
 | EVAL rule_revision_key = CONCAT(",", `kibana.alert.rule.uuid`, "@", TO_STRING(`kibana.alert.rule.revision`), ",")
@@ -192,7 +192,7 @@ def deleted_check(cluster, enabled):
     a = cluster.esql("deleted-check unfiltered", loose)
     b = cluster.esql("deleted-check enabled", loose, [{"terms": {"kibana.alert.rule.uuid": list(enabled)}}])
     ghosts = [row[0] for row in a["rows"] if row[0] not in enabled]
-    print(f"\ndeleted-rule check (gate relaxed to untagged_fp_count >= 1, LIMIT {SCREEN_LIMIT}):")
+    print(f"\ndeleted-rule check (gate relaxed to untagged_fp_count >= 1 past the watermark, LIMIT {SCREEN_LIMIT}):")
     print(f"  without enabled filter: {len(a['rows'])} rules, {len(ghosts)} of them have no enabled rule object")
     print(f"  with enabled filter:    {len(b['rows'])} rules, all enabled: {all(row[0] in enabled for row in b['rows'])}")
 

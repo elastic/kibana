@@ -100,10 +100,12 @@ before any slot is taken.
 ```yaml
 # total_count spans every alert the rule produced in the window; fp_rate_count
 # includes reviewed FPs so processing a batch does not dilute the measured rate.
-# untagged_fp_count is an upper bound on the unreviewed count the harvest
-# measures (every unreviewed FP is untagged), so the min_fp_count check here is
-# a pre-filter, not the gate; ranking on it keeps rules reviewed earlier in the
-# window from holding screen slots that unreviewed rules need.
+# A rule reviewed earlier in the window would otherwise keep passing both gates
+# and hold a screen slot, so rules whose newest FP is not newer than their newest
+# reviewed alert (the harvest's watermark, computed here in the same pass) are
+# dropped, and the rest rank on untagged_fp_count, an upper bound on the
+# unreviewed count the harvest measures. The min_fp_count check on it is a
+# pre-filter, not the gate.
 - name: screen_rule_fp_rates
   type: elasticsearch.esql.query
   if: "${{ steps.resolve_enabled_rules.output.count > 0 }}"
@@ -128,9 +130,12 @@ before any slot is taken.
           AND `kibana.alert.workflow_reason` == "false_positive"
       | STATS total_count = COUNT(*),
           fp_rate_count = COUNT(*) WHERE is_fp,
-          untagged_fp_count = COUNT(*) WHERE is_fp AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
+          untagged_fp_count = COUNT(*) WHERE is_fp AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}"),
+          last_fp_at = MAX(@timestamp) WHERE is_fp,
+          reviewed_watermark = MAX(@timestamp) WHERE MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
         BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`
-      | WHERE untagged_fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}
+      | WHERE (reviewed_watermark IS NULL OR last_fp_at > reviewed_watermark)
+        AND untagged_fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}
         AND fp_rate_count * 100 >= total_count * {{ inputs.min_fp_rate_pct | default: consts.min_fp_rate_pct }}
       | SORT untagged_fp_count DESC
       | LIMIT {{ consts.max_screened_rules }}
@@ -162,13 +167,19 @@ headroom above the harvest's 20 is for:
 - A rule reviewed earlier in the window keeps its tagged FPs in `fp_rate_count`
   (by design, so a batch does not dilute the rate), so on that count alone it
   would outrank unreviewed rules for the slots, the same starvation as #20315
-  with "reviewed" in place of "disabled". The screen pre-filters and sorts on
-  `untagged_fp_count` instead, which drops fully reviewed rules in the screen
-  itself. Untagged FPs older than the rule's watermark still count here and
-  not in the harvest, so a partly reviewed rule can pass the screen and then
-  miss `min_fp_count`; the gate stays exact because untagged ≥ unreviewed.
-  Measured cost of the extra `COUNT WHERE` over the tags doc values: none
-  visible (0.2s / 0.3s, 1.0 / 1.1 CPU-s on the perf cluster).
+  with "reviewed" in place of "disabled". The screen computes the harvest's
+  watermark in its single pass (`MAX(@timestamp)` of tagged alerts) and keeps
+  a rule only if its newest FP is newer than that, which drops every fully
+  reviewed rule whatever its size; the review tags only the newest 100 ids, so
+  a count of untagged FPs alone would keep a 1,000-FP rule in the screen with
+  900 "untagged" FPs that the watermark has already retired. The survivors
+  rank on `untagged_fp_count`, an upper bound on the unreviewed count (untagged
+  FPs below the watermark still count here and not in the harvest), so a
+  partly reviewed rule can pass the screen and then miss `min_fp_count`; the
+  gate stays exact. Measured cost of the three extra aggregates over doc
+  values already loaded: 0.3s either way, 1.1 vs 1.3 CPU-s (one more
+  `@timestamp` load per row, 5.7M → 7.3M values) on the perf cluster; the
+  full pipeline returns the same 5 rules at 2.3s vs 2.5s.
 - A rule edited mid-window has one row per revision with FPs; the old-revision
   rows are dropped by `resolve_screened_rules`.
 
@@ -562,7 +573,7 @@ POST _query?allow_partial_results=false
       "must_not": [{ "exists": { "field": "kibana.alert.group.index" } }]
     }
   },
-  "query": "FROM .alerts-security.alerts-default | EVAL is_fp = `kibana.alert.workflow_status` == \"closed\" AND `kibana.alert.workflow_reason` == \"false_positive\" | STATS total_count = COUNT(*), fp_rate_count = COUNT(*) WHERE is_fp, untagged_fp_count = COUNT(*) WHERE is_fp AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, \"detection-watch:tuning-reviewed\") BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision` | WHERE untagged_fp_count >= 10 AND fp_rate_count * 100 >= total_count * 50 | SORT untagged_fp_count DESC | LIMIT 200 | EVAL rule_revision_key = CONCAT(\",\", `kibana.alert.rule.uuid`, \"@\", TO_STRING(`kibana.alert.rule.revision`), \",\") | KEEP `kibana.alert.rule.uuid`, total_count, fp_rate_count, rule_revision_key"
+  "query": "FROM .alerts-security.alerts-default | EVAL is_fp = `kibana.alert.workflow_status` == \"closed\" AND `kibana.alert.workflow_reason` == \"false_positive\" | STATS total_count = COUNT(*), fp_rate_count = COUNT(*) WHERE is_fp, untagged_fp_count = COUNT(*) WHERE is_fp AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, \"detection-watch:tuning-reviewed\"), last_fp_at = MAX(@timestamp) WHERE is_fp, reviewed_watermark = MAX(@timestamp) WHERE MV_CONTAINS(`kibana.alert.workflow_tags`, \"detection-watch:tuning-reviewed\") BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision` | WHERE (reviewed_watermark IS NULL OR last_fp_at > reviewed_watermark) AND untagged_fp_count >= 10 AND fp_rate_count * 100 >= total_count * 50 | SORT untagged_fp_count DESC | LIMIT 200 | EVAL rule_revision_key = CONCAT(\",\", `kibana.alert.rule.uuid`, \"@\", TO_STRING(`kibana.alert.rule.revision`), \",\") | KEEP `kibana.alert.rule.uuid`, total_count, fp_rate_count, rule_revision_key"
 }
 ```
 

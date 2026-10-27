@@ -636,7 +636,7 @@ describe('detection rule workflows', () => {
       // the harvest then rejects, never drop a real candidate.
       it('pre-filters on the FP count without replacing the harvest gate', () => {
         expect(screenQuery).toContain(
-          'WHERE untagged_fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}'
+          'AND untagged_fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}'
         );
         expect(screenQuery).toContain(
           'untagged_fp_count = COUNT(*) WHERE is_fp AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")'
@@ -654,6 +654,21 @@ describe('detection rule workflows', () => {
         expect(screenQuery).toContain('| SORT untagged_fp_count DESC');
         expect(screenQuery).not.toContain('SORT fp_rate_count');
         expect(screenQuery).toContain('fp_rate_count * 100 >= total_count');
+      });
+
+      // The review tags only the newest 100 ids; the watermark retires the older
+      // untagged FPs with them. A rule with hundreds of FPs would keep a positive
+      // untagged count after its review, so the screen compares the newest FP with
+      // the newest reviewed alert, in the same pass, exactly as the harvest does.
+      it('drops fully reviewed rules in the screen, whatever their size', () => {
+        expect(screenQuery).toContain('last_fp_at = MAX(@timestamp) WHERE is_fp');
+        expect(screenQuery).toContain(
+          'reviewed_watermark = MAX(@timestamp) WHERE MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")'
+        );
+        expect(screenQuery).toContain(
+          '| WHERE (reviewed_watermark IS NULL OR last_fp_at > reviewed_watermark)'
+        );
+        expect(screenQuery).not.toContain('INLINE STATS');
       });
 
       it('screens only when there are enabled rules and harvests only screened rules', () => {
