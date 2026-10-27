@@ -2201,7 +2201,7 @@ export const UnifiedAttachmentMetadata = lazySchema(() =>
 export type UnifiedAttachmentMetadata = z.infer<typeof UnifiedAttachmentMetadata>;
 
 /**
-  * The attachment type. The type must be registered in Kibana and determines the accepted shape of `attachmentId`, `data`, and `metadata`. Common types include `comment`, `security.alert`, `observability.alert`, `stack.alert`, `security.event`, `file`, `lens`, and `dashboard`. Legacy attachment types such as `user` or `alert` are not accepted.
+  * The attachment type. The type must be registered in Kibana and determines the accepted shape of `attachmentId`, `data`, and `metadata`. Common types include `comment`, `security.alert`, `observability.alert`, `stack.alert`, `security.event`, `file`, `lens`, and `dashboard`. Legacy attachment types such as `user` or `alert` are not accepted. You can read and delete `file` attachments, but you can't create or replace them with this API. To attach a file, use `POST /api/cases/{caseId}/files`.
 
   */
 export const UnifiedAttachmentType = lazySchema(() => z.string());

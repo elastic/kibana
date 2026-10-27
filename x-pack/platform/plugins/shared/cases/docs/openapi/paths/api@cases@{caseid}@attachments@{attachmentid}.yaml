@@ -86,7 +86,8 @@ put:
               $ref: '../components/examples/get_unified_attachment_response.yaml'
     '400':
       description: >
-        The request body is invalid, or it changes the attachment type or owner.
+        The request body is invalid, the attachment type is `file`, or the body changes the
+        attachment type or owner.
       content:
         application/json:
           schema:

@@ -36,8 +36,8 @@ post:
               $ref: '../components/examples/get_unified_attachment_response.yaml'
     '400':
       description: >
-        The request body is invalid, the attachment type is not registered, the owner does not
-        match the case, or a case limit was exceeded.
+        The request body is invalid, the attachment type is not registered or is `file`, the
+        owner does not match the case, or a case limit was exceeded.
       content:
         application/json:
           schema:

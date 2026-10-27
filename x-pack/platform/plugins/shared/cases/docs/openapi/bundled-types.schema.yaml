@@ -1790,7 +1790,7 @@ paths:
                   $ref: '#/components/examples/get_unified_attachment_response'
         '400':
           description: |
-            The request body is invalid, the attachment type is not registered, the owner does not match the case, or a case limit was exceeded.
+            The request body is invalid, the attachment type is not registered or is `file`, the owner does not match the case, or a case limit was exceeded.
           content:
             application/json:
               schema:
@@ -1990,7 +1990,7 @@ paths:
                   $ref: '#/components/examples/get_unified_attachment_response'
         '400':
           description: |
-            The request body is invalid, or it changes the attachment type or owner.
+            The request body is invalid, the attachment type is `file`, or the body changes the attachment type or owner.
           content:
             application/json:
               schema:
@@ -4990,7 +4990,7 @@ components:
     unified_attachment_type:
       type: string
       description: |
-        The attachment type. The type must be registered in Kibana and determines the accepted shape of `attachmentId`, `data`, and `metadata`. Common types include `comment`, `security.alert`, `observability.alert`, `stack.alert`, `security.event`, `file`, `lens`, and `dashboard`. Legacy attachment types such as `user` or `alert` are not accepted.
+        The attachment type. The type must be registered in Kibana and determines the accepted shape of `attachmentId`, `data`, and `metadata`. Common types include `comment`, `security.alert`, `observability.alert`, `stack.alert`, `security.event`, `file`, `lens`, and `dashboard`. Legacy attachment types such as `user` or `alert` are not accepted. You can read and delete `file` attachments, but you can't create or replace them with this API. To attach a file, use `POST /api/cases/{caseId}/files`.
       example: comment
     unified_attachment_response:
       title: Case attachment response
