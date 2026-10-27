@@ -202,6 +202,7 @@ export class SearchSessionsService extends FtrService {
         .post('/internal/session/_find')
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
         .set('kbn-xsrf', 'anything')
+        .set('x-elastic-internal-origin', 'kibana')
         .set('kbn-system-request', 'true')
         .send({
           page: 1,
@@ -227,6 +228,7 @@ export class SearchSessionsService extends FtrService {
             .delete(`/internal/session/${so.id}`)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
             .set(`kbn-xsrf`, `anything`)
+            .set('x-elastic-internal-origin', 'kibana')
             .expect(200);
         })
       );

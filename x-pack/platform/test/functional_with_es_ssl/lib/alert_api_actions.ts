@@ -91,6 +91,7 @@ export async function snoozeAlert({ supertest, alertId }: { supertest: any; aler
   const { body: alert } = await supertest
     .post(`/internal/alerting/rule/${alertId}/_snooze`)
     .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'kibana')
     .set('content-type', 'application/json')
     .send({
       snooze_schedule: {
@@ -109,6 +110,7 @@ export async function scheduleRule({ supertest, ruleId }: { supertest: any; rule
   const { body: alert } = await supertest
     .post(`/internal/alerting/rule/${ruleId}/_snooze`)
     .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'kibana')
     .set('content-type', 'application/json')
     .send({
       snooze_schedule: {

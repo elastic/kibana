@@ -26,7 +26,9 @@ export function createWaitForExecutionCount(
       return true;
     }
     const prefix = spaceId ? getUrlPrefix(spaceId) : '';
-    const getResponse = await st.get(`${prefix}/internal/alerting/rule/${id}`);
+    const getResponse = await st
+      .get(`${prefix}/internal/alerting/rule/${id}`)
+      .set('x-elastic-internal-origin', 'kibana');
     expect(getResponse.status).to.eql(200);
     if (getResponse.body.monitoring.run.history.length >= count) {
       attempts = 0;

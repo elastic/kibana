@@ -256,6 +256,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .post(`/internal/reporting/schedule/printablePdfV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({ jobParams, schedule: scheduleToUse, notification });
   };
   const generatePng = async (
@@ -287,6 +288,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .post(`/internal/reporting/schedule/pngV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({ jobParams, schedule: scheduleToUse });
   };
   const generateCsv = async (
@@ -318,6 +320,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .post(`/internal/reporting/schedule/csv_searchsource`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({ jobParams, schedule: scheduleToUse });
   };
 
@@ -337,6 +340,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .post(`/internal/reporting/schedule/csv_searchsource`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
+      .set('x-elastic-internal-origin', 'kibana')
       .send({ jobParams, schedule: scheduleToUse, notification });
   };
 

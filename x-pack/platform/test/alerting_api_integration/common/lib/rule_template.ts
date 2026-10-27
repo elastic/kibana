@@ -137,6 +137,7 @@ export function getRuleTemplate({
   return supertest
     .get(`${auth.space ? `/s/${auth.space}` : ''}/internal/alerting/rule_template/${templateId}`)
     .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'kibana')
     .auth(auth.user.username, auth.user.password)
     .send();
 }
@@ -154,6 +155,7 @@ export function findRuleTemplates({
     .get(`${auth.space ? `/s/${auth.space}` : ''}/internal/alerting/rule_template/_find`)
     .query(query)
     .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'kibana')
     .auth(auth.user.username, auth.user.password)
     .send();
 }

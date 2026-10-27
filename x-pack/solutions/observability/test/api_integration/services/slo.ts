@@ -141,6 +141,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
       const { body } = await supertest
         .post(`/internal/observability/slos/_historical_summary`)
         .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'kibana')
         .auth('slo_editor', 'changeme')
         .set('elastic-api-version', '1')
         .send(params);

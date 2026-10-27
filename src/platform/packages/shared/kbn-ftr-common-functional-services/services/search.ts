@@ -60,6 +60,7 @@ export class SearchService extends FtrService {
         .post(`${spaceUrl}/internal/search/${strategy}`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'kibana')
         .send(options)
         .expect(200);
     });
@@ -72,6 +73,7 @@ export class SearchService extends FtrService {
       const resp = await supertest
         .post(`${spaceUrl}/internal/search/${strategy}/${body.id}`)
         .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'kibana')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send(options)
         .expect(200);

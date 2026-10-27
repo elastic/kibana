@@ -38,6 +38,7 @@ export const getAlertById = async ({
     .get(`${getSpaceUrlPrefix(auth?.space)}/internal/rac/alerts?id=${id}&index=${index}`)
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'kibana')
     .expect(expectedHttpCode);
 
   return alert;

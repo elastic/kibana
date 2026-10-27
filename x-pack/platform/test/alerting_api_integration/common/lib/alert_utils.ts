@@ -565,7 +565,8 @@ export class AlertUtils {
   public async runSoon(ruleId: string, options?: { force?: boolean }) {
     let request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-      .set('kbn-xsrf', 'foo');
+      .set('kbn-xsrf', 'foo')
+      .set('x-elastic-internal-origin', 'kibana');
 
     if (this.user) {
       request = request.auth(this.user.username, this.user.password);
