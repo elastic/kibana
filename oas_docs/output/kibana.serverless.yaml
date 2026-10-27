@@ -54666,7 +54666,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. Authenticate with the one-time API key issued when the callback was created, sent as `Authorization: ApiKey <encoded-key>`. The key has no other privileges. `role_arn` and `stack_arn` must be in the same AWS account. While the key is valid, a repeat report with the same values succeeds and different values return 409. The key is invalidated once the first report has been applied, so a later retry is rejected with 401 before these checks run.
+        Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. The request is not authenticated: present the one-time token issued when the callback was created in the `x-elastic-callback-token` header. The token is not an Elasticsearch credential and admits nothing but this report. `role_arn` and `stack_arn` must be in the same AWS account. While the record is pending, a repeat report with the same values succeeds and different values return 409; an expired or cancelled record returns 410.
       operationId: receive-provisioning-callback
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -54726,7 +54726,7 @@ paths:
                 type: object
                 properties:
                   status:
-                    description: 'State of the callback record. `pending`: waiting for the stack. `receiving`: a report is being applied. `received`: values stored and the identity exists. `cancelled`: the form stopped waiting and the key was invalidated.'
+                    description: 'State of the callback record. `pending`: waiting for the stack. `receiving`: a report is being applied. `received`: values stored and the identity exists. `cancelled`: the form stopped waiting and the token is refused.'
                     enum:
                       - pending
                       - receiving
@@ -54771,8 +54771,8 @@ paths:
             application/json:
               examples:
                 notFoundExample:
-                  description: No record has this ID, or the API key is not the one issued for it
-                  summary: Unknown callback or API key
+                  description: No record has this ID, or the token is not the one issued for it
+                  summary: Unknown callback or token
                   value:
                     error: Not Found
                     message: Callback not found
