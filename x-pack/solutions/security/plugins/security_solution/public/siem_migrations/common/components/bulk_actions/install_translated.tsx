@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, memo } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiFlexItem, EuiButton } from '@elastic/eui';
 import * as i18n from './translations';
 import type { BulkActionsItem } from './types';
 
@@ -75,16 +75,18 @@ export const InstallTranslatedButton = memo(
       disableInstallTranslatedItemsButton || hasSelectionButNoneInstallable || !isAuthorized;
 
     return (
-      <EuiButton
-        iconType="plusCircle"
-        onClick={onClick}
-        disabled={isDisabled}
-        isLoading={isLoading}
-        data-test-subj={dataTestSubj}
-        aria-label={ariaLabel}
-      >
-        {buttonText}
-      </EuiButton>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          iconType="plusCircle"
+          onClick={onClick}
+          disabled={isDisabled}
+          isLoading={isLoading}
+          data-test-subj={dataTestSubj}
+          aria-label={ariaLabel}
+        >
+          {buttonText}
+        </EuiButton>
+      </EuiFlexItem>
     );
   }
 );
