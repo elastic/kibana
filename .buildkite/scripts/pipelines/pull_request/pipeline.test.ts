@@ -349,6 +349,27 @@ describe('pull_request pipeline generation', () => {
     expect(output).toContain('scout-edr-real-fleet');
   });
 
+  it.each([
+    'x-pack/solutions/security/plugins/security_solution/server/fleet_integration/fleet_integration.ts',
+    'x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/integrations/install_endpoint_security_prebuilt_rule.ts',
+  ])(
+    'triggers Scout EDR real Fleet for an Endpoint Security rule install change: %s',
+    async (filename) => {
+      const changes = [{ filename }];
+      mockGetPrChangesCached.mockResolvedValue(changes);
+      mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+        realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+      );
+      jest.spyOn(console, 'warn').mockImplementation();
+      const emitted = waitForEmission();
+
+      await importPipelineModule();
+      const output = await emitted;
+
+      expect(output).toContain('scout-edr-real-fleet');
+    }
+  );
+
   it('triggers Scout EDR real Fleet for a suite-only diff', async () => {
     const changes = [
       {

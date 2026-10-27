@@ -10,10 +10,16 @@ import { css } from '@emotion/react';
 import { EuiCallOut, EuiLoadingSpinner, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApprovalContent } from '@kbn/proposals-ui';
 import type { DeclineParams } from '@kbn/proposals-ui';
 import { getUserDisplayName } from '@kbn/user-profile-components';
-import { isAwaitingDecision } from '@kbn/proposals-common';
+import {
+  isAwaitingDecision,
+  isTodoProposal,
+  PROPOSALS_UI_CAPABILITY_DECIDE,
+} from '@kbn/proposals-common';
 import {
   useApproveProposal,
   useDismissProposal,
@@ -40,6 +46,13 @@ const toFriendlyError = (error: unknown): Error => {
         i18n.translate('xpack.proposals.proposalCard.conflictError', {
           defaultMessage:
             'This proposal is no longer available to decide. Refresh the page to see its current status.',
+        })
+      );
+    }
+    if (error.response?.status === 403) {
+      return new Error(
+        i18n.translate('xpack.proposals.proposalCard.forbiddenErrorMessage', {
+          defaultMessage: "You don't have permission to decide proposals.",
         })
       );
     }
@@ -73,6 +86,10 @@ export interface ProposalApprovalCardProps {
 export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalId }) => {
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'ApprovalChatCard' });
+  const {
+    services: { application },
+  } = useKibana<CoreStart>();
+  const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
 
   const proposalQuery = useProposal(proposalId);
   const approveMutation = useApproveProposal();
@@ -153,7 +170,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
         key={isReplaced ? 'replaced' : 'current'}
         proposal={liveProposal}
         titleId={titleId}
-        readOnly={isReplaced}
+        readOnly={isReplaced || !canDecide}
         isSubmitting={isReplaced ? undefined : isSubmitting}
         currentActorName={currentActorName}
         onApprove={isPending || isReplaced ? handleApprove : undefined}

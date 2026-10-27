@@ -12,6 +12,7 @@ import {
   sendGetPackageInfoByKey,
 } from '@kbn/fleet-plugin/public';
 
+import { getEffectiveNamespace } from '../../common/effective_namespace';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
 import {
@@ -127,6 +128,7 @@ export async function updateManagedIntegrationsPolicy(
     storedServiceVars,
     globalRegion,
     namespace,
+    globalNamespace,
     authenticateAndDeployStep,
     servicesMap,
   } = opts;
@@ -203,7 +205,11 @@ export async function updateManagedIntegrationsPolicy(
   const pkgVarNames = getPackageVarNames(pkgInfo as { vars?: Array<{ name: string }> });
 
   const policyName = existingName ?? `${packageName.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}`;
-  const policyNamespace = existingNamespace ?? namespace;
+  // The namespace the instances now deploy into wins, so a change made while editing a deployed
+  // flow reaches the policy. Without one the policy keeps what it has.
+  const policyNamespace =
+    getEffectiveNamespace(members[0].instance.instanceId, storedServiceVars, globalNamespace) ||
+    (existingNamespace ?? namespace);
 
   // Use the override connector when the caller explicitly provides one (e.g. a dirty redeploy
   // that changed identity federation settings). Otherwise preserve the connector already on the
