@@ -65,6 +65,15 @@ export class NightshiftPlugin
       visibleIn: [],
       deepLinks: [
         {
+          id: 'detections' satisfies NightshiftLinkId,
+          title: i18n.translate('xpack.nightshift.detectionsDeepLinkTitle', {
+            defaultMessage: 'Detections',
+          }),
+          path: '/detections/events',
+          visibleIn: [],
+          keywords: ['detections', 'alerts', 'significant events'],
+        },
+        {
           id: 'sources' satisfies NightshiftLinkId,
           title: i18n.translate('xpack.nightshift.sourcesDeepLinkTitle', {
             defaultMessage: 'Sources',
