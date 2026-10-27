@@ -10,6 +10,7 @@ import {
   expandTimeseriesWithDottedGapLines,
   sliceTimeseriesToValidYRange,
   splitSeriesAtNullGaps,
+  trimPartialTrailingBucket,
 } from './timeseries_gap_handling';
 
 describe('splitSeriesAtNullGaps', () => {
@@ -140,6 +141,43 @@ describe('splitSeriesAtNullGaps', () => {
         { x: 500, y: 8 },
       ],
     ]);
+  });
+});
+
+describe('trimPartialTrailingBucket', () => {
+  it('returns an empty array for null or undefined input', () => {
+    expect(trimPartialTrailingBucket(null)).toEqual([]);
+    expect(trimPartialTrailingBucket(undefined)).toEqual([]);
+  });
+
+  it('returns an empty array for empty input', () => {
+    expect(trimPartialTrailingBucket([])).toEqual([]);
+  });
+
+  it('leaves a single point unchanged so there is still something to render', () => {
+    expect(trimPartialTrailingBucket([{ x: 1, y: 5 }])).toEqual([{ x: 1, y: 5 }]);
+  });
+
+  it('drops the final (partial) bucket from a multi-point series', () => {
+    expect(
+      trimPartialTrailingBucket([
+        { x: 1, y: 5 },
+        { x: 2, y: 8 },
+        { x: 3, y: 0 },
+      ])
+    ).toEqual([
+      { x: 1, y: 5 },
+      { x: 2, y: 8 },
+    ]);
+  });
+
+  it('does not mutate the input array', () => {
+    const data = [
+      { x: 1, y: 5 },
+      { x: 2, y: 8 },
+    ];
+    trimPartialTrailingBucket(data);
+    expect(data).toHaveLength(2);
   });
 });
 

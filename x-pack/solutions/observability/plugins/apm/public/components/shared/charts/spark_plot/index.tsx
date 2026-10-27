@@ -23,7 +23,11 @@ import { i18n } from '@kbn/i18n';
 import { unit } from '@kbn/apm-common';
 import type { Coordinate } from '../../../../../typings/timeseries';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
-import { APM_DOTTED_LINE_STYLE, splitSeriesAtNullGaps } from '../utils/timeseries_gap_handling';
+import {
+  APM_DOTTED_LINE_STYLE,
+  splitSeriesAtNullGaps,
+  trimPartialTrailingBucket,
+} from '../utils/timeseries_gap_handling';
 
 function hasValidTimeseries(series?: Coordinate[] | null): series is Coordinate[] {
   return !!series?.some((point) => point.y !== null);
@@ -130,10 +134,20 @@ export function SparkPlotItem({
   }
 
   if (hasValidTimeseries(series)) {
-    const { mainSegments, leadingEdge, trailingEdge, interiorEdges } =
-      splitSeriesAtNullGaps(series);
+    // The final bucket is only partially covered whenever the selected time
+    // range does not align to a full bucket boundary, which makes the line drop
+    // toward ~0 at the right edge. Full-size charts flag it with an end-zone
+    // annotation; sparklines have no room for one, so the partial bucket is
+    // trimmed instead (see trimPartialTrailingBucket).
+    const trimmedSeries = trimPartialTrailingBucket(series);
+    const trimmedComparisonSeries = trimPartialTrailingBucket(comparisonSeries);
 
-    const comparisonSplit = hasComparisonSeries ? splitSeriesAtNullGaps(comparisonSeries) : null;
+    const { mainSegments, leadingEdge, trailingEdge, interiorEdges } =
+      splitSeriesAtNullGaps(trimmedSeries);
+
+    const comparisonSplit = hasComparisonSeries
+      ? splitSeriesAtNullGaps(trimmedComparisonSeries)
+      : null;
 
     return (
       <Chart size={chartSize}>
@@ -152,7 +166,7 @@ export function SparkPlotItem({
               yScaleType={ScaleType.Linear}
               xAccessor="x"
               yAccessors={['y']}
-              data={series}
+              data={trimmedSeries}
               color={color}
             />
             {hasComparisonSeries && (
@@ -162,7 +176,7 @@ export function SparkPlotItem({
                 yScaleType={ScaleType.Linear}
                 xAccessor={'x'}
                 yAccessors={['y']}
-                data={comparisonSeries}
+                data={trimmedComparisonSeries}
                 color={comparisonSeriesColor}
               />
             )}
