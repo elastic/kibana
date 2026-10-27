@@ -89,7 +89,7 @@ describe('EvidenceView', () => {
     expect(github).toHaveAttribute('target', '_blank');
     expect(github).toHaveAttribute('rel', expect.stringContaining('noopener'));
     expect(other).toHaveAttribute('href', 'https://example.com/dash');
-    expect(screen.getAllByTestId('evidenceReferenceIcon')).toHaveLength(1);
+    expect(screen.getAllByTestId('evidenceReferenceIcon')).toHaveLength(2);
     expect(screen.getByTestId('evidenceReferenceQuery')).toHaveTextContent('FROM logs-* | LIMIT 1');
     expect(screen.getByTestId('evidenceReferenceCopyQuery')).toBeInTheDocument();
   });
