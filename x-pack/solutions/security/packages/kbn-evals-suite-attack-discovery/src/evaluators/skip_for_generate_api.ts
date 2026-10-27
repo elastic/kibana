@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0. Use of this software is subject to the Elastic License 2.0.
  */
 
 import type { Evaluator } from '@kbn/evals';
-import type {
-  AttackDiscoveryDatasetExample,
-  AttackDiscoveryTaskOutput,
-} from '../types';
+import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
 
 /**
  * Wraps a trace-based evaluator so it reports N/A instead of scoring when the
@@ -21,7 +25,7 @@ import type {
  * Trace-based token counts remain valid there and stay enabled.
  */
 export const skipForGenerateApiMode = <
-  TExample extends AttackDiscoveryDatasetExample = AttackDiscoveryDatasetExample,
+  TExample extends AttackDiscoveryDatasetExample = AttackDiscoveryDatasetExample
 >(
   evaluator: Evaluator<TExample, AttackDiscoveryTaskOutput>
 ): Evaluator<TExample, AttackDiscoveryTaskOutput> => {
