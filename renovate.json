@@ -326,7 +326,8 @@
         "@types/react",
         "@types/react-dom",
         "@types/react-test-renderer",
-        "csstype"
+        "csstype",
+        "react-element-to-jsx-string"
       ],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
@@ -343,14 +344,6 @@
     },
     {
       "matchDepNames": ["react-fast-compare"],
-      "reviewers": ["team:appex-sharedux"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:SharedUX"],
-      "enabled": true,
-      "minimumReleaseAge": "14 days"
-    },
-    {
-      "matchDepNames": ["react-element-to-jsx-string"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
