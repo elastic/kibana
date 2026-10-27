@@ -34,9 +34,11 @@ export interface FindingsWriter {
     entities?: ImpactEntity[];
   }) => Promise<void>;
   /** The findings stored for the conversation: its hypotheses and the impact summary, if any. */
-  getFindings: (params: {
-    conversationId: string;
-  }) => Promise<{ hypotheses: Hypothesis[]; impactSummary?: string }>;
+  getFindings: (params: { conversationId: string }) => Promise<{
+    hypotheses: Hypothesis[];
+    impactSummary?: string;
+    impactEvidence?: InvestigationEvidence;
+  }>;
 }
 
 export interface FindingsWriterDeps {
@@ -79,7 +81,11 @@ export const createFindingsWriter =
           getHypothesesService().findByConversationId(conversationId, spaceId),
           getImpactService().findByConversationId(conversationId, spaceId),
         ]);
-        return { hypotheses: stored?.hypotheses ?? [], impactSummary: impact?.summary };
+        return {
+          hypotheses: stored?.hypotheses ?? [],
+          impactSummary: impact?.summary,
+          impactEvidence: impact?.evidence,
+        };
       },
       setHypotheses: async ({ conversationId, hypotheses }) => {
         const { conversations, attachments, user, spaceId } = await resolveContext();

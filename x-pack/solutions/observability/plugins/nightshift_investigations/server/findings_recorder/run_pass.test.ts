@@ -197,6 +197,71 @@ describe('runFindingsPass', () => {
     expect(memory.remember).toHaveBeenCalledTimes(1);
   });
 
+  it('writes the evidence the recorder read from the conversation', async () => {
+    const evidence = {
+      description: 'Errors jumped after 01:11.',
+      chart: {
+        type: 'line' as const,
+        title: 'Errors per minute, 01:10 to 01:12 UTC',
+        x_axis: { type: 'time' as const },
+        y_axis: { unit: 'number' as const },
+        series: [
+          {
+            name: 'errors',
+            points: [
+              { x: '2026-08-09T01:10:00Z', y: 3 },
+              { x: '2026-08-09T01:11:00Z', y: 412 },
+            ],
+          },
+        ],
+      },
+    };
+    const { deps, writer, memory } = setup({
+      answers: [
+        answerWith({
+          ...output,
+          impact_evidence: evidence,
+          hypotheses: [{ ...output.hypotheses[0], evidence: [evidence] }, output.hypotheses[1]],
+        }),
+      ],
+    });
+
+    await run(deps, memory);
+
+    expect(writer.setImpact).toHaveBeenCalledWith(expect.objectContaining({ evidence }));
+    expect(writer.setHypotheses).toHaveBeenCalledWith({
+      conversationId: 'c1',
+      hypotheses: [expect.objectContaining({ evidence: [evidence] }), output.hypotheses[1]],
+    });
+  });
+
+  it('starts a follow-up round with the evidence already stored', async () => {
+    const { deps, writer, memory } = setup();
+    writer.getFindings.mockResolvedValue({
+      hypotheses: [
+        {
+          candidate: 'Pool leak',
+          confidence: 0.4,
+          status: 'investigating',
+          evidence: [{ description: 'Pool at 100%.' }],
+        },
+      ],
+      impactSummary: 'Checkout is slow',
+      impactEvidence: { description: 'Latency doubled.' },
+    });
+
+    await run(deps, memory);
+
+    expect(memory.remember).toHaveBeenCalledWith(
+      expect.objectContaining({
+        answer: expect.objectContaining({
+          impact_evidence: { description: 'Latency doubled.' },
+          hypotheses: [expect.objectContaining({ evidence: [{ description: 'Pool at 100%.' }] })],
+        }),
+      })
+    );
+  });
+
   it('writes summary, severity, hypotheses and impact from a live pass, without a verdict', async () => {
     const { deps, writer, patchMetadata, memory } = setup();
 

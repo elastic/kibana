@@ -7,17 +7,29 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import {
+  EVIDENCE_CHART_TYPES,
+  EVIDENCE_CHART_X_AXIS_TYPES,
+  EVIDENCE_CHART_Y_AXIS_UNITS,
   HYPOTHESIS_STATUSES,
+  investigationEvidenceSchema,
   MAX_ENTITY_ID_LENGTH,
   MAX_ENTITY_NAME_LENGTH,
+  MAX_EVIDENCE_CHART_ANNOTATIONS,
+  MAX_EVIDENCE_CHART_LABEL_LENGTH,
+  MAX_EVIDENCE_CHART_POINTS,
+  MAX_EVIDENCE_CHART_SERIES,
+  MAX_EVIDENCE_SHORT_TEXT_LENGTH,
   MAX_EVIDENCE_TEXT_LENGTH,
   MAX_HYPOTHESES,
   MAX_IMPACT_TOOL_ENTITIES,
+  type InvestigationEvidence,
 } from '@kbn/agentic-investigations-plugin/common';
 
 export const FINDINGS_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
 
 const MAX_METADATA_TEXT_LENGTH = 10_000;
+/** Evidence charts the recorder may attach to one hypothesis. */
+const MAX_HYPOTHESIS_EVIDENCE_ITEMS = 2;
 
 /**
  * What the model may return. Sizes are not enforced here or in {@link FINDINGS_JSON_SCHEMA}: the
@@ -26,11 +38,38 @@ const MAX_METADATA_TEXT_LENGTH = 10_000;
  * trims to the sizes the stores accept instead.
  */
 export const findingsOutputSchema = lazySchema(() => {
+  const chartSchema = z.object({
+    type: z.enum(EVIDENCE_CHART_TYPES),
+    title: z.string(),
+    x_axis: z.object({
+      type: z.enum(EVIDENCE_CHART_X_AXIS_TYPES),
+      label: z.string().optional(),
+    }),
+    y_axis: z.object({
+      label: z.string().optional(),
+      unit: z.enum(EVIDENCE_CHART_Y_AXIS_UNITS).optional(),
+    }),
+    stacked: z.boolean().optional(),
+    series: z.array(
+      z.object({
+        name: z.string(),
+        points: z.array(z.object({ x: z.string(), y: z.number() })),
+      })
+    ),
+    annotations: z
+      .array(z.object({ x: z.string(), x_end: z.string().optional(), label: z.string() }))
+      .optional(),
+  });
+  const evidenceSchema = z.object({
+    description: z.string().optional(),
+    chart: chartSchema.optional(),
+  });
   const hypothesisSchema = z.object({
     candidate: z.string().min(1),
     confidence: z.number(),
     status: z.enum(HYPOTHESIS_STATUSES),
     reason: z.string().optional(),
+    evidence: z.array(evidenceSchema).optional(),
   });
 
   return z.object({
@@ -38,6 +77,7 @@ export const findingsOutputSchema = lazySchema(() => {
     verdict: z.string().optional(),
     severity: z.enum(FINDINGS_SEVERITIES).optional(),
     impact_summary: z.string().min(1).optional(),
+    impact_evidence: evidenceSchema.optional(),
     impact_entities: z
       .array(
         z.object({
@@ -55,35 +95,192 @@ export type FindingsOutput = z.infer<typeof findingsOutputSchema>;
 const truncate = (text: string, max: number): string =>
   text.length > max ? text.slice(0, max) : text;
 
+type RawEvidence = NonNullable<FindingsOutput['impact_evidence']>;
+
+/**
+ * Trims evidence to what the stores accept. A chart is only the model's reading of numbers in the
+ * conversation, so a chart that does not fit (no usable points, or a shape the schema rejects) is
+ * dropped and the description is kept.
+ */
+export const limitEvidence = (raw: RawEvidence): InvestigationEvidence | undefined => {
+  const description = raw.description?.trim()
+    ? truncate(raw.description, MAX_EVIDENCE_TEXT_LENGTH)
+    : undefined;
+  const label = (text: string) => truncate(text, MAX_EVIDENCE_CHART_LABEL_LENGTH);
+  const short = (text: string) => truncate(text, MAX_EVIDENCE_SHORT_TEXT_LENGTH);
+  const series = (raw.chart?.series ?? [])
+    .slice(0, MAX_EVIDENCE_CHART_SERIES)
+    .map(({ name, points }) => ({
+      name: label(name),
+      points: points
+        .filter(({ x, y }) => x !== '' && Number.isFinite(y))
+        .slice(0, MAX_EVIDENCE_CHART_POINTS)
+        .map(({ x, y }) => ({ x: label(x), y })),
+    }))
+    .filter(({ points }) => points.length > 0);
+  const chart =
+    raw.chart && series.length > 0
+      ? {
+          type: raw.chart.type,
+          title: short(raw.chart.title),
+          x_axis: {
+            type: raw.chart.x_axis.type,
+            ...(raw.chart.x_axis.label ? { label: label(raw.chart.x_axis.label) } : {}),
+          },
+          y_axis: {
+            ...(raw.chart.y_axis.label ? { label: label(raw.chart.y_axis.label) } : {}),
+            ...(raw.chart.y_axis.unit ? { unit: raw.chart.y_axis.unit } : {}),
+          },
+          ...(raw.chart.stacked !== undefined ? { stacked: raw.chart.stacked } : {}),
+          series,
+          ...(raw.chart.annotations?.length
+            ? {
+                annotations: raw.chart.annotations
+                  .slice(0, MAX_EVIDENCE_CHART_ANNOTATIONS)
+                  .map(({ x, x_end: xEnd, label: text }) => ({
+                    x: label(x),
+                    ...(xEnd ? { x_end: label(xEnd) } : {}),
+                    label: short(text),
+                  })),
+              }
+            : {}),
+        }
+      : undefined;
+  const parsed = investigationEvidenceSchema.safeParse({
+    ...(description ? { description } : {}),
+    ...(chart ? { chart } : {}),
+  });
+  if (parsed.success && (parsed.data.description || parsed.data.chart)) return parsed.data;
+  return description ? { description } : undefined;
+};
+
+/** A parsed record with its evidence trimmed to what the stores accept. */
+export type FindingsRecord = Omit<FindingsOutput, 'impact_evidence' | 'hypotheses'> & {
+  impact_evidence?: InvestigationEvidence;
+  hypotheses: Array<
+    Omit<FindingsOutput['hypotheses'][number], 'evidence'> & { evidence?: InvestigationEvidence[] }
+  >;
+};
+
 /** Trims a parsed record to the sizes the metadata, hypotheses and impact stores accept. */
-export const limitFindings = (output: FindingsOutput): FindingsOutput => ({
-  ...output,
-  summary: truncate(output.summary, MAX_METADATA_TEXT_LENGTH),
-  ...(output.verdict !== undefined
-    ? { verdict: truncate(output.verdict, MAX_METADATA_TEXT_LENGTH) }
-    : {}),
-  ...(output.impact_summary !== undefined
-    ? { impact_summary: truncate(output.impact_summary, MAX_EVIDENCE_TEXT_LENGTH) }
-    : {}),
-  ...(output.impact_entities !== undefined
-    ? {
-        impact_entities: output.impact_entities
-          .slice(0, MAX_IMPACT_TOOL_ENTITIES)
-          .map(({ name, type }) => ({
-            name: truncate(name, MAX_ENTITY_NAME_LENGTH),
-            ...(type !== undefined ? { type: truncate(type, MAX_ENTITY_ID_LENGTH) } : {}),
-          })),
-      }
-    : {}),
-  hypotheses: output.hypotheses.slice(0, MAX_HYPOTHESES).map((hypothesis) => ({
-    ...hypothesis,
-    candidate: truncate(hypothesis.candidate, MAX_EVIDENCE_TEXT_LENGTH),
-    confidence: Math.min(1, Math.max(0, hypothesis.confidence)),
-    ...(hypothesis.reason !== undefined
-      ? { reason: truncate(hypothesis.reason, MAX_EVIDENCE_TEXT_LENGTH) }
+export const limitFindings = (output: FindingsOutput): FindingsRecord => {
+  const impactEvidence = output.impact_evidence ? limitEvidence(output.impact_evidence) : undefined;
+  return {
+    ...output,
+    impact_evidence: impactEvidence,
+    summary: truncate(output.summary, MAX_METADATA_TEXT_LENGTH),
+    ...(output.verdict !== undefined
+      ? { verdict: truncate(output.verdict, MAX_METADATA_TEXT_LENGTH) }
       : {}),
-  })),
-});
+    ...(output.impact_summary !== undefined
+      ? { impact_summary: truncate(output.impact_summary, MAX_EVIDENCE_TEXT_LENGTH) }
+      : {}),
+    ...(output.impact_entities !== undefined
+      ? {
+          impact_entities: output.impact_entities
+            .slice(0, MAX_IMPACT_TOOL_ENTITIES)
+            .map(({ name, type }) => ({
+              name: truncate(name, MAX_ENTITY_NAME_LENGTH),
+              ...(type !== undefined ? { type: truncate(type, MAX_ENTITY_ID_LENGTH) } : {}),
+            })),
+        }
+      : {}),
+    hypotheses: output.hypotheses.slice(0, MAX_HYPOTHESES).map(({ evidence, ...hypothesis }) => {
+      const kept = (evidence ?? [])
+        .map(limitEvidence)
+        .filter((item): item is InvestigationEvidence => item !== undefined)
+        .slice(0, MAX_HYPOTHESIS_EVIDENCE_ITEMS);
+      return {
+        ...hypothesis,
+        candidate: truncate(hypothesis.candidate, MAX_EVIDENCE_TEXT_LENGTH),
+        confidence: Math.min(1, Math.max(0, hypothesis.confidence)),
+        ...(hypothesis.reason !== undefined
+          ? { reason: truncate(hypothesis.reason, MAX_EVIDENCE_TEXT_LENGTH) }
+          : {}),
+        ...(kept.length ? { evidence: kept } : {}),
+      };
+    }),
+  };
+};
+
+const EVIDENCE_JSON_SCHEMA = {
+  type: 'object',
+  description:
+    'An observation that backs the claim: a short description, a small chart, or both. Add a chart only when the tool results in this conversation contain the numbers: copy the values exactly, never estimate or invent points, and describe instead when the numbers were clipped.',
+  properties: {
+    description: {
+      type: 'string',
+      description:
+        'Markdown: what was observed and why it matters, only what a chart does not already show.',
+    },
+    chart: {
+      type: 'object',
+      properties: {
+        type: { type: 'string', enum: EVIDENCE_CHART_TYPES },
+        title: { type: 'string', description: 'What it measures and the time window.' },
+        x_axis: {
+          type: 'object',
+          properties: {
+            type: { type: 'string', enum: EVIDENCE_CHART_X_AXIS_TYPES },
+            label: { type: 'string' },
+          },
+          required: ['type'],
+        },
+        y_axis: {
+          type: 'object',
+          properties: {
+            label: { type: 'string' },
+            unit: {
+              type: 'string',
+              enum: EVIDENCE_CHART_Y_AXIS_UNITS,
+              description: 'percent values are on a 0 to 100 scale.',
+            },
+          },
+        },
+        stacked: { type: 'boolean' },
+        series: {
+          type: 'array',
+          description: 'Up to 5 series of at most about 30 points each.',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              points: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    x: {
+                      type: 'string',
+                      description: 'ISO 8601 timestamp for a time axis, else a category label.',
+                    },
+                    y: { type: 'number' },
+                  },
+                  required: ['x', 'y'],
+                },
+              },
+            },
+            required: ['name', 'points'],
+          },
+        },
+        annotations: {
+          type: 'array',
+          description: 'At most 5: for example when the problem began.',
+          items: {
+            type: 'object',
+            properties: {
+              x: { type: 'string' },
+              x_end: { type: 'string' },
+              label: { type: 'string' },
+            },
+            required: ['x', 'label'],
+          },
+        },
+      },
+      required: ['type', 'title', 'x_axis', 'y_axis', 'series'],
+    },
+  },
+} as const;
 
 /** The same shape as {@link findingsOutputSchema}, for the inference client. */
 export const FINDINGS_JSON_SCHEMA = {
@@ -108,6 +305,11 @@ export const FINDINGS_JSON_SCHEMA = {
       type: 'string',
       description:
         'The business consequence in one or two plain sentences: who or what was affected, how badly, for how long, how broadly, with measured numbers. Omit when the evidence shows no impact yet. Under 500 characters.',
+    },
+    impact_evidence: {
+      ...EVIDENCE_JSON_SCHEMA,
+      description:
+        'Evidence of the impact: for example a chart of the error rate or request volume over the window. Omit when the conversation holds no numbers for it.',
     },
     impact_entities: {
       type: 'array',
@@ -136,6 +338,12 @@ export const FINDINGS_JSON_SCHEMA = {
             type: 'string',
             description:
               'Why it was dismissed or confirmed, or the current reasoning while investigating. Markdown, under 300 characters.',
+          },
+          evidence: {
+            type: 'array',
+            description:
+              'At most 2, only for the confirmed or leading hypothesis: the observations that decided it.',
+            items: EVIDENCE_JSON_SCHEMA,
           },
         },
         required: ['candidate', 'confidence', 'status'],

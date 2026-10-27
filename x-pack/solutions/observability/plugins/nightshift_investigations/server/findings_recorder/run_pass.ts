@@ -25,7 +25,7 @@ import {
   FINDINGS_JSON_SCHEMA,
   findingsOutputSchema,
   limitFindings,
-  type FindingsOutput,
+  type FindingsRecord,
 } from './output_schema';
 import { FINDINGS_RECORDER_SYSTEM_PROMPT } from './prompt';
 
@@ -57,7 +57,7 @@ const FALLBACK_SUMMARY_CHARS = 1_000;
 const MAX_ATTEMPTS = 2;
 
 /** Keeps the first confirmed hypothesis: at most one may be the root cause. */
-export const limitToOneConfirmed = (hypotheses: FindingsOutput['hypotheses']): Hypothesis[] => {
+export const limitToOneConfirmed = (hypotheses: FindingsRecord['hypotheses']): Hypothesis[] => {
   let confirmedSeen = false;
   return hypotheses.map((hypothesis) => {
     if (hypothesis.status !== 'confirmed') return hypothesis;
@@ -118,7 +118,7 @@ const storedRecord = async (
   conversation: ConversationLike
 ): Promise<Record<string, unknown> | undefined> => {
   try {
-    const { hypotheses, impactSummary } = await agenticInvestigations
+    const { hypotheses, impactSummary, impactEvidence } = await agenticInvestigations
       .getFindingsWriter(request)
       .getFindings({ conversationId });
     const { summary, severity, verdict } = conversation.metadata ?? {};
@@ -128,11 +128,13 @@ const storedRecord = async (
       ...(typeof verdict === 'string' && verdict ? { verdict } : {}),
       ...(typeof severity === 'string' && severity ? { severity } : {}),
       ...(impactSummary ? { impact_summary: impactSummary } : {}),
-      hypotheses: hypotheses.map(({ candidate, confidence, status, reason }) => ({
+      ...(impactEvidence ? { impact_evidence: impactEvidence } : {}),
+      hypotheses: hypotheses.map(({ candidate, confidence, status, reason, evidence }) => ({
         candidate,
         confidence,
         status,
         ...(reason ? { reason } : {}),
+        ...(evidence?.length ? { evidence } : {}),
       })),
     };
   } catch {
@@ -156,7 +158,7 @@ export const runFindingsPass = async (
   const agenticInvestigations = deps.getAgenticInvestigations();
   if (!agentBuilder || !agenticInvestigations) return false;
 
-  let output: FindingsOutput | undefined;
+  let output: FindingsRecord | undefined;
   try {
     const model = await createOptimizeModel({
       request,
@@ -292,13 +294,18 @@ export const runFindingsPass = async (
         }),
     ]);
     if (output.impact_summary) {
-      const { impact_summary: impactSummary, impact_entities: entities = [] } = output;
+      const {
+        impact_summary: impactSummary,
+        impact_entities: entities = [],
+        impact_evidence: impactEvidence,
+      } = output;
       writes.push([
         'impact',
         () =>
           writer.setImpact({
             conversationId,
             summary: impactSummary,
+            ...(impactEvidence ? { evidence: impactEvidence } : {}),
             // The entity form is only for two or more entities affected in different ways.
             entities:
               entities.length >= 2

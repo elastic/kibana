@@ -68,11 +68,15 @@ describe('createFindingsWriter', () => {
   it('reads the stored hypotheses and impact summary', async () => {
     const { writer, hypothesesService, impactService } = setup();
     hypothesesService.findByConversationId.mockResolvedValue({ hypotheses });
-    impactService.findByConversationId.mockResolvedValue({ summary: 'Checkout is slow' });
+    impactService.findByConversationId.mockResolvedValue({
+      summary: 'Checkout is slow',
+      evidence: { description: 'Error rate doubled.' },
+    });
 
     await expect(writer.getFindings({ conversationId: 'conv-1' })).resolves.toEqual({
       hypotheses,
       impactSummary: 'Checkout is slow',
+      impactEvidence: { description: 'Error rate doubled.' },
     });
     expect(hypothesesService.findByConversationId).toHaveBeenCalledWith('conv-1', 'space-a');
   });
@@ -83,6 +87,7 @@ describe('createFindingsWriter', () => {
     await expect(writer.getFindings({ conversationId: 'conv-1' })).resolves.toEqual({
       hypotheses: [],
       impactSummary: undefined,
+      impactEvidence: undefined,
     });
   });
 
