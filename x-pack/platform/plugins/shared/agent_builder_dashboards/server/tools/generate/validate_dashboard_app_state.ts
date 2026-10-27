@@ -72,7 +72,7 @@ export const createDashboardAppStateValidator = ({
         )
       : [];
   },
-  validateDashboardFields: ({ _derived, ...dashboardData }) => {
+  validateDashboardFields: (dashboardData) => {
     const result = getDashboardAppStateSchema().safeParse(dashboardData);
     return result.success ? [] : toValidationIssues(result.error.issues);
   },
