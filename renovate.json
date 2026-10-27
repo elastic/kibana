@@ -166,8 +166,7 @@
         "rxjs-marbles",
         "sharp",
         "superagent",
-        "supertest",
-        "xmlbuilder"
+        "supertest"
       ],
       "reviewers": ["team:appex-qa"],
       "matchBaseBranches": ["main"],
