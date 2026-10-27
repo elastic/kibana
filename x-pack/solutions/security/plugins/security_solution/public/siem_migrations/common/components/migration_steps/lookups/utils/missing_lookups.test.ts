@@ -60,7 +60,7 @@ describe('assertMissingLookups', () => {
       )
     ).toEqual([]);
     expect(addError).toHaveBeenCalledWith(
-      'Reference set "other_set" must match a name in the list above. The name is taken from the export, not the file name.'
+      'Reference set "other_set" must match a name in the list above. The name comes from the export, or from the file name when the export has none.'
     );
   });
 
