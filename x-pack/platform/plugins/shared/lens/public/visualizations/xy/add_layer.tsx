@@ -217,6 +217,7 @@ export function AddLayerButton({
                   name: i18n.translate('xpack.lens.configPanel.staticReferenceLinesButtonLabel', {
                     defaultMessage: 'Static values',
                   }),
+                  icon: 'number',
                   'data-test-subj': 'lnsReferenceLineLayer_static',
                   onClick: () => {
                     addLayer(
@@ -233,6 +234,7 @@ export function AddLayerButton({
                   name: i18n.translate('xpack.lens.configPanel.esqlReferenceLinesButtonLabel', {
                     defaultMessage: 'ES|QL query',
                   }),
+                  icon: 'code',
                   'data-test-subj': 'lnsReferenceLineLayer_esql',
                   onClick: () => {
                     addLayer(
