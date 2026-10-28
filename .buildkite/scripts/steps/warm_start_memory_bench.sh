@@ -67,6 +67,9 @@ download_and_extract target "$TARGET_BUILD_ID" "$TARGET_BUILD_DIR"
 export KIBANA_CI_WARM_START_MEMORY_BASELINE_BUILD_ID="$BASELINE_BUILD_ID"
 export KIBANA_CI_WARM_START_MEMORY_REPORT_PATH="$REPORT_PATH"
 
+export KBN_BENCH_RSS_BREAKDOWN_DIR="$PWD/target/rss_breakdown"
+rm -rf "$KBN_BENCH_RSS_BREAKDOWN_DIR"
+
 echo "--- Warm-start memory benchmark against merge base"
 rm -f "$REPORT_PATH"
 set +e
@@ -77,6 +80,29 @@ node scripts/bench.js \
   --right-build-dir "$TARGET_BUILD_DIR"
 BENCH_EXIT=$?
 set -e
+
+echo "--- RSS breakdown (temporary diagnostic)"
+if compgen -G "${KBN_BENCH_RSS_BREAKDOWN_DIR}/*.json" > /dev/null; then
+  buildkite-agent artifact upload "target/rss_breakdown/*.json" || echo "Warning: failed to upload RSS breakdown"
+  for f in "${KBN_BENCH_RSS_BREAKDOWN_DIR}"/*.json; do
+    echo "RSSDIAG $(basename "$f")"
+    jq -c '{
+      label,
+      cwd,
+      nodeOptions,
+      mallocArenaMax,
+      ldPreload,
+      summary,
+      heapSpacesPhysicalMiB: (.heapSpaces | map_values((.physical_space_size / 1048576 * 10 | round) / 10)),
+      executableAnonRssMiB: ((.smaps.totals.executableAnonRssKib / 1024 * 10 | round) / 10),
+      topGroups: [.smaps.groups[:14][] | {category, mappings, rssMiB}],
+      topAnon: [.smaps.topAnonMappings[:6][] | {perms, sizeKib, rssKib, startsOn64MiB}],
+      threadsByName
+    }' "$f" || true
+  done
+else
+  echo "No RSS breakdown files were written."
+fi
 
 # Disk sizing data for the agent config: overall fill plus this step's own footprint.
 echo "--- Disk usage"

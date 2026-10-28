@@ -112,7 +112,16 @@ const FORCED_GC_REQUEST_FILE = 'forced_gc_request.json';
   const keyHeapSpaces = (heapSpaces) =>
     Object.fromEntries(heapSpaces.map((space) => [space.space_name, space]));
 
+  const captureRssBreakdownSafely = (label) => {
+    try {
+      require('./rss_breakdown').captureRssBreakdown(label);
+    } catch (_) {
+      // Diagnostic only; never affect the benchmark.
+    }
+  };
+
   async function collectForcedGcHeapStats(request) {
+    captureRssBreakdownSafely('natural_tail');
     const startedAt = new Date().toISOString();
     const result = {
       requestId: request.requestId,
@@ -159,6 +168,9 @@ const FORCED_GC_REQUEST_FILE = 'forced_gc_request.json';
       session?.disconnect();
       result.completedAt = new Date().toISOString();
     }
+
+    // Must finish before the result file lands: the runner stops Kibana as soon as it appears.
+    captureRssBreakdownSafely('post_forced_gc');
 
     const resultPath = path.join(dir, `${pid}.forced_gc.json`);
     const temporaryResultPath = `${resultPath}.${request.requestId}.tmp`;

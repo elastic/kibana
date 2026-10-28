@@ -83,6 +83,7 @@ const coreId = Symbol('core');
 
 /** @internal */
 
+// TEMP (bench-rss-breakdown): touches runtime code so CI builds a fresh distributable. Do not merge.
 export class Server {
   public readonly configService: ConfigService;
   private readonly analytics: AnalyticsService;
