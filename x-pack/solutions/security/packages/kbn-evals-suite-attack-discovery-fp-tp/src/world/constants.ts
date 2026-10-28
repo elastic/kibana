@@ -80,10 +80,9 @@ export const FP_TP_BOOTSTRAP_RULE_ID = 'fptp-seeder-bootstrap-nomatch';
 /**
  * Inference feature id the managed FP/TP analysis workflow resolves its
  * connector through (`connector-id-by-feature`; `alertzero_template_models`
- * wins when the space maps it). Keep in sync with
- * ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+ * wins when the space maps it). Shared with the worker seeder.
  */
-export const FP_TP_REASONING_FEATURE_ID = 'alertzero_frontier';
+export { FP_TP_INFERENCE_FEATURE_ID as FP_TP_REASONING_FEATURE_ID } from '../constants';
 
 /** Half-width of the raw-event window the analysis reads around the cited alerts' original time. */
 export const FP_TP_RAW_EVENT_WINDOW_MS = 2 * 60 * 60 * 1000;

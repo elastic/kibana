@@ -26,7 +26,10 @@ export const INFERENCE_SETTINGS_ROUTE = '/internal/search_inference_endpoints/se
 
 export const INFERENCE_SETTINGS_API_VERSION = '1';
 
-/** Inference feature the analysis's `ai.agent` step resolves its connector from. */
+/**
+ * Inference feature the analysis's `ai.agent` step resolves its connector from.
+ * Keep in sync with ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+ */
 export const FP_TP_INFERENCE_FEATURE_ID = 'alertzero_frontier';
 
 export const FP_TP_VERDICTS = ['true_positive', 'false_positive', 'inconclusive'] as const;

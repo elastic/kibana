@@ -604,6 +604,22 @@ describe('seedTwinLiveServerless', () => {
     });
   });
 
+  it('dates the validated discovery with the same shifted time as the alerts it cites', async () => {
+    skipSleeps();
+    const s = setup();
+
+    await run(s);
+
+    const start = (s.kbnRequest.mock.calls as Array<[Parameters<FpTpLiveKbnRequest>[0]]>)
+      .map(([call]) => call)
+      .find((call) => call.method === 'POST' && call.path.startsWith('/api/workflows/workflow/'));
+    const [discovery] = (start?.body as { inputs: FpTpValidateInputs }).inputs
+      .attack_discoveries as Array<{ timestamp: string }>;
+    const plan = buildServerlessPlan(twinToWorld(twin), SPACE, NOW);
+    expect(discovery.timestamp).toBe(plan.world.attack?.['@timestamp']);
+    expect(discovery.timestamp).not.toBe(twin.attack['@timestamp']);
+  });
+
   it('refuses the default space before touching anything', async () => {
     const s = setup();
     await expect(

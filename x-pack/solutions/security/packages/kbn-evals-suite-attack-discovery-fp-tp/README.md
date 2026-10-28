@@ -97,18 +97,18 @@ The suite's stack uses the `evals_attack_discovery_fp_tp` Scout config set, whic
 
 ## Seeding a twin by hand
 
-`scripts/seed_fp_tp_twin.ts` seeds one scenario twin so the managed analysis can be run from the Workflows UI.
+`scripts/load_fp_tp_twin.js` seeds one scenario twin so the managed analysis can be run from the Workflows UI.
 
 Classic stack (Basic auth, default space; `--space` other than `default` needs `--serverless`):
 
 ```bash
-node scripts/seed_fp_tp_twin.ts --scenario encoded-powershell --variant fp
+node x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp/scripts/load_fp_tp_twin.js --scenario encoded-powershell --variant fp
 ```
 
 Serverless project (ApiKey auth, one dedicated Kibana space per seed; `--space` is required and must not be `default`):
 
 ```bash
-node scripts/seed_fp_tp_twin.ts --serverless \
+node x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp/scripts/load_fp_tp_twin.js --serverless \
   --kibanaUrl <kibana-url> --elasticsearchUrl <es-url> --apiKey <encoded-api-key> \
   --space <space-id> --reasoningConnectorId <connector-id> --variant fp
 ```

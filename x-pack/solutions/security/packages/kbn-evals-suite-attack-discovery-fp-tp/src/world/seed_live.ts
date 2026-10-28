@@ -1098,12 +1098,13 @@ export const seedTwinLiveServerless = async ({
     }
 
     let persistedAttackId = plan.attackId;
-    if (world.attack !== undefined && plan.attackTitle !== undefined) {
+    const { attack: seededAttack, alerts: seededAlerts } = plan.world;
+    if (seededAttack !== undefined && plan.attackTitle !== undefined) {
       await runValidateWorkflow(kbnRequest, {
-        alerts_context_count: world.alerts.length,
-        anonymized_alerts: toAnonymizedAlerts(world.alerts),
+        alerts_context_count: seededAlerts.length,
+        anonymized_alerts: toAnonymizedAlerts(seededAlerts),
         api_config: { connector_id: reasoningConnectorId, action_type_id: '.inference' },
-        attack_discoveries: [toValidateAttackDiscovery(world.attack)],
+        attack_discoveries: [toValidateAttackDiscovery(seededAttack)],
         generation_uuid: `${FP_TP_TWIN_SEED_LABEL}-${Date.now()}`,
         generation_source: 'fptp-seeder',
       });
