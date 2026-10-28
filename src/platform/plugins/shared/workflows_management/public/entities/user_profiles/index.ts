@@ -10,5 +10,5 @@
 export {
   executedByFallbackLabel,
   getExecutedByLabel,
-  useUserProfilesByUid,
-} from './model/use_user_profiles_by_uid';
+  getExecutedByProfiles,
+} from './model/executed_by_profiles';
