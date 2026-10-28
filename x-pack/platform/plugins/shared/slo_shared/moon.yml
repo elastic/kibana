@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/slo-schema'
   - '@kbn/slo-constants'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod

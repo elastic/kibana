@@ -1,5 +1,5 @@
 {
-  "sha1": "7dedbb371363763b1147799cd393681aed2007df",
+  "sha1": "36b8693cd4434f2439b4305c288e0012a964e178",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -21,8 +21,8 @@
       }
     },
     {
-      "id": "4dd4f954d8f8955-b10f3d5a1c9352d",
-      "title": "Observability alert investigation action starts and views an investigation from the alert detail action menu",
+      "id": "4dd4f954d8f8955-ea98c9127b1dabd",
+      "title": "Observability alert investigation action starts from the alert details header and immediately links to the investigation",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -32,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/alert_investigation_action.spec.ts",
-        "line": 91,
-        "column": 9
+        "line": 94,
+        "column": 14
       }
     },
     {
@@ -48,13 +48,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/alert_investigation_action.spec.ts",
-        "line": 114,
-        "column": 33
+        "line": 123,
+        "column": 13
       }
     },
     {
-      "id": "4dd4f954d8f8955-026fa90c51b2bbf",
-      "title": "Observability alert investigation action views a completed investigation from the alert detail action menu",
+      "id": "4dd4f954d8f8955-6e249c16c15fb6e",
+      "title": "Observability alert investigation action views a completed investigation from the alert details header",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -64,8 +64,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/alert_investigation_action.spec.ts",
-        "line": 131,
-        "column": 18
+        "line": 148,
+        "column": 7
+      }
+    },
+    {
+      "id": "4dd4f954d8f8955-672154821003063",
+      "title": "Observability alert investigation action views a running investigation from the alert details header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/alert_investigation_action.spec.ts",
+        "line": 148,
+        "column": 7
       }
     },
     {

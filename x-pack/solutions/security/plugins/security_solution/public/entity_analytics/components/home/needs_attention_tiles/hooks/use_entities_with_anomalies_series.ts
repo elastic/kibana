@@ -28,6 +28,8 @@ interface AnomaliesSeriesOptions {
   reachesBack: boolean | undefined;
   /** The live count, which replaces the newest dot so the line ends on the number shown. */
   count: number;
+  /** From the tile's delta hook (its `previous`): the delta's baseline, which starts the line. */
+  deltaBaseline: number | undefined;
 }
 
 /**
@@ -46,6 +48,7 @@ export const useEntitiesWithAnomaliesSeries = ({
   isReady,
   reachesBack,
   count,
+  deltaBaseline,
 }: AnomaliesSeriesOptions): { trend: number[] | undefined; isTrendLoading: boolean } => {
   const {
     data: resolvedIndex,
@@ -75,6 +78,7 @@ export const useEntitiesWithAnomaliesSeries = ({
   return getTileTrend({
     dots: series,
     liveCount: count,
+    deltaBaseline,
     skip,
     isFetching,
     isError,

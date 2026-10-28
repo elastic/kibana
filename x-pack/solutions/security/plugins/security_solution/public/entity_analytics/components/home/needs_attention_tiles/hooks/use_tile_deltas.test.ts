@@ -85,11 +85,12 @@ describe.each([
     'newlyHighCritical',
   ],
 ] as const)('%s', (_name, render, tileKey) => {
-  it('is the count minus the previous period', () => {
+  it('is the count minus the previous period, which it also returns for the sparkline', () => {
     returns({ previous: 4, reachesBack: true });
     const { result } = render({});
     expect(result.current).toEqual({
       delta: 6,
+      previous: 4,
       isDeltaLoading: false,
       isHistoryMissing: false,
       reachesBack: true,
@@ -251,6 +252,8 @@ describe('useAlertBasedTilesDelta', () => {
     expect(render().result.current).toEqual({
       severeAlertsDelta: 3,
       watchlistedDelta: -2,
+      severeAlertsPrevious: 7,
+      watchlistedPrevious: 6,
       isDeltaLoading: false,
       isHistoryMissing: false,
       reachesBack: true,

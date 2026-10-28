@@ -1,0 +1,31 @@
+$schema: https://moonrepo.dev/schemas/v2/tasks.json
+
+inheritedBy:
+  tags:
+    - jest-integration-tests
+
+fileGroups:
+  jestIntegrationConfigs:
+    - '**/jest.integration.config.{js,cjs,json}'
+    - '!**/__fixtures__/**'
+
+tasks:
+  jestIntegrationConfigs:
+    command: noop
+    args:
+      - '@files(jestIntegrationConfigs)'
+    tags:
+      - jest-integration-tests
+    deps:
+      - target: '~:test-source-upstream'
+        cacheStrategy: hash
+      - target: 'jest-tooling:hash'
+        cacheStrategy: hash
+    inputs:
+      - '@group(default)'
+      - '!README*'
+      - '!**/*.spec.{js,mjs,ts,tsx}'
+      - '!test/{functional,ftr}/**/*'
+      - '!test/scout*/**/*'
+    options:
+      runFromWorkspaceRoot: true

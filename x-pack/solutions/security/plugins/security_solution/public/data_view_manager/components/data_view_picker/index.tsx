@@ -37,9 +37,14 @@ interface DataViewPickerProps {
    * Force disable picker
    */
   disabled?: boolean;
+  /**
+   * When false, renders the trigger at standard (non-compressed) height
+   */
+  compressed?: boolean;
 }
 
-export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataViewPickerProps) => {
+export const DataViewPicker = memo((props: DataViewPickerProps) => {
+  const { scope, onClosePopover, disabled, compressed } = props;
   const dispatch = useDispatch();
   const selectDataView = useSelectDataView();
 
@@ -206,6 +211,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
         savedDataViews={savedDataViews}
         onClosePopover={onClosePopover}
         getDataViewHelpText={getDataViewHelpText}
+        compressed={compressed}
       />
     </div>
   );

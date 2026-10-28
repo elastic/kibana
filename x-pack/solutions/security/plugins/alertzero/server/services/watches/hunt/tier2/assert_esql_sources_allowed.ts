@@ -19,8 +19,10 @@ export type AssertEsqlSourcesAllowedResult = { ok: true } | { ok: false; reason:
  * name a target too, so a query opening with an allowed `FROM` could still reach
  * outside the scope. Every command is checked instead of the `FROM` list alone,
  * and because each one names its target as a `source` node, a command ES|QL adds
- * later is covered by default rather than silently exempt. An `ENRICH` policy is
- * refused on the same grounds: it resolves to an index this hunt never allowed.
+ * later is covered by default rather than silently exempt. `ENRICH` is refused by
+ * command, whatever its policy is named: a policy resolves to an enrich index this
+ * hunt never allowed, so a policy name that happens to match the allowlist is no
+ * reason to let it through.
  *
  * Queries that fail to parse, do not start with FROM, have no sources, or
  * name a source outside the allowlist are refused.
@@ -46,6 +48,20 @@ export const assertEsqlSourcesAllowed = (
 
   if (sourcesOf(root.commands[0]).length === 0) {
     return { ok: false, reason: 'FROM has no sources' };
+  }
+
+  // Walk the whole tree, not just top-level commands, so an `ENRICH` nested in a `FORK`
+  // branch is refused too.
+  let enrichPolicy: string | undefined;
+  Walker.walk(root, {
+    visitCommand: (command) => {
+      if (command.name === 'enrich' && enrichPolicy === undefined) {
+        enrichPolicy = sourcesOf(command)[0] ?? '';
+      }
+    },
+  });
+  if (enrichPolicy !== undefined) {
+    return { ok: false, reason: `ENRICH policy "${enrichPolicy}" is not allowed in a hunt query` };
   }
 
   for (const command of root.commands) {
