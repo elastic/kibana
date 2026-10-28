@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { first, range, xor } from 'lodash';
 import React from 'react';
-import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useFieldArray, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import { QueryBuilder } from '../../common/query_builder';
 import { COMPARATOR_OPTIONS } from '../../../constants';
 import type { CreateSLOForm } from '../../../types';
@@ -81,6 +81,8 @@ const thresholdTooltip = (
 
 export function MetricIndicator({ indexFields, isLoadingIndex, dataView }: MetricIndicatorProps) {
   const { control, setValue, register, getFieldState } = useFormContext<CreateSLOForm>();
+  // Subscribes this component to the errors it renders (the form root does not re-render on validation).
+  const formState = useFormState({ control, name: 'indicator.params.metric.threshold' });
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -279,7 +281,7 @@ export function MetricIndicator({ indexFields, isLoadingIndex, dataView }: Metri
           <EuiFlexItem grow={0}>
             <EuiFormRow
               fullWidth
-              isInvalid={getFieldState('indicator.params.metric.threshold').invalid}
+              isInvalid={getFieldState('indicator.params.metric.threshold', formState).invalid}
               label={
                 <span>
                   {thresholdLabel} {thresholdTooltip}

@@ -18,7 +18,7 @@ import {
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useEffect, useState } from 'react';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import type { Option } from '../../../helpers/create_options';
 import { createOptionsFromFields } from '../../../helpers/create_options';
 import type { CreateSLOForm } from '../../../types';
@@ -99,6 +99,8 @@ export function HistogramIndicator({
   dataView,
 }: HistogramIndicatorProps) {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
+  // Subscribes this component to the errors it renders (the form root does not re-render on validation).
+  const formState = useFormState({ control, name: `indicator.params.${type}.field` });
   const [options, setOptions] = useState<Option[]>(createOptionsFromFields(histogramFields));
 
   useEffect(() => {
@@ -157,7 +159,7 @@ export function HistogramIndicator({
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
-            isInvalid={getFieldState(`indicator.params.${type}.field`).invalid}
+            isInvalid={getFieldState(`indicator.params.${type}.field`, formState).invalid}
             label={<span>{metricLabel}</span>}
           >
             <Controller

@@ -60,7 +60,7 @@ export function DataPreviewChart({
   thresholdMessage,
   ignoreMoreThan100,
 }: DataPreviewChartProps) {
-  const { control } = useFormContext<CreateSLOForm>();
+  const { control, getValues } = useFormContext<CreateSLOForm>();
   const { charts, uiSettings } = useKibana().services;
   const { isIndicatorSectionValid } = useSectionFormValidation();
 
@@ -69,7 +69,10 @@ export function DataPreviewChart({
     to: new Date(),
   });
 
-  const indicator = useWatch({ control, name: 'indicator' });
+  // `useWatch` only triggers the re-render; the value is read with `getValues` so that a `setValue` made by a
+  // child effect during the first mount (IndexSelection resolving the data view id) is not missed.
+  useWatch({ control, name: 'indicator' });
+  const indicator = getValues('indicator');
   const groupBy = useWatch({ control, name: 'groupBy' });
   const projectRoutings = useWatch({ control, name: 'settings.projectRoutings' });
 

@@ -14,7 +14,7 @@ import type { SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
 import type { FieldPath } from 'react-hook-form';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useFormState } from 'react-hook-form';
 import { OptionalText } from '../../common/optional_text';
 import type { Suggestion } from '../../../../../hooks/use_fetch_synthetics_suggestions';
 import { useFetchSyntheticsSuggestions } from '../../../../../hooks/use_fetch_synthetics_suggestions';
@@ -52,6 +52,8 @@ export function FieldSelector({
 }: Props) {
   const { control, getFieldState } =
     useFormContext<CreateSLOForm<SyntheticsAvailabilityIndicator>>();
+  // Subscribes this component to the errors it renders (the form root does not re-render on validation).
+  const formState = useFormState({ control, name });
   const [search, setSearch] = useState<string>('');
 
   const { suggestions = [], isLoading } = useFetchSyntheticsSuggestions({
@@ -81,7 +83,7 @@ export function FieldSelector({
             label
           )
         }
-        isInvalid={getFieldState(name).invalid}
+        isInvalid={getFieldState(name, formState).invalid}
         fullWidth
         labelAppend={!required ? <OptionalText /> : undefined}
       >

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import React, { useEffect } from 'react';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import type { SLOPublicPluginsStart } from '../../../../..';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import type { CreateSLOForm } from '../../../types';
@@ -25,6 +25,8 @@ const SETTINGS_SYNC_FIELD = 'settings.syncField';
 
 export function IndexSelection({ selectedDataView }: { selectedDataView?: DataView }) {
   const { control, getFieldState, setValue } = useFormContext<CreateSLOForm>();
+  // Subscribes this component to the errors it renders (the form root does not re-render on validation).
+  const formState = useFormState({ control, name: [INDEX_FIELD, DATA_VIEW_FIELD] });
   const { dataViews: dataViewsService, dataViewFieldEditor } =
     useKibana<SLOPublicPluginsStart>().services;
 
@@ -69,7 +71,10 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
   return (
     <EuiFormRow
       label={INDEX_LABEL}
-      isInvalid={getFieldState(INDEX_FIELD).invalid || getFieldState(DATA_VIEW_FIELD).invalid}
+      isInvalid={
+        getFieldState(INDEX_FIELD, formState).invalid ||
+        getFieldState(DATA_VIEW_FIELD, formState).invalid
+      }
       fullWidth
     >
       <Controller

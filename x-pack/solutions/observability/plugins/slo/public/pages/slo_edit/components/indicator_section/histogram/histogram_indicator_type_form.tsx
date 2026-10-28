@@ -27,9 +27,11 @@ import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { HistogramIndicator } from './histogram_indicator';
 
 export function HistogramIndicatorTypeForm() {
-  const { control } = useFormContext<CreateSLOForm>();
-  const index = useWatch({ control, name: 'indicator.params.index' });
-  const dataViewId = useWatch({ control, name: DATA_VIEW_FIELD });
+  const { control, getValues } = useFormContext<CreateSLOForm>();
+  // `useWatch` only triggers the re-render; the value is read with `getValues` so that a `setValue` made by a
+  // child effect during the first mount (IndexSelection resolving the data view id) is not missed.
+  useWatch({ control, name: ['indicator.params.index', DATA_VIEW_FIELD] });
+  const [index, dataViewId] = getValues(['indicator.params.index', DATA_VIEW_FIELD]);
 
   const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
     indexPatternString: index,

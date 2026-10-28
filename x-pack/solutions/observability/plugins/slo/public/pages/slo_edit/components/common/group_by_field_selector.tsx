@@ -11,7 +11,7 @@ import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useFormState } from 'react-hook-form';
 import type { Option } from '../../helpers/create_options';
 import { createOptionsFromFields } from '../../helpers/create_options';
 import type { CreateSLOForm } from '../../types';
@@ -29,6 +29,8 @@ const placeholder = i18n.translate('xpack.slo.sloEdit.groupBy.placeholder', {
 
 export function GroupByFieldSelector({ indexFields, isDisabled, isLoading }: Props) {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
+  // Subscribes this component to the errors it renders (the form root does not re-render on validation).
+  const formState = useFormState({ control, name: 'groupBy' });
   const [options, setOptions] = useState<Option[]>(createOptionsFromFields(indexFields));
 
   useEffect(() => {
@@ -62,7 +64,7 @@ export function GroupByFieldSelector({ indexFields, isDisabled, isLoading }: Pro
           />
         </span>
       }
-      isInvalid={getFieldState('groupBy').invalid}
+      isInvalid={getFieldState('groupBy', formState).invalid}
       labelAppend={<OptionalText />}
     >
       <Controller

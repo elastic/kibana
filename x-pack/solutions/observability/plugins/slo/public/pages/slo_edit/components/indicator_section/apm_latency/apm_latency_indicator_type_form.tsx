@@ -9,7 +9,7 @@ import { EuiFieldNumber, EuiFlexGroup, EuiFormRow, EuiIconTip } from '@elastic/e
 import type { APMTransactionDurationIndicator } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import { useApmDefaultValues } from '../apm_common/use_apm_default_values';
 import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { GroupByField } from '../../common/group_by_field';
@@ -25,6 +25,8 @@ import { getGroupByCardinalityFilters } from '../apm_common/get_group_by_cardina
 export function ApmLatencyIndicatorTypeForm() {
   const { control, getFieldState } =
     useFormContext<CreateSLOForm<APMTransactionDurationIndicator>>();
+  // Subscribes this component to the errors it renders (the form root does not re-render on validation).
+  const formState = useFormState({ control, name: 'indicator.params.threshold' });
   const {
     data: { metric: apmIndex },
   } = useFetchApmIndices();
@@ -140,7 +142,7 @@ export function ApmLatencyIndicatorTypeForm() {
             />
           </span>
         }
-        isInvalid={getFieldState('indicator.params.threshold').invalid}
+        isInvalid={getFieldState('indicator.params.threshold', formState).invalid}
       >
         <Controller
           name="indicator.params.threshold"

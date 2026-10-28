@@ -8,7 +8,7 @@
 import { EuiFieldText, EuiFormRow, EuiPanel, EuiTextArea, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useFormState } from 'react-hook-form';
 import { DashboardsSelector } from '@kbn/dashboards-selector';
 import { TagsComboBox } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -19,6 +19,8 @@ import { MAX_WIDTH } from '../constants';
 
 export function SloEditFormDescriptionSection() {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
+  // Subscribes this component to the errors it renders (the form root does not re-render on validation).
+  const formState = useFormState({ control, name: 'name' });
   const sloNameId = useGeneratedHtmlId({ prefix: 'sloName' });
   const descriptionId = useGeneratedHtmlId({ prefix: 'sloDescription' });
   const tagsId = useGeneratedHtmlId({ prefix: 'tags' });
@@ -37,8 +39,8 @@ export function SloEditFormDescriptionSection() {
     >
       <EuiFormRow
         fullWidth
-        isInvalid={getFieldState('name').invalid}
-        error={getFieldState('name').error?.message}
+        isInvalid={getFieldState('name', formState).invalid}
+        error={getFieldState('name', formState).error?.message}
         label={i18n.translate('xpack.slo.sloEdit.description.sloName', {
           defaultMessage: 'SLO Name',
         })}

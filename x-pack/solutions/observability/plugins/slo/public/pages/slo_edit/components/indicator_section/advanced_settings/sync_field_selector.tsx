@@ -9,7 +9,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
 import { createOptionsFromFields } from '../../../helpers/create_options';
 import type { CreateSLOForm } from '../../../types';
@@ -20,11 +20,13 @@ const placeholder = i18n.translate('xpack.slo.sloEdit.settings.syncField.placeho
 });
 
 export function SyncFieldSelector() {
-  const { control, getFieldState } = useFormContext<CreateSLOForm>();
-  const [index, dataViewId] = useWatch({
-    control,
-    name: ['indicator.params.index', 'indicator.params.dataViewId'],
-  });
+  const { control, getFieldState, getValues } = useFormContext<CreateSLOForm>();
+  // Subscribes this component to the errors it renders (the form root does not re-render on validation).
+  const formState = useFormState({ control, name: 'settings.syncField' });
+  // `useWatch` only triggers the re-render; the value is read with `getValues` so that a `setValue` made by a
+  // child effect during the first mount (IndexSelection resolving the data view id) is not missed.
+  useWatch({ control, name: ['indicator.params.index', 'indicator.params.dataViewId'] });
+  const [index, dataViewId] = getValues(['indicator.params.index', 'indicator.params.dataViewId']);
   const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
     indexPatternString: index,
     dataViewId,
@@ -47,7 +49,7 @@ export function SyncFieldSelector() {
           />
         </span>
       }
-      isInvalid={getFieldState('settings.syncField').invalid}
+      isInvalid={getFieldState('settings.syncField', formState).invalid}
       labelAppend={<OptionalText />}
     >
       <Controller

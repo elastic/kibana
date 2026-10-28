@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimeWindowType } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import {
   BUDGETING_METHOD_OPTIONS,
   CALENDARALIGNED_TIMEWINDOW_OPTIONS,
@@ -41,6 +41,8 @@ export function SloEditFormObjectiveSection() {
     setValue,
     formState: { defaultValues },
   } = useFormContext<CreateSLOForm>();
+  // Subscribes this component to the errors it renders (the form root does not re-render on validation).
+  const formState = useFormState({ control, name: 'objective.target' });
   const { isServerless } = usePluginContext();
 
   const budgetingSelect = useGeneratedHtmlId({ prefix: 'budgetingSelect' });
@@ -267,7 +269,7 @@ export function SloEditFormObjectiveSection() {
         <EuiFlexGrid columns={3} gutterSize="m">
           <EuiFlexItem>
             <EuiFormRow
-              isInvalid={getFieldState('objective.target').invalid}
+              isInvalid={getFieldState('objective.target', formState).invalid}
               label={
                 <span>
                   {i18n.translate('xpack.slo.sloEdit.targetSlo.label', {

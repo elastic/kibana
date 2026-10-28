@@ -13,7 +13,7 @@ import { debounce } from 'lodash';
 import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import type { FieldPath } from 'react-hook-form';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import type { Suggestion } from '../../../../../hooks/use_fetch_apm_suggestions';
 import { useFetchApmSuggestions } from '../../../../../hooks/use_fetch_apm_suggestions';
 import type { CreateSLOForm } from '../../../types';
@@ -41,6 +41,8 @@ export function FieldSelector({
   tooltip,
 }: Props) {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
+  // Subscribes this component to the errors it renders (the form root does not re-render on validation).
+  const formState = useFormState({ control, name });
   const serviceName = useWatch({ control, name: 'indicator.params.service' });
   const [search, setSearch] = useState<string>('');
   const { suggestions, isLoading } = useFetchApmSuggestions({
@@ -72,7 +74,7 @@ export function FieldSelector({
             label
           )
         }
-        isInvalid={getFieldState(name).invalid}
+        isInvalid={getFieldState(name, formState).invalid}
       >
         <Controller
           defaultValue=""

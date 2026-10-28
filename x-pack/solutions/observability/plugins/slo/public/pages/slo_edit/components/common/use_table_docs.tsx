@@ -7,7 +7,7 @@
 
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import type { FieldPath } from 'react-hook-form';
-import { useFormContext, useWatch } from 'react-hook-form';
+import { useFormContext, useFormState, useWatch } from 'react-hook-form';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import type { QuerySchema } from '@kbn/slo-schema';
@@ -26,7 +26,9 @@ export const useTableDocs = ({
   name: FieldPath<CreateSLOForm>;
 }) => {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
-  const errorMessages = getFieldState(name).error?.message;
+  // Subscribes this component to the errors it renders (the form root does not re-render on validation).
+  const formState = useFormState({ control, name });
+  const errorMessages = getFieldState(name, formState).error?.message;
   const filter = useWatch({ control, name }) as QuerySchema;
 
   const esFilter = getElasticsearchQueryOrThrow(filter, dataView);
