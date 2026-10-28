@@ -76,8 +76,8 @@ export const deriveLastHuntStatus = ({
  * Tier 2 (it saw every earlier pending id) and left alone by one that did not. They exist only
  * while coverage is pending, so a settled report carries none.
  *
- * Two guards keep the stored state honest. A continuation (the element is `coverage_pending`)
- * never downgrades a `hit`: it skipped the techniques the hit came from, so its own `clean` or
+ * Two guards keep the stored state honest. A continuation (the element is `coverage_pending`, and
+ * the run did not replay the whole report) never downgrades a `hit`: it skipped the techniques the hit came from, so its own `clean` or
  * `incomplete` says nothing against the finding, and the hit keeps its status, run id and count
  * (`last_hunted_at` still moves). And a ledger that cannot hold the whole union settles
  * `coverage_pending` instead of leaving it set: ids past the cap are dropped, so a report that
@@ -89,7 +89,7 @@ boolean found = false;
 for (int i = 0; i < ctx._source.evidence.size(); i++) {
   if (ctx._source.evidence[i].space_id == params.space_id) {
     def el = ctx._source.evidence[i];
-    boolean keepHit = el.coverage_pending == true && el.last_hunt_status == 'hit' && params.last_hunt_status != 'hit';
+    boolean keepHit = !params.replayed_whole_report && el.coverage_pending == true && el.last_hunt_status == 'hit' && params.last_hunt_status != 'hit';
     if (params.stamp) {
       el.last_hunted_at = params.last_hunted_at;
       if (!keepHit) {
@@ -163,6 +163,11 @@ export interface WriteHuntEvidenceParams {
    * recorded; leave it undefined when Tier 2 did not run, which keeps the recorded list.
    */
   pendingTechniqueIds?: string[];
+  /**
+   * Whether this run replayed the whole report (a manual run that skipped nothing). Its result then
+   * replaces an earlier finding even while coverage was pending; otherwise a pending `hit` is kept.
+   */
+  replayedWholeReport?: boolean;
 }
 
 /**
@@ -198,6 +203,7 @@ export const writeHuntEvidence = async (
     totalHits,
     searchedTechniqueIds = [],
     pendingTechniqueIds,
+    replayedWholeReport = false,
   }: WriteHuntEvidenceParams,
   logger: Logger
 ): Promise<void> => {
@@ -228,6 +234,7 @@ export const writeHuntEvidence = async (
         last_hunt_event_hit_count: totalHits,
         searched_technique_ids: searchedTechniqueIds,
         pending_technique_ids: pendingTechniqueIds ?? null,
+        replayed_whole_report: replayedWholeReport,
         coverage_pending: coveragePending,
         max_ids: MAX_HUNT_TECHNIQUE_IDS,
       },

@@ -320,6 +320,7 @@ steps:
         # Deliberately not `compact`: a missing field renders as undefined, so the key is dropped from
         # the body and the report keeps its recorded pending list. `[]` says Tier 2 ran and left none.
         pendingTechniqueIds: "${{ steps.read_hunt_result.output.data.result.pending_technique_ids }}"
+        replayedWholeReport: "${{ steps.read_hunt_result.output.data.result.replayed_whole_report }}"
     on-failure:
       continue: true
 

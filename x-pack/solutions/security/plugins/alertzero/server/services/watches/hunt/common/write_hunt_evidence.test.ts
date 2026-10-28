@@ -293,7 +293,7 @@ describe('writeHuntEvidence', () => {
     // A continuation is an element that is still `coverage_pending` with a `hit` stamped; the
     // new status is not a hit, so only `last_hunted_at` is written.
     expect(script.source).toContain(
-      "boolean keepHit = el.coverage_pending == true && el.last_hunt_status == 'hit' && params.last_hunt_status != 'hit';"
+      "boolean keepHit = !params.replayed_whole_report && el.coverage_pending == true && el.last_hunt_status == 'hit' && params.last_hunt_status != 'hit';"
     );
     expect(script.source).toMatch(/if \(!keepHit\) \{[^}]*last_hunt_status[^}]*last_hunt_run_id/s);
     expect(script.params.last_hunt_status).toBe('clean');
@@ -317,6 +317,35 @@ describe('writeHuntEvidence', () => {
       'boolean pending = params.coverage_pending && ids.size() <= params.max_ids;'
     );
     expect(script.params.coverage_pending).toBe(true);
+  });
+
+  describe('a manual replay of the whole report', () => {
+    const pendingHitRun = {
+      spaceId: 'default',
+      reportId: 'report-1',
+      runId: 'run-2',
+      hasConfirmedHit: false,
+      completeness: 'complete' as const,
+      totalHits: 0,
+    };
+
+    it('lets the replay replace a pending hit, since it searched everything', async () => {
+      const esClient = makeEsClient();
+
+      await write(esClient, { ...pendingHitRun, replayedWholeReport: true });
+
+      const [{ script }] = esClient.update.mock.calls[0];
+      expect(script.params.replayed_whole_report).toBe(true);
+      expect(script.source).toContain('boolean keepHit = !params.replayed_whole_report &&');
+    });
+
+    it('keeps the guard on for a run that is not a replay', async () => {
+      const esClient = makeEsClient();
+
+      await write(esClient, pendingHitRun);
+
+      expect(esClient.update.mock.calls[0][0].script.params.replayed_whole_report).toBe(false);
+    });
   });
 
   describe('pending techniques', () => {
