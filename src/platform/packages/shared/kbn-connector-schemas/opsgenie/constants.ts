@@ -19,7 +19,7 @@ export enum SUB_ACTION {
 }
 
 export const MESSAGE_NON_EMPTY = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.nonEmptyMessageField',
+  'connectors.components.opsgenie.nonEmptyMessageField',
   {
     defaultMessage: 'must be populated with a value other than just whitespace',
   }

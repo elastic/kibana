@@ -54,7 +54,7 @@ export const useWorkflowExecutionRerun = ({
             });
 
         notifications.toasts.addSuccess(
-          i18n.translate('workflowsManagement.executionsPage.bulkReRun.success', {
+          i18n.translate('workflows.executionsPage.bulkReRun.success', {
             defaultMessage: '{count, plural, one {Re-ran # execution} other {Re-ran # executions}}',
             values: { count: 1 },
           }),
@@ -64,7 +64,7 @@ export const useWorkflowExecutionRerun = ({
         setSelectedExecution(workflowExecutionId);
       } catch (error) {
         notifications.toasts.addError(error as Error, {
-          title: i18n.translate('workflowsManagement.executionsPage.bulkReRun.partialFailure', {
+          title: i18n.translate('workflows.executionsPage.bulkReRun.partialFailure', {
             defaultMessage:
               '{count, plural, one {Failed to re-run # execution} other {Failed to re-run # executions}}',
             values: { count: 1 },
@@ -112,7 +112,7 @@ export const useWorkflowExecutionsBulkActions = ({
       const text = formatWorkflowExecutionsForCopy(selectedExecutions);
       if (!copyToClipboard(text)) {
         notifications.toasts.addWarning({
-          title: i18n.translate('workflowsManagement.executionsPage.bulkCopyAsJson.copyFailed', {
+          title: i18n.translate('workflows.executionsPage.bulkCopyAsJson.copyFailed', {
             defaultMessage: 'Unable to copy to clipboard in this browser',
           }),
         });
@@ -120,10 +120,10 @@ export const useWorkflowExecutionsBulkActions = ({
       }
 
       notifications.toasts.addSuccess({
-        title: i18n.translate('workflowsManagement.executionsPage.bulkCopyAsJson.successTitle', {
+        title: i18n.translate('workflows.executionsPage.bulkCopyAsJson.successTitle', {
           defaultMessage: 'Copied to clipboard',
         }),
-        text: i18n.translate('workflowsManagement.executionsPage.bulkCopyAsJson.successText', {
+        text: i18n.translate('workflows.executionsPage.bulkCopyAsJson.successText', {
           defaultMessage:
             '{count, plural, one {# execution copied} other {# executions copied}} as JSON',
           values: { count: selectedExecutions.length },
@@ -172,7 +172,7 @@ export const useWorkflowExecutionsBulkActions = ({
 
       if (successCount > 0) {
         notifications.toasts.addSuccess(
-          i18n.translate('workflowsManagement.executionsPage.bulkReRun.success', {
+          i18n.translate('workflows.executionsPage.bulkReRun.success', {
             defaultMessage: '{count, plural, one {Re-ran # execution} other {Re-ran # executions}}',
             values: { count: successCount },
           }),
@@ -187,7 +187,7 @@ export const useWorkflowExecutionsBulkActions = ({
             ? firstFailure.reason
             : new Error(String(firstFailure.reason));
         notifications.toasts.addError(error, {
-          title: i18n.translate('workflowsManagement.executionsPage.bulkReRun.partialFailure', {
+          title: i18n.translate('workflows.executionsPage.bulkReRun.partialFailure', {
             defaultMessage:
               '{count, plural, one {Failed to re-run # execution} other {Failed to re-run # executions}}',
             values: { count: failureCount },
@@ -206,7 +206,7 @@ export const useWorkflowExecutionsBulkActions = ({
       {
         key: 'bulk-copy-as-json',
         icon: 'copy',
-        name: i18n.translate('workflowsManagement.executionsPage.bulkCopyAsJson.label', {
+        name: i18n.translate('workflows.executionsPage.bulkCopyAsJson.label', {
           defaultMessage: 'Copy as JSON',
         }),
         'data-test-subj': 'workflowExecutionsBulkActionCopyAsJson',
@@ -221,7 +221,7 @@ export const useWorkflowExecutionsBulkActions = ({
       items.push({
         key: 'bulk-re-run',
         icon: 'refresh',
-        name: i18n.translate('workflowsManagement.executionsPage.bulkReRun.label', {
+        name: i18n.translate('workflows.executionsPage.bulkReRun.label', {
           defaultMessage: 'Re-run',
         }),
         'data-test-subj': 'workflowExecutionsBulkActionReRun',
@@ -236,7 +236,7 @@ export const useWorkflowExecutionsBulkActions = ({
       panels: [
         {
           id: 0,
-          title: i18n.translate('workflowsManagement.executionsPage.bulkActions.title', {
+          title: i18n.translate('workflows.executionsPage.bulkActions.title', {
             defaultMessage: 'Actions',
           }),
           items,

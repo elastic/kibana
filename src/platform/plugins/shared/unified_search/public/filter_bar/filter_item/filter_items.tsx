@@ -14,9 +14,9 @@ import type { InjectedIntl } from '@kbn/i18n-react';
 import { injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
+import type { FilterableSource } from '@kbn/data-source';
 import type { FilterItemProps } from './filter_item';
 import { FilterItem } from './filter_item';
 import type { IUnifiedSearchPluginServices } from '../../types';
@@ -34,7 +34,7 @@ export interface FilterItemsProps {
   /** If not read only, this is called whenever a filter is removed and/or updated */
   onFiltersUpdated?: (filters: Filter[]) => void;
   /** A list of all dataviews that are used for the filters */
-  indexPatterns: DataView[];
+  indexPatterns: FilterableSource[];
   /** This is injected by the lazer loader */
   intl: InjectedIntl;
   /** Controls whether or not filter suggestions are influenced by the global time */

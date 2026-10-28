@@ -1,5 +1,5 @@
 {
-  "sha1": "e80c399d88733b7768cd286becddc723c0b85285",
+  "sha1": "76b05343dabeb21717b540d68490620a54653746",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -97,7 +97,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/attachments_api.spec.ts",
         "line": 186,
-        "column": 80
+        "column": 86
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/attachments_api.spec.ts",
-        "line": 211,
-        "column": 15
+        "line": 212,
+        "column": 23
       }
     },
     {
@@ -128,8 +128,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/attachments_api.spec.ts",
-        "line": 226,
+        "line": 228,
         "column": 7
+      }
+    },
+    {
+      "id": "48ab216d52a1644-7caee24510382d0",
+      "title": "Agent Builder — conversation attachments API POST _restore persists an attachment_restored event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/attachments_api.spec.ts",
+        "line": 246,
+        "column": 16
       }
     },
     {
@@ -144,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/attachments_api.spec.ts",
-        "line": 243,
-        "column": 7
+        "line": 270,
+        "column": 90
       }
     },
     {
@@ -160,7 +176,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 137,
+        "line": 141,
         "column": 8
       }
     },
@@ -176,7 +192,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 242,
+        "line": 257,
         "column": 13
       }
     },
@@ -192,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 280,
-        "column": 17
+        "line": 290,
+        "column": 13
       }
     },
     {
@@ -208,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 324,
-        "column": 30
+        "line": 352,
+        "column": 17
       }
     },
     {
@@ -224,8 +240,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 356,
-        "column": 19
+        "line": 321,
+        "column": 27
       }
     },
     {
@@ -240,8 +256,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 389,
-        "column": 13
+        "line": 437,
+        "column": 7
       }
     },
     {
@@ -256,8 +272,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 416,
-        "column": 25
+        "line": 467,
+        "column": 16
       }
     },
     {
@@ -272,8 +288,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 474,
-        "column": 22
+        "line": 537,
+        "column": 14
       }
     },
     {
@@ -288,7 +304,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 113,
+        "line": 114,
         "column": 7
       }
     },
@@ -304,8 +320,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 182,
-        "column": 22
+        "line": 187,
+        "column": 13
       }
     },
     {
@@ -320,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 239,
-        "column": 16
+        "line": 243,
+        "column": 17
       }
     },
     {
@@ -336,8 +352,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 253,
-        "column": 11
+        "line": 260,
+        "column": 13
       }
     },
     {
@@ -352,8 +368,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 273,
-        "column": 7
+        "line": 278,
+        "column": 23
       }
     },
     {
@@ -449,7 +465,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
         "line": 114,
-        "column": 41
+        "column": 52
       }
     },
     {
@@ -464,7 +480,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
-        "line": 127,
+        "line": 128,
         "column": 12
       }
     },
@@ -480,7 +496,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
-        "line": 143,
+        "line": 144,
         "column": 12
       }
     },
@@ -496,7 +512,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
-        "line": 187,
+        "line": 188,
         "column": 18
       }
     },
@@ -561,7 +577,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
         "line": 114,
-        "column": 41
+        "column": 52
       }
     },
     {
@@ -576,7 +592,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
-        "line": 127,
+        "line": 128,
         "column": 12
       }
     },
@@ -592,7 +608,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
-        "line": 143,
+        "line": 144,
         "column": 12
       }
     },
@@ -608,7 +624,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
-        "line": 187,
+        "line": 188,
         "column": 18
       }
     },
@@ -1040,6 +1056,80 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_simple_multi_api.spec.ts",
         "line": 114,
         "column": 27
+      }
+    },
+    {
+      "id": "d4715fb1272d42d-21c7644969d5435",
+      "title": "Agent Builder — Task Manager runs act as the API key owner the owner of a private agent can run it on Task Manager",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_task_manager_ownership_api.spec.ts",
+        "line": 194,
+        "column": 15
+      }
+    },
+    {
+      "id": "d4715fb1272d42d-7b51574e37ba431",
+      "title": "Agent Builder — Task Manager runs act as the API key owner the agent can write metadata to its owner private conversation on Task Manager",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_task_manager_ownership_api.spec.ts",
+        "line": 255,
+        "column": 32
+      }
+    },
+    {
+      "id": "d4715fb1272d42d-b213631e46799f4",
+      "title": "Agent Builder — Task Manager runs act as the API key owner a workflow run by the owner continues their private conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_task_manager_ownership_api.spec.ts",
+        "line": 291,
+        "column": 16
+      }
+    },
+    {
+      "id": "be88358eebd37c5-1345ac6a07bbd58",
+      "title": "Agent Builder — converse tool attachment events API [local] an attachment added by a tool is stored after its step and shown after its result",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_tool_attachment_events_api.spec.ts",
+        "line": 79,
+        "column": 38
+      }
+    },
+    {
+      "id": "be88358eebd37c5-f65c0e7ab0dcf37",
+      "title": "Agent Builder — converse tool attachment events API [task_manager] an attachment added by a tool is stored after its step and shown after its result",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_tool_attachment_events_api.spec.ts",
+        "line": 79,
+        "column": 38
       }
     },
     {

@@ -23,6 +23,11 @@ export interface ResourceDefinition {
   version: number;
   mappings: MappingsDefinition;
   lifecycle: IndicesDataStreamLifecycleWithRollover;
+  /**
+   * Applies `lifecycle` to the existing data stream on every startup, for lifecycles that change
+   * through config rather than a version bump. A failure blocks initialization.
+   */
+  manageLifecycle?: boolean;
   finalPipeline: IngestPipelineDefinition;
   /**
    * Deletes the existing data stream on startup when it was created from an index template at or

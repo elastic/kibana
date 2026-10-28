@@ -247,14 +247,19 @@ export const inferenceChunkToOpenAi = (
 };
 
 /**
- * Convert an inference token count to OpenAI usage, including prompt cache hits.
+ * Convert an inference token count to OpenAI usage, including prompt cache hits and reasoning
+ * tokens. OpenAI counts reasoning inside `completion_tokens`, whereas the inference contract
+ * reports `thinking` separately.
  */
 export const tokenCountToOpenAiUsage = (tokenCount: ChatCompletionTokenCount): object => ({
   prompt_tokens: tokenCount.prompt,
-  completion_tokens: tokenCount.completion,
+  completion_tokens: tokenCount.completion + (tokenCount.thinking ?? 0),
   total_tokens: tokenCount.total,
   ...(tokenCount.cached !== undefined
     ? { prompt_tokens_details: { cached_tokens: tokenCount.cached } }
+    : {}),
+  ...(tokenCount.thinking !== undefined
+    ? { completion_tokens_details: { reasoning_tokens: tokenCount.thinking } }
     : {}),
 });
 

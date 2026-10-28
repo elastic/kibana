@@ -12,6 +12,16 @@ import { serviceEntityDefinition } from '../../../../common/domain/definitions/s
 import { genericEntityDefinition } from '../../../../common/domain/definitions/generic';
 import type { ExtractionBlock } from '../../../../common/domain/definitions/entity_schema';
 import {
+  DYNAMIC_DEFINITION_FIXTURES,
+  hostDynamicFixture,
+  k8sPodDynamicFixture,
+  userShapedDynamicFixture,
+} from '../../../../common/domain/definitions/dynamic/__fixtures__/dynamic_definition_fixtures';
+import {
+  NO_IDENTITY_ATTRIBUTE_RULE,
+  SERVABLE_IDENTITY_RULE,
+} from '../../../../common/domain/definitions/dynamic/dynamic_definition_rules';
+import {
   EntityDefinitionRegistry,
   ENTITY_DEFINITION_TYPE_PATTERN,
   type RegistrableEntityDefinition,
@@ -86,6 +96,51 @@ describe('EntityDefinitionRegistry', () => {
 
       expect(result.ok).toBe(false);
       expectRejected('bad_schema', /failed schema validation: extraction\.fields/);
+    });
+
+    // The two identity variants are told apart at runtime by key presence (`isSingleFieldIdentity`),
+    // and the registry keeps the object it was given, not the parsed copy. An identity carrying
+    // keys of both variants must be rejected outright: if the schema merely stripped the stray
+    // keys, the EUID helpers would read a `singleField` that was never validated.
+    describe('mixed identity variants', () => {
+      const ranking = { branches: [{ ranking: [[{ field: 'mixed.id' }]] }] };
+
+      it('rejects a calculated identity that also carries a single field', () => {
+        const { identityField } = hostEntityDefinition;
+        const result = registry.register({
+          ...hostEntityDefinition,
+          identityField: { ...identityField, singleField: 'host.*' },
+        });
+
+        expect(result.ok).toBe(false);
+        expectRejected('host', /failed schema validation: identityField/);
+      });
+
+      it('rejects a single-field identity that also carries a ranking', () => {
+        const result = registry.register(
+          makeDefinition('mixed', {
+            identityField: { singleField: 'mixed.name', euidRanking: ranking },
+          })
+        );
+
+        expect(result.ok).toBe(false);
+        expectRejected('mixed', /failed schema validation: identityField/);
+      });
+
+      it('rejects an unknown key inside identityField', () => {
+        const result = registry.register(
+          makeDefinition('typo', {
+            identityField: {
+              singleField: 'typo.name',
+              skipTypePrepend: true,
+              skipTypePrefix: true,
+            },
+          } as unknown as Partial<RegistrableEntityDefinition>)
+        );
+
+        expect(result.ok).toBe(false);
+        expectRejected('typo', /failed schema validation: identityField/);
+      });
     });
 
     it('accepts a definition with only the identity core', () => {
@@ -435,6 +490,91 @@ describe('EntityDefinitionRegistry', () => {
         reason: 'type name is already registered',
       });
       expect(registry.get('host')).toBe(hostEntityDefinition);
+    });
+  });
+  // The registry parses with a schema derived from the unrefined object shape, so these prove the
+  // whole-definition rules are applied there too and not only by `entitySchema`.
+  describe('dynamic definitions', () => {
+    it.each(DYNAMIC_DEFINITION_FIXTURES.map((definition) => [definition.type, definition]))(
+      'registers the %s fixture',
+      (type, definition) => {
+        expect(registry.register(definition)).toEqual({ ok: true });
+        expect(registry.get(type)?.dynamic).toEqual(definition.dynamic);
+        expect(registry.rejected()).toEqual([]);
+      }
+    );
+
+    it('rejects the user-shaped definition with the servable identity rule', () => {
+      const result = registry.register(userShapedDynamicFixture);
+
+      expect(result.ok).toBe(false);
+      expect(result.ok === false && result.reason).toContain(
+        `identityField.euidRanking.branches: ${SERVABLE_IDENTITY_RULE}:`
+      );
+      expect(registry.get('user')).toBeUndefined();
+    });
+
+    it('rejects a documentsFilter that is not the derived presence filter', () => {
+      const { identityField } = hostDynamicFixture;
+      const result = registry.register({
+        ...hostDynamicFixture,
+        identityField: {
+          ...identityField,
+          documentsFilter: { field: 'host.id', exists: true },
+        },
+      });
+
+      expect(result.ok === false && result.reason).toContain(
+        `identityField.documentsFilter: ${SERVABLE_IDENTITY_RULE}:`
+      );
+    });
+
+    it('rejects an identity carrying both variants rather than validating only the ranking', () => {
+      // `host.*` is not a literal field path, so the servable identity rule would reject it as a
+      // `singleField`; it must not slip past the rule by riding on a valid ranking.
+      const { identityField } = hostDynamicFixture;
+      const result = registry.register({
+        ...hostDynamicFixture,
+        identityField: { ...identityField, singleField: 'host.*' },
+      });
+
+      expect(result.ok).toBe(false);
+      expect(result.ok === false && result.reason).toContain('identityField');
+      expect(registry.get('host')).toBeUndefined();
+    });
+
+    it('rejects an attribute that reads the identity field', () => {
+      const [source] = k8sPodDynamicFixture.dynamic?.sources ?? [];
+      const result = registry.register({
+        ...k8sPodDynamicFixture,
+        dynamic: { sources: [{ ...source, attributes: [{ name: 'uid', field: 'k8s.pod.uid' }] }] },
+      });
+
+      expect(result.ok === false && result.reason).toContain(
+        `dynamic.sources.0.attributes.0.field: ${NO_IDENTITY_ATTRIBUTE_RULE}:`
+      );
+    });
+
+    it('still rejects unknown keys alongside a dynamic block', () => {
+      const withStaleId = {
+        ...k8sPodDynamicFixture,
+        id: 'k8s.pod-default',
+      } as unknown as RegistrableEntityDefinition;
+
+      expect(registry.register(withStaleId).ok).toBe(false);
+    });
+
+    it('registers the built-ins', () => {
+      const builtIns: RegistrableEntityDefinition[] = [
+        userEntityDefinition,
+        hostEntityDefinition,
+        serviceEntityDefinition,
+        genericEntityDefinition,
+      ];
+
+      builtIns.forEach((definition) => {
+        expect(registry.register(definition)).toEqual({ ok: true });
+      });
     });
   });
 });

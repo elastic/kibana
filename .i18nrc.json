@@ -212,7 +212,7 @@
     ],
     "visualizationUiComponents": "src/platform/packages/shared/kbn-visualization-ui-components",
     "visualizationUtils": "src/platform/packages/shared/kbn-visualization-utils",
-    "workflowsUi": "src/platform/packages/shared/kbn-workflows-ui/src/components/run_workflow_panel",
+    "workflowsUi": "src/platform/packages/shared/kbn-workflows-ui",
     "unifiedDocViewer": [
       "src/platform/plugins/shared/unified_doc_viewer",
       "src/platform/packages/shared/kbn-unified-doc-viewer"
@@ -243,7 +243,9 @@
     "visualizationsCommon": "src/platform/packages/shared/kbn-visualizations-common",
     "workflows": [
       "src/platform/packages/shared/kbn-workflows",
-      "src/platform/packages/shared/kbn-workflows-library"
+      "src/platform/packages/shared/kbn-workflows-library",
+      "src/platform/plugins/shared/workflows_management",
+      "x-pack/platform/plugins/shared/agent_builder_workflows"
     ],
     "workflowsExecutionEngine": "src/platform/plugins/shared/workflows_execution_engine",
     "workflowsExtensions": "src/platform/plugins/shared/workflows_extensions",
@@ -259,17 +261,16 @@
     "responseOpsAlertSnooze": "x-pack/platform/packages/shared/response-ops/alert-snooze",
     "responseOpsAlertsFieldsBrowser": "x-pack/platform/packages/shared/response-ops/alerts-fields-browser",
     "responseOpsRecurringScheduleForm": "x-pack/platform/packages/shared/response-ops/recurring-schedule-form",
-    "responseOpsRulesApis": "x-pack/platform/packages/shared/response-ops/rules-apis"
+    "responseOpsRulesApis": "x-pack/platform/packages/shared/response-ops/rules-apis",
+    "responseOpsFormGenerator": "x-pack/platform/packages/shared/response-ops/form-generator",
+    "connectors": "src/platform/packages/shared/kbn-connector-schemas",
+    "connectorSpecs": "src/platform/packages/shared/kbn-connector-specs",
+    "esqlLanguage": "src/platform/packages/shared/esql/kbn-esql-language",
+    "indexEditor": "src/platform/packages/private/kbn-index-editor",
+    "palettes": "src/platform/packages/shared/kbn-palettes"
   },
   "exclude": [
-    "packages/kbn-mock-idp-plugin",
-    "src/platform/packages/shared/kbn-workflows-ui",
-    "src/platform/plugins/shared/workflows_management",
-    "src/platform/packages/shared/kbn-palettes",
-    "src/platform/packages/private/kbn-index-editor",
-    "src/platform/packages/shared/esql/kbn-esql-language",
-    "src/platform/packages/shared/kbn-connector-schemas",
-    "src/platform/packages/shared/kbn-connector-specs"
+    "packages/kbn-mock-idp-plugin"
   ],
   "translations": []
 }

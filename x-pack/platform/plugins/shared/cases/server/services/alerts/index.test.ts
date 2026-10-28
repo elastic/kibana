@@ -836,14 +836,23 @@ describe('updateAlertsStatus', () => {
   });
 
   describe('ensureAttacksAuthorized', () => {
-    const ATTACK_INDEX = '.alerts-security.attack.discovery.alerts-default';
-    const AD_HOC_ATTACK_INDEX = '.adhoc.alerts-security.attack.discovery.alerts-default';
+    const ATTACK_INDEX = '.internal.alerts-security.attack.discovery.alerts-default-000001';
+    const AD_HOC_ATTACK_INDEX =
+      '.internal.adhoc.alerts-security.attack.discovery.alerts-default-000001';
+    const ATTACK_PATTERN = '.alerts-security.attack.discovery.alerts-*';
+    const AD_HOC_ATTACK_PATTERN = '.adhoc.alerts-security.attack.discovery.alerts-*';
     const attacks = [{ id: 'attack-1', index: ATTACK_INDEX }];
     const adHocAttacks = [{ id: 'attack-1', index: AD_HOC_ATTACK_INDEX }];
 
-    const attackDoc = (source: Record<string, unknown>) => ({
-      docs: [{ _index: ATTACK_INDEX, _id: 'attack-1', found: true, _source: source }],
-    });
+    const searchResponse = (
+      hits: Array<{ _index: string; _id: string; _source?: Record<string, unknown> }>
+    ) => ({ hits: { hits } });
+
+    const attackDoc = (source: Record<string, unknown>) =>
+      searchResponse([{ _index: ATTACK_INDEX, _id: 'attack-1', _source: source }]);
+
+    const adHocAttackDoc = (source: Record<string, unknown>) =>
+      searchResponse([{ _index: AD_HOC_ATTACK_INDEX, _id: 'attack-1', _source: source }]);
 
     const validAttackSource = {
       'kibana.alert.rule.rule_type_id': 'attack-discovery',
@@ -855,58 +864,150 @@ describe('updateAlertsStatus', () => {
       'kibana.space_ids': ['default'],
     };
 
-    const adHocAttackDoc = (source: Record<string, unknown>) => ({
-      docs: [{ _index: AD_HOC_ATTACK_INDEX, _id: 'attack-1', found: true, _source: source }],
-    });
-
     it('authorizes an attack discovery alert in the current space', async () => {
-      esClient.mget.mockResolvedValueOnce(attackDoc(validAttackSource) as never);
+      esClient.search.mockResolvedValueOnce(attackDoc(validAttackSource) as never);
 
       await expect(
         alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
       ).resolves.not.toThrow();
 
-      expect(esClient.mget).toHaveBeenCalledWith({
-        docs: [{ _id: 'attack-1', _index: ATTACK_INDEX }],
-        _source_includes: ['kibana.alert.rule.rule_type_id', 'kibana.space_ids'],
-      });
       expect(alertsClient.ensureAllAlertsAuthorizedRead).toHaveBeenCalledWith({ alerts: attacks });
     });
 
+    it('reads through the alias pattern rather than the index on the attachment', async () => {
+      esClient.search.mockResolvedValueOnce(attackDoc(validAttackSource) as never);
+
+      await alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' });
+
+      // Alert index privileges are granted on `.alerts-security.attack.discovery.alerts*` and
+      // never on `.internal.alerts-*`, so reading the index the attachment carries would fail
+      // for every non-superuser. A pattern rather than the alias, because single-document
+      // operations against an alias break as soon as it spans more than one index.
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: ATTACK_PATTERN,
+          query: { ids: { values: ['attack-1'] } },
+          _source: ['kibana.alert.rule.rule_type_id', 'kibana.space_ids'],
+        })
+      );
+      expect(esClient.mget).not.toHaveBeenCalled();
+    });
+
+    it('reads ad-hoc attacks through the ad-hoc pattern', async () => {
+      esClient.search.mockResolvedValueOnce(adHocAttackDoc(validAdHocAttackSource) as never);
+
+      await alertService.ensureAttacksAuthorized({ attacks: adHocAttacks, spaceId: 'default' });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: AD_HOC_ATTACK_PATTERN })
+      );
+    });
+
+    it('groups a mixed batch into one search per index family', async () => {
+      esClient.search
+        .mockResolvedValueOnce(
+          searchResponse([
+            { _index: ATTACK_INDEX, _id: 'attack-1', _source: validAttackSource },
+          ]) as never
+        )
+        .mockResolvedValueOnce(
+          searchResponse([
+            { _index: AD_HOC_ATTACK_INDEX, _id: 'attack-2', _source: validAdHocAttackSource },
+          ]) as never
+        );
+
+      await expect(
+        alertService.ensureAttacksAuthorized({
+          attacks: [
+            { id: 'attack-1', index: ATTACK_INDEX },
+            { id: 'attack-2', index: AD_HOC_ATTACK_INDEX },
+          ],
+          spaceId: 'default',
+        })
+      ).resolves.not.toThrow();
+
+      expect(esClient.search).toHaveBeenCalledTimes(2);
+    });
+
+    it('reads attacks from different backing indices of one family in a single search', async () => {
+      esClient.search.mockResolvedValueOnce(
+        searchResponse([
+          { _index: ATTACK_INDEX, _id: 'attack-1', _source: validAttackSource },
+          {
+            _index: '.internal.alerts-security.attack.discovery.alerts-default-000002',
+            _id: 'attack-2',
+            _source: validAttackSource,
+          },
+        ]) as never
+      );
+
+      await expect(
+        alertService.ensureAttacksAuthorized({
+          attacks: [
+            { id: 'attack-1', index: ATTACK_INDEX },
+            {
+              id: 'attack-2',
+              index: '.internal.alerts-security.attack.discovery.alerts-default-000002',
+            },
+          ],
+          spaceId: 'default',
+        })
+      ).resolves.not.toThrow();
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: ATTACK_PATTERN,
+          size: 2,
+          query: { ids: { values: ['attack-1', 'attack-2'] } },
+        })
+      );
+    });
+
     it('authorizes an ad-hoc attack discovery alert in the current space', async () => {
-      esClient.mget.mockResolvedValueOnce(adHocAttackDoc(validAdHocAttackSource) as never);
+      esClient.search.mockResolvedValueOnce(adHocAttackDoc(validAdHocAttackSource) as never);
 
       await expect(
         alertService.ensureAttacksAuthorized({ attacks: adHocAttacks, spaceId: 'default' })
       ).resolves.not.toThrow();
 
-      expect(esClient.mget).toHaveBeenCalledWith({
-        docs: [{ _id: 'attack-1', _index: AD_HOC_ATTACK_INDEX }],
-        _source_includes: ['kibana.alert.rule.rule_type_id', 'kibana.space_ids'],
-      });
       // `attack_discovery_ad_hoc_rule_type_id` is a sentinel the alerting framework never
-      // registers, so alerting RBAC cannot authorize it. The `mget` above runs as the current
+      // registers, so alerting RBAC cannot authorize it. The search above runs as the current
       // user, which is the index privilege gate ad-hoc discoveries are read with everywhere else.
       expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
     });
 
+    it('authorizes a dev-only data generator attack discovery alert in the current space', async () => {
+      esClient.search.mockResolvedValueOnce(
+        attackDoc({
+          'kibana.alert.rule.rule_type_id': 'security.attack_discovery.data_generator',
+          'kibana.space_ids': ['default'],
+        }) as never
+      );
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).resolves.not.toThrow();
+
+      // The generator rule writes through the same AAD config into the same index, so its
+      // documents are attack discoveries. It is registered only in dev mode or on Elastic-owned
+      // cloud, which is where the production gate lives. Rejecting these made the feature
+      // untestable with the generator everyone desk tests with.
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
     it('sends only the scheduled attacks of a mixed batch through alerting RBAC', async () => {
-      esClient.mget.mockResolvedValueOnce({
-        docs: [
-          {
-            _index: AD_HOC_ATTACK_INDEX,
-            _id: 'attack-1',
-            found: true,
-            _source: validAdHocAttackSource,
-          },
-          { _index: ATTACK_INDEX, _id: 'attack-2', found: true, _source: validAttackSource },
-        ],
-      } as never);
+      esClient.search.mockResolvedValueOnce(
+        searchResponse([
+          { _index: ATTACK_INDEX, _id: 'attack-1', _source: validAdHocAttackSource },
+          { _index: ATTACK_INDEX, _id: 'attack-2', _source: validAttackSource },
+        ]) as never
+      );
 
       await expect(
         alertService.ensureAttacksAuthorized({
           attacks: [
-            { id: 'attack-1', index: AD_HOC_ATTACK_INDEX },
+            { id: 'attack-1', index: ATTACK_INDEX },
             { id: 'attack-2', index: ATTACK_INDEX },
           ],
           spaceId: 'default',
@@ -918,8 +1019,68 @@ describe('updateAlertsStatus', () => {
       });
     });
 
+    it('pairs results to requests by id, not by the index Elasticsearch resolved', async () => {
+      // The search is issued against a pattern and the hit carries the concrete backing index,
+      // so the two never match. Comparing them would leave the scheduled set empty and skip
+      // alerting RBAC for any caller that named something other than the backing index.
+      esClient.search.mockResolvedValueOnce(
+        searchResponse([
+          {
+            _index: '.internal.alerts-security.attack.discovery.alerts-default-000007',
+            _id: 'attack-1',
+            _source: validAttackSource,
+          },
+        ]) as never
+      );
+
+      await expect(
+        alertService.ensureAttacksAuthorized({
+          attacks: [{ id: 'attack-1', index: '.alerts-security.attack.discovery.alerts-default' }],
+          spaceId: 'default',
+        })
+      ).resolves.not.toThrow();
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).toHaveBeenCalledWith({
+        alerts: [
+          {
+            id: 'attack-1',
+            index: '.internal.alerts-security.attack.discovery.alerts-default-000007',
+          },
+        ],
+      });
+    });
+
+    it('authorizes the document the search resolved, not the index the attachment named', async () => {
+      // `ensureAllAlertsAuthorizedRead` runs its own internal mget. The caller-supplied index need
+      // not hold the document the search found, so forwarding it would run the alerting
+      // permission check against a different document than the one whose rule type was read.
+      esClient.search.mockResolvedValueOnce(
+        searchResponse([
+          {
+            _index: '.internal.alerts-security.attack.discovery.alerts-default-000042',
+            _id: 'attack-1',
+            _source: validAttackSource,
+          },
+        ]) as never
+      );
+
+      await alertService.ensureAttacksAuthorized({
+        attacks: [{ id: 'attack-1', index: ATTACK_INDEX }],
+        spaceId: 'default',
+      });
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).toHaveBeenCalledWith({
+        alerts: [
+          {
+            id: 'attack-1',
+            index: '.internal.alerts-security.attack.discovery.alerts-default-000042',
+          },
+        ],
+      });
+    });
+
     it('throws when an ad-hoc attack belongs to another space', async () => {
-      esClient.mget.mockResolvedValueOnce(
+      esClient.search.mockResolvedValueOnce(
         adHocAttackDoc({
           'kibana.alert.rule.rule_type_id': 'attack_discovery_ad_hoc_rule_type_id',
           'kibana.space_ids': ['space-2'],
@@ -934,8 +1095,20 @@ describe('updateAlertsStatus', () => {
     });
 
     it('throws when the referenced document does not exist', async () => {
-      esClient.mget.mockResolvedValueOnce({
-        docs: [{ _index: ATTACK_INDEX, _id: 'attack-1', found: false }],
+      esClient.search.mockResolvedValueOnce(searchResponse([]) as never);
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).rejects.toThrow(/Referenced attack\(s\) not found: attack-1/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('reports the attack as not found when the caller may not read the pattern', async () => {
+      // A caller with no index privileges at all is refused the search instead of reading nothing.
+      esClient.search.mockRejectedValueOnce({
+        statusCode: 403,
+        body: { error: { type: 'security_exception' } },
       } as never);
 
       await expect(
@@ -945,8 +1118,23 @@ describe('updateAlertsStatus', () => {
       expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
     });
 
+    it('rethrows a read failure that is not an authorization refusal', async () => {
+      esClient.search.mockRejectedValueOnce(
+        Object.assign(new Error('unavailable_shards_exception'), {
+          statusCode: 503,
+          body: { error: { type: 'unavailable_shards_exception' } },
+        }) as never
+      );
+
+      await expect(
+        alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
+      ).rejects.toThrow(/unavailable_shards_exception/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
     it('throws when the referenced document is not an alert', async () => {
-      esClient.mget.mockResolvedValueOnce(attackDoc({ message: 'just a document' }) as never);
+      esClient.search.mockResolvedValueOnce(attackDoc({ message: 'just a document' }) as never);
 
       await expect(
         alertService.ensureAttacksAuthorized({ attacks, spaceId: 'default' })
@@ -956,7 +1144,7 @@ describe('updateAlertsStatus', () => {
     });
 
     it('throws when the referenced alert is not an attack discovery', async () => {
-      esClient.mget.mockResolvedValueOnce(
+      esClient.search.mockResolvedValueOnce(
         attackDoc({
           'kibana.alert.rule.rule_type_id': 'siem.queryRule',
           'kibana.space_ids': ['default'],
@@ -971,7 +1159,7 @@ describe('updateAlertsStatus', () => {
     });
 
     it('throws when the referenced attack belongs to another space', async () => {
-      esClient.mget.mockResolvedValueOnce(
+      esClient.search.mockResolvedValueOnce(
         attackDoc({
           'kibana.alert.rule.rule_type_id': 'attack-discovery',
           'kibana.space_ids': ['space-2'],
@@ -985,7 +1173,7 @@ describe('updateAlertsStatus', () => {
       expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
     });
 
-    it('throws without calling mget when the index belongs to a linked project (CPS)', async () => {
+    it('throws without reading when the index belongs to a linked project (CPS)', async () => {
       await expect(
         alertService.ensureAttacksAuthorized({
           attacks: [{ id: 'attack-1', index: `my-linked-project:${ATTACK_INDEX}` }],
@@ -993,11 +1181,34 @@ describe('updateAlertsStatus', () => {
         })
       ).rejects.toThrow(/linked project or remote cluster/);
 
-      expect(esClient.mget).not.toHaveBeenCalled();
+      expect(esClient.search).not.toHaveBeenCalled();
       expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
     });
 
-    it('does not call mget when there are no non-empty attacks', async () => {
+    it.each([
+      ['.alerts-security.alerts-default'],
+      ['.internal.alerts-security.alerts-default-000001'],
+      ['.kibana'],
+      ['logs-*'],
+    ])(
+      'throws without reading when the index %s is not an attack discovery index',
+      async (index) => {
+        // Without this gate the read is pointed at any index the caller can read, and a document
+        // there whose `_source` claims an attack discovery rule type in the right space would pass
+        // every check that follows.
+        await expect(
+          alertService.ensureAttacksAuthorized({
+            attacks: [{ id: 'attack-1', index }],
+            spaceId: 'default',
+          })
+        ).rejects.toThrow(/not an attack discovery index/);
+
+        expect(esClient.search).not.toHaveBeenCalled();
+        expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+      }
+    );
+
+    it('does not read when there are no non-empty attacks', async () => {
       await expect(
         alertService.ensureAttacksAuthorized({
           attacks: [{ id: '', index: '' }],
@@ -1005,12 +1216,12 @@ describe('updateAlertsStatus', () => {
         })
       ).resolves.not.toThrow();
 
-      expect(esClient.mget).not.toHaveBeenCalled();
+      expect(esClient.search).not.toHaveBeenCalled();
       expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
     });
 
     it('wraps and rethrows authorization errors', async () => {
-      esClient.mget.mockResolvedValueOnce(attackDoc(validAttackSource) as never);
+      esClient.search.mockResolvedValueOnce(attackDoc(validAttackSource) as never);
       alertsClient.ensureAllAlertsAuthorizedRead.mockRejectedValueOnce(new Error('boom'));
 
       await expect(

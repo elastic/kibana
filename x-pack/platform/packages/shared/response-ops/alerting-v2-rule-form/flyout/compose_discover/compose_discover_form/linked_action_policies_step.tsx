@@ -37,12 +37,12 @@ import {
 import { WorkflowConnectorIcons } from './workflow_connector_icons';
 
 const actionPoliciesTitle = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.title',
+  'xpack.alertingV2.alertingV2RuleForm.linkedActionPolicies.title',
   { defaultMessage: 'Action policies' }
 );
 
 const actionPoliciesDescription = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.description',
+  'xpack.alertingV2.alertingV2RuleForm.linkedActionPolicies.description',
   {
     defaultMessage:
       'Routing tags determine which action policies apply. Catch-all action policies match all alerts.',
@@ -50,27 +50,27 @@ const actionPoliciesDescription = i18n.translate(
 );
 
 const appliedPoliciesTitle = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.appliedPoliciesTitle',
+  'xpack.alertingV2.alertingV2RuleForm.linkedActionPolicies.appliedPoliciesTitle',
   { defaultMessage: 'Applied policies' }
 );
 
 const createActionPolicyLabel = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.createLink',
+  'xpack.alertingV2.alertingV2RuleForm.linkedActionPolicies.createLink',
   { defaultMessage: 'Create action policy' }
 );
 
 const emptyStateLabel = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.noMatchesEmptyState',
+  'xpack.alertingV2.alertingV2RuleForm.linkedActionPolicies.noMatchesEmptyState',
   { defaultMessage: 'No action policies match yet.' }
 );
 
 const errorTitle = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.errorTitle',
+  'xpack.alertingV2.alertingV2RuleForm.linkedActionPolicies.errorTitle',
   { defaultMessage: 'Failed to load linked action policies' }
 );
 
 const getEditLabel = (name: string) =>
-  i18n.translate('xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.editPolicyLink', {
+  i18n.translate('xpack.alertingV2.alertingV2RuleForm.linkedActionPolicies.editPolicyLink', {
     defaultMessage: 'Edit {name}',
     values: { name },
   });

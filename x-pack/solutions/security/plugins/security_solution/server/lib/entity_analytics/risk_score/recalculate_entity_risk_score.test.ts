@@ -28,8 +28,11 @@ jest.mock('./get_risk_inputs_index', () => ({
   getRiskInputsIndex: async () => ({ index: '.alerts-security.alerts-default' }),
 }));
 
+const ENGINE_ALERT_FILTER = { term: { 'kibana.alert.workflow_status': 'open' } };
+const ENTITY_IDENTITY_FILTER = { term: { 'user.name': 'alice' } };
+
 jest.mock('./maintainer/steps/build_alert_filters', () => ({
-  buildAlertFilters: () => [],
+  buildAlertFilters: () => [ENGINE_ALERT_FILTER],
 }));
 
 jest.mock('./maintainer/lookup/lookup_index', () => ({
@@ -52,7 +55,7 @@ jest.mock('./maintainer/steps/run_resolution_scoring_step', () => ({
 jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: {
     dsl: {
-      getEuidFilterBasedOnDocument: () => ({ term: { 'user.name': 'alice' } }),
+      getEuidFilterBasedOnDocument: () => ENTITY_IDENTITY_FILTER,
     },
   },
   getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
@@ -73,10 +76,13 @@ const storeEntity = (scoreNorm?: number) => ({
 describe('recalculateEntityRiskScore', () => {
   let crudClient: EntityStoreCRUDClient;
   let writer: RiskEngineDataWriter;
+  let esClient: ReturnType<
+    typeof elasticsearchServiceMock.createScopedClusterClient
+  >['asCurrentUser'];
 
   const run = () =>
     recalculateEntityRiskScore({
-      esClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
+      esClient,
       soClient: savedObjectsClientMock.create(),
       crudClient,
       namespace: 'default',
@@ -89,6 +95,8 @@ describe('recalculateEntityRiskScore', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    esClient.indices.exists.mockResolvedValue(true);
     crudClient = { listEntities: jest.fn() } as unknown as EntityStoreCRUDClient;
     writer = {} as RiskEngineDataWriter;
     mockGetConfiguration.mockResolvedValue({ dataViewId: 'security-dv', pageSize: 100 });
@@ -111,6 +119,19 @@ describe('recalculateEntityRiskScore', () => {
 
     expect(mockPersistZeroBaseScore).toHaveBeenCalledWith(
       expect.objectContaining({ entityId: ENTITY_ID, entityType: EntityType.user })
+    );
+  });
+
+  it('scores the resolution group with the engine alert filters but not the entity filter', async () => {
+    (crudClient.listEntities as jest.Mock).mockResolvedValue({ entities: [storeEntity(70)] });
+
+    await run();
+
+    expect(mockScoreBaseEntities).toHaveBeenCalledWith(
+      expect.objectContaining({ alertFilters: [ENGINE_ALERT_FILTER, ENTITY_IDENTITY_FILTER] })
+    );
+    expect(mockRunResolutionScoringStep).toHaveBeenCalledWith(
+      expect.objectContaining({ alertFilters: [ENGINE_ALERT_FILTER] })
     );
   });
 
@@ -148,6 +169,26 @@ describe('recalculateEntityRiskScore', () => {
     await run();
 
     expect(mockPersistZeroBaseScore).not.toHaveBeenCalled();
+  });
+
+  describe('when the alerts index does not exist', () => {
+    beforeEach(() => {
+      esClient.indices.exists.mockResolvedValue(false);
+    });
+
+    it('skips the recalculation and returns no scores', async () => {
+      (crudClient.listEntities as jest.Mock).mockResolvedValue({ entities: [storeEntity(70)] });
+
+      const result = await run();
+
+      expect(esClient.indices.exists).toHaveBeenCalledWith({
+        index: '.alerts-security.alerts-default',
+      });
+      expect(mockScoreBaseEntities).not.toHaveBeenCalled();
+      expect(mockPersistZeroBaseScore).not.toHaveBeenCalled();
+      expect(mockRunResolutionScoringStep).not.toHaveBeenCalled();
+      expect(result).toEqual({ baseScore: undefined, resolutionScore: undefined });
+    });
   });
 
   it('throws when the entity is not in the store', async () => {

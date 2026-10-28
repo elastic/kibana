@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { ChangeHistoryClient } from '@kbn/change-history';
 import type { IResourceInitializer } from '../services/resource_service/resource_manager';
 
@@ -21,10 +22,11 @@ import type { IResourceInitializer } from '../services/resource_service/resource
 export class RuleChangesHistoryInitializer implements IResourceInitializer {
   constructor(
     private readonly client: ChangeHistoryClient,
-    private readonly esClient: ElasticsearchClient
+    private readonly esClient: ElasticsearchClient,
+    private readonly userProfileService: UserProfileServiceStart
   ) {}
 
   public async initialize(): Promise<void> {
-    await this.client.initialize(this.esClient);
+    await this.client.initialize(this.esClient, { userProfileService: this.userProfileService });
   }
 }

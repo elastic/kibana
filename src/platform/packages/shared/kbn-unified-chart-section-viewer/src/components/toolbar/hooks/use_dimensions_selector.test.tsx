@@ -285,6 +285,33 @@ describe('useDimensionsSelector', () => {
       expect(onChange).toHaveBeenCalledWith([dim('host.name'), dim('service.name')]);
     });
 
+    it('commits a pending selection when the selector unmounts mid-debounce', () => {
+      const onChange = jest.fn();
+      const { result, unmount } = renderDimensionsHook({
+        dimensions: [dim('host.name'), dim('service.name'), dim('cloud.region')],
+        selectedDimensions: [],
+        onChange,
+        singleSelection: false,
+        isLoading: false,
+      });
+      const hostOption = (result.current.options as DimensionEntry[]).find(
+        (o) => o.value === 'host.name'
+      )!;
+
+      act(() => {
+        result.current.handleChange([{ ...hostOption, checked: 'on' }]);
+      });
+
+      expect(onChange).not.toHaveBeenCalled();
+
+      act(() => {
+        unmount();
+      });
+
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith([dim('host.name')]);
+    });
+
     it('caps the emitted selection at MAX_DIMENSIONS_SELECTIONS', () => {
       const onChange = jest.fn();
       const extras = Array.from({ length: MAX_DIMENSIONS_SELECTIONS + 2 }, (_, i) => dim(`d${i}`));

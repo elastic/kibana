@@ -35,4 +35,5 @@ export type UpsellingMessageId =
   | 'note_management_user_filter'
   | 'prebuilt_rule_customization'
   | 'prebuilt_rule_customization_description'
-  | 'endpoint_custom_yara_signatures';
+  | 'endpoint_custom_yara_signatures'
+  | 'endpoint_registry_credential_hardening';

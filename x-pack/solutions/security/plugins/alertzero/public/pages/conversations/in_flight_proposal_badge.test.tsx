@@ -45,6 +45,12 @@ describe('InFlightProposalBadge', () => {
     expect(mockIsDeclining).toHaveBeenCalledWith('p1');
   });
 
+  it('keeps the Applying badge while the approved action runs', () => {
+    renderWithKibanaRenderContext(<InFlightProposalBadge proposalId="p1" isProposalSettling />);
+
+    expect(screen.getByText('Applying')).toBeInTheDocument();
+  });
+
   it('shows the Declining badge while declining', () => {
     mockIsDeclining.mockReturnValue(true);
 

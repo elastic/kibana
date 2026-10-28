@@ -57,11 +57,11 @@ type ExportJsonFlyoutContentProps<
   closeFlyout: () => void;
   dataTestSubjPrefix: string;
   downloadExportJson: DownloadExportJson;
-  /** Consumer-owned controls rendered beside the Technical Preview badge. */
+  /** Consumer-owned controls rendered in the header row. */
   headerActions?: React.ReactNode;
   /** Consumer-owned content rendered below the header actions. */
   headerNotice?: React.ReactNode;
-  isTechnicalPreview: boolean;
+  isTechnicalPreview?: boolean;
   openInConsole?: ExportJsonOpenInConsoleConfig;
   prepareExportJson: PrepareExportJsonFunction<State, PreparedState>;
   titleId?: string;
@@ -79,7 +79,7 @@ export const ExportJsonFlyoutContent = <
   getExportJson,
   headerActions,
   headerNotice,
-  isTechnicalPreview,
+  isTechnicalPreview = false,
   openInConsole,
   prepareExportJson,
   titleId,

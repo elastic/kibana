@@ -58,21 +58,22 @@ windowStart = eventWatermark − OVERLAP_WINDOW_MINUTES
 windowEnd   = min(windowStart + MAX_WINDOW_MINUTES, startedAt − SETTLE_BUFFER_SECONDS)
 ```
 
-The window caps **event** rows only. Action rows are not upper-bounded, so `last_fired` still sees records `StoreActionsStep` just wrote (ES sets their `@timestamp` at ingest, i.e. after the settle buffer).
+The window caps **event** rows only. Action rows are not upper-bounded, so `last_fired` still sees records `DispatchStep` just wrote (ES sets their `@timestamp` at ingest, i.e. after the settle buffer). The scan reads only the action types that feed `last_fired` (`fire`, `suppress`, `unmatched`): `notified` and episode action rows carry an `alert_id`, so reading them would add an aggregation bucket per historical record.
 
 `eventWatermark` is a **content-addressed** progress marker — it advances only after alerts in the window have received `.alert-actions` records, never based on wall-clock alone:
 
 | Tick outcome                                    | `nextWatermark`                                     |
 | ----------------------------------------------- | --------------------------------------------------- |
-| Truncated (`ESQL_QUERY_ROW_LIMIT` rows returned) | `last_event_timestamp` of the last returned alert   |
+| Truncated (`dispatcher.run.alerts.max` rows returned) | `last_event_timestamp` of the last returned alert   |
 | `no_alerts` or `no_actions` halt                | `windowEnd`                                         |
-| Aborted before `StoreActionsStep`               | `eventWatermark` (no advance)                       |
+| `aborted` halt                                  | `eventWatermark` (no advance)                       |
+| `commit_failed` halt                            | `eventWatermark` (no advance)                       |
 | `inline_stats_too_large` halt                   | `eventWatermark` (no advance)                       |
 | Normal completion                               | `windowEnd`                                         |
 
 `nextWatermark` never regresses: the final value is `max(computed, eventWatermark)`.
 
-Cold start (no persisted watermark) is logged as `DISPATCHER_COLD_START` and the watermark is seeded to `startedAt − OVERLAP_WINDOW_MINUTES`.
+Cold start (no persisted watermark) is logged at info level (no code) and the watermark is seeded to `startedAt − OVERLAP_WINDOW_MINUTES`.
 
 The scan window, persisted action history, and content-addressed dedup let the dispatcher decide which alerts are new or still relevant without blindly replaying everything on every run.
 
@@ -87,9 +88,9 @@ The pipeline then moves through these phases:
 7. Load enabled action policies
 8. Evaluate policy matchers
 9. Build action groups
-10. Apply throttling
-11. Dispatch eligible groups
-12. Store final actions and reasons
+10. Set aside alerts an earlier, aborted tick already handled
+11. Apply throttling
+12. Dispatch eligible groups and record the outcomes: first the records that need no dispatch, then each chunk's records as soon as the chunk returns, and the execution history once at the end
 
 ### Decision outcomes written to `.alert-actions`
 
@@ -97,10 +98,15 @@ By the end of a dispatcher run, every alert that reached the later pipeline stag
 
 | Outcome      | What happened                                                                                              | Action documents written                             |
 | ------------ | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| `dispatch`   | The alert matched a policy, survived suppression and throttling, and was selected for delivery.            | `fire` per alert, plus `notified` per action group   |
+| `dispatch`   | The alert matched a policy, survived suppression and throttling, and was selected for delivery.            | `fire` per alert, plus `notified` per (action group, alert), written after each dispatch chunk |
+| `already notified` | An earlier tick handled this alert's content for the group (scheduled it, or failed to) but aborted before recording the alert. | `fire` with an `already notified by policy` reason   |
 | `throttled`  | The alert matched a policy, but the action group was held back by throttling.                              | `suppress` with a throttle-related reason            |
 | `suppressed` | The alert was explicitly filtered out by suppression logic such as ack, snooze, or deactivate semantics.   | `suppress` with the suppression reason               |
 | `unmatched`  | The alert remained dispatchable but matched no enabled action policy.                                      | `unmatched`                                          |
+
+`fire`, `suppress` and `unmatched` carry no `alert_id`, and the scan dedups them per series (`subject`, `group_hash`): one record hides every policy and every episode of its series. `DispatchStep` therefore writes them per series, through `SeriesLedger` (`steps/utils/series_ledger.ts`), only once every (dispatched group, alert) pair of that series has concluded. A group concludes when its chunk returns or when it fails before scheduling. Series with no group to dispatch are written in a first commit, before any scheduling. `notified` is keyed by (`action_group_id`, `alert_id`), so it is written right after each chunk; `ApplyAlreadyNotifiedStep` reads it back on later ticks.
+
+`notified` means the group concluded, not that a workflow ran: a group whose scheduling failed (license, API key, workflow lookup, schedule error) gets `notified` too, and its failure is reported as a `dispatch_failed` event. A failed attempt is therefore not retried, on an aborted tick as on a completed one, and it starts the group's throttle interval like a successful dispatch.
 
 The full action taxonomy, including user-written actions such as `ack` and `snooze`, is documented in [`../../resources/README.md`](../../resources/README.md).
 
@@ -135,10 +141,9 @@ DispatcherPipeline
    +--> FetchPoliciesStep
    +--> EvaluateMatchersStep
    +--> BuildGroupsStep
+   +--> ApplyAlreadyNotifiedStep
    +--> ApplyThrottlingStep
-   +--> DispatchStep
-   +--> StoreActionsStep
-   +--> StoreExecutionHistoryStep
+   +--> DispatchStep                (dispatch, record, execution history)
 ```
 
 Unlike the rule executor, the dispatcher is not streaming. Each step receives one immutable-looking state snapshot and returns either:
@@ -168,16 +173,27 @@ An empty matcher is a catch-all.
 | Parameter                   | Value                          | Source                                                                                                                                                                                                                                  |
 | --------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Task schedule               | `5s`                           | [`schedule_task.ts`](schedule_task.ts)                                                                                                                                                                                                  |
-| Task timeout                | `1m`                           | `DISPATCHER_TASK_TIMEOUT` in [`constants.ts`](constants.ts)                                                                                                                                                                             |
-| Soft deadline               | `42 000 ms` (~70 % of timeout) | `TICK_DEADLINE_MS` — pipeline is aborted at this point so the returned `RunResult` is always within the TM window                                                                                                                       |
-| Query row cap               | `10 000` rows                  | `ESQL_QUERY_ROW_LIMIT` in [`queries.ts`](queries.ts) — `LIMIT` on every dispatcher query; a truncated alert scan advances the watermark to the last returned row, not to `now`                                                          |
+| Task timeout                | `1m` (configurable `1m`–`5m`)  | `xpack.alerting_v2.dispatcher.run.timeout`, default `DISPATCHER_TASK_TIMEOUT` in [`constants.ts`](constants.ts); applied through the task definition's `resolveTimeout`                                                                 |
+| Soft deadline               | task timeout − `15 s` (`45 s` at `1m`) | `getTickDeadlineMs` / `TICK_DEADLINE_MARGIN_MS` in [`constants.ts`](constants.ts) — pipeline is aborted at this point so the returned `RunResult` is always within the TM window |
+| Alerts per tick             | `10 000` (configurable `1 000`–`10 000`) | `xpack.alerting_v2.dispatcher.run.alerts.max` — `LIMIT` on the alert scan; a truncated scan advances the watermark to the last returned row, not to `now`                                                                               |
+| Query row cap               | `10 000` rows                  | `ESQL_QUERY_ROW_LIMIT` in [`queries.ts`](queries.ts) — `LIMIT` on every other dispatcher query, whose results are bounded by the scanned batch                                                                                          |
 | Overlap re-read             | `10` minutes                   | `OVERLAP_WINDOW_MINUTES` — each scan re-reads this far behind the watermark; content-addressed dedup makes re-reads free                                                                                                                |
 | Max scan window             | `15` minutes                   | `MAX_WINDOW_MINUTES` — caps forward progress per tick; must be `> OVERLAP_WINDOW_MINUTES`                                                                                                                                               |
 | Settle buffer               | `5` seconds                    | `SETTLE_BUFFER_SECONDS` — excludes the most recent slice to avoid scanning mid-write                                                                                                                                                    |
 | Stuck-tick limit            | `10` ticks (~50 s)             | `STUCK_TICK_LIMIT` — after this many stuck ticks the escape hatch fires                                                                                                                                                                 |
 | Pre-fetch force-advance lag | `15` minutes                   | `PRE_FETCH_STUCK_ADVANCE_LAG_MS` — if the hatch fires with no known alerts and lag exceeds this, skip the unread window                                                                                                                 |
-| Dispatch chunk size         | `250` items                    | `DISPATCH_CHUNK_SIZE` — max items per `bulkScheduleWorkflow` call. Workflows are prefetched with a single `getWorkflowsByIdsForRequests` call (one lookup per space and API key) and scheduled in chunks batched by policy API key. The tick signal is checked between chunks. |
+| Dispatch chunk size         | `250` items                    | `DISPATCH_CHUNK_SIZE` — max items per `bulkScheduleWorkflow` call. Workflows are prefetched with a single `getWorkflowsByIdsForRequests` call (one lookup per space and API key) and scheduled in chunks batched by policy API key. A group's items never span two chunks. Each chunk is followed by one `.alert-actions` commit, and the next chunk is scheduled only after it. The tick signal is checked between chunks. |
 | Matcher language            | KQL                            | `@kbn/eval-kql`                                                                                                                                                                                                                         |
+
+### Mitigation levers
+
+Three `kibana.yml` settings (Serverless: a per-project config override) let an operator mitigate a dispatcher incident without a code change. All three require a Kibana restart, and their defaults match the values above.
+
+| Setting | Use it when | Effect and trade-off |
+| ------- | ----------- | -------------------- |
+| `xpack.alerting_v2.dispatcher.paused: true` | Notifications must stop now: duplicates, or a failing step that re-sends on every run | Every tick is a no-op. The watermark and stuck-tick counter are held, so once the setting is removed the backlog is dispatched late, at the normal drain rate. Two cases still lose alerts. If no watermark was persisted yet (first tick after a deploy, or a reset task state), resume cold-starts `OVERLAP_WINDOW_MINUTES` back and older events are not dispatched. After a pause longer than `MAX_WINDOW_MINUTES`, watermark lag already exceeds `PRE_FETCH_STUCK_ADVANCE_LAG_MS`: if `STUCK_TICK_LIMIT` consecutive ticks then stop before fetching (deadline or `inline_stats_too_large`), the escape hatch force-advances on its first fire and skips the unread window instead of holding. `DISPATCHER_PAUSED` is logged at `warn` once per Kibana start, so remove the override after the incident. |
+| `xpack.alerting_v2.dispatcher.run.alerts.max` | Ticks keep hitting `DISPATCHER_TICK_DEADLINE_EXCEEDED` under alert overload | Fewer alerts per tick (`1 000`–`10 000`), so each tick finishes before its deadline and the watermark advances to the truncation edge. The edge cannot move past the watermark when more alerts than this share one `@timestamp` (one rule run's bulk write): those ticks count as stuck even though the batches are dispatched, and after `STUCK_TICK_LIMIT` of them the escape hatch logs `DISPATCHER_WATERMARK_STUCK` and records the current batch as `unmatched`; any of its alerts the tick did not dispatch are dropped. The drain rate is about this many alerts per ~5 s tick; set too low under sustained load, lag grows until the escape hatch skips alerts. Does not help `inline_stats_too_large`: the INLINE STATS runs before `LIMIT`. |
+| `xpack.alerting_v2.dispatcher.run.timeout` | Slow Elasticsearch makes healthy-sized ticks hit the deadline | Raises the TM timeout (`1m`–`5m`); the soft deadline stays 15 s before it. A hung tick then holds the singleton task longer, delaying every notification. |
 
 ## Important pipeline state
 
@@ -192,10 +208,10 @@ The dispatcher carries state forward through `DispatcherPipelineState` in `types
 | `rules`            | `RuleCatalog`      | `FetchRulesStep`                                                                    | Rule metadata keyed by rule id; owns the orphaned-internal-alert guard.                                                                                         |
 | `policies`         | `PolicyCatalog`    | `FetchPoliciesStep`                                                                 | Enabled action policies keyed by id and grouped by space.                                                                                                       |
 | `matched`          | plain array        | `EvaluateMatchersStep`                                                              | Concrete `(alert, policy)` matches.                                                                                                                            |
-| `groups`           | plain array        | `BuildGroupsStep`                                                                   | Action groups to consider for delivery (transient — consumed by `ApplyThrottlingStep`).                                                                        |
-| `plan`             | `DispatchPlan`     | `ApplyThrottlingStep`                                                               | Delivery decision: `toDispatch` vs `throttled`, plus the `unmatched` alerts that landed in no group.                                              |
+| `groups`           | plain array        | `BuildGroupsStep`; narrowed by `ApplyAlreadyNotifiedStep`                           | Action groups to consider for delivery (transient — consumed by `ApplyThrottlingStep`).                                                                        |
+| `alreadyNotified`  | plain array        | `ApplyAlreadyNotifiedStep`                                                          | Groups narrowed to the alerts an earlier, aborted tick already handled; recorded as `fire`, never dispatched again.                                           |
+| `plan`             | `DispatchPlan`     | `ApplyThrottlingStep`                                                               | Delivery decision: `toDispatch` vs `throttled`, the `alreadyNotified` groups, plus the `unmatched` alerts that landed in no group.                            |
 | `outcome`          | `DispatchOutcome`  | `DispatchStep`                                                                      | What happened: workflow execution ids per group and failed (group, destination) attempts; `deliveredDestinationsFor()` filters totally-failed groups.           |
-| `recordedAlerts`   | plain number       | `StoreActionsStep`                                                                  | Count of alerts that received an `.alert-actions` record this tick.                                                                                            |
 
 ## Execution steps
 
@@ -213,10 +229,9 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 | 8   | `FetchPoliciesStep`          | Load enabled action policies for the space.                                                      |
 | 9   | `EvaluateMatchersStep`       | Evaluate each policy matcher against each alert context.                                         |
 | 10  | `BuildGroupsStep`            | Build `ActionGroup` objects based on policy grouping settings.                                   |
-| 11  | `ApplyThrottlingStep`        | Compare candidate groups with action history and split them into dispatch vs throttled.          |
-| 12  | `DispatchStep`               | Perform delivery side effects for eligible groups.                                               |
-| 13  | `StoreActionsStep`           | Persist the execution outcome to `.alert-actions`.                                               |
-| 14  | `StoreExecutionHistoryStep`  | Emit per-policy `dispatched` / `throttled` / `unmatched` / `dispatch_failed` event-log summaries. |
+| 11  | `ApplyAlreadyNotifiedStep`   | Move the alerts whose `notified` record (per group and alert) covers their current content out of their groups, into `alreadyNotified`. |
+| 12  | `ApplyThrottlingStep`        | Compare candidate groups with action history and split them into dispatch vs throttled.          |
+| 13  | `DispatchStep`               | Perform delivery side effects for eligible groups, commit the `.alert-actions` records each chunk made safe, and emit per-policy `dispatched` / `throttled` / `unmatched` / `dispatch_failed` event-log summaries once. Halts `commit_failed` when a commit cannot be written, and `aborted` while groups are left unattempted. |
 
 ### Suppression queries
 
@@ -231,13 +246,26 @@ Neither query has a time bound: an indefinite snooze or an ack stays in effect h
 
 When both an alert-level and a series-level record suppress an alert, `SuppressionIndex` reports the alert-level reason: an acked alert on a snoozed series reports `ack`.
 
+### Throttling lookup
+
+`ApplyThrottlingStep` reads the latest `notified` record of each candidate group (`getLastNotifiedTimestampsQueries`), but only as far back as its decision can use:
+
+| Policy                                                                         | Lookup                                                                                              |
+| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| `every_time`, or an aggregated policy (`per_field`, `all`) without an interval | None: the group dispatches either way.                                                              |
+| Aggregated policy with an interval, or `per_status_interval`                   | Records with `@timestamp ≥ startedAt − interval`: an older record cannot change the decision.       |
+| `on_status_change`, or an interval that does not parse                         | Every record of the group.                                                                          |
+
+An aggregated group keeps the same id from tick to tick and gets one `notified` record per alert it dispatches, so an unbounded lookup would grow with everything the policy ever sent. A `per_alert` group belongs to one alert episode, so its full history stays small.
+
 ## Halt reasons
 
 | Reason                   | Meaning                                                                                                                                                          |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `no_alerts`              | Nothing relevant was found for this run; watermark advances to `windowEnd`.                                                                                      |
 | `no_actions`             | The run produced no stored outcomes after evaluation; watermark advances to `windowEnd`.                                                                         |
-| `aborted`                | The pipeline was stopped early by the TM signal or the soft deadline (`TICK_DEADLINE_MS`). If aborted before `StoreActionsStep`, the watermark does not advance. |
+| `aborted`                | The pipeline was stopped early by the TM signal or the soft deadline (`getTickDeadlineMs`), or `DispatchStep` stopped with groups left unattempted. The watermark does not advance; the records already committed keep the progress. |
+| `commit_failed`          | `DispatchStep` could not write a commit's `.alert-actions` records (the bulk request threw, or ES rejected every record) and stopped scheduling. Logged once as `DISPATCH_COMMIT_FAILED`. Watermark held; tick counts toward stuck-tick limit (see below). |
 | `inline_stats_too_large` | ES rejected the INLINE STATS pre-fetch query with `illegal_argument_exception: sub-plan execution results too large`. Watermark held; tick counts toward stuck-tick limit (see below). |
 
 ## Watermark contract
@@ -246,7 +274,7 @@ The invariant maintained across all ticks:
 
 > `scanLowerBound ≤ min(@timestamp of any rule-event not yet marked in .alert-actions)`
 
-`eventWatermark` is written to Task Manager state only via the returned `RunResult`. If the TM timeout elapses before `run()` returns, TM discards the state write entirely — the watermark freezes. The soft deadline (`TICK_DEADLINE_MS ≈ 70 % of task timeout`) ensures the pipeline always stops and returns a safe `RunResult` well within the TM window.
+`eventWatermark` is written to Task Manager state only via the returned `RunResult`. If the TM timeout elapses before `run()` returns, TM discards the state write entirely — the watermark freezes. The soft deadline (`TICK_DEADLINE_MARGIN_MS`, 15 s before the task timeout, `getTickDeadlineMs`) ensures the pipeline always stops and returns a safe `RunResult` well within the TM window.
 
 ### Stuck-watermark escape hatch
 
@@ -277,10 +305,12 @@ Alerts in the skipped window are **not dispatched** (accepted data loss). Once t
 
 ## Delivery guarantees and limits
 
-- Delivery is effectively at-least-once. If delivery succeeds but action recording fails or the process crashes, a later run may re-deliver.
+- Delivery is effectively at-least-once. `DispatchStep` records each chunk right after it returns, so an abort leaves no scheduled chunk unrecorded; a crash, or a commit write that fails, re-delivers at most the chunk in flight. Records not yet searchable can still be delivered again (see `refresh: false` below). A failed commit write stops scheduling for the rest of the tick, which halts `commit_failed`. When the first commit (the series with no group to dispatch) fails, nothing is scheduled. A commit with only some records rejected logs `DISPATCH_COMMIT_DEGRADED` and scheduling continues.
+- An aborted tick keeps its progress: concluded series get their `fire` / `suppress` / `unmatched` records, so the next scan does not return them, and `ApplyAlreadyNotifiedStep` drops the (group, alert) pairs whose `notified` record covers their content.
+- Commits use `refresh: false`: records become searchable only after the next `.alert-actions` refresh, which depends on the deployment's refresh settings (`index.refresh_interval`, 1 s by default). Each tick re-reads the last `OVERLAP_WINDOW_MINUTES` (10) of events, so any record of the previous tick that is not searchable yet when the next tick queries can be delivered again, whether that tick completed or aborted. In practice this exposes the last commits of the previous tick.
 - Destination handlers should therefore be idempotent.
 - Workflow destinations are scheduled in `DISPATCH_CHUNK_SIZE` (250) batches via `bulkScheduleWorkflow`, not per-group `pLimit(3)`.
-- The alert query is capped at `ESQL_QUERY_ROW_LIMIT` (10 000) rows per run. A truncated tick advances the watermark only to the last returned row's timestamp; the deferred tail is scanned next tick.
+- The alert query is capped at `xpack.alerting_v2.dispatcher.run.alerts.max` (default 10 000) rows per run. A truncated tick advances the watermark only to the last returned row's timestamp; the deferred tail is scanned next tick.
 - Sustained backlog is drained over multiple ticks at up to `MAX_WINDOW_MINUTES − OVERLAP_WINDOW_MINUTES` minutes per tick.
 - Per-tick observability is emitted at `debug` level: `halt_reason`, `watermark_lag_ms`, `window_span_ms`, `truncated`, `alert_count`, `stuck_ticks`.
 
@@ -416,7 +446,7 @@ If you are not adding a new pipeline phase, but instead want to support a new de
 
 Current production delivery is workflow-based. `DispatchStep` uses the policy API key to craft a fake request, prefetches workflows with `getWorkflowsByIdsForRequests`, and schedules them through `bulkScheduleWorkflow` on the request-scoped workflows management client (`getClient(request)`).
 
-Workflow delivery requires an active Enterprise (or trial) license. When the license does not allow action policies, `DispatchStep` schedules no workflow and records one `license_not_supported` failure per (group, workflow destination), which `StoreExecutionHistoryStep` emits as `dispatch_failed` events. Every other step runs unchanged, so `.alert-actions` still receives the same `fire` / `suppress` / `notified` / `unmatched` docs and throttling, deduplication, and watermark behavior match a licensed cluster.
+Workflow delivery requires an active Enterprise (or trial) license. When the license does not allow action policies, `DispatchStep` schedules no workflow and records one `license_not_supported` failure per (group, workflow destination), which it emits as `dispatch_failed` events. Every other step runs unchanged, so `.alert-actions` still receives the same `fire` / `suppress` / `notified` / `unmatched` docs and throttling, deduplication, and watermark behavior match a licensed cluster.
 
 ## Testing
 
@@ -426,11 +456,10 @@ Useful coverage points:
 - `execution_pipeline.test.ts` for ordering and halt semantics
 - `dispatcher.test.ts` for service-level behavior
 - `queries.test.ts` for ES|QL generation
-- `integration_tests/dispatcher.test.ts` for end-to-end dispatcher behavior
 
 ## Safe contribution guidelines
 
 - Keep side effects concentrated in `DispatchStep`. Earlier steps should mostly classify and shape data.
 - Do not mutate existing state objects in place; return new partial state instead.
-- If you add new action semantics, verify both the query side (`queries.ts`) and the write side (`StoreActionsStep`).
+- If you add new action semantics, verify both the query side (`queries.ts`) and the write side (`SeriesLedger` and `DispatchStep`).
 - If you change grouping or throttling identity, treat it as a behavioral change that needs explicit tests because it affects future deduplication.

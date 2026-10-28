@@ -275,6 +275,62 @@ describe('ManagementApp', () => {
     expect(screen.getByTestId('esqlViewsDeleteButton')).toBeInTheDocument();
   });
 
+  it('identifies reserved views and disables their management controls', async () => {
+    const client = createClient();
+    client.getViews.mockResolvedValue({
+      views: [
+        { name: 'user-view', query: 'FROM logs-*' },
+        { name: 'reserved-view', query: 'FROM metrics-*', reserved: true },
+      ],
+    });
+
+    renderApp(client, { discoverLocator: createDiscoverLocator() });
+
+    await screen.findByText('reserved-view');
+    const reservedRow = getRow('reserved-view');
+    expect(within(reservedRow).getByTestId('esqlViewsReservedBadge')).toHaveTextContent('Reserved');
+    expect(within(reservedRow).getByRole('checkbox')).toBeDisabled();
+    const reservedActionsButton = within(reservedRow).getByTestId('esqlViewsActionsButton');
+    expect(reservedActionsButton).toHaveAttribute('aria-disabled', 'true');
+    expect(reservedActionsButton).toHaveAccessibleName(
+      'Reserved views cannot be edited or deleted.'
+    );
+    fireEvent.click(reservedActionsButton);
+    expect(screen.queryByTestId('esqlViewsEditButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('esqlViewsDeleteButton')).not.toBeInTheDocument();
+    expect(within(reservedRow).getByTestId('esqlViewsOpenInDiscoverAction')).not.toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+
+    const userRow = getRow('user-view');
+    expect(within(userRow).getByRole('checkbox')).toBeEnabled();
+    expect(within(userRow).getByTestId('esqlViewsActionsButton')).toBeEnabled();
+  });
+
+  it('shows reserved views by default and allows hiding them', async () => {
+    const client = createClient();
+    client.getViews.mockResolvedValue({
+      views: [
+        { name: 'user-view', query: 'FROM logs-*' },
+        { name: 'reserved-view', query: 'FROM metrics-*', reserved: true },
+      ],
+    });
+
+    renderApp(client);
+
+    await screen.findByText('reserved-view');
+    expect(screen.getByText('user-view')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('esqlViewsReservedFilter'));
+
+    await waitFor(() => expect(screen.queryByText('reserved-view')).not.toBeInTheDocument());
+    expect(screen.getByText('user-view')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('esqlViewsReservedFilter'));
+    expect(await screen.findByText('reserved-view')).toBeInTheDocument();
+  });
+
   it('renders the form fields while the ES|QL editor loads', async () => {
     const client = createClient();
     let resolveEditor: ((module: { default: ComponentType<EsqlEditorProps> }) => void) | undefined;
@@ -559,7 +615,7 @@ describe('ManagementApp', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'ES|QL query' })).toBeInTheDocument();
     expect(
-      screen.getByText('Write a new query, or select a recently or starred query.')
+      screen.getByText('Write a new query, or select a recent or starred query.')
     ).toBeInTheDocument();
     expect(screen.getByTestId('esqlViewQueryEditor')).toHaveValue(
       'FROM kibana_sample_data_ecommerce | WHERE KQL("term")'
@@ -1167,12 +1223,17 @@ describe('ManagementApp', () => {
 
       fireEvent.click(within(getRow('logs-view')).getByRole('checkbox'));
 
+      const actionsButton = within(otherRow).getByTestId('esqlViewsActionsButton');
       await waitFor(() => {
-        expect(within(otherRow).getByTestId('esqlViewsActionsButton')).toHaveAttribute(
-          'aria-disabled',
-          'true'
-        );
+        expect(actionsButton).toHaveAttribute('aria-disabled', 'true');
       });
+      expect(actionsButton).toHaveAccessibleName(
+        'Individual item actions are disabled when rows are being selected.'
+      );
+      fireEvent.mouseOver(actionsButton.parentElement as HTMLElement);
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        'Individual item actions are disabled when rows are being selected.'
+      );
       expect(within(otherRow).getByTestId('esqlViewsOpenInDiscoverAction')).toHaveAttribute(
         'aria-disabled',
         'true'

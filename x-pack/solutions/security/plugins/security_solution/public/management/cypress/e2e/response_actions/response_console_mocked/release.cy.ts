@@ -56,11 +56,11 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
         releaseRequestResponse = responseBody;
       }, 'release');
       submitCommand();
-      cy.contains('Action pending.').should('exist');
+      cy.contains('release is pending').should('exist');
       cy.wait('@release').then(() => {
         sendActionResponse(releaseRequestResponse);
       });
-      cy.contains('Action completed.', { timeout: 120000 }).should('exist');
+      cy.contains('release completed successfully', { timeout: 120000 }).should('exist');
       waitForEndpointListPageToBeLoaded(endpointHostname);
       checkEndpointIsNotIsolated(endpointHostname);
     });

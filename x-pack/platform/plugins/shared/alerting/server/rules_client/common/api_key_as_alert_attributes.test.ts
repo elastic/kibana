@@ -136,6 +136,27 @@ describe('apiKeyAsAlertAttributes', () => {
     });
   });
 
+  test('returns only the granted UIAM API key for a UIAM service account', () => {
+    expect(
+      apiKeyAsAlertAttributes(
+        {
+          apiKeysEnabled: true,
+          uiamResult: { id: '456', name: '456', api_key: 'def' },
+        },
+        'service-account-id',
+        false,
+        null
+      )
+    ).toEqual({
+      apiKey: null,
+      apiKeyOwner: 'service-account-id',
+      apiKeyOwnerProfileUid: null,
+      apiKeyCreatedByUser: false,
+      uiamApiKey: 'NDU2OmRlZg==',
+      uiamApiKeyExternal: false,
+    });
+  });
+
   test('stores the raw UIAM API key as-is when it has no id and is created by the user', () => {
     expect(
       apiKeyAsRuleDomainProperties(

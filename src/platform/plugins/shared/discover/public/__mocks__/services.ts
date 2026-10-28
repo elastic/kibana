@@ -31,6 +31,7 @@ import {
   CONTEXT_STEP_SETTING,
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
+  ENABLE_SOLUTION_PROFILES_IN_CLASSIC_SETTING,
   MAX_DOC_FIELDS_DISPLAYED,
   SAMPLE_SIZE_SETTING,
   SAMPLE_ROWS_PER_PAGE_SETTING,
@@ -175,6 +176,8 @@ export function createDiscoverServicesMock(): DiscoverServices {
       } else if (key === HIDE_ANNOUNCEMENTS) {
         return false;
       } else if (key === SEARCH_ON_PAGE_LOAD_SETTING) {
+        return true;
+      } else if (key === ENABLE_SOLUTION_PROFILES_IN_CLASSIC_SETTING) {
         return true;
       }
     }),

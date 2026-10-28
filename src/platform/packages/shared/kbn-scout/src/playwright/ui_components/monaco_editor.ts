@@ -375,23 +375,55 @@ export class KibanaCodeEditorWrapper {
     }>
   ): Promise<void> {
     await this.waitCodeEditorReady(testSubjId);
+    await this.typeIntoEditor({ testSubjId }, text, options);
+  }
+
+  /**
+   * Same as `simulateTyping`, but types into the editor rendered inside `container`, resolved
+   * by the model's `data-uri`, so it stays correct when several editors are mounted.
+   */
+  async simulateTypingByContainer(
+    container: Locator,
+    text: string,
+    options?: Partial<{
+      delay: number;
+    }>
+  ): Promise<void> {
+    const modelUri = await this.getEditorUri(container, container.toString());
+    await this.typeIntoEditor({ modelUri }, text, options);
+  }
+
+  private async typeIntoEditor(
+    target: { testSubjId: string } | { modelUri: string },
+    text: string,
+    options?: Partial<{
+      delay: number;
+    }>
+  ): Promise<void> {
     await this.page.evaluate(
       async ({
-        id,
+        editorTarget,
         textToType,
         typingSimulationOptions,
       }: {
-        id: string;
+        editorTarget: { testSubjId: string } | { modelUri: string };
         textToType: string;
         typingSimulationOptions?: Partial<{
           delay: number;
         }>;
       }) => {
-        const container = document.querySelector(`[data-test-subj="${id}"]`);
-        const editor = window.MonacoEnvironment?.monaco?.editor
-          ?.getEditors()
-          ?.find((e: any) => container?.contains(e.getDomNode()));
-        if (!editor) throw new Error(`Monaco editor not found for test subject: "${id}"`);
+        const editors = window.MonacoEnvironment?.monaco?.editor?.getEditors();
+        let editor;
+        let description: string;
+        if ('testSubjId' in editorTarget) {
+          const container = document.querySelector(`[data-test-subj="${editorTarget.testSubjId}"]`);
+          editor = editors?.find((e: any) => container?.contains(e.getDomNode()));
+          description = `test subject: "${editorTarget.testSubjId}"`;
+        } else {
+          editor = editors?.find((e) => e.getModel()?.uri.toString() === editorTarget.modelUri);
+          description = `model uri: "${editorTarget.modelUri}"`;
+        }
+        if (!editor) throw new Error(`Monaco editor not found for ${description}`);
         editor.focus();
         const delay = typingSimulationOptions?.delay ?? 0;
         for (let i = 0; i < textToType.length; i++) {
@@ -401,7 +433,7 @@ export class KibanaCodeEditorWrapper {
           editor.trigger('keyboard', 'type', { text: textToType[i] });
         }
       },
-      { id: testSubjId, textToType: text, typingSimulationOptions: options }
+      { editorTarget: target, textToType: text, typingSimulationOptions: options }
     );
   }
 

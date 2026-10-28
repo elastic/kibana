@@ -16,6 +16,9 @@ import { getEmptyCellValue } from '../../empty_value';
 import { TOGGLE_FIELD_ON_LABEL, TOGGLE_FIELD_OFF_LABEL } from '../../custom_fields/translations';
 import { AssigneesColumn } from './assignees_column';
 
+/** The case attributes read by the extended-field cells. */
+export type ExtendedFieldRow = Pick<CaseUI, 'extendedFields'>;
+
 /**
  * Stable column/config identity for a global field (e.g. `priority_as_keyword`). Kept snake so the
  * `_as_<type>` suffix aliasing in mergeSelectedColumnsWithConfiguration survives a flag flip.
@@ -82,7 +85,7 @@ export const parseUserPickerAssignees = (raw: string): Array<{ uid: string }> | 
  * matching the existing `assignees` pattern — instead of fetching per row.
  */
 export const getUserPickerUidsFromCase = (
-  theCase: CaseUI,
+  theCase: ExtendedFieldRow,
   userPickerFields: readonly InlineField[]
 ): string[] => {
   const uids: string[] = [];
@@ -151,7 +154,10 @@ export const renderExtendedFieldValue = (
  * recurses into the `extended_fields` record, so its keys are camelCased on the client
  * (e.g. `priorityAsKeyword`) — look up with the camel key, not the snake storage key.
  */
-export const getExtendedFieldCellValue = (field: InlineField, theCase: CaseUI): React.ReactNode =>
+export const getExtendedFieldCellValue = (
+  field: InlineField,
+  theCase: ExtendedFieldRow
+): React.ReactNode =>
   renderExtendedFieldValue(
     field,
     theCase.extendedFields?.[getFieldCamelKey(field.name, field.type)]
@@ -165,7 +171,7 @@ export const getExtendedFieldCellValue = (field: InlineField, theCase: CaseUI): 
  */
 const UserPickerFieldCell: React.FC<{
   field: InlineField;
-  theCase: CaseUI;
+  theCase: ExtendedFieldRow;
   userProfiles: Map<string, UserProfileWithAvatar>;
 }> = ({ field, theCase, userProfiles }) => {
   const rawValue = theCase.extendedFields?.[getFieldCamelKey(field.name, field.type)];
@@ -191,14 +197,14 @@ UserPickerFieldCell.displayName = 'UserPickerFieldCell';
  * User-picker fields render avatars (via `userProfiles`, bulk-fetched once by the caller from all
  * rows' uids — see `getUserPickerUidsFromCase`); every other control type renders as text.
  */
-export const getExtendedFieldTableColumn = (
+export const getExtendedFieldTableColumn = <T extends ExtendedFieldRow = CaseUI>(
   field: InlineField,
   userProfiles: Map<string, UserProfileWithAvatar>
-): EuiBasicTableColumn<CaseUI> => ({
+): EuiBasicTableColumn<T> => ({
   name: field.label ?? field.name,
   maxWidth: '18em',
   minWidth: '6em',
-  render: (theCase: CaseUI) =>
+  render: (theCase: T) =>
     field.control === FieldType.USER_PICKER ? (
       <UserPickerFieldCell field={field} theCase={theCase} userProfiles={userProfiles} />
     ) : (

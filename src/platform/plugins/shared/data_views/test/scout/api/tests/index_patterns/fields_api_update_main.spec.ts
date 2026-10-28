@@ -84,7 +84,9 @@ apiTest.describe(
       });
       expect(getResponse).toHaveStatusCode(200);
       expect(getResponse.body[SERVICE_KEY_LEGACY].fieldAttrs.foo.count).toBe(123);
+      expect(getResponse.body[SERVICE_KEY_LEGACY].fieldAttrs.foo.customLabel).toBe('test');
       expect(getResponse.body[SERVICE_KEY_LEGACY].fieldAttrs.bar.count).toBe(456);
+      expect(getResponse.body[SERVICE_KEY_LEGACY].fieldAttrs.bar.customDescription).toBe('desc');
     });
 
     apiTest(
@@ -262,6 +264,114 @@ apiTest.describe(
     });
 
     apiTest(
+      'can set field customDescription attribute on non-existing field',
+      async ({ apiClient, apiServices }) => {
+        const title = `foo-${Date.now()}-${Math.random()}*`;
+        const { data: dataView } = await apiServices.dataViews.create({ title, override: true });
+        createdIds.push(dataView.id);
+
+        const updateResponse = await apiClient.post(
+          `${DATA_VIEW_PATH_LEGACY}/${dataView.id}/fields`,
+          {
+            headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+            responseType: 'json',
+            body: { fields: { foo: { customDescription: 'foo' } } },
+          }
+        );
+        expect(updateResponse).toHaveStatusCode(200);
+        expect(updateResponse.body[SERVICE_KEY_LEGACY].fieldAttrs.foo.customDescription).toBe(
+          'foo'
+        );
+
+        const getResponse = await apiClient.get(`${DATA_VIEW_PATH_LEGACY}/${dataView.id}`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+        });
+        expect(getResponse.body[SERVICE_KEY_LEGACY].fieldAttrs.foo.customDescription).toBe('foo');
+      }
+    );
+
+    apiTest('can update customDescription attribute', async ({ apiClient }) => {
+      const title = `foo-${Date.now()}-${Math.random()}*`;
+      const createResponse = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
+        headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+        responseType: 'json',
+        body: {
+          [SERVICE_KEY_LEGACY]: { title, fieldAttrs: { foo: { customDescription: 'foo' } } },
+        },
+      });
+      expect(createResponse).toHaveStatusCode(200);
+      const id = createResponse.body[SERVICE_KEY_LEGACY].id;
+      createdIds.push(id);
+
+      const updateResponse = await apiClient.post(`${DATA_VIEW_PATH_LEGACY}/${id}/fields`, {
+        headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+        responseType: 'json',
+        body: { fields: { foo: { customDescription: 'bar' } } },
+      });
+      expect(updateResponse).toHaveStatusCode(200);
+      expect(updateResponse.body[SERVICE_KEY_LEGACY].fieldAttrs.foo.customDescription).toBe('bar');
+
+      const getResponse = await apiClient.get(`${DATA_VIEW_PATH_LEGACY}/${id}`, {
+        headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+        responseType: 'json',
+      });
+      expect(getResponse.body[SERVICE_KEY_LEGACY].fieldAttrs.foo.customDescription).toBe('bar');
+    });
+
+    apiTest(
+      'can set field customDescription attribute on an existing field',
+      async ({ apiClient }) => {
+        await apiClient.post(`${DATA_VIEW_PATH_LEGACY}/${sharedIndexPatternId}/fields`, {
+          headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+          responseType: 'json',
+          body: { fields: { foo: { customDescription: 'baz' } } },
+        });
+
+        const getResponse = await apiClient.get(
+          `${DATA_VIEW_PATH_LEGACY}/${sharedIndexPatternId}`,
+          {
+            headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+            responseType: 'json',
+          }
+        );
+
+        expect(getResponse).toHaveStatusCode(200);
+        expect(getResponse.body[SERVICE_KEY_LEGACY].fields.foo.customDescription).toBe('baz');
+      }
+    );
+
+    apiTest('can delete customDescription attribute', async ({ apiClient }) => {
+      const title = `foo-${Date.now()}-${Math.random()}*`;
+      const createResponse = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
+        headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+        responseType: 'json',
+        body: {
+          [SERVICE_KEY_LEGACY]: { title, fieldAttrs: { foo: { customDescription: 'foo' } } },
+        },
+      });
+      expect(createResponse).toHaveStatusCode(200);
+      const id = createResponse.body[SERVICE_KEY_LEGACY].id;
+      createdIds.push(id);
+
+      const updateResponse = await apiClient.post(`${DATA_VIEW_PATH_LEGACY}/${id}/fields`, {
+        headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+        responseType: 'json',
+        body: { fields: { foo: { customDescription: null } } },
+      });
+      expect(updateResponse).toHaveStatusCode(200);
+      expect(
+        updateResponse.body[SERVICE_KEY_LEGACY].fieldAttrs.foo.customDescription
+      ).toBeUndefined();
+
+      const getResponse = await apiClient.get(`${DATA_VIEW_PATH_LEGACY}/${id}`, {
+        headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+        responseType: 'json',
+      });
+      expect(getResponse.body[SERVICE_KEY_LEGACY].fieldAttrs.foo.customDescription).toBeUndefined();
+    });
+
+    apiTest(
       'can set field format attribute on non-existing field',
       async ({ apiClient, apiServices }) => {
         const title = `foo-${Date.now()}-${Math.random()}*`;
@@ -359,6 +469,43 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(getResponse.body[SERVICE_KEY_LEGACY].fieldFormats.foo).toBeUndefined();
+    });
+
+    apiTest('can set field format attribute on an existing field', async ({ apiClient }) => {
+      const createResponse = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
+        headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+        responseType: 'json',
+        body: {
+          [SERVICE_KEY_LEGACY]: { title: 'basic_inde*' },
+        },
+      });
+      expect(createResponse).toHaveStatusCode(200);
+      const id = createResponse.body[SERVICE_KEY_LEGACY].id;
+      createdIds.push(id);
+      expect(createResponse.body[SERVICE_KEY_LEGACY].fieldFormats.foo).toBeUndefined();
+
+      const updateResponse = await apiClient.post(`${DATA_VIEW_PATH_LEGACY}/${id}/fields`, {
+        headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+        responseType: 'json',
+        body: { fields: { foo: { format: { id: 'number' } } } },
+      });
+      expect(updateResponse).toHaveStatusCode(200);
+      expect(updateResponse.body[SERVICE_KEY_LEGACY].fieldFormats.foo).toStrictEqual({
+        id: 'number',
+      });
+      expect(updateResponse.body[SERVICE_KEY_LEGACY].fields.foo.format).toStrictEqual({
+        id: 'number',
+      });
+
+      const getResponse = await apiClient.get(`${DATA_VIEW_PATH_LEGACY}/${id}`, {
+        headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+        responseType: 'json',
+      });
+      expect(getResponse).toHaveStatusCode(200);
+      expect(getResponse.body[SERVICE_KEY_LEGACY].fieldFormats.foo).toStrictEqual({ id: 'number' });
+      expect(getResponse.body[SERVICE_KEY_LEGACY].fields.foo.format).toStrictEqual({
+        id: 'number',
+      });
     });
   }
 );

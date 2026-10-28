@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { Parser } from '@elastic/esql';
 import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
+import { MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { RulesAdapterV2, type RulesAdapterV2Params } from './v2_rules_adapter';
 import {
@@ -83,6 +84,36 @@ function expectMetricSeriesBreach(query: string) {
 describe('RulesAdapterV2', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('findRuleEnabledStates', () => {
+    it('finds states by id in pages of at most 500', async () => {
+      const mock = makeRulesClientMock();
+      mock.findRules.mockImplementation(async ({ filter }: { filter: string }) => ({
+        items: [...filter.matchAll(/id: "([^"]+)"/g)].map(([, id]) => ({
+          id,
+          enabled: id !== 'rule-0',
+        })),
+      }));
+      const ids = Array.from({ length: 501 }, (_, index) => `rule-${index}`);
+      const result = await makeAdapter(mock).findRuleEnabledStates(ids);
+
+      expect(mock.findRules).toHaveBeenCalledTimes(2);
+      expect(mock.findRules.mock.calls[0][0]).toMatchObject({ perPage: 500 });
+      expect(mock.findRules.mock.calls[1][0]).toMatchObject({
+        filter: 'id: "rule-500"',
+        perPage: 1,
+      });
+      expect(result.size).toBe(501);
+      expect(result.get('rule-0')).toBe(false);
+      expect(result.get('rule-500')).toBe(true);
+    });
+
+    it('skips the lookup for an empty set', async () => {
+      const mock = makeRulesClientMock();
+      expect(await makeAdapter(mock).findRuleEnabledStates([])).toEqual(new Map());
+      expect(mock.findRules).not.toHaveBeenCalled();
+    });
   });
 
   describe('v2 body mapping', () => {
@@ -832,6 +863,38 @@ describe('RulesAdapterV2', () => {
       });
       const adapter = makeAdapter(mock);
       await expect(adapter.bulkDeleteRules(['x'])).rejects.toThrow(/V2 bulk delete failed/);
+    });
+
+    it('batches source rule cleanup at the Alerting bulk limit', async () => {
+      const mock = makeRulesClientMock();
+      mock.bulkDeleteRules.mockImplementation(async ({ ids }: { ids: string[] }) => ({
+        affected_count: ids.length,
+        errors: [],
+      }));
+      const ids = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, index) => `rule-${index}`);
+
+      await expect(makeAdapter(mock).bulkDeleteRules(ids)).resolves.toBeUndefined();
+      expect(mock.bulkDeleteRules.mock.calls).toEqual([
+        [{ ids: ids.slice(0, MAX_BULK_ITEMS) }],
+        [{ ids: ids.slice(MAX_BULK_ITEMS) }],
+      ]);
+    });
+
+    it('continues after a rejected batch and throws an error identifying every failed rule', async () => {
+      const mock = makeRulesClientMock();
+      mock.bulkDeleteRules
+        .mockRejectedValueOnce(new Error('Request failed'))
+        .mockResolvedValueOnce({ affected_count: 1, errors: [] });
+      const ids = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, index) => `rule-${index}`);
+      const detail = ids
+        .slice(0, MAX_BULK_ITEMS)
+        .map((id) => `${id}: Request failed`)
+        .join('; ');
+
+      await expect(makeAdapter(mock).bulkDeleteRules(ids)).rejects.toThrow(
+        `V2 bulk delete failed for ${MAX_BULK_ITEMS} rule(s): ${detail}`
+      );
+      expect(mock.bulkDeleteRules).toHaveBeenCalledTimes(2);
     });
   });
 

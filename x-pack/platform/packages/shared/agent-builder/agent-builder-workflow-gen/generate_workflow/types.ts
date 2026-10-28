@@ -96,6 +96,11 @@ export interface ValidationResult {
   parsedWorkflow?: WorkflowYaml;
   /** Compact human-readable strings; empty when valid. */
   errors: string[];
+  /**
+   * ES|QL sources the cluster does not know. They do not block generation: the
+   * source can exist where and when the workflow runs.
+   */
+  unknownSources: string[];
 }
 
 /**
@@ -125,6 +130,11 @@ export interface ToolResultAction {
    * resulting workflow in the next turn.
    */
   currentYaml?: string;
+  /**
+   * Present when the tool changed the YAML. Unified diff of the change, so
+   * older tool results stay readable after their full YAML is dropped.
+   */
+  diff?: string;
   /**
    * Present when the tool mutated the YAML and validation was run on the
    * new state. The agent uses this to self-correct mid-loop.

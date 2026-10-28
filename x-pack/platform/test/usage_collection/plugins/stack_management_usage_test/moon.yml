@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/stack-management-usage-test-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-management'
+  defaultOwner: '@elastic/kibana-core'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/stack-management-usage-test-plugin'
   description: Moon project for @kbn/stack-management-usage-test-plugin
   channel: ''
-  owner: '@elastic/kibana-management'
+  owner: '@elastic/kibana-core'
   sourceRoot: x-pack/platform/test/usage_collection/plugins/stack_management_usage_test
 dependsOn:
   - '@kbn/core'

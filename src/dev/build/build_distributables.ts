@@ -23,6 +23,7 @@ export interface BuildOptions {
   dockerTag: string | null;
   dockerTagQualifier: string | null;
   downloadFreshNode: boolean;
+  forceNodePointerCompression: boolean;
   downloadCloudDependencies: boolean;
   initialize: boolean;
   createGenericFolders: boolean;
@@ -41,6 +42,8 @@ export interface BuildOptions {
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
   targetServerlessPlatforms: boolean;
+  targetCloudPlatforms: boolean;
+  skipFipsProvider: boolean;
   skipServerless: boolean;
   tarZstd: boolean;
   withExamplePlugins: boolean;
@@ -119,6 +122,9 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.InstallChromium);
     await globalRun(Tasks.CopyBinScripts);
     await globalRun(Tasks.CleanNodeBuilds);
+    if (!options.skipFipsProvider) {
+      await globalRun(Tasks.BundleFipsProvider);
+    }
     await globalRun(Tasks.CreateDistributionDefaults);
 
     await globalRun(Tasks.AssertFileTime);

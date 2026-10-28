@@ -179,7 +179,6 @@ describe('WorkflowsService (facade)', () => {
       'getChildWorkflowExecutions',
       'getExecutionStepExecutions',
       'getWorkflowExecutions',
-      'getWorkflowExecutionHistory',
       'getStepExecutions',
       'searchStepExecutions',
       'getExecutionLogs',
@@ -233,6 +232,7 @@ describe('WorkflowsService (facade)', () => {
       expect(changeHistoryInstance.initialize).toHaveBeenCalledWith({
         elasticsearchClient: esClient,
         authService: coreStart.security!.authc,
+        userProfileService: coreStart.userProfile,
       });
     });
 
@@ -403,7 +403,6 @@ describe('WorkflowsService (facade)', () => {
         'default'
       );
       await service.getWorkflowExecutions({ workflowId: 'wf-1' } as any, 'default');
-      await service.getWorkflowExecutionHistory('exec-1', 'default');
       await service.getStepExecutions({ executionId: 'exec-1' } as any, 'default');
       await service.searchStepExecutions({ executionId: 'exec-1' } as any, 'default');
       await service.getExecutionLogs({ executionId: 'exec-1' } as any);
@@ -422,7 +421,6 @@ describe('WorkflowsService (facade)', () => {
         'default'
       );
       expect(executionQuerySpies.getWorkflowExecutions).toHaveBeenCalled();
-      expect(executionQuerySpies.getWorkflowExecutionHistory).toHaveBeenCalled();
       expect(executionQuerySpies.getStepExecutions).toHaveBeenCalled();
       expect(executionQuerySpies.searchStepExecutions).toHaveBeenCalled();
       expect(executionQuerySpies.getExecutionLogs).toHaveBeenCalled();
@@ -437,6 +435,7 @@ describe('WorkflowsService (facade)', () => {
       await service.getAvailableConnectors('default', request);
       await service.validateWorkflow('name: wf', 'default', request, {
         includeVariableRules: false,
+        includeEsqlRules: false,
       });
       await service.getWorkflowZodSchema({ loose: false }, 'default', request);
 
@@ -445,7 +444,7 @@ describe('WorkflowsService (facade)', () => {
         'name: wf',
         'default',
         request,
-        { includeVariableRules: false }
+        { includeVariableRules: false, includeEsqlRules: false }
       );
       expect(validationSpies.getWorkflowZodSchema).toHaveBeenCalledWith(
         { loose: false },
@@ -568,17 +567,47 @@ describe('WorkflowsService (facade)', () => {
         const service = await buildService();
         const request = { headers: {} } as unknown as Parameters<
           typeof service.markStepAsResponded
-        >[1];
-        await service.markStepAsResponded('step-exec-1', request, 'inbox', 'default');
+        >[2];
+        await service.markStepAsResponded('step-exec-1', 'run-1', request, 'inbox', 'default');
 
         expect(markSpy).toHaveBeenCalledWith(
           'step-exec-1',
+          'run-1',
           expect.objectContaining({
             channel: 'inbox',
             // The mock security service returns `system` for fake
             // requests; the real service swaps in the actual user.
             respondedBy: expect.any(String),
             respondedAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+          }),
+          'default'
+        );
+      } finally {
+        markSpy.mockRestore();
+      }
+    });
+  });
+
+  describe('claimHitlStepForExternalResume', () => {
+    it('scopes the claim to the execution the link resolved and stamps the external channel', async () => {
+      const markSpy = jest
+        .spyOn(WorkflowExecutionQueryService.prototype, 'markStepAsResponded')
+        .mockResolvedValue(true as never);
+      try {
+        const service = await buildService();
+        await service.claimHitlStepForExternalResume(
+          'step-exec-1',
+          'run-1',
+          'external_resume:step-exec-1',
+          'default'
+        );
+
+        expect(markSpy).toHaveBeenCalledWith(
+          'step-exec-1',
+          'run-1',
+          expect.objectContaining({
+            channel: 'external',
+            respondedBy: 'external_resume:step-exec-1',
           }),
           'default'
         );
