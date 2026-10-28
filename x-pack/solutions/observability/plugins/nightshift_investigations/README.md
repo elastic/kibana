@@ -29,8 +29,8 @@ creates no investigation and appears as skipped in automation history: with reas
 when the automation limit denies it, and with reason `investigation_limit` when the global limit
 denies it. The automation limit is checked first, so `daily_limit` wins when both are reached. When
 the global quota denies an attempt, the client gives back the automation slot. The client also gives
-it back when the attempt loses the subject claim to a concurrent start and continues that
-investigation instead; the global quota has no refund, so that case still counts against it. An
+it back, and the global slot too, when the attempt loses the subject claim to a concurrent start and
+continues that investigation instead, or when the claim attempt itself fails. An
 attempt that fails after claiming its subjects keeps its slot: the claim stays live for two minutes,
 and an attempt that joins it in that window continues the claimed investigation and gives back only
 its own slot, so the investigation counts once. A failure while the investigation runs does not give

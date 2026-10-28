@@ -1316,6 +1316,15 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
       expect(globalBudget.release).toHaveBeenCalledTimes(1);
     });
 
+    it('releases both budgets when the claim attempt fails', async () => {
+      subjectsClient.claimSubjects.mockRejectedValue(new Error('claim conflict'));
+
+      await expect(startWithBudget(1)).rejects.toThrow('claim conflict');
+
+      expect(await usage()).toBe(0);
+      expect(globalBudget.release).toHaveBeenCalledTimes(1);
+    });
+
     it('keeps the global slot when the start fails after claiming', async () => {
       mockManagement.runWorkflow.mockRejectedValueOnce(new Error('failed'));
 
