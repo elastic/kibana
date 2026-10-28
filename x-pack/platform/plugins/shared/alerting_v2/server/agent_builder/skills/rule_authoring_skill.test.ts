@@ -15,7 +15,6 @@ import {
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import { createAlertingV2Availability } from './alerting_v2_availability';
 import { createRuleAuthoringSkill } from './rule_authoring_skill';
-
 const createDeps = () => ({
   logger: {
     debug: jest.fn(),

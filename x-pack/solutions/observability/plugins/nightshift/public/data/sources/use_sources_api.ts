@@ -13,12 +13,7 @@ import type {
 } from '@kbn/nightshift-shared';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { getFormattedError } from '../../common/errors';
-import {
-  DISCOVERY_QUERIES_QUERY_KEY,
-  DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY,
-  FEATURES_QUERY_KEY,
-  SOURCES_QUERY_KEY,
-} from '../query_keys';
+import { DISCOVERY_QUERIES_QUERY_KEY, FEATURES_QUERY_KEY, SOURCES_QUERY_KEY } from '../query_keys';
 import { useKibana } from '../../hooks/use_kibana';
 import { useBlocksNewActivity } from '../maintenance/use_significant_events_maintenance';
 
@@ -26,7 +21,6 @@ import { useBlocksNewActivity } from '../maintenance/use_significant_events_main
 const SOURCE_KNOWLEDGE_QUERY_KEYS = [
   FEATURES_QUERY_KEY,
   DISCOVERY_QUERIES_QUERY_KEY,
-  DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY,
   ['queryOccurrenceStats'],
 ];
 

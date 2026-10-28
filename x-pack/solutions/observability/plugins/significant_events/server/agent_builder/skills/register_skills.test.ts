@@ -10,7 +10,6 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
 import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
-import { streamsInvestigationManagementSkill } from './investigation_management';
 import { registerSignificantEventsSkills } from './register_skills';
 import { KI_QUERY_GENERATION_SKILL_ID } from './ki_query_generation';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
@@ -24,7 +23,6 @@ import {
 import { createSignificantEventsServer } from '../utils/test_helpers';
 
 const KI_IDENTIFICATION_SKILL_ID = 'ki-identification-management';
-const INVESTIGATION_SKILL_ID = streamsInvestigationManagementSkill.id;
 
 // Skills registered whenever the feature is available.
 // `ki-identification-management` is only added when a KI onboarding client is present.
@@ -35,7 +33,6 @@ const CORE_SKILL_IDS = [
   significantEventsKIGroundingSkill.id,
   significantEventsManagementSkill.id,
   FEATURE_IDENTIFICATION_SKILL_ID,
-  INVESTIGATION_SKILL_ID,
 ];
 
 const telemetry = {} as EbtTelemetryClient;
@@ -66,16 +63,6 @@ const getRegisteredIds = (agentBuilder: ReturnType<typeof agentBuilderMocks.crea
   agentBuilder.skills.register.mock.calls.map((call) => call[0].id);
 
 describe('registerSignificantEventsSkills', () => {
-  it('documents the Nightshift workflow and safe direct alert handoff', () => {
-    const { content } = streamsInvestigationManagementSkill;
-
-    expect(content).toContain('## Nightshift Investigation Management');
-    expect(content).toContain('using the Nightshift investigation workflow');
-    expect(content).toContain('<alert_data>');
-    expect(content).toContain('Affected entity: service.name: checkout');
-    expect(content).toContain('replace anything resembling an opening or closing `alert_data` tag');
-  });
-
   it('registers nothing when the availability flag is disabled', async () => {
     const { agentBuilder, options } = createOptions({
       isAvailable: jest.fn().mockResolvedValue(false),
@@ -120,22 +107,15 @@ describe('registerSignificantEventsSkills', () => {
     const featureIdentificationSkill = agentBuilder.skills.register.mock.calls.find(
       ([skill]) => skill.id === FEATURE_IDENTIFICATION_SKILL_ID
     )![0];
-    expect(featureIdentificationSkill.experimental).toBe(true);
+    // Internal skill: out of the user-facing library, but gated only by the Nightshift availability,
+    // not by the `agentBuilder:experimentalFeatures` setting.
+    expect(featureIdentificationSkill.hidden).toBe(true);
+    expect(featureIdentificationSkill.experimental).toBeUndefined();
     // `getInlineTools` is declared as MaybePromise, and the skill's own implementation is sync.
     expect(await featureIdentificationSkill.getInlineTools!()).toEqual(
       expect.arrayContaining([expect.objectContaining({ id: FINALIZE_FEATURES_TOOL_ID })])
     );
     expect(featureIdentificationSkill.getRegistryTools).toBeUndefined();
-  });
-
-  it('registers the investigation skill as part of core skills when available', async () => {
-    const { agentBuilder, options } = createOptions({
-      maintenanceService: undefined,
-    });
-
-    await registerSignificantEventsSkills(options);
-
-    expect(getRegisteredIds(agentBuilder)).toContain(INVESTIGATION_SKILL_ID);
   });
 
   it('includes the KI identification skill only when onboarding client and maintenance service are provided', async () => {
@@ -188,7 +168,7 @@ describe('registerSignificantEventsSkills', () => {
   it('does not latch on partial failure and retries on the next call', async () => {
     const { agentBuilder, options } = createOptions();
     agentBuilder.skills.register.mockImplementation(async (skill) => {
-      if (skill.id === INVESTIGATION_SKILL_ID) {
+      if (skill.id === FEATURE_IDENTIFICATION_SKILL_ID) {
         throw new Error('boom');
       }
     });
@@ -205,14 +185,14 @@ describe('registerSignificantEventsSkills', () => {
   it('retries only the failed skill and never re-attempts already-registered ones', async () => {
     const { agentBuilder, options } = createOptions();
     agentBuilder.skills.register.mockImplementation(async (skill) => {
-      if (skill.id === INVESTIGATION_SKILL_ID) {
+      if (skill.id === FEATURE_IDENTIFICATION_SKILL_ID) {
         throw new Error('boom');
       }
     });
 
     const { ensureRegistered } = await registerSignificantEventsSkills(options);
     // The failed attempt still appears in mock.calls even though registration did not stick.
-    expect(getRegisteredIds(agentBuilder)).toContain(INVESTIGATION_SKILL_ID);
+    expect(getRegisteredIds(agentBuilder)).toContain(FEATURE_IDENTIFICATION_SKILL_ID);
     agentBuilder.skills.register.mockClear();
     agentBuilder.skills.register.mockImplementation(async () => undefined);
 
@@ -220,20 +200,20 @@ describe('registerSignificantEventsSkills', () => {
 
     // Only the previously failed skill is retried; the ones that succeeded are not re-registered
     // (a second register() of the same id would throw "already registered").
-    expect(getRegisteredIds(agentBuilder)).toEqual([INVESTIGATION_SKILL_ID]);
+    expect(getRegisteredIds(agentBuilder)).toEqual([FEATURE_IDENTIFICATION_SKILL_ID]);
   });
 
   it('registers all skills once a transient failure recovers on a later call', async () => {
-    let failInvestigation = true;
+    let failFeatureIdentification = true;
     const { agentBuilder, options } = createOptions();
     agentBuilder.skills.register.mockImplementation(async (skill) => {
-      if (skill.id === INVESTIGATION_SKILL_ID && failInvestigation) {
+      if (skill.id === FEATURE_IDENTIFICATION_SKILL_ID && failFeatureIdentification) {
         throw new Error('boom');
       }
     });
 
     const { ensureRegistered } = await registerSignificantEventsSkills(options);
-    failInvestigation = false;
+    failFeatureIdentification = false;
 
     await ensureRegistered();
 
