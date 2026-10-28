@@ -17,6 +17,20 @@ import { RESTRICTED_GLOBALS } from './javascript.mts';
  */
 export const teamOverrides: OxlintOverride[] = [
   /**
+   * Temporarily disable some react rules for specific plugins, remove in separate PRs
+   */
+  {
+    files: ['src/platform/plugins/shared/kibana_react/**/*.{js,mjs,ts,tsx}'],
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+    },
+  },
+  {
+    files: ['src/platform/plugins/shared/kibana_utils/**/*.{js,mjs,ts,tsx}'],
+    rules: { 'react-hooks/exhaustive-deps': 'off' },
+  },
+  /**
    * Files that run BEFORE node version check
    */
   {
@@ -116,6 +130,7 @@ export const teamOverrides: OxlintOverride[] = [
     ],
     rules: {
       'no-console': ['warn', { allow: ['error'] }],
+      'react-hooks/rules-of-hooks': 'error',
     },
   },
   {
@@ -124,6 +139,23 @@ export const teamOverrides: OxlintOverride[] = [
       '@typescript-eslint/explicit-function-return-type': [
         'error',
         { allowTypedFunctionExpressions: false },
+      ],
+    },
+  },
+  {
+    files: [
+      'x-pack/platform/plugins/shared/observability_solution/**/*.{ts,tsx}',
+      'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
+      'x-pack/platform/plugins/shared/{significant_events_app,streams,streams_app}/**/*.{ts,tsx}',
+      'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
+    ],
+    rules: {
+      'react-hooks/exhaustive-deps': [
+        'error',
+        {
+          additionalHooks:
+            '^(useUrl|useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient|use.*Fetch)$',
+        },
       ],
     },
   },
@@ -446,6 +478,7 @@ export const teamOverrides: OxlintOverride[] = [
     ],
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
+      'react-hooks/exhaustive-deps': 'error',
     },
   },
   {
@@ -474,6 +507,10 @@ export const teamOverrides: OxlintOverride[] = [
    * NOTE: We also have a single rule at the bottom of the file that
    * overrides Prettier's default of not linting unnecessary backticks
    */
+  {
+    files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
+    rules: { 'react-hooks/exhaustive-deps': 'off' },
+  },
   {
     files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
     excludeFiles: [

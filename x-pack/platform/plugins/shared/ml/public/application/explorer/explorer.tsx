@@ -186,6 +186,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const collapseFn = useRef<() => void | undefined>();
   const panelsInitialized = useRef<boolean>(false);
 
+  // No dependency list: refs are assigned during the render of the resizable container and on commit,
+  // so this checks after every commit until both are available; once initialized it is a no-op.
   useEffect(
     /**
      * Preserve collapsible panel state on page load.
@@ -204,14 +206,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
           }
         }, 0);
       }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      collapseFn.current,
-      panelsInitialized,
-      topInfluencersPanelRef.current,
-      anomalyExplorerPanelState,
-    ]
+    }
   );
 
   const onPanelWidthChange = useCallback(

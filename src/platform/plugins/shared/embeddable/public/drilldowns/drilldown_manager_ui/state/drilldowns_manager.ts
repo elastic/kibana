@@ -8,6 +8,7 @@
  */
 
 import useObservable from 'react-use/lib/useObservable';
+import type { Observable } from 'rxjs';
 import { BehaviorSubject, map } from 'rxjs';
 import type { ToastsStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -27,6 +28,22 @@ import type { DrilldownState } from '../../../../server/drilldowns/types';
 import type { HasDrilldowns } from '../../types';
 
 const helloMessageStorageKey = `drilldowns:hidWelcomeMessage`;
+
+const createUseBehaviorSubject =
+  <T>(getSubject$: () => BehaviorSubject<T>) =>
+  (): T => {
+    const subject$ = getSubject$();
+    return useObservable(subject$, subject$.getValue());
+  };
+
+const createUseDrilldownFactory =
+  (getRoute$: () => Observable<string[]>, getFactory: () => DrilldownFactory | undefined) => () =>
+    useObservable(getRoute$().pipe(map(() => getFactory())), getFactory());
+
+const createUseTableItems = (getDeps: () => DrilldownsManagerDeps) => () => {
+  const { drilldowns$, factories, getTrigger, triggers } = getDeps();
+  return useTableItems(drilldowns$, factories, getTrigger, triggers);
+};
 
 export type DrilldownsManagerDeps = HasDrilldowns & {
   /**
@@ -453,21 +470,13 @@ export class DrilldownsManager {
   // Below are convenience React hooks for consuming observables in connected
   // React components.
 
-  public readonly useTitle = () => useObservable(this.title$, this.title$.getValue());
-  public readonly useFooter = () => useObservable(this.footer$, this.footer$.getValue());
-  public readonly useRoute = () => useObservable(this.route$, this.route$.getValue());
-  public readonly useWelcomeMessage = () =>
-    useObservable(this.hideWelcomeMessage$, this.hideWelcomeMessage$.getValue());
-  public readonly useDrilldownFactory = () =>
-    useObservable(
-      this.route$.pipe(map(() => this.getDrilldownManager()?.factory)),
-      this.getDrilldownManager()?.factory
-    );
-  public readonly useTableItems = () =>
-    useTableItems(
-      this.deps.drilldowns$,
-      this.deps.factories,
-      this.deps.getTrigger,
-      this.deps.triggers
-    );
+  public readonly useTitle = createUseBehaviorSubject(() => this.title$);
+  public readonly useFooter = createUseBehaviorSubject(() => this.footer$);
+  public readonly useRoute = createUseBehaviorSubject(() => this.route$);
+  public readonly useWelcomeMessage = createUseBehaviorSubject(() => this.hideWelcomeMessage$);
+  public readonly useDrilldownFactory = createUseDrilldownFactory(
+    () => this.route$,
+    () => this.getDrilldownManager()?.factory
+  );
+  public readonly useTableItems = createUseTableItems(() => this.deps);
 }

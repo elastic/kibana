@@ -335,6 +335,38 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   };
 }
 
+/** Returns the absolute ISO representation of a date math string, or `undefined` if it's invalid. */
+function toAbsoluteString(value: string, roundUp = false): string | undefined {
+  const valueAsMoment = dateMath.parse(value, { roundUp });
+  if (!valueAsMoment) {
+    return value;
+  }
+  return valueAsMoment.isValid() ? valueAsMoment.toISOString() : undefined;
+}
+
+function SharedTimefilterDuration({
+  timeFrom,
+  timeTo,
+  dateFormat,
+}: {
+  timeFrom: string;
+  timeTo: string;
+  dateFormat: string;
+}) {
+  const dateRangePretty = usePrettyDuration({
+    timeFrom,
+    timeTo,
+    quickRanges: [],
+    dateFormat,
+  });
+  return (
+    <div
+      data-shared-timefilter-duration={dateRangePretty}
+      data-test-subj="dataSharedTimefilterDuration"
+    />
+  );
+}
+
 export const SharingMetaFields = React.memo(function SharingMetaFields({
   from,
   to,
@@ -344,30 +376,14 @@ export const SharingMetaFields = React.memo(function SharingMetaFields({
   to: string;
   dateFormat: string;
 }) {
-  function toAbsoluteString(value: string, roundUp = false) {
-    const valueAsMoment = dateMath.parse(value, { roundUp });
-    if (!valueAsMoment) {
-      return value;
-    }
-    return valueAsMoment.toISOString();
-  }
+  const timeFrom = toAbsoluteString(from);
+  const timeTo = toAbsoluteString(to, true);
 
-  try {
-    const dateRangePretty = usePrettyDuration({
-      timeFrom: toAbsoluteString(from),
-      timeTo: toAbsoluteString(to, true),
-      quickRanges: [],
-      dateFormat,
-    });
-    return (
-      <div
-        data-shared-timefilter-duration={dateRangePretty}
-        data-test-subj="dataSharedTimefilterDuration"
-      />
-    );
-  } catch (e) {
+  if (timeFrom === undefined || timeTo === undefined) {
     return <div data-test-subj="dataSharedTimefilterDuration" />;
   }
+
+  return <SharedTimefilterDuration timeFrom={timeFrom} timeTo={timeTo} dateFormat={dateFormat} />;
 });
 
 type GenericQueryBarTopRow = <QT extends AggregateQuery | Query = Query>(

@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FilesContext, useFilesContext, type FilesContextValue } from './src';
+export { FilesContext, useFilesContext, useHasFilesContext, type FilesContextValue } from './src';

@@ -57,9 +57,10 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
   }, [panel$, gridLayoutStateManager.runtimeSettings$]);
 
   useEffect(() => {
+    const panelRefs = gridLayoutStateManager.panelRefs.current;
     return () => {
       // remove reference on unmount
-      delete gridLayoutStateManager.panelRefs.current[panelId];
+      delete panelRefs[panelId];
     };
   }, [panelId, gridLayoutStateManager]);
 

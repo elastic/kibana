@@ -103,3 +103,24 @@ export const playwrightOverrides: OxlintOverride[] = [
     },
   },
 ];
+
+/**
+ * Playwright fixtures hand their value to tests through a `use` callback. Oxlint's
+ * `rules-of-hooks` treats any `use()` call as React 19's `use` hook (Kibana is on React 18), so it
+ * stays off for Playwright code, which has no React components. Applied after the team overrides,
+ * which turn the rule on for some of these folders.
+ */
+export const playwrightReactHooksOverrides: OxlintOverride[] = [
+  {
+    files: [
+      ...PLAYWRIGHT_FILE_GLOBS,
+      '**/kbn-evals*/**/*.ts',
+      '**/e2e/playwright/**/*.ts',
+      'src/platform/packages/shared/kbn-scout-synthtrace/src/**/*.ts',
+      'src/platform/plugins/private/interactive_setup/test/helpers/**/*.ts',
+    ],
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
+    },
+  },
+];

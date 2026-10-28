@@ -167,7 +167,6 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
     toasts,
   ]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const onSelectionChange: EuiComboBoxProps<string>['onChange'] = useCallback(
     (async (selectionUpdate) => {
       if (selectionUpdate.some((selectedOption) => selectedOption.value === ALL_JOBS_SELECTION)) {
@@ -200,7 +199,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
         ...(selectedGroupIds.length > 0 ? { groupIds: selectedGroupIds } : {}),
       });
     }) as Exclude<EuiComboBoxProps<string>['onChange'], undefined>,
-    [jobIds, groupIds, defaultOptions, createJobUrl]
+    [jobIds, groupIds, defaultOptions, createJobUrl, navigateToUrl, onChange]
   );
 
   useEffect(() => {
