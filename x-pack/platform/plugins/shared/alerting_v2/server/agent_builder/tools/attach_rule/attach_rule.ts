@@ -13,7 +13,7 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
-import { RULE_ATTACHMENT_TYPE, ruleAttachmentDataSchema } from '@kbn/alerting-v2-schemas';
+import { ruleAttachmentDataSchema } from '@kbn/alerting-v2-schemas';
 import { ensureToolPrivilege } from '../../common/unauthorized_tool_result';
 import { createAttachmentsClient } from '../../../lib/attachments_client';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
@@ -76,13 +76,9 @@ export const attachRuleTool = ({
     try {
       const rule = await getRulesClient({ request, spaceId }).getRule({ id: ruleId });
       const data = ruleAttachmentDataSchema.parse(rule);
-      const added = await attachments.add(
-        {
-          type: RULE_ATTACHMENT_TYPE,
-          data,
-          origin: ruleId,
-          description: `Rule: ${data.metadata.name}`,
-        },
+      const added = await rules.saveDraft(
+        { ...rules.getDraft(), origin: ruleId },
+        data,
         ATTACHMENT_REF_ACTOR.agent
       );
 

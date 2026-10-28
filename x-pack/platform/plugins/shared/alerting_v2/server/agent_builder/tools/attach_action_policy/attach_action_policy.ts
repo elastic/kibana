@@ -13,10 +13,7 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
-import {
-  ACTION_POLICY_ATTACHMENT_TYPE,
-  actionPolicyAttachmentDataSchema,
-} from '@kbn/alerting-v2-schemas';
+import { actionPolicyAttachmentDataSchema } from '@kbn/alerting-v2-schemas';
 import { ensureToolPrivilege } from '../../common/unauthorized_tool_result';
 import { createAttachmentsClient } from '../../../lib/attachments_client';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
@@ -81,13 +78,9 @@ export const attachActionPolicyTool = ({
         id: policyId,
       });
       const data = actionPolicyAttachmentDataSchema.parse(policy);
-      const added = await attachments.add(
-        {
-          type: ACTION_POLICY_ATTACHMENT_TYPE,
-          data,
-          origin: policyId,
-          description: `Action Policy: ${data.name}`,
-        },
+      const added = await actionPolicies.saveDraft(
+        { ...actionPolicies.getDraft(), origin: policyId },
+        data,
         ATTACHMENT_REF_ACTOR.agent
       );
 

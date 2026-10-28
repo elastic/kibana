@@ -88,6 +88,7 @@ describe('attachRuleTool', () => {
       expect(getRule).toHaveBeenCalledWith({ id: 'rule-1' });
       expect(ctx.attachments.add).toHaveBeenCalledWith(
         {
+          id: expect.any(String),
           type: RULE_ATTACHMENT_TYPE,
           data: rule,
           origin: 'rule-1',
