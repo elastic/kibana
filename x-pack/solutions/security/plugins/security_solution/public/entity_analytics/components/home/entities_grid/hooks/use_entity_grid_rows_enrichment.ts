@@ -11,6 +11,7 @@ import { useQueries } from '@kbn/react-query';
 import type { QueryFunctionContext, UseQueryResult } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
+import { isMissingIndexError } from '../../is_missing_index_error';
 import { isAbortError } from '../../../../../common/utils/exceptions';
 import type { QueryArgs, Row } from '../common';
 import { getEntityId, getEntityIds } from '../common';
@@ -225,10 +226,11 @@ export const useEntityGridRowsEnrichment = (
   const onRowsInViewChange = useEnrichRowsInView(context, options, chunks, isPreviousData);
   const rows = useLoadedRows(chunks, enrichQueries);
   // Columns whose enricher failed show no value; say so, as an empty cell also means none.
-  useErrorToast(
-    ENRICH_ERROR_TITLE,
-    enrichQueries.find(({ data }) => data?.errors.length)?.data?.errors[0]
-  );
+  // A space that has never run a detection rule has no alerts index. That is empty data.
+  const enrichError = enrichQueries
+    .flatMap(({ data }) => data?.errors ?? [])
+    .find((error) => !isMissingIndexError(error));
+  useErrorToast(ENRICH_ERROR_TITLE, enrichError);
 
   return {
     rows,

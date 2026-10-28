@@ -87,7 +87,7 @@ spaceTest.describe(
 
     spaceTest(
       'adds a host entity to a new case and the Entities accordion shows the attached entity',
-      async ({ pageObjects, scoutSpace }) => {
+      async ({ pageObjects, entityCasesApi, scoutSpace }) => {
         const { entityCases } = pageObjects;
         const caseName = `Scout entity case – host – ${scoutSpace.id}`;
 
@@ -106,7 +106,9 @@ spaceTest.describe(
         await spaceTest.step(
           'navigate to the new case and check the Entities accordion',
           async () => {
-            await entityCases.clickCaseToastLink();
+            await entityCases.waitForCaseCreated();
+            const created = await entityCasesApi.findCaseByTitle(caseName);
+            await entityCases.navigateToCase(created.id);
 
             await entityCases.openAttachmentsTab();
             await expect(entityCases.entityAccordion).toBeVisible();
