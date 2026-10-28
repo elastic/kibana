@@ -19,6 +19,7 @@ import { useUrlParams } from '../../../hooks/use_url_params';
 import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import type { ArtifactListPageUrlParams } from '../types';
 import type { MaybeImmutable } from '../../../../../common/endpoint/types';
+import type { ArtifactEnabledStatus } from '../../../common/utils';
 import { useKueryFromExceptionsSearchFilter } from './use_kuery_from_exceptions_search_filter';
 import { useListArtifact } from '../../../hooks/artifacts';
 import { useUrlPagination } from '../../../hooks/use_url_pagination';
@@ -44,7 +45,8 @@ type WithArtifactListDataInterface = ReturnType<typeof useListArtifact> & {
 export const useWithArtifactListData = (
   apiClient: ExceptionsListApiClient,
   searchableFields: MaybeImmutable<string[]>,
-  sortableFields: MaybeImmutable<string[]> = []
+  sortableFields: MaybeImmutable<string[]> = [],
+  enabledStatus?: ArtifactEnabledStatus
 ): WithArtifactListDataInterface => {
   const isMounted = useIsMounted();
 
@@ -57,7 +59,12 @@ export const useWithArtifactListData = (
   } = useUrlPagination();
 
   // Used to determine if the `does data exist` check should be done.
-  const kuery = useKueryFromExceptionsSearchFilter(filter, searchableFields, includedPolicies);
+  const kuery = useKueryFromExceptionsSearchFilter(
+    filter,
+    searchableFields,
+    includedPolicies,
+    enabledStatus
+  );
 
   const {
     data: doesDataExist,
@@ -104,6 +111,7 @@ export const useWithArtifactListData = (
       perPage: pageSize,
       filter,
       policies: includedPolicies ? includedPolicies.split(',') : [],
+      enabledStatus,
       sortField,
       sortOrder,
     },

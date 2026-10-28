@@ -218,6 +218,15 @@ export const proposalSchema = z.object({
 
   /** Gating execution to resume. Absent when no workflow is waiting. */
   workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+  /**
+   * Stamped by `releaseGate` — the approve and dismiss routes — before it
+   * resumes the gate, and refused by `revise()` from then on: the gate adopts
+   * the chain head before it writes the decision, so a revision landing in
+   * between would be what the approval executes. Absent on a gate resumed
+   * through any other surface and on every auto-approval, so it says nothing
+   * about who decided or how.
+   */
+  gateReleasedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
 
   createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
   createdBy: proposalUserSchema.optional(),
