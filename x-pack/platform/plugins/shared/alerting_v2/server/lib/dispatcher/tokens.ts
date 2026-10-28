@@ -14,3 +14,6 @@ import type { DispatcherService } from './dispatcher';
 export const DispatcherServiceInternalToken = createToken<DispatcherService>(
   'alerting_v2.DispatcherServiceInternal'
 );
+
+/** Absolute Kibana URL used to make alert links absolute. */
+export const KibanaBaseUrlToken = createToken<string>('alerting_v2.KibanaBaseUrl');

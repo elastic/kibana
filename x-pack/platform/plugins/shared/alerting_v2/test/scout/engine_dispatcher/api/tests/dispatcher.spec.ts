@@ -254,8 +254,9 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActionsEvents.cleanUp();
+    // Events first: wiping `.alert-actions` dedup state while events remain re-dispatches them.
     await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
     await apiServices.alertingV2.maintenanceWindows.cleanUp();
 
     await apiServices.alertingV2.actionPolicies.patch(ACTION_POLICY_ID, {
@@ -277,8 +278,8 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActionsEvents.cleanUp();
     await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
     await apiServices.alertingV2.rules.cleanUp();
     await apiServices.alertingV2.actionPolicies.cleanUp();
     await apiServices.alertingV2.maintenanceWindows.cleanUp();
@@ -409,6 +410,7 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
         });
 
         expect(action.action_group_id).toBeDefined();
+        expect(action.alert_id).toBeDefined();
         expect(action.alert_status).toBeDefined();
 
         notifiedEpisodeStatuses.add(action.alert_status as string);
@@ -484,6 +486,7 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
         });
 
         expect(action.action_group_id).toBeDefined();
+        expect(action.alert_id).toBeDefined();
         expect(action.alert_status).toBeDefined();
         expect(action.group_hash).toBe('rule-1-series-1');
       }
@@ -647,8 +650,6 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
         ...buildSeriesEvents('rule-005', 'rule-005-series-2', 'rule-005-series-2-episode-1', 180),
       ];
 
-      await apiServices.alertingV2.ruleEvents.seed(events);
-
       // User actions:
       //  - rule-001 ack then unack → suppression cancelled → fire
       //  - rule-002 ack only → suppress
@@ -728,7 +729,9 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
           timestamp: actionTs(173),
         }),
       ];
+      // Seed the user actions first: a tick between the two seeds would fire every episode.
       await apiServices.alertingV2.alertActionsEvents.seed(userActions);
+      await apiServices.alertingV2.ruleEvents.seed(events);
 
       // Wait until the dispatcher has produced the full set:
       //  - rule-001:                fire     (ack/unack net = no suppress)
@@ -886,7 +889,6 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
           timestamp: eventTs(60),
         }),
       ];
-      await apiServices.alertingV2.ruleEvents.seed(events);
 
       const futureExpiry = new Date(baseTime + 24 * 60 * 60 * 1000).toISOString();
       // `expiry` for the expired-snoozes must be strictly before the event's
@@ -959,7 +961,9 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
           expiry: pastExpiry,
         }),
       ];
+      // Seed the user actions first: a tick between the two seeds fires for the wrong reason.
       await apiServices.alertingV2.alertActionsEvents.seed(userActions);
+      await apiServices.alertingV2.ruleEvents.seed(events);
 
       await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(4, {
         actionTypes: ['fire'],
@@ -1179,7 +1183,8 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
         ruleId: 'rule-groupby',
         actionTypes: ['notified'],
       });
-      expect(notifiedActions).toHaveLength(2);
+      // One notified record per (action group, alert): two host groups of two alerts each.
+      expect(notifiedActions).toHaveLength(4);
 
       const groupIds = notifiedActions.map((action) => action.action_group_id);
       expect(new Set(groupIds).size).toBe(2);
@@ -1288,6 +1293,7 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
 
       for (const action of notifiedActions) {
         expect(action.action_group_id).toBeDefined();
+        expect(action.alert_id).toBeDefined();
         expect(action.alert_status).toBeDefined();
       }
     }
@@ -1403,8 +1409,8 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
         }),
       ]);
 
-      // Digest mode dispatches one notified per policy run while still
-      // writing one fire per episode.
+      // Digest mode dispatches the policy's single group once; it writes one
+      // fire and one notified record per alert of that group.
       const fires = await expectStableCount(apiServices, 3, {
         ruleId: 'rule-1',
         actionTypes: ['fire'],
@@ -1416,7 +1422,8 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
         actionTypes: ['notified'],
       });
 
-      expect(notifiedActions).toHaveLength(1);
+      expect(notifiedActions).toHaveLength(3);
+      expect(new Set(notifiedActions.map((action) => action.action_group_id)).size).toBe(1);
     }
   );
 
@@ -1479,10 +1486,11 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
         ruleId: 'rule-groupby',
         actionTypes: ['notified'],
       });
-      // Two host groups → exactly two notified actions across the entire
-      // throttle interval, regardless of how many dispatcher ticks observe
-      // the same episodes.
-      expect(notified).toHaveLength(2);
+      // Two host groups of two alerts each → exactly four notified records
+      // (one per group and alert) across the entire throttle interval,
+      // regardless of how many dispatcher ticks observe the same episodes.
+      expect(notified).toHaveLength(4);
+      expect(new Set(notified.map((action) => action.action_group_id)).size).toBe(2);
     }
   );
 
@@ -1713,7 +1721,10 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
       // regression that re-reads stale events a chance to surface.
       await apiServices.alertingV2.dispatcher.waitForDispatcherTick({ ticks: 2 });
 
-      const actions = await apiServices.alertingV2.alertActionsEvents.find({ ruleId: 'rule-1' });
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId: 'rule-1',
+        groupHash: 'rule-1-old-series',
+      });
       expect(actions).toHaveLength(0);
     }
   );
@@ -1848,7 +1859,7 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
         }),
       ]);
 
-      // StoreActionsStep writes a throttled-policy suppress record.
+      // DispatchStep writes a throttled-policy suppress record.
       await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(1, {
         ruleId: 'rule-1',
         actionTypes: ['suppress'],

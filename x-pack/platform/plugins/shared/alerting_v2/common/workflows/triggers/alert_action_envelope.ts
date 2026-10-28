@@ -12,7 +12,7 @@ export const alertActionEnvelopeSchema = lazySchema(() =>
   z
     .object({
       occurredAt: isoDateTime().describe(
-        i18n.translate('xpack.alertingVTwo.triggers.alertAction.schema.occurredAt', {
+        i18n.translate('xpack.alertingV2.triggers.alertAction.schema.occurredAt', {
           defaultMessage: 'ISO timestamp of when the action occurred.',
         })
       ),
@@ -21,7 +21,7 @@ export const alertActionEnvelopeSchema = lazySchema(() =>
         .min(1)
         .max(128)
         .describe(
-          i18n.translate('xpack.alertingVTwo.triggers.alertAction.schema.groupHash', {
+          i18n.translate('xpack.alertingV2.triggers.alertAction.schema.groupHash', {
             defaultMessage: 'Stable hash of the alert series the alert belongs to.',
           })
         ),
@@ -31,7 +31,7 @@ export const alertActionEnvelopeSchema = lazySchema(() =>
         .max(256)
         .nullable()
         .describe(
-          i18n.translate('xpack.alertingVTwo.triggers.alertAction.schema.alertId', {
+          i18n.translate('xpack.alertingV2.triggers.alertAction.schema.alertId', {
             defaultMessage:
               'Identifier of the alert the action was applied to, or null for series-level actions that target the series as a whole.',
           })
@@ -42,7 +42,7 @@ export const alertActionEnvelopeSchema = lazySchema(() =>
         .max(256)
         .nullable()
         .describe(
-          i18n.translate('xpack.alertingVTwo.triggers.alertAction.schema.ruleId', {
+          i18n.translate('xpack.alertingV2.triggers.alertAction.schema.ruleId', {
             defaultMessage:
               'Identifier of the alerting rule the alert belongs to, or null for external-source alerts not tied to a Kibana rule.',
           })
@@ -52,7 +52,7 @@ export const alertActionEnvelopeSchema = lazySchema(() =>
         .min(1)
         .max(256)
         .describe(
-          i18n.translate('xpack.alertingVTwo.triggers.alertAction.schema.spaceId', {
+          i18n.translate('xpack.alertingV2.triggers.alertAction.schema.spaceId', {
             defaultMessage: 'Kibana space the alert lives in.',
           })
         ),
@@ -62,7 +62,7 @@ export const alertActionEnvelopeSchema = lazySchema(() =>
         .max(256)
         .nullable()
         .describe(
-          i18n.translate('xpack.alertingVTwo.triggers.alertAction.schema.actorUid', {
+          i18n.translate('xpack.alertingV2.triggers.alertAction.schema.actorUid', {
             defaultMessage:
               'User-profile uid of the actor who performed the action, or null when performed by an internal/system context.',
           })

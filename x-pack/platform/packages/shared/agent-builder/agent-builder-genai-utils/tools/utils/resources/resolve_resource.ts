@@ -10,7 +10,7 @@ import type {
   IndicesResolveIndexResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { isNotFoundError } from '@kbn/es-errors';
+import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import { EsResourceType } from '@kbn/agent-builder-common';
 import type { MappingField } from '../mappings';
 import { flattenMapping, getIndexMappings } from '../mappings';
@@ -260,7 +260,16 @@ export const resolveResourceForEsql = async ({
   }
 
   if (resourceCount === 1) {
-    return resolveSingleResource({ resourceName, resolveRes, esClient, includeFrozen });
+    try {
+      return await resolveSingleResource({ resourceName, resolveRes, esClient, includeFrozen });
+    } catch (e) {
+      // The mapping, settings and data stream APIs used for a single target need
+      // `view_index_metadata`. A caller with only `read` can still query the target,
+      // so fall through to _field_caps, which needs `read`.
+      if (!isResponseError(e) || e.statusCode !== 403) {
+        throw e;
+      }
+    }
   }
 
   const fieldCapRes = await fetchFieldCaps({ index: resourceName, esClient, includeFrozen });

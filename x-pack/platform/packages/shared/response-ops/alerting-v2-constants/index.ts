@@ -23,6 +23,8 @@ export const ALERTING_V2_ACTION_POLICIES_LOCATOR = 'ALERTING_V2_ACTION_POLICIES_
 export const ALERTING_V2_EXECUTION_HISTORY_LOCATOR = 'ALERTING_V2_EXECUTION_HISTORY_LOCATOR';
 export const ALERTING_V2_ACTION_POLICIES_APP_ID = 'action_policies';
 export const ALERTING_V2_EPISODES_APP_ID = 'alerts';
+/** Episodes list status filter value that selects every status, the one the URL carries. */
+export const ALERTING_V2_EPISODES_STATUS_ALL = 'all' as const;
 export const ALERTING_V2_EPISODES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EPISODES_APP_ID}`;
 export const ALERTING_V2_EXECUTION_HISTORY_APP_ID = 'execution_history';
 

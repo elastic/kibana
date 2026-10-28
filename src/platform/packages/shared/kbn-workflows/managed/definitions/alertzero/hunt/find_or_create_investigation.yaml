@@ -30,6 +30,11 @@ outputs:
     type: string
   - name: investigationConversationId
     type: string
+consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Continuous Threat Hunt worker"
+
 steps:
   - name: find_or_create
     type: kibana.request
@@ -110,6 +115,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.find_or_create.output.investigationConversationId }}"
         message: |-
           {% assign report = steps.find_or_create.output.report -%}
