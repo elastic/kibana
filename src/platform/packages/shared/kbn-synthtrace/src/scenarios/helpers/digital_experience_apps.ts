@@ -617,7 +617,9 @@ export const generateEdotBrowserSessions = (
               { end: returnedAt - expiredFor },
               EARLIER_VISIT_PAGE_VIEWS
             );
-            const requestInterval = Math.floor((expiredFor - SESSION_IDLE_TIMEOUT_MS) / 3);
+            const requestInterval = Math.floor(
+              (expiredFor - SESSION_IDLE_TIMEOUT_MS) / IDLE_REQUEST_COUNT
+            );
             const idleRequests = edotBrowser.idleTab({
               client: client({ tabId }),
               site,
