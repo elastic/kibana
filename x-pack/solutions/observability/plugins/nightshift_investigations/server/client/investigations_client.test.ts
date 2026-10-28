@@ -1824,9 +1824,13 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
           withConversations(makeConversation({ id: 'inv-1', status: 'closed' }));
         }
 
-        await expect(makeClient()[method]('inv-1', 'exec-1')).rejects.toThrow(
-          InvestigationNotFoundError
-        );
+        const client = makeClient();
+        const result =
+          method === 'ensureForFailure'
+            ? client.ensureForFailure('inv-1', 'exec-1', 'Permission denied')
+            : client.ensureOrCreate('inv-1', 'exec-1');
+
+        await expect(result).rejects.toThrow(InvestigationNotFoundError);
 
         expect(conversations.create).not.toHaveBeenCalled();
         expect(conversations.patchMetadata).not.toHaveBeenCalled();
