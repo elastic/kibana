@@ -4043,6 +4043,66 @@ describe('generateFleetServerOutputSSLConfig', () => {
       expect(res?.[fleetServerOutputId]).not.toHaveProperty('secrets');
     });
 
+    it('should move the dotted ssl keys of the base output (Advanced YAML) into ssl before layering the ES ssl fields', () => {
+      const res = generateFleetServerOutputSSLConfig(
+        {
+          ...baseFleetServerHost,
+          ssl: { es_certificate_authorities: ['/tmp/ssl/es-ca.crt'], es_certificate: 'my-es-cert' },
+        },
+        {
+          type: 'elasticsearch',
+          hosts: ['https://es.co:9200'],
+          'ssl.certificate': 'output-cert',
+          'ssl.certificate_authorities': ['/tmp/ssl/output-ca.crt'],
+          'ssl.key': 'output-key',
+          'ssl.ca_trusted_fingerprint': 'abcdef',
+        } as any
+      );
+      expect(res).toEqual({
+        [fleetServerOutputId]: {
+          type: 'elasticsearch',
+          hosts: ['https://es.co:9200'],
+          ssl: {
+            certificate: 'my-es-cert',
+            certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+            key: 'output-key',
+            ca_trusted_fingerprint: 'abcdef',
+          },
+        },
+      });
+    });
+
+    it('should replace a dotted plain ssl.key of the base output with the ES secret key', () => {
+      const res = generateFleetServerOutputSSLConfig(
+        { ...baseFleetServerHost, secrets: { ssl: { es_key: { id: 'my-es-key' } } } },
+        {
+          type: 'elasticsearch',
+          hosts: ['https://es.co:9200'],
+          'ssl.certificate': 'output-cert',
+          'ssl.key': 'output-key',
+        } as any
+      );
+      expect(res?.[fleetServerOutputId]).not.toHaveProperty(['ssl.key']);
+      expect(res?.[fleetServerOutputId].ssl).toEqual({ certificate: 'output-cert' });
+      expect(res?.[fleetServerOutputId].secrets).toEqual({ ssl: { key: { id: 'my-es-key' } } });
+    });
+
+    it('should prefer the nested ssl keys of the base output over the dotted ones', () => {
+      const res = generateFleetServerOutputSSLConfig(
+        { ...baseFleetServerHost, ssl: { es_certificate: 'my-es-cert' } },
+        {
+          type: 'elasticsearch',
+          'ssl.verification_mode': 'none',
+          ssl: { verification_mode: 'full' },
+        } as any
+      );
+      expect(res?.[fleetServerOutputId].ssl).toEqual({
+        certificate: 'my-es-cert',
+        verification_mode: 'full',
+      });
+      expect(res?.[fleetServerOutputId]).not.toHaveProperty(['ssl.verification_mode']);
+    });
+
     it('should only contain the ES ssl fields if the base output is not an elasticsearch output', () => {
       const res = generateFleetServerOutputSSLConfig(
         { ...baseFleetServerHost, ssl: { es_certificate: 'my-es-cert' } },

@@ -885,9 +885,24 @@ export function generateFleetServerOutputSSLConfig(
 
   const {
     secrets: baseSecrets,
-    ssl: baseSsl,
-    ...baseRest
+    ssl: baseNestedSsl,
+    ...baseWithDottedSsl
   } = baseOutput?.type === 'elasticsearch' ? baseOutput : ({} as Partial<FullAgentPolicyOutput>);
+
+  // The Advanced YAML of an output (config_yaml) is copied as is into the compiled output, so its dotted
+  // keys (e.g. `ssl.certificate`) are flat keys next to the nested `ssl`. Move them into `ssl`, otherwise the
+  // output would have two definitions of the same setting once the ES ssl settings are layered on top.
+  const baseRest: Record<string, any> = {};
+  const baseDottedSsl: Record<string, any> = {};
+  for (const [key, value] of Object.entries(baseWithDottedSsl)) {
+    if (key.startsWith('ssl.')) {
+      set(baseDottedSsl, key.slice('ssl.'.length), value);
+    } else {
+      baseRest[key] = value;
+    }
+  }
+  const baseSsl = { ...baseDottedSsl, ...baseNestedSsl };
+
   const outputConfig: FullAgentPolicyOutput = { ...baseRest, type: 'elasticsearch' };
 
   // the ES key of the fleet server host replaces the key of the base output, whether plain or secret
