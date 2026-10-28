@@ -44,6 +44,13 @@ resolve() {
 
 api_key="$(resolve SANDBOX_API_KEY '.sandbox.apiKey')"
 
+# Selecting the reinforcement micro-eval enables decision trees without turning Cortex on.
+# The key is absent otherwise, which keeps an ordinary investigation server's fingerprint unchanged.
+decision_trees=''
+case ",$(printf '%s' "${NIGHTSHIFT_DATASETS:-}" | tr -d ' ')," in
+  *,reinforcement,*) decision_trees=true ;;
+esac
+
 # Splits `https://host[:port]` into `host` and `port`. Kibana always connects over TLS, so the scheme
 # only picks the default port.
 parse_url() {
@@ -168,6 +175,7 @@ HOOK_HOST="$host" \
   HOOK_READABLE_INDICES="$readable_indices" \
   HOOK_TELEMETRY_CONFIG="$telemetry_config" \
   HOOK_KIBANA_CONFIG="$script_dir/kibana.sandbox.yml" \
+  HOOK_DECISION_TREES="$decision_trees" \
   jq -n '{
     env: ((if $ENV.HOOK_ORCA == "true" then {
       NIGHTSHIFT_DATASETS: "orcabench", NIGHTSHIFT_ORCA_TELEMETRY: "1"
@@ -181,7 +189,9 @@ HOOK_HOST="$host" \
       SANDBOX_CLIENT_KEY_PATH: $ENV.HOOK_KEY,
       SANDBOX_CA_CERT_PATH: $ENV.HOOK_CA,
       SANDBOX_KIBANA_CONFIG: $ENV.HOOK_KIBANA_CONFIG
-    } + (if $ENV.HOOK_TELEMETRY_CONFIG != "" then {
+    } + (if $ENV.HOOK_DECISION_TREES != "" then {
+      NIGHTSHIFT_DECISION_TREES: $ENV.HOOK_DECISION_TREES
+    } else {} end) + (if $ENV.HOOK_TELEMETRY_CONFIG != "" then {
       NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: $ENV.HOOK_TELEMETRY_URL,
       NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: $ENV.HOOK_TELEMETRY_KEY,
       NIGHTSHIFT_SANDBOX_READABLE_INDICES: $ENV.HOOK_READABLE_INDICES,

@@ -68,14 +68,29 @@ const boundOutput = (output: InvestigationTaskOutput): InvestigationTaskOutput =
   return output;
 };
 
-const isNotFound = (error: unknown): boolean => {
+const httpStatus = (error: unknown): number | undefined => {
   const { status, response, body } = (error ?? {}) as {
     status?: number;
     response?: { status?: number };
     body?: { statusCode?: number };
   };
-  return status === 404 || response?.status === 404 || body?.statusCode === 404;
+  return status ?? response?.status ?? body?.statusCode;
 };
+
+const isNotFound = (error: unknown): boolean => httpStatus(error) === 404;
+
+/**
+ * A shard that is still starting, or a brief upstream failure, comes back as 500–504. The
+ * investigation keeps running, so a poll treats that like "not yet" and tries again.
+ */
+const TRANSIENT_READ_STATUSES = new Set([500, 502, 503, 504]);
+const isTransientReadError = (error: unknown): boolean => {
+  const status = httpStatus(error);
+  return status !== undefined && TRANSIENT_READ_STATUSES.has(status);
+};
+
+const errorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
 
 /**
  * Reads the investigation from the shared API. A start returns its id before the investigation's
@@ -126,16 +141,27 @@ const readFinishedConversation = async (
   id: string,
   waitForRounds: boolean
 ): Promise<{ rounds: ConversationRound[] }> => {
-  let conversation = await readConversation(fetch, id);
+  let lastTransient: unknown;
+  const read = async () => {
+    try {
+      return await readConversation(fetch, id);
+    } catch (error) {
+      if (!isTransientReadError(error)) throw error;
+      lastTransient = error;
+      return undefined;
+    }
+  };
+  let conversation = await read();
   for (
     let attempt = 1;
     waitForRounds && !isPersisted(conversation) && attempt < CONVERSATION_PERSIST_ATTEMPTS;
     attempt++
   ) {
     await setTimeout(POLL_INTERVAL_MS);
-    conversation = await readConversation(fetch, id);
+    conversation = await read();
   }
   if (!conversation || conversation.rounds.length === 0) {
+    if (lastTransient && !conversation) throw lastTransient;
     throw new Error('Investigation conversation has no persisted rounds');
   }
   return conversation;
@@ -160,7 +186,8 @@ export const toInvestigationReport = ({
 export const runInvestigation = async (
   fetch: HttpHandler,
   example: InvestigationExample,
-  connector: Pick<EvalConnector, 'id'>
+  connector: Pick<EvalConnector, 'id'>,
+  { timeoutMs = INVESTIGATION_TIMEOUT_MS }: { timeoutMs?: number } = {}
 ): Promise<InvestigationTaskOutput> => {
   const started = Date.now();
   const output: InvestigationTaskOutput = {
@@ -182,22 +209,35 @@ export const runInvestigation = async (
     );
     output.investigation_id = investigationId;
     output.conversation_id = investigationId;
-    investigation = await readInvestigation(fetch, investigationId);
+    let lastTransient: unknown;
+    const readSnapshot = async () => {
+      try {
+        const snapshot = await readInvestigation(fetch, investigationId);
+        lastTransient = undefined;
+        return snapshot;
+      } catch (error) {
+        if (!isTransientReadError(error)) throw error;
+        lastTransient = error;
+        return undefined;
+      }
+    };
+    investigation = await readSnapshot();
     while (!investigation || investigation.in_progress) {
       output.workflow_status = 'running';
-      if (Date.now() - started > INVESTIGATION_TIMEOUT_MS) {
-        const minutes = INVESTIGATION_TIMEOUT_MS / 60_000;
+      if (Date.now() - started > timeoutMs) {
+        const minutes = timeoutMs / 60_000;
+        const waited = investigation
+          ? `Investigation was still in progress after ${minutes} minutes`
+          : `Investigation was not created within ${minutes} minutes`;
         throw new Error(
-          investigation
-            ? `Investigation was still in progress after ${minutes} minutes`
-            : `Investigation was not created within ${minutes} minutes`
+          lastTransient ? `${waited}. Last read failed: ${errorMessage(lastTransient)}` : waited
         );
       }
       await setTimeout(POLL_INTERVAL_MS);
-      investigation = (await readInvestigation(fetch, investigationId)) ?? investigation;
+      investigation = (await readSnapshot()) ?? investigation;
     }
   } catch (error) {
-    output.execution_error = error instanceof Error ? error.message : String(error);
+    output.execution_error = errorMessage(error);
   }
   if (!investigation || !output.investigation_id) return boundOutput(output);
 

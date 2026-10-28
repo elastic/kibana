@@ -63,7 +63,13 @@ const createInvestigationConfig = (
         '--xpack.agenticInvestigations.enabled=true',
         '--xpack.proposals.enabled=true',
         '--feature_flags.overrides.nightshift.enabled=true',
+        // Cortex, memory, and decision trees are independent. Investigation runs leave all three
+        // off. The reinforcement micro-eval exports NIGHTSHIFT_DECISION_TREES, which enables trees
+        // without turning Cortex on. Scout ignores NIGHTSHIFT_DATASETS itself: the hook sets the env.
         '--xpack.nightshift_investigations.cortex.enabled=false',
+        `--xpack.nightshift_investigations.decision_trees.enabled=${
+          process.env.NIGHTSHIFT_DECISION_TREES === 'true'
+        }`,
         '--xpack.nightshift_investigations.memory.enabled=false',
         `--config=${sandboxKibanaConfig}`,
         ...(telemetryConfig ? [`--config=${telemetryConfig}`] : []),

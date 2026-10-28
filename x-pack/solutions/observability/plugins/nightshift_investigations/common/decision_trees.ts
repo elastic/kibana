@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { DecisionTreeDiff, LearningRecord } from '@kbn/nightshift-decision-trees';
+import type {
+  DecisionTreeCounts,
+  DecisionTreeDiff,
+  LearningRecord,
+} from '@kbn/nightshift-decision-trees';
 import type { CortexEntityType, CortexPageStatus } from './cortex';
 
 /**
@@ -92,6 +96,8 @@ export interface DecisionTreeDetail extends DecisionTreeSummary {
   /** `<node_id>: <description>` entries for evidence nodes, persisted with the tree. */
   evidence_gatherer_metadata: string[];
   learnings: LearningRecord[];
+  /** Visit and reinforcement counts for every node and edge of the current tree. */
+  counts: DecisionTreeCounts;
 }
 
 export interface DecisionTreeVersionSummary {
@@ -111,6 +117,8 @@ export interface DecisionTreeVersionDetail extends DecisionTreeVersionSummary {
   mermaid: string;
   evidence_gatherer_metadata: string[];
   learnings: LearningRecord[];
+  /** Counts as they stood when this version was committed. */
+  counts: DecisionTreeCounts;
   /** Against the previous version. Absent for v1, which has no predecessor. */
   diff?: DecisionTreeDiff;
 }

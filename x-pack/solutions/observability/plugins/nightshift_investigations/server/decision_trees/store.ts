@@ -8,9 +8,12 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import {
+  countsForTree,
   extractMermaid,
+  parseStoredDecisionTree,
   symptomSlugFromTreeId,
   symptomTreeId,
+  type DecisionTreeCounts,
   type DecisionTreeView,
   type LearningRecord,
 } from '@kbn/nightshift-decision-trees';
@@ -35,6 +38,21 @@ export type {
 const MAX_TREES = 500;
 const MAX_VERSIONS = 500;
 const SPACE_ID_FIELD = 'attributes.space_id';
+
+/** Head writes that lose an optimistic-concurrency race re-read and retry this many times in all. */
+const MAX_WRITE_ATTEMPTS = 5;
+const RETRY_DELAY_MS = 50;
+
+/**
+ * The head was saved and its counts already include this commit. The version document still needs
+ * to be written; a later commit must not apply the same counts again.
+ */
+export class DecisionTreeVersionWriteError extends Error {
+  constructor(treeId: string) {
+    super(`Saved ${treeId} but its version history write failed`);
+    this.name = 'DecisionTreeVersionWriteError';
+  }
+}
 
 /**
  * Structured fields live under `attributes` so they inherit the AI-index template's flattened
@@ -64,6 +82,8 @@ interface DecisionTreeHeadSource {
   attributes?: DecisionTreeAttributes;
   learnings: LearningRecord[];
   evidence_gatherer_metadata?: string[];
+  /** Absent on trees written before counts existed; read back as zeros. */
+  counts?: DecisionTreeCounts;
 }
 
 /** An append-only version document, one per reinforcement turn. */
@@ -76,6 +96,13 @@ interface DecisionTreeVersionSource {
   attributes?: DecisionTreeAttributes;
   learnings: LearningRecord[];
   evidence_gatherer_metadata?: string[];
+  counts?: DecisionTreeCounts;
+}
+
+/** The stored tree and its counts, so a counts update can build on the latest committed state. */
+export interface StoredTreeCounts {
+  tree: DecisionTreeView;
+  counts: DecisionTreeCounts;
 }
 
 export interface DecisionTreeStore {
@@ -94,10 +121,31 @@ export interface DecisionTreeStore {
     learnings: LearningRecord[];
     /** Evidence-node descriptions; persisted so later reads can reapply them. */
     evidenceGathererMetadata: string[];
+    /**
+     * Builds this version's counts from the stored head, if any. Called again whenever the head
+     * write loses a race, so it must derive everything from its argument.
+     */
+    updateCounts: (previous: StoredTreeCounts | undefined) => DecisionTreeCounts;
   }) => Promise<DecisionTreeDetail>;
+  /**
+   * Rewrites only the head's counts, without a new version. Returns `undefined` when the tree
+   * does not exist. `reinforced` promotes the tree to established, as a reinforced commit does.
+   */
+  updateCounts: (input: {
+    treeId: string;
+    update: (current: StoredTreeCounts) => DecisionTreeCounts;
+    reinforced?: boolean;
+  }) => Promise<DecisionTreeDetail | undefined>;
   listVersions: (treeId: string) => Promise<DecisionTreeVersionSummary[]>;
   getVersion: (treeId: string, version: number) => Promise<DecisionTreeVersionDetail | undefined>;
   archive: (treeId: string) => Promise<void>;
+}
+
+/** A head document with the sequence number and primary term it was read at. */
+interface StoredHead {
+  source: DecisionTreeHeadSource;
+  seqNo?: number;
+  primaryTerm?: number;
 }
 
 /** Turns `checkout-high-latency` into `Checkout High Latency` for the tree title. */
@@ -176,12 +224,25 @@ const headToSummary = (source: DecisionTreeHeadSource): DecisionTreeSummary => (
   updated_at: source['@timestamp'],
 });
 
+/** Parses the stored tree and lays its counts over every node and edge, zero where unset. */
+const storedTreeCounts = (
+  source: DecisionTreeHeadSource | DecisionTreeVersionSource
+): StoredTreeCounts => {
+  const tree = parseStoredDecisionTree(
+    safeExtractMermaid(source.content),
+    source.attributes?.tree_id ?? '',
+    source.evidence_gatherer_metadata ?? []
+  );
+  return { tree, counts: countsForTree(tree, source.counts) };
+};
+
 const headToDetail = (source: DecisionTreeHeadSource): DecisionTreeDetail => ({
   ...headToSummary(source),
   markdown: source.content,
   mermaid: safeExtractMermaid(source.content),
   evidence_gatherer_metadata: source.evidence_gatherer_metadata ?? [],
   learnings: source.learnings,
+  counts: storedTreeCounts(source).counts,
 });
 
 const versionToSummary = (source: DecisionTreeVersionSource): DecisionTreeVersionSummary => ({
@@ -202,7 +263,42 @@ const versionToDetail = (source: DecisionTreeVersionSource): DecisionTreeVersion
   mermaid: safeExtractMermaid(source.content),
   evidence_gatherer_metadata: source.evidence_gatherer_metadata ?? [],
   learnings: source.learnings,
+  counts: storedTreeCounts(source).counts,
 });
+
+/** Create-only for a new head; otherwise compare-and-set against the read it was based on. */
+const writePrecondition = (
+  readAt: StoredHead | undefined
+):
+  | { op_type: 'create' }
+  | { if_seq_no: number; if_primary_term: number }
+  | Record<string, never> => {
+  if (!readAt) {
+    return { op_type: 'create' };
+  }
+  const { seqNo, primaryTerm } = readAt;
+  return seqNo !== undefined && primaryTerm !== undefined
+    ? { if_seq_no: seqNo, if_primary_term: primaryTerm }
+    : {};
+};
+
+const isConflict = (error: unknown): boolean => isResponseError(error) && error.statusCode === 409;
+
+const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Runs `attempt` again after a version conflict, up to {@link MAX_WRITE_ATTEMPTS} times in all. */
+const retryOnConflict = async <Result>(attempt: () => Promise<Result>): Promise<Result> => {
+  for (let attemptNumber = 1; ; attemptNumber++) {
+    try {
+      return await attempt();
+    } catch (error) {
+      if (!isConflict(error) || attemptNumber >= MAX_WRITE_ATTEMPTS) {
+        throw error;
+      }
+      await delay(RETRY_DELAY_MS * attemptNumber);
+    }
+  }
+};
 
 export const createDecisionTreeStore = ({
   esClient,
@@ -216,7 +312,7 @@ export const createDecisionTreeStore = ({
   /** Aborts in-flight Elasticsearch requests when the calling step times out. */
   signal?: AbortSignal;
 }): DecisionTreeStore => {
-  const getHead = async (symptom: string): Promise<DecisionTreeHeadSource | undefined> => {
+  const getHead = async (symptom: string): Promise<StoredHead | undefined> => {
     try {
       const response = await esClient.get<DecisionTreeHeadSource>(
         {
@@ -225,13 +321,68 @@ export const createDecisionTreeStore = ({
         },
         { signal }
       );
-      return response.found ? response._source : undefined;
+      if (!response.found || !response._source) {
+        return undefined;
+      }
+      return {
+        source: response._source,
+        seqNo: response._seq_no,
+        primaryTerm: response._primary_term,
+      };
     } catch (error) {
       if (isResponseError(error) && error.statusCode === 404) {
         return undefined;
       }
       throw error;
     }
+  };
+
+  /**
+   * Writes the head only if it is unchanged since `readAt` was read, or only if it still does not
+   * exist when there was none, so a concurrent writer surfaces as a 409 instead of a lost update.
+   */
+  const writeVersion = async (
+    symptom: string,
+    version: number,
+    document: DecisionTreeVersionSource
+  ): Promise<void> => {
+    for (let attemptNumber = 1; ; attemptNumber++) {
+      try {
+        await esClient.index(
+          {
+            index: DECISION_TREE_AI_INDEX_DEST,
+            id: versionDocId(spaceId, symptom, version),
+            document,
+            // The last write of a commit, so version history is searchable as soon as it returns.
+            refresh: 'wait_for',
+          },
+          { signal }
+        );
+        return;
+      } catch {
+        if (attemptNumber >= MAX_WRITE_ATTEMPTS) {
+          throw new DecisionTreeVersionWriteError(symptomTreeId(symptom));
+        }
+        await delay(RETRY_DELAY_MS * attemptNumber);
+      }
+    }
+  };
+
+  const writeHead = async (
+    symptom: string,
+    document: DecisionTreeHeadSource,
+    readAt: StoredHead | undefined
+  ): Promise<void> => {
+    await esClient.index(
+      {
+        index: DECISION_TREE_AI_INDEX_DEST,
+        id: headDocId(spaceId, symptom),
+        document,
+        refresh: 'wait_for',
+        ...writePrecondition(readAt),
+      },
+      { signal }
+    );
   };
 
   return {
@@ -261,8 +412,8 @@ export const createDecisionTreeStore = ({
     },
 
     get: async (treeId) => {
-      const source = await getHead(symptomSlugFromTreeId(treeId));
-      return source ? headToDetail(source) : undefined;
+      const head = await getHead(symptomSlugFromTreeId(treeId));
+      return head ? headToDetail(head.source) : undefined;
     },
 
     commit: async ({
@@ -274,82 +425,89 @@ export const createDecisionTreeStore = ({
       summary,
       learnings,
       evidenceGathererMetadata,
+      updateCounts,
     }) => {
       const symptom = symptomSlugFromTreeId(treeId);
-      const existing = await getHead(symptom);
-      const nextVersion = toCount(existing?.attributes?.version) + 1;
-      // A human-confirmed root cause is what promotes a tree from tentative to established; an
-      // ordinary turn leaves the status where it was.
-      const status: DecisionTreeStatus = reinforced
-        ? 'established'
-        : toStatus(existing?.attributes?.status);
-      const title = existing?.title ?? titleFromSymptom(symptom);
-      const nodeCount = tree.nodes.length;
-      const edgeCount = tree.edges.length;
-      const now = new Date().toISOString();
       const fullTreeId = symptomTreeId(symptom);
       const tags = ['nightshift', DECISION_TREE_TAG];
 
-      const versionDoc: DecisionTreeVersionSource = {
-        '@timestamp': now,
-        type: 'decision_tree_version',
-        title: `${title} v${nextVersion}`,
-        content: markdown,
-        tags,
-        attributes: {
+      // The head is written first and conditionally: winning that write is what claims the version
+      // number, so a racing commit retries with the next one instead of overwriting this version.
+      const { headDoc, versionDoc, version } = await retryOnConflict(async () => {
+        const existing = await getHead(symptom);
+        const nextVersion = toCount(existing?.source.attributes?.version) + 1;
+        // A human-confirmed root cause is what promotes a tree from tentative to established; an
+        // ordinary turn leaves the status where it was.
+        const status: DecisionTreeStatus = reinforced
+          ? 'established'
+          : toStatus(existing?.source.attributes?.status);
+        const title = existing?.source.title ?? titleFromSymptom(symptom);
+        const counts = updateCounts(existing ? storedTreeCounts(existing.source) : undefined);
+        const now = new Date().toISOString();
+        const sharedAttributes = {
           tree_id: fullTreeId,
           symptom,
           version: nextVersion,
-          author,
-          summary,
-          reinforced,
-          node_count: nodeCount,
-          edge_count: edgeCount,
+          node_count: tree.nodes.length,
+          edge_count: tree.edges.length,
           space_id: spaceId,
-        },
-        learnings,
-        evidence_gatherer_metadata: evidenceGathererMetadata,
-      };
+        };
 
-      const headDoc: DecisionTreeHeadSource = {
-        '@timestamp': now,
-        type: 'decision_tree',
-        title,
-        content: markdown,
-        tags,
-        attributes: {
-          tree_id: fullTreeId,
-          symptom,
-          version: nextVersion,
-          status,
-          node_count: nodeCount,
-          edge_count: edgeCount,
-          space_id: spaceId,
-        },
-        learnings: mergeLearnings(existing?.learnings ?? [], learnings),
-        evidence_gatherer_metadata: evidenceGathererMetadata,
-      };
+        const head: DecisionTreeHeadSource = {
+          '@timestamp': now,
+          type: 'decision_tree',
+          title,
+          content: markdown,
+          tags,
+          attributes: { ...sharedAttributes, status },
+          learnings: mergeLearnings(existing?.source.learnings ?? [], learnings),
+          evidence_gatherer_metadata: evidenceGathererMetadata,
+          counts,
+        };
+        await writeHead(symptom, head, existing);
 
-      await esClient.index(
-        {
-          index: DECISION_TREE_AI_INDEX_DEST,
-          id: versionDocId(spaceId, symptom, nextVersion),
-          document: versionDoc,
-        },
-        { signal }
-      );
-      await esClient.index(
-        {
-          index: DECISION_TREE_AI_INDEX_DEST,
-          id: headDocId(spaceId, symptom),
-          document: headDoc,
-          refresh: 'wait_for',
-        },
-        { signal }
-      );
+        const versionSource: DecisionTreeVersionSource = {
+          '@timestamp': now,
+          type: 'decision_tree_version',
+          title: `${title} v${nextVersion}`,
+          content: markdown,
+          tags,
+          attributes: { ...sharedAttributes, author, summary, reinforced },
+          learnings,
+          evidence_gatherer_metadata: evidenceGathererMetadata,
+          counts,
+        };
+        return { headDoc: head, versionDoc: versionSource, version: nextVersion };
+      });
 
-      logger.debug(`Committed decision tree ${fullTreeId} v${nextVersion}`);
+      // The head already holds this version and its counts. Retry only this document: running the
+      // commit again would increment the visit and reinforcement counts a second time.
+      await writeVersion(symptom, version, versionDoc);
+
+      logger.debug(`Committed decision tree ${fullTreeId} v${version}`);
       return headToDetail(headDoc);
+    },
+
+    updateCounts: async ({ treeId, update, reinforced = false }) => {
+      const symptom = symptomSlugFromTreeId(treeId);
+      return retryOnConflict(async () => {
+        const existing = await getHead(symptom);
+        if (!existing) {
+          return undefined;
+        }
+        const { source } = existing;
+        // Counts are not an edit to the tree, so `@timestamp` (its last edit) stays put.
+        const head: DecisionTreeHeadSource = {
+          ...source,
+          attributes: {
+            ...source.attributes,
+            ...(reinforced ? { status: 'established' } : {}),
+          },
+          counts: update(storedTreeCounts(source)),
+        };
+        await writeHead(symptom, head, existing);
+        return headToDetail(head);
+      });
     },
 
     listVersions: async (treeId) => {
@@ -399,23 +557,21 @@ export const createDecisionTreeStore = ({
 
     archive: async (treeId) => {
       const symptom = symptomSlugFromTreeId(treeId);
-      const existing = await getHead(symptom);
-      if (!existing) {
-        return;
-      }
-      await esClient.index(
-        {
-          index: DECISION_TREE_AI_INDEX_DEST,
-          id: headDocId(spaceId, symptom),
-          document: {
-            ...existing,
+      await retryOnConflict(async () => {
+        const existing = await getHead(symptom);
+        if (!existing) {
+          return;
+        }
+        await writeHead(
+          symptom,
+          {
+            ...existing.source,
             '@timestamp': new Date().toISOString(),
-            attributes: { ...existing.attributes, status: 'archived', space_id: spaceId },
+            attributes: { ...existing.source.attributes, status: 'archived', space_id: spaceId },
           },
-          refresh: 'wait_for',
-        },
-        { signal }
-      );
+          existing
+        );
+      });
     },
   };
 };
