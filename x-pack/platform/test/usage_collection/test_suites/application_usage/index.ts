@@ -14,6 +14,7 @@ const SCHEMA_ONLY_APP_IDS: Readonly<Record<string, string>> = {
   profiling: 'Disabled by default',
   digital_experience: 'Disabled by default (xpack.digital_experience.enabled: false)',
   searchPlayground: 'Retained only for historical usage',
+  significantEvents: 'Retained only for historical usage',
 };
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
