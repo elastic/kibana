@@ -61,7 +61,6 @@ import {
   getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig,
 } from './preconfiguration/delete_unenrolled_agent_setting';
 import { backfillPackagePolicySupportsAgentless } from './backfill_agentless';
-import { backfillPolicyBaseId } from './backfill_policy_base_id';
 import { updateDeprecatedComponentTemplates } from './setup/update_deprecated_component_templates';
 import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
@@ -306,14 +305,6 @@ async function createSetupSideEffects(
     ensureCorrectAgentlessSettingsIdsError = { error };
   }
 
-  let backfillPolicyBaseIdError;
-  try {
-    logger.debug('Backfilling policy_base_id on fleet-agents and fleet-policies');
-    await backfillPolicyBaseId(esClient);
-  } catch (error) {
-    backfillPolicyBaseIdError = { error };
-  }
-
   logger.debug('Update deprecated _source.mode in component templates');
   await updateDeprecatedComponentTemplates(esClient);
 
@@ -328,7 +319,6 @@ async function createSetupSideEffects(
       ? [backfillPackagePolicySupportsAgentlessError]
       : []),
     ...(ensureCorrectAgentlessSettingsIdsError ? [ensureCorrectAgentlessSettingsIdsError] : []),
-    ...(backfillPolicyBaseIdError ? [backfillPolicyBaseIdError] : []),
   ];
 
   logger.info('Scheduling async setup tasks');
