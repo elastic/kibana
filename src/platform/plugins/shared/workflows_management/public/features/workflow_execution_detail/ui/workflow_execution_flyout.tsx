@@ -23,16 +23,16 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ExecutionFlyoutTitle } from './execution_flyout_title';
 import { ExecutionResultCard } from './execution_result_card';
 import { ExecutionRunTags } from './execution_run_tags';
 import { ExecutionTakeActionSplitButton } from './execution_take_action_split_button';
-import { ResumeExecutionButton } from './resume_execution_button';
 import { ResumeUnavailableCallout } from './resume_unavailable_callout';
 import { STEP_DETAIL_WIDTH, StepDetailPanel } from './step_detail_panel';
 import { StepExecutionsTruncatedCallout } from './step_executions_truncated_callout';
+import type { WaitingStepAction } from './waiting_step_action_panel';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
@@ -93,6 +93,33 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       retryResume,
     } = useWaitingStepResume(executionId, workflowExecution);
     const resumeSubmitState = useResumeSubmitState(executionId, waitingStepExecutionId);
+    const waitingAction = useMemo<WaitingStepAction | undefined>(
+      () =>
+        waitingStepExecutionId
+          ? {
+              stepExecutionId: waitingStepExecutionId,
+              message: resumeMessage,
+              executionId,
+              workflowId: workflowExecution?.workflowId,
+              stepStartedAt: waitingStepStartedAt,
+              resumeSchema,
+              approvalLabels,
+              autoOpen: shouldAutoResume,
+              submitState: resumeSubmitState,
+            }
+          : undefined,
+      [
+        approvalLabels,
+        executionId,
+        resumeMessage,
+        resumeSchema,
+        resumeSubmitState,
+        shouldAutoResume,
+        waitingStepExecutionId,
+        waitingStepStartedAt,
+        workflowExecution?.workflowId,
+      ]
+    );
 
     const {
       workflowName,
@@ -116,6 +143,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
         workflowExecution,
         showStepsTab,
         selectStepExecution: setSelectedStepExecutionId,
+        waitingStepExecutionId,
       });
 
     const { handleShare, handleOpenFailedStepInEditor } = useExecutionFlyoutActions({
@@ -250,25 +278,13 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                   <ExecutionResultCard
                     workflowExecution={workflowExecution}
                     failedPosition={failedPosition}
+                    waitingStepExecutionId={waitingStepExecutionId}
                     onFocusFailedStep={focusFailedStep}
                   />
                 ) : (
                   <EuiLoadingSpinner size="m" />
                 )}
 
-                {waitingStepExecutionId && workflowExecution && (
-                  <ResumeExecutionButton
-                    executionId={executionId}
-                    workflowId={workflowExecution.workflowId}
-                    stepStartedAt={waitingStepStartedAt}
-                    resumeMessage={resumeMessage}
-                    resumeSchema={resumeSchema}
-                    approvalLabels={approvalLabels}
-                    autoOpen={shouldAutoResume}
-                    waitingStepExecutionId={waitingStepExecutionId}
-                    submitState={resumeSubmitState}
-                  />
-                )}
                 {hasResumeError && <ResumeUnavailableCallout onRetry={retryResume} />}
               </div>
             </EuiFlyoutHeader>
@@ -333,6 +349,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                         errorArrivalPulseStepId={errorArrivalPulseStepId}
                         workflowName={workflowName}
                         onBeforeDiagnose={() => setSelectedStepExecutionId(null)}
+                        waitingAction={waitingAction}
                       />
                     )}
                     {!showStepExecutionTree && (
