@@ -35,12 +35,21 @@ describe('useInstances', () => {
       fleet: { readAgentPolicies: true },
       integrations: { readPackageInfo: false },
     });
-    mockQuery.mockReturnValue({ data: [], isLoading: false, isError: false, refetch: jest.fn() });
+    mockQuery.mockReturnValue({
+      data: { items: [], total: 0, isTruncated: false },
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
   });
 
   it('groups the instances under every package they cover', () => {
     mockQuery.mockReturnValue({
-      data: [instance('a', ['aws']), instance('b', ['aws', 'aws_bedrock']), instance('c')],
+      data: {
+        items: [instance('a', ['aws']), instance('b', ['aws', 'aws_bedrock']), instance('c')],
+        total: 3,
+        isTruncated: false,
+      },
       isLoading: false,
       isError: false,
       refetch: jest.fn(),
@@ -57,7 +66,11 @@ describe('useInstances', () => {
     'groups an instance of a package named %s without throwing',
     (packageName) => {
       mockQuery.mockReturnValue({
-        data: [instance('a', [packageName]), instance('b', [packageName, 'aws'])],
+        data: {
+          items: [instance('a', [packageName]), instance('b', [packageName, 'aws'])],
+          total: 2,
+          isTruncated: false,
+        },
         isLoading: false,
         isError: false,
         refetch: jest.fn(),
@@ -72,6 +85,19 @@ describe('useInstances', () => {
       expect(result.current.instancesByPackage.get('aws')?.map((i) => i.id)).toEqual(['b']);
     }
   );
+
+  it('reports when there were too many instances to load them all', () => {
+    mockQuery.mockReturnValue({
+      data: { items: [instance('a', ['aws'])], total: 2500, isTruncated: true },
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
+
+    const { result } = renderHook(() => useInstances());
+
+    expect(result.current.isTruncated).toBe(true);
+  });
 
   it('reports a failed request and lets the caller retry', () => {
     const refetch = jest.fn();

@@ -74,30 +74,40 @@ export const sendGetCloudOnboardingDeployments = (
 
 const LIST_PAGE_SIZE = 100;
 // Stops a runaway loop: 2000 sessions in one space is far beyond what the list is meant for.
-const LIST_MAX_PAGES = 20;
+export const MAX_CLOUD_ONBOARDING_DEPLOYMENTS = 2000;
 
-/** Every deployment matching the query, fetched page by page. */
+export interface AllCloudOnboardingDeployments {
+  items: GetCloudOnboardingDeploymentsResponse['items'];
+  /** How many deployments match the query in total. */
+  total: number;
+  /** True when `items` is a subset of `total` because the page cap was reached. */
+  isTruncated: boolean;
+}
+
+/** Every deployment matching the query, fetched page by page, up to a cap. */
 export const sendGetAllCloudOnboardingDeployments = async (
   query?: Omit<NonNullable<GetCloudOnboardingDeploymentsRequest['query']>, 'page' | 'perPage'>
-) => {
+): Promise<AllCloudOnboardingDeployments> => {
   const items: GetCloudOnboardingDeploymentsResponse['items'] = [];
-  for (let page = 1; page <= LIST_MAX_PAGES; page++) {
+  let total = 0;
+  for (let page = 1; page <= MAX_CLOUD_ONBOARDING_DEPLOYMENTS / LIST_PAGE_SIZE; page++) {
     const response = await sendGetCloudOnboardingDeployments({
       ...query,
       page,
       perPage: LIST_PAGE_SIZE,
     });
     items.push(...response.items);
-    if (response.items.length === 0 || items.length >= response.total) break;
+    total = response.total;
+    if (response.items.length === 0 || items.length >= total) break;
   }
-  return items;
+  return { items, total, isTruncated: items.length < total };
 };
 
 export const useGetAllCloudOnboardingDeploymentsQuery = (
   query?: Omit<NonNullable<GetCloudOnboardingDeploymentsRequest['query']>, 'page' | 'perPage'>,
   options: { enabled?: boolean } = {}
 ) => {
-  return useQuery<GetCloudOnboardingDeploymentsResponse['items'], RequestError>({
+  return useQuery<AllCloudOnboardingDeployments, RequestError>({
     queryKey: ['cloud_onboarding_deployments', query],
     queryFn: () => sendGetAllCloudOnboardingDeployments(query),
     enabled: options.enabled,

@@ -18,7 +18,8 @@ import { ONBOARDING_ENABLED_FLAG } from '../../../../../../../services/aws_onboa
 /**
  * The onboarding sessions ("instances") saved for AWS, grouped by every package they
  * cover. Empty unless the onboarding flow is enabled and the user can read them. `isError` is set
- * when the sessions could not be loaded, and `refetch` retries."
+ * when the sessions could not be loaded, and `refetch` retries. `isTruncated` is set when there
+ * were too many sessions to load them all.
  */
 export function useInstances() {
   const { featureFlags } = useStartServices();
@@ -35,7 +36,7 @@ export function useInstances() {
   // A Map, because package names come from the API and could be `constructor` or `__proto__`.
   const instancesByPackage = useMemo(() => {
     const byPackage = new Map<string, CloudOnboardingDeploymentListItem[]>();
-    for (const item of data ?? []) {
+    for (const item of data?.items ?? []) {
       for (const packageName of item.packageNames ?? []) {
         byPackage.set(packageName, [...(byPackage.get(packageName) ?? []), item]);
       }
@@ -43,5 +44,11 @@ export function useInstances() {
     return byPackage;
   }, [data]);
 
-  return { instancesByPackage, isLoading: isEnabled && isLoading, isError, refetch };
+  return {
+    instancesByPackage,
+    isTruncated: !!data?.isTruncated,
+    isLoading: isEnabled && isLoading,
+    isError,
+    refetch,
+  };
 }

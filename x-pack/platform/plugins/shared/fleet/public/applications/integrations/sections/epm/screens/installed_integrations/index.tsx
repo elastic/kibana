@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
 import { Loading } from '../../../../../../components';
-import { useUrlPagination } from '../../../../../../hooks';
+import { MAX_CLOUD_ONBOARDING_DEPLOYMENTS, useUrlPagination } from '../../../../../../hooks';
 
 import { InstalledIntegrationsTable } from './components/installed_integrations_table';
 import { useInstalledIntegrations } from './hooks/use_installed_integrations';
@@ -35,6 +35,7 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
   const {
     instancesByPackage,
     isError: isInstancesError,
+    isTruncated: isInstancesTruncated,
     refetch: refetchInstances,
   } = useInstances();
   const pagination = useUrlPagination();
@@ -125,6 +126,23 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
                 />
               </EuiButton>
             </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
+        {isInstancesTruncated ? (
+          <>
+            <EuiCallOut
+              announceOnMount
+              color="warning"
+              iconType="warning"
+              size="s"
+              data-test-subj="instancesTruncated"
+              title={i18n.translate('xpack.fleet.epmInstalledIntegrations.instancesTruncated', {
+                defaultMessage:
+                  'Only the {max} most recent instances are shown, so some instance counts may be incomplete.',
+                values: { max: MAX_CLOUD_ONBOARDING_DEPLOYMENTS },
+              })}
+            />
             <EuiSpacer size="m" />
           </>
         ) : null}

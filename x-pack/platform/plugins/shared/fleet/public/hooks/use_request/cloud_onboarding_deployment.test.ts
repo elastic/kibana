@@ -26,9 +26,10 @@ describe('sendGetAllCloudOnboardingDeployments', () => {
       .mockResolvedValueOnce({ items: makeItems(100, 100), total: 250, page: 2, perPage: 100 })
       .mockResolvedValueOnce({ items: makeItems(200, 50), total: 250, page: 3, perPage: 100 });
 
-    const items = await sendGetAllCloudOnboardingDeployments({ provider: 'aws' });
+    const result = await sendGetAllCloudOnboardingDeployments({ provider: 'aws' });
 
-    expect(items).toHaveLength(250);
+    expect(result.items).toHaveLength(250);
+    expect(result).toEqual(expect.objectContaining({ total: 250, isTruncated: false }));
     expect(mockSendRequest.mock.calls.map(([req]) => req.query)).toEqual([
       { provider: 'aws', page: 1, perPage: 100 },
       { provider: 'aws', page: 2, perPage: 100 },
@@ -44,7 +45,7 @@ describe('sendGetAllCloudOnboardingDeployments', () => {
       perPage: 100,
     });
 
-    expect(await sendGetAllCloudOnboardingDeployments()).toHaveLength(3);
+    expect((await sendGetAllCloudOnboardingDeployments()).items).toHaveLength(3);
     expect(mockSendRequest).toHaveBeenCalledTimes(1);
   });
 
@@ -53,8 +54,25 @@ describe('sendGetAllCloudOnboardingDeployments', () => {
       .mockResolvedValueOnce({ items: makeItems(0, 100), total: 500, page: 1, perPage: 100 })
       .mockResolvedValueOnce({ items: [], total: 500, page: 2, perPage: 100 });
 
-    expect(await sendGetAllCloudOnboardingDeployments()).toHaveLength(100);
+    const result = await sendGetAllCloudOnboardingDeployments();
+    expect(result.items).toHaveLength(100);
+    expect(result.isTruncated).toBe(true);
     expect(mockSendRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it('stops at the cap and reports that the result is truncated', async () => {
+    mockSendRequest.mockImplementation(async ({ query }) => ({
+      items: makeItems((query.page - 1) * 100, 100),
+      total: 2500,
+      page: query.page,
+      perPage: 100,
+    }));
+
+    const result = await sendGetAllCloudOnboardingDeployments();
+
+    expect(mockSendRequest).toHaveBeenCalledTimes(20);
+    expect(result.items).toHaveLength(2000);
+    expect(result).toEqual(expect.objectContaining({ total: 2500, isTruncated: true }));
   });
 
   it('propagates a failed request', async () => {
