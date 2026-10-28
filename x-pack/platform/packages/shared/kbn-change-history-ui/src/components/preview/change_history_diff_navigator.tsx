@@ -16,61 +16,6 @@ import { changeHistoryPreviewTypography } from './change_history_preview_typogra
 
 export const CHANGE_HISTORY_PREVIEW_NAVIGATOR_HEIGHT = '54px';
 
-const diffNavigatorStyles = {
-  toolbar: ({ euiTheme }: UseEuiTheme) =>
-    css(changeHistoryPreviewTypography, {
-      display: 'inline-flex',
-      alignItems: 'center',
-      boxSizing: 'border-box',
-      height: CHANGE_HISTORY_PREVIEW_NAVIGATOR_HEIGHT,
-      padding: `0 ${euiTheme.size.s}`,
-      borderRadius: '10px',
-      border: euiTheme.border.thin,
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      boxShadow: euiTheme.shadows.s.down,
-    }),
-  label: css(changeHistoryPreviewTypography, {
-    fontWeight: 400,
-    whiteSpace: 'nowrap',
-
-    '& strong': {
-      fontWeight: 600,
-    },
-  }),
-  navButton: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'inline-flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: euiTheme.size.l,
-      height: euiTheme.size.l,
-      padding: 0,
-      border: 'none',
-      borderRadius: euiTheme.border.radius.small,
-      backgroundColor: 'transparent',
-      color: euiTheme.colors.textParagraph,
-      cursor: 'pointer',
-
-      '&:hover:not(:disabled)': {
-        backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
-      },
-
-      '&:focus-visible': {
-        outline: `${euiTheme.focus.width} solid ${euiTheme.focus.color}`,
-        outlineOffset: euiTheme.focus.width,
-      },
-    }),
-  navButtonDisabled: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      cursor: 'not-allowed',
-
-      '&:disabled': {
-        opacity: 1,
-        color: euiTheme.colors.textDisabled,
-      },
-    }),
-};
-
 export interface ChangeHistoryDiffNavigatorProps {
   currentIndex: number;
   totalChanges: number;
@@ -84,7 +29,7 @@ export const ChangeHistoryDiffNavigator = ({
   onPrevious,
   onNext,
 }: ChangeHistoryDiffNavigatorProps): JSX.Element => {
-  const styles = useMemoCss(diffNavigatorStyles);
+  const styles = useMemoCss(componentStyles);
 
   const hasChanges = totalChanges > 0;
   const displayIndex = hasChanges ? Math.min(currentIndex + 1, totalChanges) : 0;
@@ -162,4 +107,59 @@ export const ChangeHistoryDiffNavigator = ({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+};
+
+const componentStyles = {
+  toolbar: ({ euiTheme }: UseEuiTheme) =>
+    css(changeHistoryPreviewTypography, {
+      display: 'inline-flex',
+      alignItems: 'center',
+      boxSizing: 'border-box',
+      height: CHANGE_HISTORY_PREVIEW_NAVIGATOR_HEIGHT,
+      padding: `0 ${euiTheme.size.s}`,
+      borderRadius: '10px',
+      border: euiTheme.border.thin,
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      boxShadow: euiTheme.shadows.s.down,
+    }),
+  label: css(changeHistoryPreviewTypography, {
+    fontWeight: 400,
+    whiteSpace: 'nowrap',
+
+    '& strong': {
+      fontWeight: 600,
+    },
+  }),
+  navButton: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: euiTheme.size.l,
+      height: euiTheme.size.l,
+      padding: 0,
+      border: 'none',
+      borderRadius: euiTheme.border.radius.small,
+      backgroundColor: 'transparent',
+      color: euiTheme.colors.textParagraph,
+      cursor: 'pointer',
+
+      '&:hover:not(:disabled)': {
+        backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
+      },
+
+      '&:focus-visible': {
+        outline: `${euiTheme.focus.width} solid ${euiTheme.focus.color}`,
+        outlineOffset: euiTheme.focus.width,
+      },
+    }),
+  navButtonDisabled: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      cursor: 'not-allowed',
+
+      '&:disabled': {
+        opacity: 1,
+        color: euiTheme.colors.textDisabled,
+      },
+    }),
 };
