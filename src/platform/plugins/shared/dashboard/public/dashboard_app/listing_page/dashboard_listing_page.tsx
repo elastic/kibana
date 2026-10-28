@@ -49,7 +49,7 @@ export const DashboardListingPage = ({
     (async () => {
       try {
         const isInNoDataState = await isDashboardAppInNoDataState();
-        setShowNoDataPage(isInNoDataState && isMounted);
+        if (isMounted) setShowNoDataPage(isInNoDataState);
       } catch (error) {
         // show the listing if the no data state can not be determined
         if (isMounted) setShowNoDataPage(false);
