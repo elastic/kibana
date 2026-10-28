@@ -20,6 +20,7 @@ import { fileURLToPath } from 'url';
 import {
   filterFinishedMainBuilds,
   findConsecutiveScheduledFailures,
+  findPreviousProcessedCheck,
   findQualityGateFailures,
   type CheckWindow,
 } from './build_checks.ts';
@@ -106,7 +107,7 @@ async function getCheckWindow(buildkite: BuildkiteClient): Promise<CheckWindow> 
   const end = new Date((await buildkite.getCurrentBuild()).created_at);
   const since = new Date(end.getTime() - BUILD_SEARCH_WINDOW_DAYS * 24 * 60 * 60 * 1000);
   const notifyBuilds = await buildkite.getBuildsAfterDate(currentSlug, since.toISOString(), 50);
-  const previousBuild = notifyBuilds.find((build) => build.number < currentNumber);
+  const previousBuild = findPreviousProcessedCheck(notifyBuilds, currentNumber);
 
   return {
     start: previousBuild

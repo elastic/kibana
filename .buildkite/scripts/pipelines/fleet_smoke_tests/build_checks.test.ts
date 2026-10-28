@@ -12,6 +12,7 @@ import type { Build } from '#pipeline-utils';
 import {
   filterFinishedMainBuilds,
   findConsecutiveScheduledFailures,
+  findPreviousProcessedCheck,
   findQualityGateFailures,
 } from './build_checks.ts';
 
@@ -132,5 +133,38 @@ describe('findConsecutiveScheduledFailures', () => {
 
     expect(findQualityGateFailures(builds, window)).toEqual([gate]);
     expect(findConsecutiveScheduledFailures(builds, 3)).toEqual([]);
+  });
+});
+
+describe('findPreviousProcessedCheck', () => {
+  const check = (number: number, state: Build['state'], env: Record<string, string> = {}) =>
+    makeBuild({ number, state, env });
+
+  it('returns the most recent earlier passed check', () => {
+    const builds = [check(5, 'running'), check(4, 'passed'), check(3, 'passed')];
+
+    expect(findPreviousProcessedCheck(builds, 5)?.number).toBe(4);
+  });
+
+  it('skips dry runs', () => {
+    const builds = [check(5, 'passed', { DRY_RUN: 'true' }), check(4, 'passed')];
+
+    expect(findPreviousProcessedCheck(builds, 6)?.number).toBe(4);
+  });
+
+  it('skips failed and canceled checks', () => {
+    const builds = [check(5, 'failed'), check(4, 'canceled'), check(3, 'passed')];
+
+    expect(findPreviousProcessedCheck(builds, 6)?.number).toBe(3);
+  });
+
+  it('does not skip checks with DRY_RUN disabled', () => {
+    const builds = [check(4, 'passed', { DRY_RUN: 'false' })];
+
+    expect(findPreviousProcessedCheck(builds, 5)?.number).toBe(4);
+  });
+
+  it('returns undefined when there is no earlier processed check', () => {
+    expect(findPreviousProcessedCheck([check(5, 'passed')], 5)).toBeUndefined();
   });
 });

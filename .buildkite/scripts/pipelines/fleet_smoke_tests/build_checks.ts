@@ -49,3 +49,19 @@ export function findConsecutiveScheduledFailures(builds: Build[], threshold: num
 
   return allFailed ? recentBuilds : [];
 }
+
+// Returns the most recent earlier check that actually processed notifications, so the next window
+// starts after it. Dry runs and checks that did not pass (failed, canceled) are skipped, otherwise
+// failures that happened before them would never be reported.
+// Expects builds sorted newest first.
+export function findPreviousProcessedCheck(
+  checkBuilds: Build[],
+  currentBuildNumber: number
+): Build | undefined {
+  return checkBuilds.find(
+    (build) =>
+      build.number < currentBuildNumber &&
+      build.state === 'passed' &&
+      !build.env?.DRY_RUN?.match(/(1|true)/i)
+  );
+}
