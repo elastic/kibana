@@ -1,0 +1,42 @@
+overlay: 1.0.0
+info:
+  title: MISP Automation API corrections
+  version: 1.0.0
+actions:
+  - target: $.servers[?@.url == 'https://misp.local']
+    description: >-
+      MISP is self-hosted: the API is served by each instance at its own base URL
+      (https://www.circl.lu/doc/misp/automation/), which the connector takes from its config.
+      The spec names the placeholder host https://misp.local.
+    update:
+      url: https://{host}
+      variables:
+        host:
+          default: misp.local
+
+  - target: $.paths
+    description: >-
+      The spec only documents POST /events/addTag/{eventId}/{tagId}/local:{local}. EventsController::addTag
+      (https://github.com/MISP/MISP/blob/2.5/app/Controller/EventsController.php) also takes the event and
+      tag from the request body when they are not in the path, which is what the connector sends.
+    update:
+      /events/addTag:
+        post:
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  type: object
+                  required: [event, tag]
+                  properties:
+                    event:
+                      type: string
+                    tag:
+                      type: string
+          responses:
+            '200':
+              description: Whether the tag was attached
+              content:
+                application/json:
+                  schema:
+                    type: object
