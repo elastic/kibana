@@ -67820,6 +67820,7 @@ paths:
           required: false
           schema:
             description: A base64-encoded cursor for pagination. Use the value from the previous response to fetch the next page.
+            maxLength: 4096
             type: string
         - description: A search string to filter history entries by pack name, query text, or query ID.
           in: query
@@ -67827,6 +67828,7 @@ paths:
           required: false
           schema:
             description: A search string to filter history entries by pack name, query text, or query ID.
+            maxLength: 10000
             type: string
         - description: Comma-separated list of user IDs to filter live query history.
           in: query
@@ -67835,6 +67837,7 @@ paths:
           schema:
             description: Comma-separated list of user IDs to filter live query history.
             example: elastic,admin
+            maxLength: 10000
             type: string
         - description: Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.
           in: query
@@ -67843,6 +67846,7 @@ paths:
           schema:
             description: Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.
             example: live,scheduled
+            maxLength: 64
             type: string
         - description: The start of the time range filter (ISO 8601).
           in: query
@@ -67851,6 +67855,7 @@ paths:
           schema:
             description: The start of the time range filter (ISO 8601).
             example: '2024-01-01T00:00:00Z'
+            maxLength: 64
             type: string
         - description: The end of the time range filter (ISO 8601).
           in: query
@@ -67859,6 +67864,7 @@ paths:
           schema:
             description: The end of the time range filter (ISO 8601).
             example: '2024-12-31T23:59:59Z'
+            maxLength: 64
             type: string
       responses:
         '200':
@@ -68256,6 +68262,7 @@ paths:
           schema:
             description: The ID of the live query.
             example: 3c42c847-eb30-4452-80e0-728584042334
+            maxLength: 1024
             type: string
         - description: The query action ID whose results are exported. Filters the export to rows for this specific per-agent action.
           in: path
@@ -68264,6 +68271,7 @@ paths:
           schema:
             description: The ID of the query action.
             example: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+            maxLength: 1024
             type: string
         - description: The output format of the exported file.
           in: query
@@ -69093,6 +69101,7 @@ paths:
           schema:
             description: The schedule ID of the scheduled query.
             example: pack_my_pack_uptime
+            maxLength: 1024
             type: string
         - description: The execution count for this scheduled query run.
           in: path
@@ -69107,7 +69116,11 @@ paths:
           name: kuery
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Osquery_API_KueryOrUndefined'
+            description: The kuery to filter the results by.
+            example: 'agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13'
+            maxLength: 10000
+            nullable: true
+            type: string
         - description: The page number to return. The default is 1.
           in: query
           name: page
@@ -69125,7 +69138,12 @@ paths:
           name: sort
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Osquery_API_SortOrUndefined'
+            default: '@timestamp'
+            description: The field that is used to sort the results.
+            example: agent.name
+            maxLength: 256
+            nullable: true
+            type: string
         - description: Specifies the sort order.
           in: query
           name: sortOrder
@@ -69193,6 +69211,7 @@ paths:
           schema:
             description: The schedule ID of the scheduled query.
             example: 90f342ee-9c05-4844-849b-173993234f22
+            maxLength: 1024
             type: string
         - description: The execution counter for the scheduled query run whose results are exported. Must be a non-negative integer.
           in: path
@@ -69325,6 +69344,7 @@ paths:
           schema:
             description: The schedule ID of the scheduled query.
             example: pack_my_pack_uptime
+            maxLength: 1024
             type: string
         - description: The execution count for this scheduled query run.
           in: path
@@ -69339,7 +69359,11 @@ paths:
           name: kuery
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Osquery_API_KueryOrUndefined'
+            description: The kuery to filter the results by.
+            example: 'agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13'
+            maxLength: 10000
+            nullable: true
+            type: string
         - description: The page number to return. The default is 1.
           in: query
           name: page
@@ -69357,7 +69381,12 @@ paths:
           name: sort
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Osquery_API_SortOrUndefined'
+            default: '@timestamp'
+            description: The field that is used to sort the results.
+            example: agent.name
+            maxLength: 256
+            nullable: true
+            type: string
         - description: Specifies the sort order.
           in: query
           name: sortOrder
@@ -69371,6 +69400,7 @@ paths:
           schema:
             description: The start date filter (ISO 8601) to narrow down results.
             example: '2024-01-01T00:00:00Z'
+            maxLength: 64
             type: string
       responses:
         '200':
@@ -208918,6 +208948,7 @@ components:
             - 980a6b73-0b03-4d1e-8915-67c202e4a980
             - e40fde1c-5729-4885-b0b2-16a42e9332e3
           items:
+            maxLength: 1024
             type: string
           nullable: true
           type: array
@@ -208942,6 +208973,7 @@ components:
           description: |
             An optional KQL filter appended (with AND) to the base action/schedule filter. The filter is wrapped in parentheses so it cannot override or escape the built-in action_id / schedule_id gate.
           example: 'host.name: "prod-host-1"'
+          maxLength: 10000
           nullable: true
           type: string
     Security_Osquery_API_ExportResultRow:
