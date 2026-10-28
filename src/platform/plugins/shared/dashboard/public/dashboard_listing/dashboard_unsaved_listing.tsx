@@ -29,6 +29,7 @@ import { dashboardUnsavedListingStrings, getNewDashboardTitle } from './_dashboa
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { findService } from '../dashboard_client';
 import { getDashboardBackupService } from '../services/dashboard_api_services';
+import { coreServices } from '../services/kibana_services';
 
 const unsavedItemStyles = {
   item: (euiThemeContext: UseEuiTheme) =>
@@ -174,32 +175,40 @@ export const DashboardUnsavedListing = ({
     const existingDashboardsWithUnsavedChanges = unsavedDashboardIds.filter(
       (id) => id !== DASHBOARD_PANELS_UNSAVED_ID
     );
-    findService.findByIds(existingDashboardsWithUnsavedChanges).then((results) => {
-      const dashboardMap = {};
-      if (canceled) {
-        return;
-      }
-      let hasError = false;
-      const newItems = results.reduce((map, result) => {
-        if (result.status === 'error') {
-          hasError = true;
-          if (result.error && result.notFound) {
-            // Save object not found error
-            getDashboardBackupService().clearState(result.id);
-          }
-          return map;
+    findService
+      .findByIds(existingDashboardsWithUnsavedChanges)
+      .then((results) => {
+        const dashboardMap = {};
+        if (canceled) {
+          return;
         }
-        return {
-          ...map,
-          [result.id || DASHBOARD_PANELS_UNSAVED_ID]: result.attributes,
-        };
-      }, dashboardMap);
-      if (hasError) {
-        refreshUnsavedDashboards();
-        return;
-      }
-      setItems(newItems);
-    });
+        let hasError = false;
+        const newItems = results.reduce((map, result) => {
+          if (result.status === 'error') {
+            hasError = true;
+            if (result.error && result.notFound) {
+              // Save object not found error
+              getDashboardBackupService().clearState(result.id);
+            }
+            return map;
+          }
+          return {
+            ...map,
+            [result.id || DASHBOARD_PANELS_UNSAVED_ID]: result.attributes,
+          };
+        }, dashboardMap);
+        if (hasError) {
+          refreshUnsavedDashboards();
+          return;
+        }
+        setItems(newItems);
+      })
+      .catch((error) => {
+        if (canceled) return;
+        coreServices.notifications.toasts.addError(error, {
+          title: dashboardUnsavedListingStrings.getLoadErrorTitle(),
+        });
+      });
 
     return () => {
       canceled = true;

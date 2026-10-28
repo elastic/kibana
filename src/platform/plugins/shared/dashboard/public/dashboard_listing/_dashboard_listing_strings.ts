@@ -108,6 +108,10 @@ export const dashboardUnsavedListingStrings = {
     i18n.translate('dashboard.listing.unsaved.resetTitle', {
       defaultMessage: 'Reset changes',
     }),
+  getLoadErrorTitle: () =>
+    i18n.translate('dashboard.listing.unsaved.loadErrorTitle', {
+      defaultMessage: 'Unable to load dashboards with unsaved changes',
+    }),
 };
 
 export const resetConfirmStrings = {
@@ -126,6 +130,10 @@ export const resetConfirmStrings = {
   getResetConfirmButtonText: () =>
     i18n.translate('dashboard.resetChangesConfirmModal.confirmButtonLabel', {
       defaultMessage: 'Reset dashboard',
+    }),
+  getResetErrorTitle: () =>
+    i18n.translate('dashboard.resetChangesConfirmModal.resetErrorTitle', {
+      defaultMessage: 'Unable to reset dashboard',
     }),
 };
 

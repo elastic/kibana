@@ -10,6 +10,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
+import { i18n } from '@kbn/i18n';
+
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
@@ -45,8 +47,13 @@ export const DashboardListingPage = ({
   useEffect(() => {
     let isMounted = true;
     (async () => {
-      const isInNoDataState = await isDashboardAppInNoDataState();
-      setShowNoDataPage(isInNoDataState && isMounted);
+      try {
+        const isInNoDataState = await isDashboardAppInNoDataState();
+        setShowNoDataPage(isInNoDataState && isMounted);
+      } catch (error) {
+        // show the listing if the no data state can not be determined
+        if (isMounted) setShowNoDataPage(false);
+      }
     })();
     return () => {
       isMounted = false;
@@ -96,18 +103,31 @@ export const DashboardListingPage = ({
       dataService.query,
       kbnUrlStateStorage
     );
+    let canceled = false;
     if (title) {
-      findService.findByTitle(title).then((result) => {
-        if (!result) return;
-        redirectTo({
-          destination: 'dashboard',
-          id: result.id,
-          useReplace: true,
+      findService
+        .findByTitle(title)
+        .then((result) => {
+          if (canceled || !result) return;
+          redirectTo({
+            destination: 'dashboard',
+            id: result.id,
+            useReplace: true,
+          });
+        })
+        .catch((error) => {
+          if (canceled) return;
+          coreServices.notifications.toasts.addError(error, {
+            title: i18n.translate('dashboard.listing.findByTitleError', {
+              defaultMessage: 'Unable to find dashboard "{title}"',
+              values: { title },
+            }),
+          });
         });
-      });
     }
 
     return () => {
+      canceled = true;
       stopSyncingQueryServiceStateWithUrl();
     };
   }, [title, redirectTo, kbnUrlStateStorage]);

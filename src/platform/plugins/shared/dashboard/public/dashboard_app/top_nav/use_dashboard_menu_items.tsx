@@ -129,10 +129,15 @@ export const useDashboardMenuItems = ({
       }
       confirmDiscardUnsavedChanges(async () => {
         setIsResetting(true);
-        await dashboardApi.asyncResetToLastSavedState();
-        if (isMounted()) {
-          setIsResetting(false);
-          switchModes?.();
+        try {
+          await dashboardApi.asyncResetToLastSavedState();
+          if (isMounted()) switchModes?.();
+        } catch (error) {
+          coreServices.notifications.toasts.addError(error, {
+            title: topNavStrings.resetChangesError.title,
+          });
+        } finally {
+          if (isMounted()) setIsResetting(false);
         }
       }, viewMode);
     },
@@ -151,11 +156,18 @@ export const useDashboardMenuItems = ({
    */
   const quickSaveDashboard = useCallback(() => {
     setIsSaveInProgress(true);
-    dashboardApi.runQuickSave().then(() =>
-      setTimeout(() => {
-        setIsSaveInProgress(false);
-      }, 100)
-    );
+    dashboardApi
+      .runQuickSave()
+      .catch((error) => {
+        coreServices.notifications.toasts.addError(error, {
+          title: topNavStrings.quickSaveError.title,
+        });
+      })
+      .finally(() =>
+        setTimeout(() => {
+          setIsSaveInProgress(false);
+        }, 100)
+      );
   }, [dashboardApi]);
 
   const openAddPanelFlyout = useCallback(
