@@ -22,6 +22,7 @@ export {
   CHANGE_POINT_TYPES,
   type Detection,
   type DetectionSkip,
+  describeSkip,
   type ChangePointType,
 } from './detections';
 export {
@@ -67,6 +68,8 @@ export {
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
   ASSESSMENT_NOTE_ROLE_RULE,
+  NARRATIVE_AGREEMENT_RULE,
+  DISCOVERY_SEVERITY_APPLICATION_RULE,
   NO_RAW_SENSITIVE_VALUES_RULE,
   SUMMARY_ROLE_RULE,
   SYMPTOM_HYPOTHESIS_ROLE_RULE,

@@ -65,6 +65,16 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       coreLogger.warn('Failed to install alerting v2 managed workflows', { error });
     }
 
+    if (config.dispatcher.paused) {
+      tasksLogger.warn({
+        code: ALERTING_LOG_CODES.DISPATCHER_PAUSED,
+        labels: { task_id: DISPATCHER_TASK_ID },
+        message:
+          'alerting v2 dispatcher is paused by xpack.alerting_v2.dispatcher.paused; no ' +
+          'notifications are sent and pending alerts are dispatched late once it is removed',
+      });
+    }
+
     scheduleDispatcherTask({ taskManager }).catch((error) => {
       tasksLogger.error({
         error,

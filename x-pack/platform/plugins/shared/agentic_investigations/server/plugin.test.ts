@@ -13,6 +13,7 @@ import {
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   ESCALATIONS_UI_CAPABILITY_SHOW,
 } from '../common/escalations/constants';
+import { INVESTIGATIONS_UI_CAPABILITY_READ } from '../common/investigations/constants';
 import { IMPACT_ATTACHMENT_TYPE } from '../common/impact/attachment';
 import { SET_IMPACT_TOOL_ID } from '../common/impact/constants';
 import { SUBJECT_ATTACHMENT_TYPE } from '../common/subjects/constants';
@@ -141,9 +142,9 @@ describe('AgenticInvestigationsPlugin', () => {
 
       expect(INVESTIGATIONS_API_PRIVILEGE_READ).toBe('read_investigations');
       expect(privileges.all.api).toEqual([INVESTIGATIONS_API_PRIVILEGE_READ]);
-      expect(privileges.all.ui).toEqual([]);
+      expect(privileges.all.ui).toEqual([INVESTIGATIONS_UI_CAPABILITY_READ]);
       expect(privileges.read.api).toEqual([INVESTIGATIONS_API_PRIVILEGE_READ]);
-      expect(privileges.read.ui).toEqual([]);
+      expect(privileges.read.ui).toEqual([INVESTIGATIONS_UI_CAPABILITY_READ]);
     });
 
     it('keeps investigations in a sub-feature with a manage privilege', () => {

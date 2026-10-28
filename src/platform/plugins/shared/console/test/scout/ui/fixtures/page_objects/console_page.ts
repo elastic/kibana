@@ -198,8 +198,7 @@ export class ConsolePage {
   }
 
   async goto() {
-    await this.page.gotoApp('dev_tools', { hash: 'console' });
-    await this.inputEditor.waitFor({ state: 'visible' });
+    await this.page.gotoApp('dev_tools', { hash: 'console', readyWhen: this.inputEditor });
   }
 
   /**
@@ -210,8 +209,8 @@ export class ConsolePage {
     const encoded = compressToEncodedURIComponent(request);
     await this.page.gotoApp('dev_tools', {
       hash: `console/shell?load_from=data:text/plain,${encoded}`,
+      readyWhen: this.inputEditor,
     });
-    await this.inputEditor.waitFor({ state: 'visible' });
     await this.sendRequestButton.waitFor({ state: 'visible' });
   }
 
