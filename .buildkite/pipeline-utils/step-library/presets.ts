@@ -115,8 +115,7 @@ export const agentZones = (zones: readonly Zone[]): Pick<AgentConfig, 'zones'> =
 });
 
 export const spotAgent = (machineType: MachineType, zones: readonly Zone[]): AgentConfig => ({
-  machineType,
-  preemptible: true,
+  ...preemptibleAgent(machineType),
   spotZones: zones.join(','),
 });
 
