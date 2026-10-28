@@ -9,13 +9,15 @@ import type { StreamsUnit } from '@kbn/streams-schema';
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { assign, fromCallback, fromEventObservable, setup } from 'xstate';
+import { assign, fromEventObservable, fromPromise, raise, setup } from 'xstate';
 import type {
   MappedStatsResponse,
   StatsWindow,
   UnitStatsClient,
 } from '../../../services/unit_stats_client/types';
-import { STATS_BATCH_DEBOUNCE_MS, STATS_POLL_INTERVAL_MS } from './constants';
+import { STATS_BATCH_DEBOUNCE_MS, STATS_FRESHNESS_MS, STATS_POLL_INTERVAL_MS } from './constants';
+import { isBatchWanted, planBatches } from './stats_batching';
+import { markBatchFailed, markBatchLoading, mergeFetchedStats } from './stats_entries';
 import { registerComponent, unregisterComponent } from './stats_registration';
 import type { StatsBatch, StatsComponents } from './types';
 
@@ -31,14 +33,18 @@ export interface StatsManagerContext {
   getWindow: () => StatsWindow;
   /** Every component that is shown or cached, by kind and id. */
   components: StatsComponents;
-  /** The requests in flight by id, so a result is applied to the components it asked for. */
-  requests: Record<string, StatsBatch>;
-  /** Makes the id of the next request. */
-  requestSequence: number;
+  /**
+   * The request in flight, so its result is applied to the components it asked for. It is
+   * `NO_REQUEST` while the `request` region is idle.
+   */
+  request: StatsBatch;
   lastUpdated?: number;
   /** Failed requests in a row. A result resets it. */
   consecutiveFailures: number;
 }
+
+/** A request for no components, which stands for "nothing in flight". */
+export const NO_REQUEST: StatsBatch = { window: { kind: 'default' }, components: [] };
 
 // Sent by consumers
 
@@ -73,18 +79,16 @@ export interface StatsWindowChangedEvent {
   type: 'stats.windowChanged';
 }
 
-// Sent by a fetch actor
+// Raised by the machine itself
 
-export interface StatsFetchDoneEvent {
-  type: 'stats.fetch.done';
-  requestId: string;
-  response: MappedStatsResponse;
+/** Something may be due: the debounce ended, or a request resolved. A request in flight wins. */
+export interface StatsFetchDueEvent {
+  type: 'stats.fetchDue';
 }
 
-export interface StatsFetchFailedEvent {
-  type: 'stats.fetch.failed';
-  requestId: string;
-  reason: string;
+/** The poll interval elapsed. It asks for every shown component again. */
+export interface StatsPollEvent {
+  type: 'stats.poll';
 }
 
 export type StatsManagerEvent =
@@ -93,44 +97,26 @@ export type StatsManagerEvent =
   | StatsRefreshEvent
   | StatsUnitPersistedEvent
   | StatsWindowChangedEvent
-  | StatsFetchDoneEvent
-  | StatsFetchFailedEvent;
+  | StatsFetchDueEvent
+  | StatsPollEvent;
 
 // Actors
 
 export interface FetchStatsInput {
-  requestId: string;
   batch: StatsBatch;
 }
 
-const toFailureReason = (error: unknown): string =>
+export const toFailureReason = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
 /**
- * Runs one request. The machine stops the actor when it no longer wants the result, which runs
- * the cleanup and aborts the request. Nothing is sent after an abort, so an abort is never a failure.
+ * Runs one request. The machine invokes it from the `fetching` state, so leaving that state stops
+ * the actor, which aborts the signal and cancels the HTTP call. An abort never reaches the
+ * machine as a result.
  */
 export const createFetchStatsActor = ({ client }: { client: UnitStatsClient }) =>
-  fromCallback<StatsFetchDoneEvent | StatsFetchFailedEvent, FetchStatsInput>(
-    ({ input: { requestId, batch }, sendBack }) => {
-      const controller = new AbortController();
-
-      client
-        .fetchStats(
-          { components: batch.components, window: batch.window },
-          { signal: controller.signal }
-        )
-        .then((response) => {
-          if (controller.signal.aborted) return;
-          sendBack({ type: 'stats.fetch.done', requestId, response });
-        })
-        .catch((error: unknown) => {
-          if (controller.signal.aborted) return;
-          sendBack({ type: 'stats.fetch.failed', requestId, reason: toFailureReason(error) });
-        });
-
-      return () => controller.abort();
-    }
+  fromPromise<MappedStatsResponse, FetchStatsInput>(({ input: { batch }, signal }) =>
+    client.fetchStats({ components: batch.components, window: batch.window }, { signal })
   );
 
 /**
@@ -141,6 +127,29 @@ export const createTimeUpdatesActor = ({ timeState$ }: { timeState$: Observable<
   fromEventObservable(() =>
     timeState$.pipe(map((): StatsWindowChangedEvent => ({ type: 'stats.windowChanged' })))
   );
+
+// Planning
+
+/** A refresh or a poll asks for every shown component again. Any other event asks for what is due. */
+const isForcedBy = (event: StatsManagerEvent): boolean =>
+  event.type === 'stats.refresh' || event.type === 'stats.poll';
+
+/**
+ * The batch to request next, if anything is due. Only the first batch starts. What is left over,
+ * such as components that registered while a request was running or the ones over the request
+ * limit, stays due, and the machine plans again when the request in flight resolves.
+ */
+const planNextBatch = (
+  { components, getWindow }: StatsManagerContext,
+  event: StatsManagerEvent
+): StatsBatch | undefined => {
+  const [batch] = planBatches(components, getWindow(), {
+    now: Date.now(),
+    freshnessMs: STATS_FRESHNESS_MS,
+    force: isForcedBy(event),
+  });
+  return batch;
+};
 
 // Machine
 
@@ -165,6 +174,32 @@ export const statsManagerMachine = setup({
         components: unregisterComponent(context.components, params.ref, params.registrant),
       })
     ),
+    /** Takes the next batch as the request in flight, and marks its components as loading. */
+    startRequest: assign(({ context, event }) => {
+      const request = planNextBatch(context, event);
+      return request ? { request, components: markBatchLoading(context.components, request) } : {};
+    }),
+    /** Writes the response into the components of the request, and counts as a success. */
+    storeResult: assign(({ context }, params: { response: MappedStatsResponse }) => {
+      const now = Date.now();
+      return {
+        components: mergeFetchedStats(context.components, context.request, params.response, now),
+        lastUpdated: now,
+        consecutiveFailures: 0,
+      };
+    }),
+    /** Marks the components of the request as stale or failed, and counts the failure. */
+    storeFailure: assign(({ context }, params: { reason: string }) => ({
+      components: markBatchFailed(context.components, context.request, params.reason),
+      consecutiveFailures: context.consecutiveFailures + 1,
+    })),
+    clearRequest: assign({ request: NO_REQUEST }),
+  },
+  guards: {
+    /** Whether the event that is being handled leaves something to request. */
+    hasDueBatch: ({ context, event }) => planNextBatch(context, event) !== undefined,
+    /** Whether no shown component wants the request in flight any more. */
+    requestUnwanted: ({ context }) => !isBatchWanted(context.components, context.request),
   },
   delays: {
     batchDebounce: STATS_BATCH_DEBOUNCE_MS,
@@ -175,8 +210,7 @@ export const statsManagerMachine = setup({
   context: ({ input }) => ({
     getWindow: input.getWindow,
     components: { destination: {}, processor: {} },
-    requests: {},
-    requestSequence: 0,
+    request: NO_REQUEST,
     consecutiveFailures: 0,
   }),
   invoke: { id: 'timeUpdates', src: 'timeUpdates' },
@@ -207,7 +241,58 @@ export const statsManagerMachine = setup({
       states: {
         idle: {},
         debouncing: {
-          after: { batchDebounce: 'idle' },
+          after: {
+            batchDebounce: { target: 'idle', actions: raise({ type: 'stats.fetchDue' }) },
+          },
+        },
+      },
+    },
+    // Runs one request at a time. Leaving `fetching` stops the request, which aborts the call.
+    request: {
+      initial: 'idle',
+      states: {
+        idle: {
+          on: {
+            'stats.fetchDue': { guard: 'hasDueBatch', target: 'fetching' },
+            'stats.refresh': { guard: 'hasDueBatch', target: 'fetching' },
+            'stats.poll': { guard: 'hasDueBatch', target: 'fetching' },
+          },
+        },
+        fetching: {
+          entry: 'startRequest',
+          invoke: {
+            src: 'fetchStats',
+            input: ({ context }) => ({ batch: context.request }),
+            onDone: {
+              target: 'idle',
+              actions: [
+                { type: 'storeResult', params: ({ event }) => ({ response: event.output }) },
+                'clearRequest',
+                // What is left over, such as components that registered meanwhile, is requested next.
+                raise({ type: 'stats.fetchDue' }),
+              ],
+            },
+            // Nothing is raised after a failure. The components are still due, and a retry here
+            // would loop. The next poll or a refresh retries.
+            onError: {
+              target: 'idle',
+              actions: [
+                {
+                  type: 'storeFailure',
+                  params: ({ event }) => ({ reason: toFailureReason(event.error) }),
+                },
+                'clearRequest',
+              ],
+            },
+          },
+          // No shown component wants the request any more: leaving the state aborts it.
+          always: { guard: 'requestUnwanted', target: 'idle', actions: 'clearRequest' },
+          on: {
+            // `stats.fetchDue` is not handled here, so a request in flight is left to finish.
+            // A refresh or a poll replaces it.
+            'stats.refresh': { guard: 'hasDueBatch', target: 'fetching', reenter: true },
+            'stats.poll': { guard: 'hasDueBatch', target: 'fetching', reenter: true },
+          },
         },
       },
     },

@@ -132,12 +132,30 @@ describe('planBatches', () => {
       expect(plan(components, { ...DUE_OPTIONS, force: true })).toHaveLength(1);
     });
 
-    it('requests a component whose request is in flight, so a new batch replaces that request', () => {
+    it('does not request a component whose request is in flight, so the request can finish', () => {
       const components = withDestinationValue(registerAll([destination('es-prod')]), 'es-prod', {
         status: 'loading',
       });
 
-      expect(plan(components)).toHaveLength(1);
+      expect(plan(components)).toEqual([]);
+    });
+
+    it('requests only the components that the request in flight does not cover', () => {
+      const components = withDestinationValue(
+        registerAll([destination('es-prod'), processor('shout')]),
+        'es-prod',
+        { status: 'loading' }
+      );
+
+      expect(plan(components)[0].components).toEqual([processor('shout')]);
+    });
+
+    it('requests a component whose request is in flight when forced, because a forced flush replaces it', () => {
+      const components = withDestinationValue(registerAll([destination('es-prod')]), 'es-prod', {
+        status: 'loading',
+      });
+
+      expect(plan(components, { ...DUE_OPTIONS, force: true })).toHaveLength(1);
     });
 
     it('does not request a fresh component error again before it expires', () => {
