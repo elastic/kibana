@@ -19,6 +19,9 @@ import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimenta
 import RulesPage from './rules_page_container';
 import { hasShowActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
+import { AppStatus } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
+import { BehaviorSubject } from 'rxjs';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/get_experimental_features');
@@ -82,6 +85,12 @@ const renderRulesPage = (history = createMemoryHistory({ initialEntries: ['/'] }
     </IntlProvider>
   );
 
+const useSetAlertsAppStatus = (status: AppStatus) => {
+  useKibanaMock().services.application.applications$ = new BehaviorSubject(
+    new Map([['observability-overview', { status }]])
+  ) as unknown as ApplicationStart['applications$'];
+};
+
 describe('rulesPage', () => {
   beforeEach(() => {
     (hasShowActionsCapability as jest.Mock).mockClear();
@@ -94,6 +103,7 @@ describe('rulesPage', () => {
     useKibanaMock().services.http.basePath.prepend = jest.fn(
       (path: string) => `${MOCK_BASE_PATH}${path}`
     );
+    useSetAlertsAppStatus(AppStatus.accessible);
     useKibanaMock().services.hideListBackButton = undefined;
     useKibanaMock().services.tabs = undefined;
   });
@@ -134,6 +144,15 @@ describe('rulesPage', () => {
 
   it('omits the list back button when hideListBackButton is set', async () => {
     useKibanaMock().services.hideListBackButton = true;
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+    renderRulesPage(history);
+
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rules');
+    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
+  });
+
+  it('omits the list back button when the observability-overview app is inaccessible', async () => {
+    useSetAlertsAppStatus(AppStatus.inaccessible);
     const history = createMemoryHistory({ initialEntries: ['/'] });
     renderRulesPage(history);
 
