@@ -197,59 +197,6 @@ describe('Textbased Data Source', () => {
   });
 
   describe('uniqueLabels', () => {
-    it('uses form-based static labels while preserving custom and query labels', () => {
-      const state: TextBasedPrivateState = {
-        indexPatternRefs: [],
-        layers: {
-          a: {
-            columns: [
-              {
-                columnId: 'static',
-                fieldName: '1000',
-                operationType: 'static_value',
-                params: { value: '1000' },
-              },
-              {
-                columnId: 'duplicate',
-                fieldName: '1000',
-                operationType: 'static_value',
-                params: { value: '1000' },
-              },
-              {
-                columnId: 'negative',
-                fieldName: '-1.5',
-                operationType: 'static_value',
-                params: { value: '-1.5' },
-              },
-              {
-                columnId: 'zero',
-                fieldName: '0',
-                operationType: 'static_value',
-                params: { value: '0' },
-              },
-              {
-                columnId: 'custom',
-                fieldName: '1000',
-                operationType: 'static_value',
-                params: { value: '1000' },
-                customLabel: true,
-                label: 'Target',
-              },
-              { columnId: 'query', fieldName: 'threshold' },
-            ],
-          },
-        },
-      };
-      expect(TextBasedDatasource.uniqueLabels(state, {})).toEqual({
-        static: 'Static value: 1000',
-        duplicate: 'Static value: 1000 [1]',
-        negative: 'Static value: -1.5',
-        zero: 'Static value: 0',
-        custom: 'Target',
-        query: 'threshold',
-      });
-    });
-
     it('appends a suffix to duplicates', () => {
       const map = TextBasedDatasource.uniqueLabels(
         {

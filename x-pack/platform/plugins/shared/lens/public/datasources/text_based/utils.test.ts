@@ -27,24 +27,6 @@ describe('Text based languages utils', () => {
   });
 
   describe('reconcileQueryColumns', () => {
-    it('preserves constants without matching them to query columns', () => {
-      const constant: TextBasedLayerColumn = {
-        columnId: 'threshold',
-        fieldName: '42',
-        meta: { type: 'number' },
-        operationType: 'static_value',
-        params: { value: '42' },
-      };
-      expect(
-        reconcileQueryColumns(
-          [constant],
-          [{ id: 'value', name: 'value', meta: { type: 'number' } }]
-        )
-      ).toEqual([
-        constant,
-        { columnId: 'value', fieldName: 'value', label: 'value', meta: { type: 'number' } },
-      ]);
-    });
     it('preserves a sparse reference-line binding to a later exact query output', () => {
       const existingColumns: TextBasedLayerColumn[] = [
         { columnId: 'reference-upper', fieldName: 'upper', meta: { type: 'number' } },
@@ -100,10 +82,8 @@ describe('Text based languages utils', () => {
         { columnId: 'lower', fieldName: 'upper', meta: { type: 'number' } },
         {
           columnId: 'lower_2',
-          fieldName: '42',
-          meta: { type: 'number' },
-          operationType: 'static_value',
-          params: { value: '42' },
+          fieldName: 'another_field',
+          meta: { type: 'string' },
         },
       ];
       const queryColumns: DatatableColumn[] = ['lower', 'upper', 'lower_1'].map((id) => ({
@@ -114,12 +94,7 @@ describe('Text based languages utils', () => {
 
       const result = reconcileQueryColumns(existingColumns, queryColumns);
 
-      expect(result.map(({ columnId }) => columnId)).toEqual([
-        'lower_2',
-        'lower_3',
-        'lower',
-        'lower_1',
-      ]);
+      expect(result.map(({ columnId }) => columnId)).toEqual(['lower_3', 'lower', 'lower_1']);
       expect(result.find(({ columnId }) => columnId === 'lower')?.fieldName).toBe('upper');
       expect(new Set(result.map(({ columnId }) => columnId)).size).toBe(result.length);
     });

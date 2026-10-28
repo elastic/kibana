@@ -325,12 +325,6 @@ function convertReferenceLineLayerToAPI(
           ...decorationConfig,
         };
       }
-      const column = layer.columns.find(({ columnId }) => columnId === accessor);
-      if (column?.operationType === 'static_value') {
-        throw new Error(
-          'ES|QL reference line layers only support query column thresholds. Move static values to a separate static reference line layer.'
-        );
-      }
       const op = getValueApiColumn(accessor, layer);
       if (!op) {
         return undefined;

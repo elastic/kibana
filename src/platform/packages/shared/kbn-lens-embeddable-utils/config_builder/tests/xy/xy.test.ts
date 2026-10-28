@@ -686,37 +686,6 @@ describe('XY', () => {
           expect(result.success).toBe(false);
         });
 
-        it('rejects exporting static values from a text-based reference line layer', () => {
-          const builder = new LensConfigBuilder(undefined, true);
-          const config = xyConfigSchema.parse({
-            type: 'xy',
-            title: 'Query reference line',
-            layers: [
-              esqlDataLayer,
-              {
-                type: 'reference_lines',
-                data_source: { type: 'esql', query: 'FROM logs | STATS threshold = AVG(bytes)' },
-                thresholds: [{ column: 'threshold' }],
-              },
-            ],
-          });
-          const lensState = builder.fromAPIFormat(config);
-          let staticColumns = 0;
-          for (const layer of Object.values(
-            lensState.state.datasourceStates.textBased?.layers ?? {}
-          )) {
-            layer.columns = layer.columns.map((column) => {
-              if (column.fieldName !== 'threshold') return column;
-              staticColumns++;
-              return { ...column, operationType: 'static_value', params: { value: '42' } };
-            });
-          }
-          expect(staticColumns).toBe(1);
-          expect(() => builder.toAPIFormat(lensState)).toThrow(
-            'ES|QL reference line layers only support query column thresholds'
-          );
-        });
-
         it('rejects query columns in a static reference line layer', () => {
           const result = xyConfigSchema.safeParse({
             type: 'xy',

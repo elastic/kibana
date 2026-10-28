@@ -15,7 +15,6 @@ import type {
   TextBasedLayerColumn,
   TextBasedLayer,
 } from '@kbn/lens-common';
-import { staticValueOperationName, isValidNumber } from '@kbn/lens-common';
 
 export const MAX_NUM_OF_COLUMNS = 10;
 
@@ -93,12 +92,7 @@ export const reconcileQueryColumns = (
   columnsFromQuery: DatatableColumn[],
   preferredColumnIds: Set<string> = new Set()
 ): TextBasedLayerColumn[] => {
-  const staticColumns = existingColumns.filter(isStaticValueColumn);
-  existingColumns = existingColumns.filter((column) => !isStaticValueColumn(column));
-  const allocatedColumnIds = new Set([
-    ...staticColumns.map(({ columnId }) => columnId),
-    ...existingColumns.map(({ columnId }) => columnId),
-  ]);
+  const allocatedColumnIds = new Set(existingColumns.map(({ columnId }) => columnId));
   const queryColumnIds = new Set(columnsFromQuery.map(({ id }) => id));
   const usedColumnIds = new Set<string>();
   const findPreferredFirst = (
@@ -123,7 +117,7 @@ export const reconcileQueryColumns = (
     return exactMatch;
   });
 
-  const queryColumns = columnsFromQuery.map((queryColumn, index) => {
+  return columnsFromQuery.map((queryColumn, index) => {
     const queryFieldName = queryColumn.variable ? `??${queryColumn.variable}` : queryColumn.id;
     const exactMatch = exactMatches[index];
     const positionalMatch = existingColumns[index];
@@ -179,7 +173,6 @@ export const reconcileQueryColumns = (
       ...(queryColumn.variable ? { variable: queryColumn.variable } : {}),
     };
   });
-  return [...staticColumns, ...queryColumns];
 };
 
 export const isNumeric = (column: TextBasedLayerColumn | DatatableColumn) =>
@@ -338,15 +331,3 @@ export function updateColumnDropPartials({
     ],
   };
 }
-
-export const isStaticValueColumn = (column: TextBasedLayerColumn): boolean =>
-  column.operationType === staticValueOperationName;
-
-/** Same validation as the form-based static value operation. */
-export const isValidStaticValue = (value: string | undefined): value is string =>
-  isValidNumber(value, false, undefined, undefined, 15);
-
-export const removeStaticValue = (column: TextBasedLayerColumn): TextBasedLayerColumn => {
-  const { value, ...params } = column.params ?? {};
-  return { ...column, operationType: undefined, params: column.params ? params : undefined };
-};

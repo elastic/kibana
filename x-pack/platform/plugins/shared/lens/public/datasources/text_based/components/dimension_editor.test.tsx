@@ -129,52 +129,6 @@ describe('TextBasedDimensionEditor', () => {
     expect(screen.queryByTestId('lens-dimensionTabs-static_value')).not.toBeInTheDocument();
   });
 
-  it('keeps an existing static column editable without a method switch', async () => {
-    const setState = jest.fn();
-    fetchFieldsFromESQLExpression.mockResolvedValue({
-      columns: [
-        { id: 'a', name: 'a', meta: { type: 'number' } },
-        { id: 'b', name: 'b', meta: { type: 'number' } },
-      ],
-    });
-    render(
-      <TextBasedDimensionEditor
-        {...defaultProps}
-        state={stateWithColumn({
-          fieldName: '42',
-          operationType: 'static_value',
-          params: { value: '42' },
-        })}
-        setState={setState}
-        supportStaticValue
-        enableFormatSelector={false}
-      />
-    );
-    await waitToLoad();
-    expect(screen.getByTestId('lns-indexPattern-static_value-input')).toHaveValue(42);
-    expect(screen.queryByTestId('text-based-dimension-field')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('lens-dimensionTabs-esql')).not.toBeInTheDocument();
-    expect(setState).not.toHaveBeenCalled();
-  });
-
-  it('preserves an existing static value when query fields finish loading', async () => {
-    render(
-      <StatefulEditor
-        {...defaultProps}
-        state={stateWithColumn({
-          fieldName: '42',
-          operationType: 'static_value',
-          params: { value: '42' },
-        })}
-        supportStaticValue
-        enableFormatSelector={false}
-      />
-    );
-    await waitToLoad();
-    expect(screen.getByTestId('lns-indexPattern-static_value-input')).toHaveValue(42);
-    expect(screen.queryByTestId('lens-dimensionTabs-esql')).not.toBeInTheDocument();
-  });
-
   it('keeps query dimensions field-based even when static values are supported', async () => {
     const setState = jest.fn();
     render(

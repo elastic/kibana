@@ -32,24 +32,14 @@ describe('onDrop', () => {
   );
   describe.each<{ description: string; referenceColumn: TextBasedLayerColumn }>([
     {
-      description: 'static',
-      referenceColumn: {
-        ...column1,
-        fieldName: '1000',
-        label: 'Threshold',
-        customLabel: true,
-        meta: { type: 'number' },
-        operationType: 'static_value',
-        params: { value: '1000' },
-      },
-    },
-    {
       description: 'query',
       referenceColumn: {
         ...column1,
         fieldName: 'threshold',
         label: 'Threshold',
+        customLabel: true,
         meta: { type: 'number' },
+        params: { format: { id: 'number', params: { decimals: 2 } } },
       },
     },
   ])('reference column $description', ({ referenceColumn }) => {
