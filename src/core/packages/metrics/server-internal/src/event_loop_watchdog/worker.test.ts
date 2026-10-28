@@ -11,7 +11,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { WorkerLogger } from '@kbn/core-threads-server-internal';
 import { runWatchdogWorker } from './worker';
 import type { StatsLogMeta, WatchdogWorkerData } from './types';
-import { REPORT_REFILL_MS, SLOT_COUNT, Slot } from './types';
+import { REPORT_REFILL_MS, SLOT_COUNT, Slot } from './constants';
 
 const STATS_INTERVAL_MS = 60_000;
 

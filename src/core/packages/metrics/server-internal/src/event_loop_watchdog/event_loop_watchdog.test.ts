@@ -12,7 +12,7 @@ import { createManagedWorker } from '@kbn/core-threads-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
 import { EventLoopWatchdog } from './event_loop_watchdog';
 import type { WatchdogWorkerData } from './types';
-import { HEARTBEAT_INTERVAL_MS, Slot, WATCHDOG_WORKER_NAME } from './types';
+import { HEARTBEAT_INTERVAL_MS, Slot, WATCHDOG_WORKER_NAME } from './constants';
 
 jest.mock('@kbn/core-threads-server-internal', () => ({ createManagedWorker: jest.fn() }));
 

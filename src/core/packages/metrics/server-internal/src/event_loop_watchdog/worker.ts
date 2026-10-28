@@ -19,7 +19,7 @@ import { createWorkerLogger } from '@kbn/core-threads-server-internal';
 import { BlockDetector, type DetectedBlock } from './block_detector';
 import { BlockStats } from './block_stats';
 import type { BlockLogMeta, Phase, StatsLogMeta, WatchdogWorkerData } from './types';
-import { POLL_INTERVAL_MS, Slot, WATCHDOG_WORKER_NAME, monotonicUs } from './types';
+import { POLL_INTERVAL_MS, Slot, WATCHDOG_WORKER_NAME, monotonicUs } from './constants';
 
 export interface WatchdogWorkerDeps {
   logger: WorkerLogger;

@@ -18,7 +18,7 @@ import {
   EVENT_LOOP_WATCHDOG_FEATURE_FLAG,
   EventLoopWatchdogService,
 } from './event_loop_watchdog_service';
-import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './types';
+import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './constants';
 
 jest.mock('./event_loop_watchdog');
 

@@ -9,7 +9,7 @@
 
 import type { PollContext } from './block_detector';
 import { BlockDetector } from './block_detector';
-import { REPORT_BURST, REPORT_REFILL_MS } from './types';
+import { REPORT_BURST, REPORT_REFILL_MS } from './constants';
 
 const running: PollContext = { thresholdMs: 200, phase: 'running' };
 

@@ -18,7 +18,7 @@ import {
   Slot,
   WATCHDOG_WORKER_NAME,
   monotonicUs,
-} from './types';
+} from './constants';
 
 // The worker used 20-24 MB of heap over 10 minutes in dev, with the require hook loaded.
 const WORKER_MAX_OLD_GENERATION_SIZE_MB = 64;

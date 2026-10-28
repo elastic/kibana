@@ -8,7 +8,7 @@
  */
 
 import type { Phase } from './types';
-import { REPORT_BURST, REPORT_REFILL_MS } from './types';
+import { REPORT_BURST, REPORT_REFILL_MS } from './constants';
 
 export interface DetectedBlock {
   phase: Phase;

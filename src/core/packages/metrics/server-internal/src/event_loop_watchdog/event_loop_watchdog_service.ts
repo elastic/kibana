@@ -28,7 +28,7 @@ import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common
 import { OPS_CONFIG_PATH, type OpsConfigType } from '../ops_config';
 import { EventLoopWatchdog } from './event_loop_watchdog';
 import { resolveWorkerLogging, type LoggingConfigSubset } from './resolve_worker_logging';
-import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './types';
+import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './constants';
 
 /** Feature flag that turns the event loop watchdog on and off at runtime. */
 export const EVENT_LOOP_WATCHDOG_FEATURE_FLAG = 'core.eventLoopWatchdog.enabled';
