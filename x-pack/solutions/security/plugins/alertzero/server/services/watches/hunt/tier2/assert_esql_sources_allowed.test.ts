@@ -124,6 +124,25 @@ describe('assertEsqlSourcesAllowed', () => {
       });
     });
 
+    it('returns not ok for an ENRICH policy even when its name matches the allowlist', () => {
+      expect(
+        assertEsqlSourcesAllowed('FROM logs-aws.x | ENRICH logs-policy ON host.name', ['logs-*'])
+      ).toEqual({ ok: false, reason: expect.stringContaining('ENRICH policy "logs-policy"') });
+    });
+
+    it.each([
+      'FROM remote:logs-events | LOOKUP JOIN _coordinator:logs-lookup ON id',
+      'FROM remote:logs-events | ENRICH _any:logs-policy ON host.name',
+      'FROM remote:logs-events | ENRICH _remote:logs-policy ON host.name',
+      'FROM remote:logs-events | ENRICH _coordinator:logs-policy ON host.name',
+      'FROM _coordinator:logs-events | LIMIT 1',
+    ])('returns not ok for an ES|QL mode prefix under a wildcard-cluster scope: %s', (query) => {
+      expect(assertEsqlSourcesAllowed(query, ['*:logs-*'])).toEqual({
+        ok: false,
+        reason: expect.any(String),
+      });
+    });
+
     it('names the command that reached out of scope, not just the source', () => {
       const result = assertEsqlSourcesAllowed(
         'FROM logs-aws.* | LOOKUP JOIN evil ON host.name',

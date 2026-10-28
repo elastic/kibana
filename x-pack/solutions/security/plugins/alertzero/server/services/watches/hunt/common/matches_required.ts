@@ -97,6 +97,9 @@ export const isIndexPatternAllowed = (candidate: string, allowedPatterns: string
   const { exclude, cluster, index } = parseIndexScopeEntry(candidate);
   if (exclude) return false;
   if (index === '' || index === '*' || index.includes(':')) return false;
+  // `_any:`, `_remote:` and `_coordinator:` are ES|QL mode prefixes, not cluster aliases;
+  // `_coordinator:` resolves on the local cluster, so no remote alias may cover them.
+  if (cluster?.startsWith('_')) return false;
 
   const entries = allowedPatterns.map(parseIndexScopeEntry);
   const positives = entries

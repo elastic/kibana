@@ -122,6 +122,14 @@ describe('cross-cluster names', () => {
     expect(isIndexPatternAllowed('*:logs-aws.*', ['*:logs-*'])).toBe(true);
   });
 
+  it.each(['_any', '_remote', '_coordinator'])(
+    'refuses the ES|QL %s: mode prefix even under a `*:` scope',
+    (prefix) => {
+      expect(isIndexPatternAllowed(`${prefix}:logs-lookup`, ['*:logs-*'])).toBe(false);
+      expect(isIndexPatternAllowed(`${prefix}:logs-lookup`, [`${prefix}:logs-*`])).toBe(false);
+    }
+  );
+
   it('refuses a whole remote cluster and a remote selector', () => {
     expect(isIndexPatternAllowed('infosec_zocalo:*', ['infosec_zocalo:*'])).toBe(false);
     expect(isIndexPatternAllowed('infosec_zocalo:logs-aws.cloudtrail*::failures', ccs)).toBe(false);

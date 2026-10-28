@@ -48,7 +48,11 @@ export const isAllowedEventSourceIndex = (value: string): boolean => {
   }
 
   const { cluster, index } = splitRemoteCluster(value);
-  if ((cluster !== undefined && !isPlainName(cluster)) || !isPlainName(index)) {
+  // A leading `_` is an ES|QL mode prefix (`_coordinator:`), not a remote cluster alias.
+  if (
+    (cluster !== undefined && (!isPlainName(cluster) || cluster.startsWith('_'))) ||
+    !isPlainName(index)
+  ) {
     return false;
   }
 

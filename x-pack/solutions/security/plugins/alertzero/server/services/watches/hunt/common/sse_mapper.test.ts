@@ -1288,6 +1288,39 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     expect(huntResultOf(entry).tier1.per_index.map((row) => row.index)).toContain(remoteAlerts);
   });
 
+  it('keeps the Tier 1 verdict of a technique entry whose only Tier 1 hit is a remote alert', () => {
+    const remoteAlerts = 'infosec_zocalo:.alerts-security.alerts-default';
+    const result = withBehaviors(
+      tier1Result({
+        hits: [
+          {
+            id: 'alert-remote',
+            index: remoteAlerts,
+            timestamp: '2026-07-30T13:06:00.000Z',
+            matched: { field: 'file.hash.md5', technique_id: 'T1552.001' },
+          },
+        ],
+        counts: { total_hits: 1, returned_hits: 1, affected_hosts: 0, affected_users: 0 },
+        per_index: [{ index: remoteAlerts, hit_count: 1, required: true }],
+      }),
+      [
+        behaviorFixture({
+          technique_id: 'T1552.001',
+          execution: { executed: true, row_count: 0, hit: false },
+        }),
+      ]
+    );
+
+    const entry = buildSseData(result, 'tr-1', { spaceId: 'default' }).find(
+      (candidate) => candidate.data.corroborated_technique_id === 'T1552.001'
+    );
+    if (!entry) throw new Error('expected a technique entry for T1552.001');
+    expect(entry.data.alerts ?? []).toEqual([]);
+    expect(huntResultOf(entry).has_confirmed_hit).toBe(true);
+    expect(huntResultOf(entry).hit_sources).toEqual(['tier1']);
+    expect(significantSecurityEventAttachmentDataSchema.safeParse(entry.data).success).toBe(true);
+  });
+
   it('drops a remote alert ref from Tier 2 hits too', () => {
     const remoteAlerts = 'infosec_zocalo:.alerts-security.alerts-default';
     const result = withBehaviors(tier1Result({}), [
