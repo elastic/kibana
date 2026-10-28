@@ -32,6 +32,25 @@ export const registerDetectionEngineWorkloadType = (core: CoreSetup): void => {
 export const createNotSetUpError = (): StatusError =>
   new StatusError('Nightshift is not set up in this space', 503);
 
+/** The id of the account the space's detection engine runs as, or `undefined` when not set up. */
+const getDetectionEngineAccountId = async ({
+  core,
+  spaceId,
+}: {
+  core: CoreStart;
+  spaceId: string;
+}): Promise<string | undefined> => {
+  if (!core.security.serviceAccounts.isEnabled()) {
+    return undefined;
+  }
+  const binding = await core.security.serviceAccounts.getWorkloadBinding({
+    workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
+    workloadId: DETECTION_ENGINE_WORKLOAD_ID,
+    spaceId,
+  });
+  return binding?.serviceAccountId;
+};
+
 /** Whether the space's detection engine has an account to run as. */
 export const isDetectionEngineSetUp = async ({
   core,
@@ -39,26 +58,21 @@ export const isDetectionEngineSetUp = async ({
 }: {
   core: CoreStart;
   spaceId: string;
-}): Promise<boolean> => {
-  if (!core.security.serviceAccounts.isEnabled()) {
-    return false;
-  }
-  const binding = await core.security.serviceAccounts.getWorkloadBinding({
-    workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
-    workloadId: DETECTION_ENGINE_WORKLOAD_ID,
-    spaceId,
-  });
-  return binding !== null;
-};
+}): Promise<boolean> => (await getDetectionEngineAccountId({ core, spaceId })) !== undefined;
 
-/** Runs `fn` with a request authenticated as the account bound to the space's detection engine. */
+/**
+ * Runs `fn` with a request authenticated as the account bound to the space's detection engine.
+ * With `expectedAccountId`, refuses when the space was rebound to another account in between.
+ */
 export const withDetectionEngineAccount = <T>({
   core,
   spaceId,
+  expectedAccountId,
   fn,
 }: {
   core: CoreStart;
   spaceId: string;
+  expectedAccountId?: string;
   fn: (accountRequest: KibanaRequest) => Promise<T>;
 }): Promise<T> =>
   core.security.serviceAccounts.withScopedRequestForWorkload(
@@ -66,10 +80,45 @@ export const withDetectionEngineAccount = <T>({
       workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
       workloadId: DETECTION_ENGINE_WORKLOAD_ID,
       spaceId,
+      expectedServiceAccountId: expectedAccountId,
       executionId: uuidv4(),
     },
     fn
   );
+
+/**
+ * Runs `fn` as the space's account, refused when the space is not set up. A user's request is
+ * swapped for one authenticated as the account. A service account's request is used as it is when
+ * it is the space's account, such as a bound workflow run calling back into Kibana, and refused
+ * otherwise: only that account may act for the detection engine.
+ */
+export const asDetectionEngineAccount = async <T>({
+  core,
+  request,
+  spaceId,
+  fn,
+}: {
+  core: CoreStart;
+  request: KibanaRequest;
+  spaceId: string;
+  fn: (accountRequest: KibanaRequest) => Promise<T>;
+}): Promise<T> => {
+  const accountId = await getDetectionEngineAccountId({ core, spaceId });
+  if (accountId === undefined) {
+    throw createNotSetUpError();
+  }
+  const principal = core.security.authc.getPrincipal(request);
+  if (principal?.type !== 'service_account') {
+    return withDetectionEngineAccount({ core, spaceId, expectedAccountId: accountId, fn });
+  }
+  if (principal.serviceAccountId !== accountId) {
+    throw new StatusError(
+      `Service account [${principal.serviceAccountId}] is not the detection engine account of this space`,
+      403
+    );
+  }
+  return fn(request);
+};
 
 /**
  * Turns the space's enabled rule-backed rules off and on again as the account, so their executor

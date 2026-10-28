@@ -113,7 +113,10 @@ import {
 } from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from './lib/workflows/managed_workflow_owner';
-import { registerDetectionEngineWorkloadType } from './lib/service_accounts/detection_engine_account';
+import {
+  asDetectionEngineAccount,
+  registerDetectionEngineWorkloadType,
+} from './lib/service_accounts/detection_engine_account';
 import { removeLegacyDefaultSpaceWorkflows } from './lib/workflows/setup/remove_legacy_default_space_workflows';
 import { registerSignificantEventsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { createTriggerEmitter } from './workflows/triggers/emit';
@@ -263,14 +266,21 @@ export class SignificantEventsPlugin
         }),
       });
 
-      const getAlertingV2RulesClient = async () =>
-        pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, space, {
+      const getRulesClientFor = async (rulesRequest: KibanaRequest) =>
+        pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(rulesRequest, space, {
           app: RULE_CREATION_APP,
         });
 
       const resolveSignificantEventsAlertingContext =
         createSignificantEventsAlertingContextResolver({
-          getAlertingV2RulesClient,
+          getAlertingV2RulesClient: () => getRulesClientFor(request),
+          withAccountRulesClient: (fn) =>
+            asDetectionEngineAccount({
+              core: coreStart,
+              request,
+              spaceId: space,
+              fn: async (accountRequest) => fn(await getRulesClientFor(accountRequest)),
+            }),
           cpsEnabled,
         });
 
