@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import { isComputedFeature } from '@kbn/significant-events-schema';
 import { isConditionComplete } from '@kbn/streamlang';
@@ -31,12 +32,16 @@ import {
   toTombstone,
 } from './serializers';
 import {
+  bulkCountsWithInferenceFallback,
   bulkCreateWithInferenceFallback,
   countRawBulkInferenceErrors,
 } from './bulk_with_inference_fallback';
 import { StatusError } from '../../errors/status_error';
 import type { RevisionReader } from './revision_reader';
 import type { KIBulkOperation, KnowledgeIndicatorDataStreamClient } from './types';
+
+/** An attempt that writes nothing still owes the retry loop a clean bulk response. */
+const EMPTY_BULK_RESPONSE: BulkResponse = { errors: false, items: [], took: 0 };
 
 export class IndicatorWriter {
   constructor(
@@ -51,8 +56,25 @@ export class IndicatorWriter {
     sourceId: string,
     operations: KIBulkOperation[]
   ): Promise<{ applied: number; skipped: number }> {
+    return bulkCountsWithInferenceFallback(
+      this.logger,
+      (options) => this.bulkAttempt(sourceId, operations, options),
+      { applied: 0, skipped: 0 }
+    );
+  }
+
+  /**
+   * One bulk attempt, from the exclude/restore/delete pre-reads through the write they
+   * imply. Callers that hold the source write lease own the retry loop and take the lease
+   * around a single attempt, so the inference backoff never runs while it is held.
+   */
+  async bulkAttempt(
+    sourceId: string,
+    operations: KIBulkOperation[],
+    { includeEmbedding }: { includeEmbedding: boolean }
+  ): Promise<{ counts: { applied: number; skipped: number }; response: BulkResponse }> {
     if (operations.length === 0) {
-      return { applied: 0, skipped: 0 };
+      return { counts: { applied: 0, skipped: 0 }, response: EMPTY_BULK_RESPONSE };
     }
 
     this.assertFeatureFiltersComplete(operations);
@@ -75,24 +97,22 @@ export class IndicatorWriter {
     const totalSkipped = excludeSkipped + restoreSkipped + deleteSkipped;
 
     if (totalApplied === 0) {
-      return { applied: 0, skipped: totalSkipped };
+      return { counts: { applied: 0, skipped: totalSkipped }, response: EMPTY_BULK_RESPONSE };
     }
 
-    await bulkCreateWithInferenceFallback(this.logger, ({ includeEmbedding }) =>
-      this.dataStreamClient.create({
-        space: this.space,
-        refresh: 'wait_for',
-        documents: this.buildBulkDocs(sourceId, operations, {
-          excludableLatest,
-          restorableLatest,
-          deletableOps,
-          includeEmbedding,
-          now,
-        }) as Array<StoredKnowledgeIndicator & Record<string, unknown>>,
-      })
-    );
+    const response = await this.dataStreamClient.create({
+      space: this.space,
+      refresh: 'wait_for',
+      documents: this.buildBulkDocs(sourceId, operations, {
+        excludableLatest,
+        restorableLatest,
+        deletableOps,
+        includeEmbedding,
+        now,
+      }) as Array<StoredKnowledgeIndicator & Record<string, unknown>>,
+    });
 
-    return { applied: totalApplied, skipped: totalSkipped };
+    return { counts: { applied: totalApplied, skipped: totalSkipped }, response };
   }
 
   /**

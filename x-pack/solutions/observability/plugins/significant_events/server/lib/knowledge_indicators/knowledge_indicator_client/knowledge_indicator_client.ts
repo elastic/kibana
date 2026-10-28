@@ -6,6 +6,7 @@
  */
 
 import type { ComposerSortShorthand } from '@elastic/esql';
+import type { Logger } from '@kbn/core/server';
 import {
   type Feature,
   type KnowledgeIndicator,
@@ -22,6 +23,7 @@ import {
   type KnowledgeIndicatorDataStreamClient,
   type RuleUnbackedFilter,
 } from './types';
+import { bulkCountsWithInferenceFallback } from './bulk_with_inference_fallback';
 import { RevisionReader } from './revision_reader';
 import { IndicatorWriter } from './indicator_writer';
 import { IndicatorReader } from './indicator_reader';
@@ -53,6 +55,7 @@ export class KnowledgeIndicatorClient {
   private readonly searcher: IndicatorSearcher;
   private readonly orchestrator: QueryRuleOrchestrator;
   private readonly ttlDays: number;
+  private readonly logger: Logger;
   private readonly withSourceWrite: NonNullable<KnowledgeIndicatorClientDeps['withSourceWrite']>;
 
   constructor(
@@ -65,6 +68,7 @@ export class KnowledgeIndicatorClient {
     > = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
   ) {
     this.withSourceWrite = deps.withSourceWrite ?? ((_sourceId, run) => run());
+    this.logger = deps.logger;
     const revisionReader = new RevisionReader(deps.esClient, deps.logger, deps.space);
     this.ttlDays = config.feature_ttl_days;
     this.writer = new IndicatorWriter(
@@ -99,9 +103,18 @@ export class KnowledgeIndicatorClient {
     const removesOnly = operations.every(
       (operation) => 'delete' in operation || 'exclude' in operation
     );
-    return this.withSourceWrite(sourceId, () => this.writer.bulk(sourceId, operations), {
-      allowDisabled: removesOnly,
-    });
+    // The lease is taken per attempt, so the inference backoff between attempts runs with it
+    // released. Held across the backoff it outlives the few seconds any other writer waits.
+    return bulkCountsWithInferenceFallback(
+      this.logger,
+      ({ includeEmbedding }) =>
+        this.withSourceWrite(
+          sourceId,
+          () => this.writer.bulkAttempt(sourceId, operations, { includeEmbedding }),
+          { allowDisabled: removesOnly }
+        ),
+      { applied: 0, skipped: 0 }
+    );
   }
 
   getDefaultExpiresAt(): string {
