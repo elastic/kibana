@@ -18,6 +18,13 @@ import { apiHasLastSavedChildState } from '../last_saved_child_state';
 import type { PresentationContainer } from '../presentation_container';
 export const UNSAVED_CHANGES_DEBOUNCE = 100;
 
+interface StateApiUnsavedChanges {
+  /**
+   * @deprecated Compare children with `compareSerializedState` instead. Only Canvas and the embeddable examples still use it.
+   */
+  hasUnsavedChanges$: PublishesUnsavedChanges['hasUnsavedChanges$'];
+}
+
 export const initializeStateApi = <StateType extends object = object>({
   uuid,
   applySerializedState,
@@ -31,7 +38,7 @@ export const initializeStateApi = <StateType extends object = object>({
   HasParentApi & {
     getComparators: () => StateComparators<StateType>;
     defaultState?: Partial<StateType>;
-  }): PublishesUnsavedChanges &
+  }): StateApiUnsavedChanges &
   HasSerializableState<StateType> &
   ComparesSerializedState<StateType> => {
   const compareSerializedState = (

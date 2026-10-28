@@ -13,6 +13,9 @@ export interface PublishesUnsavedChanges {
   hasUnsavedChanges$: Observable<boolean>; // Observable rather than publishingSubject because it should be derived.
 }
 
+/**
+ * @deprecated For embeddables. Compare children with `compareSerializedState` instead. Only Canvas and the embeddable examples still use it.
+ */
 export const apiPublishesUnsavedChanges = (api: unknown): api is PublishesUnsavedChanges => {
   return Boolean(api && (api as PublishesUnsavedChanges).hasUnsavedChanges$);
 };
