@@ -26,7 +26,10 @@ import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/ma
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
 import type { NightshiftInvestigationsConfig } from './config';
-import { InvestigationLocatorDefinition } from '../common/locators';
+import {
+  InvestigationLocatorDefinition,
+  NightshiftSettingsLocatorDefinition,
+} from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { createIsNightshiftEnabledSync } from './is_nightshift_enabled';
 import { createGatedSandboxStart } from './sandbox_gate';
@@ -36,6 +39,7 @@ import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_de
 import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
 import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/install_agent_optimizations';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
+import { createResolveHookWorkflowId } from './lib/service_account/resolve_hook_workflow_id';
 import {
   createInvestigatorServiceAccountService,
   type InvestigatorServiceAccountService,
@@ -78,7 +82,7 @@ import { setupNightshiftTelemetry } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import type { NightshiftAgentTypeOptions } from './agents/investigation';
-import { registerInvestigationAgentType } from './agents/investigation';
+import { registerInvestigationAgentType, type ResolveHookWorkflowId } from './agents/investigation';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
 import { registerAssistantAgentType } from './agents/assistant';
 import { createDecisionTreeTools } from './tools/decision_tree';
@@ -94,8 +98,6 @@ import {
 } from './tools/sandbox_bash/sandbox_output_redaction';
 import { createSandboxToolAvailability } from './tools/sandbox_bash/sandbox_tool_availability';
 import {
-  nightshiftSecretsEncryptionParams,
-  nightshiftSecretsSavedObjectType,
   nightshiftCustomContextSavedObjectType,
   nightshiftAutomationSavedObjectType,
   nightshiftAutomationBudgetSavedObjectType,
@@ -103,7 +105,10 @@ import {
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
 import { createOnboardingClient } from './onboarding/onboarding_client';
-import { createSandboxSecretsClient } from './sandbox_secrets';
+import {
+  createListSandboxConnectors,
+  createListSandboxConnectorTypes,
+} from './lib/list_sandbox_connectors';
 import { createCustomContextClient } from './custom_context';
 import type {
   InvestigationQuotaCallback,
@@ -127,6 +132,8 @@ export class NightshiftInvestigationsPlugin
     >
 {
   private readonly logger: Logger;
+  /** Hooks of the Nightshift agents run as the agent account in set-up spaces. */
+  private readonly resolveHookWorkflowId: ResolveHookWorkflowId;
   private workflowsManagement?: NightshiftInvestigationsSetupDeps['workflowsManagement'];
   private workflowsExtensionsStart?: NightshiftInvestigationsStartDeps['workflowsExtensions'];
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
@@ -142,7 +149,6 @@ export class NightshiftInvestigationsPlugin
   private uiSettings?: CoreStart['uiSettings'];
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
-  private encryptedSavedObjectsStart?: NightshiftInvestigationsStartDeps['encryptedSavedObjects'];
   private securityStart?: NightshiftInvestigationsStartDeps['security'];
   private security?: CoreStart['security'];
   private coreStart?: CoreStart;
@@ -159,6 +165,11 @@ export class NightshiftInvestigationsPlugin
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
+    this.resolveHookWorkflowId = createResolveHookWorkflowId({
+      isServiceAccountExecutionEnabled: () => this.security?.serviceAccounts.isEnabled() ?? false,
+      getWorkflowsManagement: () => this.workflowsManagement,
+      logger: this.logger.get('service_account'),
+    });
   }
 
   setup(
@@ -168,6 +179,9 @@ export class NightshiftInvestigationsPlugin
     this.workflowsManagement = plugins.workflowsManagement;
     const investigationLocator = plugins.share.url.locators.create(
       new InvestigationLocatorDefinition()
+    );
+    const settingsLocator = plugins.share.url.locators.create(
+      new NightshiftSettingsLocatorDefinition()
     );
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
     const isNightshiftEnabledSync = createIsNightshiftEnabledSync(core.getStartServices);
@@ -205,9 +219,7 @@ export class NightshiftInvestigationsPlugin
 
     core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
     core.savedObjects.registerType(nightshiftAutomationBudgetSavedObjectType);
-    core.savedObjects.registerType(nightshiftSecretsSavedObjectType);
     core.savedObjects.registerType(nightshiftCustomContextSavedObjectType);
-    plugins.encryptedSavedObjects?.registerType(nightshiftSecretsEncryptionParams);
 
     const customContextClient = createCustomContextClient({
       getDeps: () => ({
@@ -219,25 +231,21 @@ export class NightshiftInvestigationsPlugin
       }),
     });
 
-    const sandboxSecretsClient = createSandboxSecretsClient({
-      getDeps: () => ({
-        featureFlags: this.featureFlags,
-        savedObjects: this.savedObjects,
-        encryptedSavedObjects: this.encryptedSavedObjectsStart,
-        security: this.securityStart,
-        spaces: this.spaces,
-      }),
-      canEncrypt: plugins.encryptedSavedObjects?.canEncrypt ?? false,
-      logger: this.logger.get('sandbox_secrets'),
-    });
-
     const onboardingClient = createOnboardingClient({
       getDeps: () => ({
         workflowsManagement: this.workflowsManagement,
         spaces: this.spaces,
+        agentBuilder: this.agentBuilder,
+        agentAvailability: this.getInvestigationAvailability(),
       }),
-      listSandboxSecretKeys: (request) => sandboxSecretsClient.listKeysForSandbox(request),
       logger: this.logger.get('onboarding'),
+    });
+
+    const listSandboxConnectors = createListSandboxConnectors({
+      getActions: () => this.actionsStart,
+    });
+    const listSandboxConnectorTypes = createListSandboxConnectorTypes({
+      getActions: () => this.actionsStart,
     });
 
     const getTriggerEmitter = (request: KibanaRequest): TriggerEmitter | undefined =>
@@ -275,6 +283,7 @@ export class NightshiftInvestigationsPlugin
         telemetryConnectorId,
         getCustomContextInstructions: ({ request, spaceId }) =>
           customContextClient.getInstructions(request, spaceId),
+        resolveHookWorkflowId: this.resolveHookWorkflowId,
         logger: this.logger.get('custom_context'),
       };
       registerInvestigationAgentType(plugins.agentBuilder, {
@@ -282,7 +291,9 @@ export class NightshiftInvestigationsPlugin
         decisionTreesEnabled: this.decisionTreesEnabled,
       });
       if (this.decisionTreesEnabled) {
-        registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
+        registerDecisionTreeReinforcementAgentType(plugins.agentBuilder, {
+          resolveHookWorkflowId: this.resolveHookWorkflowId,
+        });
       }
       if (plugins.sandbox?.isAvailable) {
         registerAssistantAgentType(plugins.agentBuilder, nightshiftAgentOptions);
@@ -295,7 +306,7 @@ export class NightshiftInvestigationsPlugin
         // Tools are registered in setup() but only run after start(), so read start deps lazily.
         const getSandboxStart = getGatedSandboxStart;
         const sandboxWorkspaceManager = createSandboxWorkspaceManager({
-          getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
+          getDeps: () => ({ actions: this.actionsStart }),
           telemetryConnectorId,
           telemetryReadableIndices: config.sandbox?.telemetry_readable_indices,
           logger: sandboxLogger,
@@ -307,7 +318,7 @@ export class NightshiftInvestigationsPlugin
         const outputRedactionLogger = sandboxLogger.get('output_redaction');
         const redaction = {
           getOutputRedactor: createSandboxOutputRedactorProvider({
-            getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
+            getDeps: () => ({ actions: this.actionsStart }),
           }),
           logger: outputRedactionLogger,
         };
@@ -328,7 +339,6 @@ export class NightshiftInvestigationsPlugin
             getSandboxStart,
             sandboxWorkspaceManager,
             resolveConnectorCredentials,
-            sandboxSecretsClient,
             logger: sandboxLogger,
           })
         );
@@ -378,7 +388,9 @@ export class NightshiftInvestigationsPlugin
             this.getInvestigationsClient,
             this.getAutomationsSoClient,
             this.getAlertsClient,
-            this.getEpisodeLookup
+            this.getEpisodeLookup,
+            () => this.actionsStart,
+            settingsLocator
           )
         );
         plugins.workflowsExtensions.registerStepDefinition(
@@ -509,7 +521,8 @@ export class NightshiftInvestigationsPlugin
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
           isCortexEnabled: () => this.cortexEnabled,
-          sandboxSecretsClient,
+          listSandboxConnectors,
+          listSandboxConnectorTypes,
           customContextClient,
           onboardingClient,
           getCortexPageStore: (request: KibanaRequest) => {
@@ -606,7 +619,6 @@ export class NightshiftInvestigationsPlugin
     this.uiSettings = coreStart.uiSettings;
     this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
-    this.encryptedSavedObjectsStart = plugins.encryptedSavedObjects;
     this.securityStart = plugins.security;
     this.security = coreStart.security;
     this.coreStart = coreStart;

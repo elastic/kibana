@@ -11,7 +11,7 @@ import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server'
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
 import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader, UIAM_ERROR_CODES } from '@kbn/core-security-server';
 import type {
   AuditLogger,
   AuditServiceSetup,
@@ -127,16 +127,13 @@ const uiamErrorResponseSchema = z.object({
  * gets a 200 and is limited at runtime instead.
  */
 const CREATE_REFUSALS: Record<string, string> = {
-  // CREATE_SA_RESULTS_IN_NO_PRIVS
-  '0x138916':
+  [UIAM_ERROR_CODES.CREATE_SA_RESULTS_IN_NO_PRIVS]:
     'your credential grants no application roles in this organization. An account is limited to ' +
     "the privileges of both its own roles and its creator's, so it would have none",
-  // ALREADY_DOWNSCOPED
-  '0x91249F':
+  [UIAM_ERROR_CODES.ALREADY_DOWNSCOPED]:
     'the credential making this request is itself downscoped, and an account cannot be downscoped ' +
     'twice. Make the request from a user session',
-  // CREATE_SA_SERVICE_ACCOUNT_NOT_SUPPORTED
-  '0x97E147':
+  [UIAM_ERROR_CODES.SA_SERVICE_ACCOUNT_NOT_SUPPORTED]:
     'a service account cannot create service accounts. Make the request from a user session',
 };
 
@@ -507,13 +504,10 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   }
 }
 
-/** `ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND` */
-const SERVICE_ACCOUNT_NOT_FOUND_CODE = '0xEDF789';
-
-const TERMINAL_EXCHANGE_CODES = new Set([
-  SERVICE_ACCOUNT_NOT_FOUND_CODE,
-  '0x3B8626', // ORGANIZATION_SERVICE_ACCOUNT_REVOKED
-  '0x93B121', // AUTHZ_DENY
+const TERMINAL_EXCHANGE_CODES = new Set<string>([
+  UIAM_ERROR_CODES.ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND,
+  UIAM_ERROR_CODES.ORGANIZATION_SERVICE_ACCOUNT_REVOKED,
+  UIAM_ERROR_CODES.AUTHZ_DENY,
 ]);
 const RETRYABLE_EXCHANGE_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
 const RETRYABLE_TRANSPORT_CODES = new Set([
@@ -553,7 +547,8 @@ const getNotFound = (id: string, error: unknown): Boom.Boom | null => {
     return null;
   }
   const parsed = uiamErrorResponseSchema.safeParse(error.output.payload);
-  return parsed.success && parsed.data.error.code === SERVICE_ACCOUNT_NOT_FOUND_CODE
+  return parsed.success &&
+    parsed.data.error.code === UIAM_ERROR_CODES.ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND
     ? Boom.notFound(`Service account [${id}] was not found`)
     : null;
 };

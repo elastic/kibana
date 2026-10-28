@@ -1307,6 +1307,8 @@
       "@kbn/eslint-config/*": ["./packages/kbn-eslint-config/*"],
       "@kbn/eslint-plugin-alerting-v2": ["./packages/kbn-eslint-plugin-alerting-v2"],
       "@kbn/eslint-plugin-alerting-v2/*": ["./packages/kbn-eslint-plugin-alerting-v2/*"],
+      "@kbn/eslint-plugin-compat": ["./packages/kbn-eslint-plugin-compat"],
+      "@kbn/eslint-plugin-compat/*": ["./packages/kbn-eslint-plugin-compat/*"],
       "@kbn/eslint-plugin-disable": ["./packages/kbn-eslint-plugin-disable"],
       "@kbn/eslint-plugin-disable/*": ["./packages/kbn-eslint-plugin-disable/*"],
       "@kbn/eslint-plugin-eslint": ["./packages/kbn-eslint-plugin-eslint"],

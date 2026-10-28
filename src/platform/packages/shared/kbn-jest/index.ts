@@ -20,6 +20,7 @@ export {
 export type { JestConfigResult, JestValidationResult } from './src/run_contract';
 
 export { runJestAll } from './src/run_all';
+export { runMoonJestProject } from './src/run_moon_project';
 
 export { runJestNegative, NEGATIVE_SCENARIOS, evaluateScenario } from './src/run_negative';
 export type { NegativeScenario, ScenarioEvaluation, ScenarioOutcome } from './src/run_negative';

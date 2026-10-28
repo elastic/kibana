@@ -135,6 +135,8 @@ export type EscalationConversationSummary = ConversationWithoutRoundsWithPermiss
   entity_types?: Record<string, string>;
   /** Display name by entity id, for the ids that have one. */
   entity_names?: Record<string, string>;
+  /** True when the caller owns the escalation or is a listed participant. */
+  can_link?: boolean;
 };
 
 export interface ListEscalationsResponse {

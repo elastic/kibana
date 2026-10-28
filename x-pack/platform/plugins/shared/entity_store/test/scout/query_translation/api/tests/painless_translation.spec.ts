@@ -18,7 +18,7 @@ import { deriveUserEntityPreAggMetadata } from '../fixtures/user_entity_pre_agg_
 import {
   USER_TS_EXTRACTION_CASES,
   type UserTsExtractionCase,
-} from '../fixtures/user_ts_extraction_cases';
+} from '../../../../fixtures/user_ts_extraction_cases';
 import { getEuidPainlessRuntimeMapping } from '../../../../../common/domain/euid/painless';
 import { getEuidFromObject } from '../../../../../common/domain/euid/memory';
 import { getBuiltInEntityDefinition } from '../../../../../common/domain/definitions/registry';

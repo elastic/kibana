@@ -26,6 +26,7 @@ describe('source_create tool', () => {
     description: 'Checkout logs',
     tags: ['prod'],
     esql: 'FROM logs-checkout-*',
+    enabled: true,
   };
   const checkout = sourceWithSlug('checkout', { ...params, type: 'logs' });
 
