@@ -79,6 +79,7 @@ const ParentForm = () => {
     <FormProvider {...form}>
       <ConnectorSwitcher connector={connector} onChange={setConnector} />
       <ConnectorFieldsForm connector={connector} isInSidebarForm={false} />
+      <span data-test-subj="isValid">{String(form.formState.isValid)}</span>
       <button type="button" onClick={form.handleSubmit(onValid)}>
         {'Submit'}
       </button>
@@ -145,6 +146,19 @@ describe('connector fields contract', () => {
     expect(getConnectorDefaultFields(connectors[0])).toEqual({ name: '' });
     expect(getConnectorDefaultFields(connectors[2])).toBeNull();
     expect(getConnectorDefaultFields(null)).toBeNull();
+  });
+
+  it('drops the previous connector errors and revalidates when switching to no connector', async () => {
+    render(<ParentForm />);
+
+    await userEvent.click(await screen.findByText('Submit'));
+    expect(await screen.findByText('Name is required')).toBeInTheDocument();
+    expect(screen.getByTestId('isValid')).toHaveTextContent('false');
+
+    await userEvent.selectOptions(screen.getByLabelText('connector'), '.none');
+
+    await waitFor(() => expect(screen.queryByText('Name is required')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.getByTestId('isValid')).toHaveTextContent('true'));
   });
 
   it('validates the mounted connector fields through its schema', async () => {
