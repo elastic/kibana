@@ -6,13 +6,13 @@
  */
 
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { isEqual, pickBy } from 'lodash';
+import { isEqual, mapValues, pickBy } from 'lodash';
 import type {
   MappedComponentStats,
   MappedStatsResponse,
 } from '../../../services/unit_stats_client/types';
 import { STATS_REQUEST_FAILED_ERROR_CODE } from './constants';
-import { pruneUnusedComponents } from './stats_registration';
+import { hasRegistrants, pruneUnusedComponents } from './stats_registration';
 import type { ComponentRecord, StatsBatch, StatsComponents, StatsEntry } from './types';
 
 const LOADING_ENTRY: StatsEntry<never> = { status: 'loading' };
@@ -178,3 +178,17 @@ export const dropRemovedComponents = (
     destination: keepIdsKind(components.destination, componentIds),
     processor: keepIdsKind(components.processor, componentIds),
   });
+
+/** Keeps who shows the component and drops its value, so it is requested again. */
+const clearValuesKind = <TStats>(record: ComponentRecord<TStats>): ComponentRecord<TStats> =>
+  mapValues(pickBy(record, hasRegistrants), ({ registrants }) => ({ registrants }));
+
+/**
+ * Drops every value, because they describe a window that is no longer the one shown. A component
+ * that someone shows stays, without a value, so it is due. A component that only held a cached
+ * value is dropped.
+ */
+export const clearValues = (components: StatsComponents): StatsComponents => ({
+  destination: clearValuesKind(components.destination),
+  processor: clearValuesKind(components.processor),
+});

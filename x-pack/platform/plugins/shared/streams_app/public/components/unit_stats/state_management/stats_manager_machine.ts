@@ -9,6 +9,7 @@ import type { StreamsUnit } from '@kbn/streams-schema';
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
+import type { MachineImplementationsFrom } from 'xstate';
 import { assign, fromEventObservable, fromPromise, raise, setup } from 'xstate';
 import type {
   MappedStatsResponse,
@@ -22,7 +23,13 @@ import {
   STATS_POLL_INTERVAL_MS,
 } from './constants';
 import { isBatchWanted, planBatches } from './stats_batching';
-import { markBatchFailed, markBatchLoading, mergeFetchedStats } from './stats_entries';
+import {
+  clearValues,
+  dropRemovedComponents,
+  markBatchFailed,
+  markBatchLoading,
+  mergeFetchedStats,
+} from './stats_entries';
 import { registerComponent, unregisterComponent } from './stats_registration';
 import type { StatsBatch, StatsComponents } from './types';
 
@@ -206,6 +213,12 @@ export const statsManagerMachine = setup({
     })),
     clearRequest: assign({ request: NO_REQUEST }),
     resetFailures: assign({ consecutiveFailures: 0 }),
+    /** The window changed, so every value describes the old range. */
+    clearValues: assign(({ context }) => ({ components: clearValues(context.components) })),
+    /** A unit was saved. A component that is no longer in it is dropped. */
+    dropRemovedComponents: assign(({ context }, params: { componentIds: string[] }) => ({
+      components: dropRemovedComponents(context.components, new Set(params.componentIds)),
+    })),
   },
   guards: {
     pollingEnabled: ({ context }) => context.pollIntervalMs !== undefined,
@@ -236,6 +249,13 @@ export const statsManagerMachine = setup({
       actions: {
         type: 'unregister',
         params: ({ event }) => ({ ref: event.ref, registrant: event.registrant }),
+      },
+    },
+    // A request that only asked for dropped components is then unwanted, and `fetching` leaves.
+    'stats.unitPersisted': {
+      actions: {
+        type: 'dropRemovedComponents',
+        params: ({ event }) => ({ componentIds: event.componentIds }),
       },
     },
   },
@@ -272,6 +292,7 @@ export const statsManagerMachine = setup({
             'stats.fetchDue': { guard: 'hasDueBatch', target: 'fetching' },
             'stats.refresh': { guard: 'hasDueBatch', target: 'fetching' },
             'stats.poll': { guard: 'hasDueBatch', target: 'fetching' },
+            'stats.windowChanged': { actions: ['clearValues', raise({ type: 'stats.fetchDue' })] },
           },
         },
         fetching: {
@@ -308,6 +329,11 @@ export const statsManagerMachine = setup({
             // left to finish. Only the user's refresh replaces it. A poll that replaced it would
             // restart a slow request on every tick, and it would never finish.
             'stats.refresh': { guard: 'hasDueBatch', target: 'fetching', reenter: true },
+            // The request in flight is for the old window, so it is stopped and asked again.
+            'stats.windowChanged': {
+              target: 'idle',
+              actions: ['clearRequest', 'clearValues', raise({ type: 'stats.fetchDue' })],
+            },
           },
         },
       },
@@ -338,5 +364,24 @@ export const statsManagerMachine = setup({
         },
       },
     },
+  },
+});
+
+export interface StatsManagerDeps {
+  client: UnitStatsClient;
+  /**
+   * The shared time state, which sends `stats.windowChanged` when it changes. A view without a
+   * picker, such as the Map, passes an observable that never emits.
+   */
+  timeState$: Observable<unknown>;
+}
+
+export const createStatsManagerImplementations = ({
+  client,
+  timeState$,
+}: StatsManagerDeps): MachineImplementationsFrom<typeof statsManagerMachine> => ({
+  actors: {
+    fetchStats: createFetchStatsActor({ client }),
+    timeUpdates: createTimeUpdatesActor({ timeState$ }),
   },
 });
