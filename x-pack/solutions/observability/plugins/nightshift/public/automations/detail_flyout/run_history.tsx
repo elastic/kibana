@@ -97,6 +97,12 @@ const getSkippedRunSummary = (
       values: { source },
     });
   }
+  if (skipReason === 'no_open_investigation') {
+    return i18n.translate('xpack.nightshift.automations.detail.skippedNoOpenInvestigationSummary', {
+      defaultMessage: '{source} · Alert recovered with no open investigations to link it to',
+      values: { source },
+    });
+  }
   return i18n.translate('xpack.nightshift.automations.detail.skippedRunSummary', {
     defaultMessage: '{source} · Daily trigger limit of {limit} reached',
     values: { source, limit: dailyLimit ?? '—' },

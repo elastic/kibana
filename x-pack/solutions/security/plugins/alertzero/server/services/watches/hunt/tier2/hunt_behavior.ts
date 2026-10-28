@@ -19,6 +19,7 @@ import type {
 } from '@kbn/alertzero-common';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { HuntBehaviorModels } from '../types';
+import { isIndexExclusion } from '../../../../../common/remote_cluster';
 import { buildMatchesRequired } from '../common/matches_required';
 import {
   huntBehaviorLlmExtractionSchema,
@@ -374,7 +375,7 @@ const executeValidatedEsql = async ({
  */
 const resolveGenerationIndex = (allowedIndices: string[]): string => {
   // Exclusion entries (`-logs-elastic_agent*`) belong to the search, not to a FROM.
-  const positives = allowedIndices.filter((pattern) => !pattern.startsWith('-'));
+  const positives = allowedIndices.filter((pattern) => !isIndexExclusion(pattern));
   return positives.length > 0 ? positives.join(',') : DEFAULT_GENERATION_INDEX;
 };
 

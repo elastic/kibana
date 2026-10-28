@@ -194,6 +194,12 @@ export class InferencePlugin
       await installTokenUsageDashboard(savedObjectsImporter, this.logger);
     };
 
+    // Apply mapping changes to an existing data stream at startup, so that during a rolling upgrade
+    // the mappings are in place before any node writes documents with new fields.
+    this.tokenUsageLogger.updateExistingDataStream().catch((e) => {
+      this.logger.error(`Failed to update token usage data stream: ${e.message}`);
+    });
+
     installDashboardIfTokenUsageTrackingEnabled().catch((e) => {
       this.logger.error(`Failed to install token usage dashboard: ${e.message}`);
     });

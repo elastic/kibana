@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { lookup as dnsLookup } from 'dns';
 import { isIPv4, isIPv6 } from 'net';
+import type { LookupFunction } from 'net';
 import type { UptimeConfig } from '../../../config';
 
 const stripBrackets = (host: string): string => host.replace(/^\[|\]$/g, '');
@@ -35,7 +37,7 @@ export const isBlockedAddress = (rawIp: string): boolean => {
   );
 };
 
-const isLoopbackHost = (hostname: string): boolean => {
+export const isLoopbackHost = (hostname: string): boolean => {
   const host = stripBrackets(hostname).toLowerCase();
   return host === 'localhost' || host === '::1' || (isIPv4(host) && host.startsWith('127.'));
 };
@@ -63,6 +65,9 @@ export const validateVaultAddress = (value: string): string | undefined => {
   return undefined;
 };
 
+export const LOOPBACK_NOT_TESTABLE_MESSAGE =
+  'A loopback address refers to the host the agent runs on, so it cannot be tested from Kibana. Save the connection and check it from the agent.';
+
 const ALLOW_ANY_HOST = '*';
 
 export const getAllowedHosts = (config: UptimeConfig): readonly string[] =>
@@ -87,4 +92,20 @@ export const hostNotAllowedMessage = (address: string): string => {
     // keep the raw value
   }
   return `Vault host "${host}" is not added to the Kibana config xpack.synthetics.secretConnections.allowedHosts`;
+};
+
+/** DNS lookup that refuses names resolving to a blocked address (guards against rebinding). */
+export const guardedLookup: LookupFunction = (hostname, options, callback) => {
+  dnsLookup(hostname, options, (err, address, family) => {
+    if (err) {
+      callback(err, address, family);
+      return;
+    }
+    const addresses = Array.isArray(address) ? address.map((a) => a.address) : [address];
+    if (addresses.some(isBlockedAddress)) {
+      callback(new Error('address resolves to a blocked link-local IP'), '', 0);
+      return;
+    }
+    callback(null, address, family);
+  });
 };

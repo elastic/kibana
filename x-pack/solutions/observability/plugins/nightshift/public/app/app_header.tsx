@@ -127,7 +127,7 @@ export function NightshiftAppHeader({
   const menu = useMemo<AppMenuConfig>(
     () => ({
       items: [
-        // Landing: Automations and Detections buttons; Knowledge and Settings in overflow.
+        // Landing: Automations and Detections buttons; Settings in overflow.
         ...(isLandingPage && onAutomationsClick && automationsHref
           ? [
               {
@@ -158,7 +158,8 @@ export function NightshiftAppHeader({
               },
             ]
           : []),
-        ...(isLandingPage && onKnowledgeClick && knowledgeHref
+        // Landing and Detections: Knowledge in overflow.
+        ...((isLandingPage || isDetectionPage) && onKnowledgeClick && knowledgeHref
           ? [
               {
                 id: 'nightshiftKnowledge',

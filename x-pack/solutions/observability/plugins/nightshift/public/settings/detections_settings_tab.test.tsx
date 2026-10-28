@@ -27,6 +27,7 @@ let mockRunLimitsIsDirty = false;
 let mockTokenTrackingIsDirty = false;
 let mockBlocksActivity = false;
 let mockRunLimitGroups: readonly string[] = [];
+let mockRunLimitExhaustionCallouts: string | undefined;
 
 jest.mock('@kbn/unsaved-changes-prompt', () => ({
   useUnsavedChangesPrompt: jest.fn(),
@@ -96,13 +97,22 @@ jest.mock('./components/use_token_tracking_form', () => ({
   }),
 }));
 jest.mock('./components/run_limits_section', () => ({
-  RunLimitsSection: ({ onConfirmSave }: { onConfirmSave: () => Promise<void> }) => (
-    <>
-      <button data-test-subj="runLimitsConfirmStub" onClick={() => void onConfirmSave()}>
-        Confirm run limits
-      </button>
-    </>
-  ),
+  RunLimitsSection: ({
+    exhaustionCallouts,
+    onConfirmSave,
+  }: {
+    exhaustionCallouts: string;
+    onConfirmSave: () => Promise<void>;
+  }) => {
+    mockRunLimitExhaustionCallouts = exhaustionCallouts;
+    return (
+      <>
+        <button data-test-subj="runLimitsConfirmStub" onClick={() => void onConfirmSave()}>
+          Confirm run limits
+        </button>
+      </>
+    );
+  },
 }));
 jest.mock('./components/use_run_limits_form', () => ({
   useRunLimitsForm: ({ groups }: { groups: readonly string[] }) => {
@@ -225,6 +235,7 @@ describe('DetectionsSettingsTab', () => {
     mockTokenTrackingIsDirty = false;
     mockBlocksActivity = false;
     mockRunLimitGroups = [];
+    mockRunLimitExhaustionCallouts = undefined;
     mockContinuousSave.mockResolvedValue(undefined);
     mockRunLimitsRequestSave.mockResolvedValue('saved');
     mockRunLimitsConfirmAndSave.mockResolvedValue('saved');
@@ -248,6 +259,7 @@ describe('DetectionsSettingsTab', () => {
       'Detection process'
     );
     expect(mockRunLimitGroups).toEqual(['detection', 'ki_extraction']);
+    expect(mockRunLimitExhaustionCallouts).toBe('groups');
   });
 
   it('saves run limits, activity settings, and token tracking through one bottom bar', async () => {
@@ -392,7 +404,7 @@ describe('DetectionsSettingsTab', () => {
   it('uses the defaults when the stored tuning configuration is invalid', () => {
     setup({
       isDeveloperMode: true,
-      tuningConfig: JSON.stringify({ sample_size: 999 }),
+      tuningConfig: JSON.stringify({ rrf_rank_constant: 999 }),
     });
 
     fireEvent.click(screen.getByTestId('nightshiftSettingsTuningEditButton'));
@@ -407,7 +419,7 @@ describe('DetectionsSettingsTab', () => {
     fireEvent.click(screen.getByTestId('nightshiftSettingsTuningEditButton'));
 
     fireEvent.change(screen.getByTestId('streams-settings-tuning-editor'), {
-      target: { value: 'sample_size: 99' },
+      target: { value: 'rrf_rank_constant: 10' },
     });
 
     expect(
@@ -431,7 +443,7 @@ describe('DetectionsSettingsTab', () => {
       .value;
 
     fireEvent.change(screen.getByTestId('streams-settings-tuning-editor'), {
-      target: { value: 'sample_size: 99' },
+      target: { value: 'rrf_rank_constant: 10' },
     });
     fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
 
@@ -447,7 +459,7 @@ describe('DetectionsSettingsTab', () => {
       .value;
 
     fireEvent.change(screen.getByTestId('streams-settings-tuning-editor'), {
-      target: { value: 'sample_size: 99' },
+      target: { value: 'rrf_rank_constant: 10' },
     });
     expect(screen.getByTestId('streams-settings-tuning-editor')).not.toHaveValue(savedYaml);
     expect(
@@ -493,7 +505,7 @@ describe('DetectionsSettingsTab', () => {
     fireEvent.click(screen.getByTestId('nightshiftSettingsTuningEditButton'));
 
     fireEvent.change(screen.getByTestId('streams-settings-tuning-editor'), {
-      target: { value: 'sample_size: 99' },
+      target: { value: 'rrf_rank_constant: 10' },
     });
 
     mockUseDeveloperMode.mockReturnValue({
@@ -519,7 +531,9 @@ describe('DetectionsSettingsTab', () => {
     );
 
     fireEvent.click(screen.getByTestId('nightshiftSettingsTuningEditButton'));
-    expect(screen.getByTestId('streams-settings-tuning-editor')).toHaveValue('sample_size: 99');
+    expect(screen.getByTestId('streams-settings-tuning-editor')).toHaveValue(
+      'rrf_rank_constant: 10'
+    );
   });
 
   it('keeps advanced schedule fields collapsed until requested', () => {
