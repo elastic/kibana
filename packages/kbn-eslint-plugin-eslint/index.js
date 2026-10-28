@@ -50,6 +50,7 @@ module.exports = eslintCompatPlugin({
     no_wrapped_error_in_logger: require('./rules/no_wrapped_error_in_logger'),
     no_sync_import_from_plugin: require('./rules/no_sync_import_from_plugin'),
     no_npx_playwright: require('./rules/no_npx_playwright'),
+    no_redundant_link_navigation: require('./rules/no_redundant_link_navigation'),
     no_viz_naming: require('./rules/no_viz_naming'),
   },
 });

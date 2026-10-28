@@ -28,6 +28,7 @@ export const kibanaRules: DummyRuleMap = {
   '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
   '@kbn/eslint/no_wrapped_error_in_logger': 'error',
   '@kbn/eslint/no_npx_playwright': 'error',
+  '@kbn/eslint/no_redundant_link_navigation': 'warn',
   '@kbn/eslint/no_feature_flag_snapshot': [
     'error',
     {

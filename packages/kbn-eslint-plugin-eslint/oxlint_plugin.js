@@ -32,6 +32,7 @@ module.exports = eslintCompatPlugin({
     require_kibana_feature_privileges_naming: require('./rules/require_kibana_feature_privileges_naming'),
     deployment_agnostic_test_context: require('./rules/deployment_agnostic_test_context'),
     no_sync_import_from_plugin: require('./rules/no_sync_import_from_plugin'),
+    no_redundant_link_navigation: require('./rules/no_redundant_link_navigation'),
     no_viz_naming: require('./rules/no_viz_naming'),
     scout_no_describe_configure: require('./rules/scout_no_describe_configure'),
     scout_prefer_both_arch_tags: require('./rules/scout_prefer_both_arch_tags'),
