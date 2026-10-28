@@ -158,10 +158,18 @@ export const DashboardListing = ({
     ]
   );
 
-  const onImportSuccess = useCallback((id: string, title: string) => {
-    setRefreshListBouncer((b) => !b);
-    coreServices.notifications.toasts.addSuccess(importDashboardJsonStrings.getSuccessToast(title));
-  }, []);
+  const onImportSuccess = useCallback(
+    (id: string, title: string) => {
+      // Only refresh the Dashboards table: importing a dashboard should not affect other registered tabs.
+      if (activeTabId === DASHBOARD_APP_ID) {
+        setRefreshListBouncer((b) => !b);
+      }
+      coreServices.notifications.toasts.addSuccess(
+        importDashboardJsonStrings.getSuccessToast(title)
+      );
+    },
+    [activeTabId]
+  );
 
   const createDashboardAction = useCallback(() => {
     if (useSessionStorageIntegration && getDashboardBackupService().dashboardHasUnsavedEdits()) {
