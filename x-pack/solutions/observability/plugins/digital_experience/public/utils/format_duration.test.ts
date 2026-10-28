@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { formatDurationMs } from './format_duration';
 
 describe('formatDurationMs', () => {
@@ -18,5 +19,17 @@ describe('formatDurationMs', () => {
     expect(formatDurationMs(1000)).toBe('1.00 s');
     expect(formatDurationMs(2412.5)).toBe('2.41 s');
     expect(formatDurationMs(60_000)).toBe('60.00 s');
+  });
+
+  it("uses the locale's decimal separator once the message is translated", () => {
+    i18n.init({
+      locale: 'de-DE',
+      messages: { 'xpack.digitalExperience.duration.seconds': '{value, number, ::.00} s' },
+    });
+    try {
+      expect(formatDurationMs(2412.5)).toBe('2,41 s');
+    } finally {
+      i18n.init({ locale: 'en', messages: {} });
+    }
   });
 });

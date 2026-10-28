@@ -101,7 +101,7 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+      <EuiFlexGroup gutterSize="s" alignItems="flexStart">
         <EuiFlexItem grow={false}>
           <EuiFilterGroup>
             <EnvironmentFilter

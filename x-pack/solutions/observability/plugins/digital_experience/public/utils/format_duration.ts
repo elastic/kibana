@@ -17,6 +17,6 @@ export const formatDurationMs = (milliseconds: number): string =>
         values: { value: Math.round(milliseconds) },
       })
     : i18n.translate('xpack.digitalExperience.duration.seconds', {
-        defaultMessage: '{value} s',
-        values: { value: (milliseconds / ONE_SECOND_MS).toFixed(2) },
+        defaultMessage: '{value, number, ::.00} s',
+        values: { value: milliseconds / ONE_SECOND_MS },
       });
