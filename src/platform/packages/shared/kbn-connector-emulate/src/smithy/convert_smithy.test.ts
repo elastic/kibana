@@ -644,4 +644,58 @@ describe('convertSmithy', () => {
       version: '2024-01-01',
     });
   });
+
+  it("keeps an XML payload structure's own namespace over the service's", () => {
+    const service = (payload: string) => ({
+      smithy: '2.0' as const,
+      shapes: {
+        [id('Things')]: {
+          type: 'service' as const,
+          version: '2024-01-01',
+          operations: [ref('GetThing')],
+          traits: {
+            'aws.api#service': { sdkId: 'Things', endpointPrefix: 'things' },
+            'aws.auth#sigv4': { name: 'things' },
+            'aws.protocols#restXml': {},
+            'smithy.api#xmlNamespace': { uri: 'http://things.example.com/service/' },
+          },
+        },
+        [id('GetThing')]: {
+          type: 'operation' as const,
+          output: ref('GetThingOutput'),
+          traits: { 'smithy.api#http': { method: 'GET', uri: '/thing', code: 200 } },
+        },
+        [id('GetThingOutput')]: {
+          type: 'structure' as const,
+          members: {
+            thing: { target: id('Thing'), traits: { 'smithy.api#httpPayload': {} } },
+          },
+        },
+        [id('Thing')]: {
+          type: 'structure' as const,
+          members: { name: { target: 'smithy.api#String' } },
+          traits: {
+            'smithy.api#xmlNamespace':
+              payload === 'own' ? { uri: 'http://things.example.com/thing/' } : undefined,
+          },
+        },
+      },
+    });
+    const responseXml = (payload: string) => {
+      const converted = convertSmithy(service(payload) as SmithyModel) as unknown as {
+        paths: Record<
+          string,
+          { get: { responses: Record<string, { content: Record<string, { schema: unknown }> }> } }
+        >;
+      };
+      return converted.paths['/thing'].get.responses['200'].content['application/xml'].schema;
+    };
+
+    expect(responseXml('own')).toMatchObject({
+      xml: { namespace: 'http://things.example.com/thing/' },
+    });
+    expect(responseXml('service')).toMatchObject({
+      xml: { namespace: 'http://things.example.com/service/' },
+    });
+  });
 });

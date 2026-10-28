@@ -181,10 +181,10 @@ export const convertSmithy = (
       };
     }
     const schema = converter.toSchema(member.target, 'body', member.traits);
-    // The target's own `xml` names the root, unless the member renames it; the wrapper adds
-    // the service's namespace.
+    // The target's own `xml` names the root, unless the member renames it; the wrapper takes the
+    // target's namespace, else the service's.
     const memberXmlName = member.traits?.['smithy.api#xmlName'];
-    const root = toXmlRoot(undefined, {});
+    const root = toXmlRoot(member.target, {});
     return {
       [documentType]: {
         schema:
@@ -308,7 +308,7 @@ export const convertSmithy = (
         ? {
             url: `https://${hostPrefix}${endpointPrefix}.{region}.amazonaws.com`,
             variables: Object.fromEntries([
-              ...[...hostPrefix.matchAll(/\{([^}]+)\}/g)].map(([, label]) => [
+              ...[...hostPrefix.matchAll(/\{([^{}]+)\}/g)].map(([, label]) => [
                 label,
                 { default: 'example' },
               ]),
