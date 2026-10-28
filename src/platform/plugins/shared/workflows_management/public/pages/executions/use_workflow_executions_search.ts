@@ -32,6 +32,30 @@ export interface UseWorkflowExecutionsSearchParams {
   enabled?: boolean;
 }
 
+const STRUCTURED_INCLUDE_FIELDS = new Set(['status', 'executedBy']);
+
+const readMatchPhraseValue = (filter: Filter, fieldKey: string): unknown => {
+  const matchPhrase = (filter as { query?: { match_phrase?: Record<string, unknown> } }).query
+    ?.match_phrase;
+  if (!matchPhrase || !Object.prototype.hasOwnProperty.call(matchPhrase, fieldKey)) {
+    return undefined;
+  }
+  return matchPhrase[fieldKey];
+};
+
+/**
+ * True when the filter is sent as a status or executedBy include list.
+ * Negated, exists, range, and every other filter go through KQL instead.
+ */
+const isStructuredIncludeFilter = (filter: Filter): boolean => {
+  if (filter.meta.disabled || filter.meta.negate) return false;
+  const key = filter.meta.key ?? '';
+  if (!STRUCTURED_INCLUDE_FIELDS.has(key)) return false;
+  if (filter.meta.type === 'phrase' || filter.meta.type === 'phrases') return true;
+  // OptionsList single-select omits meta.type and stores the value on query.match_phrase.
+  return filter.meta.type == null && readMatchPhraseValue(filter, key) != null;
+};
+
 /**
  * Extracts selected values from Kibana Filter objects for a specific field.
  *
@@ -44,10 +68,7 @@ export interface UseWorkflowExecutionsSearchParams {
  */
 const extractFilterValues = (filters: Filter[], fieldKey: string): string[] => {
   const values: string[] = [];
-  // Negated filters can't be expressed as an include list; they are sent through KQL instead.
-  const relevant = filters.filter(
-    (f) => !f.meta.disabled && !f.meta.negate && f.meta.key === fieldKey
-  );
+  const relevant = filters.filter((f) => isStructuredIncludeFilter(f) && f.meta.key === fieldKey);
   for (const f of relevant) {
     if (f.meta.type === 'phrases' && Array.isArray(f.meta.params)) {
       // Multi-select from OptionsListControl or search bar
@@ -57,14 +78,8 @@ const extractFilterValues = (filters: Filter[], fieldKey: string): string[] => {
       const actualValue = (f.meta.params as { query?: unknown } | undefined)?.query ?? f.meta.value;
       if (actualValue != null) values.push(String(actualValue));
     } else {
-      // Single-select from OptionsListControl: buildPhraseFilter does not set
-      // meta.type, so fall back to reading the raw query.match_phrase value.
-      const matchPhrase = (f as { query?: { match_phrase?: Record<string, unknown> } }).query
-        ?.match_phrase;
-      if (matchPhrase && Object.prototype.hasOwnProperty.call(matchPhrase, fieldKey)) {
-        const v = matchPhrase[fieldKey];
-        if (v != null) values.push(String(v));
-      }
+      const matchPhraseValue = readMatchPhraseValue(f, fieldKey);
+      if (matchPhraseValue != null) values.push(String(matchPhraseValue));
     }
   }
   return values;
@@ -90,19 +105,11 @@ export const useWorkflowExecutionsSearch = ({
   );
   const executedBy = useMemo(() => extractFilterValues(filters, 'executedBy'), [filters]);
 
-  // Remaining filters (e.g. workflowId, triggeredBy) and negated structured filters go through KQL.
-  const remainingFiltersKql = useMemo(() => {
-    const STRUCTURED_FIELDS = new Set(['status', 'executedBy']);
-    // exists/range filters can't be sent as include lists, so they also go through KQL.
-    const remaining = filters.filter(
-      (f) =>
-        f.meta.negate ||
-        f.meta.type === 'exists' ||
-        f.meta.type === 'range' ||
-        !STRUCTURED_FIELDS.has(f.meta.key ?? '')
-    );
-    return filtersToKql(remaining);
-  }, [filters]);
+  // Same predicate as the include lists, so a filter cannot be dropped by both paths.
+  const remainingFiltersKql = useMemo(
+    () => filtersToKql(filters.filter((f) => !isStructuredIncludeFilter(f))),
+    [filters]
+  );
 
   const kql = useMemo(() => {
     const textKql = query?.query ? `(${String(query.query)})` : '';
