@@ -51,6 +51,7 @@ const investigationDetails = {
 } satisfies Investigation;
 
 const mockOpenConversationDetails = jest.fn();
+const mockReportEvent = jest.fn();
 
 jest.mock('../../../hooks/use_fetch_investigation_statuses', () => ({
   useFetchInvestigationStatuses: () => ({ data: mockInvestigationRunStatuses }),
@@ -127,6 +128,7 @@ jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       http: { basePath: { prepend: (path: string) => path } },
+      analytics: { reportEvent: mockReportEvent },
       agentBuilder: {
         openChat: mockOpenChat,
         openConversationDetails: mockOpenConversationDetails,
@@ -188,6 +190,7 @@ describe('EventFlyout', () => {
     mockAddSuccess.mockClear();
     mockInvestigationRunStatuses = undefined;
     mockOpenConversationDetails.mockClear();
+    mockReportEvent.mockClear();
     mockCanManage = false;
     mockSignificantEventsFetch.mockImplementation((route: string) =>
       route === 'POST /internal/significant_events/events/{id}/investigate'
@@ -555,6 +558,16 @@ describe('EventFlyout', () => {
     );
     fireEvent.click(screen.getByTestId('nightshiftEventInvestigationCard'));
     expect(mockOpenConversationDetails).toHaveBeenCalledWith({ conversationId: 'conv-1' });
+    // The flyout opens without `?investigationId=`, so this card reports the view itself.
+    expect(mockReportEvent).toHaveBeenCalledWith(
+      'nightshift_investigation_viewed',
+      expect.objectContaining({
+        investigation_id: 'conv-1',
+        source: 'click',
+        status: 'open',
+        in_progress: false,
+      })
+    );
   });
 
   it('renders an unavailable investigation as a non-interactive card', () => {

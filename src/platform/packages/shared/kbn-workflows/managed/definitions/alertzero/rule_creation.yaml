@@ -48,6 +48,13 @@ triggers:
           description: >-
             Investigation the proposal is recorded on. The caller opened it for the gap,
             so the analyst sees a single record whichever route the gap takes.
+        review_context:
+          type: string
+          maxLength: 20000
+          description: >-
+            Markdown sections from the caller: the check's one-sentence summary and
+            the gap with its evidence. The proposal shows them in place of its own
+            gap section, so it has the same structure as the caller's other proposals.
       required: [investigation_id]
       additionalProperties: false
 outputs:
@@ -61,6 +68,11 @@ outputs:
     type: string
   - name: skip_reason
     type: string
+consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Rule Coverage worker"
+
 steps:
   - name: draft_creation
     type: ai.agent
@@ -73,6 +85,7 @@ steps:
     timeout: "10m"
     create-conversation: true
     with:
+      author_name: "{{ consts.author_name }}"
       # The thin agent has no skills or tools of its own. List every skill the
       # step needs, including the skills those skills load.
       configuration_overrides:
@@ -88,10 +101,11 @@ steps:
         security.create_detection_rule to create a new ES|QL rule draft now. The
         supplied context is sufficient; do not ask a follow-up question.
 
-        ATT&CK technique: {{ inputs.technique }}
-        Detection gap: {{ inputs.gap_description }}
+        {% if inputs.technique != blank %}ATT&CK technique: {{ inputs.technique }}
+        {% endif %}Detection gap: {{ inputs.gap_description }}
         Evidence: {{ inputs.evidence }}
-        Confidence: {{ inputs.confidence }}
+        {% if inputs.confidence != blank %}Confidence: {{ inputs.confidence }}
+        {% endif %}
 
         Echo the tool's returned rule fields under "rule" and the attachment
         metadata alongside it. Never return id or rule_id. If the tool did not
@@ -267,24 +281,27 @@ steps:
           **Create a new ES|QL detection rule for this gap**
 
           **Rule:** {{ steps.draft_creation.output.structured_output.rule.name }}
+          **Recommended action:** Create the rule
+
+          {% if inputs.review_context != blank %}{{ inputs.review_context }}
+          {% else %}**Detection gap**
+          {% if inputs.technique != null and inputs.technique != '' %}ATT&CK technique: {{ inputs.technique }}
+          {% endif %}{{ inputs.gap_description }}
+          {% endif %}
+          **Proposed rule**
+          **Severity:** {{ steps.draft_creation.output.structured_output.rule.severity }}. **Risk score:** {{ steps.draft_creation.output.structured_output.rule.risk_score }}.
           {{ steps.draft_creation.output.structured_output.rule.description }}
 
           ```esql
           {{ steps.draft_creation.output.structured_output.rule.query }}
           ```
 
-          **Detection gap**
-          {% if inputs.technique != null and inputs.technique != '' %}ATT&CK technique: {{ inputs.technique }}
-          {% endif %}{{ inputs.gap_description }}
-
-          **Preview:** {% if steps.preview_creation.output.succeeded == true and steps.preview_creation.output.is_aborted == false %}{{ steps.preview_creation.output.alert_count }} expected matches over {{ inputs.preview_invocation_count }} simulated runs{% else %}inconclusive{% endif %}{% if steps.preview_creation.output.error_text != null and steps.preview_creation.output.error_text != '' %}
-          Preview errors: {{ steps.preview_creation.output.error_text }}{% endif %}
-          **Severity:** {{ steps.draft_creation.output.structured_output.rule.severity }}. **Risk score:** {{ steps.draft_creation.output.structured_output.rule.risk_score }}.
-
-          **Draft:** [agent conversation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.draft_creation.output.conversation_id }})
+          **Backtest**
+          {% if steps.preview_creation.output.succeeded == true and steps.preview_creation.output.is_aborted == false %}{{ steps.preview_creation.output.alert_count }} expected matches over {{ inputs.preview_invocation_count }} simulated runs.{% else %}Inconclusive.{% endif %}{% if steps.preview_creation.output.error_text != null and steps.preview_creation.output.error_text != '' %}
+          Backtest errors: {{ steps.preview_creation.output.error_text }}{% endif %}
 
           **On approval**
-          If you approve, the agent creates the rule in the disabled state under your identity. Review the rule and enable it on the rules page. If you dismiss, the agent discards the draft.
+          If you approve, the agent creates the rule under your identity. Review the rule and its state on the rules page. If you dismiss, the agent discards the draft.
         actionWorkflowId: system-alertzero-action-create-rule
         actionInput: "${{ steps.draft_creation.output.structured_output.rule }}"
         impact: low

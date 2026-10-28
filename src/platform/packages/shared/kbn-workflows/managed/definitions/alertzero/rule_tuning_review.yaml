@@ -112,6 +112,9 @@ outputs:
   - name: applied
     type: boolean
 consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Rule Tuning worker"
   # Fallbacks for the optional operational inputs; keep in sync with the sweep's
   # consts in rule_tuning_worker.yaml.
   analysis_window_days: 7
@@ -125,6 +128,11 @@ consts:
   applied_tag: detection-watch:tuning-applied
   acknowledged_tag: detection-watch:tuning-acknowledged
   no_items: []
+  # Mirror the platform exception schema's maxItems for an exception's entries and
+  # for one entry's `values`. Applied by bound_exception_entries, not in the agent
+  # schema (see the note above exception_entries).
+  max_exception_entries: 100
+  max_exception_values: 1000
   # Mirrors ALERTS_BATCH_MAX_SIZE. `security.alerts` rejects a longer `alertIds`
   # list. The attachment shows the first 20 ids. The proposal text does not.
   alerts_per_attachment: 20
@@ -368,6 +376,7 @@ steps:
     timeout: "10m"
     create-conversation: true
     with:
+      author_name: "{{ consts.author_name }}"
       # The thin agent has no skills or tools of its own. List every skill the
       # step needs, including the skills those skills load.
       configuration_overrides:
@@ -454,7 +463,9 @@ steps:
         to the recommendation; confidence is how sure you are that the change removes
         the false positives without losing detections.
 
-        Write every text field of the proposal in ASD-STE100 Simplified Technical English.
+        Write every text field of the proposal in ASD-STE100 Simplified Technical English:
+        sentences of 20 words or less, active voice, one topic for each sentence, no em
+        dashes. Write fp_pattern and reasoning as markdown.
       schema:
         # Omit the root type so Agent Builder wraps this union under a property;
         # the LangChain-to-inference adapter drops root-level oneOf constraints.
@@ -474,14 +485,15 @@ steps:
               confidence:
                 type: string
                 enum: [low, medium, high]
-              # Bounds mirror the platform exception schema, which the action and
-              # the step validate against. An unbounded recommendation here is
-              # rejected when the proposal is created, so the review fails and the
-              # alerts wait for the next sweep instead of reaching an analyst.
+              # Field-level bounds mirror the platform exception schema, which the
+              # action and the step validate against. No maxItems on this array or on
+              # `values` on purpose: Gemini answers 400 to this schema when either cap
+              # is present next to the per-field bounds. Both caps are applied after
+              # parsing, in bound_exception_entries (consts.max_exception_entries and
+              # consts.max_exception_values), before any step consumes the entries.
               exception_entries:
                 type: array
                 minItems: 1
-                maxItems: 100
                 items:
                   oneOf:
                     - type: object
@@ -514,7 +526,6 @@ steps:
                             minLength: 1
                             maxLength: 1024
                           minItems: 1
-                          maxItems: 1000
                       required: [field, operator, values]
                     - type: object
                       properties:
@@ -650,6 +661,59 @@ steps:
   # can be backtested the same way a query change is below. Only the entries matter here;
   # eligibility to actually run the backtest is decided by can_preview_query_change, same
   # gate the query arm uses, since both reuse the same preview mechanism.
+  # The agent schema carries no maxItems (Gemini rejects the schema with either
+  # cap present, see the note above exception_entries), so a recommendation can
+  # exceed the platform bounds. Entries are ANDed, so an over-cap entry list or a
+  # sliced is_not_one_of values list would silently broaden the exception: the
+  # dropped constraints would make entities the recommendation excluded eligible
+  # for suppression. An oversized exception therefore fails the run (fail-closed,
+  # see reject_oversized_exception below) instead of being truncated.
+  - name: check_exception_entries
+    type: data.set
+    if: >-
+      ${{ steps.fetch_rule.error == null
+        and steps.fetch_rule.output.enabled == true
+        and steps.diagnose_rule.output.structured_output.change_type == 'exception' }}
+    with:
+      # Renders exactly "true" when the recommendation exceeds either platform
+      # bound, however many violations there are: the gate compares with == 'true',
+      # so per-violation output ("truetrue") would skip the fail-closed gate.
+      overflow: >-
+        {%- assign entries = steps.diagnose_rule.output.structured_output.exception_entries -%}{%- assign exceeded = false -%}{%- if entries.size > consts.max_exception_entries -%}{%- assign exceeded = true -%}{%- endif -%}{%- for entry in entries -%}{%- if entry.values != nil and entry.values.size > consts.max_exception_values -%}{%- assign exceeded = true -%}{%- endif -%}{%- endfor -%}{%- if exceeded -%}true{%- endif -%}
+
+  # Fail-closed: an oversized exception must never reach the filter step, the
+  # attachment, the proposal text or the action. The run fails before
+  # bound_exception_entries runs, so no truncated variant of the recommendation
+  # is proposed or persisted. The failing run leaves the alerts unreviewed (the
+  # tag steps are skipped), so the next sweep retries the rule.
+  - name: reject_oversized_exception
+    type: workflow.fail
+    if: "${{ steps.check_exception_entries.output.overflow == 'true' }}"
+    with:
+      message: "diagnose_rule proposed an exception exceeding the platform bounds (more than {{ consts.max_exception_entries }} entries or more than {{ consts.max_exception_values }} values in one entry); refusing to truncate it into a broader exception"
+
+  # Caps the agent's exception entries (and each entry's values) to the platform
+  # bounds. Reached only when check_exception_entries reported no overflow, so
+  # the caps never drop a constraint; they exist to normalize, not to truncate.
+  - name: bound_exception_entries
+    type: data.set
+    if: >-
+      ${{ steps.fetch_rule.error == null
+        and steps.fetch_rule.output.enabled == true
+        and steps.diagnose_rule.output.structured_output.change_type == 'exception' }}
+    with:
+      entries_json: |-
+        [
+        {%- for entry in steps.diagnose_rule.output.structured_output.exception_entries limit: consts.max_exception_entries -%}
+        {%- unless forloop.first -%},{%- endunless -%}
+        {%- if entry.values -%}
+        {"field":{{ entry.field | json }},"operator":{{ entry.operator | json }},"values":{{ entry.values | slice: 0, consts.max_exception_values | json }}}
+        {%- else -%}
+        {{ entry | json }}
+        {%- endif -%}
+        {%- endfor -%}
+        ]
+
   - name: build_exception_filter
     type: security.buildExceptionEntriesFilter
     if: >-
@@ -658,7 +722,7 @@ steps:
         and steps.diagnose_rule.output.structured_output.change_type == 'exception' }}
     with:
       existing_filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
-      entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+      entries: "${{ steps.bound_exception_entries.output.entries_json | json_parse }}"
     on-failure:
       continue: true
 
@@ -886,76 +950,61 @@ steps:
       proposed_error_text: "{{ steps.run_previews.output.proposed_error_text }}"
 
   # Diagnosis notes go to the investigation rather than into the proposal, which
-  # keeps only what the decision needs. `trigger_mode: never` appends a user_message
-  # without running the investigation agent. Called directly rather than through the
-  # journal note workflow, because this run allows one synchronous child per wake-up
-  # cycle and the proposal gate below is that child. User messages render as plain
-  # text, so no markdown. If a note fails, compose_proposal keeps that text so the
-  # analyst still sees it.
+  # keeps only what the decision needs. `ai.conversation.add_user_message` appends
+  # a user_message without running the investigation agent. Called directly rather
+  # than through the journal note workflow, because this run allows one synchronous child per wake-up
+  # cycle and the proposal gate below is that child. The chat renders markdown in
+  # user messages. If a note fails, compose_proposal keeps that text so the analyst
+  # still sees it.
   - name: post_fp_pattern
-    type: kibana.request
+    type: ai.conversation.add_user_message
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
         and steps.diagnose_rule.output.structured_output.fp_pattern != blank }}
     with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-      headers:
-        kbn-xsrf: string
-        elastic-api-version: "2023-10-31"
-        Content-Type: application/json
-      body:
-        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-        input: |-
-          False positive pattern for {{ steps.fetch_rule.output.name }}:
+      author_name: "{{ consts.author_name }}"
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: |-
+        **False positive pattern**
+        **Rule:** {{ steps.fetch_rule.output.name }}
 
-          {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
-        trigger_mode: never
+        {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
     on-failure:
       continue: true
 
   - name: post_reasoning
-    type: kibana.request
+    type: ai.conversation.add_user_message
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
         and steps.diagnose_rule.output.structured_output.reasoning != blank }}
     with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-      headers:
-        kbn-xsrf: string
-        elastic-api-version: "2023-10-31"
-        Content-Type: application/json
-      body:
-        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-        input: |-
-          Reasoning behind the tuning proposal for {{ steps.fetch_rule.output.name }}:
+      author_name: "{{ consts.author_name }}"
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: |-
+        **Tuning reasoning**
+        **Rule:** {{ steps.fetch_rule.output.name }}
+        **Change type:** `{{ steps.diagnose_rule.output.structured_output.change_type }}`
+        **Confidence:** {{ steps.diagnose_rule.output.structured_output.confidence }}
 
-          {{ steps.diagnose_rule.output.structured_output.reasoning }}
-        trigger_mode: never
+        {{ steps.diagnose_rule.output.structured_output.reasoning }}
     on-failure:
       continue: true
 
   # A risk score change has no backtest, so this note explains what approving does.
   - name: post_risk_score_note
-    type: kibana.request
+    type: ai.conversation.add_user_message
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
         and steps.diagnose_rule.output.structured_output.change_type == 'risk_score' }}
     with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-      headers:
-        kbn-xsrf: string
-        elastic-api-version: "2023-10-31"
-        Content-Type: application/json
-      body:
-        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-        input: |-
-          About the proposed risk score change for {{ steps.fetch_rule.output.name }}:
+      author_name: "{{ consts.author_name }}"
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: |-
+        **Risk score change**
+        **Rule:** {{ steps.fetch_rule.output.name }}
+        **Severity:** `{{ steps.fetch_rule.output.severity }}` → `{{ steps.diagnose_rule.output.structured_output.proposed_severity }}`
 
-          A risk score change does not change which alerts fire. If you approve, the future alerts of the rule change severity from {{ steps.fetch_rule.output.severity }} to {{ steps.diagnose_rule.output.structured_output.proposed_severity }}. Existing alerts keep their severity. The false positive count in the proposal is the evidence for this change.
-        trigger_mode: never
+        A risk score change does not change which alerts fire. If you approve, future alerts of the rule get the new severity. Existing alerts keep their severity. The false positive count in the proposal is the evidence for this change.
     on-failure:
       continue: true
 
@@ -1005,7 +1054,7 @@ steps:
         ```
         {% when "exception" %}
         Proposed exception:
-        {% for entry in steps.diagnose_rule.output.structured_output.exception_entries %}
+        {% for entry in steps.bound_exception_entries.output.entries_json | json_parse %}
         - {{ entry.field }} {{ entry.operator }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
         {% endfor %}
         Approve to add the exception to the exception list of the rule. You can remove it in the Detection Rules UI.
@@ -1143,7 +1192,7 @@ steps:
               data:
                 name: "Tuning: {{ steps.fetch_rule.output.name }}"
                 description: "Exception proposed by the rule tuning workflow after reviewing {{ inputs.fp_count }} false-positive alerts."
-                entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+                entries: "${{ steps.bound_exception_entries.output.entries_json | json_parse }}"
               description: "Proposed exception for rule: {{ steps.fetch_rule.output.name }}"
               render_inline: true
             on-failure:
@@ -1164,7 +1213,7 @@ steps:
                   name: "Tuning: {{ steps.fetch_rule.output.name }}"
                   description: "Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed."
                   # `${{ }}` keeps the entries as objects.
-                  entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+                  entries: "${{ steps.bound_exception_entries.output.entries_json | json_parse }}"
                 # Same as a query edit: an exception changes how many alerts the
                 # rule produces, so it can lose a detection. Re-ranking cannot,
                 # which is why the risk score arm is lower.
