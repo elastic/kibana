@@ -208,13 +208,15 @@ const uniqueTrimmed = (values: unknown[], max: number): { items: string[]; trunc
 /**
  * Where each kept host was seen, from the `_index` of the rows that named it. Every row here
  * already passed the required-index check, so `_index` is always a string. A name longer than
- * the origin schema allows gets no origin, which packaging reads as unknown.
+ * the origin schema allows gets no origin, which packaging reads as unknown. When the rows hit
+ * the query's cap, a host's local rows may be past it, so only local origins are kept.
  */
 const hostOriginsOf = (
   rows: unknown[][],
   hostCol: number,
   indexCol: number,
-  hosts: string[]
+  hosts: string[],
+  saturated: boolean
 ): HostOrigin[] => {
   const indicesByHost = new Map(
     hosts
@@ -229,9 +231,17 @@ const hostOriginsOf = (
   }
   return [...indicesByHost].flatMap(([name, indices]) => {
     const origin = originOfIndices(indices);
-    return origin ? [{ name, ...origin }] : [];
+    return origin && (origin.local || !saturated) ? [{ name, ...origin }] : [];
   });
 };
+
+/**
+ * The most rows the executed query could return: `executeEsql` keeps `min(N, limit)` for a
+ * trailing `LIMIT N`, and a `LIMIT` earlier in the pipeline caps it too. A `LIMIT` inside a
+ * string literal only lowers the cap, which leaves more origins unknown.
+ */
+const rowCapOf = (query: string, limit: number): number =>
+  Math.min(limit, ...[...query.matchAll(/\bLIMIT\s+(\d+)/gi)].map(([, n]) => Number(n)));
 
 /**
  * Execute a generated query in the hunt window. Hit bar counts only rows
@@ -331,7 +341,10 @@ const executeValidatedEsql = async ({
             MAX_AFFECTED_ENTITIES
           )
         : undefined;
-    const hostOrigins = hosts ? hostOriginsOf(requiredRows, hostCol, indexCol, hosts.items) : [];
+    const saturated = values.length >= rowCapOf(prepared, row_limit);
+    const hostOrigins = hosts
+      ? hostOriginsOf(requiredRows, hostCol, indexCol, hosts.items, saturated)
+      : [];
 
     // `prepareEsqlForExecute` injects `METADATA _id`/`_index` but deliberately does
     // not undo a `DROP _id` the model wrote, so a query can keep `_index` — enough to

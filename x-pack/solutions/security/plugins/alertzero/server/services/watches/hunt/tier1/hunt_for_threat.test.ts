@@ -797,10 +797,13 @@ describe('huntForThreat', () => {
     const hostBucket = (
       name: string,
       indices: string[],
-      sumOther = 0
+      sumOther = 0,
+      /** `null` leaves the field out of the bucket. */
+      docCountError: number | null = 0
     ): Record<string, unknown> => ({
       key: name,
       doc_count: indices.length + sumOther,
+      ...(docCountError === null ? {} : { doc_count_error_upper_bound: docCountError }),
       by_index: {
         buckets: indices.map((key) => ({ key, doc_count: 1 })),
         sum_other_doc_count: sumOther,
@@ -827,9 +830,34 @@ describe('huntForThreat', () => {
       const { esClient } = await huntWithHosts([]);
 
       const [[searchBody]] = (esClient.search as jest.Mock).mock.calls;
+      expect(searchBody.aggs.affected_hosts.terms).toEqual(
+        expect.objectContaining({ field: 'host.name', show_term_doc_count_error: true })
+      );
       expect(searchBody.aggs.affected_hosts.aggs).toEqual({
         by_index: { terms: { field: '_index', size: 20 } },
       });
+    });
+
+    it('leaves a remote-looking host unknown when a shard may have left it out', async () => {
+      // A shard where the host was rare (possibly a local one) dropped it from its top terms,
+      // and its `_index` breakdown with it, so the remote-only list proves nothing.
+      const { hosts } = await huntWithHosts([hostBucket('web-1', ['cluster_b:logs-a'], 0, 10)]);
+
+      expect(hosts).toEqual([{ name: 'web-1', hit_count: 1 }]);
+    });
+
+    it('leaves a remote-looking host unknown when the response reports no per-bucket error', async () => {
+      const { hosts } = await huntWithHosts([hostBucket('web-1', ['cluster_b:logs-a'], 0, null)]);
+
+      expect(hosts).toEqual([{ name: 'web-1', hit_count: 1 }]);
+    });
+
+    it('still marks a host local when a shard may have left it out', async () => {
+      const { hosts } = await huntWithHosts([
+        hostBucket('web-1', ['logs-endpoint.events-default'], 0, 10),
+      ]);
+
+      expect(hosts).toEqual([{ name: 'web-1', hit_count: 1, local: true, remote_clusters: [] }]);
     });
 
     it('marks a host seen on a local index as local, naming any remote cluster too', async () => {

@@ -857,6 +857,62 @@ describe('huntBehavior', () => {
       ]);
     });
 
+    describe('when the rows hit the query cap', () => {
+      const remoteAndLocalRows = {
+        columns: [col('_index'), col('host.name')],
+        values: [
+          ['cluster_b:logs-aws.cloudtrail-default', 'ubuntu'],
+          ['logs-aws.cloudtrail-default', 'web-1'],
+        ],
+      };
+
+      it('keeps local origins and leaves remote-only ones unknown at row_limit', async () => {
+        // The host's local rows may be past the cap, so "remote only" is not proven.
+        executeEsqlMock.mockResolvedValue(remoteAndLocalRows);
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate]),
+          logger,
+          { ...ccsParams, row_limit: 2 },
+          esClient
+        );
+
+        expect(result.behaviors[0].affected_hosts).toEqual(['ubuntu', 'web-1']);
+        expect(result.behaviors[0].affected_host_origins).toEqual([
+          { name: 'web-1', local: true, remote_clusters: [] },
+        ]);
+      });
+
+      it('treats a generated LIMIT below row_limit as the cap', async () => {
+        generateByTechnique({ 'T1078.004': GROUNDED_ESQL.replace('LIMIT 100', 'LIMIT 2') });
+        executeEsqlMock.mockResolvedValue(remoteAndLocalRows);
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate]),
+          logger,
+          ccsParams,
+          esClient
+        );
+
+        expect(result.behaviors[0].affected_host_origins).toEqual([
+          { name: 'web-1', local: true, remote_clusters: [] },
+        ]);
+      });
+
+      it('keeps a remote-only origin when the rows stopped short of the cap', async () => {
+        executeEsqlMock.mockResolvedValue(remoteAndLocalRows);
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate]),
+          logger,
+          { ...ccsParams, row_limit: 3 },
+          esClient
+        );
+
+        expect(result.behaviors[0].affected_host_origins).toEqual([
+          { name: 'ubuntu', local: false, remote_clusters: ['cluster_b'] },
+          { name: 'web-1', local: true, remote_clusters: [] },
+        ]);
+      });
+    });
+
     it('omits host origins when no host was affected', async () => {
       executeEsqlMock.mockResolvedValue({
         columns: [col('_index')],
