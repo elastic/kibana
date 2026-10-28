@@ -18,6 +18,7 @@ import {
   actionPolicyAttachmentDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import { ensureToolPrivilege } from '../../common/unauthorized_tool_result';
+import { createAttachmentsClient } from '../../../lib/attachments_client';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { ActionPolicyClient } from '../../../lib/action_policy_client';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
@@ -58,9 +59,8 @@ export const attachActionPolicyTool = ({
       return unauthorized;
     }
 
-    const existing = attachments
-      .getActive()
-      .find(({ type, origin }) => type === ACTION_POLICY_ATTACHMENT_TYPE && origin === policyId);
+    const { actionPolicies } = createAttachmentsClient(attachments);
+    const existing = actionPolicies.list().find(({ origin }) => origin === policyId);
     if (existing) {
       return {
         results: [

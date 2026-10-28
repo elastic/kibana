@@ -105,7 +105,13 @@ describe('attachActionPolicyTool', () => {
 
     it('returns the existing attachment instead of adding the policy again', async () => {
       ctx.attachments.getActive.mockReturnValue([
-        { id: 'existing-1', type: ACTION_POLICY_ATTACHMENT_TYPE, origin: 'policy-1' },
+        {
+          id: 'existing-1',
+          type: ACTION_POLICY_ATTACHMENT_TYPE,
+          origin: 'policy-1',
+          current_version: 1,
+          versions: [{ version: 1, data: policy }],
+        },
       ] as never);
 
       const result = await createTool().handler({ policyId: 'policy-1' }, ctx);
