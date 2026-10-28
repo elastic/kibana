@@ -122,11 +122,14 @@ spaceTest.describe(
 
     spaceTest(
       'a KQL query in a message can be sent to Timeline only from pages that show Timeline',
-      async ({ pageObjects }) => {
+      async ({ page, pageObjects }) => {
         const { aiAssistantPage, timelinePage } = pageObjects;
 
         await spaceTest.step('Send to Timeline is disabled on Get started', async () => {
-          await aiAssistantPage.gotoGetStarted();
+          // Get started hides the Timeline bottom bar.
+          await page.gotoApp('security/get_started', {
+            readyWhen: page.testSubj.locator('onboarding-hub-page'),
+          });
           await aiAssistantPage.open();
           await aiAssistantPage.selectConversation(CONVERSATION_TITLE);
           await expect(aiAssistantPage.sendToTimelineButton).toBeDisabled();
@@ -135,7 +138,8 @@ spaceTest.describe(
         await spaceTest.step(
           'Send to Timeline opens Timeline with the query on Cases',
           async () => {
-            await aiAssistantPage.gotoCases();
+            // Cases shows the Timeline bottom bar.
+            await page.gotoApp('security/cases', { readyWhen: timelinePage.bottomBarToggle });
             await aiAssistantPage.open();
             await expect(aiAssistantPage.conversationTitle).toContainText(CONVERSATION_TITLE);
             await aiAssistantPage.sendToTimeline();

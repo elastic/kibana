@@ -16,30 +16,16 @@ export class AiAssistantPage {
   readonly flyoutNavToggle: Locator;
   readonly conversationTitle: Locator;
   readonly sendToTimelineButton: Locator;
-  private readonly getStartedPage: Locator;
-  private readonly timelineBottomBar: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.navLink = this.page.testSubj.locator('assistantNavLink');
     this.flyoutNavToggle = this.page.testSubj.locator('aiAssistantFlyoutNavigationToggle');
     this.conversationTitle = this.page.testSubj.locator('conversationTitle');
     this.sendToTimelineButton = this.page.testSubj.locator('sendToTimelineEmptyButton');
-    this.getStartedPage = this.page.testSubj.locator('onboarding-hub-page');
-    this.timelineBottomBar = this.page.testSubj.locator('timeline-bottom-bar-title-button');
   }
 
   conversationListItem(title: string): Locator {
     return this.page.testSubj.locator(`conversation-select-${title}`);
-  }
-
-  /** Get started hides the Timeline bottom bar. */
-  async gotoGetStarted() {
-    await this.page.gotoApp('security/get_started', { readyWhen: this.getStartedPage });
-  }
-
-  /** Cases shows the Timeline bottom bar. */
-  async gotoCases() {
-    await this.page.gotoApp('security/cases', { readyWhen: this.timelineBottomBar });
   }
 
   async open() {

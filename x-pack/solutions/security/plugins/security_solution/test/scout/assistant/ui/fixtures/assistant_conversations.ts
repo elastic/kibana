@@ -27,6 +27,12 @@ const PLATFORM_ENGINEER_ROLE = 'platform_engineer';
 
 const spacePath = (spaceId: string, path: string) => `s/${spaceId}${path}`;
 
+const writeHeaders = (cookieHeader: Record<string, string>): Record<string, string> => ({
+  ...cookieHeader,
+  ...PUBLIC_API_HEADERS,
+  'kbn-xsrf': 'scout',
+});
+
 /**
  * Returns a session cookie header for the same user `browserAuth.loginAsPlatformEngineer()` logs in as.
  * Conversations are owned by the user that creates them, so they must be seeded with this session.
@@ -68,7 +74,7 @@ export const createConversation = async ({
   const response = await apiClient.post(
     spacePath(spaceId, ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL),
     {
-      headers: { ...cookieHeader, ...PUBLIC_API_HEADERS, 'kbn-xsrf': 'scout' },
+      headers: writeHeaders(cookieHeader),
       responseType: 'json',
       body: conversation,
     }
@@ -97,7 +103,7 @@ export const deleteConversation = async ({
 }): Promise<void> => {
   const response = await apiClient.delete(
     spacePath(spaceId, ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID.replace('{id}', id)),
-    { headers: { ...cookieHeader, ...PUBLIC_API_HEADERS, 'kbn-xsrf': 'scout' } }
+    { headers: writeHeaders(cookieHeader) }
   );
   if (response.statusCode !== 200 && response.statusCode !== 404) {
     throw new Error(`Failed to delete conversation ${id}: ${response.statusCode}`);
