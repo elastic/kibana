@@ -38,6 +38,7 @@ import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { getScopeFlyoutTimeRange } from '../../common/scope_time_ranges';
 
 import { getEntityData, getItems, LAST_30_DAYS } from './common';
 import { RiskContributionsPanel } from './risk_contributions_panel';
@@ -110,6 +111,8 @@ export interface RiskSummaryProps<T extends EntityType> {
    * score. Defaults to `false`: single-entity views show only the individual score.
    */
   isGroupView?: boolean;
+  /** Scope the flyout was opened from; a scope that pins a time range sets the score history window. */
+  scopeId?: string;
 }
 
 const FlyoutRiskSummaryComponent = <T extends EntityType>({
@@ -124,12 +127,15 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   prefetchedResolutionRisk,
   hideHeaderIcon,
   isGroupView = false,
+  scopeId,
 }: RiskSummaryProps<T>) => {
   const { telemetry } = useKibana().services;
   const { data } = riskScoreData;
   const fallbackRiskData = data && data.length > 0 ? data[0] : undefined;
   const { euiTheme } = useEuiTheme();
   const spaceId = useSpaceId();
+  // The score history charts span the opener's pinned range when its scope has one, else 30 days.
+  const chartRange = getScopeFlyoutTimeRange(scopeId) ?? LAST_30_DAYS;
   const { setQuery, deleteQuery } = useGlobalTime();
   // Flyouts can stack (a child entity flyout shares the Redux store with its parent), so the
   // registration must be unique per instance or the child would overwrite/delete the parent's.
@@ -200,11 +206,11 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
 
   const riskDataTimestamp = riskData?.['@timestamp'];
   const timerange = useMemo(() => {
-    const from = dateMath.parse(LAST_30_DAYS.from)?.toISOString() ?? LAST_30_DAYS.from;
-    const to = dateMath.parse(LAST_30_DAYS.to)?.toISOString() ?? LAST_30_DAYS.to;
+    const from = dateMath.parse(chartRange.from)?.toISOString() ?? chartRange.from;
+    const to = dateMath.parse(chartRange.to)?.toISOString() ?? chartRange.to;
     return { from, to };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [riskDataTimestamp]); // Update the timerange whenever the risk score timestamp changes to include new entries
+  }, [riskDataTimestamp, chartRange]); // Update the timerange whenever the risk score timestamp changes to include new entries
 
   const goToEntityInsightsTab = useCallback(
     (subTab?: RiskScoreLeftPanelSubTab) =>
@@ -308,11 +314,11 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
     [entityType, resolutionEntityData?.name, showOnlyResolutionRisk]
   );
   const resolutionTimerange = useMemo(() => {
-    const from = dateMath.parse(LAST_30_DAYS.from)?.toISOString() ?? LAST_30_DAYS.from;
-    const to = dateMath.parse(LAST_30_DAYS.to)?.toISOString() ?? LAST_30_DAYS.to;
+    const from = dateMath.parse(chartRange.from)?.toISOString() ?? chartRange.from;
+    const to = dateMath.parse(chartRange.to)?.toISOString() ?? chartRange.to;
     return { from, to };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resolutionRiskData?.['@timestamp']]);
+  }, [resolutionRiskData?.['@timestamp'], chartRange]);
 
   const panelIconType = !isPreviewMode && !hideHeaderIcon ? 'chevronLimitLeft' : undefined;
   const entityPanelTitle = (

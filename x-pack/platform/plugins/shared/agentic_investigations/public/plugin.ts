@@ -9,6 +9,7 @@ import React from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigations-common';
 import { registerEscalationConversationEventUiDefinitions } from './escalations/conversation_events';
+import { registerInvestigationConversationEventUiDefinitions } from './investigations/conversation_events';
 import { registerImpactAttachmentTypes } from './impact/attachments';
 import { registerSubjectAttachmentTypes } from './subjects/attachments';
 import { registerHypothesesAttachmentTypes } from './hypotheses/attachments';
@@ -83,13 +84,25 @@ export class AgenticInvestigationsPublicPlugin
     const { agentBuilder } = startDeps;
     if (agentBuilder) {
       registerImpactAttachmentTypes(agentBuilder, () => this.impactEntityOpener);
+      registerInvestigationConversationEventUiDefinitions(agentBuilder.conversationEvents);
       if (this.escalationsEnabled) {
         registerEscalationConversationEventUiDefinitions({
           conversationEvents: agentBuilder.conversationEvents,
           application: core.application,
         });
       }
-      registerSubjectAttachmentTypes(agentBuilder);
+      registerSubjectAttachmentTypes(agentBuilder, {
+        // The alert flyout renders shared alerting components that read core and their plugins
+        // from this context, so core is passed whole.
+        ...core,
+        share: startDeps.share,
+        data: startDeps.data,
+        dataViews: startDeps.dataViews,
+        expressions: startDeps.expressions,
+        spaces: startDeps.spaces,
+        unifiedDocViewer: startDeps.unifiedDocViewer,
+        charts: startDeps.charts,
+      });
       registerHypothesesAttachmentTypes(agentBuilder);
       registerTemplate({
         core,

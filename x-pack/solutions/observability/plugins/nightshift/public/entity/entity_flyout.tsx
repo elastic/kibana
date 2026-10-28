@@ -180,7 +180,6 @@ export function EntityFlyout({
       resizable
       aria-label={title}
       data-test-subj="nightshiftEntityFlyout"
-      type="push"
       hasAnimation={false}
       closeButtonProps={{
         'data-test-subj': 'euiFlyoutCloseButton',

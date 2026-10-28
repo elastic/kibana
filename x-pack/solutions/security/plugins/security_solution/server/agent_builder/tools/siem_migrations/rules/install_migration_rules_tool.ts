@@ -23,7 +23,7 @@ import { createSelfClient, type SelfClient } from '../../../../common/self_clien
 import { createSiemMigrationAvailability } from '../common/availability';
 import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
 import { hasRuleMigrationPrivileges } from '../common/privileges';
-import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_ids';
+import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_catalog';
 import { SIEM_MIGRATION_INSTALL_RULE_MIGRATION_TOOL_ID } from './tool_ids';
 
 const schema = lazySchema(() =>
@@ -64,7 +64,7 @@ export const installMigrationRulesTool = (
     confirmation: { askUser: 'always' },
     description: `Install fully translated rules from an Automatic Rule Migration. Mutating.
 
-See the ${RULE_MIGRATION_SKILLS.INSTALL} skill for the full workflow.`,
+See the ${RULE_MIGRATION_SKILLS.INSTALL.id} skill for the full workflow.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async (input, { request }) => {

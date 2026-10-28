@@ -4,7 +4,10 @@ CLI tool for running TypeScript type checks across Kibana Observability projects
 
 ## Overview
 
-This package wraps `tsc --build` and adds several performance features on top:
+This package wraps `tsc --build` and adds several performance features on top. It runs the
+same TypeScript 7 (`tsgo`) compiler as CI and `@kbn/ts-type-check-cli` (the `typescript-7`
+package alias), so the `.tsbuildinfo` files in CI's cache archives are reused as-is instead of
+being rebuilt by a different compiler version.
 
 - **Smart cache restore**: Before each run, the CLI checks whether local artifacts are already
   fresh. If not, it automatically fetches a matching archive and restores it silently (no flags
@@ -84,6 +87,17 @@ node x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_che
 | `--restore-artifacts [=sha]` | Only restores cached build artifacts without running the type check. When a SHA is provided (e.g. `--restore-artifacts=<sha>`), restores that exact commit's archive; otherwise runs full candidate discovery. Useful for pre-populating the cache or testing a specific archive. |
 | `--extended-diagnostics` | Passes `--extendedDiagnostics` to `tsc` for detailed compiler performance output. |
 | `--verbose` | Enables verbose logging, including internal timing breakdowns for download, extraction, and scan phases. |
+
+### Environment variables
+
+The compiler settings are shared with `@kbn/ts-type-check-cli`:
+
+| Variable | Description |
+|----------|-------------|
+| `KBN_TYPE_CHECK_BUILDERS` | Number of projects `tsgo -b` builds concurrently (`--builders`). Defaults to `floor(cores / checkers)`. |
+| `KBN_TYPE_CHECK_CHECKERS` | Number of type-checkers per project (`--checkers`). Defaults to `3`. |
+| `KBN_TYPE_CHECK_STOP_ON_ERRORS` | Set to `true` to pass `--stopBuildOnErrors`. |
+| `KBN_TYPE_CHECK_MEMORY_LIMIT_MB` | Soft memory limit for the native compiler (`GOMEMLIMIT`). Defaults to `12288`. |
 
 ## Cache server (optional)
 

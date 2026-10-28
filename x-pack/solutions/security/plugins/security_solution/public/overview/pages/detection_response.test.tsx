@@ -10,6 +10,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { render, within } from '@testing-library/react';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { DetectionResponse } from './detection_response';
+import { DASHBOARDS } from '../../app/translations';
 import { TestProviders } from '../../common/mock';
 import { noCasesPermissions, readCasesPermissions } from '../../cases_test_utils';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
@@ -46,6 +47,13 @@ jest.mock('../../common/components/search_bar', () => ({
 }));
 
 jest.mock('../../common/components/empty_prompt');
+jest.mock('../../common/components/link_to', () => ({
+  ...jest.requireActual('../../common/components/link_to'),
+  useGetSecuritySolutionUrl:
+    () =>
+    ({ deepLinkId }: { deepLinkId: string }) =>
+      `/app/security/${deepLinkId}`,
+}));
 
 const defaultUseAlertsPrivilegesReturn = {
   hasAlertsRead: true,
@@ -114,6 +122,20 @@ describe('DetectionResponse', () => {
     expect(within(page).getByTestId('mock_globalSearchBar')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseSections')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseLoader')).not.toBeInTheDocument();
+  });
+
+  it('should render a back button that points to the Dashboards page', () => {
+    const result = render(
+      <TestProviders>
+        <MemoryRouter>
+          <DetectionResponse />
+        </MemoryRouter>
+      </TestProviders>
+    );
+
+    const backButton = result.getByTestId(APP_HEADER_TEST_SUBJECTS.back);
+    expect(backButton).toHaveAttribute('href', '/app/security/dashboards');
+    expect(backButton).toHaveAttribute('aria-label', expect.stringContaining(DASHBOARDS));
   });
 
   it('should render landing page if index not exist', () => {

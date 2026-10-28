@@ -46,6 +46,12 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('Do not query the data before generating');
   });
 
+  it('treats by-reference panels as unknown content that can only be rearranged', () => {
+    expect(skill.content).toContain('by-reference panels (');
+    expect(skill.content).toContain('do not look it up with any tool or API');
+    expect(enhanceGuidance()).toContain('keep by-reference panels');
+  });
+
   it('inlines the dashboard design guidance directly in the skill body', () => {
     expect(skill.content).toContain('Dashboard Composition Guidelines');
     expect(skill.content).toContain('Panel Layout');
@@ -72,8 +78,8 @@ describe('registerSkills', () => {
     expect(guidance).toContain('applyChartRules: true');
     expect(guidance).toContain('for every existing ES|QL Lens panel');
     expect(guidance).toContain('preserveESQL: true');
-    expect(skill.content).toContain(
-      'a query change and presentation enhancement can share one edit'
+    expect(guidance).toContain(
+      'omit `preserveESQL` and describe only that change alongside the enhancement request'
     );
     // Lens mechanics stay with the chart author.
     expect(skill.content).not.toContain('apply_color_to');
@@ -107,7 +113,7 @@ describe('registerSkills', () => {
       "Skip this step when the user's message already asks for appearance only"
     );
     expect(guidance).toContain('**Content mode.** Do everything appearance mode does');
-    expect(guidance).toContain('`remove_panels`');
+    expect(guidance).toContain('Remove panels that meet the removal criteria with `remove`');
     expect(guidance).toContain(
       'replace non-ES|QL panels with new ES|QL Lens panels without asking again'
     );
@@ -120,8 +126,5 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('Available chart types');
     expect(skill.content).toContain('- region_map:');
     expect(skill.content).toContain('only when the terms are short strings');
-    expect(skill.content).toContain(
-      'provide a new `chartType` when the request changes the chart family'
-    );
   });
 });

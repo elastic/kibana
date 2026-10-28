@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import type { ConversationEvent, UserMessageEvent } from '@kbn/agent-builder-common';
-import { TimelineEventType, EventActorType, TimelineTriggerType } from '@kbn/agent-builder-common';
+import {
+  TimelineEventType,
+  EventActorType,
+  TimelineTriggerType,
+  isAttachmentEvent,
+} from '@kbn/agent-builder-common';
 import type { TimelineDisplayEvent } from '../../../../services/events';
 import type { OptimisticAttachments } from '../../../utils/build_optimistic_attachments';
 import { useConversation } from '../../../hooks/use_conversation';
@@ -17,6 +22,7 @@ import { useConversationId } from '../../../context/conversation/use_conversatio
 import { useStreamRecord } from '../../../context/streaming/streaming_context';
 import { buildItems } from './to_timeline_items';
 import { resolveTimelineItems } from './resolve_timeline_items';
+import { reuseUnchangedItems } from './reuse_unchanged_items';
 import type { TimelineItem } from './types';
 
 const PENDING_USER_MESSAGE_ID = 'pending::user_message';
@@ -37,11 +43,20 @@ const savedUserMessageId = (liveEvents: TimelineDisplayEvent[]): string | undefi
 const isUserMessageEvent = (event: ConversationEvent): event is UserMessageEvent =>
   event.type === TimelineEventType.userMessage;
 
-const isSentMessageStillMissingItsRefs = (
+const isSentMessageStillMissingItsAttachments = (
   event: ConversationEvent,
-  sentMessageId: string
+  sentMessageId: string,
+  events: ConversationEvent[]
 ): event is UserMessageEvent =>
-  event.id === sentMessageId && isUserMessageEvent(event) && !event.data.attachment_refs?.length;
+  event.id === sentMessageId &&
+  isUserMessageEvent(event) &&
+  !event.data.attachment_refs?.length &&
+  !events.some(
+    (candidate) =>
+      isAttachmentEvent(candidate) &&
+      candidate.data.source === 'chat_input' &&
+      candidate.trigger_event_id === sentMessageId
+  );
 
 const withStagedAttachments = (
   event: UserMessageEvent,
@@ -110,8 +125,9 @@ export const useTimelineItems = (): TimelineItem[] => {
     if (!pendingAttachments) {
       return [...byId.values()];
     }
-    return [...byId.values()].map((event) =>
-      isSentMessageStillMissingItsRefs(event, pendingUserMessageId)
+    const merged = [...byId.values()];
+    return merged.map((event) =>
+      isSentMessageStillMissingItsAttachments(event, pendingUserMessageId, merged)
         ? withStagedAttachments(event, pendingAttachments)
         : event
     );
@@ -137,7 +153,7 @@ export const useTimelineItems = (): TimelineItem[] => {
     ]
   );
 
-  return useMemo(() => {
+  const withAwaitingTurn = useMemo(() => {
     if (!awaitingRunStart) {
       return items;
     }
@@ -152,4 +168,10 @@ export const useTimelineItems = (): TimelineItem[] => {
     };
     return [...items, awaitingTurn];
   }, [items, awaitingRunStart]);
+
+  const previousItems = useRef<TimelineItem[]>([]);
+  return useMemo(() => {
+    previousItems.current = reuseUnchangedItems(previousItems.current, withAwaitingTurn);
+    return previousItems.current;
+  }, [withAwaitingTurn]);
 };

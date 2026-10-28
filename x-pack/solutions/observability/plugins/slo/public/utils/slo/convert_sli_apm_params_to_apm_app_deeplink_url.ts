@@ -8,6 +8,7 @@
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
+  is,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
   kqlQuerySchema,
@@ -18,8 +19,8 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(
   timeRangeOverride?: { from: string; to: string }
 ): string | undefined {
   if (
-    !apmTransactionDurationIndicatorSchema.is(slo.indicator) &&
-    !apmTransactionErrorRateIndicatorSchema.is(slo.indicator)
+    !is(apmTransactionDurationIndicatorSchema, slo.indicator) &&
+    !is(apmTransactionErrorRateIndicatorSchema, slo.indicator)
   ) {
     return undefined;
   }
@@ -53,7 +54,7 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(
   if (transactionName && transactionName !== ALL_VALUE) {
     kueryParams.push(`transaction.name : "${transactionName}"`);
   }
-  if (filter && kqlQuerySchema.is(filter) && filter.length > 0) {
+  if (filter && is(kqlQuerySchema, filter) && filter.length > 0) {
     kueryParams.push(filter);
   }
 

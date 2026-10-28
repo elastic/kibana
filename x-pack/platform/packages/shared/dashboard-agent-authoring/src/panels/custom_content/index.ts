@@ -28,8 +28,12 @@ export interface CustomContentPanelAddRequest extends PanelResolutionRequestBase
   renderer: 'custom_content';
   /** What to display. */
   nlQuery: string;
-  /** ES|QL query feeding the template. Omit for static content. */
+  /** ES|QL query feeding the template. Wins over `hasData`. */
   esql?: string;
+  /** True: generate the query from `nlQuery`. False: static content with no query. Always stated. */
+  hasData: boolean;
+  /** Index, alias or data stream to generate the query from. */
+  index?: string;
   existingPanel?: undefined;
 }
 
@@ -41,6 +45,12 @@ export interface CustomContentPanelEditRequest extends PanelResolutionRequestBas
   nlQuery?: string;
   /** New ES|QL query. Omit to keep the existing query; pass `null` to remove it. */
   esql?: string | null;
+  /** True: ensure the panel has data, generating a query only when it has none. False: remove it. */
+  hasData?: boolean;
+  /** Regenerate the query from `nlQuery`, keeping the parts the request does not change. */
+  regenerateESQL?: boolean;
+  /** Index, alias or data stream to generate the query from. */
+  index?: string;
 }
 
 /** Request to generate or refine a custom content panel's template; `existingPanel` tells them apart. */
@@ -48,63 +58,54 @@ export type CustomContentPanelResolutionRequest =
   | CustomContentPanelAddRequest
   | CustomContentPanelEditRequest;
 
-/** Adds a new custom content panel. */
-const customContentPanelRequestSchema = z.object({
+/** Creates or edits a custom content panel. */
+const customContentPanelContentSchema = z.object({
   source: z.literal('request'),
   renderer: z
     .literal('custom_content')
     .describe(
-      'Render an HTML/CSS layout generated server-side. A last resort for content Lens and Vega cannot express.'
+      'Render an HTML/CSS layout generated server-side. A last resort for content Lens and Vega cannot express. Required to edit a custom content panel; it is not inferred from the panel.'
     ),
   query: z
     .string()
     .min(1)
     .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
+    .optional()
     .describe(
-      'Natural language description of what to display. The HTML template is generated server-side from it — do not supply markup yourself.'
+      'Natural language description of what to display. The HTML template is generated server-side from it — do not supply markup yourself. Required for new panels; on an existing panel, what to change, preserving layout and design where possible.'
     ),
   esql: z
     .string()
     .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
+    .nullable()
     .optional()
     .describe(
-      'ES|QL query whose result rows feed the template. Omit for static content — it is not generated for you. Build it with the generate_esql tool rather than writing it yourself; the panel fails if Elasticsearch rejects it.'
+      'An ES|QL query the user supplied verbatim; it wins over hasData and, on an existing panel, replaces the current one (omit to keep it, pass null to remove it). Do not write a query yourself; set hasData to true and let the server generate it.'
+    ),
+  hasData: z
+    .boolean()
+    .optional()
+    .describe(
+      'Required for a new panel: true when it shows live Elasticsearch values, so the server generates the ES|QL query from "query" (and "index"); false for static content such as a banner, a legend or a note, which has no query. Always state which one it is. On an existing panel: true ensures it has data, generating a query from "query" only when it has none; false removes the query so the panel is static; omit to keep the current data state.'
+    ),
+  regenerateESQL: z
+    .boolean()
+    .optional()
+    .describe(
+      'Existing panel only. Set true when the edit changes what the panel shows: the server regenerates the ES|QL query from "query", keeping the parts the request does not change. Omit for layout, copy and style edits, which keep the current query. Requires "query".'
+    ),
+  index: z
+    .string()
+    .max(256)
+    .optional()
+    .describe(
+      'Exact index, alias, or data stream the data comes from. Pass it whenever known, together with hasData: true; on an existing panel, when regenerating or adding data.'
     ),
 });
-
-/** Edits an existing custom content panel by id. */
-const customContentEditPanelRequestSchema = z
-  .object({
-    source: z.literal('request'),
-    renderer: z
-      .literal('custom_content')
-      .describe('Required to edit a custom content panel; it is not inferred from the panel.'),
-    panelId: z.string().max(256).describe('Existing custom content panel id to update.'),
-    query: z
-      .string()
-      .min(1)
-      .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
-      .optional()
-      .describe(
-        'Natural language instruction for what to change. The server refines the existing template, preserving layout and design where possible.'
-      ),
-    esql: z
-      .string()
-      .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
-      .nullable()
-      .optional()
-      .describe(
-        'New ES|QL query. Omit to keep the existing query; pass null to remove it. Build it with the generate_esql tool rather than writing it yourself.'
-      ),
-  })
-  .refine(({ query, esql }) => query !== undefined || esql !== undefined, {
-    message: 'At least one of query or esql must be provided.',
-  });
 
 export const customContentPanelKind = defineRequestPanelKind({
   renderer: 'custom_content',
   embeddableType: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   label: 'custom content',
-  addInputSchema: customContentPanelRequestSchema,
-  editInputSchema: customContentEditPanelRequestSchema,
+  contentSchema: customContentPanelContentSchema,
 });

@@ -12,9 +12,14 @@ import type { attachmentDomainV2 } from '../../../../common/types/domain';
 import {
   UnifiedAttachmentRouteRequestSchema,
   type UnifiedAttachmentRouteRequest,
-} from '../../../../common/types/api_zod/attachment/v2';
+} from '../../../../common/types/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import {
+  createZodRouteValidation,
+  getAttachmentRequestType,
+  throwIfFileAttachment,
+} from '../utils';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 import { pickCreatedOrExistingAttachment } from '../../../client/attachments/add';
 import { toUnifiedAttachment } from '../../../services/attachments/operations/utils';
@@ -31,17 +36,19 @@ export const postAttachmentRoute = createCasesRoute<
     params: schema.object({
       case_id: schema.string({ maxLength: MAX_CASE_ID_LENGTH }),
     }),
-    body: UnifiedAttachmentRouteRequestSchema,
+    body: createZodRouteValidation(UnifiedAttachmentRouteRequestSchema),
   },
   routerOptions: {
-    // TODO(security-team#15572): flip to 'public' once this API is ready to ship.
-    access: 'internal',
+    access: 'public',
+    availability: { stability: 'tech_preview', since: '9.6.0' },
     summary: `Create a case attachment`,
     tags: ['oas-tag:cases'],
     description: 'Creates a single unified attachment (e.g. a comment or an alert).',
   },
-  handler: async ({ context, request, response }) => {
+  handler: async ({ context, request, response, incrementAttachmentTypeCounters }) => {
     try {
+      throwIfFileAttachment(request.body);
+
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
@@ -63,6 +70,7 @@ export const postAttachmentRoute = createCasesRoute<
 
       const attachment: attachmentDomainV2.UnifiedAttachment = toUnifiedAttachment(created);
 
+      incrementAttachmentTypeCounters([getAttachmentRequestType(request.body)]);
       return response.created({
         body: attachment,
       });

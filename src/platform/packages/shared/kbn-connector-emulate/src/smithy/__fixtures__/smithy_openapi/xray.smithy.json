@@ -1,0 +1,2561 @@
+{
+ "smithy": "2.0",
+ "shapes": {
+  "com.amazonaws.xray#AWSXRay": {
+   "type": "service",
+   "version": "2016-04-12",
+   "operations": [
+    {
+     "target": "com.amazonaws.xray#BatchGetTraces"
+    },
+    {
+     "target": "com.amazonaws.xray#GetGroups"
+    },
+    {
+     "target": "com.amazonaws.xray#GetInsight"
+    },
+    {
+     "target": "com.amazonaws.xray#GetInsightEvents"
+    },
+    {
+     "target": "com.amazonaws.xray#GetInsightImpactGraph"
+    },
+    {
+     "target": "com.amazonaws.xray#GetInsightSummaries"
+    },
+    {
+     "target": "com.amazonaws.xray#GetRetrievedTracesGraph"
+    },
+    {
+     "target": "com.amazonaws.xray#GetSamplingRules"
+    },
+    {
+     "target": "com.amazonaws.xray#GetServiceGraph"
+    },
+    {
+     "target": "com.amazonaws.xray#GetTimeSeriesServiceStatistics"
+    },
+    {
+     "target": "com.amazonaws.xray#GetTraceGraph"
+    },
+    {
+     "target": "com.amazonaws.xray#GetTraceSummaries"
+    },
+    {
+     "target": "com.amazonaws.xray#StartTraceRetrieval"
+    }
+   ],
+   "traits": {
+    "aws.api#service": {
+     "sdkId": "XRay",
+     "arnNamespace": "xray",
+     "cloudFormationName": "XRay",
+     "cloudTrailEventSource": "xray.amazonaws.com",
+     "endpointPrefix": "xray"
+    },
+    "aws.auth#sigv4": {
+     "name": "xray"
+    },
+    "aws.protocols#restJson1": {},
+    "smithy.api#title": "AWS X-Ray"
+   }
+  },
+  "com.amazonaws.xray#Alias": {
+   "type": "structure",
+   "members": {
+    "Name": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "Names": {
+     "target": "com.amazonaws.xray#AliasNames"
+    },
+    "Type": {
+     "target": "com.amazonaws.xray#String"
+    }
+   }
+  },
+  "com.amazonaws.xray#AliasList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#Alias"
+   }
+  },
+  "com.amazonaws.xray#AliasNames": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#String"
+   }
+  },
+  "com.amazonaws.xray#AmazonResourceName": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 1011
+    }
+   }
+  },
+  "com.amazonaws.xray#AnnotationKey": {
+   "type": "string"
+  },
+  "com.amazonaws.xray#AnnotationValue": {
+   "type": "union",
+   "members": {
+    "NumberValue": {
+     "target": "com.amazonaws.xray#NullableDouble"
+    },
+    "BooleanValue": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    },
+    "StringValue": {
+     "target": "com.amazonaws.xray#String"
+    }
+   }
+  },
+  "com.amazonaws.xray#Annotations": {
+   "type": "map",
+   "key": {
+    "target": "com.amazonaws.xray#AnnotationKey"
+   },
+   "value": {
+    "target": "com.amazonaws.xray#ValuesWithServiceIds"
+   }
+  },
+  "com.amazonaws.xray#AnomalousService": {
+   "type": "structure",
+   "members": {
+    "ServiceId": {
+     "target": "com.amazonaws.xray#ServiceId"
+    }
+   }
+  },
+  "com.amazonaws.xray#AnomalousServiceList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#AnomalousService"
+   }
+  },
+  "com.amazonaws.xray#AttributeKey": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 32
+    }
+   }
+  },
+  "com.amazonaws.xray#AttributeMap": {
+   "type": "map",
+   "key": {
+    "target": "com.amazonaws.xray#AttributeKey"
+   },
+   "value": {
+    "target": "com.amazonaws.xray#AttributeValue"
+   },
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 5
+    }
+   }
+  },
+  "com.amazonaws.xray#AttributeValue": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 32
+    }
+   }
+  },
+  "com.amazonaws.xray#AvailabilityZoneDetail": {
+   "type": "structure",
+   "members": {
+    "Name": {
+     "target": "com.amazonaws.xray#String"
+    }
+   }
+  },
+  "com.amazonaws.xray#BatchGetTraces": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.xray#BatchGetTracesRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.xray#BatchGetTracesResult"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.xray#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.xray#ThrottledException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "POST",
+     "uri": "/Traces",
+     "code": 200
+    },
+    "smithy.api#paginated": {
+     "inputToken": "NextToken",
+     "outputToken": "NextToken",
+     "items": "Traces"
+    }
+   }
+  },
+  "com.amazonaws.xray#BatchGetTracesRequest": {
+   "type": "structure",
+   "members": {
+    "TraceIds": {
+     "target": "com.amazonaws.xray#TraceIdList",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#String"
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.xray#BatchGetTracesResult": {
+   "type": "structure",
+   "members": {
+    "Traces": {
+     "target": "com.amazonaws.xray#TraceList"
+    },
+    "UnprocessedTraceIds": {
+     "target": "com.amazonaws.xray#UnprocessedTraceIdList"
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#String"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.xray#Boolean": {
+   "type": "boolean",
+   "traits": {
+    "smithy.api#default": false
+   }
+  },
+  "com.amazonaws.xray#CooldownWindowMinutes": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#default": 0,
+    "smithy.api#range": {
+     "min": 0
+    }
+   }
+  },
+  "com.amazonaws.xray#Double": {
+   "type": "double",
+   "traits": {
+    "smithy.api#default": 0
+   }
+  },
+  "com.amazonaws.xray#Edge": {
+   "type": "structure",
+   "members": {
+    "ReferenceId": {
+     "target": "com.amazonaws.xray#NullableInteger"
+    },
+    "StartTime": {
+     "target": "com.amazonaws.xray#Timestamp"
+    },
+    "EndTime": {
+     "target": "com.amazonaws.xray#Timestamp"
+    },
+    "SummaryStatistics": {
+     "target": "com.amazonaws.xray#EdgeStatistics"
+    },
+    "ResponseTimeHistogram": {
+     "target": "com.amazonaws.xray#Histogram"
+    },
+    "Aliases": {
+     "target": "com.amazonaws.xray#AliasList"
+    },
+    "EdgeType": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "ReceivedEventAgeHistogram": {
+     "target": "com.amazonaws.xray#Histogram"
+    }
+   }
+  },
+  "com.amazonaws.xray#EdgeList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#Edge"
+   }
+  },
+  "com.amazonaws.xray#EdgeStatistics": {
+   "type": "structure",
+   "members": {
+    "OkCount": {
+     "target": "com.amazonaws.xray#NullableLong"
+    },
+    "ErrorStatistics": {
+     "target": "com.amazonaws.xray#ErrorStatistics"
+    },
+    "FaultStatistics": {
+     "target": "com.amazonaws.xray#FaultStatistics"
+    },
+    "TotalCount": {
+     "target": "com.amazonaws.xray#NullableLong"
+    },
+    "TotalResponseTime": {
+     "target": "com.amazonaws.xray#NullableDouble"
+    }
+   }
+  },
+  "com.amazonaws.xray#EntitySelectorExpression": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 500
+    }
+   }
+  },
+  "com.amazonaws.xray#ErrorMessage": {
+   "type": "string"
+  },
+  "com.amazonaws.xray#ErrorRootCause": {
+   "type": "structure",
+   "members": {
+    "Services": {
+     "target": "com.amazonaws.xray#ErrorRootCauseServices"
+    },
+    "ClientImpacting": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    }
+   }
+  },
+  "com.amazonaws.xray#ErrorRootCauseEntity": {
+   "type": "structure",
+   "members": {
+    "Name": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "Exceptions": {
+     "target": "com.amazonaws.xray#RootCauseExceptions"
+    },
+    "Remote": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    }
+   }
+  },
+  "com.amazonaws.xray#ErrorRootCauseEntityPath": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#ErrorRootCauseEntity"
+   }
+  },
+  "com.amazonaws.xray#ErrorRootCauseService": {
+   "type": "structure",
+   "members": {
+    "Name": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "Names": {
+     "target": "com.amazonaws.xray#ServiceNames"
+    },
+    "Type": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "AccountId": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "EntityPath": {
+     "target": "com.amazonaws.xray#ErrorRootCauseEntityPath"
+    },
+    "Inferred": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    }
+   }
+  },
+  "com.amazonaws.xray#ErrorRootCauseServices": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#ErrorRootCauseService"
+   }
+  },
+  "com.amazonaws.xray#ErrorRootCauses": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#ErrorRootCause"
+   }
+  },
+  "com.amazonaws.xray#ErrorStatistics": {
+   "type": "structure",
+   "members": {
+    "ThrottleCount": {
+     "target": "com.amazonaws.xray#NullableLong"
+    },
+    "OtherCount": {
+     "target": "com.amazonaws.xray#NullableLong"
+    },
+    "TotalCount": {
+     "target": "com.amazonaws.xray#NullableLong"
+    }
+   }
+  },
+  "com.amazonaws.xray#EventSummaryText": {
+   "type": "string"
+  },
+  "com.amazonaws.xray#FaultRootCause": {
+   "type": "structure",
+   "members": {
+    "Services": {
+     "target": "com.amazonaws.xray#FaultRootCauseServices"
+    },
+    "ClientImpacting": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    }
+   }
+  },
+  "com.amazonaws.xray#FaultRootCauseEntity": {
+   "type": "structure",
+   "members": {
+    "Name": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "Exceptions": {
+     "target": "com.amazonaws.xray#RootCauseExceptions"
+    },
+    "Remote": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    }
+   }
+  },
+  "com.amazonaws.xray#FaultRootCauseEntityPath": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#FaultRootCauseEntity"
+   }
+  },
+  "com.amazonaws.xray#FaultRootCauseService": {
+   "type": "structure",
+   "members": {
+    "Name": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "Names": {
+     "target": "com.amazonaws.xray#ServiceNames"
+    },
+    "Type": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "AccountId": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "EntityPath": {
+     "target": "com.amazonaws.xray#FaultRootCauseEntityPath"
+    },
+    "Inferred": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    }
+   }
+  },
+  "com.amazonaws.xray#FaultRootCauseServices": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#FaultRootCauseService"
+   }
+  },
+  "com.amazonaws.xray#FaultRootCauses": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#FaultRootCause"
+   }
+  },
+  "com.amazonaws.xray#FaultStatistics": {
+   "type": "structure",
+   "members": {
+    "OtherCount": {
+     "target": "com.amazonaws.xray#NullableLong"
+    },
+    "TotalCount": {
+     "target": "com.amazonaws.xray#NullableLong"
+    }
+   }
+  },
+  "com.amazonaws.xray#FilterExpression": {
+   "type": "string"
+  },
+  "com.amazonaws.xray#FixedRate": {
+   "type": "double",
+   "traits": {
+    "smithy.api#default": 0,
+    "smithy.api#range": {
+     "min": 0,
+     "max": 1
+    }
+   }
+  },
+  "com.amazonaws.xray#ForecastStatistics": {
+   "type": "structure",
+   "members": {
+    "FaultCountHigh": {
+     "target": "com.amazonaws.xray#NullableLong"
+    },
+    "FaultCountLow": {
+     "target": "com.amazonaws.xray#NullableLong"
+    }
+   }
+  },
+  "com.amazonaws.xray#GetGroups": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.xray#GetGroupsRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.xray#GetGroupsResult"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.xray#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.xray#ThrottledException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "POST",
+     "uri": "/Groups",
+     "code": 200
+    },
+    "smithy.api#paginated": {
+     "inputToken": "NextToken",
+     "outputToken": "NextToken",
+     "items": "Groups"
+    }
+   }
+  },
+  "com.amazonaws.xray#GetGroupsNextToken": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 100
+    }
+   }
+  },
+  "com.amazonaws.xray#GetGroupsRequest": {
+   "type": "structure",
+   "members": {
+    "NextToken": {
+     "target": "com.amazonaws.xray#GetGroupsNextToken"
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.xray#GetGroupsResult": {
+   "type": "structure",
+   "members": {
+    "Groups": {
+     "target": "com.amazonaws.xray#GroupSummaryList"
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#String"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.xray#GetInsight": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.xray#GetInsightRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.xray#GetInsightResult"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.xray#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.xray#ThrottledException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "POST",
+     "uri": "/Insight",
+     "code": 200
+    }
+   }
+  },
+  "com.amazonaws.xray#GetInsightEvents": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.xray#GetInsightEventsRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.xray#GetInsightEventsResult"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.xray#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.xray#ThrottledException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "POST",
+     "uri": "/InsightEvents",
+     "code": 200
+    },
+    "smithy.api#paginated": {
+     "inputToken": "NextToken",
+     "outputToken": "NextToken",
+     "pageSize": "MaxResults"
+    }
+   }
+  },
+  "com.amazonaws.xray#GetInsightEventsMaxResults": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1,
+     "max": 50
+    }
+   }
+  },
+  "com.amazonaws.xray#GetInsightEventsRequest": {
+   "type": "structure",
+   "members": {
+    "InsightId": {
+     "target": "com.amazonaws.xray#InsightId",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "MaxResults": {
+     "target": "com.amazonaws.xray#GetInsightEventsMaxResults"
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#Token"
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.xray#GetInsightEventsResult": {
+   "type": "structure",
+   "members": {
+    "InsightEvents": {
+     "target": "com.amazonaws.xray#InsightEventList"
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#Token"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.xray#GetInsightImpactGraph": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.xray#GetInsightImpactGraphRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.xray#GetInsightImpactGraphResult"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.xray#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.xray#ThrottledException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "POST",
+     "uri": "/InsightImpactGraph",
+     "code": 200
+    }
+   }
+  },
+  "com.amazonaws.xray#GetInsightImpactGraphRequest": {
+   "type": "structure",
+   "members": {
+    "InsightId": {
+     "target": "com.amazonaws.xray#InsightId",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "StartTime": {
+     "target": "com.amazonaws.xray#Timestamp",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "EndTime": {
+     "target": "com.amazonaws.xray#Timestamp",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#Token"
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.xray#GetInsightImpactGraphResult": {
+   "type": "structure",
+   "members": {
+    "InsightId": {
+     "target": "com.amazonaws.xray#InsightId"
+    },
+    "StartTime": {
+     "target": "com.amazonaws.xray#Timestamp"
+    },
+    "EndTime": {
+     "target": "com.amazonaws.xray#Timestamp"
+    },
+    "ServiceGraphStartTime": {
+     "target": "com.amazonaws.xray#Timestamp"
+    },
+    "ServiceGraphEndTime": {
+     "target": "com.amazonaws.xray#Timestamp"
+    },
+    "Services": {
+     "target": "com.amazonaws.xray#InsightImpactGraphServiceList"
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#Token"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.xray#GetInsightRequest": {
+   "type": "structure",
+   "members": {
+    "InsightId": {
+     "target": "com.amazonaws.xray#InsightId",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.xray#GetInsightResult": {
+   "type": "structure",
+   "members": {
+    "Insight": {
+     "target": "com.amazonaws.xray#Insight"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.xray#GetInsightSummaries": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.xray#GetInsightSummariesRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.xray#GetInsightSummariesResult"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.xray#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.xray#ThrottledException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "POST",
+     "uri": "/InsightSummaries",
+     "code": 200
+    },
+    "smithy.api#paginated": {
+     "inputToken": "NextToken",
+     "outputToken": "NextToken",
+     "pageSize": "MaxResults"
+    }
+   }
+  },
+  "com.amazonaws.xray#GetInsightSummariesMaxResults": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1,
+     "max": 100
+    }
+   }
+  },
+  "com.amazonaws.xray#GetInsightSummariesRequest": {
+   "type": "structure",
+   "members": {
+    "States": {
+     "target": "com.amazonaws.xray#InsightStateList"
+    },
+    "GroupARN": {
+     "target": "com.amazonaws.xray#GroupARN"
+    },
+    "GroupName": {
+     "target": "com.amazonaws.xray#GroupName"
+    },
+    "StartTime": {
+     "target": "com.amazonaws.xray#Timestamp",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "EndTime": {
+     "target": "com.amazonaws.xray#Timestamp",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "MaxResults": {
+     "target": "com.amazonaws.xray#GetInsightSummariesMaxResults"
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#Token"
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.xray#GetInsightSummariesResult": {
+   "type": "structure",
+   "members": {
+    "InsightSummaries": {
+     "target": "com.amazonaws.xray#InsightSummaryList"
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#Token"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.xray#GetRetrievedTracesGraph": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.xray#GetRetrievedTracesGraphRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.xray#GetRetrievedTracesGraphResult"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.xray#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.xray#ResourceNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.xray#ThrottledException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "POST",
+     "uri": "/GetRetrievedTracesGraph",
+     "code": 200
+    }
+   }
+  },
+  "com.amazonaws.xray#GetRetrievedTracesGraphRequest": {
+   "type": "structure",
+   "members": {
+    "RetrievalToken": {
+     "target": "com.amazonaws.xray#RetrievalToken",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#String"
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.xray#GetRetrievedTracesGraphResult": {
+   "type": "structure",
+   "members": {
+    "RetrievalStatus": {
+     "target": "com.amazonaws.xray#RetrievalStatus"
+    },
+    "Services": {
+     "target": "com.amazonaws.xray#RetrievedServicesList"
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#String"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.xray#GetSamplingRules": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.xray#GetSamplingRulesRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.xray#GetSamplingRulesResult"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.xray#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.xray#ThrottledException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "POST",
+     "uri": "/GetSamplingRules",
+     "code": 200
+    },
+    "smithy.api#paginated": {
+     "inputToken": "NextToken",
+     "outputToken": "NextToken",
+     "items": "SamplingRuleRecords"
+    }
+   }
+  },
+  "com.amazonaws.xray#GetSamplingRulesRequest": {
+   "type": "structure",
+   "members": {
+    "NextToken": {
+     "target": "com.amazonaws.xray#String"
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.xray#GetSamplingRulesResult": {
+   "type": "structure",
+   "members": {
+    "SamplingRuleRecords": {
+     "target": "com.amazonaws.xray#SamplingRuleRecordList"
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#String"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.xray#GetServiceGraph": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.xray#GetServiceGraphRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.xray#GetServiceGraphResult"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.xray#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.xray#ThrottledException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "POST",
+     "uri": "/ServiceGraph",
+     "code": 200
+    },
+    "smithy.api#paginated": {
+     "inputToken": "NextToken",
+     "outputToken": "NextToken",
+     "items": "Services"
+    }
+   }
+  },
+  "com.amazonaws.xray#GetServiceGraphRequest": {
+   "type": "structure",
+   "members": {
+    "StartTime": {
+     "target": "com.amazonaws.xray#Timestamp",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "EndTime": {
+     "target": "com.amazonaws.xray#Timestamp",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "GroupName": {
+     "target": "com.amazonaws.xray#GroupName"
+    },
+    "GroupARN": {
+     "target": "com.amazonaws.xray#GroupARN"
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#String"
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.xray#GetServiceGraphResult": {
+   "type": "structure",
+   "members": {
+    "StartTime": {
+     "target": "com.amazonaws.xray#Timestamp"
+    },
+    "EndTime": {
+     "target": "com.amazonaws.xray#Timestamp"
+    },
+    "Services": {
+     "target": "com.amazonaws.xray#ServiceList"
+    },
+    "ContainsOldGroupVersions": {
+     "target": "com.amazonaws.xray#Boolean",
+     "traits": {
+      "smithy.api#default": false
+     }
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#String"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.xray#GetTimeSeriesServiceStatistics": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.xray#GetTimeSeriesServiceStatisticsRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.xray#GetTimeSeriesServiceStatisticsResult"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.xray#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.xray#ThrottledException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "POST",
+     "uri": "/TimeSeriesServiceStatistics",
+     "code": 200
+    },
+    "smithy.api#paginated": {
+     "inputToken": "NextToken",
+     "outputToken": "NextToken",
+     "items": "TimeSeriesServiceStatistics"
+    }
+   }
+  },
+  "com.amazonaws.xray#GetTimeSeriesServiceStatisticsRequest": {
+   "type": "structure",
+   "members": {
+    "StartTime": {
+     "target": "com.amazonaws.xray#Timestamp",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "EndTime": {
+     "target": "com.amazonaws.xray#Timestamp",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "GroupName": {
+     "target": "com.amazonaws.xray#GroupName"
+    },
+    "GroupARN": {
+     "target": "com.amazonaws.xray#GroupARN"
+    },
+    "EntitySelectorExpression": {
+     "target": "com.amazonaws.xray#EntitySelectorExpression"
+    },
+    "Period": {
+     "target": "com.amazonaws.xray#NullableInteger"
+    },
+    "ForecastStatistics": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#String"
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.xray#GetTimeSeriesServiceStatisticsResult": {
+   "type": "structure",
+   "members": {
+    "TimeSeriesServiceStatistics": {
+     "target": "com.amazonaws.xray#TimeSeriesServiceStatisticsList"
+    },
+    "ContainsOldGroupVersions": {
+     "target": "com.amazonaws.xray#Boolean",
+     "traits": {
+      "smithy.api#default": false
+     }
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#String"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.xray#GetTraceGraph": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.xray#GetTraceGraphRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.xray#GetTraceGraphResult"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.xray#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.xray#ThrottledException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "POST",
+     "uri": "/TraceGraph",
+     "code": 200
+    },
+    "smithy.api#paginated": {
+     "inputToken": "NextToken",
+     "outputToken": "NextToken",
+     "items": "Services"
+    }
+   }
+  },
+  "com.amazonaws.xray#GetTraceGraphRequest": {
+   "type": "structure",
+   "members": {
+    "TraceIds": {
+     "target": "com.amazonaws.xray#TraceIdList",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#String"
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.xray#GetTraceGraphResult": {
+   "type": "structure",
+   "members": {
+    "Services": {
+     "target": "com.amazonaws.xray#ServiceList"
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#String"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.xray#GetTraceSummaries": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.xray#GetTraceSummariesRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.xray#GetTraceSummariesResult"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.xray#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.xray#ThrottledException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "POST",
+     "uri": "/TraceSummaries",
+     "code": 200
+    },
+    "smithy.api#paginated": {
+     "inputToken": "NextToken",
+     "outputToken": "NextToken",
+     "items": "TraceSummaries"
+    }
+   }
+  },
+  "com.amazonaws.xray#GetTraceSummariesRequest": {
+   "type": "structure",
+   "members": {
+    "StartTime": {
+     "target": "com.amazonaws.xray#Timestamp",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "EndTime": {
+     "target": "com.amazonaws.xray#Timestamp",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "TimeRangeType": {
+     "target": "com.amazonaws.xray#TimeRangeType"
+    },
+    "Sampling": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    },
+    "SamplingStrategy": {
+     "target": "com.amazonaws.xray#SamplingStrategy"
+    },
+    "FilterExpression": {
+     "target": "com.amazonaws.xray#FilterExpression"
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#String"
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.xray#GetTraceSummariesResult": {
+   "type": "structure",
+   "members": {
+    "TraceSummaries": {
+     "target": "com.amazonaws.xray#TraceSummaryList"
+    },
+    "ApproximateTime": {
+     "target": "com.amazonaws.xray#Timestamp"
+    },
+    "TracesProcessedCount": {
+     "target": "com.amazonaws.xray#NullableLong"
+    },
+    "NextToken": {
+     "target": "com.amazonaws.xray#String"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.xray#GraphLink": {
+   "type": "structure",
+   "members": {
+    "ReferenceType": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "SourceTraceId": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "DestinationTraceIds": {
+     "target": "com.amazonaws.xray#TraceIdList"
+    }
+   }
+  },
+  "com.amazonaws.xray#GroupARN": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 400
+    }
+   }
+  },
+  "com.amazonaws.xray#GroupName": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 32
+    }
+   }
+  },
+  "com.amazonaws.xray#GroupSummary": {
+   "type": "structure",
+   "members": {
+    "GroupName": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "GroupARN": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "FilterExpression": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "InsightsConfiguration": {
+     "target": "com.amazonaws.xray#InsightsConfiguration"
+    }
+   }
+  },
+  "com.amazonaws.xray#GroupSummaryList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#GroupSummary"
+   }
+  },
+  "com.amazonaws.xray#HTTPMethod": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 10
+    }
+   }
+  },
+  "com.amazonaws.xray#Histogram": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#HistogramEntry"
+   }
+  },
+  "com.amazonaws.xray#HistogramEntry": {
+   "type": "structure",
+   "members": {
+    "Value": {
+     "target": "com.amazonaws.xray#Double",
+     "traits": {
+      "smithy.api#default": 0
+     }
+    },
+    "Count": {
+     "target": "com.amazonaws.xray#Integer",
+     "traits": {
+      "smithy.api#default": 0
+     }
+    }
+   }
+  },
+  "com.amazonaws.xray#Host": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 64
+    }
+   }
+  },
+  "com.amazonaws.xray#Http": {
+   "type": "structure",
+   "members": {
+    "HttpURL": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "HttpStatus": {
+     "target": "com.amazonaws.xray#NullableInteger"
+    },
+    "HttpMethod": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "UserAgent": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "ClientIp": {
+     "target": "com.amazonaws.xray#String"
+    }
+   }
+  },
+  "com.amazonaws.xray#Insight": {
+   "type": "structure",
+   "members": {
+    "InsightId": {
+     "target": "com.amazonaws.xray#InsightId"
+    },
+    "GroupARN": {
+     "target": "com.amazonaws.xray#GroupARN"
+    },
+    "GroupName": {
+     "target": "com.amazonaws.xray#GroupName"
+    },
+    "RootCauseServiceId": {
+     "target": "com.amazonaws.xray#ServiceId"
+    },
+    "Categories": {
+     "target": "com.amazonaws.xray#InsightCategoryList"
+    },
+    "State": {
+     "target": "com.amazonaws.xray#InsightState"
+    },
+    "StartTime": {
+     "target": "com.amazonaws.xray#Timestamp"
+    },
+    "EndTime": {
+     "target": "com.amazonaws.xray#Timestamp"
+    },
+    "Summary": {
+     "target": "com.amazonaws.xray#InsightSummaryText"
+    },
+    "ClientRequestImpactStatistics": {
+     "target": "com.amazonaws.xray#RequestImpactStatistics"
+    },
+    "RootCauseServiceRequestImpactStatistics": {
+     "target": "com.amazonaws.xray#RequestImpactStatistics"
+    },
+    "TopAnomalousServices": {
+     "target": "com.amazonaws.xray#AnomalousServiceList"
+    }
+   }
+  },
+  "com.amazonaws.xray#InsightCategory": {
+   "type": "enum",
+   "members": {
+    "FAULT": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FAULT"
+     }
+    }
+   }
+  },
+  "com.amazonaws.xray#InsightCategoryList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#InsightCategory"
+   }
+  },
+  "com.amazonaws.xray#InsightEvent": {
+   "type": "structure",
+   "members": {
+    "Summary": {
+     "target": "com.amazonaws.xray#EventSummaryText"
+    },
+    "EventTime": {
+     "target": "com.amazonaws.xray#Timestamp"
+    },
+    "ClientRequestImpactStatistics": {
+     "target": "com.amazonaws.xray#RequestImpactStatistics"
+    },
+    "RootCauseServiceRequestImpactStatistics": {
+     "target": "com.amazonaws.xray#RequestImpactStatistics"
+    },
+    "TopAnomalousServices": {
+     "target": "com.amazonaws.xray#AnomalousServiceList"
+    }
+   }
+  },
+  "com.amazonaws.xray#InsightEventList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#InsightEvent"
+   }
+  },
+  "com.amazonaws.xray#InsightId": {
+   "type": "string",
+   "traits": {
+    "smithy.api#pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+   }
+  },
+  "com.amazonaws.xray#InsightImpactGraphEdge": {
+   "type": "structure",
+   "members": {
+    "ReferenceId": {
+     "target": "com.amazonaws.xray#NullableInteger"
+    }
+   }
+  },
+  "com.amazonaws.xray#InsightImpactGraphEdgeList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#InsightImpactGraphEdge"
+   }
+  },
+  "com.amazonaws.xray#InsightImpactGraphService": {
+   "type": "structure",
+   "members": {
+    "ReferenceId": {
+     "target": "com.amazonaws.xray#NullableInteger"
+    },
+    "Type": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "Name": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "Names": {
+     "target": "com.amazonaws.xray#ServiceNames"
+    },
+    "AccountId": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "Edges": {
+     "target": "com.amazonaws.xray#InsightImpactGraphEdgeList"
+    }
+   }
+  },
+  "com.amazonaws.xray#InsightImpactGraphServiceList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#InsightImpactGraphService"
+   }
+  },
+  "com.amazonaws.xray#InsightState": {
+   "type": "enum",
+   "members": {
+    "ACTIVE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ACTIVE"
+     }
+    },
+    "CLOSED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "CLOSED"
+     }
+    }
+   }
+  },
+  "com.amazonaws.xray#InsightStateList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#InsightState"
+   },
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 1
+    }
+   }
+  },
+  "com.amazonaws.xray#InsightSummary": {
+   "type": "structure",
+   "members": {
+    "InsightId": {
+     "target": "com.amazonaws.xray#InsightId"
+    },
+    "GroupARN": {
+     "target": "com.amazonaws.xray#GroupARN"
+    },
+    "GroupName": {
+     "target": "com.amazonaws.xray#GroupName"
+    },
+    "RootCauseServiceId": {
+     "target": "com.amazonaws.xray#ServiceId"
+    },
+    "Categories": {
+     "target": "com.amazonaws.xray#InsightCategoryList"
+    },
+    "State": {
+     "target": "com.amazonaws.xray#InsightState"
+    },
+    "StartTime": {
+     "target": "com.amazonaws.xray#Timestamp"
+    },
+    "EndTime": {
+     "target": "com.amazonaws.xray#Timestamp"
+    },
+    "Summary": {
+     "target": "com.amazonaws.xray#InsightSummaryText"
+    },
+    "ClientRequestImpactStatistics": {
+     "target": "com.amazonaws.xray#RequestImpactStatistics"
+    },
+    "RootCauseServiceRequestImpactStatistics": {
+     "target": "com.amazonaws.xray#RequestImpactStatistics"
+    },
+    "TopAnomalousServices": {
+     "target": "com.amazonaws.xray#AnomalousServiceList"
+    },
+    "LastUpdateTime": {
+     "target": "com.amazonaws.xray#Timestamp"
+    }
+   }
+  },
+  "com.amazonaws.xray#InsightSummaryList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#InsightSummary"
+   }
+  },
+  "com.amazonaws.xray#InsightSummaryText": {
+   "type": "string"
+  },
+  "com.amazonaws.xray#InsightsConfiguration": {
+   "type": "structure",
+   "members": {
+    "InsightsEnabled": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    },
+    "NotificationsEnabled": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    }
+   }
+  },
+  "com.amazonaws.xray#InstanceIdDetail": {
+   "type": "structure",
+   "members": {
+    "Id": {
+     "target": "com.amazonaws.xray#String"
+    }
+   }
+  },
+  "com.amazonaws.xray#Integer": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#default": 0
+   }
+  },
+  "com.amazonaws.xray#InvalidRequestException": {
+   "type": "structure",
+   "members": {
+    "Message": {
+     "target": "com.amazonaws.xray#ErrorMessage"
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client"
+   }
+  },
+  "com.amazonaws.xray#LinksList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#GraphLink"
+   },
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 100
+    }
+   }
+  },
+  "com.amazonaws.xray#MaxRate": {
+   "type": "double",
+   "traits": {
+    "smithy.api#default": 0,
+    "smithy.api#range": {
+     "min": 0,
+     "max": 1
+    }
+   }
+  },
+  "com.amazonaws.xray#NullableBoolean": {
+   "type": "boolean"
+  },
+  "com.amazonaws.xray#NullableDouble": {
+   "type": "double"
+  },
+  "com.amazonaws.xray#NullableInteger": {
+   "type": "integer"
+  },
+  "com.amazonaws.xray#NullableLong": {
+   "type": "long"
+  },
+  "com.amazonaws.xray#Priority": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1,
+     "max": 9999
+    }
+   }
+  },
+  "com.amazonaws.xray#RequestImpactStatistics": {
+   "type": "structure",
+   "members": {
+    "FaultCount": {
+     "target": "com.amazonaws.xray#NullableLong"
+    },
+    "OkCount": {
+     "target": "com.amazonaws.xray#NullableLong"
+    },
+    "TotalCount": {
+     "target": "com.amazonaws.xray#NullableLong"
+    }
+   }
+  },
+  "com.amazonaws.xray#ReservoirSize": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#default": 0,
+    "smithy.api#range": {
+     "min": 0
+    }
+   }
+  },
+  "com.amazonaws.xray#ResourceARN": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 500
+    }
+   }
+  },
+  "com.amazonaws.xray#ResourceARNDetail": {
+   "type": "structure",
+   "members": {
+    "ARN": {
+     "target": "com.amazonaws.xray#String"
+    }
+   }
+  },
+  "com.amazonaws.xray#ResourceNotFoundException": {
+   "type": "structure",
+   "members": {
+    "Message": {
+     "target": "com.amazonaws.xray#ErrorMessage"
+    },
+    "ResourceName": {
+     "target": "com.amazonaws.xray#AmazonResourceName"
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 404
+   }
+  },
+  "com.amazonaws.xray#ResponseTimeRootCause": {
+   "type": "structure",
+   "members": {
+    "Services": {
+     "target": "com.amazonaws.xray#ResponseTimeRootCauseServices"
+    },
+    "ClientImpacting": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    }
+   }
+  },
+  "com.amazonaws.xray#ResponseTimeRootCauseEntity": {
+   "type": "structure",
+   "members": {
+    "Name": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "Coverage": {
+     "target": "com.amazonaws.xray#NullableDouble"
+    },
+    "Remote": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    }
+   }
+  },
+  "com.amazonaws.xray#ResponseTimeRootCauseEntityPath": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#ResponseTimeRootCauseEntity"
+   }
+  },
+  "com.amazonaws.xray#ResponseTimeRootCauseService": {
+   "type": "structure",
+   "members": {
+    "Name": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "Names": {
+     "target": "com.amazonaws.xray#ServiceNames"
+    },
+    "Type": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "AccountId": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "EntityPath": {
+     "target": "com.amazonaws.xray#ResponseTimeRootCauseEntityPath"
+    },
+    "Inferred": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    }
+   }
+  },
+  "com.amazonaws.xray#ResponseTimeRootCauseServices": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#ResponseTimeRootCauseService"
+   }
+  },
+  "com.amazonaws.xray#ResponseTimeRootCauses": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#ResponseTimeRootCause"
+   }
+  },
+  "com.amazonaws.xray#RetrievalStatus": {
+   "type": "enum",
+   "members": {
+    "SCHEDULED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "SCHEDULED"
+     }
+    },
+    "RUNNING": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "RUNNING"
+     }
+    },
+    "COMPLETE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "COMPLETE"
+     }
+    },
+    "FAILED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FAILED"
+     }
+    },
+    "CANCELLED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "CANCELLED"
+     }
+    },
+    "TIMEOUT": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "TIMEOUT"
+     }
+    }
+   }
+  },
+  "com.amazonaws.xray#RetrievalToken": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 1020
+    }
+   }
+  },
+  "com.amazonaws.xray#RetrievedService": {
+   "type": "structure",
+   "members": {
+    "Service": {
+     "target": "com.amazonaws.xray#Service"
+    },
+    "Links": {
+     "target": "com.amazonaws.xray#LinksList"
+    }
+   }
+  },
+  "com.amazonaws.xray#RetrievedServicesList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#RetrievedService"
+   },
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 1000
+    }
+   }
+  },
+  "com.amazonaws.xray#RootCauseException": {
+   "type": "structure",
+   "members": {
+    "Name": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "Message": {
+     "target": "com.amazonaws.xray#String"
+    }
+   }
+  },
+  "com.amazonaws.xray#RootCauseExceptions": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#RootCauseException"
+   }
+  },
+  "com.amazonaws.xray#RuleName": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 32
+    }
+   }
+  },
+  "com.amazonaws.xray#SamplingRateBoost": {
+   "type": "structure",
+   "members": {
+    "MaxRate": {
+     "target": "com.amazonaws.xray#MaxRate",
+     "traits": {
+      "smithy.api#default": 0,
+      "smithy.api#required": {}
+     }
+    },
+    "CooldownWindowMinutes": {
+     "target": "com.amazonaws.xray#CooldownWindowMinutes",
+     "traits": {
+      "smithy.api#default": 0,
+      "smithy.api#required": {}
+     }
+    }
+   }
+  },
+  "com.amazonaws.xray#SamplingRule": {
+   "type": "structure",
+   "members": {
+    "RuleName": {
+     "target": "com.amazonaws.xray#RuleName"
+    },
+    "RuleARN": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "ResourceARN": {
+     "target": "com.amazonaws.xray#ResourceARN",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "Priority": {
+     "target": "com.amazonaws.xray#Priority",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "FixedRate": {
+     "target": "com.amazonaws.xray#FixedRate",
+     "traits": {
+      "smithy.api#default": 0,
+      "smithy.api#required": {}
+     }
+    },
+    "ReservoirSize": {
+     "target": "com.amazonaws.xray#ReservoirSize",
+     "traits": {
+      "smithy.api#default": 0,
+      "smithy.api#required": {}
+     }
+    },
+    "ServiceName": {
+     "target": "com.amazonaws.xray#ServiceName",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "ServiceType": {
+     "target": "com.amazonaws.xray#ServiceType",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "Host": {
+     "target": "com.amazonaws.xray#Host",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "HTTPMethod": {
+     "target": "com.amazonaws.xray#HTTPMethod",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "URLPath": {
+     "target": "com.amazonaws.xray#URLPath",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "Version": {
+     "target": "com.amazonaws.xray#Version",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "Attributes": {
+     "target": "com.amazonaws.xray#AttributeMap"
+    },
+    "SamplingRateBoost": {
+     "target": "com.amazonaws.xray#SamplingRateBoost"
+    }
+   }
+  },
+  "com.amazonaws.xray#SamplingRuleRecord": {
+   "type": "structure",
+   "members": {
+    "SamplingRule": {
+     "target": "com.amazonaws.xray#SamplingRule"
+    },
+    "CreatedAt": {
+     "target": "com.amazonaws.xray#Timestamp"
+    },
+    "ModifiedAt": {
+     "target": "com.amazonaws.xray#Timestamp"
+    }
+   }
+  },
+  "com.amazonaws.xray#SamplingRuleRecordList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#SamplingRuleRecord"
+   }
+  },
+  "com.amazonaws.xray#SamplingStrategy": {
+   "type": "structure",
+   "members": {
+    "Name": {
+     "target": "com.amazonaws.xray#SamplingStrategyName"
+    },
+    "Value": {
+     "target": "com.amazonaws.xray#NullableDouble"
+    }
+   }
+  },
+  "com.amazonaws.xray#SamplingStrategyName": {
+   "type": "enum",
+   "members": {
+    "PartialScan": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "PartialScan"
+     }
+    },
+    "FixedRate": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FixedRate"
+     }
+    }
+   }
+  },
+  "com.amazonaws.xray#Segment": {
+   "type": "structure",
+   "members": {
+    "Id": {
+     "target": "com.amazonaws.xray#SegmentId"
+    },
+    "Document": {
+     "target": "com.amazonaws.xray#SegmentDocument"
+    }
+   }
+  },
+  "com.amazonaws.xray#SegmentDocument": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1
+    }
+   }
+  },
+  "com.amazonaws.xray#SegmentId": {
+   "type": "string"
+  },
+  "com.amazonaws.xray#SegmentList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#Segment"
+   }
+  },
+  "com.amazonaws.xray#Service": {
+   "type": "structure",
+   "members": {
+    "ReferenceId": {
+     "target": "com.amazonaws.xray#NullableInteger"
+    },
+    "Name": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "Names": {
+     "target": "com.amazonaws.xray#ServiceNames"
+    },
+    "Root": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    },
+    "AccountId": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "Type": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "State": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "StartTime": {
+     "target": "com.amazonaws.xray#Timestamp"
+    },
+    "EndTime": {
+     "target": "com.amazonaws.xray#Timestamp"
+    },
+    "Edges": {
+     "target": "com.amazonaws.xray#EdgeList"
+    },
+    "SummaryStatistics": {
+     "target": "com.amazonaws.xray#ServiceStatistics"
+    },
+    "DurationHistogram": {
+     "target": "com.amazonaws.xray#Histogram"
+    },
+    "ResponseTimeHistogram": {
+     "target": "com.amazonaws.xray#Histogram"
+    }
+   }
+  },
+  "com.amazonaws.xray#ServiceId": {
+   "type": "structure",
+   "members": {
+    "Name": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "Names": {
+     "target": "com.amazonaws.xray#ServiceNames"
+    },
+    "AccountId": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "Type": {
+     "target": "com.amazonaws.xray#String"
+    }
+   }
+  },
+  "com.amazonaws.xray#ServiceIds": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#ServiceId"
+   }
+  },
+  "com.amazonaws.xray#ServiceList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#Service"
+   }
+  },
+  "com.amazonaws.xray#ServiceName": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 64
+    }
+   }
+  },
+  "com.amazonaws.xray#ServiceNames": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#String"
+   }
+  },
+  "com.amazonaws.xray#ServiceStatistics": {
+   "type": "structure",
+   "members": {
+    "OkCount": {
+     "target": "com.amazonaws.xray#NullableLong"
+    },
+    "ErrorStatistics": {
+     "target": "com.amazonaws.xray#ErrorStatistics"
+    },
+    "FaultStatistics": {
+     "target": "com.amazonaws.xray#FaultStatistics"
+    },
+    "TotalCount": {
+     "target": "com.amazonaws.xray#NullableLong"
+    },
+    "TotalResponseTime": {
+     "target": "com.amazonaws.xray#NullableDouble"
+    }
+   }
+  },
+  "com.amazonaws.xray#ServiceType": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 64
+    }
+   }
+  },
+  "com.amazonaws.xray#StartTraceRetrieval": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.xray#StartTraceRetrievalRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.xray#StartTraceRetrievalResult"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.xray#InvalidRequestException"
+    },
+    {
+     "target": "com.amazonaws.xray#ResourceNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.xray#ThrottledException"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "POST",
+     "uri": "/StartTraceRetrieval",
+     "code": 200
+    }
+   }
+  },
+  "com.amazonaws.xray#StartTraceRetrievalRequest": {
+   "type": "structure",
+   "members": {
+    "TraceIds": {
+     "target": "com.amazonaws.xray#TraceIdListForRetrieval",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "StartTime": {
+     "target": "com.amazonaws.xray#Timestamp",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "EndTime": {
+     "target": "com.amazonaws.xray#Timestamp",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.xray#StartTraceRetrievalResult": {
+   "type": "structure",
+   "members": {
+    "RetrievalToken": {
+     "target": "com.amazonaws.xray#RetrievalToken"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.xray#String": {
+   "type": "string"
+  },
+  "com.amazonaws.xray#ThrottledException": {
+   "type": "structure",
+   "members": {
+    "Message": {
+     "target": "com.amazonaws.xray#ErrorMessage"
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 429
+   }
+  },
+  "com.amazonaws.xray#TimeRangeType": {
+   "type": "enum",
+   "members": {
+    "TraceId": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "TraceId"
+     }
+    },
+    "Event": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Event"
+     }
+    },
+    "Service": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Service"
+     }
+    }
+   }
+  },
+  "com.amazonaws.xray#TimeSeriesServiceStatistics": {
+   "type": "structure",
+   "members": {
+    "Timestamp": {
+     "target": "com.amazonaws.xray#Timestamp"
+    },
+    "EdgeSummaryStatistics": {
+     "target": "com.amazonaws.xray#EdgeStatistics"
+    },
+    "ServiceSummaryStatistics": {
+     "target": "com.amazonaws.xray#ServiceStatistics"
+    },
+    "ServiceForecastStatistics": {
+     "target": "com.amazonaws.xray#ForecastStatistics"
+    },
+    "ResponseTimeHistogram": {
+     "target": "com.amazonaws.xray#Histogram"
+    }
+   }
+  },
+  "com.amazonaws.xray#TimeSeriesServiceStatisticsList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#TimeSeriesServiceStatistics"
+   }
+  },
+  "com.amazonaws.xray#Timestamp": {
+   "type": "timestamp"
+  },
+  "com.amazonaws.xray#Token": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 2000
+    }
+   }
+  },
+  "com.amazonaws.xray#Trace": {
+   "type": "structure",
+   "members": {
+    "Id": {
+     "target": "com.amazonaws.xray#TraceId"
+    },
+    "Duration": {
+     "target": "com.amazonaws.xray#NullableDouble"
+    },
+    "LimitExceeded": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    },
+    "Segments": {
+     "target": "com.amazonaws.xray#SegmentList"
+    }
+   }
+  },
+  "com.amazonaws.xray#TraceAvailabilityZones": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#AvailabilityZoneDetail"
+   }
+  },
+  "com.amazonaws.xray#TraceId": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 35
+    }
+   }
+  },
+  "com.amazonaws.xray#TraceIdList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#TraceId"
+   }
+  },
+  "com.amazonaws.xray#TraceIdListForRetrieval": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#TraceId"
+   },
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 100
+    }
+   }
+  },
+  "com.amazonaws.xray#TraceInstanceIds": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#InstanceIdDetail"
+   }
+  },
+  "com.amazonaws.xray#TraceList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#Trace"
+   }
+  },
+  "com.amazonaws.xray#TraceResourceARNs": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#ResourceARNDetail"
+   }
+  },
+  "com.amazonaws.xray#TraceSummary": {
+   "type": "structure",
+   "members": {
+    "Id": {
+     "target": "com.amazonaws.xray#TraceId"
+    },
+    "StartTime": {
+     "target": "com.amazonaws.xray#Timestamp"
+    },
+    "Duration": {
+     "target": "com.amazonaws.xray#NullableDouble"
+    },
+    "ResponseTime": {
+     "target": "com.amazonaws.xray#NullableDouble"
+    },
+    "HasFault": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    },
+    "HasError": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    },
+    "HasThrottle": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    },
+    "IsPartial": {
+     "target": "com.amazonaws.xray#NullableBoolean"
+    },
+    "Http": {
+     "target": "com.amazonaws.xray#Http"
+    },
+    "Annotations": {
+     "target": "com.amazonaws.xray#Annotations"
+    },
+    "Users": {
+     "target": "com.amazonaws.xray#TraceUsers"
+    },
+    "ServiceIds": {
+     "target": "com.amazonaws.xray#ServiceIds"
+    },
+    "ResourceARNs": {
+     "target": "com.amazonaws.xray#TraceResourceARNs"
+    },
+    "InstanceIds": {
+     "target": "com.amazonaws.xray#TraceInstanceIds"
+    },
+    "AvailabilityZones": {
+     "target": "com.amazonaws.xray#TraceAvailabilityZones"
+    },
+    "EntryPoint": {
+     "target": "com.amazonaws.xray#ServiceId"
+    },
+    "FaultRootCauses": {
+     "target": "com.amazonaws.xray#FaultRootCauses"
+    },
+    "ErrorRootCauses": {
+     "target": "com.amazonaws.xray#ErrorRootCauses"
+    },
+    "ResponseTimeRootCauses": {
+     "target": "com.amazonaws.xray#ResponseTimeRootCauses"
+    },
+    "Revision": {
+     "target": "com.amazonaws.xray#Integer",
+     "traits": {
+      "smithy.api#default": 0
+     }
+    },
+    "MatchedEventTime": {
+     "target": "com.amazonaws.xray#Timestamp"
+    }
+   }
+  },
+  "com.amazonaws.xray#TraceSummaryList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#TraceSummary"
+   }
+  },
+  "com.amazonaws.xray#TraceUser": {
+   "type": "structure",
+   "members": {
+    "UserName": {
+     "target": "com.amazonaws.xray#String"
+    },
+    "ServiceIds": {
+     "target": "com.amazonaws.xray#ServiceIds"
+    }
+   }
+  },
+  "com.amazonaws.xray#TraceUsers": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#TraceUser"
+   }
+  },
+  "com.amazonaws.xray#URLPath": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 128
+    }
+   }
+  },
+  "com.amazonaws.xray#UnprocessedTraceIdList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#TraceId"
+   }
+  },
+  "com.amazonaws.xray#ValueWithServiceIds": {
+   "type": "structure",
+   "members": {
+    "AnnotationValue": {
+     "target": "com.amazonaws.xray#AnnotationValue"
+    },
+    "ServiceIds": {
+     "target": "com.amazonaws.xray#ServiceIds"
+    }
+   }
+  },
+  "com.amazonaws.xray#ValuesWithServiceIds": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.xray#ValueWithServiceIds"
+   }
+  },
+  "com.amazonaws.xray#Version": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1
+    }
+   }
+  }
+ }
+}

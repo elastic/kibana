@@ -6,7 +6,6 @@
  */
 
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import moment from 'moment';
 import type { TimeRange } from './use_lens_definition';
 
@@ -16,7 +15,7 @@ import type { TimeRange } from './use_lens_definition';
 export function getLensDefinitionInterval(dataTimeRange: TimeRange, slo: SLOWithSummaryResponse) {
   const dataTimeRangeDuration = moment(dataTimeRange.to).diff(moment(dataTimeRange.from), 'ms');
   const interval =
-    timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) &&
+    slo.budgetingMethod === 'timeslices' &&
     dataTimeRangeDuration <= 86400000 &&
     slo.objective?.timesliceWindow
       ? slo.objective.timesliceWindow

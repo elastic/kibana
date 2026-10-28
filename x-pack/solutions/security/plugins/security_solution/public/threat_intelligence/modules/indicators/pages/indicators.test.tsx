@@ -20,8 +20,10 @@ jest.mock('../../query_bar/hooks/use_filters');
 jest.mock('../hooks/use_indicators');
 jest.mock('../hooks/use_aggregated_indicators');
 
-jest.mock('../../../../common/components/filters_global', () => ({
-  FiltersGlobal: () => <div data-test-subj="SiemSearchBar" />,
+jest.mock('../../../../common/components/search_bar', () => ({
+  SiemSearchBar: ({ displayStyle }: { displayStyle?: string }) => (
+    <div data-test-subj="SiemSearchBar" data-display-style={displayStyle} />
+  ),
 }));
 
 const stub = () => {};
@@ -73,9 +75,17 @@ describe('<IndicatorsPage />', () => {
     expect(queryByTestId(TABLE_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render SIEM Search Bar', () => {
-    const { queryByTestId } = render(<IndicatorsPage />, { wrapper: TestProvidersComponent });
-    expect(queryByTestId('SiemSearchBar')).toBeInTheDocument();
+  it('should render SIEM Search Bar in the page, not in the global filters strip', () => {
+    const { getByTestId, queryByTestId } = render(<IndicatorsPage />, {
+      wrapper: TestProvidersComponent,
+    });
+    expect(getByTestId('SiemSearchBar')).toHaveAttribute('data-display-style', 'inPage');
+    expect(queryByTestId('filters-global-container')).not.toBeInTheDocument();
+  });
+
+  it('should render the update status', () => {
+    const { getByTestId } = render(<IndicatorsPage />, { wrapper: TestProvidersComponent });
+    expect(getByTestId('updateStatus')).toBeInTheDocument();
   });
 
   it('should render stack by selector', () => {
