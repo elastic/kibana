@@ -24,7 +24,15 @@ export const createEditEvaluator = (): CustomContentEvaluator => ({
       return skippedResult('This example is not an edit.');
     }
 
-    const { after, attachmentId, panelId, versionCount, baseline, followUpToolIds } = output;
+    const {
+      after,
+      attachmentId,
+      panelId,
+      versionCount,
+      baseline,
+      followUpToolIds,
+      followUpToolArgs,
+    } = output;
     if (followUpToolIds?.length === 0) {
       return {
         score: 0,
@@ -84,7 +92,7 @@ export const createEditEvaluator = (): CustomContentEvaluator => ({
           score: 0,
           label: 'data-edit-failed',
           explanation: 'A data edit should have changed the query, but it is unchanged.',
-          metadata: { esql: after.esql },
+          metadata: { esql: after.esql, followUpToolArgs },
         };
   },
 });

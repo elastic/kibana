@@ -159,6 +159,52 @@ describe('createCustomContentPanelResolver', () => {
       });
     });
 
+    it('keeps the settings of the panel that are not the query or the template', async () => {
+      const timeRange = { from: 'now-7d', to: 'now' };
+
+      const result = await resolve(
+        editRequest(
+          customContentPanel({
+            template: '<div>old</div>',
+            esql_query: ['FROM logs-*'],
+            title: 'Errors by host',
+            description: 'Last week',
+            time_range: timeRange,
+          }),
+          { nlQuery: 'Make the badges blue' }
+        )
+      );
+
+      expect(result).toMatchObject({
+        panelContent: {
+          config: {
+            title: 'Errors by host',
+            description: 'Last week',
+            time_range: timeRange,
+            esql_query: ['FROM logs-*'],
+            template: '<div>resolved</div>',
+          },
+        },
+      });
+    });
+
+    it('drops the query but keeps the other settings when the edit removes it', async () => {
+      const result = await resolve(
+        editRequest(
+          customContentPanel({
+            template: '<div>old</div>',
+            esql_query: ['FROM logs-*'],
+            title: 'Errors by host',
+          }),
+          { esql: null }
+        )
+      );
+
+      expect(result).toMatchObject({
+        panelContent: { config: { title: 'Errors by host', esql_query: undefined } },
+      });
+    });
+
     it('resolves from the existing template when the edit carries no query', async () => {
       await resolve(
         editRequest(customContentPanel({ template: '<div>old</div>' }), {

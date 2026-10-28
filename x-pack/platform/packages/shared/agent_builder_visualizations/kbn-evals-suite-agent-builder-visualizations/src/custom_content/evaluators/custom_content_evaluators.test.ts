@@ -13,6 +13,8 @@ import { createQueryContentsEvaluator } from './query_contents';
 import { createRowLimitEvaluator, readLimit } from './row_limit';
 import { createRowOrderEvaluator, labelsInOrder } from './row_order';
 import { createTemplateColumnsEvaluator, readColumnReferences } from './template_columns';
+import { createDataEditAppliedEvaluator, templateReadsColumn } from './edit_applied';
+import { createStyleEditJudge } from './style_edit_judge';
 import { createTemplateValidityEvaluator } from './template_validity';
 
 const outputWith = (
@@ -452,6 +454,20 @@ describe('Custom Content Edit', () => {
     expect(result).toMatchObject({ score: 0, label: 'no-follow-up-tool-call' });
   });
 
+  it('puts what the follow-up passed to the tools in the failure metadata', async () => {
+    const result = await run(
+      evaluator,
+      editOutput(before, {
+        followUpToolIds: ['platform.dashboard.generate_dashboard'],
+        followUpToolArgs: ['generate_dashboard panel p1: hasData=unset'],
+      }),
+      data
+    );
+    expect(result.metadata).toMatchObject({
+      followUpToolArgs: ['generate_dashboard panel p1: hasData=unset'],
+    });
+  });
+
   it('judges the edit itself when the follow-up called a tool', async () => {
     const result = await run(
       evaluator,
@@ -499,5 +515,134 @@ describe('Custom Content Edit', () => {
       data
     );
     expect(unchanged).toMatchObject({ score: 0, label: 'data-edit-failed' });
+  });
+});
+
+describe('Custom Content Data Edit Applied', () => {
+  const columnsByQuery: Record<string, string[]> = {
+    'FROM logs | STATS count = COUNT(*) BY host': ['count', 'host'],
+    'FROM logs | STATS count = COUNT(*), avg_bytes = AVG(bytes) BY host': [
+      'count',
+      'avg_bytes',
+      'host',
+    ],
+    'FROM logs | STATS total = COUNT(*)': ['total'],
+  };
+  const runQuery = jest.fn(async (query: string) => {
+    if (!(query in columnsByQuery)) throw new Error('unknown query');
+    return { columns: columnsByQuery[query].map((name) => ({ name, type: 'long' })), values: [] };
+  });
+  const evaluator = createDataEditAppliedEvaluator({ runQuery: runQuery as never });
+  const gold = { data: 'query' as const, edit: 'data' as const, addsColumn: true };
+  const before = { esql: 'FROM logs | STATS count = COUNT(*) BY host', template: '<p/>' };
+  const after = (
+    template: string,
+    esql = 'FROM logs | STATS count = COUNT(*), avg_bytes = AVG(bytes) BY host'
+  ) =>
+    outputWith(
+      { esql, template },
+      { baseline: { attachmentId: 'att-1', content: before, versionCount: 1 } }
+    );
+
+  it('reads a column through bracket access with either quote', () => {
+    expect(templateReadsColumn('{{ row["avg_bytes"].value }}', 'avg_bytes')).toBe(true);
+    expect(templateReadsColumn("{{ r['avg_bytes'].value }}", 'avg_bytes')).toBe(true);
+    expect(templateReadsColumn('{{ row["count"].value }}', 'avg_bytes')).toBe(false);
+  });
+
+  it('skips examples that are not a data edit that adds a column', async () => {
+    expect((await run(evaluator, after('<p/>'), { data: 'query', edit: 'data' })).score).toBeNull();
+    expect(
+      (await run(evaluator, after('<p/>'), { data: 'query', edit: 'style' })).score
+    ).toBeNull();
+  });
+
+  it('passes when the template shows the added column', async () => {
+    const result = await run(evaluator, after('<b>{{ row["avg_bytes"].value }}</b>'), gold);
+    expect(result).toMatchObject({ score: 1, label: 'new-column-shown' });
+  });
+
+  it('fails when the query gained a column the template does not read', async () => {
+    const result = await run(evaluator, after('<b>{{ row["count"].value }}</b>'), gold);
+    expect(result).toMatchObject({ score: 0, label: 'new-column-not-shown' });
+  });
+
+  it('fails when the edited query returns no new column', async () => {
+    const result = await run(
+      evaluator,
+      after('<b>{{ row["count"].value }}</b>', 'FROM logs | STATS count = COUNT(*) BY host'),
+      gold
+    );
+    expect(result).toMatchObject({ score: 0, label: 'no-new-column' });
+  });
+
+  it('treats every column as new when the panel was static', async () => {
+    const result = await run(
+      evaluator,
+      outputWith(
+        { esql: 'FROM logs | STATS total = COUNT(*)', template: '<b>{{ row["total"].value }}</b>' },
+        { baseline: { attachmentId: 'att-1', content: { template: '<p/>' }, versionCount: 1 } }
+      ),
+      gold
+    );
+    expect(result.score).toBe(1);
+  });
+
+  it('skips when a query does not run', async () => {
+    const result = await run(evaluator, after('<p/>', 'FROM nowhere'), gold);
+    expect(result.score).toBeNull();
+  });
+});
+
+describe('Custom Content Style Edit', () => {
+  const judge = { evaluate: jest.fn(), kind: 'LLM' as const, direction: 'maximize' as const };
+  const criteria = jest.fn(() => judge as never);
+  const evaluator = createStyleEditJudge({ criteria });
+  const styleGold = { data: 'query' as const, edit: 'style' as const };
+  const withTemplates = outputWith(
+    { esql: QUERY, template: '<b class="blue">x</b>' },
+    {
+      baseline: {
+        attachmentId: 'att-1',
+        content: { esql: QUERY, template: '<b>x</b>' },
+        versionCount: 1,
+      },
+    }
+  );
+
+  beforeEach(() => judge.evaluate.mockReset());
+
+  it('gives the judge the instruction and both templates, and returns its verdict', async () => {
+    judge.evaluate.mockResolvedValue({ score: 1, explanation: 'ok' });
+
+    const result = await evaluator.evaluate({
+      input: { question: 'q', followUp: 'Make the badges blue.' },
+      output: withTemplates,
+      expected: styleGold,
+      metadata: {},
+    });
+
+    expect(result.score).toBe(1);
+    expect(judge.evaluate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: { instruction: 'Make the badges blue.' },
+        output: { templateBefore: '<b>x</b>', templateAfter: '<b class="blue">x</b>' },
+      })
+    );
+  });
+
+  it('skips data edits, single-turn examples and runs without a template to compare', async () => {
+    const skip = async (
+      input: { question: string; followUp?: string },
+      output = withTemplates,
+      expected: typeof styleGold | { data: 'query'; edit: 'data' } = styleGold
+    ) => (await evaluator.evaluate({ input, output, expected, metadata: {} })).score;
+
+    expect(
+      await skip({ question: 'q', followUp: 'x' }, withTemplates, { data: 'query', edit: 'data' })
+    ).toBeNull();
+    expect(await skip({ question: 'q' })).toBeNull();
+    expect(await skip({ question: 'q', followUp: 'x' }, outputWith(undefined))).toBeNull();
+    expect(judge.evaluate).not.toHaveBeenCalled();
   });
 });

@@ -75,5 +75,13 @@ describe('generateCustomContentEsql', () => {
     it('asks for one row per item', () => {
       expect(CUSTOM_CONTENT_ESQL_INSTRUCTIONS).toContain('one row per item');
     });
+
+    it('shows how to build one row per step when each step has its own filter', () => {
+      expect(CUSTOM_CONTENT_ESQL_INSTRUCTIONS).toContain(
+        'never compute them as columns of one STATS row'
+      );
+      expect(CUSTOM_CONTENT_ESQL_INSTRUCTIONS).toContain('| FORK (STATS flights = COUNT(*)');
+      expect(CUSTOM_CONTENT_ESQL_INSTRUCTIONS).toContain('SORT step_no');
+    });
   });
 });

@@ -43,7 +43,7 @@ export const createDataExpectationEvaluator = (): CustomContentEvaluator => ({
       explanation: expectsQuery
         ? 'The panel should show live data but has no query.'
         : `A static panel should have no query, but it has: ${panel.esql}`,
-      metadata: { esql: panel.esql },
+      metadata: { esql: panel.esql, followUpToolArgs: output.followUpToolArgs },
     };
   },
 });

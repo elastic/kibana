@@ -30,7 +30,7 @@ const resolveCustomContentState = async (
   request: CustomContentPanelResolutionRequest,
   resolveTemplate: CustomContentTemplateResolver,
   generateEsql: CustomContentEsqlGenerator
-): Promise<CustomContentState> => {
+): Promise<Record<string, unknown>> => {
   const { nlQuery, esql, hasData, index, existingPanel } = request;
   const generate = (existingQueries: string[]) =>
     generateEsql({ nlQuery: nlQuery ?? '', index, existingQueries });
@@ -63,7 +63,7 @@ const resolveCustomContentState = async (
     existingTemplate: existing.template,
     hasExistingQuery: !isQueryChanging && !!mergedEsqlQuery,
   });
-  return { esql_query: toEsqlQueryState(mergedEsqlQuery), template };
+  return { ...existingPanel.config, esql_query: toEsqlQueryState(mergedEsqlQuery), template };
 };
 
 /**

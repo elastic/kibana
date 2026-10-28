@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { MessageRole } from '@kbn/inference-common';
+import { MessageRole, type Message } from '@kbn/inference-common';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
@@ -19,6 +19,7 @@ import {
   stripMarkdownFences,
 } from '@kbn/custom-content-common';
 import { extractDeclaredHeight } from './extract_declared_height';
+import { getLiquidSyntaxError } from './liquid_syntax';
 
 const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to the host application's real design tokens for both light and dark themes at render time. Use them for EVERY space, radius and font declaration and for every UI color — surfaces, text, borders, chrome and data marks. Never hardcode a pixel spacing value or a font stack, and never hardcode one of those colors, or the panel will look foreign next to the charts beside it. (Illustrations are the exception; see below.)
 - Required body reset: body { margin: 0; padding: var(--cc-space-l); box-sizing: border-box; font-family: var(--cc-font-family); color: var(--cc-color-text); background: var(--cc-color-background); }
@@ -265,13 +266,39 @@ export const createCustomContentTemplateResolver = ({
     }
 
     const { inferenceClient } = await modelProvider.getDefaultModel();
-    const response = await inferenceClient.chatComplete({
-      system: systemPrompt,
-      messages: [{ role: MessageRole.User, content: userContent }],
-      stream: false,
-    });
+    const messages: Message[] = [{ role: MessageRole.User, content: userContent }];
+    const generate = async () => {
+      const response = await inferenceClient.chatComplete({
+        system: systemPrompt,
+        messages,
+        stream: false,
+      });
+      return {
+        content: response.content,
+        ...extractDeclaredHeight(stripMarkdownFences(response.content)),
+      };
+    };
 
-    const { template, height } = extractDeclaredHeight(stripMarkdownFences(response.content));
+    let generated = await generate();
+    const syntaxError = getLiquidSyntaxError(generated.template);
+    if (syntaxError) {
+      logger.warn(
+        `custom_content template resolver: invalid Liquid, retrying once — ${syntaxError}`
+      );
+      messages.push(
+        { role: MessageRole.Assistant, content: generated.content },
+        {
+          role: MessageRole.User,
+          content: `That template is not valid Liquid: ${syntaxError}\n\nReturn the complete corrected template.`,
+        }
+      );
+      generated = await generate();
+      const retryError = getLiquidSyntaxError(generated.template);
+      if (retryError) {
+        throw new Error(`Generated template was rejected: invalid Liquid syntax (${retryError}).`);
+      }
+    }
+    const { template, height } = generated;
 
     if (CUSTOM_CONTENT_SCRIPT_PATTERN.test(template)) {
       throw new Error('Generated template was rejected: contains a <script> tag.');
