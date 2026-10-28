@@ -196,8 +196,10 @@ steps:
   # and plain values everywhere else so the structured output still validates. The
   # create action requires a name and a description, so such a draft can never be
   # created: proposing it fails the run instead of asking the analyst anything
-  # answerable. Step `if` cannot group with parentheses, so the compound test lives
-  # here as a flag.
+  # answerable. An interval that is empty or holds a placeholder such as `<UNKNOWN>`
+  # fails the same way on approval. An interval is date math only, so "unknown" is
+  # never a real value. Step `if` cannot group with parentheses, so the compound test
+  # lives here as a flag.
   - name: draft_ready
     type: data.set
     with:
@@ -208,6 +210,11 @@ steps:
           and steps.draft_creation.output.structured_output.rule.name != ''
           and steps.draft_creation.output.structured_output.rule.description != null
           and steps.draft_creation.output.structured_output.rule.description != ''
+          and steps.draft_creation.output.structured_output.rule.interval != null
+          and steps.draft_creation.output.structured_output.rule.interval != ''
+          and not (steps.draft_creation.output.structured_output.rule.interval contains 'unknown')
+          and not (steps.draft_creation.output.structured_output.rule.interval contains 'UNKNOWN')
+          and not (steps.draft_creation.output.structured_output.rule.interval contains 'Unknown')
           and steps.draft_creation.output.structured_output.attachment_id != null
           and steps.draft_creation.output.structured_output.attachment_id != '' }}
 

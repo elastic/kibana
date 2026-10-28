@@ -120,7 +120,12 @@ describe('Detection Rule Creation worker', () => {
     // them would ask the analyst to approve a rule that can never be created.
     it('previews and attaches only a complete draft with an attachment', () => {
       const ready = flagOf('draft_ready', 'ok');
-      const complete = { query: 'FROM x', name: 'Rare parent', description: 'Covers T1055' };
+      const complete = {
+        query: 'FROM x',
+        name: 'Rare parent',
+        description: 'Covers T1055',
+        interval: '5m',
+      };
       const attached = (rule: Partial<typeof complete>) =>
         draftContext({ attachment_id: 'a1', rule });
       const without = (field: keyof typeof complete) =>
@@ -135,6 +140,14 @@ describe('Detection Rule Creation worker', () => {
       expect(evaluate(ready, attached({ ...complete, description: '' }))).toBe(false);
       expect(evaluate(ready, attached(without('name')))).toBe(false);
       expect(evaluate(ready, attached(without('description')))).toBe(false);
+
+      // An interval is date math only, so an empty one or a placeholder can never be
+      // created.
+      expect(evaluate(ready, attached({ ...complete, interval: '' }))).toBe(false);
+      expect(evaluate(ready, attached(without('interval')))).toBe(false);
+      expect(evaluate(ready, attached({ ...complete, interval: '<UNKNOWN>' }))).toBe(false);
+      expect(evaluate(ready, attached({ ...complete, interval: 'unknown' }))).toBe(false);
+      expect(evaluate(ready, attached({ ...complete, interval: 'Unknown' }))).toBe(false);
 
       expect(evaluate(ready, draftContext({ attachment_id: '', rule: complete }))).toBe(false);
       expect(evaluate(ready, draftContext({ rule: complete }))).toBe(false);
