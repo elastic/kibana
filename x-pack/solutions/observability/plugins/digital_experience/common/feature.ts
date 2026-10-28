@@ -14,6 +14,9 @@ export const DIGITAL_EXPERIENCE_API_PRIVILEGES = {
   manage: 'manage_digital_experience',
 } as const;
 
+/** APM's API privilege, which the routes also require as the app reads its data through APM. */
+export const APM_API_PRIVILEGE = 'apm';
+
 export const DIGITAL_EXPERIENCE_UI_PRIVILEGES = {
   show: 'show',
   save: 'save',

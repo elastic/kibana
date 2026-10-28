@@ -5,15 +5,28 @@
  * 2.0.
  */
 
-import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import { TIME_RANGE } from '../constants';
+import type {
+  EuiBasicTableObject,
+  EuiSelectableObject,
+  KibanaUrl,
+  Locator,
+  ScoutPage,
+} from '@kbn/scout-oblt';
+import { TIME_RANGE } from '../../../common/fixtures/constants';
 
 const APP_PATH = '/app/digital_experience';
 
 export class DigitalExperiencePage {
   public readonly mainContainer: Locator;
-  public readonly applicationsTable: Locator;
-  public readonly applicationsUnavailable: Locator;
+  public readonly applicationsTable: EuiBasicTableObject;
+  public readonly environmentFilter: Locator;
+  public readonly environmentList: EuiSelectableObject;
+  public readonly sourceFilter: Locator;
+  public readonly sourceList: EuiSelectableObject;
+  public readonly search: Locator;
+  public readonly summary: Locator;
+  public readonly pageLoadsChart: Locator;
+  public readonly otelOverviewPlaceholder: Locator;
   public readonly overviewEmpty: Locator;
   public readonly overviewTab: Locator;
   public readonly breadcrumbs: Locator;
@@ -29,8 +42,15 @@ export class DigitalExperiencePage {
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.mainContainer = page.getByTestId('digitalExperienceMainContainer');
-    this.applicationsTable = page.getByTestId('digitalExperienceApplicationsTable');
-    this.applicationsUnavailable = page.getByTestId('digitalExperienceApplicationsUnavailable');
+    this.applicationsTable = page.components.basicTable('digitalExperienceApplicationsTable');
+    this.environmentFilter = page.getByTestId('digitalExperienceEnvironmentFilter');
+    this.environmentList = page.components.selectable('digitalExperienceEnvironmentFilterList');
+    this.sourceFilter = page.getByTestId('digitalExperienceSourceFilter');
+    this.sourceList = page.components.selectable('digitalExperienceSourceFilterList');
+    this.search = page.getByTestId('digitalExperienceApplicationsSearch');
+    this.summary = page.getByTestId('digitalExperienceApplicationsSummary');
+    this.pageLoadsChart = page.getByTestId('digitalExperiencePageLoadsChart');
+    this.otelOverviewPlaceholder = page.getByTestId('digitalExperienceOtelOverviewPlaceholder');
     this.overviewEmpty = page.getByTestId('digitalExperienceOverviewEmpty');
     this.overviewTab = page.getByTestId('digitalExperienceTab-overview');
     this.breadcrumbs = page.getByTestId('breadcrumbs');
@@ -46,8 +66,9 @@ export class DigitalExperiencePage {
     this.classicRumServiceSelect = page.getByTestId('uxServiceNameFilterSelect');
   }
 
-  async gotoApplications(timeRange = TIME_RANGE): Promise<void> {
-    await this.page.goto(this.kbnUrl.get(`${APP_PATH}?${new URLSearchParams(timeRange)}`));
+  /** Opens the list with the given URL query, by default only the time range. */
+  async gotoApplications(query: Record<string, string> = TIME_RANGE): Promise<void> {
+    await this.page.goto(this.kbnUrl.get(`${APP_PATH}?${new URLSearchParams(query)}`));
   }
 
   async gotoApplication(serviceName: string, timeRange = TIME_RANGE): Promise<void> {
@@ -61,7 +82,32 @@ export class DigitalExperiencePage {
   }
 
   applicationLink(serviceName: string): Locator {
-    return this.applicationsTable.getByRole('link', { name: serviceName });
+    // By text, not accessible name: a search highlight adds screen-reader markers to the name.
+    return this.applicationsTable.rows
+      .getByTestId('digitalExperienceApplicationLink')
+      .filter({ hasText: serviceName });
+  }
+
+  applicationRow(serviceName: string): Locator {
+    return this.applicationsTable.rows.filter({
+      has: this.page.getByRole('link', { name: serviceName, exact: true }),
+    });
+  }
+
+  classicDataHint(serviceName: string): Locator {
+    return this.applicationRow(serviceName).getByTestId('digitalExperienceClassicDataHint');
+  }
+
+  /** Picks an environment by its label, e.g. `staging` or `Not defined`. */
+  async selectEnvironment(label: string): Promise<void> {
+    await this.environmentFilter.click();
+    await this.environmentList.selectOption(label);
+  }
+
+  /** Shows one source, e.g. `Classic RUM`, or `All sources`. */
+  async selectSource(label: string): Promise<void> {
+    await this.sourceFilter.click();
+    await this.sourceList.selectOption(label);
   }
 
   breadcrumbLink(name: string): Locator {

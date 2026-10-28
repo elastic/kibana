@@ -5,25 +5,17 @@
  * 2.0.
  */
 
-import type { KibanaRole } from '@kbn/scout-oblt';
 import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
+import { testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
+
+const { COMMON_HEADERS, createRole } = testData;
 
 interface CapabilitiesResponse {
   navLinks: Record<string, boolean>;
   digital_experience: { show: boolean; save: boolean };
 }
-
-const COMMON_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-  'x-elastic-internal-origin': 'kibana',
-} as const;
-
-const createRole = (feature: KibanaRole['kibana'][number]['feature']): KibanaRole => ({
-  elasticsearch: { cluster: [], indices: [] },
-  kibana: [{ base: [], feature, spaces: ['*'] }],
-});
 
 const CAPABILITY_CASES = [
   {
