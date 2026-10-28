@@ -43,6 +43,7 @@ import { PICK_ASSET_CRITICALITY } from './translations';
 import { AssetCriticalityBadge } from './asset_criticality_badge';
 import type { Entity, State } from './use_asset_criticality';
 import { useAssetCriticalityData, useAssetCriticalityPrivileges } from './use_asset_criticality';
+import { ENTITY_GRID_QUERY_KEY } from '../home/entities_grid/common';
 import { ENTITY_STORE_ENTITIES_LIST } from '../entity_store/hooks/use_entities_list_query';
 import type {
   CriticalityLevel,
@@ -205,6 +206,7 @@ const AssetCriticalityAccordionComponent: React.FC<Props> = ({
       // threat hunting leads cards — needs a refetch rather than relying on
       // its own cache TTL.
       queryClient.invalidateQueries({ queryKey: [ENTITY_STORE_ENTITIES_LIST] });
+      queryClient.invalidateQueries({ queryKey: [ENTITY_GRID_QUERY_KEY] });
       onChange?.();
     },
   });

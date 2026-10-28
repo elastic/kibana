@@ -1,0 +1,10 @@
+summary: Replaces the content of a comment.
+value:
+  {
+    "type": "comment",
+    "owner": "cases",
+    "data": {
+      "content": "An updated comment."
+    },
+    "version": "WzIzLDFd"
+  }

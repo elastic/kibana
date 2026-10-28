@@ -13,6 +13,8 @@ import {
   ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW,
   ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID,
   ALERTZERO_ACTION_WORKFLOW_IDS,
+  ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW,
+  ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
@@ -171,6 +173,19 @@ const renderInvestigationId = (attackDiscoveryId: string): Promise<string> =>
     { inputs: { attack_discovery_id: attackDiscoveryId } }
   );
 
+const IMPACT_ENTITIES = [
+  { id: 'host:web-01-id', name: 'web-01', type: 'host' },
+  { id: 'user:alice@web-01-id@local', name: 'alice@web-01', type: 'user' },
+  { id: 'host:unnamed-id', type: 'host' },
+];
+
+// Shared by the review's and the attach's impact notes. Same engine options a run uses.
+const IMPACT_FIXTURE = {
+  collected: { output: { entities: IMPACT_ENTITIES, total: 3, truncated: false } },
+  entities: IMPACT_ENTITIES,
+  liquid: createWorkflowLiquidEngine({ strictFilters: true, strictVariables: false }),
+};
+
 describe('Attack Discovery worker chain', () => {
   it.each([
     [
@@ -194,6 +209,7 @@ describe('Attack Discovery worker chain', () => {
   it.each([
     ['worker', ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.yaml],
     ['review', ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.yaml],
+    ['attach', ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.yaml],
     ['journal note', ALERTZERO_JOURNAL_NOTE_WORKFLOW.yaml],
     ['forensics handoff', ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW.yaml],
     [
@@ -236,12 +252,14 @@ describe('Attack Discovery worker chain', () => {
       expect(dispatch?.['on-failure']).toBeUndefined();
     });
 
-    // #19276 names all three settings. `scheduleInterval` has no behavioral use in the
-    // skeleton, so dropping it would be easy and would silently break the contract.
+    // #19276 names autonomy, settings version and the schedule interval. The interval
+    // string is traceability on the runner; the alert cap derived from it is forwarded
+    // separately. Dropping either would be easy and would silently break the contract.
     it.each([
       ['autonomy', 'consts.worker_settings.autonomy'],
       ['settings_version', 'consts.worker_settings.settingsVersion'],
       ['schedule_interval', 'consts.worker_settings.scheduleInterval'],
+      ['max_alerts', 'consts.worker_settings.maxAlerts'],
     ])('forwards the %s worker setting', (input, reference) => {
       expect(asInputs(dispatch)[input]).toContain(reference);
     });
@@ -249,6 +267,7 @@ describe('Attack Discovery worker chain', () => {
     it.each([
       ['autonomy', '${{ consts.worker_settings.autonomy }}'],
       ['schedule_interval', '${{ consts.worker_settings.scheduleInterval }}'],
+      ['max_alerts', '${{ consts.worker_settings.maxAlerts }}'],
     ])('forwards %s with a type-preserving template', (input, template) => {
       expect(asInputs(dispatch)[input]).toBe(template);
     });
@@ -306,8 +325,14 @@ describe('Attack Discovery worker chain', () => {
 
     // The child runs N pipelines, each with its own 30m branch-timeout, so this
     // bounds the whole batched run rather than a single pipeline's 30m budget.
+    // 12h covers a slow 10k scan (about 8h20m) and still returns before the next
+    // 24h schedule, so the review fan-out can run.
     it('sets a step timeout that bounds the whole batched child', () => {
-      expect(run?.timeout).toBe('4h');
+      expect(run?.timeout).toBe('12h');
+    });
+
+    it('caps retrieval at the prorated alert count, defaulting to a full day', () => {
+      expect(asInputs(run).max_alerts).toBe('${{ inputs.max_alerts | default: 10000 }}');
     });
 
     it('leaves failure propagation alone so a failed generation fails the run', () => {
@@ -345,9 +370,9 @@ describe('Attack Discovery worker chain', () => {
       expect(stepIn(workerSteps, 'current_batch')?.with?.attacks).toBe('${{ foreach.item }}');
     });
 
-    it('drains discoveries in batches so parallel never exceeds its fan-out ceiling', () => {
+    it('drains reviews in batches so parallel never exceeds its fan-out ceiling', () => {
       expect(stepIn(workerSteps, 'run_review_batches')?.foreach).toContain(
-        'steps.resolve_fanout.output.batches'
+        'steps.resolve_dispatch.output.review_batches'
       );
     });
 
@@ -529,12 +554,16 @@ describe('Attack Discovery worker chain', () => {
     // asserting the template text alone would not catch the shape mismatch.
     describe('per-attack review inputs', () => {
       const liquidEngine = createWorkflowLiquidEngine();
-      // Exactly what `transform_to_alert_documents` writes.
+      // `match_fingerprints` reads the persisted dotted keys and emits these fields.
       const persistedAttack = {
-        'kibana.alert.attack_discovery.title': 'Suspicious lateral movement',
-        'kibana.alert.attack_discovery.alert_ids': ['alert-1', 'alert-2'],
-        'kibana.alert.attack_discovery.summary_markdown': 'A **summary**',
-        'kibana.alert.uuid': 'attack-hash-1',
+        attack_discovery_id: 'attack-hash-1',
+        title: 'Suspicious lateral movement',
+        alert_ids: ['alert-1', 'alert-2'],
+        summary_markdown: 'A **summary**',
+        related_investigation_id: '',
+        related_link_reason: '',
+        sibling_alert_ids: ['alert-3'],
+        sibling_attack_discovery_ids: ['attack-hash-2'],
       };
 
       const render = (template: unknown) =>
@@ -553,6 +582,9 @@ describe('Attack Discovery worker chain', () => {
       it.each([
         ['title', 'Suspicious lateral movement'],
         ['alert_ids', '["alert-1","alert-2"]'],
+        ['sibling_alert_ids', '["alert-3"]'],
+        ['sibling_attack_discovery_ids', '["attack-hash-2"]'],
+        ['related_link_reason', ''],
         ['summary_markdown', 'A **summary**'],
         ['attack_discovery_id', 'attack-hash-1'],
       ])('resolves %s against a persisted attack document', async (field, expected) => {
@@ -1214,9 +1246,7 @@ describe('Attack Discovery worker chain', () => {
       const attach = stepIn(reviewSteps, 'attach_impact');
       const journal = stepIn(reviewSteps, 'journal_impact_recorded');
 
-      // Same engine options the execution engine's templating uses, so the authored
-      // expressions evaluate here exactly as they will in a run.
-      const liquid = createWorkflowLiquidEngine({ strictFilters: true, strictVariables: false });
+      const { collected, entities, liquid } = IMPACT_FIXTURE;
       const evaluate = (expression: string, context: Record<string, unknown>): unknown =>
         liquid.evalValueSync(
           expression
@@ -1225,12 +1255,6 @@ describe('Attack Discovery worker chain', () => {
             .trim(),
           context
         );
-
-      const entities = [
-        { id: 'host:web-01-id', name: 'web-01', type: 'host' },
-        { id: 'user:alice@web-01-id@local', name: 'alice@web-01', type: 'user' },
-        { id: 'host:unnamed-id', type: 'host' },
-      ];
 
       it('continues past every impact step that fails', () => {
         expect(
@@ -1292,8 +1316,8 @@ describe('Attack Discovery worker chain', () => {
         });
 
         // The step derives the index from the space, and takes no other input that could
-        // name one.
-        it('name no index', () => {
+        // name one. Its default `entity_types` are the host and user the journal counts.
+        it('names no index and keeps the default host and user types', () => {
           expect(Object.keys(collect?.with ?? {}).sort()).toEqual(['alert_ids', 'max_entities']);
         });
 
@@ -1362,21 +1386,43 @@ describe('Attack Discovery worker chain', () => {
             { execution: { id: 'execution-1' }, inputs, steps }
           );
 
-        const collected = { output: { entities, total: 3, truncated: false } };
-
         it('writes to the derived Investigation', () => {
           expect(
             (journal?.with?.inputs as Record<string, unknown> | undefined)?.conversation_id
           ).toBe(derivedInvestigationId);
         });
 
-        it('says how many entities were recorded', async () => {
+        it('says how many hosts and users this attack recorded', async () => {
           expect(
             await render({
               attach_impact: { output: { entities } },
               collect_impact_entities: collected,
             })
-          ).toBe('Recorded impact: 3 host(s) and user(s).');
+          ).toBe('Recorded impact from this attack: 2 hosts, 1 user.');
+        });
+
+        // A combined count reads as that many hosts in the investigation summary.
+        it.each([
+          [
+            'one host and one user',
+            entities.slice(0, 2),
+            'Recorded impact from this attack: 1 host, 1 user.',
+          ],
+          [
+            'only hosts',
+            [entities[0], entities[2]],
+            'Recorded impact from this attack: 2 hosts, 0 users.',
+          ],
+          ['only a user', [entities[1]], 'Recorded impact from this attack: 0 hosts, 1 user.'],
+        ])('counts hosts and users separately: %s', async (_label, recorded, expected) => {
+          expect(
+            await render({
+              attach_impact: { output: { entities: recorded } },
+              collect_impact_entities: {
+                output: { entities: recorded, total: recorded.length, truncated: false },
+              },
+            })
+          ).toBe(expected);
         });
 
         // The attach returns everything the Investigation's impact now holds, which can
@@ -1387,16 +1433,19 @@ describe('Attack Discovery worker chain', () => {
               attach_impact: { output: { entities: [...entities, ...entities, ...entities] } },
               collect_impact_entities: collected,
             })
-          ).toBe('Recorded impact: 3 host(s) and user(s).');
+          ).toBe('Recorded impact from this attack: 2 hosts, 1 user.');
         });
 
-        it('says when it recorded only the most alerted', async () => {
+        // `total` sums every type, so it would bring back the combined count.
+        it('says when it recorded only the most alerted, without the combined total', async () => {
           expect(
             await render({
               attach_impact: { output: { entities } },
               collect_impact_entities: { output: { entities, total: 120, truncated: true } },
             })
-          ).toBe('Recorded impact: 3 host(s) and user(s) (the most alerted of 120).');
+          ).toBe(
+            'Recorded impact from this attack: 2 hosts, 1 user (only its most alerted were recorded).'
+          );
         });
 
         // A fixed sentence per error type: the raw message of an internal failure would land
@@ -1667,8 +1716,10 @@ describe('Attack Discovery worker chain', () => {
         expect(stepIn(reviewSteps, name)?.with?.update_related_alerts).toBe(false);
       });
 
-      it.each(closes)('closes by the persisted document id in %s', (name) => {
-        expect(stepIn(reviewSteps, name)?.with?.ids).toEqual(['{{ inputs.attack_discovery_id }}']);
+      it.each(closes)('closes the canonical attack and its same-run siblings in %s', (name) => {
+        expect(stepIn(reviewSteps, name)?.with?.ids).toBe(
+          '${{ inputs.sibling_attack_discovery_ids | default: consts.no_alert_ids | push: inputs.attack_discovery_id }}'
+        );
       });
     });
 
@@ -2177,7 +2228,7 @@ describe('Attack Discovery worker chain', () => {
         unknown
       >;
 
-      expect(tagStep.alert_ids).toBe('${{ inputs.alert_ids }}');
+      expect(tagStep.alert_ids).toBe('${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}');
       expect(tagStep.tags_to_add).toEqual(['{{ consts.ad_correlated_tag }}']);
       expect(tagStep.tags_to_remove).toBeUndefined();
     });
@@ -2197,7 +2248,7 @@ describe('Attack Discovery worker chain', () => {
 
       it('targets exactly the correlated alerts', () => {
         expect(queryFilters('acknowledge_correlated_alerts')).toContainEqual({
-          ids: { values: '${{ inputs.alert_ids }}' },
+          ids: { values: '${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}' },
         });
       });
 
@@ -2226,7 +2277,9 @@ describe('Attack Discovery worker chain', () => {
 
       it('reads back exactly the correlated alerts', () => {
         expect(asWith(verify).index).toBe('.alerts-security.alerts-{{ workflow.spaceId }}');
-        expect(verify?.with?.query).toEqual({ ids: { values: '${{ inputs.alert_ids }}' } });
+        expect(verify?.with?.query).toEqual({
+          ids: { values: '${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}' },
+        });
       });
 
       it.each([
@@ -2264,6 +2317,14 @@ describe('Attack Discovery worker chain', () => {
         ['closed', 1],
       ])('resolves %s from the read-back', (field, value) => {
         expect(evaluateResolved(field, readBack)).toBe(value);
+      });
+
+      it('counts the sibling attacks in the retirement', () => {
+        expect(
+          evaluateResolved('requested', {
+            inputs: { alert_ids: ['a', 'b'], sibling_alert_ids: ['c'] },
+          })
+        ).toBe(3);
       });
 
       it('marks a failed read-back as unread', () => {
@@ -2491,6 +2552,7 @@ describe('Attack Discovery worker chain', () => {
 
     const INFLECTIONS = [
       'journal_review_started',
+      'journal_related_investigation',
       'journal_evidence_attached',
       'journal_impact_recorded',
       'journal_analysis_started',
@@ -2519,6 +2581,35 @@ describe('Attack Discovery worker chain', () => {
           (step) => step.with?.['workflow-id'] === ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID
         )
       ).toBe(true);
+    });
+
+    it('renders a built-in account link without calling the earlier investigation a false positive', () => {
+      const inputs = stepIn(reviewSteps, 'journal_related_investigation')?.with?.inputs as
+        | { message?: string }
+        | undefined;
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(String(inputs?.message), {
+        inputs: {
+          related_link_reason: 'builtin_account',
+          related_investigation_id: 'inv-1',
+        },
+      });
+
+      expect(rendered.replace(/\s+/g, ' ').trim()).toBe(
+        'This attack shares only a built-in account on the same host with Investigation inv-1 and does not share its alerts. It is reviewed on its own.'
+      );
+    });
+
+    it('renders the closed false-positive note when the link has no built-in reason', () => {
+      const inputs = stepIn(reviewSteps, 'journal_related_investigation')?.with?.inputs as
+        | { message?: string }
+        | undefined;
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(String(inputs?.message), {
+        inputs: { related_link_reason: '', related_investigation_id: 'inv-1' },
+      });
+
+      expect(rendered.replace(/\s+/g, ' ').trim()).toBe(
+        'This attack shares entities with closed false-positive Investigation inv-1 and does not share its alerts. It is reviewed on its own.'
+      );
     });
 
     it('calls the journal helper at each agreed inflection', () => {
@@ -2718,20 +2809,20 @@ describe('Attack Discovery worker chain', () => {
     expect(review.settings?.timeout).toBe('176h');
   });
 
-  // Neither the floor nor the runner sets `settings.timeout`, so both take the
-  // engine's 6h default — and that is correct only because neither one waits on a
-  // human. The runner's longest wait is the 4h generation step, and the floor's is the
-  // runner. Were either to park on the review's escalation gate instead, the same
-  // default would become a 6h guillotine: the timeout is wall-clock from `startedAt`,
-  // so a parked run burns it, and tripping it cancels the child it was waiting on.
+  // Generation of a full scan can run about 8h20m on a slow day. The engine default
+  // is 6h, and a workflow timeout cancels the child this run is waiting on, so review
+  // dispatch never starts. 12h covers that scan and still ends before the next 24h
+  // schedule. Reviews are dispatched detached, so this budget is not waiting on a
+  // person. Were either workflow to park on the review's escalation gate instead, 12h
+  // would become a guillotine: the timeout is wall-clock from `startedAt`.
   it.each([
     ['floor', floor],
     ['worker', worker],
-  ])('leaves the %s workflow-level timeout at its generous default', (_name, workflow) => {
-    expect(workflow.settings?.timeout).toBeUndefined();
+  ])('gives the %s workflow 12h so a slow scan can dispatch reviews', (_name, workflow) => {
+    expect(workflow.settings?.timeout).toBe('12h');
   });
 
-  // The invariant that default rests on, asserted directly rather than inferred from
+  // The invariant the 12h budget rests on, asserted directly rather than inferred from
   // the fan-out's step type. A `workflow.execute` to the review is the one way to
   // reintroduce the park, and it would regress silently: the YAML stays valid and
   // every other assertion here still passes.
@@ -2971,7 +3062,11 @@ describe('Attack Discovery worker chain', () => {
           'run_generation',
           'resolve_fanout',
           'log_empty_run',
+          'match_fingerprints',
+          'resolve_dispatch',
           'run_review_batches',
+          'run_unmatched_reviews',
+          'run_attach_batches',
           'emit_result',
         ]);
       });
@@ -3516,6 +3611,7 @@ describe('Attack Discovery worker chain', () => {
           'verify_investigation',
           'append_workflow_execution',
           'journal_review_started',
+          'journal_related_investigation',
           'attach_discovery',
           'attach_alerts',
           'verify_evidence',
@@ -3552,14 +3648,309 @@ describe('Attack Discovery worker chain', () => {
     });
 
     describe('managed versions', () => {
-      // Both are fixed `yaml` definitions, so the hash alone would upgrade them; the
-      // bump is the deliberate signal of what shipped.
-      it('bumps the runner to version 5 for its report step', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(5);
+      // Fixed `yaml` definitions roll out through the hash; the bump is the signal.
+      it('bumps the runner to version 12 so the billable flag reconciles', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(12);
       });
 
-      it('bumps the review to version 11 so the proposal read-back is space-scoped', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(11);
+      it('continues when fingerprint matching fails', () => {
+        expect(stepIn(workerSteps, 'match_fingerprints')?.['on-failure']?.continue).toBe(true);
+      });
+
+      it('reviews the generated attacks when fingerprint matching fails', () => {
+        const fallback = stepIn(workerSteps, 'run_unmatched_reviews');
+
+        expect(fallback?.if).toBe('${{ steps.match_fingerprints.error != blank }}');
+        expect(fallback?.foreach).toBe('${{ steps.resolve_fanout.output.batches }}');
+        expect(stepIn(workerSteps, 'run_unmatched_review')?.with?.['workflow-id']).toBe(
+          ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID
+        );
+      });
+
+      it('bumps the review to version 16 so impact is journaled as separate host and user counts', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(16);
+      });
+    });
+
+    describe('attach', () => {
+      const attach = parse(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.yaml) as YamlWorkflow;
+      const attachSteps = flatten(attach.steps);
+
+      it('is installed with the Attack Discovery workflows', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS).toContain(
+          ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID
+        );
+      });
+
+      it('launches from the runner for each matched attack', () => {
+        expect(stepIn(workerSteps, 'run_attach')?.with?.['workflow-id']).toBe(
+          ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID
+        );
+      });
+
+      it('passes the matched investigation id through, so a continuation does not open its own', () => {
+        expect(asInputs(stepIn(workerSteps, 'run_attach')).investigation_id).toBe(
+          '{{ foreach.item.investigation_id }}'
+        );
+      });
+
+      it('passes the continuation alert ids through as a typed array', () => {
+        expect(asInputs(stepIn(workerSteps, 'run_attach')).alert_ids).toBe(
+          '${{ foreach.item.alert_ids }}'
+        );
+      });
+
+      it('waits for the review to create the investigation', () => {
+        expect(stepIn(attachSteps, 'wait_for_investigation')?.type).toBe(
+          'ai.conversation.metadata.read'
+        );
+        expect(stepIn(attachSteps, 'wait_for_investigation')?.with?.conversation_id).toBe(
+          '{{ inputs.investigation_id }}'
+        );
+      });
+
+      it('retries that read for the 15 minutes a missing investigation stays in flight', () => {
+        expect(stepIn(attachSteps, 'wait_for_investigation')?.['on-failure']).toEqual({
+          retry: { 'max-attempts': 30, delay: '30s' },
+        });
+      });
+
+      it('does not create the investigation', () => {
+        expect(attachSteps.some((step) => step.type === 'ai.conversation.create')).toBe(false);
+      });
+
+      it('attaches the attack discovery to the matched investigation', () => {
+        expect(stepIn(attachSteps, 'attach_discovery')?.with).toEqual(
+          expect.objectContaining({
+            conversation_id: '{{ inputs.investigation_id }}',
+            origin: '{{ inputs.attack_discovery_id }}',
+            type: 'security.attack_discovery',
+          })
+        );
+      });
+
+      it('attaches the continuation alerts in batches on that same investigation', () => {
+        expect(stepIn(attachSteps, 'attach_alerts')?.foreach).toBe(
+          '{{ inputs.alert_ids | default: consts.no_alert_ids | chunk: consts.alerts_per_attachment }}'
+        );
+      });
+
+      it('stores each alert batch as a security.alerts attachment', () => {
+        expect(stepIn(attachSteps, 'attach_alert_batch')?.with).toEqual(
+          expect.objectContaining({
+            conversation_id: '{{ inputs.investigation_id }}',
+            type: 'security.alerts',
+            data: { alertIds: '${{ foreach.item }}' },
+          })
+        );
+      });
+
+      it('journals the match, then the attachment attempt, then alert tagging', () => {
+        expect(attach.steps?.map((step) => step.name)).toEqual([
+          'wait_for_investigation',
+          'journal_attach_started',
+          'attach_discovery',
+          'attach_alerts',
+          'journal_evidence_attached',
+          'collect_impact_entities',
+          'attach_impact',
+          'journal_impact_recorded',
+          'tag_correlated_alerts',
+          'acknowledge_correlated_alerts',
+          'journal_alerts_retired',
+        ]);
+      });
+
+      it('journals the match before any attachment write', () => {
+        const names = attach.steps?.map((step) => step.name) ?? [];
+        expect(names.indexOf('journal_attach_started')).toBeLessThan(
+          names.indexOf('attach_discovery')
+        );
+      });
+
+      it('says why FP/TP was skipped', () => {
+        expect(asInputs(stepIn(attachSteps, 'journal_attach_started')).message).toContain(
+          'FP/TP analysis was skipped because this attack matches one already under investigation.'
+        );
+      });
+
+      it('does not claim the attachments landed in the opening note', () => {
+        expect(asInputs(stepIn(attachSteps, 'journal_attach_started')).message).not.toContain(
+          'Attempted attachment'
+        );
+      });
+
+      it('journals the attachment attempt after the alert batches', () => {
+        const names = attach.steps?.map((step) => step.name) ?? [];
+        expect(names.indexOf('journal_evidence_attached')).toBeGreaterThan(
+          names.indexOf('attach_alerts')
+        );
+      });
+
+      it('points at the attachment list instead of claiming every batch landed', () => {
+        expect(asInputs(stepIn(attachSteps, 'journal_evidence_attached')).message).toContain(
+          'See the attachment list for what landed.'
+        );
+      });
+
+      it('journals alert retirement only for a handed-off true positive or inconclusive', () => {
+        expect(stepIn(attachSteps, 'journal_alerts_retired')?.if).toBe(
+          '${{ inputs.journal_alerts_retired == true and inputs.alert_ids != blank }}'
+        );
+      });
+
+      it('passes the retirement journal flag through as a typed boolean', () => {
+        expect(asInputs(stepIn(workerSteps, 'run_attach')).journal_alerts_retired).toBe(
+          '${{ foreach.item.journal_alerts_retired }}'
+        );
+      });
+
+      it('keeps the tag step error message out of the journal', () => {
+        expect(asInputs(stepIn(attachSteps, 'journal_alerts_retired')).message).not.toContain(
+          'error.message'
+        );
+      });
+
+      it('bumps the attach workflow to version 7 so impact is journaled as separate host and user counts', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(7);
+      });
+
+      it('acknowledges the open alerts it tags', () => {
+        const acknowledge = stepIn(attachSteps, 'acknowledge_correlated_alerts');
+
+        expect(acknowledge?.type).toBe('kibana.SetAlertsStatus');
+        expect(acknowledge?.with?.status).toBe('acknowledged');
+        expect(acknowledge?.if).toBe(
+          '${{ inputs.tag_correlated_alerts == true and inputs.alert_ids != blank }}'
+        );
+        expect(acknowledge?.with?.query).toEqual({
+          bool: {
+            filter: [
+              { ids: { values: '${{ inputs.alert_ids }}' } },
+              { term: { 'kibana.alert.workflow_status': 'open' } },
+            ],
+          },
+        });
+      });
+
+      it('records the continuation hosts and users on the matched investigation', () => {
+        expect(stepIn(attachSteps, 'attach_impact')?.with?.conversationId).toBe(
+          '{{ inputs.investigation_id }}'
+        );
+      });
+
+      // Its default `entity_types` are the host and user the journal counts.
+      it('collects impact entities with only the host and user types the journal counts', () => {
+        expect(
+          Object.keys(stepIn(attachSteps, 'collect_impact_entities')?.with ?? {}).sort()
+        ).toEqual(['alert_ids', 'max_entities']);
+      });
+
+      // Rendered through the engine, because the message is a folded scalar whose
+      // phrases the YAML source splits across lines.
+      describe('the impact journal note', () => {
+        const { collected, entities, liquid } = IMPACT_FIXTURE;
+        const ALERT_IDS = ['alert-1', 'alert-2', 'alert-3'];
+        const MERGED = "merged into this Investigation's impact.";
+
+        const render = (
+          steps: Record<string, unknown>,
+          inputs: Record<string, unknown> = { alert_ids: ALERT_IDS, attack_discovery_id: 'ad-1' }
+        ): Promise<string> =>
+          liquid.parseAndRender(
+            String(asInputs(stepIn(attachSteps, 'journal_impact_recorded')).message),
+            { execution: { id: 'execution-1' }, inputs, steps }
+          );
+
+        it('says how many hosts and users this attack recorded, and that they were merged', async () => {
+          expect(
+            await render({
+              attach_impact: { output: { entities } },
+              collect_impact_entities: collected,
+            })
+          ).toBe(`Recorded impact from Attack Discovery ad-1: 2 hosts, 1 user, ${MERGED}`);
+        });
+
+        // A combined count reads as that many hosts in the investigation summary.
+        it.each([
+          ['one host and one user', entities.slice(0, 2), '1 host, 1 user'],
+          ['only hosts', [entities[0], entities[2]], '2 hosts, 0 users'],
+          ['only a user', [entities[1]], '0 hosts, 1 user'],
+        ])('counts hosts and users separately: %s', async (_label, recorded, counts) => {
+          expect(
+            await render({
+              attach_impact: { output: { entities: recorded } },
+              collect_impact_entities: {
+                output: { entities: recorded, total: recorded.length, truncated: false },
+              },
+            })
+          ).toBe(`Recorded impact from Attack Discovery ad-1: ${counts}, ${MERGED}`);
+        });
+
+        // The attach returns the merged impact, which includes what the review recorded.
+        it('counts what this attach found, not what the Investigation now holds', async () => {
+          expect(
+            await render({
+              attach_impact: { output: { entities: [...entities, ...entities] } },
+              collect_impact_entities: collected,
+            })
+          ).toBe(`Recorded impact from Attack Discovery ad-1: 2 hosts, 1 user, ${MERGED}`);
+        });
+
+        // `total` sums every type, so it would bring back the combined count.
+        it('says when it recorded only the most alerted, without the combined total', async () => {
+          expect(
+            await render({
+              attach_impact: { output: { entities } },
+              collect_impact_entities: { output: { entities, total: 120, truncated: true } },
+            })
+          ).toBe(
+            `Recorded impact from Attack Discovery ad-1: 2 hosts, 1 user (only its most alerted were recorded), ${MERGED}`
+          );
+        });
+
+        it('says when the attach failed, without its message', async () => {
+          expect(
+            await render({
+              attach_impact: { error: { message: 'internal detail', type: 'ApiError' } },
+              collect_impact_entities: collected,
+            })
+          ).toBe('Could not record impact. See attach execution execution-1.');
+        });
+
+        it('says when the alerts could not be read', async () => {
+          expect(
+            await render({
+              collect_impact_entities: { error: { message: 'security_exception', type: 'Error' } },
+            })
+          ).toBe(
+            "Could not read the correlated alerts' hosts and users, so no impact was recorded. See attach execution execution-1."
+          );
+        });
+
+        it('says when the attach was given no alerts', async () => {
+          expect(await render({}, { attack_discovery_id: 'ad-1' })).toBe(
+            'No impact recorded: the attach was given no correlated alerts.'
+          );
+        });
+
+        it('says when there was nothing to record', async () => {
+          expect(
+            await render({
+              collect_impact_entities: { output: { entities: [], total: 0, truncated: false } },
+            })
+          ).toBe('No impact recorded: the correlated alert(s) name no host or user.');
+        });
+      });
+
+      it('does not run FP/TP analysis', () => {
+        expect(JSON.stringify(attachSteps)).not.toContain(
+          ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID
+        );
+      });
+
+      it('does not open the forensics proposal', () => {
+        expect(JSON.stringify(attachSteps)).not.toContain(ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID);
       });
     });
   });
