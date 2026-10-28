@@ -346,15 +346,11 @@ steps:
     on-failure:
       continue: true
 
-  # The revision check is repeated on the harvest rows: `latest_revision` there is the
-  # max among the rule's FPs, which lags the current revision when the new revision
-  # has no FPs yet. The engine's rehydration planner cannot see step paths inside
-  # the quoted where_exp argument, so the keys are referenced directly as well.
+  # The harvest reads only screened rules, so its rows are at the current revision already.
   - name: resolve_fanout_rows
     type: data.set
     with:
-      rule_revision_keys: "${{ steps.resolve_enabled_rules.output.rule_revision_keys }}"
-      rows: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_enabled_rules.output.rule_revision_keys contains row[4]' | slice: 0, steps.resolve_screened_rules.output.fanout_limit }}"
+      rows: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | slice: 0, steps.resolve_screened_rules.output.fanout_limit }}"
 
   # One review execution per rule, started without waiting. Each child parks on
   # its own approval gate for up to 72h; joining on them here would park this sweep
@@ -400,7 +396,7 @@ steps:
       continue: true
     with:
       event: worker_run_completed
-      candidates_found: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_enabled_rules.output.rule_revision_keys contains row[4]' | size }}"
+      candidates_found: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | size }}"
       items_dispatched: "${{ steps.resolve_fanout_rows.output.rows | default: consts.no_rows | size }}"
       # Reviews already running plus the ones this sweep started, as the coverage sweep counts.
       items_in_flight: |-

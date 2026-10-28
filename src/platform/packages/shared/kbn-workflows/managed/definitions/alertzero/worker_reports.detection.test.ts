@@ -95,7 +95,6 @@ describe('Rule Tuning outcome reports', () => {
       activeReviews = 0,
       eligible = 0,
       harvestFailed = false,
-      ineligible = 0,
       lookupFailed = false,
       requested = 0,
       rulesLookupFailed = false,
@@ -103,11 +102,9 @@ describe('Rule Tuning outcome reports', () => {
       screenFailed = false,
     }: {
       activeReviews?: number;
-      /** Harvested rules that are still enabled, at the revision their alerts came from. */
+      /** Harvested rules. */
       eligible?: number;
       harvestFailed?: boolean;
-      /** Harvested rules edited since their alerts. */
-      ineligible?: number;
       lookupFailed?: boolean;
       requested?: number;
       rulesLookupFailed?: boolean;
@@ -116,8 +113,6 @@ describe('Rule Tuning outcome reports', () => {
       screenFailed?: boolean;
     }): Record<string, unknown> => {
       const eligibleKeys = Array.from({ length: eligible }, (_, index) => `rule-${index}@1`);
-      const ineligibleKeys = Array.from({ length: ineligible }, (_, index) => `stale-${index}@1`);
-      const harvested = [...eligibleKeys, ...ineligibleKeys];
       return {
         consts: { no_rows: [] },
         steps: {
@@ -128,7 +123,7 @@ describe('Rule Tuning outcome reports', () => {
             : {
                 harvest_fp_alerts_by_rule: harvestFailed
                   ? { error: { message: 'search_phase_execution_exception' } }
-                  : { output: { values: harvested.map(harvestRow) } },
+                  : { output: { values: eligibleKeys.map(harvestRow) } },
               }),
           list_active_reviews: lookupFailed
             ? { error: { message: 'HTTP 500' } }
@@ -198,10 +193,10 @@ describe('Rule Tuning outcome reports', () => {
         },
       ],
       [
-        // 15 noisy rules, 3 edited since their alerts, and the fan-out cap of 10:
-        // found minus dispatched is exactly what the cap held back.
-        'only the rules still eligible for review, of a harvest the cap cut short',
-        { eligible: 12, ineligible: 3, requested: 10 },
+        // 12 noisy rules and the fan-out cap of 10: found minus dispatched is
+        // exactly what the cap held back.
+        'a harvest the cap cut short',
+        { eligible: 12, requested: 10 },
         {
           candidates_found: 12,
           degraded_reason: 'none',
