@@ -71,8 +71,8 @@ tags:
     x-displayName: Alerting
   - name: alerting-v2
     description: |
-      Alerting V2 is an ES|QL-first alerting API for managing rules, alert actions, and action policies. Use these endpoints to create and manage detection rules, act on alerts, and control when and how notifications are delivered. These APIs are experimental.
-    x-displayName: Alerting V2
+      Universal Alerting is an ES|QL-first alerting API for managing rules, alert actions, and action policies. Use these endpoints to create and manage detection rules, act on alerts, and control when and how notifications are delivered.
+    x-displayName: Universal Alerting
   - description: |
       Adjust APM agent configuration without need to redeploy your application.
     name: APM agent configuration
@@ -21048,6 +21048,389 @@ paths:
       tags:
         - cases
       x-state: Technical preview
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/cases/{caseId}/attachments:
+    delete:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/attachments</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Deletes all attachments from a case. Attached files are also deleted. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
+      operationId: deleteCaseAttachmentsDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+        - $ref: '#/components/parameters/Cases_case_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: You don't have the required privileges for this case.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404_no_attachments'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The case doesn't exist or has no attachments.
+      summary: Delete all case attachments
+      tags:
+        - cases
+      x-state: Technical preview; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/attachments</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a paginated list of attachments for a case, optionally filtered by type. Attachments that you do not have privileges to read are not returned. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
+      operationId: findCaseAttachmentsDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_case_id'
+        - $ref: '#/components/parameters/Cases_attachment_type_filter'
+        - $ref: '#/components/parameters/Cases_page_index'
+        - $ref: '#/components/parameters/Cases_page_size'
+        - $ref: '#/components/parameters/Cases_attachment_sort_order'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                findAttachmentsResponse:
+                  $ref: '#/components/examples/Cases_find_unified_attachments_response'
+              schema:
+                $ref: '#/components/schemas/Cases_unified_attachments_find_response'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              examples:
+                response400:
+                  $ref: '#/components/examples/Cases_response_400_invalid_attachments_query'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: A query parameter is invalid or exceeds its limit.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+      summary: Find case attachments
+      tags:
+        - cases
+      x-state: Technical preview; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    post:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/attachments</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Adds a single attachment, such as a comment or an alert, to a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case. NOTE: Each case can have a maximum of 1,000 alerts.
+      operationId: createCaseAttachmentDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+        - $ref: '#/components/parameters/Cases_case_id'
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createAlertAttachmentRequest:
+                $ref: '#/components/examples/Cases_create_unified_alert_attachment_request'
+              createCommentAttachmentRequest:
+                $ref: '#/components/examples/Cases_create_unified_comment_attachment_request'
+            schema:
+              $ref: '#/components/schemas/Cases_unified_attachment_request'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              examples:
+                createAttachmentResponse:
+                  $ref: '#/components/examples/Cases_get_unified_attachment_response'
+              schema:
+                $ref: '#/components/schemas/Cases_unified_attachment_response'
+          description: |
+            Indicates a successful call. Returns the new attachment, or the existing one if the alert or event was already attached.
+        '400':
+          content:
+            application/json:
+              examples:
+                response400:
+                  $ref: '#/components/examples/Cases_response_400_invalid_attachment'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: |
+            The request failed for one of these reasons:
+            - The request body is invalid.
+            - The attachment type isn't registered, or is `file`.
+            - The owner doesn't match the case owner.
+            - A case limit was exceeded.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: You don't have the required privileges for this case.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The case was not found.
+      summary: Create a case attachment
+      tags:
+        - cases
+      x-state: Technical preview; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/cases/{caseId}/attachments/{attachmentId}:
+    delete:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/attachments/{attachmentId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Deletes a single attachment from a case. If it's a file, the file is also deleted. If it's an attack (`security.attack`), the alerts it added are also removed from the case, unless they're attached separately or by another attack. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
+      operationId: deleteCaseAttachmentDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+        - $ref: '#/components/parameters/Cases_case_id'
+        - $ref: '#/components/parameters/Cases_attachment_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: You don't have the required privileges for this case.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The attachment was not found in the case.
+      summary: Delete a case attachment
+      tags:
+        - cases
+      x-state: Technical preview; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/attachments/{attachmentId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a single attachment from a case. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
+      operationId: getCaseAttachmentDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_case_id'
+        - $ref: '#/components/parameters/Cases_attachment_id'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getAttachmentResponse:
+                  $ref: '#/components/examples/Cases_get_unified_attachment_response'
+              schema:
+                $ref: '#/components/schemas/Cases_unified_attachment_response'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: You don't have the required privileges for this case.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The attachment was not found in the case.
+      summary: Get a case attachment
+      tags:
+        - cases
+      x-state: Technical preview; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    put:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/attachments/{attachmentId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Fully replaces an attachment. You cannot change the attachment type or owner. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
+      operationId: replaceCaseAttachmentDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+        - $ref: '#/components/parameters/Cases_case_id'
+        - $ref: '#/components/parameters/Cases_attachment_id'
+      requestBody:
+        content:
+          application/json:
+            examples:
+              replaceAttachmentRequest:
+                $ref: '#/components/examples/Cases_update_unified_attachment_request'
+            schema:
+              $ref: '#/components/schemas/Cases_unified_attachment_put_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                replaceAttachmentResponse:
+                  $ref: '#/components/examples/Cases_replace_unified_attachment_response'
+              schema:
+                $ref: '#/components/schemas/Cases_unified_attachment_response'
+          description: Indicates a successful call. Returns the replaced attachment.
+        '400':
+          content:
+            application/json:
+              examples:
+                response400:
+                  $ref: '#/components/examples/Cases_response_400_invalid_attachment'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: |
+            The request failed for one of these reasons:
+            - The request body is invalid.
+            - The attachment type is `file`.
+            - The request changes the attachment type or owner.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: You don't have the required privileges for this case.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The attachment was not found in the case.
+        '409':
+          content:
+            application/json:
+              examples:
+                response409:
+                  $ref: '#/components/examples/Cases_response_409_attachment_version_conflict'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The attachment changed since you read it. Get the latest version and retry.
+      summary: Replace a case attachment
+      tags:
+        - cases
+      x-state: Technical preview; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -46898,10 +47281,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -47048,10 +47433,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -47163,10 +47550,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -47277,10 +47666,12 @@ paths:
                   anyOf:
                     - items:
                         description: List of collector agent IDs
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
                     - description: KQL query string. Leave empty to target all collectors
+                      maxLength: 500000
                       type: string
                 dryRun:
                   type: boolean
@@ -47396,10 +47787,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -47508,7 +47901,7 @@ paths:
                         type: string
                       maxItems: 10000
                       type: array
-                    - maxLength: 1000000
+                    - maxLength: 500000
                       type: string
                 batchSize:
                   minimum: 1
@@ -47601,10 +47994,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -47716,10 +48111,12 @@ paths:
                   anyOf:
                     - items:
                         description: list of agent IDs
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
                     - description: KQL query string, leave empty to action all agents
+                      maxLength: 500000
                       type: string
                 batchSize:
                   type: number
@@ -47837,10 +48234,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -47959,10 +48358,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -49768,6 +50169,37 @@ paths:
                   description: Global AWS region from the Service Settings step.
                   maxLength: 64
                   type: string
+                instances:
+                  description: Service instances, including duplicates, being deployed. Used to restore the service list when the onboarding is resumed.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      instanceId:
+                        description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                      isDuplicate:
+                        description: Whether the instance is a duplicate of another service.
+                        type: boolean
+                      name:
+                        description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                        maxLength: 255
+                        type: string
+                      serviceId:
+                        description: ID of the service this instance belongs to.
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                    required:
+                      - instanceId
+                      - serviceId
+                      - name
+                      - isDuplicate
+                  maxItems: 1000
+                  type: array
+                  x-state: Experimental; added in 9.7.0
                 integrationName:
                   description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                   maxLength: 160
@@ -49783,6 +50215,10 @@ paths:
                     type: string
                   maxItems: 10
                   type: array
+                namespace:
+                  description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
+                  maxLength: 100
+                  type: string
                 provider:
                   description: Cloud provider.
                   enum:
@@ -49978,6 +50414,37 @@ paths:
                         type: string
                       id:
                         type: string
+                      instances:
+                        description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            instanceId:
+                              description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                            isDuplicate:
+                              description: Whether the instance is a duplicate of another service.
+                              type: boolean
+                            name:
+                              description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                              maxLength: 255
+                              type: string
+                            serviceId:
+                              description: ID of the service this instance belongs to.
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                          required:
+                            - instanceId
+                            - serviceId
+                            - name
+                            - isDuplicate
+                        maxItems: 1000
+                        type: array
+                        x-state: Experimental; added in 9.7.0
                       integrationName:
                         description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
@@ -49991,6 +50458,9 @@ paths:
                           type: string
                         maxItems: 10
                         type: array
+                      namespace:
+                        description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
+                        type: string
                       packagePolicyIds:
                         description: Package policy IDs created for this deployment (managed_integration and agent_based).
                         items:
@@ -50331,6 +50801,37 @@ paths:
                         type: string
                       id:
                         type: string
+                      instances:
+                        description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            instanceId:
+                              description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                            isDuplicate:
+                              description: Whether the instance is a duplicate of another service.
+                              type: boolean
+                            name:
+                              description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                              maxLength: 255
+                              type: string
+                            serviceId:
+                              description: ID of the service this instance belongs to.
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                          required:
+                            - instanceId
+                            - serviceId
+                            - name
+                            - isDuplicate
+                        maxItems: 1000
+                        type: array
+                        x-state: Experimental; added in 9.7.0
                       integrationName:
                         description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
@@ -50344,6 +50845,9 @@ paths:
                           type: string
                         maxItems: 10
                         type: array
+                      namespace:
+                        description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
+                        type: string
                       packagePolicyIds:
                         description: Package policy IDs created for this deployment (managed_integration and agent_based).
                         items:
@@ -50574,6 +51078,37 @@ paths:
                       - templateVersion
                   maxItems: 10
                   type: array
+                instances:
+                  description: Service instances, including duplicates, from the last deployment. Replaces the stored list, so instances removed since the last deployment are dropped.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      instanceId:
+                        description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                      isDuplicate:
+                        description: Whether the instance is a duplicate of another service.
+                        type: boolean
+                      name:
+                        description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                        maxLength: 255
+                        type: string
+                      serviceId:
+                        description: ID of the service this instance belongs to.
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                    required:
+                      - instanceId
+                      - serviceId
+                      - name
+                      - isDuplicate
+                  maxItems: 1000
+                  type: array
+                  x-state: Experimental; added in 9.7.0
                 integrationName:
                   description: Integration name used by the last deploy, before any per-package suffix. Refreshed on each deploy because an unedited default name follows the service selection.
                   maxLength: 160
@@ -50589,6 +51124,11 @@ paths:
                     type: string
                   maxItems: 10
                   type: array
+                namespace:
+                  description: Global data stream namespace from the Service settings step. Omit it to keep the stored value, or send null to clear it. When none is set, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
+                  maxLength: 100
+                  nullable: true
+                  type: string
                 packagePolicyIds:
                   description: Package policy IDs created for this deployment (managed_integration and agent_based).
                   items:
@@ -50753,6 +51293,37 @@ paths:
                         type: string
                       id:
                         type: string
+                      instances:
+                        description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            instanceId:
+                              description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                            isDuplicate:
+                              description: Whether the instance is a duplicate of another service.
+                              type: boolean
+                            name:
+                              description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                              maxLength: 255
+                              type: string
+                            serviceId:
+                              description: ID of the service this instance belongs to.
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                          required:
+                            - instanceId
+                            - serviceId
+                            - name
+                            - isDuplicate
+                        maxItems: 1000
+                        type: array
+                        x-state: Experimental; added in 9.7.0
                       integrationName:
                         description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
@@ -50766,6 +51337,9 @@ paths:
                           type: string
                         maxItems: 10
                         type: array
+                      namespace:
+                        description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
+                        type: string
                       packagePolicyIds:
                         description: Package policy IDs created for this deployment (managed_integration and agent_based).
                         items:
@@ -51033,6 +51607,37 @@ paths:
                           type: string
                         id:
                           type: string
+                        instances:
+                          description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              instanceId:
+                                description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                                maxLength: 255
+                                minLength: 1
+                                type: string
+                              isDuplicate:
+                                description: Whether the instance is a duplicate of another service.
+                                type: boolean
+                              name:
+                                description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                                maxLength: 255
+                                type: string
+                              serviceId:
+                                description: ID of the service this instance belongs to.
+                                maxLength: 255
+                                minLength: 1
+                                type: string
+                            required:
+                              - instanceId
+                              - serviceId
+                              - name
+                              - isDuplicate
+                          maxItems: 1000
+                          type: array
+                          x-state: Experimental; added in 9.7.0
                         integrationName:
                           description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                           type: string
@@ -51046,6 +51651,9 @@ paths:
                             type: string
                           maxItems: 10
                           type: array
+                        namespace:
+                          description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
+                          type: string
                         packagePolicyIds:
                           description: Package policy IDs created for this deployment (managed_integration and agent_based).
                           items:
@@ -145356,6 +145964,24 @@ components:
         updated_at: null
         updated_by: null
         version: WzUzMiwxXQ==
+    Cases_create_unified_alert_attachment_request:
+      summary: Adds an Elastic Security alert to a case.
+      value:
+        attachmentId: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
+        metadata:
+          index: .internal.alerts-security.alerts-default-000001
+          rule:
+            id: 94309390-b76c-11ee-b4d6-39d8a0fcbc1b
+            name: Endpoint Security
+        owner: securitySolution
+        type: security.alert
+    Cases_create_unified_comment_attachment_request:
+      summary: Adds a comment to a case.
+      value:
+        data:
+          content: A new comment.
+        owner: cases
+        type: comment
     Cases_field_definition_write_request:
       summary: Create or update a reusable field definition.
       value:
@@ -145540,6 +146166,29 @@ components:
           isPreconfigured: false
           name: my-Jira
           referencedByCount: 0
+    Cases_find_unified_attachments_response:
+      summary: A page of case attachments.
+      value:
+        data:
+          - created_at: '2026-09-30T19:32:13.104Z'
+            created_by:
+              email: null
+              full_name: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+              username: elastic
+            data:
+              content: A new comment.
+            id: 8048b460-fe2b-11ec-b15d-779a7c8bbcc3
+            owner: cases
+            pushed_at: null
+            pushed_by: null
+            type: comment
+            updated_at: null
+            updated_by: null
+            version: WzIzLDFd
+        page: 1
+        per_page: 20
+        total: 1
     Cases_get_case_alerts_response:
       summary: Retrieves all alerts attached to a case
       value:
@@ -145839,6 +146488,25 @@ components:
         - security
         - tag 1
         - tag 2
+    Cases_get_unified_attachment_response:
+      summary: A single comment attachment.
+      value:
+        created_at: '2026-09-30T19:32:13.104Z'
+        created_by:
+          email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        data:
+          content: A new comment.
+        id: 8048b460-fe2b-11ec-b15d-779a7c8bbcc3
+        owner: cases
+        pushed_at: null
+        pushed_by: null
+        type: comment
+        updated_at: null
+        updated_by: null
+        version: WzIzLDFd
     Cases_push_case_response:
       summary: The push case API returns a JSON object with details about the case and the external service.
       value:
@@ -145897,6 +146565,41 @@ components:
           profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
           username: elastic
         version: WzE3NjgsM10=
+    Cases_replace_unified_attachment_response:
+      summary: A replaced comment attachment.
+      value:
+        created_at: '2026-09-30T19:32:13.104Z'
+        created_by:
+          email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        data:
+          content: An updated comment.
+        id: 8048b460-fe2b-11ec-b15d-779a7c8bbcc3
+        owner: cases
+        pushed_at: null
+        pushed_by: null
+        type: comment
+        updated_at: '2026-10-01T08:45:21.512Z'
+        updated_by:
+          email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        version: WzI0LDFd
+    Cases_response_400_invalid_attachment:
+      summary: The attachment payload is invalid.
+      value:
+        error: Bad Request
+        message: "Invalid attachment payload for type 'comment': data.content: Comment content must be a non-empty string"
+        statusCode: 400
+    Cases_response_400_invalid_attachments_query:
+      summary: A query parameter exceeds its limit.
+      value:
+        error: Bad Request
+        message: '[request query]: The provided perPage value is too high. The maximum allowed perPage value is 100.'
+        statusCode: 400
     Cases_response_400_invalid_template:
       summary: The request is invalid.
       value:
@@ -145927,11 +146630,23 @@ components:
         error: Not Found
         message: Saved object [cases-template/9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42] not found
         statusCode: 404
+    Cases_response_404_no_attachments:
+      summary: The case has no attachments.
+      value:
+        error: Not Found
+        message: No attachments found for case 293f1bc0-74f6-11ea-b83a-553aecdb28b6.
+        statusCode: 404
     Cases_response_409:
       summary: A resource conflict occurred.
       value:
         error: Conflict
         message: Template name "Security incident" already exists for owner "cases"
+        statusCode: 409
+    Cases_response_409_attachment_version_conflict:
+      summary: The attachment version is out of date.
+      value:
+        error: Conflict
+        message: This attachment has been updated. Please refresh before saving additional updates.
         statusCode: 409
     Cases_set_case_configuration_request:
       summary: Set the closure type, custom fields, and default connector for Stack Management cases.
@@ -146297,6 +147012,14 @@ components:
           profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
           username: elastic
         version: WzIwNjM2LDFd
+    Cases_update_unified_attachment_request:
+      summary: Replaces the content of a comment.
+      value:
+        data:
+          content: An updated comment.
+        owner: cases
+        type: comment
+        version: WzIzLDFd
     Data_views_create_data_view_request:
       description: Create a data view for logstash indices that includes a runtime field which extracts the shape name from a source field.
       summary: Create a data view with runtime fields.
@@ -150145,6 +150868,47 @@ components:
         oneOf:
           - $ref: '#/components/schemas/Cases_string'
           - $ref: '#/components/schemas/Cases_string_array'
+    Cases_attachment_id:
+      description: |
+        The ID of the attachment, which is its `id` field, not `attachmentId`. To get it, use the find case attachments API.
+      in: path
+      name: attachmentId
+      required: true
+      schema:
+        example: 71ec1870-725b-11ea-a0b2-c51ea50a58e2
+        maxLength: 512
+        type: string
+    Cases_attachment_sort_order:
+      description: 'Sorts attachments by creation date: `asc` (oldest first) or `desc` (newest first).'
+      example: asc
+      in: query
+      name: sortOrder
+      required: false
+      schema:
+        default: asc
+        enum:
+          - asc
+          - desc
+        type: string
+    Cases_attachment_type_filter:
+      description: |
+        Filters the returned attachments by one or more attachment types, such as `comment` or `security.alert`. To filter by multiple types, repeat the parameter. Limited to 20 types.
+      example: comment
+      in: query
+      name: type
+      required: false
+      schema:
+        oneOf:
+          - maxLength: 50
+            minLength: 1
+            type: string
+          - items:
+              maxLength: 50
+              minLength: 1
+              type: string
+            maxItems: 20
+            minItems: 1
+            type: array
     Cases_case_id:
       description: The identifier for the case. To retrieve case IDs, use the search cases (`_find)` API. All non-ASCII characters must be URL encoded.
       in: path
@@ -150274,6 +151038,7 @@ components:
       in: query
       name: search
       schema:
+        maxLength: 30000
         type: string
     Cases_searchFields:
       description: The fields to perform the simple_query_string parsed query against.
@@ -153465,6 +154230,205 @@ components:
             $ref: '#/components/schemas/Cases_template_tags'
       type: array
       x-state: Technical preview
+    Cases_unified_attachment_attachment_id:
+      description: |
+        The ID of the attached item, such as an alert or a dashboard. To attach several alerts, use an array. This isn't the attachment's own ID (`id`).
+      example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
+      oneOf:
+        - type: string
+        - items:
+            type: string
+          type: array
+    Cases_unified_attachment_data:
+      additionalProperties: true
+      description: |
+        The attachment's content. Required for comments, where `content` is the comment text (up to 30,000 characters).
+      example:
+        content: A new comment.
+      nullable: true
+      type: object
+    Cases_unified_attachment_metadata:
+      additionalProperties: true
+      description: |
+        Extra details about the attachment. For alerts, this is the alert's index and rule. Required for some types, such as `dashboard`.
+      nullable: true
+      type: object
+    Cases_unified_attachment_put_request:
+      description: |
+        The full replacement for the attachment. The `type` and `owner` must match the existing attachment. Reference attachment types require `attachmentId`. Value attachment types require `data` and don't accept `attachmentId`. Unknown properties are rejected.
+      oneOf:
+        - additionalProperties: false
+          properties:
+            attachmentId:
+              $ref: '#/components/schemas/Cases_unified_attachment_attachment_id'
+            data:
+              $ref: '#/components/schemas/Cases_unified_attachment_data'
+            metadata:
+              $ref: '#/components/schemas/Cases_unified_attachment_metadata'
+            owner:
+              $ref: '#/components/schemas/Cases_owner'
+            type:
+              $ref: '#/components/schemas/Cases_unified_attachment_type'
+            version:
+              $ref: '#/components/schemas/Cases_unified_attachment_version'
+          required:
+            - attachmentId
+            - owner
+            - type
+            - version
+          title: Reference attachment
+          type: object
+        - additionalProperties: false
+          properties:
+            data:
+              $ref: '#/components/schemas/Cases_unified_attachment_data'
+            metadata:
+              $ref: '#/components/schemas/Cases_unified_attachment_metadata'
+            owner:
+              $ref: '#/components/schemas/Cases_owner'
+            type:
+              $ref: '#/components/schemas/Cases_unified_attachment_type'
+            version:
+              $ref: '#/components/schemas/Cases_unified_attachment_version'
+          required:
+            - data
+            - owner
+            - type
+            - version
+          title: Value attachment
+          type: object
+      title: Replace case attachment request
+    Cases_unified_attachment_request:
+      description: |
+        The attachment to add to the case. Reference attachment types, such as alerts, require `attachmentId`. Value attachment types, such as comments, require `data` and don't accept `attachmentId`. The `owner` must match the owner of the case. Unknown properties are rejected.
+      oneOf:
+        - additionalProperties: false
+          properties:
+            attachmentId:
+              $ref: '#/components/schemas/Cases_unified_attachment_attachment_id'
+            data:
+              $ref: '#/components/schemas/Cases_unified_attachment_data'
+            metadata:
+              $ref: '#/components/schemas/Cases_unified_attachment_metadata'
+            owner:
+              $ref: '#/components/schemas/Cases_owner'
+            type:
+              $ref: '#/components/schemas/Cases_unified_attachment_type'
+          required:
+            - attachmentId
+            - owner
+            - type
+          title: Reference attachment
+          type: object
+        - additionalProperties: false
+          properties:
+            data:
+              $ref: '#/components/schemas/Cases_unified_attachment_data'
+            metadata:
+              $ref: '#/components/schemas/Cases_unified_attachment_metadata'
+            owner:
+              $ref: '#/components/schemas/Cases_owner'
+            type:
+              $ref: '#/components/schemas/Cases_unified_attachment_type'
+          required:
+            - data
+            - owner
+            - type
+          title: Value attachment
+          type: object
+      title: Create case attachment request
+    Cases_unified_attachment_response:
+      title: Case attachment response
+      type: object
+      properties:
+        attachmentId:
+          $ref: '#/components/schemas/Cases_unified_attachment_attachment_id'
+        created_at:
+          example: '2026-09-30T09:16:17.416Z'
+          format: date-time
+          type: string
+        created_by:
+          $ref: '#/components/schemas/Cases_case_response_created_by_properties'
+        data:
+          $ref: '#/components/schemas/Cases_unified_attachment_data'
+        id:
+          description: The attachment identifier.
+          example: 71ec1870-725b-11ea-a0b2-c51ea50a58e2
+          type: string
+        metadata:
+          $ref: '#/components/schemas/Cases_unified_attachment_metadata'
+        owner:
+          $ref: '#/components/schemas/Cases_owner'
+        pushed_at:
+          description: |
+            When this attachment was last pushed to an external system, such as Jira. Is `null` if it hasn't been pushed.
+          example: null
+          format: date-time
+          nullable: true
+          type: string
+        pushed_by:
+          $ref: '#/components/schemas/Cases_case_response_pushed_by_properties'
+        type:
+          $ref: '#/components/schemas/Cases_unified_attachment_type'
+        updated_at:
+          example: null
+          format: date-time
+          nullable: true
+          type: string
+        updated_by:
+          $ref: '#/components/schemas/Cases_case_response_updated_by_properties'
+        version:
+          description: The attachment's current version. Include it when you replace the attachment.
+          example: WzIwNDMxLDFd
+          type: string
+      required:
+        - created_at
+        - created_by
+        - id
+        - owner
+        - pushed_at
+        - pushed_by
+        - type
+        - updated_at
+        - updated_by
+        - version
+    Cases_unified_attachment_type:
+      description: |
+        The attachment type, such as `comment`, `security.alert`, `observability.alert`, `stack.alert`, `security.event`, `lens`, `dashboard`, or `file`. `security.*` types only work on Security cases, `observability.*` on Observability cases, and `stack.*` on Stack Management cases. Use `comment` (not the legacy `user` type) and a `*.alert` type (not `alert`). You can't add or replace file attachments with this API. To add a file, use `POST /api/cases/{caseId}/files`.
+      example: comment
+      type: string
+    Cases_unified_attachment_version:
+      description: |
+        The current version of the attachment. To retrieve it, use the get case attachment API. If the attachment changed since you read it, the request fails with a 409 status code.
+      example: WzIwNDMxLDFd
+      type: string
+    Cases_unified_attachments_find_response:
+      title: Find case attachments response
+      type: object
+      properties:
+        data:
+          description: The attachments on the requested page.
+          items:
+            $ref: '#/components/schemas/Cases_unified_attachment_response'
+          type: array
+        page:
+          description: The current page number.
+          example: 1
+          type: integer
+        per_page:
+          description: The number of items per page.
+          example: 20
+          type: integer
+        total:
+          description: |
+            The total number of matching attachments you can access. Attachments with invalid or unsupported data are counted but not returned, so a page can have fewer than `per_page` items.
+          example: 1
+          type: integer
+      required:
+        - data
+        - page
+        - per_page
+        - total
     Cases_update_alert_comment_request_properties:
       description: Defines properties for case comment requests when type is alert.
       type: object
@@ -159946,23 +160910,28 @@ components:
               type: string
             groupBy:
               items:
+                maxLength: 1000
                 type: string
+              maxItems: 100
               type: array
             searchConfiguration:
               additionalProperties: false
               type: object
               properties:
                 index:
+                  maxLength: 10000
                   type: string
               required:
                 - index
             threshold:
               items:
                 type: number
+              maxItems: 2
               type: array
             timeSize:
               type: number
             timeUnit:
+              maxLength: 64
               type: string
           required:
             - timeUnit
@@ -166479,6 +167448,11 @@ components:
                               - p95
                               - p99
                             type: string
+                          histogram_visualization:
+                            description: How histogram metrics are drawn. If omitted, Discover uses the percentile chart.
+                            enum:
+                              - lnsXY
+                            type: string
                           row_height:
                             anyOf:
                               - maximum: 20
@@ -168606,6 +169580,11 @@ components:
                       - p90
                       - p95
                       - p99
+                    type: string
+                  histogram_visualization:
+                    description: How histogram metrics are drawn. If omitted, Discover uses the percentile chart.
+                    enum:
+                      - lnsXY
                     type: string
                   id:
                     description: A unique identifier. Must contain only lowercase letters, numbers, hyphens, and underscores.
@@ -182031,12 +183010,16 @@ components:
             excludeTransforms:
               default: null
               items:
+                maxLength: 1000
                 type: string
+              maxItems: 1000
               nullable: true
               type: array
             includeTransforms:
               items:
+                maxLength: 1000
                 type: string
+              maxItems: 1000
               type: array
             testsConfig:
               additionalProperties: false
@@ -182645,6 +183628,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
         shipper:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
@@ -182973,6 +183957,7 @@ components:
                   required:
                     - id
                 - type: string
+              nullable: true
             ssl:
               additionalProperties: false
               type: object
@@ -182989,6 +183974,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
               required:
                 - key
         shipper:
@@ -183080,6 +184066,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
         shipper:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
@@ -183147,6 +184134,7 @@ components:
                           required:
                             - id
                         - type: string
+                      nullable: true
                     tpm:
                       additionalProperties: false
                       type: object
@@ -183163,6 +184151,7 @@ components:
                               required:
                                 - id
                             - type: string
+                          nullable: true
                         owner_auth:
                           anyOf:
                             - additionalProperties: false
@@ -183175,6 +184164,7 @@ components:
                               required:
                                 - id
                             - type: string
+                          nullable: true
         type:
           enum:
             - otlp
@@ -183258,6 +184248,7 @@ components:
                   required:
                     - id
                 - type: string
+              nullable: true
             ssl:
               additionalProperties: false
               type: object
@@ -183274,6 +184265,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
         service_token:
           nullable: true
           type: string

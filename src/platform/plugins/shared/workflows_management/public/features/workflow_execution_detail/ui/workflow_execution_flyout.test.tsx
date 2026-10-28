@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -80,10 +80,17 @@ jest.mock('./resume_execution_button', () => ({
 jest.mock('./workflow_step_execution_tree', () => ({
   WorkflowStepExecutionTree: ({
     onStepExecutionClick,
+    waitingAction,
   }: {
     onStepExecutionClick: (id: string) => void;
+    waitingAction?: { autoOpen?: boolean; stepExecutionId?: string };
   }) => (
     <>
+      <div
+        data-test-subj="tree-waiting-action"
+        data-auto-open={String(Boolean(waitingAction?.autoOpen))}
+        data-waiting-step={waitingAction?.stepExecutionId ?? ''}
+      />
       <button
         type="button"
         data-test-subj="select-waiting-step"
@@ -206,39 +213,46 @@ describe('WorkflowExecutionFlyout resume', () => {
     expect(screen.queryByTestId('resume-execution-button')).not.toBeInTheDocument();
   });
 
-  it('shows Provide action on the run and honors ?resume=true', () => {
+  it('shows Provide action in Result and honors ?resume=true on the tree row', () => {
     mockWaitingStepResume.waitingStepExecutionId = 'step-wait';
     mockWaitingStepResume.waitingStepStartedAt = '2024-01-01T00:00:00Z';
     mockWaitingStepResume.resumeMessage = 'Approve this';
     renderFlyout('?resume=true');
 
-    const resumeButtons = screen.getAllByTestId('resume-execution-button');
-    expect(resumeButtons).toHaveLength(1);
-    expect(resumeButtons[0]).toHaveAttribute('data-auto-open', 'true');
-    expect(resumeButtons[0]).toHaveAttribute('data-waiting-step', 'step-wait');
+    expect(screen.getByTestId('workflowExecutionFlyoutResultLink')).toHaveTextContent(
+      'Provide action'
+    );
+    expect(screen.queryByTestId('waitForInputCallout')).not.toBeInTheDocument();
+    const treeWaiting = screen.getByTestId('tree-waiting-action');
+    expect(treeWaiting).toHaveAttribute('data-auto-open', 'true');
+    expect(treeWaiting).toHaveAttribute('data-waiting-step', 'step-wait');
   });
 
-  it('shows a single resume control when the waiting step is selected', () => {
+  it('keeps resume on the tree row when the waiting step is selected', () => {
     mockWaitingStepResume.waitingStepExecutionId = 'step-wait';
     mockWaitingStepResume.waitingStepStartedAt = '2024-01-01T00:00:00Z';
 
     renderFlyout();
     fireEvent.click(screen.getByTestId('select-waiting-step'));
 
-    const resumeButton = screen.getByTestId('resume-execution-button');
-    expect(resumeButton).toHaveAttribute('data-waiting-step', 'step-wait');
-    expect(resumeButton).toHaveAttribute('data-execution-id', 'exec-1');
+    expect(screen.queryByTestId('resume-execution-button')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('waitForInputCallout')).not.toBeInTheDocument();
+    const treeWaiting = screen.getByTestId('tree-waiting-action');
+    expect(treeWaiting).toHaveAttribute('data-waiting-step', 'step-wait');
+    expect(treeWaiting).toHaveAttribute('data-auto-open', 'false');
   });
 
-  it('keeps ?resume=true auto-opening when the waiting step is selected', () => {
+  it('keeps ?resume=true auto-opening on the tree row when the waiting step is selected', () => {
     mockWaitingStepResume.waitingStepExecutionId = 'step-wait';
     mockWaitingStepResume.waitingStepStartedAt = '2024-01-01T00:00:00Z';
 
     renderFlyout('?resume=true');
     fireEvent.click(screen.getByTestId('select-waiting-step'));
 
-    const resumeButton = screen.getByTestId('resume-execution-button');
-    expect(resumeButton).toHaveAttribute('data-auto-open', 'true');
+    const treeWaiting = screen.getByTestId('tree-waiting-action');
+    expect(treeWaiting).toHaveAttribute('data-auto-open', 'true');
+    expect(treeWaiting).toHaveAttribute('data-waiting-step', 'step-wait');
+    expect(screen.queryByTestId('resume-execution-button')).not.toBeInTheDocument();
   });
 });
 
@@ -470,47 +484,48 @@ describe('WorkflowExecutionFlyout triggered by', () => {
     return services;
   };
 
-  it('resolves the profile UID to the user display name', async () => {
-    const services = createServices();
-    services.userProfile.bulkGet.mockResolvedValue([profile]);
+  const withResolvedProfile = () => {
+    mockPollingResult.workflowExecution = createMockWorkflowExecutionDto({
+      id: 'exec-1',
+      executedBy: profileUid,
+      executedByProfile: profile,
+    });
+  };
 
-    renderFlyout(services);
+  it('shows the user display name resolved by the server, without a client profile lookup', () => {
+    withResolvedProfile();
+    const services = renderFlyout();
 
-    await waitFor(() =>
-      expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).toHaveTextContent('elastic')
-    );
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).toHaveTextContent('elastic');
     expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).not.toHaveTextContent(
       profileUid
     );
-    expect(services.userProfile.bulkGet).toHaveBeenCalledWith({
-      uids: new Set([profileUid]),
-      dataPath: 'avatar',
-    });
+    expect(services.userProfile.bulkGet).not.toHaveBeenCalled();
   });
 
-  it('keeps the raw UID when the profile cannot be resolved', async () => {
-    const services = createServices();
-    services.userProfile.bulkGet.mockResolvedValue([]);
-
-    renderFlyout(services);
-
-    // Let any profile lookup settle before asserting the fallback.
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
+  it('keeps the raw UID when the profile cannot be resolved', () => {
+    renderFlyout();
 
     expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).toHaveTextContent(profileUid);
   });
 
-  it('hides the unresolved UID on serverless, like the execution list', async () => {
-    const services = createServices({ isServerless: true });
-    services.userProfile.bulkGet.mockResolvedValue([]);
-
-    renderFlyout(services);
-
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
+  it('shows a service account id on serverless when it is not a profile UID', () => {
+    const serviceAccountId = 'sa-nightshift-relay';
+    mockPollingResult.workflowExecution = createMockWorkflowExecutionDto({
+      id: 'exec-1',
+      executedBy: serviceAccountId,
     });
+
+    renderFlyout(createServices({ isServerless: true }));
+
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).toHaveTextContent(
+      serviceAccountId
+    );
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedByCopy')).toBeInTheDocument();
+  });
+
+  it('hides the unresolved UID on serverless, like the execution list', () => {
+    renderFlyout(createServices({ isServerless: true }));
 
     expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).not.toHaveTextContent(
       profileUid
@@ -518,17 +533,10 @@ describe('WorkflowExecutionFlyout triggered by', () => {
     expect(screen.queryByTestId('workflowExecutionFlyoutExecutedByCopy')).not.toBeInTheDocument();
   });
 
-  it('does not look up profiles nor show the user when the show executor setting is off', async () => {
-    const services = createServices({ showExecutor: false });
-    services.userProfile.bulkGet.mockResolvedValue([profile]);
+  it('does not show the user when the show executor setting is off', () => {
+    withResolvedProfile();
+    renderFlyout(createServices({ showExecutor: false }));
 
-    renderFlyout(services);
-
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
-
-    expect(services.userProfile.bulkGet).not.toHaveBeenCalled();
     expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).not.toHaveTextContent(
       profileUid
     );

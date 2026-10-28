@@ -1,8 +1,8 @@
 version: "1"
 name: Create detection rule
 description: >
-  AlertZero action: creates an ES|QL detection rule, disabled. Executed by the
-  investigation proposal gate once an analyst approves, so the rule is
+  AlertZero action: creates an ES|QL detection rule and enables it. Executed by
+  the investigation proposal gate once an analyst approves, so the rule is
   attributed to the approver.
 enabled: true
 tags:
@@ -16,7 +16,7 @@ consts:
   # live under `consts`: unknown top-level keys are stripped by the schema.
   actionMetadata:
     name: Create detection rule
-    description: Creates a new, disabled ES|QL detection rule.
+    description: Creates a new ES|QL detection rule and enables it.
     category: configure
     impact: low
     reversible: true
@@ -96,13 +96,37 @@ outputs:
     type: string
   - name: ruleName
     type: string
+  - name: enabled
+    type: boolean
 steps:
-  # Always creates the rule disabled — the step ignores `rule.enabled`. Add a
-  # `security.enableRule` step if an active rule is ever wanted.
+  # The approval is meant to close the coverage gap, and a disabled rule detects
+  # nothing, so the rule is created enabled and starts running on its first
+  # scheduled interval as the approver. Creating it enabled is a single API call
+  # rather than a create followed by an enable: the privilege check and the API
+  # key for the approver happen before the rule is saved, so an approver who may
+  # not enable rules gets one error and no rule. The gate then re-offers the
+  # proposal as it does for any failed action.
+  #
+  # Spelled out field by field, because the action owns `enabled` and the drafted
+  # body cannot carry it (`actionInput` rejects unknown fields). An optional field
+  # the draft omits renders as undefined and is dropped from the request.
   - name: create_rule
     type: security.createRule
     with:
-      rule: "${{ inputs.actionInput }}"
+      rule:
+        type: "${{ inputs.actionInput.type }}"
+        language: "${{ inputs.actionInput.language }}"
+        name: "${{ inputs.actionInput.name }}"
+        description: "${{ inputs.actionInput.description }}"
+        query: "${{ inputs.actionInput.query }}"
+        interval: "${{ inputs.actionInput.interval }}"
+        from: "${{ inputs.actionInput.from }}"
+        to: "${{ inputs.actionInput.to }}"
+        severity: "${{ inputs.actionInput.severity }}"
+        risk_score: "${{ inputs.actionInput.risk_score }}"
+        threat: "${{ inputs.actionInput.threat }}"
+        tags: "${{ inputs.actionInput.tags }}"
+        enabled: true
 
   # `workflow.execute` declares its output as unknown, so the parent falls back
   # to a heuristic read of the last step unless the child emits explicitly.
@@ -112,3 +136,4 @@ steps:
     with:
       ruleId: "{{ steps.create_rule.output.id }}"
       ruleName: "{{ steps.create_rule.output.name }}"
+      enabled: "${{ steps.create_rule.output.enabled }}"

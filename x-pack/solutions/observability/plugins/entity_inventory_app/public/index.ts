@@ -15,7 +15,6 @@ import type {
 } from './types';
 
 export type { EntityInventoryAppPublicSetup, EntityInventoryAppPublicStart };
-export { INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY } from '../common/ui_settings_keys';
 
 export const plugin: PluginInitializer<
   EntityInventoryAppPublicSetup,
