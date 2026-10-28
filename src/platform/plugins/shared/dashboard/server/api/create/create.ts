@@ -8,12 +8,12 @@
  */
 
 import type { RequestTiming } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
+import type { DashboardWriteScope } from '../write_scope';
 import type { DashboardCreateResponseBody } from './types';
 import {
   addToHistory,
@@ -25,17 +25,15 @@ import {
 export interface CreateOptions {
   id?: string;
   serverTiming?: RequestTiming;
-  spaceId?: string;
   isDashboardAppRequest?: boolean;
 }
 
 export async function create(
-  requestCtx: RequestHandlerContext,
+  { savedObjectsClient, supportsAccessControl, user, spaceId }: DashboardWriteScope,
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   createBody: DashboardState,
-  { id, serverTiming, spaceId, isDashboardAppRequest = false }: CreateOptions = {}
+  { id, serverTiming, isDashboardAppRequest = false }: CreateOptions = {}
 ): Promise<DashboardCreateResponseBody> {
-  const { core } = await requestCtx.resolve(['core']);
   const { access_control: accessControl, ...restOfData } = createBody;
 
   const { attributes: soAttributes, references: soReferences } = transformDashboardIn(
@@ -44,16 +42,12 @@ export async function create(
     serverTiming
   );
 
-  const supportsAccessControl = core.savedObjects.typeRegistry.supportsAccessControl(
-    DASHBOARD_SAVED_OBJECT_TYPE
-  );
-
   // a recreated ID may still have history from a deleted dashboard, so continue from it
   const historySequence = id
     ? await getNextHistorySequence({ spaceId, dashboardId: id, currentSequence: undefined })
     : INITIAL_HISTORY_SEQUENCE;
 
-  const savedObject = await core.savedObjects.client.create(
+  const savedObject = await savedObjectsClient.create(
     DASHBOARD_SAVED_OBJECT_TYPE,
     { ...soAttributes, historySequence },
     {
@@ -77,7 +71,7 @@ export async function create(
   });
   if (snapshot) {
     await addToHistory({
-      ctx: requestCtx,
+      user,
       dashboardId: savedObject.id,
       snapshot,
       spaceId,

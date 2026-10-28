@@ -85,7 +85,7 @@ const createDashboardClient = ({
   id?: string;
   attachmentData?: DashboardAttachmentData;
   data?: DashboardState;
-} = {}): jest.Mocked<DashboardPluginStart['client']> =>
+} = {}): jest.Mocked<Pick<DashboardPluginStart['client'], 'read'>> =>
   ({
     read: jest.fn().mockResolvedValue({
       id,
@@ -95,7 +95,7 @@ const createDashboardClient = ({
         version: 'v1',
       },
     }),
-  } as jest.Mocked<DashboardPluginStart['client']>);
+  } as jest.Mocked<Pick<DashboardPluginStart['client'], 'read'>>);
 
 const createLogger = (): Logger =>
   ({

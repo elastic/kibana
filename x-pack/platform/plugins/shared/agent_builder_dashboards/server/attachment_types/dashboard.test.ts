@@ -49,7 +49,7 @@ const createDashboardClient = ({
   updatedAt = '2025-01-02T00:00:00.000Z',
 }: {
   updatedAt?: string;
-} = {}): jest.Mocked<DashboardPluginStart['client']> =>
+} = {}): jest.Mocked<Pick<DashboardPluginStart['client'], 'read'>> =>
   ({
     read: jest.fn().mockResolvedValue({
       id: 'dashboard-1',
@@ -60,7 +60,7 @@ const createDashboardClient = ({
         version: 'v1',
       },
     }),
-  } as jest.Mocked<DashboardPluginStart['client']>);
+  } as jest.Mocked<Pick<DashboardPluginStart['client'], 'read'>>);
 
 const createLogger = (): Logger =>
   ({
@@ -186,7 +186,7 @@ describe('createDashboardAttachmentType', () => {
           version: 'v1',
         },
       }),
-    } as jest.Mocked<DashboardPluginStart['client']>;
+    } as jest.Mocked<Pick<DashboardPluginStart['client'], 'read'>>;
     const savedObjectsClient = createSavedObjectsClient();
     const definition = createDashboardAttachmentType({
       logger: createLogger(),

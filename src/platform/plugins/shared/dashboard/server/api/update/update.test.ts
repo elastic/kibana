@@ -8,7 +8,7 @@
  */
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import type { RequestHandlerContext } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { DEFAULT_DASHBOARD_STATE } from '../../../common/default_dashboard_state';
@@ -17,6 +17,7 @@ import { getChangeHistoryClient } from '../../change_history/change_history_serv
 import { setStubKibanaServices } from '../../mocks';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { transformDashboardIn } from '../transforms';
+import type { DashboardWriteScope } from '../write_scope';
 import { update } from './update';
 
 jest.mock('../../change_history/change_history_service');
@@ -36,7 +37,7 @@ const getInitialAttributes = (): DashboardSavedObjectAttributes => ({
 describe('update history sequence', () => {
   let stored: { attributes: DashboardSavedObjectAttributes; version: number };
   let loggedSequences: number[];
-  let requestCtx: RequestHandlerContext;
+  let scope: DashboardWriteScope;
 
   beforeAll(() => {
     setStubKibanaServices();
@@ -70,17 +71,12 @@ describe('update history sequence', () => {
         }
       ),
     };
-    const core = {
-      savedObjects: {
-        client: savedObjectsClient,
-        typeRegistry: { supportsAccessControl: () => false },
-      },
-      security: { authc: { getCurrentUser: () => null } },
+    scope = {
+      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientContract,
+      supportsAccessControl: false,
+      user: null,
+      spaceId: 'default',
     };
-    requestCtx = {
-      resolve: async () => ({ core }),
-      core: Promise.resolve(core),
-    } as unknown as RequestHandlerContext;
 
     // history that never refreshes: it only ever returns the first version
     mockedGetClient.mockResolvedValue({
@@ -94,7 +90,7 @@ describe('update history sequence', () => {
   });
 
   const save = (title: string) =>
-    update(requestCtx, getDashboardStateSchema(false), ID, getState(title), { spaceId: 'default' });
+    update(scope, getDashboardStateSchema(false), ID, getState(title));
 
   it('gives sequential saves distinct sequences before the history refreshes', async () => {
     await save('Second');

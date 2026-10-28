@@ -19,9 +19,9 @@ import { trackCreateDashboardAction } from '../../user_activity';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getRouteConfig } from '../get_route_config';
 import { TransformPanelsInError } from '../transforms/in/transform_panels_in_error';
+import { getWriteScopeFromContext } from '../write_scope';
 import { create } from './create';
 import { getCreateResponseBodySchema } from './schemas';
-import { spacesService } from '../../kibana_services';
 
 export function registerCreateRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -75,11 +75,15 @@ export function registerCreateRoute(
     async (ctx, req, res) =>
       telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
-          const result = await create(ctx, getCachedDashboardStateSchema(), req.body, {
-            serverTiming: req.serverTiming,
-            spaceId: spacesService?.getSpaceId(req),
-            isDashboardAppRequest,
-          });
+          const result = await create(
+            await getWriteScopeFromContext(ctx, req),
+            getCachedDashboardStateSchema(),
+            req.body,
+            {
+              serverTiming: req.serverTiming,
+              isDashboardAppRequest,
+            }
+          );
           try {
             await trackCreateDashboardAction(result, req);
           } catch (e) {

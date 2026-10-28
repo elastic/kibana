@@ -20,9 +20,9 @@ import { trackCreateDashboardAction, trackUpdateDashboardAction } from '../../us
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getRouteConfig } from '../get_route_config';
 import { TransformPanelsInError } from '../transforms/in/transform_panels_in_error';
+import { getWriteScopeFromContext } from '../write_scope';
 import { getUpdateResponseBodySchema } from './schemas';
-import { update } from './update';
-import { spacesService } from '../../kibana_services';
+import { InvalidDashboardIdError, update } from './update';
 
 export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -92,13 +92,12 @@ export function registerUpdateRoute(
       telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
           const { body, operation } = await update(
-            ctx,
+            await getWriteScopeFromContext(ctx, req),
             getCachedDashboardStateSchema(),
             req.params.id,
             req.body,
             {
               serverTiming: req.serverTiming,
-              spaceId: spacesService?.getSpaceId(req),
               isDashboardAppRequest,
             }
           );
@@ -114,6 +113,9 @@ export function registerUpdateRoute(
           if (e instanceof TransformPanelsInError) {
             logRequest(logger, req, 'warn', e.message);
             return res.custom(e.getCustomResponse());
+          }
+          if (e instanceof InvalidDashboardIdError) {
+            return writeErrorHandler(e.zodError, res, logger, req);
           }
           return writeErrorHandler(e, res, logger, req);
         }

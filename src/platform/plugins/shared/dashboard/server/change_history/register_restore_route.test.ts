@@ -8,12 +8,17 @@
  */
 
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from '@kbn/core/server/mocks';
 
 import { update } from '../api/update/update';
 import { registerRestoreChangeRoute } from './register_restore_route';
 import { getChangeHistoryContext } from './utils';
 
 jest.mock('../api/update/update');
+jest.mock('../kibana_services', () => ({
+  ...jest.requireActual('../kibana_services'),
+  spacesService: { getSpaceId: () => 'my-space' },
+}));
 jest.mock('./utils', () => ({
   ...jest.requireActual('./utils'),
   getChangeHistoryContext: jest.fn(),
@@ -74,7 +79,16 @@ describe('restore route', () => {
       body: { data: { title: 'Old title' } },
       operation: 'update',
     } as never);
-    const ctx = {} as never;
+    const savedObjectsClient = savedObjectsClientMock.create();
+    const user = { username: 'elastic', profile_uid: 'u_1' };
+    const core = {
+      savedObjects: {
+        client: savedObjectsClient,
+        typeRegistry: savedObjectsTypeRegistryMock.create(),
+      },
+      security: { authc: { getCurrentUser: () => user } },
+    };
+    const ctx = { resolve: async () => ({ core }) } as never;
     const res = httpServerMock.createResponseFactory();
 
     await getHandler()(ctx, request(), res);
@@ -83,11 +97,13 @@ describe('restore route', () => {
       additionalFilters: [{ term: { 'event.id': 'c2' } }],
       size: 1,
     });
-    expect(mockedUpdate).toHaveBeenCalledWith(ctx, expect.anything(), 'dash-1', snapshot, {
-      spaceId: 'my-space',
-      isDashboardAppRequest: true,
-      restoredFrom: 2,
-    });
+    expect(mockedUpdate).toHaveBeenCalledWith(
+      { savedObjectsClient, supportsAccessControl: false, user, spaceId: 'my-space' },
+      expect.anything(),
+      'dash-1',
+      snapshot,
+      { isDashboardAppRequest: true, restoredFrom: 2 }
+    );
     expect(res.ok).toHaveBeenCalledWith({ body: { title: 'Old title' } });
   });
 });

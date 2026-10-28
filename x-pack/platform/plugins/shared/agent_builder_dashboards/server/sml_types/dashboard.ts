@@ -20,7 +20,7 @@ import type {
 import { DASHBOARD_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 
 interface CreateDashboardSmlTypeOptions {
-  getDashboardClient: () => Promise<DashboardPluginStart['client']>;
+  getDashboardClient: () => Promise<Pick<DashboardPluginStart['client'], 'read'>>;
 }
 
 const toPanelSummary = (panel: DashboardPanel): string[] => {
