@@ -190,7 +190,9 @@ export class MyPlugin implements Plugin {
 }
 ```
 
-`get$` never errors. When a poll fails, {{kib}} skips that poll and keeps the last value. The observable completes when {{kib}} stops.
+`get$` never errors. When a poll fails, {{kib}} skips that poll and keeps the last value. The observable completes when {{kib}} stops, or when {{es}} has rejected the saved objects client (401 or 403) on every poll for 1 minute.
+
+A subscription doesn't end with the request that created it. Inside a route handler, use `get()`, or end the subscription with `takeUntil(request.events.completed$)`.
 
 `get$` throws if the setting was registered with `getValue`, because that default depends on the request. Read those settings with `get(key, { request })`.
 

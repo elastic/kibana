@@ -39,8 +39,9 @@ export interface IUiSettingsClient {
   /**
    * Emits the value `get(key)` would return without a request, then each later change, including a change saved on another Kibana node, within about 10 seconds.
    * The observable never errors. A failed poll is skipped and the last value stays.
-   * It completes when Kibana stops.
+   * It completes when Kibana stops, or when this client's saved objects client has been rejected (401 or 403) on every poll for 1 minute.
    * Reads use this client's saved objects client, so a long-lived subscriber should scope the client with `savedObjects.getUnsafeInternalClient()` and `.asScopedToNamespace(spaceId)` for a space, then unsubscribe in the plugin `stop` method.
+   * A subscription does not end with the request that created it. Inside a route handler, use `get()`, or end the subscription with `takeUntil(request.events.completed$)`.
    * Throws when the key was registered with `getValue`.
    */
   get$: <T = any>(key: string) => Observable<T>;

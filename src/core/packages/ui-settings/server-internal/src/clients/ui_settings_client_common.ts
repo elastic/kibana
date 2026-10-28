@@ -9,7 +9,17 @@
 
 import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
-import { EMPTY, catchError, defer, distinctUntilChanged, exhaustMap, map, merge, of } from 'rxjs';
+import {
+  EMPTY,
+  catchError,
+  defer,
+  distinctUntilChanged,
+  exhaustMap,
+  map,
+  merge,
+  of,
+  tap,
+} from 'rxjs';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { CannotOverrideError } from '../ui_settings_errors';
@@ -18,6 +28,9 @@ import { BaseUiSettingsClient } from './base_ui_settings_client';
 
 /** Poll period for `get$`. Separate from the user-provided cache TTL. */
 export const GET_OBSERVABLE_POLL_INTERVAL = 10_000;
+
+/** Consecutive 401/403 polls (1 minute) after which `get$` completes. */
+export const GET_OBSERVABLE_MAX_ACCESS_FAILURES = 6;
 
 interface ReadOptions {
   autoCreateOrUpgradeIfMissing?: boolean;
@@ -69,31 +82,60 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   get$<T = any>(key: string): Observable<T> {
     this.assertObservableKey(key);
 
-    return merge(of(undefined), this.pollTicks$).pipe(
-      exhaustMap((tick) =>
-        defer(() => this.pollUserProvided(tick)).pipe(
-          map((userProvided) => this.staticValue<T>(key, userProvided)),
-          catchError((error) => {
-            this.log.warn(`[UiSettings] get$("${key}") skipped a poll: ${error}`);
-            return EMPTY;
-          })
-        )
-      ),
-      distinctUntilChanged(isEqual)
-    );
+    return defer(() => {
+      let accessFailures = 0;
+      return merge(of(undefined), this.pollTicks$).pipe(
+        exhaustMap((tick) =>
+          defer(() => this.pollUserProvided(tick)).pipe(
+            tap(() => {
+              accessFailures = 0;
+            }),
+            map((userProvided) => this.staticValue<T>(key, userProvided)),
+            catchError((error) => {
+              if (
+                this.isAccessError(error) &&
+                ++accessFailures >= GET_OBSERVABLE_MAX_ACCESS_FAILURES
+              ) {
+                throw error;
+              }
+              this.log.warn(`[UiSettings] get$("${key}") skipped a poll: ${error}`);
+              return EMPTY;
+            })
+          )
+        ),
+        distinctUntilChanged(isEqual),
+        catchError((error) => {
+          this.log.warn(
+            `[UiSettings] get$("${key}") completed because its saved objects client was rejected for ${accessFailures} polls in a row: ${error}`
+          );
+          return EMPTY;
+        })
+      );
+    });
   }
 
   /**
    * Reads for `get$`. Only reads for the same tick are shared, and the first read
-   * after subscribing (no tick) is never shared.
+   * after subscribing (no tick) is never shared. A shared read rejected with 401/403
+   * is retried with this client, because the rejection may belong to the client that started it.
    */
   private async pollUserProvided(tick: number | undefined): Promise<UserProvided> {
+    return this.applyOverrides(this.onReadHook(await this.pollAttributes(tick)));
+  }
+
+  private async pollAttributes(tick: number | undefined): Promise<Record<string, any>> {
     const read = () => this.read({ ignoreErrors: false });
-    const attributes =
-      tick !== undefined && this.sharedPollReads
-        ? this.sharedPollReads.run(`${this.type}:${this.namespace}:${tick}`, read)
-        : read();
-    return this.applyOverrides(this.onReadHook(await attributes));
+    if (tick === undefined || !this.sharedPollReads) {
+      return read();
+    }
+    try {
+      return await this.sharedPollReads.run(`${this.type}:${this.namespace}:${tick}`, read);
+    } catch (error) {
+      if (!this.isAccessError(error)) {
+        throw error;
+      }
+      return read();
+    }
   }
 
   async getUserProvided<T = unknown>(bypassCache = false): Promise<UserProvided<T>> {
@@ -292,5 +334,10 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   private isIgnorableError(error: Error) {
     const { isForbiddenError, isEsUnavailableError } = SavedObjectsErrorHelpers;
     return isForbiddenError(error) || isEsUnavailableError(error);
+  }
+
+  private isAccessError(error: Error) {
+    const { isForbiddenError, isNotAuthorizedError } = SavedObjectsErrorHelpers;
+    return isForbiddenError(error) || isNotAuthorizedError(error);
   }
 }
