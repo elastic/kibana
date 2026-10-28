@@ -33,6 +33,14 @@ export interface DrilldownManagerDeps {
   initialState?: Partial<DrilldownState>;
 }
 
+const createUseState = (getState$: () => BehaviorSubject<Partial<DrilldownState>>) => () => {
+  const state$ = getState$();
+  return useObservable(state$, state$.getValue());
+};
+
+const createUseError = (getError$: () => Observable<string | undefined>) => () =>
+  useSyncObservable(getError$());
+
 /**
  * An instance of this class represents UI states of a single drilldown which
  * is currently being created or edited.
@@ -139,6 +147,6 @@ export class DrilldownManager {
   // Below are convenience React hooks for consuming observables in connected
   // React components.
 
-  public readonly useState = () => useObservable(this.state$, this.state$.getValue());
-  public readonly useError = () => useSyncObservable(this.error$);
+  public readonly useState = createUseState(() => this.state$);
+  public readonly useError = createUseError(() => this.error$);
 }

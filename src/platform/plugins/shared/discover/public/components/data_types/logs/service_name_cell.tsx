@@ -44,18 +44,6 @@ export const getServiceNameCell =
       OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE
     ) as AgentName | undefined;
 
-    if (!serviceNameValue) {
-      return <span data-test-subj={`${dataTestSubj}-empty`}>-</span>;
-    }
-
-    const agentNameIcon = otelSdkLanguage || agentName;
-
-    const getIcon = () => (
-      <EuiToolTip position="left" content={agentNameIcon} repositionOnScroll={true}>
-        <AgentIcon agentName={agentNameIcon} size="m" css={agentIconStyle} />
-      </EuiToolTip>
-    );
-
     const formattedValue = useMemo(
       () =>
         formatFieldStringValueWithHighlights({
@@ -69,6 +57,18 @@ export const getServiceNameCell =
     );
 
     const textValue = useMemo(() => extractTextFromReactNode(formattedValue), [formattedValue]);
+
+    if (!serviceNameValue) {
+      return <span data-test-subj={`${dataTestSubj}-empty`}>-</span>;
+    }
+
+    const agentNameIcon = otelSdkLanguage || agentName;
+
+    const getIcon = () => (
+      <EuiToolTip position="left" content={agentNameIcon} repositionOnScroll={true}>
+        <AgentIcon agentName={agentNameIcon} size="m" css={agentIconStyle} />
+      </EuiToolTip>
+    );
 
     return (
       <FieldBadgeWithActions

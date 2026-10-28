@@ -45,6 +45,11 @@ export interface LocatorDependencies {
   getUrl: (location: KibanaLocation, getUrlParams: LocatorGetUrlParams) => Promise<string>;
 }
 
+const createUseUrl =
+  <P extends SerializableRecord>(locator: LocatorPublic<P>) =>
+  (params: P, getUrlParams?: LocatorGetUrlParams, deps: DependencyList = []): string =>
+    useLocatorUrl<P>(locator, params, getUrlParams, deps);
+
 export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
   public readonly id: string;
   public readonly migrations: PersistableState<P>['migrations'];
@@ -55,6 +60,7 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
   ) {
     this.id = definition.id;
     this.migrations = definition.migrations || {};
+    this.useUrl = createUseUrl<P>(this);
 
     // Ensure getTimeRange and setTimeRange or neither at runtime
     //
@@ -147,11 +153,7 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
     });
   }
 
-  public readonly useUrl = (
-    params: P,
-    getUrlParams?: LocatorGetUrlParams,
-    deps: DependencyList = []
-  ): string => useLocatorUrl<P>(this, params, getUrlParams, deps);
+  public readonly useUrl: LocatorPublic<P>['useUrl'];
 
   public getTimeRange(params: P) {
     return this.definition.getTimeRange?.(params);

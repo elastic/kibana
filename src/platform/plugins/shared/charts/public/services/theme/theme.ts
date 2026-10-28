@@ -18,6 +18,37 @@ import { LIGHT_THEME, getChartsTheme } from '@elastic/charts';
 
 import { applyNumericFontFamily } from './helpers';
 
+const createUseDarkMode = (getDarkModeEnabled$: () => Observable<CoreTheme>) => (): boolean => {
+  const [value, update] = useState(false);
+
+  useEffect(() => {
+    const s = getDarkModeEnabled$().subscribe((val) => {
+      update(val.darkMode);
+    });
+    return () => s.unsubscribe();
+  }, []);
+
+  return value;
+};
+
+const createUseChartsBaseTheme =
+  (getCurrentTheme: () => Theme, getChartsBaseTheme$: () => Observable<Theme>) => (): Theme => {
+    const [value, update] = useState(getCurrentTheme());
+    const ref = useRef(value);
+
+    useEffect(() => {
+      const s = getChartsBaseTheme$().subscribe((val) => {
+        if (val !== ref.current) {
+          ref.current = val;
+          update(val);
+        }
+      });
+      return () => s.unsubscribe();
+    }, []);
+
+    return value;
+  };
+
 export class ThemeService {
   /** Returns default charts theme */
   public readonly chartsDefaultBaseTheme = LIGHT_THEME;
@@ -47,18 +78,7 @@ export class ThemeService {
    *
    * @deprecated use `useKibanaIsDarkMode`
    */
-  public useDarkMode = (): boolean => {
-    const [value, update] = useState(false);
-
-    useEffect(() => {
-      const s = this.darkModeEnabled$.subscribe((val) => {
-        update(val.darkMode);
-      });
-      return () => s.unsubscribe();
-    }, []);
-
-    return value;
-  };
+  public useDarkMode = createUseDarkMode(() => this.darkModeEnabled$);
 
   /**
    * @deprecated No longer need to use theme on top of baseTheme, see https://github.com/elastic/kibana/pull/170914#issuecomment-1823014121
@@ -92,22 +112,10 @@ export class ThemeService {
   };
 
   /** A React hook for consuming the charts theme */
-  public useChartsBaseTheme = (): Theme => {
-    const [value, update] = useState(this._chartsBaseTheme$.getValue());
-    const ref = useRef(value);
-
-    useEffect(() => {
-      const s = this.chartsBaseTheme$.subscribe((val) => {
-        if (val !== ref.current) {
-          ref.current = val;
-          update(val);
-        }
-      });
-      return () => s.unsubscribe();
-    }, []);
-
-    return value;
-  };
+  public useChartsBaseTheme = createUseChartsBaseTheme(
+    () => this._chartsBaseTheme$.getValue(),
+    () => this.chartsBaseTheme$
+  );
 
   /**
    * Initialize theme service with dark mode

@@ -88,22 +88,6 @@ module.exports = {
 
   overrides: [
     /**
-     * Temporarily disable some react rules for specific plugins, remove in separate PRs
-     */
-    {
-      files: ['src/platform/plugins/shared/kibana_react/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/rules-of-hooks': 'off',
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['src/platform/plugins/shared/kibana_utils/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    /**
      * FormatJS linter for i18n code.
      * https://formatjs.io/docs/tooling/linter
      */
@@ -308,36 +292,6 @@ module.exports = {
     /**
      * APM, UX and Observability overrides
      */
-    {
-      files: [
-        'x-pack/solutions/observability/plugins/apm/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/observability/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/ux/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/plugins/slo/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/observability/packages/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-      },
-    },
-    {
-      files: [
-        'x-pack/platform/plugins/shared/observability_solution/**/*.{ts,tsx}',
-        'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/{significant_events_app,streams,streams_app}/**/*.{ts,tsx}',
-        'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
-      ],
-      rules: {
-        'react-hooks/exhaustive-deps': [
-          'error',
-          {
-            additionalHooks:
-              '^(useUrl|useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient|use.*Fetch)$',
-          },
-        ],
-      },
-    },
     {
       files: [
         'x-pack/solutions/observability/plugins/apm/**/*.{ts,tsx}',
@@ -597,18 +551,6 @@ module.exports = {
         'x-pack/solutions/**/test/api_integration/apis/cases/**/*.{ts, tsx}',
       ],
     },
-    /**
-     * Custom Content overrides
-     */
-    {
-      files: [
-        'x-pack/platform/plugins/shared/custom_content/**/*.{ts,tsx}',
-        'x-pack/platform/packages/shared/custom-content/**/*.{ts,tsx}',
-      ],
-      rules: {
-        'react-hooks/exhaustive-deps': 'error',
-      },
-    },
 
     /**
      * Enterprise Search overrides
@@ -651,7 +593,6 @@ module.exports = {
             'newlines-between': 'always-and-inside-groups',
           },
         ],
-        'react-hooks/exhaustive-deps': 'off',
         '@typescript-eslint/member-ordering': [1, { default: { order: 'alphabetically' } }], // warning
       },
     },

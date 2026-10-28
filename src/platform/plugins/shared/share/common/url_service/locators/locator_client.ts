@@ -25,13 +25,35 @@ import { useLocatorUrl } from '.';
 
 export type LocatorClientDependencies = LocatorDependencies;
 
+type UseLocatorClientUrl = <P extends SerializableRecord>(
+  params: () => { id: string; params: P },
+  deps?: DependencyList,
+  getUrlParams?: LocatorGetUrlParams
+) => string | undefined;
+
+const createUseUrl =
+  (client: Pick<ILocatorClient, 'get'>): UseLocatorClientUrl =>
+  <P extends SerializableRecord>(
+    params: () => { id: string; params: P },
+    deps?: DependencyList,
+    getUrlParams?: LocatorGetUrlParams
+  ): string | undefined => {
+    const { id, params: locatorParams } = params();
+    const locator = client.get<P>(id);
+    // if useLocatorUrl returns an empty string, we return undefined. This is done to make sure the consumer
+    // checks whether the url has been resolved or not.
+    return useLocatorUrl(locator, locatorParams, getUrlParams, deps) || undefined;
+  };
+
 export class LocatorClient implements ILocatorClient {
   /**
    * Collection of registered locators.
    */
   protected locators: Map<string, Locator<any>> = new Map();
 
-  constructor(protected readonly deps: LocatorClientDependencies) {}
+  constructor(protected readonly deps: LocatorClientDependencies) {
+    this.useUrl = createUseUrl(this);
+  }
 
   /**
    * Creates and register a URL locator.
@@ -57,17 +79,7 @@ export class LocatorClient implements ILocatorClient {
     return this.locators.get(id);
   }
 
-  public readonly useUrl = <P extends SerializableRecord>(
-    params: () => { id: string; params: P },
-    deps?: DependencyList,
-    getUrlParams?: LocatorGetUrlParams
-  ): string | undefined => {
-    const { id, params: locatorParams } = params();
-    const locator = this.get<P>(id);
-    // if useLocatorUrl returns an empty string, we return undefined. This is done to make sure the consumer
-    // checks whether the url has been resolved or not.
-    return useLocatorUrl(locator, locatorParams, getUrlParams, deps) || undefined;
-  };
+  public readonly useUrl: UseLocatorClientUrl;
 
   protected getOrThrow<P extends SerializableRecord>(id: string): LocatorPublic<P> {
     const locator = this.locators.get(id);

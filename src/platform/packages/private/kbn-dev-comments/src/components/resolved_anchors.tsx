@@ -33,7 +33,7 @@ export const ResolvedAnchorsProvider = ({ children }: PropsWithChildren) => {
   const comments = usePageComments();
   const tick = useLayoutTick();
   const [resolver] = useState(createAnchorResolver);
-  const [, retry] = useReducer((retries: number) => retries + 1, 0);
+  const [retries, retry] = useReducer((count: number) => count + 1, 0);
 
   const { resolved, retryAt } = resolver.resolve(comments, { tick, now: Date.now() });
   // A screenshot shown full screen covers the page and the pins; hit-tested, the thread's pin would go, and the screenshot with it.
@@ -46,14 +46,14 @@ export const ResolvedAnchorsProvider = ({ children }: PropsWithChildren) => {
   );
 
   // Searches put off are made once their time has come, even on a page gone quiet.
-  // No dependencies: a render finding the wait a moment short of over must set the timer again.
+  // `retries` is a dependency: a retry finding the wait a moment short of over must set the timer again.
   useEffect(() => {
     if (retryAt === undefined) {
       return;
     }
     const timer = setTimeout(retry, Math.max(0, retryAt - Date.now()));
     return () => clearTimeout(timer);
-  });
+  }, [retryAt, retries]);
 
   // After every render, so the watched set follows what resolved; the tracker only diffs.
   useEffect(() => {

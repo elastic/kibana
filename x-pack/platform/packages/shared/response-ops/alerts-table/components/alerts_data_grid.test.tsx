@@ -686,16 +686,12 @@ describe('AlertsDataGrid', () => {
 
       it('should provide IndividualTagsActionContext to child components', async () => {
         const TestChildComponent = () => {
-          try {
-            const context = useIndividualTagsActionContext();
-            return (
-              <div data-test-subj="context-test">
-                {context.isFlyoutOpen ? 'Flyout Open' : 'Flyout Closed'}
-              </div>
-            );
-          } catch (e) {
-            return <div data-test-subj="context-test">Context Not Available</div>;
-          }
+          const context = useIndividualTagsActionContext();
+          return (
+            <div data-test-subj="context-test">
+              {context.isFlyoutOpen ? 'Flyout Open' : 'Flyout Closed'}
+            </div>
+          );
         };
 
         render(

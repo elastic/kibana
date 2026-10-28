@@ -109,7 +109,7 @@ export function useAbortableAsync<T>(
       controller.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps.concat(refreshId, clearValueOnNext));
+  }, [...deps, refreshId, clearValueOnNext]);
 
   const refresh = useCallback(() => {
     setRefreshId((id) => id + 1);
