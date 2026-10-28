@@ -45981,7 +45981,7 @@ paths:
           name: agentId
           required: true
           schema:
-            minLength: 0
+            maxLength: 512
             type: string
       responses:
         '200':
