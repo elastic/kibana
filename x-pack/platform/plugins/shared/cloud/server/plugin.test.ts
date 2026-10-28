@@ -90,6 +90,21 @@ describe('Cloud Plugin', () => {
         });
       });
 
+      it('forwards isFedrampHigh and isElasticCloudHosted from config', () => {
+        const { setup } = setupPlugin({
+          isFedrampHigh: true,
+          isElasticCloudHosted: true,
+        });
+        expect(setup.isFedrampHigh).toBe(true);
+        expect(setup.isElasticCloudHosted).toBe(true);
+      });
+
+      it('leaves isFedrampHigh and isElasticCloudHosted undefined when unset', () => {
+        const { setup } = setupPlugin();
+        expect(setup.isFedrampHigh).toBeUndefined();
+        expect(setup.isElasticCloudHosted).toBeUndefined();
+      });
+
       it('exposes cloudId', () => {
         const { setup } = setupPlugin();
         expect(setup.cloudId).toBe('cloudId');
