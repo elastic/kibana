@@ -114,9 +114,12 @@ export const readLatestFinishedSweepIndexScope = async ({
 /**
  * Whether a sweep's gate evaluated exactly the patterns of `universe` (exclusions ignored), so
  * its answer still describes the space's current default data view. A blocked sweep evaluated
- * what it reported missing; an unblocked one evaluated its resolved patterns.
+ * what it reported missing; an unblocked one evaluated its resolved patterns. A
+ * `blocked:discovery_failed` sweep records no patterns at all, so it cannot be compared and
+ * counts as current: the failure is the signal until the next sweep replaces it.
  */
 export const sweepEvaluatedUniverse = (scope: HuntScope, universe: string[]): boolean => {
+  if (scope.resolution === 'blocked:discovery_failed') return true;
   const positive = universe.filter((pattern) => !isIndexExclusion(pattern));
   const evaluated =
     scope.status === 'blocked'

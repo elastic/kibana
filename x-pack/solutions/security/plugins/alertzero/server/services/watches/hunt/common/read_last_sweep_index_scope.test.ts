@@ -162,6 +162,11 @@ describe('sweepEvaluatedUniverse', () => {
     expect(sweepEvaluatedUniverse(blocked, ['logs-*', 'extra-*'])).toBe(false);
   });
 
+  it('counts a discovery_failed sweep as current, since it records no patterns', () => {
+    const failed = { ...blocked, resolution: 'blocked:discovery_failed', missing: [] } as HuntScope;
+    expect(sweepEvaluatedUniverse(failed, ['logs-*'])).toBe(true);
+  });
+
   it('compares an unblocked sweep to its resolved patterns, ignoring exclusions', () => {
     expect(sweepEvaluatedUniverse(ok, ['logs-*', '-logs-y*'])).toBe(true);
     expect(sweepEvaluatedUniverse(ok, ['other-*'])).toBe(false);

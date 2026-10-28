@@ -1925,6 +1925,15 @@ describe('WorkersService Hunt index coverage', () => {
       expect(workers.find(({ id }) => id === HUNT)?.state).toBe('degraded');
     });
 
+    it('stays degraded after a discovery_failed sweep, which records no patterns to compare', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, { ...blockedScope('blocked:discovery_failed'), missing: [] });
+
+      const { workers } = await service.list(request, SPACE, async () => ['logs-*']);
+
+      expect(workers.find(({ id }) => id === HUNT)?.state).toBe('degraded');
+    });
+
     it('is no longer degraded once the default data view changed since the blocked sweep', async () => {
       const { service, mocks } = await setup();
       finishedSweep(mocks, blockedScope('blocked:empty_universe'));
