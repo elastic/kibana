@@ -56,7 +56,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
       completions: z.array(automationCompletionSchema).max(10).optional(),
       runtime: z
         .object({
-          dailyDispatchLimit: z.number().int().min(0).nullable().optional(),
+          dailyDispatchLimit: z.number().int().min(1).nullable().optional(),
           timeoutSeconds: z.number().int().min(1).optional(),
           dedupeWindowSeconds: z.number().int().min(0).optional(),
           overlapPolicy: z.enum(['drop', 'cancel_in_progress', 'queue']).optional(),

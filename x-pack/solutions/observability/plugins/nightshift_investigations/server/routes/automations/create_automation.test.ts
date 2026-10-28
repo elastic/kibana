@@ -119,6 +119,11 @@ describe('request validation', () => {
     expect(() => parseRows([{ ...slackRow, event: 'mention' }])).toThrow();
   });
 
+  it('rejects a daily dispatch limit of zero and accepts an omitted one', () => {
+    expect(() => params.parse({ body: { ...body, runtime: { dailyDispatchLimit: 0 } } })).toThrow();
+    expect(params.parse({ body: { ...body, runtime: {} } }).body.runtime).toEqual({});
+  });
+
   it('rejects oversized instructions during request parsing before writes', () => {
     expect(() =>
       params.parse({
