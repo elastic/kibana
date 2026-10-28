@@ -13,7 +13,7 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import type { DashboardRedirect } from '../types';
 import { getAccessControlClient } from '../../services/access_control_service';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
-import { coreServices, shareService } from '../../services/kibana_services';
+import { shareService } from '../../services/kibana_services';
 import { getDashboardAccessControlState } from '../../utils/get_dashboard_access_control_state';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
@@ -56,17 +56,10 @@ export const useDashboardShareAction = ({
   const saveFromShareModal = useCallback(async () => {
     if (lastSavedId) {
       setIsSaveInProgress(true);
-      try {
-        await dashboardApi.runQuickSave();
-      } catch (error) {
-        coreServices.notifications.toasts.addError(error, {
-          title: topNavStrings.quickSaveError.title,
-        });
-      } finally {
-        setTimeout(() => {
-          setIsSaveInProgress(false);
-        }, 100);
-      }
+      await dashboardApi.runQuickSave();
+      setTimeout(() => {
+        setIsSaveInProgress(false);
+      }, 100);
     } else {
       await dashboardApi.runInteractiveSave(redirectTo);
     }

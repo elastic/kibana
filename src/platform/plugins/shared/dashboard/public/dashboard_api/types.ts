@@ -230,6 +230,13 @@ export type DashboardApi = CanExpandPanels &
     isManaged: boolean;
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
     runInteractiveSave: (redirectTo?: DashboardRedirect) => Promise<{ id: string } | undefined>;
+    /**
+     * Saves the current dashboard state without showing the save modal.
+     * Set `restored` when the state was already saved by a restore.
+     * The save event is published without saving again.
+     * Never throws. Save failures are reported to the user with a toast,
+     * and failures while publishing the save event are logged as warnings.
+     */
     runQuickSave: (options?: { restored?: boolean }) => Promise<void>;
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;

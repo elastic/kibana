@@ -156,18 +156,11 @@ export const useDashboardMenuItems = ({
    */
   const quickSaveDashboard = useCallback(() => {
     setIsSaveInProgress(true);
-    dashboardApi
-      .runQuickSave()
-      .catch((error) => {
-        coreServices.notifications.toasts.addError(error, {
-          title: topNavStrings.quickSaveError.title,
-        });
-      })
-      .finally(() =>
-        setTimeout(() => {
-          setIsSaveInProgress(false);
-        }, 100)
-      );
+    dashboardApi.runQuickSave().finally(() =>
+      setTimeout(() => {
+        setIsSaveInProgress(false);
+      }, 100)
+    );
   }, [dashboardApi]);
 
   const openAddPanelFlyout = useCallback(
