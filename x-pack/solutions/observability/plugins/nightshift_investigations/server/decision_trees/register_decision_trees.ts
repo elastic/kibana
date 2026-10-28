@@ -92,11 +92,8 @@ export const prepareReinforcementTurn = async ({
   spaceId,
   signal,
   toolCalls = [],
-  causalConfirmed,
 }: {
   response: string;
-  /** Decided by the caller, for example with the causal check. Falls back to the text match. */
-  causalConfirmed?: boolean;
   connectorNames: string[];
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -118,7 +115,6 @@ export const prepareReinforcementTurn = async ({
     learnings,
     connectorNames,
     response,
-    causalConfirmed,
   });
   return {
     message: [embedAccessedTreesMarker(accessed.map((tree) => tree.tree_id)), message].join('\n'),

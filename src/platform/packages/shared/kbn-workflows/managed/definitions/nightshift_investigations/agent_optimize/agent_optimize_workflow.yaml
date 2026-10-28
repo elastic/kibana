@@ -147,10 +147,7 @@ steps:
     type: nightshift.decisionTreePrepare
     with:
       response: '{{ inputs.response }}'
-      prompt: '{{ inputs.prompt }}'
       agent_id: '{{ inputs.agent_id }}'
-      conversation_id: '{{ inputs.conversation_id }}'
-      round_id: '{{ inputs.round_id }}'
       # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…"
       # and JSON.parse in preprocess falls back to [], so every round distills from scratch.
       tool_calls: '${{ inputs.tool_calls }}'

@@ -527,10 +527,6 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreePrepareStepDefinition({
             getTelemetryConnectorId: () => this.ctx.config.get().sandbox?.telemetry_connector_id,
-            getAgentBuilder: () => this.agentBuilder,
-            getInference: () => this.inference,
-            getSavedObjects: () => this.savedObjects,
-            getUiSettings: () => this.uiSettings,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
           })
