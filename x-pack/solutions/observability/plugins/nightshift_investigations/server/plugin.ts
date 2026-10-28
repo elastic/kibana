@@ -378,7 +378,8 @@ export class NightshiftInvestigationsPlugin
             this.getInvestigationsClient,
             this.getAutomationsSoClient,
             this.getAlertsClient,
-            this.getEpisodeLookup
+            this.getEpisodeLookup,
+            () => this.actionsStart
           )
         );
         plugins.workflowsExtensions.registerStepDefinition(

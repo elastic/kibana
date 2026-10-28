@@ -16,6 +16,8 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { serverUnavailable } from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { notifyInvestigationQuotaReached } from '../lib/notifications/notify_investigation_quota_reached';
 import {
   DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
   INVESTIGATION_SUBJECT_TYPES,
@@ -183,7 +185,8 @@ export const triggerInvestigationStepDefinition = (
   getInvestigationsClient: GetInvestigationsClient,
   getAutomationsSoClient: GetAutomationsSoClient,
   getAlertsClient: GetAlertsClient,
-  getEpisodeLookup: GetEpisodeLookup
+  getEpisodeLookup: GetEpisodeLookup,
+  getActions: () => ActionsPluginStart | undefined
 ) =>
   createServerStepDefinition({
     id: 'nightshift.triggerInvestigation',
@@ -279,6 +282,17 @@ export const triggerInvestigationStepDefinition = (
           context.logger.info(
             `Skipped investigation of ${input.subject_type}/${subjectId}: global investigation limit reached`
           );
+          if (input.slack_thread) {
+            await notifyInvestigationQuotaReached({
+              getSoClient: () => getAutomationsSoClient(request, spaceId),
+              getActions,
+              request,
+              spaceId,
+              slackThread: input.slack_thread,
+              signal: context.abortSignal,
+              logger: context.logger,
+            });
+          }
           return { output: { skip_reason: 'investigation_limit' as const } };
         }
         throw error;

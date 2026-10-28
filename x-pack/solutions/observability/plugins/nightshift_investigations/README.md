@@ -212,6 +212,14 @@ Each execution, destination, and phase is claimed as `unconfirmed` before connec
 
 The `nightshift.sendNotifications` step validates the persisted workflow execution and its investigation binding, and reads the investigation (title, severity, summary, impact, first pending proposed action) through the shared query API. Until Agent Builder titles the investigation, messages use the run's `title` input. Investigation and execution IDs may differ for explicit continuation. It returns persisted `sent`, `failed`, and `unconfirmed` counts for the requested execution and phase; full diagnostics are available through authorized attachment reads. Notification-step failures continue the investigation workflow, while persistence failures stop further posts within that step. There is no automatic claim expiry, resend, or routing-document cleanup on investigation or space deletion. A confirmed root post from the Elastic Slack app claims its thread as a `slack_thread` subject using the thread key the Relay returns, so a mention or reply in it continues the investigation. Posts through a custom Slack connector and replies under a caller-named message register nothing here; a thread another investigation holds stays with it.
 
+### Investigation quota notice
+
+When the global investigation quota denies an automatic start from a Slack trigger,
+`nightshift.triggerInvestigation` skips the start with `investigation_limit` and replies in the
+triggering Slack thread, once per Slack channel and UTC day. The reply says the limit was reached
+and where to raise it. The once-a-day marker is claimed before posting, so a failed post is not
+retried. Alert, schedule, and manual runs post nothing.
+
 ### Workflow failures
 
 The managed investigation workflow uses `settings.on-failure.fallback` to invoke
