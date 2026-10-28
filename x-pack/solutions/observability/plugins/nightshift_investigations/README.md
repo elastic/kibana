@@ -64,10 +64,10 @@ They are **not** enabled in any serverless or stateful default config yet. Enabl
 
 The `agenticInvestigations` and `proposals` routes require the `read_investigations`, `manage_investigations`, `read_proposals`, and `manage_proposals` API privileges. The Nightshift feature grants them, so a Nightshift user does not need the `agenticInvestigations` or `proposals` feature privileges to call those routes:
 
-| Nightshift privilege | Grants |
-| --- | --- |
-| `all` | `read_investigations`, `manage_investigations`, `read_proposals`, `manage_proposals` |
-| `read` | `read_investigations`, `read_proposals` |
+| Nightshift privilege | Grants                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------ |
+| `all`                | `read_investigations`, `manage_investigations`, `read_proposals`, `manage_proposals` |
+| `read`               | `read_investigations`, `read_proposals`                                              |
 
 These API privileges are not scoped to Nightshift: they cover every agentic investigation and proposal in the space, including those created by other solutions, plus the investigation routes that share `manage_investigations` (status, assignment, impact, user profile suggestions).
 
@@ -183,6 +183,10 @@ Investigations are public conversations, and Agent Builder lets anyone who can c
 With `create`, the route creates the investigation as the identity that runs the Slack workflow. The new investigation has the thread as its subject, claimed so that concurrent creates for one thread agree on one investigation. The thread's status message is recorded on that subject as `slack.status_message_ts`.
 
 The Slack connector delivers each event at least once. The workflow passes Slack's event id as `event_id` and its own execution id as `execution_id`, and the route records both on the thread's subject in `slack.seen_events` (the latest 50). An event another execution already recorded is answered with `duplicate: true`, and the workflow skips it; the same execution asking again, for example on a retried step, is not a duplicate. A run whose investigation failed calls the route again with `release_event: true`, which removes the event as recorded for that execution, so a redelivery of the event is handled. The workflow runs one call per thread at a time, so two deliveries of one event cannot race each other.
+
+## Sandbox connectors
+
+The investigation agent reaches external systems from its sandbox through Kibana connectors. A connector is usable from the sandbox when the actions plugin reports it as sandbox capable and the caller can execute it; the sandbox bash tool then injects the connector's config and auth headers as `CONNECTOR_*` environment variables for one command (see the actions plugin's `getSandboxCredentials`).
 
 ## Notifications
 
