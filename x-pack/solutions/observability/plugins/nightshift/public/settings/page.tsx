@@ -10,7 +10,7 @@ import { EuiPageTemplate } from '@elastic/eui';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
-import { Redirect, useHistory, useParams } from 'react-router-dom';
+import { Redirect, useHistory, useLocation, useParams } from 'react-router-dom';
 import { NightshiftAppHeader } from '../app/app_header';
 import { useKibana } from '../hooks/use_kibana';
 import { DetectionsSettingsTab } from './detections_settings_tab';
@@ -53,6 +53,7 @@ export function SettingsPage({ headerProps }: { headerProps: SettingsPageHeaderP
   const { application } = useKibana().services;
   const { tab } = useParams<{ tab?: string }>();
   const history = useHistory();
+  const { search } = useLocation();
   const isAppsEnabled = useAppsEnabled();
   const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
 
@@ -77,6 +78,8 @@ export function SettingsPage({ headerProps }: { headerProps: SettingsPageHeaderP
     },
     'data-test-subj': `nightshiftSettingsTab-${id}`,
   }));
+  const backToDetections =
+    tab === 'detections' && new URLSearchParams(search).get('origin') === 'detections';
 
   return (
     <>
@@ -84,9 +87,9 @@ export function SettingsPage({ headerProps }: { headerProps: SettingsPageHeaderP
         page="settings"
         back={{
           href: application.getUrlForApp(NIGHTSHIFT_APP_ID, {
-            path: tab === 'detections' ? '/detections/events' : '/',
+            path: backToDetections ? '/detections/events' : '/',
           }),
-          label: tab === 'detections' ? detectionsLabel : nightshiftLabel,
+          label: backToDetections ? detectionsLabel : nightshiftLabel,
         }}
         tabs={tabs}
       />

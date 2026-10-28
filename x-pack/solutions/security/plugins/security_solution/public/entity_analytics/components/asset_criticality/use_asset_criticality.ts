@@ -20,6 +20,7 @@ import { useHasSecurityCapability } from '../../../helper_hooks';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics/asset_criticality';
 import type { AssetCriticality, DeleteAssetCriticalityResponse } from '../../api/api';
 import { useEntityAnalyticsRoutes } from '../../api/api';
+import { ENTITY_GRID_QUERY_KEY } from '../home/entities_grid/common';
 import { ENTITY_STORE_ENTITIES_LIST } from '../entity_store/hooks/use_entities_list_query';
 
 const ASSET_CRITICALITY_KEY = 'ASSET_CRITICALITY';
@@ -128,6 +129,7 @@ export const useAssetCriticalityData = ({
       // the Entity Store — such as the threat hunting leads cards — needs a
       // refetch rather than relying on its own cache TTL.
       QC.invalidateQueries({ queryKey: [ENTITY_STORE_ENTITIES_LIST] });
+      QC.invalidateQueries({ queryKey: [ENTITY_GRID_QUERY_KEY] });
       onChange?.();
     },
   });

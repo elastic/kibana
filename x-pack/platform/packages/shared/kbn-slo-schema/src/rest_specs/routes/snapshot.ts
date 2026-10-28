@@ -6,9 +6,9 @@
  */
 import { z } from '@kbn/zod';
 
-import { sloIdSchema } from '../../schema/zod/slo';
-import { allOrAnyString, dateType, statusSchema } from '../../schema/zod/common';
-import { MAX_DATE_STRING_LENGTH } from '../../schema/zod/limits';
+import { sloIdSchema } from '../../schema/slo';
+import { allOrAnyString, dateType, statusSchema } from '../../schema/common';
+import { MAX_DATE_STRING_LENGTH } from '../../schema/limits';
 
 const bulkSnapshotRequestItemSchema = z.object({
   id: sloIdSchema,
