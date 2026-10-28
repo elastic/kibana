@@ -27,7 +27,7 @@ const createEntry = (overrides: Record<string, unknown> = {}) => ({
   title: 'should display default samples',
   target: 'cloud-serverless-observability_complete',
   command: 'node scripts/scout run-tests',
-  location: 'x-pack/platform/plugins/shared/streams_app/-tamests/x.spec.ts',
+  location: 'x-pack/platform/plugins/shared/streams_app/test/scout/processing/ui/tests/x.spec.ts',
   owner: ['@elastic/streams-ui'],
   duration: 60000,
   error: { message: LOCATOR_TIMEOUT, stack_trace: LOCATOR_TIMEOUT },
