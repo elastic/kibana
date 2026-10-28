@@ -195,8 +195,29 @@ describe('backfillIndex', () => {
     expect(result).toEqual({ label: 'fleet-policies', status: 'partial', updated: 50 });
     expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
     expect(logger.info).toHaveBeenCalledWith(
-      'Backfilled policy_base_id on 50 fleet-policies documents: partial, 70 remaining, continuing on the next Fleet setup'
+      'Backfilled policy_base_id on 50 fleet-policies documents: partial, 70 remaining, continuing on the next run'
     );
+  });
+
+  it('reports a partial run when the final count is rejected after the time budget', async () => {
+    esClient.count
+      .mockResolvedValueOnce({ count: 120 } as any)
+      .mockRejectedValueOnce(
+        Object.assign(new Error('[parent] Data too large'), { statusCode: 429 })
+      );
+    esClient.updateByQuery.mockResolvedValue({ total: 50, updated: 50 } as any);
+    const now = jest.spyOn(Date, 'now');
+    now.mockReturnValueOnce(0).mockReturnValueOnce(500).mockReturnValue(2000);
+
+    const result = await backfillIndex(esClient, target, { logger, timeBudgetMs: 1000 });
+    now.mockRestore();
+
+    expect(result).toEqual({ label: 'fleet-policies', status: 'partial', updated: 50 });
+    expect(esClient.count).toHaveBeenCalledTimes(2);
+    expect(logger.info).toHaveBeenCalledWith(
+      'Backfilled policy_base_id on 50 fleet-policies documents: partial, remaining unknown, continuing on the next run'
+    );
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('passes the signal to Elasticsearch and does not count after a cancelled request', async () => {
@@ -222,7 +243,7 @@ describe('backfillIndex', () => {
     });
     expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.info).toHaveBeenCalledWith(
-      'Backfilled policy_base_id on 0 fleet-policies documents: partial, task cancelled, continuing on the next Fleet setup'
+      'Backfilled policy_base_id on 0 fleet-policies documents: partial, task cancelled, continuing on the next run'
     );
   });
 

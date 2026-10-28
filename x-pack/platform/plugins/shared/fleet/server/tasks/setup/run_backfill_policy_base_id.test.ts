@@ -60,9 +60,17 @@ describe('runBackfillPolicyBaseId', () => {
     expect(result).toEqual({ state: {}, runAt: new Date(1_000_000 + BACKFILL_CONTINUE_DELAY_MS) });
   });
 
+  it('schedules the next run when an index failed after updating documents', async () => {
+    backfill.mockResolvedValue([{ label: 'fleet-policies', status: 'failed', updated: 50 }]);
+
+    expect(await runBackfillPolicyBaseId({ signal: new AbortController().signal, logger })).toEqual(
+      { state: {}, runAt: expect.any(Date) }
+    );
+  });
+
   it.each([
     ['made no progress', { status: 'partial', updated: 0 }],
-    ['failed', { status: 'failed', updated: 50 }],
+    ['failed without progress', { status: 'failed', updated: 0 }],
   ] as const)('does not reschedule the task when an index %s', async (_, result) => {
     backfill.mockResolvedValue([{ label: 'fleet-policies', ...result }]);
 

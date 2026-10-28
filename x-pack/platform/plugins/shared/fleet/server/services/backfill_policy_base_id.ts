@@ -168,7 +168,7 @@ export async function backfillIndex(
   };
   const partial = (detail: string): BackfillResult => {
     logger.info(
-      `Backfilled policy_base_id on ${updated} ${label} documents: partial, ${detail}, continuing on the next Fleet setup`
+      `Backfilled policy_base_id on ${updated} ${label} documents: partial, ${detail}, continuing on the next run`
     );
     return { label, status: 'partial', updated };
   };
@@ -223,8 +223,12 @@ export async function backfillIndex(
     if (signal?.aborted) {
       return partial('task cancelled');
     }
-    const remaining = await withRetries(() => countDocumentsToBackfill(esClient, index, signal));
-    return partial(`${remaining} remaining`);
+    // The count only tells what is left, it is not retried: the budget is spent, and a rejection of it
+    // must not turn the documents updated above into a failure
+    const remaining = await countDocumentsToBackfill(esClient, index, signal).catch(
+      () => undefined
+    );
+    return partial(remaining === undefined ? 'remaining unknown' : `${remaining} remaining`);
   } catch (err) {
     if (signal?.aborted) {
       return partial('task cancelled');
