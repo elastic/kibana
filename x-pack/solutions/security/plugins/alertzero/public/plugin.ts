@@ -167,8 +167,9 @@ export class AlertZeroPublicPlugin
       isServerless: this.isServerless,
       spaces: startDeps.spaces,
     }).subscribe(this.spaceSupported$);
-    // A Classic space keeps the app accessible, so a direct URL shows an explanation instead of
-    // core's generic "Application unavailable" page. Navigation and deep links stay hidden.
+    // An unsupported space keeps the app accessible, whatever the setting is, so a direct URL
+    // shows an explanation instead of core's generic "Application unavailable" page. Navigation
+    // and deep links stay hidden.
     this.statusSubscription = combineLatest([
       settingEnabled$,
       this.availability$,
@@ -177,7 +178,7 @@ export class AlertZeroPublicPlugin
       const showNavigation =
         settingEnabled && spaceSupported && canRead && availability === 'available';
       this.appUpdater$.next(() => ({
-        status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
+        status: settingEnabled || !spaceSupported ? AppStatus.accessible : AppStatus.inaccessible,
         visibleIn: showNavigation ? ['projectSideNav', 'globalSearch'] : [],
         deepLinks: showNavigation ? getAlertZeroDeepLinks(core.application.capabilities) : [],
       }));
