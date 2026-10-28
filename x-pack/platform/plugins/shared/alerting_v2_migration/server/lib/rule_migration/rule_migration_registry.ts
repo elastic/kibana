@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { injectable } from 'inversify';
 import type { RuleMigrationDefinition } from './types';
 
 /**
  * Classic rule types that can be migrated to v2, keyed by rule type id. Populated during
  * plugin setup via `ruleMigrations.register`; read-only afterward.
  */
-@injectable()
 export class RuleMigrationRegistry {
   private readonly definitions = new Map<string, RuleMigrationDefinition>();
 

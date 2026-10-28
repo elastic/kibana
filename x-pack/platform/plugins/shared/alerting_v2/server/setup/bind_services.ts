@@ -39,7 +39,6 @@ import { RulesClientOptionsToken } from '../lib/rules_client/tokens';
 import { InternalRulesClient, InternalRulesClientProvider } from '../lib/internal_rules_client';
 import { RulesClient } from '../lib/rules_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
-import { RuleMigrationClient, RuleMigrationRegistry } from '../lib/rule_migration';
 import {
   RuleTemplatesClient,
   RuleTemplateSavedObjectsClientToken,
@@ -137,8 +136,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(EventOriginActorToken).toConstantValue('user');
   bind(RulesClientOptionsToken).toConstantValue({});
   bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
-  bind(RuleMigrationRegistry).toSelf().inSingletonScope();
-  bind(RuleMigrationClient).toSelf().inRequestScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);

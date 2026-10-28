@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/alerting-v2-migration-plugin",
+  "owner": ["@elastic/rna-project-team"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Migrates classic (v1) alerting rules to universal (v2) alerting rules.",
+  "plugin": {
+    "id": "alertingVTwoMigration",
+    "browser": false,
+    "server": true,
+    "requiredPlugins": ["alerting", "alertingVTwo", "workflowsManagement", "spaces"],
+    "optionalPlugins": ["agentBuilder", "cloud"]
+  }
+}

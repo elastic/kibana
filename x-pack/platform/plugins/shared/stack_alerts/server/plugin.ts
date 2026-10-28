@@ -25,7 +25,7 @@ export class AlertingBuiltinsPlugin
 
   public setup(
     core: CoreSetup<StackAlertsStartDeps>,
-    { alerting, features, alertingVTwo }: StackAlertsDeps
+    { alerting, features, alertingVTwoMigration }: StackAlertsDeps
   ) {
     features.registerKibanaFeature(BUILT_IN_ALERTS_FEATURE);
     features.registerKibanaFeature(STACK_ALERTS_ONLY_FEATURE);
@@ -40,7 +40,7 @@ export class AlertingBuiltinsPlugin
       },
       this.isServerless
     );
-    alertingVTwo?.ruleMigrations.register(esQueryRuleMigration);
+    alertingVTwoMigration?.ruleMigrations.register(esQueryRuleMigration);
   }
 
   public start() {}

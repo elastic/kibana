@@ -36,11 +36,8 @@ import type { RulesClient, CreateRulesClientOptions } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
 import type { ArtifactTypeDefinition } from './lib/artifact_types';
 import type { AlertEventsClient } from './lib/alert_events_client';
-import type { RuleMigrationClient, RuleMigrationDefinition } from './lib/rule_migration';
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
-
-export type RuleMigrationClientApi = PublicMethodsOf<RuleMigrationClient>;
 
 /** Rules client for system work with no user request; it only disables rules. */
 export interface InternalRulesClientApi {
@@ -66,15 +63,6 @@ export interface AlertingServerSetup {
    * Unregistered types pass through unchanged.
    */
   registerArtifactType(definition: ArtifactTypeDefinition): void;
-
-  ruleMigrations: {
-    /**
-     * Makes a classic rule type migratable to v2. The owner converts its params and supplies a
-     * default action message; alerting v2 converts rule-level fields and actions. Registering
-     * a rule type twice throws.
-     */
-    register(definition: RuleMigrationDefinition): void;
-  };
 }
 
 export interface AlertingServerStart {
@@ -109,12 +97,6 @@ export interface AlertingServerStart {
    * check via PrivilegeChecker before invoking the client.
    */
   getAlertEventsClientWithRequest(request: KibanaRequest): Promise<AlertEventsClientApi>;
-
-  /**
-   * Returns a client that converts classic rules of registered rule types into v2 rules and
-   * action policies, creating them with the request's credentials in its space.
-   */
-  getRuleMigrationClientWithRequest(request: KibanaRequest): Promise<RuleMigrationClientApi>;
 }
 
 export interface AlertingServerSetupDependencies {

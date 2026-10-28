@@ -12,15 +12,17 @@ const alertingTool = (name: string) => `${ALERTING_NAMESPACE}.${name}`;
 
 /**
  * Tool ids exposed by the Alerting V2 Agent Builder skills
- * (`rule-authoring` and `action-policy-authoring`).
+ * (`rule-authoring`, `action-policy-authoring` and `classic-to-universal-rule-migration`).
  */
 export const ALERTING_TOOL_IDS = {
   manageRule: alertingTool('manage_rule'),
   manageActionPolicy: alertingTool('manage_action_policy'),
+  getClassicRule: alertingTool('get_classic_rule'),
 } as const;
 
 export const RULE_AUTHORING_SKILL_ID = 'rule-authoring';
 export const ACTION_POLICY_AUTHORING_SKILL_ID = 'action-policy-authoring';
+export const CLASSIC_TO_UNIVERSAL_RULE_MIGRATION_SKILL_ID = 'classic-to-universal-rule-migration';
 
 /**
  * Initial message sent to the Agent Builder when the user clicks "Create with

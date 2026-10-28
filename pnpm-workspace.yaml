@@ -1465,6 +1465,7 @@ packages:
   - 'x-pack/platform/plugins/shared/aiops'
   - 'x-pack/platform/plugins/shared/alerting'
   - 'x-pack/platform/plugins/shared/alerting_v2'
+  - 'x-pack/platform/plugins/shared/alerting_v2_migration'
   - 'x-pack/platform/plugins/shared/anonymization'
   - 'x-pack/platform/plugins/shared/apm_sources_access'
   - 'x-pack/platform/plugins/shared/automatic_import'

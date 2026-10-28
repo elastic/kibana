@@ -6,23 +6,13 @@
  */
 
 import Boom from '@hapi/boom';
-import { inject, injectable } from 'inversify';
-import { Request } from '@kbn/core-di-server';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { buildInlineWorkflowYaml } from '@kbn/alerting-v2-utils';
+import type { ActionPolicyClientApi, RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { ActionPolicyClient } from '../action_policy_client';
-import { RulesClient } from '../rules_client';
-import { WorkflowsManagementApiToken } from '../dispatcher/steps/dispatch_step_tokens';
-import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../services/logger_service/logger_service';
-import { ALERTING_LOG_CODES } from '../errors/error_codes';
-import type { AlertingLabels } from '../services/logger_service/types';
+import { MIGRATION_LOG_CODES } from '../log_codes';
 import { convertClassicRule, isMigratedActionPolicyReady } from './convert_classic_rule';
-import { RuleMigrationRegistry } from './rule_migration_registry';
+import type { RuleMigrationRegistry } from './rule_migration_registry';
 import type {
   ClassicRule,
   MigratedActionPolicy,
@@ -30,15 +20,25 @@ import type {
   RuleMigrationResult,
 } from './types';
 
-type MigrationRulesClient = Pick<RulesClient, 'createRule' | 'deleteRule'>;
+type MigrationRulesClient = Pick<RulesClientApi, 'createRule' | 'deleteRule'>;
 type MigrationActionPolicyClient = Pick<
-  ActionPolicyClient,
+  ActionPolicyClientApi,
   'createActionPolicy' | 'deleteActionPolicy'
 >;
 type MigrationWorkflowsManagement = Pick<
   WorkflowsServerPluginSetup['management'],
   'createWorkflow' | 'deleteWorkflows'
 >;
+
+export interface RuleMigrationClientOptions {
+  request: KibanaRequest;
+  spaceId: string;
+  registry: RuleMigrationRegistry;
+  rulesClient: MigrationRulesClient;
+  actionPolicyClient: MigrationActionPolicyClient;
+  workflowsManagement: MigrationWorkflowsManagement;
+  logger: Logger;
+}
 
 interface CreatedResources {
   ruleId?: string;
@@ -47,21 +47,31 @@ interface CreatedResources {
 }
 
 /** Converts classic rules of registered rule types into v2 rules and simple action policies. */
-@injectable()
 export class RuleMigrationClient {
-  private readonly logger: LoggerServiceContract;
+  private readonly request: KibanaRequest;
+  private readonly spaceId: string;
+  private readonly registry: RuleMigrationRegistry;
+  private readonly rulesClient: MigrationRulesClient;
+  private readonly actionPolicyClient: MigrationActionPolicyClient;
+  private readonly workflowsManagement: MigrationWorkflowsManagement;
+  private readonly logger: Logger;
 
-  constructor(
-    @inject(Request) private readonly request: KibanaRequest,
-    @inject(RequestSpaceIdToken) private readonly spaceId: string,
-    @inject(RuleMigrationRegistry) private readonly registry: RuleMigrationRegistry,
-    @inject(RulesClient) private readonly rulesClient: MigrationRulesClient,
-    @inject(ActionPolicyClient) private readonly actionPolicyClient: MigrationActionPolicyClient,
-    @inject(WorkflowsManagementApiToken)
-    private readonly workflowsManagement: MigrationWorkflowsManagement,
-    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
-  ) {
-    this.logger = loggerService.forSubsystem('ruleMigration');
+  constructor({
+    request,
+    spaceId,
+    registry,
+    rulesClient,
+    actionPolicyClient,
+    workflowsManagement,
+    logger,
+  }: RuleMigrationClientOptions) {
+    this.request = request;
+    this.spaceId = spaceId;
+    this.registry = registry;
+    this.rulesClient = rulesClient;
+    this.actionPolicyClient = actionPolicyClient;
+    this.workflowsManagement = workflowsManagement;
+    this.logger = logger;
   }
 
   /** Whether the rule type has a registered migration. */
@@ -130,9 +140,9 @@ export class RuleMigrationClient {
     });
     created.actionPolicyIds.push(actionPolicyId);
 
-    this.logger.debug({
-      message: `Migrated classic action ${sourceActionId} to action policy ${actionPolicyId}`,
-    });
+    this.logger.debug(
+      () => `Migrated classic action ${sourceActionId} to action policy ${actionPolicyId}`
+    );
   }
 
   /** Deletes what a failed migration created, most dependent first. */
@@ -152,15 +162,22 @@ export class RuleMigrationClient {
     }
   }
 
-  private async attemptCleanup(labels: AlertingLabels, cleanup: () => Promise<unknown>) {
+  private async attemptCleanup(labels: Record<string, string>, cleanup: () => Promise<unknown>) {
     try {
       await cleanup();
     } catch (error) {
-      this.logger.warn({
-        message: 'Failed to undo part of a rule migration',
-        error,
-        code: ALERTING_LOG_CODES.RULE_MIGRATION_ROLLBACK_FAILED,
-        labels: { ...labels, space_id: this.spaceId },
+      const normalizedError = error instanceof Error ? error : new Error(String(error));
+      this.logger.warn('Failed to undo part of a rule migration', {
+        labels: {
+          ...labels,
+          space_id: this.spaceId,
+          code: MIGRATION_LOG_CODES.RULE_MIGRATION_ROLLBACK_FAILED,
+        },
+        error: {
+          message: normalizedError.message,
+          stack_trace: normalizedError.stack,
+          type: normalizedError.name,
+        },
       });
     }
   }

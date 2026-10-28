@@ -18,7 +18,6 @@ import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { InternalRulesClient } from '../lib/internal_rules_client';
-import { RuleMigrationClient, RuleMigrationRegistry } from '../lib/rule_migration';
 import type {
   AlertingServerSetup,
   AlertingServerStart,
@@ -26,21 +25,14 @@ import type {
   InternalRulesClientApi,
   ActionPolicyClientApi,
   AlertEventsClientApi,
-  RuleMigrationClientApi,
 } from '../types';
 
 export function bindContract({ bind }: ContainerModuleLoadOptions) {
   bind(Setup).toDynamicValue(({ get }) => {
     const registry = get(ArtifactTypeRegistry);
-    const ruleMigrationRegistry = get(RuleMigrationRegistry);
     const contract: AlertingServerSetup = {
       registerArtifactType: (definition) => {
         registry.register(definition);
-      },
-      ruleMigrations: {
-        register: (definition) => {
-          ruleMigrationRegistry.register(definition);
-        },
       },
     };
     return contract;
@@ -96,11 +88,6 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
       },
       async getAlertEventsClientWithRequest(request: KibanaRequest): Promise<AlertEventsClientApi> {
         return buildScope(request).get(AlertEventsClient);
-      },
-      async getRuleMigrationClientWithRequest(
-        request: KibanaRequest
-      ): Promise<RuleMigrationClientApi> {
-        return buildScope(request).get(RuleMigrationClient);
       },
     };
     return contract;

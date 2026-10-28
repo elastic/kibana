@@ -1,0 +1,26 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["../../../../../typings/**/*", "server/**/*"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/utility-types",
+    "@kbn/alerting-plugin",
+    "@kbn/alerting-v2-plugin",
+    "@kbn/alerting-v2-constants",
+    "@kbn/alerting-v2-schemas",
+    "@kbn/alerting-v2-utils",
+    "@kbn/workflows-management-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
+    "@kbn/cloud-plugin",
+    "@kbn/zod",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-logging-server-mocks"
+  ]
+}

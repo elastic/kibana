@@ -7,7 +7,10 @@
 
 import { Parser } from '@elastic/esql';
 import { getGroupByColumnsFromQuery, splitResultToRuleQuery } from '@kbn/alerting-v2-utils';
-import type { ConvertRuleParams, RuleParamsConversion } from '@kbn/alerting-v2-plugin/server';
+import type {
+  ConvertRuleParams,
+  RuleParamsConversion,
+} from '@kbn/alerting-v2-migration-plugin/server';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);

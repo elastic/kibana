@@ -707,6 +707,9 @@ importers:
       '@kbn/alerting-v2-episodes-ui':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui
+      '@kbn/alerting-v2-migration-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/alerting_v2_migration
       '@kbn/alerting-v2-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/alerting_v2
@@ -9419,6 +9422,8 @@ importers:
   x-pack/platform/plugins/shared/alerting: {}
 
   x-pack/platform/plugins/shared/alerting_v2: {}
+
+  x-pack/platform/plugins/shared/alerting_v2_migration: {}
 
   x-pack/platform/plugins/shared/anonymization: {}
 

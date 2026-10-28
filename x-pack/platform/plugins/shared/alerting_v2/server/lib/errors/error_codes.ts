@@ -681,14 +681,6 @@ export const ALERTING_LOG_CODES = {
   // ─────────────────────────────── Routes ──────────────────────────────
   /** An alerting v2 HTTP route handler failed with an unexpected 5xx error. */
   ROUTES_HANDLER_FAILED: 'ROUTES_HANDLER_FAILED',
-
-  // ─────────────────────────── Rule migration ──────────────────────────
-  /**
-   * Migrating a classic rule failed and undoing what it had already created
-   * failed too. The leftover rule, action policy or workflow is carried in
-   * `labels` and must be deleted by hand.
-   */
-  RULE_MIGRATION_ROLLBACK_FAILED: 'RULE_MIGRATION_ROLLBACK_FAILED',
 } as const;
 
 export type AlertingV2LogCode = (typeof ALERTING_LOG_CODES)[keyof typeof ALERTING_LOG_CODES];

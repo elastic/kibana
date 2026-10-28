@@ -6,8 +6,8 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { parse } from 'yaml';
-import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { RuleMigrationClient } from './rule_migration_client';
 import { RuleMigrationRegistry } from './rule_migration_registry';
 import type { ClassicRule } from './types';
@@ -48,7 +48,7 @@ describe('RuleMigrationClient', () => {
   let rulesClient: { createRule: jest.Mock; deleteRule: jest.Mock };
   let actionPolicyClient: { createActionPolicy: jest.Mock; deleteActionPolicy: jest.Mock };
   let workflowsManagement: { createWorkflow: jest.Mock; deleteWorkflows: jest.Mock };
-  let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let client: RuleMigrationClient;
 
   beforeEach(() => {
@@ -73,17 +73,16 @@ describe('RuleMigrationClient', () => {
       deleteWorkflows: jest.fn().mockResolvedValue({}),
     };
 
-    const logging = createLoggerService();
-    mockLogger = logging.mockLogger;
-    client = new RuleMigrationClient(
+    logger = loggingSystemMock.createLogger();
+    client = new RuleMigrationClient({
       request,
-      'space-1',
+      spaceId: 'space-1',
       registry,
       rulesClient,
       actionPolicyClient,
       workflowsManagement,
-      logging.loggerService
-    );
+      logger,
+    });
   });
 
   describe('canMigrate', () => {
@@ -198,7 +197,17 @@ describe('RuleMigrationClient', () => {
         request
       );
       expect(rulesClient.deleteRule).toHaveBeenCalledWith({ id: 'rule-1' });
-      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Failed to undo part of a rule migration',
+        expect.objectContaining({
+          labels: expect.objectContaining({
+            policy_id: 'policy-1',
+            space_id: 'space-1',
+            code: 'RULE_MIGRATION_ROLLBACK_FAILED',
+          }),
+        })
+      );
     });
   });
 });

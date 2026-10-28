@@ -35,6 +35,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,
+  `${internalNamespaces.platformAlerting}.get_classic_rule`,
 
   // Proposals
   'platform.proposals.revise',
@@ -232,6 +233,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Alerting
   'rule-authoring',
   'action-policy-authoring',
+  'classic-to-universal-rule-migration',
 
   // Platform – Dashboard
   'dashboards',

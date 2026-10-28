@@ -1261,6 +1261,7 @@ x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/search-ml-ux
 x-pack/platform/plugins/shared/aiops @elastic/search-ml-ux
 x-pack/platform/plugins/shared/alerting @elastic/response-ops
 x-pack/platform/plugins/shared/alerting_v2 @elastic/rna-project-team
+x-pack/platform/plugins/shared/alerting_v2_migration @elastic/rna-project-team
 x-pack/platform/plugins/shared/anonymization @elastic/workchat-eng @elastic/security-threat-hunting
 x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-signals-traces-team
 x-pack/platform/plugins/shared/automatic_import @elastic/siem-conduit

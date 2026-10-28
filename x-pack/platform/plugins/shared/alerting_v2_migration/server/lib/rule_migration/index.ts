@@ -7,6 +7,7 @@
 
 export { RuleMigrationRegistry } from './rule_migration_registry';
 export { RuleMigrationClient } from './rule_migration_client';
+export { createRuleMigrationClientFactory } from './create_rule_migration_client_factory';
 export { convertClassicRule, isMigratedActionPolicyReady } from './convert_classic_rule';
 export type {
   ActionMigrationNote,

@@ -6,7 +6,7 @@
  */
 
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
-import type { RuleMigrationDefinition } from '@kbn/alerting-v2-plugin/server';
+import type { RuleMigrationDefinition } from '@kbn/alerting-v2-migration-plugin/server';
 import { convertEsQueryParams } from './convert_es_query_params';
 
 // Liquid over the action policy workflow payload. Mirrors the classic `defaultActionMessage`:
