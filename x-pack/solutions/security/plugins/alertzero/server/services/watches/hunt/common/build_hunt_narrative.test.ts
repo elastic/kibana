@@ -367,7 +367,7 @@ describe('buildHuntNarrative', () => {
     expect(narrative).toContain('the report is not marked as hunted, stays eligible');
   });
 
-  it('says a retryable run with a hit recorded the hit, and makes no eligibility claim', () => {
+  it('says the hit of a retryable run stands, makes no eligibility claim and does not claim the write', () => {
     const narrative = buildHuntNarrative(
       result({
         tier1: hitTier1(),
@@ -378,7 +378,8 @@ describe('buildHuntNarrative', () => {
       ctx
     );
 
-    expect(narrative).toContain('The confirmed hit is recorded on the report');
+    expect(narrative).toContain('The confirmed hit stands');
+    expect(narrative).not.toContain('recorded on the report');
     expect(narrative).not.toContain('stays eligible');
   });
 

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { HuntCompleteness } from '@kbn/alertzero-common';
 import { HUNT_REPORTS_INDEX } from '../../../../../common/constants';
+import { MAX_HUNT_TECHNIQUE_IDS } from './hunt_technique_limit';
 import { buildHuntSpaceFilterTerms } from './space_filter';
 
 export type LastHuntStatus = 'hit' | 'clean' | 'incomplete';
@@ -71,6 +72,13 @@ export const deriveLastHuntStatus = ({
  * unset. The coverage ledger (`hunted_technique_ids`, `coverage_pending`) is written on every run:
  * ids are unioned with what earlier runs recorded, so a later run can skip them, and the cap keeps
  * the array within the contract's bound.
+ *
+ * Two guards keep the stored state honest. A continuation (the element is `coverage_pending`)
+ * never downgrades a `hit`: it skipped the techniques the hit came from, so its own `clean` or
+ * `incomplete` says nothing against the finding, and the hit keeps its status, run id and count
+ * (`last_hunted_at` still moves). And a ledger that cannot hold the whole union settles
+ * `coverage_pending` instead of leaving it set: ids past the cap are dropped, so a report that
+ * stayed pending would re-search the same techniques on every sweep and never gain ground.
  */
 const EVIDENCE_SCRIPT = `
 if (!(ctx._source.evidence instanceof List)) { ctx._source.evidence = new ArrayList(); }
@@ -78,11 +86,14 @@ boolean found = false;
 for (int i = 0; i < ctx._source.evidence.size(); i++) {
   if (ctx._source.evidence[i].space_id == params.space_id) {
     def el = ctx._source.evidence[i];
+    boolean keepHit = el.coverage_pending == true && el.last_hunt_status == 'hit' && params.last_hunt_status != 'hit';
     if (params.stamp) {
       el.last_hunted_at = params.last_hunted_at;
-      el.last_hunt_status = params.last_hunt_status;
-      el.last_hunt_run_id = params.last_hunt_run_id;
-      el.last_hunt_event_hit_count = params.last_hunt_event_hit_count;
+      if (!keepHit) {
+        el.last_hunt_status = params.last_hunt_status;
+        el.last_hunt_run_id = params.last_hunt_run_id;
+        el.last_hunt_event_hit_count = params.last_hunt_event_hit_count;
+      }
     }
     Set ids = new LinkedHashSet();
     if (el.hunted_technique_ids instanceof List) { ids.addAll(el.hunted_technique_ids); }
@@ -90,7 +101,7 @@ for (int i = 0; i < ctx._source.evidence.size(); i++) {
     List capped = new ArrayList();
     for (def id : ids) { if (capped.size() < params.max_ids) { capped.add(id); } }
     el.hunted_technique_ids = capped;
-    el.coverage_pending = params.coverage_pending;
+    el.coverage_pending = params.coverage_pending && ids.size() <= params.max_ids;
     found = true;
   }
 }
@@ -106,10 +117,19 @@ if (!found) {
   List capped = new ArrayList();
   for (def id : params.searched_technique_ids) { if (capped.size() < params.max_ids) { capped.add(id); } }
   el.hunted_technique_ids = capped;
-  el.coverage_pending = params.coverage_pending;
+  el.coverage_pending = params.coverage_pending && params.searched_technique_ids.size() <= params.max_ids;
   ctx._source.evidence.add(el);
 }
 `.trim();
+
+interface LedgerElement {
+  space_id?: string;
+  coverage_pending?: boolean;
+}
+
+interface LedgerSource {
+  evidence?: LedgerElement[];
+}
 
 export interface WriteHuntEvidenceParams {
   spaceId: string;
@@ -122,9 +142,6 @@ export interface WriteHuntEvidenceParams {
   /** Techniques this run searched, unioned into the report's per-space coverage ledger. */
   searchedTechniqueIds?: string[];
 }
-
-/** Most technique ids the ledger keeps per report and space; matches the mapping consumers' bound. */
-export const MAX_LEDGER_TECHNIQUE_IDS = 100;
 
 /**
  * Whether a run settles the report's hunt-once gate. A confirmed hit always does, whatever the
@@ -158,17 +175,21 @@ export const writeHuntEvidence = async (
     completeness,
     totalHits,
     searchedTechniqueIds = [],
-  }: WriteHuntEvidenceParams
+  }: WriteHuntEvidenceParams,
+  logger: Logger
 ): Promise<void> => {
   const stamp = shouldStampHunt({ hasConfirmedHit, completeness });
   // A retryable run that found nothing and searched nothing (a blocked scope, no model) has
   // nothing to record: no stamp, and a ledger with no ids says nothing a later run could use.
   if (!stamp && searchedTechniqueIds.length === 0) return;
 
-  await esClient.update({
+  const coveragePending = completeness === 'incomplete_retryable';
+  const response = await esClient.update<unknown, unknown, LedgerSource>({
     index: HUNT_REPORTS_INDEX,
     id: reportId,
     retry_on_conflict: 3,
+    // Read back only the ledger, to tell whether the cap settled a run that wanted to continue.
+    _source_includes: ['evidence.space_id', 'evidence.coverage_pending'],
     script: {
       lang: 'painless',
       source: EVIDENCE_SCRIPT,
@@ -180,9 +201,17 @@ export const writeHuntEvidence = async (
         last_hunt_run_id: runId,
         last_hunt_event_hit_count: totalHits,
         searched_technique_ids: searchedTechniqueIds,
-        coverage_pending: completeness === 'incomplete_retryable',
-        max_ids: MAX_LEDGER_TECHNIQUE_IDS,
+        coverage_pending: coveragePending,
+        max_ids: MAX_HUNT_TECHNIQUE_IDS,
       },
     },
   });
+
+  const stored = response.get?._source?.evidence?.find((element) => element.space_id === spaceId);
+  if (coveragePending && stored?.coverage_pending === false) {
+    logger.warn(
+      `Hunt coverage ledger for report ${reportId} in space ${spaceId} holds more than ` +
+        `${MAX_HUNT_TECHNIQUE_IDS} techniques, so coverage was settled with techniques still unsearched.`
+    );
+  }
 };

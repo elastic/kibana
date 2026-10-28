@@ -362,7 +362,7 @@ steps:
         Hunt coordinator did not finish before the hunt child stopped polling (60 reads, 10s apart); see hunt execution {{ execution.id }}.
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "complete" -%}
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_retryable" and steps.read_hunt_result.output.data.result.has_confirmed_hit == true -%}
-        The confirmed hit was recorded on the report, but part of the hunt did not run ({{ steps.read_hunt_result.output.data.result.message }}), so this run is not a statement about everything the report describes.
+        The confirmed hit {% if steps.write_evidence.error == nil %}was recorded on the report{% else %}could not be recorded on the report ({{ steps.write_evidence.error.message }}){% endif %}, but part of the hunt did not run ({{ steps.read_hunt_result.output.data.result.message }}), so this run is not a statement about everything the report describes.
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_retryable" -%}
         The hunt was incomplete but retryable ({{ steps.read_hunt_result.output.data.result.message }}), so the report is not marked as hunted and stays eligible for a later sweep.
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_final" -%}

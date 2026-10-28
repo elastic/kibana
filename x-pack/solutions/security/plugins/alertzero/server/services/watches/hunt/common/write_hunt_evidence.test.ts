@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import {
-  deriveLastHuntStatus,
-  MAX_LEDGER_TECHNIQUE_IDS,
-  shouldStampHunt,
-  writeHuntEvidence,
-} from './write_hunt_evidence';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { MAX_HUNT_TECHNIQUE_IDS } from './hunt_technique_limit';
+import { deriveLastHuntStatus, shouldStampHunt, writeHuntEvidence } from './write_hunt_evidence';
+import type { WriteHuntEvidenceParams } from './write_hunt_evidence';
 
 describe('deriveLastHuntStatus', () => {
   it('collapses to exactly the three statuses the UI labels', () => {
@@ -59,12 +57,21 @@ describe('shouldStampHunt', () => {
 });
 
 describe('writeHuntEvidence', () => {
-  const makeEsClient = () => ({ update: jest.fn().mockResolvedValue({}) });
+  const logger = loggingSystemMock.createLogger();
+  const makeEsClient = (stored?: Array<{ space_id: string; coverage_pending: boolean }>) => ({
+    update: jest.fn().mockResolvedValue(stored ? { get: { _source: { evidence: stored } } } : {}),
+  });
+  const write = (esClient: ReturnType<typeof makeEsClient>, params: WriteHuntEvidenceParams) =>
+    writeHuntEvidence(esClient as never, params, logger);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('writes the evidence fields the candidate selection gate filters on', async () => {
     const esClient = makeEsClient();
 
-    await writeHuntEvidence(esClient as never, {
+    await write(esClient, {
       spaceId: 'default',
       reportId: 'report-1',
       runId: 'run-1',
@@ -95,7 +102,7 @@ describe('writeHuntEvidence', () => {
   it('keys the evidence element by space, matching the candidate selection gate', async () => {
     const esClient = makeEsClient();
 
-    await writeHuntEvidence(esClient as never, {
+    await write(esClient, {
       spaceId: 'hunt-space',
       reportId: 'report-1',
       runId: 'run-1',
@@ -112,7 +119,7 @@ describe('writeHuntEvidence', () => {
   it('never sets alert_hits* keys, which belong to the Attribute Alerts writer on the same element', async () => {
     const esClient = makeEsClient();
 
-    await writeHuntEvidence(esClient as never, {
+    await write(esClient, {
       spaceId: 'default',
       reportId: 'report-1',
       runId: 'run-1',
@@ -128,7 +135,7 @@ describe('writeHuntEvidence', () => {
   it('records a real zero hit count rather than dropping it, distinct from never searched', async () => {
     const esClient = makeEsClient();
 
-    await writeHuntEvidence(esClient as never, {
+    await write(esClient, {
       spaceId: 'default',
       reportId: 'report-1',
       runId: 'run-1',
@@ -142,7 +149,7 @@ describe('writeHuntEvidence', () => {
   it('stamps the gate and marks nothing pending on a complete run', async () => {
     const esClient = makeEsClient();
 
-    await writeHuntEvidence(esClient as never, {
+    await write(esClient, {
       spaceId: 'default',
       reportId: 'report-1',
       runId: 'run-1',
@@ -159,7 +166,7 @@ describe('writeHuntEvidence', () => {
   it('records a confirmed hit on a retryable run and leaves coverage pending', async () => {
     const esClient = makeEsClient();
 
-    await writeHuntEvidence(esClient as never, {
+    await write(esClient, {
       spaceId: 'default',
       reportId: 'report-1',
       runId: 'run-1',
@@ -181,7 +188,7 @@ describe('writeHuntEvidence', () => {
   it('writes only the ledger on a retryable run with no hit, so the stamp stays unset', async () => {
     const esClient = makeEsClient();
 
-    await writeHuntEvidence(esClient as never, {
+    await write(esClient, {
       spaceId: 'default',
       reportId: 'report-1',
       runId: 'run-1',
@@ -206,7 +213,7 @@ describe('writeHuntEvidence', () => {
   it('writes nothing for a retryable run with no hit that searched nothing', async () => {
     const esClient = makeEsClient();
 
-    await writeHuntEvidence(esClient as never, {
+    await write(esClient, {
       spaceId: 'default',
       reportId: 'report-1',
       runId: 'run-1',
@@ -222,7 +229,7 @@ describe('writeHuntEvidence', () => {
   it('unions the searched ids into the ledger rather than replacing it, within the cap', async () => {
     const esClient = makeEsClient();
 
-    await writeHuntEvidence(esClient as never, {
+    await write(esClient, {
       spaceId: 'default',
       reportId: 'report-1',
       runId: 'run-1',
@@ -234,14 +241,14 @@ describe('writeHuntEvidence', () => {
 
     const [{ script }] = esClient.update.mock.calls[0];
     expect(script.params.searched_technique_ids).toEqual(['T1001', 'T1002']);
-    expect(script.params.max_ids).toBe(MAX_LEDGER_TECHNIQUE_IDS);
+    expect(script.params.max_ids).toBe(MAX_HUNT_TECHNIQUE_IDS);
     expect(script.source).toContain('ids.addAll(el.hunted_technique_ids)');
   });
 
   it('sends an empty ledger update when the run reported no searched ids', async () => {
     const esClient = makeEsClient();
 
-    await writeHuntEvidence(esClient as never, {
+    await write(esClient, {
       spaceId: 'default',
       reportId: 'report-1',
       runId: 'run-1',
@@ -256,7 +263,7 @@ describe('writeHuntEvidence', () => {
   it('still never touches alert_hits* keys when writing the ledger', async () => {
     const esClient = makeEsClient();
 
-    await writeHuntEvidence(esClient as never, {
+    await write(esClient, {
       spaceId: 'default',
       reportId: 'report-1',
       runId: 'run-1',
@@ -267,5 +274,90 @@ describe('writeHuntEvidence', () => {
     });
 
     expect(esClient.update.mock.calls[0][0].script.source).not.toContain('alert_hits');
+  });
+
+  it('keeps an earlier hit when a continuation finds nothing, but still moves the hunt time', async () => {
+    const esClient = makeEsClient();
+
+    await write(esClient, {
+      spaceId: 'default',
+      reportId: 'report-1',
+      runId: 'run-2',
+      hasConfirmedHit: false,
+      completeness: 'complete',
+      totalHits: 0,
+      searchedTechniqueIds: ['T1002'],
+    });
+
+    const [{ script }] = esClient.update.mock.calls[0];
+    // A continuation is an element that is still `coverage_pending` with a `hit` stamped; the
+    // new status is not a hit, so only `last_hunted_at` is written.
+    expect(script.source).toContain(
+      "boolean keepHit = el.coverage_pending == true && el.last_hunt_status == 'hit' && params.last_hunt_status != 'hit';"
+    );
+    expect(script.source).toMatch(/if \(!keepHit\) \{[^}]*last_hunt_status[^}]*last_hunt_run_id/s);
+    expect(script.params.last_hunt_status).toBe('clean');
+  });
+
+  it('settles coverage_pending when the union would not fit the cap', async () => {
+    const esClient = makeEsClient();
+
+    await write(esClient, {
+      spaceId: 'default',
+      reportId: 'report-1',
+      runId: 'run-1',
+      hasConfirmedHit: false,
+      completeness: 'incomplete_retryable',
+      totalHits: 0,
+      searchedTechniqueIds: ['T1001'],
+    });
+
+    const [{ script }] = esClient.update.mock.calls[0];
+    expect(script.source).toContain(
+      'el.coverage_pending = params.coverage_pending && ids.size() <= params.max_ids;'
+    );
+    expect(script.params.coverage_pending).toBe(true);
+  });
+
+  it('warns when the cap settled a run that wanted to continue', async () => {
+    const esClient = makeEsClient([{ space_id: 'default', coverage_pending: false }]);
+
+    await write(esClient, {
+      spaceId: 'default',
+      reportId: 'report-1',
+      runId: 'run-1',
+      hasConfirmedHit: false,
+      completeness: 'incomplete_retryable',
+      totalHits: 0,
+      searchedTechniqueIds: ['T1001'],
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('report-1'));
+  });
+
+  it('does not warn when the run is still pending, or when it never wanted to continue', async () => {
+    const pending = makeEsClient([{ space_id: 'default', coverage_pending: true }]);
+    await write(pending, {
+      spaceId: 'default',
+      reportId: 'report-1',
+      runId: 'run-1',
+      hasConfirmedHit: false,
+      completeness: 'incomplete_retryable',
+      totalHits: 0,
+      searchedTechniqueIds: ['T1001'],
+    });
+
+    const done = makeEsClient([{ space_id: 'default', coverage_pending: false }]);
+    await write(done, {
+      spaceId: 'default',
+      reportId: 'report-1',
+      runId: 'run-2',
+      hasConfirmedHit: false,
+      completeness: 'complete',
+      totalHits: 0,
+      searchedTechniqueIds: ['T1002'],
+    });
+
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 });

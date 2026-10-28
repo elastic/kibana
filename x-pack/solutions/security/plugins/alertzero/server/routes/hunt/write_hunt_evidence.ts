@@ -78,15 +78,19 @@ export const registerWriteHuntEvidenceRoute = ({
             return response.notFound({ body: { message: `Report ${reportId} not found` } });
           }
 
-          await writeHuntEvidence(reportsEsClient, {
-            spaceId,
-            reportId,
-            runId,
-            hasConfirmedHit,
-            completeness,
-            totalHits,
-            searchedTechniqueIds,
-          });
+          await writeHuntEvidence(
+            reportsEsClient,
+            {
+              spaceId,
+              reportId,
+              runId,
+              hasConfirmedHit,
+              completeness,
+              totalHits,
+              searchedTechniqueIds,
+            },
+            logger
+          );
 
           const body: WriteHuntEvidenceResponse = { acknowledged: true };
           return response.ok({ body });
