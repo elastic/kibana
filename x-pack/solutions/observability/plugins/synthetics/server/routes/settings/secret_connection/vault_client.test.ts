@@ -103,6 +103,19 @@ describe('testHashiCorpVault', () => {
       expect(result).toEqual({ ok: false, message: 'Token rejected (HTTP 403) (Vault 1.15.0).' });
     });
 
+    it.each([
+      ['an oversized', 'v'.repeat(65)],
+      ['a non-version', '1.15.0 <script>alert(1)</script>'],
+    ])('leaves out %s version string', async (_label, version) => {
+      fetchMock
+        .mockResolvedValueOnce(jsonResponse(200, { version }))
+        .mockResolvedValueOnce(jsonResponse(200, { data: {} }));
+
+      const result = await testHashiCorpVault({ address, authMethod: 'token', token: 'tok' }, logger);
+
+      expect(result).toEqual({ ok: true, message: 'Token authenticated.' });
+    });
+
     it('does not accept a 200 lookup without data', async () => {
       fetchMock.mockResolvedValueOnce(health()).mockResolvedValueOnce(jsonResponse(200, {}));
 

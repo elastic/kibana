@@ -31,7 +31,13 @@ import {
   whenSecretConnectionsEnabled,
 } from './connection_utils';
 import { isCredentialSensitiveChange, SECRET_REENTRY_REQUIRED_MESSAGE } from './credential_guard';
-import { getAllowedHosts, hostNotAllowedMessage, isAddressHostAllowed } from './address_guard';
+import {
+  getAllowedHosts,
+  hostNotAllowedMessage,
+  isAddressHostAllowed,
+  isLoopbackHost,
+  LOOPBACK_NOT_TESTABLE_MESSAGE,
+} from './address_guard';
 import type { SaveBody, TestBody } from './schemas';
 import { SaveBodySchema, TestBodySchema } from './schemas';
 import { testHashiCorpVault } from './vault_client';
@@ -183,6 +189,11 @@ export const testSecretConnectionRoute: SyntheticsRestApiRouteFactory<
     const { address, authMethod, namespace, tlsSkipVerify, roleId } = body.config;
     if (!isAddressHostAllowed(address, getAllowedHosts(server.config))) {
       return { ok: false, message: hostNotAllowedMessage(address) };
+    }
+    // Kibana would test its own host, not the agent's, and could send a stored credential to a
+    // service on that host.
+    if (isLoopbackHost(new URL(address).hostname)) {
+      return { ok: false, message: LOOPBACK_NOT_TESTABLE_MESSAGE };
     }
 
     // Fall back to the stored secret when the client submits a blank (editing), but never

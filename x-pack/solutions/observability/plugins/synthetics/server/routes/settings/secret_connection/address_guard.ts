@@ -37,7 +37,7 @@ export const isBlockedAddress = (rawIp: string): boolean => {
   );
 };
 
-const isLoopbackHost = (hostname: string): boolean => {
+export const isLoopbackHost = (hostname: string): boolean => {
   const host = stripBrackets(hostname).toLowerCase();
   return host === 'localhost' || host === '::1' || (isIPv4(host) && host.startsWith('127.'));
 };
@@ -64,6 +64,9 @@ export const validateVaultAddress = (value: string): string | undefined => {
   if (isBlockedAddress(url.hostname)) return 'must not be a link-local address';
   return undefined;
 };
+
+export const LOOPBACK_NOT_TESTABLE_MESSAGE =
+  'A loopback address refers to the host the agent runs on, so it cannot be tested from Kibana. Save the connection and check it from the agent.';
 
 const ALLOW_ANY_HOST = '*';
 

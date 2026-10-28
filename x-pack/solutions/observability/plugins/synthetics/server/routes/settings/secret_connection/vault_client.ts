@@ -31,6 +31,9 @@ const HEALTH_QUERY = new URLSearchParams({
 const TOKEN_LOOKUP_PATH = '/v1/auth/token/lookup-self';
 const APPROLE_LOGIN_PATH = '/v1/auth/approle/login';
 
+// The version comes from a caller-chosen address, so only a plain version string is shown.
+const VERSION_PATTERN = /^[0-9A-Za-z.+_-]{1,64}$/;
+
 const NOT_VAULT_MESSAGE = 'The address did not respond like a Vault server.';
 const UNREACHABLE_MESSAGE = 'Could not reach the Vault address.';
 const AUTH_ERROR_MESSAGE = 'Could not authenticate with Vault.';
@@ -149,7 +152,9 @@ export const testHashiCorpVault = async (
       const health = await call(`${HEALTH_PATH}?${HEALTH_QUERY}`);
       if (!health.body) return { ok: false, message: NOT_VAULT_MESSAGE };
       const { version } = health.body;
-      if (typeof version === 'string') versionNote = ` (Vault ${version})`;
+      if (typeof version === 'string' && VERSION_PATTERN.test(version)) {
+        versionNote = ` (Vault ${version})`;
+      }
     } catch (e) {
       logger.warn(`Vault connection test could not reach ${base}: ${e}`);
       return { ok: false, message: UNREACHABLE_MESSAGE };

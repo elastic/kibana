@@ -17,7 +17,7 @@ import {
 } from './secret_connection';
 import { testHashiCorpVault } from './vault_client';
 import { SECRET_REENTRY_REQUIRED_MESSAGE } from './credential_guard';
-import { hostNotAllowedMessage } from './address_guard';
+import { hostNotAllowedMessage, LOOPBACK_NOT_TESTABLE_MESSAGE } from './address_guard';
 import { connectionInUseMessage, SECRET_CONNECTIONS_DISABLED_MESSAGE } from './connection_utils';
 
 jest.mock('./vault_client', () => ({
@@ -138,6 +138,21 @@ describe('secret connection routes', () => {
       expect(testHashiCorpVault).not.toHaveBeenCalled();
     });
 
+    it.each(['http://127.0.0.1:8200', 'http://localhost:8200', 'http://[::1]:8200'])(
+      'refuses to test the loopback address %s from Kibana',
+      async (loopback) => {
+        const { routeContext } = setup({
+          body: { name: 'prod', config: { ...storedConfig, address: loopback } },
+          stored: { config: { ...storedConfig, address: loopback }, secrets: { token: 'stored' } },
+        });
+
+        const result = await runTest(routeContext);
+
+        expect(result).toEqual({ ok: false, message: LOOPBACK_NOT_TESTABLE_MESSAGE });
+        expect(testHashiCorpVault).not.toHaveBeenCalled();
+      }
+    );
+
     it('responds 404 without a Vault request while secret connections are disabled', async () => {
       const { routeContext, response } = setup({
         body: { config: storedConfig, secrets: { token: 't' } },
@@ -156,6 +171,21 @@ describe('secret connection routes', () => {
   describe('PUT', () => {
     const save = (routeContext: unknown) =>
       saveSecretConnectionRoute().handler(routeContext as any);
+
+    it('responds 404 and writes nothing while secret connections are disabled', async () => {
+      const { routeContext, create, response } = setup({
+        body: { name: 'prod', config: storedConfig, secrets: { token: 't' } },
+        secretConnections: { enabled: false },
+      });
+
+      await save(routeContext);
+
+      expect(response.notFound).toHaveBeenCalledWith({
+        body: { message: SECRET_CONNECTIONS_DISABLED_MESSAGE },
+      });
+      expect(create).not.toHaveBeenCalled();
+      expect(asyncGlobalParamsPropagation).not.toHaveBeenCalled();
+    });
 
     it('writes nothing for a host outside allowedHosts', async () => {
       const { routeContext, create, response } = setup({
