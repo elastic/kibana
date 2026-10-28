@@ -112,6 +112,9 @@ outputs:
   - name: applied
     type: boolean
 consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Rule Tuning worker"
   # Fallbacks for the optional operational inputs; keep in sync with the sweep's
   # consts in rule_tuning_worker.yaml.
   analysis_window_days: 7
@@ -368,6 +371,7 @@ steps:
     timeout: "10m"
     create-conversation: true
     with:
+      author_name: "{{ consts.author_name }}"
       # The thin agent has no skills or tools of its own. List every skill the
       # step needs, including the skills those skills load.
       configuration_overrides:
@@ -454,7 +458,9 @@ steps:
         to the recommendation; confidence is how sure you are that the change removes
         the false positives without losing detections.
 
-        Write every text field of the proposal in ASD-STE100 Simplified Technical English.
+        Write every text field of the proposal in ASD-STE100 Simplified Technical English:
+        sentences of 20 words or less, active voice, one topic for each sentence, no em
+        dashes. Write fp_pattern and reasoning as markdown.
       schema:
         # Omit the root type so Agent Builder wraps this union under a property;
         # the LangChain-to-inference adapter drops root-level oneOf constraints.
@@ -886,76 +892,61 @@ steps:
       proposed_error_text: "{{ steps.run_previews.output.proposed_error_text }}"
 
   # Diagnosis notes go to the investigation rather than into the proposal, which
-  # keeps only what the decision needs. `trigger_mode: never` appends a user_message
-  # without running the investigation agent. Called directly rather than through the
-  # journal note workflow, because this run allows one synchronous child per wake-up
-  # cycle and the proposal gate below is that child. User messages render as plain
-  # text, so no markdown. If a note fails, compose_proposal keeps that text so the
-  # analyst still sees it.
+  # keeps only what the decision needs. `ai.conversation.add_user_message` appends
+  # a user_message without running the investigation agent. Called directly rather
+  # than through the journal note workflow, because this run allows one synchronous child per wake-up
+  # cycle and the proposal gate below is that child. The chat renders markdown in
+  # user messages. If a note fails, compose_proposal keeps that text so the analyst
+  # still sees it.
   - name: post_fp_pattern
-    type: kibana.request
+    type: ai.conversation.add_user_message
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
         and steps.diagnose_rule.output.structured_output.fp_pattern != blank }}
     with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-      headers:
-        kbn-xsrf: string
-        elastic-api-version: "2023-10-31"
-        Content-Type: application/json
-      body:
-        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-        input: |-
-          False positive pattern for {{ steps.fetch_rule.output.name }}:
+      author_name: "{{ consts.author_name }}"
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: |-
+        **False positive pattern**
+        **Rule:** {{ steps.fetch_rule.output.name }}
 
-          {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
-        trigger_mode: never
+        {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
     on-failure:
       continue: true
 
   - name: post_reasoning
-    type: kibana.request
+    type: ai.conversation.add_user_message
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
         and steps.diagnose_rule.output.structured_output.reasoning != blank }}
     with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-      headers:
-        kbn-xsrf: string
-        elastic-api-version: "2023-10-31"
-        Content-Type: application/json
-      body:
-        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-        input: |-
-          Reasoning behind the tuning proposal for {{ steps.fetch_rule.output.name }}:
+      author_name: "{{ consts.author_name }}"
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: |-
+        **Tuning reasoning**
+        **Rule:** {{ steps.fetch_rule.output.name }}
+        **Change type:** `{{ steps.diagnose_rule.output.structured_output.change_type }}`
+        **Confidence:** {{ steps.diagnose_rule.output.structured_output.confidence }}
 
-          {{ steps.diagnose_rule.output.structured_output.reasoning }}
-        trigger_mode: never
+        {{ steps.diagnose_rule.output.structured_output.reasoning }}
     on-failure:
       continue: true
 
   # A risk score change has no backtest, so this note explains what approving does.
   - name: post_risk_score_note
-    type: kibana.request
+    type: ai.conversation.add_user_message
     if: >-
       ${{ steps.create_investigation.output.conversation_id != null
         and steps.diagnose_rule.output.structured_output.change_type == 'risk_score' }}
     with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-      headers:
-        kbn-xsrf: string
-        elastic-api-version: "2023-10-31"
-        Content-Type: application/json
-      body:
-        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-        input: |-
-          About the proposed risk score change for {{ steps.fetch_rule.output.name }}:
+      author_name: "{{ consts.author_name }}"
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: |-
+        **Risk score change**
+        **Rule:** {{ steps.fetch_rule.output.name }}
+        **Severity:** `{{ steps.fetch_rule.output.severity }}` → `{{ steps.diagnose_rule.output.structured_output.proposed_severity }}`
 
-          A risk score change does not change which alerts fire. If you approve, the future alerts of the rule change severity from {{ steps.fetch_rule.output.severity }} to {{ steps.diagnose_rule.output.structured_output.proposed_severity }}. Existing alerts keep their severity. The false positive count in the proposal is the evidence for this change.
-        trigger_mode: never
+        A risk score change does not change which alerts fire. If you approve, future alerts of the rule get the new severity. Existing alerts keep their severity. The false positive count in the proposal is the evidence for this change.
     on-failure:
       continue: true
 

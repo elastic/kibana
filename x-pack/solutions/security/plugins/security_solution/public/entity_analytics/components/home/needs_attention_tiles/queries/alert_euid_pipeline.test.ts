@@ -14,7 +14,7 @@ describe('buildAlertEuidPipeline', () => {
     const query = pipelineText();
     expect(query).toContain('| FORK (');
     expect(query).toContain('WHERE `kibana.alert.entity.id` IS NOT NULL');
-    expect(query).toContain('| EVAL _ea_entity_id = `kibana.alert.entity.id`');
+    expect(query).toContain('| EVAL _ea_entity_id = `kibana.alert.entity.id`::KEYWORD');
     expect(query).toContain('WHERE `kibana.alert.entity.id` IS NULL');
     expect(query).not.toContain('COALESCE(`kibana.alert.entity.id`');
   });
@@ -30,6 +30,53 @@ describe('buildAlertEuidPipeline', () => {
     expect(derived).toContain('host_euid =');
     expect(derived).toContain('service_euid =');
     expect(derived).toContain('_ea_entity_id = MV_DEDUPE(MV_APPEND(MV_APPEND(');
+  });
+
+  describe('unstamped branch identity filter', () => {
+    const unstampedWhere = (): string =>
+      pipelineText()
+        .split('\n')
+        .find((line) => line.includes('`kibana.alert.entity.id` IS NULL')) ?? '';
+
+    it('keeps only alerts that could resolve to a user, host or service EUID', () => {
+      const where = unstampedWhere();
+      expect(where).toContain('user.name IS NOT NULL');
+      expect(where).toContain('host.name IS NOT NULL');
+      expect(where).toContain('service.name IS NOT NULL');
+    });
+
+    it('does not cast the fields, so ES|QL can push the filter down to Lucene', () => {
+      expect(unstampedWhere()).not.toMatch(/\bTO_[A-Z]+\(/);
+    });
+
+    it('skips failed-outcome user alerts, as risk scoring does', () => {
+      expect(unstampedWhere()).toContain('event.outcome != "failure"');
+    });
+
+    it('nulls each EUID unless its own type accepts the alert', () => {
+      const derived = pipelineText().split('WHERE `kibana.alert.entity.id` IS NULL')[1];
+      const guard = derived.split('\n').find((line) => line.includes('user_euid = CASE(')) ?? '';
+      expect(guard).toContain('user_euid = CASE(');
+      expect(guard).toContain('host_euid = CASE(');
+      expect(guard).toContain('service_euid = CASE(');
+      // The user guard keeps the failure exclusion, so a host field cannot let a failed user alert in.
+      const userGuard = guard.slice(0, guard.indexOf('host_euid = CASE('));
+      expect(userGuard).toContain('event.outcome != "failure"');
+      expect(derived.indexOf('user_euid = CASE(')).toBeGreaterThan(derived.indexOf('user_euid ='));
+      expect(derived.indexOf('user_euid = CASE(')).toBeLessThan(derived.indexOf('MV_DEDUPE'));
+    });
+
+    it('filters before the EUID evals', () => {
+      const query = pipelineText();
+      expect(query.indexOf('user.name IS NOT NULL')).toBeLessThan(query.indexOf('user_euid ='));
+    });
+
+    it('does not filter the stamped branch', () => {
+      const stamped = pipelineText()
+        .split('\n')
+        .find((line) => line.includes('IS NOT NULL'));
+      expect(stamped).toBe('    WHERE `kibana.alert.entity.id` IS NOT NULL');
+    });
   });
 
   it('expands _ea_entity_id, filters nulls, deduplicates, then renames to entity.id for the JOIN', () => {

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY =
-  'observability:infraEntitiesInventoryExperience';
+export { ListDetailsAppHeader } from './list_details_app_header';
+export { ListDetailsFallbackAppHeader } from './list_details_fallback_app_header';

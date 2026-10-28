@@ -137,6 +137,12 @@ export type CancelAllActiveWorkflowExecutions = (params: {
   onCancelled?: (executionId: string) => void;
 }) => Promise<void>;
 
+/**
+ * Stores the response of an execution waiting for input and hands it to Task Manager. With a
+ * request, a handoff that keeps failing is reverted and rejected with
+ * `WorkflowResumeNotAppliedError`, as are failures before anything is written, so the caller can
+ * release its claim on the waiting step. Any other rejection may have left the response pending.
+ */
 export type ResumeWorkflowExecution = (
   executionId: string,
   spaceId: string,

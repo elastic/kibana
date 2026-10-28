@@ -9,6 +9,7 @@ import { useCallback, useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
+import { isMissingIndexError } from '../../is_missing_index_error';
 import type { QueryArgs, Row } from '../common';
 import { ANOMALY_COUNT_FIELD, getNumber } from '../common';
 import { findSortPageFetcher } from '../grid_columns';
@@ -251,14 +252,15 @@ export const useEntityGridData = (
   );
   const { rows, onRowsInViewChange } = enrichment;
   const prefetch = usePrefetch(context);
-  useErrorToast(
-    GRID_QUERY_ERROR_TITLE,
-    context.entitiesIndexError ??
-      resolvedEntityFilterOverrides.error ??
-      rowsQuery.error ??
-      countQuery.error ??
-      enrichment.error
-  );
+  // A missing index is empty data. Skip those and toast the first real failure.
+  const gridError = [
+    context.entitiesIndexError,
+    resolvedEntityFilterOverrides.error,
+    rowsQuery.error,
+    countQuery.error,
+    enrichment.error,
+  ].find((error) => error != null && !isMissingIndexError(error));
+  useErrorToast(GRID_QUERY_ERROR_TITLE, gridError);
 
   return {
     prefetch,

@@ -93,6 +93,9 @@ export class EntityCasesPage {
     const flyout = `(preview:!(),right:(id:host-panel,params:(contextID:host-panel,entityId:${entityId},hostName:${hostName},isPreviewMode:!f,scopeId:alerts-page)))`;
     await this.page.gotoApp('security/entity_analytics_home_page', { params: { flyout } });
     await this.takeActionButton.waitFor({ state: 'visible', timeout: 30000 });
+    // The new home page toasts when its alerts query has nothing to read. That toast sits over
+    // the flyout actions. Closing is a no-op when no toast is showing.
+    await this.dismissToasts();
   }
 
   async openTakeActionMenu() {
@@ -103,6 +106,17 @@ export class EntityCasesPage {
   async clickAddToNewCase() {
     await this.addToCaseItem.click();
     await this.createNewCaseFromModalButton.click();
+  }
+
+  private async dismissToasts() {
+    await this.page.components.toast().closeAll();
+  }
+
+  // The success toast is the signal that the UI created the case. Callers open the case by id
+  // afterwards: following this link navigates inside the app while the home-page flyout is still
+  // open, and that lands in the security error boundary.
+  async waitForCaseCreated() {
+    await this.caseToastLink.waitFor({ state: 'visible', timeout: 30000 });
   }
 
   async fillCaseName(name: string) {
@@ -136,9 +150,5 @@ export class EntityCasesPage {
     await this.attachmentsTab.waitFor();
     await this.attachmentsTab.click();
     await this.attachmentsContainer.waitFor();
-  }
-
-  async clickCaseToastLink() {
-    await this.caseToastLink.click();
   }
 }

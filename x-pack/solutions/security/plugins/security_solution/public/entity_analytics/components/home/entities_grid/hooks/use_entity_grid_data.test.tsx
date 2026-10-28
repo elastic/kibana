@@ -336,6 +336,32 @@ describe('useEntityGridData', () => {
         )
       );
     });
+
+    it('does not toast when the only failure is a missing index', () => {
+      mockContext({
+        concreteEntityIndexName: null,
+        isEntitiesIndexLoading: false,
+        entitiesIndexError: new Error('no such index [.alerts-security.alerts-default]'),
+      });
+
+      renderGridData();
+
+      expect(useErrorToast).toHaveBeenLastCalledWith(expect.any(String), undefined);
+    });
+
+    it('toasts a later query failure when an earlier error is a missing index', async () => {
+      const queryError = new Error('Found 2 problems');
+      mockContext({
+        entitiesIndexError: new Error('Unknown index [.alerts-security.alerts-default]'),
+      });
+      mockFetchSortPage.mockRejectedValue(queryError);
+
+      renderGridData();
+
+      await waitFor(() =>
+        expect(useErrorToast).toHaveBeenLastCalledWith(expect.any(String), queryError)
+      );
+    });
   });
 
   describe('prefetch', () => {
