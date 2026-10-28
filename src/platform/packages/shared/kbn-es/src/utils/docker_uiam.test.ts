@@ -96,20 +96,61 @@ describe('#getUiamContainers()', () => {
     ]);
   });
 
-  test.each(['PT1M', 'PT90S', 'PT2M30S', 'PT5M'])('accepts %s', (expiration) => {
+  test.each(['PT1M', 'PT90S', 'PT2M30S', 'PT5M', 'PT0H1M'])('accepts %s', (expiration) => {
     expect(() => getUiamContainers({ ephemeralTokenExpiration: expiration })).not.toThrow();
   });
 
-  test.each(['PT30S', 'PT5M1S', 'PT10M', 'P1D', '60', 'PT1H'])('rejects %s', (expiration) => {
-    expect(() => getUiamContainers({ ephemeralTokenExpiration: expiration })).toThrow(
-      `Invalid UIAM ephemeral token expiration [${expiration}]: expected an ISO-8601 duration from PT1M to PT5M, such as PT1M or PT90S.`
-    );
-  });
+  test.each(['', 'PT', 'PT0S', 'PT30S', 'PT5M1S', 'PT10M', 'P1D', '60', 'PT1H'])(
+    'rejects %s',
+    (expiration) => {
+      expect(() => getUiamContainers({ ephemeralTokenExpiration: expiration })).toThrow(
+        `Invalid UIAM ephemeral token expiration [${expiration}]: expected an ISO-8601 duration from PT1M to PT5M, such as PT1M or PT90S.`
+      );
+    }
+  );
 
   test('does not change the shared container definitions', () => {
     getUiamContainers({ ephemeralTokenExpiration: 'PT1M' });
 
     expect(UIAM_CONTAINERS.map(ephemeralExpirationParam)).toEqual([undefined, undefined]);
+  });
+
+  test('configures short session access tokens only on the main UIAM container', () => {
+    const containers = getUiamContainers({ includeOAuth: true, accessTokenExpiration: 'PT1M' });
+    expect(
+      containers.map((container) =>
+        container.params.find((param) => param.startsWith('uiam.tokens.access.expiration='))
+      )
+    ).toEqual([undefined, 'uiam.tokens.access.expiration=PT1M', undefined]);
+    expect(getUiamContainers()[1].params).not.toContain('uiam.tokens.access.expiration=PT1M');
+  });
+
+  test.each(['PT1M', 'PT60S', 'PT90S', 'PT2M30S', 'PT5M', 'PT10M', 'PT1H', 'PT1H2M3S'])(
+    'accepts session token lifetime %s',
+    (accessTokenExpiration) => {
+      expect(() => getUiamContainers({ accessTokenExpiration })).not.toThrow();
+    }
+  );
+
+  test.each(['', 'PT', 'PT10S', 'PT0M', 'PT0H0M59S', 'PT-1M', 'PT1.5M', 'P1D', 'bad', '1m'])(
+    'rejects unsupported session token lifetime %s before starting containers',
+    (accessTokenExpiration) => {
+      expect(() => getUiamContainers({ accessTokenExpiration })).toThrow(
+        'expected an ISO-8601 duration of at least PT1M'
+      );
+    }
+  );
+
+  test('validates both token lifetimes without sharing their upper bounds', () => {
+    expect(() =>
+      getUiamContainers({ ephemeralTokenExpiration: 'PT5M', accessTokenExpiration: 'PT1H' })
+    ).not.toThrow();
+    expect(() =>
+      getUiamContainers({ ephemeralTokenExpiration: 'PT1H', accessTokenExpiration: 'PT1M' })
+    ).toThrow('Invalid UIAM ephemeral token expiration');
+    expect(() =>
+      getUiamContainers({ ephemeralTokenExpiration: 'PT1M', accessTokenExpiration: 'PT59S' })
+    ).toThrow('Invalid UIAM access token expiration');
   });
 });
 

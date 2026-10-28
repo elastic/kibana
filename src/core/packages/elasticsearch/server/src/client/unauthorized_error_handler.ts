@@ -9,7 +9,7 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { UnauthorizedError } from '@kbn/es-errors';
-import type { AuthHeaders, KibanaRequest } from '@kbn/core-http-server';
+import type { AuthHeaders, Headers, KibanaRequest } from '@kbn/core-http-server';
 
 /**
  * @public
@@ -17,6 +17,8 @@ import type { AuthHeaders, KibanaRequest } from '@kbn/core-http-server';
 export interface UnauthorizedErrorHandlerOptions {
   error: UnauthorizedError;
   request: KibanaRequest;
+  /** Authentication headers used by the failed attempt, when supplied by the transport. */
+  authHeaders?: Headers;
 }
 
 /**

@@ -334,6 +334,17 @@ describe('UiamService', () => {
   });
 
   describe('#getClientAuthentication', () => {
+    it('resolves client authentication from stored headers without a full request', () => {
+      expect(
+        uiamService.getClientAuthentication({
+          headers: {
+            authorization: 'Bearer essu_renewed-token',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'renewed-token-secret',
+          },
+        })
+      ).toEqual({ scheme: 'SharedSecret', value: 'renewed-token-secret' });
+    });
+
     it('includes shared secret in client authentication', () => {
       expect(uiamService.getClientAuthentication()).toEqual({
         scheme: 'SharedSecret',

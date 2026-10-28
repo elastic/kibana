@@ -197,7 +197,7 @@ const createInternalSetupContractMock = () => {
     getDeprecatedRoutes: jest.fn(),
     getRegisteredDeprecatedApis: jest.fn(),
     registerOnPostValidation: jest.fn(),
-    registerAuth: jest.fn(),
+    registerAuth: jest.fn().mockReturnValue(createAuthHeaderStorageMock()),
     registerOnPostAuth: jest.fn(),
     registerRouteHandlerContext: jest.fn(),
     registerOnPreResponse: jest.fn(),
