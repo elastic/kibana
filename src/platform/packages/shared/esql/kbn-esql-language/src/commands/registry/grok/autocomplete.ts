@@ -55,7 +55,7 @@ export async function autocomplete(
   if (hasField && !hasPatterns && endsWithSpace) {
     return buildConstantsDefinitions(
       ['"%{WORD:firstWord}"'],
-      i18n.translate('kbn-esql-language.esql.autocomplete.aPatternString', {
+      i18n.translate('esqlLanguage.esql.autocomplete.aPatternString', {
         defaultMessage: 'A pattern string',
       }),
       {
@@ -67,7 +67,7 @@ export async function autocomplete(
   if (endsWithComma) {
     return buildConstantsDefinitions(
       ['"%{WORD:nextWord}"'],
-      i18n.translate('kbn-esql-language.esql.autocomplete.aPatternString', {
+      i18n.translate('esqlLanguage.esql.autocomplete.aPatternString', {
         defaultMessage: 'A pattern string',
       }),
       {

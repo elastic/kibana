@@ -12,6 +12,7 @@ import type {
   PluginInitializerContext,
   Logger,
 } from '@kbn/core/server';
+import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type {
   AgentBuilderDashboardsSetupDependencies,
   AgentBuilderDashboardsStartDependencies,
@@ -45,9 +46,13 @@ export class AgentBuilderDashboardsPlugin
     >,
     setupDeps: AgentBuilderDashboardsSetupDependencies
   ): AgentBuilderDashboardsPluginSetup {
-    const getDashboardClient = async () => {
-      const [, startDeps] = await coreSetup.getStartServices();
-      return startDeps.dashboard.client;
+    // Read dashboards the way the Dashboard app loads them, so unconvertible panels are kept.
+    const getDashboardClient = async (): Promise<DashboardPluginStart['client']> => {
+      const [, { dashboard }] = await coreSetup.getStartServices();
+      return {
+        read: (savedObjectsClient, id) =>
+          dashboard.client.read(savedObjectsClient, id, { isDashboardAppRequest: true }),
+      };
     };
     const getDashboardValidator = async () => {
       const [, startDeps] = await coreSetup.getStartServices();

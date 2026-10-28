@@ -77,7 +77,7 @@ export const AwsCloudwatch: ConnectorSpec = {
   metadata: {
     id: '.aws_cloudwatch',
     displayName: 'AWS CloudWatch',
-    description: i18n.translate('core.kibanaConnectorSpecs.awsCloudwatch.metadata.description', {
+    description: i18n.translate('connectorSpecs.awsCloudwatch.metadata.description', {
       defaultMessage:
         'List and suppress alarms, query metrics and Logs Insights, and retrieve log events in AWS CloudWatch',
     }),
@@ -100,15 +100,12 @@ export const AwsCloudwatch: ConnectorSpec = {
         )
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.awsCloudwatch.config.region.label', {
+          label: i18n.translate('connectorSpecs.awsCloudwatch.config.region.label', {
             defaultMessage: 'AWS Region',
           }),
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.awsCloudwatch.config.region.helpText',
-            {
-              defaultMessage: 'For example, us-east-1',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.awsCloudwatch.config.region.helpText', {
+            defaultMessage: 'For example, us-east-1',
+          }),
           placeholder: 'us-east-1',
         }),
     })
@@ -415,7 +412,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.awsCloudwatch.test.description', {
+    description: i18n.translate('connectorSpecs.awsCloudwatch.test.description', {
       defaultMessage: 'Verifies the connection by listing CloudWatch metrics',
     }),
     handler: async (ctx) => {

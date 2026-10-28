@@ -59,7 +59,6 @@ dependsOn:
   - '@kbn/observability-shared-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/apm-data-view'
-  - '@kbn/rison'
   - '@kbn/slo-plugin'
   - '@kbn/slo-schema'
   - '@kbn/cases-plugin'
@@ -90,6 +89,7 @@ dependsOn:
   - '@kbn/content-packs-schema'
   - '@kbn/streamlang'
   - '@kbn/ai-anonymization-common'
+  - '@kbn/zod'
 tags:
   - test-helper
   - package
