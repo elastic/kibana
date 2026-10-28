@@ -26,11 +26,11 @@ const memory = (id: string, type: string, title: string): StoredMemoryDocument =
 
 const link = (id: string, fromId: string, toId: string): StoredMemoryDocument => ({
   ...memory(id, 'memory.relationship', `${fromId} owns ${toId}`),
-  attributes: {
-    'relationship.from_id': fromId,
-    'relationship.to_id': toId,
-    'relationship.relation': 'owns',
-  },
+  attributes: { 'relationship.relation': 'owns' },
+  references: [
+    { uri: `ki://long-term-memory/${fromId}`, relation: 'relates_to', description: 'from' },
+    { uri: `ki://long-term-memory/${toId}`, relation: 'relates_to', description: 'to' },
+  ],
 });
 
 const hit = (document: StoredMemoryDocument) => ({
@@ -99,10 +99,22 @@ describe('updateLinksOfEnd', () => {
 
     expect(updated).toBe(1);
     expect(esClient.search).toHaveBeenCalledTimes(2);
-    expect(indexed()[1].attributes).toMatchObject({
-      'relationship.from_id': 'other',
-      'relationship.to_id': 'new',
-      'memory.key': 'other|owns|new',
+    expect(indexed()[1]).toMatchObject({
+      attributes: { 'memory.key': 'other|owns|new' },
+      references: [
+        { uri: 'ki://long-term-memory/other', relation: 'relates_to', description: 'from' },
+        { uri: 'ki://long-term-memory/new', relation: 'relates_to', description: 'to' },
+      ],
+    });
+  });
+
+  it('finds the links of an end by its reference uri', async () => {
+    mockRounds();
+
+    await update({});
+
+    expect(esClient.search.mock.calls[0][0]?.query?.bool?.filter).toContainEqual({
+      terms: { 'references.uri': ['ki://long-term-memory/old'] },
     });
   });
 

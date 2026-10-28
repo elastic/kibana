@@ -307,8 +307,6 @@ describe('applyDreamOperations', () => {
         ],
         attributes: {
           'memory.key': 'entity-1|owns|fact-1',
-          'relationship.from_id': 'entity-1',
-          'relationship.to_id': 'fact-1',
           'relationship.relation': 'owns',
         },
       });
@@ -424,10 +422,10 @@ describe('applyDreamOperations', () => {
         [
           {
             op: 'create',
-            from_id: 'entity-1',
-            relation: 'Owns',
-            to_id: 'fact-1',
-            description: 'The team said so.',
+            from_id: 'fact-1',
+            relation: 'About',
+            to_id: 'entity-1',
+            description: 'The fact is about the team.',
             source_ids: ['s1'],
           },
         ],
@@ -437,31 +435,59 @@ describe('applyDreamOperations', () => {
       expect(result).toEqual({ applied: 1, skipped: 0 });
       expect(indexedDocuments()[0]).toMatchObject({
         type: 'memory.relationship',
-        title: 'Search team owns Orders use @timestamp',
+        title: 'Orders use @timestamp about Search team',
         references: [
-          { uri: 'ki://long-term-memory/entity-1', relation: 'relates_to', description: 'from' },
-          { uri: 'ki://long-term-memory/fact-1', relation: 'relates_to', description: 'to' },
+          { uri: 'ki://long-term-memory/fact-1', relation: 'relates_to', description: 'from' },
+          { uri: 'ki://long-term-memory/entity-1', relation: 'relates_to', description: 'to' },
           { uri: 'ki://short-term-memory/s1', relation: 'derived_from' },
         ],
         attributes: {
-          'memory.key': 'entity-1|owns|fact-1',
-          'relationship.from_id': 'entity-1',
-          'relationship.to_id': 'fact-1',
-          'relationship.relation': 'owns',
+          'memory.key': 'fact-1|about|entity-1',
+          'relationship.relation': 'about',
         },
       });
+      expect(indexedDocuments()[0].attributes).not.toHaveProperty(['relationship.from_id']);
+      expect(indexedDocuments()[0].attributes).not.toHaveProperty(['relationship.to_id']);
+    });
+
+    it('links any two memories with related_to and a description', async () => {
+      mockLive(entity(), fact());
+
+      const result = await apply(
+        [
+          {
+            op: 'create',
+            from_id: 'entity-1',
+            relation: 'related_to',
+            to_id: 'fact-1',
+            description: 'The team wrote the convention.',
+            source_ids: ['s1'],
+          },
+        ],
+        RELATIONSHIP_MEMORY_TYPE
+      );
+
+      expect(result).toEqual({ applied: 1, skipped: 0 });
     });
 
     it.each([
-      ['an end that is missing', { from_id: 'entity-1', to_id: 'gone', relation: 'owns' }],
-      ['a memory linked to itself', { from_id: 'entity-1', to_id: 'entity-1', relation: 'owns' }],
+      ['an end that is missing', { from_id: 'fact-1', to_id: 'gone', relation: 'about' }],
+      ['a memory linked to itself', { from_id: 'fact-1', to_id: 'fact-1', relation: 'about' }],
       [
-        'a relation that is not a short verb',
-        { from_id: 'entity-1', to_id: 'fact-1', relation: 'is owned by!' },
+        'a relation that is not allowed',
+        { from_id: 'fact-1', to_id: 'entity-1', relation: 'is owned by!' },
+      ],
+      [
+        'a relation that cannot join its ends',
+        { from_id: 'entity-1', to_id: 'fact-1', relation: 'owns' },
+      ],
+      [
+        'related_to without a description',
+        { from_id: 'entity-1', to_id: 'fact-1', relation: 'related_to' },
       ],
       [
         'an end that is another relationship',
-        { from_id: 'entity-1', to_id: 'link-1', relation: 'owns' },
+        { from_id: 'fact-1', to_id: 'link-1', relation: 'about' },
       ],
     ])('skips a relationship with %s', async (_name, ends) => {
       mockLive(entity(), fact(), link());
@@ -501,8 +527,6 @@ describe('applyDreamOperations', () => {
         id: 'link-1',
         attributes: {
           'memory.key': 'new-1|owns|fact-1',
-          'relationship.from_id': 'new-1',
-          'relationship.to_id': 'fact-1',
         },
         references: [
           { uri: 'ki://long-term-memory/new-1', relation: 'relates_to', description: 'from' },

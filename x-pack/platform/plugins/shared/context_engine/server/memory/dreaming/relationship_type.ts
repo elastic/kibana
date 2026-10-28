@@ -11,14 +11,13 @@ import type { MemoryReference, StoredMemoryDocument } from '../memory_document';
 import { buildKiUri } from '../memory_document';
 import type { LongTermMemoryTypeDefinition, PreparedMemory } from './long_term_types';
 import { SHARED_DREAM_OPERATIONS, readAttribute } from './long_term_types';
+import { RELATED_TO, checkRelation, describeRelationRules } from './relation_rules';
 
 export const RELATIONSHIP_ENDPOINT_TYPES: readonly LongTermMemoryType[] = [
   'memory.entity',
   'memory.fact',
   'memory.procedure',
 ];
-
-const RELATION_PATTERN = /^[a-z][a-z_]{1,39}$/;
 
 /** The `description` of the two references that point at a relationship's ends. */
 export const RELATIONSHIP_END_ROLES = { from: 'from', to: 'to' } as const;
@@ -32,8 +31,13 @@ export const normalizeRelation = (relation: string): string =>
     .toLowerCase()
     .replace(/[\s-]+/g, '_');
 
+const END_URI_PREFIX = buildKiUri(LONG_TERM_MEMORY_AI_INDEX_ID, '');
+
+/** The `references.uri` a relationship uses to point at one of its ends. */
+export const buildEndUri = (id: string): string => buildKiUri(LONG_TERM_MEMORY_AI_INDEX_ID, id);
+
 const endReference = (id: string, role: string): MemoryReference => ({
-  uri: buildKiUri(LONG_TERM_MEMORY_AI_INDEX_ID, id),
+  uri: buildEndUri(id),
   relation: 'relates_to',
   description: role,
 });
@@ -41,6 +45,22 @@ const endReference = (id: string, role: string): MemoryReference => ({
 export const isEndReference = ({ relation, description }: MemoryReference): boolean =>
   relation === 'relates_to' &&
   (description === RELATIONSHIP_END_ROLES.from || description === RELATIONSHIP_END_ROLES.to);
+
+/** The ids of the two memories a relationship links, read from its end references. */
+export const readRelationshipEnds = (
+  link: StoredMemoryDocument | undefined
+): { fromId?: string; toId?: string } => {
+  const idOf = (role: string) => {
+    const reference = link?.references?.find(
+      (candidate) =>
+        isEndReference(candidate) &&
+        candidate.description === role &&
+        candidate.uri.startsWith(END_URI_PREFIX)
+    );
+    return reference ? decodeURIComponent(reference.uri.slice(END_URI_PREFIX.length)) : undefined;
+  };
+  return { fromId: idOf(RELATIONSHIP_END_ROLES.from), toId: idOf(RELATIONSHIP_END_ROLES.to) };
+};
 
 const buildContent = (title: string, description: string) =>
   description.length > 0 ? `${title}.\n${description}` : title;
@@ -63,11 +83,7 @@ export const buildRelationshipFields = ({
     title,
     description,
     content: buildContent(title, description),
-    attributes: {
-      [MEMORY_ATTRIBUTES.relationshipFromId]: from.id,
-      [MEMORY_ATTRIBUTES.relationshipToId]: to.id,
-      [MEMORY_ATTRIBUTES.relationshipRelation]: relation,
-    },
+    attributes: { [MEMORY_ATTRIBUTES.relationshipRelation]: relation },
     references: [
       endReference(from.id, RELATIONSHIP_END_ROLES.from),
       endReference(to.id, RELATIONSHIP_END_ROLES.to),
@@ -79,36 +95,29 @@ export const RELATIONSHIP_MEMORY_TYPE: LongTermMemoryTypeDefinition = {
   type: 'memory.relationship',
   label: 'relationships',
   instructions: [
-    'A relationship links two existing long-term memories: an entity, a fact or a procedure. For example a team owns a system, a service depends on another, a fact is about an entity, or a procedure applies to a system.',
-    'Only link memories listed under "Existing long-term memories", by id. Never link a memory to itself.',
+    'A relationship links two long-term memories: an entity, a fact or a procedure. For example a team owns a system, a service depends on another, a fact is about an entity, or a procedure applies to a system.',
     'Only record links a session stated or clearly showed, and that stay true. Do not infer links from two memories merely being mentioned together.',
-    'Set `from_id`, `relation` and `to_id` so that "<from> <relation> <to>" reads as a true sentence. `relation` is a short lowercase verb in snake_case, for example `owns`, `member_of`, `part_of`, `depends_on`, `uses`, `maintains`, `about` or `applies_to`.',
-    'Set `description` to one sentence on why the link holds. The title and key are built from the two ends, so do not set them.',
-    'Use `create` for a new link.',
-    'Use `reinforce` when a session repeats an existing link.',
-    'Use `supersede` when an existing link changed, for example the relation or one of its ends; give the full new link.',
-    'Use `outdate` when a link no longer holds and nothing replaces it, for example ownership moved to a team that is not a known entity.',
+    'For each of the two memories, set `from_id` / `to_id` when it is listed under "Existing long-term memories". Otherwise set `from_title` / `to_title` to the title a long-term memory would have, `from_type` / `to_type`, and for an entity `from_kind` / `to_kind`. Links to things that are not long-term memories are dropped.',
+    `Set \`relation\` so that "<from> <relation> <to>" reads as a true sentence, using one of the allowed relations below. Use \`${RELATED_TO}\` only when none fits, and then say how the two relate in \`description\`.`,
+    'Set `description` to one sentence on why the link holds.',
+    'List a link from "Existing long-term relationships" again when a session repeats it. A link that changed, for example ownership that moved to another team, is listed as the new link; the old one is replaced.',
+    'Put a link under `outdate`, by id, when a session shows it no longer holds and nothing replaces it.',
+    'Allowed relations (from -> to):',
+    ...describeRelationRules(),
   ].join('\n'),
   operations: SHARED_DREAM_OPERATIONS,
   endpointTypes: RELATIONSHIP_ENDPOINT_TYPES,
-  outputProperties: {
-    from_id: { type: 'string', description: 'The memory the relationship starts from.' },
-    relation: { type: 'string', description: 'A short lowercase verb in snake_case.' },
-    to_id: { type: 'string', description: 'The memory the relationship points at.' },
-  },
   initialAttributes: () => ({}),
   prepare: async (operation, { target, getLiveMemory }) => {
-    const fromId = operation.from_id ?? readAttribute(target, MEMORY_ATTRIBUTES.relationshipFromId);
-    const toId = operation.to_id ?? readAttribute(target, MEMORY_ATTRIBUTES.relationshipToId);
+    const ends = readRelationshipEnds(target);
+    const fromId = operation.from_id ?? ends.fromId;
+    const toId = operation.to_id ?? ends.toId;
     const rawRelation =
       operation.relation ?? readAttribute(target, MEMORY_ATTRIBUTES.relationshipRelation);
     if (!fromId || !toId || !rawRelation) {
       return { ok: false, reason: 'it is missing from_id, relation or to_id' };
     }
     const relation = normalizeRelation(rawRelation);
-    if (!RELATION_PATTERN.test(relation)) {
-      return { ok: false, reason: `the relation '${rawRelation}' is not a short lowercase verb` };
-    }
     if (fromId === toId) {
       return { ok: false, reason: 'it links a memory to itself' };
     }
@@ -119,19 +128,19 @@ export const RELATIONSHIP_MEMORY_TYPE: LongTermMemoryTypeDefinition = {
         reason: 'an end is not a live entity, fact or procedure in this space',
       };
     }
-    return {
-      ok: true,
-      memory: buildRelationshipFields({
-        from,
-        relation,
-        to,
-        description: operation.description ?? target?.description ?? '',
-      }),
-    };
+    const description = operation.description ?? target?.description ?? '';
+    const invalid = checkRelation({ from, relation, to, description });
+    if (invalid) {
+      return { ok: false, reason: invalid };
+    }
+    return { ok: true, memory: buildRelationshipFields({ from, relation, to, description }) };
   },
-  describe: (memory) => [
-    `from_id: ${readAttribute(memory, MEMORY_ATTRIBUTES.relationshipFromId) ?? ''}`,
-    `relation: ${readAttribute(memory, MEMORY_ATTRIBUTES.relationshipRelation) ?? ''}`,
-    `to_id: ${readAttribute(memory, MEMORY_ATTRIBUTES.relationshipToId) ?? ''}`,
-  ],
+  describe: (memory) => {
+    const { fromId, toId } = readRelationshipEnds(memory);
+    return [
+      `from_id: ${fromId ?? ''}`,
+      `relation: ${readAttribute(memory, MEMORY_ATTRIBUTES.relationshipRelation) ?? ''}`,
+      `to_id: ${toId ?? ''}`,
+    ];
+  },
 };

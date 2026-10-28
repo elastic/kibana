@@ -18,6 +18,13 @@ export type LongTermMemoryType = (typeof LONG_TERM_MEMORY_TYPES)[number];
 
 export const MEMORY_KI_TYPES = [...SHORT_TERM_MEMORY_TYPES, ...LONG_TERM_MEMORY_TYPES] as const;
 
+/** Long-term memory types recall searches; relationships come back as links between them. */
+export const RECALL_MEMORY_TYPES = ['memory.fact', 'memory.entity', 'memory.procedure'] as const;
+export type RecallMemoryType = (typeof RECALL_MEMORY_TYPES)[number];
+export const DEFAULT_RECALL_SIZE = 10;
+export const MAX_RECALL_SIZE = 25;
+export const MAX_RECALL_QUERY_LENGTH = 1000;
+
 /** Managed AI index holding every space's short-term memories. */
 export const SHORT_TERM_MEMORY_AI_INDEX_ID = 'short-term-memory';
 export const SHORT_TERM_MEMORY_DATA_STREAM = '.ai-index-ds-short-term-memory';
@@ -50,8 +57,6 @@ export const MEMORY_ATTRIBUTES = {
   procedureVerificationBy: 'procedure.verification.by',
   entityKind: 'entity.kind',
   entityAliases: 'entity.aliases',
-  relationshipFromId: 'relationship.from_id',
-  relationshipToId: 'relationship.to_id',
   relationshipRelation: 'relationship.relation',
 } as const;
 

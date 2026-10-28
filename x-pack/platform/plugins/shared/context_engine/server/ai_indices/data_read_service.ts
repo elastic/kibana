@@ -13,7 +13,15 @@ import type {
   QueryAiIndicesRequest,
   QueryAiIndicesResponse,
 } from '../../common/http_api/ai_indices';
-import { AiIndexAuditAction, aiIndexAuditEvent } from '../audit/audit_events';
+import type { RecallMemoriesRequest, RecallMemoriesResponse } from '../../common/http_api/memory';
+import {
+  AiIndexAuditAction,
+  MemoryAuditAction,
+  aiIndexAuditEvent,
+  memoryAuditEvent,
+} from '../audit/audit_events';
+import { MemoryDisabledError } from '../memory/errors';
+import { recallMemories } from '../memory/recall';
 import { describeAiIndex } from './describe';
 import { AiIndexNotReadableError } from './errors';
 import { filterReadableAiIndices, probeAiIndices } from './filter_readable_ai_indices';
@@ -31,6 +39,8 @@ export interface AiIndexDataReadServiceApi {
    * failed. `ids` limits which entries are checked.
    */
   list(ids?: string[]): Promise<AiIndexHttpItem[]>;
+  /** Long-term memories that match a query, with their links. Throws `MemoryDisabledError` while memory is off. */
+  recall(request: RecallMemoriesRequest): Promise<RecallMemoriesResponse>;
 }
 
 export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
@@ -99,6 +109,27 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
       return readable;
     } catch (error) {
       auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, error }));
+      throw error;
+    }
+  }
+
+  async recall(request: RecallMemoriesRequest): Promise<RecallMemoriesResponse> {
+    const { esClient, spaceId, auditLogger, logger, isMemoryEnabled } = this.deps;
+    try {
+      if (!(await isMemoryEnabled())) {
+        throw new MemoryDisabledError();
+      }
+      const response = await recallMemories({
+        esClient,
+        spaceId,
+        ...request,
+        now: new Date().toISOString(),
+        logger,
+      });
+      auditLogger.log(memoryAuditEvent({ action: MemoryAuditAction.RECALL }));
+      return response;
+    } catch (error) {
+      auditLogger.log(memoryAuditEvent({ action: MemoryAuditAction.RECALL, error }));
       throw error;
     }
   }

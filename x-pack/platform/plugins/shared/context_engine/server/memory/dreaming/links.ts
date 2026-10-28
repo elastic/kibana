@@ -14,7 +14,13 @@ import { updateMemoryProvenance } from '../memory_document';
 import { buildActiveLongTermFilter } from './candidates';
 import type { DreamApplyContext } from './long_term_types';
 import { readAttribute } from './long_term_types';
-import { buildRelationshipFields, isEndReference, isRelationshipEnd } from './relationship_type';
+import {
+  buildEndUri,
+  buildRelationshipFields,
+  isEndReference,
+  isRelationshipEnd,
+  readRelationshipEnds,
+} from './relationship_type';
 
 export const LINKS_PER_ROUND = 100;
 /** Each round moves or expires the links it finds, so the next round finds the rest. */
@@ -28,13 +34,7 @@ export interface StoredLink {
 }
 
 const linksOf = (ids: string[]): QueryDslQueryContainer => ({
-  bool: {
-    should: [
-      { terms: { [`attributes.${MEMORY_ATTRIBUTES.relationshipFromId}`]: ids } },
-      { terms: { [`attributes.${MEMORY_ATTRIBUTES.relationshipToId}`]: ids } },
-    ],
-    minimum_should_match: 1,
-  },
+  terms: { 'references.uri': ids.map(buildEndUri) },
 });
 
 /** Live relationships in the space that start or end at one of the ids. */
@@ -116,8 +116,7 @@ export const updateLinksOfEnd = async ({
   });
 
   const repoint = async (link: StoredMemoryDocument): Promise<StoredMemoryDocument> => {
-    const fromId = readAttribute(link, MEMORY_ATTRIBUTES.relationshipFromId);
-    const toId = readAttribute(link, MEMORY_ATTRIBUTES.relationshipToId);
+    const { fromId, toId } = readRelationshipEnds(link);
     const relation = readAttribute(link, MEMORY_ATTRIBUTES.relationshipRelation);
     if (!replacement || !fromId || !toId || !relation) {
       return outdate(link);

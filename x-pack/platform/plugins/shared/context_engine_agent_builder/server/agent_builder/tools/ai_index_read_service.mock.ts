@@ -13,6 +13,7 @@ export const createAiIndexDataReadServiceMock = (): jest.Mocked<AiIndexDataReadS
   query: jest.fn(),
   describe: jest.fn(),
   list: jest.fn(),
+  recall: jest.fn(),
 });
 
 export const createAiIndexToolDepsMock = ({

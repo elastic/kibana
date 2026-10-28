@@ -14,10 +14,14 @@ import { AiIndexDataReadService } from './data_read_service';
 import { describeAiIndex } from './describe';
 import { AiIndexNotFoundError, AiIndexNotReadableError } from './errors';
 import { filterReadableAiIndices, probeAiIndices } from './filter_readable_ai_indices';
+import { MemoryDisabledError } from '../memory/errors';
+import { recallMemories } from '../memory/recall';
 
 jest.mock('./describe');
 jest.mock('./filter_readable_ai_indices');
+jest.mock('../memory/recall');
 
+const recallMemoriesMock = jest.mocked(recallMemories);
 const describeAiIndexMock = jest.mocked(describeAiIndex);
 const filterReadableAiIndicesMock = jest.mocked(filterReadableAiIndices);
 const probeAiIndicesMock = jest.mocked(probeAiIndices);
@@ -267,6 +271,50 @@ describe('AiIndexDataReadService', () => {
         expect.objectContaining({
           event: expect.objectContaining({ action: 'ai_index_list', outcome: 'failure' }),
           error: { code: 'Error', message: 'boom' },
+        })
+      );
+    });
+  });
+
+  describe('recall', () => {
+    const recall = { memories: [], linked_memories: [], links: [] };
+
+    beforeEach(() => {
+      recallMemoriesMock.mockReset();
+    });
+
+    it('recalls in the service space and audit-logs success', async () => {
+      recallMemoriesMock.mockResolvedValue(recall);
+
+      const result = await service.recall({ query: 'perf-canary', size: 5 });
+
+      expect(result).toBe(recall);
+      expect(recallMemoriesMock).toHaveBeenCalledWith(
+        expect.objectContaining({ esClient, spaceId: 'marketing', query: 'perf-canary', size: 5 })
+      );
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'context_engine_memory_recall',
+            type: ['access'],
+            outcome: 'success',
+          }),
+        })
+      );
+    });
+
+    it('fails while memory is off', async () => {
+      isMemoryEnabled.mockResolvedValueOnce(false);
+
+      await expect(service.recall({ query: 'perf-canary' })).rejects.toThrow(MemoryDisabledError);
+
+      expect(recallMemoriesMock).not.toHaveBeenCalled();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'context_engine_memory_recall',
+            outcome: 'failure',
+          }),
         })
       );
     });

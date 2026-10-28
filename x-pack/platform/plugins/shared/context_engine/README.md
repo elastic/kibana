@@ -282,6 +282,22 @@ The Agent Builder `platform.context_engine.remember` and `forget` tools call the
 same service. They keep their `tool://` writer, add the user id, and use the
 conversation id as the session id.
 
+### Recalling long-term memory
+
+The Agent Builder `platform.context_engine.recall` tool takes
+`{ query, types?, size? }` and returns:
+
+- `memories`: the live facts, entities and procedures that match, best first
+  (a lexical and a semantic search merged by rank, lexical only when the
+  semantic search fails), with their content.
+- `links`: the relationships that start or end at a match.
+- `linked_memories`: the memories at the other end of those links, without
+  their content.
+
+It reads as the current user, like the AI index tools, so it needs Context
+Engine's `read` privilege and read access to the long-term store. It fails
+while memory is off.
+
 ### Dreaming
 
 Dreaming is a per-space background task (`contextEngine:memoryDreaming:<space>`)
@@ -322,11 +338,25 @@ references. Per type:
 Entities about people hold work context only (name, role, team, what they own).
 Type-specific fields live in the flattened `attributes`: `entity.kind`,
 `entity.aliases`, `fact.verification.*`, `procedure.verification.*`, and
-`relationship.from_id`, `relationship.to_id`, `relationship.relation`. A
-relationship also points at its two ends with `relates_to` references
-(`description` is `from` or `to`), so agents can find a memory's links in ES|QL
-with `references.uri`. Its title reads as a sentence, such as "Team Search owns
-Context Engine".
+`relationship.relation`. A relationship records its two ends only as
+`relates_to` references (`description` is `from` or `to`). Dreaming, recall and
+ES|QL all find a memory's links with `references.uri`. Its title reads as a
+sentence, such as "Team Search owns Context Engine".
+
+Relationships take more steps than the other types:
+
+1. The model lists links. It names each end by id when the memory was shown to
+   it, and otherwise by title, type and kind. Each link uses an allowed relation
+   for its two ends (for example `member_of` from a person or team to a team),
+   or `related_to` with a description of how the two relate.
+2. Names are matched to live long-term memories by search. An exact title,
+   alias or entity key wins; otherwise the top hit wins when it scores at least
+   1.5 times the next one. Close calls go to one batched model call. A link
+   with an end that matches nothing is dropped.
+3. Each link is compared with the live links between the same two memories, or
+   with the same relation at one of its ends. An identical link is reinforced,
+   a link with nothing related is created, and the rest go to one batched model
+   call that decides to create, reinforce, supersede or skip.
 
 Relationships follow their ends: when an end is superseded, its live
 relationships move to the new memory; when an end is outdated or refuted, they

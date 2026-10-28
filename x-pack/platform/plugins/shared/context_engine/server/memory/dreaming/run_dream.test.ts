@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { ChatCompletionErrorCode, InferenceTaskError } from '@kbn/inference-common';
 import type { InferenceClient } from '@kbn/inference-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { LongTermMemoryType } from '../../../common/memory';
@@ -126,6 +127,22 @@ describe('runDream', () => {
     });
     expect(result).toMatchObject({ caughtUp: true });
     expect(result.behindFrom).toBeUndefined();
+  });
+
+  it('says which output fields were invalid when the model output fails validation', async () => {
+    output.mockRejectedValueOnce(
+      new InferenceTaskError(
+        ChatCompletionErrorCode.ToolValidationError,
+        'Tool call arguments for structuredOutput (call-1) were invalid',
+        { errorsText: 'operations.0.op: Invalid option' }
+      )
+    );
+
+    const result = await dream();
+
+    expect(result.types['memory.fact'].error).toBe(
+      'Tool call arguments for structuredOutput (call-1) were invalid: operations.0.op: Invalid option'
+    );
   });
 
   it('stops at a batch boundary once the time budget is spent', async () => {

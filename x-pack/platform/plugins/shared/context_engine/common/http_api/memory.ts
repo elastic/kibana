@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ShortTermMemoryType } from '../memory';
+import type { RecallMemoryType, ShortTermMemoryType } from '../memory';
 
 export interface RememberMemoryRequest {
   /** The id of an existing memory to revise. Omit to create a new memory. */
@@ -32,6 +32,44 @@ export interface ForgetMemoryRequest {
 
 export interface ForgetMemoryResponse {
   id: string;
+}
+
+export interface RecallMemoriesRequest {
+  query: string;
+  /** Defaults to every recallable type. */
+  types?: RecallMemoryType[];
+  /** How many memories match the query. Defaults to `DEFAULT_RECALL_SIZE`. */
+  size?: number;
+}
+
+export interface RecalledMemory {
+  id: string;
+  type: string;
+  title: string;
+  description?: string;
+  /** Set on the memories that matched the query, not on the memories linked to them. */
+  content?: string;
+  /** For an entity, its kind. */
+  kind?: string;
+  aliases?: string[];
+  updated_at: string;
+}
+
+export interface RecalledLink {
+  id: string;
+  from_id: string;
+  relation: string;
+  to_id: string;
+  description?: string;
+}
+
+export interface RecallMemoriesResponse {
+  /** The long-term memories that match the query, best first. */
+  memories: RecalledMemory[];
+  /** Memories linked to a match that did not match themselves. */
+  linked_memories: RecalledMemory[];
+  /** Relationships that start or end at a match. */
+  links: RecalledLink[];
 }
 
 export interface MemoryDreamingUser {

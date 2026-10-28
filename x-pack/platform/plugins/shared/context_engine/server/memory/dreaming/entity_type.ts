@@ -20,7 +20,7 @@ export const MAX_ENTITY_ALIASES = 20;
 const MAX_ALIAS_LENGTH = 200;
 const MAX_SLUG_LENGTH = 100;
 
-const isEntityKind = (value: string | undefined): value is EntityKind =>
+export const isEntityKind = (value: string | undefined): value is EntityKind =>
   ENTITY_KINDS.some((kind) => kind === value);
 
 export const slugify = (value: string): string =>

@@ -95,6 +95,7 @@ export const improvementAuditEvent = ({
 export enum MemoryAuditAction {
   REMEMBER = 'context_engine_memory_remember',
   FORGET = 'context_engine_memory_forget',
+  RECALL = 'context_engine_memory_recall',
   DREAMING_ENABLE = 'context_engine_memory_dreaming_enable',
   DREAMING_DISABLE = 'context_engine_memory_dreaming_disable',
   DREAMING_RUN = 'context_engine_memory_dreaming_run',
@@ -103,6 +104,7 @@ export enum MemoryAuditAction {
 const memoryEventMessages: Record<MemoryAuditAction, [string, string]> = {
   context_engine_memory_remember: ['remember a memory', 'remembered a memory'],
   context_engine_memory_forget: ['forget a memory', 'forgotten a memory'],
+  context_engine_memory_recall: ['recall memories', 'recalled memories'],
   context_engine_memory_dreaming_enable: ['turn on memory dreaming', 'turned on memory dreaming'],
   context_engine_memory_dreaming_disable: [
     'turn off memory dreaming',
@@ -114,6 +116,7 @@ const memoryEventMessages: Record<MemoryAuditAction, [string, string]> = {
 const memoryEventTypes: Record<MemoryAuditAction, string> = {
   context_engine_memory_remember: 'creation',
   context_engine_memory_forget: 'deletion',
+  context_engine_memory_recall: 'access',
   context_engine_memory_dreaming_enable: 'change',
   context_engine_memory_dreaming_disable: 'change',
   context_engine_memory_dreaming_run: 'start',

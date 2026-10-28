@@ -8,6 +8,7 @@
 import { randomUUID } from 'crypto';
 import pMap from 'p-map';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { isToolValidationError } from '@kbn/inference-common';
 import type { InferenceClient } from '@kbn/inference-common';
 import { MEMORY_ATTRIBUTES, MEMORY_DREAMING_WRITER_URI } from '../../../common/memory';
 import type { StoredMemoryDocument } from '../memory_document';
@@ -16,6 +17,7 @@ import { applyDreamOperations } from './apply_operations';
 import type { DreamBatch } from './batches';
 import { buildDreamBatches, fitToTokenBudget } from './batches';
 import { MAX_CANDIDATES_PER_TYPE, fetchCandidates } from './candidates';
+import { proposeLinkOperations } from './link_operations';
 import { findLinks } from './links';
 import type { DreamOperation, LongTermMemoryTypeDefinition } from './long_term_types';
 import { LONG_TERM_MEMORY_TYPE_DEFINITIONS } from './memory_types';
@@ -83,7 +85,13 @@ const earliest = (timestamps: string[]) =>
 
 const latest = (a: string, b: string) => (toTime(b) > toTime(a) ? b : a);
 
-const toErrorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
+const toErrorMessage = (error: unknown) => {
+  if (!(error instanceof Error)) {
+    return String(error);
+  }
+  const details = isToolValidationError(error) ? error.meta.errorsText : undefined;
+  return details ? `${error.message}: ${details}` : error.message;
+};
 
 const groupBySession = (memories: StoredMemoryDocument[]) => {
   const sessions = new Map<string, StoredMemoryDocument[]>();
@@ -186,31 +194,52 @@ export const runDream = async ({
       : { candidates: fitted };
   };
 
-  const dreamBatch = async (definition: LongTermMemoryTypeDefinition, { memories }: DreamBatch) => {
-    const { candidates, links } = await fetchBatchCandidates(definition, memories);
+  const proposeOperations = async (
+    definition: LongTermMemoryTypeDefinition,
+    sessions: Map<string, StoredMemoryDocument[]>,
+    candidates: StoredMemoryDocument[]
+  ): Promise<DreamOperation[]> => {
     const response = await inferenceClient.output({
       id: `context_engine_memory_dream_${definition.type}`,
       connectorId,
       system: buildDreamSystemPrompt(definition),
-      input: buildDreamInput({
-        sessions: groupBySession(memories),
-        candidates,
-        links,
-        definition,
-      }),
+      input: buildDreamInput({ sessions, candidates, definition }),
       schema: buildDreamOutputSchema(definition),
       abortSignal: signal,
+      retry: { onValidationError: 1 },
     });
-    return applyDreamOperations({
+    return toOperations(response.output);
+  };
+
+  const dreamBatch = async (definition: LongTermMemoryTypeDefinition, { memories }: DreamBatch) => {
+    const { candidates, links } = await fetchBatchCandidates(definition, memories);
+    const sessions = groupBySession(memories);
+    const { operations, dropped } = definition.endpointTypes
+      ? await proposeLinkOperations({
+          esClient,
+          inferenceClient,
+          connectorId,
+          spaceId,
+          definition,
+          sessions,
+          candidates,
+          links: links ?? [],
+          now,
+          logger,
+          signal,
+        })
+      : { operations: await proposeOperations(definition, sessions, candidates), dropped: 0 };
+    const { applied, skipped } = await applyDreamOperations({
       esClient,
       spaceId,
       definition,
-      operations: toOperations(response.output),
+      operations,
       sources: new Map(memories.map((memory) => [memory.id, memory])),
       context,
       logger,
       generateId,
     });
+    return { applied, skipped: skipped + dropped };
   };
 
   /** Dreams one type over the short-term memories after its cursor, up to `end`. */
