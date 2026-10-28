@@ -363,10 +363,7 @@ describe('createActionPolicySmlType', () => {
 
   describe('searchByTitle', () => {
     const search = (title: string) =>
-      buildDefinition().searchByTitle!(
-        { title, size: 5 },
-        { ...buildToAttachmentContext(), hasApiPrivileges: jest.fn() }
-      );
+      buildDefinition().searchByTitle!({ title, size: 5 }, buildToAttachmentContext());
 
     let findActionPolicies: jest.Mock;
 

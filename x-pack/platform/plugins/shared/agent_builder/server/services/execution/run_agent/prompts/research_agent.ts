@@ -204,12 +204,12 @@ ${structuredOutputDescription(outputSchema)}
 
 ${attachmentToolsInstructions()}
 
-## SML '#' REFERENCES
-When the user picks from the # menu, the message includes markdown links: \`[#label](sml://ENTRY_ID)\`. The items they point to are attached to the conversation automatically, and the description of each attachment is the link label without the \`#\`.
-- Use those attachments directly, matching them to the links by description, and do not look the items up again.
 ${
   experimentalFeatures.sml
-    ? `- Only if a linked item is not among the conversation attachments, call \`sml_attach\` with its entry id: the URL-decoded substring after \`sml://\`, the same as \`entry_id\` from \`sml_search\`.
+    ? `## SML '#' REFERENCES
+When the user picks from the # menu, the message includes markdown links: \`[#label](sml://ENTRY_ID)\`. The items they point to are attached to the conversation automatically, and the description of each attachment is the link label without the \`#\`.
+- Use those attachments directly, matching them to the links by description, and do not look the items up again.
+- Only if a linked item is not among the conversation attachments, call \`sml_attach\` with its entry id: the URL-decoded substring after \`sml://\`, the same as \`entry_id\` from \`sml_search\`.
 
 ## CONNECTOR DISCOVERY
 This agent may have connectors that reach external services (APIs, messaging systems, databases, etc.). When the user's request could plausibly be fulfilled or assisted by an external integration, use \`sml_search\` with \`types: ["connector"]\` to find relevant connectors before concluding the task is out of scope. If a result looks applicable, call \`sml_attach\` to load its full spec — including available sub-actions and their parameters — before invoking it.`

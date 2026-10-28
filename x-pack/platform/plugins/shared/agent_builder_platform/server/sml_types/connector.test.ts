@@ -463,7 +463,6 @@ describe('connectorSmlType', () => {
       const context = {
         ...createAttachmentContext(),
         savedObjectsClient: {} as never,
-        hasApiPrivileges: jest.fn(),
       };
       return connectorSmlType.searchByTitle!({ title, size, constraints }, context);
     };
