@@ -39,7 +39,7 @@ import { alertingV2Overrides } from './alerting_v2.mts';
 import { securityImportsOverrides } from './security_imports.mts';
 import { banOverrides } from './ban.mts';
 import { cypressOverrides } from './cypress.mts';
-import { dependRules } from './depend.mts';
+import { dependOverrides, dependRules } from './depend.mts';
 import { eslintCommentsOverrides } from './eslint_comments.mts';
 import { euiRules } from './eui.mts';
 import { formatjsOverrides } from './formatjs.mts';
@@ -99,6 +99,10 @@ export default defineConfig<OxlintConfig>({
       name: '@kbn/alerting-v2',
       specifier: './packages/kbn-eslint-plugin-alerting-v2/oxlint_plugin.js',
     },
+    {
+      name: '@kbn/compat',
+      specifier: './packages/kbn-eslint-plugin-compat/oxlint_plugin.js',
+    },
     'eslint-plugin-ban',
     'eslint-plugin-cypress',
     'eslint-plugin-depend',
@@ -140,6 +144,7 @@ export default defineConfig<OxlintConfig>({
     ...kbnUiOverrides,
     ...alertingV2Overrides,
     ...banOverrides,
+    ...dependOverrides,
     ...cypressOverrides,
     ...eslintCommentsOverrides,
     ...nOverrides,
