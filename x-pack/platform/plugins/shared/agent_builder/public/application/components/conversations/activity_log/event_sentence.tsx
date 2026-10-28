@@ -57,9 +57,15 @@ interface EventSentenceProps {
   event: ActivityEvent;
   actor: React.ReactNode;
   templateName?: string;
+  attachmentName?: string;
 }
 
-export const EventSentence: React.FC<EventSentenceProps> = ({ event, actor, templateName }) => {
+export const EventSentence: React.FC<EventSentenceProps> = ({
+  event,
+  actor,
+  templateName,
+  attachmentName,
+}) => {
   const actorNode = <Highlight>{actor}</Highlight>;
 
   switch (event.type) {
@@ -126,7 +132,7 @@ export const EventSentence: React.FC<EventSentenceProps> = ({ event, actor, temp
           defaultMessage="{actor} added attachment {attachment}"
           values={{
             actor: actorNode,
-            attachment: <Highlight>{event.data.attachment_type}</Highlight>,
+            attachment: <Highlight>{attachmentName ?? event.data.attachment_type}</Highlight>,
           }}
         />
       );
@@ -137,7 +143,7 @@ export const EventSentence: React.FC<EventSentenceProps> = ({ event, actor, temp
           defaultMessage="{actor} updated attachment {attachment}"
           values={{
             actor: actorNode,
-            attachment: <Highlight>{event.data.attachment_type}</Highlight>,
+            attachment: <Highlight>{attachmentName ?? event.data.attachment_type}</Highlight>,
           }}
         />
       );

@@ -27,6 +27,7 @@ import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../hooks/use_kibana';
 import { ActivityLogRow } from './activity_log_row';
+import { getAttachmentName } from './get_attachment_name';
 import {
   findTriggeringUser,
   getEventParticipants,
@@ -51,7 +52,7 @@ const EVENT_ICONS: Record<string, string> = {
 
 export const ActivityLogContent: React.FC = () => {
   const { conversation } = useConversation();
-  const { conversationTemplatesService } = useAgentBuilderServices();
+  const { attachmentsService, conversationTemplatesService } = useAgentBuilderServices();
   const {
     services: { settings },
   } = useKibana();
@@ -126,13 +127,27 @@ export const ActivityLogContent: React.FC = () => {
             event={event}
             actorLabel={actorLabel(event, triggeringUser)}
             templateName={templateName}
+            attachmentName={getAttachmentName({
+              event,
+              attachments: conversation?.attachments,
+              getLabel: (attachment) =>
+                attachmentsService.getAttachmentUiDefinition(attachment.type)?.getLabel(attachment),
+            })}
             timeZone={timeZone}
             profiles={profiles}
           />
         ),
       };
     });
-  }, [rows, profiles, agentNames, conversationTemplatesService, timeZone]);
+  }, [
+    rows,
+    profiles,
+    agentNames,
+    conversationTemplatesService,
+    attachmentsService,
+    conversation?.attachments,
+    timeZone,
+  ]);
 
   if (isInitialLoading) {
     return <EuiSkeletonText lines={6} data-test-subj="agentBuilderActivityLogLoading" />;

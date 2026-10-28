@@ -46,6 +46,7 @@ interface ActivityLogRowProps {
   event: ActivityEvent;
   actorLabel: string;
   templateName?: string;
+  attachmentName?: string;
   timeZone?: string;
   profiles: Map<string, UserProfileWithAvatar>;
 }
@@ -54,6 +55,7 @@ export const ActivityLogRow: React.FC<ActivityLogRowProps> = ({
   event,
   actorLabel,
   templateName,
+  attachmentName,
   timeZone,
   profiles,
 }) => {
@@ -61,7 +63,16 @@ export const ActivityLogRow: React.FC<ActivityLogRowProps> = ({
   const participants = getEventParticipants(event);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="xs"
+      responsive={false}
+      css={css`
+        padding-block-start: calc(
+          (${euiTheme.size.xl} - ${euiTheme.size.base} - ${euiTheme.size.xs}) / 2
+        );
+      `}
+    >
       <EuiFlexItem grow={false}>
         <EuiText
           size="s"
@@ -69,7 +80,12 @@ export const ActivityLogRow: React.FC<ActivityLogRowProps> = ({
             color: ${euiTheme.colors.textSubdued};
           `}
         >
-          <EventSentence event={event} actor={actorLabel} templateName={templateName} />
+          <EventSentence
+            event={event}
+            actor={actorLabel}
+            templateName={templateName}
+            attachmentName={attachmentName}
+          />
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -83,7 +99,12 @@ export const ActivityLogRow: React.FC<ActivityLogRowProps> = ({
         </EuiText>
       </EuiFlexItem>
       {participants.length > 0 && (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            margin-block-start: ${euiTheme.size.m};
+          `}
+        >
           <ParticipantList participants={participants} profiles={profiles} />
         </EuiFlexItem>
       )}
