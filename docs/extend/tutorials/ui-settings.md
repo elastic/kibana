@@ -159,6 +159,40 @@ export class MyPlugin implements Plugin {
 }
 ```
 
+### Subscribe to changes
+
+`get$` emits the current value of a setting, then each new value. A change saved on this {{kib}} node or another shows up within about 10 seconds.
+
+Use an internal saved objects client when the subscription should outlive the request that created it. For a space, call `asScopedToNamespace(spaceId)` on that client before you pass it to `asScopedToClient`. Unsubscribe in `stop`.
+
+```ts
+import type { Subscription } from 'rxjs';
+import type { CoreStart, Plugin } from '@kbn/core/server';
+
+export class MyPlugin implements Plugin {
+  private subscription?: Subscription;
+
+  public start(core: CoreStart) {
+    const savedObjectsClient = core.savedObjects.getUnsafeInternalClient();
+    const uiSettings = core.uiSettings.asScopedToClient(savedObjectsClient);
+    this.subscription = uiSettings.get$<boolean>('myPlugin:enabled').subscribe((enabled) => {
+      if (enabled) {
+        startWork();
+      } else {
+        stopWork();
+      }
+    });
+  }
+
+  public stop() {
+    this.subscription?.unsubscribe();
+  }
+}
+```
+
+`get$` never errors. When a poll fails, {{kib}} skips that poll and keeps the last value. The observable completes when {{kib}} stops.
+
+`get$` throws if the setting was registered with `getValue`, because that default depends on the request. Read those settings with `get(key, { request })`.
 
 ## Client-side usage [client-side-usage]
 

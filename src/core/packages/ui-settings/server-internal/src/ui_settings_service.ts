@@ -8,7 +8,8 @@
  */
 
 import type { Observable } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, interval, ReplaySubject } from 'rxjs';
+import { share, takeUntil } from 'rxjs';
 import { mapToObject } from '@kbn/std';
 
 import type { Logger } from '@kbn/logging';
@@ -36,7 +37,9 @@ import type { InternalUiSettingsRequestHandlerContext } from './internal_types';
 import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
 import { registerRoutes, registerInternalRoutes } from './routes';
 import { getCoreSettings, getGlobalCoreSettings } from './settings';
+import { GET_OBSERVABLE_POLL_INTERVAL } from './clients/ui_settings_client_common';
 import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
+import { InflightReads } from './inflight_reads';
 import { NamespacedCache } from './namespaced_cache';
 
 export interface SetupDeps {
@@ -64,6 +67,12 @@ export class UiSettingsService
   private globalOverrides: Record<string, any> = {};
   private allowlist: Set<string> | null = null;
   private readonly sharedUserProvidedCache = new NamespacedCache<Record<string, any>>();
+  private readonly stop$ = new ReplaySubject<void>(1);
+  private readonly pollTicks$ = interval(GET_OBSERVABLE_POLL_INTERVAL).pipe(
+    takeUntil(this.stop$),
+    share()
+  );
+  private readonly sharedPollReads = new InflightReads<Record<string, unknown>>();
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('ui-settings-service');
@@ -142,6 +151,8 @@ export class UiSettingsService
   }
 
   public async stop() {
+    this.stop$.next();
+    this.stop$.complete();
     this.sharedUserProvidedCache.clear();
   }
 
@@ -167,6 +178,8 @@ export class UiSettingsService
         log: this.log,
         sharedUserProvidedCache: this.sharedUserProvidedCache,
         namespace,
+        pollTicks$: this.pollTicks$,
+        sharedPollReads: this.sharedPollReads,
       };
       return UiSettingsClientFactory.create(options) as ClientType<T>;
     };

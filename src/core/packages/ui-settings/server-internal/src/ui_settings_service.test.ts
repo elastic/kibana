@@ -395,5 +395,110 @@ describe('uiSettings', () => {
         expect(MockUiSettingsGlobalClientConstructor.mock.calls[0][0].defaults).not.toBe(defaults);
       });
     });
+
+    describe('get$', () => {
+      beforeEach(() => {
+        jest.useFakeTimers();
+        const { UiSettingsClient } = jest.requireActual<
+          typeof import('./clients/ui_settings_client')
+        >('./clients/ui_settings_client');
+        MockUiSettingsClientConstructor.mockImplementation(
+          (options: ConstructorParameters<typeof UiSettingsClient>[0]) =>
+            new UiSettingsClient(options)
+        );
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+        MockUiSettingsClientConstructor.mockReset();
+      });
+
+      const startWithWatchedSetting = async () => {
+        const { register } = await service.setup(setupDeps);
+        register({
+          watched: {
+            value: 'from-default',
+            schema: schema.string(),
+          },
+        });
+        savedObjectsClient.getCurrentNamespace.mockReturnValue('space-1');
+        savedObjectsClient.get.mockResolvedValue({
+          type: 'config',
+          id: 'version',
+          references: [],
+          attributes: { watched: 'from-es' },
+        });
+        const start = await service.start();
+        return start;
+      };
+
+      it('shares one read per tick between two clients for the same space', async () => {
+        const start = await startWithWatchedSetting();
+        const firstClient = start.asScopedToClient(savedObjectsClient);
+        const secondClient = start.asScopedToClient(savedObjectsClient);
+        const firstValues: string[] = [];
+        const secondValues: string[] = [];
+        const firstSubscription = firstClient.get$<string>('watched').subscribe((value) => {
+          firstValues.push(value);
+        });
+        const secondSubscription = secondClient.get$<string>('watched').subscribe((value) => {
+          secondValues.push(value);
+        });
+
+        await jest.advanceTimersByTimeAsync(0);
+        expect(firstValues).toEqual(['from-es']);
+        expect(secondValues).toEqual(['from-es']);
+        const readsAfterSubscribe = savedObjectsClient.get.mock.calls.length;
+
+        await jest.advanceTimersByTimeAsync(10_000);
+        expect(savedObjectsClient.get.mock.calls.length).toBe(readsAfterSubscribe + 1);
+        await jest.advanceTimersByTimeAsync(10_000);
+        expect(savedObjectsClient.get.mock.calls.length).toBe(readsAfterSubscribe + 2);
+
+        firstSubscription.unsubscribe();
+        secondSubscription.unsubscribe();
+      });
+
+      it('completes an open get$ on stop, and a get$ started after stop completes without another poll', async () => {
+        const start = await startWithWatchedSetting();
+        const client = start.asScopedToClient(savedObjectsClient);
+        const values: string[] = [];
+        let completed = false;
+        client.get$<string>('watched').subscribe({
+          next: (value) => values.push(value),
+          complete: () => {
+            completed = true;
+          },
+        });
+
+        await jest.advanceTimersByTimeAsync(0);
+        expect(values).toEqual(['from-es']);
+        expect(completed).toBe(false);
+
+        await service.stop();
+        await jest.advanceTimersByTimeAsync(0);
+        expect(completed).toBe(true);
+
+        const laterValues: string[] = [];
+        let laterCompleted = false;
+        start
+          .asScopedToClient(savedObjectsClient)
+          .get$<string>('watched')
+          .subscribe({
+            next: (value) => laterValues.push(value),
+            complete: () => {
+              laterCompleted = true;
+            },
+          });
+        await jest.advanceTimersByTimeAsync(0);
+        expect(laterCompleted).toBe(true);
+        expect(laterValues).toEqual(['from-es']);
+
+        const readsAfterStop = savedObjectsClient.get.mock.calls.length;
+        await jest.advanceTimersByTimeAsync(30_000);
+        expect(savedObjectsClient.get.mock.calls.length).toBe(readsAfterStop);
+        expect(laterValues).toEqual(['from-es']);
+      });
+    });
   });
 });

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
 import { BaseUiSettingsClient } from './base_ui_settings_client';
@@ -38,6 +40,11 @@ export class UiSettingsDefaultsClient extends BaseUiSettingsClient {
 
   async getUserProvided<T = unknown>(): Promise<Record<string, UserProvidedValues<T>>> {
     return this.userProvided as Record<string, UserProvidedValues<T>>;
+  }
+
+  get$<T = any>(key: string): Observable<T> {
+    this.assertObservableKey(key);
+    return of(this.staticValue<T>(key, this.userProvided));
   }
 
   // Any mutating operations are not supported by default UI settings.

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable } from 'rxjs';
 import type {
   UserProvidedValues,
   UiSettingsParams,
@@ -35,6 +36,14 @@ export interface IUiSettingsClient {
    * Retrieves uiSettings values set by the user with fallbacks to default values if not specified.
    */
   get: <T = any>(key: string, context?: GetUiSettingsContext) => Promise<T>;
+  /**
+   * Emits the value `get(key)` would return without a request, then each later change, including a change saved on another Kibana node, within about 10 seconds.
+   * The observable never errors. A failed poll is skipped and the last value stays.
+   * It completes when Kibana stops.
+   * Reads use this client's saved objects client, so a long-lived subscriber should scope the client with `savedObjects.getUnsafeInternalClient()` and `.asScopedToNamespace(spaceId)` for a space, then unsubscribe in the plugin `stop` method.
+   * Throws when the key was registered with `getValue`.
+   */
+  get$: <T = any>(key: string) => Observable<T>;
   /**
    * Retrieves a set of all uiSettings values set by the user with fallbacks to default values if not specified.
    */

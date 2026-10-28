@@ -8,6 +8,7 @@
  */
 
 import { omit } from 'lodash';
+import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type {
   GetUiSettingsContext,
@@ -47,16 +48,9 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
   }
 
   async get<T = any>(key: string, context?: GetUiSettingsContext): Promise<T> {
-    // Check for user-provided override first
     const userProvided = await this.getUserProvided();
-    if (userProvided[key]?.userValue !== undefined) {
-      const value = userProvided[key].userValue as T;
-      return value;
-    }
-
-    // Fall back to default value
     const definition = this.defaults[key];
-    if (definition?.getValue) {
+    if (userProvided[key]?.userValue === undefined && definition?.getValue) {
       try {
         const value = (await definition.getValue(context)) as T;
         return value;
@@ -70,8 +64,22 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
         return fallback;
       }
     }
-    const defaultValue = definition?.value as T;
-    return defaultValue;
+    return this.staticValue<T>(key, userProvided);
+  }
+
+  protected assertObservableKey(key: string) {
+    if (this.defaults[key]?.getValue) {
+      throw new Error(
+        `UiSettingsClient.get$("${key}") cannot be used because its default depends on the request. Use get("${key}", { request }) instead.`
+      );
+    }
+  }
+
+  protected staticValue<T>(key: string, userProvided: Record<string, UserProvidedValues>): T {
+    if (userProvided[key]?.userValue !== undefined) {
+      return userProvided[key].userValue as T;
+    }
+    return this.defaults[key]?.value as T;
   }
 
   async getAll<T = any>(context?: GetUiSettingsContext) {
@@ -151,6 +159,8 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
 
     return values;
   }
+
+  abstract get$<T = any>(key: string): Observable<T>;
 
   abstract getUserProvided<T = any>(): Promise<Record<string, UserProvidedValues<T>>>;
 

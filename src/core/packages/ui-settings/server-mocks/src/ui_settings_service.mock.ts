@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { of } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type {
@@ -21,6 +22,7 @@ const createClientMock = () => {
   const mocked: jest.Mocked<IUiSettingsClient> = lazyObject({
     getRegistered: jest.fn().mockReturnValue({}),
     get: jest.fn().mockResolvedValue(false),
+    get$: jest.fn().mockReturnValue(of(false)),
     getAll: jest.fn().mockResolvedValue({}),
     getUserProvided: jest.fn().mockResolvedValue({}),
     setMany: jest.fn(),

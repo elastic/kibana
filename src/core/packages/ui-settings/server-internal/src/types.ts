@@ -14,7 +14,9 @@ import type {
 } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
+import type { InflightReads } from './inflight_reads';
 import type { NamespacedCache } from './namespaced_cache';
 
 /** @internal */
@@ -44,4 +46,8 @@ export interface UiSettingsServiceOptions {
   sharedUserProvidedCache?: NamespacedCache<Record<string, any>>;
   /** Namespace for cache keys (typically space ID) */
   namespace: string;
+  /** Shared poll clock for `get$` */
+  pollTicks$?: Observable<unknown>;
+  /** In-flight `get$` reads shared across clients on this node */
+  sharedPollReads?: InflightReads<Record<string, unknown>>;
 }

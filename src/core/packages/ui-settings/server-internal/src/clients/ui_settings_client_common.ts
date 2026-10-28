@@ -7,14 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isEqual } from 'lodash';
+import type { Observable } from 'rxjs';
+import { EMPTY, catchError, defer, distinctUntilChanged, exhaustMap, map, merge, of } from 'rxjs';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { CannotOverrideError } from '../ui_settings_errors';
 import type { UiSettingsServiceOptions } from '../types';
 import { BaseUiSettingsClient } from './base_ui_settings_client';
 
+/** Poll period for `get$`. Separate from the user-provided cache TTL. */
+export const GET_OBSERVABLE_POLL_INTERVAL = 10_000;
+
 interface ReadOptions {
   autoCreateOrUpgradeIfMissing?: boolean;
+  ignoreErrors?: boolean;
 }
 
 interface UserProvidedValue<T = unknown> {
@@ -33,17 +40,56 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   private readonly buildNum: UiSettingsServiceOptions['buildNum'];
   private readonly savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
   private readonly sharedUserProvidedCache?: UiSettingsServiceOptions['sharedUserProvidedCache'];
+  private readonly sharedPollReads?: UiSettingsServiceOptions['sharedPollReads'];
+  private readonly pollTicks$: Observable<unknown>;
   private readonly namespace: string;
 
   constructor(options: UiSettingsServiceOptions) {
     super(options);
-    const { savedObjectsClient, type, id, buildNum, sharedUserProvidedCache, namespace } = options;
+    const {
+      savedObjectsClient,
+      type,
+      id,
+      buildNum,
+      sharedUserProvidedCache,
+      sharedPollReads,
+      pollTicks$ = EMPTY,
+      namespace,
+    } = options;
     this.type = type;
     this.id = id;
     this.buildNum = buildNum;
     this.savedObjectsClient = savedObjectsClient;
     this.sharedUserProvidedCache = sharedUserProvidedCache;
+    this.sharedPollReads = sharedPollReads;
+    this.pollTicks$ = pollTicks$;
     this.namespace = namespace;
+  }
+
+  get$<T = any>(key: string): Observable<T> {
+    this.assertObservableKey(key);
+
+    return merge(of('first'), this.pollTicks$).pipe(
+      exhaustMap((tick) =>
+        defer(() => this.pollUserProvided({ shared: tick !== 'first' })).pipe(
+          map((userProvided) => this.staticValue<T>(key, userProvided)),
+          catchError((error) => {
+            this.log.warn(`[UiSettings] get$("${key}") skipped a poll: ${error}`);
+            return EMPTY;
+          })
+        )
+      ),
+      distinctUntilChanged(isEqual)
+    );
+  }
+
+  private async pollUserProvided({ shared }: { shared: boolean }): Promise<UserProvided> {
+    const read = () => this.read({ ignoreErrors: false });
+    const attributes =
+      shared && this.sharedPollReads
+        ? this.sharedPollReads.run(`${this.type}:${this.namespace}`, read)
+        : read();
+    return this.applyOverrides(this.onReadHook(await attributes));
   }
 
   async getUserProvided<T = unknown>(bypassCache = false): Promise<UserProvided<T>> {
@@ -206,9 +252,10 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     }
   }
 
-  private async read({ autoCreateOrUpgradeIfMissing = true }: ReadOptions = {}): Promise<
-    Record<string, any>
-  > {
+  private async read({
+    autoCreateOrUpgradeIfMissing = true,
+    ignoreErrors = true,
+  }: ReadOptions = {}): Promise<Record<string, any>> {
     try {
       const resp = await this.savedObjectsClient.get<Record<string, any>>(this.type, this.id);
       return resp.attributes;
@@ -224,13 +271,13 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
         });
 
         if (!failedUpgradeAttributes) {
-          return await this.read({ autoCreateOrUpgradeIfMissing: false });
+          return await this.read({ autoCreateOrUpgradeIfMissing: false, ignoreErrors });
         }
 
         return failedUpgradeAttributes;
       }
 
-      if (this.isIgnorableError(error)) {
+      if (ignoreErrors && this.isIgnorableError(error)) {
         return {};
       }
 

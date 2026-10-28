@@ -254,4 +254,52 @@ describe('ui settings defaults', () => {
       expect(uiSettings.isOverridden('bar')).toBe(true);
     });
   });
+
+  describe('#get$()', () => {
+    const readOnce = async (uiSettings: UiSettingsDefaultsClient, key: string) => {
+      const values: unknown[] = [];
+      let completed = false;
+      uiSettings.get$(key).subscribe({
+        next: (value) => values.push(value),
+        complete: () => {
+          completed = true;
+        },
+      });
+      await new Promise((resolve) => setImmediate(resolve));
+      return { values, completed };
+    };
+
+    it('emits the resolved value once and completes', async () => {
+      const uiSettings = new UiSettingsDefaultsClient({
+        defaults: {
+          foo: { value: 'default foo', schema: schema.string() },
+          bar: { value: 'default bar', schema: schema.string() },
+        },
+        overrides: { foo: 'overridden foo' },
+        log: logger,
+      });
+
+      const foo = await readOnce(uiSettings, 'foo');
+      const bar = await readOnce(uiSettings, 'bar');
+
+      expect(foo).toEqual({ values: ['overridden foo'], completed: true });
+      expect(bar).toEqual({ values: ['default bar'], completed: true });
+    });
+
+    it('throws synchronously when the default depends on the request', () => {
+      const uiSettings = new UiSettingsDefaultsClient({
+        defaults: {
+          dynamic: {
+            value: 'fallback',
+            schema: schema.string(),
+            getValue: async () => 'from-request',
+          },
+        },
+        log: logger,
+      });
+
+      expect(() => uiSettings.get$('dynamic')).toThrow(/dynamic/);
+      expect(() => uiSettings.get$('dynamic')).toThrow(/request/);
+    });
+  });
 });
