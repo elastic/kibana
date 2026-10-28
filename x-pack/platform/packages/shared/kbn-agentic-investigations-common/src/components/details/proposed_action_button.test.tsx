@@ -24,7 +24,11 @@ const mockProposal: ApprovalProposal = {
   impact: 'critical',
   status: 'pending',
   category: 'Response action',
-  action: { name: 'Isolate cfo-mbp-14 — host isolation', reversible: false },
+  action: {
+    name: 'Isolate cfo-mbp-14 — host isolation',
+    reversible: false,
+    approvalPolicy: 'always-gate',
+  },
 };
 
 const baseProps: ProposedActionButtonProps = {
@@ -46,7 +50,14 @@ describe('ProposedActionButton', () => {
     renderButton();
     expect(screen.getByText('Isolate cfo-mbp-14 — host isolation')).toBeInTheDocument();
     expect(screen.getByText('Needs review')).toBeInTheDocument();
-    expect(screen.getByText('Response action • Irreversible')).toBeInTheDocument();
+    expect(screen.getByTestId('proposedAction')).toHaveTextContent(
+      'Response action • Irreversible'
+    );
+  });
+
+  it('shows "Irreversible" in the danger color', () => {
+    renderButton();
+    expect(screen.getByText('Irreversible').className).toMatch(/danger/i);
   });
 
   it('names the row with its own title and status, not a fixed string every row shares', () => {
@@ -198,13 +209,33 @@ describe('ProposedActionButton', () => {
       expect(screen.getByText('Applied')).toBeInTheDocument();
       expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
       expect(screen.getByText(/Bonnie Fishel/)).toBeInTheDocument();
-      expect(screen.queryByText('Response action • Irreversible')).not.toBeInTheDocument();
+      expect(screen.queryByText('Irreversible')).not.toBeInTheDocument();
+    });
+
+    it('shows the full date and time in a tooltip on the time of the decision', async () => {
+      renderButton({ proposal: decidedProposal });
+
+      fireEvent.mouseOver(screen.getByText(/^\d{1,2}:\d{2}/));
+
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(/^1 Jan 2024, \d{2}:\d{2}$/);
     });
 
     it('shows a Declined badge for a dismissed proposal', () => {
       renderButton({ proposal: { ...decidedProposal, decision: 'dismissed' } });
 
       expect(screen.getByText('Declined')).toBeInTheDocument();
+    });
+
+    it.each<[string, Partial<ApprovalProposal>, RegExp]>([
+      ['approved', {}, /^Approved by\s/],
+      ['declined', { decision: 'dismissed' }, /^Declined by\s/],
+      ['failed', { status: 'failed' }, /^Executed by\s/],
+      ['to-do, marked as applied,', { category: 'todo', status: 'no_action' }, /^Applied by\s/],
+    ])('captions a %s proposal with who acted and when', (_, overrides, caption) => {
+      renderButton({ proposal: { ...decidedProposal, ...overrides } });
+
+      expect(screen.getByText(caption)).toBeInTheDocument();
+      expect(screen.getByText('Bonnie Fishel')).toBeInTheDocument();
     });
 
     it('is still clickable, opening a read-only modal for the closed record', () => {
@@ -231,6 +262,13 @@ describe('ProposedActionButton', () => {
 
       expect(screen.getByText('Failed')).toBeInTheDocument();
       expect(screen.queryByText('Applied')).not.toBeInTheDocument();
+    });
+
+    it('keeps the badge label as the caption for an expired proposal that has an actor', () => {
+      renderButton({ proposal: { ...decidedProposal, status: 'expired' } });
+
+      expect(screen.getAllByText('Expired').length).toBeGreaterThanOrEqual(2);
+      expect(screen.queryByText(/Approved by/)).not.toBeInTheDocument();
     });
 
     it('names the decider without a time when the record carries no decidedAt', () => {

@@ -145,13 +145,14 @@ describe(
 
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_TITLE).should(
           'contain.text',
-          // @ts-ignore
-          rule.threat[0].framework
+          'Threat mappings'
         );
 
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_DETAILS)
           // @ts-ignore
-          .should('contain.text', rule.threat[0].technique[0].name)
+          .should('contain.text', rule.threat[0].framework)
+          // @ts-ignore
+          .and('contain.text', rule.threat[0].technique[0].name)
           // @ts-ignore
           .and('contain.text', rule.threat[0].tactic.name);
       });

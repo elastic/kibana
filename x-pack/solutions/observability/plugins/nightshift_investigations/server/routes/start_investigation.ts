@@ -8,16 +8,15 @@
 import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
-import { freeFormContextSchema, investigationNotificationDestinationsSchema } from '../../common';
+import {
+  freeFormContextSchema,
+  investigationNotificationDestinationsSchema,
+  MAX_ALERTS_PER_INVESTIGATION,
+} from '../../common';
 import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID, MAX_KEYWORD_LENGTH } from '../../common';
-import { fetchAlertSnapshot } from '../lib/alert_snapshot';
+import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
-
-const subjectIdAndSummary = {
-  id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-  summary: z.string().max(MAX_TEXT_LENGTH).optional(),
-};
 
 const startInvestigationMessage = {
   message: z.string().min(1).max(MAX_TEXT_LENGTH).optional(),
@@ -27,18 +26,11 @@ const startInvestigationModel = {
   connector_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
 };
 
-/** Headline shown in the list and flyout from the moment the record exists. */
-const titleSchema = z.string().min(1).max(MAX_TITLE_LENGTH);
-
-/** Keeps a derived title to one readable line, since it is rendered as a list headline. */
-const MAX_DERIVED_TITLE_LENGTH = 200;
-
 /**
- * A manual investigation is defined by its question, so when the caller names no title the
- * question stands in for it, collapsed to one line the way the client derives the subject summary.
+ * Accepted for compatibility but not stored as the investigation's title: Agent Builder generates
+ * that from the investigation's first round.
  */
-const deriveTitleFromMessage = (message: string): string =>
-  message.replace(/\s+/g, ' ').trim().slice(0, MAX_DERIVED_TITLE_LENGTH);
+const titleSchema = z.string().min(1).max(MAX_TITLE_LENGTH);
 
 // A union rather than one object with a loose `context`, so that an alert investigation is
 // always backed by alert data: the alert branch accepts no caller context — the handler loads
@@ -49,18 +41,19 @@ const startInvestigationBodySchema = z.union([
   z.object({
     subject: z.object({
       type: z.literal('alert'),
-      ...subjectIdAndSummary,
+      ids: z
+        .array(z.string().min(1).max(MAX_KEYWORD_LENGTH))
+        .min(1)
+        .max(MAX_ALERTS_PER_INVESTIGATION),
+      summary: z.string().max(MAX_TEXT_LENGTH).optional(),
     }),
-    // Optional here only: the handler derives it from the alert's rule name when omitted.
     title: titleSchema.optional(),
-    concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
     ...startInvestigationMessage,
     ...startInvestigationModel,
     notificationDestinations: investigationNotificationDestinationsSchema.optional(),
   }),
   // A manual investigation is defined by its question, so `message` is required and the
-  // subject id is optional: there is no entity to point at, only the prompt. The title is
-  // optional for the same reason: the handler derives it from the question when omitted.
+  // subject id is optional: there is no entity to point at, only the prompt.
   z.object({
     subject: z.object({
       type: z.literal('manual'),
@@ -72,7 +65,6 @@ const startInvestigationBodySchema = z.union([
       summary: z.string().max(MAX_TEXT_LENGTH).optional(),
     }),
     title: titleSchema.optional(),
-    concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
     context: freeFormContextSchema.optional(),
     message: z.string().min(1).max(MAX_TEXT_LENGTH),
     ...startInvestigationModel,
@@ -90,15 +82,17 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
   options: {
     access: 'internal',
     summary: 'Start an investigation',
-    description: 'Triggers an investigation workflow for a given subject.',
+    description:
+      'Starts an investigation for a given subject, or continues the open investigation that ' +
+      'already holds it. An alert subject takes one or more alert ids, classic or universal; the ' +
+      'first is the stored subject, used for naming and the summary, and returns the investigation (Agent Builder conversation) id. A new ' +
+      'investigation is created when the start is accepted; its run records the subjects.',
   },
   security: {
-    // agentBuilder:write is used as a proxy for "this user is authorized to spend AI tokens."
-    // The investigation workflow itself creates the Agent Builder conversation — the calling user
-    // does not create it directly — so this is not a strict AB permission requirement. We use
-    // agentBuilder:write because it is the best available signal that a user has been granted
-    // access to AI-resource-consuming features in this deployment. When conversation templates
-    // land with their own privilege model, this should be revisited.
+    // agentBuilder:write is required because a start that opens a new investigation creates its
+    // Agent Builder conversation as the calling user. It is also the best available signal that
+    // a user has been granted access to AI-resource-consuming features in this deployment. When
+    // conversation templates land with their own privilege model, this should be revisited.
     authz: {
       requiredPrivileges: ['agentBuilder:write'],
     },
@@ -106,7 +100,13 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
   params: z.object({
     body: startInvestigationBodySchema,
   }),
-  handler: async ({ request, params, getInvestigationsClient, getAlertsClient }) => {
+  handler: async ({
+    request,
+    params,
+    getInvestigationsClient,
+    getAlertsClient,
+    getEpisodeLookup,
+  }) => {
     const client = getInvestigationsClient(request);
     const { body } = params;
 
@@ -117,12 +117,17 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
         if (!alertsClient) {
           throw serverUnavailable('Alert lookup is unavailable');
         }
-        const snapshot = await fetchAlertSnapshot(alertsClient, body.subject.id);
+        const lookup = getEpisodeLookup(request);
+        const [primaryId] = body.subject.ids;
+        const alerts = await fetchInvestigationAlertSnapshots({
+          alertsClient,
+          alertIds: body.subject.ids,
+          ...lookup,
+        });
         return await client.start({
-          subject: body.subject,
-          title: body.title ?? snapshot.rule_name,
-          concurrency_key: body.concurrency_key ?? snapshot.id,
-          context: { alerts: [snapshot] },
+          subject: { type: 'alert', id: primaryId, summary: body.subject.summary },
+          title: body.title,
+          context: { alerts },
           trigger_type: 'manual',
           message: body.message,
           ...(body.connector_id ? { connector_id: body.connector_id } : {}),
@@ -131,11 +136,7 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
             : {}),
         });
       }
-      return await client.start({
-        ...body,
-        title: body.title ?? deriveTitleFromMessage(body.message),
-        trigger_type: 'manual',
-      });
+      return await client.start({ ...body, trigger_type: 'manual' });
     } catch (error) {
       rethrowInvestigationClientError(error);
     }

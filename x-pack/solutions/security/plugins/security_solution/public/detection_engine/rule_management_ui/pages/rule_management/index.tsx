@@ -104,9 +104,6 @@ const RulesPageContent = () => {
           onOpenValueLists={showValueListFlyout}
           onOpenImportRules={showImportModal}
         />
-        <NeedAdminForUpdateRulesCallOut />
-        <MissingDetectionsPrivilegesCallOut />
-        <MlJobCompatibilityCallout />
         <ValueListsFlyout showFlyout={isValueListFlyoutVisible} onClose={hideValueListFlyout} />
         <RuleImportModal
           isImportModalVisible={isImportModalVisible}
@@ -118,6 +115,9 @@ const RulesPageContent = () => {
             <RuleSettingsModal isOpen={isRuleSettingsModalOpen} onClose={closeRuleSettingsModal} />
           )}
           <EuiSpacer size="s" />
+          <NeedAdminForUpdateRulesCallOut />
+          <MissingDetectionsPrivilegesCallOut />
+          <MlJobCompatibilityCallout />
           <RuleUpdateCallouts shouldShowUpdateRulesCallout={canEditRules} />
           {deprecatedRulesCallout}
           <MaintenanceWindowCallout

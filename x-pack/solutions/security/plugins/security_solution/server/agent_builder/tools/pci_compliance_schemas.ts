@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, isoDateTime } from '@kbn/zod';
 import { PCI_REQUIREMENTS } from './pci_compliance_requirements';
 
 /**
@@ -36,8 +36,8 @@ export const pciIndexPatternSchema = z
  */
 export const pciTimeRangeSchema = z
   .object({
-    from: z.string().datetime({ offset: true }),
-    to: z.string().datetime({ offset: true }),
+    from: isoDateTime({ offset: true }),
+    to: isoDateTime({ offset: true }),
   })
   .refine((value) => new Date(value.from) <= new Date(value.to), {
     message: '`from` must be earlier than or equal to `to`.',

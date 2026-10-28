@@ -33,7 +33,7 @@ export interface SnapshotSourceOverride {
 export interface KIQueryGenerationScenario {
   input: {
     scenario_id: string;
-    stream_name: string;
+    source_id: string;
     stream_description: string;
   };
   output: {
@@ -102,7 +102,7 @@ export type { ChronicSeedInput };
 export interface DiscoveryScenario {
   input: {
     scenario_id: string;
-    stream_name: string;
+    source_id: string;
     detections: Array<Partial<Detection>>;
     /**
      * Seeds a synthetic chronic rate-flat failure pattern (steady logs + one backed query KI)
@@ -113,6 +113,8 @@ export interface DiscoveryScenario {
   };
   /** Ordered ground-truth continuation chains by `rule_name`, keyed by continuation path label. */
   continuationChains?: Record<string, string[]>;
+  /** Restricts the continuation paths replayed for this scenario; every path runs when omitted. */
+  continuationPaths?: readonly string[];
   output: {
     criteria: SamplingCriterion[];
     expected_min_evidence_count?: number;

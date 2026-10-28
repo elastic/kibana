@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { getMitreFrameworkByThreatName } from '@kbn/security-mitre-attack-common';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { createPrebuiltRuleAssetsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
@@ -69,20 +70,24 @@ const findPrebuiltRulesFilterSchema = z
       .array(
         z
           .string()
-          .regex(/^T\d{4}$/)
+          .regex(/^(AML\.)?T\d{4}$/)
           .max(MAX_STRING_LENGTH)
       )
       .optional()
-      .describe('MITRE technique IDs to include (OR), e.g. ["T1059", "T1078"].'),
+      .describe(
+        'MITRE technique IDs to include (OR), e.g. ["T1059", "T1078"] (ATT&CK) or ["AML.T0044"] (ATLAS).'
+      ),
     mitreTactic: z
       .array(
         z
           .string()
-          .regex(/^TA\d{4}$/)
+          .regex(/^(AML\.)?TA\d{4}$/)
           .max(MAX_STRING_LENGTH)
       )
       .optional()
-      .describe('MITRE tactic IDs to include (OR), e.g. ["TA0001", "TA0006"].'),
+      .describe(
+        'MITRE tactic IDs to include (OR), e.g. ["TA0001", "TA0006"] (ATT&CK) or ["AML.TA0000"] (ATLAS).'
+      ),
     relatedIntegrations: z
       .array(z.string().min(1).max(MAX_STRING_LENGTH))
       .optional()
@@ -118,7 +123,7 @@ export const findPrebuiltRulesSchema = z
           'Available fields: ' +
           '`description` (full rule description); ' +
           '`query` (the detection query/logic; `machine_learning` rules have none); ' +
-          '`threat` (full MITRE ATT&CK mapping incl. techniques and subtechniques — triage gives ' +
+          '`threat` (full MITRE ATT&CK/ATLAS mapping incl. techniques and subtechniques — triage gives ' +
           'tactics only); ' +
           '`note` (investigation guide / runbook shown when an alert fires); ' +
           '`references` (external reference URLs); ' +
@@ -156,8 +161,11 @@ const DEFAULT_FIELDS_TO_FETCH = [
 export const reduceMitreToTacticsOnly = (rule: RuleResponse) => ({
   ...rule,
   threat: (rule.threat ?? [])
-    .filter((entry) => entry.framework === 'MITRE ATT&CK')
-    .map((entry) => ({ tactic: { id: entry.tactic?.id, name: entry.tactic?.name } })),
+    .filter((entry) => getMitreFrameworkByThreatName(entry.framework) !== undefined)
+    .map((entry) => ({
+      framework: entry.framework,
+      tactic: { id: entry.tactic?.id, name: entry.tactic?.name },
+    })),
 });
 
 interface FindPrebuiltRulesToolDeps {

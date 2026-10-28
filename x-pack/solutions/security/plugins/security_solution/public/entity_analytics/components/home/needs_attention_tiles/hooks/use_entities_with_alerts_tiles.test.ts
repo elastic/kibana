@@ -17,19 +17,19 @@ describe('parseAlertBasedTilesResponse', () => {
   it('returns zeros and empty arrays when there are no rows', () => {
     const result = parseAlertBasedTilesResponse(makeResponse([], []));
     expect(result).toEqual({
-      alertsCount: 0,
-      alertsEntityIds: [],
+      severeAlertsCount: 0,
+      severeAlertsEntityIds: [],
       watchlistedCount: 0,
       watchlistedEntityIds: [],
     });
   });
 
-  it('parses all four columns from a single-row response', () => {
+  it('parses all columns from a single-row response', () => {
     const result = parseAlertBasedTilesResponse(
       makeResponse(
         [
-          { name: 'alerts_count', type: 'long' },
-          { name: 'alerts_entity_ids', type: 'keyword' },
+          { name: 'severe_alerts_count', type: 'long' },
+          { name: 'severe_alerts_entity_ids', type: 'keyword' },
           { name: 'watchlisted_count', type: 'long' },
           { name: 'watchlisted_entity_ids', type: 'keyword' },
         ],
@@ -37,10 +37,28 @@ describe('parseAlertBasedTilesResponse', () => {
       )
     );
     expect(result).toEqual({
-      alertsCount: 42,
-      alertsEntityIds: ['host:web01', 'user:alice@okta'],
+      severeAlertsCount: 42,
+      severeAlertsEntityIds: ['host:web01', 'user:alice@okta'],
       watchlistedCount: 3,
       watchlistedEntityIds: ['user:alice@okta'],
+    });
+  });
+
+  it('reads the counts of a count-only response (the previous period), with no id lists', () => {
+    const result = parseAlertBasedTilesResponse(
+      makeResponse(
+        [
+          { name: 'severe_alerts_count', type: 'long' },
+          { name: 'watchlisted_count', type: 'long' },
+        ],
+        [[42, 3]]
+      )
+    );
+    expect(result).toEqual({
+      severeAlertsCount: 42,
+      severeAlertsEntityIds: [],
+      watchlistedCount: 3,
+      watchlistedEntityIds: [],
     });
   });
 
@@ -48,15 +66,15 @@ describe('parseAlertBasedTilesResponse', () => {
     const result = parseAlertBasedTilesResponse(
       makeResponse(
         [
-          { name: 'alerts_count', type: 'long' },
-          { name: 'alerts_entity_ids', type: 'keyword' },
+          { name: 'severe_alerts_count', type: 'long' },
+          { name: 'severe_alerts_entity_ids', type: 'keyword' },
           { name: 'watchlisted_count', type: 'long' },
           { name: 'watchlisted_entity_ids', type: 'keyword' },
         ],
         [[1, 'host:web01', 0, null]]
       )
     );
-    expect(result.alertsEntityIds).toEqual(['host:web01']);
+    expect(result.severeAlertsEntityIds).toEqual(['host:web01']);
     expect(result.watchlistedEntityIds).toEqual([]);
   });
 
@@ -64,15 +82,15 @@ describe('parseAlertBasedTilesResponse', () => {
     const result = parseAlertBasedTilesResponse(
       makeResponse(
         [
-          { name: 'alerts_count', type: 'long' },
-          { name: 'alerts_entity_ids', type: 'keyword' },
+          { name: 'severe_alerts_count', type: 'long' },
+          { name: 'severe_alerts_entity_ids', type: 'keyword' },
           { name: 'watchlisted_count', type: 'long' },
           { name: 'watchlisted_entity_ids', type: 'keyword' },
         ],
         [[null, [], null, []]]
       )
     );
-    expect(result.alertsCount).toBe(0);
+    expect(result.severeAlertsCount).toBe(0);
     expect(result.watchlistedCount).toBe(0);
   });
 
@@ -80,23 +98,23 @@ describe('parseAlertBasedTilesResponse', () => {
     const result = parseAlertBasedTilesResponse(
       makeResponse(
         [
-          { name: 'alerts_count', type: 'long' },
-          { name: 'alerts_entity_ids', type: 'keyword' },
+          { name: 'severe_alerts_count', type: 'long' },
+          { name: 'severe_alerts_entity_ids', type: 'keyword' },
           { name: 'watchlisted_count', type: 'long' },
           { name: 'watchlisted_entity_ids', type: 'keyword' },
         ],
         [[2, ['host:web01', null, '', 'user:alice@okta'], 0, []]]
       )
     );
-    expect(result.alertsEntityIds).toEqual(['host:web01', 'user:alice@okta']);
+    expect(result.severeAlertsEntityIds).toEqual(['host:web01', 'user:alice@okta']);
   });
 
   it('returns zeros when a column is missing from the response', () => {
     const result = parseAlertBasedTilesResponse(
-      makeResponse([{ name: 'alerts_count', type: 'long' }], [[10]])
+      makeResponse([{ name: 'severe_alerts_count', type: 'long' }], [[10]])
     );
-    expect(result.alertsCount).toBe(10);
-    expect(result.alertsEntityIds).toEqual([]);
+    expect(result.severeAlertsCount).toBe(10);
+    expect(result.severeAlertsEntityIds).toEqual([]);
     expect(result.watchlistedCount).toBe(0);
     expect(result.watchlistedEntityIds).toEqual([]);
   });

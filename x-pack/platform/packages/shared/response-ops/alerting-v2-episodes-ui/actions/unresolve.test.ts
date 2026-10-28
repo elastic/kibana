@@ -10,6 +10,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { CLASSIC_EPISODE_SOURCE_ID } from '../classic_alerts/constants';
 import type { AlertEpisode } from '../queries/episodes_query';
+import * as i18n from './translations';
 import { createUnresolveAction } from './unresolve';
 import * as bulk from './bulk_create_alert_actions';
 
@@ -85,6 +86,58 @@ describe('createUnresolveAction', () => {
     expect(action.showWhenDisabled?.({ episodes })).toBe(false);
   });
 
+  describe('getBulkDisabledReason', () => {
+    const classicEpisode = (status: string) =>
+      makeEpisode({
+        'episode.id': 'classic-1',
+        'episode.status': status as never,
+        supports_actions: false,
+        source_id: CLASSIC_EPISODE_SOURCE_ID,
+      });
+    const universalEpisode = (status: string) =>
+      makeEpisode({ 'episode.id': 'universal-1', 'episode.status': status as never });
+
+    const reasonFor = (episodes: AlertEpisode[]) =>
+      createUnresolveAction(makeDeps()).getBulkDisabledReason!(episodes);
+
+    it('gives a reason when a resolved classic alert is selected', () => {
+      expect(
+        reasonFor([
+          universalEpisode(ALERT_EPISODE_STATUS.INACTIVE),
+          classicEpisode(ALERT_EPISODE_STATUS.INACTIVE),
+        ])
+      ).toBe(i18n.UNRESOLVE_NOT_AVAILABLE);
+    });
+
+    it('gives a reason when only a resolved classic alert is selected', () => {
+      expect(reasonFor([classicEpisode(ALERT_EPISODE_STATUS.INACTIVE)])).toBe(
+        i18n.UNRESOLVE_NOT_AVAILABLE
+      );
+    });
+
+    it('gives no reason when the classic alert in the selection is still active', () => {
+      expect(
+        reasonFor([
+          universalEpisode(ALERT_EPISODE_STATUS.INACTIVE),
+          classicEpisode(ALERT_EPISODE_STATUS.ACTIVE),
+        ])
+      ).toBeUndefined();
+    });
+
+    it('gives no reason when every selected alert is still active', () => {
+      expect(
+        reasonFor([
+          universalEpisode(ALERT_EPISODE_STATUS.ACTIVE),
+          classicEpisode(ALERT_EPISODE_STATUS.ACTIVE),
+        ])
+      ).toBeUndefined();
+    });
+
+    it('gives no reason when every selected alert is universal', () => {
+      expect(reasonFor([universalEpisode(ALERT_EPISODE_STATUS.INACTIVE)])).toBeUndefined();
+    });
+  });
+
   it('execute: POSTs per-episode ACTIVATE items with reason, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
     jest
@@ -137,7 +190,7 @@ describe('createUnresolveAction', () => {
     expect(onSuccess).not.toHaveBeenCalled();
   });
 
-  it('execute: error path calls notifications.toasts.addDanger with BULK_ERROR_TOAST', async () => {
+  it('execute: shows the request error in an expandable error toast', async () => {
     const deps = makeDeps();
     jest.spyOn(bulk, 'bulkActivateEpisodeActions').mockRejectedValue(new Error('network error'));
     const onSuccess = jest.fn();
@@ -145,7 +198,10 @@ describe('createUnresolveAction', () => {
       episodes: [makeEpisode()],
       onSuccess,
     });
-    expect(deps.notifications.toasts.addDanger).toHaveBeenCalled();
+    expect(deps.notifications.toasts.addError).toHaveBeenCalledWith(
+      expect.objectContaining({ stack: 'e1 — network error' }),
+      expect.objectContaining({ toastMessage: 'network error' })
+    );
     expect(onSuccess).not.toHaveBeenCalled();
   });
 });

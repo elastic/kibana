@@ -71,7 +71,7 @@ export const AutomationUsageCell = ({
             <EuiFlexItem grow={false}>
               <EuiText
                 size="xs"
-                color={isLimitHigh ? limitColor : undefined}
+                color={isLimitHigh ? euiTheme.colors.textWarning : undefined}
                 css={{
                   fontWeight: euiTheme.font.weight.semiBold,
                   fontVariantNumeric: 'tabular-nums',

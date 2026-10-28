@@ -123,8 +123,10 @@ export { getBuiltinActionGroups, RecoveredActionGroup } from './builtin_action_g
 export type {
   BulkEditSkipReason,
   BulkGapsFillingSkipReason,
+  BulkDeleteSkipReason,
   BulkEditActionSkipResult,
   BulkGapsFillingSkipResult,
+  BulkDeleteActionSkipResult,
   BulkActionSkipResult,
 } from './bulk_action';
 export {
@@ -185,6 +187,7 @@ export { GAP_AUTO_FILL_STATUS } from './constants';
 export type { GapAutoFillStatus } from './constants';
 export { backfillInitiator } from './constants';
 export type { BackfillInitiator } from './constants';
+export { MISSING_UIAM_API_KEY_TAG, LEGACY_MISSING_UIAM_API_KEY_TAG } from './constants';
 export {
   mappingFromFieldMap,
   getComponentTemplateFromFieldMap,

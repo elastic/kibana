@@ -52,8 +52,10 @@ import { StateAnnotation, toCurrentRun } from './state';
 import { processResearchResponse, processToolNodeResponse } from './response_processing';
 import { createAnswerAgentStructured } from './answer_agent_structured';
 import { countNonTodosSteps, stepUpdates, type RunStepUpdate } from './step_state';
+import type { CycleHookRuntime } from './cycle_hooks/cycle_hook_runtime';
 import type { ToolExecutionBuffer } from './run_tracker';
 import type { SubagentTracker } from './subagent_tracker';
+import type { RunAttachmentEvents } from './run_attachment_events';
 import type { ProcessedConversation } from './utils/prepare_conversation';
 
 // number of successive recoverable errors we try to recover from before throwing
@@ -73,10 +75,12 @@ export const createAgentGraph = ({
   subagentTracker,
   toolExecutionBuffer,
   todoStateManager,
+  runAttachmentEvents,
   roundId,
   sessionId,
   cacheControl,
   contextManagement,
+  cycleHooks,
 }: {
   chatModel: InferenceChatModel;
   toolManager: ToolManager;
@@ -93,6 +97,7 @@ export const createAgentGraph = ({
   toolExecutionBuffer?: ToolExecutionBuffer;
   /** Authoritative view of the todos written by the `todo_write` tool during this run. */
   todoStateManager?: TodoStateManager;
+  runAttachmentEvents?: RunAttachmentEvents;
   roundId: string;
   /** Optional session ID forwarded to EIS for prompt-cache scoping. Non-EIS endpoints ignore it. */
   sessionId?: string;
@@ -101,6 +106,8 @@ export const createAgentGraph = ({
     ContextManagementDeps,
     'conversation' | 'chatModel' | 'cacheControl' | 'events'
   >;
+  /** The execution's cycle hooks, dispatched in their own node before each research model call. */
+  cycleHooks?: CycleHookRuntime;
 }) => {
   const contextManagementNodes = createContextManagementNodes({
     ...contextManagement,
@@ -140,6 +147,23 @@ export const createAgentGraph = ({
         })
       ),
     };
+  };
+
+  /**
+   * Lands what the cycle hooks append in the state as its own super-step, before the model request:
+   * the notes are then part of every streamed state, so a fatal research error still keeps them.
+   */
+  const dispatchCycleHooks = async (state: StateType): Promise<StateUpdate> => {
+    if (!cycleHooks) {
+      return {};
+    }
+    const injected = await cycleHooks.dispatch({
+      cycle: state.currentCycle,
+      attempt: state.errorCount + state.contextRetryCount,
+      steps: state.steps,
+      summary: state.compactionSummary,
+    });
+    return injected.length > 0 ? { steps: injected } : {};
   };
 
   const researchAgent = async (state: StateType): Promise<StateUpdate> => {
@@ -217,7 +241,7 @@ export const createAgentGraph = ({
 
     if (outcome.type === 'retry_error') {
       if (state.errorCount <= MAX_ERROR_COUNT) {
-        return steps.researchAgent;
+        return steps.cycleHooks;
       } else {
         // max error count reached, stop execution by throwing
         throw outcome.error;
@@ -297,6 +321,9 @@ export const createAgentGraph = ({
     }
 
     const completed = new Set(processed.completedToolCallIds);
+    const attachmentEvents =
+      runAttachmentEvents?.drainToolCalls(outcome.toolCalls.map(({ toolCallId }) => toolCallId)) ??
+      [];
     return {
       steps: updates,
       toolRenderState: processed.renderState,
@@ -305,6 +332,7 @@ export const createAgentGraph = ({
         processed.prompts.length > 0
           ? { type: 'interrupted', prompts: processed.prompts }
           : { type: 'completed' },
+      attachmentEvents,
     };
   };
 
@@ -385,7 +413,7 @@ export const createAgentGraph = ({
   };
 
   const contextManagementEdge = async (state: StateType) =>
-    state.compactionRequest ? steps.compactContext : steps.researchAgent;
+    state.compactionRequest ? steps.compactContext : steps.cycleHooks;
 
   // note: the node names are used in the event convertion logic, they should *not* be changed
   const graphBuilder = new StateGraph(StateAnnotation)
@@ -393,6 +421,7 @@ export const createAgentGraph = ({
     .addNode(steps.checkBackgroundWork, checkBackgroundWork)
     .addNode(steps.contextManagement, contextManagementNodes.contextManagement)
     .addNode(steps.compactContext, contextManagementNodes.compactContext)
+    .addNode(steps.cycleHooks, dispatchCycleHooks)
     .addNode(steps.researchAgent, researchAgent)
     .addNode(steps.executeTool, executeTool)
     .addNode(steps.handleToolInterrupt, handleToolInterrupt)
@@ -402,9 +431,10 @@ export const createAgentGraph = ({
     .addEdge(steps.checkBackgroundWork, steps.contextManagement)
     .addConditionalEdges(steps.contextManagement, contextManagementEdge, {
       [steps.compactContext]: steps.compactContext,
-      [steps.researchAgent]: steps.researchAgent,
+      [steps.cycleHooks]: steps.cycleHooks,
     })
-    .addEdge(steps.compactContext, steps.researchAgent)
+    .addEdge(steps.compactContext, steps.cycleHooks)
+    .addEdge(steps.cycleHooks, steps.researchAgent)
     .addConditionalEdges(steps.executeTool, executeToolEdge, {
       [steps.checkBackgroundWork]: steps.checkBackgroundWork,
       [steps.handleToolInterrupt]: steps.handleToolInterrupt,
@@ -417,7 +447,7 @@ export const createAgentGraph = ({
       .addNode(steps.prepareToAnswer, prepareToAnswer)
       .addNode(steps.answerAgent, answerAgentStructured)
       .addConditionalEdges(steps.researchAgent, researchAgentEdge, {
-        [steps.researchAgent]: steps.researchAgent,
+        [steps.cycleHooks]: steps.cycleHooks,
         [steps.contextManagement]: steps.contextManagement,
         [steps.executeTool]: steps.executeTool,
         [steps.prepareToAnswer]: steps.prepareToAnswer,
@@ -429,7 +459,7 @@ export const createAgentGraph = ({
       });
   } else {
     graphBuilder.addConditionalEdges(steps.researchAgent, researchAgentEdge, {
-      [steps.researchAgent]: steps.researchAgent,
+      [steps.cycleHooks]: steps.cycleHooks,
       [steps.contextManagement]: steps.contextManagement,
       [steps.executeTool]: steps.executeTool,
       [steps.finalize]: steps.finalize,

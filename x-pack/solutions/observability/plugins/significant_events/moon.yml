@@ -19,7 +19,7 @@ project:
 dependsOn:
   - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/nightshift-shared'
-  - '@kbn/streams-plugin'
+  - '@kbn/nightshift-sources-plugin'
   - '@kbn/core'
   - '@kbn/core-pricing-common'
   - '@kbn/significant-events-schema'
@@ -82,7 +82,9 @@ dependsOn:
   - '@kbn/cps-server-utils'
   - '@kbn/esql-utils'
   - '@kbn/nightshift-investigations-plugin'
+  - '@kbn/agentic-investigations-plugin'
   - '@kbn/core-elasticsearch-server-mocks'
+  - '@kbn/core-http-server-mocks'
 tags:
   - plugin
   - prod
@@ -97,6 +99,4 @@ fileGroups:
     - public/**/*
     - test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

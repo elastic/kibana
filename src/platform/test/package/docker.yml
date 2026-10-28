@@ -1,7 +1,42 @@
 - name: test kibana docker package
   hosts: docker
+  vars:
+    kibana_docker_image_variant: default
+    kibana_enable_pointer_compression: 'false'
+    kibana_docker_image_prefix: "{{ 'kibana-cloud' if kibana_docker_image_variant == 'cloud' else 'kibana' }}"
+    kibana_docker_image_repository: "{{ 'docker.elastic.co/kibana-ci/kibana-cloud' if kibana_docker_image_variant == 'cloud' else 'docker.elastic.co/kibana/kibana' }}"
   roles:
     - install_docker
     - install_kibana_docker
     - assert_kibana_listening
     - assert_kibana_available
+  post_tasks:
+    - name: find running node executable
+      become: yes
+      command:
+        argv:
+          - docker
+          - exec
+          - kibana
+          - /bin/sh
+          - -c
+          - |
+            for executable in /proc/[0-9]*/exe; do
+              if target=$(readlink "$executable"); then
+                case "$target" in
+                  /usr/share/kibana/node/*/bin/node) printf '%s\n' "$target" ;;
+                esac
+              fi
+            done
+      changed_when: false
+      register: kibana_node_executables
+      when: kibana_docker_image_variant == 'cloud'
+
+    - name: assert cloud node selection
+      assert:
+        that:
+          - kibana_node_executables.stdout_lines | unique | list == [expected_node]
+        fail_msg: "Expected {{ expected_node }}, found {{ kibana_node_executables.stdout_lines }}"
+      vars:
+        expected_node: "/usr/share/kibana/node/{{ 'pointer-compression' if kibana_enable_pointer_compression == 'true' else 'default' }}/bin/node"
+      when: kibana_docker_image_variant == 'cloud'

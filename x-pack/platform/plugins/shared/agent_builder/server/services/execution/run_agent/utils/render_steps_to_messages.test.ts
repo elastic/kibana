@@ -13,7 +13,12 @@ import type {
   ToolCallStep,
   ToolResult,
 } from '@kbn/agent-builder-common';
-import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStepType,
+  ToolCallInvocation,
+  ToolResultType,
+  createInjectedContextStep,
+} from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode, ExecutionStatus } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { internalTools } from '@kbn/agent-builder-common/tools';
@@ -28,6 +33,8 @@ import {
 } from './render_steps_to_messages';
 import { toolCallKey } from './filestore_substitution';
 import type { ToolCallResultTransformer } from './tool_summarization';
+import { attachmentEventFixture } from '../../../../test_utils/timeline';
+import { createAttachmentNoticeRenderer } from './attachment_event_presentation';
 
 const other = (id: string, data: object = { id }): ToolResult => ({
   tool_result_id: `r-${id}`,
@@ -424,6 +431,57 @@ describe('renderCurrentRun', () => {
     ]);
   });
 
+  it('puts the attachment notice after the tool results and before the image trailer', async () => {
+    const results: ToolResult[] = [
+      {
+        tool_result_id: 'i1',
+        type: ToolResultType.image,
+        data: { attachment_id: 'ok', mime_type: 'image/png', name: 'pic', description: '' },
+      },
+    ];
+    const messages = await renderCurrentRun({
+      run: {
+        roundId: 'r',
+        steps: [call('c1', { results })],
+        renderState: rendered('c1'),
+        cycleLimit: 10,
+        pendingToolCallIds: [],
+        retryNotices: [],
+        attachmentEvents: [
+          attachmentEventFixture({ id: 't', toolCallId: 'c1', attachmentId: 'att-2' }),
+        ],
+      },
+      phase: 'research',
+      imageResolver: async () => ({ base64: 'AAA', mimeType: 'image/png' }),
+      attachments: {
+        notices: createAttachmentNoticeRenderer({ describeType: () => undefined }),
+        resumeAnchors: new Map(),
+      },
+    });
+    expect(types(messages)).toEqual(['ai', 'tool', 'human', 'human']);
+    expect(messages[2].content).toContain('attachment_id="att-2"');
+    expect(messages[3].content).toEqual([
+      { type: 'text', text: expect.stringContaining('attachment_id="ok"') },
+      { type: 'image_url', image_url: { url: 'data:image/png;base64,AAA' } },
+    ]);
+  });
+
+  it('renders no notice when the run has attachment events but no attachments option', async () => {
+    const messages = await renderCurrentRun({
+      run: {
+        roundId: 'r',
+        steps: [call('c1')],
+        renderState: rendered('c1'),
+        cycleLimit: 10,
+        pendingToolCallIds: [],
+        retryNotices: [],
+        attachmentEvents: [attachmentEventFixture({ id: 't', toolCallId: 'c1' })],
+      },
+      phase: 'research',
+    });
+    expect(types(messages)).toEqual(['ai', 'tool']);
+  });
+
   describe('range', () => {
     const error = createAgentExecutionError('bad', AgentExecutionErrorCode.emptyResponse, {});
     const steps: ConversationRoundStep[] = [
@@ -559,5 +617,76 @@ describe('renderCurrentRun', () => {
       expect(types(messages)).toEqual(['ai', 'tool', 'human']);
       expect(imageResolver).toHaveBeenCalledWith({ attachmentId: 'ok' });
     });
+  });
+});
+
+describe('injected context', () => {
+  const note = createInjectedContextStep({ hook_id: 'memory', text: 'remember <this>' });
+
+  it('renders as a user message wrapping the escaped text with its source', async () => {
+    const [message] = await renderHistorySteps({ steps: [note] });
+
+    expect(message.getType()).toBe('human');
+    expect(message.name).toBe('injected_context');
+    expect(message.content).toContain('<injected_context');
+    expect(message.content).not.toContain('memory');
+    expect(message.content).toContain('remember &lt;this&gt;');
+  });
+
+  it('renders in both phases of the current run, identically to history', async () => {
+    const [history] = await renderHistorySteps({ steps: [note] });
+    const [research] = await current([note], {});
+    const [answer] = await current([note], {}, { phase: 'answer' });
+
+    expect(research.toDict()).toEqual(history.toDict());
+    expect(answer.toDict()).toEqual(history.toDict());
+  });
+});
+
+describe('dynamic tool calls', () => {
+  const dynamicCall = (id: string, overrides: Partial<ToolCallStep> = {}) =>
+    call(id, {
+      tool_id: 'skill.tool',
+      params: { q: id },
+      invocation: ToolCallInvocation.dynamic,
+      ...overrides,
+    });
+
+  it('renders a history step as the execute_dynamic_tool call the model made', async () => {
+    const steps: ConversationRoundStep[] = [
+      reasoning('why a', { tool_call_group_id: 'g', tool_call_id: 'a' }),
+      dynamicCall('a', { tool_call_group_id: 'g' }),
+      call('b', { tool_call_group_id: 'g' }),
+    ];
+    const [ai, toolA] = (await renderHistorySteps({ steps })) as [AIMessage, ToolMessage];
+
+    expect(ai.tool_calls).toEqual([
+      {
+        id: 'a',
+        name: internalTools.executeDynamicTool,
+        args: { _reasoning: 'why a', tool_id: 'skill.tool', params: { q: 'a' } },
+        type: 'tool_call',
+      },
+      { id: 'b', name: 'my_tool', args: { q: 'b' }, type: 'tool_call' },
+    ]);
+    expect(toolA.tool_call_id).toBe('a');
+  });
+
+  it('renders a current-run step the same way, using the render state name', async () => {
+    const steps: ConversationRoundStep[] = [dynamicCall('a')];
+    const renderState = rendered('a', { toolName: internalTools.executeDynamicTool });
+
+    const [ai] = (await current(steps, renderState)) as [AIMessage];
+    const [history] = (await renderHistorySteps({ steps })) as [AIMessage];
+
+    expect(ai.tool_calls).toEqual([
+      {
+        id: 'a',
+        name: internalTools.executeDynamicTool,
+        args: { tool_id: 'skill.tool', params: { q: 'a' } },
+        type: 'tool_call',
+      },
+    ]);
+    expect(ai.tool_calls).toEqual(history.tool_calls);
   });
 });

@@ -22,11 +22,16 @@ const baseArgs = {
   size: 100,
 };
 
-function makeEsClient(buckets: Array<{ key: string }>, missingCount: number): ElasticsearchClient {
+function makeEsClient(
+  buckets: Array<{ key: string }>,
+  missingCount: number,
+  otelBuckets: Array<{ key: string }> = []
+): ElasticsearchClient {
   return {
     search: async () => ({
       aggregations: {
         environments: { buckets },
+        otel_environments: { buckets: otelBuckets },
         missing_environments: { doc_count: missingCount },
       },
     }),
@@ -44,6 +49,15 @@ describe('getUnifiedEnvironments', () => {
     const esClient = makeEsClient([{ key: 'dev' }], 0);
     const result = await getUnifiedEnvironments({ esClient, ...baseArgs });
     expect(result).toEqual(['dev']);
+  });
+
+  it('merges environments from deployment.environment.name with service.environment', async () => {
+    const esClient = makeEsClient([{ key: 'production' }], 0, [
+      { key: 'dev' },
+      { key: 'production' },
+    ]);
+    const result = await getUnifiedEnvironments({ esClient, ...baseArgs });
+    expect(result).toEqual(['dev', 'production']);
   });
 
   it('appends ENVIRONMENT_NOT_DEFINED when docs have no service.environment', async () => {

@@ -46,8 +46,20 @@ Array [
               },
             },
             Object {
-              "term": Object {
-                "service.environment": "prod",
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "term": Object {
+                      "service.environment": "prod",
+                    },
+                  },
+                  Object {
+                    "term": Object {
+                      "resource.attributes.deployment.environment.name": "prod",
+                    },
+                  },
+                ],
               },
             },
           ],

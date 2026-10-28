@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiImage, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiEmptyPrompt, EuiFlexGroup, EuiImage, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { SecurityPageName } from '../../../common/constants';
+import { useKibana } from '../../common/lib/kibana';
 import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
 import { SecuritySolutionLinkButton } from '../../common/components/links';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
@@ -26,75 +28,104 @@ import illustrationSearchAnalytics from '../../common/images/illustration_search
  * "Entities" attachment accordion); pages should keep using
  * `EntityStoreDisabledEmptyPrompt` below for the full-page layout.
  */
-export const EntityStoreDisabledEmptyPromptBody = React.memo(() => (
-  <EuiEmptyPrompt
-    color="plain"
-    css={css`
-      .euiEmptyPrompt__icon {
-        min-inline-size: 224px;
-        text-align: center;
+export const EntityStoreDisabledEmptyPromptBody = React.memo(() => {
+  const { application } = useKibana().services;
+  const canReadIntegrations = application.capabilities.fleet?.read === true;
+  const addIntegrationsUrl = application.getUrlForApp(INTEGRATIONS_PLUGIN_ID, {
+    path: '/browse/security/advanced_analytics_ueba',
+  });
+  const onAddIntegrationsClick = useCallback(
+    (event: React.MouseEvent) => {
+      event.preventDefault();
+      application.navigateToUrl(addIntegrationsUrl);
+    },
+    [application, addIntegrationsUrl]
+  );
+
+  return (
+    <EuiEmptyPrompt
+      color="plain"
+      css={css`
+        .euiEmptyPrompt__icon {
+          min-inline-size: 228px;
+          text-align: center;
+        }
+        .euiEmptyPrompt__content {
+          flex: 1;
+        }
+      `}
+      data-test-subj="entityStoreDisabledEmptyPrompt"
+      icon={<EuiImage size={196} alt="" url={illustrationSearchAnalytics} />}
+      layout="horizontal"
+      style={{ maxWidth: 800 }}
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics"
+            defaultMessage="Enable Entity analytics"
+          />
+        </h2>
       }
-      .euiEmptyPrompt__content {
-        flex: 1;
+      body={
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics.body"
+          defaultMessage="Start collecting entity data across your environment, so you can spot your riskiest entities and anomalous behavior at a glance, and catch threats before they escalate."
+        />
       }
-    `}
-    data-test-subj="entityStoreDisabledEmptyPrompt"
-    icon={<EuiImage size={192} alt="" url={illustrationSearchAnalytics} />}
-    layout="horizontal"
-    style={{ maxWidth: 800 }}
-    title={
-      <h2>
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics"
-          defaultMessage="Enable Entity analytics"
-        />
-      </h2>
-    }
-    body={
-      <FormattedMessage
-        id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics.body"
-        defaultMessage="Start collecting entity data across your environment, so you can spot your riskiest entities and anomalous behavior at a glance, and catch threats before they escalate."
-      />
-    }
-    actions={
-      <SecuritySolutionLinkButton
-        fill
-        deepLinkId={SecurityPageName.entityAnalyticsManagement}
-        iconType="external"
-        iconSide="right"
-        target="_blank"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics.action"
-          defaultMessage="Enable Entity analytics"
-        />
-      </SecuritySolutionLinkButton>
-    }
-    footer={
-      <FormattedMessage
-        id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics.footer"
-        defaultMessage="<semibold>Want to learn more?</semibold> {docsLink}"
-        values={{
-          semibold: (chunks: React.ReactNode) => (
-            <EuiText size="s" component="span" css={{ fontWeight: 600 }}>
-              {chunks}
-            </EuiText>
-          ),
-          docsLink: (
-            <EntityAnalyticsLearnMoreLink
-              title={
+      actions={[
+        <SecuritySolutionLinkButton
+          key="enable"
+          fill
+          deepLinkId={SecurityPageName.entityAnalyticsManagement}
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics.action"
+            defaultMessage="Enable Entity analytics"
+          />
+        </SecuritySolutionLinkButton>,
+        ...(canReadIntegrations
+          ? [
+              <EuiButtonEmpty
+                key="addIntegrations"
+                href={addIntegrationsUrl}
+                onClick={onAddIntegrationsClick}
+                iconType="tablePlus"
+                data-test-subj="entityStoreDisabledEmptyPromptAddIntegrations"
+              >
                 <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics.footerLink"
-                  defaultMessage="Read the docs"
+                  id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics.addIntegrations"
+                  defaultMessage="Add integrations"
                 />
-              }
-            />
-          ),
-        }}
-      />
-    }
-  />
-));
+              </EuiButtonEmpty>,
+            ]
+          : []),
+      ]}
+      footer={
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics.footer"
+          defaultMessage="<semibold>Want to learn more?</semibold> {docsLink}"
+          values={{
+            semibold: (chunks: React.ReactNode) => (
+              <EuiText size="s" component="span" css={{ fontWeight: 600 }}>
+                {chunks}
+              </EuiText>
+            ),
+            docsLink: (
+              <EntityAnalyticsLearnMoreLink
+                title={
+                  <FormattedMessage
+                    id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics.footerLink"
+                    defaultMessage="Read documentation"
+                  />
+                }
+              />
+            ),
+          }}
+        />
+      }
+    />
+  );
+});
 EntityStoreDisabledEmptyPromptBody.displayName = 'EntityStoreDisabledEmptyPromptBody';
 
 export const EntityStoreDisabledEmptyPrompt = React.memo(() => (

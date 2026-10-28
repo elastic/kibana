@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiButton,
@@ -16,26 +16,33 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
-import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { usePageReady } from '@kbn/ebt-tools';
-import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
-import type { ListInvestigationItem, Severity } from '@kbn/nightshift-investigations-plugin/common';
+import type { Severity } from '@kbn/nightshift-investigations-plugin/common';
+import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
 import { useKibana } from '../hooks/use_kibana';
 import { isHttpNotFoundError } from '../common/http_error';
+import {
+  INVESTIGATION_VIEW_SOURCES,
+  reportNightshiftHomepageViewed,
+  reportNightshiftInvestigationsSearched,
+  reportNightshiftInvestigationViewed,
+  type InvestigationViewSource,
+} from '../common/ebt_events';
 import { RETRY_BUTTON_LABEL } from '../common/messages';
 import { useInvestigationSections } from '../hooks/use_investigation_sections';
 import {
   InvestigationList,
   type InvestigationListHandle,
 } from '../investigation/investigation_list';
-import { InvestigationDetailFlyout } from '../investigation/investigation_detail_flyout';
 import { isInvestigationSectionVisible } from '../investigation/investigation_section';
 import { InvestigationSeverityTiles } from '../investigation/investigation_severity_tiles';
-import { StartInvestigationPanel } from '../investigation/start_investigation_panel';
+import { useFlyoutShareUrlCustomAction } from '../common/flyout_share_url_button';
 import {
+  buildNightshiftInvestigationFlyoutShareUrl,
   clearNightshiftInvestigationIdParam,
   getNightshiftInvestigationIdFromSearch,
   getNightshiftSearchQueryFromSearch,
@@ -54,11 +61,18 @@ const INVESTIGATIONS_SEARCH_DEBOUNCE_MS = 300;
 
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const { application, nightshiftInvestigations } = useKibana().services;
+  const { analytics, application, nightshiftInvestigations, agenticInvestigations, agentBuilder } =
+    useKibana().services;
   const history = useHistory();
   const { search } = useLocation();
   const sectionsRef = useRef<InvestigationListHandle>(null);
   const scrolledToSeverity = useRef<Severity | undefined>(undefined);
+  // A click sets this for the navigation it triggers; anything else is a deep link.
+  const investigationViewSource = useRef<InvestigationViewSource>(
+    INVESTIGATION_VIEW_SOURCES.DEEP_LINK
+  );
+  const hasReportedHomepageView = useRef(false);
+  const reportedSearchQuery = useRef<string | undefined>(undefined);
 
   // Read filter state from URL so it survives navigation and is shareable.
   const searchQuery = useMemo(() => getNightshiftSearchQueryFromSearch(search), [search]);
@@ -72,10 +86,13 @@ export function NightshiftApp(): React.ReactElement {
   const {
     sections,
     severityCounts,
+    areSeverityCountsLoading,
+    areSeverityCountsFetching,
     hasActiveInvestigations,
     isInitialLoading,
     isFetching,
     totalCount,
+    matchedCount,
     loadedCount,
     refetchAll,
   } = useInvestigationSections({ query: debouncedSearchQuery });
@@ -93,29 +110,26 @@ export function NightshiftApp(): React.ReactElement {
     [sections]
   );
 
-  const isInvestigationsAvailable = nightshiftInvestigations?.investigationsClient != null;
-  const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
-  const [isStartInvestigationOpen, setIsStartInvestigationOpen] = useState(false);
-
-  const toggleStartInvestigation = useCallback(
-    () => setIsStartInvestigationOpen((isOpen) => !isOpen),
-    []
-  );
-  const closeStartInvestigation = useCallback(() => setIsStartInvestigationOpen(false), []);
+  // Investigations are Agent Builder conversations listed by the agentic investigations API.
+  const isInvestigationsAvailable =
+    nightshiftInvestigations?.investigationsClient != null &&
+    agenticInvestigations != null &&
+    agentBuilder != null;
 
   const selectedInvestigationId = useMemo(
     () => getNightshiftInvestigationIdFromSearch(search),
     [search]
   );
 
-  const showAllEventsHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
-    deepLinkId: 'events',
+  const showAllEventsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+    path: '/detections/events',
   });
 
   const handleInvestigationClick = useCallback(
-    (investigation: ListInvestigationItem) => {
+    (investigation: InvestigationSummary) => {
+      investigationViewSource.current = INVESTIGATION_VIEW_SOURCES.CLICK;
       const params = new URLSearchParams(history.location.search);
-      setNightshiftInvestigationIdParam(params, investigation.investigation_id);
+      setNightshiftInvestigationIdParam(params, investigation.id);
       history.replace({ search: params.toString() });
     },
     [history]
@@ -126,6 +140,47 @@ export function NightshiftApp(): React.ReactElement {
     clearNightshiftInvestigationIdParam(params);
     history.replace({ search: params.toString() });
   }, [history]);
+
+  const getInvestigationShareUrl = useCallback(
+    () =>
+      selectedInvestigationId
+        ? buildNightshiftInvestigationFlyoutShareUrl(selectedInvestigationId)
+        : window.location.href,
+    [selectedInvestigationId]
+  );
+  const shareInvestigationAction = useFlyoutShareUrlCustomAction(getInvestigationShareUrl);
+
+  // `?investigationId=` (also what the investigation locator builds) opens the investigation's
+  // Agent Builder conversation details flyout; the id is the conversation id.
+  useEffect(() => {
+    if (!selectedInvestigationId || !agentBuilder) {
+      return;
+    }
+    let closeFlyout: (() => void) | undefined;
+    let isCancelled = false;
+    void agentBuilder
+      .openConversationDetails({
+        conversationId: selectedInvestigationId,
+        trailingActions: [shareInvestigationAction],
+        // Closed by the user, not replaced by another selection or unmounted.
+        onClose: () => {
+          if (!isCancelled) {
+            handleFlyoutClose();
+          }
+        },
+      })
+      .then((close) => {
+        if (isCancelled) {
+          close();
+        } else {
+          closeFlyout = close;
+        }
+      });
+    return () => {
+      isCancelled = true;
+      closeFlyout?.();
+    };
+  }, [agentBuilder, handleFlyoutClose, selectedInvestigationId, shareInvestigationAction]);
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -169,6 +224,75 @@ export function NightshiftApp(): React.ReactElement {
     () => sections.flatMap((section) => section.investigations),
     [sections]
   );
+  // Read by effects that must not re-run when the list refetches.
+  const loadedInvestigationsRef = useRef(loadedInvestigations);
+  loadedInvestigationsRef.current = loadedInvestigations;
+
+  // The landing page is "viewed" once its first load lands, with what it then shows.
+  useEffect(() => {
+    // The counts come from their own query: reporting before it settles would report zeros.
+    if (
+      hasReportedHomepageView.current ||
+      isInitialLoading ||
+      areSeverityCountsLoading ||
+      allFailed
+    ) {
+      return;
+    }
+    hasReportedHomepageView.current = true;
+    reportNightshiftHomepageViewed(analytics, {
+      investigationCount: loadedCount,
+      severityCounts,
+      unratedCount: loadedInvestigationsRef.current.filter(
+        ({ metadata }) => metadata.severity === undefined
+      ).length,
+    });
+  }, [
+    allFailed,
+    analytics,
+    areSeverityCountsLoading,
+    isInitialLoading,
+    loadedCount,
+    severityCounts,
+  ]);
+
+  // Clicks cannot carry an id, and a deep link is not a click: report the view itself so both
+  // paths join to the investigation they opened. Severity and status need the loaded list, so
+  // this waits for the first load.
+  useEffect(() => {
+    if (!selectedInvestigationId || isInitialLoading) {
+      return;
+    }
+    const source = investigationViewSource.current;
+    investigationViewSource.current = INVESTIGATION_VIEW_SOURCES.DEEP_LINK;
+    reportNightshiftInvestigationViewed(analytics, {
+      investigationId: selectedInvestigationId,
+      source,
+      investigation: loadedInvestigationsRef.current.find(
+        ({ id }) => id === selectedInvestigationId
+      ),
+    });
+  }, [analytics, isInitialLoading, selectedInvestigationId]);
+
+  // Searching is typing, not clicking. Reported once the debounced term's results have landed,
+  // so an empty result set is distinguishable from a hit. The term itself is never reported.
+  useEffect(() => {
+    const query = debouncedSearchQuery?.trim();
+    if (!query) {
+      reportedSearchQuery.current = undefined;
+      return;
+    }
+    // `matchedCount` is built from the severity counts query, so that has to have landed too.
+    if (isFetching || areSeverityCountsFetching || reportedSearchQuery.current === query) {
+      return;
+    }
+    reportedSearchQuery.current = query;
+    reportNightshiftInvestigationsSearched(analytics, {
+      queryLength: query.length,
+      // Each matching investigation once: the section totals overlap.
+      resultCount: matchedCount,
+    });
+  }, [analytics, areSeverityCountsFetching, debouncedSearchQuery, isFetching, matchedCount]);
 
   usePageReady({
     isReady: !isInitialLoading && !allFailed,
@@ -179,11 +303,9 @@ export function NightshiftApp(): React.ReactElement {
       key2: 'investigation_total',
       value2: totalCount,
       key3: 'active_investigation_count',
-      value3: loadedInvestigations.filter(
-        ({ status }) => status === 'pending' || status === 'running'
-      ).length,
-      key4: 'failed_investigation_count',
-      value4: loadedInvestigations.filter(({ status }) => status === 'failed').length,
+      value3: loadedInvestigations.filter(({ in_progress: inProgress }) => inProgress).length,
+      key4: 'unrated_investigation_count',
+      value4: loadedInvestigations.filter(({ metadata }) => metadata.severity === undefined).length,
     },
     meta: {
       description: '[ttfmp_nightshift] The Nightshift landing page has loaded investigations.',
@@ -225,16 +347,7 @@ export function NightshiftApp(): React.ReactElement {
         isLoading={isInitialLoading}
         hasActiveInvestigations={hasActiveInvestigations}
         showAllEventsHref={showAllEventsHref}
-        onStartInvestigationClick={canManage ? toggleStartInvestigation : undefined}
-        isStartInvestigationOpen={isStartInvestigationOpen}
       />
-
-      {isStartInvestigationOpen && (
-        <>
-          <EuiSpacer size="l" />
-          <StartInvestigationPanel onClose={closeStartInvestigation} />
-        </>
-      )}
 
       <EuiSpacer size="l" />
 
@@ -247,6 +360,7 @@ export function NightshiftApp(): React.ReactElement {
         onChange={handleSearchChange}
         isClearable
         fullWidth
+        compressed
       />
 
       <EuiSpacer size="m" />
@@ -266,14 +380,6 @@ export function NightshiftApp(): React.ReactElement {
         selectedInvestigationId={selectedInvestigationId}
         onInvestigationClick={handleInvestigationClick}
       />
-
-      {selectedInvestigationId && (
-        <InvestigationDetailFlyout
-          key={selectedInvestigationId}
-          investigationId={selectedInvestigationId}
-          onClose={handleFlyoutClose}
-        />
-      )}
     </EuiFlexGroup>
   );
 }

@@ -14,7 +14,7 @@ import type {
 import type { UserActionFindRequestTypes } from '../../../../common/types/api';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
 import { defaultSortField } from '../../../common/utils';
-import { decodeOrThrow } from '../../../common/runtime_types';
+import { decodeOrThrowZod } from '../../../common/runtime_types';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -37,8 +37,8 @@ import type {
   UserActionTransformedAttributes,
 } from '../../../common/types/user_actions';
 import { bulkDecodeSOAttributes } from '../../utils';
-import { UserActionTransformedAttributesRt } from '../../../common/types/user_actions';
-import type { UserActionType } from '../../../../common/types/domain';
+import { UserActionTransformedAttributesSchema } from '../../../common/types/user_actions';
+import type { UserActionAttributes, UserActionType } from '../../../../common/types/domain';
 import {
   UserActionActions,
   UserActionTypes,
@@ -83,7 +83,7 @@ export class UserActionFinder {
 
       const decodeRes = bulkDecodeSOAttributes(
         res.saved_objects,
-        UserActionTransformedAttributesRt
+        UserActionTransformedAttributesSchema
       );
 
       return {
@@ -111,10 +111,10 @@ export class UserActionFinder {
    * logged whenever the cap is actually hit so truncation isn't silent.
    *
    * `decode` (defaults to `true`) controls whether each attribute is validated
-   * with `decodeOrThrow` as it's collected. Callers that only need a subset of
+   * with `decodeOrThrowZod` as it's collected. Callers that only need a subset of
    * the results (e.g. after filtering + pagination) can pass `decode: false` and
    * call `decodeUserActions` themselves on just that subset, avoiding paying the
-   * io-ts decode cost for records that end up discarded.
+   * decode cost for records that end up discarded.
    */
   public async findAll({
     caseId,
@@ -167,7 +167,9 @@ export class UserActionFinder {
   ): UserActionSavedObjectTransformed[] {
     return userActions.map((so) => ({
       ...so,
-      attributes: decodeOrThrow(UserActionTransformedAttributesRt)(so.attributes),
+      attributes: decodeOrThrowZod(UserActionTransformedAttributesSchema)(
+        so.attributes
+      ) as UserActionAttributes,
     }));
   }
 
@@ -192,11 +194,12 @@ export class UserActionFinder {
   }
 
   private static buildActionFilter(): KueryNode | undefined {
-    const filterForUserActionsExcludingComments = fromKueryExpression(
-      `not (${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${AttachmentType.user} or ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${COMMENT_ATTACHMENT_TYPE})`
+    // Comment edits and deletions stay in History, so All = Comments + History.
+    const filterForUserActionsExcludingCommentCreations = fromKueryExpression(
+      `not ((${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${AttachmentType.user} or ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${COMMENT_ATTACHMENT_TYPE}) and ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.action: ${UserActionActions.create})`
     );
 
-    return filterForUserActionsExcludingComments;
+    return filterForUserActionsExcludingCommentCreations;
   }
 
   private static buildCommentTypeFilter(): KueryNode | undefined {
@@ -369,7 +372,9 @@ export class UserActionFinder {
           return {
             ...res,
             attributes: decode
-              ? decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes)
+              ? (decodeOrThrowZod(UserActionTransformedAttributesSchema)(
+                  res.attributes
+                ) as UserActionAttributes)
               : (res.attributes as UserActionTransformedAttributes),
           };
         })

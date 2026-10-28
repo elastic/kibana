@@ -12,6 +12,7 @@ import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+import { snoozeAlert } from '../../lib/alert_api_actions';
 import { ObjectRemover } from '../../lib/object_remover';
 import { getTestAlertData, getTestConnectorData } from '../../lib/get_test_data';
 
@@ -30,7 +31,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const find = getService('find');
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
-  const toasts = getService('toasts');
 
   async function createConnectorManualCleanup(overwrites: Record<string, any> = {}) {
     const { body: createdConnector } = await supertest
@@ -45,6 +45,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const createdConnector = await createConnectorManualCleanup(overwrites);
     objectRemover.add(createdConnector.id, 'connector', 'actions');
     return createdConnector;
+  }
+
+  async function readRuleEnabledBadge() {
+    if (await testSubjects.exists('ruleEnabledBadge')) {
+      return await testSubjects.getVisibleText('ruleEnabledBadge');
+    }
+    await testSubjects.click('appHeaderBadgesOverflow');
+    // the overflow popover fades in, and getVisibleText() reads '' until it is displayed
+    await testSubjects.existOrFail('ruleEnabledBadge');
+    const text = await testSubjects.getVisibleText('ruleEnabledBadge');
+    await testSubjects.click('appHeaderBadgesOverflow');
+    return text;
   }
 
   async function createAlwaysFiringRule(overwrites: Record<string, any> = {}, spaceId?: string) {
@@ -123,6 +135,56 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   }
 
+  async function getRule(ruleId: string) {
+    const { body } = await supertest
+      .get(`/internal/alerting/rule/${encodeURIComponent(ruleId)}`)
+      .expect(200);
+    return body;
+  }
+
+  async function snoozeRule(ruleId: string) {
+    await supertest
+      .post(`/internal/alerting/rule/${encodeURIComponent(ruleId)}/_snooze`)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        snooze_schedule: {
+          id: uuidv4(),
+          duration: 60 * 60 * 1000,
+          rRule: {
+            count: 1,
+            dtstart: moment().add(3, 'hours').toISOString(),
+            tzid: 'UTC',
+          },
+        },
+      })
+      .expect(204);
+  }
+
+  async function getRuleSnoozeState(ruleId: string) {
+    const {
+      mute_all: muteAll,
+      snooze_schedule: snoozeSchedule,
+      is_snoozed_until: isSnoozedUntil,
+    } = await getRule(ruleId);
+    return {
+      muteAll,
+      scheduleCount: (snoozeSchedule ?? []).length,
+      isSnoozedUntil: isSnoozedUntil ?? null,
+    };
+  }
+
+  async function resetSnooze(ruleId: string) {
+    const { snooze_schedule: snoozeSchedule } = await getRule(ruleId);
+    const scheduleIds = ((snoozeSchedule ?? []) as Array<{ id?: string }>)
+      .map(({ id }) => id)
+      .filter(Boolean);
+    await supertest
+      .post(`/internal/alerting/rule/${encodeURIComponent(ruleId)}/_unsnooze`)
+      .set('kbn-xsrf', 'foo')
+      .send({ ...(scheduleIds?.length > 0 && { schedule_ids: scheduleIds }) })
+      .expect(204);
+  }
+
   async function getAlertSummary(ruleId: string) {
     const { body: summary } = await supertest
       .get(`/internal/alerting/rule/${encodeURIComponent(ruleId)}/_alert_summary`)
@@ -146,11 +208,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Rule Details', function () {
     describe('Header', function () {
       const testRunUuid = uuidv4();
+      let rule: { id: string; name: string };
       before(async () => {
         await pageObjects.common.navigateToApp('management', {
           path: 'insightsAndAlerting/triggersActions',
         });
-        const rule = await createRuleWithSmallInterval(testRunUuid);
+        rule = await createRuleWithSmallInterval(testRunUuid);
 
         // refresh to see rule
         await browser.refresh();
@@ -162,6 +225,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // click on first alert
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
+      });
+
+      beforeEach(async () => {
+        await resetSnooze(rule.id);
+        await browser.refresh();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.existOrFail('rulesListNotifyBadge-unsnoozed');
       });
 
       after(async () => {
@@ -179,142 +249,122 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(owner).to.be('API key owner elastic');
       });
 
-      it('renders toast when schedule is less than configured minimum', async () => {
-        await testSubjects.existOrFail('intervalConfigToast');
-
-        const editButton = await testSubjects.find('ruleIntervalToastEditButton');
-        await editButton.click();
-
-        await testSubjects.click('rulePageFooterCancelButton');
-      });
-
       it('should disable the rule', async () => {
-        const statusBadge = await testSubjects.find('ruleEnabledBadge');
-
-        expect(await statusBadge.getVisibleText()).to.eql('Enabled');
+        expect(await readRuleEnabledBadge()).to.eql('Enabled');
 
         await testSubjects.click('ruleEnabledSwitch');
-
         await testSubjects.click('confirmModalConfirmButton');
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async () => {
-          expect(await statusBadge.getVisibleText()).to.eql('Disabled');
+          expect((await getRule(rule.id)).enabled).to.equal(false);
         });
       });
 
       it('should allow you to snooze a disabled rule', async () => {
-        const statusBadge = await testSubjects.find('ruleEnabledBadge');
+        expect(await readRuleEnabledBadge()).to.eql('Disabled');
 
-        expect(await statusBadge.getVisibleText()).to.eql('Disabled');
-
-        let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
-        await snoozeBadge.click();
-
-        const snoozeIndefinite = await testSubjects.find('ruleSnoozeIndefiniteApply');
-        await snoozeIndefinite.click();
+        await testSubjects.clickWhenNotDisabled('rulesListNotifyBadge-unsnoozed');
+        await testSubjects.clickWhenNotDisabled('ruleSnoozeIndefiniteApply');
+        await testSubjects.waitForDeleted('ruleSnoozeIndefiniteApply');
 
         await retry.try(async () => {
-          await testSubjects.existOrFail('rulesListNotifyBadge-snoozedIndefinitely');
+          expect((await getRuleSnoozeState(rule.id)).muteAll).to.equal(true);
         });
-
-        // Unsnooze the rule for the next test
-        snoozeBadge = await testSubjects.find('rulesListNotifyBadge-snoozedIndefinitely');
-        await snoozeBadge.click();
-
-        const snoozeCancel = await testSubjects.find('ruleSnoozeCancel');
-        await snoozeCancel.click();
       });
 
-      it('should reenable a disabled the rule', async () => {
-        const statusBadge = await testSubjects.find('ruleEnabledBadge');
-
-        expect(await statusBadge.getVisibleText()).to.eql('Disabled');
+      it('should reenable a disabled rule', async () => {
+        expect((await getRule(rule.id)).enabled).to.equal(false);
 
         await testSubjects.click('ruleEnabledSwitch');
 
         await retry.try(async () => {
-          expect(await statusBadge.getVisibleText()).to.eql('Enabled');
+          expect((await getRule(rule.id)).enabled).to.equal(true);
         });
       });
 
       it('should snooze the rule', async () => {
-        let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
-        await snoozeBadge.click();
-
-        const snoozeIndefinite = await testSubjects.find('ruleSnoozeIndefiniteApply');
-        await snoozeIndefinite.click();
+        await testSubjects.clickWhenNotDisabled('rulesListNotifyBadge-unsnoozed');
+        await testSubjects.clickWhenNotDisabled('ruleSnoozeIndefiniteApply');
+        await testSubjects.waitForDeleted('ruleSnoozeIndefiniteApply');
 
         await retry.try(async () => {
-          await testSubjects.existOrFail('rulesListNotifyBadge-snoozedIndefinitely');
+          expect((await getRuleSnoozeState(rule.id)).muteAll).to.equal(true);
         });
-
-        // Unsnooze the rule for the next test
-        snoozeBadge = await testSubjects.find('rulesListNotifyBadge-snoozedIndefinitely');
-        await snoozeBadge.click();
-
-        const snoozeCancel = await testSubjects.find('ruleSnoozeCancel');
-        await snoozeCancel.click();
-        await pageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should snooze the rule for a set duration', async () => {
-        let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
-        await snoozeBadge.click();
-
-        const snooze8h = await testSubjects.find('linkSnooze8h');
-        await snooze8h.click();
-
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.clickWhenNotDisabled('rulesListNotifyBadge-unsnoozed');
+        await testSubjects.clickWhenNotDisabled('linkSnooze8h');
+        await testSubjects.waitForDeleted('linkSnooze8h');
 
         await retry.try(async () => {
-          await testSubjects.existOrFail('rulesListNotifyBadge-snoozed');
+          const { muteAll, scheduleCount, isSnoozedUntil } = await getRuleSnoozeState(rule.id);
+          expect(muteAll).to.equal(false);
+          expect(scheduleCount).to.equal(1);
+          expect(isSnoozedUntil).not.to.be(null);
+          const hoursUntilExpiry = moment(isSnoozedUntil).diff(moment(), 'hours', true);
+          expect(hoursUntilExpiry).to.be.within(7, 8);
         });
-
-        // Unsnooze the rule for the next test
-        snoozeBadge = await testSubjects.find('rulesListNotifyBadge-snoozed');
-        await snoozeBadge.click();
-
-        const snoozeCancel = await testSubjects.find('ruleSnoozeCancel');
-        await snoozeCancel.click();
-        await pageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should add snooze schedule', async () => {
-        let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
-        await snoozeBadge.click();
-
-        const addScheduleButton = await testSubjects.find('ruleAddSchedule');
-        await addScheduleButton.click();
-
-        const saveScheduleButton = await testSubjects.find('scheduler-saveSchedule');
-        await saveScheduleButton.click();
-
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.clickWhenNotDisabled('rulesListNotifyBadge-unsnoozed');
+        await testSubjects.clickWhenNotDisabled('ruleAddSchedule');
+        await testSubjects.clickWhenNotDisabled('scheduler-saveSchedule');
+        await testSubjects.waitForDeleted('scheduler-saveSchedule');
 
         await retry.try(async () => {
-          await testSubjects.existOrFail('rulesListNotifyBadge-scheduled');
+          const { muteAll, scheduleCount } = await getRuleSnoozeState(rule.id);
+          expect(muteAll).to.equal(false);
+          expect(scheduleCount).to.equal(1);
         });
+      });
 
-        // Unsnooze the rule for the next test
-        snoozeBadge = await testSubjects.find('rulesListNotifyBadge-scheduled');
-        await snoozeBadge.click();
-
-        const snoozeCancel = await testSubjects.find('ruleRemoveAllSchedules');
-        await snoozeCancel.click();
-
-        const confirmButton = await testSubjects.find('confirmModalConfirmButton');
-        await confirmButton.click();
+      it('should unsnooze an actively snoozed rule from the snooze badge', async () => {
+        await snoozeAlert({ supertest, alertId: rule.id });
+        await browser.refresh();
         await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await testSubjects.clickWhenNotDisabled('rulesListNotifyBadge-snoozed');
+        await testSubjects.clickWhenNotDisabled('ruleSnoozeCancel');
+        await testSubjects.waitForDeleted('ruleSnoozeCancel');
+
+        await retry.try(async () => {
+          expect(await getRuleSnoozeState(rule.id)).to.eql({
+            muteAll: false,
+            scheduleCount: 0,
+            isSnoozedUntil: null,
+          });
+        });
+      });
+
+      it('should remove all snooze schedules from the snooze badge', async () => {
+        await snoozeRule(rule.id);
+        await browser.refresh();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await testSubjects.clickWhenNotDisabled('rulesListNotifyBadge-scheduled');
+        await testSubjects.clickWhenNotDisabled('ruleRemoveAllSchedules');
+        await testSubjects.click('confirmModalConfirmButton');
+        await testSubjects.waitForDeleted('ruleRemoveAllSchedules');
+
+        await retry.try(async () => {
+          expect((await getRuleSnoozeState(rule.id)).scheduleCount).to.equal(0);
+        });
       });
     });
 
     describe('Edit rule button', function () {
-      const ruleName = uuidv4();
-      const updatedRuleName = `Changed Rule Name ${ruleName}`;
+      let ruleName: string;
+      let updatedRuleName: string;
+      let rule: { id: string; name: string };
 
-      before(async () => {
-        await createAlwaysFiringRule({
+      beforeEach(async () => {
+        ruleName = uuidv4();
+        updatedRuleName = `Changed Rule Name ${ruleName}`;
+
+        rule = await createAlwaysFiringRule({
           name: ruleName,
           rule_type_id: '.index-threshold',
           params: {
@@ -363,10 +413,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // click on first rule
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(ruleName);
 
-        const actionsButton = await testSubjects.find('app-menu-overflow-button');
-        await actionsButton.click();
-        const editButton = await testSubjects.find('openEditRuleFlyoutButton');
-        await editButton.click();
+        await testSubjects.clickWhenNotDisabled('app-menu-overflow-button');
+        await testSubjects.clickWhenNotDisabled('openEditRuleFlyoutButton');
         expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
 
         await testSubjects.setValue('ruleDetailsNameInput', updatedRuleName, {
@@ -374,13 +422,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         await find.clickByCssSelector('[data-test-subj="rulePageFooterSaveButton"]:not(disabled)');
-
-        const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql(`Updated "${updatedRuleName}"`);
-
-        await retry.tryForTime(30 * 1000, async () => {
-          const headingText = await pageObjects.ruleDetailsUI.getHeadingText();
-          expect(headingText.includes(updatedRuleName)).to.be(true);
+        await retry.try(async () => {
+          const { name } = await getRule(rule.id);
+          expect(name).to.eql(updatedRuleName);
         });
       });
 
@@ -398,14 +442,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesList');
 
         // click on first rule
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(updatedRuleName);
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(ruleName);
 
-        const actionsButton = await testSubjects.find('app-menu-overflow-button');
-        await actionsButton.click();
-        const editButton = await testSubjects.find('openEditRuleFlyoutButton');
-        await editButton.click();
+        await testSubjects.clickWhenNotDisabled('app-menu-overflow-button');
+        await testSubjects.clickWhenNotDisabled('openEditRuleFlyoutButton');
 
-        await testSubjects.setValue('ruleDetailsNameInput', uuidv4(), {
+        await testSubjects.setValue('ruleDetailsNameInput', updatedRuleName, {
           clearWithKeyboard: true,
         });
 
@@ -414,12 +456,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
         await find.waitForDeletedByCssSelector('[data-test-subj="rulePageFooterCancelButton"]');
 
-        await actionsButton.click();
-        await testSubjects.click('openEditRuleFlyoutButton');
+        // re-open the editor with fresh lookups: elements found before the cancel navigation are stale
+        await testSubjects.clickWhenNotDisabled('app-menu-overflow-button');
+        await testSubjects.clickWhenNotDisabled('openEditRuleFlyoutButton');
+        await retry.try(async () => {
+          const nameAfterCancel = await testSubjects.getAttribute('ruleDetailsNameInput', 'value');
+          expect(nameAfterCancel).to.eql(ruleName);
 
-        const nameInputAfterCancel = await testSubjects.find('ruleDetailsNameInput');
-        const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
-        expect(textAfterCancel).to.eql(updatedRuleName);
+          const { name } = await getRule(rule.id);
+          expect(name).to.eql(ruleName);
+        });
       });
     });
 
@@ -469,8 +515,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
         await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-        const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql('Deleted 1 connector');
+        await supertest.get(`/api/actions/connector/${connector.id}`).expect(404);
 
         // Wait to ensure the table is finished loading
         await pageObjects.triggersActionsUI.tableFinishedLoading();
@@ -565,8 +610,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await find.clickByCssSelector('[data-test-subj="rulePageFooterSaveButton"]:not(disabled)');
 
-        const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql(`Updated "${updatedRuleName}"`);
+        await retry.try(async () => {
+          const { name, actions } = await getRule(rule.id);
+          expect(name).to.eql(updatedRuleName);
+          expect(actions).to.have.length(connectors.length);
+          actions.forEach((action: { frequency: Record<string, unknown> }) => {
+            expect(action.frequency).to.eql({
+              summary: false,
+              notify_when: RuleNotifyWhen.THROTTLE,
+              throttle: '2d',
+            });
+          });
+        });
       });
     });
 
@@ -880,16 +935,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('Saved Objects Management Navigation', function () {
       const testRunUuid = uuidv4();
-      const getRuleObjectDisplayName = (title: string) => `Rule: [${title}]`;
       const spacesService = getService('spaces');
       const spaceId = 'test-space-' + testRunUuid;
       const testRuleName = `so-nav-test-rule-${testRunUuid}`;
       const testSpaceRuleName = `so-nav-test-rule-space-${testRunUuid}`;
+      let testRuleId: string;
+      let testSpaceRuleId: string;
 
       before(async () => {
-        await createAlwaysFiringRule({
+        const testRule = await createAlwaysFiringRule({
           name: testRuleName,
         });
+        testRuleId = testRule.id;
 
         await spacesService.create({
           id: spaceId,
@@ -897,12 +954,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           description: 'Test space for saved objects navigation',
         });
 
-        await createAlwaysFiringRule(
+        const testSpaceRule = await createAlwaysFiringRule(
           {
             name: testSpaceRuleName,
           },
           spaceId
         );
+        testSpaceRuleId = testSpaceRule.id;
       });
 
       after(async () => {
@@ -918,9 +976,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.savedObjects.waitTableIsLoaded();
 
-        await pageObjects.savedObjects.clickObjectLinkByTitle(
-          getRuleObjectDisplayName(testRuleName)
-        );
+        await testSubjects.click(`~row-${testRuleId} > savedObjectsTableRowTitle`);
 
         // Assert we've navigated to the rule details page
         await retry.tryForTime(10000, async () => {
@@ -929,7 +985,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // Verify we're on the rule details page by checking for rule-specific elements
-        await testSubjects.existOrFail('ruleEnabledBadge');
         await testSubjects.existOrFail('openEditRuleFlyoutButton');
       });
 
@@ -943,9 +998,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Wait for the saved objects table to load
         await pageObjects.savedObjects.waitTableIsLoaded();
 
-        await pageObjects.savedObjects.clickObjectLinkByTitle(
-          getRuleObjectDisplayName(testSpaceRuleName)
-        );
+        await testSubjects.click(`~row-${testSpaceRuleId} > savedObjectsTableRowTitle`);
 
         // Assert we've navigated to the rule details page
         await retry.tryForTime(10000, async () => {
@@ -954,7 +1007,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // Verify we're on the rule details page by checking for rule-specific elements
-        await testSubjects.existOrFail('ruleEnabledBadge');
         await testSubjects.existOrFail('openEditRuleFlyoutButton');
 
         // Assert that we're still within the correct space by checking the URL

@@ -6,8 +6,13 @@
  */
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { AgenticInvestigationsPublicPluginStart } from '@kbn/agentic-investigations-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { InferencePublicStart } from '@kbn/inference-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-investigations-plugin/public';
+import type { NightshiftSourcesPublicPluginStart } from '@kbn/nightshift-sources-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -16,6 +21,7 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SignificantEventsPublicPluginStart } from '@kbn/significant-events-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 export interface NightshiftSetupDependencies {
@@ -26,15 +32,23 @@ export interface NightshiftStartDependencies {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  inference: InferencePublicStart;
   lens: LensPublicStart;
+  licensing: LicensingPluginStart;
+  nightshiftSources: NightshiftSourcesPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
   share: SharePluginStart;
   significantEvents: SignificantEventsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  /** Investigation cards and the shared investigations API. */
+  agenticInvestigations?: AgenticInvestigationsPublicPluginStart;
   nightshiftInvestigations?: NightshiftInvestigationsPublicStart;
+  cps?: CPSPluginStart;
   serverless?: ServerlessPluginStart;
   spaces?: SpacesPluginStart;
+  /** The connector flyout and the connector type registry for the sandbox connectors UI. */
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
 }
 
 /* eslint-disable-next-line @typescript-eslint/no-empty-interface */

@@ -7,13 +7,18 @@
 
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/logging';
-import { SELF_AGENT_ID, type AgentConfiguration } from '@kbn/agent-builder-common';
+import {
+  SELF_AGENT_ID,
+  type AgentApprovals,
+  type AgentConfiguration,
+} from '@kbn/agent-builder-common';
 
 export interface ResolvedSubagent {
   /** real ID or SELF_AGENT_ID */
   id: string;
   description: string;
   inferenceFeatureId?: string;
+  approvals?: AgentApprovals;
 }
 
 const SELF_DESCRIPTION = 'This agent (self-fork).';
@@ -27,7 +32,7 @@ export interface SubagentRegistryLookup {
   get: (id: string) => Promise<
     | {
         description?: string;
-        configuration?: Pick<AgentConfiguration, 'inference_feature_id'>;
+        configuration?: Pick<AgentConfiguration, 'inference_feature_id' | 'approvals'>;
       }
     | undefined
   >;
@@ -39,7 +44,8 @@ export interface SubagentRegistryLookup {
  *   - `_self` passes through untouched with a fixed description; no registry
  *     lookup is performed for it.
  *   - Real ids are fetched via `agentRegistry.get(id)` in parallel with
- *     bounded concurrency. Ids that don't exist, are denied by access
+ *     bounded concurrency, and carry the agent's stored auto-approval
+ *     defaults. Ids that don't exist, are denied by access
  *     control, or fail to deserialize are silently dropped (a debug log is
  *     emitted). This mirrors how the UI hides agents the current user
  *     cannot see, and avoids leaking existence of hidden agents into the
@@ -81,10 +87,12 @@ export const resolveAllowedSubagents = async ({
             return undefined;
           }
           const inferenceFeatureId = def.configuration?.inference_feature_id;
+          const approvals = def.configuration?.approvals;
           return {
             id,
             description: def.description ?? NO_DESCRIPTION,
             ...(inferenceFeatureId !== undefined ? { inferenceFeatureId } : {}),
+            ...(approvals ? { approvals } : {}),
           };
         } catch (err) {
           logger?.debug(

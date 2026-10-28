@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { automationCompletionSchema, automationCompletionInputSchema } from './schemas';
+import {
+  automationCompletionSchema,
+  automationCompletionInputSchema,
+  MAX_PROMPT_TEMPLATE_LENGTH,
+  promptTemplateSchema,
+} from './schemas';
 
 describe('automation completion input', () => {
   it.each([undefined, '', '   '])(
@@ -42,5 +47,19 @@ describe('automation completion input', () => {
     expect(
       automationCompletionSchema.safeParse({ action: 'post_to_slack', targetMode }).success
     ).toBe(true);
+  });
+});
+
+describe('prompt template', () => {
+  it('accepts a template at the limit', () => {
+    expect(promptTemplateSchema.safeParse('a'.repeat(MAX_PROMPT_TEMPLATE_LENGTH)).success).toBe(
+      true
+    );
+  });
+
+  it('rejects a template over the limit', () => {
+    expect(promptTemplateSchema.safeParse('a'.repeat(MAX_PROMPT_TEMPLATE_LENGTH + 1)).success).toBe(
+      false
+    );
   });
 });

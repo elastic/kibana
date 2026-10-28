@@ -9,14 +9,34 @@
 
 import path from 'path';
 import fs from 'fs';
+import { findPackageForPath } from '@kbn/repo-packages';
+import { REPO_ROOT } from '@kbn/repo-info';
 import {
   getKibanaModuleData,
   getKibanaModulePath,
   readKibanaModuleManifest,
 } from './read_manifest';
 
+jest.mock('@kbn/repo-packages', () => ({
+  ...jest.requireActual('@kbn/repo-packages'),
+  findPackageForPath: jest.fn(),
+}));
+
 describe('read_manifest', () => {
   describe('getKibanaModulePath', () => {
+    it('resolves build tests to the owning dev module manifest', () => {
+      const configPath = path.join(
+        REPO_ROOT,
+        'src/dev/build/test/scout_fips/api/playwright.config.ts'
+      );
+      jest.mocked(findPackageForPath).mockReturnValueOnce({
+        directory: 'src/dev',
+      } as ReturnType<typeof findPackageForPath>);
+
+      expect(getKibanaModulePath(configPath)).toBe(path.join(REPO_ROOT, 'src/dev/kibana.jsonc'));
+      expect(findPackageForPath).toHaveBeenCalledWith(REPO_ROOT, configPath);
+    });
+
     it('should resolve the manifest path correctly for a valid Scout config path (plugin)', () => {
       const configPath = path.join(
         path.sep,

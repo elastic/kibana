@@ -16,6 +16,23 @@
  */
 export type WellKnownWorkflowTriggerSource = 'manual' | 'scheduled' | 'alert' | 'workflow-step';
 
+/** `triggeredBy` of every execution a `workflow.execute` or `workflow.executeAsync` step starts. */
+export const WORKFLOW_STEP_TRIGGER_SOURCE: Extract<
+  WellKnownWorkflowTriggerSource,
+  'workflow-step'
+> = 'workflow-step';
+
+/**
+ * `triggeredBy` of every execution Agent Builder starts as an agent hook (before-agent and
+ * post-execution workflows). Only server code sets `triggeredBy`, so a workflow can check it to
+ * refuse runs that a user started directly.
+ */
+export const AGENT_BUILDER_HOOK_TRIGGER_SOURCE = 'agent-builder-hook';
+
+/** True when a `workflow.execute` or `workflow.executeAsync` step started the execution. */
+export const isWorkflowStepTriggered = (triggeredBy: string | undefined): boolean =>
+  triggeredBy === WORKFLOW_STEP_TRIGGER_SOURCE;
+
 const WELL_KNOWN_SET: ReadonlySet<string> = new Set<WellKnownWorkflowTriggerSource>([
   'manual',
   'scheduled',

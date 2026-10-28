@@ -1,5 +1,5 @@
 {
-  "sha1": "74e4655320450a6540c4d1954856bcb972c50d1e",
+  "sha1": "5a98c8a0a2ee26edb94c39f593f62cc5e9e7cd6d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/artifact_policy_revision.spec.ts",
-        "line": 130,
-        "column": 45
+        "line": 128,
+        "column": 12
+      }
+    },
+    {
+      "id": "520d757d08531dc-111d588549633d2",
+      "title": "Endpoint generated alerts promotes an alert from a live Endpoint to a Detection Engine alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/endpoint_generated_alerts.spec.ts",
+        "line": 53,
+        "column": 12
       }
     },
     {
@@ -28,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/host_isolation.spec.ts",
-        "line": 160,
-        "column": 22
+        "line": 152,
+        "column": 12
       }
     },
     {
@@ -42,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/process_operations.spec.ts",
-        "line": 139,
-        "column": 7
+        "line": 138,
+        "column": 12
       }
     },
     {
@@ -56,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/scan_action.spec.ts",
-        "line": 149,
-        "column": 53
+        "line": 145,
+        "column": 10
       }
     },
     {
@@ -70,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/scan_action.spec.ts",
-        "line": 168,
-        "column": 25
+        "line": 166,
+        "column": 10
       }
     }
   ]

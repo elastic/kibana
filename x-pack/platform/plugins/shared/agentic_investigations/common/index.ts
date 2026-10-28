@@ -23,15 +23,22 @@ export {
   MAX_EVIDENCE_CHART_LABEL_LENGTH,
   MAX_EVIDENCE_CHART_POINTS,
   MAX_EVIDENCE_CHART_SERIES,
+  MAX_EVIDENCE_REFERENCES,
+  MAX_EVIDENCE_REFERENCE_URL_LENGTH,
   MAX_EVIDENCE_SHORT_TEXT_LENGTH,
   MAX_EVIDENCE_TEXT_LENGTH,
   evidenceChartSchema,
+  evidenceReferenceSchema,
   investigationEvidenceSchema,
+  isEvidenceLinkReference,
 } from './evidence';
 export type {
   EvidenceChart,
   EvidenceChartAnnotation,
   EvidenceChartSeries,
+  EvidenceLinkReference,
+  EvidenceQueryReference,
+  EvidenceReference,
   InvestigationEvidence,
 } from './evidence';
 
@@ -44,13 +51,17 @@ export type {
 // them so consumers have a single entry point per the plugin's public surface.
 export {
   IMPACT_ATTACHMENT_TYPE,
+  IMPACT_ESCALATION_SUMMARY_URL,
   IMPACT_INDEX_NAME,
   IMPACT_INTERNAL_URL,
+  IMPACT_PILLS_PAGE_SIZE,
+  IMPACT_PROPOSAL_SUMMARY_URL,
   MAX_ENTITY_ID_LENGTH,
   MAX_ENTITY_IDS,
   MAX_ENTITY_NAME_LENGTH,
   MAX_IMPACT_CONVERSATION_IDS,
   MAX_IMPACT_ID_LENGTH,
+  MAX_IMPACT_PILLS_REACH,
   MAX_IMPACT_TOOL_ENTITIES,
   SET_IMPACT_TOOL_ID,
   attachImpactRequestSchema,
@@ -61,7 +72,13 @@ export {
   storedImpactEntitiesSchema,
 } from './impact';
 
-export type { AttachImpactRequest, GetImpactQuery, Impact, ImpactEntity } from './impact';
+export type {
+  AttachImpactRequest,
+  GetImpactQuery,
+  Impact,
+  ImpactEntity,
+  ImpactPillsResponse,
+} from './impact';
 
 // Subjects and hypotheses export constants and types only: this directory is an extra public
 // dir, so every value exported here lands in the page load bundle. Their schemas stay in the
@@ -69,7 +86,7 @@ export type { AttachImpactRequest, GetImpactQuery, Impact, ImpactEntity } from '
 export {
   INVESTIGATION_SUBJECT_TRIGGER_TYPES,
   INVESTIGATION_SUBJECT_TYPES,
-  MAX_SLACK_SEEN_EVENT_IDS,
+  MAX_SLACK_SEEN_EVENTS,
   MAX_SUBJECT_ID_LENGTH,
   MAX_SUBJECTS_PER_CONVERSATION,
   MAX_SUBJECTS_PER_REQUEST,
@@ -85,6 +102,7 @@ export type {
   InvestigationSubjectKey,
   InvestigationSubjectTriggerType,
   InvestigationSubjectType,
+  SlackSeenEvent,
   SlackThreadSubject,
 } from './subjects/subject';
 
@@ -136,11 +154,13 @@ export {
   INVESTIGATION_BY_ID_URL,
   INVESTIGATION_CLOSE_PREVIEW_URL,
   INVESTIGATION_SEVERITIES,
+  INVESTIGATION_SEVERITY_URL,
   INVESTIGATION_STATUS_URL,
   INVESTIGATIONS_INTERNAL_URL,
   INVESTIGATIONS_PRIVILEGES_URL,
   INVESTIGATIONS_SEVERITY_COUNTS_URL,
   INVESTIGATIONS_UI_CAPABILITY_MANAGE,
+  INVESTIGATIONS_UI_CAPABILITY_READ,
   INVESTIGATIONS_UI_CAPABILITY_SHOW,
 } from './investigations/constants';
 export type {
@@ -188,6 +208,12 @@ export type {
   SetEscalationStatusResponse,
   EscalationClosePreviewResponse,
 } from './investigations/status';
+
+export type {
+  SetInvestigationSeverityRequest,
+  SetInvestigationSeverityResponse,
+  InvestigationSeverityChangedEventData,
+} from './investigations/severity_change';
 
 export {
   assignConversationRequestBodySchema,

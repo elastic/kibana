@@ -186,6 +186,9 @@ function buildBaseExecutionTelemetryFields(
     ...(executionMetadata.parentWorkflowInvocation && {
       parentWorkflowInvocation: executionMetadata.parentWorkflowInvocation,
     }),
+    ...(executionMetadata.executionChain && {
+      executionChain: executionMetadata.executionChain,
+    }),
     ...(executionMetadata.eventChainDepth !== undefined && {
       eventChainDepth: executionMetadata.eventChainDepth,
     }),

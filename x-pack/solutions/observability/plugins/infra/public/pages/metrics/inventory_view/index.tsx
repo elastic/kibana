@@ -26,22 +26,17 @@ import { useMetricsAppHeaderMenu } from '../header/use_metrics_app_header_menu';
 
 export const SnapshotPage = (): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
+
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
 
-  useMetricsBreadcrumbs(
-    [
-      {
-        text: inventoryTitle,
-      },
-    ],
-    { parent: 'app' }
-  );
+  useMetricsBreadcrumbs([{ text: inventoryTitle }], {
+    parent: 'app',
+  });
 
   const { menu, flyouts } = useMetricsAppHeaderMenu();
   const { showOnboarding } = useInfraHasData();
 
-  // Template noDataConfig ignores children; Inventory renders onboarding as body instead.
   return (
     <InventoryViewsProvider>
       <WaffleOptionsProvider>

@@ -149,11 +149,11 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
     const acceptLabel = this.isReplaceMode
       ? i18n.translate('esqlEditor.commentReview.replace', {
           defaultMessage: 'Replace ({shortcut})',
-          values: { shortcut: isMac ? '⌘⇧↵' : 'Ctrl+Shift+Enter' },
+          values: { shortcut: isMac ? '⌘↵' : 'Ctrl+Enter' },
         })
       : i18n.translate('esqlEditor.commentReview.accept', {
           defaultMessage: 'Keep ({shortcut})',
-          values: { shortcut: isMac ? '⌘⇧↵' : 'Ctrl+Shift+Enter' },
+          values: { shortcut: isMac ? '⌘↵' : 'Ctrl+Enter' },
         });
 
     const rejectButton = this.createButton(

@@ -19,8 +19,8 @@ export const CREATE_UNACK_EPISODE_ACTION_REQUEST: CreateUnackEpisodeActionBody =
 export const createUnackEpisodeActionOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     requestBody: {
-      name: 'createUnackEpisodeActionRequest',
-      summary: 'Unacknowledge the alert episode',
+      name: 'createUnackAlertActionRequest',
+      summary: 'Unacknowledge the alert',
       value: CREATE_UNACK_EPISODE_ACTION_REQUEST,
     },
     responses: {

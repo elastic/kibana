@@ -9,7 +9,7 @@
 
 import type { Reducer } from 'react';
 import type { Filter, BooleanRelation } from '@kbn/es-query';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import { addFilter, moveFilter, removeFilter, updateFilters } from './utils';
 import type { Operator } from '../filter_bar/filter_editor';
 import type { FilterLocation } from './types';
@@ -29,13 +29,13 @@ export interface AddFilterPayload {
   dest: FilterLocation;
   filter: Filter;
   booleanRelation: BooleanRelation;
-  dataView: DataView;
+  dataView: FilterableSource;
 }
 
 /** @internal **/
 export interface UpdateFilterPayload {
   dest: FilterLocation;
-  field?: DataViewField;
+  field?: FilterableField;
   operator?: Operator;
   params?: Filter['meta']['params'];
 }
@@ -50,7 +50,7 @@ export interface MoveFilterPayload {
   from: FilterLocation;
   to: FilterLocation;
   booleanRelation: BooleanRelation;
-  dataView: DataView;
+  dataView: FilterableSource;
 }
 
 /** @internal **/

@@ -1061,7 +1061,7 @@ describe('autocomplete', () => {
         ]);
         // no comma if there are no more fields
         testSuggestions(
-          'FROM a METADATA _id, _ignored, _index, _source, _index_mode, _score, _name, _class, _version/',
+          'FROM a METADATA _id, _ignored, _index, _source, _index_mode, _score, _size, _slice, _name, _class, _version/',
           [
             withAutoSuggest({
               filterText: '_version',
@@ -1325,6 +1325,21 @@ describe('autocomplete', () => {
 
       expect(suggestedTexts).toEqual(expect.arrayContaining(['index', 'otherIndex']));
       expect(suggestedTexts.some((text) => text.trim() === 'doubleField')).toBe(false);
+    });
+  });
+
+  describe('STATS BY columns are scoped to the command that defines them', () => {
+    it('suggests a subquery STATS BY column inside its aggregation without leaking the outer BY column', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestions = await suggestFn(
+        'FROM index | STATS COUNT() WHERE keywordField IN (FROM index | STATS VALUES(/) BY agent = keywordField) BY abc = keywordField'
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      // The subquery's own BY column is in scope for its aggregation expression.
+      expect(labels).toContain('agent');
+      // The outer query's BY column must not leak into the subquery.
+      expect(labels).not.toContain('abc');
     });
   });
 

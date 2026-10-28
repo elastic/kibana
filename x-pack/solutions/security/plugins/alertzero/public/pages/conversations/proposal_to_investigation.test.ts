@@ -7,7 +7,6 @@
 
 import { proposalToInvestigation } from './proposal_to_investigation';
 import type { ProposalItem } from '../../../common/proposals/list';
-import type { ProposalWithMetadata } from '@kbn/proposals-common';
 
 const baseProposal: ProposalItem = {
   id: 'prop-001',
@@ -73,86 +72,35 @@ describe('proposalToInvestigation', () => {
     });
   });
 
-  describe('closed action label derivation', () => {
-    const decidedAt = '2026-09-10T11:00:00.000Z';
-    const closeAction = {
-      name: 'Close alerts as false positive',
-    } as ProposalWithMetadata['action'];
-
-    it('uses "N alerts closed as false positive" once the close succeeded', () => {
-      const result = proposalToInvestigation({
-        ...baseProposal,
-        decidedAt,
-        status: 'succeeded',
-        actionInput: { alertIds: ['a1', 'a2', 'a3'], reason: 'false_positive' },
-      });
-      expect(result.title).toBe('3 alerts closed as false positive');
-    });
-
-    it('singularises "alert" when count is 1', () => {
-      const result = proposalToInvestigation({
-        ...baseProposal,
-        decidedAt,
-        status: 'succeeded',
-        actionInput: { alertIds: ['a1'], reason: 'false_positive' },
-      });
-      expect(result.title).toBe('1 alert closed as false positive');
-    });
-
-    it.each(['no_action', 'expired', 'failed'] as const)(
-      'keeps the proposal title for a %s proposal, since nothing was closed',
-      (status) => {
-        const result = proposalToInvestigation({
-          ...baseProposal,
-          decidedAt,
-          status,
-          title: 'Close alerts as false positive',
-          action: closeAction,
-          actionInput: { alertIds: ['a1', 'a2'], reason: 'false_positive' },
-        });
-        expect(result.title).toBe('Close alerts as false positive');
-      }
-    );
-
-    it('keeps the proposal title for a succeeded proposal of another action', () => {
-      const result = proposalToInvestigation({
-        ...baseProposal,
-        decidedAt,
-        status: 'succeeded',
-        title: 'Isolate host',
-        action: { name: 'Isolate host' } as ProposalWithMetadata['action'],
-        actionInput: { alertIds: ['a1'] },
-      });
-      expect(result.title).toBe('Isolate host');
-    });
-
-    it('falls back to the proposal title when alertIds is absent', () => {
-      const result = proposalToInvestigation({
-        ...baseProposal,
-        decidedAt,
-        status: 'succeeded',
-        title: 'Close alerts as false positive',
-      });
-      expect(result.title).toBe('Close alerts as false positive');
-    });
-
+  describe('decided rows', () => {
     it('labels a decided row with its conversation title, which the compact row prints second', () => {
       const result = proposalToInvestigation({
         ...baseProposal,
-        decidedAt,
+        decidedAt: '2026-09-10T11:00:00.000Z',
+        decision: 'approved',
+        status: 'succeeded',
         conversationTitle: 'My conversation',
       });
       expect(result.primaryActionLabel).toBe('My conversation');
     });
+  });
 
-    it('does not override primaryActionLabel for pending proposals', () => {
-      const result = proposalToInvestigation({
-        ...baseProposal,
-        title: 'Close alerts as false positive',
-        actionInput: { alertIds: ['a1', 'a2'], reason: 'false_positive' },
-      });
-      expect(result.primaryActionLabel).toBe('Close alerts as false positive');
-    });
+  describe('title after a decision', () => {
+    // The adapter must stay action-agnostic: a worker that needs a specific label sets the
+    // proposal title, and the card shows that title before and after the decision.
+    it.each(['succeeded', 'failed', 'expired', 'no_action'] as const)(
+      'keeps the supplied title once the proposal is %s',
+      (status) => {
+        const result = proposalToInvestigation({
+          ...baseProposal,
+          decidedAt: '2026-09-10T11:00:00.000Z',
+          status,
+          title: 'Close 2 alerts as false positive',
+          actionInput: { alertIds: ['a1', 'a2'], reason: 'false_positive' },
+        });
+        expect(result.title).toBe('Close 2 alerts as false positive');
+      }
+    );
   });
 
   describe('closed detection', () => {
@@ -167,10 +115,70 @@ describe('proposalToInvestigation', () => {
       expect(result.recommendedAction).toBe('closed');
     });
 
-    it('does not set "closed" when decidedAt is absent', () => {
+    it('carries createdAt and decidedAt in proposalCreatedAt and proposalDecidedAt', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        decidedAt: '2026-09-10T11:00:00.000Z',
+      });
+      expect(result.proposalDecidedAt).toBe('2026-09-10T11:00:00.000Z');
+      expect(result.proposalCreatedAt).toBe(baseProposal.createdAt);
+    });
+
+    it('does not set "closed" when the proposal is still pending', () => {
       const result = proposalToInvestigation({ ...baseProposal, category: 'respond' });
       expect(result.recommendedAction).toBe('respond');
     });
+
+    it('keeps an approved proposal in its category while its action runs', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        category: 'respond',
+        decision: 'approved',
+        status: 'executing',
+        decidedAt: '2026-09-10T11:00:00.000Z',
+      });
+      expect(result.recommendedAction).toBe('respond');
+      expect(result.isProposalSettling).toBe(true);
+      expect(result.pendingProposalCount).toBe(0);
+    });
+
+    it('marks an approved proposal that still reads pending as settling and keeps its category', () => {
+      // The gate writes the decision before the status, so a read can see both for a moment.
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        category: 'respond',
+        decision: 'approved',
+        status: 'pending',
+        decidedAt: '2026-09-10T11:00:00.000Z',
+      });
+      expect(result.recommendedAction).toBe('respond');
+      expect(result.isProposalSettling).toBe(true);
+    });
+
+    it('does not mark an undecided or a settled proposal as settling', () => {
+      expect(proposalToInvestigation({ ...baseProposal }).isProposalSettling).toBe(false);
+      expect(
+        proposalToInvestigation({
+          ...baseProposal,
+          decision: 'approved',
+          status: 'succeeded',
+          decidedAt: '2026-09-10T11:00:00.000Z',
+        }).isProposalSettling
+      ).toBe(false);
+    });
+
+    it.each(['succeeded', 'failed', 'expired', 'no_action'] as const)(
+      'moves a %s proposal to closed',
+      (status) => {
+        const result = proposalToInvestigation({
+          ...baseProposal,
+          category: 'configure',
+          status,
+          decidedAt: '2026-09-10T11:00:00.000Z',
+        });
+        expect(result.recommendedAction).toBe('closed');
+      }
+    );
   });
 
   describe('status', () => {
@@ -182,6 +190,24 @@ describe('proposalToInvestigation', () => {
       expect(
         proposalToInvestigation({ ...baseProposal, status: 'succeeded' }).status
       ).toBeUndefined();
+    });
+
+    it.each(['open', 'closed'] as const)(
+      'carries the investigation status %s as conversationStatus, never as status',
+      (conversationStatus) => {
+        const result = proposalToInvestigation({
+          ...baseProposal,
+          status: 'succeeded',
+          conversationStatus,
+        });
+
+        expect(result.conversationStatus).toBe(conversationStatus);
+        expect(result.status).toBeUndefined();
+      }
+    );
+
+    it('leaves conversationStatus unset when the investigation status is unknown', () => {
+      expect(proposalToInvestigation(baseProposal).conversationStatus).toBeUndefined();
     });
   });
 
@@ -247,21 +273,6 @@ describe('proposalToInvestigation', () => {
     it('events is empty array', () => {
       const result = proposalToInvestigation(baseProposal);
       expect(result.events).toEqual([]);
-    });
-
-    it('affectedSurface is undefined when Impact was not hydrated', () => {
-      const result = proposalToInvestigation(baseProposal);
-      expect(result.affectedSurface).toBeUndefined();
-      expect(result.entityIds).toBeUndefined();
-    });
-
-    it('copies hydrated entity ids onto the card and uses the first as affectedSurface', () => {
-      const result = proposalToInvestigation({
-        ...baseProposal,
-        entityIds: ['cfo@corp', 'host-1'],
-      });
-      expect(result.entityIds).toEqual(['cfo@corp', 'host-1']);
-      expect(result.affectedSurface).toBe('cfo@corp');
     });
 
     it('pendingProposalCount is 1 for undecided proposals', () => {

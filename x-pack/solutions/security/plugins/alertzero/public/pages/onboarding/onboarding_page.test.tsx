@@ -128,7 +128,7 @@ const renderPage = ({
     ...coreStart,
     http: { ...coreStart.http, get: resolvedHttpGet, patch: httpPatch },
   };
-  const history = createMemoryHistory();
+  const history = createMemoryHistory({ initialEntries: ['/onboarding'] });
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
@@ -155,7 +155,12 @@ const renderPage = ({
     fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
   }
 
-  return { history, application: core.application, toasts: core.notifications.toasts };
+  return {
+    history,
+    application: core.application,
+    reportEvent: core.analytics.reportEvent as jest.Mock,
+    toasts: core.notifications.toasts,
+  };
 };
 
 describe('OnboardingPage', () => {
@@ -366,7 +371,7 @@ describe('OnboardingPage', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
-      await waitFor(() => expect(history.location.pathname).toBe('/watches'));
+      await waitFor(() => expect(history.location.pathname).toBe('/'));
       expect(mockEnsureWorkerServiceAccounts).toHaveBeenCalledTimes(1);
       expect([...mockEnsureWorkerServiceAccounts.mock.calls[0][2]].sort()).toEqual(
         [...ALL_ONBOARDING_WORKER_IDS].sort()
@@ -430,7 +435,7 @@ describe('OnboardingPage', () => {
       expect(toasts.addDanger).toHaveBeenCalledWith(
         expect.objectContaining({ text: expect.stringContaining('Alert Triage: Forbidden') })
       );
-      expect(history.location.pathname).not.toBe('/watches');
+      expect(history.location.pathname).toBe('/onboarding');
 
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
@@ -495,13 +500,13 @@ describe('OnboardingPage', () => {
       expect(screen.queryByText('Before you enable')).not.toBeInTheDocument();
     });
 
-    it('calls the API for all workers and navigates to /watches when Enable and run is clicked', async () => {
+    it('calls the API for all workers and navigates to the AlertZero home when Enable and run is clicked', async () => {
       const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
       const { history } = renderPage({ canWrite: true, httpPatch });
 
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
-      await waitFor(() => expect(history.location.pathname).toBe('/watches'));
+      await waitFor(() => expect(history.location.pathname).toBe('/'));
       expect(httpPatch).toHaveBeenCalledTimes(6);
     });
 
@@ -553,7 +558,28 @@ describe('OnboardingPage', () => {
           'disabled'
         )
       );
-      expect(history.location.pathname).toBe('/');
+      expect(history.location.pathname).toBe('/onboarding');
+    });
+
+    it('reports each failed enable and the partial save as onboarding errors', async () => {
+      const triageId = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
+      const httpPatch = jest.fn(async (url: string) => {
+        if (url.includes(triageId)) {
+          throw new Error('blocked by index [secret]');
+        }
+        return { worker: { id: 'mock', enabled: true } };
+      });
+      const { reportEvent } = renderPage({ canWrite: true, httpPatch });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: 'Enable and run' })).not.toBeDisabled()
+      );
+
+      expect(reportEvent.mock.calls).toEqual([
+        ['alertzero_ui_error_shown', { error_class: 'unknown', surface: 'onboarding' }],
+        ['alertzero_ui_error_shown', { error_class: 'partial_failure', surface: 'onboarding' }],
+      ]);
     });
 
     it('sends the saved revision when Enable and run is retried after a partial save', async () => {
@@ -710,7 +736,7 @@ describe('OnboardingPage', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
-      await waitFor(() => expect(history.location.pathname).toBe('/watches'));
+      await waitFor(() => expect(history.location.pathname).toBe('/'));
       // Only the 5 present workers should be PATCHed — not the skill-gated absent one.
       expect(httpPatch).toHaveBeenCalledTimes(5);
       expect(httpPatch).not.toHaveBeenCalledWith(

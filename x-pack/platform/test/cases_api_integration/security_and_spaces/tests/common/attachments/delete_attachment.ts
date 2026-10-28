@@ -7,17 +7,33 @@
 
 import expect from '@kbn/expect';
 import type { Case } from '@kbn/cases-plugin/common/types/domain';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { getPostCaseRequest, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
+  getPostCaseRequest,
+  getUnifiedFilesAttachmentReq,
+  postCaseReq,
+  postCommentUserReq,
+} from '../../../../common/lib/mock';
+import {
+  bulkCreateAttachments,
+  createAndUploadFile,
   deleteAllCaseItems,
+  deleteAllFiles,
   createCase,
   createComment,
   deleteAttachmentV2,
   getAllComments,
+  getAttachmentV2,
+  listFiles,
+  seedLegacyCommentAttachment,
+  seedOwnerlessAttachment,
+  seedUnreadableAttachment,
   superUserSpace1Auth,
+  unifiedAttachmentExists,
 } from '../../../../common/lib/api';
+import { SECURITY_SOLUTION_FILE_KIND } from '../../../../common/lib/constants';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -35,6 +51,118 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('delete_attachment', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
+      await deleteAllFiles({ supertest });
+    });
+
+    it('deletes a file attachment together with its file', async () => {
+      const postedCase = await createCase(
+        supertest,
+        getPostCaseRequest({ owner: 'securitySolution' })
+      );
+
+      const { create } = await createAndUploadFile({
+        supertest,
+        createFileParams: {
+          name: 'testfile',
+          kind: SECURITY_SOLUTION_FILE_KIND,
+          mimeType: 'text/plain',
+          meta: { caseIds: [postedCase.id], owner: [postedCase.owner] },
+        },
+        data: 'abc',
+      });
+
+      const caseWithFile = await bulkCreateAttachments({
+        supertest,
+        caseId: postedCase.id,
+        params: [
+          getUnifiedFilesAttachmentReq({ attachmentId: create.file.id, owner: 'securitySolution' }),
+        ],
+      });
+
+      await deleteAttachmentV2({
+        supertest,
+        caseId: postedCase.id,
+        attachmentId: caseWithFile.comments![0].id,
+      });
+
+      const files = await listFiles({ supertest, params: { kind: SECURITY_SOLUTION_FILE_KIND } });
+      expect(files.total).to.be(0);
+    });
+
+    it('keeps a file linked to another case and still deletes its attachment', async () => {
+      const [postedCase, otherCase] = await Promise.all([
+        createCase(supertest, getPostCaseRequest({ owner: 'securitySolution' })),
+        createCase(supertest, getPostCaseRequest({ owner: 'securitySolution' })),
+      ]);
+
+      const { create } = await createAndUploadFile({
+        supertest,
+        createFileParams: {
+          name: 'testfile',
+          kind: SECURITY_SOLUTION_FILE_KIND,
+          mimeType: 'text/plain',
+          meta: { caseIds: [postedCase.id, otherCase.id], owner: [postedCase.owner] },
+        },
+        data: 'abc',
+      });
+
+      const caseWithFile = await bulkCreateAttachments({
+        supertest,
+        caseId: postedCase.id,
+        params: [
+          getUnifiedFilesAttachmentReq({ attachmentId: create.file.id, owner: 'securitySolution' }),
+        ],
+      });
+
+      await deleteAttachmentV2({
+        supertest,
+        caseId: postedCase.id,
+        attachmentId: caseWithFile.comments![0].id,
+      });
+
+      expect(await getAllComments({ supertest, caseId: postedCase.id })).to.be.empty();
+      const files = await listFiles({ supertest, params: { kind: SECURITY_SOLUTION_FILE_KIND } });
+      expect(files.files.map(({ id }) => id)).to.eql([create.file.id]);
+    });
+
+    it('deletes an attachment with no stored owner', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const attachmentId = await seedOwnerlessAttachment({ es, caseId: postedCase.id });
+
+      await deleteAttachmentV2({ supertest, caseId: postedCase.id, attachmentId });
+
+      expect(await unifiedAttachmentExists({ es, id: attachmentId })).to.be(false);
+    });
+
+    it('deletes an attachment that cannot be read', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const attachmentId = await seedUnreadableAttachment({ es, caseId: postedCase.id });
+
+      await deleteAttachmentV2({ supertest, caseId: postedCase.id, attachmentId });
+
+      expect(await unifiedAttachmentExists({ es, id: attachmentId })).to.be(false);
+    });
+
+    it('deletes a leftover cases-comments attachment', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const attachmentId = await seedLegacyCommentAttachment({
+        es,
+        caseId: postedCase.id,
+        attributes: {
+          type: AttachmentType.user,
+          comment: 'leftover comment',
+          owner: 'securitySolutionFixture',
+        },
+      });
+
+      await deleteAttachmentV2({ supertest, caseId: postedCase.id, attachmentId });
+
+      await getAttachmentV2({
+        supertest,
+        caseId: postedCase.id,
+        attachmentId,
+        expectedHttpCode: 404,
+      });
     });
 
     describe('unhappy path', () => {
@@ -54,7 +182,9 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 404,
         })) as Error;
 
-        expect(error.message).to.be(`This comment ${attachmentId} does not exist in fake-id.`);
+        expect(error.message).to.be(
+          `This attachment ${attachmentId} does not exist in case fake-id.`
+        );
       });
 
       it('404s when attachment is not there', async () => {
@@ -144,6 +274,37 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         expect(remaining.length).to.eql(1);
         expect(remaining[0].id).to.eql(attachmentId);
+      });
+
+      it('authorizes an attachment with no stored owner on the case owner', async () => {
+        const caseInfo: Case = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          superUserSpace1Auth
+        );
+        const attachmentId = await seedOwnerlessAttachment({
+          es,
+          caseId: caseInfo.id,
+          space: 'space1',
+        });
+
+        await deleteAttachmentV2({
+          supertest: supertestWithoutAuth,
+          caseId: caseInfo.id,
+          attachmentId,
+          auth: { user: obsOnly, space: 'space1' },
+          expectedHttpCode: 403,
+        });
+        expect(await unifiedAttachmentExists({ es, id: attachmentId })).to.be(true);
+
+        await deleteAttachmentV2({
+          supertest: supertestWithoutAuth,
+          caseId: caseInfo.id,
+          attachmentId,
+          auth: { user: secOnly, space: 'space1' },
+        });
+        expect(await unifiedAttachmentExists({ es, id: attachmentId })).to.be(false);
       });
     });
   });

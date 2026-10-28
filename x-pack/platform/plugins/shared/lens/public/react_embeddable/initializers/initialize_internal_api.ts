@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { initializeTitleManager } from '@kbn/presentation-publishing';
+import { apiHasDisableTriggers, type initializeTitleManager } from '@kbn/presentation-publishing';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -14,7 +14,6 @@ import type {
   ExpressionWrapperProps,
   LensInternalApi,
   LensOverrides,
-  LensPanelProps,
   LensRuntimeState,
   VisualizationContext,
   UserMessage,
@@ -41,10 +40,12 @@ export function initializeInternalApi(
     initialState.attributes || createEmptyLensState().attributes
   );
   const overrides$ = new BehaviorSubject(initialState.overrides);
-  const disableTriggers$ = new BehaviorSubject(initialState.disableTriggers);
+  const disableTriggers$ = apiHasDisableTriggers(parentApi)
+    ? parentApi.disableTriggers$
+    : new BehaviorSubject(initialState.disableTriggers ?? false);
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 
-  const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+  const dataSources$ = new BehaviorSubject<DataView[] | undefined>(undefined);
   // This is an internal error state, not to be confused with the runtime error state thrown by the expression pipeline
   // In both cases a blocking error can happen, but for Lens validation errors we want to have full control over the UI
   // while for runtime errors the error will bubble up to the embeddable presentation layer
@@ -57,6 +58,7 @@ export function initializeInternalApi(
   const isNewlyCreated$ = new BehaviorSubject<boolean>(initialState.isNewPanel || false);
 
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
+  const loadError$ = new BehaviorSubject<Error | undefined>(initialState.loadError);
   const visualizationContext$ = new BehaviorSubject<VisualizationContext>({
     // doc can point to a different set of attributes for the visualization
     // i.e. when inline editing or applying a suggestion
@@ -78,6 +80,7 @@ export function initializeInternalApi(
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
   return {
+    loadError$,
     attributes$,
     overrides$,
     disableTriggers$,
@@ -88,7 +91,7 @@ export function initializeInternalApi(
     expressionAbortController$,
     renderCount$,
     isNewlyCreated$,
-    dataViews$,
+    dataSources$,
     blockingError$,
     messages$,
     validationMessages$,
@@ -110,12 +113,11 @@ export function initializeInternalApi(
     updateAttributes: (attributes: LensRuntimeState['attributes']) => attributes$.next(attributes),
     updateAbortController: (abortController: AbortController) =>
       expressionAbortController$.next(abortController),
-    updateDisabledTriggers: (disableTriggers: LensPanelProps['disableTriggers']) =>
-      disableTriggers$.next(disableTriggers),
-    updateDataViews: (dataViews: DataView[] | undefined) => dataViews$.next(dataViews),
+    updateDataViews: (dataViews: DataView[] | undefined) => dataSources$.next(dataViews),
     updateMessages: (newMessages: UserMessage[]) => messages$.next(newMessages),
     updateValidationMessages: (newMessages: UserMessage[]) => validationMessages$.next(newMessages),
     updateBlockingError: (blockingError: Error | undefined) => blockingError$.next(blockingError),
+    updateLoadError: (loadError: Error | undefined) => loadError$.next(loadError),
     setAsCreated: () => isNewlyCreated$.next(false),
     getDisplayOptions: () => {
       const latestAttributes = attributes$.getValue();

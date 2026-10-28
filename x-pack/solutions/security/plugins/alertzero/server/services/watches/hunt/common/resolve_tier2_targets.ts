@@ -153,6 +153,23 @@ const staysInsideUniverse = (pattern: string, indexPatterns: string[]): boolean 
  * wildcard pair per vendor; if even that does not fit it is dropped rather than sent, and
  * the result reads degraded.
  */
+/**
+ * Whether choosing a dataset by model is the only signal left for this report: it matched no
+ * dataset by vendor or product, Tier 1 hit no index, and there is report text to read. This is the
+ * one gate for asking the model, and the coordinator reads it too, so a run that could not ask
+ * (no model for the tier) can be told apart from one that asked and found nothing.
+ */
+export const needsModelDatasetMatch = ({
+  scope,
+  tier1,
+  report,
+}: {
+  scope: Pick<ResolvedHuntScope, 'report_matches'>;
+  tier1: Pick<HuntForThreatResult, 'per_index'>;
+  report?: HuntScopeReportContext;
+}): boolean =>
+  scope.report_matches.length === 0 && tier1.per_index.length === 0 && Boolean(report?.text);
+
 export const resolveTier2Targets = async ({
   scope,
   tier1,
@@ -173,7 +190,7 @@ export const resolveTier2Targets = async ({
   const tier1Hits = uniq(tier1.per_index.map(({ index }) => collapseIndexName(index)));
 
   let modelMatches: string[] = [];
-  if (reportMatches.length === 0 && tier1Hits.length === 0 && model && report?.text) {
+  if (model && report && needsModelDatasetMatch({ scope, tier1, report })) {
     const matched = await matchDatasetsWithModel({
       model,
       datasets: scope.discovered,

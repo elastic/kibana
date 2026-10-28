@@ -198,6 +198,16 @@ Add GitHub labels to trigger evals in PR CI:
 
 Model groups follow the pattern `eis/<modelId>` for EIS or `openrouter/<provider>-<model>` for OpenRouter.
 
+A suite whose results are only comparable under one fixed judge (e.g. one scored against a pinned baseline) can set `defaultJudge` to a judge connector id in its `evals.suites.json` entry:
+
+```json
+"defaultJudge": "eis-abc-1"
+```
+
+The judge is resolved in this order: `models:judge:` label (locally `--evaluation-connector-id`, then `EVAL_CONNECTOR_ID`), then the suite's `defaultJudge`, then the Vault `evaluationConnectorId`.
+
+`defaultJudge` applies to PR (label-triggered) runs and the local CLI. Weekly and on-demand runs go straight to `run_suite.sh`, where the Vault default is already exported, so they use `EVAL_CONNECTOR_ID` or the Vault default and ignore the `defaultJudge`.
+
 PRs touching the eval framework get `evals:smoke-tests` automatically
 ([`.github/paths-labeller.yml`](../../../../../.github/paths-labeller.yml)). Add
 `evals:skip-smoke-tests` to skip it.
@@ -206,6 +216,14 @@ When the labels match, PR CI triggers the dedicated
 [`kibana-evals-pr-llm-evals`](https://buildkite.com/elastic/kibana-evals-pr-llm-evals) pipeline. Results
 surface on the PR as a separate `kibana-evals` commit status — open its build for per-suite/per-model
 results and triage.
+
+Every run logs a link to its experiments in the evals UI
+(`/app/management/ai/evals/experiments/<experiment-id>?execution_id=<execution-id>`) after the
+score table. The link points at the Kibana that received the scores: `EVAL_KBN_URL` when set
+(by CI, `--evaluations-kbn-url`, or the datasets profile's `evaluationsKbn.url`; `dev-vault` and a
+synced `config.json` point it at the golden cluster), otherwise the Kibana Scout ran against. On Buildkite (PR, weekly and on-demand builds) the same
+links are added to a `kbn-evals-experiments-<suite>` build annotation, one row per model and
+shard, so they show at the top of the build. Logged URLs never include credentials.
 
 #### Per-spec model groups
 
@@ -242,7 +260,7 @@ suite config. Drop `KBN_EVALS_WEEKLY=1` to see the PR / on-demand fanout.
 
 ```bash
 CI=x-pack/platform/packages/shared/kbn-evals/scripts/ci
-export EVAL_SUITE_INFO="$(node $CI/get_suite_info.js significant-events)"
+export EVAL_SUITE_INFO="$(node $CI/get_suite_info.js nightshift-investigations)"
 export EVAL_MODEL_GROUPS="$(jq -r '.weeklyEisModelGroups | join(",")' <<<"$EVAL_SUITE_INFO")"
 export KIBANA_TESTING_INFERENCE_ENDPOINTS="$(jq -c '[.weeklyEisModelGroups[] | ltrimstr("eis/")]
   | map({ key: ("eis-" + gsub("[^a-zA-Z0-9]+"; "-")), value: { provider: "elastic", providerConfig: { model_id: . } } })
@@ -332,11 +350,32 @@ A suite whose Scout server needs secrets from the evals config can map them into
   "id": "my-suite",
   "configPath": "x-pack/.../kbn-evals-suite-my-suite/playwright.config.ts",
   "serverConfigSet": "evals_my_suite",
-  "scoutHook": "x-pack/.../kbn-evals-suite-my-suite/scout/scout_hook.sh"
+  "scoutHook": "x-pack/.../kbn-evals-suite-my-suite/scout/scout_hook.sh",
+  "vaultSecret": "my-suite"
 }
 ```
 
-The hook reads the evals config JSON (the `--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI) on stdin and prints `{ "env"?: Record<string, string> }`. `node scripts/evals start`/`run` and `run_suite.sh` export that env to Scout and the Playwright run, so the suite's server config set can read it. Kibana also resolves `${VAR}` references in YAML config files from its environment, so a config set can pass a suite-owned YAML file with `--config` and keep secrets out of files and process arguments. Scout restarts when the hook output changes. Keep suite-specific keys in the evals config; the shared schema allows unknown blocks. See [the Nightshift investigations hook](../../../../solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh) for an example.
+The hook reads a config JSON on stdin and prints `{ "env"?: Record<string, string> }`. `node scripts/evals start`/`run` and `run_suite.sh` export that env to Scout and the Playwright run, so the suite's server config set can read it. Kibana also resolves `${VAR}` references in YAML config files from its environment, so a config set can pass a suite-owned YAML file with `--config` and keep secrets out of files and process arguments. Scout restarts when the hook output changes. See [the Nightshift investigations hook](../../../../solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh) for an example.
+
+Give the suite its own Vault secret with `vaultSecret`, so rotating its credentials never rewrites the general config other suites read. The hook then reads that secret instead of the general config:
+
+| Where                        | Hook input                                                                                    |
+| ---------------------------- | --------------------------------------------------------------------------------------------- |
+| CI (`run_suite.sh`)          | `kv/ci-shared/kbn-evals/<vaultSecret>` in the ci-prod Vault                                   |
+| `--profile dev-vault`        | `secret/kibana-issues/dev/kbn-evals/<vaultSecret>` in the dev Vault                           |
+| `--profile <file profile>`   | `config.<profile>.json`, which holds the suite's blocks next to the general keys              |
+| No `vaultSecret` (any place) | The general config (`--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI)                 |
+
+CI forwards the initial hook input as `KBN_EVALS_SCOUT_HOOK_CONFIG_B64`. The native `evals run`
+command reuses it when no datasets profile is selected, so both hook invocations see the same
+suite secret without another Vault read. Explicit profiles retain their own configuration.
+
+Manage the secret with the Vault scripts' `--suite` flag, which keeps the local copy in a gitignored `vault/config.json` next to the suite's `playwright.config.ts` (copy `vault/config.example.json` to start):
+
+```bash
+node scripts/vault/retrieve_secrets.js --vault ci-prod --suite my-suite
+node scripts/vault/upload_secrets.js --vault ci-prod --suite my-suite
+```
 
 ### Serverless suites (`scoutArch` / `scoutDomain`)
 
@@ -664,7 +703,7 @@ node scripts/vault/upload_secrets.js --vault ci-prod
 node scripts/vault/get_command.js --vault ci-prod
 ```
 
-Upload writes the whole secret, so always retrieve first. The ci-prod path is KV v2 and keeps previous versions (numbered up by one per upload). To undo a bad upload, retrieve an earlier version and upload it again. Retrieve validates the config and fails before touching `config.json` if the version can't be read:
+Upload writes the whole secret, so always retrieve first. The ci-prod path is KV v2 and keeps previous versions (numbered up by one per upload). To undo a bad upload, retrieve an earlier version and upload it again (add `--suite <id>` to both for a suite's secret). Retrieve validates the config and fails before touching `config.json` if the version can't be read:
 
 ```bash
 node scripts/vault/retrieve_secrets.js --vault ci-prod --version <n>

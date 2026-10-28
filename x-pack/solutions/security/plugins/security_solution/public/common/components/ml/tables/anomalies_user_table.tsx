@@ -70,8 +70,7 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
 
   const { jobNameById, loading: loadingJobs } = useInstalledSecurityJobNameById();
   const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
-  const euidApi = useEntityStoreEuidApi();
-  const euid = euidApi?.euid;
+  const euidApi = useEntityStoreEuidApi() ?? undefined;
 
   const getAnomaliesUserTableFilterQuerySelector = useMemo(
     () => usersSelectors.usersAnomaliesJobIdFilterSelector(),
@@ -120,7 +119,7 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
   const anomaliesInfluencersFilterQuery = useMemo(
     () =>
       buildAnomaliesTableInfluencersFilterQuery({
-        euid,
+        euidApi,
         entityType: 'user',
         isScopedToEntity,
         identityFields,
@@ -128,7 +127,7 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
         fallbackDisplayName: userName,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [euid, isScopedToEntity, userName, identitySignature]
+    [euidApi, isScopedToEntity, userName, identitySignature]
   );
 
   const [loadingTable, tableData] = useAnomaliesTableData({
@@ -140,14 +139,14 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
       userName,
       identityFields,
       entityRecord: isScopedToEntity && entityRecord ? entityRecord : undefined,
-      euid,
+      euidApi,
     }),
     filterQuery: anomaliesInfluencersFilterQuery,
     jobIds: selectedJobIds.length > 0 ? selectedJobIds : jobIds,
     aggregationInterval: selectedInterval,
   });
 
-  const users = convertAnomaliesToUsers(tableData, jobNameById, userName, identityFields, euid);
+  const users = convertAnomaliesToUsers(tableData, jobNameById, userName, identityFields, euidApi);
   const columns = getAnomaliesUserTableColumnsCurated(type, startDate, endDate);
   const pagination = {
     initialPageIndex: 0,

@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source .buildkite/scripts/common/util.sh
+
 echo --- Create new branch off main
 
 branch="$BRANCH"
@@ -18,11 +20,14 @@ git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
 git fetch origin main
 git checkout -b "$branch" origin/main
+# The Buildkite App credential is not a bypass actor of the "Release Branches" ruleset, so the
+# push is rejected for missing required status checks. kibanamachine is a bypass actor.
+GITHUB_PR_OWNER=elastic GITHUB_PR_REPO=kibana GITHUB_PR_BRANCH="$branch" \
+  push_as_github_token
+
 if [ "${DRY_RUN:-}" = "true" ]; then
-  git push origin "$branch"
   buildkite-agent meta-data set "version_bump:dry_run_branch" "$branch"
   echo "DRY_RUN temporary branch '$branch' was pushed"
 else
-  git push origin "$branch"
   echo "Branch '$branch' created and pushed to origin"
 fi

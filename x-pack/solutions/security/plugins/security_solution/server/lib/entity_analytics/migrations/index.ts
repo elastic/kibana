@@ -17,7 +17,9 @@ import { createEventIngestedPipelineInAllNamespaces } from '../utils/event_inges
 import { updatePrivilegedMonitoringSourceIndex } from '../privilege_monitoring/migrations/update_source_index';
 import { upsertPrivilegedMonitoringEntitySource } from '../privilege_monitoring/migrations/upsert_entity_source';
 import { installPrebuiltWatchlists } from '../watchlists/migrations/install_prebuilt_watchlists';
+import { scheduleAlertEntityIdBackfill } from './backfill_alert_entity_id';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
+import type { EntityAnalyticsConfig } from '../types';
 
 export interface EntityAnalyticsMigrationsParams {
   taskManager?: TaskManagerSetupContract;
@@ -26,6 +28,7 @@ export interface EntityAnalyticsMigrationsParams {
   auditLogger: AuditLogger | undefined;
   kibanaVersion: string;
   experimentalFeatures?: ExperimentalFeatures;
+  entityAnalyticsConfig?: EntityAnalyticsConfig;
   hasEncryptionKey: boolean;
   /** When defined, migrations are scoped to this space only. When undefined, all spaces are migrated. */
   spaceId?: string;
@@ -78,4 +81,6 @@ export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMi
   if (paramsWithScopedLogger.experimentalFeatures?.entityAnalyticsEntityStoreV2) {
     await cleanupLegacyRiskEngine(paramsWithScopedLogger);
   }
+
+  await scheduleAlertEntityIdBackfill(paramsWithScopedLogger);
 };

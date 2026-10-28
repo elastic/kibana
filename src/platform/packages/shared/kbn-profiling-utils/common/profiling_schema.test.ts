@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PROFILING_EVENTS_INDEX_BY_SCHEMA, ProfilingSchema } from './profiling_schema';
+import {
+  PROFILING_EVENTS_INDEX_BY_SCHEMA,
+  PROFILING_STACKTRACES_INDEX_BY_SCHEMA,
+  ProfilingSchema,
+} from './profiling_schema';
 
 describe('PROFILING_EVENTS_INDEX_BY_SCHEMA', () => {
   // The values are pinned on purpose. The data streams of both schemas share the `profiling-events`
@@ -17,6 +21,16 @@ describe('PROFILING_EVENTS_INDEX_BY_SCHEMA', () => {
     expect(PROFILING_EVENTS_INDEX_BY_SCHEMA).toStrictEqual({
       [ProfilingSchema.ECS]: 'profiling-events-all',
       [ProfilingSchema.OTEL]: 'profiling-events-all.otel-*',
+    });
+  });
+});
+
+describe('PROFILING_STACKTRACES_INDEX_BY_SCHEMA', () => {
+  // Pinned for the same reason: `profiling-stacktraces*` would match the stacktraces of both schemas.
+  test('targets only the stacktraces of each schema', () => {
+    expect(PROFILING_STACKTRACES_INDEX_BY_SCHEMA).toStrictEqual({
+      [ProfilingSchema.ECS]: 'profiling-stacktraces',
+      [ProfilingSchema.OTEL]: 'profiling-stacktraces.otel-*',
     });
   });
 });

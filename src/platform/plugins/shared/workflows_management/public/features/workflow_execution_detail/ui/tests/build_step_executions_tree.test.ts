@@ -1037,6 +1037,72 @@ describe('buildStepExecutionsTree', () => {
       expect(result[0].isRetryAttempt).toBeUndefined();
       expect(result[0].attemptNumber).toBeUndefined();
     });
+
+    it('transforms attempts and keeps the fallback scope after them', () => {
+      const tryBlockScopes = [
+        { nodeId: 'enterTryBlock_http_call', nodeType: 'enter-try-block' },
+        { nodeId: 'enterNormalPath_http_call', nodeType: 'enter-normal-path' },
+      ];
+      const attempt = (id: string, scopeId: string, index: number) =>
+        createStepExecution({
+          id,
+          stepId: 'http_call',
+          stepType: 'http',
+          status: ExecutionStatus.FAILED,
+          stepExecutionIndex: index,
+          scopeStack: [
+            {
+              stepId: 'http_call',
+              nestedScopes: [
+                ...tryBlockScopes,
+                { nodeId: 'enterRetry_http_call', nodeType: 'enter-retry', scopeId },
+              ],
+            },
+          ],
+        });
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-retry',
+          stepId: 'http_call',
+          stepType: 'retry',
+          status: ExecutionStatus.FAILED,
+          scopeStack: [{ stepId: 'http_call', nestedScopes: tryBlockScopes }],
+        }),
+        attempt('exec-attempt-1', '1-attempt', 0),
+        attempt('exec-attempt-2', '2-attempt', 1),
+        createStepExecution({
+          id: 'exec-fallback-step',
+          stepId: 'log_fallback',
+          stepType: 'console',
+          status: ExecutionStatus.COMPLETED,
+          scopeStack: [
+            {
+              stepId: 'http_call',
+              nestedScopes: [
+                { nodeId: 'enterTryBlock_http_call', nodeType: 'enter-try-block' },
+                {
+                  nodeId: 'enterFallbackPath_http_call',
+                  nodeType: 'enter-fallback-path',
+                  scopeId: 'fallback',
+                },
+              ],
+            },
+          ],
+        }),
+      ];
+
+      const [retryParent] = buildStepExecutionsTree(stepExecutions);
+
+      expect(retryParent).toMatchObject({ stepId: 'http_call', retryAttemptCount: 2 });
+      expect(retryParent.children.map((child) => child.stepExecutionId ?? child.stepId)).toEqual([
+        'exec-attempt-1',
+        'exec-attempt-2',
+        'fallback',
+      ]);
+      expect(retryParent.children[2].children[0]).toMatchObject({
+        stepExecutionId: 'exec-fallback-step',
+      });
+    });
   });
 
   describe('edge cases', () => {

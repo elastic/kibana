@@ -97,7 +97,7 @@ export const Sentry: ConnectorSpec = {
   metadata: {
     id: '.sentry',
     displayName: 'Sentry',
-    description: i18n.translate('core.kibanaConnectorSpecs.sentry.metadata.description', {
+    description: i18n.translate('connectorSpecs.sentry.metadata.description', {
       defaultMessage:
         'Triage Sentry issues: list, read, resolve, ignore, reopen, assign, and bulk-update error groups, provision issue alert rules, and correlate incidents to releases.',
     }),
@@ -115,16 +115,13 @@ export const Sentry: ConnectorSpec = {
         overrides: {
           meta: {
             token: {
-              label: i18n.translate('core.kibanaConnectorSpecs.sentry.auth.bearer.token.label', {
+              label: i18n.translate('connectorSpecs.sentry.auth.bearer.token.label', {
                 defaultMessage: 'Auth Token',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.sentry.auth.bearer.token.helpText',
-                {
-                  defaultMessage:
-                    'A Sentry auth token with org:read, project:read, event:read, and event:write scopes (add alerts:write if you plan to provision issue alert rules, and event:admin if you plan to use deleteIssue). Create one as an internal integration (Settings > Developer Settings) or a personal auth token.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.sentry.auth.bearer.token.helpText', {
+                defaultMessage:
+                  'A Sentry auth token with org:read, project:read, event:read, and event:write scopes (add alerts:write if you plan to provision issue alert rules, and event:admin if you plan to use deleteIssue). Create one as an internal integration (Settings > Developer Settings) or a personal auth token.',
+              }),
             },
           },
         },
@@ -141,26 +138,23 @@ export const Sentry: ConnectorSpec = {
         .describe('Your Sentry organization slug')
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.sentry.config.organizationSlug.label', {
+          label: i18n.translate('connectorSpecs.sentry.config.organizationSlug.label', {
             defaultMessage: 'Organization slug',
           }),
           placeholder: 'my-org',
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.sentry.config.organizationSlug.helpText',
-            {
-              defaultMessage:
-                'The slug of your Sentry organization, found in the URL: sentry.io/organizations/your-slug/',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.sentry.config.organizationSlug.helpText', {
+            defaultMessage:
+              'The slug of your Sentry organization, found in the URL: sentry.io/organizations/your-slug/',
+          }),
         }),
       baseUrl: UISchemas.url('https://sentry.io/api/0')
         .optional()
         .describe('Sentry API base URL')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.sentry.config.baseUrl.label', {
+          label: i18n.translate('connectorSpecs.sentry.config.baseUrl.label', {
             defaultMessage: 'API base URL',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.sentry.config.baseUrl.helpText', {
+          helpText: i18n.translate('connectorSpecs.sentry.config.baseUrl.helpText', {
             defaultMessage:
               'Leave empty to use Sentry SaaS (https://sentry.io/api/0). If your organization uses a region-specific data storage location, use its regional domain instead, e.g. https://us.sentry.io/api/0 or https://de.sentry.io/api/0. Set this for a self-hosted Sentry instance, e.g. https://sentry.example.com/api/0.',
           }),
@@ -527,7 +521,7 @@ export const Sentry: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.sentry.test.description', {
+    description: i18n.translate('connectorSpecs.sentry.test.description', {
       defaultMessage: 'Verifies the Sentry connection by listing organization projects',
     }),
     handler: async (ctx) => {

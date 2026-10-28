@@ -11,6 +11,7 @@ import sinon from 'sinon';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { UserConnectorTokenClient } from './user_connector_token_client';
+import { EarsRequestError } from './ears/ears_request_error';
 import { revokeEarsCredentials } from './ears/revoke_ears_credentials';
 import { actionsConfigMock } from '../actions_config.mock';
 import type { Logger } from '@kbn/core/server';
@@ -45,7 +46,7 @@ beforeEach(() => {
   clock.reset();
   jest.resetAllMocks();
   jest.restoreAllMocks();
-  mockRevokeEarsCredentials.mockResolvedValue(undefined);
+  mockRevokeEarsCredentials.mockResolvedValue({ earsRequestIds: [], errors: [] });
   userClient = new UserConnectorTokenClient({
     unsecuredSavedObjectsClient,
     encryptedSavedObjectsClient,
@@ -208,6 +209,174 @@ describe('UserConnectorTokenClient', () => {
       });
 
       expect(result).toEqual({ connectorToken: null, hasErrors: false });
+    });
+  });
+
+  describe('getUsableOAuthConnectorIds()', () => {
+    const PAST = '2020-12-31T12:00:00.000Z';
+    const FUTURE = '2021-01-02T12:00:00.000Z';
+
+    const mockTokens = (
+      tokens: Array<{ connectorId: string; expiresAt?: string; refreshTokenExpiresAt?: string }>
+    ) => {
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: tokens.length,
+        per_page: 10,
+        page: 1,
+        saved_objects: tokens.map(({ connectorId, ...rest }) => ({
+          id: `token-${connectorId}`,
+          type: 'user_connector_token',
+          attributes: {
+            profileUid: 'user-profile-123',
+            connectorId,
+            credentialType: 'oauth',
+            credentials: {},
+            createdAt: PAST,
+            updatedAt: PAST,
+            ...rest,
+          },
+          score: 1,
+          references: [],
+        })),
+      });
+    };
+
+    const mockDecryptedCredentials = (credentials: Record<string, unknown>) =>
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+        id: 'token-id',
+        type: 'user_connector_token',
+        references: [],
+        attributes: { credentials },
+      });
+
+    const getUsable = (connectorIds: string[]) =>
+      userClient.getUsableOAuthConnectorIds({ profileUid: 'user-profile-123', connectorIds });
+
+    test('returns an empty set without querying when there are no connector ids', async () => {
+      expect(await getUsable([])).toEqual(new Set());
+      expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
+    });
+
+    test('treats an unexpired access token as usable without decrypting', async () => {
+      mockTokens([{ connectorId: 'a', expiresAt: FUTURE }, { connectorId: 'b' }]);
+
+      expect(await getUsable(['a', 'b'])).toEqual(new Set(['a', 'b']));
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    test('treats an expired access token with a refresh token as usable', async () => {
+      mockTokens([{ connectorId: 'a', expiresAt: PAST }]);
+      mockDecryptedCredentials({ accessToken: 'at', refreshToken: 'rt' });
+
+      expect(await getUsable(['a'])).toEqual(new Set(['a']));
+    });
+
+    test('treats an expired access token without a refresh token as not usable', async () => {
+      mockTokens([{ connectorId: 'a', expiresAt: PAST }]);
+      mockDecryptedCredentials({ accessToken: 'at' });
+
+      expect(await getUsable(['a'])).toEqual(new Set());
+    });
+
+    test('treats an expired refresh token as not usable without decrypting', async () => {
+      mockTokens([{ connectorId: 'a', expiresAt: PAST, refreshTokenExpiresAt: PAST }]);
+
+      expect(await getUsable(['a'])).toEqual(new Set());
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    test('treats connectors without a token as not usable', async () => {
+      mockTokens([{ connectorId: 'a', expiresAt: FUTURE }]);
+
+      expect(await getUsable(['a', 'b'])).toEqual(new Set(['a']));
+    });
+
+    test('treats a token that fails to decrypt as not usable', async () => {
+      mockTokens([{ connectorId: 'a', expiresAt: PAST }]);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(
+        new Error('decrypt failed')
+      );
+
+      expect(await getUsable(['a'])).toEqual(new Set());
+      expect(logger.error).toHaveBeenCalled();
+    });
+
+    test('returns an empty set when the token lookup fails', async () => {
+      unsecuredSavedObjectsClient.find.mockRejectedValueOnce(new Error('find failed'));
+
+      expect(await getUsable(['a'])).toEqual(new Set());
+      expect(logger.error).toHaveBeenCalled();
+    });
+
+    test('pages through tokens so a connector with many tokens does not hide another', async () => {
+      const tokenSo = (connectorId: string, index: number) => ({
+        id: `token-${connectorId}-${index}`,
+        type: 'user_connector_token',
+        attributes: {
+          profileUid: 'user-profile-123',
+          connectorId,
+          credentialType: 'oauth',
+          credentials: {},
+          expiresAt: FUTURE,
+          createdAt: PAST,
+          updatedAt: PAST,
+        },
+        score: 1,
+        references: [],
+      });
+      unsecuredSavedObjectsClient.find
+        .mockResolvedValueOnce({
+          total: 101,
+          per_page: 100,
+          page: 1,
+          saved_objects: Array.from({ length: 100 }, (_, index) => tokenSo('b', index)),
+        })
+        .mockResolvedValueOnce({
+          total: 101,
+          per_page: 100,
+          page: 2,
+          saved_objects: [tokenSo('a', 0)],
+        });
+
+      expect(await getUsable(['a', 'b'])).toEqual(new Set(['a', 'b']));
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(2);
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ page: 2 })
+      );
+    });
+
+    test('caps concurrent decryption of tokens', async () => {
+      const connectorIds = Array.from({ length: 25 }, (_, index) => `connector-${index}`);
+      mockTokens(connectorIds.map((connectorId) => ({ connectorId, expiresAt: PAST })));
+
+      let inFlight = 0;
+      let maxInFlight = 0;
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockImplementation(async () => {
+        inFlight++;
+        maxInFlight = Math.max(maxInFlight, inFlight);
+        await Promise.resolve();
+        await Promise.resolve();
+        inFlight--;
+        return {
+          id: 'token-id',
+          type: 'user_connector_token',
+          references: [],
+          attributes: { credentials: { refreshToken: 'rt' } },
+        };
+      });
+
+      expect(await getUsable(connectorIds)).toEqual(new Set(connectorIds));
+      expect(maxInFlight).toBe(10);
+    });
+
+    test('only considers the most recent token per connector', async () => {
+      mockTokens([
+        { connectorId: 'a', expiresAt: FUTURE },
+        { connectorId: 'a', expiresAt: PAST, refreshTokenExpiresAt: PAST },
+      ]);
+
+      expect(await getUsable(['a'])).toEqual(new Set(['a']));
     });
   });
 
@@ -488,7 +657,7 @@ describe('UserConnectorTokenClient', () => {
 
       mockRevokeEarsCredentials
         .mockRejectedValueOnce(new Error('provider timeout'))
-        .mockResolvedValueOnce(undefined);
+        .mockResolvedValueOnce({ earsRequestIds: [], errors: [] });
 
       await userClient.deleteAllConnectorTokens({
         connectorId: '123',
@@ -502,6 +671,128 @@ describe('UserConnectorTokenClient', () => {
       // second user was still attempted
       expect(mockRevokeEarsCredentials).toHaveBeenCalledWith(
         expect.objectContaining({ credentials: { accessToken: 'access-token-2' } })
+      );
+    });
+
+    test('logs a tagged revoke line per user with the EARS request ids', async () => {
+      const createdAt = new Date().toISOString();
+      const tokenFor = (id: string, profileUid: string) => ({
+        id,
+        type: 'user_connector_token',
+        references: [],
+        attributes: {
+          profileUid,
+          connectorId: '123',
+          credentialType: 'oauth',
+          credentials: { accessToken: `access-token-${profileUid}` },
+          createdAt,
+          updatedAt: createdAt,
+        },
+      });
+      mockOAuthTokensFinder([tokenFor('token-id-1', 'user-1'), tokenFor('token-id-2', 'user-2')]);
+      mockEmptyDeletion();
+
+      mockRevokeEarsCredentials
+        .mockResolvedValueOnce({ earsRequestIds: ['req-a', 'req-b'], errors: [] })
+        .mockRejectedValueOnce(
+          new EarsRequestError({
+            message: 'Failed to revoke token via auth redirect service',
+            status: 502,
+            earsRequestId: 'req-502',
+          })
+        );
+
+      await userClient.deleteAllConnectorTokens({
+        connectorId: '123',
+        authType: 'ears',
+        provider: 'test-provider',
+      });
+
+      expect(logger.info).toHaveBeenCalledWith(
+        'EARS revoke success: connectorId=123 provider=test-provider profileUid=user-1 earsRequestId=req-a,req-b',
+        { tags: ['ears', 'revoke', 'success'] }
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        'EARS revoke failure: connectorId=123 provider=test-provider profileUid=user-2 earsRequestId=req-502 status=502',
+        { tags: ['ears', 'revoke', 'failure'] }
+      );
+    });
+
+    test('logs a revoke failure with the request id of the revoke that succeeded', async () => {
+      const createdAt = new Date().toISOString();
+      mockOAuthTokensFinder([
+        {
+          id: 'token-id-1',
+          type: 'user_connector_token',
+          references: [],
+          attributes: {
+            profileUid: 'user-1',
+            connectorId: '123',
+            credentialType: 'oauth',
+            credentials: { accessToken: 'access-token-user-1' },
+            createdAt,
+            updatedAt: createdAt,
+          },
+        },
+      ]);
+      mockEmptyDeletion();
+      mockRevokeEarsCredentials.mockResolvedValueOnce({
+        earsRequestIds: ['req-a'],
+        errors: [new Error('provider timeout')],
+      });
+
+      await userClient.deleteAllConnectorTokens({
+        connectorId: '123',
+        authType: 'ears',
+        provider: 'test-provider',
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to revoke EARS OAuth token')
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        'EARS revoke failure: connectorId=123 provider=test-provider profileUid=user-1 earsRequestId=req-a reason="provider timeout"',
+        { tags: ['ears', 'revoke', 'failure'] }
+      );
+    });
+
+    test('logs every attempted revoke id on a failure line, including the failed one', async () => {
+      const createdAt = new Date().toISOString();
+      mockOAuthTokensFinder([
+        {
+          id: 'token-id-1',
+          type: 'user_connector_token',
+          references: [],
+          attributes: {
+            profileUid: 'user-1',
+            connectorId: '123',
+            credentialType: 'oauth',
+            credentials: { accessToken: 'access-token-user-1' },
+            createdAt,
+            updatedAt: createdAt,
+          },
+        },
+      ]);
+      mockEmptyDeletion();
+      const failure = new EarsRequestError({
+        message: 'Failed to revoke token via auth redirect service',
+        status: 502,
+        earsRequestId: 'req-502',
+      });
+      mockRevokeEarsCredentials.mockResolvedValueOnce({
+        earsRequestIds: ['req-a', 'req-502'],
+        errors: [failure],
+      });
+
+      await userClient.deleteAllConnectorTokens({
+        connectorId: '123',
+        authType: 'ears',
+        provider: 'test-provider',
+      });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        'EARS revoke failure: connectorId=123 provider=test-provider profileUid=user-1 earsRequestId=req-a,req-502 status=502',
+        { tags: ['ears', 'revoke', 'failure'] }
       );
     });
 

@@ -90,6 +90,10 @@ describe('POST: validate custom YARA signature', () => {
 
   describe('registerCustomYaraSignaturesRoutes()', () => {
     it('does not register the route when the feature flag is off', () => {
+      (
+        apiTestSetup.endpointAppContextMock.experimentalFeatures as Mutable<ExperimentalFeatures>
+      ).customYaraSignaturesEnabled = false;
+
       registerCustomYaraSignaturesRoutes(
         apiTestSetup.routerMock,
         apiTestSetup.endpointAppContextMock

@@ -20,9 +20,10 @@ interface Props {
   timeRange?: TimeRange;
   visConfig: TileMapVisConfig;
   onInitialRenderComplete: () => void;
+  interactive?: boolean;
 }
 
-export function TileMapVisualization(props: Props) {
+export function TileMapVisualization({ interactive, ...props }: Props) {
   const isMounted = useMountedState();
   const initialMapCenter = useMemo(() => {
     return {
@@ -48,6 +49,7 @@ export function TileMapVisualization(props: Props) {
       mapCenter={initialMapCenter}
       isLayerTOCOpen={true}
       layerList={initialLayerList}
+      interactive={interactive}
       onApiAvailable={(api) => {
         api.onRenderComplete$.pipe(first()).subscribe(() => {
           if (isMounted()) {

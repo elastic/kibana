@@ -20,6 +20,11 @@ jest.mock('@kbn/custom-content-server', () => ({
   createCustomContentTemplateResolver: jest.fn(() => mockResolver),
 }));
 
+const mockGenerateEsql = jest.fn();
+jest.mock('@kbn/agent-builder-visualizations-server', () => ({
+  generateCustomContentEsql: (params: unknown) => mockGenerateEsql(params),
+}));
+
 const makeAttachment = (data: Record<string, unknown>) => ({
   id: 'att-1',
   type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
@@ -49,7 +54,13 @@ const makeContext = (attachmentData?: Record<string, unknown>) => {
 };
 
 const callHandler = async (
-  params: { embeddable_id?: string; prompt?: string; esqlQuery?: string | null },
+  params: {
+    embeddable_id?: string;
+    prompt?: string;
+    esqlQuery?: string | null;
+    regenerateEsql?: boolean;
+    index?: string;
+  },
   attachmentData?: Record<string, unknown>
 ) => {
   const tool = createUpdateCustomContentTool();
@@ -65,6 +76,7 @@ describe('createUpdateCustomContentTool handler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockResolver.mockResolvedValue({ template: '<div>generated</div>', height: 320 });
+    mockGenerateEsql.mockResolvedValue('FROM logs | STATS count = COUNT(*) BY host');
   });
 
   describe('missing attachment', () => {
@@ -146,6 +158,112 @@ describe('createUpdateCustomContentTool handler', () => {
       const result = results[0] as ToolResult;
       if (!isErrorResult(result)) throw new Error('Expected error result');
       expect(result.data.message).toMatch(/LLM failure/);
+    });
+  });
+
+  describe('regenerating the query', () => {
+    const existing = {
+      panel_template: '<p>old</p>',
+      esql_query: 'FROM logs | STATS count = COUNT(*) BY host',
+      embeddable_id: 'p1',
+    };
+
+    it('generates from the stored query and samples the new schema when regenerateEsql is set', async () => {
+      mockGenerateEsql.mockResolvedValue(
+        'FROM logs | STATS count = COUNT(*), errors = COUNT(*) WHERE status >= 500 BY host'
+      );
+
+      const { ctx } = await callHandler(
+        {
+          embeddable_id: 'p1',
+          prompt: 'Also show the error count',
+          regenerateEsql: true,
+          index: 'logs',
+        },
+        existing
+      );
+
+      expect(mockGenerateEsql).toHaveBeenCalledWith(
+        expect.objectContaining({
+          nlQuery: 'Also show the error count',
+          index: 'logs',
+          existingQueries: ['FROM logs | STATS count = COUNT(*) BY host'],
+        })
+      );
+      expect(mockResolver).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esqlQuery:
+            'FROM logs | STATS count = COUNT(*), errors = COUNT(*) WHERE status >= 500 BY host',
+          hasExistingQuery: false,
+        })
+      );
+      expect(ctx.update).toHaveBeenCalledWith(
+        'att-1',
+        expect.objectContaining({
+          data: expect.objectContaining({
+            esql_query:
+              'FROM logs | STATS count = COUNT(*), errors = COUNT(*) WHERE status >= 500 BY host',
+          }),
+        }),
+        ATTACHMENT_REF_ACTOR.agent
+      );
+    });
+
+    it('does not generate a query for a style-only edit', async () => {
+      await callHandler({ embeddable_id: 'p1', prompt: 'Make the badges blue' }, existing);
+
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
+      expect(mockResolver).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlQuery: undefined, hasExistingQuery: true })
+      );
+    });
+
+    it('lets an explicit query win over regenerateEsql', async () => {
+      await callHandler(
+        {
+          embeddable_id: 'p1',
+          prompt: 'Use my query',
+          esqlQuery: 'FROM metrics',
+          regenerateEsql: true,
+        },
+        existing
+      );
+
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
+      expect(mockResolver).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlQuery: 'FROM metrics' })
+      );
+    });
+
+    it('generates from nothing when the panel has no query yet', async () => {
+      await callHandler(
+        { embeddable_id: 'p1', prompt: 'Show hosts', regenerateEsql: true },
+        { panel_template: '<p>banner</p>', embeddable_id: 'p1' }
+      );
+
+      expect(mockGenerateEsql).toHaveBeenCalledWith(
+        expect.objectContaining({ existingQueries: [] })
+      );
+    });
+
+    it('returns an error and stores nothing when the query cannot be generated', async () => {
+      mockGenerateEsql.mockRejectedValue(
+        new Error(
+          'Could not generate an ES|QL query for this panel: no suitable index. Pass a hint.'
+        )
+      );
+
+      const { results, ctx } = await callHandler(
+        { embeddable_id: 'p1', prompt: 'Show hosts', regenerateEsql: true },
+        existing
+      );
+
+      const result = results[0] as ToolResult;
+      if (!isErrorResult(result)) throw new Error('Expected error result');
+      expect(result.data.message).toContain('Could not generate an ES|QL query');
+      expect(result.data.message).toContain('no suitable index');
+      expect(mockResolver).not.toHaveBeenCalled();
+      expect(ctx.update).not.toHaveBeenCalled();
     });
   });
 

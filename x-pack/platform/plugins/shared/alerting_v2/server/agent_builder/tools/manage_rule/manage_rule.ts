@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -16,8 +16,6 @@ import {
   DASHBOARD_ARTIFACT_TYPE,
   RUNBOOK_ARTIFACT_TYPE,
 } from '@kbn/alerting-v2-constants';
-import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
-import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import {
   ruleOperationSchema,
   executeRuleOperations,
@@ -26,16 +24,19 @@ import {
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import { generateRuleOperationsUsageList } from '../../skills/schema_to_skill_docs';
+import { createAttachmentsClient } from '../../../lib/attachments_client';
 
-const manageRuleSchema = z.object({
-  ruleAttachmentId: z
-    .string()
-    .optional()
-    .describe(
-      '(optional) The rule attachment ID to modify. If not provided, a new rule is created.'
-    ),
-  operations: z.array(ruleOperationSchema).min(1),
-});
+const manageRuleSchema = lazySchema(() =>
+  z.object({
+    ruleAttachmentId: z
+      .string()
+      .optional()
+      .describe(
+        '(optional) The rule attachment ID to modify. If not provided, a new rule is created.'
+      ),
+    operations: z.array(ruleOperationSchema).min(1),
+  })
+);
 
 export interface ManageRuleToolDeps {
   logger: LoggerServiceContract;
@@ -62,16 +63,10 @@ ${generateRuleOperationsUsageList()}`,
   ) => {
     let ruleId: string | undefined;
     try {
-      const currentAttachment = previousAttachmentId
-        ? attachments.getAttachmentRecord(previousAttachmentId)
-        : undefined;
-
-      const isNew = !currentAttachment;
-      const attachmentId = previousAttachmentId ?? uuidv4();
-
-      const currentData: Partial<RuleAttachmentData> =
-        currentAttachment?.versions.at(-1)?.data ?? {};
-      ruleId = currentAttachment?.origin;
+      const { rules } = createAttachmentsClient(attachments);
+      const draft = rules.getDraft(previousAttachmentId);
+      const { isNew, data: currentData } = draft;
+      ruleId = draft.origin;
 
       const {
         data: updatedData,
@@ -98,23 +93,7 @@ ${generateRuleOperationsUsageList()}`,
         (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
       );
 
-      const attachmentInput = {
-        id: attachmentId,
-        type: RULE_ATTACHMENT_TYPE,
-        description: `Rule: ${updatedData.metadata?.name ?? attachmentId}`,
-        data: updatedData,
-      };
-
-      const attachment = isNew
-        ? await attachments.add(attachmentInput)
-        : await attachments.update(attachmentId, {
-            data: updatedData,
-            description: attachmentInput.description,
-          });
-
-      if (!attachment) {
-        throw new Error(`Failed to persist rule attachment "${attachmentId}".`);
-      }
+      const attachment = await rules.saveDraft(draft, updatedData);
 
       logger.debug({
         message: () => (isNew ? 'Rule attachment created' : 'Rule attachment updated'),

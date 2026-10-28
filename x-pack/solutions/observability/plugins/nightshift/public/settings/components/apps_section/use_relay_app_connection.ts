@@ -18,7 +18,7 @@ import {
   type SlackAppWorkspace,
 } from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
-import { getFormattedError } from '../../utils/errors';
+import { getFormattedError } from '../../../common/errors';
 import { RELAY_APP_BINDINGS_QUERY_KEY } from './use_relay_app_bindings';
 
 const STATUS_ROUTE = '/internal/significant_events/apps/slack/status';
@@ -37,6 +37,8 @@ export interface UseRelayAppConnection {
   status: RelayAppConnectionStatus;
   error?: string;
   workspace?: SlackAppWorkspace;
+  createdBy?: string;
+  createdAt?: string;
   isMutating: boolean;
   retryStatusRequest: () => void;
   connect: () => Promise<void>;
@@ -138,6 +140,8 @@ export function useRelayAppConnection(): UseRelayAppConnection {
     status: statusQuery.data?.status ?? RELAY_APP_CONNECTION_STATUS.notConnected,
     error: statusQuery.data?.error,
     workspace: statusQuery.data?.workspace,
+    createdBy: statusQuery.data?.createdBy,
+    createdAt: statusQuery.data?.createdAt,
     isMutating:
       connectMutation.isLoading || confirmMutation.isLoading || disconnectMutation.isLoading,
     retryStatusRequest: () => {

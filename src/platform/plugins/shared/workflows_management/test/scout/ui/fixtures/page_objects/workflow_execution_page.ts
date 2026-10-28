@@ -102,6 +102,14 @@ export class WorkflowExecutionPage {
     await this.dismissToasts();
   }
 
+  async cancelExecution(): Promise<void> {
+    await this.page.testSubj
+      .locator('workflowExecutionFlyoutTakeAction')
+      .getByRole('button', { name: 'More actions' })
+      .click();
+    await this.page.testSubj.click('workflowExecutionFlyoutCancelExecution');
+  }
+
   /** Success toasts sit over the flyout and block clicks on the step tree. */
   private async dismissToasts(): Promise<void> {
     await this.page.evaluate(() => {

@@ -137,5 +137,38 @@ spaceTest.describe(
         await expect(dataGrid.getNextPageButton()).toBeHidden();
       }
     );
+
+    spaceTest(
+      'should load more documents from the sample-size footer in singlePage mode',
+      async ({ pageObjects }) => {
+        const { logsExperience } = pageObjects;
+        const { sampleSizeFooter, loadMoreLink } = logsExperience;
+
+        const limitedTo = (documentCount: string) =>
+          new RegExp(`Search results are limited to ${documentCount} documents\\.\\s*Load more`);
+
+        await logsExperience.gotoDataView(LOGS.SYNTH_FETCH_MORE_DATA_VIEW);
+
+        // In singlePage mode the footer only renders once the bottom of the grid is reached.
+        await logsExperience.scrollGridToBottom();
+        await expect(sampleSizeFooter).toHaveText(
+          limitedTo(LOGS.DEFAULT_SAMPLE_SIZE.toLocaleString('en'))
+        );
+        await expect(loadMoreLink).toBeVisible();
+
+        await logsExperience.loadMore();
+        await logsExperience.scrollGridToBottom();
+        await expect(sampleSizeFooter).toHaveText(
+          limitedTo((2 * LOGS.DEFAULT_SAMPLE_SIZE).toLocaleString('en'))
+        );
+
+        // The third sample size is past the total document count, so every row is now loaded and
+        // the footer has nothing left to report.
+        await logsExperience.loadMore();
+        await logsExperience.scrollGridToBottom();
+        await expect(sampleSizeFooter).toBeHidden();
+        await expect(loadMoreLink).toBeHidden();
+      }
+    );
   }
 );
