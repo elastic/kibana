@@ -6,7 +6,7 @@
  */
 
 import { useState, useCallback, useMemo } from 'react';
-import type { CommandMatchResult, TextMatch } from './types';
+import type { CommandId, CommandMatchResult, TextMatch } from './types';
 import { matchCommand } from './command_matcher';
 import { useAvailableCommandDefinitions } from './command_definitions';
 import { getTextBeforeCursor } from './utils/get_text_before_cursor';
@@ -25,6 +25,8 @@ interface CommandMenuState {
 interface UseCommandMenuOptions {
   /** Whether command detection is enabled. Defaults to true. */
   readonly enabled?: boolean;
+  /** Commands that are not detected, even when they are otherwise available. */
+  readonly excludedCommandIds?: readonly CommandId[];
 }
 
 const INACTIVE_MATCH: TextMatch = {
@@ -44,8 +46,15 @@ interface ConfirmedContent {
  * user types. Check `match.isActive` to show/hide the command menu.
  */
 export const useCommandMenu = (options: UseCommandMenuOptions = {}): CommandMenuState => {
-  const { enabled = true } = options;
-  const definitions = useAvailableCommandDefinitions();
+  const { enabled = true, excludedCommandIds } = options;
+  const availableDefinitions = useAvailableCommandDefinitions();
+  const definitions = useMemo(
+    () =>
+      excludedCommandIds?.length
+        ? availableDefinitions.filter(({ id }) => !excludedCommandIds.includes(id))
+        : availableDefinitions,
+    [availableDefinitions, excludedCommandIds]
+  );
 
   const [textMatch, setTextMatch] = useState<TextMatch>(INACTIVE_MATCH);
   const [confirmedContent, setConfirmedContent] = useState<ConfirmedContent | null>(null);

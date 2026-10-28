@@ -7,7 +7,7 @@
 
 import type { RefObject } from 'react';
 import { useRef, useMemo, useState, useCallback } from 'react';
-import type { CommandMatchResult, CommandBadgeData } from './command_menu';
+import type { CommandId, CommandMatchResult, CommandBadgeData } from './command_menu';
 import { useCommandMenu, useCommandMenuPrefetch } from './command_menu';
 import {
   CommandBadgeSerializationError,
@@ -79,18 +79,20 @@ const useMessageEditorInstance = ({
   syncIsEmpty,
   onEditorFocus,
   onContentChange,
+  excludedCommandIds,
 }: {
   ref: RefObject<HTMLDivElement>;
   syncIsEmpty: () => void;
   onEditorFocus?: () => void;
   onContentChange?: () => void;
+  excludedCommandIds?: readonly CommandId[];
 }): MessageEditorInstance => {
   const {
     match: commandMatch,
     dismiss: dismissCommandMenu,
     checkInputForCommand,
     reportContent,
-  } = useCommandMenu();
+  } = useCommandMenu({ excludedCommandIds });
   const prefetchCommandMenus = useCommandMenuPrefetch();
 
   const messageEditor = useMemo(
@@ -252,13 +254,19 @@ const useMessageEditorController = ({
  * <MessageEditor messageEditor={messageEditor} onSubmit={handleSubmit} />
  */
 export const useMessageEditor = (
-  options: { onEditorFocus?: () => void; onContentChange?: () => void; maxLength?: number } = {}
+  options: {
+    onEditorFocus?: () => void;
+    onContentChange?: () => void;
+    maxLength?: number;
+    /** Commands whose menu must not open, e.g. because the chat does not support them. */
+    excludedCommandIds?: readonly CommandId[];
+  } = {}
 ): {
   messageEditor: MessageEditorInstance;
   controller: MessageEditorController;
   overLimitCharacterCount: number;
 } => {
-  const { onEditorFocus, onContentChange, maxLength = Infinity } = options;
+  const { onEditorFocus, onContentChange, maxLength = Infinity, excludedCommandIds } = options;
   const ref = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(true);
   const [overLimitCharacterCount, setOverLimitCharacterCount] = useState(0);
@@ -279,7 +287,13 @@ export const useMessageEditor = (
     setIsEmpty(nextIsEmpty);
   }, [maxLength]);
 
-  const instance = useMessageEditorInstance({ ref, syncIsEmpty, onEditorFocus, onContentChange });
+  const instance = useMessageEditorInstance({
+    ref,
+    syncIsEmpty,
+    onEditorFocus,
+    onContentChange,
+    excludedCommandIds,
+  });
   const controller = useMessageEditorController({ ref, syncIsEmpty, isEmpty });
   const messageEditor = useMemo(
     () => ({

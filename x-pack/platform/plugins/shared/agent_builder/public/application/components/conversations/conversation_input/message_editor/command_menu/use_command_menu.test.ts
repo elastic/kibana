@@ -7,6 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { useCommandMenu } from './use_command_menu';
+import { CommandId } from './types';
 import { getTextBeforeCursor } from './utils/get_text_before_cursor';
 
 jest.mock('../../../../../hooks/use_experimental_features', () => ({
@@ -104,6 +105,23 @@ describe('useCommandMenuCommand', () => {
       result.current.checkInputForCommand(mockElement);
     });
     expect(result.current.match.isActive).toBe(false);
+  });
+
+  it('excludedCommandIds prevents detection of the excluded command only', () => {
+    const excludedCommandIds = [CommandId.Skill];
+    const { result } = renderHook(() => useCommandMenu({ excludedCommandIds }));
+
+    mockGetTextBeforeCursor.mockReturnValue('/summarize');
+    act(() => {
+      result.current.checkInputForCommand(mockElement);
+    });
+    expect(result.current.match.isActive).toBe(false);
+
+    mockGetTextBeforeCursor.mockReturnValue('#connector');
+    act(() => {
+      result.current.checkInputForCommand(mockElement);
+    });
+    expect(result.current.match.activeCommand?.command.id).toBe(CommandId.Sml);
   });
 
   describe('no stickiness — a later trigger always wins immediately', () => {
