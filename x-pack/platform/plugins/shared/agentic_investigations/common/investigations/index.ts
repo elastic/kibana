@@ -11,3 +11,9 @@ export * from './severity_change';
 export * from './step_types';
 export * from './investigation';
 export * from './title';
+export {
+  INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+  MAX_INVESTIGATION_RUN_FAILURE_TEXT_LENGTH,
+  investigationRunFailedEventSchema,
+} from './run_failure';
+export type { InvestigationRunFailedEventData } from './run_failure';
