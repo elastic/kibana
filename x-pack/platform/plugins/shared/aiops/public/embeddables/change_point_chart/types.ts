@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   HasEditCapabilities,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishesTimeRange,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
@@ -33,6 +34,6 @@ export interface ChangePointComponentApi {
 
 export type ChangePointEmbeddableApi = DefaultEmbeddableApi<ChangePointChartEmbeddableState> &
   HasEditCapabilities &
-  PublishesDataViews &
+  PublishesDataSources<DataView> &
   PublishesTimeRange &
   ChangePointComponentApi;
