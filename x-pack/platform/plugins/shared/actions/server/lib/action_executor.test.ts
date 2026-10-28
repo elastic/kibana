@@ -2033,6 +2033,7 @@ describe('Connector metrics', () => {
     jest.spyOn(connectorExecuteCounter, 'add').mockImplementation(() => {});
     jest.spyOn(connectorExecuteDuration, 'record').mockImplementation(() => {});
     jest.spyOn(connectorAuthCounter, 'add').mockImplementation(() => {});
+    connectorTypeRegistry.isSpecActionType.mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -2069,6 +2070,21 @@ describe('Connector metrics', () => {
       'connector.sub_action': 'default',
       success: true,
     });
+  });
+
+  test('flags a spec-based connector type', async () => {
+    mockConnector();
+    connectorTypeRegistry.isSpecActionType.mockReturnValueOnce(true);
+    (
+      connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+    ).mockResolvedValueOnce({ actionId: CONNECTOR_ID, status: 'ok' });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(connectorExecuteCounter.add).toHaveBeenCalledWith(
+      1,
+      expect.objectContaining({ 'connector.spec_based': true })
+    );
   });
 
   test('records a failed execution with its error source', async () => {

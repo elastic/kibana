@@ -52,7 +52,7 @@ export async function create(params: ConnectorCreateParams): Promise<Connector> 
     recordConnectorCreate({
       connectorType: actionTypeId,
       authType,
-      specBased: Boolean(params.context.actionTypeRegistry.getSpec(actionTypeId)),
+      specBased: params.context.actionTypeRegistry.isSpecActionType(actionTypeId),
     });
     return connector;
   } catch (error) {
@@ -61,7 +61,7 @@ export async function create(params: ConnectorCreateParams): Promise<Connector> 
     recordConnectorCreate({
       connectorType: toBoundedLabel(actionTypeId, actionTypeRegistry.has(actionTypeId)),
       authType: toBoundedLabel(authType, authType === 'none' || authTypeRegistry.has(authType)),
-      specBased: Boolean(actionTypeRegistry.getSpec(actionTypeId)),
+      specBased: actionTypeRegistry.isSpecActionType(actionTypeId),
       errorType: getConnectorCreateErrorType(error),
     });
     throw error;

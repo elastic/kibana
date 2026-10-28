@@ -454,7 +454,7 @@ export class ActionExecutor {
         if (this.connectorRateLimiter.isRateLimited(actionTypeId)) {
           recordConnectorExecute({
             connectorType: actionTypeId,
-            specBased: Boolean(actionTypeRegistry.getSpec(actionTypeId)),
+            specBased: actionTypeRegistry.isSpecActionType(actionTypeId),
             origin: getConnectorExecuteOrigin(source?.type),
             errorType: 'rate_limited',
             errorSource: 'user',
@@ -478,7 +478,7 @@ export class ActionExecutor {
           } catch (e) {
             recordConnectorExecute({
               connectorType: actionTypeId,
-              specBased: Boolean(actionTypeRegistry.getSpec(actionTypeId)),
+              specBased: actionTypeRegistry.isSpecActionType(actionTypeId),
               origin: getConnectorExecuteOrigin(source?.type),
               errorType: 'disabled',
               errorSource: 'framework',
@@ -600,7 +600,7 @@ export class ActionExecutor {
           eventLogger.logEvent(event);
           recordConnectorExecute({
             connectorType: actionTypeId,
-            specBased: Boolean(actionTypeRegistry.getSpec(actionTypeId)),
+            specBased: actionTypeRegistry.isSpecActionType(actionTypeId),
             origin: getConnectorExecuteOrigin(source?.type),
             errorType: 'invalid',
             errorSource: err.result?.errorSource === TaskErrorSource.USER ? 'user' : 'framework',
@@ -691,7 +691,7 @@ export class ActionExecutor {
         const { subAction } = validatedParams;
         recordConnectorExecute({
           connectorType: actionTypeId,
-          specBased: Boolean(actionTypeRegistry.getSpec(actionTypeId)),
+          specBased: actionTypeRegistry.isSpecActionType(actionTypeId),
           origin: getConnectorExecuteOrigin(source?.type),
           // Validated against the connector's params schema, so the value is bounded.
           // Connectors without sub-actions have a single operation, reported as "default".

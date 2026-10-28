@@ -80,6 +80,7 @@ const actionTypeRegistry: ActionTypeRegistry = {
   get: jest.fn(),
   has: jest.fn(),
   getSpec: jest.fn(),
+  isSpecActionType: jest.fn().mockReturnValue(false),
   isSystemActionType: jest.fn().mockReturnValue(false),
   ensureActionTypeEnabled: jest.fn(),
   isDeprecated: jest.fn().mockReturnValue(false),
@@ -1122,7 +1123,7 @@ describe('create()', () => {
     });
 
     test('flags a spec-based connector type', async () => {
-      (actionTypeRegistry.getSpec as jest.Mock).mockReturnValueOnce({ metadata: { id: 'x' } });
+      (actionTypeRegistry.isSpecActionType as jest.Mock).mockReturnValueOnce(true);
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: '1',
         type: 'action',
