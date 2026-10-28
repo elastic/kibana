@@ -18,6 +18,7 @@ const s3SettingsWithSecretsSchema = schema.object({
   // no longer used, but still accepted for backwards compatibility
   region: optionalString,
   endpoint: optionalString,
+  addressing_style: optionalString,
   auth: optionalString,
   access_key: nullableSecretString,
   secret_key: nullableSecretString,

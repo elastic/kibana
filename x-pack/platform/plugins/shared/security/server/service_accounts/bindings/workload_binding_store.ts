@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
@@ -196,5 +197,47 @@ export class WorkloadBindingStore {
     }
 
     return bindings;
+  }
+
+  /**
+   * Counts the workloads bound to each of the given service accounts, across operations and spaces.
+   * An account with no bindings is left out of the result.
+   *
+   * Not integrity-verified, for the same reason as {@link findByServiceAccountId}. The count is
+   * for display only.
+   */
+  async countByServiceAccountIds(serviceAccountIds: string[]): Promise<Map<string, number>> {
+    if (serviceAccountIds.length === 0) {
+      return new Map();
+    }
+
+    const field = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.serviceAccountId`;
+    const { aggregations } = await this.client.find<
+      WorkloadBindingAttributes,
+      {
+        byServiceAccount: estypes.AggregationsTermsAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
+      }
+    >({
+      type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+      perPage: 0,
+      // TODO(legrego): This will need a more refined approach once service accounts
+      // support fine-grained authorization checks.
+      namespaces: [ALL_NAMESPACES_STRING],
+      filter: nodeBuilder.or(serviceAccountIds.map((id) => nodeBuilder.is(field, id))),
+      // `include` and `size` cover every id, so each count is exact.
+      aggs: {
+        byServiceAccount: {
+          terms: { field, include: serviceAccountIds, size: serviceAccountIds.length },
+        },
+      },
+    });
+
+    const buckets = aggregations?.byServiceAccount.buckets;
+    return new Map(
+      (Array.isArray(buckets) ? buckets : []).map(({ key, doc_count: count }) => [
+        String(key),
+        count,
+      ])
+    );
   }
 }

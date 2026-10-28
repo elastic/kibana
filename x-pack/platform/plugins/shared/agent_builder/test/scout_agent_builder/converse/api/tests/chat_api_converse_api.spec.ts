@@ -9,6 +9,7 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
+import type { AttachmentAddedEventData } from '@kbn/agent-builder-common';
 import {
   ChatEventType,
   CONVERSATION_SCHEMA_VERSION,
@@ -340,9 +341,15 @@ apiTest.describe(
           (event) => event.type === TimelineEventType.userMessage
         )!;
         expect((userMessage.data as { message?: string }).message).toBe('');
-        expect((userMessage.data as { attachment_refs?: unknown[] }).attachment_refs).toHaveLength(
-          1
+        expect('attachment_refs' in userMessage.data).toBe(false);
+        const inputEvents = conversation.events!.filter(
+          (event) =>
+            event.type === TimelineEventType.attachmentAdded &&
+            (event.data as AttachmentAddedEventData).source === 'chat_input' &&
+            event.trigger_event_id === userMessage.id
         );
+        expect(inputEvents).toHaveLength(1);
+        expect((inputEvents[0].data as AttachmentAddedEventData).format).toBe(2);
         // The attachment change is activity as well as timeline, so both list it.
         expect(
           conversation.events!.filter(isActivityEvent).map((event) => event.type)

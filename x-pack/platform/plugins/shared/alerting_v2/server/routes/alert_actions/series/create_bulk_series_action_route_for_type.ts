@@ -30,7 +30,7 @@ import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../../route_descriptio
 export interface BulkSeriesActionBody<TAction extends CreateSeriesAlertActionBody['action_type']> {
   items: Array<
     Omit<Extract<CreateSeriesAlertActionBody, { action_type: TAction }>, 'action_type'> & {
-      group_hash: string;
+      series_id: string;
     }
   >;
 }

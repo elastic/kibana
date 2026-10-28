@@ -25,6 +25,17 @@ export const DELETE_CASES_FAILED_MESSAGE = (caseIds: string[], errorMessage: str
     values: { caseIds: caseIds.join(', '), errorMessage },
   });
 
+export const DELETE_ATTACHMENTS_FAILED_MESSAGE = (
+  caseId: string,
+  ids: string[],
+  errorMessage: string
+) =>
+  i18n.translate('xpack.cases.workflowSteps.deleteAttachments.error.attachmentsCouldNotBeDeleted', {
+    defaultMessage:
+      'Attachments could not be deleted on case "{caseId}": {ids}. Reason: {errorMessage}',
+    values: { caseId, ids: ids.join(', '), errorMessage },
+  });
+
 export const BULK_DELETE_OBSERVABLES_FAILED_MESSAGE = (
   caseId: string,
   observableIds: string[],

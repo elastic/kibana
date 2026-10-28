@@ -122,4 +122,20 @@ describe('Options list sorting button', () => {
       .map((el) => el.textContent);
     expect(optionsText).toEqual(['By document count', 'Numerically']);
   });
+
+  test('when isInteractive is false, disables the sorting button', () => {
+    const contextMock = getOptionsListContextMock();
+    const component = render(
+      <OptionsListControlContext.Provider
+        value={{
+          componentApi: contextMock.componentApi,
+          displaySettings: { ...contextMock.displaySettings, isInteractive: false },
+        }}
+      >
+        <OptionsListPopoverSortingButton showOnlySelected={false} />
+      </OptionsListControlContext.Provider>
+    );
+    const sortButton = component.getByTestId('optionsListControl__sortingOptionsButton');
+    expect(sortButton).toBeDisabled();
+  });
 });

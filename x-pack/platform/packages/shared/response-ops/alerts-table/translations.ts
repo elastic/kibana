@@ -7,91 +7,100 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const FEATURE_LABEL = i18n.translate('responseOpsAlertsTable.feature.label', {
+export const FEATURE_LABEL = i18n.translate('xpack.responseOpsAlertsTable.feature.label', {
   defaultMessage: 'Feature',
 });
 
-export const CASES = i18n.translate('responseOpsAlertsTable.cases.label', {
+export const CASES = i18n.translate('xpack.responseOpsAlertsTable.cases.label', {
   defaultMessage: 'Cases',
 });
 
 export const MAINTENANCE_WINDOWS = i18n.translate(
-  'responseOpsAlertsTable.maintenanceWindows.label',
+  'xpack.responseOpsAlertsTable.maintenanceWindows.label',
   {
     defaultMessage: 'Maintenance Windows',
   }
 );
 
 export const OBSERVABILITY_DISPLAY_NAME = i18n.translate(
-  'responseOpsAlertsTable.sections.alertsTable.observability',
+  'xpack.responseOpsAlertsTable.sections.alertsTable.observability',
   {
     defaultMessage: 'Observability',
   }
 );
 
 export const SECURITY_DISPLAY_NAME = i18n.translate(
-  'responseOpsAlertsTable.sections.alertsTable.security',
+  'xpack.responseOpsAlertsTable.sections.alertsTable.security',
   {
     defaultMessage: 'Security',
   }
 );
 
 export const STACK_DISPLAY_NAME = i18n.translate(
-  'responseOpsAlertsTable.sections.alertsTable.stack',
+  'xpack.responseOpsAlertsTable.sections.alertsTable.stack',
   {
     defaultMessage: 'Stack',
   }
 );
 
 export const STACK_MONITORING_DISPLAY_NAME = i18n.translate(
-  'responseOpsAlertsTable.sections.alertsTable.stackMonitoring',
+  'xpack.responseOpsAlertsTable.sections.alertsTable.stackMonitoring',
   {
     defaultMessage: 'Stack Monitoring',
   }
 );
 
 export const UPTIME_DISPLAY_NAME = i18n.translate(
-  'responseOpsAlertsTable.sections.alertsTable.uptime',
+  'xpack.responseOpsAlertsTable.sections.alertsTable.uptime',
   {
     defaultMessage: 'Uptime',
   }
 );
 
-export const APM_DISPLAY_NAME = i18n.translate('responseOpsAlertsTable.sections.alertsTable.apm', {
-  defaultMessage: 'APM',
-});
+export const APM_DISPLAY_NAME = i18n.translate(
+  'xpack.responseOpsAlertsTable.sections.alertsTable.apm',
+  {
+    defaultMessage: 'APM',
+  }
+);
 
 export const INFRASTRUCTURE_DISPLAY_NAME = i18n.translate(
-  'responseOpsAlertsTable.sections.alertsTable.infrastructure',
+  'xpack.responseOpsAlertsTable.sections.alertsTable.infrastructure',
   {
     defaultMessage: 'Infrastructure',
   }
 );
 
-export const SLO_DISPLAY_NAME = i18n.translate('responseOpsAlertsTable.sections.alertsTable.slos', {
-  defaultMessage: 'SLOs',
-});
+export const SLO_DISPLAY_NAME = i18n.translate(
+  'xpack.responseOpsAlertsTable.sections.alertsTable.slos',
+  {
+    defaultMessage: 'SLOs',
+  }
+);
 
 export const LOGS_DISPLAY_NAME = i18n.translate(
-  'responseOpsAlertsTable.sections.alertsTable.logs',
+  'xpack.responseOpsAlertsTable.sections.alertsTable.logs',
   {
     defaultMessage: 'Logs',
   }
 );
 
-export const ML_DISPLAY_NAME = i18n.translate('responseOpsAlertsTable.sections.alertsTable.ml', {
-  defaultMessage: 'Machine Learning',
-});
+export const ML_DISPLAY_NAME = i18n.translate(
+  'xpack.responseOpsAlertsTable.sections.alertsTable.ml',
+  {
+    defaultMessage: 'Machine Learning',
+  }
+);
 
 export const ALERTS_TABLE_CONF_ERROR_TITLE = i18n.translate(
-  'responseOpsAlertsTable.alertsTable.configuration.errorTitle',
+  'xpack.responseOpsAlertsTable.alertsTable.configuration.errorTitle',
   {
     defaultMessage: 'Unable to load alerts table',
   }
 );
 
 export const ALERTS_TABLE_CONF_ERROR_MESSAGE = i18n.translate(
-  'responseOpsAlertsTable.alertsTable.configuration.errorBody',
+  'xpack.responseOpsAlertsTable.alertsTable.configuration.errorBody',
   {
     defaultMessage:
       'There was an error loading the alerts table. This table is missing the necessary configuration. Please contact your administrator for help',
@@ -99,97 +108,106 @@ export const ALERTS_TABLE_CONF_ERROR_MESSAGE = i18n.translate(
 );
 
 export const ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL = i18n.translate(
-  'responseOpsAlertsTable.sections.alertsTable.column.actions',
+  'xpack.responseOpsAlertsTable.sections.alertsTable.column.actions',
   {
     defaultMessage: 'Actions',
   }
 );
 
 export const ALERTS_TABLE_TITLE = i18n.translate(
-  'responseOpsAlertsTable.sections.alertsTable.title',
+  'xpack.responseOpsAlertsTable.sections.alertsTable.title',
   {
     defaultMessage: 'Alerts table',
   }
 );
 
 export const ALERTS_TABLE_FILTERS_ERROR_TITLE = i18n.translate(
-  'responseOpsAlertsTable.alertsTable.filters.errorTitle',
+  'xpack.responseOpsAlertsTable.alertsTable.filters.errorTitle',
   {
     defaultMessage: 'Unsupported alerts filters set',
   }
 );
 
 export const ALERTS_TABLE_UNKNOWN_ERROR_TITLE = i18n.translate(
-  'responseOpsAlertsTable.alertsTable.unknownErrorTitle',
+  'xpack.responseOpsAlertsTable.alertsTable.unknownErrorTitle',
   {
     defaultMessage: 'Cannot display alerts',
   }
 );
 
 export const ALERTS_TABLE_SHOW_ERROR_DETAILS = i18n.translate(
-  'responseOpsAlertsTable.alertsTable.showErrorDetails',
+  'xpack.responseOpsAlertsTable.alertsTable.showErrorDetails',
   {
     defaultMessage: 'Show details',
   }
 );
 
 export const ALERTS_TABLE_UNKNOWN_ERROR_MESSAGE = i18n.translate(
-  'responseOpsAlertsTable.alertsTable.unknownErrorBody',
+  'xpack.responseOpsAlertsTable.alertsTable.unknownErrorBody',
   {
     defaultMessage: 'An error occurred while rendering the alerts table',
   }
 );
 
 export const ALERTS_TABLE_UNKNOWN_ERROR_COPY_TO_CLIPBOARD_LABEL = i18n.translate(
-  'responseOpsAlertsTable.alertsTable.unknownErrorCopyToClipboardLabel',
+  'xpack.responseOpsAlertsTable.alertsTable.unknownErrorCopyToClipboardLabel',
   {
     defaultMessage: 'Copy error to clipboard',
   }
 );
 
-export const UPDATING = i18n.translate('responseOpsAlertsTable.alertsTable.lastUpdated.updating', {
-  defaultMessage: 'Updating...',
-});
+export const UPDATING = i18n.translate(
+  'xpack.responseOpsAlertsTable.alertsTable.lastUpdated.updating',
+  {
+    defaultMessage: 'Updating...',
+  }
+);
 
-export const UPDATED = i18n.translate('responseOpsAlertsTable.alertsTable.lastUpdated.updated', {
-  defaultMessage: 'Updated',
-});
+export const UPDATED = i18n.translate(
+  'xpack.responseOpsAlertsTable.alertsTable.lastUpdated.updated',
+  {
+    defaultMessage: 'Updated',
+  }
+);
 
-export const INSPECT = i18n.translate('responseOpsAlertsTable.inspectDescription', {
+export const INSPECT = i18n.translate('xpack.responseOpsAlertsTable.inspectDescription', {
   defaultMessage: 'Inspect',
 });
 
-export const CLOSE = i18n.translate('responseOpsAlertsTable.inspect.modal.closeTitle', {
+export const CLOSE = i18n.translate('xpack.responseOpsAlertsTable.inspect.modal.closeTitle', {
   defaultMessage: 'Close',
 });
 
 export const SOMETHING_WENT_WRONG = i18n.translate(
-  'responseOpsAlertsTable.inspect.modal.somethingWentWrongDescription',
+  'xpack.responseOpsAlertsTable.inspect.modal.somethingWentWrongDescription',
   {
     defaultMessage: 'Sorry about that, something went wrong.',
   }
 );
 export const INDEX_PATTERN = i18n.translate(
-  'responseOpsAlertsTable.inspect.modal.indexPatternLabel',
+  'xpack.responseOpsAlertsTable.inspect.modal.indexPatternLabel',
   {
     defaultMessage: 'Index pattern',
   }
 );
 
 export const INDEX_PATTERN_DESC = i18n.translate(
-  'responseOpsAlertsTable.inspect.modal.indexPatternDescription',
+  'xpack.responseOpsAlertsTable.inspect.modal.indexPatternDescription',
   {
     defaultMessage:
       'The index pattern that connected to the Elasticsearch indices. These indices can be configured in Kibana > Advanced Settings.',
   }
 );
 
-export const QUERY_TIME = i18n.translate('responseOpsAlertsTable.inspect.modal.queryTimeLabel', {
-  defaultMessage: 'Query time',
-});
+export const QUERY_TIME = i18n.translate(
+  'xpack.responseOpsAlertsTable.inspect.modal.queryTimeLabel',
+  {
+    defaultMessage: 'Query time',
+  }
+);
 
 export const QUERY_TIME_DESC = i18n.translate(
-  'responseOpsAlertsTable.inspect.modal.queryTimeDescription',
+  'xpack.responseOpsAlertsTable.inspect.modal.queryTimeDescription',
   {
     defaultMessage:
       'The time it took to process the query. Does not include the time to send the request or parse it in the browser.',
@@ -197,49 +215,49 @@ export const QUERY_TIME_DESC = i18n.translate(
 );
 
 export const REQUEST_TIMESTAMP = i18n.translate(
-  'responseOpsAlertsTable.inspect.modal.reqTimestampLabel',
+  'xpack.responseOpsAlertsTable.inspect.modal.reqTimestampLabel',
   {
     defaultMessage: 'Request timestamp',
   }
 );
 
 export const REQUEST_TIMESTAMP_DESC = i18n.translate(
-  'responseOpsAlertsTable.inspect.modal.reqTimestampDescription',
+  'xpack.responseOpsAlertsTable.inspect.modal.reqTimestampDescription',
   {
     defaultMessage: 'Time when the start of the request has been logged',
   }
 );
 
 export const SELECTED_ALERTS = (selectedAlertsFormatted: string, selectedAlerts: number) =>
-  i18n.translate('responseOpsAlertsTable.toolbar.bulkActions.selectedAlertsTitle', {
+  i18n.translate('xpack.responseOpsAlertsTable.toolbar.bulkActions.selectedAlertsTitle', {
     values: { selectedAlertsFormatted, selectedAlerts },
     defaultMessage:
       'Selected {selectedAlertsFormatted} {selectedAlerts, plural, =1 {alert} other {alerts}}',
   });
 
 export const SELECT_ALL_ALERTS = (totalAlertsFormatted: string, totalAlerts: number) =>
-  i18n.translate('responseOpsAlertsTable.toolbar.bulkActions.selectAllAlertsTitle', {
+  i18n.translate('xpack.responseOpsAlertsTable.toolbar.bulkActions.selectAllAlertsTitle', {
     values: { totalAlertsFormatted, totalAlerts },
     defaultMessage:
       'Select all {totalAlertsFormatted} {totalAlerts, plural, =1 {alert} other {alerts}}',
   });
 
 export const CLEAR_SELECTION = i18n.translate(
-  'responseOpsAlertsTable.toolbar.bulkActions.clearSelectionTitle',
+  'xpack.responseOpsAlertsTable.toolbar.bulkActions.clearSelectionTitle',
   {
     defaultMessage: 'Clear selection',
   }
 );
 
 export const COLUMN_HEADER_ARIA_LABEL = i18n.translate(
-  'responseOpsAlertsTable.bulkActions.columnHeader.AriaLabel',
+  'xpack.responseOpsAlertsTable.bulkActions.columnHeader.AriaLabel',
   {
     defaultMessage: 'Select all rows',
   }
 );
 
 export const SELECT_ROW_ARIA_LABEL = (displayedRowIndex: number) =>
-  i18n.translate('responseOpsAlertsTable.bulkActions.selectRowCheckbox.AriaLabel', {
+  i18n.translate('xpack.responseOpsAlertsTable.bulkActions.selectRowCheckbox.AriaLabel', {
     values: { displayedRowIndex },
     defaultMessage: 'Select row {displayedRowIndex}',
   });
@@ -350,7 +368,7 @@ export const getAlertFlyoutAriaLabel = (alertDescription: string) =>
   });
 
 export const BULK_ACTIONS_ARIA_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.alertsTable.bulkActionsAriaLabel',
+  'xpack.responseOpsAlertsTable.alertsTable.bulkActionsAriaLabel',
   {
     defaultMessage: 'Bulk actions',
   }

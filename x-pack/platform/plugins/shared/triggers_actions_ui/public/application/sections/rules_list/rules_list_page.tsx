@@ -19,7 +19,6 @@ import { getClassicTabs } from '../rules_page/get_classic_tabs';
 import { getRulesPageMenu } from '../rules_page/get_rules_page_menu';
 import { useRulesPageActions } from '../rules_page/rules_page_actions';
 import { RULES_PAGE_MODE, useRulesPageMode } from '../rules_page/use_rules_page_mode';
-import { UniversalRulesIntroCallout } from './components/universal_rules_intro_callout';
 
 const RulesList = lazy(() => import('./components/rules_list'));
 
@@ -45,7 +44,7 @@ export const RulesListContainer = () => {
   });
   const {
     openCreateRuleModal,
-    openSettingsFlyout,
+    navigateToSettings,
     navigateToCreateRuleForm,
     navigateToCreateRuleFromTemplateForm,
     navigateToEditRuleForm,
@@ -100,7 +99,7 @@ export const RulesListContainer = () => {
       canShowSettings,
       extraItems,
       onCreateRule: openCreateRuleModal,
-      onOpenSettings: openSettingsFlyout,
+      onOpenSettings: navigateToSettings,
     });
   }, [
     mode,
@@ -109,7 +108,7 @@ export const RulesListContainer = () => {
     canShowSettings,
     history,
     openCreateRuleModal,
-    openSettingsFlyout,
+    navigateToSettings,
   ]);
 
   return (
@@ -129,7 +128,6 @@ export const RulesListContainer = () => {
         menu={rulesListMenu}
         docLink={docLink}
       />
-      <UniversalRulesIntroCallout />
       <RulesList
         rulesListKey="rules-page"
         showCreateRuleButtonInPrompt={true}

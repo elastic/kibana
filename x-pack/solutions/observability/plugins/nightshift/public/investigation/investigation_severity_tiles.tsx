@@ -20,17 +20,19 @@ import {
   type UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { Severity, SeverityCounts } from '@kbn/nightshift-investigations-plugin/common';
 import { getSeverityLabel, SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { SEVERITY_TILE_ICON, SEVERITY_TILE_ICON_COLORS } from '../common/severity';
 
 /** A muted tier has no section to scroll to, so its tile reads as a figure rather than a control. */
 type SeverityTileState = 'muted' | 'interactive';
 
 interface SeverityTileStateStyles {
-  /** `EuiPanel`'s `color` prop, since the two states differ in panel fill as well as in CSS. */
-  panelColor: EuiPanelProps['color'];
+  /** `EuiPanel`'s `color` prop when a state needs a filled panel; omit for border-only. */
+  panelColor?: EuiPanelProps['color'];
   panel?: SerializedStyles;
   count?: SerializedStyles;
 }
@@ -69,7 +71,7 @@ const getSeverityTileStyles = (
         {
           muted: css`
             ${iconBoxBase}
-            background: ${euiTheme.colors.backgroundBaseSubdued};
+            background: ${euiTheme.colors.backgroundBaseDisabled};
             color: ${euiTheme.colors.textDisabled};
           `,
           interactive: css`
@@ -97,15 +99,15 @@ const getSeverityTileStyles = (
       font-weight: ${euiTheme.font.weight.medium};
     `,
     byState: {
+      // Empty tiles: border only, no panel fill; count/icon stay muted.
       muted: {
-        panelColor: 'subdued',
+        panelColor: 'transparent',
         count: css`
-          color: ${euiTheme.colors.textSubdued};
+          color: ${euiTheme.colors.textDisabled};
         `,
       },
       // Clickable EuiPanel defaults to hover shadow `m`; use `xs` for a lighter lift.
       interactive: {
-        panelColor: undefined,
         panel: css`
           &&:hover,
           &&:focus,
@@ -152,6 +154,14 @@ export const InvestigationSeverityTiles = ({
               css={stateStyles.panel}
               data-test-subj={`nightshiftSeverityTile-${severity}`}
               onClick={isMuted ? undefined : () => onSeverityClick(severity)}
+              {...(isMuted
+                ? {}
+                : getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SEVERITY_INVESTIGATIONS,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.SEVERITY_TILES,
+                    // The tier is the point of the click; the count rides on the page-view event.
+                    detail: severity,
+                  }))}
             >
               <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>

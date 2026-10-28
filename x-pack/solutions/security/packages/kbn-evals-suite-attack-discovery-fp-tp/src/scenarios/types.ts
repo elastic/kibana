@@ -16,6 +16,7 @@ export type FpTpEvidenceState =
   | 'complete'
   | 'entities_missing'
   | 'events_missing'
+  | 'events_truncated'
   | 'mixed'
   | 'attack_discovery_missing'
   | 'cited_alert_missing';

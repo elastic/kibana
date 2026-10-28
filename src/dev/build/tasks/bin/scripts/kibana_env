@@ -1,17 +1,71 @@
 # Load package-owned defaults before user node.options and NODE_OPTIONS.
 # DIR is set by the calling launcher after resolving its symlinks.
 KBN_DISTRIBUTION_ROOT="$(cd "$DIR" && pwd)" || exit 1
-CONFIG_DIR=${KBN_PATH_CONF:-"$DIR/config"}
+CONFIG_DIR=${KBN_PATH_CONF:-"$KBN_DISTRIBUTION_ROOT/config"}
 
 if [ -f "$KBN_DISTRIBUTION_ROOT/config_defaults/node_env.sh" ]; then
   . "$KBN_DISTRIBUTION_ROOT/config_defaults/node_env.sh"
 fi
 
+KBN_NODE_OPTS=${KBN_NODE_OPTS:-}
 if [ -f "${CONFIG_DIR}/node.options" ]; then
-  KBN_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
+  KBN_NODE_OPTS="$(grep -v '^#' < "${CONFIG_DIR}/node.options" | xargs)"
 fi
 
 if [ -f "$KBN_DISTRIBUTION_ROOT/config_defaults/node.options" ]; then
   KBN_DEFAULT_NODE_OPTS="$(grep -v '^#' < "$KBN_DISTRIBUTION_ROOT/config_defaults/node.options" | xargs)"
   KBN_NODE_OPTS="$KBN_DEFAULT_NODE_OPTS ${KBN_NODE_OPTS:-}"
 fi
+
+{{#linux}}
+# Select the bundled provider only when requested, preserving external OpenSSL
+# configuration (including the provider supplied by the FIPS Docker image).
+KBN_ENABLE_FIPS=false
+KBN_FORCE_FIPS=false
+KBN_CUSTOM_OPENSSL_CONFIG=false
+# Match Node: only double quotes group values, and backslashes escape characters
+# only inside double quotes. The trailing space flushes the final option.
+KBN_NODE_OPTIONS="${KBN_NODE_OPTS:-} ${NODE_OPTIONS:-} "
+KBN_NODE_OPTION=
+KBN_NODE_QUOTED=false
+KBN_NODE_ESCAPED=false
+while [ -n "$KBN_NODE_OPTIONS" ]; do
+  KBN_NODE_OPTIONS_REST=${KBN_NODE_OPTIONS#?}
+  KBN_NODE_CHAR=${KBN_NODE_OPTIONS%"$KBN_NODE_OPTIONS_REST"}
+  KBN_NODE_OPTIONS=$KBN_NODE_OPTIONS_REST
+
+  if [ "$KBN_NODE_ESCAPED" = true ]; then
+    KBN_NODE_ESCAPED=false
+  elif [ "$KBN_NODE_CHAR" = '\' ] && [ "$KBN_NODE_QUOTED" = true ]; then
+    KBN_NODE_ESCAPED=true
+    continue
+  elif [ "$KBN_NODE_CHAR" = '"' ]; then
+    if [ "$KBN_NODE_QUOTED" = true ]; then
+      KBN_NODE_QUOTED=false
+    else
+      KBN_NODE_QUOTED=true
+    fi
+    continue
+  elif [ "$KBN_NODE_CHAR" = ' ' ] && [ "$KBN_NODE_QUOTED" = false ]; then
+    # Node boolean flags use their names, ignoring any =value suffix.
+    case "${KBN_NODE_OPTION%%=*}" in
+      --enable[-_]fips) KBN_ENABLE_FIPS=true ;;
+      --no[-_]enable[-_]fips) KBN_ENABLE_FIPS=false ;;
+      --force[-_]fips) KBN_FORCE_FIPS=true ;;
+      --no[-_]force[-_]fips) KBN_FORCE_FIPS=false ;;
+      --openssl[-_]config) KBN_CUSTOM_OPENSSL_CONFIG=true ;;
+    esac
+    KBN_NODE_OPTION=
+    continue
+  fi
+  KBN_NODE_OPTION="$KBN_NODE_OPTION$KBN_NODE_CHAR"
+done
+
+if { [ "$KBN_ENABLE_FIPS" = true ] || [ "$KBN_FORCE_FIPS" = true ]; } &&
+   [ "$KBN_CUSTOM_OPENSSL_CONFIG" = false ] &&
+   [ -z "${OPENSSL_CONF:-}" ] && [ -z "${OPENSSL_CONF_INCLUDE:-}" ] && [ -z "${OPENSSL_MODULES:-}" ]; then
+  export OPENSSL_CONF="$KBN_DISTRIBUTION_ROOT/node/fips/config/nodejs.cnf"
+  export OPENSSL_CONF_INCLUDE="$KBN_DISTRIBUTION_ROOT/node/fips/config"
+  export OPENSSL_MODULES="$KBN_DISTRIBUTION_ROOT/node/fips/modules"
+fi
+{{/linux}}

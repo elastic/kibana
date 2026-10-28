@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { apm, timerange, infra, generateShortId, log } from '@kbn/synthtrace-client';
+import {
+  apm,
+  timerange,
+  infra,
+  generateShortId,
+  log,
+  type InfraDocument,
+} from '@kbn/synthtrace-client';
 
 const SERVICE_PREFIX = 'service';
 // generates traces, metrics for services
@@ -142,15 +149,19 @@ export function generatePodsData({
     .fill(0)
     .map((_, idx) => infra.pod(`pod-${idx}`, `node-name-${idx}`));
 
-  return range
-    .interval('30s')
-    .rate(1)
-    .generator((timestamp) =>
-      pods.flatMap((pod, idx) => [
-        pod.metrics().timestamp(timestamp),
-        pod.container(`container-${idx}`).metrics().timestamp(timestamp),
-      ])
-    );
+  return (
+    range
+      .interval('30s')
+      .rate(1)
+      // Explicit type argument: the callback mixes pod and container documents, and inference would
+      // otherwise pick one of them as the element type.
+      .generator<InfraDocument>((timestamp) =>
+        pods.flatMap((pod, idx) => [
+          pod.metrics().timestamp(timestamp),
+          pod.container(`container-${idx}`).metrics().timestamp(timestamp),
+        ])
+      )
+  );
 }
 
 export function generateLogsDataForHosts({

@@ -122,6 +122,29 @@ export const BulkGetAgentPoliciesResponseSchema = schema.object(
   { meta: { id: 'bulk_get_agent_policies_response' } }
 );
 
+export const GetAgentPoliciesPackagePoliciesSummaryRequestSchema = {
+  body: schema.object({
+    ids: schema.arrayOf(schema.string({ maxLength: 1000 }), {
+      minSize: 1,
+      maxSize: 100,
+      meta: { description: 'list of agent policy ids' },
+    }),
+  }),
+};
+
+export const GetAgentPoliciesPackagePoliciesSummaryResponseSchema = schema.object({
+  items: schema.recordOf(
+    schema.string(),
+    schema.object({
+      count: schema.number(),
+      has_fleet_server: schema.boolean(),
+      has_managed: schema.boolean(),
+      has_root_integrations: schema.boolean(),
+      has_shared: schema.boolean(),
+    })
+  ),
+});
+
 export const GetOneAgentPolicyRequestSchema = {
   params: schema.object({
     agentPolicyId: schema.string({ meta: { description: 'The ID of the agent policy' } }),

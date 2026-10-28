@@ -170,6 +170,15 @@ describe('AgentGrouper', () => {
       expect((option.value as { groups: { policy: string } }).groups.policy).toEqual('policy-1');
     });
 
+    it('strips the sentinel suffix from the agent policy_id so it matches the policy group key', () => {
+      const agentData: GroupedAgent[] = [genAgent('policy-1#sentinel', 'sentinel-agent', uuidv4())];
+
+      const result = generateAgentOption(AGENT_SELECTION_LABEL, AGENT_GROUP_KEY.Agent, agentData);
+      const option = result.options[0];
+
+      expect((option.value as { groups: { policy: string } }).groups.policy).toEqual('policy-1');
+    });
+
     it('leaves a policy_id containing a non-version "#" suffix untouched', () => {
       const agentData: GroupedAgent[] = [genAgent('policy#123', 'custom-id-agent', uuidv4())];
 

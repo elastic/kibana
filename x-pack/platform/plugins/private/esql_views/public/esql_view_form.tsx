@@ -203,7 +203,7 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
       data-test-subj="esqlViewFormFlyout"
       onClose={handleClose}
       ownFocus
-      size="l"
+      size="m"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">

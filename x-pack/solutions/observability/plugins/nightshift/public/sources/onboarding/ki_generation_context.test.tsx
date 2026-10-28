@@ -6,9 +6,13 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
-import { NIGHTSHIFT_DEFAULT_MODELS } from '@kbn/significant-events-schema';
+import {
+  NIGHTSHIFT_DEFAULT_MODELS,
+  SignificantEventsWorkflowStatus,
+  type SignificantEventsWorkflowStatusResult,
+} from '@kbn/significant-events-schema';
 import { KiGenerationProvider, useKiGeneration } from './ki_generation_context';
 
 const mockBulkOnboarding = {
@@ -24,6 +28,11 @@ const mockBulkOnboarding = {
 };
 
 let mockSources: NightshiftSource[] = [];
+let mockIsPaused = false;
+
+jest.mock('../../data/maintenance/use_significant_events_maintenance', () => ({
+  useBlocksNewActivity: () => ({ isBlocked: mockIsPaused }),
+}));
 
 jest.mock('../../data/sources/use_fetch_sources', () => ({
   useFetchSources: () => ({
@@ -49,9 +58,25 @@ const createSource = (esqlUpdatedAt: string): NightshiftSource => ({
   esql_updated_at: esqlUpdatedAt,
 });
 
+let reportStatus: (sourceId: string, status: SignificantEventsWorkflowStatusResult) => void = () =>
+  undefined;
+
 jest.mock('./use_bulk_onboarding', () => ({
-  useBulkOnboarding: () => mockBulkOnboarding,
+  useBulkOnboarding: ({ onSourceStatusUpdate }: { onSourceStatusUpdate: typeof reportStatus }) => {
+    reportStatus = onSourceStatusUpdate;
+    return mockBulkOnboarding;
+  },
 }));
+
+const AwaitingRunProbe = () => {
+  const { awaitingRunSourceIds, generatingSourceIds } = useKiGeneration();
+  return (
+    <>
+      <div data-test-subj="awaiting-run">{awaitingRunSourceIds.join(',')}</div>
+      <div data-test-subj="generating">{generatingSourceIds.join(',')}</div>
+    </>
+  );
+};
 
 const ContextProbe = () => {
   const { onboardingConfig, featuresConnectors, queriesConnectors } = useKiGeneration();
@@ -90,7 +115,9 @@ describe('KiGenerationProvider model defaults', () => {
 describe('KiGenerationProvider status polling', () => {
   beforeEach(() => {
     mockBulkOnboarding.onboardingStatusUpdateQueue.add.mockClear();
+    mockBulkOnboarding.expectOnboardingStart.mockClear();
     mockSources = [];
+    mockIsPaused = false;
   });
 
   it('enqueues a source once and again only when its query version changes', () => {
@@ -106,5 +133,50 @@ describe('KiGenerationProvider status polling', () => {
     rerender(<KiGenerationProvider>{null}</KiGenerationProvider>);
     expect(mockBulkOnboarding.onboardingStatusUpdateQueue.add).toHaveBeenCalledTimes(2);
     expect(mockBulkOnboarding.onboardingStatusUpdateQueue.add).toHaveBeenLastCalledWith('source-1');
+  });
+
+  it('marks an edited source as awaiting its run until a status is reported', () => {
+    mockSources = [createSource('2026-09-01T00:00:00.000Z')];
+    const { rerender } = render(
+      <KiGenerationProvider>
+        <AwaitingRunProbe />
+      </KiGenerationProvider>
+    );
+    expect(screen.getByTestId('awaiting-run')).toHaveTextContent('');
+
+    mockSources = [createSource('2026-09-02T00:00:00.000Z')];
+    rerender(
+      <KiGenerationProvider>
+        <AwaitingRunProbe />
+      </KiGenerationProvider>
+    );
+    expect(screen.getByTestId('awaiting-run')).toHaveTextContent('source-1');
+
+    act(() => {
+      reportStatus('source-1', {
+        status: SignificantEventsWorkflowStatus.InProgress,
+        executionId: 'run-2',
+      });
+    });
+    expect(screen.getByTestId('awaiting-run')).toHaveTextContent('');
+  });
+
+  it('expects no run for a source created in a paused space', () => {
+    mockIsPaused = true;
+    const { rerender } = render(
+      <KiGenerationProvider>
+        <AwaitingRunProbe />
+      </KiGenerationProvider>
+    );
+
+    mockSources = [createSource('2026-09-01T00:00:00.000Z')];
+    rerender(
+      <KiGenerationProvider>
+        <AwaitingRunProbe />
+      </KiGenerationProvider>
+    );
+    expect(screen.getByTestId('generating')).toHaveTextContent('');
+    expect(screen.getByTestId('awaiting-run')).toHaveTextContent('');
+    expect(mockBulkOnboarding.expectOnboardingStart).not.toHaveBeenCalled();
   });
 });

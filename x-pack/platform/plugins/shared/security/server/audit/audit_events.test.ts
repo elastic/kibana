@@ -1137,6 +1137,18 @@ describe('#serviceAccountAuditEvent', () => {
     `);
   });
 
+  test('records the platform assumers of a create in the message', () => {
+    expect(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.CREATE,
+        serviceAccount: { id: 'service-account-id', name: 'nightshift-relay' },
+        platformAssumers: ['relay', 'sandbox'],
+      }).message
+    ).toBe(
+      'User has created service account [id=service-account-id, name=nightshift-relay] [platformAssumers=relay,sandbox]'
+    );
+  });
+
   test('records a forced delete in the message', () => {
     expect(
       serviceAccountAuditEvent({

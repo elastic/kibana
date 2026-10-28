@@ -9,7 +9,7 @@ import type { BulkUnsnoozeSeriesActionItem } from '@kbn/alerting-v2-schemas';
 import type { EpisodeActionExtension } from '../types/episode_data_source';
 import type { EpisodeAction } from './types';
 import { bulkUnsnoozeSeriesActions } from './bulk_create_alert_actions';
-import { uniqueByGroup } from './helpers';
+import { uniqueBySeries } from './helpers';
 import {
   createCompositeEpisodeAction,
   type CompositeActionDeps,
@@ -27,13 +27,14 @@ export const createUnsnoozeAction = (
       order: 21,
       displayName: i18n.UNSNOOZE,
       iconType: 'bell',
-      isCompatible: (ep) => isEpisodeSnoozed(ep.last_snooze_action, ep.snoozed_until),
+      isCompatible: (ep) =>
+        ep.series_id != null && isEpisodeSnoozed(ep.last_snooze_action, ep.snoozed_until),
       execute: (episodes, http) =>
         bulkUnsnoozeSeriesActions(
           http,
-          uniqueByGroup(episodes).map(
+          uniqueBySeries(episodes).map(
             (ep): BulkUnsnoozeSeriesActionItem => ({
-              group_hash: ep.group_hash,
+              series_id: ep.series_id,
             })
           )
         ),

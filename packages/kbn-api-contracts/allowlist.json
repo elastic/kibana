@@ -254,78 +254,6 @@
       "prUrl": "https://github.com/elastic/kibana/pull/286654"
     },
     {
-      "path": "/api/fleet/agents/bulk_migrate",
-      "method": "post",
-      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of agent IDs. The array alternative bounds its items (maxLength 512), which narrows that subschema. The KQL alternative is deliberately not length-bounded: it uses searchFilter.warn(), which records overlong input to the kibana.schema.string_length_violation.length histogram instead of rejecting it, because Fleet's own UI builds queries that inline every managed agent policy ID. Valid consumers sending reasonably sized inputs are unaffected.",
-      "approvedBy": "@elastic/streams-ui",
-      "oasdiffId": "request-property-any-of-removed",
-      "prUrl": "https://github.com/elastic/kibana/pull/288283"
-    },
-    {
-      "path": "/api/fleet/agents/bulk_privilege_level_change",
-      "method": "post",
-      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of agent IDs. The array alternative bounds its items (maxLength 512), which narrows that subschema. The KQL alternative is deliberately not length-bounded: it uses searchFilter.warn(), which records overlong input to the kibana.schema.string_length_violation.length histogram instead of rejecting it, because Fleet's own UI builds queries that inline every managed agent policy ID. Valid consumers sending reasonably sized inputs are unaffected.",
-      "approvedBy": "@elastic/streams-ui",
-      "oasdiffId": "request-property-any-of-removed",
-      "prUrl": "https://github.com/elastic/kibana/pull/288283"
-    },
-    {
-      "path": "/api/fleet/agents/bulk_reassign",
-      "method": "post",
-      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of agent IDs. The array alternative bounds its items (maxLength 512), which narrows that subschema. The KQL alternative is deliberately not length-bounded: it uses searchFilter.warn(), which records overlong input to the kibana.schema.string_length_violation.length histogram instead of rejecting it, because Fleet's own UI builds queries that inline every managed agent policy ID. Valid consumers sending reasonably sized inputs are unaffected.",
-      "approvedBy": "@elastic/streams-ui",
-      "oasdiffId": "request-property-any-of-removed",
-      "prUrl": "https://github.com/elastic/kibana/pull/288283"
-    },
-    {
-      "path": "/api/fleet/agents/bulk_remove_collectors",
-      "method": "post",
-      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of agent IDs. The array alternative bounds its items (maxLength 512), which narrows that subschema. The KQL alternative is deliberately not length-bounded: it uses searchFilter.warn(), which records overlong input to the kibana.schema.string_length_violation.length histogram instead of rejecting it, because Fleet's own UI builds queries that inline every managed agent policy ID. Valid consumers sending reasonably sized inputs are unaffected.",
-      "approvedBy": "@elastic/streams-ui",
-      "oasdiffId": "request-property-any-of-removed",
-      "prUrl": "https://github.com/elastic/kibana/pull/288283"
-    },
-    {
-      "path": "/api/fleet/agents/bulk_request_diagnostics",
-      "method": "post",
-      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of agent IDs. The array alternative bounds its items (maxLength 512), which narrows that subschema. The KQL alternative is deliberately not length-bounded: it uses searchFilter.warn(), which records overlong input to the kibana.schema.string_length_violation.length histogram instead of rejecting it, because Fleet's own UI builds queries that inline every managed agent policy ID. Valid consumers sending reasonably sized inputs are unaffected.",
-      "approvedBy": "@elastic/streams-ui",
-      "oasdiffId": "request-property-any-of-removed",
-      "prUrl": "https://github.com/elastic/kibana/pull/288283"
-    },
-    {
-      "path": "/api/fleet/agents/bulk_rollback",
-      "method": "post",
-      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of agent IDs. The array alternative bounds its items (maxLength 512), which narrows that subschema. The KQL alternative is deliberately not length-bounded: it uses searchFilter.warn(), which records overlong input to the kibana.schema.string_length_violation.length histogram instead of rejecting it, because Fleet's own UI builds queries that inline every managed agent policy ID. Valid consumers sending reasonably sized inputs are unaffected.",
-      "approvedBy": "@elastic/streams-ui",
-      "oasdiffId": "request-property-any-of-removed",
-      "prUrl": "https://github.com/elastic/kibana/pull/288283"
-    },
-    {
-      "path": "/api/fleet/agents/bulk_unenroll",
-      "method": "post",
-      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of agent IDs. The array alternative bounds its items (maxLength 512), which narrows that subschema. The KQL alternative is deliberately not length-bounded: it uses searchFilter.warn(), which records overlong input to the kibana.schema.string_length_violation.length histogram instead of rejecting it, because Fleet's own UI builds queries that inline every managed agent policy ID. Valid consumers sending reasonably sized inputs are unaffected.",
-      "approvedBy": "@elastic/streams-ui",
-      "oasdiffId": "request-property-any-of-removed",
-      "prUrl": "https://github.com/elastic/kibana/pull/288283"
-    },
-    {
-      "path": "/api/fleet/agents/bulk_update_agent_tags",
-      "method": "post",
-      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of agent IDs. The array alternative bounds its items (maxLength 512), which narrows that subschema. The KQL alternative is deliberately not length-bounded: it uses searchFilter.warn(), which records overlong input to the kibana.schema.string_length_violation.length histogram instead of rejecting it, because Fleet's own UI builds queries that inline every managed agent policy ID. Valid consumers sending reasonably sized inputs are unaffected.",
-      "approvedBy": "@elastic/streams-ui",
-      "oasdiffId": "request-property-any-of-removed",
-      "prUrl": "https://github.com/elastic/kibana/pull/288283"
-    },
-    {
-      "path": "/api/fleet/agents/bulk_upgrade",
-      "method": "post",
-      "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). The 'agents' field accepts a KQL string or an array of agent IDs. The array alternative bounds its items (maxLength 512), which narrows that subschema. The KQL alternative is deliberately not length-bounded: it uses searchFilter.warn(), which records overlong input to the kibana.schema.string_length_violation.length histogram instead of rejecting it, because Fleet's own UI builds queries that inline every managed agent policy ID. Valid consumers sending reasonably sized inputs are unaffected.",
-      "approvedBy": "@elastic/streams-ui",
-      "oasdiffId": "request-property-any-of-removed",
-      "prUrl": "https://github.com/elastic/kibana/pull/288283"
-    },
-    {
       "path": "/api/fleet/epm/packages/_bulk",
       "method": "post",
       "reason": "Intentional input bounds added to prevent unbounded-string DoS (CWE-770). Each item in the 'packages' array accepts a string (package name) or a package object; adding maxLength to both anyOf alternatives narrowed the subschemas. Valid consumers sending reasonably sized inputs are unaffected.",
@@ -711,6 +639,54 @@
       "approvedBy": "@elastic/security-defend-workflows",
       "oasdiffId": "request-property-max-length-set",
       "prUrl": "https://github.com/elastic/kibana/pull/295450"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_migrate",
+      "method": "post",
+      "reason": "oasdiff misreports this as removed anyOf subschemas because both agents branches gained maxLength (512 per agent ID, 500000 for the KQL string). The real change is a new length limit. Agent IDs are UUIDs, and 500000 covers the largest query the Fleet UI generates (a select-all selection excluding up to 10000 agent IDs), so no known valid request is affected.",
+      "approvedBy": "@elastic/streams-ui",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/299837"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_reassign",
+      "method": "post",
+      "reason": "oasdiff misreports this as removed anyOf subschemas because both agents branches gained maxLength (512 per agent ID, 500000 for the KQL string). The real change is a new length limit. Agent IDs are UUIDs, and 500000 covers the largest query the Fleet UI generates (a select-all selection excluding up to 10000 agent IDs), so no known valid request is affected.",
+      "approvedBy": "@elastic/streams-ui",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/299837"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_request_diagnostics",
+      "method": "post",
+      "reason": "oasdiff misreports this as removed anyOf subschemas because both agents branches gained maxLength (512 per agent ID, 500000 for the KQL string). The real change is a new length limit. Agent IDs are UUIDs, and 500000 covers the largest query the Fleet UI generates (a select-all selection excluding up to 10000 agent IDs), so no known valid request is affected.",
+      "approvedBy": "@elastic/streams-ui",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/299837"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_unenroll",
+      "method": "post",
+      "reason": "oasdiff misreports this as removed anyOf subschemas because both agents branches gained maxLength (512 per agent ID, 500000 for the KQL string). The real change is a new length limit. Agent IDs are UUIDs, and 500000 covers the largest query the Fleet UI generates (a select-all selection excluding up to 10000 agent IDs), so no known valid request is affected.",
+      "approvedBy": "@elastic/streams-ui",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/299837"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_update_agent_tags",
+      "method": "post",
+      "reason": "oasdiff misreports this as removed anyOf subschemas because both agents branches gained maxLength (512 per agent ID, 500000 for the KQL string). The real change is a new length limit. Agent IDs are UUIDs, and 500000 covers the largest query the Fleet UI generates (a select-all selection excluding up to 10000 agent IDs), so no known valid request is affected.",
+      "approvedBy": "@elastic/streams-ui",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/299837"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_upgrade",
+      "method": "post",
+      "reason": "oasdiff misreports this as removed anyOf subschemas because both agents branches gained maxLength (512 per agent ID, 500000 for the KQL string). The real change is a new length limit. Agent IDs are UUIDs, and 500000 covers the largest query the Fleet UI generates (a select-all selection excluding up to 10000 agent IDs), so no known valid request is affected.",
+      "approvedBy": "@elastic/streams-ui",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/299837"
     }
   ]
 }

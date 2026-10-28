@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiAccordion, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { EntityType } from '../../../../common/entity_analytics/types';
+import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
@@ -46,6 +47,11 @@ interface ResolutionSectionProps {
   }) => void;
   /** When true, hides the chevron icon in the resolution group header. Used by the v2 flyout. */
   hideHeaderIcons?: boolean;
+  /**
+   * View mode of the flyout the section sits in. In `resolved` mode the flyout shows the whole
+   * group, so the target entity's row stays linkable and opens its own single-entity view.
+   */
+  mode?: EntityViewMode;
 }
 
 export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
@@ -55,6 +61,7 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
   openDetailsPanel,
   onShowEntity,
   hideHeaderIcons = false,
+  mode = 'single',
 }) => {
   const {
     data: group,
@@ -111,6 +118,8 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
   );
 
   const targetEntityId = group?.target ? getEntityId(group.target) : undefined;
+  // In the group view no single entity is "open", so every row (the target included) can be opened.
+  const currentEntityId = mode === 'resolved' ? undefined : entityId;
 
   return (
     <EuiAccordion
@@ -145,7 +154,7 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
           isError={isError}
           targetEntityId={targetEntityId}
           onEntityNameClick={handleEntityNameClick}
-          currentEntityId={entityId}
+          currentEntityId={currentEntityId}
         />
       </ExpandablePanel>
     </EuiAccordion>

@@ -118,8 +118,8 @@ describe('createBadgeElement', () => {
       metadata: {},
     });
 
-    expect(badge.firstElementChild?.textContent).toBe('@dashboard/My chart');
-    expect(badge.getAttribute('aria-label')).toBe('@dashboard/My chart');
-    expect(badge.title).toBe('@dashboard/My chart');
+    expect(badge.firstElementChild?.textContent).toBe('#dashboard/My chart');
+    expect(badge.getAttribute('aria-label')).toBe('#dashboard/My chart');
+    expect(badge.title).toBe('#dashboard/My chart');
   });
 });

@@ -23,7 +23,7 @@ import {
   getCodeOwnersEntries,
   getOwningTeamsForPath,
 } from '@kbn/code-owners';
-import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
+import { SCOUT_REPORT_OUTPUT_ROOT, SCOUT_TEST_RUN_SCOPE } from '@kbn/scout-info';
 import path from 'node:path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import stripAnsi from 'strip-ansi';
@@ -68,6 +68,7 @@ export class ScoutJestReporter extends BaseReporter {
     this.baseTestRunInfo = {
       id: this.runId,
       target: buildScoutTargetInfo(),
+      scope: SCOUT_TEST_RUN_SCOPE,
       config: {
         category: reporterOptions.configCategory,
       },

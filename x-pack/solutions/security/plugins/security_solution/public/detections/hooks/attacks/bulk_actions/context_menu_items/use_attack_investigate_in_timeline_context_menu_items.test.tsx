@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type React from 'react';
 import { renderHook } from '@testing-library/react';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { useAttackInvestigateInTimelineContextMenuItems } from './use_attack_investigate_in_timeline_context_menu_items';
 import { useBulkAttackInvestigateInTimelineItems } from '../bulk_action_items/use_bulk_attack_investigate_in_timeline_items';
 
@@ -93,6 +95,46 @@ describe('useAttackInvestigateInTimelineContextMenuItems', () => {
       closePopover: undefined,
       telemetrySource: 'attacks_page_group_take_action',
     });
+  });
+
+  it('hands the bulk action the timestamp of every attack it was given', async () => {
+    const onClick = jest.fn();
+    mockUseBulkAttackInvestigateInTimelineItems.mockReturnValue({
+      items: [
+        {
+          label: 'Investigate in Timeline',
+          key: 'attack-investigate-in-timeline-action-item',
+          'data-test-subj': 'attack-investigate-in-timeline-action-item',
+          disableOnQuery: true,
+          onClick,
+        },
+      ],
+      panels: [],
+    });
+
+    const { result } = renderHook(() =>
+      useAttackInvestigateInTimelineContextMenuItems({
+        attacksWithTimelineAlerts: [
+          {
+            attackId: 'attack-1',
+            relatedAlertIds: ['alert-1'],
+            timestamp: '2024-05-02T09:00:00.000Z',
+          },
+          { attackId: 'attack-2', relatedAlertIds: ['alert-2'] },
+        ],
+      })
+    );
+
+    await result.current.items[0].onClick?.({} as React.MouseEvent);
+
+    expect(onClick.mock.calls[0][0]).toEqual([
+      expect.objectContaining({
+        data: expect.arrayContaining([{ field: TIMESTAMP, value: ['2024-05-02T09:00:00.000Z'] }]),
+      }),
+      expect.objectContaining({
+        data: expect.arrayContaining([{ field: TIMESTAMP, value: [] }]),
+      }),
+    ]);
   });
 
   it('should return empty panels', () => {

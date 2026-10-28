@@ -17,7 +17,7 @@ import { smlAutocompletePath, smlSearchPath } from '@kbn/agent-builder-sml-plugi
 /**
  * Browser client for SML.
  *   - `search(...)` → `/internal/agent_builder_sml/sml/_search` (hybrid retrieval)
- *   - `autocomplete(...)` → `/internal/agent_builder_sml/sml/_autocomplete` (@ menu / typeahead)
+ *   - `autocomplete(...)` → `/internal/agent_builder_sml/sml/_autocomplete` (# menu / typeahead)
  */
 export class SmlService {
   private readonly http: HttpSetup;

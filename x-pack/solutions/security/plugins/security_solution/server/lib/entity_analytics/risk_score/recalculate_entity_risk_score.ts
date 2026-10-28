@@ -20,6 +20,7 @@ import { persistZeroBaseScore, scoreBaseEntities } from './maintainer/steps/scor
 import { runResolutionScoringStep } from './maintainer/steps/run_resolution_scoring_step';
 import { fetchWatchlistConfigs } from './maintainer/utils/fetch_watchlist_configs';
 import type { RiskEngineDataWriter } from './risk_engine_data_writer';
+import { DEFAULT_ALERT_SAMPLE_SIZE } from './constants';
 import type { RiskEngineConfiguration } from '../types';
 
 export interface RecalculateEntityRiskScoreParams {
@@ -60,7 +61,7 @@ export const recalculateEntityRiskScore = async ({
   getWriter,
   idBasedRiskScoringEnabled,
   logger,
-  alertSampleSizePerShard = 10000,
+  alertSampleSizePerShard = DEFAULT_ALERT_SAMPLE_SIZE,
   collectScores = false,
 }: RecalculateEntityRiskScoreParams) => {
   const engineConfig = await getConfiguration({
@@ -98,6 +99,13 @@ export const recalculateEntityRiskScore = async ({
   const lookupIndex = getLookupIndexName(namespace);
   const calculationRunId = uuidv4();
   const now = new Date().toISOString();
+
+  // The alerts index is created lazily, so a space without alerts has none. Skip recalculation.
+  const alertsIndexExists = await esClient.indices.exists({ index: alertsIndex });
+  if (!alertsIndexExists) {
+    logger.warn(`Alerts index "${alertsIndex}" does not exist yet, skipping recalculation`);
+    return { baseScore: undefined, resolutionScore: undefined };
+  }
 
   const { scores: baseScores, scoresCalculated } = await scoreBaseEntities({
     esClient,

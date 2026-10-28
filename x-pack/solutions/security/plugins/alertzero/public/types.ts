@@ -13,13 +13,17 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { WorkflowsPublicPluginStart } from '@kbn/workflows-management-plugin/public';
 
 export interface AlertZeroClientConfig {
   enabled: boolean;
 }
 
-export type AlertZeroSetupDependencies = Record<string, never>;
+export interface AlertZeroSetupDependencies {
+  /** Required plugin, see `requiredPlugins` in kibana.jsonc. */
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
+}
 
 export interface AlertZeroStartDependencies {
   licensing: LicensingPluginStart;

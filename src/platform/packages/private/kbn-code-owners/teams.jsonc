@@ -630,6 +630,20 @@
     ]
   },
   {
+    "id": "obs-signals-rum",
+    "name": "Obs UX: Signals & RUM",
+    "areas": ["observability"],
+    "github": {
+      "team": "elastic/obs-signals-rum-team",
+      "label": "Team:obs-signals-rum"
+    },
+    "responsibilities": [
+      "User Experience / Digital Experience app",
+      "Real User Monitoring (RUM, EDOT Browser, EDOT React Native)",
+      "Sessions and Session Replay"
+    ]
+  },
+  {
     "id": "obs-signals-logs",
     "name": "Obs UX: Signals & Logs",
     "areas": [
@@ -671,7 +685,7 @@
       "observability"
     ],
     "github": {
-      "team": "elastic/observability-bi"
+      "team": "elastic/obs-bi-team"
     }
   },
   {
@@ -780,6 +794,20 @@
     }
   },
   {
+    "id": "automatic-migrations",
+    "name": "Automatic Migrations",
+    "areas": [
+      "security"
+    ],
+    "github": {
+      "team": "elastic/automatic-migrations",
+      "label": "Team:Automatic Migrations"
+    },
+    "responsibilities": [
+      "SIEM rule and dashboard automatic migrations"
+    ]
+  },
+  {
     "id": "security-data-engineering",
     "name": "Security Data Engineering",
     "areas": [
@@ -834,16 +862,6 @@
     "github": {
       "team": "elastic/security-detection-engineering",
       "label": "Team:Detection Engineering"
-    }
-  },
-  {
-    "id": "security-detection-platform",
-    "name": "Security Detection Platform",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/security-detection-platform"
     }
   },
   {

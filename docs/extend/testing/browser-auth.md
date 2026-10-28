@@ -4,7 +4,7 @@ navigation_title: Browser auth
 
 # Browser authentication in Scout [scout-browser-auth]
 
-Use the `browserAuth` fixture to authenticate **UI tests**. Scout uses **SAML**, so the same approach works across deployment types.
+Use the `browserAuth` fixture to authenticate **UI tests**. Scout uses **SAML**, so the same approach works across deployment types. For the overall auth model and which fixture uses which identity, see [Authentication in Scout](./scout-auth.md).
 
 ## Log in with `browserAuth` [scout-browser-auth-login]
 

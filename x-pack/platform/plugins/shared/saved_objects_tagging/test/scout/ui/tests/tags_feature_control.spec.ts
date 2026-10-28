@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import type { KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
@@ -137,9 +138,7 @@ const loginAndOpenTagsPage = async ({
   await pageObjects.tagManagement.goto();
 };
 
-// custom-role login is not supported in ECH yet, so this suite runs on local
-// stateful only.
-test.describe('Tags management feature controls', { tag: '@local-stateful-classic' }, () => {
+test.describe('Tags management feature controls', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.savedObjects.cleanStandardList();
     await kbnClient.importExport.load(KBN_ARCHIVES.FUNCTIONAL_BASE);

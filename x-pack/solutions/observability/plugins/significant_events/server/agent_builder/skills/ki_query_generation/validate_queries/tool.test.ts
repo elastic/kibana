@@ -123,6 +123,12 @@ describe('ki_queries_validate tool', () => {
     );
     expect(tool.schema.safeParse({ slug: 'logs.test', queries: [] }).success).toBe(true);
     expect(
+      tool.schema.safeParse({
+        slug: 'logs.test',
+        queries: [{ ...candidate, category: 'unsupported' }],
+      }).success
+    ).toBe(false);
+    expect(
       tool.schema.safeParse({ slug: 'logs.test', queries: Array(101).fill(candidate) }).success
     ).toBe(false);
   });

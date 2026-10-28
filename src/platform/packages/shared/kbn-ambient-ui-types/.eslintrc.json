@@ -5,7 +5,6 @@
         "**/*.d.ts"
       ],
       "rules": {
-        "@typescript-eslint/triple-slash-reference": "off",
         "spaced-comment": "off"
       }
     }

@@ -12,11 +12,55 @@ import type {
   BindServiceAccountWorkloadParams,
   CreateServiceAccountParams,
   ServiceAccount,
+  ServiceAccountBoundWorkload,
   ServiceAccountWorkloadBinding,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
   ServiceAccountWorkloadRef,
 } from '@kbn/core-security-common';
+
+/**
+ * A platform service, outside Kibana, that can also assume a service account a plugin creates.
+ * The security plugin maps each name to that service's identity, so a caller never names a
+ * principal directly. Adding a name here needs a matching entry in the security plugin.
+ *
+ * @public
+ */
+export type ServiceAccountPlatformAssumer = 'relay' | 'sandbox';
+
+/**
+ * Create parameters for server-side callers. Only the server contract accepts
+ * `platformAssumers`. The HTTP route and the browser contract take {@link CreateServiceAccountParams}.
+ *
+ * @public
+ */
+export interface CreateServiceAccountServerParams extends CreateServiceAccountParams {
+  /**
+   * Platform services that may exchange the account for a token, in addition to this Kibana
+   * project. Only supported when service accounts are backed by UIAM. Elasticsearch service
+   * accounts reject a create that names any.
+   */
+  platformAssumers?: readonly ServiceAccountPlatformAssumer[];
+}
+
+/** @public */
+export interface DeleteServiceAccountOptions {
+  /**
+   * Deletes the account even when workloads are still bound to it. Those workloads then fail at
+   * their next token exchange until someone unbinds them.
+   */
+  force: boolean;
+}
+
+/**
+ * What came of a delete. An account that is still bound to workloads is not deleted unless the
+ * caller forces it, and the workloads that stopped it are reported back.
+ *
+ * @public
+ */
+export type DeleteServiceAccountResult =
+  | { deleted: true; warnings: string[] }
+  | { deleted: false; workloads: [ServiceAccountBoundWorkload, ...ServiceAccountBoundWorkload[]] };
 
 /**
  * Core's service accounts service.
@@ -39,9 +83,22 @@ export interface CoreServiceAccountsService {
    * the provided request. Requires the `manage_security` cluster privilege.
    *
    * @param request The request whose user the service account is created on behalf of.
-   * @param params The name and roles for the new service account.
+   * @param params The name and roles for the new service account, and any platform services that
+   * may also assume it.
    */
-  create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
+  create(request: KibanaRequest, params: CreateServiceAccountServerParams): Promise<ServiceAccount>;
+
+  /**
+   * Deletes a service account. Requires `manage_security`. When workloads are still bound to the
+   * account and `options.force` is not set, the account is kept and the result has
+   * `deleted: false` with the blocking workloads. Otherwise it has `deleted: true` with any
+   * warnings from the delete.
+   */
+  delete(
+    request: KibanaRequest,
+    id: string,
+    params: DeleteServiceAccountOptions
+  ): Promise<DeleteServiceAccountResult>;
 
   /**
    * Binds a service account to a workload, so that the workload runs as that account until it is

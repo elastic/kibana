@@ -86,6 +86,7 @@ export class ListActionPoliciesRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'List action policies',
     description: 'Get a paginated list of action policies with optional filtering and sorting.',
     oasOperationObject: listActionPoliciesOasExamples,
