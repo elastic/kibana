@@ -29,6 +29,7 @@ export type {
   AlertZeroAdWorkerRunCompletedPayload,
   AlertZeroAlertTriageBatchClassifiedPayload,
   AlertZeroAlertTriageBatchGroupedPayload,
+  AlertZeroAlertTriageDecisionsMatchedPayload,
   AlertZeroAlertTriageClosureResolvedPayload,
   AlertZeroEndpointAnalysisCompletedPayload,
   AlertZeroEnvelope,
