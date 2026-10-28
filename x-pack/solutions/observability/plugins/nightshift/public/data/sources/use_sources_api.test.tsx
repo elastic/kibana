@@ -9,12 +9,7 @@ import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
-import {
-  DISCOVERY_QUERIES_QUERY_KEY,
-  DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY,
-  FEATURES_QUERY_KEY,
-  SOURCES_QUERY_KEY,
-} from '../query_keys';
+import { DISCOVERY_QUERIES_QUERY_KEY, FEATURES_QUERY_KEY, SOURCES_QUERY_KEY } from '../query_keys';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSourcesApi } from './use_sources_api';
 
@@ -49,7 +44,6 @@ const nginxSource: NightshiftSource = {
 const KNOWLEDGE_PREFIXES = [
   [...FEATURES_QUERY_KEY],
   [...DISCOVERY_QUERIES_QUERY_KEY],
-  [...DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY],
   ['queryOccurrenceStats'],
 ];
 
