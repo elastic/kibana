@@ -64,7 +64,7 @@ export const getPatternAnalysisEmbeddableFactory = (
 
       const initialDataViewId =
         runtimeState.data_view_id ?? (await pluginStart.data.dataViews.getDefaultId());
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
+      const dataSources$ = new BehaviorSubject<DataView[] | undefined>(
         initialDataViewId ? [await pluginStart.data.dataViews.get(initialDataViewId)] : []
       );
 
@@ -150,7 +150,7 @@ export const getPatternAnalysisEmbeddableFactory = (
         },
         dataLoading$,
         blockingError$,
-        dataViews$,
+        dataSources$,
         cancelRequests: (reason?: AbortReason) => {
           requestCancellationManager.cancel(reason);
           // Without this the dashboard keeps showing the panel as loading, which keeps the

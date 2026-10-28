@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -26,7 +27,7 @@ import type {
   PublishingSubject,
   PublishesTimeRange,
   PublishesWritableTitle,
-  PublishesDataViews,
+  PublishesDataSources,
 } from '@kbn/presentation-publishing';
 import { type BehaviorSubject } from 'rxjs';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
@@ -106,7 +107,7 @@ export type AnomalyChartsApi = AnomalyChartsComponentApi & AnomalyChartsDataLoad
 
 export type AnomalyChartsEmbeddableApi = MlEmbeddableBaseApi<AnomalyChartsEmbeddableState> &
   CanCancelRequests &
-  PublishesDataViews &
+  PublishesDataSources<DataView> &
   PublishesWritableTitle &
   HasEditCapabilities &
   AnomalyChartsApi;

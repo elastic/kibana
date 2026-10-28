@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   CanCancelRequests,
   HasEditCapabilities,
   PublishesBlockingError,
   PublishesDataLoading,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishesTimeRange,
 } from '@kbn/presentation-publishing';
 import type { BehaviorSubject } from 'rxjs';
@@ -30,7 +31,7 @@ export type FieldStatisticsTableEmbeddableApi =
   DefaultEmbeddableApi<FieldStatsTableEmbeddableState> &
     CanCancelRequests &
     HasEditCapabilities &
-    PublishesDataViews &
+    PublishesDataSources<DataView> &
     PublishesTimeRange &
     PublishesDataLoading &
     PublishesBlockingError &

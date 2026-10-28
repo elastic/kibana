@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   CanCancelRequests,
   HasEditCapabilities,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishesTimeRange,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
@@ -23,6 +24,6 @@ export interface LogRateAnalysisComponentApi {
 export type LogRateAnalysisEmbeddableApi = DefaultEmbeddableApi<LogRateAnalysisEmbeddableState> &
   CanCancelRequests &
   HasEditCapabilities &
-  PublishesDataViews &
+  PublishesDataSources<DataView> &
   PublishesTimeRange &
   LogRateAnalysisComponentApi;

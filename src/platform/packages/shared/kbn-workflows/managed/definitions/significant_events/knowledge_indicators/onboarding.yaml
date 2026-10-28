@@ -65,6 +65,7 @@ triggers:
         description: "Stop features identification after this many healthy-successful passes without a new feature (degraded iterations are neutral and not counted)."
       - name: featuresSampleSize
         type: number
+        default: 20
         description: "Number of documents sampled per features identification iteration."
       - name: featuresTtlDays
         type: number

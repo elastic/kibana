@@ -61,7 +61,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
+      const dataSources$ = new BehaviorSubject<DataView[] | undefined>([
         await pluginStart.data.dataViews.get(runtimeState.data_view_id),
       ]);
 
@@ -139,7 +139,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
         },
         dataLoading$,
         blockingError$,
-        dataViews$,
+        dataSources$,
         cancelRequests: (reason?: AbortReason) => {
           requestCancellationManager.cancel(reason);
           // Without this the dashboard keeps showing the panel as loading, which keeps the

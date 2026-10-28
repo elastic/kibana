@@ -64,7 +64,7 @@ export const getChangePointChartEmbeddableFactory = (
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
+      const dataSources$ = new BehaviorSubject<DataView[] | undefined>([
         await pluginStart.data.dataViews.get(state.data_view_id),
       ]);
 
@@ -139,7 +139,7 @@ export const getChangePointChartEmbeddableFactory = (
         },
         dataLoading$,
         blockingError$,
-        dataViews$,
+        dataSources$,
         cancelRequests: (reason?: AbortReason) => {
           requestCancellationManager.cancel(reason);
           // Without this the dashboard keeps showing the panel as loading, which keeps the

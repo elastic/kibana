@@ -197,7 +197,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         filters$,
         interval,
         setInterval: (v) => interval.next(v),
-        dataViews$: buildDataViewPublishingApi(
+        dataSources$: buildDataViewPublishingApi(
           {
             anomalyDetectorService: services[2].anomalyDetectorService,
             dataViewsService: services[1].data.dataViews,

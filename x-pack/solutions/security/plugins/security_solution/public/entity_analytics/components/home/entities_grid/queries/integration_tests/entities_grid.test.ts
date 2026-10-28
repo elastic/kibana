@@ -184,6 +184,26 @@ const FILTER_CASES: readonly FilterCase[] = [
     ['user:alice@okta', 'user:bob@okta'],
   ],
   [
+    // Unknown is also the absence of a level: host:h3 has none.
+    'an unknown risk level filter',
+    { entityFilters: { ...EMPTY_ENTITY_FILTERS, riskLevels: [RiskSeverity.Unknown] } },
+    'entity.name',
+    'asc',
+    ['host:h3'],
+  ],
+  [
+    'an unknown risk level filter with a risk level',
+    {
+      entityFilters: {
+        ...EMPTY_ENTITY_FILTERS,
+        riskLevels: [RiskSeverity.Unknown, RiskSeverity.Critical],
+      },
+    },
+    'entity.name',
+    'asc',
+    ['host:h1', 'host:h3'],
+  ],
+  [
     // host:h1 is high impact itself, and extreme through one of its aliases.
     'a criticality filter on the highest criticality of the group',
     { entityFilters: { ...EMPTY_ENTITY_FILTERS, assetCriticality: ['extreme_impact'] } },

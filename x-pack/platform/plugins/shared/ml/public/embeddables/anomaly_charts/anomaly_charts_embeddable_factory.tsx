@@ -153,7 +153,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
           // cancel button visible and blocks `waitForPanelsToLoad$`.
           chartsManager.dataLoadingApi.onLoading(false);
         },
-        dataViews$: buildDataViewPublishingApi(
+        dataSources$: buildDataViewPublishingApi(
           {
             anomalyDetectorService: mlServices.anomalyDetectorService,
             dataViewsService: pluginsStartServices.data.dataViews,

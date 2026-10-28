@@ -1,0 +1,9 @@
+description: >
+  The ID of the attached item, such as an alert or a dashboard. To attach several alerts, use an
+  array. This isn't the attachment's own ID (`id`).
+oneOf:
+  - type: string
+  - type: array
+    items:
+      type: string
+example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42

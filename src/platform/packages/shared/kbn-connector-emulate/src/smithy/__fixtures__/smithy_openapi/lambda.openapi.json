@@ -1,0 +1,1515 @@
+{
+ "openapi": "3.0.2",
+ "info": {
+  "title": "AWS Lambda",
+  "version": "2015-03-31"
+ },
+ "paths": {
+  "/2015-03-31/functions": {
+   "get": {
+    "operationId": "ListFunctions",
+    "parameters": [
+     {
+      "name": "MasterRegion",
+      "in": "query",
+      "schema": {
+       "type": "string",
+       "maxLength": 50,
+       "minLength": 1,
+       "pattern": "^ALL|(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}$"
+      }
+     },
+     {
+      "name": "FunctionVersion",
+      "in": "query",
+      "schema": {
+       "$ref": "#/components/schemas/FunctionVersion"
+      }
+     },
+     {
+      "name": "Marker",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "MaxItems",
+      "in": "query",
+      "schema": {
+       "type": "number",
+       "maximum": 10000,
+       "minimum": 1
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "ListFunctions 200 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListFunctionsResponseContent"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "InvalidParameterValueException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InvalidParameterValueExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "TooManyRequestsException 429 response",
+      "headers": {
+       "Retry-After": {
+        "schema": {
+         "type": "string"
+        }
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TooManyRequestsExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServiceException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/2015-03-31/functions/{FunctionName}": {
+   "get": {
+    "operationId": "GetFunction",
+    "parameters": [
+     {
+      "name": "FunctionName",
+      "in": "path",
+      "schema": {
+       "type": "string",
+       "maxLength": 256,
+       "minLength": 1,
+       "pattern": "^(arn:(aws[a-zA-Z-]*)?:lambda:)?((eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:)?(\\d{12}:)?(function:)?([a-zA-Z0-9-_\\.]+)(:(\\$LATEST(\\.PUBLISHED)?|[a-zA-Z0-9-_]+))?$"
+      },
+      "required": true
+     },
+     {
+      "name": "Qualifier",
+      "in": "query",
+      "schema": {
+       "type": "string",
+       "maxLength": 128,
+       "minLength": 1,
+       "pattern": "^\\$(LATEST(\\.PUBLISHED)?)|[a-zA-Z0-9-_$]+$"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "GetFunction 200 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GetFunctionResponseContent"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "InvalidParameterValueException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InvalidParameterValueExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "ResourceNotFoundException 404 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "TooManyRequestsException 429 response",
+      "headers": {
+       "Retry-After": {
+        "schema": {
+         "type": "string"
+        }
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TooManyRequestsExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServiceException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/2015-03-31/functions/{FunctionName}/invocations": {
+   "post": {
+    "operationId": "Invoke",
+    "requestBody": {
+     "content": {
+      "application/octet-stream": {
+       "schema": {
+        "$ref": "#/components/schemas/InvokeInputPayload"
+       }
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "FunctionName",
+      "in": "path",
+      "schema": {
+       "type": "string",
+       "maxLength": 256,
+       "minLength": 1,
+       "pattern": "^(arn:(aws[a-zA-Z-]*)?:lambda:)?((eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:)?(\\d{12}:)?(function:)?([a-zA-Z0-9-_\\.]+)(:(\\$LATEST(\\.PUBLISHED)?|[a-zA-Z0-9-_]+))?$"
+      },
+      "required": true
+     },
+     {
+      "name": "Qualifier",
+      "in": "query",
+      "schema": {
+       "type": "string",
+       "maxLength": 128,
+       "minLength": 1,
+       "pattern": "^\\$(LATEST(\\.PUBLISHED)?)|[a-zA-Z0-9-_$]+$"
+      }
+     },
+     {
+      "name": "X-Amz-Client-Context",
+      "in": "header",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "X-Amz-Durable-Execution-Name",
+      "in": "header",
+      "schema": {
+       "type": "string",
+       "maxLength": 64,
+       "minLength": 1,
+       "pattern": "^[a-zA-Z0-9-_]+$"
+      }
+     },
+     {
+      "name": "X-Amz-Invocation-Type",
+      "in": "header",
+      "schema": {
+       "$ref": "#/components/schemas/InvocationType"
+      }
+     },
+     {
+      "name": "X-Amz-Log-Type",
+      "in": "header",
+      "schema": {
+       "$ref": "#/components/schemas/LogType"
+      }
+     },
+     {
+      "name": "X-Amz-Tenant-Id",
+      "in": "header",
+      "schema": {
+       "type": "string",
+       "maxLength": 256,
+       "minLength": 1,
+       "pattern": "^[a-zA-Z0-9\\._:\\/=+\\-@ ]+$"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Invoke 200 response",
+      "headers": {
+       "X-Amz-Durable-Execution-Arn": {
+        "schema": {
+         "type": "string",
+         "maxLength": 1024,
+         "minLength": 1,
+         "pattern": "^arn:([a-zA-Z0-9-]+):lambda:([a-zA-Z0-9-]+):(\\d{12}):function:([a-zA-Z0-9_-]+):(\\$LATEST(?:\\.PUBLISHED)?|[0-9]+)/durable-execution/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$"
+        }
+       },
+       "X-Amz-Executed-Version": {
+        "schema": {
+         "type": "string",
+         "maxLength": 1024,
+         "minLength": 1,
+         "pattern": "^(\\$LATEST|[0-9]+)$"
+        }
+       },
+       "X-Amz-Function-Error": {
+        "schema": {
+         "type": "string"
+        }
+       },
+       "X-Amz-Log-Result": {
+        "schema": {
+         "type": "string"
+        }
+       }
+      },
+      "content": {
+       "application/octet-stream": {
+        "schema": {
+         "$ref": "#/components/schemas/InvokeOutputPayload"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "SnapStartException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SnapStartExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "402": {
+      "description": "ServiceQuotaExceededException 402 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceQuotaExceededExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "403": {
+      "description": "S3FilesMountFailureException 403 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/S3FilesMountFailureExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "ResourceNotFoundException 404 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "408": {
+      "description": "SnapStartTimeoutException 408 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SnapStartTimeoutExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "409": {
+      "description": "SnapStartRegenerationFailureException 409 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SnapStartRegenerationFailureExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "410": {
+      "description": "EFSIOException 410 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/EFSIOExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "413": {
+      "description": "SerializedRequestEntityTooLargeException 413 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SerializedRequestEntityTooLargeExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "415": {
+      "description": "UnsupportedMediaTypeException 415 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UnsupportedMediaTypeExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "TooManyRequestsException 429 response",
+      "headers": {
+       "Retry-After": {
+        "schema": {
+         "type": "string"
+        }
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TooManyRequestsExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServiceException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "502": {
+      "description": "SubnetIPAddressLimitReachedException 502 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SubnetIPAddressLimitReachedExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "ApplicationLogLevel": {
+    "type": "string",
+    "enum": [
+     "TRACE",
+     "DEBUG",
+     "INFO",
+     "WARN",
+     "ERROR",
+     "FATAL"
+    ]
+   },
+   "Architecture": {
+    "type": "string",
+    "enum": [
+     "x86_64",
+     "arm64"
+    ]
+   },
+   "CapacityProviderConfig": {
+    "type": "object",
+    "properties": {
+     "LambdaManagedInstancesCapacityProviderConfig": {
+      "$ref": "#/components/schemas/LambdaManagedInstancesCapacityProviderConfig"
+     }
+    },
+    "required": [
+     "LambdaManagedInstancesCapacityProviderConfig"
+    ]
+   },
+   "Concurrency": {
+    "type": "object",
+    "properties": {
+     "ReservedConcurrentExecutions": {
+      "type": "number",
+      "minimum": 0
+     }
+    }
+   },
+   "DeadLetterConfig": {
+    "type": "object",
+    "properties": {
+     "TargetArn": {
+      "type": "string",
+      "maxLength": 10000,
+      "minLength": 0,
+      "pattern": "^(arn:(aws[a-zA-Z-]*)?:[a-z0-9-.]+:.*)|()$"
+     }
+    }
+   },
+   "DirectS3Read": {
+    "type": "string",
+    "enum": [
+     "ENABLED",
+     "DISABLED",
+     "AUTO"
+    ]
+   },
+   "DurableConfig": {
+    "type": "object",
+    "properties": {
+     "KMSKeyArn": {
+      "type": "string",
+      "maxLength": 10000,
+      "minLength": 0,
+      "pattern": "^(arn:(aws[a-zA-Z-]*)?:[a-z0-9-.]+:.*)|()$"
+     },
+     "RetentionPeriodInDays": {
+      "type": "number",
+      "maximum": 90,
+      "minimum": 1
+     },
+     "ExecutionTimeout": {
+      "type": "number",
+      "maximum": 31622400,
+      "minimum": 1
+     }
+    }
+   },
+   "EFSIOExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "Type": {
+      "type": "string"
+     },
+     "Message": {
+      "type": "string"
+     }
+    }
+   },
+   "EnvironmentError": {
+    "type": "object",
+    "properties": {
+     "ErrorCode": {
+      "type": "string"
+     },
+     "Message": {
+      "type": "string",
+      "format": "password"
+     }
+    }
+   },
+   "EnvironmentResponse": {
+    "type": "object",
+    "properties": {
+     "Variables": {
+      "$ref": "#/components/schemas/EnvironmentVariables"
+     },
+     "Error": {
+      "$ref": "#/components/schemas/EnvironmentError"
+     }
+    }
+   },
+   "EnvironmentVariables": {
+    "type": "object",
+    "additionalProperties": {
+     "type": "string",
+     "format": "password"
+    },
+    "format": "password"
+   },
+   "EphemeralStorage": {
+    "type": "object",
+    "properties": {
+     "Size": {
+      "type": "number",
+      "maximum": 32768,
+      "minimum": 512
+     }
+    },
+    "required": [
+     "Size"
+    ]
+   },
+   "FileSystemConfig": {
+    "type": "object",
+    "properties": {
+     "Arn": {
+      "type": "string",
+      "maxLength": 256,
+      "minLength": 0,
+      "pattern": "^arn:aws[a-zA-Z-]*:elasticfilesystem:(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:\\d{12}:access-point/fsap-[a-f0-9]{17}$|^arn:aws[-a-z]*:s3files:[0-9a-z-:]+:file-system/fs-[0-9a-f]{17,40}/access-point/fsap-[0-9a-f]{17,40}$"
+     },
+     "LocalMountPath": {
+      "type": "string",
+      "maxLength": 160,
+      "minLength": 0,
+      "pattern": "^/mnt/[a-zA-Z0-9-_.]+$"
+     },
+     "S3FilesConfig": {
+      "$ref": "#/components/schemas/S3FilesConfig"
+     }
+    },
+    "required": [
+     "Arn",
+     "LocalMountPath"
+    ]
+   },
+   "FunctionCodeLocation": {
+    "type": "object",
+    "properties": {
+     "RepositoryType": {
+      "type": "string"
+     },
+     "Location": {
+      "type": "string",
+      "maxLength": 10000,
+      "minLength": 0
+     },
+     "ImageUri": {
+      "type": "string"
+     },
+     "ResolvedImageUri": {
+      "type": "string"
+     },
+     "ResolvedS3Object": {
+      "$ref": "#/components/schemas/ResolvedS3Object"
+     },
+     "SourceKMSKeyArn": {
+      "type": "string",
+      "maxLength": 10000,
+      "minLength": 0,
+      "pattern": "^(arn:(aws[a-zA-Z-]*)?:[a-z0-9-.]+:.*)|()$"
+     },
+     "Error": {
+      "$ref": "#/components/schemas/FunctionCodeLocationError"
+     }
+    }
+   },
+   "FunctionCodeLocationError": {
+    "type": "object",
+    "properties": {
+     "ErrorCode": {
+      "type": "string"
+     },
+     "Message": {
+      "type": "string",
+      "format": "password"
+     }
+    }
+   },
+   "FunctionConfiguration": {
+    "type": "object",
+    "properties": {
+     "FunctionName": {
+      "type": "string",
+      "maxLength": 256,
+      "minLength": 1,
+      "pattern": "^(arn:(aws[a-zA-Z-]*)?:lambda:)?((eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:)?(\\d{12}:)?(function:)?([a-zA-Z0-9-_\\.]+)(:(\\$LATEST(\\.PUBLISHED)?|[a-zA-Z0-9-_]+))?$"
+     },
+     "FunctionArn": {
+      "type": "string",
+      "maxLength": 10000,
+      "minLength": 0,
+      "pattern": "^arn:(aws[a-zA-Z-]*)?:lambda:(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:\\d{12}:function:[a-zA-Z0-9-_\\.]+(:(\\$LATEST(\\.PUBLISHED)?|[a-zA-Z0-9-_]+))?$"
+     },
+     "Runtime": {
+      "$ref": "#/components/schemas/Runtime"
+     },
+     "Role": {
+      "type": "string",
+      "maxLength": 10000,
+      "minLength": 0,
+      "pattern": "^arn:(aws[a-zA-Z-]*)?:iam::\\d{12}:role/?[a-zA-Z_0-9+=,.@\\-_/]+$"
+     },
+     "Handler": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 0,
+      "pattern": "^[^\\s]+$"
+     },
+     "CodeSize": {
+      "type": "number",
+      "default": 0
+     },
+     "Description": {
+      "type": "string",
+      "maxLength": 256,
+      "minLength": 0
+     },
+     "Timeout": {
+      "type": "number",
+      "maximum": 5400,
+      "minimum": 1
+     },
+     "MemorySize": {
+      "type": "number",
+      "maximum": 32768,
+      "minimum": 128
+     },
+     "LastModified": {
+      "type": "string",
+      "maxLength": 100,
+      "minLength": 0,
+      "pattern": "^.*$"
+     },
+     "CodeSha256": {
+      "type": "string"
+     },
+     "Version": {
+      "type": "string",
+      "maxLength": 1024,
+      "minLength": 1,
+      "pattern": "^(\\$LATEST|[0-9]+)$"
+     },
+     "VpcConfig": {
+      "$ref": "#/components/schemas/VpcConfigResponse"
+     },
+     "DeadLetterConfig": {
+      "$ref": "#/components/schemas/DeadLetterConfig"
+     },
+     "Environment": {
+      "$ref": "#/components/schemas/EnvironmentResponse"
+     },
+     "KMSKeyArn": {
+      "type": "string",
+      "maxLength": 10000,
+      "minLength": 0,
+      "pattern": "^(arn:(aws[a-zA-Z-]*)?:[a-z0-9-.]+:.*)|()$"
+     },
+     "TracingConfig": {
+      "$ref": "#/components/schemas/TracingConfigResponse"
+     },
+     "MasterArn": {
+      "type": "string",
+      "maxLength": 10000,
+      "minLength": 0,
+      "pattern": "^arn:(aws[a-zA-Z-]*)?:lambda:(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:\\d{12}:function:[a-zA-Z0-9-_]+(:(\\$LATEST|[a-zA-Z0-9-_]+))?$"
+     },
+     "RevisionId": {
+      "type": "string"
+     },
+     "Layers": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/Layer"
+      }
+     },
+     "State": {
+      "$ref": "#/components/schemas/State"
+     },
+     "StateReason": {
+      "type": "string"
+     },
+     "StateReasonCode": {
+      "$ref": "#/components/schemas/StateReasonCode"
+     },
+     "LastUpdateStatus": {
+      "$ref": "#/components/schemas/LastUpdateStatus"
+     },
+     "LastUpdateStatusReason": {
+      "type": "string"
+     },
+     "LastUpdateStatusReasonCode": {
+      "$ref": "#/components/schemas/LastUpdateStatusReasonCode"
+     },
+     "FileSystemConfigs": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/FileSystemConfig"
+      },
+      "maxItems": 1,
+      "minItems": 0
+     },
+     "SigningProfileVersionArn": {
+      "type": "string",
+      "maxLength": 10000,
+      "minLength": 0,
+      "pattern": "^arn:(aws[a-zA-Z0-9-]*):([a-zA-Z0-9\\-])+:((eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1})?:(\\d{12})?:(.*)$"
+     },
+     "SigningJobArn": {
+      "type": "string",
+      "maxLength": 10000,
+      "minLength": 0,
+      "pattern": "^arn:(aws[a-zA-Z0-9-]*):([a-zA-Z0-9\\-])+:((eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1})?:(\\d{12})?:(.*)$"
+     },
+     "PackageType": {
+      "$ref": "#/components/schemas/PackageType"
+     },
+     "ImageConfigResponse": {
+      "$ref": "#/components/schemas/ImageConfigResponse"
+     },
+     "Architectures": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/Architecture"
+      },
+      "maxItems": 1,
+      "minItems": 1
+     },
+     "EphemeralStorage": {
+      "$ref": "#/components/schemas/EphemeralStorage"
+     },
+     "SnapStart": {
+      "$ref": "#/components/schemas/SnapStartResponse"
+     },
+     "RuntimeVersionConfig": {
+      "$ref": "#/components/schemas/RuntimeVersionConfig"
+     },
+     "LoggingConfig": {
+      "$ref": "#/components/schemas/LoggingConfig"
+     },
+     "TenancyConfig": {
+      "$ref": "#/components/schemas/TenancyConfig"
+     },
+     "CapacityProviderConfig": {
+      "$ref": "#/components/schemas/CapacityProviderConfig"
+     },
+     "ConfigSha256": {
+      "type": "string"
+     },
+     "DurableConfig": {
+      "$ref": "#/components/schemas/DurableConfig"
+     }
+    }
+   },
+   "FunctionVersion": {
+    "type": "string",
+    "enum": [
+     "ALL"
+    ]
+   },
+   "GetFunctionResponseContent": {
+    "type": "object",
+    "properties": {
+     "Configuration": {
+      "$ref": "#/components/schemas/FunctionConfiguration"
+     },
+     "Code": {
+      "$ref": "#/components/schemas/FunctionCodeLocation"
+     },
+     "Tags": {
+      "$ref": "#/components/schemas/Tags"
+     },
+     "TagsError": {
+      "$ref": "#/components/schemas/TagsError"
+     },
+     "Concurrency": {
+      "$ref": "#/components/schemas/Concurrency"
+     }
+    }
+   },
+   "ImageConfig": {
+    "type": "object",
+    "properties": {
+     "EntryPoint": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1500,
+      "minItems": 0
+     },
+     "Command": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1500,
+      "minItems": 0
+     },
+     "WorkingDirectory": {
+      "type": "string",
+      "maxLength": 1000,
+      "minLength": 0
+     }
+    }
+   },
+   "ImageConfigError": {
+    "type": "object",
+    "properties": {
+     "ErrorCode": {
+      "type": "string"
+     },
+     "Message": {
+      "type": "string",
+      "format": "password"
+     }
+    }
+   },
+   "ImageConfigResponse": {
+    "type": "object",
+    "properties": {
+     "ImageConfig": {
+      "$ref": "#/components/schemas/ImageConfig"
+     },
+     "Error": {
+      "$ref": "#/components/schemas/ImageConfigError"
+     }
+    }
+   },
+   "InvalidParameterValueExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "Type": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     }
+    }
+   },
+   "InvocationType": {
+    "type": "string",
+    "enum": [
+     "Event",
+     "RequestResponse",
+     "DryRun"
+    ]
+   },
+   "InvokeInputPayload": {
+    "type": "string",
+    "format": "byte"
+   },
+   "InvokeOutputPayload": {
+    "type": "string",
+    "format": "byte"
+   },
+   "LambdaManagedInstancesCapacityProviderConfig": {
+    "type": "object",
+    "properties": {
+     "CapacityProviderArn": {
+      "type": "string",
+      "maxLength": 140,
+      "minLength": 1,
+      "pattern": "^arn:aws[a-zA-Z-]*:lambda:(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:\\d{12}:capacity-provider:[a-zA-Z0-9-_]+$"
+     },
+     "PerExecutionEnvironmentMaxConcurrency": {
+      "type": "number",
+      "maximum": 1600,
+      "minimum": 1
+     },
+     "ExecutionEnvironmentMemoryGiBPerVCpu": {
+      "type": "number",
+      "maximum": 8,
+      "minimum": 2,
+      "format": "double"
+     }
+    },
+    "required": [
+     "CapacityProviderArn"
+    ]
+   },
+   "LastUpdateStatus": {
+    "type": "string",
+    "enum": [
+     "Successful",
+     "Failed",
+     "InProgress"
+    ]
+   },
+   "LastUpdateStatusReasonCode": {
+    "type": "string",
+    "enum": [
+     "EniLimitExceeded",
+     "InsufficientRolePermissions",
+     "InvalidConfiguration",
+     "InternalError",
+     "SubnetOutOfIPAddresses",
+     "InvalidSubnet",
+     "InvalidSecurityGroup",
+     "ImageDeleted",
+     "ImageAccessDenied",
+     "InvalidImage",
+     "KMSKeyAccessDenied",
+     "KMSKeyNotFound",
+     "InvalidStateKMSKey",
+     "DisabledKMSKey",
+     "EFSIOError",
+     "EFSMountConnectivityError",
+     "EFSMountFailure",
+     "EFSMountTimeout",
+     "InvalidRuntime",
+     "InvalidZipFileException",
+     "FunctionError",
+     "ServiceQuotaExceededException",
+     "VcpuLimitExceeded",
+     "CapacityProviderScalingLimitExceeded",
+     "InsufficientCapacity",
+     "EC2RequestLimitExceeded",
+     "FunctionError.InitTimeout",
+     "FunctionError.RuntimeInitError",
+     "FunctionError.ExtensionInitError",
+     "FunctionError.InvalidEntryPoint",
+     "FunctionError.InvalidWorkingDirectory",
+     "FunctionError.PermissionDenied",
+     "FunctionError.TooManyExtensions",
+     "FunctionError.InitResourceExhausted",
+     "DisallowedByVpcEncryptionControl",
+     "DependencyError"
+    ]
+   },
+   "Layer": {
+    "type": "object",
+    "properties": {
+     "Arn": {
+      "type": "string",
+      "maxLength": 2048,
+      "minLength": 1,
+      "pattern": "^((arn:(aws[a-zA-Z-]*)?:lambda:(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:\\d{12}:layer:[a-zA-Z0-9-_]+:[0-9]+)|(arn:[a-zA-Z0-9-]+:lambda:::awslayer:[a-zA-Z0-9-_]+))$"
+     },
+     "CodeSize": {
+      "type": "number",
+      "default": 0
+     },
+     "SigningProfileVersionArn": {
+      "type": "string",
+      "maxLength": 10000,
+      "minLength": 0,
+      "pattern": "^arn:(aws[a-zA-Z0-9-]*):([a-zA-Z0-9\\-])+:((eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1})?:(\\d{12})?:(.*)$"
+     },
+     "SigningJobArn": {
+      "type": "string",
+      "maxLength": 10000,
+      "minLength": 0,
+      "pattern": "^arn:(aws[a-zA-Z0-9-]*):([a-zA-Z0-9\\-])+:((eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1})?:(\\d{12})?:(.*)$"
+     }
+    }
+   },
+   "ListFunctionsResponseContent": {
+    "type": "object",
+    "properties": {
+     "NextMarker": {
+      "type": "string"
+     },
+     "Functions": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/FunctionConfiguration"
+      }
+     }
+    }
+   },
+   "LogFormat": {
+    "type": "string",
+    "enum": [
+     "JSON",
+     "Text"
+    ]
+   },
+   "LogType": {
+    "type": "string",
+    "enum": [
+     "None",
+     "Tail"
+    ]
+   },
+   "LoggingConfig": {
+    "type": "object",
+    "properties": {
+     "LogFormat": {
+      "$ref": "#/components/schemas/LogFormat"
+     },
+     "ApplicationLogLevel": {
+      "$ref": "#/components/schemas/ApplicationLogLevel"
+     },
+     "SystemLogLevel": {
+      "$ref": "#/components/schemas/SystemLogLevel"
+     },
+     "LogGroup": {
+      "type": "string",
+      "maxLength": 512,
+      "minLength": 1,
+      "pattern": "^[\\.\\-_/#A-Za-z0-9]+$"
+     }
+    }
+   },
+   "PackageType": {
+    "type": "string",
+    "enum": [
+     "Zip",
+     "Image"
+    ]
+   },
+   "ResolvedS3Object": {
+    "type": "object",
+    "properties": {
+     "S3Bucket": {
+      "type": "string",
+      "maxLength": 63,
+      "minLength": 3,
+      "pattern": "^[0-9A-Za-z\\.\\-_]*(?<!\\.)$"
+     },
+     "S3Key": {
+      "type": "string",
+      "maxLength": 1024,
+      "minLength": 1,
+      "pattern": "^.*$"
+     },
+     "S3ObjectVersion": {
+      "type": "string",
+      "maxLength": 1024,
+      "minLength": 1,
+      "pattern": "^.*$"
+     }
+    }
+   },
+   "ResourceNotFoundExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "Type": {
+      "type": "string"
+     },
+     "Message": {
+      "type": "string"
+     }
+    }
+   },
+   "Runtime": {
+    "type": "string",
+    "enum": [
+     "nodejs",
+     "nodejs4.3",
+     "nodejs6.10",
+     "nodejs8.10",
+     "nodejs10.x",
+     "nodejs12.x",
+     "nodejs14.x",
+     "nodejs16.x",
+     "nodejs18.x",
+     "nodejs20.x",
+     "nodejs22.x",
+     "nodejs24.x",
+     "java8",
+     "java8.al2",
+     "java11",
+     "java17",
+     "java21",
+     "java25",
+     "python2.7",
+     "python3.6",
+     "python3.7",
+     "python3.8",
+     "python3.9",
+     "python3.10",
+     "python3.11",
+     "python3.12",
+     "python3.13",
+     "python3.14",
+     "dotnetcore1.0",
+     "dotnetcore2.0",
+     "dotnetcore2.1",
+     "dotnetcore3.1",
+     "dotnet6",
+     "dotnet8",
+     "dotnet10",
+     "nodejs4.3-edge",
+     "go1.x",
+     "ruby2.5",
+     "ruby2.7",
+     "ruby3.2",
+     "ruby3.3",
+     "ruby3.4",
+     "ruby4.0",
+     "provided",
+     "provided.al2",
+     "provided.al2023",
+     "nodejs26.x",
+     "python3.15",
+     "java8.al2023",
+     "java11.al2023",
+     "java17.al2023"
+    ]
+   },
+   "RuntimeVersionConfig": {
+    "type": "object",
+    "properties": {
+     "RuntimeVersionArn": {
+      "type": "string",
+      "maxLength": 2048,
+      "minLength": 26,
+      "pattern": "^((arn:(aws[a-zA-Z-]*):lambda:(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}::runtime:.+)|(arn:(aws[a-zA-Z-]*):lambda:(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:\\d{12}:runtime/[A-Za-z0-9_.-]{1,128}/version/[A-Za-z0-9_.-]{1,128}))$"
+     },
+     "Error": {
+      "$ref": "#/components/schemas/RuntimeVersionError"
+     }
+    }
+   },
+   "RuntimeVersionError": {
+    "type": "object",
+    "properties": {
+     "ErrorCode": {
+      "type": "string"
+     },
+     "Message": {
+      "type": "string",
+      "format": "password"
+     }
+    }
+   },
+   "S3FilesConfig": {
+    "type": "object",
+    "properties": {
+     "DirectS3Read": {
+      "$ref": "#/components/schemas/DirectS3Read"
+     }
+    }
+   },
+   "S3FilesMountFailureExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "Type": {
+      "type": "string"
+     },
+     "Message": {
+      "type": "string"
+     }
+    }
+   },
+   "SerializedRequestEntityTooLargeExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "Type": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     }
+    }
+   },
+   "ServiceExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "Type": {
+      "type": "string"
+     },
+     "Message": {
+      "type": "string"
+     }
+    }
+   },
+   "ServiceQuotaExceededExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "Type": {
+      "type": "string"
+     },
+     "Message": {
+      "type": "string"
+     }
+    }
+   },
+   "SnapStartApplyOn": {
+    "type": "string",
+    "enum": [
+     "PublishedVersions",
+     "None"
+    ]
+   },
+   "SnapStartExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "Type": {
+      "type": "string"
+     },
+     "Message": {
+      "type": "string"
+     }
+    }
+   },
+   "SnapStartOptimizationStatus": {
+    "type": "string",
+    "enum": [
+     "On",
+     "Off"
+    ]
+   },
+   "SnapStartRegenerationFailureExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "Type": {
+      "type": "string"
+     },
+     "Message": {
+      "type": "string"
+     }
+    }
+   },
+   "SnapStartResponse": {
+    "type": "object",
+    "properties": {
+     "ApplyOn": {
+      "$ref": "#/components/schemas/SnapStartApplyOn"
+     },
+     "OptimizationStatus": {
+      "$ref": "#/components/schemas/SnapStartOptimizationStatus"
+     }
+    }
+   },
+   "SnapStartTimeoutExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "Type": {
+      "type": "string"
+     },
+     "Message": {
+      "type": "string"
+     }
+    }
+   },
+   "State": {
+    "type": "string",
+    "enum": [
+     "Pending",
+     "Active",
+     "Inactive",
+     "Failed",
+     "Deactivating",
+     "Deactivated",
+     "ActiveNonInvocable",
+     "Deleting"
+    ]
+   },
+   "StateReasonCode": {
+    "type": "string",
+    "enum": [
+     "Idle",
+     "Creating",
+     "Restoring",
+     "EniLimitExceeded",
+     "InsufficientRolePermissions",
+     "InvalidConfiguration",
+     "InternalError",
+     "SubnetOutOfIPAddresses",
+     "InvalidSubnet",
+     "InvalidSecurityGroup",
+     "ImageDeleted",
+     "ImageAccessDenied",
+     "InvalidImage",
+     "KMSKeyAccessDenied",
+     "KMSKeyNotFound",
+     "InvalidStateKMSKey",
+     "DisabledKMSKey",
+     "EFSIOError",
+     "EFSMountConnectivityError",
+     "EFSMountFailure",
+     "EFSMountTimeout",
+     "InvalidRuntime",
+     "InvalidZipFileException",
+     "FunctionError",
+     "ServiceQuotaExceededException",
+     "VcpuLimitExceeded",
+     "CapacityProviderScalingLimitExceeded",
+     "InsufficientCapacity",
+     "EC2RequestLimitExceeded",
+     "FunctionError.InitTimeout",
+     "FunctionError.RuntimeInitError",
+     "FunctionError.ExtensionInitError",
+     "FunctionError.InvalidEntryPoint",
+     "FunctionError.InvalidWorkingDirectory",
+     "FunctionError.PermissionDenied",
+     "FunctionError.TooManyExtensions",
+     "FunctionError.InitResourceExhausted",
+     "DisallowedByVpcEncryptionControl",
+     "DrainingDurableExecutions",
+     "DependencyError"
+    ]
+   },
+   "SubnetIPAddressLimitReachedExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "Type": {
+      "type": "string"
+     },
+     "Message": {
+      "type": "string"
+     }
+    }
+   },
+   "SystemLogLevel": {
+    "type": "string",
+    "enum": [
+     "DEBUG",
+     "INFO",
+     "WARN"
+    ]
+   },
+   "Tags": {
+    "type": "object",
+    "additionalProperties": {
+     "type": "string",
+     "maxLength": 256,
+     "minLength": 0,
+     "pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
+    }
+   },
+   "TagsError": {
+    "type": "object",
+    "properties": {
+     "ErrorCode": {
+      "type": "string",
+      "maxLength": 21,
+      "minLength": 10,
+      "pattern": "^[A-Za-z]+Exception$"
+     },
+     "Message": {
+      "type": "string",
+      "maxLength": 1000,
+      "minLength": 84,
+      "pattern": "^.*$"
+     }
+    },
+    "required": [
+     "ErrorCode",
+     "Message"
+    ]
+   },
+   "TenancyConfig": {
+    "type": "object",
+    "properties": {
+     "TenantIsolationMode": {
+      "$ref": "#/components/schemas/TenantIsolationMode"
+     }
+    },
+    "required": [
+     "TenantIsolationMode"
+    ]
+   },
+   "TenantIsolationMode": {
+    "type": "string",
+    "enum": [
+     "PER_TENANT"
+    ]
+   },
+   "ThrottleReason": {
+    "type": "string",
+    "enum": [
+     "ConcurrentInvocationLimitExceeded",
+     "FunctionInvocationRateLimitExceeded",
+     "ReservedFunctionConcurrentInvocationLimitExceeded",
+     "ReservedFunctionInvocationRateLimitExceeded",
+     "CallerRateLimitExceeded",
+     "ConcurrentSnapshotCreateLimitExceeded"
+    ]
+   },
+   "TooManyRequestsExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "Type": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     },
+     "Reason": {
+      "$ref": "#/components/schemas/ThrottleReason"
+     }
+    }
+   },
+   "TracingConfigResponse": {
+    "type": "object",
+    "properties": {
+     "Mode": {
+      "$ref": "#/components/schemas/TracingMode"
+     }
+    }
+   },
+   "TracingMode": {
+    "type": "string",
+    "enum": [
+     "Active",
+     "PassThrough"
+    ]
+   },
+   "UnsupportedMediaTypeExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "Type": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     }
+    }
+   },
+   "VpcConfigResponse": {
+    "type": "object",
+    "properties": {
+     "SubnetIds": {
+      "type": "array",
+      "items": {
+       "type": "string",
+       "maxLength": 1024,
+       "minLength": 0,
+       "pattern": "^subnet-[0-9a-z]*$"
+      },
+      "maxItems": 16,
+      "minItems": 0
+     },
+     "SecurityGroupIds": {
+      "type": "array",
+      "items": {
+       "type": "string",
+       "maxLength": 1024,
+       "minLength": 0,
+       "pattern": "^sg-[0-9a-zA-Z]*$"
+      },
+      "maxItems": 5,
+      "minItems": 0
+     },
+     "VpcId": {
+      "type": "string"
+     },
+     "Ipv6AllowedForDualStack": {
+      "type": "boolean"
+     }
+    }
+   }
+  },
+  "securitySchemes": {
+   "aws.auth.sigv4": {
+    "type": "apiKey",
+    "description": "AWS Signature Version 4 authentication",
+    "name": "Authorization",
+    "in": "header",
+    "x-amazon-apigateway-authtype": "awsSigv4"
+   }
+  }
+ },
+ "security": [
+  {
+   "aws.auth.sigv4": []
+  }
+ ]
+}

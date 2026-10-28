@@ -49,9 +49,11 @@ const mockActionPolicyGetRedirectUrl = jest.fn(
   ({ actionPolicyId }: { actionPolicyId: string }) =>
     `/app/alerting_v2/action-policies/edit/${actionPolicyId}`
 );
+const mockRulesNavigateSync = jest.fn();
 jest.mock('../application/locator_context', () => ({
   useAlertingLocators: () => ({
     actionPolicyLocators: { getRedirectUrl: mockActionPolicyGetRedirectUrl },
+    rulesLocators: { navigateSync: mockRulesNavigateSync },
   }),
 }));
 
@@ -404,6 +406,67 @@ describe('useComposeDiscoverFlyout — builder-to-ES|QL confirmation', () => {
 
     expect(capturedFlyoutProps.builderType).toBe('threshold');
     expect(screen.queryByTestId('alertingV2ConfirmBuilderToEsqlModal')).not.toBeInTheDocument();
+  });
+});
+
+describe('useComposeDiscoverFlyout — page-based builders', () => {
+  const sequenceRule = {
+    id: 'seq-1',
+    metadata: { name: 'My sequence', builder: { type: 'sequence' } },
+  } as unknown as RuleApiResponse;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    capturedFlyoutProps = {};
+    hookApi = undefined;
+  });
+
+  it('navigates to the host-aware sequence edit page instead of opening the flyout', () => {
+    render(<Harness />);
+
+    act(() => {
+      hookApi!.openEditFlyout(sequenceRule);
+    });
+
+    expect(mockRulesNavigateSync).toHaveBeenCalledWith({
+      page: 'sequence_edit',
+      ruleId: 'seq-1',
+    });
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+  });
+
+  it('navigates to the host-aware sequence clone page instead of opening the flyout', () => {
+    render(<Harness />);
+
+    act(() => {
+      hookApi!.openCloneFlyout(sequenceRule);
+    });
+
+    expect(mockRulesNavigateSync).toHaveBeenCalledWith({
+      page: 'sequence_clone',
+      ruleId: 'seq-1',
+    });
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+  });
+
+  it('still opens the flyout for builders without a page', async () => {
+    mockParseState.mockReturnValue({ stats: [{ fn: 'count', alias: 'count' }] });
+    render(<Harness />);
+
+    act(() => {
+      hookApi!.openEditFlyout({
+        id: 'rule-threshold',
+        metadata: { name: 'Threshold rule', builder: { type: 'threshold' } },
+        query: { base: 'FROM logs-*' },
+      } as unknown as RuleApiResponse);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+    expect(mockRulesNavigateSync).not.toHaveBeenCalled();
   });
 });
 
