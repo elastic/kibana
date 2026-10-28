@@ -11,7 +11,6 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect } from 'react';
 import type { ChangeHistoryPreviewEditorContext } from '@kbn/change-history-ui';
-import { ChangeHistoryPreviewFooterSpacer } from '@kbn/change-history-ui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useWorkflowChangeHistoryPreviewValidation } from './use_workflow_change_history_preview_validation';
 import {
@@ -25,10 +24,8 @@ const SETTINGS_RESERVE_PX = 48;
 
 export interface WorkflowChangeHistoryPreviewValidationProps {
   context: ChangeHistoryPreviewEditorContext;
-  /** Whether validation results are highlighted in the editor and listed in the footer. */
-  highlightValidationErrors: boolean;
-  /** YAML validated in the preview. */
-  validationYaml: string;
+  highlightValidationErrors: boolean; // whether validation results are highlighted in the editor and listed in the footer
+  validationYaml: string; // YAML validated in the preview
 }
 
 /** Runs workflow YAML validation against the shared preview editors and renders the results accordion in the footer. */
@@ -36,7 +33,7 @@ export const WorkflowChangeHistoryPreviewValidation = ({
   context,
   highlightValidationErrors,
   validationYaml,
-}: WorkflowChangeHistoryPreviewValidationProps): JSX.Element => {
+}: WorkflowChangeHistoryPreviewValidationProps): JSX.Element | null => {
   const styles = useMemoCss(componentStyles);
   const { decorationsRef, isEditorMounted, ...editorContext } = context;
   const { validationResults, isValidationLoading, validationError, handleValidationErrorClick } =
@@ -51,7 +48,7 @@ export const WorkflowChangeHistoryPreviewValidation = ({
   useEffect(() => () => clearWorkflowYamlComputationCache(), []);
 
   if (!highlightValidationErrors) {
-    return <ChangeHistoryPreviewFooterSpacer />;
+    return null;
   }
 
   return (

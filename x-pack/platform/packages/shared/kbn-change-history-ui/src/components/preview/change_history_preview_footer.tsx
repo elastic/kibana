@@ -32,19 +32,6 @@ const previewFooterStyles = {
       alignItems: 'center',
       height: CHANGE_HISTORY_PREVIEW_FOOTER_HEIGHT,
     }),
-  spacer: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      minHeight: CHANGE_HISTORY_PREVIEW_FOOTER_HEIGHT,
-      borderTop: euiTheme.border.thin,
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    }),
-};
-
-/** Empty footer bar. Render it from `renderFooter` when there is nothing to show in the footer. */
-export const ChangeHistoryPreviewFooterSpacer = (): JSX.Element => {
-  const styles = useMemoCss(previewFooterStyles);
-
-  return <div css={styles.spacer} aria-hidden={true} />;
 };
 
 /**

@@ -21,6 +21,5 @@ export type ChangeHistoryChangesRenderFn = (props: {
   item: ChangeHistoryListItem;
   changes: ChangeHistoryListItemChanges;
   summary: unknown;
-  /** Localized "N changes" label for this row. */
-  nChanges: string;
+  nChanges: string; // localized "N changes" label for this row
 }) => ReactNode;

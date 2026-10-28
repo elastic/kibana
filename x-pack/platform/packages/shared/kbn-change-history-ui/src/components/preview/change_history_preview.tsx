@@ -28,7 +28,6 @@ import { ChangeHistoryMonacoDiff } from './change_history_monaco_diff';
 import {
   CHANGE_HISTORY_PREVIEW_FOOTER_HEIGHT,
   ChangeHistoryPreviewFooter,
-  ChangeHistoryPreviewFooterSpacer,
 } from './change_history_preview_footer';
 import { ChangeHistoryPreviewSettingsPopover } from './change_history_preview_settings_popover';
 
@@ -71,8 +70,7 @@ export interface ChangeHistoryPreviewProps {
    */
   editorOptions?: monaco.editor.IEditorOptions;
   /**
-   * Footer content. Always mounted, so it can run effects against the editors. Render
-   * `ChangeHistoryPreviewFooterSpacer` when there is nothing to show. Defaults to the spacer.
+   * Footer content. Always mounted, so it can run effects against the editors.
    * The context is `null` until a Monaco editor has mounted.
    */
   renderFooter?: (context: ChangeHistoryPreviewEditorContext | null) => ReactNode;
@@ -216,7 +214,7 @@ export const ChangeHistoryPreview = ({
             ) : null
           }
         >
-          {renderFooter ? renderFooter(editorContext) : <ChangeHistoryPreviewFooterSpacer />}
+          {renderFooter?.(editorContext)}
         </ChangeHistoryPreviewFooter>
       </div>
       {isCompareMode && diffNavigation && (

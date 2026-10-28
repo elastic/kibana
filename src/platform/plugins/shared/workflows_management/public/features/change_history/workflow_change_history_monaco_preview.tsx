@@ -12,7 +12,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo, useState } from 'react';
 import type { ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
-import { ChangeHistoryPreview, ChangeHistoryPreviewFooterSpacer } from '@kbn/change-history-ui';
+import { ChangeHistoryPreview } from '@kbn/change-history-ui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { getWorkflowValidationDisplayOptions } from '@kbn/workflows-ui';
 import { WorkflowChangeHistoryPreviewSettings } from './workflow_change_history_preview_settings';
@@ -98,9 +98,7 @@ export const WorkflowChangeHistoryMonacoPreview = ({
             highlightValidationErrors={highlightValidationErrors}
             validationYaml={targetYaml}
           />
-        ) : (
-          <ChangeHistoryPreviewFooterSpacer />
-        )
+        ) : null
       }
       data-test-subj="workflowChangeHistoryMonacoPreview"
     />

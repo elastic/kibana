@@ -213,7 +213,7 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
                                   <span data-test-subj="changeHistoryItemChanges">
                                     {i18n.N_CHANGES(item.changes.count)}
                                   </span>
-                                )}{' '}
+                                )}
                               </>
                             )}
                           </>
