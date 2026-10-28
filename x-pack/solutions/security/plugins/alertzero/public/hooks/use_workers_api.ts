@@ -129,6 +129,8 @@ export const useUpdateWorker = () => {
       await queryClient.invalidateQueries({ queryKey });
       // Hunt enable/disable/settings can change TI supply; refresh when present.
       await invalidateHuntThreatIntelSupplyStatus(queryClient);
+      // The coverage answer switches between the last sweep and the role as the worker changes.
+      await queryClient.invalidateQueries({ queryKey: queryKeys.huntWorkerIndexCoverage.all });
     },
   });
 };

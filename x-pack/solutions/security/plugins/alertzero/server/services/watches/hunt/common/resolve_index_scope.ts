@@ -44,7 +44,7 @@ const defaultWindow = (): IndexScopeWindow => ({
  * The universe patterns no resolved name globs to. A name counts whether it resolved as an
  * index, an alias, a data stream, or a data stream's backing index.
  */
-const unresolvedPatterns = (
+export const unresolvedPatterns = (
   patterns: string[],
   resolved: IndicesResolveIndexResponse
 ): string[] => {
