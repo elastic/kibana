@@ -560,6 +560,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     severeAlertsEntityIds,
     watchlistedCount,
     watchlistedEntityIds,
+    hasCount: alertBasedHasCount,
     isLoading: alertBasedLoading,
     isCountPending: alertBasedPending,
     isTimedOut: alertBasedTimedOut,
@@ -573,6 +574,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   const {
     count: anomaliesCount,
     entityIds: anomaliesEntityIds,
+    hasCount: anomaliesHasCount,
     isLoading: anomaliesLoading,
     isMissingJobs: anomaliesMissingJobs,
     isCountPending: anomaliesPending,
@@ -587,6 +589,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   const {
     count: newEntityCount,
     entityIds: newEntityEntityIds,
+    hasCount: newEntityHasCount,
     isLoading: newEntityLoading,
     isCountPending: newEntityPending,
     isTimedOut: newEntityTimedOut,
@@ -600,6 +603,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   const {
     count: riskMoversCount,
     entityIds: riskMoversEntityIds,
+    hasCount: riskMoversHasCount,
     isLoading: riskMoversLoading,
     isMissingIndex: riskMoversMissingIndex,
     isCountPending: riskMoversPending,
@@ -614,6 +618,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   const {
     count: newlyHCCount,
     entityIds: newlyHCEntityIds,
+    hasCount: newlyHCHasCount,
     isLoading: newlyHCLoading,
     isMissingIndex: newlyHCMissingIndex,
     isCountPending: newlyHCPending,
@@ -940,6 +945,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: alertsTrend,
         isLoading: alertBasedLoading,
+        hasCount: alertBasedHasCount,
         entityIds: severeAlertsEntityIds,
         isUnavailable: Boolean(alertBasedError),
         noDataMessage: !canReadAlerts
@@ -975,6 +981,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: anomaliesHistoryMissing,
         trend: anomaliesTrend,
         isLoading: anomaliesLoading,
+        hasCount: anomaliesHasCount,
         entityIds: anomaliesEntityIds,
         // Without ML jobs the tile shows 0, which isn't a real count.
         isUnavailable: Boolean(anomaliesError) || anomaliesMissingJobs,
@@ -1016,6 +1023,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: riskMoversHistoryMissing,
         trend: riskMoversTrend,
         isLoading: riskMoversLoading,
+        hasCount: riskMoversHasCount,
         entityIds: riskMoversEntityIds,
         isUnavailable: Boolean(riskMoversError),
         noDataMessage: !canReadRisk
@@ -1055,6 +1063,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: newlyHCHistoryMissing,
         trend: newlyHCTrend,
         isLoading: newlyHCLoading,
+        hasCount: newlyHCHasCount,
         entityIds: newlyHCEntityIds,
         isUnavailable: Boolean(newlyHCError),
         noDataMessage: !canReadRisk
@@ -1096,6 +1105,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: watchlistedTrend,
         isLoading: alertBasedLoading,
+        hasCount: alertBasedHasCount,
         entityIds: watchlistedEntityIds,
         isUnavailable: Boolean(alertBasedError),
         noDataMessage: !canReadAlerts
@@ -1127,6 +1137,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: newEntityHistoryMissing,
         trend: newEntityTrend,
         isLoading: newEntityLoading,
+        hasCount: newEntityHasCount,
         entityIds: newEntityEntityIds,
         isUnavailable: Boolean(newEntityError),
         noDataMessage: newEntityTimedOut ? TILE_TIMEOUT_MESSAGE : undefined,
@@ -1201,6 +1212,11 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
       newEntityLoading,
       newEntityTimedOut,
       riskMoversMissingIndex,
+      alertBasedHasCount,
+      anomaliesHasCount,
+      riskMoversHasCount,
+      newlyHCHasCount,
+      newEntityHasCount,
       timeRange,
     ]
   );

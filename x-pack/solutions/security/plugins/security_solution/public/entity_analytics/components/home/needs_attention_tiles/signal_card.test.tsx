@@ -31,6 +31,7 @@ const card = (overrides: Partial<SignalCardData> = {}): SignalCardData => ({
   title: 'New entity',
   description: 'First seen in the last 7 days',
   value: 12345,
+  hasCount: true,
   filterLabel: 'New entity (7d)',
   ...overrides,
 });
@@ -266,10 +267,28 @@ describe('SignalCard', () => {
     expect(tile).toHaveAttribute('aria-disabled', 'true');
   });
 
-  it('shows a dash at 0 without a no-data message', () => {
-    renderCard({ value: 0 });
+  it('shows 0, not a dash, for a count that genuinely came back 0, and is not clickable', () => {
+    const onToggle = jest.fn();
+    renderCard({ value: 0, hasCount: true }, { onToggle });
+    const tile = screen.getByTestId('eaFaceliftSignalCard-newEntity');
 
-    expect(screen.getByTestId('eaFaceliftSignalCard-newEntity')).toHaveTextContent('—');
+    expect(tile).toHaveTextContent('0');
+    expect(tile).not.toHaveTextContent('—');
+    fireEvent.click(tile);
+    fireEvent.keyDown(tile, { key: 'Enter' });
+    expect(onToggle).not.toHaveBeenCalled();
+    expect(tile).toHaveAttribute('aria-disabled', 'true');
+  });
+
+  it('shows a dash, not 0, when there is no count (failed, skipped, timed out or no access)', () => {
+    const onToggle = jest.fn();
+    renderCard({ value: 0, hasCount: false }, { onToggle });
+    const tile = screen.getByTestId('eaFaceliftSignalCard-newEntity');
+
+    expect(tile).toHaveTextContent('—');
+    expect(tile).not.toHaveTextContent('0');
+    fireEvent.click(tile);
+    expect(onToggle).not.toHaveBeenCalled();
   });
 
   it('shows the no-data message instead of the dash at 0, with no delta, no sparkline and no click', () => {

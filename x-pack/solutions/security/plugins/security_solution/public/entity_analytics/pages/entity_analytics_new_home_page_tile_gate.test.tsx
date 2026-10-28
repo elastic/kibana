@@ -229,12 +229,14 @@ const mockTiles = (
     severeAlertsEntityIds: [],
     watchlistedCount: 2,
     watchlistedEntityIds: [],
+    hasCount: true,
     isLoading: false,
     isCountPending: of('alerts').isCountPending,
   });
   const count = (tile: Tile) => ({
     count: 3,
     entityIds: [],
+    hasCount: true,
     isLoading: false,
     isMissingIndex: false,
     isCountPending: of(tile).isCountPending,
@@ -490,6 +492,27 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
       render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
       expect(lastOptions('useTilesTimeoutNotice')).toBeFalsy();
     });
+  });
+
+  it('passes whether each count has a result to its tile, so a missing count is not shown as 0', () => {
+    mockTiles();
+    hooks.useRiskMoversCount.mockReturnValue({
+      ...hooks.useRiskMoversCount(),
+      count: 0,
+      hasCount: false,
+    });
+    hooks.useNewlyHighCriticalCount.mockReturnValue({
+      ...hooks.useNewlyHighCriticalCount(),
+      count: 0,
+      hasCount: true,
+    });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(getCard('riskMovers')).toEqual(expect.objectContaining({ value: 0, hasCount: false }));
+    expect(getCard('newlyHighCritical')).toEqual(
+      expect.objectContaining({ value: 0, hasCount: true })
+    );
+    expect(getCard('newEntity')).toEqual(expect.objectContaining({ hasCount: true }));
   });
 
   it('tells the anomalies tile that it needs jobs only when no security ML job is installed', () => {

@@ -23,7 +23,12 @@ export interface SignalCardData {
   title: string;
   value: number;
   isLoading?: boolean;
-  /** Short hint shown under the dash when value is 0, e.g. which index needs data. */
+  /**
+   * True only when the count query returned a result. A failed, skipped, timed-out or no-access count
+   * is false, so the tile shows a dash for it and "0" only for a genuine 0.
+   */
+  hasCount: boolean;
+  /** Short hint shown in place of the value when value is 0, e.g. which index needs data. */
   noDataMessage?: string;
   description: string;
   delta?: number;

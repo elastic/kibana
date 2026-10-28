@@ -382,7 +382,11 @@ const renderValueRow = (card: SignalCardData, isLoading: boolean, isZero: boolea
   if (isLoading) {
     return <EuiLoadingSpinner size="l" data-test-subj="eaFaceliftSignalCardLoading" />;
   }
-  return isZero ? '—' : formatTileNumber(card.value);
+  // A 0 without a result (failed, skipped, timed out, no access) is not a count: keep the dash.
+  if (isZero && !card.hasCount) {
+    return '—';
+  }
+  return formatTileNumber(card.value);
 };
 
 /**
