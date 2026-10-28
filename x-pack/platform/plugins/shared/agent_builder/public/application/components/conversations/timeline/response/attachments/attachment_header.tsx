@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import {
   EuiBadge,
   EuiBadgeGroup,
@@ -93,8 +93,8 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const measureRef = useRef<HTMLDivElement | null>(null);
-  const { width: headerWidth } = useResizeObserver(measureRef.current);
+  const [measureElement, setMeasureElement] = useState<HTMLDivElement | null>(null);
+  const { width: headerWidth } = useResizeObserver(measureElement);
   const isCompact = headerWidth > 0 && headerWidth <= COMPACT_WIDTH_THRESHOLD;
 
   const colorTokens = useHeaderColorTokens(color);
@@ -130,8 +130,8 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
       : ''}
     border-radius: ${headerBorderRadius};
     min-height: ${isCanvas ? CANVAS_HEADER_HEIGHT : INLINE_HEADER_HEIGHT}px;
-    padding: ${isCanvas ? euiTheme.size.base : euiTheme.size.s} ${euiTheme.size.s}
-      ${isCanvas ? euiTheme.size.base : euiTheme.size.s} ${euiTheme.size.base};
+    padding: ${isCanvas ? euiTheme.size.base : euiTheme.size.xs} ${euiTheme.size.s}
+      ${isCanvas ? euiTheme.size.base : euiTheme.size.xs} ${euiTheme.size.base};
   `;
 
   const badgeStyles = css`
@@ -151,7 +151,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   }
 
   return (
-    <div ref={measureRef} style={{ width: '100%' }}>
+    <div ref={setMeasureElement} style={{ width: '100%' }}>
       <EuiSplitPanel.Inner color={color ?? 'subdued'} css={headerStyles} paddingSize="none">
         {previewBadgeState === 'preview_available' && (
           <EuiBadge iconType="readOnly" css={badgeStyles}>

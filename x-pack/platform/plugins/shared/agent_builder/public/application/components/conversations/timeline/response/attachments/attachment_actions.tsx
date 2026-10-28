@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenu,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiPopover,
+  EuiSplitButton,
   EuiToolTip,
 } from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type ActionButton, ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 
@@ -24,164 +23,153 @@ interface AttachmentActionsProps {
   iconOnly?: boolean;
 }
 
+const MORE_ACTIONS_LABEL = i18n.translate('xpack.agentBuilder.attachmentActions.moreActions', {
+  defaultMessage: 'More actions',
+});
+
+const MORE_ACTIONS_POPOVER_LABEL = i18n.translate(
+  'xpack.agentBuilder.attachmentActions.moreActionsPopover',
+  {
+    defaultMessage: 'Attachment actions',
+  }
+);
+
+const getNavProps = (button: ActionButton) => ({
+  href: button.href,
+  target: button.href && button.openInNewTab ? '_blank' : undefined,
+  rel: button.href && button.openInNewTab ? 'noopener noreferrer' : undefined,
+  onClick: button.handler,
+});
+
 export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
   buttons,
   iconOnly = false,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const secondaryButtons = buttons.filter((b) => b.type === ActionButtonType.SECONDARY);
-  const primaryButtons = buttons.filter((b) => b.type === ActionButtonType.PRIMARY);
-  const overflowButtons = buttons.filter((b) => b.type === ActionButtonType.OVERFLOW);
+  const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-  const togglePopover = useCallback(() => {
-    setIsPopoverOpen((prev) => !prev);
-  }, []);
+  const mainButton = buttons.find(({ type }) => type === ActionButtonType.PRIMARY);
+  const menuButtons = buttons.filter((button) => button !== mainButton);
 
-  const closePopover = useCallback(() => {
-    setIsPopoverOpen(false);
-  }, []);
+  const menu = useMemo(
+    () => (
+      <EuiContextMenu
+        initialPanelId={0}
+        panels={[
+          {
+            id: 0,
+            items: menuButtons.map(
+              (button): EuiContextMenuPanelItemDescriptor => ({
+                name: button.label,
+                icon: button.icon,
+                disabled: button.disabled,
+                toolTipContent: button.disabled ? button.disabledReason : undefined,
+                href: button.href,
+                target: button.href && button.openInNewTab ? '_blank' : undefined,
+                rel: button.href && button.openInNewTab ? 'noopener noreferrer' : undefined,
+                onClick: () => {
+                  closePopover();
+                  button.handler();
+                },
+              })
+            ),
+          },
+        ]}
+      />
+    ),
+    [menuButtons, closePopover]
+  );
 
-  const maybeWrapWithTooltip = useCallback((button: ActionButton, element: React.ReactElement) => {
-    if (!button.disabled || !button.disabledReason) {
-      return element;
+  const popoverProps = {
+    'aria-label': MORE_ACTIONS_POPOVER_LABEL,
+    isOpen: isPopoverOpen,
+    closePopover,
+    panelPaddingSize: 'none' as const,
+    anchorPosition: 'downRight' as const,
+    // The header sits close to the viewport edge, so the default 16px buffer would flip the menu
+    // to the side of the button on narrow screens. Keep it below the button instead.
+    buffer: 8,
+    children: menu,
+  };
+
+  if (!mainButton) {
+    if (menuButtons.length === 0) {
+      return null;
     }
-
     return (
-      <EuiToolTip content={button.disabledReason}>
-        <span tabIndex={0}>{element}</span>
+      <EuiPopover
+        {...popoverProps}
+        button={
+          <EuiToolTip content={MORE_ACTIONS_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              color="text"
+              size="s"
+              iconType="ellipsis"
+              aria-label={MORE_ACTIONS_LABEL}
+              onClick={togglePopover}
+              data-test-subj="agentBuilderAttachmentMoreActions"
+            />
+          </EuiToolTip>
+        }
+      />
+    );
+  }
+
+  const isIconOnly = iconOnly && Boolean(mainButton.icon);
+  const mainTooltipContent = mainButton.disabled
+    ? mainButton.disabledReason
+    : isIconOnly
+    ? mainButton.label
+    : undefined;
+  const mainProps = {
+    ...getNavProps(mainButton),
+    iconType: mainButton.icon,
+    isDisabled: mainButton.disabled,
+    hasAriaDisabled: Boolean(mainButton.disabled && mainButton.disabledReason),
+    'data-test-subj': 'agentBuilderAttachmentPrimaryAction',
+  };
+  const mainColor = mainButton.color ?? 'text';
+
+  if (menuButtons.length === 0) {
+    return isIconOnly ? (
+      <EuiToolTip content={mainTooltipContent}>
+        <EuiButtonIcon
+          {...mainProps}
+          aria-label={mainButton.label}
+          iconType={mainButton.icon ?? ''}
+          color={mainColor}
+          size="s"
+        />
+      </EuiToolTip>
+    ) : (
+      <EuiToolTip content={mainTooltipContent}>
+        <EuiButton {...mainProps} color={mainColor} size="s">
+          {mainButton.label}
+        </EuiButton>
       </EuiToolTip>
     );
-  }, []);
-
-  // Derive the navigation/click props for an EUI button. When `href` is set we
-  // render an anchor (so middle-click / cmd-click / "Open in new tab" all work
-  // natively); `rel="noopener noreferrer"` is added automatically when
-  // `openInNewTab` is true.
-  const getNavProps = (button: ActionButton) => ({
-    href: button.href,
-    target: button.href && button.openInNewTab ? '_blank' : undefined,
-    rel: button.href && button.openInNewTab ? 'noopener noreferrer' : undefined,
-    onClick: button.handler,
-  });
+  }
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd" responsive={false}>
-      {secondaryButtons.map((button) => (
-        <EuiFlexItem grow={false} key={button.label}>
-          {iconOnly ? (
-            <EuiToolTip content={button.disabled ? button.disabledReason : button.label}>
-              <span tabIndex={button.disabled ? 0 : undefined}>
-                <EuiButtonIcon
-                  aria-label={button.label}
-                  color="text"
-                  size="s"
-                  iconType={button.icon ?? ''}
-                  isDisabled={button.disabled}
-                  {...getNavProps(button)}
-                />
-              </span>
-            </EuiToolTip>
-          ) : (
-            maybeWrapWithTooltip(
-              button,
-              <EuiButtonEmpty
-                color={button.color ?? 'text'}
-                size="s"
-                iconType={button.icon}
-                isDisabled={button.disabled}
-                {...getNavProps(button)}
-              >
-                {button.label}
-              </EuiButtonEmpty>
-            )
-          )}
-        </EuiFlexItem>
-      ))}
-      {primaryButtons.map((button) => (
-        <EuiFlexItem grow={false} key={button.label}>
-          {iconOnly ? (
-            <EuiToolTip content={button.disabled ? button.disabledReason : button.label}>
-              <span tabIndex={button.disabled ? 0 : undefined}>
-                <EuiButtonIcon
-                  aria-label={button.label}
-                  color="text"
-                  size="s"
-                  iconType={button.icon ?? ''}
-                  isDisabled={button.disabled}
-                  {...getNavProps(button)}
-                />
-              </span>
-            </EuiToolTip>
-          ) : (
-            maybeWrapWithTooltip(
-              button,
-              <EuiButton
-                color={button.color ?? 'text'}
-                size="s"
-                iconType={button.icon}
-                isDisabled={button.disabled}
-                {...getNavProps(button)}
-              >
-                {button.label}
-              </EuiButton>
-            )
-          )}
-        </EuiFlexItem>
-      ))}
-      {overflowButtons.length > 0 && (
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            aria-label={i18n.translate('xpack.agentBuilder.attachmentActions.moreActionsPopover', {
-              defaultMessage: 'Attachment actions',
-            })}
-            button={
-              <EuiToolTip
-                content={i18n.translate('xpack.agentBuilder.attachmentActions.moreActions', {
-                  defaultMessage: 'More actions',
-                })}
-                disableScreenReaderOutput
-              >
-                <EuiButtonIcon
-                  color="text"
-                  iconType="boxesVertical"
-                  aria-label={i18n.translate('xpack.agentBuilder.attachmentActions.moreActions', {
-                    defaultMessage: 'More actions',
-                  })}
-                  onClick={togglePopover}
-                  size="s"
-                />
-              </EuiToolTip>
-            }
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-            panelPaddingSize="none"
-            anchorPosition="downRight"
-          >
-            <EuiContextMenu
-              initialPanelId={0}
-              panels={[
-                {
-                  id: 0,
-                  items: overflowButtons.map((button) => ({
-                    name: button.label,
-                    icon: button.icon,
-                    disabled: button.disabled,
-                    toolTipContent: button.disabled ? button.disabledReason : undefined,
-                    href: button.href,
-                    target: button.href && button.openInNewTab ? '_blank' : undefined,
-                    rel: button.href && button.openInNewTab ? 'noopener noreferrer' : undefined,
-                    onClick: () => {
-                      closePopover();
-                      button.handler();
-                    },
-                  })),
-                },
-              ]}
-            />
-          </EuiPopover>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+    <EuiSplitButton size="s" color={mainColor} hasAriaDisabled={mainProps.hasAriaDisabled}>
+      <EuiSplitButton.ActionPrimary
+        {...mainProps}
+        isIconOnly={isIconOnly}
+        tooltipProps={mainTooltipContent ? { content: mainTooltipContent } : undefined}
+        aria-label={mainButton.label}
+      >
+        {mainButton.label}
+      </EuiSplitButton.ActionPrimary>
+      <EuiSplitButton.ActionSecondary
+        aria-label={MORE_ACTIONS_LABEL}
+        iconType="chevronSingleDown"
+        onClick={togglePopover}
+        popoverProps={popoverProps}
+        tooltipProps={{ content: MORE_ACTIONS_LABEL, disableScreenReaderOutput: true }}
+        data-test-subj="agentBuilderAttachmentMoreActions"
+      />
+    </EuiSplitButton>
   );
 };

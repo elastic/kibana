@@ -148,8 +148,10 @@ describe('InlineAttachmentWithActions', () => {
     );
 
     expect(screen.getByText('Inline content')).not.toBeNull();
-    expect(screen.getByRole('button', { name: 'Static action' })).not.toBeNull();
     expect(await screen.findByRole('button', { name: 'Dynamic action' })).not.toBeNull();
+
+    fireEvent.click(screen.getByTestId('agentBuilderAttachmentMoreActions'));
+    expect(await screen.findByText('Static action')).not.toBeNull();
   });
 
   describe('openSidebarConversation prop forwarded to inline content and action buttons', () => {
@@ -208,10 +210,11 @@ describe('InlineAttachmentWithActions', () => {
       });
     });
 
-    it('invokes openSidebarConversationInternal when triggered from an action button', () => {
+    it('invokes openSidebarConversationInternal when triggered from an action button', async () => {
       renderWithFakeContent({ isSidebar: false });
 
-      fireEvent.click(screen.getByRole('button', { name: ACTION_TRIGGER }));
+      fireEvent.click(screen.getByTestId('agentBuilderAttachmentMoreActions'));
+      fireEvent.click(await screen.findByText(ACTION_TRIGGER));
 
       expect(mockOpenSidebarConversation).toHaveBeenCalledTimes(1);
       expect(mockOpenSidebarConversation).toHaveBeenCalledWith({
@@ -230,10 +233,11 @@ describe('InlineAttachmentWithActions', () => {
       });
     });
 
-    it('invokes openSidebarConversationInternal when triggered from an action button inside the sidebar', () => {
+    it('invokes openSidebarConversationInternal when triggered from an action button inside the sidebar', async () => {
       renderWithFakeContent({ isSidebar: true });
 
-      fireEvent.click(screen.getByRole('button', { name: ACTION_TRIGGER }));
+      fireEvent.click(screen.getByTestId('agentBuilderAttachmentMoreActions'));
+      fireEvent.click(await screen.findByText(ACTION_TRIGGER));
 
       expect(mockOpenSidebarConversation).toHaveBeenCalledTimes(1);
       expect(mockOpenSidebarConversation).toHaveBeenCalledWith({

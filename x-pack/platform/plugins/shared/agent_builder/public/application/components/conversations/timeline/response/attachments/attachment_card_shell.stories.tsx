@@ -189,6 +189,116 @@ export const WithOverflowActions: Story = {
   },
 };
 
+export const SplitButtonWithSecondaryActions: Story = {
+  args: {
+    icon: 'document',
+    title: 'T1110 MITRE technique for OKTA',
+    actionButtons: [
+      {
+        label: 'Primary',
+        icon: 'play',
+        type: ActionButtonType.PRIMARY,
+        handler: action('primary'),
+      },
+      {
+        label: 'Secondary',
+        icon: 'search',
+        type: ActionButtonType.SECONDARY,
+        handler: action('s1'),
+      },
+      { label: 'Secondary', icon: 'user', type: ActionButtonType.SECONDARY, handler: action('s2') },
+      {
+        label: 'Secondary',
+        icon: 'wrench',
+        type: ActionButtonType.SECONDARY,
+        handler: action('s3'),
+      },
+      {
+        label: 'Delete',
+        icon: 'trash',
+        type: ActionButtonType.OVERFLOW,
+        handler: action('delete'),
+      },
+    ],
+    body: bodyPlaceholder,
+  },
+};
+
+export const PrimaryOnly: Story = {
+  args: {
+    icon: 'document',
+    title: 'note.txt',
+    actionButtons: [
+      { label: 'Copy', icon: 'copy', type: ActionButtonType.PRIMARY, handler: action('copy') },
+    ],
+    body: bodyPlaceholder,
+  },
+};
+
+export const MenuOnlyWithoutPrimary: Story = {
+  args: {
+    icon: 'document',
+    title: 'note.txt',
+    actionButtons: [
+      { label: 'Copy', icon: 'copy', type: ActionButtonType.SECONDARY, handler: action('copy') },
+      {
+        label: 'Delete',
+        icon: 'trash',
+        type: ActionButtonType.OVERFLOW,
+        handler: action('delete'),
+      },
+    ],
+    body: bodyPlaceholder,
+  },
+};
+
+export const DisabledPrimary: Story = {
+  args: {
+    icon: 'document',
+    title: 'rule.json',
+    actionButtons: [
+      {
+        label: 'Create rule',
+        icon: 'plusCircle',
+        type: ActionButtonType.PRIMARY,
+        disabled: true,
+        disabledReason: 'You need the manage rules privilege.',
+        handler: action('create'),
+      },
+      { label: 'Copy', icon: 'copy', type: ActionButtonType.SECONDARY, handler: action('copy') },
+    ],
+    body: bodyPlaceholder,
+  },
+};
+
+export const CompactWidth: Story = {
+  render: (args) => (
+    <div style={{ maxWidth: 480 }}>
+      <Shell {...args} />
+    </div>
+  ),
+  args: {
+    icon: 'document',
+    title: 'T1110 MITRE technique for OKTA',
+    actionButtons: [
+      {
+        label: 'Primary',
+        icon: 'play',
+        type: ActionButtonType.PRIMARY,
+        handler: action('primary'),
+      },
+      {
+        label: 'Secondary',
+        icon: 'search',
+        type: ActionButtonType.SECONDARY,
+        handler: action('s1'),
+      },
+      { label: 'Secondary', icon: 'user', type: ActionButtonType.SECONDARY, handler: action('s2') },
+    ],
+    body: bodyPlaceholder,
+  },
+};
+
 const COLOR_VARIANTS: HeaderColor[] = ['primary', 'danger', 'warning', 'accent', 'success'];
 
 export const ColorVariants: Story = {

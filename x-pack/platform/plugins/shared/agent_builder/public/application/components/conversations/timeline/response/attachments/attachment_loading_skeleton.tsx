@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,7 +15,7 @@ import {
   useResizeObserver,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
+import { AttachmentCard } from './attachment_card';
 import { INLINE_HEADER_HEIGHT, COMPACT_WIDTH_THRESHOLD } from './attachment_header';
 
 /**
@@ -26,25 +26,18 @@ import { INLINE_HEADER_HEIGHT, COMPACT_WIDTH_THRESHOLD } from './attachment_head
 export const AttachmentLoadingSkeleton: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
-  const headerRef = useRef<HTMLDivElement | null>(null);
-  const { width: headerWidth } = useResizeObserver(headerRef.current);
+  const [measureElement, setMeasureElement] = useState<HTMLDivElement | null>(null);
+  const { width: headerWidth } = useResizeObserver(measureElement);
   const isCompact = headerWidth > 0 && headerWidth <= COMPACT_WIDTH_THRESHOLD;
 
   const headerStyles = css`
     min-height: ${isCompact ? 'auto' : `${INLINE_HEADER_HEIGHT}px`};
-    padding: ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.base};
+    padding: ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.size.xs} ${euiTheme.size.base};
   `;
 
   return (
-    <EuiSplitPanel.Outer
-      grow
-      hasShadow={false}
-      hasBorder={true}
-      css={css`
-        border-radius: ${AB_PANEL_RADIUS}px;
-      `}
-    >
-      <div ref={headerRef} style={{ width: '100%' }}>
+    <AttachmentCard>
+      <div ref={setMeasureElement} style={{ width: '100%' }}>
         <EuiSplitPanel.Inner color="subdued" css={headerStyles} paddingSize="none">
           <EuiFlexGroup
             responsive={false}
@@ -81,6 +74,6 @@ export const AttachmentLoadingSkeleton: React.FC = () => {
           </EuiFlexGroup>
         </EuiSplitPanel.Inner>
       </div>
-    </EuiSplitPanel.Outer>
+    </AttachmentCard>
   );
 };

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiSplitPanel } from '@elastic/eui';
+import { EuiSplitPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { HeaderColor } from '@kbn/agent-builder-browser/attachments';
 import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
@@ -19,16 +19,17 @@ interface AttachmentCardProps {
 }
 
 export const AttachmentCard: React.FC<AttachmentCardProps> = ({ color, maxWidth, children }) => {
+  const { euiTheme } = useEuiTheme();
   const { border } = useHeaderColorTokens(color);
 
   return (
     <EuiSplitPanel.Outer
       grow
       hasShadow={false}
-      hasBorder={true}
+      hasBorder={false}
       css={css`
         overflow: visible;
-        border-color: ${border};
+        border: ${euiTheme.border.width.thin} solid ${border};
         border-radius: ${AB_PANEL_RADIUS}px;
         ${maxWidth !== undefined ? `max-width: ${maxWidth}px;` : ''}
       `}
