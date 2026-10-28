@@ -27,12 +27,21 @@ paths:
   /items:
     get:
       description: Lists items
+      parameters: [{ name: page, in: query, schema: { type: integer } }]
       responses:
         '200':
           description: ok
           content:
             application/json:
               schema: { type: array, items: { $ref: 'models.yaml#/Item' } }
+  /tags:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: { type: array, items: { type: string } }
   /unused:
     get:
       responses: { '204': { description: none } }
@@ -73,6 +82,25 @@ const withLegacy: ConnectorSpec = {
       handler: async ({ client }) => (await client.get(`${BASE}/legacy`)).data,
     },
   },
+};
+
+const withTags: ConnectorSpec = {
+  ...connector,
+  actions: {
+    ...connector.actions,
+    listTags: {
+      scope: 'read',
+      input: z.object({}),
+      handler: async ({ client }) => (await client.get(`${BASE}/tags`)).data,
+    },
+  },
+};
+
+const itemsOperation = {
+  source: 'main',
+  method: 'get',
+  path: '/items',
+  pagination: { style: 'page', request: { pageParam: 'page' }, response: { itemsPath: '' } },
 };
 
 describe('updateVendorApi', () => {
@@ -128,7 +156,7 @@ describe('updateVendorApi', () => {
           fetchedAt: '2026-10-07T12:00:00.000Z',
         },
       },
-      operations: { listItems: [{ source: 'main', method: 'get', path: '/items' }] },
+      operations: { listItems: [itemsOperation] },
     });
     const snapshot = await readJson('snapshots/main.openapi.json');
     expect(Object.keys(snapshot.paths)).toEqual(['/items']);
@@ -187,8 +215,55 @@ describe('updateVendorApi', () => {
     });
   });
 
+  it('proposes pagination for review once, then keeps what the manifest declares', async () => {
+    await update({ sources: { main: SPEC_URL } });
+    expect(warnings).toEqual([
+      'GET /items (main): proposed "pagination" from parameter and field names in manifest.json; review it',
+    ]);
+
+    const manifest = await readJson('manifest.json');
+    const declared = {
+      ...manifest,
+      operations: { listItems: [{ ...itemsOperation, pagination: 'none' }] },
+    };
+    await fs.writeFile(path.join(directory, 'manifest.json'), JSON.stringify(declared));
+    warnings = [];
+
+    expect((await update()).problems).toEqual([]);
+    expect((await readJson('manifest.json')).operations).toEqual(declared.operations);
+    expect(warnings).toEqual([]);
+  });
+
+  it('reports requests the spec rejects as problems', async () => {
+    const invalid: ConnectorSpec = {
+      ...connector,
+      actions: {
+        listItems: {
+          scope: 'read',
+          input: z.object({}),
+          handler: async ({ client }) => (await client.get(`${BASE}/items?page=first`)).data,
+        },
+      },
+    };
+
+    const { problems } = await update({ connector: invalid, sources: { main: SPEC_URL } });
+
+    expect(problems).toEqual([
+      expect.stringMatching(/^listItems: GET .*\/items breaks the spec: /),
+    ]);
+  });
+
+  it('reports list-like operations it cannot propose pagination for', async () => {
+    const { problems } = await update({ connector: withTags, sources: { main: SPEC_URL } });
+
+    expect(problems).toEqual([
+      'GET /tags (main) looks like it returns a collection, as it returns an array; declare its "pagination" in manifest.json, or "none" if it returns everything at once',
+    ]);
+  });
+
   it('records against the overlay but snapshots the vendor spec without it', async () => {
     await update({ sources: { main: SPEC_URL } });
+    warnings = [];
     await fs.writeFile(
       path.join(directory, 'overlay.yaml'),
       `
@@ -227,6 +302,43 @@ actions:
     expect(result.changed).toEqual(['manifest.json', 'snapshots/old.openapi.json']);
     expect(await fs.readFile(path.join(directory, 'manifest.json'), 'utf8')).toBe(before);
     expect(await fs.readdir(path.join(directory, 'snapshots'))).toContain('old.openapi.json');
+  });
+
+  it('converts Google Discovery documents to OpenAPI before bundling them', async () => {
+    const discoveryUrl = 'https://api.example.com/$discovery/rest?version=v1';
+    documents[discoveryUrl] = JSON.stringify({
+      kind: 'discovery#restDescription',
+      title: 'Example',
+      version: 'v1',
+      rootUrl: `${BASE}/`,
+      servicePath: '',
+      schemas: { Item: { id: 'Item', type: 'object', properties: { name: { type: 'string' } } } },
+      resources: {
+        items: {
+          methods: {
+            list: {
+              id: 'example.items.list',
+              path: 'items',
+              httpMethod: 'GET',
+              response: { $ref: 'Item' },
+            },
+          },
+        },
+      },
+    });
+
+    expect(await update({ sources: { main: discoveryUrl } })).toEqual({
+      changed: ['snapshots/main.openapi.json', 'manifest.json'],
+      problems: [],
+    });
+    expect(fetched).toEqual([discoveryUrl]);
+    expect((await readJson('manifest.json')).sources.main).toEqual(
+      expect.objectContaining({ format: 'discovery', apiVersion: 'v1' })
+    );
+    const snapshot = await readJson('snapshots/main.openapi.json');
+    expect(snapshot.openapi).toBe('3.0.3');
+    expect(snapshot.paths['/items'].get.operationId).toBe('example.items.list');
+    expect((await update()).changed).toEqual([]);
   });
 
   it('removes snapshots of sources that are gone', async () => {

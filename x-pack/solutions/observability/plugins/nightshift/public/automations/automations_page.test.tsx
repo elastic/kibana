@@ -21,8 +21,8 @@ import {
   useToggleAutomation,
   useUpdateAutomation,
 } from './hooks/use_automations';
+import { useRunQuotas } from '../data/run_quotas/use_significant_events_run_quotas';
 import { useKibana } from '../hooks/use_kibana';
-import { useRunQuotas } from '../settings/hooks/use_significant_events_run_quotas';
 import type { Automation } from './hooks/use_automations';
 
 jest.mock('./hooks/use_automations', () => ({
@@ -38,7 +38,7 @@ jest.mock('./hooks/use_automations', () => ({
   useUpdateAutomation: jest.fn(),
 }));
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('../settings/hooks/use_significant_events_run_quotas', () => ({
+jest.mock('../data/run_quotas/use_significant_events_run_quotas', () => ({
   useRunQuotas: jest.fn(),
 }));
 jest.mock('../hooks/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));

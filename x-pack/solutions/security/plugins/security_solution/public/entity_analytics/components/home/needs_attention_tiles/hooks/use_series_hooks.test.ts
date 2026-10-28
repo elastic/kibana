@@ -59,6 +59,8 @@ const DOTS = Array.from({ length: DOT_COUNT }, (_, i) => 10 + i);
 interface TileGate {
   count: number;
   reachesBack: boolean | undefined;
+  /** The count the tile's delta compares with; undefined when it has no delta. */
+  deltaBaseline?: number;
 }
 interface RunOptions {
   isReady: boolean;
@@ -108,6 +110,8 @@ const HOOKS: readonly HookCase[] = [
           reachesBack: severe.reachesBack,
           severeAlertsCount: severe.count,
           watchlistedCount: watchlisted.count,
+          severeAlertsBaseline: severe.deltaBaseline,
+          watchlistedBaseline: watchlisted.deltaBaseline,
         })
       ).result.current;
       return { trends: [alertsTrend, watchlistedTrend], isTrendLoading };
@@ -131,6 +135,7 @@ const HOOKS: readonly HookCase[] = [
           entityFilters,
           reachesBack: tile.reachesBack,
           count: tile.count,
+          deltaBaseline: tile.deltaBaseline,
         })
       ).result.current;
       return { trends: [trend], isTrendLoading };
@@ -154,6 +159,7 @@ const HOOKS: readonly HookCase[] = [
           entityFilters,
           reachesBack: tile.reachesBack,
           count: tile.count,
+          deltaBaseline: tile.deltaBaseline,
         })
       ).result.current;
       return { trends: [trend], isTrendLoading };
@@ -185,6 +191,8 @@ const HOOKS: readonly HookCase[] = [
           newlyHighCriticalReachesBack: newlyHighCritical.reachesBack,
           riskMoversCount: riskMovers.count,
           newlyHighCriticalCount: newlyHighCritical.count,
+          riskMoversBaseline: riskMovers.deltaBaseline,
+          newlyHighCriticalBaseline: newlyHighCritical.deltaBaseline,
         })
       ).result.current;
       return { trends: [riskMoversTrend, newlyHighCriticalTrend], isTrendLoading };
@@ -193,7 +201,7 @@ const HOOKS: readonly HookCase[] = [
 ];
 
 const TWO_TILE_HOOKS = HOOKS.filter(({ tileCount }) => tileCount === 2);
-const [, ANOMALIES, NEW_ENTITY, RISK] = HOOKS;
+const [ALERTS, ANOMALIES, NEW_ENTITY, RISK] = HOOKS;
 
 /** Tile t counts 4 + t, and draws dots offset by 100 * t, so a swapped tile shows. */
 const settledTiles = (hook: HookCase): TileGate[] =>
@@ -404,5 +412,69 @@ describe('series hooks', () => {
         expect.objectContaining({ strategy: 'esql_async', projectRouting: '_alias:_origin' })
       );
     });
+  });
+});
+
+const setUpSettledSeries = (hook: HookCase) => {
+  jest.clearAllMocks();
+  (useKibana as jest.Mock).mockReturnValue({
+    services: { data: { search: { search: mockSearch } } },
+  });
+  mockIndex.mockReturnValue({ data: { indexName: '.entities-v1' }, isLoading: false });
+  mockJobs.mockReturnValue({ jobIds: ['job_a'], loading: false });
+  (useTileQueryInputs as jest.Mock).mockImplementation(
+    (spaceId: string, entityFilters: EntityFilters) => ({
+      ...mockIndex(spaceId),
+      entityFilterClauses: buildEntityFilterClauses(entityFilters),
+    })
+  );
+  mockUseQuery.mockReturnValue(queryResult({ data: hook.toQueryData(dotsOfTiles(hook)) }));
+};
+
+describe.each([[NEW_ENTITY], [ANOMALIES]])('delta baseline of $name', (hook) => {
+  const [dots] = dotsOfTiles(hook);
+  const [tile] = settledTiles(hook);
+
+  beforeEach(() => setUpSettledSeries(hook));
+
+  it('starts the line on the delta baseline, so last - first is the delta', () => {
+    const deltaBaseline = 1;
+    const [trend = []] = run(hook, { tiles: [{ ...tile, deltaBaseline }] }).trends;
+    expect(trend).toEqual([deltaBaseline, ...dots.slice(0, -1), tile.count]);
+    expect(trend).toHaveLength(DOT_COUNT + 1);
+    expect(trend[trend.length - 1] - trend[0]).toBe(tile.count - deltaBaseline);
+  });
+
+  it('keeps the line at 6 points when the tile has no delta', () => {
+    const [trend] = run(hook).trends;
+    expect(trend).toHaveLength(DOT_COUNT);
+  });
+});
+
+describe.each([[ALERTS], [RISK]])('delta baselines of the $name tiles', (hook) => {
+  const [firstDots, secondDots] = dotsOfTiles(hook);
+  const [first, second] = settledTiles(hook);
+
+  beforeEach(() => setUpSettledSeries(hook));
+
+  it('starts each line on the baseline of its own tile, so last - first is its delta', () => {
+    const { trends } = run(hook, {
+      tiles: [
+        { ...first, deltaBaseline: 1 },
+        { ...second, deltaBaseline: 2 },
+      ],
+    });
+    expect(trends).toEqual([
+      [1, ...firstDots.slice(0, -1), first.count],
+      [2, ...secondDots.slice(0, -1), second.count],
+    ]);
+  });
+
+  it('keeps a line at 6 points when its own tile has no delta, whatever the other has', () => {
+    const [firstTrend, secondTrend] = run(hook, {
+      tiles: [{ ...first, deltaBaseline: 1 }, second],
+    }).trends;
+    expect(firstTrend).toHaveLength(DOT_COUNT + 1);
+    expect(secondTrend).toHaveLength(DOT_COUNT);
   });
 });
