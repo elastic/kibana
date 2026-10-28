@@ -247,7 +247,7 @@ describe('user-interactive task priority', () => {
           taskType: 'workflow:resume',
           priority: TaskPriority.UserInteractive,
         }),
-        expect.objectContaining({ request, cloneApiKey: true })
+        expect.objectContaining({ request, cloneApiKey: true, regenerateApiKey: true })
       );
       expect(taskManager.runSoon).toHaveBeenCalled();
       expect(mockUpdateWorkflowExecution).toHaveBeenCalledWith(
