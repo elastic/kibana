@@ -7,7 +7,6 @@
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import pRetry from 'p-retry';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 

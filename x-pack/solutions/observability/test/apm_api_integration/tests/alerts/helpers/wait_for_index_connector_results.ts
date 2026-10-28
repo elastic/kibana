@@ -6,7 +6,6 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import pRetry from 'p-retry';
 import { APM_ACTION_VARIABLE_INDEX } from './constants';
 
 async function getIndexConnectorResults(es: Client) {

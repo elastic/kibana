@@ -7,7 +7,6 @@
 
 import axios from 'axios';
 import { last } from 'lodash';
-import pRetry from 'p-retry';
 
 const DEFAULT_VERSION = '8.15.0-SNAPSHOT';
 

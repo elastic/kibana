@@ -14,7 +14,6 @@ import path from 'path';
 import expect from '@kbn/expect';
 import axios from 'axios';
 import { last } from 'lodash';
-import pRetry from 'p-retry';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';

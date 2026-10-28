@@ -146,8 +146,8 @@ export function MachineLearningStackManagementJobsProvider({
           const button = await testSubjects.find(buttonTestSubj, 10000);
           await testSubjects.click(buttonTestSubj);
 
-        const isPressed = await button.getAttribute('aria-pressed');
-        expect(isPressed).to.eql('true', `Button '${buttonTestSubj}' should be checked`);
+          const isPressed = await button.getAttribute('aria-pressed');
+          expect(isPressed).to.eql('true', `Button '${buttonTestSubj}' should be checked`);
 
           const isPressed = await button.getAttribute('aria-pressed');
           expect(isPressed).to.eql('true', `Button '${buttonTestSubj}' should be checked`);
