@@ -2799,6 +2799,38 @@ steps:
       const [, passedContext] = (engine.scheduleWorkflow as jest.Mock).mock.calls[0];
       expect(passedContext.metadata).toEqual(scheduleMeta);
     });
+
+    it('refuses a delegated-identity-only workflow before the engine schedules it', async () => {
+      const workflow = {
+        id: 'system-security-attack-discovery-worker',
+        name: 'Attack Discovery Runner',
+        enabled: true,
+        definition: {
+          triggers: [{ type: 'manual' }],
+          steps: [
+            {
+              name: 'run_generation',
+              type: 'workflow.execute',
+              with: { 'workflow-id': 'child', 'run-as-mode': 'inherit' },
+            },
+          ],
+        },
+        yaml: 'name: Attack Discovery Runner',
+      };
+
+      await expect(
+        api.scheduleWorkflow(
+          workflow as any,
+          'default',
+          { event: { alerts: [{}] } },
+          mockRequest,
+          'alert'
+        )
+      ).rejects.toBeInstanceOf(WorkflowRequiresDelegatedIdentityError);
+
+      const engine = await mockWorkflowsService.getWorkflowsExecutionEngine();
+      expect(engine.scheduleWorkflow).not.toHaveBeenCalled();
+    });
   });
 
   describe('bulkScheduleWorkflow', () => {
@@ -2932,6 +2964,70 @@ steps:
       );
 
       expect(result).toBe(engineResults);
+    });
+
+    it('returns a per-item error for a delegated-identity workflow and still schedules the rest', async () => {
+      const delegated = {
+        id: 'system-security-attack-discovery-worker',
+        name: 'Attack Discovery Runner',
+        enabled: true,
+        definition: {
+          triggers: [{ type: 'manual' }],
+          steps: [
+            {
+              name: 'run_generation',
+              type: 'workflow.execute',
+              with: { 'workflow-id': 'child', 'run-as-mode': 'inherit' },
+            },
+          ],
+        },
+        yaml: 'name: Attack Discovery Runner',
+      };
+      const engineResults = [{ status: 'scheduled' as const, workflowExecutionId: 'exec-ok' }];
+      mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mockResolvedValue(engineResults);
+
+      const result = await api.bulkScheduleWorkflow(
+        [
+          { workflow: delegated as any, spaceId: 'default', inputs: {}, triggeredBy: 'alert' },
+          { workflow: workflowA as any, spaceId: 'default', inputs: {}, triggeredBy: 'alert' },
+        ],
+        mockRequest
+      );
+
+      expect(result[0]).toEqual({
+        status: 'error',
+        error: { message: expect.stringContaining('cannot be run standalone') },
+      });
+      expect(result[1]).toEqual(engineResults[0]);
+      const [passedItems] = mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mock.calls[0];
+      expect(passedItems).toHaveLength(1);
+      expect(passedItems[0].workflow).toBe(workflowA);
+    });
+
+    it('does not call the engine when every item requires a delegated identity', async () => {
+      const delegated = {
+        id: 'system-security-attack-discovery-worker',
+        name: 'Attack Discovery Runner',
+        enabled: true,
+        definition: {
+          steps: [
+            {
+              name: 'run_generation',
+              type: 'workflow.execute',
+              with: { 'workflow-id': 'child', 'run-as-mode': 'inherit' },
+            },
+          ],
+        },
+        yaml: 'name: Attack Discovery Runner',
+      };
+
+      const result = await api.bulkScheduleWorkflow(
+        [{ workflow: delegated as any, spaceId: 'default', inputs: {}, triggeredBy: 'alert' }],
+        mockRequest
+      );
+
+      expect(mockWorkflowsExecutionEngine.bulkScheduleWorkflow).not.toHaveBeenCalled();
+      expect(result[0]?.status).toBe('error');
     });
   });
 

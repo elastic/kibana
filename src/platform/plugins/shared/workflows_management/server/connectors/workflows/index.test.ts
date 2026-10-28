@@ -319,7 +319,8 @@ describe('Workflows Connector', () => {
     });
 
     it('refuses a delegated-identity-only workflow through the runWorkflow gate', async () => {
-      // The standalone gate lives inside runWorkflow; the connector does not re-check.
+      // This service is not the rule-action path. api.run schedules. The gate still applies
+      // to callers of getWorkflowsService.
       jest
         .mocked(mockWorkflowsManagementApi.runWorkflow)
         .mockRejectedValue(new WorkflowRequiresDelegatedIdentityError('cannot be run standalone'));
@@ -347,6 +348,55 @@ describe('Workflows Connector', () => {
         { a: 1 },
         mockRequest
       );
+    });
+  });
+
+  describe('getScheduleWorkflowService (rule actions)', () => {
+    const mockRequest = {} as KibanaRequest;
+    const getScheduleService = async () => {
+      const { getScheduleWorkflowService } = getWorkflowsConnectorTypeArgs(
+        mockWorkflowsManagementApi
+      );
+      if (!getScheduleWorkflowService) throw new Error('getScheduleWorkflowService is missing');
+      return getScheduleWorkflowService(mockRequest);
+    };
+
+    const storedWorkflow = {
+      id: 'system-security-attack-discovery-worker',
+      name: 'Attack Discovery Runner',
+      yaml: 'name: Attack Discovery Runner',
+      enabled: true,
+      valid: true,
+      createdAt: '2026-01-01T00:00:00.000Z',
+      createdBy: 'owner',
+      lastUpdatedAt: '2026-01-01T00:00:00.000Z',
+      lastUpdatedBy: 'owner',
+      definition: {
+        version: '1',
+        name: 'Attack Discovery Runner',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [],
+      },
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.mocked(mockWorkflowsManagementApi.getWorkflow).mockResolvedValue(storedWorkflow as any);
+    });
+
+    it('schedules a rule action and surfaces the standalone refusal from scheduleWorkflow', async () => {
+      jest
+        .mocked(mockWorkflowsManagementApi.scheduleWorkflow)
+        .mockRejectedValue(new WorkflowRequiresDelegatedIdentityError('cannot be run standalone'));
+
+      const schedule = await getScheduleService();
+
+      await expect(
+        schedule('system-security-attack-discovery-worker', 'default', { event: {} }, 'alert')
+      ).rejects.toBeInstanceOf(WorkflowRequiresDelegatedIdentityError);
+      expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowsManagementApi.runWorkflow).not.toHaveBeenCalled();
     });
   });
 

@@ -177,6 +177,55 @@ describe('bulkScheduleWorkflow', () => {
     return workflow;
   };
 
+  const delegatedRunner = (): WorkflowExecutionEngineModel =>
+    createWorkflow('system-security-attack-discovery-worker', {
+      definition: {
+        name: 'Attack Discovery Runner',
+        enabled: true,
+        version: '1',
+        triggers: [{ type: 'manual' }],
+        steps: [
+          {
+            name: 'run_generation',
+            type: 'workflow.execute',
+            with: { 'workflow-id': 'child', 'run-as-mode': 'inherit' },
+          },
+        ],
+      } as WorkflowExecutionEngineModel['definition'],
+    });
+
+  it('scheduleWorkflow refuses a delegated-identity workflow before persisting it', async () => {
+    await expect(
+      pluginStart.scheduleWorkflow(delegatedRunner(), { spaceId: 'default' }, request)
+    ).rejects.toThrow(/cannot be run standalone/);
+    expect(mockCreateWorkflowExecution).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  it('scheduleWorkflow still attempts parent inheritance when the run is delegated by a parent', async () => {
+    await expect(
+      pluginStart.scheduleWorkflow(
+        delegatedRunner(),
+        { spaceId: 'default', inheritParentIdentity: true },
+        request
+      )
+    ).rejects.toThrow(/parent executing as a service account/);
+    expect(mockCreateWorkflowExecution).not.toHaveBeenCalled();
+  });
+
+  it('bulkScheduleWorkflow records a per-item error and does not persist a delegated-identity workflow', async () => {
+    const results = await pluginStart.bulkScheduleWorkflow(
+      [{ workflow: delegatedRunner(), context: { spaceId: 'default', triggeredBy: 'alert' } }],
+      request
+    );
+    expect(results[0]).toEqual({
+      status: 'error',
+      error: { message: expect.stringContaining('cannot be run standalone') },
+    });
+    expect(mockBulkCreateWorkflowExecutions).not.toHaveBeenCalled();
+    expect(mockConcurrencyCheckConcurrency).not.toHaveBeenCalled();
+  });
+
   it.each(['executeWorkflow', 'scheduleWorkflow'] as const)(
     '%s rejects a bound execution when deletion wins during persistence',
     async (method) => {

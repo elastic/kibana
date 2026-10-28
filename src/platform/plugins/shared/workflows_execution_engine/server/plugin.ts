@@ -76,6 +76,10 @@ import {
   stampWorkflowTaskRunEventFields,
 } from './lib/workflow_task_run_event_fields';
 import { WorkflowsMeteringService } from './metering/metering_service';
+import {
+  refuseDelegatedIdentityWorkflow,
+  refuseStandaloneDelegatedIdentityRun,
+} from './refuse_standalone_delegated_identity';
 import { createDataClientBundle, type DataClientBundle } from './repositories/data_access_layer';
 import { LogsRepository } from './repositories/logs_repository';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
@@ -1343,6 +1347,11 @@ export class WorkflowsExecutionEnginePlugin
       const spaceId = (context.spaceId as string | undefined) || 'default';
       await ensureExecutionAccess(workflow, spaceId, request);
       await ensureWorkflowEnabled(workflow, spaceId);
+      // Before identity resolution, persistence, and the concurrency drain. A standalone
+      // delegated-identity run fails at the first inherit step and, with cancel-in-progress,
+      // would cancel the space's in-flight run. Parent workflow.execute sets the flag and
+      // must still reach resolveInheritedWorkflowIdentity.
+      refuseStandaloneDelegatedIdentityRun(workflow, context);
       const inheritedIdentity = resolveInheritedWorkflowIdentity(originalRequest, workflow, {
         inheritParentIdentity: context.inheritParentIdentity === true,
         parentWorkflowId:
@@ -1652,6 +1661,9 @@ export class WorkflowsExecutionEnginePlugin
       for (let idx = 0; idx < items.length; idx++) {
         const item = items[idx];
         try {
+          // Bulk scheduling never resolves a parent service account, so refuse before
+          // the execution is written and before the later concurrency drain.
+          refuseDelegatedIdentityWorkflow(item.workflow);
           const spaceId = spaceIdFor(item);
           if (!item.workflow.isEphemeral) {
             const state = executionStates.get(`${spaceId}:${item.workflow.id}`);

@@ -724,21 +724,27 @@ export class WorkflowsManagementApi {
   }
 
   /**
-   * Rejects a direct run of a workflow that can only execute as the delegated identity of a
-   * parent run. Enforced inside `runWorkflow`, the lowest common point every direct start
-   * passes through; `testWorkflow` (engine-direct) calls it separately. Runs started by a
-   * parent's `workflow.execute` step and the scheduled path never reach it.
+   * Rejects a run of a workflow that can only execute as the delegated identity of a parent.
+   * `runWorkflow`, `scheduleWorkflow`, and `testWorkflow` throw; `bulkScheduleWorkflow` records
+   * a per-item error so one doomed workflow does not fail the batch. A parent's
+   * `workflow.execute` step goes straight to the engine with `inheritParentIdentity` and never
+   * passes through here. The engine repeats the check so event-trigger scheduling cannot
+   * persist that run or cancel an in-flight one.
    */
   public assertRunnableStandalone(workflow: WorkflowExecutionEngineModel): void {
     if (requiresDelegatedIdentity(workflow)) {
       throw new WorkflowRequiresDelegatedIdentityError(
-        i18n.translate('workflows.api.workflowRequiresDelegatedIdentityErrorMessage', {
-          defaultMessage:
-            "Workflow ''{workflowId}'' delegates its execution identity to a parent workflow and cannot be run standalone.",
-          values: { workflowId: workflow.id },
-        })
+        this.standaloneDelegatedIdentityMessage(workflow.id)
       );
     }
+  }
+
+  private standaloneDelegatedIdentityMessage(workflowId: string): string {
+    return i18n.translate('workflows.api.workflowRequiresDelegatedIdentityErrorMessage', {
+      defaultMessage:
+        "Workflow ''{workflowId}'' delegates its execution identity to a parent workflow and cannot be run standalone.",
+      values: { workflowId },
+    });
   }
 
   public async runWorkflow(
@@ -753,10 +759,10 @@ export class WorkflowsManagementApi {
     if (!workflow.isEphemeral) {
       await this.assertWorkflowAccess(workflow.id, spaceId, 'execute', request);
     }
-    // Direct starts land here from every entry point (the Run route, Cases, the workflows
-    // connector, executeWorkflow and its plugin callers). A parent's `workflow.execute` step
-    // goes straight to the engine and never passes through, so gating here cannot block a
-    // valid inherited run.
+    // Direct starts land here from the Run route, Cases, executeWorkflow, and its plugin
+    // callers. Rule actions schedule instead of calling runWorkflow; scheduleWorkflow applies
+    // the same refusal. A parent's `workflow.execute` step goes straight to the engine and
+    // never passes through, so gating here cannot block a valid inherited run.
     this.assertRunnableStandalone(workflow);
     const { event, ...manualInputs } = inputs;
     const context: Record<string, unknown> = {
@@ -975,6 +981,9 @@ export class WorkflowsManagementApi {
     triggeredBy: string,
     metadata?: WorkflowExecutionEventDispatchMetadata
   ): Promise<string> {
+    // Rule actions and event-trigger callers that go through this API never inherit a
+    // parent service account. Refuse before the engine persists the run or drains concurrency.
+    this.assertRunnableStandalone(workflow);
     const { event, ...manualInputs } = inputs;
     const context: Record<string, unknown> = {
       event,
@@ -999,8 +1008,18 @@ export class WorkflowsManagementApi {
     request: KibanaRequest
   ): Promise<BulkScheduleWorkflowResult> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const results: BulkScheduleWorkflowResult = new Array(items.length);
+    const forwardedIndexes: number[] = [];
 
-    const engineItems = items.map((item) => {
+    const engineItems = items.flatMap((item, index) => {
+      if (requiresDelegatedIdentity(item.workflow)) {
+        results[index] = {
+          status: 'error',
+          error: { message: this.standaloneDelegatedIdentityMessage(item.workflow.id) },
+        };
+        return [];
+      }
+      forwardedIndexes.push(index);
       const { event, ...manualInputs } = item.inputs;
       const context: Record<string, unknown> = {
         event,
@@ -1011,10 +1030,25 @@ export class WorkflowsManagementApi {
       if (item.metadata) {
         context.metadata = item.metadata;
       }
-      return { workflow: item.workflow, context };
+      return [{ workflow: item.workflow, context }];
     });
 
-    return workflowsExecutionEngine.bulkScheduleWorkflow(engineItems, request);
+    if (engineItems.length === 0) {
+      return items.length === 0
+        ? workflowsExecutionEngine.bulkScheduleWorkflow([], request)
+        : results;
+    }
+
+    const engineResults = await workflowsExecutionEngine.bulkScheduleWorkflow(engineItems, request);
+    // Keep the engine array identity when every item was forwarded, so callers that
+    // compare the result by reference still see the engine payload.
+    if (forwardedIndexes.length === items.length) {
+      return engineResults;
+    }
+    forwardedIndexes.forEach((itemIndex, resultIndex) => {
+      results[itemIndex] = engineResults[resultIndex];
+    });
+    return results;
   }
 
   public async testWorkflow({
