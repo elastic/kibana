@@ -124,8 +124,6 @@ export const DashboardListingPage = ({
     };
   }, [title, redirectTo, kbnUrlStateStorage]);
 
-  const titleFilter = title ? `${title}` : '';
-
   if (showNoDataPage === undefined) {
     return null;
   }
@@ -138,7 +136,7 @@ export const DashboardListingPage = ({
       {!showNoDataPage && (
         <DashboardListing
           useSessionStorageIntegration={true}
-          initialFilter={initialFilter ?? titleFilter}
+          initialFilter={initialFilter ?? title ?? ''}
           goToDashboard={(id, viewMode) => {
             redirectTo({ destination: 'dashboard', id, editMode: viewMode === 'edit' });
           }}
