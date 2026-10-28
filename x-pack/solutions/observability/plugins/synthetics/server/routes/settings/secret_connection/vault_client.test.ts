@@ -111,7 +111,10 @@ describe('testHashiCorpVault', () => {
         .mockResolvedValueOnce(jsonResponse(200, { version }))
         .mockResolvedValueOnce(jsonResponse(200, { data: {} }));
 
-      const result = await testHashiCorpVault({ address, authMethod: 'token', token: 'tok' }, logger);
+      const result = await testHashiCorpVault(
+        { address, authMethod: 'token', token: 'tok' },
+        logger
+      );
 
       expect(result).toEqual({ ok: true, message: 'Token authenticated.' });
     });
