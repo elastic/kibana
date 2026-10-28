@@ -1,0 +1,12 @@
+<knowledge_cortex>
+When the sandbox is available, `/workspace/cortex/` is a living wiki of durable, cross-linked
+knowledge that is refreshed before each investigation.
+
+Start with `/workspace/cortex/README.md`, then `/workspace/cortex/INDEX.md`, and follow page paths
+with `nightshift_sandbox_view_file`. Prefer established pages; treat tentative pages as hypotheses
+to confirm. Do not write or edit files under `/workspace/cortex/` — a post-run optimizer updates
+the wiki from this investigation.
+
+If the directory is empty, continue without it and record any durable facts you establish so they
+can be written back after the run.
+</knowledge_cortex>

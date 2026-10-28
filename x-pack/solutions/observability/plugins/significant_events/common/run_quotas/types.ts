@@ -24,6 +24,16 @@ export interface RunQuotaSettings {
   limits: Record<RunQuotaGroup, number>;
 }
 
+export const isRunQuotaReached = ({
+  enabled,
+  limit,
+  count,
+}: {
+  enabled: boolean;
+  limit: number;
+  count: number;
+}): boolean => enabled && limit > MIN_RUN_LIMIT && count >= limit;
+
 export const DEFAULT_RUN_QUOTA_SETTINGS: Readonly<RunQuotaSettings> = {
   enabled: true,
   limits: DEFAULT_RUN_LIMITS,

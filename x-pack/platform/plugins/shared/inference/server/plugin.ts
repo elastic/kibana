@@ -8,7 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { BoundInferenceClient, InferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import {
   aiAnonymizationSettings,
   parseLegacyAnonymizationRules,
@@ -31,8 +31,10 @@ import {
 import { registerRoutes } from './routes';
 import type { InferenceConfig } from './config';
 import type {
+  FeatureEndpointResolver,
   InferenceBoundClientCreateOptions,
   InferenceClientCreateOptions,
+  InferenceServerClient,
   InferenceServerSetup,
   InferenceServerStart,
   InferenceSetupDependencies,
@@ -131,6 +133,7 @@ export class InferencePlugin
   private regexWorker?: RegexWorkerService;
   private endpointIdCache: InferenceEndpointIdCache;
   private tokenUsageLogger: TokenUsageLogger;
+  private featureEndpointResolver?: FeatureEndpointResolver;
 
   constructor(context: PluginInitializerContext<InferenceConfig>) {
     this.logger = context.logger.get();
@@ -156,7 +159,14 @@ export class InferencePlugin
       logger: this.logger,
     });
 
-    return {};
+    return {
+      registerFeatureEndpointResolver: (resolver) => {
+        if (this.featureEndpointResolver) {
+          throw new Error('A feature endpoint resolver is already registered');
+        }
+        this.featureEndpointResolver = resolver;
+      },
+    };
   }
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
@@ -183,6 +193,12 @@ export class InferencePlugin
       const savedObjectsImporter = core.savedObjects.createImporter(internalClient);
       await installTokenUsageDashboard(savedObjectsImporter, this.logger);
     };
+
+    // Apply mapping changes to an existing data stream at startup, so that during a rolling upgrade
+    // the mappings are in place before any node writes documents with new fields.
+    this.tokenUsageLogger.updateExistingDataStream().catch((e) => {
+      this.logger.error(`Failed to update token usage data stream: ${e.message}`);
+    });
 
     installDashboardIfTokenUsageTrackingEnabled().catch((e) => {
       this.logger.error(`Failed to install token usage dashboard: ${e.message}`);
@@ -338,6 +354,11 @@ export class InferencePlugin
     const createStreamingResolver = (request: KibanaRequest) =>
       createInferenceStreamingResolver({ core, logger: this.logger, request });
 
+    const createFeatureEndpointResolver = (request: KibanaRequest) => {
+      const resolver = this.featureEndpointResolver;
+      return resolver ? (featureId: string) => resolver(featureId, request) : undefined;
+    };
+
     return {
       getClient: <T extends InferenceClientCreateOptions>(options: T) => {
         return createInferenceClient({
@@ -353,7 +374,10 @@ export class InferencePlugin
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
           resolveConnectorId: createConnectorIdResolver(options.request),
           shouldStreamInferenceEndpoint: createStreamingResolver(options.request),
-        }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
+          resolveFeatureEndpoint: createFeatureEndpointResolver(options.request),
+        }) as T extends InferenceBoundClientCreateOptions
+          ? BoundInferenceClient
+          : InferenceServerClient;
       },
 
       getChatModel: async (options) => {

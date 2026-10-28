@@ -9,7 +9,7 @@ Optional Playwright fixtures and helpers that depend on `@kbn/synthtrace` and `@
 
 ## When to use
 
-- Specs that need worker fixtures `apmSynthtraceEsClient`, `infraSynthtraceEsClient`, or `logsSynthtraceEsClient`.
+- Specs that need worker fixtures `apmSynthtraceEsClient`, `infraSynthtraceEsClient`, `logsSynthtraceEsClient`, or `otelSynthtraceEsClient`.
 - Parallel `global.setup.ts` callbacks that need those fixtures in scope.
 - One-off client access via `getSynthtraceClient` (e.g. Discover-style trace ingestion in setup only).
 

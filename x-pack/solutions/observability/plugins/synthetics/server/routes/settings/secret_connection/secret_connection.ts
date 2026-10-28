@@ -9,9 +9,10 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type {
+  SecretConnectionStatus,
+  SecretConnectionTestResult,
   SecretProviderType,
   SyntheticsSecretConnection,
-  SecretConnectionStatus,
 } from '../../../../common/runtime_types';
 import { SECRET_PROVIDER_HASHICORP_VAULT } from '../../../../common/runtime_types';
 import { syntheticsSecretConnectionType } from '../../../../common/types/saved_objects';
@@ -30,9 +31,16 @@ import {
   whenSecretConnectionsEnabled,
 } from './connection_utils';
 import { isCredentialSensitiveChange, SECRET_REENTRY_REQUIRED_MESSAGE } from './credential_guard';
-import { getAllowedHosts, hostNotAllowedMessage, isAddressHostAllowed } from './address_guard';
-import type { SaveBody } from './schemas';
-import { SaveBodySchema } from './schemas';
+import {
+  getAllowedHosts,
+  hostNotAllowedMessage,
+  isAddressHostAllowed,
+  isLoopbackHost,
+  LOOPBACK_NOT_TESTABLE_MESSAGE,
+} from './address_guard';
+import type { SaveBody, TestBody } from './schemas';
+import { SaveBodySchema, TestBodySchema } from './schemas';
+import { testHashiCorpVault } from './vault_client';
 
 /** GET: list all Vault connections (secret-free). */
 export const getSecretConnectionsRoute: SyntheticsRestApiRouteFactory<
@@ -165,5 +173,56 @@ export const deleteSecretConnectionRoute: SyntheticsRestApiRouteFactory<
     );
     await propagate(server, spaceId);
     return { deleted: true };
+  }),
+});
+
+/** POST /_test: check reachability + auth from Kibana. Never persists anything. */
+export const testSecretConnectionRoute: SyntheticsRestApiRouteFactory<
+  SecretConnectionTestResult
+> = () => ({
+  method: 'POST',
+  path: SYNTHETICS_API_URLS.SECRET_CONNECTION + '/_test',
+  validate: { body: TestBodySchema },
+  requiredPrivileges: [SECRET_CONNECTION_WRITE_API],
+  handler: whenSecretConnectionsEnabled(async ({ request, server, spaceId }) => {
+    const body = request.body as TestBody;
+    const { address, authMethod, namespace, tlsSkipVerify, roleId } = body.config;
+    if (!isAddressHostAllowed(address, getAllowedHosts(server.config))) {
+      return { ok: false, message: hostNotAllowedMessage(address) };
+    }
+    // Kibana would test its own host, not the agent's, and could send a stored credential to a
+    // service on that host.
+    if (isLoopbackHost(new URL(address).hostname)) {
+      return { ok: false, message: LOOPBACK_NOT_TESTABLE_MESSAGE };
+    }
+
+    // Fall back to the stored secret when the client submits a blank (editing), but never
+    // for a changed endpoint: that would send the stored credential to a new address.
+    let token = body.secrets?.token;
+    let secretId = body.secrets?.secretId;
+    const missingSecret = authMethod === 'token' ? !token : !secretId;
+    if (missingSecret && body.name) {
+      try {
+        const decrypted = await getSecretConnectionEncryptedClient(
+          server.encryptedSavedObjects
+        ).getDecryptedAsInternalUser<SyntheticsSecretConnection>(
+          syntheticsSecretConnectionType,
+          secretConnectionId(body.name, spaceId),
+          { namespace: spaceId }
+        );
+        if (isCredentialSensitiveChange(decrypted.attributes.config, body.config)) {
+          return { ok: false, message: SECRET_REENTRY_REQUIRED_MESSAGE };
+        }
+        token = token || decrypted.attributes.secrets?.token;
+        secretId = secretId || decrypted.attributes.secrets?.secretId;
+      } catch (e) {
+        // No stored connection; testHashiCorpVault reports the missing secret.
+      }
+    }
+
+    return testHashiCorpVault(
+      { address, authMethod, namespace, tlsSkipVerify, roleId, token, secretId },
+      server.logger
+    );
   }),
 });

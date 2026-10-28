@@ -121,7 +121,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
               align-items: center;
               gap: 2px;
               position: absolute;
-              bottom: calc(100% + 4px);
+              bottom: calc(100% + ${euiTheme.size.s} + ${euiTheme.size.xs});
               left: 50%;
               transform: translateX(-50%);
               z-index: ${euiTheme.levels.content};

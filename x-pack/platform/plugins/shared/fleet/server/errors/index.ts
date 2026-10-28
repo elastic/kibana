@@ -272,6 +272,7 @@ export class FleetNotFoundError<TMeta = unknown> extends FleetError<TMeta> {}
 export class FleetTooManyRequestsError extends FleetError {}
 
 export class OutputUnauthorizedError extends FleetError {}
+export class FleetServerHostInvalidError extends FleetError {}
 export class OutputLicenceError extends FleetError {}
 export class DownloadSourceError extends FleetError {}
 export class DeleteUnenrolledAgentsPreconfiguredError extends FleetError {}

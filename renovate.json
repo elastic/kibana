@@ -164,10 +164,8 @@
         "playwright",
         "pngjs",
         "rxjs-marbles",
-        "sharp",
         "superagent",
-        "supertest",
-        "xmlbuilder"
+        "supertest"
       ],
       "reviewers": ["team:appex-qa"],
       "matchBaseBranches": ["main"],
@@ -1343,15 +1341,6 @@
     {
       "groupName": "yauzl/yazl",
       "matchDepNames": ["yazl", "yauzl", "@types/yazl", "@types/yauzl"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "package.json/pnpm-lock.yaml utils",
-      "matchDepNames": ["sort-package-json"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
