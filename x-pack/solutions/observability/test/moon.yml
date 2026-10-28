@@ -62,7 +62,6 @@ dependsOn:
   - '@kbn/observability-shared-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/apm-data-view'
-  - '@kbn/rison'
   - '@kbn/slo-plugin'
   - '@kbn/slo-schema'
   - '@kbn/cases-plugin'
