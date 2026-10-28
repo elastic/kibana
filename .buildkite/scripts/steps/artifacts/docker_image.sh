@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# node scripts/build rebuilds the shared webpack bundles without the remote cache
+export KBN_BOOTSTRAP_NO_PREBUILT=true
+
 .buildkite/scripts/bootstrap.sh
 
 source .buildkite/scripts/steps/artifacts/env.sh
@@ -30,32 +33,39 @@ check_cdn_assets_ready() {
 echo "--- Clean up cached images"
 clean_cached_images
 
-KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
-export KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
+# node scripts/build always names images kibana-ci/<name>; PR pipelines push them to <name>-pr
+BUILD_OUTPUT_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless:$KIBANA_IMAGE_TAG"
+KIBANA_PUSH_REPOSITORY="$(kibana_ci_image_repository kibana-serverless)"
+export KIBANA_IMAGE="$KIBANA_PUSH_REPOSITORY:$KIBANA_IMAGE_TAG"
 
-KIBANA_WORKPLACE_AI_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-workplaceai"
-export KIBANA_WORKPLACE_AI_IMAGE="$KIBANA_WORKPLACE_AI_BASE_IMAGE:$KIBANA_IMAGE_TAG"
+WORKPLACE_AI_BUILD_OUTPUT_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-workplaceai:$KIBANA_IMAGE_TAG"
+KIBANA_WORKPLACE_AI_PUSH_REPOSITORY="$(kibana_ci_image_repository kibana-serverless-workplaceai)"
+export KIBANA_WORKPLACE_AI_IMAGE="$KIBANA_WORKPLACE_AI_PUSH_REPOSITORY:$KIBANA_IMAGE_TAG"
 
-KIBANA_OBSERVABILITY_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-observability"
-export KIBANA_OBSERVABILITY_IMAGE="$KIBANA_OBSERVABILITY_BASE_IMAGE:$KIBANA_IMAGE_TAG"
+OBSERVABILITY_BUILD_OUTPUT_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-observability:$KIBANA_IMAGE_TAG"
+KIBANA_OBSERVABILITY_PUSH_REPOSITORY="$(kibana_ci_image_repository kibana-serverless-observability)"
+export KIBANA_OBSERVABILITY_IMAGE="$KIBANA_OBSERVABILITY_PUSH_REPOSITORY:$KIBANA_IMAGE_TAG"
 
-KIBANA_SEARCH_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-elasticsearch"
-export KIBANA_SEARCH_IMAGE="$KIBANA_SEARCH_BASE_IMAGE:$KIBANA_IMAGE_TAG"
+SEARCH_BUILD_OUTPUT_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-elasticsearch:$KIBANA_IMAGE_TAG"
+KIBANA_SEARCH_PUSH_REPOSITORY="$(kibana_ci_image_repository kibana-serverless-elasticsearch)"
+export KIBANA_SEARCH_IMAGE="$KIBANA_SEARCH_PUSH_REPOSITORY:$KIBANA_IMAGE_TAG"
 
-KIBANA_SECURITY_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-security"
-export KIBANA_SECURITY_IMAGE="$KIBANA_SECURITY_BASE_IMAGE:$KIBANA_IMAGE_TAG"
+SECURITY_BUILD_OUTPUT_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-security:$KIBANA_IMAGE_TAG"
+KIBANA_SECURITY_PUSH_REPOSITORY="$(kibana_ci_image_repository kibana-serverless-security)"
+export KIBANA_SECURITY_IMAGE="$KIBANA_SECURITY_PUSH_REPOSITORY:$KIBANA_IMAGE_TAG"
 
 retag_image_with_architecture() {
-  local image="$1"
-  local artifact="$2"
+  local build_output_image="$1"
+  local target_image="$2"
+  local artifact="$3"
 
-  docker rmi "$image" || true
+  docker rmi "$build_output_image" || true
   docker load < "target/${artifact}-amd64.tar.gz"
-  docker tag "$image" "$image-amd64"
+  docker tag "$build_output_image" "$target_image-amd64"
 
-  docker rmi "$image" || true
+  docker rmi "$build_output_image" || true
   docker load < "target/${artifact}-arm64.tar.gz"
-  docker tag "$image" "$image-arm64"
+  docker tag "$build_output_image" "$target_image-arm64"
 }
 
 create_and_push_manifest() {
@@ -108,11 +118,11 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
     --docker-tag="$KIBANA_IMAGE_TAG"
 
   echo "--- Tag images"
-  retag_image_with_architecture "$KIBANA_IMAGE" "kibana-serverless-$BASE_VERSION-docker-image"
-  retag_image_with_architecture "$KIBANA_WORKPLACE_AI_IMAGE" "kibana-serverless-workplaceai-$BASE_VERSION-docker-image"
-  retag_image_with_architecture "$KIBANA_OBSERVABILITY_IMAGE" "kibana-serverless-observability-$BASE_VERSION-docker-image"
-  retag_image_with_architecture "$KIBANA_SEARCH_IMAGE" "kibana-serverless-elasticsearch-$BASE_VERSION-docker-image"
-  retag_image_with_architecture "$KIBANA_SECURITY_IMAGE" "kibana-serverless-security-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$BUILD_OUTPUT_IMAGE" "$KIBANA_IMAGE" "kibana-serverless-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$WORKPLACE_AI_BUILD_OUTPUT_IMAGE" "$KIBANA_WORKPLACE_AI_IMAGE" "kibana-serverless-workplaceai-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$OBSERVABILITY_BUILD_OUTPUT_IMAGE" "$KIBANA_OBSERVABILITY_IMAGE" "kibana-serverless-observability-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$SEARCH_BUILD_OUTPUT_IMAGE" "$KIBANA_SEARCH_IMAGE" "kibana-serverless-elasticsearch-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$SECURITY_BUILD_OUTPUT_IMAGE" "$KIBANA_SECURITY_IMAGE" "kibana-serverless-security-$BASE_VERSION-docker-image"
 
   echo "--- Push images"
   docker_with_retry push "$KIBANA_IMAGE-arm64"
@@ -135,11 +145,11 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
 
   # Update latest tags when building off main
   if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
-    docker buildx imagetools create -t "$KIBANA_BASE_IMAGE:latest" "$KIBANA_IMAGE"
-    docker buildx imagetools create -t "$KIBANA_WORKPLACE_AI_BASE_IMAGE:latest" "$KIBANA_WORKPLACE_AI_IMAGE"
-    docker buildx imagetools create -t "$KIBANA_OBSERVABILITY_BASE_IMAGE:latest" "$KIBANA_OBSERVABILITY_IMAGE"
-    docker buildx imagetools create -t "$KIBANA_SEARCH_BASE_IMAGE:latest" "$KIBANA_SEARCH_IMAGE"
-    docker buildx imagetools create -t "$KIBANA_SECURITY_BASE_IMAGE:latest" "$KIBANA_SECURITY_IMAGE"
+    docker buildx imagetools create -t "$KIBANA_PUSH_REPOSITORY:latest" "$KIBANA_IMAGE"
+    docker buildx imagetools create -t "$KIBANA_WORKPLACE_AI_PUSH_REPOSITORY:latest" "$KIBANA_WORKPLACE_AI_IMAGE"
+    docker buildx imagetools create -t "$KIBANA_OBSERVABILITY_PUSH_REPOSITORY:latest" "$KIBANA_OBSERVABILITY_IMAGE"
+    docker buildx imagetools create -t "$KIBANA_SEARCH_PUSH_REPOSITORY:latest" "$KIBANA_SEARCH_IMAGE"
+    docker buildx imagetools create -t "$KIBANA_SECURITY_PUSH_REPOSITORY:latest" "$KIBANA_SECURITY_IMAGE"
   fi
 
   echo "--- Build dependencies report"
@@ -164,7 +174,7 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_BUCKET/$GIT_ABBREV_COMMIT"
 
   echo "--- Validate CDN assets"
-  ts-node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/validate_cdn_assets.ts" \
+  node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/validate_cdn_assets.ts" \
     "$GCS_SA_CDN_URL" \
     "$CDN_ASSETS_FOLDER"
 

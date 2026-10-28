@@ -16,13 +16,13 @@ import {
   FIPS_140_3_IMAGE,
   FIPS_140_2_IMAGE,
   USE_QA_IMAGE_GH_LABEL,
-} from './agent_images';
-import { FIPS_GH_LABELS, FIPS_VERSION } from './pr_labels';
+} from './agent_images.ts';
+import { FIPS_GH_LABELS, FIPS_VERSION } from './pr_labels.ts';
 
 const mockSetAnnotation = jest.fn();
 
-jest.mock('./buildkite', () => {
-  const actual = jest.requireActual('./buildkite');
+jest.mock('./buildkite/index.ts', () => {
+  const actual = jest.requireActual('./buildkite/index.ts');
   return {
     ...actual,
     BuildkiteClient: jest.fn().mockImplementation(() => ({

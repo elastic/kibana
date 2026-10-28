@@ -1,0 +1,355 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import Crypto from 'crypto';
+import Fs from 'fs';
+import Os from 'os';
+import Path from 'path';
+import { spawnSync } from 'child_process';
+
+const UTIL_PATH = Path.resolve(__dirname, './util.sh');
+const BUILD_ID = 'current-build';
+const BUCKET = 'kibana-ci-artifacts-us-central1';
+
+const writeExecutable = (targetPath: string, contents: string) => {
+  Fs.writeFileSync(targetPath, contents, { mode: 0o755 });
+};
+
+const createMockBinaries = (binDir: string) => {
+  writeExecutable(
+    Path.join(binDir, 'buildkite-agent'),
+    `#!/usr/bin/env bash
+set -euo pipefail
+echo "buildkite-agent $*" >> "$CALLS_FILE"
+case "$1 $2" in
+  "meta-data set") echo "$3=$4" >> "$META_FILE" ;;
+  "meta-data get") grep -F "$3=" "$META_FILE" | tail -n 1 | cut -d= -f2- || true ;;
+  "artifact shasum") echo "\${MOCK_SHASUM:-}" ;;
+esac
+`
+  );
+
+  writeExecutable(
+    Path.join(binDir, 'gcloud'),
+    `#!/usr/bin/env bash
+set -euo pipefail
+echo "gcloud $*" >> "$CALLS_FILE"
+if [[ "$1 $2 \${3:-}" == "config set auth/access_token_file" ]]; then
+  echo "$4" > "$CLOUDSDK_CONFIG/access_token_file"
+elif [[ "$1 $2 \${3:-}" == "config unset auth/access_token_file" ]]; then
+  rm -f "$CLOUDSDK_CONFIG/access_token_file"
+elif [[ "$1 $2" == "auth print-access-token" ]]; then
+  echo "mock-token"
+elif [[ "$1 $2 \${3:-}" == "storage objects describe" ]]; then
+  [[ -f "\${4/gs:\\/\\//$FAKE_GCS/}" ]]
+elif [[ "$1 $2" == "storage cp" ]]; then
+  echo "gcloud-auth token=$(cat "$(cat "$CLOUDSDK_CONFIG/access_token_file")")" >> "$CALLS_FILE"
+  src="\${@: -2:1}"
+  src="\${src/gs:\\/\\//$FAKE_GCS/}"
+  dest="\${@: -1}"
+  dest="\${dest/gs:\\/\\//$FAKE_GCS/}"
+  if [[ "$*" == *"--if-generation-match=0"* && -f "$dest" ]]; then
+    echo "precondition failed" >&2
+    exit 1
+  fi
+  mkdir -p "$(dirname "$dest")"
+  cp "$src" "$dest"
+fi
+`
+  );
+
+  writeExecutable(
+    Path.join(binDir, 'timeout'),
+    `#!/usr/bin/env bash
+shift
+exec "$@"
+`
+  );
+};
+
+const setupSandbox = () => {
+  const root = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kibana-buildkite-util-'));
+  const dirs = {
+    root,
+    bin: Path.join(root, 'bin'),
+    gcs: Path.join(root, 'gcs'),
+    checkout: Path.join(root, 'checkout'),
+    gcloudConfig: Path.join(root, 'gcloud-config'),
+    wifCredentials: Path.join(root, 'wif-credentials'),
+  };
+  Object.values(dirs).forEach((dir) => Fs.mkdirSync(dir, { recursive: true }));
+  Fs.writeFileSync(Path.join(dirs.gcloudConfig, 'config'), '');
+  createMockBinaries(dirs.bin);
+
+  const callsFile = Path.join(root, 'calls.log');
+  const metaFile = Path.join(root, 'meta-data');
+  Fs.writeFileSync(callsFile, '');
+  Fs.writeFileSync(metaFile, '');
+
+  const run = (script: string, env: Record<string, string> = {}) => {
+    const result = spawnSync(
+      'bash',
+      ['-c', `set -euo pipefail; source "${UTIL_PATH}"; ${script}`],
+      {
+        cwd: dirs.checkout,
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          PATH: `${dirs.bin}:${process.env.PATH ?? ''}`,
+          CALLS_FILE: callsFile,
+          META_FILE: metaFile,
+          FAKE_GCS: dirs.gcs,
+          CLOUDSDK_CONFIG: dirs.gcloudConfig,
+          KIBANA_WIF_CREDENTIALS_DIR: dirs.wifCredentials,
+          GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES: '1',
+          BUILDKITE_AGENT_GCP_REGION: 'us-central1',
+          BUILDKITE_BUILD_ID: BUILD_ID,
+          ...env,
+        },
+      }
+    );
+    const calls = Fs.readFileSync(callsFile, 'utf-8').split('\n').filter(Boolean);
+    return { ...result, calls };
+  };
+
+  const gcsObjectPath = (buildId: string, checksum: string, name: string) =>
+    Path.join(dirs.gcs, BUCKET, 'tmp/builds', buildId, checksum, name);
+
+  const putGcsObject = (buildId: string, checksum: string, name: string, contents: string) => {
+    const target = gcsObjectPath(buildId, checksum, name);
+    Fs.mkdirSync(Path.dirname(target), { recursive: true });
+    Fs.writeFileSync(target, contents);
+  };
+
+  const cleanup = () => Fs.rmSync(root, { recursive: true, force: true });
+
+  return { dirs, run, gcsObjectPath, putGcsObject, cleanup };
+};
+
+const sha256 = (contents: string) => Crypto.createHash('sha256').update(contents).digest('hex');
+
+describe('tmp artifact helpers', () => {
+  let sandbox: ReturnType<typeof setupSandbox>;
+
+  beforeEach(() => {
+    sandbox = setupSandbox();
+  });
+
+  afterEach(() => {
+    sandbox.cleanup();
+  });
+
+  it('records a checksum on upload that a download from the same build accepts', () => {
+    const { dirs, run } = sandbox;
+    Fs.writeFileSync(Path.join(dirs.root, 'run_order.json'), '{"groups":[]}');
+
+    const upload = run(
+      `upload_tmp_artifact "${dirs.root}/run_order.json" run_order.json "${BUILD_ID}"`
+    );
+    expect(upload.status).toBe(0);
+    expect(upload.calls).toContain(
+      `buildkite-agent meta-data set tmp-artifact-sha256:run_order.json ${sha256('{"groups":[]}')}`
+    );
+
+    const download = run(`download_tmp_artifact run_order.json . "${BUILD_ID}"`);
+    expect(download.status).toBe(0);
+    expect(Fs.readFileSync(Path.join(dirs.checkout, 'run_order.json'), 'utf-8')).toBe(
+      '{"groups":[]}'
+    );
+    expect(download.calls.some((call) => call.includes('artifact download'))).toBe(false);
+  });
+
+  it('mints one access token per job and shares it across regional uploads and downloads', () => {
+    const { dirs, run } = sandbox;
+    const mints = (calls: string[]) =>
+      calls.filter((call) => call.startsWith('gcloud auth print-access-token'));
+    Fs.writeFileSync(Path.join(dirs.root, 'a.json'), '{}');
+
+    const upload = run(`upload_tmp_artifact "${dirs.root}/a.json" a.json "${BUILD_ID}"`);
+    expect(upload.status).toBe(0);
+    expect(mints(upload.calls)).toHaveLength(1);
+    const cpAuth = upload.calls.filter((call) => call.startsWith('gcloud-auth'));
+    expect(cpAuth).toHaveLength(7);
+    expect(new Set(cpAuth)).toEqual(new Set(['gcloud-auth token=mock-token']));
+
+    const download = run(`download_tmp_artifact a.json . "${BUILD_ID}"`);
+    const downloadCalls = download.calls.slice(upload.calls.length);
+    expect(download.status).toBe(0);
+    expect(mints(downloadCalls)).toHaveLength(0);
+    expect(downloadCalls).toContain('gcloud-auth token=mock-token');
+  });
+
+  it('discards a GCS object whose checksum does not match and falls back to buildkite', () => {
+    const { dirs, run, putGcsObject } = sandbox;
+    Fs.writeFileSync(
+      Path.join(dirs.root, 'meta-data'),
+      `tmp-artifact-sha256:a.json=${sha256('expected')}\n`
+    );
+    putGcsObject(BUILD_ID, sha256('expected'), 'a.json', 'different');
+
+    const result = run(`download_tmp_artifact a.json . "${BUILD_ID}"`);
+
+    expect(result.status).toBe(0);
+    expect(result.stderr).toContain('Checksum mismatch for a.json');
+    expect(Fs.existsSync(Path.join(dirs.checkout, 'a.json'))).toBe(false);
+    expect(result.calls).toContain(
+      `buildkite-agent artifact download a.json . --build ${BUILD_ID}`
+    );
+  });
+
+  it('fails without fallback when the checksum does not match', () => {
+    const { dirs, run, putGcsObject } = sandbox;
+    Fs.writeFileSync(
+      Path.join(dirs.root, 'meta-data'),
+      `tmp-artifact-sha256:a.json=${sha256('expected')}\n`
+    );
+    putGcsObject(BUILD_ID, sha256('expected'), 'a.json', 'different');
+
+    const result = run(`download_tmp_artifact a.json . "${BUILD_ID}" false`);
+
+    expect(result.status).not.toBe(0);
+    expect(Fs.existsSync(Path.join(dirs.checkout, 'a.json'))).toBe(false);
+  });
+
+  it('skips GCS when the build recorded no checksum', () => {
+    const { run, putGcsObject } = sandbox;
+    putGcsObject(BUILD_ID, sha256('anything'), 'moon-cache.tar.zst', 'anything');
+
+    const result = run(`download_tmp_artifact moon-cache.tar.zst . "${BUILD_ID}" false`);
+
+    expect(result.status).not.toBe(0);
+    expect(result.calls.some((call) => call.startsWith('gcloud storage cp'))).toBe(false);
+  });
+
+  it('verifies artifacts of other builds against the buildkite artifact checksum', () => {
+    const { dirs, run, putGcsObject } = sandbox;
+    putGcsObject('other-build', sha256('distributable'), 'kibana-default.tar.zst', 'distributable');
+
+    const result = run(`download_tmp_artifact kibana-default.tar.zst . other-build`, {
+      MOCK_SHASUM: sha256('distributable'),
+    });
+
+    expect(result.status).toBe(0);
+    expect(result.calls).toContain(
+      'buildkite-agent artifact shasum --sha256 --build other-build kibana-default.tar.zst'
+    );
+    expect(Fs.readFileSync(Path.join(dirs.checkout, 'kibana-default.tar.zst'), 'utf-8')).toBe(
+      'distributable'
+    );
+  });
+
+  it('uploads to a checksum-addressed path and never overwrites an existing object', () => {
+    const { dirs, run, gcsObjectPath } = sandbox;
+    const localPath = Path.join(dirs.root, 'run_order.json');
+    Fs.writeFileSync(localPath, 'v1');
+    const uploadCommand = `upload_tmp_artifact "${localPath}" run_order.json "${BUILD_ID}"`;
+
+    const first = run(uploadCommand);
+    const uploads = first.calls.filter((call) => call.startsWith('gcloud storage cp'));
+    expect(uploads).toHaveLength(7);
+    expect(uploads).toContain(
+      `gcloud storage cp --if-generation-match=0 ${localPath} gs://${BUCKET}/tmp/builds/${BUILD_ID}/${sha256(
+        'v1'
+      )}/run_order.json`
+    );
+
+    const retry = run(uploadCommand);
+    expect(retry.status).toBe(0);
+    expect(retry.calls.filter((call) => call.startsWith('gcloud storage cp'))).toHaveLength(7);
+    expect(Fs.readFileSync(gcsObjectPath(BUILD_ID, sha256('v1'), 'run_order.json'), 'utf-8')).toBe(
+      'v1'
+    );
+  });
+
+  it('downloads the latest upload when a retried producer uploads different content', () => {
+    const { dirs, run, gcsObjectPath } = sandbox;
+    const localPath = Path.join(dirs.root, 'run_order.json');
+    const uploadCommand = `upload_tmp_artifact "${localPath}" run_order.json "${BUILD_ID}"`;
+    Fs.writeFileSync(localPath, 'v1');
+    run(uploadCommand);
+    Fs.writeFileSync(localPath, 'v2');
+    run(uploadCommand);
+
+    const download = run(`download_tmp_artifact run_order.json . "${BUILD_ID}"`);
+
+    expect(download.status).toBe(0);
+    expect(Fs.readFileSync(Path.join(dirs.checkout, 'run_order.json'), 'utf-8')).toBe('v2');
+    expect(Fs.existsSync(gcsObjectPath(BUILD_ID, sha256('v1'), 'run_order.json'))).toBe(true);
+    expect(download.calls.some((call) => call.includes('artifact download'))).toBe(false);
+  });
+
+  it('ignores recorded checksums that are not sha256 digests', () => {
+    const { dirs, run } = sandbox;
+    Fs.writeFileSync(Path.join(dirs.root, 'meta-data'), 'tmp-artifact-sha256:a.json=../other\n');
+
+    const result = run(`download_tmp_artifact a.json . "${BUILD_ID}" false`);
+
+    expect(result.status).not.toBe(0);
+    expect(result.calls.some((call) => call.startsWith('gcloud storage cp'))).toBe(false);
+  });
+});
+
+describe('extract_moon_cache', () => {
+  let sandbox: ReturnType<typeof setupSandbox>;
+  let source: string;
+
+  const createArchive = (entries: string[]) => {
+    const archive = Path.join(sandbox.dirs.root, 'moon-cache.tar.gz');
+    const result = spawnSync('tar', ['-czf', archive, ...entries], {
+      cwd: source,
+      encoding: 'utf-8',
+    });
+    expect(result.status).toBe(0);
+    return archive;
+  };
+
+  beforeEach(() => {
+    sandbox = setupSandbox();
+    source = Path.join(sandbox.dirs.root, 'source');
+    Fs.mkdirSync(Path.join(source, '.moon/cache/hashes'), { recursive: true });
+    Fs.writeFileSync(Path.join(source, '.moon/cache/hashes/abc.json'), '{}');
+    Fs.writeFileSync(Path.join(source, 'package.json'), 'replaced');
+  });
+
+  afterEach(() => {
+    sandbox.cleanup();
+  });
+
+  it('restores .moon/cache', () => {
+    const archive = createArchive(['.moon/cache']);
+
+    const result = sandbox.run(`extract_moon_cache "${archive}"`);
+
+    expect(result.status).toBe(0);
+    expect(
+      Fs.readFileSync(Path.join(sandbox.dirs.checkout, '.moon/cache/hashes/abc.json'), 'utf-8')
+    ).toBe('{}');
+    expect(Fs.readdirSync(Path.join(sandbox.dirs.checkout, '.moon'))).toEqual(['cache']);
+  });
+
+  it('refuses archives with entries outside .moon/cache', () => {
+    const archive = createArchive(['.moon/cache', 'package.json']);
+
+    const result = sandbox.run(`extract_moon_cache "${archive}"`);
+
+    expect(result.status).not.toBe(0);
+    expect(Fs.existsSync(Path.join(sandbox.dirs.checkout, 'package.json'))).toBe(false);
+    expect(Fs.existsSync(Path.join(sandbox.dirs.checkout, '.moon/cache'))).toBe(false);
+  });
+
+  it('refuses archives containing links', () => {
+    Fs.symlinkSync(sandbox.dirs.root, Path.join(source, '.moon/cache/linked'));
+    const archive = createArchive(['.moon/cache']);
+
+    const result = sandbox.run(`extract_moon_cache "${archive}"`);
+
+    expect(result.status).not.toBe(0);
+    expect(Fs.existsSync(Path.join(sandbox.dirs.checkout, '.moon/cache'))).toBe(false);
+  });
+});

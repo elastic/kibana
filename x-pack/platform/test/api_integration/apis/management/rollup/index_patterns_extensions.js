@@ -9,7 +9,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import { FIELDS_FOR_WILDCARD_PATH as BASE_URI } from '@kbn/data-views-plugin/common/constants';
 import expect from '@kbn/expect';
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import { registerHelpers } from './rollup.test_helpers';
 import { getRandomString } from './lib';
 import { DataViewType } from '@kbn/data-views-plugin/common';
@@ -47,7 +47,7 @@ export default function ({ getService }) {
         });
 
         it('should return 404 the rollup index to query does not exist', async () => {
-          uri = `${BASE_URI}?${stringify(
+          uri = `${BASE_URI}?${queryString.stringify(
             {
               pattern: 'foo',
               type: DataViewType.ROLLUP,
@@ -75,7 +75,7 @@ export default function ({ getService }) {
           pattern: indexName,
           rollup_index: rollupIndex,
         };
-        const uri = `${BASE_URI}?${stringify(params, { sort: false })}`;
+        const uri = `${BASE_URI}?${queryString.stringify(params, { sort: false })}`;
         const { body } = await supertest
           .get(uri)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)

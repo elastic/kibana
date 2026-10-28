@@ -201,7 +201,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       const hitCountNumber = await PageObjects.discover.getHitCount();
       const originalHitCount = parseInt(hitCountNumber.replace(/\,/g, ''), 10);
       await filterBar.addFilter({ field: 'extension.keyword', operation: 'is', value: 'jpg' });
-      expect(await filterBar.hasFilter('extension.keyword', 'jpg')).to.be(true);
+      await filterBar.expectFilter('extension.keyword', 'jpg');
       await retry.try(async () => {
         const filteredHitCountNumber = await PageObjects.discover.getHitCount();
         const hitCount = parseInt(filteredHitCountNumber.replace(/\,/g, ''), 10);

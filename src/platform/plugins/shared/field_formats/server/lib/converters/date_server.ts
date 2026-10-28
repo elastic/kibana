@@ -12,13 +12,8 @@ import { memoize, noop } from 'lodash';
 import moment from 'moment-timezone';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { NULL_LABEL } from '@kbn/field-formats-common';
-import type { FieldFormatsGetConfigFn } from '../../../common';
 import { FieldFormat, FIELD_FORMAT_IDS } from '../../../common';
-import type {
-  FieldFormatMetaParams,
-  FieldFormatParams,
-  TextContextTypeConvert,
-} from '../../../common/types';
+import type { TextContextTypeConvert } from '../../../common/types';
 
 export class DateFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.DATE;
@@ -30,39 +25,6 @@ export class DateFormat extends FieldFormat {
   private memoizedConverter: Function = noop;
   private memoizedPattern: string = '';
   private timeZone: string = '';
-
-  constructor(
-    params?: FieldFormatParams & FieldFormatMetaParams,
-    getConfig?: FieldFormatsGetConfigFn
-  ) {
-    super(params, getConfig);
-
-    this.memoizedConverter = memoize((val: string | number) => {
-      if (val == null) {
-        return NULL_LABEL;
-      }
-
-      /* On the server, importing moment returns a new instance. Unlike on
-       * the client side, it doesn't have the dateFormat:tz configuration
-       * baked in.
-       * We need to set the timezone manually here. The date is taken in as
-       * UTC and converted into the desired timezone. */
-      let date;
-      if (this.timeZone === 'Browser') {
-        // Assume a warning has been logged this can be unpredictable. It
-        // would be too verbose to log anything here.
-        date = moment.utc(val);
-      } else {
-        date = moment.utc(val).tz(this.timeZone);
-      }
-
-      if (date.isValid()) {
-        return date.format(this.memoizedPattern);
-      } else {
-        return val;
-      }
-    });
-  }
 
   getParamDefaults() {
     return {
@@ -81,6 +43,34 @@ export class DateFormat extends FieldFormat {
     if (timezoneChanged || datePatternChanged) {
       this.timeZone = timezone;
       this.memoizedPattern = pattern;
+
+      // recreate the converter so previously memoized values don't leak the old
+      // timezone or pattern (mirrors date_nanos_server.ts)
+      this.memoizedConverter = memoize((value: string | number) => {
+        if (value == null) {
+          return NULL_LABEL;
+        }
+
+        /* On the server, importing moment returns a new instance. Unlike on
+         * the client side, it doesn't have the dateFormat:tz configuration
+         * baked in.
+         * We need to set the timezone manually here. The date is taken in as
+         * UTC and converted into the desired timezone. */
+        let date;
+        if (this.timeZone === 'Browser') {
+          // Assume a warning has been logged this can be unpredictable. It
+          // would be too verbose to log anything here.
+          date = moment.utc(value);
+        } else {
+          date = moment.utc(value).tz(this.timeZone);
+        }
+
+        if (date.isValid()) {
+          return date.format(this.memoizedPattern);
+        } else {
+          return value;
+        }
+      });
     }
 
     return this.memoizedConverter(val);

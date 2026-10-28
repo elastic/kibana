@@ -102,6 +102,15 @@ describe('rRuleRequestSchema', () => {
         rRuleRequestSchema.validate({ ...basicRequest, byweekday: ['invalid'] })
       ).toThrow();
     });
+
+    test('returns an error if the array length is larger than 50', () => {
+      expect(() =>
+        rRuleRequestSchema.validate({
+          ...basicRequest,
+          byweekday: Array.from({ length: 51 }, () => 'MO'),
+        })
+      ).toThrow();
+    });
   });
 
   describe('bymonthday', () => {
@@ -122,6 +131,15 @@ describe('rRuleRequestSchema', () => {
     test('returns an error if the values are bigger than 31', () => {
       expect(() => rRuleRequestSchema.validate({ ...basicRequest, bymonthday: [32] })).toThrow();
     });
+
+    test('returns an error if the array length is larger than 31', () => {
+      expect(() =>
+        rRuleRequestSchema.validate({
+          ...basicRequest,
+          bymonthday: Array.from({ length: 32 }, () => 1),
+        })
+      ).toThrow();
+    });
   });
 
   describe('bymonth', () => {
@@ -141,6 +159,15 @@ describe('rRuleRequestSchema', () => {
 
     test('returns an error if the values are bigger than 12', () => {
       expect(() => rRuleRequestSchema.validate({ ...basicRequest, bymonth: [13] })).toThrow();
+    });
+
+    test('returns an error if array length is larger than 12', () => {
+      expect(() =>
+        rRuleRequestSchema.validate({
+          ...basicRequest,
+          bymonth: Array.from({ length: 13 }, () => 1),
+        })
+      ).toThrow();
     });
   });
 });

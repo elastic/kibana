@@ -9,7 +9,10 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: UpdatePrivMonUser
+      deprecated: true
       summary: Update a monitored user
+      description: |
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
       parameters:
         - name: id
           in: path

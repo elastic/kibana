@@ -13,7 +13,6 @@ import { deleteAllCaseItems, getComment } from '../../../../common/lib/api';
 
 export default function createGetTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
 
@@ -46,12 +45,14 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     describe('7.13.2', () => {
       before(async () => {
-        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2');
+        await kibanaServer.importExport.load(
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.13.2/cases.json'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2'
+        await kibanaServer.importExport.unload(
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.13.2/cases.json'
         );
       });
 

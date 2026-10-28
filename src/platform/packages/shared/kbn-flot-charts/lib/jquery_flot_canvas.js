@@ -1,3 +1,5 @@
+import jQuery from 'jquery';
+
 /* Flot plugin for drawing all elements of a plot on the canvas.
 
 Copyright (c) 2007-2014 IOLA and Ole Laursen.

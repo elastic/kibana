@@ -81,8 +81,17 @@ jest.mock('../servers/configs', () => ({
 }));
 
 describe('runDiscoverPlaywrightConfigs', () => {
+  const originalTargetAttributes = process.env.SCOUT_TARGET_ATTRIBUTES;
   let flagsReader: jest.Mocked<FlagsReader>;
   let log: jest.Mocked<ToolingLog>;
+
+  afterAll(() => {
+    if (originalTargetAttributes === undefined) {
+      delete process.env.SCOUT_TARGET_ATTRIBUTES;
+    } else {
+      process.env.SCOUT_TARGET_ATTRIBUTES = originalTargetAttributes;
+    }
+  });
 
   const mockFilteredModules: ModuleDiscoveryInfo[] = [
     {
@@ -126,6 +135,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    delete process.env.SCOUT_TARGET_ATTRIBUTES;
 
     // Re-setup fs mocks after clearing
     (fs.readFileSync as jest.Mock).mockImplementation((path: string) => {
@@ -308,6 +318,134 @@ describe('runDiscoverPlaywrightConfigs', () => {
     const callArgs = (filterModulesByScoutCiConfig as jest.Mock).mock.calls[0];
     expect(callArgs[0]).toBe(log);
     expect(Array.isArray(callArgs[1])).toBe(true);
+  });
+
+  describe('"--validate" test tag checks', () => {
+    const firstTest = () => mockTestableModules.modules[0].configs[0].manifest.tests[0];
+
+    const runValidate = () => {
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.boolean.mockImplementation((flag) => flag === 'validate');
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+    };
+
+    it('rejects a test tagged with limits alone', () => {
+      firstTest().tags = ['@limit/only-fips'];
+
+      expect(runValidate).toThrow(
+        /invalid Scout test tag usage[\s\S]*At least one of the following tags is required/
+      );
+    });
+
+    it('rejects conflicting limit tags', () => {
+      firstTest().tags = ['@local-stateful-classic', '@limit/only-fips', '@limit/except-fips'];
+
+      expect(runValidate).toThrow(/Conflicting limit tags for the 'fips' target attribute/);
+    });
+
+    it('reports a malformed limit tag instead of failing discovery on it', () => {
+      firstTest().tags = ['@local-stateful-classic', '@limit/onlyfips'];
+
+      expect(runValidate).toThrow(/Invalid limit tag\(s\): @limit\/onlyfips/);
+    });
+
+    it('names the offending file and test', () => {
+      const test = firstTest();
+      test.tags = ['@limit/only-fips'];
+
+      expect(runValidate).toThrow(`${test.location.file}: test "${test.title}"`);
+    });
+
+    it('tolerates tags Playwright derives from test titles', () => {
+      firstTest().tags = ['@timestamp', '@local-stateful-classic'];
+
+      expect(runValidate).not.toThrow();
+    });
+
+    it('ignores global setup and teardown hooks, which carry no target tag', () => {
+      const test = firstTest();
+      test.tags = [];
+      test.location = {
+        ...test.location,
+        file: 'plugin/test/scout/ui/parallel_tests/global.setup.ts',
+      };
+
+      expect(runValidate).not.toThrow();
+    });
+
+    it('does not run without "--validate"', () => {
+      firstTest().tags = ['@limit/only-fips'];
+      flagsReader.enum.mockReturnValue('all');
+
+      expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).not.toThrow();
+    });
+  });
+
+  describe('"--targetAttribute" flag (test limits)', () => {
+    const setLimitTagsOnPackageA = (limitTags: string[]) => {
+      const packageA = mockTestableModules.modules.find((module) => module.name === 'packageA')!;
+      packageA.configs[0].manifest.tests[0].tags = [
+        '@local-stateful-classic',
+        '@cloud-stateful-classic',
+        '@cloud-serverless-observability_complete',
+        ...limitTags,
+      ];
+    };
+
+    const discoveredModuleCounts = (): string => {
+      const foundMessage = log.info.mock.calls.find((call) =>
+        call[0].includes('Found Playwright config files')
+      );
+      expect(foundMessage).toBeDefined();
+      return foundMessage![0];
+    };
+
+    it('drops configs whose only tests require an undeclared attribute', () => {
+      setLimitTagsOnPackageA(['@limit/only-fips']);
+      flagsReader.enum.mockReturnValue('all');
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      expect(discoveredModuleCounts()).toContain('0 package(s)');
+    });
+
+    it('keeps those configs when the attribute is declared', () => {
+      setLimitTagsOnPackageA(['@limit/only-fips']);
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.arrayOfStrings.mockImplementation((name: string) =>
+        name === 'targetAttribute' ? ['fips'] : []
+      );
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      expect(discoveredModuleCounts()).toContain('1 package(s)');
+      expect(log.info).toHaveBeenCalledWith('Test target attributes: fips');
+    });
+
+    it('drops configs limited to the attribute being absent when it is declared', () => {
+      setLimitTagsOnPackageA(['@limit/except-fips']);
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.arrayOfStrings.mockImplementation((name: string) =>
+        name === 'targetAttribute' ? ['fips'] : []
+      );
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      expect(discoveredModuleCounts()).toContain('0 package(s)');
+    });
+
+    it('never reports limit tags as test target tags', () => {
+      setLimitTagsOnPackageA(['@limit/except-fips']);
+      flagsReader.enum.mockReturnValue('all');
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      const packageAMessage = log.info.mock.calls.find((call) =>
+        call[0].includes('src/platform/packages/shared/packageA')
+      );
+      expect(packageAMessage).toBeDefined();
+      expect(packageAMessage![0]).not.toContain('@limit/');
+    });
   });
 
   it('filters configs based on target tags for "all" target (tags.deploymentAgnostic)', () => {
@@ -866,7 +1004,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(foundMessage![0]).toBe('No Playwright config files found');
   });
 
-  it('only collects tags from passed spec files', () => {
+  it('only collects tags from runnable tests', () => {
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockReturnValue(false);
 
@@ -908,8 +1046,8 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   id: 'test3',
                   title: 'Test 3',
                   expectedStatus: 'passed',
-                  location: { file: 'test3.ts', line: 1, column: 1 }, // Not a .spec.ts file
-                  tags: ['@cloud-serverless-search'], // Should NOT be included (not .spec.ts)
+                  location: { file: 'parallel_tests/global.setup.ts', line: 1, column: 1 },
+                  tags: ['@cloud-serverless-search'], // Should NOT be included (setup hook)
                 },
                 {
                   id: 'test4',
@@ -954,7 +1092,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     // For target 'all', only tags in deploymentAgnostic are shown (filtered by filterModulesByTargetTags)
     expect(configLogCall![0]).toContain('@local-stateful-classic');
     expect(configLogCall![0]).toContain('@cloud-serverless-observability_complete');
-    // Should NOT contain tags from failed tests or non-spec files
+    // Should NOT contain tags from failed tests or global setup hooks
     expect(configLogCall![0]).not.toContain('@cloud-serverless-security_complete');
     expect(configLogCall![0]).not.toContain('@cloud-serverless-search');
   });
@@ -1302,7 +1440,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
         'node scripts/scout run-tests --location cloud --arch stateful --domain classic';
 
       // Find stateful group for 'search'
-      // For stateful (ECH), domain is based on group: 'search' => 'search'
       const statefulSearchGroup = savedData.find(
         (g: any) =>
           g.testTarget?.arch === 'stateful' &&
@@ -1310,13 +1447,12 @@ describe('runDiscoverPlaywrightConfigs', () => {
           g.scoutCommand === statefulScoutCmd
       );
       expect(statefulSearchGroup).toBeDefined();
-      expect(statefulSearchGroup.testTarget.domain).toBe('search');
+      expect(statefulSearchGroup.testTarget.domain).toBe('classic');
       expect(statefulSearchGroup.configs).toContain(
         'x-pack/platform/plugins/private/pluginSearch/test/scout/ui/playwright.config.ts'
       );
 
       // Find stateful group for 'platform'
-      // For stateful (ECH), domain is based on group: 'platform' => 'classic'
       const statefulPlatformGroup = savedData.find(
         (g: any) =>
           g.testTarget?.arch === 'stateful' &&

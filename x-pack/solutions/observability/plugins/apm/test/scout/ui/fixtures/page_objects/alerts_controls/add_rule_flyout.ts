@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-oblt';
+import { EXTENDED_TIMEOUT } from '../../constants';
 
 type AddRuleFlyoutStep = 'definition' | 'actions' | 'details';
 
@@ -20,6 +21,7 @@ export class AddRuleFlyout {
   public readonly scheduleUnitSelect: Locator;
 
   public readonly nameInput: Locator;
+  public readonly relatedDashboards: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.flyout = this.page.getByRole('dialog');
@@ -32,10 +34,19 @@ export class AddRuleFlyout {
     this.scheduleUnitSelect = this.flyout.getByTestId('ruleScheduleUnitInput');
 
     this.nameInput = this.flyout.getByTestId('ruleDetailsNameInput');
+    this.relatedDashboards = this.flyout.getByTestId('ruleLinkedDashboards');
   }
 
   public async waitForErrorCountToLoad() {
-    await this.flyout.getByRole('heading', { name: 'Error count threshold' }).waitFor();
+    await this.flyout
+      .getByRole('heading', { name: 'Error count threshold' })
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
+  }
+
+  public async waitForLatencyToLoad() {
+    await this.flyout
+      .getByRole('heading', { name: 'Latency threshold' })
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   public async fillName(name: string) {

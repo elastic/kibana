@@ -12,7 +12,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
-  describe('management - group 3 (import/export/management)', function () {
+  describe('management - group 3 (data views: fields, relationships, cache, aliases)', function () {
     before(async () => {
       await esArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
@@ -20,12 +20,15 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/makelogs');
     });
 
-    loadTestFile(require.resolve('./_mgmt_import_saved_objects'));
-    loadTestFile(require.resolve('./_import_objects'));
     loadTestFile(require.resolve('./_test_huge_fields'));
     loadTestFile(require.resolve('./_handle_alias'));
     loadTestFile(require.resolve('./_handle_version_conflict'));
     loadTestFile(require.resolve('./_handle_not_found'));
     loadTestFile(require.resolve('./_legacy_url_redirect'));
+    loadTestFile(require.resolve('./_data_view_relationships'));
+    loadTestFile(require.resolve('./_edit_field'));
+    loadTestFile(require.resolve('./_data_view_field_filters'));
+    loadTestFile(require.resolve('./_cache'));
+    loadTestFile(require.resolve('./_managed_data_view'));
   });
 }

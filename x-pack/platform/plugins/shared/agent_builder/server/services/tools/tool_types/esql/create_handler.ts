@@ -7,7 +7,10 @@
 
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolHandlerFn } from '@kbn/agent-builder-server';
-import { interpolateEsqlQuery } from '@kbn/agent-builder-genai-utils/tools/utils';
+import {
+  applyFrozenTierExclusion,
+  interpolateEsqlQuery,
+} from '@kbn/agent-builder-genai-utils/tools/utils';
 import type { EsqlToolParamValue } from '@kbn/agent-builder-common';
 import { type EsqlToolConfig, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -70,8 +73,11 @@ export const createHandler = (
       .filter(([, value]) => value !== null)
       .map(([param, value]) => ({ [param]: value }));
 
+    const filter = applyFrozenTierExclusion(undefined, configuration.include_frozen);
+
     const result = await client.esql.query({
       query: configuration.query,
+      ...(filter ? { filter } : {}),
       // TODO: wait until client is fixed: https://github.com/elastic/elasticsearch-specification/issues/5083
       ...(paramArray.length > 0 ? { params: paramArray as unknown as FieldValue[] } : {}),
     });

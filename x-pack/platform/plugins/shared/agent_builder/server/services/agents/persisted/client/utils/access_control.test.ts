@@ -36,13 +36,29 @@ describe('hasReadAccess', () => {
   });
 
   it('returns true for owner regardless of visibility', () => {
-    const source = { ...baseSource, visibility: AgentVisibility.Private, created_by_name: 'owner' };
+    const source = {
+      ...baseSource,
+      visibility: AgentVisibility.Private,
+      created_by_id: ownerUser.id,
+      created_by_name: 'owner',
+    };
     expect(hasReadAccess({ source, user: ownerUser, isAdmin: false })).toBe(true);
   });
 
-  it('returns true for owner by username only', () => {
+  it('returns true for legacy owners that only stored created_by_name', () => {
     const source = { ...baseSource, visibility: AgentVisibility.Private, created_by_name: 'owner' };
     expect(hasReadAccess({ source, user: ownerByUsernameOnly, isAdmin: false })).toBe(true);
+    expect(hasReadAccess({ source, user: ownerUser, isAdmin: false })).toBe(true);
+  });
+
+  it('returns false for same username when the document stored a different created_by_id', () => {
+    const source = {
+      ...baseSource,
+      visibility: AgentVisibility.Private,
+      created_by_id: 'other-realm-id',
+      created_by_name: 'owner',
+    };
+    expect(hasReadAccess({ source, user: ownerUser, isAdmin: false })).toBe(false);
   });
 
   it('returns true for non-owner when visibility is undefined (legacy agent treated as public)', () => {
@@ -76,7 +92,12 @@ describe('hasWriteAccess', () => {
   });
 
   it('returns true for owner regardless of visibility', () => {
-    const source = { ...baseSource, visibility: AgentVisibility.Private, created_by_name: 'owner' };
+    const source = {
+      ...baseSource,
+      visibility: AgentVisibility.Private,
+      created_by_id: ownerUser.id,
+      created_by_name: 'owner',
+    };
     expect(hasWriteAccess({ source, user: ownerUser, isAdmin: false })).toBe(true);
   });
 
@@ -105,26 +126,36 @@ describe('hasWriteAccess', () => {
 });
 
 describe('buildVisibilityReadFilter', () => {
-  it('includes owner username clause and must_not private visibility', () => {
+  it('includes owner id clause, legacy username ownership, and must_not private visibility', () => {
     const filter = buildVisibilityReadFilter({ user: ownerUser });
     expect(filter).toEqual({
       bool: {
         should: [
           { bool: { must_not: { term: { visibility: AgentVisibility.Private } } } },
-          { term: { created_by_name: 'owner' } },
           { term: { created_by_id: 'user-1' } },
+          {
+            bool: {
+              must_not: { exists: { field: 'created_by_id' } },
+              filter: { term: { created_by_name: 'owner' } },
+            },
+          },
         ],
         minimum_should_match: 1,
       },
     });
   });
 
-  it('omits created_by_id clause when user.id is undefined', () => {
+  it('omits created_by_id clause when user.id is undefined but still adds legacy username clause', () => {
     const filter = buildVisibilityReadFilter({ user: ownerByUsernameOnly });
     expect(filter.bool.should).toHaveLength(2);
     expect(filter.bool.should).toEqual([
       { bool: { must_not: { term: { visibility: AgentVisibility.Private } } } },
-      { term: { created_by_name: 'owner' } },
+      {
+        bool: {
+          must_not: { exists: { field: 'created_by_id' } },
+          filter: { term: { created_by_name: 'owner' } },
+        },
+      },
     ]);
   });
 });

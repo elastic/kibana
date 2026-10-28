@@ -143,6 +143,37 @@ export default function ({ getService }: FtrProviderContext) {
           .send(toolWithInvalidParams)
           .expect(400);
       });
+
+      it('should persist include_frozen', async () => {
+        const testTool = {
+          ...mockTool,
+          id: 'include-frozen-esql-test-tool',
+          configuration: { ...mockTool.configuration, include_frozen: true },
+        };
+
+        await supertest
+          .post('/api/agent_builder/tools')
+          .set('kbn-xsrf', 'kibana')
+          .send(testTool)
+          .expect(200);
+        createdToolIds.push(testTool.id);
+
+        const response = await supertest.get(`/api/agent_builder/tools/${testTool.id}`).expect(200);
+
+        expect(response.body.configuration).to.have.property('include_frozen', true);
+      });
+
+      it('should validate include_frozen is a boolean', async () => {
+        await supertest
+          .post('/api/agent_builder/tools')
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            ...mockTool,
+            id: 'invalid-include-frozen-esql-tool',
+            configuration: { ...mockTool.configuration, include_frozen: 'yes' },
+          })
+          .expect(400);
+      });
     });
 
     describe('POST /api/agent_builder/tools/_execute', () => {
@@ -306,6 +337,27 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(response.body).to.have.property('id', 'update-test-tool');
         expect(response.body).to.have.property('description', updates.description);
+      });
+
+      it('should update include_frozen', async () => {
+        const testTool = { ...mockTool, id: 'update-include-frozen-esql-test-tool' };
+
+        await supertest
+          .post('/api/agent_builder/tools')
+          .set('kbn-xsrf', 'kibana')
+          .send(testTool)
+          .expect(200);
+        createdToolIds.push(testTool.id);
+
+        const response = await supertest
+          .put(`/api/agent_builder/tools/${testTool.id}`)
+          .set('kbn-xsrf', 'kibana')
+          .send({ configuration: { include_frozen: true } })
+          .expect(200);
+
+        expect(response.body.configuration).to.have.property('include_frozen', true);
+        expect(response.body.configuration).to.have.property('query', mockTool.configuration.query);
+        expect(response.body.configuration.params).to.eql(mockTool.configuration.params);
       });
 
       it('should return 404 for non-existent tool', async () => {

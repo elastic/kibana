@@ -27,7 +27,7 @@ export const listModules = async (listFlag: string, log: ToolingLog) => {
   const correct: Package[] = [];
 
   // get all modules
-  await safeExec('yarn kbn bootstrap');
+  await safeExec('node scripts/kbn bootstrap');
   const modules = getPackages(REPO_ROOT);
 
   // find modules selected by user filters

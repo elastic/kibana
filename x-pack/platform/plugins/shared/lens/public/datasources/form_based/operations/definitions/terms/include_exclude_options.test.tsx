@@ -65,8 +65,9 @@ describe('IncludeExcludeComponent', () => {
       exclude: undefined,
       tableRows,
     });
-    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
-    await userEvent.type(screen.getByRole('combobox', { name: 'Include values' }), 'test.*{Enter}');
+    const user = userEvent.setup({ delay: null });
+    await user.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await user.type(screen.getByRole('combobox', { name: 'Include values' }), 'test.*{Enter}');
     expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('test.*');
     expect(onUpdateSpy).toHaveBeenCalledTimes(1);
   });
@@ -134,14 +135,15 @@ describe('IncludeExcludeComponent', () => {
       tableRows,
     });
     const typedValues = ['test.*', 'ABC'];
-    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
-    await userEvent.type(
+    const user = userEvent.setup({ delay: null });
+    await user.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await user.type(
       screen.getByRole('combobox', { name: 'Include values' }),
       `${typedValues[0]}{Enter}`
     );
 
-    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
-    await userEvent.type(
+    await user.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await user.type(
       screen.getByRole('combobox', { name: 'Include values' }),
       `${typedValues[1]}{Enter}`
     );
@@ -208,12 +210,13 @@ describe('IncludeExcludeComponent', () => {
       tableRows,
     });
 
-    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
-    await userEvent.type(screen.getByRole('combobox', { name: 'Include values' }), 'test{enter}');
+    const user = userEvent.setup({ delay: null });
+    await user.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await user.type(screen.getByRole('combobox', { name: 'Include values' }), 'test{enter}');
     expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('test');
 
-    await userEvent.click(screen.getByRole('combobox', { name: 'Exclude values' }));
-    await userEvent.type(screen.getByRole('combobox', { name: 'Exclude values' }), 'test{enter}');
+    await user.click(screen.getByRole('combobox', { name: 'Exclude values' }));
+    await user.type(screen.getByRole('combobox', { name: 'Exclude values' }), 'test{enter}');
     expect(screen.getByTestId('lens-exclude-terms-combobox')).toHaveTextContent('test');
 
     expect(screen.getByTestId('lens-include-terms-combobox')).not.toHaveTextContent('test');
@@ -229,15 +232,16 @@ describe('IncludeExcludeComponent', () => {
       tableRows,
     });
 
-    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
-    await userEvent.type(screen.getByRole('combobox', { name: 'Include values' }), 'test{enter}');
+    const user = userEvent.setup({ delay: null });
+    await user.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await user.type(screen.getByRole('combobox', { name: 'Include values' }), 'test{enter}');
     expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('test');
 
-    await userEvent.type(screen.getByRole('combobox', { name: 'Include values' }), 'test1{enter}');
+    await user.type(screen.getByRole('combobox', { name: 'Include values' }), 'test1{enter}');
     expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('test1');
 
-    await userEvent.click(screen.getByRole('combobox', { name: 'Exclude values' }));
-    await userEvent.type(screen.getByRole('combobox', { name: 'Exclude values' }), 'test1{enter}');
+    await user.click(screen.getByRole('combobox', { name: 'Exclude values' }));
+    await user.type(screen.getByRole('combobox', { name: 'Exclude values' }), 'test1{enter}');
     expect(screen.getByTestId('lens-exclude-terms-combobox')).toHaveTextContent('test1');
 
     expect(screen.getByTestId('lens-include-terms-combobox')).not.toHaveTextContent('test1');
