@@ -22,7 +22,6 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -94,7 +93,6 @@ export const EntitiesPanel = ({
   knowledgeHref?: string;
   onKnowledgeClick?: () => void;
 }): React.ReactElement => {
-  const { euiTheme } = useEuiTheme();
   const query = useDetectionEntities(timeRange);
   const [search, setSearch] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -238,7 +236,16 @@ export const EntitiesPanel = ({
   );
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj="nightshiftDetectionEntitiesPanel">
+    <EuiPanel
+      hasBorder
+      paddingSize="m"
+      data-test-subj="nightshiftDetectionEntitiesPanel"
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 0,
+      }}
+    >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
@@ -270,7 +277,8 @@ export const EntitiesPanel = ({
         aria-label={ENTITIES_TITLE}
         searchable
         isPreFiltered
-        height={euiTheme.base * 30}
+        height="full"
+        css={{ minHeight: 0 }}
         options={options}
         renderOption={(option) => option.searchableLabel ?? option.label}
         searchProps={{

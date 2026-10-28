@@ -17,6 +17,7 @@ import {
   assertWorkerModeSpace,
   buildWorkerModePlan,
   createWorkerModeSuffix,
+  hostUserFromAlerts,
   resolveWorkerModeExample,
   WORKER_MODE_EXAMPLES,
   workerModeCleanupTargets,
@@ -238,6 +239,10 @@ describe('buildWorkerModePlan', () => {
     );
   });
 
+  it('returns a set that does not share its host', () => {
+    expect(plan.sharesHostUser).toBe(false);
+  });
+
   it('throws for the default space', () => {
     expect(() =>
       buildWorkerModePlan({ space: 'default', exampleId: 'encoded-powershell.fp', now: NOW })
@@ -336,6 +341,67 @@ describe('buildWorkerModePlan on serverless', () => {
     expect(plan.alertOperations).toEqual(classic.alertOperations);
     expect(plan.entityReadAlias).toBe(classic.entityReadAlias);
     expect([...plan.hostIds].sort()).toEqual([...classic.hostIds].sort());
+  });
+});
+
+describe('buildWorkerModePlan sharing a host and user', () => {
+  const first = buildWorkerModePlan({
+    space: 'qa-fp',
+    exampleId: 'encoded-powershell.tp',
+    now: NOW,
+    suffix: 'run1',
+  });
+  const hostUser = hostUserFromAlerts(first.world.alerts);
+  const plain = buildWorkerModePlan({
+    space: 'qa-fp',
+    exampleId: 'encoded-powershell.tp',
+    now: NOW,
+    suffix: 'run2',
+  });
+  const shared = buildWorkerModePlan({
+    space: 'qa-fp',
+    exampleId: 'encoded-powershell.tp',
+    now: NOW,
+    suffix: 'run2',
+    hostUser,
+  });
+
+  it('returns the first set host id', () => {
+    expect(shared.hostIds).toEqual(first.hostIds);
+  });
+
+  it('returns the first set host and user names', () => {
+    expect(hostUserFromAlerts(shared.world.alerts)).toEqual(hostUser);
+  });
+
+  it('returns the alert ids of its own run marker', () => {
+    expect(shared.alertIds).toEqual(plain.alertIds);
+  });
+
+  it('returns event ids disjoint from the first set', () => {
+    const firstEventIds = first.events.map(({ id }) => id);
+    expect(shared.events.map(({ id }) => id).filter((id) => firstEventIds.includes(id))).toEqual(
+      []
+    );
+  });
+
+  it('returns no entities to write', () => {
+    expect(shared.entities).toEqual([]);
+  });
+
+  it('returns sharesHostUser', () => {
+    expect(shared.sharesHostUser).toBe(true);
+  });
+});
+
+describe('hostUserFromAlerts', () => {
+  it('throws when the alerts name more than one host', () => {
+    expect(() =>
+      hostUserFromAlerts([
+        { source: { host: { id: 'h1', name: 'host-a' }, user: { name: 'alice' } } },
+        { source: { host: { id: 'h2', name: 'host-b' }, user: { name: 'alice' } } },
+      ])
+    ).toThrow('exactly one host and one user');
   });
 });
 

@@ -8,7 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { FP_TP_INFERENCE_FEATURE_ID } from '../constants';
 import type { FpTpLiveKbnRequest } from '../world';
-import { buildWorkerModePlan } from './plan';
+import { buildWorkerModePlan, hostUserFromAlerts } from './plan';
 import {
   cleanupWorkerModeSpace,
   ensureAttackDiscoveryWorkflowsSetting,
@@ -16,6 +16,7 @@ import {
   ensureAnonymizationFields,
   ensureReasoningMapping,
   ensureWorkerModeSpace,
+  readWorkerModeHostUser,
   seedWorkerModePlan,
 } from './seed';
 
@@ -254,6 +255,68 @@ describe('seedWorkerModePlan', () => {
     for (const name of new Set(serverlessPlan.events.map(({ index }) => index))) {
       expect(store.createDataStream).toHaveBeenCalledWith({ name });
     }
+  });
+
+  it('leaves the shared host entities when a later set fails', async () => {
+    const first = buildWorkerModePlan({
+      space: 'qa-fp',
+      exampleId: 'encoded-powershell.tp',
+      now: new Date('2026-10-14T12:00:00.000Z'),
+      suffix: 'run1',
+    });
+    const shared = buildWorkerModePlan({
+      space: 'qa-fp',
+      exampleId: 'encoded-powershell.tp',
+      now: new Date('2026-10-14T12:00:00.000Z'),
+      suffix: 'run2',
+      hostUser: hostUserFromAlerts(first.world.alerts),
+    });
+    const esClient = {
+      bulk: jest
+        .fn()
+        .mockResolvedValueOnce({ errors: false })
+        .mockResolvedValueOnce({ errors: true, items: [] }),
+      deleteByQuery: jest.fn().mockResolvedValue({}),
+      search: jest.fn(),
+    };
+    const kbnRequest = okKbnRequest();
+
+    await expect(
+      seedWorkerModePlan({
+        esClient: esClient as unknown as EsClient,
+        kbnRequest,
+        plan: shared,
+      })
+    ).rejects.toThrow('events bulk had item errors');
+    expect(esClient.search).not.toHaveBeenCalled();
+    expect(kbnRequest).not.toHaveBeenCalled();
+  });
+});
+
+describe('readWorkerModeHostUser', () => {
+  it('returns the host and user on the existing seed', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            { _source: { host: { id: 'host-1', name: 'wks-alice-01' }, user: { name: 'alice' } } },
+            { _source: { host: { id: 'host-1', name: 'wks-alice-01' }, user: { name: 'alice' } } },
+          ],
+        },
+      }),
+    };
+
+    await expect(
+      readWorkerModeHostUser({ esClient: esClient as unknown as EsClient, space: 'qa-fp' })
+    ).resolves.toEqual({ hostId: 'host-1', hostName: 'wks-alice-01', userName: 'alice' });
+  });
+
+  it('throws when the space has no seed', async () => {
+    const esClient = { search: jest.fn().mockResolvedValue({ hits: { hits: [] } }) };
+
+    await expect(
+      readWorkerModeHostUser({ esClient: esClient as unknown as EsClient, space: 'qa-fp' })
+    ).rejects.toThrow('--append needs an existing seed');
   });
 });
 

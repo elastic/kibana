@@ -44,6 +44,9 @@ describe('useSetInitialValue', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     mockUseEditorActionContext.mockReturnValue(editorDispatchMock);
+    (removeLoadFromParameter as jest.Mock).mockImplementation(() => {
+      window.location.hash = window.location.hash.split('?')[0];
+    });
   });
 
   it('should set the initial value only once', async () => {
@@ -226,6 +229,37 @@ describe('useSetInitialValue', () => {
     // The initial value should still be set
     expect(setValueMock).toHaveBeenCalledWith('initial value');
     // The dispatch should be called with the remote data
+    expect(editorDispatchMock).toHaveBeenCalledWith({
+      type: 'setRequestToRestore',
+      payload: { request: 'decompressed data' },
+    });
+  });
+
+  it('should apply a data URI present on mount once when an effect dependency changes', async () => {
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      value: {
+        hash: '?load_from=data:text/plain,compressed-data',
+      },
+    });
+    (decompressFromEncodedURIComponent as jest.Mock).mockReturnValue('decompressed data');
+
+    await act(async () => {
+      const { rerender } = renderHook(
+        ({ localStorageValue }: { localStorageValue: string }) =>
+          useSetInitialValue({
+            localStorageValue,
+            setValue: setValueMock,
+            toasts: toastsMock,
+          }),
+        { initialProps: { localStorageValue: 'initial value' } }
+      );
+
+      // Re-run the effect before the previous implementation's debounce could complete.
+      rerender({ localStorageValue: 'updated value' });
+    });
+
+    expect(editorDispatchMock).toHaveBeenCalledTimes(1);
     expect(editorDispatchMock).toHaveBeenCalledWith({
       type: 'setRequestToRestore',
       payload: { request: 'decompressed data' },
