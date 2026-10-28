@@ -167,9 +167,22 @@ export const pagePathGetters: {
     const search = queryParams.toString();
     return [INTEGRATIONS_BASE_PATH, `/browse${categoryPath}${search ? `?${search}` : ''}`];
   },
-  integrations_installed: ({ query, category }: { query?: string; category?: string }) => {
+  integrations_installed: ({
+    query,
+    category,
+    viewInstances,
+  }: {
+    query?: string;
+    category?: string;
+    /** Package name whose onboarding instances panel to open. */
+    viewInstances?: string;
+  }) => {
     const categoryPath = category ? `/${category}` : ``;
-    const queryParams = query ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${query}` : ``;
+    const params = [
+      ...(query ? [`${INTEGRATIONS_SEARCH_QUERYPARAM}=${query}`] : []),
+      ...(viewInstances ? [`viewInstances=${encodeURIComponent(viewInstances)}`] : []),
+    ];
+    const queryParams = params.length ? `?${params.join('&')}` : ``;
     return [INTEGRATIONS_BASE_PATH, `/installed${categoryPath}${queryParams}`];
   },
   integrations_installed_updates_available: ({

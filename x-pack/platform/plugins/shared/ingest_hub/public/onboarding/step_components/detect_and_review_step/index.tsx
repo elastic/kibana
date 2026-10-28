@@ -28,6 +28,7 @@ import { useReconciledServiceSettings } from '../service_settings_step/use_recon
 import { useServiceDataDetection } from './use_service_data_detection';
 import { DeploymentSummary } from './deployment_summary';
 import { AgentSetupCallout } from './agent_setup_callout';
+import { AWS_MAIN_PACKAGE_NAME } from '../authenticate_and_deploy_step/deploy_group_helpers';
 import { InstalledContent } from './installed_content';
 import { useAwsOverviewDashboardUrl } from './use_aws_overview_dashboard_url';
 import { StepFooter } from '../step_footer';
@@ -71,11 +72,24 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
   // Resolve the href to [Metrics AWS] Overview for the "Take me to my data" button.
   const overviewHref = useAwsOverviewDashboardUrl(installationInfo);
 
-  // Versionless pkgkey: Fleet's detail page resolves it to the installed version.
-  const [policiesAppPath, policiesDetailPath] = pagePathGetters.integration_details_policies({
-    pkgkey: 'aws',
+  // Finish opens Installed integrations with the instances of a deployed package, where this
+  // session is listed: the main `aws` package when the session covers it, else the first one. The
+  // session is listed under every package it covers.
+  const instancesPackageName = useMemo(() => {
+    const packageNames = new Set(
+      selectedServiceIds.flatMap((id) => {
+        const packageName = awsServicesMap?.get(id)?.packageName;
+        return packageName ? [packageName] : [];
+      })
+    );
+    return packageNames.has(AWS_MAIN_PACKAGE_NAME) || packageNames.size === 0
+      ? AWS_MAIN_PACKAGE_NAME
+      : [...packageNames][0];
+  }, [selectedServiceIds, awsServicesMap]);
+  const [installedAppPath, installedPath] = pagePathGetters.integrations_installed({
+    viewInstances: instancesPackageName,
   });
-  const policiesHref = services.http.basePath.prepend(`${policiesAppPath}${policiesDetailPath}`);
+  const finishHref = services.http.basePath.prepend(`${installedAppPath}${installedPath}`);
 
   const hasDeployedServices = selectedServiceIds.length > 0;
 
@@ -138,7 +152,7 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              href={policiesHref}
+              href={finishHref}
               onClick={onContinue}
               data-test-subj="detectAndReviewStep-finishButton"
             >
