@@ -10,6 +10,9 @@ export interface NameValuePair {
   value: number;
 }
 
+/** Mutually exclusive: `disabled` = not enabled; `snoozed` = enabled and snoozed; `enabled` otherwise. */
+export type ActionPolicyStatus = 'enabled' | 'disabled' | 'snoozed';
+
 /**
  * Usage type for telemetry usage collector.
  */

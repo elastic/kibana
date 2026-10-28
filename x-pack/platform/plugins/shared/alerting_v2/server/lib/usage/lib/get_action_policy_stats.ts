@@ -8,8 +8,10 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { TERMS_SIZE, bucketsToArray } from './constants';
+import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
+import { TERMS_SIZE, bucketsToArray, bucketsToRecord } from './constants';
 import type { ActionPolicyStatsAggregations, ActionPolicyStatsResults } from './types';
+import type { ActionPolicyStatus } from '../types';
 
 export async function getActionPolicyStats(
   esClient: ElasticsearchClient,
@@ -173,6 +175,24 @@ export async function getActionPolicyStats(
       avg_group_by_fields_count: {
         avg: { field: 'ap_group_by_count' },
       },
+      count_by_status: {
+        terms: { field: 'ap_status', size: TERMS_SIZE },
+      },
+      count_by_grouping_mode: {
+        terms: { field: 'ap_grouping_mode', size: TERMS_SIZE },
+      },
+      count_by_throttle_strategy: {
+        terms: { field: 'ap_throttle_strategy', size: TERMS_SIZE },
+      },
+      workflows_per_policy_percentiles: {
+        percentiles: { field: 'ap_destinations_count', percents: [50, 99] },
+      },
+      workflows_per_policy_avg: {
+        avg: { field: 'ap_destinations_count' },
+      },
+      count_with_multiple_workflows: {
+        filter: { range: { ap_destinations_count: { gt: 1 } } },
+      },
     },
   });
 
@@ -180,6 +200,7 @@ export async function getActionPolicyStats(
     typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
 
   const aggs = response.aggregations as unknown as ActionPolicyStatsAggregations | undefined;
+  const workflowsPerPolicy = aggs?.workflows_per_policy_percentiles.values;
 
   return {
     action_policies_count: total,
@@ -190,5 +211,20 @@ export async function getActionPolicyStats(
     action_policies_count_by_throttle_interval: bucketsToArray(
       aggs?.count_by_throttle_interval.buckets
     ),
+    action_policies_count_by_status: bucketsToRecord<ActionPolicyStatus>(
+      aggs?.count_by_status.buckets
+    ),
+    action_policies_count_by_grouping_mode: bucketsToRecord<GroupingMode>(
+      aggs?.count_by_grouping_mode.buckets
+    ),
+    action_policies_count_by_throttle_strategy: bucketsToRecord<ThrottleStrategy | 'none'>(
+      aggs?.count_by_throttle_strategy.buckets
+    ),
+    action_policies_workflows_per_policy: {
+      p50: workflowsPerPolicy?.['50.0'] ?? null,
+      p99: workflowsPerPolicy?.['99.0'] ?? null,
+      avg: aggs?.workflows_per_policy_avg.value ?? null,
+    },
+    action_policies_count_with_multiple_workflows: aggs?.count_with_multiple_workflows.doc_count ?? 0,
   };
 }
