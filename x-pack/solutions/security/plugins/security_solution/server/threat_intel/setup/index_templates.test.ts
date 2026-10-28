@@ -64,7 +64,12 @@ const fullyMigratedReportMappings = () => ({
     // v30: evidence is a space-keyed nested array; the guard checks the leaf. The hunt
     // coverage ledger leaves are patched in place by their own migration.
     evidence: {
-      properties: { space_id: {}, hunted_technique_ids: {}, coverage_pending: {} },
+      properties: {
+        space_id: {},
+        hunted_technique_ids: {},
+        pending_technique_ids: {},
+        coverage_pending: {},
+      },
     },
     extracted: {
       properties: {
@@ -314,7 +319,7 @@ describe('index_templates — migrations', () => {
   });
 
   describe('hunt coverage ledger on evidence', () => {
-    it.each(['hunted_technique_ids', 'coverage_pending'])(
+    it.each(['hunted_technique_ids', 'pending_technique_ids', 'coverage_pending'])(
       'adds evidence.%s when absent',
       async (field) => {
         const mappings = fullyMigratedReportMappings();
@@ -728,7 +733,7 @@ describe('index_templates — mapping coverage guard', () => {
     );
   });
 
-  it('evidence declares the hunt coverage ledger: searched technique ids and a pending flag', async () => {
+  it('evidence declares the hunt coverage ledger: searched and pending technique ids and a pending flag', async () => {
     const { byIndex } = await runInstall();
 
     const properties = (
@@ -740,12 +745,17 @@ describe('index_templates — mapping coverage guard', () => {
     expect((properties.evidence as { properties: Record<string, unknown> }).properties).toEqual(
       expect.objectContaining({
         hunted_technique_ids: { type: 'keyword' },
+        pending_technique_ids: { type: 'keyword' },
         coverage_pending: { type: 'boolean' },
       })
     );
   });
 
-  it.each(['evidence.hunted_technique_ids', 'evidence.coverage_pending'])(
+  it.each([
+    'evidence.hunted_technique_ids',
+    'evidence.pending_technique_ids',
+    'evidence.coverage_pending',
+  ])(
     '%s is a required report field so a half-applied migration fails bootstrap loudly',
     (requiredPath) => {
       expect(src).toContain(`{ path: '${requiredPath}' }`);

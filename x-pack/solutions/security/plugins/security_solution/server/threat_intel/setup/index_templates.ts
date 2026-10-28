@@ -360,7 +360,11 @@ const threatReportsTemplate = {
             // searched for the report (bounded by the writer), so a later run spends its
             // query budget on the rest. `coverage_pending` is true while a later run
             // could still search more, which keeps the report in the candidate pool.
+            // `pending_technique_ids` is the other half of the ledger: the techniques a
+            // run could not search but a later one still should, kept so the next run does
+            // not depend on its own extraction returning them again.
             hunted_technique_ids: { type: 'keyword' as const },
+            pending_technique_ids: { type: 'keyword' as const },
             coverage_pending: { type: 'boolean' as const },
             // rank_score * a boost derived from hunt feedback. Reserved mapping
             // only: no writer or reader exists yet, Hunt Watch's writer owns it.
@@ -968,7 +972,8 @@ const migrateExistingPublishedAtMapping = async (
 };
 
 /**
- * `evidence.hunted_technique_ids` and `evidence.coverage_pending`, the hunt coverage ledger, for
+ * `evidence.hunted_technique_ids`, `evidence.pending_technique_ids` and
+ * `evidence.coverage_pending`, the hunt coverage ledger, for
  * clusters whose reports index predates them. `evidence` is already `nested`, so the fragment
  * declares it nested: an omitted `type` defaults to `object`, which Elasticsearch refuses to merge
  * into a nested field. An index without `evidence` is left to the stale-index check, since the
@@ -997,7 +1002,9 @@ const migrateExistingHuntLedgerMapping = async (
       // An index without evidence is stale beyond this migration; the schema check reports it.
       if (
         evidenceProps &&
-        (!evidenceProps.hunted_technique_ids || !evidenceProps.coverage_pending)
+        (!evidenceProps.hunted_technique_ids ||
+          !evidenceProps.pending_technique_ids ||
+          !evidenceProps.coverage_pending)
       ) {
         await esClient.indices.putMapping({
           index: indexName,
@@ -1006,6 +1013,7 @@ const migrateExistingHuntLedgerMapping = async (
               type: 'nested',
               properties: {
                 hunted_technique_ids: { type: 'keyword' },
+                pending_technique_ids: { type: 'keyword' },
                 coverage_pending: { type: 'boolean' },
               },
             },
@@ -1729,6 +1737,7 @@ const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
   { path: 'evidence.space_id' },
   // Leaves of the hunt coverage ledger, patched onto the nested evidence field in place.
   { path: 'evidence.hunted_technique_ids' },
+  { path: 'evidence.pending_technique_ids' },
   { path: 'evidence.coverage_pending' },
   { path: 'extracted.iocs.value', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   { path: 'extracted.iocs.defanged', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
