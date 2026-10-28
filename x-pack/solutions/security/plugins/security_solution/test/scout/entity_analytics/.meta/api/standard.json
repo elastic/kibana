@@ -1,0 +1,104 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "635d9d2633f6320-b4484bd14cdb09d",
+      "title": "Entity risk score calculation privileges an admin can recalculate the risk score of an entity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/risk_score/entity_calculation_privileges.spec.ts",
+        "line": 161,
+        "column": 10
+      }
+    },
+    {
+      "id": "635d9d2633f6320-fed04db99c4cb5b",
+      "title": "Entity risk score calculation privileges a user with only the index privileges the calculation needs can recalculate, without cluster privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/risk_score/entity_calculation_privileges.spec.ts",
+        "line": 172,
+        "column": 10
+      }
+    },
+    {
+      "id": "635d9d2633f6320-31b44204e66e95e",
+      "title": "Entity risk score calculation privileges a user without read access to the risk score lookup index is rejected with a 403",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/risk_score/entity_calculation_privileges.spec.ts",
+        "line": 217,
+        "column": 12
+      }
+    },
+    {
+      "id": "635d9d2633f6320-0204f2c8c1dd03b",
+      "title": "Entity risk score calculation privileges a user without write access to the risk score index is rejected with a 403",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/risk_score/entity_calculation_privileges.spec.ts",
+        "line": 217,
+        "column": 12
+      }
+    },
+    {
+      "id": "635d9d2633f6320-6a83657fc63530c",
+      "title": "Entity risk score calculation privileges a user without write access to the entity store is rejected with a 403",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/risk_score/entity_calculation_privileges.spec.ts",
+        "line": 217,
+        "column": 12
+      }
+    },
+    {
+      "id": "635d9d2633f6320-df7478aab0eeb6b",
+      "title": "Entity risk score calculation privileges a user without the entity analytics feature privilege is rejected with a 403",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/risk_score/entity_calculation_privileges.spec.ts",
+        "line": 232,
+        "column": 10
+      }
+    }
+  ]
+}

@@ -11,6 +11,7 @@ import type {
   CheckPrivilegesResponse,
   SecurityPluginStart,
 } from '@kbn/security-plugin/server';
+import { ENTITY_LATEST, getEntitiesAlias, getLatestEntityIndexPattern } from '../../../../common';
 
 export type Privileges = z.infer<typeof Privileges>;
 export const Privileges = lazySchema(() =>
@@ -109,4 +110,34 @@ export const hasReadWritePermissions = (
     has_read_permissions: hasOnAllIndices('read') || cluster.some(has('read')),
     has_write_permissions: hasOnAllIndices('write') || cluster.some(has('write')),
   };
+};
+
+export interface CheckEntityStoreIndexPrivilegesOpts {
+  request: KibanaRequest;
+  security: SecurityPluginStart;
+  spaceId: string;
+}
+
+export const checkEntityStoreIndexPrivileges = async ({
+  request,
+  security,
+  spaceId,
+}: CheckEntityStoreIndexPrivilegesOpts): Promise<Privileges> => {
+  const entitiesAliasPattern = getEntitiesAlias(ENTITY_LATEST, spaceId);
+  const latestEntityIndexPattern = getLatestEntityIndexPattern(spaceId);
+
+  return checkAndFormatPrivileges({
+    indexPatterns: [entitiesAliasPattern, latestEntityIndexPattern],
+    request,
+    security,
+    privilegesToCheck: {
+      elasticsearch: {
+        cluster: [],
+        index: {
+          [entitiesAliasPattern]: ['read', 'write'],
+          [latestEntityIndexPattern]: ['read', 'write'],
+        },
+      },
+    },
+  });
 };

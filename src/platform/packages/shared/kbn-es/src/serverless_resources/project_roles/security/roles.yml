@@ -137,6 +137,11 @@ editor:
         - '.ml-anomalies-*'
       privileges:
         - read
+    - names:
+        - '.entity_analytics.risk_score.lookup-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -660,6 +665,11 @@ soc_manager:
         - .entity_analytics.monitoring*
       privileges:
         - read
+    - names:
+        - '.entity_analytics.risk_score.lookup-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -755,6 +765,11 @@ detections_admin:
       privileges:
         - read
         - write
+    - names:
+        - '.entity_analytics.risk_score.lookup-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -826,6 +841,11 @@ platform_engineer:
         - .entity_analytics.monitoring*
       privileges:
         - read
+    - names:
+        - '.entity_analytics.risk_score.lookup-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
