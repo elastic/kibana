@@ -60,7 +60,7 @@ Each positive example carries a partial Lens Config API gold (`config`): chart `
 - **Custom Content Row Order** (`CODE`) — runs the query and checks that a text column lists the expected labels (whole words, ignoring case), as rows, in the requested order (a funnel sorted by value or returned as one wide row scores 0).
 - **Custom Content Template Columns** (`CODE`) — every `row["…"]` / `max["…"]` the template reads is a column the query returns. Templates that read columns with dot access (`row.col`) are not checked and are reported as skipped.
 - **Custom Content Edit** (`CODE`) — the follow-up stored a new version of the same panel, compared with the panel as it stood after the first turn; a style edit changed the template and kept the query, a data edit changed the query. A follow-up that called no tool (`no-follow-up-tool-call`) or that created a new panel instead of editing the first scores 0.
-- **Trajectory** and **Trace-based** — as above (tokens, latency, tool calls), which makes the cost of a custom panel repeatable.
+- **Trace-based** (shared) — tokens, latency and tool-call counts from the agent's OTel trace, as above. There is no Trajectory evaluator here: the agent can store a custom panel with `create_visualization` or with `generate_dashboard`, so there is no single expected tool path to compare.
 
 Run only this spec with `node scripts/evals run --suite agent-builder-visualizations --grep "Custom Content"`.
 

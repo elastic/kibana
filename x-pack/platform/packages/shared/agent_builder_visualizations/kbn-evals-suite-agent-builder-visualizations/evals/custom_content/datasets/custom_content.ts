@@ -71,16 +71,14 @@ export const CUSTOM_CONTENT_DATA_EXAMPLES: CustomContentDatasetExample[] = [
 export const CUSTOM_CONTENT_STATIC_EXAMPLES: CustomContentDatasetExample[] = [
   {
     input: {
-      question:
-        'Create a custom panel with a banner: the title "Web Traffic Overview" on a blue gradient with a short subtitle. It needs no data.',
+      question: `${CREATE_PANEL} with a banner: the title "Web Traffic Overview" on a blue gradient with a short subtitle. It needs no data.`,
     },
     output: { data: 'static' },
     metadata: { useCase: 'banner', dataSource: 'none' },
   },
   {
     input: {
-      question:
-        'Create a custom panel with a legend that explains three colors: green means healthy, orange means degraded, red means down. It needs no data.',
+      question: `${CREATE_PANEL} with a legend that explains three colors: green means healthy, orange means degraded, red means down. It needs no data.`,
     },
     output: { data: 'static' },
     metadata: { useCase: 'legend', dataSource: 'none' },
@@ -107,8 +105,7 @@ export const CUSTOM_CONTENT_EDIT_EXAMPLES: CustomContentDatasetExample[] = [
   },
   {
     input: {
-      question:
-        'Create a custom panel with a banner: the title "Web Traffic Overview" on a blue gradient. It needs no data.',
+      question: `${CREATE_PANEL} with a banner: the title "Web Traffic Overview" on a blue gradient. It needs no data.`,
       followUp: 'Make the title bigger.',
     },
     output: { data: 'static', edit: 'style' },
@@ -116,8 +113,7 @@ export const CUSTOM_CONTENT_EDIT_EXAMPLES: CustomContentDatasetExample[] = [
   },
   {
     input: {
-      question:
-        'Create a custom panel with a banner: the title "Web Traffic Overview" on a blue gradient. It needs no data.',
+      question: `${CREATE_PANEL} with a banner: the title "Web Traffic Overview" on a blue gradient. It needs no data.`,
       followUp: `Now show the live total number of requests from ${LOGS} under the title. It must update with the dashboard time range.`,
     },
     output: { data: 'query', edit: 'data' },
