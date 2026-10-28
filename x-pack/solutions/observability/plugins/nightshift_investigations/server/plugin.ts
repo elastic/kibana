@@ -26,7 +26,10 @@ import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/ma
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
 import type { NightshiftInvestigationsConfig } from './config';
-import { InvestigationLocatorDefinition } from '../common/locators';
+import {
+  InvestigationLocatorDefinition,
+  NightshiftSettingsLocatorDefinition,
+} from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { createIsNightshiftEnabledSync } from './is_nightshift_enabled';
 import { createGatedSandboxStart } from './sandbox_gate';
@@ -176,6 +179,9 @@ export class NightshiftInvestigationsPlugin
     this.workflowsManagement = plugins.workflowsManagement;
     const investigationLocator = plugins.share.url.locators.create(
       new InvestigationLocatorDefinition()
+    );
+    const settingsLocator = plugins.share.url.locators.create(
+      new NightshiftSettingsLocatorDefinition()
     );
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
     const isNightshiftEnabledSync = createIsNightshiftEnabledSync(core.getStartServices);
@@ -389,7 +395,9 @@ export class NightshiftInvestigationsPlugin
             this.getInvestigationsClient,
             this.getAutomationsSoClient,
             this.getAlertsClient,
-            this.getEpisodeLookup
+            this.getEpisodeLookup,
+            () => this.actionsStart,
+            settingsLocator
           )
         );
         plugins.workflowsExtensions.registerStepDefinition(

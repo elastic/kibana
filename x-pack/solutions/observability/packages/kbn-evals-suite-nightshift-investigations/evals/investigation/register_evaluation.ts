@@ -158,7 +158,7 @@ export const registerInvestigationEvaluation = ({
             { timeout: 60_000 }
           )
           .toBe(true);
-        await replaceCustomContext(fetch, getDatasetCustomContext(dataset.name));
+        await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
         const [experiment] = await executorClient.runExperiment(
           {
             name: orca
