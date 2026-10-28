@@ -59,6 +59,7 @@ import {
 } from '../../../utils/resolve_source_ids';
 import { listAllSources } from '../../../utils/list_all_sources';
 import { getLiveEntities } from '../../../../lib/significant_events/entities/get_live_entities';
+import { filterQueryLinksByEntity } from '../../../../lib/significant_events/entities/filter_query_links_by_entity';
 import type { PersistQueriesResult } from '../../../../lib/significant_events/persist_queries';
 import { persistQueries } from '../../../../lib/significant_events/persist_queries';
 import { queryFromLink } from '../../../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
@@ -442,30 +443,6 @@ const reconcileQueriesRoute = createServerRoute({
     };
   },
 });
-
-/**
- * Keeps links whose query names a selected entity, or, for Unassigned, names no live entity. Runs
- * before pagination so the total and the page reflect the selection.
- */
-const filterQueryLinksByEntity = async (
-  links: QueryLink[],
-  { entityIds = [], unassignedEntities }: { entityIds?: string[]; unassignedEntities?: boolean },
-  loadLiveEntities: () => ReturnType<typeof getLiveEntities>
-): Promise<QueryLink[]> => {
-  const live = unassignedEntities ? await loadLiveEntities() : undefined;
-  // A truncated live set would misreport entities past the cap as unassigned, so skip Unassigned.
-  const liveIds = live && !live.truncated ? new Set(live.entities.map(({ id }) => id)) : undefined;
-  if (entityIds.length === 0 && !liveIds) {
-    return links;
-  }
-  const selected = new Set(entityIds);
-  return links.filter(({ query }) => {
-    const ids = (query.features ?? []).map(({ id }) => id);
-    return (
-      ids.some((id) => selected.has(id)) || Boolean(liveIds && !ids.some((id) => liveIds.has(id)))
-    );
-  });
-};
 
 const getDiscoveryQueriesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_queries',
