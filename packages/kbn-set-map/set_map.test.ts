@@ -30,5 +30,6 @@ describe('SetMap', () => {
         "foo",
       }
     `);
+    expect(sm.get('missing')).toBeUndefined();
   });
 });
