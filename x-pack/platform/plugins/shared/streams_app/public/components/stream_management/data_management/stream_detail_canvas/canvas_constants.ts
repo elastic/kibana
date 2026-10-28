@@ -69,7 +69,8 @@ export const SOURCE_NODE_HEIGHT = 74;
 export const DESTINATION_NODE_HEIGHT = 106;
 /** A routing card with a single rule. Each extra rule adds a row. */
 export const ROUTING_NODE_HEIGHT = 96;
-export const PROCESSING_NODE_HEIGHT = 44;
+// The stats row adds 24 (the reserved row) to the 44 of the title and count.
+export const PROCESSING_NODE_HEIGHT = 68;
 
 export const NODE_HEIGHT_BY_TYPE: Readonly<Record<string, number>> = {
   [SOURCE_NODE_TYPE]: SOURCE_NODE_HEIGHT,
