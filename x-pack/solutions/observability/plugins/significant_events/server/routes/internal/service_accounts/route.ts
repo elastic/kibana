@@ -38,7 +38,7 @@ const enableServiceAccountsRoute = createServerRoute({
   params: z.object({
     body: z.object({
       serviceAccountIds: z.object({
-        kiExtraction: z.string().min(1).max(SERVICE_ACCOUNT_ID_MAX_LENGTH),
+        detectionEngine: z.string().min(1).max(SERVICE_ACCOUNT_ID_MAX_LENGTH),
       }),
     }),
   }),

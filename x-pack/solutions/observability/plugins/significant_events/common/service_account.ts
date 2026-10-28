@@ -7,17 +7,17 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
-/** The service account knowledge indicator extraction runs as, shared by every space. */
-export const KI_EXTRACTION_SERVICE_ACCOUNT_NAME = 'nightshift_ki_extraction';
+/** The service account the detection engine runs as, shared by every space. */
+export const DETECTION_ENGINE_SERVICE_ACCOUNT_NAME = 'nightshift_detection_engine';
 
 /**
- * The role of the KI extraction service account, named like the account. It starts from the
- * Nightshift privilege the KI routes require; a privilege is only added once a run was refused
- * without it.
+ * The role of the detection engine service account, named like the account. It starts from the
+ * Nightshift privilege the detection engine routes require; a privilege is only added once a run
+ * was refused without it.
  */
-export const KI_EXTRACTION_SERVICE_ACCOUNT_ROLE: Omit<estypes.SecurityPutRoleRequest, 'name'> = {
+export const DETECTION_ENGINE_SERVICE_ACCOUNT_ROLE: Omit<estypes.SecurityPutRoleRequest, 'name'> = {
   description:
-    'Privileges for the service account that runs knowledge indicator extraction. Assigned by Kibana; do not assign to users.',
+    'Privileges for the service account the Nightshift detection engine runs as. Assigned by Kibana; do not assign to users.',
   // Calls the LLM through an inference endpoint (feature identification, query generation).
   cluster: ['monitor_inference'],
   indices: [
@@ -34,7 +34,7 @@ export const KI_EXTRACTION_SERVICE_ACCOUNT_ROLE: Omit<estypes.SecurityPutRoleReq
   applications: [
     {
       application: 'kibana-.kibana',
-      // `manage_nightshift`, which every KI route requires.
+      // `manage_nightshift`, which every detection engine route requires.
       privileges: ['feature_nightshift.minimal_all'],
       resources: ['*'],
     },

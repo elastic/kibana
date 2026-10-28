@@ -94,7 +94,7 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID]: { serviceAccountId: 'example-account' },
   [NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID]: { serviceAccountId: 'kibana/nightshift_agent' },
   [NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID]: {
-    serviceAccountId: 'kibana/nightshift_ki_extraction',
+    serviceAccountId: 'kibana/nightshift_detection_engine',
   },
   [NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID]: {
     serviceAccountId: 'kibana/nightshift_agent',

@@ -24,7 +24,7 @@ import type { SignificantEventsMaintenanceSummary } from '../../../common/mainte
 
 /** The ids of the accounts a space is set up with, as the service accounts backend assigned them. */
 export interface DetectionEngineServiceAccountIds {
-  kiExtraction: string;
+  detectionEngine: string;
 }
 
 const canManageSecurity = async (core: CoreStart, request: KibanaRequest): Promise<boolean> => {
@@ -118,13 +118,13 @@ export const createServiceAccountSetupService = ({
       {
         spaceId,
         workflowIdSuffix: spaceId,
-        values: { serviceAccountId: serviceAccountIds.kiExtraction },
+        values: { serviceAccountId: serviceAccountIds.detectionEngine },
       }
     );
     // What the detection engine does outside workflow runs, such as turning rules on, runs as the
     // account too. Binding again with another account rebinds it.
     await core.security.serviceAccounts.bindWorkload(request, {
-      serviceAccountId: serviceAccountIds.kiExtraction,
+      serviceAccountId: serviceAccountIds.detectionEngine,
       workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
       workloadId: DETECTION_ENGINE_WORKLOAD_ID,
     });
