@@ -3,6 +3,8 @@ name: "Source knowledge reconciliation"
 enabled: true
 description: "Applies source changes before onboarding the current query."
 settings:
+  # Rendered with the detection engine service account of the space.
+  run_as: __SERVICE_ACCOUNT_ID__
   timeout: "60m"
   concurrency:
     key: "nightshift-source-reconciliation-{{ inputs.sourceId }}"

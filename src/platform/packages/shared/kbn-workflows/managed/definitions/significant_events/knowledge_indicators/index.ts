@@ -10,7 +10,6 @@
 import FEATURES_IDENTIFICATION_YAML from './features_identification.yaml';
 import ONBOARDING_YAML from './onboarding.yaml';
 import QUERIES_GENERATION_YAML from './queries_generation.yaml';
-import SOURCE_RECONCILIATION_YAML from './source_reconciliation.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
 
 export const SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID =
@@ -52,19 +51,5 @@ export const SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW = {
   version: 10,
   billable: false,
   yaml: ONBOARDING_YAML,
-  management: SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT,
-} as const satisfies ManagedWorkflowDefinition;
-
-/** Durable cleanup and onboarding scheduling after source catalog changes. */
-export const SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID =
-  'system-nightshift-source-reconciliation';
-
-/** Queues source changes so a later edit cannot be dropped behind a running cleanup. */
-export const SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW = {
-  id: SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID,
-  pluginId: 'significantEvents',
-  version: 1,
-  billable: false,
-  yaml: SOURCE_RECONCILIATION_YAML,
   management: SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;

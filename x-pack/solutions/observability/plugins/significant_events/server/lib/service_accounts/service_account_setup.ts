@@ -16,6 +16,8 @@ import {
   NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
+  getNightshiftBoundSourceReconciliationWorkflowId,
+  NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -42,6 +44,7 @@ const BOUND_WORKFLOW_IDS = [
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
 ] as const;
 
 const canManageSecurity = async (core: CoreStart, request: KibanaRequest): Promise<boolean> => {
@@ -240,6 +243,7 @@ export const createServiceAccountSetupService = ({
     for (const workflowId of [
       getNightshiftBoundKiSyncWorkflowId(spaceId),
       getNightshiftBoundKiContinuousOnboardingWorkflowId(spaceId),
+      getNightshiftBoundSourceReconciliationWorkflowId(spaceId),
     ]) {
       await waitForNoRuns({ management: workflowsManagement, request, spaceId, workflowId });
     }

@@ -10,13 +10,13 @@ import {
   NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
@@ -38,18 +38,22 @@ export const GLOBAL_CORE_WORKFLOW_IDS = [
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
 ] as const;
 
 /**
- * Entry points bound to a service account and installed per space, as `${id}-${spaceId}`, by the
- * space's setup. Pausing cancels their executions but does not disable them: they only run when
- * started by routes that are blocked while the space is paused.
+ * Manually started workflows bound to a service account and installed per space, as
+ * `${id}-${spaceId}`, by the space's setup. Pausing cancels their executions but does not disable
+ * them: the KI onboarding entry point is only started by routes that are blocked while the space
+ * is paused, and source reconciliation keeps applying source changes, which leaves rules off
+ * while the space is paused.
  */
-export const PER_SPACE_BOUND_WORKFLOW_IDS = [NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID] as const;
+export const PER_SPACE_BOUND_WORKFLOW_IDS = [
+  NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
+] as const;
 
 /** Scheduled discovery workflows controlled by the per-space Settings toggle. */
 export const SCHEDULED_DISCOVERY_WORKFLOW_IDS = [

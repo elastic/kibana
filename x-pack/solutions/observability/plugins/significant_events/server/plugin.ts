@@ -34,8 +34,7 @@ import {
 import type { Subscription } from 'rxjs';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-import { SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID } from '@kbn/workflows/managed';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import { getNightshiftBoundSourceReconciliationWorkflowId } from '@kbn/workflows/managed';
 import {
   createSourceKnowledgeStateClient,
   sourceKnowledgeStateSavedObjectType,
@@ -114,6 +113,7 @@ import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from './lib/workflows/managed_workflow_owner';
 import {
   asDetectionEngineAccount,
+  isDetectionEngineSetUp,
   registerDetectionEngineWorkloadType,
 } from './lib/service_accounts/detection_engine_account';
 import { removeLegacyDefaultSpaceWorkflows } from './lib/workflows/setup/remove_legacy_default_space_workflows';
@@ -546,24 +546,25 @@ export class SignificantEventsPlugin
       },
     });
 
-    const sourceReconciliation = plugins.workflowsManagement?.management
-      ? new WorkflowExecutionService<{ sourceId: string; sourceSlug: string }>({
-          managementApi: plugins.workflowsManagement.management,
-          workflowId: SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID,
-          workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        })
-      : undefined;
+    const reconciliationManagementApi = plugins.workflowsManagement?.management;
     plugins.nightshiftSources.onSourceChange(
       createSourceChangeListener({
         enqueueReconciliation: async ({ sourceId, sourceSlug, request }) => {
-          if (!sourceReconciliation) {
+          if (!reconciliationManagementApi) {
             throw new Error('Workflows management is required to reconcile source knowledge');
           }
-          await sourceReconciliation.execute({
-            executionSpaceId: request.spaceId,
-            inputs: { sourceId, sourceSlug },
-            request,
-          });
+          const { spaceId } = request;
+          // Source changes are applied as the space's service account, by the space's bound
+          // reconciliation. A space that is not set up has no detection engine to apply them to.
+          const [coreStart] = await core.getStartServices();
+          if (!(await isDetectionEngineSetUp({ core: coreStart, spaceId }))) {
+            return;
+          }
+          await new WorkflowExecutionService<{ sourceId: string; sourceSlug: string }>({
+            managementApi: reconciliationManagementApi,
+            workflowId: getNightshiftBoundSourceReconciliationWorkflowId(spaceId),
+            workflowSpaceId: spaceId,
+          }).execute({ executionSpaceId: spaceId, inputs: { sourceId, sourceSlug }, request });
         },
       })
     );
