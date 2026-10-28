@@ -44,32 +44,35 @@ const alertDoc = {
   [ALERT_INSTANCE_ID]: 'instance-from-doc',
 };
 
+const noUnresolvedErrors = { unresolvedCount: 0, permanentCount: 0, unresolvedErrorTypes: {} };
+
 describe('alert_conflict_resolver', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.spyOn(Math, 'random').mockReturnValue(0);
   });
 
-  describe('handles errors gracefully', () => {
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  describe('throws errors', () => {
     test('when mget fails', async () => {
       const { bulkRequest, bulkResponse } = getReqRes('ic');
 
       esClient.mget.mockRejectedValueOnce(new Error('mget failed'));
 
-      await resolveAlertConflicts({
-        logger,
-        esClient,
-        bulkRequest,
-        bulkResponse,
-        ruleId,
-        ruleName,
-        ruleType,
-      });
-
-      expect(logger.error).toHaveBeenNthCalledWith(
-        2,
-        `Error resolving alert conflicts ${ruleInfo}: mget failed`,
-        logTags
-      );
+      await expect(
+        resolveAlertConflicts({
+          logger,
+          esClient,
+          bulkRequest,
+          bulkResponse,
+          ruleId,
+          ruleName,
+          ruleType,
+        })
+      ).rejects.toThrowError('mget failed');
     });
 
     test('when bulk fails', async () => {
@@ -80,20 +83,40 @@ describe('alert_conflict_resolver', () => {
       });
       esClient.bulk.mockRejectedValueOnce(new Error('bulk failed'));
 
-      await resolveAlertConflicts({
-        logger,
-        esClient,
-        bulkRequest,
-        bulkResponse,
-        ruleId,
-        ruleName,
-        ruleType,
+      await expect(
+        resolveAlertConflicts({
+          logger,
+          esClient,
+          bulkRequest,
+          bulkResponse,
+          ruleId,
+          ruleName,
+          ruleType,
+        })
+      ).rejects.toThrowError('bulk failed');
+    });
+
+    test('when the retried bulk response has an unexpected number of items', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('ir ir');
+
+      esClient.bulk.mockResolvedValueOnce({
+        errors: false,
+        took: 0,
+        items: [getBulkResItem(1)],
       });
 
-      expect(logger.error).toHaveBeenNthCalledWith(
-        2,
-        `Error resolving alert conflicts ${ruleInfo}: bulk failed`,
-        logTags
+      await expect(
+        resolveAlertConflicts({
+          logger,
+          esClient,
+          bulkRequest,
+          bulkResponse,
+          ruleId,
+          ruleName,
+          ruleType,
+        })
+      ).rejects.toThrowError(
+        'Unexpected number of bulk response items retried; expecting 2, retried 1'
       );
     });
   });
@@ -101,7 +124,7 @@ describe('alert_conflict_resolver', () => {
   describe('is successful with', () => {
     test('no bulk results', async () => {
       const { bulkRequest, bulkResponse } = getReqRes('');
-      await resolveAlertConflicts({
+      const result = await resolveAlertConflicts({
         logger,
         esClient,
         bulkRequest,
@@ -110,12 +133,13 @@ describe('alert_conflict_resolver', () => {
         ruleName,
         ruleType,
       });
+      expect(result).toEqual(noUnresolvedErrors);
       expect(logger.error).not.toHaveBeenCalled();
     });
 
     test('no errors in bulk results', async () => {
-      const { bulkRequest, bulkResponse } = getReqRes('c is is c is');
-      await resolveAlertConflicts({
+      const { bulkRequest, bulkResponse } = getReqRes('c is is c is d');
+      const result = await resolveAlertConflicts({
         logger,
         esClient,
         bulkRequest,
@@ -124,7 +148,9 @@ describe('alert_conflict_resolver', () => {
         ruleName,
         ruleType,
       });
+      expect(result).toEqual(noUnresolvedErrors);
       expect(logger.error).not.toHaveBeenCalled();
+      expect(esClient.bulk).not.toHaveBeenCalled();
     });
 
     test('one conflicted doc', async () => {
@@ -140,7 +166,7 @@ describe('alert_conflict_resolver', () => {
         items: [getBulkResItem(0)],
       });
 
-      await resolveAlertConflicts({
+      const result = await resolveAlertConflicts({
         logger,
         esClient,
         bulkRequest,
@@ -150,6 +176,7 @@ describe('alert_conflict_resolver', () => {
         ruleType,
       });
 
+      expect(result).toEqual(noUnresolvedErrors);
       expect(logger.error).toHaveBeenNthCalledWith(
         1,
         `Error writing alerts ${ruleInfo}: 0 successful, 1 conflicts, 0 errors: `,
@@ -162,14 +189,15 @@ describe('alert_conflict_resolver', () => {
       );
       expect(logger.info).toHaveBeenNthCalledWith(
         1,
-        `Retrying bulk update of 1 conflicted alerts ${ruleInfo}`,
+        `Retrying bulk update of 1 alerts (retry 1 of 3): 1 conflicts, 0 retryable errors ${ruleInfo}`,
         logTags
       );
       expect(logger.info).toHaveBeenNthCalledWith(
         2,
-        `Retried bulk update of 1 conflicted alerts succeeded ${ruleInfo}`,
+        `Retried bulk update of 1 alerts succeeded ${ruleInfo}`,
         logTags
       );
+      expect(Math.random).not.toHaveBeenCalled();
     });
 
     test('one conflicted doc amonst other successes and errors', async () => {
@@ -185,7 +213,7 @@ describe('alert_conflict_resolver', () => {
         items: [getBulkResItem(2)],
       });
 
-      await resolveAlertConflicts({
+      const result = await resolveAlertConflicts({
         logger,
         esClient,
         bulkRequest,
@@ -195,6 +223,7 @@ describe('alert_conflict_resolver', () => {
         ruleType,
       });
 
+      expect(result).toEqual({ ...noUnresolvedErrors, permanentCount: 1 });
       expect(logger.error).toHaveBeenNthCalledWith(
         1,
         `Error writing alerts ${ruleInfo}: 2 successful, 1 conflicts, 1 errors: hallo`,
@@ -207,12 +236,12 @@ describe('alert_conflict_resolver', () => {
       );
       expect(logger.info).toHaveBeenNthCalledWith(
         1,
-        `Retrying bulk update of 1 conflicted alerts ${ruleInfo}`,
+        `Retrying bulk update of 1 alerts (retry 1 of 3): 1 conflicts, 0 retryable errors ${ruleInfo}`,
         logTags
       );
       expect(logger.info).toHaveBeenNthCalledWith(
         2,
-        `Retried bulk update of 1 conflicted alerts succeeded ${ruleInfo}`,
+        `Retried bulk update of 1 alerts succeeded ${ruleInfo}`,
         logTags
       );
     });
@@ -230,7 +259,7 @@ describe('alert_conflict_resolver', () => {
         items: [getBulkResItem(2), getBulkResItem(3), getBulkResItem(5)],
       });
 
-      await resolveAlertConflicts({
+      const result = await resolveAlertConflicts({
         logger,
         esClient,
         bulkRequest,
@@ -240,6 +269,7 @@ describe('alert_conflict_resolver', () => {
         ruleType,
       });
 
+      expect(result).toEqual({ ...noUnresolvedErrors, permanentCount: 1 });
       expect(logger.error).toHaveBeenNthCalledWith(
         1,
         `Error writing alerts ${ruleInfo}: 2 successful, 3 conflicts, 1 errors: hallo`,
@@ -262,12 +292,387 @@ describe('alert_conflict_resolver', () => {
       );
       expect(logger.info).toHaveBeenNthCalledWith(
         1,
-        `Retrying bulk update of 3 conflicted alerts ${ruleInfo}`,
+        `Retrying bulk update of 3 alerts (retry 1 of 3): 3 conflicts, 0 retryable errors ${ruleInfo}`,
         logTags
       );
       expect(logger.info).toHaveBeenNthCalledWith(
         2,
-        `Retried bulk update of 3 conflicted alerts succeeded ${ruleInfo}`,
+        `Retried bulk update of 3 alerts succeeded ${ruleInfo}`,
+        logTags
+      );
+    });
+
+    test('a conflicted doc alongside a delete op', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('d ic');
+
+      esClient.mget.mockResolvedValueOnce({
+        docs: [getMGetResDoc(2, alertDoc)],
+      });
+
+      esClient.bulk.mockResolvedValueOnce({
+        errors: false,
+        took: 0,
+        items: [getBulkResItem(2)],
+      });
+
+      const result = await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
+
+      expect(result).toEqual(noUnresolvedErrors);
+      expect(esClient.mget).toHaveBeenCalledWith(
+        expect.objectContaining({ docs: [{ _id: 'id-2', _index: 'index-2' }] })
+      );
+      expect(esClient.bulk).toHaveBeenCalledTimes(1);
+      expect(esClient.bulk.mock.calls[0][0]).toEqual({
+        refresh: 'wait_for',
+        index: 'some-index',
+        require_alias: true,
+        operations: [
+          {
+            index: {
+              _id: 'id-2',
+              _index: 'index-2',
+              if_seq_no: 18,
+              if_primary_term: 1,
+              require_alias: false,
+            },
+          },
+          alertDoc,
+        ],
+      });
+      expect(logger.info).toHaveBeenNthCalledWith(
+        2,
+        `Retried bulk update of 1 alerts succeeded ${ruleInfo}`,
+        logTags
+      );
+    });
+
+    test('retryable errors that succeed on retry', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('is ir iu ib cr');
+
+      esClient.bulk.mockResolvedValueOnce({
+        errors: false,
+        took: 0,
+        items: [
+          getBulkResItem(2),
+          getBulkResItem(3),
+          getBulkResItem(4),
+          getResponseItem('create', 5, false, 201),
+        ],
+      });
+
+      const result = await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
+
+      expect(result).toEqual(noUnresolvedErrors);
+      expect(esClient.mget).not.toHaveBeenCalled();
+      expect(esClient.bulk).toHaveBeenCalledTimes(1);
+      expect(esClient.bulk.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          operations: [
+            getIndexOp(2),
+            alertDoc,
+            getIndexOp(3),
+            alertDoc,
+            getIndexOp(4),
+            alertDoc,
+            { create: {} },
+            alertDoc,
+          ],
+        })
+      );
+      expect(Math.random).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenNthCalledWith(
+        1,
+        `Error writing alerts ${ruleInfo}: 1 successful, 0 conflicts, 4 errors: hallo; hallo; hallo; hallo`,
+        logTags
+      );
+      expect(logger.info).toHaveBeenNthCalledWith(
+        1,
+        `Retrying bulk update of 4 alerts (retry 1 of 3): 0 conflicts, 4 retryable errors ${ruleInfo}`,
+        logTags
+      );
+      expect(logger.info).toHaveBeenNthCalledWith(
+        2,
+        `Retried bulk update of 4 alerts succeeded ${ruleInfo}`,
+        logTags
+      );
+    });
+
+    test('a retryable delete op', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('dr');
+
+      esClient.bulk.mockResolvedValueOnce({
+        errors: false,
+        took: 0,
+        items: [getResponseItem('delete', 1, false, 200)],
+      });
+
+      const result = await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
+
+      expect(result).toEqual(noUnresolvedErrors);
+      expect(esClient.bulk.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ operations: [getDeleteOp(1)] })
+      );
+    });
+
+    test('a conflict and a retryable error in the same retry', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('ic ir');
+
+      esClient.mget.mockResolvedValueOnce({
+        docs: [getMGetResDoc(1, alertDoc)],
+      });
+
+      esClient.bulk.mockResolvedValueOnce({
+        errors: false,
+        took: 0,
+        items: [getBulkResItem(1), getBulkResItem(2)],
+      });
+
+      const result = await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
+
+      expect(result).toEqual(noUnresolvedErrors);
+      expect(esClient.mget).toHaveBeenCalledWith(
+        expect.objectContaining({ docs: [{ _id: 'id-1', _index: 'index-1' }] })
+      );
+      expect(esClient.bulk).toHaveBeenCalledTimes(1);
+      expect(logger.info).toHaveBeenNthCalledWith(
+        1,
+        `Retrying bulk update of 2 alerts (retry 1 of 3): 1 conflicts, 1 retryable errors ${ruleInfo}`,
+        logTags
+      );
+    });
+
+    test('a retry that only resolves some of the retryable errors', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('ir ir');
+
+      esClient.bulk
+        .mockResolvedValueOnce({
+          errors: true,
+          took: 0,
+          items: [
+            getBulkResItem(1),
+            getResponseItem('index', 2, true, 429, 'es_rejected_execution_exception'),
+          ],
+        })
+        .mockResolvedValueOnce({
+          errors: false,
+          took: 0,
+          items: [getBulkResItem(2)],
+        });
+
+      const result = await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
+
+      expect(result).toEqual(noUnresolvedErrors);
+      expect(esClient.bulk).toHaveBeenCalledTimes(2);
+      expect(esClient.bulk.mock.calls[1][0]).toEqual(
+        expect.objectContaining({ operations: [getIndexOp(2), alertDoc] })
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Retried bulk update of 2 alerts still had 1 errors ${ruleInfo}: 1 es_rejected_execution_exception`,
+        logTags
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        `Retrying bulk update of 1 alerts (retry 2 of 3): 0 conflicts, 1 retryable errors ${ruleInfo}`,
+        logTags
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        `Retried bulk update of 1 alerts succeeded ${ruleInfo}`,
+        logTags
+      );
+    });
+
+    test('a create conflict, which means the alert was already written', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('cc is');
+
+      const result = await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
+
+      expect(result).toEqual(noUnresolvedErrors);
+      expect(esClient.mget).not.toHaveBeenCalled();
+      expect(esClient.bulk).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Skipped creating 1 alerts that already exist ${ruleInfo}`,
+        logTags
+      );
+    });
+
+    test('errors that are not retried', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('ie is');
+
+      const result = await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
+
+      expect(result).toEqual({ ...noUnresolvedErrors, permanentCount: 1 });
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    test('server errors and missing indices, which are not retried', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('ix in is');
+
+      const result = await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
+
+      expect(result).toEqual({ ...noUnresolvedErrors, permanentCount: 2 });
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    test('a retry that fails with an error that is not retried', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('ir');
+
+      esClient.bulk.mockResolvedValueOnce({
+        errors: true,
+        took: 0,
+        items: [getResponseItem('index', 1, true, 400, 'mapper_parsing_exception')],
+      });
+
+      const result = await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
+
+      expect(result).toEqual({ ...noUnresolvedErrors, permanentCount: 1 });
+      expect(esClient.bulk).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Retried bulk update of 1 alerts still had 1 errors ${ruleInfo}: 1 mapper_parsing_exception`,
+        logTags
+      );
+    });
+  });
+
+  describe('reports unresolved errors', () => {
+    test('when retryable errors still fail after all retries', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('ir is');
+
+      esClient.bulk.mockResolvedValue({
+        errors: true,
+        took: 0,
+        items: [getResponseItem('index', 1, true, 429, 'es_rejected_execution_exception')],
+      });
+
+      const result = await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
+
+      expect(result).toEqual({
+        unresolvedCount: 1,
+        permanentCount: 0,
+        unresolvedErrorTypes: { es_rejected_execution_exception: 1 },
+      });
+      expect(esClient.bulk).toHaveBeenCalledTimes(3);
+      expect(Math.random).toHaveBeenCalledTimes(3);
+      expect(logger.info).toHaveBeenCalledWith(
+        `Retrying bulk update of 1 alerts (retry 3 of 3): 0 conflicts, 1 retryable errors ${ruleInfo}`,
+        logTags
+      );
+      expect(logger.error).toHaveBeenLastCalledWith(
+        `Bulk update of 1 alerts still failed after 3 retries ${ruleInfo}: 1 es_rejected_execution_exception`,
+        logTags
+      );
+    });
+
+    test('when conflicts still fail after all retries', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('ic');
+
+      esClient.mget.mockResolvedValue({
+        docs: [getMGetResDoc(1, alertDoc)],
+      });
+      esClient.bulk.mockResolvedValue({
+        errors: true,
+        took: 0,
+        items: [getResponseItem('index', 1, true, 409, 'version_conflict_engine_exception')],
+      });
+
+      const result = await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
+
+      expect(result).toEqual({
+        unresolvedCount: 1,
+        permanentCount: 0,
+        unresolvedErrorTypes: { version_conflict_engine_exception: 1 },
+      });
+      expect(esClient.mget).toHaveBeenCalledTimes(3);
+      expect(esClient.bulk).toHaveBeenCalledTimes(3);
+      expect(Math.random).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenLastCalledWith(
+        `Bulk update of 1 alerts still failed after 3 retries ${ruleInfo}: 1 version_conflict_engine_exception`,
         logTags
       );
     });
@@ -303,12 +708,21 @@ interface GetReqResResult {
 }
 
 /**
- * takes as input a string of c, is, ic, ie tokens and builds appropriate
+ * takes as input a string of the tokens below and builds appropriate
  * bulk request and response objects to use in the tests:
- * - c: create, ignored by the resolve logic
+ * - c: create with success
+ * - cc: create with conflict
+ * - cr: create with retryable error
+ * - d: delete with success
+ * - dr: delete with retryable error
  * - is: index with success
  * - ic: index with conflict
- * - ie: index with error but not conflict
+ * - ie: index with error that is not retried
+ * - ix: index with server error that is not a circuit breaker (500)
+ * - in: index with missing index (404)
+ * - ir: index with retryable error (429)
+ * - iu: index with retryable error (503)
+ * - ib: index with retryable error (circuit breaker)
  */
 function getReqRes(bulkOps: string): GetReqResResult {
   const ops = bulkOps.trim().split(/\s+/g);
@@ -328,10 +742,43 @@ function getReqRes(bulkOps: string): GetReqResResult {
   for (const op of ops) {
     id++;
     switch (op) {
-      // create, ignored by the resolve logic
+      // create with success
       case 'c':
         bulkRequest.operations.push(createOp, alertDoc);
         bulkResponse.items.push(getResponseItem('create', id, false, 200));
+        break;
+
+      // create with conflict
+      case 'cc':
+        bulkResponse.errors = true;
+        bulkRequest.operations.push(createOp, alertDoc);
+        bulkResponse.items.push(
+          getResponseItem('create', id, true, 409, 'version_conflict_engine_exception')
+        );
+        break;
+
+      // create with retryable error
+      case 'cr':
+        bulkResponse.errors = true;
+        bulkRequest.operations.push(createOp, alertDoc);
+        bulkResponse.items.push(
+          getResponseItem('create', id, true, 429, 'es_rejected_execution_exception')
+        );
+        break;
+
+      // delete with success
+      case 'd':
+        bulkRequest.operations.push(getDeleteOp(id));
+        bulkResponse.items.push(getResponseItem('delete', id, false, 200));
+        break;
+
+      // delete with retryable error
+      case 'dr':
+        bulkResponse.errors = true;
+        bulkRequest.operations.push(getDeleteOp(id));
+        bulkResponse.items.push(
+          getResponseItem('delete', id, true, 429, 'es_rejected_execution_exception')
+        );
         break;
 
       // index with success
@@ -344,14 +791,59 @@ function getReqRes(bulkOps: string): GetReqResResult {
       case 'ic':
         bulkResponse.errors = true;
         bulkRequest.operations.push(getIndexOp(id), alertDoc);
-        bulkResponse.items.push(getResponseItem('index', id, true, 409));
+        bulkResponse.items.push(
+          getResponseItem('index', id, true, 409, 'version_conflict_engine_exception')
+        );
         break;
 
-      // index with error but not conflict
+      // index with error that is not retried
       case 'ie':
         bulkResponse.errors = true;
         bulkRequest.operations.push(getIndexOp(id), alertDoc);
         bulkResponse.items.push(getResponseItem('index', id, true, 418)); // I'm a teapot
+        break;
+
+      // index with server error that is not a circuit breaker
+      case 'ix':
+        bulkResponse.errors = true;
+        bulkRequest.operations.push(getIndexOp(id), alertDoc);
+        bulkResponse.items.push(getResponseItem('index', id, true, 500, 'illegal_state_exception'));
+        break;
+
+      // index with missing index
+      case 'in':
+        bulkResponse.errors = true;
+        bulkRequest.operations.push(getIndexOp(id), alertDoc);
+        bulkResponse.items.push(
+          getResponseItem('index', id, true, 404, 'index_not_found_exception')
+        );
+        break;
+
+      // index with retryable error (429)
+      case 'ir':
+        bulkResponse.errors = true;
+        bulkRequest.operations.push(getIndexOp(id), alertDoc);
+        bulkResponse.items.push(
+          getResponseItem('index', id, true, 429, 'es_rejected_execution_exception')
+        );
+        break;
+
+      // index with retryable error (503)
+      case 'iu':
+        bulkResponse.errors = true;
+        bulkRequest.operations.push(getIndexOp(id), alertDoc);
+        bulkResponse.items.push(
+          getResponseItem('index', id, true, 503, 'unavailable_shards_exception')
+        );
+        break;
+
+      // index with retryable error (circuit breaker), matched by error type
+      case 'ib':
+        bulkResponse.errors = true;
+        bulkRequest.operations.push(getIndexOp(id), alertDoc);
+        bulkResponse.items.push(
+          getResponseItem('index', id, true, 500, 'circuit_breaking_exception')
+        );
         break;
 
       // developer error
@@ -384,6 +876,15 @@ function getIndexOp(id: number) {
   };
 }
 
+function getDeleteOp(id: number) {
+  return {
+    delete: {
+      _id: `id-${id}`,
+      _index: `index-${id}`,
+    },
+  };
+}
+
 function getBulkResponse(): BulkResponse {
   return {
     errors: false,
@@ -396,14 +897,15 @@ function getResponseItem(
   type: BulkOperationType,
   id: number,
   error: boolean,
-  status: number
+  status: number,
+  errorType: string = 'illegal_argument_exception'
 ): Partial<Record<BulkOperationType, BulkResponseItem>> {
   if (error) {
     return {
       [type]: {
         _index: `index-${id}`,
         _id: `id-${id}`,
-        error: { reason: 'hallo' },
+        error: { type: errorType, reason: 'hallo' },
         status,
       },
     };

@@ -68,7 +68,7 @@ import {
   getContinualAlertsQuery,
   AlertBuilder,
 } from './lib';
-import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
+import { formatErrorTypeCounts, resolveAlertConflicts } from './lib/alert_conflict_resolver';
 import { createEmptyTrackedAlerts } from './lib/get_tracked_alerts';
 import { reconcileTrackedAlertsWithState } from './lib/reconcile_tracked_alerts';
 import { getMaxAlertLimit } from '../../common';
@@ -456,20 +456,24 @@ export class AlertsClient<
       const bulkBody = alertBuilder.getBulkBody(alertsToIndex);
 
       try {
-        const response = await esClient.bulk({
-          // On serverless we can force a refresh to we don't wait for the longer refresh interval
-          // When too many refresh calls are done in a short period of time, they are throttled by stateless Elasticsearch
-          refresh: this.isServerless ? true : 'wait_for',
-          index: this.indexTemplateAndPattern.alias,
-          require_alias: !this.isUsingDataStreams(),
-          body: bulkBody,
-        });
+        const response = await retryTransientEsErrors(
+          () =>
+            esClient.bulk({
+              // On serverless we can force a refresh to we don't wait for the longer refresh interval
+              // When too many refresh calls are done in a short period of time, they are throttled by stateless Elasticsearch
+              refresh: this.isServerless ? true : 'wait_for',
+              index: this.indexTemplateAndPattern.alias,
+              require_alias: !this.isUsingDataStreams(),
+              body: bulkBody,
+            }),
+          { logger: this.options.logger }
+        );
 
         // If there were individual indexing errors, they will be returned in the success response
         if (response && response.errors) {
           this.throwIfHasClusterBlockException(response);
 
-          await resolveAlertConflicts({
+          const { unresolvedCount, unresolvedErrorTypes } = await resolveAlertConflicts({
             logger: this.options.logger,
             esClient,
             bulkRequest: {
@@ -483,6 +487,15 @@ export class AlertsClient<
             ruleName: this.options.rule.name,
             ruleType: this.ruleType.id,
           });
+
+          // task state, events and actions must not move ahead of alert docs that failed to write
+          if (unresolvedCount > 0) {
+            throw new Error(
+              `Failed to write ${unresolvedCount} of ${
+                alertsToIndex.length
+              } alerts: ${formatErrorTypeCounts(unresolvedErrorTypes)}`
+            );
+          }
         }
       } catch (err) {
         this.options.logger.error(
