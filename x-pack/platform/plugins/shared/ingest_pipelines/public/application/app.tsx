@@ -13,11 +13,7 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { useKibana } from '../shared_imports';
 
-import {
-  APP_CAPABILITIES,
-  APP_CLUSTER_REQUIRED_PRIVILEGE,
-  PLUGIN_ID,
-} from '../../common/constants';
+import { APP_CLUSTER_REQUIRED_PRIVILEGE } from '../../common/constants';
 
 import {
   PipelinesList,
@@ -48,8 +44,10 @@ export const AppWithoutRouter = () => {
 };
 
 export const App: FunctionComponent = () => {
-  const { history, application } = useKibana().services;
-  const canManage = application.capabilities[PLUGIN_ID]?.[APP_CAPABILITIES.manage] === true;
+  const {
+    history,
+    config: { canManage },
+  } = useKibana().services;
 
   if (!canManage) {
     return (
