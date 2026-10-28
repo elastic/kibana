@@ -27,7 +27,9 @@ const ALERT = {
   host: { name: 'h1' },
 };
 const KEY_HASH = hashKey(SPACE, buildPatternKeys(ALERT).wide);
-const [GEN0, GEN1] = generationIds(SPACE, KEY_HASH);
+// The step reads the clock for the day of the ids, so the clock is fixed for the whole file.
+const NOW = Date.parse('2026-10-26T12:00:00Z');
+const [GEN0, GEN1] = generationIds(SPACE, KEY_HASH, NOW);
 
 const baseInput = {
   autonomy: 'manual' as const,
@@ -58,6 +60,7 @@ const setup = ({
     | { falsePositive: number; truePositive: number }
     | 'fails',
 } = {}) => {
+  const logger = { warn: jest.fn() };
   const privileges = {
     assertCanRead: jest.fn(),
     assertCanManage: jest.fn(),
@@ -116,6 +119,7 @@ const setup = ({
           }),
         } as never),
       isGroupingEnabled: async () => groupingEnabled,
+      logger: logger as never,
     });
   const context = (input: Record<string, unknown>) =>
     ({
@@ -127,6 +131,7 @@ const setup = ({
       },
     } as unknown as StepHandlerContext<unknown, unknown>);
   return {
+    logger,
     service,
     privileges,
     management,
@@ -139,6 +144,14 @@ const setup = ({
         .output as unknown as StepOutput,
   };
 };
+
+beforeAll(() => {
+  jest.spyOn(Date, 'now').mockReturnValue(NOW);
+});
+
+afterAll(() => {
+  jest.restoreAllMocks();
+});
 
 describe('triage group false positives step', () => {
   it.each([
@@ -353,6 +366,28 @@ describe('triage group false positives step', () => {
       expect.objectContaining({ kind: 'overflow', alert_ids: ['a1', 'a2'] }),
     ]);
     expect(output.mints[0].proposal_id).not.toBe(GEN0);
+  });
+
+  it('logs a warning when a pattern has used every proposal id it can mint today', async () => {
+    const used = generationIds(SPACE, KEY_HASH, NOW).map((id) =>
+      openHead({ id, rootProposalId: id, status: 'expired' })
+    );
+    const { group, logger } = setup({ heads: used });
+
+    const output = await group({ ...baseInput, fp_candidate_ids: ['a1', 'a2'] });
+
+    expect(output.mints).toEqual([expect.objectContaining({ kind: 'overflow' })]);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('2 alert(s)'));
+  });
+
+  it('does not repeat the lookup warning when the proposal lookup was incomplete', async () => {
+    const { group, service, logger } = setup({ heads: [openHead()] });
+    service.list.mockResolvedValue({ proposals: [openHead()], total: 3 });
+
+    await group({ ...baseInput, fp_candidate_ids: ['a1', 'a2'] });
+
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('proposal lookup'));
   });
 
   it('tells the reviewer the alerts joined a proposal that failed to take them', async () => {

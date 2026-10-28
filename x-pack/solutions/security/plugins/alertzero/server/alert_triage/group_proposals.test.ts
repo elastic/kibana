@@ -11,7 +11,8 @@ import {
   GROUPED_PROPOSAL_JOIN_MARGIN_MS,
   GROUPED_PROPOSAL_LIST_HEADS_TERMS,
   GROUPED_PROPOSAL_MAX_ALERTS,
-  GROUPED_PROPOSAL_MAX_GENERATIONS,
+  GROUPED_PROPOSAL_LOOKUP_IDS_PER_KEY,
+  GROUPED_PROPOSAL_MAX_GENERATIONS_PER_DAY,
   GROUPED_PROPOSAL_MAX_REVISIONS,
 } from './constants';
 import {
@@ -19,6 +20,7 @@ import {
   groupFpCandidates,
   HeadsTruncatedError,
   isJoinableHead,
+  lookupIds,
   type GroupingDeps,
   type GroupingHead,
 } from './group_proposals';
@@ -26,7 +28,8 @@ import {
 const SPACE = 'default';
 const NOW = Date.parse('2026-10-26T12:00:00Z');
 const HOUR = 60 * 60 * 1000;
-const [GEN0, GEN1] = generationIds(SPACE, 'key-a');
+const DAY = 24 * HOUR;
+const [GEN0, GEN1] = generationIds(SPACE, 'key-a', NOW);
 
 const head = (overrides: Partial<GroupingHead> = {}): GroupingHead => ({
   proposalId: GEN0,
@@ -96,12 +99,12 @@ describe('groupFpCandidates', () => {
       { keyHash: 'key-b', alertIds: ['b1', 'b2'] },
     ]);
     expect(deps.listHeads).toHaveBeenCalledTimes(1);
-    expect(deps.listHeads.mock.calls[0][0]).toHaveLength(2 * GROUPED_PROPOSAL_MAX_GENERATIONS);
+    expect(deps.listHeads.mock.calls[0][0]).toHaveLength(2 * GROUPED_PROPOSAL_LOOKUP_IDS_PER_KEY);
   });
 
   it("partitions the head lookup so one terms query stays under Elasticsearch's clause limit", async () => {
     const keysNeeded =
-      Math.floor(GROUPED_PROPOSAL_LIST_HEADS_TERMS / GROUPED_PROPOSAL_MAX_GENERATIONS) + 1;
+      Math.floor(GROUPED_PROPOSAL_LIST_HEADS_TERMS / GROUPED_PROPOSAL_LOOKUP_IDS_PER_KEY) + 1;
     const { deps, run } = setup();
     await run(
       Array.from({ length: keysNeeded }, (_, i) => ({ keyHash: `key-${i}`, alertIds: [`a${i}`] }))
@@ -109,7 +112,7 @@ describe('groupFpCandidates', () => {
     expect(deps.listHeads.mock.calls.length).toBe(2);
     expect(deps.listHeads.mock.calls[0][0]).toHaveLength(GROUPED_PROPOSAL_LIST_HEADS_TERMS);
     expect(deps.listHeads.mock.calls[1][0]).toHaveLength(
-      keysNeeded * GROUPED_PROPOSAL_MAX_GENERATIONS - GROUPED_PROPOSAL_LIST_HEADS_TERMS
+      keysNeeded * GROUPED_PROPOSAL_LOOKUP_IDS_PER_KEY - GROUPED_PROPOSAL_LIST_HEADS_TERMS
     );
   });
 
@@ -169,8 +172,8 @@ describe('groupFpCandidates', () => {
     expect(plan.mints[0].proposalId).toBe(GEN1);
   });
 
-  it('mints under a random id when every generation exists', async () => {
-    const all = generationIds(SPACE, 'key-a').map((id) =>
+  it('mints under a random id when every id the key can mint today exists', async () => {
+    const all = generationIds(SPACE, 'key-a', NOW).map((id) =>
       head({ proposalId: id, rootProposalId: id, status: 'expired' })
     );
     const { run } = setup(all);
@@ -178,6 +181,90 @@ describe('groupFpCandidates', () => {
     expect(plan.mints).toEqual([
       { proposalId: 'random-0', alertIds: ['a1', 'a2'], kind: 'overflow' },
     ]);
+  });
+
+  describe('proposal ids by day', () => {
+    it('differ by day for the same key, and by key for the same day', () => {
+      expect(generationIds(SPACE, 'key-a', NOW)[0]).not.toBe(
+        generationIds(SPACE, 'key-a', NOW + DAY)[0]
+      );
+      expect(generationIds(SPACE, 'key-a', NOW)[0]).not.toBe(generationIds(SPACE, 'key-b', NOW)[0]);
+      expect(generationIds(SPACE, 'key-a', NOW)).toEqual(generationIds(SPACE, 'key-a', NOW + HOUR));
+    });
+
+    it('look back over the days a proposal can still take joins, and no further', () => {
+      const window = lookupIds(SPACE, 'key-a', NOW);
+      expect(window).toHaveLength(GROUPED_PROPOSAL_LOOKUP_IDS_PER_KEY);
+      expect(window).toEqual(expect.arrayContaining(generationIds(SPACE, 'key-a', NOW)));
+      expect(window).toEqual(expect.arrayContaining(generationIds(SPACE, 'key-a', NOW - 2 * DAY)));
+      expect(window).not.toEqual(
+        expect.arrayContaining(generationIds(SPACE, 'key-a', NOW - 3 * DAY))
+      );
+    });
+
+    it('join a head minted the day before, and mint the next one under the new day', async () => {
+      const midnight = Date.parse('2026-10-27T00:10:00Z');
+      const [yesterday] = generationIds(SPACE, 'key-a', midnight - DAY);
+      const [today] = generationIds(SPACE, 'key-a', midnight);
+      const open = head({
+        proposalId: yesterday,
+        rootProposalId: yesterday,
+        expiresAt: new Date(midnight + 60 * HOUR).toISOString(),
+      });
+      const joined = setup([open]);
+      const joinPlan = await groupFpCandidates({
+        keys: [{ keyHash: 'key-a', alertIds: ['a1'] }],
+        spaceId: SPACE,
+        now: midnight,
+        pool: false,
+        deps: joined.deps,
+      });
+      expect(joinPlan.joins[0].rootProposalId).toBe(yesterday);
+
+      const full = setup([{ ...open, revision: GROUPED_PROPOSAL_MAX_REVISIONS }]);
+      const mintPlan = await groupFpCandidates({
+        keys: [{ keyHash: 'key-a', alertIds: ['a1'] }],
+        spaceId: SPACE,
+        now: midnight,
+        pool: false,
+        deps: full.deps,
+      });
+      expect(mintPlan.mints[0].proposalId).toBe(today);
+    });
+
+    it('free the ids of a day the next day, so a key that used them all groups again', async () => {
+      const used = generationIds(SPACE, 'key-a', NOW).map((id) =>
+        head({ proposalId: id, rootProposalId: id, status: 'expired' })
+      );
+      expect(used).toHaveLength(GROUPED_PROPOSAL_MAX_GENERATIONS_PER_DAY);
+      const { deps } = setup(used);
+      const nextDay = await groupFpCandidates({
+        keys: [{ keyHash: 'key-a', alertIds: ['a1'] }],
+        spaceId: SPACE,
+        now: NOW + DAY,
+        pool: false,
+        deps,
+      });
+      expect(nextDay.mints).toEqual([
+        {
+          proposalId: generationIds(SPACE, 'key-a', NOW + DAY)[0],
+          alertIds: ['a1'],
+          kind: 'keyed',
+        },
+      ]);
+    });
+
+    it('use one day for every key of a batch', async () => {
+      const { run } = setup();
+      const plan = await run([
+        { keyHash: 'key-a', alertIds: ['a1', 'a2'] },
+        { keyHash: 'key-b', alertIds: ['b1', 'b2'] },
+      ]);
+      expect(plan.mints.map(({ proposalId }) => proposalId)).toEqual([
+        generationIds(SPACE, 'key-a', NOW)[0],
+        generationIds(SPACE, 'key-b', NOW)[0],
+      ]);
+    });
   });
 
   it('skips a head whose gate is no longer waiting or whose Investigation is closed', async () => {
@@ -199,7 +286,11 @@ describe('groupFpCandidates', () => {
         true
       );
       expect(plan.mints).toEqual([
-        { proposalId: generationIds(SPACE, 'key-c')[0], alertIds: ['c1', 'c2'], kind: 'keyed' },
+        {
+          proposalId: generationIds(SPACE, 'key-c', NOW)[0],
+          alertIds: ['c1', 'c2'],
+          kind: 'keyed',
+        },
         { proposalId: 'random-0', alertIds: ['a1', 'b1'], kind: 'pooled' },
       ]);
     });
@@ -298,7 +389,7 @@ describe('groupFpCandidates', () => {
     it('run a few at a time, not all at once', async () => {
       const keys = Array.from({ length: 12 }, (_, i) => `key-${i}`);
       const heads = keys.map((key) => {
-        const [root] = generationIds(SPACE, key);
+        const [root] = generationIds(SPACE, key, NOW);
         return head({ proposalId: root, rootProposalId: root });
       });
       let running = 0;

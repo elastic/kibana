@@ -76,16 +76,34 @@ export const GROUPED_PROPOSAL_JOIN_MARGIN_MS = 24 * 60 * 60 * 1000;
 /** Keys of one batch whose joins run at once. */
 export const GROUPED_PROPOSAL_JOIN_CONCURRENCY = 4;
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** How long a grouped proposal waits for a decision: the gate's default, as the review never sets one. */
+export const GROUPED_PROPOSAL_EXPIRY_MS = 72 * 60 * 60 * 1000;
+
 /**
- * Generations of one key the lookup reads. A key gains about one generation every 72 hours, so 200
- * cover about 18 months. Past that, the key gets random ids and no joins.
+ * Proposal ids carry the UTC day they were minted on, and the generation counter restarts each day.
+ * A proposal takes joins only until `GROUPED_PROPOSAL_JOIN_MARGIN_MS` before its deadline, so the
+ * lookup reads that many days back plus the current one. It must grow if the expiry does.
  */
-export const GROUPED_PROPOSAL_MAX_GENERATIONS = 200;
+export const GROUPED_PROPOSAL_LOOKBACK_DAYS =
+  Math.ceil((GROUPED_PROPOSAL_EXPIRY_MS - GROUPED_PROPOSAL_JOIN_MARGIN_MS) / DAY_MS) + 1;
+
+/**
+ * Proposals one key can mint in one UTC day. A key fills a proposal in hours (20 revisions at one
+ * join per sweep), and about 15 a day is the busiest case seen. Past this, the key gets random ids
+ * and no joins until the next day.
+ */
+export const GROUPED_PROPOSAL_MAX_GENERATIONS_PER_DAY = 50;
+
+/** Root ids one key adds to a head lookup. */
+export const GROUPED_PROPOSAL_LOOKUP_IDS_PER_KEY =
+  GROUPED_PROPOSAL_LOOKBACK_DAYS * GROUPED_PROPOSAL_MAX_GENERATIONS_PER_DAY;
 
 /**
  * Most root ids one head lookup sends as a `terms` clause. Elasticsearch's default
  * `indices.query.bool.max_clause_count` is 65,536; a batch of many keys times
- * `GROUPED_PROPOSAL_MAX_GENERATIONS` can exceed that in one call.
+ * `GROUPED_PROPOSAL_LOOKUP_IDS_PER_KEY` can exceed that in one call.
  */
 export const GROUPED_PROPOSAL_LIST_HEADS_TERMS = 10_000;
 

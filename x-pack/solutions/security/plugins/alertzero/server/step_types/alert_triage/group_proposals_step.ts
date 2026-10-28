@@ -346,6 +346,18 @@ export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsSte
           pool: true,
           deps: groupingDeps,
         });
+        // An incomplete lookup is logged by the planner. Here every id a key can mint today was used.
+        const overflowed = plan.mints.filter(({ kind }) => kind === 'overflow');
+        if (!plan.lookupIncomplete && overflowed.length > 0) {
+          deps.logger?.warn(
+            `alert_triage grouping: ${
+              overflowed.length
+            } pattern(s) used every proposal id they can mint today, so ${overflowed.reduce(
+              (sum, { alertIds }) => sum + alertIds.length,
+              0
+            )} alert(s) got proposals of their own and joined none`
+          );
+        }
         return {
           output: {
             ...empty,

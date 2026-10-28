@@ -13,7 +13,8 @@ import {
   GROUPED_PROPOSAL_JOIN_MARGIN_MS,
   GROUPED_PROPOSAL_LIST_HEADS_TERMS,
   GROUPED_PROPOSAL_MAX_ALERTS,
-  GROUPED_PROPOSAL_MAX_GENERATIONS,
+  GROUPED_PROPOSAL_LOOKBACK_DAYS,
+  GROUPED_PROPOSAL_MAX_GENERATIONS_PER_DAY,
   GROUPED_PROPOSAL_MAX_REVISIONS,
 } from './constants';
 
@@ -85,11 +86,24 @@ export interface GroupingPlan {
   lookupIncomplete?: boolean;
 }
 
-/** The ids of generations 0 to N of a key, in generation order. */
-export const generationIds = (spaceId: string, keyHash: string): string[] =>
-  Array.from({ length: GROUPED_PROPOSAL_MAX_GENERATIONS }, (_, generation) =>
-    buildProposalId({ spaceId, subjectKey: keyHash, generation })
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const utcDay = (timestamp: number): string => new Date(timestamp).toISOString().slice(0, 10);
+
+const idsOfDay = (spaceId: string, keyHash: string, day: string): string[] =>
+  Array.from({ length: GROUPED_PROPOSAL_MAX_GENERATIONS_PER_DAY }, (_, generation) =>
+    buildProposalId({ spaceId, subjectKey: `${keyHash}|${day}`, generation })
   );
+
+/** The ids a key can mint today, in generation order. */
+export const generationIds = (spaceId: string, keyHash: string, now: number): string[] =>
+  idsOfDay(spaceId, keyHash, utcDay(now));
+
+/** The ids a head lookup reads for a key: today's and those of the days a proposal can still take joins. */
+export const lookupIds = (spaceId: string, keyHash: string, now: number): string[] =>
+  Array.from({ length: GROUPED_PROPOSAL_LOOKBACK_DAYS }, (_, back) =>
+    idsOfDay(spaceId, keyHash, utcDay(now - (GROUPED_PROPOSAL_LOOKBACK_DAYS - 1 - back) * DAY_MS))
+  ).flat();
 
 /**
  * Whether a head takes `adding` more alerts. The deadline margin gives a joined alert time to be
@@ -176,10 +190,16 @@ export const groupFpCandidates = async ({
   pool: boolean;
   deps: GroupingDeps;
 }): Promise<GroupingPlan> => {
-  const idsByKey = new Map(keys.map(({ keyHash }) => [keyHash, generationIds(spaceId, keyHash)]));
-  const generationOf = new Map<string, { keyHash: string; generation: number }>();
-  for (const [keyHash, ids] of idsByKey) {
-    ids.forEach((id, generation) => generationOf.set(id, { keyHash, generation }));
+  // One day for the whole batch, so two keys cannot mint under different days.
+  const mintableByKey = new Map(
+    keys.map(({ keyHash }) => [keyHash, generationIds(spaceId, keyHash, now)])
+  );
+  // The position in the lookup is oldest day first, so joins fill the oldest open proposal first.
+  const generationOf = new Map<string, { keyHash: string; order: number }>();
+  for (const { keyHash } of keys) {
+    lookupIds(spaceId, keyHash, now).forEach((id, order) =>
+      generationOf.set(id, { keyHash, order })
+    );
   }
   let allHeads: GroupingHead[];
   try {
@@ -205,13 +225,13 @@ export const groupFpCandidates = async ({
       lookupIncomplete: true,
     };
   }
-  const headsByKey = new Map<string, Array<GroupingHead & { generation: number }>>();
+  const headsByKey = new Map<string, Array<GroupingHead & { order: number }>>();
   for (const head of allHeads) {
     const found = generationOf.get(head.rootProposalId);
     if (found) {
       headsByKey.set(found.keyHash, [
         ...(headsByKey.get(found.keyHash) ?? []),
-        { ...head, generation: found.generation },
+        { ...head, order: found.order },
       ]);
     }
   }
@@ -222,9 +242,7 @@ export const groupFpCandidates = async ({
     keys,
     GROUPED_PROPOSAL_JOIN_CONCURRENCY,
     async ({ keyHash, alertIds }) => {
-      const heads = [...(headsByKey.get(keyHash) ?? [])].sort(
-        (a, b) => a.generation - b.generation
-      );
+      const heads = [...(headsByKey.get(keyHash) ?? [])].sort((a, b) => a.order - b.order);
       let join: GroupedJoin | undefined;
       let failed = false;
       for (const head of heads) {
@@ -239,10 +257,9 @@ export const groupFpCandidates = async ({
       }
       if (join) return { join };
       if (pool && alertIds.length === 1 && !failed) return { pooled: alertIds };
-      const taken = new Set(heads.map(({ generation }) => generation));
-      const free = (idsByKey.get(keyHash) ?? []).findIndex(
-        (_, generation) => !taken.has(generation)
-      );
+      const taken = new Set(heads.map(({ rootProposalId }) => rootProposalId));
+      const mintable = mintableByKey.get(keyHash) ?? [];
+      const free = mintable.findIndex((id) => !taken.has(id));
       if (failed) {
         return {
           mint: { proposalId: deps.newId(), alertIds: [...alertIds], kind: 'failed_join' as const },
@@ -253,7 +270,7 @@ export const groupFpCandidates = async ({
           free === -1
             ? { proposalId: deps.newId(), alertIds: [...alertIds], kind: 'overflow' as const }
             : {
-                proposalId: buildProposalId({ spaceId, subjectKey: keyHash, generation: free }),
+                proposalId: mintable[free],
                 alertIds: [...alertIds],
                 kind: 'keyed' as const,
               },

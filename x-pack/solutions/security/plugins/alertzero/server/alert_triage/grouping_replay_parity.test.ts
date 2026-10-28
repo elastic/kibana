@@ -23,7 +23,7 @@ const START = Date.parse('2026-10-01T00:00:00Z');
  * The batches of a scenario, run through the planner over an in-memory proposal store: a proposal
  * is created for each mint, open for 72 hours, and every join is a revise of its head.
  */
-const replay = async ({ docs, batches }: ReplayParityScenario) => {
+const replay = async ({ docs, batches }: Pick<ReplayParityScenario, 'docs' | 'batches'>) => {
   const heads = new Map<string, GroupingHead>();
   const created: Array<{ root: string; hours: number }> = [];
   let joined = 0;
@@ -94,4 +94,34 @@ describe('the grouping planner matches the offline replay', () => {
       expect(await replay(scenario)).toEqual(scenario.expected);
     }
   );
+});
+
+// Written by hand, not part of the generated fixture. A pattern that comes back every 15 minutes
+// fills a proposal (20 revisions) in 5 hours. When proposal ids were numbered 0 to 199 for good, a
+// pattern like this used them all in 42 days and went back to one proposal per batch. The ids now
+// restart each UTC day, so 44 days of batches still make full proposals, and none of them is a
+// lone batch.
+describe('a pattern that returns every sweep', () => {
+  const SWEEPS = 4200; // 43.75 days of 15-minute sweeps: past the old 200 ids, 210 full proposals
+  const doc = {
+    'kibana.alert.rule.uuid': 'rule-1',
+    'kibana.alert.rule.revision': 1,
+    host: { os: { type: 'windows' } },
+    process: { executable: 'C:\\a\\run.exe', code_signature: { subject_name: 'Acme' } },
+  };
+
+  it('keeps joining past the 42 days the old numbering lasted', async () => {
+    const batches = Array.from({ length: SWEEPS }, (_, i) => ({
+      hours: i / 4,
+      ids: [`b${i}-1`, `b${i}-2`],
+    }));
+    const docs = Object.fromEntries(batches.flatMap(({ ids }) => ids.map((id) => [id, doc])));
+
+    const { proposals, joined } = await replay({ docs, batches });
+
+    // A proposal holds its first batch and 19 joins, 40 alerts, and the next batch starts another.
+    expect(proposals).toHaveLength(SWEEPS / GROUPED_PROPOSAL_MAX_REVISIONS);
+    expect(proposals.every(({ size, revisions }) => size === 40 && revisions === 20)).toBe(true);
+    expect(joined).toBe(SWEEPS * 2 - proposals.length * 2);
+  });
 });
