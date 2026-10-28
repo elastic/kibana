@@ -15,13 +15,6 @@ import { linkedRulesQueryOptions } from '../model/linked_rules_query_options';
 
 export const LinkedRulesWarning = ({ workflowIds }: { workflowIds: string[] }) => {
   const api = useWorkflowsApi();
-  const { data, isError, isLoading } = useQuery(linkedRulesQueryOptions(api, workflowIds));
-  return (
-    <LinkedRulesCallout
-      workflowCount={workflowIds.length}
-      data={data}
-      isError={isError}
-      isLoading={isLoading}
-    />
-  );
+  const { data, isError } = useQuery(linkedRulesQueryOptions(api, workflowIds));
+  return <LinkedRulesCallout workflowCount={workflowIds.length} data={data} isError={isError} />;
 };

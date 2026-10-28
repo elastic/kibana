@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { KQLSyntaxError } from '@kbn/es-query';
@@ -608,6 +609,23 @@ describe('Internal Routes', () => {
     expect(response.ok).toHaveBeenCalledWith({
       body: { total: 12, rules: [{ id: 'rule-1', name: 'Rule 1', ruleTypeId: 'siem.queryRule' }] },
     });
+  });
+
+  it('should return no linked rules when the user cannot read any rule types', async () => {
+    mockRulesFind.mockRejectedValue(
+      Boom.forbidden('Unauthorized to find rules for any rule types.')
+    );
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({ body: { ids: ['wf-1'] } });
+
+    await routeHandlers[`POST:/internal/workflows/_linked_rules`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.ok).toHaveBeenCalledWith({ body: { total: 0, rules: [] } });
   });
 
   it('rejects non-integer workflow history page values at route validation', () => {

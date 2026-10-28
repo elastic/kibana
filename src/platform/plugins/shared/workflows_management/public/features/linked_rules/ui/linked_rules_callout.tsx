@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiLink, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import type { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -33,20 +33,10 @@ interface LinkedRulesCalloutProps {
   workflowCount: number;
   data?: GetLinkedRulesResponse;
   isError: boolean;
-  isLoading?: boolean;
 }
 
-export const LinkedRulesCallout = ({
-  workflowCount,
-  data,
-  isError,
-  isLoading = false,
-}: LinkedRulesCalloutProps) => {
+export const LinkedRulesCallout = ({ workflowCount, data, isError }: LinkedRulesCalloutProps) => {
   const { application } = useKibana().services;
-
-  if (isLoading) {
-    return <EuiLoadingSpinner size="m" data-test-subj="workflowLinkedRulesLoading" />;
-  }
 
   if (isError) {
     return (

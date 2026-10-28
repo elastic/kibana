@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import { systemConnectorActionRefPrefix } from '@kbn/alerting-plugin/common';
 import { schema } from '@kbn/config-schema';
 import { escapeQuotes } from '@kbn/es-query';
@@ -71,6 +72,9 @@ export function registerGetLinkedRulesRoute(deps: RouteDependencies) {
             },
           });
         } catch (error) {
+          if (Boom.isBoom(error) && error.output.statusCode === 403) {
+            return response.ok({ body: { total: 0, rules: [] } });
+          }
           return handleRouteError(response, error);
         }
       })
