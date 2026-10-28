@@ -314,9 +314,84 @@ describe('writeHuntEvidence', () => {
 
     const [{ script }] = esClient.update.mock.calls[0];
     expect(script.source).toContain(
-      'el.coverage_pending = params.coverage_pending && ids.size() <= params.max_ids;'
+      'boolean pending = params.coverage_pending && ids.size() <= params.max_ids;'
     );
     expect(script.params.coverage_pending).toBe(true);
+  });
+
+  describe('pending techniques', () => {
+    const retryable = {
+      spaceId: 'default',
+      reportId: 'report-1',
+      runId: 'run-1',
+      hasConfirmedHit: false,
+      completeness: 'incomplete_retryable' as const,
+      totalHits: 0,
+    };
+
+    it("sends the run's pending ids so they replace what the report recorded", async () => {
+      const esClient = makeEsClient();
+
+      await write(esClient, {
+        ...retryable,
+        searchedTechniqueIds: ['T1001'],
+        pendingTechniqueIds: ['T1002', 'T1003'],
+      });
+
+      const [{ script }] = esClient.update.mock.calls[0];
+      expect(script.params.pending_technique_ids).toEqual(['T1002', 'T1003']);
+      expect(script.source).toContain('el.pending_technique_ids = pendingIds;');
+    });
+
+    it('sends null when Tier 2 did not run, so the report keeps what it recorded', async () => {
+      const esClient = makeEsClient();
+
+      await write(esClient, { ...retryable, hasConfirmedHit: true, searchedTechniqueIds: [] });
+
+      expect(esClient.update.mock.calls[0][0].script.params.pending_technique_ids).toBeNull();
+      expect(esClient.update.mock.calls[0][0].script.source).toContain(
+        'params.pending_technique_ids != null'
+      );
+    });
+
+    it('clears the pending ids whenever coverage is settled', async () => {
+      const esClient = makeEsClient();
+
+      await write(esClient, {
+        ...retryable,
+        completeness: 'complete',
+        searchedTechniqueIds: ['T1001'],
+        pendingTechniqueIds: [],
+      });
+
+      expect(esClient.update.mock.calls[0][0].script.source).toContain(
+        'el.pending_technique_ids = new ArrayList();'
+      );
+    });
+
+    it('records pending ids even when the run searched nothing and found nothing', async () => {
+      const esClient = makeEsClient();
+
+      await write(esClient, {
+        ...retryable,
+        searchedTechniqueIds: [],
+        pendingTechniqueIds: ['T1002'],
+      });
+
+      expect(esClient.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('still writes nothing when the run searched nothing and left nothing pending', async () => {
+      const esClient = makeEsClient();
+
+      await write(esClient, {
+        ...retryable,
+        searchedTechniqueIds: [],
+        pendingTechniqueIds: [],
+      });
+
+      expect(esClient.update).not.toHaveBeenCalled();
+    });
   });
 
   it('warns when the cap settled a run that wanted to continue', async () => {

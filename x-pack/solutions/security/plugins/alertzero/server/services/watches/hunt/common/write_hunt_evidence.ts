@@ -69,9 +69,12 @@ export const deriveLastHuntStatus = ({
  *
  * Two groups of keys with different lifetimes. The stamp (`last_hunt_*`) is written only when
  * `params.stamp` is true: it is the hunt-once gate and a run that must be retried has to leave it
- * unset. The coverage ledger (`hunted_technique_ids`, `coverage_pending`) is written on every run:
- * ids are unioned with what earlier runs recorded, so a later run can skip them, and the cap keeps
- * the array within the contract's bound.
+ * unset. The coverage ledger (`hunted_technique_ids`, `pending_technique_ids`,
+ * `coverage_pending`) is written on every run: searched ids are unioned with what earlier runs
+ * recorded, so a later run can skip them, and the cap keeps the array within the contract's bound.
+ * The pending ids are the techniques a later run still owes, replaced by each run that reached
+ * Tier 2 (it saw every earlier pending id) and left alone by one that did not. They exist only
+ * while coverage is pending, so a settled report carries none.
  *
  * Two guards keep the stored state honest. A continuation (the element is `coverage_pending`)
  * never downgrades a `hit`: it skipped the techniques the hit came from, so its own `clean` or
@@ -101,7 +104,15 @@ for (int i = 0; i < ctx._source.evidence.size(); i++) {
     List capped = new ArrayList();
     for (def id : ids) { if (capped.size() < params.max_ids) { capped.add(id); } }
     el.hunted_technique_ids = capped;
-    el.coverage_pending = params.coverage_pending && ids.size() <= params.max_ids;
+    boolean pending = params.coverage_pending && ids.size() <= params.max_ids;
+    el.coverage_pending = pending;
+    if (!pending) {
+      el.pending_technique_ids = new ArrayList();
+    } else if (params.pending_technique_ids != null) {
+      List pendingIds = new ArrayList();
+      for (def id : params.pending_technique_ids) { if (pendingIds.size() < params.max_ids) { pendingIds.add(id); } }
+      el.pending_technique_ids = pendingIds;
+    }
     found = true;
   }
 }
@@ -117,7 +128,13 @@ if (!found) {
   List capped = new ArrayList();
   for (def id : params.searched_technique_ids) { if (capped.size() < params.max_ids) { capped.add(id); } }
   el.hunted_technique_ids = capped;
-  el.coverage_pending = params.coverage_pending && params.searched_technique_ids.size() <= params.max_ids;
+  boolean pending = params.coverage_pending && params.searched_technique_ids.size() <= params.max_ids;
+  el.coverage_pending = pending;
+  List pendingIds = new ArrayList();
+  if (pending && params.pending_technique_ids != null) {
+    for (def id : params.pending_technique_ids) { if (pendingIds.size() < params.max_ids) { pendingIds.add(id); } }
+  }
+  el.pending_technique_ids = pendingIds;
   ctx._source.evidence.add(el);
 }
 `.trim();
@@ -141,6 +158,11 @@ export interface WriteHuntEvidenceParams {
   totalHits: number;
   /** Techniques this run searched, unioned into the report's per-space coverage ledger. */
   searchedTechniqueIds?: string[];
+  /**
+   * Techniques this run could not search but a later one still should. Replaces what the report
+   * recorded; leave it undefined when Tier 2 did not run, which keeps the recorded list.
+   */
+  pendingTechniqueIds?: string[];
 }
 
 /**
@@ -175,13 +197,17 @@ export const writeHuntEvidence = async (
     completeness,
     totalHits,
     searchedTechniqueIds = [],
+    pendingTechniqueIds,
   }: WriteHuntEvidenceParams,
   logger: Logger
 ): Promise<void> => {
   const stamp = shouldStampHunt({ hasConfirmedHit, completeness });
-  // A retryable run that found nothing and searched nothing (a blocked scope, no model) has
-  // nothing to record: no stamp, and a ledger with no ids says nothing a later run could use.
-  if (!stamp && searchedTechniqueIds.length === 0) return;
+  // A retryable run that found nothing, searched nothing and left nothing pending (a blocked
+  // scope, no model) has nothing to record: no stamp, and a ledger with no ids says nothing a
+  // later run could use.
+  if (!stamp && searchedTechniqueIds.length === 0 && (pendingTechniqueIds ?? []).length === 0) {
+    return;
+  }
 
   const coveragePending = completeness === 'incomplete_retryable';
   const response = await esClient.update<unknown, unknown, LedgerSource>({
@@ -201,6 +227,7 @@ export const writeHuntEvidence = async (
         last_hunt_run_id: runId,
         last_hunt_event_hit_count: totalHits,
         searched_technique_ids: searchedTechniqueIds,
+        pending_technique_ids: pendingTechniqueIds ?? null,
         coverage_pending: coveragePending,
         max_ids: MAX_HUNT_TECHNIQUE_IDS,
       },
