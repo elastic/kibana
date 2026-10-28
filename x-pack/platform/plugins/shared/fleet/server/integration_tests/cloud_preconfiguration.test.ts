@@ -55,72 +55,56 @@ describe('Fleet cloud preconfiguration', () => {
 
     esServer = await startES();
     const startOrRestartKibana = async (kbnConfig: any = defaultKbnConfig) => {
-      const maxTries = 3;
-      let currentTry = 0;
+      if (kbnServer) {
+        await kbnServer.stop();
+      }
 
-      const startOrRestart = async () => {
-        if (kbnServer) {
-          await kbnServer.stop();
-        }
-
-        const root = createRootWithCorePlugins(
-          {
-            xpack: {
-              ...kbnConfig.xpack,
-              fleet: {
-                ...kbnConfig.xpack.fleet,
-                registryUrl,
-              },
-            },
-            logging: {
-              appenders: {
-                file: {
-                  type: 'file',
-                  fileName: logFilePath,
-                  layout: {
-                    type: 'json',
-                  },
-                },
-              },
-              loggers: [
-                {
-                  name: 'root',
-                  appenders: ['file'],
-                },
-                {
-                  name: 'plugins.fleet',
-                  level: 'all',
-                },
-              ],
+      const root = createRootWithCorePlugins(
+        {
+          xpack: {
+            ...kbnConfig.xpack,
+            fleet: {
+              ...kbnConfig.xpack.fleet,
+              registryUrl,
             },
           },
-          { oss: false }
-        );
+          logging: {
+            appenders: {
+              file: {
+                type: 'file',
+                fileName: logFilePath,
+                layout: {
+                  type: 'json',
+                },
+              },
+            },
+            loggers: [
+              {
+                name: 'root',
+                appenders: ['file'],
+              },
+              {
+                name: 'plugins.fleet',
+                level: 'all',
+              },
+            ],
+          },
+        },
+        { oss: false }
+      );
 
-        await root.preboot();
-        const coreSetup = await root.setup();
-        const coreStart = await root.start();
+      await root.preboot();
+      const coreSetup = await root.setup();
+      const coreStart = await root.start();
 
-        kbnServer = {
-          root,
-          coreSetup,
-          coreStart,
-          stop: async () => await root.shutdown(),
-        };
-
-        await waitForFleetSetup(kbnServer.root);
+      kbnServer = {
+        root,
+        coreSetup,
+        coreStart,
+        stop: async () => await root.shutdown(),
       };
 
-      try {
-        currentTry++;
-        await startOrRestart();
-      } catch (e) {
-        if (currentTry < maxTries) {
-          await startOrRestart();
-        } else {
-          throw e;
-        }
-      }
+      await waitForFleetSetup(kbnServer.root);
     };
 
     await startOrRestartKibana();

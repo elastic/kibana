@@ -28,8 +28,12 @@ export interface CustomContentPanelAddRequest extends PanelResolutionRequestBase
   renderer: 'custom_content';
   /** What to display. */
   nlQuery: string;
-  /** ES|QL query feeding the template. Omit for static content. */
+  /** ES|QL query feeding the template. Wins over `hasData`. */
   esql?: string;
+  /** True: generate the query from `nlQuery`. False: static content with no query. Always stated. */
+  hasData: boolean;
+  /** Index, alias or data stream to generate the query from. */
+  index?: string;
   existingPanel?: undefined;
 }
 
@@ -41,6 +45,12 @@ export interface CustomContentPanelEditRequest extends PanelResolutionRequestBas
   nlQuery?: string;
   /** New ES|QL query. Omit to keep the existing query; pass `null` to remove it. */
   esql?: string | null;
+  /** True: ensure the panel has data, generating a query only when it has none. False: remove it. */
+  hasData?: boolean;
+  /** Regenerate the query from `nlQuery`, keeping the parts the request does not change. */
+  regenerateESQL?: boolean;
+  /** Index, alias or data stream to generate the query from. */
+  index?: string;
 }
 
 /** Request to generate or refine a custom content panel's template; `existingPanel` tells them apart. */
@@ -70,7 +80,26 @@ const customContentPanelContentSchema = z.object({
     .nullable()
     .optional()
     .describe(
-      'ES|QL query whose result rows feed the template. Omit for static content — it is not generated for you. Build it with the generate_esql tool rather than writing it yourself; the panel fails if Elasticsearch rejects it. On an existing panel: omit to keep the existing query; pass null to remove it.'
+      'An ES|QL query the user supplied verbatim; it wins over hasData and, on an existing panel, replaces the current one (omit to keep it, pass null to remove it). Do not write a query yourself; set hasData to true and let the server generate it.'
+    ),
+  hasData: z
+    .boolean()
+    .optional()
+    .describe(
+      'Required for a new panel: true when it shows live Elasticsearch values, so the server generates the ES|QL query from "query" (and "index"); false for static content such as a banner, a legend or a note, which has no query. Always state which one it is. On an existing panel: true ensures it has data, generating a query from "query" only when it has none; false removes the query so the panel is static; omit to keep the current data state.'
+    ),
+  regenerateESQL: z
+    .boolean()
+    .optional()
+    .describe(
+      'Existing panel only. Set true when the edit changes what the panel shows: the server regenerates the ES|QL query from "query", keeping the parts the request does not change. Omit for layout, copy and style edits, which keep the current query. Requires "query".'
+    ),
+  index: z
+    .string()
+    .max(256)
+    .optional()
+    .describe(
+      'Exact index, alias, or data stream the data comes from. Pass it whenever known, together with hasData: true; on an existing panel, when regenerating or adding data.'
     ),
 });
 

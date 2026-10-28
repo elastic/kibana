@@ -10,7 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { NIGHTSHIFT_SETTINGS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import type { NightshiftSettingsLocatorParams } from '@kbn/nightshift-shared';
-import type { RunQuotaGroup } from '@kbn/significant-events-plugin/common';
+import { isRunQuotaReached, type RunQuotaGroup } from '@kbn/significant-events-plugin/common';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useRunQuotas } from '../../../hooks/use_significant_events_run_quotas';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -31,8 +31,6 @@ const RUN_QUOTA_GROUP_LABELS: Record<RunQuotaGroup, string> = {
   ),
 };
 
-const isFiniteRunLimit = (limit: number): boolean => limit > 0;
-
 interface RunQuotaExhaustionCalloutProps {
   enabled: boolean;
   limits: Record<RunQuotaGroup, number>;
@@ -51,9 +49,9 @@ export const getExhaustedRunQuotaGroups = ({
   RunQuotaExhaustionCalloutProps,
   'enabled' | 'limits' | 'counts' | 'groups'
 >): RunQuotaGroup[] =>
-  enabled
-    ? groups.filter((group) => isFiniteRunLimit(limits[group]) && counts[group] >= limits[group])
-    : [];
+  groups.filter((group) =>
+    isRunQuotaReached({ enabled, limit: limits[group], count: counts[group] })
+  );
 
 export const getRunQuotaSettingsTab = (
   groups: readonly RunQuotaGroup[]

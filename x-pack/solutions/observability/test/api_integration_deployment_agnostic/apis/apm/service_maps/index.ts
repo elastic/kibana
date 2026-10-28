@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
   describe('service_maps', () => {
     loadTestFile(require.resolve('./service_maps.spec.ts'));
     loadTestFile(require.resolve('./service_maps_kuery_filter.spec.ts'));
+    loadTestFile(require.resolve('./service_maps_connection.spec.ts'));
   });
 }

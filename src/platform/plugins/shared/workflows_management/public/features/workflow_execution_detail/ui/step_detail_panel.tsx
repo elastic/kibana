@@ -116,7 +116,7 @@ interface StepResumeActionProps {
 }
 
 /**
- * Resume button for a waiting child step. The run's own wait is resumed from the header,
+ * Resume button for a waiting child step. The run's own wait is resumed from the tree row,
  * so the step panel only carries child runs.
  */
 const StepResumeAction = ({
