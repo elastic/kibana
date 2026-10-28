@@ -217,7 +217,7 @@ steps:
     type: data.set
     with:
       rule_line: "**Rule:** [{{ steps.fetch_rule.output.name }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ inputs.rule_uuid }}) (`{{ inputs.rule_uuid }}`)"
-      fp_summary: "{% if inputs.total_alert_count > 0 %}Analysts closed {{ inputs.total_fp_count }} of {{ inputs.total_alert_count }} alerts ({{ inputs.total_fp_count | times: 100 | divided_by: inputs.total_alert_count | round }}%) as false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. {{ inputs.fp_count }} of them are not reviewed yet.{% else %}Analysts closed {{ inputs.fp_count }} alerts as false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.{% endif %}"
+      fp_summary: "{% if inputs.total_alert_count > 0 %}{{ inputs.total_fp_count }} of {{ inputs.total_alert_count }} alerts ({{ inputs.total_fp_count | times: 100 | divided_by: inputs.total_alert_count | round }}%) were judged false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. {{ inputs.fp_count }} of them are not reviewed yet. Some were closed by analysts and some were classified by Alert Triage and may still be open.{% else %}{{ inputs.fp_count }} alerts were judged false positives, closed by analysts or classified by Alert Triage, in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.{% endif %}"
 
   # Manual mode only: ask the analyst before the agent diagnoses this rule. Assisted
   # mode skips this step and goes directly to diagnosis.
@@ -390,15 +390,16 @@ steps:
         Use the [/investigate-rule](skill://investigate-rule) skill to investigate
         rule_id "{{ steps.fetch_rule.output.rule_id }}" ({{ steps.fetch_rule.output.name }}).
 
-        {{ inputs.fp_count }} alerts from this rule were closed as false positives
-        during the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. Their document ids
+        {{ inputs.fp_count }} alerts from this rule were judged false positives
+        (closed by analysts, or classified by Alert Triage and possibly still open) during the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. Their document ids
         {%- if inputs.fp_count > inputs.alert_ids.size %} (newest {{ inputs.alert_ids.size }} of {{ inputs.fp_count }}){%- endif %}:
         ["{{ inputs.alert_ids | join: '", "' }}"]
 
         Retrieve exactly these alerts with the investigate-rule.get_alerts_by_ids
         tool, passing the rule's investigation_fields as additional_fields, and use
-        them as the confirmed false positives grounding the diagnosis; do not
-        re-derive the closed set. Return one structured tuning recommendation.
+        them as the false positives grounding the diagnosis, checking each alert's
+        status and tags before treating it as analyst-confirmed; do not
+        re-derive the set. Return one structured tuning recommendation.
 
         These ids are the whole dataset, so do not run the security.alerts queries:
         they would re-fetch alerts already in hand. Base the volume and entity
