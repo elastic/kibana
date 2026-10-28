@@ -8,6 +8,8 @@
  */
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import deepEqual from 'fast-deep-equal';
+import { isPlainObject } from 'lodash';
 import {
   apiComparesSerializedState,
   apiHasType,
@@ -22,6 +24,19 @@ import { diffDashboardSettings } from './settings_manager';
 import { diffUnifiedSearchState } from './unified_search_manager';
 
 const getRefId = (config?: object) => (config && 'ref_id' in config ? config.ref_id : undefined);
+
+const omitUndefinedKeysDeep = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(omitUndefinedKeysDeep);
+  if (!isPlainObject(value)) return value;
+  return Object.fromEntries(
+    Object.entries(value as object)
+      .filter(([, entry]) => entry !== undefined)
+      .map(([key, entry]) => [key, omitUndefinedKeysDeep(entry)])
+  );
+};
+
+const areConfigsDeepEqual = (baseline?: object, current?: object) =>
+  deepEqual(omitUndefinedKeysDeep(baseline), omitUndefinedKeysDeep(current));
 
 // The baseline is usually the same last saved state object on every compare, and states are
 // never mutated in place, so its deserialized layout is computed once.
@@ -72,10 +87,10 @@ const diffLayout = (
     }
     // a panel that has not loaded is compared with its type's comparer
     const typeComparer = currentType ? panelTypeComparers?.[currentType] : undefined;
-    // Until the comparer loads there is nothing to compare with, and loading it re-compares. A type
-    // with no definition renders an error panel, whose config cannot change.
-    if (!typeComparer) return false;
-    return !typeComparer(baselinePanel, currentPanel);
+    if (typeComparer) return !typeComparer(baselinePanel, currentPanel);
+    // Until the comparer loads, compare the configs as they are, so a change is not missed. This may
+    // report an equivalent config as changed; loading the comparer re-compares.
+    return !areConfigsDeepEqual(baselinePanel, currentPanel);
   };
 
   const { hasPanelChanges, hasPinnedPanelChanges } = getLayoutChanges(

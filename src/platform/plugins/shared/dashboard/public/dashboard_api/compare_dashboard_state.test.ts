@@ -223,9 +223,22 @@ describe('diffDashboardStates', () => {
       });
     });
 
-    it('reports no config change for a panel whose type comparer has not loaded', () => {
-      const baseline = state({ panels: [lensPanel({ id: 'panel-1' })] });
+    it('deep compares a panel whose type comparer has not loaded', () => {
+      const baseline = state({
+        panels: [lensPanel({ id: 'panel-1', config: { title: 'Count' } })],
+      });
       const current = state({ panels: [lensPanel({ id: 'panel-1', config: { title: 'Sum' } })] });
+
+      expect(diffDashboardStates(baseline, current)).toEqual({ panels: current.panels });
+    });
+
+    it('ignores undefined keys when deep comparing a panel whose type comparer has not loaded', () => {
+      const baseline = state({
+        panels: [lensPanel({ id: 'panel-1', config: { title: 'Count' } })],
+      });
+      const current = state({
+        panels: [lensPanel({ id: 'panel-1', config: { title: 'Count', description: undefined } })],
+      });
 
       expect(diffDashboardStates(baseline, current)).toEqual({});
     });
