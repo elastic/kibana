@@ -18,10 +18,10 @@ gated by the Nightshift feature privileges: reads need `read_nightshift`, writes
 | Method | Path | Privilege | Notes |
 | --- | --- | --- | --- |
 | `GET` | `/internal/nightshift/sources?page&per_page&search&enabled` | read | Paginated catalog, sorted by title. Does not fetch views. `search` matches titles that contain every word, in any order, ignoring case; the last word may be a partial word. `ids` narrows the list to those sources; `search`, `enabled` and paging apply to them. |
-| `POST` | `/internal/nightshift/sources` | manage | Validates the query, derives `type`, writes the saved object, creates the view |
+| `POST` | `/internal/nightshift/sources` | manage | Validates the query, derives `type`, writes the saved object, creates the view. Takes `enabled` (default `true`) to create the source switched off |
 | `POST` | `/internal/nightshift/sources/_validate` | manage | Runs the create checks on `{ esql }` without writing; answers `{ valid: true, type, index_exists }` or `{ valid: false, error }` |
 | `GET` | `/internal/nightshift/sources/{sourceId}` | read | Source plus view health, including a `FROM <view> \| LIMIT 0` probe for `unresolvable` |
-| `PUT` | `/internal/nightshift/sources/{sourceId}` | manage | Full replace of `title`, `description`, `tags`, `esql`; always re-puts the view |
+| `PUT` | `/internal/nightshift/sources/{sourceId}` | manage | Full replace of `title`, `description`, `tags`, `esql`; always re-puts the view. Does not take `enabled` |
 | `DELETE` | `/internal/nightshift/sources/{sourceId}` | manage | Deletes the view (404 ignored), then the saved object. The engine knowledge of the source is cleaned up asynchronously; a failed cleanup is logged and retried by the sync sweep, which does not run while maintenance is paused |
 | `POST` | `/internal/nightshift/sources/{sourceId}/_enable` | manage | Flips `enabled` only |
 | `POST` | `/internal/nightshift/sources/{sourceId}/_disable` | manage | Flips `enabled` only |
@@ -118,6 +118,12 @@ cancel onboarding, skip the source when picking candidates, re-onboard after a q
 The plugin cannot call engines directly without reintroducing the dependency cycle it exists to
 avoid. Engines that need to react right away subscribe through `setup.onSourceChange` (see
 [Engine access](#engine-access)); the reconcile stays as the safety net.
+
+A source is created enabled unless `POST` sends `enabled: false`. Engines see a source created
+disabled like any other disabled source, and start onboarding it when it is enabled later. `enabled`
+belongs to creation: the `PUT` body does not take it, so it is rejected like any other unknown key,
+and an update keeps the stored state. `_enable` and `_disable` are the only way to change it
+afterwards.
 
 ## Elasticsearch privileges
 
