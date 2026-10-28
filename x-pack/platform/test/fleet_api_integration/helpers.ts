@@ -303,6 +303,24 @@ async function getPolicyBaseIdBackfillTask(providerContext: FtrProviderContext) 
   return res.found ? res._source : undefined;
 }
 
+const FLEET_STARTUP_SETUP_SETTLED_SUMMARIES = ['Fleet is available', 'Fleet setup failed'];
+
+// Waits for the Fleet setup Kibana runs on start to reach a terminal state and release the `fleet-setup` lock.
+export async function waitForFleetStartupSetup(
+  providerContext: FtrProviderContext,
+  timeout = 2 * 60 * 1000
+) {
+  const supertest = providerContext.getService('supertest');
+
+  await providerContext
+    .getService('retry')
+    .waitForWithTimeout("Kibana's startup Fleet setup to settle", timeout, async () => {
+      const { body } = await supertest.get('/api/status').expect(200);
+
+      return FLEET_STARTUP_SETUP_SETTLED_SUMMARIES.includes(body?.status?.plugins?.fleet?.summary);
+    });
+}
+
 // The policy_base_id backfill runs in a Fleet setup task, after the setup response.
 // The task is removed once it ran.
 export async function waitForPolicyBaseIdBackfill(providerContext: FtrProviderContext) {
