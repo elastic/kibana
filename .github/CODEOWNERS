@@ -2129,7 +2129,6 @@ x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/s
 /x-pack/platform/test/functional/page_objects/geo_file_upload.ts @elastic/kibana-dashboards
 /x-pack/platform/test/functional/page_objects/gis_page.ts @elastic/kibana-dashboards
 /x-pack/platform/test/upgrade/apps/maps @elastic/kibana-dashboards
-/x-pack/platform/test/functional/apps/maps/ @elastic/kibana-dashboards
 /x-pack/platform/test/fixtures/es_archives/maps/ @elastic/kibana-dashboards
 /x-pack/platform/plugins/shared/stack_alerts/server/rule_types/geo_containment @elastic/kibana-dashboards
 /x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment @elastic/kibana-dashboards
