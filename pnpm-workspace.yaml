@@ -268,6 +268,7 @@ packages:
   - 'packages/kbn-docs-utils'
   - 'packages/kbn-eslint-config'
   - 'packages/kbn-eslint-plugin-alerting-v2'
+  - 'packages/kbn-eslint-plugin-compat'
   - 'packages/kbn-eslint-plugin-disable'
   - 'packages/kbn-eslint-plugin-eslint'
   - 'packages/kbn-eslint-plugin-i18n'
