@@ -168,7 +168,7 @@ const prepareLegacyVisualization = async ({
   await expect
     .poll(() => discover.getHistogramLegendLabels())
     .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
-  expect(await discover.getVisualizationTitle()).toBe('Line');
+  await expect(discover.getHistogramChart()).toHaveAttribute('data-series-type', 'line');
   await discover.saveSearch(sessionName);
 
   const { saved_objects: sessions } = await kbnClient.savedObjects.find<DiscoverSessionAttributes>({
@@ -205,8 +205,7 @@ const prepareLegacyVisualization = async ({
   return { sourceSession, legacyVisContext };
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/295237
-spaceTest.describe.skip(
+spaceTest.describe(
   'Discover session API — visualization persistence',
   { tag: '@local-stateful-classic' },
   () => {
@@ -233,12 +232,13 @@ spaceTest.describe.skip(
         await spaceTest.step('save a customized chart and verify a normal reload', async () => {
           await discover.writeAndSubmitEsqlQuery(ESQL_QUERY);
           await discover.changeVisualizationShape('Line');
-          expect(await discover.getVisualizationTitle()).toBe('Line');
+          // The chart may still be loading here; wait on it without reopening the flyout.
+          await expect(discover.getHistogramChart()).toHaveAttribute('data-series-type', 'line');
 
           await discover.saveSearch(sessionName);
           await page.reload();
           await discover.waitUntilTabIsLoaded();
-          expect(await discover.getVisualizationTitle()).toBe('Line');
+          await expect(discover.getHistogramChart()).toHaveAttribute('data-series-type', 'line');
         });
 
         const { sessionId, tab, visContext } = await roundTripSavedVisualization(
@@ -258,7 +258,7 @@ spaceTest.describe.skip(
           await discover.waitUntilTabIsLoaded();
           await expect(discover.getHistogramChart()).toBeVisible();
           expect(await discover.getEsqlQueryValue()).toBe(ESQL_QUERY);
-          expect(await discover.getVisualizationTitle()).toBe('Line');
+          await expect(discover.getHistogramChart()).toHaveAttribute('data-series-type', 'line');
           expect(await discover.getHistogramSuggestionType()).toBe('histogramForESQL');
         });
 
@@ -271,7 +271,7 @@ spaceTest.describe.skip(
 
           await discover.goto({ queryMode: 'esql', savedSearchId: resavedId });
           await discover.waitUntilTabIsLoaded();
-          expect(await discover.getVisualizationTitle()).toBe('Line');
+          await expect(discover.getHistogramChart()).toHaveAttribute('data-series-type', 'line');
           expect(await discover.getEsqlQueryValue()).toBe(ESQL_QUERY);
         });
       }
@@ -290,7 +290,7 @@ spaceTest.describe.skip(
           await expect
             .poll(() => discover.getHistogramLegendLabels())
             .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
-          expect(await discover.getVisualizationTitle()).toBe('Line');
+          await expect(discover.getHistogramChart()).toHaveAttribute('data-series-type', 'line');
           await discover.saveSearch(sessionName);
         });
 
@@ -321,7 +321,7 @@ spaceTest.describe.skip(
           await expect
             .poll(() => discover.getHistogramLegendLabels())
             .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
-          expect(await discover.getVisualizationTitle()).toBe('Line');
+          await expect(discover.getHistogramChart()).toHaveAttribute('data-series-type', 'line');
           expect(await discover.getEsqlQueryValue()).toBe(BREAKDOWN_QUERY);
         });
 
@@ -337,7 +337,7 @@ spaceTest.describe.skip(
           await expect
             .poll(() => discover.getHistogramLegendLabels())
             .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
-          expect(await discover.getVisualizationTitle()).toBe('Line');
+          await expect(discover.getHistogramChart()).toHaveAttribute('data-series-type', 'line');
         });
       }
     );
@@ -420,7 +420,7 @@ spaceTest.describe.skip(
           await expect
             .poll(() => discover.getHistogramLegendLabels())
             .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
-          expect(await discover.getVisualizationTitle()).toBe('Line');
+          await expect(discover.getHistogramChart()).toHaveAttribute('data-series-type', 'line');
         });
 
         await discover.saveSearch(sessionName);
@@ -440,7 +440,7 @@ spaceTest.describe.skip(
           await expect
             .poll(() => discover.getHistogramLegendLabels())
             .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
-          expect(await discover.getVisualizationTitle()).toBe('Line');
+          await expect(discover.getHistogramChart()).toHaveAttribute('data-series-type', 'line');
           expect(await discover.getEsqlQueryValue()).toBe(BREAKDOWN_QUERY);
         });
       }
@@ -482,7 +482,7 @@ spaceTest.describe.skip(
             .poll(() => discover.getHistogramLegendLabels())
             .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
           await expect(legendItems).toContainText([/\d/]);
-          expect(await discover.getVisualizationTitle()).toBe('Line');
+          await expect(discover.getHistogramChart()).toHaveAttribute('data-series-type', 'line');
         });
 
         await discover.saveSearch(sessionName);
@@ -498,7 +498,7 @@ spaceTest.describe.skip(
             .poll(() => discover.getHistogramLegendLabels())
             .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
           await expect(legendItems).toContainText([/\d/]);
-          expect(await discover.getVisualizationTitle()).toBe('Line');
+          await expect(discover.getHistogramChart()).toHaveAttribute('data-series-type', 'line');
           expect(await discover.getEsqlQueryValue()).toBe(BREAKDOWN_QUERY);
         });
       }

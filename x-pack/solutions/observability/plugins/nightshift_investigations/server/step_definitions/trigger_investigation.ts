@@ -14,6 +14,11 @@ import {
 } from '@kbn/significant-events-schema';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { serverUnavailable } from '@hapi/boom';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { NightshiftSettingsLocator } from '../../common/locators';
+import { notifyInvestigationQuotaReached } from '../lib/notifications/notify_investigation_quota_reached';
 import {
   DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
   INVESTIGATION_SUBJECT_TYPES,
@@ -22,10 +27,18 @@ import {
   MAX_KEYWORD_LENGTH,
   toSlackThreadSubjectId,
 } from '../../common';
-import type { GetAutomationsSoClient, GetInvestigationsClient } from '../routes/types';
+import type {
+  GetAlertsClient,
+  GetAutomationsSoClient,
+  GetEpisodeLookup,
+  GetInvestigationsClient,
+} from '../routes/types';
+import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../lib/automations/types';
-import { consumeAutomationBudget } from '../lib/automations/automation_budget';
+import { createAutomationBudget } from '../lib/automations/automation_budget';
+import { AutomationDailyLimitReachedError, InvestigationQuotaDeniedError } from '../client/errors';
+import type { AutomationBudget } from '../types';
 
 const inputSchema = lazySchema(() =>
   z.object({
@@ -93,7 +106,7 @@ const inputSchema = lazySchema(() =>
       .record(z.string(), z.unknown())
       .optional()
       .describe(
-        'Additional context to pass to the investigation workflow. When subject_type is "alert" this must carry an "alerts" array of alert snapshots, or the investigation is rejected.'
+        'Additional context to pass to the investigation workflow. When subject_type is "alert" and no "alerts" array is given, the alert is looked up by subject_id (classic or universal). Otherwise this must carry an "alerts" array of alert snapshots.'
       ),
     notificationDestinations: investigationNotificationDestinationsSchema
       .optional()
@@ -121,6 +134,30 @@ const inputSchema = lazySchema(() =>
   })
 );
 
+const resolveAlerts = async ({
+  subjectId,
+  request,
+  spaceId,
+  getAlertsClient,
+  getEpisodeLookup,
+}: {
+  subjectId: string;
+  request: KibanaRequest;
+  spaceId: string;
+  getAlertsClient: GetAlertsClient;
+  getEpisodeLookup: GetEpisodeLookup;
+}) => {
+  const alertsClient = await getAlertsClient(request);
+  if (!alertsClient) {
+    throw serverUnavailable('Alert lookup is unavailable');
+  }
+  return fetchInvestigationAlertSnapshots({
+    alertsClient,
+    alertIds: [subjectId],
+    ...getEpisodeLookup(request, spaceId),
+  });
+};
+
 const toSubjectId = ({
   subject_type: subjectType,
   subject_id: subjectId,
@@ -147,14 +184,18 @@ const toSubjectId = ({
 
 export const triggerInvestigationStepDefinition = (
   getInvestigationsClient: GetInvestigationsClient,
-  getAutomationsSoClient: GetAutomationsSoClient
+  getAutomationsSoClient: GetAutomationsSoClient,
+  getAlertsClient: GetAlertsClient,
+  getEpisodeLookup: GetEpisodeLookup,
+  getActions: () => ActionsPluginStart | undefined,
+  settingsLocator: NightshiftSettingsLocator
 ) =>
   createServerStepDefinition({
     id: 'nightshift.triggerInvestigation',
     label: 'Trigger Nightshift Investigation',
     category: StepCategory.Ai,
     description:
-      'Start an investigation for a given subject (significant event, alert, or other entity). When the subject, or any alert in context.alerts, is already part of an open investigation, that investigation continues instead. Returns investigation_id for tracking, or skip_reason when the automation daily limit is reached.',
+      'Start an investigation for a given subject (significant event, alert, or other entity). When the subject, or any alert in context.alerts, is already part of an open investigation, that investigation continues instead. Returns investigation_id for tracking, or skip_reason when the automation daily limit or the deployment-wide investigation limit is reached.',
     inputSchema,
     outputSchema: z.object({
       investigation_id: z
@@ -162,7 +203,7 @@ export const triggerInvestigationStepDefinition = (
         .optional()
         .describe('The investigation (Agent Builder conversation) the start created or continued'),
       skip_reason: z
-        .literal('daily_limit')
+        .enum(['daily_limit', 'investigation_limit'])
         .optional()
         .describe('Why the investigation was not dispatched'),
       daily_limit: z
@@ -176,44 +217,89 @@ export const triggerInvestigationStepDefinition = (
       const request = context.contextManager.getFakeRequest();
       // getFakeRequest() does not carry space info, so the space ID must be extracted from the
       // workflow context explicitly. See https://github.com/elastic/kibana/issues/284786.
-      const { workflow } = context.contextManager.getContext();
+      const { workflow, kibanaUrl } = context.contextManager.getContext();
       const spaceId = workflow.spaceId;
       const input = inputSchema.parse(context.input);
       const subjectId = toSubjectId(input);
+      let automationBudget: AutomationBudget | undefined;
       if (input.automation_id) {
         const soClient = getAutomationsSoClient(request, spaceId);
+        const automationId = input.automation_id;
         const automation = await soClient.get<NightshiftAutomationAttributes>(
           NIGHTSHIFT_AUTOMATION_SO_TYPE,
-          input.automation_id
+          automationId
         );
         if (automation.attributes.workflowId !== workflow.id) {
           throw new Error('The automation does not belong to this workflow.');
         }
-        const dailyLimit = automation.attributes.runtime.dailyDispatchLimit;
-        const allowed = await consumeAutomationBudget(soClient, input.automation_id, dailyLimit);
-        if (!allowed) {
-          return { output: { skip_reason: 'daily_limit' as const, daily_limit: dailyLimit } };
-        }
+        automationBudget = createAutomationBudget(
+          soClient,
+          automationId,
+          automation.attributes.runtime.dailyDispatchLimit
+        );
       }
       const client = getInvestigationsClient(request, spaceId);
-      const result = await client.start({
-        subject: {
-          type: input.subject_type,
-          id: subjectId,
-          summary: input.summary,
-        },
-        title: input.title,
-        trigger_type: input.trigger_type ?? 'automatic',
-        message: input.message,
-        source_ids: input.source_ids,
-        context:
-          input.scope_query && input.subject_type === 'manual'
-            ? { ...input.context, scope_query: input.scope_query }
-            : input.context,
-        timeout_seconds: input.timeout_seconds,
-        notificationDestinations: input.notificationDestinations,
-        slack_thread: input.slack_thread,
-      });
-      return { output: result };
+      const alerts =
+        input.subject_type === 'alert' && !input.context?.alerts
+          ? await resolveAlerts({
+              subjectId,
+              request,
+              spaceId,
+              getAlertsClient,
+              getEpisodeLookup,
+            })
+          : undefined;
+      try {
+        const result = await client.start(
+          {
+            subject: {
+              type: input.subject_type,
+              id: subjectId,
+              summary: input.summary,
+            },
+            title: input.title,
+            trigger_type: input.trigger_type ?? 'automatic',
+            message: input.message,
+            source_ids: input.source_ids,
+            context: alerts
+              ? { alerts }
+              : input.scope_query && input.subject_type === 'manual'
+              ? { ...input.context, scope_query: input.scope_query }
+              : input.context,
+            timeout_seconds: input.timeout_seconds,
+            notificationDestinations: input.notificationDestinations,
+            slack_thread: input.slack_thread,
+          },
+          { automationBudget }
+        );
+        return { output: result };
+      } catch (error) {
+        if (error instanceof AutomationDailyLimitReachedError) {
+          context.logger.info(
+            `Skipped investigation of ${input.subject_type}/${subjectId} for automation ${input.automation_id}: daily limit of ${error.limit} reached`
+          );
+          return { output: { skip_reason: 'daily_limit' as const, daily_limit: error.limit } };
+        }
+        if (error instanceof InvestigationQuotaDeniedError) {
+          context.logger.info(
+            `Skipped investigation of ${input.subject_type}/${subjectId}: global investigation limit reached`
+          );
+          if (input.slack_thread) {
+            await notifyInvestigationQuotaReached({
+              getSoClient: () => getAutomationsSoClient(request, spaceId),
+              getActions,
+              request,
+              spaceId,
+              slackThread: input.slack_thread,
+              settingsLocator,
+              kibanaUrl,
+              signal: context.abortSignal,
+              logger: context.logger,
+            });
+          }
+          return { output: { skip_reason: 'investigation_limit' as const } };
+        }
+        throw error;
+      }
     },
   });
