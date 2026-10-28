@@ -2,7 +2,14 @@ env:
   GITHUB_COMMIT_STATUS_ENABLED: 'true'
   GITHUB_COMMIT_STATUS_CONTEXT: 'kibana-ci'
 steps:
-  - command: .buildkite/scripts/lifecycle/pre_build.sh
+  # Registers every long-running step for cancel-on-gate-failure, so a failing
+  # CHECK_GATE step ends the build (and releases the merge queue) right away.
+  # Gate steps only start after pre_build, so registration always comes first.
+  - command:
+      - .buildkite/scripts/lifecycle/pre_build.sh
+      - |
+        buildkite-agent meta-data set cancel_on_gate_failure_batch:merge_queue \
+          '["pick_test_group_run_order","build","check_oas_snapshot","quick_checks","checks","linting","linting_with_types","check_types"]'
     label: Pre-Build
     key: pre_build
     timeout_in_minutes: 10
