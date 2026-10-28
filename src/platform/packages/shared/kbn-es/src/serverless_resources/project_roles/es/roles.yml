@@ -1,17 +1,21 @@
 # -----
 # Copy from internal roles config in elasticsearch-controller
 # -----
+
+# Predefined roles for "Elasticsearch" project types
+
 viewer:
   metadata:
     _public: true
     _reserved: true
-  cluster: ['manage_own_api_key', 'read_pipeline', 'read_project_routing']
+  cluster: ['manage_own_api_key', 'monitor_inference', 'read_pipeline', 'read_project_routing']
   indices:
     - names:
         - '*'
       privileges:
         - 'read'
         - 'view_index_metadata'
+        - 'read_view_metadata'
   applications:
     - application: 'kibana-.kibana'
       privileges:
