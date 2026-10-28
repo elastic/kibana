@@ -121,13 +121,13 @@ export const LiveApp = ({ document, appId, view, onViewChange }: LiveAppProps) =
       <AppIdContext.Provider value={appId}>
         <AppRuntimeContext.Provider value={runtime}>
           <TimeRangeControlContext.Provider value={timeRangeControl}>
-            <WorkflowRunnerProvider appId={appId}>
-              <DataLayerContext.Provider value={dataLayer}>
+            <DataLayerContext.Provider value={dataLayer}>
+              <WorkflowRunnerProvider appId={appId}>
                 <AppFrame theme={document.theme}>
                   <NodeRenderer node={document.root} />
                 </AppFrame>
-              </DataLayerContext.Provider>
-            </WorkflowRunnerProvider>
+              </WorkflowRunnerProvider>
+            </DataLayerContext.Provider>
           </TimeRangeControlContext.Provider>
         </AppRuntimeContext.Provider>
       </AppIdContext.Provider>

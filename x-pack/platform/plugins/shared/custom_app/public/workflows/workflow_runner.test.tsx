@@ -14,8 +14,10 @@ import {
   WorkflowRunnerProvider,
 } from './workflow_runner';
 import type { WorkflowRunRequest } from '../runtime/app_runtime';
+import { DataLayerContext } from '../data/data_layer_context';
+import type { DataLayer } from '../data/data_layer';
 
-const mockClient = { get: jest.fn(), run: jest.fn(), list: jest.fn() };
+const mockClient = { get: jest.fn(), run: jest.fn(), list: jest.fn(), execution: jest.fn() };
 const toasts = { addSuccess: jest.fn(), addDanger: jest.fn(), addWarning: jest.fn() };
 const navigateToApp = jest.fn();
 let mockCapabilities: Record<string, unknown> = {};
@@ -62,12 +64,20 @@ const Asker = ({ requests }: { requests: WorkflowRunRequest[] }) => {
 
 const setup = (
   requests: WorkflowRunRequest[] = [{ workflow: 'isolate-host', inputs: { host: 'web-1' } }],
-  appId?: string
+  appId?: string,
+  layer?: Pick<DataLayer, 'retry'>
 ) => {
-  render(
+  const runner = (
     <WorkflowRunnerProvider appId={appId}>
       <Asker requests={requests} />
     </WorkflowRunnerProvider>
+  );
+  render(
+    layer ? (
+      <DataLayerContext.Provider value={layer as DataLayer}>{runner}</DataLayerContext.Provider>
+    ) : (
+      runner
+    )
   );
 };
 
@@ -219,6 +229,36 @@ describe('running the workflows an action asks for', () => {
       source: 'custom_app',
       nodeId: 'go',
     });
+  });
+
+  it('asks the app for its data again when the run is over, since a run can change what is shown', async () => {
+    const layer = { retry: jest.fn() };
+    mockClient.execution
+      .mockResolvedValueOnce({ status: 'running' })
+      .mockResolvedValueOnce({ status: 'completed' });
+    setup(undefined, undefined, layer);
+    await ask();
+    await screen.findByText('Isolate host');
+
+    await userEvent.click(screen.getByTestId('customAppRunWorkflowConfirm'));
+
+    // Not while it is still going.
+    await waitFor(() => expect(mockClient.execution).toHaveBeenCalledWith('exec-1'));
+    expect(layer.retry).not.toHaveBeenCalled();
+    await waitFor(() => expect(layer.retry).toHaveBeenCalledTimes(1), { timeout: 5000 });
+    expect(mockClient.execution).toHaveBeenCalledTimes(2);
+  });
+
+  it('asks again too when a run fails, which may have done part of what it does', async () => {
+    const layer = { retry: jest.fn() };
+    mockClient.execution.mockResolvedValue({ status: 'failed' });
+    setup(undefined, undefined, layer);
+    await ask();
+    await screen.findByText('Isolate host');
+
+    await userEvent.click(screen.getByTestId('customAppRunWorkflowConfirm'));
+
+    await waitFor(() => expect(layer.retry).toHaveBeenCalledTimes(1), { timeout: 5000 });
   });
 
   it('says that it started, with a way to its execution', async () => {

@@ -44,6 +44,12 @@ const path = (id: string) => `/api/workflows/workflow/${encodeURIComponent(id)}`
 export const createWorkflowClient = (http: HttpStart) => ({
   get: (id: string) => http.get<WorkflowSummary>(path(id), { version: API_VERSION }),
 
+  /** How a run is going, to know when it is over. */
+  execution: (id: string) =>
+    http.get<{ status: string }>(`/api/workflows/executions/${encodeURIComponent(id)}`, {
+      version: API_VERSION,
+    }),
+
   list: ({ query, size }: { query?: string; size: number }) =>
     http.get<WorkflowList>('/api/workflows', {
       version: API_VERSION,

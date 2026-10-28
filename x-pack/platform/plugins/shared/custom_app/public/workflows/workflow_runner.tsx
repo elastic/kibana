@@ -37,6 +37,7 @@ import { i18n } from '@kbn/i18n';
 import type { Capabilities } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { WorkflowRunRequest } from '../runtime/app_runtime';
+import { DataLayerContext } from '../data/data_layer_context';
 import { getServices } from '../services';
 import { createWorkflowClient, type WorkflowClient, type WorkflowSummary } from './workflow_client';
 
@@ -339,6 +340,11 @@ interface Pending {
   nodeId: string;
 }
 
+/** How long a run is followed, and how often it is asked after, to show what it changed. */
+const FOLLOW_INTERVAL_MS = 1000;
+const FOLLOW_LIMIT = 45;
+const FINISHED = ['completed', 'failed', 'cancelled', 'timed_out', 'skipped'];
+
 /**
  * Lets what is inside run workflows, after the user has agreed. `appId` is the saved app they come
  * from, when there is one, and is sent with each run so it can be traced to the app.
@@ -360,6 +366,35 @@ export const WorkflowRunnerProvider = ({
   const [isRunning, setIsRunning] = useState(false);
   const [statuses, setStatuses] = useState<Readonly<Record<string, WorkflowStatus>>>({});
   const asked = useRef(new Set<string>());
+  // A run can change what the app shows, such as the severity of a case, so when it is over the
+  // app asks for its data again. Without a data layer around it, there is nothing to ask.
+  const layer = useContext(DataLayerContext);
+  const isMounted = useRef(true);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  const refreshWhenDone = useCallback(
+    async (executionId: string) => {
+      for (let attempt = 0; attempt < FOLLOW_LIMIT && isMounted.current; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, FOLLOW_INTERVAL_MS));
+        // The app may have gone away while waiting, and then there is nothing left to refresh.
+        if (!isMounted.current) return;
+        try {
+          const { status } = await client.execution(executionId);
+          if (FINISHED.includes(status)) break;
+        } catch {
+          break;
+        }
+      }
+      // Whether it ended or is still going, what is shown is asked for again once.
+      if (isMounted.current) layer?.retry();
+    },
+    [client, layer]
+  );
 
   const look = useCallback(
     async (id: string) => {
@@ -428,6 +463,7 @@ export const WorkflowRunnerProvider = ({
             ...(appId ? { appId } : {}),
           },
         });
+        void refreshWhenDone(workflowExecutionId);
         core.notifications.toasts.addSuccess({
           title: i18n.translate('xpack.customApp.workflows.started', {
             defaultMessage: 'Workflow run started',
@@ -460,7 +496,7 @@ export const WorkflowRunnerProvider = ({
     }
     setIsRunning(false);
     setPending(undefined);
-  }, [appId, client, core, pending]);
+  }, [appId, client, core, pending, refreshWhenDone]);
 
   const value = useMemo<WorkflowRunner>(
     () => ({ availability, statuses, track, request }),

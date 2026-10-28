@@ -388,8 +388,8 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
         return (
           <AppRuntimeContext.Provider value={runtime}>
             <TimeRangeControlContext.Provider value={timeRangeControl}>
-              <WorkflowRunnerProvider appId={libraryId}>
-                <DataLayerContext.Provider value={dataLayer}>
+              <DataLayerContext.Provider value={dataLayer}>
+                <WorkflowRunnerProvider appId={libraryId}>
                   {isEmptyDocument(document) ? (
                     <EmptyApp
                       canEdit={viewMode === 'edit'}
@@ -402,8 +402,8 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
                       <NodeRenderer node={document.root} />
                     </AppFrame>
                   )}
-                </DataLayerContext.Provider>
-              </WorkflowRunnerProvider>
+                </WorkflowRunnerProvider>
+              </DataLayerContext.Provider>
             </TimeRangeControlContext.Provider>
           </AppRuntimeContext.Provider>
         );
