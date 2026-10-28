@@ -12,6 +12,12 @@ import { NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/manag
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { StatusError } from '../errors/status_error';
 import type { SignificantEventsKIsOnboardingClient } from '../workflows/onboarding_workflow_client';
+import type { GetScopedClients } from '../../routes/types';
+import {
+  DETECTION_ENGINE_WORKLOAD_ID,
+  DETECTION_ENGINE_WORKLOAD_TYPE,
+  reassignRulesToAccount,
+} from './detection_engine_account';
 import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from '../workflows/managed_workflow_owner';
 
 /** The ids of the accounts a space is set up with, as the service accounts backend assigned them. */
@@ -57,11 +63,13 @@ export const createServiceAccountSetupService = ({
   spaces,
   workflowsExtensions,
   onboardingClient,
+  getScopedClients,
 }: {
   core: CoreStart;
   spaces: SpacesPluginStart | undefined;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
   onboardingClient: SignificantEventsKIsOnboardingClient | undefined;
+  getScopedClients: GetScopedClients;
 }) => {
   /** Refuses before anything is written: 400 when service accounts are off, 403, then 404. */
   const assertCanSetUp = async (request: KibanaRequest, spaceId: string): Promise<void> => {
@@ -88,7 +96,11 @@ export const createServiceAccountSetupService = ({
     request: KibanaRequest;
     spaceId: string;
     serviceAccountIds: DetectionEngineServiceAccountIds;
-  }): Promise<{ spaceId: string; serviceAccountIds: DetectionEngineServiceAccountIds }> => {
+  }): Promise<{
+    spaceId: string;
+    serviceAccountIds: DetectionEngineServiceAccountIds;
+    rules: { reassigned: number; failedIds: string[] };
+  }> => {
     await assertCanSetUp(request, spaceId);
     if (!workflowsExtensions) {
       throw new StatusError('Workflows are not available', 400);
@@ -105,7 +117,17 @@ export const createServiceAccountSetupService = ({
         values: { serviceAccountId: serviceAccountIds.kiExtraction },
       }
     );
-    return { spaceId, serviceAccountIds };
+    // What the detection engine does outside workflow runs, such as turning rules on, runs as the
+    // account too. Binding again with another account rebinds it.
+    await core.security.serviceAccounts.bindWorkload(request, {
+      serviceAccountId: serviceAccountIds.kiExtraction,
+      workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
+      workloadId: DETECTION_ENGINE_WORKLOAD_ID,
+    });
+    // Rules created before the setup, or under another account, keep their old keys until they are
+    // enabled again as this account.
+    const rules = await reassignRulesToAccount({ core, spaceId, getScopedClients });
+    return { spaceId, serviceAccountIds, rules };
   };
 
   /**
@@ -132,6 +154,10 @@ export const createServiceAccountSetupService = ({
       NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
       { spaceId, workflowIdSuffix: spaceId }
     );
+    await core.security.serviceAccounts.unbindWorkload(request, {
+      workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
+      workloadId: DETECTION_ENGINE_WORKLOAD_ID,
+    });
     return { spaceId };
   };
 

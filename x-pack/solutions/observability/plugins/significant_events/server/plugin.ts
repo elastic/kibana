@@ -113,6 +113,7 @@ import {
 } from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from './lib/workflows/managed_workflow_owner';
+import { registerDetectionEngineWorkloadType } from './lib/service_accounts/detection_engine_account';
 import { removeLegacyDefaultSpaceWorkflows } from './lib/workflows/setup/remove_legacy_default_space_workflows';
 import { registerSignificantEventsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { createTriggerEmitter } from './workflows/triggers/emit';
@@ -171,6 +172,7 @@ export class SignificantEventsPlugin
     core: CoreSetup<SignificantEventsPluginStartDependencies>,
     plugins: SignificantEventsPluginSetupDependencies
   ): void {
+    registerDetectionEngineWorkloadType(core);
     this.server = {
       logger: this.logger,
       workflowsManagement: plugins.workflowsManagement,
