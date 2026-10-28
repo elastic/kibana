@@ -866,10 +866,10 @@ export const slackEvents: ConnectorSpecEvents = {
     },
     [SLACK_HITL_ACTION_EVENT_KEY]: {
       eventId: SLACK_HITL_ACTION_EVENT_ID,
-      title: i18n.translate('core.kibanaConnectorSpecs.slack.events.hitlAction.title', {
+      title: i18n.translate('connectorSpecs.slack.events.hitlAction.title', {
         defaultMessage: 'Workflow HITL action',
       }),
-      description: i18n.translate('core.kibanaConnectorSpecs.slack.events.hitlAction.description', {
+      description: i18n.translate('connectorSpecs.slack.events.hitlAction.description', {
         defaultMessage:
           'A human-in-the-loop Approve, Decline, or Submit control was used in Slack. Resumes a paused workflow; not intended as a workflow start trigger.',
       }),
