@@ -82,8 +82,9 @@ export const assertSourcePreview = async (
   });
 
   await transformWizard.useFullData();
-  await expect(transformWizard.startDateButton).toHaveText(expected.fullTimeRange.start);
-  await expect(transformWizard.endDateButton).toHaveText(expected.fullTimeRange.end);
+  await expect(async () => {
+    expect(await datePicker.getTimeConfig()).toStrictEqual(expected.fullTimeRange);
+  }).toPass({ timeout: POLL_TIMEOUT_MS });
   await expect(async () => {
     expect(await transformWizard.getDataGridRowCount(transformWizard.indexPreview)).toBe(
       INDEX_PREVIEW_ROWS
