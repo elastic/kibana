@@ -24,6 +24,7 @@ import { AssetCriticalityLevelsForBulkUpload } from '../../../../common/api/enti
 import { securityTool } from '../constants';
 import { IdentifierType } from '../../../../common/api/entity_analytics/common/common.gen';
 import { recalculateEntityRiskScore } from '../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score';
+import { checkEntityRiskScoreCalculationPrivileges } from '../../../lib/entity_analytics/risk_score/check_entity_risk_score_calculation_privileges';
 import { RiskScoreDataClient } from '../../../lib/entity_analytics/risk_score/risk_score_data_client';
 import { ASSET_CRITICALITY_UPDATED_TOOL_EVENT } from '../../../../common/entity_analytics/tool_events';
 import { createToolTelemetryTracker } from './tool_telemetry_tracker';
@@ -209,33 +210,47 @@ export const setAssetCriticalityTool = (
 
         let riskScore:
           | { recalculated: true; entityRiskScore: number; resolutionGroupRiskScore?: number }
-          | { recalculated: false } = { recalculated: false };
+          | { recalculated: false; reason?: 'missing_privileges' } = { recalculated: false };
         try {
-          const riskScoreDataClient = new RiskScoreDataClient({
-            logger,
-            kibanaVersion,
-            esClient: client,
-            soClient: savedObjectsClient,
+          const canRecalculate = await checkEntityRiskScoreCalculationPrivileges({
+            request,
+            security,
             namespace: spaceId,
-          });
-          const entityScore = await recalculateEntityRiskScore({
-            esClient: client,
             soClient: savedObjectsClient,
-            crudClient: entityStoreClient,
-            namespace: spaceId,
-            entityId,
-            identifierType: entityType,
-            getWriter: (ns) => riskScoreDataClient.getWriter({ namespace: ns }),
-            idBasedRiskScoringEnabled: true,
             logger,
-            collectScores: true,
           });
-          if (entityScore.baseScore != null) {
-            riskScore = {
-              recalculated: true,
-              entityRiskScore: entityScore.baseScore,
-              resolutionGroupRiskScore: entityScore.resolutionScore,
-            };
+          if (!canRecalculate) {
+            logger.warn(
+              `[SetAssetCriticality] Skipping risk score recalculation for ${entityId}: missing index privileges`
+            );
+            riskScore = { recalculated: false, reason: 'missing_privileges' };
+          } else {
+            const riskScoreDataClient = new RiskScoreDataClient({
+              logger,
+              kibanaVersion,
+              esClient: client,
+              soClient: savedObjectsClient,
+              namespace: spaceId,
+            });
+            const entityScore = await recalculateEntityRiskScore({
+              esClient: client,
+              soClient: savedObjectsClient,
+              crudClient: entityStoreClient,
+              namespace: spaceId,
+              entityId,
+              identifierType: entityType,
+              getWriter: (ns) => riskScoreDataClient.getWriter({ namespace: ns }),
+              idBasedRiskScoringEnabled: true,
+              logger,
+              collectScores: true,
+            });
+            if (entityScore.baseScore != null) {
+              riskScore = {
+                recalculated: true,
+                entityRiskScore: entityScore.baseScore,
+                resolutionGroupRiskScore: entityScore.resolutionScore,
+              };
+            }
           }
         } catch (error) {
           logger.warn(

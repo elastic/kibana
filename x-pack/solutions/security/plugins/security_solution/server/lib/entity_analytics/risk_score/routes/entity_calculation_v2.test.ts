@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { loggerMock } from '@kbn/logging-mocks';
+import { getLatestEntityIndexPattern } from '@kbn/entity-store/common';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { checkEntityStoreIndexPrivileges } from '@kbn/entity-store/server';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
@@ -24,6 +26,7 @@ import { configMock } from '../../../../config.mock';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import { riskScoreEntityCalculationRouteV2 } from './entity_calculation_v2';
 import { riskEnginePrivilegesMock } from '../../risk_engine/routes/risk_engine_privileges.mock';
+import { MISSING_INDEX_PRIVILEGES_MESSAGE } from '../check_entity_risk_score_calculation_privileges';
 import { getLookupIndexName } from '../maintainer/lookup/lookup_index';
 import { getConfiguration } from '../../risk_engine/utils/saved_object_configuration';
 import { scoreBaseEntities } from '../maintainer/steps/score_base_entities';
@@ -68,6 +71,34 @@ const entityDocMock = {
   },
 };
 
+// Answers each privilege check from the requested payload, denying view_index_metadata on the
+// given indices.
+const createSecurity = (deniedMetadataIndices: string[] = []) => {
+  const security = riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess();
+  (security.authz.checkPrivilegesDynamicallyWithRequest as jest.Mock).mockReturnValue(
+    jest.fn(async (payload: { elasticsearch: { index: Record<string, string[]> } }) => {
+      const index = Object.fromEntries(
+        Object.entries(payload.elasticsearch.index).map(([name, privileges]) => [
+          name,
+          privileges.map((privilege) => ({
+            privilege,
+            authorized: !(
+              privilege === 'view_index_metadata' && deniedMetadataIndices.includes(name)
+            ),
+          })),
+        ])
+      );
+      return {
+        hasAllRequested: Object.values(index).every((privileges) =>
+          privileges.every(({ authorized }) => authorized)
+        ),
+        privileges: { elasticsearch: { cluster: [], index }, kibana: [] },
+      };
+    })
+  );
+  return security;
+};
+
 describe('entity risk score V2 calculation route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let clients: MockClients;
@@ -86,6 +117,9 @@ describe('entity risk score V2 calculation route', () => {
     (checkEntityStoreIndexPrivileges as jest.Mock).mockResolvedValue({
       has_read_permissions: true,
       has_write_permissions: true,
+      privileges: {
+        elasticsearch: { index: { [getLatestEntityIndexPattern('default')]: { read: true } } },
+      },
     });
 
     server = serverMock.create();
@@ -103,7 +137,7 @@ describe('entity risk score V2 calculation route', () => {
     getStartServicesMock = jest.fn().mockResolvedValue([
       {},
       {
-        security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
+        security: createSecurity(),
       },
     ]);
 
@@ -143,7 +177,7 @@ describe('entity risk score V2 calculation route', () => {
   });
 
   it('only checks the index privileges the calculation needs, not cluster privileges', async () => {
-    const security = riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess();
+    const security = createSecurity();
     getStartServicesMock.mockResolvedValue([{}, { security }]);
 
     await server.inject(buildRequest(), requestContextMock.convertContext(context));
@@ -154,6 +188,7 @@ describe('entity risk score V2 calculation route', () => {
       elasticsearch: {
         cluster: [],
         index: {
+          'default-alerts-index': ['read', 'view_index_metadata'],
           ...RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
           [getLookupIndexName(context.securitySolution.getSpaceId())]: ['read'],
         },
@@ -173,6 +208,38 @@ describe('entity risk score V2 calculation route', () => {
     );
 
     expect(response.status).toEqual(403);
+    expect(scoreBaseEntities).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['the alerts index', 'default-alerts-index'],
+    ['the entity store latest index', getLatestEntityIndexPattern('default')],
+  ])(
+    'returns 403 with the missing privileges message and skips scoring when view_index_metadata is missing on %s',
+    async (_, deniedIndex) => {
+      getStartServicesMock.mockResolvedValue([{}, { security: createSecurity([deniedIndex]) }]);
+
+      const response = await server.inject(
+        buildRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(403);
+      expect(response.body.message).toEqual(MISSING_INDEX_PRIVILEGES_MESSAGE);
+      expect(scoreBaseEntities).not.toHaveBeenCalled();
+    }
+  );
+
+  it('formats errors thrown while checking privileges instead of returning a raw 500', async () => {
+    (getConfiguration as jest.Mock).mockRejectedValueOnce(Boom.badRequest('saved object failure'));
+
+    const response = await server.inject(
+      buildRequest(),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(400);
+    expect(response.body.message).toEqual('saved object failure');
     expect(scoreBaseEntities).not.toHaveBeenCalled();
   });
 

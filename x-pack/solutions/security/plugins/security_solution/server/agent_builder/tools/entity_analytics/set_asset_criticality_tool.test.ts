@@ -24,6 +24,12 @@ import {
 jest.mock('../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score', () => ({
   recalculateEntityRiskScore: jest.fn().mockResolvedValue(undefined),
 }));
+jest.mock(
+  '../../../lib/entity_analytics/risk_score/check_entity_risk_score_calculation_privileges',
+  () => ({
+    checkEntityRiskScoreCalculationPrivileges: jest.fn().mockResolvedValue(true),
+  })
+);
 
 const ENTITY_ID = 'host:server1';
 const ENTITY_TYPE = 'host' as const;
@@ -387,6 +393,32 @@ describe('setAssetCriticalityTool', () => {
           }
         ).riskScore
       ).toEqual({ recalculated: true, entityRiskScore: 75.5, resolutionGroupRiskScore: undefined });
+    });
+
+    it('skips the recalculation and reports missing_privileges when the caller cannot run it', async () => {
+      const { recalculateEntityRiskScore: mockRecalculate } = jest.requireMock(
+        '../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score'
+      );
+      const { checkEntityRiskScoreCalculationPrivileges: mockCheck } = jest.requireMock(
+        '../../../lib/entity_analytics/risk_score/check_entity_risk_score_calculation_privileges'
+      );
+      mockCheck.mockResolvedValueOnce(false);
+
+      const ctx = acceptedCtx();
+      const result = (await tool.handler(
+        { entityId: ENTITY_ID, entityType: ENTITY_TYPE, criticality: CRITICALITY },
+        ctx
+      )) as ToolHandlerStandardReturn;
+
+      expect(mockRecalculate).not.toHaveBeenCalled();
+      expect(mockBulkUpdateEntity).toHaveBeenCalled();
+      const other = result.results[0] as OtherResult;
+      expect(other.type).toBe(ToolResultType.other);
+      expect((other.data as { success: boolean }).success).toBe(true);
+      expect((other.data as { riskScore: unknown }).riskScore).toEqual({
+        recalculated: false,
+        reason: 'missing_privileges',
+      });
     });
 
     it('omits riskScore from the response when recalculation fails', async () => {
