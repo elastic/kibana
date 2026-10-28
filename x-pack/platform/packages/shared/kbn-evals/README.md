@@ -224,17 +224,10 @@ fewer models, list it under `specModelGroups` in
 ```jsonc
 {
   "id": "significant-events",
-  "weeklyEisModelGroups": [
-    "eis/openai-gpt-5.4",
-    "eis/anthropic-claude-4.6-opus",
-    "eis/openai-gpt-5.4-mini"
-  ],
+  "weeklyEisModelGroups": ["eis/openai-gpt-5.4", "eis/anthropic-claude-4.6-opus", "eis/openai-gpt-5.4-mini"],
   "specModelGroups": [
     { "files": ["evals/discovery/discovery.spec.ts"], "models": ["eis/openai-gpt-5.4"] },
-    {
-      "files": ["evals/ki_feature_extraction/ki_feature_extraction.spec.ts"],
-      "models": ["eis/openai-gpt-5.4-mini"]
-    }
+    { "files": ["evals/ki_feature_extraction/ki_feature_extraction.spec.ts"], "models": ["eis/openai-gpt-5.4-mini"] }
   ]
 }
 ```
@@ -281,20 +274,20 @@ Run a suite on any branch without a PR:
 2. Click **New build**, select branch/commit
 3. Add environment variables:
 
-| Variable                                | Required           | Description                                                                                                  |
-| --------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `EVAL_SUITE_ID`                         | yes                | Suite id from `evals.suites.json`. Comma-separate to run several suites                                      |
-| `EVAL_MODEL_GROUPS`                     | yes                | Comma-separated model groups, e.g. `eis/openai-gpt-5.4,openrouter/openai-gpt-5.4`                            |
-| `EVAL_INCLUDE_EIS_MODELS`               | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                                                             |
-| `EVAL_CONNECTOR_ID`                     | no                 | LLM-as-judge connector override                                                                              |
-| `EVAL_SERVER_CONFIG_SET`                | some suites        | From `serverConfigSet` in `evals.suites.json`                                                                |
-| `EVAL_SCOUT_ARCH` / `EVAL_SCOUT_DOMAIN` | some suites        | From `scoutArch` / `scoutDomain` in `evals.suites.json` (default `stateful` / `classic`)                     |
-| `KIBANA_BUILD_ID`                       | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
-| `EVAL_GREP`                             | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                        |
-| `EVAL_REPETITIONS`                      | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
-| `EVAL_CONCURRENCY`                      | no                 | Examples each experiment runs at once (same as `--concurrency`)                                              |
-| `EVAL_SPACE_IDS`                        | no                 | Comma-separated spaces to assign datasets and scores to (same as `--space-ids`)                              |
-| `EVAL_SLACK_NOTIFICATION_CHANNEL`       | no                 | Slack channel or member ID to send the triage to. If unset, no Slack notification is sent for on-demand runs |
+| Variable                          | Required           | Description                                                                                                  |
+| --------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `EVAL_SUITE_ID`                   | yes                | Suite id from `evals.suites.json`. Comma-separate to run several suites                                      |
+| `EVAL_MODEL_GROUPS`               | yes                | Comma-separated model groups, e.g. `eis/openai-gpt-5.4,openrouter/openai-gpt-5.4`                            |
+| `EVAL_INCLUDE_EIS_MODELS`         | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                                                             |
+| `EVAL_CONNECTOR_ID`               | no                 | LLM-as-judge connector override                                                                              |
+| `EVAL_SERVER_CONFIG_SET`          | some suites        | From `serverConfigSet` in `evals.suites.json`                                                                |
+| `EVAL_SCOUT_ARCH` / `EVAL_SCOUT_DOMAIN` | some suites  | From `scoutArch` / `scoutDomain` in `evals.suites.json` (default `stateful` / `classic`)                     |
+| `KIBANA_BUILD_ID`                 | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
+| `EVAL_GREP`                       | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                        |
+| `EVAL_REPETITIONS`                | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
+| `EVAL_CONCURRENCY`                | no                 | Examples each experiment runs at once (same as `--concurrency`)                                              |
+| `EVAL_SPACE_IDS`                  | no                 | Comma-separated spaces to assign datasets and scores to (same as `--space-ids`)                              |
+| `EVAL_SLACK_NOTIFICATION_CHANNEL` | no                 | Slack channel or member ID to send the triage to. If unset, no Slack notification is sent for on-demand runs |
 
 Example (single suite):
 
@@ -356,12 +349,12 @@ The hook reads a config JSON on stdin and prints `{ "env"?: Record<string, strin
 
 Give the suite its own Vault secret with `vaultSecret`, so rotating its credentials never rewrites the general config other suites read. The hook then reads that secret instead of the general config:
 
-| Where                        | Hook input                                                                       |
-| ---------------------------- | -------------------------------------------------------------------------------- |
-| CI (`run_suite.sh`)          | `kv/ci-shared/kbn-evals/<vaultSecret>` in the ci-prod Vault                      |
-| `--profile dev-vault`        | `secret/kibana-issues/dev/kbn-evals/<vaultSecret>` in the dev Vault              |
-| `--profile <file profile>`   | `config.<profile>.json`, which holds the suite's blocks next to the general keys |
-| No `vaultSecret` (any place) | The general config (`--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI)    |
+| Where                        | Hook input                                                                                    |
+| ---------------------------- | --------------------------------------------------------------------------------------------- |
+| CI (`run_suite.sh`)          | `kv/ci-shared/kbn-evals/<vaultSecret>` in the ci-prod Vault                                   |
+| `--profile dev-vault`        | `secret/kibana-issues/dev/kbn-evals/<vaultSecret>` in the dev Vault                           |
+| `--profile <file profile>`   | `config.<profile>.json`, which holds the suite's blocks next to the general keys              |
+| No `vaultSecret` (any place) | The general config (`--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI)                 |
 
 CI forwards the initial hook input as `KBN_EVALS_SCOUT_HOOK_CONFIG_B64`. The native `evals run`
 command reuses it when no datasets profile is selected, so both hook invocations see the same
