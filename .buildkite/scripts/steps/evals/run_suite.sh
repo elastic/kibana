@@ -440,8 +440,6 @@ EOF
         # Fresh-baseline mode: emit the post-comparison step inside the fanout so
         # it starts only after all model steps have written their execution IDs to
         # Buildkite metadata.
-        # Pass EVAL_PR_NUMBER, not GITHUB_PR_NUMBER: the latter makes the pre-command
-        # hook treat this main build as a PR build and fail on missing PR-bot env vars.
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
       - label: "LLM Evals: ${EVAL_SUITE_ID} (fresh baseline comparison)"
         key: "kbn-evals-${group_key_safe}-fresh-compare"
