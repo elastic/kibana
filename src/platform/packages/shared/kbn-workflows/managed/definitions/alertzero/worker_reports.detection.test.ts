@@ -88,8 +88,8 @@ describe('Rule Tuning outcome reports', () => {
 
     describeReportStep(steps, 'report_worker_run_completed', 'worker_run_completed', 'emit_result');
 
-    /** A harvest row; the rule's `id@revision` key is its seventh column. */
-    const harvestRow = (ruleKey: string): unknown[] => [0, 0, 0, 0, 0, 0, ruleKey];
+    /** A harvest row; the rule's `id@revision` key is its fifth column. */
+    const harvestRow = (ruleKey: string): unknown[] => [0, 0, 0, 0, ruleKey];
 
     const sweepContext = ({
       activeReviews = 0,
@@ -99,41 +99,60 @@ describe('Rule Tuning outcome reports', () => {
       lookupFailed = false,
       requested = 0,
       rulesLookupFailed = false,
+      rulesTruncated = false,
+      screenFailed = false,
     }: {
       activeReviews?: number;
       /** Harvested rules that are still enabled, at the revision their alerts came from. */
       eligible?: number;
       harvestFailed?: boolean;
-      /** Harvested rules disabled or edited since their alerts. */
+      /** Harvested rules edited since their alerts. */
       ineligible?: number;
       lookupFailed?: boolean;
       requested?: number;
       rulesLookupFailed?: boolean;
+      /** More enabled rules than the lookup's page holds. */
+      rulesTruncated?: boolean;
+      screenFailed?: boolean;
     }): Record<string, unknown> => {
       const eligibleKeys = Array.from({ length: eligible }, (_, index) => `rule-${index}@1`);
       const ineligibleKeys = Array.from({ length: ineligible }, (_, index) => `stale-${index}@1`);
+      const harvested = [...eligibleKeys, ...ineligibleKeys];
       return {
         consts: { no_rows: [] },
         steps: {
           collect_active_rules: { output: { expected: activeReviews } },
-          harvest_fp_alerts_by_rule: harvestFailed
-            ? { error: { message: 'search_phase_execution_exception' } }
-            : { output: { values: [...eligibleKeys, ...ineligibleKeys].map(harvestRow) } },
+          // Skipped after a failed lookup or screen, so it has no output at all.
+          ...(rulesLookupFailed || screenFailed
+            ? {}
+            : {
+                harvest_fp_alerts_by_rule: harvestFailed
+                  ? { error: { message: 'search_phase_execution_exception' } }
+                  : { output: { values: harvested.map(harvestRow) } },
+              }),
           list_active_reviews: lookupFailed
             ? { error: { message: 'HTTP 500' } }
             : { output: { results: [] } },
-          list_enabled_candidates: rulesLookupFailed
+          list_enabled_rules: rulesLookupFailed
             ? { error: { message: 'HTTP 500' } }
             : { output: { data: [] } },
-          // Rendered from `list_enabled_candidates`, so a failed lookup leaves no key.
-          resolve_current_revisions: {
-            output: {
-              rule_revision_keys: rulesLookupFailed ? ',' : `,${eligibleKeys.join(',')},`,
-            },
-          },
+          // Skipped after a failed lookup, so its keys are unset.
+          ...(rulesLookupFailed
+            ? {}
+            : {
+                resolve_enabled_rules: {
+                  output: {
+                    rule_revision_keys: `,${eligibleKeys.join(',')},`,
+                    truncated: rulesTruncated,
+                  },
+                },
+              }),
           resolve_fanout_rows: {
             output: { rows: Array.from({ length: requested }, (_, index) => [`rule-${index}`]) },
           },
+          screen_rule_fp_rates: screenFailed
+            ? { error: { message: 'search_phase_execution_exception' } }
+            : { output: { values: [] } },
         },
       };
     };
@@ -179,7 +198,7 @@ describe('Rule Tuning outcome reports', () => {
         },
       ],
       [
-        // 15 noisy rules, 3 disabled or edited since their alerts, and the fan-out cap of 10:
+        // 15 noisy rules, 3 edited since their alerts, and the fan-out cap of 10:
         // found minus dispatched is exactly what the cap held back.
         'only the rules still eligible for review, of a harvest the cap cut short',
         { eligible: 12, ineligible: 3, requested: 10 },
@@ -194,8 +213,8 @@ describe('Rule Tuning outcome reports', () => {
         },
       ],
       [
-        // Without the enabled rules, no harvested rule can be confirmed eligible.
-        'a failed rules lookup after a harvest that worked, which empties the fan-out',
+        // Without the enabled rules the screen and the harvest are skipped.
+        'a failed rules lookup, which skips the screen and the harvest',
         { eligible: 3, rulesLookupFailed: true },
         {
           candidates_found: 0,
@@ -205,6 +224,34 @@ describe('Rule Tuning outcome reports', () => {
           lookup_failed: false,
           run_outcome: 'failed_source_unavailable',
           source_read_failed: true,
+        },
+      ],
+      [
+        'a failed screen, which skips the harvest',
+        { eligible: 3, screenFailed: true },
+        {
+          candidates_found: 0,
+          degraded_reason: 'dependency_unavailable',
+          items_dispatched: 0,
+          items_in_flight: '0',
+          lookup_failed: false,
+          run_outcome: 'failed_source_unavailable',
+          source_read_failed: true,
+        },
+      ],
+      [
+        // The first page of enabled rules was full: the rules past it were never
+        // screened, so the reviews it did start are only part of the picture.
+        'a space with more enabled rules than one lookup page holds',
+        { eligible: 2, requested: 2, rulesTruncated: true },
+        {
+          candidates_found: 2,
+          degraded_reason: 'capacity',
+          items_dispatched: 2,
+          items_in_flight: '2',
+          lookup_failed: false,
+          run_outcome: 'degraded_partial',
+          source_read_failed: false,
         },
       ],
       [
@@ -221,7 +268,7 @@ describe('Rule Tuning outcome reports', () => {
         },
       ],
       [
-        // The harvest drops rules already under review, so the sweep finds nothing new.
+        // The screen drops rules already under review, so the sweep finds nothing new.
         'nothing new to review while reviews are in flight',
         { activeReviews: 2 },
         {
@@ -999,7 +1046,7 @@ describe('Rule Coverage outcome reports', () => {
 
 describe('Rule Tuning and Rule Coverage managed versions', () => {
   it.each([
-    [ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.id, ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.version, 31],
+    [ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.id, ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.version, 32],
     [ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.id, ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.version, 34],
     [ALERTZERO_COVERAGE_WORKER_WORKFLOW.id, ALERTZERO_COVERAGE_WORKER_WORKFLOW.version, 6],
     [ALERTZERO_COVERAGE_REVIEW_WORKFLOW.id, ALERTZERO_COVERAGE_REVIEW_WORKFLOW.version, 7],
