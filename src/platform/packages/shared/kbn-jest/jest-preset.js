@@ -112,8 +112,7 @@ module.exports = {
   transform: {
     '^.+\\.(js|mjs|tsx?)$':
       '<rootDir>/src/platform/packages/shared/kbn-jest/src/transforms/swc/index.js',
-    '^.+\\.(txt|html)?$':
-      '<rootDir>/src/platform/packages/shared/kbn-jest/src/transforms/raw.js',
+    '^.+\\.(txt|html)?$': '<rootDir>/src/platform/packages/shared/kbn-jest/src/transforms/raw.js',
     '^.+\\.peggy?$': '<rootDir>/src/platform/packages/shared/kbn-jest/src/transforms/peggy.js',
   },
 
