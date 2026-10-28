@@ -16,7 +16,6 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
-import { AttachmentsService } from '../../../lib/services/attachments_service';
 import { linkActionPolicyToRuleTool } from './link_action_policy_to_rule';
 import { linkRuleToActionPolicyTool } from './link_rule_to_action_policy';
 import { linkRoutingTag, type LinkRoutingTagResult } from './link_routing_tag';
@@ -104,7 +103,6 @@ const link = (
     },
     {
       attachments: ctx.attachments,
-      attachmentsService: new AttachmentsService(),
       logger: logger as unknown as LoggerServiceContract,
       spaceId: ctx.spaceId,
     }
@@ -360,7 +358,6 @@ describe('link routing tag tools', () => {
   const logger = createLogger();
   const deps = {
     logger: logger as unknown as LoggerServiceContract,
-    attachmentsService: new AttachmentsService(),
   };
 
   it('puts the rule first on the rule-authoring tool', () => {

@@ -27,7 +27,6 @@ const linkRuleToActionPolicySchema = lazySchema(() =>
 
 export const linkRuleToActionPolicyTool = ({
   logger,
-  attachmentsService,
 }: LinkRoutingTagToolDeps): BuiltinSkillBoundedTool<typeof linkRuleToActionPolicySchema> => ({
   id: ALERTING_TOOL_IDS.linkRuleToActionPolicy,
   type: ToolType.builtin,
@@ -37,5 +36,5 @@ export const linkRuleToActionPolicyTool = ({
 Use when this rule should notify through an action policy already in the conversation. Both attachment ids are required. Omit tag to derive notify-<rule-name>. Updates conversation attachments only and does not save the rule or the policy.`,
   schema: linkRuleToActionPolicySchema,
   handler: async (input, { attachments, spaceId }) =>
-    linkRoutingTag(input, { attachments, attachmentsService, logger, spaceId }),
+    linkRoutingTag(input, { attachments, logger, spaceId }),
 });

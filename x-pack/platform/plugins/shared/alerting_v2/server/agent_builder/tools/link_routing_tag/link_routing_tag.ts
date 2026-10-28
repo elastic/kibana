@@ -11,16 +11,17 @@ import { getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import {
-  ACTION_POLICY_ATTACHMENT_TYPE,
   POLICY_MATCHER_TAGS_MAX,
-  RULE_ATTACHMENT_TYPE,
   type ActionPolicyAttachmentData,
   type RuleAttachmentData,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
-import type { AttachmentsServiceContract } from '../../../lib/services/attachments_service';
-import type { AttachmentEntry } from '../../../lib/services/attachments_service/attachments_client';
+import {
+  createAttachmentsClient,
+  type AttachmentDraft,
+  type TypedAttachmentClient,
+} from '../../../lib/attachments_client';
 
 const NOTIFY_PREFIX = 'notify-';
 const ATTACHMENT_ID_MAX_LENGTH = 256;
@@ -35,7 +36,6 @@ export class LinkRoutingTagError extends Error {
 
 export interface LinkRoutingTagToolDeps {
   logger: LoggerServiceContract;
-  attachmentsService: AttachmentsServiceContract;
 }
 
 export interface LinkRoutingTagInput {
@@ -105,31 +105,23 @@ const unionTag = (
   return [...current, tag];
 };
 
-const resolveEntry = <TData>(
+const resolveDraft = <TData>(
   attachments: AttachmentStateManager,
+  client: TypedAttachmentClient<TData>,
   attachmentId: string,
-  expectedType: string,
   label: string,
   expectedPhrase: string
-): AttachmentEntry<TData> => {
+): AttachmentDraft<TData> & { version: number } => {
   const record = attachments.getAttachmentRecord(attachmentId);
   if (!record) {
     throw new LinkRoutingTagError(`${label} attachment "${attachmentId}" was not found.`);
   }
-  if (record.type !== expectedType) {
+  if (record.type !== client.type) {
     throw new LinkRoutingTagError(
       `Attachment "${attachmentId}" is of type "${record.type}", expected ${expectedPhrase}.`
     );
   }
-  const latest = record.versions.at(-1);
-  return {
-    id: record.id,
-    type: record.type,
-    version: latest?.version ?? record.current_version,
-    description: record.description,
-    origin: record.origin,
-    data: (latest?.data ?? {}) as TData,
-  };
+  return { ...client.getDraft(attachmentId), version: record.current_version };
 };
 
 export interface LinkRoutingTagResult {
@@ -158,7 +150,6 @@ export const linkRoutingTag = async (
   { ruleAttachmentId, actionPolicyAttachmentId, tag }: LinkRoutingTagInput,
   {
     attachments,
-    attachmentsService,
     logger,
     spaceId,
   }: LinkRoutingTagToolDeps & { attachments: AttachmentStateManager; spaceId: string }
@@ -166,17 +157,12 @@ export const linkRoutingTag = async (
   let ruleId: string | undefined;
   let policyId: string | undefined;
   try {
-    const rule = resolveEntry<RuleAttachmentData>(
+    const client = createAttachmentsClient(attachments);
+    const rule = resolveDraft(attachments, client.rules, ruleAttachmentId, 'Rule', 'a rule');
+    const policy = resolveDraft(
       attachments,
-      ruleAttachmentId,
-      RULE_ATTACHMENT_TYPE,
-      'Rule',
-      'a rule'
-    );
-    const policy = resolveEntry<ActionPolicyAttachmentData>(
-      attachments,
+      client.actionPolicies,
       actionPolicyAttachmentId,
-      ACTION_POLICY_ATTACHMENT_TYPE,
       'Action policy',
       'an action policy'
     );
@@ -214,7 +200,7 @@ export const linkRoutingTag = async (
     const ruleChanged = !sameList(existingRoutingTags, nextRoutingTags);
     const policyChanged = !sameList(existingMatcherTags, nextMatcherTags);
 
-    const nextRuleData: RuleAttachmentData = {
+    const nextRuleData: Partial<RuleAttachmentData> = {
       ...rule.data,
       metadata: {
         ...rule.data.metadata,
@@ -223,7 +209,7 @@ export const linkRoutingTag = async (
       },
     };
     const expression = policy.data.matcher?.expression;
-    const nextPolicyData: ActionPolicyAttachmentData = {
+    const nextPolicyData: Partial<ActionPolicyAttachmentData> = {
       ...policy.data,
       matcher:
         expression != null && expression !== ''
@@ -231,29 +217,22 @@ export const linkRoutingTag = async (
           : { tags: nextMatcherTags },
     };
 
-    const client = attachmentsService.getClient(attachments);
     let ruleVersion = rule.version;
     let policyVersion = policy.version;
 
     if (ruleChanged) {
-      const savedRule = await client.rules.saveDraft(
-        client.rules.getDraft(ruleAttachmentId),
-        nextRuleData
-      );
+      const savedRule = await client.rules.saveDraft(rule, nextRuleData);
       ruleVersion = savedRule.current_version ?? ruleVersion;
     }
 
     if (policyChanged) {
       try {
-        const savedPolicy = await client.actionPolicies.saveDraft(
-          client.actionPolicies.getDraft(actionPolicyAttachmentId),
-          nextPolicyData
-        );
+        const savedPolicy = await client.actionPolicies.saveDraft(policy, nextPolicyData);
         policyVersion = savedPolicy.current_version ?? policyVersion;
       } catch (error) {
         if (ruleChanged) {
           try {
-            await client.rules.saveDraft(client.rules.getDraft(ruleAttachmentId), rule.data);
+            await client.rules.saveDraft(rule, rule.data);
           } catch (rollbackError) {
             logger.warn({
               message: 'Failed to roll back rule attachment after action policy link failed',
@@ -277,13 +256,13 @@ export const linkRoutingTag = async (
       rule_saved: ruleSaved,
       ...(ruleSaved ? {} : { matches_before_rule_saved: false as const }),
       ruleAttachment: {
-        id: rule.id,
+        id: rule.attachmentId,
         version: ruleVersion,
         ...(nextRuleData.id != null ? { ruleId: nextRuleData.id } : {}),
         routing_tags: nextRoutingTags,
       },
       actionPolicyAttachment: {
-        id: policy.id,
+        id: policy.attachmentId,
         version: policyVersion,
         ...(nextPolicyData.id != null ? { policyId: nextPolicyData.id } : {}),
         matcher_tags: nextMatcherTags,
