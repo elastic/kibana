@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/core-chrome-app-menu-components';
 
 import { CaseDetailsAppHeader } from './case_details_app_header';
 import { renderWithTestingProviders } from '../../../../common/mock';
@@ -33,7 +34,12 @@ jest.mock('../../../confirm_delete_case', () => ({
 }));
 
 jest.mock('./case_settings_popover', () => ({
-  CaseSettingsPopover: () => <div data-test-subj="case-settings-popover" />,
+  CaseSettingsPopover: ({ anchorElement }: { anchorElement: HTMLElement }) => (
+    <div
+      data-test-subj="case-settings-popover"
+      data-anchor-test-subj={anchorElement.getAttribute('data-test-subj')}
+    />
+  ),
 }));
 
 (useGetCaseConnectors as jest.Mock).mockReturnValue({ data: {} });
@@ -133,6 +139,22 @@ describe('CaseDetailsAppHeader', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('case-settings-popover')).not.toBeInTheDocument();
     });
+  });
+
+  it('anchors the settings popover to the overflow button when opened from the overflow menu', async () => {
+    renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+    await userEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+    fireEvent.click(
+      within(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.popover)).getByTestId(
+        'case-settings-button'
+      )
+    );
+
+    expect(await screen.findByTestId('case-settings-popover')).toHaveAttribute(
+      'data-anchor-test-subj',
+      APP_MENU_TEST_SUBJECTS.overflowButton
+    );
   });
 
   it('adds the case to chat from the chat actions dropdown', async () => {

@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment-timezone';
 import type { AppHeaderMetadataItems, AppHeaderTitle } from '@kbn/app-header';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/core-chrome-app-menu-components';
 import type { CaseSeverity, CaseStatuses } from '../../../../../../common/types/domain';
 import type { CaseUI } from '../../../../../../common';
 import type { OnUpdateFields } from '../../../types';
@@ -32,6 +33,26 @@ import { getBadges } from '../utils/header_badges';
 import { getMenu } from '../utils/header_menu';
 import { useRunCaseWorkflow } from '../../../../workflows/use_run_case_workflow';
 import { RunCaseWorkflowModal } from '../../../../workflows/run_case_workflow_modal';
+
+/**
+ * Returns an element that stays mounted while the settings popover is open. When the settings item
+ * is rendered inside the app menu "More" popover, its trigger is unmounted as soon as that popover
+ * closes, so the settings popover is anchored to the "More" button instead.
+ */
+const getSettingsAnchor = (triggerElement: HTMLElement): HTMLElement => {
+  const isInOverflowMenu =
+    triggerElement.closest(`[data-test-subj="${APP_MENU_TEST_SUBJECTS.popover}"]`) !== null;
+
+  if (!isInOverflowMenu) {
+    return triggerElement;
+  }
+
+  return (
+    document.querySelector<HTMLElement>(
+      `[data-test-subj="${APP_MENU_TEST_SUBJECTS.overflowButton}"]`
+    ) ?? triggerElement
+  );
+};
 
 interface UseCaseViewHeaderArgs {
   caseData: CaseUI;
@@ -158,8 +179,8 @@ export const useCaseViewHeader = ({
     [caseConnectors, caseData.connector.id]
   );
 
-  const onOpenSettings = useCallback((anchor: HTMLElement) => {
-    setSettingsAnchor(anchor);
+  const onOpenSettings = useCallback((triggerElement: HTMLElement) => {
+    setSettingsAnchor(getSettingsAnchor(triggerElement));
     setIsSettingsOpen((prev) => !prev);
   }, []);
 

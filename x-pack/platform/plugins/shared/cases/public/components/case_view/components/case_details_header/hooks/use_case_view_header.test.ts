@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/core-chrome-app-menu-components';
 
 import { useCaseViewHeader } from './use_case_view_header';
 import { basicCase } from '../../../../../containers/mock';
@@ -386,6 +387,36 @@ describe('useCaseViewHeader', () => {
 
     expect(result.current.isSettingsOpen).toBe(true);
     expect(result.current.settingsAnchor).toBe(mockElement);
+  });
+
+  describe('when the settings item is rendered in the app menu overflow popover', () => {
+    const overflowButton = document.createElement('button');
+    const overflowPopover = document.createElement('div');
+    const overflowMenuItem = document.createElement('button');
+
+    beforeEach(() => {
+      overflowButton.setAttribute('data-test-subj', APP_MENU_TEST_SUBJECTS.overflowButton);
+      overflowPopover.setAttribute('data-test-subj', APP_MENU_TEST_SUBJECTS.popover);
+      overflowPopover.appendChild(overflowMenuItem);
+      document.body.append(overflowButton, overflowPopover);
+    });
+
+    afterEach(() => {
+      overflowButton.remove();
+      overflowPopover.remove();
+    });
+
+    it('anchors the settings popover to the overflow button', () => {
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+
+      act(() => {
+        const settingsItem = result.current.menu.items!.find((item) => item.id === 'caseSettings');
+        settingsItem?.run?.({ triggerElement: overflowMenuItem, returnFocus: jest.fn() });
+      });
+
+      expect(result.current.isSettingsOpen).toBe(true);
+      expect(result.current.settingsAnchor).toBe(overflowButton);
+    });
   });
 
   it('calls onStatusChanged when status badge item is clicked', () => {
