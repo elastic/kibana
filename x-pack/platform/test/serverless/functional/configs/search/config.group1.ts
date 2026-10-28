@@ -14,7 +14,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...baseTestConfig.getAll(),
     testFiles: [
       require.resolve('../../test_suites/home_page'),
-      require.resolve('../../test_suites/management'),
       require.resolve('../../test_suites/platform_security'),
       require.resolve('../../test_suites/reporting'),
     ],

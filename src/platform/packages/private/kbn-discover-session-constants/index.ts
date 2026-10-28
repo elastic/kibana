@@ -39,6 +39,9 @@ export const METRICS_GRID_SIMPLE_AGGREGATIONS = ['avg', 'sum', 'min', 'max'] as 
 
 export const METRICS_GRID_HISTOGRAM_PERCENTILES = ['p50', 'p75', 'p90', 'p95', 'p99'] as const;
 
+/** Lens visualization types used to draw histogram metrics. */
+export const METRICS_GRID_HISTOGRAM_VISUALIZATIONS = ['lnsXY', 'lnsHeatmap'] as const;
+
 export const METRICS_GRID_SORT_FIELDS = ['alphabetically', 'recency'] as const;
 
 export const METRICS_GRID_SORT_DIRECTIONS = ['asc', 'desc'] as const;

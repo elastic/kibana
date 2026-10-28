@@ -214,4 +214,18 @@ describe('AlienVaultOTXConnector', () => {
       await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
+
+  describe.each(['getIndicator', 'getRelatedPulses'] as const)('%s indicator length', (action) => {
+    it.each([
+      [8192, true],
+      [8193, false],
+    ])('%d characters valid=%s', (length, expected) => {
+      expect(
+        AlienVaultOTXConnector.actions[action].input.safeParse({
+          indicatorType: 'domain',
+          indicator: 'a'.repeat(length),
+        }).success
+      ).toBe(expected);
+    });
+  });
 });

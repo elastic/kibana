@@ -20,7 +20,9 @@ import {
 } from '@kbn/workflows';
 import {
   WorkflowExecutionInvalidStatusError,
+  WorkflowExecutionNotFoundError,
   WorkflowNotFoundError,
+  WorkflowResumeNotAppliedError,
 } from '@kbn/workflows/common/errors';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
@@ -133,6 +135,7 @@ describe('WorkflowsManagementApi', () => {
       getExecutionStepExecutions: jest.fn(),
       searchStepExecutions: jest.fn(),
       markStepAsResponded: jest.fn(),
+      releaseHitlStepClaim: jest.fn(),
       getWaitingStepExecutionId: jest.fn(),
       getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
     } as any;
@@ -2699,9 +2702,16 @@ steps:
   });
 
   describe('resumeWorkflowExecution (consolidated HITL claim)', () => {
+    const claim = {
+      respondedBy: 'elastic',
+      respondedAt: '2026-04-29T10:00:00.000Z',
+      channel: 'inbox',
+    };
+
     beforeEach(() => {
       mockWorkflowsExecutionEngine.resumeWorkflowExecution.mockResolvedValue({ resumedBy: 'user' });
-      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValue(true);
+      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValue(claim);
+      mockWorkflowsService.releaseHitlStepClaim.mockResolvedValue(true);
     });
 
     it('claims the caller-supplied step before resuming and forwards the channel', async () => {
@@ -2716,6 +2726,7 @@ steps:
       expect(mockWorkflowsService.getWaitingStepExecutionId).not.toHaveBeenCalled();
       expect(mockWorkflowsService.markStepAsResponded).toHaveBeenCalledWith(
         'step-exec-1',
+        'run-1',
         mockRequest,
         'agent_builder',
         'default'
@@ -2741,6 +2752,7 @@ steps:
       );
       expect(mockWorkflowsService.markStepAsResponded).toHaveBeenCalledWith(
         'step-exec-9',
+        'run-1',
         mockRequest,
         undefined,
         'default'
@@ -2748,7 +2760,7 @@ steps:
     });
 
     it('throws a conflict and never resumes when the first-writer-wins claim is lost', async () => {
-      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValue(false);
+      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValue(null);
 
       await expect(
         api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest, {
@@ -2790,7 +2802,7 @@ steps:
       });
 
       audit.logExecutionResumed.mockClear();
-      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValueOnce(false);
+      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValueOnce(null);
 
       await expect(
         api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest, {
@@ -2803,6 +2815,160 @@ steps:
         executionId: 'run-1',
         channel: 'inbox',
         error: expect.any(WorkflowExecutionInvalidStatusError),
+      });
+    });
+
+    describe('claim release', () => {
+      let audit: { logExecutionResumed: jest.Mock; logExecutionCanceled: jest.Mock };
+
+      const resume = () =>
+        api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest, {
+          channel: 'inbox',
+          stepExecutionId: 'step-exec-1',
+        });
+
+      beforeEach(() => {
+        audit = { logExecutionResumed: jest.fn(), logExecutionCanceled: jest.fn() };
+        api.setAuditLog(audit as any);
+      });
+
+      it('resolves the engine before claiming so a failed lookup cannot strand the claim', async () => {
+        const lookupError = new Error('engine unavailable');
+        jest
+          .spyOn(mockWorkflowsService, 'getWorkflowsExecutionEngine')
+          .mockRejectedValue(lookupError);
+
+        await expect(resume()).rejects.toBe(lookupError);
+
+        expect(mockWorkflowsService.markStepAsResponded).not.toHaveBeenCalled();
+        expect(mockWorkflowsService.releaseHitlStepClaim).not.toHaveBeenCalled();
+      });
+
+      it('releases the claim and rethrows the original error when the resume was not applied', async () => {
+        const cause = new Error('task manager unavailable');
+        mockWorkflowsExecutionEngine.resumeWorkflowExecution.mockRejectedValue(
+          new WorkflowResumeNotAppliedError('run-1', cause)
+        );
+
+        await expect(resume()).rejects.toBe(cause);
+
+        expect(mockWorkflowsService.releaseHitlStepClaim).toHaveBeenCalledWith(
+          'step-exec-1',
+          claim,
+          'default'
+        );
+        expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+          executionId: 'run-1',
+          channel: 'inbox',
+          error: cause,
+          claimReleased: true,
+        });
+      });
+
+      it('releases the claim and rethrows a WorkflowExecutionNotFoundError', async () => {
+        const engineError = new WorkflowExecutionNotFoundError('run-1');
+        mockWorkflowsExecutionEngine.resumeWorkflowExecution.mockRejectedValue(engineError);
+
+        await expect(resume()).rejects.toBe(engineError);
+
+        expect(mockWorkflowsService.releaseHitlStepClaim).toHaveBeenCalledWith(
+          'step-exec-1',
+          claim,
+          'default'
+        );
+        expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+          executionId: 'run-1',
+          channel: 'inbox',
+          error: engineError,
+          claimReleased: true,
+        });
+      });
+
+      it.each([
+        ['is not waiting for input', 'completed'],
+        ['has already finished', 'waiting_for_input (already finished at 2026-10-20T15:55:00Z)'],
+      ])('keeps the claim when the execution %s', async (_case, status) => {
+        const engineError = new WorkflowExecutionInvalidStatusError(
+          'run-1',
+          status,
+          'waiting_for_input'
+        );
+        mockWorkflowsExecutionEngine.resumeWorkflowExecution.mockRejectedValue(engineError);
+
+        await expect(resume()).rejects.toBe(engineError);
+
+        expect(mockWorkflowsService.releaseHitlStepClaim).not.toHaveBeenCalled();
+        expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+          executionId: 'run-1',
+          channel: 'inbox',
+          error: engineError,
+        });
+      });
+
+      it('audits claimReleased: false when the step no longer holds the claim', async () => {
+        const cause = new Error('task manager unavailable');
+        mockWorkflowsExecutionEngine.resumeWorkflowExecution.mockRejectedValue(
+          new WorkflowResumeNotAppliedError('run-1', cause)
+        );
+        mockWorkflowsService.releaseHitlStepClaim.mockResolvedValue(false);
+
+        await expect(resume()).rejects.toBe(cause);
+
+        expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+          executionId: 'run-1',
+          channel: 'inbox',
+          error: cause,
+          claimReleased: false,
+        });
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('Did not release the claim on step execution step-exec-1')
+        );
+      });
+
+      it('keeps the claim when the engine does not confirm that nothing is pending', async () => {
+        const engineError = new Error('handoff outcome unknown');
+        mockWorkflowsExecutionEngine.resumeWorkflowExecution.mockRejectedValue(engineError);
+
+        await expect(resume()).rejects.toBe(engineError);
+
+        expect(mockWorkflowsService.releaseHitlStepClaim).not.toHaveBeenCalled();
+        expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+          executionId: 'run-1',
+          channel: 'inbox',
+          error: engineError,
+        });
+        expect(audit.logExecutionResumed.mock.calls[0][1].claimReleased).toBeUndefined();
+      });
+
+      it('still throws the original error when releasing the claim fails', async () => {
+        const cause = new Error('task manager unavailable');
+        mockWorkflowsExecutionEngine.resumeWorkflowExecution.mockRejectedValue(
+          new WorkflowResumeNotAppliedError('run-1', cause)
+        );
+        mockWorkflowsService.releaseHitlStepClaim.mockRejectedValue(
+          new Error('cluster unavailable')
+        );
+
+        await expect(resume()).rejects.toBe(cause);
+
+        expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+          executionId: 'run-1',
+          channel: 'inbox',
+          error: cause,
+          claimReleased: false,
+        });
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('cluster unavailable'));
+      });
+
+      it('does not release the claim when the resume succeeds', async () => {
+        await expect(resume()).resolves.toEqual({ resumedBy: 'user' });
+
+        expect(mockWorkflowsService.releaseHitlStepClaim).not.toHaveBeenCalled();
+        expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+          executionId: 'run-1',
+          resumedBy: 'user',
+          channel: 'inbox',
+        });
       });
     });
   });

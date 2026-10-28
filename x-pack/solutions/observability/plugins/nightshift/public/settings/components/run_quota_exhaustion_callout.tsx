@@ -10,12 +10,11 @@ import { EuiSpacer } from '@elastic/eui';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import type { RunQuotaGroup } from '@kbn/significant-events-plugin/common';
+import { isRunQuotaReached, type RunQuotaGroup } from '@kbn/significant-events-plugin/common';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import { useKibana } from '../../hooks/use_kibana';
-import { isFiniteRunLimit, type RunLimitDraft } from './run_limit_draft';
 
 export const RunQuotaExhaustionCallout = ({
   enabled,
@@ -24,7 +23,7 @@ export const RunQuotaExhaustionCallout = ({
   groups,
 }: {
   enabled: boolean;
-  limits: Record<RunQuotaGroup, RunLimitDraft>;
+  limits: Record<RunQuotaGroup, number>;
   counts: Record<RunQuotaGroup, number>;
   groups: readonly RunQuotaGroup[];
 }) => {
@@ -33,9 +32,9 @@ export const RunQuotaExhaustionCallout = ({
   const canUseAutomations =
     nightshiftEnabled && nightshiftInvestigations?.investigationsClient != null;
   const automationsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/automations' });
-  const exhaustedGroups = enabled
-    ? groups.filter((group) => isFiniteRunLimit(limits[group]) && counts[group] >= limits[group])
-    : [];
+  const exhaustedGroups = groups.filter((group) =>
+    isRunQuotaReached({ enabled, limit: limits[group], count: counts[group] })
+  );
 
   if (exhaustedGroups.length === 0) {
     return null;
@@ -49,11 +48,11 @@ export const RunQuotaExhaustionCallout = ({
         size="s"
         data-test-subj="nightshiftRunLimitsBanner"
         title={i18n.translate('xpack.nightshift.settings.runLimits.exhaustionTitle', {
-          defaultMessage: 'Automations reached a daily run limit',
+          defaultMessage: 'Automations reached a daily run limit for this deployment.',
         })}
         text={i18n.translate('xpack.nightshift.settings.runLimits.exhaustionDescription', {
           defaultMessage:
-            'New automation runs are skipped until the limit resets at midnight (UTC). Manual runs are not limited.',
+            'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue. You can still trigger investigations manually',
         })}
         actionProps={
           canUseAutomations

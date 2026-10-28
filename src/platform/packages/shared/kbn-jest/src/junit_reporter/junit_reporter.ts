@@ -10,14 +10,12 @@
 import { resolve, dirname, relative } from 'path';
 import { writeFileSync, mkdirSync } from 'fs';
 
-import xmlBuilder from 'xmlbuilder';
-
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { Config } from '@jest/types';
 import type { AggregatedResult, Test } from '@jest/reporters';
 import { BaseReporter } from '@jest/reporters';
 
-import { escapeCdata } from '../xml';
+import { escapeCdata, XmlElement } from '../xml';
 import { getUniqueJunitReportPath } from '../report_path';
 import { prettifyCommandLine } from '../prettify_command_line';
 
@@ -55,12 +53,7 @@ export default class JestJUnitReporter extends BaseReporter {
 
     const reportName = this._reportName;
     const rootDirectory = this._rootDirectory;
-    const root = xmlBuilder.create(
-      'testsuites',
-      { encoding: 'utf-8' },
-      {},
-      { keepNullAttributes: false }
-    );
+    const root = new XmlElement('testsuites');
 
     const msToIso = (ms: number | null | undefined) =>
       typeof ms === 'number' ? new Date(ms).toISOString().slice(0, -5) : undefined;
