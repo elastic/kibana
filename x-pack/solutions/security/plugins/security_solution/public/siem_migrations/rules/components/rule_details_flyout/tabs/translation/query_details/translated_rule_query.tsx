@@ -93,11 +93,14 @@ export const TranslatedRuleQuery: React.FC<TranslatedRuleQueryProps> = React.mem
     });
 
     const [isEditing, setIsEditing] = useState(false);
+    // Version of the rule the draft is based on, to detect updates made while editing
+    const [editedRuleUpdatedAt, setEditedRuleUpdatedAt] = useState<string>();
     const onCancel = useCallback(() => setIsEditing(false), []);
     const onEdit = useCallback(() => {
       form.reset({ defaultValue: formDefaultValue });
+      setEditedRuleUpdatedAt(migrationRule.updated_at);
       setIsEditing(true);
-    }, [form, formDefaultValue]);
+    }, [form, formDefaultValue, migrationRule.updated_at]);
     const onSave = useCallback(
       async (newRuleName: string, newQuery: string) => {
         await onTranslationUpdate?.(newRuleName, newQuery);
@@ -106,15 +109,15 @@ export const TranslatedRuleQuery: React.FC<TranslatedRuleQueryProps> = React.mem
       [onTranslationUpdate]
     );
 
-    // The rule can stop being editable while the user edits it, e.g. when the AI agent matches it
-    // to a prebuilt rule. Saving the draft would overwrite that change, so discard it.
+    // The rule can be updated while the user edits it, e.g. when the AI agent rewrites its query
+    // or matches it to a prebuilt rule. Saving the draft would overwrite that change, so discard it.
     const { addWarning } = useAppToasts();
     useEffect(() => {
-      if (isEditing && !canEdit) {
+      if (isEditing && (!canEdit || migrationRule.updated_at !== editedRuleUpdatedAt)) {
         setIsEditing(false);
         addWarning({ title: i18n.RULE_UPDATED_IN_BACKGROUND });
       }
-    }, [isEditing, canEdit, addWarning]);
+    }, [isEditing, canEdit, migrationRule.updated_at, editedRuleUpdatedAt, addWarning]);
 
     return (
       <>
