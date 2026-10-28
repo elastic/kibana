@@ -240,6 +240,26 @@ describe('useMessageEditor insertText', () => {
     document.body.removeChild(outside);
   });
 
+  it('puts the text at the end when focusing moves the caret to the start of the editor', () => {
+    const { result } = renderHook(() => useMessageEditor());
+    attachRef(result.current.messageEditor, div);
+    div.textContent = 'hello world';
+    window.getSelection()?.removeAllRanges();
+    // Browsers put the caret at the start of a contentEditable that gets focus without a selection
+    jest.spyOn(div, 'focus').mockImplementation(() => {
+      const range = document.createRange();
+      range.setStart(div, 0);
+      range.collapse(true);
+      window.getSelection()?.addRange(range);
+    });
+
+    act(() => {
+      result.current.controller.insertText('@');
+    });
+
+    expect(div.textContent).toBe('hello world @');
+  });
+
   it('inserts at the caret, not at the end, when the caret is inside the editor', () => {
     const { result } = renderHook(() => useMessageEditor());
     attachRef(result.current.messageEditor, div);

@@ -236,8 +236,10 @@ const useMessageEditorController = ({
         if (!editor || !sel) {
           return;
         }
+        // Checked before focus(), because focus() moves the caret to the start of the editor
+        const isCaretInside = sel.rangeCount > 0 && editor.contains(sel.anchorNode);
         editor.focus();
-        if (sel.rangeCount === 0 || !editor.contains(sel.anchorNode)) {
+        if (!isCaretInside) {
           const endRange = document.createRange();
           endRange.selectNodeContents(editor);
           endRange.collapse(false);
