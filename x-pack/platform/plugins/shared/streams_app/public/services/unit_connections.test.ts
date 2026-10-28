@@ -900,6 +900,38 @@ describe('routing rule connections', () => {
     ).toBe(routed);
   });
 
+  it("reconnects a rule to a destination for its telemetry after the rule's line is dropped", () => {
+    const routed = unitWith([
+      {
+        id: 'main',
+        supported_telemetry: ['logs', 'traces'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          {
+            name: 'routes',
+            value: [
+              { telemetry: ['traces'], destinations: ['es-traces'] },
+              { destinations: ['es-logs'] },
+            ],
+          },
+        ],
+      },
+    ]);
+    routed.unit.destinations = [
+      { id: 'es-logs', type: 'elasticsearch', supported_telemetry: ['logs'] },
+      { id: 'es-traces', type: 'elasticsearch', supported_telemetry: ['traces'] },
+    ];
+    const tracesRule = { pipelineId: 'main', ruleIndex: 0 };
+
+    const dropped = disconnectRouteFromTarget(routed, tracesRule, destination('es-traces'));
+    expect(dropped.unit.pipelines[0]?.supported_telemetry).toEqual(['logs']);
+    expect(canConnectRouteToTarget(dropped, tracesRule, destination('es-traces'))).toBe(true);
+
+    const reconnected = connectRouteToTarget(dropped, tracesRule, destination('es-traces'));
+    expect(reconnected.unit.pipelines[0]?.supported_telemetry).toEqual(['logs', 'traces']);
+    expect(pipelineConfig(reconnected, 'main')).toEqual(pipelineConfig(routed, 'main'));
+  });
+
   it('refuses destinations on a rule that forwards to pipelines', () => {
     const routed = unitWith([
       {

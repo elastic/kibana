@@ -25,7 +25,6 @@ import {
   allocateComponentId,
   isDelegatingRoute,
   hasScopedWiring,
-  intersectSignals,
   pipelineForwards,
   pruneUnit,
   readEntryIds,
@@ -958,9 +957,13 @@ const withRuleTargets = (
   );
 };
 
-/** Signals a rule carries: its own `telemetry` within the pipeline's, or all of the pipeline's. */
-const ruleSignals = (pipeline: UnitPipeline, ruleIndex: number): UnitSignal[] =>
-  intersectSignals(pipeline.supported_telemetry, readRoutes(pipeline.config)[ruleIndex]?.telemetry);
+/**
+ * Signals a rule carries: its own `telemetry`, or the pipeline's. The rule's own
+ * list is read as is, since the pipeline narrows away signals of a rule left
+ * unconnected.
+ */
+const ruleSignals = (pipeline: UnitPipeline, ruleIndex: number): readonly UnitSignal[] =>
+  readRoutes(pipeline.config)[ruleIndex]?.telemetry ?? pipeline.supported_telemetry;
 
 const routeFitsTarget = (
   unit: Unit,
@@ -983,8 +986,9 @@ const routeFitsTarget = (
 
 /**
  * Writes new targets for one rule, or returns `unit` unchanged when they do not
- * fit. A routed child pipeline keeps its last destination, since dropping the
- * pipeline would leave its parent route pointing nowhere.
+ * fit. The pipeline regains the rule's signals before they are narrowed to its
+ * targets again. A routed child pipeline keeps its last destination, since
+ * dropping the pipeline would leave its parent route pointing nowhere.
  */
 const writeRuleTargets = (
   unit: Unit,
@@ -997,7 +1001,12 @@ const writeRuleTargets = (
   if (!config || (!pipelineForwards(config) && isRoutedPipeline(unit, pipelineId))) {
     return unit;
   }
-  return writePipeline(unit, pipelineIndex, config);
+  return writePipeline(
+    unit,
+    pipelineIndex,
+    config,
+    unionSignals(pipeline.supported_telemetry, ruleSignals(pipeline, ruleIndex))
+  );
 };
 
 export const canConnectRouteToTarget = (
