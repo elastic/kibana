@@ -16,6 +16,7 @@ import {
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import type { TimeRange } from '@kbn/es-query';
 import { AlertEpisodesStatusFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/status_filter';
+import { AlertEpisodesSourceFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/source_filter';
 import { AlertEpisodesSeverityFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/severity_filter';
 import { AlertEpisodesRuleFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/rule_filter';
 import { AlertEpisodesTagFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/tag_filter';
@@ -132,6 +133,13 @@ export const EpisodesFilterBar = ({
     [onFilterChange]
   );
 
+  const onSourcesChange = useCallback(
+    (sources: string[] | undefined) => {
+      onFilterChange((prev) => ({ ...prev, sources }));
+    },
+    [onFilterChange]
+  );
+
   const onSeveritiesChange = useCallback(
     (severity: string[] | undefined) => {
       onFilterChange((prev) => ({ ...prev, severity }));
@@ -234,6 +242,14 @@ export const EpisodesFilterBar = ({
               selectedStatuses={filterState.status}
               onStatusesChange={onStatusesChange}
               data-test-subj="episodesFilterBar-status"
+            />
+
+            <AlertEpisodesSourceFilter
+              selectedSources={filterState.sources}
+              onSourcesChange={onSourcesChange}
+              services={services}
+              timeRange={timeRange}
+              data-test-subj="episodesFilterBar-source"
             />
 
             <AlertEpisodesSeverityFilter

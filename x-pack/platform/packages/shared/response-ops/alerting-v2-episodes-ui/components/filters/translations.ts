@@ -175,3 +175,29 @@ export const SEVERITY_FILTER_NO_MATCH = i18n.translate(
     defaultMessage: 'No matching severities',
   }
 );
+
+/** --- Source filter --- */
+export const SOURCE_FILTER_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.sourceFilter.ariaLabel',
+  {
+    defaultMessage: 'Source filter',
+  }
+);
+
+export const SOURCE_FILTER_LABEL = i18n.translate('xpack.alertingV2EpisodesUi.sourceFilter.label', {
+  defaultMessage: 'Source',
+});
+
+export const SOURCE_FILTER_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.alertingV2EpisodesUi.sourceFilter.searchPlaceholder',
+  {
+    defaultMessage: 'Search sources…',
+  }
+);
+
+export const SOURCE_FILTER_NO_MATCH = i18n.translate(
+  'xpack.alertingV2EpisodesUi.sourceFilter.noMatch',
+  {
+    defaultMessage: 'No matching sources',
+  }
+);

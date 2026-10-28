@@ -94,6 +94,12 @@ export const queryKeys = {
     queryV2Source?: boolean
   ) =>
     [...queryKeys.tagOptionsAll(), spaceId, timeRange, additionalSourceId, queryV2Source] as const,
+  connectorSourcesAll: () => [...queryKeys.all, 'connector-sources'] as const,
+  connectorSources: (
+    spaceId: string,
+    timeRange?: { from: string; to: string } | null,
+    queryV2Source?: boolean
+  ) => [...queryKeys.connectorSourcesAll(), spaceId, timeRange, queryV2Source] as const,
   tagSuggestionsAll: () => [...queryKeys.all, 'tag-suggestions'] as const,
   tagSuggestions: (spaceId: string) => [...queryKeys.tagSuggestionsAll(), spaceId] as const,
   assigneeSuggestions: (searchTerm: string) =>

@@ -7,10 +7,13 @@
 
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { createMockServices } from '@kbn/alerting-v2-episodes-ui/hooks/test_utils';
 import { useFetchEpisodeTagOptions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_tag_options';
+import { useFetchEpisodeConnectorSources } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_connector_sources';
+import * as inlineFilterPopoverModule from '@kbn/alerting-v2-episodes-ui/components/filters/inline_filter_popover';
 import { useBulkGetProfiles } from '@kbn/alerting-v2-episodes-ui/hooks/use_bulk_get_profiles';
 import { fetchRulesSearch } from '@kbn/alerting-v2-episodes-ui/apis/fetch_rules_search';
 import { TestProviders } from '../../../test_utils/test_providers';
@@ -59,6 +62,10 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_tag_options', ()
   useFetchEpisodeTagOptions: jest.fn(),
 }));
 
+jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_connector_sources', () => ({
+  useFetchEpisodeConnectorSources: jest.fn(),
+}));
+
 jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_rules_search', () => ({
   fetchRulesSearch: jest.fn(),
 }));
@@ -68,6 +75,8 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_bulk_get_profiles', () => ({
 }));
 
 const mockUseFetchEpisodeTagOptions = jest.mocked(useFetchEpisodeTagOptions);
+const mockUseFetchEpisodeConnectorSources = jest.mocked(useFetchEpisodeConnectorSources);
+const InlineFilterPopoverSpy = jest.spyOn(inlineFilterPopoverModule, 'InlineFilterPopover');
 const mockFetchRulesSearch = jest.mocked(fetchRulesSearch);
 const mockUseBulkGetProfiles = jest.mocked(useBulkGetProfiles);
 
@@ -133,6 +142,10 @@ describe('EpisodesFilterBar', () => {
       data: [],
       isLoading: false,
     } as unknown as ReturnType<typeof useFetchEpisodeTagOptions>);
+    mockUseFetchEpisodeConnectorSources.mockReturnValue({
+      data: [],
+      isLoading: false,
+    } as unknown as ReturnType<typeof useFetchEpisodeConnectorSources>);
     mockFetchRulesSearch.mockResolvedValue([]);
     mockUseBulkGetProfiles.mockReturnValue({
       data: [],
@@ -222,12 +235,34 @@ describe('EpisodesFilterBar', () => {
     });
   });
 
+  it('writes a source selection into the filter state', async () => {
+    const user = userEvent.setup({ delay: null });
+    renderFilterBar();
+    defaultProps.onFilterChange.mockClear();
+
+    await user.click(screen.getByTestId('episodesFilterBar-source-button'));
+    const popoverProps = InlineFilterPopoverSpy.mock.calls.at(-1)?.[0];
+    if (!popoverProps) {
+      throw new Error('Source filter popover was not opened');
+    }
+    act(() => {
+      popoverProps.onSelectionChange(['v2', 'zabbix']);
+    });
+
+    const updateFilter = defaultProps.onFilterChange.mock.calls[0][0];
+    expect(updateFilter({ status: ['active'] })).toEqual({
+      status: ['active'],
+      sources: ['v2', 'zabbix'],
+    });
+  });
+
   it('renders search and all episode filters', () => {
     renderFilterBar();
 
     expect(screen.getByRole('search', { name: 'Filter alerts' })).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-search')).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-status-button')).toBeInTheDocument();
+    expect(screen.getByTestId('episodesFilterBar-source-button')).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-severity-button')).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-rule-button')).toBeInTheDocument();
     expect(screen.getByTestId('episodesFilterBar-tags-button')).toBeInTheDocument();
