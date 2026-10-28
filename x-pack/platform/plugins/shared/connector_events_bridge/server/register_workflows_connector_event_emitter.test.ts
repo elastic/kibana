@@ -9,6 +9,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { ConnectorEventEmitParams, ConnectorEventEmitter } from '@kbn/actions-plugin/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { HITL_SLACK_ACTION_EVENT_ID } from '@kbn/workflows';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 import {
@@ -183,7 +184,7 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
 
     await emitter.emit(
       createEmitParams({
-        eventId: 'slack2.hitl_action',
+        eventId: HITL_SLACK_ACTION_EVENT_ID,
         connectorTypeId: '.slack2',
         payload: {
           executionId: 'exec-1',
@@ -213,7 +214,7 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
 
     await emitter.emit(
       createEmitParams({
-        eventId: 'slack2.hitl_action',
+        eventId: HITL_SLACK_ACTION_EVENT_ID,
         connectorTypeId: '.slack2',
         payload: {
           executionId: 'exec-1',
@@ -258,7 +259,7 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
     await expect(
       emitter.emit(
         createEmitParams({
-          eventId: 'slack2.hitl_action',
+          eventId: HITL_SLACK_ACTION_EVENT_ID,
           connectorTypeId: '.slack2',
           payload: {
             executionId: 'exec-1',
@@ -300,7 +301,7 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
     await expect(
       emitter.emit(
         createEmitParams({
-          eventId: 'slack2.hitl_action',
+          eventId: HITL_SLACK_ACTION_EVENT_ID,
           connectorTypeId: '.slack2',
           payload: {
             executionId: 'exec-1',
@@ -343,7 +344,7 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
     await expect(
       emitter.emit(
         createEmitParams({
-          eventId: 'slack2.hitl_action',
+          eventId: HITL_SLACK_ACTION_EVENT_ID,
           connectorTypeId: '.slack2',
           payload: {
             executionId: 'exec-1',

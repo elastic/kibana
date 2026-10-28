@@ -8,6 +8,7 @@
  */
 
 import { INBOUND_WEBHOOK_CONNECTOR_TYPE_ID } from '@kbn/connector-specs';
+import { HITL_SLACK_ACTION_EVENT_ID } from '@kbn/workflows';
 import {
   getConnectorEventTriggerDefinitions,
   getConnectorTypeIdForTriggerEventId,
@@ -33,6 +34,6 @@ describe('getConnectorEventTriggerDefinitions', () => {
     );
 
     expect(ids).toContain('slack2.message');
-    expect(ids).not.toContain('slack2.hitl_action');
+    expect(ids).not.toContain(HITL_SLACK_ACTION_EVENT_ID);
   });
 });
