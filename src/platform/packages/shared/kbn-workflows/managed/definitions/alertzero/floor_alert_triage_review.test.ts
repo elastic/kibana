@@ -503,6 +503,8 @@ describe('floor_alert_triage_review — re-tag failure tracking', () => {
   it.each([
     ['record_retag_failures', 'retag_dismissed_alerts'],
     ['record_expired_retag_failures', 'retag_expired_alerts'],
+    ['record_unknown_retag_failures', 'retag_unknown_alerts'],
+    ['record_dismissed_read_failed_retag_failures', 'retag_dismissed_read_failed'],
   ])('%s counts the failed alerts, or every candidate when the step failed', (name, retagName) => {
     const expr = stepByName(name)?.with?.failed_retag_count as string;
     const variables = { fp_candidate_count: 7 };

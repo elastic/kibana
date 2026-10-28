@@ -538,6 +538,12 @@ steps:
             with:
               proposal_id: "{{ inputs.proposal_id | default: steps.create_fp_proposal.output.proposalId }}"
               alert_ids: "${{ variables.retag_alert_ids }}"
+
+          - name: record_dismissed_read_failed_retag_failures
+            type: data.set
+            with:
+              failed_retag_count: "${{ steps.retag_dismissed_read_failed.output.failed | default: variables.fp_candidate_count }}"
+
           - name: post_comment_dismissed_read_failed
             type: ai.conversation.add_user_message
             on-failure:
@@ -547,9 +553,11 @@ steps:
               conversation_id: "{{ inputs.conversation_id }}"
               message: >-
                 ⚠️ The proposal was dismissed, but its details could not be read after
-                retries ({{ steps.get_proposal.error.message }}). {{ variables.fp_candidate_count }}
-                alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}was{% else %}were{% endif %} re-tagged az:inconclusive; this Investigation
-                stays open for manual follow-up.
+                retries ({{ steps.get_proposal.error.message }}). {% if variables.failed_retag_count > 0 %}{{ variables.fp_candidate_count | minus: variables.failed_retag_count }} of {{ variables.fp_candidate_count }}
+                alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged az:inconclusive; {{ variables.failed_retag_count }} failed after retries and
+                {% if variables.failed_retag_count == 1 %}needs{% else %}need{% endif %} manual re-tagging.{% else %}{{ variables.fp_candidate_count }}
+                alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}was{% else %}were{% endif %} re-tagged az:inconclusive.{% endif %}
+                This Investigation stays open for manual follow-up.
 
   # Expiry is not a dismissal: nobody rejected the verdict, so the alerts keep `az:model_fp`. They
   # leave `az:false_positive`, which nothing would revisit. The gate also settles as expired when
@@ -634,6 +642,11 @@ steps:
           proposal_id: "{{ inputs.proposal_id | default: steps.create_fp_proposal.output.proposalId }}"
           alert_ids: "${{ variables.retag_alert_ids }}"
 
+      - name: record_unknown_retag_failures
+        type: data.set
+        with:
+          failed_retag_count: "${{ steps.retag_unknown_alerts.output.failed | default: variables.fp_candidate_count }}"
+
       - name: post_comment_outcome_unknown
         type: ai.conversation.add_user_message
         on-failure:
@@ -648,7 +661,7 @@ steps:
           # per-alert result, so this reports the ambiguity instead of a specific (possibly
           # wrong) closed/open count.
           message: >-
-            ⚠️ The closure proposal ended in an unexpected state (status: "{{ steps.create_fp_proposal.output.status | default: 'unknown' }}"). Some of the {{ variables.fp_candidate_count }} candidate alert{% if variables.fp_candidate_count != 1 %}s{% endif %} may already be closed if a closure attempt partially succeeded before this outcome — check each alert's workflow_status rather than assuming all remain open. The candidates were re-tagged az:inconclusive. This Investigation stays open for review.
+            ⚠️ The closure proposal ended in an unexpected state (status: "{{ steps.create_fp_proposal.output.status | default: 'unknown' }}"). Some of the {{ variables.fp_candidate_count }} candidate alert{% if variables.fp_candidate_count != 1 %}s{% endif %} may already be closed if a closure attempt partially succeeded before this outcome — check each alert's workflow_status rather than assuming all remain open. {% if variables.failed_retag_count > 0 %}{{ variables.fp_candidate_count | minus: variables.failed_retag_count }} of {{ variables.fp_candidate_count }} were re-tagged az:inconclusive; {{ variables.failed_retag_count }} failed after retries and {% if variables.failed_retag_count == 1 %}needs{% else %}need{% endif %} manual re-tagging.{% else %}The candidates were re-tagged az:inconclusive.{% endif %} This Investigation stays open for review.
 
   # Telemetry: how the closure proposal settled, once its outcome has been applied.
   - name: report_closure_resolved
