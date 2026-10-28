@@ -69,7 +69,10 @@ const RULE_UUID = 'kibana.alert.rule.uuid';
 const RULE_REVISION = 'kibana.alert.rule.revision';
 const NAME_OVERRIDE = 'kibana.alert.rule.rule_name_override';
 
-/** Every field `buildPatternKeys` reads, so a caller that only needs keys can load just these. */
+/**
+ * Every field `buildPatternKeys` reads, so a search can fetch only those. Keep it in step with
+ * `buildCondition`, `serialize` and `getDetection`: a field missing here silently changes keys.
+ */
 export const PATTERN_KEY_FIELDS: readonly string[] = [
   ...new Set([
     ...Object.values(FIELD_SETS).flatMap(({ fields, hash }) => (hash ? [...fields, hash] : fields)),

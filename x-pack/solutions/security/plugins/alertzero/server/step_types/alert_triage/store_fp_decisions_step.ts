@@ -22,7 +22,7 @@ import {
   strictKeyTag,
   type FpDecisionKind,
 } from '../../alert_triage/fp_decisions';
-import { findKeyTagsWithVerdicts, loadAlertsByIds } from './ports';
+import { findKeyTagsWithVerdicts, loadAlertsByIds, statusCodeOf } from './ports';
 
 export interface StoreFpDecisionsStepDependencies {
   isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
@@ -36,13 +36,6 @@ const NOTHING = {
   keys_over_cap: 0,
   written: 0,
   failed: 0,
-};
-
-const statusCodeOf = (error: unknown): number | undefined => {
-  if (typeof error !== 'object' || error === null) return undefined;
-  const { statusCode, meta } = error as { statusCode?: unknown; meta?: { statusCode?: unknown } };
-  const code = statusCode ?? meta?.statusCode;
-  return typeof code === 'number' ? code : undefined;
 };
 
 /**
