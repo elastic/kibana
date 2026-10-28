@@ -265,6 +265,17 @@ describe('WorkflowApi', () => {
     });
   });
 
+  describe('getLinkedRules', () => {
+    it('should call POST /internal/workflows/_linked_rules with ids', async () => {
+      await api.getLinkedRules(['w1', 'w2']);
+
+      expect(http.post).toHaveBeenCalledWith('/internal/workflows/_linked_rules', {
+        body: JSON.stringify({ ids: ['w1', 'w2'] }),
+        version: INTERNAL_VERSION,
+      });
+    });
+  });
+
   // ---------------------------------------------------------------------------
   // Execution operations
   // ---------------------------------------------------------------------------

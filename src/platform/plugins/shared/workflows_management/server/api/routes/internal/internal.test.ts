@@ -63,8 +63,12 @@ describe('Internal Routes', () => {
     Promise<SearchTriggerEventLogResult>,
     [TriggerEventLogSearchCall]
   >();
+  const mockRulesFind = jest.fn();
 
   const mockContext = {
+    alerting: Promise.resolve({
+      getRulesClient: jest.fn().mockResolvedValue({ find: mockRulesFind }),
+    }),
     workflows: Promise.resolve({
       isWorkflowsAvailable: true,
       emitEvent: jest.fn(),
@@ -573,6 +577,36 @@ describe('Internal Routes', () => {
     expect(mockApi.disableAllWorkflows).toHaveBeenCalledWith('default', request);
     expect(response.ok).toHaveBeenCalledWith({
       body: { total: 3, disabled: 3, failures: [] },
+    });
+  });
+
+  it('should return the rules that run the given workflows', async () => {
+    mockRulesFind.mockResolvedValue({
+      total: 12,
+      data: [{ id: 'rule-1', name: 'Rule 1', alertTypeId: 'siem.queryRule' }],
+    });
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({ body: { ids: ['wf-1', 'wf-"2'] } });
+
+    await routeHandlers[`POST:/internal/workflows/_linked_rules`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockRulesFind).toHaveBeenCalledWith({
+      options: {
+        filter:
+          'alert.attributes.actions:{ actionRef: "system_action:system-connector-.workflows" and params.subActionParams.workflowId: ("wf-1" or "wf-\\"2") }',
+        page: 1,
+        perPage: 10,
+        sortField: 'name',
+        sortOrder: 'asc',
+      },
+    });
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { total: 12, rules: [{ id: 'rule-1', name: 'Rule 1', ruleTypeId: 'siem.queryRule' }] },
     });
   });
 

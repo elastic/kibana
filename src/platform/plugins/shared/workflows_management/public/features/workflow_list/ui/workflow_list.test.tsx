@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
@@ -74,6 +74,14 @@ jest.mock('../../../entities/workflows/model/use_workflow_actions', () => ({
     runWorkflow: mockRunWorkflow,
     cloneWorkflow: mockCloneWorkflow,
     updateWorkflow: mockUpdateWorkflow,
+  }),
+}));
+
+const mockConfirmDisable = jest.fn();
+jest.mock('../../linked_rules/model/use_disable_workflows_confirmation', () => ({
+  useDisableWorkflowsConfirmation: () => ({
+    confirmDisable: mockConfirmDisable,
+    confirmModal: null,
   }),
 }));
 
@@ -441,6 +449,7 @@ describe('WorkflowList', () => {
     });
 
     it('passes workflow definition when toggling enabled from the list', async () => {
+      mockConfirmDisable.mockResolvedValue(true);
       const workflow = createMockWorkflow({
         id: 'wf-toggle',
         enabled: true,
@@ -457,15 +466,37 @@ describe('WorkflowList', () => {
 
       await userEvent.click(screen.getByTestId('workflowToggleSwitch-wf-toggle'));
 
-      expect(mockUpdateWorkflow.mutate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'wf-toggle',
-          workflow: { enabled: false },
-          workflowDefinition: workflow.definition,
-          skipRefetch: true,
-        }),
-        expect.any(Object)
+      expect(mockConfirmDisable).toHaveBeenCalledWith(['wf-toggle']);
+      await waitFor(() =>
+        expect(mockUpdateWorkflow.mutate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 'wf-toggle',
+            workflow: { enabled: false },
+            workflowDefinition: workflow.definition,
+            skipRefetch: true,
+          }),
+          expect.any(Object)
+        )
       );
+    });
+
+    it('does not disable the workflow when the user cancels the confirmation', async () => {
+      mockConfirmDisable.mockResolvedValue(false);
+      const workflow = createMockWorkflow({ id: 'wf-toggle', enabled: true });
+
+      mockUseWorkflows.mockReturnValue({
+        data: createMockWorkflowListDto([workflow]),
+        isLoading: false,
+        error: null,
+        refetch: mockRefetch,
+      });
+
+      renderComponent();
+
+      await userEvent.click(screen.getByTestId('workflowToggleSwitch-wf-toggle'));
+
+      await waitFor(() => expect(mockConfirmDisable).toHaveBeenCalledWith(['wf-toggle']));
+      expect(mockUpdateWorkflow.mutate).not.toHaveBeenCalled();
     });
 
     it('renders multiple workflows', () => {
