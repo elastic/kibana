@@ -376,12 +376,18 @@ export function initializeFetch({
       return;
     }
 
+    // Own the abort controller so that cancelling the panel (or a refetch) aborts this request
+    const moreAbortController = new AbortController();
+    abortController = moreAbortController;
+
     stateManager.isLoadingMore.next(true);
+    // The dashboard shows its cancel button based on the panels' loading state
+    setDataLoading(true);
 
     try {
       const executionContext = await getExecutionContext(api, discoverServices);
       const nextPageResult = await currentPagination.nextPage({
-        abortSignal: abortController?.signal,
+        abortSignal: moreAbortController.signal,
         executionContext,
       });
       const dataView = api.dataViews$.getValue()?.[0];
@@ -399,9 +405,15 @@ export function initializeFetch({
       stateManager.rows.next([...stateManager.rows.getValue(), ...moreRecords]);
       stateManager.pagination.next(nextPageResult.pagination);
     } catch (error) {
-      setSearchError(error);
+      if (!moreAbortController.signal.aborted) {
+        setSearchError(error);
+      }
     } finally {
-      stateManager.isLoadingMore.next(false);
+      // A refetch that replaced this request owns the loading state now
+      if (moreAbortController.signal.reason !== AbortReason.REPLACED) {
+        stateManager.isLoadingMore.next(false);
+        setDataLoading(false);
+      }
     }
   };
 

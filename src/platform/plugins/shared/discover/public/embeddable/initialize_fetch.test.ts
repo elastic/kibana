@@ -47,11 +47,16 @@ describe('initialize fetch', () => {
   const refreshTrigger$ = new BehaviorSubject<void>(undefined);
   let cleanupFetch: (() => void) | undefined;
   let fetchMore: (() => Promise<void>) | undefined;
+  let cancelRequests: (() => void) | undefined;
 
   const waitOneTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
   beforeAll(async () => {
-    const { cleanup, fetchMore: fetchMoreFn } = initializeFetch({
+    const {
+      cleanup,
+      fetchMore: fetchMoreFn,
+      cancelRequests: cancelRequestsFn,
+    } = initializeFetch({
       api: mockedApi,
       stateManager,
       discoverServices: discoverServiceMock,
@@ -65,6 +70,7 @@ describe('initialize fetch', () => {
     });
     cleanupFetch = cleanup;
     fetchMore = fetchMoreFn;
+    cancelRequests = cancelRequestsFn;
     await waitOneTick();
   });
 
@@ -179,6 +185,37 @@ describe('initialize fetch', () => {
       );
       expect(stateManager.pagination.getValue()).toBe(nextPagination);
       expect(stateManager.isLoadingMore.getValue()).toBe(false);
+    });
+
+    it('should report the panel as loading while the next page loads and honor cancellation', async () => {
+      let signal: AbortSignal | undefined;
+      const nextPage = jest.fn().mockImplementation(
+        (options: { abortSignal: AbortSignal }) =>
+          new Promise((_resolve, reject) => {
+            signal = options.abortSignal;
+            signal.addEventListener('abort', () => reject(new Error('aborted')));
+          })
+      );
+      discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
+        rawResponse: { hits: { hits: firstPage, total: 2 } },
+        pagination: { hasNextPage: true, nextPage },
+      });
+      mockedApi.savedSearch$.next(savedSearch);
+      await waitOneTick();
+      expect(mockedApi.dataLoading$.getValue()).toBe(false);
+
+      const pending = fetchMore?.();
+      await waitOneTick();
+      expect(mockedApi.dataLoading$.getValue()).toBe(true);
+      expect(stateManager.isLoadingMore.getValue()).toBe(true);
+
+      cancelRequests?.(); // what the dashboard cancel button triggers
+      await pending;
+
+      expect(signal?.aborted).toBe(true);
+      expect(mockedApi.dataLoading$.getValue()).toBe(false);
+      expect(stateManager.isLoadingMore.getValue()).toBe(false);
+      expect(mockedApi.searchError$.getValue()).toBeUndefined();
     });
 
     it('should do nothing when there is no next page', async () => {
