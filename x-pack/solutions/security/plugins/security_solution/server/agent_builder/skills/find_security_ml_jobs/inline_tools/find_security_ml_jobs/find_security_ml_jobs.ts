@@ -10,7 +10,8 @@ import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { ML_INTERNAL_USER_REQUEST } from '@kbn/ml-plugin/server';
 import type { ModuleJob } from '@kbn/ml-common-types/modules';
 import { isJobStarted } from '../../../../../../common/machine_learning/helpers';
 import type { LEGACY_ML_GROUP_ID, ML_GROUP_ID } from '../../../../../../common/constants';
@@ -60,11 +61,10 @@ const getActiveMlModules = async (
   soClient: SavedObjectsClientContract,
   ml?: FindSecurityMlJobsSkillsContext['ml']
 ): Promise<ActiveMlModules[]> => {
-  const fakeRequest = Object.create(null) as KibanaRequest;
-  const mlModulesProvider = ml?.modulesProvider(fakeRequest, soClient);
+  const mlModulesProvider = ml?.modulesProvider(ML_INTERNAL_USER_REQUEST, soClient);
   const modules = await mlModulesProvider?.listModules?.();
 
-  const jobServiceProvider = ml?.jobServiceProvider(fakeRequest, soClient);
+  const jobServiceProvider = ml?.jobServiceProvider(ML_INTERNAL_USER_REQUEST, soClient);
   const allJobsWithStatus = await jobServiceProvider?.jobsSummary();
 
   const formattedModules = modules?.map((module) => ({

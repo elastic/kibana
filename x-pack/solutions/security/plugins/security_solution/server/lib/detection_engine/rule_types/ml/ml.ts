@@ -7,7 +7,7 @@
 
 /* eslint require-atomic-updates: ["error", { "allowProperties": true }] */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import { ML_INTERNAL_USER_REQUEST } from '@kbn/ml-plugin/server';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import type { MachineLearningRuleParams } from '../../rule_schema';
@@ -67,11 +67,8 @@ export const mlExecutor = async ({
       throw new Error('ML plugin unavailable during rule execution');
     }
 
-    // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
-    // currently unused by the jobsSummary function.
-    const fakeRequest = {} as KibanaRequest;
     const summaryJobs = await ml
-      .jobServiceProvider(fakeRequest, services.savedObjectsClient)
+      .jobServiceProvider(ML_INTERNAL_USER_REQUEST, services.savedObjectsClient)
       .jobsSummary(ruleParams.machineLearningJobId);
     const jobSummaries = summaryJobs.filter((job) =>
       ruleParams.machineLearningJobId.includes(job.id)
@@ -106,9 +103,7 @@ export const mlExecutor = async ({
     try {
       const searchResults = await findMlSignals({
         ml,
-        // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
-        // currently unused by the mlAnomalySearch function.
-        request: {} as unknown as KibanaRequest,
+        request: ML_INTERNAL_USER_REQUEST,
         savedObjectsClient: services.savedObjectsClient,
         jobIds: ruleParams.machineLearningJobId,
         anomalyThreshold: ruleParams.anomalyThreshold,

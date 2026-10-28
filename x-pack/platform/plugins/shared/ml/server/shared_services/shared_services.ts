@@ -10,7 +10,6 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import { isCoreKibanaRequest } from '@kbn/core-http-server-utils';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { IClusterClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -22,6 +21,7 @@ import type { CompatibleModule, MlFeatures } from '../../common/constants/app';
 import type { MlLicense } from '../../common/license';
 
 import { licenseChecks } from './license_checks';
+import { isMlInternalUserRequest } from './internal_user_request';
 import type {
   MlSystemProvider,
   JobServiceProvider,
@@ -233,9 +233,6 @@ function getRequestItemsProvider(
     );
     let scopedClient: IScopedClusterClient;
     let mlClient: MlClient;
-    // While https://github.com/elastic/kibana/issues/64588 exists we
-    // will not receive a real request object when being called from an alert.
-    // instead a dummy request object will be supplied
     const clusterClient = getClusterClient();
     const getSobSavedObjectService = (client: IScopedClusterClient) => {
       return mlSavedObjectServiceFactory(
@@ -280,7 +277,7 @@ function getRequestItemsProvider(
     };
 
     let mlSavedObjectService;
-    if (isCoreKibanaRequest(request)) {
+    if (!isMlInternalUserRequest(request)) {
       scopedClient = clusterClient.asScoped(request);
       mlSavedObjectService = getSobSavedObjectService(scopedClient);
       const auditLogger = new MlAuditLogger(auditService, request);

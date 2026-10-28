@@ -9,6 +9,7 @@ import { memoize } from 'lodash';
 
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { ML_INTERNAL_USER_REQUEST } from '@kbn/ml-plugin/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type {
@@ -136,10 +137,9 @@ export class RequestContextFactory implements IRequestContextFactory {
           elserInferenceId: params?.elserInferenceId,
           manageGlobalKnowledgeBaseAIAssistant:
             securitySolutionAssistant.manageGlobalKnowledgeBaseAIAssistant as boolean,
-          // uses internal user to interact with ML API
           getTrainedModelsProvider: () =>
             plugins.ml.trainedModelsProvider(
-              {} as KibanaRequest,
+              ML_INTERNAL_USER_REQUEST,
               coreStart.savedObjects.createInternalRepository()
             ),
         });

@@ -17,6 +17,7 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { DocLinksServiceSetup, DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { KibanaRequest, RequestTiming } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type {
   ElasticsearchClient,
   ElasticsearchCapabilities,
@@ -457,17 +458,8 @@ export class SavedObjectsService
         return undefined;
       }
 
-      // Create a minimal request-like object for extensions that need it
-      // but don't require actual user context (like encryption/spaces)
-      // Using 'unknown' cast is intentional here as we're creating a minimal fake request
-      const internalRequest = {
-        headers: {},
-        getBasePath: () => '',
-        path: '/',
-        route: { settings: {} },
-        url: { href: '/' },
-        raw: { req: { url: '/' } },
-      } as unknown as KibanaRequest;
+      // Fake request for extensions that need one but don't require user context (like encryption/spaces)
+      const internalRequest = CoreKibanaRequest.from({ headers: {}, path: '/' });
 
       return extensionFactory({
         typeRegistry: this.typeRegistry,

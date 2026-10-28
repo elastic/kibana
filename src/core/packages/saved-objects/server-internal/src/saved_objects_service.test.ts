@@ -30,6 +30,7 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
+import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type {
   SavedObjectsClientFactoryProvider,
   SavedObjectsEncryptionExtensionFactory,
@@ -1011,9 +1012,8 @@ describe('SavedObjectsService', () => {
           expect(encryptionFactory).toHaveBeenCalledWith({
             typeRegistry: expect.any(Object),
             request: expect.objectContaining({
-              headers: {},
-              getBasePath: expect.any(Function),
-              path: '/',
+              isFakeRequest: true,
+              spaceId: 'default',
             }),
           });
         });
@@ -1035,9 +1035,8 @@ describe('SavedObjectsService', () => {
           expect(spacesFactory).toHaveBeenCalledWith({
             typeRegistry: expect.any(Object),
             request: expect.objectContaining({
-              headers: {},
-              getBasePath: expect.any(Function),
-              path: '/',
+              isFakeRequest: true,
+              spaceId: 'default',
             }),
           });
         });
@@ -1079,7 +1078,7 @@ describe('SavedObjectsService', () => {
           expect(extensions.securityExtension).toBeUndefined();
         });
 
-        it('creates proper fake request object for extension factories', async () => {
+        it('passes a fake request scoped to the default space to extension factories', async () => {
           const coreContext = createCoreContext();
           const soService = new SavedObjectsService(coreContext);
           const setup = await soService.setup(createSetupDeps());
@@ -1091,21 +1090,15 @@ describe('SavedObjectsService', () => {
 
           (soService as any).getInternalExtensions([]);
 
-          expect(encryptionFactory).toHaveBeenCalledWith({
-            typeRegistry: expect.any(Object),
-            request: expect.objectContaining({
+          const { request } = encryptionFactory.mock.calls[0][0];
+          expect(request).toBeInstanceOf(CoreKibanaRequest);
+          expect(request).toEqual(
+            expect.objectContaining({
               headers: {},
-              getBasePath: expect.any(Function),
-              path: '/',
-              route: { settings: {} },
-              url: { href: '/' },
-              raw: { req: { url: '/' } },
-            }),
-          });
-
-          // Test that getBasePath function works
-          const requestArg = encryptionFactory.mock.calls[0][0].request;
-          expect(requestArg.getBasePath()).toBe('');
+              isFakeRequest: true,
+              spaceId: 'default',
+            })
+          );
         });
 
         it('passes type registry correctly to extension factories', async () => {

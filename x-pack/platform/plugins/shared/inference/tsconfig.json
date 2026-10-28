@@ -29,6 +29,7 @@
     "@kbn/repo-info",
     "@kbn/logging-mocks",
     "@kbn/core-http-server",
+    "@kbn/core-http-server-utils",
     "@kbn/actions-plugin",
     "@kbn/config-schema",
     "@kbn/inference-common",

@@ -90,6 +90,10 @@ Disallows the usage of an async function as a constructor for a Promise function
 
 Disallows the usage of constructor arguments into class property initializers.
 
+## no_kibana_request_literal
+
+Disallows hand-building a `KibanaRequest` (or `CoreKibanaRequest`) by casting an object literal or an `Object.create(...)` result. Such objects skip the `KibanaRequest` constructor, so fields such as `spaceId` are left unset. Use `kibanaRequestFactory` from `@kbn/core-http-server-utils` to build a fake request, or `ML_INTERNAL_USER_REQUEST` from `@kbn/ml-plugin/server` to call ML services as the internal user. Enabled for non-test files only.
+
 ## no_feature_flag_snapshot
 
 Disallows freezing `getBooleanValue$` / `getStringValue$` / `getNumberValue$` on the first emission via `firstValueFrom`, or via `subscribe()` immediately followed by `unsubscribe()`.
