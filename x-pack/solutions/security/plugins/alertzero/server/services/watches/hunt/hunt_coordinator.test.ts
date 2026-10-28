@@ -1261,6 +1261,30 @@ describe('huntCoordinator', () => {
       expect(result.searched_technique_ids).toEqual([]);
     });
 
+    it('reports the techniques a retryable gap names as pending, and not final or budget gaps', async () => {
+      mockT2.mockResolvedValueOnce({
+        status: 'behaviors_proposed',
+        behaviors: [],
+        indexed_behaviors: [],
+        incomplete: [
+          { reason: 'execute_failed', detail: 'failed', technique_id: 'T1001' },
+          { reason: 'collapsed', detail: 'shared artifacts', technique_id: 'T1003' },
+        ],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await run('run-pending-ids');
+
+      expect(result.pending_technique_ids).toEqual(['T1001']);
+    });
+
+    it('reports no pending techniques when Tier 2 left none', async () => {
+      const result = await run('run-pending-none');
+
+      expect(result.pending_technique_ids).toEqual([]);
+    });
+
     it('omits the list when Tier 2 did not run', async () => {
       const result = await huntCoordinator({ esClient, reportsEsClient: esClient }, {}, logger, {
         spaceId: 'default',
@@ -1272,6 +1296,7 @@ describe('huntCoordinator', () => {
       });
 
       expect(result.searched_technique_ids).toBeUndefined();
+      expect(result.pending_technique_ids).toBeUndefined();
     });
   });
 
@@ -1885,6 +1910,30 @@ describe('huntCoordinator', () => {
       expect(result.tier2_skipped_reason).toBeUndefined();
       expect(result.completeness).toBe('incomplete_final');
       expect(result.completed_successfully).toBe(true);
+    });
+
+    it('reports no pending techniques for a report retired because nothing on it could be grounded', async () => {
+      mockT1.mockResolvedValueOnce(
+        tier1Result({
+          status: 'no_searchable_terms',
+          searched_iocs: 0,
+          searched_techniques: 0,
+          resolved_iocs: [],
+          resolved_techniques: [],
+        })
+      );
+      mockT2.mockResolvedValueOnce(
+        tier2Result({
+          incomplete: [
+            { reason: 'query_ungrounded', technique_id: 'T1190', detail: 'no literal matched' },
+          ],
+        })
+      );
+
+      const result = await run('run-kev-ungrounded-pending');
+
+      expect(result.completeness).toBe('incomplete_final');
+      expect(result.pending_technique_ids).toEqual([]);
     });
 
     it('keeps an ungrounded query retryable when another behavior on the same text did ground and run', async () => {

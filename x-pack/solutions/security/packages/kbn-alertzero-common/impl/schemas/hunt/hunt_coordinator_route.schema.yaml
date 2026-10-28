@@ -449,6 +449,20 @@ components:
             type: string
             minLength: 1
             maxLength: 32
+        pending_technique_ids:
+          type: array
+          maxItems: 100
+          description: >-
+            Technique ids this run could not search but a later run still
+            should: the ones a retryable coverage gap names. The caller
+            records these so the next run keeps them as pending even if
+            its own extraction no longer returns them. Absent when Tier 2
+            did not run, which tells the caller to leave what it has
+            recorded alone; empty when nothing is pending.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 32
         incomplete:
           type: array
           description: >-

@@ -263,6 +263,16 @@ export const HuntCoordinatorResult = lazySchema(() =>
         'Technique ids this run settled in Tier 2: behaviors whose query executed and whose result a retry would not change (a conclusive result, or an inconclusive one the completeness classifier treats as final), plus techniques collapsed into a sibling whose query executed conclusively. Techniques that were skipped, failed, lost to the behavior budget, or whose sibling did not execute conclusively are not listed. Absent or empty when Tier 2 did not run. The caller records these so a later run can skip them.'
       ),
     /**
+     * Technique ids this run could not search but a later run still should: the ones a retryable coverage gap names. The caller records these so the next run keeps them as pending even if its own extraction no longer returns them. Absent when Tier 2 did not run, which tells the caller to leave what it has recorded alone; empty when nothing is pending.
+     */
+    pending_technique_ids: z
+      .array(z.string().min(1).max(32))
+      .max(100)
+      .optional()
+      .describe(
+        'Technique ids this run could not search but a later run still should: the ones a retryable coverage gap names. The caller records these so the next run keeps them as pending even if its own extraction no longer returns them. Absent when Tier 2 did not run, which tells the caller to leave what it has recorded alone; empty when nothing is pending.'
+      ),
+    /**
      * The coordinator's own coverage gaps — input this run had to truncate, and a Tier 2 that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the Tier-1-only paths, not even that. Absent or empty means the coordinator itself found nothing to report here.
      */
     incomplete: z
