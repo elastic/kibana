@@ -1321,7 +1321,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). A successful emit returns 202. A connector HTTP ack returns 200 (JSON or a plain-text body) and does not emit.
+        Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). A successful emit returns 202. An emit that includes an HTTP ack returns that status, usually 200 with an empty body, and still emits. A connector HTTP-only ack returns 200 (JSON or a plain-text body; `.inboundWebhook` handshake is `{ challenge }`) and does not emit.
       operationId: post-actions-events-connector-type-id-connector-id
       parameters:
         - description: The Kibana connector type identifier.
@@ -1366,7 +1366,7 @@ paths:
               examples:
                 ingestEventsAckResponse:
                   $ref: '#/components/examples/ingest_events_ack_response'
-          description: Connector HTTP 200 ack. No event is emitted. JSON or a plain-text body.
+          description: Connector HTTP 200 ack. A handshake such as `.inboundWebhook` `{ challenge }` does not emit. An ack included with an emit may have an empty body, and the events are still emitted. The body may be JSON or plain-text.
         '202':
           content:
             'application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*':
