@@ -85,6 +85,13 @@ export interface ChangeHistoryPreviewProps {
 const toText = (value: string | object): string =>
   typeof value === 'string' ? value : JSON.stringify(value, null, 2);
 
+const previewContainerStyle = css({
+  display: 'grid',
+  gridTemplateRows: 'auto 1fr auto', // header, content (fills space), footer
+  height: '100%',
+  width: '100%',
+});
+
 const monacoDiffPreviewStyles = {
   floatingToolbar: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -156,18 +163,7 @@ export const ChangeHistoryPreview = ({
 
   return (
     <>
-      <div
-        data-test-subj={dataTestSubj}
-        css={[
-          containerCss,
-          css`
-            display: grid;
-            grid-template-rows: auto 1fr auto; /* Header, Content (fills space), Footer */
-            height: 100%;
-            width: 100%;
-          `,
-        ]}
-      >
+      <div data-test-subj={dataTestSubj} css={[containerCss, previewContainerStyle]}>
         <ChangeHistoryCompareIndicator
           compareSpec={isCompareMode ? compareSpec : undefined}
           compareMode={compareMode}
