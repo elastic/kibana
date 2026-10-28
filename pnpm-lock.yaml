@@ -4896,8 +4896,8 @@ importers:
         specifier: 6.0.0
         version: 6.0.0
       remark-gfm:
-        specifier: 4.0.0
-        version: 4.0.0(supports-color@10.2.2)
+        specifier: 4.0.1
+        version: 4.0.1(supports-color@10.2.2)
       remark-parse-no-trim:
         specifier: 8.0.4
         version: 8.0.4
@@ -23208,8 +23208,8 @@ packages:
   remark-emoji@2.2.0:
     resolution: {integrity: sha512-P3cj9s5ggsUvWw5fS2uzCHJMGuXYRb0NnZqYlNecewXt8QBU9n5vW3DUUKOhepS8F9CwdMx9B8a3i7pqFWAI5w==}
 
-  remark-gfm@4.0.0:
-    resolution: {integrity: sha512-U92vJgBPkbw4Zfu/IiW2oTZLSL3Zpv+uI7My2eq8JxKgqraFdU8YUGicEJCEgSbeaG+QDFqIcwwfMTOEelPxuA==}
+  remark-gfm@4.0.1:
+    resolution: {integrity: sha512-1quofZ2RQ9EWdeN34S79+KExV1764+wCUGop5CPL1WGdD0ocPpu91lzPGbwWMECpEpd42kJGQwzRfyov9j4yNg==}
 
   remark-parse-no-trim@8.0.4:
     resolution: {integrity: sha512-WtqeHNTZ0LSdyemmY1/G6y9WoEFblTtgckfKF5/NUnri919/0/dEu8RCDfvXtJvu96soMvT+mLWWgYVUaiHoag==}
@@ -41706,7 +41706,7 @@ snapshots:
       node-emoji: 1.11.0
       unist-util-visit: 2.0.3
 
-  remark-gfm@4.0.0(supports-color@10.2.2):
+  remark-gfm@4.0.1(supports-color@10.2.2):
     dependencies:
       '@types/mdast': 4.0.4
       mdast-util-gfm: 3.1.0(supports-color@10.2.2)
