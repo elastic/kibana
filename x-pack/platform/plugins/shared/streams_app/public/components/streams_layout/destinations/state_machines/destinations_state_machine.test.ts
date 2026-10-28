@@ -9,10 +9,12 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { createActor, waitFor, type Actor, type AnyActorRef } from 'xstate';
 import { createDefaultUnit } from '../../../../services/unit_repository';
 import type { DestinationApiKeyGenerationDeps } from '../destination_api_keys';
-import type { UnitDestination } from '../destination_models';
+import type { UnitDestination } from '@kbn/streams-schema';
+import { EMPTY_DESTINATION_CREATION_FORM, type DestinationCreationFormData } from '../types';
 import {
   createDestinationsMachineImplementations,
   destinationsStateMachine,
+  getDestinationViewModels,
   type DestinationsParentEvent,
 } from './destinations_state_machine';
 
@@ -29,17 +31,22 @@ describe('destinationsStateMachine', () => {
   const apiKeyCalls = () =>
     fetch.mock.calls.filter(([endpoint]: [string]) => endpoint.includes('/destinations/api_key'));
 
-  const fillS3 = () => {
-    actor.send({ type: 'modal.openCreate' });
-    actor.send({ type: 'storageKind.select', storageKind: 'external_storage' });
-    actor.send({ type: 'destinationName.change', destinationName: 'S3 archive' });
-    actor.send({
-      type: 's3.change',
+  const s3FormData: DestinationCreationFormData = {
+    ...EMPTY_DESTINATION_CREATION_FORM,
+    storageKind: 'external_storage',
+    destinationName: 'S3 archive',
+    s3: {
       region: 'eu-west-1',
       bucket: 'demo-bucket',
+      prefix: '',
       accessKeyId: 'AKIA',
       secretAccessKey: 'shh',
-    });
+    },
+  };
+
+  const createS3Destination = () => {
+    actor.send({ type: 'modal.openCreate' });
+    actor.send({ type: 'destination.create', formData: s3FormData });
   };
 
   beforeEach(() => {
@@ -70,9 +77,76 @@ describe('destinationsStateMachine', () => {
     actor.stop();
   });
 
+  it('ignores an invalid form', () => {
+    actor.send({ type: 'modal.openCreate' });
+    actor.send({ type: 'destination.create', formData: EMPTY_DESTINATION_CREATION_FORM });
+
+    expect(actor.getSnapshot().matches({ configuring: 'supplyingConfiguration' })).toBe(true);
+    expect(actor.getSnapshot().context.creationContext).toBeUndefined();
+    expect(parentSend).not.toHaveBeenCalled();
+  });
+
+  it('keeps the context when stats are requested again for a destination', () => {
+    const timeRange = { start: 0, end: 1000 };
+    actor.send({ type: 'indexStats.request', destinationId: 'es-1', timeRange });
+    const { context } = actor.getSnapshot();
+    const detailRef = context.destinationDetailRefs['es-1'];
+
+    actor.send({ type: 'indexStats.request', destinationId: 'es-1', timeRange });
+
+    expect(detailRef).toBeDefined();
+    expect(actor.getSnapshot().context).toBe(context);
+    expect(getDestinationViewModels(actor.getSnapshot().context)).toBe(
+      getDestinationViewModels(context)
+    );
+  });
+
+  it('keeps the destination view models when unrelated context changes', () => {
+    const before = getDestinationViewModels(actor.getSnapshot().context);
+
+    actor.send({ type: 'modal.openCreate' });
+    actor.send({ type: 'flyout.close' });
+
+    expect(getDestinationViewModels(actor.getSnapshot().context)).toBe(before);
+  });
+
+  it('resolves indices once after a subsequent unit load and passes an abort signal', async () => {
+    await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+    actor.send({ type: 'unit.loaded', unitDefinition });
+    fetch.mockClear();
+
+    actor.send({ type: 'unit.loaded', unitDefinition });
+    await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+
+    const resolveCalls = fetch.mock.calls.filter(([endpoint]: [string]) =>
+      endpoint.includes('/_resolve_indices')
+    );
+    expect(resolveCalls).toHaveLength(1);
+    expect(resolveCalls[0][1].signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it('clears resolved indices while refreshing', async () => {
+    await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+    fetch.mockResolvedValueOnce({
+      destinations: {
+        'es-1': { indices: [{ name: 'logs-old', is_data_stream: false }] },
+      },
+    });
+    actor.send({ type: 'resolvedIndices.reload' });
+    await waitFor(
+      actor,
+      (snapshot) => snapshot.context.resolvedIndicesByDestination['es-1'] !== undefined
+    );
+
+    fetch.mockResolvedValueOnce({ destinations: {} });
+    actor.send({ type: 'resolvedIndices.reload' });
+
+    expect(actor.getSnapshot().context.resolvedIndicesByDestination).toEqual({});
+    await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+  });
+
   it('creates an S3 destination without minting an API key and sends the secrets to the parent', () => {
-    fillS3();
-    actor.send({ type: 'destination.create' });
+    createS3Destination();
     expect(apiKeyCalls()).toEqual([]);
     expect(actor.getSnapshot().matches({ configuring: 'persisting' })).toBe(true);
     expect(parentSend).toHaveBeenCalledWith(
@@ -94,8 +168,7 @@ describe('destinationsStateMachine', () => {
   it.each(['unit.persisted', 'unit.persistenceFailed'] as const)(
     'drops key values from context after %s',
     (type) => {
-      fillS3();
-      actor.send({ type: 'destination.create' });
+      createS3Destination();
       const [[{ unitDefinition: persisted }]] = parentSend.mock.calls;
       actor.send(
         type === 'unit.persisted'
@@ -118,24 +191,17 @@ describe('destinationsStateMachine', () => {
       throw new Error('mint failed');
     });
     actor.send({ type: 'modal.openCreate' });
-    actor.send({ type: 'destinationName.change', destinationName: 'Logs' });
-    actor.send({ type: 'destination.create' });
+    actor.send({
+      type: 'destination.create',
+      formData: { ...EMPTY_DESTINATION_CREATION_FORM, destinationName: 'Logs' },
+    });
     await waitFor(
       actor,
       (snapshot) =>
         snapshot.matches({ configuring: 'supplyingConfiguration' }) &&
         Boolean(snapshot.context.apiKeyError)
     );
-    actor.send({ type: 'storageKind.select', storageKind: 'external_storage' });
-    actor.send({ type: 'destinationName.change', destinationName: 'S3 archive' });
-    actor.send({
-      type: 's3.change',
-      region: 'eu-west-1',
-      bucket: 'demo-bucket',
-      accessKeyId: 'AKIA',
-      secretAccessKey: 'shh',
-    });
-    actor.send({ type: 'destination.create' });
+    actor.send({ type: 'destination.create', formData: s3FormData });
     actor.send({
       type: 'unit.persistenceFailed',
       destinationIds: ['s3-archive'],

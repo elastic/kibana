@@ -42,12 +42,7 @@ export const DestinationGridCell = ({
       );
     case 'type':
       return (
-        <EuiFlexGroup
-          justifyContent="flexEnd"
-          alignItems="center"
-          gutterSize="none"
-          responsive={false}
-        >
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
           <EuiBadge color="hollow">{getDestinationTypeLabel(destination.type)}</EuiBadge>
         </EuiFlexGroup>
       );
@@ -57,35 +52,20 @@ export const DestinationGridCell = ({
       }
       if (resolvedIndicesStatus === 'loading' && targetedIndexCount === 0) {
         return (
-          <EuiFlexGroup
-            justifyContent="flexEnd"
-            alignItems="center"
-            gutterSize="none"
-            responsive={false}
-          >
+          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
             <EuiLoadingSpinner size="s" />
           </EuiFlexGroup>
         );
       }
       if (resolvedIndicesStatus === 'unavailable') {
         return (
-          <EuiFlexGroup
-            justifyContent="flexEnd"
-            alignItems="center"
-            gutterSize="none"
-            responsive={false}
-          >
+          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
             <span>-</span>
           </EuiFlexGroup>
         );
       }
       return (
-        <EuiFlexGroup
-          justifyContent="flexEnd"
-          alignItems="center"
-          gutterSize="none"
-          responsive={false}
-        >
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
           <EuiBadge
             color="hollow"
             data-test-subj="streamsDestinationIndexCountBadge"

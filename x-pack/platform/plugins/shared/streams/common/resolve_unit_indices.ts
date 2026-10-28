@@ -10,6 +10,8 @@ import type {
   EffectiveFailureStore,
 } from '@kbn/streams-schema';
 
+export type ResolvedDestinationIndexHealth = 'green' | 'yellow' | 'red';
+
 /** Lifecycle and privileges are only reported for data streams; regular indices are listed without them. */
 export type ResolvedDestinationIndex =
   | {
@@ -18,6 +20,10 @@ export type ResolvedDestinationIndex =
       lifecycle: ClassicIngestStreamEffectiveLifecycle;
       /** True when enabled, or when the data stream lookup failed and it is unknown. */
       failure_store_enabled: boolean;
+      /** True when the enabled failure store has at least one backing index. */
+      failure_store_has_data?: boolean;
+      /** Undefined when the data stream lookup failed. */
+      health?: ResolvedDestinationIndexHealth;
       privileges: { read_failure_store: boolean };
     }
   | { name: string; is_data_stream: false };

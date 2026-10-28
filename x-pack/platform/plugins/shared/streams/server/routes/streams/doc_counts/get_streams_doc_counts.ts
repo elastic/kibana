@@ -43,10 +43,12 @@ export async function getDocCountsForStreams(options: {
    * When omitted, doc counts are returned for all streams.
    */
   streamName?: string;
+  /** Limits the computation to these stream names; takes precedence over `streamName`. */
+  streamNames?: readonly string[];
 }): Promise<StreamDocsStat[]> {
-  const { isServerless, esClient, esClientAsSecondaryAuthUser, streamName } = options;
+  const { isServerless, esClient, esClientAsSecondaryAuthUser, streamName, streamNames } = options;
 
-  const streams = await getDataStreamsWithIndexNames({ esClient, streamName });
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName, streamNames });
   if (!streams.length) {
     return [];
   }
@@ -131,10 +133,12 @@ export async function getDegradedDocCountsForStreams(options: {
    * When omitted, degraded counts are returned for all streams.
    */
   streamName?: string;
+  /** Limits the computation to these stream names; takes precedence over `streamName`. */
+  streamNames?: readonly string[];
 }): Promise<StreamDocsStat[]> {
-  const { esClient, streamName } = options;
+  const { esClient, streamName, streamNames } = options;
 
-  const streams = await getDataStreamsWithIndexNames({ esClient, streamName });
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName, streamNames });
 
   if (!streams.length) {
     return [];
@@ -221,21 +225,23 @@ export async function getIngestionDocCountsForStreams(options: {
   start: number;
   end: number;
   streamName?: string;
+  /** Limits the computation to these stream names; takes precedence over `streamName`. */
+  streamNames?: readonly string[];
 }): Promise<StreamDocsStat[]> {
-  const { esClient, streamsClient, start, end, streamName } = options;
+  const { esClient, streamsClient, start, end, streamName, streamNames } = options;
 
-  const streams = await getDataStreamsWithIndexNames({ esClient, streamName });
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName, streamNames });
 
   if (!streams.length) {
     return [];
   }
 
-  const streamNames = streams.map((stream) => stream.name);
+  const resolvedStreamNames = streams.map((stream) => stream.name);
   const privilegeChunks = await processAsyncInChunks<
     string,
     Record<string, { read_failure_store: boolean }>
   >({
-    items: streamNames,
+    items: resolvedStreamNames,
     processChunk: (chunk) => streamsClient.getPrivilegesPerStream(chunk),
   });
   const readFailureStoreByStream: Record<string, { read_failure_store: boolean }> = Object.assign(
@@ -351,10 +357,12 @@ export async function getFailedDocCountsForStreams(options: {
    * When omitted, failed counts are returned for all streams.
    */
   streamName?: string;
+  /** Limits the computation to these stream names; takes precedence over `streamName`. */
+  streamNames?: readonly string[];
 }): Promise<StreamDocsStat[]> {
-  const { esClient, start, end, streamName } = options;
+  const { esClient, start, end, streamName, streamNames } = options;
 
-  const streams = await getDataStreamsWithIndexNames({ esClient, streamName });
+  const streams = await getDataStreamsWithIndexNames({ esClient, streamName, streamNames });
 
   if (!streams.length) {
     return [];
@@ -376,40 +384,50 @@ export async function getFailedDocCountsForStreams(options: {
   const startIso = new Date(start).toISOString();
   const endIso = new Date(end).toISOString();
 
-  const esqlQuery = `
-FROM *::failures METADATA _index
+  const getFailedCountRows = async (source: string): Promise<ESQLSearchResponse> =>
+    (await esClient.esql.query({
+      query: `
+FROM ${source} METADATA _index
 | WHERE @timestamp >= "${startIso}" AND @timestamp <= "${endIso}"
 | STATS failed_count = COUNT(*) BY backing_index = _index
-`.trim();
+`.trim(),
+      drop_null_columns: true,
+    })) as ESQLSearchResponse;
 
-  const response = (await esClient.esql.query({
-    query: esqlQuery,
-    drop_null_columns: true,
-  })) as ESQLSearchResponse;
-
-  const backingIndexCol = response.columns.findIndex((col) => col.name === 'backing_index');
-  const failedCountCol = response.columns.findIndex((col) => col.name === 'failed_count');
-
-  if (backingIndexCol === -1 || failedCountCol === -1) {
-    return [];
-  }
+  // Scoped requests only read their own failure indices instead of every failure store.
+  const isScoped = Boolean(streamNames ?? streamName);
+  const responses = isScoped
+    ? await processAsyncInChunks({
+        items: Array.from(backingIndexToStream.keys()),
+        processChunk: (indices) => getFailedCountRows(indices.join(',')),
+      })
+    : [await getFailedCountRows('*::failures')];
 
   const countsByStream = new Map<string, number>();
 
-  for (const row of response.values) {
-    const backingIndex = row[backingIndexCol] as string | undefined;
-    const failedCount = Number(row[failedCountCol] ?? 0);
+  for (const response of responses) {
+    const backingIndexCol = response.columns.findIndex((col) => col.name === 'backing_index');
+    const failedCountCol = response.columns.findIndex((col) => col.name === 'failed_count');
 
-    if (!backingIndex || !Number.isFinite(failedCount)) {
+    if (backingIndexCol === -1 || failedCountCol === -1) {
       continue;
     }
 
-    const stream = backingIndexToStream.get(backingIndex);
-    if (!stream) {
-      continue;
-    }
+    for (const row of response.values) {
+      const backingIndex = row[backingIndexCol] as string | undefined;
+      const failedCount = Number(row[failedCountCol] ?? 0);
 
-    countsByStream.set(stream, (countsByStream.get(stream) ?? 0) + failedCount);
+      if (!backingIndex || !Number.isFinite(failedCount)) {
+        continue;
+      }
+
+      const stream = backingIndexToStream.get(backingIndex);
+      if (!stream) {
+        continue;
+      }
+
+      countsByStream.set(stream, (countsByStream.get(stream) ?? 0) + failedCount);
+    }
   }
 
   return Array.from(countsByStream.entries()).map(

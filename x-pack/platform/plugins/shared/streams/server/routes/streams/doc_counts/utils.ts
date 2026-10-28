@@ -10,6 +10,9 @@ import { isEmpty } from 'lodash';
 import type { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
+import { lazySchema, z } from '@kbn/zod/v4';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
+import { MAX_STATS_STREAM_NAMES } from '../../../../common/constants';
 
 interface MeteringStatsResponse {
   indices?: Array<{
@@ -26,33 +29,74 @@ export const DATA_STREAM_INDEX_NAMES_FILTER_PATH = [
   'data_streams.failure_store.indices.index_name',
 ];
 
-/**
- * Fetches data streams with only their names and backing index names, for one stream or all of them.
- */
-export async function getDataStreamsWithIndexNames({
-  esClient,
-  streamName,
-}: {
-  esClient: ElasticsearchClient;
-  streamName?: string;
-}): Promise<IndicesGetDataStreamResponse['data_streams']> {
-  const request = streamName
-    ? esClient.indices.getDataStream({
-        name: streamName,
-        filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
-      })
-    : esClient.indices.getDataStream({ filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH });
+const statsStreamNamesSchema = () =>
+  z.array(z.string().min(1).max(MAX_STREAM_NAME_LENGTH)).min(1).max(MAX_STATS_STREAM_NAMES);
 
+/** Request body of the POST variants of the bulk stats endpoints. */
+export const statsStreamNamesBodySchema = lazySchema(() =>
+  z.object({ streams: statsStreamNamesSchema() })
+);
+
+/** Like {@link statsStreamNamesBodySchema}, plus the time range of the time-bound stats. */
+export const statsStreamNamesTimeRangeBodySchema = lazySchema(() =>
+  z.object({ streams: statsStreamNamesSchema(), start: z.number(), end: z.number() })
+);
+
+const getNamedDataStreams = async (
+  esClient: ElasticsearchClient,
+  names: string[]
+): Promise<IndicesGetDataStreamResponse['data_streams']> => {
   try {
+    const { data_streams: resolvedDataStreams = [] } = await esClient.indices.resolveIndex({
+      name: names.join(','),
+      expand_wildcards: 'open',
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      filter_path: 'data_streams.name',
+    });
+    const resolvedNames = resolvedDataStreams.map(({ name }) => name);
+    if (resolvedNames.length === 0) {
+      return [];
+    }
     // filter_path drops `data_streams` entirely when nothing matches.
-    const { data_streams: dataStreams = [] } = await request;
+    const { data_streams: dataStreams = [] } = await esClient.indices.getDataStream({
+      name: resolvedNames,
+      filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
+    });
     return dataStreams;
   } catch (error) {
-    if (streamName && isNotFoundError(error)) {
+    if (isNotFoundError(error)) {
       return [];
     }
     throw error;
   }
+};
+
+/**
+ * Fetches data streams with only their names and backing index names, for the given
+ * stream names or all of them. Missing names are skipped.
+ */
+export async function getDataStreamsWithIndexNames({
+  esClient,
+  streamName,
+  streamNames = streamName ? [streamName] : undefined,
+}: {
+  esClient: ElasticsearchClient;
+  streamName?: string;
+  streamNames?: readonly string[];
+}): Promise<IndicesGetDataStreamResponse['data_streams']> {
+  if (!streamNames) {
+    const { data_streams: dataStreams = [] } = await esClient.indices.getDataStream({
+      filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
+    });
+    return dataStreams;
+  }
+
+  const chunks = await processAsyncInChunks({
+    items: [...new Set(streamNames)],
+    processChunk: (names) => getNamedDataStreams(esClient, names),
+  });
+  return chunks.flat();
 }
 
 /**

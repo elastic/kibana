@@ -10,6 +10,7 @@ import { DATA_STREAM_INDEX_NAMES_FILTER_PATH } from '../doc_counts/utils';
 import { storageStatsRoutes } from './route';
 
 const route = storageStatsRoutes['GET /internal/streams/storage_stats'];
+const postRoute = storageStatsRoutes['POST /internal/streams/storage_stats'];
 
 type HandlerParams = Parameters<typeof route.handler>[0];
 
@@ -34,12 +35,14 @@ const callHandler = ({
   getDataStreamResponse,
   isServerless = false,
   meteringIndices = [],
+  streams,
 }: {
   dataStreams: DataStreamInput[];
   indicesStats?: Record<string, IndicesStatsIndicesStats>;
   getDataStreamResponse?: object;
   isServerless?: boolean;
   meteringIndices?: MeteringIndexInput[];
+  streams?: string[];
 }) => {
   getDataStream = jest.fn().mockResolvedValue(
     getDataStreamResponse ?? {
@@ -49,9 +52,16 @@ const callHandler = ({
       })),
     }
   );
+  const dataStreamNames = new Set(dataStreams.map(({ name }) => name));
   const esClient = {
     indices: {
       getDataStream,
+      resolveIndex: jest.fn(async ({ name }: { name: string }) => ({
+        data_streams: name
+          .split(',')
+          .filter((dataStreamName) => dataStreamNames.has(dataStreamName))
+          .map((dataStreamName) => ({ name: dataStreamName })),
+      })),
       stats: jest.fn().mockResolvedValue({ indices: indicesStats }),
     },
   };
@@ -73,14 +83,16 @@ const callHandler = ({
     getScopedClients,
     request: {},
     server: { isServerless },
-    params: {},
+    params: streams ? { body: { streams } } : {},
     response: {},
     logger: { error: jest.fn() },
     context: {},
     telemetry,
   } as unknown as HandlerParams;
 
-  return route.handler(handlerParams);
+  return streams
+    ? postRoute.handler(handlerParams as unknown as Parameters<typeof postRoute.handler>[0])
+    : route.handler(handlerParams);
 };
 
 // Frozen searchable-snapshot indices report `size_in_bytes: 0`; their real size is in
@@ -96,6 +108,19 @@ const hotStats = (size: number): IndicesStatsIndicesStats =>
   } as IndicesStatsIndicesStats);
 
 describe('storage_stats route (stateful)', () => {
+  it('only resolves the requested data streams when posted stream names', async () => {
+    await callHandler({
+      dataStreams: [{ name: 'stream-a', indices: ['.ds-stream-a-000001'] }],
+      indicesStats: { '.ds-stream-a-000001': hotStats(1_000) },
+      streams: ['stream-a', 'stream-b'],
+    });
+
+    expect(getDataStream).toHaveBeenCalledWith({
+      name: ['stream-a'],
+      filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
+    });
+  });
+
   it('counts frozen searchable-snapshot data via total_data_set_size_in_bytes', async () => {
     const result = await callHandler({
       dataStreams: [

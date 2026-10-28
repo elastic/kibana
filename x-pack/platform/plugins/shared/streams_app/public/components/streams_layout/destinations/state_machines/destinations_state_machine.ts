@@ -8,22 +8,25 @@
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { and, assign, fromPromise, not, sendTo, setup, stateIn } from 'xstate';
+import { and, assign, enqueueActions, fromPromise, not, sendTo, setup, stateIn } from 'xstate';
 import type { ActorRefFrom, AnyActorRef, MachineImplementationsFrom } from 'xstate';
 import {
   STREAMS_DEFAULT_UNIT_ID,
   type ResolveUnitIndicesResponse,
   type ResolvedDestinationIndex,
 } from '@kbn/streams-plugin/common';
-import { collectUnitComponentIds, type StreamsUnit } from '@kbn/streams-schema';
+import {
+  collectUnitComponentIds,
+  getSignalTargetsWritePatterns,
+  type StreamsUnit,
+} from '@kbn/streams-schema';
 import { notifyUnitUpdated } from '../../notify_unit_updated';
 import { createDestinationId } from '../destination_helpers';
-import { canSubmitDestinationForm, getDestinationCreationFormErrors } from '../destination_form';
+import { canSubmitDestinationForm } from '../destination_form';
 import {
-  AUTO_INDEX_PATTERNS,
   createUnitDestination,
   getConfiguredDestinations,
-  getDestinationCreateSpecs,
+  getDestinationCreateSpec,
   getUnitDestinations,
   toDestinationViewModel,
   toS3DestinationViewModel,
@@ -38,17 +41,18 @@ import {
 } from '../destination_api_keys';
 import type {
   DestinationCreationFormData,
-  DestinationCreationFormErrors,
-  DestinationSignal,
-  DestinationStorageKind,
+  DestinationSignalTargets,
   DestinationViewModel,
 } from '../types';
-import { EMPTY_ELASTICSEARCH_DESTINATION_FORM, EMPTY_S3_DESTINATION_FORM } from '../types';
+import type { DestinationIndexStatsTimeRange } from '../destination_index_stats';
+import {
+  createDestinationDetailMachineImplementations,
+  destinationDetailStateMachine,
+  type DestinationDetailActorRef,
+} from './destination_detail_state_machine';
 import { removeComponentFromPipelines } from '../../../../services/unit_connections';
 import type { Unit } from '../../../../services/unit_repository';
 import { getFormattedError } from '../../../../util/errors';
-
-export type { DestinationCreationFormErrors };
 
 export interface DestinationsParentEvent {
   type: 'unit.changed';
@@ -63,21 +67,17 @@ export interface DestinationsStateInput {
   parentRef: AnyActorRef;
 }
 
-export interface PendingDestination {
+export interface PendingDestination extends DestinationSignalTargets {
   id: string;
-  signals: DestinationSignal[];
-  index?: string;
-  /** Stored on the unit as `index_patterns` when auto and the user set write targets. */
-  unitPatterns?: string[];
   /** API key write-role globs. */
   patterns: string[];
 }
 
+/** A submitted create form and what has been staged from it. */
 export interface DestinationCreationContext {
   formData: DestinationCreationFormData;
-  formErrors: DestinationCreationFormErrors;
-  pendingDestinations?: PendingDestination[];
-  createdDestinations?: DestinationViewModel[];
+  pendingDestination?: PendingDestination;
+  createdDestination?: DestinationViewModel;
 }
 
 export type ResolvedIndicesStatus = 'loading' | 'ready' | 'unavailable';
@@ -92,6 +92,8 @@ export interface DestinationsStateContext {
   parentRef: AnyActorRef;
   resolvedIndicesByDestination: Record<string, ResolvedDestinationIndex[]>;
   resolvedIndicesError?: string;
+  /** Spawned the first time a destination's details are shown. */
+  destinationDetailRefs: Record<string, DestinationDetailActorRef>;
 }
 
 export type DestinationsStateEvent =
@@ -106,40 +108,23 @@ export type DestinationsStateEvent =
       message: string;
       intent: 'create' | 'delete';
     }
-  | { type: 'destination.create' }
+  | { type: 'destination.create'; formData: DestinationCreationFormData }
   | { type: 'destination.delete'; destinationId: string }
   | { type: 'destination.deleteMany'; destinationIds: string[] }
   | { type: 'destination.view'; destinationId: string }
-  | { type: 'storageKind.select'; storageKind: DestinationStorageKind }
-  | { type: 'destinationName.change'; destinationName: string }
-  | {
-      type: 'elasticsearch.change';
-      auto?: boolean;
-      logsIndex?: string;
-      metricsIndex?: string;
-      tracesIndex?: string;
-    }
-  | {
-      type: 's3.change';
-      region?: string;
-      bucket?: string;
-      prefix?: string;
-      accessKeyId?: string;
-      secretAccessKey?: string;
-    }
-  | { type: 'creationForm.blur' }
   | { type: 'modal.openCreate' }
   | { type: 'modal.closeCreate' }
   | { type: 'flyout.close' }
-  | { type: 'xstate.done.actor.generateApiKey'; output: DestinationApiKeyGrant[] }
+  | { type: 'xstate.done.actor.generateApiKey'; output: DestinationApiKey }
   | { type: 'xstate.error.actor.generateApiKey'; error: unknown }
   | { type: 'resolvedIndices.reload' }
   | { type: 'xstate.done.actor.loadResolvedIndices'; output: ResolveUnitIndicesResponse }
-  | { type: 'xstate.error.actor.loadResolvedIndices'; error: unknown };
-
-export interface DestinationApiKeyGrant extends DestinationApiKey {
-  destinationId: string;
-}
+  | { type: 'xstate.error.actor.loadResolvedIndices'; error: unknown }
+  | {
+      type: 'indexStats.request';
+      destinationId: string;
+      timeRange: DestinationIndexStatsTimeRange;
+    };
 
 const removeDestinationsFromContext = (
   context: Pick<DestinationsStateContext, 'unitDefinition' | 'selectedDestinationId'>,
@@ -162,30 +147,6 @@ const removeDestinationsFromContext = (
   };
 };
 
-const getCreationFormErrors = ({
-  formData,
-  unitDefinition,
-}: {
-  formData: DestinationCreationFormData;
-  unitDefinition: Unit;
-}): DestinationCreationFormErrors => getDestinationCreationFormErrors({ formData, unitDefinition });
-
-/** Keep an empty name quiet until the name field has already shown a required error. */
-const withoutUnrevealedRequiredErrors = (
-  next: DestinationCreationFormErrors,
-  previous: DestinationCreationFormErrors
-): DestinationCreationFormErrors => ({
-  ...next,
-  destinationName:
-    next.destinationName === 'required' && previous.destinationName !== 'required'
-      ? undefined
-      : next.destinationName,
-  staticIndexes:
-    next.staticIndexes === 'required' && previous.staticIndexes !== 'required'
-      ? undefined
-      : next.staticIndexes,
-});
-
 export const destinationsStateMachine = setup({
   types: {
     input: {} as DestinationsStateInput,
@@ -195,6 +156,7 @@ export const destinationsStateMachine = setup({
   actors: {
     generateApiKey: getPlaceholderFor(createGenerateApiKeyActor),
     loadResolvedIndices: getPlaceholderFor(createLoadResolvedIndicesActor),
+    destinationDetail: destinationDetailStateMachine,
   },
   actions: {
     notifyDestinationCreated: getPlaceholderFor(createNotifyDestinationCreatedAction),
@@ -214,6 +176,76 @@ export const destinationsStateMachine = setup({
         ),
         resolvedIndicesError: undefined,
       };
+    }),
+    clearResolvedIndices: assign({
+      resolvedIndicesByDestination: {},
+      resolvedIndicesError: undefined,
+    }),
+    spawnDestinationDetail: assign(({ context, event, spawn }) => {
+      if (event.type !== 'indexStats.request') {
+        return {};
+      }
+      const { destinationId } = event;
+      return {
+        destinationDetailRefs: {
+          ...context.destinationDetailRefs,
+          [destinationId]: spawn('destinationDetail', {
+            id: `destinationDetail-${destinationId}`,
+            input: {
+              destinationId,
+              indices: context.resolvedIndicesByDestination[destinationId] ?? [],
+            },
+          }),
+        },
+      };
+    }),
+    // Spawned while indices are resolving; the detail waits for `indices.update`.
+    spawnPendingDestinationDetail: assign(({ context, event, spawn }) => {
+      if (event.type !== 'indexStats.request') {
+        return {};
+      }
+      const { destinationId } = event;
+      return {
+        destinationDetailRefs: {
+          ...context.destinationDetailRefs,
+          [destinationId]: spawn('destinationDetail', {
+            id: `destinationDetail-${destinationId}`,
+            input: { destinationId },
+          }),
+        },
+      };
+    }),
+    forwardIndexStatsRequest: enqueueActions(({ context, event, enqueue }) => {
+      if (event.type !== 'indexStats.request') {
+        return;
+      }
+      const detailRef = context.destinationDetailRefs[event.destinationId];
+      if (detailRef) {
+        enqueue.sendTo(detailRef, { type: 'indexStats.request', timeRange: event.timeRange });
+      }
+    }),
+    resetDestinationDetails: enqueueActions(({ context, enqueue }) => {
+      for (const detailRef of Object.values(context.destinationDetailRefs)) {
+        enqueue.sendTo(detailRef, { type: 'indices.reset' });
+      }
+    }),
+    updateDestinationDetails: enqueueActions(({ context, enqueue }) => {
+      const destinationIds = new Set(
+        getUnitDestinations(context.unitDefinition).map(({ id }) => id)
+      );
+      const destinationDetailRefs: Record<string, DestinationDetailActorRef> = {};
+      for (const [destinationId, detailRef] of Object.entries(context.destinationDetailRefs)) {
+        if (!destinationIds.has(destinationId)) {
+          enqueue.stopChild(detailRef);
+          continue;
+        }
+        destinationDetailRefs[destinationId] = detailRef;
+        enqueue.sendTo(detailRef, {
+          type: 'indices.update',
+          indices: context.resolvedIndicesByDestination[destinationId] ?? [],
+        });
+      }
+      enqueue.assign({ destinationDetailRefs });
     }),
     storeResolvedIndicesError: assign(({ event }) =>
       event.type === 'xstate.error.actor.loadResolvedIndices'
@@ -235,160 +267,23 @@ export const destinationsStateMachine = setup({
           context.selectedDestinationId && destinationIds.has(context.selectedDestinationId)
             ? context.selectedDestinationId
             : undefined,
-        creationContext: context.creationContext
-          ? {
-              ...context.creationContext,
-              formErrors: withoutUnrevealedRequiredErrors(
-                getCreationFormErrors({
-                  formData: context.creationContext.formData,
-                  unitDefinition: event.unitDefinition,
-                }),
-                context.creationContext.formErrors
-              ),
-            }
-          : undefined,
       };
     }),
-    startFreshCreate: assign(() => ({
-      creationContext: {
-        formData: {
-          storageKind: 'local_elasticsearch' as const,
-          destinationName: '',
-          elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM },
-          s3: { ...EMPTY_S3_DESTINATION_FORM },
-        },
-        formErrors: {},
-      },
-      persistenceError: undefined,
-      apiKeyError: undefined,
-    })),
     clearCreate: assign({
       creationContext: undefined,
       persistenceError: undefined,
       apiKeyError: undefined,
     }),
-    selectStorageKind: assign(({ context, event }) => {
-      if (event.type !== 'storageKind.select' || !context.creationContext) {
-        return {};
-      }
-      const formData: DestinationCreationFormData = {
-        ...context.creationContext.formData,
-        storageKind: event.storageKind,
-      };
-      return {
-        creationContext: {
-          ...context.creationContext,
-          formData,
-          formErrors: withoutUnrevealedRequiredErrors(
-            getCreationFormErrors({
-              formData,
-              unitDefinition: context.unitDefinition,
-            }),
-            context.creationContext.formErrors
-          ),
-        },
-      };
-    }),
-    updateDestinationName: assign(({ context, event }) => {
-      if (event.type !== 'destinationName.change' || !context.creationContext) {
-        return {};
-      }
-      return {
-        creationContext: {
-          ...context.creationContext,
-          formData: {
-            ...context.creationContext.formData,
-            destinationName: event.destinationName,
-          },
-          formErrors: getCreationFormErrors({
-            formData: {
-              ...context.creationContext.formData,
-              destinationName: event.destinationName,
-            },
-            unitDefinition: context.unitDefinition,
-          }),
-        },
-      };
-    }),
-    validateCreationForm: assign(({ context }) =>
-      context.creationContext
-        ? {
-            creationContext: {
-              ...context.creationContext,
-              formErrors: getCreationFormErrors({
-                formData: context.creationContext.formData,
-                unitDefinition: context.unitDefinition,
-              }),
-            },
-          }
+    storeCreationForm: assign(({ event }) =>
+      event.type === 'destination.create'
+        ? { creationContext: { formData: event.formData }, apiKeyError: undefined }
         : {}
     ),
-    updateElasticsearchForm: assign(({ context, event }) => {
-      if (event.type !== 'elasticsearch.change' || !context.creationContext) {
-        return {};
-      }
-      const elasticsearch = {
-        ...context.creationContext.formData.elasticsearch,
-        ...(event.auto !== undefined ? { auto: event.auto } : {}),
-        ...(event.logsIndex !== undefined ? { logsIndex: event.logsIndex } : {}),
-        ...(event.metricsIndex !== undefined ? { metricsIndex: event.metricsIndex } : {}),
-        ...(event.tracesIndex !== undefined ? { tracesIndex: event.tracesIndex } : {}),
-      };
-      const formData: DestinationCreationFormData = {
-        ...context.creationContext.formData,
-        elasticsearch,
-      };
-      return {
-        creationContext: {
-          ...context.creationContext,
-          formData,
-          formErrors: withoutUnrevealedRequiredErrors(
-            getCreationFormErrors({
-              formData,
-              unitDefinition: context.unitDefinition,
-            }),
-            context.creationContext.formErrors
-          ),
-        },
-        apiKeyError: undefined,
-      };
-    }),
-    updateS3Form: assign(({ context, event }) => {
-      if (event.type !== 's3.change' || !context.creationContext) {
-        return {};
-      }
-      const formData: DestinationCreationFormData = {
-        ...context.creationContext.formData,
-        s3: {
-          ...context.creationContext.formData.s3,
-          ...(event.region !== undefined ? { region: event.region } : {}),
-          ...(event.bucket !== undefined ? { bucket: event.bucket } : {}),
-          ...(event.prefix !== undefined ? { prefix: event.prefix } : {}),
-          ...(event.accessKeyId !== undefined ? { accessKeyId: event.accessKeyId } : {}),
-          ...(event.secretAccessKey !== undefined
-            ? { secretAccessKey: event.secretAccessKey }
-            : {}),
-        },
-      };
-      return {
-        creationContext: {
-          ...context.creationContext,
-          formData,
-          formErrors: withoutUnrevealedRequiredErrors(
-            getCreationFormErrors({
-              formData,
-              unitDefinition: context.unitDefinition,
-            }),
-            context.creationContext.formErrors
-          ),
-        },
-      };
-    }),
     stageCreatedS3Destination: assign(({ context }) => {
       if (!context.creationContext) {
         return {};
       }
-      const { destinationName, s3 } = context.creationContext.formData;
+      const { destinationName, description, s3 } = context.creationContext.formData;
       const name = destinationName.trim();
       const id = createDestinationId({
         name,
@@ -397,6 +292,7 @@ export const destinationsStateMachine = setup({
       const node = createS3UnitDestination({
         id,
         name,
+        description,
         region: s3.region.trim(),
         bucket: s3.bucket.trim(),
         prefix: s3.prefix.trim(),
@@ -404,10 +300,7 @@ export const destinationsStateMachine = setup({
       return {
         creationContext: {
           ...context.creationContext,
-          createdDestinations: [toS3DestinationViewModel(node)],
-          // A failed Elasticsearch key mint leaves its pending ids behind, and a later
-          // S3 persist failure would otherwise revoke them.
-          pendingDestinations: undefined,
+          createdDestination: toS3DestinationViewModel(node),
         },
         unitDefinition: withUnitDestinations(context.unitDefinition, [
           ...getUnitDestinations(context.unitDefinition),
@@ -421,30 +314,17 @@ export const destinationsStateMachine = setup({
       if (!context.creationContext) {
         return {};
       }
-      const name = context.creationContext.formData.destinationName.trim();
-      const existingIds = [...collectUnitComponentIds(context.unitDefinition.unit)];
-      const pendingDestinations: PendingDestination[] = [];
-      for (const spec of getDestinationCreateSpecs(
-        context.creationContext.formData.elasticsearch
-      )) {
-        const idName = spec.index ? `${name}-${spec.signals[0]}` : name;
-        const id = createDestinationId({
-          name: idName,
-          existingIds: [...existingIds, ...pendingDestinations.map((pending) => pending.id)],
-        });
-        pendingDestinations.push({
-          id,
-          signals: spec.signals,
-          index: spec.index,
-          unitPatterns: spec.patterns,
-          patterns: spec.index ? [spec.index] : spec.patterns ?? [...AUTO_INDEX_PATTERNS],
-        });
-      }
+      const spec = getDestinationCreateSpec(context.creationContext.formData.elasticsearch);
+      const pendingDestination: PendingDestination = {
+        ...spec,
+        id: createDestinationId({
+          name: context.creationContext.formData.destinationName.trim(),
+          existingIds: collectUnitComponentIds(context.unitDefinition.unit),
+        }),
+        patterns: getSignalTargetsWritePatterns(spec),
+      };
       return {
-        creationContext: {
-          ...context.creationContext,
-          pendingDestinations,
-        },
+        creationContext: { ...context.creationContext, pendingDestination },
         apiKeyError: undefined,
       };
     }),
@@ -452,44 +332,33 @@ export const destinationsStateMachine = setup({
       if (event.type !== 'xstate.done.actor.generateApiKey' || !context.creationContext) {
         return {};
       }
-      const { destinationName, storageKind } = context.creationContext.formData;
-      const pendingDestinations = context.creationContext.pendingDestinations;
-      if (storageKind !== 'local_elasticsearch' || !pendingDestinations?.length) {
+      const { destinationName, description, storageKind } = context.creationContext.formData;
+      const { pendingDestination } = context.creationContext;
+      if (storageKind !== 'local_elasticsearch' || !pendingDestination) {
         return {};
       }
-      const name = destinationName.trim();
-      const encodedByDestinationId = new Map(
-        event.output.map((apiKey) => [apiKey.destinationId, apiKey.encoded])
-      );
-      const unitDestinations = pendingDestinations.map((pending) =>
-        createUnitDestination({
-          id: pending.id,
-          name,
-          signals: pending.signals,
-          index: pending.index,
-          patterns: pending.unitPatterns,
-          apiKey: encodedByDestinationId.get(pending.id),
-        })
-      );
-      const createdDestinations = unitDestinations.flatMap((unitDestination) => {
-        const destination = toDestinationViewModel(unitDestination);
-        return destination ? [destination] : [];
+      const { id, signals, indexBySignal, writePatternsBySignal } = pendingDestination;
+      const unitDestination = createUnitDestination({
+        id,
+        name: destinationName.trim(),
+        description,
+        signals,
+        indexBySignal,
+        writePatternsBySignal,
+        apiKey: event.output.encoded,
       });
-      if (createdDestinations.length === 0) {
+      const createdDestination = toDestinationViewModel(unitDestination);
+      if (!createdDestination) {
         return {};
       }
-      const createdIds = new Set(unitDestinations.map(({ id }) => id));
       const unitDefinition = withUnitDestinations(context.unitDefinition, [
         ...getUnitDestinations(context.unitDefinition).filter(
-          ({ id: destinationId }) => !createdIds.has(destinationId)
+          (destination) => destination.id !== id
         ),
-        ...unitDestinations,
+        unitDestination,
       ]);
       return {
-        creationContext: {
-          ...context.creationContext,
-          createdDestinations,
-        },
+        creationContext: { ...context.creationContext, createdDestination },
         unitDefinition,
         persistenceError: undefined,
         apiKeyError: undefined,
@@ -503,16 +372,16 @@ export const destinationsStateMachine = setup({
     notifyParentCreate: sendTo(
       ({ context }) => context.parentRef,
       ({ context }): DestinationsParentEvent => {
-        const destinationIds = context.creationContext?.createdDestinations?.map(({ id }) => id);
-        if (!context.creationContext || !destinationIds?.length) {
-          throw new Error('Expected created destinations');
+        const createdDestination = context.creationContext?.createdDestination;
+        if (!context.creationContext || !createdDestination) {
+          throw new Error('Expected a created destination');
         }
         const { storageKind, s3 } = context.creationContext.formData;
-        const names = s3CredentialNames(destinationIds[0]);
+        const names = s3CredentialNames(createdDestination.id);
         return {
           type: 'unit.changed',
           unitDefinition: context.unitDefinition,
-          destinationIds,
+          destinationIds: [createdDestination.id],
           intent: 'create',
           secrets:
             storageKind === 'external_storage'
@@ -601,23 +470,22 @@ export const destinationsStateMachine = setup({
     ),
   },
   guards: {
-    canCreateDestination: ({ context }) =>
-      Boolean(
-        context.creationContext &&
-          canSubmitDestinationForm({
-            formData: context.creationContext.formData,
-            unitDefinition: context.unitDefinition,
-          })
-      ),
+    hasDestinationDetail: ({ context, event }) =>
+      event.type === 'indexStats.request' &&
+      Boolean(context.destinationDetailRefs[event.destinationId]),
+    canCreateDestination: ({ context, event }) =>
+      event.type === 'destination.create' &&
+      canSubmitDestinationForm({
+        formData: event.formData,
+        unitDefinition: context.unitDefinition,
+      }),
     isCreatedDestination: ({ context, event }) => {
-      const createdDestinationIds = context.creationContext?.createdDestinations?.map(
-        ({ id }) => id
-      );
+      const createdDestinationId = context.creationContext?.createdDestination?.id;
       return (
         (event.type === 'unit.persisted' ||
           (event.type === 'unit.persistenceFailed' && event.intent === 'create')) &&
-        Boolean(createdDestinationIds?.length) &&
-        Boolean(createdDestinationIds?.every((id) => event.destinationIds.includes(id)))
+        createdDestinationId !== undefined &&
+        event.destinationIds.includes(createdDestinationId)
       );
     },
     hasDestinationsToDelete: ({ event }) =>
@@ -630,8 +498,11 @@ export const destinationsStateMachine = setup({
             ({ id }) => id === context.selectedDestinationId
           )
       ),
-    isExternalStorage: ({ context }) =>
-      context.creationContext?.formData.storageKind === 'external_storage',
+    // The first unit load is already being resolved. Every later load also refreshes cluster state.
+    hasPreviouslyLoadedUnit: ({ context, event }) =>
+      event.type === 'unit.loaded' && context.hasReceivedUnit,
+    isExternalStorage: ({ event }) =>
+      event.type === 'destination.create' && event.formData.storageKind === 'external_storage',
     isDeletePersistenceFailure: ({ event }) =>
       event.type === 'unit.persistenceFailed' && event.intent === 'delete',
     unitSaveIsIdle: stateIn('#destinationsUnitSaveIdle'),
@@ -644,6 +515,7 @@ export const destinationsStateMachine = setup({
     hasReceivedUnit: false,
     parentRef: input.parentRef,
     resolvedIndicesByDestination: {},
+    destinationDetailRefs: {},
   }),
   on: {
     'unit.loaded': { actions: 'syncLoadedUnit' },
@@ -671,29 +543,23 @@ export const destinationsStateMachine = setup({
             'modal.openCreate': {
               guard: 'unitSaveIsIdle',
               target: 'supplyingConfiguration',
-              actions: 'startFreshCreate',
+              actions: 'clearCreate',
             },
           },
         },
         supplyingConfiguration: {
           on: {
-            'storageKind.select': { actions: 'selectStorageKind' },
-            'destinationName.change': { actions: 'updateDestinationName' },
-            'elasticsearch.change': { actions: 'updateElasticsearchForm' },
-            's3.change': { actions: 'updateS3Form' },
-            'creationForm.blur': { actions: 'validateCreationForm' },
             'destination.create': [
               {
                 target: 'persisting',
                 guard: and(['isExternalStorage', 'canCreateDestination', 'unitSaveIsIdle']),
-                actions: ['stageCreatedS3Destination', 'notifyParentCreate'],
+                actions: ['storeCreationForm', 'stageCreatedS3Destination', 'notifyParentCreate'],
               },
               {
                 target: 'mintingApiKey',
                 guard: and(['canCreateDestination', 'unitSaveIsIdle', not('isExternalStorage')]),
-                actions: 'assignPendingDestination',
+                actions: ['storeCreationForm', 'assignPendingDestination'],
               },
-              { actions: 'validateCreationForm' },
             ],
             'modal.closeCreate': { target: 'idle', actions: 'clearCreate' },
           },
@@ -703,15 +569,13 @@ export const destinationsStateMachine = setup({
             id: 'generateApiKey',
             src: 'generateApiKey',
             input: ({ context }) => {
-              const pendingDestinations = context.creationContext?.pendingDestinations;
-              if (!pendingDestinations?.length) {
-                throw new Error('Expected pending destinations');
+              const pendingDestination = context.creationContext?.pendingDestination;
+              if (!pendingDestination) {
+                throw new Error('Expected a pending destination');
               }
               return {
-                destinations: pendingDestinations.map((pending) => ({
-                  destinationId: pending.id,
-                  patterns: pending.patterns,
-                })),
+                destinationId: pendingDestination.id,
+                patterns: pendingDestination.patterns,
               };
             },
             onDone: {
@@ -766,9 +630,19 @@ export const destinationsStateMachine = setup({
       on: {
         'resolvedIndices.reload': { target: '.loading' },
         'unit.persisted': { target: '.loading' },
+        'unit.loaded': { guard: 'hasPreviouslyLoadedUnit', target: '.loading' },
       },
       states: {
         loading: {
+          entry: ['resetDestinationDetails', 'clearResolvedIndices'],
+          on: {
+            'indexStats.request': [
+              { guard: 'hasDestinationDetail', actions: 'forwardIndexStatsRequest' },
+              {
+                actions: ['spawnPendingDestinationDetail', 'forwardIndexStatsRequest'],
+              },
+            ],
+          },
           invoke: {
             id: 'loadResolvedIndices',
             src: 'loadResolvedIndices',
@@ -782,10 +656,27 @@ export const destinationsStateMachine = setup({
             },
           },
         },
-        ready: {},
+        ready: {
+          entry: 'updateDestinationDetails',
+          on: {
+            'indexStats.request': [
+              { guard: 'hasDestinationDetail', actions: 'forwardIndexStatsRequest' },
+              {
+                actions: ['spawnDestinationDetail', 'forwardIndexStatsRequest'],
+              },
+            ],
+          },
+        },
         unavailable: {
+          entry: 'updateDestinationDetails',
           on: {
             'resolvedIndices.reload': { target: 'loading' },
+            'indexStats.request': [
+              { guard: 'hasDestinationDetail', actions: 'forwardIndexStatsRequest' },
+              {
+                actions: ['spawnDestinationDetail', 'forwardIndexStatsRequest'],
+              },
+            ],
           },
         },
       },
@@ -821,21 +712,22 @@ export const destinationsStateMachine = setup({
 
 export type DestinationsActorRef = ActorRefFrom<typeof destinationsStateMachine>;
 
-const destinationViewModelsByContext = new WeakMap<
-  DestinationsStateContext,
+// Keyed by unit so unrelated context updates keep the same array, which the grid relies on.
+const destinationViewModelsByUnit = new WeakMap<
+  DestinationsStateContext['unitDefinition'],
   DestinationViewModel[]
 >();
 
-export const getDestinationViewModels = (
-  context: DestinationsStateContext
-): DestinationViewModel[] => {
-  const cachedDestinationViewModels = destinationViewModelsByContext.get(context);
+export const getDestinationViewModels = ({
+  unitDefinition,
+}: DestinationsStateContext): DestinationViewModel[] => {
+  const cachedDestinationViewModels = destinationViewModelsByUnit.get(unitDefinition);
   if (cachedDestinationViewModels) {
     return cachedDestinationViewModels;
   }
 
-  const destinationViewModels = getConfiguredDestinations(context.unitDefinition);
-  destinationViewModelsByContext.set(context, destinationViewModels);
+  const destinationViewModels = getConfiguredDestinations(unitDefinition);
+  destinationViewModelsByUnit.set(unitDefinition, destinationViewModels);
   return destinationViewModels;
 };
 
@@ -866,65 +758,38 @@ function createNotifyDestinationDeletedAction({ toasts }: { toasts: Toasts }) {
   };
 }
 
-const revokeDestinationApiKeys = async ({
+const revokeDestinationApiKey = async ({
   services,
   toasts,
-  destinationIds,
+  destinationId,
 }: {
   services: DestinationApiKeyServices;
   toasts: Toasts;
-  destinationIds: string[];
+  destinationId: string;
 }): Promise<void> => {
-  const results = await Promise.allSettled(
-    destinationIds.map((destinationId) => services.delete(destinationId))
-  );
-  const failedDestinationIds = destinationIds.filter(
-    (_destinationId, index) => results[index].status === 'rejected'
-  );
-  if (failedDestinationIds.length === 0) {
-    return;
+  try {
+    await services.delete(destinationId);
+  } catch {
+    toasts.addWarning({
+      title: i18n.translate('xpack.streams.destinations.unusedApiKeyRevokeFailedTitle', {
+        defaultMessage: 'Could not revoke the unused API key',
+      }),
+      text: i18n.translate('xpack.streams.destinations.unusedApiKeyRevokeFailedText', {
+        defaultMessage:
+          'The API key created for {destinationId} is still active. Invalidate it from Stack Management > API keys.',
+        values: { destinationId },
+      }),
+    });
   }
-  toasts.addWarning({
-    title: i18n.translate('xpack.streams.destinations.apiKeyRevokeFailedTitle', {
-      defaultMessage: 'Could not revoke unused API keys',
-    }),
-    text: i18n.translate('xpack.streams.destinations.apiKeyRevokeFailedText', {
-      defaultMessage:
-        'API keys created for {destinationIds} are still active. Invalidate them from Stack Management > API keys.',
-      values: { destinationIds: failedDestinationIds.join(', ') },
-    }),
-  });
 };
 
-function createGenerateApiKeyActor({
-  services,
-  toasts,
-}: {
-  services: DestinationApiKeyServices;
-  toasts: Toasts;
-}) {
+function createGenerateApiKeyActor({ services }: { services: DestinationApiKeyServices }) {
   return fromPromise(
     async ({
-      input,
+      input: { destinationId, patterns },
     }: {
-      input: { destinations: Array<{ destinationId: string; patterns: string[] }> };
-    }): Promise<DestinationApiKeyGrant[]> => {
-      const grants: DestinationApiKeyGrant[] = [];
-      try {
-        for (const destination of input.destinations) {
-          const apiKey = await services.generate(destination.destinationId, destination.patterns);
-          grants.push({ ...apiKey, destinationId: destination.destinationId });
-        }
-        return grants;
-      } catch (error) {
-        await revokeDestinationApiKeys({
-          services,
-          toasts,
-          destinationIds: grants.map(({ destinationId }) => destinationId),
-        });
-        throw error;
-      }
-    }
+      input: { destinationId: string; patterns: string[] };
+    }): Promise<DestinationApiKey> => services.generate(destinationId, patterns)
   );
 }
 
@@ -936,18 +801,20 @@ function createRevokePendingDestinationApiKeyAction({
   toasts: Toasts;
 }) {
   return ({ context }: { context: DestinationsStateContext }) => {
-    const destinationIds = (context.creationContext?.pendingDestinations ?? []).map(({ id }) => id);
-    void revokeDestinationApiKeys({ services, toasts, destinationIds });
+    const destinationId = context.creationContext?.pendingDestination?.id;
+    if (destinationId) {
+      void revokeDestinationApiKey({ services, toasts, destinationId });
+    }
   };
 }
 
 function createLoadResolvedIndicesActor({
   streamsRepositoryClient,
 }: DestinationApiKeyGenerationDeps) {
-  return fromPromise(async (): Promise<ResolveUnitIndicesResponse> => {
+  return fromPromise(async ({ signal }): Promise<ResolveUnitIndicesResponse> => {
     return streamsRepositoryClient.fetch('GET /internal/streams/unit/{id}/_resolve_indices', {
       params: { path: { id: STREAMS_DEFAULT_UNIT_ID } },
-      signal: null,
+      signal,
     });
   });
 }
@@ -975,8 +842,11 @@ export const createDestinationsMachineImplementations = ({
   const services = createDestinationApiKeyServices(apiKeyGenerationDeps);
   return {
     actors: {
-      generateApiKey: createGenerateApiKeyActor({ services, toasts }),
+      generateApiKey: createGenerateApiKeyActor({ services }),
       loadResolvedIndices: createLoadResolvedIndicesActor(apiKeyGenerationDeps),
+      destinationDetail: destinationDetailStateMachine.provide(
+        createDestinationDetailMachineImplementations(apiKeyGenerationDeps)
+      ),
     },
     actions: {
       notifyDestinationCreated: createNotifyDestinationCreatedAction({ toasts }),

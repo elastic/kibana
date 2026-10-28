@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { StreamsUnit } from '@kbn/streams-schema';
+import { getSignalTargetsWritePatterns, type StreamsUnit } from '@kbn/streams-schema';
 import { getDestinationNameValidationError } from './destination_helpers';
+import { EMPTY_ELASTICSEARCH_DESTINATION_FORM } from './types';
 import {
   composeStaticIndex,
   composeStaticIndexesForAll,
   createUnitDestination,
-  haveStaticIndexRemaindersDiverged,
   getConfiguredDestinations,
-  getDestinationCreateSpecs,
-  getDestinationWritePatterns,
+  getDestinationCreateSpec,
+  getDestinationIndices,
   getStaticIndexRemainder,
   toS3DestinationViewModel,
   validateAutoWritePattern,
@@ -50,8 +50,8 @@ describe('destination models', () => {
         type: 'elasticsearch',
         signals: ['logs'],
         mode: 'static',
-        index: 'logs-prod-default',
-        indexPatterns: undefined,
+        indexBySignal: { logs: 'logs-prod-default' },
+        writePatternsBySignal: {},
       },
     ]);
   });
@@ -63,7 +63,8 @@ describe('destination models', () => {
         id: 'logs-nginx-default',
         name: 'logs-nginx-default',
         signals: ['logs'],
-        index: 'logs-nginx-default',
+        indexBySignal: { logs: 'logs-nginx-default' },
+        writePatternsBySignal: {},
       }),
     ]);
 
@@ -76,7 +77,7 @@ describe('destination models', () => {
         name: 'logs-nginx-default',
         type: 'elasticsearch',
         supported_telemetry: ['logs'],
-        config: [{ name: 'index', value: 'logs-nginx-default' }],
+        config: [{ name: 'index', telemetry: ['logs'], value: 'logs-nginx-default' }],
       },
     ]);
   });
@@ -105,33 +106,40 @@ describe('destination models', () => {
     ).toBeUndefined();
   });
 
-  it('stores an unscoped index for a single signal and a plaintext api_key', () => {
+  it('stores a telemetry-scoped index per signal, a description, and a plaintext api_key', () => {
     expect(
       createUnitDestination({
-        id: 'es-logs',
-        name: 'Logs',
-        signals: ['logs'],
-        index: 'logs-app-default',
+        id: 'es-app',
+        name: 'App',
+        description: ' Application data ',
+        signals: ['logs', 'traces'],
+        indexBySignal: { logs: 'logs-app-default', traces: 'traces-app-default' },
+        writePatternsBySignal: {},
         apiKey: 'encoded-key',
       })
     ).toEqual({
-      id: 'es-logs',
-      name: 'Logs',
+      id: 'es-app',
+      name: 'App',
+      description: 'Application data',
       type: 'elasticsearch',
-      supported_telemetry: ['logs'],
+      supported_telemetry: ['logs', 'traces'],
       config: [
-        { name: 'index', value: 'logs-app-default' },
+        { name: 'index', telemetry: ['logs'], value: 'logs-app-default' },
+        { name: 'index', telemetry: ['traces'], value: 'traces-app-default' },
         { name: 'api_key', value: 'encoded-key' },
       ],
     });
   });
 
-  it('omits index and index_patterns on a full-auto destination', () => {
+  it('omits index and write_patterns on a full-auto destination', () => {
     expect(
       createUnitDestination({
         id: 'es-auto',
         name: 'Auto',
+        description: '',
         signals: ['logs', 'metrics', 'traces'],
+        indexBySignal: {},
+        writePatternsBySignal: {},
         apiKey: 'encoded-key',
       })
     ).toEqual({
@@ -143,13 +151,14 @@ describe('destination models', () => {
     });
   });
 
-  it('stores user write targets on index_patterns for one auto destination', () => {
+  it('stores custom auto write patterns as telemetry-scoped write_patterns', () => {
     expect(
       createUnitDestination({
         id: 'es-billing',
         name: 'Billing',
         signals: ['logs', 'metrics'],
-        patterns: ['logs-billing-*', 'metrics-billing-*'],
+        indexBySignal: {},
+        writePatternsBySignal: { logs: ['logs-billing-*'], metrics: ['metrics-billing-*'] },
         apiKey: 'encoded-key',
       })
     ).toEqual({
@@ -158,74 +167,125 @@ describe('destination models', () => {
       type: 'elasticsearch',
       supported_telemetry: ['logs', 'metrics'],
       config: [
-        { name: 'index_patterns', value: ['logs-billing-*', 'metrics-billing-*'] },
+        { name: 'write_patterns', telemetry: ['logs'], value: ['logs-billing-*'] },
+        { name: 'write_patterns', telemetry: ['metrics'], value: ['metrics-billing-*'] },
         { name: 'api_key', value: 'encoded-key' },
       ],
     });
   });
 
-  it('creates one auto destination, with index_patterns only when write targets are filled', () => {
+  it('builds one destination spec from the form', () => {
+    expect(getDestinationCreateSpec(EMPTY_ELASTICSEARCH_DESTINATION_FORM)).toEqual({
+      signals: ['logs', 'metrics', 'traces'],
+      indexBySignal: {},
+      writePatternsBySignal: {},
+    });
     expect(
-      getDestinationCreateSpecs({
-        auto: true,
-        logsIndex: '',
-        metricsIndex: '',
-        tracesIndex: '',
-      })
-    ).toEqual([{ signals: ['logs', 'metrics', 'traces'] }]);
-    expect(
-      getDestinationCreateSpecs({
-        auto: true,
+      getDestinationCreateSpec({
+        ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+        useCustomWritePatterns: true,
+        customSignals: ['metrics', 'logs'],
         logsIndex: 'logs-billing-*',
         metricsIndex: 'metrics-billing-*',
-        tracesIndex: '',
+        tracesIndex: 'traces-ignored-*',
       })
-    ).toEqual([
-      {
-        signals: ['logs', 'metrics'],
-        patterns: ['logs-billing-*', 'metrics-billing-*'],
-      },
-    ]);
+    ).toEqual({
+      signals: ['logs', 'metrics'],
+      indexBySignal: {},
+      writePatternsBySignal: { logs: ['logs-billing-*'], metrics: ['metrics-billing-*'] },
+    });
     expect(
-      getDestinationCreateSpecs({
+      getDestinationCreateSpec({
+        ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
         auto: false,
         logsIndex: 'logs-app-default',
-        metricsIndex: '',
         tracesIndex: 'traces-app-default',
       })
-    ).toEqual([
-      { signals: ['logs'], index: 'logs-app-default' },
-      { signals: ['traces'], index: 'traces-app-default' },
+    ).toEqual({
+      signals: ['logs', 'traces'],
+      indexBySignal: { logs: 'logs-app-default', traces: 'traces-app-default' },
+      writePatternsBySignal: {},
+    });
+  });
+
+  it('reads telemetry-scoped config, preferring a scoped entry over an unscoped one', () => {
+    const [destination] = getConfiguredDestinations({
+      ...storedUnit,
+      unit: {
+        ...storedUnit.unit,
+        destinations: [
+          {
+            id: 'es-mixed',
+            name: 'Mixed',
+            description: 'Mixed routing',
+            type: 'elasticsearch',
+            supported_telemetry: ['logs', 'metrics', 'traces'],
+            config: [
+              { name: 'index', value: 'logs-shared-default' },
+              { name: 'index', telemetry: ['metrics'], value: 'metrics-app-default' },
+              { name: 'write_patterns', telemetry: ['traces'], value: ['traces-billing-*'] },
+            ],
+          },
+        ],
+      },
+    });
+
+    expect(destination).toEqual({
+      id: 'es-mixed',
+      name: 'Mixed',
+      description: 'Mixed routing',
+      type: 'elasticsearch',
+      signals: ['logs', 'metrics', 'traces'],
+      mode: 'static',
+      indexBySignal: {
+        logs: 'logs-shared-default',
+        metrics: 'metrics-app-default',
+        traces: 'logs-shared-default',
+      },
+      writePatternsBySignal: { traces: ['traces-billing-*'] },
+    });
+    if (destination.type !== 'elasticsearch') {
+      throw new Error('Expected an Elasticsearch destination');
+    }
+    expect(getDestinationIndices(destination)).toEqual([
+      'logs-shared-default',
+      'metrics-app-default',
+    ]);
+    // A static index is where documents go, so it wins over write_patterns of the same signal.
+    expect(getSignalTargetsWritePatterns(destination)).toEqual([
+      'logs-shared-default',
+      'metrics-app-default',
     ]);
   });
 
-  it('reads stored index_patterns onto auto destinations', () => {
-    expect(
-      getConfiguredDestinations({
-        ...storedUnit,
-        unit: {
-          ...storedUnit.unit,
-          destinations: [
-            {
-              id: 'es-billing',
-              name: 'Billing',
-              type: 'elasticsearch',
-              supported_telemetry: ['logs', 'metrics', 'traces'],
-              config: [{ name: 'index_patterns', value: ['logs-billing-*', 'metrics-billing-*'] }],
-            },
-          ],
-        },
-      })
-    ).toEqual([
-      {
-        id: 'es-billing',
-        name: 'Billing',
-        type: 'elasticsearch',
-        signals: ['logs', 'metrics', 'traces'],
-        mode: 'auto',
-        index: undefined,
-        indexPatterns: ['logs-billing-*', 'metrics-billing-*'],
+  it('resolves each signal of an API-written mix of index and write_patterns', () => {
+    const [destination] = getConfiguredDestinations({
+      ...storedUnit,
+      unit: {
+        ...storedUnit.unit,
+        destinations: [
+          {
+            id: 'es-api',
+            name: 'API',
+            type: 'elasticsearch',
+            supported_telemetry: ['logs', 'metrics', 'traces'],
+            config: [
+              { name: 'index', telemetry: ['logs'], value: 'logs-app.otel-default' },
+              { name: 'write_patterns', telemetry: ['logs'], value: ['logs-app.otel-*'] },
+              { name: 'write_patterns', telemetry: ['metrics'], value: ['metrics-app-*'] },
+            ],
+          },
+        ],
       },
+    });
+    if (destination.type !== 'elasticsearch') {
+      throw new Error('Expected an Elasticsearch destination');
+    }
+    expect(destination.mode).toBe('static');
+    expect(getSignalTargetsWritePatterns(destination)).toEqual([
+      'logs-app.otel-default',
+      'metrics-app-*',
+      'traces-*-*',
     ]);
   });
 
@@ -249,47 +309,29 @@ describe('destination models', () => {
       {
         id: 'es-auto',
         name: 'Auto logs',
+        description: undefined,
         type: 'elasticsearch',
         signals: ['logs'],
         mode: 'auto',
-        index: undefined,
-        indexPatterns: undefined,
+        indexBySignal: {},
+        writePatternsBySignal: {},
       },
     ]);
     const [destination] = destinations;
     if (destination.type !== 'elasticsearch') {
       throw new Error('Expected an Elasticsearch destination');
     }
-    expect(getDestinationWritePatterns(destination)).toEqual(['logs-*-*']);
+    expect(getSignalTargetsWritePatterns(destination)).toEqual(['logs-*-*']);
   });
 
-  it('expands every auto signal into a write pattern', () => {
+  it('resolves write patterns per signal from write_patterns, then index, then auto', () => {
     expect(
-      getDestinationWritePatterns({
+      getSignalTargetsWritePatterns({
         signals: ['logs', 'metrics', 'traces'],
-        mode: 'auto',
+        indexBySignal: { metrics: 'metrics-app-default' },
+        writePatternsBySignal: { logs: ['logs-billing-*'] },
       })
-    ).toEqual(['logs-*-*', 'metrics-*-*', 'traces-*-*']);
-  });
-
-  it('uses stored index_patterns for an auto destination write scope', () => {
-    expect(
-      getDestinationWritePatterns({
-        signals: ['logs', 'metrics', 'traces'],
-        mode: 'auto',
-        indexPatterns: ['logs-billing-*', 'metrics-billing-*'],
-      })
-    ).toEqual(['logs-billing-*', 'metrics-billing-*']);
-  });
-
-  it('expands only the configured static index for write-scope listing', () => {
-    expect(
-      getDestinationWritePatterns({
-        signals: ['logs'],
-        mode: 'static',
-        index: 'logs-app-default',
-      })
-    ).toEqual(['logs-app-default']);
+    ).toEqual(['logs-billing-*', 'metrics-app-default', 'traces-*-*']);
   });
 
   it('composes a shared remainder onto every signal for All', () => {
@@ -301,27 +343,6 @@ describe('destination models', () => {
       metricsIndex: 'metrics-app-default',
       tracesIndex: 'traces-app-default',
     });
-    expect(
-      haveStaticIndexRemaindersDiverged({
-        logsIndex: 'logs-app-default',
-        metricsIndex: 'metrics-app-default',
-        tracesIndex: 'traces-app-default',
-      })
-    ).toBe(false);
-    expect(
-      haveStaticIndexRemaindersDiverged({
-        logsIndex: '',
-        metricsIndex: '',
-        tracesIndex: '',
-      })
-    ).toBe(false);
-    expect(
-      haveStaticIndexRemaindersDiverged({
-        logsIndex: 'logs-app-default',
-        metricsIndex: '',
-        tracesIndex: '',
-      })
-    ).toBe(true);
   });
 
   it('rejects templated names and indexes that do not match the signal pattern', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UnitDestination } from './destination_models';
+import type { UnitDestination } from '@kbn/streams-schema';
 import { DESTINATION_SIGNALS } from './destination_models';
 
 export const s3CredentialNames = (
@@ -19,20 +19,24 @@ export const s3CredentialNames = (
 export const createS3UnitDestination = ({
   id,
   name,
+  description,
   region,
   bucket,
   prefix,
 }: {
   id: string;
   name: string;
+  description?: string;
   region: string;
   bucket: string;
   prefix: string;
 }): UnitDestination => {
   const { accessKeyId, secretAccessKey } = s3CredentialNames(id);
+  const trimmedDescription = description?.trim();
   return {
     id,
     name,
+    ...(trimmedDescription ? { description: trimmedDescription } : {}),
     type: 's3',
     supported_telemetry: [...DESTINATION_SIGNALS],
     config: [

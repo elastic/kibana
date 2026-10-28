@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useController } from 'react-hook-form';
 import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -13,6 +14,7 @@ import {
   sourceTypeSelectsSignals,
   type SourceSignal,
 } from './source_models';
+import type { SourceCreationFormData } from './source_form';
 import type { SourceType } from './types';
 
 const SIGNAL_LABELS: Record<SourceSignal, string> = {
@@ -29,19 +31,20 @@ const SIGNAL_LABELS: Record<SourceSignal, string> = {
 
 interface SourceSignalsFieldsProps {
   sourceType: SourceType;
-  signals: SourceSignal[];
   disabled: boolean;
   isInvalid: boolean;
-  onChange: (signals: SourceSignal[]) => void;
 }
 
+/** Signal checkboxes, bound to the `signals` field of the surrounding `FormProvider`. */
 export const SourceSignalsFields = ({
   sourceType,
-  signals,
   disabled,
   isInvalid,
-  onChange,
 }: SourceSignalsFieldsProps) => {
+  const {
+    field: { value: signals, onChange, onBlur },
+  } = useController<SourceCreationFormData, 'signals'>({ name: 'signals' });
+
   if (!sourceTypeSelectsSignals(sourceType)) {
     return null;
   }
@@ -52,6 +55,7 @@ export const SourceSignalsFields = ({
       ? signals.filter((candidate) => candidate !== signal)
       : [...signals, signal];
     onChange(availableSignals.filter((candidate) => next.includes(candidate)));
+    onBlur();
   };
 
   return (

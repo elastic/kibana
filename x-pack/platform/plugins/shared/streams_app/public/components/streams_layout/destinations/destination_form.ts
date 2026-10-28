@@ -16,9 +16,11 @@ import {
 } from './destination_models';
 import { getDestinationTypeDefinition } from './destination_type_registry';
 import { s3CredentialNames } from './s3_destination_models';
+import { getVisibleFormErrors } from '../visible_form_errors';
 import type {
   DestinationCreationFormData,
   DestinationCreationFormErrors,
+  DestinationCreationFormField,
   ElasticsearchDestinationFormData,
   S3DestinationFormData,
   S3FieldsErrors,
@@ -83,20 +85,27 @@ const getS3NameError = ({
     : undefined;
 };
 
+type LocalElasticsearchErrors = Pick<
+  DestinationCreationFormErrors,
+  'staticIndexes' | 'customSignals' | 'logsIndex' | 'metricsIndex' | 'tracesIndex'
+>;
+
 const getLocalElasticsearchErrors = (
   elasticsearch: ElasticsearchDestinationFormData
-): Pick<
-  DestinationCreationFormErrors,
-  'staticIndexes' | 'logsIndex' | 'metricsIndex' | 'tracesIndex'
-> => {
-  const errors: Pick<
-    DestinationCreationFormErrors,
-    'staticIndexes' | 'logsIndex' | 'metricsIndex' | 'tracesIndex'
-  > = {};
+): LocalElasticsearchErrors => {
+  const errors: LocalElasticsearchErrors = {};
   if (elasticsearch.auto) {
-    for (const signal of ['logs', 'metrics', 'traces'] as const) {
+    if (!elasticsearch.useCustomWritePatterns) {
+      return errors;
+    }
+    if (elasticsearch.customSignals.length === 0) {
+      errors.customSignals = 'required';
+    }
+    for (const signal of elasticsearch.customSignals) {
       const field = SIGNAL_INDEX_FIELDS[signal];
-      const error = validateAutoWritePattern(signal, elasticsearch[field]);
+      const error = elasticsearch[field].trim()
+        ? validateAutoWritePattern(signal, elasticsearch[field])
+        : 'required';
       if (error) {
         errors[field] = error;
       }
@@ -109,7 +118,7 @@ const getLocalElasticsearchErrors = (
   if (!hasIndex) {
     errors.staticIndexes = 'required';
   }
-  for (const signal of ['logs', 'metrics', 'traces'] as const) {
+  for (const signal of DESTINATION_SIGNALS) {
     const field = SIGNAL_INDEX_FIELDS[signal];
     const error = validateStaticSignalIndex(signal, elasticsearch[field]);
     if (error) {
@@ -144,6 +153,40 @@ export const getDestinationCreationFormErrors = ({
   };
   return { ...errors, ...getLocalElasticsearchErrors(formData.elasticsearch) };
 };
+
+type FormFieldPath =
+  | 'destinationName'
+  | `elasticsearch.${keyof ElasticsearchDestinationFormData}`
+  | `s3.${keyof S3DestinationFormData}`;
+
+/** Form inputs whose touched state reveals each error. */
+const ERROR_FIELD_PATHS: Record<DestinationCreationFormField, readonly FormFieldPath[]> = {
+  destinationName: ['destinationName'],
+  staticIndexes: [
+    'elasticsearch.logsIndex',
+    'elasticsearch.metricsIndex',
+    'elasticsearch.tracesIndex',
+  ],
+  customSignals: ['elasticsearch.customSignals'],
+  logsIndex: ['elasticsearch.logsIndex'],
+  metricsIndex: ['elasticsearch.metricsIndex'],
+  tracesIndex: ['elasticsearch.tracesIndex'],
+  region: ['s3.region'],
+  bucket: ['s3.bucket'],
+  accessKeyId: ['s3.accessKeyId'],
+  secretAccessKey: ['s3.secretAccessKey'],
+};
+
+export const getVisibleDestinationFormErrors = ({
+  errors,
+  touchedFields,
+  isSubmitted,
+}: {
+  errors: DestinationCreationFormErrors;
+  touchedFields: object;
+  isSubmitted: boolean;
+}): DestinationCreationFormErrors =>
+  getVisibleFormErrors({ errors, touchedFields, isSubmitted, fieldPaths: ERROR_FIELD_PATHS });
 
 export const canSubmitDestinationForm = ({
   formData,

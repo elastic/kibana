@@ -10,73 +10,50 @@ import { useActorRef, useSelector } from '@xstate/react';
 import { i18n } from '@kbn/i18n';
 import { STREAMS_DEFAULT_UNIT_ID, type ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
-import { createUnitRepository } from '../../../services/unit_repository';
-import { canSubmitDestinationForm } from './destination_form';
-import type { DestinationNameValidationError } from './destination_helpers';
+import { createUnitRepository, type Unit } from '../../../services/unit_repository';
 import {
   getDestinationViewModels,
   type DestinationsActorRef,
   type ResolvedIndicesStatus,
 } from './state_machines/destinations_state_machine';
+import type {
+  DestinationIndexStats,
+  DestinationIndexStatsTimeRange,
+} from './destination_index_stats';
+import {
+  selectIndexStats,
+  selectIndexStatsStatus,
+  type DestinationDetailActorRef,
+  type DestinationIndexStatsStatus,
+} from './state_machines/destination_detail_state_machine';
 import {
   destinationsTableStateMachine,
   type DestinationsTablePagination,
   type DestinationsTableSortingColumn,
 } from './state_machines/destinations_table_state_machine';
-import {
-  EMPTY_ELASTICSEARCH_DESTINATION_FORM,
-  EMPTY_S3_DESTINATION_FORM,
-  type DestinationCreationFormErrors,
-  type DestinationStorageKind,
-  type DestinationType,
-  type DestinationViewModel,
-  type ElasticsearchDestinationFormData,
-  type S3DestinationFormData,
-  type S3FieldsErrors,
-} from './types';
-
-const NO_S3_ERRORS: S3FieldsErrors = {};
+import type { DestinationCreationFormData, DestinationType, DestinationViewModel } from './types';
 
 export interface DestinationsController {
   destinations: DestinationViewModel[];
   resolvedIndicesByDestination: Record<string, ResolvedDestinationIndex[]>;
   resolvedIndicesStatus: ResolvedIndicesStatus;
   resolvedIndicesError?: string;
+  /** Only destinations whose details were shown. */
+  destinationDetailRefs: Record<string, DestinationDetailActorRef>;
+  requestIndexStats: (destinationId: string, timeRange: DestinationIndexStatsTimeRange) => void;
   query: string;
   selectedDestination?: DestinationViewModel;
   isCreateModalOpen: boolean;
   isRefreshingUnit: boolean;
-  storageKind: DestinationStorageKind;
-  destinationName: string;
-  destinationNameError?: DestinationNameValidationError;
-  elasticsearchAuto: boolean;
-  elasticsearchLogsIndex: string;
-  elasticsearchMetricsIndex: string;
-  elasticsearchTracesIndex: string;
-  staticIndexesError?: DestinationCreationFormErrors['staticIndexes'];
-  logsIndexError?: DestinationCreationFormErrors['logsIndex'];
-  metricsIndexError?: DestinationCreationFormErrors['metricsIndex'];
-  tracesIndexError?: DestinationCreationFormErrors['tracesIndex'];
-  s3Form: S3DestinationFormData;
-  s3Errors: S3FieldsErrors;
-  canCreateDestination: boolean;
+  /** The unit new destinations are validated against. */
+  unitDefinition: Unit;
   isUnitSaving: boolean;
   persistenceError?: string;
   apiKeyError?: string;
   isCreatingDestination: boolean;
   isCreateFailed: boolean;
   refreshUnit: () => void;
-  createDestination: () => void;
-  setStorageKind: (storageKind: DestinationStorageKind) => void;
-  setCreateDestinationName: (destinationName: string) => void;
-  setElasticsearchAuto: (auto: boolean) => void;
-  setElasticsearchIndexes: (
-    indexes: Partial<
-      Pick<ElasticsearchDestinationFormData, 'logsIndex' | 'metricsIndex' | 'tracesIndex'>
-    >
-  ) => void;
-  setS3Form: (changes: Partial<S3DestinationFormData>) => void;
-  validateCreationForm: () => void;
+  createDestination: (formData: DestinationCreationFormData) => void;
   deleteDestination: (destinationId: string) => void;
   setQuery: (query: string) => void;
   openCreateModal: () => void;
@@ -211,30 +188,7 @@ export const useDestinations = ({
     destinationsActorRef,
     (state) => state.context.persistenceError
   );
-  const creationContext = useSelector(
-    destinationsActorRef,
-    (state) => state.context.creationContext
-  );
-  const storageKind = creationContext?.formData.storageKind ?? 'local_elasticsearch';
-  const destinationName = creationContext?.formData.destinationName ?? '';
-  const destinationNameError = creationContext?.formErrors.destinationName;
-  const elasticsearchAuto =
-    creationContext?.formData.elasticsearch.auto ?? EMPTY_ELASTICSEARCH_DESTINATION_FORM.auto;
-  const elasticsearchLogsIndex =
-    creationContext?.formData.elasticsearch.logsIndex ??
-    EMPTY_ELASTICSEARCH_DESTINATION_FORM.logsIndex;
-  const elasticsearchMetricsIndex =
-    creationContext?.formData.elasticsearch.metricsIndex ??
-    EMPTY_ELASTICSEARCH_DESTINATION_FORM.metricsIndex;
-  const elasticsearchTracesIndex =
-    creationContext?.formData.elasticsearch.tracesIndex ??
-    EMPTY_ELASTICSEARCH_DESTINATION_FORM.tracesIndex;
-  const staticIndexesError = creationContext?.formErrors.staticIndexes;
-  const logsIndexError = creationContext?.formErrors.logsIndex;
-  const metricsIndexError = creationContext?.formErrors.metricsIndex;
-  const tracesIndexError = creationContext?.formErrors.tracesIndex;
-  const s3Form = creationContext?.formData.s3 ?? EMPTY_S3_DESTINATION_FORM;
-  const s3Errors: S3FieldsErrors = creationContext?.formErrors ?? NO_S3_ERRORS;
+  const unitDefinition = useSelector(destinationsActorRef, (state) => state.context.unitDefinition);
   const apiKeyError = useSelector(destinationsActorRef, (state) => state.context.apiKeyError);
   const isCreatingDestination = useSelector(
     destinationsActorRef,
@@ -249,16 +203,6 @@ export const useDestinations = ({
     destinationsActorRef,
     (state) => !state.matches({ configuring: 'idle' })
   );
-  const canCreateDestination = useSelector(destinationsActorRef, (state) => {
-    const creation = state.context.creationContext;
-    return Boolean(
-      creation &&
-        canSubmitDestinationForm({
-          formData: creation.formData,
-          unitDefinition: state.context.unitDefinition,
-        })
-    );
-  });
   const isUnitSaving = useSelector(destinationsActorRef, (state) =>
     state.matches({ unitSave: 'saving' })
   );
@@ -288,42 +232,19 @@ export const useDestinations = ({
     }
   );
 
+  const destinationDetailRefs = useSelector(
+    destinationsActorRef,
+    (state) => state.context.destinationDetailRefs
+  );
+  const requestIndexStats = useCallback(
+    (destinationId: string, timeRange: DestinationIndexStatsTimeRange) =>
+      destinationsActorRef.send({ type: 'indexStats.request', destinationId, timeRange }),
+    [destinationsActorRef]
+  );
+
   const createDestination = useCallback(
-    () => destinationsActorRef.send({ type: 'destination.create' }),
-    [destinationsActorRef]
-  );
-  const setStorageKind = useCallback(
-    (nextStorageKind: DestinationStorageKind) =>
-      destinationsActorRef.send({ type: 'storageKind.select', storageKind: nextStorageKind }),
-    [destinationsActorRef]
-  );
-  const setCreateDestinationName = useCallback(
-    (nextDestinationName: string) =>
-      destinationsActorRef.send({
-        type: 'destinationName.change',
-        destinationName: nextDestinationName,
-      }),
-    [destinationsActorRef]
-  );
-  const setElasticsearchAuto = useCallback(
-    (auto: boolean) => destinationsActorRef.send({ type: 'elasticsearch.change', auto }),
-    [destinationsActorRef]
-  );
-  const setElasticsearchIndexes = useCallback(
-    (
-      indexes: Partial<
-        Pick<ElasticsearchDestinationFormData, 'logsIndex' | 'metricsIndex' | 'tracesIndex'>
-      >
-    ) => destinationsActorRef.send({ type: 'elasticsearch.change', ...indexes }),
-    [destinationsActorRef]
-  );
-  const setS3Form = useCallback(
-    (changes: Partial<S3DestinationFormData>) =>
-      destinationsActorRef.send({ type: 's3.change', ...changes }),
-    [destinationsActorRef]
-  );
-  const validateCreationForm = useCallback(
-    () => destinationsActorRef.send({ type: 'creationForm.blur' }),
+    (formData: DestinationCreationFormData) =>
+      destinationsActorRef.send({ type: 'destination.create', formData }),
     [destinationsActorRef]
   );
   const openCreateModal = useCallback(
@@ -346,40 +267,26 @@ export const useDestinations = ({
       resolvedIndicesByDestination,
       resolvedIndicesStatus,
       resolvedIndicesError,
+      destinationDetailRefs,
+      requestIndexStats,
       query,
       selectedDestination: destinationViews.find(({ id }) => id === selectedDestinationId),
       isCreateModalOpen,
       isRefreshingUnit,
-      storageKind,
-      destinationName,
-      destinationNameError,
-      elasticsearchAuto,
-      elasticsearchLogsIndex,
-      elasticsearchMetricsIndex,
-      elasticsearchTracesIndex,
-      staticIndexesError,
-      logsIndexError,
-      metricsIndexError,
-      tracesIndexError,
-      s3Form,
-      s3Errors,
-      canCreateDestination: canCreateDestination && !isUnitSaving,
+      unitDefinition,
       isUnitSaving,
       persistenceError,
       apiKeyError,
       isCreatingDestination,
       isCreateFailed,
       refreshUnit: () => {
-        tableState?.refreshUnit();
-        destinationsActorRef.send({ type: 'resolvedIndices.reload' });
+        if (tableState) {
+          tableState.refreshUnit();
+        } else {
+          destinationsActorRef.send({ type: 'resolvedIndices.reload' });
+        }
       },
       createDestination,
-      setStorageKind,
-      setCreateDestinationName,
-      setElasticsearchAuto,
-      setElasticsearchIndexes,
-      setS3Form,
-      validateCreationForm,
       deleteDestination,
       setQuery: (nextQuery: string) => {
         tableState?.setQuery(nextQuery);
@@ -392,25 +299,16 @@ export const useDestinations = ({
       reloadResolvedIndices,
     }),
     [
-      canCreateDestination,
+      destinationDetailRefs,
+      requestIndexStats,
       resolvedIndicesByDestination,
       resolvedIndicesError,
       resolvedIndicesStatus,
       isUnitSaving,
       createDestination,
       deleteDestination,
-      destinationName,
-      destinationNameError,
       destinationViews,
-      elasticsearchAuto,
-      elasticsearchLogsIndex,
-      elasticsearchMetricsIndex,
-      elasticsearchTracesIndex,
       reloadResolvedIndices,
-      staticIndexesError,
-      logsIndexError,
-      metricsIndexError,
-      tracesIndexError,
       destinationsActorRef,
       isCreateFailed,
       isCreateModalOpen,
@@ -421,16 +319,16 @@ export const useDestinations = ({
       query,
       selectedDestinationId,
       apiKeyError,
-      setCreateDestinationName,
-      setElasticsearchAuto,
-      setElasticsearchIndexes,
-      s3Errors,
-      s3Form,
-      setS3Form,
-      setStorageKind,
-      storageKind,
       tableState,
-      validateCreationForm,
+      unitDefinition,
     ]
   );
 };
+
+/** Index stats of one destination; loading until its detail actor exists. */
+export const useDestinationIndexStats = (
+  destinationDetailRef: DestinationDetailActorRef | undefined
+): { stats?: DestinationIndexStats; status: DestinationIndexStatsStatus } => ({
+  stats: useSelector(destinationDetailRef, selectIndexStats),
+  status: useSelector(destinationDetailRef, selectIndexStatsStatus),
+});
