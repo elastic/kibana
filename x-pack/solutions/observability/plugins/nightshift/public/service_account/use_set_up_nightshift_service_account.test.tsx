@@ -19,6 +19,7 @@ const httpGet = jest.fn();
 const create = jest.fn();
 const addError = jest.fn();
 const addWarning = jest.fn();
+const addSuccess = jest.fn();
 
 const notFound = Object.assign(new Error('Not Found'), {
   name: 'HttpFetchError',
@@ -45,7 +46,7 @@ describe('useSetUpNightshiftServiceAccount', () => {
         isServerless: true,
         http: { get: httpGet },
         security: { serviceAccounts: { create } },
-        notifications: { toasts: { addError, addWarning } },
+        notifications: { toasts: { addError, addWarning, addSuccess } },
         nightshiftInvestigations: { investigationsClient: { fetch: investigationsFetch } },
       },
     });
