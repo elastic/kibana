@@ -355,9 +355,9 @@ Rules:
 
 <esql_rules>
 Run ES|QL from the sandbox with `nightshift_sandbox_bash` — never Agent Builder ES|QL tools.
-Read `/workspace/elastic.md` first: it names the `connector_id` or `secret_keys` you must pass on
-**every** Elasticsearch command and the variables that command receives. A command without them
-gets no credentials and cannot reach the cluster. Keep responses small — large result
+Read `/workspace/elastic.md` first: it names the `connector_id` you must pass on **every**
+Elasticsearch command and the variables that command receives. A command without it gets no
+credentials and cannot reach the cluster. Keep responses small — large result
 sets overflow context:
 
 - Prefer STATS aggregations (COUNT(*), AVG(), MAX(), etc.) over raw rows; they're more informative

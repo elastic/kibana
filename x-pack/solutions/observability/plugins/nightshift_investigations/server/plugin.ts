@@ -97,8 +97,6 @@ import {
 } from './tools/sandbox_bash/sandbox_output_redaction';
 import { createSandboxToolAvailability } from './tools/sandbox_bash/sandbox_tool_availability';
 import {
-  nightshiftSecretsEncryptionParams,
-  nightshiftSecretsSavedObjectType,
   nightshiftCustomContextSavedObjectType,
   nightshiftAutomationSavedObjectType,
   nightshiftAutomationBudgetSavedObjectType,
@@ -112,7 +110,10 @@ import {
   readInvestigationLimit,
 } from './lib/investigation_limit/global_investigation_budget';
 import { createOnboardingClient } from './onboarding/onboarding_client';
-import { createSandboxSecretsClient } from './sandbox_secrets';
+import {
+  createListSandboxConnectors,
+  createListSandboxConnectorTypes,
+} from './lib/list_sandbox_connectors';
 import { createCustomContextClient } from './custom_context';
 import type {
   NightshiftInvestigationsServerSetup,
@@ -150,7 +151,6 @@ export class NightshiftInvestigationsPlugin
   private uiSettings?: CoreStart['uiSettings'];
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
-  private encryptedSavedObjectsStart?: NightshiftInvestigationsStartDeps['encryptedSavedObjects'];
   private securityStart?: NightshiftInvestigationsStartDeps['security'];
   private security?: CoreStart['security'];
   private coreStart?: CoreStart;
@@ -216,9 +216,7 @@ export class NightshiftInvestigationsPlugin
     core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
     core.savedObjects.registerType(nightshiftAutomationBudgetSavedObjectType);
     core.savedObjects.registerType(nightshiftInvestigationLimitSavedObjectType);
-    core.savedObjects.registerType(nightshiftSecretsSavedObjectType);
     core.savedObjects.registerType(nightshiftCustomContextSavedObjectType);
-    plugins.encryptedSavedObjects?.registerType(nightshiftSecretsEncryptionParams);
 
     const customContextClient = createCustomContextClient({
       getDeps: () => ({
@@ -230,25 +228,21 @@ export class NightshiftInvestigationsPlugin
       }),
     });
 
-    const sandboxSecretsClient = createSandboxSecretsClient({
-      getDeps: () => ({
-        featureFlags: this.featureFlags,
-        savedObjects: this.savedObjects,
-        encryptedSavedObjects: this.encryptedSavedObjectsStart,
-        security: this.securityStart,
-        spaces: this.spaces,
-      }),
-      canEncrypt: plugins.encryptedSavedObjects?.canEncrypt ?? false,
-      logger: this.logger.get('sandbox_secrets'),
-    });
-
     const onboardingClient = createOnboardingClient({
       getDeps: () => ({
         workflowsManagement: this.workflowsManagement,
         spaces: this.spaces,
+        agentBuilder: this.agentBuilder,
+        agentAvailability: this.getInvestigationAvailability(),
       }),
-      listSandboxSecretKeys: (request) => sandboxSecretsClient.listKeysForSandbox(request),
       logger: this.logger.get('onboarding'),
+    });
+
+    const listSandboxConnectors = createListSandboxConnectors({
+      getActions: () => this.actionsStart,
+    });
+    const listSandboxConnectorTypes = createListSandboxConnectorTypes({
+      getActions: () => this.actionsStart,
     });
 
     const getTriggerEmitter = (request: KibanaRequest): TriggerEmitter | undefined =>
@@ -306,7 +300,7 @@ export class NightshiftInvestigationsPlugin
         // Tools are registered in setup() but only run after start(), so read start deps lazily.
         const getSandboxStart = getGatedSandboxStart;
         const sandboxWorkspaceManager = createSandboxWorkspaceManager({
-          getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
+          getDeps: () => ({ actions: this.actionsStart }),
           telemetryConnectorId,
           telemetryReadableIndices: config.sandbox?.telemetry_readable_indices,
           logger: sandboxLogger,
@@ -318,7 +312,7 @@ export class NightshiftInvestigationsPlugin
         const outputRedactionLogger = sandboxLogger.get('output_redaction');
         const redaction = {
           getOutputRedactor: createSandboxOutputRedactorProvider({
-            getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
+            getDeps: () => ({ actions: this.actionsStart }),
           }),
           logger: outputRedactionLogger,
         };
@@ -339,7 +333,6 @@ export class NightshiftInvestigationsPlugin
             getSandboxStart,
             sandboxWorkspaceManager,
             resolveConnectorCredentials,
-            sandboxSecretsClient,
             logger: sandboxLogger,
           })
         );
@@ -522,7 +515,8 @@ export class NightshiftInvestigationsPlugin
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
           isCortexEnabled: () => this.cortexEnabled,
-          sandboxSecretsClient,
+          listSandboxConnectors,
+          listSandboxConnectorTypes,
           customContextClient,
           onboardingClient,
           getCortexPageStore: (request: KibanaRequest) => {
@@ -612,7 +606,6 @@ export class NightshiftInvestigationsPlugin
     this.uiSettings = coreStart.uiSettings;
     this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
-    this.encryptedSavedObjectsStart = plugins.encryptedSavedObjects;
     this.securityStart = plugins.security;
     this.security = coreStart.security;
     this.coreStart = coreStart;
