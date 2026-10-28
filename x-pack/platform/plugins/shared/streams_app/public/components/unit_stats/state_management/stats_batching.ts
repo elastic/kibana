@@ -20,18 +20,19 @@ export interface DueOptions {
 }
 
 /**
- * A component is due when it has no value, when its request is in flight (a new batch replaces
- * that request, so its components go in the new one), or when its value is old.
+ * A component is due when it has no value, or its value is old, or the flush is forced. A
+ * component whose request is in flight (`loading`) is not due: the request is left to finish, and
+ * the next flush picks up whatever it did not cover.
  */
 const isDue = <TStats>(
   { entry, fetchedAt }: StatsComponentState<TStats>,
   { now, freshnessMs, force }: DueOptions
-): boolean =>
-  force ||
-  !entry ||
-  entry.status === 'loading' ||
-  fetchedAt === undefined ||
-  now - fetchedAt >= freshnessMs;
+): boolean => {
+  if (force || !entry) return true;
+  if (entry.status === 'loading') return false;
+
+  return fetchedAt === undefined || now - fetchedAt >= freshnessMs;
+};
 
 const collectDueRefs = <TStats>(
   record: ComponentRecord<TStats>,
