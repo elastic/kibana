@@ -706,6 +706,24 @@ Per action:
 
 `vendorApiFixturesSchema` is the schema.
 
+### Drift detection
+
+`--drift` compares a connector's committed artifacts with the vendor's latest specs, without writing them:
+
+```bash
+# One connector, or every connector with a manifest when --connector is left out
+node scripts/connector_vendor_api --drift --connector firecrawl --report target/drift.json
+```
+
+For each connector it:
+
+- fetches every source in `manifest.json` (a source that doesn't load is reported as unreachable);
+- records the actions against the committed snapshots and against the latest specs, with the overlay applied, as a refresh would, but in a temporary copy of the folder;
+- compares each regenerated snapshot with the committed one and classifies the changes with [`oasdiff`](https://github.com/oasdiff/oasdiff) `changelog`. The binary is `OASDIFF_BIN`, else `oasdiff` on the `PATH`, as for `@kbn/api-contracts`; Kibana's CI agents have it. A response that widens (a new enum value, a longer string) is breaking, since a connector reading the field may not handle it; deprecations are their own kind;
+- reports overlay actions that no longer match the latest specs.
+
+Each connector in the JSON report gets a `verdict`: `healthy`, `vendor-drift` (the actions pass against the snapshots but not the latest specs), `kibana-regression` (they fail against the snapshots already) or `unknown` (a spec didn't load). Its `outcome` says what to do: `none`, `refresh` (only non-breaking changes, or the actions now call other operations, and everything passes; a run with `--refresh` updates the artifacts) or `issue` (anything breaking, deprecated, unreachable, unclassified without `oasdiff`, failing, or a stale overlay action). A new `info.version` alone changes nothing, since some vendors bump it on every deploy.
+
 ### Running a connector in Kibana against its contract mock
 
 `node scripts/connector_emulate` serves a connector's contract mock as an HTTP forward proxy (see the server mode section of `@kbn/connector-emulate`'s README), so a running Kibana can execute the connector without vendor credentials:
