@@ -70,6 +70,10 @@ export const HUNT_INTERNAL_ROUTE_BASE = '/internal/alertzero/hunt' as const;
 /** The hunt scope for the space: the default data view Tier 1 searches and what resolved in it. */
 export const HUNT_INDEX_SCOPE_URL = `${HUNT_INTERNAL_ROUTE_BASE}/index_scope` as const;
 
+/** Which default data view patterns the Hunt worker's service account cannot read. */
+export const HUNT_WORKER_INDEX_COVERAGE_URL =
+  `${HUNT_INTERNAL_ROUTE_BASE}/index_scope/worker_coverage` as const;
+
 /** Candidate report selection for the tagged Worker's scheduled sweep and manual trigger. */
 export const CANDIDATES_URL = `${HUNT_INTERNAL_ROUTE_BASE}/candidates` as const;
 

@@ -205,13 +205,17 @@ const getStrandedDependentReasons = (
  * requesting user, so without connector access it reports no model in a space that has one.
  */
 export const getWorkerWarningReasons = (
-  worker: Pick<Worker, 'id' | 'blockingReasons'>,
+  worker: Pick<Worker, 'id' | 'blockingReasons'> & Partial<Pick<Worker, 'state' | 'stateReason'>>,
   enabledById: WorkerEnabledById,
   { includeBlocking }: { includeBlocking: boolean }
 ): WorkerWarningReason[] => [
   ...(includeBlocking ? getBlockingWarningReasons(worker, { withLink: false }) : []),
   ...getDisabledProviderReasons(worker.id, enabledById),
   ...getStrandedDependentReasons(worker.id, enabledById),
+  // Shown to read-only viewers too: it says why the worker is degraded, not how to change it.
+  ...(worker.state === 'degraded' && worker.stateReason
+    ? [{ id: 'degraded', message: worker.stateReason }]
+    : []),
 ];
 
 /**

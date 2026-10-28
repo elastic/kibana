@@ -44,6 +44,9 @@ jest.mock('../../hooks/use_can_write_alertzero', () => ({
 }));
 jest.mock('../../hooks/use_watches_api');
 jest.mock('../../hooks/use_workers_api');
+jest.mock('../../hooks/hunt/use_hunt_worker_index_coverage', () => ({
+  useHuntWorkerIndexCoverage: jest.fn(() => ({ data: undefined })),
+}));
 jest.mock('../../hooks/hunt/use_hunt_threat_intel_supply', () => ({
   useHuntThreatIntelSupplyStatus: jest.fn(() => ({
     data: {
