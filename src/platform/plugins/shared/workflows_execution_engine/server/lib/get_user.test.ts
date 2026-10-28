@@ -17,6 +17,13 @@ const createClusterClient = (): IClusterClient =>
     asScoped: jest.fn(),
   } as unknown as IClusterClient);
 
+const createScopedClusterClient = (authenticate: jest.Mock): IClusterClient =>
+  ({
+    asScoped: jest.fn().mockReturnValue({
+      asCurrentUser: { security: { authenticate } },
+    }),
+  } as unknown as IClusterClient);
+
 const createSecurity = (user: unknown): SecurityServiceStart =>
   ({
     authc: {
@@ -59,5 +66,23 @@ describe('getAuthenticatedUser', () => {
     await expect(
       getAuthenticatedUser(createRequest(), createSecurity(null), createClusterClient())
     ).resolves.toBeUndefined();
+  });
+
+  it('returns the API key authenticate username when Kibana has no username', async () => {
+    const request = {
+      headers: { authorization: 'ApiKey essu_granted' },
+      isFakeRequest: true,
+    } as KibanaRequest;
+    const authenticate = jest.fn().mockResolvedValue({
+      username: 'sa-id',
+      authentication_realm: { name: '_cloud_service_account', type: '_cloud_service_account' },
+    });
+    const clusterClient = createScopedClusterClient(authenticate);
+
+    await expect(getAuthenticatedUser(request, createSecurity({}), clusterClient)).resolves.toBe(
+      'sa-id'
+    );
+    expect(clusterClient.asScoped).toHaveBeenCalledWith(request);
+    expect(authenticate).toHaveBeenCalledTimes(1);
   });
 });

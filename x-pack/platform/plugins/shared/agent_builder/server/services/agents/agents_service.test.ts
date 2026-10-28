@@ -14,6 +14,7 @@ import {
 } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { isAllowedBuiltinAgent, isAllowedAgentType } from '@kbn/agent-builder-server/allow_lists';
 import {
   agentBuilderDefaultAiIndexId,
@@ -44,14 +45,24 @@ const createSystemClientMock = createSystemClient as jest.MockedFunction<typeof 
 const runToolRefCleanupMock = runToolRefCleanup as jest.MockedFunction<typeof runToolRefCleanup>;
 const runSkillRefCleanupMock = runSkillRefCleanup as jest.MockedFunction<typeof runSkillRefCleanup>;
 
-const createStartDeps = (): AgentsServiceStartDeps => ({
-  security: securityServiceMock.createStart(),
-  elasticsearch: elasticsearchServiceMock.createStart(),
-  uiSettings: uiSettingsServiceMock.createStartContract(),
-  savedObjects: savedObjectsServiceMock.createStartContract(),
-  spaces: undefined,
-  toolsService: createToolsServiceStartMock(),
-});
+const createStartDeps = ({
+  experimentalEnabled = true,
+}: { experimentalEnabled?: boolean } = {}): AgentsServiceStartDeps => {
+  const uiSettings = uiSettingsServiceMock.createStartContract();
+  const uiSettingsClient = uiSettingsServiceMock.createClient();
+  uiSettingsClient.get.mockImplementation(async (settingId: string) =>
+    settingId === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID ? experimentalEnabled : false
+  );
+  uiSettings.asScopedToClient.mockReturnValue(uiSettingsClient);
+  return {
+    security: securityServiceMock.createStart(),
+    elasticsearch: elasticsearchServiceMock.createStart(),
+    uiSettings,
+    savedObjects: savedObjectsServiceMock.createStartContract(),
+    spaces: undefined,
+    toolsService: createToolsServiceStartMock(),
+  };
+};
 
 describe('AgentsService', () => {
   let logger: ReturnType<typeof loggerMock.create>;
@@ -223,6 +234,26 @@ describe('AgentsService', () => {
         const resolved = await resolve({ tools: [], ai_indices: [] });
 
         expect(resolved.ai_indices).toEqual(Object.keys(defaultAiIndices));
+      });
+
+      describe('when Agent Builder experimental features are off', () => {
+        beforeEach(() => {
+          service = new AgentsService();
+          service.setup({ logger });
+          started = service.start(createStartDeps({ experimentalEnabled: false }));
+        });
+
+        it('does not grant the default AI index', async () => {
+          const resolved = await resolve({ tools: [], ai_indices: [] });
+
+          expect(resolved.ai_indices).toEqual([]);
+        });
+
+        it("keeps the agent's own AI indices", async () => {
+          const resolved = await resolve({ tools: [], ai_indices: ['custom-index'] });
+
+          expect(resolved.ai_indices).toEqual(['custom-index']);
+        });
       });
     });
 

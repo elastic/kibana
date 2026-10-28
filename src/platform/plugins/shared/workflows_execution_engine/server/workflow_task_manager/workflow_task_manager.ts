@@ -10,6 +10,7 @@
 import { v4 } from 'uuid';
 import { type KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
+  type ConcreteTaskInstance,
   type RunSoonOptions,
   TaskAlreadyRunningError,
   type TaskManagerStartContract,
@@ -47,6 +48,9 @@ export const getWorkflowWakeTaskId = (executionId: string): string =>
   `workflow-wake-${executionId}`;
 
 export const WORKFLOW_WAKE_POLL_INTERVAL_MS = 30_000;
+
+/** Lead time within which an idle task counts as about to be claimed. */
+const RESUME_TASK_DUE_GRACE_MS = 5_000;
 
 /** Tasks beyond one page re-arm the wake task when they fire, which removes them. */
 const REMOVE_EXECUTION_TASKS_PAGE_SIZE = 100;
@@ -371,6 +375,44 @@ export class WorkflowTaskManager {
       // A claimed wake task is retained and polls again; it cannot delete this request on success.
       if (!(error instanceof TaskAlreadyRunningError)) throw error;
     }
+  }
+
+  /**
+   * Whether a resume is already on its way: the immediate runner is claimed or about to be, or
+   * the wake task that pokes a busy runner is claimed or due within its poll interval. Throws
+   * when a task cannot be read, since a caller must not undo a resume it cannot rule out.
+   */
+  async isResumeInProgress(executionId: string): Promise<boolean> {
+    const wakeTaskId = getWorkflowWakeTaskId(executionId);
+    const results = await this.taskManager.bulkGet([
+      getWorkflowImmediateResumeTaskId(executionId),
+      wakeTaskId,
+    ]);
+    const now = Date.now();
+    const isOnItsWay = ({ id, status, runAt }: ConcreteTaskInstance): boolean => {
+      if (status === TaskStatus.Claiming || status === TaskStatus.Running) return true;
+      // An idle wake task pokes the runner when it fires, so it counts if it fires within a poll.
+      const dueWithinMs =
+        id === wakeTaskId
+          ? WORKFLOW_WAKE_POLL_INTERVAL_MS + RESUME_TASK_DUE_GRACE_MS
+          : RESUME_TASK_DUE_GRACE_MS;
+      return status === TaskStatus.Idle && runAt.getTime() <= now + dueWithinMs;
+    };
+
+    let unreadableTaskId: string | undefined;
+    for (const result of results) {
+      if (result.tag === 'ok') {
+        if (isOnItsWay(result.value)) return true;
+      } else if (result.error.error.statusCode !== 404) {
+        // A missing task cannot be resuming anything, but an unreadable one might be.
+        unreadableTaskId = result.error.id;
+      }
+    }
+
+    if (unreadableTaskId !== undefined) {
+      throw new Error(`Failed to read task ${unreadableTaskId} while checking for a resume`);
+    }
+    return false;
   }
 
   /** Ensures a retained wake task with cloned execution credentials exists before handoff. */

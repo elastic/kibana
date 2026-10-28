@@ -167,22 +167,13 @@ export {
 } from './locators';
 
 export {
-  SANDBOX_SECRETS_API_PATH,
-  SANDBOX_SECRET_KEY_REGEX,
-  MAX_SANDBOX_SECRET_KEY_LENGTH,
-  MIN_SANDBOX_SECRET_VALUE_LENGTH,
-  MAX_SANDBOX_SECRET_VALUE_LENGTH,
-  MAX_SANDBOX_SECRETS,
-  MAX_SANDBOX_SECRETS_VERSION_LENGTH,
-  validateSandboxSecretKey,
-  validateSandboxSecretValue,
-  hasSandboxSecretValueLineBreak,
-  type SandboxSecretEntry,
-  type GetSandboxSecretsResponse,
-  type PutSandboxSecretsRequest,
-  type PutSandboxSecretsResponse,
-} from './sandbox_secrets';
-
+  SANDBOX_CONNECTORS_API_PATH,
+  SANDBOX_CONNECTOR_TYPES_API_PATH,
+  type SandboxConnector,
+  type GetSandboxConnectorsResponse,
+  type SandboxConnectorType,
+  type GetSandboxConnectorTypesResponse,
+} from './sandbox_connectors';
 export {
   CUSTOM_CONTEXT_API_PATH,
   MAX_CUSTOM_CONTEXT_SNIPPET_LENGTH,
@@ -210,6 +201,7 @@ export {
   type OnboardingSuggestionsStatus,
   type OnboardingSuggestionsExecution,
   type GetOnboardingResponse,
+  type EnableOnboardingResponse,
   type StartOnboardingSuggestionsResponse,
 } from './onboarding';
 
@@ -263,3 +255,42 @@ export {
   type InvestigationCompletedTriggerPayload,
   type InvestigationFailedTriggerPayload,
 } from './workflows/triggers';
+export {
+  getNightshiftRoleName,
+  getNightshiftServiceAccountName,
+  NIGHTSHIFT_SERVICE_ACCOUNT_KINDS,
+  type EnableInvestigatorServiceAccountBody,
+  type InvestigatorServiceAccountStatus,
+  type NightshiftBoundWorkflowStatus,
+  type NightshiftServiceAccountIds,
+  type NightshiftServiceAccountInfo,
+  type NightshiftServiceAccountKind,
+} from './service_account';
+export {
+  createHttpServiceAccountsApi,
+  ensureNightshiftServiceAccounts,
+  getSecurityRoleUrl,
+  NightshiftServiceAccountSetupError,
+  SECURITY_ROLE_API_VERSION,
+  SECURITY_SERVICE_ACCOUNT_URL,
+  type ListedServiceAccount,
+  type ListedServiceAccountsPage,
+  type NightshiftServiceAccountsApi,
+  type NightshiftServiceAccountSetupErrorCode,
+} from './ensure_service_accounts';
+export {
+  ensureNightshiftServiceAccountRoles,
+  NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES,
+} from './service_account_roles';
+
+export {
+  KNOWLEDGE_PURGE_CONFIRMATION,
+  KNOWLEDGE_PURGE_SCOPES,
+  MAX_PURGE_INVESTIGATIONS,
+  emptyPurgeCounts,
+  type KnowledgePurgeCounts,
+  type KnowledgePurgeInvestigation,
+  type KnowledgePurgePreview,
+  type KnowledgePurgeResult,
+  type KnowledgePurgeScope,
+} from './purge';

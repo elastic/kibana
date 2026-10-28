@@ -6,6 +6,7 @@
  */
 
 import type {
+  AttachmentTimelineEvent,
   CompactionSummary,
   CompactionTrigger,
   ConversationRoundStep,
@@ -102,4 +103,6 @@ export interface CurrentRun {
   retryNotices: RetryNotice[];
   /** The summary the context is currently rendered with; its cursor decides what stays verbatim. */
   compactionSummary?: CompactionSummary;
+  /** Attachment events of the run (a resume: plus the paused round's), placed at their anchors. */
+  attachmentEvents?: AttachmentTimelineEvent[];
 }

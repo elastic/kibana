@@ -25,11 +25,11 @@ export class GenAiSettingsPage {
    * Navigate to the GenAI Settings page in Stack Management
    */
   async navigateTo() {
-    // A cold Kibana bootstrap on Cloud outruns the `load` event gate, so wait on the page's own signal instead.
-    await this.page.gotoApp('management/ai/genAiSettings', undefined, {
-      waitUntil: 'domcontentloaded',
+    await this.page.gotoApp('management/ai/genAiSettings', {
+      readyWhen: this.page.testSubj.locator('genAiSettingsPage'),
+      // A cold Kibana bootstrap on Cloud regularly outlasts the default app-ready budget.
+      readyTimeout: 35_000,
     });
-    await this.waitForPageToLoad(35_000);
   }
 
   /**
