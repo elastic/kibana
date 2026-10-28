@@ -33,8 +33,7 @@ describe('createHistogramDistributionQuery', () => {
       })
     ).toBe(`TS metrics-a
   | STATS count = COUNT(latency.exp, bucket) BY bucket = BUCKET(latency.exp, 10, 1, 250), TBUCKET(100)
-  | EVAL bucket = RANGE_MIN(bucket)
-  | SORT bucket DESC`);
+  | EVAL bucket = RANGE_MIN(bucket)`);
   });
 
   it('uses a tdigest field directly', () => {
@@ -48,8 +47,7 @@ describe('createHistogramDistributionQuery', () => {
 
     expect(query).toBe(`TS metrics-a
   | STATS count = COUNT(latency.tdigest, bucket) BY bucket = BUCKET(latency.tdigest, 10, 1, 250), TBUCKET(100)
-  | EVAL bucket = RANGE_MIN(bucket)
-  | SORT bucket DESC`);
+  | EVAL bucket = RANGE_MIN(bucket)`);
   });
 
   it('casts a legacy histogram with TO_TDIGEST', () => {
@@ -63,8 +61,7 @@ describe('createHistogramDistributionQuery', () => {
 
     expect(query).toBe(`TS metrics-a
   | STATS count = COUNT(TO_TDIGEST(latency.legacy), bucket) BY bucket = BUCKET(TO_TDIGEST(latency.legacy), 10, 1, 250), TBUCKET(100)
-  | EVAL bucket = RANGE_MIN(bucket)
-  | SORT bucket DESC`);
+  | EVAL bucket = RANGE_MIN(bucket)`);
   });
 
   it('omits NULLIFY when WHERE cannot name an extra column', () => {
@@ -92,8 +89,7 @@ describe('createHistogramDistributionQuery', () => {
 TS metrics-a
   | WHERE host.name == "a"
   | STATS count = COUNT(latency.exp, bucket) BY bucket = BUCKET(latency.exp, 10, 1, 250), TBUCKET(100)
-  | EVAL bucket = RANGE_MIN(bucket)
-  | SORT bucket DESC`);
+  | EVAL bucket = RANGE_MIN(bucket)`);
   });
 
   it('opens a positive span when min equals max', () => {
@@ -103,6 +99,15 @@ TS metrics-a
         bounds: { min: 5, max: 5 },
       })
     ).toContain('BUCKET(latency.exp, 10, 5, 5.000005)');
+  });
+
+  it('leaves value-range order out of the query', () => {
+    const query = createHistogramDistributionQuery({
+      metricItem: createMetric(),
+      bounds,
+    });
+
+    expect(query).not.toContain('SORT');
   });
 
   it('returns undefined for a non-histogram instrument', () => {

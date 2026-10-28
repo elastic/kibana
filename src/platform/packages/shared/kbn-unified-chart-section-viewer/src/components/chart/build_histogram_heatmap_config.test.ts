@@ -29,6 +29,7 @@ describe('buildHistogramHeatmapConfig', () => {
       breakdown: 'bucket',
       legend: { show: false },
       axisLabel: { xAxis: true, yAxis: true },
+      ySort: 'desc',
     });
   });
 });

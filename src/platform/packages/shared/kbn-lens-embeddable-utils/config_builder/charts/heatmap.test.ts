@@ -94,6 +94,7 @@ test('generates metric chart config', async () => {
             "isYAxisLabelVisible": false,
             "isYAxisTitleVisible": false,
             "type": "heatmap_grid",
+            "ySortPredicate": "desc",
           },
           "layerId": "layer_0",
           "layerType": "data",
@@ -135,6 +136,33 @@ test('hides the legend when configured', async () => {
   expect(state.visualization).toEqual(
     expect.objectContaining({
       legend: expect.objectContaining({ isVisible: false }),
+    })
+  );
+});
+
+test('sorts the vertical axis when configured', async () => {
+  const { state } = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'test',
+      dataset: {
+        esql: 'from test | count=count() by @timestamp, category',
+      },
+      breakdown: 'category',
+      xAxis: '@timestamp',
+      value: 'count',
+      ySort: 'asc',
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  expect(state.visualization).toEqual(
+    expect.objectContaining({
+      gridConfig: expect.objectContaining({
+        ySortPredicate: 'asc',
+      }),
     })
   );
 });

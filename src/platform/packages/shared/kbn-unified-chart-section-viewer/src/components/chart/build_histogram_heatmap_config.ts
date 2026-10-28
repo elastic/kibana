@@ -33,4 +33,6 @@ export const buildHistogramHeatmapConfig = ({
   breakdown: HISTOGRAM_BUCKET_COLUMN,
   legend: { show: false },
   axisLabel: { xAxis: true, yAxis: true },
+  // Histogram ranges run high to low, matching the previous query sort.
+  ySort: 'desc',
 });

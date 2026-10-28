@@ -249,6 +249,8 @@ export interface LensHeatmapConfigBase {
   xAxis: LensBreakdownConfig;
   legend?: Identity<LensLegendConfig>;
   axisLabel?: { xAxis?: boolean; yAxis?: boolean };
+  /** Vertical-axis order. Becomes the heatmap `ySortPredicate`. Omitted uses descending. */
+  ySort?: 'asc' | 'desc';
 }
 
 export type LensHeatmapConfig = Identity<LensBaseConfig & LensBaseLayer & LensHeatmapConfigBase>;
