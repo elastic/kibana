@@ -40,7 +40,6 @@ export type MachineType =
   | 'n2-standard-2'
   | 'n2-standard-4'
   | 'n2-standard-8'
-  | 'n2-highmem-4'
   | 'n2d-custom-16-32768'
   | 'n2d-standard-2'
   | 'n2d-standard-8'
@@ -63,6 +62,7 @@ export const usZones = [
 
 export const spotZones = {
   centralFCA: ['us-central1-f', 'us-central1-c', 'us-central1-a'],
+  centralFCBA: ['us-central1-f', 'us-central1-c', 'us-central1-b', 'us-central1-a'],
   allUS: usZones,
   // Zones aligned with the preemptible N2D CPU quota, which is separate from the standard quota.
   n2dPreemptible: [

@@ -23,12 +23,7 @@ export const agentBuilderSmokeTestsSteps = (): readonly Step[] => [
         key: 'discover-eis-models',
         timeout_in_minutes: 10,
         env: { FTR_EIS_CCM: '1' },
-        agents: spotAgent('n2-standard-2', [
-          'us-central1-f',
-          'us-central1-c',
-          'us-central1-b',
-          'us-central1-a',
-        ]),
+        agents: spotAgent('n2-standard-2', spotZones.centralFCBA),
         artifact_paths: ['target/eis_models.json'],
         retry: retry.agentLossOrAnyOnce,
       }),
