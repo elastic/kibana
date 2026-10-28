@@ -64,7 +64,8 @@ export function registerSetupTasks(taskManager: TaskManagerSetupContract) {
                   logger,
                 });
               } else if (taskParams.type === 'backfillPolicyBaseId') {
-                await runBackfillPolicyBaseId({
+                // Returns the next run when the backfill is not finished
+                return await runBackfillPolicyBaseId({
                   signal,
                   logger,
                 });
