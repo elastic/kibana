@@ -15,6 +15,7 @@ import type {
   WorkflowExecutionDto,
   WorkflowExecutionListDto,
   WorkflowListDto,
+  WorkflowStepExecutionDto,
 } from '@kbn/workflows';
 /** `managedBy` stamped on AlertZero managed workflow executions. */
 const ALERTZERO_MANAGED_BY = 'alertzero';
@@ -80,9 +81,18 @@ export interface WatchWorkflowsManagementClient {
   getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
-    request: KibanaRequest,
-    options?: { includeOutput?: boolean }
+    request: KibanaRequest
   ): Promise<WorkflowExecutionDto | null>;
+
+  /**
+   * One step of one execution with its output, read without loading the output of every other
+   * step in the run. Returns the document that carries the step's result when the id is shared.
+   */
+  getStepExecution(
+    params: { workflowId: string; workflowExecutionId: string; stepId: string },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowStepExecutionDto | undefined>;
 
   cancelAllActiveWorkflowExecutions(
     workflowId: string,
@@ -222,12 +232,34 @@ export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagem
   getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
-    request: KibanaRequest,
-    options?: { includeOutput?: boolean }
+    request: KibanaRequest
   ): Promise<WorkflowExecutionDto | null> {
-    return this.management
-      .getClient(request)
-      .getWorkflowExecution(workflowExecutionId, spaceId, options);
+    return this.management.getClient(request).getWorkflowExecution(workflowExecutionId, spaceId);
+  }
+
+  async getStepExecution(
+    {
+      workflowId,
+      workflowExecutionId,
+      stepId,
+    }: { workflowId: string; workflowExecutionId: string; stepId: string },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowStepExecutionDto | undefined> {
+    const { results } = await this.management.searchStepExecutions(
+      {
+        request,
+        workflowId,
+        stepId,
+        workflowExecutionIds: [workflowExecutionId],
+        includeOutput: true,
+        sourceIncludes: ['stepId', 'startedAt', 'finishedAt', 'output'],
+        page: 1,
+        size: 5,
+      },
+      spaceId
+    );
+    return results.find(({ output }) => output !== undefined) ?? results[0];
   }
 
   cancelAllActiveWorkflowExecutions(

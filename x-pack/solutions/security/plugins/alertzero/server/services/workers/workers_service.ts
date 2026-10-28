@@ -39,7 +39,10 @@ import {
   type ThreatIntelSupplyService,
 } from '../threat_intel_supply';
 import { getHuntAccountLabel } from '../watches/hunt/common/resolve_worker_index_coverage';
-import { readLatestFinishedSweepIndexScope } from '../watches/hunt/common/read_last_sweep_index_scope';
+import {
+  readLatestFinishedSweepIndexScope,
+  sweepEvaluatedUniverse,
+} from '../watches/hunt/common/read_last_sweep_index_scope';
 import type { GetWorkerBlockingReasons } from './worker_blocking_reasons';
 
 /**
@@ -48,6 +51,17 @@ import type { GetWorkerBlockingReasons } from './worker_blocking_reasons';
  */
 const WORKER_IDS_BY_REQUIRED_SKILL: Readonly<Record<string, readonly string[]>> = {
   'endpoint-forensic-analysis': [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID],
+};
+
+/** Reads the patterns of the space's default data view, so a stale sweep can be told apart. */
+export type GetHuntUniverse = () => Promise<string[]>;
+
+/** `2026-10-28T14:03:11.000Z` as `2026-10-28 14:03 UTC`, which is what the band tooltip shows. */
+const formatSweepTime = (iso: string): string => {
+  const time = new Date(iso);
+  return Number.isNaN(time.getTime())
+    ? iso
+    : `${time.toISOString().slice(0, 16).replace('T', ' ')} UTC`;
 };
 
 const getDefinitionFromTemplate = (registration: WorkerRegistration): WorkflowYaml | null => {
@@ -202,7 +216,11 @@ export class WorkersService {
     }
   }
 
-  async list(request: KibanaRequest, spaceId: string): Promise<ListWorkersResponse> {
+  async list(
+    request: KibanaRequest,
+    spaceId: string,
+    getHuntUniverse?: GetHuntUniverse
+  ): Promise<ListWorkersResponse> {
     await this.ensureAgent(spaceId);
 
     const [agentLookup, hiddenWorkerIds, blockingReasons] = await Promise.all([
@@ -215,7 +233,14 @@ export class WorkersService {
         .list()
         .filter((registration) => !hiddenWorkerIds.has(registration.id))
         .map((registration) =>
-          this.projectWorker(registration, spaceId, request, blockingReasons, agentLookup)
+          this.projectWorker(
+            registration,
+            spaceId,
+            request,
+            blockingReasons,
+            agentLookup,
+            getHuntUniverse
+          )
         )
     );
     return ListWorkersResponse.parse({ workers });
@@ -224,7 +249,8 @@ export class WorkersService {
   async get(
     workerId: string,
     request: KibanaRequest,
-    spaceId: string
+    spaceId: string,
+    getHuntUniverse?: GetHuntUniverse
   ): Promise<Worker | undefined> {
     await this.ensureAgent(spaceId);
     const registration = workerRegistry.get(workerId);
@@ -239,7 +265,14 @@ export class WorkersService {
       this.buildAgentLookup(request),
       this.getBlockingReasons(request),
     ]);
-    return this.projectWorker(registration, spaceId, request, blockingReasons, agentLookup);
+    return this.projectWorker(
+      registration,
+      spaceId,
+      request,
+      blockingReasons,
+      agentLookup,
+      getHuntUniverse
+    );
   }
 
   /**
@@ -294,7 +327,8 @@ export class WorkersService {
     workerId: string,
     patch: UpdateWorkerRequestBody,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    getHuntUniverse?: GetHuntUniverse
   ): Promise<WorkerUpdateResult> {
     const registration = workerRegistry.get(workerId);
     if (!registration) {
@@ -500,7 +534,8 @@ export class WorkersService {
       spaceId,
       request,
       blockingReasons,
-      agentLookup
+      agentLookup,
+      getHuntUniverse
     );
     return { outcome: 'updated', response: { worker } };
   }
@@ -515,11 +550,13 @@ export class WorkersService {
     spaceId,
     request,
     serviceAccountId,
+    getHuntUniverse,
   }: {
     workflowId: string;
     spaceId: string;
     request: KibanaRequest;
     serviceAccountId: string | undefined;
+    getHuntUniverse: GetHuntUniverse | undefined;
   }): Promise<string | undefined> {
     try {
       const sweep = await readLatestFinishedSweepIndexScope({
@@ -531,10 +568,16 @@ export class WorkersService {
       });
       const scope = sweep?.scope;
       if (!sweep || scope?.status !== 'blocked') return undefined;
+      // A sweep that evaluated an older default data view says nothing about the current one:
+      // the coverage callout already stops using it, so the state must too.
+      if (getHuntUniverse && !sweepEvaluatedUniverse(scope, await getHuntUniverse())) {
+        return undefined;
+      }
       const account = getHuntAccountLabel({ serviceAccountId });
+      const sweptAt = formatSweepTime(sweep.checkedAt);
       return scope.resolution === 'blocked:discovery_failed'
-        ? `The sweep at ${sweep.checkedAt} running as ${account} could not resolve this space's default data view`
-        : `The sweep at ${sweep.checkedAt} running as ${account} could not see any index in this space's default data view`;
+        ? `The sweep at ${sweptAt} running as ${account} could not resolve this space's default data view`
+        : `The sweep at ${sweptAt} running as ${account} could not see any index in this space's default data view`;
     } catch (error) {
       this.logger.debug(
         `Failed to read the last hunt sweep: ${
@@ -550,7 +593,8 @@ export class WorkersService {
     spaceId: string,
     request: KibanaRequest,
     blockingReasons: WorkerBlockingReason[],
-    agentLookupCallback?: AgentLookup
+    agentLookupCallback?: AgentLookup,
+    getHuntUniverse?: GetHuntUniverse
   ): Promise<Worker> {
     const managedWorkflows = await this.requireManagedWorkflows();
     const status = await managedWorkflows.getWorkflowStatus(registration.id, {
@@ -617,6 +661,7 @@ export class WorkersService {
           spaceId,
           request,
           serviceAccountId: settings.serviceAccountId,
+          getHuntUniverse,
         });
       }
     } else {

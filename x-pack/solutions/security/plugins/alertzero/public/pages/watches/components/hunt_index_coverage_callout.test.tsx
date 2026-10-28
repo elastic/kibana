@@ -48,6 +48,19 @@ describe('HuntIndexCoverageCallout', () => {
     );
   });
 
+  it('mentions cross-cluster patterns on stateful only when an unreadable pattern is remote', () => {
+    const { unmount } = renderCallout(coverage());
+    expect(screen.getByTestId('alertZeroHuntIndexCoverageCallout')).not.toHaveTextContent(
+      'Cross-cluster'
+    );
+    unmount();
+
+    renderCallout(coverage({ unreadable_by_worker: ['remote:logs-*'] }));
+    expect(screen.getByTestId('alertZeroHuntIndexCoverageCallout')).toHaveTextContent(
+      'Cross-cluster patterns need an Elasticsearch version'
+    );
+  });
+
   it('names the account by its label', () => {
     renderCallout(
       coverage({ service_account_id: 'opaque-uiam-id', account_label: 'alertzero_threat_hunt' })
@@ -76,7 +89,7 @@ describe('HuntIndexCoverageCallout', () => {
   it('shows the stateful guidance when not serverless', () => {
     renderCallout(coverage({ is_serverless: false }));
     expect(screen.getByTestId('alertZeroHuntIndexCoverageCallout')).toHaveTextContent(
-      'Cross-cluster patterns need an Elasticsearch version'
+      "The worker's built-in role reads the standard Elastic Agent and Beats patterns only."
     );
   });
 

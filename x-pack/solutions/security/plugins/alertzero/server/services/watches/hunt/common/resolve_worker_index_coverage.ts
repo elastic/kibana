@@ -11,10 +11,14 @@ import {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   WORKER_SERVICE_ACCOUNT_NAMES,
 } from '@kbn/alertzero-common';
-import { isIndexExclusion } from '../../../../../common/remote_cluster';
+import { isIndexExclusion, splitRemoteCluster } from '../../../../../common/remote_cluster';
 import type { WatchWorkflowsManagementClient } from '../../watch_workflows_management_client';
-import { readLatestFinishedSweepIndexScope } from './read_last_sweep_index_scope';
-import { readWorkerRole, statusCodeOf, uncoveredPatterns } from './role_pattern_coverage';
+import { statusCodeOf } from '../../../../lib/es_error';
+import {
+  readLatestFinishedSweepIndexScope,
+  sweepEvaluatedUniverse,
+} from './read_last_sweep_index_scope';
+import { readWorkerRole, uncoveredPatterns } from './role_pattern_coverage';
 import { unresolvedPatterns } from './resolve_index_scope';
 
 export type HuntWorkerIndexCoverage = HuntWorkerIndexCoverageResponse;
@@ -49,9 +53,6 @@ interface ResolveWorkerIndexCoverageParams {
 
 const minus = (values: string[], remove: string[]): string[] =>
   values.filter((value) => !remove.includes(value));
-
-const sameMembers = (a: string[], b: string[]): boolean =>
-  a.length === b.length && a.every((value) => b.includes(value));
 
 /**
  * Which patterns of the space's default data view the caller can resolve and the Hunt worker's
@@ -121,20 +122,18 @@ export const resolveWorkerIndexCoverage = async ({
     });
     const scope = sweep?.scope;
     if (sweep && scope && scope.resolution !== 'blocked:discovery_failed') {
-      const evaluated =
-        scope.status === 'blocked'
-          ? scope.missing
-          : scope.index_patterns.filter((pattern) => !isIndexExclusion(pattern));
-      if (sameMembers(evaluated, universe)) {
+      if (sweepEvaluatedUniverse(scope, universe)) {
         let sweepMissing = scope.missing;
         try {
           const role = await readRole();
           if (role) {
             const uncovered = uncoveredPatterns({ role, patterns: universe, isServerless });
-            // On Serverless the local role cannot show that a project-qualified miss is stale: the
-            // linked project may not be searchable by the worker whatever `logs-*` grants locally.
+            // A remote miss the sweep observed stays: the role cannot show it is stale, because
+            // the cross-cluster key (stateful) or the linked project (Serverless) may still
+            // exclude what the role grants.
             sweepMissing = sweepMissing.filter(
-              (pattern) => uncovered.includes(pattern) || (isServerless && pattern.includes(':'))
+              (pattern) =>
+                uncovered.includes(pattern) || splitRemoteCluster(pattern).cluster !== undefined
             );
           }
         } catch (err) {

@@ -7,6 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { HuntScope } from '@kbn/alertzero-common';
+import { isIndexExclusion } from '../../../../../common/remote_cluster';
 import type { WatchWorkflowsManagementClient } from '../../watch_workflows_management_client';
 
 /** The Hunt worker's gate step; its output is the `HuntScope` the sweep evaluated. */
@@ -22,7 +23,10 @@ export interface LastSweepIndexScope {
 
 interface ReadLastSweepIndexScopeParams {
   management: WatchWorkflowsManagementClient;
+  workflowId: string;
   executionId: string;
+  /** Used as `checkedAt` when the execution has no gate step, e.g. the sweep never reached it. */
+  executionTime: string;
   spaceId: string;
   request: KibanaRequest;
   logger: Logger;
@@ -35,26 +39,21 @@ interface ReadLastSweepIndexScopeParams {
  */
 export const readLastSweepIndexScope = async ({
   management,
+  workflowId,
   executionId,
+  executionTime,
   spaceId,
   request,
   logger,
 }: ReadLastSweepIndexScopeParams): Promise<LastSweepIndexScope | undefined> => {
   try {
-    const execution = await management.getWorkflowExecution(executionId, spaceId, request, {
-      includeOutput: true,
-    });
-    if (!execution) return undefined;
-
-    const step = execution.stepExecutions.find(
-      ({ stepId }) => stepId === CHECK_INDEX_SCOPE_STEP_ID
+    // Only the gate step: the full execution would load the output of every other step.
+    const step = await management.getStepExecution(
+      { workflowId, workflowExecutionId: executionId, stepId: CHECK_INDEX_SCOPE_STEP_ID },
+      spaceId,
+      request
     );
-    if (!step)
-      return {
-        checkedAt: execution.finishedAt ?? execution.startedAt,
-        executionId,
-        scope: undefined,
-      };
+    if (!step) return { checkedAt: executionTime, executionId, scope: undefined };
 
     const parsed = HuntScope.safeParse(step.output);
     return {
@@ -89,7 +88,7 @@ export const readLatestFinishedSweepIndexScope = async ({
   request: KibanaRequest;
   logger: Logger;
 }): Promise<LastSweepIndexScope | undefined> => {
-  let latest: { id: string } | undefined;
+  let latest: { id: string; startedAt?: string; finishedAt?: string } | undefined;
   try {
     latest = await management.getLatestFinishedWorkflowExecution(workflowId, spaceId, request);
   } catch (err) {
@@ -101,5 +100,27 @@ export const readLatestFinishedSweepIndexScope = async ({
     return undefined;
   }
   if (!latest) return undefined;
-  return readLastSweepIndexScope({ management, executionId: latest.id, spaceId, request, logger });
+  return readLastSweepIndexScope({
+    management,
+    workflowId,
+    executionId: latest.id,
+    executionTime: latest.finishedAt ?? latest.startedAt ?? new Date(0).toISOString(),
+    spaceId,
+    request,
+    logger,
+  });
+};
+
+/**
+ * Whether a sweep's gate evaluated exactly the patterns of `universe` (exclusions ignored), so
+ * its answer still describes the space's current default data view. A blocked sweep evaluated
+ * what it reported missing; an unblocked one evaluated its resolved patterns.
+ */
+export const sweepEvaluatedUniverse = (scope: HuntScope, universe: string[]): boolean => {
+  const positive = universe.filter((pattern) => !isIndexExclusion(pattern));
+  const evaluated =
+    scope.status === 'blocked'
+      ? scope.missing
+      : scope.index_patterns.filter((pattern) => !isIndexExclusion(pattern));
+  return evaluated.length === positive.length && evaluated.every((p) => positive.includes(p));
 };

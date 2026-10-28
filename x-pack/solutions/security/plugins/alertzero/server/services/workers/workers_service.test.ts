@@ -171,6 +171,7 @@ const createPersistentHarness = () => {
     getWorkflows: jest.fn(),
     getWorkflowExecutions: jest.fn(async () => ({ results: [], page: 1, size: 10, total: 0 })),
     getWorkflowExecution: jest.fn(async () => null),
+    getStepExecution: jest.fn(async () => undefined),
     getLatestFinishedWorkflowExecution: jest.fn(async () => undefined),
     cancelAllActiveWorkflowExecutions: jest.fn(async () => undefined),
     updateWorkflow,
@@ -1869,11 +1870,11 @@ describe('WorkersService Hunt index coverage', () => {
     );
     const mocks = harness.management as unknown as {
       getLatestFinishedWorkflowExecution: jest.Mock;
-      getWorkflowExecution: jest.Mock;
+      getStepExecution: jest.Mock;
       getWorkflowExecutions: jest.Mock;
     };
     mocks.getLatestFinishedWorkflowExecution.mockClear();
-    mocks.getWorkflowExecution.mockClear();
+    mocks.getStepExecution.mockClear();
     return { harness, service, mocks, logger };
   };
 
@@ -1881,21 +1882,15 @@ describe('WorkersService Hunt index coverage', () => {
     (await service.list(request, SPACE)).workers.find(({ id }) => id === HUNT);
 
   const finishedSweep = (
-    mocks: { getLatestFinishedWorkflowExecution: jest.Mock; getWorkflowExecution: jest.Mock },
+    mocks: { getLatestFinishedWorkflowExecution: jest.Mock; getStepExecution: jest.Mock },
     scope: unknown
   ) => {
     mocks.getLatestFinishedWorkflowExecution.mockResolvedValue({ id: 'exec-finished' });
-    mocks.getWorkflowExecution.mockResolvedValue({
+    mocks.getStepExecution.mockResolvedValue({
+      stepId: 'check_index_scope',
       startedAt: 's',
-      finishedAt: 'f',
-      stepExecutions: [
-        {
-          stepId: 'check_index_scope',
-          startedAt: 's',
-          finishedAt: '2026-10-28T10:00:00.000Z',
-          output: scope,
-        },
-      ],
+      finishedAt: '2026-10-28T10:00:00.000Z',
+      output: scope,
     });
   };
 
@@ -1908,7 +1903,7 @@ describe('WorkersService Hunt index coverage', () => {
 
       expect(hunt).toMatchObject({
         state: 'degraded',
-        stateReason: `The sweep at 2026-10-28T10:00:00.000Z running as ${ACCOUNT} could not see any index in this space's default data view`,
+        stateReason: `The sweep at 2026-10-28 10:00 UTC running as ${ACCOUNT} could not see any index in this space's default data view`,
       });
     });
 
@@ -1919,6 +1914,24 @@ describe('WorkersService Hunt index coverage', () => {
       const hunt = await huntOf(service);
 
       expect(hunt?.stateReason).toContain("could not resolve this space's default data view");
+    });
+
+    it('stays degraded when the sweep evaluated the current default data view', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, blockedScope('blocked:empty_universe'));
+
+      const { workers } = await service.list(request, SPACE, async () => ['logs-*']);
+
+      expect(workers.find(({ id }) => id === HUNT)?.state).toBe('degraded');
+    });
+
+    it('is no longer degraded once the default data view changed since the blocked sweep', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, blockedScope('blocked:empty_universe'));
+
+      const { workers } = await service.list(request, SPACE, async () => ['custom-*']);
+
+      expect(workers.find(({ id }) => id === HUNT)?.state).toBe('ok');
     });
 
     it('stays ok after a sweep that resolved', async () => {
@@ -1944,9 +1957,11 @@ describe('WorkersService Hunt index coverage', () => {
 
       const hunt = await huntOf(service);
 
-      expect(mocks.getWorkflowExecution).toHaveBeenCalledWith('exec-finished', SPACE, request, {
-        includeOutput: true,
-      });
+      expect(mocks.getStepExecution).toHaveBeenCalledWith(
+        expect.objectContaining({ workflowExecutionId: 'exec-finished' }),
+        SPACE,
+        request
+      );
       expect(hunt?.state).toBe('degraded');
     });
 
@@ -2048,7 +2063,7 @@ describe('WorkersService Hunt index coverage', () => {
 
       await service.getHuntCoverageInputs(SPACE, request);
 
-      expect(mocks.getWorkflowExecution).not.toHaveBeenCalled();
+      expect(mocks.getStepExecution).not.toHaveBeenCalled();
     });
   });
 });

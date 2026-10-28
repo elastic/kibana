@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiCallOut, EuiCode, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import type { HuntWorkerIndexCoverageResponse } from '@kbn/alertzero-common';
+import { splitRemoteCluster } from '../../../../common/remote_cluster';
 import * as settingsI18n from '../settings_translations';
 
 interface HuntIndexCoverageCalloutProps {
@@ -28,6 +29,9 @@ export const HuntIndexCoverageCallout = ({ coverage }: HuntIndexCoverageCalloutP
     return null;
   }
   const { account_label: account, checked_at: checkedAt, is_serverless: isServerless } = coverage;
+  const hasRemotePattern = coverage.unreadable_by_worker.some(
+    (pattern) => splitRemoteCluster(pattern).cluster !== undefined
+  );
 
   return (
     <>
@@ -80,6 +84,9 @@ export const HuntIndexCoverageCallout = ({ coverage }: HuntIndexCoverageCalloutP
             {isServerless
               ? settingsI18n.HUNT_INDEX_COVERAGE_GUIDANCE_SERVERLESS
               : settingsI18n.HUNT_INDEX_COVERAGE_GUIDANCE_STATEFUL}
+            {!isServerless && hasRemotePattern
+              ? ` ${settingsI18n.HUNT_INDEX_COVERAGE_GUIDANCE_STATEFUL_REMOTE}`
+              : null}
           </p>
         </EuiText>
       </EuiCallOut>

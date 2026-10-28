@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isIndexExclusion, splitRemoteCluster } from '../../../../../common/remote_cluster';
+import { statusCodeOf } from '../../../../lib/es_error';
 import { compileGlob } from './index_glob';
 
 /** A role's index grants, reduced to what the coverage check reads. */
@@ -93,15 +94,6 @@ const normalizeRole = ({ indices = [], remote_indices: remoteIndices = [] }: Raw
     clusters: toArray(clusters),
   })),
 });
-
-/** The HTTP status of an Elasticsearch client error, read from either place the client puts it. */
-export const statusCodeOf = (error: unknown): number | undefined => {
-  const { statusCode, meta } = (error ?? {}) as {
-    statusCode?: number;
-    meta?: { statusCode?: number };
-  };
-  return statusCode ?? meta?.statusCode;
-};
 
 /** Whether an Elasticsearch client error is a 403 or 404 (role unreadable or absent). */
 export const isRoleUnreadableError = (error: unknown): boolean => {

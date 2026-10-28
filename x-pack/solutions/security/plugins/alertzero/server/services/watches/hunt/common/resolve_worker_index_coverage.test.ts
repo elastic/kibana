@@ -64,7 +64,7 @@ const setup = ({
   const management = {
     getLatestFinishedWorkflowExecution: jest.fn(),
     getLatestWorkflowExecution: jest.fn(),
-    getWorkflowExecution: jest.fn(),
+    getStepExecution: jest.fn(),
   };
   if (sweep?.listThrows) {
     management.getLatestFinishedWorkflowExecution.mockRejectedValue(new Error('boom'));
@@ -73,20 +73,16 @@ const setup = ({
       sweep && !sweep.noExecution ? { id: 'exec-1' } : undefined
     );
   }
-  management.getWorkflowExecution.mockResolvedValue({
-    startedAt: 's',
-    finishedAt: 'f',
-    stepExecutions: sweep?.scope
-      ? [
-          {
-            stepId: 'check_index_scope',
-            startedAt: 's',
-            finishedAt: 'swept-at',
-            output: sweep.scope,
-          },
-        ]
-      : [],
-  });
+  management.getStepExecution.mockResolvedValue(
+    sweep?.scope
+      ? {
+          stepId: 'check_index_scope',
+          startedAt: 's',
+          finishedAt: 'swept-at',
+          output: sweep.scope,
+        }
+      : undefined
+  );
   const logger = loggingSystemMock.createLogger();
   const run = (overrides: Record<string, unknown> = {}) =>
     resolveWorkerIndexCoverage({
@@ -158,26 +154,54 @@ describe('resolveWorkerIndexCoverage', () => {
       await expect(run()).resolves.toMatchObject({ unreadable_by_worker: [] });
     });
 
-    it('keeps a project-qualified miss on Serverless even when the local role covers its pattern', async () => {
-      const { esClient, run } = setup({
-        universe: ['logs-*', 'linked:logs-*'],
-        callerResolves: resolved('logs-x', 'linked:logs-x'),
+    it.each([
+      ['Serverless', true],
+      ['stateful', false],
+    ])(
+      'keeps a remote miss on %s even when the role covers its pattern',
+      async (_name, isServerless) => {
+        const { esClient, run } = setup({
+          universe: ['logs-*', 'linked:logs-*'],
+          callerResolves: resolved('logs-x', 'linked:logs-x'),
+          role: {
+            indices: [{ names: ['logs-*'], privileges: ['read'] }],
+            remote_indices: [{ clusters: ['linked'], names: ['logs-*'], privileges: ['read'] }],
+          },
+          sweep: {
+            scope: sweepScope({
+              index_patterns: ['logs-*', 'linked:logs-*'],
+              missing: ['linked:logs-*'],
+            }),
+          },
+        });
+        esClient.security.queryRole.mockResolvedValue({
+          roles: [
+            {
+              name: 'alertzero_threat_hunt',
+              indices: [{ names: ['logs-*'], privileges: ['read'] }],
+            },
+          ],
+        } as never);
+        await expect(run({ isServerless })).resolves.toMatchObject({
+          source: 'last_sweep',
+          unreadable_by_worker: ['linked:logs-*'],
+        });
+      }
+    );
+
+    it('still drops a stale local miss the role now covers', async () => {
+      const { run } = setup({
+        universe: ['logs-*', 'custom-*', 'linked:logs-*'],
+        callerResolves: resolved('logs-x', 'custom-a', 'linked:logs-x'),
+        role: { indices: [{ names: ['logs-*', 'custom-*'], privileges: ['read'] }] },
         sweep: {
           scope: sweepScope({
-            index_patterns: ['logs-*', 'linked:logs-*'],
-            missing: ['linked:logs-*'],
+            index_patterns: ['logs-*', 'custom-*', 'linked:logs-*'],
+            missing: ['custom-*'],
           }),
         },
       });
-      esClient.security.queryRole.mockResolvedValue({
-        roles: [
-          { name: 'alertzero_threat_hunt', indices: [{ names: ['logs-*'], privileges: ['read'] }] },
-        ],
-      } as never);
-      await expect(run({ isServerless: true })).resolves.toMatchObject({
-        source: 'last_sweep',
-        unreadable_by_worker: ['linked:logs-*'],
-      });
+      await expect(run()).resolves.toMatchObject({ unreadable_by_worker: [] });
     });
 
     it('applies the plain subtraction when the role is unreadable', async () => {

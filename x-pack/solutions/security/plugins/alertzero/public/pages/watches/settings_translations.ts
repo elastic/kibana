@@ -303,7 +303,15 @@ export const HUNT_INDEX_COVERAGE_GUIDANCE_STATEFUL = i18n.translate(
   'xpack.alertzero.watches.settings.huntIndexCoverage.guidanceStateful',
   {
     defaultMessage:
-      "The worker's built-in role reads the standard Elastic Agent and Beats patterns only. Cross-cluster patterns need an Elasticsearch version whose alertzero_threat_hunt role includes remote indices. Remove other patterns from securitySolution:defaultIndex or route their data into a covered data stream.",
+      "The worker's built-in role reads the standard Elastic Agent and Beats patterns only. Remove other patterns from securitySolution:defaultIndex or route their data into a covered data stream.",
+  }
+);
+
+export const HUNT_INDEX_COVERAGE_GUIDANCE_STATEFUL_REMOTE = i18n.translate(
+  'xpack.alertzero.watches.settings.huntIndexCoverage.guidanceStatefulRemote',
+  {
+    defaultMessage:
+      'Cross-cluster patterns need an Elasticsearch version whose alertzero_threat_hunt role includes remote indices.',
   }
 );
 
