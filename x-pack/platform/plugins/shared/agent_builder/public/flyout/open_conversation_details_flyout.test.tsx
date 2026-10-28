@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import type { EuiFlyoutMenuAction, EuiFlyoutSize } from '@elastic/eui';
+import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import { ConversationTemplatesService } from '../services/conversation_templates';
 import { openConversationDetailsFlyout } from './open_conversation_details_flyout';
+import {
+  CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
+  CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH,
+  CONVERSATION_DETAILS_FLYOUT_MIN_WIDTH,
+} from './conversation_details_flyout_width';
 
 describe('openConversationDetailsFlyout', () => {
   const setup = () => {
+    localStorage.clear();
     const core = coreMock.createStart();
+    const conversationTemplatesService = new ConversationTemplatesService();
     const close = jest.fn();
     let resolveClosed: () => void = () => {};
     const onClosed = new Promise<void>((resolve) => {
@@ -24,24 +31,30 @@ describe('openConversationDetailsFlyout', () => {
 
     const open = ({
       onClose,
-      size,
+      templateId,
       trailingActions,
     }: {
       onClose?: () => void;
-      size?: EuiFlyoutSize;
+      templateId?: string;
       trailingActions?: EuiFlyoutMenuAction[];
     } = {}) =>
       openConversationDetailsFlyout({
         core,
         conversationsService: { get: jest.fn() } as unknown as ConversationsService,
-        conversationTemplatesService: new ConversationTemplatesService(),
+        conversationTemplatesService,
         conversationId: 'conversation',
         onClose,
-        size,
+        templateId,
         trailingActions,
       });
 
-    return { core, close, open, closeFlyout: () => resolveClosed() };
+    return {
+      core,
+      close,
+      open,
+      conversationTemplatesService,
+      closeFlyout: () => resolveClosed(),
+    };
   };
 
   it('opens a managed flyout in the conversation details history group', async () => {
@@ -76,15 +89,65 @@ describe('openConversationDetailsFlyout', () => {
     );
   });
 
-  it('opens at the size the caller asks for, and small by default', async () => {
+  it('opens resizable at the default width, within the shared min/max bounds', async () => {
     const { core, open } = setup();
 
-    await open({ size: 'm' });
     await open();
 
-    const [[, wideOptions], [, defaultOptions]] = core.overlays.openSystemFlyout.mock.calls;
-    expect(wideOptions?.size).toBe('m');
-    expect(defaultOptions?.size).toBe('s');
+    const [[, options]] = core.overlays.openSystemFlyout.mock.calls;
+    expect(options).toEqual(
+      expect.objectContaining({
+        size: CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
+        defaultSize: CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
+        minWidth: CONVERSATION_DETAILS_FLYOUT_MIN_WIDTH,
+        maxWidth: CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH,
+        resizable: true,
+      })
+    );
+  });
+
+  it("opens at the template's default width when the template defines one", async () => {
+    const { core, open, conversationTemplatesService } = setup();
+    conversationTemplatesService.registerTemplateUIDefinition('investigation', {
+      name: 'Investigation',
+      tabs: [],
+      detailsFlyout: { defaultWidth: 600 },
+    });
+
+    await open({ templateId: 'investigation' });
+
+    const [[, options]] = core.overlays.openSystemFlyout.mock.calls;
+    expect(options?.size).toBe(600);
+    expect(options?.defaultSize).toBe(600);
+  });
+
+  it('reopens at the width the user resized this template to', async () => {
+    const { core, open } = setup();
+
+    await open({ templateId: 'investigation' });
+    const [[, firstOptions]] = core.overlays.openSystemFlyout.mock.calls;
+    firstOptions?.onResize?.(620);
+
+    await open({ templateId: 'investigation' });
+    await open({ templateId: 'escalation' });
+
+    const [, [, sameTemplateOptions], [, otherTemplateOptions]] =
+      core.overlays.openSystemFlyout.mock.calls;
+    expect(sameTemplateOptions?.size).toBe(620);
+    expect(otherTemplateOptions?.size).toBe(CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH);
+  });
+
+  it('clamps a remembered width to the allowed range', async () => {
+    const { core, open } = setup();
+
+    await open({ templateId: 'investigation' });
+    const [[, firstOptions]] = core.overlays.openSystemFlyout.mock.calls;
+    firstOptions?.onResize?.(2000);
+
+    await open({ templateId: 'investigation' });
+
+    const [, [, options]] = core.overlays.openSystemFlyout.mock.calls;
+    expect(options?.size).toBe(CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH);
   });
 
   it('renders no menu actions by default', async () => {

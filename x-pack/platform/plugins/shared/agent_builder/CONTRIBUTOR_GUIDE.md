@@ -1181,6 +1181,25 @@ agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation',
 }));
 ```
 
+### Conversation details flyout width
+
+Every conversation details flyout — the in-chat one and the ones opened with
+`openConversationDetails` — is resizable and uses the same width rules, so a conversation opens
+at the same width in Agent Builder, Nightshift and AlertZero:
+
+- Default width 480px, minimum 400px, maximum 640px.
+- A template can open wider or narrower by default with `detailsFlyout.defaultWidth` (px, clamped
+  to the min/max above).
+- When the user drags the flyout, that width is remembered per conversation template (in
+  `localStorage`) and wins over the default on the next open.
+
+Pass `templateId` when opening the flyout so it picks up that template's default and remembered
+width; the conversation itself only loads after the flyout is already open:
+
+```tsx
+agentBuilder.openConversationDetails({ conversationId, templateId: 'investigation' });
+```
+
 ### Conversation details menu actions
 
 Menu actions are icon buttons rendered in the flyout menu bar before the close button. Each entry

@@ -13,6 +13,10 @@ export const storageKeys = {
 
   getAgentIdKey: (spaceId: string): string => `agentBuilder.agentId.${spaceId}`,
 
+  /** User-chosen width of the conversation details flyout, remembered per conversation template. */
+  getConversationDetailsFlyoutWidthKey: (templateId?: string): string =>
+    `agentBuilder.conversationDetailsFlyoutWidth.${templateId || 'default'}`,
+
   getLastConversationKey: (sessionTag?: string, agentId?: string): string => {
     const tag = sessionTag || 'default';
     const agent = agentId || 'default';

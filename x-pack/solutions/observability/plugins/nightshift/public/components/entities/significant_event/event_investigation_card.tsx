@@ -8,12 +8,12 @@
 import React, { useCallback } from 'react';
 import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
+import { INVESTIGATION_TEMPLATE_ID } from '@kbn/agentic-investigations-plugin/common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationStatus } from '@kbn/investigation-output';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
-import { INVESTIGATION_FLYOUT_SIZE } from '../../../common/constants';
 import {
   INVESTIGATION_VIEW_SOURCES,
   reportNightshiftInvestigationViewed,
@@ -58,7 +58,7 @@ export const EventInvestigationCard = ({
     });
     void agentBuilder.openConversationDetails({
       conversationId,
-      size: INVESTIGATION_FLYOUT_SIZE,
+      templateId: INVESTIGATION_TEMPLATE_ID,
     });
   }, [agentBuilder, analytics, conversationId, investigation]);
   const latestInvestigation = getLatestInvestigation(event);

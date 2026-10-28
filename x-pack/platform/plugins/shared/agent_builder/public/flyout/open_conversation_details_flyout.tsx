@@ -9,12 +9,16 @@ import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator } from '@elastic/eui';
-import type { EuiFlyoutMenuAction, EuiFlyoutProps } from '@elastic/eui';
+import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { ConversationDetailsFlyoutSnapshot, FLYOUT_TITLE } from './conversation_details_flyout';
+import {
+  getConversationDetailsFlyoutDefaultWidth,
+  getConversationDetailsFlyoutWidthProps,
+} from './conversation_details_flyout_width';
 import { flyoutMenuRowStyles } from './flyout_menu_row_styles';
 
 const notFoundMessage = (conversationId: string) =>
@@ -32,12 +36,10 @@ export interface OpenConversationDetailsFlyoutOptions {
   conversationTemplatesService: ConversationTemplatesService;
   conversationId: string;
   onClose?: () => void;
-  /** Flyout width. Defaults to `'s'`. */
-  size?: EuiFlyoutProps['size'];
+  /** Template of the conversation, selecting the default and remembered flyout width. */
+  templateId?: string;
   trailingActions?: EuiFlyoutMenuAction[];
 }
-
-const DEFAULT_FLYOUT_SIZE = 's';
 
 export const openConversationDetailsFlyout = async ({
   core,
@@ -45,11 +47,16 @@ export const openConversationDetailsFlyout = async ({
   conversationTemplatesService,
   conversationId,
   onClose,
-  size = DEFAULT_FLYOUT_SIZE,
+  templateId,
   trailingActions,
 }: OpenConversationDetailsFlyoutOptions): Promise<() => void> => {
   const titleId = generateTitleId();
   const queryClient = new QueryClient();
+
+  const templateDefaultWidth = templateId
+    ? conversationTemplatesService.getTemplateUIDefinition(templateId)?.detailsFlyout?.defaultWidth
+    : undefined;
+  const widthProps = getConversationDetailsFlyoutWidthProps({ templateId, templateDefaultWidth });
 
   const onNotFound = () => {
     flyoutRef.close();
@@ -70,12 +77,13 @@ export const openConversationDetailsFlyout = async ({
       session: 'start',
       historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
       title: FLYOUT_TITLE,
-      size,
+      ...widthProps,
+      // Lets the flyout menu's reset action return to the default, not to the remembered width.
+      defaultSize: getConversationDetailsFlyoutDefaultWidth(templateDefaultWidth),
       flyoutMenuDisplayMode: 'always',
       flyoutMenuProps: { trailingActions },
       type: 'push',
       paddingSize: 'm',
-      resizable: true,
       css: flyoutMenuRowStyles,
       role: 'region',
       'data-test-subj': 'agentBuilderConversationDetailsFlyout-snapshot',

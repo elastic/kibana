@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import type { Severity } from '@kbn/nightshift-investigations-plugin/common';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
+import { INVESTIGATION_TEMPLATE_ID } from '@kbn/agentic-investigations-plugin/common';
 import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
 import { useKibana } from '../hooks/use_kibana';
 import { isHttpNotFoundError } from '../common/http_error';
@@ -41,7 +42,6 @@ import {
 import { isInvestigationSectionVisible } from '../investigation/investigation_section';
 import { InvestigationSeverityTiles } from '../investigation/investigation_severity_tiles';
 import { useFlyoutShareUrlCustomAction } from '../common/flyout_share_url_button';
-import { INVESTIGATION_FLYOUT_SIZE } from '../common/constants';
 import {
   buildNightshiftInvestigationFlyoutShareUrl,
   clearNightshiftInvestigationIdParam,
@@ -162,7 +162,7 @@ export function NightshiftApp(): React.ReactElement {
     void agentBuilder
       .openConversationDetails({
         conversationId: selectedInvestigationId,
-        size: INVESTIGATION_FLYOUT_SIZE,
+        templateId: INVESTIGATION_TEMPLATE_ID,
         trailingActions: [shareInvestigationAction],
         // Closed by the user, not replaced by another selection or unmounted.
         onClose: () => {

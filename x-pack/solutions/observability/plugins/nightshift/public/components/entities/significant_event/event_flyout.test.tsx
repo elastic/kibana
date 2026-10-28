@@ -559,7 +559,7 @@ describe('EventFlyout', () => {
     fireEvent.click(screen.getByTestId('nightshiftEventInvestigationCard'));
     expect(mockOpenConversationDetails).toHaveBeenCalledWith({
       conversationId: 'conv-1',
-      size: 'm',
+      templateId: 'investigation',
     });
     // The flyout opens without `?investigationId=`, so this card reports the view itself.
     expect(mockReportEvent).toHaveBeenCalledWith(

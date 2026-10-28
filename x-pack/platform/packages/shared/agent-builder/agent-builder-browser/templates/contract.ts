@@ -86,6 +86,12 @@ export interface ConversationTemplateUIDefinition {
   briefCard?: ComponentType<ConversationTemplateBriefCardRenderProps>;
   /** Optional flyout content; capture capabilities from the template registration context. */
   detailsFlyout?: {
+    /**
+     * Width (px) the details flyout opens at before the user resizes it, overriding Agent
+     * Builder's default. Clamped to the flyout's min/max width. Once the user drags the flyout,
+     * their width is remembered for this template and wins over this value.
+     */
+    defaultWidth?: number;
     /** Replaces the default title above the tabs, inside Agent Builder's EuiFlyoutHeader. */
     header?: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
     /** Rendered inside Agent Builder's EuiFlyoutFooter when provided. */

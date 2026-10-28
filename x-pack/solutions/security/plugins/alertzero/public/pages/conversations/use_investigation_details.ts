@@ -9,6 +9,7 @@ import { useEffect, useRef } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { getCopyLinkFlyoutAction } from '@kbn/agentic-investigations-common';
+import { INVESTIGATION_TEMPLATE_ID } from '@kbn/agentic-investigations-plugin/common';
 
 /**
  * Opens Agent Builder's conversation details flyout for the conversation named in the URL.
@@ -57,6 +58,7 @@ export const useInvestigationDetails = ({
     void agentBuilder
       .openConversationDetails({
         conversationId,
+        templateId: INVESTIGATION_TEMPLATE_ID,
         trailingActions: [getCopyLinkFlyoutAction(() => onCopyLinkRef.current(conversationId))],
         onClose: () => {
           if (!isTearingDown) {
