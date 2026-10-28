@@ -73,9 +73,11 @@ export interface ApplicationStart {
    * Before rendering a UI element that a user could use to navigate to another application,
    * first check if the destination application is actually available using the isAppRegistered API.
    *
-   * For links, render `href={getUrlForApp(appId, options)}` instead of calling this from `onClick`.
-   * Core already routes same-origin `<a href>` clicks through {@link ApplicationStart.navigateToUrl},
-   * and a plain `href` keeps Cmd/Ctrl-click and "open in new tab" working.
+   * For links, render `href={getUrlForApp(appId, { path, deepLinkId })}` instead of calling this from
+   * `onClick`. Core already routes same-origin `<a href>` clicks through
+   * {@link ApplicationStart.navigateToUrl}, and a plain `href` keeps Cmd/Ctrl-click and
+   * "open in new tab" working. Keep the explicit call when you need options a URL can't carry
+   * (`state`, `replace`, `openInNewTab`, `skipAppLeave`).
    *
    * @param appId - The identifier of the app to navigate to
    * @param options - navigation options
@@ -107,8 +109,9 @@ export interface ApplicationStart {
    * Links don't need to call this: core listens for clicks on `document.body` and routes same-origin
    * `<a href>` clicks through this method, leaving modifier clicks, `target="_blank"`, `download`
    * and `data-kbn-redirect-app-link-ignore` links to the browser. Call it from `onClick` only when
-   * the element has no `href`, navigation must wait for async work, or click propagation is stopped
-   * before it reaches `document.body`.
+   * the element has no `href`, navigation must wait for async work, click propagation is stopped
+   * before it reaches `document.body`, or you need options a URL can't carry (`state`,
+   * `skipAppLeave`, `forceRedirect`).
    *
    * @example
    * ```ts

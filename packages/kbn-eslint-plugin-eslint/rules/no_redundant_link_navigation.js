@@ -53,7 +53,13 @@ const getStatementCall = (statement) => {
 const isExit = ({ type }) => type === 'ReturnStatement' || type === 'ThrowStatement';
 
 // Navigation options that a plain link click cannot reproduce.
-const LINK_INEXPRESSIBLE_OPTIONS = new Set(['replace', 'state', 'openInNewTab', 'skipAppLeave']);
+const LINK_INEXPRESSIBLE_OPTIONS = new Set([
+  'replace',
+  'state',
+  'openInNewTab',
+  'skipAppLeave',
+  'forceRedirect',
+]);
 
 const hasOnlyLinkExpressibleOptions = ({ arguments: [, options] }) =>
   !options ||

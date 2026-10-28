@@ -85,6 +85,9 @@ ruleTester.run('@kbn/eslint/no_redundant_link_navigation', rule, {
       code: '<a href={url} onClick={(e) => { e.preventDefault(); navigateToUrl(url, { state: { from } }); }} />',
     },
     {
+      code: '<a href={url} onClick={(e) => { e.preventDefault(); navigateToUrl(url, { forceRedirect: true }); }} />',
+    },
+    {
       code: '<a href={url} onClick={(e) => { e.preventDefault(); navigateToApp(app, options); }} />',
     },
     // some clicks are prevented without navigating
