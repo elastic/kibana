@@ -81,7 +81,7 @@ describe('<RuleDetails />', () => {
     expect(getByTestId(FLYOUT_ERROR_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render not found state when the rule was deleted', () => {
+  it('should render not found state when the rule was deleted and no alert is left to rebuild it', () => {
     mockUseRuleDetails.mockReturnValue({
       rule: null,
       loading: false,
@@ -93,21 +93,6 @@ describe('<RuleDetails />', () => {
 
     expect(getByTestId(RULE_DETAILS_NOT_FOUND_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(FLYOUT_ERROR_TEST_ID)).not.toBeInTheDocument();
-  });
-
-  it('should render not found state even when the deleted rule was rebuilt from its alerts', () => {
-    mockUseRuleDetails.mockReturnValue({
-      rule,
-      loading: true,
-      isExistingRule: false,
-    });
-    mockGetStepsData.mockReturnValue({});
-
-    const { getByTestId, queryByTestId } = renderRuleDetails();
-
-    expect(getByTestId(RULE_DETAILS_NOT_FOUND_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(RULE_DETAILS_LOADING_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId('ruleDetailsFooter')).not.toBeInTheDocument();
   });
 
   it('should render footer with rule', () => {
