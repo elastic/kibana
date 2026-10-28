@@ -1,7 +1,7 @@
 {
   "type": "shared-browser",
   "id": "@kbn/agentic-investigations-common",
-  "owner": ["@elastic/security-solution"],
+  "owner": ["@elastic/security-solution", "@elastic/nightshift"],
   "group": "platform",
   "visibility": "shared"
 }
