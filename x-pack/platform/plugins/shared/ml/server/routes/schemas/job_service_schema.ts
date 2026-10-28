@@ -130,6 +130,8 @@ export const datafeedPreviewSchema = schema.object(
     job: schema.maybe(schema.object(anomalyDetectionJobSchema)),
     datafeed: schema.maybe(datafeedConfigSchema),
     datafeedId: schema.maybe(schema.string({ maxLength: 10000 })),
+    start: schema.maybe(schema.oneOf([schema.number(), schema.string({ maxLength: 10000 })])),
+    end: schema.maybe(schema.oneOf([schema.number(), schema.string({ maxLength: 10000 })])),
   },
   {
     validate: (v) => {
