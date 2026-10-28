@@ -1613,6 +1613,7 @@ describe('detection rule workflows', () => {
 
         expect(rendered).toContain('The backtest did not run');
         expect(rendered).toContain(reason);
+        expect(rendered).not.toContain('The backtest ran');
         expect(rendered).not.toContain('Alerts with the current rule');
         expect(rendered).toContain('Approving still applies the proposed change');
       });
