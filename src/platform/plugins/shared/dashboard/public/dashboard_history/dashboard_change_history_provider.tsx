@@ -83,6 +83,7 @@ export const DashboardChangeHistoryProvider = ({
           data-test-subj="changeHistoryItemChanges"
           size={'xs'}
           flush={'both'}
+          onKeyDown={(event: React.KeyboardEvent) => event.stopPropagation()} // keep the row's key handler from preventing the native button click
           onClick={() => {
             ignoreEventPropogation.current = true; // if clicking the nChanges button, ignore propogation up to `onSelectChange`
             setIsComparingToPrevious(true);

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -41,6 +41,14 @@ export const DashboardChangeHistoryView = ({
 
   // "Compare to this version" only sets a `vs_row` compare spec, it doesn't go through the "changes" button
   const showComparison = isComparingToPrevious || compareSpec?.comparisonType === 'vs_row';
+
+  const isShowingComparison = Boolean(showComparison && compareSpec);
+  const { title } = previewProps.change.snapshot as DashboardState;
+
+  // dashboardPreview sets the title when mounted; the JSON comparison doesn't mount it
+  useEffect(() => {
+    if (isShowingComparison) setPreviewTitle(title);
+  }, [isShowingComparison, title, setPreviewTitle]);
 
   if (showComparison && compareSpec) {
     return (

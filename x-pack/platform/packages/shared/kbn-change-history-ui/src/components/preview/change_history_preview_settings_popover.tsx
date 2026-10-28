@@ -6,14 +6,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import {
-  EuiButtonIcon,
-  EuiHorizontalRule,
-  EuiPopover,
-  EuiText,
-  EuiToolTip,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiHorizontalRule, EuiPopover, EuiText, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
@@ -67,10 +60,6 @@ export const ChangeHistoryPreviewSettingsPopover = ({
 }: ChangeHistoryPreviewSettingsPopoverProps): JSX.Element => {
   const styles = useMemoCss(settingsPopoverStyles);
   const [isOpen, setIsOpen] = useState(false);
-  const popoverTitleId = useGeneratedHtmlId({
-    prefix: 'changeHistoryPreviewSettingsTitle',
-  });
-
   const settingsLabel = i18n.translate('xpack.changeHistoryUi.preview.settings.label', {
     defaultMessage: 'Settings',
   });
@@ -102,7 +91,7 @@ export const ChangeHistoryPreviewSettingsPopover = ({
   return (
     <EuiPopover
       data-test-subj="changeHistoryPreviewSettingsPopover"
-      aria-labelledby={popoverTitleId}
+      aria-label={settingsLabel}
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
       anchorPosition="upRight"
