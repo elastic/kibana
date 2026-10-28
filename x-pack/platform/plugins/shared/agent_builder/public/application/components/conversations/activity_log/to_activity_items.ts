@@ -10,6 +10,7 @@ import {
   EventActorType,
   TimelineEventType,
   isActivityEvent,
+  isAttachmentEvent,
   type ActivityEvent,
   type ConversationEvent,
   type ConversationParticipant,
@@ -42,7 +43,9 @@ export const getTemplateDisplayName = (templateId: string, registeredName?: stri
 };
 
 export const isListedActivityEvent = (event: ConversationEvent): event is ActivityEvent =>
-  isActivityEvent(event) && !HIDDEN_EVENT_TYPES.has(event.type);
+  isActivityEvent(event) &&
+  !HIDDEN_EVENT_TYPES.has(event.type) &&
+  !(isAttachmentEvent(event) && event.data.hidden);
 
 export const toActivityItems = (events: ConversationEvent[] = []): ActivityEvent[] =>
   events

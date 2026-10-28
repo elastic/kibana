@@ -43,6 +43,16 @@ const Highlight = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+const UserCount = ({ count }: { count: number }) => (
+  <Highlight>
+    <FormattedMessage
+      id="xpack.agentBuilder.activityLog.userCount"
+      defaultMessage="{count, plural, one {# user} other {# users}}"
+      values={{ count }}
+    />
+  </Highlight>
+);
+
 interface EventSentenceProps {
   event: ActivityEvent;
   actor: React.ReactNode;
@@ -79,16 +89,22 @@ export const EventSentence: React.FC<EventSentenceProps> = ({ event, actor, temp
       return (
         <FormattedMessage
           id="xpack.agentBuilder.activityLog.participantsAdded"
-          defaultMessage="{actor} added {count, plural, one {# user} other {# users}}"
-          values={{ actor: actorNode, count: event.data.participants.length }}
+          defaultMessage="{actor} added {users}"
+          values={{
+            actor: actorNode,
+            users: <UserCount count={event.data.participants.length} />,
+          }}
         />
       );
     case ConversationActivityEventType.participantsRemoved:
       return (
         <FormattedMessage
           id="xpack.agentBuilder.activityLog.participantsRemoved"
-          defaultMessage="{actor} removed {count, plural, one {# user} other {# users}}"
-          values={{ actor: actorNode, count: event.data.participants.length }}
+          defaultMessage="{actor} removed {users}"
+          values={{
+            actor: actorNode,
+            users: <UserCount count={event.data.participants.length} />,
+          }}
         />
       );
     case ConversationActivityEventType.visibilityUpdated:

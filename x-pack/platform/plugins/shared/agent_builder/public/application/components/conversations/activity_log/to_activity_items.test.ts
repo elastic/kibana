@@ -61,6 +61,51 @@ describe('isListedActivityEvent', () => {
   });
 });
 
+describe('hidden attachments', () => {
+  const attachmentEvent = (type: string, hidden?: boolean) =>
+    event('e', type, undefined, {
+      data: {
+        attachment_id: 'a1',
+        attachment_type: 'screen_context',
+        source: 'chat_input',
+        hidden,
+      },
+    });
+
+  it.each([TimelineEventType.attachmentAdded, TimelineEventType.attachmentUpdated])(
+    'does not list a hidden %s event',
+    (type) => {
+      expect(isListedActivityEvent(attachmentEvent(type, true))).toBe(false);
+    }
+  );
+
+  it.each([TimelineEventType.attachmentAdded, TimelineEventType.attachmentUpdated])(
+    'lists a %s event that is not hidden',
+    (type) => {
+      expect(isListedActivityEvent(attachmentEvent(type, false))).toBe(true);
+      expect(isListedActivityEvent(attachmentEvent(type))).toBe(true);
+    }
+  );
+
+  it('leaves out hidden attachments when building the log', () => {
+    const result = toActivityItems([
+      event('visible', TimelineEventType.attachmentAdded, undefined, {
+        data: { attachment_id: 'a1', attachment_type: 'dashboard', source: 'execution' },
+      }),
+      event('hidden', TimelineEventType.attachmentAdded, undefined, {
+        data: {
+          attachment_id: 'a2',
+          attachment_type: 'screen_context',
+          source: 'chat_input',
+          hidden: true,
+        },
+      }),
+    ]);
+
+    expect(result.map(({ id }) => id)).toEqual(['visible']);
+  });
+});
+
 describe('toActivityItems', () => {
   it('returns an empty list when there are no events', () => {
     expect(toActivityItems(undefined)).toEqual([]);
