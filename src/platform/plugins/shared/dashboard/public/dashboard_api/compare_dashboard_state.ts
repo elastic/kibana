@@ -16,6 +16,7 @@ import {
 } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { isDashboardSection } from '../../common';
+import { isDevMode } from '../services/dev_mode';
 import { deserializeLayout } from './layout_manager/deserialize_layout';
 import { getLayoutChanges } from './layout_manager/get_layout_changes';
 import { diffApproximationState } from './approximation_manager';
@@ -74,11 +75,22 @@ const getPanelConfigs = ({ panels, pinned_panels: pinnedPanels }: DashboardState
   return configs;
 };
 
+// The caches above rely on panels never being mutated in place, so dev mode freezes them to throw
+// on any such mutation. Frozen objects are skipped, since panel configs are shared across states.
+const freezeInDevMode = (value: unknown) => {
+  if (!isDevMode || typeof value !== 'object' || value === null || Object.isFrozen(value)) return;
+  Object.values(value).forEach(freezeInDevMode);
+  Object.freeze(value);
+};
+
 const diffLayout = (
   baseline: DashboardState,
   current: DashboardState,
   children?: { [id: string]: unknown }
 ): Partial<Pick<DashboardState, 'panels' | 'pinned_panels'>> => {
+  [baseline.panels, baseline.pinned_panels, current.panels, current.pinned_panels].forEach(
+    freezeInDevMode
+  );
   const baselineLayout = getBaselineLayout(baseline);
   const currentLayout = deserializeLayout(current.panels, current.pinned_panels);
   const currentConfigs = getPanelConfigs(current);

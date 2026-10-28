@@ -81,6 +81,7 @@ import { untilPluginStartServicesReady, setKibanaServices } from './services/kib
 import { dashboardAppClientApi$ } from './services/dashboard_app_client_api';
 import { getDashboardRecentlyAccessedService } from './services/dashboard_recently_accessed_service';
 import { setLogger } from './services/logger';
+import { setIsDevMode } from './services/dev_mode';
 import { registerActions } from './dashboard_actions/register_actions';
 import { getDashboardPageTitle } from './dashboard_app/_dashboard_app_strings';
 import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
@@ -159,6 +160,7 @@ export class DashboardPlugin
 {
   constructor(initializerContext: PluginInitializerContext) {
     setLogger(initializerContext.logger.get('dashboard'));
+    setIsDevMode(initializerContext.env.mode.dev);
   }
 
   private appStateSubscription?: Subscription;

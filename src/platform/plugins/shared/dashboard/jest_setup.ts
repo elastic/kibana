@@ -19,8 +19,11 @@ import {
   setStubKibanaServices,
   setStubLogger,
 } from './public/services/mocks';
+import { setIsDevMode } from './public/services/dev_mode';
 
 setStubLogger();
+// Freeze compared states, so tests catch in-place mutation
+setIsDevMode(true);
 // Start the kibana services with stubs
 setStubKibanaServices();
 
