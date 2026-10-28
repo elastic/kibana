@@ -101,7 +101,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
         />
         <EuiSpacer size="l" />
 
-        <ScanFailureCallout />
+        <ScanFailureCallout surface="onboarding" />
 
         {canModifyWorkers ? null : (
           <>

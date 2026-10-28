@@ -58,7 +58,7 @@ import {
 import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
-import type { EntityViewMode } from '../../../../flyout/entity_details/shared/types';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export interface UserProps {
   /**
@@ -158,7 +158,7 @@ export const User: FC<UserProps> = memo(function User({
     entityType: 'user',
     skip: !entityStoreV2Enabled || isInitializing,
   });
-  const { aliasRecords } = entityFromStoreResult;
+  const { aliasRecords, aliasCount } = entityFromStoreResult;
   const isGroupView = isEntityGroupView(aliasRecords);
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
@@ -271,6 +271,7 @@ export const User: FC<UserProps> = memo(function User({
 
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
     entityRecord: observedUser.entityRecord ?? null,
+    isGroupView,
   });
 
   const tabsNode = tabs ? (
@@ -350,6 +351,8 @@ export const User: FC<UserProps> = memo(function User({
             entityType: EntityType.user,
             value: userName,
             entityId: entityStoreEntityId,
+            mode,
+            scopeId,
             onOpenEntity: onOpenUser,
             title: userName,
             origin: FLYOUT_ORIGIN.ANOMALIES_SECTION,
@@ -398,6 +401,7 @@ export const User: FC<UserProps> = memo(function User({
             entityType: 'user',
             entityName: userName,
             scopeId,
+            mode,
             onShowEntity: onOpenUser,
             onShowRelatedEntity: onShowRelatedEntityFromResolution,
             title: userName,
@@ -461,6 +465,7 @@ export const User: FC<UserProps> = memo(function User({
           lastSeen={observedUser.lastSeen}
           entityId={panelDisplayEntityId}
           aliasRecords={aliasRecords}
+          aliasCount={aliasCount}
           mode={mode}
           identityFields={documentEntityIdentifiers}
           isEntityInStore={!!observedUser.entityRecord}
@@ -497,8 +502,10 @@ export const User: FC<UserProps> = memo(function User({
             entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
             aliasRecords={aliasRecords}
             noEntityInStore={noEntityInStore}
+            isEntityRecordLoading={entityStoreV2Enabled && entityFromStoreResult.isLoading}
             entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
+            mode={mode}
             onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons
             riskScoreQueryId={USER_PANEL_RISK_SCORE_QUERY_ID}

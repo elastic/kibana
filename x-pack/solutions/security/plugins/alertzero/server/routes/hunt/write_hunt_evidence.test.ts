@@ -27,7 +27,11 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
     search: jest.fn().mockResolvedValue({ hits: { hits: [{ _id: 'report-1' }] } }),
   };
   const context = {
-    alertzero: Promise.resolve({ subscription: 'available', hasRequiredDependencies: true }),
+    alertzero: Promise.resolve({
+      subscription: 'available',
+      hasRequiredDependencies: true,
+      isSpaceSupported: true,
+    }),
     core: Promise.resolve({
       elasticsearch: { client: { asInternalUser } },
       uiSettings: { client: { get: jest.fn().mockResolvedValue(true) } },

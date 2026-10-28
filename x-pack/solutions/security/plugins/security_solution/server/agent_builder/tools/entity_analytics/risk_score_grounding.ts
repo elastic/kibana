@@ -11,8 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { EntityMaintainerTaskStatus } from '@kbn/entity-store/server';
 import type { EntityStoreStartContract } from '@kbn/entity-store/server';
-
-const RISK_SCORE_MAINTAINER_ID = 'risk-score';
+import { RISK_SCORE_MAINTAINER_ID } from '../../../../common/entity_analytics/risk_score/constants';
 
 /**
  * Checks the status of the risk-score entity maintainer.

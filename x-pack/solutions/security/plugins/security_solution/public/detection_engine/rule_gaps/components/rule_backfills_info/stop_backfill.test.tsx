@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -81,7 +81,7 @@ describe('StopBackfill', () => {
     });
   });
 
-  it('should call deleteBackfillMutation and telemetry when confirmed', async () => {
+  it('should call deleteBackfillMutation and telemetry when confirmed', () => {
     mockUseDeleteBackfill.mockImplementation((options) => ({
       mutate: () => {
         if (options.onSuccess) {
@@ -97,21 +97,19 @@ describe('StopBackfill', () => {
     fireEvent.click(getByTestId('rule-backfills-delete-button'));
     fireEvent.click(getByTestId('confirmModalConfirmButton'));
 
-    await waitFor(() => {
-      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
-        ManualRuleRunEventTypes.ManualRuleRunCancelJob,
-        {
-          totalTasks: backfill.total,
-          completedTasks: backfill.complete,
-          errorTasks: backfill.error,
-        }
-      );
-    });
+    expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
+      ManualRuleRunEventTypes.ManualRuleRunCancelJob,
+      {
+        totalTasks: backfill.total,
+        completedTasks: backfill.complete,
+        errorTasks: backfill.error,
+      }
+    );
 
     expect(addSuccess).toHaveBeenCalledWith(i18n.BACKFILLS_TABLE_STOP_CONFIRMATION_SUCCESS);
   });
 
-  it('should call addError on deleteBackfillMutation error', async () => {
+  it('should call addError on deleteBackfillMutation error', () => {
     mockUseDeleteBackfill.mockImplementation((options) => ({
       mutate: () => {
         if (options.onError) {
@@ -127,11 +125,9 @@ describe('StopBackfill', () => {
     fireEvent.click(getByTestId('rule-backfills-delete-button'));
     fireEvent.click(getByTestId('confirmModalConfirmButton'));
 
-    await waitFor(() => {
-      expect(addError).toHaveBeenCalledWith(expect.any(Error), {
-        title: i18n.BACKFILLS_TABLE_STOP_CONFIRMATION_ERROR,
-        toastMessage: 'Error stopping backfill',
-      });
+    expect(addError).toHaveBeenCalledWith(expect.any(Error), {
+      title: i18n.BACKFILLS_TABLE_STOP_CONFIRMATION_ERROR,
+      toastMessage: 'Error stopping backfill',
     });
   });
 });

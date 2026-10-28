@@ -25,6 +25,7 @@ describe('huntCompletenessOf', () => {
     'generation_failed',
     'execute_failed',
     'catalog_unavailable',
+    'extraction_pending',
   ])('treats %s as retryable, so the report stays eligible', (reason) => {
     expect(huntCompletenessOf([gap(reason)])).toBe('incomplete_retryable');
     expect(completedSuccessfully(huntCompletenessOf([gap(reason)]))).toBe(false);
@@ -42,6 +43,7 @@ describe('huntCompletenessOf', () => {
 
   it.each<HuntIncompleteReason>([
     'generation_budget',
+    'collapsed',
     'unknown_technique_id',
     'rows_unclassifiable',
     'refs_unavailable',
@@ -51,6 +53,20 @@ describe('huntCompletenessOf', () => {
     expect(huntCompletenessOf([gap(reason)])).toBe('incomplete_final');
     // Retired, because re-running reproduces the same gap and re-spends the run.
     expect(completedSuccessfully(huntCompletenessOf([gap(reason)]))).toBe(true);
+  });
+
+  it('lets extraction_pending win over nothing_searched, so an unenriched report is not retired', () => {
+    const completeness = huntCompletenessOf([gap('nothing_searched'), gap('extraction_pending')]);
+    expect(completeness).toBe('incomplete_retryable');
+    expect(completedSuccessfully(completeness)).toBe(false);
+  });
+
+  it('lets a retryable gap win over a collapsed one', () => {
+    // The sibling that generation never ran for stays final on its own, but a report
+    // that also hit a retryable gap elsewhere still gains from a later run.
+    expect(huntCompletenessOf([gap('collapsed'), gap('execute_failed')])).toBe(
+      'incomplete_retryable'
+    );
   });
 
   it('treats an ungrounded query as final when the run had nothing searchable, so the report retires', () => {

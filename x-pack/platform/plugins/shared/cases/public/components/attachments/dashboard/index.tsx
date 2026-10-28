@@ -11,7 +11,7 @@ import {
   DashboardAttachmentPayloadSchema,
   type DashboardAttachmentData,
   type DashboardAttachmentMetadata,
-} from '../../../../common/types/domain_zod/attachment/dashboard/v2';
+} from '../../../../common/types/domain/attachment/dashboard/v2';
 import {
   defineAttachment,
   type UnifiedReferenceAttachmentViewProps,
@@ -73,6 +73,7 @@ export const getDashboardAttachmentType = () =>
       }),
     }),
     getAttachmentList: () => ({ children: DashboardAttachmentsTab }),
+    getCountLabel: ({ count }) => i18n.DASHBOARDS_COUNT(count),
     schema: DashboardAttachmentPayloadSchema,
     // Exclude pesistable data from the workflow schema
     workflowSchema: DashboardAttachmentPayloadSchema.omit({ data: true }),

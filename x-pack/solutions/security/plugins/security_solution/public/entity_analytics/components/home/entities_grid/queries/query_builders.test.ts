@@ -246,6 +246,23 @@ describe('entities grid query builders', () => {
     });
   });
 
+  it('never filters a LAST(), which drops groups on multi-shard indices (elastic/elasticsearch#162505)', async () => {
+    const queries: string[] = [];
+    const runQuery = async (steps: readonly string[]): Promise<Row[]> => {
+      queries.push(steps.join('\n'));
+      return [];
+    };
+    for (const [, fetchSortPage] of SORT_PAGE_FETCHERS) {
+      queries.push(await recordSortQueries(fetchSortPage, BASE_ARGS));
+    }
+    for (const [, enricher] of COLUMN_ENRICHERS) {
+      await enricher.fetch(PAGE_ROWS, BASE_ARGS, createRunContext(runQuery));
+    }
+
+    expect(queries.join('\n')).toContain('LAST(');
+    expect(queries.join('\n')).not.toMatch(/LAST\([^)]*\)\s+WHERE/);
+  });
+
   describe('the enrich queries of a resolved row', () => {
     const ALIAS: Row = {
       'entity.id': 'host:alias-1',
@@ -292,6 +309,18 @@ describe('entities grid query builders', () => {
 
       expect(runQuery).not.toHaveBeenCalled();
       expect(fields.get('host:h-1')).toEqual({ anomaly_count: null });
+    });
+
+    it('sorts by anomalies without security jobs by entity id, reading no anomaly index', async () => {
+      const runQuery = createRunner(pageRows);
+
+      const rows = await anomalyCountQuerySpec.fetchSortPage(
+        { ...BASE_ARGS, sort: { field: 'anomaly_count', direction: 'desc' }, anomalyJobIds: [] },
+        createRunContext(runQuery)
+      );
+
+      expect(rows).toEqual(pageRows.map((row) => expect.objectContaining(row)));
+      expect(runQuery.mock.calls.flat(2).join('\n')).not.toContain('.ml-anomalies');
     });
 
     it('reads the alerts of many entities in several queries, which ES|QL can parse', async () => {

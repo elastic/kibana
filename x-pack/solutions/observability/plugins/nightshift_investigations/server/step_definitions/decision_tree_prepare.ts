@@ -9,10 +9,11 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import { usesDecisionTrees } from '../agents/agent_policy';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
-import { toolCallsSchema } from './tool_calls_schema';
+import { withToolResults } from '../investigation_round';
+import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
 
 const MAX_INPUT_CHARS = 100_000;
 
@@ -45,6 +46,9 @@ export const decisionTreePrepareStepDefinition = ({
       tool_calls: toolCallsSchema.describe(
         'Investigator tool calls from this round. Used to see which decision-tree files were read.'
       ),
+      tool_results: toolResultsSchema.describe(
+        'Results of the investigator tool calls, keyed by tool_call_id.'
+      ),
     }),
     outputSchema: z.object({
       message: z.string().describe('Message to hand the reinforcement agent.'),
@@ -55,7 +59,12 @@ export const decisionTreePrepareStepDefinition = ({
       skipped: z.boolean().describe('True when this round is not eligible for reinforcement.'),
     }),
     handler: async (context) => {
-      const { response, agent_id: agentId, tool_calls: toolCalls } = context.input;
+      const {
+        response,
+        agent_id: agentId,
+        tool_calls: toolCalls,
+        tool_results: toolResults,
+      } = context.input;
       const skippedOutput = {
         output: {
           message: '',
@@ -74,7 +83,7 @@ export const decisionTreePrepareStepDefinition = ({
 
       // Only the Nightshift investigator's rounds feed the decision trees: this workflow is its
       // post-execution hook, and another agent's round must not rewrite the trees.
-      if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
+      if (!usesDecisionTrees(agentId)) {
         return skippedOutput;
       }
 
@@ -86,7 +95,7 @@ export const decisionTreePrepareStepDefinition = ({
         esClient: context.contextManager.getScopedEsClient(),
         logger,
         spaceId,
-        toolCalls: (toolCalls ?? []) as InvestigationToolCall[],
+        toolCalls: withToolResults((toolCalls ?? []) as InvestigationToolCall[], toolResults ?? []),
       });
 
       return {

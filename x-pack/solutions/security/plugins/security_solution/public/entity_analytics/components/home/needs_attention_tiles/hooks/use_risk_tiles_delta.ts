@@ -6,10 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import type { EntityFilters, TimeRange } from '../../entities_grid/common';
-import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import { buildRiskHistoryReachesBackQuery } from '../queries/risk_previous_period';
 import { buildNewlyHighCriticalCountQuery } from '../queries/tile_newly_high_critical_query';
 import { buildRiskMoversCountQuery } from '../queries/tile_risk_movers_query';
@@ -51,21 +50,23 @@ const useRiskTileDelta = (
   }: RiskTileDeltaOptions
 ): {
   delta: number | undefined;
+  /** The count over the previous period, which the sparkline starts from. */
+  previous: number | undefined;
   isDeltaLoading: boolean;
   isHistoryMissing: boolean;
   reachesBack: boolean | undefined;
 } => {
-  const { data: resolvedIndex, isLoading: isIndexLoading } =
-    useResolvedLatestEntitiesIndexName(spaceId);
+  const {
+    data: resolvedIndex,
+    isLoading: isIndexLoading,
+    entityFilterClauses,
+  } = useTileQueryInputs(spaceId, entityFilters);
   const index = resolvedIndex?.indexName;
 
   const guardQuery = buildRiskHistoryReachesBackQuery(spaceId, timeRange);
   const previousQuery = useMemo(
-    () =>
-      index
-        ? buildPrevious(spaceId, index, timeRange, buildEntityFilterClauses(entityFilters))
-        : null,
-    [buildPrevious, spaceId, index, timeRange, entityFilters]
+    () => (index ? buildPrevious(spaceId, index, timeRange, entityFilterClauses) : null),
+    [buildPrevious, spaceId, index, timeRange, entityFilterClauses]
   );
 
   const { previous, reachesBack, isHistoryMissing, isError } = usePreviousPeriod({
@@ -80,6 +81,7 @@ const useRiskTileDelta = (
 
   return {
     delta: previous !== undefined ? count - previous : undefined,
+    previous,
     isHistoryMissing,
     reachesBack,
     isDeltaLoading: isDeltaStillComing({

@@ -173,8 +173,18 @@ describe('AddDataView', () => {
     expect(getPageTemplateProps().suppressMenu).toBe(true);
   });
 
-  it('shows the menu when there is data', () => {
-    renderView({ status: makeStatus({ otel: { hasData: true } }) });
+  it.each([
+    ['OTel data', makeStatus({ otel: { hasData: true } })],
+    [
+      'Universal Profiling data',
+      makeStatus({ universalProfiling: { hasData: true, hasSetup: true } }),
+    ],
+    [
+      'Universal Profiling data even when setup is incomplete',
+      makeStatus({ universalProfiling: { hasData: true, hasSetup: false } }),
+    ],
+  ])('shows the menu when there is %s', (_name, status) => {
+    renderView({ status });
 
     expect(getPageTemplateProps().suppressMenu).toBe(false);
   });

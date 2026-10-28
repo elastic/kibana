@@ -358,9 +358,9 @@ describe('EntityAnalyticsHomePage', () => {
     expect(screen.getByRole('link', { name: 'Enable Entity analytics' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Add integrations/ })).toHaveAttribute(
       'href',
-      '/app/integrations/browse/advanced_analytics_ueba'
+      '/app/integrations/browse/security/advanced_analytics_ueba'
     );
-    expect(screen.getByRole('link', { name: /Read the docs/ })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Read documentation/ })).toBeInTheDocument();
     expect(screen.queryByTestId('entity-analytics-home-entities-table')).not.toBeInTheDocument();
   });
 
@@ -385,9 +385,9 @@ describe('EntityAnalyticsHomePage', () => {
     expect(screen.getByRole('link', { name: 'Enable Entity analytics' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Add integrations/ })).toHaveAttribute(
       'href',
-      '/app/integrations/browse/advanced_analytics_ueba'
+      '/app/integrations/browse/security/advanced_analytics_ueba'
     );
-    expect(screen.getByRole('link', { name: /Read the docs/ })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Read documentation/ })).toBeInTheDocument();
     expect(screen.queryByTestId('entity-analytics-home-entities-table')).not.toBeInTheDocument();
   });
 
@@ -429,7 +429,7 @@ describe('EntityAnalyticsHomePage', () => {
     expect(screen.queryByTestId('entity-analytics-home-entities-table')).not.toBeInTheDocument();
   });
 
-  it('disabled empty prompt footer renders a Read the docs link to the entity analytics docs', () => {
+  it('disabled empty prompt footer renders a Read documentation link to the entity analytics docs', () => {
     mockUseEntityStoreStatus.mockReturnValue({
       data: { status: 'not_installed', engines: [] },
     });
@@ -442,7 +442,7 @@ describe('EntityAnalyticsHomePage', () => {
     );
 
     expect(screen.getByText('Want to learn more?', { exact: false })).toBeInTheDocument();
-    const docsLink = screen.getByRole('link', { name: /Read the docs/ });
+    const docsLink = screen.getByRole('link', { name: /Read documentation/ });
     expect(docsLink).toBeInTheDocument();
     expect(docsLink).toHaveAttribute('href', expect.stringContaining('entity-risk-scoring'));
     expect(docsLink).toHaveAttribute('target', '_blank');

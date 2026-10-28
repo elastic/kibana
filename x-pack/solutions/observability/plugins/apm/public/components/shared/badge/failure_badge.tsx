@@ -5,36 +5,32 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiBadge, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from '@emotion/styled';
 import type { EventOutcome } from '../../../../typings/es_schemas/raw/fields/event_outcome';
 
-const ResetLineHeight = styled.span`
-  line-height: initial;
-`;
+export interface FailureBadgeDescriptor {
+  label: string;
+  color: string;
+  toolTipContent: string;
+}
 
-export function FailureBadge({ outcome }: { outcome?: EventOutcome }) {
-  const { euiTheme } = useEuiTheme();
-
+/** Resolves the failure badge's label, color, and tooltip, or `undefined` when the outcome is not a failure. */
+export function getFailureBadgeDescriptor(
+  outcome: EventOutcome | undefined,
+  euiTheme: EuiThemeComputed
+): FailureBadgeDescriptor | undefined {
   if (outcome !== 'failure') {
-    return null;
+    return undefined;
   }
 
-  return (
-    <ResetLineHeight>
-      <EuiToolTip
-        content={i18n.translate('xpack.apm.failure_badge.tooltip', {
-          defaultMessage: 'event.outcome = failure',
-        })}
-      >
-        <EuiBadge color={euiTheme.colors.danger} tabIndex={0}>
-          {i18n.translate('xpack.apm.failure_badge.label', {
-            defaultMessage: 'failure',
-          })}
-        </EuiBadge>
-      </EuiToolTip>
-    </ResetLineHeight>
-  );
+  return {
+    label: i18n.translate('xpack.apm.failure_badge.label', {
+      defaultMessage: 'failure',
+    }),
+    color: euiTheme.colors.danger,
+    toolTipContent: i18n.translate('xpack.apm.failure_badge.tooltip', {
+      defaultMessage: 'event.outcome = failure',
+    }),
+  };
 }

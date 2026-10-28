@@ -60,10 +60,10 @@ export const EPISODES_LIST_COLUMN_SOURCE = i18n.translate(
   }
 );
 
-export const EPISODES_LIST_COLUMN_MAINTENANCE_WINDOWS = i18n.translate(
-  'xpack.alertingV2.episodes.columns.maintenanceWindows',
+export const EPISODES_LIST_COLUMN_SUPPRESSED = i18n.translate(
+  'xpack.alertingV2.episodes.columns.suppressed',
   {
-    defaultMessage: 'Maintenance windows',
+    defaultMessage: 'Suppressed',
   }
 );
 
@@ -124,6 +124,37 @@ export const EPISODES_FILTER_BAR_SEARCH_ARIA_LABEL = i18n.translate(
     defaultMessage: 'Filter alerts',
   }
 );
+
+export const EPISODES_FILTER_BAR_SEARCH_SYNTAX_ERROR = i18n.translate(
+  'xpack.alertingV2.episodes.filterBar.searchSyntaxErrorTooltip',
+  {
+    defaultMessage: 'Fix the KQL syntax before updating.',
+  }
+);
+
+export const getEpisodesFilterBarNumericValueError = (field: string) =>
+  i18n.translate('xpack.alertingV2.episodes.filterBar.numericValueErrorTooltip', {
+    defaultMessage: '{field} requires a numeric value.',
+    values: { field },
+  });
+
+export const getEpisodesFilterBarDateValueError = (field: string) =>
+  i18n.translate('xpack.alertingV2.episodes.filterBar.dateValueErrorTooltip', {
+    defaultMessage: '{field} requires an ISO date value.',
+    values: { field },
+  });
+
+export const getEpisodesFilterBarWildcardError = (field: string) =>
+  i18n.translate('xpack.alertingV2.episodes.filterBar.wildcardErrorTooltip', {
+    defaultMessage: 'Wildcards are not supported for {field}.',
+    values: { field },
+  });
+
+export const getEpisodesFilterBarRangeValueError = (field: string) =>
+  i18n.translate('xpack.alertingV2.episodes.filterBar.rangeValueErrorTooltip', {
+    defaultMessage: '{field} range comparisons require a string or number.',
+    values: { field },
+  });
 
 export const BULK_ACKNOWLEDGE = i18n.translate(
   'xpack.alertingV2.episodes.bulkActions.acknowledge',

@@ -22,20 +22,20 @@ interface StreamsLayoutTabConfig {
 }
 
 /** Tab ids in the order they render in the header. */
-export const STREAMS_LAYOUT_TABS = ['canvas', 'sources', 'destinations'] as const;
+export const STREAMS_LAYOUT_TABS = ['map', 'sources', 'destinations'] as const;
 
 export type StreamsLayoutTab = (typeof STREAMS_LAYOUT_TABS)[number];
 
-export const DEFAULT_STREAMS_LAYOUT_TAB: StreamsLayoutTab = 'canvas';
+export const DEFAULT_STREAMS_LAYOUT_TAB: StreamsLayoutTab = 'map';
 
 /**
  * Registry of the layout tabs. Adding a tab means adding its id above and a
  * single entry here.
  */
 export const streamsLayoutTabs: Record<StreamsLayoutTab, StreamsLayoutTabConfig> = {
-  canvas: {
-    label: i18n.translate('xpack.streams.streamsLayout.canvasTab', {
-      defaultMessage: 'Canvas',
+  map: {
+    label: i18n.translate('xpack.streams.streamsLayout.mapTab', {
+      defaultMessage: 'Map',
     }),
     Component: StreamsCanvas,
     noPadding: true,

@@ -202,8 +202,8 @@ steps:
   # plain ids by stripping the fixed 18-char prefix (17-digit timestamp plus the
   # separator, hence SUBSTRING from 19). Tagging those 100 places the reviewed
   # watermark at the newest FP, which retires the older untagged ones too.
-  # The DSL filter carries every per-document exclusion (window, building blocks,
-  # in-flight rules), pushed down to Lucene before ES|QL sees a row. Skipping an
+  # The DSL filter carries every per-document exclusion (window, EQL sequence
+  # members, in-flight rules), pushed down to Lucene before ES|QL sees a row. Skipping an
   # in-flight rule here, before STATS/LIMIT, frees its sweep slot for the
   # next-noisiest one; the empty-array `terms` matches nothing, which makes that
   # `must_not` a no-op — the fail-open path when the lookup errored, the parse was
@@ -220,7 +220,7 @@ steps:
                   gte: "now-{{ inputs.analysis_window_days | default: consts.analysis_window_days }}d"
           must_not:
             - exists:
-                field: kibana.alert.building_block_type
+                field: kibana.alert.group.index
             - terms:
                 kibana.alert.rule.uuid: "${{ steps.resolve_active_rules.output.rule_uuids | default: consts.no_rows }}"
       query: |-
@@ -319,6 +319,32 @@ steps:
             analysis_window_days: "${{ inputs.analysis_window_days | default: consts.analysis_window_days }}"
             preview_invocation_count: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
             parent_run_id: "{{ execution.id }}"
+
+  # Telemetry: the sweep's outcome.
+  - name: report_worker_run_completed
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: worker_run_completed
+      candidates_found: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_current_revisions.output.rule_revision_keys contains row[6]' | size }}"
+      items_dispatched: "${{ steps.resolve_fanout_rows.output.rows | default: consts.no_rows | size }}"
+      # Reviews already running plus the ones this sweep started, as the coverage sweep counts.
+      items_in_flight: |-
+        {%- assign started = steps.resolve_fanout_rows.output.rows | default: consts.no_rows | size -%}
+        {{ steps.collect_active_rules.output.expected | default: 0 | plus: started }}
+      source_read_failed: "${{ steps.harvest_fp_alerts_by_rule.error != null or steps.list_enabled_candidates.error != null }}"
+      lookup_failed: "${{ steps.list_active_reviews.error != null }}"
+      degraded_reason: "{% if steps.harvest_fp_alerts_by_rule.error != null or steps.list_enabled_candidates.error != null or steps.list_active_reviews.error != null %}dependency_unavailable{% else %}none{% endif %}"
+      run_outcome: |-
+        {%- assign requested = steps.resolve_fanout_rows.output.rows | default: consts.no_rows | size -%}
+        {%- if steps.harvest_fp_alerts_by_rule.error != null or steps.list_enabled_candidates.error != null -%}
+        failed_source_unavailable
+        {%- elsif requested > 0 -%}
+        produced
+        {%- else -%}
+        empty_nothing_found
+        {%- endif -%}
 
   # Decisions are not known here: each review reports its own outcome and tags its
   # alerts once its gate resolves.

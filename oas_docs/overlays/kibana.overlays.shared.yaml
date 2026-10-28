@@ -30,10 +30,10 @@ actions:
     description: Change tag description and displayName
     update:
       description: >
-        Alerting V2 is an ES|QL-first alerting API for managing rules, alert actions, and action policies.
+        Universal Alerting is an ES|QL-first alerting API for managing rules, alert actions, and action policies.
         Use these endpoints to create and manage detection rules, act on alerts, and control when and how
-        notifications are delivered. These APIs are experimental.
-      x-displayName: 'Alerting V2'
+        notifications are delivered.
+      x-displayName: 'Universal Alerting'
   - target: '$.tags[?(@.name=="connectors")]'
     description: Change tag description and displayName
     update:
@@ -158,6 +158,14 @@ actions:
     description: Change displayName
     update:
       x-displayName: "Data views"
+  - target: '$.tags[?(@.name=="data-views-v2")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
+        Use these endpoints to list, retrieve, create, replace, and delete data views with the
+        as-code data view definition.
+      x-displayName: "Data views v2"
   - target: '$.tags[?(@.name=="slo")]'
     description: Change displayName
     update:

@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiText, EuiTextColor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   getPolicyIdsFromArtifact,
@@ -15,6 +15,7 @@ import {
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import type { ContextMenuItemNavByRouterProps } from '../../context_menu_with_router_support';
+import { POLICY_DETAILS_NOT_ACCESSIBLE_IN_ACTIVE_SPACE } from '../../artifact_entry_card/components/translations';
 import { useArtifactAssignedPolicies } from '../hooks/use_artifact_assigned_policies';
 
 export interface ArtifactViewPolicyAssignmentProps {
@@ -48,8 +49,9 @@ ArtifactViewPolicyAssignment.displayName = 'ArtifactViewPolicyAssignment';
 const ArtifactViewAssignedPolicies = memo<ArtifactViewPolicyAssignmentProps>(
   ({ item, labels, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const { euiTheme } = useEuiTheme();
     const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
-    const { policies } = useArtifactAssignedPolicies([item]);
+    const { policies, isLoading: isLoadingPolicies } = useArtifactAssignedPolicies([item]);
 
     const policyIds = useMemo(() => getPolicyIdsFromArtifact(item), [item]);
     const policyNavLinks = useMemo<ContextMenuItemNavByRouterProps[]>(() => {
@@ -70,7 +72,24 @@ const ArtifactViewAssignedPolicies = memo<ArtifactViewPolicyAssignmentProps>(
           {policyNavLinks.map((policy, index) => {
             const policyId = policyIds[index];
             const isClickable = Boolean(canReadPolicyManagement && policy.href);
+            const isAccessible = isLoadingPolicies || Boolean(policy.href);
             const policyTestSubj = getTestId(`policy-${policyId}`);
+
+            if (!isAccessible) {
+              return (
+                <li key={policyId}>
+                  <EuiToolTip content={POLICY_DETAILS_NOT_ACCESSIBLE_IN_ACTIVE_SPACE}>
+                    <EuiTextColor
+                      color={euiTheme.colors.textDisabled}
+                      tabIndex={0}
+                      data-test-subj={policyTestSubj}
+                    >
+                      {policy.children}
+                    </EuiTextColor>
+                  </EuiToolTip>
+                </li>
+              );
+            }
 
             return (
               <li key={policyId}>

@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import React, {
-  useCallback,
-  useEffect,
-  useState,
-  type ChangeEvent,
-  type SetStateAction,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useState, type SetStateAction } from 'react';
 import {
   EuiFilterGroup,
-  EuiFieldSearch,
   euiContainerCSS,
   euiContainerQuery,
   useEuiContainerQuery,
@@ -38,9 +31,10 @@ import type {
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { AlertingDateRangePicker } from '@kbn/alerting-v2-browser-shared';
-import useDebounce from 'react-use/lib/useDebounce';
 import { css } from '@emotion/react';
+import { EpisodesKqlInput } from './episodes_kql_input';
 import * as i18n from '../translations';
+import { validateEpisodeKql, type EpisodeKqlValidation } from '../utils/episodes_query_filter';
 
 export interface EpisodesFilterBarProps {
   filterState: EpisodesFilterState;
@@ -84,6 +78,28 @@ const filterGroupCss = css`
   max-width: 100%;
 `;
 
+const getValidationTooltip = (validation: EpisodeKqlValidation): string | undefined => {
+  if (validation.isValid) {
+    return undefined;
+  }
+  if (validation.error.type === 'syntax') {
+    return i18n.EPISODES_FILTER_BAR_SEARCH_SYNTAX_ERROR;
+  }
+  const { field, reason } = validation.error;
+  if (reason === 'numericValue') {
+    return i18n.getEpisodesFilterBarNumericValueError(field);
+  }
+  if (reason === 'dateValue') {
+    return i18n.getEpisodesFilterBarDateValueError(field);
+  }
+  if (reason === 'wildcard') {
+    return i18n.getEpisodesFilterBarWildcardError(field);
+  }
+  if (reason === 'stringOrNumericRangeValue') {
+    return i18n.getEpisodesFilterBarRangeValueError(field);
+  }
+};
+
 export const EpisodesFilterBar = ({
   filterState,
   onFilterChange,
@@ -100,21 +116,14 @@ export const EpisodesFilterBar = ({
     `(width < ${euiTheme.breakpoint.s}px)`
   );
   const [queryStringInput, setQueryStringInput] = useState(filterState.queryString ?? '');
+  const queryValidation = useMemo(() => validateEpisodeKql(queryStringInput), [queryStringInput]);
+  const normalizedQueryStringInput = queryStringInput.trim() || undefined;
+  const appliedQueryString = filterState.queryString?.trim() || undefined;
+  const queryNeedsUpdate = normalizedQueryStringInput !== appliedQueryString;
 
   useEffect(() => {
     setQueryStringInput(filterState.queryString ?? '');
   }, [filterState.queryString]);
-
-  useDebounce(
-    () => {
-      const trimmedValue = queryStringInput.trim() || undefined;
-      onFilterChange((prev) =>
-        trimmedValue !== prev.queryString ? { ...prev, queryString: trimmedValue } : prev
-      );
-    },
-    300,
-    [queryStringInput]
-  );
 
   const onStatusesChange = useCallback(
     (status: string[] | undefined) => {
@@ -151,9 +160,24 @@ export const EpisodesFilterBar = ({
     [onFilterChange]
   );
 
-  const onKueryChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setQueryStringInput(e.target.value);
+  const onKueryChange = useCallback((value: string) => {
+    setQueryStringInput(value);
   }, []);
+
+  const submitQuery = useCallback(() => {
+    if (!queryValidation.isValid || !queryNeedsUpdate) {
+      return;
+    }
+    onFilterChange((prev) => ({ ...prev, queryString: normalizedQueryStringInput }));
+  }, [normalizedQueryStringInput, onFilterChange, queryNeedsUpdate, queryValidation.isValid]);
+
+  const handleRefresh = useCallback(() => {
+    if (queryNeedsUpdate) {
+      submitQuery();
+      return;
+    }
+    onRefresh?.();
+  }, [onRefresh, queryNeedsUpdate, submitQuery]);
 
   return (
     <section
@@ -181,13 +205,13 @@ export const EpisodesFilterBar = ({
         `}
       >
         <div css={searchCss}>
-          <EuiFieldSearch
-            fullWidth
-            compressed
-            placeholder={i18n.EPISODES_FILTER_BAR_SEARCH_PLACEHOLDER}
+          <EpisodesKqlInput
             value={queryStringInput}
             onChange={onKueryChange}
+            onSubmit={submitQuery}
+            placeholder={i18n.EPISODES_FILTER_BAR_SEARCH_PLACEHOLDER}
             data-test-subj="episodesFilterBar-search"
+            http={services.http}
           />
         </div>
         <div css={filtersCss}>
@@ -249,7 +273,11 @@ export const EpisodesFilterBar = ({
             onChange={onTimeChange}
             services={services}
             onRefresh={onRefresh}
+            onManualRefresh={handleRefresh}
             isLoading={isLoading}
+            needsUpdate={queryNeedsUpdate}
+            isRefreshDisabled={!queryValidation.isValid}
+            refreshTooltip={getValidationTooltip(queryValidation)}
             showTimeWindowButtons={!isNarrowContainer}
             width="auto"
             collapsed={isNarrowContainer}
