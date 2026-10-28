@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { ALERT_FETCH_LIMIT, BATCH_ALERT_CAP, RULE_FETCH_LIMIT } from '../../alert_triage/constants';
 import {
   fetchTriageAlerts,
   listLiveExecutionIds,
   loadAlertsByIds,
+  readKeyHistory,
   tagAlerts,
   type TriageFilters,
 } from './ports';
@@ -52,6 +54,61 @@ describe('tagAlerts', () => {
     await expect(
       tagWith({ updated: 1, timed_out: false, failures: [{ cause: { type: 'x' } }] }).run()
     ).rejects.toThrow('not fully applied');
+  });
+});
+
+describe('tagAlerts on a version conflict', () => {
+  const conflict = () =>
+    new KibanaApiCallError({
+      status: 409,
+      headers: {},
+      body: { version_conflicts: 1 },
+      message: 'HTTP 409: version_conflict_engine_exception',
+    });
+  const ok = { status: 200, headers: {}, body: { updated: 2, timed_out: false, failures: [] } };
+  const run = (callKibanaApi: jest.Mock) =>
+    tagAlerts({ callKibanaApi })({ alertIds: ['a1', 'a2'], add: ['t'], remove: [] });
+
+  it('repeats the call, so one alert another writer touched does not fail the sweep', async () => {
+    const callKibanaApi = jest.fn().mockRejectedValueOnce(conflict()).mockResolvedValue(ok);
+
+    await expect(run(callKibanaApi)).resolves.toBeUndefined();
+    expect(callKibanaApi).toHaveBeenCalledTimes(2);
+  });
+
+  it('gives up after three attempts', async () => {
+    const callKibanaApi = jest.fn().mockRejectedValue(conflict());
+
+    await expect(run(callKibanaApi)).rejects.toThrow('version_conflict');
+    expect(callKibanaApi).toHaveBeenCalledTimes(3);
+  });
+
+  it('does not repeat any other error', async () => {
+    const callKibanaApi = jest
+      .fn()
+      .mockRejectedValue(
+        new KibanaApiCallError({ status: 500, headers: {}, body: {}, message: 'HTTP 500' })
+      );
+
+    await expect(run(callKibanaApi)).rejects.toThrow('HTTP 500');
+    expect(callKibanaApi).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('readKeyHistory', () => {
+  it('counts the preserved model judgement as well as the legacy false-positive tag', async () => {
+    const callKibanaApi = jest.fn().mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: { aggregations: { verdicts: { buckets: {} } } },
+    });
+
+    await readKeyHistory({ callKibanaApi }, { strictKeyTags: ['k'], excludeIds: [], since: 0 });
+
+    const { aggs } = callKibanaApi.mock.calls[0][0].body;
+    expect(aggs.verdicts.filters.filters.falsePositive).toEqual({
+      terms: { 'kibana.alert.workflow_tags': ['az:false_positive', 'az:model_fp'] },
+    });
   });
 });
 
@@ -119,6 +176,16 @@ describe('loadAlertsByIds', () => {
     ]);
   });
 
+  it('asks only for the given fields', async () => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValue({ status: 200, headers: {}, body: { hits: { hits: [] } } });
+    await loadAlertsByIds({ callKibanaApi }, ['a1'], ['host.name']);
+    await loadAlertsByIds({ callKibanaApi }, ['a1']);
+    expect(callKibanaApi.mock.calls[0][0].body._source).toEqual(['host.name']);
+    expect(callKibanaApi.mock.calls[1][0].body).not.toHaveProperty('_source');
+  });
+
   it('reports the ids that could not be loaded', async () => {
     const { missingAlertIds } = await loadWith([{ _id: 'a1', _index: 'i', _source: {} }]);
 
@@ -178,6 +245,40 @@ describe('fetchTriageAlerts', () => {
         }),
     };
   };
+
+  describe('detection of a rule that overrides the alert name', () => {
+    const overridden = (source: Record<string, unknown>) => ({
+      _id: 'd1',
+      _source: {
+        ...hit('d1', 'endpoint-rule', 50)._source,
+        'kibana.alert.rule.rule_name_override': 'message',
+        ...source,
+      },
+    });
+    const detectionOf = async (alertHit: unknown) =>
+      (await fetchWith([{ hits: [alertHit] }]).run())[0].detection;
+
+    it('is the Defend rule.id', async () => {
+      expect(await detectionOf(overridden({ 'rule.id': 'def-1', 'event.code': 'malware' }))).toBe(
+        'def-1'
+      );
+    });
+
+    it('falls back to event.code when rule.id is missing', async () => {
+      expect(await detectionOf(overridden({ 'event.code': 'shellcode_thread' }))).toBe(
+        'shellcode_thread'
+      );
+    });
+
+    it('is absent for a rule without a name override, whatever the event carries', async () => {
+      expect(
+        await detectionOf({
+          ...hit('d1', 'r', 1),
+          _source: { ...hit('d1', 'r', 1)._source, 'rule.id': 'x' },
+        })
+      ).toBeUndefined();
+    });
+  });
 
   // One rule with a large backlog used to fill the single global top-10,000 result, so quieter
   // rules never reached the planner and its fair split had nothing to share out.

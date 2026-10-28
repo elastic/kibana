@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { buildAlertsPagePath } from './build_alerts_page_path';
+export { buildAlertsPagePath, buildAlertsPageTagPath } from './build_alerts_page_path';
 export { formatPageFilterSearchParam } from './format_page_filter_search_param';
 export { buildPageTimerange, encodePageParam } from './page_url';
