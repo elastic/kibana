@@ -36,7 +36,7 @@ export const renderBoundOnboardingYaml = ({
   renderRunAs(BOUND_ONBOARDING_WORKFLOW_YAML, serviceAccountId);
 
 /**
- * The space's entry point to KI onboarding, installed per space and bound to the KI extraction
+ * The space's entry point to KI onboarding, installed per space and bound to the detection engine
  * service account. It calls the shared onboarding workflow, which inherits its identity and hands
  * it to the workflows it starts. A space without this entry point cannot run KI extraction.
  */

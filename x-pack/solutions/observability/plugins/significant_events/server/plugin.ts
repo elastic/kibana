@@ -106,7 +106,6 @@ import {
   createCleanupWorkflowService,
   type CleanupWorkflowService,
 } from './lib/workflows/cleanup_workflow';
-import { createSyncWorkflowService, type SyncWorkflowService } from './lib/workflows/sync_workflow';
 import {
   createSignificantEventsScheduledWorkflowsService,
   type SignificantEventsScheduledWorkflowsService,
@@ -458,7 +457,6 @@ export class SignificantEventsPlugin
     }
 
     let continuousOnboardingWorkflowService: ContinuousOnboardingWorkflowService | undefined;
-    let syncWorkflowService: SyncWorkflowService | undefined;
     let cleanupWorkflowService: CleanupWorkflowService | undefined;
     let significantEventsScheduledWorkflowsService:
       | SignificantEventsScheduledWorkflowsService
@@ -502,12 +500,6 @@ export class SignificantEventsPlugin
           getManagedWorkflowsClient,
         });
       }
-
-      syncWorkflowService = createSyncWorkflowService({
-        logger: this.logger,
-        managementApi,
-        getManagedWorkflowsClient,
-      });
 
       cleanupWorkflowService = createCleanupWorkflowService({
         logger: this.logger,
@@ -575,12 +567,6 @@ export class SignificantEventsPlugin
             request,
           });
         },
-        ensurePeriodicReconciliation: async (request) => {
-          // Keep periodic repair available even when continuous onboarding is switched off.
-          if ((await this.maintenanceService?.getState({ request })) !== 'paused') {
-            await syncWorkflowService?.ensureEnabled({ request, spaceId: request.spaceId });
-          }
-        },
       })
     );
 
@@ -602,7 +588,6 @@ export class SignificantEventsPlugin
         telemetry: telemetryClient,
         getScopedClients: this.getScopedClients,
         continuousOnboardingWorkflowService,
-        syncWorkflowService,
         cleanupWorkflowService,
         significantEventsScheduledWorkflowsService,
         workflowClients,

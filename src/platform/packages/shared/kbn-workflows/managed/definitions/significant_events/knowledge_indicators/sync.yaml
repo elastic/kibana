@@ -9,11 +9,10 @@
 # Per-stream failures do not abort the sweep (iteration-on-failure: continue),
 # and each _reconcile call retries transient failures on its own.
 #
-# This is a per-space managed workflow installed by the significant_events
-# plugin. It is installed and enabled on demand in a space by
-# SyncWorkflowService.ensureEnabled, bootstrapped from the feature-extraction
-# path. Once enabled it keeps running on its own schedule, independent of
-# extraction. Every request is prefixed with the space the workflow runs in.
+# Installed per space, bound to the detection engine service account
+# (`system-sources-ki-sync-bound`), by the space's service account setup, which
+# also enables it. Pause and Resume disable and enable it. Every request is
+# prefixed with the space the workflow runs in.
 
 version: '1'
 name: 'KI Sync'
@@ -26,6 +25,8 @@ tags:
   - knowledge-indicators
   - sync
 settings:
+  # Rendered with the detection engine service account of the space.
+  run_as: __SERVICE_ACCOUNT_ID__
   # Max duration of one sweep — independent of the schedule interval below.
   timeout: '60m'
   # Only one instance of this workflow runs at a time; overlapping triggers are dropped.

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import {
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
@@ -17,7 +18,6 @@ import {
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
@@ -42,9 +42,9 @@ export const GLOBAL_CORE_WORKFLOW_IDS = [
 ] as const;
 
 /**
- * Bound to a service account and installed per space, as `${id}-${spaceId}`, by the space's setup.
- * Pausing cancels their executions but never disables them: changing a bound workflow needs
- * `manage_security`, which pausing does not.
+ * Entry points bound to a service account and installed per space, as `${id}-${spaceId}`, by the
+ * space's setup. Pausing cancels their executions but does not disable them: they only run when
+ * started by routes that are blocked while the space is paused.
  */
 export const PER_SPACE_BOUND_WORKFLOW_IDS = [NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID] as const;
 
@@ -54,10 +54,13 @@ export const SCHEDULED_DISCOVERY_WORKFLOW_IDS = [
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 ] as const;
 
-/** Per-space knowledge indicator workflows, installed on demand when a space needs them. */
+/**
+ * Per-space scheduled knowledge indicator workflows. The sync is bound to the space's service
+ * account, so disabling or enabling it needs `manage_security`.
+ */
 export const KNOWLEDGE_INDICATOR_SCHEDULED_WORKFLOW_IDS = [
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
 ] as const;
 
 /** Scheduled workflows included in per-space maintenance sweeps. */
@@ -101,23 +104,6 @@ export interface MaintenanceWorkflowTarget {
   spaceId: SpaceId;
 }
 
-/**
- * The pre-per-space KI sync document of the default space. Startup keeps it until
- * `${id}-default` is enabled, since it is the only thing reconciling the default space until
- * then, so Pause and Resume still cover it. Missing documents are a no-op for both.
- *
- * TODO: remove with the legacy default-space cleanup.
- * https://github.com/elastic/kibana/issues/294271
- */
-export const LEGACY_DEFAULT_SPACE_SYNC_TARGET: MaintenanceWorkflowTarget = {
-  id: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-  spaceId: DEFAULT_SPACE_ID,
-};
-
-/** The legacy sync document only exists in the default space, so other spaces have none to cover. */
-const legacyTargetsFor = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] =>
-  spaceIds.includes(DEFAULT_SPACE_ID) ? [LEGACY_DEFAULT_SPACE_SYNC_TARGET] : [];
-
 /** Per-space scheduled documents are installed as `${baseId}-${spaceId}`. */
 const scheduledTargetsFor = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] =>
   spaceIds.flatMap((spaceId) =>
@@ -136,7 +122,6 @@ const scheduledTargetsFor = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] =
  * no new background work, so it is safe to leave enabled.
  */
 export const buildDisableTargets = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] => [
-  ...legacyTargetsFor(spaceIds),
   ...scheduledTargetsFor(spaceIds),
 ];
 
