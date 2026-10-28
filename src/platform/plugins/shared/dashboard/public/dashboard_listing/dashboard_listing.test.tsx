@@ -18,6 +18,7 @@ import { render, waitFor, act, screen } from '@testing-library/react';
 import { coreServices } from '../services/kibana_services';
 import { DashboardListing } from './dashboard_listing';
 import type { DashboardListingProps, DashboardListingTab } from './types';
+import { openImportDashboardJsonFlyout } from './import_json/open_import_dashboard_json_flyout';
 
 const mockAppHeader = jest.fn().mockReturnValue(null);
 jest.mock('@kbn/app-header', () => ({
@@ -31,6 +32,12 @@ jest.mock('@kbn/shared-ux-error-boundary', () => ({
   __esModule: true,
   KibanaSectionErrorBoundary: ({ children }: { children: React.ReactNode }) => children,
 }));
+
+jest.mock('./import_json/open_import_dashboard_json_flyout', () => ({
+  openImportDashboardJsonFlyout: jest.fn(),
+}));
+
+const mockOpenImportDashboardJsonFlyout = jest.mocked(openImportDashboardJsonFlyout);
 
 /**
  * Mock the active-tab renderer because these tests verify Dashboard listing shell wiring.
@@ -254,3 +261,76 @@ test.each([
     }
   }
 );
+
+describe('dashboard import', () => {
+  test('refreshes the Dashboards tab after a dashboard import', () => {
+    renderDashboardListing({}, { initialEntries: ['/list/dashboards'] });
+
+    const initialActiveTabProps = mockActiveTab.mock.calls[mockActiveTab.mock.calls.length - 1][0];
+
+    expect(initialActiveTabProps.tabs[0].render?.()).toMatchObject({
+      props: { refreshListBouncer: false },
+    });
+
+    const appHeaderProps = mockAppHeader.mock.calls[mockAppHeader.mock.calls.length - 1][0];
+    const importItem = appHeaderProps.menu.items.find(
+      (item: { testId: string }) => item.testId === 'dashboardListingImportButton'
+    );
+
+    act(() => {
+      importItem.run();
+    });
+
+    const { onImportSuccess } = mockOpenImportDashboardJsonFlyout.mock.calls[0][0];
+
+    act(() => {
+      onImportSuccess('dashboard-id', 'Imported dashboard');
+    });
+
+    const updatedActiveTabProps = mockActiveTab.mock.calls[mockActiveTab.mock.calls.length - 1][0];
+
+    expect(updatedActiveTabProps.tabs[0].render?.()).toMatchObject({
+      props: { refreshListBouncer: true },
+    });
+  });
+
+  test('does not recreate the active registered tab after a dashboard import', () => {
+    renderDashboardListing(
+      {
+        getTabs: () => [
+          {
+            id: 'annotations',
+            title: 'Annotations',
+            getTableList: jest.fn(),
+          },
+        ],
+      },
+      { initialEntries: ['/list/annotations'] }
+    );
+
+    const initialActiveTabProps = mockActiveTab.mock.calls[mockActiveTab.mock.calls.length - 1][0];
+    const initialLoad = initialActiveTabProps.tabs[1].load;
+    const initialRenderCount = mockActiveTab.mock.calls.length;
+
+    const appHeaderProps = mockAppHeader.mock.calls[mockAppHeader.mock.calls.length - 1][0];
+    const importItem = appHeaderProps.menu.items.find(
+      (item: { testId: string }) => item.testId === 'dashboardListingImportButton'
+    );
+
+    act(() => {
+      importItem.run();
+    });
+
+    const { onImportSuccess } = mockOpenImportDashboardJsonFlyout.mock.calls[0][0];
+
+    act(() => {
+      onImportSuccess('dashboard-id', 'Imported dashboard');
+    });
+
+    expect(mockActiveTab).toHaveBeenCalledTimes(initialRenderCount);
+
+    const currentActiveTabProps = mockActiveTab.mock.calls[mockActiveTab.mock.calls.length - 1][0];
+
+    expect(currentActiveTabProps.tabs[1].load).toBe(initialLoad);
+  });
+});
