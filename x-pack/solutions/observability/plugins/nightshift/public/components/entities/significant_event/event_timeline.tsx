@@ -64,8 +64,10 @@ const RevisionStatus = ({
 
 const RevisionDetails = ({
   revision,
+  assessmentNote,
 }: {
   revision: SignificantEventResponse;
+  assessmentNote: string | undefined;
 }): React.ReactElement => (
   <>
     {revision.severity ? (
@@ -76,9 +78,9 @@ const RevisionDetails = ({
         })}
       </EuiText>
     ) : null}
-    {revision.assessment_note ? (
+    {assessmentNote ? (
       <EuiText size="xs" color="subdued">
-        {revision.assessment_note}
+        {assessmentNote}
       </EuiText>
     ) : null}
     {revision.workflow_execution_id ? (
@@ -91,6 +93,35 @@ const RevisionDetails = ({
     ) : null}
   </>
 );
+
+const getRevisionStatusLabel = ({
+  previousStatus,
+  status,
+  hasDeactivation,
+}: {
+  previousStatus: SignificantEventResponse['status'];
+  status: SignificantEventResponse['status'];
+  hasDeactivation: boolean;
+}): string => {
+  if (hasDeactivation) {
+    return i18n.translate('xpack.nightshift.flyout.timelineDeactivatedLabel', {
+      defaultMessage: 'Significant event deactivated',
+    });
+  }
+  if (previousStatus === 'inactive' && status !== 'inactive') {
+    return i18n.translate('xpack.nightshift.flyout.timelineReopenedLabel', {
+      defaultMessage: 'Significant event reopened',
+    });
+  }
+  if (previousStatus !== status) {
+    return i18n.translate('xpack.nightshift.flyout.timelineStatusChangedLabel', {
+      defaultMessage: 'Status changed to',
+    });
+  }
+  return i18n.translate('xpack.nightshift.flyout.timelineEventUpdatedLabel', {
+    defaultMessage: 'Significant event updated',
+  });
+};
 
 export const EventTimeline = ({
   event,
@@ -193,7 +224,10 @@ export const EventTimeline = ({
                   })}
                   revision={raisedRevision}
                 />
-                <RevisionDetails revision={raisedRevision} />
+                <RevisionDetails
+                  revision={raisedRevision}
+                  assessmentNote={raisedRevision.assessment_note}
+                />
               </>
             ) : (
               <EuiText size="xs" color="subdued">
@@ -214,7 +248,12 @@ export const EventTimeline = ({
   });
   items.push(
     ...revisions.slice(1).map((revision, index) => {
-      const statusChanged = revision.status !== revisions[index].status;
+      const previousRevision = revisions[index];
+      const becameInactive =
+        previousRevision.status !== 'inactive' && revision.status === 'inactive';
+      const deactivation = becameInactive
+        ? data.deactivations?.find(({ episode_id: episodeId }) => episodeId === revision.episode_id)
+        : undefined;
       return {
         timestamp: revision['@timestamp'],
         item: {
@@ -224,18 +263,17 @@ export const EventTimeline = ({
             <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" responsive={false}>
               <EuiFlexItem>
                 <RevisionStatus
-                  label={
-                    statusChanged
-                      ? i18n.translate('xpack.nightshift.flyout.timelineStatusChangedLabel', {
-                          defaultMessage: 'Status changed to',
-                        })
-                      : i18n.translate('xpack.nightshift.flyout.timelineEventUpdatedLabel', {
-                          defaultMessage: 'Significant event updated',
-                        })
-                  }
+                  label={getRevisionStatusLabel({
+                    previousStatus: previousRevision.status,
+                    status: revision.status,
+                    hasDeactivation: deactivation !== undefined,
+                  })}
                   revision={revision}
                 />
-                <RevisionDetails revision={revision} />
+                <RevisionDetails
+                  revision={revision}
+                  assessmentNote={deactivation?.reason || revision.assessment_note}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
