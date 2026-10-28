@@ -70,6 +70,7 @@ export const buildFullProfileDiscriminationDataset = (runMarker: string) => {
         metadata: {
           alertCount: fullProfilePlan.alerts.length,
           fixture: 'full-profile',
+          scenarioKey: 'full-profile-live-retrieval',
           seedProfile: 'full',
         },
       },

@@ -65,6 +65,13 @@ export const withEvalsTracing = (baseConfig: ScoutServerConfig): ScoutServerConf
   if (tracingExporters) {
     JSON.parse(tracingExporters); // validate parseable JSON; throws early if malformed
   }
+  // Agent Builder maintains its own tracer provider whose spans back the trace-based
+  // evaluators. It always exports to the local ES; entries here are APPENDED, so setting
+  // this adds a remote destination (e.g. the golden cluster) without losing local fidelity.
+  const { AGENT_BUILDER_TRACING_EXPORTERS: agentBuilderTracingExporters } = process.env;
+  if (agentBuilderTracingExporters) {
+    JSON.parse(agentBuilderTracingExporters); // validate parseable JSON; throws early if malformed
+  }
   const isCi = Boolean(process.env.CI);
   const shouldEnableTracing = Boolean(tracingExporters) || !isCi;
   const exporters = tracingExporters ?? defaultExporters;
@@ -97,6 +104,15 @@ export const withEvalsTracing = (baseConfig: ScoutServerConfig): ScoutServerConf
       serverArgs: [
         ...baseConfig.kbnTestServer.serverArgs,
         '--xpack.evals.enabled=true',
+        // Unconditional, unlike the redaction overrides below: Agent Builder's span processor
+        // strips gen_ai.tool.call.arguments/.result from every tool span unless this is on, and
+        // the trace-based evaluators read those attributes from the local ES. Gating it on
+        // `shouldEnableTracing` drops tool details on CI whenever exporters are unset, so
+        // SkillInvoked scores 0 for every model and reads as a model failure.
+        '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true',
+        ...(agentBuilderTracingExporters
+          ? [`--xpack.agentBuilder.tracing.exporters=${agentBuilderTracingExporters}`]
+          : []),
         ...(shouldEnableTracing
           ? [
               '--elastic.apm.active=false',
@@ -113,7 +129,6 @@ export const withEvalsTracing = (baseConfig: ScoutServerConfig): ScoutServerConf
               '--uiSettings.overrides.agentBuilder:tracing:includeUserPrompts=true',
               '--uiSettings.overrides.agentBuilder:tracing:includeSystemPrompt=true',
               '--uiSettings.overrides.agentBuilder:tracing:includeLlmResponses=true',
-              '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true',
               '--uiSettings.overrides.agentBuilder:tracing:includeRealNames=true',
               '--uiSettings.overrides.agentBuilder:tracing:includeRealIds=true',
             ]

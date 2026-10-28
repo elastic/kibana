@@ -68,7 +68,11 @@ describe('noise FPR evaluators', () => {
         expectedWorkflowStages: [],
         forbiddenAlertIds: ['ad-portable-loud-cluster-alert-3'],
       },
-      metadata: { alertCount: 178, fixture: 'full-profile' },
+      metadata: {
+        alertCount: 178,
+        fixture: 'full-profile',
+        scenarioKey: 'full-profile-live-retrieval',
+      },
     });
 
     expect(result.score).toBe(0);
@@ -162,7 +166,11 @@ describe('noise FPR evaluators', () => {
       input: {} as never,
       output: { ...baseOutput(), adToolResult: { status: 'completed', discoveryCount: 15 } },
       expected: { expectedToolPath: [], expectedWorkflowStages: [], maxDiscoveryCount: 12 },
-      metadata: { alertCount: 178, fixture: 'full-profile' },
+      metadata: {
+        alertCount: 178,
+        fixture: 'full-profile',
+        scenarioKey: 'full-profile-live-retrieval',
+      },
     });
 
     expect(result.score).toBe(0);
@@ -186,7 +194,11 @@ describe('noise FPR evaluators', () => {
       input: {} as never,
       output,
       expected: { expectedToolPath: [], expectedWorkflowStages: [], maxDiscoveryCount: 12 },
-      metadata: { alertCount: 178, fixture: 'full-profile' },
+      metadata: {
+        alertCount: 178,
+        fixture: 'full-profile',
+        scenarioKey: 'full-profile-live-retrieval',
+      },
     });
 
     expect(result.score).toBe(0);
@@ -199,7 +211,11 @@ describe('noise FPR evaluators', () => {
       input: {} as never,
       output: baseOutput(),
       expected: { expectedToolPath: [], expectedWorkflowStages: [], minValidatedDiscoveryCount: 1 },
-      metadata: { alertCount: 178, fixture: 'full-profile' },
+      metadata: {
+        alertCount: 178,
+        fixture: 'full-profile',
+        scenarioKey: 'full-profile-live-retrieval',
+      },
     });
 
     expect(result.score).toBe(1);
@@ -220,7 +236,11 @@ describe('noise FPR evaluators', () => {
       input: {} as never,
       output,
       expected: { expectedToolPath: [], expectedWorkflowStages: [], minValidatedDiscoveryCount: 1 },
-      metadata: { alertCount: 178, fixture: 'full-profile' },
+      metadata: {
+        alertCount: 178,
+        fixture: 'full-profile',
+        scenarioKey: 'full-profile-live-retrieval',
+      },
     });
 
     expect(result.score).toBe(0);

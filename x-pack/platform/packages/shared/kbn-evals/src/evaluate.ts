@@ -35,6 +35,11 @@ import { EvalsClient } from './utils/evals_client';
 import { EvaluatorApiClient } from './utils/evaluator_api_client';
 import { getBuildkiteCiMetadataFromEnv } from './utils/ci_metadata';
 import { getSpaceIdsFromEnv } from './utils/space_ids';
+import {
+  classifyIngestOutcome,
+  createIngestOutcome,
+  recordIngestFailure,
+} from './utils/ingest_outcome';
 import { DEFAULT_EXPERIMENT_CONCURRENCY, getConcurrencyFromEnv } from './utils/concurrency';
 import { buildIngestRequest, toScoreModel } from './utils/build_ingest_request';
 import { buildModelFromConnector } from './utils/build_model_from_connector';
@@ -311,6 +316,11 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const gitMetadata = getGitMetadata();
       const hostName = osHostname();
 
+      // Score ingest is best-effort per example so one bad document cannot abort a
+      // long sweep. Tally outcomes so a run that exported nothing can be told apart
+      // from one that succeeded; see `classifyIngestOutcome`.
+      const ingestOutcome = createIngestOutcome();
+
       const executorClient = new KibanaEvalsClient({
         log,
         model,
@@ -350,21 +360,31 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
               ingestRequests.map((ingestRequest) => evalsClient.ingestScores(ingestRequest))
             );
             for (const result of results) {
+              ingestOutcome.ingested += result.ingested;
               if (result.failed.length > 0) {
+                const reasons = result.failed.map((f) => f.reason).join(', ');
+                recordIngestFailure(ingestOutcome, reasons);
                 log.warning(
-                  `Score ingest partially failed for example ${event.exampleId}: ${result.failed
-                    .map((f) => f.reason)
-                    .join(', ')}`
+                  `Score ingest partially failed for example ${event.exampleId}: ${reasons}`
                 );
               }
             }
           } catch (error) {
+            recordIngestFailure(ingestOutcome, String(error));
             log.warning(`Score ingest failed for example ${event.exampleId}: ${error}`);
           }
         },
       });
 
       await use(executorClient);
+
+      const ingestVerdict = classifyIngestOutcome(ingestOutcome);
+      if (ingestVerdict.kind === 'total-failure') {
+        throw new Error(ingestVerdict.message);
+      }
+      if (ingestVerdict.kind === 'partial') {
+        log.error(ingestVerdict.message);
+      }
 
       const datasetRunResults = await executorClient.getDatasetRunResults();
       if (datasetRunResults.length > 0 && executionId) {

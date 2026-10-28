@@ -286,6 +286,7 @@ EOF
           EVAL_GREP_INVERT: "${EVAL_GREP_INVERT:-}"
           EVAL_SPEC_FILES: "${shard_spec_file_args}"
           EVAL_REPETITIONS: "${EVAL_REPETITIONS:-}"
+          EVAL_REPETITION_TIER: "${EVAL_REPETITION_TIER:-}"
           EVAL_CONCURRENCY: "${EVAL_CONCURRENCY:-}"
         timeout_in_minutes: ${timeout_in_minutes}
         concurrency_group: "kbn-evals-${group_key_safe}"

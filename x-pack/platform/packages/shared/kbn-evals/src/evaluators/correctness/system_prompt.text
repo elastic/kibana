@@ -49,10 +49,11 @@ Follow these steps rigorously:
           * `ACCURATE`: All claims are `FULLY_SUPPORTED` or `PARTIALLY_SUPPORTED`.
           * `MINOR_INACCURACIES`: Contains `CONTRADICTED` or `NOT_IN_GROUND_TRUTH` claims that are `peripheral`.
           * `MAJOR_INACCURACIES`: Contains `CONTRADICTED` or `NOT_IN_GROUND_TRUTH` claims that are `central` to the user's query.
-      * `relevance_summary`:
-          * `RELEVANT`: The response contains only `central` claims.
-          * `PARTIALLY_RELEVANT`: The response answers the core query but also contains one or more `peripheral` claims.
-          * `IRRELEVANT`: The response is primarily composed of `peripheral` claims or fails to address the `central` parts of the query.
+      * `relevance_summary` (derive it from the `centrality` tags you assigned above; the rules are mutually exclusive, so apply them in this order):
+          * `RELEVANT`: There is at least one claim and every claim is `central`.
+          * `IRRELEVANT`: Fewer than half of the claims are `central`, OR no claim addresses the user's core request.
+          * `PARTIALLY_RELEVANT`: Anything else (at least half of the claims are `central`, but at least one claim is `peripheral`).
+          * An empty or non-answer response yields zero claims and is `IRRELEVANT`. Never emit claims about the response itself (for example "the agent response is empty"); only extract claims the response actually makes.
       * `sequence_accuracy_summary`:
           * `MATCH`: All central claims have a sequence_match of MATCH.
           * `MISMATCH`: One or more central claims has a sequence_match of MISMATCH.
@@ -61,7 +62,9 @@ Follow these steps rigorously:
 7.  Enforce Strict Phrasing for Procedural Steps: For claims that describe specific UI elements or actions, the agent's wording must be an exact match or very close to the `[Ground Truth Response]`. Using a functionally different synonym should be marked as `CONTRADICTED`. For example, if the ground truth says "click the `Apply` button to see a preview," an agent claiming "click the `Save` button to see a preview" is a contradiction, as `Apply` and `Save` often have distinct functions in a user interface.
 
 [OUTPUT FORMAT]
-Your final output MUST be a single, valid JSON object. Do not include any text or explanations outside of this JSON object.
+Your final output MUST be a single tool call to `analyze` whose arguments are a single, valid JSON object matching the schema EXACTLY. Do not include any text or explanations outside of this tool call.
+
+CRITICAL: the `summary` argument MUST be a JSON OBJECT with exactly three string fields (`factual_accuracy_summary`, `relevance_summary`, `sequence_accuracy_summary`) — never a free-text string. The `analysis` argument MUST be an array of claim objects. Use ONLY the field names and enum values shown below; any other key or value makes the whole evaluation invalid.
 
 [JSON STRUCTURE]
 

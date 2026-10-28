@@ -170,14 +170,68 @@ describe('persona_matrix_tools_seed', () => {
       expect(log.warning).not.toHaveBeenCalled();
     });
 
-    it('does NOT delete pre-existing tools (POST returns 409 conflict)', async () => {
+    it('reinstalls a pre-existing tool on 409 (delete + POST), never silently reuses it', async () => {
       const mod = await import('./persona_matrix_tools_seed');
       const client = createClient(agentWith(), 'conflict');
 
       await mod.seedPersonaMatrixTools({ kbnClient: asKbn(client), log, parity: true });
-      await mod.cleanupPersonaMatrixTools({ kbnClient: asKbn(client), log });
 
-      const deletes = client.request.mock.calls.filter(([req]) => req.method === 'DELETE');
+      // 409 recovery must DELETE the stale definition and POST the current one
+      // (multi-model gate workers re-seed against the same stack and can hit a
+      // tool left behind by an earlier model's run). The initial POST attempt
+      // also counts as a call, so each tool produces two POSTs and one DELETE.
+      const toolIds = [...mod.PERSONA_MATRIX_TOOL_IDS, ...mod.PERSONA_MATRIX_PARITY_TOOL_IDS];
+      const deletes = client.request.mock.calls
+        .filter(([req]) => req.method === 'DELETE')
+        .map(([req]) => req);
+      const posts = client.request.mock.calls.filter(([req]) => req.method === 'POST');
+      expect(deletes).toHaveLength(toolIds.length);
+      expect(posts).toHaveLength(toolIds.length * 2);
+      for (const id of toolIds) {
+        expect(deletes).toContainEqual(
+          expect.objectContaining({
+            method: 'DELETE',
+            path: `/api/agent_builder/tools/${encodeURIComponent(id)}`,
+          })
+        );
+      }
+      // Reinstalled tools are NOT added to createdToolIds: cleanup force-deletes only
+      // tools this run created fresh, so the reinstalled definitions survive for the
+      // next model worker (which 409s and refreshes them again).
+      await mod.cleanupPersonaMatrixTools({ kbnClient: asKbn(client), log });
+      const cleanupDeletes = client.request.mock.calls
+        .filter(([req]) => req.method === 'DELETE' && String(req.path).endsWith('force=true'))
+        .map(([req]) => req.path);
+      expect(cleanupDeletes).toHaveLength(0);
+    });
+
+    it('warns and keeps the existing tool when the 409 reinstall fails', async () => {
+      const mod = await import('./persona_matrix_tools_seed');
+      const client = createClient(agentWith(), 'conflict');
+      // DELETE fails too — recovery must fall back to the existing definition.
+      client.request.mockImplementation(
+        async ({ method, path }: { method: string; path: string }) => {
+          if (method === 'GET' && path === AGENT_TOOLS_PATH) {
+            return { data: agentWith() };
+          }
+          if (method === 'PUT' && path === AGENT_TOOLS_PATH) {
+            return { data: {} };
+          }
+          if (method === 'POST' && path === '/api/agent_builder/tools') {
+            throw Object.assign(new Error('Conflict: already exists'), { status: 409 });
+          }
+          throw Object.assign(new Error('delete blocked'), { status: 403 });
+        }
+      );
+
+      await mod.seedPersonaMatrixTools({ kbnClient: asKbn(client), log, parity: true });
+
+      expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('reinstall failed'));
+      // The pre-existing tool was never created by this run; cleanup must NOT delete it.
+      await mod.cleanupPersonaMatrixTools({ kbnClient: asKbn(client), log });
+      const deletes = client.request.mock.calls.filter(
+        ([req]) => req.method === 'DELETE' && String(req.path).endsWith('force=true')
+      );
       expect(deletes).toHaveLength(0);
     });
   });

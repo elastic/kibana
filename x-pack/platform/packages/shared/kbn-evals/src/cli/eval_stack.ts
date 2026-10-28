@@ -32,7 +32,9 @@ import { probeHttp } from './profiles';
 
 const SCOUT_LOCAL_CONFIG = '.scout/servers/local.json';
 const SCOUT_READY_POLL_INTERVAL_MS = 3000;
-const SCOUT_READY_TIMEOUT_MS = 180_000;
+// Overridable via SCOUT_READY_TIMEOUT_MS env: cold-boot rspack compile (303
+// bundles) can exceed the 180s default on loaded eval VMs.
+const SCOUT_READY_TIMEOUT_MS = Number(process.env.SCOUT_READY_TIMEOUT_MS) || 180_000;
 // Serverless starts three ES containers (and may pull the image) before Kibana boots.
 const SERVERLESS_SCOUT_READY_TIMEOUT_MS = 600_000;
 const PROBE_TIMEOUT_MS = 2000;
@@ -201,6 +203,7 @@ export interface EnsureScoutOptions {
   log: ToolingLog;
   gcsCredentials: string | undefined;
   tracingExporters: string | undefined;
+  agentBuilderTracingExporters?: string | undefined;
   /** Env from the suite's `scoutHook`, forwarded to Scout (see `runScoutHook`). */
   suiteScoutEnv?: Record<string, string>;
   serverConfigSet?: string;
@@ -216,6 +219,7 @@ export const ensureScout = async ({
   log,
   gcsCredentials,
   tracingExporters,
+  agentBuilderTracingExporters,
   suiteScoutEnv,
   serverConfigSet = 'evals_tracing',
   scoutTarget = DEFAULT_SCOUT_TARGET,
@@ -226,6 +230,9 @@ export const ensureScout = async ({
   }
   if (tracingExporters) {
     scoutEnv.TRACING_EXPORTERS = tracingExporters;
+  }
+  if (agentBuilderTracingExporters) {
+    scoutEnv.AGENT_BUILDER_TRACING_EXPORTERS = agentBuilderTracingExporters;
   }
 
   const scoutAlive = isServiceRunning(repoRoot, 'scout');
@@ -375,6 +382,7 @@ export const ensureEvalStack = async ({
     log,
     gcsCredentials: profileEnvOverrides.GCS_CREDENTIALS,
     tracingExporters: profileEnvOverrides.TRACING_EXPORTERS,
+    agentBuilderTracingExporters: profileEnvOverrides.AGENT_BUILDER_TRACING_EXPORTERS,
     suiteScoutEnv,
     serverConfigSet,
     scoutTarget,

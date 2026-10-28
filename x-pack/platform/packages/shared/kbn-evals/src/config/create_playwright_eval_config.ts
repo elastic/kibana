@@ -18,6 +18,7 @@ import {
   type EvalConnector,
   type StackConnectorDefinition,
 } from '../utils/eval_connector';
+import { resolveRepetitions } from './repetition_tiers';
 import { DEFAULT_EXPERIMENT_CONCURRENCY, getConcurrencyFromEnv } from '../utils/concurrency';
 
 export interface EvaluationTestOptions extends ScoutTestOptions {
@@ -86,9 +87,7 @@ export function createPlaywrightEvalsConfig({
     );
   }
 
-  // Priority of determining repetition number: env variable, config parameter, default
-  const experimentRepetitions =
-    parseInt(process.env.EVAL_REPETITIONS || '', 10) || repetitions || 1;
+  const experimentRepetitions = resolveRepetitions(process.env, repetitions);
 
   const experimentConcurrency =
     getConcurrencyFromEnv() ?? concurrency ?? DEFAULT_EXPERIMENT_CONCURRENCY;

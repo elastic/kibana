@@ -30,6 +30,19 @@ export interface InferenceEndpointExecutor {
   invoke(options: InferenceEndpointInvokeOptions): Promise<Readable>;
 }
 
+/**
+ * Default per-request timeout for an inference endpoint call.
+ *
+ * Agent Builder eval runs drive much longer single turns than product traffic
+ * (multi-step skills against large alert sets), where the 180s default aborts
+ * a turn mid-flight and the example is scored as a failure of the model rather
+ * than of the harness. The eval VMs raise it via AGENT_BUILDER_INFERENCE_TIMEOUT_MS;
+ * unset, the product default is unchanged.
+ */
+const AGENT_BUILDER_INFERENCE_TIMEOUT_MS = Number(
+  process.env.AGENT_BUILDER_INFERENCE_TIMEOUT_MS ?? 180_000
+);
+
 export const createInferenceEndpointExecutor = ({
   inferenceId,
   esClient,
@@ -41,7 +54,12 @@ export const createInferenceEndpointExecutor = ({
   stream?: boolean;
 }): InferenceEndpointExecutor => {
   return {
-    async invoke({ body, signal, metadata, timeout = 180_000 }): Promise<Readable> {
+    async invoke({
+      body,
+      signal,
+      metadata,
+      timeout = AGENT_BUILDER_INFERENCE_TIMEOUT_MS,
+    }): Promise<Readable> {
       const { pluginId, productSolution, productFeature, interactionId, traceId, userId, spaceId } =
         metadata?.connectorTelemetry ?? {};
       const path = `/_inference/chat_completion/${encodeURIComponent(inferenceId)}`;

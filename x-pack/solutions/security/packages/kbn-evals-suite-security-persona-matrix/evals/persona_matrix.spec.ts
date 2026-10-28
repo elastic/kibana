@@ -14,10 +14,12 @@ import {
   cleanupChrysalisAlerts,
   seedProfile,
 } from '../src/fixtures/chrysalis_seed';
+import { seedPersonaMatrixEnvironment, cleanupEnvSeeds } from '../src/fixtures/env_seeds';
 import {
   seedPersonaMatrixTools,
   cleanupPersonaMatrixTools,
 } from '../src/fixtures/persona_matrix_tools_seed';
+import { assertPersonaMatrixToolsRegistered } from '../src/fixtures/tool_registration_check';
 
 const DATASET_NAME = 'security: security-persona-matrix';
 const DATASET_DESCRIPTION =
@@ -27,6 +29,12 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
   evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
     await seedChrysalisAlerts({ esClient: esClient as unknown as EsClient, log, count: 3 });
     log.info('[persona-matrix] seeded Chrysalis alerts');
+    await seedPersonaMatrixEnvironment({
+      esClient: esClient as unknown as EsClient,
+      kbnClient,
+      log,
+    });
+    log.info('[persona-matrix] seeded environment-truth data (endpoint, labs, ti-mock, entity)');
     await seedPersonaMatrixTools({ kbnClient, log, parity: seedProfile === 'parity' });
     log.info(
       `[persona-matrix] seeded persona-matrix tools (profile: ${seedProfile}${
@@ -37,10 +45,15 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
 
   evaluate.afterAll(async ({ esClient, kbnClient, log }) => {
     await cleanupChrysalisAlerts({ esClient: esClient as unknown as EsClient, log });
+    await cleanupEnvSeeds({
+      esClient: esClient as unknown as EsClient,
+      kbnClient,
+      log,
+    });
     await cleanupPersonaMatrixTools({ kbnClient, log });
   });
 
-  evaluate('all 21 examples', async ({ evaluateDataset, log }) => {
+  evaluate('all 21 examples', async ({ evaluateDataset, kbnClient, log }) => {
     const examplesFilter = process.env.EVAL_EXAMPLES?.split(',')
       .map((id) => id.trim())
       .filter(Boolean);
@@ -56,6 +69,10 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
         examplesFilter ? ` (filtered: ${examplesFilter.join(',')})` : ''
       }`
     );
+
+    // Pre-flight: fail fast if an expected custom tool isn't registered, rather
+    // than silently scoring a tool that doesn't exist.
+    await assertPersonaMatrixToolsRegistered({ kbnClient, log });
 
     await evaluateDataset({
       dataset: {

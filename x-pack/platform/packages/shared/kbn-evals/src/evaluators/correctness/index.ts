@@ -13,6 +13,8 @@ import { LlmCorrectnessEvaluationPrompt } from './prompt';
 import {
   calculateFactualScore,
   calculateRelevanceScore,
+  deriveRelevanceLabel,
+  isAgentResponseEmpty,
   calculateProceduralFidelityScore,
 } from './scoring';
 import type { CorrectnessAnalysis } from './types';
@@ -129,12 +131,17 @@ export function createQuantitativeCorrectnessEvaluators(): Evaluator[] {
   const extractCorrectnessAnalysis = (output: any): CorrectnessAnalysis | null => {
     return ((output as any)?.correctnessAnalysis as CorrectnessAnalysis) || null;
   };
-
   // Helper function to create evaluator with common validation logic
   const quantitativeEvaluator = (
     name: string,
     scoreCalculator: (analysis: CorrectnessAnalysis) => number,
-    summaryKey: keyof CorrectnessAnalysis['summary']
+    summaryKey: keyof CorrectnessAnalysis['summary'],
+    refine?: (args: {
+      output: unknown;
+      correctnessAnalysis: CorrectnessAnalysis;
+      score: number;
+      label: string;
+    }) => { score: number; label: string; extraMetadata?: Record<string, unknown> }
   ): Evaluator => ({
     evaluate: async ({ output, metadata }) => {
       const correctnessAnalysis = extractCorrectnessAnalysis(output);
@@ -148,14 +155,20 @@ export function createQuantitativeCorrectnessEvaluators(): Evaluator[] {
         };
       }
 
-      const score = scoreCalculator(correctnessAnalysis);
+      const baseScore = scoreCalculator(correctnessAnalysis);
       const summaryText = correctnessAnalysis.summary[summaryKey];
+      const { score, label, extraMetadata } = refine?.({
+        output,
+        correctnessAnalysis,
+        score: baseScore,
+        label: summaryText,
+      }) ?? { score: baseScore, label: summaryText };
 
       return {
         score,
-        label: summaryText,
-        explanation: summaryText,
-        metadata: { ...(metadata ?? {}), correctnessAnalysis },
+        label,
+        explanation: label,
+        metadata: { ...(metadata ?? {}), correctnessAnalysis, ...extraMetadata },
       };
     },
     kind: 'LLM',
@@ -165,7 +178,26 @@ export function createQuantitativeCorrectnessEvaluators(): Evaluator[] {
 
   return [
     quantitativeEvaluator('Factuality', calculateFactualScore, 'factual_accuracy_summary'),
-    quantitativeEvaluator('Relevance', calculateRelevanceScore, 'relevance_summary'),
+    quantitativeEvaluator(
+      'Relevance',
+      calculateRelevanceScore,
+      'relevance_summary',
+      ({ output, correctnessAnalysis, score, label }) => {
+        // An empty response has nothing to be relevant about. The judge tends to emit a single
+        // central meta-claim about the emptiness, which would otherwise score 1.0.
+        const responseIsEmpty = isAgentResponseEmpty(output);
+        const expectedLabel = responseIsEmpty
+          ? 'IRRELEVANT'
+          : deriveRelevanceLabel(correctnessAnalysis.analysis ?? []);
+
+        return {
+          score: responseIsEmpty ? 0 : score,
+          label: responseIsEmpty ? 'IRRELEVANT' : label,
+          // The judge's label is kept as emitted; this flag only makes drift from the rubric measurable.
+          extraMetadata: { relevanceLabelConsistent: label === expectedLabel },
+        };
+      }
+    ),
     quantitativeEvaluator(
       'Sequence Accuracy',
       calculateProceduralFidelityScore,

@@ -60,4 +60,27 @@ describe.each([
       unlinkSync(filePath);
     }
   });
+
+  it('passes no Agent Builder exporters through without AGENT_BUILDER_TRACING_EXPORTERS', () => {
+    const { kbnTestServer } = loadServers(modulePath, {});
+
+    expect(kbnTestServer.serverArgs ?? []).not.toContainEqual(
+      expect.stringContaining('--xpack.agentBuilder.tracing.exporters=')
+    );
+  });
+
+  it('forwards AGENT_BUILDER_TRACING_EXPORTERS to the Kibana server args', () => {
+    const exporters = '[{"http":{"url":"https://golden.example:4318/v1/traces"}}]';
+    const { kbnTestServer } = loadServers(modulePath, {
+      AGENT_BUILDER_TRACING_EXPORTERS: exporters,
+    });
+
+    expect(kbnTestServer.serverArgs ?? []).toContain(
+      `--xpack.agentBuilder.tracing.exporters=${exporters}`
+    );
+  });
+
+  it('throws early on malformed AGENT_BUILDER_TRACING_EXPORTERS JSON', () => {
+    expect(() => loadServers(modulePath, { AGENT_BUILDER_TRACING_EXPORTERS: '{nope' })).toThrow();
+  });
 });

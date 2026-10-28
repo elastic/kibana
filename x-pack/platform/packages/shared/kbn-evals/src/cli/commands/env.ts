@@ -25,6 +25,12 @@ const ENV_DOCS = [
     example: 'EVAL_REPETITIONS=3',
   },
   {
+    name: 'EVAL_REPETITION_TIER',
+    description:
+      'Named repetition budget: smoke (n=1), confirm (n=3), publish (n=5). Rejected when it contradicts an explicit EVAL_REPETITIONS.',
+    example: 'EVAL_REPETITION_TIER=publish',
+  },
+  {
     name: 'EVAL_CONCURRENCY',
     description:
       'Overrides how many examples an experiment runs at once (default 5). A concurrency passed to runExperiment in the spec still wins.',
