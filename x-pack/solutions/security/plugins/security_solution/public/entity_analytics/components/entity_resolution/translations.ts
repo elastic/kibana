@@ -72,6 +72,13 @@ export const TARGET_ENTITY_TOOLTIP = i18n.translate(
   { defaultMessage: 'This is the primary entity for this resolution group' }
 );
 
+export const INSUFFICIENT_PRIVILEGES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityResolution.insufficientPrivileges',
+  {
+    defaultMessage: 'You do not have permission to modify resolution groups',
+  }
+);
+
 export const CANNOT_REMOVE_TARGET_TOOLTIP = i18n.translate(
   'xpack.securitySolution.entityResolution.cannotRemoveTarget',
   { defaultMessage: 'The primary entity cannot be removed from the resolution group' }

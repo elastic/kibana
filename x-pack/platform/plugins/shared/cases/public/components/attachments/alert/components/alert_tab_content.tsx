@@ -55,10 +55,10 @@ export const StackAlertTabContent = ({ caseData, onRemove }: CommonAttachmentLis
     [removeActions]
   );
 
-  // Not memoized: the alerts table appends its default bulk actions to this panel in place.
-  const removeBulkActions: BulkActionsPanelConfig[] | undefined = removeActions && [
-    { id: 0, items: [removeActions.bulkAction] },
-  ];
+  const removeBulkActions = useMemo<BulkActionsPanelConfig[] | undefined>(
+    () => removeActions && [{ id: 0, items: [removeActions.bulkAction] }],
+    [removeActions]
+  );
 
   const { isLoading, data: alertData } = useGetFeatureIds(alertIds, true);
 

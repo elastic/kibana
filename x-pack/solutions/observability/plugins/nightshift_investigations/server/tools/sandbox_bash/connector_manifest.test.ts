@@ -64,12 +64,10 @@ const renderManifest = async ({
   allowedConnectorIds = ['connector-1'],
   connectors = [createRawConnector()],
   withActionsClient = true,
-  secretKeys = [],
 }: {
   allowedConnectorIds?: readonly string[];
   connectors?: Array<Record<string, unknown>>;
   withActionsClient?: boolean;
-  secretKeys?: readonly string[];
 } = {}) => {
   const session = createSessionMock();
   const { getActionsClient } = createGetActionsClient(connectors);
@@ -79,7 +77,6 @@ const renderManifest = async ({
     session: session as unknown as SandboxSession,
     callContext: createCallContext(allowedConnectorIds),
     getActionsClient: withActionsClient ? (getActionsClient as any) : undefined,
-    secretKeys,
     logger,
   });
 
@@ -157,24 +154,6 @@ describe('writeConnectorManifest', () => {
       const { content } = await renderManifest({ withActionsClient: false });
 
       expect(content).toContain('*(No connectors are assigned to this agent.)*');
-    });
-  });
-
-  describe('sandbox secrets', () => {
-    it('documents the secret_keys contract and lists every available key', async () => {
-      const { content } = await renderManifest({ secretKeys: ['GITHUB_TOKEN', 'PAGERDUTY_KEY'] });
-
-      expect(content).toContain('# Sandbox Secrets');
-      expect(content).toContain('`secret_keys` parameter of the bash tool');
-      expect(content).toContain('- `GITHUB_TOKEN`');
-      expect(content).toContain('- `PAGERDUTY_KEY`');
-    });
-
-    it('notes when no secrets are configured', async () => {
-      const { content } = await renderManifest({ secretKeys: [] });
-
-      expect(content).toContain('# Sandbox Secrets');
-      expect(content).toContain('*(No secrets are configured in this space.)*');
     });
   });
 
