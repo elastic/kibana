@@ -13,7 +13,7 @@ import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 const paramsSchema = schema.object({
-  name: schema.string(),
+  name: schema.string({ maxLength: 1000 }),
 });
 
 async function getDatastreamsForComponentTemplate(

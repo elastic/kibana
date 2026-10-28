@@ -22,26 +22,32 @@ import { buildEcsObjects } from '../../helpers/build_ecs_objects';
 export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.details> = {
   buildDsl: (parsedRequest) => {
     const { authFilter, ...options } = parsedRequest;
-    const { indexName, eventId, runtimeMappings = {} } = options;
+    const { indexName, eventId, runtimeMappings = {}, includeHiddenIndices } = options;
     return buildTimelineDetailsQuery({
       indexName,
       id: eventId,
       runtimeMappings,
       authFilter,
+      includeHiddenIndices,
     });
   },
   parse: async (
     options,
     response: IEsSearchResponse<EventHit>
   ): Promise<TimelineEventsDetailsStrategyResponse> => {
-    const { indexName, eventId, runtimeMappings = {} } = options;
+    const { indexName, eventId, runtimeMappings = {}, includeHiddenIndices } = options;
     // _source is removed here as it's only needed in the rawEventData below
     const { fields, _source, ...hitsData } = response.rawResponse.hits.hits[0] ?? {};
 
     const inspect = {
       dsl: [
         inspectStringifyObject(
-          buildTimelineDetailsQuery({ indexName, id: eventId, runtimeMappings })
+          buildTimelineDetailsQuery({
+            indexName,
+            id: eventId,
+            runtimeMappings,
+            includeHiddenIndices,
+          })
         ),
       ],
     };

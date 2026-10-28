@@ -204,16 +204,13 @@ export class SettingsPageObject extends FtrService {
   }
 
   async getSaveDataViewButtonActive() {
+    // EuiButton renders its disabled state as the native `disabled` attribute rather than a
+    // class, and a disabled button never fires its onClick, so the element has to be probed
+    // directly: a click sent to it is dropped without throwing.
     await this.retry.waitFor('active save button', async () => {
-      return (
-        (
-          await this.find.allByCssSelector(
-            '[data-test-subj="saveIndexPatternButton"]:not(.euiButton-isDisabled)'
-          )
-        ).length === 1
-      );
+      return await (await this.getSaveIndexPatternButton()).isEnabled();
     });
-    return await this.testSubjects.find('saveIndexPatternButton');
+    return await this.getSaveIndexPatternButton();
   }
 
   async clickEditIndexButton() {
@@ -480,11 +477,22 @@ export class SettingsPageObject extends FtrService {
     }
   }
 
-  async addCustomDataViewId(value: string) {
+  // `toggleAdvancedSetting` flips the section between shown and hidden, so calling it
+  // unconditionally would collapse the section again when the form is filled a second time.
+  async showAdvancedSettings() {
+    if (await this.testSubjects.exists('advancedSettings')) {
+      return;
+    }
     await this.testSubjects.click('toggleAdvancedSetting');
+    await this.testSubjects.existOrFail('advancedSettings');
+  }
+
+  async addCustomDataViewId(value: string) {
+    await this.showAdvancedSettings();
     const customDataViewIdInput = await (
       await this.testSubjects.find('savedObjectIdField')
     ).findByTagName('input');
+    await customDataViewIdInput.clearValueWithKeyboard();
     await customDataViewIdInput.type(value);
   }
 
@@ -517,9 +525,14 @@ export class SettingsPageObject extends FtrService {
   }
 
   async allowHiddenClick() {
-    await this.testSubjects.click('toggleAdvancedSetting');
+    await this.showAdvancedSettings();
     const allowHiddenField = await this.testSubjects.find('allowHiddenField');
-    await (await allowHiddenField.findByTagName('button')).click();
+    const allowHiddenToggle = await allowHiddenField.findByTagName('button');
+    // The toggle is a switch, so re-clicking it on a second fill would turn allow-hidden back off.
+    if ((await allowHiddenToggle.getAttribute('aria-checked')) === 'true') {
+      return;
+    }
+    await allowHiddenToggle.click();
   }
 
   async createIndexPattern(
@@ -531,7 +544,12 @@ export class SettingsPageObject extends FtrService {
     dataViewName?: string,
     allowHidden?: boolean
   ) {
+    let hasSubmittedTheForm = false;
     await this.retry.try(async () => {
+      if (hasSubmittedTheForm && !(await this.testSubjects.exists('indexPatternEditorFlyout'))) {
+        // The save was accepted and the editor flyout closed: the data view was created.
+        return;
+      }
       await this.header.waitUntilLoadingHasFinished();
       await this.clickKibanaIndexPatterns();
 
@@ -578,8 +596,14 @@ export class SettingsPageObject extends FtrService {
           return validationError === '0';
         }
       );
+      await (await this.getSaveDataViewButtonActive()).click();
+      hasSubmittedTheForm = true;
 
-      await (await this.getSaveIndexPatternButton()).click();
+      // The Save click can be swallowed when it races the async CCS source
+      // resolution re-render, leaving the flyout open with nothing submitted.
+      // Confirm the flyout closed inside this retry.try so a swallowed click
+      // re-runs fill→save, rather than the URL loop below dead-polling forever.
+      await this.testSubjects.missingOrFail('indexPatternEditorFlyout', { timeout: 30000 });
     });
     await this.header.waitUntilLoadingHasFinished();
     await this.retry.try(async () => {

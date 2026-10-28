@@ -5,9 +5,11 @@
  * 2.0.
  */
 import { stringify } from 'querystring';
+import { CERTIFICATES_ROUTE } from '../constants/ui';
 
 const format = ({ pathname, query }: { pathname: string; query: Record<string, any> }): string => {
-  return `${pathname}?${stringify(query)}`;
+  const queryString = stringify(query);
+  return queryString ? `${pathname}?${queryString}` : pathname;
 };
 export const getSyntheticsErrorRouteFromMonitorId = ({
   configId,
@@ -24,3 +26,26 @@ export const getSyntheticsErrorRouteFromMonitorId = ({
       locationId,
     },
   });
+
+export const getSyntheticsCertificatesRoute = ({
+  commonName,
+  issuer,
+}: {
+  commonName?: string;
+  issuer?: string;
+}) => {
+  const query: Record<string, string> = {};
+
+  if (commonName) {
+    query.search = commonName;
+  }
+
+  if (issuer) {
+    query.issuers = JSON.stringify([issuer]);
+  }
+
+  return format({
+    pathname: `/app/synthetics${CERTIFICATES_ROUTE}`,
+    query,
+  });
+};

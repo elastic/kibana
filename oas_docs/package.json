@@ -11,7 +11,7 @@
     "@redocly/cli": "2.35.1"
   },
   "overrides": {
-    "axios": "1.15.2"
+    "axios": "1.19.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

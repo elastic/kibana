@@ -298,6 +298,7 @@ export class CsvGenerator {
         currentFilters,
         forceNow: this.job.forceNow,
         logger: this.logger,
+        timezone: settings.timezone,
       });
       this.logger.debug(() => `Updated filters: ${JSON.stringify(updatedFilters)}`, {
         tags: [this.jobId],

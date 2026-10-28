@@ -27,7 +27,7 @@ function findMatchingNodes(stats: any, nodeAttrs: string): any {
 }
 
 const paramsSchema = schema.object({
-  nodeAttrs: schema.string(),
+  nodeAttrs: schema.string({ maxLength: 1000 }),
 });
 
 export function registerDetailsRoute({
