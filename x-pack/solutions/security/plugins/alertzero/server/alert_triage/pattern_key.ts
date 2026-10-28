@@ -11,9 +11,12 @@
  *
  * Two levels of one key:
  * - strict: the rule, the detection and the normalised values of a fixed field set. An alert with
- *   no identifying field (path) has no strict key, so a Decision can never match "the whole rule".
+ *   no identifying field has no strict key, so a Decision can never match "the whole rule".
+ *   Process, file, library and registry alerts are identified by a path. Cloud and identity alerts
+ *   have no path, so they are identified by what was done and where (see `CLOUD_SCOPES`).
  * - wide: the strict condition with the executable and file path cut to their folder. Missing
- *   fields are empty values, so an alert with none of them gets `rule + detection`.
+ *   fields are empty values, so an alert with none of them gets `rule + detection`. A cloud alert
+ *   keeps that wide key, so grouping is the same as before the cloud strict key existed.
  *
  * An offline reference implementation of the keys, not checked in because it works on real alert data,
  * produced the parity fixture. The parity test checks that this module groups the fixture alerts the same way.
@@ -27,10 +30,11 @@ export interface PatternKeys {
   wide: string;
 }
 
-type Kind = 'library' | 'registry' | 'file' | 'process';
+type PathKind = 'library' | 'registry' | 'file' | 'process';
+type Kind = PathKind | 'cloud';
 
 /** Most specific first, process last: file, library and registry events also carry `process.executable`. */
-const KINDS: readonly Kind[] = ['library', 'registry', 'file', 'process'];
+const KINDS: readonly PathKind[] = ['library', 'registry', 'file', 'process'];
 
 interface FieldSet {
   fields: readonly string[];
@@ -39,7 +43,7 @@ interface FieldSet {
   hash?: string;
 }
 
-const FIELD_SETS: Record<Kind, FieldSet> = {
+const FIELD_SETS: Record<PathKind, FieldSet> = {
   library: {
     fields: ['dll.path', 'dll.code_signature.subject_name'],
     identifying: 'dll.path',
@@ -61,6 +65,17 @@ const FIELD_SETS: Record<Kind, FieldSet> = {
     hash: 'process.hash.sha256',
   },
 };
+
+/**
+ * The strict condition of an alert with no path: `event.action` plus the first scope it has, the
+ * cloud account, else the user. The action alone would be the whole rule (one rule collapsed 67,000
+ * alerts into one key); the scope splits it by account or person. Chosen on InfoSec's top 100 rules
+ * without path fields (800,000 alerts in 7 days): action + account gave 6,805 keys of which 97% of
+ * alerts repeat, and action + user 82,745 keys of which 93% repeat. Adding the source IP gave 292,000
+ * keys, mostly seen once. An alert with no action, or with neither scope, has no strict key.
+ */
+const CLOUD_ACTION = 'event.action';
+const CLOUD_SCOPES = ['cloud.account.id', 'user.name'] as const;
 
 const SIGNER_SUFFIX = 'subject_name';
 const WIDE_PATH_FIELDS = ['process.executable', 'file.path'];
@@ -144,7 +159,7 @@ const toFolder = (path: string): string => {
 };
 
 /** The kinds `event.category` names first, then the rest, so every alert tries all four. */
-const candidateKinds = (doc: AlertDocument): Kind[] => {
+const candidateKinds = (doc: AlertDocument): PathKind[] => {
   const categories = ([] as unknown[]).concat(
     (doc.event as AlertDocument | undefined)?.category ?? doc['event.category'] ?? []
   );
@@ -160,12 +175,22 @@ interface Condition {
   values: Array<[string, string]>;
 }
 
+const buildCloudCondition = (doc: AlertDocument): Condition | undefined => {
+  const scope = CLOUD_SCOPES.find((field) => isPresent(getField(doc, field)));
+  if (!isPresent(getField(doc, CLOUD_ACTION)) || scope === undefined) return undefined;
+  const values = [CLOUD_ACTION, scope].map((field): [string, string] => [
+    field,
+    String(getField(doc, field)),
+  ]);
+  return { kind: 'cloud', values: values.sort(byField) };
+};
+
 const buildCondition = (doc: AlertDocument): Condition | undefined => {
   const osType = getField(doc, 'host.os.type');
   const kind = candidateKinds(doc).find((candidate) =>
     isPresent(getField(doc, FIELD_SETS[candidate].identifying))
   );
-  if (kind === undefined) return undefined;
+  if (kind === undefined) return buildCloudCondition(doc);
 
   const { fields, hash } = FIELD_SETS[kind];
   const wanted = [...fields];
@@ -209,6 +234,8 @@ const widen = ({ kind, values }: Condition): Condition => ({
  */
 export const PATTERN_KEY_SOURCE_FIELDS: readonly string[] = [
   ...new Set([
+    CLOUD_ACTION,
+    ...CLOUD_SCOPES,
     ...Object.values(FIELD_SETS).flatMap(({ fields, identifying, hash }) => [
       ...fields,
       identifying,
@@ -255,5 +282,7 @@ export const describePatternKey = (key: string): PatternKeyDescription => {
 export const buildPatternKeys = (doc: AlertDocument): PatternKeys => {
   const condition = buildCondition(doc);
   if (condition === undefined) return { wide: serialize(doc, undefined) };
-  return { strict: serialize(doc, condition), wide: serialize(doc, widen(condition)) };
+  // A cloud alert keeps its wide key, so proposals and grouping do not change; only decisions use the new strict key.
+  const wide = condition.kind === 'cloud' ? undefined : widen(condition);
+  return { strict: serialize(doc, condition), wide: serialize(doc, wide) };
 };

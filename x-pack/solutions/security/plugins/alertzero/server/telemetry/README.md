@@ -219,7 +219,7 @@ Emitted by the Alert Triage Worker once for each classified batch, after it tagg
 | Field | Type | Required | Description |
 |---|---|---|---|
 | envelope | | | See above |
-| `alerts_with_strict_key` | long | yes | Classified alerts with a strict pattern key, whatever their verdict. An alert with no identifying field (path) has none |
+| `alerts_with_strict_key` | long | yes | Classified alerts with a strict pattern key, whatever their verdict. An alert has none when it has no identifying field: a path, or for a cloud or identity alert an `event.action` plus a `cloud.account.id` or `user.name` |
 | `strict_keys` | long | yes | Distinct strict keys among those alerts |
 | `strict_keys_single_alert` | long | yes | Strict keys that only one alert of the batch has |
 | `wide_keys` | long | yes | Distinct wide keys among the classified alerts. Every alert has one |
