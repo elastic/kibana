@@ -6,33 +6,24 @@
  */
 
 import { isValidTraceId } from '@opentelemetry/api';
-import type {
-  CoreRequestHandlerContext,
-  ElasticsearchClient,
-  KibanaRequest,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { EvaluationSubject, EvaluateResponse, Model } from '@kbn/evals-common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
+import { isResponseError } from '@kbn/es-errors';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { z } from '@kbn/zod/v4';
 import { mapWithConcurrency } from '@kbn/evals-runner';
-import { withEvaluatorNameBaggage } from '../../../evaluators/evaluator_tracing_context';
-import { formatEvidenceSchemaIssues } from '../../../evaluators/evidence/schema_issues';
-import { createTraceAccessor } from '../../../evaluators/trace_accessor';
-import { awaitTraceReady, TraceReadinessError } from '../../../evaluators/trace_readiness';
-import type { EvaluatorDefinition } from '../../../evaluators/types';
-import { resolveConnectorModel } from '../../../lib/resolve_connector_model';
+import { withEvaluatorNameBaggage } from '../evaluators/evaluator_tracing_context';
+import { formatEvidenceSchemaIssues } from '../evaluators/evidence/schema_issues';
+import { createTraceAccessor } from '../evaluators/trace_accessor';
+import { awaitTraceReady, TraceReadinessError } from '../evaluators/trace_readiness';
+import type { EvaluatorDefinition } from '../evaluators/types';
+import { resolveConnectorModel } from '../lib/resolve_connector_model';
+import { EvaluationExecutionError } from './evaluation_execution_error';
 
 /** Max evaluators graded in parallel for one trace; bounds concurrent judge-model calls. */
 export const EVALUATOR_CONCURRENCY = 4;
-
-export class EvaluationExecutionError extends Error {
-  constructor(message: string, public readonly responseType: 'badRequest' | 'notFound') {
-    super(message);
-    this.name = 'EvaluationExecutionError';
-  }
-}
 
 export interface ResolvedEvaluator {
   definition: EvaluatorDefinition;
@@ -40,7 +31,7 @@ export interface ResolvedEvaluator {
 }
 
 interface ExecuteEvaluatorsOptions {
-  coreContext: CoreRequestHandlerContext;
+  /** Binds the judge's inference client and resolves its connector's model. */
   request: KibanaRequest;
   subject: EvaluationSubject;
   evaluators: ResolvedEvaluator[];
@@ -55,7 +46,6 @@ interface ExecuteEvaluatorsOptions {
 }
 
 export const executeEvaluators = async ({
-  coreContext,
   request,
   subject,
   evaluators,
@@ -116,6 +106,12 @@ export const executeEvaluators = async ({
   } catch (error) {
     if (error instanceof TraceReadinessError) {
       throw new EvaluationExecutionError(error.message, 'notFound');
+    }
+    if (isResponseError(error) && error.statusCode === 403) {
+      throw new EvaluationExecutionError(
+        'Insufficient Elasticsearch privileges to read the trace. Grant read access to traces-* and logs-*.',
+        'forbidden'
+      );
     }
     throw error;
   }
