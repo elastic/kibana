@@ -60,14 +60,6 @@ export class InferenceFeatureRegistry {
       };
     }
 
-    const parentIsHidden =
-      feature.parentFeatureId !== undefined && this.features.get(feature.parentFeatureId)?.isHidden;
-    if (parentIsHidden && !feature.isHidden) {
-      const error = `Feature "${feature.featureId}" must be hidden because its parent "${feature.parentFeatureId}" is hidden.`;
-      this.logger.error(`Failed to register inference feature: ${error}`);
-      return { ok: false, error };
-    }
-
     this.features.set(feature.featureId, {
       ...feature,
       recommendedEndpoints: normalizeRecommendedEndpoints(feature.recommendedEndpoints),

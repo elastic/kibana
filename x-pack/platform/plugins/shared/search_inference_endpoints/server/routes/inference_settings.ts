@@ -165,7 +165,7 @@ export const defineInferenceSettingsRoutes = ({
       errorHandler(logger)(async (context, request, response) => {
         const attrs = request.body;
 
-        const validationErrors = validateInferenceSettings(attrs, featureRegistry);
+        const validationErrors = validateInferenceSettings(attrs);
         if (validationErrors.length > 0) {
           return response.badRequest({
             body: {

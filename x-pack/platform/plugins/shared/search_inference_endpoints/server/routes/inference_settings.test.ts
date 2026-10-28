@@ -15,7 +15,6 @@ import {
 } from '../../common/constants';
 import { APIRoutes } from '../../common/types';
 import { MockRouter } from '../../__mocks__/router.mock';
-import { InferenceFeatureRegistry } from '../inference_feature_registry';
 import { defineInferenceSettingsRoutes } from './inference_settings';
 
 const mockFeatureRegistry = {
@@ -350,56 +349,6 @@ describe('Inference Settings API', () => {
             errors: expect.arrayContaining([
               expect.stringContaining('Duplicate endpoints in feature "agent_builder"'),
             ]),
-          },
-        },
-      });
-    });
-
-    it('should reject saving models for hidden features', async () => {
-      const featureRegistry = new InferenceFeatureRegistry(mockLogger);
-      featureRegistry.register({
-        featureId: 'visible_feature',
-        featureName: 'Visible',
-        featureDescription: 'Visible.',
-        taskType: 'chat_completion',
-        recommendedEndpoints: ['.endpoint-a'],
-      });
-      featureRegistry.register({
-        featureId: 'hidden_feature',
-        featureName: 'Hidden',
-        featureDescription: 'Hidden.',
-        taskType: 'chat_completion',
-        recommendedEndpoints: ['.endpoint-b'],
-        isHidden: true,
-      });
-      const router = new MockRouter({
-        context,
-        method: 'put',
-        path: APIRoutes.PUT_INFERENCE_SETTINGS,
-        version: ROUTE_VERSIONS.v1,
-      });
-      defineInferenceSettingsRoutes({
-        logger: mockLogger,
-        router: router.router,
-        featureRegistry,
-        getConnectorById,
-      });
-
-      await router.callRoute({
-        body: {
-          features: [
-            { feature_id: 'visible_feature', endpoints: [{ id: '.endpoint-a' }] },
-            { feature_id: 'hidden_feature', endpoints: [{ id: '.endpoint-c' }] },
-          ],
-        },
-      });
-
-      expect(mockSOClient.create).not.toHaveBeenCalled();
-      expect(router.response.badRequest).toHaveBeenCalledWith({
-        body: {
-          message: 'Invalid inference settings',
-          attributes: {
-            errors: ['Models for hidden features cannot be changed: hidden_feature'],
           },
         },
       });

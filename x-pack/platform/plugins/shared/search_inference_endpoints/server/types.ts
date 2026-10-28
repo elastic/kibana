@@ -38,16 +38,11 @@ export interface InferenceFeatureConfig {
    */
   allowTemplateRequiredModels?: boolean;
   /**
-   * When true, the feature is not shown on the Feature settings page and admins
-   * can't change its models. Saved model settings for the feature and its parents
-   * are ignored, so it resolves like a feature with no saved settings: its
-   * `recommendedEndpoints` (or the nearest parent's) with their parameters.
-   * The global default model and the feature specific models toggle still apply,
-   * as they do for visible features: the global default model goes first unless
-   * `ignoreGlobalDefault` is set, and when feature specific models are off only
-   * the global default model is returned, without parameters.
-   * A visible feature can't use a hidden feature as its parent. Hide the parent
-   * too when all of its sub-features are hidden.
+   * When true, the feature is not shown on the Feature settings page, so admins
+   * can't change its models there. Its models resolve the same way as for visible
+   * features: its `recommendedEndpoints` (or the nearest parent's) with their
+   * parameters, and the global default model and the feature specific models
+   * toggle still apply. Set `ignoreGlobalDefault` to skip the global default model.
    */
   isHidden?: boolean;
   visibilityCondition?: {
