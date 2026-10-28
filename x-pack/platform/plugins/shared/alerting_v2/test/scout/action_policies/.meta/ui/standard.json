@@ -1,5 +1,5 @@
 {
-  "sha1": "80176e2f583f4d51e1ec55f5a2943eca6ba142f3",
+  "sha1": "b9bba22a52e6f4eae98900116d33ef5de25a3bd0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -114,6 +114,62 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_affected_rules.spec.ts",
         "line": 69,
         "column": 7
+      }
+    },
+    {
+      "id": "fef2892633c85b5-73105c6e4a9d4df",
+      "title": "Action policy attachment canvas in Agent Builder renders the policy definition for a proposed policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_attachment_canvas.spec.ts",
+        "line": 160,
+        "column": 22
+      }
+    },
+    {
+      "id": "fef2892633c85b5-e79fe8ff8a4bb24",
+      "title": "Action policy attachment canvas in Agent Builder Create policy persists the policy and switches to persisted actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_attachment_canvas.spec.ts",
+        "line": 175,
+        "column": 11
+      }
+    },
+    {
+      "id": "fef2892633c85b5-dd860bd5197522f",
+      "title": "Action policy attachment canvas in Agent Builder View in Policies opens the persisted policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_attachment_canvas.spec.ts",
+        "line": 208,
+        "column": 18
+      }
+    },
+    {
+      "id": "fef2892633c85b5-1d20d0eba541076",
+      "title": "Action policy attachment canvas in Agent Builder closes and reopens the canvas without losing its content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_attachment_canvas.spec.ts",
+        "line": 220,
+        "column": 83
       }
     }
   ]
