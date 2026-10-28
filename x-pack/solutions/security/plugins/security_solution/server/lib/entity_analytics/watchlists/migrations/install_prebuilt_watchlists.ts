@@ -314,6 +314,12 @@ const ensureEntitySources = async ({
 /**
  * Backfills `integrations.syncMarkerIndex` on a pre-existing managed integration source that
  * was created before the prebuilt definitions carried it.
+ *
+ * Deliberately resets `integrations.syncData`. A source backfilled here has, by definition, never had a
+ * successful deletion-detection pass, but update detection kept running and advancing
+ * `lastUpdateProcessed` the whole time. Clearing `syncData` makes the next update-detection pass fall
+ * back to its normal first-run window, putting this source on the same footing as a freshly
+ * created one before deletion detection ever runs against it.
  */
 const backfillSyncMarkerIndex = async ({
   sourceClient,
@@ -337,10 +343,10 @@ const backfillSyncMarkerIndex = async ({
 
   await sourceClient.update({
     id: existing.id,
-    integrations: { syncMarkerIndex: expectedSyncMarkerIndex },
+    integrations: { syncMarkerIndex: expectedSyncMarkerIndex, syncData: {} },
   });
   logger.info(
-    `Backfilled missing integrations.syncMarkerIndex on entity source '${entitySourceInput.name}'`
+    `Backfilled missing integrations.syncMarkerIndex on entity source '${entitySourceInput.name}' and reset its syncData.`
   );
 };
 
