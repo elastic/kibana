@@ -52,7 +52,7 @@ import { AttachmentPillsRow } from './attachment_pills_row';
 import { useImageUpload } from './use_image_upload';
 import {
   getPocLeadingMention,
-  parsePocMentions,
+  usePocMentionScope,
 } from './message_editor/command_menu/menus/mentions';
 
 const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.container.label', {
@@ -60,7 +60,7 @@ const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.
 });
 
 const postToTeamLabel = i18n.translate('xpack.agentBuilder.conversationInput.postToTeam.label', {
-  defaultMessage: 'Leaving a post to the team',
+  defaultMessage: "Posting to the team · Agent won't respond.",
 });
 
 const getMessageTooLongLabel = (characterCount: number): string =>
@@ -148,9 +148,8 @@ const InputContainer: React.FC<
     isDisabled: boolean;
     isCollapsed: boolean;
     triggerMode: ChatTriggerMode;
-    headerLabel?: string;
   }>
-> = ({ children, isDisabled, isCollapsed, triggerMode, headerLabel }) => {
+> = ({ children, isDisabled, isCollapsed, triggerMode }) => {
   const showHeader = triggerMode === ChatTriggerMode.Never;
 
   return (
@@ -170,7 +169,7 @@ const InputContainer: React.FC<
         <div css={headerClipStyles}>
           <div css={headerContentStyles}>
             <EuiIcon type="megaphone" size="s" aria-hidden={true} />
-            <EuiText size="xs">{headerLabel ?? postToTeamLabel}</EuiText>
+            <EuiText size="xs">{postToTeamLabel}</EuiText>
           </div>
         </div>
       </div>
@@ -194,9 +193,10 @@ const InputContainer: React.FC<
  */
 const useTriggerMode = () => {
   const conversationId = useConversationId();
-  const isShared = useIsSharedConversation();
-  // POC: always offer the toggle so mentions can flip it, even in a private conversation
-  const isSelectable = isShared || true;
+  const isSharedConversation = useIsSharedConversation();
+  // POC: the Storybook demo has no server, so it tells the input whether the chat is shared
+  const { isShared: isSharedInDemo } = usePocMentionScope();
+  const isSelectable = isSharedInDemo ?? isSharedConversation;
 
   const [choice, setChoice] = useState<{
     conversationId?: string;
@@ -343,31 +343,52 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   const { triggerMode, setTriggerMode, isSelectable: isTriggerModeSelectable } = useTriggerMode();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
 
-  // POC: only a mention at the very start of the message switches the posting mode.
-  // It switches once per leading mention, so a manual toggle change afterwards sticks.
-  const pocLeadingMentionIdRef = useRef<string | undefined>(undefined);
-  const [pocMentionedUsers, setPocMentionedUsers] = useState('');
-  pocOnContentChangeRef.current = (content) => {
-    setPocMentionedUsers(
-      parsePocMentions(content)
-        .filter(({ kind }) => kind === 'user')
-        .map(({ name }) => name)
-        .filter((name, index, names) => names.indexOf(name) === index)
-        .join(', ')
-    );
-    const leadingMention = getPocLeadingMention(content);
-    if (leadingMention?.id === pocLeadingMentionIdRef.current) {
-      return;
-    }
-    pocLeadingMentionIdRef.current = leadingMention?.id;
-    if (!leadingMention) {
-      return;
-    }
-    setTriggerMode(leadingMention.kind === 'user' ? ChatTriggerMode.Never : ChatTriggerMode.Always);
+  // POC: toggle rules. Only a mention chip at the very start of the message switches the mode.
+  // It is checked on every content change. When the message stops starting with a mention, the
+  // toggle goes back to what it was before. A manual toggle change turns automatic switching off
+  // until the message is sent.
+  const { isShared: isSharedInDemo } = usePocMentionScope();
+  const pocTriggerModeRef = useRef(triggerMode);
+  pocTriggerModeRef.current = triggerMode;
+  const pocModeBeforeMentionRef = useRef<ChatTriggerMode | undefined>(undefined);
+  const pocManualOverrideRef = useRef(false);
+  const pocSetAutoTriggerMode = (mode: ChatTriggerMode) => {
+    pocTriggerModeRef.current = mode;
+    setTriggerMode(mode);
   };
+  pocOnContentChangeRef.current = (content) => {
+    if (!isTriggerModeSelectable || pocManualOverrideRef.current) {
+      return;
+    }
+    const leadingMention = getPocLeadingMention(content);
+    if (!leadingMention) {
+      const modeBefore = pocModeBeforeMentionRef.current;
+      pocModeBeforeMentionRef.current = undefined;
+      if (modeBefore !== undefined && modeBefore !== pocTriggerModeRef.current) {
+        pocSetAutoTriggerMode(modeBefore);
+      }
+      return;
+    }
+    if (pocModeBeforeMentionRef.current === undefined) {
+      pocModeBeforeMentionRef.current = pocTriggerModeRef.current;
+    }
+    const mentionMode =
+      leadingMention.kind === 'user' ? ChatTriggerMode.Never : ChatTriggerMode.Always;
+    if (mentionMode !== pocTriggerModeRef.current) {
+      pocSetAutoTriggerMode(mentionMode);
+    }
+  };
+  // POC: this is only called from the toggle itself, so it means the user flipped it by hand
+  const pocHandleManualTriggerModeChange = (mode: ChatTriggerMode) => {
+    pocManualOverrideRef.current = true;
+    pocModeBeforeMentionRef.current = undefined;
+    pocTriggerModeRef.current = mode;
+    setTriggerMode(mode);
+  };
+  // POC: after send, the toggle stays where it is and automatic switching is on again
   const pocResetMentions = () => {
-    pocLeadingMentionIdRef.current = undefined;
-    setPocMentionedUsers('');
+    pocManualOverrideRef.current = false;
+    pocModeBeforeMentionRef.current = undefined;
   };
   // POC: the @ button types "@" at the caret (or at the end), which opens the mentions menu
   const pocInsertMentionTrigger = () => {
@@ -395,10 +416,6 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     const needsSpace = previousChar !== undefined && !/[\s\u200B]/.test(previousChar);
     document.execCommand('insertText', false, needsSpace ? ' @' : '@');
   };
-  const pocHeaderLabel =
-    triggerMode === ChatTriggerMode.Never && pocMentionedUsers
-      ? `Sending to ${pocMentionedUsers} - they will get a notification`
-      : undefined;
 
   const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
     useImageUpload({
@@ -591,7 +608,6 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       isDisabled={isInputDisabled}
       isCollapsed={shouldCollapseInput}
       triggerMode={triggerMode}
-      headerLabel={pocHeaderLabel}
     >
       {(visibleAttachments.length > 0 || uploadingNames.size > 0) && (
         <EuiFlexItem grow={false}>
@@ -632,8 +648,8 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
           isSubmitting={isCreatingConversation || isSendingUserMessage}
           showTriggerModeSelector={isTriggerModeSelectable}
           triggerMode={triggerMode}
-          onTriggerModeChange={setTriggerMode}
-          onMentionClick={pocInsertMentionTrigger}
+          onTriggerModeChange={pocHandleManualTriggerModeChange}
+          onMentionClick={isSharedInDemo === false ? undefined : pocInsertMentionTrigger}
         />
       )}
     </InputContainer>

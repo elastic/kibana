@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Skills } from './menus/skills';
 import { Sml } from './menus/sml';
-import { Mentions } from './menus/mentions';
+import { Mentions, usePocMentionScope } from './menus/mentions';
 import type { CommandDefinition } from './types';
 import { CommandId } from './types';
 import { useExperimentalFeatures } from '../../../../../hooks/use_experimental_features';
@@ -64,11 +64,15 @@ export const getCommandDefinitionByScheme = (scheme: string) => {
  */
 export const useAvailableCommandDefinitions = (): readonly CommandDefinition[] => {
   const isSmlEnabled = useExperimentalFeatures();
+  // POC: `@` is a normal character in a private, not shared chat
+  const { isShared } = usePocMentionScope();
 
-  return useMemo(() => {
-    if (isSmlEnabled) {
-      return sortedCommandDefinitions;
-    }
-    return sortedCommandDefinitions.filter((c) => !c.experimental);
-  }, [isSmlEnabled]);
+  return useMemo(
+    () =>
+      sortedCommandDefinitions.filter(
+        (c) =>
+          (isSmlEnabled || !c.experimental) && (isShared !== false || c.id !== CommandId.Mention)
+      ),
+    [isSmlEnabled, isShared]
+  );
 };

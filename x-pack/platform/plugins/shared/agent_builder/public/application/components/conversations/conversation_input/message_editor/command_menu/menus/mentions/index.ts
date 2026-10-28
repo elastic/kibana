@@ -9,6 +9,7 @@ export {
   Mentions,
   POC_SPACE_USERS,
   PocMentionScopeProvider,
+  usePocMentionScope,
   parsePocMentions,
   getPocLeadingMention,
 } from './mentions';
