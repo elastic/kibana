@@ -633,6 +633,25 @@ describe('huntCoordinator', () => {
       );
     });
 
+    it('does not apply the ledger to a manual run, which replays the whole report', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+
+      await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        allTiers({} as ScopedModel),
+        logger,
+        {
+          spaceId: 'default',
+          indexPatterns: INDEX_PATTERNS,
+          trigger: 'manual',
+          run_id: 'run-ledger-manual',
+          report_id: 'rpt-1',
+        }
+      );
+
+      expect(mockT2.mock.calls.at(-1)?.[2]).not.toHaveProperty('already_searched_technique_ids');
+    });
+
     it('does not apply the ledger to text the caller supplied, which is a different search', async () => {
       mockLoad.mockResolvedValueOnce(loaded);
 

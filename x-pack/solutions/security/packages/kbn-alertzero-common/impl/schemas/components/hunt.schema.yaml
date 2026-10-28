@@ -53,8 +53,9 @@ components:
         produces the same gap, so retrying only re-spends it. `collapsed` is the
         generation budget's gap for a technique whose evidence names the same
         report artifacts as another technique's: the other one generated first,
-        its query was seen to filter on those artifacts, and the budget ran out
-        before this one got a query of its own. The artifacts were searched; this
+        its query was seen to filter on those artifacts and executed
+        conclusively, and the budget ran out before this one got a query of its
+        own. The artifacts were searched; this
         technique's own behavior was not. The same report and quotes reproduce it.
         `input_truncated` means the report carried more IOCs, techniques or text
         than a hunt accepts, so only a prefix of it was hunted.

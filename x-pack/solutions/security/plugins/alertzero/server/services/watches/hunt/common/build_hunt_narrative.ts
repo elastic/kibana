@@ -322,7 +322,7 @@ const describeCoverage = (result: HuntCoordinatorCoreResult): string[] => {
     lines.push(
       `**Still to be searched (${stillToSearch.length}):** ${codeList(
         stillToSearch
-      )}. A later sweep continues with these; techniques this run already searched are not repeated.`
+      )}. A later sweep continues with these while the report is still inside the sweep's publish-date window; techniques this run already searched are not repeated.`
     );
   }
   return lines;

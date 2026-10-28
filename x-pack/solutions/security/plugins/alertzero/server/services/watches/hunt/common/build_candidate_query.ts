@@ -144,7 +144,9 @@ export const buildCandidateQuery = async (
     // A hunted report is retired unless it is flagged `coverage_pending`: an earlier run searched
     // only part of it (techniques past the generation budget, or a transient gap) and recorded the
     // rest as still to do. A report without the flag, including every one hunted before the flag
-    // existed, stays retired.
+    // existed, stays retired. A pending report is still subject to the publish-date lookback below,
+    // on purpose: with no attempt counter, the window is what stops a report whose gap never clears
+    // from being retried forever. The hunt narrative says so.
     filterClauses.push({
       bool: {
         must_not: [
