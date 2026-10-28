@@ -9,18 +9,14 @@ import { posix } from 'path';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { OutputRedactor } from '../tools/sandbox_bash/output_redactor';
 import {
-  RECORDER_FINDINGS_PATH,
-  RECORDER_LIST_MAX_ENTRIES,
   RECORDER_READ_DEFAULT_BYTES,
   RECORDER_READ_MAX_BYTES,
   RECORDER_RESULTS_DIR,
   RECORDER_WORKSPACE_ROOT,
 } from './constants';
 
-/** The tools the final pass may call: two to read the investigation's workspace, one to answer. */
+/** The tool the final pass may call to read the investigation's workspace. Read-only. */
 export const RECORDER_READ_FILE_TOOL = 'recorder_read_file';
-export const RECORDER_LIST_FILES_TOOL = 'recorder_list_files';
-export const RECORDER_WRITE_FILE_TOOL = 'recorder_write_file';
 
 export const RECORDER_READ_FILE_SCHEMA = {
   type: 'object',
@@ -41,40 +37,13 @@ export const RECORDER_READ_FILE_SCHEMA = {
   required: ['path'],
 } as const;
 
-export const RECORDER_LIST_FILES_SCHEMA = {
-  type: 'object',
-  properties: {
-    dir: {
-      type: 'string',
-      description: 'Absolute path of a directory under /workspace.',
-    },
-  },
-  required: ['dir'],
-} as const;
-
-/** The write tool takes no path: it can only ever write the findings file. */
-export const RECORDER_WRITE_FILE_SCHEMA = {
-  type: 'object',
-  properties: {
-    content: {
-      type: 'string',
-      description: `The whole record as JSON, in the format given in the system prompt. It is written to ${RECORDER_FINDINGS_PATH}.`,
-    },
-  },
-  required: ['content'],
-} as const;
-
-/** What the final pass can do in the workspace: read what exists, and write its one findings file. */
+/** What the final pass can do in the workspace: read what exists, and leave the round's results. */
 export interface RecorderWorkspace {
   /** Writes the full text of tool results the recorder is shown clipped. */
   writeResults: (files: ReadonlyArray<{ path: string; content: string }>) => Promise<void>;
-  /** Writes the record the final pass answered with, to the one path it may write. */
-  writeFindings: (content: string) => Promise<void>;
   readFile: (args: { path: string; offset?: number; length?: number }) => Promise<string>;
-  listFiles: (args: { dir: string }) => Promise<string>;
 }
 
-/** A directory name is passed to `find` inside single quotes, so only plain characters are allowed. */
 const SAFE_PATH = /^[A-Za-z0-9_./ -]+$/;
 
 /**
@@ -122,13 +91,6 @@ export const createRecorderWorkspace = ({
     );
   },
 
-  writeFindings: async (content) => {
-    await session.mkdirs([posix.dirname(RECORDER_FINDINGS_PATH)]);
-    await session.writeFiles([
-      { path: RECORDER_FINDINGS_PATH, content: Buffer.from(content, 'utf8') },
-    ]);
-  },
-
   readFile: async ({ path: rawPath, offset, length }) => {
     const resolved = resolveWorkspacePath(rawPath);
     if (!resolved.ok) return `Error: ${resolved.reason}`;
@@ -136,8 +98,7 @@ export const createRecorderWorkspace = ({
 
     const [stat] = await session.statFiles([path]);
     if (!stat?.exists) return `Error: ${path} does not exist.`;
-    if (stat.is_dir)
-      return `Error: ${path} is a directory. List it with ${RECORDER_LIST_FILES_TOOL}.`;
+    if (stat.is_dir) return `Error: ${path} is a directory, not a file.`;
 
     const start = toInt(offset, 0, 0, Number.MAX_SAFE_INTEGER);
     const count = toInt(length, RECORDER_READ_DEFAULT_BYTES, 1, RECORDER_READ_MAX_BYTES);
@@ -151,22 +112,5 @@ export const createRecorderWorkspace = ({
         ? `\n[bytes ${start}-${end} of ${stat.size}; read on with offset ${end}]`
         : '';
     return `${redactor.redact(slice.toString('utf8'))}${more}`;
-  },
-
-  listFiles: async ({ dir: rawDir }) => {
-    const resolved = resolveWorkspacePath(rawDir);
-    if (!resolved.ok) return `Error: ${resolved.reason}`;
-    const { path } = resolved;
-
-    // A fixed command with the validated path quoted: the model never supplies shell syntax.
-    const { stdout, exit_code: exitCode } = await session.runCommand({
-      command: `find '${path}' -mindepth 1 -maxdepth 1 -printf '%y %s %p\\n' | sort -k3 | head -n ${RECORDER_LIST_MAX_ENTRIES}`,
-      timeout_seconds: 15,
-    });
-    if (exitCode !== 0) return `Error: ${path} could not be listed.`;
-    const listing = stdout.trim();
-    return redactor.redact(
-      listing.length > 0 ? `type size path\n${listing}` : `${path} is empty or does not exist.`
-    );
   },
 });

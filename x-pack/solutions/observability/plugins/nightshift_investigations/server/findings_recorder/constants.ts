@@ -29,12 +29,9 @@ export const ANSWER_MAX_CHARS = 20_000;
 export const RECORDER_WORKSPACE_ROOT = '/workspace';
 /** Full text of the tool results that the recorder is shown clipped, written at the final pass. */
 export const RECORDER_RESULTS_DIR = '/workspace/.recorder/results';
-/** The one file the final pass may write: its record, as JSON in the output format. */
-export const RECORDER_FINDINGS_PATH = '/workspace/.recorder/findings.json';
 /** Model calls the final pass may spend reading files before it must answer. */
 export const RECORDER_MAX_TOOL_ROUNDS = 10;
 /** Reads and lists the final pass may make in total, so a loop cannot read the whole workspace. */
 export const RECORDER_MAX_TOOL_CALLS = 20;
 export const RECORDER_READ_DEFAULT_BYTES = 16_000;
 export const RECORDER_READ_MAX_BYTES = 32_000;
-export const RECORDER_LIST_MAX_ENTRIES = 200;

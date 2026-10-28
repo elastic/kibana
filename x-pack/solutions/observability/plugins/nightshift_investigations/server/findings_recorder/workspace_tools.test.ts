@@ -54,7 +54,6 @@ describe('createRecorderWorkspace', () => {
       ),
       writeFiles: jest.fn().mockResolvedValue([]),
       mkdirs: jest.fn().mockResolvedValue([true]),
-      runCommand: jest.fn().mockResolvedValue({ stdout: '', stderr: '', exit_code: 0 }),
     };
     const workspace = createRecorderWorkspace({
       session: session as unknown as SandboxSession,
@@ -113,27 +112,8 @@ describe('createRecorderWorkspace', () => {
     await expect(workspace.readFile({ path: '/etc/passwd' })).resolves.toContain(
       'Only paths under'
     );
-    await expect(workspace.listFiles({ dir: '/' })).resolves.toContain('Only paths under');
     expect(session.statFiles).not.toHaveBeenCalled();
-    expect(session.runCommand).not.toHaveBeenCalled();
-  });
-
-  it('lists a directory with a fixed command and the path quoted', async () => {
-    const { workspace, session } = setup();
-    session.runCommand.mockResolvedValue({
-      stdout: 'f 3000 /workspace/.recorder/results/001-x.txt\n',
-      stderr: '',
-      exit_code: 0,
-    });
-
-    const text = await workspace.listFiles({ dir: '/workspace/.recorder/results' });
-
-    expect(text).toContain('/workspace/.recorder/results/001-x.txt');
-    expect(session.runCommand).toHaveBeenCalledWith(
-      expect.objectContaining({
-        command: expect.stringContaining("find '/workspace/.recorder/results' -mindepth 1"),
-      })
-    );
+    expect(session.readFiles).not.toHaveBeenCalled();
   });
 
   it('writes the results into the recorder directory', async () => {
@@ -147,17 +127,5 @@ describe('createRecorderWorkspace', () => {
     expect(session.writeFiles).toHaveBeenCalledWith([
       { path: '/workspace/.recorder/results/001-x.txt', content: Buffer.from('abc') },
     ]);
-  });
-
-  it('writes the record to the one findings path, which it takes no argument for', async () => {
-    const { workspace, session } = setup();
-
-    await workspace.writeFindings('{"summary":"s"}');
-
-    expect(session.mkdirs).toHaveBeenCalledWith(['/workspace/.recorder']);
-    expect(session.writeFiles).toHaveBeenCalledWith([
-      { path: '/workspace/.recorder/findings.json', content: Buffer.from('{"summary":"s"}') },
-    ]);
-    expect(workspace.writeFindings.length).toBe(1);
   });
 });

@@ -35,12 +35,8 @@ import {
 import { buildRecorderSystemPrompt } from './prompt';
 import { RECORDER_MAX_TOOL_CALLS, RECORDER_MAX_TOOL_ROUNDS } from './constants';
 import {
-  RECORDER_LIST_FILES_SCHEMA,
-  RECORDER_LIST_FILES_TOOL,
   RECORDER_READ_FILE_SCHEMA,
   RECORDER_READ_FILE_TOOL,
-  RECORDER_WRITE_FILE_SCHEMA,
-  RECORDER_WRITE_FILE_TOOL,
   type RecorderWorkspace,
 } from './workspace_tools';
 
@@ -341,15 +337,6 @@ export const runFindingsPass = async (
           "Reads a file in the investigation's workspace. Use it for the full output of a tool result that was clipped.",
         schema: RECORDER_READ_FILE_SCHEMA,
       },
-      [RECORDER_LIST_FILES_TOOL]: {
-        description: "Lists a directory in the investigation's workspace.",
-        schema: RECORDER_LIST_FILES_SCHEMA,
-      },
-      [RECORDER_WRITE_FILE_TOOL]: {
-        description:
-          'Writes the record, as JSON in the given format, to the findings file. It is the only file that can be written, and it takes no path. Checks the record and says what to fix.',
-        schema: RECORDER_WRITE_FILE_SCHEMA,
-      },
     };
 
     interface ModelCall {
@@ -383,76 +370,39 @@ export const runFindingsPass = async (
       return undefined;
     };
 
-    /**
-     * The model's answer as a file: JSON in the output format. A record that does not parse or
-     * match is sent back to the model as the tool's result, so it can write it again.
-     */
-    const checkWrittenRecord = (raw: unknown): { record: FindingsRecord } | { error: string } => {
-      const content = (raw as { content?: unknown } | undefined)?.content;
-      if (typeof content !== 'string') {
-        return { error: 'Error: content must be the whole record as a JSON string.' };
+    const readFile = async (call: ModelCall, ws: RecorderWorkspace): Promise<string> => {
+      if (call.function.name !== RECORDER_READ_FILE_TOOL) {
+        return `Error: ${call.function.name} is not available here. Answer with ${STRUCTURED_OUTPUT_TOOL}.`;
       }
-      let json: unknown;
-      try {
-        json = JSON.parse(content);
-      } catch (error) {
-        return {
-          error: `Error: the content is not valid JSON (${
-            error instanceof Error ? error.message : String(error)
-          }). Write the whole record again.`,
-        };
-      }
-      const parsed = findingsOutputSchema.safeParse(json);
-      if (!parsed.success) {
-        const issues = parsed.error.issues
-          .slice(0, 8)
-          .map(({ path, message }) => `${path.join('.') || '(record)'}: ${message}`);
-        return {
-          error: `Error: the record does not match the format. Fix and write it again.\n${issues.join(
-            '\n'
-          )}`,
-        };
-      }
-      return { record: limitFindings(parsed.data) };
-    };
-
-    const runWorkspaceTool = async (call: ModelCall, ws: RecorderWorkspace): Promise<string> => {
       const args = (call.function.arguments ?? {}) as Record<string, unknown>;
       try {
-        if (call.function.name === RECORDER_READ_FILE_TOOL) {
-          return await ws.readFile({
-            path: String(args.path ?? ''),
-            offset: typeof args.offset === 'number' ? args.offset : undefined,
-            length: typeof args.length === 'number' ? args.length : undefined,
-          });
-        }
-        if (call.function.name === RECORDER_LIST_FILES_TOOL) {
-          return await ws.listFiles({ dir: String(args.dir ?? '') });
-        }
-        return `Error: ${call.function.name} is not available here. Write the record with ${RECORDER_WRITE_FILE_TOOL}.`;
+        return await ws.readFile({
+          path: String(args.path ?? ''),
+          offset: typeof args.offset === 'number' ? args.offset : undefined,
+          length: typeof args.length === 'number' ? args.length : undefined,
+        });
       } catch (error) {
         return `Error: ${error instanceof Error ? error.message : String(error)}`;
       }
     };
 
     /**
-     * The final pass with files: the model may read files, then it writes its record to the
-     * findings file. Returns nothing when it never writes a valid one, so the caller falls back
-     * to a single call without files.
+     * The final pass with files: the model may read files, then it answers with the answer tool,
+     * as every pass does. Returns nothing when it never answers, so the caller falls back to a
+     * single call without files.
      */
-    const readThenWrite = async (ws: RecorderWorkspace): Promise<FindingsRecord | undefined> => {
+    const readThenAnswer = async (ws: RecorderWorkspace): Promise<FindingsRecord | undefined> => {
       const conversationSoFar: Message[] = [...messages];
       let reads = 0;
       for (let round = 1; round <= RECORDER_MAX_TOOL_ROUNDS && !guard.signal.aborted; round++) {
-        const mustWrite = round === RECORDER_MAX_TOOL_ROUNDS || reads >= RECORDER_MAX_TOOL_CALLS;
+        const mustAnswer = round === RECORDER_MAX_TOOL_ROUNDS || reads >= RECORDER_MAX_TOOL_CALLS;
         const response = await ask(
           conversationSoFar,
           toolsWithFiles,
-          mustWrite ? { function: RECORDER_WRITE_FILE_TOOL } : 'auto',
+          mustAnswer ? { function: STRUCTURED_OUTPUT_TOOL } : 'auto',
           true
         );
         const calls = response.toolCalls ?? [];
-        // A model that answers with the answer tool instead of the file is not turned away.
         const answerCall = calls.find((call) => call.function.name === STRUCTURED_OUTPUT_TOOL);
         if (answerCall) {
           return parseRecord(answerCall.function.arguments, `with files, round ${round}`);
@@ -463,49 +413,25 @@ export const runFindingsPass = async (
           content: response.content ?? null,
           toolCalls: calls as unknown as ToolCall[],
         });
-        let written: FindingsRecord | undefined;
         for (const call of calls) {
-          let result: string;
-          if (call.function.name === RECORDER_WRITE_FILE_TOOL) {
-            const checked = checkWrittenRecord(call.function.arguments);
-            if ('record' in checked) {
-              written = checked.record;
-              result = 'Saved.';
-              // The file mirrors the record that is committed. A failed write does not lose it.
-              await ws
-                .writeFindings((call.function.arguments as { content: string }).content)
-                .catch((error) =>
-                  logger.warn(
-                    `Findings recorder could not write the findings file for ${conversationId}: ${
-                      error instanceof Error ? error.message : String(error)
-                    }`
-                  )
-                );
-            } else {
-              result = checked.error;
-            }
-          } else {
-            reads++;
-            result =
-              reads > RECORDER_MAX_TOOL_CALLS
-                ? `Error: no more files can be read. Write the record with ${RECORDER_WRITE_FILE_TOOL} now.`
-                : await runWorkspaceTool(call, ws);
-          }
+          reads++;
           conversationSoFar.push({
             role: MessageRole.Tool,
             name: call.function.name,
             toolCallId: call.toolCallId,
-            response: result,
+            response:
+              reads > RECORDER_MAX_TOOL_CALLS
+                ? `Error: no more files can be read. Answer with ${STRUCTURED_OUTPUT_TOOL} now.`
+                : await readFile(call, ws),
           });
         }
-        if (written) return written;
       }
       return undefined;
     };
 
     if (workspace) {
       try {
-        output = await readThenWrite(workspace);
+        output = await readThenAnswer(workspace);
       } catch (error) {
         if (!guard.signal.aborted) {
           logger.warn(
