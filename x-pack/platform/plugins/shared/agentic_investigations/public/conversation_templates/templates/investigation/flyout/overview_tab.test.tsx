@@ -103,4 +103,20 @@ describe('InvestigationOverview', () => {
     expect(screen.queryByText('Impact')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationHypothesisTreeButton')).not.toBeInTheDocument();
   });
+
+  it('ends in a loading skeleton while an agent still works on the investigation', () => {
+    mockUseInvestigation.mockReturnValue({ data: { ...investigation, in_progress: true } });
+
+    renderOverview();
+
+    expect(screen.getByTestId('investigationOverviewLoadingSection')).toBeInTheDocument();
+  });
+
+  it('renders no loading skeleton once the investigation is no longer in progress', () => {
+    mockUseInvestigation.mockReturnValue({ data: investigation });
+
+    renderOverview();
+
+    expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
+  });
 });
