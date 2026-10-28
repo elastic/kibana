@@ -1466,6 +1466,61 @@ describe('Agent policy', () => {
       expect(mockedPackagePolicyService.findAllForAgentPolicy).not.toHaveBeenCalled();
       expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
     });
+
+    it('should keep stored version conditions without reading package policies when they are unchanged', async () => {
+      const soClient = getSavedObjectMock({
+        revision: 1,
+        monitoring_enabled: [],
+        has_agent_version_conditions: false,
+      });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy', {
+        asyncDeploy: true,
+        agentVersionConditionsUnchanged: true,
+      });
+
+      expect(soClient.find).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: PACKAGE_POLICY_SAVED_OBJECT_TYPE })
+      );
+      expect(mockedPackagePolicyService.findAllForAgentPolicy).not.toHaveBeenCalled();
+
+      const [, , attributes] = soClient.update.mock.calls[0];
+      expect(attributes).toEqual(expect.objectContaining({ revision: 2 }));
+      expect(attributes).not.toHaveProperty('min_agent_version');
+      expect(attributes).not.toHaveProperty('package_agent_version_conditions');
+      expect((attributes as Record<string, unknown>).has_agent_version_conditions).toBeUndefined();
+      expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
+    });
+
+    it('should still compute version conditions when unchanged but never stored', async () => {
+      const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      mockPackagePolicySOs(soClient, [
+        {
+          name: 'apache-1',
+          package: { name: 'apache', title: 'Apache', version: '1.3.2' },
+          package_agent_version_condition: '>=9.3.0',
+        },
+      ]);
+
+      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy', {
+        agentVersionConditionsUnchanged: true,
+      });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ type: PACKAGE_POLICY_SAVED_OBJECT_TYPE })
+      );
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        'agent-policy',
+        expect.objectContaining({
+          has_agent_version_conditions: true,
+          min_agent_version: '9.3.0',
+        })
+      );
+    });
   });
 
   describe('bumpAllAgentPoliciesForOutput', () => {

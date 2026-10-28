@@ -6,7 +6,7 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import { omit, partition, isEqual, cloneDeep, without, chunk } from 'lodash';
+import { omit, partition, isEqual, cloneDeep, without, chunk, uniq, xor } from 'lodash';
 import { indexBy } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
@@ -306,6 +306,39 @@ async function getPkgInfoAssetsMap({
   );
 
   return packageInfosandAssetsMap;
+}
+
+/**
+ * Returns the agent policies whose version conditions (see
+ * `agentPolicyService.computeMinAgentVersionData`) an update of `oldPackagePolicy` can change.
+ */
+function getAgentPolicyIdsWithVersionConditionChanges({
+  oldPackagePolicy,
+  newPackage,
+  newPolicyIds,
+  pkgInfo,
+  assetsMap,
+}: {
+  oldPackagePolicy: PackagePolicy;
+  newPackage: PackagePolicy['package'];
+  newPolicyIds: string[];
+  pkgInfo: PackageInfo;
+  assetsMap: PackagePolicyAssetsMap;
+}): string[] {
+  const conditionsMayChange =
+    oldPackagePolicy.package?.name !== newPackage?.name ||
+    oldPackagePolicy.package?.version !== newPackage?.version ||
+    Boolean(oldPackagePolicy.package_agent_version_condition) ||
+    Boolean(pkgInfo.conditions?.agent?.version) ||
+    hasAgentVersionConditionInInputTemplate(assetsMap);
+
+  if (conditionsMayChange) {
+    return uniq([...oldPackagePolicy.policy_ids, ...newPolicyIds]);
+  }
+
+  // `inputs_for_versions` left over from an earlier package version still counts as a condition,
+  // so (un)assigning the package policy can change the agent policies it moves between.
+  return xor(oldPackagePolicy.policy_ids, newPolicyIds);
 }
 
 export async function getPackagePolicySavedObjectType() {
@@ -925,6 +958,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     options: {
       user?: AuthenticatedUser;
       removeProtectionFn?: (policyId: string) => undefined | boolean;
+      agentVersionConditionsUnchangedFn?: (policyId: string) => boolean;
       asyncDeploy?: boolean;
     } = {}
   ) {
@@ -938,6 +972,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             removeProtection: options.removeProtectionFn
               ? options.removeProtectionFn(policyId)
               : undefined,
+            agentVersionConditionsUnchanged: options.agentVersionConditionsUnchangedFn?.(policyId),
           }),
         {
           concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
@@ -2051,6 +2086,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // caller opted out via `bumpRevision: false` (e.g. silent updates that must
     // not trigger agent policy redeployments).
     const associatedPolicyIds = new Set([...oldPackagePolicy.policy_ids, ...newPolicy.policy_ids]);
+    const agentPolicyIdsWithVersionConditionChanges = new Set(
+      getAgentPolicyIdsWithVersionConditionChanges({
+        oldPackagePolicy,
+        newPackage: newPolicy.package,
+        newPolicyIds: newPolicy.policy_ids,
+        pkgInfo,
+        assetsMap,
+      })
+    );
     const shouldBumpAgentPolicies = options?.bumpRevision ?? true;
     logger.debug(
       `${
@@ -2070,6 +2114,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       ? this.bumpAgentPoliciesRevision({ soClient, esClient }, [...associatedPolicyIds], {
           user: options?.user,
           asyncDeploy: options?.asyncDeploy,
+          agentVersionConditionsUnchangedFn: (policyId) =>
+            !agentPolicyIdsWithVersionConditionChanges.has(policyId),
           removeProtectionFn: (policyId) => {
             const isEndpointPolicy = newPolicy.package?.name === 'endpoint';
 
@@ -2239,6 +2285,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     > = [];
 
     const assetsToInstallFn: Array<() => Promise<void>> = [];
+    const agentPolicyIdsWithVersionConditionChanges = new Set<string>();
 
     await pMap(packagePolicyUpdates, async (packagePolicyUpdate) => {
       try {
@@ -2449,6 +2496,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         const targetAgentVersionCondition = pkgInfo?.conditions?.agent?.version;
 
+        getAgentPolicyIdsWithVersionConditionChanges({
+          oldPackagePolicy,
+          newPackage: restOfPackagePolicy.package,
+          newPolicyIds: packagePolicy.policy_ids,
+          pkgInfo,
+          assetsMap,
+        }).forEach((agentPolicyId) => agentPolicyIdsWithVersionConditionChanges.add(agentPolicyId));
+
         policiesToUpdate.push({
           type: savedObjectType,
           id,
@@ -2567,6 +2622,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         ? this.bumpAgentPoliciesRevision({ soClient, esClient }, [...associatedPolicyIds], {
             user: options?.user,
             asyncDeploy: options?.asyncDeploy,
+            agentVersionConditionsUnchangedFn: (agentPolicyId) =>
+              !agentPolicyIdsWithVersionConditionChanges.has(agentPolicyId),
             removeProtectionFn: (agentPolicyId) => {
               // Check if the agent policy is in both old and updated package policies
               const assignedInOldPolicies = endpointOldPackagePoliciesIds.has(agentPolicyId);
