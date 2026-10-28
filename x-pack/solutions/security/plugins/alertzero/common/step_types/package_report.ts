@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
+import { convergedProposalSchema, mintSuppressionSchema } from './resolve_proposals';
 
 export const PACKAGE_REPORT_STEP_ID = 'hunt.packageReport' as const;
 
@@ -42,7 +43,7 @@ export const packageReportInputSchema = z.object({
   ),
   reportId: boundedId.describe('Threat report id this Investigation is bound to.'),
   investigationConversationId: boundedId.describe(
-    'Investigation conversation id; must equal uuidv5(hunt:report:{reportId}).'
+    'Investigation conversation id; must equal uuidv5(hunt:report:{spaceId}|{reportId}).'
   ),
   runId: boundedId.describe('Current-run id; packaging reads only attachments scoped to this run.'),
   /**
@@ -142,36 +143,6 @@ const coverageSkippedSchema = z.object({
   reason: z.enum(['disabled', 'denied', 'storage_failure', 'already_processed']),
 });
 
-/**
- * A proposal this run did not mint because a live one already holds the subject, raised by an
- * Investigation that may or may not be this one's. Only another Investigation's is reported: a
- * rerun landing on its own Proposal is not news.
- */
-export const convergedProposalSchema = z.object({
-  title: z.string().optional(),
-  /** The live revision of the Proposal this run converged onto. */
-  proposalId: z.string(),
-  /** The Investigation that raised it. */
-  ownerConversationId: z.string(),
-  /**
-   * What happened to that Proposal's comment: `revised` when this Investigation was added to it,
-   * otherwise why it was not (already named, already decided, too long, already revised as
-   * often as packaging will, refused).
-   */
-  outcome: z.enum([
-    'revised',
-    'already_mentioned',
-    'not_revisable',
-    'too_long',
-    'revision_limit',
-    'failed',
-  ]),
-  /** The journal line for this Investigation, saying where its finding went. */
-  note: z.string().max(2000),
-});
-
-export type ConvergedProposal = z.infer<typeof convergedProposalSchema>;
-
 export const packageReportMintPayloadSchema = z.object({
   /**
    * What is being proposed: uuidv5(subjectId, actionWorkflowId[, processKey]). No Investigation in
@@ -180,7 +151,7 @@ export const packageReportMintPayloadSchema = z.object({
    */
   subjectKey: z.string(),
   /**
-   * The id the gate creates the Proposal under: `buildHuntProposalId` over the subject key, at the
+   * The id the gate creates the Proposal under: `buildProposalId` over the subject key, at the
    * first generation no live Proposal holds. Resolved by packaging, which has the Proposals
    * service; `decidePackageReport` stays pure and never sees it. The service refuses an id that
    * already exists, which is what makes two runs that race over one subject create one Proposal.
@@ -246,7 +217,7 @@ export const packageReportOutputSchema = z.discriminatedUnion('status', [
      * it minted nothing rather than risk a duplicate: `check_failed`. A Proposal that already
      * holds a subject is not a suppression, it is `converged`.
      */
-    mintSuppression: z.enum(['none', 'check_failed']),
+    mintSuppression: mintSuppressionSchema,
     /**
      * `none` unless this run was a clean one (no confirmed hit) whose dismissal was withheld
      * because the Investigation still carries an open (`pending`/`executing`) Proposal from an

@@ -77,7 +77,7 @@ import {
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
-import type { VegaParser } from '../data_model/vega_parser';
+import type { VegaRenderDescriptor } from '../data_model/types';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { extractProjectRoutingOverrides } from '../lib/extract_project_routing_overrides';
 import { getEsqlQueriesFromSpec } from '../lib/spec_uses_esql';
@@ -101,7 +101,7 @@ const LazyVegaVisComponent = lazy(() =>
  */
 interface VegaRenderInput {
   showWarnings: boolean;
-  visData: VegaParser;
+  visData: VegaRenderDescriptor;
 }
 
 /**
@@ -475,6 +475,7 @@ export const vegaEmbeddableFactory = (
                 <LazyVegaVisComponent
                   deps={deps.visualizationDependencies}
                   fireEvent={fireEvent}
+                  inspectorAdapters={inspectorAdapters}
                   renderComplete={onRenderComplete}
                   showWarnings={renderInput.showWarnings}
                   visData={renderInput.visData}

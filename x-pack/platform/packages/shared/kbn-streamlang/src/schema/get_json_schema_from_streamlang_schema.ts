@@ -383,7 +383,7 @@ function enhanceConditionBlockSchema(
 ): void {
   if (!conditionBlockSchema.title) {
     conditionBlockSchema.title = i18n.translate(
-      'xpack.streams.streamlangSchema.conditionBlock.title',
+      'xpack.streamlang.streamlangSchema.conditionBlock.title',
       {
         defaultMessage: 'Condition block',
       }
@@ -397,11 +397,11 @@ function enhanceConditionBlockSchema(
   // Provide multiple snippet options for common condition patterns
   conditionBlockSchema.defaultSnippets = [
     {
-      label: i18n.translate('xpack.streams.streamlangSchema.snippets.conditionBlock.label', {
+      label: i18n.translate('xpack.streamlang.streamlangSchema.snippets.conditionBlock.label', {
         defaultMessage: 'Condition block',
       }),
       description: i18n.translate(
-        'xpack.streams.streamlangSchema.snippets.conditionBlock.description',
+        'xpack.streamlang.streamlangSchema.snippets.conditionBlock.description',
         {
           defaultMessage: 'Conditional step execution with field equals condition',
         }
@@ -415,11 +415,11 @@ function enhanceConditionBlockSchema(
       },
     },
     {
-      label: i18n.translate('xpack.streams.streamlangSchema.snippets.conditionBlockAnd.label', {
+      label: i18n.translate('xpack.streamlang.streamlangSchema.snippets.conditionBlockAnd.label', {
         defaultMessage: 'Condition block (AND)',
       }),
       description: i18n.translate(
-        'xpack.streams.streamlangSchema.snippets.conditionBlockAnd.description',
+        'xpack.streamlang.streamlangSchema.snippets.conditionBlockAnd.description',
         {
           defaultMessage: 'Execute steps if all conditions are true',
         }
@@ -441,11 +441,11 @@ function enhanceConditionBlockSchema(
       },
     },
     {
-      label: i18n.translate('xpack.streams.streamlangSchema.snippets.conditionBlockOr.label', {
+      label: i18n.translate('xpack.streamlang.streamlangSchema.snippets.conditionBlockOr.label', {
         defaultMessage: 'Condition block (OR)',
       }),
       description: i18n.translate(
-        'xpack.streams.streamlangSchema.snippets.conditionBlockOr.description',
+        'xpack.streamlang.streamlangSchema.snippets.conditionBlockOr.description',
         {
           defaultMessage: 'Execute steps if any condition is true',
         }
@@ -467,11 +467,11 @@ function enhanceConditionBlockSchema(
       },
     },
     {
-      label: i18n.translate('xpack.streams.streamlangSchema.snippets.conditionBlockElse.label', {
+      label: i18n.translate('xpack.streamlang.streamlangSchema.snippets.conditionBlockElse.label', {
         defaultMessage: 'Condition block with else',
       }),
       description: i18n.translate(
-        'xpack.streams.streamlangSchema.snippets.conditionBlockElse.description',
+        'xpack.streamlang.streamlangSchema.snippets.conditionBlockElse.description',
         {
           defaultMessage: 'Conditional step execution with if and else branches',
         }
@@ -740,11 +740,11 @@ function addFilterConditionSnippets(conditionSchema: Record<string, unknown>): v
       const variantProps = variant?.properties as Record<string, unknown> | undefined;
       // Check if this variant looks like a filter condition (has 'field' property)
       if (variantProps?.field && !variantProps?.and && !variantProps?.or) {
-        variant.title = i18n.translate('xpack.streams.streamlangSchema.filterCondition.title', {
+        variant.title = i18n.translate('xpack.streamlang.streamlangSchema.filterCondition.title', {
           defaultMessage: 'Filter condition',
         });
         variant.description = i18n.translate(
-          'xpack.streams.streamlangSchema.filterCondition.description',
+          'xpack.streamlang.streamlangSchema.filterCondition.description',
           {
             defaultMessage: 'Compare a field value using operators like eq, neq, lt, gt, contains',
           }
@@ -753,11 +753,11 @@ function addFilterConditionSnippets(conditionSchema: Record<string, unknown>): v
       }
       // Add titles and snippets for logical operators (and, or, not)
       if (variantProps?.and) {
-        variant.title = i18n.translate('xpack.streams.streamlangSchema.andCondition.title', {
+        variant.title = i18n.translate('xpack.streamlang.streamlangSchema.andCondition.title', {
           defaultMessage: 'AND condition',
         });
         variant.description = i18n.translate(
-          'xpack.streams.streamlangSchema.andCondition.description',
+          'xpack.streamlang.streamlangSchema.andCondition.description',
           {
             defaultMessage: 'All conditions must be true',
           }
@@ -765,11 +765,11 @@ function addFilterConditionSnippets(conditionSchema: Record<string, unknown>): v
         addLogicalOperatorSnippet(variant, 'and');
       }
       if (variantProps?.or) {
-        variant.title = i18n.translate('xpack.streams.streamlangSchema.orCondition.title', {
+        variant.title = i18n.translate('xpack.streamlang.streamlangSchema.orCondition.title', {
           defaultMessage: 'OR condition',
         });
         variant.description = i18n.translate(
-          'xpack.streams.streamlangSchema.orCondition.description',
+          'xpack.streamlang.streamlangSchema.orCondition.description',
           {
             defaultMessage: 'At least one condition must be true',
           }
@@ -777,11 +777,11 @@ function addFilterConditionSnippets(conditionSchema: Record<string, unknown>): v
         addLogicalOperatorSnippet(variant, 'or');
       }
       if (variantProps?.not) {
-        variant.title = i18n.translate('xpack.streams.streamlangSchema.notCondition.title', {
+        variant.title = i18n.translate('xpack.streamlang.streamlangSchema.notCondition.title', {
           defaultMessage: 'NOT condition',
         });
         variant.description = i18n.translate(
-          'xpack.streams.streamlangSchema.notCondition.description',
+          'xpack.streamlang.streamlangSchema.notCondition.description',
           {
             defaultMessage: 'Negate a condition',
           }
@@ -804,19 +804,19 @@ function addLogicalOperatorSnippet(schema: Record<string, unknown>, operator: 'a
 
   const label =
     operator === 'and'
-      ? i18n.translate('xpack.streams.streamlangSchema.snippets.andCondition.label', {
+      ? i18n.translate('xpack.streamlang.streamlangSchema.snippets.andCondition.label', {
           defaultMessage: 'AND condition',
         })
-      : i18n.translate('xpack.streams.streamlangSchema.snippets.orCondition.label', {
+      : i18n.translate('xpack.streamlang.streamlangSchema.snippets.orCondition.label', {
           defaultMessage: 'OR condition',
         });
 
   const description =
     operator === 'and'
-      ? i18n.translate('xpack.streams.streamlangSchema.snippets.andCondition.description', {
+      ? i18n.translate('xpack.streamlang.streamlangSchema.snippets.andCondition.description', {
           defaultMessage: 'Combine conditions with AND logic',
         })
-      : i18n.translate('xpack.streams.streamlangSchema.snippets.orCondition.description', {
+      : i18n.translate('xpack.streamlang.streamlangSchema.snippets.orCondition.description', {
           defaultMessage: 'Combine conditions with OR logic',
         });
 
@@ -850,11 +850,11 @@ function addNotOperatorSnippet(schema: Record<string, unknown>): void {
 
   schema.defaultSnippets = [
     {
-      label: i18n.translate('xpack.streams.streamlangSchema.snippets.notCondition.label', {
+      label: i18n.translate('xpack.streamlang.streamlangSchema.snippets.notCondition.label', {
         defaultMessage: 'NOT condition',
       }),
       description: i18n.translate(
-        'xpack.streams.streamlangSchema.snippets.notCondition.description',
+        'xpack.streamlang.streamlangSchema.snippets.notCondition.description',
         {
           defaultMessage: 'Negate a condition',
         }
@@ -881,11 +881,11 @@ function addOperatorSnippetsToFilterCondition(
 
   filterConditionSchema.defaultSnippets = [
     {
-      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldEquals.label', {
+      label: i18n.translate('xpack.streamlang.streamlangSchema.snippets.fieldEquals.label', {
         defaultMessage: 'Field equals',
       }),
       description: i18n.translate(
-        'xpack.streams.streamlangSchema.snippets.fieldEquals.description',
+        'xpack.streamlang.streamlangSchema.snippets.fieldEquals.description',
         {
           defaultMessage: 'Check if field equals a value',
         }
@@ -896,11 +896,11 @@ function addOperatorSnippetsToFilterCondition(
       },
     },
     {
-      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldNotEquals.label', {
+      label: i18n.translate('xpack.streamlang.streamlangSchema.snippets.fieldNotEquals.label', {
         defaultMessage: 'Field not equals',
       }),
       description: i18n.translate(
-        'xpack.streams.streamlangSchema.snippets.fieldNotEquals.description',
+        'xpack.streamlang.streamlangSchema.snippets.fieldNotEquals.description',
         {
           defaultMessage: 'Check if field does not equal a value',
         }
@@ -911,11 +911,11 @@ function addOperatorSnippetsToFilterCondition(
       },
     },
     {
-      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldLessThan.label', {
+      label: i18n.translate('xpack.streamlang.streamlangSchema.snippets.fieldLessThan.label', {
         defaultMessage: 'Field less than',
       }),
       description: i18n.translate(
-        'xpack.streams.streamlangSchema.snippets.fieldLessThan.description',
+        'xpack.streamlang.streamlangSchema.snippets.fieldLessThan.description',
         {
           defaultMessage: 'Check if field is less than a value',
         }
@@ -926,11 +926,14 @@ function addOperatorSnippetsToFilterCondition(
       },
     },
     {
-      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldLessThanOrEqual.label', {
-        defaultMessage: 'Field less than or equal',
-      }),
+      label: i18n.translate(
+        'xpack.streamlang.streamlangSchema.snippets.fieldLessThanOrEqual.label',
+        {
+          defaultMessage: 'Field less than or equal',
+        }
+      ),
       description: i18n.translate(
-        'xpack.streams.streamlangSchema.snippets.fieldLessThanOrEqual.description',
+        'xpack.streamlang.streamlangSchema.snippets.fieldLessThanOrEqual.description',
         {
           defaultMessage: 'Check if field is less than or equal to a value',
         }
@@ -941,11 +944,11 @@ function addOperatorSnippetsToFilterCondition(
       },
     },
     {
-      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldGreaterThan.label', {
+      label: i18n.translate('xpack.streamlang.streamlangSchema.snippets.fieldGreaterThan.label', {
         defaultMessage: 'Field greater than',
       }),
       description: i18n.translate(
-        'xpack.streams.streamlangSchema.snippets.fieldGreaterThan.description',
+        'xpack.streamlang.streamlangSchema.snippets.fieldGreaterThan.description',
         {
           defaultMessage: 'Check if field is greater than a value',
         }
@@ -957,13 +960,13 @@ function addOperatorSnippetsToFilterCondition(
     },
     {
       label: i18n.translate(
-        'xpack.streams.streamlangSchema.snippets.fieldGreaterThanOrEqual.label',
+        'xpack.streamlang.streamlangSchema.snippets.fieldGreaterThanOrEqual.label',
         {
           defaultMessage: 'Field greater than or equal',
         }
       ),
       description: i18n.translate(
-        'xpack.streams.streamlangSchema.snippets.fieldGreaterThanOrEqual.description',
+        'xpack.streamlang.streamlangSchema.snippets.fieldGreaterThanOrEqual.description',
         {
           defaultMessage: 'Check if field is greater than or equal to a value',
         }
@@ -974,11 +977,11 @@ function addOperatorSnippetsToFilterCondition(
       },
     },
     {
-      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldContains.label', {
+      label: i18n.translate('xpack.streamlang.streamlangSchema.snippets.fieldContains.label', {
         defaultMessage: 'Field contains',
       }),
       description: i18n.translate(
-        'xpack.streams.streamlangSchema.snippets.fieldContains.description',
+        'xpack.streamlang.streamlangSchema.snippets.fieldContains.description',
         {
           defaultMessage: 'Check if field contains a value',
         }
@@ -989,11 +992,11 @@ function addOperatorSnippetsToFilterCondition(
       },
     },
     {
-      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldStartsWith.label', {
+      label: i18n.translate('xpack.streamlang.streamlangSchema.snippets.fieldStartsWith.label', {
         defaultMessage: 'Field starts with',
       }),
       description: i18n.translate(
-        'xpack.streams.streamlangSchema.snippets.fieldStartsWith.description',
+        'xpack.streamlang.streamlangSchema.snippets.fieldStartsWith.description',
         {
           defaultMessage: 'Check if field starts with a value',
         }
@@ -1004,11 +1007,11 @@ function addOperatorSnippetsToFilterCondition(
       },
     },
     {
-      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldEndsWith.label', {
+      label: i18n.translate('xpack.streamlang.streamlangSchema.snippets.fieldEndsWith.label', {
         defaultMessage: 'Field ends with',
       }),
       description: i18n.translate(
-        'xpack.streams.streamlangSchema.snippets.fieldEndsWith.description',
+        'xpack.streamlang.streamlangSchema.snippets.fieldEndsWith.description',
         {
           defaultMessage: 'Check if field ends with a value',
         }
@@ -1019,11 +1022,11 @@ function addOperatorSnippetsToFilterCondition(
       },
     },
     {
-      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldExists.label', {
+      label: i18n.translate('xpack.streamlang.streamlangSchema.snippets.fieldExists.label', {
         defaultMessage: 'Field exists',
       }),
       description: i18n.translate(
-        'xpack.streams.streamlangSchema.snippets.fieldExists.description',
+        'xpack.streamlang.streamlangSchema.snippets.fieldExists.description',
         {
           defaultMessage: 'Check if field exists',
         }
@@ -1034,11 +1037,11 @@ function addOperatorSnippetsToFilterCondition(
       },
     },
     {
-      label: i18n.translate('xpack.streams.streamlangSchema.snippets.fieldRange.label', {
+      label: i18n.translate('xpack.streamlang.streamlangSchema.snippets.fieldRange.label', {
         defaultMessage: 'Field range',
       }),
       description: i18n.translate(
-        'xpack.streams.streamlangSchema.snippets.fieldRange.description',
+        'xpack.streamlang.streamlangSchema.snippets.fieldRange.description',
         {
           defaultMessage: 'Check if field is within a range',
         }

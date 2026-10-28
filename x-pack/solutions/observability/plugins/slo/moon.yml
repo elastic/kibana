@@ -90,7 +90,6 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/aiops-log-rate-analysis'
   - '@kbn/data-view-field-editor-plugin'
-  - '@kbn/securitysolution-io-ts-utils'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/datemath'
   - '@kbn/dashboard-plugin'
@@ -144,6 +143,7 @@ dependsOn:
   - '@kbn/cps-server-utils'
   - '@kbn/app-header'
   - '@kbn/ui-callout'
+  - '@kbn/slo-constants'
 tags:
   - plugin
   - prod
@@ -157,6 +157,4 @@ fileGroups:
     - server/**/*
     - test/scout*/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

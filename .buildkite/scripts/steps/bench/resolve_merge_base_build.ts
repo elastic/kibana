@@ -52,29 +52,24 @@ async function main(): Promise<void> {
   const commit = process.env.GITHUB_PR_MERGE_BASE;
   if (!commit) {
     log('GITHUB_PR_MERGE_BASE is not set; cannot resolve a baseline build');
-    return;
+    process.exit(1);
   }
 
   const pipelineSlug = process.env.WARM_START_MEMORY_BASELINE_PIPELINE || 'kibana-on-merge';
 
-  try {
-    const build = await findMergeBaseBuild(createTimeBoundedClient(), pipelineSlug, commit);
-    if (!build) {
-      return;
-    }
-
-    log(`--- Baseline distributable from ${pipelineSlug} #${build.number} (${build.web_url})`);
-
-    // Sole stdout line for the bash wrapper to parse.
-    process.stdout.write(`${build.id}\n`);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    log(`Baseline build lookup failed (${message}); skipping the warm-start memory benchmark`);
+  const build = await findMergeBaseBuild(createTimeBoundedClient(), pipelineSlug, commit);
+  if (!build) {
+    return;
   }
+
+  log(`--- Baseline distributable from ${pipelineSlug} #${build.number} (${build.web_url})`);
+
+  // Sole stdout line for the bash wrapper to parse.
+  process.stdout.write(`${build.id}\n`);
 }
 
 main().catch((error) => {
   const message = error instanceof Error ? error.message : String(error);
-  log(`Unexpected baseline build lookup error (${message}); skipping the benchmark`);
-  process.exit(0);
+  log(`Baseline build lookup failed (${message})`);
+  process.exit(1);
 });

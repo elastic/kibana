@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { SearchHit } from '@kbn/es-types';
 
 import type { IncomingDataList } from '../../../common/types/rest_spec/agent';
+import { filterIncomingDataWithData } from '../../../common/services';
 
 import { sendGetAgentIncomingData, useLink } from '../../hooks';
 
@@ -133,10 +134,7 @@ export const usePollingIncomingData = ({
         });
         if (data?.items) {
           // filter out  agents that have `data = false` and keep polling
-          const filtered = data?.items.filter((item) => {
-            const key = Object.keys(item)[0];
-            return item[key].data === true;
-          });
+          const filtered = filterIncomingDataWithData(data.items);
 
           if (filtered.length > 0) {
             setResult({

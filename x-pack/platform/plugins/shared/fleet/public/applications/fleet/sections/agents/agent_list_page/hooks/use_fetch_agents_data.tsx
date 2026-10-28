@@ -329,7 +329,8 @@ export function useFetchAgentsData() {
             kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
           }),
           sendGetAgentPolicies({
-            kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
+            // agentless agents are managed by Elastic: no bulk action applies to them
+            kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true or ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
             perPage: SO_SEARCH_LIMIT,
             full: false,
             showAgentless,

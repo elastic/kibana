@@ -5,29 +5,33 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { THREAT_FRAMEWORK_NAME } from '@kbn/security-mitre-attack-common';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useMitreConfiguration } from '../../../../common/hooks/mitre/use_mitre_configuration';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 import { InvalidMitreRulesModal } from './invalid_mitre_rules_modal';
+import { filterInvalidlyMappedRulesByFramework } from './helpers';
 import * as i18n from './translations';
 
 const CoverageOverviewInvalidMitreRulesCalloutComponent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { docLinks } = useKibana().services;
   const {
-    state: { data },
+    state: { data, framework, frameworkVersion },
   } = useCoverageOverviewDashboardContext();
-  const { frameworkVersion } = useMitreConfiguration();
+  const frameworkLabel = THREAT_FRAMEWORK_NAME[framework];
   // The hook returns the version without the leading 'v', so re-add it at the display site.
   const displayVersion = frameworkVersion ? `v${frameworkVersion}` : undefined;
 
   const closeModal = useCallback(() => setIsModalOpen(false), []);
   const openModal = useCallback(() => setIsModalOpen(true), []);
 
-  const { enabledRules = [], disabledRules = [] } = data?.invalidlyMappedRules ?? {};
+  const { enabledRules, disabledRules } = useMemo(
+    () => filterInvalidlyMappedRulesByFramework(data?.invalidlyMappedRules, framework),
+    [data?.invalidlyMappedRules, framework]
+  );
   const invalidCount = enabledRules.length + disabledRules.length;
 
   // Without a resolved MITRE version there is nothing meaningful to compare against, so stay hidden.
@@ -40,16 +44,17 @@ const CoverageOverviewInvalidMitreRulesCalloutComponent = () => {
       <EuiCallOut
         announceOnMount={false}
         data-test-subj="coverageOverviewInvalidMitreRulesCallout"
-        title={i18n.INVALID_MITRE_RULES_CALLOUT_TITLE}
+        title={i18n.INVALID_MITRE_RULES_CALLOUT_TITLE(frameworkLabel)}
         color="warning"
         iconType="warning"
       >
         <p>
           <FormattedMessage
             id="xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesCallout.description"
-            defaultMessage="You have {count, plural, one {# rule that references} other {# rules that reference}} MITRE ATT&CK® IDs not present in the currently supported version ({version}). They may not appear correctly in the coverage matrix. {learnMoreLink}"
+            defaultMessage="You have {count, plural, one {# rule that references} other {# rules that reference}} {framework} IDs not present in the currently supported version ({version}). They may not appear correctly in the coverage matrix. {learnMoreLink}"
             values={{
               count: invalidCount,
+              framework: frameworkLabel,
               version: displayVersion,
               learnMoreLink: (
                 <EuiLink
@@ -63,7 +68,7 @@ const CoverageOverviewInvalidMitreRulesCalloutComponent = () => {
             }}
           />
         </p>
-        <p>{i18n.INVALID_MITRE_RULES_CALLOUT_PREBUILT_NOTICE}</p>
+        <p>{i18n.INVALID_MITRE_RULES_CALLOUT_PREBUILT_NOTICE(frameworkLabel)}</p>
         <EuiButton
           data-test-subj="coverageOverviewInvalidMitreRulesViewButton"
           color="warning"
@@ -79,6 +84,7 @@ const CoverageOverviewInvalidMitreRulesCalloutComponent = () => {
         <InvalidMitreRulesModal
           enabledRules={enabledRules}
           disabledRules={disabledRules}
+          framework={frameworkLabel}
           onClose={closeModal}
         />
       )}

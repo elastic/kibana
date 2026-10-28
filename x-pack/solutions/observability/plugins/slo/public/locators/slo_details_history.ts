@@ -10,7 +10,7 @@ import {
   sloDetailsHistoryLocatorID,
   type SloDetailsHistoryLocatorParams,
 } from '@kbn/deeplinks-observability';
-import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
+import { ALL_VALUE } from '@kbn/slo-constants';
 
 export class SloDetailsHistoryLocatorDefinition
   implements LocatorDefinition<SloDetailsHistoryLocatorParams>

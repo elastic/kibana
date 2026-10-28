@@ -23,29 +23,37 @@ const linkStyle = css`
 
 type DiscoverButtonVariant = 'button' | 'emptyButton' | 'iconButton' | 'link';
 
-type OpenInDiscoverProps = DiscoverIndexSource & {
-  dataTestSubj: string;
-  label: string;
-  variant: DiscoverButtonVariant;
+type OpenInDiscoverLinkParams = DiscoverIndexSource & {
   rangeFrom: string;
   rangeTo: string;
   queryParams: ESQLQueryParams;
   ebt: Partial<EbtClickAttrs> & Pick<EbtClickAttrs, 'element'>;
 };
 
-export function OpenInDiscover({
-  dataTestSubj,
-  label,
-  variant,
+type OpenInDiscoverProps = OpenInDiscoverLinkParams & {
+  dataTestSubj: string;
+  label: string;
+  variant: DiscoverButtonVariant;
+};
+
+export interface OpenInDiscoverLink {
+  href: string | undefined;
+  isLoading: boolean;
+  isDisabled: boolean;
+  ebtProps: ReturnType<typeof getEbtProps> | {};
+}
+
+/** Resolves a Discover link's href, loading and disabled state, and EBT attributes. */
+export function useOpenInDiscoverLink({
   rangeFrom,
   rangeTo,
   queryParams,
   ebt,
   ...source
-}: OpenInDiscoverProps) {
+}: OpenInDiscoverLinkParams): OpenInDiscoverLink {
   const { indexSettingsStatus } = useApmIndexSettingsContext();
 
-  const discoverHref = useDiscoverHref({
+  const href = useDiscoverHref({
     ...source,
     rangeFrom,
     rangeTo,
@@ -57,8 +65,19 @@ export function OpenInDiscover({
   const usesApmIndexSettings = source.indexType !== 'logs';
   const isLoading = usesApmIndexSettings && indexSettingsStatus === FETCH_STATUS.LOADING;
   const isDisabled =
-    !discoverHref || (usesApmIndexSettings && indexSettingsStatus !== FETCH_STATUS.SUCCESS);
+    !href || (usesApmIndexSettings && indexSettingsStatus !== FETCH_STATUS.SUCCESS);
   const ebtProps = ebt ? getEbtProps({ action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER, ...ebt }) : {};
+
+  return { href, isLoading, isDisabled, ebtProps };
+}
+
+export function OpenInDiscover({
+  dataTestSubj,
+  label,
+  variant,
+  ...linkParams
+}: OpenInDiscoverProps) {
+  const { href: discoverHref, isLoading, isDisabled, ebtProps } = useOpenInDiscoverLink(linkParams);
 
   switch (variant) {
     case 'button':

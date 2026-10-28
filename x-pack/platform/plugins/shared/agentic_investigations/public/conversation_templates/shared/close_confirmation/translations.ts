@@ -28,6 +28,16 @@ export const CLOSE_INVESTIGATION_PROPOSALS_WARNING = (count: number) =>
     values: { count },
   });
 
+export const CLOSE_INVESTIGATION_RUNNING_ACTIONS_WARNING = (count: number) =>
+  i18n.translate(
+    'xpack.agenticInvestigations.closeConfirmation.investigation.runningActionsWarning',
+    {
+      defaultMessage:
+        '{count, plural, one {# action is still running and will finish on its own.} other {# actions are still running and will finish on their own.}}',
+      values: { count },
+    }
+  );
+
 export const DISMISS_REASON_LABEL = i18n.translate(
   'xpack.agenticInvestigations.closeConfirmation.investigation.dismissReasonLabel',
   { defaultMessage: 'Reason for declining proposals' }
