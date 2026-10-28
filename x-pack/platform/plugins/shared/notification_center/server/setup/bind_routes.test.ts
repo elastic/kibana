@@ -7,7 +7,13 @@
 
 import { Container } from 'inversify';
 import { KibanaContainerModule, Logger } from '@kbn/core-di';
-import { CoreStart, InternalElasticsearchClient, Request, Response, Route } from '@kbn/core-di-server';
+import {
+  CoreStart,
+  InternalElasticsearchClient,
+  Request,
+  Response,
+  Route,
+} from '@kbn/core-di-server';
 import { coreMock, elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
@@ -52,9 +58,7 @@ describe('bindRoutes', () => {
   it('binds every Notification Center route as an internal, authz-opted-out route', () => {
     const routes = createRequestScope().getAll(Route);
 
-    expect(
-      routes.map(({ method, path, options }) => [method, path, options?.access])
-    ).toEqual(
+    expect(routes.map(({ method, path, options }) => [method, path, options?.access])).toEqual(
       expect.arrayContaining([
         ['get', GET_NOTIFICATIONS_PATH, 'internal'],
         ['get', GET_UNREAD_STATUS_PATH, 'internal'],

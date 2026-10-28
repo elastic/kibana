@@ -77,9 +77,7 @@ describe('bindTasks', () => {
     start(container);
     await new Promise(process.nextTick);
 
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('task manager unavailable')
-    );
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('task manager unavailable'));
   });
 
   it('resolves the cleanup service only when the task runs, after start', async () => {

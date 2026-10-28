@@ -19,10 +19,10 @@ import { ScopedUserStorage } from '../tokens';
 export const bindServices = ({ bind }: ContainerModuleLoadOptions): void => {
   // `Request` only resolves inside a request scope, so read state is request-scoped with it.
   bind(ScopedUserStorage)
-    .toResolvedValue((userStorage, request) => userStorage.asScoped(request), [
-      CoreStart('userStorage'),
-      Request,
-    ])
+    .toResolvedValue(
+      (userStorage, request) => userStorage.asScoped(request),
+      [CoreStart('userStorage'), Request]
+    )
     .inRequestScope();
   bind(ReadStateService).toSelf().inRequestScope();
 
