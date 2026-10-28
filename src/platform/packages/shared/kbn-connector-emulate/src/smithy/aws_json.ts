@@ -10,7 +10,7 @@
 import type { ContractRequest, ContractResponse, Violation } from '../contract/types';
 import { isRecord } from '../openapi/schema_walk';
 import type { JsonSchema, OpenApiDocument } from '../openapi/types';
-import { createShapeConverter } from './shape_schema';
+import { createShapeConverter, isRequired } from './shape_schema';
 import type { SmithyModel } from './smithy_model';
 import {
   collectOperations,
@@ -162,8 +162,13 @@ export const createAwsJsonService = (
         operationId: name,
         ...documentationOf(operation),
         ...(hasTrait(operation.traits, 'smithy.api#deprecated') ? { deprecated: true } : {}),
-        // Operations without input take an empty body as well as `{}`.
-        requestBody: { required: false, content: bothMediaTypes(input) },
+        // Operations whose input has no required members take an empty body as well as `{}`.
+        requestBody: {
+          required: membersOf(model, operation.input?.target).some(([, member]) =>
+            isRequired(member)
+          ),
+          content: bothMediaTypes(input),
+        },
         responses: {
           '200': {
             description: `${name} 200 response`,
