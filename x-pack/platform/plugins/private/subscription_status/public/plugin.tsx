@@ -75,7 +75,7 @@ export class SubscriptionStatusPlugin
           return;
         }
         const { status, hasBillingAccess, SubscriptionBadge } = badge;
-        const { analytics, application, chrome } = core;
+        const { analytics, chrome } = core;
         const context = {
           projectType: status.projectType,
           licenseType: status.kind === 'popover' ? status.licenseType : undefined,
@@ -91,7 +91,6 @@ export class SubscriptionStatusPlugin
                 ...context,
               })
             }
-            onNavigate={(href) => application.navigateToUrl(href)}
           />
         );
         analytics.reportEvent<BadgeShownEvent>(BADGE_SHOWN_EVENT, { hasBillingAccess, ...context });
@@ -102,32 +101,38 @@ export class SubscriptionStatusPlugin
     this.badgeSubscription?.unsubscribe();
   }
 
+  /** Cloud Hosted and ECE are cloud-enabled; everything else, including ECK, is self-managed. */
   private getBadge$(
-    { application, docLinks }: CoreStart,
+    core: CoreStart,
     cloud?: CloudStart,
     licensing?: LicensingPluginStart
   ): Observable<ResolvedBadge | undefined> | undefined {
-    // Cloud Hosted and ECE are cloud-enabled; ECK reports as self-managed.
-    if (cloud?.isCloudEnabled) {
-      return defer(() =>
-        resolveServerlessStatus({ cloud, csp: this.csp, region: this.region })
-      ).pipe(map((status) => status && { status, hasBillingAccess: status.kind === 'popover' }));
-    }
-    if (!licensing) return undefined;
+    if (cloud?.isCloudEnabled) return this.getCloudBadge$(cloud);
+    if (licensing) return getSelfManagedBadge$(core, licensing);
+    return undefined;
+  }
 
-    const canManageLicense = Boolean(
-      application.capabilities.management?.stack?.license_management
-    );
-    const urls = {
-      compareFeatures: docLinks.links.subscriptions,
-      manageLicense: application.getUrlForApp('management', { path: 'stack/license_management' }),
-    };
-
-    return licensing.license$.pipe(
-      map((license) => {
-        const status = resolveSelfManagedStatus({ license, canManageLicense, urls });
-        return status && { status, hasBillingAccess: canManageLicense };
-      })
+  private getCloudBadge$(cloud: CloudStart): Observable<ResolvedBadge | undefined> {
+    return defer(() => resolveServerlessStatus({ cloud, csp: this.csp, region: this.region })).pipe(
+      map((status) => status && { status, hasBillingAccess: status.kind === 'popover' })
     );
   }
 }
+
+const getSelfManagedBadge$ = (
+  { application, docLinks }: CoreStart,
+  licensing: LicensingPluginStart
+): Observable<ResolvedBadge | undefined> => {
+  const canManageLicense = Boolean(application.capabilities.management?.stack?.license_management);
+  const urls = {
+    compareFeatures: docLinks.links.subscriptions,
+    manageLicense: application.getUrlForApp('management', { path: 'stack/license_management' }),
+  };
+
+  return licensing.license$.pipe(
+    map((license) => {
+      const status = resolveSelfManagedStatus({ license, canManageLicense, urls });
+      return status && { status, hasBillingAccess: canManageLicense };
+    })
+  );
+};

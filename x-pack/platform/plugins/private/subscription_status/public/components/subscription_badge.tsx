@@ -6,7 +6,6 @@
  */
 
 import React, { useState } from 'react';
-import type { MouseEvent } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -35,8 +34,6 @@ export interface SubscriptionBadgeProps {
   status: SubscriptionStatus;
   onOpen: () => void;
   onAction: (id: SubscriptionStatusActionId) => void;
-  /** Navigates to the href of internal actions without a full page reload. */
-  onNavigate?: (href: string) => void;
 }
 
 type PopoverStatus = Extract<SubscriptionStatus, { kind: 'popover' }>;
@@ -45,7 +42,6 @@ const SubscriptionPopover = ({
   status,
   onOpen,
   onAction,
-  onNavigate,
 }: Omit<SubscriptionBadgeProps, 'status'> & { status: PopoverStatus }) => {
   const [isOpen, setIsOpen] = useState(false);
   const {
@@ -68,13 +64,9 @@ const SubscriptionPopover = ({
   const getActionProps = ({ id, href, external }: SubscriptionStatusAction) => ({
     href,
     target: external ? '_blank' : undefined,
-    onClick: (event: MouseEvent) => {
+    onClick: () => {
       onAction(id);
       setIsOpen(false);
-      if (!external && onNavigate) {
-        event.preventDefault();
-        onNavigate(href);
-      }
     },
   });
 
@@ -188,22 +180,10 @@ const SubscriptionPopover = ({
   );
 };
 
-export const SubscriptionBadge = ({
-  status,
-  onOpen,
-  onAction,
-  onNavigate,
-}: SubscriptionBadgeProps) => {
+export const SubscriptionBadge = ({ status, onOpen, onAction }: SubscriptionBadgeProps) => {
   switch (status.kind) {
     case 'popover':
-      return (
-        <SubscriptionPopover
-          status={status}
-          onOpen={onOpen}
-          onAction={onAction}
-          onNavigate={onNavigate}
-        />
-      );
+      return <SubscriptionPopover status={status} onOpen={onOpen} onAction={onAction} />;
     case 'tooltip':
       return (
         // The tooltip is only linked to the badge while visible, so the message is also rendered as

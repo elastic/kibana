@@ -16,7 +16,7 @@ export interface SubscriptionStatusAction {
   id: SubscriptionStatusActionId;
   label: string;
   href: string;
-  /** External actions open in a new tab; internal ones navigate within Kibana. */
+  /** External actions open in a new tab. */
   external: boolean;
 }
 

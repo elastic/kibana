@@ -56,12 +56,7 @@ const SelfManagedScenario = ({
   }
 
   const badge = (
-    <SubscriptionBadge
-      status={resolved}
-      onOpen={action('onOpen')}
-      onAction={action('onAction')}
-      onNavigate={action('onNavigate')}
-    />
+    <SubscriptionBadge status={resolved} onOpen={action('onOpen')} onAction={action('onAction')} />
   );
 
   return inClassicHeader ? (
