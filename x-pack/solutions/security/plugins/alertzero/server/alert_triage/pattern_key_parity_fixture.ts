@@ -46,6 +46,13 @@ const nix = (type: string, executable: string, extra: Record<string, unknown> = 
   host: os(type),
   process: { executable, ...extra },
 });
+const library = (dll: Record<string, unknown>, executable?: string) => ({
+  ...base,
+  host: os('windows'),
+  event: { category: ['library'] },
+  dll: { path: 'C:\\Lib\\x.dll', ...dll },
+  ...(executable ? { process: { executable } } : {}),
+});
 const registry = (executable: string) => ({
   ...base,
   host: os('windows'),
@@ -132,6 +139,19 @@ export const PARITY_ALERTS: ParityAlert[] = [
   },
   { id: 'file-1', doc: file('C:\\Data\\f1.tmp'), strict: 13, wide: 12 },
   { id: 'file-2-same-folder', doc: file('C:\\Data\\f2.tmp'), strict: 14, wide: 12 },
+  {
+    id: 'library-1',
+    doc: library({ code_signature: ACME }, 'C:\\Tools\\w.exe'),
+    strict: 16,
+    wide: 14,
+  },
+  {
+    id: 'library-same',
+    doc: library({ code_signature: ACME }, 'C:\\Other\\z.exe'),
+    strict: 16,
+    wide: 14,
+  },
+  { id: 'library-unsigned', doc: library({ hash: { sha256: 'dd01' } }), strict: 17, wide: 15 },
   { id: 'registry-1', doc: registry('C:\\Tools\\w.exe'), strict: 18, wide: 16 },
   { id: 'registry-same', doc: registry('C:\\Tools\\w.exe'), strict: 18, wide: 16 },
   { id: 'registry-other-program', doc: registry('C:\\Tools\\v.exe'), strict: 19, wide: 17 },
