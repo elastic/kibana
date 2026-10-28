@@ -51,6 +51,11 @@ export interface ProcessedConversation {
   timeline: ProcessedTimelineEvent[];
   nextInput: ProcessedRoundInput;
   attachmentTypes: ProcessedAttachmentType[];
+  /**
+   * False for an agent that cannot act on attachments: the prompt then carries neither the
+   * attachment events nor the type descriptions. Absent means they are included.
+   */
+  includeAttachmentNotices?: boolean;
   /** Description of an attachment type, resolved when rendering (types can appear mid-run). */
   describeAttachmentType?: (type: string) => string | undefined;
   /** Where each resume's input attachments render: `prompt_response` id → the items its pause waited on. */
@@ -80,7 +85,7 @@ export const prepareConversation = async ({
   context,
   metadata,
   templateId,
-  includeAttachmentTypes = true,
+  includeAttachmentNotices = true,
   resumeAnchors,
 }: {
   /** The conversation's normalized context timeline (see `eventsForContext`). */
@@ -91,10 +96,11 @@ export const prepareConversation = async ({
   metadata?: Record<string, MetadataFieldValue>;
   templateId?: string;
   /**
-   * Whether to describe the attachment types in the user messages. An agent without attachment
-   * tools cannot act on the descriptions, so it leaves them out.
+   * Whether the user messages carry the attachment events (`<conversation_event>`) and the
+   * descriptions of the attachment types. An agent without attachment tools cannot act on either,
+   * so it leaves them out.
    */
-  includeAttachmentTypes?: boolean;
+  includeAttachmentNotices?: boolean;
   resumeAnchors?: ResumeAnchors;
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;
@@ -198,7 +204,7 @@ export const prepareConversation = async ({
   ];
 
   const attachmentTypes = await Promise.all(
-    (includeAttachmentTypes ? attachmentTypeIds : []).map<Promise<ProcessedAttachmentType>>(
+    (includeAttachmentNotices ? attachmentTypeIds : []).map<Promise<ProcessedAttachmentType>>(
       async (type) => {
         const definition = attachmentsService.getTypeDefinition(type);
         const description = definition?.getAgentDescription?.() ?? undefined;
@@ -214,6 +220,7 @@ export const prepareConversation = async ({
     nextInput: processedNextInput,
     timeline: processedTimeline,
     attachmentTypes,
+    ...(includeAttachmentNotices ? {} : { includeAttachmentNotices: false }),
     describeAttachmentType: (type) =>
       attachmentsService.getTypeDefinition(type)?.getAgentDescription?.() ?? undefined,
     attachmentStateManager,

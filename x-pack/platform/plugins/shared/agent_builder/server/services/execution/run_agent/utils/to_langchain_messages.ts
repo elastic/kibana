@@ -53,11 +53,20 @@ import {
   type RoundAttachmentPlacement,
 } from './attachment_placement';
 
+/** For an agent that cannot act on attachments: no events and no type instructions. */
+const NO_NOTICES: AttachmentNoticeRenderer = { render: () => '', typeInstructions: () => '' };
+
 /** The notice renderer of one prompt build; per-type instructions are given once across it. */
 export const noticeRendererFor = (
-  conversation: Pick<ProcessedConversation, 'attachmentTypes' | 'describeAttachmentType'>,
+  conversation: Pick<
+    ProcessedConversation,
+    'attachmentTypes' | 'describeAttachmentType' | 'includeAttachmentNotices'
+  >,
   { withTypeInstructions = true }: { withTypeInstructions?: boolean } = {}
 ): AttachmentNoticeRenderer => {
+  if (conversation.includeAttachmentNotices === false) {
+    return NO_NOTICES;
+  }
   const renderer = createAttachmentNoticeRenderer({
     describeType: (type) =>
       conversation.describeAttachmentType

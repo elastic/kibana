@@ -30,7 +30,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import { sanitizeToolId, wrapToolResultContent } from '@kbn/agent-builder-genai-utils/langchain';
-import { prepareMessages, groupToolCallSteps } from './to_langchain_messages';
+import { prepareMessages, groupToolCallSteps, noticeRendererFor } from './to_langchain_messages';
 import { formatDate } from '../prompts/utils/helpers';
 import type { ToolCallResultTransformer } from './tool_summarization';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
@@ -1958,5 +1958,27 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
       expect(result[3].content).toContain('LLM &lt;boom&gt;');
       expect(result[4].content).toContain('third');
     });
+  });
+});
+
+describe('noticeRendererFor', () => {
+  const events = [attachmentEventFixture({ id: 'e1' })];
+  const conversation = {
+    attachmentTypes: [{ type: 'text', description: 'A text attachment' }],
+    describeAttachmentType: () => 'A text attachment',
+  };
+
+  it('renders the attachment events and the type instructions by default', () => {
+    const rendered = noticeRendererFor(conversation).render(events);
+
+    expect(rendered).toContain('<conversation_event type="attachment_added"');
+    expect(rendered).toContain('ATTACHMENT TYPES');
+  });
+
+  it('renders neither for an agent that cannot act on attachments', () => {
+    const notices = noticeRendererFor({ ...conversation, includeAttachmentNotices: false });
+
+    expect(notices.render(events)).toBe('');
+    expect(notices.typeInstructions(['text'])).toBe('');
   });
 });

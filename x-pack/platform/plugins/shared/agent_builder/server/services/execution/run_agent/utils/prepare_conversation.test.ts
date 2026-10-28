@@ -252,7 +252,7 @@ describe('prepareConversation', () => {
       ]);
     });
 
-    it('leaves the attachment types out when includeAttachmentTypes is false', async () => {
+    it('leaves the attachment types out, and says the notices are off, when includeAttachmentNotices is false', async () => {
       mockContext.attachmentStateManager = createAttachmentStateManager([], {
         getTypeDefinition: (type: string) => ({
           id: type,
@@ -274,10 +274,11 @@ describe('prepareConversation', () => {
           attachments: [{ id: 'note-1', type: 'text', data: { content: 'hello' } }],
         },
         context: mockContext,
-        includeAttachmentTypes: false,
+        includeAttachmentNotices: false,
       });
 
       expect(result.attachmentTypes).toEqual([]);
+      expect(result.includeAttachmentNotices).toBe(false);
     });
 
     it('treats same ID as a new version of an existing attachment', async () => {

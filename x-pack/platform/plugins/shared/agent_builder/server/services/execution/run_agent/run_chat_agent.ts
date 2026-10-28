@@ -250,7 +250,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     context,
     metadata: conversation?.metadata,
     templateId: conversation?.template_id,
-    includeAttachmentTypes: !rawAgent,
+    includeAttachmentNotices: !rawAgent,
     resumeAnchors,
   });
   processedConversation.resumedRoundId = pendingTurn?.id;
