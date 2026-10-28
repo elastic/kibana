@@ -137,7 +137,7 @@ describe('InstalledIntegrationsTable', () => {
   const renderComponent = (
     packages: InstalledPackageUIPackageListItem[],
     overrides?: {
-      collectionInstanceCounts?: Record<string, number>;
+      instanceCounts?: Map<string, number>;
       rollingbackIntegrations?: InstalledPackageUIPackageListItem[];
       rollbackAvailable?: Record<string, boolean>;
     }
@@ -166,7 +166,7 @@ describe('InstalledIntegrationsTable', () => {
         isLoading={false}
         pagination={defaultPagination}
         selection={defaultSelection}
-        collectionInstanceCounts={overrides?.collectionInstanceCounts}
+        instanceCounts={overrides?.instanceCounts}
       />
     );
 
@@ -232,28 +232,28 @@ describe('InstalledIntegrationsTable', () => {
     });
   });
 
-  describe('collection instances', () => {
-    it('shows no column without collection instances', () => {
+  describe('instances', () => {
+    it('shows no column without instances', () => {
       renderComponent([basePackage]);
       expect(screen.queryByText('Instances')).not.toBeInTheDocument();
     });
 
     it('shows the count as a link for a package with instances', () => {
-      renderComponent([basePackage], { collectionInstanceCounts: { 'test-package': 3 } });
+      renderComponent([basePackage], { instanceCounts: new Map([['test-package', 3]]) });
       expect(screen.getByText('Instances')).toBeInTheDocument();
       expect(
-        screen.getByTestId('installedIntegrationsTable.collectionInstancesLink.test-package')
+        screen.getByTestId('installedIntegrationsTable.instancesLink.test-package')
       ).toHaveTextContent('3');
     });
 
-    it('opens the collection instances of the package on click', async () => {
+    it('opens the instances of the package on click', async () => {
       const addViewInstances = jest.fn();
       (useViewInstances as jest.Mock).mockReturnValue({ addViewInstances });
-      renderComponent([basePackage], { collectionInstanceCounts: { 'test-package': 2 } });
+      renderComponent([basePackage], { instanceCounts: new Map([['test-package', 2]]) });
 
       await act(async () => {
         screen
-          .getByTestId('installedIntegrationsTable.collectionInstancesLink.test-package')
+          .getByTestId('installedIntegrationsTable.instancesLink.test-package')
           .click();
       });
 

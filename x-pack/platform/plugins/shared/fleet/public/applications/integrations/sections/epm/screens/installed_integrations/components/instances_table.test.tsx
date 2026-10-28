@@ -11,7 +11,7 @@ import { screen, act, within } from '@testing-library/react';
 import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
 import type { CloudOnboardingDeploymentListItem } from '../../../../../../../../common/types';
 
-import { CollectionInstancesTable } from './collection_instances_table';
+import { InstancesTable } from './instances_table';
 
 const mockNavigateToApp = jest.fn();
 
@@ -50,10 +50,10 @@ const makeInstance = (
   ...overrides,
 });
 
-describe('CollectionInstancesTable', () => {
+describe('InstancesTable', () => {
   const renderTable = (instances: CloudOnboardingDeploymentListItem[], packageName = 'aws') =>
     createIntegrationsTestRendererMock().render(
-      <CollectionInstancesTable instances={instances} packageName={packageName} />
+      <InstancesTable instances={instances} packageName={packageName} />
     );
 
   beforeEach(() => {
@@ -63,7 +63,7 @@ describe('CollectionInstancesTable', () => {
   it('renders one row per instance with its name, user and agents', () => {
     renderTable([makeInstance(), makeInstance({ id: 'deployment-2', integrationName: 'Two' })]);
 
-    expect(screen.getAllByTestId('collectionInstancesTableRow')).toHaveLength(2);
+    expect(screen.getAllByTestId('instancesTableRow')).toHaveLength(2);
     expect(screen.getByText('AWS-collection-1')).toBeInTheDocument();
     expect(screen.getByText('Two')).toBeInTheDocument();
     expect(screen.getAllByText('elastic')).toHaveLength(2);
@@ -82,7 +82,7 @@ describe('CollectionInstancesTable', () => {
   it('shows a service count per deployment method', () => {
     renderTable([makeInstance()]);
 
-    const row = screen.getByTestId('collectionInstancesTableRow');
+    const row = screen.getByTestId('instancesTableRow');
     expect(within(row).getByText('2')).toBeInTheDocument();
     expect(within(row).getByText('1')).toBeInTheDocument();
   });
@@ -90,7 +90,7 @@ describe('CollectionInstancesTable', () => {
   it('shows the service titles by method in a tooltip', async () => {
     renderTable([makeInstance()]);
 
-    const row = screen.getByTestId('collectionInstancesTableRow');
+    const row = screen.getByTestId('instancesTableRow');
     await act(async () => {
       within(row).getByText('2').focus();
     });
@@ -103,7 +103,7 @@ describe('CollectionInstancesTable', () => {
   it('shows the version of the package being viewed', () => {
     renderTable([makeInstance()], 'aws_bedrock');
 
-    const row = screen.getByTestId('collectionInstancesTableRow');
+    const row = screen.getByTestId('instancesTableRow');
     expect(within(row).getByText('1.2.0')).toBeInTheDocument();
     expect(within(row).queryByText('8.11.0')).not.toBeInTheDocument();
   });
@@ -111,7 +111,7 @@ describe('CollectionInstancesTable', () => {
   it('shows the version of another package of the instance when that one is viewed', () => {
     renderTable([makeInstance()], 'aws');
 
-    const row = screen.getByTestId('collectionInstancesTableRow');
+    const row = screen.getByTestId('instancesTableRow');
     expect(within(row).getByText('8.11.0')).toBeInTheDocument();
     expect(within(row).queryByText('1.2.0')).not.toBeInTheDocument();
   });
@@ -119,7 +119,7 @@ describe('CollectionInstancesTable', () => {
   it('shows a dash when the instance has no policy of the package being viewed', () => {
     renderTable([makeInstance({ packages: [] })], 'aws');
 
-    const row = screen.getByTestId('collectionInstancesTableRow');
+    const row = screen.getByTestId('instancesTableRow');
     expect(within(row).queryByText('8.11.0')).not.toBeInTheDocument();
     expect(within(row).getAllByText('-').length).toBeGreaterThanOrEqual(1);
   });
@@ -137,7 +137,7 @@ describe('CollectionInstancesTable', () => {
       }),
     ]);
 
-    const row = screen.getByTestId('collectionInstancesTableRow');
+    const row = screen.getByTestId('instancesTableRow');
     await act(async () => {
       within(row).getByText(String(count)).focus();
     });
@@ -157,7 +157,7 @@ describe('CollectionInstancesTable', () => {
       }),
     ]);
 
-    const row = screen.getByTestId('collectionInstancesTableRow');
+    const row = screen.getByTestId('instancesTableRow');
     expect(within(row).getAllByText('-').length).toBeGreaterThanOrEqual(3);
   });
 
@@ -165,7 +165,7 @@ describe('CollectionInstancesTable', () => {
     renderTable([makeInstance()]);
 
     await act(async () => {
-      screen.getByTestId('collectionInstanceLink').click();
+      screen.getByTestId('instanceLink').click();
     });
 
     expect(mockNavigateToApp).toHaveBeenCalledWith('onboarding', {

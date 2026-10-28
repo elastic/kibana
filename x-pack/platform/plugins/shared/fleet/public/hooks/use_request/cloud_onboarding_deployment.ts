@@ -63,13 +63,34 @@ export const sendGetCloudOnboardingDeployments = (
   });
 };
 
-export const useGetCloudOnboardingDeploymentsQuery = (
-  query?: GetCloudOnboardingDeploymentsRequest['query'],
+const LIST_PAGE_SIZE = 100;
+// Stops a runaway loop: 2000 sessions in one space is far beyond what the list is meant for.
+const LIST_MAX_PAGES = 20;
+
+/** Every deployment matching the query, fetched page by page. */
+export const sendGetAllCloudOnboardingDeployments = async (
+  query?: Omit<NonNullable<GetCloudOnboardingDeploymentsRequest['query']>, 'page' | 'perPage'>
+) => {
+  const items: GetCloudOnboardingDeploymentsResponse['items'] = [];
+  for (let page = 1; page <= LIST_MAX_PAGES; page++) {
+    const response = await sendGetCloudOnboardingDeployments({
+      ...query,
+      page,
+      perPage: LIST_PAGE_SIZE,
+    });
+    items.push(...response.items);
+    if (response.items.length === 0 || items.length >= response.total) break;
+  }
+  return items;
+};
+
+export const useGetAllCloudOnboardingDeploymentsQuery = (
+  query?: Omit<NonNullable<GetCloudOnboardingDeploymentsRequest['query']>, 'page' | 'perPage'>,
   options: { enabled?: boolean } = {}
 ) => {
-  return useQuery<GetCloudOnboardingDeploymentsResponse, RequestError>({
+  return useQuery<GetCloudOnboardingDeploymentsResponse['items'], RequestError>({
     queryKey: ['cloud_onboarding_deployments', query],
-    queryFn: () => sendGetCloudOnboardingDeployments(query),
+    queryFn: () => sendGetAllCloudOnboardingDeployments(query),
     enabled: options.enabled,
   });
 };

@@ -6,7 +6,9 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
 import { Loading } from '../../../../../../components';
@@ -20,8 +22,8 @@ import type { InstalledPackageUIPackageListItem } from './types';
 import { useInstalledIntegrationsActions } from './hooks/use_installed_integrations_actions';
 import { BulkActionContextProvider } from './hooks/use_bulk_actions_context';
 import { PackagePoliciesPanel } from './components/package_policies_panel';
-import { CollectionInstancesPanel } from './components/collection_instances_panel';
-import { useCollectionInstances } from './hooks/use_collection_instances';
+import { InstancesPanel } from './components/instances_panel';
+import { useInstances } from './hooks/use_instances';
 
 const InstalledIntegrationsPageContent: React.FunctionComponent<{
   prereleaseIntegrationsEnabled: boolean;
@@ -30,7 +32,11 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
   const filters = useUrlFilters();
   const { selectedPackageViewPolicies } = useViewPolicies();
   const { selectedPackageViewInstances } = useViewInstances();
-  const { instancesByPackage } = useCollectionInstances();
+  const {
+    instancesByPackage,
+    isError: isInstancesError,
+    refetch: refetchInstances,
+  } = useInstances();
   const pagination = useUrlPagination();
   const { upgradingIntegrations, uninstallingIntegrations, rollingbackIntegrations } =
     useInstalledIntegrationsActions();
@@ -60,7 +66,7 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
     [selectedPackageViewPolicies, installedPackages]
   );
 
-  const collectionInstancesSelectedItem = useMemo(
+  const instancesSelectedItem = useMemo(
     () =>
       selectedPackageViewInstances
         ? installedPackages.find((item) => item.name === selectedPackageViewInstances)
@@ -68,13 +74,10 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
     [selectedPackageViewInstances, installedPackages]
   );
 
-  const collectionInstanceCounts = useMemo(
+  const instanceCounts = useMemo(
     () =>
-      Object.fromEntries(
-        Object.entries(instancesByPackage).map(([packageName, instances]) => [
-          packageName,
-          instances.length,
-        ])
+      new Map(
+        [...instancesByPackage].map(([packageName, instances]) => [packageName, instances.length])
       ),
     [instancesByPackage]
   );
@@ -98,22 +101,52 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
           selectedItems={selectedItems}
         />
         <EuiSpacer size="l" />
+        {isInstancesError ? (
+          <>
+            <EuiCallOut
+              announceOnMount
+              color="warning"
+              iconType="warning"
+              size="s"
+              data-test-subj="instancesLoadError"
+              title={i18n.translate(
+                'xpack.fleet.epmInstalledIntegrations.instancesError',
+                {
+                  defaultMessage: 'Could not load the instances',
+                }
+              )}
+            >
+              <EuiButton
+                size="s"
+                color="warning"
+                onClick={() => refetchInstances()}
+                data-test-subj="instancesRetry"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.epmInstalledIntegrations.instancesRetry"
+                  defaultMessage="Retry"
+                />
+              </EuiButton>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
         <InstalledIntegrationsTable
           total={total}
           pagination={pagination}
           isLoading={isInitialLoading || isLoading}
           installedPackages={installedPackages}
           selection={{ selectedItems, setSelectedItems }}
-          collectionInstanceCounts={collectionInstanceCounts}
+          instanceCounts={instanceCounts}
         />
       </div>
       {viewPoliciesSelectedItem ? (
         <PackagePoliciesPanel installedPackage={viewPoliciesSelectedItem} />
       ) : null}
-      {collectionInstancesSelectedItem ? (
-        <CollectionInstancesPanel
-          installedPackage={collectionInstancesSelectedItem}
-          instances={instancesByPackage[collectionInstancesSelectedItem.name] ?? []}
+      {instancesSelectedItem ? (
+        <InstancesPanel
+          installedPackage={instancesSelectedItem}
+          instances={instancesByPackage.get(instancesSelectedItem.name) ?? []}
         />
       ) : null}
     </>

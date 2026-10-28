@@ -25,14 +25,14 @@ const EMPTY_CELL = '-';
 
 const DEPLOYMENT_METHOD_LABELS: Record<DeploymentMethod, string> = {
   managed_integration: i18n.translate(
-    'xpack.fleet.epmInstalledIntegrations.collectionInstances.managedIntegrationMethod',
+    'xpack.fleet.epmInstalledIntegrations.instances.managedIntegrationMethod',
     { defaultMessage: 'Managed integration' }
   ),
-  ecf: i18n.translate('xpack.fleet.epmInstalledIntegrations.collectionInstances.ecfMethod', {
+  ecf: i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.ecfMethod', {
     defaultMessage: 'Elastic Cloud Forwarder',
   }),
   agent_based: i18n.translate(
-    'xpack.fleet.epmInstalledIntegrations.collectionInstances.agentBasedMethod',
+    'xpack.fleet.epmInstalledIntegrations.instances.agentBasedMethod',
     { defaultMessage: 'Agent-based' }
   ),
 };
@@ -46,7 +46,7 @@ const getServicesTooltip = (method: DeploymentMethod, serviceNames: string[]): s
   const moreCount = serviceNames.length - MAX_TOOLTIP_SERVICES;
   const services =
     moreCount > 0
-      ? i18n.translate('xpack.fleet.epmInstalledIntegrations.collectionInstances.moreServices', {
+      ? i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.moreServices', {
           defaultMessage:
             '{named} and {moreCount, plural, one {# more service} other {# more services}}',
           values: { named, moreCount },
@@ -76,7 +76,7 @@ const SlashSeparatedValues: React.FunctionComponent<{
   );
 };
 
-export const CollectionInstancesTable: React.FunctionComponent<{
+export const InstancesTable: React.FunctionComponent<{
   instances: CloudOnboardingDeploymentListItem[];
   /** The package being viewed, whose deployed version the Version column shows. */
   packageName: string;
@@ -96,18 +96,18 @@ export const CollectionInstancesTable: React.FunctionComponent<{
   const columns: Array<EuiBasicTableColumn<CloudOnboardingDeploymentListItem>> = [
     {
       field: 'integrationName',
-      name: i18n.translate('xpack.fleet.epmInstalledIntegrations.collectionInstances.nameColumn', {
+      name: i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.nameColumn', {
         defaultMessage: 'Instance',
       }),
       render: (_: unknown, item: CloudOnboardingDeploymentListItem) => (
-        <EuiLink onClick={() => openInstance(item.id)} data-test-subj="collectionInstanceLink">
+        <EuiLink onClick={() => openInstance(item.id)} data-test-subj="instanceLink">
           {item.integrationName || item.deploymentName || item.id}
         </EuiLink>
       ),
     },
     {
       name: i18n.translate(
-        'xpack.fleet.epmInstalledIntegrations.collectionInstances.servicesColumn',
+        'xpack.fleet.epmInstalledIntegrations.instances.servicesColumn',
         { defaultMessage: 'Services' }
       ),
       render: (item: CloudOnboardingDeploymentListItem) => (
@@ -131,7 +131,7 @@ export const CollectionInstancesTable: React.FunctionComponent<{
     },
     {
       name: i18n.translate(
-        'xpack.fleet.epmInstalledIntegrations.collectionInstances.versionColumn',
+        'xpack.fleet.epmInstalledIntegrations.instances.versionColumn',
         { defaultMessage: 'Version' }
       ),
       render: (item: CloudOnboardingDeploymentListItem) =>
@@ -140,7 +140,7 @@ export const CollectionInstancesTable: React.FunctionComponent<{
     {
       field: 'updatedBy',
       name: i18n.translate(
-        'xpack.fleet.epmInstalledIntegrations.collectionInstances.updatedByColumn',
+        'xpack.fleet.epmInstalledIntegrations.instances.updatedByColumn',
         { defaultMessage: 'Last updated by' }
       ),
       render: (updatedBy?: string) => updatedBy ?? EMPTY_CELL,
@@ -148,7 +148,7 @@ export const CollectionInstancesTable: React.FunctionComponent<{
     {
       field: 'updatedAt',
       name: i18n.translate(
-        'xpack.fleet.epmInstalledIntegrations.collectionInstances.updatedAtColumn',
+        'xpack.fleet.epmInstalledIntegrations.instances.updatedAtColumn',
         { defaultMessage: 'Last updated' }
       ),
       render: (updatedAt?: string) =>
@@ -164,7 +164,7 @@ export const CollectionInstancesTable: React.FunctionComponent<{
     {
       field: 'agentCount',
       name: i18n.translate(
-        'xpack.fleet.epmInstalledIntegrations.collectionInstances.agentsColumn',
+        'xpack.fleet.epmInstalledIntegrations.instances.agentsColumn',
         { defaultMessage: 'Agents' }
       ),
       render: (agentCount: number) => (agentCount > 0 ? agentCount : EMPTY_CELL),
@@ -177,10 +177,10 @@ export const CollectionInstancesTable: React.FunctionComponent<{
       itemId="id"
       columns={columns}
       tableCaption={i18n.translate(
-        'xpack.fleet.epmInstalledIntegrations.collectionInstances.tableCaption',
-        { defaultMessage: 'Collection instances' }
+        'xpack.fleet.epmInstalledIntegrations.instances.tableCaption',
+        { defaultMessage: 'Instances' }
       )}
-      rowProps={{ 'data-test-subj': 'collectionInstancesTableRow' }}
+      rowProps={{ 'data-test-subj': 'instancesTableRow' }}
     />
   );
 };

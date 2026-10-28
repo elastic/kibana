@@ -13,6 +13,7 @@ import type {
   CloudOnboardingDeploymentPackage,
 } from '../../../common/types/models/cloud_onboarding_deployment';
 import { appContextService } from '../../services/app_context';
+import { agentPolicyService } from '../../services/agent_policy';
 import { packagePolicyService } from '../../services/package_policy';
 import { getAgentCountForAgentPolicies } from '../../services/agent_policies/agent_policy_agent_count';
 
@@ -44,7 +45,9 @@ export function getServicesByMethod(
 
 /**
  * Adds what the list needs from the deployments' policies: the deployed package versions and the
- * number of enrolled agents. A policy that no longer exists is skipped.
+ * number of enrolled agents. A policy that no longer exists, or is not in the space of `soClient`,
+ * is skipped. Agent policy ids are client-supplied, so they are resolved through `soClient` before
+ * the agent count, which is not space scoped, is queried.
  */
 export async function enrichDeployments(
   soClient: SavedObjectsClientContract,
@@ -65,12 +68,15 @@ export async function enrichDeployments(
     ]),
   ];
 
-  const allAgentPolicyIds = [...new Set(deployments.flatMap(agentPolicyIdsOf))];
-  const agentCounts = allAgentPolicyIds.length
-    ? await getAgentCountForAgentPolicies(
-        appContextService.getInternalUserESClient(),
-        allAgentPolicyIds
-      )
+  const requestedAgentPolicyIds = [...new Set(deployments.flatMap(agentPolicyIdsOf))];
+  const agentPolicies = requestedAgentPolicyIds.length
+    ? await agentPolicyService.getByIds(soClient, requestedAgentPolicyIds, { ignoreMissing: true })
+    : [];
+  const accessibleAgentPolicyIds = new Set(agentPolicies.map((policy) => policy.id));
+  const agentCounts = accessibleAgentPolicyIds.size
+    ? await getAgentCountForAgentPolicies(appContextService.getInternalUserESClient(), [
+        ...accessibleAgentPolicyIds,
+      ])
     : {};
 
   return deployments.map((deployment) => {
@@ -85,7 +91,10 @@ export async function enrichDeployments(
       ...deployment,
       packages: [...packages.values()],
       servicesByMethod: getServicesByMethod(deployment),
-      agentCount: agentPolicyIdsOf(deployment).reduce((sum, id) => sum + (agentCounts[id] ?? 0), 0),
+      agentCount: agentPolicyIdsOf(deployment).reduce(
+        (sum, id) => sum + (accessibleAgentPolicyIds.has(id) ? agentCounts[id] ?? 0 : 0),
+        0
+      ),
     };
   });
 }

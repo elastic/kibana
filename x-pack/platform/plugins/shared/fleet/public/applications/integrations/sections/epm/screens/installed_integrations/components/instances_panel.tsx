@@ -13,11 +13,11 @@ import type { CloudOnboardingDeploymentListItem } from '../../../../../../../../
 import type { InstalledPackageUIPackageListItem } from '../types';
 import { useViewInstances } from '../hooks/use_url_filters';
 
-import { CollectionInstancesTable } from './collection_instances_table';
+import { InstancesTable } from './instances_table';
 import { PackagePanelTitle } from './package_panel_title';
 import { ResizablePanel } from './resizable_panel';
 
-export const CollectionInstancesPanel: React.FunctionComponent<{
+export const InstancesPanel: React.FunctionComponent<{
   installedPackage: InstalledPackageUIPackageListItem;
   instances: CloudOnboardingDeploymentListItem[];
 }> = ({ installedPackage, instances }) => {
@@ -29,7 +29,7 @@ export const CollectionInstancesPanel: React.FunctionComponent<{
       title={<PackagePanelTitle installedPackage={installedPackage} />}
       content={
         <div css={[paddingStyles.s]}>
-          <CollectionInstancesTable instances={instances} packageName={installedPackage.name} />
+          <InstancesTable instances={instances} packageName={installedPackage.name} />
         </div>
       }
       onClose={() => addViewInstances('')}

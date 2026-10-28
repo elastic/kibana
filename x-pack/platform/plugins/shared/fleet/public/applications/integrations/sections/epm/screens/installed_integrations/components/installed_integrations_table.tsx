@@ -45,6 +45,8 @@ import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
 import { AlertsCell } from './alerts_cell';
 import { DashboardsCell } from './dashboards_cell';
 
+const EMPTY_COUNTS: ReadonlyMap<string, number> = new Map();
+
 function wrapActionWithDisabledTooltip(
   action: Action<InstalledPackageUIPackageListItem>,
   disabled: boolean,
@@ -65,22 +67,22 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
     selectedItems: InstalledPackageUIPackageListItem[];
     setSelectedItems: React.Dispatch<React.SetStateAction<InstalledPackageUIPackageListItem[]>>;
   };
-  /** Number of collection instances (onboarding sessions) per package name. */
-  collectionInstanceCounts?: Record<string, number>;
+  /** Number of instances (onboarding sessions) per package name. */
+  instanceCounts?: ReadonlyMap<string, number>;
 }> = ({
   installedPackages,
   total,
   isLoading,
   pagination,
   selection,
-  collectionInstanceCounts = {},
+  instanceCounts = EMPTY_COUNTS,
 }) => {
   const authz = useAuthz();
   const { getHref } = useLink();
   const { selectedItems, setSelectedItems } = selection;
   const { addViewPolicies } = useViewPolicies();
   const { addViewInstances } = useViewInstances();
-  const hasCollectionInstances = Object.values(collectionInstanceCounts).some((count) => count > 0);
+  const hasInstances = [...instanceCounts.values()].some((count) => count > 0);
   const {
     actions: {
       bulkUninstallIntegrationsWithConfirmModal,
@@ -319,22 +321,22 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               return policiesLink;
             },
           },
-          ...(hasCollectionInstances
+          ...(hasInstances
             ? [
                 {
                   name: i18n.translate(
-                    'xpack.fleet.epmInstalledIntegrations.collectionInstancesColumnTitle',
+                    'xpack.fleet.epmInstalledIntegrations.instancesColumnTitle',
                     {
                       defaultMessage: 'Instances',
                     }
                   ),
                   width: '160px',
                   render: (item: InstalledPackageUIPackageListItem) => {
-                    const count = collectionInstanceCounts[item.name] ?? 0;
+                    const count = instanceCounts.get(item.name) ?? 0;
                     return count > 0 ? (
                       <EuiLink
                         onClick={() => addViewInstances(item.name)}
-                        data-test-subj={`installedIntegrationsTable.collectionInstancesLink.${item.name}`}
+                        data-test-subj={`installedIntegrationsTable.instancesLink.${item.name}`}
                       >
                         {count}
                       </EuiLink>

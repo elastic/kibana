@@ -9,12 +9,14 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { CloudOnboardingDeployment } from '../../../common/types/models/cloud_onboarding_deployment';
 import { appContextService } from '../../services/app_context';
+import { agentPolicyService } from '../../services/agent_policy';
 import { packagePolicyService } from '../../services/package_policy';
 import { getAgentCountForAgentPolicies } from '../../services/agent_policies/agent_policy_agent_count';
 
 import { enrichDeployments, getServicesByMethod } from './list_enrichment';
 
 jest.mock('../../services/app_context');
+jest.mock('../../services/agent_policy');
 jest.mock('../../services/package_policy');
 jest.mock('../../services/agent_policies/agent_policy_agent_count');
 
@@ -89,6 +91,9 @@ describe('enrichDeployments', () => {
       },
       { id: 'pp3', policy_ids: ['ap1'], package: { name: 'aws', title: 'AWS', version: '8.11.0' } },
     ] as any);
+    jest
+      .mocked(agentPolicyService.getByIds)
+      .mockImplementation(async (_soClient, ids) => ids.map((id) => ({ id } as any)));
     jest.mocked(getAgentCountForAgentPolicies).mockResolvedValue({ ap1: 1, ap2: 2 });
   });
 
@@ -128,5 +133,28 @@ describe('enrichDeployments', () => {
     ]);
 
     expect(item.packages).toEqual([{ name: 'aws', title: 'AWS', version: '8.11.0' }]);
+  });
+
+  it('does not count the agents of agent policies outside the space of the client', async () => {
+    jest
+      .mocked(agentPolicyService.getByIds)
+      .mockImplementation(async (_soClient, ids) =>
+        ids.filter((id) => id !== 'other-space-policy').map((id) => ({ id } as any))
+      );
+
+    const [item] = await enrichDeployments(soClient, [
+      makeDeployment({
+        mechanisms: ['agent_based'],
+        agentPolicyIds: ['ap2', 'other-space-policy'],
+      }),
+    ]);
+
+    expect(agentPolicyService.getByIds).toHaveBeenCalledWith(
+      soClient,
+      ['ap2', 'other-space-policy'],
+      { ignoreMissing: true }
+    );
+    expect(getAgentCountForAgentPolicies).toHaveBeenCalledWith(expect.anything(), ['ap2']);
+    expect(item.agentCount).toBe(2);
   });
 });
