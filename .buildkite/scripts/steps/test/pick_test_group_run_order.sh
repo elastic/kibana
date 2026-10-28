@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
+export KBN_BOOTSTRAP_NO_PREBUILT=true
+source .buildkite/scripts/bootstrap.sh
 
 echo '--- Pick Test Group Run Order'
 node "$(dirname "${0}")/pick_test_group_run_order.ts"
