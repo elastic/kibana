@@ -148,4 +148,16 @@ describe('createRecorderWorkspace', () => {
       { path: '/workspace/.recorder/results/001-x.txt', content: Buffer.from('abc') },
     ]);
   });
+
+  it('writes the record to the one findings path, which it takes no argument for', async () => {
+    const { workspace, session } = setup();
+
+    await workspace.writeFindings('{"summary":"s"}');
+
+    expect(session.mkdirs).toHaveBeenCalledWith(['/workspace/.recorder']);
+    expect(session.writeFiles).toHaveBeenCalledWith([
+      { path: '/workspace/.recorder/findings.json', content: Buffer.from('{"summary":"s"}') },
+    ]);
+    expect(workspace.writeFindings.length).toBe(1);
+  });
 });

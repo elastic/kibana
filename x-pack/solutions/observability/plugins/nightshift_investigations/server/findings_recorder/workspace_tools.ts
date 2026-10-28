@@ -9,6 +9,7 @@ import { posix } from 'path';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { OutputRedactor } from '../tools/sandbox_bash/output_redactor';
 import {
+  RECORDER_FINDINGS_PATH,
   RECORDER_LIST_MAX_ENTRIES,
   RECORDER_READ_DEFAULT_BYTES,
   RECORDER_READ_MAX_BYTES,
@@ -16,9 +17,10 @@ import {
   RECORDER_WORKSPACE_ROOT,
 } from './constants';
 
-/** The tools the final pass may call to read the investigation's workspace. Read-only. */
+/** The tools the final pass may call: two to read the investigation's workspace, one to answer. */
 export const RECORDER_READ_FILE_TOOL = 'recorder_read_file';
 export const RECORDER_LIST_FILES_TOOL = 'recorder_list_files';
+export const RECORDER_WRITE_FILE_TOOL = 'recorder_write_file';
 
 export const RECORDER_READ_FILE_SCHEMA = {
   type: 'object',
@@ -50,10 +52,24 @@ export const RECORDER_LIST_FILES_SCHEMA = {
   required: ['dir'],
 } as const;
 
-/** What the final pass can do in the workspace: read what exists and leave the round's results. */
+/** The write tool takes no path: it can only ever write the findings file. */
+export const RECORDER_WRITE_FILE_SCHEMA = {
+  type: 'object',
+  properties: {
+    content: {
+      type: 'string',
+      description: `The whole record as JSON, in the format given in the system prompt. It is written to ${RECORDER_FINDINGS_PATH}.`,
+    },
+  },
+  required: ['content'],
+} as const;
+
+/** What the final pass can do in the workspace: read what exists, and write its one findings file. */
 export interface RecorderWorkspace {
   /** Writes the full text of tool results the recorder is shown clipped. */
   writeResults: (files: ReadonlyArray<{ path: string; content: string }>) => Promise<void>;
+  /** Writes the record the final pass answered with, to the one path it may write. */
+  writeFindings: (content: string) => Promise<void>;
   readFile: (args: { path: string; offset?: number; length?: number }) => Promise<string>;
   listFiles: (args: { dir: string }) => Promise<string>;
 }
@@ -104,6 +120,13 @@ export const createRecorderWorkspace = ({
     await session.writeFiles(
       files.map(({ path, content }) => ({ path, content: Buffer.from(content, 'utf8') }))
     );
+  },
+
+  writeFindings: async (content) => {
+    await session.mkdirs([posix.dirname(RECORDER_FINDINGS_PATH)]);
+    await session.writeFiles([
+      { path: RECORDER_FINDINGS_PATH, content: Buffer.from(content, 'utf8') },
+    ]);
   },
 
   readFile: async ({ path: rawPath, offset, length }) => {

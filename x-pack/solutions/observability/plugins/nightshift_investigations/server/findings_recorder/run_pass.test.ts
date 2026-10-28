@@ -10,7 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { MessageRole } from '@kbn/inference-common';
 import { createOptimizeModel } from '../lib/create_optimize_model';
 import type { RecorderMemory } from './coordinator';
-import { FINAL_INSTRUCTION, FINDINGS_RECORDER_SYSTEM_PROMPT, LIVE_INSTRUCTION } from './prompt';
+import { FINAL_INSTRUCTION, LIVE_INSTRUCTION, buildRecorderSystemPrompt } from './prompt';
 import {
   limitToOneConfirmed,
   runFindingsPass,
@@ -117,7 +117,7 @@ describe('runFindingsPass', () => {
     await run(deps, memory);
 
     const call = chatComplete.mock.calls[0][0];
-    expect(call.system).toBe(FINDINGS_RECORDER_SYSTEM_PROMPT);
+    expect(call.system).toBe(buildRecorderSystemPrompt({ final: false }));
     expect(call.messages[0]).toMatchObject({ role: MessageRole.User, content: 'Why?' });
     expect(call.messages.at(-1)).toMatchObject({
       role: MessageRole.User,
@@ -606,12 +606,26 @@ describe('runFindingsPass with workspace files', () => {
 
   const workspace = () => ({
     writeResults: jest.fn().mockResolvedValue(undefined),
+    writeFindings: jest.fn().mockResolvedValue(undefined),
     readFile: jest.fn().mockResolvedValue('t,value\n01:10,3\n01:11,412'),
     listFiles: jest.fn().mockResolvedValue('f 3000 /workspace/.recorder/results/001-x.txt'),
   });
   const readCall = (id: string, path: string) => ({
     content: '',
     toolCalls: [{ toolCallId: id, function: { name: 'recorder_read_file', arguments: { path } } }],
+  });
+
+  const writeCall = (record: unknown, id = 'w1') => ({
+    content: '',
+    toolCalls: [
+      {
+        toolCallId: id,
+        function: {
+          name: 'recorder_write_file',
+          arguments: { content: typeof record === 'string' ? record : JSON.stringify(record) },
+        },
+      },
+    ],
   });
 
   const setupFiles = (answers: unknown[], ws = workspace()) => {
@@ -681,10 +695,11 @@ describe('runFindingsPass with workspace files', () => {
     );
   });
 
-  it('lets the final pass read a file, then answers with what it read', async () => {
+  it('lets the final pass read a file, then write its record to the findings file', async () => {
+    const record = { ...output, impact_evidence: { description: 'Errors went from 3 to 412.' } };
     const { run, ws, chatComplete, writer } = setupFiles([
       readCall('r1', '/workspace/.recorder/results/001-nightshift_sandbox_bash.txt'),
-      answerWith({ ...output, impact_evidence: { description: 'Errors went from 3 to 412.' } }),
+      writeCall(record),
     ]);
 
     await expect(run()).resolves.toBe(true);
@@ -696,9 +711,11 @@ describe('runFindingsPass with workspace files', () => {
     });
     // The second call sees the file's text as the tool's result.
     const second = chatComplete.mock.calls[1][0].messages;
-    expect(JSON.stringify(second.slice(-2))).toContain('01:11,412');
+    expect(JSON.stringify(second)).toContain('01:11,412');
     expect(chatComplete.mock.calls[0][0].toolChoice).toBe('auto');
     expect(chatComplete.mock.calls[0][0].tools).toHaveProperty('recorder_read_file');
+    expect(chatComplete.mock.calls[0][0].tools).toHaveProperty('recorder_write_file');
+    expect(ws.writeFindings).toHaveBeenCalledWith(JSON.stringify(record));
     expect(writer.setImpact).toHaveBeenCalledWith(
       expect.objectContaining({ evidence: { description: 'Errors went from 3 to 412.' } })
     );
@@ -713,19 +730,80 @@ describe('runFindingsPass with workspace files', () => {
     expect(chatComplete.mock.calls[0][0].tools).not.toHaveProperty('recorder_read_file');
   });
 
-  it('forces the answer once the reads are used up', async () => {
-    const reads = Array.from({ length: 5 }, (_, i) => readCall(`r${i}`, '/workspace/a.txt'));
-    const { run, chatComplete } = setupFiles([...reads, answerWith(output)]);
+  it('forces the write on the last round', async () => {
+    const reads = Array.from({ length: 9 }, (_, i) => readCall(`r${i}`, '/workspace/a.txt'));
+    const { run, chatComplete } = setupFiles([...reads, writeCall(output)]);
 
     await run();
 
     const choices = chatComplete.mock.calls.map(([call]) => call.toolChoice);
-    expect(choices.slice(0, 4)).toEqual(['auto', 'auto', 'auto', 'auto']);
-    expect(choices[4]).toEqual({ function: 'structuredOutput' });
+    expect(choices).toHaveLength(10);
+    expect(choices.slice(0, 9).every((choice) => choice === 'auto')).toBe(true);
+    expect(choices[9]).toEqual({ function: 'recorder_write_file' });
+  });
+
+  it('sends a record that does not match the format back, and takes the corrected one', async () => {
+    const { run, chatComplete, ws, writer } = setupFiles([
+      writeCall({ summary: 'only a summary' }),
+      writeCall('{ not json', 'w2'),
+      writeCall(output, 'w3'),
+    ]);
+
+    await expect(run()).resolves.toBe(true);
+
+    // The model was told what was wrong each time, in the tool's results.
+    const conversation = JSON.stringify(chatComplete.mock.calls[2][0].messages);
+    expect(conversation).toContain('does not match the format');
+    expect(conversation).toContain('hypotheses');
+    expect(conversation).toContain('not valid JSON');
+    // Only the valid record reaches the file and the stores.
+    expect(ws.writeFindings).toHaveBeenCalledTimes(1);
+    expect(writer.setHypotheses).toHaveBeenCalledTimes(1);
+  });
+
+  it('still records the answer when the findings file cannot be written', async () => {
+    const { run, ws, writer, deps } = setupFiles([writeCall(output)]);
+    ws.writeFindings.mockRejectedValue(new Error('disk full'));
+
+    await expect(run()).resolves.toBe(true);
+
+    expect(writer.setImpact).toHaveBeenCalled();
+    expect(deps.logger.warn).toHaveBeenCalledWith(expect.stringContaining('findings file'));
+  });
+
+  it('gives each kind of pass its own system prompt', async () => {
+    const live = buildRecorderSystemPrompt({ final: false });
+    const finalPlain = buildRecorderSystemPrompt({ final: true });
+    const finalFiles = buildRecorderSystemPrompt({ final: true, files: true });
+
+    // A live pass is not told about the fields it does not write, or the files it cannot read.
+    expect(live).toContain('hypotheses');
+    for (const only of ['impact', 'severity', 'verdict', 'recorder_read_file']) {
+      expect(live).not.toContain(only);
+    }
+    expect(finalPlain).toContain('impact');
+    expect(finalPlain).not.toContain('recorder_write_file');
+    expect(finalFiles).toContain('recorder_write_file');
+    expect(finalFiles).toContain('/workspace/.recorder/findings.json');
+    expect(finalFiles).toContain('"impact_entities"');
+  });
+
+  it('sends the prompt that matches the pass', async () => {
+    const files = setupFiles([writeCall(output)]);
+    await files.run();
+    const live = setupFiles([answerWith(output)]);
+    await live.run({ answer: undefined });
+
+    expect(files.chatComplete.mock.calls[0][0].system).toBe(
+      buildRecorderSystemPrompt({ final: true, files: true })
+    );
+    expect(live.chatComplete.mock.calls[0][0].system).toBe(
+      buildRecorderSystemPrompt({ final: false })
+    );
   });
 
   it('answers a read it cannot make with an error, and keeps going', async () => {
-    const { run, ws } = setupFiles([readCall('r1', '/etc/passwd'), answerWith(output)]);
+    const { run, ws } = setupFiles([readCall('r1', '/etc/passwd'), writeCall(output)]);
     ws.readFile.mockResolvedValue('Error: Only paths under /workspace can be read.');
 
     await expect(run()).resolves.toBe(true);

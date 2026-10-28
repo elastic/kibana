@@ -32,13 +32,15 @@ import {
   limitFindings,
   type FindingsRecord,
 } from './output_schema';
-import { FINDINGS_RECORDER_SYSTEM_PROMPT } from './prompt';
+import { buildRecorderSystemPrompt } from './prompt';
 import { RECORDER_MAX_TOOL_CALLS, RECORDER_MAX_TOOL_ROUNDS } from './constants';
 import {
   RECORDER_LIST_FILES_SCHEMA,
   RECORDER_LIST_FILES_TOOL,
   RECORDER_READ_FILE_SCHEMA,
   RECORDER_READ_FILE_TOOL,
+  RECORDER_WRITE_FILE_SCHEMA,
+  RECORDER_WRITE_FILE_TOOL,
   type RecorderWorkspace,
 } from './workspace_tools';
 
@@ -343,6 +345,11 @@ export const runFindingsPass = async (
         description: "Lists a directory in the investigation's workspace.",
         schema: RECORDER_LIST_FILES_SCHEMA,
       },
+      [RECORDER_WRITE_FILE_TOOL]: {
+        description:
+          'Writes the record, as JSON in the given format, to the findings file. It is the only file that can be written, and it takes no path. Checks the record and says what to fix.',
+        schema: RECORDER_WRITE_FILE_SCHEMA,
+      },
     };
 
     interface ModelCall {
@@ -352,10 +359,11 @@ export const runFindingsPass = async (
     const ask = async (
       conversationMessages: Message[],
       toolDefinitions: Record<string, unknown>,
-      toolChoice: unknown
+      toolChoice: unknown,
+      withFiles: boolean
     ) =>
       (await model.inferenceClient.chatComplete({
-        system: FINDINGS_RECORDER_SYSTEM_PROMPT,
+        system: buildRecorderSystemPrompt({ final, files: withFiles }),
         messages: conversationMessages,
         tools: toolDefinitions as never,
         toolChoice: toolChoice as never,
@@ -375,6 +383,39 @@ export const runFindingsPass = async (
       return undefined;
     };
 
+    /**
+     * The model's answer as a file: JSON in the output format. A record that does not parse or
+     * match is sent back to the model as the tool's result, so it can write it again.
+     */
+    const checkWrittenRecord = (raw: unknown): { record: FindingsRecord } | { error: string } => {
+      const content = (raw as { content?: unknown } | undefined)?.content;
+      if (typeof content !== 'string') {
+        return { error: 'Error: content must be the whole record as a JSON string.' };
+      }
+      let json: unknown;
+      try {
+        json = JSON.parse(content);
+      } catch (error) {
+        return {
+          error: `Error: the content is not valid JSON (${
+            error instanceof Error ? error.message : String(error)
+          }). Write the whole record again.`,
+        };
+      }
+      const parsed = findingsOutputSchema.safeParse(json);
+      if (!parsed.success) {
+        const issues = parsed.error.issues
+          .slice(0, 8)
+          .map(({ path, message }) => `${path.join('.') || '(record)'}: ${message}`);
+        return {
+          error: `Error: the record does not match the format. Fix and write it again.\n${issues.join(
+            '\n'
+          )}`,
+        };
+      }
+      return { record: limitFindings(parsed.data) };
+    };
+
     const runWorkspaceTool = async (call: ModelCall, ws: RecorderWorkspace): Promise<string> => {
       const args = (call.function.arguments ?? {}) as Record<string, unknown>;
       try {
@@ -388,55 +429,83 @@ export const runFindingsPass = async (
         if (call.function.name === RECORDER_LIST_FILES_TOOL) {
           return await ws.listFiles({ dir: String(args.dir ?? '') });
         }
-        return `Error: ${call.function.name} is not available here. Answer with structuredOutput.`;
+        return `Error: ${call.function.name} is not available here. Write the record with ${RECORDER_WRITE_FILE_TOOL}.`;
       } catch (error) {
         return `Error: ${error instanceof Error ? error.message : String(error)}`;
       }
     };
 
     /**
-     * The final pass with files: the model may read a few files, then must answer. Returns
-     * nothing when it never answers, so the caller falls back to a single call without files.
+     * The final pass with files: the model may read files, then it writes its record to the
+     * findings file. Returns nothing when it never writes a valid one, so the caller falls back
+     * to a single call without files.
      */
-    const readThenAnswer = async (ws: RecorderWorkspace): Promise<FindingsRecord | undefined> => {
+    const readThenWrite = async (ws: RecorderWorkspace): Promise<FindingsRecord | undefined> => {
       const conversationSoFar: Message[] = [...messages];
-      let used = 0;
+      let reads = 0;
       for (let round = 1; round <= RECORDER_MAX_TOOL_ROUNDS && !guard.signal.aborted; round++) {
-        const mustAnswer = round === RECORDER_MAX_TOOL_ROUNDS || used >= RECORDER_MAX_TOOL_CALLS;
+        const mustWrite = round === RECORDER_MAX_TOOL_ROUNDS || reads >= RECORDER_MAX_TOOL_CALLS;
         const response = await ask(
           conversationSoFar,
           toolsWithFiles,
-          mustAnswer ? { function: STRUCTURED_OUTPUT_TOOL } : 'auto'
+          mustWrite ? { function: RECORDER_WRITE_FILE_TOOL } : 'auto',
+          true
         );
         const calls = response.toolCalls ?? [];
+        // A model that answers with the answer tool instead of the file is not turned away.
         const answerCall = calls.find((call) => call.function.name === STRUCTURED_OUTPUT_TOOL);
-        if (answerCall)
+        if (answerCall) {
           return parseRecord(answerCall.function.arguments, `with files, round ${round}`);
+        }
         if (calls.length === 0) return undefined;
         conversationSoFar.push({
           role: MessageRole.Assistant,
           content: response.content ?? null,
           toolCalls: calls as unknown as ToolCall[],
         });
+        let written: FindingsRecord | undefined;
         for (const call of calls) {
-          used++;
+          let result: string;
+          if (call.function.name === RECORDER_WRITE_FILE_TOOL) {
+            const checked = checkWrittenRecord(call.function.arguments);
+            if ('record' in checked) {
+              written = checked.record;
+              result = 'Saved.';
+              // The file mirrors the record that is committed. A failed write does not lose it.
+              await ws
+                .writeFindings((call.function.arguments as { content: string }).content)
+                .catch((error) =>
+                  logger.warn(
+                    `Findings recorder could not write the findings file for ${conversationId}: ${
+                      error instanceof Error ? error.message : String(error)
+                    }`
+                  )
+                );
+            } else {
+              result = checked.error;
+            }
+          } else {
+            reads++;
+            result =
+              reads > RECORDER_MAX_TOOL_CALLS
+                ? `Error: no more files can be read. Write the record with ${RECORDER_WRITE_FILE_TOOL} now.`
+                : await runWorkspaceTool(call, ws);
+          }
           conversationSoFar.push({
             role: MessageRole.Tool,
             name: call.function.name,
             toolCallId: call.toolCallId,
-            response:
-              used > RECORDER_MAX_TOOL_CALLS
-                ? 'Error: no more files can be read. Answer with structuredOutput now.'
-                : await runWorkspaceTool(call, ws),
+            response: result,
           });
         }
+        if (written) return written;
       }
       return undefined;
     };
 
     if (workspace) {
       try {
-        output = await readThenAnswer(workspace);
+        output = await readThenWrite(workspace);
       } catch (error) {
         if (!guard.signal.aborted) {
           logger.warn(
@@ -453,7 +522,12 @@ export const runFindingsPass = async (
     const plainMessages = workspace ? buildMessages(false) : messages;
     for (let attempt = 1; attempt <= MAX_ATTEMPTS && !output && !guard.signal.aborted; attempt++) {
       try {
-        const response = await ask(plainMessages, tools, { function: STRUCTURED_OUTPUT_TOOL });
+        const response = await ask(
+          plainMessages,
+          tools,
+          { function: STRUCTURED_OUTPUT_TOOL },
+          false
+        );
         const call = response.toolCalls?.find((c) => c.function.name === STRUCTURED_OUTPUT_TOOL);
         output = parseRecord(call?.function.arguments, `attempt ${attempt}`);
       } catch (error) {
