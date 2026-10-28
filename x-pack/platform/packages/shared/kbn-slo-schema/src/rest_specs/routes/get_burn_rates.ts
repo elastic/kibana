@@ -6,8 +6,8 @@
  */
 import { z } from '@kbn/zod';
 
-import { durationType } from '../../schema/zod/duration';
-import { allOrAnyString } from '../../schema/zod/common';
+import { durationType } from '../../schema/duration';
+import { allOrAnyString } from '../../schema/common';
 
 const getSLOBurnRatesResponseSchema = z.object({
   burnRates: z.array(

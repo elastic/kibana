@@ -130,7 +130,7 @@ steps:
   - name: step1
     type: console
 `;
-      const result = modifyWorkflowProperty(yamlWithoutInputs, 'inputs', {
+      const result = modifyWorkflowProperty(yamlWithoutInputs, 'outputs', {
         alert_id: { type: 'string' },
       });
 
@@ -138,9 +138,11 @@ steps:
 
       const lines = result.yaml.split('\n');
       const triggersLine = lines.findIndex((l) => l === 'triggers:');
+      const outputsLine = lines.findIndex((l) => l === 'outputs:');
       const stepsLine = lines.findIndex((l) => l === 'steps:');
 
-      expect(stepsLine).toBeGreaterThan(triggersLine);
+      expect(outputsLine).toBeGreaterThan(triggersLine);
+      expect(stepsLine).toBeGreaterThan(outputsLine);
     });
 
     it('inserts enabled between name and steps when intermediate properties are absent', () => {
@@ -180,11 +182,13 @@ steps:
       expect(versionLine).toBeLessThan(nameLine);
     });
 
-    it('appends non-canonical properties at the end', () => {
-      const result = modifyWorkflowProperty(SAMPLE_WORKFLOW, 'custom_field', 'custom_value');
-
-      expect(result.success).toBe(true);
-      expect(result.yaml.trimEnd().endsWith('custom_field: custom_value')).toBe(true);
+    it('rejects keys that are not top-level workflow keys', () => {
+      for (const property of ['custom_field', 'trigger.0.with.every', 'steps']) {
+        const result = modifyWorkflowProperty(SAMPLE_WORKFLOW, property, 'x');
+        expect(result.success).toBe(false);
+        expect(result.error).toContain('is not a top-level workflow key');
+        expect(result.yaml).toBe(SAMPLE_WORKFLOW);
+      }
     });
   });
 
@@ -577,6 +581,117 @@ steps:
       const result = deleteStep(SAMPLE_WORKFLOW, 'ghost');
       expect(result.success).toBe(false);
       expect(result.error).toContain('not found');
+    });
+  });
+
+  describe('edits on steps nested inside if blocks', () => {
+    const NESTED_WORKFLOW = `version: "1"
+name: Nested
+steps:
+  - name: setup
+    type: console
+    with:
+      message: init
+  # Outer gate
+  - name: outer_gate
+    type: if
+    condition: "inputs.enabled: true"
+    steps:
+      - name: inner_gate
+        type: if
+        condition: "inputs.level: high"
+        steps:
+          # Post the note
+          - name: post_note
+            type: console
+            with:
+              message: "old note"
+          - name: post_other
+            type: console
+            with:
+              message: other
+    else:
+      - name: skipped
+        type: console
+        with:
+          message: skipped
+  - name: cleanup
+    type: console
+    with:
+      message: done
+`;
+
+    it.each([
+      ['a root step', 'setup', 'renamed_setup'],
+      ['a nested step', 'post_note', 'renamed_note'],
+    ])('renames %s through the name property', (_label, stepName, newName) => {
+      const result = modifyStepProperty(NESTED_WORKFLOW, stepName, 'name', newName);
+      expect(result.success).toBe(true);
+      expect(result.yaml).toContain(`name: ${newName}`);
+      expect(result.yaml).not.toContain(`name: ${stepName}\n`);
+    });
+
+    const getInnerSteps = (yaml: string) =>
+      parseDocument(yaml).toJSON().steps[1].steps[0].steps as Array<Record<string, unknown>>;
+
+    it('modifyStep replaces a deeply nested step', () => {
+      const result = modifyStep(NESTED_WORKFLOW, 'post_note', {
+        name: 'post_note',
+        type: 'console',
+        with: { message: '{{ variables.note }}' },
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(result.success).toBe(true);
+      expect(getInnerSteps(result.yaml)[0].with).toEqual({ message: '{{ variables.note }}' });
+      expect(getInnerSteps(result.yaml)[1].name).toBe('post_other');
+      expect(result.yaml).toContain('# Outer gate');
+      expect(result.yaml).toContain('# Post the note');
+    });
+
+    it('modifyStepProperty updates a property of a deeply nested step', () => {
+      const result = modifyStepProperty(NESTED_WORKFLOW, 'post_note', 'with', {
+        message: '{{ variables.note }}',
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(result.success).toBe(true);
+      expect(getInnerSteps(result.yaml)[0].with).toEqual({ message: '{{ variables.note }}' });
+      expect(result.yaml).toContain('# Post the note');
+    });
+
+    it('modifyStepProperty updates a step in an else branch', () => {
+      const result = modifyStepProperty(NESTED_WORKFLOW, 'skipped', 'with', {
+        message: 'changed',
+      });
+
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().steps[1].else[0].with).toEqual({
+        message: 'changed',
+      });
+    });
+
+    it('deleteStep removes a deeply nested step', () => {
+      const result = deleteStep(NESTED_WORKFLOW, 'post_other');
+
+      expect(result.error).toBeUndefined();
+      expect(result.success).toBe(true);
+      const innerSteps = getInnerSteps(result.yaml);
+      expect(innerSteps).toHaveLength(1);
+      expect(innerSteps[0].name).toBe('post_note');
+    });
+
+    it('leaves other root steps unchanged', () => {
+      const result = modifyStep(NESTED_WORKFLOW, 'post_note', {
+        name: 'post_note',
+        type: 'console',
+        with: { message: 'new' },
+      });
+
+      const before = parseDocument(NESTED_WORKFLOW).toJSON().steps;
+      const after = parseDocument(result.yaml).toJSON().steps;
+      expect(after[0]).toEqual(before[0]);
+      expect(after[2]).toEqual(before[2]);
     });
   });
 
@@ -1169,6 +1284,167 @@ steps:
       const step = parsed.steps.find((s: any) => s.name === 'search_data');
       expect(step.with.index).toBe('new-index');
       expect(step['with.index']).toBeUndefined();
+    });
+  });
+
+  describe('dot paths deeper than one level', () => {
+    const PATH_WORKFLOW = `# owner: soc
+name: paths
+triggers:
+  - type: scheduled
+    with:
+      every: 5m # keep this comment
+  - type: manual
+steps:
+  - name: call_child
+    type: workflow.execute
+    with:
+      workflow-id: child
+      inputs:
+        incident_id: "{{ variables.incident }}"
+        dry_run: "\${{ consts.dry_run }}"
+`;
+
+    it('adds a key inside a nested map of a step', () => {
+      const result = modifyStepProperty(
+        PATH_WORKFLOW,
+        'call_child',
+        'with.inputs.owner',
+        '{{ inputs.owner }}'
+      );
+      expect(result.success).toBe(true);
+      const step = parseDocument(result.yaml).toJSON().steps[0];
+      expect(step.with.inputs.owner).toBe('{{ inputs.owner }}');
+      expect(step.with['inputs.owner']).toBeUndefined();
+      expect(result.yaml).toContain('dry_run: "${{ consts.dry_run }}"');
+    });
+
+    it('replaces a value inside a list by index', () => {
+      const result = modifyWorkflowProperty(PATH_WORKFLOW, 'triggers.0.with.every', '30m');
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().triggers[0].with.every).toBe('30m');
+      expect(result.yaml).toContain('# owner: soc');
+      expect(result.yaml).toContain('# keep this comment');
+    });
+
+    it('creates a missing root key with the nested value', () => {
+      const result = modifyWorkflowProperty(PATH_WORKFLOW, 'consts.url', 'https://example.com');
+      expect(result.success).toBe(true);
+      const parsed = parseDocument(result.yaml).toJSON();
+      expect(parsed.consts).toEqual({ url: 'https://example.com' });
+      expect(parsed.steps).toHaveLength(1);
+    });
+
+    it('adds a key to an existing root map', () => {
+      const withConsts = PATH_WORKFLOW.replace('triggers:', 'consts:\n  a: 1\ntriggers:');
+      const result = modifyWorkflowProperty(withConsts, 'consts.url', 'https://example.com');
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().consts).toEqual({
+        a: 1,
+        url: 'https://example.com',
+      });
+    });
+
+    it('fills an empty root key', () => {
+      const withEmpty = PATH_WORKFLOW.replace('triggers:', 'consts:\ntriggers:');
+      const result = modifyWorkflowProperty(withEmpty, 'consts.url', 'https://example.com');
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().consts).toEqual({ url: 'https://example.com' });
+    });
+
+    it('rejects a list index that does not exist', () => {
+      const result = modifyWorkflowProperty(PATH_WORKFLOW, 'triggers.5.with.every', '30m');
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('2 items');
+      expect(result.yaml).toBe(PATH_WORKFLOW);
+    });
+
+    const withConsts = (consts: string) =>
+      PATH_WORKFLOW.replace('triggers:', `consts:\n${consts}\ntriggers:`);
+
+    it('replaces a scalar with a map on the next lines', () => {
+      const yaml = withConsts('  query: old # note');
+      const result = modifyWorkflowProperty(yaml, 'consts.query', { match_all: {} });
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().consts).toEqual({ query: { match_all: {} } });
+    });
+
+    it('adds a key to an empty flow map', () => {
+      const yaml = PATH_WORKFLOW.replace('triggers:', 'consts: {}\ntriggers:');
+      const result = modifyWorkflowProperty(yaml, 'consts.url', 'https://example.com');
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().consts).toEqual({ url: 'https://example.com' });
+    });
+
+    it('keeps the list marker when replacing a null first field of a list item', () => {
+      const yaml = withConsts('  records:\n    - value: null\n      untouched: keep');
+      const result = modifyWorkflowProperty(yaml, 'consts.records.0.value', 'new');
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().consts).toEqual({
+        records: [{ value: 'new', untouched: 'keep' }],
+      });
+    });
+
+    it('replaces a whole list item', () => {
+      const result = modifyWorkflowProperty(PATH_WORKFLOW, 'triggers.1', {
+        type: 'manual',
+        inputs: { properties: { host: { type: 'string' } } },
+      });
+      expect(result.success).toBe(true);
+      const parsed = parseDocument(result.yaml).toJSON();
+      expect(parsed.triggers[1].inputs.properties.host).toEqual({ type: 'string' });
+      expect(parsed.triggers[0].with.every).toBe('5m');
+    });
+
+    it('replaces a scalar step property with a map', () => {
+      const result = modifyStepProperty(PATH_WORKFLOW, 'call_child', 'with.workflow-id', {
+        id: 'child',
+      });
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().steps[0].with['workflow-id']).toEqual({
+        id: 'child',
+      });
+    });
+
+    it('replaces an inline scalar with a multi-line string', () => {
+      const yaml = PATH_WORKFLOW.replace('workflow-id: child', 'workflow-id: child # old');
+      const result = modifyStepProperty(
+        yaml,
+        'call_child',
+        'with.workflow-id',
+        'line one\nline two'
+      );
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().steps[0].with['workflow-id']).toBe(
+        'line one\nline two'
+      );
+    });
+
+    it('quotes a new key that needs quoting', () => {
+      const result = modifyStepProperty(
+        PATH_WORKFLOW,
+        'call_child',
+        'with.inputs.@timestamp',
+        'now'
+      );
+      expect(result.success).toBe(true);
+      expect(result.yaml).toContain('"@timestamp": now');
+    });
+
+    it('keeps trailing blank lines of a keep-chomp block scalar when adding a sibling', () => {
+      const yaml = withConsts('  banner: |+\n    keep me\n');
+      const result = modifyWorkflowProperty(yaml, 'consts.url', 'u');
+      expect(result.success).toBe(true);
+      expect(parseDocument(result.yaml).toJSON().consts).toEqual({
+        banner: 'keep me\n\n',
+        url: 'u',
+      });
+    });
+
+    it('rejects a path through a scalar', () => {
+      const result = modifyWorkflowProperty(PATH_WORKFLOW, 'name.first', 'x');
+      expect(result.success).toBe(false);
+      expect(result.yaml).toBe(PATH_WORKFLOW);
     });
   });
 

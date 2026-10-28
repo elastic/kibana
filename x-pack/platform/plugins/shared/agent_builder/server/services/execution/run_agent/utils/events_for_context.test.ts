@@ -24,6 +24,7 @@ import {
 import {
   abortedExec0Timeline,
   activityEventFixture,
+  attachmentEventFixture,
   completedRoundTimeline,
   customEventFixture,
   failedExec0Timeline,
@@ -262,5 +263,36 @@ describe('eventsForContext — activity events', () => {
     expect(timeline.some(isActivityEvent)).toBe(false);
     expect(timeline.find((event) => event.id === 'note')).toEqual(note);
     expect(eventsToRounds(timeline).map((round) => round.id)).toEqual(['a']);
+  });
+
+  it('keeps attachment events, which are activity as well as timeline, among dropped activity', () => {
+    const toolAttachment = attachmentEventFixture({
+      id: 'tool-attachment',
+      createdAt: '2026-01-01T00:00:30.000Z',
+      executionId: 'a::execution',
+      toolCallId: 'call-1',
+    });
+    const apiAttachment = attachmentEventFixture({
+      id: 'api-attachment',
+      source: 'http_api',
+      createdAt: '2026-01-01T00:01:00.000Z',
+    });
+    const conversation = conversationWith({
+      schema_version: CONVERSATION_SCHEMA_VERSION,
+      events: [
+        ...completedRound('a', '2026-01-01T00:00:00.000Z'),
+        toolAttachment,
+        apiAttachment,
+        activityEventFixture({ id: 'renamed', created_at: '2026-01-01T00:02:00.000Z' }),
+      ],
+    });
+
+    const timeline = eventsForContext(conversation);
+
+    expect(timeline.filter(isActivityEvent).map((event) => event.id)).toEqual([
+      'tool-attachment',
+      'api-attachment',
+    ]);
+    expect(timeline.some((event) => event.id === 'renamed')).toBe(false);
   });
 });
