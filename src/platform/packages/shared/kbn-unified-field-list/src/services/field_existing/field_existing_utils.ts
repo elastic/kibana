@@ -58,6 +58,7 @@ export async function fetchFieldExistence({
   // Identify two categories of fields requiring a refresh:
   // 1. New fields - fields that don't exist in the current data view
   // 2. Fields with mapping changes - existing fields with updated mapping information
+  // Both are returned as `newFields`, so consumers can replace their stale field objects.
   const newFields: typeof existingFieldList = [];
   const fieldsWithMappingChanges: typeof existingFieldList = [];
 
@@ -81,7 +82,7 @@ export async function fetchFieldExistence({
   return {
     indexPatternTitle: dataView.getIndexPattern(),
     existingFieldNames: getExistingFields(existingFieldList, allFields),
-    newFields,
+    newFields: [...newFields, ...fieldsWithMappingChanges],
   };
 }
 
