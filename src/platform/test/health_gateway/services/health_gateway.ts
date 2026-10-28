@@ -36,7 +36,7 @@ export class HealthGatewayService extends FtrService {
       throw new Error('Health gateway is already running');
     }
 
-    this.port = await getPort({ port: portNumbers(1024, 65536) });
+    this.port = await getPort({ port: portNumbers(1024, 65535) });
 
     await this.runner.run(`health-gateway-${this.port}`, {
       cmd: 'node',
