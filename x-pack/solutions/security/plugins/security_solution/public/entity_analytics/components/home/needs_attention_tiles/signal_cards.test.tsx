@@ -18,7 +18,7 @@ jest.mock('@elastic/charts', () => ({
   AreaSeries: () => null,
   Position: { Left: 'left' },
   ScaleType: { Linear: 'linear' },
-  CurveType: { CURVE_STEP_AFTER: 'curveStepAfter' },
+  CurveType: { CURVE_STEP: 'curveStep' },
 }));
 
 const CARD_IDS: SignalCardId[] = [

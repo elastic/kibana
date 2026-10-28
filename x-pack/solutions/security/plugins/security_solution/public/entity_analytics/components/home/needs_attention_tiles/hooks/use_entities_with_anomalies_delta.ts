@@ -40,6 +40,8 @@ export const useEntitiesWithAnomaliesDelta = ({
   count,
 }: AnomaliesDeltaOptions): {
   delta: number | undefined;
+  /** The count over the previous period, which the sparkline starts from. */
+  previous: number | undefined;
   isDeltaLoading: boolean;
   isHistoryMissing: boolean;
   /** True once the history check passed, so the sparkline can follow the same rule. */
@@ -81,6 +83,7 @@ export const useEntitiesWithAnomaliesDelta = ({
 
   return {
     delta: previous !== undefined ? count - previous : undefined,
+    previous,
     isHistoryMissing,
     reachesBack,
     isDeltaLoading: isDeltaStillComing({
