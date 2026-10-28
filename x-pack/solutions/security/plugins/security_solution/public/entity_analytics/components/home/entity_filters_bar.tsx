@@ -63,7 +63,11 @@ const FILTER_TITLES = {
 };
 
 const FilterEntry = ({ children }: { children: React.ReactNode }) => (
-  <EuiFlexItem>
+  <EuiFlexItem
+    css={css`
+      min-width: 180px;
+    `}
+  >
     <EuiFilterGroup compressed>{children}</EuiFilterGroup>
   </EuiFlexItem>
 );
@@ -173,7 +177,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
   ].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
       <FilterEntry>
         <MultiselectFilter<EntityType>
           title={FILTER_TITLES.entityType}
