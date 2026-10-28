@@ -93,7 +93,7 @@ function getDefaultLensApiMock() {
       status: 'rendered',
       timeToEvent: 1000,
     }),
-    dataViews$: new BehaviorSubject<DataView[] | undefined>(undefined),
+    dataSources$: new BehaviorSubject<DataView[] | undefined>(undefined),
     savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
     adapters$: new BehaviorSubject<Adapters>({}),
     updateAttributes: jest.fn(),

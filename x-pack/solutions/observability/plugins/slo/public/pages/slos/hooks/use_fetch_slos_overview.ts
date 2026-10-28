@@ -7,7 +7,7 @@
 import type { Filter } from '@kbn/es-query';
 import { buildQueryFromFilters } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { GetSLOStatsOverviewResponse } from '@kbn/slo-schema/src/rest_specs/routes/get_slo_stats_overview';
+import type { GetSLOStatsOverviewResponse } from '@kbn/slo-schema';
 import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
