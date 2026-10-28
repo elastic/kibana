@@ -19,10 +19,10 @@ import { OutputErrorCode } from '../../../../common/workflows/contract/error_cod
 import { runQueryStepCommonDefinition } from '../../../../common/workflows/step_types/run_query/run_query_common';
 import type { RunQueryOutput } from '../../../../common/workflows/step_types/run_query/run_query_common';
 import { runQueryInputSchema } from '../../../../common/workflows/step_types/run_query/run_query_common';
-import { isMissingPrivilege, parseStepInput } from '../../lib/errors';
+import { parseStepInput } from '../../lib/errors';
 import { dispatchLiveQuery, readLiveQuery } from '../../lib/live_query';
 import { parseWaitTimeoutMs } from '../../lib/poll_contract';
-import { resolveTarget } from '../../lib/preflight';
+import { assertCanReadLiveQueries, resolveTarget } from '../../lib/preflight';
 import { resolveSavedQuery, type ResolvedSavedQuery } from '../../lib/resolve_saved_query';
 
 const stateSchema = lazySchema(() =>
@@ -36,38 +36,20 @@ const stateSchema = lazySchema(() =>
         query_id: z.string(),
         action_id: z.string(),
         ecs_keys: z.array(z.string()),
+        indexed: z.number().optional(),
+        stalled_polls: z.number().optional(),
       })
     ),
+    deadline_read_failures: z.number().optional(),
   })
 );
 
-/** ECS field names from a saved-query mapping, whether the API returned a record or `{ key }` rows. */
-const ecsKeysFromMapping = (mapping: unknown): string[] => {
-  if (!mapping) return [];
-  if (Array.isArray(mapping)) {
-    return mapping.flatMap((entry) =>
-      entry && typeof entry === 'object' && 'key' in entry && typeof entry.key === 'string'
-        ? [entry.key]
-        : []
-    );
-  }
-
-  if (typeof mapping === 'object') {
-    return Object.keys(mapping as Record<string, unknown>);
-  }
-
-  return [];
-};
-
-const dispatchFields = (savedQuery: ResolvedSavedQuery | undefined, savedQueryId: string) =>
-  savedQuery
-    ? {
-        query: savedQuery.query,
-        ecs_mapping: savedQuery.ecs_mapping,
-        saved_query_id: savedQueryId,
-        ...(savedQuery.timeout ? { timeout: savedQuery.timeout } : {}),
-      }
-    : { saved_query_id: savedQueryId };
+const dispatchFields = (savedQuery: ResolvedSavedQuery) => ({
+  query: savedQuery.query,
+  ecs_mapping: savedQuery.ecs_mapping,
+  saved_query_id: savedQuery.id,
+  ...(savedQuery.timeout ? { timeout: savedQuery.timeout } : {}),
+});
 
 const failedOutput = (
   errorCode: RunQueryOutput['error_code'],
@@ -91,21 +73,16 @@ export const runQueryStepDefinition = createPollServerStepDefinition({
     const input = parseStepInput(runQueryInputSchema, context.input);
 
     const { target, agentCount } = await resolveTarget(contextManager, input);
-    // `run_saved_queries` can dispatch a saved query but cannot read the saved-query API.
-    // The live-query route loads the stored SQL for that privilege, so a 403 here is not fatal:
-    // send the id alone. Callers who can read the query still send its SQL, which is what
-    // `writeLiveQueries` actually runs.
-    let savedQuery: ResolvedSavedQuery | undefined;
-    try {
-      savedQuery = await resolveSavedQuery(contextManager, input.saved_query);
-    } catch (error) {
-      if (!isMissingPrivilege(error)) throw error;
-    }
+    // Fails closed without saved-query read: the step validates the stored SQL (no `{{…}}`
+    // placeholders, exactly one match) before anything reaches the agents, and never sends a
+    // bare `saved_query_id` the caller could not read.
+    const savedQuery = await resolveSavedQuery(contextManager, input.saved_query);
+    await assertCanReadLiveQueries(contextManager);
 
     const dispatched = await dispatchLiveQuery({
       contextManager,
       logger,
-      fields: dispatchFields(savedQuery, input.saved_query),
+      fields: dispatchFields(savedQuery),
       target,
     });
     if (dispatched.type === 'unconfirmed') {
@@ -130,9 +107,7 @@ export const runQueryStepDefinition = createPollServerStepDefinition({
           {
             query_id: input.saved_query,
             action_id: dispatched.queries[0].action_id,
-            ecs_keys: savedQuery
-              ? Object.keys(savedQuery.ecs_mapping ?? {})
-              : ecsKeysFromMapping(dispatched.queries[0].ecs_mapping),
+            ecs_keys: Object.keys(savedQuery.ecs_mapping ?? {}),
           },
         ],
       },
@@ -151,7 +126,7 @@ export const runQueryStepDefinition = createPollServerStepDefinition({
       deadlinePassed: Date.now() >= new Date(state.deadline).getTime(),
       budget: { remainingBytes: OUTPUT_BUDGET_BYTES, exhausted: false },
     });
-    if (reading.type === 'pending') return { state };
+    if (reading.type === 'pending') return { state: reading.state };
     if (reading.type === 'failed') {
       return { output: failedOutput(reading.errorCode, state.agents_total, state.action_id) };
     }

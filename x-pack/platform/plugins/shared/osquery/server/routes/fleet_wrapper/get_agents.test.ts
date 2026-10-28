@@ -79,6 +79,12 @@ describe('getAgentsRoute', () => {
     routeHandler = routeVersion.handler;
   });
 
+  it('requires Osquery Read, not just run_saved_queries', () => {
+    const route = mockRouter.versioned.getRoute('get', '/internal/osquery/fleet_wrapper/agents');
+
+    expect(route.config.security?.authz).toEqual({ requiredPrivileges: ['osquery-read'] });
+  });
+
   it('merges version-suffixed policy buckets and resolves the base policy name', async () => {
     mockListAgents.mockResolvedValue({
       total: 7,

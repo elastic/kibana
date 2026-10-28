@@ -13,6 +13,7 @@ import { apiError, createContextManager, createLogger, resultEdges } from '../..
 
 const FIND = 'GET /api/osquery/saved_queries';
 const POST = 'POST /api/osquery/live_queries';
+const LIST = 'GET /api/osquery/live_queries';
 const DETAILS = 'GET /api/osquery/live_queries/action-1';
 const RESULTS = 'GET /api/osquery/live_queries/action-1/results/query-action-1';
 
@@ -41,6 +42,7 @@ type Routes = Parameters<typeof createContextManager>[0];
 const start = (routes: Routes, input: Record<string, unknown> = {}) => {
   const contextManager = createContextManager({
     [FIND]: () => ({ data: [SAVED_QUERY] }),
+    [LIST]: () => ({ data: { items: [] } }),
     [POST]: () => dispatchBody,
     ...routes,
   });
@@ -141,34 +143,35 @@ describe('osquery.runQuery step', () => {
       expect(contextManager.callKibanaApi).not.toHaveBeenCalled();
     });
 
-    it('dispatches the saved query id alone when the caller cannot read saved queries', async () => {
-      const { contextManager, result } = start({
-        [FIND]: () => apiError(403, 'Forbidden'),
-        [POST]: () => ({
-          data: {
-            action_id: 'action-1',
-            agents: ['agent-1'],
-            queries: [
-              {
-                action_id: 'query-action-1',
-                ecs_mapping: { 'process.name': { field: 'name' } },
-              },
-            ],
-          },
-        }),
-      });
+    const posted = (contextManager: ReturnType<typeof createContextManager>) =>
+      contextManager.callKibanaApi.mock.calls.some(([call]) => call.method === 'POST');
 
-      const { state } = (await result) as {
-        state: { queries: Array<{ ecs_keys: string[] }> };
-      };
-      const post = contextManager.callKibanaApi.mock.calls.find(
-        ([call]) => call.method === 'POST'
-      )![0] as {
-        body: Record<string, unknown>;
-      };
+    it('fails with MISSING_PRIVILEGE before dispatch when the caller cannot read saved queries', async () => {
+      const { contextManager, result } = start({ [FIND]: () => apiError(403, 'Forbidden') });
 
-      expect(post.body).toEqual({ saved_query_id: 'procs', agent_ids: ['agent-1'] });
-      expect(state.queries[0].ecs_keys).toEqual(['process.name']);
+      await expect(result).rejects.toMatchObject({ details: { code: 'MISSING_PRIVILEGE' } });
+      expect(posted(contextManager)).toBe(false);
+    });
+
+    it('fails with MISSING_PRIVILEGE before dispatch when the caller cannot read live queries', async () => {
+      const { contextManager, result } = start({ [LIST]: () => apiError(403, 'Forbidden') });
+
+      const error = (await result.catch((e) => e)) as ExecutionError;
+
+      expect(error.details).toEqual({ code: 'MISSING_PRIVILEGE' });
+      expect(error.message).toMatch(/live_queries_read/);
+      expect(posted(contextManager)).toBe(false);
+    });
+
+    it('probes live query read access with a one-item list', async () => {
+      const { contextManager, result } = start({});
+
+      await result;
+
+      const probe = contextManager.callKibanaApi.mock.calls.find(
+        ([call]) => call.method === 'GET' && call.path === '/api/osquery/live_queries'
+      );
+      expect(probe?.[0].query).toEqual({ pageSize: 1, sort: '@timestamp' });
     });
 
     it('sends policy targeting as agent_policy_ids and counts the agents first', async () => {
@@ -336,8 +339,73 @@ describe('osquery.runQuery step', () => {
         [RESULTS]: results,
       });
 
-      expect(await result).toEqual({ state: { ...baseState, deadline: expect.any(String) } });
+      expect(await result).toEqual({
+        state: {
+          ...baseState,
+          deadline: expect.any(String),
+          queries: [{ ...baseState.queries[0], indexed: 200, stalled_polls: 0 }],
+        },
+      });
       expect(pageSizes(results)).toEqual([1]);
+    });
+
+    it('counts a poll as stalled when the searchable count did not move', async () => {
+      const { result } = poll(
+        {
+          [DETAILS]: () => ({ data: { queries: [counters({ docs: 20 })] } }),
+          [RESULTS]: resultsRoute(5),
+        },
+        { queries: [{ ...baseState.queries[0], indexed: 5, stalled_polls: 1 }] }
+      );
+
+      const { state } = (await result) as { state: { queries: unknown[] } };
+
+      expect(state.queries[0]).toMatchObject({ indexed: 5, stalled_polls: 2 });
+    });
+
+    it('resets the stall count when more rows became searchable', async () => {
+      const { result } = poll(
+        {
+          [DETAILS]: () => ({ data: { queries: [counters({ docs: 20 })] } }),
+          [RESULTS]: resultsRoute(8),
+        },
+        { queries: [{ ...baseState.queries[0], indexed: 5, stalled_polls: 2 }] }
+      );
+
+      const { state } = (await result) as { state: { queries: unknown[] } };
+
+      expect(state.queries[0]).toMatchObject({ indexed: 8, stalled_polls: 0 });
+    });
+
+    it('reads the rows that exist once the searchable count stalled, before the deadline', async () => {
+      const results = resultsRoute(5);
+      const { result } = poll(
+        {
+          [DETAILS]: () => ({ data: { queries: [counters({ docs: 20 })] } }),
+          [RESULTS]: results,
+        },
+        { queries: [{ ...baseState.queries[0], indexed: 5, stalled_polls: 2 }] }
+      );
+
+      const { output } = (await result) as { output: Record<string, unknown> };
+
+      expect(output).toMatchObject({ status: 'success', row_count: 20, truncated: true });
+      expect(output.rows).toHaveLength(5);
+    });
+
+    it('finishes as success when a duplicate response makes pending negative', async () => {
+      const { result } = poll({
+        [DETAILS]: () => ({
+          data: { queries: [counters({ pending: -1, responded: 2, successful: 2 })] },
+        }),
+      });
+
+      const { output } = (await result) as { output: Record<string, unknown> };
+
+      expect(output).toMatchObject({
+        status: 'success',
+        agents: { total: 1, responded: 2, pending: 0, failed: 0 },
+      });
     });
 
     it('reads every row once in ingest order when all of them are searchable', async () => {
@@ -512,10 +580,38 @@ describe('osquery.runQuery step', () => {
       expect(await result).toEqual({ state: expect.any(Object) });
     });
 
-    it('reports timed_out at the deadline even when the details read keeps failing', async () => {
+    it('keeps polling through a 5xx before the deadline even with zero agents in state', async () => {
+      const { result } = poll({ [DETAILS]: () => apiError(502) }, { agents_total: 0 });
+
+      expect(await result).toEqual({ state: expect.any(Object) });
+    });
+
+    it('retries a failed details read after the deadline before reporting anything', async () => {
       const { result } = poll(
         { [DETAILS]: () => apiError(502) },
         { deadline: new Date(Date.now() - 1000).toISOString() }
+      );
+
+      expect(await result).toEqual({
+        state: expect.objectContaining({ deadline_read_failures: 1 }),
+      });
+    });
+
+    it('reports the real outcome when a read after the deadline succeeds on retry', async () => {
+      const { result } = poll(
+        { [DETAILS]: () => ({ data: { queries: [counters()] } }) },
+        { deadline: new Date(Date.now() - 1000).toISOString(), deadline_read_failures: 2 }
+      );
+
+      const { output } = (await result) as { output: Record<string, unknown> };
+
+      expect(output).toMatchObject({ status: 'success' });
+    });
+
+    it('reports timed_out once the details read failed on every grace poll', async () => {
+      const { result } = poll(
+        { [DETAILS]: () => apiError(502) },
+        { deadline: new Date(Date.now() - 1000).toISOString(), deadline_read_failures: 2 }
       );
 
       const { output } = (await result) as { output: Record<string, unknown> };

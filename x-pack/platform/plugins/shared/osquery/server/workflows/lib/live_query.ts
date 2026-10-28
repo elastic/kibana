@@ -6,6 +6,10 @@
  */
 
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
+import {
+  DEADLINE_READ_GRACE_POLLS,
+  RESULTS_SETTLE_POLLS,
+} from '../../../common/workflows/contract/budget';
 import { OutputErrorCode } from '../../../common/workflows/contract/error_codes';
 import type { OutputErrorCodeValue } from '../../../common/workflows/contract/error_codes';
 import type { StepStatus, TargetInput } from '../../../common/workflows/contract/schemas';
@@ -22,6 +26,10 @@ export interface PollQuerySpec {
   query_id: string;
   action_id: string;
   ecs_keys: string[];
+  /** Searchable result count seen by the last poll, while it was below the reported rows. */
+  indexed?: number;
+  /** Polls in a row that saw `indexed` unchanged. */
+  stalled_polls?: number;
 }
 
 /** Durable state seeded by `start` and carried between polls. */
@@ -31,6 +39,8 @@ export interface LiveQueryPollState {
   max_rows: number;
   agents_total: number;
   queries: PollQuerySpec[];
+  /** Failed status reads since the deadline passed. */
+  deadline_read_failures?: number;
 }
 
 export interface QueryResult {
@@ -44,7 +54,7 @@ export interface QueryResult {
 }
 
 export type LiveQueryReading =
-  | { type: 'pending' }
+  | { type: 'pending'; state: LiveQueryPollState }
   | { type: 'failed'; errorCode: OutputErrorCodeValue }
   | { type: 'done'; results: QueryResult[] };
 
@@ -144,7 +154,9 @@ const isForbidden = (error: unknown): boolean =>
 
 /**
  * One poll of a dispatched live query. Never throws: a 401/403 or 404 ends the run with an
- * `error_code`, any other read failure keeps polling until the deadline.
+ * `error_code`, any other read failure keeps polling until the deadline and for
+ * {@link DEADLINE_READ_GRACE_POLLS} polls after it. A `pending` reading carries the state for
+ * the next poll.
  */
 export const readLiveQuery = async ({
   contextManager,
@@ -159,6 +171,7 @@ export const readLiveQuery = async ({
   deadlinePassed: boolean;
   budget: OutputBudget;
 }): Promise<LiveQueryReading> => {
+  const pending: LiveQueryReading = { type: 'pending', state };
   let details: DetailsResponse['data']['queries'] = [];
   try {
     const { body } = await contextManager.callKibanaApi<DetailsResponse>({
@@ -179,6 +192,15 @@ export const readLiveQuery = async ({
     }
 
     logger.warn(`Live query ${state.action_id} poll failed: ${(error as Error).message}`);
+
+    // Without counters nothing can be concluded before the deadline. After it, one failed read
+    // must not turn a finished run into `timed_out`: retry a few times first.
+    if (!deadlinePassed) return pending;
+
+    const failures = (state.deadline_read_failures ?? 0) + 1;
+    if (failures <= DEADLINE_READ_GRACE_POLLS) {
+      return { type: 'pending', state: { ...state, deadline_read_failures: failures } };
+    }
   }
 
   const finished: Array<{
@@ -191,30 +213,38 @@ export const readLiveQuery = async ({
     const detail = details.find((query) => query.action_id === spec.action_id);
     const counters = {
       responded: detail?.responded ?? 0,
-      pending: detail?.pending ?? state.agents_total,
+      // A duplicate agent response makes the route's `agents - responses` negative.
+      pending: Math.max(0, detail?.pending ?? state.agents_total),
       failed: detail?.failed ?? 0,
       successful: detail?.successful ?? 0,
     };
     const status = deriveStepStatus(counters, deadlinePassed);
-    if (status === undefined) return { type: 'pending' };
+    if (status === undefined) return pending;
 
     finished.push({ spec, status, counters, rowCount: detail?.docs ?? 0 });
   }
 
   // The response counters are written before the result documents become searchable. Until the
-  // deadline, a poll only counts them; the rows are read once, when all of them can be.
+  // deadline, a poll only counts them; the rows are read once, when all of them can be, or once
+  // the searchable count stopped moving for RESULTS_SETTLE_POLLS polls (documents the agents
+  // reported can be lost before they are indexed).
   if (!deadlinePassed) {
+    const queries: PollQuerySpec[] = [];
+    let waiting = false;
     for (const { spec, rowCount } of finished) {
       const wanted = Math.min(rowCount, state.max_rows);
-      if (wanted === 0) continue;
+      if (wanted === 0) {
+        queries.push(spec);
+        continue;
+      }
 
+      let indexed: number;
       try {
-        const indexed = await countIndexedResults({
+        indexed = await countIndexedResults({
           contextManager,
           actionId: state.action_id,
           queryActionId: spec.action_id,
         });
-        if (indexed < wanted) return { type: 'pending' };
       } catch (error) {
         if (isForbidden(error)) {
           return { type: 'failed', errorCode: OutputErrorCode.STATUS_UNREADABLE_FORBIDDEN };
@@ -224,9 +254,26 @@ export const readLiveQuery = async ({
           `Live query ${state.action_id} results count failed: ${(error as Error).message}`
         );
 
-        return { type: 'pending' };
+        return pending;
+      }
+
+      if (indexed >= wanted) {
+        queries.push(spec);
+        continue;
+      }
+
+      const stalledPolls = indexed === spec.indexed ? (spec.stalled_polls ?? 0) + 1 : 0;
+      queries.push({ ...spec, indexed, stalled_polls: stalledPolls });
+      if (stalledPolls < RESULTS_SETTLE_POLLS) {
+        waiting = true;
+      } else {
+        logger.warn(
+          `Live query ${state.action_id}: ${indexed} of ${wanted} result rows searchable and unchanged for ${stalledPolls} polls; reading what exists`
+        );
       }
     }
+
+    if (waiting) return { type: 'pending', state: { ...state, queries } };
   }
 
   const results: QueryResult[] = [];
@@ -252,7 +299,7 @@ export const readLiveQuery = async ({
           `Live query ${state.action_id} results read failed: ${(error as Error).message}`
         );
         // The rows were countable a moment ago: read them again on the next poll.
-        if (!deadlinePassed) return { type: 'pending' };
+        if (!deadlinePassed) return pending;
       }
     }
 

@@ -32,11 +32,7 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
       path: '/internal/osquery/fleet_wrapper/agents',
       security: {
         authz: {
-          // The agent picker uses Osquery Read. Workflow steps that target by policy or
-          // platform run as `run_saved_queries`, which does not include that privilege.
-          requiredPrivileges: [
-            { anyRequired: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-runSavedQueries`] },
-          ],
+          requiredPrivileges: [`${PLUGIN_ID}-read`],
         },
       },
     })
@@ -71,9 +67,9 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
-        // Page through every osquery package policy. One page of 1000 is smaller than the
-        // set `parseAgentSelection` dispatches, so the workflow step's agent ceiling would
-        // pass and the live query would still fan out past it.
+        // Page through every osquery package policy: with only the first 1000, agents of the
+        // remaining policies were missing from the picker and from the counts the workflow
+        // step's preflight reads, while `parseAgentSelection` still dispatches to them.
         const packagePolicies: PackagePolicy[] = [];
         const packagePolicyKuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`;
         let packagePolicyPage = 1;

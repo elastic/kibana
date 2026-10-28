@@ -10,7 +10,7 @@ import type { PlatformId } from '../../../common/constants';
 import { PreDispatchErrorCode } from '../../../common/workflows/contract/error_codes';
 import { TARGET_AGENT_LIMIT } from '../../../common/workflows/contract/budget';
 import type { TargetInput } from '../../../common/workflows/contract/schemas';
-import { INTERNAL_API_HEADERS } from './api_headers';
+import { INTERNAL_API_HEADERS, PUBLIC_API_HEADERS } from './api_headers';
 import { stepError, toPreDispatchReadError } from './errors';
 import type { KibanaApiCaller } from './types';
 
@@ -116,4 +116,24 @@ export const resolveTarget = async (
   if (total > TARGET_AGENT_LIMIT) throw tooMany(total);
 
   return { target: { agent_platforms: buckets.map((bucket) => bucket.id) }, agentCount: total };
+};
+
+/**
+ * Fails with `MISSING_PRIVILEGE` when the caller cannot read live queries (`live_queries_read`).
+ * Without it the query would still run on every target, but its status and rows could never be
+ * read back by this workflow.
+ */
+export const assertCanReadLiveQueries = async (contextManager: KibanaApiCaller): Promise<void> => {
+  try {
+    await contextManager.callKibanaApi({
+      method: 'GET',
+      path: '/api/osquery/live_queries',
+      // The route's default sort (`created_at`) is not mapped on the actions index and fails
+      // the search; sort like the Live queries UI does.
+      query: { pageSize: 1, sort: '@timestamp' },
+      headers: PUBLIC_API_HEADERS,
+    });
+  } catch (error) {
+    throw toPreDispatchReadError('Reading live query results (live_queries_read)', error);
+  }
 };

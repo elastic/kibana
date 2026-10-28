@@ -8,16 +8,23 @@
 export const DEFAULT_WAIT_MS = 5 * 60 * 1000;
 export const MAX_WAIT_MS = 30 * 60 * 1000;
 
+export const WAIT_DURATION_PATTERN = /^([1-9][0-9]*)(s|m|h)$/;
+
 const WAIT_UNIT_MS = { s: 1000, m: 60 * 1000, h: 60 * 60 * 1000 } as const;
+
+/** A `wait_timeout` duration (`30s`, `5m`, `1h`) in milliseconds; `undefined` when invalid. */
+export const parseWaitMs = (value: string | undefined): number | undefined => {
+  const match = value?.match(WAIT_DURATION_PATTERN);
+  if (!match) return undefined;
+
+  return Number(match[1]) * WAIT_UNIT_MS[match[2] as keyof typeof WAIT_UNIT_MS];
+};
 
 /** False for a duration above {@link MAX_WAIT_MS}. Invalid strings are rejected by the schema regex. */
 export const isWithinMaxWait = (value: string): boolean => {
-  const match = value.match(/^([1-9][0-9]*)(s|m|h)$/);
-  if (!match) return false;
+  const ms = parseWaitMs(value);
 
-  const unit = match[2] as keyof typeof WAIT_UNIT_MS;
-
-  return Number(match[1]) * WAIT_UNIT_MS[unit] <= MAX_WAIT_MS;
+  return ms !== undefined && ms <= MAX_WAIT_MS;
 };
 
 export const DEFAULT_MAX_ROWS = 1000;
@@ -33,6 +40,18 @@ export const RESULTS_PAGE_SIZE = 200;
 export const RESULTS_MAX_WINDOW = 10000;
 /** `callKibanaApi` caps one response at 10MB and the step output must stay below it. */
 export const OUTPUT_BUDGET_BYTES = 8 * 1024 * 1024;
+
+/**
+ * Polls in a row, after every agent answered, that the searchable result count may stay below
+ * the agent-reported row count before the rows are read anyway. Result documents can be lost
+ * after the agent reported them; without a bound the step would wait out the whole deadline.
+ */
+export const RESULTS_SETTLE_POLLS = 3;
+/**
+ * Extra polls after the deadline when the status read itself fails, so one transient error on
+ * the last poll is not reported as `timed_out`.
+ */
+export const DEADLINE_READ_GRACE_POLLS = 2;
 
 export const POLL_POLICY = {
   strategy: 'exponential',

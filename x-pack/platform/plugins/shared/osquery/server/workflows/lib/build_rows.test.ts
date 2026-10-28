@@ -59,4 +59,16 @@ describe('buildRow', () => {
     expect(row.agent).toEqual({ id: 'a2', name: 'h2' });
     expect(row.columns).toEqual({ port: '22' });
   });
+
+  it('serializes object and array column values as JSON, and null as a string', () => {
+    const row = buildRow(
+      {
+        agent: { id: 'a1' },
+        osquery: { tags: ['a', 'b'], meta: { k: 1 }, empty: null },
+      },
+      []
+    );
+
+    expect(row.columns).toEqual({ tags: '["a","b"]', meta: '{"k":1}', empty: 'null' });
+  });
 });

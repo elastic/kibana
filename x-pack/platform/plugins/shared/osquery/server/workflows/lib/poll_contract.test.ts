@@ -63,6 +63,18 @@ describe('poll_contract', () => {
         'partial',
       ],
       [
+        'negative pending from a duplicate response, before the deadline',
+        counters({ responded: 4, successful: 4, pending: -1 }),
+        false,
+        'success',
+      ],
+      [
+        'negative pending from a duplicate response, after the deadline',
+        counters({ responded: 4, successful: 4, pending: -1 }),
+        true,
+        'success',
+      ],
+      [
         'pending agents before the deadline',
         counters({ responded: 1, successful: 1, pending: 2 }),
         false,

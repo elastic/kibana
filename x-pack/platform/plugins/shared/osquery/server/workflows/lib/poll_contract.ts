@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { parseWaitMs } from '../../../common/workflows/contract/budget';
 import type { StepStatus } from '../../../common/workflows/contract/schemas';
 
 export interface QueryCounters {
@@ -14,18 +15,11 @@ export interface QueryCounters {
   successful: number;
 }
 
-const UNIT_MS = { s: 1000, m: 60 * 1000, h: 60 * 60 * 1000 } as const;
-
 /** Invalid or missing values use the default; values above the cap are clamped. */
 export const parseWaitTimeoutMs = (
   value: string | undefined,
   { defaultMs, maxMs }: { defaultMs: number; maxMs: number }
-): number => {
-  const match = value?.match(/^([1-9][0-9]*)(s|m|h)$/);
-  if (!match) return defaultMs;
-
-  return Math.min(Number(match[1]) * UNIT_MS[match[2] as keyof typeof UNIT_MS], maxMs);
-};
+): number => Math.min(parseWaitMs(value) ?? defaultMs, maxMs);
 
 const finishedStatus = (counters: QueryCounters): StepStatus => {
   if (counters.failed === 0) return 'success';
@@ -34,7 +28,11 @@ const finishedStatus = (counters: QueryCounters): StepStatus => {
   return 'partial';
 };
 
-/** First matching row of the status table; `undefined` means keep polling. */
+/**
+ * First matching row of the status table; `undefined` means keep polling. `pending` is
+ * `agents - responses`, so a duplicate response (Fleet delivers at least once) can make it
+ * negative: anything at or below zero means every agent answered.
+ */
 export const deriveStepStatus = (
   counters: QueryCounters,
   deadlinePassed: boolean
@@ -43,13 +41,13 @@ export const deriveStepStatus = (
     if (counters.responded === 0) return 'timed_out';
     // Polls are spaced out, so a run that finished just before the deadline is often first
     // seen after it: report it as finished, not as cut short.
-    if (counters.pending === 0) return finishedStatus(counters);
+    if (counters.pending <= 0) return finishedStatus(counters);
     if (counters.successful === 0) return 'failed';
 
     return 'partial';
   }
 
-  if (counters.pending === 0) return finishedStatus(counters);
+  if (counters.pending <= 0) return finishedStatus(counters);
 
   return undefined;
 };

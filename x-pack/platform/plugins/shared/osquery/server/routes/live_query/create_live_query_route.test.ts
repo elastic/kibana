@@ -9,10 +9,10 @@ import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { CoreStart, RequestHandler } from '@kbn/core/server';
 import { escapeQuotes } from '@kbn/es-query';
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, OSQUERY_MAX_AGENTS_HEADER } from '../../../common/constants';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { createLiveQueryRoute } from './create_live_query_route';
+import { createLiveQueryRoute, maxAgentsFromHeader } from './create_live_query_route';
 import { createActionHandler } from '../../handlers';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
 
@@ -108,12 +108,15 @@ describe('createLiveQueryRoute', () => {
     coreStart,
     racGet,
     getActiveSpace,
+    workflowsExtensionsEnabled = false,
   }: {
     coreStart: CoreStart;
     racGet?: jest.Mock;
     getActiveSpace?: jest.Mock;
+    workflowsExtensionsEnabled?: boolean;
   }): OsqueryAppContext =>
     ({
+      experimentalFeatures: { workflowsExtensionsEnabled },
       getStartServices: jest.fn().mockResolvedValue([coreStart, { security: {} }]),
       service: {
         getActiveSpace: getActiveSpace ?? jest.fn().mockResolvedValue({ id: 'default' }),
@@ -142,20 +145,24 @@ describe('createLiveQueryRoute', () => {
       coreStart,
       racGet,
       getActiveSpace,
+      workflowsExtensionsEnabled,
+      headers,
     }: {
       coreStart?: CoreStart;
       racGet?: jest.Mock;
       getActiveSpace?: jest.Mock;
+      workflowsExtensionsEnabled?: boolean;
+      headers?: Record<string, string>;
     } = {}
   ) => {
     const start = coreStart ?? createMockCoreStart({ [SAVED_QUERY_ID]: { query: STORED_QUERY } });
     const mockRouter = createMockRouter();
     createLiveQueryRoute(
       mockRouter,
-      createOsqueryContext({ coreStart: start, racGet, getActiveSpace })
+      createOsqueryContext({ coreStart: start, racGet, getActiveSpace, workflowsExtensionsEnabled })
     );
 
-    const mockRequest = httpServerMock.createKibanaRequest({ body });
+    const mockRequest = httpServerMock.createKibanaRequest({ body, headers });
     const mockResponse = httpServerMock.createResponseFactory();
 
     await getRouteHandler(mockRouter)({} as never, mockRequest, mockResponse);
@@ -414,6 +421,38 @@ describe('createLiveQueryRoute', () => {
         }),
       })
     );
+  });
+
+  describe('max agents header', () => {
+    const body = { saved_query_id: SAVED_QUERY_ID, query: STORED_QUERY, agent_ids: ['agent-1'] };
+    const headers = { [OSQUERY_MAX_AGENTS_HEADER]: '1000' };
+    const passedMaxAgents = () => mockedCreateActionHandler.mock.calls[0][2].maxAgents;
+
+    it('passes the header value to the action handler with the workflow steps on', async () => {
+      await invokeRoute(body, { workflowsExtensionsEnabled: true, headers });
+
+      expect(passedMaxAgents()).toBe(1000);
+    });
+
+    it('ignores the header while the workflow steps are off', async () => {
+      await invokeRoute(body, { workflowsExtensionsEnabled: false, headers });
+
+      expect(passedMaxAgents()).toBeUndefined();
+    });
+
+    it.each([
+      ['a positive integer', '250', 250],
+      ['the first value of a repeated header', ['5', '9'], 5],
+      ['a missing header', undefined, undefined],
+      ['zero', '0', undefined],
+      ['a negative number', '-1', undefined],
+      ['a decimal', '1.5', undefined],
+      ['a leading zero', '010', undefined],
+      ['more than seven digits', '12345678', undefined],
+      ['text', 'all', undefined],
+    ])('maxAgentsFromHeader reads %s', (_name, header, expected) => {
+      expect(maxAgentsFromHeader(header)).toBe(expected);
+    });
   });
 
   it('dispatches ad-hoc SQL for a writeLiveQueries caller without stored fill-in', async () => {

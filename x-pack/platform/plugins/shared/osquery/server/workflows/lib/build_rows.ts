@@ -31,18 +31,22 @@ const readEcsValue = (source: Record<string, unknown>, key: string): unknown => 
   return isLeafValue(parent) ? parent : undefined;
 };
 
+/** Column values are strings; an object or array keeps its content instead of `[object Object]`. */
+const toColumnValue = (value: unknown): string =>
+  value !== null && typeof value === 'object' ? JSON.stringify(value) : String(value);
+
 const toColumns = (source: Record<string, unknown>): Record<string, string> => {
   const columns: Record<string, string> = {};
   const nested = source.osquery;
   if (nested && typeof nested === 'object') {
     Object.entries(nested as Record<string, unknown>).forEach(([key, value]) => {
-      columns[key] = String(value);
+      columns[key] = toColumnValue(value);
     });
   }
 
   Object.entries(source).forEach(([key, value]) => {
     if (key.startsWith('osquery.')) {
-      columns[key.slice('osquery.'.length)] = String(value);
+      columns[key.slice('osquery.'.length)] = toColumnValue(value);
     }
   });
 

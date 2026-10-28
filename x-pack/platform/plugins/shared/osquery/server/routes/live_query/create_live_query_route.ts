@@ -224,7 +224,10 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
               alertData,
               space,
               dispatch: { entryPoint: 'live_query', source: liveDispatchSource },
-              maxAgents: maxAgentsFromHeader(request.headers[OSQUERY_MAX_AGENTS_HEADER]),
+              // Only the workflow steps send the header; it does nothing while they are off.
+              maxAgents: osqueryContext.experimentalFeatures.workflowsExtensionsEnabled
+                ? maxAgentsFromHeader(request.headers[OSQUERY_MAX_AGENTS_HEADER])
+                : undefined,
             }
           );
 
@@ -255,7 +258,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
 };
 
 /** A positive integer from the workflow step. Anything else means the caller did not opt in. */
-const maxAgentsFromHeader = (header: string | string[] | undefined): number | undefined => {
+export const maxAgentsFromHeader = (header: string | string[] | undefined): number | undefined => {
   const raw = Array.isArray(header) ? header[0] : header;
   if (!raw || !/^[1-9][0-9]{0,6}$/.test(raw)) {
     return undefined;

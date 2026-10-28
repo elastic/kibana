@@ -297,7 +297,7 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
   );
 
   apiTest(
-    'STATUS_UNREADABLE_FORBIDDEN without live_queries_read, right after dispatch',
+    'MISSING_PRIVILEGE without live_queries_read, before anything is dispatched',
     async ({ apiClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
         osqueryRole(['minimal_read', 'run_saved_queries', 'saved_queries_read'])
@@ -307,14 +307,30 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
         'osq-wf-no-read',
         runQueryStep(`agent_ids: ["${AGENT_A.id}"]`)
       );
-      const execution = await workflows.waitForEnd(await workflows.run(workflowId), 60_000);
+      const execution = await workflows.waitForEnd(await workflows.run(workflowId));
 
-      expect(execution.status).toBe('completed');
-      expect(stepOf(execution, 'q').output).toMatchObject({
-        status: 'failed',
-        error_code: 'STATUS_UNREADABLE_FORBIDDEN',
-        action_id: expect.stringContaining(''),
-      });
+      expect(execution.status).toBe('failed');
+      expect(stepOf(execution, 'q').error?.details?.code).toBe('MISSING_PRIVILEGE');
+      expect(stepOf(execution, 'q').error?.message).toMatch(/live_queries_read/);
+      await workflows.delete(workflowId);
+    }
+  );
+
+  apiTest(
+    'MISSING_PRIVILEGE without saved_queries_read, before anything is dispatched',
+    async ({ apiClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
+        osqueryRole(['minimal_read', 'run_saved_queries', 'live_queries_read'])
+      );
+      const workflows = workflowsClient(apiClient, apiKeyHeader);
+      const workflowId = await workflows.create(
+        'osq-wf-no-saved-query-read',
+        runQueryStep(`agent_ids: ["${AGENT_A.id}"]`)
+      );
+      const execution = await workflows.waitForEnd(await workflows.run(workflowId));
+
+      expect(execution.status).toBe('failed');
+      expect(stepOf(execution, 'q').error?.details?.code).toBe('MISSING_PRIVILEGE');
       await workflows.delete(workflowId);
     }
   );

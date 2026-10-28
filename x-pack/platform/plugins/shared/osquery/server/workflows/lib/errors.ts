@@ -11,10 +11,6 @@ import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { PreDispatchErrorCode } from '../../../common/workflows/contract/error_codes';
 import type { PreDispatchErrorCodeValue } from '../../../common/workflows/contract/error_codes';
 
-/** True when a pre-dispatch read was rejected for authz (401/403). */
-export const isMissingPrivilege = (error: unknown): boolean =>
-  error instanceof ExecutionError && error.details?.code === PreDispatchErrorCode.MISSING_PRIVILEGE;
-
 /** Raised before dispatch: `details.code` is the contract's error code. */
 export const stepError = (
   code: PreDispatchErrorCodeValue,

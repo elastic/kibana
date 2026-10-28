@@ -28,11 +28,13 @@ export type PlatformId = (typeof PLATFORM_IDS)[number];
 export const OSQUERY_SCHEDULED_INPUT_TYPE = 'osquery_scheduled';
 
 /**
- * Workflow steps send this on `POST /api/osquery/live_queries`. The route rejects the request
- * when the agents it actually selects exceed the value, which is the set the fleet-wrapper
- * preflight can undercount.
+ * Internal, not part of the public API contract. Workflow steps send this on
+ * `POST /api/osquery/live_queries`; the route then rejects the request when the agents it
+ * actually selects exceed the value, which is the set the fleet-wrapper preflight can
+ * undercount. It can only narrow a request, and is ignored while `workflowsExtensionsEnabled`
+ * is off.
  */
-export const OSQUERY_MAX_AGENTS_HEADER = 'x-osquery-max-agents';
+export const OSQUERY_MAX_AGENTS_HEADER = 'x-elastic-internal-osquery-max-agents';
 
 export const API_VERSIONS = {
   public: {
