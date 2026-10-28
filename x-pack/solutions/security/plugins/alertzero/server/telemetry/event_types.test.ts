@@ -223,6 +223,10 @@ const FIXTURES: {
   [ALERTZERO_TELEMETRY_EVENTS.AlertTriageDecisionsMatched]: {
     ...envelope,
     candidates: 120,
+    capped: 0,
+    close_failures: 0,
+    closed: 0,
+    skipped: 0,
     decisions_matched: 3,
     excluded_by_severity: 4,
     match_failed: false,

@@ -518,6 +518,12 @@ const matchFpDecisionsOutputSchema = lazySchema(() =>
     decisions_matched: z.number().describe('Distinct decisions that matched an alert.'),
     would_close: z.number().describe('Alerts a false positive decision matched.'),
     would_skip: z.number().describe('Alerts a do-not-propose item matched.'),
+    closed: z.number().describe('Alerts closed by a decision. Always 0 unless the mode is `on`.'),
+    skipped: z.number().describe('Alerts kept out of analysis by a dismissal. 0 unless `on`.'),
+    capped: z
+      .number()
+      .describe('Matches left for the normal path because the decision reached its daily cap.'),
+    close_failures: z.number().describe('Decisions whose alerts could not all be closed.'),
     excluded_by_severity: z
       .number()
       .describe('Matches the severity guard keeps with a human, not tagged.'),
@@ -539,7 +545,7 @@ export const triageMatchFpDecisionsStepCommonDefinition: CommonStepDefinition<
     'xpack.alertzero.workflows.steps.triageMatchFpDecisions.description',
     {
       defaultMessage:
-        'Matches open alerts against the stored decisions of the space, without a model. In shadow mode it only tags the matches.',
+        'Matches open alerts against the stored decisions of the space, without a model. In shadow mode it only tags the matches; in on mode it closes them.',
     }
   ),
   category: StepCategory.KibanaSecurity,

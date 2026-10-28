@@ -364,12 +364,12 @@ export class AlertZeroPlugin
       .subscribe((enabled) => {
         this.triageGroupingEnabled = enabled;
       });
-    // The kill switch for matching decisions in the sweep. Only `off` turns it off: any other value,
+    // The switch for matching decisions in the sweep. Only `off` and `on` are read: any other value,
     // and a missing flag provider, give shadow, which closes nothing.
     this.decisionAutoCloseFlagSubscription = core.featureFlags
       .getStringValue$<string>(TRIAGE_DECISION_AUTO_CLOSE_FLAG, 'shadow')
       .subscribe((mode) => {
-        this.decisionAutoCloseMode = mode === 'off' ? 'off' : 'shadow';
+        this.decisionAutoCloseMode = mode === 'off' || mode === 'on' ? mode : 'shadow';
       });
     this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;

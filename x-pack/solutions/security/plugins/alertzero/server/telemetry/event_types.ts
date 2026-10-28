@@ -151,6 +151,10 @@ export interface AlertZeroAlertTriageBatchGroupedPayload extends AlertZeroEnvelo
 
 export interface AlertZeroAlertTriageDecisionsMatchedPayload extends AlertZeroEnvelope {
   candidates: number;
+  capped: number;
+  close_failures: number;
+  closed: number;
+  skipped: number;
   decisions_matched: number;
   excluded_by_severity: number;
   match_failed: boolean;
@@ -617,6 +621,14 @@ export const ALERTZERO_ALERT_TRIAGE_DECISIONS_MATCHED_EVENT: EventTypeOpts<Alert
     schema: {
       ...ENVELOPE_SCHEMA,
       candidates: countField('Open, untriaged alerts the sweep checked against the decisions'),
+      capped: countField(
+        'Matches left for the normal path because a decision reached its daily cap'
+      ),
+      close_failures: countField('Decisions whose alerts could not all be closed'),
+      closed: countField('Alerts closed by a decision. 0 unless the deployment runs in on mode'),
+      skipped: countField(
+        'Alerts a dismissed pattern kept out of analysis. 0 unless the deployment runs in on mode'
+      ),
       decisions_matched: countField('Distinct decisions that matched at least one alert'),
       excluded_by_severity: countField(
         'Alerts of a matched pattern that their severity keeps with a human. Unknown severity counts here'
@@ -626,7 +638,7 @@ export const ALERTZERO_ALERT_TRIAGE_DECISIONS_MATCHED_EVENT: EventTypeOpts<Alert
       ),
       tag_failures: countField('Decisions whose alerts could not be tagged'),
       would_close: countField(
-        'Alerts an approved decision matched. In shadow mode they are only tagged'
+        'Alerts an approved decision matched, whether they were closed or only tagged'
       ),
       would_skip: countField(
         'Alerts a dismissed pattern matched. In shadow mode they are only tagged'

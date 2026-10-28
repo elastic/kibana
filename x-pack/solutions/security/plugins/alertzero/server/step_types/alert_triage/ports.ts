@@ -18,6 +18,7 @@ import {
   TRIAGE_FAILED_TAG,
   TRIAGE_PENDING_TAG,
   TRIAGE_WOULD_CLOSE_TAG_PREFIX,
+  TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX,
   TRIAGE_WOULD_SKIP_TAG_PREFIX,
   VERDICT_TAGS,
   type AlertSeverity,
@@ -33,6 +34,7 @@ type KibanaApi = Pick<StepHandlerContext['contextManager'], 'callKibanaApi'>;
 // security_solution constants.
 const SIGNALS_SEARCH_PATH = '/api/detection_engine/signals/search';
 const SIGNALS_TAGS_PATH = '/api/detection_engine/signals/tags';
+const SIGNALS_STATUS_PATH = '/api/detection_engine/signals/status';
 
 const WORKFLOW_RUN_TASK_TYPE = 'workflow:run';
 
@@ -340,6 +342,69 @@ export const tagAlerts =
     }
   };
 
+/**
+ * Closes alerts as false positives, the reason the closure action records. Throws unless every
+ * alert was updated: a close that was only partly applied must not be reported as done.
+ */
+export const closeAlertsAsFalsePositive = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[]
+): Promise<void> => {
+  const { body } = await callKibanaApi<{
+    updated?: number;
+    version_conflicts?: number;
+    failures?: unknown[];
+  }>({
+    method: 'POST',
+    path: SIGNALS_STATUS_PATH,
+    body: { signal_ids: alertIds, status: 'closed', reason: 'false_positive' },
+  });
+  const failureCount = body.failures?.length ?? 0;
+  if (failureCount > 0 || (body.updated ?? 0) < alertIds.length) {
+    throw new Error(
+      `Closing ${alertIds.length} alert(s) was not fully applied (updated: ${
+        body.updated ?? 0
+      }, conflicts: ${body.version_conflicts ?? 0}, failures: ${failureCount})`
+    );
+  }
+};
+
+/**
+ * Alerts one decision closed in the last 24 hours, for its daily cap. shortcut: it relies on
+ * `kibana.alert.workflow_status_updated_at`, which every closed alert carries; if a mapping lacks
+ * it the count is 0 and only the per-sweep cap applies. Upgrade to a stored counter if that matters.
+ */
+export const countClosedByDecision = async (
+  { callKibanaApi }: KibanaApi,
+  decisionId: string,
+  since: number
+): Promise<number> => {
+  const { body } = await callKibanaApi<{ hits?: { total?: { value?: number } | number } }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: 0,
+      track_total_hits: true,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: { [ALERT_FIELDS.tags]: `${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${decisionId}` },
+            },
+            {
+              range: {
+                'kibana.alert.workflow_status_updated_at': { gte: new Date(since).toISOString() },
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+  const total = body.hits?.total;
+  return typeof total === 'number' ? total : total?.value ?? 0;
+};
+
 /** One count query, no writes: open alerts older than the look-back that were never triaged. */
 export const countAgedOutAlerts = async (
   { callKibanaApi }: KibanaApi,
@@ -525,7 +590,10 @@ export const fetchDecisionCandidates = async (
   analysisTagPrefix: string,
   windowStart: number,
   filters: TriageFilters,
-  after?: unknown[]
+  {
+    after,
+    includeTaggedByShadow = false,
+  }: { after?: unknown[]; includeTaggedByShadow?: boolean } = {}
 ): Promise<DecisionCandidatesPage> => {
   const { body } = await callKibanaApi<{
     hits?: { hits?: Array<AlertHit & { sort?: unknown[] }> };
@@ -546,8 +614,13 @@ export const fetchDecisionCandidates = async (
           ],
           must_not: [
             ...UNTRIAGED_MUST_NOT(analysisTagPrefix),
-            { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_CLOSE_TAG_PREFIX } },
-            { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_SKIP_TAG_PREFIX } },
+            // In `on` the alerts shadow tagged are the ones to close, so they stay in.
+            ...(includeTaggedByShadow
+              ? []
+              : [
+                  { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_CLOSE_TAG_PREFIX } },
+                  { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_SKIP_TAG_PREFIX } },
+                ]),
             ...excludedByFilters(filters),
           ],
         },

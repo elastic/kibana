@@ -14,6 +14,11 @@ import {
 } from '../../../common/step_types/alert_triage';
 import {
   DECISION_AUTO_CLOSE_SEVERITIES,
+  DECISION_DAILY_CLOSE_CAP,
+  VERDICT_INCONCLUSIVE_TAG,
+  TAG_CHUNK_SIZE,
+  TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX,
+  TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX,
   TRIAGE_WOULD_CLOSE_TAG_PREFIX,
   TRIAGE_WOULD_SKIP_TAG_PREFIX,
   type DecisionAutoCloseMode,
@@ -26,7 +31,13 @@ import {
   type StoredDecision,
 } from '../../alert_triage/fp_decisions';
 import { tagInChunks } from '../../alert_triage/plan_sweep';
-import { fetchDecisionCandidates, statusCodeOf, tagAlerts } from './ports';
+import {
+  closeAlertsAsFalsePositive,
+  countClosedByDecision,
+  fetchDecisionCandidates,
+  statusCodeOf,
+  tagAlerts,
+} from './ports';
 
 export interface MatchFpDecisionsStepDependencies {
   isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
@@ -51,6 +62,10 @@ const NOTHING = {
   decisions_matched: 0,
   would_close: 0,
   would_skip: 0,
+  closed: 0,
+  skipped: 0,
+  capped: 0,
+  close_failures: 0,
   excluded_by_severity: 0,
   tag_failures: 0,
 };
@@ -63,6 +78,11 @@ const NOTHING = {
  * In `shadow` it only tags: `az:would_close:<decision>` for a false positive decision, and
  * `az:would_skip:<decision>` for a dismissed pattern. The alert still goes through analysis and
  * grouping, so shadow changes no outcome and shows what `on` would do.
+ *
+ * In `on` it acts. An approved match is tagged `az:closed_by_decision:<decision>` and closed as a
+ * false positive, up to the decision's daily cap; the rest wait for the normal path. A dismissed
+ * match is tagged `az:inconclusive` and `az:skipped_by_decision:<decision>`, so it is neither
+ * analysed nor proposed. Neither calls a model.
  *
  * It fails open. A step that cannot read the setting, the decisions or the alerts reports `failed`
  * and matches nothing, so every alert goes through analysis as before.
@@ -79,7 +99,8 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
       });
 
       try {
-        if ((await getMode()) === 'off') return result('off');
+        const mode = await getMode();
+        if (mode === 'off') return result('off');
         if (!(await isContextEngineEnabled(contextManager.getFakeRequest()))) {
           return result('disabled');
         }
@@ -91,30 +112,84 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
           excludedRuleTags: input.excluded_rule_tags,
         };
         const write = tagAlerts(contextManager);
-        const totals = {
-          candidates: 0,
-          closed: 0,
-          skipped: 0,
-          matched: 0,
-          excluded: 0,
-          failures: 0,
-        };
+        const totals = { ...NOTHING };
         const decisionsSeen = new Set<string>();
+        // Alerts each decision may still close today. Read once per decision, then counted down.
+        const room = new Map<string, number>();
 
+        const warn = (what: string, error: unknown) =>
+          logger.warn(`${what}: ${error instanceof Error ? error.message : error}`);
+
+        /** Tags the alerts of each decision. A decision that cannot be tagged is counted and skipped. */
         const tag = async (prefix: string, byDecision: Map<string, string[]>) => {
           for (const [id, alertIds] of byDecision) {
             try {
               await tagInChunks(write, { alertIds, add: [`${prefix}${id}`], remove: [] });
             } catch (error) {
-              totals.failures++;
-              logger.warn(
-                `Could not tag the alerts of decision ${id}: ${
-                  error instanceof Error ? error.message : error
-                }`
-              );
+              totals.tag_failures++;
+              warn(`Could not tag the alerts of decision ${id}`, error);
             }
           }
         };
+
+        /**
+         * Closes what each decision may still close today. The decision's tag goes on first, so a
+         * close that lands is always findable by revoke; a close that fails leaves tagged open
+         * alerts, which the next sweep tries again. When the daily count cannot be read nothing is
+         * closed, because the cap could not be applied.
+         */
+        const close = async (byDecision: Map<string, string[]>) => {
+          for (const [id, alertIds] of byDecision) {
+            try {
+              if (!room.has(id)) {
+                room.set(
+                  id,
+                  Math.max(
+                    0,
+                    DECISION_DAILY_CLOSE_CAP -
+                      (await countClosedByDecision(contextManager, id, now - 24 * HOUR_MS))
+                  )
+                );
+              }
+              const allowed = alertIds.slice(0, room.get(id));
+              totals.capped += alertIds.length - allowed.length;
+              if (allowed.length === 0) continue;
+              await tagInChunks(write, {
+                alertIds: allowed,
+                add: [`${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${id}`],
+                remove: [],
+              });
+              for (let from = 0; from < allowed.length; from += TAG_CHUNK_SIZE) {
+                await closeAlertsAsFalsePositive(
+                  contextManager,
+                  allowed.slice(from, from + TAG_CHUNK_SIZE)
+                );
+                totals.closed += Math.min(TAG_CHUNK_SIZE, allowed.length - from);
+                room.set(id, (room.get(id) ?? 0) - Math.min(TAG_CHUNK_SIZE, allowed.length - from));
+              }
+            } catch (error) {
+              totals.close_failures++;
+              warn(`Could not close the alerts of decision ${id}`, error);
+            }
+          }
+        };
+
+        const tagSkipped = async (byDecision: Map<string, string[]>) => {
+          for (const [id, alertIds] of byDecision) {
+            try {
+              await tagInChunks(write, {
+                alertIds,
+                add: [VERDICT_INCONCLUSIVE_TAG, `${TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX}${id}`],
+                remove: [],
+              });
+              totals.skipped += alertIds.length;
+            } catch (error) {
+              totals.tag_failures++;
+              warn(`Could not tag the alerts of decision ${id}`, error);
+            }
+          }
+        };
+
         const count = (byDecision: Map<string, string[]>) =>
           [...byDecision.values()].reduce((sum, ids) => sum + ids.length, 0);
 
@@ -125,7 +200,7 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
             input.analysis_tag_prefix,
             now - input.lookback_hours * HOUR_MS,
             filters,
-            after
+            { after, includeTaggedByShadow: mode === 'on' }
           );
           const hashes = hashCandidates(found.candidates, input.space_id);
           const matches = matchDecisions({
@@ -138,13 +213,21 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
             }),
             severities: DECISION_AUTO_CLOSE_SEVERITIES,
           });
-          await tag(TRIAGE_WOULD_CLOSE_TAG_PREFIX, matches.wouldClose);
-          await tag(TRIAGE_WOULD_SKIP_TAG_PREFIX, matches.wouldSkip);
+
+          if (mode === 'on') {
+            await close(matches.wouldClose);
+            // A dismissed pattern is a verdict of its own: `az:inconclusive` takes the alert out of
+            // the sweep and keeps it from a proposal, and the decision tag says why.
+            await tagSkipped(matches.wouldSkip);
+          } else {
+            await tag(TRIAGE_WOULD_CLOSE_TAG_PREFIX, matches.wouldClose);
+            await tag(TRIAGE_WOULD_SKIP_TAG_PREFIX, matches.wouldSkip);
+          }
 
           totals.candidates += found.candidates.length;
-          totals.closed += count(matches.wouldClose);
-          totals.skipped += count(matches.wouldSkip);
-          totals.excluded += matches.excludedBySeverity;
+          totals.would_close += count(matches.wouldClose);
+          totals.would_skip += count(matches.wouldSkip);
+          totals.excluded_by_severity += matches.excludedBySeverity;
           for (const id of [...matches.wouldClose.keys(), ...matches.wouldSkip.keys()]) {
             decisionsSeen.add(id);
           }
@@ -152,14 +235,7 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
           if (after === undefined) break;
         }
 
-        return result('ok', {
-          candidates: totals.candidates,
-          decisions_matched: decisionsSeen.size,
-          would_close: totals.closed,
-          would_skip: totals.skipped,
-          excluded_by_severity: totals.excluded,
-          tag_failures: totals.failures,
-        });
+        return result('ok', { ...totals, decisions_matched: decisionsSeen.size });
       } catch (error) {
         logger.warn(
           `Triage decisions were not matched: ${error instanceof Error ? error.message : error}`

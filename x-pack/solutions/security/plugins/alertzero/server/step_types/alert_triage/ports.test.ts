@@ -8,6 +8,8 @@
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { ALERT_FETCH_LIMIT, BATCH_ALERT_CAP, RULE_FETCH_LIMIT } from '../../alert_triage/constants';
 import {
+  closeAlertsAsFalsePositive,
+  countClosedByDecision,
   fetchDecisionCandidates,
   fetchTriageAlerts,
   findKeyTagsWithVerdicts,
@@ -537,7 +539,7 @@ describe('fetchDecisionCandidates', () => {
           'alert_analysis:',
           Date.parse('2026-10-12'),
           { ...NO_FILTERS, ...filters },
-          after
+          { after }
         ),
     };
   };
@@ -598,5 +600,55 @@ describe('fetchDecisionCandidates', () => {
     expect(query).toContain('alert_analysis:');
     expect(query).toContain('az:would_close:');
     expect(query).toContain('az:would_skip:');
+  });
+});
+
+describe('closeAlertsAsFalsePositive', () => {
+  const closeWith = (body: Record<string, unknown>) => {
+    const callKibanaApi = jest.fn().mockResolvedValue({ status: 200, headers: {}, body });
+    return { callKibanaApi, run: () => closeAlertsAsFalsePositive({ callKibanaApi }, ['a', 'b']) };
+  };
+
+  it('closes the alerts with the reason the closure action records', async () => {
+    const { run, callKibanaApi } = closeWith({ updated: 2, failures: [] });
+
+    await run();
+
+    expect(callKibanaApi).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/api/detection_engine/signals/status',
+        body: { signal_ids: ['a', 'b'], status: 'closed', reason: 'false_positive' },
+      })
+    );
+  });
+
+  it.each([
+    ['fewer alerts updated than asked', { updated: 1, version_conflicts: 1 }],
+    ['a failure', { updated: 2, failures: [{ cause: 'x' }] }],
+  ])('throws on %s, so a partial close is never reported as done', async (_name, body) => {
+    await expect(closeWith(body).run()).rejects.toThrow('not fully applied');
+  });
+});
+
+describe('countClosedByDecision', () => {
+  it.each([
+    [{ value: 7 }, 7],
+    [12, 12],
+    [undefined, 0],
+  ])('reads the total %p as %p', async (total, expected) => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValue({ status: 200, headers: {}, body: { hits: { total } } });
+
+    const count = await countClosedByDecision(
+      { callKibanaApi },
+      'fp-decision-1',
+      Date.parse('2026-10-27')
+    );
+
+    expect(count).toBe(expected);
+    expect(JSON.stringify(callKibanaApi.mock.calls[0][0].body.query)).toContain(
+      'az:closed_by_decision:fp-decision-1'
+    );
   });
 });
