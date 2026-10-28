@@ -33,14 +33,18 @@ export interface ResolvedServices {
 
 const getAgentConfiguration = async ({
   agentRegistry,
+  agentService,
   agentId,
+  request,
 }: {
   agentRegistry: AgentRegistry;
+  agentService: AgentsServiceStart;
   agentId: string;
+  request: KibanaRequest;
 }): Promise<AgentConfiguration> => {
   try {
-    const { configuration } = await agentRegistry.get(agentId);
-    return configuration;
+    const agent = await agentRegistry.get(agentId);
+    return await agentService.resolveAgentConfiguration({ agent, request });
   } catch (error) {
     throw isAgentNotFoundError(error)
       ? createAgentNotFoundError({
@@ -134,7 +138,7 @@ export const resolveServices = async ({
 }): Promise<ResolvedServices> => {
   const agentRegistry = await agentService.getRegistry({ request });
   const { inference_feature_id: agentInferenceFeatureId, reasoning_level: agentReasoningLevel } =
-    await getAgentConfiguration({ agentRegistry, agentId });
+    await getAgentConfiguration({ agentRegistry, agentService, agentId, request });
   const inferenceFeatureId = connectorId === undefined ? agentInferenceFeatureId : undefined;
 
   const {

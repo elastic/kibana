@@ -41,6 +41,11 @@ export interface InferenceFeatureConfig {
     key: string;
     value: string | number | boolean | null;
   };
+  /**
+   * When true, the feature resolves models like any other but is left out of Model Settings,
+   * for features whose models are owned by code rather than chosen by admins.
+   */
+  hidden?: boolean;
 }
 
 export type RegisteredInferenceFeature = Omit<InferenceFeatureConfig, 'recommendedEndpoints'> & {

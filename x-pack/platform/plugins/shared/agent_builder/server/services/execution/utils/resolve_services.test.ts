@@ -208,6 +208,23 @@ describe('resolveServices', () => {
     });
   });
 
+  it("uses the inference feature declared by the agent's type", async () => {
+    const { deps } = createDeps({
+      agentFeatureEndpoints: ['agent-endpoint-1'],
+      featureEndpoints: ['endpoint-1'],
+    });
+    jest
+      .mocked(deps.agentService.resolveAgentConfiguration)
+      .mockImplementation(async ({ agent }) => ({
+        ...agent.configuration,
+        inference_feature_id: AGENT_FEATURE_ID,
+      }));
+
+    const { selectedConnectorId } = await resolveServices(deps);
+
+    expect(selectedConnectorId).toBe('agent-endpoint-1');
+  });
+
   it("falls back to the Agent Builder feature when the agent's feature has no model", async () => {
     const { deps } = createDeps({
       inferenceFeatureId: AGENT_FEATURE_ID,

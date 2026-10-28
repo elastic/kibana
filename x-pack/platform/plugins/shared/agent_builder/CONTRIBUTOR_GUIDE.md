@@ -334,7 +334,7 @@ agentBuilder.agents.register({
 });
 ```
 
-`inference_feature_id` is only supported for built-in agents, and cannot be set by agent types.
+Agent types can declare it the same way, in their `baseConfiguration`. It cannot be set on user-created agents.
 
 ### Choosing the agent's reasoning level
 

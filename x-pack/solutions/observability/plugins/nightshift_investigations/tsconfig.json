@@ -70,6 +70,7 @@
     "@kbn/proposals-common",
     "@kbn/core-security-common",
     "@kbn/eval-kql",
-    "@kbn/rrule"
+    "@kbn/rrule",
+    "@kbn/search-inference-endpoints"
   ]
 }

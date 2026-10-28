@@ -46,7 +46,7 @@ export const defineInferenceFeaturesRoutes = ({
       },
       errorHandler(logger)(async (context, _request, response) => {
         const { uiSettings } = await context.core;
-        const allFeatures = featureRegistry.getAll();
+        const allFeatures = featureRegistry.getAll().filter((feature) => !feature.hidden);
 
         const conditionKeys = [
           ...new Set(
