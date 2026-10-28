@@ -8,7 +8,11 @@
  */
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { executedByFallbackLabel, getExecutedByLabel } from './use_user_profiles_by_uid';
+import {
+  executedByFallbackLabel,
+  getExecutedByLabel,
+  getExecutedByProfiles,
+} from './executed_by_profiles';
 
 const createProfile = (user: UserProfileWithAvatar['user']): UserProfileWithAvatar => ({
   uid: 'u_alice',
@@ -39,6 +43,21 @@ describe('getExecutedByLabel', () => {
     const profile = createProfile({ username: '' });
 
     expect(getExecutedByLabel(profile, 'u_alice')).toBe('u_alice');
+  });
+});
+
+describe('getExecutedByProfiles', () => {
+  it('indexes the resolved profiles by the executedBy value of each execution', () => {
+    const profile = createProfile({ username: 'alice' });
+
+    const profiles = getExecutedByProfiles([
+      { executedBy: 'u_alice', executedByProfile: profile },
+      { executedBy: 'u_alice', executedByProfile: profile },
+      { executedBy: 'bob' },
+      {},
+    ]);
+
+    expect(Array.from(profiles.entries())).toEqual([['u_alice', profile]]);
   });
 });
 
