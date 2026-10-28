@@ -217,6 +217,25 @@ steps:
                 Triage of {{ inputs.alert_ids.size }} alert{% if inputs.alert_ids.size != 1 %}s{% endif %} from rule
                 "{{ inputs.rule_name }}" ({{ inputs.rule_id }}) needs attention.
               workflow_execution_ids: ["{{ execution.id }}"]
+        - name: attach_classify_failed_alerts
+          type: foreach
+          foreach: "${{ inputs.alert_ids | chunk: 20 | json }}"
+          steps:
+            - name: attach_classify_failed_alert_chunk
+              type: ai.attachment.add
+              on-failure:
+                retry:
+                  max-attempts: 3
+                  delay: 5s
+                continue: true
+              with:
+                conversation_id: "{{ steps.create_classify_failed_investigation.output.conversation_id }}"
+                type: security.alerts
+                render_inline: false
+                data:
+                  alertIds: "${{ foreach.item }}"
+                description: "Alerts of this batch that were not classified"
+
         - name: post_comment_classify_failed
           type: ai.conversation.add_user_message
           on-failure:
@@ -332,6 +351,25 @@ steps:
                   Triage of {{ inputs.alert_ids.size }} alert{% if inputs.alert_ids.size != 1 %}s{% endif %} from rule
                   "{{ inputs.rule_name }}" ({{ inputs.rule_id }}) needs attention.
                 workflow_execution_ids: ["{{ execution.id }}"]
+          - name: attach_classification_empty_alerts
+            type: foreach
+            foreach: "${{ inputs.alert_ids | chunk: 20 | json }}"
+            steps:
+              - name: attach_classification_empty_alert_chunk
+                type: ai.attachment.add
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: 5s
+                  continue: true
+                with:
+                  conversation_id: "{{ steps.create_classification_empty_investigation.output.conversation_id }}"
+                  type: security.alerts
+                  render_inline: false
+                  data:
+                    alertIds: "${{ foreach.item }}"
+                  description: "Alerts of this batch that got no verdict"
+
           - name: post_comment_classification_empty
             type: ai.conversation.add_user_message
             on-failure:
@@ -373,6 +411,25 @@ steps:
                       Triage of {{ inputs.alert_ids.size }} alert{% if inputs.alert_ids.size != 1 %}s{% endif %} from rule
                       "{{ inputs.rule_name }}" ({{ inputs.rule_id }}) needs attention.
                     workflow_execution_ids: ["{{ execution.id }}"]
+              - name: attach_missing_alerts
+                type: foreach
+                foreach: "${{ steps.classify_alerts.output.missing_alert_ids | chunk: 20 | json }}"
+                steps:
+                  - name: attach_missing_alert_chunk
+                    type: ai.attachment.add
+                    on-failure:
+                      retry:
+                        max-attempts: 3
+                        delay: 5s
+                      continue: true
+                    with:
+                      conversation_id: "{{ steps.create_missing_alert_ids_investigation.output.conversation_id }}"
+                      type: security.alerts
+                      render_inline: false
+                      data:
+                        alertIds: "${{ foreach.item }}"
+                      description: "Alerts of this batch that got no verdict"
+
               - name: post_comment_missing_alert_ids
                 type: ai.conversation.add_user_message
                 on-failure:
@@ -770,6 +827,12 @@ steps:
         type: if
         condition: "${{ steps.create_proposal_investigation.error == blank }}"
         steps:
+          - name: init_mint_attach_tracking
+            type: data.set
+            with:
+              failed_attach_chunk_count: 0
+              total_attach_chunk_count: "${{ steps.process_mints.item.alert_ids | chunk: 20 | size }}"
+
           - name: attach_mint_alerts
             type: foreach
             foreach: "${{ steps.process_mints.item.alert_ids | chunk: 20 | json }}"
@@ -788,6 +851,12 @@ steps:
                   data:
                     alertIds: "${{ foreach.item }}"
                   description: "Alerts in this closure proposal"
+
+              - name: record_attach_mint_alert_chunk_failure
+                type: data.set
+                if: "${{ steps.attach_mint_alert_chunk.error != blank }}"
+                with:
+                  failed_attach_chunk_count: "${{ variables.failed_attach_chunk_count | plus: 1 }}"
 
           # First message of the Investigation. It describes only this proposal's alerts. The batch counts
           # and the model summary cover other alerts too, which made the numbers disagree.
@@ -811,6 +880,8 @@ steps:
                 {%- assign shown = shown | plus: 1 -%}{%- endif -%}{%- endfor %}
 
                 {% if steps.process_mints.item.kind == 'keyed' %}If more alerts match this pattern while the proposal is open, they are added here and noted in a separate message.{% endif %}
+
+                {% if variables.failed_attach_chunk_count > 0 %}⚠️ {{ variables.failed_attach_chunk_count }} of {{ variables.total_attach_chunk_count }} alert chunk(s) failed to attach after retries; some alerts are not visible in this Investigation.{% endif %}
 
                 [View execution]({{ execution.url }})
 
@@ -849,6 +920,12 @@ steps:
     type: foreach
     foreach: "${{ variables.group_joins | json }}"
     steps:
+      - name: init_joined_attach_tracking
+        type: data.set
+        with:
+          failed_attach_chunk_count: 0
+          total_attach_chunk_count: "${{ steps.process_joins.item.alert_ids | chunk: 20 | size }}"
+
       - name: attach_joined_alerts
         type: foreach
         foreach: "${{ steps.process_joins.item.alert_ids | chunk: 20 | json }}"
@@ -867,6 +944,12 @@ steps:
               data:
                 alertIds: "${{ foreach.item }}"
               description: "Alerts added to this closure proposal"
+
+          - name: record_attach_joined_alert_chunk_failure
+            type: data.set
+            if: "${{ steps.attach_joined_alert_chunk.error != blank }}"
+            with:
+              failed_attach_chunk_count: "${{ variables.failed_attach_chunk_count | plus: 1 }}"
 
       - name: attach_joined_impact_gate
         type: if
@@ -916,6 +999,8 @@ steps:
             {%- assign shown = shown | plus: 1 -%}{%- endif -%}{%- endfor %}
 
             [View all {{ steps.process_joins.item.total_alerts }} alerts of this proposal](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.process_joins.item.alerts_page_query }})
+
+            {% if variables.failed_attach_chunk_count > 0 %}⚠️ {{ variables.failed_attach_chunk_count }} of {{ variables.total_attach_chunk_count }} alert chunk(s) failed to attach after retries; some alerts are not visible in this Investigation.{% endif %}
 
   # ---------------------------------------------------------------------------
   # 7c. The alerts that are in no proposal (true positives, inconclusive verdicts, false positives
@@ -983,6 +1068,12 @@ steps:
         type: if
         condition: "${{ variables.home_conversation_id != '' }}"
         steps:
+          - name: init_other_attach_tracking
+            type: data.set
+            with:
+              failed_attach_chunk_count: 0
+              total_attach_chunk_count: "${{ variables.other_alert_ids | chunk: 20 | size }}"
+
           - name: attach_other_alerts
             type: foreach
             foreach: "${{ variables.other_alert_ids | chunk: 20 | json }}"
@@ -1001,6 +1092,12 @@ steps:
                   data:
                     alertIds: "${{ foreach.item }}"
                   description: "Alerts analysed in this triage run that are not in a closure proposal"
+
+              - name: record_attach_other_alert_chunk_failure
+                type: data.set
+                if: "${{ steps.attach_other_alert_chunk.error != blank }}"
+                with:
+                  failed_attach_chunk_count: "${{ variables.failed_attach_chunk_count | plus: 1 }}"
 
           - name: count_other_entities
             type: data.set
@@ -1030,6 +1127,8 @@ steps:
                 {% if variables.batch_conversation_created and variables.proposal_count == 0 %}Triage of rule **{{ inputs.rule_name }}** is complete. No closure proposal was needed.{% elsif variables.batch_conversation_created %}Triage of rule **{{ inputs.rule_name }}** is complete. The alerts in this Investigation are in none of the {{ variables.proposal_count }} closure proposals of this batch, each of which has its own Investigation.{% else %}This batch also held alerts that are in no closure proposal.{% endif %}
 
                 {{ variables.other_alert_count }} of the {{ variables.alert_count }} analyzed alert{% if variables.alert_count != 1 %}s{% endif %} {% if variables.other_alert_count == 1 %}is{% else %}are{% endif %} in no closure proposal: {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.inconclusive_count }} inconclusive, {{ variables.other_alert_count | minus: steps.classify_alerts.output.true_positive_count | minus: steps.classify_alerts.output.inconclusive_count | at_least: 0 }} false positive below the {{ inputs.confidence_floor }} confidence floor.{% if steps.classify_alerts.output.inconclusive_count > 0 and steps.group_fp_candidates_call.output.inconclusive_alerts_page_query != blank %} [View the inconclusive alerts](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.group_fp_candidates_call.output.inconclusive_alerts_page_query }}){% endif %}
+
+                {% if variables.failed_attach_chunk_count > 0 %}⚠️ {{ variables.failed_attach_chunk_count }} of {{ variables.total_attach_chunk_count }} alert chunk(s) failed to attach after retries; some alerts are not visible in this Investigation.{% endif %}
 
                 [View execution]({{ execution.url }})
 

@@ -132,20 +132,39 @@ describe('floor_alert_triage_batch — Investigations', () => {
     expect(stepByName('create_investigation')).toBeUndefined();
   });
 
-  it('opens each failure Investigation before it comments on it, and leaves it open', () => {
+  it('opens each failure Investigation, attaches the alerts that need attention, then comments, and leaves it open', () => {
     const failures = [
-      ['create_classify_failed_investigation', 'post_comment_classify_failed'],
-      ['create_classification_empty_investigation', 'post_comment_classification_empty'],
-      ['create_missing_alert_ids_investigation', 'post_comment_missing_alert_ids'],
-      ['create_grouping_failed_investigation', 'post_comment_grouping_failed'],
+      [
+        'create_classify_failed_investigation',
+        'attach_classify_failed_alerts',
+        'post_comment_classify_failed',
+        'inputs.alert_ids',
+      ],
+      [
+        'create_classification_empty_investigation',
+        'attach_classification_empty_alerts',
+        'post_comment_classification_empty',
+        'inputs.alert_ids',
+      ],
+      [
+        'create_missing_alert_ids_investigation',
+        'attach_missing_alerts',
+        'post_comment_missing_alert_ids',
+        'steps.classify_alerts.output.missing_alert_ids',
+      ],
     ];
-    failures.forEach(([create, comment]) => {
-      const flat = allSteps.map((step) => step.name);
-      expect(flat.indexOf(create)).toBe(flat.indexOf(comment) - 1);
+    const flat = allSteps.map((step) => step.name);
+    failures.forEach(([create, attach, comment, ids]) => {
+      expect(flat.indexOf(attach)).toBe(flat.indexOf(create) + 1);
+      expect(flat.indexOf(comment)).toBe(flat.indexOf(attach) + 2);
+      expect(stepByName(attach)?.foreach).toContain(ids);
       expect(stepByName(comment)?.with?.conversation_id).toBe(
         `{{ steps.${create}.output.conversation_id }}`
       );
     });
+    expect(flat.indexOf('post_comment_grouping_failed')).toBe(
+      flat.indexOf('create_grouping_failed_investigation') + 1
+    );
     // Only the batch Investigation without a proposal is closed; a failure Investigation stays open.
     expect(
       allSteps
@@ -249,6 +268,7 @@ describe('floor_alert_triage_batch — classify_alerts on-failure', () => {
     const abort = stepByName('abort_classify_failed');
     expect(classify?.['on-failure']?.fallback?.map((step) => step.name)).toEqual([
       'create_classify_failed_investigation',
+      'attach_classify_failed_alerts',
       'post_comment_classify_failed',
       'release_claims_classify_failed',
       'abort_classify_failed',
@@ -999,6 +1019,7 @@ describe('floor_alert_triage_batch — a failed batch Investigation', () => {
     expect(evalExpr(gate.condition, { variables: { home_conversation_id: '' } })).toBe(false);
     expect(evalExpr(gate.condition, { variables: { home_conversation_id: 'conv-1' } })).toBe(true);
     expect(gate.steps.map((step) => step.name)).toEqual([
+      'init_other_attach_tracking',
       'attach_other_alerts',
       'count_other_entities',
       'attach_other_impact_gate',
@@ -1518,6 +1539,28 @@ describe('floor_alert_triage_batch — grouping', () => {
         },
       })
     ).toContain('[View all 42 alerts of this proposal](/s/team/app/security/alerts?filters=x)');
+  });
+
+  it('counts the alert chunks that fail to attach and says so in the Investigation', () => {
+    [
+      ['attach_mint_alert_chunk', 'record_attach_mint_alert_chunk_failure'],
+      ['attach_joined_alert_chunk', 'record_attach_joined_alert_chunk_failure'],
+      ['attach_other_alert_chunk', 'record_attach_other_alert_chunk_failure'],
+    ].forEach(([attach, record]) => {
+      expect(stepByName(attach)?.['on-failure']?.continue).toBe(true);
+      expect(stepByName(record)?.if).toBe(`\${{ steps.${attach}.error != blank }}`);
+    });
+
+    const message = (stepByName('post_comment_joined_owner')?.with as { message: string }).message;
+    const render = (failed: number) =>
+      renderString(message, {
+        workflow: { spaceId: 'team' },
+        inputs: { rule_name: 'Rule A' },
+        variables: { failed_attach_chunk_count: failed, total_attach_chunk_count: 5 },
+        steps: { process_joins: { item: { alert_ids: ['a'], total_alerts: 3, revision: 2 } } },
+      });
+    expect(render(2)).toContain('2 of 5 alert chunk(s) failed to attach after retries');
+    expect(render(0)).not.toContain('failed to attach');
   });
 
   it('reports whether the batch created a conversation, for a proposal, a failure or its own alerts', () => {
