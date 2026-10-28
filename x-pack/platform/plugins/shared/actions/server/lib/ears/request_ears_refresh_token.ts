@@ -11,7 +11,8 @@ import type { Logger } from '@kbn/core/server';
 import { getEarsEndpointsForProvider, resolveEarsUrl } from './url';
 import { request } from '../axios_utils';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
-import type { OAuthTokenResponse } from '../request_oauth_token';
+import { EarsRequestError, getEarsRequestId } from './ears_request_error';
+import type { EarsTokenResponse } from './request_ears_token';
 
 export interface EarsRefreshTokenRequestParams {
   refreshToken: string;
@@ -29,7 +30,7 @@ export async function requestEarsRefreshToken(
   logger: Logger,
   params: EarsRefreshTokenRequestParams,
   configurationUtilities: ActionsConfigurationUtilities
-): Promise<OAuthTokenResponse> {
+): Promise<EarsTokenResponse> {
   const axiosInstance = axios.create();
   const { refreshEndpoint: earsRefreshPath } = getEarsEndpointsForProvider(provider);
   const refreshUrl = resolveEarsUrl(earsRefreshPath, configurationUtilities.getEarsUrl());
@@ -50,6 +51,8 @@ export async function requestEarsRefreshToken(
     validateStatus: () => true,
   });
 
+  const earsRequestId = getEarsRequestId(res.headers);
+
   if (res.status === 200) {
     return {
       tokenType: res.data.token_type,
@@ -57,10 +60,15 @@ export async function requestEarsRefreshToken(
       expiresIn: res.data.expires_in,
       refreshToken: res.data.refresh_token,
       refreshTokenExpiresIn: res.data.refresh_token_expires_in,
+      earsRequestId,
     };
   } else {
     const errString = stableStringify(res.data);
     logger.debug(`error thrown refreshing the access token from EARS ${refreshUrl}: ${errString}`);
-    throw new Error('Failed to refresh token from auth redirect service');
+    throw new EarsRequestError({
+      message: 'Failed to refresh token from auth redirect service',
+      status: res.status,
+      earsRequestId,
+    });
   }
 }

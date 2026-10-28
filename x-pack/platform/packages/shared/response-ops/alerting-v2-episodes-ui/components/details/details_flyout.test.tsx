@@ -393,13 +393,13 @@ describe('AlertEpisodeDetailsFlyout', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('renders the severity header value as a colored dot with its label', () => {
+  it('renders the severity header value as a soft badge with its label', () => {
     mockUseEpisodeDetailsHeaderData.mockReturnValue({ ...baseHeaderData, severity: 'high' });
 
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
 
     const severity = screen.getByTestId('alertingV2EpisodeFlyoutSeverity');
-    expect(severity.querySelector('[data-euiicon-type="dot"]')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingV2EpisodeSeverityBadge-high')).toBeInTheDocument();
     expect(severity).toHaveTextContent('High');
   });
 

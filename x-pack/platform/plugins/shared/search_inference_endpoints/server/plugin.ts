@@ -17,11 +17,13 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
+import { createInferenceRequestError } from '@kbn/inference-common';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 
 import { defineRoutes } from './routes';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
 import { getForFeature as getForFeatureFn } from './inference_endpoints';
-import { resolveModelsForFeature } from './lib/resolve_models_for_feature';
+import { NO_DEFAULT_CONNECTOR, resolveModelsForFeature } from './lib/resolve_models_for_feature';
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
   GetForFeatureOptions,
@@ -109,6 +111,49 @@ export class SearchInferenceEndpointsPlugin
       getForFeature,
       getConnectorList,
       getConnectorById,
+    });
+
+    plugins.inference.registerFeatureEndpointResolver(async (featureId, request) => {
+      const [coreStart, , { features, endpoints }] = await core.getStartServices();
+      const feature = features.get(featureId);
+      if (!feature) {
+        throw createInferenceRequestError(`Feature "${featureId}" is not registered`, 400);
+      }
+      if (feature.taskType !== 'chat_completion') {
+        throw createInferenceRequestError(
+          `Feature "${featureId}" is not a chat completion feature (task type "${feature.taskType}")`,
+          400
+        );
+      }
+
+      const {
+        endpoints: [topEndpoint],
+        soEntryFound,
+      } = await endpoints.getForFeature(featureId, request);
+      if (!topEndpoint) {
+        return undefined;
+      }
+
+      const isConfiguredForFeature = soEntryFound || topEndpoint.isRecommended;
+      if (!isConfiguredForFeature) {
+        const defaultConnectorId = await coreStart.uiSettings
+          .asScopedToClient(coreStart.savedObjects.getScopedClient(request))
+          .get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
+        if (!defaultConnectorId || defaultConnectorId === NO_DEFAULT_CONNECTOR) {
+          return undefined;
+        }
+        const defaultConnector = await getConnectorById(defaultConnectorId, request).catch(
+          () => undefined
+        );
+        if (topEndpoint.connectorId !== defaultConnector?.connectorId) {
+          return undefined;
+        }
+      }
+      return {
+        connectorId: topEndpoint.connectorId,
+        temperature: topEndpoint.parameters?.temperature,
+        reasoning: topEndpoint.parameters?.reasoning,
+      };
     });
 
     plugins.features.registerKibanaFeature({
