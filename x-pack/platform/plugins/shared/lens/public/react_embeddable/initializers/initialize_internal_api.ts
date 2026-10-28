@@ -45,7 +45,7 @@ export function initializeInternalApi(
     : new BehaviorSubject(initialState.disableTriggers ?? false);
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 
-  const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+  const dataSources$ = new BehaviorSubject<DataView[] | undefined>(undefined);
   // This is an internal error state, not to be confused with the runtime error state thrown by the expression pipeline
   // In both cases a blocking error can happen, but for Lens validation errors we want to have full control over the UI
   // while for runtime errors the error will bubble up to the embeddable presentation layer
@@ -91,7 +91,7 @@ export function initializeInternalApi(
     expressionAbortController$,
     renderCount$,
     isNewlyCreated$,
-    dataViews$,
+    dataSources$,
     blockingError$,
     messages$,
     validationMessages$,
@@ -113,7 +113,7 @@ export function initializeInternalApi(
     updateAttributes: (attributes: LensRuntimeState['attributes']) => attributes$.next(attributes),
     updateAbortController: (abortController: AbortController) =>
       expressionAbortController$.next(abortController),
-    updateDataViews: (dataViews: DataView[] | undefined) => dataViews$.next(dataViews),
+    updateDataViews: (dataViews: DataView[] | undefined) => dataSources$.next(dataViews),
     updateMessages: (newMessages: UserMessage[]) => messages$.next(newMessages),
     updateValidationMessages: (newMessages: UserMessage[]) => validationMessages$.next(newMessages),
     updateBlockingError: (blockingError: Error | undefined) => blockingError$.next(blockingError),
