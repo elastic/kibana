@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { FiltersSchema, QuerySchema, SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useEffect } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
 import { formatAllFilters } from '../../../helpers/format_filters';
 import type { CreateSLOForm } from '../../../types';
@@ -21,17 +21,20 @@ import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { FieldSelector } from '../synthetics_common/field_selector';
 
 export function SyntheticsAvailabilityIndicatorTypeForm() {
-  const { watch, setValue, getValues } =
+  const { control, setValue, getValues } =
     useFormContext<CreateSLOForm<SyntheticsAvailabilityIndicator>>();
-  const dataViewId = watch(DATA_VIEW_FIELD);
+  const dataViewId = useWatch({ control, name: DATA_VIEW_FIELD });
 
-  const [monitorIds = [], projects = [], tags = [], index, globalFilters] = watch([
-    'indicator.params.monitorIds',
-    'indicator.params.projects',
-    'indicator.params.tags',
-    'indicator.params.index',
-    'indicator.params.filter',
-  ]);
+  const [monitorIds = [], projects = [], tags = [], index, globalFilters] = useWatch({
+    control,
+    name: [
+      'indicator.params.monitorIds',
+      'indicator.params.projects',
+      'indicator.params.tags',
+      'indicator.params.index',
+      'indicator.params.filter',
+    ],
+  });
 
   const { dataView } = useCreateDataView({
     indexPatternString: index,

@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import React from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import type { CreateSLOForm } from '../../../types';
 import { TimestampFieldSelector } from '../../common/timestamp_field_selector';
 import { IndexSelection } from './index_selection';
@@ -19,8 +19,8 @@ interface Props {
 }
 
 export function IndexAndTimestampField({ dataView, isLoading }: Props) {
-  const { watch } = useFormContext<CreateSLOForm>();
-  const index = watch('indicator.params.index');
+  const { control } = useFormContext<CreateSLOForm>();
+  const index = useWatch({ control, name: 'indicator.params.index' });
 
   const timestampFields = dataView?.fields?.filter((field) => field.type === 'date') ?? [];
 

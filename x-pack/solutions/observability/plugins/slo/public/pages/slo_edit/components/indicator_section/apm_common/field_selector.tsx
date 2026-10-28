@@ -13,7 +13,7 @@ import { debounce } from 'lodash';
 import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import type { FieldPath } from 'react-hook-form';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import type { Suggestion } from '../../../../../hooks/use_fetch_apm_suggestions';
 import { useFetchApmSuggestions } from '../../../../../hooks/use_fetch_apm_suggestions';
 import type { CreateSLOForm } from '../../../types';
@@ -40,8 +40,8 @@ export function FieldSelector({
   placeholder,
   tooltip,
 }: Props) {
-  const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
-  const serviceName = watch('indicator.params.service');
+  const { control, getFieldState } = useFormContext<CreateSLOForm>();
+  const serviceName = useWatch({ control, name: 'indicator.params.service' });
   const [search, setSearch] = useState<string>('');
   const { suggestions, isLoading } = useFetchApmSuggestions({
     fieldName,

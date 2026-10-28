@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { IndexAndTimestampField } from '../custom_common/index_and_timestamp_field';
 import { GroupByField } from '../../common/group_by_field';
 import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
@@ -31,9 +31,9 @@ export { NEW_CUSTOM_METRIC } from './metric_indicator';
 const SUPPORTED_METRIC_FIELD_TYPES = ['number', 'histogram'];
 
 export function CustomMetricIndicatorTypeForm() {
-  const { watch } = useFormContext<CreateSLOForm>();
-  const index = watch('indicator.params.index');
-  const dataViewId = watch(DATA_VIEW_FIELD);
+  const { control } = useFormContext<CreateSLOForm>();
+  const index = useWatch({ control, name: 'indicator.params.index' });
+  const dataViewId = useWatch({ control, name: DATA_VIEW_FIELD });
 
   const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
     indexPatternString: index,

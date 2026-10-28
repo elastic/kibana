@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { first, range, xor } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
+import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import {
   aggValueToLabel,
   CUSTOM_METRIC_AGGREGATION_OPTIONS,
@@ -92,7 +92,7 @@ export function MetricIndicator({
   isLoadingIndex,
   dataView,
 }: MetricIndicatorProps) {
-  const { control, watch, setValue, register, getFieldState } = useFormContext<CreateSLOForm>();
+  const { control, setValue, register, getFieldState } = useFormContext<CreateSLOForm>();
   const [options, setOptions] = useState<Option[]>(createOptionsFromFields(metricFields));
   const [aggregationOptions, setAggregationOptions] = useState(CUSTOM_METRIC_AGGREGATION_OPTIONS);
 
@@ -104,8 +104,9 @@ export function MetricIndicator({
     control,
     name: `indicator.params.${type}.metrics`,
   });
-  const equation = watch(`indicator.params.${type}.equation`);
-  const indexPattern = watch('indicator.params.index');
+  const equation = useWatch({ control, name: `indicator.params.${type}.equation` });
+  const indexPattern = useWatch({ control, name: 'indicator.params.index' });
+  const metrics = useWatch({ control, name: `indicator.params.${type}.metrics` });
 
   const disableAdd = fields?.length === MAX_VARIABLES || !indexPattern;
   const disableDelete = fields?.length === 1 || !indexPattern;
@@ -210,7 +211,7 @@ export function MetricIndicator({
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
-                {watch(`indicator.params.${type}.metrics.${index}.aggregation`) !== 'doc_count' && (
+                {metrics?.[index]?.aggregation !== 'doc_count' && (
                   <EuiFlexItem>
                     <EuiFormRow
                       fullWidth

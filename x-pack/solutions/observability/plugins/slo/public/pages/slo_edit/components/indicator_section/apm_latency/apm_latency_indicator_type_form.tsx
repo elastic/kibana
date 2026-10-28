@@ -9,7 +9,7 @@ import { EuiFieldNumber, EuiFlexGroup, EuiFormRow, EuiIconTip } from '@elastic/e
 import type { APMTransactionDurationIndicator } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useApmDefaultValues } from '../apm_common/use_apm_default_values';
 import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { GroupByField } from '../../common/group_by_field';
@@ -23,7 +23,7 @@ import { formatAllFilters } from '../../../helpers/format_filters';
 import { getGroupByCardinalityFilters } from '../apm_common/get_group_by_cardinality_filters';
 
 export function ApmLatencyIndicatorTypeForm() {
-  const { control, watch, getFieldState } =
+  const { control, getFieldState } =
     useFormContext<CreateSLOForm<APMTransactionDurationIndicator>>();
   const {
     data: { metric: apmIndex },
@@ -35,13 +35,16 @@ export function ApmLatencyIndicatorTypeForm() {
     transactionType = '',
     transactionName = '',
     globalFilters,
-  ] = watch([
-    'indicator.params.service',
-    'indicator.params.environment',
-    'indicator.params.transactionType',
-    'indicator.params.transactionName',
-    'indicator.params.filter',
-  ]);
+  ] = useWatch({
+    control,
+    name: [
+      'indicator.params.service',
+      'indicator.params.environment',
+      'indicator.params.transactionType',
+      'indicator.params.transactionName',
+      'indicator.params.filter',
+    ],
+  });
   const indicatorParamsFilters = getGroupByCardinalityFilters({
     serviceName,
     environment,
@@ -52,7 +55,7 @@ export function ApmLatencyIndicatorTypeForm() {
 
   useApmDefaultValues();
 
-  const dataViewId = watch(DATA_VIEW_FIELD);
+  const dataViewId = useWatch({ control, name: DATA_VIEW_FIELD });
 
   const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
     indexPatternString: apmIndex,

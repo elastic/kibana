@@ -8,12 +8,12 @@
 import { EuiFieldNumber, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import type { CreateSLOForm } from '../types';
 
 export function SloEditFormObjectiveSectionTimeslices() {
-  const { control, getFieldState, watch } = useFormContext<CreateSLOForm>();
-  const indicator = watch('indicator.type');
+  const { control, getFieldState } = useFormContext<CreateSLOForm>();
+  const indicator = useWatch({ control, name: 'indicator.type' });
 
   return (
     <>

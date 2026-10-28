@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
 import type { CreateSLOForm } from '../../../types';
 import { DataPreviewChart } from '../../common/data_preview_chart';
@@ -18,9 +18,9 @@ import { IndexAndTimestampField } from '../custom_common/index_and_timestamp_fie
 import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 
 export function CustomKqlIndicatorTypeForm() {
-  const { watch } = useFormContext<CreateSLOForm>();
-  const index = watch('indicator.params.index');
-  const dataViewId = watch(DATA_VIEW_FIELD);
+  const { control } = useFormContext<CreateSLOForm>();
+  const index = useWatch({ control, name: 'indicator.params.index' });
+  const dataViewId = useWatch({ control, name: DATA_VIEW_FIELD });
 
   const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
     indexPatternString: index,

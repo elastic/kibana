@@ -8,7 +8,7 @@
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import type { QuerySchema } from '@kbn/slo-schema';
 import React from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { EuiSpacer } from '@elastic/eui';
 import type { CreateSLOForm } from '../../types';
 import { GroupByCardinality } from './group_by_cardinality';
@@ -23,10 +23,10 @@ export function GroupByField({
   isLoading: boolean;
   filters?: QuerySchema;
 }) {
-  const { watch } = useFormContext<CreateSLOForm>();
+  const { control } = useFormContext<CreateSLOForm>();
 
   const groupByFields = dataView?.fields?.filter((field) => canGroupBy(field)) ?? [];
-  const index = watch('indicator.params.index');
+  const index = useWatch({ control, name: 'indicator.params.index' });
 
   return (
     <div style={{ paddingRight: 34 }}>

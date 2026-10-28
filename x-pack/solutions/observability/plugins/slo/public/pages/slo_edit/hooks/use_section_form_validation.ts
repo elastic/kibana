@@ -13,30 +13,28 @@ import {
   timesliceMetricBasicMetricWithField,
   timesliceMetricPercentileMetric,
 } from '@kbn/slo-schema';
-import type {
-  FormState,
-  UseFormGetFieldState,
-  UseFormGetValues,
-  UseFormWatch,
-} from 'react-hook-form';
-import { isEmpty, isObject } from 'lodash';
+import { get, isEmpty, isObject } from 'lodash';
+import type { FieldPath } from 'react-hook-form';
+import { useFormContext, useFormState, useWatch } from 'react-hook-form';
 import type { CreateSLOForm } from '../types';
 
-interface Props {
-  getFieldState: UseFormGetFieldState<CreateSLOForm>;
-  getValues: UseFormGetValues<CreateSLOForm>;
-  formState: FormState<CreateSLOForm>;
-  watch: UseFormWatch<CreateSLOForm>;
-}
+export function useSectionFormValidation() {
+  const { control, getValues } = useFormContext<CreateSLOForm>();
+  // Subscribes this component (not the form root) to the values and errors read below.
+  const [indicatorType] = useWatch({
+    control,
+    name: ['indicator.type', 'indicator.params', 'name'],
+  });
+  const { errors } = useFormState({ control });
+  const isInvalid = (field: FieldPath<CreateSLOForm>) => Boolean(get(errors, field));
 
-export function useSectionFormValidation({ getFieldState, getValues, formState, watch }: Props) {
   let isIndicatorSectionValid: boolean = false;
 
-  switch (watch('indicator.type')) {
+  switch (indicatorType) {
     case 'sli.metric.custom':
       const isGoodParamsValid = () => {
         const data = getValues('indicator.params.good') as MetricCustomIndicator['params']['good'];
-        const isEquationValid = !getFieldState('indicator.params.good.equation').invalid;
+        const isEquationValid = !isInvalid('indicator.params.good.equation');
         const areMetricsValid =
           isObject(data) &&
           (data.metrics ?? []).every((metric) => {
@@ -56,7 +54,7 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
         const data = getValues(
           'indicator.params.total'
         ) as MetricCustomIndicator['params']['total'];
-        const isEquationValid = !getFieldState('indicator.params.total.equation').invalid;
+        const isEquationValid = !isInvalid('indicator.params.total.equation');
         const areMetricsValid =
           isObject(data) &&
           (data.metrics ?? []).every((metric) => {
@@ -78,7 +76,7 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
             'indicator.params.filter',
             'indicator.params.timestampField',
           ] as const
-        ).every((field) => !getFieldState(field).invalid) &&
+        ).every((field) => !isInvalid(field)) &&
         (['indicator.params.index', 'indicator.params.timestampField'] as const).every(
           (field) => !!getValues(field)
         ) &&
@@ -90,7 +88,7 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
         const data = getValues(
           'indicator.params.metric'
         ) as TimesliceMetricIndicator['params']['metric'];
-        const isEquationValid = !getFieldState('indicator.params.metric.equation').invalid;
+        const isEquationValid = !isInvalid('indicator.params.metric.equation');
         const areMetricsValid =
           isObject(data) &&
           (data.metrics ?? []).every((metric) => {
@@ -112,7 +110,7 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
             'indicator.params.filter',
             'indicator.params.timestampField',
           ] as const
-        ).every((field) => !getFieldState(field).invalid) &&
+        ).every((field) => !isInvalid(field)) &&
         (['indicator.params.index', 'indicator.params.timestampField'] as const).every(
           (field) => !!getValues(field)
         ) &&
@@ -146,7 +144,7 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
             'indicator.params.good.filter',
             'indicator.params.total.filter',
           ] as const
-        ).every((field) => !getFieldState(field).invalid) &&
+        ).every((field) => !isInvalid(field)) &&
         (
           [
             'indicator.params.good.aggregation',
@@ -169,7 +167,7 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
             'indicator.params.total',
             'indicator.params.timestampField',
           ] as const
-        ).every((field) => !getFieldState(field).invalid) &&
+        ).every((field) => !isInvalid(field)) &&
         (
           [
             'indicator.params.good',
@@ -188,8 +186,8 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
             'indicator.params.transactionName',
             'indicator.params.threshold',
           ] as const
-        ).every((field) => !getFieldState(field, formState).invalid && getValues(field) !== '') &&
-        !getFieldState('indicator.params.index', formState).invalid;
+        ).every((field) => !isInvalid(field) && getValues(field) !== '') &&
+        !isInvalid('indicator.params.index');
       break;
     case 'sli.apm.transactionErrorRate':
       isIndicatorSectionValid =
@@ -200,19 +198,17 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
             'indicator.params.transactionType',
             'indicator.params.transactionName',
           ] as const
-        ).every((field) => !getFieldState(field, formState).invalid && getValues(field) !== '') &&
-        (['indicator.params.index'] as const).every(
-          (field) => !getFieldState(field, formState).invalid
-        );
+        ).every((field) => !isInvalid(field) && getValues(field) !== '') &&
+        (['indicator.params.index'] as const).every((field) => !isInvalid(field));
       break;
     case 'sli.synthetics.availability':
       isIndicatorSectionValid =
         (['indicator.params.monitorIds'] as const).every(
-          (field) => !getFieldState(field, formState).invalid && getValues(field)?.length
+          (field) => !isInvalid(field) && getValues(field)?.length
         ) &&
         (
           ['indicator.params.index', 'indicator.params.tags', 'indicator.params.projects'] as const
-        ).every((field) => !getFieldState(field, formState).invalid);
+        ).every((field) => !isInvalid(field));
       break;
     default:
       isIndicatorSectionValid = false;
@@ -229,12 +225,10 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
       'settings.syncDelay',
       'settings.frequency',
     ] as const
-  ).every((field) => !getFieldState(field).invalid);
+  ).every((field) => !isInvalid(field));
 
   const isDescriptionSectionValid =
-    !getFieldState('name').invalid &&
-    getValues('name') !== '' &&
-    !getFieldState('description').invalid;
+    !isInvalid('name') && getValues('name') !== '' && !isInvalid('description');
 
   return {
     isIndicatorSectionValid,

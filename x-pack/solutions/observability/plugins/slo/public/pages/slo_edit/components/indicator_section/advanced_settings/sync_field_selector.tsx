@@ -9,7 +9,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
 import { createOptionsFromFields } from '../../../helpers/create_options';
 import type { CreateSLOForm } from '../../../types';
@@ -20,8 +20,11 @@ const placeholder = i18n.translate('xpack.slo.sloEdit.settings.syncField.placeho
 });
 
 export function SyncFieldSelector() {
-  const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
-  const [index, dataViewId] = watch(['indicator.params.index', 'indicator.params.dataViewId']);
+  const { control, getFieldState } = useFormContext<CreateSLOForm>();
+  const [index, dataViewId] = useWatch({
+    control,
+    name: ['indicator.params.index', 'indicator.params.dataViewId'],
+  });
   const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
     indexPatternString: index,
     dataViewId,

@@ -9,7 +9,7 @@ import { EuiComboBox, EuiFieldNumber, EuiFlexItem, EuiFormRow, EuiIconTip } from
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { AGGREGATION_OPTIONS, aggValueToLabel } from '../../../helpers/aggregation_options';
 import type { Option } from '../../../helpers/create_options';
 import { createOptionsFromFields } from '../../../helpers/create_options';
@@ -49,9 +49,12 @@ export function MetricInput({
   isLoadingIndex,
   indexFields,
 }: MetricInputProps) {
-  const { control, watch } = useFormContext<CreateSLOForm>();
-  const metric = watch(`indicator.params.metric.metrics.${index}`);
-  const metricAggregation = watch(`indicator.params.metric.metrics.${index}.aggregation`);
+  const { control } = useFormContext<CreateSLOForm>();
+  const metric = useWatch({ control, name: `indicator.params.metric.metrics.${index}` });
+  const metricAggregation = useWatch({
+    control,
+    name: `indicator.params.metric.metrics.${index}.aggregation`,
+  });
 
   const [metricFields, setMetricFields] = useState(
     indexFields.filter((field) => NUMERIC_FIELD_TYPES.includes(field.type))
