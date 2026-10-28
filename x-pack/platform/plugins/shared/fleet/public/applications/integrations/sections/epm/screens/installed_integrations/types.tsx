@@ -6,6 +6,7 @@
  */
 
 import type { PackageListItem } from '../../../../../../../common';
+import type { UsePackageIconType } from '../../../../../../hooks';
 
 export type InstalledPackagesUIInstallationStatus =
   | 'not_installed'
@@ -33,7 +34,10 @@ export interface InstalledIntegrationsFilter {
 }
 
 /** What a bottom panel needs to show its package in the title. */
-export type PanelPackage = Pick<
-  InstalledPackageUIPackageListItem,
-  'name' | 'title' | 'version' | 'icons'
->;
+export interface PanelPackage {
+  name: string;
+  title: string;
+  version: string;
+  /** Any icon shape `TableIcon` takes, so the package info of a package not on the page fits too. */
+  icons?: UsePackageIconType['icons'];
+}
