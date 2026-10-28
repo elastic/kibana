@@ -189,7 +189,10 @@ export class SavedMap {
       );
     }
 
-    const layerList: LayerDescriptor[] = (this._attributes?.layers as LayerDescriptor[]) ?? [];
+    // Copy, since attributes may be the embeddable's serialized state, which must not be mutated
+    const layerList: LayerDescriptor[] = [
+      ...((this._attributes?.layers as LayerDescriptor[] | undefined) ?? []),
+    ];
     if (layerList.length === 0) {
       const basemapLayerDescriptor = createBasemapLayerDescriptor();
       if (basemapLayerDescriptor) {
