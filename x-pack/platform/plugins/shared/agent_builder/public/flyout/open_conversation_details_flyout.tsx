@@ -15,10 +15,7 @@ import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-brow
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { ConversationDetailsFlyoutSnapshot, FLYOUT_TITLE } from './conversation_details_flyout';
-import {
-  CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
-  getConversationDetailsFlyoutWidthProps,
-} from './conversation_details_flyout_width';
+import { getConversationDetailsFlyoutWidthProps } from './conversation_details_flyout_width';
 import { flyoutMenuRowStyles } from './flyout_menu_row_styles';
 
 const notFoundMessage = (conversationId: string) =>
@@ -70,8 +67,6 @@ export const openConversationDetailsFlyout = async ({
       historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
       title: FLYOUT_TITLE,
       ...getConversationDetailsFlyoutWidthProps(),
-      // Lets the flyout menu's reset action return to the default, not to the remembered width.
-      defaultSize: CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
       flyoutMenuDisplayMode: 'always',
       flyoutMenuProps: { trailingActions },
       type: 'push',

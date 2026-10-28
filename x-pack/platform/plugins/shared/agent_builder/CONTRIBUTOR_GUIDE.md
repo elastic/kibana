@@ -1189,8 +1189,7 @@ width in every consuming app:
 
 - Default width 480px, minimum 400px, maximum 640px.
 - When the user drags the flyout, that width is remembered (in `localStorage`) and used on the
-  next open, wherever the flyout is opened from. The flyout menu's reset action returns it to the
-  default.
+  next open, wherever the flyout is opened from.
 
 The width is not configurable per template or per caller: all surfaces share one setting.
 

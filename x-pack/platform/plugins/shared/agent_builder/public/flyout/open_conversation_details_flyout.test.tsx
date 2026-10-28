@@ -95,7 +95,6 @@ describe('openConversationDetailsFlyout', () => {
     expect(options).toEqual(
       expect.objectContaining({
         size: CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
-        defaultSize: CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
         minWidth: CONVERSATION_DETAILS_FLYOUT_MIN_WIDTH,
         maxWidth: CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH,
         resizable: true,
@@ -114,8 +113,6 @@ describe('openConversationDetailsFlyout', () => {
 
     const [, [, options]] = core.overlays.openSystemFlyout.mock.calls;
     expect(options?.size).toBe(620);
-    // A reset still returns to the default, not to the remembered width.
-    expect(options?.defaultSize).toBe(CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH);
   });
 
   it('clamps a remembered width to the allowed range', async () => {
