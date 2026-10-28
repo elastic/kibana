@@ -14,9 +14,9 @@ test.describe(
   'Subscription status badge on a self-managed trial',
   { tag: ['@local-stateful-classic'] },
   () => {
-    test.beforeEach(async ({ browserAuth, page }) => {
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
-      await page.gotoApp('home');
+      await pageObjects.home.goto();
     });
 
     test('shows the days left and links to the feature comparison', async ({ page }) => {
