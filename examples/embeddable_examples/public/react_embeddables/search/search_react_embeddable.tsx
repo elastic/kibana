@@ -13,6 +13,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
+  areComparatorsEqual,
   fetch$,
   initializeTimeRangeManager,
   timeRangeComparators,
@@ -28,6 +29,9 @@ import type { SearchApi, Services, SearchSerializedState } from './types';
 export const getSearchEmbeddableFactory = (services: Services) => {
   const factory: EmbeddablePublicDefinition<SearchSerializedState, SearchApi> = {
     type: SEARCH_EMBEDDABLE_TYPE,
+    // Must use the same comparators as 'getComparators' below, for panels that are not built yet.
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(timeRangeComparators, baseline, current),
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const timeRangeManager = initializeTimeRangeManager(initialState);
       const defaultDataView = await services.dataViews.getDefaultDataView();

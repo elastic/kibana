@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import type { StateComparators, PresentationContainer } from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
+  areComparatorsEqual,
   initializeTitleManager,
   useBatchedPublishingSubjects,
   initializeStateManager,
@@ -40,9 +41,17 @@ const bookStateComparators: StateComparators<BookState> = {
   numberOfPages: 'referenceEquality',
 };
 
+const bookEmbeddableComparators: StateComparators<BookEmbeddableState> = {
+  ...titleComparators,
+  ...bookStateComparators,
+  savedObjectId: 'skip', // saved book id will not change over the lifetime of the embeddable.
+};
+
 export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
   const savedBookEmbeddableFactory: EmbeddablePublicDefinition<BookEmbeddableState, BookApi> = {
     type: BOOK_EMBEDDABLE_TYPE,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(bookEmbeddableComparators, baseline, current),
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const titleManager = initializeTitleManager(initialState);
       const savedObjectId = (initialState as BookByReferenceState).savedObjectId;
@@ -63,13 +72,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
         parentApi,
         serializeState: () => serializeBook(savedObjectId),
         anyStateChange$: merge(titleManager.anyStateChange$, bookStateManager.anyStateChange$),
-        getComparators: () => {
-          return {
-            ...titleComparators,
-            ...bookStateComparators,
-            savedObjectId: 'skip', // saved book id will not change over the lifetime of the embeddable.
-          };
-        },
+        getComparators: () => bookEmbeddableComparators,
         applySerializedState: async (nextState) => {
           titleManager.reinitializeState(nextState);
           if (!savedObjectId) bookStateManager.reinitializeState(nextState as BookState);

@@ -26,6 +26,7 @@ export const factory: EmbeddablePublicDefinition<{}, Api> = {
   getPlacementHints: () => {
     return { width: 48, height: 12 };
   },
+  compareSerializedState: () => true,
   buildEmbeddable: async ({ finalizeApi, parentApi }) => {
     const api = finalizeApi({
       anyStateChange$: of(),
