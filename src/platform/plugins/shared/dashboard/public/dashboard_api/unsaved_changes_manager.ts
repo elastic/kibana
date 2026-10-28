@@ -91,6 +91,8 @@ export function initializeUnsavedChangesManager({
     anyStateChange$,
     // re-compare once a panel loads, so it is compared with its own comparators
     layoutManager.api.children$,
+    // re-compare once a panel type's comparer loads, for panels that have not loaded
+    layoutManager.internalApi.panelTypeComparers$,
     lastSavedState$
   ).pipe(
     debounceTime(DEBOUNCE_TIME),
@@ -98,7 +100,8 @@ export function initializeUnsavedChangesManager({
       diffDashboardStates(
         lastSavedState$.value,
         getCurrentState(),
-        layoutManager.api.children$.getValue()
+        layoutManager.api.children$.getValue(),
+        layoutManager.internalApi.panelTypeComparers$.getValue()
       )
     )
   );

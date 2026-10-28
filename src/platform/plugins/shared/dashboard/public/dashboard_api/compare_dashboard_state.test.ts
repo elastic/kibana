@@ -209,6 +209,32 @@ describe('diffDashboardStates', () => {
       ).toEqual({ panels: current.panels });
     });
 
+    it('compares a panel that has not loaded with its type comparer', () => {
+      const baseline = state({ panels: [lensPanel({ id: 'panel-1' })] });
+      const current = state({
+        panels: [lensPanel({ id: 'panel-1', config: { title: 'Count', description: '' } })],
+      });
+
+      expect(diffDashboardStates(baseline, current, {}, { lens: () => true })).toEqual({});
+      expect(diffDashboardStates(baseline, current, {}, { visualization: () => true })).toEqual({
+        panels: current.panels,
+      });
+    });
+
+    it('prefers a loaded panel comparator over its type comparer', () => {
+      const baseline = state({ panels: [lensPanel({ id: 'panel-1' })] });
+      const current = state({ panels: [lensPanel({ id: 'panel-1', config: { title: 'Sum' } })] });
+
+      expect(
+        diffDashboardStates(
+          baseline,
+          current,
+          { 'panel-1': { type: 'lens', compareSerializedState: () => false } },
+          { lens: () => true }
+        )
+      ).toEqual({ panels: current.panels });
+    });
+
     describe('compare cache', () => {
       const panelsState = (config: object) =>
         state({ panels: [lensPanel({ id: 'panel-1', config })] });

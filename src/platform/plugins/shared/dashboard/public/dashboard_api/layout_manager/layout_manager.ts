@@ -65,6 +65,7 @@ import {
 import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
+import type { PanelTypeComparers } from '../compare_dashboard_state';
 import { areLayoutsEqual } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
@@ -119,6 +120,27 @@ export function initializeLayoutManager(
       gridLayout$.next(transformDashboardLayoutToGridLayout(layout, panelResizeSettings));
     }
   );
+
+  /** Each panel type's comparer, so panels that have not loaded are compared like loaded ones */
+  const panelTypeComparers$ = new BehaviorSubject<PanelTypeComparers>({});
+  const requestedPanelTypes = new Set<string>();
+  const loadPanelTypeComparer = async (type: string) => {
+    try {
+      const definition = await embeddableService.getEmbeddableDefinition(type);
+      const compareSerializedState = definition?.compareSerializedState;
+      if (!compareSerializedState) return;
+      panelTypeComparers$.next({ ...panelTypeComparers$.value, [type]: compareSerializedState });
+    } catch {
+      // an unknown panel type renders an error panel and is compared with deep equality
+    }
+  };
+  const panelTypeComparersSubscription = layout$.subscribe(({ panels, pinnedPanels }) => {
+    [...Object.values(panels), ...Object.values(pinnedPanels)].forEach(({ type }) => {
+      if (requestedPanelTypes.has(type)) return;
+      requestedPanelTypes.add(type);
+      loadPanelTypeComparer(type);
+    });
+  });
 
   const latestChildrenState$ = childrenLatestState$(children$);
   const stateChangedSubscription = latestChildrenState$.subscribe((childrenState) => {
@@ -527,6 +549,7 @@ export function initializeLayoutManager(
         map(() => undefined)
       ),
       childrenStateLoading$,
+      panelTypeComparers$,
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       setLastSavedState: (lastSavedState: DashboardState) => {
@@ -662,6 +685,7 @@ export function initializeLayoutManager(
       stateChangedSubscription.unsubscribe();
       gridLayoutSubscription.unsubscribe();
       removeOrphanedChildrenSubscription.unsubscribe();
+      panelTypeComparersSubscription.unsubscribe();
     },
   };
 }

@@ -38,21 +38,28 @@ const getBaselineLayout = (baseline: DashboardState) => {
   return baselineLayout;
 };
 
+/**
+ * Compares two serialized panel states of one panel type without loading the panel, keyed by type.
+ * Returns `true` when they are equal.
+ */
+export interface PanelTypeComparers {
+  [panelType: string]: (baseline: object | undefined, current: object | undefined) => boolean;
+}
+
 // Panel configs keep their identity until the panel changes, so a compare result is reused while
-// the child, the baseline config and the current config are the same objects.
-const NO_CHILD = {};
+// the comparer, the baseline config and the current config are the same objects.
+const DEEP_EQUAL = {};
 const panelCompareCache = new WeakMap<object, WeakMap<object, WeakMap<object, boolean>>>();
 
 const getCachedPanelChange = (
-  child: object | undefined,
+  comparerKey: object,
   baselineConfig: object | undefined,
   currentConfig: object | undefined,
   compare: () => boolean
 ) => {
   if (!baselineConfig || !currentConfig || shouldLogStateDiff()) return compare();
-  const childKey = child ?? NO_CHILD;
-  const byBaseline = panelCompareCache.get(childKey) ?? new WeakMap();
-  panelCompareCache.set(childKey, byBaseline);
+  const byBaseline = panelCompareCache.get(comparerKey) ?? new WeakMap();
+  panelCompareCache.set(comparerKey, byBaseline);
   const byCurrent = byBaseline.get(baselineConfig) ?? new WeakMap();
   byBaseline.set(baselineConfig, byCurrent);
   const cached = byCurrent.get(currentConfig);
@@ -86,7 +93,8 @@ const freezeInDevMode = (value: unknown) => {
 const diffLayout = (
   baseline: DashboardState,
   current: DashboardState,
-  children?: { [id: string]: unknown }
+  children?: { [id: string]: unknown },
+  panelTypeComparers?: PanelTypeComparers
 ): Partial<Pick<DashboardState, 'panels' | 'pinned_panels'>> => {
   [baseline.panels, baseline.pinned_panels, current.panels, current.pinned_panels].forEach(
     freezeInDevMode
@@ -106,19 +114,29 @@ const diffLayout = (
     // live panel comparators skip ref_id since it is fixed for a loaded panel
     if (getRefId(baselinePanel) !== getRefId(currentPanel)) return true;
     const child = children?.[panelId];
-    const compare = () =>
-      apiComparesSerializedState(child) && apiHasType(child) && child.type === currentType
-        ? !child.compareSerializedState(
+    if (apiComparesSerializedState(child) && apiHasType(child) && child.type === currentType) {
+      return getCachedPanelChange(
+        child,
+        baselinePanel,
+        currentConfigs[panelId],
+        () =>
+          !child.compareSerializedState(
             baselinePanel,
             currentPanel,
             (key) => `panel: ${panelId}, key: ${key}`
           )
-        : !deepEqual(baselinePanel, currentPanel);
+      );
+    }
+    // a panel that has not loaded is compared with its type's comparer, when the type has one
+    const typeComparer = currentType ? panelTypeComparers?.[currentType] : undefined;
     return getCachedPanelChange(
-      typeof child === 'object' && child !== null ? child : undefined,
+      typeComparer ?? DEEP_EQUAL,
       baselinePanel,
       currentConfigs[panelId],
-      compare
+      () =>
+        typeComparer
+          ? !typeComparer(baselinePanel, currentPanel)
+          : !deepEqual(baselinePanel, currentPanel)
     );
   };
 
@@ -143,12 +161,14 @@ const diffLayout = (
 
 /**
  * The changes from `baseline` to `current`, in the same shape the unsaved-changes manager
- * produces. Pass the open dashboard's children so each panel uses its own comparators.
+ * produces. Pass the open dashboard's children so each panel uses its own comparators, and the
+ * panel type comparers for panels that have not loaded.
  */
 export const diffDashboardStates = (
   baseline: DashboardState,
   current: DashboardState,
-  children?: { [id: string]: unknown }
+  children?: { [id: string]: unknown },
+  panelTypeComparers?: PanelTypeComparers
 ): Partial<DashboardState> & ReturnType<typeof diffDashboardSettings> => {
   // The current state only has time_range / project_routing while its restore flag is on, the
   // flag unsaved changes reads. Flag changes themselves are reported by the settings diff.
@@ -157,6 +177,6 @@ export const diffDashboardStates = (
     ...diffUnifiedSearchState(baseline, current, Boolean(current.time_range)),
     ...diffApproximationState(baseline, current),
     ...diffProjectRoutingState(baseline, current, Boolean(current.project_routing)),
-    ...diffLayout(baseline, current, children),
+    ...diffLayout(baseline, current, children, panelTypeComparers),
   };
 };

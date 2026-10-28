@@ -309,7 +309,12 @@ export function getDashboardApi({
       attributes: getState(),
     }),
     diffStates: (baseline: DashboardState, current: DashboardState) =>
-      diffDashboardStates(baseline, current, layoutManager.api.children$.getValue()),
+      diffDashboardStates(
+        baseline,
+        current,
+        layoutManager.api.children$.getValue(),
+        layoutManager.internalApi.panelTypeComparers$.getValue()
+      ),
     setState,
     runInteractiveSave: (redirectTo?: DashboardRedirect) => {
       trackOverlayApi.clearOverlays();
