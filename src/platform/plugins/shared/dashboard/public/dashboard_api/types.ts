@@ -30,7 +30,7 @@ import type {
   HasUniqueId,
   PresentationContainer,
   PublishesDataLoading,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishesDescription,
   PublishesEditablePauseFetch,
   PublishesHideBorder,
@@ -179,7 +179,7 @@ export type DashboardApi = CanExpandPanels &
   HasUniqueId &
   PresentationContainer &
   PublishesDataLoading &
-  PublishesDataViews &
+  PublishesDataSources &
   PublishesDescription &
   PublishesHideBorder &
   Pick<PublishesTitle, 'title$' | 'hideTitle$'> &
@@ -230,7 +230,7 @@ export type DashboardApi = CanExpandPanels &
     isManaged: boolean;
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
     runInteractiveSave: (redirectTo?: DashboardRedirect) => Promise<{ id: string } | undefined>;
-    runQuickSave: () => Promise<void>;
+    runQuickSave: (options?: { restored?: boolean }) => Promise<void>;
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;
     scrollToTop: () => void;
@@ -246,7 +246,7 @@ export type DashboardApi = CanExpandPanels &
     setSettings: (settings: Partial<DashboardSettings>) => void;
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
-    setState: (state: DashboardState, options?: DashboardSetStateOptions) => void;
+    setState: (state: DashboardState, options?: DashboardSetStateOptions) => Promise<void>;
 
     publishedChildFilters$: PublishingSubject<Filter[] | undefined>;
     unpublishedChildFilters$: PublishingSubject<Filter[] | undefined>;
@@ -291,5 +291,6 @@ export type DashboardInternalApi = ReturnType<
 
 export interface DashboardUser {
   uid: string;
+  name?: string;
   hasGlobalAccessControlPrivilege: boolean;
 }
