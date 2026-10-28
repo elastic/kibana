@@ -546,10 +546,27 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     requestImmediateClaim: boolean;
   }): Promise<ExecuteAgentResult> {
     const task = this.buildRunAgentTask(executionId);
-    await this.deps.taskManager.schedule(task, {
-      request,
-      cloneApiKey: true,
-    });
+
+    try {
+      await this.deps.taskManager.schedule(task, {
+        request,
+        cloneApiKey: true,
+      });
+    } catch (err) {
+      // No task will ever run this execution: a keyed redelivery, which only follows it, then sees
+      // it failed instead of waiting on it.
+      try {
+        await this.createExecutionClient().updateStatus(executionId, ExecutionStatus.failed, {
+          error: serializeExecutionError(err),
+        });
+      } catch (statusErr) {
+        this.logger.error(
+          `Failed to record status for execution ${executionId} after it failed to schedule: ${statusErr.message}`
+        );
+      }
+
+      throw err;
+    }
 
     this.logger.debug(`Scheduled remote agent execution ${executionId} for agent ${agentId}`);
 

@@ -1997,6 +1997,71 @@ describe('AgentExecutionService', () => {
       expect(conversationClient.update).not.toHaveBeenCalled();
     });
 
+    it('marks the execution failed when scheduling fails', async () => {
+      mockTaskManagerSchedule.mockRejectedValueOnce(new Error('task manager unavailable'));
+
+      await converse().catch(() => undefined);
+
+      const [{ executionId }] = mockExecutionClient.create.mock.calls[0];
+      expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
+        executionId,
+        ExecutionStatus.failed,
+        { error: expect.objectContaining({ message: 'task manager unavailable' }) }
+      );
+    });
+
+    it('rethrows the scheduling error when recording the failed status fails', async () => {
+      const scheduleError = new Error('task manager unavailable');
+      mockTaskManagerSchedule.mockRejectedValueOnce(scheduleError);
+      mockExecutionClient.updateStatus.mockRejectedValueOnce(new Error('ES unavailable'));
+
+      const error = await converse().catch((thrown) => thrown);
+
+      expect(error).toBe(scheduleError);
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('after it failed to schedule: ES unavailable')
+      );
+    });
+
+    it('a keyed redelivery after a scheduling failure follows the failed execution without scheduling', async () => {
+      const keyed = () =>
+        service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          useTaskManager: true,
+          executionId: 'exec-1',
+          metadata: { execution_idempotency_key: 'Ev123' },
+          params: {
+            agentId: 'agent-1',
+            conversationId: 'conversation-1',
+            nextInput: { message: 'Hello' },
+          },
+        });
+
+      mockTaskManagerSchedule.mockRejectedValueOnce(new Error('task manager unavailable'));
+
+      await expect(keyed()).rejects.toThrow('task manager unavailable');
+
+      expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
+        'exec-1',
+        ExecutionStatus.failed,
+        expect.anything()
+      );
+
+      mockExecutionClient.create.mockRejectedValueOnce(conflictError());
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.failed,
+        eventCount: 0,
+        conversationId: 'conversation-1',
+      });
+
+      const result = await keyed();
+
+      expect(result.executionId).toBe('exec-1');
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+      expect(mockTaskManagerSchedule).toHaveBeenCalledTimes(1);
+    });
+
     it('a keyed redelivery runs normally once the holder is free', async () => {
       const keyed = () =>
         service.executeAgent({
