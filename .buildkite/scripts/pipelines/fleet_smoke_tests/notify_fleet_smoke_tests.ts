@@ -19,15 +19,19 @@ import { fileURLToPath } from 'url';
 
 import { BuildkiteClient, type Build } from '#pipeline-utils';
 
+import {
+  filterFinishedMainBuilds,
+  findConsecutiveScheduledFailures,
+  findQualityGateFailures,
+  type CheckWindow,
+} from './build_checks.ts';
+
 const SMOKE_TESTS_PIPELINE_SLUG = 'fleet-smoke-tests';
 const BUILD_SEARCH_WINDOW_DAYS = 7;
 const DEFAULT_CONSECUTIVE_FAILURES_THRESHOLD = 3;
 const DRY_RUN = !!process.env.DRY_RUN?.match(/(1|true)/i);
-
-const SCHEDULED_BUILDS_MESSAGE_PREFIX = 'Scheduled QA Smoke Tests';
-const QUALITY_GATE_BUILDS_MESSAGE_SUFFIX = '(triggered by pipeline.tests-qa.yaml)';
-// Slightly longer than the hourly schedule of the notify pipeline, so each failed build alerts once.
-const QUALITY_GATE_FAILURE_LOOKBACK_MS = 65 * 60 * 1000;
+// Used when the previous check of this pipeline can't be found (first run, local run)
+const DEFAULT_CHECK_WINDOW_MS = 60 * 60 * 1000;
 
 function getThreshold(): number {
   const raw = process.env.CONSECUTIVE_FAILURES_THRESHOLD;
@@ -89,83 +93,75 @@ function sendSlackNotification(message: string): void {
   execSync(`buildkite-agent pipeline upload "${notifyFile}"`, { stdio: 'inherit' });
 }
 
+// The window runs from the creation of the previous build of this pipeline to the creation of the
+// current one, so consecutive checks tile without gaps or overlaps and a failed build alerts once.
+async function getCheckWindow(buildkite: BuildkiteClient): Promise<CheckWindow> {
+  const currentSlug = process.env.BUILDKITE_PIPELINE_SLUG;
+  const currentNumber = Number(process.env.BUILDKITE_BUILD_NUMBER);
+
+  if (!process.env.BUILDKITE || !currentSlug || !Number.isFinite(currentNumber)) {
+    const end = new Date();
+    return { start: new Date(end.getTime() - DEFAULT_CHECK_WINDOW_MS), end };
+  }
+
+  const end = new Date((await buildkite.getCurrentBuild()).created_at);
+  const since = new Date(end.getTime() - BUILD_SEARCH_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+  const notifyBuilds = await buildkite.getBuildsAfterDate(currentSlug, since.toISOString(), 50);
+  const previousBuild = notifyBuilds.find((build) => build.number < currentNumber);
+
+  return {
+    start: previousBuild
+      ? new Date(previousBuild.created_at)
+      : new Date(end.getTime() - DEFAULT_CHECK_WINDOW_MS),
+    end,
+  };
+}
+
+function alert(lines: string[]): void {
+  const message = [
+    ...lines,
+    `<https://buildkite.com/elastic/${SMOKE_TESTS_PIPELINE_SLUG}|View pipeline>`,
+  ].join('\n');
+
+  console.log(`Sending alert:\n${message}`);
+  sendSlackNotification(message);
+}
+
+const formatBuildLinks = (builds: Build[]) =>
+  builds.map((b) => `<${b.web_url}|#${b.number}>`).join(', ');
+
 async function main() {
   const buildkite = new BuildkiteClient();
   const threshold = getThreshold();
 
   const since = new Date(Date.now() - BUILD_SEARCH_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString();
-  const builds = await buildkite.getBuildsAfterDate(SMOKE_TESTS_PIPELINE_SLUG, since, 50);
-
-  const finishedMainBuilds = builds.filter(
-    (build) => ['passed', 'failed'].includes(build.state) && build.branch === 'main'
+  const builds = filterFinishedMainBuilds(
+    await buildkite.getBuildsAfterDate(SMOKE_TESTS_PIPELINE_SLUG, since, 50)
   );
+  console.log(`${builds.length} finished build(s) found on main`);
 
-  checkQualityGateFailures(finishedMainBuilds);
-  checkConsecutiveFailures(finishedMainBuilds, threshold);
-}
+  const window = await getCheckWindow(buildkite);
+  console.log(`Check window: ${window.start.toISOString()} - ${window.end.toISOString()}`);
 
-function checkQualityGateFailures(builds: Build[]): void {
-  const cutoff = Date.now() - QUALITY_GATE_FAILURE_LOOKBACK_MS;
-  const recentlyFailed = builds.filter(
-    (build) =>
-      build.state === 'failed' &&
-      build.message?.includes(QUALITY_GATE_BUILDS_MESSAGE_SUFFIX) &&
-      new Date(build.finished_at).getTime() >= cutoff
-  );
-
-  if (recentlyFailed.length === 0) {
-    console.log('No recently failed quality gate build(s)');
-    return;
+  const gateFailures = findQualityGateFailures(builds, window);
+  if (gateFailures.length > 0) {
+    alert([
+      `:alert: *fleet-smoke-tests* failed in the Kibana serverless QA quality gate (soft fail, review before promotion).`,
+      `Failed builds: ${formatBuildLinks(gateFailures)}`,
+    ]);
+  } else {
+    console.log('No quality gate failures in the check window');
   }
 
-  const buildLinks = recentlyFailed.map((b) => `<${b.web_url}|#${b.number}>`).join(', ');
-
-  const message = [
-    `:alert: *fleet-smoke-tests* failed in the Kibana serverless QA quality gate (soft fail, review before promotion).`,
-    `Failed builds: ${buildLinks}`,
-    `<https://buildkite.com/elastic/${SMOKE_TESTS_PIPELINE_SLUG}|View pipeline>`,
-  ].join('\n');
-
-  console.log(`Sending alert:\n${message}`);
-  sendSlackNotification(message);
-}
-
-function checkConsecutiveFailures(builds: Build[], threshold: number): void {
-  const relevantBuilds = builds.filter((build) =>
-    build.message?.includes(SCHEDULED_BUILDS_MESSAGE_PREFIX)
-  );
-
-  console.log(`${relevantBuilds.length} finished scheduled build(s) found on main`);
-
-  if (relevantBuilds.length === 0) {
-    return;
-  }
-
-  const recentBuilds = relevantBuilds.slice(0, threshold);
-  const allFailed =
-    recentBuilds.length === threshold && recentBuilds.every((b) => b.state === 'failed');
-
-  console.log(
-    `Last ${recentBuilds.length} build(s): ${recentBuilds
-      .map((b) => `#${b.number} (${b.state})`)
-      .join(', ')}`
-  );
-
-  if (!allFailed) {
+  const consecutiveFailures = findConsecutiveScheduledFailures(builds, threshold);
+  if (consecutiveFailures.length > 0) {
+    alert([
+      `:alert: *fleet-smoke-tests* has failed ${threshold} times in a row.`,
+      `Failed builds: ${formatBuildLinks(consecutiveFailures)}`,
+    ]);
+  } else {
     console.log(`No alert needed (not ${threshold} consecutive failures)`);
-    return;
   }
-
-  const buildLinks = recentBuilds.map((b) => `<${b.web_url}|#${b.number}>`).join(', ');
-
-  const message = [
-    `:alert: *fleet-smoke-tests* has failed ${threshold} times in a row.`,
-    `Failed builds: ${buildLinks}`,
-    `<https://buildkite.com/elastic/${SMOKE_TESTS_PIPELINE_SLUG}|View pipeline>`,
-  ].join('\n');
-
-  console.log(`Sending alert:\n${message}`);
-  sendSlackNotification(message);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
