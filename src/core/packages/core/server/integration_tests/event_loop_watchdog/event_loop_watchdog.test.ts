@@ -73,7 +73,8 @@ const runHarness = (scenario: string, timeoutMs = 90_000): Promise<HarnessResult
       child.kill('SIGKILL');
       reject(error);
     });
-    child.on('exit', (exitCode) => {
+    // `close`, not `exit`: `exit` can fire before stdout, stderr and fd 3 are drained.
+    child.on('close', (exitCode) => {
       clearTimeout(timer);
       const workerLogLines: HarnessResult['workerLogLines'] = [];
       const unparsedLogLines: string[] = [];
