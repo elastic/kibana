@@ -397,7 +397,7 @@ const CloudOnboardingDeploymentListItemSchema = CloudOnboardingDeploymentItemSch
   ),
   agentCount: schema.number({
     min: 0,
-    meta: { description: 'Agents enrolled in the deployment agent policies.' },
+    meta: { description: 'Number of agents enrolled in the deployment agent policies. Only agent policies in the current space are counted.' },
   }),
 });
 
