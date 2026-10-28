@@ -89,12 +89,15 @@ dependsOn:
   - '@kbn/agent-builder-sml-plugin'
   - '@kbn/server-http-tools'
   - '@kbn/task-manager-plugin'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/data-plugin'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*

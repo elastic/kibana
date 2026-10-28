@@ -12,7 +12,6 @@ import { telemetryTargetNameSchema } from '../common/telemetry_targets';
 export interface TelemetryTarget {
   connectorId?: string;
   readableIndices?: string;
-  allowSecretFallback?: boolean;
 }
 
 export const resolveTelemetryTarget = (

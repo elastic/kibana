@@ -15,6 +15,7 @@ import { EuiButton, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 import type { Location } from 'history';
 
 import type { Pipeline } from '../../../../common/types';
+import { APP_CAPABILITIES, PLUGIN_ID } from '../../../../common/constants';
 import { useKibana, SectionLoading } from '../../../shared_imports';
 import { UIM_PIPELINES_LIST_LOAD } from '../../constants';
 import {
@@ -25,8 +26,6 @@ import {
   getManageProcessorsPath,
 } from '../../services/navigation';
 import { ingestPipelinesListTitle } from '../../components';
-import { useCheckManageProcessorsPrivileges } from '../manage_processors';
-
 import { EmptyList } from './empty_list';
 import { PipelineTable } from './table';
 import { PipelineDeleteModal } from './delete_modal';
@@ -82,7 +81,8 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
 
   const { data, isLoading, error, resendRequest } = services.api.useLoadPipelines();
 
-  const hasManageProcessorsPrivileges = useCheckManageProcessorsPrivileges();
+  const hasManageProcessorsPrivileges =
+    services.application.capabilities[PLUGIN_ID]?.[APP_CAPABILITIES.manageProcessors] === true;
   // Track component loaded
   useEffect(() => {
     services.metric.trackUiMetric(UIM_PIPELINES_LIST_LOAD);

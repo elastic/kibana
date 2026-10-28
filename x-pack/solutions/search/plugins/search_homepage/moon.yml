@@ -61,6 +61,7 @@ tags:
   - group-search
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - __mocks__/**/*

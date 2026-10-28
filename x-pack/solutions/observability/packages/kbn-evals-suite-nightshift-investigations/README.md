@@ -335,9 +335,8 @@ all configured telemetry connectors; the sandbox workspace manager reads the con
 and narrows the per-call connector list before writing manifests, resolving credentials, or loading
 the output redactor. Only the selected connector's authorized hint reaches `/workspace/elastic.md`.
 Decision-tree reinforcement uses the same conversation target. Unknown targets fail before execution.
-Custom sandbox agents keep selection through their own connector allow-list. Legacy investigations
-retain the sandbox-secret fallback when no telemetry connector is usable; named targets and `none`
-do not fall back to a different Elasticsearch source.
+Custom sandbox agents keep selection through their own connector allow-list. Telemetry access uses
+connectors only; investigations do not fall back to a different Elasticsearch source.
 
 ### Legacy remote telemetry configuration
 

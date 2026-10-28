@@ -7,39 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FilterableSource } from '@kbn/data-source';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
-import { apiPublishesDataViews, combineCompatibleChildrenApis } from '@kbn/presentation-publishing';
+import type { PublishesDataSources, PublishingSubject } from '@kbn/presentation-publishing';
+import {
+  apiPublishesDataSources,
+  combineCompatibleChildrenApis,
+} from '@kbn/presentation-publishing';
 import { uniqBy } from 'lodash';
 import { BehaviorSubject, switchMap } from 'rxjs';
 
 export function initializeDataViewsManager(
   children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>
 ) {
-  const dataViews$ = new BehaviorSubject<DataView[] | undefined>([]);
+  const dataSources$ = new BehaviorSubject<FilterableSource[] | undefined>([]);
 
-  const dataViewsSubscription = combineCompatibleChildrenApis<PublishesDataViews, DataView[]>(
-    { children$ },
-    'dataViews$',
-    apiPublishesDataViews,
-    []
-  )
+  const dataSourcesSubscription = combineCompatibleChildrenApis<
+    PublishesDataSources,
+    FilterableSource[]
+  >({ children$ }, 'dataSources$', apiPublishesDataSources, [])
     .pipe(
-      switchMap(async (childDataViews) => {
-        return uniqBy(childDataViews, 'id');
+      switchMap(async (childDataSources) => {
+        return uniqBy(childDataSources, 'id');
       })
     )
-    .subscribe((nextDataViews) => {
-      dataViews$.next(nextDataViews);
+    .subscribe((nextDataSources) => {
+      dataSources$.next(nextDataSources);
     });
 
   return {
     api: {
-      dataViews$,
+      dataSources$,
     },
     cleanup: () => {
-      dataViewsSubscription.unsubscribe();
+      dataSourcesSubscription.unsubscribe();
     },
   };
 }

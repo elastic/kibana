@@ -15,6 +15,7 @@ export * from './const.ts';
 export * from './utils.ts';
 export { listChangedFiles } from './strategy_git.ts';
 export { getAffectedProjectsMoon } from './strategy_moon.ts';
+export { queryMoonTestSelection } from './moon_test_tasks.ts';
 
 export interface AffectedPackagesConfig {
   strategy?: 'git' | 'moon';

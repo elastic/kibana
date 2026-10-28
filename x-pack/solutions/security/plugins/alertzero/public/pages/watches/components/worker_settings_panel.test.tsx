@@ -24,6 +24,10 @@ import {
 import { WorkerSettingsPanel } from './worker_settings_panel';
 import { getBlockingWarningReasons } from './blocking_warning_reasons';
 
+jest.mock('../../../hooks/hunt/use_hunt_worker_index_coverage', () => ({
+  useHuntWorkerIndexCoverage: jest.fn(() => ({ data: undefined })),
+}));
+
 jest.mock('../../../hooks/hunt/use_hunt_threat_intel_supply', () => ({
   useHuntThreatIntelSupplyStatus: jest.fn(() => ({
     data: {
@@ -325,7 +329,7 @@ describe('WorkerSettingsPanel Hunt threat intel supply', () => {
     useHuntThreatIntelSupplyStatus: jest.Mock;
   };
 
-  const renderHuntPanel = () => {
+  const renderHuntPanel = (isExpanded = true) => {
     const core = coreMock.createStart();
     core.http.get.mockResolvedValue(undefined);
     core.application.getUrlForApp.mockReturnValue('/app/workflows');
@@ -364,7 +368,7 @@ describe('WorkerSettingsPanel Hunt threat intel supply', () => {
             <WorkerSettingsPanel
               worker={huntWorker}
               isAccordion={false}
-              isExpanded
+              isExpanded={isExpanded}
               onToggle={jest.fn()}
               enabled={false}
               settings={huntWorker.settings}
@@ -384,6 +388,57 @@ describe('WorkerSettingsPanel Hunt threat intel supply', () => {
   it('renders the threat intel supply section for Hunt', () => {
     renderHuntPanel();
     expect(screen.getByTestId('alertZeroThreatIntelSupplySection')).toBeInTheDocument();
+  });
+
+  describe('index coverage callout', () => {
+    const { useHuntWorkerIndexCoverage } = jest.requireMock(
+      '../../../hooks/hunt/use_hunt_worker_index_coverage'
+    ) as { useHuntWorkerIndexCoverage: jest.Mock };
+
+    const unreadable = {
+      data: {
+        universe: ['logs-*', 'custom-edr-*'],
+        unreadable_by_worker: ['custom-edr-*'],
+        missing_for_everyone: [],
+        source: 'role',
+        checked_at: '2026-10-28T10:00:00.000Z',
+        service_account_id: null,
+        role_name: 'alertzero_threat_hunt',
+        account_label: 'alertzero_threat_hunt',
+        is_serverless: false,
+      },
+    };
+
+    beforeEach(() => {
+      useHuntWorkerIndexCoverage.mockReset().mockReturnValue({ data: undefined });
+    });
+
+    it('renders the callout for Hunt when the worker cannot read a pattern', () => {
+      useHuntWorkerIndexCoverage.mockReturnValue(unreadable);
+      renderHuntPanel();
+      expect(screen.getByTestId('alertZeroHuntIndexCoverageCallout')).toBeInTheDocument();
+    });
+
+    it('asks for coverage when the panel is expanded', () => {
+      renderHuntPanel(true);
+      expect(useHuntWorkerIndexCoverage).toHaveBeenLastCalledWith(true);
+    });
+
+    it('does not ask for coverage while the panel is collapsed', () => {
+      renderHuntPanel(false);
+      expect(useHuntWorkerIndexCoverage).toHaveBeenLastCalledWith(false);
+    });
+
+    it('never asks for coverage for a non-Hunt worker', () => {
+      renderPanel(WORKFLOW_ID, false);
+      expect(useHuntWorkerIndexCoverage).toHaveBeenLastCalledWith(false);
+    });
+
+    it('does not render the callout for a non-Hunt worker', () => {
+      useHuntWorkerIndexCoverage.mockReturnValue(unreadable);
+      renderPanel(WORKFLOW_ID, false);
+      expect(screen.queryByTestId('alertZeroHuntIndexCoverageCallout')).not.toBeInTheDocument();
+    });
   });
 
   it('omits the threat intel supply section for non-Hunt workers', () => {
