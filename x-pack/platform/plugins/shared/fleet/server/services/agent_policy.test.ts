@@ -1191,6 +1191,37 @@ describe('Agent policy', () => {
       expect(soClient.delete).not.toHaveBeenCalled();
     });
 
+    it('should not delete exclusive package policies when removing it from a shared package policy fails', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        {
+          id: 'package-1',
+          version: 'WzEsMV0=',
+          policy_id: 'policy_1',
+          policy_ids: ['policy_1', 'int_policy_2'],
+        },
+        {
+          id: 'package-2',
+          policy_id: 'policy_1',
+          policy_ids: ['policy_1'],
+        },
+      ] as any);
+      mockedPackagePolicyService.bulkUpdatePartial.mockResolvedValue({
+        updatedPolicies: [],
+        failedPolicies: [
+          {
+            update: { id: 'package-1', version: 'WzEsMV0=', attributes: {} },
+            error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+          },
+        ],
+      });
+
+      await expect(agentPolicyService.delete(soClient, esClient, 'policy_1')).rejects.toThrow(
+        'Cannot delete agent policy [policy_1]: failed to remove it from shared package policies [package-1]: version conflict'
+      );
+      expect(mockedPackagePolicyService.delete).not.toHaveBeenCalled();
+      expect(soClient.delete).not.toHaveBeenCalled();
+    });
+
     it('should force-revoke agents before deleting an agentless policy', async () => {
       const agentlessSoClient = getSavedObjectMock({
         revision: 1,

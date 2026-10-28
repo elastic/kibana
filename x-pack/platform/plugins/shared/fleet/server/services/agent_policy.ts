@@ -1719,23 +1719,6 @@ class AgentPolicyService {
       const { policiesWithSingleAP: packagePoliciesToDelete, policiesWithMultipleAP } =
         this.packagePoliciesWithSingleAndMultiplePolicies(packagePolicies);
 
-      if (packagePoliciesToDelete.length > 0) {
-        await packagePolicyService.delete(
-          soClient,
-          esClient,
-          packagePoliciesToDelete.map((p) => p.id),
-          {
-            force: options?.force,
-            skipUnassignFromAgentPolicies: true,
-          }
-        );
-        logger.debug(
-          `Deleted package policies with single agent policy with ids ${packagePoliciesToDelete
-            .map((policy) => policy.id)
-            .join(', ')}`
-        );
-      }
-
       if (policiesWithMultipleAP.length > 0) {
         // Only the agent policy reference changes, so skip the full update path: it needs the
         // package info, which may not be available for the package policy's version.
@@ -1770,6 +1753,23 @@ class AgentPolicyService {
 
         logger.debug(
           `Updated package policies with multiple agent policies with ids ${updatedPolicies
+            .map((policy) => policy.id)
+            .join(', ')}`
+        );
+      }
+
+      if (packagePoliciesToDelete.length > 0) {
+        await packagePolicyService.delete(
+          soClient,
+          esClient,
+          packagePoliciesToDelete.map((p) => p.id),
+          {
+            force: options?.force,
+            skipUnassignFromAgentPolicies: true,
+          }
+        );
+        logger.debug(
+          `Deleted package policies with single agent policy with ids ${packagePoliciesToDelete
             .map((policy) => policy.id)
             .join(', ')}`
         );
