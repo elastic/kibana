@@ -134,11 +134,6 @@ export function SparkPlotItem({
   }
 
   if (hasValidTimeseries(series)) {
-    // The final bucket is only partially covered whenever the selected time
-    // range does not align to a full bucket boundary, which makes the line drop
-    // toward ~0 at the right edge. Full-size charts flag it with an end-zone
-    // annotation; sparklines have no room for one, so the partial bucket is
-    // trimmed instead (see trimPartialTrailingBucket).
     const trimmedSeries = trimPartialTrailingBucket(series);
     const trimmedComparisonSeries = trimPartialTrailingBucket(comparisonSeries);
 
