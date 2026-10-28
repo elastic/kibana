@@ -78,6 +78,7 @@ triggers:
         description: "Fraction (0–1) of sample for diverse documents in features identification."
       - name: featuresMaxExcludedInPrompt
         type: number
+        default: 10
         description: "Max excluded features sent in LLM prompt during features identification."
       - name: featuresMaxEntityFilters
         type: number
