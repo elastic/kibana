@@ -67,6 +67,19 @@ export function getFieldValue(doc: any, field: string): string | undefined {
   return String(fieldInObject);
 }
 
+/**
+ * Returns every non-empty value of a field (flattened or nested), as strings.
+ * Unlike {@link getFieldValue}, multi-valued fields are not reduced to their first element.
+ */
+export function getFieldValues(doc: any, field: string): string[] {
+  const flattenedValue = doc[field];
+  const fieldInObject = isEmpty(flattenedValue) ? get(doc, field) : flattenedValue;
+  const values = Array.isArray(fieldInObject) ? fieldInObject : [fieldInObject];
+  return values
+    .filter((value) => !isEmpty(value) && typeof value !== 'object')
+    .map((value) => String(value));
+}
+
 export function getCompositionFields(composition: EuidAttribute[]): string[] {
   return composition.filter(isEuidField).map((attr) => attr.field);
 }
@@ -112,9 +125,8 @@ export function evaluateStreamlangCondition(doc: any, condition: unknown): boole
       return c.exists === exists;
     }
     if ('includes' in c) {
-      const fieldVal = getFieldValue(doc, c.field);
-      if (fieldVal === undefined) return false;
-      return String(fieldVal).includes(String(c.includes));
+      // Membership over all values (like ES|QL MV_CONTAINS), not a substring check on the first.
+      return getFieldValues(doc, c.field).includes(String(c.includes));
     }
   }
   return false;
