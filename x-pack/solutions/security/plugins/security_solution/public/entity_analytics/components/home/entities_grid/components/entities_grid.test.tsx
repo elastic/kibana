@@ -120,6 +120,44 @@ describe('EntitiesGrid', () => {
     );
   });
 
+  it('lists a large group by risk score, with its main entity marked even when its score is lower', () => {
+    const MAIN_ENTITY: Row = {
+      'entity.id': 'host:a',
+      'entity.name': 'alpha',
+      'entity.risk.calculated_score_norm': 20,
+    };
+    const ALIAS: Row = {
+      'entity.id': 'host:a-okta',
+      'entity.name': 'alpha-okta',
+      'entity.risk.calculated_score_norm': 80,
+    };
+    jest.mocked(useEntityGridData).mockImplementation((options) => {
+      const data = {
+        isEnriching: false,
+        updatedAt: null,
+        isFetching: false,
+        isAtLoadLimit: false,
+        prefetch: jest.fn(),
+        onRowsInViewChange: jest.fn(),
+      };
+      if (options.keyScope !== 'children') return { ...data, rows: [GROUP], total: 1 };
+      return options.entityExpression?.startsWith('entity.id')
+        ? { ...data, rows: [MAIN_ENTITY], total: 1 }
+        : { ...data, rows: [ALIAS], total: 150 };
+    });
+    jest.mocked(useEntityAnalyticsUrlState).mockReturnValue({
+      expandedIds: ['host:a'],
+      toggleExpandedId,
+    } as unknown as ReturnType<typeof useEntityAnalyticsUrlState>);
+
+    renderGrid();
+
+    const recordNames = screen.getAllByText(/^alpha/).slice(1);
+    expect(recordNames.map((name) => name.textContent)).toEqual(['alpha-okta', 'alpha']);
+    expect(screen.getAllByTestId('entityGridMainEntityIcon')).toHaveLength(1);
+    expect(screen.getByText('Showing 2 of 151 records')).toBeInTheDocument();
+  });
+
   it('has no expander when the rows are individual records', () => {
     renderGrid({ rowsMode: 'individual', columns: INDIVIDUAL_ROWS_COLUMNS });
 

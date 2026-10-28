@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { computeTestID } from '@kbn/scout-reporting';
-
+import { getScoutTestId } from './failure_identity';
 import type { TestFailure } from './get_failures';
-import { getLocationFromClassname } from './get_failures';
 import type { ScoutTestFailureExtended } from './get_scout_failures';
 
 const DASHBOARD_URL = 'https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history';
@@ -22,19 +20,8 @@ const risonString = (value: string): string => `'${value.replace(/!/g, '!!').rep
 export const testHistoryDashboardUrl = (
   failure: TestFailure | ScoutTestFailureExtended
 ): string | undefined => {
-  let testId: string;
-
-  if ('id' in failure && failure.id) {
-    testId = failure.id;
-  } else if (failure.testType === 'ftr' || failure.testType === 'jest') {
-    const filePath =
-      failure.testType === 'jest' ? failure.location : getLocationFromClassname(failure.classname);
-    if (!filePath || !/\.[cm]?[jt]sx?$/.test(filePath) || !failure.name) return;
-
-    testId = computeTestID(filePath, failure.name);
-  } else {
-    return;
-  }
+  const testId = getScoutTestId(failure);
+  if (!testId) return;
 
   const globalState = '(time:(from:now-30d,to:now))';
   const appState = `(query:(language:kuery,query:${risonString(

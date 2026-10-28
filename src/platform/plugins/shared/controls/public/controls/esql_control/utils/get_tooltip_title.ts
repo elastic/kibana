@@ -8,7 +8,7 @@
  */
 
 import type { ESQLVariableType } from '@kbn/esql-types';
-import { getVariableNamePrefix } from '@kbn/esql-utils';
+import { getVariableNamePrefix } from '@kbn/esql-controls-utils';
 
 export const getTooltipTitle = (
   variableName: string,

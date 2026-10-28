@@ -68,6 +68,10 @@ export const createSamlSessionManager = (
       sourcePath: rolesDefinitionPath,
     },
     cloudUsersFilePath: config.cloudUsersFilePath,
+    customSamlRealm:
+      config.customSamlProviderName && customRoleName
+        ? { providerName: config.customSamlProviderName, roles: [customRoleName] }
+        : undefined,
     serverless: config.projectType
       ? {
           uiam: config.uiam,

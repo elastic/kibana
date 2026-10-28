@@ -27,6 +27,11 @@ tags:
   - watch
   - watch-floor
   - attack-discovery
+settings:
+  # The parent step timeout does not replace this. Omitting it applies the
+  # engine's 6h default, which fails this child on a slow scan and so fails the
+  # runner before it can dispatch reviews. Same 12h as that parent step.
+  timeout: "12h"
 
 triggers:
   - type: manual
@@ -39,7 +44,9 @@ triggers:
             Maximum alerts per Attack Discovery run. Also sets the retrieval
             ceiling at `batch_size * 100`, because the engine caps a parallel
             fan-out at 100 branches — a smaller batch buys less total coverage,
-            not more.
+            not more. A prompt-template connector analyzes at most 100 alerts
+            per batch; a larger batch reports that count and logs how many
+            alerts were omitted.
           maximum: 1000
           minimum: 50
           type: integer
@@ -53,6 +60,16 @@ triggers:
             How far back to retrieve alerts: "30m", "2h", "7d".
           pattern: "^[0-9]+(ms|s|m|h|d|w)$"
           type: string
+        max_alerts:
+          default: 10000
+          description: >
+            How many alerts to retrieve before slicing into batches. The
+            per-space worker prorates this to its schedule interval. The LIMIT
+            below also stays at or under `batch_size * 100` (and 10000), so the
+            fan-out cannot exceed 100 branches.
+          maximum: 10000
+          minimum: 100
+          type: integer
 
 steps:
   # Ids only. Each batch's `security.attack-discovery.run` retrieves and anonymizes
@@ -81,15 +98,23 @@ steps:
       # false, for an alert with no closing reason. Kept as its own `| WHERE`
       # pipe (pipes are ANDed) so the `OR` cannot widen the clauses above it.
       #
-      # `LIMIT` is derived so the fan-out can never exceed 100 branches.
+      # `LIMIT` is the prorated alert cap, and never more than one page of
+      # branches (`batch_size * 100`, itself capped at 10000). Newest first:
+      # an ascending sort would spend that cap on the oldest alerts and let
+      # newer ones age out of the lookback without being analyzed. The list
+      # stays time-ordered, so each batch is still a contiguous slice and the
+      # first batch is the newest. Each batch re-sorts its own slice ascending
+      # before the model sees it.
       query: |-
+        {%- assign branch_ceiling = inputs.batch_size | times: 100 | at_most: 10000 -%}
+        {%- assign alert_limit = inputs.max_alerts | default: 10000 | at_most: branch_ceiling -%}
         FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
           | WHERE @timestamp >= NOW() - {{ inputs.lookback }}
           | WHERE kibana.alert.workflow_status IN ("open", "acknowledged")
           | WHERE kibana.alert.building_block_type IS NULL
           | WHERE kibana.alert.workflow_reason IS NULL OR kibana.alert.workflow_reason != "false_positive"
-          | SORT @timestamp ASC
-          | LIMIT {{ inputs.batch_size | times: 100 | at_most: 10000 }}
+          | SORT @timestamp DESC
+          | LIMIT {{ alert_limit }}
           | KEEP _id
 
   # `mode: settled` is what turns a failed batch into a gap instead of a failed
@@ -157,10 +182,14 @@ steps:
           connector_id: "{{ inputs.connector_id }}"
           # Stated on the leaf step rather than threaded down from the Worker: the
           # tier is a property of the call, not of the caller. Only consulted when
-          # `connector_id` is empty, and ignored when AlertZero is disabled and the
-          # tier is therefore unregistered. Keep in sync with
-          # ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
-          feature_id: alertzero_frontier
+          # `connector_id` is empty. An unset cyber-domain row resolves to nothing
+          # (it recommends no endpoints), so the frontier tier stays in charge.
+          # Ignored when AlertZero is disabled and the ids are therefore
+          # unregistered. Keep in sync with ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID
+          # and ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+          feature_id:
+            - alertzero_template_models
+            - alertzero_frontier
           # No ground-truth gate: each generated attack goes to a review whose FP/TP
           # analysis owns the false-positive decision. The gate corroborates the
           # alerts against the same entities and raw events and hands its

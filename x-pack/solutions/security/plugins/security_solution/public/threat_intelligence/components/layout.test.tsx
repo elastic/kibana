@@ -7,31 +7,52 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { DefaultPageLayout } from './layout';
 import '@testing-library/jest-dom';
 import { TestProvidersComponent } from '../mocks/test_providers';
-import { TITLE_TEST_ID } from './test_ids';
 
-describe('<Layout />', () => {
-  describe('when pageTitle is not specified', () => {
-    beforeEach(() => {
-      render(<DefaultPageLayout />, { wrapper: TestProvidersComponent });
+describe('<DefaultPageLayout />', () => {
+  it('renders the page title in the app header', () => {
+    render(<DefaultPageLayout pageTitle="Stranger Threats" />, {
+      wrapper: TestProvidersComponent,
     });
 
-    it('should not render secondary heading', () => {
-      expect(screen.queryByTestId(`${TITLE_TEST_ID}`)).not.toBeInTheDocument();
-    });
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'Stranger Threats'
+    );
   });
 
-  describe('when pageTitle is passed, it should be rendered as secondary heading', () => {
-    beforeEach(() => {
-      render(<DefaultPageLayout pageTitle="Stranger Threats" />, {
-        wrapper: TestProvidersComponent,
-      });
+  it('does not render a back button', () => {
+    render(<DefaultPageLayout pageTitle="Stranger Threats" />, {
+      wrapper: TestProvidersComponent,
     });
 
-    it('should render secondary heading', () => {
-      expect(screen.queryByText('Stranger Threats')).toBeInTheDocument();
+    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
+  });
+
+  it('renders a documentation item that points to the indicators documentation', async () => {
+    render(<DefaultPageLayout pageTitle="Stranger Threats" />, {
+      wrapper: TestProvidersComponent,
     });
+
+    await openAppMenuOverflow();
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toHaveAttribute(
+      'href',
+      'https://www.elastic.co/docs/solutions/security/investigate/indicators-of-compromise'
+    );
+  });
+
+  it('renders children', () => {
+    render(
+      <DefaultPageLayout pageTitle="Stranger Threats">
+        <div data-test-subj="content" />
+      </DefaultPageLayout>,
+      { wrapper: TestProvidersComponent }
+    );
+
+    expect(screen.getByTestId('content')).toBeInTheDocument();
   });
 });

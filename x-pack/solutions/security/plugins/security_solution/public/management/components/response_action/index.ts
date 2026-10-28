@@ -6,3 +6,4 @@
  */
 
 export * from './response_action_results/response_action_results';
+export * from './response_action_details/response_action_details';

@@ -27,6 +27,7 @@ export {
   CHAT_MESSAGE_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
   CONVERSATION_ID_MAX_LENGTH,
+  USER_MESSAGE_AUTHOR_NAME_MAX_LENGTH,
   CONVERSATION_METADATA_KEY_MAX_LENGTH,
   MODEL_CONTEXT_MAX_LENGTH,
   WORKFLOW_CONTEXT_MAX_NAMESPACES,
@@ -52,6 +53,7 @@ export {
   type Conversation,
   type ConversationOrigin,
   type ConversationRoundAuthor,
+  type ConversationRoundAuthorDecoration,
   type ConversationRoundOrigin,
   type ConversationInternalState,
   type TodoItem,
@@ -91,7 +93,9 @@ export {
   type CompactionToolCallSummary,
   type CompactionEntity,
   ConversationRoundStepType,
+  ToolCallInvocation,
   isToolCallStep,
+  isDynamicToolCall,
   isReasoningStep,
   isCompactionStep,
   type AskUserQuestionStep,
@@ -120,6 +124,7 @@ export {
   type InjectedContextStepData,
   createInjectedContextStep,
   isInjectedContextStep,
+  relevantSkillsHookId,
 } from './conversation';
 export {
   ChatEventType,
@@ -273,8 +278,13 @@ export {
   type AttachmentUpdatedEvent,
   type AttachmentDeletedEventData,
   type AttachmentDeletedEvent,
+  type AttachmentRestoredEventData,
+  type AttachmentRestoredEvent,
+  ATTACHMENT_EVENT_FORMAT,
+  isCurrentFormatAttachmentEvent,
   type AttachmentTimelineEvent,
   isAttachmentEvent,
+  isUserMessageEvent,
   ConversationActivityEventType,
   type ConversationCreatedActivityEventData,
   type ConversationCreatedActivityEvent,
@@ -314,3 +324,8 @@ export {
   assertValidConversationEventType,
   type ConversationAddEventInput,
 } from './timeline_events';
+export type {
+  ChatCallbackEventResponse,
+  ChatCallbackFailureResponse,
+  ChatCallbackResponse,
+} from './callback';

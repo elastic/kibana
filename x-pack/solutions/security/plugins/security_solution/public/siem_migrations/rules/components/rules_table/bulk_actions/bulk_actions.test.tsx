@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
+import { RULES_UI_EDIT_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import { BulkActions } from './bulk_actions';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import {
@@ -258,6 +259,39 @@ describe('BulkActions', () => {
 
     fireEvent.click(getByTestId('installTranslatedItemsButton'));
     expect(installTranslatedRule).toHaveBeenCalled();
+  });
+
+  it('should disable the install translated button when the user lacks Rules: All privilege', () => {
+    mockSiemMigrationsService.rules.getMissingCapabilities.mockReturnValue([
+      { capability: RULES_UI_EDIT_PRIVILEGE, description: 'Security > Rules: All' },
+    ]);
+    const mockTranslationStats = getRuleMigrationTranslationStatsMock({
+      rules: {
+        total: 13,
+        success: {
+          total: 11,
+          result: { full: 3, partial: 1, untranslatable: 7 },
+          installable: 3,
+          missing_index: 0,
+          prebuilt: 0,
+        },
+        failed: 2,
+      },
+    });
+    const { getByTestId } = render(
+      <TestProviders>
+        <BulkActions
+          selectedRules={[]}
+          translationStats={mockTranslationStats}
+          isTableLoading={false}
+          migrationStats={mockMigrationStats}
+          installTranslatedRule={jest.fn()}
+          setMissingIndexPatternFlyoutOpen={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('installTranslatedItemsButton')).toBeDisabled();
   });
 
   it('renders the install selected button', () => {

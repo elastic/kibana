@@ -23,6 +23,7 @@ import {
 import { getEbtProps } from '@kbn/ebt-click';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../../common/features';
@@ -74,6 +75,7 @@ export const AutomationsPanel = ({
   const { canSuggest, suggestAutomation } = useSuggestAutomation({ aiIndex, isManaged, onSaved });
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
+  const { canExecuteWorkflow } = useWorkflowsCapabilities();
 
   const canCreateWorkflow = application.capabilities.workflowsManagement?.createWorkflow === true;
 
@@ -259,13 +261,13 @@ export const AutomationsPanel = ({
                 <React.Fragment key={automation.value}>
                   <AutomationRow
                     automation={automation}
-                    name={summary?.name}
-                    enabled={summary?.enabled}
+                    workflowSummary={summary}
                     editHref={application.getUrlForApp(WORKFLOWS_APP_ID, {
                       path: `/${encodeURIComponent(automation.value)}${returnSearch}`,
                     })}
                     isReadOnly={isManaged}
-                    isDisabled={isBusy}
+                    isBusy={isBusy}
+                    canRun={canExecuteWorkflow}
                     onDelete={() => deleteAutomation(automation.value)}
                   />
                   {index < automations.length - 1 && <EuiSpacer size="s" />}
