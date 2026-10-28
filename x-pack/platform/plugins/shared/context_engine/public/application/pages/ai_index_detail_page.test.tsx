@@ -38,6 +38,7 @@ import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 
 const AI_INDEX_DETAIL_ROUTE_PATHS = [
   CONTEXT_ENGINE_PATHS.detail,
+  CONTEXT_ENGINE_PATHS.detailSources,
   CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators,
 ] as const;
 
@@ -222,7 +223,10 @@ const renderWithProviders = (
   );
 };
 
-const waitForAiIndexDetailLoaded = () => screen.findByTestId('contextAiIndexSourceRow');
+const waitForAiIndexDetailLoaded = async () => {
+  fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-sources'));
+  return screen.findByTestId('contextAiIndexSourceRow');
+};
 
 const confirmAutomationDelete = async () => {
   const modal = await screen.findByTestId('contextAutomationDeleteConfirmModal');
@@ -256,6 +260,7 @@ describe('AiIndexDetailPage', () => {
 
     renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
 
+    fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-sources'));
     await screen.findByTestId('contextAiIndexSourcesEmpty');
 
     expect(screen.getByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
@@ -289,6 +294,7 @@ describe('AiIndexDetailPage', () => {
 
     renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
 
+    fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-sources'));
     await screen.findByTestId('contextAiIndexSourcesEmpty');
 
     const callout = screen.getByTestId('contextAiIndexCreatedCallout');
@@ -321,6 +327,7 @@ describe('AiIndexDetailPage', () => {
 
     renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
 
+    fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-sources'));
     await screen.findByTestId('contextAddSourcesButton');
     expect(screen.getByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
 
@@ -385,6 +392,7 @@ describe('AiIndexDetailPage', () => {
       </ChromeServiceProvider>
     );
 
+    fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-sources'));
     await screen.findByTestId('contextAiIndexSourcesEmpty');
 
     expect(screen.getByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
@@ -482,10 +490,12 @@ describe('AiIndexDetailPage', () => {
 
     renderWithProviders(services);
 
+    fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-sources'));
     expect(await screen.findByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-overview'));
     expect(screen.getByTestId('contextAutomationsLocked')).toHaveAttribute(
       'aria-label',
-      'Automations locked. Add a source above to unlock automations.'
+      'Automations locked. Add a source in the Sources tab to unlock automations.'
     );
     expect(screen.queryByTestId('contextAiIndexAutomationsEmpty')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
@@ -499,7 +509,9 @@ describe('AiIndexDetailPage', () => {
 
     renderWithProviders(services);
 
+    fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-sources'));
     expect(await screen.findByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-overview'));
     expect(screen.getByTestId('contextAutomationsLocked')).toBeInTheDocument();
     expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextSignalsPanel')).not.toBeInTheDocument();
@@ -611,7 +623,8 @@ describe('AiIndexDetailPage', () => {
 
     await waitForAiIndexDetailLoaded();
 
-    fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
+    fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-sources'));
+    fireEvent.click(await screen.findByTestId('contextEditSourcesButton'));
 
     expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
     expect(await screen.findByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
@@ -624,6 +637,7 @@ describe('AiIndexDetailPage', () => {
 
     renderWithProviders(services);
 
+    fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-sources'));
     await screen.findByTestId('contextAddSourcesButton');
     expect(services.http.get).toHaveBeenCalledTimes(1);
 
@@ -787,9 +801,10 @@ describe('AiIndexDetailPage', () => {
 
     expect(screen.getByTestId('contextAiIndexDetailManagedBadge')).toHaveTextContent('Managed');
     expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-sources'));
     expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextAddSourcesButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
   });
 
   it('shows all overview sections for managed AI indexes without setup locks', async () => {
@@ -821,9 +836,9 @@ describe('AiIndexDetailPage', () => {
 
     expect(screen.queryByTestId('contextAiIndexDetailManagedBadge')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextAddDescriptionButton')).toBeInTheDocument();
-    expect(screen.getByTestId('contextEditSourcesButton')).toBeInTheDocument();
-
     expect(screen.getByTestId('contextAddAutomationButton')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-sources'));
+    expect(screen.getByTestId('contextEditSourcesButton')).toBeInTheDocument();
   });
 
   it('renders connector sources using the connector id when no name is resolved', async () => {

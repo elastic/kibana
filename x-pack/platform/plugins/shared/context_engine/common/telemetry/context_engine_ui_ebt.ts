@@ -56,6 +56,7 @@ const ebtAction = {
   },
   aiIndexDetail: {
     TAB_OVERVIEW: 'tab_overview',
+    TAB_SOURCES: 'tab_sources',
     TAB_KNOWLEDGE_INDICATORS: 'tab_knowledge_indicators',
   },
   description: {

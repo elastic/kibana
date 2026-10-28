@@ -43,6 +43,7 @@ import {
 import {
   CONTEXT_ENGINE_PATHS,
   getAiIndexDetailPath,
+  getAiIndexSourcesPath,
   getAiIndexKnowledgeIndicatorsPath,
 } from '../paths';
 import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
@@ -53,6 +54,10 @@ const managedBadgeLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.mana
 
 const overviewTabLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.tabs.overview', {
   defaultMessage: 'Overview',
+});
+
+const sourcesTabLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.tabs.sources', {
+  defaultMessage: 'Sources',
 });
 
 const knowledgeIndicatorsTabLabel = i18n.translate(
@@ -95,6 +100,8 @@ export const AiIndexDetailPage = () => {
   const { discoverHref, indexManagementHref } = useAiIndexDestLinks(aiIndex?.dest);
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const isMemoryEnabled = useMemoryEnabled();
+  const isSourcesTab =
+    useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailSources, exact: true }) !== null;
   const isKnowledgeIndicatorsTab =
     useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators, exact: true }) !== null;
   const resolvedAiIndexId = aiIndex?.id ?? id ?? '';
@@ -138,6 +145,7 @@ export const AiIndexDetailPage = () => {
     });
   const pageTitle = aiIndex?.id ?? id ?? '';
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
+  const sources = useMemo(() => aiIndex?.sources ?? [], [aiIndex?.sources]);
 
   useContextEngineBreadcrumbs(pageTitle ? [{ text: pageTitle }] : []);
 
@@ -204,18 +212,25 @@ export const AiIndexDetailPage = () => {
     const overviewTab: AppHeaderTab = {
       id: 'overview',
       label: overviewTabLabel,
-      isSelected: showKnowledgeIndicatorsTabInHeader ? !isKnowledgeIndicatorsTab : true,
+      isSelected: !isSourcesTab && !isKnowledgeIndicatorsTab,
       onClick: () => navigateToContextEngine(getAiIndexDetailPath(resolvedAiIndexId)),
       'data-test-subj': 'contextAiIndexDetailTab-overview',
     };
 
-    if (!showKnowledgeIndicatorsTabInHeader) {
-      return [overviewTab];
-    }
-
-    return [
+    const tabs: AppHeaderTab[] = [
       overviewTab,
       {
+        id: 'sources',
+        label: sourcesTabLabel,
+        isSelected: isSourcesTab,
+        onClick: () => navigateToContextEngine(getAiIndexSourcesPath(resolvedAiIndexId)),
+        badge: sources.length,
+        'data-test-subj': 'contextAiIndexDetailTab-sources',
+      },
+    ];
+
+    if (showKnowledgeIndicatorsTabInHeader) {
+      tabs.push({
         id: 'knowledge_indicators',
         label: knowledgeIndicatorsTabLabel,
         isSelected: isKnowledgeIndicatorsTab,
@@ -223,17 +238,30 @@ export const AiIndexDetailPage = () => {
           navigateToContextEngine(getAiIndexKnowledgeIndicatorsPath(resolvedAiIndexId)),
         badge: hasKnowledgeIndicators ? summary.total : undefined,
         'data-test-subj': 'contextAiIndexDetailTab-knowledge_indicators',
-      },
-    ];
+      });
+    }
+
+    return tabs;
   }, [
     error,
     hasKnowledgeIndicators,
     isKnowledgeIndicatorsTab,
+    isSourcesTab,
     navigateToContextEngine,
     resolvedAiIndexId,
     showKnowledgeIndicatorsTabInHeader,
+    sources.length,
     summary.total,
   ]);
+
+  const sourcesPanel = (
+    <SourcesPanel
+      isLoading={isLoading}
+      aiIndex={aiIndex}
+      onSaved={refetch}
+      isManaged={hideEditControls}
+    />
+  );
 
   const overviewTabContent = (
     <>
@@ -256,13 +284,6 @@ export const AiIndexDetailPage = () => {
         </>
       )}
       <EuiSpacer size="m" />
-      <SourcesPanel
-        isLoading={isLoading}
-        aiIndex={aiIndex}
-        onSaved={refetch}
-        isManaged={hideEditControls}
-      />
-      <EuiSpacer size="m" />
       {showAutomationsPanel ? (
         <AutomationsPanel
           isLoading={isLoading}
@@ -283,7 +304,7 @@ export const AiIndexDetailPage = () => {
           description={
             <FormattedMessage
               id="xpack.contextEngine.aiIndexDetail.automations.lockedBody"
-              defaultMessage="Add a source above to unlock automations."
+              defaultMessage="Add a source in the Sources tab to unlock automations."
             />
           }
         />
@@ -330,6 +351,9 @@ export const AiIndexDetailPage = () => {
     />
   ) : (
     <Routes>
+      <Route path={CONTEXT_ENGINE_PATHS.detailSources} exact>
+        {aiIndex ? sourcesPanel : null}
+      </Route>
       <Route path={CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators} exact>
         {aiIndex ? <ListKiPanel aiIndex={aiIndex} discoverHref={discoverHref} /> : null}
       </Route>

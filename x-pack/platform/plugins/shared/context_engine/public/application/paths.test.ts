@@ -8,6 +8,7 @@
 import {
   decodeRouteParam,
   getAiIndexDetailPath,
+  getAiIndexSourcesPath,
   getAiIndexKnowledgeIndicatorsPath,
   getViewKiPath,
 } from './paths';
@@ -15,6 +16,12 @@ import {
 describe('getAiIndexDetailPath', () => {
   it('builds the path without encoding the id', () => {
     expect(getAiIndexDetailPath('my-ai-index')).toBe('/ai_index/my-ai-index');
+  });
+});
+
+describe('getAiIndexSourcesPath', () => {
+  it('builds the sources tab path', () => {
+    expect(getAiIndexSourcesPath('my-ai-index')).toBe('/ai_index/my-ai-index/sources');
   });
 });
 
