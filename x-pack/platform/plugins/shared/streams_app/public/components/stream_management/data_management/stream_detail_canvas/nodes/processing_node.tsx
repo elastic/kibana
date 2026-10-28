@@ -15,6 +15,7 @@ import type { ProcessingNode as ProcessingNodeType } from '../types';
 import { PROCESSING_NODE_HEIGHT, PROCESSING_NODE_WIDTH } from '../canvas_constants';
 import { ConnectionHandle, NODE_HANDLE_CLASS } from './connection_handle';
 import { getNodeCardStyles } from './node_card_styles';
+import { ProcessingNodeStats } from './processing_node_stats';
 
 /** Compact pill for processing applied between a source, a route and a destination. */
 export function ProcessingNode({ data, selected, dragging }: NodeProps<ProcessingNodeType>) {
@@ -50,10 +51,13 @@ export function ProcessingNode({ data, selected, dragging }: NodeProps<Processin
         ]}
       >
         <EuiIcon type="processor" aria-hidden={true} />
-        <EuiText size="xs">
-          <strong>{data.title}</strong>
-          <div>{countLabel}</div>
-        </EuiText>
+        <div>
+          <EuiText size="xs">
+            <strong>{data.title}</strong>
+            <div>{countLabel}</div>
+          </EuiText>
+          <ProcessingNodeStats slot={data.ref} />
+        </div>
       </EuiPanel>
       {data.ref.kind === PROCESSING_SLOT_KIND.pipeline ? (
         <ConnectionHandle

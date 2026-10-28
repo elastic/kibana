@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useId, useMemo } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useRef } from 'react';
 import { createActorContext } from '@xstate/react';
 import type { StreamsUnit } from '@kbn/streams-schema';
+import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
 import { NEVER } from 'rxjs';
 import { useKibana } from '../../../hooks/use_kibana';
+import type { ProcessingNodeRef } from '../../../services/unit_graph';
 import type {
   DestinationStatsView,
   ProcessorStatsView,
   StatsWindow,
 } from '../../../services/unit_stats_client/types';
 import { createUnitStatsClient } from '../../../services/unit_stats_client/unit_stats_client';
+import { getSlotStats, type SlotStats } from './get_slot_stats';
 import { createStatsManagerImplementations, statsManagerMachine } from './stats_manager_machine';
 import type { StatsEntry } from './types';
 
@@ -67,24 +70,35 @@ export const StatsManagerProvider = ({
   );
 };
 
+/** Keeps the previous reference while the value is equal, so a new array of the same ids is not a change. */
+const useStableValue = <T,>(value: T): T => {
+  const stable = useRef(value);
+  if (!isEqual(stable.current, value)) {
+    stable.current = value;
+  }
+  return stable.current;
+};
+
 /**
- * Shows a component to the manager while the caller is mounted. The registrant is made here, so a
+ * Shows components to the manager while the caller is mounted. The registrant is made here, so a
  * repeated registration of the same caller changes nothing, and a caller never removes the
- * interest of another one. Nothing is registered while the id is undefined.
+ * interest of another one. Nothing is registered for an empty list.
  */
-const useRegisteredComponent = (kind: StreamsUnit.StatsComponentRef['kind'], id?: string) => {
+const useRegisteredComponents = (
+  kind: StreamsUnit.StatsComponentRef['kind'],
+  ids: readonly string[]
+) => {
   const actorRef = StatsManagerContext.useActorRef();
   const registrant = useId();
+  const stableIds = useStableValue(ids);
 
   useEffect(() => {
-    if (id === undefined) return;
-
-    const ref = { kind, id };
-    actorRef.send({ type: 'stats.register', ref, registrant });
+    const refs = stableIds.map((id) => ({ kind, id }));
+    refs.forEach((ref) => actorRef.send({ type: 'stats.register', ref, registrant }));
     return () => {
-      actorRef.send({ type: 'stats.unregister', ref, registrant });
+      refs.forEach((ref) => actorRef.send({ type: 'stats.unregister', ref, registrant }));
     };
-  }, [actorRef, kind, id, registrant]);
+  }, [actorRef, kind, stableIds, registrant]);
 };
 
 /**
@@ -95,7 +109,7 @@ const useRegisteredComponent = (kind: StreamsUnit.StatsComponentRef['kind'], id?
 export const useDestinationStats = (
   id: string | undefined
 ): StatsEntry<DestinationStatsView> | undefined => {
-  useRegisteredComponent('destination', id);
+  useRegisteredComponents('destination', id === undefined ? [] : [id]);
 
   return StatsManagerContext.useSelector((state) =>
     id === undefined ? undefined : state.context.components.destination[id]?.entry
@@ -106,11 +120,41 @@ export const useDestinationStats = (
 export const useProcessorStats = (
   id: string | undefined
 ): StatsEntry<ProcessorStatsView> | undefined => {
-  useRegisteredComponent('processor', id);
+  useRegisteredComponents('processor', id === undefined ? [] : [id]);
 
   return StatsManagerContext.useSelector((state) =>
     id === undefined ? undefined : state.context.components.processor[id]?.entry
   );
+};
+
+const areEntriesEqual = (
+  previous: ReadonlyArray<StatsEntry<ProcessorStatsView> | undefined>,
+  next: ReadonlyArray<StatsEntry<ProcessorStatsView> | undefined>
+): boolean =>
+  previous.length === next.length && previous.every((entry, index) => entry === next[index]);
+
+/**
+ * The numbers of a processing node. `processorIds` is the slot's processors in the order they run.
+ * An empty list registers nothing and gives `unknown`. It re-renders the caller only when one of
+ * those processors gets a new entry.
+ */
+export const useSlotStats = ({
+  ref,
+  processorIds,
+}: {
+  ref: ProcessingNodeRef;
+  processorIds: readonly string[];
+}): SlotStats => {
+  const stableIds = useStableValue(processorIds);
+  const stableRef = useStableValue(ref);
+  useRegisteredComponents('processor', stableIds);
+
+  const entries = StatsManagerContext.useSelector(
+    (state) => stableIds.map((id) => state.context.components.processor[id]?.entry),
+    areEntriesEqual
+  );
+
+  return useMemo(() => getSlotStats(stableRef, entries), [stableRef, entries]);
 };
 
 /** For a refresh button. A refresh asks again for everything shown, and restarts polling. */
