@@ -6,6 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import pRetry from 'p-retry';
 import { APM_ACTION_VARIABLE_INDEX } from './constants';
 
 async function getIndexConnectorResults(es: Client) {
@@ -20,15 +21,11 @@ export async function waitForIndexConnectorResults({
   es: Client;
   minCount?: number;
 }) {
-  return await retryForSuccess(new debugLog({ context: 'waitForIndexConnectorResults' }), {
-    timeout: 20_000,
-    methodName: 'waitForIndexConnectorResults',
-    block: async () => {
-      const results = await getIndexConnectorResults(es);
-      if (results.length < minCount)
-        throw new Error(`Expected ${minCount} but got ${results.length} results`);
-
-      return results;
-    },
+  return pRetry(async () => {
+    const results = await getIndexConnectorResults(es);
+    if (results.length < minCount) {
+      throw new Error(`Expected ${minCount} but got ${results.length} results`);
+    }
+    return results;
   });
 }

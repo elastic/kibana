@@ -148,9 +148,6 @@ export function MachineLearningStackManagementJobsProvider({
 
           const isPressed = await button.getAttribute('aria-pressed');
           expect(isPressed).to.eql('true', `Button '${buttonTestSubj}' should be checked`);
-
-          const isPressed = await button.getAttribute('aria-pressed');
-          expect(isPressed).to.eql('true', `Button '${buttonTestSubj}' should be checked`);
         },
         { description: `select share to spaces mode ${buttonTestSubj}` }
       );

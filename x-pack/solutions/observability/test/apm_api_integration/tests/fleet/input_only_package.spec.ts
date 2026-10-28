@@ -180,49 +180,30 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   });
 }
 
-async function getApmServices(
-  apmApiClient: ApmApiClient,
-  start: string,
-  end: string,
-  retrySvc: RetryService,
-  expected: { latency: number; throughput: number; transactionErrorRate: number }
-) {
-  return await retrySvc.tryForTime(
-    20_000,
-    async () => {
-      const res = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/services',
-        params: {
-          query: {
-            start,
-            end,
-            probability: 1,
-            environment: 'ENVIRONMENT_ALL',
-            kuery: '',
-            documentType: ApmDocumentType.TransactionMetric,
-            rollupInterval: RollupInterval.OneMinute,
-            useDurationSummary: true,
-          },
+function getApmServices(apmApiClient: ApmApiClient, start: string, end: string) {
+  return pRetry(async () => {
+    const res = await apmApiClient.readUser({
+      endpoint: 'GET /internal/apm/services',
+      params: {
+        query: {
+          start,
+          end,
+          probability: 1,
+          environment: 'ENVIRONMENT_ALL',
+          kuery: '',
+          documentType: ApmDocumentType.TransactionMetric,
+          rollupInterval: RollupInterval.OneMinute,
+          useDurationSummary: true,
         },
       },
     });
 
-      const service = res.body.items[0];
-      if (
-        res.body.items.length === 0 ||
-        service?.latency !== expected.latency ||
-        service?.throughput !== expected.throughput ||
-        service?.transactionErrorRate !== expected.transactionErrorRate
-      ) {
-        throw new Error(
-          `Timed-out: APM Service data not fully indexed yet (got latency=${service?.latency}, throughput=${service?.throughput}, transactionErrorRate=${service?.transactionErrorRate})`
-        );
-      }
+    if (res.body.items.length === 0 || !res.body.items[0].latency) {
+      throw new Error(`Timed-out: No APM Services were found`);
+    }
 
-      return res.body.items;
-    },
-    { description: 'getApmServices' }
-  );
+    return res.body.items;
+  });
 }
 
 function getSynthtraceScenario() {

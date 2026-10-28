@@ -17,6 +17,7 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const fleetAndAgents = getService('fleetAndAgents');
+  const retry = getService('retry');
 
   async function getLatestFleetPolicies(policyId: string): Promise<any> {
     const policyDocRes = await es.search({

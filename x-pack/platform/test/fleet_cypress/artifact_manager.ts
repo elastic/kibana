@@ -7,18 +7,14 @@
 
 import axios from 'axios';
 import { last } from 'lodash';
+import pRetry from 'p-retry';
 
 const DEFAULT_VERSION = '8.15.0-SNAPSHOT';
 
 export async function getLatestVersion(): Promise<string> {
-  return retryForSuccess(
-    new ToolingLog({ level: 'debug', writeTo: process.stdout }, { context: name }),
-    {
-      timeout: 60_000,
-      methodName: name,
-      block: () => axios('https://artifacts-api.elastic.co/v1/versions'),
-    }
-  )
+  return pRetry(() => axios('https://artifacts-api.elastic.co/v1/versions'), {
+    maxRetryTime: 60 * 1000, // 1 minute
+  })
     .then(
       (response) =>
         last((response.data.versions as string[]).filter((v) => v.includes('-SNAPSHOT'))) ||

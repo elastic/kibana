@@ -9,7 +9,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
 import type SuperTest from 'supertest';
 
-const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
+const RETRIES_COUNT = 10;
 
 export async function waitForActiveRule({
   ruleId,
@@ -32,5 +32,13 @@ export async function waitForActiveRule({
 
       return status;
     },
-  });
+    {
+      retries: RETRIES_COUNT,
+      onFailedAttempt: (error) => {
+        if (logger) {
+          logger.info(`Attempt ${error.attemptNumber}/${RETRIES_COUNT}: Waiting for active rule`);
+        }
+      },
+    }
+  );
 }

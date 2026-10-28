@@ -63,6 +63,9 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>): 
     initialDelay,
   } = options;
 
+  if (initialDelay) {
+    await delay(initialDelay);
+  }
   const start = Date.now();
   const criticalWebDriverErrors = ['NoSuchSessionError', 'NoSuchWindowError'];
   let lastError;

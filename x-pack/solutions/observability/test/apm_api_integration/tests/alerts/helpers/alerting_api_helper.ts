@@ -71,7 +71,8 @@ export async function runRuleSoon({
         throw new Error(`[Rule] Running a rule ${ruleId} failed: ${error}`);
       }
     },
-  });
+    { retries: 10 }
+  );
 }
 
 export async function deleteAlertsByRuleId({ es, ruleId }: { es: Client; ruleId: string }) {

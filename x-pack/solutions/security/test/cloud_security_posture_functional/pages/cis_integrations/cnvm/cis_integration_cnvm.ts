@@ -21,12 +21,6 @@ export default function (providerContext: FtrProviderContext) {
     const logger = getService('log');
     const RETRY_DELAY = 1000;
     const retryOptions = { retryDelay: RETRY_DELAY };
-    const kibanaServer = getService('kibanaServer');
-
-    before(async () => {
-      await kibanaServer.savedObjects.clean({ types: policiesSavedObjects });
-    });
-
     beforeEach(async () => {
       cisIntegration = pageObjects.cisAddIntegration;
 

@@ -55,7 +55,7 @@ export const installFleetPackage = async ({
     retryService,
     () =>
       supertest
-        .post(epmRouteService.getInstallPath(packageName, packageVersion))
+        .post(epmRouteService.getInstallPath(packageName, packageVersion ?? ''))
         .set('kbn-xsrf', 'xxxx')
         .set('elastic-api-version', '2023-10-31')
         .type('application/json')

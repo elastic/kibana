@@ -19,6 +19,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const fleetAndAgents = getService('fleetAndAgents');
+  const retry = getService('retry');
 
   const pkgName = 'system';
   const pkgVersion = '1.27.0';

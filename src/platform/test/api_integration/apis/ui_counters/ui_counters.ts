@@ -15,8 +15,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 const APP_NAME = 'myApp';
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
