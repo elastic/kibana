@@ -3097,6 +3097,7 @@ x-pack/platform/plugins/shared/entity_store/common/domain/definitions/dynamic @e
 /x-pack/solutions/security/plugins/security_solution/public/timelines @elastic/security-investigations
 
 /x-pack/solutions/security/plugins/security_solution/test/scout/agent_builder/ @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/test/scout/assistant/ @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/test/scout/overview/ @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ @elastic/security-investigations
