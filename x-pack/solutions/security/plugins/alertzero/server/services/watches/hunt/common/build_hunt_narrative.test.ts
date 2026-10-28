@@ -400,6 +400,7 @@ describe('buildHuntNarrative', () => {
     );
 
     expect(narrative).toContain('**Still to be searched (2):** `T1059` and `T1105`.');
+    expect(narrative).toContain('while the report is still inside the sweep');
     expect(narrative).toContain('techniques this run already searched are not repeated');
     expect(narrative).not.toContain('`T1566`.');
   });
