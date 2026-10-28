@@ -68,6 +68,8 @@ export type {
 } from './src/markdown';
 export { applyOverlay, InvalidOverlayError, JsonPathError } from './src/overlay';
 export type { OverlayAction, OverlayDocument, OverlayFinding, OverlayResult } from './src/overlay';
+export { convertSmithy, isSmithyModel } from './src/smithy';
+export type { ConvertSmithyOptions, SmithyModel } from './src/smithy';
 export {
   convertDiscovery,
   convertSwagger2,
