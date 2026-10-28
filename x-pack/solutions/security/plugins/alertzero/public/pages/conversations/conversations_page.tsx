@@ -545,24 +545,30 @@ const ConversationsPageContent: React.FC = () => {
 
   return (
     <AlertZeroPageSection contentProps={pageContentProps}>
-      <InvestigationActionModals
-        action={modalState.type}
-        recordId={modalState.recordId}
-        initialAssignee={actionInvestigation?.assignee}
-        investigation={actionInvestigation}
-        approvalProposal={selectedProposal}
-        readOnly={!canDecide}
-        onCloseAction={closeModal}
-        onCloseApproval={closeApproval}
-        onConfirmApproval={confirmApproval}
-        isSubmitting={isSubmittingSelected}
-        currentActorName={currentActorName}
-        basePath={http.basePath}
-        onDismissApproval={dismissApproval}
-        renderCloseModal={canManageInvestigations ? renderCloseModal : undefined}
-        renderDismissModal={renderDismissModal}
-        renderEscalationModal={renderEscalationModal}
-      />
+      {/* The approval modal renders agent-authored markdown, and the app has no error boundary of
+          its own, so a render error there would otherwise unmount the whole queue and leave the
+          proposal undecidable from the UI. The same boundary already guards the close and
+          escalation modals. */}
+      <EscalationModalBoundary>
+        <InvestigationActionModals
+          action={modalState.type}
+          recordId={modalState.recordId}
+          initialAssignee={actionInvestigation?.assignee}
+          investigation={actionInvestigation}
+          approvalProposal={selectedProposal}
+          readOnly={!canDecide}
+          onCloseAction={closeModal}
+          onCloseApproval={closeApproval}
+          onConfirmApproval={confirmApproval}
+          isSubmitting={isSubmittingSelected}
+          currentActorName={currentActorName}
+          basePath={http.basePath}
+          onDismissApproval={dismissApproval}
+          renderCloseModal={canManageInvestigations ? renderCloseModal : undefined}
+          renderDismissModal={renderDismissModal}
+          renderEscalationModal={renderEscalationModal}
+        />
+      </EscalationModalBoundary>
 
       {/* No `wrap`: a wrapping column sizes each line to its widest content, which let a
           long row title push the queue past the viewport instead of truncating. */}

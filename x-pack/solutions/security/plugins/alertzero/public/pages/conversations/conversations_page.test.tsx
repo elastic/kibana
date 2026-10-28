@@ -662,6 +662,26 @@ describe('ConversationsPage decisions', () => {
     );
   });
 
+  it('keeps the queue usable when the approval modal fails to render', () => {
+    // React reports a caught render error on the console; it's the expected path here.
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockProposals({
+      respond: [{ ...actionProposal, comment: 'Tune [the rule](/app/security/rules/id/abc).' }],
+    });
+    const { core } = renderPage('/');
+    // The comment's link is resolved against the base path while the modal renders, so a
+    // resolver that throws stands in for any render-time failure inside the modal.
+    jest.spyOn(core.http.basePath, 'prepend').mockImplementation(() => {
+      throw new Error('cannot resolve');
+    });
+    openApproval();
+
+    // The failure stays inside the boundary: the modal is gone, the queue is not.
+    expect(screen.queryByRole('dialog', { name: 'Revoke sessions' })).not.toBeInTheDocument();
+    expect(screen.getByText('Impossible travel — exec account')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Open actions menu' })).toBeInTheDocument();
+  });
+
   it('keeps an approved proposal in its category while its action runs', async () => {
     renderPage('/');
     openApproval();
