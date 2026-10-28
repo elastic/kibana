@@ -26,15 +26,22 @@ export interface OnMergeSelection {
   suites: Record<OnMergeSuite, OnMergeSuiteDecision>;
 }
 
-/** Parses `ON_MERGE_SELECTIVE_MODE`; unset means `off`. */
+/**
+ * Parses `ON_MERGE_SELECTIVE_MODE`; unset or unrecognised means `off`.
+ *
+ * Falls back rather than throwing: this is read from `loadRunOrderConfig()` in the
+ * "Pick Test Group Run Order" step, which exits non-zero on any error. A typo in the
+ * variable must disable the shadow run, not fail the build.
+ */
 export const parseOnMergeSelectiveMode = (raw: string | undefined): OnMergeSelectiveMode => {
   const value = raw?.trim().toLowerCase() || 'off';
   if (!(ON_MERGE_SELECTIVE_MODES as readonly string[]).includes(value)) {
-    throw new Error(
-      `invalid ON_MERGE_SELECTIVE_MODE: ${raw}. Valid values: ${ON_MERGE_SELECTIVE_MODES.join(
+    console.error(
+      `Ignoring invalid ON_MERGE_SELECTIVE_MODE: ${raw}. Valid values: ${ON_MERGE_SELECTIVE_MODES.join(
         ', '
-      )}`
+      )}. Falling back to 'off'.`
     );
+    return 'off';
   }
   return value as OnMergeSelectiveMode;
 };

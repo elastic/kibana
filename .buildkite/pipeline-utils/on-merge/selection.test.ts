@@ -22,10 +22,18 @@ describe('parseOnMergeSelectiveMode', () => {
     expect(parseOnMergeSelectiveMode(raw)).toBe(expected);
   });
 
-  it('rejects unknown modes', () => {
-    expect(() => parseOnMergeSelectiveMode('enabled')).toThrow(
-      'invalid ON_MERGE_SELECTIVE_MODE: enabled'
-    );
+  it('falls back to off for unknown modes instead of throwing', () => {
+    // `loadRunOrderConfig()` reads this in a step that exits non-zero on any error,
+    // so a typo has to disable the shadow run rather than fail the build.
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      expect(parseOnMergeSelectiveMode('enabled')).toBe('off');
+      expect(consoleError).toHaveBeenCalledWith(
+        expect.stringContaining('Ignoring invalid ON_MERGE_SELECTIVE_MODE: enabled')
+      );
+    } finally {
+      consoleError.mockRestore();
+    }
   });
 });
 

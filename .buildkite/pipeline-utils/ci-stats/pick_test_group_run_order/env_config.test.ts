@@ -182,6 +182,19 @@ describe('loadRunOrderConfig', () => {
     expect(loadRunOrderConfig().onMergeSelectiveMode).toBe('off');
   });
 
+  it('does not throw on an invalid on-merge selective mode', () => {
+    // The picker exits non-zero on any error from loadRunOrderConfig, so a bad value
+    // must disable the shadow run rather than fail the on-merge build.
+    process.env.BUILDKITE_PIPELINE_SLUG = 'kibana-on-merge';
+    process.env.ON_MERGE_SELECTIVE_MODE = 'enabled';
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      expect(loadRunOrderConfig().onMergeSelectiveMode).toBe('off');
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
   it('ignores ON_MERGE_SELECTIVE_MODE outside on-merge', () => {
     process.env.ON_MERGE_SELECTIVE_MODE = 'shadow';
     const cfg = loadRunOrderConfig();
