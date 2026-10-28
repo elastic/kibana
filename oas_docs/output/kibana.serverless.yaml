@@ -2673,7 +2673,6 @@ paths:
                   value:
                     active_execution:
                       execution_id: 3b0a8c1e-6f2d-4c57-9a43-1d8e5f7b2a90
-                      started_at: '2025-09-19T17:45:39.554Z'
                     agent_id: elastic-ai-agent
                     created_at: '2025-09-19T17:45:39.554Z'
                     id: bcc176c5-38f6-40be-be0c-898e34fa1480
