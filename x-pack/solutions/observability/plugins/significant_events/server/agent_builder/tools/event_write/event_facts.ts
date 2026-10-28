@@ -203,14 +203,15 @@ export const computeEventFacts = ({
       ? mergeSignalsLatestPerRule(priorDocs, candidate.input.signals ?? [], timestamp)
       : candidate.input.signals ?? [];
 
-  const episodeContext = isContinuation
-    ? mergeEpisodeContext(priorDocs, rest, timestamp)
-    : {
-        sourceIds: rest.source_ids,
-        causalFeatures: rest.causal_features ?? [],
-        blastRadius: rest.blast_radius ?? [],
-        confidence: rest.confidence ?? 0,
-      };
+  const episodeContext =
+    isContinuation && !reopens
+      ? mergeEpisodeContext(priorDocs, rest, timestamp)
+      : {
+          sourceIds: rest.source_ids,
+          causalFeatures: rest.causal_features ?? [],
+          blastRadius: rest.blast_radius ?? [],
+          confidence: rest.confidence ?? 0,
+        };
 
   const { status } = candidate;
 
@@ -226,7 +227,9 @@ export const computeEventFacts = ({
   // A rule that now confirms what the event stored as unconfirmed changes what the event is about:
   // its title and hypothesis must be free to say so.
   const frozenNarrative =
-    isContinuation && !escalatesStoredVerdict({ submitted: candidate.input.signals, latest })
+    isContinuation &&
+    !reopens &&
+    !escalatesStoredVerdict({ submitted: candidate.input.signals, latest })
       ? preserveStableNarrative(
           extractRuleUuids(candidate.input.signals),
           latest,

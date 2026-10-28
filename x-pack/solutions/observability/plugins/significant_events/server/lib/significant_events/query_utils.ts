@@ -55,7 +55,7 @@ export interface PaginatedSearchOptions extends CommonSearchOptions {
 }
 
 /**
- * Maximum number of distinct active events returned by `findLatestActive`. With `sourceIds` + `ruleUuids`
+ * Maximum number of distinct live events returned by `findLatestLive`. With `sourceIds` + `ruleUuids`
  * narrowing the result is proportional to the write batch size, so this cap is a safety bound
  * rather than an operational limit. Shared by `EventClient` and `RuleEventsClient`.
  */

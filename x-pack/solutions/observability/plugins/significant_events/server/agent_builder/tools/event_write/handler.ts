@@ -20,12 +20,17 @@ import {
   decideLifecycle,
   StatusChange,
 } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
+import type { SeriesHead } from '../../../lib/significant_events/events/rule_events_client';
 import { mergeSignalsLatestPerRule } from './episode_context';
 import type { EventsWriteSource } from './severity_lock';
 import {
   buildWriteCandidates,
-  fetchActiveEventsForDedup,
+  DEFAULT_INACTIVE_LOOKBACK_MS,
+  fetchInactiveEventsForReuse,
+  fetchLiveEventsForDedup,
   markDuplicateKeys,
+  competingInactiveHeads,
+  reopenMatchingInactiveSeries,
   resolveDedupSkips,
 } from './dedup';
 import {
@@ -76,14 +81,17 @@ export async function eventsWriteBulkHandler({
   inputs,
   source,
   rejectUnknownEventIds,
+  inactiveLookbackMs = DEFAULT_INACTIVE_LOOKBACK_MS,
   logger,
 }: {
-  /** Reads prior versions and active events from `.rule-events`, and writes each new version. */
+  /** Reads prior versions and live events from `.rule-events`, and writes each new version. */
   eventSearchClient: RuleEventsClient;
   inputs: EventsWriteInput[];
   source?: EventsWriteSource;
   /** Discovery-only guard for explicit IDs that have no canonical event history. */
   rejectUnknownEventIds?: boolean;
+  /** How long a closed series stays reusable by a batch it covers (default 48 h). */
+  inactiveLookbackMs?: number;
   logger?: Logger;
 }): Promise<EventsWriteBulkResult[]> {
   const timestamp = new Date().toISOString();
@@ -94,21 +102,43 @@ export async function eventsWriteBulkHandler({
   const candidates = markDuplicateKeys(buildWriteCandidates(inputs), results);
   const dedupCandidates = candidates.filter((c): c is DedupCandidate => c.mode === 'dedup');
 
-  const activeEvents = await fetchActiveEventsForDedup(eventSearchClient, dedupCandidates);
-  const toWrite = resolveDedupSkips(candidates, activeEvents, results);
+  const liveEvents = await fetchLiveEventsForDedup(eventSearchClient, dedupCandidates);
+  const unskipped = resolveDedupSkips(candidates, liveEvents, results);
+  const inactiveEvents = await fetchInactiveEventsForReuse({
+    eventSearchClient,
+    dedupCandidates: unskipped.filter((c): c is DedupCandidate => c.mode === 'dedup'),
+    inactiveLookbackMs,
+  });
+  const competing = competingInactiveHeads(unskipped, inactiveEvents);
+  // Which closed series an operator deactivated only matters when several compete for one batch;
+  // otherwise the single match wins and the hold stage below does its own lookup.
+  const deactivatedGroupHashes =
+    competing.length === 0
+      ? new Set<string>()
+      : new Set((await eventSearchClient.findOperatorDeactivations({ heads: competing })).keys());
+  const toWrite = reopenMatchingInactiveSeries({
+    candidates: unskipped,
+    inactive: inactiveEvents,
+    deactivatedGroupHashes,
+  });
 
   const eventHistory = await loadHistory({ eventSearchClient, candidates: toWrite });
   const known = keepKnownEvents({ candidates: eventHistory, enabled: rejectUnknownEventIds });
   const decided = decideStatuses({ candidates: known.kept, timestamp });
+  const held = await holdDeactivatedReopens({
+    candidates: decided.kept,
+    eventSearchClient,
+    logger,
+  });
 
   // Facts (merged signals/topology, proposed-then-locked severity) are derived once per candidate,
   // so the no-op check and the final document agree on the same severity.
-  const eventsFacts = decided.kept.map((candidate) =>
+  const eventsFacts = held.kept.map((candidate) =>
     computeEventFacts({ candidate, timestamp, source })
   );
   const changed = keepChanged({ facts: eventsFacts });
 
-  [known, decided, changed].forEach(({ skipped }) =>
+  [known, decided, held, changed].forEach(({ skipped }) =>
     skipped.forEach((result) => {
       results[result.index] = result;
     })
@@ -228,6 +258,71 @@ const decideStatuses = ({
       written: false,
       skipped: true,
       reason: 'unchanged_outcome',
+    });
+  });
+  return stage;
+};
+
+type ReopeningCandidate = ResolvedWriteCandidate & { mode: 'snapshot'; reopensSeries: SeriesHead };
+
+/** A write that would reopen a closed series that the server matched by identity. */
+const isReopeningCandidate = (candidate: ResolvedWriteCandidate): candidate is ReopeningCandidate =>
+  candidate.mode === 'snapshot' &&
+  candidate.reopensSeries !== undefined &&
+  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.some((status) => status === candidate.status);
+
+/**
+ * Sets aside the writes that would reopen a series an operator deactivated, so the agent can read the
+ * operator's reason before the series reopens. A write that carries `reopen_deactivated` has read it
+ * and goes through. Only a new-event batch that a closed series covers can be held: an
+ * item that names a closed event itself has no series head to look a deactivation up by.
+ */
+const holdDeactivatedReopens = async ({
+  candidates,
+  eventSearchClient,
+  logger,
+}: {
+  candidates: ResolvedWriteCandidate[];
+  eventSearchClient: RuleEventsClient;
+  logger?: Logger;
+}): Promise<Stage<ResolvedWriteCandidate>> => {
+  const stage: Stage<ResolvedWriteCandidate> = { kept: [], skipped: [] };
+  const reopening = candidates.filter(isReopeningCandidate);
+  if (reopening.length === 0) {
+    stage.kept.push(...candidates);
+    return stage;
+  }
+
+  // Looked up even for an item that carries `reopen_deactivated`: the flag cannot be proven to
+  // follow a hold, so a reopen it lets through is logged.
+  const deactivations = await eventSearchClient.findOperatorDeactivations({
+    heads: reopening.map(({ reopensSeries }) => reopensSeries),
+  });
+  candidates.forEach((candidate) => {
+    const deactivation = isReopeningCandidate(candidate)
+      ? deactivations.get(candidate.reopensSeries.groupHash)
+      : undefined;
+    if (deactivation === undefined) {
+      stage.kept.push(candidate);
+      return;
+    }
+    const identity = `event_id=${candidate.eventId} group_hash=${deactivation.groupHash}`;
+    if (candidate.input.reopen_deactivated === true) {
+      logger?.info(`reopened_after_deactivation ${identity}`);
+      stage.kept.push(candidate);
+      return;
+    }
+    logger?.info(`held_by_deactivation ${identity}`);
+    stage.skipped.push({
+      index: candidate.index,
+      event_id: candidate.eventId,
+      status: 'inactive',
+      written: false,
+      skipped: true,
+      reason: 'held_by_deactivation',
+      existing_event_id: candidate.eventId,
+      deactivation_reason: deactivation.reason,
+      deactivated_at: deactivation.deactivatedAt,
     });
   });
   return stage;

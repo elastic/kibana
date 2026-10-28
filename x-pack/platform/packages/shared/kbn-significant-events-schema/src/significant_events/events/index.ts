@@ -9,6 +9,7 @@ import { lazySchema, z, isoDateTime } from '@kbn/zod/v4';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import dedent from 'dedent';
+import { i18n } from '@kbn/i18n';
 import { significantEventBaseSchema } from '../common_schemas';
 import {
   MAX_ID_LENGTH,
@@ -16,6 +17,22 @@ import {
   ASSESSMENT_NOTE_ROLE_RULE,
   NO_RAW_SENSITIVE_VALUES_RULE,
 } from '../constants';
+
+/** Alerting v2 `deactivate` accepts a reason of 1 to 1024 characters. */
+export const MAX_DEACTIVATION_REASON_LENGTH = 1024;
+
+/**
+ * How long a closed series stays reusable by an exact-identity batch. The server reads it as its
+ * default lookback; the operator UI quotes it, so the two cannot drift.
+ */
+export const INACTIVE_SERIES_LOOKBACK_HOURS = 48;
+
+/** Note recorded when an operator changes status without giving a reason. */
+export const operatorFallbackAssessmentNote = (status: 'active' | 'inactive'): string =>
+  i18n.translate('xpack.significantEvents.events.operatorFallbackAssessmentNote', {
+    defaultMessage: 'Manually set to {status} by an operator. No reason was given.',
+    values: { status },
+  });
 
 export const SIGNIFICANT_EVENT_STATUS_OPTIONS = [
   ALERT_EPISODE_STATUS.ACTIVE,
@@ -55,7 +72,8 @@ export const significantEventManualStatusSchema = z
  * Statuses that represent an unresolved / ongoing event. Deduplication uses this set to find a
  * prior event for the same issue so successive write cycles dedup against it — a recovering event
  * is still the live episode, so a re-firing rule continues it instead of creating a duplicate. An
- * inactive issue that recurs should create a fresh event.
+ * inactive series is not live: it is reopened only when a batch matches its identity exactly, which
+ * starts a new episode under the same event_id.
  */
 export const SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS = [
   ALERT_EPISODE_STATUS.ACTIVE,
@@ -124,4 +142,6 @@ export type SignificantEvent = z.infer<typeof significantEventSchema>;
  */
 export interface SignificantEventResponse extends SignificantEvent {
   created_at: string;
+  /** The `alert.id` of the series' latest version: the episode an operator deactivation addresses. */
+  episode_id?: string;
 }
