@@ -45,6 +45,7 @@ tags:
   - prod
   - group-platform
   - private
+  - scout-tests
 fileGroups:
   src:
     - index.ts
