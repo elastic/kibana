@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
+import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { TERMS_SIZE, bucketsToArray, bucketsToRecord } from './constants';
 import type { ActionPolicyStatsAggregations, ActionPolicyStatsResults } from './types';
 import type { ActionPolicyStatus } from '../types';
@@ -225,6 +225,7 @@ export async function getActionPolicyStats(
       p99: workflowsPerPolicy?.['99.0'] ?? null,
       avg: aggs?.workflows_per_policy_avg.value ?? null,
     },
-    action_policies_count_with_multiple_workflows: aggs?.count_with_multiple_workflows.doc_count ?? 0,
+    action_policies_count_with_multiple_workflows:
+      aggs?.count_with_multiple_workflows.doc_count ?? 0,
   };
 }
