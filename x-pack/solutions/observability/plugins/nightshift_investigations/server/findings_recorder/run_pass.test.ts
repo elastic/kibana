@@ -64,6 +64,7 @@ describe('runFindingsPass', () => {
     earlier = [] as never[],
     events = [] as Array<Record<string, unknown>>,
     workspace = undefined as unknown,
+    proposals = undefined as unknown,
   } = {}) => {
     const writer = {
       setHypotheses: jest.fn().mockResolvedValue(undefined),
@@ -93,6 +94,7 @@ describe('runFindingsPass', () => {
       getUiSettings: () => ({} as never),
       getAgenticInvestigations: () => ({ getFindingsWriter: () => writer } as never),
       ...(workspace ? { getWorkspace: jest.fn().mockResolvedValue(workspace) } : {}),
+      ...(proposals ? { getProposals: () => proposals as never } : {}),
       logger: loggerMock.create(),
     };
     return { deps, writer, patchMetadata, chatComplete, memory };
@@ -563,6 +565,119 @@ describe('runFindingsPass', () => {
     expect(chatComplete).not.toHaveBeenCalled();
     expect(writer.setHypotheses).not.toHaveBeenCalled();
     expect(deps.logger.warn).not.toHaveBeenCalled();
+  });
+
+  describe('proposals', () => {
+    const proposed = (titles: string[] = []) => ({
+      listTitles: jest.fn().mockResolvedValue(titles),
+      propose: jest.fn().mockResolvedValue(undefined),
+    });
+    const withProposals = {
+      ...output,
+      proposals: [
+        {
+          title: 'Restore the missing secrets',
+          comment: 'Re-create the four secret ids.',
+          impact: 'low',
+          confidence: 'high',
+        },
+        { title: 'Roll back the image', comment: 'Roll back to git-8c16d082da2c.' },
+      ],
+    };
+
+    it('proposes the actions on the final pass', async () => {
+      const proposals = proposed();
+      const { deps, memory } = setup({ answers: [answerWith(withProposals)], proposals });
+
+      await run(deps, memory, { answer: 'Root cause: bad deploy' });
+
+      expect(proposals.propose).toHaveBeenCalledTimes(2);
+      expect(proposals.propose).toHaveBeenCalledWith({
+        request,
+        conversationId: 'c1',
+        proposal: {
+          title: 'Restore the missing secrets',
+          comment: 'Re-create the four secret ids.',
+          impact: 'low',
+          confidence: 'high',
+        },
+      });
+    });
+
+    it('never proposes from a live pass', async () => {
+      const proposals = proposed();
+      const { deps, memory } = setup({ answers: [answerWith(withProposals)], proposals });
+
+      await run(deps, memory);
+
+      expect(proposals.propose).not.toHaveBeenCalled();
+    });
+
+    it('does not propose again what the conversation already has, however it is worded', async () => {
+      const proposals = proposed(['  restore the MISSING secrets ']);
+      const { deps, memory } = setup({ answers: [answerWith(withProposals)], proposals });
+
+      await run(deps, memory, { answer: 'Root cause: bad deploy' });
+
+      expect(proposals.propose).toHaveBeenCalledTimes(1);
+      expect(proposals.propose).toHaveBeenCalledWith(
+        expect.objectContaining({
+          proposal: expect.objectContaining({ title: 'Roll back the image' }),
+        })
+      );
+    });
+
+    it('proposes a repeated title once', async () => {
+      const proposals = proposed();
+      const twice = {
+        ...output,
+        proposals: [withProposals.proposals[0], withProposals.proposals[0]],
+      };
+      const { deps, memory } = setup({ answers: [answerWith(twice)], proposals });
+
+      await run(deps, memory, { answer: 'Root cause: bad deploy' });
+
+      expect(proposals.propose).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps writing the rest of the record when a proposal cannot be created', async () => {
+      const proposals = proposed();
+      proposals.propose.mockRejectedValue(new Error('Workflows are not available'));
+      const { deps, writer, memory } = setup({ answers: [answerWith(withProposals)], proposals });
+
+      await expect(run(deps, memory, { answer: 'Root cause: bad deploy' })).resolves.toBe(true);
+
+      expect(writer.setImpact).toHaveBeenCalled();
+      expect(deps.logger.warn).toHaveBeenCalledWith(expect.stringContaining('proposals'));
+    });
+
+    it('writes no proposals when the plugin is not there', async () => {
+      const { deps, writer, memory } = setup({ answers: [answerWith(withProposals)] });
+
+      await expect(run(deps, memory, { answer: 'Root cause: bad deploy' })).resolves.toBe(true);
+
+      expect(writer.setImpact).toHaveBeenCalled();
+    });
+
+    it('tells a follow-up round what is already proposed, so it does not repeat it', async () => {
+      const proposals = proposed(['Roll back the image']);
+      const { deps, writer, memory } = setup({ proposals });
+      writer.getFindings.mockResolvedValue({
+        hypotheses: [{ candidate: 'Bad deploy', confidence: 0.8, status: 'confirmed' }],
+        impactEntities: [],
+      });
+
+      await run(deps, memory);
+
+      expect(memory.remember).toHaveBeenCalledWith(
+        expect.objectContaining({
+          atGroups: 0,
+          answer: expect.objectContaining({
+            proposals: [{ title: 'Roll back the image', comment: 'Already proposed.' }],
+          }),
+        })
+      );
+    });
   });
 
   it('keeps its answer in the conversation for the next pass', async () => {

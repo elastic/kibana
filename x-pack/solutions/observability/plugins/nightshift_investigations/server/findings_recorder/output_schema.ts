@@ -25,10 +25,18 @@ import {
   MAX_IMPACT_TOOL_ENTITIES,
   type InvestigationEvidence,
 } from '@kbn/agentic-investigations-plugin/common';
+import {
+  MAX_COMMENT_LENGTH,
+  MAX_TITLE_LENGTH,
+  proposalConfidenceSchema,
+  proposalImpactSchema,
+} from '@kbn/proposals-common';
 
 export const FINDINGS_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
 
 const MAX_METADATA_TEXT_LENGTH = 10_000;
+/** Actions the final pass may propose for a person to decide. */
+export const MAX_PROPOSALS = 3;
 /** Evidence charts the recorder may attach to one hypothesis. */
 const MAX_HYPOTHESIS_EVIDENCE_ITEMS = 2;
 
@@ -87,6 +95,17 @@ export const findingsOutputSchema = lazySchema(() => {
           name: z.string().min(1),
           type: z.string().min(1).optional(),
           evidence: evidenceSchema.optional(),
+        })
+      )
+      .optional(),
+    // Actions for a person to decide. Only the final pass records them.
+    proposals: z
+      .array(
+        z.object({
+          title: z.string().min(1),
+          comment: z.string().min(1),
+          impact: z.string().optional(),
+          confidence: z.string().optional(),
         })
       )
       .optional(),
@@ -185,8 +204,9 @@ export const limitEvidence = (raw: RawEvidence): InvestigationEvidence | undefin
 /** A parsed record with its evidence trimmed to what the stores accept. */
 export type FindingsRecord = Omit<
   FindingsOutput,
-  'impact_evidence' | 'impact_entities' | 'hypotheses'
+  'impact_evidence' | 'impact_entities' | 'hypotheses' | 'proposals'
 > & {
+  proposals?: Array<{ title: string; comment: string; impact?: string; confidence?: string }>;
   /** `null` retracts the stored evidence. */
   impact_evidence?: InvestigationEvidence | null;
   impact_entities?: Array<{ name: string; type?: string; evidence?: InvestigationEvidence }>;
@@ -222,6 +242,21 @@ export const limitFindings = (output: FindingsOutput): FindingsRecord => {
                 ...(kept ? { evidence: kept } : {}),
               };
             }),
+        }
+      : {}),
+    ...(output.proposals !== undefined
+      ? {
+          proposals: output.proposals
+            .slice(0, MAX_PROPOSALS)
+            .map(({ title, comment, impact, confidence }) => ({
+              title: truncate(title.trim(), MAX_TITLE_LENGTH),
+              comment: truncate(comment, MAX_COMMENT_LENGTH),
+              // A value the proposal store does not know is left out, not sent to fail the write.
+              ...(impact && proposalImpactSchema.safeParse(impact).success ? { impact } : {}),
+              ...(confidence && proposalConfidenceSchema.safeParse(confidence).success
+                ? { confidence }
+                : {}),
+            })),
         }
       : {}),
     hypotheses: output.hypotheses.slice(0, MAX_HYPOTHESES).map(({ evidence, ...hypothesis }) => {
@@ -366,6 +401,32 @@ export const FINDINGS_JSON_SCHEMA = {
           },
         },
         required: ['name'],
+      },
+    },
+    proposals: {
+      type: 'array',
+      description: `Concrete actions for a person to decide, at most ${MAX_PROPOSALS}: a command, a config change, a code fix or a rollback the findings support. Leave out general advice and anything already proposed.`,
+      items: {
+        type: 'object',
+        properties: {
+          title: { type: 'string', description: 'Short plain text naming the action.' },
+          comment: {
+            type: 'string',
+            description:
+              'What to do and why, in Markdown: the concrete steps and the findings that support them.',
+          },
+          impact: {
+            type: 'string',
+            enum: proposalImpactSchema.options,
+            description: 'How disruptive carrying out the action is.',
+          },
+          confidence: {
+            type: 'string',
+            enum: proposalConfidenceSchema.options,
+            description: 'How strongly the findings support that this action resolves the issue.',
+          },
+        },
+        required: ['title', 'comment'],
       },
     },
     hypotheses: {

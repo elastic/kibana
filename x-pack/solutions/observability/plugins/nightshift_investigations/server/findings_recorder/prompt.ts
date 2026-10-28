@@ -72,6 +72,7 @@ ${SUMMARY}
   - If the conversation says a person changed the severity, it is theirs: leave severity out of your answer, whatever the evidence shows.
 - impact: the business consequence in one or two plain sentences: who or what was affected, how badly, for how long and how broadly, using the numbers the agent measured. Add entities only when two or more services or components were affected in different ways, grouped at service level; never list a single entity. Give each entity its own evidence of how it was affected. When the record already lists entities, list them again with their evidence unless the agent has since shown they were not affected.
 ${evidenceField(files)}
+- proposals: concrete actions for a person to decide, at most three, and only for steps the findings support: a command to run, a config change, a code fix or a rollback. Not general advice, and none that repeats a proposal the record already lists. Each has a short plain-text title and a comment saying what to do and why, in Markdown, with the concrete steps and the findings that support them. Add impact (how disruptive the action is) and confidence (how strongly the findings say it resolves the issue) when you can judge them. Leave proposals out when the cause is unverified and no action is clear.
 ${HYPOTHESES}
 
 ${UPDATING}`;

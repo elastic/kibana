@@ -11,6 +11,7 @@ import {
 } from '@kbn/agentic-investigations-plugin/common';
 import {
   FINDINGS_JSON_SCHEMA,
+  LIVE_FINDINGS_JSON_SCHEMA,
   findingsOutputSchema,
   entityIdFor,
   limitEvidence,
@@ -148,6 +149,43 @@ describe('evidence', () => {
     const record = limitFindings(parsed.data);
     expect(record.impact_evidence?.chart?.series[0].points).toHaveLength(3);
     expect(record.hypotheses[0].evidence).toHaveLength(2);
+  });
+});
+
+describe('proposals', () => {
+  const parse = (proposals: unknown) => {
+    const parsed = findingsOutputSchema.safeParse({ summary: 's', hypotheses: [], proposals });
+    if (!parsed.success) throw new Error(parsed.error.message);
+    return limitFindings(parsed.data).proposals;
+  };
+
+  it('keeps at most three, trims the title and the comment to the store limits', () => {
+    const many = Array.from({ length: 5 }, (_, i) => ({ title: ` t${i} `, comment: `c${i}` }));
+    expect(parse(many)).toHaveLength(3);
+    const [long] = parse([{ title: 'x'.repeat(400), comment: 'y'.repeat(9_000) }]) ?? [];
+    expect(long.title).toHaveLength(256);
+    expect(long.comment).toHaveLength(8_192);
+    expect(parse([{ title: ' trimmed ', comment: 'c' }])?.[0].title).toBe('trimmed');
+  });
+
+  it('keeps an impact and a confidence the store knows, and leaves out one it does not', () => {
+    const [known, unknown] =
+      parse([
+        { title: 'a', comment: 'c', impact: 'low', confidence: 'high' },
+        { title: 'b', comment: 'c', impact: 'catastrophic', confidence: 'certain' },
+      ]) ?? [];
+    expect(known).toMatchObject({ impact: 'low', confidence: 'high' });
+    expect(unknown).not.toHaveProperty('impact');
+    expect(unknown).not.toHaveProperty('confidence');
+  });
+
+  it('leaves the field out of the record when the model sent none', () => {
+    expect(parse(undefined)).toBeUndefined();
+  });
+
+  it('asks for proposals in the final schema only', () => {
+    expect(FINDINGS_JSON_SCHEMA.properties).toHaveProperty('proposals');
+    expect(LIVE_FINDINGS_JSON_SCHEMA.properties).not.toHaveProperty('proposals');
   });
 });
 

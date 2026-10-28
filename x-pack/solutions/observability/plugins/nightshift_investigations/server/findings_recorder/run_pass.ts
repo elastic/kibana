@@ -43,6 +43,17 @@ import {
   type RecorderWorkspace,
 } from './workspace_tools';
 
+/** What the final pass needs from the proposals plugin: what is already proposed, and to propose. */
+export interface RecorderProposals {
+  /** The titles of the proposals the investigation already has, so a later round does not repeat them. */
+  listTitles: (args: { request: KibanaRequest; conversationId: string }) => Promise<string[]>;
+  propose: (args: {
+    request: KibanaRequest;
+    conversationId: string;
+    proposal: { title: string; comment: string; impact?: string; confidence?: string };
+  }) => Promise<void>;
+}
+
 export interface FindingsPassDeps {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   getInference: () => InferenceServerStart | undefined;
@@ -53,6 +64,7 @@ export interface FindingsPassDeps {
    * A read-only view of the investigation's sandbox workspace, for the final pass. Absent or
    * resolving to `undefined` when there is no sandbox: the final pass then answers without files.
    */
+  getProposals?: () => RecorderProposals | undefined;
   getWorkspace?: (args: {
     request: KibanaRequest;
     conversationId: string;
@@ -182,7 +194,8 @@ const storedRecord = async (
   agenticInvestigations: AgenticInvestigationsPluginStart,
   request: KibanaRequest,
   conversationId: string,
-  conversation: ConversationLike
+  conversation: ConversationLike,
+  proposedTitles: readonly string[]
 ): Promise<Record<string, unknown> | undefined> => {
   try {
     const { hypotheses, impactSummary, impactEvidence, impactEntities } =
@@ -195,6 +208,12 @@ const storedRecord = async (
       ...(typeof severity === 'string' && severity ? { severity } : {}),
       ...(impactSummary ? { impact_summary: impactSummary } : {}),
       ...(impactEvidence ? { impact_evidence: impactEvidence } : {}),
+      // What is already proposed, so a follow-up does not propose it again.
+      ...(proposedTitles.length
+        ? {
+            proposals: proposedTitles.map((title) => ({ title, comment: 'Already proposed.' })),
+          }
+        : {}),
       ...(impactEntities.length
         ? {
             impact_entities: impactEntities.map(({ id, name, type, evidence }) => ({
@@ -267,11 +286,16 @@ export const runFindingsPass = async (
     if (!model) return false;
 
     if (memory.turns().length === 0) {
+      const proposedTitles = await deps
+        .getProposals?.()
+        ?.listTitles({ request, conversationId })
+        .catch(() => []);
       const stored = await storedRecord(
         agenticInvestigations,
         request,
         conversationId,
-        conversation
+        conversation,
+        proposedTitles ?? []
       );
       if (stored) memory.remember({ atGroups: 0, final: false, answer: stored });
     }
@@ -582,6 +606,26 @@ export const runFindingsPass = async (
                 }
               : {}),
           }),
+      ]);
+    }
+    const proposals = deps.getProposals?.();
+    if (final && proposals && record.proposals?.length) {
+      const wanted = record.proposals;
+      writes.push([
+        'proposals',
+        async () => {
+          // Read again here: another round may have proposed since the pass started. A title
+          // already proposed is not proposed again, whichever way the model worded the rest.
+          const key = (title: string) => title.trim().toLowerCase();
+          const proposed = new Set(
+            (await proposals.listTitles({ request, conversationId })).map(key)
+          );
+          for (const proposal of wanted) {
+            if (proposed.has(key(proposal.title))) continue;
+            proposed.add(key(proposal.title));
+            await proposals.propose({ request, conversationId, proposal });
+          }
+        },
       ]);
     }
   }
