@@ -65,7 +65,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
         '.euiBasicTable[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)'
       );
     },
-    async searchConnectors(searchText: string) {
+    async searchConnectors(searchText: string, { expectNoResults = false } = {}) {
       const searchBox = await find.byCssSelector('[data-test-subj="actionsList"] .euiFieldSearch');
       await searchBox.click();
       await searchBox.clearValue();
@@ -73,7 +73,9 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await searchBox.pressKeys(ENTER_KEY);
       await retry.waitFor('connectors list filtered to the search text', async () => {
         const rows = await this.getConnectorsList();
-        return rows.length > 0 && rows.every((row) => row.name.includes(searchText));
+        return expectNoResults
+          ? rows.length === 0
+          : rows.length > 0 && rows.every((row) => row.name.includes(searchText));
       });
     },
     async searchAlerts(searchText: string) {
