@@ -285,13 +285,28 @@ const buildRecommendationReasonLines = ({
   if (!hasExecutable) {
     lines.push('No respond action could be filled for this finding.');
   }
-  if (unenrolledHosts.length > 0) {
+  // A remote-only host was never looked up in this deployment's Fleet, so "not enrolled"
+  // would be a claim nothing checked; it gets its own line naming where it was seen.
+  const remoteHosts = unenrolledHosts.filter((h) => h.remoteClusters !== undefined);
+  const localUnenrolled = unenrolledHosts.filter((h) => h.remoteClusters === undefined);
+  if (localUnenrolled.length > 0) {
     lines.push(
-      `${unenrolledHosts.length === 1 ? 'Host' : 'Hosts'} ${unenrolledHosts
+      `${localUnenrolled.length === 1 ? 'Host' : 'Hosts'} ${localUnenrolled
         .map((h) => h.name)
         .join(', ')} ${
-        unenrolledHosts.length === 1 ? 'is' : 'are'
-      } not enrolled, so no Defend action reaches ${unenrolledHosts.length === 1 ? 'it' : 'them'}.`
+        localUnenrolled.length === 1 ? 'is' : 'are'
+      } not enrolled, so no Defend action reaches ${localUnenrolled.length === 1 ? 'it' : 'them'}.`
+    );
+  }
+  if (remoteHosts.length > 0) {
+    lines.push(
+      `${remoteHosts.length === 1 ? 'Host' : 'Hosts'} ${remoteHosts
+        .map((h) => `${h.name} (${(h.remoteClusters ?? []).join(', ')})`)
+        .join(', ')} ${
+        remoteHosts.length === 1 ? 'was' : 'were'
+      } seen only on a remote cluster, so response actions from this deployment can't reach ${
+        remoteHosts.length === 1 ? 'it' : 'them'
+      }.`
     );
   }
   const identityCount = users.length + services.length;

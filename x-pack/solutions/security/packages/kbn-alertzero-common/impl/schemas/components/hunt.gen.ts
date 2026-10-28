@@ -179,9 +179,37 @@ export const AffectedAsset = lazySchema(() =>
   z.object({
     name: z.string(),
     hit_count: z.number().int(),
+    /**
+     * Whether any hit for this asset came from a local index. Absent when the source indices are unknown (for example, the per-asset index breakdown was cut off before any local index was seen).
+     */
+    local: z
+      .boolean()
+      .optional()
+      .describe(
+        'Whether any hit for this asset came from a local index. Absent when the source indices are unknown (for example, the per-asset index breakdown was cut off before any local index was seen).'
+      ),
+    /**
+     * Remote cluster aliases (`<cluster>:` prefix of a hit's `_index`) this asset was seen on. Present whenever `local` is.
+     */
+    remote_clusters: z
+      .array(z.string().max(255))
+      .max(20)
+      .optional()
+      .describe(
+        "Remote cluster aliases (`<cluster>:` prefix of a hit's `_index`) this asset was seen on. Present whenever `local` is."
+      ),
   })
 );
 export type AffectedAsset = z.infer<typeof AffectedAsset>;
+
+export const HostOrigin = lazySchema(() =>
+  z.object({
+    name: z.string().max(512),
+    local: z.boolean(),
+    remote_clusters: z.array(z.string().max(255)).max(20),
+  })
+);
+export type HostOrigin = z.infer<typeof HostOrigin>;
 
 export const HuntForThreatHit = lazySchema(() =>
   z

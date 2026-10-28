@@ -20,6 +20,7 @@ import {
   HuntIoc,
   HuntForThreatResult,
   HuntIncompleteReason,
+  HostOrigin,
   HuntForThreatHit,
   HuntIncompleteness,
   HuntCompleteness,
@@ -159,6 +160,16 @@ export const HuntCoordinatorResult = lazySchema(() =>
               .array(z.string())
               .optional()
               .describe('Distinct user.name values from required-index rows, capped at 20.'),
+            /**
+             * Where each `affected_hosts` entry was seen (local cluster, remote clusters, or both), from the same rows' `_index`.
+             */
+            affected_host_origins: z
+              .array(HostOrigin)
+              .max(20)
+              .optional()
+              .describe(
+                "Where each `affected_hosts` entry was seen (local cluster, remote clusters, or both), from the same rows' `_index`."
+              ),
             /**
              * True when more than 20 distinct hosts were seen.
              */

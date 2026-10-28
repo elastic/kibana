@@ -13,6 +13,7 @@ import type { z } from '@kbn/zod/v4';
 import type {
   HuntBehaviorArticleContext,
   HuntBehaviorIoc,
+  HostOrigin,
   HuntForThreatHit,
   HuntIncompleteness,
   HuntIncompleteReason,
@@ -20,6 +21,7 @@ import type {
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { HuntBehaviorModels } from '../types';
 import { isIndexExclusion } from '../../../../../common/remote_cluster';
+import { originOfIndices } from '../common/host_origin';
 import { buildMatchesRequired } from '../common/matches_required';
 import {
   huntBehaviorLlmExtractionSchema,
@@ -43,6 +45,8 @@ import type {
 } from './types';
 
 const MAX_AFFECTED_ENTITIES = 20;
+/** `HostOrigin.name` schema cap. */
+const MAX_ORIGIN_NAME_LENGTH = 512;
 /** Cap Tier 2 Discover refs to match SSE `events[]` / `alerts[]` max. */
 const MAX_HITS = 50;
 
@@ -202,6 +206,34 @@ const uniqueTrimmed = (values: unknown[], max: number): { items: string[]; trunc
 };
 
 /**
+ * Where each kept host was seen, from the `_index` of the rows that named it. Every row here
+ * already passed the required-index check, so `_index` is always a string. A name longer than
+ * the origin schema allows gets no origin, which packaging reads as unknown.
+ */
+const hostOriginsOf = (
+  rows: unknown[][],
+  hostCol: number,
+  indexCol: number,
+  hosts: string[]
+): HostOrigin[] => {
+  const indicesByHost = new Map(
+    hosts
+      .filter((name) => name.length <= MAX_ORIGIN_NAME_LENGTH)
+      .map((name) => [name, new Set<string>()])
+  );
+  for (const row of rows) {
+    const host = row[hostCol];
+    const index = row[indexCol];
+    if (typeof host !== 'string' || typeof index !== 'string') continue;
+    indicesByHost.get(host.trim())?.add(index);
+  }
+  return [...indicesByHost].flatMap(([name, indices]) => {
+    const origin = originOfIndices(indices);
+    return origin ? [{ name, ...origin }] : [];
+  });
+};
+
+/**
  * Execute a generated query in the hunt window. Hit bar counts only rows
  * whose `_index` matches a required pattern. Per-behavior errors record
  * `executed: false` and do not fail the tier.
@@ -226,6 +258,7 @@ const executeValidatedEsql = async ({
   execution: BehaviorExecution;
   affected_hosts?: string[];
   affected_users?: string[];
+  affected_host_origins?: HostOrigin[];
   affected_hosts_truncated?: boolean;
   affected_users_truncated?: boolean;
   hits?: HuntForThreatHit[];
@@ -298,6 +331,7 @@ const executeValidatedEsql = async ({
             MAX_AFFECTED_ENTITIES
           )
         : undefined;
+    const hostOrigins = hosts ? hostOriginsOf(requiredRows, hostCol, indexCol, hosts.items) : [];
 
     // `prepareEsqlForExecute` injects `METADATA _id`/`_index` but deliberately does
     // not undo a `DROP _id` the model wrote, so a query can keep `_index` — enough to
@@ -344,6 +378,7 @@ const executeValidatedEsql = async ({
       ...(hosts && hosts.items.length > 0
         ? {
             affected_hosts: hosts.items,
+            ...(hostOrigins.length > 0 ? { affected_host_origins: hostOrigins } : {}),
             ...(hosts.truncated ? { affected_hosts_truncated: true } : {}),
           }
         : {}),
@@ -1027,6 +1062,9 @@ export const huntBehavior = async (
         );
       }
       if (executed.affected_hosts) behavior.affected_hosts = executed.affected_hosts;
+      if (executed.affected_host_origins) {
+        behavior.affected_host_origins = executed.affected_host_origins;
+      }
       if (executed.affected_users) behavior.affected_users = executed.affected_users;
       if (executed.affected_hosts_truncated) behavior.affected_hosts_truncated = true;
       if (executed.affected_users_truncated) behavior.affected_users_truncated = true;

@@ -321,6 +321,15 @@ components:
                       rows, capped at 20.
                     items:
                       type: string
+                  affected_host_origins:
+                    type: array
+                    maxItems: 20
+                    description: >-
+                      Where each `affected_hosts` entry was seen (local
+                      cluster, remote clusters, or both), from the same rows'
+                      `_index`.
+                    items:
+                      $ref: '../components/hunt.schema.yaml#/components/schemas/HostOrigin'
                   affected_hosts_truncated:
                     type: boolean
                     description: >-

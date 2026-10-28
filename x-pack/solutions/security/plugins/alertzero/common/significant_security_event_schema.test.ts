@@ -64,6 +64,45 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
     expect(result.success).toBe(false);
   });
 
+  it('keeps an entity origin when present', () => {
+    const origin = { local: false, remote_clusters: ['cluster_b'] };
+    const result = significantSecurityEventAttachmentDataSchema.safeParse({
+      ...validPayload,
+      entities: [{ field: 'host.name', value: 'srv-01', ...origin }],
+    });
+
+    expect(result.success && result.data.entities).toEqual([
+      { field: 'host.name', value: 'srv-01', ...origin },
+    ]);
+  });
+
+  it('rejects an entity origin naming more remote clusters than the bound', () => {
+    const result = significantSecurityEventAttachmentDataSchema.safeParse({
+      ...validPayload,
+      entities: [
+        {
+          field: 'host.name',
+          value: 'srv-01',
+          local: false,
+          remote_clusters: Array.from({ length: 21 }, (_, i) => `c${i}`),
+        },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an entity origin with a cluster alias over 255 characters', () => {
+    const result = significantSecurityEventAttachmentDataSchema.safeParse({
+      ...validPayload,
+      entities: [
+        { field: 'host.name', value: 'srv-01', local: false, remote_clusters: ['c'.repeat(256)] },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
   it('rejects alerts missing index', () => {
     const result = significantSecurityEventAttachmentDataSchema.safeParse({
       ...validPayload,

@@ -10,6 +10,7 @@ import type { significantSecurityEventAttachmentDataSchema } from '../../../../.
 import { significantSecurityEventAttachmentReadSchema } from '../../../../../common/significant_security_event_schema';
 import { splitRemoteCluster } from '../../../../../common/remote_cluster';
 import type { ResolveHostEnrollment } from '../../../fleet/resolve_host_enrollment';
+import { HostOrigins, toEntityOrigin } from '../common/host_origin';
 import { buildMatchesRequired } from '../common/matches_required';
 import type { RehydrateProcessSelectors } from './rehydrate_process_selectors';
 import type {
@@ -256,10 +257,26 @@ export const readCurrentRunState = async ({
 
   // Enrollment is resolved by host name against this deployment's Fleet, so a remote host
   // sharing a name with a local agent (`ubuntu`, `ip-10-0-0-12`) would resolve to that
-  // unrelated agent. Entities carry no provenance, so the cut is run-wide and resolves only
-  // on positive local evidence: an alert ref (always local), a local hit index, or a
-  // truncated `per_index` that may hide one. A run with no hit index has nothing to back an
-  // action, so it resolves nothing. A mixed local/remote run still resolves every host.
+  // unrelated agent. The run-wide cut resolves only on positive local evidence: an alert ref
+  // (always local), a local hit index, or a truncated `per_index` that may hide one. A run
+  // with no hit index has nothing to back an action. A host's own origin only narrows that
+  // cut, never widens it: whoever writes an SSE can set `local` (and `hunt_result`, so Tier
+  // 2's origins can't be trusted either). A host the hunt saw locally almost always comes
+  // with local evidence; the exception, Tier 2 rows whose `_id` was dropped in a run whose
+  // Tier 1 hits were all remote, fails closed. A host seen only on remote clusters is
+  // never resolved; one with no origin (an older SSE, an agent-written entity, a source
+  // breakdown that was cut off) follows the run-wide cut.
+  //
+  // Origins are read off `host.name` only, which is the field the mapper writes them on. A
+  // `host.hostname` entity of the same value would otherwise merge in as an unknown
+  // sighting and undo a known one.
+  const hostOrigins = new HostOrigins();
+  for (const sse of currentRun) {
+    for (const entity of sse.entities) {
+      if (entity.field === 'host.name') hostOrigins.add(entity.value, toEntityOrigin(entity));
+    }
+  }
+
   const hitIndices = [
     ...currentRun.flatMap((sse) =>
       (sse.hunt_result?.tier1.per_index ?? [])
@@ -275,6 +292,16 @@ export const readCurrentRunState = async ({
 
   const hosts: CurrentRunHost[] = [];
   for (const name of hostNames) {
+    const origin = hostOrigins.originOf(name);
+    if (origin && !origin.local) {
+      hosts.push({
+        name,
+        enrolled: false,
+        capabilities: [],
+        remoteClusters: origin.remote_clusters,
+      });
+      continue;
+    }
     const enrollment = hasLocalEvidence
       ? await resolveHostEnrollment(name)
       : { enrolled: false as const };

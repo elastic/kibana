@@ -26,6 +26,7 @@ import type { SignificantSecurityEventAttachmentData } from '../../../../../comm
 import type { SeverityLevel } from '../../../../../common/attachment_enums';
 import { splitRemoteCluster, stripBackingPrefix } from '../../../../../common/remote_cluster';
 import type { HuntCoordinatorCoreResult } from '../hunt_coordinator';
+import { HostOrigins, toEntityOrigin } from './host_origin';
 
 /**
  * Full SSE attachment payload produced by this mapper. Derived from the
@@ -302,7 +303,31 @@ const buildEntities = (
     (entity) => `${entity.field}|${entity.value}`
   );
 
-  return { entities: taken, truncated, originalCount };
+  const origins = hostOrigins(result, onlyTechniqueId);
+  const entities = taken.map((entity): SseEntityRef => {
+    const origin = entity.field === 'host.name' ? origins.originOf(entity.value) : undefined;
+    return origin ? { ...entity, ...origin } : entity;
+  });
+  return { entities, truncated, originalCount };
+};
+
+/**
+ * Where each host entity was seen, merged over every place this entry names it: Tier 1's
+ * assets and the scoped behaviors' rows. `takeAlternating` keeps one copy of a host both
+ * tiers name, so the origin is merged here rather than read off whichever copy survived.
+ */
+const hostOrigins = (result: HuntCoordinatorCoreResult, onlyTechniqueId?: string): HostOrigins => {
+  const origins = new HostOrigins();
+  for (const host of result.tier1.affected_assets.hosts) {
+    origins.add(host.name, toEntityOrigin(host));
+  }
+  for (const behavior of scopedBehaviors(result, onlyTechniqueId)) {
+    const byName = new Map(
+      (behavior.affected_host_origins ?? []).map((origin) => [origin.name, toEntityOrigin(origin)])
+    );
+    for (const host of behavior.affected_hosts ?? []) origins.add(host, byName.get(host));
+  }
+  return origins;
 };
 
 /**

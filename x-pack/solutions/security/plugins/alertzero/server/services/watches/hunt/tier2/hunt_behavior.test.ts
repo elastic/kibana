@@ -811,6 +811,68 @@ describe('huntBehavior', () => {
     expect(result.behaviors[0].affected_hosts_truncated).toBe(true);
   });
 
+  describe('host origins', () => {
+    const ccsParams = { ...executeParams, allowed_indices: ['logs-aws.*', 'cluster_b:logs-aws.*'] };
+
+    it('records where each affected host was seen, from the rows that named it', async () => {
+      executeEsqlMock.mockResolvedValue({
+        columns: [col('_index'), col('host.name')],
+        values: [
+          ['logs-aws.cloudtrail-default', 'web-1'],
+          ['cluster_b:logs-aws.cloudtrail-default', 'web-1'],
+          ['cluster_b:logs-aws.cloudtrail-default', 'ubuntu'],
+        ],
+      });
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        ccsParams,
+        esClient
+      );
+
+      expect(result.behaviors[0].affected_hosts).toEqual(['web-1', 'ubuntu']);
+      expect(result.behaviors[0].affected_host_origins).toEqual([
+        { name: 'web-1', local: true, remote_clusters: ['cluster_b'] },
+        { name: 'ubuntu', local: false, remote_clusters: ['cluster_b'] },
+      ]);
+    });
+
+    it('ignores rows outside the required scope when deciding a host origin', async () => {
+      executeEsqlMock.mockResolvedValue({
+        columns: [col('_index'), col('host.name')],
+        values: [
+          ['cluster_b:logs-aws.cloudtrail-default', 'ubuntu'],
+          ['.alerts-security.alerts-default', 'ubuntu'],
+        ],
+      });
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        ccsParams,
+        esClient
+      );
+
+      expect(result.behaviors[0].affected_host_origins).toEqual([
+        { name: 'ubuntu', local: false, remote_clusters: ['cluster_b'] },
+      ]);
+    });
+
+    it('omits host origins when no host was affected', async () => {
+      executeEsqlMock.mockResolvedValue({
+        columns: [col('_index')],
+        values: [['logs-aws.cloudtrail-default']],
+      });
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        ccsParams,
+        esClient
+      );
+
+      expect(result.behaviors[0].affected_host_origins).toBeUndefined();
+    });
+  });
+
   describe('a generated query that reads outside the hunt scope', () => {
     const OUT_OF_SCOPE_ESQL = 'FROM .kibana-secrets\n| LIMIT 10';
 
