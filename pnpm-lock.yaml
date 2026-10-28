@@ -5504,6 +5504,9 @@ importers:
       '@kbn/eslint-plugin-alerting-v2':
         specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-alerting-v2
+      '@kbn/eslint-plugin-compat':
+        specifier: workspace:*
+        version: link:packages/kbn-eslint-plugin-compat
       '@kbn/eslint-plugin-disable':
         specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-disable
@@ -7012,6 +7015,8 @@ importers:
   packages/kbn-eslint-config: {}
 
   packages/kbn-eslint-plugin-alerting-v2: {}
+
+  packages/kbn-eslint-plugin-compat: {}
 
   packages/kbn-eslint-plugin-disable: {}
 

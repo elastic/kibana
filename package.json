@@ -1860,6 +1860,7 @@
     "@kbn/es-snapshot-loader": "workspace:*",
     "@kbn/eslint-config": "workspace:*",
     "@kbn/eslint-plugin-alerting-v2": "workspace:*",
+    "@kbn/eslint-plugin-compat": "workspace:*",
     "@kbn/eslint-plugin-disable": "workspace:*",
     "@kbn/eslint-plugin-eslint": "workspace:*",
     "@kbn/eslint-plugin-i18n": "workspace:*",
