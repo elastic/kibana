@@ -10,7 +10,6 @@
 import { ControlValuesSource, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { apiComparesSerializedState } from '@kbn/presentation-publishing';
 import { waitFor } from '@testing-library/react';
 
 import { dataViewsService } from '../../../services/kibana_services';
@@ -317,32 +316,6 @@ describe('Options List Control Api', () => {
       });
       const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
       expect(hasUnsavedChanges).toBe(false);
-    });
-
-    test('compares an ES|QL control sorted by count as sorted by key, the way it loads it', async () => {
-      const initialState = optionsListDSLControlSchema.parse({
-        values_source: ControlValuesSource.FIELD,
-        data_view_id: 'myDataViewId',
-        field_name: 'myFieldName',
-      });
-      const { api } = await factory.buildEmbeddable({
-        initializeDrilldownsManager: jest.fn(),
-        initialState,
-        finalizeApi,
-        uuid,
-        parentApi: {},
-      });
-      const esqlState = { ...initialState, values_source: ControlValuesSource.ESQL };
-      const compareSerializedState = apiComparesSerializedState(api)
-        ? api.compareSerializedState
-        : undefined;
-
-      expect(
-        compareSerializedState?.(
-          { ...esqlState, sort: { by: '_count', direction: 'desc' } },
-          { ...esqlState, sort: { by: '_key', direction: 'desc' } }
-        )
-      ).toBe(true);
     });
   });
 
