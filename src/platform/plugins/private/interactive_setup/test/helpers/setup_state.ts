@@ -23,7 +23,9 @@ const VERIFICATION_CODE_ROUTE = '/test_endpoints/verification_code';
  * `/internal/interactive_setup/{enroll,configure}` has to carry it, and it changes on every boot.
  */
 export async function getVerificationCode(apiClient: ApiClientFixture): Promise<string> {
-  const response = await apiClient.get(VERIFICATION_CODE_ROUTE);
+  const response = await apiClient.get(VERIFICATION_CODE_ROUTE, {
+    headers: { 'x-elastic-internal-origin': 'kibana' },
+  });
   expect(response).toHaveStatusCode(200);
 
   return response.body.verificationCode;
