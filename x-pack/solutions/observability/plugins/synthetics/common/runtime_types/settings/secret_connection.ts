@@ -69,3 +69,9 @@ export interface SecretConnectionStatus {
   config?: HashiCorpVaultConfig;
   hasSecret?: boolean;
 }
+
+/** Outcome of `POST /_test`: whether Kibana could reach Vault and authenticate. */
+export interface SecretConnectionTestResult {
+  ok: boolean;
+  message: string;
+}

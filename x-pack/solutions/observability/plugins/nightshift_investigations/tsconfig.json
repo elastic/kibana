@@ -8,10 +8,12 @@
     "server/**/*",
     "public/**/*",
     "integration_tests/**/*",
+    "scripts/**/*",
     "test/scout*/**/*"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/dev-cli-runner",
     "@kbn/share-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/nightshift-decision-trees",
@@ -51,6 +53,7 @@
     "@kbn/es-types",
     "@kbn/rule-registry-plugin",
     "@kbn/actions-plugin",
+    "@kbn/actions-types",
     "@kbn/alerting-plugin",
     "@kbn/sandbox-plugin",
     "@kbn/context-engine-plugin",

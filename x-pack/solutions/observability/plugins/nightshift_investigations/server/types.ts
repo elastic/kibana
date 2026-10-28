@@ -41,6 +41,11 @@ export interface InvestigationQuotaResult {
 
 export type InvestigationQuotaCallback = () => Promise<InvestigationQuotaResult>;
 
+export interface AutomationBudget {
+  consume: () => Promise<void>;
+  release: () => Promise<void>;
+}
+
 export interface NightshiftInvestigationsServerSetup {
   registerInvestigationQuota: (callback: InvestigationQuotaCallback) => void;
 }

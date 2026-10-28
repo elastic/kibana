@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { i18n } from '@kbn/i18n';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -28,6 +29,9 @@ import {
   MAX_SLACK_SEEN_EVENTS,
   MAX_EVIDENCE_TEXT_LENGTH,
   MAX_SUBJECTS_PER_CONVERSATION,
+  INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+  MAX_INVESTIGATION_RUN_FAILURE_TEXT_LENGTH,
+  investigationRunFailedEventSchema,
 } from '@kbn/agentic-investigations-plugin/common';
 import { assertNever } from '@kbn/std';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
@@ -40,7 +44,7 @@ import {
 import { investigationNotificationDestinationsSchema } from '../../common/schemas';
 import type { InvestigationNotificationDestination } from '../../common/schemas';
 import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
-import type { InvestigationQuotaCallback } from '../types';
+import type { AutomationBudget, InvestigationQuotaCallback } from '../types';
 import type {
   AlertInvestigationContext,
   InvestigationAlertSnapshot,
@@ -431,18 +435,21 @@ export class NightshiftInvestigationsClient {
     };
   }
 
-  async start({
-    subject,
-    title,
-    trigger_type,
-    message,
-    timeout_seconds,
-    source_ids,
-    connector_id,
-    context = {},
-    notificationDestinations,
-    slack_thread: slackThread,
-  }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
+  async start(
+    {
+      subject,
+      title,
+      trigger_type,
+      message,
+      timeout_seconds,
+      source_ids,
+      connector_id,
+      context = {},
+      notificationDestinations,
+      slack_thread: slackThread,
+    }: StartInvestigationRequest,
+    { automationBudget }: { automationBudget?: AutomationBudget } = {}
+  ): Promise<StartInvestigationResponse> {
     if (!(await this.checkInfrastructureAvailability())) {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
@@ -493,9 +500,12 @@ export class NightshiftInvestigationsClient {
       newInvestigationId,
       // Only a start that opens a new investigation counts against the daily automatic quota:
       // a follow-up adds a round to an investigation that was already paid for.
-      assertCanOpenNew: () => this.assertQuotaForNewInvestigation(trigger_type),
+      assertCanOpenNew: () => this.assertQuotaForNewInvestigation(trigger_type, automationBudget),
     });
     const isFollowUp = investigationId !== newInvestigationId;
+    if (isFollowUp) {
+      await this.releaseAutomationBudget(automationBudget);
+    }
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install stays because the run
@@ -590,6 +600,18 @@ export class NightshiftInvestigationsClient {
     }
   }
 
+  private async releaseAutomationBudget(automationBudget?: AutomationBudget): Promise<void> {
+    try {
+      await automationBudget?.release();
+    } catch (error) {
+      this.logger.warn(
+        `Could not release the automation budget: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
   private async getInvestigationWorkflow(spaceId: string): Promise<InstalledWorkflow> {
     const { workflowsManagement } = this.requireWriteDeps();
     const workflowId = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
@@ -632,19 +654,25 @@ export class NightshiftInvestigationsClient {
     );
   }
 
-  /** Charges the daily automatic quota for a start that opens a new investigation. */
+  /**
+   * Charges the automation budget, then the global quota. A global denial releases the automation
+   * budget, so a denied start never uses up the automation limit.
+   */
   private async assertQuotaForNewInvestigation(
-    triggerType: StartInvestigationRequest['trigger_type']
+    triggerType: StartInvestigationRequest['trigger_type'],
+    automationBudget?: AutomationBudget
   ): Promise<void> {
     switch (triggerType) {
       case 'manual':
         return;
       case 'automatic': {
+        await automationBudget?.consume();
         const { allowed } = await evaluateInvestigationQuota({
           callback: this.investigationQuotaCallback,
           logger: this.logger,
         });
         if (!allowed) {
+          await this.releaseAutomationBudget(automationBudget);
           throw new InvestigationQuotaDeniedError();
         }
         return;
@@ -722,8 +750,9 @@ export class NightshiftInvestigationsClient {
     }
 
     // Charged before the claim, so a denied start claims nothing. A start that then loses the
-    // claim to a concurrent one becomes a follow-up but stays charged; the quota callback has no
-    // refund, and the race needs two starts for the same new subject within moments.
+    // claim to a concurrent one becomes a follow-up and releases its automation budget, but the
+    // global quota stays charged; the quota callback has no refund, and the race needs two starts
+    // for the same new subject within moments.
     await assertCanOpenNew();
     const claim = await subjectsClient.claimSubjects({
       conversationId: newInvestigationId,
@@ -768,15 +797,20 @@ export class NightshiftInvestigationsClient {
     return this.ensureInvestigationConversation(investigationId, executionId, true);
   }
 
-  /** Records a failed run without reopening a conversation the user has closed. */
-  async ensureForFailure(investigationId: string, executionId: string): Promise<string> {
-    return this.ensureInvestigationConversation(investigationId, executionId, false);
+  /** Records a failed run and its context without reopening a conversation the user has closed. */
+  async ensureForFailure(
+    investigationId: string,
+    executionId: string,
+    reason: string
+  ): Promise<string> {
+    return this.ensureInvestigationConversation(investigationId, executionId, false, reason);
   }
 
   private async ensureInvestigationConversation(
     investigationId: string,
     executionId: string,
-    reopen: boolean
+    reopen: boolean,
+    failureReason?: string
   ): Promise<string> {
     const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
 
@@ -816,6 +850,16 @@ export class NightshiftInvestigationsClient {
         : {}),
     });
 
+    if (failureReason !== undefined) {
+      await this.recordInvestigationRunFailure({
+        conversations,
+        conversationId: conversation.id,
+        executionId,
+        message: asString(inputs?.message),
+        reason: failureReason,
+      });
+    }
+
     const subjects = recoverSubjectsFromInputs(inputs, investigationId);
     if (subjects.length > 0) {
       const subjectsClient = agenticInvestigations.getSubjectsClient(this.request);
@@ -851,6 +895,49 @@ export class NightshiftInvestigationsClient {
     }
 
     return conversation.id;
+  }
+
+  private async recordInvestigationRunFailure({
+    conversations,
+    conversationId,
+    executionId,
+    message,
+    reason,
+  }: {
+    conversations: ConversationPublicClient;
+    conversationId: string;
+    executionId: string;
+    message?: string;
+    reason: string;
+  }): Promise<void> {
+    try {
+      await conversations.addEvents({
+        conversationId,
+        events: [
+          {
+            type: INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+            data: investigationRunFailedEventSchema.parse({
+              execution_id: executionId,
+              request: message?.trim()
+                ? message.slice(0, MAX_INVESTIGATION_RUN_FAILURE_TEXT_LENGTH)
+                : undefined,
+              reason: (
+                reason.trim() ||
+                i18n.translate('xpack.nightshiftInvestigations.failure.defaultReasonErrorMessage', {
+                  defaultMessage: 'Investigation failed',
+                })
+              ).slice(0, MAX_INVESTIGATION_RUN_FAILURE_TEXT_LENGTH),
+            }),
+          },
+        ],
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Could not record failure context for investigation "${conversationId}", execution "${executionId}": ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
   }
 
   /**
