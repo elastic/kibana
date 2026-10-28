@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
+
 export interface NameValuePair {
   name: string;
   value: number;
@@ -62,6 +64,15 @@ export interface AlertingV2Usage {
   action_policies_count_with_group_by?: number;
   action_policies_avg_group_by_fields_count?: number | null;
   action_policies_count_by_throttle_interval?: NameValuePair[];
+  action_policies_count_by_status?: Partial<Record<ActionPolicyStatus, number>>;
+  action_policies_count_by_grouping_mode?: Partial<Record<GroupingMode, number>>;
+  action_policies_count_by_throttle_strategy?: Partial<Record<ThrottleStrategy | 'none', number>>;
+  action_policies_workflows_per_policy?: {
+    p50: number | null;
+    p99: number | null;
+    avg: number | null;
+  };
+  action_policies_count_with_multiple_workflows?: number;
 
   // alert event stats
   alerts_count?: number;
