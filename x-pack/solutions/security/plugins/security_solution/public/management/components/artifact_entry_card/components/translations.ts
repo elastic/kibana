@@ -189,6 +189,11 @@ export const DESCRIPTION_LABEL = i18n.translate(
   }
 );
 
+export const POLICY_DETAILS_NOT_ACCESSIBLE_IN_ACTIVE_SPACE = i18n.translate(
+  'xpack.securitySolution.effectScope.policyDetailsNotAccessibleInActiveSpace',
+  { defaultMessage: 'Policy is not accessible from the current space' }
+);
+
 export const MANAGEMENT_OF_SHARED_PER_POLICY_ARTIFACT_NOT_ALLOWED_MESSAGE = i18n.translate(
   'xpack.securitySolution.translations.sharedPerPolicyArtifactNotAllowed',
   {

@@ -29,7 +29,10 @@ import type { StartInvestigationRequest } from '../../common';
 import { freeFormContextSchema } from '../../common/schemas';
 import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
+import { createAutomationBudget, readAutomationUsage } from '../lib/automations/automation_budget';
+import { createBudgetRepository } from '../lib/automations/automation_budget.mock';
 import {
+  AutomationDailyLimitReachedError,
   InvalidInvestigationContextError,
   InvestigationNotFoundError,
   InvestigationQuotaDeniedError,
@@ -1240,6 +1243,113 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
 
     expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
     expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+  });
+
+  describe('with an automation budget', () => {
+    let repository: ReturnType<typeof createBudgetRepository>;
+    const startWithBudget = (
+      dailyLimit: number,
+      triggerType: StartInvestigationRequest['trigger_type'] = 'automatic'
+    ) =>
+      makeClient().start(
+        {
+          subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: triggerType,
+          context: { alerts: [makeAlert('alert-1')] },
+        },
+        { automationBudget: createAutomationBudget(repository, 'a1', dailyLimit) }
+      );
+    const usage = () => readAutomationUsage(repository, 'a1');
+
+    beforeEach(() => {
+      repository = createBudgetRepository();
+    });
+
+    it('charges the automation budget before the global quota', async () => {
+      await startWithBudget(1);
+
+      expect(await usage()).toBe(1);
+      expect(repository.create.mock.invocationCallOrder[0]).toBeLessThan(
+        investigationQuotaCallback.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('releases the automation budget when the global quota denies the start', async () => {
+      investigationQuotaCallback.mockResolvedValue({ allowed: false });
+
+      await expect(startWithBudget(1)).rejects.toBeInstanceOf(InvestigationQuotaDeniedError);
+
+      expect(await usage()).toBe(0);
+      expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
+    });
+
+    it('does not charge the global quota when the automation budget denies the start', async () => {
+      await expect(startWithBudget(0)).rejects.toBeInstanceOf(AutomationDailyLimitReachedError);
+
+      expect(investigationQuotaCallback).not.toHaveBeenCalled();
+      expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
+    });
+
+    it('admits one of two starts racing for the last slot', async () => {
+      const results = await Promise.allSettled([startWithBudget(1), startWithBudget(1)]);
+
+      expect(results.filter(({ status }) => status === 'fulfilled')).toHaveLength(1);
+      expect(results).toContainEqual({
+        status: 'rejected',
+        reason: expect.any(AutomationDailyLimitReachedError),
+      });
+      expect(await usage()).toBe(1);
+      expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
+    });
+
+    it('releases the automation budget when the start loses the claim and continues the holder', async () => {
+      subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-holder' });
+      withConversations(makeConversation({ id: 'inv-holder' }));
+
+      await expect(startWithBudget(1)).resolves.toEqual({ investigation_id: 'inv-holder' });
+
+      expect(await usage()).toBe(0);
+    });
+
+    it.each([
+      [
+        'the workflow launch',
+        () => mockManagement.runWorkflow.mockRejectedValueOnce(new Error('failed')),
+      ],
+      [
+        'the agent installation',
+        () => installInvestigationAgentMock.mockRejectedValueOnce(new Error('failed')),
+      ],
+    ])('keeps the automation slot with the claim when %s fails', async (_step, fail) => {
+      fail();
+
+      await expect(startWithBudget(1)).rejects.toThrow('failed');
+
+      expect(await usage()).toBe(1);
+    });
+
+    it('counts once an investigation a retry opens on the claim of a failed start', async () => {
+      mockNewInvestigationId.mockReturnValueOnce('inv-failed');
+      mockManagement.runWorkflow.mockRejectedValueOnce(new Error('failed'));
+      await expect(startWithBudget(2)).rejects.toThrow('failed');
+      subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-failed' });
+
+      await expect(startWithBudget(2)).resolves.toEqual({ investigation_id: 'inv-failed' });
+
+      expect(await usage()).toBe(1);
+    });
+
+    it('does not use the automation budget for a follow-up or a manual start', async () => {
+      agenticInvestigationsClient.findOpenBySubjects.mockResolvedValueOnce([{ id: 'inv-1' }]);
+      withConversations(makeConversation({ id: 'inv-1' }));
+      subjectsClient.listByConversationIds.mockResolvedValue([makeStoredSubject()]);
+
+      await expect(startWithBudget(1)).resolves.toEqual({ investigation_id: 'inv-1' });
+      await startWithBudget(0, 'manual');
+
+      expect(repository.create).not.toHaveBeenCalled();
+      expect(repository.update).not.toHaveBeenCalled();
+    });
   });
 
   it('describes the alerts again when every alert is already part of the investigation', async () => {
@@ -2456,5 +2566,40 @@ describe('NightshiftInvestigationsClient.followUpRecoveredAlert()', () => {
       }).followUpRecoveredAlert(RECOVERY)
     ).rejects.toThrow(InvestigationUnavailableError);
     expect(agenticInvestigationsClient.findOpenBySubjects).not.toHaveBeenCalled();
+  });
+});
+
+describe('NightshiftInvestigationsClient.claimSlackThread()', () => {
+  const THREAD = {
+    investigationId: 'inv-1',
+    externalConversationId: 'slack:T1:C1:1.1',
+    channel: 'C1',
+    threadTs: '1.1',
+  };
+
+  it('claims the thread and records it on the investigation', async () => {
+    await expect(makeClient().claimSlackThread(THREAD)).resolves.toBe(true);
+
+    expect(subjectsClient.claimSubjects).toHaveBeenCalledWith(
+      expect.objectContaining({
+        conversationId: 'inv-1',
+        subjects: [{ type: 'slack_thread', id: 'slack:T1:C1:1.1' }],
+      })
+    );
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [
+      {
+        type: 'slack_thread',
+        id: 'slack:T1:C1:1.1',
+        slack: { channel: 'C1', thread_ts: '1.1' },
+      },
+    ]);
+  });
+
+  it('leaves a thread another investigation holds with that investigation', async () => {
+    subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-2' });
+
+    await expect(makeClient().claimSlackThread(THREAD)).resolves.toBe(false);
+
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
   });
 });
