@@ -154,6 +154,21 @@ describe('AWS JSON services from Smithy models', () => {
     ]);
   });
 
+  it('takes an empty body only for inputs without required members', async () => {
+    const { fetch } = createEmulatorFetch({ specs: [model] });
+
+    // `GetMetricData` requires `MetricName`, so omitting the whole input is as invalid as `{}`.
+    const withRequired = await send(fetch, 'Metrics_20240101.GetMetricData', undefined);
+    const noInput = await send(fetch, 'Metrics_20240101.GetWidget', undefined);
+
+    expect(withRequired.status).toBe(400);
+    expect(await withRequired.json()).toEqual({
+      __type: 'ValidationException',
+      message: expect.any(String),
+    });
+    expect(noInput.status).toBe(200);
+  });
+
   it('answers as AWS does when a request reaches no operation or lacks credentials', async () => {
     const { fetch, calls } = createEmulatorFetch({ specs: [model] });
 
