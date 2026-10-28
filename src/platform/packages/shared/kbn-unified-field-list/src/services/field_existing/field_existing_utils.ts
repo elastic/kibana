@@ -58,6 +58,7 @@ export async function fetchFieldExistence({
   // Identify two categories of fields requiring a refresh:
   // 1. New fields - fields that don't exist in the current data view
   // 2. Fields with mapping changes - existing fields with updated mapping information
+  // Both are returned as `newFields`, so consumers can replace their stale field objects.
   const newFields: typeof existingFieldList = [];
   const fieldsWithMappingChanges: typeof existingFieldList = [];
 
@@ -77,11 +78,15 @@ export async function fetchFieldExistence({
     // Refresh with force=true to ensure all fields are properly loaded
     await dataViewsService.refreshFields(dataView, false, true);
   }
+  // Take remapped fields from the refreshed data view, so their saved attributes (custom label, popularity count) are preserved
+  const remappedFields = fieldsWithMappingChanges.map(
+    (field) => dataView.getFieldByName(field.name)?.toSpec() ?? field
+  );
   const allFields = buildFieldList(dataView, metaFields);
   return {
     indexPatternTitle: dataView.getIndexPattern(),
     existingFieldNames: getExistingFields(existingFieldList, allFields),
-    newFields,
+    newFields: [...newFields, ...remappedFields],
   };
 }
 
