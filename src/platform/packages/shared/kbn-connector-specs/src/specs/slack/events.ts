@@ -168,37 +168,39 @@ const SlackTeamJoinEventSchema = lazySchema(() =>
   })
 );
 
-const SlackSlashCommandEventSchema = z.object({
-  workspace: slackId('Slack workspace (team) id.'),
-  channel: slackId('Channel where the slash command was run.'),
-  channelName: z
-    .string()
-    .min(1)
-    .max(SLACK_EVENT_NAME_MAX)
-    .optional()
-    .describe('Channel name, when Slack includes it.'),
-  user: slackId('User id of the person who ran the command.'),
-  userName: z
-    .string()
-    .min(1)
-    .max(SLACK_EVENT_NAME_MAX)
-    .optional()
-    .describe('Username of the person who ran the command, when Slack includes it.'),
-  command: z
-    .string()
-    .min(2)
-    .max(SLACK_EVENT_NAME_MAX)
-    .startsWith('/')
-    .describe('Slash command, including the leading slash.'),
-  text: z.string().max(SLACK_EVENT_TEXT_MAX).optional().describe('Text after the command.'),
-  responseUrl: z
-    .string()
-    .max(SLACK_RESPONSE_URL_MAX)
-    .startsWith('https://')
-    .optional()
-    .describe('Temporary Slack URL for a delayed reply to this command.'),
-  apiAppId: optionalSlackId('Slack app id, when Slack includes it.'),
-});
+const SlackSlashCommandEventSchema = lazySchema(() =>
+  z.object({
+    workspace: slackId('Slack workspace (team) id.'),
+    channel: slackId('Channel where the slash command was run.'),
+    channelName: z
+      .string()
+      .min(1)
+      .max(SLACK_EVENT_NAME_MAX)
+      .optional()
+      .describe('Channel name, when Slack includes it.'),
+    user: slackId('User id of the person who ran the command.'),
+    userName: z
+      .string()
+      .min(1)
+      .max(SLACK_EVENT_NAME_MAX)
+      .optional()
+      .describe('Username of the person who ran the command, when Slack includes it.'),
+    command: z
+      .string()
+      .min(2)
+      .max(SLACK_EVENT_NAME_MAX)
+      .startsWith('/')
+      .describe('Slash command, including the leading slash.'),
+    text: z.string().max(SLACK_EVENT_TEXT_MAX).optional().describe('Text after the command.'),
+    responseUrl: z
+      .string()
+      .max(SLACK_RESPONSE_URL_MAX)
+      .startsWith('https://')
+      .optional()
+      .describe('Temporary Slack URL for a delayed reply to this command.'),
+    apiAppId: optionalSlackId('Slack app id, when Slack includes it.'),
+  })
+);
 
 const SlackMemberJoinedChannelEventSchema = lazySchema(() =>
   z.object({
