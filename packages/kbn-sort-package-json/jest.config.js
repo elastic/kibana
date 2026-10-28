@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/jest/jest_node',
+  preset: '@kbn/test/jest_node',
   rootDir: '../..',
   roots: ['<rootDir>/packages/kbn-sort-package-json'],
 };
