@@ -55,6 +55,7 @@ export const createWorkflowStepConversationClientMock = (
     bulkGet: jest.Mock;
     list: jest.Mock;
     search: jest.Mock;
+    count: jest.Mock;
     addAccessControlEntries: jest.Mock;
     removeAccessControlEntries: jest.Mock;
     patchMetadata: jest.Mock;
@@ -67,6 +68,7 @@ export const createWorkflowStepConversationClientMock = (
   const bulkGet = overrides.bulkGet ?? jest.fn().mockResolvedValue(new Map());
   const list = overrides.list ?? jest.fn();
   const search = overrides.search ?? jest.fn();
+  const count = overrides.count ?? jest.fn().mockResolvedValue({ total: 0, groups: [] });
   const addAccessControlEntries =
     overrides.addAccessControlEntries ?? jest.fn().mockResolvedValue({});
   const removeAccessControlEntries =
@@ -80,6 +82,7 @@ export const createWorkflowStepConversationClientMock = (
     bulkGet,
     list,
     search,
+    count,
     addAccessControlEntries,
     removeAccessControlEntries,
     patchMetadata,
@@ -93,6 +96,7 @@ export const createWorkflowStepConversationClientMock = (
     bulkGet,
     list,
     search,
+    count,
     addAccessControlEntries,
     removeAccessControlEntries,
     patchMetadata,

@@ -43,6 +43,7 @@ export const createConversationPublicClient = ({
     list: client.list.bind(client),
     delete: async (conversationId) => client.delete(conversationId),
     search: client.search.bind(client),
+    count: client.count.bind(client),
     addEvents: ({ conversationId, events }) =>
       client.addCustomEvents({ id: conversationId, events }, { source }),
     create: async ({ agentId, id, title, accessControl, templateId, metadata }) => {

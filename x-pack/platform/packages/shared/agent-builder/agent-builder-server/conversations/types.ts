@@ -12,6 +12,8 @@ import type {
   Conversation,
   ConversationListOptions,
   ConversationSearchOptions,
+  ConversationCountOptions,
+  ConversationCountResult,
   ConversationWithPermissions,
   ConversationWithoutRoundsWithPermissions,
   ConversationListResult,
@@ -58,7 +60,7 @@ export interface ConversationUpdatePublicRequest {
 }
 
 /**
- * A conversation client exposing get, bulk get, list, search, create, patchMetadata, and update operations
+ * A conversation client exposing get, bulk get, list, search, count, create, patchMetadata, and update operations
  */
 export interface ConversationPublicClient {
   /**
@@ -78,6 +80,11 @@ export interface ConversationPublicClient {
    * filter, or both.
    */
   search(options: ConversationSearchOptions): Promise<ConversationListResult>;
+  /**
+   * Count the conversations readable by the current user, applying the same filter, title query,
+   * and access control as `search`, optionally bucketed by 1 or 2 fields.
+   */
+  count(options?: ConversationCountOptions): Promise<ConversationCountResult>;
   /**
    * Create a new empty conversation (without triggering an execution).
    */

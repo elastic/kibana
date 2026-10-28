@@ -69,3 +69,57 @@ export interface ConversationSearchOptions {
   page?: number;
   perPage?: number;
 }
+
+/** Default number of buckets a conversation count returns per `groupBy`. */
+export const CONVERSATION_COUNT_DEFAULT_GROUP_SIZE = 100;
+
+/** Maximum number of buckets a conversation count may request. */
+export const CONVERSATION_COUNT_MAX_GROUP_SIZE = 1000;
+
+/**
+ * A field conversations can be bucketed by: a registry field or `metadata.<key>`.
+ * Nested (`event_type`) and date (`created_at`, `updated_at`) fields are rejected at runtime.
+ */
+export type ConversationGroupByField =
+  | ConversationSearchFilterField
+  | `${typeof CONVERSATION_SEARCH_METADATA_FIELD_PREFIX}.${string}`;
+
+export interface ConversationCountOptions {
+  /**
+   * Free-text query matched against the conversation title, as in {@link ConversationSearchOptions}.
+   */
+  query?: string;
+  /**
+   * KQL filter over the same fields as {@link ConversationSearchOptions.filter}.
+   */
+  filter?: string | KueryNode;
+  agentId?: string;
+  /**
+   * 1 or 2 fields to bucket the matching conversations by. With 2 fields, each bucket is one
+   * combination of values (a `multi_terms` aggregation).
+   */
+  groupBy?: ConversationGroupByField | [ConversationGroupByField, ConversationGroupByField];
+  /**
+   * Bucket value for conversations missing a `groupBy` field. Conversations missing a field
+   * with no `missing` value are left out of the buckets, but still counted in `total`.
+   */
+  missing?: Partial<Record<ConversationGroupByField, string>>;
+  /**
+   * Maximum number of buckets. Defaults to {@link CONVERSATION_COUNT_DEFAULT_GROUP_SIZE}, capped
+   * at {@link CONVERSATION_COUNT_MAX_GROUP_SIZE}.
+   */
+  size?: number;
+}
+
+export interface ConversationCountGroup {
+  /** Bucket values keyed by the `groupBy` field name as the caller wrote it. */
+  key: Record<string, string>;
+  count: number;
+}
+
+export interface ConversationCountResult {
+  /** Conversations matching the filter, query, and access control. Not capped at 10,000. */
+  total: number;
+  /** Buckets in descending count order. Empty when `groupBy` is not set. */
+  groups: ConversationCountGroup[];
+}
