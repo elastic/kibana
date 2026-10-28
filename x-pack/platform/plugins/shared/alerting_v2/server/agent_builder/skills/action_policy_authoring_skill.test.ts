@@ -70,18 +70,13 @@ describe('createActionPolicyAuthoringSkill', () => {
     expect(uiSettings.get).not.toHaveBeenCalled();
   });
 
-  it('exposes the manage action policy and link action policy inline tools', async () => {
+  it('exposes only the manage action policy inline tool', async () => {
     const skill = createActionPolicyAuthoringSkill(createDeps());
 
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
     const inlineToolIds = inlineTools.map((tool) => tool.id);
 
-    expect(inlineToolIds).toEqual([
-      ALERTING_TOOL_IDS.manageActionPolicy,
-      ALERTING_TOOL_IDS.linkActionPolicyToRule,
-    ]);
-    expect(inlineToolIds).not.toContain(ALERTING_TOOL_IDS.manageRule);
-    expect(inlineToolIds).not.toContain(ALERTING_TOOL_IDS.linkRuleToActionPolicy);
+    expect(inlineToolIds).toEqual([ALERTING_TOOL_IDS.manageActionPolicy]);
   });
 
   it('includes action policy discovery and default notification setup instructions', () => {
@@ -92,8 +87,7 @@ describe('createActionPolicyAuthoringSkill', () => {
     expect(skill.content).not.toContain('Part 1: Action Policies');
     expect(skill.content).toContain('Default Notification Setup');
     expect(skill.content).toContain('action-policy-single-rule.md');
-    expect(skill.content).toContain(ALERTING_TOOL_IDS.linkActionPolicyToRule);
-    expect(skill.content).toContain('rule_saved');
+    expect(skill.content).toContain('link_action_policy_to_rule');
     expect(skill.content).toContain('action-policy-multi-rule.md');
     expect(skill.content).not.toContain('## Multi-rule policies');
     expect(skill.content).not.toContain('Step 2 — Create a Default Action Policy');

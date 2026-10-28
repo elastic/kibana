@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-export { linkActionPolicyToRuleTool } from './link_action_policy_to_rule';
-export { linkRuleToActionPolicyTool } from './link_rule_to_action_policy';
+export {
+  linkActionPolicyToRuleTool,
+  linkActionPolicyToRuleToolId,
+} from './link_action_policy_to_rule';
+export {
+  linkRuleToActionPolicyTool,
+  linkRuleToActionPolicyToolId,
+} from './link_rule_to_action_policy';
 export type { LinkRoutingTagToolDeps } from './link_routing_tag';

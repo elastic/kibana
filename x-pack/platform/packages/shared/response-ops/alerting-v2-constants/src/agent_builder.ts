@@ -17,8 +17,6 @@ const alertingTool = (name: string) => `${ALERTING_NAMESPACE}.${name}`;
 export const ALERTING_TOOL_IDS = {
   manageRule: alertingTool('manage_rule'),
   manageActionPolicy: alertingTool('manage_action_policy'),
-  linkRuleToActionPolicy: alertingTool('link_rule_to_action_policy'),
-  linkActionPolicyToRule: alertingTool('link_action_policy_to_rule'),
 } as const;
 
 export const RULE_AUTHORING_SKILL_ID = 'rule-authoring';

@@ -578,15 +578,6 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('After ensuring the rule is `kind: alert`');
     });
 
-    it('covers linking a rule to an existing action policy', () => {
-      const doc = generateNotificationsOverviewDoc();
-      expect(doc).toContain('## Linking a Rule to an Existing Action Policy');
-      expect(doc).toContain('platform.alerting.link_rule_to_action_policy');
-      expect(doc).toContain('Do not set `routing_tags` by hand');
-      expect(doc).toContain('{actionPolicyAttachment.id}');
-      expect(doc).toContain('rule_saved');
-    });
-
     it('links sibling references without a ./references/ prefix', () => {
       const doc = generateNotificationsOverviewDoc();
       expect(doc).toContain('(./rule-kind.md)');
@@ -799,13 +790,11 @@ describe('schema_to_skill_docs', () => {
     it('instructs the link tool and defers shared policies to the multi-rule reference', () => {
       const doc = generateSingleRuleActionPolicyDoc();
       expect(doc).toContain('# Single-rule Action Policies');
-      expect(doc).toContain('platform.alerting.link_action_policy_to_rule');
+      expect(doc).toContain("policy attachment's `link_action_policy_to_rule` tool");
       expect(doc).toContain('set_metadata');
       expect(doc).toContain('set_destinations');
       expect(doc).toContain('{ operation: "validate" }');
-      expect(doc).toContain('Do not call `set_matcher` after this link');
       expect(doc).not.toContain('Call `manage_rule`');
-      expect(doc).toContain('notify-');
       expect(doc).not.toContain('rule.id:');
       expect(doc).toContain('kind: signal');
       expect(doc).toContain('(./action-policy-multi-rule.md)');

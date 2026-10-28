@@ -77,7 +77,7 @@ user to the "Create policy" or "Update Policy" button in the rendered attachment
 Use operations[] to:
 1. set_metadata — set name and description
 2. set_destinations — set workflow destinations (type: 'workflow', id: '<workflow-id>')
-3. set_matcher — set matcher \`tags\` (string[]) to match a family of rules by routing tag, or a KQL \`expression\` over alert context fields, or null for catch-all. To target one specific rule, call \`${ALERTING_TOOL_IDS.linkActionPolicyToRule}\` instead of setting tags here. Do not call \`set_matcher\` after that link.
+3. set_matcher — set matcher \`tags\` (string[]) to match a family of rules by routing tag, or a KQL \`expression\` over alert context fields, or null for catch-all. To target one specific rule, use the policy attachment's \`link_action_policy_to_rule\` tool instead of setting tags here. Do not call \`set_matcher\` after that link.
 4. set_grouping — set groupingMode (per_alert | all | per_field) and groupBy fields
 5. set_throttle — set throttle strategy and optional interval
 6. validate — validate the accumulated policy against the API request schema; throws if not ready to save`,

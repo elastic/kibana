@@ -489,20 +489,7 @@ When a user asks for notifications on a rule that is currently \`kind: signal\` 
 1. **Explain the difference**: Events (\`kind: signal\`) rules are observation-only and do not trigger notifications. Alerts (\`kind: alert\`) track alert lifecycle and can dispatch to action policies.
 2. If the rule is a **draft (in-memory)**: use \`set_kind\` to change it to \`alert\`, then load the \`action-policy-authoring\` skill for notification setup.
 3. If the rule is **persisted**: \`kind\` is immutable after creation. Inform the user that the existing Events (\`kind: signal\`) rule cannot be converted. Offer to create a new Alerts (\`kind: alert\`) rule with the same query and schedule, then set up notifications on the new rule.
-4. After ensuring the rule is \`kind: alert\`, load the \`action-policy-authoring\` skill for notification setup.
-
-## Linking a Rule to an Existing Action Policy
-
-When the user wants this rule associated with an action policy already in the conversation, call \`platform.alerting.link_rule_to_action_policy\` with the rule attachment id and the action policy attachment id. The tool writes one routing tag onto the rule's \`routing_tags\` and the policy's \`matcher.tags\`. Do not set \`routing_tags\` by hand. \`routing_tags\` is only allowed on \`kind: alert\` rules.
-
-Do not compose the action policy from the rule authoring skill. Notification setup still loads \`action-policy-authoring\`. Catch-all and expression-only policies are not linked with this tool.
-
-After the tool returns, render both attachments with the ids and versions from the result:
-
-\`<render_attachment id=\\"{ruleAttachment.id}\\" version=\\"{ruleAttachment.version}\\"/>\`
-\`<render_attachment id=\\"{actionPolicyAttachment.id}\\" version=\\"{actionPolicyAttachment.version}\\"/>\`
-
-When \`rule_saved\` is false, name \`routing_tag\` and state both that the rule is unsaved and that the policy matches no alerts until the rule carrying that tag is saved. Do not block the policy on saving the rule."
+4. After ensuring the rule is \`kind: alert\`, load the \`action-policy-authoring\` skill for notification setup."
 `;
 
 exports[`schema_to_skill_docs generateRecoveryStrategyDoc matches the reviewed skill-doc snapshot 1`] = `
@@ -825,10 +812,7 @@ to one rule is a **shared routing tag on both sides**:
 - The rule's \`metadata.routing_tags\` must contain a tag that uniquely identifies it.
 - The policy's \`matcher.tags\` must contain that same tag.
 
-\`platform.alerting.link_action_policy_to_rule\` writes that tag onto both attachments.
-Omit \`tag\` to use \`notify-<rule-slug>\` (lowercase kebab of the rule name,
-for example \`notify-high-cpu-prod\`). The tool keeps existing tags. It errors
-when the rule is already at the routing-tag cap (20) instead of dropping one.
+The policy attachment's \`link_action_policy_to_rule\` tool writes that tag onto both attachments.
 
 ## Steps
 
@@ -844,18 +828,11 @@ Call \`manage_action_policy\` with these operations in order. Do not set matcher
 
 ### 2. Link the policy to the rule
 
-Call \`platform.alerting.link_action_policy_to_rule\` with \`actionPolicyAttachmentId\` from the policy draft and \`ruleAttachmentId\` from the rule.
-Do not set \`routing_tags\` or \`matcher.tags\` by hand. Do not call \`set_matcher\` after this link.
+Call the policy attachment's \`link_action_policy_to_rule\` tool with \`ruleAttachmentId\` from the rule.
 
 ### 3. Validate
 
 Call \`manage_action_policy\` with \`{ operation: \\"validate\\" }\` as the last operation.
-
-> **Save reminder**: the link tool only updates in-memory attachments.
-> The routing tag only takes effect once the user saves the rule. When the tool
-> result has \`rule_saved: false\`, name \`routing_tag\` and state both that the rule
-> is unsaved and that the policy matches no alerts until the rule carrying that
-> tag is saved. Do not block creating or saving the policy on saving the rule.
 
 If the user explicitly requests a cross-rule or shared policy, consult the
 [multi-rule action policies reference](./action-policy-multi-rule.md)."

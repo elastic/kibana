@@ -309,6 +309,22 @@ describe('createRuleAttachmentType', () => {
       const value = await formatValue({ ...baseRuleData, schedule: { every: '' } as never });
       expect(value).toContain('Schedule: unknown');
     });
+
+    it('names the bound link tool in the representation', async () => {
+      const value = await formatValue(baseRuleData);
+      expect(value).toContain('platform.alerting.link_rule_to_action_policy.attach-1');
+    });
+
+    it('exposes a link tool bound to the rule attachment', async () => {
+      const formatted = await definition.format(buildAttachment(baseRuleData), {
+        request: {} as KibanaRequest,
+        spaceId: 'default',
+      });
+      const tools = (await formatted.getBoundedTools?.()) ?? [];
+      expect(tools.map((tool) => tool.id)).toEqual([
+        'platform.alerting.link_rule_to_action_policy.attach-1',
+      ]);
+    });
   });
 
   describe('getAgentDescription', () => {

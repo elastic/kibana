@@ -13,7 +13,6 @@ import {
   ALERTING_V2_ENABLED_SETTING_ID,
   RULE_AUTHORING_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
-import { linkRuleToActionPolicyTool } from '../tools/link_routing_tag';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { manageRuleTool } from '../tools/manage_rule';
 import {
@@ -205,5 +204,5 @@ When the user asks what happens if data stops arriving (missing metrics, heartbe
 
 ### Notifications
 When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md).`,
-    getInlineTools: () => [manageRuleTool(deps), linkRuleToActionPolicyTool(deps)],
+    getInlineTools: () => [manageRuleTool(deps)],
   });

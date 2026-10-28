@@ -360,42 +360,42 @@ describe('link routing tag tools', () => {
     logger: logger as unknown as LoggerServiceContract,
   };
 
-  it('puts the rule first on the rule-authoring tool', () => {
-    const tool = linkRuleToActionPolicyTool(deps);
+  it('binds the rule-side tool to its rule attachment', () => {
+    const tool = linkRuleToActionPolicyTool({ ...deps, ruleAttachmentId: 'rule-1' });
 
-    expect(tool.id).toBe('platform.alerting.link_rule_to_action_policy');
-    expect(tool.excludeFromMcp).toBe(true);
-    expect(tool.description).toContain("rule's metadata.routing_tags");
-    expect(tool.description).not.toMatch(/tell the user|remind the user/i);
-    expect(Object.keys(tool.schema.shape)).toEqual([
-      'ruleAttachmentId',
-      'actionPolicyAttachmentId',
-      'tag',
-    ]);
+    expect(tool.id).toBe('platform.alerting.link_rule_to_action_policy.rule-1');
+    expect(tool.description).toContain('rule attachment "rule-1"');
+    expect(tool.description).toContain('rule_saved');
+    expect(tool.description).toContain('{actionPolicyAttachment.id}');
+    expect(Object.keys(tool.schema.shape)).toEqual(['actionPolicyAttachmentId', 'tag']);
   });
 
-  it('puts the action policy first on the action-policy-authoring tool', () => {
-    const tool = linkActionPolicyToRuleTool(deps);
+  it('binds the policy-side tool to its action policy attachment', () => {
+    const tool = linkActionPolicyToRuleTool({ ...deps, actionPolicyAttachmentId: 'policy-1' });
 
-    expect(tool.id).toBe('platform.alerting.link_action_policy_to_rule');
-    expect(tool.excludeFromMcp).toBe(true);
-    expect(tool.description).toContain("policy's matcher.tags");
-    expect(tool.description).not.toMatch(/tell the user|remind the user/i);
-    expect(Object.keys(tool.schema.shape)).toEqual([
-      'actionPolicyAttachmentId',
-      'ruleAttachmentId',
-      'tag',
-    ]);
+    expect(tool.id).toBe('platform.alerting.link_action_policy_to_rule.policy-1');
+    expect(tool.description).toContain('action policy attachment "policy-1"');
+    expect(tool.description).toContain('rule_saved');
+    expect(tool.description).toContain('{ruleAttachment.id}');
+    expect(Object.keys(tool.schema.shape)).toEqual(['ruleAttachmentId', 'tag']);
   });
 
-  it('links through the action policy tool', async () => {
+  it('links through the rule-bound tool', async () => {
     const ctx = createContext();
-    const tool = linkActionPolicyToRuleTool(deps);
+    const tool = linkRuleToActionPolicyTool({ ...deps, ruleAttachmentId: 'rule-1' });
 
-    const result = await tool.handler(
-      { actionPolicyAttachmentId: 'policy-1', ruleAttachmentId: 'rule-1' },
-      ctx
+    const result = await tool.handler({ actionPolicyAttachmentId: 'policy-1' }, ctx);
+
+    expect(resultData(result as Awaited<ReturnType<typeof link>>).routing_tag).toBe(
+      'notify-high-cpu-prod'
     );
+  });
+
+  it('links through the policy-bound tool', async () => {
+    const ctx = createContext();
+    const tool = linkActionPolicyToRuleTool({ ...deps, actionPolicyAttachmentId: 'policy-1' });
+
+    const result = await tool.handler({ ruleAttachmentId: 'rule-1' }, ctx);
 
     expect(resultData(result as Awaited<ReturnType<typeof link>>).routing_tag).toBe(
       'notify-high-cpu-prod'

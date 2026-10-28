@@ -6,11 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import {
-  ACTION_POLICY_AUTHORING_SKILL_ID,
-  ALERTING_TOOL_IDS,
-  RULE_KIND_LABELS,
-} from '@kbn/alerting-v2-constants';
+import { ACTION_POLICY_AUTHORING_SKILL_ID, RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import {
   createRuleDataBaseSchema,
   createActionPolicyDataSchema,
@@ -729,19 +725,6 @@ export const generateNotificationsOverviewDoc = (): string => {
     `2. If the rule is a **draft (in-memory)**: use \`set_kind\` to change it to \`alert\`, then load the \`${ACTION_POLICY_AUTHORING_SKILL_ID}\` skill for notification setup.`,
     `3. If the rule is **persisted**: \`kind\` is immutable after creation. Inform the user that the existing ${signalLabel} (\`kind: signal\`) rule cannot be converted. Offer to create a new ${alertLabel} (\`kind: alert\`) rule with the same query and schedule, then set up notifications on the new rule.`,
     `4. After ensuring the rule is \`kind: alert\`, load the \`${ACTION_POLICY_AUTHORING_SKILL_ID}\` skill for notification setup.`,
-    '',
-    '## Linking a Rule to an Existing Action Policy',
-    '',
-    `When the user wants this rule associated with an action policy already in the conversation, call \`${ALERTING_TOOL_IDS.linkRuleToActionPolicy}\` with the rule attachment id and the action policy attachment id. The tool writes one routing tag onto the rule's \`routing_tags\` and the policy's \`matcher.tags\`. \`routing_tags\` is only allowed on \`kind: alert\` rules.`,
-    '',
-    `Do not compose the action policy from the rule authoring skill. Notification setup still loads \`${ACTION_POLICY_AUTHORING_SKILL_ID}\`. Catch-all and expression-only policies are not linked with this tool.`,
-    '',
-    'After the tool returns, render both attachments with the ids and versions from the result:',
-    '',
-    '`<render_attachment id="{ruleAttachment.id}" version="{ruleAttachment.version}"/>`',
-    '`<render_attachment id="{actionPolicyAttachment.id}" version="{actionPolicyAttachment.version}"/>`',
-    '',
-    'When `rule_saved` is false, name `routing_tag` and state both that the rule is unsaved and that the policy matches no alerts until the rule carrying that tag is saved.',
   ].join('\n');
 };
 
@@ -1036,10 +1019,7 @@ export const generateSingleRuleActionPolicyDoc = (): string =>
     "- The rule's `metadata.routing_tags` must contain a tag that uniquely identifies it.",
     "- The policy's `matcher.tags` must contain that same tag.",
     '',
-    `\`${ALERTING_TOOL_IDS.linkActionPolicyToRule}\` writes that tag onto both attachments.`,
-    'Omit `tag` to use `notify-<rule-slug>` (lowercase kebab of the rule name,',
-    'for example `notify-high-cpu-prod`). The tool keeps existing tags. It errors',
-    'when the rule is already at the routing-tag cap (20) instead of dropping one.',
+    "The policy attachment's `link_action_policy_to_rule` tool writes that tag onto both attachments.",
     '',
     '## Steps',
     '',
@@ -1055,18 +1035,11 @@ export const generateSingleRuleActionPolicyDoc = (): string =>
     '',
     '### 2. Link the policy to the rule',
     '',
-    `Call \`${ALERTING_TOOL_IDS.linkActionPolicyToRule}\` with \`actionPolicyAttachmentId\` from the policy draft and \`ruleAttachmentId\` from the rule.`,
-    'Do not set `routing_tags` or `matcher.tags` by hand. Do not call `set_matcher` after this link.',
+    "Call the policy attachment's `link_action_policy_to_rule` tool with `ruleAttachmentId` from the rule.",
     '',
     '### 3. Validate',
     '',
     'Call `manage_action_policy` with `{ operation: "validate" }` as the last operation.',
-    '',
-    '> **Save reminder**: the link tool only updates in-memory attachments.',
-    '> The routing tag only takes effect once the user saves the rule. When the tool',
-    '> result has `rule_saved: false`, name `routing_tag` and state both that the rule',
-    '> is unsaved and that the policy matches no alerts until the rule carrying that',
-    '> tag is saved. Do not block creating or saving the policy on saving the rule.',
     '',
     'If the user explicitly requests a cross-rule or shared policy, consult the',
     '[multi-rule action policies reference](./action-policy-multi-rule.md).',

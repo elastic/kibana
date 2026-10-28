@@ -78,6 +78,26 @@ describe('createActionPolicyAttachmentType', () => {
     });
   });
 
+  describe('format', () => {
+    it('names and exposes a link tool bound to the policy attachment', async () => {
+      const formatted = await definition.format(
+        { id: 'attach-1', type: ACTION_POLICY_ATTACHMENT_TYPE, data: basePolicyData },
+        createResolveContext()
+      );
+      const representation = await formatted.getRepresentation?.();
+      const tools = (await formatted.getBoundedTools?.()) ?? [];
+
+      expect(representation).toEqual(
+        expect.objectContaining({
+          value: expect.stringContaining('platform.alerting.link_action_policy_to_rule.attach-1'),
+        })
+      );
+      expect(tools.map((tool) => tool.id)).toEqual([
+        'platform.alerting.link_action_policy_to_rule.attach-1',
+      ]);
+    });
+  });
+
   describe('resolve', () => {
     it('returns policy data parsed against the schema', async () => {
       getActionPolicy.mockResolvedValueOnce(basePolicyData);

@@ -19,6 +19,10 @@ import Boom from '@hapi/boom';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { RulesClient } from '../../lib/rules_client';
+import {
+  linkRuleToActionPolicyTool,
+  linkRuleToActionPolicyToolId,
+} from '../tools/link_routing_tag';
 
 interface CreateRuleAttachmentTypeOptions {
   logger: LoggerServiceContract;
@@ -42,6 +46,9 @@ const formatRuleAttachmentDescription = (
     `Schedule: ${schedule}`,
     ...(data.metadata.description ? [`Description: ${data.metadata.description}`] : []),
     ...(data.metadata.tags?.length ? [`Tags: ${data.metadata.tags.join(', ')}`] : []),
+    `To link this rule to an action policy in the conversation, call ${linkRuleToActionPolicyToolId(
+      attachmentId
+    )}.`,
   ].join('\n');
 };
 
@@ -119,10 +126,13 @@ export const createRuleAttachmentType = ({
       type: 'text',
       value: formatRuleAttachmentDescription(attachment.id, attachment.data, attachment.origin),
     }),
+    getBoundedTools: () => [
+      linkRuleToActionPolicyTool({ ruleAttachmentId: attachment.id, logger }),
+    ],
   }),
 
   getAgentDescription: () =>
-    `A rule attachment represents a Universal Rule — either a proposed rule (not yet saved) or a saved rule linked via its ID. To create, explain, or modify rules, load the rule-authoring skill.`,
+    `A rule attachment represents a Universal Rule — either a proposed rule (not yet saved) or a saved rule linked via its ID. To create, explain, or modify rules, load the rule-authoring skill. To link a rule to an action policy in the conversation, use that rule attachment's link_rule_to_action_policy tool.`,
 
   getTools: () => [],
 });

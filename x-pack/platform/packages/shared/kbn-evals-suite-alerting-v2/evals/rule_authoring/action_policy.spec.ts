@@ -79,7 +79,6 @@ evaluate.describe(
                   expectedToolIds: [
                     ALERTING_TOOL_IDS.manageActionPolicy,
                     ALERTING_TOOL_IDS.manageRule,
-                    ALERTING_TOOL_IDS.linkActionPolicyToRule,
                     WORKFLOW_GENERATION_TOOL_ID,
                   ],
                   expectRenderAttachment: [
