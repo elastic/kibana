@@ -49,6 +49,7 @@ import {
   shouldExecute as isDueForExecution,
   applyFilterlist,
   mergeByPriority,
+  toDateOnly,
 } from './health_diagnostic_utils';
 import { parseHealthDiagnosticQueries } from './health_diagnostic_query_parser';
 import { type CircuitBreaker, ValidationError } from './health_diagnostic_circuit_breakers.types';
@@ -434,7 +435,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
           return true;
         }
         const { name, scheduleCron, enabled, expiresAt, stackVersions } = query;
-        if (expiresAt !== undefined && now.getTime() >= new Date(expiresAt).getTime()) {
+        if (expiresAt !== undefined && toDateOnly(now) > expiresAt) {
           this.logger.debug('Skipping expired health diagnostic query', {
             queryId: (query as { id?: string }).id,
             name,
