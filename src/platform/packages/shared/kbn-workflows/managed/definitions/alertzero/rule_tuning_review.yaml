@@ -758,6 +758,13 @@ steps:
       run-as-mode: inherit
       inputs:
         space_id: "{{ workflow.spaceId }}"
+        # An ES|QL rule names its indices in the query and a data view rule in the
+        # view, so neither has an `index` to check; both rely on the preview's own
+        # missing-indices warning instead.
+        indices: >-
+          ${{ steps.fetch_rule.output.index
+            | default: consts.no_items
+            | concat: steps.fetch_rule.output.threat_index }}
         preview_body:
           type: "{{ steps.fetch_rule.output.type }}"
           name: "{{ steps.fetch_rule.output.name }}"
@@ -890,6 +897,10 @@ steps:
       proposed_alert_count: "${{ steps.run_previews.output.proposed_alert_count | default: -1 }}"
       proposed_is_aborted: "${{ steps.run_previews.output.proposed_is_aborted | default: false }}"
       proposed_error_text: "{{ steps.run_previews.output.proposed_error_text }}"
+      unreadable_indices: "{{ steps.run_previews.output.unreadable_indices }}"
+      no_matching_indices: >-
+        ${{ steps.run_previews.output.no_matching_indices == true
+          or steps.run_previews.output.proposed_no_matching_indices == true }}
 
   # Diagnosis notes go to the investigation rather than into the proposal, which
   # keeps only what the decision needs. `ai.conversation.add_user_message` appends
@@ -1040,6 +1051,17 @@ steps:
         The proposed schedule ran {{ steps.compute_schedule_preview_runs.output.proposed_invocation_count }} simulated executions with interval {{ steps.diagnose_rule.output.structured_output.proposed_interval }} and lookback {{ steps.diagnose_rule.output.structured_output.proposed_from }}, over the same time span.
         {% endif %}
 
+        {% if steps.record_preview_outcome.output.unreadable_indices != blank %}
+        The backtest did not run: the Rule Tuning worker's service account cannot read these rule indices: `{{ steps.record_preview_outcome.output.unreadable_indices }}`.
+        The worker reads only the default security index patterns, so a rule on other indices cannot be backtested until its account is granted `read` on them.
+        To check the change yourself, ask the agent in this investigation to preview the rule with and without it.
+        Approving still applies the proposed change.
+        {% elsif steps.record_preview_outcome.output.no_matching_indices == true %}
+        The backtest did not run: no index the Rule Tuning worker can read matches the rule's index patterns, so there is no data to count alerts in.
+        Either the indices do not exist, or the worker's service account cannot read them: it reads only the default security index patterns, so a rule on other indices cannot be backtested until its account is granted `read` on them.
+        To check the change yourself, ask the agent in this investigation to preview the rule with and without it.
+        Approving still applies the proposed change.
+        {% else %}
         Alerts with the current rule: {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %}
         Alerts with the proposed change: {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}
         {% if steps.record_preview_outcome.output.current_error_text != '' %}
@@ -1047,6 +1069,7 @@ steps:
         {% endif %}
         {% if steps.record_preview_outcome.output.proposed_error_text != '' %}
         Proposed preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
+        {% endif %}
         {% endif %}
         {% else %}
         No backtest is available for this change.

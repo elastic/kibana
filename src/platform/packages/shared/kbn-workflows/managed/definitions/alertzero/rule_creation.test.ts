@@ -198,6 +198,30 @@ describe('Detection Rule Creation worker', () => {
       expect(schema.safeParse(allEmpty).success).toBe(false);
     });
 
+    // The preview runs as the worker's service account, which reads only the default
+    // security index patterns. A draft over other indices previews as zero matches
+    // with only a warning, which the preview reports as no_matching_indices; the
+    // comment has to say so rather than present 0 as a result.
+    it('reports a draft whose indices the preview could not see instead of 0 matches', async () => {
+      const comment = String(inputsOf(stepByName('propose_creation')).comment);
+      const render = (preview: Record<string, unknown>) =>
+        createWorkflowLiquidEngine().parseAndRenderSync(comment, {
+          inputs: { preview_invocation_count: 3 },
+          steps: {
+            draft_creation: { output: { structured_output: { rule: {} } } },
+            preview_creation: { output: preview },
+          },
+        });
+
+      const skipped = render({ succeeded: false, no_matching_indices: true, error_text: 'w' });
+      expect(skipped).toContain('no index the Rule Coverage worker can read matches');
+      expect(skipped).not.toContain('expected matches');
+      expect(skipped).not.toContain('Backtest errors');
+
+      const counted = render({ succeeded: true, is_aborted: false, alert_count: 4 });
+      expect(counted).toContain('4 expected matches over 3 simulated runs');
+    });
+
     // The preview informs the analyst; it does not gate the proposal.
     it('proposes the draft whatever the preview returned', () => {
       expect(stepByName('propose_creation')?.if).not.toContain('preview_creation');
