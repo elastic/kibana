@@ -193,6 +193,11 @@ export function populateValidationMessages(
     basicValidations.frequency.valid = false;
     basicValidations.frequency.message = invalidTimeIntervalMessage(datafeedConfig.frequency);
   }
+
+  if (validationResults.contains('scroll_size_invalid')) {
+    basicValidations.scrollSize.valid = false;
+    basicValidations.scrollSize.message = invalidScrollSizeMessage();
+  }
   if (validationResults.contains('missing_summary_count_field_name')) {
     basicValidations.summaryCountField.valid = false;
     basicValidations.summaryCountField.message = i18n.translate(
@@ -219,4 +224,10 @@ export function invalidTimeIntervalMessage(value: estypes.Duration | undefined) 
       },
     }
   );
+}
+
+export function invalidScrollSizeMessage() {
+  return i18n.translate('xpack.ml.newJob.wizard.validateJob.scrollSizeInvalidErrorMessage', {
+    defaultMessage: 'Scroll size must be a whole number greater than zero.',
+  });
 }

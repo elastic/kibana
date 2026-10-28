@@ -673,6 +673,15 @@ export function basicDatafeedValidation(datafeed: Datafeed): ValidationResults {
       valid = false;
     }
     messages.push(frequencyMessage);
+
+    if (datafeed.scroll_size !== undefined) {
+      let scrollSizeMessage = { id: 'scroll_size_valid' };
+      if (Number.isInteger(datafeed.scroll_size) === false || datafeed.scroll_size < 1) {
+        scrollSizeMessage = { id: 'scroll_size_invalid' };
+        valid = false;
+      }
+      messages.push(scrollSizeMessage);
+    }
   }
 
   return {
