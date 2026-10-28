@@ -51367,7 +51367,7 @@ paths:
                   maxLength: 64
                   type: string
                 instances:
-                  description: Service instances (originals and duplicates) being deployed, so a resumed onboarding rebuilds the Service settings rows.
+                  description: Service instances, including duplicates, being deployed. Used to restore the service list when the onboarding is resumed.
                   items:
                     additionalProperties: false
                     type: object
@@ -51381,11 +51381,11 @@ paths:
                         description: Whether the instance is a duplicate of another service.
                         type: boolean
                       name:
-                        description: Display name of the instance.
+                        description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
                         maxLength: 255
                         type: string
                       serviceId:
-                        description: The service this instance belongs to.
+                        description: ID of the service this instance belongs to.
                         maxLength: 255
                         minLength: 1
                         type: string
@@ -51396,6 +51396,7 @@ paths:
                       - isDuplicate
                   maxItems: 1000
                   type: array
+                  x-state: Experimental; added in 9.7.0
                 integrationName:
                   description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                   maxLength: 160
@@ -51611,7 +51612,7 @@ paths:
                       id:
                         type: string
                       instances:
-                        description: Service instances (originals and duplicates) of the last deploy. Hydrated into the Service settings step on resume.
+                        description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
                         items:
                           additionalProperties: false
                           type: object
@@ -51625,11 +51626,11 @@ paths:
                               description: Whether the instance is a duplicate of another service.
                               type: boolean
                             name:
-                              description: Display name of the instance.
+                              description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
                               maxLength: 255
                               type: string
                             serviceId:
-                              description: The service this instance belongs to.
+                              description: ID of the service this instance belongs to.
                               maxLength: 255
                               minLength: 1
                               type: string
@@ -51640,6 +51641,7 @@ paths:
                             - isDuplicate
                         maxItems: 1000
                         type: array
+                        x-state: Experimental; added in 9.7.0
                       integrationName:
                         description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
@@ -51997,7 +51999,7 @@ paths:
                       id:
                         type: string
                       instances:
-                        description: Service instances (originals and duplicates) of the last deploy. Hydrated into the Service settings step on resume.
+                        description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
                         items:
                           additionalProperties: false
                           type: object
@@ -52011,11 +52013,11 @@ paths:
                               description: Whether the instance is a duplicate of another service.
                               type: boolean
                             name:
-                              description: Display name of the instance.
+                              description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
                               maxLength: 255
                               type: string
                             serviceId:
-                              description: The service this instance belongs to.
+                              description: ID of the service this instance belongs to.
                               maxLength: 255
                               minLength: 1
                               type: string
@@ -52026,6 +52028,7 @@ paths:
                             - isDuplicate
                         maxItems: 1000
                         type: array
+                        x-state: Experimental; added in 9.7.0
                       integrationName:
                         description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
@@ -52273,7 +52276,7 @@ paths:
                   maxItems: 10
                   type: array
                 instances:
-                  description: Service instances (originals and duplicates) of the last deploy. Replaces the stored list, so an instance removed since the last deploy is dropped.
+                  description: Service instances, including duplicates, from the last deployment. Replaces the stored list, so instances removed since the last deployment are dropped.
                   items:
                     additionalProperties: false
                     type: object
@@ -52287,11 +52290,11 @@ paths:
                         description: Whether the instance is a duplicate of another service.
                         type: boolean
                       name:
-                        description: Display name of the instance.
+                        description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
                         maxLength: 255
                         type: string
                       serviceId:
-                        description: The service this instance belongs to.
+                        description: ID of the service this instance belongs to.
                         maxLength: 255
                         minLength: 1
                         type: string
@@ -52302,6 +52305,7 @@ paths:
                       - isDuplicate
                   maxItems: 1000
                   type: array
+                  x-state: Experimental; added in 9.7.0
                 integrationName:
                   description: Integration name used by the last deploy, before any per-package suffix. Refreshed on each deploy because an unedited default name follows the service selection.
                   maxLength: 160
@@ -52487,7 +52491,7 @@ paths:
                       id:
                         type: string
                       instances:
-                        description: Service instances (originals and duplicates) of the last deploy. Hydrated into the Service settings step on resume.
+                        description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
                         items:
                           additionalProperties: false
                           type: object
@@ -52501,11 +52505,11 @@ paths:
                               description: Whether the instance is a duplicate of another service.
                               type: boolean
                             name:
-                              description: Display name of the instance.
+                              description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
                               maxLength: 255
                               type: string
                             serviceId:
-                              description: The service this instance belongs to.
+                              description: ID of the service this instance belongs to.
                               maxLength: 255
                               minLength: 1
                               type: string
@@ -52516,6 +52520,7 @@ paths:
                             - isDuplicate
                         maxItems: 1000
                         type: array
+                        x-state: Experimental; added in 9.7.0
                       integrationName:
                         description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
@@ -52800,7 +52805,7 @@ paths:
                         id:
                           type: string
                         instances:
-                          description: Service instances (originals and duplicates) of the last deploy. Hydrated into the Service settings step on resume.
+                          description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
                           items:
                             additionalProperties: false
                             type: object
@@ -52814,11 +52819,11 @@ paths:
                                 description: Whether the instance is a duplicate of another service.
                                 type: boolean
                               name:
-                                description: Display name of the instance.
+                                description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
                                 maxLength: 255
                                 type: string
                               serviceId:
-                                description: The service this instance belongs to.
+                                description: ID of the service this instance belongs to.
                                 maxLength: 255
                                 minLength: 1
                                 type: string
@@ -52829,6 +52834,7 @@ paths:
                               - isDuplicate
                           maxItems: 1000
                           type: array
+                          x-state: Experimental; added in 9.7.0
                         integrationName:
                           description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                           type: string
