@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
@@ -35,25 +35,25 @@ import {
 } from '../common/hitl';
 import { DURATION_REGEX, MAX_DURATION_LENGTH } from '../common/utils/duration/duration';
 
-export const DurationSchema = z
+export const DurationSchema = lazySchema(() => z
   .string()
   .max(MAX_DURATION_LENGTH)
-  .regex(DURATION_REGEX, 'Invalid duration format');
+  .regex(DURATION_REGEX, 'Invalid duration format'));
 
-export const ByteSizeSchema = z
+export const ByteSizeSchema = lazySchema(() => z
   .string()
-  .regex(/^\d+(\.\d+)?\s*(b|kb|mb|gb)$/i, 'Invalid byte size format (e.g., "10mb", "1gb")');
+  .regex(/^\d+(\.\d+)?\s*(b|kb|mb|gb)$/i, 'Invalid byte size format (e.g., "10mb", "1gb")'));
 
 /* -- Settings -- */
-export const RetryPolicySchema = z.object({
+export const RetryPolicySchema = lazySchema(() => z.object({
   'max-attempts': z.number().int().min(1).optional(),
   'timeout-seconds': z.number().int().min(1).optional(),
-});
+}));
 
-export const RetryDelayStrategySchema = z.enum(['fixed', 'exponential']);
+export const RetryDelayStrategySchema = lazySchema(() => z.enum(['fixed', 'exponential']));
 export type RetryDelayStrategy = z.infer<typeof RetryDelayStrategySchema>;
 
-export const WorkflowRetrySchema = z.object({
+export const WorkflowRetrySchema = lazySchema(() => z.object({
   'max-attempts': z.number().min(1),
   condition: z.string().optional(), // e.g., "${{error.type == 'NetworkError'}}" (default: always retry)
   delay: DurationSchema.optional(), // e.g., '5s', '1h30m' (default: no delay)
@@ -65,30 +65,30 @@ export const WorkflowRetrySchema = z.object({
   'max-delay': DurationSchema.optional(),
   /** Add jitter to delay to avoid thundering herd. Default: false. */
   jitter: z.boolean().optional(),
-});
+}));
 export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 
-const IfConditionSchema = z
+const IfConditionSchema = lazySchema(() => z
   .string()
   .max(IF_CONDITION_MAX_LENGTH)
   .describe(
     'KQL condition that controls whether this step runs, e.g. "steps.prev.output.status : \'success\'"'
-  );
+  ));
 
 // Base step schema, with recursive steps property
-export const BaseStepSchema = z.object({
+export const BaseStepSchema = lazySchema(() => z.object({
   name: z.string().min(1),
   type: z.string(),
   'max-step-size': ByteSizeSchema.optional(),
   if: IfConditionSchema.optional(),
-});
+}));
 export type BaseStep = z.infer<typeof BaseStepSchema>;
 
-export const WorkflowOnFailureSchema = z.object({
+export const WorkflowOnFailureSchema = lazySchema(() => z.object({
   retry: WorkflowRetrySchema.optional(),
   fallback: z.array(BaseStepSchema).min(1).optional(),
   continue: z.union([z.boolean(), z.string()]).optional(),
-});
+}));
 
 export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
 
@@ -105,17 +105,17 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
   return schema;
 }
 
-export const CollisionStrategySchema = z
+export const CollisionStrategySchema = lazySchema(() => z
   .enum(['cancel-in-progress', 'drop', 'queue'])
   .describe(
     'How to handle collisions when max concurrent runs is exceeded: `drop`, `cancel-in-progress` or `queue`.'
-  );
+  ));
 export type CollisionStrategy = z.infer<typeof CollisionStrategySchema>;
 
 export const DEFAULT_CONCURRENCY_QUEUE_SIZE = 100;
 export const DEFAULT_CONCURRENCY_QUEUE_TTL = '24h';
 
-export const ConcurrencySettingsSchema = z.object({
+export const ConcurrencySettingsSchema = lazySchema(() => z.object({
   key: z
     .string()
     .max(512)
@@ -141,14 +141,14 @@ export const ConcurrencySettingsSchema = z.object({
   'queue-ttl': DurationSchema.optional().describe(
     'Only applies when strategy is `queue`. Max time a run may stay queued before it is skipped (default: `24h`).'
   ),
-});
+}));
 export type ConcurrencySettings = z.infer<typeof ConcurrencySettingsSchema>;
 
 export const LIQUID_PARSE_LIMIT_MAX = 600_000;
 export const LIQUID_RENDER_LIMIT_MAX = 2_000;
 export const LIQUID_MEMORY_LIMIT_MAX = 60_000_000;
 
-export const LiquidSettingsSchema = z.object({
+export const LiquidSettingsSchema = lazySchema(() => z.object({
   parseLimit: z
     .number()
     .int()
@@ -172,10 +172,10 @@ export const LiquidSettingsSchema = z.object({
     .describe(
       'Liquid memory operation limit for array and string operations. Defaults to 15000000; maximum is 60000000.'
     ),
-});
+}));
 export type LiquidSettings = z.infer<typeof LiquidSettingsSchema>;
 
-export const WorkflowSettingsSchema = z.object({
+export const WorkflowSettingsSchema = lazySchema(() => z.object({
   run_as: z.string().min(1).max(1024).optional(),
   'on-failure': WorkflowOnFailureSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
@@ -183,7 +183,7 @@ export const WorkflowSettingsSchema = z.object({
   concurrency: ConcurrencySettingsSchema.optional(),
   'max-step-size': ByteSizeSchema.optional(), // e.g., '10mb', '15MB', '1gb'
   liquid: LiquidSettingsSchema.optional(),
-});
+}));
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
 
 export function getWorkflowSettingsSchema(stepSchema: z.ZodType, loose: boolean = false) {
@@ -200,9 +200,9 @@ export function getWorkflowSettingsSchema(stepSchema: z.ZodType, loose: boolean 
 }
 
 /* --- Steps --- */
-export const TimeoutPropSchema = z.object({
+export const TimeoutPropSchema = lazySchema(() => z.object({
   timeout: DurationSchema.optional(),
-});
+}));
 export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
 /** Upper bound on a Liquid duration template. Matches other dynamic expressions in this schema. */
@@ -215,7 +215,7 @@ const liquidDurationTemplateSchema = (message: string) =>
     .regex(/\{\{[\s\S]*\}\}/, message);
 
 /** A duration, or Liquid that renders to one at step entry. */
-export const DynamicTimeoutSchema = z
+export const DynamicTimeoutSchema = lazySchema(() => z
   .union([
     DurationSchema,
     liquidDurationTemplateSchema(
@@ -224,10 +224,10 @@ export const DynamicTimeoutSchema = z
   ])
   .describe(
     "Duration (`72h`) or Liquid that renders to one (`{{ inputs.expiresIn | default: '72h' }}`)."
-  );
+  ));
 
 /** A wait duration, or Liquid that renders to one at step entry. */
-export const DynamicDurationSchema = z
+export const DynamicDurationSchema = lazySchema(() => z
   .union([
     DurationSchema,
     liquidDurationTemplateSchema(
@@ -236,52 +236,52 @@ export const DynamicDurationSchema = z
   ])
   .describe(
     "Duration (`5s`) or Liquid that renders to one (`{{ inputs.waitFor | default: '5s' }}`)."
-  );
+  ));
 
-export const DynamicTimeoutPropSchema = z.object({
+export const DynamicTimeoutPropSchema = lazySchema(() => z.object({
   timeout: DynamicTimeoutSchema.optional(),
-});
+}));
 
-export const MaxStepSizePropSchema = z.object({
+export const MaxStepSizePropSchema = lazySchema(() => z.object({
   'max-step-size': ByteSizeSchema.optional(),
-});
+}));
 export type MaxStepSizeProp = z.infer<typeof MaxStepSizePropSchema>;
 
-export const MaxIterationsObjectSchema = z.object({
+export const MaxIterationsObjectSchema = lazySchema(() => z.object({
   limit: z.number().int().positive(),
   'on-limit': z.enum(['continue', 'fail']),
-});
+}));
 
-export const MaxIterationsSchema = z.union([
+export const MaxIterationsSchema = lazySchema(() => z.union([
   z.number().int().positive(),
   MaxIterationsObjectSchema,
-]);
+]));
 export type MaxIterations = z.infer<typeof MaxIterationsSchema>;
 
 export const DEFAULT_LOOP_MAX_ITERATIONS = 2000;
 
-export const LoopStepPropsSchema = z.object({
+export const LoopStepPropsSchema = lazySchema(() => z.object({
   'max-iterations': MaxIterationsSchema.optional(),
   'iteration-timeout': DurationSchema.optional(),
   'iteration-on-failure': WorkflowOnFailureSchema.optional(),
-});
+}));
 export type LoopStepProps = z.infer<typeof LoopStepPropsSchema>;
 
-const StepWithForEachSchema = z.object({
+const StepWithForEachSchema = lazySchema(() => z.object({
   foreach: z.union([z.string(), z.array(z.unknown())]).optional(),
-});
+}));
 export type StepWithForeach = z.infer<typeof StepWithForEachSchema>;
 
 export type StepWithOnFailure = z.infer<typeof StepWithOnFailureSchema>;
 
-export const StepWithIfConditionSchema = z.object({
+export const StepWithIfConditionSchema = lazySchema(() => z.object({
   if: IfConditionSchema.optional(),
-});
+}));
 export type StepWithIfCondition = z.infer<typeof StepWithIfConditionSchema>;
 
-export const StepWithOnFailureSchema = z.object({
+export const StepWithOnFailureSchema = lazySchema(() => z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
-});
+}));
 
 export const BaseConnectorStepSchema = BaseStepSchema.extend({
   type: z.string().min(1),
@@ -307,37 +307,37 @@ export const BuiltInStepProperties = [
 ];
 export type BuiltInStepProperty = (typeof BuiltInStepProperties)[number];
 
-export const WaitStepInputSchema = z.object({
+export const WaitStepInputSchema = lazySchema(() => z.object({
   duration: DynamicDurationSchema.describe(
     'Duration to wait, e.g. "5s", "1h30m". Units in descending order (w/d/h/m/s/ms). ' +
       "Accepts Liquid that renders to one (`{{ inputs.waitFor | default: '5s' }}`)."
   ),
-});
-export const WaitStepSchema = BaseStepSchema.extend({
+}));
+export const WaitStepSchema = lazySchema(() => BaseStepSchema.extend({
   type: z.literal('wait').describe('Pause execution for a specified duration'),
   with: WaitStepInputSchema,
-});
+}));
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
 const hitlChannelMessageField = {
-  message: z
+  message: lazySchema(() => z
     .string()
     .max(MAX_HITL_MESSAGE_LENGTH)
     .optional()
     .describe(
       'Optional notification template. Use {{context.hitl.externalFormLink}} for the external input form link.'
-    ),
+    )),
 };
 
-export const HitlSlackChannelSchema = z.object({
+export const HitlSlackChannelSchema = lazySchema(() => z.object({
   'connector-id': z
     .string()
     .min(1)
     .max(CONNECTOR_ID_MAX_LENGTH)
     .describe('Slack webhook connector saved object id or name (posts to the webhook channel)'),
-});
+}));
 
-export const HitlSlackApiChannelSchema = z.object({
+export const HitlSlackApiChannelSchema = lazySchema(() => z.object({
   'connector-id': z
     .string()
     .min(1)
@@ -355,14 +355,14 @@ export const HitlSlackApiChannelSchema = z.object({
     .describe(
       'Slack channels to notify. Each entry may be a channel ID (e.g. C0123456789) or a channel name (e.g. #alerts). Must be allowed on the Slack API connector when an allowlist is configured.'
     ),
-});
+}));
 
-export const HitlEmailRecipientListSchema = z
+export const HitlEmailRecipientListSchema = lazySchema(() => z
   .array(z.string().min(1).max(MAX_HITL_EMAIL_ADDRESS_LENGTH))
   .min(1)
-  .max(MAX_HITL_EMAIL_RECIPIENTS);
+  .max(MAX_HITL_EMAIL_RECIPIENTS));
 
-export const HitlEmailChannelSchema = z.object({
+export const HitlEmailChannelSchema = lazySchema(() => z.object({
   'connector-id': z
     .string()
     .min(1)
@@ -377,9 +377,9 @@ export const HitlEmailChannelSchema = z.object({
     .max(MAX_HITL_EMAIL_SUBJECT_LENGTH)
     .optional()
     .describe('Email subject. Defaults to a built-in subject when omitted.'),
-});
+}));
 
-export const HitlSlack2ChannelSchema = z.object({
+export const HitlSlack2ChannelSchema = lazySchema(() => z.object({
   'connector-id': z
     .string()
     .min(1)
@@ -399,9 +399,9 @@ export const HitlSlack2ChannelSchema = z.object({
     .describe(
       'Conversation IDs to send the message to (e.g. C... for channels, G... for private channels, D... for DMs).'
     ),
-});
+}));
 
-export const HitlTeamsChannelSchema = z.object({
+export const HitlTeamsChannelSchema = lazySchema(() => z.object({
   'connector-id': z
     .string()
     .min(1)
@@ -421,9 +421,9 @@ export const HitlTeamsChannelSchema = z.object({
     .describe(
       'Channel ID, or Liquid that renders to one. Obtain this from listChannels (the "id" field on each channel object).'
     ),
-});
+}));
 
-export const HitlServiceNowChannelSchema = z.object({
+export const HitlServiceNowChannelSchema = lazySchema(() => z.object({
   'connector-id': z
     .string()
     .min(1)
@@ -443,14 +443,14 @@ export const HitlServiceNowChannelSchema = z.object({
     .describe(
       'sys_id of the record, or Liquid that renders to one (e.g. {{ inputs.incident_sys_id }}).'
     ),
-});
+}));
 
 const MAX_HITL_HTTP_HEADER_COUNT = 20;
 const MAX_HITL_HTTP_HEADER_NAME_LENGTH = 256;
 
 export const HITL_HTTP_DESTINATION_ERROR = 'Set connector-id or url. Either one is enough.';
 
-export const HitlHttpChannelSchema = z
+export const HitlHttpChannelSchema = lazySchema(() => z
   .object({
     'connector-id': z
       .string()
@@ -506,7 +506,7 @@ export const HitlHttpChannelSchema = z
   })
   .meta({
     anyOf: [{ required: ['connector-id'] }, { required: ['url'] }],
-  });
+  }));
 
 const hitlChannelDescriptions = {
   slack: 'Notify via a Slack incoming-webhook connector (posts to the webhook configured channel)',
@@ -521,7 +521,7 @@ const hitlChannelDescriptions = {
   http: 'Send the response links in an HTTP request. Set a connector-id or a url. Uses the workflow HTTP connector, including its destination controls.',
 } as const;
 
-export const WaitForInputChannelsSchema = z
+export const WaitForInputChannelsSchema = lazySchema(() => z
   .object({
     slack: HitlSlackChannelSchema.extend(hitlChannelMessageField)
       .optional()
@@ -544,9 +544,9 @@ export const WaitForInputChannelsSchema = z
     http: HitlHttpChannelSchema.optional().describe(hitlChannelDescriptions.http),
   })
   .optional()
-  .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
+  .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION));
 
-export const WaitForApprovalChannelsSchema = z
+export const WaitForApprovalChannelsSchema = lazySchema(() => z
   .object({
     slack: HitlSlackChannelSchema.loose().optional().describe(hitlChannelDescriptions.slack),
     slack_api: HitlSlackApiChannelSchema.loose()
@@ -561,9 +561,9 @@ export const WaitForApprovalChannelsSchema = z
     http: HitlHttpChannelSchema.optional().describe(hitlChannelDescriptions.http),
   })
   .optional()
-  .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
+  .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION));
 
-export const WaitForInputStepInputSchema = z
+export const WaitForInputStepInputSchema = lazySchema(() => z
   .object({
     message: z
       .string()
@@ -575,7 +575,7 @@ export const WaitForInputStepInputSchema = z
     ),
     channels: WaitForInputChannelsSchema,
   })
-  .optional();
+  .optional());
 export const WaitForInputStepSchema = BaseStepSchema.extend({
   type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
   with: WaitForInputStepInputSchema,
@@ -584,7 +584,7 @@ export const WaitForInputStepSchema = BaseStepSchema.extend({
   .merge(StepWithOnFailureSchema);
 export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
 
-export const WaitForApprovalStepInputSchema = z
+export const WaitForApprovalStepInputSchema = lazySchema(() => z
   .object({
     message: z
       .string()
@@ -603,7 +603,7 @@ export const WaitForApprovalStepInputSchema = z
       .describe('Label for the reject action (default: Decline)'),
     channels: WaitForApprovalChannelsSchema,
   })
-  .optional();
+  .optional());
 
 export const WaitForApprovalStepSchema = BaseStepSchema.extend({
   type: z
@@ -615,15 +615,15 @@ export const WaitForApprovalStepSchema = BaseStepSchema.extend({
   .merge(StepWithOnFailureSchema);
 export type WaitForApprovalStep = z.infer<typeof WaitForApprovalStepSchema>;
 
-export const DataSetStepInputSchema = z
+export const DataSetStepInputSchema = lazySchema(() => z
   .record(z.string(), z.unknown())
   .describe(
     'Key-value pairs where keys are variable names and values are the data to store. Values support Liquid expressions. Access via {{ variables.key_name }}'
-  );
-export const DataSetStepSchema = BaseStepSchema.extend({
+  ));
+export const DataSetStepSchema = lazySchema(() => BaseStepSchema.extend({
   type: z.literal('data.set').describe('Set variables in the workflow context'),
   with: DataSetStepInputSchema,
-});
+}));
 export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 
 // Fetcher configuration for HTTP request customization (shared across formats)
@@ -634,7 +634,7 @@ export const IGNORED_KIBANA_FETCHER_SETTING_MESSAGE =
 const KIBANA_FETCHER_SCHEMA_DESCRIPTION =
   'Deprecated. Still applied unless Kibana steps use the Core self HTTP client. When that client is in use, these options are ignored: configure routing, TLS, and redirects with `server.selfHttp`, and use `max-step-size` for response limits.';
 
-const FetcherConfigObjectSchema = z
+const FetcherConfigObjectSchema = lazySchema(() => z
   .object({
     skip_ssl_verification: z
       .boolean()
@@ -653,23 +653,23 @@ const FetcherConfigObjectSchema = z
       .optional()
       .describe('Maximum response body size in bytes. Aborts the request mid-stream if exceeded.'),
   })
-  .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' });
+  .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' }));
 
-export const FetcherConfigSchema = FetcherConfigObjectSchema.optional();
+export const FetcherConfigSchema = lazySchema(() => FetcherConfigObjectSchema.optional());
 
-export const KibanaFetcherConfigSchema = FetcherConfigObjectSchema.meta({
+export const KibanaFetcherConfigSchema = lazySchema(() => FetcherConfigObjectSchema.meta({
   $id: 'kibanaFetcher',
   deprecated: true,
   description: KIBANA_FETCHER_SCHEMA_DESCRIPTION,
-}).optional();
+}).optional());
 
 // Single source of truth for the kibana.request HTTP method enum (mirrors the `http` step's
 // valid values). Reused by the connector schema (editor + validation) and the runtime guard so
 // the editor and runtime can never accept/reject different methods.
 export const KibanaHttpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
-export const KibanaHttpMethodSchema = z.enum(KibanaHttpMethods);
+export const KibanaHttpMethodSchema = lazySchema(() => z.enum(KibanaHttpMethods));
 
-export const ElasticsearchStepInputSchema = z.union([
+export const ElasticsearchStepInputSchema = lazySchema(() => z.union([
   // Raw API format - like Dev Console
   z.object({
     request: z.object({
@@ -693,35 +693,35 @@ export const ElasticsearchStepInputSchema = z.union([
       aggregations: z.record(z.string(), z.any()).optional(),
     })
     .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
-]);
+]));
 // Generic Elasticsearch step schema for backend validation
-export const ElasticsearchStepSchema = BaseStepSchema.extend({
+export const ElasticsearchStepSchema = lazySchema(() => BaseStepSchema.extend({
   type: z.string().refine((val) => val.startsWith('elasticsearch.'), {
     message: 'Elasticsearch step type must start with "elasticsearch."',
   }),
   with: ElasticsearchStepInputSchema,
   timeout: DynamicTimeoutSchema.optional(),
-});
+}));
 export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
 
 // Kibana step meta options that control routing and debugging (not forwarded as HTTP params)
 export const KibanaStepMetaSchema = {
-  use_server_info: z
+  use_server_info: lazySchema(() => z
     .boolean()
     .optional()
-    .describe('Use the server info URL (internal host:port) instead of the public URL'),
-  use_localhost: z
+    .describe('Use the server info URL (internal host:port) instead of the public URL')),
+  use_localhost: lazySchema(() => z
     .boolean()
     .optional()
-    .describe('Use localhost:5601 instead of the configured URL'),
-  debug: z
+    .describe('Use localhost:5601 instead of the configured URL')),
+  debug: lazySchema(() => z
     .boolean()
     .optional()
-    .describe('Include the resolved full URL in the step output for debugging'),
+    .describe('Include the resolved full URL in the step output for debugging')),
 };
 
 // Generic Kibana step schema for backend validation
-export const KibanaStepInputSchema = z.union([
+export const KibanaStepInputSchema = lazySchema(() => z.union([
   // Raw API format - direct HTTP API calls
   z.object({
     request: z.object({
@@ -756,26 +756,26 @@ export const KibanaStepInputSchema = z.union([
       ...KibanaStepMetaSchema,
     })
     .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
-]);
-export const KibanaStepSchema = BaseStepSchema.extend({
+]));
+export const KibanaStepSchema = lazySchema(() => BaseStepSchema.extend({
   type: z.string().refine((val) => val.startsWith('kibana.'), {
     message: 'Kibana step type must start with "kibana."',
   }),
   with: KibanaStepInputSchema,
   timeout: DynamicTimeoutSchema.optional(),
-});
+}));
 export type KibanaStep = z.infer<typeof KibanaStepSchema>;
 
-export const ForEachStepConfigSchema = z.object({
+export const ForEachStepConfigSchema = lazySchema(() => z.object({
   foreach: z
     .union([z.string(), z.array(z.unknown())])
     .describe(
       'Liquid expression evaluating to an array, e.g. "{{ steps.search.output.hits.hits | json }}"'
     ),
   steps: z.array(BaseStepSchema).min(1).describe('Steps to execute for each item'),
-});
+}));
 
-export const ForEachStepSchema = BaseStepSchema.extend({
+export const ForEachStepSchema = lazySchema(() => BaseStepSchema.extend({
   type: z
     .literal('foreach')
     .describe(
@@ -784,7 +784,7 @@ export const ForEachStepSchema = BaseStepSchema.extend({
   ...ForEachStepConfigSchema.shape,
   ...LoopStepPropsSchema.shape,
   ...TimeoutPropSchema.shape,
-});
+}));
 
 export type ForEachStep = z.infer<typeof ForEachStepSchema>;
 
@@ -807,7 +807,7 @@ export const getForEachStepSchema = (stepSchema: z.ZodType, loose: boolean = fal
   return schema;
 };
 
-export const WhileStepConfigSchema = z.object({
+export const WhileStepConfigSchema = lazySchema(() => z.object({
   condition: z
     .string()
     .describe(
@@ -817,9 +817,9 @@ export const WhileStepConfigSchema = z.object({
     .array(BaseStepSchema)
     .min(1)
     .describe('Steps to execute in each iteration of the while loop'),
-});
+}));
 
-export const WhileStepSchema = BaseStepSchema.extend({
+export const WhileStepSchema = lazySchema(() => BaseStepSchema.extend({
   type: z
     .literal('while')
     .describe(
@@ -828,7 +828,7 @@ export const WhileStepSchema = BaseStepSchema.extend({
   ...WhileStepConfigSchema.shape,
   ...LoopStepPropsSchema.shape,
   ...TimeoutPropSchema.shape,
-});
+}));
 
 export type WhileStep = z.infer<typeof WhileStepSchema>;
 
@@ -845,13 +845,13 @@ export const getWhileStepSchema = (stepSchema: z.ZodType, loose: boolean = false
   return schema;
 };
 
-export const SwitchCaseSchema = z.object({
+export const SwitchCaseSchema = lazySchema(() => z.object({
   match: z.union([z.string(), z.number(), z.boolean()]),
   steps: z.array(BaseStepSchema).min(1).describe('Steps to execute when this case matches'),
-});
+}));
 export type SwitchCase = z.infer<typeof SwitchCaseSchema>;
 
-export const SwitchStepConfigSchema = z.object({
+export const SwitchStepConfigSchema = lazySchema(() => z.object({
   expression: z
     .string()
     .describe(
@@ -862,9 +862,9 @@ export const SwitchStepConfigSchema = z.object({
     .min(1)
     .describe('Ordered list of match-to-steps mappings. First matching case is executed'),
   default: z.array(BaseStepSchema).optional().describe('Steps to execute when no case matches'),
-});
+}));
 
-export const SwitchStepSchema = BaseStepSchema.extend({
+export const SwitchStepSchema = lazySchema(() => BaseStepSchema.extend({
   type: z
     .literal('switch')
     .describe(
@@ -872,7 +872,7 @@ export const SwitchStepSchema = BaseStepSchema.extend({
     ),
   ...SwitchStepConfigSchema.shape,
   ...TimeoutPropSchema.shape,
-});
+}));
 export type SwitchStep = z.infer<typeof SwitchStepSchema>;
 
 export const getSwitchStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
@@ -892,7 +892,7 @@ export const getSwitchStepSchema = (stepSchema: z.ZodType, loose: boolean = fals
   return schema;
 };
 
-export const IfStepConfigSchema = z.object({
+export const IfStepConfigSchema = lazySchema(() => z.object({
   condition: IfConditionSchema,
   // This step already gates on `condition`; a step-level `if` would be a second,
   // invisible gate. Reject it instead of stripping it, so the author sees why.
@@ -901,15 +901,15 @@ export const IfStepConfigSchema = z.object({
     .optional(),
   steps: z.array(BaseStepSchema).min(1).describe('Steps to execute when the condition is true'),
   else: z.array(BaseStepSchema).optional().describe('Steps to execute when the condition is false'),
-});
-export const IfStepSchema = BaseStepSchema.extend({
+}));
+export const IfStepSchema = lazySchema(() => BaseStepSchema.extend({
   type: z
     .literal('if')
     .describe(
       'Conditional execution. Runs steps when condition is true, with optional else block for the false branch'
     ),
   ...IfStepConfigSchema.shape,
-});
+}));
 export type IfStep = z.infer<typeof IfStepSchema>;
 
 export const getIfStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
@@ -943,7 +943,7 @@ export const PARALLEL_FOREACH_EXPRESSION_MAX_LENGTH = 2000;
 
 // `concurrency` accepts either a bare number (shorthand for `{ max: N }`) or an
 // object so authors can also control whether parked/polling lanes hold a slot.
-export const ParallelConcurrencyObjectSchema = z.object({
+export const ParallelConcurrencyObjectSchema = lazySchema(() => z.object({
   max: z
     .number()
     .int()
@@ -963,10 +963,10 @@ export const ParallelConcurrencyObjectSchema = z.object({
       'When true (default), a branch that is waiting/polling still occupies a concurrency slot. ' +
         'When false, waiting branches free their slot so more branches can start.'
     ),
-});
+}));
 export type ParallelConcurrencyObject = z.infer<typeof ParallelConcurrencyObjectSchema>;
 
-export const ParallelConcurrencySchema = z
+export const ParallelConcurrencySchema = lazySchema(() => z
   .union([
     z
       .number()
@@ -978,19 +978,19 @@ export const ParallelConcurrencySchema = z
       ),
     ParallelConcurrencyObjectSchema,
   ])
-  .describe('Concurrency control: a number (max lanes) or { max, count-waiting }.');
+  .describe('Concurrency control: a number (max lanes) or { max, count-waiting }.'));
 
-export const ParallelModeSchema = z
+export const ParallelModeSchema = lazySchema(() => z
   .enum(['fail-fast', 'settled'])
   .describe(
     'fail-fast (default): stop scheduling new branches when one fails, let in-flight branches finish, then fail. ' +
       'settled: let every branch reach a terminal state; the step succeeds and reports per-branch results.'
-  );
+  ));
 export type ParallelMode = z.infer<typeof ParallelModeSchema>;
 
 // A single named branch in a static parallel step. Each branch has its own
 // (heterogeneous) body — unlike dynamic fan-out, branches run different steps.
-export const ParallelBranchSchema = z.object({
+export const ParallelBranchSchema = lazySchema(() => z.object({
   name: z
     .string()
     .min(1)
@@ -1002,7 +1002,7 @@ export const ParallelBranchSchema = z.object({
     .array(BaseStepSchema)
     .min(1)
     .describe('Branch body. v1 supports a straight-line sequence of steps per branch.'),
-});
+}));
 
 // Shared so the base config schema and the connector-aware `getParallelStepSchema`
 // variant surface the same validation message for a degenerate single-branch step.
@@ -1016,7 +1016,7 @@ const PARALLEL_STATIC_MIN_BRANCHES_MESSAGE =
 // - Static branches (`branches`): run a FIXED set of named, heterogeneous
 //   branch bodies concurrently (scatter-gather). The set is known at author
 //   time, so each branch compiles to its own real subgraph.
-export const ParallelStepConfigSchema = z.object({
+export const ParallelStepConfigSchema = lazySchema(() => z.object({
   foreach: z
     .union([z.string().max(PARALLEL_FOREACH_EXPRESSION_MAX_LENGTH), z.array(z.unknown())])
     .optional()
@@ -1044,10 +1044,10 @@ export const ParallelStepConfigSchema = z.object({
     'Maximum duration a single branch may run before it is failed with a timeout. ' +
       'Independent of the step-level `timeout`, which bounds the whole parallel step.'
   ),
-});
+}));
 // Object form (extendable). The exported `ParallelStepSchema` applies the
 // mode-exclusivity refinement on top; keep this base for `.extend()` callers.
-export const ParallelStepObjectSchema = BaseStepSchema.extend({
+export const ParallelStepObjectSchema = lazySchema(() => BaseStepSchema.extend({
   type: z
     .literal('parallel')
     .describe(
@@ -1057,7 +1057,7 @@ export const ParallelStepObjectSchema = BaseStepSchema.extend({
     ),
   ...ParallelStepConfigSchema.shape,
   ...TimeoutPropSchema.shape,
-});
+}));
 
 // Exactly one mode. Dynamic requires `steps`; static must not use top-level `steps`.
 // Accepts `unknown` so it can be used as a refinement on any parallel-step schema
@@ -1120,18 +1120,18 @@ export const getParallelStepSchema = (stepSchema: z.ZodType, loose: boolean = fa
   return applyParallelModeRefinement(schema);
 };
 
-export const MergeStepConfigSchema = z.object({
+export const MergeStepConfigSchema = lazySchema(() => z.object({
   sources: z
     .array(z.string())
     .describe('References to branch or step names whose results to merge'),
   steps: z.array(BaseStepSchema).describe('Steps to execute after merging'),
-});
-export const MergeStepSchema = BaseStepSchema.extend({
+}));
+export const MergeStepSchema = lazySchema(() => BaseStepSchema.extend({
   type: z
     .literal('merge')
     .describe('Merge results from parallel branches and continue with subsequent steps'),
   ...MergeStepConfigSchema.shape,
-});
+}));
 export type MergeStep = z.infer<typeof MergeStepSchema>;
 
 export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
@@ -1147,31 +1147,31 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
   return schema;
 };
 
-export const LoopBreakStepSchema = BaseStepSchema.extend({
+export const LoopBreakStepSchema = lazySchema(() => BaseStepSchema.extend({
   type: z
     .literal('loop.break')
     .describe('Exit the enclosing loop immediately. Valid only inside a foreach or while body'),
-});
+}));
 export type LoopBreakStep = z.infer<typeof LoopBreakStepSchema>;
 
-export const LoopContinueStepSchema = BaseStepSchema.extend({
+export const LoopContinueStepSchema = lazySchema(() => BaseStepSchema.extend({
   type: z
     .literal('loop.continue')
     .describe(
       'Skip remaining steps in the current iteration and advance to the next one. Valid only inside a foreach or while body'
     ),
-});
+}));
 export type LoopContinueStep = z.infer<typeof LoopContinueStepSchema>;
 
-export const ConsoleStepInputSchema = z.object({
+export const ConsoleStepInputSchema = lazySchema(() => z.object({
   message: z.unknown().optional(),
-});
+}));
 
-export const WorkflowRunAsModeSchema = z.enum(['default', 'inherit', 'override']);
+export const WorkflowRunAsModeSchema = lazySchema(() => z.enum(['default', 'inherit', 'override']));
 export type WorkflowRunAsMode = z.infer<typeof WorkflowRunAsModeSchema>;
 
 // Base schema shared by both workflow.execute and workflow.executeAsync
-export const WorkflowExecuteStepInputSchema = z.object({
+export const WorkflowExecuteStepInputSchema = lazySchema(() => z.object({
   'workflow-id': z.string().min(1).max(1024),
   'allowed-workflow-ids': z
     .array(
@@ -1209,38 +1209,38 @@ export const WorkflowExecuteStepInputSchema = z.object({
       'Use default identity, inherit the parent service account, or override the managed child service account for this execution.'
     )
     .meta({ doNotSuggest: true }),
-});
+}));
 
 const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
   with: WorkflowExecuteStepInputSchema,
 }).merge(StepWithOnFailureSchema);
 
-export const WorkflowExecuteStepSchema = WorkflowExecuteBaseSchema.extend({
+export const WorkflowExecuteStepSchema = lazySchema(() => WorkflowExecuteBaseSchema.extend({
   type: z.literal('workflow.execute'),
-});
+}));
 export type WorkflowExecuteStep = z.infer<typeof WorkflowExecuteStepSchema>;
 
-export const WorkflowExecuteAsyncStepSchema = WorkflowExecuteBaseSchema.extend({
+export const WorkflowExecuteAsyncStepSchema = lazySchema(() => WorkflowExecuteBaseSchema.extend({
   type: z.literal('workflow.executeAsync'),
-});
+}));
 export type WorkflowExecuteAsyncStep = z.infer<typeof WorkflowExecuteAsyncStepSchema>;
 
-export const WorkflowExecuteAsyncStepOutputSchema = z.object({
+export const WorkflowExecuteAsyncStepOutputSchema = lazySchema(() => z.object({
   workflowId: z.string(),
   executionId: z.string(),
   awaited: z.boolean(),
   status: z.string(),
   startedAt: z.string().optional(),
-});
+}));
 
-export const WorkflowOutputStepSchema = BaseStepSchema.extend({
+export const WorkflowOutputStepSchema = lazySchema(() => BaseStepSchema.extend({
   type: z.literal('workflow.output'),
   status: z.enum(['completed', 'cancelled', 'failed']).optional().default('completed'),
   with: z.record(z.string(), z.any()),
-});
+}));
 export type WorkflowOutputStep = z.infer<typeof WorkflowOutputStepSchema>;
 
-export const WorkflowFailStepSchema = BaseStepSchema.extend({
+export const WorkflowFailStepSchema = lazySchema(() => BaseStepSchema.extend({
   type: z.literal('workflow.fail'),
   with: z
     .object({
@@ -1248,7 +1248,7 @@ export const WorkflowFailStepSchema = BaseStepSchema.extend({
       reason: z.string().optional(),
     })
     .optional(),
-});
+}));
 export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
 
 /* --- Outputs --- */
@@ -1257,7 +1257,7 @@ export const WorkflowOutputSchema = LegacyWorkflowInputSchema;
 export type WorkflowOutput = z.infer<typeof WorkflowOutputSchema>;
 
 /* --- Consts --- */
-export const WorkflowConstsSchema = z.record(
+export const WorkflowConstsSchema = lazySchema(() => z.record(
   z.string(),
   z.union([
     z.string(),
@@ -1267,7 +1267,7 @@ export const WorkflowConstsSchema = z.record(
     z.object({}),
     z.array(z.any()),
   ])
-);
+));
 
 const StepSchema = z.lazy(() =>
   z.union([
@@ -1321,7 +1321,7 @@ export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
 /* --- Workflow --- */
 // Base schema without transform - can be extended (used in generate_yaml_schema_from_connectors.ts)
-const WorkflowSchemaBase = z.object({
+const WorkflowSchemaBase = lazySchema(() => z.object({
   version: z.literal('1').optional().default('1').describe('The version of the workflow schema'),
   name: z.string().min(1),
   description: z.string().optional(),
@@ -1331,7 +1331,7 @@ const WorkflowSchemaBase = z.object({
   outputs: z.union([JsonModelSchema, z.array(WorkflowOutputSchema)]).optional(),
   consts: WorkflowConstsSchema.optional(),
   steps: z.array(StepSchema).min(1),
-});
+}));
 
 /** Normalize inputs or outputs from either JSON Schema or legacy array format to JsonModelSchema. */
 function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSchema> | undefined {
@@ -1443,7 +1443,7 @@ export { WorkflowSchemaForAutocompleteBase };
 // Canonical shape for normalized LLM token usage. The `WorkflowTokenUsage` type
 // in `types/v1.ts` is derived from this schema, so there is a single source of
 // truth shared by runtime validation (workflow context) and the TS types.
-export const WorkflowTokenUsageSchema = z.object({
+export const WorkflowTokenUsageSchema = lazySchema(() => z.object({
   inputTokens: z.number().describe('Total input (prompt) tokens consumed.'),
   outputTokens: z.number().describe('Total output (completion) tokens produced.'),
   cachedTokens: z
@@ -1451,20 +1451,20 @@ export const WorkflowTokenUsageSchema = z.object({
     .optional()
     .describe('Cached input tokens reused. This is a subset of inputTokens.'),
   totalTokens: z.number().describe('Sum of input and output tokens.'),
-});
+}));
 
 // Token usage attributed to a single step, adding the step id and its resolved
 // connector to the aggregate token shape.
-export const WorkflowStepTokenUsageSchema = WorkflowTokenUsageSchema.extend({
+export const WorkflowStepTokenUsageSchema = lazySchema(() => WorkflowTokenUsageSchema.extend({
   stepId: z.string().max(512).describe('Id of the step that produced this usage.'),
   connectorId: z
     .string()
     .max(CONNECTOR_ID_MAX_LENGTH)
     .optional()
     .describe('Id of the LLM connector the step resolved to, when reported by the model.'),
-});
+}));
 
-export const WorkflowEffectiveIdentitySchema = z.object({
+export const WorkflowEffectiveIdentitySchema = lazySchema(() => z.object({
   type: z.literal('service_account'),
   id: z.string().max(1024),
   inheritedFrom: z
@@ -1472,9 +1472,9 @@ export const WorkflowEffectiveIdentitySchema = z.object({
       workloadId: z.string().max(1024),
     })
     .optional(),
-});
+}));
 
-export const WorkflowExecutionContextSchema = z.object({
+export const WorkflowExecutionContextSchema = lazySchema(() => z.object({
   id: z.string(),
   isTestRun: z.boolean(),
   startedAt: z.date(),
@@ -1483,10 +1483,10 @@ export const WorkflowExecutionContextSchema = z.object({
   effectiveIdentity: WorkflowEffectiveIdentitySchema.optional(),
   triggeredBy: z.string().optional(),
   usage: WorkflowTokenUsageSchema.optional(),
-});
+}));
 export type WorkflowExecutionContext = z.infer<typeof WorkflowExecutionContextSchema>;
 
-export const WorkflowDataContextSchema = z.object({
+export const WorkflowDataContextSchema = lazySchema(() => z.object({
   id: z.string(),
   name: z.string(),
   enabled: z.boolean(),
@@ -1495,15 +1495,15 @@ export const WorkflowDataContextSchema = z.object({
     .number()
     .optional()
     .describe('Workflow document version captured when the execution was created.'),
-});
+}));
 export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
 
 /**
  * Timestamp injected by the platform for event-driven (custom) trigger events only.
  */
-export const EventTimestampSchema = z.object({
+export const EventTimestampSchema = lazySchema(() => z.object({
   timestamp: z.string().describe('Time when the event was received (ISO 8601).'),
-});
+}));
 
 // Recursive type for workflow inputs that supports nested objects from JSON Schema
 const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
@@ -1518,7 +1518,7 @@ const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
   ])
 );
 
-export const WorkflowHitlTemplateContextSchema = z.object({
+export const WorkflowHitlTemplateContextSchema = lazySchema(() => z.object({
   [HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY]: z
     .string()
     .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
@@ -1543,13 +1543,13 @@ export const WorkflowHitlTemplateContextSchema = z.object({
     .describe(
       'External waitForApproval reject URL. Populated when rendering an HTTP approval request.'
     ),
-});
+}));
 
-export const WorkflowTemplatePersistedContextSchema = z.object({
+export const WorkflowTemplatePersistedContextSchema = lazySchema(() => z.object({
   hitl: WorkflowHitlTemplateContextSchema.optional(),
-});
+}));
 
-export const WorkflowContextSchema = z.object({
+export const WorkflowContextSchema = lazySchema(() => z.object({
   /**
    * Persisted execution-context values exposed to templates as `context.*`
    * (for example `context.hitl.externalFormLink` during external waitForInput).
@@ -1586,10 +1586,10 @@ export const WorkflowContextSchema = z.object({
     })
     .optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
-});
+}));
 export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
 
-export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
+export const DynamicWorkflowContextSchema = lazySchema(() => WorkflowContextSchema.extend({
   // overriding record with object to avoid type mismatch when
   // extending with actual inputs, outputs and consts of different types
   inputs: z.object({}),
@@ -1598,48 +1598,48 @@ export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
   // overriding event with base event schema (spaceId only) so it can be
   // dynamically extended with trigger-specific properties (e.g., alerts, rule)
   event: BaseEventSchema.optional(),
-});
+}));
 export type DynamicWorkflowContext = z.infer<typeof DynamicWorkflowContextSchema>;
 
-export const StepDataSchema = z.object({
+export const StepDataSchema = lazySchema(() => z.object({
   output: z.any().optional(),
   error: z.any().optional(),
-});
+}));
 export type StepData = z.infer<typeof StepDataSchema>;
 
 const ForEachContextItemSchema = z.unknown();
-export const ForEachContextSchema = z.object({
+export const ForEachContextSchema = lazySchema(() => z.object({
   items: z.array(ForEachContextItemSchema),
   index: z.number().int(),
   item: ForEachContextItemSchema,
   total: z.number().int(),
-});
+}));
 export type ForEachContext = z.infer<typeof ForEachContextSchema>;
 
-export const BaseSerializedErrorSchema = z.object({
+export const BaseSerializedErrorSchema = lazySchema(() => z.object({
   type: z.string(),
   message: z.string(),
   details: z.record(z.string(), z.unknown()).optional(),
-});
+}));
 export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;
 
-export const WhileContextSchema = z.object({
+export const WhileContextSchema = lazySchema(() => z.object({
   iteration: z.number().int(),
-});
+}));
 export type WhileContext = z.infer<typeof WhileContextSchema>;
 
-export const StepContextSchema = WorkflowContextSchema.extend({
+export const StepContextSchema = lazySchema(() => WorkflowContextSchema.extend({
   steps: z.record(z.string(), StepDataSchema),
   foreach: ForEachContextSchema.optional(),
   while: WhileContextSchema.optional(),
   variables: z.record(z.string(), z.unknown()).optional(),
   error: BaseSerializedErrorSchema.optional(),
-});
+}));
 export type StepContext = z.infer<typeof StepContextSchema>;
 
-export const DynamicStepContextSchema = DynamicWorkflowContextSchema.extend({
+export const DynamicStepContextSchema = lazySchema(() => DynamicWorkflowContextSchema.extend({
   // overriding record with object to avoid type mismatch when
   // extending with actual step ids and different output types
   steps: z.object({}),
-});
+}));
 export type DynamicStepContext = z.infer<typeof DynamicStepContextSchema>;

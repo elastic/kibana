@@ -7,7 +7,7 @@
 
 import type { ActionMetadata } from '@kbn/workflows';
 import { actionCategorySchema, actionImpactSchema } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_CHARTS_SUMMARY_BUCKETS, PROPOSAL_CATEGORY_TODO } from './constants';
 
 /**
@@ -15,7 +15,7 @@ import { MAX_CHARTS_SUMMARY_BUCKETS, PROPOSAL_CATEGORY_TODO } from './constants'
  * "awaiting a decision" answerable regardless of the surface that decided.
  * Immutable once set.
  */
-export const proposalDecisionSchema = z.enum(['approved', 'dismissed']);
+export const proposalDecisionSchema = lazySchema(() => z.enum(['approved', 'dismissed']));
 export type ProposalDecision = z.infer<typeof proposalDecisionSchema>;
 
 /**
@@ -26,7 +26,7 @@ export type ProposalDecision = z.infer<typeof proposalDecisionSchema>;
  * answered in time, so `dismissed` no longer does double duty for "declined"
  * and "deadline passed".
  */
-export const proposalStatusSchema = z.enum([
+export const proposalStatusSchema = lazySchema(() => z.enum([
   'pending',
   'executing',
   'succeeded',
@@ -35,14 +35,14 @@ export const proposalStatusSchema = z.enum([
   'no_action',
   /** Replaced by a revision, not rejected — distinct from `dismissed`/`no_action`. */
   'superseded',
-]);
+]));
 export type ProposalStatus = z.infer<typeof proposalStatusSchema>;
 
 /** Same vocabulary an action declares about itself, so the two cannot drift. */
 export const proposalImpactSchema = actionImpactSchema;
 export type ProposalImpact = z.infer<typeof proposalImpactSchema>;
 
-export const proposalConfidenceSchema = z.enum(['low', 'medium', 'high']);
+export const proposalConfidenceSchema = lazySchema(() => z.enum(['low', 'medium', 'high']));
 export type ProposalConfidence = z.infer<typeof proposalConfidenceSchema>;
 
 /**
@@ -64,13 +64,13 @@ export type ProposalConfidence = z.infer<typeof proposalConfidenceSchema>;
  * Required, and fixed for the whole revision chain: `revise()` and `clone()`
  * inherit it, and no update path can move it.
  */
-export const proposalOriginSchema = z.enum([
+export const proposalOriginSchema = lazySchema(() => z.enum([
   'alertzero',
   'nightshift',
   'context_engine',
   /** The standalone chat surface, owned by no solution feature. */
   'agent_builder',
-]);
+]));
 export type ProposalOrigin = z.infer<typeof proposalOriginSchema>;
 
 /**
@@ -81,7 +81,7 @@ export type ProposalOrigin = z.infer<typeof proposalOriginSchema>;
 export const proposalCategorySchema = actionCategorySchema;
 export type ProposalCategory = z.infer<typeof proposalCategorySchema>;
 
-export const dismissReasonSchema = z.enum([
+export const dismissReasonSchema = lazySchema(() => z.enum([
   /** The default: an analyst can decline without picking a specific reason at all. */
   'no_reason',
   'duplicate',
@@ -90,7 +90,7 @@ export const dismissReasonSchema = z.enum([
   'handled_elsewhere',
   'risk_accepted',
   'other',
-]);
+]));
 export type DismissReason = z.infer<typeof dismissReasonSchema>;
 
 /**
@@ -119,11 +119,11 @@ const MAX_TIMESTAMP_LENGTH = 64;
 /** An action's input is opaque to us, so cap its breadth rather than its shape. */
 const MAX_ACTION_INPUT_KEYS = 100;
 
-export const boundedActionInput = z
+export const boundedActionInput = lazySchema(() => z
   .record(z.string().max(MAX_NAME_LENGTH), z.unknown())
   .refine((value) => Object.keys(value).length <= MAX_ACTION_INPUT_KEYS, {
     message: `actionInput may not exceed ${MAX_ACTION_INPUT_KEYS} keys`,
-  });
+  }));
 
 /**
  * Who did something, in the shape Cases established. The profile uid is the
@@ -136,15 +136,15 @@ export const boundedActionInput = z
  * Field names are camelCase to match the rest of this plugin's contract; Cases
  * uses snake_case because that is its own API convention.
  */
-export const proposalUserSchema = z.object({
+export const proposalUserSchema = lazySchema(() => z.object({
   username: z.string().max(MAX_ID_LENGTH).nullable(),
   fullName: z.string().max(MAX_NAME_LENGTH).nullable(),
   email: z.string().max(MAX_NAME_LENGTH).nullable(),
   profileUid: z.string().max(MAX_ID_LENGTH).optional(),
-});
+}));
 export type ProposalUser = z.infer<typeof proposalUserSchema>;
 
-export const proposalSchema = z.object({
+export const proposalSchema = lazySchema(() => z.object({
   id: z.string().max(MAX_ID_LENGTH),
   spaceId: z.string().max(MAX_ID_LENGTH),
   /** Conversation this proposal belongs to. The reverse link lives on the conversation. */
@@ -230,7 +230,7 @@ export const proposalSchema = z.object({
 
   createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
   createdBy: proposalUserSchema.optional(),
-});
+}));
 export type Proposal = z.infer<typeof proposalSchema>;
 
 /** Catalog metadata resolved on read. */
@@ -238,7 +238,7 @@ export interface ProposalWithMetadata extends Proposal {
   action?: ActionMetadata;
 }
 
-export const createProposalRequestSchema = z.object({
+export const createProposalRequestSchema = lazySchema(() => z.object({
   conversationId: z.string().max(MAX_ID_LENGTH),
   /**
    * Short plain-text label. Same precedence as `category` — the caller wins,
@@ -287,10 +287,10 @@ export const createProposalRequestSchema = z.object({
    * derived from. Omitting `id` mints a random one, exactly as before.
    */
   id: z.uuid().optional(),
-});
+}));
 export type CreateProposalRequest = z.infer<typeof createProposalRequestSchema>;
 
-export const approveProposalRequestSchema = z.object({
+export const approveProposalRequestSchema = lazySchema(() => z.object({
   /**
    * The action input the approver was shown. Rejected with a conflict when it
    * no longer matches the record, so an approval can never apply to values the
@@ -298,13 +298,13 @@ export const approveProposalRequestSchema = z.object({
    */
   actionInput: boundedActionInput.optional(),
   rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
-});
+}));
 export type ApproveProposalRequest = z.infer<typeof approveProposalRequestSchema>;
 
-export const dismissProposalRequestSchema = z.object({
+export const dismissProposalRequestSchema = lazySchema(() => z.object({
   dismissReason: dismissReasonSchema,
   rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
-});
+}));
 export type DismissProposalRequest = z.infer<typeof dismissProposalRequestSchema>;
 
 /**
@@ -325,7 +325,7 @@ export const MAX_PROPOSALS_PAGE_OFFSET = 10_000 - MAX_PROPOSALS_PAGE_SIZE;
  * The complementary query — "no human ever answered", which also takes in
  * `expired` — is not expressible here, because nothing needs it yet.
  */
-export const proposalFiltersSchema = z.object({
+export const proposalFiltersSchema = lazySchema(() => z.object({
   status: proposalStatusSchema.optional(),
   decision: proposalDecisionSchema.optional(),
   conversationId: z.string().max(MAX_ID_LENGTH).optional(),
@@ -345,10 +345,10 @@ export const proposalFiltersSchema = z.object({
    * default so the list stays a faithful view of the index.
    */
   excludeExpired: z.stringbool().default(false),
-});
+}));
 export type ProposalFilters = z.infer<typeof proposalFiltersSchema>;
 
-export const listProposalsQuerySchema = proposalFiltersSchema.extend({
+export const listProposalsQuerySchema = lazySchema(() => proposalFiltersSchema.extend({
   /** Filters to proposals in the given action category. */
   category: proposalCategorySchema.optional(),
   /** Bounds the closed queue to a recency window rather than all decided history. */
@@ -361,7 +361,7 @@ export const listProposalsQuerySchema = proposalFiltersSchema.extend({
   order: z.enum(['priority', 'newest']).optional(),
   size: z.coerce.number().int().min(1).max(MAX_PROPOSALS_PAGE_SIZE).default(50),
   from: z.coerce.number().int().min(0).max(MAX_PROPOSALS_PAGE_OFFSET).default(0),
-});
+}));
 export type ListProposalsQuery = z.infer<typeof listProposalsQuerySchema>;
 
 export interface ListProposalsResponse {
@@ -369,7 +369,7 @@ export interface ListProposalsResponse {
   total: number;
 }
 
-export const proposalChartsSummaryQuerySchema = z
+export const proposalChartsSummaryQuerySchema = lazySchema(() => z
   .object({
     /** The 168h ceiling keeps the ES|QL queries cheap. */
     windowHours: z.coerce.number().int().min(1).max(168).default(24),
@@ -396,7 +396,7 @@ export const proposalChartsSummaryQuerySchema = z
         `windowHours and bucketMinutes must not resolve to more than ` +
         `${MAX_CHARTS_SUMMARY_BUCKETS} buckets`,
     }
-  );
+  ));
 export type ProposalChartsSummaryQuery = z.infer<typeof proposalChartsSummaryQuerySchema>;
 
 export interface ProposalChartsSummaryBucket {

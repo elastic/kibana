@@ -13,7 +13,7 @@ import {
   streamsUnitIdentifierSchema,
   type ClassicIngestStreamEffectiveLifecycle,
 } from '@kbn/streams-schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_RESOLVE_INDEX_PATTERN_LENGTH,
   MAX_RESOLVE_INDEX_PATTERNS,
@@ -30,11 +30,11 @@ import { getDataStreamLifecycle, getFailureStore } from '../../../lib/streams/st
 import { processAsyncInChunks } from '../../../utils/process_async_in_chunks';
 import { createServerRoute } from '../../create_server_route';
 
-const unitPathSchema = z.object({
+const unitPathSchema = lazySchema(() => z.object({
   path: z.object({
     id: streamsUnitIdentifierSchema.describe('The unit id.'),
   }),
-});
+}));
 
 const assertStreamsCanvasEnabled = async (uiSettingsClient: {
   get: (key: string) => Promise<unknown>;

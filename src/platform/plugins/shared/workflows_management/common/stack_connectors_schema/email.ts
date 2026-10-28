@@ -12,9 +12,9 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export const EmailAttachmentSchema = z.object({
+export const EmailAttachmentSchema = lazySchema(() => z.object({
   filename: z.string().max(255).describe('Attachment file name'),
   content: z
     .string()
@@ -22,10 +22,10 @@ export const EmailAttachmentSchema = z.object({
     .describe('Attachment body (plain text or base64 when encoding is set)'),
   contentType: z.string().max(255).optional().describe('MIME type, e.g. text/csv'),
   encoding: z.string().max(20).optional().describe('Optional encoding, e.g. base64'),
-});
+}));
 
 // Email connector parameter schema
-export const EmailParamsSchema = z.object({
+export const EmailParamsSchema = lazySchema(() => z.object({
   to: z.array(z.string()),
   cc: z.array(z.string()).optional(),
   bcc: z.array(z.string()).optional(),
@@ -33,13 +33,13 @@ export const EmailParamsSchema = z.object({
   message: z.string(),
   messageHTML: z.string().optional(),
   attachments: z.array(EmailAttachmentSchema).optional(),
-});
+}));
 
 // Email connector response schema
-export const EmailResponseSchema = z.object({
+export const EmailResponseSchema = lazySchema(() => z.object({
   messageId: z.string(),
   accepted: z.array(z.string()),
   rejected: z.array(z.string()),
   pending: z.array(z.string()),
   response: z.string(),
-});
+}));

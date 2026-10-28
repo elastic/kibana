@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { StepCategory } from '@kbn/workflows';
 import { JsonModelSchema } from '@kbn/workflows/spec/schema/common/json_model_schema';
@@ -49,7 +49,7 @@ const apiSelectorArraySchema = (target: ApiTarget, exampleApi: string) => {
 /**
  * Input schema for the run agent step.
  */
-export const InputSchema = z.object({
+export const InputSchema = lazySchema(() => z.object({
   /**
    * output schema for the run agent step, if provided agent will return structured output
    */
@@ -196,12 +196,12 @@ export const InputSchema = z.object({
     .describe(
       'Runtime configuration overrides applied to this step execution only. Each provided field replaces the corresponding field in the stored agent configuration.'
     ),
-});
+}));
 
 /**
  * Output schema for the run agent step.
  */
-export const OutputSchema = z.object({
+export const OutputSchema = lazySchema(() => z.object({
   message: z
     .string()
     .describe(
@@ -236,7 +236,7 @@ export const OutputSchema = z.object({
     })
     .describe('Step execution metadata, including token usage across all LLM rounds.')
     .optional(),
-});
+}));
 
 /**
  * Validation message shown when `aggregate-by` is set without a `plugin-id`. The parent
@@ -255,7 +255,7 @@ export const EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE =
 /**
  * Config schema for the run agent step.
  */
-export const ConfigSchema = z
+export const ConfigSchema = lazySchema(() => z
   .object({
     /**
      * The ID of the agent to chat with. Defaults to the default Elastic AI agent.
@@ -418,7 +418,7 @@ export const ConfigSchema = z
         path: ['ephemeral'],
       });
     }
-  });
+  }));
 
 export type RunAgentStepInputSchema = typeof InputSchema;
 export type RunAgentStepOutputSchema = typeof OutputSchema;

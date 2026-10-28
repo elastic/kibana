@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { MAX_EXAMPLES_PER_DATASET } from '@kbn/evals-common';
@@ -20,7 +20,7 @@ import {
   toErrorResult,
 } from './tool_utils';
 
-const schema = z.object({
+const schema = lazySchema(() => z.object({
   dataset_id: datasetIdSchema,
   offset: z
     .number()
@@ -31,7 +31,7 @@ const schema = z.object({
     .describe(
       `Index of the first example to return, for paging through large datasets. Defaults to 0.`
     ),
-});
+}));
 
 /**
  * Reads one dataset, including a bounded page of its examples.

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -26,7 +26,7 @@ export const OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID = 'observability.get_ser
 
 const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 
-const getServiceTopologyToolSchema = z.object({
+const getServiceTopologyToolSchema = lazySchema(() => z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   serviceName: z
     .string()
@@ -69,7 +69,7 @@ const getServiceTopologyToolSchema = z.object({
       'KQL filter applied when computing the `nodeMetadata` alert and SLO badges, ' +
         'e.g. \'service.name: "frontend"\'. Omit when no filter applies.'
     ),
-});
+}));
 
 export function createGetServiceTopologyTool({
   core,

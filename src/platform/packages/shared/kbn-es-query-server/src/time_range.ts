@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-const absoluteTimeRangeMode = z.literal('absolute');
-const relativeTimeRangeMode = z.literal('relative');
+const absoluteTimeRangeMode = lazySchema(() => z.literal('absolute'));
+const relativeTimeRangeMode = lazySchema(() => z.literal('relative'));
 
-export const timeRangeSchema = z
+export const timeRangeSchema = lazySchema(() => z
   .object({
     from: z.string().meta({
       description:
@@ -32,18 +32,18 @@ export const timeRangeSchema = z
     id: 'kbn-es-query-server-timeRangeSchema',
     title: 'Time range',
     description: 'Specifies the time range for a query.',
-  });
+  }));
 
-export const absoluteTimeRangeSchema = timeRangeSchema
+export const absoluteTimeRangeSchema = lazySchema(() => timeRangeSchema
   .extend({
     mode: absoluteTimeRangeMode,
   })
   .strict()
-  .meta({ id: 'kbn-es-query-server-absoluteTimeRangeSchema' });
+  .meta({ id: 'kbn-es-query-server-absoluteTimeRangeSchema' }));
 
-export const relativeTimeRangeSchema = timeRangeSchema
+export const relativeTimeRangeSchema = lazySchema(() => timeRangeSchema
   .extend({
     mode: relativeTimeRangeMode,
   })
   .strict()
-  .meta({ id: 'kbn-es-query-server-relativeTimeRangeSchema' });
+  .meta({ id: 'kbn-es-query-server-relativeTimeRangeSchema' }));

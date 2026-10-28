@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import type { OmitUpsertProps } from './core';
 
 /* eslint-disable @typescript-eslint/no-namespace */
@@ -57,7 +57,7 @@ export namespace BaseStream {
   }
 }
 
-export const baseStreamDefinitionSchema = z.object({
+export const baseStreamDefinitionSchema = lazySchema(() => z.object({
   name: z.string(),
   description: z.string(),
   updated_at: isoDateTime(),
@@ -68,19 +68,19 @@ export const baseStreamDefinitionSchema = z.object({
       })
     )
     .optional(),
-});
+}));
 
-export const baseStreamGetResponseSchema = z.object({
+export const baseStreamGetResponseSchema = lazySchema(() => z.object({
   dashboards: z.array(z.string()),
   rules: z.array(z.string()),
-});
+}));
 
-export const baseStreamUpsertRequestSchema = z.object({
+export const baseStreamUpsertRequestSchema = lazySchema(() => z.object({
   dashboards: z.array(z.string()),
   rules: z.array(z.string()),
-});
+}));
 
-export const baseStreamUpsertDefinitionSchema = baseStreamDefinitionSchema.omit({
+export const baseStreamUpsertDefinitionSchema = lazySchema(() => baseStreamDefinitionSchema.omit({
   name: true,
   updated_at: true,
-});
+}));

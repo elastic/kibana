@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -51,7 +51,7 @@ const isEmptyDashboard = ({ panels, pinned_panels: pinnedPanels }: DashboardAtta
   panels.every((widget) => isSection(widget) && widget.panels.length === 0) &&
   (pinnedPanels ?? []).length === 0;
 
-const generateDashboardSchema = z.object({
+const generateDashboardSchema = lazySchema(() => z.object({
   dashboardAttachmentId: z
     .string()
     .max(256)
@@ -68,7 +68,7 @@ const generateDashboardSchema = z.object({
     .describe(
       'The user\'s own arrangement or size request, in plain words, e.g. "make the table full width". Omit it otherwise: new, moved, and removed panels and sections are placed and sized automatically, so do not describe where your changes go. It arranges panels only within their section or the top level: to move a panel into or out of a section, set its `section` in `panels`.'
     ),
-});
+}));
 
 const asString = (value: unknown): string | undefined =>
   typeof value === 'string' ? value : undefined;

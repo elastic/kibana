@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   DEFAULT_DSL_OPTIONS_LIST_STATE,
   DEFAULT_ESQL_OPTIONS_LIST_STATE,
@@ -42,15 +42,15 @@ export const optionsListDisplaySettingsSchema = z
   })
   .strict();
 
-export const optionsListSearchTechniqueSchema = z
+export const optionsListSearchTechniqueSchema = lazySchema(() => z
   .union([z.literal('prefix'), z.literal('wildcard'), z.literal('exact')])
   .default(DEFAULT_DSL_OPTIONS_LIST_STATE.search_technique)
   .meta({
     description:
       'The matching technique used when searching available options. `prefix` matches values starting with the search term, `wildcard` matches values containing the search term, and `exact` requires a complete match. Only applies to string and IP fields. Defaults to `wildcard`.',
-  });
+  }));
 
-export const optionsListSortSchema = z
+export const optionsListSortSchema = lazySchema(() => z
   .object({
     by: z.enum(['_count', '_key']).meta({
       description:
@@ -65,11 +65,11 @@ export const optionsListSortSchema = z
   .meta({
     description:
       'Defines how the available options are sorted in the control popover. Defaults to `{ by: "_count", direction: "desc" }`.',
-  });
+  }));
 
-export const optionsListSelectionSchema = z.union([z.string(), z.number()]).meta({
+export const optionsListSelectionSchema = lazySchema(() => z.union([z.string(), z.number()]).meta({
   description: 'A selected option value. Accepts a string or a number.',
-});
+}));
 
 const optionsListControlBaseParameters = z
   .object({
@@ -79,30 +79,30 @@ const optionsListControlBaseParameters = z
 
 const optionsListDSLExtras = {
   ...optionsListControlBaseParameters.shape,
-  exclude: z.boolean().default(DEFAULT_DSL_OPTIONS_LIST_STATE.exclude).meta({
+  exclude: lazySchema(() => z.boolean().default(DEFAULT_DSL_OPTIONS_LIST_STATE.exclude).meta({
     description:
       'When `true`, the control filters to documents that do NOT match the selected options. Defaults to `false`.',
-  }),
-  exists_selected: z.boolean().default(DEFAULT_DSL_OPTIONS_LIST_STATE.exists_selected).meta({
+  })),
+  exists_selected: lazySchema(() => z.boolean().default(DEFAULT_DSL_OPTIONS_LIST_STATE.exists_selected).meta({
     description:
       "When `true`, the control filters to documents where the field exists, regardless of the field's value. Defaults to `false`.",
-  }),
-  run_past_timeout: z.boolean().default(DEFAULT_DSL_OPTIONS_LIST_STATE.run_past_timeout).meta({
+  })),
+  run_past_timeout: lazySchema(() => z.boolean().default(DEFAULT_DSL_OPTIONS_LIST_STATE.run_past_timeout).meta({
     description:
       'When `true`, the options list query continues running even if it exceeds the configured timeout threshold. Defaults to `false`.',
-  }),
+  })),
   search_technique: optionsListSearchTechniqueSchema,
-  selected_options: z
+  selected_options: lazySchema(() => z
     .array(optionsListSelectionSchema)
     .max(SELECTIONS_MAX)
     .default(DEFAULT_DSL_OPTIONS_LIST_STATE.selected_options)
     .meta({
       description: 'The list of currently selected option values.',
-    }),
-  single_select: z.boolean().default(DEFAULT_DSL_OPTIONS_LIST_STATE.single_select).meta({
+    })),
+  single_select: lazySchema(() => z.boolean().default(DEFAULT_DSL_OPTIONS_LIST_STATE.single_select).meta({
     description:
       'When `true`, only one option can be selected at a time. Selecting a new option deselects any previously selected option. Defaults to `false`.',
-  }),
+  })),
   sort: optionsListSortSchema,
 };
 
@@ -153,7 +153,7 @@ const baseEsqlControlSchema = z
   })
   .strip();
 
-export const optionsListESQLControlSchema = z.discriminatedUnion('control_type', [
+export const optionsListESQLControlSchema = lazySchema(() => z.discriminatedUnion('control_type', [
   baseEsqlControlSchema
     .extend({
       control_type: z.literal('STATIC_VALUES'),
@@ -183,4 +183,4 @@ export const optionsListESQLControlSchema = z.discriminatedUnion('control_type',
       description:
         'An ES|QL variable control whose selectable options are dynamically retrieved by running an ES|QL query.',
     }),
-]);
+]));

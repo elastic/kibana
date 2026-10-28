@@ -15,7 +15,7 @@
  * and uses passthrough() to preserve all mapping properties.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { getShapeAt } from '../../../common/utils/zod';
 
@@ -52,9 +52,9 @@ const customPropertySchema: z.ZodType = z.lazy(() =>
  * Custom mappings schema that validates the top-level structure
  * while allowing flexible property definitions.
  */
-const customMappingsSchema = z.looseObject({
+const customMappingsSchema = lazySchema(() => z.looseObject({
   properties: z.optional(z.record(z.string(), customPropertySchema)),
-});
+}));
 
 // export contract
 export const INDICES_CREATE_CONTRACT: InternalConnectorContract = {
@@ -93,12 +93,12 @@ Note that changing this setting will also affect the \`wait_for_active_shards\` 
     urlParams: ['master_timeout', 'timeout', 'wait_for_active_shards'],
     bodyParams: ['aliases', 'mappings', 'settings'],
   },
-  paramsSchema: z.object({
+  paramsSchema: lazySchema(() => z.object({
     index: types_index_name,
     aliases: z.optional(z.record(z.string(), indices_types_alias)),
     mappings: z.optional(customMappingsSchema),
     settings: z.optional(indices_types_index_settings),
     ...getShapeAt(indices_create_request, 'query'),
-  }),
+  })),
   outputSchema: indices_create_response,
 };

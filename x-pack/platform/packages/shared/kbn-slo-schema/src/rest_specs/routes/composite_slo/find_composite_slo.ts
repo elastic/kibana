@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   compositeStatusSchema,
   compositeSloWithSummaryResponseSchema,
 } from '../../../schema/composite_slo';
 
-const findCompositeSLOQuerySchema = z.object({
+const findCompositeSLOQuerySchema = lazySchema(() => z.object({
   search: z.string().optional(),
   page: z.coerce.number().min(1).optional(),
   perPage: z.coerce.number().min(1).max(1000).optional(),
@@ -25,20 +25,20 @@ const findCompositeSLOQuerySchema = z.object({
     .transform((raw) => raw.split(',').map((s) => s.trim()))
     .pipe(z.array(compositeStatusSchema).min(1))
     .optional(),
-});
+}));
 
-const findCompositeSLOParamsSchema = z.object({
+const findCompositeSLOParamsSchema = lazySchema(() => z.object({
   query: findCompositeSLOQuerySchema.optional(),
-});
+}));
 
 // The list endpoint returns summary responses (definition + summary), mirroring the SLO
 // `find` endpoint, so the list UI does not need a second round-trip to fetch summaries.
-const findCompositeSLOResponseSchema = z.object({
+const findCompositeSLOResponseSchema = lazySchema(() => z.object({
   page: z.number(),
   perPage: z.number(),
   total: z.number(),
   results: z.array(compositeSloWithSummaryResponseSchema),
-});
+}));
 
 type FindCompositeSLOParams = z.infer<typeof findCompositeSLOQuerySchema>;
 type FindCompositeSLOResponse = z.output<typeof findCompositeSLOResponseSchema>;

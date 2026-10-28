@@ -34,7 +34,7 @@ import {
 import { groupIsNotCollapsed } from '../../utils';
 
 const pieStateSharedShape = {
-  legend: z
+  legend: lazySchema(() => z
     .object({
       nested: legendNestedSchema,
       truncate_after_lines: legendTruncateAfterLinesSchema,
@@ -48,7 +48,7 @@ const pieStateSharedShape = {
       id: 'visPieLegend',
       title: 'Legend',
       description: 'Legend configuration for pie chart',
-    }),
+    })),
 };
 
 /**
@@ -95,7 +95,7 @@ const pieStylingSchema = lazySchema(() =>
  * Color configuration for primary metric in pie chart
  */
 const partitionConfigPrimaryMetricOptionsShape = {
-  color: z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional(),
+  color: lazySchema(() => z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional()),
 };
 
 /**

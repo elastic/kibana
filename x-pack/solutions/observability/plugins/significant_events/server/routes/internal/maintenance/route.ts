@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   NIGHTSHIFT_API_PRIVILEGES,
   NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
@@ -29,7 +29,7 @@ const bootstrapCleanupRoute = createServerRoute({
       requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({
     request,
     server,
@@ -69,7 +69,7 @@ const pauseRoute = createServerRoute({
       requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({
     request,
     server,
@@ -97,7 +97,7 @@ const resumeRoute = createServerRoute({
       requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({
     request,
     server,
@@ -127,7 +127,7 @@ const resetRoute = createServerRoute({
       requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({
     request,
     server,
@@ -155,7 +155,7 @@ const statusRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({
     request,
     server,

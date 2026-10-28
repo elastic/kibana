@@ -26,7 +26,7 @@ const legacyMetricConfigMetricOptionsShape = {
   /**
    * Font scale for the legacy metric label and value.
    */
-  size: z
+  size: lazySchema(() => z
     .union([
       z.literal('xs'),
       z.literal('s'),
@@ -37,8 +37,8 @@ const legacyMetricConfigMetricOptionsShape = {
     ])
     .default('m')
     .optional()
-    .meta({ description: 'Font size for the label and value' }),
-  labels: z
+    .meta({ description: 'Font size for the label and value' })),
+  labels: lazySchema(() => z
     .object({
       /**
        * Alignment for labels. Possible values:
@@ -51,8 +51,8 @@ const legacyMetricConfigMetricOptionsShape = {
     })
     .strict()
     .optional()
-    .meta({ description: 'Labels configuration' }),
-  values: z
+    .meta({ description: 'Labels configuration' })),
+  values: lazySchema(() => z
     .object({
       /**
        * Alignment for values. Possible values:
@@ -66,7 +66,7 @@ const legacyMetricConfigMetricOptionsShape = {
     })
     .strict()
     .optional()
-    .meta({ description: 'Values configuration' }),
+    .meta({ description: 'Values configuration' })),
   /**
    * Where to apply the color (background or value)
    */
@@ -74,7 +74,7 @@ const legacyMetricConfigMetricOptionsShape = {
   /**
    * Color configuration
    */
-  color: z
+  color: lazySchema(() => z
     .union([
       colorByValueAbsoluteSchema,
       colorByValuePaletteSchema,
@@ -83,7 +83,7 @@ const legacyMetricConfigMetricOptionsShape = {
     ])
     .default(AUTO_COLOR)
     .optional()
-    .meta({ description: 'Color configuration based on the metric value.' }),
+    .meta({ description: 'Color configuration based on the metric value.' })),
 };
 
 export const legacyMetricConfigSchemaNoESQL = lazySchema(() =>

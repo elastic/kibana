@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /** default NER model **/
 
@@ -39,15 +39,15 @@ export const ANONYMIZATION_ENTITY_CLASSES = [
 ] as const;
 export type AnonymizationEntityClass = (typeof ANONYMIZATION_ENTITY_CLASSES)[number];
 
-export const anonymizationEntityClassSchema = z.enum(ANONYMIZATION_ENTITY_CLASSES);
-export const nerEntityClassSchema = z.enum(NER_ENTITY_CLASSES);
+export const anonymizationEntityClassSchema = lazySchema(() => z.enum(ANONYMIZATION_ENTITY_CLASSES));
+export const nerEntityClassSchema = lazySchema(() => z.enum(NER_ENTITY_CLASSES));
 export const TOKEN_SOURCE_TYPES = ['message', 'tool_call', 'artifact', 'workflow'] as const;
 export type TokenSourceType = (typeof TOKEN_SOURCE_TYPES)[number];
-export const tokenSourceTypeSchema = z.enum(TOKEN_SOURCE_TYPES);
-const tokenSourceRefValueSchema = z.union([z.string(), z.number(), z.boolean()]);
-export const tokenSourceRefSchema = z.record(z.string(), tokenSourceRefValueSchema);
+export const tokenSourceTypeSchema = lazySchema(() => z.enum(TOKEN_SOURCE_TYPES));
+const tokenSourceRefValueSchema = lazySchema(() => z.union([z.string(), z.number(), z.boolean()]));
+export const tokenSourceRefSchema = lazySchema(() => z.record(z.string(), tokenSourceRefValueSchema));
 
-export const fieldRuleSchema = z
+export const fieldRuleSchema = lazySchema(() => z
   .object({
     /** ECS or custom field name (e.g., `host.name`). */
     field: z.string(),
@@ -64,9 +64,9 @@ export const fieldRuleSchema = z
   .refine((rule) => !rule.anonymized || Boolean(rule.entityClass), {
     message: 'entityClass is required when anonymized is true',
     path: ['entityClass'],
-  });
+  }));
 
-export const regexRuleSchema = z.object({
+export const regexRuleSchema = lazySchema(() => z.object({
   /** Unique rule identifier. */
   id: z.string(),
   /** Must be `"regex"`. */
@@ -77,9 +77,9 @@ export const regexRuleSchema = z.object({
   pattern: z.string(),
   /** Whether the rule is active. */
   enabled: z.boolean(),
-});
+}));
 
-export const nerRuleSchema = z.object({
+export const nerRuleSchema = lazySchema(() => z.object({
   /** Unique rule identifier. */
   id: z.string(),
   /** Must be `"ner"`. */
@@ -95,16 +95,16 @@ export const nerRuleSchema = z.object({
   allowedEntityClasses: z.array(nerEntityClassSchema),
   /** Whether the rule is active. */
   enabled: z.boolean(),
-});
+}));
 
 /** Reusable profile rules payload shared by APIs and persisted profiles. */
-export const anonymizationProfileRulesSchema = z.object({
+export const anonymizationProfileRulesSchema = lazySchema(() => z.object({
   fieldRules: z.array(fieldRuleSchema),
   regexRules: z.array(regexRuleSchema).optional().default([]),
   nerRules: z.array(nerRuleSchema).optional().default([]),
-});
+}));
 
-export const anonymizationProfileSchema = z.object({
+export const anonymizationProfileSchema = lazySchema(() => z.object({
   /** UUID for the profile. */
   id: z.string(),
   /** Profile display name. */
@@ -132,26 +132,26 @@ export const anonymizationProfileSchema = z.object({
   createdBy: z.string(),
   /** Username of last updater. */
   updatedBy: z.string(),
-});
+}));
 
 /** Public API payload for profile creation. */
-export const createAnonymizationProfileRequestSchema = z.object({
+export const createAnonymizationProfileRequestSchema = lazySchema(() => z.object({
   name: z.string(),
   description: z.string().optional(),
   targetType: z.enum(['data_view', 'index_pattern', 'index']),
   targetId: z.string(),
   rules: anonymizationProfileRulesSchema,
-});
+}));
 
 /** Public API payload for profile updates. */
-export const updateAnonymizationProfileRequestSchema = z.object({
+export const updateAnonymizationProfileRequestSchema = lazySchema(() => z.object({
   name: z.string().optional(),
   description: z.string().optional(),
   rules: anonymizationProfileRulesSchema.optional(),
-});
+}));
 
 /** Public API query payload for profile search. */
-export const findAnonymizationProfilesQuerySchema = z.object({
+export const findAnonymizationProfilesQuerySchema = lazySchema(() => z.object({
   filter: z.string().optional(),
   target_type: z.enum(['data_view', 'index_pattern', 'index']).optional(),
   target_id: z.string().optional(),
@@ -159,9 +159,9 @@ export const findAnonymizationProfilesQuerySchema = z.object({
   sort_order: z.enum(['asc', 'desc']).optional(),
   page: z.coerce.number().int().min(1).optional(),
   per_page: z.coerce.number().int().min(1).max(1000).optional(),
-});
+}));
 
-const tokenSourceEntryBaseSchema = z.object({
+const tokenSourceEntryBaseSchema = lazySchema(() => z.object({
   /** The token (e.g., `HOST_NAME_ae687...`). */
   token: z.string(),
   /** RFC-6901 JSON Pointer to the string leaf that was tokenized. */
@@ -191,9 +191,9 @@ const tokenSourceEntryBaseSchema = z.object({
   ruleId: z.string().optional(),
   /** When the token was first seen (optional). */
   firstSeenAt: z.string().optional(),
-});
+}));
 
-export const tokenSourceEntrySchema = tokenSourceEntryBaseSchema.refine(
+export const tokenSourceEntrySchema = lazySchema(() => tokenSourceEntryBaseSchema.refine(
   (entry) => {
     if (entry.sourceType !== 'message') {
       return true;
@@ -212,9 +212,9 @@ export const tokenSourceEntrySchema = tokenSourceEntryBaseSchema.refine(
       'tokenSourceEntry.sourceRef.messageId or tokenSourceEntry.sourceRef.messageIndex is required when sourceType is "message"',
     path: ['sourceRef'],
   }
-);
+));
 
-export const replacementsSetSchema = z.object({
+export const replacementsSetSchema = lazySchema(() => z.object({
   /** UUID for the mapping set. */
   id: z.string(),
   /** Space identifier. */
@@ -232,4 +232,4 @@ export const replacementsSetSchema = z.object({
   updatedAt: z.string(),
   /** Username/service identity. */
   createdBy: z.string(),
-});
+}));

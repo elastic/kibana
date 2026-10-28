@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 
 export const CONNECTOR_SETUP_ATTACHMENT_TYPE = 'connector_setup' as const;
 
-export const connectorSetupAttachmentDataSchema = z.object({
+export const connectorSetupAttachmentDataSchema = lazySchema(() => z.object({
   connector_type: z.string(),
   connector_type_name: z.string().optional(),
   suggested_name: z.string().optional(),
   reason: z.string().optional(),
-});
+}));
 
 /**
  * Data shape stored on a `connector_setup` attachment.

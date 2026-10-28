@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import {
@@ -35,7 +35,7 @@ export class EvalExperimentConfigError extends Error {
   }
 }
 
-export const evaluatorInputSchema = z.object({
+export const evaluatorInputSchema = lazySchema(() => z.object({
   name: z
     .string()
     .min(1)
@@ -53,14 +53,14 @@ export const evaluatorInputSchema = z.object({
     .describe(
       'Judge model connector id. REQUIRED for `llm` evaluators (needsJudgeConnector=true); omit for `code` evaluators. Ask the user to pick it from list_connectors; do not guess or default to the first one.'
     ),
-});
+}));
 
 /**
  * The shared "experiment configuration" accepted by the preview/save/run tools.
  * Mirrors the evals "new experiment" form. The workflow topology (single,
  * dataset fan-out, or cross-model) is inferred by the generator from these inputs.
  */
-export const evalExperimentConfigSchema = z
+export const evalExperimentConfigSchema = lazySchema(() => z
   .object({
     name: z
       .string()
@@ -127,7 +127,7 @@ export const evalExperimentConfigSchema = z
     message:
       'agent_id must be omitted when target is `inference`. Set target to `agent` to evaluate an Agent Builder agent.',
     path: ['agent_id'],
-  });
+  }));
 
 export type EvalExperimentConfig = z.infer<typeof evalExperimentConfigSchema>;
 

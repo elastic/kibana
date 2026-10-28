@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ExceptionListItemHumanId } from '@kbn/securitysolution-exceptions-common/api';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
@@ -18,7 +18,7 @@ import {
 
 export const CreateRuleExceptionStepId = 'security.createRuleException' as const;
 
-export const createRuleExceptionInputSchema = z
+export const createRuleExceptionInputSchema = lazySchema(() => z
   .object({
     rule_id: z.string().min(1).max(36),
     item_id: ExceptionListItemHumanId.optional(),
@@ -33,7 +33,7 @@ export const createRuleExceptionInputSchema = z
         message: OVERWRITE_REQUIRES_ITEM_ID_MESSAGE,
       });
     }
-  });
+  }));
 
 export const createRuleExceptionOutputSchema = exceptionItemOutputSchema;
 

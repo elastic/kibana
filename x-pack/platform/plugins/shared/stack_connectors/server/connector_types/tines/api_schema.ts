@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { TinesStoryObjectSchema } from '@kbn/connector-schemas/tines';
 
 // Tines response base schema
-export const TinesBaseApiResponseSchema = z.object({
+export const TinesBaseApiResponseSchema = lazySchema(() => z.object({
   meta: z.object({
     pages: z.coerce.number(),
   }),
-});
+}));
 
 // Stories action schema
-export const TinesStoriesApiResponseSchema = TinesBaseApiResponseSchema.extend({
+export const TinesStoriesApiResponseSchema = lazySchema(() => TinesBaseApiResponseSchema.extend({
   stories: z.array(TinesStoryObjectSchema.extend({}).strip()),
-});
+}));
 
 // Single Webhook action schema
-export const TinesWebhookApiResponseSchema = z.object({
+export const TinesWebhookApiResponseSchema = lazySchema(() => z.object({
   id: z.coerce.number(),
   name: z.string(),
   type: z.string(),
@@ -30,14 +30,14 @@ export const TinesWebhookApiResponseSchema = z.object({
     path: z.string().optional(),
     secret: z.string().optional(),
   }),
-});
+}));
 
 // Webhooks action schema
-export const TinesWebhooksApiResponseSchema = TinesBaseApiResponseSchema.extend({
+export const TinesWebhooksApiResponseSchema = lazySchema(() => TinesBaseApiResponseSchema.extend({
   agents: z.array(TinesWebhookApiResponseSchema),
-});
+}));
 
-export const TinesRunApiResponseSchema = z.object({});
+export const TinesRunApiResponseSchema = lazySchema(() => z.object({}));
 
 export type TinesBaseApiResponse = z.infer<typeof TinesBaseApiResponseSchema>;
 export type TinesStoriesApiResponse = z.infer<typeof TinesStoriesApiResponseSchema>;

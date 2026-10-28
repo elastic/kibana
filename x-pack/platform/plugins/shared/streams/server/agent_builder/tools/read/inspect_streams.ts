@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -61,7 +61,7 @@ const ASPECT_VALUES = [
 ] as const;
 type Aspect = (typeof ASPECT_VALUES)[number];
 
-const inspectStreamsSchema = z.object({
+const inspectStreamsSchema = lazySchema(() => z.object({
   names: z
     .array(z.string())
     .describe(
@@ -74,7 +74,7 @@ const inspectStreamsSchema = z.object({
     .describe(
       'What information to return. Default: ["overview"]. Options: overview, schema, quality, lifecycle, processing, routing. Use multiple aspects for a deep dive on specific streams.'
     ),
-});
+}));
 
 export const createInspectStreamsTool = ({
   getScopedClients,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { ErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -40,7 +40,7 @@ export interface GetAnomalyDetectionJobsToolResult {
   };
 }
 
-const getAnomalyDetectionJobsSchema = z.object({
+const getAnomalyDetectionJobsSchema = lazySchema(() => z.object({
   group: z
     .string()
     .max(MAX_SHORT_STRING_LENGTH)
@@ -90,7 +90,7 @@ const getAnomalyDetectionJobsSchema = z.object({
       'Filter anomalies by influencer fields using KQL syntax. Influencer fields are entity fields like service.name, host.name, kubernetes.pod.name, etc. Examples: \'service.name: "frontend"\', \'service.name: "frontend" AND host.name: "server-1"\', \'NOT host.name: "server-3"\'.'
     ),
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-});
+}));
 
 export function createGetAnomalyDetectionJobsTool({
   core,

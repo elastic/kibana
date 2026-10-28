@@ -6,7 +6,7 @@
  */
 
 import { badRequest, serverUnavailable } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
@@ -37,7 +37,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
   security: {
     authz: { requiredPrivileges: ['manage_nightshift'] },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({ id: z.string().min(1).max(512) }),
     body: z.object({
       name: z.string().min(1).max(500).optional(),
@@ -63,7 +63,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
         })
         .optional(),
     }),
-  }),
+  })),
   handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {

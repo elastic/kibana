@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { InlineFieldSchema, FieldSchema, isRefField, isDisplayOnlyField } from './fields';
 import type { Field, InlineField, RefField } from './fields';
 import {
@@ -206,7 +206,7 @@ export const buildStrictFieldsArraySchema = (grandfatheredNames?: ReadonlySet<st
   );
 
 /** Strict fields-array schema with no grandfathered names — the create-path default. */
-export const StrictFieldsArraySchema = buildStrictFieldsArraySchema();
+export const StrictFieldsArraySchema = lazySchema(() => buildStrictFieldsArraySchema());
 
 /**
  * Collects the field names (inline) and `$ref` aliases already present in a template's

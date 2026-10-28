@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
@@ -42,7 +42,7 @@ interface ResolvedEntitiesState {
   unresolved: UnresolvedEntityResult[];
 }
 
-const schema = z.object({
+const schema = lazySchema(() => z.object({
   targetId: z
     .string()
     .min(1)
@@ -60,7 +60,7 @@ const schema = z.object({
     .describe(
       `Entities to link to the target, becoming its aliases. When \`targetId\` is omitted, list every entity to merge here (at least two) and the tool picks which one becomes the target. Accepts EUIDs, canonical entity.name, or user.full_name values. Up to ${MAX_ENTITIES_PER_CALL} per call; for larger bulk merges, direct the user to the CSV import in the UI.`
     ),
-});
+}));
 
 export const SECURITY_LINK_ENTITIES_TOOL_ID = securityTool('link_entities');
 

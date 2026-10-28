@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_TITLE_LENGTH } from '../../../constants';
 
-export const ExternalServiceResponseSchema = z.object({
+export const ExternalServiceResponseSchema = lazySchema(() => z.object({
   title: z.string().max(MAX_TITLE_LENGTH),
   id: z.string().max(512),
   pushedDate: z.string().max(50),
@@ -22,6 +22,6 @@ export const ExternalServiceResponseSchema = z.object({
       })
     )
     .optional(),
-});
+}));
 
 export type ExternalServiceResponse = z.infer<typeof ExternalServiceResponseSchema>;

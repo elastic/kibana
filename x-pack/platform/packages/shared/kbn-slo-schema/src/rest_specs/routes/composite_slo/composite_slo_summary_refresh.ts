@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-const postCompositeSloSummaryRefreshParamsSchema = z.object({});
+const postCompositeSloSummaryRefreshParamsSchema = lazySchema(() => z.object({}));
 
 export type CompositeSloSummaryRefreshSkippedReason =
   | 'task_disabled'

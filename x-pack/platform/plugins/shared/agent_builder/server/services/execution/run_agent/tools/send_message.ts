@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { filter, firstValueFrom } from 'rxjs';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   SELF_AGENT_ID,
   ToolType,
@@ -23,7 +23,7 @@ import type { SubagentTracker } from '../subagent_tracker';
 import { filterReachableSubagents } from '../utils/filter_reachable_subagents';
 import { selectSubagentConnectorId } from '../utils/select_subagent_connector_id';
 
-const schema = z.object({
+const schema = lazySchema(() => z.object({
   to: z.string().describe('Name of the persistent sub-agent to talk to.'),
   prompt: z.string().describe('The message to send.'),
   run_in_background: z
@@ -36,7 +36,7 @@ const schema = z.object({
     .enum([EffortLevels.low, EffortLevels.medium, EffortLevels.high])
     .optional()
     .describe('The effort level of this exchange.'),
-});
+}));
 
 const toolDescription = `Send a message to an existing persistent sub-agent.
 

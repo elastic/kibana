@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 
 export const MAX_ID_LENGTH = 1024;
@@ -18,11 +18,11 @@ export const isEvalsOwnedWorkflow = (
   workflow: Pick<WorkflowDetailDto, 'definition'> | null | undefined
 ): boolean => Boolean(workflow?.definition?.tags?.includes(EVALS_EXPERIMENT_WORKFLOW_TAG));
 
-export const experimentEvaluatorSchema = z.object({
+export const experimentEvaluatorSchema = lazySchema(() => z.object({
   name: z.string().max(MAX_NAME_LENGTH),
   version: z.string().max(MAX_NAME_LENGTH).optional(),
   connector_id: z.string().max(MAX_ID_LENGTH).optional(),
-});
+}));
 
 export type ExperimentEvaluator = z.infer<typeof experimentEvaluatorSchema>;
 
@@ -35,7 +35,7 @@ export const EXPERIMENT_LIMITS = {
   maxSpaceIds: 100,
 } as const;
 
-export const runExperimentRequestSchema = z.object({
+export const runExperimentRequestSchema = lazySchema(() => z.object({
   name: z.string().max(MAX_NAME_LENGTH).optional(),
   connector_ids: z
     .array(z.string().max(MAX_ID_LENGTH))
@@ -57,7 +57,7 @@ export const runExperimentRequestSchema = z.object({
     .min(1)
     .max(EXPERIMENT_LIMITS.maxSpaceIds)
     .optional(),
-});
+}));
 
 export type RunExperimentRequest = z.infer<typeof runExperimentRequestSchema>;
 

@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ZodError } from '@kbn/zod/v4';
 
 export const SCOUT_TARGET_LOCATION: string = process.env.SCOUT_TARGET_LOCATION || 'unknown';
 export const SCOUT_TARGET_ARCH: string = process.env.SCOUT_TARGET_ARCH || 'unknown';
 export const SCOUT_TARGET_DOMAIN: string = process.env.SCOUT_TARGET_DOMAIN || 'unknown';
 
-export const ScoutTargetLocationSchema = z.enum(['local', 'cloud']);
-export const ScoutTargetArchSchema = z.enum(['stateful', 'serverless']);
-export const ScoutTargetDomainSchema = z.enum([
+export const ScoutTargetLocationSchema = lazySchema(() => z.enum(['local', 'cloud']));
+export const ScoutTargetArchSchema = lazySchema(() => z.enum(['stateful', 'serverless']));
+export const ScoutTargetDomainSchema = lazySchema(() => z.enum([
   'classic',
   'search',
   'observability_complete',
@@ -25,12 +25,12 @@ export const ScoutTargetDomainSchema = z.enum([
   'security_essentials',
   'security_ease',
   'vectordb',
-]);
-export const ScoutTestTargetSchema = z.object({
+]));
+export const ScoutTestTargetSchema = lazySchema(() => z.object({
   location: ScoutTargetLocationSchema,
   arch: ScoutTargetArchSchema,
   domain: ScoutTargetDomainSchema,
-});
+}));
 
 export type ScoutTargetLocation = z.infer<typeof ScoutTargetLocationSchema>;
 export type ScoutTargetArch = z.infer<typeof ScoutTargetArchSchema>;

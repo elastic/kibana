@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
@@ -25,36 +25,36 @@ import { Direction } from '@kbn/evals-common';
 // Shared sub-schemas
 // ---------------------------------------------------------------------------
 
-const recordSchema = z.record(z.string(), z.unknown());
+const recordSchema = lazySchema(() => z.record(z.string(), z.unknown()));
 
-export const modelSchema = z.object({
+export const modelSchema = lazySchema(() => z.object({
   id: z.string(),
   family: z.string().optional(),
   provider: z.string().optional(),
-});
+}));
 
-export const exampleSchema = z.object({
+export const exampleSchema = lazySchema(() => z.object({
   id: z.string(),
   index: z.number().int().optional(),
   input: recordSchema.optional(),
   output: z.unknown().optional(),
   metadata: recordSchema.nullable().optional(),
-});
+}));
 
-export const datasetSchema = z.object({
+export const datasetSchema = lazySchema(() => z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().optional(),
   examples: z.array(exampleSchema),
-});
+}));
 
-export const evaluatorConfigSchema = z.object({
+export const evaluatorConfigSchema = lazySchema(() => z.object({
   name: z.string(),
   version: z.string().optional(),
   connector_id: z.string().optional(),
-});
+}));
 
-export const evaluatorResultSchema = z.object({
+export const evaluatorResultSchema = lazySchema(() => z.object({
   evaluator: z.object({
     name: z.string(),
     version: z.string().optional(),
@@ -73,22 +73,22 @@ export const evaluatorResultSchema = z.object({
       direction: Direction.optional(),
     })
   ),
-});
+}));
 
 /**
  * Spaces the ingested scores are assigned to. When omitted, the ingest step
  * stamps the workflow's execution space.
  */
-const spaceIdsSchema = z.array(z.string().min(1)).min(1).optional();
+const spaceIdsSchema = lazySchema(() => z.array(z.string().min(1)).min(1).optional());
 
 /** Fields that describe "the thing being evaluated" (a task). */
 const taskTargetShape = {
-  connector_id: z.string(),
-  agent_id: z.string().optional(),
+  connector_id: lazySchema(() => z.string()),
+  agent_id: lazySchema(() => z.string().optional()),
   /** Explicit task provider id registered by a suite (overrides inference of the above). */
-  task_ref: z.string().optional(),
+  task_ref: lazySchema(() => z.string().optional()),
   /** Free-form parameters passed through to the task provider. */
-  params: recordSchema.optional(),
+  params: lazySchema(() => recordSchema.optional()),
 };
 
 const label = (id: string, defaultMessage: string) =>
@@ -103,13 +103,13 @@ const description = (id: string, defaultMessage: string) =>
 
 export const ResolveDatasetStepId = 'ai.evals.resolveDataset' as const;
 
-export const resolveDatasetInputSchema = z.object({
+export const resolveDatasetInputSchema = lazySchema(() => z.object({
   dataset_ids: z.array(z.string()).min(1),
-});
+}));
 
-export const resolveDatasetOutputSchema = z.object({
+export const resolveDatasetOutputSchema = lazySchema(() => z.object({
   datasets: z.array(datasetSchema),
-});
+}));
 
 export const resolveDatasetCommonDefinition: CommonStepDefinition<
   typeof resolveDatasetInputSchema,
@@ -129,15 +129,15 @@ export const resolveDatasetCommonDefinition: CommonStepDefinition<
 
 export const ExecuteTaskStepId = 'ai.evals.executeTask' as const;
 
-export const executeTaskInputSchema = z.object({
+export const executeTaskInputSchema = lazySchema(() => z.object({
   ...taskTargetShape,
   example: exampleSchema,
-});
+}));
 
-export const executeTaskOutputSchema = z.object({
+export const executeTaskOutputSchema = lazySchema(() => z.object({
   output: recordSchema,
   trace_id: z.string().optional(),
-});
+}));
 
 export const executeTaskCommonDefinition: CommonStepDefinition<
   typeof executeTaskInputSchema,
@@ -157,16 +157,16 @@ export const executeTaskCommonDefinition: CommonStepDefinition<
 
 export const EvaluateTraceStepId = 'ai.evals.evaluateTrace' as const;
 
-export const evaluateTraceInputSchema = z.object({
+export const evaluateTraceInputSchema = lazySchema(() => z.object({
   trace_id: z.string(),
   reference_data: recordSchema.optional(),
   evaluators: z.array(evaluatorConfigSchema).min(1),
-});
+}));
 
-export const evaluateTraceOutputSchema = z.object({
+export const evaluateTraceOutputSchema = lazySchema(() => z.object({
   results: z.array(evaluatorResultSchema),
   errors: z.array(z.string()).optional(),
-});
+}));
 
 export const evaluateTraceCommonDefinition: CommonStepDefinition<
   typeof evaluateTraceInputSchema,
@@ -186,7 +186,7 @@ export const evaluateTraceCommonDefinition: CommonStepDefinition<
 
 export const IngestScoresStepId = 'ai.evals.ingestScores' as const;
 
-export const ingestScoresInputSchema = z.object({
+export const ingestScoresInputSchema = lazySchema(() => z.object({
   experiment_id: z.string(),
   experiment_name: z.string().optional(),
   execution_id: z.string().optional(),
@@ -207,13 +207,13 @@ export const ingestScoresInputSchema = z.object({
   }),
   evaluator_results: z.array(evaluatorResultSchema),
   space_ids: spaceIdsSchema,
-});
+}));
 
-export const ingestScoresOutputSchema = z.object({
+export const ingestScoresOutputSchema = lazySchema(() => z.object({
   ingested: z.number().int(),
   conflicted: z.number().int(),
   failed: z.number().int(),
-});
+}));
 
 export const ingestScoresCommonDefinition: CommonStepDefinition<
   typeof ingestScoresInputSchema,
@@ -233,7 +233,7 @@ export const ingestScoresCommonDefinition: CommonStepDefinition<
 
 export const PersistOnlineScoresStepId = 'ai.evals.persistOnlineScores' as const;
 
-export const persistOnlineScoresInputSchema = z.object({
+export const persistOnlineScoresInputSchema = lazySchema(() => z.object({
   monitor: z.object({ id: z.string(), name: z.string() }),
   trace_id: z.string(),
   connector_id: z.string().optional(),
@@ -247,13 +247,13 @@ export const persistOnlineScoresInputSchema = z.object({
   ),
   /** Evaluator failures reported by `ai.evals.evaluateTrace`, counted but not persisted. */
   errors: z.array(z.string()).optional(),
-});
+}));
 
-export const persistOnlineScoresOutputSchema = z.object({
+export const persistOnlineScoresOutputSchema = lazySchema(() => z.object({
   created: z.number().int(),
   skipped: z.number().int(),
   failed_evaluators: z.number().int(),
-});
+}));
 
 export const persistOnlineScoresCommonDefinition: CommonStepDefinition<
   typeof persistOnlineScoresInputSchema,
@@ -277,7 +277,7 @@ export const persistOnlineScoresCommonDefinition: CommonStepDefinition<
 
 export const EvaluateExampleStepId = 'ai.evals.evaluateExample' as const;
 
-export const evaluateExampleInputSchema = z.object({
+export const evaluateExampleInputSchema = lazySchema(() => z.object({
   ...taskTargetShape,
   experiment_id: z.string(),
   experiment_name: z.string().optional(),
@@ -290,14 +290,14 @@ export const evaluateExampleInputSchema = z.object({
   reference_data: recordSchema.optional(),
   repetitions: z.number().int().min(1).optional(),
   space_ids: spaceIdsSchema,
-});
+}));
 
-export const evaluateExampleOutputSchema = z.object({
+export const evaluateExampleOutputSchema = lazySchema(() => z.object({
   scores_ingested: z.number().int(),
   failed: z.number().int(),
   repetitions: z.number().int(),
   errors: z.array(z.string()).optional(),
-});
+}));
 
 export const evaluateExampleCommonDefinition: CommonStepDefinition<
   typeof evaluateExampleInputSchema,
@@ -317,7 +317,7 @@ export const evaluateExampleCommonDefinition: CommonStepDefinition<
 
 export const EvaluateDatasetStepId = 'ai.evals.evaluateDataset' as const;
 
-export const evaluateDatasetInputSchema = z.object({
+export const evaluateDatasetInputSchema = lazySchema(() => z.object({
   ...taskTargetShape,
   experiment_id: z.string(),
   experiment_name: z.string().optional(),
@@ -330,16 +330,16 @@ export const evaluateDatasetInputSchema = z.object({
   /** Max examples evaluated in parallel within this step. */
   concurrency: z.number().int().min(1).optional(),
   space_ids: spaceIdsSchema,
-});
+}));
 
-export const evaluateDatasetOutputSchema = z.object({
+export const evaluateDatasetOutputSchema = lazySchema(() => z.object({
   experiment_id: z.string(),
   example_count: z.number().int(),
   completed: z.number().int(),
   failed: z.number().int(),
   scores_ingested: z.number().int(),
   errors: z.array(z.string()).optional(),
-});
+}));
 
 export const evaluateDatasetCommonDefinition: CommonStepDefinition<
   typeof evaluateDatasetInputSchema,
@@ -362,17 +362,17 @@ export const evaluateDatasetCommonDefinition: CommonStepDefinition<
 // ---------------------------------------------------------------------------
 
 export const StartExperimentStepId = 'ai.evals.startExperiment' as const;
-export const startExperimentInputSchema = z.object({
+export const startExperimentInputSchema = lazySchema(() => z.object({
   task_model: modelSchema,
   suite_id: z.string().optional(),
   experiment_id: z.string().optional(),
   execution_id: z.string().optional(),
-});
+}));
 
-export const startExperimentOutputSchema = z.object({
+export const startExperimentOutputSchema = lazySchema(() => z.object({
   experiment_id: z.string(),
   execution_id: z.string(),
-});
+}));
 
 export const startExperimentCommonDefinition: CommonStepDefinition<
   typeof startExperimentInputSchema,
@@ -392,13 +392,13 @@ export const startExperimentCommonDefinition: CommonStepDefinition<
 
 export const CompareExperimentsStepId = 'ai.evals.compareExperiments' as const;
 
-export const compareExperimentsInputSchema = z.object({
+export const compareExperimentsInputSchema = lazySchema(() => z.object({
   experiment_ids: z.array(z.string()).min(2),
-});
+}));
 
-export const compareExperimentsOutputSchema = z.object({
+export const compareExperimentsOutputSchema = lazySchema(() => z.object({
   comparison: z.unknown(),
-});
+}));
 
 export const compareExperimentsCommonDefinition: CommonStepDefinition<
   typeof compareExperimentsInputSchema,

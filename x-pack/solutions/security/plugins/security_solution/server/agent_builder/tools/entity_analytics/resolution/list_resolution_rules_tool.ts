@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -17,7 +17,7 @@ import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import { checkResolutionAccess } from './check_resolution_access';
 import { getResolutionToolAvailability } from './resolution_availability';
 
-const schema = z.object({});
+const schema = lazySchema(() => z.object({}));
 
 export const SECURITY_LIST_RESOLUTION_RULES_TOOL_ID = securityTool('list_resolution_rules');
 

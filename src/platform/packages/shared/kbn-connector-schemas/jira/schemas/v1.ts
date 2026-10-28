@@ -11,8 +11,8 @@ import { Coerced, validateRecordKeysAllowed, validateRecordMaxKeys } from '../..
 import { MAX_OTHER_FIELDS_LENGTH } from '../constants';
 
 export const ExternalIncidentServiceConfiguration = {
-  apiUrl: z.string(),
-  projectKey: z.string(),
+  apiUrl: lazySchema(() => z.string()),
+  projectKey: lazySchema(() => z.string()),
 };
 
 export const ExternalIncidentServiceConfigurationSchema = lazySchema(() =>
@@ -20,8 +20,8 @@ export const ExternalIncidentServiceConfigurationSchema = lazySchema(() =>
 );
 
 export const ExternalIncidentServiceSecretConfiguration = {
-  email: z.string(),
-  apiToken: z.string(),
+  email: lazySchema(() => z.string()),
+  apiToken: lazySchema(() => z.string()),
 };
 
 export const ExternalIncidentServiceSecretConfigurationSchema = lazySchema(() =>
@@ -29,12 +29,12 @@ export const ExternalIncidentServiceSecretConfigurationSchema = lazySchema(() =>
 );
 
 const incidentSchemaObject = {
-  summary: z.string(),
-  description: z.string().nullable().default(null),
-  externalId: z.string().nullable().default(null),
-  issueType: z.string().nullable().default(null),
-  priority: z.string().nullable().default(null),
-  labels: z
+  summary: lazySchema(() => z.string()),
+  description: lazySchema(() => z.string().nullable().default(null)),
+  externalId: lazySchema(() => z.string().nullable().default(null)),
+  issueType: lazySchema(() => z.string().nullable().default(null)),
+  priority: lazySchema(() => z.string().nullable().default(null)),
+  labels: lazySchema(() => z
     .array(
       z.string().check((ctx) => {
         if ((ctx.value as string).match(/\s/g)) {
@@ -47,8 +47,8 @@ const incidentSchemaObject = {
       })
     )
     .nullable()
-    .default(null),
-  parent: z.string().nullable().default(null),
+    .default(null)),
+  parent: lazySchema(() => z.string().nullable().default(null)),
   otherFields: Coerced(
     z
       .record(z.string(), z.any())

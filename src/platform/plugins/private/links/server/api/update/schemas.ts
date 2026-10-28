@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { asCodeMetaSchema, MAX_ID_LENGTH } from '@kbn/as-code-shared-schemas';
 import { linksApiStateSchema } from '../schemas';
 import { LINKS_ID_DESCRIPTION } from '../constants';
 
 export const updateRequestBodySchema = linksApiStateSchema;
 
-export const updateResponseBodySchema = z
+export const updateResponseBodySchema = lazySchema(() => z
   .object({
     id: z.string().max(MAX_ID_LENGTH).meta({
       description: LINKS_ID_DESCRIPTION,
@@ -26,4 +26,4 @@ export const updateResponseBodySchema = z
   .meta({
     id: 'LinksItemResponse',
     description: 'Response containing a links library item with metadata.',
-  });
+  }));

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
 
-export const SettingsUserActionPayloadSchema = z.object({
+export const SettingsUserActionPayloadSchema = lazySchema(() => z.object({
   settings: z.object({
     syncAlerts: z.boolean().optional(),
     extractObservables: z.boolean().optional(),
   }),
-});
+}));
 
-export const SettingsUserActionSchema = z.object({
+export const SettingsUserActionSchema = lazySchema(() => z.object({
   type: z.literal(UserActionTypes.settings),
   payload: SettingsUserActionPayloadSchema,
-});
+}));

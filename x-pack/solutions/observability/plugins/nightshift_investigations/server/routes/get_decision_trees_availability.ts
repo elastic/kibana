@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 export const getDecisionTreesAvailabilityRoute = createNightshiftInvestigationsServerRoute({
@@ -20,7 +20,7 @@ export const getDecisionTreesAvailabilityRoute = createNightshiftInvestigationsS
   security: {
     authz: { requiredPrivileges: ['agentBuilder:read'] },
   },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({ isDecisionTreesEnabled }) => {
     return { enabled: isDecisionTreesEnabled() };
   },

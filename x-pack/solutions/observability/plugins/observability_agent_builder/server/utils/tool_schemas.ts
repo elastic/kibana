@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_SHORT_STRING_LENGTH } from './schema_limits';
 
 const startDescription =
@@ -16,8 +16,8 @@ const endDescription =
 export const indexDescription = 'Concrete index or index pattern to analyze. Example: "logs-*".';
 
 export const timeRangeSchemaRequired = {
-  start: z.string().max(MAX_SHORT_STRING_LENGTH).describe(startDescription),
-  end: z.string().max(MAX_SHORT_STRING_LENGTH).describe(endDescription),
+  start: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH).describe(startDescription)),
+  end: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH).describe(endDescription)),
 };
 
 export function timeRangeSchemaOptional(defaultTimeRange: { start: string; end: string }) {

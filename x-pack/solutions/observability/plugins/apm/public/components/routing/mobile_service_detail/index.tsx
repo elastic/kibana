@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { toBooleanFromString } from '../../../../common/utils/to_boolean_from_string';
@@ -142,7 +142,7 @@ export const mobileServiceDetailRoute = {
             showMobileFilters: true,
           },
         }),
-        params: z
+        params: lazySchema(() => z
           .object({
             query: z
               .object({
@@ -157,7 +157,7 @@ export const mobileServiceDetailRoute = {
               })
               .optional(),
           })
-          .optional(),
+          .optional()),
       },
       '/mobile-services/{serviceName}/transactions': {
         ...page({
@@ -171,7 +171,7 @@ export const mobileServiceDetailRoute = {
             showMobileFilters: true,
           },
         }),
-        params: z
+        params: lazySchema(() => z
           .object({
             query: z
               .object({
@@ -187,11 +187,11 @@ export const mobileServiceDetailRoute = {
               })
               .optional(),
           })
-          .optional(),
+          .optional()),
         children: {
           '/mobile-services/{serviceName}/transactions/view': {
             element: <TransactionDetails />,
-            params: z.object({
+            params: lazySchema(() => z.object({
               query: z
                 .object({
                   comparisonEnabled: toBooleanFromString,
@@ -208,7 +208,7 @@ export const mobileServiceDetailRoute = {
                   })
                 )
                 .merge(offsetSchema),
-            }),
+            })),
             defaults: {
               query: {
                 showCriticalPath: '',
@@ -232,7 +232,7 @@ export const mobileServiceDetailRoute = {
             showMobileFilters: true,
           },
         }),
-        params: z
+        params: lazySchema(() => z
           .object({
             query: z
               .object({
@@ -248,28 +248,28 @@ export const mobileServiceDetailRoute = {
               })
               .optional(),
           })
-          .optional(),
+          .optional()),
         children: {
           '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}': {
             element: <ErrorGroupDetails />,
-            params: z.object({
+            params: lazySchema(() => z.object({
               path: z.object({
                 groupId: z.string(),
               }),
               query: z.object({ errorId: z.string().optional() }),
-            }),
+            })),
           },
           '/mobile-services/{serviceName}/errors-and-crashes/': {
             element: <MobileErrorCrashesOverview />,
           },
           '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}': {
             element: <CrashGroupDetails />,
-            params: z.object({
+            params: lazySchema(() => z.object({
               path: z.object({
                 groupId: z.string(),
               }),
               query: z.object({ errorId: z.string().optional() }),
-            }),
+            })),
           },
         },
       },
@@ -315,7 +315,7 @@ export const mobileServiceDetailRoute = {
           bottomHeaderContent: AlertsHeaderSearchBar,
           contentWrapper: AlertsSearchBarContextProvider,
         }),
-        params: z
+        params: lazySchema(() => z
           .object({
             query: z
               .object({
@@ -323,7 +323,7 @@ export const mobileServiceDetailRoute = {
               })
               .optional(),
           })
-          .optional(),
+          .optional()),
       },
       '/mobile-services/{serviceName}/dashboards': {
         ...page({
@@ -333,7 +333,7 @@ export const mobileServiceDetailRoute = {
           }),
           element: <ServiceDashboards />,
         }),
-        params: z
+        params: lazySchema(() => z
           .object({
             query: z
               .object({
@@ -341,7 +341,7 @@ export const mobileServiceDetailRoute = {
               })
               .optional(),
           })
-          .optional(),
+          .optional()),
       },
       '/mobile-services/{serviceName}/': {
         element: <RedirectToDefaultServiceRouteView />,

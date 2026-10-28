@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
@@ -25,7 +25,7 @@ const RULE_ID_VALUES = Object.values(RESOLUTION_RULE_IDS) as [
   ...ResolutionRuleId[]
 ];
 
-const schema = z.object({
+const schema = lazySchema(() => z.object({
   rules: z
     .array(
       z.object({
@@ -40,7 +40,7 @@ const schema = z.object({
     .min(1)
     .max(RULE_ID_VALUES.length)
     .describe('One or more resolution rules to enable or disable.'),
-});
+}));
 
 export const SECURITY_SET_RESOLUTION_RULES_TOOL_ID = securityTool('set_resolution_rules');
 

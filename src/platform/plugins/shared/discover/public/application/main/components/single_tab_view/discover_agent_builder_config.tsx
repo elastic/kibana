@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useMemo, useRef } from 'react';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
@@ -38,13 +38,13 @@ const MAX_SAMPLE_ROWS = 10;
 const MAX_COLUMNS = 100;
 const MAX_VALUE_LENGTH = 100;
 
-const updateQuerySchema = z.object({
+const updateQuerySchema = lazySchema(() => z.object({
   query: z.string().min(1).describe('The query string to apply to the current Discover tab.'),
   language: z
     .enum(['kuery', 'lucene'])
     .optional()
     .describe('For non-ES|QL tabs, the query language to use if it should change.'),
-});
+}));
 
 export const toDiscoverQuery = (
   currentQuery: AggregateQuery | Query | undefined,

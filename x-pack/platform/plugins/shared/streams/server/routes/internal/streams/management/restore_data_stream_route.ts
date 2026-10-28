@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -22,9 +22,9 @@ export const restoreDataStreamRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
-  }),
+  })),
   handler: async ({
     params,
     request,

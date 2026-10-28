@@ -8,25 +8,25 @@
 import { i18n } from '@kbn/i18n';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_IMPACT_ID_LENGTH } from '../constants';
 import { storedImpactEntitiesSchema } from '../impact';
 
 export const GetImpactStepId = 'investigations.getImpact' as const;
 
-export const getImpactStepInputSchema = z.object({
+export const getImpactStepInputSchema = lazySchema(() => z.object({
   conversationId: z
     .string()
     .min(1)
     .max(MAX_IMPACT_ID_LENGTH)
     .describe('Conversation whose impact to read.'),
-});
+}));
 
-export const getImpactStepOutputSchema = z.object({
+export const getImpactStepOutputSchema = lazySchema(() => z.object({
   id: z.string(),
   /** Empty when the impact was recorded as a summary and evidence only. */
   entities: storedImpactEntitiesSchema,
-});
+}));
 
 export const getImpactStepCommonDefinition: BaseStepDefinition<
   typeof getImpactStepInputSchema,

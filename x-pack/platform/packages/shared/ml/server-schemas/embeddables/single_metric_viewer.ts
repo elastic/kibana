@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
@@ -13,7 +13,7 @@ import {
 import { mlEntityFieldValueSchema } from '@kbn/ml-anomaly-utils/schemas';
 import { MAX_STRING_LENGTH } from '../constants';
 
-export const singleMetricViewerEmbeddableStateSchema = z
+export const singleMetricViewerEmbeddableStateSchema = lazySchema(() => z
   .object({
     ...serializedTitlesSchema.shape,
     ...serializedTimeRangeSchema.shape,
@@ -43,7 +43,7 @@ export const singleMetricViewerEmbeddableStateSchema = z
   .meta({
     id: 'ml_single_metric_viewer',
     description: 'Single Metric Viewer embeddable',
-  });
+  }));
 
 export type SingleMetricViewerEmbeddableState = z.output<
   typeof singleMetricViewerEmbeddableStateSchema

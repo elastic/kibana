@@ -11,7 +11,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import pRetry from 'p-retry';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export const ESQL_FUNCTIONAL_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Functional Equivalence';
 
@@ -118,10 +118,10 @@ const CalibratedEsqlEquivalencePrompt = createPrompt({
   name: 'security_esql_equivalence_v2',
   description:
     'Three-point calibrated rubric judging ES|QL functional equivalence with explicit allow/deny lists for common transformations.',
-  input: z.object({
+  input: lazySchema(() => z.object({
     ground_truth: z.string(),
     prediction: z.string(),
-  }),
+  })),
 })
   .version({
     system: {

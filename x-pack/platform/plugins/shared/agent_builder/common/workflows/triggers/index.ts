@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { ConversationMetadataUpdatedTriggerId } from '@kbn/agent-builder-common';
 
@@ -31,7 +31,7 @@ export {
 export { conversationUpdatedTriggerCommonDefinition } from './conversation_updated';
 export type { ConversationUpdatedTriggerEvent } from '@kbn/agent-builder-common';
 
-const conversationMetadataUpdatedEventSchema = z.object({
+const conversationMetadataUpdatedEventSchema = lazySchema(() => z.object({
   conversationId: z.string().meta({
     description: i18n.translate(
       'xpack.agentBuilder.workflowTriggers.conversationMetadataUpdated.eventSchema.conversationId',
@@ -68,7 +68,7 @@ const conversationMetadataUpdatedEventSchema = z.object({
       }
     ),
   }),
-});
+}));
 
 export type { ConversationMetadataUpdatedEvent } from '@kbn/agent-builder-common';
 

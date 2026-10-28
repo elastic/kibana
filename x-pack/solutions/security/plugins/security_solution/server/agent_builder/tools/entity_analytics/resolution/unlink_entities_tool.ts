@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
@@ -42,7 +42,7 @@ interface ResolvedEntitiesState {
   nonAliases: NonAliasEntity[];
 }
 
-const schema = z.object({
+const schema = lazySchema(() => z.object({
   entityIds: z
     .array(z.string().min(1))
     .min(1)
@@ -65,7 +65,7 @@ const schema = z.object({
     `
     )
     .optional(),
-});
+}));
 
 export const SECURITY_UNLINK_ENTITIES_TOOL_ID = securityTool('unlink_entities');
 

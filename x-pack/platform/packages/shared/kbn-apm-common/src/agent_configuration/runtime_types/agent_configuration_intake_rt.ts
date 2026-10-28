@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { settingDefinitions } from '../setting_definitions';
 import type { SettingValidation } from '../setting_definitions/types';
 
@@ -18,16 +18,16 @@ const knownSettings = settingDefinitions.reduce<Record<string, SettingValidation
   {}
 );
 
-export const serviceSchema = z.object({
+export const serviceSchema = lazySchema(() => z.object({
   name: z.string().optional(),
   environment: z.string().optional(),
-});
+}));
 
 /**
  * Every value must be a string, and known settings additionally pass their
  * per-setting validation.
  */
-export const settingsSchema = z.record(z.string(), z.string()).superRefine((settings, ctx) => {
+export const settingsSchema = lazySchema(() => z.record(z.string(), z.string()).superRefine((settings, ctx) => {
   for (const [key, validator] of Object.entries(knownSettings)) {
     const value = settings[key];
     if (value !== undefined) {
@@ -39,10 +39,10 @@ export const settingsSchema = z.record(z.string(), z.string()).superRefine((sett
       }
     }
   }
-});
+}));
 
-export const agentConfigurationIntakeSchema = z.object({
+export const agentConfigurationIntakeSchema = lazySchema(() => z.object({
   agent_name: z.string().optional(),
   service: serviceSchema,
   settings: settingsSchema,
-});
+}));

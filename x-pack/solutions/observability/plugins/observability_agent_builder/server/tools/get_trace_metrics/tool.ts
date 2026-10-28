@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -22,7 +22,7 @@ import { OBSERVABILITY_GET_HOSTS_TOOL_ID, OBSERVABILITY_GET_SERVICES_TOOL_ID } f
 
 export const OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID = 'observability.get_trace_metrics';
 
-const getTraceMetricsSchema = z.object({
+const getTraceMetricsSchema = lazySchema(() => z.object({
   ...timeRangeSchemaRequired,
   kqlFilter: z
     .string()
@@ -46,7 +46,7 @@ const getTraceMetricsSchema = z.object({
     .enum(['latency', 'throughput', 'failureRate'])
     .describe('Metric to sort the results by.')
     .default('latency'),
-});
+}));
 
 export function createGetTraceMetricsTool({
   core,

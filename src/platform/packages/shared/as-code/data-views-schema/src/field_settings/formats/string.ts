@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const stringFormatSchema = z
+export const stringFormatSchema = lazySchema(() => z
   .object({
     type: z.literal('string'),
     params: z
@@ -55,4 +55,4 @@ export const stringFormatSchema = z
     id: 'kbn-field-format-string',
     title: 'String field format',
     description: 'Formats a field into a string value.',
-  });
+  }));

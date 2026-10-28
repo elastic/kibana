@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
@@ -20,11 +20,11 @@ import {
 import { RULE_MIGRATION_SKILLS } from '../skills/siem_migration/rules/skill_catalog';
 import { RULE_MIGRATION_SKILL_LIST } from '../skills/siem_migration/rules/content';
 
-const ruleMigrationItemsDataSchema = z.object({
+const ruleMigrationItemsDataSchema = lazySchema(() => z.object({
   migration_id: MigrationId,
   rule_ids: z.array(z.string().min(1).max(256)).max(200).default([]),
   attachmentLabel: z.string().max(500).optional(),
-});
+}));
 
 type RuleMigrationItemsAttachmentData = z.infer<typeof ruleMigrationItemsDataSchema>;
 

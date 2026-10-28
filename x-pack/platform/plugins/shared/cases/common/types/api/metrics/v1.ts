@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export enum CaseMetricsFeature {
   ALERTS_COUNT = 'alerts.count',
@@ -17,21 +17,21 @@ export enum CaseMetricsFeature {
   STATUS = 'status',
 }
 
-export const SingleCaseMetricsFeatureFieldSchema = z.union([
+export const SingleCaseMetricsFeatureFieldSchema = lazySchema(() => z.union([
   z.literal(CaseMetricsFeature.ALERTS_COUNT),
   z.literal(CaseMetricsFeature.ALERTS_USERS),
   z.literal(CaseMetricsFeature.ALERTS_HOSTS),
   z.literal(CaseMetricsFeature.CONNECTORS),
   z.literal(CaseMetricsFeature.LIFESPAN),
-]);
+]));
 
-export const CasesMetricsFeatureFieldSchema = z.union([
+export const CasesMetricsFeatureFieldSchema = lazySchema(() => z.union([
   SingleCaseMetricsFeatureFieldSchema,
   z.literal(CaseMetricsFeature.MTTR),
   z.literal(CaseMetricsFeature.STATUS),
-]);
+]));
 
-const StatusInfoSchema = z.object({
+const StatusInfoSchema = lazySchema(() => z.object({
   /**
    * Duration the case was in the open status in milliseconds
    */
@@ -44,9 +44,9 @@ const StatusInfoSchema = z.object({
    * The ISO string representation of the dates the case was reopened
    */
   reopenDates: z.array(z.string().max(50)),
-});
+}));
 
-const AlertHostsMetricsSchema = z.object({
+const AlertHostsMetricsSchema = lazySchema(() => z.object({
   /**
    * Total unique hosts represented in the alerts
    */
@@ -67,9 +67,9 @@ const AlertHostsMetricsSchema = z.object({
       count: z.number(),
     })
   ),
-});
+}));
 
-const AlertUsersMetricsSchema = z.object({
+const AlertUsersMetricsSchema = lazySchema(() => z.object({
   /**
    * Total unique users represented in the alerts
    */
@@ -86,16 +86,16 @@ const AlertUsersMetricsSchema = z.object({
       count: z.number(),
     })
   ),
-});
+}));
 
-export const SingleCaseMetricsRequestSchema = z.object({
+export const SingleCaseMetricsRequestSchema = lazySchema(() => z.object({
   /**
    * The metrics to retrieve.
    */
   features: z.array(SingleCaseMetricsFeatureFieldSchema),
-});
+}));
 
-export const CasesMetricsRequestSchema = z.object({
+export const CasesMetricsRequestSchema = lazySchema(() => z.object({
   /**
    * The metrics to retrieve.
    */
@@ -114,9 +114,9 @@ export const CasesMetricsRequestSchema = z.object({
    * that the user has access to.
    */
   owner: z.union([z.array(z.string()), z.string()]).optional(),
-});
+}));
 
-export const SingleCaseMetricsResponseSchema = z.object({
+export const SingleCaseMetricsResponseSchema = lazySchema(() => z.object({
   alerts: z
     .object({
       /**
@@ -163,9 +163,9 @@ export const SingleCaseMetricsResponseSchema = z.object({
       statusInfo: StatusInfoSchema,
     })
     .optional(),
-});
+}));
 
-export const CasesMetricsResponseSchema = z.object({
+export const CasesMetricsResponseSchema = lazySchema(() => z.object({
   /**
    * The average resolve time of all cases in seconds
    */
@@ -174,7 +174,7 @@ export const CasesMetricsResponseSchema = z.object({
    * The number of total cases per status
    */
   status: z.object({ open: z.number(), inProgress: z.number(), closed: z.number() }).optional(),
-});
+}));
 
 export type SingleCaseMetricsRequest = z.infer<typeof SingleCaseMetricsRequestSchema>;
 export type CasesMetricsRequest = z.infer<typeof CasesMetricsRequestSchema>;

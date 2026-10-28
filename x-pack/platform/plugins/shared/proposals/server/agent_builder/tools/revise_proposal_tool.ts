@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
@@ -25,7 +25,7 @@ interface ReviseProposalToolDependencies {
   privileges: Pick<ProposalPrivilegesChecker, 'assertCanManage'>;
 }
 
-const reviseProposalSchema = z.object({
+const reviseProposalSchema = lazySchema(() => z.object({
   proposalId: z
     .string()
     .min(1)
@@ -52,7 +52,7 @@ const reviseProposalSchema = z.object({
     ),
   impact: proposalImpactSchema.optional().describe('Override for the impact rating.'),
   confidence: proposalConfidenceSchema.optional().describe('Override for the confidence rating.'),
-});
+}));
 
 /**
  * Replaces a pending proposal with a modified copy at an analyst's request.

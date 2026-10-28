@@ -6,7 +6,7 @@
  */
 
 import { memoize, omit, pick, uniq } from 'lodash';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { xyConfigSchemaESQL } from '@kbn/lens-embeddable-utils';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { chartTypeRegistry } from './chart_type_registry';
@@ -42,9 +42,9 @@ const toSectionsSchema = ({ shape }: z.ZodObject): z.ZodObject =>
  * `data_source` into every layer, which reference line and annotation layers reject.
  */
 const [xyDataLayerSchema] = xyConfigSchemaESQL.shape.layers.element.options;
-const xySectionsSchema = toSectionsSchema(xyConfigSchemaESQL).extend({
+const xySectionsSchema = lazySchema(() => toSectionsSchema(xyConfigSchemaESQL).extend({
   layers: z.array(xyDataLayerSchema.omit({ data_source: true })).min(1),
-});
+}));
 
 /** The top-level config keys the model can load for a chart type. */
 const getSectionsSchema = memoize(

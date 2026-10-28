@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type {
   PluginManifest,
   ParsedPluginArchive,
@@ -83,7 +83,7 @@ const readAndValidateManifest = async (archive: ZipArchive): Promise<PluginManif
   return validateManifest(parsed);
 };
 
-const pathFieldSchema = z.union([z.string(), z.array(z.string())]);
+const pathFieldSchema = lazySchema(() => z.union([z.string(), z.array(z.string())]));
 
 const pluginManifestSchema = z
   .object({

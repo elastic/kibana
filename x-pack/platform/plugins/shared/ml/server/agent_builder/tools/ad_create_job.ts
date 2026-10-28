@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -25,7 +25,7 @@ import { getMessages } from '../../../common/constants/messages';
 import type { BuildMlClientFn, BuildDataRecognizerFn } from '../ml_client_factory';
 import { AD_CREATE_JOB_TOOL_ID } from './tool_ids';
 
-const schema = z.object({
+const schema = lazySchema(() => z.object({
   operation: z.enum([
     'validate_spec',
     'estimate_memory',
@@ -82,7 +82,7 @@ const schema = z.object({
     .describe(
       'For get_module: return full job and datafeed configs. Default false returns a slim projection (id, detectors, bucket_span, influencers) to avoid large context.'
     ),
-});
+}));
 
 export const createAdCreateJobTool = (
   resolveMlCapabilities: ResolveMlCapabilities,

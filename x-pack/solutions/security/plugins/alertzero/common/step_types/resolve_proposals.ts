@@ -9,21 +9,21 @@ import { i18n } from '@kbn/i18n';
 import { MAX_COMMENT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/proposals-common';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export const RESOLVE_PROPOSALS_STEP_ID = 'alertzero.resolveProposals' as const;
 
 /** Upper bound on proposals one step call resolves; each one is a few Proposals-service reads. */
 export const MAX_PROPOSALS_PER_RESOLVE = 50;
 
-const boundedId = z.string().trim().min(1).max(256);
+const boundedId = lazySchema(() => z.string().trim().min(1).max(256));
 
 /**
  * A proposal this run did not mint because a live one already holds the subject, raised by an
  * Investigation that may or may not be this one's. Only another Investigation's is reported: a
  * rerun landing on its own Proposal is not news.
  */
-export const convergedProposalSchema = z.object({
+export const convergedProposalSchema = lazySchema(() => z.object({
   title: z.string().optional(),
   /** The live revision of the Proposal this run converged onto. */
   proposalId: z.string(),
@@ -44,7 +44,7 @@ export const convergedProposalSchema = z.object({
   ]),
   /** The journal line for this Investigation, saying where its finding went. */
   note: z.string().max(2000),
-});
+}));
 
 export type ConvergedProposal = z.infer<typeof convergedProposalSchema>;
 
@@ -53,12 +53,12 @@ export type ConvergedProposal = z.infer<typeof convergedProposalSchema>;
  * risk a duplicate: `check_failed`. A Proposal that already holds a subject is not a suppression,
  * it is `converged`.
  */
-export const mintSuppressionSchema = z.enum(['none', 'check_failed']);
+export const mintSuppressionSchema = lazySchema(() => z.enum(['none', 'check_failed']));
 
 export type MintSuppression = z.infer<typeof mintSuppressionSchema>;
 
 /** What a worker wants to propose: a catalog action and the input it would run with. */
-export const candidateProposalSchema = z.object({
+export const candidateProposalSchema = lazySchema(() => z.object({
   actionWorkflowId: boundedId.describe('Catalog action workflow id.'),
   actionInput: z
     .record(z.string(), z.unknown())
@@ -67,19 +67,19 @@ export const candidateProposalSchema = z.object({
   title: z.string().max(MAX_TITLE_LENGTH).optional(),
   comment: z.string().max(MAX_COMMENT_LENGTH).optional(),
   confidence: z.enum(['low', 'medium', 'high']).optional(),
-});
+}));
 
 export type CandidateProposal = z.infer<typeof candidateProposalSchema>;
 
 /** A candidate proposal nothing live holds, with the id to create it under. */
-export const resolvedProposalSchema = candidateProposalSchema.extend({
+export const resolvedProposalSchema = lazySchema(() => candidateProposalSchema.extend({
   subjectKey: z.string(),
   proposalId: z.uuid(),
-});
+}));
 
 export type ResolvedProposal = z.infer<typeof resolvedProposalSchema>;
 
-export const resolveProposalsInputSchema = z.object({
+export const resolveProposalsInputSchema = lazySchema(() => z.object({
   investigationConversationId: boundedId.describe(
     'The Investigation this run would raise its Proposals on.'
   ),
@@ -87,9 +87,9 @@ export const resolveProposalsInputSchema = z.object({
     .array(candidateProposalSchema)
     .max(MAX_PROPOSALS_PER_RESOLVE)
     .describe('What this run wants to propose.'),
-});
+}));
 
-export const resolveProposalsOutputSchema = z.object({
+export const resolveProposalsOutputSchema = lazySchema(() => z.object({
   /** What to create, each under its own `proposalId`. Pass the id through to the create step. */
   proposals: z.array(resolvedProposalSchema),
   /** What a live Proposal from another Investigation already holds; nothing is created for these. */
@@ -101,7 +101,7 @@ export const resolveProposalsOutputSchema = z.object({
   /** The settlement barrier for this run's gates: existing plus what this run mints. */
   expectedProposalCount: z.number().int().min(0),
   mintSuppression: mintSuppressionSchema,
-});
+}));
 
 export type ResolveProposalsInput = z.infer<typeof resolveProposalsInputSchema>;
 export type ResolveProposalsOutput = z.infer<typeof resolveProposalsOutputSchema>;

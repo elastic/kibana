@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   dismissReasonSchema,
   MAX_RATIONALE_LENGTH,
@@ -19,12 +19,12 @@ import {
 
 export const GetProposalStepId = 'proposals.getProposal' as const;
 
-export const getProposalStepInputSchema = z.object({
+export const getProposalStepInputSchema = lazySchema(() => z.object({
   proposalId: z.string().describe('Proposal to read.'),
-});
+}));
 
 /** Only the fields a gating workflow branches on; not the whole record. */
-export const getProposalStepOutputSchema = z.object({
+export const getProposalStepOutputSchema = lazySchema(() => z.object({
   // Extracted from the stored schemas so the two vocabularies cannot drift.
   status: proposalStatusSchema,
   decision: proposalDecisionSchema.optional(),
@@ -36,7 +36,7 @@ export const getProposalStepOutputSchema = z.object({
   dismissReason: dismissReasonSchema.optional(),
   /** Analyst-supplied rationale for the dismiss decision. */
   rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
-});
+}));
 
 export const getProposalStepCommonDefinition: BaseStepDefinition<
   typeof getProposalStepInputSchema,

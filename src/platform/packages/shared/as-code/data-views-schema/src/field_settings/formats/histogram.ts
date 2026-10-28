@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { numeralPatternSchema } from './common';
 
-export const histogramFormatSchema = z
+export const histogramFormatSchema = lazySchema(() => z
   .object({
     type: z.literal('histogram'),
     params: z.object({
@@ -23,4 +23,4 @@ export const histogramFormatSchema = z
     title: 'Histogram field format',
     description:
       'Formats a histogram field into a numeric value following the defined pattern. The default pattern is defined by format:bytes:defaultPattern, format:percent:defaultPattern or format:number:defaultPattern advanced settings depending on the selected format.',
-  });
+  }));

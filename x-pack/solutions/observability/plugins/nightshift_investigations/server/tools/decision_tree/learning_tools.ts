@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -37,14 +37,14 @@ interface LearningToolDeps {
   onRecord?: (conversationId: string, record: LearningRecord) => void;
 }
 
-const treeIdField = z
+const treeIdField = lazySchema(() => z
   .string()
   .max(256)
   .describe(
     'The symptom:<slug> tree this learning belongs to. Use the id from decision-trees/monitors.md, or the slug you are creating.'
-  );
+  ));
 
-const systemLearningSchema = z.object({
+const systemLearningSchema = lazySchema(() => z.object({
   tree_id: treeIdField,
   category: z
     .enum(SYSTEM_LEARNING_CATEGORIES)
@@ -53,15 +53,15 @@ const systemLearningSchema = z.object({
     .string()
     .max(MAX_LEARNING_LENGTH)
     .describe('The learning, in 1-4 lines of plain language.'),
-});
+}));
 
-const remediationSchema = z.object({
+const remediationSchema = lazySchema(() => z.object({
   tree_id: treeIdField,
   content: z
     .string()
     .max(MAX_LEARNING_LENGTH)
     .describe('The remediation that resolved the issue, in 1-4 lines of plain language.'),
-});
+}));
 
 const toolLearningSchema = (connectorNames: readonly string[]) =>
   z.object({

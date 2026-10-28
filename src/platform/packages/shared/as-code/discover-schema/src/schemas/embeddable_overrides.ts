@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { DataGridDensity } from '@kbn/discover-session-constants';
 import { columnSettingsEntrySchema, documentsDisplayModeSchema, sortSchema } from './data_table';
 
-export const discoverSessionApiEmbeddableOverridesSchema = z
+export const discoverSessionApiEmbeddableOverridesSchema = lazySchema(() => z
   .object({
     column_order: z
       .array(z.string().meta({ description: 'Field name of a column in display order.' }))
@@ -76,4 +76,4 @@ export const discoverSessionApiEmbeddableOverridesSchema = z
     }),
   })
   .strict()
-  .default({});
+  .default({}));

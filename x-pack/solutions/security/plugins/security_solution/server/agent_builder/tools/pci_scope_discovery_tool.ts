@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -15,7 +15,7 @@ import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_
 import { securityTool } from './constants';
 import { pciIndexPatternSchema, buildScopeClaim } from './pci_compliance_schemas';
 
-const pciScopeType = z.enum([
+const pciScopeType = lazySchema(() => z.enum([
   'all',
   'network',
   'identity',
@@ -23,9 +23,9 @@ const pciScopeType = z.enum([
   'cloud',
   'application',
   'vulnerability',
-]);
+]));
 
-const pciScopeDiscoverySchema = z.object({
+const pciScopeDiscoverySchema = lazySchema(() => z.object({
   scopeType: pciScopeType
     .optional()
     .default('all')
@@ -40,7 +40,7 @@ const pciScopeDiscoverySchema = z.object({
     .describe(
       'Optional custom index patterns to include for environments with non-native ingestion.'
     ),
-});
+}));
 
 export const PCI_SCOPE_DISCOVERY_TOOL_ID = securityTool('pci_scope_discovery');
 

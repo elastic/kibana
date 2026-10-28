@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
@@ -19,7 +19,7 @@ const UNSUPPORTED_OPERATORS: readonly string[] = ['is_in_list', 'is_not_in_list'
 // unions in step input schemas break workflow validation for template-string
 // inputs, see bulk_action_schemas.ts). Value-list operators are rejected: this
 // step builds the filter itself and cannot resolve a value list.
-export const buildExceptionEntriesFilterInputSchema = z.object({
+export const buildExceptionEntriesFilterInputSchema = lazySchema(() => z.object({
   entries: z
     .array(exceptionEntrySchema)
     .min(1)
@@ -46,15 +46,15 @@ export const buildExceptionEntriesFilterInputSchema = z.object({
     .array(z.record(z.string(), z.unknown()))
     .default([])
     .describe("The rule's own current filters, to preserve alongside the new one"),
-});
+}));
 
-export const buildExceptionEntriesFilterOutputSchema = z.object({
+export const buildExceptionEntriesFilterOutputSchema = lazySchema(() => z.object({
   filters: z
     .array(z.record(z.string(), z.unknown()))
     .describe(
       "existing_filters plus one filter excluding alerts the proposed exception would suppress — use in place of the rule's own filters when previewing the exception"
     ),
-});
+}));
 
 export const buildExceptionEntriesFilterStepCommonDefinition: BaseStepDefinition<
   typeof buildExceptionEntriesFilterInputSchema,

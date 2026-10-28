@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const ipFormatSchema = z
+export const ipFormatSchema = lazySchema(() => z
   .object({
     type: z.literal('ip'),
   })
@@ -17,4 +17,4 @@ export const ipFormatSchema = z
     id: 'kbn-field-format-ip',
     title: 'IP field format',
     description: 'Formats a field into an IP address.',
-  });
+  }));

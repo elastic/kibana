@@ -11,7 +11,7 @@ import type { Client as ESClient } from '@elastic/elasticsearch';
 import fs from 'node:fs';
 import path from 'node:path';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   SCOUT_TEST_EVENTS_INDEX_PATTERN,
   ScoutTargetAttributeSchema,
@@ -36,7 +36,7 @@ const isUnknownColumnError = (error: unknown, column: string): boolean => {
   return text.includes('Unknown column') && text.includes(column);
 };
 
-export const ScoutTestConfigStatsEntrySchema = z.object({
+export const ScoutTestConfigStatsEntrySchema = lazySchema(() => z.object({
   path: z.string(),
   test_target: ScoutTestTargetSchema.transform(
     (data) => new ScoutTestTarget(data.location, data.arch, data.domain)
@@ -52,11 +52,11 @@ export const ScoutTestConfigStatsEntrySchema = z.object({
     max: z.int(),
     estimate: z.int(),
   }),
-});
+}));
 
 export type ScoutTestConfigStatsEntry = z.infer<typeof ScoutTestConfigStatsEntrySchema>;
 
-export const ScoutTestConfigStatsDataSchema = z.object({
+export const ScoutTestConfigStatsDataSchema = lazySchema(() => z.object({
   lastUpdated: z.coerce.date(),
   lookbackDays: z.int().min(1).max(7),
   buildkite: z.object({
@@ -68,7 +68,7 @@ export const ScoutTestConfigStatsDataSchema = z.object({
     ),
   }),
   configs: z.array(ScoutTestConfigStatsEntrySchema),
-});
+}));
 
 export type ScoutTestConfigStatsData = z.infer<typeof ScoutTestConfigStatsDataSchema>;
 

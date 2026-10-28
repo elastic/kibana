@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IngestBaseStream } from './base';
 import {
   IngestBase,
@@ -49,11 +49,11 @@ interface IngestWired {
 }
 
 const ingestWiredShape = {
-  wired: z.object({
+  wired: lazySchema(() => z.object({
     fields: fieldDefinitionSchema,
     routing: routingDefinitionListSchema,
     draft: z.boolean().optional(),
-  }),
+  })),
 };
 
 export type WiredIngest = Omit<IngestBase, 'processing'> &
@@ -61,11 +61,11 @@ export type WiredIngest = Omit<IngestBase, 'processing'> &
     processing: StreamlangIngestStreamProcessing;
   };
 
-const wiredIngestSchemaObject = z.object({
+const wiredIngestSchemaObject = lazySchema(() => z.object({
   ...ingestBaseSchemaFields,
   processing: streamlangIngestStreamProcessingSchema,
   ...ingestWiredShape,
-});
+}));
 
 export const WiredIngest: Validation<IngestBase, WiredIngest> = validation(
   IngestBase.right,
@@ -77,11 +77,11 @@ export type WiredIngestUpsertRequest = Omit<IngestBaseUpsertRequest, 'processing
     processing: StreamlangIngestStreamProcessingUpsert;
   };
 
-const wiredIngestUpsertSchemaObject = z.object({
+const wiredIngestUpsertSchemaObject = lazySchema(() => z.object({
   ...ingestBaseUpsertSchemaFields,
   processing: streamlangIngestStreamProcessingUpsertSchema,
   ...ingestWiredShape,
-});
+}));
 
 export const WiredIngestUpsertRequest: Validation<
   IngestBaseUpsertRequest,
@@ -136,7 +136,7 @@ export namespace WiredStream {
 
 const wiredStreamDefinitionSchema = ingestBaseStreamDefinitionSchema
   .extend({
-    type: z.literal('wired'),
+    type: lazySchema(() => z.literal('wired')),
     ingest: wiredIngestSchemaObject,
   })
   .meta({ id: 'WiredStreamDefinition' });
@@ -144,7 +144,7 @@ const wiredStreamDefinitionSchema = ingestBaseStreamDefinitionSchema
 const wiredStreamGetResponseSchema = ingestBaseStreamGetResponseSchema
   .extend({
     stream: wiredStreamDefinitionSchema,
-    data_stream_exists: z.boolean(),
+    data_stream_exists: lazySchema(() => z.boolean()),
     inherited_fields: inheritedFieldDefinitionSchema,
     effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
     effective_settings: wiredIngestStreamEffectiveSettingsSchema,
@@ -155,7 +155,7 @@ const wiredStreamGetResponseSchema = ingestBaseStreamGetResponseSchema
 const wiredStreamUpsertRequestSchema = ingestBaseStreamUpsertRequestSchema
   .extend({
     stream: ingestBaseStreamUpsertDefinitionSchema.extend({
-      type: z.literal('wired'),
+      type: lazySchema(() => z.literal('wired')),
       ingest: wiredIngestUpsertSchemaObject,
     }),
   })

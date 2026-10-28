@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { SKILL_ATTACHMENT_TYPE, type SkillAttachmentData } from '../../../common/attachments';
 
-const loadSkillForEditingSchema = z.object({
+const loadSkillForEditingSchema = lazySchema(() => z.object({
   skill_id: z
     .string()
     .min(1)
     .describe(
       'ID of the existing user-created skill to load for editing. Must match the id of a persisted, non-readonly skill.'
     ),
-});
+}));
 
 /**
  * Inline tool that fetches an existing user-created skill and captures it as a

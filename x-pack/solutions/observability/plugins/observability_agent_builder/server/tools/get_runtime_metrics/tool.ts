@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -31,7 +31,7 @@ export type GetRuntimeMetricsToolResult = OtherResult<{
 
 const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 
-const getRuntimeMetricsToolSchema = z.object({
+const getRuntimeMetricsToolSchema = lazySchema(() => z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   serviceName: z
     .string()
@@ -59,7 +59,7 @@ const getRuntimeMetricsToolSchema = z.object({
     .describe(
       'KQL filter to narrow down results. Examples: "service.name: ad", "host.name: web-*".'
     ),
-});
+}));
 
 export function createGetRuntimeMetricsTool({
   core,

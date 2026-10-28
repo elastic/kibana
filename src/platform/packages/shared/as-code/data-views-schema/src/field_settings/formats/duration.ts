@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const durationFormatSchema = z
+export const durationFormatSchema = lazySchema(() => z
   .object({
     type: z.literal('duration'),
     params: z.object({
@@ -81,4 +81,4 @@ export const durationFormatSchema = z
     id: 'kbn-field-format-duration',
     title: 'Duration field format',
     description: 'Formats a field into a duration value.',
-  });
+  }));

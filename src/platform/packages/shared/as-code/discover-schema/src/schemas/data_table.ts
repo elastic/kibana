@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { DataGridDensity } from '@kbn/discover-session-constants';
 
 export const columnSettingsEntrySchema = z
@@ -29,9 +29,9 @@ export const sortSchema = z
   })
   .strict();
 
-export const documentsDisplayModeSchema = z.enum(['table', 'json']).optional();
+export const documentsDisplayModeSchema = lazySchema(() => z.enum(['table', 'json']).optional());
 
-export const dataTableLimitsSchema = z
+export const dataTableLimitsSchema = lazySchema(() => z
   .object({
     rows_per_page: z.number().min(1).max(10000).optional().meta({
       description:
@@ -43,9 +43,9 @@ export const dataTableLimitsSchema = z
     }),
   })
   .strict()
-  .meta({ id: 'discoverSessionEmbeddableDataTableLimitsSchema' });
+  .meta({ id: 'discoverSessionEmbeddableDataTableLimitsSchema' }));
 
-export const dataTableSchema = z
+export const dataTableSchema = lazySchema(() => z
   .object({
     column_order: z
       .array(z.string().meta({ description: 'Field name of a column in display order.' }))
@@ -100,4 +100,4 @@ export const dataTableSchema = z
     }),
   })
   .strict()
-  .meta({ id: 'discoverSessionEmbeddableDataTableSchema' });
+  .meta({ id: 'discoverSessionEmbeddableDataTableSchema' }));

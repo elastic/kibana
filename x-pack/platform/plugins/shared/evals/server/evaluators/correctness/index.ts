@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { runLlmJudge } from '../llm_judge';
 import type { EvaluatorDefinition } from '../types';
 import { LlmCorrectnessEvaluationPrompt } from './prompt';
@@ -16,23 +16,23 @@ import {
 } from './scoring';
 import type { CorrectnessAnalysis } from './types';
 
-const referenceDataSchema = z.object({
+const referenceDataSchema = lazySchema(() => z.object({
   expected: z
     .string()
     .trim()
     .min(1)
     .max(131072)
     .describe('The expected ground truth response to compare against.'),
-});
+}));
 
-const correctnessEvidenceSchema = z.object({
+const correctnessEvidenceSchema = lazySchema(() => z.object({
   input: z.object({
     message: z.string().trim().min(1),
   }),
   response: z.object({
     message: z.string().trim().min(1),
   }),
-});
+}));
 
 export const correctnessEvaluator: EvaluatorDefinition<z.infer<typeof referenceDataSchema>> = {
   name: 'correctness',

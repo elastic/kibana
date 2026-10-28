@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import { JsonModelShapeSchema } from '@kbn/workflows/spec/schema/common/json_model_shape_schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 
 /**
@@ -32,7 +32,7 @@ export const normalizeOptionalConnectorParam = (value: string | undefined): stri
 export const AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE =
   '`aggregate-by` can only be set when `plugin-id` is also set.';
 
-export const ConfigSchema = z
+export const ConfigSchema = lazySchema(() => z
   .object({
     'connector-id': z.string().max(255).optional(),
     'max-step-size': z
@@ -109,18 +109,18 @@ export const ConfigSchema = z
         path: ['aggregate-by'],
       });
     }
-  });
+  }));
 
 // Maybe we can define specific schema for metadata in the future
 // For now it's a record with string keys and any values
 // Because langchain returns it this format
-export const MetadataSchema = z.record(z.string(), z.any());
+export const MetadataSchema = lazySchema(() => z.record(z.string(), z.any()));
 
 /**
  * Input schema for the AI prompt step.
  * Uses variables structure with key->value pairs.
  */
-export const InputSchema = z.object({
+export const InputSchema = lazySchema(() => z.object({
   prompt: z.string(),
   systemPrompt: z.string().optional(),
   schema: JsonModelShapeSchema.optional().describe('The schema for the output of the step.'),
@@ -150,7 +150,7 @@ export const InputSchema = z.object({
     .record(z.string(), z.unknown())
     .optional()
     .describe('Variables for template_id. Ignored when the connector does not require a template.'),
-});
+}));
 
 export function getStructuredOutputSchema(contentSchema: z.ZodType) {
   return z.object({
@@ -159,16 +159,16 @@ export function getStructuredOutputSchema(contentSchema: z.ZodType) {
   });
 }
 
-const StringOutputSchema = z.object({
+const StringOutputSchema = lazySchema(() => z.object({
   content: z.string(),
   metadata: MetadataSchema,
-});
+}));
 
 /**
  * Output schema for the AI prompt step.
  * Uses variables structure with key->value pairs.
  */
-export const OutputSchema = z.union([StringOutputSchema, getStructuredOutputSchema(z.unknown())]);
+export const OutputSchema = lazySchema(() => z.union([StringOutputSchema, getStructuredOutputSchema(z.unknown())]));
 
 export type AiPromptStepConfigSchema = typeof ConfigSchema;
 export type AiPromptStepInputSchema = typeof InputSchema;

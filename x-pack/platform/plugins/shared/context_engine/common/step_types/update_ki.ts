@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
@@ -13,7 +13,7 @@ import { aiIndexIdSchema, kiIdSchema, kiLifecycleStatusSchema, kiPartialFieldsSc
 
 export const UPDATE_KI_STEP_ID = 'context-engine.updateKi' as const;
 
-export const updateKiInputSchema = z.object({
+export const updateKiInputSchema = lazySchema(() => z.object({
   ai_index_id: aiIndexIdSchema,
   ki_id: kiIdSchema,
   ki: kiPartialFieldsSchema.describe('The knowledge indicator fields to update'),
@@ -26,14 +26,14 @@ export const updateKiInputSchema = z.object({
     .boolean()
     .optional()
     .describe('Wait for the write to become searchable before the step completes (default false)'),
-});
+}));
 
-export const updateKiOutputSchema = z.object({
+export const updateKiOutputSchema = lazySchema(() => z.object({
   id: z.string().describe('The document id of the updated knowledge indicator'),
   result: z
     .enum(['updated', 'noop'])
     .describe('Whether the update changed the document or was a no-op'),
-});
+}));
 
 export const updateKiStepCommonDefinition: CommonStepDefinition<
   typeof updateKiInputSchema,

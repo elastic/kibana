@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { badData, badRequest } from '@hapi/boom';
 import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
@@ -19,9 +19,9 @@ import { upsertQueryStream } from '../../../lib/streams/helpers/query_upsert';
  * Schema for API request body - accepts esql for UX simplicity.
  * This is different from the stored Query schema which uses { view: string }.
  */
-const queryRequestBodySchema = z.object({
+const queryRequestBodySchema = lazySchema(() => z.object({
   esql: z.string().max(65535),
-});
+}));
 
 export interface QueryStreamObjectGetResponse {
   /** The view reference stored in the definition */
@@ -60,11 +60,11 @@ const readQueryStreamRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({
       name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the query stream.'),
     }),
-  }),
+  })),
   handler: async ({
     params,
     request,
@@ -133,7 +133,7 @@ const upsertQueryStreamRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({
       name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the query stream.'),
     }),
@@ -153,7 +153,7 @@ const upsertQueryStreamRoute = createServerRoute({
         })
         .optional(),
     }),
-  }),
+  })),
   handler: async ({ params, request, getScopedClients, context }) => {
     const { streamsClient, attachmentClient } = await getScopedClients({
       request,

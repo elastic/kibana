@@ -8,7 +8,7 @@
  */
 
 import type { Request as InspectedRequest } from '@kbn/inspector-plugin/public';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Analysis result for multi_match query types found in ES query DSL.
@@ -182,6 +182,6 @@ export function mergeMultiMatchAnalyses(analyses: MultiMatchAnalysis[]): MultiMa
   );
 }
 
-const RequestWithQuery = z.object({
+const RequestWithQuery = lazySchema(() => z.object({
   query: z.record(z.string(), z.unknown()),
-});
+}));

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 
@@ -21,9 +21,9 @@ export const getConnectorByIdRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({ connectorId: z.string().max(256) }),
-  }),
+  })),
   handler: async ({ request, params, server }) => {
     return server.inference.getConnectorById(params.path.connectorId, request);
   },

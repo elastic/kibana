@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_ID_LENGTH,
   KIsOnboardingStep,
@@ -61,7 +61,7 @@ const onboardingExecuteRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
     body: z.discriminatedUnion('action', [
       z.object({
@@ -99,7 +99,7 @@ const onboardingExecuteRoute = createServerRoute({
         action: z.literal('cancel').describe('Cancel an in-progress onboarding workflow'),
       }),
     ]),
-  }),
+  })),
   handler: async ({
     params,
     request,
@@ -207,9 +207,9 @@ const onboardingStatusRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
-  }),
+  })),
   handler: async ({
     params,
     request,
@@ -255,11 +255,11 @@ const onboardingBulkStatusRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     body: z.object({
       sourceIds: sourceIdsArraySchema({ min: 1, max: MAX_SOURCES_PER_QUERY }),
     }),
-  }),
+  })),
   handler: async ({
     params,
     request,

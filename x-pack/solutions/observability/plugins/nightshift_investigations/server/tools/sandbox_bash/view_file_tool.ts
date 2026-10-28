@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -18,7 +18,7 @@ export const SANDBOX_VIEW_FILE_TOOL_ID = 'nightshift_sandbox_view_file';
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 
-const viewFileSchema = z.object({
+const viewFileSchema = lazySchema(() => z.object({
   file_path: z
     .string()
     .max(4096)
@@ -37,7 +37,7 @@ const viewFileSchema = z.object({
     .min(0)
     .optional()
     .describe('Last line to show inclusive (default: 0 = end of file).'),
-});
+}));
 
 export const createSandboxViewFileTool = ({
   getSandboxStart,

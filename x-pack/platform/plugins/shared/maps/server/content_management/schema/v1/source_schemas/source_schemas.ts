@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { SOURCE_TYPES } from '../../../../../common';
 import { MVT_FIELD_TYPE } from '../../../../../common/constants';
 import {
@@ -15,7 +15,7 @@ import {
 } from './es_agg_source_schemas';
 import { ESQLSourceSchema, ESSearchSourceSchema } from './es_source_schemas';
 
-export const EMSFileSourceSchema = z
+export const EMSFileSourceSchema = lazySchema(() => z
   .object({
     id: z.string().meta({
       description: 'Administrative boundaries layer id from Elastic Maps Service (EMS).',
@@ -28,9 +28,9 @@ export const EMSFileSourceSchema = z
   .strict()
   .meta({
     description: 'Administrative boundaries from Elastic Maps Service (EMS).',
-  });
+  }));
 
-export const EMSTMSSourceSchema = z
+export const EMSTMSSourceSchema = lazySchema(() => z
   .object({
     id: z.string().optional().meta({
       description:
@@ -49,18 +49,18 @@ export const EMSTMSSourceSchema = z
   .strict()
   .meta({
     description: 'Basemap from Elastic Maps Service (EMS) Tile Map Service (TMS).',
-  });
+  }));
 
-export const kibanaTilemapSourceSchema = z
+export const kibanaTilemapSourceSchema = lazySchema(() => z
   .object({
     type: z.literal(SOURCE_TYPES.KIBANA_TILEMAP),
   })
   .strict()
   .meta({
     description: `Tile map service configured by 'map.tilemap.url' kibana.yml setting.`,
-  });
+  }));
 
-export const WMSSourceSchema = z
+export const WMSSourceSchema = lazySchema(() => z
   .object({
     serviceUrl: z.url().meta({
       description: 'WMS URL',
@@ -76,9 +76,9 @@ export const WMSSourceSchema = z
   .strict()
   .meta({
     description: 'Raster source from Web Map Service (WMS)',
-  });
+  }));
 
-export const XYZTMSSourceSchema = z
+export const XYZTMSSourceSchema = lazySchema(() => z
   .object({
     urlTemplate: z.url().meta({
       description: 'TMS URL',
@@ -88,7 +88,7 @@ export const XYZTMSSourceSchema = z
   .strict()
   .meta({
     description: 'Raster source from Tile Map Service (TMS)',
-  });
+  }));
 
 export const MVTFieldSchema = z
   .object({
@@ -97,7 +97,7 @@ export const MVTFieldSchema = z
   })
   .strict();
 
-export const TiledSingleLayerVectorSourceSchema = z
+export const TiledSingleLayerVectorSourceSchema = lazySchema(() => z
   .object({
     fields: z.array(MVTFieldSchema).optional(),
     layerName: z.string().meta({
@@ -122,9 +122,9 @@ export const TiledSingleLayerVectorSourceSchema = z
   .strict()
   .meta({
     description: 'Vector tile source that displays a single source layer',
-  });
+  }));
 
-export const sourceSchema = z.union([
+export const sourceSchema = lazySchema(() => z.union([
   z
     .object({
       type: z.string(),
@@ -141,4 +141,4 @@ export const sourceSchema = z.union([
   ESPewPewSourceSchema,
   ESSearchSourceSchema,
   ESQLSourceSchema,
-]);
+]));

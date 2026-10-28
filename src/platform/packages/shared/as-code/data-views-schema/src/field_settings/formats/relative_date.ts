@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const relativeDateFormatSchema = z
+export const relativeDateFormatSchema = lazySchema(() => z
   .object({
     type: z.literal('relative_date'),
   })
@@ -17,4 +17,4 @@ export const relativeDateFormatSchema = z
     id: 'kbn-field-format-relative_date',
     title: 'Relative date field format',
     description: 'Formats a field into a relative date value. For example: "1 day ago".',
-  });
+  }));

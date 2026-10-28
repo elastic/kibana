@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 
 /**
@@ -15,14 +15,14 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
  */
 export const AiClassifyStepTypeId = 'ai.classify';
 
-export const ConfigSchema = z.object({
+export const ConfigSchema = lazySchema(() => z.object({
   'connector-id': z.string().optional(),
-});
+}));
 
-export const CategorySchema = z.union([
+export const CategorySchema = lazySchema(() => z.union([
   z.string(),
   z.object({ name: z.string(), description: z.string() }),
-]);
+]));
 
 export type Category = z.infer<typeof CategorySchema>;
 export const getCategoryName = (category: Category): string =>
@@ -31,7 +31,7 @@ export const getCategoryName = (category: Category): string =>
 /**
  * Input schema for the AI classify step.
  */
-export const InputSchema = z.object({
+export const InputSchema = lazySchema(() => z.object({
   input: z.union([z.string(), z.array(z.unknown()), z.record(z.string(), z.unknown())]),
   categories: z.array(CategorySchema).min(1),
   instructions: z.string().optional(),
@@ -39,18 +39,18 @@ export const InputSchema = z.object({
   fallbackCategory: CategorySchema.optional(),
   includeRationale: z.boolean().optional(),
   temperature: z.number().min(0).max(1).optional(),
-});
+}));
 
 /**
  * Output schema for the AI classify step.
  * This is the base schema - the dynamic schema will be created based on input parameters.
  */
-export const OutputSchema = z.object({
+export const OutputSchema = lazySchema(() => z.object({
   category: z.string().optional(),
   categories: z.array(z.string()).optional(),
   rationale: z.string().optional(),
   metadata: z.record(z.string(), z.any()),
-});
+}));
 
 export type AiClassifyStepConfigSchema = typeof ConfigSchema;
 export type AiClassifyStepInputSchema = typeof InputSchema;

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
 export const CUSTOM_TRIGGER_ID = 'example.customTrigger' as const;
@@ -17,7 +17,7 @@ export const CUSTOM_TRIGGER_ID = 'example.customTrigger' as const;
 export const CUSTOM_TRIGGER_CATEGORIES = ['alerts', 'notifications', 'audit', 'demo'] as const;
 export type CustomTriggerCategory = (typeof CUSTOM_TRIGGER_CATEGORIES)[number];
 
-export const customTriggerEventSchema = z.object({
+export const customTriggerEventSchema = lazySchema(() => z.object({
   message: z.string().describe('The message text for the event.'),
   source: z.string().optional().describe('The source that emitted the event.'),
   category: z.string().optional().describe('Category of the event.'),
@@ -31,7 +31,7 @@ export const customTriggerEventSchema = z.object({
     .optional()
     .describe('Example nested property (foo.bar.baz).'),
   another: z.string().optional().describe('Another string property.'),
-});
+}));
 
 export type CustomTriggerEvent = z.infer<typeof customTriggerEventSchema>;
 

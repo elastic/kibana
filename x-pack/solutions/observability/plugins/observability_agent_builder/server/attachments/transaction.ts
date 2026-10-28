@@ -6,7 +6,7 @@
  */
 
 import dedent from 'dedent';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
@@ -18,13 +18,13 @@ import { observabilityAttachmentDataSchema } from './observability_attachment_da
 const GET_TRANSACTION_DETAILS_TOOL_ID = 'get_transaction_details';
 
 const transactionDataSchema = observabilityAttachmentDataSchema.extend({
-  serviceName: z.string().max(MAX_SHORT_STRING_LENGTH),
-  transactionName: z.string().max(MAX_SHORT_STRING_LENGTH),
-  transactionType: z.string().max(MAX_SHORT_STRING_LENGTH),
-  traceId: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
-  transactionId: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
-  start: z.string().max(MAX_SHORT_STRING_LENGTH),
-  end: z.string().max(MAX_SHORT_STRING_LENGTH),
+  serviceName: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH)),
+  transactionName: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH)),
+  transactionType: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH)),
+  traceId: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH).optional()),
+  transactionId: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH).optional()),
+  start: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH)),
+  end: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH)),
 });
 
 export type TransactionAttachmentData = z.infer<typeof transactionDataSchema>;

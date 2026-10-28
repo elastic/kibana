@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isEmpty } from 'lodash';
 import type { LoghubSystem } from './read_loghub_system_files';
 import { getFileOrThrow } from '../utils';
@@ -40,7 +40,7 @@ export interface LoghubQuery {
   query: DslQuery;
 }
 
-export const querySchema: z.ZodType<LoghubQuery> = z.object({
+export const querySchema: z.ZodType<LoghubQuery> = lazySchema(() => z.object({
   id: z.string(),
   title: z.string(),
   description: z.string(),
@@ -81,11 +81,11 @@ export const querySchema: z.ZodType<LoghubQuery> = z.object({
         }),
       })
     ),
-});
+}));
 
-export const queryFileSchema = z.object({
+export const queryFileSchema = lazySchema(() => z.object({
   queries: z.array(querySchema),
-});
+}));
 
 export function tokenize(text: string): string[] {
   return text

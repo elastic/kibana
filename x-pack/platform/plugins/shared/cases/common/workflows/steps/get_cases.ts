@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../bundled-types.gen';
@@ -14,24 +14,24 @@ import { MAX_BULK_GET_CASES } from '../../constants';
 
 export const GetCasesStepTypeId = 'cases.getCases';
 
-const InputSchema = z.object({
+const InputSchema = lazySchema(() => z.object({
   case_ids: z
     .array(z.string().min(1))
     .min(1, 'at least one case_id is required')
     .max(MAX_BULK_GET_CASES),
-});
+}));
 
-const BulkGetErrorSchema = z.object({
+const BulkGetErrorSchema = lazySchema(() => z.object({
   error: z.string(),
   message: z.string(),
   status: z.number().int().optional(),
   caseId: z.string(),
-});
+}));
 
-const OutputSchema = z.object({
+const OutputSchema = lazySchema(() => z.object({
   cases: z.array(CaseResponsePropertiesSchema).max(MAX_BULK_GET_CASES),
   errors: z.array(BulkGetErrorSchema),
-});
+}));
 
 type GetCasesStepInputSchema = typeof InputSchema;
 type GetCasesStepOutputSchema = typeof OutputSchema;

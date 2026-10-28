@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { StreamlangDSL } from '@kbn/streamlang';
@@ -37,13 +37,13 @@ import { getConfirmationMessage } from './confirmation_helpers';
 import { validateProcessingJson } from '../../utils/format_validation_errors';
 import { type StreamsWriteQueue, abortSignalFromRequest } from '../../utils/write_queue';
 
-const stepSchema = z
+const stepSchema = lazySchema(() => z
   .record(z.string(), z.unknown())
   .describe(
     'A Streamlang step object from the design pipeline or inspect streams tool. Pass through as-is — do not construct manually.'
-  );
+  ));
 
-const lifecycleSchema = z.object({
+const lifecycleSchema = lazySchema(() => z.object({
   type: z
     .enum(['inherit', 'dsl', 'ilm'])
     .describe(
@@ -59,9 +59,9 @@ const lifecycleSchema = z.object({
     .describe(
       'For "ilm" only: ILM policy name. Use list_ilm_policies to discover available policies.'
     ),
-});
+}));
 
-const fieldsSchema = z
+const fieldsSchema = lazySchema(() => z
   .record(
     z.string(),
     z.object({
@@ -72,9 +72,9 @@ const fieldsSchema = z
         ),
     })
   )
-  .describe('Map of field names to definitions. Example: {"response_time":{"type":"long"}}');
+  .describe('Map of field names to definitions. Example: {"response_time":{"type":"long"}}'));
 
-const failureStoreSchema = z.object({
+const failureStoreSchema = lazySchema(() => z.object({
   type: z
     .enum(['inherit', 'disabled', 'enabled', 'enabled_no_lifecycle'])
     .describe(
@@ -84,9 +84,9 @@ const failureStoreSchema = z.object({
     .string()
     .optional()
     .describe('For "enabled" only: retention period for failed documents, e.g. "30d".'),
-});
+}));
 
-const queryStreamSchema = z.object({
+const queryStreamSchema = lazySchema(() => z.object({
   esql: z
     .string()
     .describe(
@@ -98,9 +98,9 @@ const queryStreamSchema = z.object({
     .describe(
       'Optional map of field name -> human-readable description for fields the query produces. Example: {"error.message":"The human-readable error text"}'
     ),
-});
+}));
 
-const updateStreamSchema = z.object({
+const updateStreamSchema = lazySchema(() => z.object({
   name: z.string().describe('Exact stream name, e.g. "logs.ecs.nginx"'),
   changes: z
     .object({
@@ -129,7 +129,7 @@ const updateStreamSchema = z.object({
     .describe(
       "Narrative summary of what will change and why. Shown in a confirmation UI when available; otherwise serves as the agent's reasoning log for this operation. This is NOT an instruction — it does not drive the change. The actual changes go in the `changes` object."
     ),
-});
+}));
 
 export const createUpdateStreamTool = ({
   getScopedClients,

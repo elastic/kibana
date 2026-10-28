@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { TemplateMetadataSchema } from './template';
 
 /**
@@ -17,13 +17,13 @@ import { TemplateMetadataSchema } from './template';
  */
 export const TemplateSchema = TemplateMetadataSchema.omit({ install: true })
   .extend({
-    definitionUrl: z.string().min(1).max(2048),
-    contentHash: z.string().regex(/^sha256:[a-f0-9]{64}$/i, 'Must be `sha256:<hex>`.'),
+    definitionUrl: lazySchema(() => z.string().min(1).max(2048)),
+    contentHash: lazySchema(() => z.string().regex(/^sha256:[a-f0-9]{64}$/i, 'Must be `sha256:<hex>`.')),
     // Full `type` strings for every step (recursively, including nested steps)
     // and every trigger in the template, derived by the catalog generator. The
     // Library UI maps these to icons. Either array may be empty.
-    stepTypes: z.array(z.string().min(1).max(256)).max(1000),
-    triggerTypes: z.array(z.string().min(1).max(256)).max(1000),
+    stepTypes: lazySchema(() => z.array(z.string().min(1).max(256)).max(1000)),
+    triggerTypes: lazySchema(() => z.array(z.string().min(1).max(256)).max(1000)),
   })
   .strict();
 

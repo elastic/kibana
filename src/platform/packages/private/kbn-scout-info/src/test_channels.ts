@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, ZodError } from '@kbn/zod';
+import { z, ZodError, lazySchema } from '@kbn/zod';
 
-export const ScoutTestChannelSchema = z.enum([
+export const ScoutTestChannelSchema = lazySchema(() => z.enum([
   'ci-on-commit', // Immediate feedback, as soon as the change is committed.
   'ci-batch-3h', // Scheduled every 3 hours; slower but timely feedback to changes.
   'ci-batch-daily', // Scheduled once per day; benchmarks or test that target code areas with dormant or low churn.
   'ci-batch-weekly', // Scheduled once per week; for large-scale / long-running tests.
-]);
+]));
 export type ScoutTestChannel = z.infer<typeof ScoutTestChannelSchema>;
 export type ScoutTestChannelsDefinition = ScoutTestChannel[];
 

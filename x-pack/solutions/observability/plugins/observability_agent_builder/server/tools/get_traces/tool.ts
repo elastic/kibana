@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
@@ -31,7 +31,7 @@ import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_GET_TRACES_TOOL_ID = 'observability.get_traces';
 
-const getTracesSchema = z.object({
+const getTracesSchema = lazySchema(() => z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   index: z.string().max(MAX_INDEX_PATTERN_LENGTH).describe(indexDescription).optional(),
   kqlFilter: z
@@ -69,7 +69,7 @@ const getTracesSchema = z.object({
     .array(z.string().max(MAX_SHORT_STRING_LENGTH))
     .default(DEFAULT_TRACE_FIELDS)
     .describe('Fields to include in the returned documents.'),
-});
+}));
 
 export function createGetTracesTool({
   core,

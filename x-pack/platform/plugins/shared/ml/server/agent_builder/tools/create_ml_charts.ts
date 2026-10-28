@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -26,7 +26,7 @@ import {
 } from '../attachment_types/constants';
 import { CREATE_ML_CHARTS_TOOL_ID } from './tool_ids';
 
-const schema = z.object({
+const schema = lazySchema(() => z.object({
   chart_type: z
     .enum(['anomaly_swimlane', 'anomaly_charts', 'single_metric_viewer'])
     .describe(
@@ -109,7 +109,7 @@ const schema = z.object({
       'Time range for the chart. Set to the analysis window for historical/batch jobs — omitting defaults to "last 15 minutes" which shows no data for historical jobs. Omit only for realtime jobs that should track the current time range.'
     ),
   title: z.string().max(500).optional().describe('Descriptive panel title.'),
-});
+}));
 
 /**
  * Maps a minimum score (0–100) to the SeverityThreshold[] format expected by

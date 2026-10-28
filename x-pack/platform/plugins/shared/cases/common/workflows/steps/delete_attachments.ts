@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import * as i18n from '../translations';
@@ -14,27 +14,27 @@ import { CasesStepCaseIdSchema } from './shared';
 
 export const DeleteAttachmentsStepTypeId = 'cases.deleteAttachments';
 
-const IdsSchema = z
+const IdsSchema = lazySchema(() => z
   .array(z.string().min(1, 'ids values are required').max(MAX_ATTACHMENT_ID_LENGTH))
   .min(1)
-  .max(MAX_BULK_DELETE_ATTACHMENTS);
+  .max(MAX_BULK_DELETE_ATTACHMENTS));
 
 const InputSchema = CasesStepCaseIdSchema.extend({
-  ids: IdsSchema.describe(
+  ids: lazySchema(() => IdsSchema.describe(
     "The `id` of each attachment to delete, from `cases.getAllAttachments`. Use the attachment's own `id`, not its `attachmentId`, which points to an alert, event, or saved object."
-  ),
-  include_related: z
+  )),
+  include_related: lazySchema(() => z
     .boolean()
     .optional()
     .describe(
       'Also delete the attachments that the deleted ones brought to the case, such as the alerts of an attack. Default: true.'
-    ),
+    )),
 });
 
-const OutputSchema = z.object({
+const OutputSchema = lazySchema(() => z.object({
   case_id: z.string(),
   ids: IdsSchema,
-});
+}));
 
 type DeleteAttachmentsStepInputSchema = typeof InputSchema;
 type DeleteAttachmentsStepOutputSchema = typeof OutputSchema;

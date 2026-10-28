@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   DEFAULT_ICON,
   ICON_SOURCE,
@@ -23,7 +23,7 @@ export const symbolizeAsOptions = z
   })
   .strict();
 
-export const symbolizeAsSchema = z
+export const symbolizeAsSchema = lazySchema(() => z
   .object({
     options: z
       .object({
@@ -42,9 +42,9 @@ export const symbolizeAsSchema = z
   })
   .meta({
     description: 'Configure to symbolize Point features as Circle markers or Icons',
-  });
+  }));
 
-const iconSource = z.union([z.literal(ICON_SOURCE.CUSTOM), z.literal(ICON_SOURCE.MAKI)]).optional();
+const iconSource = lazySchema(() => z.union([z.literal(ICON_SOURCE.CUSTOM), z.literal(ICON_SOURCE.MAKI)]).optional());
 
 export const iconStop = z
   .object({
@@ -75,7 +75,7 @@ export const iconStaticOptions = z
   })
   .strict();
 
-export const iconSchema = z
+export const iconSchema = lazySchema(() => z
   .union([
     z
       .object({
@@ -98,7 +98,7 @@ export const iconSchema = z
   })
   .meta({
     description: 'Configure to set Point feature icon',
-  });
+  }));
 
 export const orientationDynamicOptions = z
   .object({
@@ -113,7 +113,7 @@ export const orientationStaticOptions = z
   })
   .strict();
 
-export const orientationSchema = z
+export const orientationSchema = lazySchema(() => z
   .union([
     z
       .object({
@@ -137,7 +137,7 @@ export const orientationSchema = z
   .meta({
     description:
       'Configure to rotate the icon clockwise. Ignored when Point features are symbolized as circle markers',
-  });
+  }));
 
 export const sizeDynamicOptions = z
   .object({
@@ -168,8 +168,8 @@ const sizeDynamiceSchema = z
     options: sizeDynamicOptions,
   })
   .strict();
-export const sizeSchema = z.union([sizeStaticSchema, sizeDynamiceSchema]);
-export const lineWidthSchema = z
+export const sizeSchema = lazySchema(() => z.union([sizeStaticSchema, sizeDynamiceSchema]));
+export const lineWidthSchema = lazySchema(() => z
   .union([sizeStaticSchema, sizeDynamiceSchema])
   .default({
     type: STYLE_TYPE.STATIC,
@@ -179,8 +179,8 @@ export const lineWidthSchema = z
   })
   .meta({
     description: 'Configure to set feature border width',
-  });
-export const iconSizeSchema = z
+  }));
+export const iconSizeSchema = lazySchema(() => z
   .union([sizeStaticSchema, sizeDynamiceSchema])
   .default({
     type: STYLE_TYPE.STATIC,
@@ -190,8 +190,8 @@ export const iconSizeSchema = z
   })
   .meta({
     description: 'Configure to set Point feature radius size in pixels',
-  });
-export const labelSizeSchema = z
+  }));
+export const labelSizeSchema = lazySchema(() => z
   .union([sizeStaticSchema, sizeDynamiceSchema])
   .default({
     type: STYLE_TYPE.STATIC,
@@ -201,4 +201,4 @@ export const labelSizeSchema = z
   })
   .meta({
     description: 'Configure to set label text size',
-  });
+  }));

@@ -6,7 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AvailabilityConfig } from '../availability';
 import type { SkillBoundedTool } from './tools';
 import type {
@@ -203,7 +203,7 @@ export interface ReferencedContent {
   content: string;
 }
 
-export const referencedContentSchema = z.array(
+export const referencedContentSchema = lazySchema(() => z.array(
   z.object({
     name: z
       .string()
@@ -222,14 +222,14 @@ export const referencedContentSchema = z.array(
       ),
     content: z.string().min(1, 'Content must be non-empty'),
   })
-);
+));
 /**
  * Zod schema for validating SkillTypeDefinition name and description fields.
  * Validates:
  * - name: max 64 characters, lowercase letters, numbers, and hyphens only
  * - description: max 1024 characters, non-empty
  */
-export const skillDefinitionSchema = z.object({
+export const skillDefinitionSchema = lazySchema(() => z.object({
   id: z.string().min(1, 'ID must be non-empty'),
   basePath: z.string().min(1, 'Base path must be non-empty'),
   name: z
@@ -245,7 +245,7 @@ export const skillDefinitionSchema = z.object({
     .max(1024, 'Description must be at most 1024 characters'),
   content: z.string().min(1, 'Content must be non-empty'),
   referencedContent: referencedContentSchema.optional(),
-});
+}));
 
 /**
  * Validates a SkillTypeDefinition against the schema constraints.

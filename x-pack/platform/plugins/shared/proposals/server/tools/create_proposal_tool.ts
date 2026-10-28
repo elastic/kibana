@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type {
   BuiltinToolDefinition,
@@ -28,7 +28,7 @@ import {
 import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
 import type { ProposalsService } from '../services/proposals_service';
 
-export const createProposalToolSchema = z.object({
+export const createProposalToolSchema = lazySchema(() => z.object({
   title: z
     .string()
     .min(1)
@@ -53,7 +53,7 @@ export const createProposalToolSchema = z.object({
   category: proposalCategorySchema
     .optional()
     .describe('Grouping for the decision queue, when your instructions name one.'),
-});
+}));
 
 export type CreateProposalToolParams = z.infer<typeof createProposalToolSchema>;
 

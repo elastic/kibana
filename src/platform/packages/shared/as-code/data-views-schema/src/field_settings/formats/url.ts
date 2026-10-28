@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-const baseSubtypeOptionsSchema = z.object({
+const baseSubtypeOptionsSchema = lazySchema(() => z.object({
   url_template: z.string().optional().meta({
     title: 'URL template',
     description:
@@ -20,9 +20,9 @@ const baseSubtypeOptionsSchema = z.object({
     description:
       'The template to use for the label. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{url}}. For example: "{{value}}".',
   }),
-});
+}));
 
-export const urlFormatSchema = z
+export const urlFormatSchema = lazySchema(() => z
   .object({
     type: z.literal('url'),
     params: z.discriminatedUnion('type', [
@@ -65,4 +65,4 @@ export const urlFormatSchema = z
     id: 'kbn-field-format-url',
     title: 'URL field format',
     description: 'Formats a field into a link, image or audio.',
-  });
+  }));

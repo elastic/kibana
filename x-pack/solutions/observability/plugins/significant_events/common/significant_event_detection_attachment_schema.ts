@@ -6,13 +6,13 @@
  */
 
 import { CHANGE_POINT_TYPES } from '@kbn/significant-events-schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export const lifecycleDetectionAttachmentSchema = z.object({
+export const lifecycleDetectionAttachmentSchema = lazySchema(() => z.object({
   '@timestamp': z.string(),
   detection_id: z.string(),
   rule_name: z.string(),
   rule_uuid: z.string().optional(),
   source_id: z.string().optional(),
   change_point_type: z.enum(CHANGE_POINT_TYPES),
-});
+}));

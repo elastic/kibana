@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import type { UserStorageServiceSetup } from '@kbn/core-user-storage-server';
 import { notificationIdSchema } from '../../common/notification_schema';
 
@@ -42,11 +42,11 @@ export const readAllBeforeSchema = isoDateTime();
  */
 export const readOverrideSchema = z.object({ read: z.boolean(), markedAt: isoDateTime() }).strict();
 
-export const overridesSchema = z
+export const overridesSchema = lazySchema(() => z
   .record(notificationIdSchema, readOverrideSchema)
   .refine((overrides) => Object.keys(overrides).length <= MAX_OVERRIDES, {
     message: `Cannot exceed ${MAX_OVERRIDES} read overrides`,
-  });
+  }));
 
 export type ReadOverride = z.infer<typeof readOverrideSchema>;
 export type ReadOverrides = z.infer<typeof overridesSchema>;

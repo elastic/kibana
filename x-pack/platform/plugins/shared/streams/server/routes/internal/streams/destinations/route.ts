@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { streamsUnitIdentifierSchema } from '@kbn/streams-schema';
@@ -29,15 +29,15 @@ import {
   type DestinationApiKeyPrivilegeResult,
 } from './helpers';
 
-const destinationIdSchema = z
+const destinationIdSchema = lazySchema(() => z
   .string()
   .max(256)
-  .regex(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/);
+  .regex(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/));
 
-const patternsSchema = z
+const patternsSchema = lazySchema(() => z
   .array(z.string().min(1).max(MAX_RESOLVE_INDEX_PATTERN_LENGTH))
   .min(1)
-  .max(MAX_RESOLVE_INDEX_PATTERNS);
+  .max(MAX_RESOLVE_INDEX_PATTERNS));
 
 /**
  * Reports whether the current user can mint a destination API key for the
@@ -53,11 +53,11 @@ const getDestinationApiKeyPrivilegesRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     body: z.object({
       patterns: patternsSchema,
     }),
-  }),
+  })),
   handler: async ({ getScopedClients, request, params }) => {
     const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
     return getDestinationApiKeyPrivileges({
@@ -82,13 +82,13 @@ const createDestinationApiKeyRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     body: z.object({
       destinationId: destinationIdSchema,
       patterns: patternsSchema,
       unitId: streamsUnitIdentifierSchema.optional(),
     }),
-  }),
+  })),
   handler: async ({ getScopedClients, request, params }) => {
     const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
     const {
@@ -138,12 +138,12 @@ const deleteDestinationApiKeysRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     body: z.object({
       destinationId: destinationIdSchema,
       unitId: streamsUnitIdentifierSchema.optional(),
     }),
-  }),
+  })),
   handler: async ({ getScopedClients, request, params }) => {
     const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
     const {

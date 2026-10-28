@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ServiceSchemaType } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
@@ -18,8 +18,8 @@ export interface ServiceIngestionTypeResponse {
 
 export const serviceIngestionTypeRoute = defineRoute<ServiceIngestionTypeResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/ingestion_type',
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({ serviceName: z.string().max(MAX_SERVICE_NAME_LENGTH) }),
     query: environmentSchema.merge(rangeSchema),
-  }),
+  })),
 });

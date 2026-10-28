@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { queryNumber, optionalQueryString, MAX_DATE_RANGE_LENGTH } from '../zod_query';
 import { queryPings } from '../../queries/query_pings';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
-export const getPingsRouteQuerySchema = z.strictObject({
+export const getPingsRouteQuerySchema = lazySchema(() => z.strictObject({
   from: z.string().max(MAX_DATE_RANGE_LENGTH),
   to: z.string().max(MAX_DATE_RANGE_LENGTH),
   locations: optionalQueryString,
@@ -23,7 +23,7 @@ export const getPingsRouteQuerySchema = z.strictObject({
   sort: optionalQueryString,
   status: optionalQueryString,
   remoteName: z.string().max(256).optional(),
-});
+}));
 
 type GetPingsRouteRequest = z.infer<typeof getPingsRouteQuerySchema>;
 

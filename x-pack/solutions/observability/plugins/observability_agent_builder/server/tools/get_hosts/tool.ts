@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { ErrorResult, OtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -38,7 +38,7 @@ export type GetHostsToolResult = OtherResult<{
   }>;
 }>;
 
-const getHostsSchema = z.object({
+const getHostsSchema = lazySchema(() => z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   limit: z.number().int().min(1).max(100).default(20).describe(`Maximum number of hosts to return`),
   kqlFilter: z
@@ -48,7 +48,7 @@ const getHostsSchema = z.object({
     .describe(
       'KQL filter to narrow down results. Examples: "service.name: frontend", "host.name: web-*", "cloud.provider: aws".'
     ),
-});
+}));
 
 export function createGetHostsTool({
   core,

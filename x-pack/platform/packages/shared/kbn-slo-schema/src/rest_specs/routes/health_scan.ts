@@ -5,17 +5,17 @@
  * 2.0.
  */
 import { BooleanFromString } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { sloHealthSchema } from '../../schema/health';
 
-const postHealthScanParamsSchema = z.object({
+const postHealthScanParamsSchema = lazySchema(() => z.object({
   body: z
     .object({
       force: BooleanFromString.optional(),
     })
     .optional(),
-});
+}));
 
 interface PostHealthScanResponse {
   scanId: string;
@@ -26,7 +26,7 @@ interface PostHealthScanResponse {
   error?: string;
 }
 
-const getHealthScanParamsSchema = z.object({
+const getHealthScanParamsSchema = lazySchema(() => z.object({
   path: z.object({
     scanId: z.string(),
   }),
@@ -38,15 +38,15 @@ const getHealthScanParamsSchema = z.object({
       allSpaces: BooleanFromString.optional(),
     })
     .optional(),
-});
+}));
 
-const listHealthScanParamsSchema = z.object({
+const listHealthScanParamsSchema = lazySchema(() => z.object({
   query: z
     .object({
       size: z.coerce.number().optional(),
     })
     .optional(),
-});
+}));
 
 interface HealthScanSummary {
   scanId: string;
@@ -60,7 +60,7 @@ interface ListHealthScanResponse {
   scans: HealthScanSummary[];
 }
 
-const healthScanResultResponseSchema = z.object({
+const healthScanResultResponseSchema = lazySchema(() => z.object({
   '@timestamp': z.string(),
   scanId: z.string(),
   spaceId: z.string(),
@@ -71,7 +71,7 @@ const healthScanResultResponseSchema = z.object({
     enabled: z.boolean(),
   }),
   health: sloHealthSchema,
-});
+}));
 
 type HealthScanResultResponse = z.input<typeof healthScanResultResponseSchema>;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 // ============================================================================
 // Panel Grid Schema - ideally we should import the schema from dashboard schemas, but they use config-schema library
@@ -16,12 +16,12 @@ import { z } from '@kbn/zod/v4';
  * Grid dimensions (in dashboard grid units) for layout.
  * Dashboard grid is 48 columns wide; height is in same units.
  */
-export const panelGridSchema = z.object({
+export const panelGridSchema = lazySchema(() => z.object({
   x: z.number(),
   y: z.number(),
   w: z.number().int().min(1).max(48),
   h: z.number().int().min(1),
-});
+}));
 
 // ============================================================================
 // Panel Schema
@@ -31,12 +31,12 @@ export const panelGridSchema = z.object({
  * Zod schema for dashboard panel entries.
  * The `type` field contains the actual embeddable type.
  */
-const attachmentPanelSchema = z.object({
+const attachmentPanelSchema = lazySchema(() => z.object({
   type: z.string(),
   id: z.string(),
   config: z.record(z.string(), z.unknown()),
   grid: panelGridSchema,
-});
+}));
 
 export type AttachmentPanel = z.infer<typeof attachmentPanelSchema>;
 
@@ -44,17 +44,17 @@ export type AttachmentPanel = z.infer<typeof attachmentPanelSchema>;
 // Section Schema
 // ============================================================================
 
-export const sectionGridSchema = z.object({
+export const sectionGridSchema = lazySchema(() => z.object({
   y: z.number().int().min(0).describe('Section position in outer dashboard grid coordinates.'),
-});
+}));
 
-const dashboardSectionSchema = z.object({
+const dashboardSectionSchema = lazySchema(() => z.object({
   id: z.string(),
   title: z.string(),
   collapsed: z.boolean(),
   grid: sectionGridSchema,
   panels: z.array(attachmentPanelSchema),
-});
+}));
 
 export type DashboardSection = z.infer<typeof dashboardSectionSchema>;
 
@@ -68,16 +68,16 @@ export const isSection = (
 // Query Schema
 // ============================================================================
 
-const querySchema = z.object({
+const querySchema = lazySchema(() => z.object({
   expression: z.union([z.string(), z.record(z.string(), z.unknown())]),
   language: z.string(),
-});
+}));
 
 // ============================================================================
 // Time Range Schema
 // ============================================================================
 
-export const timeRangeSchema = z.object({
+export const timeRangeSchema = lazySchema(() => z.object({
   from: z
     .string()
     .max(100)
@@ -96,22 +96,22 @@ export const timeRangeSchema = z.object({
     .describe(
       'Optional mode hint. Use "relative" when from/to use date math expressions, "absolute" when using exact ISO 8601 timestamps.'
     ),
-});
+}));
 
 // ============================================================================
 // Refresh Interval Schema
 // ============================================================================
 
-const refreshIntervalSchema = z.object({
+const refreshIntervalSchema = lazySchema(() => z.object({
   pause: z.boolean(),
   value: z.number(),
-});
+}));
 
 // ============================================================================
 // Dashboard Options Schema
 // ============================================================================
 
-const optionsSchema = z.object({
+const optionsSchema = lazySchema(() => z.object({
   auto_apply_filters: z.boolean().optional(),
   hide_panel_titles: z.boolean().optional(),
   hide_panel_borders: z.boolean().optional(),
@@ -119,32 +119,32 @@ const optionsSchema = z.object({
   sync_colors: z.boolean().optional(),
   sync_tooltips: z.boolean().optional(),
   sync_cursor: z.boolean().optional(),
-});
+}));
 
 // ============================================================================
 // Access Control Schema
 // ============================================================================
 
-const accessControlSchema = z
+const accessControlSchema = lazySchema(() => z
   .object({
     access_mode: z.union([z.literal('write_restricted'), z.literal('default')]).optional(),
   })
-  .optional();
+  .optional());
 
 // ============================================================================
 // Filter Schema
 // ============================================================================
 
 // Filters have complex union types that are difficult to express precisely in Zod.
-const filterSchema = z.record(z.string(), z.unknown());
+const filterSchema = lazySchema(() => z.record(z.string(), z.unknown()));
 
 // ============================================================================
 // Pinned Panels (Controls) Schema
 // ============================================================================
 
 // Controls have complex union types. We use a permissive schema here.
-const pinnedControlSchema = z.record(z.string(), z.unknown());
-const pinnedPanelsSchema = z.array(pinnedControlSchema);
+const pinnedControlSchema = lazySchema(() => z.record(z.string(), z.unknown()));
+const pinnedPanelsSchema = lazySchema(() => z.array(pinnedControlSchema));
 
 // ============================================================================
 // Dashboard Attachment Data Schema (matches DashboardState)
@@ -154,7 +154,7 @@ const pinnedPanelsSchema = z.array(pinnedControlSchema);
  * Zod schema for dashboard attachment data.
  * This schema matches the structure of DashboardState from @kbn/dashboard-plugin.
  */
-export const dashboardAttachmentDataSchema = z.object({
+export const dashboardAttachmentDataSchema = lazySchema(() => z.object({
   title: z.string(),
   description: z.string().optional(),
   panels: z.array(z.union([attachmentPanelSchema, dashboardSectionSchema])),
@@ -168,6 +168,6 @@ export const dashboardAttachmentDataSchema = z.object({
   access_control: accessControlSchema.optional(),
   project_routing: z.string().optional(),
   esql_approximation: z.boolean().optional(),
-});
+}));
 
 export type DashboardAttachmentData = z.infer<typeof dashboardAttachmentDataSchema>;

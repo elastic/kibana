@@ -35,7 +35,7 @@ import {
 import { groupIsNotCollapsed } from '../../utils';
 
 const treemapSharedConfigShape = {
-  legend: z
+  legend: lazySchema(() => z
     .object({
       nested: legendNestedSchema,
       truncate_after_lines: legendTruncateAfterLinesSchema,
@@ -49,7 +49,7 @@ const treemapSharedConfigShape = {
       id: 'visTreemapLegend',
       title: 'Legend',
       description: 'Configuration for the treemap chart legend appearance and behavior',
-    }),
+    })),
 };
 
 const treemapStylingSchema = lazySchema(() =>
@@ -79,7 +79,7 @@ const partitionConfigPrimaryMetricOptionsShape = {
   /**
    * Color configuration
    */
-  color: z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional(),
+  color: lazySchema(() => z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional()),
 };
 
 const partitionConfigBreakdownByOptionsShape = {

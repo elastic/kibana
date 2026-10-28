@@ -8,18 +8,18 @@
 import { i18n } from '@kbn/i18n';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { proposalDecisionSchema, proposalStatusSchema } from '../proposal';
 
 export const GetLatestRevisionStepId = 'proposals.getLatestRevision' as const;
 
-export const getLatestRevisionStepInputSchema = z.object({
+export const getLatestRevisionStepInputSchema = lazySchema(() => z.object({
   proposalId: z
     .string()
     .describe('Any proposal in the revision chain to resolve — not necessarily the root.'),
-});
+}));
 
-export const getLatestRevisionStepOutputSchema = z.object({
+export const getLatestRevisionStepOutputSchema = lazySchema(() => z.object({
   proposalId: z.string().describe('The live revision — the input id if it was already live.'),
   revision: z.number().int().min(1),
   status: proposalStatusSchema,
@@ -30,7 +30,7 @@ export const getLatestRevisionStepOutputSchema = z.object({
     .describe(
       'The live revision action input. Resolve this before executing the action: a revision may have corrected the parameters, and the trigger input a caller captured at creation is then stale.'
     ),
-});
+}));
 
 /**
  * Resolves the live revision of a chain. The gate workflow's loop carries a

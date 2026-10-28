@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const staticLookupFormatSchema = z
+export const staticLookupFormatSchema = lazySchema(() => z
   .object({
     type: z.literal('static_lookup'),
     params: z.object({
@@ -30,4 +30,4 @@ export const staticLookupFormatSchema = z
     title: 'Static lookup field format',
     description:
       'Formats a field into a static value based on the lookup entries or the unknown key value.',
-  });
+  }));

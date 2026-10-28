@@ -9,12 +9,12 @@ import type { ToolRunnableConfig } from '@langchain/core/tools';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { Command } from '@langchain/langgraph';
 import { ToolMessage } from '@langchain/core/messages';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
 import { MAX_STRING_LENGTH } from '../../../common';
 import { FIELD_MAPPING_TYPES } from '../state';
 
-const fieldMappingSchema = z.object({
+const fieldMappingSchema = lazySchema(() => z.object({
   name: z
     .string()
     .max(MAX_STRING_LENGTH.body)
@@ -24,7 +24,7 @@ const fieldMappingSchema = z.object({
     .describe(
       'Elasticsearch field type: "keyword" for strings, "long" for numbers, "ip" for IP addresses, "date" for date values'
     ),
-});
+}));
 
 export const submitReviewTool = (): DynamicStructuredTool => {
   const schema = z.object({

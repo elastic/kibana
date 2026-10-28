@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { BooleanFromString } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { sloHealthSchema } from '../../schema/health';
 import { sloDefinitionSchema } from '../../schema/slo';
 
-const findSloDefinitionsParamsSchema = z.object({
+const findSloDefinitionsParamsSchema = lazySchema(() => z.object({
   query: z
     .object({
       search: z.string().optional(),
@@ -21,18 +21,18 @@ const findSloDefinitionsParamsSchema = z.object({
       perPage: z.string().optional(),
     })
     .optional(),
-});
+}));
 
 const sloDefinitionResponseSchema = sloDefinitionSchema.extend({
   health: sloHealthSchema.optional(),
 });
 
-const findSloDefinitionsResponseSchema = z.object({
+const findSloDefinitionsResponseSchema = lazySchema(() => z.object({
   page: z.number(),
   perPage: z.number(),
   total: z.number(),
   results: z.array(sloDefinitionResponseSchema),
-});
+}));
 
 type FindSLODefinitionsParams = NonNullable<
   z.output<typeof findSloDefinitionsParamsSchema.shape.query>

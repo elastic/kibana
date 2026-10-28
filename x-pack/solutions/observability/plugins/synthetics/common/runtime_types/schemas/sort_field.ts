@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { ConfigKey } from '../../constants/monitor_management';
 
-export const MonitorSortFieldSchema = z
+export const MonitorSortFieldSchema = lazySchema(() => z
   .enum([
     'enabled',
     'status',
@@ -26,12 +26,12 @@ export const MonitorSortFieldSchema = z
     `${ConfigKey.SCHEDULE}.keyword` as 'schedule.keyword',
     ConfigKey.JOURNEY_ID,
   ])
-  .optional();
+  .optional());
 
 export type MonitorListSortField = z.infer<typeof MonitorSortFieldSchema>;
 
 /** Sort fields the overview status route actually applies in `sortConfigs`. */
-export const OverviewStatusSortFieldSchema = z
+export const OverviewStatusSortFieldSchema = lazySchema(() => z
   .enum([
     'status',
     'updated_at',
@@ -40,4 +40,4 @@ export const OverviewStatusSortFieldSchema = z
     `${ConfigKey.NAME}.keyword` as 'name.keyword',
     `${ConfigKey.MONITOR_TYPE}.keyword` as 'type.keyword',
   ])
-  .optional();
+  .optional());

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   asCodeMetaSchema,
   asCodePaginationResponseMetaSchema,
@@ -31,12 +31,12 @@ export const discoverSessionApiResponseSchema = z
   .strict();
 
 /* Shared context for warnings produced while transforming a Discover session tab. */
-const discoverSessionWarningBaseSchema = z.object({
+const discoverSessionWarningBaseSchema = lazySchema(() => z.object({
   message: z.string().meta({ description: 'The reason the content was dropped.' }),
   tab_id: z.string().meta({ description: 'The ID of the tab that contains the dropped content.' }),
-});
+}));
 
-const discoverSessionDroppedItemWarningSchema = discoverSessionWarningBaseSchema
+const discoverSessionDroppedItemWarningSchema = lazySchema(() => discoverSessionWarningBaseSchema
   .extend({
     type: z.literal('dropped_item'),
     key: z
@@ -59,9 +59,9 @@ const discoverSessionDroppedItemWarningSchema = discoverSessionWarningBaseSchema
     title: 'Dropped item',
     description:
       'An item in a tab that was excluded from the response because it failed validation.',
-  });
+  }));
 
-const discoverSessionDroppedPropertyWarningSchema = discoverSessionWarningBaseSchema
+const discoverSessionDroppedPropertyWarningSchema = lazySchema(() => discoverSessionWarningBaseSchema
   .extend({
     type: z.literal('dropped_property'),
     key: z.string().meta({ description: 'The name of the property that was dropped.' }),
@@ -75,21 +75,21 @@ const discoverSessionDroppedPropertyWarningSchema = discoverSessionWarningBaseSc
     id: 'kbn-discover-session-dropped-property-warning',
     title: 'Dropped property',
     description: 'A tab property excluded from the response due to malformed data.',
-  });
+  }));
 
 /* Allows GET responses to preserve valid session data while reporting what was dropped. */
-export const discoverSessionWarningsSchema = z
+export const discoverSessionWarningsSchema = lazySchema(() => z
   .array(
     z.union([discoverSessionDroppedItemWarningSchema, discoverSessionDroppedPropertyWarningSchema])
   )
   .meta({
     description:
       'Warnings about content omitted from the API response due to conversion or validation errors. The saved session is not modified.',
-  });
+  }));
 
-export const discoverSessionGetResponseSchema = discoverSessionApiResponseSchema.extend({
+export const discoverSessionGetResponseSchema = lazySchema(() => discoverSessionApiResponseSchema.extend({
   warnings: discoverSessionWarningsSchema.optional(),
-});
+}));
 
 export const discoverSessionSanitizeResponseSchema = z
   .object({
@@ -110,28 +110,28 @@ export const discoverSessionSearchRequestParamsSchema = getAsCodeSearchRequestSc
     arrayDescription: 'Tag IDs to exclude.',
   },
 }).extend({
-  tag_names: z
+  tag_names: lazySchema(() => z
     .union([z.string(), z.array(z.string()).max(100)])
     .optional()
     .meta({
       description:
         'A tag name to include. Accepts a single tag name or multiple tag names. When multiple are specified, Discover sessions matching any of the tag names are included. If the same name is shared by multiple tags, sessions matching any of those tags are included.',
-    }),
-  excluded_tag_names: z
+    })),
+  excluded_tag_names: lazySchema(() => z
     .union([z.string(), z.array(z.string()).max(100)])
     .optional()
     .meta({
       description:
         'A tag name to exclude. Accepts a single tag name or multiple tag names. When multiple are specified, Discover sessions matching any of the tag names are excluded. If the same name is shared by multiple tags, sessions matching any of those tags are excluded.',
-    }),
-  query: z
+    })),
+  query: lazySchema(() => z
     .string()
     .max(MAX_SEARCH_QUERY_LENGTH)
     .meta({
       description:
         'Full-text search (`simple_query_string`) over `title` and `description`. All terms must match.',
     })
-    .optional(),
+    .optional()),
 });
 
 const discoverSessionSearchItemSchema = z

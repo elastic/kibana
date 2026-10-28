@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
@@ -16,13 +16,13 @@ export const getInvestigationAvailabilityRoute = createNightshiftInvestigationsS
     summary: 'Get investigation availability',
   },
   security: { authz: { requiredPrivileges: ['agentBuilder:write'] } },
-  params: z.object({
+  params: lazySchema(() => z.object({
     query: z
       .object({
         connector_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
       })
       .optional(),
-  }),
+  })),
   handler: async ({ request, params, getInvestigationsClient }) => ({
     available: await getInvestigationsClient(request).isAvailable(params?.query?.connector_id),
   }),

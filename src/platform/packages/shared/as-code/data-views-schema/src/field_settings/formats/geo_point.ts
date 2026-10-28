@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const geoPointFormatSchema = z
+export const geoPointFormatSchema = lazySchema(() => z
   .object({
     type: z.literal('geo_point'),
     params: z
@@ -53,4 +53,4 @@ export const geoPointFormatSchema = z
     id: 'kbn-field-format-geo_point',
     title: 'Geo point field format',
     description: 'Formats a field into a geo point value.',
-  });
+  }));

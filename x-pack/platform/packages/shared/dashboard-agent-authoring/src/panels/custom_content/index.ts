@@ -11,7 +11,7 @@ import {
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
 } from '@kbn/custom-content-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { PanelResolutionRequestBase } from '../../resolve_panel';
 import { defineRequestPanelKind } from '../panel_kind';
 
@@ -59,7 +59,7 @@ export type CustomContentPanelResolutionRequest =
   | CustomContentPanelEditRequest;
 
 /** Creates or edits a custom content panel. */
-const customContentPanelContentSchema = z.object({
+const customContentPanelContentSchema = lazySchema(() => z.object({
   source: z.literal('request'),
   renderer: z
     .literal('custom_content')
@@ -101,7 +101,7 @@ const customContentPanelContentSchema = z.object({
     .describe(
       'Exact index, alias, or data stream the data comes from. Pass it whenever known, together with hasData: true; on an existing panel, when regenerating or adding data.'
     ),
-});
+}));
 
 export const customContentPanelKind = defineRequestPanelKind({
   renderer: 'custom_content',

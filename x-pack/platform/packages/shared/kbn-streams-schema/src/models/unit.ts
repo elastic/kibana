@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { recursiveRecord } from '../shared/record_types';
 
 /**
  * Component / unit identifiers from streams-spec `defs.schema.yaml`.
  * Lowercase alphanumeric and hyphens, no leading or trailing hyphen.
  */
-export const streamsUnitIdentifierSchema = z
+export const streamsUnitIdentifierSchema = lazySchema(() => z
   .string()
   .min(1)
   .max(256)
-  .regex(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/);
+  .regex(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/));
 
-export const streamsSignalSchema = z.enum(['logs', 'metrics', 'traces', 'docs', 'profiles']);
+export const streamsSignalSchema = lazySchema(() => z.enum(['logs', 'metrics', 'traces', 'docs', 'profiles']));
 
-export const streamsSupportedTelemetrySchema = z
+export const streamsSupportedTelemetrySchema = lazySchema(() => z
   .array(streamsSignalSchema)
   .min(1)
   .max(5)
   .refine((signals) => new Set(signals).size === signals.length, {
     message: 'supported_telemetry must not contain duplicate signals',
-  });
+  }));
 
 /** Route `context` from streams-spec `defs.schema.yaml#/$defs/ottl_routing_context`. */
-export const streamsOttlRoutingContextSchema = z.enum([
+export const streamsOttlRoutingContextSchema = lazySchema(() => z.enum([
   'record',
   'resource',
   'log',
@@ -37,49 +37,49 @@ export const streamsOttlRoutingContextSchema = z.enum([
   'metric',
   'datapoint',
   'profile',
-]);
+]));
 
 const displayFieldsSchema = {
-  name: z.string().max(1024).optional(),
-  description: z.string().max(10000).optional(),
+  name: lazySchema(() => z.string().max(1024).optional()),
+  description: lazySchema(() => z.string().max(10000).optional()),
 };
 
-export const streamsConfigEntrySchema = z.strictObject({
+export const streamsConfigEntrySchema = lazySchema(() => z.strictObject({
   name: z.string().min(1).max(256),
   value: z.unknown(),
   telemetry: streamsSupportedTelemetrySchema.optional(),
-});
+}));
 
 const componentFields = {
   ...displayFieldsSchema,
   id: streamsUnitIdentifierSchema,
-  type: z.string().min(1).max(256),
+  type: lazySchema(() => z.string().min(1).max(256)),
   supported_telemetry: streamsSupportedTelemetrySchema,
-  config: z.array(streamsConfigEntrySchema).max(500).optional(),
+  config: lazySchema(() => z.array(streamsConfigEntrySchema).max(500).optional()),
 };
 
-const componentBaseSchema = z.strictObject(componentFields);
+const componentBaseSchema = lazySchema(() => z.strictObject(componentFields));
 
-const sourceSchema = z.strictObject({
+const sourceSchema = lazySchema(() => z.strictObject({
   ...componentFields,
   path_template: z.string().max(2048).optional(),
-});
+}));
 
-const identifierListSchema = z.array(streamsUnitIdentifierSchema).max(2000);
+const identifierListSchema = lazySchema(() => z.array(streamsUnitIdentifierSchema).max(2000));
 
 const pipelineRouteBase = {
-  when: z.string().max(10000).optional(),
-  processors: identifierListSchema.optional(),
-  action: z.enum(['copy', 'move']).optional(),
-  context: streamsOttlRoutingContextSchema.optional(),
-  telemetry: streamsSupportedTelemetrySchema.optional(),
+  when: lazySchema(() => z.string().max(10000).optional()),
+  processors: lazySchema(() => identifierListSchema.optional()),
+  action: lazySchema(() => z.enum(['copy', 'move']).optional()),
+  context: lazySchema(() => streamsOttlRoutingContextSchema.optional()),
+  telemetry: lazySchema(() => streamsSupportedTelemetrySchema.optional()),
 };
 
 /**
  * Pipeline route from streams-spec `pipeline.schema.yaml#/$defs/route`.
  * `destinations` and `pipelines` are mutually exclusive (`oneOf`).
  */
-export const streamsPipelineRouteSchema = z.union([
+export const streamsPipelineRouteSchema = lazySchema(() => z.union([
   z.strictObject({
     ...pipelineRouteBase,
     destinations: identifierListSchema.min(1),
@@ -88,16 +88,16 @@ export const streamsPipelineRouteSchema = z.union([
     ...pipelineRouteBase,
     pipelines: identifierListSchema.min(1),
   }),
-]);
+]));
 
 const pipelineConfigTelemetry = {
-  telemetry: streamsSupportedTelemetrySchema.optional(),
+  telemetry: lazySchema(() => streamsSupportedTelemetrySchema.optional()),
 };
 
 /**
  * Closed pipeline config names from streams-spec `pipeline.schema.yaml`.
  */
-export const streamsPipelineConfigEntrySchema = z.discriminatedUnion('name', [
+export const streamsPipelineConfigEntrySchema = lazySchema(() => z.discriminatedUnion('name', [
   z.strictObject({
     name: z.literal('sources'),
     value: identifierListSchema.min(1),
@@ -118,9 +118,9 @@ export const streamsPipelineConfigEntrySchema = z.discriminatedUnion('name', [
     value: identifierListSchema.min(1),
     ...pipelineConfigTelemetry,
   }),
-]);
+]));
 
-export const streamsPipelineSchema = z
+export const streamsPipelineSchema = lazySchema(() => z
   .strictObject({
     ...displayFieldsSchema,
     id: streamsUnitIdentifierSchema,
@@ -134,7 +134,7 @@ export const streamsPipelineSchema = z
       return !(hasDestinations && hasRoutes);
     },
     { message: 'destinations and routes are mutually exclusive', path: ['config'] }
-  );
+  ));
 
 /**
  * Authored Streams unit document from streams-spec `unit.schema.yaml`.
@@ -143,12 +143,12 @@ export const streamsPipelineSchema = z
  * requests with this schema. The config-distributor validates authored
  * documents (`transpiler.Compile()`).
  */
-export const streamsUnitSchema = z.strictObject({
+export const streamsUnitSchema = lazySchema(() => z.strictObject({
   sources: z.array(sourceSchema).max(2000).default([]),
   processors: z.array(componentBaseSchema).max(2000).optional(),
   destinations: z.array(componentBaseSchema).max(2000).default([]),
   pipelines: z.array(streamsPipelineSchema).max(2000).default([]),
-});
+}));
 
 export const streamsUnitUiMetadataSchema = recursiveRecord.default({});
 
@@ -158,18 +158,18 @@ export const streamsUnitUiMetadataSchema = recursiveRecord.default({});
  * in `unit`. Kibana encrypts this map at rest (ESO) and seals each value under
  * the project wrap key for the distributor `credentials[]` sidecar.
  */
-export const streamsUnitSecretsSchema = z
+export const streamsUnitSecretsSchema = lazySchema(() => z
   .record(streamsUnitIdentifierSchema, z.string().max(16384))
   .refine((secrets) => Object.keys(secrets).length <= 500, {
     message: 'At most 500 unit secrets are allowed',
-  });
+  }));
 
-export const streamsUnitResponseSchema = z.object({
+export const streamsUnitResponseSchema = lazySchema(() => z.object({
   unit: streamsUnitSchema,
   ui_metadata: streamsUnitUiMetadataSchema,
-});
+}));
 
-export const streamsUnitUpsertRequestSchema = z.object({
+export const streamsUnitUpsertRequestSchema = lazySchema(() => z.object({
   unit: streamsUnitSchema,
   ui_metadata: streamsUnitUiMetadataSchema,
   // Omitted on PUT means keep the stored secrets. Provided keys merge with the
@@ -178,7 +178,7 @@ export const streamsUnitUpsertRequestSchema = z.object({
   // and every reference needs a provided or stored secret (400 otherwise).
   // Stored secrets no config value references any more are dropped.
   secrets: streamsUnitSecretsSchema.optional(),
-});
+}));
 
 /**
  * The most components one stats request can name. The UI shows at most 50 rows of a kind at
@@ -190,12 +190,12 @@ export const MAX_STREAMS_UNIT_STATS_COMPONENTS = 100;
  * Stats request. A component ref is a discriminated union on `kind`. Adding a kind is
  * adding a member.
  */
-export const streamsUnitStatsComponentRefSchema = z.discriminatedUnion('kind', [
+export const streamsUnitStatsComponentRefSchema = lazySchema(() => z.discriminatedUnion('kind', [
   z.strictObject({ kind: z.literal('destination'), id: streamsUnitIdentifierSchema }),
   z.strictObject({ kind: z.literal('processor'), id: streamsUnitIdentifierSchema }),
-]);
+]));
 
-export const streamsUnitStatsFilterSchema = z.strictObject({
+export const streamsUnitStatsFilterSchema = lazySchema(() => z.strictObject({
   /**
    * Omit to read every config hash in the window, with no hash filter. The distributor
    * generates a 64-character lowercase SHA-256 hex and only requires a non-empty value,
@@ -213,9 +213,9 @@ export const streamsUnitStatsFilterSchema = z.strictObject({
       message: 'time_range.start must be before time_range.end',
     })
     .optional(),
-});
+}));
 
-export const streamsUnitStatsRequestSchema = z.strictObject({
+export const streamsUnitStatsRequestSchema = lazySchema(() => z.strictObject({
   filter: streamsUnitStatsFilterSchema.optional(),
   /**
    * Lists the unit components to receive stats on, destinations and processors together, with
@@ -232,24 +232,24 @@ export const streamsUnitStatsRequestSchema = z.strictObject({
       message: 'components must not contain duplicates',
     })
     .optional(),
-});
+}));
 
-export const streamsUnitStatsErrorSchema = z.object({
+export const streamsUnitStatsErrorSchema = lazySchema(() => z.object({
   code: z.string(),
   reason: z.string(),
-});
+}));
 
 /** `value: null` means no data. `unit` is always set: a UCUM string, for example `s` or `{item}`. */
-const statsValueSchema = z.object({ value: z.number().nullable(), unit: z.string() });
+const statsValueSchema = lazySchema(() => z.object({ value: z.number().nullable(), unit: z.string() }));
 /** A rate is always per unit of time. `time_unit` is always set: the UCUM time unit, for example `s`. */
-const statsRateSchema = statsValueSchema.extend({ time_unit: z.string() });
+const statsRateSchema = lazySchema(() => statsValueSchema.extend({ time_unit: z.string() }));
 
-export const streamsUnitStatsSeriesSchema = z.object({
+export const streamsUnitStatsSeriesSchema = lazySchema(() => z.object({
   bucket_ms: z.number(),
   points: z.array(z.object({ start: z.string(), value: z.number() })),
-});
+}));
 
-export const streamsUnitStatsDestinationResultSchema = z.object({
+export const streamsUnitStatsDestinationResultSchema = lazySchema(() => z.object({
   error: streamsUnitStatsErrorSchema.optional(),
   latency: z.object({ average: statsValueSchema }),
   events: z.object({
@@ -264,9 +264,9 @@ export const streamsUnitStatsDestinationResultSchema = z.object({
      */
     failed: z.object({ rate: statsRateSchema }),
   }),
-});
+}));
 
-export const streamsUnitStatsProcessorInstanceSchema = z.object({
+export const streamsUnitStatsProcessorInstanceSchema = lazySchema(() => z.object({
   pipeline_id: z.string(),
   /** The position of the route in the pipeline, null for the processors of the pipeline itself. */
   route_index: z.number().int().nonnegative().nullable(),
@@ -282,9 +282,9 @@ export const streamsUnitStatsProcessorInstanceSchema = z.object({
      */
     failed: z.object({ rate: statsRateSchema }),
   }),
-});
+}));
 
-export const streamsUnitStatsProcessorResultSchema = z.object({
+export const streamsUnitStatsProcessorResultSchema = lazySchema(() => z.object({
   error: streamsUnitStatsErrorSchema.optional(),
   /**
    * Where the processor ran in the window, one entry per pipeline and route. Empty when it has no
@@ -293,22 +293,22 @@ export const streamsUnitStatsProcessorResultSchema = z.object({
    * window: an instance is only reliable within one unit version.
    */
   instances: z.array(streamsUnitStatsProcessorInstanceSchema),
-});
+}));
 
-export const streamsUnitStatsMetaSchema = z.object({
+export const streamsUnitStatsMetaSchema = lazySchema(() => z.object({
   window: z.object({ start: z.string(), end: z.string() }),
   /** Config hash that the server filtered on. Absent when the request had no `config_hash`. */
   config_hash: z.string().optional(),
-});
+}));
 
-export const streamsUnitStatsResponseSchema = z.object({
+export const streamsUnitStatsResponseSchema = lazySchema(() => z.object({
   components: z.object({
     /** Component references by their IDs. */
     destinations: z.record(z.string(), streamsUnitStatsDestinationResultSchema),
     processors: z.record(z.string(), streamsUnitStatsProcessorResultSchema),
   }),
   meta: streamsUnitStatsMetaSchema,
-});
+}));
 
 export const collectUnitComponentIds = (unit: StreamsUnit.Configuration): string[] => {
   const components: ReadonlyArray<{ id?: unknown }> = [

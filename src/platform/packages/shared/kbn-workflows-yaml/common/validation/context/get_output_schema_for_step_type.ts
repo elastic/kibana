@@ -10,12 +10,12 @@
 import { getBuiltInStepDefinition, hitlAuditOutputFields } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isAtomic } from '@kbn/workflows/graph';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import type { WorkflowContextRegistry } from './registry';
 import { structuralStepOutputSchemas } from './structural_step_output_schemas';
 
-const waitForInputFallbackSchema: z.ZodSchema = z.record(z.string(), z.unknown());
+const waitForInputFallbackSchema: z.ZodSchema = lazySchema(() => z.record(z.string(), z.unknown()));
 
 export const getOutputSchemaForStepType = (
   registry: WorkflowContextRegistry,

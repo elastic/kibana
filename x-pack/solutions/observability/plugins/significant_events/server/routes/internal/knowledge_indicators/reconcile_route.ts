@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../create_server_route';
@@ -23,9 +23,9 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
-  }),
+  })),
   handler: async ({ params, request, getScopedClients, server, maintenanceService }) => {
     const { getKnowledgeIndicatorClient, licensing, sourcesClient } = await getScopedClients({
       request,

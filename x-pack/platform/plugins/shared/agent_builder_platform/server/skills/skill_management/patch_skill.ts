@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { skillCreateRequestSchema } from '@kbn/agent-builder-common';
@@ -14,16 +14,16 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { SKILL_ATTACHMENT_TYPE, type SkillAttachmentData } from '../../../common/attachments';
 import { validateToolIdsAgainstRegistry, formatInvalidToolIdsMessage } from './validate_tool_ids';
 
-const contentPatchSchema = z.object({
+const contentPatchSchema = lazySchema(() => z.object({
   find: z
     .string()
     .describe(
       'Exact substring to find in the current `content`. Must match exactly once; include enough surrounding context to make it unique.'
     ),
   replace: z.string().describe('Replacement text. Use an empty string to delete the matched text.'),
-});
+}));
 
-const referencedFilePatchSchema = z.object({
+const referencedFilePatchSchema = lazySchema(() => z.object({
   name: z.string().describe('`name` of an existing referenced file to patch.'),
   relativePath: z
     .string()
@@ -35,9 +35,9 @@ const referencedFilePatchSchema = z.object({
     .string()
     .describe('Exact substring to find in the file content (must match exactly once).'),
   replace: z.string().describe('Replacement text. Empty string deletes the matched text.'),
-});
+}));
 
-const referencedFileAddSchema = z.object({
+const referencedFileAddSchema = lazySchema(() => z.object({
   name: z
     .string()
     .describe(
@@ -47,17 +47,17 @@ const referencedFileAddSchema = z.object({
     .string()
     .describe('Folder relative to the skill, must start with `./`. Avoid `../`.'),
   content: z.string().describe('Markdown content for the new file.'),
-});
+}));
 
-const referencedFileRemoveSchema = z.object({
+const referencedFileRemoveSchema = lazySchema(() => z.object({
   name: z.string().describe('`name` of the referenced file to remove.'),
   relativePath: z
     .string()
     .optional()
     .describe('Optional `relativePath` to disambiguate when names collide.'),
-});
+}));
 
-const patchSkillSchema = z.object({
+const patchSkillSchema = lazySchema(() => z.object({
   attachment_id: z
     .string()
     .describe('Attachment id of the existing `skill` (returned by `propose_skill`).'),
@@ -87,7 +87,7 @@ const patchSkillSchema = z.object({
     .array(referencedFileRemoveSchema)
     .optional()
     .describe('Referenced files to remove (matched by `name`, optionally `relativePath`).'),
-});
+}));
 
 export type PatchSkillInput = z.infer<typeof patchSkillSchema>;
 

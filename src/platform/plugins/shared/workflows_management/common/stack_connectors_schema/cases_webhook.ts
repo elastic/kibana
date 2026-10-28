@@ -12,10 +12,10 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 // Cases Webhook connector parameter schemas for different sub-actions
-export const CasesWebhookCreateCaseParamsSchema = z.object({
+export const CasesWebhookCreateCaseParamsSchema = lazySchema(() => z.object({
   incident: z.object({
     title: z.string(),
     description: z.string(),
@@ -24,9 +24,9 @@ export const CasesWebhookCreateCaseParamsSchema = z.object({
     urgency: z.string().optional(),
     impact: z.string().optional(),
   }),
-});
+}));
 
-export const CasesWebhookUpdateCaseParamsSchema = z.object({
+export const CasesWebhookUpdateCaseParamsSchema = lazySchema(() => z.object({
   incident: z.object({
     title: z.string().optional(),
     description: z.string().optional(),
@@ -36,20 +36,20 @@ export const CasesWebhookUpdateCaseParamsSchema = z.object({
     impact: z.string().optional(),
   }),
   incidentId: z.string(),
-});
+}));
 
-export const CasesWebhookCreateCommentParamsSchema = z.object({
+export const CasesWebhookCreateCommentParamsSchema = lazySchema(() => z.object({
   incidentId: z.string(),
   comment: z.object({
     comment: z.string(),
     commentId: z.string(),
   }),
-});
+}));
 
 // Cases Webhook connector response schema
-export const CasesWebhookResponseSchema = z.object({
+export const CasesWebhookResponseSchema = lazySchema(() => z.object({
   id: z.string(),
   title: z.string(),
   url: z.string(),
   pushedDate: z.string(),
-});
+}));

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
@@ -15,7 +15,7 @@ import { VerifyKiOutputSchema, kiVerifiersSchema } from './verify_ki_step';
 
 export const CREATE_KI_STEP_ID = 'context-engine.createKi' as const;
 
-export const createKiInputSchema = z.object({
+export const createKiInputSchema = lazySchema(() => z.object({
   ai_index_id: aiIndexIdSchema,
   ki_id: kiIdSchema
     .optional()
@@ -34,14 +34,14 @@ export const createKiInputSchema = z.object({
     .describe(
       'Wait for the write to become searchable before the step completes (default false). Set when a later step in the same run updates or deletes this KI.'
     ),
-});
+}));
 
-export const createKiOutputSchema = z.object({
+export const createKiOutputSchema = lazySchema(() => z.object({
   id: z.string().describe('The id of the created knowledge indicator'),
   verification: VerifyKiOutputSchema.optional().describe(
     'Verifier results; present when `verifiers` was given'
   ),
-});
+}));
 
 export type CreateKiOutput = z.infer<typeof createKiOutputSchema>;
 

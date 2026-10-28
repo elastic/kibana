@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Validation } from './validation/validation';
 import { validation } from './validation/validation';
 import type { BaseStream } from './base';
@@ -106,7 +106,7 @@ Object.assign(Streams, {
  * a `discriminator` extension so code generators can produce properly typed
  * sealed-class / tagged-union structs.
  */
-export const streamDefinitionSchema = z
+export const streamDefinitionSchema = lazySchema(() => z
   .union([
     nWiredStream.Definition.right,
     nClassicStream.Definition.right,
@@ -124,4 +124,4 @@ export const streamDefinitionSchema = z
         },
       },
     },
-  });
+  }));

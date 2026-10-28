@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { GraphNodeSchema } from './base';
 import { SwitchStepSchema } from '../../../spec/schema';
 
@@ -18,44 +18,44 @@ export const EnterSwitchNodeConfigurationSchema = SwitchStepSchema.omit({
 export type EnterSwitchNodeConfiguration = z.infer<typeof EnterSwitchNodeConfigurationSchema>;
 
 export const EnterSwitchNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('enter-switch'),
-  exitNodeId: z.string(),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('enter-switch')),
+  exitNodeId: lazySchema(() => z.string()),
   configuration: EnterSwitchNodeConfigurationSchema,
 });
 export type EnterSwitchNode = z.infer<typeof EnterSwitchNodeSchema>;
 
 export const EnterCaseBranchNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('enter-case-branch'),
-  match: z.union([z.string(), z.number(), z.boolean()]),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('enter-case-branch')),
+  match: lazySchema(() => z.union([z.string(), z.number(), z.boolean()])),
   index: z.number().int().nonnegative(),
 });
 export type EnterCaseBranchNode = z.infer<typeof EnterCaseBranchNodeSchema>;
 
 export const ExitCaseBranchNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('exit-case-branch'),
-  startNodeId: z.string(),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('exit-case-branch')),
+  startNodeId: lazySchema(() => z.string()),
 });
 export type ExitCaseBranchNode = z.infer<typeof ExitCaseBranchNodeSchema>;
 
 export const EnterDefaultBranchNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('enter-default-branch'),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('enter-default-branch')),
 });
 export type EnterDefaultBranchNode = z.infer<typeof EnterDefaultBranchNodeSchema>;
 
 export const ExitDefaultBranchNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('exit-default-branch'),
-  startNodeId: z.string(),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('exit-default-branch')),
+  startNodeId: lazySchema(() => z.string()),
 });
 export type ExitDefaultBranchNode = z.infer<typeof ExitDefaultBranchNodeSchema>;
 
 export const ExitSwitchNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('exit-switch'),
-  startNodeId: z.string(),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('exit-switch')),
+  startNodeId: lazySchema(() => z.string()),
 });
 export type ExitSwitchNode = z.infer<typeof ExitSwitchNodeSchema>;

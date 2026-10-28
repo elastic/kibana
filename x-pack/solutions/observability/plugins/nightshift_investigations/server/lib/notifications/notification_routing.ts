@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { types } from '@kbn/storage-adapter';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { defineInvestigationAttachment } from '@kbn/agentic-investigations-plugin/server';
 import { investigationNotificationDestinationSchema } from '../../../common';
 
 export const NOTIFICATION_ROUTING_ATTACHMENT_TYPE = 'nightshift.notification_routing';
-export const notificationPhaseSchema = z.enum(['started', 'completed', 'failed']);
-const identifier = z.string().min(1).max(500);
-const messageId = z.string().min(1).max(100);
-const timestamp = z.string().min(1).max(64);
+export const notificationPhaseSchema = lazySchema(() => z.enum(['started', 'completed', 'failed']));
+const identifier = lazySchema(() => z.string().min(1).max(500));
+const messageId = lazySchema(() => z.string().min(1).max(100));
+const timestamp = lazySchema(() => z.string().min(1).max(64));
 
-export const notificationAttemptSchema = z.strictObject({
+export const notificationAttemptSchema = lazySchema(() => z.strictObject({
   execution_id: identifier,
   destination_id: identifier,
   phase: notificationPhaseSchema,
@@ -29,9 +29,9 @@ export const notificationAttemptSchema = z.strictObject({
   external_conversation_id: identifier.optional(),
   sent_at: timestamp.optional(),
   error: z.string().max(MAX_TEXT_LENGTH).optional(),
-});
+}));
 
-export const notificationRoutingSchema = z.strictObject({
+export const notificationRoutingSchema = lazySchema(() => z.strictObject({
   id: identifier,
   spaceId: identifier,
   conversationId: identifier,
@@ -59,7 +59,7 @@ export const notificationRoutingSchema = z.strictObject({
     })
   ),
   attempts: z.array(notificationAttemptSchema),
-});
+}));
 
 export type NotificationPhase = z.infer<typeof notificationPhaseSchema>;
 export type NotificationAttempt = z.infer<typeof notificationAttemptSchema>;

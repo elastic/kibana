@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { StepCategory } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
@@ -21,17 +21,17 @@ export const SetVarStepTypeId = 'example.setVariable';
  * Input schema for the setvar step.
  * Uses variables structure with key->value pairs.
  */
-export const InputSchema = z.object({
+export const InputSchema = lazySchema(() => z.object({
   variables: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
-});
+}));
 
 /**
  * Output schema for the setvar step.
  * Uses variables structure with key->value pairs.
  */
-export const OutputSchema = z.object({
+export const OutputSchema = lazySchema(() => z.object({
   variables: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
-});
+}));
 
 export type SetVarStepInputSchema = typeof InputSchema;
 export type SetVarStepOutputSchema = typeof OutputSchema;

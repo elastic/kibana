@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
@@ -22,7 +22,7 @@ const DEFAULT_SAMPLE_LOOKBACK_DAYS = 7;
 const SAMPLE_HIT_COUNT = 3;
 const SAMPLE_SOURCE_FIELD_LIMIT = 20;
 
-const pciFieldMapperSchema = z.object({
+const pciFieldMapperSchema = lazySchema(() => z.object({
   indexPattern: pciIndexPatternSchema.describe(
     'Index pattern to inspect for field mapping (e.g. "logs-custom-myapp*").'
   ),
@@ -38,7 +38,7 @@ const pciFieldMapperSchema = z.object({
       'Optional ISO-8601 time range for the sample hit lookup. Defaults to the last 7 days. ' +
         'Keeping a narrow window avoids scanning frozen/cold data when looking for representative rows.'
     ),
-});
+}));
 
 export const PCI_FIELD_MAPPER_TOOL_ID = securityTool('pci_field_mapper');
 

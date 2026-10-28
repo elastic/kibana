@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-const DocumentSchema = z.object({
+const DocumentSchema = lazySchema(() => z.object({
   id: z.string().max(512),
   index: z.string().max(256),
   attached_at: z.string().max(50),
-});
+}));
 
-export const DocumentResponseSchema = z.array(DocumentSchema);
+export const DocumentResponseSchema = lazySchema(() => z.array(DocumentSchema));
 
 export type DocumentResponse = z.infer<typeof DocumentResponseSchema>;

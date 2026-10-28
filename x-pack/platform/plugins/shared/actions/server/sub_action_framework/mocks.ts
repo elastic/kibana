@@ -6,18 +6,18 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosError } from 'axios';
 import type { ConnectorUsageCollector } from '../usage';
 import { SubActionConnector } from './sub_action_connector';
 import { CaseConnector } from './case';
 import type { ExternalServiceIncidentResponse, ServiceParams } from './types';
 
-export const TestConfigSchema = z.object({ url: z.string() });
-export const TestSecretsSchema = z.object({
+export const TestConfigSchema = lazySchema(() => z.object({ url: z.string() }));
+export const TestSecretsSchema = lazySchema(() => z.object({
   username: z.string(),
   password: z.string(),
-});
+}));
 export type TestConfig = z.infer<typeof TestConfigSchema>;
 export type TestSecrets = z.infer<typeof TestSecretsSchema>;
 

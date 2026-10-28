@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Condition } from '@kbn/streamlang';
 import { BINARY_OPERATORS } from '@kbn/streamlang';
 
@@ -19,23 +19,23 @@ const COND_DEPTH = 5;
 
 // Comparison operands (eq, contains, startsWith, range members, …) can be arbitrary
 // document values and need a document-string-sized bound, not an identifier-sized one.
-const boundedStringOrNumberOrBoolean = z.union([
+const boundedStringOrNumberOrBoolean = lazySchema(() => z.union([
   z.string().max(COND_VAL_MAX),
   z.number(),
   z.boolean(),
-]);
+]));
 
-const boundedRangeCondition = z.strictObject({
+const boundedRangeCondition = lazySchema(() => z.strictObject({
   gt: boundedStringOrNumberOrBoolean.optional(),
   gte: boundedStringOrNumberOrBoolean.optional(),
   lt: boundedStringOrNumberOrBoolean.optional(),
   lte: boundedStringOrNumberOrBoolean.optional(),
-});
+}));
 
 // Use strictObject so unknown keys are rejected rather than silently stripped.
 // The binary arm mirrors shorthandBinaryFilterConditionSchema's .refine() so that
 // { field: "x" } (no operator) is not accepted as binary — it must fall through to unary.
-const boundedFilterCondition = z.union([
+const boundedFilterCondition = lazySchema(() => z.union([
   z
     .strictObject({
       field: z.string().nonempty().max(COND_FIELD_MAX),
@@ -58,10 +58,10 @@ const boundedFilterCondition = z.union([
     field: z.string().nonempty().max(COND_FIELD_MAX),
     exists: z.boolean().optional(),
   }),
-]);
+]));
 
-const boundedAlways = z.strictObject({ always: z.strictObject({}) });
-const boundedNever = z.strictObject({ never: z.strictObject({}) });
+const boundedAlways = lazySchema(() => z.strictObject({ always: z.strictObject({}) }));
+const boundedNever = lazySchema(() => z.strictObject({ never: z.strictObject({}) }));
 
 function buildBoundedCondition(depth: number): z.ZodType<Condition> {
   if (depth === 0) {

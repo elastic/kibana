@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -51,7 +51,7 @@ const computeProgressPct = (
   return Math.max(0, Math.min(100, Math.round(raw * 100)));
 };
 
-const schema = z.object({
+const schema = lazySchema(() => z.object({
   operation: z.enum([
     'open_job',
     'close_job',
@@ -103,7 +103,7 @@ const schema = z.object({
     .describe(
       'For await_batch_completion: epoch ms the datafeed was started to — used to compute progress_pct.'
     ),
-});
+}));
 
 export const createAdManageJobStateTool = (
   resolveMlCapabilities: ResolveMlCapabilities,

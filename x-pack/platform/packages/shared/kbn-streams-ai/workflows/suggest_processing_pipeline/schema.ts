@@ -6,7 +6,7 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   conditionSchema,
   filterConditionSchema,
@@ -29,23 +29,23 @@ import {
 } from '@kbn/streamlang';
 import { NonEmptyString } from '@kbn/zod-helpers/v4';
 
-const postParseProcessorUnionSchema = z.union([
+const postParseProcessorUnionSchema = lazySchema(() => z.union([
   dateProcessorSchema,
   removeProcessorSchema,
   renameProcessorSchema,
   convertProcessorSchema,
-]);
+]));
 
-const fullProcessorUnionSchema = z.union([
+const fullProcessorUnionSchema = lazySchema(() => z.union([
   grokProcessorSchema,
   dissectProcessorSchema,
   dateProcessorSchema,
   removeProcessorSchema,
   renameProcessorSchema,
   convertProcessorSchema,
-]);
+]));
 
-export const pipelineDefinitionSchema = z
+export const pipelineDefinitionSchema = lazySchema(() => z
   .object({
     steps: z
       .array(
@@ -58,13 +58,13 @@ export const pipelineDefinitionSchema = z
         'Ordered list of processors that transform documents. Processors execute sequentially'
       ),
   })
-  .describe('The pipeline definition object containing processing steps');
+  .describe('The pipeline definition object containing processing steps'));
 
 /**
  * When a system-managed grok/dissect step runs first, the agent only proposes
  * post-parse processors; grok/dissect are excluded to avoid duplicate parsing.
  */
-export const postParsePipelineDefinitionSchema = z
+export const postParsePipelineDefinitionSchema = lazySchema(() => z
   .object({
     steps: z
       .array(postParseProcessorUnionSchema)
@@ -72,7 +72,7 @@ export const postParsePipelineDefinitionSchema = z
         'Ordered list of post-parse processors (no grok/dissect). Processors execute sequentially'
       ),
   })
-  .describe('Pipeline definition for post-parse-only suggested steps (no grok/dissect)');
+  .describe('Pipeline definition for post-parse-only suggested steps (no grok/dissect)'));
 
 export type PipelineDefinition = z.infer<typeof pipelineDefinitionSchema>;
 export type PostParsePipelineDefinition = z.infer<typeof postParsePipelineDefinitionSchema>;

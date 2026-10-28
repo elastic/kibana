@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { ConfigKey } from '../../../common/constants/monitor_management';
 import { AlertConfigsCodec } from '../../../common/runtime_types/schemas/alert_config';
@@ -53,7 +53,7 @@ const boundedJsonRuntime: z.ZodType<BoundedJson> = z.lazy(() =>
 
 // Validated by `boundedJsonRuntime`, but exposed as a free-form value so the
 // OpenAPI spec doesn't expand the recursive union at every use.
-const boundedJson = z
+const boundedJson = lazySchema(() => z
   .custom<BoundedJson>()
   .superRefine((value, ctx) => {
     const result = boundedJsonRuntime.safeParse(value);
@@ -64,7 +64,7 @@ const boundedJson = z
       ctx.addIssue({ code: 'custom', message, path });
     }
   })
-  .meta({ id: 'syntheticsJsonValue', description: 'Any JSON value.' });
+  .meta({ id: 'syntheticsJsonValue', description: 'Any JSON value.' }));
 
 const MONITOR_OAS_IDS: Record<MonitorTypeEnum, string> = {
   [MonitorTypeEnum.HTTP]: 'httpMonitorFields',
@@ -74,20 +74,20 @@ const MONITOR_OAS_IDS: Record<MonitorTypeEnum, string> = {
   [MonitorTypeEnum.API]: 'apiMonitorFields',
 };
 
-const locationInput = z.union([
+const locationInput = lazySchema(() => z.union([
   z.string().min(1).max(MAX_ROUTE_ID_LENGTH).meta({ title: 'Location ID' }),
   z
     .looseObject({
       id: z.string().min(1).max(MAX_ROUTE_ID_LENGTH),
     })
     .meta({ title: 'Location object' }),
-]);
+]));
 
-const locationsField = z
+const locationsField = lazySchema(() => z
   .array(locationInput)
-  .max(MAX_MONITOR_FANOUT_SIZE, { error: maxArraySizeMessage(MAX_MONITOR_FANOUT_SIZE) });
+  .max(MAX_MONITOR_FANOUT_SIZE, { error: maxArraySizeMessage(MAX_MONITOR_FANOUT_SIZE) }));
 
-const scheduleField = z.union([
+const scheduleField = lazySchema(() => z.union([
   safeNumber(z.number()).meta({ title: 'Minutes' }),
   z
     .strictObject({
@@ -95,26 +95,26 @@ const scheduleField = z.union([
       unit: ScheduleUnitCodec,
     })
     .meta({ title: 'Number and unit' }),
-]);
+]));
 
-const stringList = z.union([
+const stringList = lazySchema(() => z.union([
   z.string().max(MAX_ROUTE_STRING_LENGTH).meta({ title: 'Single value' }),
   z
     .array(z.string().max(MAX_ROUTE_STRING_LENGTH))
     .max(MAX_MONITOR_FANOUT_SIZE)
     .meta({ title: 'Multiple values' }),
-]);
+]));
 
-const stringMap = z.record(
+const stringMap = lazySchema(() => z.record(
   z.string().max(MAX_ROUTE_STRING_LENGTH),
   z.string().max(MAX_PARAM_VALUE_LENGTH)
-);
+));
 
-const optionalString = z.string().max(MAX_ROUTE_STRING_LENGTH).optional();
-const optionalIdList = z
+const optionalString = lazySchema(() => z.string().max(MAX_ROUTE_STRING_LENGTH).optional());
+const optionalIdList = lazySchema(() => z
   .array(z.string().max(MAX_ROUTE_ID_LENGTH))
   .max(MAX_MONITOR_FANOUT_SIZE)
-  .optional();
+  .optional());
 
 /** Nested public-API objects that flatten into dotted ConfigKeys. Not `url` (string alias). */
 const NESTED_PARENTS = [
@@ -145,53 +145,53 @@ const SHARED_REQUEST_KEYS = [
 const typedOverlays: Record<string, z.ZodType> = {
   [ConfigKey.NAME]: optionalString,
   [ConfigKey.NAMESPACE]: NameSpaceString.optional(),
-  [ConfigKey.ENABLED]: z.boolean().optional(),
-  [ConfigKey.LOCATIONS]: locationsField.optional(),
-  [ConfigKey.SCHEDULE]: scheduleField.optional(),
-  [ConfigKey.TAGS]: stringList.optional(),
-  [ConfigKey.PARAMS]: z
+  [ConfigKey.ENABLED]: lazySchema(() => z.boolean().optional()),
+  [ConfigKey.LOCATIONS]: lazySchema(() => locationsField.optional()),
+  [ConfigKey.SCHEDULE]: lazySchema(() => scheduleField.optional()),
+  [ConfigKey.TAGS]: lazySchema(() => stringList.optional()),
+  [ConfigKey.PARAMS]: lazySchema(() => z
     .union([
       z.string().max(MAX_PARAM_VALUE_LENGTH).meta({ title: 'JSON string' }),
       stringMap.meta({ title: 'Key-value object' }),
     ])
-    .optional(),
+    .optional()),
   [ConfigKey.ALERT_CONFIG]: AlertConfigsCodec.optional(),
-  [ConfigKey.LABELS]: stringMap.optional(),
+  [ConfigKey.LABELS]: lazySchema(() => stringMap.optional()),
   [ConfigKey.KIBANA_SPACES]: optionalIdList,
   [ConfigKey.MAINTENANCE_WINDOWS]: optionalIdList,
   [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorTypeCodec.optional(),
   [ConfigKey.MONITOR_SOURCE_TYPE]: SourceTypeCodec.optional(),
   [ConfigKey.MODE]: ModeCodec.optional(),
-  [ConfigKey.IPV4]: z.boolean().optional(),
-  [ConfigKey.IPV6]: z.boolean().optional(),
-  [ConfigKey.TIMEOUT]: z
+  [ConfigKey.IPV4]: lazySchema(() => z.boolean().optional()),
+  [ConfigKey.IPV6]: lazySchema(() => z.boolean().optional()),
+  [ConfigKey.TIMEOUT]: lazySchema(() => z
     .union([
       z.string().max(32).meta({ title: 'Seconds as string' }),
       z.number().meta({ title: 'Seconds' }),
       z.null(),
     ])
-    .optional(),
+    .optional()),
   [ConfigKey.MAX_ATTEMPTS]: safeNumber(z.number()).optional(),
-  [ConfigKey.MAX_REDIRECTS]: z
+  [ConfigKey.MAX_REDIRECTS]: lazySchema(() => z
     .union([
       z.string().max(32).meta({ title: 'Count as string' }),
       z.number().meta({ title: 'Count' }),
     ])
-    .optional(),
-  [ConfigKey.URLS]: z.union([z.string().max(MAX_ROUTE_STRING_LENGTH), z.null()]).optional(),
+    .optional()),
+  [ConfigKey.URLS]: lazySchema(() => z.union([z.string().max(MAX_ROUTE_STRING_LENGTH), z.null()]).optional()),
   [ConfigKey.HOSTS]: optionalString,
   url: optionalString,
   host: optionalString,
-  inline_script: z.string().max(MAX_PARAM_VALUE_LENGTH).optional(),
-  'source.inline': boundedJson.optional(),
-  private_locations: locationsField.optional(),
-  ssl: boundedJson.optional(),
-  check: boundedJson.optional(),
-  response: boundedJson.optional(),
-  source: boundedJson.optional(),
-  filter_journeys: boundedJson.optional(),
-  service: boundedJson.optional(),
-  retest_on_failure: z.boolean().optional(),
+  inline_script: lazySchema(() => z.string().max(MAX_PARAM_VALUE_LENGTH).optional()),
+  'source.inline': lazySchema(() => boundedJson.optional()),
+  private_locations: lazySchema(() => locationsField.optional()),
+  ssl: lazySchema(() => boundedJson.optional()),
+  check: lazySchema(() => boundedJson.optional()),
+  response: lazySchema(() => boundedJson.optional()),
+  source: lazySchema(() => boundedJson.optional()),
+  filter_journeys: lazySchema(() => boundedJson.optional()),
+  service: lazySchema(() => boundedJson.optional()),
+  retest_on_failure: lazySchema(() => z.boolean().optional()),
 };
 
 const SSL_DESCRIPTION =
@@ -303,7 +303,7 @@ const bodyForType = (type: MonitorTypeEnum) => {
     .meta({ id: MONITOR_OAS_IDS[type] });
 };
 
-export const createMonitorRequestBody = z
+export const createMonitorRequestBody = lazySchema(() => z
   .discriminatedUnion('type', [
     bodyForType(MonitorTypeEnum.HTTP),
     bodyForType(MonitorTypeEnum.TCP),
@@ -315,7 +315,7 @@ export const createMonitorRequestBody = z
     id: 'createMonitorRequest',
     description:
       'Create a synthetics monitor. Required and default fields vary by type (HTTP, TCP, ICMP, browser, or API).',
-  });
+  }));
 
 const editPatchShape = Object.fromEntries(
   [
@@ -330,7 +330,7 @@ const editPatchShape = Object.fromEntries(
  * `type` optional for `{ enabled: false }` patches; when present, only that
  * type's keys are allowed. Invalid `type` is an enum 400, not nested invalid_union.
  */
-export const editMonitorRequestBody = z
+export const editMonitorRequestBody = lazySchema(() => z
   .strictObject({
     type: MonitorTypeCodec.optional(),
     ...editPatchShape,
@@ -354,4 +354,4 @@ export const editMonitorRequestBody = z
     id: 'editMonitorRequest',
     description:
       'Partial monitor update. type is optional; when present, only fields for that monitor type are allowed.',
-  });
+  }));

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_GROUP_SIGNAL_IDS,
   MAX_IMPROVEMENTS_PER_RUN,
@@ -17,37 +17,37 @@ import type { ImprovementAction } from './improvement_actions';
 import { IMPROVEMENT_ACTIONS } from './improvement_actions';
 
 const proposedImprovementShape = {
-  title: z
+  title: lazySchema(() => z
     .string()
     .min(1)
     .max(MAX_IMPROVEMENT_TITLE_LENGTH)
-    .describe('A short, specific description of the change being proposed.'),
-  rationale: z
+    .describe('A short, specific description of the change being proposed.')),
+  rationale: lazySchema(() => z
     .string()
     .min(1)
     .max(MAX_IMPROVEMENT_RATIONALE_LENGTH)
     .describe(
       'Why the evidence supports this change. Reference what the signals showed, not what might be true in general.'
-    ),
-  confidence: z
+    )),
+  confidence: lazySchema(() => z
     .number()
     .min(0)
     .max(1)
     .optional()
-    .describe('How strongly the evidence supports this change, from 0 to 1.'),
-  signal_tags: z
+    .describe('How strongly the evidence supports this change, from 0 to 1.')),
+  signal_tags: lazySchema(() => z
     .array(z.string().min(1).max(256))
     .max(16)
     .optional()
-    .describe('Classifier tags of the group this was derived from, e.g. `coverage_gap`.'),
-  signal_ids: z
+    .describe('Classifier tags of the group this was derived from, e.g. `coverage_gap`.')),
+  signal_ids: lazySchema(() => z
     .array(z.string().min(1).max(1024))
     .min(1)
     .max(MAX_GROUP_SIGNAL_IDS)
     .describe(
       'Ids of the signals that evidence this change, taken from the groups you were given.'
-    ),
-  target: z
+    )),
+  target: lazySchema(() => z
     .object({
       ki_id: z.string().min(1).max(512).optional().describe('The Knowledge Indicator to change.'),
       workflow_id: z.string().min(1).max(1024).optional().describe('The automation to change.'),
@@ -67,8 +67,8 @@ const proposedImprovementShape = {
         ),
     })
     .optional()
-    .describe('What the action operates on. An `add_*` action carries `subject` instead of an id.'),
-  payload: z
+    .describe('What the action operates on. An `add_*` action carries `subject` instead of an id.')),
+  payload: lazySchema(() => z
     .object({
       ki: kiFieldsSchema.optional().describe('For `add_ki`: the document to create.'),
       ki_patch: kiPartialFieldsSchema.optional().describe('For `edit_ki`: the fields to change.'),
@@ -86,24 +86,24 @@ const proposedImprovementShape = {
         .describe('For `add_source` / `edit_source`: the source definition.'),
     })
     .optional()
-    .describe('The body of the change. Which field applies depends on the action.'),
+    .describe('The body of the change. Which field applies depends on the action.')),
 };
 
 /** The full taxonomy, for callers that do not narrow. */
-export const proposedImprovementSchema = z.object({
+export const proposedImprovementSchema = lazySchema(() => z.object({
   action: z.enum(IMPROVEMENT_ACTIONS).describe('The kind of change being proposed.'),
   ...proposedImprovementShape,
-});
+}));
 
 export type ProposedImprovement = z.infer<typeof proposedImprovementSchema>;
 
-const summaryField = z
+const summaryField = lazySchema(() => z
   .string()
   .max(MAX_IMPROVEMENT_RATIONALE_LENGTH)
   .optional()
   .describe(
     'What the run found, in one paragraph. Say so plainly when the evidence did not justify any change.'
-  );
+  ));
 
 /**
  * The run's structured output, narrowed to the actions this AI index permits; an empty allow-list

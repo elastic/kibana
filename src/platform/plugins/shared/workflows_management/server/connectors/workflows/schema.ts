@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 const AlertStatesSchema = z
   .object({
@@ -18,13 +18,13 @@ const AlertStatesSchema = z
   })
   .strict();
 
-const RunSubActionParamsSchema = z.object({
+const RunSubActionParamsSchema = lazySchema(() => z.object({
   workflowId: z.string(),
   inputs: z.any().optional(),
   spaceId: z.string(),
   summaryMode: z.boolean().optional().default(true),
   alertStates: AlertStatesSchema.optional(),
-});
+}));
 
 // Schema for rule configuration (what the UI saves)
 export const WorkflowsRuleActionParamsSchema = schema.object({

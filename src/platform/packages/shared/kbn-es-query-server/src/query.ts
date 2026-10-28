@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const querySchema = z
+export const querySchema = lazySchema(() => z
   .object({
     query: z.union([
       z.string().meta({
@@ -21,11 +21,11 @@ export const querySchema = z
     language: z.string(),
   })
   .strict()
-  .meta({ id: 'kbn-es-query-server-querySchema' });
+  .meta({ id: 'kbn-es-query-server-querySchema' }));
 
-export const aggregateQuerySchema = z
+export const aggregateQuerySchema = lazySchema(() => z
   .object({
     esql: z.string(),
   })
   .strict()
-  .meta({ id: 'kbn-es-query-server-aggregateQuerySchema' });
+  .meta({ id: 'kbn-es-query-server-aggregateQuerySchema' }));

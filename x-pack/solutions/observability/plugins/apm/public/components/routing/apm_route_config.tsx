@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import React from 'react';
 import { toBooleanFromString } from '../../../common/utils/to_boolean_from_string';
 import { Breadcrumb } from '../app/breadcrumb';
@@ -41,7 +41,7 @@ const ServiceInventoryTitle = i18n.translate('xpack.apm.views.serviceInventory.t
 const apmRoutes = {
   '/link-to/transaction': {
     element: <TransactionDetailsByNameLink />,
-    params: z.object({
+    params: lazySchema(() => z.object({
       query: z.object({ transactionName: z.string(), serviceName: z.string() }).merge(
         z.object({
           rangeFrom: z.string().optional(),
@@ -49,7 +49,7 @@ const apmRoutes = {
           environment: z.string().optional(),
         })
       ),
-    }),
+    })),
   },
   '/link-to/transaction/{transactionId}': {
     element: <TransactionLink />,
@@ -123,7 +123,7 @@ const apmRoutes = {
             </ServiceGroupTemplate>
           </Breadcrumb>
         ),
-        params: z.object({
+        params: lazySchema(() => z.object({
           query: environmentSchema
             .merge(
               z.object({
@@ -145,7 +145,7 @@ const apmRoutes = {
               })
             )
             .merge(offsetSchema),
-        }),
+        })),
         defaults: {
           query: {
             environment: ENVIRONMENT_ALL.value,

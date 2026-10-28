@@ -12,7 +12,7 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 // TheHive severity levels
 export enum TheHiveSeverity {
@@ -32,7 +32,7 @@ export enum TheHiveTLP {
 }
 
 // TheHive connector parameter schemas for different sub-actions
-export const TheHivePushToServiceParamsSchema = z.object({
+export const TheHivePushToServiceParamsSchema = lazySchema(() => z.object({
   incident: z.object({
     title: z.string(),
     description: z.string(),
@@ -50,9 +50,9 @@ export const TheHivePushToServiceParamsSchema = z.object({
     )
     .nullable()
     .optional(),
-});
+}));
 
-export const TheHiveCreateAlertParamsSchema = z.object({
+export const TheHiveCreateAlertParamsSchema = lazySchema(() => z.object({
   title: z.string(),
   description: z.string(),
   type: z.string(),
@@ -63,14 +63,14 @@ export const TheHiveCreateAlertParamsSchema = z.object({
   tlp: z.number().default(TheHiveTLP.AMBER).nullable().optional(),
   tags: z.array(z.string()).nullable().optional(),
   body: z.string().nullable().optional(),
-});
+}));
 
-export const TheHiveGetIncidentParamsSchema = z.object({
+export const TheHiveGetIncidentParamsSchema = lazySchema(() => z.object({
   externalId: z.string(),
-});
+}));
 
 // TheHive connector response schemas
-export const TheHiveIncidentResponseSchema = z.object({
+export const TheHiveIncidentResponseSchema = lazySchema(() => z.object({
   _id: z.string(),
   _type: z.string(),
   _createdBy: z.string(),
@@ -95,9 +95,9 @@ export const TheHiveIncidentResponseSchema = z.object({
   summary: z.string().nullable().optional(),
   impactStatus: z.string().nullable().optional(),
   assignee: z.string().nullable().optional(),
-});
+}));
 
-export const TheHiveCreateAlertResponseSchema = z.object({
+export const TheHiveCreateAlertResponseSchema = lazySchema(() => z.object({
   _id: z.string(),
   _type: z.string(),
   _createdBy: z.string(),
@@ -110,4 +110,4 @@ export const TheHiveCreateAlertResponseSchema = z.object({
   severity: z.number(),
   tlp: z.number(),
   tags: z.array(z.string()).optional(),
-});
+}));

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -38,7 +38,7 @@ const INVALID_LICENSE = i18n.translate(
 const isActivePlatinumLicense = (license?: ILicense) =>
   Boolean(license && license.isActive && license.hasAtLeast('platinum'));
 
-const getApmCorrelationsSchema = z.object({
+const getApmCorrelationsSchema = lazySchema(() => z.object({
   ...timeRangeSchemaRequired,
   kqlFilter: z
     .string()
@@ -80,7 +80,7 @@ const getApmCorrelationsSchema = z.object({
     .describe(
       `Maximum number of correlated values to return per field. Defaults to 10. Hard limit: ${MAX_RESULTS_PER_FIELD}.`
     ),
-});
+}));
 
 export function createGetApmCorrelationsTool({
   core,

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { skillCreateRequestSchema } from '@kbn/agent-builder-common';
 
 export const SKILL_ATTACHMENT_TYPE = 'skill' as const;
 
-export const skillAttachmentDataSchema = z.object({
+export const skillAttachmentDataSchema = lazySchema(() => z.object({
   mode: z.enum(['create', 'edit']),
   skill: skillCreateRequestSchema,
   /**
@@ -22,7 +22,7 @@ export const skillAttachmentDataSchema = z.object({
    * Preserved across `patch_skill` calls.
    */
   originalContent: z.string().optional(),
-});
+}));
 
 /**
  * Data shape stored on a `skill` attachment version.

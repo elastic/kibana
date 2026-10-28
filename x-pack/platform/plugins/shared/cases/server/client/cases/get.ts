@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { chunk, uniqBy } from 'lodash';
 import pMap from 'p-map';
 import type {
@@ -74,7 +74,7 @@ import type {
 } from '../../common/types/case';
 import { CaseSchema, CaseStatusSchema } from '../../../common/types/domain';
 
-export const CasesByAttachmentIDsRequestSchema = z.object({
+export const CasesByAttachmentIDsRequestSchema = lazySchema(() => z.object({
   /**
    * Only the cases of this owner. One owner per call, as a user may read one solution's cases
    * and not another's.
@@ -101,14 +101,14 @@ export const CasesByAttachmentIDsRequestSchema = z.object({
    * Only the cases with one of these statuses.
    */
   status: z.union([CaseStatusSchema, z.array(CaseStatusSchema)]).optional(),
-});
+}));
 
-export const GetCaseIDsByAttachmentIDsResponseSchema = z.array(
+export const GetCaseIDsByAttachmentIDsResponseSchema = lazySchema(() => z.array(
   z.object({
     attachmentId: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
     caseIds: z.array(z.string().max(MAX_ATTACHMENT_ID_LENGTH)),
   })
-);
+));
 
 export type CasesByAttachmentIDsRequest = z.infer<typeof CasesByAttachmentIDsRequestSchema>;
 export type GetCaseIDsByAttachmentIDsResponse = z.infer<

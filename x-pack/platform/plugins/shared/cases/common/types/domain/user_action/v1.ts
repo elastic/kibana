@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { UserSchema } from '../user/v1';
 import {
   ActionSourceSchema,
@@ -56,29 +56,29 @@ export type { ActionSource, ActionSourceType } from './source/v1';
 
 export type { UserActionType, UserActionAction } from './action/v1';
 
-const UserActionCommonAttributesSchema = z.object({
+const UserActionCommonAttributesSchema = lazySchema(() => z.object({
   created_at: z.string(),
   created_by: UserSchema,
   owner: z.string(),
   action: UserActionActionsSchema,
   source: ActionSourceSchema.nullable().optional(),
-});
+}));
 
 /**
  * This should only be used for the getAll route and it should be removed when the route is removed
  * @deprecated use CaseUserActionInjectedIdsSchema instead
  */
-export const CaseUserActionInjectedDeprecatedIdsSchema = z.object({
+export const CaseUserActionInjectedDeprecatedIdsSchema = lazySchema(() => z.object({
   action_id: z.string(),
   case_id: z.string(),
   comment_id: z.string().nullable(),
-});
+}));
 
-export const CaseUserActionInjectedIdsSchema = z.object({
+export const CaseUserActionInjectedIdsSchema = lazySchema(() => z.object({
   comment_id: z.string().nullable(),
-});
+}));
 
-const BasicUserActionsSchema = z.union([
+const BasicUserActionsSchema = lazySchema(() => z.union([
   DescriptionUserActionSchema,
   TagsUserActionSchema,
   TitleUserActionSchema,
@@ -94,27 +94,27 @@ const BasicUserActionsSchema = z.union([
   TemplateUserActionSchema,
   WorkflowUserActionSchema,
   BulkAttachmentsUserActionSchema,
-]);
+]));
 
-const CommonUserActionsWithIdsSchema = z.union([BasicUserActionsSchema, CommentUserActionSchema]);
-const CommonUserActionsWithoutIdsSchema = z.union([
+const CommonUserActionsWithIdsSchema = lazySchema(() => z.union([BasicUserActionsSchema, CommentUserActionSchema]));
+const CommonUserActionsWithoutIdsSchema = lazySchema(() => z.union([
   BasicUserActionsSchema,
   CommentUserActionWithoutIdsSchema,
-]);
+]));
 
-const UserActionPayloadSchema = z.union([
+const UserActionPayloadSchema = lazySchema(() => z.union([
   CommonUserActionsWithIdsSchema,
   CreateCaseUserActionSchema,
   ConnectorUserActionSchema,
   PushedUserActionSchema,
-]);
+]));
 
-const UserActionsWithoutIdsSchema = z.union([
+const UserActionsWithoutIdsSchema = lazySchema(() => z.union([
   CommonUserActionsWithoutIdsSchema,
   CreateCaseUserActionWithoutConnectorIdSchema,
   ConnectorUserActionWithoutConnectorIdSchema,
   PushedUserActionWithoutConnectorIdSchema,
-]);
+]));
 
 export const CaseUserActionBasicSchema = UserActionPayloadSchema.and(
   UserActionCommonAttributesSchema
@@ -135,7 +135,7 @@ const UserActionSchema = UserActionAttributesSchema.and(
   z.object({ id: z.string(), version: z.string() })
 );
 
-export const UserActionsSchema = z.array(UserActionSchema);
+export const UserActionsSchema = lazySchema(() => z.array(UserActionSchema));
 
 export type CaseUserActionWithoutReferenceIds = z.infer<
   typeof CaseUserActionWithoutReferenceIdsSchema

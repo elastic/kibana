@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
@@ -14,7 +14,7 @@ import { CONVERSATION_EVENT_TYPE_MAX_LENGTH } from '../../constants';
 
 export const AddConversationEventStepTypeId = 'ai.conversation.add_event';
 
-const InputSchema = z.object({
+const InputSchema = lazySchema(() => z.object({
   conversation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH).meta({
     description: 'The unique identifier of the conversation to append the event to.',
   }),
@@ -26,9 +26,9 @@ const InputSchema = z.object({
     description:
       'The event payload. Its shape is defined by the registered event type and is validated against that type before the event is appended.',
   }),
-});
+}));
 
-const OutputSchema = z.object({
+const OutputSchema = lazySchema(() => z.object({
   conversation_id: z
     .string()
     .meta({ description: 'The ID of the conversation the event was appended to.' }),
@@ -37,7 +37,7 @@ const OutputSchema = z.object({
   created_at: z
     .string()
     .meta({ description: 'The ISO timestamp assigned to the event by the server.' }),
-});
+}));
 
 export type AddConversationEventInputSchema = typeof InputSchema;
 export type AddConversationEventOutputSchema = typeof OutputSchema;

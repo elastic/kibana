@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { dataViewReferenceSchema, dataViewSpecSchema } from '@kbn/as-code-data-views-schema';
 import {
   discoverSessionApiClassicTabSchema,
@@ -19,7 +19,7 @@ import { MAX_DISCOVER_SESSION_TABS } from '@kbn/discover-session-constants';
 import { MAX_SAVED_OBJECT_ID_LENGTH } from '@kbn/core-saved-objects-server';
 import { discoverSessionApiResponseSchema, discoverSessionGetResponseSchema } from './schema';
 
-const internalTabSchema = z.union([
+const internalTabSchema = lazySchema(() => z.union([
   discoverSessionApiClassicTabSchema.extend({
     data_source: z.discriminatedUnion('type', [
       dataViewReferenceSchema,
@@ -30,18 +30,18 @@ const internalTabSchema = z.union([
   }),
   discoverSessionApiEsqlTabSchema,
   discoverSessionApiMetricsTabSchema,
-]);
+]));
 
 /** Uses the public session format while preserving inline Data View IDs for Discover. */
 export const discoverSessionInternalDataSchema = discoverSessionApiDataSchema.extend({
-  tabs: z
+  tabs: lazySchema(() => z
     .array(internalTabSchema)
     .min(1)
     .max(MAX_DISCOVER_SESSION_TABS)
     .refine(
       (tabs) => new Set(tabs.map((tab) => tab.id)).size === tabs.length,
       'tabs must have unique ids'
-    ),
+    )),
 });
 
 export const discoverSessionInternalParamsSchema = z

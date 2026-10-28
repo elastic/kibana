@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   allowHiddenIndicesSchema,
   fieldFiltersSchema,
@@ -22,7 +22,7 @@ import {
 } from '../runtime_fields/schema_saved_runtime_fields';
 import { fieldSettingsWithPopularitySchema } from '../field_settings/schema_field_settings';
 
-export const savedFieldSettingsSchema = z
+export const savedFieldSettingsSchema = lazySchema(() => z
   .union([
     savedCompositeRuntimeFieldSchema,
     savedPrimitiveRuntimeFieldSchema,
@@ -33,9 +33,9 @@ export const savedFieldSettingsSchema = z
     title: 'Field settings or runtime field',
     description:
       'Display overrides for an indexed field, or a runtime field definition when `type` is set to a runtime field kind.',
-  });
+  }));
 
-export const savedDataViewSpecSchema = z
+export const savedDataViewSpecSchema = lazySchema(() => z
   .object({
     id: z.string().min(1).max(256).optional().meta({
       title: 'Data view ID',
@@ -62,4 +62,4 @@ export const savedDataViewSpecSchema = z
     title: 'Saved data view spec',
     description:
       'Defines an stored data source with a mandatory index pattern and optional settings like id, name, show hidden indices and field settings.',
-  });
+  }));

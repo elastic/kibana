@@ -28,7 +28,7 @@ import {
 } from './shared';
 
 const waffleConfigSharedShape = {
-  legend: z
+  legend: lazySchema(() => z
     .object({
       values: z
         .array(
@@ -50,7 +50,7 @@ const waffleConfigSharedShape = {
       id: 'visWaffleLegend',
       title: 'Legend',
       description: 'Legend configuration for waffle chart',
-    }),
+    })),
 };
 
 const waffleStylingSchema = lazySchema(() =>
@@ -74,7 +74,7 @@ const partitionConfigPrimaryMetricOptionsShape = {
   /**
    * Color configuration
    */
-  color: z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional(),
+  color: lazySchema(() => z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional()),
 };
 
 /**

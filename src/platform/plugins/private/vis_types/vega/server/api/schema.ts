@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, displayName, description, searchFilter } from '@kbn/zod';
+import { z, displayName, description, searchFilter, lazySchema } from '@kbn/zod';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { asCodeQuerySchema, getAsCodeTagsSchema } from '@kbn/as-code-shared-schemas';
 
-export const vegaSpecSchema = z
+export const vegaSpecSchema = lazySchema(() => z
   .discriminatedUnion('format', [
     z
       .object({
@@ -36,7 +36,7 @@ export const vegaSpecSchema = z
     title: 'Vega spec',
     description:
       'The Vega or Vega-Lite specification. Use `{ "format": "hjson", "value": "<hjson-string>" }` for HJSON (comments and unquoted keys are preserved) or `{ "format": "json", "value": { ... } }` for a JSON object.',
-  });
+  }));
 
 // TODO: Remove the expression override once the shared query schema is bounded (https://github.com/elastic/kibana/issues/299890)
 export const vegaQuerySchema = asCodeQuerySchema
@@ -47,7 +47,7 @@ export const vegaQuerySchema = asCodeQuerySchema
   })
   .optional();
 
-export const vegaFiltersSchema = z.array(asCodeFilterSchema).max(100).optional();
+export const vegaFiltersSchema = lazySchema(() => z.array(asCodeFilterSchema).max(100).optional());
 
 export const vegaLibraryItemSchema = z
   .object({

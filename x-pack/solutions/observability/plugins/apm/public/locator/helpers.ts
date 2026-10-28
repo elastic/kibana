@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { anomalyThresholdSchema, environmentSchema } from '@kbn/apm-types';
 import type { Environment } from '../../common/environment_rt';
 import { apmRouter } from '../components/routing/apm_route_config';
@@ -28,7 +28,7 @@ const SERVICE_OVERVIEW_TAB_PATHS = {
   errors: { regular: '/services/{serviceName}/errors' },
 } as const;
 
-export const APMLocatorPayloadValidator = z.union([
+export const APMLocatorPayloadValidator = lazySchema(() => z.union([
   z.object({ serviceName: z.undefined().optional() }),
   z
     .object({ serviceName: z.string() })
@@ -63,7 +63,7 @@ export const APMLocatorPayloadValidator = z.union([
         ),
       })
     ),
-]);
+]));
 
 export type APMLocatorPayload = z.infer<typeof APMLocatorPayloadValidator>;
 

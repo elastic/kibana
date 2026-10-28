@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const asCodeQuerySchema = z
+export const asCodeQuerySchema = lazySchema(() => z
   .object({
     expression: z.string().meta({
       description: 'A query expression in KQL or Lucene syntax.',
@@ -25,6 +25,6 @@ export const asCodeQuerySchema = z
     title: 'Query',
     description:
       'A search query consisting of an expression and its language. Supports KQL and Lucene syntax.',
-  });
+  }));
 
 export type AsCodeQuery = z.output<typeof asCodeQuerySchema>;

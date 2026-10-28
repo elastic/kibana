@@ -8,18 +8,18 @@
 // Intentionally copied from @kbn/evals — pending future extraction to @kbn/evals-common.
 
 import { createPrompt } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import systemPromptText from './system_prompt.text';
 import userPromptText from './user_prompt.text';
 
 export const LlmGroundednessEvaluationPrompt = createPrompt({
   name: 'llm_groundedness_evaluation',
   description: 'Prompt for evaluating the groundedness of LLM responses',
-  input: z.object({
+  input: lazySchema(() => z.object({
     user_query: z.string().max(131072),
     agent_response: z.string().max(131072),
     tool_call_history: z.string().max(131072).optional(),
-  }),
+  })),
 })
   .version({
     system: {

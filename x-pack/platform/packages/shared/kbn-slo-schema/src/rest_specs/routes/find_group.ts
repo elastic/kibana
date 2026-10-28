@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { groupSummarySchema } from '../../schema/common';
 
-const groupBySchema = z.union([
+const groupBySchema = lazySchema(() => z.union([
   z.literal('ungrouped'),
   z.literal('slo.tags'),
   z.literal('status'),
@@ -16,9 +16,9 @@ const groupBySchema = z.union([
   z.literal('slo.instanceId'),
   z.literal('_index'),
   z.literal('slo.id'),
-]);
+]));
 
-const findSLOGroupsParamsSchema = z.object({
+const findSLOGroupsParamsSchema = lazySchema(() => z.object({
   query: z
     .object({
       page: z.string().optional(),
@@ -29,20 +29,20 @@ const findSLOGroupsParamsSchema = z.object({
       filters: z.string().optional(),
     })
     .optional(),
-});
+}));
 
-const sloGroupWithSummaryResponseSchema = z.object({
+const sloGroupWithSummaryResponseSchema = lazySchema(() => z.object({
   group: z.string(),
   groupBy: groupBySchema,
   summary: groupSummarySchema,
-});
+}));
 
-const findSLOGroupsResponseSchema = z.object({
+const findSLOGroupsResponseSchema = lazySchema(() => z.object({
   page: z.number(),
   perPage: z.number(),
   total: z.number(),
   results: z.array(sloGroupWithSummaryResponseSchema),
-});
+}));
 
 type FindSLOGroupsParams = NonNullable<z.output<typeof findSLOGroupsParamsSchema.shape.query>>;
 type FindSLOGroupsResponse = z.input<typeof findSLOGroupsResponseSchema>;

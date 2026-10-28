@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionType as ConnectorType, ExecutorType } from './types';
 
 export const defaultValidateDef = {
-  config: { schema: z.object({}) },
-  secrets: { schema: z.object({}) },
-  params: { schema: z.object({}) },
+  config: { schema: lazySchema(() => z.object({})) },
+  secrets: { schema: lazySchema(() => z.object({})) },
+  params: { schema: lazySchema(() => z.object({})) },
 };
 
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {

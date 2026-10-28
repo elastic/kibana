@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { skillCreateRequestSchema } from '@kbn/agent-builder-common';
@@ -14,7 +14,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { SKILL_ATTACHMENT_TYPE, type SkillAttachmentData } from '../../../common/attachments';
 import { validateToolIdsAgainstRegistry, formatInvalidToolIdsMessage } from './validate_tool_ids';
 
-const referencedContentSchema = z.object({
+const referencedContentSchema = lazySchema(() => z.object({
   name: z
     .string()
     .describe(
@@ -26,9 +26,9 @@ const referencedContentSchema = z.object({
       'Folder relative to the skill, must start with `./`. Use `./` for the skill root or `./examples` (single segment) for a subfolder. Avoid `../`.'
     ),
   content: z.string().describe('Markdown content for this referenced file.'),
-});
+}));
 
-const proposeSkillSchema = z.object({
+const proposeSkillSchema = lazySchema(() => z.object({
   id: z
     .string()
     .describe(
@@ -56,7 +56,7 @@ const proposeSkillSchema = z.object({
     .describe(
       'Optional supporting markdown files (examples, reference snippets). Up to 100 entries. Each entry resolves to `[basePath]/[skill-name]/[relativePath]/[name].md` in the agent filestore.'
     ),
-});
+}));
 
 export type ProposeSkillInput = z.infer<typeof proposeSkillSchema>;
 

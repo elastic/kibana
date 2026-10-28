@@ -12,10 +12,10 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 // AI Message schema (subset of OpenAI.ChatCompletionMessageParam)
-const AIMessageZodSchema = z.object({
+const AIMessageZodSchema = lazySchema(() => z.object({
   role: z.string(),
   content: z.string().nullable().optional(),
   name: z.string().optional(),
@@ -32,26 +32,26 @@ const AIMessageZodSchema = z.object({
     )
     .optional(),
   tool_call_id: z.string().optional(),
-});
+}));
 
 // AI Tool schema
-const AIToolZodSchema = z.object({
+const AIToolZodSchema = lazySchema(() => z.object({
   type: z.string(),
   function: z.object({
     name: z.string(),
     description: z.string().optional(),
     parameters: z.record(z.string(), z.any()).optional(),
   }),
-});
+}));
 
 // Telemetry metadata schema
-const TelemetryMetadataZodSchema = z.object({
+const TelemetryMetadataZodSchema = lazySchema(() => z.object({
   pluginId: z.string().optional(),
   aggregateBy: z.string().optional(),
-});
+}));
 
 // Inference parameter schemas
-export const InferenceUnifiedCompletionParamsSchema = z.object({
+export const InferenceUnifiedCompletionParamsSchema = lazySchema(() => z.object({
   body: z.object({
     messages: z.array(AIMessageZodSchema).default([]),
     model: z.string().optional(),
@@ -80,28 +80,28 @@ export const InferenceUnifiedCompletionParamsSchema = z.object({
   }),
   signal: z.any().optional(),
   telemetryMetadata: TelemetryMetadataZodSchema.optional(),
-});
+}));
 
-export const InferenceCompletionParamsSchema = z.object({
+export const InferenceCompletionParamsSchema = lazySchema(() => z.object({
   input: z.string(),
-});
+}));
 
-export const InferenceRerankParamsSchema = z.object({
+export const InferenceRerankParamsSchema = lazySchema(() => z.object({
   input: z.array(z.string()).default([]),
   query: z.string(),
-});
+}));
 
-export const InferenceTextEmbeddingParamsSchema = z.object({
+export const InferenceTextEmbeddingParamsSchema = lazySchema(() => z.object({
   input: z.string(),
   inputType: z.string(),
-});
+}));
 
-export const InferenceSparseEmbeddingParamsSchema = z.object({
+export const InferenceSparseEmbeddingParamsSchema = lazySchema(() => z.object({
   input: z.string(),
-});
+}));
 
 // Inference response schemas
-export const InferenceUnifiedCompletionResponseSchema = z.object({
+export const InferenceUnifiedCompletionResponseSchema = lazySchema(() => z.object({
   id: z.string(),
   choices: z
     .array(
@@ -146,17 +146,17 @@ export const InferenceUnifiedCompletionResponseSchema = z.object({
     })
     .nullable()
     .optional(),
-});
+}));
 
-export const InferenceCompletionResponseSchema = z
+export const InferenceCompletionResponseSchema = lazySchema(() => z
   .array(
     z.object({
       result: z.string(),
     })
   )
-  .default([]);
+  .default([]));
 
-export const InferenceRerankResponseSchema = z
+export const InferenceRerankResponseSchema = lazySchema(() => z
   .array(
     z.object({
       text: z.string().optional(),
@@ -164,16 +164,16 @@ export const InferenceRerankResponseSchema = z
       score: z.number(),
     })
   )
-  .default([]);
+  .default([]));
 
-export const InferenceTextEmbeddingResponseSchema = z
+export const InferenceTextEmbeddingResponseSchema = lazySchema(() => z
   .array(
     z.object({
       embedding: z.array(z.any()).default([]),
     })
   )
-  .default([]);
+  .default([]));
 
-export const InferenceSparseEmbeddingResponseSchema = z
+export const InferenceSparseEmbeddingResponseSchema = lazySchema(() => z
   .array(z.object({}).passthrough())
-  .default([]);
+  .default([]));

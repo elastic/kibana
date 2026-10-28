@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
 import { customContentStateSchema } from '@kbn/custom-content-common';
 
-export const customContentEmbeddableSchema = z.object({
+export const customContentEmbeddableSchema = lazySchema(() => z.object({
   ...customContentStateSchema.shape,
   ...serializedTitlesSchema.shape,
   ...serializedTimeRangeSchema.shape,
-});
+}));
 
 export type CustomContentEmbeddableState = z.output<typeof customContentEmbeddableSchema>;

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { createPrompt } from '@kbn/inference-common';
 import reviewFieldsPromptTemplate from './review_fields_prompt_template.text';
 
 export const ReviewDissectFieldsPrompt = createPrompt({
   name: 'review_dissect_fields_prompt',
   description: 'Review and map dissect-extracted fields to ECS-compliant fields',
-  input: z.object({
+  input: lazySchema(() => z.object({
     /**
      * Raw log messages to pass to LLM
      */
@@ -38,7 +38,7 @@ export const ReviewDissectFieldsPrompt = createPrompt({
      * ```
      */
     review_fields: z.string(),
-  }),
+  })),
 })
   .version({
     template: {

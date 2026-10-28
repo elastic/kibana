@@ -6,8 +6,8 @@
  */
 
 import { CONVERSATION_ID_MAX_LENGTH } from '@kbn/agent-builder-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export const escalationIdParamsSchema = z.object({
+export const escalationIdParamsSchema = lazySchema(() => z.object({
   id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH),
-});
+}));

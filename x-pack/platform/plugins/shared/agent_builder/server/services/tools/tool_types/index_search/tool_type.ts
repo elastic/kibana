@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { IndexSearchToolConfig } from '@kbn/agent-builder-common/tools';
 import type { TopSnippetsConfig } from '@kbn/agent-builder-genai-utils';
@@ -17,9 +17,9 @@ import type { ToolTypeDefinition } from '../definitions';
 import { validateConfig } from './validate_configuration';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 
-const searchSchema = z.object({
+const searchSchema = lazySchema(() => z.object({
   nlQuery: z.string().describe('A natural language query expressing the search request'),
-});
+}));
 
 type SearchSchemaType = typeof searchSchema;
 

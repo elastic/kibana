@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
@@ -21,13 +21,13 @@ import {
 
 export const CreateConversationStepTypeId = 'ai.conversation.create';
 
-const AccessControlEntrySchema = z.object({
+const AccessControlEntrySchema = lazySchema(() => z.object({
   type: z.literal('user'),
   id: z.string().min(1).max(CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH),
   role: z.literal(ConversationAccessControlRole.Member),
-});
+}));
 
-const AccessControlSchema = z
+const AccessControlSchema = lazySchema(() => z
   .object({
     access_mode: z.enum([
       ConversationAccessControlMode.Private,
@@ -46,9 +46,9 @@ const AccessControlSchema = z
         val.entries.length > 0
       ),
     { message: 'ACL entries are not supported when access_mode is "public"' }
-  );
+  ));
 
-const MetadataSchema = z
+const MetadataSchema = lazySchema(() => z
   .record(
     z.string().max(256),
     z.union([
@@ -60,9 +60,9 @@ const MetadataSchema = z
   )
   .refine((val) => Object.keys(val).length <= 100, {
     message: 'metadata may not have more than 100 keys',
-  });
+  }));
 
-const InputSchema = z
+const InputSchema = lazySchema(() => z
   .object({
     agent_id: z.string().min(1).max(agentIdMaxLength).optional().meta({
       description:
@@ -90,9 +90,9 @@ const InputSchema = z
   .refine((val) => !val.metadata || !!val.template_id, {
     message:
       '`metadata` requires `template_id`: metadata values are validated against the referenced template',
-  });
+  }));
 
-const OutputSchema = z.object({
+const OutputSchema = lazySchema(() => z.object({
   conversation_id: z.string().meta({ description: 'The ID of the newly created conversation.' }),
   agent_id: z.string().meta({ description: 'The agent associated with the conversation.' }),
   template_id: z
@@ -103,7 +103,7 @@ const OutputSchema = z.object({
     description:
       'The conversation metadata after applying template defaults and caller-supplied values.',
   }),
-});
+}));
 
 type CreateConversationInputSchema = typeof InputSchema;
 type CreateConversationOutputSchema = typeof OutputSchema;

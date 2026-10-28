@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -55,7 +55,7 @@ const emitSearchAttachments = async (
 // array must stay bounded to avoid resource exhaustion.
 const MAX_ALERT_IDS = 100;
 
-const casesSchema = z.object({
+const casesSchema = lazySchema(() => z.object({
   mode: z
     .enum(['get', 'bulk_get', 'similar', 'by_alert', 'search'])
     .describe(
@@ -84,7 +84,7 @@ const casesSchema = z.object({
       `Array of alert IDs to find cases containing these alerts (max ${MAX_ALERT_IDS}). Required for by_alert mode.`
     ),
   // owner, assignees, from, to, search: descriptions inherited from step schemas
-});
+}));
 
 async function fetchCaseById(
   caseId: string,

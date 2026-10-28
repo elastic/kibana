@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
@@ -13,7 +13,7 @@ import { CONVERSATION_ID_MAX_LENGTH } from '@kbn/agent-builder-common';
 
 export const ReadAttachmentStepTypeId = 'ai.attachment.read';
 
-const InputSchema = z.object({
+const InputSchema = lazySchema(() => z.object({
   conversation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH).meta({
     description: 'The ID of the conversation the attachment belongs to.',
   }),
@@ -23,12 +23,12 @@ const InputSchema = z.object({
   version: z.number().int().positive().optional().meta({
     description: 'Optional version number to read. Defaults to the current version.',
   }),
-});
+}));
 
-const OutputSchema = z.object({
+const OutputSchema = lazySchema(() => z.object({
   data: z.unknown().meta({ description: 'The raw attachment data at the requested version.' }),
   version: z.number().meta({ description: 'The version number that was read.' }),
-});
+}));
 
 type ReadAttachmentInputSchema = typeof InputSchema;
 type ReadAttachmentOutputSchema = typeof OutputSchema;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { querySchema } from '@kbn/es-query-server';
 import { LAYER_TYPE } from '../../../../../common';
 import {
@@ -146,11 +146,11 @@ export const vectorLayerSchema = layerSchema
   })
   .strict();
 
-export const layersSchema = z.union([
+export const layersSchema = lazySchema(() => z.union([
   EMSVectorTileLayerSchema,
   heatmapLayerSchema,
   layerGroupSchema,
   rasterLayerSchema,
   vectorLayerSchema,
   z.object({}).loose(),
-]);
+]));

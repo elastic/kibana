@@ -43,12 +43,12 @@ const upsertFeatureRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
     body: lazySchema(() =>
       baseFeatureSchema.and(z.object({ expires_at: isoDateTime().optional() }))
     ),
-  }),
+  })),
   handler: async ({
     params,
     request,
@@ -104,12 +104,12 @@ const deleteFeatureRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({
       sourceId: z.string().max(MAX_INPUT_STRING_LENGTH),
       id: z.string().max(MAX_INPUT_STRING_LENGTH).max(MAX_INPUT_STRING_LENGTH),
     }),
-  }),
+  })),
   handler: async ({
     params,
     request,
@@ -154,7 +154,7 @@ const listFeaturesRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({ sourceId: z.string().max(MAX_INPUT_STRING_LENGTH) }),
     query: z.optional(
       z.object({
@@ -163,7 +163,7 @@ const listFeaturesRoute = createServerRoute({
         include_excluded: BooleanFromString.optional(),
       })
     ),
-  }),
+  })),
   handler: async ({
     params,
     request,
@@ -203,7 +203,7 @@ export const listAllFeaturesRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     query: z
       .object({
         query: z
@@ -215,7 +215,7 @@ export const listAllFeaturesRoute = createServerRoute({
         include_excluded: BooleanFromString.optional(),
       })
       .optional(),
-  }),
+  })),
   handler: async ({
     params,
     request,
@@ -263,7 +263,7 @@ const bulkFeaturesRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
     body: z.object({
       operations: z.array(
@@ -291,7 +291,7 @@ const bulkFeaturesRoute = createServerRoute({
         ])
       ),
     }),
-  }),
+  })),
   handler: async ({
     params,
     request,
@@ -349,7 +349,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     body: z.object({
       operations: z
         .array(
@@ -361,7 +361,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
         )
         .min(1),
     }),
-  }),
+  })),
   handler: async ({
     params,
     request,

@@ -99,7 +99,7 @@ const gaugeConfigMetricOptionsShape = {
   /**
    * Title configuration
    */
-  title: z
+  title: lazySchema(() => z
     .object({
       visible: z
         .boolean()
@@ -110,24 +110,24 @@ const gaugeConfigMetricOptionsShape = {
     })
     .strict()
     .optional()
-    .meta({ description: 'Title configuration' }),
+    .meta({ description: 'Title configuration' })),
   /**
    * Subtitle
    */
-  subtitle: z.string().optional().meta({ description: 'Subtitle below the gauge value.' }),
+  subtitle: lazySchema(() => z.string().optional().meta({ description: 'Subtitle below the gauge value.' })),
   /**
    * Color configuration
    */
-  color: z
+  color: lazySchema(() => z
     .union([colorByValueSchema, noColorSchema, autoColorSchema])
 
     .default(AUTO_COLOR)
     .optional()
-    .meta({ description: 'Color configuration for the gauge fill.' }),
+    .meta({ description: 'Color configuration for the gauge fill.' })),
   /**
    * Tick marks configuration
    */
-  ticks: z
+  ticks: lazySchema(() => z
     .object({
       visible: z
         .boolean()
@@ -145,7 +145,7 @@ const gaugeConfigMetricOptionsShape = {
     .strict()
 
     .optional()
-    .meta({ description: 'Ticks configuration' }),
+    .meta({ description: 'Ticks configuration' })),
 };
 
 export const gaugeConfigSchemaNoESQL = lazySchema(() =>

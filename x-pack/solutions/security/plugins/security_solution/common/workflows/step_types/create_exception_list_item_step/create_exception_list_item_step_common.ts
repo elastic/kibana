@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   ExceptionListHumanId,
   ExceptionListItemHumanId,
@@ -22,7 +22,7 @@ import {
 
 export const CreateExceptionListItemStepId = 'security.createExceptionListItem' as const;
 
-export const createExceptionListItemInputSchema = z
+export const createExceptionListItemInputSchema = lazySchema(() => z
   .object({
     list_id: ExceptionListHumanId,
     namespace_type: ExceptionNamespaceType.optional().default('single'),
@@ -38,7 +38,7 @@ export const createExceptionListItemInputSchema = z
         message: OVERWRITE_REQUIRES_ITEM_ID_MESSAGE,
       });
     }
-  });
+  }));
 
 export const createExceptionListItemOutputSchema = exceptionItemOutputSchema;
 

@@ -8,7 +8,7 @@
  */
 
 import * as t from 'io-ts';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import type {
   EndpointOf,
@@ -202,11 +202,11 @@ const repository = {
   }),
   ...createServerRoute({
     endpoint: 'GET /internal/endpoint_with_params_zod',
-    params: z.object({
+    params: lazySchema(() => z.object({
       path: z.object({
         serviceName: z.string(),
       }),
-    }),
+    })),
     handler: async () => {
       return {
         yesParamsForMe: true,

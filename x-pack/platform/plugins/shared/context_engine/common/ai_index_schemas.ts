@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_AI_INDEX_AUTOMATION_LENGTH,
   MAX_AI_INDEX_AUTOMATIONS,
@@ -21,32 +21,32 @@ import {
 import type { AiIndexProperties, AiIndexTraceWithQuery } from './http_api/ai_indices';
 import { validateAiIndexId } from './validation';
 
-export const aiIndexDestSchema = z.object({
+export const aiIndexDestSchema = lazySchema(() => z.object({
   type: z.enum(['data_stream', 'index']),
   value: z.string().min(1).max(MAX_AI_INDEX_DEST_VALUE_LENGTH),
-});
+}));
 
-export const aiIndexAutomationSchema = z.object({
+export const aiIndexAutomationSchema = lazySchema(() => z.object({
   type: z.literal('workflow'),
   value: z.string().max(MAX_AI_INDEX_AUTOMATION_LENGTH),
-});
+}));
 
-const aiIndexEsqlSourceSchema = z.object({
+const aiIndexEsqlSourceSchema = lazySchema(() => z.object({
   type: z.literal('esql'),
   value: z.string().max(MAX_AI_INDEX_SOURCE_VALUE_LENGTH),
-});
+}));
 
-const aiIndexConnectorSourceSchema = z.object({
+const aiIndexConnectorSourceSchema = lazySchema(() => z.object({
   type: z.literal('connector'),
   value: z.string().min(1).max(MAX_AI_INDEX_SOURCE_VALUE_LENGTH),
-});
+}));
 
-export const aiIndexSourceSchema = z.discriminatedUnion('type', [
+export const aiIndexSourceSchema = lazySchema(() => z.discriminatedUnion('type', [
   aiIndexEsqlSourceSchema,
   aiIndexConnectorSourceSchema,
-]);
+]));
 
-export const aiIndexTraceSchema = z.discriminatedUnion('type', [
+export const aiIndexTraceSchema = lazySchema(() => z.discriminatedUnion('type', [
   z.object({
     type: z.literal('elastic_agent'),
     value: z.string().min(1).max(MAX_AI_INDEX_TRACE_VALUE_LENGTH),
@@ -65,18 +65,18 @@ export const aiIndexTraceSchema = z.discriminatedUnion('type', [
     type: z.literal('esql'),
     value: z.string().min(1).max(MAX_AI_INDEX_TRACE_VALUE_LENGTH),
   }),
-]);
+]));
 
-export const aiIndexPropertiesSchema = z.object({
+export const aiIndexPropertiesSchema = lazySchema(() => z.object({
   description: z.string().max(MAX_AI_INDEX_DESCRIPTION_LENGTH).optional(),
   memory_enabled: z.boolean().default(true),
   dest: aiIndexDestSchema,
   sources: z.array(aiIndexSourceSchema).max(MAX_AI_INDEX_SOURCES).default([]),
   automations: z.array(aiIndexAutomationSchema).max(MAX_AI_INDEX_AUTOMATIONS).default([]),
   traces: z.array(aiIndexTraceSchema).max(MAX_AI_INDEX_TRACES).default([]),
-});
+}));
 
-export const aiIndexIdFieldSchema = z
+export const aiIndexIdFieldSchema = lazySchema(() => z
   .string()
   .min(1)
   .max(MAX_AI_INDEX_ID_LENGTH)
@@ -88,11 +88,11 @@ export const aiIndexIdFieldSchema = z
         message: validationError,
       });
     }
-  });
+  }));
 
 const [elasticAgentTraceSchema, indexTraceSchema, esqlTraceSchema] = aiIndexTraceSchema.options;
 // Overwrite traces because we need to include the derived/runtime query for the attachment data
-export const aiIndexAttachmentDataSchema = aiIndexPropertiesSchema.omit({ traces: true }).extend({
+export const aiIndexAttachmentDataSchema = lazySchema(() => aiIndexPropertiesSchema.omit({ traces: true }).extend({
   id: aiIndexIdFieldSchema,
   traces: z
     .array(
@@ -103,7 +103,7 @@ export const aiIndexAttachmentDataSchema = aiIndexPropertiesSchema.omit({ traces
       ])
     )
     .max(MAX_AI_INDEX_TRACES),
-});
+}));
 
 /**
  * Snapshot of an AI index attached to an Agent Builder conversation.

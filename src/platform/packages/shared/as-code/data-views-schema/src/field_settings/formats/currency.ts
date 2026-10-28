@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const currencyFormatSchema = z
+export const currencyFormatSchema = lazySchema(() => z
   .object({
     type: z.literal('currency'),
   })
@@ -18,4 +18,4 @@ export const currencyFormatSchema = z
     title: 'Currency field format',
     description:
       'Formats a field into a currency value. The format is determined by the pattern of the format:currency:defaultPattern advanced setting.',
-  });
+  }));

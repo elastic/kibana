@@ -7,25 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, type ZodObjectType } from '@kbn/zod';
+import { z, type ZodObjectType, lazySchema } from '@kbn/zod';
 
-export const apiError = z.object({
+export const apiError = lazySchema(() => z.object({
   error: z.string(),
   message: z.string(),
   statusCode: z.number(),
   metadata: z.object({}).loose(),
-});
+}));
 
-export const referenceSchema = z
+export const referenceSchema = lazySchema(() => z
   .object({
     name: z.string(),
     type: z.string(),
     id: z.string(),
   })
   .strict()
-  .meta({ id: 'kbn-content-management-utils-referenceSchema' });
+  .meta({ id: 'kbn-content-management-utils-referenceSchema' }));
 
-export const referencesSchema = z.array(referenceSchema);
+export const referencesSchema = lazySchema(() => z.array(referenceSchema));
 
 export const savedObjectSchema = <T extends ZodObjectType>(attributesSchema: T) =>
   z
@@ -60,7 +60,7 @@ export const objectTypeToGetResultSchema = <T extends ZodObjectType>(soSchema: T
     })
     .strict();
 
-export const createOptionsSchema = z.object({
+export const createOptionsSchema = lazySchema(() => z.object({
   id: z.string().optional(),
   references: referencesSchema.optional(),
   overwrite: z.boolean().optional(),
@@ -68,11 +68,11 @@ export const createOptionsSchema = z.object({
   refresh: z.boolean().optional(),
   initialNamespaces: z.array(z.string()).optional(),
   managed: z.boolean().optional(),
-});
+}));
 
-export const schemaAndOr = z.enum(['AND', 'OR']);
+export const schemaAndOr = lazySchema(() => z.enum(['AND', 'OR']));
 
-export const searchOptionsSchema = z.object({
+export const searchOptionsSchema = lazySchema(() => z.object({
   page: z.number().optional(),
   perPage: z.number().optional(),
   sortField: z.string().optional(),
@@ -95,16 +95,16 @@ export const searchOptionsSchema = z.object({
       keepAlive: z.string().optional(),
     })
     .optional(),
-});
+}));
 
-export const updateOptionsSchema = z.object({
+export const updateOptionsSchema = lazySchema(() => z.object({
   references: referencesSchema.optional(),
   version: z.string().optional(),
   refresh: z.union([z.boolean(), z.literal('wait_for')]).optional(),
   upsert: z.unknown().optional(), // TODO: see if and where this is used and remove if not needed
   retryOnConflict: z.number().optional(),
   mergeAttributes: z.boolean().optional(),
-});
+}));
 
 export const createResultSchema = <T extends ZodObjectType>(soSchema: T) =>
   z

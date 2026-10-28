@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { durationType } from '../../schema/duration';
 import { sloIdSchema } from '../../schema/slo';
 
-const purgeInstancesParamsSchema = z.object({
+const purgeInstancesParamsSchema = lazySchema(() => z.object({
   body: z.object({
     list: z.array(sloIdSchema).optional(),
     staleDuration: durationType.optional(),
     force: z.boolean().optional(),
   }),
-});
+}));
 
 interface PurgeInstancesResponse {
   taskId?: string;
@@ -24,11 +24,11 @@ interface PurgeInstancesResponse {
 type PurgeInstancesInput = z.input<typeof purgeInstancesParamsSchema.shape.body>;
 type PurgeInstancesParams = z.output<typeof purgeInstancesParamsSchema.shape.body>;
 
-const purgeInstancesStatusParamsSchema = z.object({
+const purgeInstancesStatusParamsSchema = lazySchema(() => z.object({
   path: z.object({
     taskId: z.string(),
   }),
-});
+}));
 
 interface PurgeInstancesStatusResponse {
   completed: boolean;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import {
@@ -28,7 +28,7 @@ export const InputSchema = CasesStepCaseIdVersionSchema.extend({
    * treats `''` as empty and only rejects it when the field is required. It is intentionally not
    * bounded with `.min(1)`.
    */
-  fields: z.record(z.string().min(1), z.string()),
+  fields: lazySchema(() => z.record(z.string().min(1), z.string())),
 });
 
 export const OutputSchema = CasesStepSingleCaseOutputSchema;

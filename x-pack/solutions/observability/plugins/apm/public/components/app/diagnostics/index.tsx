@@ -7,7 +7,7 @@
 
 import { Outlet } from '@kbn/typed-react-router-config';
 import React from 'react';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { EuiButton, EuiCallOut, EuiLoadingLogo, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
@@ -32,7 +32,7 @@ import { getIsIndicesTabOk } from './summary_tab/indicies_status';
 import { DiagnosticsApmDocuments } from './apm_documents_tab';
 import { isPending } from '../../../hooks/use_fetcher';
 
-const params = z.object({
+const params = lazySchema(() => z.object({
   query: z
     .object({
       rangeFrom: z.string(),
@@ -45,7 +45,7 @@ const params = z.object({
         kuery: z.string().optional(),
       })
     ),
-});
+}));
 
 export const diagnosticsRoute = {
   '/diagnostics': {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import { internalTools, ToolType } from '@kbn/agent-builder-common';
 import { createOtherResult } from '@kbn/agent-builder-server';
@@ -14,9 +14,9 @@ import type { ModelProvider } from '@kbn/agent-builder-server/runner';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { selectRelevantSkills } from '../utils/relevant_skills/select_relevant_skills';
 
-const schema = z.object({
+const schema = lazySchema(() => z.object({
   query: z.string().describe('A short description of the sub-task you need a skill for'),
-});
+}));
 
 /**
  * On-demand counterpart to the implicit `<relevant_skills>` selection: lets the agent search the

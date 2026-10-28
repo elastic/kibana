@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   DiscoverTabType,
   MAX_METRICS_TAB_DIMENSIONS,
@@ -19,7 +19,7 @@ import {
   METRICS_GRID_SORT_FIELDS,
 } from '@kbn/discover-session-constants';
 
-const simpleAggregationSchema = z.enum(METRICS_GRID_SIMPLE_AGGREGATIONS);
+const simpleAggregationSchema = lazySchema(() => z.enum(METRICS_GRID_SIMPLE_AGGREGATIONS));
 
 export const discoverSessionApiMetricsTabTypeStateSchema = z
   .object({

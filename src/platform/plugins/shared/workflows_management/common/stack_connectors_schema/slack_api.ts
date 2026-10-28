@@ -12,10 +12,10 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 // Slack API connector response schema
-export const SlackApiResponseSchema = z.object({
+export const SlackApiResponseSchema = lazySchema(() => z.object({
   ok: z.boolean(),
   channel: z.string().optional(),
   ts: z.string().optional(),
@@ -47,4 +47,4 @@ export const SlackApiResponseSchema = z.object({
     )
     .optional(),
   error: z.string().optional(),
-});
+}));

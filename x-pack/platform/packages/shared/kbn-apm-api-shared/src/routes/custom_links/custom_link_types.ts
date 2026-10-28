@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export const filterOptionsSchema = z
   .object({
@@ -15,10 +15,10 @@ export const filterOptionsSchema = z
   })
   .partial();
 
-const filterKeySchema = z.union([
+const filterKeySchema = lazySchema(() => z.union([
   z.literal(''),
   z.enum(['service.name', 'service.environment', 'transaction.name', 'transaction.type']),
-]);
+]));
 
 export const payloadSchema = z
   .object({

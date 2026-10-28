@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../bundled-types.gen';
 
-export const CasesStepCaseIdSchema = z.object({
+export const CasesStepCaseIdSchema = lazySchema(() => z.object({
   case_id: z.string().min(1, 'case_id is required'),
-});
+}));
 
-export const CasesStepCaseIdVersionSchema = CasesStepCaseIdSchema.extend({
+export const CasesStepCaseIdVersionSchema = lazySchema(() => CasesStepCaseIdSchema.extend({
   version: z.string().min(1).optional(),
-});
+}));
 
-export const CasesStepSingleCaseOutputSchema = z.object({
+export const CasesStepSingleCaseOutputSchema = lazySchema(() => z.object({
   case: CaseResponsePropertiesSchema,
-});
+}));
 
 export const CasesStepBaseConfigSchema = z
   .object({

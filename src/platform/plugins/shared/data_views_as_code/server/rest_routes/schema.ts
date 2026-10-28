@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { savedDataViewSpecSchema } from '@kbn/as-code-data-views-schema';
 import {
   asCodeMetaSchema,
@@ -16,11 +16,11 @@ import {
 } from '@kbn/as-code-shared-schemas';
 
 const dataViewsMetaSchema = asCodeMetaSchema.extend({
-  spaces: z
+  spaces: lazySchema(() => z
     .array(z.string().max(1000))
     .max(100)
     .optional()
-    .meta({ description: 'The IDs of the spaces where the data view is available.' }),
+    .meta({ description: 'The IDs of the spaces where the data view is available.' })),
 });
 
 export const asCodeResponseSchema = z
@@ -31,7 +31,7 @@ export const asCodeResponseSchema = z
   })
   .strict();
 
-export const asCodeMinimalResponseSchema = z.object({
+export const asCodeMinimalResponseSchema = lazySchema(() => z.object({
   id: z.string().max(1000).meta({ description: 'The ID of the data view.' }),
   data: savedDataViewSpecSchema.pick({
     name: true,
@@ -39,11 +39,11 @@ export const asCodeMinimalResponseSchema = z.object({
     time_field: true,
   }),
   meta: dataViewsMetaSchema,
-});
+}));
 
-export const asCodePaginatedResponseSchema = z.object({
+export const asCodePaginatedResponseSchema = lazySchema(() => z.object({
   data: z.array(asCodeMinimalResponseSchema).max(PAGINATION_MAX_SIZE),
   meta: asCodePaginationResponseMetaSchema,
-});
+}));
 
 export const savedDataViewSpecSchemaWithoutId = savedDataViewSpecSchema.omit({ id: true });

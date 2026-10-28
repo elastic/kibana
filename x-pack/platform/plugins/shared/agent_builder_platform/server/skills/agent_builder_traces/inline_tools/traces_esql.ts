@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
@@ -19,14 +19,14 @@ import { buildAgentBuilderTracesIndexPattern } from '@kbn/agent-builder-plugin/c
 
 export const AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID = 'agent-builder-traces.generate_esql';
 
-const tracesEsqlSchema = z.object({
+const tracesEsqlSchema = lazySchema(() => z.object({
   prompt: z
     .string()
     .max(1024)
     .describe(
       'Natural language question about Agent Builder OTel traces (token usage, latency, tool calls, errors, or captured message content).'
     ),
-});
+}));
 
 const buildTracesQueryRules = (tracesIndex: string) =>
   `

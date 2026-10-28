@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { timezoneNames } from './timezone_names';
 
 // Minimum interval is 1 minute (60s). Seconds are allowed only for values ≥ 60.
@@ -15,7 +15,7 @@ export const SCHEDULED_INTERVAL_PATTERN = /^(([6-9]\d|\d{3,})s|\d+[mhd])$/;
 export const SCHEDULED_INTERVAL_ERROR =
   'Scheduled interval must be at least 1 minute. Use format like "1m", "90s", "2h", "1d"';
 
-export const ScheduledTriggerSchema = z.object({
+export const ScheduledTriggerSchema = lazySchema(() => z.object({
   type: z.literal('scheduled'),
   with: z.union([
     z.object({
@@ -37,4 +37,4 @@ export const ScheduledTriggerSchema = z.object({
       }),
     }),
   ]),
-});
+}));

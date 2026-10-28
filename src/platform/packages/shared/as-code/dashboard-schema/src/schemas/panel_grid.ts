@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
 } from '../constants';
 
-export const panelGridSchema = z
+export const panelGridSchema = lazySchema(() => z
   .object({
     x: z.number().meta({ description: 'The x coordinate of the panel in grid units.' }),
     y: z.number().meta({ description: 'The y coordinate of the panel in grid units.' }),
@@ -31,4 +31,4 @@ export const panelGridSchema = z
     id: 'kbn-dashboard-panel-grid',
     title: 'Panel grid',
     description: 'The position and size of the panel on the dashboard grid.',
-  });
+  }));

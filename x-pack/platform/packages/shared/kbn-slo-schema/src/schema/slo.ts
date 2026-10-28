@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
@@ -21,21 +21,21 @@ import {
   SLO_ID_REGEX,
 } from './validation_constants';
 
-const occurrencesBudgetingMethodSchema = z.literal('occurrences');
-const timeslicesBudgetingMethodSchema = z.literal('timeslices');
+const occurrencesBudgetingMethodSchema = lazySchema(() => z.literal('occurrences'));
+const timeslicesBudgetingMethodSchema = lazySchema(() => z.literal('timeslices'));
 
-const budgetingMethodSchema = z
+const budgetingMethodSchema = lazySchema(() => z
   .union([occurrencesBudgetingMethodSchema, timeslicesBudgetingMethodSchema])
   .meta({
     id: 'SLOBudgetingMethod',
     description: 'The budgeting method to use when computing the rollup data.',
-  });
+  }));
 
-const targetSchema = z.object({
+const targetSchema = lazySchema(() => z.object({
   target: z.number().describe('the target objective between 0 and 1 excluded'),
-});
+}));
 
-const objectiveSchema = targetSchema
+const objectiveSchema = lazySchema(() => targetSchema
   .extend({
     timesliceTarget: z
       .number()
@@ -47,9 +47,9 @@ const objectiveSchema = targetSchema
       )
       .optional(),
   })
-  .meta({ id: 'SLOObjective', description: 'Defines properties for the SLO objective' });
+  .meta({ id: 'SLOObjective', description: 'Defines properties for the SLO objective' }));
 
-const boundedProjectRoutingSchema = z
+const boundedProjectRoutingSchema = lazySchema(() => z
   .string()
   .max(MAX_PROJECT_ROUTINGS_LENGTH, PROJECT_ROUTINGS_TOO_LONG_MESSAGE)
   .refine((value) => value.trim().length > 0, PROJECT_ROUTINGS_EMPTY_MESSAGE)
@@ -57,9 +57,9 @@ const boundedProjectRoutingSchema = z
     'ES ProjectRouting expression controlling which linked projects the L1 rollup reads. ' +
       'When set (including null), overrides preventCrossProjectSearch. null and `_alias:_origin` mean origin only; ' +
       '`_alias:*` means all linked projects. Subset example `_id:p1 AND _id:p2`.'
-  );
+  ));
 
-const settingsSchema = z
+const settingsSchema = lazySchema(() => z
   .object({
     syncDelay: durationType.describe(
       'The time delay in minutes between the current time and the latest source data time. ' +
@@ -94,7 +94,7 @@ const settingsSchema = z
       .optional(),
     projectRoutings: boundedProjectRoutingSchema.nullable().optional(),
   })
-  .meta({ id: 'SLOSettings', description: 'Defines properties for SLO settings.' });
+  .meta({ id: 'SLOSettings', description: 'Defines properties for SLO settings.' }));
 
 const groupBySchema = allOrAnyStringOrArray.meta({
   id: 'SLOGroupBy',
@@ -103,17 +103,17 @@ const groupBySchema = allOrAnyStringOrArray.meta({
 
 const optionalSettingsSchema = settingsSchema.partial();
 
-const tagsSchema = z.array(z.string()).describe('List of tags');
+const tagsSchema = lazySchema(() => z.array(z.string()).describe('List of tags'));
 
 // id cannot contain special characters and spaces
-const sloIdSchema = z
+const sloIdSchema = lazySchema(() => z
   .string()
   .min(MIN_SLO_ID_LENGTH, SLO_ID_INVALID_MESSAGE)
   .max(MAX_SLO_ID_LENGTH, SLO_ID_INVALID_MESSAGE)
   .regex(SLO_ID_REGEX, SLO_ID_INVALID_MESSAGE)
-  .describe('The identifier of the SLO.');
+  .describe('The identifier of the SLO.'));
 
-const baseSloSchema = z.object({
+const baseSloSchema = lazySchema(() => z.object({
   id: sloIdSchema,
   name: z.string().describe('The name of the SLO.'),
   description: z.string().describe('The description of the SLO.'),
@@ -131,32 +131,32 @@ const baseSloSchema = z.object({
   version: z.number().describe('The internal SLO version'),
   createdBy: z.string().describe('The user who created the SLO.').optional(),
   updatedBy: z.string().describe('The user who last updated the SLO.').optional(),
-});
+}));
 
-const dashboardsWithIdSchema = z.object({
+const dashboardsWithIdSchema = lazySchema(() => z.object({
   dashboards: z
     .array(z.object({ id: z.string().describe('Dashboard saved-object id') }))
     .describe('Array of dashboard references')
     .optional(),
-});
-const dashboardsWithRefIdSchema = z.object({
+}));
+const dashboardsWithRefIdSchema = lazySchema(() => z.object({
   dashboards: z
     .array(z.object({ refId: z.string().describe('Dashboard reference id') }))
     .describe('Array of dashboard references')
     .optional(),
-});
+}));
 
-const artifactsWithIdSchema = dashboardsWithIdSchema.meta({
+const artifactsWithIdSchema = lazySchema(() => dashboardsWithIdSchema.meta({
   id: 'SLOArtifacts',
   description: 'Links to related assets for the SLO',
-});
+}));
 
-const sloDefinitionSchema = baseSloSchema
+const sloDefinitionSchema = lazySchema(() => baseSloSchema
   .extend({ artifacts: artifactsWithIdSchema.optional() })
-  .meta({ id: 'SLODefinition', description: 'The SLO definition' });
-const storedSloDefinitionSchema = baseSloSchema.extend({
+  .meta({ id: 'SLODefinition', description: 'The SLO definition' }));
+const storedSloDefinitionSchema = lazySchema(() => baseSloSchema.extend({
   artifacts: dashboardsWithRefIdSchema.optional(),
-});
+}));
 
 export {
   boundedProjectRoutingSchema,

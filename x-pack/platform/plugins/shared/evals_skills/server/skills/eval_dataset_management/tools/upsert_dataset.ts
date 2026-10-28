@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { EvalDatasetManagementToolDeps } from './deps';
@@ -27,7 +27,7 @@ import {
   withDatasetLookup,
 } from './tool_utils';
 
-const schema = z.object({
+const schema = lazySchema(() => z.object({
   name: datasetNameSchema,
   description: datasetDescriptionSchema,
   tags: datasetTagsSchema.optional(),
@@ -35,7 +35,7 @@ const schema = z.object({
   examples: datasetExamplesSchema.describe(
     'The complete example set. Matched by name: an existing dataset with this name has its examples replaced, and any example missing from this list is removed.'
   ),
-});
+}));
 
 type UpsertParams = z.infer<typeof schema>;
 

@@ -6,7 +6,7 @@
  */
 
 import path from 'path';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
@@ -19,9 +19,9 @@ import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 import { findParamVaultReferenceError } from '../secret_connection/connection_utils';
 
-const RequestParamsSchema = z.strictObject({
+const RequestParamsSchema = lazySchema(() => z.strictObject({
   id: routeId.describe('The unique identifier for the parameter.'),
-});
+}));
 
 type RequestParams = z.infer<typeof RequestParamsSchema>;
 

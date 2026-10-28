@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /** Attachment type identifier registered with Agent Builder. */
 export const PROPOSAL_ATTACHMENT_TYPE = 'platform.proposal' as const;
@@ -15,7 +15,7 @@ export const PROPOSAL_ATTACHMENT_TYPE = 'platform.proposal' as const;
  * card and the agent read it at display time — anything snapshotted here would
  * still say "pending" after the analyst had decided.
  */
-export const proposalAttachmentDataSchema = z.object({
+export const proposalAttachmentDataSchema = lazySchema(() => z.object({
   // Same bound as `proposalSchema.id`, which is what this always holds.
   proposalId: z.string().max(256),
   /**
@@ -24,6 +24,6 @@ export const proposalAttachmentDataSchema = z.object({
    * Carries the proposal's own title, which `create()` always resolves.
    */
   title: z.string().max(256),
-});
+}));
 
 export type ProposalAttachmentData = z.infer<typeof proposalAttachmentDataSchema>;

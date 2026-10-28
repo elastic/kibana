@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { timeRangeSchema } from '@kbn/agent-builder-dashboards-common';
 import { controlInputSchema } from '../controls';
 import { upsertPanelContentSchema } from '../panels';
 
-const idSchema = z.string().min(1).max(256);
+const idSchema = lazySchema(() => z.string().min(1).max(256));
 
-const upsertSectionSchema = z.object({
+const upsertSectionSchema = lazySchema(() => z.object({
   id: idSchema.describe(
     'Section id. An existing section id updates that section; a new id creates a section with this id. Use a short readable slug for new sections, e.g. "key-metrics".'
   ),
@@ -26,9 +26,9 @@ const upsertSectionSchema = z.object({
     .boolean()
     .optional()
     .describe('Whether the section is collapsed. Defaults to false.'),
-});
+}));
 
-const upsertPanelSchema = z.object({
+const upsertPanelSchema = lazySchema(() => z.object({
   id: idSchema.describe(
     'Panel id. An existing panel id updates that panel; a new id creates a panel with this id. Use a short readable slug for new panels, e.g. "error-rate-trend". List each panel once; to move and edit a panel, set `section` and `content` in the same item. Ids are handles that never change: read panel titles for what a panel shows.'
   ),
@@ -43,13 +43,13 @@ const upsertPanelSchema = z.object({
     .describe(
       'Panel content. Required for new panels. For an existing panel, edits it (e.g. a request with a query describing the change) and must match its kind; to change the kind, remove the panel and add a new one with a new id. Omit to only move the panel.'
     ),
-});
+}));
 
 /**
  * The desired changes to a dashboard, keyed by id: dashboard fields, and sections, panels and
  * controls to create or update, and ids to remove.
  */
-export const upsertDashboardSchema = z.object({
+export const upsertDashboardSchema = lazySchema(() => z.object({
   title: z
     .string()
     .min(1)
@@ -92,7 +92,7 @@ export const upsertDashboardSchema = z.object({
     .describe(
       'Ids of panels, sections, or controls to remove. Removing a section also removes the panels still in it; to keep some, move them in the same call with `panels[].section` (null for the top level). A section is kept when a panel listed to move out of it cannot be moved.'
     ),
-});
+}));
 
 export type DashboardUpsert = z.infer<typeof upsertDashboardSchema>;
 

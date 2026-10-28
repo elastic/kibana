@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { referenceSchema } from '@kbn/content-management-utils/zod';
 
-const droppedPanelWarningSchema = z
+const droppedPanelWarningSchema = lazySchema(() => z
   .object({
     type: z.literal('dropped_panel'),
     message: z
@@ -33,9 +33,9 @@ const droppedPanelWarningSchema = z
     title: 'Dropped panel',
     description:
       'A panel that was excluded from the response because its type is not supported by the API.',
-  });
+  }));
 
-const droppedDashboardProperty = z
+const droppedDashboardProperty = lazySchema(() => z
   .object({
     type: z.literal('dropped_property'),
     message: z
@@ -52,12 +52,12 @@ const droppedDashboardProperty = z
     id: 'kbn-dashboard-dropped-property-warning',
     title: 'Dropped property',
     description: 'A property that was excluded from the response because it failed validation.',
-  });
+  }));
 
-export const warningsSchema = z
+export const warningsSchema = lazySchema(() => z
   .array(z.union([droppedPanelWarningSchema, droppedDashboardProperty]))
   .max(100)
   .meta({
     description:
       'A list of warnings returned by the Dashboards API. Present only when one or more dashboard properties failed validation.',
-  });
+  }));

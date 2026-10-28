@@ -13,7 +13,7 @@ import {
   HUMAN_READABLE_ID_PATTERN,
 } from '@kbn/human-readable-id';
 import type { DotKeysOf, DotObject, JsonValue, RecursivePartial } from '@kbn/utility-types';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { WorkflowAccessSubject, WorkflowPermissions } from '../common/access_control';
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type {
@@ -361,7 +361,7 @@ export interface WorkflowStepExecutionListDto {
 
 // TODO: convert to actual elastic document spec
 
-export const EsWorkflowSchema = z.object({
+export const EsWorkflowSchema = lazySchema(() => z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().optional(),
@@ -382,7 +382,7 @@ export const EsWorkflowSchema = z.object({
   valid: z.boolean().readonly(),
   /** Monotonic workflow document version counter (`_source.version`). */
   version: z.number().optional(),
-});
+}));
 
 export type EsWorkflow = z.infer<typeof EsWorkflowSchema> & WorkflowAccessSubject;
 
@@ -394,7 +394,7 @@ export type EsWorkflowCreate = Omit<
 export const MAX_WORKFLOW_YAML_LENGTH = 1_048_576;
 const MAX_BULK_CREATE_WORKFLOWS = 500;
 
-export const CreateWorkflowCommandSchema = z.object({
+export const CreateWorkflowCommandSchema = lazySchema(() => z.object({
   yaml: z.string().max(MAX_WORKFLOW_YAML_LENGTH),
   id: z
     .string()
@@ -402,24 +402,24 @@ export const CreateWorkflowCommandSchema = z.object({
     .max(HUMAN_READABLE_ID_MAX_LENGTH)
     .regex(HUMAN_READABLE_ID_PATTERN)
     .optional(),
-});
+}));
 export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
-export const BulkCreateWorkflowsCommandSchema = z.object({
+export const BulkCreateWorkflowsCommandSchema = lazySchema(() => z.object({
   workflows: z.array(CreateWorkflowCommandSchema).max(MAX_BULK_CREATE_WORKFLOWS),
-});
+}));
 
 export type BulkCreateWorkflowsCommand = z.infer<typeof BulkCreateWorkflowsCommandSchema>;
 
-export const UpdateWorkflowCommandSchema = z.object({
+export const UpdateWorkflowCommandSchema = lazySchema(() => z.object({
   name: z.string(),
   description: z.string().optional(),
   enabled: z.boolean(),
   tags: z.array(z.string()),
   yaml: z.string(),
-});
+}));
 
-export const SearchWorkflowCommandSchema = z.object({
+export const SearchWorkflowCommandSchema = lazySchema(() => z.object({
   triggerType: z.string().optional(),
   size: z.number().default(100),
   page: z.number().default(1),
@@ -429,42 +429,42 @@ export const SearchWorkflowCommandSchema = z.object({
   tags: z.array(z.string()).optional(),
   query: z.string().optional(),
   _full: z.boolean().default(false),
-});
+}));
 
-export const RunWorkflowCommandSchema = z.object({
+export const RunWorkflowCommandSchema = lazySchema(() => z.object({
   inputs: z.record(z.string(), z.unknown()),
-});
+}));
 export type RunWorkflowCommand = z.infer<typeof RunWorkflowCommandSchema>;
 
-export const RunStepCommandSchema = z.object({
+export const RunStepCommandSchema = lazySchema(() => z.object({
   workflowYaml: z.string(),
   workflowId: z.string().optional(), // Optional to allow for test step runs for unsaved workflows
   stepId: z.string(),
   executionContext: z.record(z.string(), z.unknown()).optional(),
   contextOverride: z.record(z.string(), z.unknown()).optional(),
-});
+}));
 export type RunStepCommand = z.infer<typeof RunStepCommandSchema>;
 
-export const TestWorkflowCommandSchema = z.object({
+export const TestWorkflowCommandSchema = lazySchema(() => z.object({
   workflowYaml: z.string(),
   inputs: z.record(z.string(), z.unknown()),
-});
+}));
 export type TestWorkflowCommand = z.infer<typeof TestWorkflowCommandSchema>;
 
-export const RunWorkflowResponseSchema = z.object({
+export const RunWorkflowResponseSchema = lazySchema(() => z.object({
   workflowExecutionId: z.string(),
-});
+}));
 export type RunWorkflowResponseDto = z.infer<typeof RunWorkflowResponseSchema>;
 
-export const TestWorkflowResponseSchema = z.object({
+export const TestWorkflowResponseSchema = lazySchema(() => z.object({
   workflowExecutionId: z.string(),
-});
+}));
 export type TestWorkflowResponseDto = z.infer<typeof TestWorkflowResponseSchema>;
 
 /** Result of scheduling a resume for a workflow execution that was waiting for human input. */
-export const ResumeWorkflowExecutionResponseSchema = z.object({
+export const ResumeWorkflowExecutionResponseSchema = lazySchema(() => z.object({
   resumedBy: z.string(),
-});
+}));
 export type ResumeWorkflowExecutionResponseDto = z.infer<
   typeof ResumeWorkflowExecutionResponseSchema
 >;

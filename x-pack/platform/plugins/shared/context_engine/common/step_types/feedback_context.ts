@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
@@ -13,11 +13,11 @@ import { aiIndexIdSchema } from './ki';
 
 export const FEEDBACK_CONTEXT_STEP_ID = 'context-engine.getFeedbackContext' as const;
 
-export const feedbackContextInputSchema = z.object({
+export const feedbackContextInputSchema = lazySchema(() => z.object({
   ai_index_id: aiIndexIdSchema.describe('The AI index to analyze'),
-});
+}));
 
-export const feedbackContextOutputSchema = z.object({
+export const feedbackContextOutputSchema = lazySchema(() => z.object({
   agent_id: z
     .string()
     .describe(
@@ -41,7 +41,7 @@ export const feedbackContextOutputSchema = z.object({
     .describe('The resolved window the signals were read from.'),
   signal_spaces: z.array(z.string()).describe('The spaces the selected signals came from.'),
   signal_count: z.number().describe('How many signals were selected.'),
-});
+}));
 
 export const feedbackContextStepCommonDefinition: CommonStepDefinition<
   typeof feedbackContextInputSchema,

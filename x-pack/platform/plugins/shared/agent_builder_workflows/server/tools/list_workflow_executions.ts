@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { type ExecutionStatus, ExecutionStatusValues } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
@@ -15,9 +15,9 @@ import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import { hasWorkflowExecutionReadPrivilege } from '@kbn/agent-builder-tools-base/workflows';
 
-const executionStatusSchema = z.enum(ExecutionStatusValues as [string, ...string[]]);
+const executionStatusSchema = lazySchema(() => z.enum(ExecutionStatusValues as [string, ...string[]]));
 
-const listWorkflowExecutionsSchema = z.object({
+const listWorkflowExecutionsSchema = lazySchema(() => z.object({
   workflowId: z
     .string()
     .optional()
@@ -41,7 +41,7 @@ const listWorkflowExecutionsSchema = z.object({
     .min(1)
     .optional()
     .describe('Page number for pagination, starting at 1. Defaults to 1.'),
-});
+}));
 
 export const listWorkflowExecutionsTool = ({
   workflowsManagement,

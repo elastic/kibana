@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { CostResponse } from '../../../../common/cost';
 import { createServerRoute } from '../../create_server_route';
@@ -97,14 +97,14 @@ const getCostRoute = createServerRoute({
       requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     query: z
       .object({
         refresh: optionalBooleanQuery,
       })
       .strict()
       .optional(),
-  }),
+  })),
   handler: async ({
     params,
     request,

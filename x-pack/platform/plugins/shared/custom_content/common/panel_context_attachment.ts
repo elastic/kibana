@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ESQLVariableType } from '@kbn/esql-types';
 import {
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
@@ -29,7 +29,7 @@ export const MAX_SHORT_FIELD_LENGTH = 256;
  */
 export const MAX_FETCH_CONTEXT_BYTES = 10_000;
 
-export const customContentContextAttachmentDataSchema = z.object({
+export const customContentContextAttachmentDataSchema = lazySchema(() => z.object({
   panel_template: z.string().max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH),
   esql_query: z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH).optional(),
   panel_title: z.string().max(MAX_SHORT_FIELD_LENGTH).optional(),
@@ -58,7 +58,7 @@ export const customContentContextAttachmentDataSchema = z.object({
   query: z.record(z.string().max(MAX_SHORT_FIELD_LENGTH), z.unknown()).optional(),
   is_approximate: z.boolean().optional(),
   project_routing: z.string().max(1024).optional(),
-});
+}));
 
 export type CustomContentContextAttachmentData = z.infer<
   typeof customContentContextAttachmentDataSchema

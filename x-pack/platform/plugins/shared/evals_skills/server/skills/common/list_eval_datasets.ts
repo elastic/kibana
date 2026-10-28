@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { DatasetMaturity, MAX_TAG_LENGTH, MAX_TAGS_PER_DATASET } from '@kbn/evals-common';
@@ -19,7 +19,7 @@ export interface ListEvalDatasetsToolDeps {
   getStartDependencies: () => Promise<EvalsSkillsStartDependencies>;
 }
 
-const schema = z.object({
+const schema = lazySchema(() => z.object({
   search: z
     .string()
     .max(MAX_NAME_LENGTH)
@@ -45,7 +45,7 @@ const schema = z.object({
     .max(100)
     .optional()
     .describe('Maximum number of datasets to return. Defaults to 50.'),
-});
+}));
 
 /**
  * Lists evaluation datasets visible in the active space. Each skill passes its

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { InternalConnectorContract } from '../..';
 
 /**
@@ -60,7 +60,7 @@ export const ENHANCED_ELASTICSEARCH_CONNECTORS: EnhancedConnectorDefinition[] = 
     },
     parameterEnhancements: {
       query: {
-        schema: z.string().min(1).describe('ES|QL query string'),
+        schema: lazySchema(() => z.string().min(1).describe('ES|QL query string')),
         example: 'FROM my-index | WHERE status = "active" | LIMIT 100',
         description:
           'ES|QL query string. Use the Elasticsearch Query Language to filter, aggregate, and transform data.',

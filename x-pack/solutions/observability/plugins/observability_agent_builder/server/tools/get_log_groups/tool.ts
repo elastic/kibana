@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
@@ -37,7 +37,7 @@ const DEFAULT_TIME_RANGE = {
 
 export const OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID = 'observability.get_log_groups';
 
-const getLogsSchema = z.object({
+const getLogsSchema = lazySchema(() => z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   index: z.string().max(MAX_INDEX_PATTERN_LENGTH).describe(indexDescription).optional(),
   kqlFilter: z
@@ -72,7 +72,7 @@ const getLogsSchema = z.object({
       dedent`Include firstSeen timestamp for application exception groups. Useful for detecting new exceptions.`
     ),
   limit: z.number().optional().default(20).describe('Maximum number of log groups to return.'),
-});
+}));
 
 export function createGetLogGroupsTool({
   core,

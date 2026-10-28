@@ -6,7 +6,7 @@
  */
 
 import { badRequest, conflict, notFound } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import {
   MAX_CUSTOM_CONTEXT_SNIPPETS,
@@ -45,7 +45,7 @@ const getCustomContextRoute = createNightshiftInvestigationsServerRoute({
       'Returns the custom context snippets of the current space. They are appended to the investigation agent system prompt.',
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read] } },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({ request, customContextClient }): Promise<GetCustomContextResponse> => {
     try {
       return await customContextClient.get(request);
@@ -64,7 +64,7 @@ const putCustomContextRoute = createNightshiftInvestigationsServerRoute({
       'Replaces the custom context snippets of the current space. Snippets without an id are added; existing snippets not listed are removed.',
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
-  params: z.object({
+  params: lazySchema(() => z.object({
     body: z.object({
       snippets: z
         .array(
@@ -76,7 +76,7 @@ const putCustomContextRoute = createNightshiftInvestigationsServerRoute({
         .max(MAX_CUSTOM_CONTEXT_SNIPPETS),
       version: z.string().max(MAX_CUSTOM_CONTEXT_VERSION_LENGTH).optional(),
     }),
-  }),
+  })),
   handler: async ({ request, params, customContextClient }): Promise<PutCustomContextResponse> => {
     try {
       return await customContextClient.replace(request, params.body);

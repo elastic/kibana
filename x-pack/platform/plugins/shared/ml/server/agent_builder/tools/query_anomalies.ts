@@ -6,7 +6,7 @@
  */
 
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -171,7 +171,7 @@ export const resolveParamDates = (
   return result;
 };
 
-const schema = z.object({
+const schema = lazySchema(() => z.object({
   query: z
     .string()
     .min(1)
@@ -189,7 +189,7 @@ const schema = z.object({
     .optional()
     .default(DEFAULT_LIMIT)
     .describe(`(Optional) Max rows to return. Defaults to ${DEFAULT_LIMIT}.`),
-});
+}));
 
 const stripEsqlComments = (query: string): string => {
   const withoutBlockComments = query.replace(/\/\*[\s\S]*?\*\//g, ' ');

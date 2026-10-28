@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { maxReferencedContentItems } from './referenced_content_shared';
 import {
@@ -27,23 +27,23 @@ export const skillNameRegexp = /^[a-zA-Z0-9](?:[a-zA-Z0-9 _-]*[a-zA-Z0-9])?$/;
 /** Maximum number of tools a skill can reference. */
 export const maxToolsPerSkill = 5;
 
-const skillNameSchema = z
+const skillNameSchema = lazySchema(() => z
   .string()
   .min(1, 'Name must be non-empty')
   .max(skillNameMaxLength, `Name must be at most ${skillNameMaxLength} characters`)
   .regex(
     skillNameRegexp,
     'Name must start and end with a letter or number, and contain only letters, numbers, spaces, hyphens, and underscores'
-  );
+  ));
 
-const skillDescriptionSchema = z
+const skillDescriptionSchema = lazySchema(() => z
   .string()
   .min(1, 'Description must be non-empty')
-  .max(1024, 'Description must be at most 1024 characters');
+  .max(1024, 'Description must be at most 1024 characters'));
 
-const skillContentSchema = z.string().min(1, 'Content must be non-empty');
+const skillContentSchema = lazySchema(() => z.string().min(1, 'Content must be non-empty'));
 
-const referencedContentItemSchema = z.object({
+const referencedContentItemSchema = lazySchema(() => z.object({
   name: z
     .string()
     .trim()
@@ -55,7 +55,7 @@ const referencedContentItemSchema = z.object({
     ),
   relativePath: z.string().trim().min(1, 'Relative path must be non-empty'),
   content: z.string(),
-});
+}));
 
 const referencedContentSuperRefineMessages: Record<ReferencedContentRefineIssueCode, string> = {
   [REFERENCED_CONTENT_REFINE_ISSUE_CODE.PATH_PROTOCOL]: 'Folder path must start with ./.',
@@ -79,11 +79,11 @@ const superRefineReferencedContent = (
   }
 };
 
-const toolIdsSchema = z
+const toolIdsSchema = lazySchema(() => z
   .array(z.string().min(1, 'Tool ID must be non-empty'))
-  .max(maxToolsPerSkill, `A skill can reference at most ${maxToolsPerSkill} tools`);
+  .max(maxToolsPerSkill, `A skill can reference at most ${maxToolsPerSkill} tools`));
 
-export const skillCreateRequestObjectSchema = z.object({
+export const skillCreateRequestObjectSchema = lazySchema(() => z.object({
   id: z
     .string()
     .min(1, 'ID must be non-empty')
@@ -103,18 +103,18 @@ export const skillCreateRequestObjectSchema = z.object({
     )
     .optional(),
   tool_ids: toolIdsSchema,
-});
+}));
 
 /**
  * Zod schema for validating skill create request bodies.
  */
-export const skillCreateRequestSchema = skillCreateRequestObjectSchema.superRefine((data, ctx) => {
+export const skillCreateRequestSchema = lazySchema(() => skillCreateRequestObjectSchema.superRefine((data, ctx) => {
   if (data.referenced_content?.length) {
     superRefineReferencedContent(data.referenced_content, ctx);
   }
-});
+}));
 
-const skillUpdateRequestObjectSchema = z.object({
+const skillUpdateRequestObjectSchema = lazySchema(() => z.object({
   name: skillNameSchema.optional(),
   description: skillDescriptionSchema.optional(),
   content: skillContentSchema.optional(),
@@ -126,16 +126,16 @@ const skillUpdateRequestObjectSchema = z.object({
     )
     .optional(),
   tool_ids: toolIdsSchema.optional(),
-});
+}));
 
 /**
  * Zod schema for validating skill update request bodies.
  */
-export const skillUpdateRequestSchema = skillUpdateRequestObjectSchema.superRefine((data, ctx) => {
+export const skillUpdateRequestSchema = lazySchema(() => skillUpdateRequestObjectSchema.superRefine((data, ctx) => {
   if (data.referenced_content?.length !== undefined) {
     superRefineReferencedContent(data.referenced_content, ctx);
   }
-});
+}));
 
 /**
  * Validates a skill ID has the right format.

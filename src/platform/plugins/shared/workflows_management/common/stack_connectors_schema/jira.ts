@@ -12,10 +12,10 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 // Jira connector parameter schemas for different sub-actions
-export const JiraPushToServiceParamsSchema = z.object({
+export const JiraPushToServiceParamsSchema = lazySchema(() => z.object({
   incident: z.object({
     summary: z.string(),
     description: z.string().optional(),
@@ -32,34 +32,34 @@ export const JiraPushToServiceParamsSchema = z.object({
       })
     )
     .optional(),
-});
+}));
 
-export const JiraGetIncidentParamsSchema = z.object({
+export const JiraGetIncidentParamsSchema = lazySchema(() => z.object({
   id: z.string(),
-});
+}));
 
-export const JiraGetFieldsParamsSchema = z.object({
+export const JiraGetFieldsParamsSchema = lazySchema(() => z.object({
   // Common fields parameters - usually empty object
-});
+}));
 
-export const JiraGetIssueTypesParamsSchema = z.object({
+export const JiraGetIssueTypesParamsSchema = lazySchema(() => z.object({
   // Issue types parameters - usually empty object
-});
+}));
 
-export const JiraGetFieldsByIssueTypeParamsSchema = z.object({
+export const JiraGetFieldsByIssueTypeParamsSchema = lazySchema(() => z.object({
   id: z.string(), // Issue type ID
-});
+}));
 
-export const JiraGetIssuesParamsSchema = z.object({
+export const JiraGetIssuesParamsSchema = lazySchema(() => z.object({
   title: z.string(),
-});
+}));
 
-export const JiraGetIssueParamsSchema = z.object({
+export const JiraGetIssueParamsSchema = lazySchema(() => z.object({
   id: z.string(),
-});
+}));
 
 // Jira connector response schemas
-export const JiraIssueResponseSchema = z.object({
+export const JiraIssueResponseSchema = lazySchema(() => z.object({
   id: z.string(),
   key: z.string(),
   title: z.string(),
@@ -70,16 +70,16 @@ export const JiraIssueResponseSchema = z.object({
   status: z.string(),
   priority: z.string().optional(),
   labels: z.array(z.string()).optional(),
-});
+}));
 
-export const JiraPushToServiceResponseSchema = z.object({
+export const JiraPushToServiceResponseSchema = lazySchema(() => z.object({
   id: z.string(),
   key: z.string(),
   title: z.string(),
   url: z.string(),
-});
+}));
 
-export const JiraFieldsResponseSchema = z.array(
+export const JiraFieldsResponseSchema = lazySchema(() => z.array(
   z.object({
     id: z.string(),
     name: z.string(),
@@ -89,9 +89,9 @@ export const JiraFieldsResponseSchema = z.array(
     }),
     required: z.boolean(),
   })
-);
+));
 
-export const JiraIssueTypesResponseSchema = z.array(
+export const JiraIssueTypesResponseSchema = lazySchema(() => z.array(
   z.object({
     id: z.string(),
     name: z.string(),
@@ -99,9 +99,9 @@ export const JiraIssueTypesResponseSchema = z.array(
     iconUrl: z.string().optional(),
     subtask: z.boolean(),
   })
-);
+));
 
-export const JiraIssuesResponseSchema = z.array(
+export const JiraIssuesResponseSchema = lazySchema(() => z.array(
   z.object({
     id: z.string(),
     key: z.string(),
@@ -110,4 +110,4 @@ export const JiraIssuesResponseSchema = z.array(
     created: z.string(),
     updated: z.string(),
   })
-);
+));

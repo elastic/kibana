@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * UI context captured from the APM service map page when the user starts an
@@ -21,7 +21,7 @@ const MAX_LABEL_LENGTH = 1024;
 /** Cap the highlighted-services list so the attachment stays a compact context payload. */
 const MAX_HIGHLIGHTED_SERVICES = 50;
 
-export const serviceMapContextAttachmentDataSchema = z.object({
+export const serviceMapContextAttachmentDataSchema = lazySchema(() => z.object({
   /** Environment filter of the map view. Omitted when "All" is selected. */
   environment: z.string().max(MAX_LABEL_LENGTH).optional(),
   /** KQL filter applied to the map, if any. */
@@ -41,6 +41,6 @@ export const serviceMapContextAttachmentDataSchema = z.object({
     .array(z.string().max(MAX_LABEL_LENGTH))
     .max(MAX_HIGHLIGHTED_SERVICES)
     .optional(),
-});
+}));
 
 export type ServiceMapContextAttachmentData = z.infer<typeof serviceMapContextAttachmentDataSchema>;

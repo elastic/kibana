@@ -24,7 +24,7 @@ import type {
   AuditServiceSetup,
   CheckPrivilegesWithRequest,
 } from '@kbn/security-plugin-types-server';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './bindings';
 import { ensureClusterPrivilege } from './cluster_privilege';
@@ -87,7 +87,7 @@ const TOKEN_DELETE_CONCURRENCY = 10;
  * The discriminator on an account Elasticsearch reports, which decides whether the account is one
  * Kibana manages at all.
  */
-const userManagedEntrySchema = z.object({ type: z.literal('user_managed') });
+const userManagedEntrySchema = lazySchema(() => z.object({ type: z.literal('user_managed') }));
 
 /**
  * The rest of what Elasticsearch reports for an account keyed by its `{namespace}/{service}`
@@ -98,14 +98,14 @@ const userManagedEntrySchema = z.object({ type: z.literal('user_managed') });
  * account written outside Kibana can hold that much, and it must still read as "taken" rather
  * than as unreadable. The description is left unbounded for the same reason.
  */
-const accountEntrySchema = z.object({
+const accountEntrySchema = lazySchema(() => z.object({
   roles: z
     .array(z.string().min(1).max(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH))
     .max(ES_SERVICE_ACCOUNT_MAX_ROLES),
   enabled: z.boolean(),
   // codeql[js/kibana/unbounded-string-in-schema] Elasticsearch caps it at 1,000 characters on write.
   description: z.string().optional(),
-});
+}));
 
 /**
  * One account as the query API reports it. Unlike the keyed GET response, the principal is a

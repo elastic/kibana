@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
 
-const ObservablesActionTypeSchema = z.union([
+const ObservablesActionTypeSchema = lazySchema(() => z.union([
   z.literal('add'),
   z.literal('delete'),
   z.literal('update'),
-]);
+]));
 
-export const ObservablePayloadSchema = z.object({
+export const ObservablePayloadSchema = lazySchema(() => z.object({
   count: z.number(),
   actionType: ObservablesActionTypeSchema,
-});
+}));
 
-export const ObservablesUserActionPayloadSchema = z.object({
+export const ObservablesUserActionPayloadSchema = lazySchema(() => z.object({
   observables: ObservablePayloadSchema,
-});
+}));
 
-export const ObservablesUserActionSchema = z.object({
+export const ObservablesUserActionSchema = lazySchema(() => z.object({
   type: z.literal(UserActionTypes.observables),
   payload: ObservablesUserActionPayloadSchema,
-});
+}));
 
 export type ObservablesActionType = z.infer<typeof ObservablesActionTypeSchema>;

@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { AgentConfigurationPageStep } from '../../../../common/agent_configuration/constants';
@@ -80,7 +80,7 @@ export const settingsRoute = {
           tab: 'agent-configuration',
           element: <CreateAgentConfigurationRouteView />,
         }),
-        params: z.object({
+        params: lazySchema(() => z.object({
           query: z
             .object({
               pageStep: z
@@ -92,7 +92,7 @@ export const settingsRoute = {
                 .optional(),
             })
             .optional(),
-        }),
+        })),
       },
       '/settings/agent-configuration/edit': {
         ...page({
@@ -102,7 +102,7 @@ export const settingsRoute = {
           tab: 'agent-configuration',
           element: <EditAgentConfigurationRouteView />,
         }),
-        params: z.object({
+        params: lazySchema(() => z.object({
           query: z
             .object({
               environment: z.string().optional(),
@@ -116,7 +116,7 @@ export const settingsRoute = {
                 .optional(),
             })
             .optional(),
-        }),
+        })),
       },
       '/settings/apm-indices': page({
         title: i18n.translate('xpack.apm.views.settings.indices.title', {
@@ -161,7 +161,7 @@ export const settingsRoute = {
           element: <AgentExplorer />,
           tab: 'agent-explorer',
         }),
-        params: z.object({
+        params: lazySchema(() => z.object({
           query: environmentSchema.merge(
             z.object({
               kuery: z.string(),
@@ -169,7 +169,7 @@ export const settingsRoute = {
               serviceName: z.string(),
             })
           ),
-        }),
+        })),
       },
       '/settings': {
         element: <Redirect to="/settings/general-settings" />,

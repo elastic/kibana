@@ -21,14 +21,14 @@ import {
 } from '@kbn/context-engine-plugin/server/ai_indices/ki_revision';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 import { createMemoryToolsAvailability } from '../ai_index_tools_availability';
 import { getWritableMemoryAiIndex } from '../get_writable_memory_ai_index';
 import { createMemoryWriter, isMemoryDocument } from '../memory_document';
 
-const forgetSchema = z.object({
+const forgetSchema = lazySchema(() => z.object({
   aiIndexId: aiIndexIdFieldSchema.describe(
     'The Context Engine AI-index registry ID containing the memory. Use the ID from the agent AI INDICES configuration, not the backing Elasticsearch index or data stream name.'
   ),
@@ -37,7 +37,7 @@ const forgetSchema = z.object({
     .min(1)
     .max(MAX_KI_ID_LENGTH)
     .describe('The ID of the existing memory to mark as deleted'),
-});
+}));
 
 export const createForgetTool = ({
   getAiIndexService,

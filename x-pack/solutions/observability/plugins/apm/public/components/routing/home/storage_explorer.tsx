@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ApmMainTemplate } from '../templates/apm_main_template';
 import { SearchBar } from '../../shared/search_bar/search_bar';
@@ -42,9 +42,9 @@ export const storageExplorer = {
         </ApmMainTemplate>
       </Breadcrumb>
     ),
-    params: z.object({
+    params: lazySchema(() => z.object({
       query: indexLifecyclePhaseSchema,
-    }),
+    })),
     defaults: {
       query: {
         indexLifecyclePhase: IndexLifecyclePhaseSelectOption.All,

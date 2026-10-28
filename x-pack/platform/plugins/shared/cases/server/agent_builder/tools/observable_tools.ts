@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformCoreCasesTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -24,7 +24,7 @@ import { emitFromStepResult, injectAttachmentIds } from '../attachments/emit_att
 
 type GetCasesClientFn = (request: KibanaRequest) => Promise<CasesClient>;
 
-const observablesSchema = z.object({
+const observablesSchema = lazySchema(() => z.object({
   mode: z
     .enum(['add', 'update', 'delete'])
     .describe(
@@ -35,7 +35,7 @@ const observablesSchema = z.object({
     ),
   ...addObservablesStepCommonDefinition.inputSchema.partial().shape,
   ...updateObservableStepCommonDefinition.inputSchema.partial().shape,
-});
+}));
 
 export const observablesTool = (
   getCasesClientFn: GetCasesClientFn

@@ -8,13 +8,13 @@
  */
 
 import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { getDashboardStateSchema } from '../api/dashboard_state_schemas';
 import { DASHBOARD_CHANGE_HISTORY_API_PATH } from '../../common/constants';
 import { CHANGE_HISTORY_ROUTE_SECURITY, getChangeHistoryContext } from './utils';
 
-const detailsResponseSchema = z.object({
+const detailsResponseSchema = lazySchema(() => z.object({
   id: z.string(),
   timestamp: z.string(),
   actor: z.object({
@@ -24,7 +24,7 @@ const detailsResponseSchema = z.object({
   action: z.string(),
   snapshot: getDashboardStateSchema(true),
   isCurrent: z.boolean(),
-});
+}));
 export type ChangeDetailsResponse = z.infer<typeof detailsResponseSchema>;
 
 export const registerChangeDetailsRoute = (router: IRouter<RequestHandlerContext>) => {

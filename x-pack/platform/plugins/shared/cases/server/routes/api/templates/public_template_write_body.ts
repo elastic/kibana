@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { TemplateSchema } from '../../../../common/types/domain/template/v1';
 
 /**
@@ -16,7 +16,7 @@ import { TemplateSchema } from '../../../../common/types/domain/template/v1';
  * computes or ignores them, but a public contract must not appear to accept inputs it discards.
  * Unknown keys are rejected so the accepted surface can grow without ambiguity.
  */
-export const PublicTemplateWriteBodySchema = z.strictObject({
+export const PublicTemplateWriteBodySchema = lazySchema(() => z.strictObject({
   /**
    * Template identity name (unique per owner, case-insensitive). Optional when the YAML
    * definition provides a case-default title (`name:`), which is then used as the identity name.
@@ -29,6 +29,6 @@ export const PublicTemplateWriteBodySchema = z.strictObject({
   tags: TemplateSchema.shape.tags,
   /** Disabled templates are hidden from the case creation flow. Defaults to enabled. */
   isEnabled: TemplateSchema.shape.isEnabled,
-});
+}));
 
 export type PublicTemplateWriteBody = z.infer<typeof PublicTemplateWriteBodySchema>;

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   compositeSloIdSchema,
   compositeTagsSchema,
@@ -15,7 +15,7 @@ import {
   compositeMethodSchema,
 } from '../../../schema/composite_slo';
 
-const updateCompositeSLOBodySchema = z.object({
+const updateCompositeSLOBodySchema = lazySchema(() => z.object({
   name: z.string().optional(),
   description: z.string().optional(),
   members: compositeSloMembersSchema.optional(),
@@ -25,20 +25,20 @@ const updateCompositeSLOBodySchema = z.object({
   objective: compositeTargetSchema.optional(),
   tags: compositeTagsSchema.optional(),
   enabled: z.boolean().optional(),
-});
+}));
 
-const updateCompositeSLOParamsSchema = z.object({
+const updateCompositeSLOParamsSchema = lazySchema(() => z.object({
   path: z.object({
     id: compositeSloIdSchema,
   }),
   body: updateCompositeSLOBodySchema,
-});
+}));
 
-const updateCompositeSLOInputSchema = updateCompositeSLOBodySchema.extend({
+const updateCompositeSLOInputSchema = lazySchema(() => updateCompositeSLOBodySchema.extend({
   id: compositeSloIdSchema,
   spaceId: z.string(),
   userId: z.string(),
-});
+}));
 
 type UpdateCompositeSLOInput = z.input<typeof updateCompositeSLOInputSchema>;
 

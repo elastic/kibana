@@ -6,7 +6,7 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { escapeKuery } from '@kbn/es-query';
@@ -28,7 +28,7 @@ import {
  */
 export const MAX_LIST_ENDPOINTS_PAGE = 199;
 
-const listEndpointsSchema = z.object({
+const listEndpointsSchema = lazySchema(() => z.object({
   hostNameFilter: z
     .string()
     .max(MAX_HOSTNAME_FILTER_LENGTH)
@@ -44,7 +44,7 @@ const listEndpointsSchema = z.object({
     .describe(
       `Zero-based page of results to fetch (default 0). Each page holds up to ${LIST_ENDPOINTS_PAGE_SIZE} endpoints; when the response reports \`hasMore: true\`, request the next page to continue.`
     ),
-});
+}));
 
 export const listEndpointsTool = (
   endpointAppContextService: EndpointAppContextService

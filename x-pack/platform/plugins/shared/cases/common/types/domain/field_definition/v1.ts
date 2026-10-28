@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_CUSTOM_FIELD_KEY_LENGTH } from '../../../constants';
 
-export const FieldDefinitionSchema = z.object({
+export const FieldDefinitionSchema = lazySchema(() => z.object({
   /**
    * Unique identifier for the field definition
    */
@@ -58,24 +58,24 @@ export const FieldDefinitionSchema = z.object({
    * the server and changed from the Field Library reorder controls.
    */
   displayOrder: z.number().int().nonnegative().optional(),
-});
+}));
 
 export type FieldDefinition = z.infer<typeof FieldDefinitionSchema>;
 
 // `fieldDefinitionId` is server-generated and `legacyKey` is server-managed —
 // ordinary create/update callers can never set, change, or clear them (Zod
 // strips unknown keys on parse, so a submitted value is silently dropped).
-export const CreateFieldDefinitionInputSchema = FieldDefinitionSchema.omit({
+export const CreateFieldDefinitionInputSchema = lazySchema(() => FieldDefinitionSchema.omit({
   fieldDefinitionId: true,
   legacyKey: true,
   displayOrder: true,
-});
+}));
 
 export type CreateFieldDefinitionInput = z.infer<typeof CreateFieldDefinitionInputSchema>;
 
-export const UpdateFieldDefinitionInputSchema = FieldDefinitionSchema.omit({
+export const UpdateFieldDefinitionInputSchema = lazySchema(() => FieldDefinitionSchema.omit({
   fieldDefinitionId: true,
   legacyKey: true,
-});
+}));
 
 export type UpdateFieldDefinitionInput = z.infer<typeof UpdateFieldDefinitionInputSchema>;

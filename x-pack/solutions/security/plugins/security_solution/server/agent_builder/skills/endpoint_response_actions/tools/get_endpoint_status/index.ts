@@ -6,7 +6,7 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { escapeQuotes } from '@kbn/es-query';
@@ -47,7 +47,7 @@ export interface AmbiguousHostnameResult {
   message: string;
 }
 
-const getEndpointStatusSchema = z
+const getEndpointStatusSchema = lazySchema(() => z
   .object({
     hostName: z
       .string()
@@ -68,7 +68,7 @@ const getEndpointStatusSchema = z
   })
   .refine((value) => Boolean(value.hostName || value.agentId), {
     message: 'Provide hostName, agentId, or both.',
-  });
+  }));
 
 export const getEndpointStatusTool = (
   endpointAppContextService: EndpointAppContextService

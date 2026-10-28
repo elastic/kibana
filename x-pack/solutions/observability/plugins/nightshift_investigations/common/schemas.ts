@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import type { JsonValue } from '@kbn/utility-types';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { INVESTIGATION_SUBJECT_TYPES } from './workflows/triggers';
@@ -28,13 +28,13 @@ export const MAX_ALERTS_PER_INVESTIGATION = 20;
 const MAX_EVALUATION_ENTRIES = 20;
 const MAX_V2_ALERT_DATA_LENGTH = 32_000;
 
-export const investigationSubjectTypeSchema = z.enum(INVESTIGATION_SUBJECT_TYPES);
+export const investigationSubjectTypeSchema = lazySchema(() => z.enum(INVESTIGATION_SUBJECT_TYPES));
 
-export const investigationSubjectSchema = z.object({
+export const investigationSubjectSchema = lazySchema(() => z.object({
   type: investigationSubjectTypeSchema,
   id: z.string().min(1).max(500),
   summary: z.string().max(MAX_TEXT_LENGTH).optional(),
-});
+}));
 
 /** Bound on notification destinations one investigation fans out to; one per automation is the norm. */
 export const MAX_INVESTIGATION_NOTIFICATIONS = 5;
@@ -67,7 +67,7 @@ const notificationParamValueSchema = (remainingDepth: number): z.ZodType<JsonVal
 };
 
 /** Generic destination envelope; notification handlers validate connector-specific params at runtime. */
-export const investigationNotificationDestinationSchema = z.strictObject({
+export const investigationNotificationDestinationSchema = lazySchema(() => z.strictObject({
   type: z.string().min(1).max(100),
   connector_id: z.string().min(1).max(500),
   params: z
@@ -80,18 +80,18 @@ export const investigationNotificationDestinationSchema = z.strictObject({
     }),
   automation_id: z.string().max(500).optional(),
   automation_name: z.string().max(500).optional(),
-});
+}));
 
-export const investigationNotificationDestinationsSchema = z
+export const investigationNotificationDestinationsSchema = lazySchema(() => z
   .array(investigationNotificationDestinationSchema)
-  .max(MAX_INVESTIGATION_NOTIFICATIONS);
+  .max(MAX_INVESTIGATION_NOTIFICATIONS));
 
-export const alertSnapshotGroupSchema = z.object({
+export const alertSnapshotGroupSchema = lazySchema(() => z.object({
   field: z.string().max(500),
   value: z.string().max(1000),
-});
+}));
 
-export const alertSnapshotEvaluationSchema = z.object({
+export const alertSnapshotEvaluationSchema = lazySchema(() => z.object({
   /**
    * The observed value, from `kibana.alert.evaluation.value` or, when the rule type writes the
    * plural field instead, `kibana.alert.evaluation.values`. Every shape here is real:
@@ -111,7 +111,7 @@ export const alertSnapshotEvaluationSchema = z.object({
    * custom-threshold rule type, which writes one entry per criterion.
    */
   threshold: z.union([z.number(), z.array(z.number()).max(MAX_EVALUATION_ENTRIES)]).optional(),
-});
+}));
 
 /**
  * A point-in-time copy of the alert fields an investigation needs, taken by the caller at trigger
@@ -121,7 +121,7 @@ export const alertSnapshotEvaluationSchema = z.object({
  * Field sources are `kibana.alert.*`. Everything optional here is optional because the source
  * field is not guaranteed, not merely for convenience — see the notes on each.
  */
-export const alertSnapshotSchema = z.object({
+export const alertSnapshotSchema = lazySchema(() => z.object({
   /** `kibana.alert.uuid` */
   id: z.string().min(1).max(500),
   /** `kibana.alert.rule.uuid` */
@@ -168,14 +168,14 @@ export const alertSnapshotSchema = z.object({
    * populate it. Deriving it per rule type from `rule_parameters` is separate work.
    */
   index_pattern: z.string().max(1000).optional(),
-});
+}));
 
 /**
  * A point-in-time copy of an alerting v2 episode, resolved server-side from its id. Unlike a
  * classic alert it has no rule type, category or reason, and the alert's own fields live in
  * `data`.
  */
-export const v2AlertSnapshotSchema = z.object({
+export const v2AlertSnapshotSchema = lazySchema(() => z.object({
   alert_version: z.literal('v2'),
   /** `episode.id` */
   id: z.string().min(1).max(500),
@@ -194,12 +194,12 @@ export const v2AlertSnapshotSchema = z.object({
     .record(z.string().max(128), z.unknown())
     .refine((data) => JSON.stringify(data).length <= MAX_V2_ALERT_DATA_LENGTH)
     .optional(),
-});
+}));
 
-export const investigationAlertSnapshotSchema = z.discriminatedUnion('alert_version', [
+export const investigationAlertSnapshotSchema = lazySchema(() => z.discriminatedUnion('alert_version', [
   alertSnapshotSchema.extend({ alert_version: z.literal('v1').optional() }),
   v2AlertSnapshotSchema,
-]);
+]));
 
 /**
  * Strict, so that an alert investigation carries alert data and nothing else. In particular a
@@ -220,11 +220,11 @@ export const alertInvestigationContextSchema = z
  * (significant events now send `context.event_id`), but an id-shaped allowlist costs a legitimate
  * caller nothing and still rejects values carrying `/`, `?` or `..` from older callers.
  */
-const significantEventUuidSchema = z
+const significantEventUuidSchema = lazySchema(() => z
   .string()
   .min(1)
   .max(500)
-  .regex(/^[A-Za-z0-9_-]+$/, 'event_uuid must be an id: letters, digits, underscore or hyphen');
+  .regex(/^[A-Za-z0-9_-]+$/, 'event_uuid must be an id: letters, digits, underscore or hyphen'));
 
 /**
  * Deliberately open apart from `event_uuid`. The significant events plugin owns the payload it
@@ -233,12 +233,12 @@ const significantEventUuidSchema = z
  * add a field. Only the key with a hazard attached is constrained; the bounds on key count and key
  * length stay, so an open context is still not an unbounded one.
  */
-export const freeFormContextSchema = z
+export const freeFormContextSchema = lazySchema(() => z
   .looseObject({ event_uuid: significantEventUuidSchema.optional() })
   .refine((value) => Object.keys(value).length <= 50, { message: 'context exceeds 50 key limit' })
   .refine((value) => Object.keys(value).every((key) => key.length <= 128), {
     message: 'context has a key longer than 128 characters',
-  });
+  }));
 
 export type InvestigationSubject = z.infer<typeof investigationSubjectSchema>;
 export type InvestigationNotificationDestination = z.infer<

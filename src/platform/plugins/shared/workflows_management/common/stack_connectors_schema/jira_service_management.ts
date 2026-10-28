@@ -12,10 +12,10 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 // Jira Service Management connector parameter schemas for different sub-actions
-export const JiraServiceManagementCreateAlertParamsSchema = z.object({
+export const JiraServiceManagementCreateAlertParamsSchema = lazySchema(() => z.object({
   message: z.string(),
   alias: z.string().optional(),
   description: z.string().optional(),
@@ -47,18 +47,18 @@ export const JiraServiceManagementCreateAlertParamsSchema = z.object({
   priority: z.enum(['P1', 'P2', 'P3', 'P4', 'P5']).optional(),
   user: z.string().optional(),
   note: z.string().optional(),
-});
+}));
 
-export const JiraServiceManagementCloseAlertParamsSchema = z.object({
+export const JiraServiceManagementCloseAlertParamsSchema = lazySchema(() => z.object({
   alias: z.string(),
   user: z.string().optional(),
   source: z.string().optional(),
   note: z.string().optional(),
-});
+}));
 
 // Jira Service Management connector response schema
-export const JiraServiceManagementResponseSchema = z.object({
+export const JiraServiceManagementResponseSchema = lazySchema(() => z.object({
   result: z.string(),
   took: z.number(),
   requestId: z.string(),
-});
+}));

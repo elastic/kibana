@@ -12,15 +12,15 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 // Microsoft Teams connector parameter schema
-export const TeamsParamsSchema = z.object({
+export const TeamsParamsSchema = lazySchema(() => z.object({
   message: z.string(),
-});
+}));
 
 // Microsoft Teams connector response schema
-export const TeamsResponseSchema = z.object({
+export const TeamsResponseSchema = lazySchema(() => z.object({
   type: z.string(),
   id: z.string(),
   timestamp: z.string(),
@@ -39,4 +39,4 @@ export const TeamsResponseSchema = z.object({
   }),
   text: z.string(),
   replyToId: z.string().optional(),
-});
+}));

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const asCodeMetaSchema = z
+export const asCodeMetaSchema = lazySchema(() => z
   .object({
     created_at: z
       .string()
@@ -42,6 +42,6 @@ export const asCodeMetaSchema = z
   .strict()
   .meta({
     id: 'kbn-as-code-meta',
-  });
+  }));
 
 export type AsCodeMeta = z.output<typeof asCodeMetaSchema>;

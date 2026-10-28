@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 const MAX_TEXT_LENGTH = 10_000;
 const MAX_MERMAID_LENGTH = 100_000;
@@ -18,7 +18,7 @@ const MAX_LIST_SIZE = 200;
  * by the symptom it diagnoses rather than by a monitor id, because the slug was never a
  * monitor identifier. The remaining fields match the reference so the same evaluators apply.
  */
-export const decisionTreePlanSchema = z.object({
+export const decisionTreePlanSchema = lazySchema(() => z.object({
   symptom: z
     .string()
     .max(MAX_TEXT_LENGTH)
@@ -54,6 +54,6 @@ export const decisionTreePlanSchema = z.object({
     .array(z.string().max(MAX_TEXT_LENGTH))
     .max(MAX_LIST_SIZE)
     .describe('A short list of keywords which can be used to search for this investigation plan.'),
-});
+}));
 
 export type DecisionTreePlan = z.infer<typeof decisionTreePlanSchema>;

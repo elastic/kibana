@@ -17,13 +17,13 @@ import {
   MAX_AI_INDEX_QUERY_PARAM_KEY_LENGTH,
   MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH,
 } from '@kbn/context-engine-plugin/common/constants';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
 import { getErrorMessage, type AiIndexToolDeps } from '../ai_index_read_service';
 import { queryAiIndicesHandler } from './handler';
 
-const queryAiIndicesSchema = z.object({
+const queryAiIndicesSchema = lazySchema(() => z.object({
   query: z
     .string()
     .min(1)
@@ -51,7 +51,7 @@ const queryAiIndicesSchema = z.object({
     .describe(
       `(Optional) Maximum rows to return. Defaults to ${DEFAULT_AI_INDEX_QUERY_LIMIT}, at most ${MAX_AI_INDEX_QUERY_LIMIT}. If the query has a smaller LIMIT, that smaller value is used.`
     ),
-});
+}));
 
 export const createQueryAiIndicesTool = (
   deps: AiIndexToolDeps

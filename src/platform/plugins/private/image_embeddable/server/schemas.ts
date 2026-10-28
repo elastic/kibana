@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { DEFAULT_OBJECT_FIT, IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../common';
 
-const imageFileSrcSchema = z
+const imageFileSrcSchema = lazySchema(() => z
   .object({
     type: z.literal('file'),
     file_id: z.string(),
@@ -20,9 +20,9 @@ const imageFileSrcSchema = z
   .strict()
   .meta({
     title: 'file',
-  });
+  }));
 
-const imageUrlSrcSchema = z
+const imageUrlSrcSchema = lazySchema(() => z
   .object({
     type: z.literal('url'),
     url: z.string().meta({ description: 'URL of the image' }),
@@ -30,7 +30,7 @@ const imageUrlSrcSchema = z
   .strict()
   .meta({
     title: 'url',
-  });
+  }));
 
 const imageConfigSchema = z
   .object({

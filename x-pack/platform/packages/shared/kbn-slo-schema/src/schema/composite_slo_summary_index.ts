@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   compositeSloBaseDefinitionSchema,
   compositeSloMemberWithSummarySchema,
@@ -17,7 +17,7 @@ import {
  * truth for both writing the document (see `buildCompositeSummaryDoc`) and decoding it on read,
  * so the persisted and decoded shapes can never drift apart.
  */
-const compositeSloSummaryDocumentSchema = z.object({
+const compositeSloSummaryDocumentSchema = lazySchema(() => z.object({
   spaceId: z.string(),
   summaryUpdatedAt: z.string(),
   compositeSlo: compositeSloBaseDefinitionSchema.pick({
@@ -36,7 +36,7 @@ const compositeSloSummaryDocumentSchema = z.object({
   // Optional so documents that predate per-member summaries keep decoding; the reader's consumers
   // fall back to computing members live when absent.
   members: z.array(compositeSloMemberWithSummarySchema).optional(),
-});
+}));
 
 type CompositeSLOSummaryDocument = z.infer<typeof compositeSloSummaryDocumentSchema>;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
@@ -14,7 +14,7 @@ import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlToolsOptions } from './types';
 
-const smlAttachSchema = z.object({
+const smlAttachSchema = lazySchema(() => z.object({
   entry_ids: z
     .array(z.string())
     .min(1)
@@ -22,7 +22,7 @@ const smlAttachSchema = z.object({
     .describe(
       'One or more entry_id values exactly as returned by sml_search, or the path after sml:// in a user # reference link.'
     ),
-});
+}));
 
 /**
  * Creates the sml_attach tool.

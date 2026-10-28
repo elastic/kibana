@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   boundedActionInput,
   MAX_COMMENT_LENGTH,
@@ -24,7 +24,7 @@ import {
  * `origin` is absent for a different reason: it names the system that produced
  * the chain, which a revision does not change.
  */
-export const reviseProposalRequestSchema = z.object({
+export const reviseProposalRequestSchema = lazySchema(() => z.object({
   /**
    * Renaming is exactly the kind of feedback that produces a revision. A blank
    * keeps the predecessor's, since every proposal carries one.
@@ -35,13 +35,13 @@ export const reviseProposalRequestSchema = z.object({
   actionInput: boundedActionInput.optional(),
   impact: proposalImpactSchema.optional(),
   confidence: proposalConfidenceSchema.optional(),
-});
+}));
 export type ReviseProposalRequest = z.infer<typeof reviseProposalRequestSchema>;
 
 /** Shared by the route response and the Agent Builder tool's output contract. */
-export const reviseProposalResponseSchema = z.object({
+export const reviseProposalResponseSchema = lazySchema(() => z.object({
   proposalId: z.string(),
   revision: z.number().int().min(1),
   status: proposalStatusSchema,
-});
+}));
 export type ReviseProposalResponse = z.infer<typeof reviseProposalResponseSchema>;

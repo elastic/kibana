@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod';
+import { z, isoDateTime, lazySchema } from '@kbn/zod';
 import { isInternalURL } from '@kbn/std';
 import {
   NOTIFICATION_NAMESPACES,
@@ -73,7 +73,7 @@ export const ctaSchema = z
   .strict();
 
 /** Idempotency key; see notification_id.ts for the ID conventions. */
-export const notificationIdSchema = z.string().min(1).max(512);
+export const notificationIdSchema = lazySchema(() => z.string().min(1).max(512));
 
 /**
  * Field shape shared by the write and read schemas. `namespace` and `type` are
@@ -103,7 +103,7 @@ const notificationObject = z
  * The assembled write payload, validated before append.
  * The `(namespace, type)` pair must be registered in the NOTIFICATION_REGISTRY.
  */
-export const notificationWriteSchema = notificationObject.superRefine((value, ctx) => {
+export const notificationWriteSchema = lazySchema(() => notificationObject.superRefine((value, ctx) => {
   if (!isRegisteredNotificationRef(value.namespace, value.type)) {
     ctx.addIssue({
       code: 'custom',
@@ -111,7 +111,7 @@ export const notificationWriteSchema = notificationObject.superRefine((value, ct
       message: `type "${value.type}" is not registered under namespace "${value.namespace}"`,
     });
   }
-});
+}));
 
 /**
  * Shape of a notification stored in the NC data stream.

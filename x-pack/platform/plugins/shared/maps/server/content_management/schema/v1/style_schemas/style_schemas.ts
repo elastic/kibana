@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { LAYER_STYLE_TYPE } from '../../../../../common/constants';
 import { vectorStyleSchema } from './vector_style_schemas/vector_style_schemas';
 
-export const EMSVectorTileStyleSchema = z
+export const EMSVectorTileStyleSchema = lazySchema(() => z
   .object({
     color: z.string(),
     type: z.literal(LAYER_STYLE_TYPE.EMS_VECTOR_TILE),
@@ -17,9 +17,9 @@ export const EMSVectorTileStyleSchema = z
   .strict()
   .meta({
     description: 'Elastic Maps Service (EMS) Vector Tile style configuration.',
-  });
+  }));
 
-export const heatmapStyleSchema = z
+export const heatmapStyleSchema = lazySchema(() => z
   .object({
     colorRampName: z
       .union([
@@ -39,9 +39,9 @@ export const heatmapStyleSchema = z
   .strict()
   .meta({
     description: 'Heatmap style configuration.',
-  });
+  }));
 
-export const styleSchema = z.union([
+export const styleSchema = lazySchema(() => z.union([
   z
     .object({
       type: z.string(),
@@ -50,4 +50,4 @@ export const styleSchema = z.union([
   EMSVectorTileStyleSchema,
   heatmapStyleSchema,
   vectorStyleSchema,
-]);
+]));

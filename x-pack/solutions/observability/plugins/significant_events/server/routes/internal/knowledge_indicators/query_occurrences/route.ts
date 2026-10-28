@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { MAX_ID_LENGTH, type QueryOccurrencesResponse } from '@kbn/significant-events-schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/significant_events/helpers/fill_bucket_gaps';
 import { createSignificantEventsTracedEsClient } from '../../../../lib/significant_events/create_significant_events_traced_es_client';
@@ -24,7 +24,7 @@ const dateFromString = makeIsoDateFromString('ISO 8601 datetime');
 
 const readQueryOccurrencesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_query_occurrences',
-  params: z.object({
+  params: lazySchema(() => z.object({
     query: z.object({
       from: dateFromString.describe('Start of the time range'),
       to: dateFromString.describe('End of the time range'),
@@ -49,7 +49,7 @@ const readQueryOccurrencesRoute = createServerRoute({
         .describe('Alerting rule UUIDs to include in the occurrence response'),
       searchMode: searchModeSchema,
     }),
-  }),
+  })),
   options: {
     access: 'internal',
     summary: 'Read query occurrences',

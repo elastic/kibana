@@ -6,13 +6,13 @@
  */
 
 import { diffLines } from 'diff';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 
-const workflowYamlDiffStatusSchema = z.enum(['pending', 'accepted', 'declined']);
+const workflowYamlDiffStatusSchema = lazySchema(() => z.enum(['pending', 'accepted', 'declined']));
 
-const workflowYamlDiffDataSchema = z.object({
+const workflowYamlDiffDataSchema = lazySchema(() => z.object({
   beforeYaml: z.string().describe('Original workflow YAML content before the proposed change'),
   afterYaml: z.string().describe('Proposed workflow YAML content after the change'),
   proposalId: z
@@ -21,7 +21,7 @@ const workflowYamlDiffDataSchema = z.object({
   status: workflowYamlDiffStatusSchema.default('pending'),
   workflowId: z.string().optional().describe('The workflow ID'),
   name: z.string().optional().describe('The workflow name'),
-});
+}));
 
 type WorkflowYamlDiffData = z.infer<typeof workflowYamlDiffDataSchema>;
 

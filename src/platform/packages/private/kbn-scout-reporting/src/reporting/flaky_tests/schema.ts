@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Bump whenever a change to the schemas below would break a consumer reading a previously
@@ -16,7 +16,7 @@ import { z } from '@kbn/zod/v4';
 export const FLAKY_TEST_REPORT_SCHEMA_VERSION = 1;
 
 export const TEST_FRAMEWORKS = ['jest', 'ftr', 'cypress', 'playwright'] as const;
-export const TestFrameworkSchema = z.enum(TEST_FRAMEWORKS);
+export const TestFrameworkSchema = lazySchema(() => z.enum(TEST_FRAMEWORKS));
 export type TestFramework = z.infer<typeof TestFrameworkSchema>;
 
 /**
@@ -24,10 +24,10 @@ export type TestFramework = z.infer<typeof TestFrameworkSchema>;
  * clean pass in the window.
  */
 export const FLAKY_TEST_CLASSIFICATIONS = ['flaky', 'consistently-failing'] as const;
-export const FlakyTestClassificationSchema = z.enum(FLAKY_TEST_CLASSIFICATIONS);
+export const FlakyTestClassificationSchema = lazySchema(() => z.enum(FLAKY_TEST_CLASSIFICATIONS));
 export type FlakyTestClassification = z.infer<typeof FlakyTestClassificationSchema>;
 
-export const FlakyTestSampleFailureSchema = z.object({
+export const FlakyTestSampleFailureSchema = lazySchema(() => z.object({
   message: z.string(),
   buildUrl: z.optional(z.string()),
   /** Buildkite job the failure happened in; `<buildUrl>#<jobId>` opens its log. */
@@ -35,21 +35,21 @@ export const FlakyTestSampleFailureSchema = z.object({
   /** Label of the Buildkite step, e.g. `FTR Configs #21` or `Scout Lane #3 - stateful-classic / default`. */
   stepLabel: z.optional(z.string()),
   timestamp: z.coerce.date(),
-});
+}));
 export type FlakyTestSampleFailure = z.infer<typeof FlakyTestSampleFailureSchema>;
 
 /** Failed attempts with one error on one pipeline. */
-export const FlakyTestErrorPipelineSchema = z.object({
+export const FlakyTestErrorPipelineSchema = lazySchema(() => z.object({
   pipeline: z.string(),
   failuresCount: z.int(),
-});
+}));
 
 /**
  * One distinct error of a test over the window, across every pipeline and branch, not just the
  * report scope. Errors are told apart by the first three lines of their message with ids, URLs
  * and numbers normalised away, so a diff that differs only in a count is one error.
  */
-export const FlakyTestErrorSchema = z.object({
+export const FlakyTestErrorSchema = lazySchema(() => z.object({
   /** The normalised head the failures were grouped on; lets a consumer merge errors across tests. */
   key: z.string(),
   /** The newest failure's message, in full. */
@@ -69,7 +69,7 @@ export const FlakyTestErrorSchema = z.object({
   /** The newest failure's build and Buildkite job; `<url>#<jobId>` opens the job's log. */
   lastFailedBuildUrl: z.optional(z.string()),
   lastFailedJobId: z.optional(z.string()),
-});
+}));
 export type FlakyTestError = z.infer<typeof FlakyTestErrorSchema>;
 
 /**
@@ -77,23 +77,23 @@ export type FlakyTestError = z.infer<typeof FlakyTestErrorSchema>;
  * `status` is the framework's own verdict (`passed`, `failed`, `timedOut`, `skipped`, `todo`,
  * ...); Playwright runs that passed on retry report `flaky`.
  */
-export const FlakyTestBranchLatestRunSchema = z.object({
+export const FlakyTestBranchLatestRunSchema = lazySchema(() => z.object({
   status: z.string(),
   timestamp: z.coerce.date(),
   buildUrl: z.optional(z.string()),
   /** Buildkite job of that run; `<buildUrl>#<jobId>` opens its log. */
   jobId: z.optional(z.string()),
-});
+}));
 export type FlakyTestBranchLatestRun = z.infer<typeof FlakyTestBranchLatestRunSchema>;
 
 /** Most recent run of the test across all branches in scope. */
-export const FlakyTestLatestRunSchema = FlakyTestBranchLatestRunSchema.extend({
+export const FlakyTestLatestRunSchema = lazySchema(() => FlakyTestBranchLatestRunSchema.extend({
   branch: z.string(),
-});
+}));
 export type FlakyTestLatestRun = z.infer<typeof FlakyTestLatestRunSchema>;
 
 /** Build counts of one test on one branch; the entry-level counts are the sum over branches. */
-export const FlakyTestBranchStatsSchema = z.object({
+export const FlakyTestBranchStatsSchema = lazySchema(() => z.object({
   branch: z.string(),
   builds: z.int(),
   failedBuilds: z.int(),
@@ -109,7 +109,7 @@ export const FlakyTestBranchStatsSchema = z.object({
   latestRun: z.optional(FlakyTestBranchLatestRunSchema),
   /** Every setup (pipeline, config, target) that ran the test on this branch skipped it last. */
   skipped: z.optional(z.boolean()),
-});
+}));
 export type FlakyTestBranchStats = z.infer<typeof FlakyTestBranchStatsSchema>;
 
 /**
@@ -117,7 +117,7 @@ export type FlakyTestBranchStats = z.infer<typeof FlakyTestBranchStatsSchema>;
  * record a target; Jest and Cypress runs, and FTR runs whose target can't be resolved, report
  * the mode `unknown`.
  */
-export const FlakyTestTargetStatsSchema = z.object({
+export const FlakyTestTargetStatsSchema = lazySchema(() => z.object({
   /** `<arch>-<domain>`, e.g. `stateful-classic` or `serverless-security_complete`. */
   mode: z.string(),
   /** Where the target ran: `local` or `cloud`. */
@@ -131,7 +131,7 @@ export const FlakyTestTargetStatsSchema = z.object({
   /** The build of that failure and its Buildkite job; `<url>#<jobId>` opens the job's log. */
   lastFailedBuildUrl: z.optional(z.string()),
   lastFailedJobId: z.optional(z.string()),
-});
+}));
 export type FlakyTestTargetStats = z.infer<typeof FlakyTestTargetStatsSchema>;
 
 /**
@@ -139,20 +139,20 @@ export type FlakyTestTargetStats = z.infer<typeof FlakyTestTargetStatsSchema>;
  * branches that clear every threshold on their own, so that a clean branch cannot dilute a
  * flaky one.
  */
-export const FlakyTestFlakiestBranchSchema = z.object({
+export const FlakyTestFlakiestBranchSchema = lazySchema(() => z.object({
   branch: z.string(),
   builds: z.int(),
   failedBuilds: z.int(),
   /** `failedBuilds / builds` on this branch. */
   buildFailRate: z.number(),
-});
+}));
 export type FlakyTestFlakiestBranch = z.infer<typeof FlakyTestFlakiestBranchSchema>;
 
 /**
  * One test aggregated over the report window. Counts are per execution (one per test run;
  * Playwright in-run retries collapse into a single execution) and per Buildkite build.
  */
-export const FlakyTestEntrySchema = z.object({
+export const FlakyTestEntrySchema = lazySchema(() => z.object({
   testId: z.string(),
   framework: TestFrameworkSchema,
   title: z.string(),
@@ -205,11 +205,11 @@ export const FlakyTestEntrySchema = z.object({
    * written before the field existed still parse.
    */
   errors: z.array(FlakyTestErrorSchema).default([]),
-});
+}));
 export type FlakyTestEntry = z.infer<typeof FlakyTestEntrySchema>;
 
 /** Build counts on one Buildkite pipeline, any branch, for the tests of one file. */
-export const FlakyTestPipelineStatsSchema = z.object({
+export const FlakyTestPipelineStatsSchema = lazySchema(() => z.object({
   pipeline: z.string(),
   builds: z.int(),
   failedBuilds: z.int(),
@@ -229,7 +229,7 @@ export const FlakyTestPipelineStatsSchema = z.object({
   lastFailedJobId: z.optional(z.string()),
   /** Label of the Buildkite step that failure ran in. */
   lastFailedStepLabel: z.optional(z.string()),
-});
+}));
 export type FlakyTestPipelineStats = z.infer<typeof FlakyTestPipelineStatsSchema>;
 
 /**
@@ -237,20 +237,20 @@ export type FlakyTestPipelineStats = z.infer<typeof FlakyTestPipelineStatsSchema
  * pipeline across every pipeline and branch in the window, not just the report scope. A build
  * counts once however many of the file's tests failed in it.
  */
-export const FlakyTestFileStatsSchema = z.object({
+export const FlakyTestFileStatsSchema = lazySchema(() => z.object({
   filePath: z.string(),
   framework: TestFrameworkSchema,
   testIds: z.array(z.string()),
   /** Most failed builds first. */
   byPipeline: z.array(FlakyTestPipelineStatsSchema),
-});
+}));
 export type FlakyTestFileStats = z.infer<typeof FlakyTestFileStatsSchema>;
 
 /**
  * A test qualifies when a single branch clears all three build thresholds on its own: a test
  * flaky on `9.5` but clean on `main` is judged on its `9.5` numbers, not on the diluted total.
  */
-export const FlakyTestReportThresholdsSchema = z.object({
+export const FlakyTestReportThresholdsSchema = lazySchema(() => z.object({
   /** Branches on which the test was seen in fewer builds than this cannot qualify it. */
   minBuilds: z.int().min(1),
   /** Branches on which the test failed in fewer builds than this cannot qualify it. */
@@ -263,7 +263,7 @@ export const FlakyTestReportThresholdsSchema = z.object({
   minFailRate: z.number().min(0).max(1).default(0),
   /** Maximum number of tests kept per list. */
   maxTests: z.int().min(1),
-});
+}));
 export type FlakyTestReportThresholds = z.infer<typeof FlakyTestReportThresholdsSchema>;
 
 export interface FlakyTestReportOptions {
@@ -294,7 +294,7 @@ export const DEFAULT_FLAKY_TEST_REPORT_OPTIONS: Omit<FlakyTestReportOptions, 'no
   samplesPerTest: 3,
 };
 
-export const FlakyTestReportSchema = z.object({
+export const FlakyTestReportSchema = lazySchema(() => z.object({
   schemaVersion: z.literal(FLAKY_TEST_REPORT_SCHEMA_VERSION),
   generatedAt: z.coerce.date(),
   window: z.object({
@@ -335,5 +335,5 @@ export const FlakyTestReportSchema = z.object({
    * written before the field existed still parse.
    */
   files: z.array(FlakyTestFileStatsSchema).default([]),
-});
+}));
 export type FlakyTestReport = z.infer<typeof FlakyTestReportSchema>;

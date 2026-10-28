@@ -6,7 +6,7 @@
  */
 
 import path from 'path';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ContentPackSavedObject } from './saved_object';
 import { SUPPORTED_SAVED_OBJECT_TYPE } from './saved_object';
 import type { ContentPackStream } from './stream';
@@ -50,11 +50,11 @@ export interface ContentPackManifest {
   version: string;
 }
 
-export const contentPackManifestSchema: z.Schema<ContentPackManifest> = z.object({
+export const contentPackManifestSchema: z.Schema<ContentPackManifest> = lazySchema(() => z.object({
   name: z.string(),
   description: z.string(),
   version: z.string(),
-});
+}));
 
 export type ContentPackEntry = ContentPackSavedObject | ContentPackStream;
 

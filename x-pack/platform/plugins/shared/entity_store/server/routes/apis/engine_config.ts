@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
@@ -22,18 +22,18 @@ import {
   NonPriorityLogExtractionTypeOverride,
 } from '../../domain/saved_objects';
 
-const paramsSchema = z.object({
+const paramsSchema = lazySchema(() => z.object({
   entityType: EntityType,
-});
+}));
 
-const bodySchema = z.object({
+const bodySchema = lazySchema(() => z.object({
   /** Layer 5: reaches both processes, minus the fields only the non-priority layer may set. */
   logExtraction: LogExtractionTypeOverride.superRefine(validateLogExtractionParams).optional(),
   /** Layer 6: non-priority process only. */
   nonPriorityOverride: NonPriorityLogExtractionTypeOverride.superRefine(
     validateLogExtractionParams
   ).optional(),
-});
+}));
 
 type EngineConfigRequestParams = z.infer<typeof paramsSchema>;
 type EngineConfigRequestBody = z.infer<typeof bodySchema>;

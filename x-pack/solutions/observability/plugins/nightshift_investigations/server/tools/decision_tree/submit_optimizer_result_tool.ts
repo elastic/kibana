@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -41,7 +41,7 @@ export const DECISION_TREE_SUBMIT_TOOL_ID = 'nightshift_submit_optimizer_result'
 const MAX_TREE_FILE_BYTES = 2 * 1024 * 1024;
 const MAX_SUBMISSIONS = 10;
 
-const submissionSchema = z.object({
+const submissionSchema = lazySchema(() => z.object({
   tree_id: z
     .string()
     .max(256)
@@ -59,9 +59,9 @@ const submissionSchema = z.object({
     .describe(
       "One entry per evidence_gatherer node, formatted '<node_id>: <description>'. Describe the toolset used, what data it gathers and from which sources, preserving exact query entities such as index patterns, field names, metric names, service names and filters."
     ),
-});
+}));
 
-const submitSchema = z.object({
+const submitSchema = lazySchema(() => z.object({
   symptom_trees: z
     .array(submissionSchema)
     .max(MAX_SUBMISSIONS)
@@ -74,7 +74,7 @@ const submitSchema = z.object({
     .max(4096)
     .default('')
     .describe('One or two sentences describing what changed in the tree, or why nothing changed.'),
-});
+}));
 
 interface SubmissionOutcome {
   tree_id: string;

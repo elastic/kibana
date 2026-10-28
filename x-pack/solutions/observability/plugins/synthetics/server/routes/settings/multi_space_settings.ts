@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import type { SyntheticsMultiSpaceSettingsWithSpaces } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { isCCSEnabled } from '../../lib/remote_result_utils';
@@ -15,12 +15,12 @@ import type { SyntheticsRestApiRouteFactory } from '../types';
 const MAX_SELECTED_REMOTE_CLUSTERS = 100;
 const MAX_SHARED_SPACES = 1_000;
 
-export const SyntheticsMultiSpaceSettingsSchema = z.strictObject({
+export const SyntheticsMultiSpaceSettingsSchema = lazySchema(() => z.strictObject({
   useAllRemoteClusters: z.boolean().optional(),
   selectedRemoteClusters: z.array(z.string().max(256)).max(MAX_SELECTED_REMOTE_CLUSTERS).optional(),
   // Optional list of spaces the settings should be shared with. Accepts `*` for "all spaces".
   spaces: z.array(z.string().min(1).max(256)).min(1).max(MAX_SHARED_SPACES).optional(),
-});
+}));
 
 export const createGetMultiSpaceSettingsRoute: SyntheticsRestApiRouteFactory<
   SyntheticsMultiSpaceSettingsWithSpaces

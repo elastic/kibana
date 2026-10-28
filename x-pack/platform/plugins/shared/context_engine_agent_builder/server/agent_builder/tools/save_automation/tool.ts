@@ -11,7 +11,7 @@ import { hasWorkflowReadPrivilege } from '@kbn/agent-builder-tools-base/workflow
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import {
   MAX_AI_INDEX_AUTOMATION_LENGTH,
@@ -53,7 +53,7 @@ export const normalizeSaveAutomationParams = (
   aiIndexId: blankToUndefined(params.aiIndexId),
 });
 
-const saveAutomationSchema = z
+const saveAutomationSchema = lazySchema(() => z
   .object({
     workflowAttachmentId: z
       .string()
@@ -122,7 +122,7 @@ const saveAutomationSchema = z
         path: ['aiIndexId'],
       });
     }
-  });
+  }));
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 

@@ -19,7 +19,7 @@ import {
 } from '../constants';
 
 const configSchemaProps = {
-  apiUrl: z.string().nullable().default(null),
+  apiUrl: lazySchema(() => z.string().nullable().default(null)),
 };
 export const ConfigSchema = lazySchema(() => z.object(configSchemaProps).strict());
 

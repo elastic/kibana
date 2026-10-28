@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -36,7 +36,7 @@ import {
   getUpdatePrebuiltRulePatch,
 } from './utils/update_translated_rule';
 
-const schema = z.object({
+const schema = lazySchema(() => z.object({
   migration_id: MigrationId,
   rule_id: z
     .string()
@@ -73,7 +73,7 @@ const schema = z.object({
     .describe(
       `REQUIRED. A markdown explanation of what you changed and why, covering every aspect you are updating in this call. It is appended to the rule's comment history and shown to the user in the rule details flyout, so write it for that reader. Follow the examples in the skill instructions for the expected shape.`
     ),
-});
+}));
 
 const buildPath = (migrationId: string): string =>
   SIEM_RULE_MIGRATION_RULES_PATH.replace('{migration_id}', encodeURIComponent(migrationId));

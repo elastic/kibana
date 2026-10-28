@@ -6,10 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { numeralPatternSchema } from './common';
 
-const baseColorOptions = z.object({
+const baseColorOptions = lazySchema(() => z.object({
   text: z.string().meta({
     title: 'Text color',
     description: 'The text color to use for the field.',
@@ -18,9 +18,9 @@ const baseColorOptions = z.object({
     title: 'Background color',
     description: 'The background color to use for the field.',
   }),
-});
+}));
 
-export const colorFormatSchema = z
+export const colorFormatSchema = lazySchema(() => z
   .object({
     type: z.literal('color'),
     params: z.discriminatedUnion('field_type', [
@@ -67,4 +67,4 @@ export const colorFormatSchema = z
     id: 'kbn-field-format-color',
     title: 'Color field format',
     description: 'Formats a field into a color value.',
-  });
+  }));

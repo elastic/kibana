@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 /**
  * IMPORTANT: Any changes to this file must be carefully checked against both usage
@@ -14,7 +14,7 @@ import { z } from '@kbn/zod';
  * If types need to diverge, they should be split into separate files.
  */
 
-const transformHealthSchema = z.object({
+const transformHealthSchema = lazySchema(() => z.object({
   isProblematic: z.boolean(),
   missing: z.boolean(),
   status: z.union([z.literal('healthy'), z.literal('unhealthy'), z.literal('unavailable')]),
@@ -28,13 +28,13 @@ const transformHealthSchema = z.object({
     z.literal('unavailable'),
   ]),
   stateMatches: z.boolean().optional(),
-});
+}));
 
-const sloHealthSchema = z.object({
+const sloHealthSchema = lazySchema(() => z.object({
   isProblematic: z.boolean(),
   rollup: transformHealthSchema,
   summary: transformHealthSchema,
-});
+}));
 
 export { sloHealthSchema, transformHealthSchema };
 

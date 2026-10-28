@@ -9,24 +9,24 @@
 
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const DataFindStepTypeId = 'data.find';
 
-export const ConfigSchema = z.object({
+export const ConfigSchema = lazySchema(() => z.object({
   items: z.unknown(),
-});
+}));
 
-export const InputSchema = z.object({
+export const InputSchema = lazySchema(() => z.object({
   condition: z.string(),
   errorIfEmpty: z.boolean().optional(),
-});
+}));
 
-export const OutputSchema = z.object({
+export const OutputSchema = lazySchema(() => z.object({
   item: z.unknown().nullable(),
   index: z.number().nullable(),
-});
+}));
 
 export type DataFindStepConfigSchema = typeof ConfigSchema;
 export type DataFindStepInputSchema = typeof InputSchema;

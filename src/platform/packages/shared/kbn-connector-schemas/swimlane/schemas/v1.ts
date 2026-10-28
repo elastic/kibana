@@ -9,30 +9,30 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 export const ConfigMap = {
-  id: z.string(),
-  key: z.string(),
-  name: z.string(),
-  fieldType: z.string(),
+  id: lazySchema(() => z.string()),
+  key: lazySchema(() => z.string()),
+  name: lazySchema(() => z.string()),
+  fieldType: lazySchema(() => z.string()),
 };
 
 export const ConfigMapSchema = lazySchema(() => z.object(ConfigMap).strict());
 
 export const ConfigMapping = {
-  ruleNameConfig: ConfigMapSchema.nullable().default(null),
-  alertIdConfig: ConfigMapSchema.nullable().default(null),
-  caseIdConfig: ConfigMapSchema.nullable().default(null),
-  caseNameConfig: ConfigMapSchema.nullable().default(null),
-  commentsConfig: ConfigMapSchema.nullable().default(null),
-  severityConfig: ConfigMapSchema.nullable().default(null),
-  descriptionConfig: ConfigMapSchema.nullable().default(null),
+  ruleNameConfig: lazySchema(() => ConfigMapSchema.nullable().default(null)),
+  alertIdConfig: lazySchema(() => ConfigMapSchema.nullable().default(null)),
+  caseIdConfig: lazySchema(() => ConfigMapSchema.nullable().default(null)),
+  caseNameConfig: lazySchema(() => ConfigMapSchema.nullable().default(null)),
+  commentsConfig: lazySchema(() => ConfigMapSchema.nullable().default(null)),
+  severityConfig: lazySchema(() => ConfigMapSchema.nullable().default(null)),
+  descriptionConfig: lazySchema(() => ConfigMapSchema.nullable().default(null)),
 };
 
 export const ConfigMappingSchema = lazySchema(() => z.object(ConfigMapping).strict());
 
 export const SwimlaneServiceConfiguration = {
-  apiUrl: z.string(),
-  appId: z.string(),
-  connectorType: z.enum(['all', 'alerts', 'cases']),
+  apiUrl: lazySchema(() => z.string()),
+  appId: lazySchema(() => z.string()),
+  connectorType: lazySchema(() => z.enum(['all', 'alerts', 'cases'])),
   mappings: ConfigMappingSchema,
 };
 
@@ -41,7 +41,7 @@ export const SwimlaneServiceConfigurationSchema = lazySchema(() =>
 );
 
 export const SwimlaneSecretsConfiguration = {
-  apiToken: z.string(),
+  apiToken: lazySchema(() => z.string()),
 };
 
 export const SwimlaneSecretsConfigurationSchema = lazySchema(() =>
@@ -49,12 +49,12 @@ export const SwimlaneSecretsConfigurationSchema = lazySchema(() =>
 );
 
 const SwimlaneFields = {
-  alertId: z.string().nullable().default(null),
-  ruleName: z.string().nullable().default(null),
-  caseId: z.string().nullable().default(null),
-  caseName: z.string().nullable().default(null),
-  severity: z.string().nullable().default(null),
-  description: z.string().nullable().default(null),
+  alertId: lazySchema(() => z.string().nullable().default(null)),
+  ruleName: lazySchema(() => z.string().nullable().default(null)),
+  caseId: lazySchema(() => z.string().nullable().default(null)),
+  caseName: lazySchema(() => z.string().nullable().default(null)),
+  severity: lazySchema(() => z.string().nullable().default(null)),
+  description: lazySchema(() => z.string().nullable().default(null)),
 };
 
 export const ExecutorSubActionPushParamsSchema = lazySchema(() =>

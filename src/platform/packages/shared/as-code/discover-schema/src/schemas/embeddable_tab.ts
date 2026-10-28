@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { discoverSessionApiClassicTabBaseSchema, discoverSessionApiEsqlTabBaseSchema } from './tab';
 import { discoverSessionApiMetricsTabTypeStateSchema } from './metrics_tab';
 import { discoverSessionApiDefaultTabTypeStateSchema } from './session_data';
@@ -26,11 +26,11 @@ const embeddableMetricsTabSchema = discoverSessionApiEsqlTabBaseSchema
  * Inline tab configuration for a by-value Discover panel. Unlike the session API tab schemas, it
  * omits session-only fields such as id, label, and presentation state.
  */
-export const discoverSessionApiEmbeddableTabSchema = z.union([
+export const discoverSessionApiEmbeddableTabSchema = lazySchema(() => z.union([
   discoverSessionApiClassicTabBaseSchema.extend(discoverSessionApiDefaultTabTypeStateSchema.shape),
   discoverSessionApiEsqlTabBaseSchema
     .extend(discoverSessionApiDefaultTabTypeStateSchema.shape)
     // extend() does not preserve object-level metadata.
     .meta({ ...discoverSessionApiEsqlTabBaseSchema.meta() }),
   embeddableMetricsTabSchema,
-]);
+]));

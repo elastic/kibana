@@ -9,12 +9,12 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 const configSchemaProps = {
-  webhookIntegrationUrl: z.string(),
+  webhookIntegrationUrl: lazySchema(() => z.string()),
 };
 export const ConfigSchema = lazySchema(() => z.object(configSchemaProps).strict());
 
 const secretSchemaProps = {
-  token: z.string(),
+  token: lazySchema(() => z.string()),
 };
 export const SecretsSchema = lazySchema(() => z.object(secretSchemaProps).strict());
 

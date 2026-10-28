@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   UnifiedHistogramSuggestionType,
   MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH,
 } from '@kbn/discover-session-constants';
 
-export const visContextSchema = z
+export const visContextSchema = lazySchema(() => z
   .object({
     suggestion_type: z
       .enum([
@@ -33,4 +33,4 @@ export const visContextSchema = z
   .meta({
     description:
       'The saved chart configuration. Discover reuses it when compatible with the tab’s current settings and query results; otherwise, it rebuilds the chart.',
-  });
+  }));

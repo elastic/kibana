@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import * as t from 'io-ts';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import Boom from '@hapi/boom';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
@@ -121,11 +121,11 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
 
 const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/kubernetes/{onboardingId}/has-data',
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({
       onboardingId: z.string().max(36),
     }),
-  }),
+  })),
   security: {
     authz: {
       enabled: false,

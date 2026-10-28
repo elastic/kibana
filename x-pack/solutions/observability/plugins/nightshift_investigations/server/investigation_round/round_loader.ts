@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ConversationRoundStep, ToolCallStep, ToolResult } from '@kbn/agent-builder-common';
@@ -20,29 +20,29 @@ const MAX_ROUND_TEXT_LENGTH = 65_536;
  * `decisionTreeReinforce`).
  */
 export const investigationRoundInputsSchema = {
-  prompt: z
+  prompt: lazySchema(() => z
     .string()
     .max(MAX_ROUND_TEXT_LENGTH)
-    .describe('The user message that started the round.'),
-  response: z
+    .describe('The user message that started the round.')),
+  response: lazySchema(() => z
     .string()
     .max(MAX_ROUND_TEXT_LENGTH)
-    .describe("The assistant's final response for the round."),
-  conversation_id: z.string().max(1024).optional().describe('Conversation the round belongs to.'),
-  round_id: z
+    .describe("The assistant's final response for the round.")),
+  conversation_id: lazySchema(() => z.string().max(1024).optional().describe('Conversation the round belongs to.')),
+  round_id: lazySchema(() => z
     .string()
     .max(1024)
     .optional()
     .describe(
       'Id or positional/semantic alias (e.g. "0", "-1", "1st", "first", "last", "investigation_start") of the completed round.'
-    ),
-  round_index: z
+    )),
+  round_index: lazySchema(() => z
     .number()
     .int()
     .optional()
     .describe(
       'Zero-based sequence index of the round in the conversation (supports negative offsets such as -1 for latest).'
-    ),
+    )),
   tool_calls: toolCallsSchema.describe(
     'Investigator tool calls from this round. Shows the optimizer what the investigator queried.'
   ),

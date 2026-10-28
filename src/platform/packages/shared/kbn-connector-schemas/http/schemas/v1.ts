@@ -76,15 +76,15 @@ export const HttpFormDataFieldSchema = lazySchema(() =>
   )
 );
 
-export const QueryParamScalarSchema = z.union([z.string(), z.number(), z.boolean()]);
+export const QueryParamScalarSchema = lazySchema(() => z.union([z.string(), z.number(), z.boolean()]));
 
 type QueryParamScalar = z.infer<typeof QueryParamScalarSchema>;
 export type QueryParamValue = QueryParamScalar | QueryParamScalar[];
 
-export const QueryParamValueSchema = z.union([
+export const QueryParamValueSchema = lazySchema(() => z.union([
   QueryParamScalarSchema,
   z.array(QueryParamScalarSchema),
-]);
+]));
 
 export const ParamsSchema = lazySchema(() =>
   z

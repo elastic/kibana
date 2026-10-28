@@ -32,7 +32,7 @@ import {
 } from '@kbn/context-engine-plugin/server/ai_indices/ki_revision';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { isoDateTime, z } from '@kbn/zod/v4';
+import { isoDateTime, z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 import { createMemoryToolsAvailability } from '../ai_index_tools_availability';
@@ -45,10 +45,10 @@ import {
   updateMemoryProvenance,
 } from '../memory_document';
 
-const memoryTypeSchema = z.enum(MEMORY_KI_TYPES);
+const memoryTypeSchema = lazySchema(() => z.enum(MEMORY_KI_TYPES));
 const DEFAULT_MEMORY_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
 
-const rememberSchema = z.object({
+const rememberSchema = lazySchema(() => z.object({
   aiIndexId: aiIndexIdFieldSchema.describe(
     'The Context Engine AI-index registry ID where the memory will be stored. Use the ID from the agent AI INDICES configuration, not the backing Elasticsearch index or data stream name.'
   ),
@@ -93,7 +93,7 @@ const rememberSchema = z.object({
     .describe(
       'ISO 8601 timestamp after which the memory must not be recalled. UTC (Z) and numeric timezone offsets are accepted. If omitted, this call sets the expiry to 90 days from now, including when revising an existing memory. Set to null to make the memory non-expiring.'
     ),
-});
+}));
 
 export const createRememberTool = ({
   getAiIndexService,

@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import qs from 'query-string';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
@@ -193,7 +193,7 @@ export const serviceDetailRoute = {
             showTransactionTypeSelector: true,
           },
         }),
-        params: z.object({
+        params: lazySchema(() => z.object({
           query: z
             .object({
               page: z.coerce.number().optional(),
@@ -202,7 +202,7 @@ export const serviceDetailRoute = {
               sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
             })
             .optional(),
-        }),
+        })),
       },
       '/services/{serviceName}/transactions': {
         ...page({
@@ -216,7 +216,7 @@ export const serviceDetailRoute = {
             showTimeComparison: true,
           },
         }),
-        params: z.object({
+        params: lazySchema(() => z.object({
           query: z
             .object({
               page: z.coerce.number().optional(),
@@ -225,11 +225,11 @@ export const serviceDetailRoute = {
               sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
             })
             .optional(),
-        }),
+        })),
         children: {
           '/services/{serviceName}/transactions/view': {
             element: <TransactionDetails />,
-            params: z.object({
+            params: lazySchema(() => z.object({
               query: z
                 .object({
                   comparisonEnabled: toBooleanFromString,
@@ -250,7 +250,7 @@ export const serviceDetailRoute = {
                   })
                 )
                 .merge(offsetSchema),
-            }),
+            })),
             defaults: {
               query: {
                 showCriticalPath: '',
@@ -283,7 +283,7 @@ export const serviceDetailRoute = {
             showTimeComparison: true,
           },
         }),
-        params: z.object({
+        params: lazySchema(() => z.object({
           query: z
             .object({
               page: z.coerce.number().optional(),
@@ -292,16 +292,16 @@ export const serviceDetailRoute = {
               sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
             })
             .optional(),
-        }),
+        })),
         children: {
           '/services/{serviceName}/errors/{groupId}': {
             element: <ErrorGroupDetails />,
-            params: z.object({
+            params: lazySchema(() => z.object({
               path: z.object({
                 groupId: z.string(),
               }),
               query: z.object({ errorId: z.string().optional() }),
-            }),
+            })),
           },
           '/services/{serviceName}/errors': {
             element: <ErrorGroupOverview />,
@@ -322,11 +322,11 @@ export const serviceDetailRoute = {
           },
           '/services/{serviceName}/metrics/{id}': {
             element: <MetricsDetails />,
-            params: z.object({
+            params: lazySchema(() => z.object({
               path: z.object({
                 id: z.string(),
               }),
-            }),
+            })),
           },
         },
       },
@@ -342,15 +342,15 @@ export const serviceDetailRoute = {
         children: {
           '/services/{serviceName}/nodes/{serviceNodeName}/metrics': {
             element: <RedirectNodeMetricsToMetricsDetails />,
-            params: z.object({
+            params: lazySchema(() => z.object({
               path: z.object({
                 serviceNodeName: z.string(),
               }),
-            }),
+            })),
           },
           '/services/{serviceName}/nodes': {
             element: <RedirectNodesToMetrics />,
-            params: z.object({
+            params: lazySchema(() => z.object({
               query: z
                 .object({
                   sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
@@ -359,7 +359,7 @@ export const serviceDetailRoute = {
                   page: z.coerce.number().optional(),
                 })
                 .optional(),
-            }),
+            })),
           },
         },
       },
@@ -387,7 +387,7 @@ export const serviceDetailRoute = {
           }),
           element: <InfraOverview />,
         }),
-        params: z.object({
+        params: lazySchema(() => z.object({
           query: z
             .object({
               detailTab: z
@@ -399,7 +399,7 @@ export const serviceDetailRoute = {
                 .optional(),
             })
             .optional(),
-        }),
+        })),
       },
       '/services/{serviceName}/alerts': {
         ...page({
@@ -414,7 +414,7 @@ export const serviceDetailRoute = {
           bottomHeaderContent: AlertsHeaderSearchBar,
           contentWrapper: AlertsSearchBarContextProvider,
         }),
-        params: z.object({
+        params: lazySchema(() => z.object({
           query: z
             .object({
               alertStatus: z
@@ -426,7 +426,7 @@ export const serviceDetailRoute = {
                 .optional(),
             })
             .optional(),
-        }),
+        })),
       },
       '/services/{serviceName}/profiling': {
         ...page({
@@ -451,9 +451,9 @@ export const serviceDetailRoute = {
           }),
           element: <ServiceDashboards />,
         }),
-        params: z.object({
+        params: lazySchema(() => z.object({
           query: z.object({ dashboardId: z.string().optional() }).optional(),
-        }),
+        })),
       },
       '/services/{serviceName}/': {
         element: <RedirectToDefaultServiceRouteView />,

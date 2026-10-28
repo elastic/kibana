@@ -12,16 +12,16 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 // Gen AI connector parameter schema for run action
-export const GenAIRunParamsSchema = z.object({
+export const GenAIRunParamsSchema = lazySchema(() => z.object({
   body: z.string().describe('The request body as a JSON string'),
   timeout: z.number().optional().describe('Request timeout in milliseconds'),
-});
+}));
 
 // Gen AI connector parameter schema for invokeAI action
-export const GenAIInvokeAIParamsSchema = z.object({
+export const GenAIInvokeAIParamsSchema = lazySchema(() => z.object({
   messages: z
     .array(
       z.object({
@@ -112,27 +112,27 @@ export const GenAIInvokeAIParamsSchema = z.object({
   temperature: z.number().optional().describe('Sampling temperature'),
   response_format: z.any().optional().describe('Response format specification'),
   timeout: z.number().optional().describe('Request timeout in milliseconds'),
-});
+}));
 
 // Gen AI connector parameter schema for stream actions
-export const GenAIStreamParamsSchema = z.object({
+export const GenAIStreamParamsSchema = lazySchema(() => z.object({
   body: z.string().describe('The request body as a JSON string'),
   stream: z.boolean().default(false).describe('Whether to stream the response'),
   timeout: z.number().optional().describe('Request timeout in milliseconds'),
-});
+}));
 
 // Gen AI connector parameter schema for getDashboard action
-export const GenAIDashboardParamsSchema = z.object({
+export const GenAIDashboardParamsSchema = lazySchema(() => z.object({
   dashboardId: z.string().describe('The ID of the dashboard to retrieve'),
-});
+}));
 
 // Gen AI connector parameter schema for test action
-export const GenAITestParamsSchema = z.object({
+export const GenAITestParamsSchema = lazySchema(() => z.object({
   timeout: z.number().optional().describe('Request timeout in milliseconds'),
-});
+}));
 
 // Gen AI connector response schemas
-export const GenAIRunResponseSchema = z.object({
+export const GenAIRunResponseSchema = lazySchema(() => z.object({
   id: z.string().optional(),
   object: z.string().optional(),
   created: z.number().optional(),
@@ -152,23 +152,23 @@ export const GenAIRunResponseSchema = z.object({
       index: z.number().optional(),
     })
   ),
-});
+}));
 
-export const GenAIInvokeAIResponseSchema = z.object({
+export const GenAIInvokeAIResponseSchema = lazySchema(() => z.object({
   message: z.string(),
   usage: z.object({
     prompt_tokens: z.number(),
     completion_tokens: z.number(),
     total_tokens: z.number(),
   }),
-});
+}));
 
-export const GenAIStreamResponseSchema = z.any();
+export const GenAIStreamResponseSchema = lazySchema(() => z.any());
 
-export const GenAIDashboardResponseSchema = z.object({
+export const GenAIDashboardResponseSchema = lazySchema(() => z.object({
   available: z.boolean().describe('Whether the dashboard is available'),
-});
+}));
 
-export const GenAITestResponseSchema = z.object({
+export const GenAITestResponseSchema = lazySchema(() => z.object({
   success: z.boolean().describe('Whether the test was successful'),
-});
+}));

@@ -12,20 +12,20 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 // OpenAI connector parameter schema
-export const OpenAIParamsSchema = z.object({
+export const OpenAIParamsSchema = lazySchema(() => z.object({
   body: z.string(),
   model: z.string().optional(),
   n: z.number().optional(),
   stop: z.array(z.string()).optional(),
   temperature: z.number().optional(),
   max_tokens: z.number().optional(),
-});
+}));
 
 // OpenAI connector response schema
-export const OpenAIResponseSchema = z.object({
+export const OpenAIResponseSchema = lazySchema(() => z.object({
   choices: z.array(
     z.object({
       message: z.object({
@@ -42,4 +42,4 @@ export const OpenAIResponseSchema = z.object({
       total_tokens: z.number(),
     })
     .optional(),
-});
+}));

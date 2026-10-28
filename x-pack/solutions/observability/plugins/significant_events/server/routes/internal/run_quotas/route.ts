@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   NIGHTSHIFT_API_PRIVILEGES,
   NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
@@ -31,7 +31,7 @@ import {
   type RunQuotaSettingsAttributes,
 } from '../../../lib/run_quotas';
 
-const limitsUpdateSchema = z
+const limitsUpdateSchema = lazySchema(() => z
   .object({
     detection: z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).optional(),
     investigation: z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).optional(),
@@ -40,9 +40,9 @@ const limitsUpdateSchema = z
   .strict()
   .refine((limits) => Object.values(limits).some((limit) => limit !== undefined), {
     message: 'At least one run limit is required',
-  });
+  }));
 
-const activateLimitsSchema = z
+const activateLimitsSchema = lazySchema(() => z
   .object({
     detection: z
       .number()
@@ -66,9 +66,9 @@ const activateLimitsSchema = z
   .strict()
   .refine((limits) => Object.values(limits).some((limit) => limit !== undefined), {
     message: 'At least one run limit to activate is required',
-  });
+  }));
 
-const settingsUpdateSchema = z.union([
+const settingsUpdateSchema = lazySchema(() => z.union([
   z
     .object({
       enabled: z.boolean().optional(),
@@ -83,13 +83,13 @@ const settingsUpdateSchema = z.union([
       activateLimits: activateLimitsSchema,
     })
     .strict(),
-]);
+]));
 
-const consumeRequestSchema = z.discriminatedUnion('group', [
+const consumeRequestSchema = lazySchema(() => z.discriminatedUnion('group', [
   z.object({ group: z.literal('detection') }).strict(),
   z.object({ group: z.literal('ki_extraction') }).strict(),
   z.object({ group: z.literal('investigation') }).strict(),
-]);
+]));
 
 const readRunQuotaSnapshot = async ({
   internalRepository,
@@ -138,7 +138,7 @@ const getRunQuotasRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({ request, server, getScopedClients }) => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
@@ -164,9 +164,9 @@ const putRunQuotasRoute = createServerRoute({
       requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     body: settingsUpdateSchema,
-  }),
+  })),
   handler: async ({ params, request, server, getScopedClients }) => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
@@ -195,9 +195,9 @@ const consumeRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     body: consumeRequestSchema,
-  }),
+  })),
   handler: async ({ params, request, server, getScopedClients }) => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });

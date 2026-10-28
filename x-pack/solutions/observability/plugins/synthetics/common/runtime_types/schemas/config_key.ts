@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { ConfigKey } from '../../constants/monitor_management';
 
-export const ConfigKeyCodec = z.enum(ConfigKey);
+export const ConfigKeyCodec = lazySchema(() => z.enum(ConfigKey));

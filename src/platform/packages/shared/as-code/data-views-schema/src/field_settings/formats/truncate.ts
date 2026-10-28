@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const truncateFormatSchema = z
+export const truncateFormatSchema = lazySchema(() => z
   .object({
     type: z.literal('truncate'),
     params: z
@@ -23,4 +23,4 @@ export const truncateFormatSchema = z
     title: 'Truncate field format',
     description:
       'Truncates the field value to the specified length. If the field value is longer than the specified length, it will be truncated and the remaining text will be replaced with "...".',
-  });
+  }));

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   skillIdMaxLength,
   skillNameMaxLength,
@@ -121,7 +121,7 @@ export interface ReferencedContentItem {
   content: string;
 }
 
-const referencedContentItemSchema: z.ZodType<ReferencedContentItem> = z.object({
+const referencedContentItemSchema: z.ZodType<ReferencedContentItem> = lazySchema(() => z.object({
   name: z
     .string()
     .trim()
@@ -130,9 +130,9 @@ const referencedContentItemSchema: z.ZodType<ReferencedContentItem> = z.object({
     .regex(skillNameRegexp, { message: validationMessages.referencedContentName.format }),
   relativePath: z.string().trim(),
   content: z.string(),
-});
+}));
 
-const skillFormObjectSchema = z.object({
+const skillFormObjectSchema = lazySchema(() => z.object({
   name: z
     .string()
     .min(1, { message: validationMessages.name.required })
@@ -147,9 +147,9 @@ const skillFormObjectSchema = z.object({
   referenced_content: z
     .array(referencedContentItemSchema)
     .max(maxReferencedContentItems, { message: validationMessages.referencedContent.maxItems }),
-});
+}));
 
-export const skillFormValidationSchema = skillFormObjectSchema.superRefine((data, ctx) => {
+export const skillFormValidationSchema = lazySchema(() => skillFormObjectSchema.superRefine((data, ctx) => {
   for (const issue of collectReferencedContentRefineIssues(data.referenced_content)) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
@@ -157,7 +157,7 @@ export const skillFormValidationSchema = skillFormObjectSchema.superRefine((data
       path: ['referenced_content', issue.itemIndex, issue.field],
     });
   }
-});
+}));
 
 export type SkillFormData = z.infer<typeof skillFormObjectSchema>;
 

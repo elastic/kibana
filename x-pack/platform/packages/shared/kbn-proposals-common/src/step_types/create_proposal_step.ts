@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_TITLE_LENGTH,
   proposalCategorySchema,
@@ -20,7 +20,7 @@ import { optionalStepInput } from './optional_step_input';
 
 export const CreateProposalStepId = 'proposals.createProposal' as const;
 
-export const createProposalStepInputSchema = z.object({
+export const createProposalStepInputSchema = lazySchema(() => z.object({
   conversationId: z.string().describe('Conversation this proposal belongs to.'),
   title: optionalStepInput(z.string().max(MAX_TITLE_LENGTH)).describe(
     'Short plain-text label naming what is proposed \u2014 `comment` is already the markdown body. Optional here, but stored on every proposal: omitting it stores the action workflow\u2019s own name, or `Proposed action` when the action has no name either.'
@@ -54,9 +54,9 @@ export const createProposalStepInputSchema = z.object({
   proposalId: optionalStepInput(z.uuid()).describe(
     'The id to create the proposal under, instead of a random one, for a caller that derives it from what it is proposing. An id that already exists fails the step with a conflict and creates nothing. Omit for a proposal that is always new.'
   ),
-});
+}));
 
-export const createProposalStepOutputSchema = z.object({
+export const createProposalStepOutputSchema = lazySchema(() => z.object({
   proposalId: z.string(),
   /** Equal to `proposalId` here; carried by the gate so it can resolve the chain later. */
   rootProposalId: z.string(),
@@ -80,7 +80,7 @@ export const createProposalStepOutputSchema = z.object({
    * point rather than restarting the clock on every retry.
    */
   expiresAt: z.string().optional(),
-});
+}));
 
 export const createProposalStepCommonDefinition: BaseStepDefinition<
   typeof createProposalStepInputSchema,

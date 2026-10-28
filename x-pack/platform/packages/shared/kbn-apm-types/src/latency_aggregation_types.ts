@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export enum LatencyAggregationType {
   avg = 'avg',
@@ -13,8 +13,8 @@ export enum LatencyAggregationType {
   p95 = 'p95',
 }
 
-export const latencyAggregationTypeSchema = z.union([
+export const latencyAggregationTypeSchema = lazySchema(() => z.union([
   z.literal(LatencyAggregationType.avg),
   z.literal(LatencyAggregationType.p95),
   z.literal(LatencyAggregationType.p99),
-]);
+]));

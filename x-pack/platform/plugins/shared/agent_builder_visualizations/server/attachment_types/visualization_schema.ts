@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_VEGA_SPEC_LENGTH } from '@kbn/agent-builder-visualizations-common';
 import {
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
@@ -17,10 +17,10 @@ import {
 
 export { MAX_VEGA_SPEC_LENGTH };
 
-const timeRangeSchema = z.object({
+const timeRangeSchema = lazySchema(() => z.object({
   from: z.string().max(256),
   to: z.string().max(256),
-});
+}));
 
 /**
  * A Lens or Vega payload. `renderer` is optional because attachments predating the
@@ -62,7 +62,7 @@ const chartVisualizationSchema = z
  * are what make it safe at render time; rejecting scripts and oversized markup here keeps the
  * stored payload clean too, matching what the dashboard generation path enforces.
  */
-const customContentVisualizationSchema = z.object({
+const customContentVisualizationSchema = lazySchema(() => z.object({
   renderer: z.literal('custom_content'),
   query: z.string().max(2048),
   visualization: z.object({
@@ -90,14 +90,14 @@ const customContentVisualizationSchema = z.object({
   // A custom content panel with no query renders static content.
   esql: z.string().max(4096).optional(),
   time_range: timeRangeSchema.optional(),
-});
+}));
 
 /**
  * Runtime validation for visualization attachment data; the matching type contract is
  * `VisualizationAttachmentData`. A union rather than conditional refinements, so the parser
  * enforces the same per-renderer guarantees the type expresses.
  */
-export const visualizationAttachmentDataSchema = z.union([
+export const visualizationAttachmentDataSchema = lazySchema(() => z.union([
   customContentVisualizationSchema,
   chartVisualizationSchema,
-]);
+]));

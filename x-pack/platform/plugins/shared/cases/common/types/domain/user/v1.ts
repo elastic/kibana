@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-const UserWithoutProfileUidSchema = z.object({
+const UserWithoutProfileUidSchema = lazySchema(() => z.object({
   email: z.union([z.string(), z.null(), z.undefined()]),
   full_name: z.union([z.string(), z.null(), z.undefined()]),
   username: z.union([z.string(), z.null(), z.undefined()]),
-});
+}));
 
-export const UserSchema = UserWithoutProfileUidSchema.extend({
+export const UserSchema = lazySchema(() => UserWithoutProfileUidSchema.extend({
   profile_uid: z.string().optional(),
-});
+}));
 
-export const UserWithProfileInfoSchema = z.object({
+export const UserWithProfileInfoSchema = lazySchema(() => z.object({
   user: UserWithoutProfileUidSchema,
   uid: z.string().optional(),
   avatar: z
@@ -27,16 +27,16 @@ export const UserWithProfileInfoSchema = z.object({
       imageUrl: z.string().nullable().optional(),
     })
     .optional(),
-});
+}));
 
-export const UsersSchema = z.array(UserSchema);
+export const UsersSchema = lazySchema(() => z.array(UserSchema));
 
 export type User = z.infer<typeof UserSchema>;
 export type UserWithProfileInfo = z.infer<typeof UserWithProfileInfoSchema>;
 
-export const CaseUserProfileSchema = z.object({
+export const CaseUserProfileSchema = lazySchema(() => z.object({
   uid: z.string(),
-});
+}));
 
 export type CaseUserProfile = z.infer<typeof CaseUserProfileSchema>;
 
@@ -44,20 +44,20 @@ export type CaseUserProfile = z.infer<typeof CaseUserProfileSchema>;
  * UID-only assignees for caller-supplied input (templates, imports). Identity
  * fields are server-derived, so they must not be expressible on the input side.
  */
-export const CaseUserProfilesSchema = z.array(CaseUserProfileSchema);
+export const CaseUserProfilesSchema = lazySchema(() => z.array(CaseUserProfileSchema));
 export type CaseUserProfiles = z.infer<typeof CaseUserProfilesSchema>;
 
-export const CaseAssigneeSchema = z.object({
+export const CaseAssigneeSchema = lazySchema(() => z.object({
   uid: z.string(),
   username: z.string().nullable().optional(),
   full_name: z.string().nullable().optional(),
   email: z.string().nullable().optional(),
-});
+}));
 
 export type CaseAssignee = z.infer<typeof CaseAssigneeSchema>;
 
 /**
  * Assignees
  */
-export const CaseAssigneesSchema = z.array(CaseAssigneeSchema);
+export const CaseAssigneesSchema = lazySchema(() => z.array(CaseAssigneeSchema));
 export type CaseAssignees = z.infer<typeof CaseAssigneesSchema>;

@@ -12,16 +12,16 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 // Elasticsearch Index connector parameter schema
-export const EsIndexParamsSchema = z.object({
+export const EsIndexParamsSchema = lazySchema(() => z.object({
   documents: z.array(z.record(z.string(), z.any())),
   indexOverride: z.string().optional(),
-});
+}));
 
 // Elasticsearch Index connector response schema
-export const EsIndexResponseSchema = z.object({
+export const EsIndexResponseSchema = lazySchema(() => z.object({
   took: z.number(),
   errors: z.boolean(),
   items: z.array(
@@ -51,4 +51,4 @@ export const EsIndexResponseSchema = z.object({
         .optional(),
     })
   ),
-});
+}));

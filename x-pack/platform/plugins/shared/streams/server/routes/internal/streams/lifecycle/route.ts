@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
@@ -200,9 +200,9 @@ const lifecycleStatsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
-  }),
+  })),
   handler: async ({ params, request, getScopedClients }) => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const name = params.path.name;
@@ -257,9 +257,9 @@ const lifecycleDslPhaseStatsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
-  }),
+  })),
   handler: async ({
     params,
     request,
@@ -308,9 +308,9 @@ const lifecycleIlmExplainRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
-  }),
+  })),
   handler: async ({ params, request, getScopedClients }) => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const name = params.path.name;
@@ -334,9 +334,9 @@ const lifecycleInheritedRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
-  }),
+  })),
   handler: async ({ params, request, getScopedClients, logger }) => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const name = params.path.name;
@@ -383,7 +383,7 @@ const lifecycleIlmPoliciesRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({ request, getScopedClients }): Promise<IlmPolicyWithUsage[]> => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const policiesResponse =
@@ -405,10 +405,10 @@ const lifecycleIlmPoliciesRoute = createServerRoute({
   },
 });
 
-const ilmPhaseSchema = z.looseObject({
+const ilmPhaseSchema = lazySchema(() => z.looseObject({
   min_age: z.string().max(64).optional(),
   actions: z.record(z.string().max(1000), z.any()).optional(),
-});
+}));
 
 const lifecycleIlmPoliciesUpdateRoute = createServerRoute({
   endpoint: 'POST /internal/streams/lifecycle/_policy',
@@ -420,7 +420,7 @@ const lifecycleIlmPoliciesUpdateRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     body: z.object({
       name: z.string().max(1000),
       phases: z.object({
@@ -437,7 +437,7 @@ const lifecycleIlmPoliciesUpdateRoute = createServerRoute({
     query: z.object({
       allow_overwrite: BooleanFromString.optional().default(false),
     }),
-  }),
+  })),
   handler: async ({ params, request, getScopedClients }) => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const { name, meta, source_policy_name: sourcePolicyName, ...policy } = params.body;
@@ -478,7 +478,7 @@ const lifecycleSnapshotRepositoriesRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({
     request,
     getScopedClients,
@@ -526,9 +526,9 @@ const lifecycleGlobalRetentionRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
-  }),
+  })),
   handler: async ({ params, request, getScopedClients }): Promise<DataStreamGlobalRetention> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const { name } = params.path;

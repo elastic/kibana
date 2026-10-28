@@ -14,10 +14,10 @@
  *   version: 2026-02-10
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 
 export type AnonymizationEntityClass = z.infer<typeof AnonymizationEntityClass>;
-export const AnonymizationEntityClass = z.enum([
+export const AnonymizationEntityClass = lazySchema(() => z.enum([
   'PER',
   'ORG',
   'LOC',
@@ -31,89 +31,89 @@ export const AnonymizationEntityClass = z.enum([
   'ENTITY_NAME',
   'RESOURCE_NAME',
   'RESOURCE_ID',
-]);
+]));
 export type AnonymizationEntityClassEnum = typeof AnonymizationEntityClass.enum;
 export const AnonymizationEntityClassEnum = AnonymizationEntityClass.enum;
 
 export type NerEntityClass = z.infer<typeof NerEntityClass>;
-export const NerEntityClass = z.enum(['PER', 'ORG', 'LOC', 'MISC']);
+export const NerEntityClass = lazySchema(() => z.enum(['PER', 'ORG', 'LOC', 'MISC']));
 export type NerEntityClassEnum = typeof NerEntityClass.enum;
 export const NerEntityClassEnum = NerEntityClass.enum;
 
 export type ErrorResponse = z.infer<typeof ErrorResponse>;
-export const ErrorResponse = z.object({
+export const ErrorResponse = lazySchema(() => z.object({
   /**
    * Human-readable error message.
    */
   message: z.string(),
-});
+}));
 
 export type AnonymizationTargetType = z.infer<typeof AnonymizationTargetType>;
-export const AnonymizationTargetType = z.enum(['data_view', 'index_pattern', 'index']);
+export const AnonymizationTargetType = lazySchema(() => z.enum(['data_view', 'index_pattern', 'index']));
 export type AnonymizationTargetTypeEnum = typeof AnonymizationTargetType.enum;
 export const AnonymizationTargetTypeEnum = AnonymizationTargetType.enum;
 
 export type SortOrder = z.infer<typeof SortOrder>;
-export const SortOrder = z.enum(['asc', 'desc']);
+export const SortOrder = lazySchema(() => z.enum(['asc', 'desc']));
 export type SortOrderEnum = typeof SortOrder.enum;
 export const SortOrderEnum = SortOrder.enum;
 
 export type ProfileSortField = z.infer<typeof ProfileSortField>;
-export const ProfileSortField = z.enum(['created_at', 'name', 'updated_at']);
+export const ProfileSortField = lazySchema(() => z.enum(['created_at', 'name', 'updated_at']));
 export type ProfileSortFieldEnum = typeof ProfileSortField.enum;
 export const ProfileSortFieldEnum = ProfileSortField.enum;
 
 export type FieldRule = z.infer<typeof FieldRule>;
-export const FieldRule = z.object({
+export const FieldRule = lazySchema(() => z.object({
   field: z.string(),
   allowed: z.boolean(),
   anonymized: z.boolean(),
   entityClass: AnonymizationEntityClass.optional(),
-});
+}));
 
 export type RegexRule = z.infer<typeof RegexRule>;
-export const RegexRule = z.object({
+export const RegexRule = lazySchema(() => z.object({
   id: z.string(),
   type: z.literal('regex'),
   entityClass: AnonymizationEntityClass,
   pattern: z.string(),
   enabled: z.boolean(),
-});
+}));
 
 export type NerRule = z.infer<typeof NerRule>;
-export const NerRule = z.object({
+export const NerRule = lazySchema(() => z.object({
   id: z.string(),
   type: z.literal('ner'),
   modelId: z.string().optional(),
   allowedEntityClasses: z.array(NerEntityClass),
   enabled: z.boolean(),
-});
+}));
 
 export type AnonymizationProfileRules = z.infer<typeof AnonymizationProfileRules>;
-export const AnonymizationProfileRules = z.object({
+export const AnonymizationProfileRules = lazySchema(() => z.object({
   fieldRules: z.array(FieldRule),
   regexRules: z.array(RegexRule).optional().default([]),
   nerRules: z.array(NerRule).optional().default([]),
-});
+}));
 
 export type CreateAnonymizationProfileRequest = z.infer<typeof CreateAnonymizationProfileRequest>;
-export const CreateAnonymizationProfileRequest = z.object({
+export const CreateAnonymizationProfileRequest = lazySchema(() => z.object({
   name: z.string(),
   description: z.string().optional(),
   targetType: AnonymizationTargetType,
   targetId: z.string(),
   rules: AnonymizationProfileRules,
-});
+}));
 
 export type UpdateAnonymizationProfileRequest = z.infer<typeof UpdateAnonymizationProfileRequest>;
-export const UpdateAnonymizationProfileRequest = z.object({
+export const UpdateAnonymizationProfileRequest = lazySchema(() => z.object({
   name: z.string().optional(),
   description: z.string().optional(),
   rules: AnonymizationProfileRules.optional(),
-});
+}));
 
 export type AnonymizationProfile = z.infer<typeof AnonymizationProfile>;
-export const AnonymizationProfile = z.object({
+export const AnonymizationProfile = lazySchema(() => z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().optional(),
@@ -129,18 +129,18 @@ export const AnonymizationProfile = z.object({
   updatedAt: isoDateTime(),
   createdBy: z.string(),
   updatedBy: z.string(),
-});
+}));
 
 export type FindProfilesResponse = z.infer<typeof FindProfilesResponse>;
-export const FindProfilesResponse = z.object({
+export const FindProfilesResponse = lazySchema(() => z.object({
   page: z.number().int().min(1),
   perPage: z.number().int().min(1).max(1000),
   total: z.number().int().min(0),
   data: z.array(AnonymizationProfile),
-});
+}));
 
 export type ReplacementsSetResponse = z.infer<typeof ReplacementsSetResponse>;
-export const ReplacementsSetResponse = z.object({
+export const ReplacementsSetResponse = lazySchema(() => z.object({
   id: z.string(),
   namespace: z.string(),
   replacements: z.array(
@@ -149,15 +149,15 @@ export const ReplacementsSetResponse = z.object({
       original: z.string(),
     })
   ),
-});
+}));
 
 export type DeanonymizeRequest = z.infer<typeof DeanonymizeRequest>;
-export const DeanonymizeRequest = z.object({
+export const DeanonymizeRequest = lazySchema(() => z.object({
   text: z.string(),
   replacementsId: z.string(),
-});
+}));
 
 export type DeanonymizeResponse = z.infer<typeof DeanonymizeResponse>;
-export const DeanonymizeResponse = z.object({
+export const DeanonymizeResponse = lazySchema(() => z.object({
   text: z.string(),
-});
+}));

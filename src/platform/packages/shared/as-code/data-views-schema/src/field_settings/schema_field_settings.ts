@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { formatSchema } from './formats/format_schema';
 
-export const fieldSettingsBaseSchema = z
+export const fieldSettingsBaseSchema = lazySchema(() => z
   .object({
     format: formatSchema.optional(),
     custom_label: z.string().min(1).optional().meta({
@@ -32,16 +32,16 @@ export const fieldSettingsBaseSchema = z
     title: 'Field settings',
     description:
       'Display overrides for a field. These settings can define a custom label, description, and format.',
-  });
+  }));
 
-const popularitySchema = z.number().min(0).optional().meta({
+const popularitySchema = lazySchema(() => z.number().min(0).optional().meta({
   id: 'kbn-runtime-field-popularity',
   title: 'Popularity',
   description:
     'Adjust the popularity to make the field appear higher or lower in the fields list. By default, Discover orders fields from most selected to least selected.',
-});
+}));
 
-export const fieldSettingsWithPopularitySchema = fieldSettingsBaseSchema
+export const fieldSettingsWithPopularitySchema = lazySchema(() => fieldSettingsBaseSchema
   .extend({
     popularity: popularitySchema,
   })
@@ -50,4 +50,4 @@ export const fieldSettingsWithPopularitySchema = fieldSettingsBaseSchema
     title: 'Field settings',
     description:
       'Display overrides for a field. These settings can define a custom label, description, format and popularity.',
-  });
+  }));

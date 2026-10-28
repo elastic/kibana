@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import * as i18n from '../translations';
@@ -22,14 +22,14 @@ import {
 
 export const AddObservablesStepTypeId = 'cases.addObservables';
 
-const ObservableInputSchema = z.object({
+const ObservableInputSchema = lazySchema(() => z.object({
   typeKey: z.enum(OBSERVABLE_TYPES_BUILTIN_KEYS),
   value: z.string().min(1, 'value is required'),
   description: z.string().nullable().optional(),
-});
+}));
 
 const InputSchema = CasesStepCaseIdSchema.extend({
-  observables: z.array(ObservableInputSchema).min(1).max(MAX_OBSERVABLES_PER_CASE),
+  observables: lazySchema(() => z.array(ObservableInputSchema).min(1).max(MAX_OBSERVABLES_PER_CASE)),
 });
 
 const OutputSchema = CasesStepSingleCaseOutputSchema;

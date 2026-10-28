@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { CreateCaseRequest as CreateCaseRequestSchema } from '../../bundled-types.gen';
@@ -26,7 +26,7 @@ export const OutputSchema = CasesStepSingleCaseOutputSchema;
 
 // `connector-id` is what's triggering the connector selector.
 const ConfigSchema = CasesStepBaseConfigSchema.extend({
-  'connector-id': z.string().optional(),
+  'connector-id': lazySchema(() => z.string().optional()),
 });
 
 type CreateCaseStepInputSchema = typeof InputSchema;

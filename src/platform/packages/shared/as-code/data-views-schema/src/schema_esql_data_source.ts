@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from './constants';
 
-export const esqlDataSourceSchema = z
+export const esqlDataSourceSchema = lazySchema(() => z
   .object({
     type: z.literal(AS_CODE_ESQL_DATA_SOURCE_TYPE),
     /**
@@ -29,4 +29,4 @@ export const esqlDataSourceSchema = z
     title: 'ES|QL Data Source',
     description:
       'Uses an ES|QL query as the data source. The query is executed at render time; resulting columns are available as fields.',
-  });
+  }));

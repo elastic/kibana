@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -22,7 +22,7 @@ import { getToolHandler } from './handler';
 export const OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID =
   'observability.get_trace_change_points';
 
-const getTraceChangePointsSchema = z.object({
+const getTraceChangePointsSchema = lazySchema(() => z.object({
   ...timeRangeSchemaRequired,
   kqlFilter: z
     .string()
@@ -47,7 +47,7 @@ const getTraceChangePointsSchema = z.object({
     .enum(['avg', 'p95', 'p99'])
     .default('avg')
     .describe('Aggregation type for latency change points analysis.'),
-});
+}));
 
 export function createGetTraceChangePointsTool({
   core,

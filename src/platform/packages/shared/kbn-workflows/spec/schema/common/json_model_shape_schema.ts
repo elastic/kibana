@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { builtinWorkflowInputDefinitionRefSchema } from '../../builtin_workflow_input_definitions';
 
 /**
@@ -129,9 +129,9 @@ export const JSON_SCHEMA_PROPERTY_KEYS = [
 ] as const satisfies readonly (keyof JsonSchema)[];
 
 /** Shared `type` keyword (single type or array of types). */
-const jsonSchemaTypeField = z
+const jsonSchemaTypeField = lazySchema(() => z
   .union([z.enum(JSON_SCHEMA_TYPE_VALUES), z.array(z.enum(JSON_SCHEMA_TYPE_VALUES))])
-  .optional();
+  .optional());
 
 /**
  * Zod schema representing any JSON Schema node (Draft 7 / 2020-12)
@@ -190,7 +190,7 @@ export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
  * Individual property schemas inside `properties` still use the full
  * JsonModelShapeSchema with all keywords available.
  */
-export const JsonModelRootShapeSchema = z
+export const JsonModelRootShapeSchema = lazySchema(() => z
   .object({
     type: z.literal('object').optional(),
     title: z.string().optional(),
@@ -202,4 +202,4 @@ export const JsonModelRootShapeSchema = z
     definitions: z.record(z.string(), JsonModelShapeSchema).optional(),
     $defs: z.record(z.string(), JsonModelShapeSchema).optional(),
   })
-  .meta({ jsonSchemaModel: true });
+  .meta({ jsonSchemaModel: true }));

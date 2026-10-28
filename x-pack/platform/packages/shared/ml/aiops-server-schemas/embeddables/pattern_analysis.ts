@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
@@ -20,7 +20,7 @@ import {
   RANDOM_SAMPLER_OPTION,
 } from '@kbn/ml-random-sampler-utils';
 
-export const patternAnalysisEmbeddableStateSchema = z
+export const patternAnalysisEmbeddableStateSchema = lazySchema(() => z
   .object({
     ...serializedTitlesSchema.shape,
     ...serializedTimeRangeSchema.shape,
@@ -74,6 +74,6 @@ export const patternAnalysisEmbeddableStateSchema = z
   .meta({
     id: 'aiops_pattern_analysis',
     description: 'Log Pattern Analysis embeddable schema',
-  });
+  }));
 
 export type PatternAnalysisEmbeddableState = z.output<typeof patternAnalysisEmbeddableStateSchema>;

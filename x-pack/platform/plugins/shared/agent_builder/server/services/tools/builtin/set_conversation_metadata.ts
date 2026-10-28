@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, internalTools, createBadRequestError } from '@kbn/agent-builder-common';
 import type { ConversationTemplate, MetadataFieldValue } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -17,7 +17,7 @@ const MAX_STRING_VALUE = 10_000;
 const MAX_ARRAY_ITEMS = 100;
 const MAX_ARRAY_ITEM_LENGTH = 2_000;
 
-const setConversationMetadataSchema = z.object({
+const setConversationMetadataSchema = lazySchema(() => z.object({
   metadata: z
     .record(
       z.string(),
@@ -31,7 +31,7 @@ const setConversationMetadataSchema = z.object({
     .describe(
       `Key/value pairs to merge into the conversation metadata. Use a string for TEXT, SELECT, DATE, and USER fields. Use a number for NUMBER fields. Use a boolean (true or false) for TOGGLE fields. Use an array of strings for TEXT_ARRAY fields. Existing keys not included here are left unchanged. Pass an empty string as the value to clear a specific string key.`
     ),
-});
+}));
 
 const toolDescription = `Update conversation metadata fields defined by the active template.
 

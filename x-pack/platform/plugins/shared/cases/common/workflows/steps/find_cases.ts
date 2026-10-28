@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import {
@@ -26,7 +26,7 @@ import { MAX_CASES_PER_PAGE, MAX_DOCS_PER_PAGE } from '../../constants';
 
 export const FindCasesStepTypeId = 'cases.findCases';
 
-const FindCasesSortFieldSchema = z.enum([
+const FindCasesSortFieldSchema = lazySchema(() => z.enum([
   'title',
   'category',
   'createdAt',
@@ -34,18 +34,18 @@ const FindCasesSortFieldSchema = z.enum([
   'closedAt',
   'status',
   'severity',
-]);
+]));
 
-const FindCasesDefaultSearchOperatorSchema = z.enum(['AND', 'OR']);
-const FindCasesSearchFieldSchema = z.union([SearchFieldsType, z.literal('incremental_id.text')]);
-const FindCasesSearchFieldArraySchema = z.union([
+const FindCasesDefaultSearchOperatorSchema = lazySchema(() => z.enum(['AND', 'OR']));
+const FindCasesSearchFieldSchema = lazySchema(() => z.union([SearchFieldsType, z.literal('incremental_id.text')]));
+const FindCasesSearchFieldArraySchema = lazySchema(() => z.union([
   SearchFieldsTypeArray,
   z.array(FindCasesSearchFieldSchema),
-]);
+]));
 
-const CustomFieldValueSchema = z.union([z.string(), z.boolean(), z.number(), z.null()]);
+const CustomFieldValueSchema = lazySchema(() => z.union([z.string(), z.boolean(), z.number(), z.null()]));
 
-export const InputSchema = z.object({
+export const InputSchema = lazySchema(() => z.object({
   assignees: z
     .union([String, StringArray])
     .optional()
@@ -83,9 +83,9 @@ export const InputSchema = z.object({
     .max(500)
     .optional()
     .describe('ISO 8601 datetime end (exclusive). Example: "2025-01-22T00:00:00Z".'),
-});
+}));
 
-export const OutputSchema = z.object({
+export const OutputSchema = lazySchema(() => z.object({
   cases: z.array(CaseResponsePropertiesSchema).max(MAX_DOCS_PER_PAGE),
   count_closed_cases: z.number().int(),
   count_in_progress_cases: z.number().int(),
@@ -93,7 +93,7 @@ export const OutputSchema = z.object({
   page: z.number().int(),
   per_page: z.number().int(),
   total: z.number().int(),
-});
+}));
 
 type FindCasesStepInputSchema = typeof InputSchema;
 type FindCasesStepOutputSchema = typeof OutputSchema;

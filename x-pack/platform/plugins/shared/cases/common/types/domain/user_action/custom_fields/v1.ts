@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { CaseCustomFieldsSchema } from '../../custom_field/v1';
 import { UserActionTypes } from '../action/v1';
 
-export const CustomFieldsUserActionPayloadSchema = z.object({
+export const CustomFieldsUserActionPayloadSchema = lazySchema(() => z.object({
   customFields: CaseCustomFieldsSchema,
-});
+}));
 
-export const CustomFieldsUserActionSchema = z.object({
+export const CustomFieldsUserActionSchema = lazySchema(() => z.object({
   type: z.literal(UserActionTypes.customFields),
   payload: CustomFieldsUserActionPayloadSchema,
-});
+}));

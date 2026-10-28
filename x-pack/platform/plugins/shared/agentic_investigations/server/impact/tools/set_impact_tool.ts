@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import { investigationEvidenceSchema, MAX_EVIDENCE_TEXT_LENGTH } from '../../../common/evidence';
 import {
@@ -22,7 +22,7 @@ import { attachImpactFromTool } from '../attachments/attach_impact_from_tool';
 import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
 import type { ImpactService } from '../services/impact_service';
 
-const setImpactEntitySchema = z.object({
+const setImpactEntitySchema = lazySchema(() => z.object({
   name: z
     .string()
     .min(1)
@@ -50,9 +50,9 @@ const setImpactEntitySchema = z.object({
   evidence: investigationEvidenceSchema
     .optional()
     .describe("Evidence of this entity's impact, ideally a chart of its failure signal."),
-});
+}));
 
-export const setImpactToolSchema = z.object({
+export const setImpactToolSchema = lazySchema(() => z.object({
   summary: z
     .string()
     .min(1)
@@ -75,7 +75,7 @@ export const setImpactToolSchema = z.object({
     .describe(
       'Only when two or more entities were affected in different ways, each with its own evidence. Replaces the stored list; pass [] to remove entities.'
     ),
-});
+}));
 
 export type SetImpactToolParams = z.infer<typeof setImpactToolSchema>;
 

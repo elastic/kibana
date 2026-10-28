@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const asCodeEsqlApproximationSchema = z.object({
+export const asCodeEsqlApproximationSchema = lazySchema(() => z.object({
   esql_approximation: z.boolean().optional().meta({
     description:
       'When `true`, ES|QL visualizations that use `STATS` run with [approximate execution](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) for faster, estimated results.',
   }),
-});
+}));

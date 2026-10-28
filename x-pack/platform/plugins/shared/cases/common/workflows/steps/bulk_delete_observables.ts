@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import * as i18n from '../translations';
@@ -14,19 +14,19 @@ import { CasesStepCaseIdSchema } from './shared';
 
 export const BulkDeleteObservablesStepTypeId = 'cases.bulkDeleteObservables';
 
-const ObservableIdsSchema = z
+const ObservableIdsSchema = lazySchema(() => z
   .array(z.string().min(1, 'observable_ids values are required').max(OBSERVABLE_ID_MAX_LENGTH))
   .min(1)
-  .max(MAX_OBSERVABLES_PER_CASE);
+  .max(MAX_OBSERVABLES_PER_CASE));
 
 const InputSchema = CasesStepCaseIdSchema.extend({
   observable_ids: ObservableIdsSchema,
 });
 
-const OutputSchema = z.object({
+const OutputSchema = lazySchema(() => z.object({
   case_id: z.string(),
   observable_ids: z.array(z.string()),
-});
+}));
 
 type BulkDeleteObservablesStepInputSchema = typeof InputSchema;
 type BulkDeleteObservablesStepOutputSchema = typeof OutputSchema;

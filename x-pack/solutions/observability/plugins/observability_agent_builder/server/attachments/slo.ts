@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
@@ -19,9 +19,9 @@ import { observabilityAttachmentDataSchema } from './observability_attachment_da
 const GET_SLO_DETAILS_TOOL_ID = 'get_slo_details';
 
 const sloDataSchema = observabilityAttachmentDataSchema.extend({
-  sloId: z.string().max(MAX_SHORT_STRING_LENGTH),
-  sloInstanceId: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
-  remoteName: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
+  sloId: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH)),
+  sloInstanceId: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH).optional()),
+  remoteName: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH).optional()),
 });
 
 export type SloAttachmentData = z.infer<typeof sloDataSchema>;

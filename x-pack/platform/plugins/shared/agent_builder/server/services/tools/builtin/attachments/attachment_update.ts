@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
@@ -13,13 +13,13 @@ import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
 
-const attachmentUpdateSchema = z.object({
+const attachmentUpdateSchema = lazySchema(() => z.object({
   attachment_id: z.string().describe('ID of the attachment to update'),
   data: z
     .record(z.string(), z.any())
     .describe('New data/content for the attachment as a JSON object'),
   description: z.string().optional().describe('Optional new description for the attachment'),
-});
+}));
 
 /**
  * Creates the attachment_update tool.

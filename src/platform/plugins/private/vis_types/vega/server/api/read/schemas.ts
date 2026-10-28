@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 import { vegaLibraryItemSchema } from '../schema';
 import {
@@ -15,9 +15,9 @@ import {
   VEGA_LIBRARY_ITEM_PARAMS_ID_DESCRIPTION,
 } from '../constants';
 
-export const readRequestParamsSchema = z.object({
+export const readRequestParamsSchema = lazySchema(() => z.object({
   id: z.string().meta({ description: VEGA_LIBRARY_ITEM_PARAMS_ID_DESCRIPTION }),
-});
+}));
 
 export const readResponseBodySchema = z
   .object({

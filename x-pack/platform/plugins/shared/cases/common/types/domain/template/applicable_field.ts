@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Where an applicable field comes from:
  * - `global` — an `isGlobal` field-library definition, writable on any case for the owner.
  * - `template` — a field contributed by the applied template (in addition to the global fields).
  */
-export const ApplicableFieldSourceSchema = z.enum(['global', 'template']);
+export const ApplicableFieldSourceSchema = lazySchema(() => z.enum(['global', 'template']));
 export type ApplicableFieldSource = z.infer<typeof ApplicableFieldSourceSchema>;
 
 /**
@@ -21,7 +21,7 @@ export type ApplicableFieldSource = z.infer<typeof ApplicableFieldSourceSchema>;
  * place in the `extended_fields` map. `type`/`control` come straight from the validated field
  * definition, so their values are already constrained upstream.
  */
-export const ApplicableFieldSchema = z.object({
+export const ApplicableFieldSchema = lazySchema(() => z.object({
   /** Storage key to write in `extended_fields`, e.g. `priority_as_keyword`. */
   key: z.string(),
   /** Field name as authored in the field definition. */
@@ -47,10 +47,10 @@ export const ApplicableFieldSchema = z.object({
   defaultValue: z.string().optional(),
   source: ApplicableFieldSourceSchema,
   isGlobal: z.boolean(),
-});
+}));
 export type ApplicableField = z.infer<typeof ApplicableFieldSchema>;
 
-export const ApplicableFieldsResponseSchema = z.object({
+export const ApplicableFieldsResponseSchema = lazySchema(() => z.object({
   fields: z.array(ApplicableFieldSchema),
-});
+}));
 export type ApplicableFieldsResponse = z.infer<typeof ApplicableFieldsResponseSchema>;

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export const CasesStatusResponseSchema = z.object({
+export const CasesStatusResponseSchema = lazySchema(() => z.object({
   count_open_cases: z.number(),
   count_in_progress_cases: z.number(),
   count_closed_cases: z.number(),
-});
+}));
 
-export const CasesStatusRequestSchema = z.object({
+export const CasesStatusRequestSchema = lazySchema(() => z.object({
   /**
    * A KQL date. If used all cases created after (gte) the from date will be returned
    */
@@ -27,7 +27,7 @@ export const CasesStatusRequestSchema = z.object({
    * that the user has access to will be returned.
    */
   owner: z.union([z.array(z.string()), z.string()]).optional(),
-});
+}));
 
 export type CasesStatusResponse = z.infer<typeof CasesStatusResponseSchema>;
 export type CasesStatusRequest = z.infer<typeof CasesStatusRequestSchema>;

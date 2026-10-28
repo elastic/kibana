@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
@@ -17,11 +17,11 @@ import {
 } from '@kbn/agent-builder-tools-base/workflows';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 
-const getWorkflowExecutionStatusSchema = z.object({
+const getWorkflowExecutionStatusSchema = lazySchema(() => z.object({
   executionId: z
     .string()
     .describe(`ID of the workflow execution (execution_id) to retrieve the status for.`),
-});
+}));
 
 export const getWorkflowExecutionStatusTool = ({
   workflowsManagement,

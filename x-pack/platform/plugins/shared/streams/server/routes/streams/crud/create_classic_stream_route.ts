@@ -9,7 +9,7 @@ import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import type { ClassicIngestUpsertRequest } from '@kbn/streams-schema';
 import { badData } from '@hapi/boom';
 import type { Streams } from '@kbn/streams-schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { getErrorMessage } from '../../../lib/streams/errors/parse_error';
@@ -33,13 +33,13 @@ export const createClassicStreamRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     body: z.object({
       name: z.string().max(MAX_STREAM_NAME_LENGTH),
       description: z.string().max(1000).optional(),
       ingest: z.any(),
     }),
-  }),
+  })),
   handler: async ({ params, request, getScopedClients, logger }): Promise<UpsertStreamResponse> => {
     const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
     const {

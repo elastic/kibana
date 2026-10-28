@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
 import { AssigneesUserActionPayloadSchema } from '../assignees/v1';
 import { CategoryUserActionPayloadSchema } from '../category/v1';
@@ -19,7 +19,7 @@ import { SettingsUserActionPayloadSchema } from '../settings/v1';
 import { TagsUserActionPayloadSchema } from '../tags/v1';
 import { TitleUserActionPayloadSchema } from '../title/v1';
 
-const CommonPayloadAttributesSchema = z.object({
+const CommonPayloadAttributesSchema = lazySchema(() => z.object({
   assignees: AssigneesUserActionPayloadSchema.shape.assignees,
   description: DescriptionUserActionPayloadSchema.shape.description,
   status: z.string(),
@@ -30,14 +30,14 @@ const CommonPayloadAttributesSchema = z.object({
   owner: z.string(),
   category: CategoryUserActionPayloadSchema.shape.category.optional(),
   customFields: CustomFieldsUserActionPayloadSchema.shape.customFields.optional(),
-});
+}));
 
-export const CreateCaseUserActionSchema = z.object({
+export const CreateCaseUserActionSchema = lazySchema(() => z.object({
   type: z.literal(UserActionTypes.create_case),
   payload: ConnectorUserActionPayloadSchema.merge(CommonPayloadAttributesSchema),
-});
+}));
 
-export const CreateCaseUserActionWithoutConnectorIdSchema = z.object({
+export const CreateCaseUserActionWithoutConnectorIdSchema = lazySchema(() => z.object({
   type: z.literal(UserActionTypes.create_case),
   payload: ConnectorUserActionPayloadWithoutConnectorIdSchema.merge(CommonPayloadAttributesSchema),
-});
+}));

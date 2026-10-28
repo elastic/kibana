@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { platformCoreCasesTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -23,7 +23,7 @@ type GetCasesClientFn = (request: KibanaRequest) => Promise<CasesClient>;
 const MAX_PER_PAGE = 50;
 const DEFAULT_PER_PAGE = 20;
 
-const findTemplatesSchema = z.object({
+const findTemplatesSchema = lazySchema(() => z.object({
   owner: Owner.describe('The solution the templates belong to. Required.'),
   search: z
     .string()
@@ -51,7 +51,7 @@ const findTemplatesSchema = z.object({
     .max(MAX_PER_PAGE)
     .optional()
     .describe(`Results per page, max ${MAX_PER_PAGE}. Default ${DEFAULT_PER_PAGE}.`),
-});
+}));
 
 export const findTemplatesTool = (
   getCasesClientFn: GetCasesClientFn

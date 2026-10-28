@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas';
 import { markdownStateSchema } from '@kbn/dashboard-markdown-schemas';
 
-export const markdownByValueStateSchema = z
+export const markdownByValueStateSchema = lazySchema(() => z
   .object({
     ...serializedTitlesSchema.shape,
     ...markdownStateSchema.shape,
   })
   .strip()
-  .meta(BY_VALUE_SCHEMA_META);
+  .meta(BY_VALUE_SCHEMA_META));
 
-const markdownByReferenceStateSchema = z
+const markdownByReferenceStateSchema = lazySchema(() => z
   .object({
     ...serializedTitlesSchema.shape,
     ref_id: z.string().meta({
@@ -28,13 +28,13 @@ const markdownByReferenceStateSchema = z
     }),
   })
   .strip()
-  .meta(BY_REF_SCHEMA_META);
+  .meta(BY_REF_SCHEMA_META));
 
-export const markdownEmbeddableSchema = z
+export const markdownEmbeddableSchema = lazySchema(() => z
   .union([markdownByValueStateSchema, markdownByReferenceStateSchema])
   .meta({
     description: 'Markdown panel config',
-  });
+  }));
 
 export type MarkdownByValueState = z.output<typeof markdownByValueStateSchema>;
 export type MarkdownByReferenceState = z.output<typeof markdownByReferenceStateSchema>;

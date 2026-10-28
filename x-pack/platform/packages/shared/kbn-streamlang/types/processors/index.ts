@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { createIsNarrowSchema, NonEmptyString } from '@kbn/zod-helpers/v4';
 import type { Condition } from '../conditions';
 import { conditionSchema, isAlwaysCondition } from '../conditions';
@@ -904,7 +904,7 @@ export type StreamlangProcessorDefinition =
   | RegisteredDomainProcessor
   | ManualIngestPipelineProcessor;
 
-export const streamlangProcessorSchema = z.union([
+export const streamlangProcessorSchema = lazySchema(() => z.union([
   grokProcessorSchema,
   dissectProcessorSchema,
   uriPartsProcessorSchema,
@@ -932,7 +932,7 @@ export const streamlangProcessorSchema = z.union([
   userAgentProcessorSchema,
   registeredDomainSchema,
   manualIngestPipelineProcessorSchema,
-]);
+]));
 
 export const isProcessWithOverrideOption = createIsNarrowSchema(
   processorBaseSchema,

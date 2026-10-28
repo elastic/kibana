@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_EVIDENCE_TEXT_LENGTH } from '../evidence/evidence';
 import { userSchema } from '../user';
 import {
@@ -24,10 +24,10 @@ const MAX_SNAPSHOT_KEY_LENGTH = 128;
 /** Serialized size bound on a snapshot, whose open fields (rule parameters, grouping) are opaque. */
 export const MAX_SUBJECT_SNAPSHOT_LENGTH = 64_000;
 
-export const investigationSubjectTypeSchema = z.enum(INVESTIGATION_SUBJECT_TYPES);
+export const investigationSubjectTypeSchema = lazySchema(() => z.enum(INVESTIGATION_SUBJECT_TYPES));
 export type InvestigationSubjectType = z.infer<typeof investigationSubjectTypeSchema>;
 
-export const investigationSubjectTriggerTypeSchema = z.enum(INVESTIGATION_SUBJECT_TRIGGER_TYPES);
+export const investigationSubjectTriggerTypeSchema = lazySchema(() => z.enum(INVESTIGATION_SUBJECT_TRIGGER_TYPES));
 export type InvestigationSubjectTriggerType = z.infer<typeof investigationSubjectTriggerTypeSchema>;
 
 /**
@@ -36,7 +36,7 @@ export type InvestigationSubjectTriggerType = z.infer<typeof investigationSubjec
  * so every Nightshift snapshot validates, and any other field is kept as is. The key count and the
  * serialized size are bounded because the open fields are opaque.
  */
-export const alertSubjectSnapshotSchema = z
+export const alertSubjectSnapshotSchema = lazySchema(() => z
   .looseObject({
     /** `kibana.alert.uuid` */
     id: z.string().min(1).max(500).optional(),
@@ -73,7 +73,7 @@ export const alertSubjectSnapshotSchema = z
   })
   .refine((value) => JSON.stringify(value).length <= MAX_SUBJECT_SNAPSHOT_LENGTH, {
     message: `snapshot exceeds ${MAX_SUBJECT_SNAPSHOT_LENGTH} characters`,
-  });
+  }));
 export type AlertSubjectSnapshot = z.infer<typeof alertSubjectSnapshotSchema>;
 
 /**
@@ -84,14 +84,14 @@ export const isUniversalAlertSnapshot = (snapshot?: AlertSubjectSnapshot): boole
   typeof snapshot?.source === 'string' && snapshot.source.length > 0;
 
 /** A delivered Slack event and the run (for example a workflow execution) that handled it. */
-export const slackSeenEventSchema = z.object({
+export const slackSeenEventSchema = lazySchema(() => z.object({
   event_id: z.string().min(1).max(MAX_ID_LENGTH),
   execution_id: z.string().min(1).max(MAX_ID_LENGTH),
-});
+}));
 export type SlackSeenEvent = z.infer<typeof slackSeenEventSchema>;
 
 /** Where a `slack_thread` subject lives, and the status message the investigation keeps updated. */
-export const slackThreadSubjectSchema = z.object({
+export const slackThreadSubjectSchema = lazySchema(() => z.object({
   /** Channel id or name, rendered as `#channel`. */
   channel: z.string().min(1).max(MAX_ID_LENGTH),
   thread_ts: z.string().min(1).max(MAX_TIMESTAMP_LENGTH),
@@ -108,14 +108,14 @@ export const slackThreadSubjectSchema = z.object({
    * list; it replaces the stored one.
    */
   seen_events: z.array(slackSeenEventSchema).max(MAX_SLACK_SEEN_EVENTS).optional(),
-});
+}));
 export type SlackThreadSubject = z.infer<typeof slackThreadSubjectSchema>;
 
 /** Identifies a subject across investigations: the lookup and claim key. */
-export const investigationSubjectKeySchema = z.object({
+export const investigationSubjectKeySchema = lazySchema(() => z.object({
   type: investigationSubjectTypeSchema,
   id: z.string().min(1).max(MAX_SUBJECT_ID_LENGTH),
-});
+}));
 export type InvestigationSubjectKey = z.infer<typeof investigationSubjectKeySchema>;
 
 /**
@@ -123,7 +123,7 @@ export type InvestigationSubjectKey = z.infer<typeof investigationSubjectKeySche
  * Slack threads. A later write for the same subject replaces the fields it sends and keeps the
  * rest; `slack` is merged field by field, so a writer can add `status_message_ts` alone.
  */
-export const investigationSubjectInputSchema = investigationSubjectKeySchema
+export const investigationSubjectInputSchema = lazySchema(() => investigationSubjectKeySchema
   .extend({
     /** What the subject is about: an event title, the question asked. Plain text. */
     summary: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
@@ -136,19 +136,19 @@ export const investigationSubjectInputSchema = investigationSubjectKeySchema
   })
   .refine(({ type, slack }) => slack === undefined || type === 'slack_thread', {
     message: 'slack is only allowed on slack_thread subjects',
-  });
+  }));
 export type InvestigationSubjectInput = z.infer<typeof investigationSubjectInputSchema>;
 
-export const investigationSubjectInputsSchema = z
+export const investigationSubjectInputsSchema = lazySchema(() => z
   .array(investigationSubjectInputSchema)
   .min(1)
-  .max(MAX_SUBJECTS_PER_REQUEST);
+  .max(MAX_SUBJECTS_PER_REQUEST));
 
 /**
  * Stored subject document. `subjectType` and `subjectId` name the subject; `id` is the document
  * (and attachment) id, a hash of space, conversation, subject type, and subject id.
  */
-export const investigationSubjectSchema = z.object({
+export const investigationSubjectSchema = lazySchema(() => z.object({
   id: z.string().max(MAX_ID_LENGTH),
   spaceId: z.string().max(MAX_ID_LENGTH),
   conversationId: z.string().max(MAX_ID_LENGTH),
@@ -161,5 +161,5 @@ export const investigationSubjectSchema = z.object({
   createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
   createdBy: userSchema.optional(),
   updatedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
-});
+}));
 export type InvestigationSubject = z.infer<typeof investigationSubjectSchema>;

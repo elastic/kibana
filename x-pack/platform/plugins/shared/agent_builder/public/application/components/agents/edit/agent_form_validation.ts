@@ -15,7 +15,7 @@ import {
   isInProtectedNamespace,
   hasNamespaceName,
 } from '@kbn/agent-builder-common/base/namespaces';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isValidAgentAvatarColor } from '../../../utils/color';
 
 const isEmoji = (str: string): boolean =>
@@ -54,7 +54,7 @@ export const truncateAvatarSymbol = (value: string): string => {
   return graphemes.slice(0, 2).join('');
 };
 
-export const agentFormSchema = z.object({
+export const agentFormSchema = lazySchema(() => z.object({
   id: z
     .string()
     .min(1, {
@@ -161,4 +161,4 @@ export const agentFormSchema = z.object({
       })
       .optional(),
   }),
-});
+}));

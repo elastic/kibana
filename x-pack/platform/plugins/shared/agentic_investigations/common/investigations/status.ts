@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { dismissReasonSchema } from '@kbn/proposals-common';
 
 const MAX_EXPECTED_IDS = 1000;
 const MAX_ID_LENGTH = 256;
 
-export const setInvestigationStatusRequestSchema = z.object({
+export const setInvestigationStatusRequestSchema = lazySchema(() => z.object({
   status: z.enum(['open', 'closed']),
   dismiss_reason: dismissReasonSchema.optional(),
   rationale: z.string().max(4096).optional(),
@@ -22,7 +22,7 @@ export const setInvestigationStatusRequestSchema = z.object({
    * dismissing proposals the user never reviewed.
    */
   expected_proposal_ids: z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_EXPECTED_IDS).optional(),
-});
+}));
 
 export type SetInvestigationStatusRequest = z.infer<typeof setInvestigationStatusRequestSchema>;
 
@@ -50,7 +50,7 @@ export interface InvestigationClosePreviewResponse {
   running_proposal_count: number;
 }
 
-export const setEscalationStatusRequestSchema = z.object({
+export const setEscalationStatusRequestSchema = lazySchema(() => z.object({
   status: z.enum(['open', 'closed']),
   dismiss_reason: dismissReasonSchema.optional(),
   rationale: z.string().max(4096).optional(),
@@ -67,7 +67,7 @@ export const setEscalationStatusRequestSchema = z.object({
    * Rejects with 409 when any currently-pending proposal was not in this list.
    */
   expected_proposal_ids: z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_EXPECTED_IDS).optional(),
-});
+}));
 
 export type SetEscalationStatusRequest = z.infer<typeof setEscalationStatusRequestSchema>;
 

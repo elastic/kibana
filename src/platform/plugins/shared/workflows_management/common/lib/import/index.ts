@@ -14,7 +14,7 @@ import {
   isValidId,
 } from '@kbn/human-readable-id';
 import { MAX_WORKFLOW_YAML_LENGTH } from '@kbn/workflows';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { workflowIdSchema } from '../workflow_id_schema';
 
 export {
@@ -74,10 +74,10 @@ export function detectFileFormat(bytes: Uint8Array): 'zip' | 'yaml' {
 export const WORKFLOW_EXPORT_VERSION = '1';
 export { MAX_WORKFLOW_YAML_LENGTH };
 
-export const WorkflowExportEntrySchema = z.object({
+export const WorkflowExportEntrySchema = lazySchema(() => z.object({
   id: workflowIdSchema,
   yaml: z.string().max(MAX_WORKFLOW_YAML_LENGTH),
-});
+}));
 
 const SUPPORTED_EXPORT_VERSIONS = [WORKFLOW_EXPORT_VERSION] as const;
 

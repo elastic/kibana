@@ -10,8 +10,8 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { Coerced, validateRecordKeysAllowed, validateRecordMaxKeys } from '../../common/utils';
 
 export const ExternalIncidentServiceConfiguration = {
-  apiUrl: z.string(),
-  orgId: z.string(),
+  apiUrl: lazySchema(() => z.string()),
+  orgId: lazySchema(() => z.string()),
 };
 
 export const ExternalIncidentServiceConfigurationSchema = lazySchema(() =>
@@ -19,8 +19,8 @@ export const ExternalIncidentServiceConfigurationSchema = lazySchema(() =>
 );
 
 export const ExternalIncidentServiceSecretConfiguration = {
-  apiKeyId: z.string(),
-  apiKeySecret: z.string(),
+  apiKeyId: lazySchema(() => z.string()),
+  apiKeySecret: lazySchema(() => z.string()),
 };
 
 export const ExternalIncidentServiceSecretConfigurationSchema = lazySchema(() =>
@@ -55,11 +55,11 @@ const AdditionalFields = {
 };
 
 const CommonIncidentAttributes = {
-  name: z.string(),
-  description: z.string().nullable().default(null),
-  externalId: z.string().nullable().default(null),
-  incidentTypes: z.array(z.coerce.number()).nullable().default(null),
-  severityCode: z.coerce.number().nullable().default(null),
+  name: lazySchema(() => z.string()),
+  description: lazySchema(() => z.string().nullable().default(null)),
+  externalId: lazySchema(() => z.string().nullable().default(null)),
+  incidentTypes: lazySchema(() => z.array(z.coerce.number()).nullable().default(null)),
+  severityCode: lazySchema(() => z.coerce.number().nullable().default(null)),
   ...AdditionalFields,
 };
 
@@ -87,10 +87,10 @@ export const ExecutorSubActionPushParamsSchema = lazySchema(() =>
 );
 
 export const PushToServiceIncidentSchema = {
-  name: z.string(),
-  description: z.string().nullable().default(null),
-  incidentTypes: z.array(z.coerce.number()).nullable().default(null),
-  severityCode: z.coerce.number().nullable().default(null),
+  name: lazySchema(() => z.string()),
+  description: lazySchema(() => z.string().nullable().default(null)),
+  incidentTypes: lazySchema(() => z.array(z.coerce.number()).nullable().default(null)),
+  severityCode: lazySchema(() => z.coerce.number().nullable().default(null)),
   ...AdditionalFields,
 };
 

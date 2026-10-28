@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type {
   InitialBenchConfig,
   ModuleBenchmark,
@@ -16,7 +16,7 @@ import type {
   ScriptBenchmark,
 } from './types';
 
-const benchmarkSchemaBase = z.object({
+const benchmarkSchemaBase = lazySchema(() => z.object({
   // Restrict benchmark name to filename-safe characters we allow for generated artifacts
   // (alphanumeric, underscore, dash, dot). Avoid spaces and path separators.
   name: z
@@ -26,7 +26,7 @@ const benchmarkSchemaBase = z.object({
   description: z.string().optional(),
   runs: z.number().optional(),
   timeout: z.number().optional(),
-});
+}));
 
 const moduleBenchmarkSchema = benchmarkSchemaBase.extend({
   kind: z.literal('module'),
@@ -57,7 +57,7 @@ const scriptBenchmarkSchema = benchmarkSchemaBase.extend({
   run: scriptSchema,
 }) satisfies z.Schema<ScriptBenchmark>;
 
-const benchmarkSchema = z.union([moduleBenchmarkSchema, scriptBenchmarkSchema]);
+const benchmarkSchema = lazySchema(() => z.union([moduleBenchmarkSchema, scriptBenchmarkSchema]));
 
 const pairedComparisonRunSchema = z
   .object({

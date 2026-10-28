@@ -6,7 +6,7 @@
  */
 
 import dedent from 'dedent';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import {
   ToolResultType,
@@ -37,7 +37,7 @@ const DEFAULT_TIME_RANGE = {
   end: 'now',
 };
 
-const getLogsSchema = z.object({
+const getLogsSchema = lazySchema(() => z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   index: z.string().max(MAX_INDEX_PATTERN_LENGTH).describe('Log index pattern').optional(),
   kqlFilter: z
@@ -78,7 +78,7 @@ const getLogsSchema = z.object({
     .describe(
       'Fields to include in log samples and category samples. Overrides the default fields when provided.'
     ),
-});
+}));
 
 export function createGetLogsTool({
   core,

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { momentPatternSchema } from './common';
 
-export const dateNanosFormatSchema = z
+export const dateNanosFormatSchema = lazySchema(() => z
   .object({
     type: z.literal('date_nanos'),
     params: z
@@ -23,4 +23,4 @@ export const dateNanosFormatSchema = z
     id: 'kbn-field-format-date_nanos',
     title: 'Date nanos field format',
     description: 'Formats a field into a date nanos value following the defined pattern.',
-  });
+  }));

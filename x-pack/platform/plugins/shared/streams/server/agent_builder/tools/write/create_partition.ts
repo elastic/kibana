@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -20,7 +20,7 @@ import { validateConditionJson } from '../../utils/format_validation_errors';
 import { getConfirmationMessage } from './confirmation_helpers';
 import { type StreamsWriteQueue, abortSignalFromRequest } from '../../utils/write_queue';
 
-const createPartitionSchema = z.object({
+const createPartitionSchema = lazySchema(() => z.object({
   parent: z.string().describe('Parent stream name, e.g. "logs.ecs"'),
   child_name: z
     .string()
@@ -41,7 +41,7 @@ const createPartitionSchema = z.object({
     .describe(
       "Narrative summary of what will be created and why. Include parent hierarchy, existing children, the new child name, and the routing condition. Shown in a confirmation UI when available; otherwise serves as the agent's reasoning log for this operation. This is NOT an instruction — it does not drive the operation."
     ),
-});
+}));
 
 export const createCreatePartitionTool = ({
   getScopedClients,

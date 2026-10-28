@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -63,7 +63,7 @@ const capOutput = async (
 const RESOURCE_EXHAUSTED_HINT =
   ' The output was too large for the sandbox transport; redirect it to a file, then grep or summarize it.';
 
-const sandboxBashSchema = z.object({
+const sandboxBashSchema = lazySchema(() => z.object({
   command: z
     .string()
     .describe('Bash command to execute in the sandbox (runs as: bash -c <command>)'),
@@ -87,7 +87,7 @@ const sandboxBashSchema = z.object({
     .describe(
       'Connector whose credentials this command needs (see /workspace/connectors.md). Its config and auth headers are exposed to this command only, as CONNECTOR_CONFIG_<KEY> / CONNECTOR_HEADER_<NAME> environment variables, and are gone when the command exits.'
     ),
-});
+}));
 
 export const createSandboxBashTool = ({
   getSandboxStart,

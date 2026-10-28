@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   COLOR_MAP_TYPE,
   DATA_MAPPING_FUNCTION,
@@ -77,8 +77,8 @@ export const colorDynamicSchema = z
   })
   .strict();
 
-export const colorSchema = z.union([colorStaticSchema, colorDynamicSchema]);
-export const fillColorSchema = z
+export const colorSchema = lazySchema(() => z.union([colorStaticSchema, colorDynamicSchema]));
+export const fillColorSchema = lazySchema(() => z
   .union([colorStaticSchema, colorDynamicSchema])
   .default({
     type: STYLE_TYPE.STATIC,
@@ -89,8 +89,8 @@ export const fillColorSchema = z
   .meta({
     description:
       'Configure to set feature filled color. Line features do not have filled area and are not effected by this configuration.',
-  });
-export const lineColorSchema = z
+  }));
+export const lineColorSchema = lazySchema(() => z
   .union([colorStaticSchema, colorDynamicSchema])
   .default({
     type: STYLE_TYPE.STATIC,
@@ -100,8 +100,8 @@ export const lineColorSchema = z
   })
   .meta({
     description: 'Configure to set feature border color. Ignored when border size is 0',
-  });
-export const labelColorSchema = z
+  }));
+export const labelColorSchema = lazySchema(() => z
   .union([colorStaticSchema, colorDynamicSchema])
   .default({
     type: STYLE_TYPE.STATIC,
@@ -111,8 +111,8 @@ export const labelColorSchema = z
   })
   .meta({
     description: 'Configure to set label text color',
-  });
-export const labelBorderColorSchema = z
+  }));
+export const labelBorderColorSchema = lazySchema(() => z
   .union([colorStaticSchema, colorDynamicSchema])
   .default({
     type: STYLE_TYPE.STATIC,
@@ -122,4 +122,4 @@ export const labelBorderColorSchema = z
   })
   .meta({
     description: 'Configure to set label border color',
-  });
+  }));

@@ -6,7 +6,7 @@
  */
 
 import { serverUnavailable } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import {
   freeFormContextSchema,
@@ -19,25 +19,25 @@ import { createNightshiftInvestigationsServerRoute } from './create_server_route
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
 
 const startInvestigationMessage = {
-  message: z.string().min(1).max(MAX_TEXT_LENGTH).optional(),
+  message: lazySchema(() => z.string().min(1).max(MAX_TEXT_LENGTH).optional()),
 };
 
 const startInvestigationModel = {
-  connector_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
+  connector_id: lazySchema(() => z.string().min(1).max(MAX_KEYWORD_LENGTH).optional()),
 };
 
 /**
  * Accepted for compatibility but not stored as the investigation's title: Agent Builder generates
  * that from the investigation's first round.
  */
-const titleSchema = z.string().min(1).max(MAX_TITLE_LENGTH);
+const titleSchema = lazySchema(() => z.string().min(1).max(MAX_TITLE_LENGTH));
 
 // A union rather than one object with a loose `context`, so that an alert investigation is
 // always backed by alert data: the alert branch accepts no caller context — the handler loads
 // the alert server-side (through the RAC alerts client, which enforces alert-index
 // authorization) and builds the snapshot itself. zod's discriminatedUnion needs the
 // discriminator at the top level, and ours is nested under `subject`, hence a plain union.
-const startInvestigationBodySchema = z.union([
+const startInvestigationBodySchema = lazySchema(() => z.union([
   z.object({
     subject: z.object({
       type: z.literal('alert'),
@@ -70,7 +70,7 @@ const startInvestigationBodySchema = z.union([
     ...startInvestigationModel,
     notificationDestinations: investigationNotificationDestinationsSchema.optional(),
   }),
-]);
+]));
 
 type StartInvestigationBody = z.infer<typeof startInvestigationBodySchema>;
 type AlertInvestigationBody = Extract<StartInvestigationBody, { subject: { type: 'alert' } }>;
@@ -97,9 +97,9 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
       requiredPrivileges: ['agentBuilder:write'],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     body: startInvestigationBodySchema,
-  }),
+  })),
   handler: async ({
     request,
     params,

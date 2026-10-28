@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -54,7 +54,7 @@ const getCalendarsAssociatedWithJob = async (
   return { jobFound: true as const, calendars: calendarsWithEvents };
 };
 
-const schema = z.object({
+const schema = lazySchema(() => z.object({
   operation: z.enum([
     'get_jobs',
     'get_job_stats',
@@ -71,7 +71,7 @@ const schema = z.object({
     .describe(
       'Job ID. Required for all operations except get_jobs, get_job_stats (optional filter), get_available_metadata, and validate_permissions.'
     ),
-});
+}));
 
 export const createAdGetJobInfoTool = (
   resolveMlCapabilities: ResolveMlCapabilities,

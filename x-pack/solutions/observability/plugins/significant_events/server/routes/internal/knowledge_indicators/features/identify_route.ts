@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { resolveNightshiftModelForRequest, type InferenceDocument } from '@kbn/nightshift-ai';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
@@ -39,7 +39,7 @@ import { createSignificantEventsAvailability } from '../../../../agent_builder/t
 const getSerializedByteLength = (value: unknown) =>
   Buffer.byteLength(JSON.stringify(value), 'utf8');
 
-const inferenceDocumentSchema: z.ZodType<InferenceDocument> = z
+const inferenceDocumentSchema: z.ZodType<InferenceDocument> = lazySchema(() => z
   .object({
     _id: z.string().max(MAX_ID_LENGTH).optional(),
     fields: z
@@ -50,15 +50,15 @@ const inferenceDocumentSchema: z.ZodType<InferenceDocument> = z
   })
   .refine((document) => getSerializedByteLength(document) <= MAX_INFERENCE_DOCUMENT_BYTES, {
     message: `Documents cannot exceed ${MAX_INFERENCE_DOCUMENT_BYTES} serialized bytes`,
-  });
+  }));
 
-const inferenceDocumentsSchema = z
+const inferenceDocumentsSchema = lazySchema(() => z
   .array(inferenceDocumentSchema)
   .min(1)
   .max(100)
   .refine((documents) => getSerializedByteLength(documents) <= MAX_INFERENCE_DOCUMENTS_BYTES, {
     message: `Documents cannot exceed ${MAX_INFERENCE_DOCUMENTS_BYTES} serialized bytes in aggregate`,
-  });
+  }));
 
 // Best-effort bootstrap of the standalone KI sync (groundedness) sweep workflow of the
 // request space, which runs under a request whose API key can schedule the workflow trigger.
@@ -106,7 +106,7 @@ const prepareInferredSamplingRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
     body: z.object({
       start: z.number().optional(),
@@ -119,7 +119,7 @@ const prepareInferredSamplingRoute = createServerRoute({
       maxEntityFilters: z.number().int().min(1).max(50).optional(),
       samplingTimeoutMs: z.number().int().min(1_000).max(240_000).optional(),
     }),
-  }),
+  })),
   handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
     const scopedClients = await getScopedClients({ request });
     const { streamDataEsClient, sourcesClient, tuningConfig, licensing } = scopedClients;
@@ -177,7 +177,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
     body: z.object({
       connectorId: z.string().max(MAX_ID_LENGTH).optional(),
@@ -192,7 +192,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       maxExcludedFeaturesInPrompt: z.number().optional(),
       maxPreviouslyIdentifiedFeatures: z.number().optional(),
     }),
-  }),
+  })),
   handler: async ({
     params,
     request,
@@ -330,7 +330,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
     body: z
       .object({
@@ -341,7 +341,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
       })
       .nullable()
       .optional(),
-  }),
+  })),
   handler: async ({
     params,
     request,
@@ -421,12 +421,12 @@ const shouldIdentifyRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
     query: z.object({
       thresholdHours: z.coerce.number().min(0),
     }),
-  }),
+  })),
   handler: async ({ params, request, getScopedClients, server }) => {
     const scopedClients = await getScopedClients({ request });
     const { licensing } = scopedClients;

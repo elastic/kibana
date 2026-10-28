@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { CaseConnectorSchema, ConnectorMappingsSchema } from '../connector/v1';
 import { UserSchema } from '../user/v1';
 import {
@@ -16,12 +16,12 @@ import {
 import { CaseBaseOptionalFieldsSchema } from '../case/v1';
 import { CaseObservableTypeSchema } from '../observable/v1';
 
-export const ClosureTypeSchema = z.union([
+export const ClosureTypeSchema = lazySchema(() => z.union([
   z.literal('close-by-user'),
   z.literal('close-by-pushing'),
-]);
+]));
 
-export const CustomFieldConfigurationWithoutTypeSchema = z.object({
+export const CustomFieldConfigurationWithoutTypeSchema = lazySchema(() => z.object({
   /**
    * key of custom field
    */
@@ -34,38 +34,38 @@ export const CustomFieldConfigurationWithoutTypeSchema = z.object({
    * custom field options - required
    */
   required: z.boolean(),
-});
+}));
 
-export const TextCustomFieldConfigurationSchema = CustomFieldConfigurationWithoutTypeSchema.extend({
+export const TextCustomFieldConfigurationSchema = lazySchema(() => CustomFieldConfigurationWithoutTypeSchema.extend({
   type: CustomFieldTextTypeSchema,
   defaultValue: z.string().nullable().optional(),
-});
+}));
 
 export const ToggleCustomFieldConfigurationSchema =
-  CustomFieldConfigurationWithoutTypeSchema.extend({
+  lazySchema(() => CustomFieldConfigurationWithoutTypeSchema.extend({
     type: CustomFieldToggleTypeSchema,
     defaultValue: z.boolean().nullable().optional(),
-  });
+  }));
 
 export const NumberCustomFieldConfigurationSchema =
-  CustomFieldConfigurationWithoutTypeSchema.extend({
+  lazySchema(() => CustomFieldConfigurationWithoutTypeSchema.extend({
     type: CustomFieldNumberTypeSchema,
     defaultValue: z.number().nullable().optional(),
-  });
+  }));
 
-export const CustomFieldConfigurationSchema = z.union([
+export const CustomFieldConfigurationSchema = lazySchema(() => z.union([
   TextCustomFieldConfigurationSchema,
   ToggleCustomFieldConfigurationSchema,
   NumberCustomFieldConfigurationSchema,
-]);
+]));
 
-export const CustomFieldsConfigurationSchema = z.array(CustomFieldConfigurationSchema);
+export const CustomFieldsConfigurationSchema = lazySchema(() => z.array(CustomFieldConfigurationSchema));
 
-export const ObservableTypesConfigurationSchema = z.array(CaseObservableTypeSchema);
+export const ObservableTypesConfigurationSchema = lazySchema(() => z.array(CaseObservableTypeSchema));
 
-export const WorkflowTagsConfigurationSchema = z.array(z.string());
+export const WorkflowTagsConfigurationSchema = lazySchema(() => z.array(z.string()));
 
-export const TemplateConfigurationSchema = z.object({
+export const TemplateConfigurationSchema = lazySchema(() => z.object({
   /**
    * key of template
    */
@@ -86,11 +86,11 @@ export const TemplateConfigurationSchema = z.object({
    * tags of template
    */
   tags: z.array(z.string()).optional(),
-});
+}));
 
-export const TemplatesConfigurationSchema = z.array(TemplateConfigurationSchema);
+export const TemplatesConfigurationSchema = lazySchema(() => z.array(TemplateConfigurationSchema));
 
-export const ConfigurationBasicWithoutOwnerSchema = z.object({
+export const ConfigurationBasicWithoutOwnerSchema = lazySchema(() => z.object({
   /**
    * The external connector
    */
@@ -120,35 +120,35 @@ export const ConfigurationBasicWithoutOwnerSchema = z.object({
    * An empty array shows all workflows.
    */
   workflowTags: WorkflowTagsConfigurationSchema,
-});
+}));
 
-export const CasesConfigureBasicSchema = ConfigurationBasicWithoutOwnerSchema.extend({
+export const CasesConfigureBasicSchema = lazySchema(() => ConfigurationBasicWithoutOwnerSchema.extend({
   /**
    * The plugin owner that manages this configuration
    */
   owner: z.string(),
-});
+}));
 
-export const ConfigurationActivityFieldsSchema = z.object({
+export const ConfigurationActivityFieldsSchema = lazySchema(() => z.object({
   created_at: z.string(),
   created_by: UserSchema,
   updated_at: z.string().nullable(),
   updated_by: UserSchema.nullable(),
-});
+}));
 
 export const ConfigurationAttributesSchema = CasesConfigureBasicSchema.merge(
   ConfigurationActivityFieldsSchema
 );
 
-export const ConfigurationSchema = ConfigurationAttributesSchema.extend({
+export const ConfigurationSchema = lazySchema(() => ConfigurationAttributesSchema.extend({
   id: z.string(),
   version: z.string(),
   error: z.string().nullable(),
   owner: z.string(),
   mappings: ConnectorMappingsSchema,
-});
+}));
 
-export const ConfigurationsSchema = z.array(ConfigurationSchema);
+export const ConfigurationsSchema = lazySchema(() => z.array(ConfigurationSchema));
 
 export type CustomFieldsConfiguration = z.infer<typeof CustomFieldsConfigurationSchema>;
 export type CustomFieldConfiguration = z.infer<typeof CustomFieldConfigurationSchema>;

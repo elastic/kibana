@@ -6,7 +6,7 @@
  */
 
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
@@ -26,14 +26,14 @@ const SingleOverviewCustomSchema = z
   })
   .strict();
 
-const groupBySchema = z
+const groupBySchema = lazySchema(() => z
   .union([
     z.literal('slo.tags'),
     z.literal('status'),
     z.literal('slo.indicator.type'),
     z.literal('_index'), // remote cluster
   ])
-  .default('status');
+  .default('status'));
 
 const GroupOverviewCustomSchema = z
   .object({

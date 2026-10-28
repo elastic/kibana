@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { KbnZodType } from './kbn_zod_type';
 import { KbnZodTypes } from './kbn_zod_type';
 
@@ -17,9 +17,9 @@ import { KbnZodTypes } from './kbn_zod_type';
  *
  * Accepts "true" or "false" as strings, or a boolean.
  */
-const _BooleanFromString = z
+const _BooleanFromString = lazySchema(() => z
   .union([z.enum(['true', 'false']).transform((val) => val === 'true'), z.boolean()])
-  .describe("A boolean value, which can be 'true' or 'false' as string or a native boolean.");
+  .describe("A boolean value, which can be 'true' or 'false' as string or a native boolean."));
 
 // Add custom type marker for identification
 Object.defineProperty(_BooleanFromString, 'kbnTypeName', {

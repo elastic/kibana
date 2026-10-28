@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -19,7 +19,7 @@ export const SANDBOX_STR_REPLACE_TOOL_ID = 'nightshift_sandbox_str_replace';
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 const CONTEXT_LINES = 5;
 
-const strReplaceSchema = z.object({
+const strReplaceSchema = lazySchema(() => z.object({
   file_path: z
     .string()
     .max(4096)
@@ -36,7 +36,7 @@ const strReplaceSchema = z.object({
     .string()
     .max(100_000)
     .describe('The string to replace old_str with. Use an empty string to delete old_str.'),
-});
+}));
 
 export const createSandboxStrReplaceTool = ({
   getSandboxStart,

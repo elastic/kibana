@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 
-export const dashboardNavigationOptionsSchema = z
+export const dashboardNavigationOptionsSchema = lazySchema(() => z
   .object({
     use_filters: z.boolean().default(DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.use_filters).meta({
       description: 'When enabled, filters are passed to the opening dashboard.',
@@ -26,6 +26,6 @@ export const dashboardNavigationOptionsSchema = z
       }),
   })
   .strict()
-  .default(DEFAULT_DASHBOARD_NAVIGATION_OPTIONS);
+  .default(DEFAULT_DASHBOARD_NAVIGATION_OPTIONS));
 
 export type DashboardNavigationOptions = z.output<typeof dashboardNavigationOptionsSchema>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { StreamDocsStat } from '../../../../common';
@@ -27,13 +27,13 @@ const degradedDocCountsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     query: z
       .object({
         stream: z.string().max(MAX_STREAM_NAME_LENGTH).optional(),
       })
       .optional(),
-  }),
+  })),
   handler: async ({ getScopedClients, request, params }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
@@ -56,13 +56,13 @@ const totalDocCountsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     query: z
       .object({
         stream: z.string().max(MAX_STREAM_NAME_LENGTH).optional(),
       })
       .optional(),
-  }),
+  })),
   handler: async ({ getScopedClients, request, server, params }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
     const streamName = params?.query?.stream;
@@ -88,13 +88,13 @@ const failedDocCountsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     query: z.object({
       start: z.coerce.number(),
       end: z.coerce.number(),
       stream: z.string().max(MAX_STREAM_NAME_LENGTH).optional(),
     }),
-  }),
+  })),
   handler: async ({ getScopedClients, request, params }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
@@ -119,13 +119,13 @@ const ingestionDocCountsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     query: z.object({
       start: z.coerce.number(),
       end: z.coerce.number(),
       stream: z.string().max(MAX_STREAM_NAME_LENGTH).optional(),
     }),
-  }),
+  })),
   handler: async ({ getScopedClients, request, params }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;

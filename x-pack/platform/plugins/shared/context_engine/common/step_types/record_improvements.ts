@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +16,7 @@ export const RECORD_IMPROVEMENTS_STEP_ID = 'context-engine.recordImprovements' a
 
 const MAX_IMPROVEMENTS_PER_REQUEST = 200;
 
-export const recordImprovementsInputSchema = z.object({
+export const recordImprovementsInputSchema = lazySchema(() => z.object({
   ai_index_id: aiIndexIdSchema.describe('The AI index these improvements are proposed for'),
   agent_run_id: z
     .string()
@@ -36,9 +36,9 @@ export const recordImprovementsInputSchema = z.object({
     .max(MAX_IMPROVEMENTS_PER_REQUEST)
     .default([])
     .describe('What the run proposed, straight off the agent'),
-});
+}));
 
-export const recordImprovementsOutputSchema = z.object({
+export const recordImprovementsOutputSchema = lazySchema(() => z.object({
   recorded: z
     .array(
       z.object({
@@ -58,7 +58,7 @@ export const recordImprovementsOutputSchema = z.object({
       })
     )
     .describe('The proposals that were not recorded, each with why'),
-});
+}));
 
 export const recordImprovementsStepCommonDefinition: CommonStepDefinition<
   typeof recordImprovementsInputSchema,

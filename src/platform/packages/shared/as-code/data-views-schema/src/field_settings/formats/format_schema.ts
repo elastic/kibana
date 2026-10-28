@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { booleanFormatSchema } from './boolean';
 import { colorFormatSchema } from './color';
 import { staticLookupFormatSchema } from './static_lookup';
@@ -46,13 +46,13 @@ const knownFormatSchemas = {
   url: urlFormatSchema,
 } as const;
 
-const extensibleFormatSchema = z.object({ type: z.string(), params: z.any().optional() }).meta({
+const extensibleFormatSchema = lazySchema(() => z.object({ type: z.string(), params: z.any().optional() }).meta({
   title: 'Extensible format',
   description:
     'Fallback for custom formatter IDs only. Known formatter IDs must match their dedicated schema and are validated at runtime.',
-});
+}));
 
-export const formatSchema = z
+export const formatSchema = lazySchema(() => z
   .union([
     booleanFormatSchema,
     bytesFormatSchema,
@@ -96,4 +96,4 @@ export const formatSchema = z
     title: 'Format',
     description:
       'Set your preferred format for displaying the value. Changing the format can affect the value and prevent highlighting in Discover.',
-  });
+  }));

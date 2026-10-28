@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { durationType } from '../../schema/duration';
 import { allOrAnyString } from '../../schema/common';
 
-const getSLOBurnRatesResponseSchema = z.object({
+const getSLOBurnRatesResponseSchema = lazySchema(() => z.object({
   burnRates: z.array(
     z.object({
       name: z.string(),
@@ -17,9 +17,9 @@ const getSLOBurnRatesResponseSchema = z.object({
       sli: z.number(),
     })
   ),
-});
+}));
 
-const getSLOBurnRatesParamsSchema = z.object({
+const getSLOBurnRatesParamsSchema = lazySchema(() => z.object({
   path: z.object({ id: z.string() }),
   body: z.object({
     instanceId: allOrAnyString,
@@ -31,7 +31,7 @@ const getSLOBurnRatesParamsSchema = z.object({
     ),
     remoteName: z.string().optional(),
   }),
-});
+}));
 
 type GetSLOBurnRatesResponse = z.input<typeof getSLOBurnRatesResponseSchema>;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -23,14 +23,14 @@ import { checkWatchlistAccess } from './check_watchlist_access';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 import { toDataSourceSummary } from './data_source_utils';
 
-const schema = z.object({
+const schema = lazySchema(() => z.object({
   watchlistId: z
     .string()
     .min(1)
     .describe(
       'The id of the watchlist to inspect. Use `security.get_watchlist_id` to resolve a watchlist name to its id first when the user named the watchlist.'
     ),
-});
+}));
 
 export const SECURITY_LIST_WATCHLIST_DATA_SOURCES_TOOL_ID = securityTool(
   'list_watchlist_data_sources'

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
@@ -13,18 +13,18 @@ import { aiIndexIdSchema, kiIdSchema } from './ki';
 
 export const DELETE_KI_STEP_ID = 'context-engine.deleteKi' as const;
 
-export const deleteKiInputSchema = z.object({
+export const deleteKiInputSchema = lazySchema(() => z.object({
   ai_index_id: aiIndexIdSchema,
   ki_id: kiIdSchema,
   refresh: z
     .boolean()
     .optional()
     .describe('Wait for the write to become searchable before the step completes (default false)'),
-});
+}));
 
-export const deleteKiOutputSchema = z.object({
+export const deleteKiOutputSchema = lazySchema(() => z.object({
   id: z.string().describe('The document id of the deleted knowledge indicator'),
-});
+}));
 
 export const deleteKiStepCommonDefinition: CommonStepDefinition<
   typeof deleteKiInputSchema,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/as-code-dashboard-schema';
 
 export interface LayoutGrid {
@@ -61,7 +61,7 @@ export interface LayoutRequest {
 }
 
 /** A panel answered as a compact `[id, x, y, w, h]` tuple, which keeps the answer short. */
-const arrangedPanelsSchema = z
+const arrangedPanelsSchema = lazySchema(() => z
   .array(
     z
       .tuple([
@@ -77,13 +77,13 @@ const arrangedPanelsSchema = z
       ])
       .transform(([id, x, y, w, h]) => ({ id, x, y, w, h }))
   )
-  .max(500);
+  .max(500));
 
 /**
  * The answer of the layout call: grid positions in the containers of the request. Panels are
  * answered as `[id, x, y, w, h]` and sections as `[id, y, panels]`, and read into objects.
  */
-export const layoutArrangementSchema = z.object({
+export const layoutArrangementSchema = lazySchema(() => z.object({
   plan: z.string(),
   panels: arrangedPanelsSchema,
   sections: z
@@ -93,7 +93,7 @@ export const layoutArrangementSchema = z.object({
         .transform(([id, y, panels]) => ({ id, y, panels }))
     )
     .max(100),
-});
+}));
 
 export type LayoutArrangement = z.output<typeof layoutArrangementSchema>;
 

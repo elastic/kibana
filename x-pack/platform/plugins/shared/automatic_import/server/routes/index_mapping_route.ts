@@ -7,7 +7,7 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { AutomaticImportPluginRequestHandlerContext } from '../types';
@@ -17,9 +17,9 @@ import { AUTOMATIC_IMPORT_API_PRIVILEGES } from '../feature';
 
 export const INDEX_MAPPINGS_PATH = '/api/automatic_import/index_mappings/{index_name}';
 
-const GetIndexMappingsRequestParams = z.object({
+const GetIndexMappingsRequestParams = lazySchema(() => z.object({
   index_name: z.string().min(1).max(255),
-});
+}));
 
 /**
  * Extracts the mappings from an `indices.getMapping` response.

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { createPrompt } from '@kbn/inference-common';
 import { Streams } from '@kbn/streams-schema';
 import systemPromptTemplate from './system_prompt.text';
@@ -14,7 +14,7 @@ import taskPromptTemplate from './task_prompt.text';
 export const SuggestIngestPipelinePrompt = createPrompt({
   name: 'suggest_ingest_pipeline_prompt',
   description: 'Suggest ingest pipeline based on stream analysis',
-  input: z.object({
+  input: lazySchema(() => z.object({
     stream: Streams.all.Definition.right,
     pipeline_schema: z.string(),
     fields_schema: z.string(),
@@ -29,7 +29,7 @@ export const SuggestIngestPipelinePrompt = createPrompt({
     upstream_extraction_context: z.string(),
     /** Conditional field examples for ECS or OTel, injected into system prompt based on stream type */
     field_examples: z.string(),
-  }),
+  })),
 })
   .version({
     system: {

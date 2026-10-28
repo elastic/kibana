@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
@@ -29,7 +29,7 @@ import { getFieldValuesHandler } from './get_field_values_handler';
 
 export const OBSERVABILITY_GET_INDEX_INFO_TOOL_ID = 'observability.get_index_info';
 
-const getIndexInfoSchema = z.object({
+const getIndexInfoSchema = lazySchema(() => z.object({
   operation: z.enum(['get-index-patterns', 'list-fields', 'get-field-values']).describe(
     dedent(`Operation to perform:
         - "get-index-patterns": Get observability index patterns and discovered data streams 
@@ -63,7 +63,7 @@ const getIndexInfoSchema = z.object({
     .describe(
       'Investigation focus to filter relevant fields. Examples: "memory issues", "high latency".'
     ),
-});
+}));
 
 export function createGetIndexInfoTool({
   core,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import {
   SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
@@ -15,21 +15,21 @@ import {
 } from './constants';
 import type { ServiceAccountRoleLimits } from './constants';
 
-export const serviceAccountIdSchema = z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH);
+export const serviceAccountIdSchema = lazySchema(() => z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH));
 
 /**
  * Validates the name a caller asks for. Beyond the create parameters it is also what a refused
  * create checks before naming the account in its audit event, so a rejected name never reaches the
  * log as received.
  */
-export const serviceAccountNameSchema = z
+export const serviceAccountNameSchema = lazySchema(() => z
   .string()
   .min(1)
   .max(SERVICE_ACCOUNT_NAME_MAX_LENGTH)
   .regex(
     SERVICE_ACCOUNT_NAME_REGEX,
     'must begin with a letter or digit and may contain only letters, digits, hyphens and underscores'
-  );
+  ));
 
 /**
  * The cap applies to the raw input, before the trim, so the body limit on the route covers every

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import {
@@ -102,12 +102,12 @@ const countAlertsRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     body: z.object({
       lookback: z.string().max(64),
       ruleUuid: z.string().max(256).optional(),
     }),
-  }),
+  })),
   handler: async ({ params, request, getScopedClients, server, getSpaceId, logger }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing } = scopedClients;
@@ -148,12 +148,12 @@ const changePointScanRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     body: z.object({
       lookback: z.string().max(64),
       bucketInterval: z.string().max(64),
     }),
-  }),
+  })),
   handler: async ({ params, request, getScopedClients, server, getSpaceId, telemetry, logger }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing } = scopedClients;

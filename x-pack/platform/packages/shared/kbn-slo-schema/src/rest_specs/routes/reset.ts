@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { sloDefinitionSchema, sloIdSchema } from '../../schema/slo';
 
-const resetSLOParamsSchema = z.object({
+const resetSLOParamsSchema = lazySchema(() => z.object({
   path: z.object({ id: sloIdSchema }),
-});
+}));
 
 const resetSLOResponseSchema = sloDefinitionSchema;
 

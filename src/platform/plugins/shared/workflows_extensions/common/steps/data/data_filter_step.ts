@@ -9,21 +9,21 @@
 
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const DataFilterStepTypeId = 'data.filter';
 
-export const ConfigSchema = z.object({
+export const ConfigSchema = lazySchema(() => z.object({
   items: z.unknown(),
-});
+}));
 
-export const InputSchema = z.object({
+export const InputSchema = lazySchema(() => z.object({
   condition: z.string(),
   limit: z.number().positive().optional(),
-});
+}));
 
-export const OutputSchema = z.array(z.unknown());
+export const OutputSchema = lazySchema(() => z.array(z.unknown()));
 
 export type DataFilterStepConfigSchema = typeof ConfigSchema;
 export type DataFilterStepInputSchema = typeof InputSchema;

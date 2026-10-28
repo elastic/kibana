@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { MAX_AI_INDEX_ID_LENGTH } from '../constants';
 
 export const MAX_KI_ID_LENGTH = 512;
@@ -27,30 +27,30 @@ export const MAX_KI_REFERENCE_DESCRIPTION_LENGTH = 2048;
 export const KI_REFERENCE_RELATIONS = ['derived_from', 'relates_to', 'supersedes'] as const;
 export const KI_LIFECYCLE_STATUSES = ['active', 'deleted', 'verification_failed'] as const;
 
-export const aiIndexIdSchema = z
+export const aiIndexIdSchema = lazySchema(() => z
   .string()
   .min(1)
   .max(MAX_AI_INDEX_ID_LENGTH)
-  .describe('The id of the AI index the knowledge indicator belongs to');
+  .describe('The id of the AI index the knowledge indicator belongs to'));
 
-export const kiIdSchema = z
+export const kiIdSchema = lazySchema(() => z
   .string()
   .min(1)
   .max(MAX_KI_ID_LENGTH)
-  .describe('The document id of the knowledge indicator');
+  .describe('The document id of the knowledge indicator'));
 
-export const kiReferenceRelationSchema = z
+export const kiReferenceRelationSchema = lazySchema(() => z
   .enum(KI_REFERENCE_RELATIONS)
-  .describe('How the URI relates to this KI');
+  .describe('How the URI relates to this KI'));
 export type KiReferenceRelation = z.infer<typeof kiReferenceRelationSchema>;
 
-export const kiLifecycleStatusSchema = z
+export const kiLifecycleStatusSchema = lazySchema(() => z
   .enum(KI_LIFECYCLE_STATUSES)
-  .describe('Lifecycle status of the KI. Unset reads as active');
+  .describe('Lifecycle status of the KI. Unset reads as active'));
 export type KiLifecycleStatus = z.infer<typeof kiLifecycleStatusSchema>;
 
 /** A URI this KI relates to. */
-export const kiReferenceSchema = z.object({
+export const kiReferenceSchema = lazySchema(() => z.object({
   uri: z
     .string()
     .min(1)
@@ -62,7 +62,7 @@ export const kiReferenceSchema = z.object({
     .max(MAX_KI_REFERENCE_DESCRIPTION_LENGTH)
     .optional()
     .describe('Why this reference exists'),
-});
+}));
 
 type KiAttributeValue = string | number | boolean | string[];
 
@@ -104,7 +104,7 @@ export const omitNullKiAttributes = <
  * A Knowledge Indicator (KI) document. Fields mirror the base AI index
  * mappings (`ai-index@mappings`).
  */
-export const kiFieldsSchema = z.object({
+export const kiFieldsSchema = lazySchema(() => z.object({
   type: z
     .string()
     .min(1)
@@ -155,12 +155,12 @@ export const kiFieldsSchema = z.object({
   expires_at: isoDateTime({ offset: true })
     .optional()
     .describe('Expiry date in ISO 8601. Leave unset and the KI never expires'),
-});
+}));
 
 /** The subset of KI fields that can be changed by an update. A null `expires_at` clears the expiry. */
-export const kiPartialFieldsSchema = kiFieldsSchema.partial().extend({
+export const kiPartialFieldsSchema = lazySchema(() => kiFieldsSchema.partial().extend({
   expires_at: kiFieldsSchema.shape.expires_at.nullable(),
-});
+}));
 
 export type KiFields = z.infer<typeof kiFieldsSchema>;
 export type KiPartialFields = z.infer<typeof kiPartialFieldsSchema>;

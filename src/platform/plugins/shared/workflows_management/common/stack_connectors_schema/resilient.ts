@@ -12,19 +12,19 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 // Resilient connector parameter schemas for different sub-actions
-export const ResilientCreateIncidentParamsSchema = z.object({
+export const ResilientCreateIncidentParamsSchema = lazySchema(() => z.object({
   incident: z.object({
     name: z.string(),
     description: z.string().optional(),
     incidentTypes: z.array(z.number()).optional(),
     severityCode: z.number().optional(),
   }),
-});
+}));
 
-export const ResilientUpdateIncidentParamsSchema = z.object({
+export const ResilientUpdateIncidentParamsSchema = lazySchema(() => z.object({
   incident: z.object({
     name: z.string().optional(),
     description: z.string().optional(),
@@ -32,17 +32,17 @@ export const ResilientUpdateIncidentParamsSchema = z.object({
     severityCode: z.number().optional(),
   }),
   incidentId: z.string(),
-});
+}));
 
-export const ResilientAddCommentParamsSchema = z.object({
+export const ResilientAddCommentParamsSchema = lazySchema(() => z.object({
   incidentId: z.string(),
   comment: z.object({
     text: z.string(),
   }),
-});
+}));
 
 // Resilient connector response schema
-export const ResilientIncidentResponseSchema = z.object({
+export const ResilientIncidentResponseSchema = lazySchema(() => z.object({
   id: z.number(),
   name: z.string(),
   description: z.string().optional(),
@@ -50,4 +50,4 @@ export const ResilientIncidentResponseSchema = z.object({
   create_date: z.number(),
   severity_code: z.number().optional(),
   incident_type_ids: z.array(z.number()).optional(),
-});
+}));

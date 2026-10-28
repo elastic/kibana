@@ -6,7 +6,7 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
@@ -25,7 +25,7 @@ import {
 import { hostTargetFields, requireHostTarget } from '../services/resolve_target';
 import { buildDispatchConfirmation, prepareDispatch } from '../services/dispatch_action';
 
-const getRunningProcessesSchema = z
+const getRunningProcessesSchema = lazySchema(() => z
   .object({
     ...hostTargetFields('The hostname of the endpoint to list running processes for.'),
     comment: z
@@ -35,7 +35,7 @@ const getRunningProcessesSchema = z
       .optional()
       .describe('An optional comment explaining why the process list is being retrieved.'),
   })
-  .refine(requireHostTarget.check, { message: requireHostTarget.message });
+  .refine(requireHostTarget.check, { message: requireHostTarget.message }));
 
 /**
  * Inspection action: retrieves the list of running processes from an enrolled

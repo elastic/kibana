@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
@@ -18,7 +18,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 
-const getConnectorSubActionsSchema = z.object({
+const getConnectorSubActionsSchema = lazySchema(() => z.object({
   connector_id: z
     .string()
     .min(1)
@@ -26,7 +26,7 @@ const getConnectorSubActionsSchema = z.object({
     .describe(
       'The id of the connector instance to describe. Use a value returned by list_connectors — never invent an id.'
     ),
-});
+}));
 
 export type GetConnectorSubActionsInput = z.infer<typeof getConnectorSubActionsSchema>;
 

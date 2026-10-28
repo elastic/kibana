@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export const instancesSortFieldSchema = z.enum([
+export const instancesSortFieldSchema = lazySchema(() => z.enum([
   'serviceNodeName',
   'latency',
   'throughput',
   'errorRate',
   'cpuUsage',
   'memoryUsage',
-]);
+]));
 
 export type InstancesSortField = z.infer<typeof instancesSortFieldSchema>;

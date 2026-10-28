@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -41,7 +41,7 @@ import {
 
 const DEFAULT_RANGE = { start: 'now-10d', end: 'now' };
 
-const baseSchema = z.object({
+const baseSchema = lazySchema(() => z.object({
   watchlistId: z
     .string()
     .min(1)
@@ -55,13 +55,13 @@ const baseSchema = z.object({
     .describe(
       'KQL filter query. Matches are added to the watchlist automatically, and re-evaluated on a schedule (about every 10 minutes) — entities/documents that stop matching are removed. For `store` sources, this queries the entity store directly, which holds every entity type (`user`, `host`, `service`, `generic`) in one index — a query with no entity-type clause matches across all of them, so if the user\'s request implies a specific type (e.g. "critical-risk users", "Ubuntu hosts"), add an `entity.EngineMetadata.Type: "user"` / `"host"` / `"service"` / `"generic"` clause (same field and values `security.search_entities`\' `entityTypes` filters on) — do NOT use `entity.type` for this, its value is an inconsistent per-source fallback (e.g. `"Identity"` for users, not `"user"`) and can be missing entirely. Example: `entity.risk.calculated_level: "Critical" and entity.EngineMetadata.Type: "user"`. For `index` sources, this queries the target `indexPattern` instead (e.g. raw Okta logs) using that index\'s own fields (e.g. `event.action: "user.session.start"`) — the entity type is implied by `identifierField` there, so an entity-type clause does not apply. In both cases, only write a clause for a condition the user named concretely (a real field, or a value they gave/confirmed) — if they described the condition only in human/conceptual terms (e.g. "contract terminated", "flagged as risky") without saying which field or value means that, ask them what field/value to filter on; do not invent one, since a plausible-sounding guess can silently match nothing or the wrong entities.'
     ),
-});
+}));
 
-const rangeSchema = z.object({
+const rangeSchema = lazySchema(() => z.object({
   start: z.string().min(1).max(256).describe('Lookback start, e.g. "now-10d".'),
   end: z.string().min(1).max(256).describe('Lookback end, e.g. "now".'),
-});
-const indexPatternSchema = z.object({
+}));
+const indexPatternSchema = lazySchema(() => z.object({
   indexPattern: z
     .string()
     .min(1)
@@ -77,9 +77,9 @@ const indexPatternSchema = z.object({
   range: rangeSchema.describe(
     'Only used when `type` is `index`. Lookback window applied to the target index. Defaults to the last 10 days.'
   ),
-});
+}));
 
-const schema = baseSchema
+const schema = lazySchema(() => baseSchema
   .extend(indexPatternSchema.partial().shape)
   .extend({
     type: z
@@ -104,7 +104,7 @@ const schema = baseSchema
         message: 'identifierField is required when type is "index".',
       });
     }
-  });
+  }));
 
 export const SECURITY_SET_WATCHLIST_RULE_BASED_DATA_SOURCE_TOOL_ID = securityTool(
   'set_watchlist_rule_based_data_source'

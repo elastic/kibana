@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
@@ -27,7 +27,7 @@ export interface BulkUpdateAttachmentsResponse {
   acknowledged: boolean;
 }
 
-const attachmentTypeSchema = z.enum(ATTACHMENT_TYPES);
+const attachmentTypeSchema = lazySchema(() => z.enum(ATTACHMENT_TYPES));
 
 const listAttachmentsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{streamName}/attachments 2023-10-31',
@@ -81,7 +81,7 @@ const listAttachmentsRoute = createServerRoute({
       },
     }),
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({
       streamName: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream'),
     }),
@@ -103,7 +103,7 @@ const listAttachmentsRoute = createServerRoute({
           .describe('Filter by tags (single value or array)'),
       })
       .optional(),
-  }),
+  })),
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
@@ -185,13 +185,13 @@ const linkAttachmentRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({
       streamName: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream'),
       attachmentType: attachmentTypeSchema.describe('The type of the attachment'),
       attachmentId: z.string().max(256).describe('The ID of the attachment'),
     }),
-  }),
+  })),
   handler: async ({ params, request, getScopedClients }): Promise<LinkAttachmentResponse> => {
     const { attachmentClient, streamsClient } = await getScopedClients({
       request,
@@ -261,13 +261,13 @@ const unlinkAttachmentRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({
       streamName: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream'),
       attachmentType: attachmentTypeSchema.describe('The type of the attachment'),
       attachmentId: z.string().max(256).describe('The ID of the attachment'),
     }),
-  }),
+  })),
   handler: async ({ params, request, getScopedClients }): Promise<UnlinkAttachmentResponse> => {
     const { attachmentClient, streamsClient } = await getScopedClients({
       request,
@@ -290,10 +290,10 @@ const unlinkAttachmentRoute = createServerRoute({
   },
 });
 
-const attachmentSchema = z.object({
+const attachmentSchema = lazySchema(() => z.object({
   id: z.string().max(256),
   type: attachmentTypeSchema,
-});
+}));
 
 const bulkAttachmentsRoute = createServerRoute({
   endpoint: `POST /api/streams/{streamName}/attachments/_bulk 2023-10-31`,
@@ -356,7 +356,7 @@ const bulkAttachmentsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({
       streamName: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream'),
     }),
@@ -374,7 +374,7 @@ const bulkAttachmentsRoute = createServerRoute({
         )
         .max(1000),
     }),
-  }),
+  })),
   handler: async ({
     params,
     request,

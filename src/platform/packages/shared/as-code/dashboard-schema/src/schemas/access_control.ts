@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const accessControlSchema = z
+export const accessControlSchema = lazySchema(() => z
   .object({
     access_mode: z
       .union([z.literal('write_restricted'), z.literal('default')])
@@ -25,4 +25,4 @@ export const accessControlSchema = z
     description: 'Access control settings for the dashboard.',
     id: 'kbn-dashboard-access-control',
     title: 'Access control',
-  });
+  }));

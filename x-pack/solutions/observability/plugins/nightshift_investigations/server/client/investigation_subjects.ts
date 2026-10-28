@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   INVESTIGATION_SUBJECT_TRIGGER_TYPES,
   INVESTIGATION_SUBJECT_TYPES,
@@ -44,7 +44,7 @@ const MAX_SLACK_PERMALINK_LENGTH = 2048;
  * creation of the conversation, so subjects are only ever recorded there. Agentic investigations
  * validates these again when it stores them.
  */
-export const workflowSubjectInputSchema = z.object({
+export const workflowSubjectInputSchema = lazySchema(() => z.object({
   type: z.enum(INVESTIGATION_SUBJECT_TYPES),
   id: z.string().min(1).max(MAX_SUBJECT_ID_LENGTH),
   summary: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
@@ -58,13 +58,13 @@ export const workflowSubjectInputSchema = z.object({
       permalink: z.string().max(MAX_SLACK_PERMALINK_LENGTH).optional(),
     })
     .optional(),
-});
+}));
 
 export type WorkflowSubjectInput = z.infer<typeof workflowSubjectInputSchema>;
 
-export const workflowSubjectInputsSchema = z
+export const workflowSubjectInputsSchema = lazySchema(() => z
   .array(workflowSubjectInputSchema)
-  .max(MAX_SUBJECTS_PER_REQUEST);
+  .max(MAX_SUBJECTS_PER_REQUEST));
 
 const truncateSummary = (summary: string | undefined): string | undefined =>
   summary ? summary.slice(0, MAX_EVIDENCE_TEXT_LENGTH) : undefined;

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
 
-export const logRateAnalysisEmbeddableStateSchema = z
+export const logRateAnalysisEmbeddableStateSchema = lazySchema(() => z
   .object({
     ...serializedTitlesSchema.shape,
     ...serializedTimeRangeSchema.shape,
@@ -23,6 +23,6 @@ export const logRateAnalysisEmbeddableStateSchema = z
   .meta({
     id: 'aiops_log_rate_analysis',
     description: 'Log rate analysis embeddable schema',
-  });
+  }));
 
 export type LogRateAnalysisEmbeddableState = z.output<typeof logRateAnalysisEmbeddableStateSchema>;

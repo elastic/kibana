@@ -14,7 +14,7 @@ import type {
   Conversation,
   ConversationWithoutRoundsWithPermissions,
 } from '@kbn/agent-builder-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
   MAX_ESCALATION_ASSIGNEES,
@@ -29,12 +29,12 @@ import {
 export type EscalationConversation = Conversation;
 
 /** Conversation ids are UUIDs; the bound matches what the conversation client accepts. */
-const conversationIdSchema = z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH);
+const conversationIdSchema = lazySchema(() => z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH));
 
 /** A user profile uid, bounded to the length the conversation ACL enforces. */
-const assigneeIdSchema = z.string().min(1).max(CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH);
+const assigneeIdSchema = lazySchema(() => z.string().min(1).max(CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH));
 
-export const escalationVisibilitySchema = z.enum(['private', 'public']);
+export const escalationVisibilitySchema = lazySchema(() => z.enum(['private', 'public']));
 export type EscalationVisibility = z.infer<typeof escalationVisibilitySchema>;
 
 /**
@@ -42,10 +42,10 @@ export type EscalationVisibility = z.infer<typeof escalationVisibilitySchema>;
  * field options in the escalation conversation template
  * (`agent_builder_platform/server/conversation_templates/escalation.ts`).
  */
-export const escalationStatusSchema = z.enum(['open', 'closed']);
+export const escalationStatusSchema = lazySchema(() => z.enum(['open', 'closed']));
 export type EscalationStatus = z.infer<typeof escalationStatusSchema>;
 
-export const createEscalationRequestSchema = z.object({
+export const createEscalationRequestSchema = lazySchema(() => z.object({
   /**
    * The investigation to escalate. A single id, not an array: an escalation is opened
    * *from* one investigation. Further investigations are attached through the update
@@ -61,7 +61,7 @@ export const createEscalationRequestSchema = z.object({
    * are also used as the ACL entries so assignees can see the escalation.
    */
   assignees: z.array(assigneeIdSchema).min(1).max(MAX_ESCALATION_ASSIGNEES),
-});
+}));
 
 export type CreateEscalationRequest = z.infer<typeof createEscalationRequestSchema>;
 
@@ -72,12 +72,12 @@ export type CreateEscalationRequest = z.infer<typeof createEscalationRequestSche
  * requests could each read the same stale list and one link could be silently lost.
  * Follow-up: elastic/security-team#19370 (race-safe append).
  */
-export const linkEscalationRequestSchema = z.object({
+export const linkEscalationRequestSchema = lazySchema(() => z.object({
   [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: z
     .array(conversationIdSchema)
     .min(1)
     .max(MAX_ESCALATION_LINKED_INVESTIGATIONS),
-});
+}));
 
 export type LinkEscalationRequest = z.infer<typeof linkEscalationRequestSchema>;
 
@@ -92,7 +92,7 @@ export type LinkEscalationRequest = z.infer<typeof linkEscalationRequestSchema>;
  * `status` defaults to `'open'` to preserve backward compatibility for callers
  * that do not send the parameter. `'all'` is provided for admin / diagnostic use.
  */
-export const listEscalationsQuerySchema = z
+export const listEscalationsQuerySchema = lazySchema(() => z
   .object({
     page: z.coerce.number().int().min(1).default(1),
     per_page: z.coerce
@@ -118,7 +118,7 @@ export const listEscalationsQuerySchema = z
   })
   .refine(({ page, per_page: perPage }) => page * perPage <= MAX_ESCALATIONS_RESULT_WINDOW, {
     message: `page * per_page must not exceed ${MAX_ESCALATIONS_RESULT_WINDOW}; escalations beyond that are not reachable through this API`,
-  });
+  }));
 
 export type ListEscalationsQuery = z.infer<typeof listEscalationsQuerySchema>;
 

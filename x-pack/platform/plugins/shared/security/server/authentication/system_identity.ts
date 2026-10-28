@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { SystemIdentity } from '@kbn/security-plugin-types-server';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { SERVICE_ACCOUNT_TOKEN_MAX_LENGTH } from '../../common/service_accounts';
 import type { UiamServicePublic } from '../uiam';
@@ -17,10 +17,10 @@ import type { UiamServicePublic } from '../uiam';
  * Kibana's mTLS certificate alone is a `project` service account principal; anything else means
  * the request was not authenticated the way we intended and the token must not be handed out.
  */
-const kibanaAuthenticateResponseSchema = z.object({
+const kibanaAuthenticateResponseSchema = lazySchema(() => z.object({
   type: z.literal('project'),
   token: z.string().min(1).max(SERVICE_ACCOUNT_TOKEN_MAX_LENGTH),
-});
+}));
 
 interface UiamSystemIdentityOptions {
   logger: Logger;

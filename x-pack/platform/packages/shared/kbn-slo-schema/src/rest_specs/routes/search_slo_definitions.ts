@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-const searchSLODefinitionsParamsSchema = z.object({
+const searchSLODefinitionsParamsSchema = lazySchema(() => z.object({
   query: z
     .object({
       search: z.string().optional(),
@@ -15,7 +15,7 @@ const searchSLODefinitionsParamsSchema = z.object({
       remoteName: z.string().optional(),
     })
     .optional(),
-});
+}));
 
 type SearchSLODefinitionsParams = NonNullable<
   z.output<typeof searchSLODefinitionsParamsSchema.shape.query>

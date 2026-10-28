@@ -12,7 +12,7 @@ import {
   HUMAN_READABLE_ID_MIN_LENGTH,
   HUMAN_READABLE_ID_PATTERN,
 } from '@kbn/human-readable-id';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 /**
  * Canonical Zod schema for persisted workflow IDs. Enforces the same
@@ -20,8 +20,8 @@ import { z } from '@kbn/zod';
  * across the codebase (import, generation, action policies) validate against
  * a single source of truth.
  */
-export const workflowIdSchema = z
+export const workflowIdSchema = lazySchema(() => z
   .string()
   .min(HUMAN_READABLE_ID_MIN_LENGTH)
   .max(HUMAN_READABLE_ID_MAX_LENGTH)
-  .regex(HUMAN_READABLE_ID_PATTERN);
+  .regex(HUMAN_READABLE_ID_PATTERN));

@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import type { StartDeps } from '../plugin';
 import type { DashboardPluginStart } from '../types';
@@ -19,7 +19,7 @@ const MAX_PER_PAGE = 100;
 // Elasticsearch's default `index.max_result_window`: `from + size` may not exceed it
 const MAX_RESULT_WINDOW = 10000;
 
-const listResponseSchema = z.object({
+const listResponseSchema = lazySchema(() => z.object({
   items: z.array(
     z.object({
       id: z.string(),
@@ -33,7 +33,7 @@ const listResponseSchema = z.object({
     })
   ),
   total: z.number(),
-});
+}));
 export type HistoryListResponse = z.infer<typeof listResponseSchema>;
 
 export const registerHistoryListRoute = (

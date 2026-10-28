@@ -10,7 +10,7 @@
 import type { Document } from 'yaml';
 import type { DynamicStepContextSchema } from '@kbn/workflows';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { getScalarValueAtOffset } from '../../yaml/get_scalar_value_at_offset';
 import {
   forLoopScopesContainingOffset,
@@ -177,7 +177,7 @@ export function mapBlockScalarSourceToValueOffset(
 }
 
 /** LiquidJS forloop object schema (index, index0, rindex, rindex0, first, last, length) */
-const FORLOOP_SCHEMA = z.object({
+const FORLOOP_SCHEMA = lazySchema(() => z.object({
   index: z.number(),
   index0: z.number(),
   rindex: z.number(),
@@ -185,7 +185,7 @@ const FORLOOP_SCHEMA = z.object({
   first: z.boolean(),
   last: z.boolean(),
   length: z.number(),
-});
+}));
 
 /** Matches a Liquid variable path (e.g. steps.x.outputs.value). */
 const VARIABLE_PATH_REGEX = /^[\w.]+$/;

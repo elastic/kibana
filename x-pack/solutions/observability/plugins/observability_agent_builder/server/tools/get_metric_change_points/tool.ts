@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -26,7 +26,7 @@ import { getToolHandler } from './handler';
 export const OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID =
   'observability.get_metric_change_points';
 
-const getMetricChangePointsSchema = z.object({
+const getMetricChangePointsSchema = lazySchema(() => z.object({
   ...timeRangeSchemaRequired,
   index: z
     .string()
@@ -59,7 +59,7 @@ const getMetricChangePointsSchema = z.object({
     .describe(
       `Fields to break down metrics by. Use low-cardinality fields. Examples: ['service.name', 'service.version'], ['service.name', 'host.name'], ['cloud.availability_zone'].`
     ),
-});
+}));
 
 export function createGetMetricChangePointsTool({
   core,

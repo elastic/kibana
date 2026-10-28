@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import * as i18n from './translations';
 
 export const FieldType = {
@@ -24,24 +24,24 @@ export const FieldType = {
 
 export type FieldType = (typeof FieldType)[keyof typeof FieldType];
 
-export const ConditionRuleSchema = z.object({
+export const ConditionRuleSchema = lazySchema(() => z.object({
   field: z.string(),
   operator: z.enum(['eq', 'neq', 'contains', 'empty', 'not_empty']),
   value: z.union([z.string(), z.number(), z.boolean()]).optional(),
-});
+}));
 
-export const CompoundConditionSchema = z.object({
+export const CompoundConditionSchema = lazySchema(() => z.object({
   combine: z.enum(['all', 'any']).default('all'),
   rules: z.array(ConditionRuleSchema).min(1),
-});
+}));
 
-export const ConditionSchema = z.union([ConditionRuleSchema, CompoundConditionSchema]);
+export const ConditionSchema = lazySchema(() => z.union([ConditionRuleSchema, CompoundConditionSchema]));
 
-export const DisplaySchema = z.object({
+export const DisplaySchema = lazySchema(() => z.object({
   show_when: ConditionSchema.optional(),
-});
+}));
 
-export const ValidationSchema = z.object({
+export const ValidationSchema = lazySchema(() => z.object({
   required: z.boolean().optional(),
   required_when: ConditionSchema.optional(),
   /** When true, the field must be filled in before a case can be moved to closed status. */
@@ -56,7 +56,7 @@ export const ValidationSchema = z.object({
   max: z.number().optional(),
   min_length: z.number().optional(),
   max_length: z.number().optional(),
-});
+}));
 
 export type ConditionRule = z.infer<typeof ConditionRuleSchema>;
 export type CompoundCondition = z.infer<typeof CompoundConditionSchema>;
@@ -82,7 +82,7 @@ export interface ConditionRenderProps {
   isSaveDisabled?: boolean;
 }
 
-const BaseFieldSchema = z.object({
+const BaseFieldSchema = lazySchema(() => z.object({
   name: z.string(),
   label: z.string().optional(),
   type: z.literal('keyword'),
@@ -94,13 +94,13 @@ const BaseFieldSchema = z.object({
     })
     .catchall(z.unknown())
     .optional(),
-});
+}));
 
-export const InputTextFieldSchema = BaseFieldSchema.extend({
+export const InputTextFieldSchema = lazySchema(() => BaseFieldSchema.extend({
   control: z.literal(FieldType.INPUT_TEXT),
-});
+}));
 
-export const InputNumberFieldSchema = BaseFieldSchema.extend({
+export const InputNumberFieldSchema = lazySchema(() => BaseFieldSchema.extend({
   control: z.literal(FieldType.INPUT_NUMBER),
   type: z.union([
     z.literal('long'),
@@ -119,9 +119,9 @@ export const InputNumberFieldSchema = BaseFieldSchema.extend({
     })
     .catchall(z.unknown())
     .optional(),
-});
+}));
 
-export const SelectBasicFieldSchema = BaseFieldSchema.extend({
+export const SelectBasicFieldSchema = lazySchema(() => BaseFieldSchema.extend({
   control: z.literal(FieldType.SELECT_BASIC),
   metadata: z
     .object({
@@ -129,9 +129,9 @@ export const SelectBasicFieldSchema = BaseFieldSchema.extend({
       default: z.string().optional(),
     })
     .catchall(z.unknown()),
-});
+}));
 
-export const TextareaFieldSchema = BaseFieldSchema.extend({
+export const TextareaFieldSchema = lazySchema(() => BaseFieldSchema.extend({
   control: z.literal(FieldType.TEXTAREA),
   metadata: z
     .object({
@@ -140,9 +140,9 @@ export const TextareaFieldSchema = BaseFieldSchema.extend({
     })
     .catchall(z.unknown())
     .optional(),
-});
+}));
 
-export const DatePickerFieldSchema = BaseFieldSchema.extend({
+export const DatePickerFieldSchema = lazySchema(() => BaseFieldSchema.extend({
   control: z.literal(FieldType.DATE_PICKER),
   type: z.literal('date'),
   metadata: z
@@ -156,9 +156,9 @@ export const DatePickerFieldSchema = BaseFieldSchema.extend({
     })
     .catchall(z.unknown())
     .optional(),
-});
+}));
 
-export const ToggleFieldSchema = BaseFieldSchema.extend({
+export const ToggleFieldSchema = lazySchema(() => BaseFieldSchema.extend({
   control: z.literal(FieldType.TOGGLE),
   // A toggle stores a boolean value, so its extended-field storage key is `<name>_as_boolean` and
   // it publishes as a native `boolean` runtime field (see cases_analytics_v2 runtime_fields.ts).
@@ -171,11 +171,11 @@ export const ToggleFieldSchema = BaseFieldSchema.extend({
     })
     .catchall(z.unknown())
     .optional(),
-});
+}));
 
-export const UserPickerDefaultSchema = z.array(z.object({ uid: z.string(), name: z.string() }));
+export const UserPickerDefaultSchema = lazySchema(() => z.array(z.object({ uid: z.string(), name: z.string() })));
 
-export const UserPickerFieldSchema = BaseFieldSchema.extend({
+export const UserPickerFieldSchema = lazySchema(() => BaseFieldSchema.extend({
   control: z.literal(FieldType.USER_PICKER),
   metadata: z
     .object({
@@ -184,11 +184,11 @@ export const UserPickerFieldSchema = BaseFieldSchema.extend({
     })
     .catchall(z.unknown())
     .optional(),
-});
+}));
 
 const uniqueStrings = (arr: string[]) => new Set(arr).size === arr.length;
 
-export const CheckboxGroupFieldSchema = BaseFieldSchema.extend({
+export const CheckboxGroupFieldSchema = lazySchema(() => BaseFieldSchema.extend({
   control: z.literal(FieldType.CHECKBOX_GROUP),
   metadata: z
     .object({
@@ -214,9 +214,9 @@ export const CheckboxGroupFieldSchema = BaseFieldSchema.extend({
         });
       }
     }),
-});
+}));
 
-export const RadioGroupFieldSchema = BaseFieldSchema.extend({
+export const RadioGroupFieldSchema = lazySchema(() => BaseFieldSchema.extend({
   control: z.literal(FieldType.RADIO_GROUP),
   metadata: z
     .object({
@@ -240,7 +240,7 @@ export const RadioGroupFieldSchema = BaseFieldSchema.extend({
         });
       }
     }),
-});
+}));
 
 /**
  * A reference to a named field definition in the owner's field library.
@@ -268,7 +268,7 @@ export const RadioGroupFieldSchema = BaseFieldSchema.extend({
  * which is what made conditional visibility appear to be broken for `$ref` fields (see
  * `applyRefFieldOverride`).
  */
-export const RefFieldSchema = z.object({
+export const RefFieldSchema = lazySchema(() => z.object({
   name: z.string().optional(),
   $ref: z.string().min(1),
   metadata: z
@@ -287,7 +287,7 @@ export const RefFieldSchema = z.object({
     .optional(),
   display: DisplaySchema.optional(),
   validation: ValidationSchema.optional(),
-});
+}));
 
 export type RefField = z.infer<typeof RefFieldSchema>;
 
@@ -299,7 +299,7 @@ export type RefField = z.infer<typeof RefFieldSchema>;
  * `type` is defaulted to `keyword` (never authored) since a display-only field only inherits it
  * from BaseFieldSchema to build a snake key, which is then rejected as an unknown extended field.
  */
-export const MarkdownFieldSchema = BaseFieldSchema.extend({
+export const MarkdownFieldSchema = lazySchema(() => BaseFieldSchema.extend({
   control: z.literal(FieldType.MARKDOWN),
   type: z.literal('keyword').default('keyword'),
   metadata: z
@@ -307,14 +307,14 @@ export const MarkdownFieldSchema = BaseFieldSchema.extend({
       content: z.string(),
     })
     .catchall(z.unknown()),
-});
+}));
 
 /**
  * Union of all inline (control-based) field definitions — every concrete field shape that can be
  * authored directly, excluding library references (`$ref`). This is the schema for a standalone
  * field-library definition, which stores concrete fields, never references to other fields.
  */
-export const InlineFieldSchema = z.union([
+export const InlineFieldSchema = lazySchema(() => z.union([
   InputTextFieldSchema,
   InputNumberFieldSchema,
   SelectBasicFieldSchema,
@@ -325,13 +325,13 @@ export const InlineFieldSchema = z.union([
   CheckboxGroupFieldSchema,
   RadioGroupFieldSchema,
   MarkdownFieldSchema,
-]);
+]));
 
 /**
  * This can be used to parse `fields` section in the YAML `definition` of the template.
  * Includes both inline field definitions (with `control`) and library references (with `ref`).
  */
-export const FieldSchema = z.union([...InlineFieldSchema.options, RefFieldSchema]);
+export const FieldSchema = lazySchema(() => z.union([...InlineFieldSchema.options, RefFieldSchema]));
 
 export type Field = z.infer<typeof FieldSchema>;
 

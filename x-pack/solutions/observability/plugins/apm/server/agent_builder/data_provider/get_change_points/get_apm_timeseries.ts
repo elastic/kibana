@@ -7,7 +7,7 @@
 
 import datemath from '@elastic/datemath';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ChangePointType } from '@kbn/es-types/src';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
@@ -33,7 +33,7 @@ export enum ApmTimeseriesType {
   errorEventRate = 'error_event_rate',
 }
 
-const timeseriesSchema = z.union([
+const timeseriesSchema = lazySchema(() => z.union([
   z.object({
     name: z.union([
       z.literal(ApmTimeseriesType.transactionThroughput),
@@ -63,9 +63,9 @@ const timeseriesSchema = z.union([
   z.object({
     name: z.literal(ApmTimeseriesType.errorEventRate),
   }),
-]);
+]));
 
-export const getApmTimeseriesRt = z.object({
+export const getApmTimeseriesRt = lazySchema(() => z.object({
   stats: z.array(
     z.object({
       'service.name': z.string(),
@@ -78,7 +78,7 @@ export const getApmTimeseriesRt = z.object({
   ),
   start: z.string(),
   end: z.string(),
-});
+}));
 
 type ApmTimeseriesArgs = z.infer<typeof getApmTimeseriesRt>;
 

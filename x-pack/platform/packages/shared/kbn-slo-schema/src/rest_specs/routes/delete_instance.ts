@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { sloIdSchema } from '../../schema/slo';
 
-const deleteSLOInstancesParamsSchema = z.object({
+const deleteSLOInstancesParamsSchema = lazySchema(() => z.object({
   body: z.object({
     list: z.array(
       z.object({
@@ -19,7 +19,7 @@ const deleteSLOInstancesParamsSchema = z.object({
       })
     ),
   }),
-});
+}));
 
 type DeleteSLOInstancesInput = z.input<typeof deleteSLOInstancesParamsSchema.shape.body>;
 type DeleteSLOInstancesParams = z.output<typeof deleteSLOInstancesParamsSchema.shape.body>;

@@ -30,34 +30,34 @@ const NIGHTSHIFT_SOURCE_SLUGS_DESCRIPTION =
 export const MAX_NIGHTSHIFT_SOURCE_SLUGS = 100;
 
 /** One source slug. Callers append a sentence with {@link nightshiftSourceSlugField}. */
-export const nightshiftSourceSlugSchema = z
+export const nightshiftSourceSlugSchema = lazySchema(() => z
   .string()
   .min(1)
   .max(MAX_SOURCE_SLUG_LENGTH)
-  .describe(NIGHTSHIFT_SOURCE_SLUG_DESCRIPTION);
+  .describe(NIGHTSHIFT_SOURCE_SLUG_DESCRIPTION));
 
 /** Same slug field, with one extra sentence after the shared description. */
 export const nightshiftSourceSlugField = (detail: string): z.ZodString =>
   nightshiftSourceSlugSchema.describe(`${NIGHTSHIFT_SOURCE_SLUG_DESCRIPTION} ${detail}`);
 
 /** A bounded list of source slugs. */
-export const nightshiftSourceSlugsSchema = z
+export const nightshiftSourceSlugsSchema = lazySchema(() => z
   .array(nightshiftSourceSlugSchema)
   .max(MAX_NIGHTSHIFT_SOURCE_SLUGS)
-  .describe(NIGHTSHIFT_SOURCE_SLUGS_DESCRIPTION);
+  .describe(NIGHTSHIFT_SOURCE_SLUGS_DESCRIPTION));
 
 /** Same slug list, with one extra sentence after the shared description. */
 export const nightshiftSourceSlugsField = (detail: string): z.ZodArray<z.ZodString> =>
   nightshiftSourceSlugsSchema.describe(`${NIGHTSHIFT_SOURCE_SLUGS_DESCRIPTION} ${detail}`);
 
-const sourceTitleSchema = z.string().trim().min(1).max(MAX_SOURCE_TITLE_LENGTH);
-const sourceDescriptionSchema = z.string().max(MAX_SOURCE_DESCRIPTION_LENGTH);
-const sourceEsqlSchema = z.string().trim().min(1).max(MAX_SOURCE_ESQL_LENGTH);
-const sourceTagsSchema = z
+const sourceTitleSchema = lazySchema(() => z.string().trim().min(1).max(MAX_SOURCE_TITLE_LENGTH));
+const sourceDescriptionSchema = lazySchema(() => z.string().max(MAX_SOURCE_DESCRIPTION_LENGTH));
+const sourceEsqlSchema = lazySchema(() => z.string().trim().min(1).max(MAX_SOURCE_ESQL_LENGTH));
+const sourceTagsSchema = lazySchema(() => z
   .array(z.string().trim().min(1).max(MAX_SOURCE_TAG_LENGTH))
-  .max(MAX_SOURCE_TAGS);
+  .max(MAX_SOURCE_TAGS));
 
-const nightshiftSourceSchema = z.object({
+const nightshiftSourceSchema = lazySchema(() => z.object({
   id: z.string(),
   title: sourceTitleSchema,
   description: sourceDescriptionSchema.optional(),
@@ -72,7 +72,7 @@ const nightshiftSourceSchema = z.object({
   created_at: z.string(),
   updated_at: z.string(),
   esql_updated_at: z.string(),
-});
+}));
 
 export type NightshiftSource = z.infer<typeof nightshiftSourceSchema>;
 
@@ -81,12 +81,12 @@ export interface SourceWithHealth {
   health: SourceHealth;
 }
 
-export const createSourceRequestSchema = z.object({
+export const createSourceRequestSchema = lazySchema(() => z.object({
   title: sourceTitleSchema,
   description: sourceDescriptionSchema.optional(),
   tags: sourceTagsSchema.default([]),
   esql: sourceEsqlSchema,
-});
+}));
 
 /** Wire shape callers send; `tags` may be omitted on create (defaults to `[]`). */
 export type CreateSourceRequest = z.input<typeof createSourceRequestSchema>;
@@ -95,12 +95,12 @@ export type CreateSourceRequest = z.input<typeof createSourceRequestSchema>;
 export type SourceInput = z.output<typeof createSourceRequestSchema>;
 
 /** On update, `tags` is required so omitting it is a validation error instead of silently clearing. */
-export const updateSourceRequestSchema = z.object({
+export const updateSourceRequestSchema = lazySchema(() => z.object({
   title: sourceTitleSchema,
   description: sourceDescriptionSchema.optional(),
   tags: sourceTagsSchema,
   esql: sourceEsqlSchema,
-});
+}));
 
 export type UpdateSourceRequest = z.input<typeof updateSourceRequestSchema>;
 
@@ -120,7 +120,7 @@ export type ValidateSourceQueryResponse =
   | { valid: true; type: SourceType; index_exists: boolean }
   | { valid: false; error: string };
 
-export const listSourcesQuerySchema = z.object({
+export const listSourcesQuerySchema = lazySchema(() => z.object({
   page: z.coerce.number().int().min(1).default(1),
   per_page: z.coerce
     .number()
@@ -143,7 +143,7 @@ export const listSourcesQuerySchema = z.object({
     .describe(
       'Return only the sources with these ids. Ids that match no source are left out. Search, enabled, and paging apply to the sources that were found.'
     ),
-});
+}));
 
 export interface ListSourcesResponse {
   sources: NightshiftSource[];

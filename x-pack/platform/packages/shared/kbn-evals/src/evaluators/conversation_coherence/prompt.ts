@@ -6,16 +6,16 @@
  */
 
 import { createPrompt } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import systemPromptText from './system_prompt.text';
 import userPromptText from './user_prompt.text';
 
 export const LlmCoherenceEvaluationPrompt = createPrompt({
   name: 'llm_coherence_evaluation',
   description: 'Prompt for evaluating the coherence of multi-turn conversations',
-  input: z.object({
+  input: lazySchema(() => z.object({
     conversation: z.string(),
-  }),
+  })),
 })
   .version({
     system: {

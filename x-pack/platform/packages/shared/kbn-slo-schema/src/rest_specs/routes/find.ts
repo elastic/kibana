@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { BooleanFromString } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { sloWithDataResponseSchema } from '../slo';
 
-const sortDirectionSchema = z.union([z.literal('asc'), z.literal('desc')]);
-const sortBySchema = z.union([
+const sortDirectionSchema = lazySchema(() => z.union([z.literal('asc'), z.literal('desc')]));
+const sortBySchema = lazySchema(() => z.union([
   z.literal('error_budget_consumed'),
   z.literal('error_budget_remaining'),
   z.literal('sli_value'),
@@ -17,9 +17,9 @@ const sortBySchema = z.union([
   z.literal('burn_rate_5m'),
   z.literal('burn_rate_1h'),
   z.literal('burn_rate_1d'),
-]);
+]));
 
-const searchAfterArraySchema = z.array(z.union([z.string(), z.number()]));
+const searchAfterArraySchema = lazySchema(() => z.array(z.union([z.string(), z.number()])));
 
 // Codec: wire form is a JSON-encoded string; decoded form is the parsed array.
 const searchAfterSchema = z.codec(
@@ -48,7 +48,7 @@ const searchAfterSchema = z.codec(
   }
 );
 
-const findSLOQuerySchema = z.object({
+const findSLOQuerySchema = lazySchema(() => z.object({
   filters: z.string().optional(),
   kqlQuery: z.string().optional(),
   // Used for page-based pagination; kept as strings to preserve backward compatibility
@@ -60,20 +60,20 @@ const findSLOQuerySchema = z.object({
   // Used for cursor-based pagination; searchAfter is a JSON-encoded array
   searchAfter: searchAfterSchema.optional(),
   size: z.string().optional(),
-});
+}));
 
-const findSLOParamsSchema = z.object({
+const findSLOParamsSchema = lazySchema(() => z.object({
   query: findSLOQuerySchema.optional(),
-});
+}));
 
-const findSLOResponseSchema = z.object({
+const findSLOResponseSchema = lazySchema(() => z.object({
   page: z.number(),
   perPage: z.number(),
   total: z.number(),
   results: z.array(sloWithDataResponseSchema),
   searchAfter: searchAfterArraySchema.optional(),
   size: z.number().optional(),
-});
+}));
 
 type FindSLOParams = z.output<typeof findSLOQuerySchema>;
 type FindSLOResponse = z.input<typeof findSLOResponseSchema>;

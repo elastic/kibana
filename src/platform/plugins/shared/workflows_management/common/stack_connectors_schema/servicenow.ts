@@ -12,10 +12,10 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 // ServiceNow ITSM connector parameter schemas
-export const ServiceNowCreateIncidentParamsSchema = z.object({
+export const ServiceNowCreateIncidentParamsSchema = lazySchema(() => z.object({
   incident: z.object({
     short_description: z.string(),
     description: z.string().optional(),
@@ -28,9 +28,9 @@ export const ServiceNowCreateIncidentParamsSchema = z.object({
     correlation_display: z.string().optional(),
     additional_fields: z.record(z.string(), z.any()).optional(),
   }),
-});
+}));
 
-export const ServiceNowUpdateIncidentParamsSchema = z.object({
+export const ServiceNowUpdateIncidentParamsSchema = lazySchema(() => z.object({
   incident: z.object({
     short_description: z.string().optional(),
     description: z.string().optional(),
@@ -44,28 +44,28 @@ export const ServiceNowUpdateIncidentParamsSchema = z.object({
     additional_fields: z.record(z.string(), z.any()).optional(),
   }),
   incidentId: z.string(),
-});
+}));
 
-export const ServiceNowGetIncidentParamsSchema = z.object({
+export const ServiceNowGetIncidentParamsSchema = lazySchema(() => z.object({
   id: z.string(),
-});
+}));
 
-export const ServiceNowGetFieldsParamsSchema = z.object({
+export const ServiceNowGetFieldsParamsSchema = lazySchema(() => z.object({
   // Common fields parameters - usually empty object
-});
+}));
 
-export const ServiceNowGetChoicesParamsSchema = z.object({
+export const ServiceNowGetChoicesParamsSchema = lazySchema(() => z.object({
   fields: z.array(z.string()),
-});
+}));
 
-export const ServiceNowCloseIncidentParamsSchema = z.object({
+export const ServiceNowCloseIncidentParamsSchema = lazySchema(() => z.object({
   incidentId: z.string(),
   closeCode: z.string().optional(),
   closeNotes: z.string().optional(),
-});
+}));
 
 // ServiceNow ITOM specific schemas
-export const ServiceNowAddEventParamsSchema = z.object({
+export const ServiceNowAddEventParamsSchema = lazySchema(() => z.object({
   source: z.string(),
   node: z.string(),
   type: z.string(),
@@ -75,10 +75,10 @@ export const ServiceNowAddEventParamsSchema = z.object({
   severity: z.string().optional(),
   description: z.string().optional(),
   additional_info: z.record(z.string(), z.any()).optional(),
-});
+}));
 
 // ServiceNow SIR connector parameter schemas
-export const ServiceNowCreateSecurityIncidentParamsSchema = z.object({
+export const ServiceNowCreateSecurityIncidentParamsSchema = lazySchema(() => z.object({
   incident: z.object({
     short_description: z.string(),
     description: z.string().optional(),
@@ -89,10 +89,10 @@ export const ServiceNowCreateSecurityIncidentParamsSchema = z.object({
     priority: z.string().optional(),
     additional_fields: z.record(z.string(), z.any()).optional(),
   }),
-});
+}));
 
 // ServiceNow connector response schemas
-export const ServiceNowIncidentResponseSchema = z.object({
+export const ServiceNowIncidentResponseSchema = lazySchema(() => z.object({
   sys_id: z.string(),
   number: z.string(),
   short_description: z.string(),
@@ -103,9 +103,9 @@ export const ServiceNowIncidentResponseSchema = z.object({
   priority: z.string().optional(),
   sys_created_on: z.string(),
   sys_updated_on: z.string(),
-});
+}));
 
-export const ServiceNowFieldsResponseSchema = z.array(
+export const ServiceNowFieldsResponseSchema = lazySchema(() => z.array(
   z.object({
     name: z.string(),
     label: z.string(),
@@ -120,9 +120,9 @@ export const ServiceNowFieldsResponseSchema = z.array(
       )
       .optional(),
   })
-);
+));
 
-export const ServiceNowChoicesResponseSchema = z.record(
+export const ServiceNowChoicesResponseSchema = lazySchema(() => z.record(
   z.string(),
   z.array(
     z.object({
@@ -130,11 +130,11 @@ export const ServiceNowChoicesResponseSchema = z.record(
       value: z.string(),
     })
   )
-);
+));
 
-export const ServiceNowEventResponseSchema = z.object({
+export const ServiceNowEventResponseSchema = lazySchema(() => z.object({
   sys_id: z.string(),
   number: z.string(),
   state: z.string(),
   sys_created_on: z.string(),
-});
+}));

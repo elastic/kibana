@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
@@ -14,7 +14,7 @@ import { authorNameSchema } from '../author_name_schema';
 
 export const AddUserMessageStepTypeId = 'ai.conversation.add_user_message';
 
-const InputSchema = z.object({
+const InputSchema = lazySchema(() => z.object({
   conversation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH).meta({
     description: 'The unique identifier of the conversation to add the user message to.',
   }),
@@ -23,13 +23,13 @@ const InputSchema = z.object({
     .refine((value) => value.trim().length > 0, { message: 'message must not be blank' })
     .meta({ description: 'The user message text.' }),
   author_name: authorNameSchema,
-});
+}));
 
-const OutputSchema = z.object({
+const OutputSchema = lazySchema(() => z.object({
   conversation_id: z
     .string()
     .meta({ description: 'The ID of the conversation the user message was added to.' }),
-});
+}));
 
 export type AddUserMessageInputSchema = typeof InputSchema;
 type AddUserMessageOutputSchema = typeof OutputSchema;

@@ -8,13 +8,13 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export class TestTrackError extends Error {
   // Base exception for test track errors
 }
 
-export const TestTrackSpecSchema = z.object({
+export const TestTrackSpecSchema = lazySchema(() => z.object({
   stats: z.object({
     lane: z.object({
       count: z.int(),
@@ -43,14 +43,14 @@ export const TestTrackSpecSchema = z.object({
     })
   ),
   metadata: z.record(z.string(), z.any()),
-});
+}));
 
 export type TestTrackSpec = z.infer<typeof TestTrackSpecSchema>;
 export type TestTrackLaneStatus = z.infer<
   typeof TestTrackSpecSchema.shape.lanes.element.shape.status
 >;
 
-export const TestTrackLoadSchema = z.object({
+export const TestTrackLoadSchema = lazySchema(() => z.object({
   id: z.string(),
   stats: z.object({
     runCount: z.int(),
@@ -64,7 +64,7 @@ export const TestTrackLoadSchema = z.object({
     }),
   }),
   metadata: z.record(z.string(), z.any()),
-});
+}));
 
 export type TestTrackLoad = z.infer<typeof TestTrackLoadSchema>;
 

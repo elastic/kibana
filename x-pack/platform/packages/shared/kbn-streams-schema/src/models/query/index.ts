@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { BaseStream } from '../base';
 import {
   baseStreamDefinitionSchema,
@@ -75,9 +75,9 @@ export namespace QueryStream {
 
 const queryStreamDefinitionSchema = baseStreamDefinitionSchema
   .extend({
-    type: z.literal('query'),
+    type: lazySchema(() => z.literal('query')),
     query: QueryWithEsql.right,
-    field_descriptions: z.record(z.string(), z.string()).optional(),
+    field_descriptions: lazySchema(() => z.record(z.string(), z.string()).optional()),
   })
   .meta({ id: 'QueryStreamDefinition' });
 
@@ -91,9 +91,9 @@ const queryStreamGetResponseSchema = baseStreamGetResponseSchema
 const queryStreamUpsertRequestSchema = baseStreamUpsertRequestSchema
   .extend({
     stream: baseStreamUpsertDefinitionSchema.extend({
-      type: z.literal('query'),
+      type: lazySchema(() => z.literal('query')),
       query: QueryWithEsql.right,
-      field_descriptions: z.record(z.string(), z.string()).optional(),
+      field_descriptions: lazySchema(() => z.record(z.string(), z.string()).optional()),
     }),
   })
   .meta({ id: 'QueryStreamUpsertRequest' });

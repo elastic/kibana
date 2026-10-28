@@ -10,7 +10,7 @@ import type {
   AttachmentResolveContext,
 } from '@kbn/agent-builder-server/attachments';
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import {
   WORKFLOW_EDITOR_READ_ONLY_REASONS,
@@ -27,13 +27,13 @@ import { workflowTools } from '../../common/constants';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
-const clientDiagnosticSchema = z.object({
+const clientDiagnosticSchema = lazySchema(() => z.object({
   severity: z.enum(['error', 'warning']),
   message: z.string(),
   source: z.string(),
-});
+}));
 
-const workflowYamlDataSchema = z.object({
+const workflowYamlDataSchema = lazySchema(() => z.object({
   yaml: z.string().describe('The workflow YAML content'),
   workflowId: z.string().optional().describe('The workflow ID'),
   name: z.string().optional().describe('The workflow name'),
@@ -45,11 +45,11 @@ const workflowYamlDataSchema = z.object({
     .enum(WORKFLOW_EDITOR_READ_ONLY_REASONS)
     .optional()
     .describe('Why the editor cannot apply changes; absent when the user can edit'),
-});
+}));
 
 type WorkflowYamlData = z.infer<typeof workflowYamlDataSchema>;
 
-const workflowYamlOriginSchema = z.string().describe('The workflow ID to resolve');
+const workflowYamlOriginSchema = lazySchema(() => z.string().describe('The workflow ID to resolve'));
 
 const areWorkflowYamlsEquivalent = (left: string, right: string): boolean => {
   const parsedLeft = parseYamlToJSONWithoutValidation(left);

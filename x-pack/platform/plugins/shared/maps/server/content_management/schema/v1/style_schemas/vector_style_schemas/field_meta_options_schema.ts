@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const fieldMetaOptionsSchema = z
+export const fieldMetaOptionsSchema = lazySchema(() => z
   .object({
     isEnabled: z.boolean().meta({
       description:
@@ -20,4 +20,4 @@ export const fieldMetaOptionsSchema = z
   .meta({
     description:
       'Use to configure how dynamic styling domain ranges and categories are calculated and mapped to feature values.',
-  });
+  }));

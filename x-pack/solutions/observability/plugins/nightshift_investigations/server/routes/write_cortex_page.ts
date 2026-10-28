@@ -6,7 +6,7 @@
  */
 
 import { conflict, notFound } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { CORTEX_ENTITY_TYPES, CORTEX_PAGE_STATUSES } from '../../common/cortex';
@@ -20,10 +20,10 @@ const MAX_CONTENT_LENGTH = 100_000;
 export const cortexWritePrivileges = [NIGHTSHIFT_API_PRIVILEGES.manage, 'agentBuilder:read'];
 
 /** The `version` a page was read at; the write fails if the page changed since. */
-export const cortexPageVersion = z
+export const cortexPageVersion = lazySchema(() => z
   .string()
   .max(39)
-  .regex(/^\d{1,19}:\d{1,19}$/);
+  .regex(/^\d{1,19}:\d{1,19}$/));
 
 /** Maps a lost versioned write to a 409 the UI can explain. */
 export const withVersionConflict = async <T>(id: string, write: () => Promise<T>): Promise<T> => {
@@ -37,7 +37,7 @@ export const withVersionConflict = async <T>(id: string, write: () => Promise<T>
   }
 };
 
-const cortexPageBody = z.object({
+const cortexPageBody = lazySchema(() => z.object({
   entity_type: z.enum(CORTEX_ENTITY_TYPES),
   // Slugs are canonicalized to kebab-case, so one alphanumeric keeps the page id non-empty.
   slug: z
@@ -48,7 +48,7 @@ const cortexPageBody = z.object({
   description: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
   content: z.string().max(MAX_CONTENT_LENGTH),
   status: z.enum(CORTEX_PAGE_STATUSES),
-});
+}));
 
 export const createCortexPageRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/cortex/pages',
@@ -61,7 +61,7 @@ export const createCortexPageRoute = createNightshiftInvestigationsServerRoute({
   security: {
     authz: { requiredPrivileges: cortexWritePrivileges },
   },
-  params: z.object({ body: cortexPageBody }),
+  params: lazySchema(() => z.object({ body: cortexPageBody })),
   handler: async ({ request, params, getCortexPageStore, isCortexEnabled }) => {
     if (!isCortexEnabled()) throw notFound('Cortex is not enabled');
 
@@ -88,7 +88,7 @@ export const updateCortexPageRoute = createNightshiftInvestigationsServerRoute({
   security: {
     authz: { requiredPrivileges: cortexWritePrivileges },
   },
-  params: z.object({ body: cortexPageBody.extend({ version: cortexPageVersion }) }),
+  params: lazySchema(() => z.object({ body: cortexPageBody.extend({ version: cortexPageVersion }) })),
   handler: async ({ request, params, getCortexPageStore, isCortexEnabled }) => {
     if (!isCortexEnabled()) throw notFound('Cortex is not enabled');
 

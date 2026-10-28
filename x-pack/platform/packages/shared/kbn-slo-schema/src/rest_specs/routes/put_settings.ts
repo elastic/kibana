@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { serverlessSloSettingsSchema, sloSettingsSchema } from '../../schema/settings';
 
-const putSLOSettingsParamsSchema = z.object({
+const putSLOSettingsParamsSchema = lazySchema(() => z.object({
   body: sloSettingsSchema,
-});
+}));
 
-const putSLOServerlessSettingsParamsSchema = z.object({
+const putSLOServerlessSettingsParamsSchema = lazySchema(() => z.object({
   body: serverlessSloSettingsSchema,
-});
+}));
 
 const putSLOSettingsResponseSchema = sloSettingsSchema;
 

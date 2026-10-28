@@ -12,10 +12,10 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 // PagerDuty connector parameter schema
-export const PagerDutyParamsSchema = z.object({
+export const PagerDutyParamsSchema = lazySchema(() => z.object({
   eventAction: z.enum(['trigger', 'acknowledge', 'resolve']),
   dedupKey: z.string().optional(),
   summary: z.string().optional(),
@@ -43,11 +43,11 @@ export const PagerDutyParamsSchema = z.object({
       })
     )
     .optional(),
-});
+}));
 
 // PagerDuty connector response schema
-export const PagerDutyResponseSchema = z.object({
+export const PagerDutyResponseSchema = lazySchema(() => z.object({
   status: z.string(),
   message: z.string(),
   dedup_key: z.string().optional(),
-});
+}));

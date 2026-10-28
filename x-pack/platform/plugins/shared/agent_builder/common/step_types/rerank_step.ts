@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Step type ID for the rerank workflow step
@@ -25,7 +25,7 @@ export const RERANK_DEFAULT_MAX_INPUT_TOTAL_LENGTH = 2000;
 /**
  * Input schema for the rerank step
  */
-const RerankInputSchema = z.object({
+const RerankInputSchema = lazySchema(() => z.object({
   rerank_text: z.string().describe('Text to rerank documents against'),
   data: z.array(z.any()).describe('Array of documents to rerank'),
   fields: z
@@ -52,24 +52,24 @@ const RerankInputSchema = z.object({
     .describe(
       `Maximum character length for the total text sent per document to the rerank endpoint. Applied after field extraction and concatenation. Prevents exceeding model token limits. Defaults to ${RERANK_DEFAULT_MAX_INPUT_TOTAL_LENGTH} characters.`
     ),
-});
+}));
 
 /**
  * Config schema for the rerank step
  * Defines step-level configuration that controls execution behavior
  */
-const RerankConfigSchema = z.object({
+const RerankConfigSchema = lazySchema(() => z.object({
   inference_id: z
     .string()
     .optional()
     .describe(
       'Rerank inference endpoint ID. If not provided, automatically selects an available rerank endpoint from Elasticsearch, prioritizing Elastic-hosted models over self-hosted Elasticsearch models.'
     ),
-});
+}));
 
-const RerankOutputSchema = z
+const RerankOutputSchema = lazySchema(() => z
   .array(z.any())
-  .describe('Array of reranked documents in descending relevance order');
+  .describe('Array of reranked documents in descending relevance order'));
 
 export type RerankInput = z.infer<typeof RerankInputSchema>;
 export type RerankConfig = z.infer<typeof RerankConfigSchema>;

@@ -6,7 +6,7 @@
  */
 
 import path from 'path';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
@@ -21,7 +21,7 @@ import { toClientContract, toSavedObjectContract } from './helpers';
 import { MAX_ROUTE_ID_LENGTH } from '../../zod_query';
 import type { PrivateLocation } from '../../../../common/runtime_types';
 
-export const PrivateLocationSchema = z.strictObject({
+export const PrivateLocationSchema = lazySchema(() => z.strictObject({
   label: z
     .string()
     .min(1)
@@ -53,7 +53,7 @@ export const PrivateLocationSchema = z.strictObject({
     .describe(
       'An array of space IDs where the private location is available. If it is not provided, the private location is available in all spaces.'
     ),
-});
+}));
 
 export type PrivateLocationObject = z.infer<typeof PrivateLocationSchema>;
 

@@ -7,7 +7,7 @@
 
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { streamsUnitIdentifierSchema, streamsUnitStatsRequestSchema } from '@kbn/streams-schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { StreamsUnitService } from '../../../lib/saved_objects/streams_unit_service';
 import { createServerRoute } from '../../create_server_route';
@@ -26,12 +26,12 @@ export const getStreamsUnitStatsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({
       id: streamsUnitIdentifierSchema.describe('The unit id.'),
     }),
     body: streamsUnitStatsRequestSchema.optional(),
-  }),
+  })),
   handler: async ({
     params,
     request,

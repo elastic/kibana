@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import type { ProposalConfidence, ProposalImpact, ProposalStatus } from '@kbn/proposals-common';
 import type { InvestigationEvidence } from '../evidence/evidence';
 import type { Hypothesis } from '../hypotheses/hypotheses';
@@ -52,12 +52,12 @@ const multiValued = <TItem extends z.ZodType>(
     .transform((value): Array<z.output<TItem>> => (Array.isArray(value) ? value : [value]))
     .optional();
 
-export const investigationIdSchema = z.string().min(1).max(MAX_ID_LENGTH);
+export const investigationIdSchema = lazySchema(() => z.string().min(1).max(MAX_ID_LENGTH));
 
-export const investigationIdParamsSchema = z.object({ id: investigationIdSchema });
+export const investigationIdParamsSchema = lazySchema(() => z.object({ id: investigationIdSchema }));
 
 /** Filters shared by the list and the severity counts. All of them are ANDed. */
-export const investigationFiltersSchema = z.object({
+export const investigationFiltersSchema = lazySchema(() => z.object({
   /** Investigation (conversation) ids, for reading a known set such as the cards on screen. */
   id: multiValued(investigationIdSchema, MAX_INVESTIGATION_ID_FILTER_VALUES),
   status: multiValued(z.enum(INVESTIGATION_METADATA_STATUSES)),
@@ -78,11 +78,11 @@ export const investigationFiltersSchema = z.object({
   query: z.string().trim().min(1).max(MAX_FILTER_TEXT_LENGTH).optional(),
   created_after: isoDateTime({ offset: true }).optional(),
   created_before: isoDateTime({ offset: true }).optional(),
-});
+}));
 export type InvestigationFiltersInput = z.input<typeof investigationFiltersSchema>;
 export type InvestigationFilters = z.output<typeof investigationFiltersSchema>;
 
-export const listInvestigationsQuerySchema = investigationFiltersSchema
+export const listInvestigationsQuerySchema = lazySchema(() => investigationFiltersSchema
   .extend({
     sort_field: z.enum(INVESTIGATIONS_SORT_FIELDS).default('created_at'),
     sort_order: z.enum(['asc', 'desc']).default('desc'),
@@ -96,7 +96,7 @@ export const listInvestigationsQuerySchema = investigationFiltersSchema
   })
   .refine(({ page, per_page: perPage }) => page * perPage <= MAX_INVESTIGATION_CANDIDATES, {
     message: `page * per_page must not exceed ${MAX_INVESTIGATION_CANDIDATES}; investigations beyond that are not reachable through this API`,
-  });
+  }));
 export type ListInvestigationsQueryInput = z.input<typeof listInvestigationsQuerySchema>;
 export type ListInvestigationsQuery = z.output<typeof listInvestigationsQuerySchema>;
 

@@ -7,7 +7,7 @@
 
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { streamsUnitIdentifierSchema } from '@kbn/streams-schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { StreamsUnitService } from '../../../lib/saved_objects/streams_unit_service';
 import { revokeRemovedComponentApiKeys } from '../../../lib/unit_config/revoke_removed_component_api_keys';
@@ -20,11 +20,11 @@ import { unitStatsRoutes } from './stats_route';
 
 const UNIT_PUT_MAX_BYTES = 1_048_576;
 
-const unitPathSchema = z.object({
+const unitPathSchema = lazySchema(() => z.object({
   path: z.object({
     id: streamsUnitIdentifierSchema.describe('The unit id.'),
   }),
-});
+}));
 
 export const getStreamsUnitRoute = createServerRoute({
   endpoint: 'GET /internal/streams/unit/{id}',
@@ -82,7 +82,7 @@ export const putStreamsUnitRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({
       id: streamsUnitIdentifierSchema.describe('The unit id.'),
     }),
@@ -90,7 +90,7 @@ export const putStreamsUnitRoute = createServerRoute({
     // framework does not schema-validate the unit; the config distributor does.
     // The generic keeps repository-client PUTs typed as StreamsUnit.UpsertRequest.
     body: z.custom<StreamsUnit.UpsertRequest | Buffer>(() => true),
-  }),
+  })),
   handler: async ({
     params,
     request,

@@ -25,7 +25,7 @@ import {
   KibanaHttpMethodSchema,
   KibanaStepMetaSchema,
 } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   BedrockParamsSchema,
@@ -265,7 +265,7 @@ export const ConnectorActionInputSchemas = new Map<string, Record<string, z.ZodS
   [
     '.xsoar',
     {
-      getPlaybooks: z.object({}),
+      getPlaybooks: lazySchema(() => z.object({})),
       run: XSOARRunActionParamsSchema,
     },
   ],
@@ -491,7 +491,7 @@ export const staticConnectors: BaseConnectorContract[] = [
         message: z.string(),
       })
       .required(),
-    outputSchema: z.string(),
+    outputSchema: lazySchema(() => z.string()),
     description: i18n.translate('workflows.connectors.console.description', {
       defaultMessage: 'Log a message to the workflow logs',
     }),
@@ -501,14 +501,14 @@ export const staticConnectors: BaseConnectorContract[] = [
   {
     type: 'elasticsearch.request',
     summary: 'Elasticsearch Request',
-    paramsSchema: z.object({
+    paramsSchema: lazySchema(() => z.object({
       method: z.string(),
       path: z.string(),
       body: z.any().optional(),
       params: z.any().optional(),
       headers: z.any().optional(),
-    }),
-    outputSchema: z.any(),
+    })),
+    outputSchema: lazySchema(() => z.any()),
     description: i18n.translate('workflows.connectors.elasticsearch.request.description', {
       defaultMessage: 'Make a generic request to an Elasticsearch API',
     }),
@@ -516,7 +516,7 @@ export const staticConnectors: BaseConnectorContract[] = [
   {
     type: 'kibana.request',
     summary: 'Kibana Request',
-    paramsSchema: z.object({
+    paramsSchema: lazySchema(() => z.object({
       method: KibanaHttpMethodSchema.optional().describe('The HTTP method to use for the request.'),
       path: z.string(),
       body: z.any().optional(),
@@ -540,12 +540,12 @@ export const staticConnectors: BaseConnectorContract[] = [
         ),
       fetcher: KibanaFetcherConfigSchema,
       ...KibanaStepMetaSchema,
-    }),
-    outputSchema: z
+    })),
+    outputSchema: lazySchema(() => z
       .any()
       .describe(
         'JSON-parsed response body, or an empty object ({}) for 204 No Content / 304 Not Modified responses'
-      ),
+      )),
     description: i18n.translate('workflows.connectors.kibana.request.description', {
       defaultMessage:
         "Make a generic request to a Kibana API. APIs that return 204 No Content or 304 Not Modified produce an empty output ('{}').",

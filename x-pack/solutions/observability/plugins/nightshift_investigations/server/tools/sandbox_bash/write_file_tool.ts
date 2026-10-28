@@ -6,7 +6,7 @@
  */
 
 import * as path from 'path';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -17,7 +17,7 @@ import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 
 export const SANDBOX_WRITE_FILE_TOOL_ID = 'nightshift_sandbox_write_file';
 
-const writeFileSchema = z.object({
+const writeFileSchema = lazySchema(() => z.object({
   file_path: z
     .string()
     .max(4096)
@@ -28,7 +28,7 @@ const writeFileSchema = z.object({
     .string()
     .max(10 * 1024 * 1024)
     .describe('Full content to write. Overwrites the file if it already exists.'),
-});
+}));
 
 export const createSandboxWriteFileTool = ({
   getSandboxStart,

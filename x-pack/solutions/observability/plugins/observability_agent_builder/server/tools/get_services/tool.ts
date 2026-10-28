@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -25,7 +25,7 @@ export const OBSERVABILITY_GET_SERVICES_TOOL_ID = 'observability.get_services';
 
 const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 
-const getServicesSchema = z.object({
+const getServicesSchema = lazySchema(() => z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   anomalySeverities: z
     .array(
@@ -49,7 +49,7 @@ const getServicesSchema = z.object({
     .describe(
       'KQL filter to narrow down services. Examples: "host.name: web-server-01", "service.name: frontend".'
     ),
-});
+}));
 
 export function createGetServicesTool({
   core,

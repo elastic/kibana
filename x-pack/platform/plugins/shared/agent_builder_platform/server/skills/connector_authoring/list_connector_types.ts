@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
@@ -64,7 +64,7 @@ const projectConnectorType = (actionType: ActionType): ListedConnectorType => {
   };
 };
 
-const listConnectorTypesSchema = z.object({}).describe('No parameters.');
+const listConnectorTypesSchema = lazySchema(() => z.object({}).describe('No parameters.'));
 
 export type ListConnectorTypesInput = z.infer<typeof listConnectorTypesSchema>;
 

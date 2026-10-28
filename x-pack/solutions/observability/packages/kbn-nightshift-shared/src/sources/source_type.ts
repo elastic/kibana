@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Kinds of data a Nightshift source may target. `unknown` is a real value: an index that
@@ -16,7 +16,7 @@ export const SOURCE_TYPES = ['logs', 'metrics', 'traces', 'unknown'] as const;
 
 export type SourceType = (typeof SOURCE_TYPES)[number];
 
-export const sourceTypeSchema = z.enum(SOURCE_TYPES);
+export const sourceTypeSchema = lazySchema(() => z.enum(SOURCE_TYPES));
 
 /** A type an index name can match. `unknown` is the absence of these, not a pattern. */
 export type KnownSourceType = Exclude<SourceType, 'unknown'>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   LABEL_BORDER_SIZES,
   LABEL_POSITIONS,
@@ -26,7 +26,7 @@ export const labelBorderSizeOptions = z
   })
   .strict();
 
-export const labelBorderSizeSchema = z
+export const labelBorderSizeSchema = lazySchema(() => z
   .object({
     options: labelBorderSizeOptions,
   })
@@ -38,9 +38,9 @@ export const labelBorderSizeSchema = z
   })
   .meta({
     description: 'Configure to set label border width',
-  });
+  }));
 
-export const labelPositionSchema = z
+export const labelPositionSchema = lazySchema(() => z
   .object({
     options: z
       .object({
@@ -60,9 +60,9 @@ export const labelPositionSchema = z
   })
   .meta({
     description: 'Configure to place label above, in the center of, or below the Point feature',
-  });
+  }));
 
-export const labelZoomRangeSchema = z
+export const labelZoomRangeSchema = lazySchema(() => z
   .object({
     options: z
       .object({
@@ -82,7 +82,7 @@ export const labelZoomRangeSchema = z
   })
   .meta({
     description: 'Configure to set the zoom range for which labels are displayed',
-  });
+  }));
 
 export const labelDynamicOptions = z
   .object({
@@ -98,7 +98,7 @@ export const labelStaticOptions = z
   })
   .strict();
 
-export const labelSchema = z
+export const labelSchema = lazySchema(() => z
   .union([
     z
       .object({
@@ -121,4 +121,4 @@ export const labelSchema = z
   })
   .meta({
     description: 'Configure to set label content',
-  });
+  }));

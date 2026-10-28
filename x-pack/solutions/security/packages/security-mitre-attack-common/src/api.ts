@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
 import type { MitreFramework, MitreEntityType } from './schema';
 import { mitreFrameworkSchema } from './schema';
@@ -17,7 +17,7 @@ import type { MitreEntityStatus, MitreEntitySummaryBuckets } from './types';
 // -------------------------------------------------------------------------
 
 /** Zod schema for the GET /internal/mitre/entities request query parameters. */
-export const GetMitreEntitiesRequestQuery = z.object({
+export const GetMitreEntitiesRequestQuery = lazySchema(() => z.object({
   /** MITRE framework to query. One framework per request; defaults to ATT&CK Enterprise. */
   framework: mitreFrameworkSchema.optional().default(DEFAULT_MITRE_FRAMEWORK),
   /** Pin results to a specific framework version. Defaults to the latest indexed version. */
@@ -33,7 +33,7 @@ export const GetMitreEntitiesRequestQuery = z.object({
     .optional(),
   /** Whether to include revoked and deprecated entities. Defaults to 'active'. */
   status: z.enum(['active', 'all']).optional().default('active'),
-});
+}));
 
 export type GetMitreEntitiesRequestQueryInput = z.input<typeof GetMitreEntitiesRequestQuery>;
 export type GetMitreEntitiesRequestQueryOutput = z.output<typeof GetMitreEntitiesRequestQuery>;

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
 /**
@@ -33,12 +33,12 @@ export const INVESTIGATION_FAILED_TRIGGER_ID = 'nightshift-investigations.failed
 
 export const EMITTED_INVESTIGATION_STATUSES = ['running', 'completed', 'failed'] as const;
 
-const subjectSchema = z.object({
+const subjectSchema = lazySchema(() => z.object({
   type: z.enum(INVESTIGATION_SUBJECT_TYPES).describe('Kind of entity being investigated.'),
   id: z.string().describe('Identifier of the investigated entity.'),
-});
+}));
 
-const baseInvestigationSchema = z.object({
+const baseInvestigationSchema = lazySchema(() => z.object({
   investigation_id: z
     .string()
     .describe('ID of the investigation, which is the id of its Agent Builder conversation.'),
@@ -50,23 +50,23 @@ const baseInvestigationSchema = z.object({
     .enum(INVESTIGATION_TRIGGER_TYPES)
     .describe('What initiated the investigation: automatic or manual.'),
   started_at: z.string().describe('When the investigation started (ISO 8601 timestamp).'),
-});
+}));
 
 export type InvestigationsTriggerBasePayload = z.infer<typeof baseInvestigationSchema>;
 
-const startedSchema = baseInvestigationSchema.extend({
+const startedSchema = lazySchema(() => baseInvestigationSchema.extend({
   status: z.literal('running').describe('Always "running" for this trigger.'),
-});
+}));
 
-const completedSchema = baseInvestigationSchema.extend({
+const completedSchema = lazySchema(() => baseInvestigationSchema.extend({
   status: z.literal('completed').describe('Always "completed" for this trigger.'),
   completed_at: z.string().describe('When the investigation finished (ISO 8601 timestamp).'),
-});
+}));
 
-const failedSchema = baseInvestigationSchema.extend({
+const failedSchema = lazySchema(() => baseInvestigationSchema.extend({
   status: z.literal('failed').describe('Always "failed" for this trigger.'),
   completed_at: z.string().describe('When the investigation finished (ISO 8601 timestamp).'),
-});
+}));
 
 export type InvestigationStartedTriggerPayload = z.infer<typeof startedSchema>;
 export type InvestigationCompletedTriggerPayload = z.infer<typeof completedSchema>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import {
@@ -19,7 +19,7 @@ import * as i18n from '../translations';
 export const AddCommentStepTypeId = 'cases.addComment';
 
 export const InputSchema = CasesStepCaseIdSchema.extend({
-  comment: z.string().min(1, 'comment is required').max(MAX_COMMENT_LENGTH),
+  comment: lazySchema(() => z.string().min(1, 'comment is required').max(MAX_COMMENT_LENGTH)),
 });
 
 export const OutputSchema = CasesStepSingleCaseOutputSchema;

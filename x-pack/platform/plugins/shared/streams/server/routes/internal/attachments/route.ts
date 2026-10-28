@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { ATTACHMENT_SUGGESTIONS_LIMIT, STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import type { Attachment } from '../../../lib/streams/attachments/types';
 import { ATTACHMENT_TYPES } from '../../../lib/streams/attachments/types';
-const attachmentTypeSchema = z.enum(ATTACHMENT_TYPES);
+const attachmentTypeSchema = lazySchema(() => z.enum(ATTACHMENT_TYPES));
 
 export interface SuggestAttachmentsResponse {
   suggestions: Attachment[];
@@ -27,7 +27,7 @@ const suggestAttachmentsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({
       streamName: z.string().max(MAX_STREAM_NAME_LENGTH),
     }),
@@ -43,7 +43,7 @@ const suggestAttachmentsRoute = createServerRoute({
         tags: z.optional(z.union([z.string().max(256), z.array(z.string().max(256)).max(100)])),
       })
       .optional(),
-  }),
+  })),
   handler: async ({ params, request, getScopedClients }): Promise<SuggestAttachmentsResponse> => {
     const { attachmentClient, streamsClient } = await getScopedClients({
       request,

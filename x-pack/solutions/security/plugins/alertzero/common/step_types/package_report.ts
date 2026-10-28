@@ -9,7 +9,7 @@ import { getAiIndexDest } from '@kbn/context-engine-plugin/common/ai_index_dest'
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { convergedProposalSchema, mintSuppressionSchema } from './resolve_proposals';
 
 export const PACKAGE_REPORT_STEP_ID = 'hunt.packageReport' as const;
@@ -35,9 +35,9 @@ export const MAX_SUMMARY_PROPOSAL_BULLETS = 20;
  */
 export const MAX_SUMMARY_BULLETS_CHARS = 5000;
 
-const boundedId = z.string().trim().min(1).max(256);
+const boundedId = lazySchema(() => z.string().trim().min(1).max(256));
 
-export const packageReportInputSchema = z.object({
+export const packageReportInputSchema = lazySchema(() => z.object({
   spaceId: boundedId.describe(
     'Space the Investigation lives in (S1; must match the workflow space).'
   ),
@@ -125,25 +125,25 @@ export const packageReportInputSchema = z.object({
     .describe(
       "The coordinator's `tier2.behaviors`. Clean-run coverage KIs carry the executed query as `validated_esql` with `esql_status: executed_no_rows`."
     ),
-});
+}));
 
 /** One Tier 2 behavior as passed into packaging, for runs that left no SSE. */
 export type PackageReportBehavior = NonNullable<
   z.infer<typeof packageReportInputSchema>['behaviors']
 >[number];
 
-const coverageWrittenSchema = z.object({
+const coverageWrittenSchema = lazySchema(() => z.object({
   kiId: z.string(),
   subject: z.string(),
-});
+}));
 
-const coverageSkippedSchema = z.object({
+const coverageSkippedSchema = lazySchema(() => z.object({
   kiId: z.string(),
   subject: z.string(),
   reason: z.enum(['disabled', 'denied', 'storage_failure', 'already_processed']),
-});
+}));
 
-export const packageReportMintPayloadSchema = z.object({
+export const packageReportMintPayloadSchema = lazySchema(() => z.object({
   /**
    * What is being proposed: uuidv5(subjectId, actionWorkflowId[, processKey]). No Investigation in
    * it, so two Investigations that reach the same host share it; the recommendation, which has no
@@ -175,9 +175,9 @@ export const packageReportMintPayloadSchema = z.object({
     })
     .optional(),
   confidence: z.enum(['low', 'medium', 'high']).optional(),
-});
+}));
 
-export const packageReportOutputSchema = z.discriminatedUnion('status', [
+export const packageReportOutputSchema = lazySchema(() => z.discriminatedUnion('status', [
   z.object({
     status: z.literal('packaged'),
     coverage: z.object({
@@ -239,7 +239,7 @@ export const packageReportOutputSchema = z.discriminatedUnion('status', [
     status: z.literal('run_incomplete'),
     reason: z.string(),
   }),
-]);
+]));
 
 export type PackageReportInput = z.infer<typeof packageReportInputSchema>;
 export type PackageReportOutput = z.infer<typeof packageReportOutputSchema>;

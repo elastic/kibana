@@ -12,35 +12,35 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 // Tines connector parameter schemas for different sub-actions
-export const TinesStoriesParamsSchema = z.object({
+export const TinesStoriesParamsSchema = lazySchema(() => z.object({
   // Get stories parameters
-});
+}));
 
-export const TinesWebhooksParamsSchema = z.object({
+export const TinesWebhooksParamsSchema = lazySchema(() => z.object({
   // Get webhooks parameters
-});
+}));
 
-export const TinesRunParamsSchema = z.object({
+export const TinesRunParamsSchema = lazySchema(() => z.object({
   webhook: z.object({
     url: z.string(),
     body: z.string().optional(),
     headers: z.record(z.string(), z.string()).optional(),
   }),
-});
+}));
 
-export const TinesTestParamsSchema = z.object({
+export const TinesTestParamsSchema = lazySchema(() => z.object({
   webhook: z.object({
     url: z.string(),
     body: z.string().optional(),
     headers: z.record(z.string(), z.string()).optional(),
   }),
-});
+}));
 
 // Tines connector response schema
-export const TinesResponseSchema = z.object({
+export const TinesResponseSchema = lazySchema(() => z.object({
   status: z.string(),
   data: z.any(),
-});
+}));

@@ -13,7 +13,7 @@ import {
   type Feature,
 } from '@kbn/significant-events-schema';
 import type { SimilarFeatureHit } from '@kbn/nightshift-ai';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import pLimit from 'p-limit';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 
@@ -26,7 +26,7 @@ export const FEATURE_SIMILARITY_TOOL_DESCRIPTION =
   'matches in semantic relevance order. A match may come from another source: `sources` lists the ' +
   'slug of every source holding it, and `properties` is the identity to compare against the candidate.';
 
-export const featureCandidateSchema = z.object({
+export const featureCandidateSchema = lazySchema(() => z.object({
   candidate_id: z
     .string()
     .max(MAX_ID_LENGTH)
@@ -34,7 +34,7 @@ export const featureCandidateSchema = z.object({
   title: z.string().max(MAX_TEXT_LENGTH).describe('Candidate feature title.'),
   description: z.string().max(MAX_TEXT_LENGTH).describe('Candidate feature description.'),
   type: z.enum(INFERRED_FEATURE_TYPES).describe('Candidate feature type.'),
-});
+}));
 
 export type FeatureCandidate = z.infer<typeof featureCandidateSchema>;
 

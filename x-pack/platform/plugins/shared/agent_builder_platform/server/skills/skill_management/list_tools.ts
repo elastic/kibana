@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
@@ -27,7 +27,7 @@ export const projectListedTool = (tool: ExecutableTool): ListedTool => ({
   description: tool.description,
 });
 
-const listToolsSchema = z.object({}).describe('No parameters.');
+const listToolsSchema = lazySchema(() => z.object({}).describe('No parameters.'));
 
 export type ListToolsInput = z.infer<typeof listToolsSchema>;
 

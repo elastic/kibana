@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
@@ -17,20 +17,20 @@ import {
   CHANGE_POINT_DETECTION_VIEW_TYPE,
 } from '@kbn/aiops-change-point-detection/constants';
 
-const aggregationFunctionSchema = z
+const aggregationFunctionSchema = lazySchema(() => z
   .union([z.literal('avg'), z.literal('sum'), z.literal('min'), z.literal('max')])
   .default(CHANGE_POINT_CHART_DEFAULT_AGG_FUNCTION)
-  .meta({ description: 'The aggregation function used to calculate the metric values.' });
+  .meta({ description: 'The aggregation function used to calculate the metric values.' }));
 
-const viewTypeSchema = z
+const viewTypeSchema = lazySchema(() => z
   .union([
     z.literal(CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS),
     z.literal(CHANGE_POINT_DETECTION_VIEW_TYPE.TABLE),
   ])
   .default(CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS)
-  .meta({ description: 'The type of change point detection view to display.' });
+  .meta({ description: 'The type of change point detection view to display.' }));
 
-export const changePointChartEmbeddableStateSchema = z
+export const changePointChartEmbeddableStateSchema = lazySchema(() => z
   .object({
     ...serializedTitlesSchema.shape,
     ...serializedTimeRangeSchema.shape,
@@ -67,7 +67,7 @@ export const changePointChartEmbeddableStateSchema = z
   .meta({
     id: 'aiops_change_point_chart',
     description: 'Change point detection chart embeddable schema',
-  });
+  }));
 
 export type ChangePointChartEmbeddableState = z.output<
   typeof changePointChartEmbeddableStateSchema

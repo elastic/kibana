@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   asCodeEsqlApproximationSchema,
   asCodeIdSchema,
@@ -103,14 +103,14 @@ export const discoverSessionApiEsqlTabSchema = z
   })
   .strict();
 
-export const discoverSessionApiMetricsTabSchema = discoverSessionApiEsqlTabSchema
+export const discoverSessionApiMetricsTabSchema = lazySchema(() => discoverSessionApiEsqlTabSchema
   .extend(discoverSessionApiMetricsTabTypeStateSchema.shape)
   .meta({
     title: 'Metrics tab',
     description: 'An ES|QL tab with saved metrics grid settings.',
-  });
+  }));
 
-export const discoverSessionApiTabSchema = z
+export const discoverSessionApiTabSchema = lazySchema(() => z
   .union([
     discoverSessionApiClassicTabSchema,
     discoverSessionApiEsqlTabSchema,
@@ -121,9 +121,9 @@ export const discoverSessionApiTabSchema = z
       'A Discover tab definition. `data_source.type` identifies the data source; `type` identifies the tab type. ' +
       'The tab type describes the saved settings and does not change how Discover displays the tab. ' +
       'Default tabs support data views and ES|QL; metrics tabs support only ES|QL.',
-  });
+  }));
 
-export const discoverSessionApiDataSchema = z
+export const discoverSessionApiDataSchema = lazySchema(() => z
   .object({
     title: z
       .string()
@@ -157,4 +157,4 @@ export const discoverSessionApiDataSchema = z
     id: 'kbn-discover-session-data',
     title: 'Discover session data',
     description: 'Configuration data for a Discover session.',
-  });
+  }));

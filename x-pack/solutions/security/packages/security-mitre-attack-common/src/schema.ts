@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 // -------------------------------------------------------------------------
 // TypeScript domain model
@@ -54,9 +54,9 @@ export type MitreEntity = MitreTactic | MitreTechnique | MitreSubtechnique;
 // Zod schemas
 // -------------------------------------------------------------------------
 
-export const mitreFrameworkSchema = z.enum(MITRE_FRAMEWORKS);
+export const mitreFrameworkSchema = lazySchema(() => z.enum(MITRE_FRAMEWORKS));
 
-const mitreEntityBaseSchema = z.object({
+const mitreEntityBaseSchema = lazySchema(() => z.object({
   framework: mitreFrameworkSchema,
   framework_version: z.string().min(1),
   id: z.string().min(1),
@@ -66,29 +66,29 @@ const mitreEntityBaseSchema = z.object({
   revoked: z.boolean(),
   superseded_by_id: z.array(z.string()).optional(),
   deprecated: z.boolean(),
-});
+}));
 
-const mitreTacticSchema = mitreEntityBaseSchema.extend({
+const mitreTacticSchema = lazySchema(() => mitreEntityBaseSchema.extend({
   type: z.literal('tactic'),
   position: z.number().int().nonnegative(),
-});
+}));
 
-const mitreTechniqueSchema = mitreEntityBaseSchema.extend({
+const mitreTechniqueSchema = lazySchema(() => mitreEntityBaseSchema.extend({
   type: z.literal('technique'),
   tactic_ids: z.array(z.string()),
-});
+}));
 
-const mitreSubtechniqueSchema = mitreEntityBaseSchema.extend({
+const mitreSubtechniqueSchema = lazySchema(() => mitreEntityBaseSchema.extend({
   type: z.literal('subtechnique'),
   tactic_ids: z.array(z.string()),
   technique_id: z.string().min(1),
-});
+}));
 
-export const mitreEntitySchema = z.discriminatedUnion('type', [
+export const mitreEntitySchema = lazySchema(() => z.discriminatedUnion('type', [
   mitreTacticSchema,
   mitreTechniqueSchema,
   mitreSubtechniqueSchema,
-]);
+]));
 
 /** Validates the full artifact file content: a flat array of self-describing entities. */
-export const mitreEntitiesSchema = z.array(mitreEntitySchema);
+export const mitreEntitiesSchema = lazySchema(() => z.array(mitreEntitySchema));

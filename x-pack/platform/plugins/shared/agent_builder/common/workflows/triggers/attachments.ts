@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import {
   ConversationAttachmentAddedTriggerId,
@@ -16,46 +16,46 @@ import {
 
 const i18nPrefix = 'xpack.agentBuilder.workflowTriggers';
 
-const attachmentEventSourceSchema = z
+const attachmentEventSourceSchema = lazySchema(() => z
   .enum(['workflow', 'http_api', 'server_api', 'chat_input', 'execution'])
   .meta({
     description: i18n.translate(`${i18nPrefix}.attachments.eventSchema.source`, {
       defaultMessage:
         'What triggered the change: `workflow` (attachment workflow step), `http_api` (attachment HTTP API), `server_api` (another Kibana plugin using the Agent Builder server-side contract), `chat_input` (attached to a user message), or `execution` (created by the agent during a run). Use this to ignore changes made by your own workflow.',
     }),
-  });
+  }));
 
 const baseAttachmentEventFields = {
-  conversationId: z.string().meta({
+  conversationId: lazySchema(() => z.string().meta({
     description: i18n.translate(`${i18nPrefix}.attachments.eventSchema.conversationId`, {
       defaultMessage: 'The ID of the conversation the attachment belongs to.',
     }),
-  }),
-  attachmentId: z.string().meta({
+  })),
+  attachmentId: lazySchema(() => z.string().meta({
     description: i18n.translate(`${i18nPrefix}.attachments.eventSchema.attachmentId`, {
       defaultMessage: 'The ID of the attachment.',
     }),
-  }),
-  attachmentType: z.string().meta({
+  })),
+  attachmentType: lazySchema(() => z.string().meta({
     description: i18n.translate(`${i18nPrefix}.attachments.eventSchema.attachmentType`, {
       defaultMessage: 'The attachment type (for example, `text`, `esql`, or `dashboard`).',
     }),
-  }),
+  })),
   source: attachmentEventSourceSchema,
 };
 
-const currentVersionField = z.number().meta({
+const currentVersionField = lazySchema(() => z.number().meta({
   description: i18n.translate(`${i18nPrefix}.attachments.eventSchema.currentVersion`, {
     defaultMessage: 'The attachment version after this change.',
   }),
-});
+}));
 
-const attachmentAddedEventSchema = z.object({
+const attachmentAddedEventSchema = lazySchema(() => z.object({
   ...baseAttachmentEventFields,
   currentVersion: currentVersionField,
-});
+}));
 
-const attachmentUpdatedEventSchema = z.object({
+const attachmentUpdatedEventSchema = lazySchema(() => z.object({
   ...baseAttachmentEventFields,
   previousVersion: z.number().meta({
     description: i18n.translate(`${i18nPrefix}.attachments.eventSchema.previousVersion`, {
@@ -63,9 +63,9 @@ const attachmentUpdatedEventSchema = z.object({
     }),
   }),
   currentVersion: currentVersionField,
-});
+}));
 
-const attachmentDeletedEventSchema = z.object({
+const attachmentDeletedEventSchema = lazySchema(() => z.object({
   ...baseAttachmentEventFields,
   hardDelete: z.boolean().meta({
     description: i18n.translate(`${i18nPrefix}.attachments.eventSchema.hardDelete`, {
@@ -73,7 +73,7 @@ const attachmentDeletedEventSchema = z.object({
         'True when the attachment was permanently removed; false when it was soft-deleted and can be restored.',
     }),
   }),
-});
+}));
 
 export const attachmentAddedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: ConversationAttachmentAddedTriggerId,

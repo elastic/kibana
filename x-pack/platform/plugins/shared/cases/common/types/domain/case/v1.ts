@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
 import { Settings } from '../../../bundled-types.gen';
 import {
@@ -37,19 +37,19 @@ export const CaseStatusSchema = z.nativeEnum(CaseStatuses);
 
 export const caseStatuses = Object.values(CaseStatuses);
 
-export const DefaultCloseReasonSchema = z.union([
+export const DefaultCloseReasonSchema = lazySchema(() => z.union([
   z.literal('false_positive'),
   z.literal('duplicate'),
   z.literal('true_positive'),
   z.literal('benign_positive'),
   z.literal('automated_closure'),
   z.literal('other'),
-]);
+]));
 
 /**
  * Close reason
  */
-export const CaseCloseReasonSchema = z.union([DefaultCloseReasonSchema, z.string()]);
+export const CaseCloseReasonSchema = lazySchema(() => z.union([DefaultCloseReasonSchema, z.string()]));
 
 /**
  * Severity — exposed as a TS-enum-typed schema so consumers using
@@ -62,24 +62,24 @@ export const CaseSeveritySchema = z.nativeEnum(CaseSeverity);
  */
 export const CaseSettingsSchema = Settings;
 
-export const CaseTemplateSchema = z.object({
+export const CaseTemplateSchema = lazySchema(() => z.object({
   id: z.string(),
   version: z.number(),
-});
+}));
 
 const CaseBaseFields = {
   /**
    * The description of the case
    */
-  description: z.string(),
+  description: lazySchema(() => z.string()),
   /**
    * The identifying strings for filter a case
    */
-  tags: z.array(z.string()),
+  tags: lazySchema(() => z.array(z.string())),
   /**
    * The title of a case
    */
-  title: z.string(),
+  title: lazySchema(() => z.string()),
   /**
    * The external system that the case can be synced with
    */
@@ -95,7 +95,7 @@ const CaseBaseFields = {
   /**
    * The category of the case.
    */
-  category: z.string().nullable(),
+  category: lazySchema(() => z.string().nullable()),
   /**
    * An array containing the possible,
    * user-configured custom fields.
@@ -108,10 +108,10 @@ const CaseBaseFields = {
   /**
    * Observables
    */
-  observables: z.array(CaseObservableSchema),
+  observables: lazySchema(() => z.array(CaseObservableSchema)),
 };
 
-export const CaseBaseOptionalFieldsSchema = z.object({
+export const CaseBaseOptionalFieldsSchema = lazySchema(() => z.object({
   description: z.string().optional(),
   tags: z.array(z.string()).optional(),
   title: z.string().optional(),
@@ -122,9 +122,9 @@ export const CaseBaseOptionalFieldsSchema = z.object({
   customFields: CaseCustomFieldsSchema.optional(),
   settings: CaseSettingsSchema.optional(),
   observables: z.array(CaseObservableSchema).optional(),
-});
+}));
 
-const CaseBasicSchema = z.object({
+const CaseBasicSchema = lazySchema(() => z.object({
   /**
    * The current status of the case (open, closed, in-progress)
    */
@@ -134,9 +134,9 @@ const CaseBasicSchema = z.object({
    */
   owner: z.string(),
   ...CaseBaseFields,
-});
+}));
 
-export const CaseAttributesSchema = CaseBasicSchema.extend({
+export const CaseAttributesSchema = lazySchema(() => CaseBasicSchema.extend({
   duration: z.number().nullable(),
   closed_at: z.string().nullable(),
   closed_by: UserSchema.nullable(),
@@ -153,9 +153,9 @@ export const CaseAttributesSchema = CaseBasicSchema.extend({
   time_to_resolve: z.number().nullable().optional(),
   template: CaseTemplateSchema.nullable().optional(),
   [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
-});
+}));
 
-export const CaseSchema = CaseAttributesSchema.extend({
+export const CaseSchema = lazySchema(() => CaseAttributesSchema.extend({
   // Populated at response time by enrichCasesWithFieldLabels — not persisted to the SO.
   // Maps storage keys (e.g. `priority_as_keyword`) to user-facing labels (e.g. "Priority").
   [CASE_EXTENDED_FIELDS_LABELS]: z.record(z.string(), z.string()).optional(),
@@ -170,34 +170,34 @@ export const CaseSchema = CaseAttributesSchema.extend({
   totalEvents: z.number().optional(),
   version: z.string(),
   comments: z.array(AttachmentSchemaV2).optional(),
-});
+}));
 
-export const CasesSchema = z.array(CaseSchema);
+export const CasesSchema = lazySchema(() => z.array(CaseSchema));
 
-export const AttachmentTotalsSchema = z.object({
+export const AttachmentTotalsSchema = lazySchema(() => z.object({
   alerts: z.number(),
   events: z.number(),
   userComments: z.number(),
-});
+}));
 
-export const RelatedCaseSchema = z.object({
+export const RelatedCaseSchema = lazySchema(() => z.object({
   id: z.string(),
   title: z.string(),
   description: z.string(),
   status: CaseStatusSchema,
   createdAt: z.string(),
   totals: AttachmentTotalsSchema,
-});
+}));
 
-export const SimilaritySchema = z.object({
+export const SimilaritySchema = lazySchema(() => z.object({
   typeKey: z.string(),
   typeLabel: z.string(),
   value: z.string(),
-});
+}));
 
-export const SimilarCaseSchema = CaseSchema.extend({
+export const SimilarCaseSchema = lazySchema(() => CaseSchema.extend({
   similarities: z.object({ observables: z.array(SimilaritySchema) }),
-});
+}));
 
 export type Case = z.infer<typeof CaseSchema>;
 export type Cases = z.infer<typeof CasesSchema>;

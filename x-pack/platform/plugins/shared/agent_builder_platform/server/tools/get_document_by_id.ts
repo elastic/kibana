@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { getDocumentById } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
-const getDocumentByIdSchema = z.object({
+const getDocumentByIdSchema = lazySchema(() => z.object({
   id: z.string().describe('ID of the document to retrieve'),
   index: z.string().describe('Name of the index to retrieve the document from'),
-});
+}));
 
 export const getDocumentByIdTool = (): BuiltinToolDefinition<typeof getDocumentByIdSchema> => {
   return {

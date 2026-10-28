@@ -13,7 +13,7 @@ import {
   resolveEntityAccess,
 } from '@kbn/entity-access-control';
 import type { AccessControl, EntityAccessDecision } from '@kbn/entity-access-control';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export const WORKFLOW_ACCESS_CONTROL_ROLES = ['viewer', 'executor', 'editor'] as const;
 export type WorkflowAccessControlRole = (typeof WORKFLOW_ACCESS_CONTROL_ROLES)[number];
@@ -23,7 +23,7 @@ export const storedWorkflowAccessControlSchema = workflowAccessControlSchema
   .extend({
     entries: workflowAccessControlSchema.shape.entries
       .unwrap()
-      .element.extend({ added_at: z.string() })
+      .element.extend({ added_at: lazySchema(() => z.string()) })
       .array()
       .max(ACCESS_CONTROL_MAX_ENTRIES),
   })

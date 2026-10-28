@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export const SERVICE_MAP_ATTACHMENT_TYPE = 'observability.service-map' as const;
 
 // Upper bound on free-form string inputs to avoid unbounded-string DoS (CodeQL).
 const MAX_LABEL_LENGTH = 1024;
 
-const serviceNodeSchema = z.object({
+const serviceNodeSchema = lazySchema(() => z.object({
   'service.name': z.string().max(MAX_LABEL_LENGTH),
   'agent.name': z.string().max(MAX_LABEL_LENGTH).optional(),
-});
+}));
 
-const externalNodeSchema = z.object({
+const externalNodeSchema = lazySchema(() => z.object({
   'span.destination.service.resource': z.string().max(MAX_LABEL_LENGTH),
   // `span.type` and `span.subtype` are optional: real exit-span data frequently
   // omits the subtype (and occasionally the type). They only drive the dependency
@@ -25,30 +25,30 @@ const externalNodeSchema = z.object({
   // would reject the entire topology and prevent the map from rendering.
   'span.type': z.string().max(MAX_LABEL_LENGTH).optional(),
   'span.subtype': z.string().max(MAX_LABEL_LENGTH).optional(),
-});
+}));
 
-const nodeSchema = z.union([serviceNodeSchema, externalNodeSchema]);
+const nodeSchema = lazySchema(() => z.union([serviceNodeSchema, externalNodeSchema]));
 
-const connectionMetricsSchema = z
+const connectionMetricsSchema = lazySchema(() => z
   .object({
     errorRate: z.number().optional(),
     latencyMs: z.number().optional(),
     throughputPerMin: z.number().optional(),
   })
-  .optional();
+  .optional());
 
-const connectionSchema = z.object({
+const connectionSchema = lazySchema(() => z.object({
   source: nodeSchema,
   target: nodeSchema,
   metrics: connectionMetricsSchema,
-});
+}));
 
 /**
  * Per-service badge metadata injected at the top level so each service's
  * state is set once regardless of how many connections it participates in.
  * Keys are `service.name` values; missing entries mean no badges are shown.
  */
-const serviceNodeMetadataSchema = z.object({
+const serviceNodeMetadataSchema = lazySchema(() => z.object({
   alertsCount: z.number().optional(),
   /**
    * Worst SLO status for the service. `'violated'` and `'degrading'` render a
@@ -63,9 +63,9 @@ const serviceNodeMetadataSchema = z.object({
    */
   anomalySeverity: z.enum(['critical', 'major', 'minor', 'warning', 'low', 'unknown']).optional(),
   anomalyScore: z.number().optional(),
-});
+}));
 
-export const serviceMapAttachmentDataSchema = z.object({
+export const serviceMapAttachmentDataSchema = lazySchema(() => z.object({
   connections: z.array(connectionSchema),
   /**
    * Optional badge metadata keyed by `service.name`.
@@ -100,7 +100,7 @@ export const serviceMapAttachmentDataSchema = z.object({
    * Optional for back-compat with stored conversations.
    */
   view: z.enum(['contextual', 'full']).optional(),
-});
+}));
 
 /**
  * Renderer fallback when `timeRange` is absent or unparseable. Mirrors the

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
@@ -18,7 +18,7 @@ import {
 } from '../../../common/attachments';
 import { getConnectorTypeDisplayName, isConnectorTypeAvailable } from './utils';
 
-const proposeConnectorSchema = z.object({
+const proposeConnectorSchema = lazySchema(() => z.object({
   connector_type: z
     .string()
     .describe(
@@ -36,7 +36,7 @@ const proposeConnectorSchema = z.object({
     .describe(
       'Optional one-line explanation, shown on the card, of why this connector helps with the task at hand.'
     ),
-});
+}));
 
 export type ProposeConnectorInput = z.infer<typeof proposeConnectorSchema>;
 

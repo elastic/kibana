@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Configuration schema for overrides to the table configuration that can be persisted across sessions.
  * This should include only the serializable properties that are user-configurable, all other props
  * will be removed by parsing to avoid saving unnecessary or non-serializable objects.
  */
-export const alertsTableConfigurationSchema = z.object({
+export const alertsTableConfigurationSchema = lazySchema(() => z.object({
   columns: z
     .array(
       z.object({
@@ -23,6 +23,6 @@ export const alertsTableConfigurationSchema = z.object({
     .optional(),
   visibleColumns: z.array(z.string()).optional(),
   sort: z.array(z.record(z.string(), z.object({ order: z.enum(['asc', 'desc']) }))).optional(),
-});
+}));
 
 export type AlertsTableConfiguration = z.infer<typeof alertsTableConfigurationSchema>;

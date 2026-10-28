@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { getErrorMessage } from '../../../lib/streams/errors/parse_error';
@@ -28,12 +28,12 @@ export const validateClassicStreamRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     body: z.object({
       name: z.string().max(MAX_STREAM_NAME_LENGTH),
       selectedTemplateName: z.string().max(256),
     }),
-  }),
+  })),
   handler: async ({ params, request, getScopedClients, logger }) => {
     const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
     const { name, selectedTemplateName } = params.body;

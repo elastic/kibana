@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -26,7 +26,7 @@ import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID = 'observability.get_log_change_points';
 
-const getLogChangePointsSchema = z.object({
+const getLogChangePointsSchema = lazySchema(() => z.object({
   ...timeRangeSchemaRequired,
   index: z
     .string()
@@ -47,7 +47,7 @@ const getLogChangePointsSchema = z.object({
     .describe(
       'The unstructured text field to run the categorize_text aggregation on. This groups similar logs into patterns.'
     ),
-});
+}));
 
 export function createGetLogChangePointsTool({
   core,

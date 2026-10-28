@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -18,7 +18,7 @@ import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-
 import { SmlSearchFilterType } from '@kbn/agent-builder-sml-plugin/server';
 import type { SmlToolsOptions } from './types';
 
-const smlSearchSchema = z.object({
+const smlSearchSchema = lazySchema(() => z.object({
   query: z
     .string()
     .min(1)
@@ -50,7 +50,7 @@ const smlSearchSchema = z.object({
       'Optional. Restrict results to records with any of these tags (e.g. ["production", "sales"]). ' +
         'ANY semantics. Omit to ignore tags.'
     ),
-});
+}));
 
 /**
  * Creates the sml_search tool.

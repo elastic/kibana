@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { createOtherResult } from '@kbn/agent-builder-server';
 import { investigationEvidenceSchema, MAX_EVIDENCE_TEXT_LENGTH } from '../../../common/evidence';
 import {
@@ -20,7 +20,7 @@ import { createInvestigationTool } from '../../investigation_attachments';
 import type { ResolveUser } from '../../services/resolve_user';
 import type { HypothesesService } from '../services/hypotheses_service';
 
-const setHypothesisSchema = z.object({
+const setHypothesisSchema = lazySchema(() => z.object({
   candidate: z
     .string()
     .min(1)
@@ -46,16 +46,16 @@ const setHypothesisSchema = z.object({
     .max(MAX_HYPOTHESIS_EVIDENCE)
     .optional()
     .describe('What the status rests on, ideally a chart of the signal that supports it.'),
-});
+}));
 
-export const setHypothesesToolSchema = z.object({
+export const setHypothesesToolSchema = lazySchema(() => z.object({
   hypotheses: z
     .array(setHypothesisSchema)
     .max(MAX_HYPOTHESES)
     .describe(
       'Every hypothesis considered so far, each with its own confidence and status, not only those that changed.'
     ),
-});
+}));
 
 export type SetHypothesesToolParams = z.infer<typeof setHypothesesToolSchema>;
 

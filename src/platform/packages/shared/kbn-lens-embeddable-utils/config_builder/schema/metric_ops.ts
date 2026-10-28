@@ -62,19 +62,19 @@ const advancedOperationSettings = {
   /**
    * Reduced time range
    */
-  reduced_time_range: z.string().optional().meta({
+  reduced_time_range: lazySchema(() => z.string().optional().meta({
     id: 'visOperationReducedTimeRangeSetting',
     title: 'Operation Reduced Time Range Setting',
     description: 'Reduced time range',
-  }),
+  })),
   /**
    * Time shift
    */
-  time_shift: z.string().optional().meta({
+  time_shift: lazySchema(() => z.string().optional().meta({
     id: 'visOperationTimeShiftSetting',
     title: 'Operation Time Shift Setting',
     description: 'Time shift',
-  }),
+  })),
   /**
    * Filter
    */
@@ -82,14 +82,14 @@ const advancedOperationSettings = {
   /**
    * Time scale
    */
-  time_scale: z
+  time_scale: lazySchema(() => z
     .union([z.literal('s'), z.literal('m'), z.literal('h'), z.literal('d')])
     .optional()
     .meta({
       id: 'visOperationTimeScaleSetting',
       title: 'Operation Time Scale Setting',
       description: 'Time scale',
-    }),
+    })),
 };
 
 export const formulaOperationDefinitionSchema = lazySchema(() =>
@@ -115,9 +115,9 @@ export const formulaOperationDefinitionSchema = lazySchema(() =>
 );
 
 const esqlColumn = {
-  column: z.string().meta({
+  column: lazySchema(() => z.string().meta({
     description: 'Column to use',
-  }),
+  })),
 };
 
 export const esqlColumnSchema = lazySchema(() =>
@@ -150,9 +150,9 @@ const emptyAsNullSchemaRawObject = {
   /**
    * Whether to consider null values as null
    */
-  empty_as_null: z.boolean().default(LENS_EMPTY_AS_NULL_DEFAULT_VALUE).meta({
+  empty_as_null: lazySchema(() => z.boolean().default(LENS_EMPTY_AS_NULL_DEFAULT_VALUE).meta({
     description: 'When `true`, treats empty buckets as null instead of zero.',
-  }),
+  })),
 };
 
 export const countMetricOperationSchema = lazySchema(() =>

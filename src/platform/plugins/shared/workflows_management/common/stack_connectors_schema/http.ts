@@ -17,10 +17,10 @@ import {
   HttpMethodSchema,
   HttpRequestBodySchema,
 } from '@kbn/connector-schemas/http/schemas/v1';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 // HTTP connector parameter schema
-export const HttpParamsSchema = z.object({
+export const HttpParamsSchema = lazySchema(() => z.object({
   url: z
     .string()
     .optional()
@@ -45,12 +45,12 @@ export const HttpParamsSchema = z.object({
       keep_alive: z.boolean().optional(),
     })
     .optional(),
-});
+}));
 
 // HTTP connector response schema
-export const HttpResponseSchema = z.object({
+export const HttpResponseSchema = lazySchema(() => z.object({
   status: z.number(),
   statusText: z.string(),
   data: z.any(),
   headers: z.record(z.string(), z.string()),
-});
+}));

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
 
-export const BulkAttachmentsPayloadSchema = z.object({
+export const BulkAttachmentsPayloadSchema = lazySchema(() => z.object({
   /** The unified attachment type, e.g. `security.alert` or `file`. */
   attachmentType: z.string(),
   /**
@@ -16,15 +16,15 @@ export const BulkAttachmentsPayloadSchema = z.object({
    * nothing counts as 1 item.
    */
   count: z.number(),
-});
+}));
 
-export const BulkAttachmentsUserActionPayloadSchema = z.object({
+export const BulkAttachmentsUserActionPayloadSchema = lazySchema(() => z.object({
   bulkAttachments: BulkAttachmentsPayloadSchema,
-});
+}));
 
-export const BulkAttachmentsUserActionSchema = z.object({
+export const BulkAttachmentsUserActionSchema = lazySchema(() => z.object({
   type: z.literal(UserActionTypes.bulkAttachments),
   payload: BulkAttachmentsUserActionPayloadSchema,
-});
+}));
 
 export type BulkAttachmentsPayload = z.infer<typeof BulkAttachmentsPayloadSchema>;

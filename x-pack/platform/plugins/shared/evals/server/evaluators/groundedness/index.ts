@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { runLlmJudge } from '../llm_judge';
 import type { EvaluatorDefinition } from '../types';
 import { LlmGroundednessEvaluationPrompt } from './prompt';
 import { calculateGroundednessScore } from './scoring';
 import type { GroundednessAnalysis } from './types';
 
-const groundednessEvidenceSchema = z.object({
+const groundednessEvidenceSchema = lazySchema(() => z.object({
   input: z.object({
     message: z.string().trim().min(1),
   }),
@@ -20,7 +20,7 @@ const groundednessEvidenceSchema = z.object({
     message: z.string().trim().min(1),
   }),
   steps: z.array(z.object({}).catchall(z.unknown())),
-});
+}));
 
 export const groundednessEvaluator: EvaluatorDefinition = {
   name: 'groundedness',

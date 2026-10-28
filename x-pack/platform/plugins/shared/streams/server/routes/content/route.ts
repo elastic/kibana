@@ -6,7 +6,7 @@
  */
 
 import { Readable } from 'stream';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type {
   ContentPack,
   ContentPackStream,
@@ -86,7 +86,7 @@ const exportContentRoute = createServerRoute({
       },
     }),
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({
       name: z
         .string()
@@ -99,7 +99,7 @@ const exportContentRoute = createServerRoute({
       version: z.string().max(100),
       include: boundedIncludedObjectsSchema,
     }),
-  }),
+  })),
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
@@ -221,7 +221,7 @@ const importContentRoute = createServerRoute({
       },
     }),
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({
       name: z
         .string()
@@ -235,7 +235,7 @@ const importContentRoute = createServerRoute({
         .transform((value) => boundedIncludedObjectsSchema.parse(JSON.parse(value))),
       content: z.instanceof(Readable),
     }),
-  }),
+  })),
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
@@ -293,14 +293,14 @@ const previewContentRoute = createServerRoute({
       output: 'stream',
     },
   },
-  params: z.object({
+  params: lazySchema(() => z.object({
     path: z.object({
       name: z.string().max(MAX_STREAM_NAME_LENGTH),
     }),
     body: z.object({
       content: z.instanceof(Readable),
     }),
-  }),
+  })),
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],

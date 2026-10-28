@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
@@ -19,20 +19,20 @@ import { CaseConnectorWithoutNameSchema } from '../connector/v1';
 import { CaseUserProfilesSchema } from '../user/v1';
 
 /** Template tag: non-empty and length-bounded, mirroring the client-side metadata validation. */
-const TemplateTagSchema = z.string().min(1).max(MAX_TEMPLATE_TAG_LENGTH);
+const TemplateTagSchema = lazySchema(() => z.string().min(1).max(MAX_TEMPLATE_TAG_LENGTH));
 
 /** Default case settings a template applies when creating a case; both optional and independent. */
-export const TemplateSettingsSchema = z.object({
+export const TemplateSettingsSchema = lazySchema(() => z.object({
   syncAlerts: z.boolean().optional(),
   extractObservables: z.boolean().optional(),
-});
+}));
 
 export type TemplateSettings = z.infer<typeof TemplateSettingsSchema>;
 
 /**
  * Template schema for case templates
  */
-export const TemplateSchema = z.object({
+export const TemplateSchema = lazySchema(() => z.object({
   /**
    * Template identifier, can be shared across multiple SO's as we are storing all the changes made to the template
    */
@@ -128,14 +128,14 @@ export const TemplateSchema = z.object({
    * migrated template. Absent on templates created directly in v2.
    */
   legacyKey: z.string().min(1).max(MAX_TEMPLATE_KEY_LENGTH).optional(),
-});
+}));
 
 export type Template = z.infer<typeof TemplateSchema>;
 
 /**
  * Parsed template definition
  */
-export const ParsedTemplateDefinitionSchema = z.object({
+export const ParsedTemplateDefinitionSchema = lazySchema(() => z.object({
   /**
    * Top-level case defaults applied when creating a case from this template.
    *
@@ -181,14 +181,14 @@ export const ParsedTemplateDefinitionSchema = z.object({
     },
     { message: 'Field names must be unique.' }
   ),
-});
+}));
 
 export type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
 
 /**
  * Parsed template schema with parsed definition
  */
-export const ParsedTemplateSchema = TemplateSchema.omit({
+export const ParsedTemplateSchema = lazySchema(() => TemplateSchema.omit({
   definition: true,
 }).extend({
   /**
@@ -202,7 +202,7 @@ export const ParsedTemplateSchema = TemplateSchema.omit({
   definitionString: z.string(),
   isLatest: z.boolean(),
   latestVersion: z.number(),
-});
+}));
 
 export type ParsedTemplate = z.infer<typeof ParsedTemplateSchema>;
 

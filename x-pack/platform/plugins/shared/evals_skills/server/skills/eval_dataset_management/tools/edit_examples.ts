@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { MAX_ID_LENGTH } from '@kbn/evals-plugin/common';
@@ -28,7 +28,7 @@ import {
 
 const MAX_REMOVED_EXAMPLES = 100;
 
-const schema = z
+const schema = lazySchema(() => z
   .object({
     dataset_id: datasetIdSchema,
     add: datasetExamplesSchema
@@ -46,7 +46,7 @@ const schema = z
   })
   .refine(({ add, remove_ids: removeIds }) => (add?.length ?? 0) + (removeIds?.length ?? 0) > 0, {
     message: 'Pass at least one example to add or one example id to remove.',
-  });
+  }));
 
 type EditParams = z.infer<typeof schema>;
 

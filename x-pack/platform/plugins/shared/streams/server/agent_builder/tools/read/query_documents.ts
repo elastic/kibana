@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -29,7 +29,7 @@ const MAX_STRING_LENGTH = 200;
 const MAX_FIELDS_FOR_PROMPT = 1000;
 const MAX_FIELDS_PROMPT_CHARS = 20_000;
 
-const queryDocumentsSchema = z.object({
+const queryDocumentsSchema = lazySchema(() => z.object({
   name: z.string().describe('Exact stream name, e.g. "logs.ecs.nginx"'),
   query: z.string().describe(
     dedent(`Natural language description of what to search or aggregate. Include field names when known. Examples:
@@ -49,7 +49,7 @@ const queryDocumentsSchema = z.object({
         '(error.type, error.message, error.stack_trace, and the original document under document.source). ' +
         'Use "failures" after diagnose_stream flags processing errors to see raw rejected documents.'
     ),
-});
+}));
 
 const DISALLOWED_DSL_KEYS = new Set([
   'script',

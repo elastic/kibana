@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export const captureBodySchema = z.enum(['off', 'errors', 'transactions', 'all']);
+export const captureBodySchema = lazySchema(() => z.enum(['off', 'errors', 'transactions', 'all']));

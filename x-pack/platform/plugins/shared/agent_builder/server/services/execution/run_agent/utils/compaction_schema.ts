@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 /**
  * Zod schema for the LLM-generated portion of the compaction summary.
@@ -14,7 +14,7 @@ import { z } from '@kbn/zod';
  * Deterministic fields (tool_calls_summary, agent_actions) are extracted
  * programmatically and merged afterward.
  */
-export const llmCompactionSchema = z.object({
+export const llmCompactionSchema = lazySchema(() => z.object({
   discussion_summary: z
     .string()
     .describe(
@@ -54,7 +54,7 @@ export const llmCompactionSchema = z.object({
     .describe(
       'Important questions the user asked that were not fully resolved. May be empty if everything was addressed.'
     ),
-});
+}));
 
 export type LlmCompactionOutput = z.infer<typeof llmCompactionSchema>;
 

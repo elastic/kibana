@@ -12,8 +12,8 @@ import { AuthConfiguration, WebhookMethods } from '../../common/auth';
 export const HeadersSchema = lazySchema(() => z.record(z.string(), z.string()));
 
 const configSchemaProps = {
-  url: z.string(),
-  method: z
+  url: lazySchema(() => z.string()),
+  method: lazySchema(() => z
     .enum([
       WebhookMethods.POST,
       WebhookMethods.PUT,
@@ -21,8 +21,8 @@ const configSchemaProps = {
       WebhookMethods.GET,
       WebhookMethods.DELETE,
     ])
-    .default(WebhookMethods.POST),
-  headers: HeadersSchema.nullable().default(null),
+    .default(WebhookMethods.POST)),
+  headers: lazySchema(() => HeadersSchema.nullable().default(null)),
   hasAuth: AuthConfiguration.hasAuth,
   authType: AuthConfiguration.authType,
   certType: AuthConfiguration.certType,

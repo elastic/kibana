@@ -12,7 +12,7 @@ import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import type { Environment } from '../../../../common/environment_rt';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
@@ -26,13 +26,13 @@ import { getServiceAnnotations } from '../../services/annotations';
 import { getServiceMetadataDetails } from '../../services/get_service_metadata_details';
 import { getAnomalies } from './get_anomalies';
 
-export const serviceSummaryRouteRt = z.object({
+export const serviceSummaryRouteRt = lazySchema(() => z.object({
   'service.name': z.string(),
   start: z.string(),
   end: z.string(),
   'service.environment': z.string().optional(),
   'transaction.type': z.string().optional(),
-});
+}));
 
 export interface ServiceSummary {
   'service.name': string;

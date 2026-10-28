@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * The contract an **action workflow** satisfies. Lives here rather than in a
@@ -38,11 +38,11 @@ export const ACTION_WORKFLOW_INPUT = 'actionInput' as const;
  * Consumers group and aggregate on it — nothing sorts on it, and the display
  * order of categories is a UI concern rather than something stored.
  */
-export const actionCategorySchema = z.string().min(1).max(64);
+export const actionCategorySchema = lazySchema(() => z.string().min(1).max(64));
 export type ActionCategory = z.infer<typeof actionCategorySchema>;
 
 /** How consequential running the action is. Intrinsic to the action, not the situation. */
-export const actionImpactSchema = z.enum(['low', 'medium', 'high', 'critical']);
+export const actionImpactSchema = lazySchema(() => z.enum(['low', 'medium', 'high', 'critical']));
 export type ActionImpact = z.infer<typeof actionImpactSchema>;
 
 /**
@@ -50,7 +50,7 @@ export type ActionImpact = z.infer<typeof actionImpactSchema>;
  * autonomy policy resolves to. Required, so an action is only auto-approved
  * when its author declared `autonomy-dependent`.
  */
-export const actionApprovalPolicySchema = z.enum(['always-gate', 'autonomy-dependent']);
+export const actionApprovalPolicySchema = lazySchema(() => z.enum(['always-gate', 'autonomy-dependent']));
 export type ActionApprovalPolicy = z.infer<typeof actionApprovalPolicySchema>;
 
 /**
@@ -59,11 +59,11 @@ export type ActionApprovalPolicy = z.infer<typeof actionApprovalPolicySchema>;
  * that declares no `subject` is inferred `process` when its input schema has
  * `parameters`, else `host`, so older installed definitions keep working.
  */
-export const actionSubjectKindSchema = z.enum(['host', 'process']);
+export const actionSubjectKindSchema = lazySchema(() => z.enum(['host', 'process']));
 export type ActionSubjectKind = z.infer<typeof actionSubjectKindSchema>;
 
 /** Self-description an action workflow declares under `consts.actionMetadata`. */
-export const actionMetadataSchema = z.object({
+export const actionMetadataSchema = lazySchema(() => z.object({
   name: z.string().min(1).max(256),
   description: z.string().max(2048).optional(),
   category: actionCategorySchema.optional(),
@@ -74,5 +74,5 @@ export const actionMetadataSchema = z.object({
   subject: z
     .union([actionSubjectKindSchema, z.array(actionSubjectKindSchema).min(1).max(2)])
     .optional(),
-});
+}));
 export type ActionMetadata = z.infer<typeof actionMetadataSchema>;

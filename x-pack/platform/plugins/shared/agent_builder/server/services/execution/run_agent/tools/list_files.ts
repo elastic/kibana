@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IFileSystem } from 'just-bash';
 import { ToolType } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
@@ -15,7 +15,7 @@ import type { IFilesystemService } from '@kbn/agent-builder-server/runner';
 
 const MAX_DEPTH = 5;
 
-const schema = z.object({
+const schema = lazySchema(() => z.object({
   path: z.string().describe('Absolute path of the directory to list'),
   depth: z
     .number()
@@ -26,7 +26,7 @@ const schema = z.object({
     .describe(
       `Level of depth to include (1 = immediate children only, 2 = include children of subdirectories, etc.). Capped at ${MAX_DEPTH}.`
     ),
-});
+}));
 
 export const createListFilesTool = ({
   filesystemService,

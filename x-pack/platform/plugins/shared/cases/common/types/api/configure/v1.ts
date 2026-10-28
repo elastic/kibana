@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_KEY_LENGTH,
@@ -38,7 +38,7 @@ import {
   CaseCustomFieldNumberWithValidationValueSchema,
 } from '../custom_field/v1';
 
-export const CustomFieldConfigurationWithoutTypeSchema = z.object({
+export const CustomFieldConfigurationWithoutTypeSchema = lazySchema(() => z.object({
   /**
    * key of custom field
    */
@@ -55,36 +55,36 @@ export const CustomFieldConfigurationWithoutTypeSchema = z.object({
    * custom field options - required
    */
   required: z.boolean(),
-});
+}));
 
-export const TextCustomFieldConfigurationSchema = CustomFieldConfigurationWithoutTypeSchema.extend({
+export const TextCustomFieldConfigurationSchema = lazySchema(() => CustomFieldConfigurationWithoutTypeSchema.extend({
   type: CustomFieldTextTypeSchema,
   defaultValue: CaseCustomFieldTextWithValidationValueSchema('defaultValue').nullable().optional(),
-});
+}));
 
 export const ToggleCustomFieldConfigurationSchema =
-  CustomFieldConfigurationWithoutTypeSchema.extend({
+  lazySchema(() => CustomFieldConfigurationWithoutTypeSchema.extend({
     type: CustomFieldToggleTypeSchema,
     defaultValue: z.boolean().nullable().optional(),
-  });
+  }));
 
 export const NumberCustomFieldConfigurationSchema =
-  CustomFieldConfigurationWithoutTypeSchema.extend({
+  lazySchema(() => CustomFieldConfigurationWithoutTypeSchema.extend({
     type: CustomFieldNumberTypeSchema,
     defaultValue: CaseCustomFieldNumberWithValidationValueSchema({ fieldName: 'defaultValue' })
       .nullable()
       .optional(),
-  });
+  }));
 
 /**
  * @deprecated Custom fields are superseded by the field library and the case `extended_fields`.
  */
 export const CustomFieldsConfigurationSchema = limitedArraySchema({
-  codec: z.union([
+  codec: lazySchema(() => z.union([
     TextCustomFieldConfigurationSchema,
     ToggleCustomFieldConfigurationSchema,
     NumberCustomFieldConfigurationSchema,
-  ]),
+  ])),
   min: 0,
   max: MAX_CUSTOM_FIELDS_PER_CASE,
   fieldName: 'customFields',
@@ -94,7 +94,7 @@ export const ObservableTypesConfigurationSchema = limitedArraySchema({
   min: 0,
   max: MAX_CUSTOM_OBSERVABLE_TYPES,
   fieldName: 'observableTypes',
-  codec: z.object({
+  codec: lazySchema(() => z.object({
     key: regexStringSchema({
       codec: limitedStringSchema({
         fieldName: 'key',
@@ -109,7 +109,7 @@ export const ObservableTypesConfigurationSchema = limitedArraySchema({
       min: 1,
       max: MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
     }),
-  }),
+  })),
 });
 
 export const WorkflowTagsConfigurationSchema = limitedArraySchema({
@@ -123,7 +123,7 @@ export const WorkflowTagsConfigurationSchema = limitedArraySchema({
   fieldName: 'workflow tags',
 });
 
-export const TemplateConfigurationSchema = z.object({
+export const TemplateConfigurationSchema = lazySchema(() => z.object({
   /**
    * key of template
    */
@@ -161,7 +161,7 @@ export const TemplateConfigurationSchema = z.object({
     max: MAX_TAGS_PER_TEMPLATE,
     fieldName: `template's tags`,
   }).optional(),
-});
+}));
 
 /**
  * @deprecated Configuration-embedded templates are superseded by the case templates system
@@ -174,7 +174,7 @@ export const TemplatesConfigurationSchema = limitedArraySchema({
   fieldName: 'templates',
 });
 
-export const ConfigurationRequestSchema = z.object({
+export const ConfigurationRequestSchema = lazySchema(() => z.object({
   /**
    * The external connector
    */
@@ -192,9 +192,9 @@ export const ConfigurationRequestSchema = z.object({
   observableTypes: ObservableTypesConfigurationSchema.optional(),
   extractObservables: z.boolean().optional(),
   workflowTags: WorkflowTagsConfigurationSchema.optional(),
-});
+}));
 
-export const GetConfigurationFindRequestSchema = z.object({
+export const GetConfigurationFindRequestSchema = lazySchema(() => z.object({
   /**
    * The configuration plugin owner to filter the search by. If this is left empty the results will include all configurations
    * that the user has permissions to access
@@ -202,13 +202,13 @@ export const GetConfigurationFindRequestSchema = z.object({
   owner: z
     .union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)])
     .optional(),
-});
+}));
 
-export const CaseConfigureRequestParamsSchema = z.object({
+export const CaseConfigureRequestParamsSchema = lazySchema(() => z.object({
   configuration_id: z.string().max(512),
-});
+}));
 
-export const ConfigurationPatchRequestSchema = z.object({
+export const ConfigurationPatchRequestSchema = lazySchema(() => z.object({
   closure_type: ClosureTypeSchema.optional(),
   connector: ConfigurationBasicWithoutOwnerSchema.shape.connector.optional(),
   customFields: CustomFieldsConfigurationSchema.optional(),
@@ -217,7 +217,7 @@ export const ConfigurationPatchRequestSchema = z.object({
   extractObservables: z.boolean().optional(),
   workflowTags: WorkflowTagsConfigurationSchema.optional(),
   version: z.string().max(512),
-});
+}));
 
 export type ConfigurationRequest = z.infer<typeof ConfigurationRequestSchema>;
 export type ConfigurationPatchRequest = z.infer<typeof ConfigurationPatchRequestSchema>;

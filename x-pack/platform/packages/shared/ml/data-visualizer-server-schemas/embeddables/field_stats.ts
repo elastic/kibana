@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
@@ -14,9 +14,9 @@ import {
 const baseProps = {
   ...serializedTitlesSchema.shape,
   ...serializedTimeRangeSchema.shape,
-  show_distributions: z.boolean().default(false).meta({
+  show_distributions: lazySchema(() => z.boolean().default(false).meta({
     description: 'Whether to show the distribution mini-charts in the table.',
-  }),
+  })),
 };
 
 const fieldStatsDataViewSchema = z
@@ -42,11 +42,11 @@ const fieldStatsEsqlSchema = z
   })
   .strict();
 
-export const fieldStatsTableEmbeddableSchema = z
+export const fieldStatsTableEmbeddableSchema = lazySchema(() => z
   .discriminatedUnion('view_type', [fieldStatsDataViewSchema, fieldStatsEsqlSchema])
   .meta({
     id: 'data_visualizer_field_stats',
     description: 'Field statistics table embeddable schema',
-  });
+  }));
 
 export type FieldStatsTableEmbeddableState = z.output<typeof fieldStatsTableEmbeddableSchema>;

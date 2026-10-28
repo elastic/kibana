@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Model } from '@kbn/evals-common';
 import {
   createServerStepDefinition,
@@ -60,22 +60,22 @@ const POLL_BATCH_SIZE = 25;
  */
 const EVALUATE_DATASET_POLL_CEILINGS = { maxAttempts: 10_000, maxWaitMs: 60_000 } as const;
 
-const stateExampleSchema = z.object({
+const stateExampleSchema = lazySchema(() => z.object({
   id: z.string(),
   index: z.number().int(),
   input: z.record(z.string(), z.unknown()).optional(),
   output: z.unknown().optional(),
   metadata: z.record(z.string(), z.unknown()).nullable().optional(),
-});
+}));
 
-const resolvedModelSchema = z.object({
+const resolvedModelSchema = lazySchema(() => z.object({
   id: z.string(),
   family: z.string().optional(),
   provider: z.string().optional(),
-});
+}));
 
 /** Progress persisted between `ai.evals.evaluateDataset` poll cycles. */
-const evaluateDatasetStateSchema = z.object({
+const evaluateDatasetStateSchema = lazySchema(() => z.object({
   work: z.array(
     z.object({
       dataset: z.object({ id: z.string(), name: z.string() }),
@@ -89,7 +89,7 @@ const evaluateDatasetStateSchema = z.object({
   errors: z.array(z.string()),
   task_model: resolvedModelSchema,
   evaluator_model: resolvedModelSchema,
-});
+}));
 
 const MAX_DATASET_STEP_ERRORS = 20;
 

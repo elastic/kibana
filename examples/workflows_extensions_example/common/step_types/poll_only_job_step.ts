@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { StepCategory } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
  */
 export const PollOnlyJobStepTypeId = 'example.pollOnlyJobDemo';
 
-export const InputSchema = z.object({
+export const InputSchema = lazySchema(() => z.object({
   /**
    * Identifier returned when the job was created (transform, snapshot, export API, etc.).
    */
@@ -27,14 +27,14 @@ export const InputSchema = z.object({
    * (including the poll that returns `{ output }`).
    */
   simulatedStatusPolls: z.coerce.number().int().min(1).max(10).default(3),
-});
+}));
 
-export const OutputSchema = z.object({
+export const OutputSchema = lazySchema(() => z.object({
   jobId: z.string(),
   status: z.enum(['completed']),
   resultUri: z.string(),
   completedAt: z.string(),
-});
+}));
 
 export type PollOnlyJobStepInputSchema = typeof InputSchema;
 export type PollOnlyJobStepOutputSchema = typeof OutputSchema;

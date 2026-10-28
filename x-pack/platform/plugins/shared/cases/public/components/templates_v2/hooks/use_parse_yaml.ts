@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { FieldSchema } from '../../../../common/types/domain/template/fields';
 import { TemplateSettingsSchema } from '../../../../common/types/domain/template/v1';
 import { CaseSeverity as CaseSeveritySchema } from '../../../../common/bundled-types.gen';
@@ -17,7 +17,7 @@ import { checkTemplateExists } from '../utils';
 import type { ValidatedFile } from './use_validate_yaml';
 import * as i18n from '../translations';
 
-const ImportedDefinitionSchema = z.object({
+const ImportedDefinitionSchema = lazySchema(() => z.object({
   fields: z.array(FieldSchema).refine(
     (fields) => {
       const fieldNames = new Set(
@@ -27,9 +27,9 @@ const ImportedDefinitionSchema = z.object({
     },
     { message: 'Field names must be unique.' }
   ),
-});
+}));
 
-const ImportedTemplateSchema = z
+const ImportedTemplateSchema = lazySchema(() => z
   .object({
     templateId: z.string().optional(),
     // `.trim().min(1)` so a whitespace-only name (e.g. `name: '  '`) is rejected rather than
@@ -64,7 +64,7 @@ const ImportedTemplateSchema = z
       message: 'Either template_name or name is required',
       path: ['template_name'],
     }
-  );
+  ));
 
 type ImportedTemplate = z.infer<typeof ImportedTemplateSchema>;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -17,7 +17,7 @@ import { STREAMS_DESIGN_PIPELINE_TOOL_ID as DESIGN_PIPELINE } from '../tool_ids'
 import { classifyError } from '../../utils/error_utils';
 import { nlToStreamlang } from './nl_to_streamlang';
 
-const samplesSchema = z
+const samplesSchema = lazySchema(() => z
   .union([
     z.object({
       source: z.literal('stream'),
@@ -35,9 +35,9 @@ const samplesSchema = z
       'Omit to auto-fetch 100 recent documents from the stream (recommended). ' +
       'Use { source: "stream", size: N } to control the sample size. ' +
       'Use { source: "inline", documents: [...], status: "processed"|"unprocessed" } to provide your own.'
-  );
+  ));
 
-const designPipelineSchema = z.object({
+const designPipelineSchema = lazySchema(() => z.object({
   stream_name: z.string().describe('Exact stream name, e.g. "logs.otel.linux"'),
   instruction: z
     .string()
@@ -49,7 +49,7 @@ const designPipelineSchema = z.object({
         '"rename attributes.src_ip to source.ip"'
     ),
   samples: samplesSchema,
-});
+}));
 
 export const createDesignPipelineTool = ({
   getScopedClients,

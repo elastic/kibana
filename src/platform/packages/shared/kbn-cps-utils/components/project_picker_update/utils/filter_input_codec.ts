@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 const filterExpressionPattern = /^(-?)([^:]*):(.*)$/;
 const oneOfValuePattern = /^\[(.*)\]$/;
@@ -69,34 +69,34 @@ export function isNegatedOperator(operator: FilterOperatorLiteral | undefined): 
   return operator !== undefined && NEGATED_OPERATORS.has(operator);
 }
 
-const filterBase = z.object({
+const filterBase = lazySchema(() => z.object({
   tagName: z.string(),
-});
+}));
 
 // operators that compare against a single value, e.g. `is:env:prod`
-const SingleValueFilterExpression = filterBase.extend({
+const SingleValueFilterExpression = lazySchema(() => filterBase.extend({
   operator: z.enum([FilterOperator.EQUALS, FilterOperator.NOT_EQUALS]),
   tagValue: z.string(),
-});
+}));
 
 // operators that compare against a list of values, e.g. `oneOf:env:prod,staging`
-const MultiValueFilterExpression = filterBase.extend({
+const MultiValueFilterExpression = lazySchema(() => filterBase.extend({
   operator: z.enum([FilterOperator.ONE_OF, FilterOperator.NOT_ONE_OF]),
   tagValue: z.array(z.string()),
-});
+}));
 
 // operators that don't carry a value at all, e.g. `exists:env:`
-const NoValueFilterExpression = filterBase.extend({
+const NoValueFilterExpression = lazySchema(() => filterBase.extend({
   operator: z.enum([FilterOperator.EXISTS, FilterOperator.NOT_EXISTS]),
   // present (always undefined) so `tagValue` is a valid key to read across every union member
   tagValue: z.undefined(),
-});
+}));
 
-export const FilterExpressionSchema = z.union([
+export const FilterExpressionSchema = lazySchema(() => z.union([
   SingleValueFilterExpression,
   MultiValueFilterExpression,
   NoValueFilterExpression,
-]);
+]));
 
 export type FilterExpressionValue = z.output<typeof FilterExpressionSchema>;
 

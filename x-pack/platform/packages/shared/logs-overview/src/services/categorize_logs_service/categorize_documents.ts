@@ -9,7 +9,7 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import { lastValueFrom } from 'rxjs';
 import { fromPromise } from 'xstate';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import type { LogCategorizationParams } from './types';
 import { createCategorizationRequestParams } from './queries';
 import type { LogCategory, LogCategoryChange } from '../../types';
@@ -147,20 +147,20 @@ const mapChangePoint = ({ change, histogram }: EsCategoryBucket): LogCategoryCha
 /**
  * The official types are lacking the change_point aggregation
  */
-const esChangePointBucketSchema = z.object({
+const esChangePointBucketSchema = lazySchema(() => z.object({
   key: isoDateTime(),
   doc_count: z.number(),
-});
+}));
 
-const esChangePointDetailsSchema = z.object({
+const esChangePointDetailsSchema = lazySchema(() => z.object({
   p_value: z.number(),
-});
+}));
 
-const esChangePointCorrelationSchema = esChangePointDetailsSchema.extend({
+const esChangePointCorrelationSchema = lazySchema(() => esChangePointDetailsSchema.extend({
   r_value: z.number(),
-});
+}));
 
-const esChangePointSchema = z.union([
+const esChangePointSchema = lazySchema(() => z.union([
   z
     .object({
       bucket: esChangePointBucketSchema,
@@ -245,7 +245,7 @@ const esChangePointSchema = z.union([
       type: z.object({}),
     })
     .transform((value) => ({ type: 'unknown' as const, rawChange: JSON.stringify(value) })),
-]);
+]));
 
 const esHistogramSchema = z
   .object({
@@ -265,12 +265,12 @@ const esHistogramSchema = z
 
 type EsHistogram = z.output<typeof esHistogramSchema>;
 
-const esCategoryBucketSchema = z.object({
+const esCategoryBucketSchema = lazySchema(() => z.object({
   key: z.string(),
   doc_count: z.number(),
   change: esChangePointSchema,
   histogram: esHistogramSchema,
-});
+}));
 
 type EsCategoryBucket = z.output<typeof esCategoryBucketSchema>;
 

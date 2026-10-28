@@ -10,13 +10,13 @@ import { isBoom } from '@hapi/boom';
 import pLimit from 'p-limit';
 import { MAX_SOURCES_PER_PAGE } from '@kbn/nightshift-shared';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { listAllSources } from './list_all_sources';
 
 /** Most source ids one request may filter by. Matches the page size of the source list. */
 export const MAX_SOURCE_IDS_PER_REQUEST = MAX_SOURCES_PER_PAGE;
 
-const sourceIdSchema = z.string().min(1).max(MAX_ID_LENGTH);
+const sourceIdSchema = lazySchema(() => z.string().min(1).max(MAX_ID_LENGTH));
 
 /** A JSON body list of source ids. */
 export const sourceIdsArraySchema = ({ min, max }: { min: number; max: number }) =>

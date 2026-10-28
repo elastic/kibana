@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   AtomicGraphNodeSchema,
   DataSetGraphNodeSchema,
@@ -61,7 +61,7 @@ import {
   ExitSwitchNodeSchema,
 } from './switch_nodes';
 
-const GraphNodeUnionSchema = z.discriminatedUnion('type', [
+const GraphNodeUnionSchema = lazySchema(() => z.discriminatedUnion('type', [
   SyntheticGraphNodeSchema,
   AtomicGraphNodeSchema,
   DataSetGraphNodeSchema,
@@ -106,6 +106,6 @@ const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   ExitSwitchNodeSchema,
   LoopBreakNodeSchema,
   LoopContinueNodeSchema,
-]);
+]));
 
 export type GraphNodeUnion = z.infer<typeof GraphNodeUnionSchema>;

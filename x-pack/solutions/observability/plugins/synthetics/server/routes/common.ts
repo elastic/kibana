@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { isEmpty } from 'lodash';
 import { escapeQuotes } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -37,24 +37,24 @@ const MAX_FILTER_ITEM_LENGTH = MAX_ROUTE_STRING_LENGTH;
 const MAX_FILTER_ARRAY_SIZE = 1000;
 const MAX_SEARCH_AFTER_SIZE = 50;
 
-const stringOrArray = z
+const stringOrArray = lazySchema(() => z
   .union([
     z.string().max(MAX_FILTER_ITEM_LENGTH),
     z.array(z.string().max(MAX_FILTER_ITEM_LENGTH)).max(MAX_FILTER_ARRAY_SIZE),
   ])
   .optional()
-  .describe('A string or an array of strings.');
+  .describe('A string or an array of strings.'));
 
 const stringOrArrayFilter = (description: string) =>
   stringOrArray.describe(`${description} Accepts a string or an array of strings.`);
 
 const CommonQuerySchema = {
-  query: z.string().max(MAX_ROUTE_STRING_LENGTH).optional().describe('A free-text query string.'),
-  filter: z
+  query: lazySchema(() => z.string().max(MAX_ROUTE_STRING_LENGTH).optional().describe('A free-text query string.')),
+  filter: lazySchema(() => z
     .string()
     .max(MAX_ROUTE_STRING_LENGTH)
     .optional()
-    .describe('Additional KQL filtering criteria.'),
+    .describe('Additional KQL filtering criteria.')),
   tags: stringOrArrayFilter('Tags to filter monitors.'),
   monitorTypes: stringOrArrayFilter('The monitor types to filter by, such as `http`.'),
   locations: stringOrArrayFilter('The location IDs to filter by.'),
@@ -71,32 +71,32 @@ const CommonQuerySchema = {
   showFromAllSpaces: queryBoolean
     .optional()
     .describe('If `true`, return monitors from all spaces the user can access.'),
-  useLogicalAndFor: z
+  useLogicalAndFor: lazySchema(() => z
     .union([
       z.string().max(MAX_FILTER_ITEM_LENGTH),
       z.array(z.enum(useLogicalAndFields)).max(MAX_FILTER_ARRAY_SIZE),
     ])
     .optional()
-    .describe('Apply logical AND for `tags` and/or `locations`. Accepts a string or an array.'),
+    .describe('Apply logical AND for `tags` and/or `locations`. Accepts a string or an array.')),
   // Date-range window for the overview list (see runtime type docs). The
   // overview page always sends these; their presence scopes each monitor's
   // status to the window instead of the default "current status" look-back.
   // Bounded length: these only ever carry a short datemath expression
   // (`now-15m`) or an ISO-8601 timestamp, so cap the input to avoid unbounded
   // strings reaching `datemath.parse` (CodeQL: unbounded string DoS).
-  dateRangeStart: z
+  dateRangeStart: lazySchema(() => z
     .string()
     .max(MAX_DATE_RANGE_LENGTH)
     .optional()
-    .describe('The start of the status window, as datemath (`now-15m`) or an ISO-8601 timestamp.'),
-  dateRangeEnd: z
+    .describe('The start of the status window, as datemath (`now-15m`) or an ISO-8601 timestamp.')),
+  dateRangeEnd: lazySchema(() => z
     .string()
     .max(MAX_DATE_RANGE_LENGTH)
     .optional()
-    .describe('The end of the status window, as datemath (`now`) or an ISO-8601 timestamp.'),
+    .describe('The end of the status window, as datemath (`now`) or an ISO-8601 timestamp.')),
 };
 
-export const QuerySchema = z.strictObject({
+export const QuerySchema = lazySchema(() => z.strictObject({
   ...CommonQuerySchema,
   page: queryNumber.optional().describe('The page number for paginated results.'),
   perPage: queryNumber.optional().describe('The number of items to return per page.'),
@@ -110,11 +110,11 @@ export const QuerySchema = z.strictObject({
     .optional()
     .describe('A JSON array of sort values from the previous page, for cursor-based paging.'),
   internal: queryBoolean.optional().default(false).describe('For internal use only.'),
-});
+}));
 
 export type MonitorsQuery = z.infer<typeof QuerySchema>;
 
-export const OverviewStatusSchema = z.strictObject({
+export const OverviewStatusSchema = lazySchema(() => z.strictObject({
   ...CommonQuerySchema,
   scopeStatusByLocation: queryBoolean.optional(),
   groupByMonitor: queryBoolean.optional(),
@@ -135,16 +135,16 @@ export const OverviewStatusSchema = z.strictObject({
       MONITOR_STATUS_ENUM.DISABLED,
     ])
     .optional(),
-});
+}));
 
 export type OverviewStatusQuery = z.infer<typeof OverviewStatusSchema>;
 
-export const OverviewStatusStaleBodySchema = z.strictObject({
+export const OverviewStatusStaleBodySchema = lazySchema(() => z.strictObject({
   monitorQueryIds: z
     .array(z.string().max(MAX_MONITOR_QUERY_ID_LENGTH))
     .min(1)
     .max(MAX_MONITOR_QUERY_IDS_IN_BODY),
-});
+}));
 
 export type OverviewStatusStaleBody = z.infer<typeof OverviewStatusStaleBodySchema>;
 

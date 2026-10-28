@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   asCodeMetaSchema,
   asCodePaginationParamsSchema,
@@ -31,7 +31,7 @@ export const tagIdParamSchema = z
   })
   .strict();
 
-export const tagAttributesSchema = z
+export const tagAttributesSchema = lazySchema(() => z
   .object({
     name: z.string().min(1).max(256).meta({
       description: 'The display name of the tag.',
@@ -47,16 +47,16 @@ export const tagAttributesSchema = z
   .strict()
   .meta({
     id: 'kbn-tags-attributes',
-  });
+  }));
 
-export const tagRequestAttributesSchema = tagAttributesSchema
+export const tagRequestAttributesSchema = lazySchema(() => tagAttributesSchema
   .extend({
     color: tagAttributesSchema.shape.color.optional(),
   })
   .strict()
   .meta({
     id: 'kbn-tags-request-attributes',
-  });
+  }));
 
 export const tagResponseItemSchema = z
   .object({

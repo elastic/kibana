@@ -9,7 +9,7 @@
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { writeErrorHandler } from '@kbn/as-code-utils';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -23,9 +23,9 @@ import {
 import { isVegaApiEnabled } from '../is_vega_api_enabled';
 import { deleteItem } from './delete';
 
-const deleteRequestParamsSchema = z.object({
+const deleteRequestParamsSchema = lazySchema(() => z.object({
   id: z.string().meta({ description: VEGA_LIBRARY_ITEM_PARAMS_ID_DESCRIPTION }),
-});
+}));
 
 export const registerDeleteRoute = (
   router: VersionedRouter<RequestHandlerContext>,

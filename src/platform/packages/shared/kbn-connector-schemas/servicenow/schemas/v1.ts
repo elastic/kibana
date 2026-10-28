@@ -11,16 +11,16 @@ import { Coerced, validateRecordKeysAllowed, validateRecordMaxKeys } from '../..
 import { DEFAULT_ALERTS_GROUPING_KEY, MAX_ADDITIONAL_FIELDS_LENGTH } from '../constants';
 
 export const ExternalIncidentServiceConfigurationBase = {
-  apiUrl: z.string(),
-  isOAuth: z.boolean().default(false),
-  userIdentifierValue: z.string().nullable().default(null), // required if isOAuth = true
-  clientId: z.string().nullable().default(null), // required if isOAuth = true
-  jwtKeyId: z.string().nullable().default(null), // required if isOAuth = true
+  apiUrl: lazySchema(() => z.string()),
+  isOAuth: lazySchema(() => z.boolean().default(false)),
+  userIdentifierValue: lazySchema(() => z.string().nullable().default(null)), // required if isOAuth = true
+  clientId: lazySchema(() => z.string().nullable().default(null)), // required if isOAuth = true
+  jwtKeyId: lazySchema(() => z.string().nullable().default(null)), // required if isOAuth = true
 };
 
 export const ExternalIncidentServiceConfiguration = {
   ...ExternalIncidentServiceConfigurationBase,
-  usesTableApi: z.boolean().default(true),
+  usesTableApi: lazySchema(() => z.boolean().default(true)),
 };
 
 export const ExternalIncidentServiceConfigurationBaseSchema = lazySchema(() =>
@@ -32,11 +32,11 @@ export const ExternalIncidentServiceConfigurationSchema = lazySchema(() =>
 );
 
 export const ExternalIncidentServiceSecretConfiguration = {
-  password: z.string().nullable().default(null), // required if isOAuth = false
-  username: z.string().nullable().default(null), // required if isOAuth = false
-  clientSecret: z.string().nullable().default(null), // required if isOAuth = true
-  privateKey: z.string().nullable().default(null), // required if isOAuth = true
-  privateKeyPassword: z.string().nullable().default(null),
+  password: lazySchema(() => z.string().nullable().default(null)), // required if isOAuth = false
+  username: lazySchema(() => z.string().nullable().default(null)), // required if isOAuth = false
+  clientSecret: lazySchema(() => z.string().nullable().default(null)), // required if isOAuth = true
+  privateKey: lazySchema(() => z.string().nullable().default(null)), // required if isOAuth = true
+  privateKeyPassword: lazySchema(() => z.string().nullable().default(null)),
 };
 
 export const ExternalIncidentServiceSecretConfigurationSchema = lazySchema(() =>
@@ -58,13 +58,13 @@ export const CommentsSchema = lazySchema(() =>
 );
 
 export const CommonAttributes = {
-  short_description: z.string(),
-  description: z.string().nullable().default(null),
-  externalId: z.string().nullable().default(null),
-  category: z.string().nullable().default(null),
-  subcategory: z.string().nullable().default(null),
-  correlation_id: z.string().nullable().default(DEFAULT_ALERTS_GROUPING_KEY),
-  correlation_display: z.string().nullable().default(null),
+  short_description: lazySchema(() => z.string()),
+  description: lazySchema(() => z.string().nullable().default(null)),
+  externalId: lazySchema(() => z.string().nullable().default(null)),
+  category: lazySchema(() => z.string().nullable().default(null)),
+  subcategory: lazySchema(() => z.string().nullable().default(null)),
+  correlation_id: lazySchema(() => z.string().nullable().default(DEFAULT_ALERTS_GROUPING_KEY)),
+  correlation_display: lazySchema(() => z.string().nullable().default(null)),
   additional_fields: Coerced(
     z
       .record(z.string(), z.any())

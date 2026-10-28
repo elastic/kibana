@@ -7,12 +7,12 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { EvaluationDataset, EvalsClient } from '@kbn/evals';
 import { DatasetTags } from '@kbn/evals-common';
 import { investigationExampleSchema, type InvestigationExample } from './types';
 
-const investigationFileSchema = z.object({
+const investigationFileSchema = lazySchema(() => z.object({
   dataset: z
     .string()
     .min('nightshift/'.length + 1)
@@ -21,7 +21,7 @@ const investigationFileSchema = z.object({
   description: z.string().max(2_000).optional(),
   tags: DatasetTags.default([]),
   examples: z.array(investigationExampleSchema).min(1).max(1_000),
-});
+}));
 
 const assertDistinctCaseIds = (examples: InvestigationExample[]) => {
   const caseIds = new Set<string>();

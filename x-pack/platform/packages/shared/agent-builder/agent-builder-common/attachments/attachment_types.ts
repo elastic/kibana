@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * List of internal / built-in attachment types.
@@ -28,10 +28,10 @@ interface AttachmentDataMap {
   [AttachmentType.image]: ImageAttachmentData;
 }
 
-export const esqlAttachmentDataSchema = z.object({
+export const esqlAttachmentDataSchema = lazySchema(() => z.object({
   query: z.string(),
   description: z.string().optional(),
-});
+}));
 
 /**
  * Data for an esql attachment.
@@ -43,9 +43,9 @@ export interface EsqlAttachmentData {
   description?: string;
 }
 
-export const textAttachmentDataSchema = z.object({
+export const textAttachmentDataSchema = lazySchema(() => z.object({
   content: z.string(),
-});
+}));
 
 /**
  * Data for a text attachment.
@@ -55,10 +55,10 @@ export interface TextAttachmentData {
   content: string;
 }
 
-export const screenContextTimeRangeSchema = z.object({
+export const screenContextTimeRangeSchema = lazySchema(() => z.object({
   from: z.string(),
   to: z.string(),
-});
+}));
 
 export interface TimeRange {
   from: string;
@@ -107,13 +107,13 @@ export interface ScreenContextAttachmentData {
  */
 export const CONNECTOR_TAG_PREFIX = 'connector:';
 
-export const connectorAttachmentDataSchema = z.object({
+export const connectorAttachmentDataSchema = lazySchema(() => z.object({
   connector_id: z.string(),
   connector_name: z.string(),
   connector_type: z.string(),
   /** Explicit allowlist of sub-actions; omit for recommended (isTool) actions. */
   selected_actions: z.array(z.string()).optional(),
-});
+}));
 
 /**
  * Data for a connector attachment.
@@ -140,11 +140,11 @@ export const MAX_IMAGE_BYTES = 3.5 * 1024 * 1024;
 
 export const MAX_IMAGES_PER_ROUND = 10;
 
-export const imageAttachmentDataSchema = z.object({
+export const imageAttachmentDataSchema = lazySchema(() => z.object({
   file_id: z.string().max(1024),
   name: z.string().max(1024),
   mime_type: z.enum(SUPPORTED_IMAGE_MIME_TYPES),
-});
+}));
 
 /**
  * Data for an image attachment.

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export const INTERNAL_ACCESS = 'internal' as const;
 
-export const proposalIdParamsSchema = z.object({
+export const proposalIdParamsSchema = lazySchema(() => z.object({
   id: z.string().min(1).max(256),
-});
+}));
 
-export const reviseProposalParamsSchema = z.object({
+export const reviseProposalParamsSchema = lazySchema(() => z.object({
   proposalId: z.string().min(1).max(256),
-});
+}));

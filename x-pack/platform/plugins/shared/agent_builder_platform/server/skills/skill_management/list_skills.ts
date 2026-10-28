@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
@@ -24,7 +24,7 @@ const projectListedSkill = (skill: InternalSkillDefinition): ListedSkill => ({
   description: skill.description,
 });
 
-const listSkillsSchema = z.object({}).describe('No parameters.');
+const listSkillsSchema = lazySchema(() => z.object({}).describe('No parameters.'));
 
 export const createListSkillsTool = (): BuiltinSkillBoundedTool<typeof listSkillsSchema> => ({
   id: 'list_skills',

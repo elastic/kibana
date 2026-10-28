@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * String schema that rejects Mustache template syntax.
@@ -13,19 +13,19 @@ import { z } from '@kbn/zod/v4';
  * validation APIs, and prevents invalid DSL creation entirely.
  * Checks for `{{` anywhere in the string which makes Mustache active in Ingest Pipelines.
  */
-const NoMustacheString = z
+const NoMustacheString = lazySchema(() => z
   .string()
   .nonempty()
   .refine((val) => val.trim() !== '', 'No empty strings allowed')
   .refine((val) => !val.includes('{{'), {
     message: 'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names',
-  });
+  }));
 
 /**
  * Smart validation that rejects Mustache templates only if the value is a string.
  * Non-string values (numbers, booleans, etc.) pass through since they can't contain templates.
  */
-export const NoMustacheValue = z.unknown().refine(
+export const NoMustacheValue = lazySchema(() => z.unknown().refine(
   (val) => {
     if (typeof val === 'string') {
       return !val.includes('{{');
@@ -35,13 +35,13 @@ export const NoMustacheValue = z.unknown().refine(
   {
     message: 'Mustache template syntax {{ }} or {{{ }}} is not allowed in [value] field',
   }
-);
+));
 
 /**
  * Array validation that rejects Mustache templates in any string elements.
  * Non-string array elements (numbers, booleans, etc.) pass through.
  */
-export const NoMustacheArrayValues = z
+export const NoMustacheArrayValues = lazySchema(() => z
   .array(z.unknown())
   .nonempty()
   .refine(
@@ -56,7 +56,7 @@ export const NoMustacheArrayValues = z
     {
       message: 'Mustache template syntax {{ }} or {{{ }}} is not allowed in array [value] elements',
     }
-  );
+  ));
 
 /**
  * Source field names (from fields) - prevents Mustache templates in field references
@@ -71,4 +71,4 @@ export const StreamlangTargetField = NoMustacheString;
 /**
  * Separator for join and split processors. Allows spaces and other characters.
  */
-export const StreamlangSeparator = z.string().min(1);
+export const StreamlangSeparator = lazySchema(() => z.string().min(1));

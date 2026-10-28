@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -38,7 +38,7 @@ import {
 
 const REPORT_FORMATS = ['summary', 'detailed', 'executive'] as const;
 
-const pciComplianceSchema = z
+const pciComplianceSchema = lazySchema(() => z
   .object({
     mode: z
       .enum(['check', 'report'])
@@ -88,7 +88,7 @@ const pciComplianceSchema = z
   .describe(
     'Run PCI DSS v4.0.1 compliance checks (`mode: check`) or generate a compliance report (`mode: report`). ' +
       'One tool replaces the prior pci_compliance_check / pci_compliance_report pair.'
-  );
+  ));
 
 export const PCI_COMPLIANCE_TOOL_ID = securityTool('pci_compliance');
 

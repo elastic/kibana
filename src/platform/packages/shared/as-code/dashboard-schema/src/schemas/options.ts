@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../constants';
 
-export const optionsSchema = z
+export const optionsSchema = lazySchema(() => z
   .object({
     auto_apply_filters: z.boolean().default(DEFAULT_DASHBOARD_OPTIONS.auto_apply_filters).meta({
       description:
@@ -46,4 +46,4 @@ export const optionsSchema = z
     id: 'kbn-dashboard-options',
     title: 'Options',
     description: 'Display and behavior settings for the dashboard.',
-  });
+  }));

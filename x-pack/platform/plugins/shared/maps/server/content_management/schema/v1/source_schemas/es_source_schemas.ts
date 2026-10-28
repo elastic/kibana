@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { SortDirection } from '@kbn/data-plugin/common/search';
 import { SCALING_TYPES, SOURCE_TYPES } from '../../../../../common';
 
-const applyForceRefreshSchema = z.boolean().default(true).optional().meta({
+const applyForceRefreshSchema = lazySchema(() => z.boolean().default(true).optional().meta({
   description: `When true, results are re-fetched when page's automatic refresh fires or user clicks 'Refresh'.`,
-});
+}));
 
-const narrowByGlobalSearch = z
+const narrowByGlobalSearch = lazySchema(() => z
   .boolean()
   .default(true)
   .optional()
-  .meta({ description: `When true, results narrowed by page's search bar.` });
+  .meta({ description: `When true, results narrowed by page's search bar.` }));
 
-const narrowByGlobalTime = z
+const narrowByGlobalTime = lazySchema(() => z
   .boolean()
   .default(true)
   .optional()
-  .meta({ description: `When true, results narrowed by page's time range.` });
+  .meta({ description: `When true, results narrowed by page's time range.` }));
 
 // base schema for Elasticsearch DSL sources
-export const BaseESSourceSchema = z
+export const BaseESSourceSchema = lazySchema(() => z
   .object({
     applyForceRefresh: applyForceRefreshSchema,
     applyGlobalQuery: narrowByGlobalSearch,
@@ -37,9 +37,9 @@ export const BaseESSourceSchema = z
   .strict()
   .meta({
     description: 'Elasticsearch JSON-based query language state',
-  });
+  }));
 
-export const ESSearchSourceSchema = BaseESSourceSchema.extend({
+export const ESSearchSourceSchema = lazySchema(() => BaseESSourceSchema.extend({
   filterByMapBounds: z.boolean().default(true).optional(),
   geoField: z.string().meta({
     description: 'Field containing indexed geo-point or geo-shape values.',
@@ -87,9 +87,9 @@ export const ESSearchSourceSchema = BaseESSourceSchema.extend({
 }).meta({
   description:
     'Vector tile or vector feature source returning points, lines, and polygons from Elasticsearch documents.',
-});
+}));
 
-export const ESQLSourceSchema = z
+export const ESQLSourceSchema = lazySchema(() => z
   .object({
     applyForceRefresh: applyForceRefreshSchema,
     dateField: z.string().optional().meta({
@@ -113,4 +113,4 @@ export const ESQLSourceSchema = z
   .meta({
     description:
       'Vector feature source returning points, lines, and polygons from Elasticsearch ES|QL request. One feature is returned per response row. Feature geometry is provided from first geo_point or geo_shape column.',
-  });
+  }));

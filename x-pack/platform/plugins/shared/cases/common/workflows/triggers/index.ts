@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { Owner as OwnerSchema } from '../../bundled-types.gen';
 import {
@@ -40,14 +40,14 @@ import {
 
 export const CaseCreatedTriggerId = 'cases.caseCreated' as const;
 
-const baseCaseEventSchema = z.object({
+const baseCaseEventSchema = lazySchema(() => z.object({
   // We're adding `string()` to the union to allow for more lenient runtime checks in test envs.
   // The OwnerSchema is still needed and should not be removed.
   owner: z
     .union([OwnerSchema, z.string().min(1).max(50)])
     .meta({ description: CASE_TRIGGER_EVENT_SCHEMA_OWNER_DESCRIPTION }),
   caseId: z.string().meta({ description: CASE_TRIGGER_EVENT_SCHEMA_CASE_ID_DESCRIPTION }),
-});
+}));
 
 export const caseCreatedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: CaseCreatedTriggerId,
@@ -83,12 +83,12 @@ triggers:
 
 export const CaseUpdatedTriggerId = 'cases.caseUpdated' as const;
 
-const caseUpdatedEventSchema = baseCaseEventSchema.extend({
+const caseUpdatedEventSchema = lazySchema(() => baseCaseEventSchema.extend({
   updatedFields: z
     .array(z.string())
     .optional()
     .meta({ description: CASE_UPDATED_TRIGGER_EVENT_SCHEMA_UPDATED_FIELDS_DESCRIPTION }),
-});
+}));
 
 export const caseUpdatedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: CaseUpdatedTriggerId,
@@ -124,14 +124,14 @@ triggers:
 
 export const CaseStatusUpdatedTriggerId = 'cases.caseStatusUpdated' as const;
 
-const caseStatusUpdatedEventSchema = baseCaseEventSchema.extend({
+const caseStatusUpdatedEventSchema = lazySchema(() => baseCaseEventSchema.extend({
   status: z
     .string()
     .meta({ description: CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_STATUS_DESCRIPTION }),
   previousStatus: z
     .string()
     .meta({ description: CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_DESCRIPTION }),
-});
+}));
 
 export const caseStatusUpdatedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: CaseStatusUpdatedTriggerId,
@@ -170,7 +170,7 @@ triggers:
 
 export const AttachmentsAddedTriggerId = 'cases.attachmentsAdded' as const;
 
-const attachmentsAddedEventSchema = baseCaseEventSchema.extend({
+const attachmentsAddedEventSchema = lazySchema(() => baseCaseEventSchema.extend({
   ids: z
     .array(z.string())
     .meta({ description: ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_IDS_DESCRIPTION }),
@@ -181,7 +181,7 @@ const attachmentsAddedEventSchema = baseCaseEventSchema.extend({
   attachmentType: z
     .string()
     .meta({ description: ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION }),
-});
+}));
 
 export const attachmentsAddedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: AttachmentsAddedTriggerId,
@@ -324,11 +324,11 @@ triggers:
 
 export const CommentsAddedTriggerId = 'cases.commentsAdded' as const;
 
-const CommentsAddedEventSchema = baseCaseEventSchema.extend({
+const CommentsAddedEventSchema = lazySchema(() => baseCaseEventSchema.extend({
   commentIds: z
     .array(z.string())
     .meta({ description: COMMENTS_ADDED_TRIGGER_EVENT_SCHEMA_COMMENT_IDS_DESCRIPTION }),
-});
+}));
 
 export const commentsAddedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: CommentsAddedTriggerId,
@@ -364,11 +364,11 @@ triggers:
 
 export const ExtendedFieldsUpdatedTriggerId = 'cases.extendedFieldsUpdated' as const;
 
-const extendedFieldsUpdatedEventSchema = baseCaseEventSchema.extend({
+const extendedFieldsUpdatedEventSchema = lazySchema(() => baseCaseEventSchema.extend({
   changedFields: z
     .array(z.string())
     .meta({ description: EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_CHANGED_FIELDS_DESCRIPTION }),
-});
+}));
 
 export type ExtendedFieldsUpdatedPayload = z.infer<typeof extendedFieldsUpdatedEventSchema>;
 

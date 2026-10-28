@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, ZodError } from '@kbn/zod/v4';
+import { z, ZodError, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Attributes describing the environment a Scout test target runs in, beyond its
@@ -17,17 +17,17 @@ import { z, ZodError } from '@kbn/zod/v4';
  * method and the attribute into a single '-'-separated pair.
  */
 export const SCOUT_TARGET_ATTRIBUTE_VALUES = ['fips'] as const;
-export const ScoutTargetAttributeSchema = z.enum(SCOUT_TARGET_ATTRIBUTE_VALUES);
+export const ScoutTargetAttributeSchema = lazySchema(() => z.enum(SCOUT_TARGET_ATTRIBUTE_VALUES));
 export type ScoutTargetAttribute = z.infer<typeof ScoutTargetAttributeSchema>;
 
 export const SCOUT_LIMIT_SELECTION_METHOD_VALUES = ['only', 'except'] as const;
-export const ScoutLimitSelectionMethodSchema = z.enum(SCOUT_LIMIT_SELECTION_METHOD_VALUES);
+export const ScoutLimitSelectionMethodSchema = lazySchema(() => z.enum(SCOUT_LIMIT_SELECTION_METHOD_VALUES));
 export type ScoutLimitSelectionMethod = z.infer<typeof ScoutLimitSelectionMethodSchema>;
 
-export const ScoutTestLimitSchema = z.object({
+export const ScoutTestLimitSchema = lazySchema(() => z.object({
   selectionMethod: ScoutLimitSelectionMethodSchema,
   targetAttribute: ScoutTargetAttributeSchema,
-});
+}));
 
 /**
  * A constraint that narrows the test targets a test may run on, based on whether a

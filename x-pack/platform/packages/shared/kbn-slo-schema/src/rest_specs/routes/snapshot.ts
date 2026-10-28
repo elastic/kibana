@@ -4,30 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { sloIdSchema } from '../../schema/slo';
 import { allOrAnyString, dateType, statusSchema } from '../../schema/common';
 import { MAX_DATE_STRING_LENGTH } from '../../schema/limits';
 
-const bulkSnapshotRequestItemSchema = z.object({
+const bulkSnapshotRequestItemSchema = lazySchema(() => z.object({
   id: sloIdSchema,
   instanceId: allOrAnyString.optional(),
-});
+}));
 
-const snapshotErrorBudgetSchema = z.object({
+const snapshotErrorBudgetSchema = lazySchema(() => z.object({
   initial: z.number(),
   consumed: z.number().nullable(),
   remaining: z.number().nullable(),
-});
+}));
 
-const snapshotSummarySchema = z.object({
+const snapshotSummarySchema = lazySchema(() => z.object({
   status: statusSchema,
   sliValue: z.number().nullable(),
   errorBudget: snapshotErrorBudgetSchema,
   good: z.number(),
   total: z.number(),
-});
+}));
 
 const snapshotResultSchema = z.intersection(
   z.object({
@@ -40,27 +40,27 @@ const snapshotResultSchema = z.intersection(
   ])
 );
 
-const bulkSnapshotParamsSchema = z.object({
+const bulkSnapshotParamsSchema = lazySchema(() => z.object({
   body: z.object({
     at: dateType,
     requests: z.array(bulkSnapshotRequestItemSchema),
   }),
-});
+}));
 
-const snapshotResponseSchema = z.object({
+const snapshotResponseSchema = lazySchema(() => z.object({
   at: z.string(),
   results: z.array(snapshotResultSchema),
-});
+}));
 
 // Query params cannot use the `dateType` codec: the OAS query converter rejects
 // codecs whose output is a class instance. The handler converts it to a Date.
-const dateStringQuerySchema = z
+const dateStringQuerySchema = lazySchema(() => z
   .string()
   .max(MAX_DATE_STRING_LENGTH)
   .refine((value) => !isNaN(new Date(value).getTime()), { message: 'Invalid date' })
-  .describe('A date string, for example 2023-01-12T10:03:19.000Z');
+  .describe('A date string, for example 2023-01-12T10:03:19.000Z'));
 
-const getSnapshotParamsSchema = z.object({
+const getSnapshotParamsSchema = lazySchema(() => z.object({
   path: z.object({
     id: sloIdSchema,
   }),
@@ -68,7 +68,7 @@ const getSnapshotParamsSchema = z.object({
     at: dateStringQuerySchema,
     instanceId: allOrAnyString.optional(),
   }),
-});
+}));
 
 type BulkSnapshotRequestItem = z.output<typeof bulkSnapshotRequestItemSchema>;
 type SnapshotSummary = z.output<typeof snapshotSummarySchema>;

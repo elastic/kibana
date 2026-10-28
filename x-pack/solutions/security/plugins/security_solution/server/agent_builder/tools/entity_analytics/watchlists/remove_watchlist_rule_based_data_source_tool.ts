@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -32,7 +32,7 @@ import {
   type ConfirmedDataSourceState,
 } from './data_source_utils';
 
-const schema = z.object({
+const schema = lazySchema(() => z.object({
   watchlistId: z
     .string()
     .min(1)
@@ -44,7 +44,7 @@ const schema = z.object({
     .describe(
       'Which rule-based data source to remove — `store` (entity-store query) or `index` (index correlation). A watchlist may have one of each; pass the one the user means. Use `security.list_watchlist_data_sources` first if unsure which exist.'
     ),
-});
+}));
 
 export const SECURITY_REMOVE_WATCHLIST_RULE_BASED_DATA_SOURCE_TOOL_ID = securityTool(
   'remove_watchlist_rule_based_data_source'

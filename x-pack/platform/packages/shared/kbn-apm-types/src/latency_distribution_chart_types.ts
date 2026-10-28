@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export enum LatencyDistributionChartType {
   transactionLatency = 'transactionLatency',
@@ -14,10 +14,10 @@ export enum LatencyDistributionChartType {
   dependencyLatency = 'dependencyLatency',
 }
 
-export const latencyDistributionChartTypeSchema = z.union([
+export const latencyDistributionChartTypeSchema = lazySchema(() => z.union([
   z.literal(LatencyDistributionChartType.transactionLatency),
   z.literal(LatencyDistributionChartType.spanLatency),
   z.literal(LatencyDistributionChartType.latencyCorrelations),
   z.literal(LatencyDistributionChartType.failedTransactionsCorrelations),
   z.literal(LatencyDistributionChartType.dependencyLatency),
-]);
+]));

@@ -56,11 +56,11 @@ export const ExecutorSubActionPushParamsSchema = lazySchema(() =>
 );
 
 export const PushToServiceIncidentSchema = {
-  title: z.string(),
-  description: z.string(),
-  severity: z.coerce.number().nullable().default(null),
-  tlp: z.coerce.number().nullable().default(null),
-  tags: z.array(z.string()).nullable().default(null),
+  title: lazySchema(() => z.string()),
+  description: lazySchema(() => z.string()),
+  severity: lazySchema(() => z.coerce.number().nullable().default(null)),
+  tlp: lazySchema(() => z.coerce.number().nullable().default(null)),
+  tags: lazySchema(() => z.array(z.string()).nullable().default(null)),
 };
 
 export const ExecutorSubActionGetIncidentParamsSchema = lazySchema(() =>

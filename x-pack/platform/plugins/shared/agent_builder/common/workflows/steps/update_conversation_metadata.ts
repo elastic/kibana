@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +16,7 @@ import {
 
 export const UpdateConversationMetadataStepTypeId = 'ai.conversation.metadata.patch';
 
-const InputSchema = z.object({
+const InputSchema = lazySchema(() => z.object({
   conversation_id: z
     .string()
     .meta({
@@ -44,9 +44,9 @@ const InputSchema = z.object({
       description:
         'Key/value pairs to merge into the conversation metadata. Only keys defined by the active template are accepted. Existing keys not included here are left unchanged.',
     }),
-});
+}));
 
-const OutputSchema = z.object({
+const OutputSchema = lazySchema(() => z.object({
   conversation_id: z.string().meta({ description: 'The ID of the updated conversation.' }),
   changed_fields: z.array(z.string()).meta({
     description:
@@ -55,7 +55,7 @@ const OutputSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).meta({
     description: 'The full conversation metadata after applying the patch.',
   }),
-});
+}));
 
 type UpdateConversationMetadataInputSchema = typeof InputSchema;
 type UpdateConversationMetadataOutputSchema = typeof OutputSchema;

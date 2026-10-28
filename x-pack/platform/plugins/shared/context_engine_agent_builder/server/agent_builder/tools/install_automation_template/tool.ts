@@ -10,7 +10,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
@@ -52,7 +52,7 @@ const REQUIRED_TEMPLATE_FIELDS = {
 const findDuplicate = (values: readonly string[]): string | undefined =>
   values.find((item, position) => values.indexOf(item) !== position);
 
-const installAutomationTemplateSchema = z
+const installAutomationTemplateSchema = lazySchema(() => z
   .object({
     template: z
       .enum(['document_orchestration', 'index_metadata', 'unit_profile', 'targeted_ki_writer'])
@@ -280,7 +280,7 @@ const installAutomationTemplateSchema = z
         path: ['sourceIndex'],
       });
     }
-  });
+  }));
 
 type InstallAutomationTemplateInput = z.infer<typeof installAutomationTemplateSchema>;
 

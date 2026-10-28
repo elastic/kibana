@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   compositeRuntimeFieldSchema,
   primitiveRuntimeFieldSchema,
@@ -23,16 +23,16 @@ import {
   nameSchema,
 } from './common';
 
-export const fieldSettingsSchema = z
+export const fieldSettingsSchema = lazySchema(() => z
   .union([compositeRuntimeFieldSchema, primitiveRuntimeFieldSchema, fieldSettingsBaseSchema])
   .meta({
     id: 'kbn-field-settings-entry',
     title: 'Field settings or runtime field',
     description:
       'Display overrides for an indexed field, or a runtime field definition when `type` is set to a runtime field kind.',
-  });
+  }));
 
-export const dataViewReferenceSchema = z
+export const dataViewReferenceSchema = lazySchema(() => z
   .object({
     type: z.literal(AS_CODE_DATA_VIEW_REFERENCE_TYPE),
     ref_id: z.string().meta({
@@ -41,9 +41,9 @@ export const dataViewReferenceSchema = z
     }),
   })
   .strict()
-  .meta({ id: 'kbn-data-view-reference-schema', title: 'Data view reference' });
+  .meta({ id: 'kbn-data-view-reference-schema', title: 'Data view reference' }));
 
-export const dataViewSpecSchema = z
+export const dataViewSpecSchema = lazySchema(() => z
   .object({
     type: z.literal(AS_CODE_DATA_VIEW_SPEC_TYPE),
     name: nameSchema,
@@ -58,9 +58,9 @@ export const dataViewSpecSchema = z
     }),
   })
   .strict()
-  .meta({ id: 'kbn-data-view-spec-schema', title: 'Data view inline spec' });
+  .meta({ id: 'kbn-data-view-spec-schema', title: 'Data view inline spec' }));
 
-export const dataViewSchema = z.discriminatedUnion('type', [
+export const dataViewSchema = lazySchema(() => z.discriminatedUnion('type', [
   dataViewReferenceSchema,
   dataViewSpecSchema,
-]);
+]));

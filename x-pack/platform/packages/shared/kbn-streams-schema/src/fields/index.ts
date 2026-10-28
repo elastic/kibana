@@ -26,7 +26,7 @@ import type {
   MappingVersionProperty,
   MappingWildcardProperty,
 } from '@elastic/elasticsearch/lib/api/types';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NonEmptyString } from '@kbn/zod-helpers/v4';
 
 import { recursiveRecord, boundedJsonValue } from '../shared/record_types';
@@ -86,7 +86,7 @@ export type FieldDefinitionConfigAdvancedParameters = Omit<
   'type' | 'format' | 'description'
 >;
 
-export const fieldDefinitionConfigSchema = (
+export const fieldDefinitionConfigSchema = lazySchema(() => (
   z.intersection(
     recursiveRecord,
     z.union([
@@ -107,7 +107,7 @@ export const fieldDefinitionConfigSchema = (
       }),
     ])
   ) as z.ZodType<FieldDefinitionConfig>
-).meta({ id: 'FieldDefinitionConfig' });
+).meta({ id: 'FieldDefinitionConfig' }));
 
 export interface FieldDefinition {
   [x: string]: FieldDefinitionConfig;
@@ -139,9 +139,9 @@ export function isMappingProperties(value: FieldDefinition): value is StreamsMap
   return Object.values(value).every((prop) => Boolean(prop.type) && prop.type !== 'system');
 }
 
-export const fieldDefinitionSchema: z.Schema<FieldDefinition> = z
+export const fieldDefinitionSchema: z.Schema<FieldDefinition> = lazySchema(() => z
   .record(z.string(), fieldDefinitionConfigSchema)
-  .meta({ id: 'FieldDefinition' });
+  .meta({ id: 'FieldDefinition' }));
 
 /**
  * Schema for classic stream field overrides.
@@ -159,7 +159,7 @@ export type ClassicFieldDefinitionConfig =
       description?: string;
     };
 
-export const classicFieldDefinitionConfigSchema = (
+export const classicFieldDefinitionConfigSchema = lazySchema(() => (
   z.intersection(
     recursiveRecord,
     z.union([
@@ -174,15 +174,15 @@ export const classicFieldDefinitionConfigSchema = (
       }),
     ])
   ) as z.ZodType<ClassicFieldDefinitionConfig>
-).meta({ id: 'ClassicFieldDefinitionConfig' });
+).meta({ id: 'ClassicFieldDefinitionConfig' }));
 
 export interface ClassicFieldDefinition {
   [x: string]: ClassicFieldDefinitionConfig;
 }
 
-export const classicFieldDefinitionSchema: z.Schema<ClassicFieldDefinition> = z
+export const classicFieldDefinitionSchema: z.Schema<ClassicFieldDefinition> = lazySchema(() => z
   .record(z.string(), classicFieldDefinitionConfigSchema)
-  .meta({ id: 'ClassicFieldDefinition' });
+  .meta({ id: 'ClassicFieldDefinition' }));
 
 export type InheritedFieldDefinitionConfig = FieldDefinitionConfig & {
   from: string;
@@ -193,7 +193,7 @@ export interface InheritedFieldDefinition {
   [x: string]: InheritedFieldDefinitionConfig;
 }
 
-export const inheritedFieldDefinitionSchema: z.Schema<InheritedFieldDefinition> = z
+export const inheritedFieldDefinitionSchema: z.Schema<InheritedFieldDefinition> = lazySchema(() => z
   .record(
     z.string(),
     z.intersection(
@@ -204,7 +204,7 @@ export const inheritedFieldDefinitionSchema: z.Schema<InheritedFieldDefinition> 
       })
     )
   )
-  .meta({ id: 'InheritedFieldDefinition' });
+  .meta({ id: 'InheritedFieldDefinition' }));
 
 export type NamedFieldDefinitionConfig = FieldDefinitionConfig & {
   name: string;

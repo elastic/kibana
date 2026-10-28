@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
@@ -32,7 +32,7 @@ export const MAX_ENTITIES = 100;
 export const MAX_ALERT_ENTITY_ID_LENGTH = 256;
 export const MAX_ALERT_ENTITY_NAME_LENGTH = 512;
 
-export const getAlertEntitiesInputSchema = z.object({
+export const getAlertEntitiesInputSchema = lazySchema(() => z.object({
   alert_ids: z
     .array(z.string().min(1).max(MAX_ALERT_ID_LENGTH))
     .min(1)
@@ -60,9 +60,9 @@ export const getAlertEntitiesInputSchema = z.object({
     .describe(
       `The most entities to return, most-alerted first (default: ${DEFAULT_MAX_ENTITIES}, max: ${MAX_ENTITIES})`
     ),
-});
+}));
 
-export const getAlertEntitiesOutputSchema = z.object({
+export const getAlertEntitiesOutputSchema = lazySchema(() => z.object({
   entities: z
     .array(
       z.object({
@@ -81,7 +81,7 @@ export const getAlertEntitiesOutputSchema = z.object({
     .describe('The entities, most-alerted first, ties broken by id'),
   total: z.number().int().describe('How many distinct entities the alerts reference'),
   truncated: z.boolean().describe('Whether `entities` holds fewer than `total`'),
-});
+}));
 
 export const getAlertEntitiesStepCommonDefinition: BaseStepDefinition<
   typeof getAlertEntitiesInputSchema,

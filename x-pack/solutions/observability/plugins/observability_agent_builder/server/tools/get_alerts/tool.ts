@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
@@ -52,7 +52,7 @@ export const defaultFields = [
   'transaction.name',
 ];
 
-const getAlertsSchema = z.object({
+const getAlertsSchema = lazySchema(() => z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   kqlFilter: z
     .string()
@@ -71,7 +71,7 @@ const getAlertsSchema = z.object({
     .describe(
       'Fields to include in the alert documents. Use to request specific fields like "error.message" or "url.full".'
     ),
-});
+}));
 
 export function createGetAlertsTool({
   core,

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import {
   ESQL_VALID_RUNTIME_VERIFIER_ID,
@@ -32,7 +32,7 @@ export const MAX_KI_VERIFIER_TIMEOUT_SEC = 300;
 export const DEFAULT_KI_VERIFIER_STEP_TIMEOUT_SEC = 300;
 export const MAX_KI_VERIFIER_STEP_TIMEOUT_SEC = MAX_KI_VERIFIERS * MAX_KI_VERIFIER_TIMEOUT_SEC;
 
-export const kiVerifierWorkflowSchema = z.object({
+export const kiVerifierWorkflowSchema = lazySchema(() => z.object({
   workflow_id: z
     .string()
     .min(1)
@@ -64,11 +64,11 @@ export const kiVerifierWorkflowSchema = z.object({
     })
     .optional()
     .describe('When omitted, the verifier runs for every KI'),
-});
+}));
 
 export type KiVerifierWorkflow = z.infer<typeof kiVerifierWorkflowSchema>;
 
-export const kiVerifierEntrySchema = z.union([z.enum(KI_VERIFIER_IDS), kiVerifierWorkflowSchema]);
+export const kiVerifierEntrySchema = lazySchema(() => z.union([z.enum(KI_VERIFIER_IDS), kiVerifierWorkflowSchema]));
 
 export type KiVerifierEntry = z.infer<typeof kiVerifierEntrySchema>;
 
@@ -76,7 +76,7 @@ export type KiVerifierEntry = z.infer<typeof kiVerifierEntrySchema>;
 export const getKiVerifierEntryKey = (entry: KiVerifierEntry): string =>
   typeof entry === 'string' ? entry : `${WORKFLOW_VERIFIER_ID_PREFIX}${entry.workflow_id}`;
 
-export const kiVerifiersSchema = z
+export const kiVerifiersSchema = lazySchema(() => z
   .array(kiVerifierEntrySchema)
   .min(1)
   .max(MAX_KI_VERIFIERS)
@@ -85,9 +85,9 @@ export const kiVerifiersSchema = z
   })
   .describe(
     'The verifiers to run, in order: built-in verifier ids and custom verifier workflows (`workflow_id`). At least one unique entry is required.'
-  );
+  ));
 
-export const VerifyKiInputSchema = z.object({
+export const VerifyKiInputSchema = lazySchema(() => z.object({
   ki: kiPartialFieldsSchema,
   ai_index_id: aiIndexIdSchema.optional().describe('AI index the KI belongs to'),
   total_timeout_sec: z
@@ -100,9 +100,9 @@ export const VerifyKiInputSchema = z.object({
       `Total seconds to wait for all verifiers before aborting the step (default ${DEFAULT_KI_VERIFIER_STEP_TIMEOUT_SEC})`
     ),
   verifiers: kiVerifiersSchema,
-});
+}));
 
-export const VerifyKiOutputSchema = z.object({
+export const VerifyKiOutputSchema = lazySchema(() => z.object({
   passed: z.boolean(),
   results: z.array(
     z.object({
@@ -111,7 +111,7 @@ export const VerifyKiOutputSchema = z.object({
       reason: z.string().optional(),
     })
   ),
-});
+}));
 
 export type VerifyKiInputSchemaType = typeof VerifyKiInputSchema;
 export type VerifyKiOutputSchemaType = typeof VerifyKiOutputSchema;

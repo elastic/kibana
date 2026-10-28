@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import { createReasoningEvent } from '@kbn/agent-builder-genai-utils/langchain';
@@ -20,13 +20,13 @@ import { toCurrentRun, type StateType, type StateUpdate } from './state';
 import { processStructuredAnswerResponse } from './response_processing';
 import { countNonTodosSteps } from './step_state';
 
-const structuredOutputZodSchema = z.object({
+const structuredOutputZodSchema = lazySchema(() => z.object({
   response: z.string().describe("The response to the user's query"),
   data: z
     .record(z.string(), z.unknown())
     .optional()
     .describe('Optional structured data to include in the response'),
-});
+}));
 
 const { $schema: _$schema, ...structuredOutputSchema } = z.toJSONSchema(structuredOutputZodSchema, {
   io: 'input',

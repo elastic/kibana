@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { ALL_VALUE, SLO_STATUS } from '../constants';
 import { MAX_DATE_STRING_LENGTH } from './limits';
 
-const allOrAnyString = z.union([z.literal(ALL_VALUE), z.string()]);
+const allOrAnyString = lazySchema(() => z.union([z.literal(ALL_VALUE), z.string()]));
 
-const allOrAnyStringOrArray = z.union([allOrAnyString, z.array(allOrAnyString)]);
+const allOrAnyStringOrArray = lazySchema(() => z.union([allOrAnyString, z.array(allOrAnyString)]));
 
 /**
  * Codec between a wire-form date string and a `Date` instance.
@@ -43,7 +43,7 @@ const dateType = z.codec(
   }
 );
 
-const errorBudgetSchema = z
+const errorBudgetSchema = lazySchema(() => z
   .object({
     initial: z.number().describe('The initial error budget, as 1 - objective'),
     consumed: z
@@ -58,11 +58,11 @@ const errorBudgetSchema = z
         'Only for SLO defined with occurrences budgeting method and calendar aligned time window.'
       ),
   })
-  .meta({ id: 'SLOErrorBudget' });
+  .meta({ id: 'SLOErrorBudget' }));
 
-const statusSchema = z.enum(SLO_STATUS).meta({ id: 'SLOSummaryStatus' });
+const statusSchema = lazySchema(() => z.enum(SLO_STATUS).meta({ id: 'SLOSummaryStatus' }));
 
-const summarySchema = z
+const summarySchema = lazySchema(() => z
   .object({
     status: statusSchema,
     sliValue: z.number(),
@@ -72,11 +72,11 @@ const summarySchema = z
     oneDayBurnRate: z.number(),
     summaryUpdatedAt: z.string().nullable().optional(),
   })
-  .meta({ id: 'SLOSummary', description: 'The SLO computed data' });
+  .meta({ id: 'SLOSummary', description: 'The SLO computed data' }));
 
-const groupingsSchema = z.record(z.string(), z.union([z.string(), z.number()]));
+const groupingsSchema = lazySchema(() => z.record(z.string(), z.union([z.string(), z.number()])));
 
-const metaSchema = z.object({
+const metaSchema = lazySchema(() => z.object({
   synthetics: z
     .object({
       monitorId: z.string(),
@@ -84,14 +84,14 @@ const metaSchema = z.object({
       configId: z.string(),
     })
     .optional(),
-});
+}));
 
-const remoteSchema = z.object({
+const remoteSchema = lazySchema(() => z.object({
   remoteName: z.string(),
   kibanaUrl: z.string(),
-});
+}));
 
-const groupSummarySchema = z.object({
+const groupSummarySchema = lazySchema(() => z.object({
   total: z.number(),
   worst: z.object({
     sliValue: z.number(),
@@ -107,12 +107,12 @@ const groupSummarySchema = z.object({
   healthy: z.number(),
   degrading: z.number(),
   noData: z.number(),
-});
+}));
 
-const dateRangeSchema = z.object({
+const dateRangeSchema = lazySchema(() => z.object({
   from: dateType,
   to: dateType,
-});
+}));
 
 export {
   allOrAnyString,

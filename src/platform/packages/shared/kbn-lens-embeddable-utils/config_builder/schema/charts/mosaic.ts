@@ -29,7 +29,7 @@ import {
 import { groupIsNotCollapsed } from '../../utils';
 
 const mosaicConfigSharedShape = {
-  legend: z
+  legend: lazySchema(() => z
     .object({
       nested: legendNestedSchema,
       truncate_after_lines: legendTruncateAfterLinesSchema,
@@ -43,7 +43,7 @@ const mosaicConfigSharedShape = {
       id: 'visMosaicLegend',
       title: 'Legend',
       description: 'Legend configuration for mosaic chart appearance and behavior',
-    }),
+    })),
 };
 
 const mosaicStylingSchema = lazySchema(() =>

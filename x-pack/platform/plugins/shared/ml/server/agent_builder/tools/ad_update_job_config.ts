@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -18,20 +18,20 @@ import { hasMlCapabilitiesProvider } from '../../lib/capabilities/check_capabili
 import type { BuildMlClientFn } from '../ml_client_factory';
 import { AD_UPDATE_JOB_CONFIG_TOOL_ID } from './tool_ids';
 
-const calendarEventSchema = z.object({
+const calendarEventSchema = lazySchema(() => z.object({
   start_time: z.string().describe('ISO 8601 start time.'),
   end_time: z.string().describe('ISO 8601 end time.'),
   description: z.string().describe('Description of the scheduled event.'),
-});
+}));
 
 type CalendarEventInput = z.infer<typeof calendarEventSchema>;
 
-const delayedDataCheckSchema = z.object({
+const delayedDataCheckSchema = lazySchema(() => z.object({
   enabled: z.boolean(),
   check_window: z.string().optional().describe('Duration string, e.g. "2h".'),
-});
+}));
 
-const schema = z.object({
+const schema = lazySchema(() => z.object({
   operation: z.enum([
     'update_memory_limit',
     'update_query_delay',
@@ -78,7 +78,7 @@ const schema = z.object({
     .describe(
       'Optional for create_calendar_event. Calendar ID to create or update. Defaults to "calendar-{first_job_id}".'
     ),
-});
+}));
 
 const isAlreadyExistsError = (err: unknown): boolean => {
   if (!err || typeof err !== 'object') {

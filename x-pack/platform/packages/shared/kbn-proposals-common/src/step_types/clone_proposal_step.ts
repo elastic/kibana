@@ -8,22 +8,22 @@
 import { i18n } from '@kbn/i18n';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { optionalStepInput } from './optional_step_input';
 
 export const CloneProposalStepId = 'proposals.cloneProposal' as const;
 
-export const cloneProposalStepInputSchema = z.object({
+export const cloneProposalStepInputSchema = lazySchema(() => z.object({
   proposalId: z.string().describe('Proposal to supersede.'),
   executionError: optionalStepInput(z.string()).describe(
     'Why the original failed, recorded on it alongside the supersession.'
   ),
-});
+}));
 
-export const cloneProposalStepOutputSchema = z.object({
+export const cloneProposalStepOutputSchema = lazySchema(() => z.object({
   /** The new proposal. The original now points at it via `supersededBy`. */
   proposalId: z.string(),
-});
+}));
 
 export const cloneProposalStepCommonDefinition: BaseStepDefinition<
   typeof cloneProposalStepInputSchema,

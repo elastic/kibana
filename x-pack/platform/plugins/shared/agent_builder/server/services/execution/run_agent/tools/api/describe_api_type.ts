@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { stringify as stringifyYaml } from 'yaml';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { ApiTarget } from '@kbn/agent-builder-common';
@@ -25,7 +25,7 @@ export interface ApiDescribeTypeResultData {
   expandable_types: string[];
 }
 
-const describeApiTypeSchema = z.object({
+const describeApiTypeSchema = lazySchema(() => z.object({
   target: targetSchema,
   api: z
     .string()
@@ -43,7 +43,7 @@ const describeApiTypeSchema = z.object({
         '(e.g. ["_types.query_dsl__QueryContainer", "_types.aggregations__AggregationContainer"]). ' +
         'Pass every type you still need in one call rather than calling this tool repeatedly.'
     ),
-});
+}));
 
 export const createDescribeApiTypeTool = ({
   discoveryEnabled,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import {
   serializedTimeRangeSchema,
@@ -13,7 +13,7 @@ import {
 } from '@kbn/presentation-publishing-schemas';
 import { MAX_STRING_LENGTH } from '../constants';
 
-export const severityThresholdSchema = z.union([
+export const severityThresholdSchema = lazySchema(() => z.union([
   z
     .object({
       min: z.literal(ML_ANOMALY_THRESHOLD.LOW),
@@ -45,11 +45,11 @@ export const severityThresholdSchema = z.union([
       min: z.number().min(0).max(100),
     })
     .strict(),
-]);
+]));
 
 export type SeverityThreshold = z.output<typeof severityThresholdSchema>;
 
-export const anomalyChartsEmbeddableStateSchema = z
+export const anomalyChartsEmbeddableStateSchema = lazySchema(() => z
   .object({
     ...serializedTitlesSchema.shape,
     ...serializedTimeRangeSchema.shape,
@@ -67,6 +67,6 @@ export const anomalyChartsEmbeddableStateSchema = z
   .meta({
     id: 'ml_anomaly_charts',
     description: 'Anomaly Charts embeddable',
-  });
+  }));
 
 export type AnomalyChartsEmbeddableState = z.output<typeof anomalyChartsEmbeddableStateSchema>;

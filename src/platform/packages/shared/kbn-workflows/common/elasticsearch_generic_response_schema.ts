@@ -7,22 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Basic _shards info, appears in many responses
  */
-export const EsShardsInfoSchema = z.object({
+export const EsShardsInfoSchema = lazySchema(() => z.object({
   total: z.number(),
   successful: z.number(),
   failed: z.number(),
   skipped: z.number().optional(),
-});
+}));
 
 /**
  * A generic document source – override with your own schema
  */
-export const EsHitSourceSchema = z.record(z.string(), z.unknown());
+export const EsHitSourceSchema = lazySchema(() => z.record(z.string(), z.unknown()));
 
 /**
  * Generic hit (for search, msearch, etc.)
@@ -43,7 +43,7 @@ export const EsHitSchema = z
 /**
  * `hits` container used in search-like APIs
  */
-export const EsHitsSchema = z.object({
+export const EsHitsSchema = lazySchema(() => z.object({
   total: z
     .union([
       z.number(),
@@ -55,7 +55,7 @@ export const EsHitsSchema = z.object({
     .optional(),
   max_score: z.number().nullable().optional(),
   hits: z.array(EsHitSchema),
-});
+}));
 
 /**
  * Single bucket; appears inside many agg responses
@@ -76,7 +76,7 @@ export const EsAggregationBucketSchema = z
  * - or “thing with buckets”
  * - or fallback to unknown
  */
-export const EsAggregationsSchema = z
+export const EsAggregationsSchema = lazySchema(() => z
   .record(
     z.string(),
     z.union([
@@ -96,7 +96,7 @@ export const EsAggregationsSchema = z
       z.unknown(),
     ])
   )
-  .optional();
+  .optional());
 
 /**
  * A generic Elasticsearch JSON response.
