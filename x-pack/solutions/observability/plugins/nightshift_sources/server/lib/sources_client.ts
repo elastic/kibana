@@ -130,7 +130,6 @@ export class SourcesClient {
       type,
       slug,
       view_name: getNightshiftSourceViewName(this.deps.spaceId, slug),
-      enabled: true,
       created_by: username,
       created_at: now,
       updated_at: now,

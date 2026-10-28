@@ -779,4 +779,23 @@ describe('durable source revision reconciliation', () => {
     await reconcile();
     expect(state.onboardingScheduled).toBe(false);
   });
+
+  it('starts no run for a source created disabled, and exactly one when it is first enabled', async () => {
+    const { reconcile, source, state, scheduleSourceOnboarding } = setup();
+    state.revision = undefined;
+    state.onboardingScheduled = false;
+    source.enabled = false;
+
+    await reconcile();
+    expect(scheduleSourceOnboarding).not.toHaveBeenCalled();
+    expect(state).toMatchObject({ revision: 'revision-2', onboardingScheduled: false });
+
+    source.enabled = true;
+    await reconcile();
+    expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
+    expect(state.onboardingScheduled).toBe(true);
+
+    await reconcile();
+    expect(scheduleSourceOnboarding).toHaveBeenCalledTimes(1);
+  });
 });
