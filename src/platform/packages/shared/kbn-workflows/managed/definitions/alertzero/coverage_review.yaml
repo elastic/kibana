@@ -564,7 +564,7 @@ steps:
         {%- endif %}
       gap_block: |-
         **Detection gap**
-        {% if steps.gap.output.technique != null and steps.gap.output.technique != '' %}ATT&CK technique: {{ steps.gap.output.technique }}
+        {% if steps.gap.output.technique != null and steps.gap.output.technique != '' %}ATT&CK technique: {{ steps.gap.output.technique }}{% if steps.coverage_check.output.structured_output.technique_matches == false %} (does not match the content, so the check ignored it){% endif %}
         {% endif %}{{ steps.gap.output.description }}
         {% if steps.gap.output.evidence != null and steps.gap.output.evidence != '' %}
         **Evidence**

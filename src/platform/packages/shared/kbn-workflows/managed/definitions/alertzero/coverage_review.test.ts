@@ -892,6 +892,27 @@ describe('Detection Coverage review', () => {
       }
     );
 
+    // The gap evidence still shows the technique Hunt reported, but a mismatch gets
+    // a note, so the analyst does not read the wrong label as the rule's mapping.
+    it.each([
+      [true, false],
+      [false, true],
+    ])('notes a mismatched technique in the gap evidence (matches: %s)', (matches, noted) => {
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
+        String(withOf('compose_evidence')?.gap_block),
+        {
+          steps: {
+            gap: { output: { technique: 'T1110', description: 'LSASS memory dump', evidence: '' } },
+            coverage_check: { output: { structured_output: { technique_matches: matches } } },
+          },
+        }
+      );
+      expect(rendered).toContain('ATT&CK technique: T1110');
+      expect(rendered.includes('(does not match the content, so the check ignored it)')).toBe(
+        noted
+      );
+    });
+
     // A step that dies takes the run with it, so the human never learns what happened.
     // Every step that calls out must let the run reach `emit_result` and report the truth.
     it.each([
