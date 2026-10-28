@@ -70,15 +70,9 @@ export class InspectorService extends FtrService {
    */
   public async close(): Promise<void> {
     this.log.debug('Close Inspector');
-    let isOpen = await this.testSubjects.exists('inspectorPanel');
-    if (isOpen) {
-      await this.retry.try(async () => {
-        await this.flyout.close('inspectorPanel');
-        isOpen = await this.testSubjects.exists('inspectorPanel');
-        if (isOpen) {
-          throw new Error('Failed to close inspector');
-        }
-      });
+    // `exists` defaults to a displayed probe, which reads a mounted flyout as already closed.
+    if (await this.testSubjects.exists('inspectorPanel', { allowHidden: true })) {
+      await this.flyout.close('inspectorPanel');
     }
   }
 
