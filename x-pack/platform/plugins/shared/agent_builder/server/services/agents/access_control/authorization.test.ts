@@ -9,7 +9,6 @@ import {
   agentBuilderDefaultAgentId,
   AgentAccessControlMode,
   AgentAccessControlRole,
-  serviceAccountUserId,
   type AgentAccessControlEntry,
   type CurrentUser,
   type UserIdAndName,
@@ -311,49 +310,6 @@ describe('agent access-control authorization', () => {
 
 describe('bound service accounts', () => {
   const privateAccess = { access_mode: AgentAccessControlMode.Private, entries: [] };
-  const boundAccount: CurrentUser = {
-    id: serviceAccountUserId('kibana/sa-1'),
-    username: 'kibana/sa-1',
-    type: 'service_account',
-    isAdmin: false,
-  };
-
-  it('grants the bound service account User access to its own private agent', () => {
-    const args = {
-      accessControl: privateAccess,
-      owner,
-      currentUser: boundAccount,
-      boundServiceAccountId: 'kibana/sa-1',
-    };
-    expect(getEffectiveAgentRole(args)).toBe(AgentAccessControlRole.User);
-    expect(hasAgentUseAccess(args)).toBe(true);
-    expect(hasAgentWriteAccess(args)).toBe(false);
-  });
-
-  it('grants nothing to another service account or an unbound agent', () => {
-    expect(
-      getEffectiveAgentRole({
-        accessControl: privateAccess,
-        owner,
-        currentUser: boundAccount,
-        boundServiceAccountId: 'kibana/sa-2',
-      })
-    ).toBeUndefined();
-    expect(
-      getEffectiveAgentRole({ accessControl: privateAccess, owner, currentUser: boundAccount })
-    ).toBeUndefined();
-  });
-
-  it('does not treat a human whose id looks like the account as the bound account', () => {
-    expect(
-      getEffectiveAgentRole({
-        accessControl: privateAccess,
-        owner,
-        currentUser: { ...boundAccount, type: 'user' },
-        boundServiceAccountId: 'kibana/sa-1',
-      })
-    ).toBeUndefined();
-  });
 
   describe('canConfigureAgentExecutionIdentity', () => {
     it('requires write access and manage_security, and never the default agent', () => {

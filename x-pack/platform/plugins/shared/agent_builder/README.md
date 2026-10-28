@@ -200,14 +200,14 @@ that owns it, through the agent registry on the start contract:
 
 ```ts
 const registry = await agentBuilder.agents.getRegistry({ request });
-await registry.update(agentId, { service_account_id: 'kibana/my-account' }); // `null` unbinds
+await registry.setServiceAccount(agentId, 'kibana/my-account'); // `null` unbinds
 ```
 
 The request must belong to a user with write access to the agent and the `manage_security`
-privilege, because Core creates the binding under that user. There is no HTTP API for binding
-until the UI manages it (tracked in
-[elastic/kibana#300118](https://github.com/elastic/kibana/issues/300118)); the agent editor shows
-the binding read-only. The agent then runs every conversation with that account's permissions,
+privilege, because Core creates the binding under that user. The binding is not part of the
+agent update request: there is no HTTP API for it until the UI manages it (tracked in
+[elastic/kibana#300118](https://github.com/elastic/kibana/issues/300118)), and the agent editor
+shows it read-only. The agent then runs every conversation with that account's permissions,
 whoever started it; the conversation owner and round authors stay the caller.
 
 - Binding, replacing or removing the account needs write access to the agent and the
@@ -219,9 +219,14 @@ whoever started it; the conversation owner and round authors stay the caller.
   `all`). A caller without it is refused with a 403 and never falls back to their own identity.
   Grant it to the service account the Slack relay or a workflow uses to call bound agents.
 - Bound runs execute through Task Manager with the account's short-lived token, minted by Core's
-  service account workload bindings; the agent only stores the account id. A request that already
-  runs as the bound account (a workflow step or a parent agent under the same account) runs the
-  agent inline instead of nesting a second task.
+  service account workload bindings. Core's binding is the authority: the agent only stores the
+  account id, so the dispatcher and the UI know it is bound, and a mismatch between the two fails
+  the run at mint. A request that already runs as the bound account (a workflow step or a parent
+  agent under the same account) runs the agent inline instead of nesting a second task.
+- The account holds no access to agents of its own. A run resolves the agent it was dispatched
+  for without consulting access control, since the caller's access was checked at dispatch, and
+  refuses to continue if the agent is no longer bound to that account. Anything else the run
+  looks up, such as sub-agents, is subject to the account's own access.
 
 ## Hooks
 

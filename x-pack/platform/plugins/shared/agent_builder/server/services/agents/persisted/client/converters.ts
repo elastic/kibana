@@ -155,7 +155,7 @@ export const updateRequestToEs = ({
   user?: UserIdAndName;
 }): AgentProperties => {
   const currentConfig = currentProps.configuration ?? currentProps.config;
-  const { configuration, access_control, service_account_id, ...restUpdate } = update;
+  const { configuration, access_control, ...restUpdate } = update;
   const { approvals: nextApprovals, ...restConfiguration } = configuration ?? {};
   const currentAccessControl = normalizeAccessControl(currentProps);
 
@@ -183,13 +183,6 @@ export const updateRequestToEs = ({
     ...(user && { updated_by_id: user.id, updated_by_name: user.username }),
     updated_at: updateDate.toISOString(),
   };
-
-  // `null` removes the binding reference, a string replaces it, `undefined` keeps it.
-  if (service_account_id === null) {
-    delete updated.service_account_id;
-  } else if (service_account_id !== undefined) {
-    updated.service_account_id = service_account_id;
-  }
 
   if (
     currentProps.created_by_id === undefined &&

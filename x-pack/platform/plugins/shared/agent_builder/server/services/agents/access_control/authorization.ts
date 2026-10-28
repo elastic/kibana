@@ -11,7 +11,6 @@ import {
   AgentAccessControlRole,
   accessControlRoleMeets,
   maxAccessControlRole,
-  serviceAccountUserId,
   type AgentAccessControl,
   type AgentAccessControlEntry,
   type CurrentUser,
@@ -24,21 +23,7 @@ export interface AgentAuthzArgs {
   accessControl?: AgentAccessControl;
   owner?: UserIdAndName;
   currentUser?: CurrentUser | null;
-  /** Service account the agent runs as, when it is bound to one. */
-  boundServiceAccountId?: string;
 }
-
-/**
- * A bound service account executes the agent under its own credentials, so the agent lookups a run
- * performs after the credential swap must see at least User access for it.
- */
-const isBoundServiceAccount = ({
-  boundServiceAccountId,
-  currentUser,
-}: Pick<AgentAuthzArgs, 'boundServiceAccountId' | 'currentUser'>): boolean =>
-  boundServiceAccountId !== undefined &&
-  currentUser?.type === 'service_account' &&
-  currentUser.id === serviceAccountUserId(boundServiceAccountId);
 
 /**
  * Checks whether the current user owns the agent.
@@ -142,7 +127,6 @@ export const getEffectiveAgentRole = ({
   accessControl,
   owner,
   currentUser,
-  boundServiceAccountId,
 }: AgentAuthzArgs): EffectiveAgentRole | undefined => {
   if (currentUser?.isAdmin) {
     return 'admin';
@@ -152,10 +136,7 @@ export const getEffectiveAgentRole = ({
   }
   const entryRole = accessControlRoleForUser(accessControl, currentUser);
   const baseline = accessControlModeRole(accessControl?.access_mode);
-  const boundRole = isBoundServiceAccount({ boundServiceAccountId, currentUser })
-    ? AgentAccessControlRole.User
-    : undefined;
-  return maxAccessControlRole(maxAccessControlRole(entryRole, baseline), boundRole);
+  return maxAccessControlRole(entryRole, baseline);
 };
 
 /**
@@ -225,10 +206,14 @@ export const canConfigureAgentExecutionIdentity = (
  * Every edit of a bound agent directs its service account, so editing one requires the same
  * `manage_security` privilege as the binding. Unbound agents are unaffected.
  */
-export const canEditBoundAgent = (
-  args: Pick<AgentAuthzArgs, 'boundServiceAccountId' | 'currentUser'>
-): boolean =>
-  args.boundServiceAccountId === undefined || args.currentUser?.canManageSecurity === true;
+export const canEditBoundAgent = ({
+  boundServiceAccountId,
+  currentUser,
+}: {
+  /** Service account the agent runs as, when it is bound to one. */
+  boundServiceAccountId?: string;
+  currentUser?: CurrentUser | null;
+}): boolean => boundServiceAccountId === undefined || currentUser?.canManageSecurity === true;
 
 /**
  * Checks whether the caller can read and list the agent.

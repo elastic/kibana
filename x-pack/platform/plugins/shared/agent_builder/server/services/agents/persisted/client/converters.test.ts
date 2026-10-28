@@ -1197,20 +1197,4 @@ describe('service_account_id', () => {
       'service_account_id'
     );
   });
-
-  it('keeps, replaces or removes the account on update', () => {
-    const currentProps = storedDoc('kibana/sa-1')._source!;
-    const update = (patch: AgentUpdateRequest) =>
-      updateRequestToEs({
-        agentId: 'agent-1',
-        currentProps,
-        update: patch,
-        updateDate: new Date(updateDate),
-        user: testUser,
-      });
-
-    expect(update({ name: 'renamed' }).service_account_id).toBe('kibana/sa-1');
-    expect(update({ service_account_id: 'kibana/sa-2' }).service_account_id).toBe('kibana/sa-2');
-    expect(update({ service_account_id: null })).not.toHaveProperty('service_account_id');
-  });
 });

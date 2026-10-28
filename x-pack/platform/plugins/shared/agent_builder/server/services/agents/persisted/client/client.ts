@@ -19,7 +19,7 @@ import {
   chatAgentTypeId,
   createAgentNotFoundError,
   createBadRequestError,
-  createInternalError,
+  createForbiddenError,
   isAgentNotFoundError,
   getAccessControlEntryKey,
   isAgentAccessControlRole,
@@ -50,7 +50,7 @@ import type {
   AgentsUsingToolsResult,
   PersistedAgentDefinitionWithPermissions,
 } from '../types';
-import type { AgentAccess } from '../../agent_source';
+import type { AgentAccess, GetAgentOptions } from '../../agent_source';
 import type { AgentProfileStorage, AgentProperties } from './storage';
 import { createStorage } from './storage';
 import {
@@ -80,11 +80,11 @@ import {
 } from '../../access_control';
 import { hasRequiredDocumentFields } from './utils/helper';
 import {
+  AGENT_WORKLOAD_TYPE,
   assertCanConfigureExecutionIdentity,
   assertCanDeleteBoundAgent,
   assertCanEditBoundAgent,
   unbindDeletedAgent,
-  withAgentBindingChange,
   type ServiceAccountBindingDeps,
 } from '../../service_account_binding';
 
@@ -95,26 +95,6 @@ export interface GetAgentAccessControlResult {
     update_access_control: boolean;
   };
 }
-
-/**
- * Conditional-write parameters for a document read with `seq_no_primary_term`, so a concurrent
- * write (for example a binding change) is refused instead of silently overwritten.
- */
-const occParams = (document: Document & { _seq_no?: number; _primary_term?: number }) =>
-  document._seq_no !== undefined && document._primary_term !== undefined
-    ? { if_seq_no: document._seq_no, if_primary_term: document._primary_term }
-    : {};
-
-const rethrowConflict = (agentId: string, error: unknown): never => {
-  if (isVersionConflictError(error)) {
-    throw createInternalError(
-      `Agent ${agentId} was modified by another request; reload it and retry.`,
-      { statusCode: 409 },
-      { cause: error }
-    );
-  }
-  throw error;
-};
 
 const workflowIdsEqual = (a: string[], b: string[]): boolean =>
   a.length === b.length && a.every((id, index) => id === b[index]);
@@ -180,13 +160,18 @@ export interface AgentClient {
   /** Get the agent and assert the caller has at least `access` rights on it. */
   getWithAccess(
     agentId: string,
-    access: AgentAccess
+    options: Required<Pick<GetAgentOptions, 'access'>> & Pick<GetAgentOptions, 'runAs'>
   ): Promise<PersistedAgentDefinitionWithPermissions>;
   create(profile: AgentCreateRequest): Promise<PersistedAgentDefinitionWithPermissions>;
   ensureDefaultAgent(profile: AgentCreateRequest): Promise<PersistedAgentDefinitionWithPermissions>;
   update(
     agentId: string,
     profile: AgentUpdateRequest
+  ): Promise<PersistedAgentDefinitionWithPermissions>;
+  /** Binds the agent to a service account, or unbinds it with `null`. */
+  setServiceAccount(
+    agentId: string,
+    serviceAccountId: string | null
   ): Promise<PersistedAgentDefinitionWithPermissions>;
   getIds(options?: AgentListOptions): Promise<string[]>;
   list(options?: AgentListOptions): Promise<PersistedAgentDefinitionWithPermissions[]>;
@@ -221,7 +206,6 @@ const getAgentDocument = async ({
     track_total_hits: false,
     size: 1,
     terminate_after: 1,
-    seq_no_primary_term: true,
     query: {
       bool: {
         filter: [
@@ -381,52 +365,6 @@ class AgentClientImpl implements AgentClient {
     this.bindings = bindings;
   }
 
-  /**
-   * Persists the agent, binding or unbinding its service account in Core first when the write
-   * changes it. `nextId` follows the update request: a string binds, `null` unbinds, `undefined`
-   * keeps `previousId`.
-   */
-  private async writeWithBinding<T>({
-    agentId,
-    documentId,
-    previousId,
-    nextId,
-    write,
-  }: {
-    agentId: string;
-    documentId: string;
-    previousId: string | undefined;
-    nextId: string | null | undefined;
-    write: () => Promise<T>;
-  }): Promise<T> {
-    const resolvedNext = nextId === undefined ? previousId : nextId ?? undefined;
-    if (resolvedNext === previousId) {
-      return write();
-    }
-    return withAgentBindingChange({
-      bindings: this.bindings,
-      request: this.request,
-      logger: this.logger,
-      agentId,
-      spaceId: this.space,
-      nextId: resolvedNext,
-      write,
-      // A realtime get sees a concurrent writer's document before the index refreshes; a search
-      // could still return the losing version and compensate to the wrong binding.
-      readStoredId: async () => {
-        try {
-          const stored = await this.storage.getClient().get({ id: documentId });
-          return stored._source?.service_account_id;
-        } catch (error) {
-          if (error?.meta?.statusCode === 404) {
-            return null;
-          }
-          throw error;
-        }
-      },
-    });
-  }
-
   async getAgentsUsingTools(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult> {
     return runToolRefCleanup({
       storage: this.storage,
@@ -496,9 +434,9 @@ class AgentClientImpl implements AgentClient {
 
   async getWithAccess(
     agentId: string,
-    access: AgentAccess
+    { access, runAs }: Required<Pick<GetAgentOptions, 'access'>> & Pick<GetAgentOptions, 'runAs'>
   ): Promise<PersistedAgentDefinitionWithPermissions> {
-    const document = await this.getDocumentWithAccess({ agentId, access });
+    const document = await this.getDocumentWithAccess({ agentId, access, runAs });
     return withPermissions({ document, user: this.user });
   }
 
@@ -669,13 +607,6 @@ class AgentClientImpl implements AgentClient {
       nextApprovals: profileUpdate.configuration?.approvals,
       user: this.user,
     });
-    assertCanConfigureExecutionIdentity({
-      source,
-      currentId: source.service_account_id,
-      nextId: profileUpdate.service_account_id,
-      user: this.user,
-      bindings: this.bindings,
-    });
 
     if (profileUpdate.configuration?.tools) {
       await this.validateAgentToolSelection(profileUpdate.configuration.tools);
@@ -689,19 +620,48 @@ class AgentClientImpl implements AgentClient {
       user: this.user,
     });
 
-    await this.writeWithBinding({
-      agentId,
-      documentId: document._id,
-      previousId: source.service_account_id,
-      nextId: profileUpdate.service_account_id,
-      write: async () => {
-        try {
-          return await this.storage
-            .getClient()
-            .index({ id: document._id, document: updatedAgent, ...occParams(document) });
-        } catch (error) {
-          return rethrowConflict(agentId, error);
-        }
+    await this.storage.getClient().index({ id: document._id, document: updatedAgent });
+
+    return this.get(agentId);
+  }
+
+  /**
+   * Core's binding is the authority a run is minted against; the id stored on the agent only
+   * tells the dispatcher and the UI that the agent is bound. A write failing between the two
+   * leaves the agent either not dispatched as the account or refused at mint, never run as an
+   * account it is not bound to, and a retry settles it.
+   */
+  async setServiceAccount(
+    agentId: string,
+    serviceAccountId: string | null
+  ): Promise<PersistedAgentDefinitionWithPermissions> {
+    const document = await this.getDocumentWithAccess({ agentId, access: 'write' });
+    const source = document._source;
+    assertCanConfigureExecutionIdentity({ source, user: this.user, bindings: this.bindings });
+
+    const { serviceAccounts } = this.bindings;
+    if (serviceAccountId) {
+      await serviceAccounts.bindWorkload(this.request, {
+        workloadType: AGENT_WORKLOAD_TYPE,
+        workloadId: agentId,
+        serviceAccountId,
+      });
+    } else {
+      await serviceAccounts.unbindWorkload(this.request, {
+        workloadType: AGENT_WORKLOAD_TYPE,
+        workloadId: agentId,
+      });
+    }
+
+    const { service_account_id: _previous, ...rest } = source;
+    await this.storage.getClient().index({
+      id: document._id,
+      document: {
+        ...rest,
+        ...(serviceAccountId ? { service_account_id: serviceAccountId } : {}),
+        updated_by_id: this.user.id,
+        updated_by_name: this.user.username,
+        updated_at: new Date().toISOString(),
       },
     });
 
@@ -715,16 +675,7 @@ class AgentClientImpl implements AgentClient {
     const source = document._source;
     assertCanDeleteBoundAgent({ source, user: this.user });
 
-    // Conditional on the version checked above, so a binding made concurrently is not deleted
-    // past the manage_security check, and the unbind follows a delete that definitely happened.
-    let deleteResponse;
-    try {
-      deleteResponse = await this.storage
-        .getClient()
-        .delete({ id: document._id, ...occParams(document) });
-    } catch (error) {
-      return rethrowConflict(id, error);
-    }
+    const deleteResponse = await this.storage.getClient().delete({ id: document._id });
     await unbindDeletedAgent({
       bindings: this.bindings,
       request: this.request,
@@ -787,13 +738,7 @@ class AgentClientImpl implements AgentClient {
       user: this.user,
     });
 
-    try {
-      await this.storage
-        .getClient()
-        .index({ id: document._id, document: next, ...occParams(document) });
-    } catch (error) {
-      rethrowConflict(agentId, error);
-    }
+    await this.storage.getClient().index({ id: document._id, document: next });
 
     return nextAccessControl;
   }
@@ -815,9 +760,11 @@ class AgentClientImpl implements AgentClient {
   private async getDocumentWithAccess({
     agentId,
     access,
+    runAs,
   }: {
     agentId: string;
     access: AgentAccess;
+    runAs?: string;
   }): Promise<Required<Document>> {
     const document = await this._get(agentId);
     if (!hasRequiredDocumentFields(document)) {
@@ -825,6 +772,18 @@ class AgentClientImpl implements AgentClient {
     }
 
     const source = document._source;
+    // A run was authorized for its caller when it was dispatched and executes under the account's
+    // credentials, which hold no access to the agent themselves; it only has to be the agent the
+    // account was bound to run.
+    if (runAs !== undefined) {
+      if (source.service_account_id !== runAs) {
+        throw createForbiddenError(
+          `Agent "${agentId}" is no longer bound to service account "${runAs}".`
+        );
+      }
+      return document;
+    }
+
     let allowed = false;
     switch (access) {
       case 'read':

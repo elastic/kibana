@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
 import type { CoreServiceAccountsService, KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   ServiceAccountWorkloadDetails,
@@ -15,7 +14,6 @@ import {
   agentBuilderDefaultAgentId,
   createBadRequestError,
   createForbiddenError,
-  createInternalError,
   type CurrentUser,
 } from '@kbn/agent-builder-common';
 import { AGENTBUILDER_PATH } from '../../../common/features';
@@ -30,30 +28,16 @@ export interface ServiceAccountBindingDeps {
   serviceAccounts: CoreServiceAccountsService;
 }
 
-/**
- * Guards a change of the service account an agent runs as.
- *
- * @param source - The stored agent.
- * @param currentId - The account bound before the write, or `undefined` when unbound.
- * @param nextId - The account requested by the write: a string binds, `null` unbinds, `undefined`
- * keeps the current one.
- */
+/** Guards binding, replacing or removing the service account an agent runs as. */
 export const assertCanConfigureExecutionIdentity = ({
   source,
-  currentId,
-  nextId,
   user,
   bindings,
 }: {
   source: AgentProperties;
-  currentId: string | undefined;
-  nextId: string | null | undefined;
   user: CurrentUser;
   bindings: ServiceAccountBindingDeps;
 }): void => {
-  if (nextId === undefined || nextId === (currentId ?? null)) {
-    return;
-  }
   if (!bindings.serviceAccounts.isEnabled()) {
     throw createBadRequestError('Service accounts are not enabled on this Kibana.');
   }
@@ -84,98 +68,6 @@ export const assertCanEditBoundAgent = ({
   throw createForbiddenError(
     `Editing agent "${source.id}", which runs as service account "${source.service_account_id}", requires the manage_security privilege.`
   );
-};
-
-/**
- * Binds or unbinds the agent in Core before `write` persists the agent's own reference, and
- * reconciles the binding to the stored winner when the write fails. The two stores share no
- * transaction, so a failed write is compensated on a best-effort basis.
- */
-export const withAgentBindingChange = async <T>({
-  bindings,
-  request,
-  logger,
-  agentId,
-  spaceId,
-  nextId,
-  write,
-  readStoredId,
-}: {
-  bindings: ServiceAccountBindingDeps;
-  request: KibanaRequest;
-  logger: Logger;
-  agentId: string;
-  spaceId: string;
-  /** The account the write binds, or `undefined` to unbind. */
-  nextId: string | undefined;
-  write: () => Promise<T>;
-  /** Re-reads the persisted reference, or `null` when the agent no longer exists. */
-  readStoredId: () => Promise<string | undefined | null>;
-}): Promise<T> => {
-  const { serviceAccounts } = bindings;
-  const coordinates = { workloadType: AGENT_WORKLOAD_TYPE, workloadId: agentId, spaceId };
-  const previous = await serviceAccounts.getWorkloadBinding(coordinates);
-  const changed = nextId !== previous?.serviceAccountId;
-  let written = previous;
-  if (changed) {
-    if (nextId) {
-      written = await serviceAccounts.bindWorkload(request, {
-        workloadType: AGENT_WORKLOAD_TYPE,
-        workloadId: agentId,
-        serviceAccountId: nextId,
-      });
-    } else {
-      await serviceAccounts.unbindWorkload(request, {
-        workloadType: AGENT_WORKLOAD_TYPE,
-        workloadId: agentId,
-      });
-      written = null;
-    }
-  }
-
-  try {
-    return await write();
-  } catch (error) {
-    if (!changed) {
-      throw error;
-    }
-    try {
-      const current = await serviceAccounts.getWorkloadBinding(coordinates);
-      if (!isEqual(current, written)) {
-        logger.error(`Binding compensation skipped after a concurrent change to agent ${agentId}.`);
-        throw error;
-      }
-      const stored = await readStoredId();
-      const targetId = stored ?? undefined;
-      if (targetId && targetId !== current?.serviceAccountId) {
-        await serviceAccounts.bindWorkload(request, {
-          workloadType: AGENT_WORKLOAD_TYPE,
-          workloadId: agentId,
-          serviceAccountId: targetId,
-        });
-      } else if (!targetId && current) {
-        await serviceAccounts.unbindWorkload(request, {
-          workloadType: AGENT_WORKLOAD_TYPE,
-          workloadId: agentId,
-        });
-      }
-    } catch (compensationError) {
-      if (compensationError === error) {
-        throw error;
-      }
-      logger.error(
-        `Binding compensation failed for agent ${agentId}: ${
-          compensationError instanceof Error ? compensationError.message : String(compensationError)
-        }`
-      );
-      throw createInternalError(
-        'Agent write and service account binding compensation failed. Reconcile the agent binding before retrying.',
-        {},
-        { cause: compensationError }
-      );
-    }
-    throw error;
-  }
 };
 
 /** Deleting a bound agent removes its binding, which Core only allows with `manage_security`. */

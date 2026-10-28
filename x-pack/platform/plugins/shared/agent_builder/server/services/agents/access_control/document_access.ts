@@ -60,7 +60,6 @@ export const hasReadAccess = ({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
-    boundServiceAccountId: source.service_account_id,
   });
 
 export const hasUseAccess = ({
@@ -74,7 +73,6 @@ export const hasUseAccess = ({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
-    boundServiceAccountId: source.service_account_id,
   });
 
 export const hasWriteAccess = ({
@@ -88,7 +86,6 @@ export const hasWriteAccess = ({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
-    boundServiceAccountId: source.service_account_id,
   });
 
 export const hasDeleteAccess = ({
@@ -102,7 +99,6 @@ export const hasDeleteAccess = ({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
-    boundServiceAccountId: source.service_account_id,
   });
 
 export const hasManageAccessControlAccess = ({
@@ -117,7 +113,6 @@ export const hasManageAccessControlAccess = ({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
-    boundServiceAccountId: source.service_account_id,
   });
 
 export const hasConfigureApprovalsAccess = ({
@@ -132,7 +127,6 @@ export const hasConfigureApprovalsAccess = ({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
-    boundServiceAccountId: source.service_account_id,
   });
 
 export const hasConfigureExecutionIdentityAccess = ({
@@ -147,7 +141,6 @@ export const hasConfigureExecutionIdentityAccess = ({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
-    boundServiceAccountId: source.service_account_id,
   });
 
 /** Whether the caller may edit the agent given its binding; see {@link canEditBoundAgent}. */

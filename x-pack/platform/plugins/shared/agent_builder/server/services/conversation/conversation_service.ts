@@ -29,6 +29,8 @@ export interface ConversationService {
   getScopedClientAsUser(options: {
     request: KibanaRequest;
     user: CurrentUser;
+    /** Service account the execution runs as; see `GetAgentOptions.runAs`. */
+    runAs?: string;
   }): Promise<ConversationClient>;
 }
 
@@ -90,19 +92,23 @@ export class ConversationServiceImpl implements ConversationService {
   async getScopedClientAsUser({
     request,
     user,
+    runAs,
   }: {
     request: KibanaRequest;
     user: CurrentUser;
+    runAs?: string;
   }): Promise<ConversationClient> {
-    return this.createScopedClient({ request, user });
+    return this.createScopedClient({ request, user, runAs });
   }
 
   private async createScopedClient({
     request,
     user,
+    runAs,
   }: {
     request: KibanaRequest;
     user: CurrentUser;
+    runAs?: string;
   }): Promise<ConversationClient> {
     const esClient = this.getScopedEsClient(request).asInternalUser;
     const space = getCurrentSpaceId({ request, spaces: this.spaces });
@@ -112,6 +118,7 @@ export class ConversationServiceImpl implements ConversationService {
 
     return createClient({
       user,
+      runAs,
       esClient,
       logger: this.logger,
       space,

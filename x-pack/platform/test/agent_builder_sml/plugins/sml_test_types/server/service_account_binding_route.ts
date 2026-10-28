@@ -43,9 +43,10 @@ export const registerServiceAccountBindingRoute = (core: CoreSetup<StartDependen
       const [, { agentBuilder }] = await core.getStartServices();
       const registry = await agentBuilder.agents.getRegistry({ request });
       try {
-        const agent = await registry.update(request.params.id, {
-          service_account_id: request.body.service_account_id,
-        });
+        const agent = await registry.setServiceAccount(
+          request.params.id,
+          request.body.service_account_id
+        );
         return response.ok({
           body: { id: agent.id, service_account_id: agent.service_account_id },
         });

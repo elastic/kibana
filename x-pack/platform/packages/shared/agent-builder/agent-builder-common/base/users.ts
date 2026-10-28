@@ -23,11 +23,6 @@ export const REALM_USER_ID_PREFIX = 'realm:';
 export const serviceAccountUserId = (serviceAccountId: string) =>
   `${SERVICE_ACCOUNT_ID_PREFIX}${serviceAccountId}`;
 
-export const serviceAccountIdFromUserId = (userId: string | undefined): string | undefined =>
-  userId?.startsWith(SERVICE_ACCOUNT_ID_PREFIX)
-    ? userId.slice(SERVICE_ACCOUNT_ID_PREFIX.length)
-    : undefined;
-
 // `bulkGet` resolves a batch as one unit: one synthetic id would drop every real user's profile in it.
 export const isUserProfileId = (id: string | undefined): id is string =>
   id !== undefined &&

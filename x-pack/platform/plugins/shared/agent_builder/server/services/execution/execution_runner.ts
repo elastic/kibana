@@ -215,6 +215,7 @@ const handleConversationExecution = async ({
   const conversationClient = await deps.conversationService.getScopedClientAsUser({
     request,
     user: { ...owner, isAdmin: false },
+    runAs: execution.runAs?.serviceAccountId,
   });
 
   const author = conversationClient.getAuthor(origin?.author, requestAuthor);
@@ -295,7 +296,7 @@ const handleConversationExecution = async ({
       abortSignal,
       conversation,
       // Only a bound run swaps credentials; an unbound run's request already is the owner.
-      ...(execution.runAs ? { owner } : {}),
+      ...(execution.runAs ? { owner, runAs: execution.runAs } : {}),
       defaultConnectorId: selectedConnectorId,
       telemetryMetadata: roundTelemetryMetadata,
       maxContentLength,
@@ -322,7 +323,14 @@ const handleConversationExecution = async ({
           ? modelProvider.selectModel({ effortLevel: 'low' }).then((model) => model.chatModel)
           : undefined,
         modelProvider.getDefaultModel(),
-        agentService.getRegistry({ request }).then((registry) => registry.get(agentId)),
+        agentService
+          .getRegistry({ request })
+          .then((registry) =>
+            registry.get(
+              agentId,
+              execution.runAs ? { runAs: execution.runAs.serviceAccountId } : undefined
+            )
+          ),
         loadTracingPrivacySettings({
           uiSettingsClient: deps.uiSettings.asScopedToClient(
             deps.savedObjects.getScopedClient(request)

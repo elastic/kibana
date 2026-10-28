@@ -1135,34 +1135,72 @@ describe('AgentClient service account bindings', () => {
     mockEsClient.delete.mockResolvedValue({ result: 'deleted' });
   });
 
-  describe('update', () => {
+  describe('setServiceAccount', () => {
     it('refuses to bind without manage_security and writes nothing', async () => {
       mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc()] } });
       const client = await buildClient(mockUser);
 
-      await expect(
-        client.update('agent-1', { service_account_id: 'kibana/sa-1' })
-      ).rejects.toMatchObject({ meta: { statusCode: 403 } });
+      await expect(client.setServiceAccount('agent-1', 'kibana/sa-1')).rejects.toMatchObject({
+        meta: { statusCode: 403 },
+      });
 
       expect(serviceAccounts.bindWorkload).not.toHaveBeenCalled();
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
-    it('binds in Core, then stores the reference', async () => {
+    it('binds in Core, then stores the account id on the agent', async () => {
       mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc()] } });
+      const order: string[] = [];
+      serviceAccounts.bindWorkload.mockImplementation(async () => {
+        order.push('bind');
+      });
+      mockEsClient.index.mockImplementation(async () => {
+        order.push('index');
+        return {};
+      });
       const client = await buildClient(securityUser);
 
-      await client.update('agent-1', { service_account_id: 'kibana/sa-1' });
+      await client.setServiceAccount('agent-1', 'kibana/sa-1');
 
       expect(serviceAccounts.bindWorkload).toHaveBeenCalledWith(request, {
         workloadType: 'agent',
         workloadId: 'agent-1',
         serviceAccountId: 'kibana/sa-1',
       });
-      expect(mockEsClient.index.mock.calls[0][0].document.service_account_id).toBe('kibana/sa-1');
+      expect(mockEsClient.index.mock.calls[0][0].document).toMatchObject({
+        service_account_id: 'kibana/sa-1',
+        updated_by_id: securityUser.id,
+      });
+      expect(order).toEqual(['bind', 'index']);
     });
 
-    it('keeps the binding on a metadata edit by a caller with manage_security', async () => {
+    it('unbinds in Core, then removes the account id from the agent', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc('kibana/sa-1')] } });
+      const client = await buildClient(securityUser);
+
+      await client.setServiceAccount('agent-1', null);
+
+      expect(serviceAccounts.unbindWorkload).toHaveBeenCalledWith(request, {
+        workloadType: 'agent',
+        workloadId: 'agent-1',
+      });
+      expect(mockEsClient.index.mock.calls[0][0].document).not.toHaveProperty('service_account_id');
+    });
+
+    it('leaves the agent untouched when Core refuses the binding', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc()] } });
+      serviceAccounts.bindWorkload.mockRejectedValue(new Error('no such account'));
+      const client = await buildClient(securityUser);
+
+      await expect(client.setServiceAccount('agent-1', 'kibana/sa-1')).rejects.toThrow(
+        'no such account'
+      );
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('update', () => {
+    it('keeps the binding on an edit by a caller with manage_security', async () => {
       mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc('kibana/sa-1')] } });
       const client = await buildClient(securityUser);
 
@@ -1194,36 +1232,30 @@ describe('AgentClient service account bindings', () => {
         update_access_control: false,
       });
     });
-
-    it('unbinds in Core when the reference is removed', async () => {
-      mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc('kibana/sa-1')] } });
-      serviceAccounts.getWorkloadBinding.mockResolvedValue({ serviceAccountId: 'kibana/sa-1' });
-      const client = await buildClient(securityUser);
-
-      await client.update('agent-1', { service_account_id: null });
-
-      expect(serviceAccounts.unbindWorkload).toHaveBeenCalledWith(request, {
-        workloadType: 'agent',
-        workloadId: 'agent-1',
-      });
-      expect(mockEsClient.index.mock.calls[0][0].document).not.toHaveProperty('service_account_id');
-    });
   });
 
-  describe('concurrent writes', () => {
-    it('writes conditionally and reports a concurrent change as a conflict', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [{ ...buildDoc(), _seq_no: 7, _primary_term: 2 }] },
+  describe('getWithAccess for a run as the bound account', () => {
+    const stranger = { ...mockUser, id: 'stranger-id', username: 'stranger' };
+
+    it('resolves the bound agent without consulting access control', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc('kibana/sa-1')] } });
+      const client = await buildClient(stranger);
+
+      await expect(client.getWithAccess('agent-1', { access: 'use' })).rejects.toMatchObject({
+        meta: { statusCode: 404 },
       });
-      mockEsClient.index.mockRejectedValueOnce({ statusCode: 409 });
+      await expect(
+        client.getWithAccess('agent-1', { access: 'use', runAs: 'kibana/sa-1' })
+      ).resolves.toMatchObject({ id: 'agent-1', service_account_id: 'kibana/sa-1' });
+    });
+
+    it('refuses an agent that is not bound to the account', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc()] } });
       const client = await buildClient(securityUser);
 
-      await expect(client.update('agent-1', { name: 'renamed' })).rejects.toMatchObject({
-        meta: { statusCode: 409 },
-      });
-      expect(mockEsClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({ if_seq_no: 7, if_primary_term: 2 })
-      );
+      await expect(
+        client.getWithAccess('agent-1', { access: 'use', runAs: 'kibana/sa-1' })
+      ).rejects.toMatchObject({ meta: { statusCode: 403 } });
     });
   });
 
@@ -1238,10 +1270,8 @@ describe('AgentClient service account bindings', () => {
       expect(mockEsClient.delete).not.toHaveBeenCalled();
     });
 
-    it('deletes conditionally on the checked version, then unbinds', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [{ ...buildDoc('kibana/sa-1'), _seq_no: 7, _primary_term: 2 }] },
-      });
+    it('deletes the agent, then unbinds it', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc('kibana/sa-1')] } });
       const order: string[] = [];
       mockEsClient.delete.mockImplementation(async () => {
         order.push('delete');
@@ -1255,27 +1285,11 @@ describe('AgentClient service account bindings', () => {
 
       await expect(client.delete({ id: 'agent-1' })).resolves.toBe(true);
 
-      expect(mockEsClient.delete).toHaveBeenCalledWith(
-        expect.objectContaining({ if_seq_no: 7, if_primary_term: 2 })
-      );
       expect(serviceAccounts.unbindWorkload).toHaveBeenCalledWith(request, {
         workloadType: 'agent',
         workloadId: 'agent-1',
       });
       expect(order).toEqual(['delete', 'unbind']);
-    });
-
-    it('reports a concurrent change as a conflict and keeps the binding', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [{ ...buildDoc(), _seq_no: 7, _primary_term: 2 }] },
-      });
-      mockEsClient.delete.mockRejectedValueOnce({ statusCode: 409 });
-      const client = await buildClient(mockUser);
-
-      await expect(client.delete({ id: 'agent-1' })).rejects.toMatchObject({
-        meta: { statusCode: 409 },
-      });
-      expect(serviceAccounts.unbindWorkload).not.toHaveBeenCalled();
     });
   });
 });
