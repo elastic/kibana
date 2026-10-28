@@ -10,7 +10,7 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 /**
  * Warning: This version might diverge from the API response. It should not be used anymore.
- * Use the one from `plugins/security_solutions/common/types/timelines/api`.
+ * Use `RowRendererId` from `solutions/security/plugins/security_solution/common/api/timeline`.
  * @deprecated
  */
 export enum DeprecatedRowRendererId {
