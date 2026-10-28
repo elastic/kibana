@@ -307,6 +307,7 @@ export const InstancesTable: React.FunctionComponent<{
       />
       {flyoutAgent?.packagePolicy ? (
         <InstanceAgentFlyout
+          agent={flyoutAgent.agent}
           agentPolicyId={flyoutAgent.agentPolicyId}
           packagePolicy={flyoutAgent.packagePolicy}
           onClose={() => setFlyoutAgent(null)}

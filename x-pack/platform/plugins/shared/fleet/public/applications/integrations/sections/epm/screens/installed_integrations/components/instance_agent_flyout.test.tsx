@@ -9,8 +9,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
-import type { AgentPolicy, PackagePolicy } from '../../../../../../../../common/types';
-import { useBulkGetAgentPoliciesQuery } from '../../../../../../../hooks';
+import type { Agent, AgentPolicy, PackagePolicy } from '../../../../../../../../common/types';
 
 import { InstanceAgentFlyout } from './instance_agent_flyout';
 
@@ -27,25 +26,22 @@ jest.mock('../../../../../../../components', () => ({
       {policyId} {policyName}
     </div>
   ),
-  AgentEnrollmentFlyout: ({
+  AgentlessStatusDetailsFlyout: ({
+    policyName,
+    agent,
     agentPolicy,
-    installedPackagePolicy,
+    packagePolicy,
   }: {
+    policyName: string;
+    agent: Agent;
     agentPolicy?: AgentPolicy;
-    installedPackagePolicy?: { name: string; version: string };
+    packagePolicy: PackagePolicy;
   }) => (
-    <div data-test-subj="agentEnrollmentFlyout">
-      {agentPolicy?.id} {installedPackagePolicy?.name}@{installedPackagePolicy?.version}
+    <div data-test-subj="agentlessStatusDetailsFlyout">
+      {policyName} {agent.id} {agentPolicy?.id} {packagePolicy.id}
     </div>
   ),
 }));
-
-jest.mock('../../../../../../../hooks', () => ({
-  ...jest.requireActual('../../../../../../../hooks'),
-  useBulkGetAgentPoliciesQuery: jest.fn(),
-}));
-
-const mockUseBulkGetAgentPolicies = useBulkGetAgentPoliciesQuery as jest.Mock;
 
 const packagePolicy = (supportsAgentless: boolean) =>
   ({
@@ -61,40 +57,26 @@ describe('InstanceAgentFlyout', () => {
   const render = (supportsAgentless: boolean) =>
     createIntegrationsTestRendererMock().render(
       <InstanceAgentFlyout
+        agent={{ id: 'agent-1', status: 'degraded' } as Agent}
         agentPolicyId="ap1"
         packagePolicy={packagePolicy(supportsAgentless)}
         onClose={jest.fn()}
       />
     );
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseBulkGetAgentPolicies.mockReturnValue({
-      data: { items: [{ id: 'ap1', name: 'Agent policy 1' }] },
-      isLoading: false,
-    });
-  });
-
-  it('opens the agentless flyout for a managed integration policy', () => {
+  it('opens the agentless enrollment flyout for a managed integration policy', () => {
     render(true);
 
     expect(screen.getByTestId('agentlessEnrollmentFlyout')).toHaveTextContent('ap1 aws-1');
-    expect(screen.queryByTestId('agentEnrollmentFlyout')).not.toBeInTheDocument();
-    expect(mockUseBulkGetAgentPolicies).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('agentlessStatusDetailsFlyout')).not.toBeInTheDocument();
   });
 
-  it('opens the agent enrollment flyout with the agent policy for an agent-based policy', () => {
+  it('opens the component health of the clicked agent for an agent-based policy', () => {
     render(false);
 
-    expect(mockUseBulkGetAgentPolicies).toHaveBeenCalledWith(['ap1'], { ignoreMissing: true });
-    expect(screen.getByTestId('agentEnrollmentFlyout')).toHaveTextContent('ap1 aws@8.11.0');
+    expect(screen.getByTestId('agentlessStatusDetailsFlyout')).toHaveTextContent(
+      'AWS agent-1 ap1 pp1'
+    );
     expect(screen.queryByTestId('agentlessEnrollmentFlyout')).not.toBeInTheDocument();
-  });
-
-  it('waits for the agent policy before opening the agent enrollment flyout', () => {
-    mockUseBulkGetAgentPolicies.mockReturnValue({ data: undefined, isLoading: true });
-    render(false);
-
-    expect(screen.queryByTestId('agentEnrollmentFlyout')).not.toBeInTheDocument();
   });
 });
