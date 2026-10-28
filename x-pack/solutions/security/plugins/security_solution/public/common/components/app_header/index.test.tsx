@@ -105,7 +105,9 @@ describe('SecurityAppHeader', () => {
       ...chrome,
       componentDeps: {
         ...chrome.componentDeps,
-        legacyActionMenu$: new BehaviorSubject<MountPoint | undefined>(mount),
+        legacyActionMenu$: new BehaviorSubject<MountPoint | undefined>(
+          mount
+        ) as unknown as typeof chrome.componentDeps.legacyActionMenu$,
       },
     };
 
