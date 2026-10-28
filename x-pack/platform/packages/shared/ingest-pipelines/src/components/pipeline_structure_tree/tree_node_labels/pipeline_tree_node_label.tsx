@@ -46,6 +46,7 @@ export const PipelineTreeNodeLabel = ({
       data-test-subj={`pipelineTreeNode-${pipelineName}`}
       responsive={false}
     >
+      {/* minWith allows the text to shrink to fit the container */}
       <EuiFlexItem grow={true} css={{ minWidth: 0 }}>
         <EuiText
           className="eui-textTruncate"
