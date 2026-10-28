@@ -10,11 +10,20 @@
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import type { ChangeHistoryPreviewEditorContext } from '@kbn/change-history-ui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
-import { WorkflowChangeHistoryPreviewFooter } from './workflow_change_history_preview_footer';
+import { useWorkflowChangeHistoryPreviewValidation } from './use_workflow_change_history_preview_validation';
+import { WorkflowChangeHistoryPreviewValidation } from './workflow_change_history_preview_validation';
+
+jest.mock('./use_workflow_change_history_preview_validation');
+
+jest.mock('../validate_workflow_yaml/lib/workflow_yaml_computation_cache', () => ({
+  clearWorkflowYamlComputationCache: jest.fn(),
+}));
 
 jest.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accordion', () => ({
+  WORKFLOW_YAML_VALIDATION_ACCORDION_CLASS: 'workflowYamlValidationAccordion',
   WorkflowYamlValidationAccordion: ({
     validationErrors,
     isLoading,
@@ -50,53 +59,65 @@ const sampleError: YamlValidationResult = {
   afterMessage: null,
 };
 
-const renderFooter = (
-  props: Partial<React.ComponentProps<typeof WorkflowChangeHistoryPreviewFooter>> = {}
-) =>
-  render(
+const mockUseValidation = jest.mocked(useWorkflowChangeHistoryPreviewValidation);
+
+const context = {
+  isEditorMounted: true,
+  decorationsRef: { current: null },
+} as unknown as ChangeHistoryPreviewEditorContext;
+
+const renderValidation = ({
+  highlightValidationErrors = true,
+  validationResults = [],
+  isValidationLoading = false,
+  validationError = null,
+}: {
+  highlightValidationErrors?: boolean;
+  validationResults?: YamlValidationResult[];
+  isValidationLoading?: boolean;
+  validationError?: Error | null;
+} = {}) => {
+  mockUseValidation.mockReturnValue({
+    validationResults,
+    isValidationLoading,
+    validationError,
+    handleValidationErrorClick: jest.fn(),
+  });
+
+  return render(
     <I18nProvider>
-      <WorkflowChangeHistoryPreviewFooter
-        validationResults={[]}
-        isEditorMounted={true}
-        isValidationLoading={false}
-        validationError={null}
-        {...props}
+      <WorkflowChangeHistoryPreviewValidation
+        context={context}
+        highlightValidationErrors={highlightValidationErrors}
+        validationYaml="name: test"
       />
     </I18nProvider>
   );
+};
 
-describe('WorkflowChangeHistoryPreviewFooter', () => {
+describe('WorkflowChangeHistoryPreviewValidation', () => {
   it('shows initializing state while validation is loading and no results exist yet', () => {
-    renderFooter({
-      isValidationLoading: true,
-      validationResults: [],
-    });
+    renderValidation({ isValidationLoading: true });
 
     expect(screen.getByText('Initializing validation...')).toBeInTheDocument();
   });
 
   it('hides validation results while validation is still in progress', () => {
-    renderFooter({
-      isValidationLoading: true,
-      validationResults: [sampleError],
-    });
+    renderValidation({ isValidationLoading: true, validationResults: [sampleError] });
 
     expect(screen.getByText('Initializing validation...')).toBeInTheDocument();
     expect(screen.queryByText('1 error(s)')).not.toBeInTheDocument();
   });
 
   it('shows validation results after loading completes', () => {
-    renderFooter({
-      isValidationLoading: false,
-      validationResults: [sampleError],
-    });
+    renderValidation({ validationResults: [sampleError] });
 
     expect(screen.getByText('1 error(s)')).toBeInTheDocument();
     expect(screen.queryByText('Initializing validation...')).not.toBeInTheDocument();
   });
 
   it('shows operational validation failures separately from diagnostics', () => {
-    renderFooter({ validationError: new Error('Connector metadata is unavailable') });
+    renderValidation({ validationError: new Error('Connector metadata is unavailable') });
 
     expect(
       screen.getByText('Validation failed: Connector metadata is unavailable')
@@ -104,11 +125,17 @@ describe('WorkflowChangeHistoryPreviewFooter', () => {
   });
 
   it('wraps the validation accordion to reserve space for the settings button', () => {
-    renderFooter();
+    renderValidation();
 
     expect(
       screen.getByTestId('workflowChangeHistoryPreviewValidationAccordion')
     ).toBeInTheDocument();
     expect(screen.getByTestId('workflowYamlEditorValidationErrorsList')).toBeInTheDocument();
+  });
+
+  it('renders no accordion when validation highlighting is disabled', () => {
+    renderValidation({ highlightValidationErrors: false });
+
+    expect(screen.queryByTestId('workflowYamlEditorValidationErrorsList')).not.toBeInTheDocument();
   });
 });
