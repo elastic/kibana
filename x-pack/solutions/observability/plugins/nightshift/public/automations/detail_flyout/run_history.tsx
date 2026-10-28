@@ -99,7 +99,7 @@ const getSkippedRunSummary = (
   }
   if (skipReason === 'no_open_investigation') {
     return i18n.translate('xpack.nightshift.automations.detail.skippedNoOpenInvestigationSummary', {
-      defaultMessage: '{source} · Alert recovered and no open investigation held it',
+      defaultMessage: '{source} · Alert recovered with no open investigations to link it to',
       values: { source },
     });
   }
