@@ -21,12 +21,9 @@ import { skippedResult, withLowScoreLogging } from '../evaluator_utils';
 import { createEsqlExecutionEvaluator } from '../evaluators/esql_execution';
 import { createEsqlQueryRunner } from '../evaluators/esql_query_runner';
 import {
-  getLastCustomContentAttachmentId,
-  getLastWrittenDashboardId,
+  findStoredPanel,
   getOtherRenderers,
   getToolErrors,
-  readStoredCustomContent,
-  readStoredCustomContentFromDashboard,
   toLoggedVisualizations,
   type CustomContentTaskOutput,
 } from './custom_content_output';
@@ -120,6 +117,18 @@ export function createEvaluateCustomContentDataset({
           `First turn returned no conversationId; cannot run follow-up "${followUp}"`
         );
       }
+      const readStored = async (turn: typeof first, turnSteps: typeof first.steps) =>
+        turn.conversationId
+          ? findStoredPanel(
+              turnSteps,
+              await agentBuilderClient.getConversation<Conversation>(turn.conversationId)
+            )
+          : undefined;
+
+      // "Create a custom panel" can end in a standalone visualization or in a dashboard written by
+      // generate_dashboard. Both are valid; score whichever the agent used. An edit is judged
+      // against the panel as it stood before the follow-up, so that is read first.
+      const baseline = followUp ? await readStored(first, first.steps) : undefined;
       const last = followUp
         ? await agentBuilderClient.converse({
             agentId,
@@ -129,26 +138,8 @@ export function createEvaluateCustomContentDataset({
         : first;
 
       const steps = [...(first.steps ?? []), ...(followUp ? last.steps ?? [] : [])];
-      // "Create a custom panel" can end in a standalone visualization or in a dashboard written by
-      // generate_dashboard. Both are valid; score whichever the agent used.
-      const visualizationId = getLastCustomContentAttachmentId(steps);
-      const dashboardId = visualizationId ? undefined : getLastWrittenDashboardId(steps);
-      const attachmentId = visualizationId ?? dashboardId;
-
-      let stored: ReturnType<typeof readStoredCustomContent> = { versionCount: 0 };
-      let storedIn: CustomContentTaskOutput['storedIn'] = 'none';
-      if (attachmentId && last.conversationId) {
-        const conversation = await agentBuilderClient.getConversation<Conversation>(
-          last.conversationId
-        );
-        if (visualizationId) {
-          stored = readStoredCustomContent(conversation, visualizationId);
-          storedIn = 'visualization';
-        } else if (dashboardId) {
-          stored = readStoredCustomContentFromDashboard(conversation, dashboardId);
-          storedIn = 'dashboard';
-        }
-      }
+      const stored = await readStored(last, steps);
+      const storedIn = stored?.storedIn ?? 'none';
 
       const toolIds = getToolIds({ steps });
       const followUpToolIds = followUp ? getToolIds({ steps: last.steps ?? [] }) : undefined;
@@ -169,11 +160,16 @@ export function createEvaluateCustomContentDataset({
         steps,
         toolIds,
         followUpToolIds,
-        visualizations: toLoggedVisualizations(stored.after, attachmentId),
+        visualizations: toLoggedVisualizations(stored?.content, stored?.attachmentId),
         otherRenderers,
-        after: stored.after,
-        before: stored.before,
-        versionCount: stored.versionCount,
+        after: stored?.content,
+        attachmentId: stored?.attachmentId,
+        versionCount: stored?.versionCount ?? 0,
+        baseline: baseline && {
+          attachmentId: baseline.attachmentId,
+          content: baseline.content,
+          versionCount: baseline.versionCount,
+        },
         storedIn,
         agentTraceId: last.traceId,
         turns: followUp ? 2 : 1,

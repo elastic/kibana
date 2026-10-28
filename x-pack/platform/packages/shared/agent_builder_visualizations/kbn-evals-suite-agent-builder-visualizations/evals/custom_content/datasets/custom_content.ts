@@ -102,7 +102,7 @@ export const CUSTOM_CONTENT_EDIT_EXAMPLES: CustomContentDatasetExample[] = [
       question: `${CREATE_PANEL} with a status card for each machine.os in ${LOGS}, showing the request count and an OK or Warning badge.`,
       followUp: 'Also show the average bytes per operating system in each card.',
     },
-    output: { data: 'query', edit: 'data', queryContains: ['machine.os'] },
+    output: { data: 'query', edit: 'data', queryContains: ['machine.os', 'AVG(bytes)'] },
     metadata: { useCase: 'data-edit', dataSource: 'logs' },
   },
   {

@@ -24,22 +24,37 @@ export const createEditEvaluator = (): CustomContentEvaluator => ({
       return skippedResult('This example is not an edit.');
     }
 
-    const { before, after, versionCount, followUpToolIds } = output;
+    const { after, attachmentId, versionCount, baseline, followUpToolIds } = output;
     if (followUpToolIds?.length === 0) {
       return {
         score: 0,
         label: 'no-follow-up-tool-call',
         explanation:
           'The agent answered the follow-up without calling a tool, so nothing was edited.',
-        metadata: { versionCount },
       };
     }
-    if (!before || !after || versionCount < 2) {
+
+    const before = baseline?.content;
+    if (!baseline || !before || !after) {
       return {
         score: 0,
         label: 'not-stored-as-edit',
-        explanation: 'The follow-up did not store a new version of the same panel.',
-        metadata: { versionCount },
+        explanation: 'There is no panel from the first turn and the follow-up to compare.',
+      };
+    }
+    if (baseline.attachmentId !== attachmentId) {
+      return {
+        score: 0,
+        label: 'new-panel-instead-of-edit',
+        explanation: 'The follow-up created a new panel instead of editing the first one.',
+      };
+    }
+    if (versionCount <= baseline.versionCount) {
+      return {
+        score: 0,
+        label: 'not-stored-as-edit',
+        explanation: 'The follow-up did not store a new version of the panel.',
+        metadata: { versionsBefore: baseline.versionCount, versionsAfter: versionCount },
       };
     }
 

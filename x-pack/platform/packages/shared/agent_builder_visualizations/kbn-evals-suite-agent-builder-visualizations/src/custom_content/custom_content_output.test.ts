@@ -10,6 +10,7 @@ import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common'
 import {
   getLastCustomContentAttachmentId,
   getLastWrittenDashboardId,
+  findStoredPanel,
   getToolErrors,
   readStoredCustomContent,
   readStoredCustomContentFromDashboard,
@@ -277,5 +278,39 @@ describe('toLoggedVisualizations', () => {
   it('shows a static panel with an empty query, and nothing when no panel was stored', () => {
     expect(toLoggedVisualizations({ template: '<p/>' }, undefined)[0].esql).toBe('');
     expect(toLoggedVisualizations(undefined, undefined)).toEqual([]);
+  });
+});
+
+describe('findStoredPanel', () => {
+  const vizStep = (attachmentId: string) => ({
+    type: 'tool_call',
+    tool_id: 'platform.core.create_visualization',
+    results: [
+      {
+        type: 'visualization',
+        data: { renderer: 'custom_content', esql: 'FROM logs', attachment_id: attachmentId },
+      },
+    ],
+  });
+
+  it('reads a panel stored in a visualization attachment, with its version count', () => {
+    const conversation = conversationWith([
+      customContentData({ esql: 'FROM logs', visualization: { template: '<p>old</p>' } }),
+      customContentData({ esql: 'FROM logs', visualization: { template: '<p>new</p>' } }),
+    ]);
+
+    expect(findStoredPanel([vizStep('att-1')], conversation)).toMatchObject({
+      attachmentId: 'att-1',
+      storedIn: 'visualization',
+      versionCount: 2,
+      content: { esql: 'FROM logs', template: '<p>new</p>' },
+    });
+  });
+
+  it('reports nothing when no panel was stored', () => {
+    expect(findStoredPanel([], { attachments: [] } as unknown as Conversation)).toEqual({
+      versionCount: 0,
+      storedIn: 'none',
+    });
   });
 });

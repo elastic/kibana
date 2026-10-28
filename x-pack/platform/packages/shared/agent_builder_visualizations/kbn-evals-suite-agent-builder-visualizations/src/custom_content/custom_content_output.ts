@@ -21,16 +21,25 @@ export interface StoredCustomContent {
   height?: number;
 }
 
+/** A panel's attachment as it stood at one point of the conversation. */
+export interface StoredPanelSnapshot {
+  attachmentId?: string;
+  content?: StoredCustomContent;
+  versionCount: number;
+}
+
 export interface CustomContentTaskOutput {
   errors: unknown[];
   messages: Array<{ message: string }>;
   steps?: Array<Record<string, unknown>>;
   /** The panel after the last turn; undefined when the agent created none. */
   after?: StoredCustomContent;
-  /** The panel after the first stored version; equals `after` unless an edit followed. */
-  before?: StoredCustomContent;
-  /** Stored versions of the panel's attachment; 1 means no edit was ever stored. */
+  /** The attachment holding `after`. */
+  attachmentId?: string;
+  /** Stored versions of that attachment after the last turn. */
   versionCount: number;
+  /** The panel as it stood after the first turn; only for an example with a follow-up. */
+  baseline?: StoredPanelSnapshot;
   /** Where the agent stored the panel: a standalone visualization, a dashboard, or nowhere. */
   storedIn: 'visualization' | 'dashboard' | 'none';
   /** Tool ids the agent called, in order, for diagnosing a run that produced no panel. */
@@ -197,6 +206,32 @@ export const getOtherRenderers = (steps: Array<Record<string, unknown>> | undefi
 ];
 
 /** Why a run has no custom content panel, naming what the agent did instead. */
+/**
+ * Finds the panel the agent stored in the steps of a conversation and reads it: a standalone
+ * visualization or, when there is none, the dashboard written by `generate_dashboard`.
+ */
+export const findStoredPanel = (
+  steps: Array<Record<string, unknown>> | undefined,
+  conversation: Conversation
+): StoredPanelSnapshot & { storedIn: CustomContentTaskOutput['storedIn'] } => {
+  const visualizationId = getLastCustomContentAttachmentId(steps);
+  if (visualizationId) {
+    const { after, versionCount } = readStoredCustomContent(conversation, visualizationId);
+    return {
+      attachmentId: visualizationId,
+      content: after,
+      versionCount,
+      storedIn: 'visualization',
+    };
+  }
+  const dashboardId = getLastWrittenDashboardId(steps);
+  if (dashboardId) {
+    const { after, versionCount } = readStoredCustomContentFromDashboard(conversation, dashboardId);
+    return { attachmentId: dashboardId, content: after, versionCount, storedIn: 'dashboard' };
+  }
+  return { versionCount: 0, storedIn: 'none' };
+};
+
 const TEMPLATE_EXCERPT_LENGTH = 200;
 
 export const toLoggedVisualizations = (

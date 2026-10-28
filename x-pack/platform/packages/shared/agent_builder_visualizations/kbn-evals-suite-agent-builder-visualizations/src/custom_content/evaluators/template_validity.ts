@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Liquid } from 'liquidjs';
 import {
   CUSTOM_CONTENT_MAX_HEIGHT,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
@@ -17,6 +18,17 @@ import type { CustomContentEvaluator } from '../types';
 export const CUSTOM_CONTENT_TEMPLATE_EVALUATOR_NAME = 'Custom Content Template';
 
 /** The stored template is usable: present, script-free, within the size and height limits. */
+const liquid = new Liquid();
+
+export const isValidLiquid = (template: string): boolean => {
+  try {
+    liquid.parse(template.trim());
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export const createTemplateValidityEvaluator = (): CustomContentEvaluator => ({
   name: CUSTOM_CONTENT_TEMPLATE_EVALUATOR_NAME,
   kind: 'CODE',
@@ -36,6 +48,10 @@ export const createTemplateValidityEvaluator = (): CustomContentEvaluator => ({
       {
         name: 'has a template',
         passed: typeof template === 'string' && template.trim().length > 0,
+      },
+      {
+        name: 'is valid Liquid',
+        passed: isValidLiquid(template ?? ''),
       },
       {
         name: 'has no script tag',

@@ -22,7 +22,7 @@ const outputWith = (
   errors: [],
   messages: [],
   after,
-  before: after,
+  attachmentId: 'att-1',
   versionCount: 1,
   turns: 1,
   storedIn: 'visualization' as const,
@@ -49,6 +49,25 @@ const QUERY = 'FROM logs | STATS count = COUNT(*) BY host | LIMIT 100';
 
 describe('Custom Content Template', () => {
   const evaluator = createTemplateValidityEvaluator();
+
+  it('fails a template whose Liquid block is not closed', async () => {
+    const result = await run(
+      createTemplateValidityEvaluator(),
+      outputWith({ template: '<div>{% if true %}Hello</div>' })
+    );
+    expect(result.score).toBeLessThan(1);
+    expect(result.explanation).toContain('valid Liquid');
+  });
+
+  it('accepts a template that loops over the rows', async () => {
+    const result = await run(
+      createTemplateValidityEvaluator(),
+      outputWith({
+        template: '<ul>{% for r in rows %}<li>{{ r["host"].value }}</li>{% endfor %}</ul>',
+      })
+    );
+    expect(result.score).toBe(1);
+  });
 
   it('passes a script-free template within the limits', async () => {
     const result = await run(evaluator, outputWith({ template: '<p>hi</p>', height: 320 }));
@@ -304,23 +323,78 @@ describe('Custom Content Edit', () => {
   const evaluator = createEditEvaluator();
   const before = { esql: QUERY, template: '<p>old</p>' };
 
+  const editOutput = (
+    after: StoredCustomContent | undefined,
+    {
+      baselineContent = before,
+      baselineVersions = 1,
+      baselineAttachmentId = 'att-1',
+      versions = 2,
+      ...overrides
+    }: Partial<CustomContentTaskOutput> & {
+      baselineContent?: StoredCustomContent;
+      baselineVersions?: number;
+      baselineAttachmentId?: string;
+      versions?: number;
+    } = {}
+  ) =>
+    outputWith(after, {
+      versionCount: versions,
+      baseline: {
+        attachmentId: baselineAttachmentId,
+        content: baselineContent,
+        versionCount: baselineVersions,
+      },
+      ...overrides,
+    });
+
+  const style = { data: 'query' as const, edit: 'style' as const };
+  const data = { data: 'query' as const, edit: 'data' as const };
+
   it('skips examples that are not edits', async () => {
     expect((await run(evaluator, outputWith(before))).score).toBeNull();
   });
 
   it('fails when the follow-up did not store a new version', async () => {
-    const result = await run(evaluator, outputWith(before, { before, versionCount: 1 }), {
-      data: 'query',
-      edit: 'style',
-    });
+    const result = await run(evaluator, editOutput(before, { versions: 1 }), style);
     expect(result).toMatchObject({ score: 0, label: 'not-stored-as-edit' });
+  });
+
+  it('does not count versions written while creating the panel as the edit', async () => {
+    const result = await run(
+      evaluator,
+      editOutput({ esql: QUERY, template: '<p>new</p>' }, { baselineVersions: 2, versions: 2 }),
+      style
+    );
+    expect(result).toMatchObject({ score: 0, label: 'not-stored-as-edit' });
+  });
+
+  it('fails when there is no panel from the first turn', async () => {
+    const result = await run(
+      evaluator,
+      outputWith(before, { versionCount: 2, baseline: { versionCount: 0 } }),
+      style
+    );
+    expect(result).toMatchObject({ score: 0, label: 'not-stored-as-edit' });
+  });
+
+  it('fails when the follow-up created a new panel instead of editing the first', async () => {
+    const result = await run(
+      evaluator,
+      editOutput(
+        { esql: QUERY, template: '<p>new</p>' },
+        { baselineAttachmentId: 'att-0', versions: 2 }
+      ),
+      style
+    );
+    expect(result).toMatchObject({ score: 0, label: 'new-panel-instead-of-edit' });
   });
 
   it('fails a follow-up that made no tool call, even when the stored panel has several versions', async () => {
     const result = await run(
       evaluator,
-      outputWith(before, { before, versionCount: 3, followUpToolIds: [] }),
-      { data: 'query', edit: 'data' }
+      editOutput(before, { versions: 3, followUpToolIds: [] }),
+      data
     );
     expect(result).toMatchObject({ score: 0, label: 'no-follow-up-tool-call' });
   });
@@ -328,21 +402,23 @@ describe('Custom Content Edit', () => {
   it('judges the edit itself when the follow-up called a tool', async () => {
     const result = await run(
       evaluator,
-      outputWith(before, {
-        before,
-        versionCount: 2,
-        followUpToolIds: ['platform.dashboard.generate_dashboard'],
-      }),
-      { data: 'query', edit: 'data' }
+      editOutput(before, { followUpToolIds: ['platform.dashboard.generate_dashboard'] }),
+      data
     );
     expect(result).toMatchObject({ score: 0, label: 'data-edit-failed' });
   });
 
   it('passes a style edit that changes the template and keeps the query', async () => {
+    const result = await run(evaluator, editOutput({ esql: QUERY, template: '<p>new</p>' }), style);
+    expect(result.score).toBe(1);
+  });
+
+  it('does not blame a style edit for a query changed while creating the panel', async () => {
+    const created = { esql: 'FROM other', template: '<p>old</p>' };
     const result = await run(
       evaluator,
-      outputWith({ esql: QUERY, template: '<p>new</p>' }, { before, versionCount: 2 }),
-      { data: 'query', edit: 'style' }
+      editOutput({ esql: 'FROM other', template: '<p>new</p>' }, { baselineContent: created }),
+      style
     );
     expect(result.score).toBe(1);
   });
@@ -350,8 +426,8 @@ describe('Custom Content Edit', () => {
   it('fails a style edit that changed the query', async () => {
     const result = await run(
       evaluator,
-      outputWith({ esql: 'FROM other', template: '<p>new</p>' }, { before, versionCount: 2 }),
-      { data: 'query', edit: 'style' }
+      editOutput({ esql: 'FROM other', template: '<p>new</p>' }),
+      style
     );
     expect(result.score).toBe(0.5);
   });
@@ -359,18 +435,15 @@ describe('Custom Content Edit', () => {
   it('passes a data edit that changed the query and fails one that did not', async () => {
     const changed = await run(
       evaluator,
-      outputWith(
-        { esql: `${QUERY} | KEEP host`, template: '<p>new</p>' },
-        { before, versionCount: 2 }
-      ),
-      { data: 'query', edit: 'data' }
+      editOutput({ esql: `${QUERY} | KEEP host`, template: '<p>new</p>' }),
+      data
     );
     expect(changed.score).toBe(1);
 
     const unchanged = await run(
       evaluator,
-      outputWith({ esql: QUERY, template: '<p>new</p>' }, { before, versionCount: 2 }),
-      { data: 'query', edit: 'data' }
+      editOutput({ esql: QUERY, template: '<p>new</p>' }),
+      data
     );
     expect(unchanged).toMatchObject({ score: 0, label: 'data-edit-failed' });
   });
