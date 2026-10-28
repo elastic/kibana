@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { resolveNightshiftModelForRequest, type InferenceDocument } from '@kbn/nightshift-ai';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
@@ -106,20 +106,22 @@ const prepareInferredSamplingRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
-    body: z.object({
-      start: z.number().optional(),
-      end: z.number().optional(),
-      runId: z.string().max(MAX_ID_LENGTH).optional(),
-      iteration: z.number().int().min(1).optional(),
-      sampleSize: z.number().int().min(1).max(100),
-      entityFilteredRatio: z.number().min(0).max(1).optional(),
-      diverseRatio: z.number().min(0).max(1).optional(),
-      maxEntityFilters: z.number().int().min(1).max(50).optional(),
-      samplingTimeoutMs: z.number().int().min(1_000).max(240_000).optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+      body: z.object({
+        start: z.number().optional(),
+        end: z.number().optional(),
+        runId: z.string().max(MAX_ID_LENGTH).optional(),
+        iteration: z.number().int().min(1).optional(),
+        sampleSize: z.number().int().min(1).max(100),
+        entityFilteredRatio: z.number().min(0).max(1).optional(),
+        diverseRatio: z.number().min(0).max(1).optional(),
+        maxEntityFilters: z.number().int().min(1).max(50).optional(),
+        samplingTimeoutMs: z.number().int().min(1_000).max(240_000).optional(),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
     const scopedClients = await getScopedClients({ request });
     const { streamDataEsClient, sourcesClient, tuningConfig, licensing } = scopedClients;
