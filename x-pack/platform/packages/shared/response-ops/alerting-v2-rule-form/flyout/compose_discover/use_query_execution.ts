@@ -11,6 +11,8 @@ import { getESQLResults } from '@kbn/esql-utils';
 import { Parser } from '@elastic/esql';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import { getRuleProjectRouting } from '../../utils/get_rule_project_routing';
 
 export interface QueryColumn extends EuiDataGridColumn {
   esType: string;
@@ -39,6 +41,7 @@ interface UseQueryExecutionParams {
   timeField: string;
   timeRange: TimeRange;
   data: DataPublicPluginStart;
+  cps?: CPSPluginStart;
   /**
    * The active tab. Each tab remembers its own last-executed query/time
    * range/time field, so switching tabs shows that tab's own cached result —
@@ -94,6 +97,7 @@ export const useQueryExecution = ({
   timeField,
   timeRange,
   data,
+  cps,
   tab = DEFAULT_TAB,
 }: UseQueryExecutionParams): QueryExecutionResult => {
   const queryClient = useQueryClient();
@@ -118,10 +122,11 @@ export const useQueryExecution = ({
       search: data.search.search,
       dropNullColumns: true,
       timeRange: executionTimeRange,
+      projectRouting: getRuleProjectRouting(executionQuery, cps),
     });
 
     return result.response;
-  }, [executionQuery, executionTimeRange, executionTimeField, data.search.search]);
+  }, [executionQuery, executionTimeRange, executionTimeField, data.search.search, cps]);
 
   const {
     data: response,

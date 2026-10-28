@@ -11,6 +11,7 @@ import type {
   AggregateQuery,
   ExecutionContextSearch,
   Filter,
+  ProjectRouting,
   Query,
   TimeRange,
 } from '@kbn/es-query';
@@ -341,6 +342,8 @@ export type LensRendererProps = Omit<LensRendererPrivateProps, 'hide_title' | 't
   hidePanelTitles?: boolean;
   timeRange?: TimeRange;
   parentApi?: unknown;
+  /** CPS project routing for the chart searches, unless the parent API publishes one. */
+  projectRouting?: ProjectRouting;
 };
 
 /**

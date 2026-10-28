@@ -39,15 +39,18 @@ export const useSandboxEditorMounts = ({
     application: services.application,
     http: services.http,
     search: services.data.search.search,
+    cps: services.cps,
   });
 
   const { onEditorMount: onAlertCompletionMount } = useSplitQueryCompletion({
     baseQuery,
     search: services.data.search.search,
+    cps: services.cps,
   });
   const { onEditorMount: onRecoveryCompletionMount } = useSplitQueryCompletion({
     baseQuery,
     search: services.data.search.search,
+    cps: services.cps,
   });
   const { onEditorMount: onAlertValidationMount } = useSplitQueryValidation({
     baseQuery,

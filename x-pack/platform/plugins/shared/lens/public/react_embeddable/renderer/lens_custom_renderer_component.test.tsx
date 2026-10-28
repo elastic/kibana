@@ -47,3 +47,32 @@ describe('LensRenderer interactivity inheritance', () => {
     expect(parentApi?.disableTriggers$).toBe(dashboardParentApi.disableTriggers$);
   });
 });
+
+describe('LensRenderer project routing', () => {
+  beforeEach(() => {
+    lastGetParentApi = undefined;
+  });
+
+  it('publishes the projectRouting prop to the embeddable', () => {
+    const props = getLensComponentProps({
+      projectRouting: '_alias:*',
+    }) as unknown as LensRendererProps;
+
+    render(<LensRenderer {...props} />);
+
+    expect(lastGetParentApi?.().projectRouting$?.getValue()).toBe('_alias:*');
+  });
+
+  it('forwards the parent projectRouting$ over the prop', () => {
+    const dashboardParentApi = { projectRouting$: new BehaviorSubject('_alias:_origin') };
+
+    const props = getLensComponentProps({
+      parentApi: dashboardParentApi,
+      projectRouting: '_alias:*',
+    }) as unknown as LensRendererProps;
+
+    render(<LensRenderer {...props} />);
+
+    expect(lastGetParentApi?.().projectRouting$).toBe(dashboardParentApi.projectRouting$);
+  });
+});

@@ -173,6 +173,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
     application: services.application,
     http: services.http,
     search: services.data.search.search,
+    cps: services.cps,
   });
 
   const validationQueries = useMemo(() => {

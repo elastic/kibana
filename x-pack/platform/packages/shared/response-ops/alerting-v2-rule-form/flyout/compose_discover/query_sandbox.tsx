@@ -240,6 +240,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     timeField,
     timeRange,
     data: services.data,
+    cps: services.cps,
     tab: tabProps?.activeTab,
   });
 

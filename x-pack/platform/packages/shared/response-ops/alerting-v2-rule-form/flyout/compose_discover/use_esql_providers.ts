@@ -67,6 +67,7 @@ export const useEsqlAutocomplete = (services: RuleFormServices) => {
     application: services.application,
     http: services.http,
     search: services.data.search.search,
+    cps: services.cps,
   });
 
   // Keep callbacks ref current so providers always use the latest without
