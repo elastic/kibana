@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { ALERT_FETCH_LIMIT, BATCH_ALERT_CAP, RULE_FETCH_LIMIT } from '../../alert_triage/constants';
 import {
   fetchTriageAlerts,
@@ -52,6 +53,44 @@ describe('tagAlerts', () => {
     await expect(
       tagWith({ updated: 1, timed_out: false, failures: [{ cause: { type: 'x' } }] }).run()
     ).rejects.toThrow('not fully applied');
+  });
+});
+
+describe('tagAlerts on a version conflict', () => {
+  const conflict = () =>
+    new KibanaApiCallError({
+      status: 409,
+      headers: {},
+      body: { version_conflicts: 1 },
+      message: 'HTTP 409: version_conflict_engine_exception',
+    });
+  const ok = { status: 200, headers: {}, body: { updated: 2, timed_out: false, failures: [] } };
+  const run = (callKibanaApi: jest.Mock) =>
+    tagAlerts({ callKibanaApi })({ alertIds: ['a1', 'a2'], add: ['t'], remove: [] });
+
+  it('repeats the call, so one alert another writer touched does not fail the sweep', async () => {
+    const callKibanaApi = jest.fn().mockRejectedValueOnce(conflict()).mockResolvedValue(ok);
+
+    await expect(run(callKibanaApi)).resolves.toBeUndefined();
+    expect(callKibanaApi).toHaveBeenCalledTimes(2);
+  });
+
+  it('gives up after three attempts', async () => {
+    const callKibanaApi = jest.fn().mockRejectedValue(conflict());
+
+    await expect(run(callKibanaApi)).rejects.toThrow('version_conflict');
+    expect(callKibanaApi).toHaveBeenCalledTimes(3);
+  });
+
+  it('does not repeat any other error', async () => {
+    const callKibanaApi = jest
+      .fn()
+      .mockRejectedValue(
+        new KibanaApiCallError({ status: 500, headers: {}, body: {}, message: 'HTTP 500' })
+      );
+
+    await expect(run(callKibanaApi)).rejects.toThrow('HTTP 500');
+    expect(callKibanaApi).toHaveBeenCalledTimes(1);
   });
 });
 

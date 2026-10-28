@@ -6,6 +6,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
+import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
@@ -299,25 +300,40 @@ interface UpdateByQueryResult {
   failures?: unknown[];
 }
 
+const TAG_ATTEMPTS = 3;
+const VERSION_CONFLICT_STATUS = 409;
+
 /**
  * Throws unless the whole update was applied: a claim or release that was only partly stored would
- * otherwise be reported as done, and the next sweep could plan the same alerts again.
+ * otherwise be reported as done, and the next sweep could plan the same alerts again. The route
+ * answers 409 when another writer changed an alert between its search and its write (a batch
+ * tagging a verdict, the rule engine, an analyst). Adding or removing a tag is idempotent, so the
+ * call is repeated: the search runs again and sees the current version.
  */
 export const tagAlerts =
   ({ callKibanaApi }: KibanaApi): SweepPorts['tagAlerts'] =>
   async ({ alertIds, add, remove }) => {
-    const { body } = await callKibanaApi<UpdateByQueryResult>({
-      method: 'POST',
-      path: SIGNALS_TAGS_PATH,
-      body: { ids: alertIds, tags: { tags_to_add: add, tags_to_remove: remove } },
-    });
-    const failureCount = body.failures?.length ?? 0;
-    if (body.timed_out === true || failureCount > 0) {
-      throw new Error(
-        `Tagging ${alertIds.length} alert(s) was not fully applied (timed_out: ${
-          body.timed_out === true
-        }, failures: ${failureCount})`
-      );
+    for (let attempt = 1; ; attempt++) {
+      try {
+        const { body } = await callKibanaApi<UpdateByQueryResult>({
+          method: 'POST',
+          path: SIGNALS_TAGS_PATH,
+          body: { ids: alertIds, tags: { tags_to_add: add, tags_to_remove: remove } },
+        });
+        const failureCount = body.failures?.length ?? 0;
+        if (body.timed_out === true || failureCount > 0) {
+          throw new Error(
+            `Tagging ${alertIds.length} alert(s) was not fully applied (timed_out: ${
+              body.timed_out === true
+            }, failures: ${failureCount})`
+          );
+        }
+        return;
+      } catch (error) {
+        const conflict =
+          error instanceof KibanaApiCallError && error.status === VERSION_CONFLICT_STATUS;
+        if (!conflict || attempt >= TAG_ATTEMPTS) throw error;
+      }
     }
   };
 
