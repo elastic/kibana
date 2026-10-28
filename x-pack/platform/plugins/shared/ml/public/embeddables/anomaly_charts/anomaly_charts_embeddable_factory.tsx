@@ -13,11 +13,13 @@ import type { StartServicesAccessor } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subscription, map, merge } from 'rxjs';
 import {
+  areComparatorsEqual,
   fetch$,
   getViewModeSubject,
   timeRangeComparators,
   titleComparators,
   useStateFromPublishingSubject,
+  type StateComparators,
   type ViewMode,
 } from '@kbn/presentation-publishing';
 import useUnmount from 'react-use/lib/useUnmount';
@@ -50,6 +52,12 @@ import { buildDataViewPublishingApi } from '../common/build_data_view_publishing
 import { EmbeddableAnomalyChartsUserInput } from './anomaly_charts_setup_flyout';
 import { checkPermissionAsync } from '../../application/capabilities/check_capabilities';
 
+const comparators: StateComparators<AnomalyChartsEmbeddableState> = {
+  ...titleComparators,
+  ...timeRangeComparators,
+  ...anomalyChartsComparators,
+};
+
 export const getAnomalyChartsReactEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
   usageCollection?: UsageCollectionSetup
@@ -59,6 +67,8 @@ export const getAnomalyChartsReactEmbeddableFactory = (
     AnomalyChartsEmbeddableApi
   > = {
     type: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(comparators, baseline, current),
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       await checkPermissionAsync(getStartServices, 'canGetJobs', true);
       if (!apiHasExecutionContext(parentApi)) {
@@ -97,13 +107,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
           timeRangeManager.anyStateChange$,
           chartsManager.anyStateChange$
         ),
-        getComparators: () => {
-          return {
-            ...titleComparators,
-            ...timeRangeComparators,
-            ...anomalyChartsComparators,
-          };
-        },
+        getComparators: () => comparators,
         applySerializedState: (nextState) => {
           timeRangeManager.reinitializeState(nextState);
           titleManager.reinitializeState(nextState);
