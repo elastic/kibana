@@ -275,8 +275,8 @@ describe('AlertZeroPublicPlugin app registration', () => {
   });
 
   describe('in a Classic space', () => {
-    const startWithSpace = async (spaces: ReturnType<typeof createSpaces>) => {
-      const { coreSetup, plugin, coreStart } = setupPlugin(new BehaviorSubject(true));
+    const startWithSpace = async (spaces: ReturnType<typeof createSpaces>, setting = true) => {
+      const { coreSetup, plugin, coreStart } = setupPlugin(new BehaviorSubject(setting));
       const { updater$ } = coreSetup.application.register.mock.calls[0][0];
       if (!updater$) throw new Error('Missing application updater');
       const onUpdate = jest.fn();
@@ -300,6 +300,21 @@ describe('AlertZeroPublicPlugin app registration', () => {
         plugin.stop();
       }
     );
+
+    it('keeps the app accessible but hides navigation when the setting is off', async () => {
+      const { onUpdate, plugin, subscription } = await startWithSpace(
+        createSpaces('classic'),
+        false
+      );
+
+      expect(onUpdate).toHaveBeenLastCalledWith({
+        status: AppStatus.accessible,
+        visibleIn: [],
+        deepLinks: [],
+      });
+      subscription.unsubscribe();
+      plugin.stop();
+    });
 
     it('keeps the app accessible but hides navigation when the space cannot be read', async () => {
       const spaces = createSpaces();
