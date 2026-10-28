@@ -188,7 +188,23 @@ const createRuntime = async (
     newId: uuidv4,
     onError: (message) => deps.logger?.warn(`alert_triage grouping: ${message}`),
   };
-  return { spaceId, groupingDeps };
+  // A proposal is searchable before its create step has attached the card and its gate reached
+  // `WAITING_FOR_INPUT`. A gate that was released or settled has a decision or a final status.
+  const isGateStarting = async ({ status, decision, workflowExecutionId }: GroupingHead) => {
+    if (status !== 'pending' || decision !== undefined || !workflowExecutionId || !management) {
+      return false;
+    }
+    const execution = await management.getWorkflowExecution(workflowExecutionId, spaceId, {
+      omitStepExecutions: true,
+      request,
+    });
+    return (
+      !execution?.finishedAt &&
+      (execution?.status === ExecutionStatus.PENDING ||
+        execution?.status === ExecutionStatus.RUNNING)
+    );
+  };
+  return { spaceId, groupingDeps, isGateStarting };
 };
 
 /** Alert Analysis cuts the id after the prefix to this, so the prefixed id fits the 256 limit. */
@@ -413,7 +429,7 @@ export const getTriageJoinProposalStepDefinition = (deps: GroupProposalsStepDepe
           alerts_page_query: '',
         };
         if (!(await deps.isGroupingEnabled())) return { output: notJoined };
-        const { groupingDeps } = await createRuntime(deps, context, {
+        const { groupingDeps, isGateStarting } = await createRuntime(deps, context, {
           ruleName: input.rule_name,
           confidenceFloor: input.confidence_floor,
         });
@@ -432,6 +448,14 @@ export const getTriageJoinProposalStepDefinition = (deps: GroupProposalsStepDepe
           now: Date.now(),
           deps: groupingDeps,
         });
+        // The owner's gate is still starting, which a retry fixes. A gate that has been released or
+        // settled does not change, so that case returns `joined: false`.
+        if (!join && (await isGateStarting(head))) {
+          throw new ExecutionError({
+            type: 'GateStarting',
+            message: `Proposal ${input.proposal_id} has not reached its gate yet`,
+          });
+        }
         return {
           output: join
             ? {

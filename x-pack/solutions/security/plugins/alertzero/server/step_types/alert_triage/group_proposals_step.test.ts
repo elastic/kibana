@@ -455,6 +455,25 @@ describe('triage join proposal step', () => {
     await expect(join(input)).rejects.toThrow('not searchable yet');
   });
 
+  it('fails while the owner is still starting its gate, so the review retries it', async () => {
+    const { join, service } = setup({
+      heads: [openHead()],
+      gateStatus: ExecutionStatus.RUNNING,
+    });
+
+    await expect(join(input)).rejects.toThrow('has not reached its gate yet');
+    expect(service.revise).not.toHaveBeenCalled();
+  });
+
+  it('does not fail for a gate that is running because the proposal was already decided', async () => {
+    const { join } = setup({
+      heads: [openHead({ decision: 'approved', status: 'approved' })],
+      gateStatus: ExecutionStatus.RUNNING,
+    });
+
+    expect((await join(input)).joined).toBe(false);
+  });
+
   it('does not join a proposal that cannot take the alerts, which a retry would not change', async () => {
     const { join, service } = setup({ heads: [openHead({ status: 'succeeded' })] });
 
