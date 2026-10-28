@@ -48136,7 +48136,7 @@ paths:
                       - isDuplicate
                   maxItems: 1000
                   type: array
-                  x-state: Experimental; added in 9.7.0
+                  x-state: Experimental
                 integrationName:
                   description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                   maxLength: 160
@@ -48381,7 +48381,7 @@ paths:
                             - isDuplicate
                         maxItems: 1000
                         type: array
-                        x-state: Experimental; added in 9.7.0
+                        x-state: Experimental
                       integrationName:
                         description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
@@ -48768,7 +48768,7 @@ paths:
                             - isDuplicate
                         maxItems: 1000
                         type: array
-                        x-state: Experimental; added in 9.7.0
+                        x-state: Experimental
                       integrationName:
                         description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
@@ -49045,7 +49045,7 @@ paths:
                       - isDuplicate
                   maxItems: 1000
                   type: array
-                  x-state: Experimental; added in 9.7.0
+                  x-state: Experimental
                 integrationName:
                   description: Integration name used by the last deploy, before any per-package suffix. Refreshed on each deploy because an unedited default name follows the service selection.
                   maxLength: 160
@@ -49260,7 +49260,7 @@ paths:
                             - isDuplicate
                         maxItems: 1000
                         type: array
-                        x-state: Experimental; added in 9.7.0
+                        x-state: Experimental
                       integrationName:
                         description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
@@ -49574,7 +49574,7 @@ paths:
                               - isDuplicate
                           maxItems: 1000
                           type: array
-                          x-state: Experimental; added in 9.7.0
+                          x-state: Experimental
                         integrationName:
                           description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                           type: string
