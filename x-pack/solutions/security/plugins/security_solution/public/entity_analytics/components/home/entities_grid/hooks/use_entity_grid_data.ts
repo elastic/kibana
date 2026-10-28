@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { isMissingIndexError } from '../../is_missing_index_error';
 import type { QueryArgs, Row } from '../common';
-import { ANOMALY_COUNT_FIELD, getNumber } from '../common';
+import { ANOMALY_COUNT_FIELD, ENTITY_GRID_QUERY_KEY, getNumber } from '../common';
 import { findSortPageFetcher } from '../grid_columns';
 import { buildEntitiesInViewCountQuery } from '../queries/entities_in_view';
 import { createEsqlRunner } from '../queries/esql';
@@ -43,7 +43,7 @@ const GRID_QUERY_ERROR_TITLE = i18n.translate(
 export const MAX_LOADED_ROWS = 1_000;
 
 /** Prefix of every query of expanded groups' records, e.g. for `useIsFetching`. */
-export const ENTITY_GRID_CHILDREN_QUERY_KEY = ['entity-grid', 'children'] as const;
+export const ENTITY_GRID_CHILDREN_QUERY_KEY = [ENTITY_GRID_QUERY_KEY, 'children'] as const;
 
 /**
  * How long loaded rows stay fresh. A group's records rarely change while it is expanded, so
@@ -59,7 +59,7 @@ const isAnomalySort = ({ sortField }: UseEntityGridDataOptions) =>
 
 const getRowsKey = (context: GridContext, options: UseEntityGridDataOptions) =>
   [
-    'entity-grid',
+    ENTITY_GRID_QUERY_KEY,
     getKeyScope(options),
     'rows',
     {
@@ -82,7 +82,7 @@ const getCountKey = (
   countQuery: readonly string[]
 ) =>
   [
-    'entity-grid',
+    ENTITY_GRID_QUERY_KEY,
     getKeyScope(options),
     'count',
     { spaceId: context.spaceId, countQuery: countQuery.join('\n') },
@@ -90,7 +90,7 @@ const getCountKey = (
 
 const getFilterOverridesKey = (context: GridContext, options: OverridesOptions) =>
   [
-    'entity-grid',
+    ENTITY_GRID_QUERY_KEY,
     getKeyScope(options),
     'resolved-entity-filter-overrides',
     {
