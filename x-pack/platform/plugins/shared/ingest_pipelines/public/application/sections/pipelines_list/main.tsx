@@ -26,6 +26,7 @@ import {
 } from '../../services/navigation';
 import { ingestPipelinesListTitle } from '../../components';
 import { useCheckManageProcessorsPrivileges } from '../manage_processors';
+import { usePipelinesPrivileges } from '../../hooks';
 
 import { EmptyList } from './empty_list';
 import { PipelineTable } from './table';
@@ -83,6 +84,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
   const { data, isLoading, error, resendRequest } = services.api.useLoadPipelines();
 
   const hasManageProcessorsPrivileges = useCheckManageProcessorsPrivileges();
+  const { canManage } = usePipelinesPrivileges();
   // Track component loaded
   useEffect(() => {
     services.metric.trackUiMetric(UIM_PIPELINES_LIST_LOAD);
@@ -124,7 +126,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
     });
   };
 
-  const showCreateInHeader = Boolean(data && data.length > 0) && !error;
+  const showCreateInHeader = canManage && Boolean(data && data.length > 0) && !error;
   const createPath = getCreatePath();
   const createFromCsvPath = getCreateFromCsvPath();
   const manageProcessorsPath = getManageProcessorsPath();

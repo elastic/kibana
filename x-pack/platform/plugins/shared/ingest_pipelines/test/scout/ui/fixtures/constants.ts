@@ -52,6 +52,21 @@ export const INGEST_PIPELINES_USER_ROLE = {
   ],
 };
 
+export const READ_PIPELINE_USER_ROLE = {
+  elasticsearch: {
+    cluster: ['read_pipeline'],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: {
+        advancedSettings: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
 export const MANAGE_PROCESSORS_USER_ROLE = {
   elasticsearch: {
     cluster: ['manage'],

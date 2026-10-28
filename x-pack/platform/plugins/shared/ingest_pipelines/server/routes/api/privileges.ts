@@ -8,10 +8,14 @@
 import type { Privileges } from '@kbn/es-ui-shared-plugin/common';
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../../types';
-import { API_BASE_PATH, APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../../common/constants';
+import {
+  API_BASE_PATH,
+  APP_CLUSTER_MANAGE_PRIVILEGES,
+  APP_CLUSTER_READ_PRIVILEGES,
+} from '../../../common/constants';
 
 const requiredPrivilegesMap = {
-  ingest_pipelines: APP_CLUSTER_REQUIRED_PRIVILEGES,
+  ingest_pipelines: [...APP_CLUSTER_MANAGE_PRIVILEGES, ...APP_CLUSTER_READ_PRIVILEGES],
   manage_processors: ['manage'],
 };
 const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } = {}): string[] =>
@@ -22,6 +26,7 @@ const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } =
     return privileges;
   }, []);
 
+// todo where is this used?
 export const registerPrivilegesRoute = ({ router, config }: RouteDependencies) => {
   router.get(
     {

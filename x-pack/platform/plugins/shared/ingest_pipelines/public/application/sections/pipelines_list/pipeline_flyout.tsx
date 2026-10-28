@@ -11,6 +11,7 @@ import { EuiFlyout, EuiSplitPanel, useIsWithinBreakpoints } from '@elastic/eui';
 import { DetailsPanel, TreePanel, NotFoundPanel } from './flyout_content';
 import type { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
+import { usePipelinesPrivileges } from '../../hooks';
 
 export interface Props {
   ingestPipeline: string;
@@ -35,6 +36,7 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
   const {
     services: { api },
   } = useKibana();
+  const { canManage } = usePipelinesPrivileges();
 
   const [pipelineName, setPipelineName] = useState(ingestPipeline);
   const [treeRootStack, setTreeRootStack] = useState([ingestPipeline]);
@@ -92,7 +94,7 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
           (error && !isLoading ? (
             <NotFoundPanel
               pipelineName={pipelineName}
-              onCreatePipeline={() => onCreateClick(pipelineName)}
+              onCreatePipeline={canManage ? () => onCreateClick(pipelineName) : undefined}
               error={error}
               displayWarning={pipelineName !== ingestPipeline}
             />
@@ -104,7 +106,7 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
                 onEditClick={onEditClick}
                 onCloneClick={onCloneClick}
                 onDeleteClick={onDeleteClick}
-                renderActions={!error}
+                renderActions={canManage && !error}
                 renderViewTreeButton={
                   isResponsiveFlyout && responsiveFlyoutContent === DETAILS_VIEW
                 }

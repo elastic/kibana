@@ -30,6 +30,7 @@ const KIBANA_ADMIN_WITHOUT_INGEST_ROLE = {
 
 export interface IngestPipelinesBrowserAuthFixture extends BrowserAuthFixture {
   loginAsIngestPipelinesUser: () => Promise<void>;
+  loginAsReadPipelineUser: () => Promise<void>;
   loginAsManageProcessorsUser: () => Promise<void>;
   loginAsDashboardReadWithIngest: () => Promise<void>;
   loginAsDevToolsReadWithIngest: () => Promise<void>;
@@ -53,6 +54,8 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
       ...browserAuth,
       loginAsIngestPipelinesUser: () =>
         browserAuth.loginWithCustomRole(testData.INGEST_PIPELINES_USER_ROLE),
+      loginAsReadPipelineUser: () =>
+        browserAuth.loginWithCustomRole(testData.READ_PIPELINE_USER_ROLE),
       loginAsManageProcessorsUser: () =>
         browserAuth.loginWithCustomRole(testData.MANAGE_PROCESSORS_USER_ROLE),
       loginAsDashboardReadWithIngest: () =>

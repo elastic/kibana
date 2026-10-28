@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIconTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIconTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -28,20 +28,27 @@ export const PipelineTreeNodeLabel = ({
   onClick,
   level,
 }: PipelineTreeNodeLabelProps) => {
+  const { euiTheme } = useEuiTheme();
   const maxCharacters = MAX_PIPELINE_NAME_LENGTH - level * 4;
 
   return (
     <EuiFlexGroup
       direction="row"
       gutterSize="s"
-      css={{ width: '100%', minWidth: `${360 - level * 25}px`, position: 'relative' }}
+      css={{
+        width: '100%',
+        // Fill the tree node button (a size container), minus its expansion arrow and gap.
+        minWidth: `calc(100cqi - ${euiTheme.size.base} - ${euiTheme.size.s})`,
+        position: 'relative',
+      }}
       alignItems="center"
       justifyContent="center"
       data-test-subj={`pipelineTreeNode-${pipelineName}`}
       responsive={false}
     >
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem grow={true} css={{ minWidth: 0 }}>
         <EuiText
+          className="eui-textTruncate"
           onClick={(e: React.MouseEvent) => {
             e.stopPropagation();
             onClick();

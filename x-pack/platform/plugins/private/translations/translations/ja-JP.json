@@ -27578,7 +27578,6 @@
     "xpack.ingestPipelines.addProcessorFormOnFailureFlyout.addButtonLabel": "プロセッサーを追加",
     "xpack.ingestPipelines.app.checkingPrivilegesDescription": "権限を確認中…",
     "xpack.ingestPipelines.app.checkingPrivilegesErrorMessage": "サーバーからユーザー特権を取得中にエラーが発生しました。",
-    "xpack.ingestPipelines.app.deniedPrivilegeDescription": "取り込みパイプラインを使用するには、{privilegesCount, plural, one {this cluster privilege} other {これらのクラスター権限}}：{missingPrivileges}が必要です。",
     "xpack.ingestPipelines.app.deniedPrivilegeTitle": "クラスターの権限が必要です",
     "xpack.ingestPipelines.appTitle": "取り込みパイプライン",
     "xpack.ingestPipelines.breadcrumb.createPipelineLabel": "パイプラインの作成",

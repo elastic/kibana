@@ -18,7 +18,7 @@ interface Props {
   pipelineName: string;
   error: Error;
   displayWarning: boolean;
-  onCreatePipeline: () => void;
+  onCreatePipeline?: () => void;
 }
 
 export const NotFoundPanel: FunctionComponent<Props> = ({
@@ -50,18 +50,22 @@ export const NotFoundPanel: FunctionComponent<Props> = ({
             )
           }
           data-test-subj="missingCustomPipeline"
-          actionProps={{
-            primary: {
-              onClick: onCreatePipeline,
-              'data-test-subj': 'createCustomPipeline',
-              children: (
-                <FormattedMessage
-                  id="xpack.ingestPipelines.list.missingCustomPipeline.button"
-                  defaultMessage="Create pipeline"
-                />
-              ),
-            },
-          }}
+          actionProps={
+            onCreatePipeline
+              ? {
+                  primary: {
+                    onClick: onCreatePipeline,
+                    'data-test-subj': 'createCustomPipeline',
+                    children: (
+                      <FormattedMessage
+                        id="xpack.ingestPipelines.list.missingCustomPipeline.button"
+                        defaultMessage="Create pipeline"
+                      />
+                    ),
+                  },
+                }
+              : undefined
+          }
         />
       );
     }

@@ -27,7 +27,6 @@ export {
   sendRequest,
   useAuthorizationContext,
   useRequest,
-  WithPrivileges,
   XJson,
   JsonEditor,
   attemptToURIDecode,

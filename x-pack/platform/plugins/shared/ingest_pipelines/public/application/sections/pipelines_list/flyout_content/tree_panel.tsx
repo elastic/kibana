@@ -45,8 +45,8 @@ export const TreePanel = React.memo(
         style={{
           overflowY: 'auto',
           borderRight: euiTheme.border.thin,
-          maxWidth: '460px',
-          minWidth: '460px',
+          flex: '0 1 460px',
+          minWidth: 0,
         }}
         paddingSize="l"
       >

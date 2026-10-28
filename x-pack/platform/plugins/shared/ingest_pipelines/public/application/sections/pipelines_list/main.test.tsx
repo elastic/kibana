@@ -21,6 +21,7 @@ import type { SectionLoading, useKibana } from '../../../shared_imports';
 
 const mockUseKibana = jest.fn();
 const mockUseCheckManageProcessorsPrivileges = jest.fn();
+const mockUsePipelinesPrivileges = jest.fn();
 
 type MockServices = ReturnType<typeof useKibana>['services'];
 type DeepPartialMockServices = DeepPartial<MockServices>;
@@ -76,6 +77,11 @@ jest.mock('../../../shared_imports', () => ({
 jest.mock('../manage_processors', () => ({
   ...jest.requireActual('../manage_processors'),
   useCheckManageProcessorsPrivileges: () => mockUseCheckManageProcessorsPrivileges(),
+}));
+
+jest.mock('../../hooks', () => ({
+  ...jest.requireActual('../../hooks'),
+  usePipelinesPrivileges: () => mockUsePipelinesPrivileges(),
 }));
 
 jest.mock('./empty_list', () => ({
@@ -170,6 +176,7 @@ const renderPipelinesList = (path: string, services: DeepPartialMockServices) =>
 describe('PipelinesList section', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUsePipelinesPrivileges.mockReturnValue({ canRead: true, canManage: true });
   });
 
   describe('WHEN mounting the PipelinesList route', () => {
@@ -323,6 +330,44 @@ describe('PipelinesList section', () => {
 
           await openAppMenuOverflow();
           expect(screen.getByTestId('manageProcessorsLink')).toBeInTheDocument();
+        });
+      });
+
+      describe('AND WHEN the user can manage pipelines', () => {
+        it('SHOULD show the create pipeline action', () => {
+          renderPipelinesList('/', services);
+
+          expect(screen.getByTestId('createPipelineDropdown')).toBeInTheDocument();
+        });
+      });
+
+      describe('AND WHEN the user can only read pipelines', () => {
+        beforeEach(() => {
+          mockUsePipelinesPrivileges.mockReturnValue({ canRead: true, canManage: false });
+        });
+
+        it('SHOULD render the list without the create pipeline action', () => {
+          renderPipelinesList('/', services);
+
+          expect(screen.getByTestId('pipelineTable')).toBeInTheDocument();
+          expect(screen.queryByTestId('createPipelineDropdown')).not.toBeInTheDocument();
+        });
+
+        it('SHOULD not show the Manage processors link', async () => {
+          const servicesWithManageProcessors = createServicesWithLoadPipelines(
+            {
+              data: mockPipelines,
+            },
+            {
+              config: { enableManageProcessors: true },
+            }
+          );
+          mockUseCheckManageProcessorsPrivileges.mockReturnValue(true);
+
+          renderPipelinesList('/', servicesWithManageProcessors);
+
+          await openAppMenuOverflow();
+          expect(screen.queryByTestId('manageProcessorsLink')).not.toBeInTheDocument();
         });
       });
     });

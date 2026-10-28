@@ -27563,7 +27563,6 @@
     "xpack.ingestPipelines.addProcessorFormOnFailureFlyout.addButtonLabel": "Adicionar processador",
     "xpack.ingestPipelines.app.checkingPrivilegesDescription": "Verificando privilégios…",
     "xpack.ingestPipelines.app.checkingPrivilegesErrorMessage": "Erro ao buscar privilégios de usuário no servidor.",
-    "xpack.ingestPipelines.app.deniedPrivilegeDescription": "Para usar pipelines de ingestão, você deve ter {privilegesCount, plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}.",
     "xpack.ingestPipelines.app.deniedPrivilegeTitle": "Privilégios de cluster necessários",
     "xpack.ingestPipelines.appTitle": "Pipelines de ingestão",
     "xpack.ingestPipelines.breadcrumb.createPipelineLabel": "Criar pipeline",

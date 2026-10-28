@@ -317,77 +317,79 @@ export const DetailsPanel: FunctionComponent<Props> = ({
           </EuiDescriptionList>
         </EuiSplitPanel.Inner>
 
-        <EuiSkeletonRectangle isLoading={isLoading} height={1}>
-          <EuiSplitPanel.Inner color="subdued" grow={false}>
-            <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-              {renderViewTreeButton && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    onClick={onViewTreeClick}
-                    flush="left"
-                    data-test-subj="viewTreeButton"
+        {(renderActions || renderViewTreeButton) && (
+          <EuiSkeletonRectangle isLoading={isLoading} height={1}>
+            <EuiSplitPanel.Inner color="subdued" grow={false} data-test-subj="detailsPanelFooter">
+              <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+                {renderViewTreeButton && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      onClick={onViewTreeClick}
+                      flush="left"
+                      data-test-subj="viewTreeButton"
+                    >
+                      {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.viewTreeLabel', {
+                        defaultMessage: 'View full hierarchy',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                )}
+                {renderActions && (
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    alignItems="center"
+                    justifyContent="flexEnd"
+                    responsive={false}
                   >
-                    {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.viewTreeLabel', {
-                      defaultMessage: 'View full hierarchy',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              )}
-              {renderActions && (
-                <EuiFlexGroup
-                  gutterSize="s"
-                  alignItems="center"
-                  justifyContent="flexEnd"
-                  responsive={false}
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="editPipelineButton"
-                      aria-label={i18n.translate(
-                        'xpack.ingestPipelines.list.pipelineDetails.editPipelineActionsAriaLabel',
-                        {
-                          defaultMessage: 'Edit pipeline',
-                        }
-                      )}
-                      onClick={() => onEditClick(pipeline.name)}
-                    >
-                      {i18n.translate(
-                        'xpack.ingestPipelines.list.pipelineDetails.editPipelineButtonLabel',
-                        {
-                          defaultMessage: 'Edit pipeline',
-                        }
-                      )}
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiPopover
-                      isOpen={showPopover}
-                      closePopover={() => setShowPopover(false)}
-                      button={actionsPopoverButton}
-                      panelPaddingSize="none"
-                      repositionOnScroll
-                      aria-label={i18n.translate(
-                        'xpack.ingestPipelines.list.pipelineDetails.actionsPopoverAriaLabel',
-                        { defaultMessage: 'Pipeline actions' }
-                      )}
-                    >
-                      <EuiContextMenu
-                        initialPanelId={0}
-                        panels={[
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        data-test-subj="editPipelineButton"
+                        aria-label={i18n.translate(
+                          'xpack.ingestPipelines.list.pipelineDetails.editPipelineActionsAriaLabel',
                           {
-                            id: 0,
-                            items: popoverActions,
-                          },
-                        ]}
-                        css={styles.contextMenu}
-                      />
-                    </EuiPopover>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              )}
-            </EuiFlexGroup>
-          </EuiSplitPanel.Inner>
-        </EuiSkeletonRectangle>
+                            defaultMessage: 'Edit pipeline',
+                          }
+                        )}
+                        onClick={() => onEditClick(pipeline.name)}
+                      >
+                        {i18n.translate(
+                          'xpack.ingestPipelines.list.pipelineDetails.editPipelineButtonLabel',
+                          {
+                            defaultMessage: 'Edit pipeline',
+                          }
+                        )}
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiPopover
+                        isOpen={showPopover}
+                        closePopover={() => setShowPopover(false)}
+                        button={actionsPopoverButton}
+                        panelPaddingSize="none"
+                        repositionOnScroll
+                        aria-label={i18n.translate(
+                          'xpack.ingestPipelines.list.pipelineDetails.actionsPopoverAriaLabel',
+                          { defaultMessage: 'Pipeline actions' }
+                        )}
+                      >
+                        <EuiContextMenu
+                          initialPanelId={0}
+                          panels={[
+                            {
+                              id: 0,
+                              items: popoverActions,
+                            },
+                          ]}
+                          css={styles.contextMenu}
+                        />
+                      </EuiPopover>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
+              </EuiFlexGroup>
+            </EuiSplitPanel.Inner>
+          </EuiSkeletonRectangle>
+        )}
       </EuiSplitPanel.Outer>
     </EuiSplitPanel.Inner>
   );

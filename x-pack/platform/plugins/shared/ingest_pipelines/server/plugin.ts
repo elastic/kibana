@@ -11,7 +11,7 @@ import type { IngestPipelinesConfigType } from './config';
 import { ApiRoutes } from './routes';
 import { handleEsError } from './shared_imports';
 import type { Dependencies } from './types';
-import { APP_CLUSTER_REQUIRED_PRIVILEGES } from '../common/constants';
+import { APP_CLUSTER_MANAGE_PRIVILEGES, APP_CLUSTER_READ_PRIVILEGES } from '../common/constants';
 
 export class IngestPipelinesPlugin implements Plugin<void, void, any, any> {
   private readonly apiRoutes: ApiRoutes;
@@ -33,7 +33,11 @@ export class IngestPipelinesPlugin implements Plugin<void, void, any, any> {
       privileges: [
         {
           ui: [],
-          requiredClusterPrivileges: APP_CLUSTER_REQUIRED_PRIVILEGES,
+          requiredClusterPrivileges: APP_CLUSTER_MANAGE_PRIVILEGES,
+        },
+        {
+          ui: [],
+          requiredClusterPrivileges: APP_CLUSTER_READ_PRIVILEGES,
         },
       ],
     });

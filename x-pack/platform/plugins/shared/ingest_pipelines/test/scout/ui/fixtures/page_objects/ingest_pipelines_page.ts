@@ -22,7 +22,9 @@ export class IngestPipelinesPage {
   public readonly navigationBlockConfirmModal: Locator;
   public readonly geoipEmptyListPrompt: Locator;
   public readonly deleteManagedAssetsCallout: Locator;
-  private readonly createPipelineDropdown: Locator;
+  public readonly createPipelineDropdown: Locator;
+  public readonly editPipelineButton: Locator;
+  public readonly detailsPanelFooter: Locator;
   private readonly createNewPipelineButton: Locator;
   private readonly createPipelineFromCsvButton: Locator;
   private readonly nameFieldInput: Locator;
@@ -65,6 +67,8 @@ export class IngestPipelinesPage {
     this.geoipEmptyListPrompt = this.page.testSubj.locator('geoipEmptyListPrompt');
     this.deleteManagedAssetsCallout = this.page.testSubj.locator('deleteManagedAssetsCallout');
     this.createPipelineDropdown = this.page.testSubj.locator('createPipelineDropdown');
+    this.editPipelineButton = this.page.testSubj.locator('editPipelineButton');
+    this.detailsPanelFooter = this.page.testSubj.locator('detailsPanelFooter');
     this.createNewPipelineButton = this.page.testSubj.locator('createNewPipeline');
     this.createPipelineFromCsvButton = this.page.testSubj.locator('createPipelineFromCsv');
     this.nameFieldInput = this.page.testSubj.locator('nameField').locator('input');
