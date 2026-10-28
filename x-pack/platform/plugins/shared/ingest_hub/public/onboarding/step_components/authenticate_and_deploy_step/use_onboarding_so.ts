@@ -76,11 +76,8 @@ export function useOnboardingSO(): UseOnboardingSOResult {
           return name ? [[id, name]] : [];
         })
       );
-      return {
-        ...body,
-        ...(packageNames.length ? { packageNames } : {}),
-        ...(Object.keys(serviceNames).length ? { serviceNames } : {}),
-      };
+      // Sent even when empty, so an update that leaves no known package clears the stored ones.
+      return { ...body, packageNames, serviceNames };
     },
     [packageNameByServiceId, displayNameByServiceId]
   );

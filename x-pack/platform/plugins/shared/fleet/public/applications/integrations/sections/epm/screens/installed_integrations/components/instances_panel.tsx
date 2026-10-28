@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { useEuiPaddingCSS } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import type { CloudOnboardingDeploymentListItem } from '../../../../../../../../common/types';
 import type { PanelPackage } from '../types';
@@ -20,16 +21,29 @@ import { ResizablePanel } from './resizable_panel';
 export const InstancesPanel: React.FunctionComponent<{
   installedPackage: PanelPackage;
   instances: CloudOnboardingDeploymentListItem[];
-}> = ({ installedPackage, instances }) => {
+  isLoading?: boolean;
+}> = ({ installedPackage, instances, isLoading = false }) => {
   const { addViewInstances } = useViewInstances();
   const paddingStyles = useEuiPaddingCSS();
 
   return (
     <ResizablePanel
-      title={<PackagePanelTitle installedPackage={installedPackage} />}
+      title={
+        <PackagePanelTitle
+          installedPackage={installedPackage}
+          // Tells this panel apart from View policies, which shows the same package title.
+          subtitle={i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.panelSubtitle', {
+            defaultMessage: 'Instances',
+          })}
+        />
+      }
       content={
         <div css={[paddingStyles.s]}>
-          <InstancesTable instances={instances} packageName={installedPackage.name} />
+          <InstancesTable
+            instances={instances}
+            packageName={installedPackage.name}
+            isLoading={isLoading}
+          />
         </div>
       }
       onClose={() => addViewInstances('')}

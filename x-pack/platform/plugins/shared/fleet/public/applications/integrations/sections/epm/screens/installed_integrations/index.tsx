@@ -37,6 +37,8 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
   const { selectedPackageViewPolicies } = useViewPolicies();
   const { selectedPackageViewInstances } = useViewInstances();
   const {
+    isEnabled: isInstancesEnabled,
+    isLoading: isInstancesLoading,
     instancesByPackage,
     isError: isInstancesError,
     isTruncated: isInstancesTruncated,
@@ -83,11 +85,12 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
   // come from the full list either way.
   const { data: instancesPackageInfo, isError: isInstancesPackageInfoError } =
     useGetPackageInfoByKeyQuery(selectedPackageViewInstances ?? '', undefined, undefined, {
-      enabled: !!selectedPackageViewInstances && !instancesItemOnPage,
+      enabled: isInstancesEnabled && !!selectedPackageViewInstances && !instancesItemOnPage,
     });
   const instancesSelectedItem: PanelPackage | undefined = useMemo(() => {
+    // Without instances (flag off, or no access) a link to them opens nothing.
+    if (!isInstancesEnabled || !selectedPackageViewInstances) return;
     if (instancesItemOnPage) return instancesItemOnPage;
-    if (!selectedPackageViewInstances) return;
     const item = instancesPackageInfo?.item;
     if (item?.name === selectedPackageViewInstances) {
       return { name: item.name, title: item.title, version: item.version, icons: item.icons };
@@ -102,6 +105,7 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
       };
     }
   }, [
+    isInstancesEnabled,
     instancesItemOnPage,
     instancesPackageInfo,
     isInstancesPackageInfoError,
@@ -195,6 +199,7 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
         <InstancesPanel
           installedPackage={instancesSelectedItem}
           instances={instancesByPackage.get(instancesSelectedItem.name) ?? []}
+          isLoading={isInstancesLoading}
         />
       ) : null}
     </>

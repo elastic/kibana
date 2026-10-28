@@ -45,6 +45,8 @@ export function useInstances() {
   }, [data]);
 
   return {
+    /** False when the onboarding flow is off or the user cannot read instances. */
+    isEnabled,
     instancesByPackage,
     isTruncated: !!data?.isTruncated,
     isLoading: isEnabled && isLoading,

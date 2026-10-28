@@ -104,7 +104,8 @@ export const InstancesTable: React.FunctionComponent<{
   instances: CloudOnboardingDeploymentListItem[];
   /** The package being viewed, whose deployed version the Version column shows. */
   packageName: string;
-}> = ({ instances, packageName }) => {
+  isLoading?: boolean;
+}> = ({ instances, packageName, isLoading = false }) => {
   const { application, notifications } = useStartServices();
   const authz = useAuthz();
   const { getHref } = useLink();
@@ -331,6 +332,7 @@ export const InstancesTable: React.FunctionComponent<{
       ) : null}
       <EuiBasicTable
         items={instances}
+        loading={isLoading}
         itemId="id"
         columns={columns}
         tableCaption={i18n.translate(

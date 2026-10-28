@@ -14,7 +14,9 @@ import type { PanelPackage } from '../types';
 
 export const PackagePanelTitle: React.FunctionComponent<{
   installedPackage: PanelPackage;
-}> = ({ installedPackage }) => (
+  /** Shown after the package title, e.g. what the panel lists. */
+  subtitle?: string;
+}> = ({ installedPackage, subtitle }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
       <TableIcon
@@ -27,5 +29,12 @@ export const PackagePanelTitle: React.FunctionComponent<{
     <EuiFlexItem grow={false}>
       <EuiText size="s">{installedPackage.title}</EuiText>
     </EuiFlexItem>
+    {subtitle ? (
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" color="subdued" data-test-subj="packagePanelSubtitle">
+          · {subtitle}
+        </EuiText>
+      </EuiFlexItem>
+    ) : null}
   </EuiFlexGroup>
 );

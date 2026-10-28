@@ -92,6 +92,18 @@ describe('useOnboardingSO service details', () => {
     });
   });
 
+  it('sends empty packages and names when no service maps to a package, to clear the stored ones', async () => {
+    const { result } = renderHook(() => useOnboardingSO());
+
+    await result.current.updateDeployment('d1', { services: ['unknown-service'] });
+
+    expect(mockUpdate).toHaveBeenCalledWith('d1', {
+      services: ['unknown-service'],
+      packageNames: [],
+      serviceNames: {},
+    });
+  });
+
   it('leaves an update without services untouched', async () => {
     const { result } = renderHook(() => useOnboardingSO());
 

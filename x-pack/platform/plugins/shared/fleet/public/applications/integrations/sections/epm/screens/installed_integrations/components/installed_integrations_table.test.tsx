@@ -233,6 +233,17 @@ describe('InstalledIntegrationsTable', () => {
   });
 
   describe('instances', () => {
+    it('fixes the integration name column width only with the Instances column', () => {
+      const { unmount } = renderComponent([basePackage]);
+      expect(screen.getByText('Integration name').closest('th')).not.toHaveStyle({
+        width: '340px',
+      });
+      unmount();
+
+      renderComponent([basePackage], { instanceCounts: new Map([['test-package', 1]]) });
+      expect(screen.getByText('Integration name').closest('th')).toHaveStyle({ width: '340px' });
+    });
+
     it('shows no column without instances', () => {
       renderComponent([basePackage]);
       expect(screen.queryByText('Instances')).not.toBeInTheDocument();

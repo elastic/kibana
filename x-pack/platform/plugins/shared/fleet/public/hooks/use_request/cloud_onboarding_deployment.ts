@@ -111,5 +111,7 @@ export const useGetAllCloudOnboardingDeploymentsQuery = (
     queryKey: ['cloud_onboarding_deployments', query],
     queryFn: () => sendGetAllCloudOnboardingDeployments(query),
     enabled: options.enabled,
+    // A refetch reads every page with its policies and agents: not worth it on every tab focus.
+    refetchOnWindowFocus: false,
   });
 };
