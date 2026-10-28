@@ -255,6 +255,31 @@ describe('MainNavigation', () => {
     expect(screen.getByTestId('appHeaderBack')).toHaveAttribute('aria-label', 'Back to Packs');
   });
 
+  it.each([
+    ['/new', undefined],
+    ['/saved_queries/new', undefined],
+    ['/saved_queries/e3f633ea-ae6e-41e1-908d-322bf774d4f0', 'Edit demo-query'],
+    ['/packs/add', undefined],
+    ['/packs/test-pack-id/edit', 'Edit demo-pack'],
+  ])(
+    'should show Add integrations, Feedback and Documentation on the %s subpage',
+    async (path, title) => {
+      renderNavigation(path, title, createChromeWithFeedback());
+
+      await openAppMenuOverflow();
+      expect(screen.getByTestId('osqueryAddIntegrationsMenuItem')).toHaveAttribute(
+        'href',
+        '/app/integrations/browse'
+      );
+      expect(screen.getByTestId('appHeaderMenuFeedback')).toHaveTextContent('Feedback');
+      expect(screen.getByTestId('appHeaderMenuDocumentation')).toHaveAttribute(
+        'href',
+        OSQUERY_DOC_LINK
+      );
+      expect(screen.queryByTestId('osqueryRunQueryButton')).not.toBeInTheDocument();
+    }
+  );
+
   it.each(['/history', '/packs', '/saved_queries'])(
     'should render the tab strip on the %s list route',
     (path) => {

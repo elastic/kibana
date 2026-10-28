@@ -88,28 +88,31 @@ export const MainNavigation = () => {
 
   const addIntegrationsMenuItem = useAddIntegrationsMenuItem();
 
-  const menu = useMemo<AppHeaderMenu | undefined>(
-    () =>
-      isListView
-        ? {
-            primaryActionItem: {
-              id: 'runQuery',
-              iconType: 'play' as const,
-              label: i18n.translate('xpack.osquery.history.newLiveQueryButtonLabel', {
-                defaultMessage: 'Run query',
-              }),
-              href: newQueryNavProps.href,
-              testId: 'osqueryRunQueryButton',
-              disableButton: !canRunQuery,
-              run: () => {
-                history.push('/new');
-              },
-            },
-            items: addIntegrationsMenuItem ? [addIntegrationsMenuItem] : [],
-          }
-        : undefined,
-    [addIntegrationsMenuItem, canRunQuery, history, isListView, newQueryNavProps.href]
-  );
+  const menu = useMemo<AppHeaderMenu | undefined>(() => {
+    const items = addIntegrationsMenuItem ? [addIntegrationsMenuItem] : [];
+
+    // Subpages (Run query, pack and saved query create/edit) have no actions of their own.
+    if (!isListView) {
+      return items.length ? { items } : undefined;
+    }
+
+    return {
+      primaryActionItem: {
+        id: 'runQuery',
+        iconType: 'play' as const,
+        label: i18n.translate('xpack.osquery.history.newLiveQueryButtonLabel', {
+          defaultMessage: 'Run query',
+        }),
+        href: newQueryNavProps.href,
+        testId: 'osqueryRunQueryButton',
+        disableButton: !canRunQuery,
+        run: () => {
+          history.push('/new');
+        },
+      },
+      items,
+    };
+  }, [addIntegrationsMenuItem, canRunQuery, history, isListView, newQueryNavProps.href]);
   const loadingMenu = useMemo(() => ({ buttonCount: 1, hasPrimary: false }), []);
 
   const tabs = useMemo<AppHeaderTab[]>(
@@ -248,7 +251,7 @@ export const MainNavigation = () => {
       back={subpageHeader?.back}
       tabs={subpageHeader ? undefined : tabs}
       menu={menu}
-      docLink={isListView ? docLinks.links.osquery.guide : undefined}
+      docLink={docLinks.links.osquery.guide}
     />
   );
 };
