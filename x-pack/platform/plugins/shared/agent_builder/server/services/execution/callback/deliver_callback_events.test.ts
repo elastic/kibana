@@ -262,6 +262,35 @@ describe('deliverCallbackEvents', () => {
     ).toBe(false);
   });
 
+  it('filters out model_reasoning_chunk events but delivers the complete model_reasoning event', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const modelReasoningEvent = {
+      type: ChatEventType.modelReasoning,
+      data: { message_id: 'message-1', reasoning: 'Let me think.' },
+    } as ChatEvent;
+    const roundCompleteEvent = createRoundCompleteEvent();
+
+    await deliverCallbackEvents({
+      execution: createConversationExecution(),
+      events$: of(
+        {
+          type: ChatEventType.modelReasoningChunk,
+          data: { message_id: 'message-1', text_chunk: 'Let me think.' },
+        } as ChatEvent,
+        modelReasoningEvent,
+        roundCompleteEvent
+      ),
+      callbackDeliveryService: service,
+      ...surfacesDeps,
+      logger: loggerMock.create(),
+    });
+
+    const deliveredEvents = service.makeCallbackRequest.mock.calls.map(
+      ([{ payload }]) => (payload as { event: ChatEvent }).event
+    );
+    expect(deliveredEvents).toEqual([modelReasoningEvent, roundCompleteEvent]);
+  });
+
   it('retries only round_complete events; other events are delivered at-most-once', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const progressEvent = createReasoningEvent('progress');

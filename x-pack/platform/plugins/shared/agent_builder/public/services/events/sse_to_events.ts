@@ -31,6 +31,7 @@ import {
   isExecutionTerminatedEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,
+  isModelReasoningEvent,
   isPromptRequestEvent,
   isReasoningEvent,
   isSubstitutionAppliedEvent,
@@ -44,6 +45,7 @@ import {
   parseExecutionId,
 } from '@kbn/agent-builder-common';
 import {
+  createModelReasoningStep,
   createReasoningStep,
   createSubstitutionStep,
   createToolCallStep,
@@ -278,6 +280,17 @@ export const sseToEvents = (state: LiveEventsState, event: ChatEvent): LiveEvent
           tool_call_group_id: event.data.tool_call_group_id,
         })
       )
+    );
+  }
+
+  if (isModelReasoningEvent(event)) {
+    // Appended so the ids of the later steps match the persisted sequence.
+    return withAppendedStep(
+      state,
+      createModelReasoningStep({
+        reasoning: event.data.reasoning,
+        tool_call_group_id: event.data.tool_call_group_id,
+      })
     );
   }
 

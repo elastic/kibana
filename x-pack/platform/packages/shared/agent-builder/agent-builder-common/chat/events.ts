@@ -50,6 +50,8 @@ export enum ChatEventType {
   toolUi = 'tool_ui',
   toolResult = 'tool_result',
   reasoning = 'reasoning',
+  modelReasoningChunk = 'model_reasoning_chunk',
+  modelReasoning = 'model_reasoning',
   messageChunk = 'message_chunk',
   messageComplete = 'message_complete',
   thinkingComplete = 'thinking_complete',
@@ -250,6 +252,46 @@ export const isReasoningEvent = (
   event: AgentBuilderEvent<string, any>
 ): event is ReasoningEvent => {
   return event.type === ChatEventType.reasoning;
+};
+
+export interface ModelReasoningChunkEventData {
+  /** ID of the LLM response this chunk is bound to, shared with its `message_chunk` events */
+  message_id: string;
+  /** chunk (reasoning text delta) */
+  text_chunk: string;
+}
+
+export type ModelReasoningChunkEvent = ChatEventBase<
+  ChatEventType.modelReasoningChunk,
+  ModelReasoningChunkEventData
+>;
+
+export const isModelReasoningChunkEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is ModelReasoningChunkEvent => {
+  return event.type === ChatEventType.modelReasoningChunk;
+};
+
+// Model reasoning
+
+export interface ModelReasoningEventData {
+  /** ID of the LLM response this reasoning is bound to, shared with its `model_reasoning_chunk` events */
+  message_id: string;
+  /** full reasoning text of the LLM response */
+  reasoning: string;
+  /** when the LLM response produced tool calls, the corresponding tool call group ID */
+  tool_call_group_id?: string;
+}
+
+export type ModelReasoningEvent = ChatEventBase<
+  ChatEventType.modelReasoning,
+  ModelReasoningEventData
+>;
+
+export const isModelReasoningEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is ModelReasoningEvent => {
+  return event.type === ChatEventType.modelReasoning;
 };
 
 // Message chunk
@@ -644,6 +686,8 @@ export type ChatAgentEvent =
   | ToolResultEvent
   | PromptRequestEvent
   | ReasoningEvent
+  | ModelReasoningChunkEvent
+  | ModelReasoningEvent
   | MessageChunkEvent
   | MessageCompleteEvent
   | ThinkingCompleteEvent

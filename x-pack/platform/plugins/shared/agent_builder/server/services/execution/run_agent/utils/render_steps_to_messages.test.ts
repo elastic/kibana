@@ -18,6 +18,7 @@ import {
   ToolCallInvocation,
   ToolResultType,
   createInjectedContextStep,
+  createModelReasoningStep,
 } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode, ExecutionStatus } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
@@ -145,6 +146,24 @@ describe('renderHistorySteps', () => {
     expect(toolA.tool_call_id).toBe('a');
     expect(toolA.content).toBe(wrapToolResultContent(JSON.stringify({ results: [other('a')] })));
     expect(toolB.tool_call_id).toBe('b');
+  });
+
+  it('never renders model reasoning, and keeps the tool call group it belongs to whole', async () => {
+    const steps: ConversationRoundStep[] = [
+      createModelReasoningStep({ reasoning: 'provider thoughts', tool_call_group_id: 'g' }),
+      reasoning('group thought', { tool_call_group_id: 'g' }),
+      call('a', { tool_call_group_id: 'g' }),
+      createModelReasoningStep({ reasoning: 'more provider thoughts', tool_call_group_id: 'g' }),
+      call('b', { tool_call_group_id: 'g' }),
+      createModelReasoningStep({ reasoning: 'final provider thoughts' }),
+    ];
+    const messages = await renderHistorySteps({ steps });
+
+    expect(types(messages)).toEqual(['ai', 'tool', 'tool']);
+    const [ai] = messages as [AIMessage];
+    expect(ai.content).toBe('group thought');
+    expect(ai.tool_calls?.map((toolCall) => toolCall.id)).toEqual(['a', 'b']);
+    expect(JSON.stringify(messages)).not.toContain('provider thoughts');
   });
 
   it('passes results through the transformer', async () => {

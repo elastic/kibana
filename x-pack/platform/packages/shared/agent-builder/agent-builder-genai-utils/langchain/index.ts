@@ -15,6 +15,8 @@ export {
   createTextChunkEvent,
   createMessageEvent,
   createReasoningEvent,
+  createModelReasoningChunkEvent,
+  createModelReasoningEvent,
   createToolCallEvent,
   createBrowserToolCallEvent,
   createToolResultEvent,
@@ -25,6 +27,7 @@ export {
 } from './graph_events';
 export {
   extractTextContent,
+  extractReasoningContent,
   extractToolCalls,
   extractToolCallsWithReasoning,
   extractToolReturn,

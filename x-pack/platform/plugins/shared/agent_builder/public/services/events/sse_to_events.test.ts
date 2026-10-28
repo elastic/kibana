@@ -126,6 +126,33 @@ describe('sseToEvents', () => {
     expect(streamingEvent(state)?.data.message).toBe('Hello');
   });
 
+  it('ignores model reasoning chunks and appends a step for model reasoning, keeping later step ids in sequence', () => {
+    const state = fold(
+      executionStarted(),
+      {
+        type: ChatEventType.modelReasoningChunk,
+        data: { message_id: 'm1', text_chunk: 'Let me think.' },
+      } as ChatEvent,
+      {
+        type: ChatEventType.modelReasoning,
+        data: { message_id: 'm1', reasoning: 'Let me think.', tool_call_group_id: 'g1' },
+      } as ChatEvent,
+      toolCall('t1')
+    );
+
+    expect(ids(state)).toEqual([
+      `${EXECUTION_ID}::execution_started`,
+      executionStepEventId(ROUND_ID, 0, 0),
+      executionStepEventId(ROUND_ID, 0, 1),
+    ]);
+    expect(stepOf(state, executionStepEventId(ROUND_ID, 0, 0))).toEqual({
+      type: ConversationRoundStepType.modelReasoning,
+      reasoning: 'Let me think.',
+      tool_call_group_id: 'g1',
+    });
+    expect(stepAt(state, executionStepEventId(ROUND_ID, 0, 1))?.tool_call_id).toBe('t1');
+  });
+
   it('patches the same step event through tool call, progress and result', () => {
     const stepId = executionStepEventId(ROUND_ID, 0, 0);
     const state = fold(

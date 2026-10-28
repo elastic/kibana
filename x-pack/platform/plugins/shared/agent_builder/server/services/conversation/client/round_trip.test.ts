@@ -19,6 +19,7 @@ import {
   TimelineEventType,
   TimelineTriggerType,
   ZERO_MODEL_USAGE,
+  createModelReasoningStep,
 } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import { BOOM } from '../../../test_utils/timeline';
@@ -100,6 +101,25 @@ describe('round-trip fidelity: eventsToRounds(roundsToEvents(round)) === round',
       state: { agent: { nodes: [] } } as unknown as ConversationRound['state'],
     });
 
+    expect(roundTrip([round])).toEqual([round]);
+  });
+
+  it('preserves model reasoning steps in place', () => {
+    const round = baseRound({
+      steps: [
+        createModelReasoningStep({ reasoning: 'provider thoughts', tool_call_group_id: 'grp-1' }),
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'tc-1',
+          tool_id: 'platform.core.execute_esql',
+          params: { query: 'FROM foo' },
+          progression: [],
+          tool_call_group_id: 'grp-1',
+          results: [],
+        },
+        createModelReasoningStep({ reasoning: 'final provider thoughts' }),
+      ],
+    });
     expect(roundTrip([round])).toEqual([round]);
   });
 

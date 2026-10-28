@@ -47,6 +47,64 @@ describe('processResearchResponse', () => {
     expect(turn.pendingToolCallIds).toEqual([]);
   });
 
+  it('appends a model reasoning step to a handover when the model returned reasoning', () => {
+    const turn = processResearchResponse(
+      new AIMessageChunk({
+        content: 'done',
+        additional_kwargs: { reasoning_content: 'Thinking it through.' },
+      }),
+      { cycle: 1, toolManager }
+    );
+    expect(turn.outcome).toEqual({ type: 'handover', message: 'done', forceful: false });
+    expect(turn.stepUpdates).toEqual([
+      {
+        type: 'append',
+        step: {
+          type: ConversationRoundStepType.modelReasoning,
+          reasoning: 'Thinking it through.',
+        },
+      },
+    ]);
+  });
+
+  it('does not keep model reasoning of an empty response', () => {
+    const turn = processResearchResponse(
+      new AIMessageChunk({
+        content: '',
+        additional_kwargs: { reasoning_content: 'Thinking it through.' },
+      }),
+      { cycle: 1, toolManager }
+    );
+    expect(turn.outcome.type).toBe('retry_error');
+    expect(turn.stepUpdates).toEqual([]);
+  });
+
+  it('places the model reasoning step before the steps of the tool call group', () => {
+    const message = new AIMessageChunk({
+      content: 'Let me look.',
+      additional_kwargs: { reasoning_content: 'I should search first.' },
+      tool_calls: [{ id: 'c1', name: 'my_tool', args: { q: 1 } }],
+    });
+    const turn = processResearchResponse(message, { cycle: 1, toolManager });
+    const groupId = (turn.outcome as { toolCallGroupId: string }).toolCallGroupId;
+    expect(turn.stepUpdates.map((update) => update.type)).toEqual([
+      'append',
+      'append',
+      'append_tool_call',
+    ]);
+    expect(turn.stepUpdates[0]).toEqual({
+      type: 'append',
+      step: {
+        type: ConversationRoundStepType.modelReasoning,
+        reasoning: 'I should search first.',
+        tool_call_group_id: groupId,
+      },
+    });
+    expect(turn.stepUpdates[1]).toMatchObject({
+      step: { type: ConversationRoundStepType.reasoning, reasoning: 'Let me look.' },
+    });
+  });
+
   it('produces a retry_error on empty responses', () => {
     const turn = processResearchResponse(new AIMessageChunk({ content: '' }), {
       cycle: 1,
