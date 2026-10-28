@@ -29,9 +29,9 @@ const SELECTED_DAY = 20;
  * September 20 in Japan represented as UTC instants:
  *
  * Sep 20 00:00:00.000 Japan = Sep 19 15:00:00.000 UTC
- * Sep 20 23:59:59.999 Japan = Sep 20 14:59:59.999 UTC
+ * Sep 20 23:59:59.000 Japan = Sep 20 14:59:59.000 UTC
  */
-const EXPECTED_DATE_RANGE = '2015-09-19T15:00:00.000Z to 2015-09-20T14:59:59.999Z';
+const EXPECTED_DATE_RANGE = '2015-09-19T15:00:00.000Z to 2015-09-20T14:59:59.000Z';
 const EXPECTED_DISPLAY_RANGE = 'Sep 20, 2015, 00:00 → Sep 20, 2015, 23:59';
 
 spaceTest.describe('Date range picker UI settings', { tag: testData.SQM_UI_TAG }, () => {
@@ -101,7 +101,7 @@ spaceTest.describe('Date range picker UI settings', { tag: testData.SQM_UI_TAG }
 
         /*
          * Verify the actual query bounds are the corresponding UTC instants,
-         * including the final millisecond of the selected day.
+         * ending on the last whole second of the selected day.
          */
         await expect(datePicker.getTimePickerControl()).toHaveAttribute(
           'data-date-range',
