@@ -142,13 +142,15 @@ A space counts as set up when its entry point is installed, enabled and bound to
 
 ### Agent Builder hooks
 
-Agent Builder starts hook workflows with the request of the agent run, and the workflows engine runs a workflow started that way as the original caller. In a set-up space, the investigation agent and the decision-tree reinforcement agent therefore name the space's bound hook entry points instead of the global hooks, so hooks run as the agent account:
+Agent Builder starts hook workflows with the request of the agent run, and the workflows engine runs a workflow started that way as the original caller. The investigation agent and the decision-tree reinforcement agent therefore always name the space's bound hook entry points, so hooks run as the agent account:
 
 - `system-nightshift-sandbox-materialize-workspace-bound-<space>`
 - `system-nightshift-agent-optimize-bound-<space>`
 - `system-nightshift-decision-tree-hydrate-bound-<space>`
 
-Each calls its global hook with `run-as-mode: inherit`. A hook entry point only runs when Agent Builder starts it as a hook (`triggeredBy: agent-builder-hook`, which only server code sets), so nobody can run it directly with made-up round content and plant knowledge as the agent account. Spaces that are not set up, and spaces whose setup cannot be read, keep running the global hooks.
+Each calls its global hook with `run-as-mode: inherit`. A hook entry point only runs when Agent Builder starts it as a hook (`triggeredBy: agent-builder-hook`, which only server code sets), so nobody can run it directly with made-up round content and plant knowledge as the agent account.
+
+There is no fallback to the global hooks. Setup installs the three entry points, and a space without them cannot run Nightshift at all: availability requires the bound investigation entry point, so a run that reaches a hook is always in a set-up space.
 
 The decision-tree reinforcement agent is shared: everyone can run it, so agent optimize can run it as the agent account, and only admins can change it. Agent Builder still hides it from UI listings, and its submit tool writes decision trees as the caller.
 
