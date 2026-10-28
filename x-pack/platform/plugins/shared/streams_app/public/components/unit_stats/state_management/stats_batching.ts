@@ -8,8 +8,9 @@
 import { MAX_STREAMS_UNIT_STATS_COMPONENTS } from '@kbn/streams-schema';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { chunk } from 'lodash';
+import type { StatsWindow } from '../../../services/unit_stats_client/types';
 import { hasRegistrants, isRegistered } from './stats_registration';
-import type { ComponentRecord, StatsBatch, StatsComponentState, StatsWindows } from './types';
+import type { ComponentRecord, StatsBatch, StatsComponents, StatsComponentState } from './types';
 
 export interface DueOptions {
   now: number;
@@ -19,8 +20,8 @@ export interface DueOptions {
 }
 
 /**
- * A component is due when it has no value, when its request is in flight (a new batch for the
- * window replaces that request, so its components go in the new one), or when its value is old.
+ * A component is due when it has no value, when its request is in flight (a new batch replaces
+ * that request, so its components go in the new one), or when its value is old.
  */
 const isDue = <TStats>(
   { entry, fetchedAt }: StatsComponentState<TStats>,
@@ -42,25 +43,28 @@ const collectDueRefs = <TStats>(
     .map(([id]) => ({ kind, id }));
 
 /**
- * One batch per window, split in chunks of the request limit. A component shown by several
- * consumers is one entry, so a processor used in two slots is requested once.
+ * The due components, split in chunks of the request limit. Every batch is for the same window,
+ * the one the caller resolved for this flush. A component shown by several consumers is one entry,
+ * so a processor used in two slots is requested once.
  */
-export const planBatches = (windows: StatsWindows, options: DueOptions): StatsBatch[] =>
-  Object.entries(windows).flatMap(([windowKey, windowState]) =>
-    chunk(
-      [
-        ...collectDueRefs(windowState.destination, 'destination', options),
-        ...collectDueRefs(windowState.processor, 'processor', options),
-      ],
-      MAX_STREAMS_UNIT_STATS_COMPONENTS
-    ).map((components) => ({ windowKey, window: windowState.window, components }))
-  );
+export const planBatches = (
+  components: StatsComponents,
+  window: StatsWindow,
+  options: DueOptions
+): StatsBatch[] =>
+  chunk(
+    [
+      ...collectDueRefs(components.destination, 'destination', options),
+      ...collectDueRefs(components.processor, 'processor', options),
+    ],
+    MAX_STREAMS_UNIT_STATS_COMPONENTS
+  ).map((batchComponents) => ({ window, components: batchComponents }));
 
 /**
  * A request is wanted while any of its components is still shown. The machine stops a request
  * that is no longer wanted, which aborts it.
  */
 export const isBatchWanted = (
-  windows: StatsWindows,
-  { windowKey, components }: Pick<StatsBatch, 'windowKey' | 'components'>
-): boolean => components.some((ref) => isRegistered(windows[windowKey], ref));
+  components: StatsComponents,
+  batch: Pick<StatsBatch, 'components'>
+): boolean => batch.components.some((ref) => isRegistered(components, ref));

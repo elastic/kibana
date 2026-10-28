@@ -31,22 +31,20 @@ export interface StatsComponentState<TStats> {
   fetchedAt?: number;
 }
 
-/** The components of one kind in one window, by id. */
+/** The components of one kind, by id. */
 export type ComponentRecord<TStats> = Record<string, StatsComponentState<TStats>>;
 
-/** The components of one window. A kind has its own record, so each entry is typed by kind. */
-export interface StatsWindowState {
-  window: StatsWindow;
-  destination: Record<string, StatsComponentState<DestinationStatsView>>;
-  processor: Record<string, StatsComponentState<ProcessorStatsView>>;
+/**
+ * The components of a view. A kind has its own record, so each entry is typed by kind. Their
+ * entries describe the window the manager holds, which is not part of this structure.
+ */
+export interface StatsComponents {
+  destination: ComponentRecord<DestinationStatsView>;
+  processor: ComponentRecord<ProcessorStatsView>;
 }
 
-/** Keyed by window key. The Map has one window. A table has one per picker range it showed. */
-export type StatsWindows = Record<string, StatsWindowState>;
-
-/** One request: the components of one window, at most `MAX_STREAMS_UNIT_STATS_COMPONENTS`. */
+/** One request, for the window that was resolved at the flush. At most `MAX_STREAMS_UNIT_STATS_COMPONENTS`. */
 export interface StatsBatch {
-  windowKey: string;
   window: StatsWindow;
   components: StreamsUnit.StatsComponentRef[];
 }

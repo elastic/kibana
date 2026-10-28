@@ -6,20 +6,14 @@
  */
 
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { isEqual, mapValues, pickBy } from 'lodash';
+import { isEqual, pickBy } from 'lodash';
 import type {
   MappedComponentStats,
   MappedStatsResponse,
 } from '../../../services/unit_stats_client/types';
 import { STATS_REQUEST_FAILED_ERROR_CODE } from './constants';
-import { pruneUnusedWindows } from './stats_registration';
-import type {
-  ComponentRecord,
-  StatsBatch,
-  StatsEntry,
-  StatsWindows,
-  StatsWindowState,
-} from './types';
+import { pruneUnusedComponents } from './stats_registration';
+import type { ComponentRecord, StatsBatch, StatsComponents, StatsEntry } from './types';
 
 const LOADING_ENTRY: StatsEntry<never> = { status: 'loading' };
 
@@ -49,16 +43,6 @@ const groupIdsByKind = (components: StreamsUnit.StatsComponentRef[]): IdsByKind 
   return { destination, processor };
 };
 
-/** Applies an update to one window. A window that is gone is left out, so there is nothing to update. */
-const withWindowState = (
-  windows: StatsWindows,
-  windowKey: string,
-  update: (windowState: StatsWindowState) => StatsWindowState
-): StatsWindows => {
-  const windowState = windows[windowKey];
-  return windowState ? { ...windows, [windowKey]: update(windowState) } : windows;
-};
-
 const markLoadingKind = <TStats>(
   record: ComponentRecord<TStats>,
   ids: string[]
@@ -77,14 +61,16 @@ const markLoadingKind = <TStats>(
  * Marks the components of a request that is about to start. Only a component without a value, or
  * with an error, shows as loading. A component that has a value keeps it while the refresh runs.
  */
-export const markBatchLoading = (windows: StatsWindows, batch: StatsBatch): StatsWindows => {
+export const markBatchLoading = (
+  components: StatsComponents,
+  batch: StatsBatch
+): StatsComponents => {
   const ids = groupIdsByKind(batch.components);
 
-  return withWindowState(windows, batch.windowKey, (windowState) => ({
-    ...windowState,
-    destination: markLoadingKind(windowState.destination, ids.destination),
-    processor: markLoadingKind(windowState.processor, ids.processor),
-  }));
+  return {
+    destination: markLoadingKind(components.destination, ids.destination),
+    processor: markLoadingKind(components.processor, ids.processor),
+  };
 };
 
 const mergeResultsKind = <TStats>(
@@ -116,23 +102,22 @@ const mergeResultsKind = <TStats>(
 
 /** Writes the result of a request into the entries of its components, and stamps when it arrived. */
 export const mergeFetchedStats = (
-  windows: StatsWindows,
+  components: StatsComponents,
   batch: StatsBatch,
   response: MappedStatsResponse,
   now: number
-): StatsWindows => {
+): StatsComponents => {
   const ids = groupIdsByKind(batch.components);
 
-  return withWindowState(windows, batch.windowKey, (windowState) => ({
-    ...windowState,
+  return {
     destination: mergeResultsKind(
-      windowState.destination,
+      components.destination,
       ids.destination,
       response.destinations,
       now
     ),
-    processor: mergeResultsKind(windowState.processor, ids.processor, response.processors, now),
-  }));
+    processor: mergeResultsKind(components.processor, ids.processor, response.processors, now),
+  };
 };
 
 const markFailedKind = <TStats>(
@@ -164,17 +149,16 @@ const markFailedKind = <TStats>(
  * than a failed refresh, and a value that is already stale stays as it is.
  */
 export const markBatchFailed = (
-  windows: StatsWindows,
+  components: StatsComponents,
   batch: StatsBatch,
   reason: string
-): StatsWindows => {
+): StatsComponents => {
   const ids = groupIdsByKind(batch.components);
 
-  return withWindowState(windows, batch.windowKey, (windowState) => ({
-    ...windowState,
-    destination: markFailedKind(windowState.destination, ids.destination, reason),
-    processor: markFailedKind(windowState.processor, ids.processor, reason),
-  }));
+  return {
+    destination: markFailedKind(components.destination, ids.destination, reason),
+    processor: markFailedKind(components.processor, ids.processor, reason),
+  };
 };
 
 const keepIdsKind = <TStats>(
@@ -187,13 +171,10 @@ const keepIdsKind = <TStats>(
  * its registrants. Nothing is dropped for a change to a route: a refetch reads the same window.
  */
 export const dropRemovedComponents = (
-  windows: StatsWindows,
+  components: StatsComponents,
   componentIds: ReadonlySet<string>
-): StatsWindows =>
-  pruneUnusedWindows(
-    mapValues(windows, (windowState) => ({
-      ...windowState,
-      destination: keepIdsKind(windowState.destination, componentIds),
-      processor: keepIdsKind(windowState.processor, componentIds),
-    }))
-  );
+): StatsComponents =>
+  pruneUnusedComponents({
+    destination: keepIdsKind(components.destination, componentIds),
+    processor: keepIdsKind(components.processor, componentIds),
+  });

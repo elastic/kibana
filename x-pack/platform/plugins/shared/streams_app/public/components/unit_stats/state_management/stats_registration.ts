@@ -6,18 +6,8 @@
  */
 
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { mapValues, pickBy } from 'lodash';
-import type { StatsWindow } from '../../../services/unit_stats_client/types';
-import type { ComponentRecord, StatsComponentState, StatsWindows, StatsWindowState } from './types';
-
-export const getWindowKey = (window: StatsWindow): string =>
-  window.kind === 'default' ? 'default' : `${window.start}/${window.end}`;
-
-const createWindowState = (window: StatsWindow): StatsWindowState => ({
-  window,
-  destination: {},
-  processor: {},
-});
+import { pickBy } from 'lodash';
+import type { ComponentRecord, StatsComponents, StatsComponentState } from './types';
 
 // Registration
 
@@ -49,39 +39,31 @@ const changeRegistrants = <TStats>(
 };
 
 const withComponentRegistrants = (
-  windowState: StatsWindowState,
+  components: StatsComponents,
   ref: StreamsUnit.StatsComponentRef,
   update: RegistrantsUpdate
-): StatsWindowState => {
+): StatsComponents => {
   switch (ref.kind) {
     case 'destination':
       return {
-        ...windowState,
-        destination: changeRegistrants(windowState.destination, ref.id, update),
+        ...components,
+        destination: changeRegistrants(components.destination, ref.id, update),
       };
     case 'processor':
       return {
-        ...windowState,
-        processor: changeRegistrants(windowState.processor, ref.id, update),
+        ...components,
+        processor: changeRegistrants(components.processor, ref.id, update),
       };
     default:
-      return windowState;
+      return components;
   }
 };
 
 export const registerComponent = (
-  windows: StatsWindows,
+  components: StatsComponents,
   ref: StreamsUnit.StatsComponentRef,
-  window: StatsWindow,
   registrant: string
-): StatsWindows => {
-  const windowKey = getWindowKey(window);
-  const windowState = windows[windowKey] ?? createWindowState(window);
-  return {
-    ...windows,
-    [windowKey]: withComponentRegistrants(windowState, ref, addRegistrant(registrant)),
-  };
-};
+): StatsComponents => withComponentRegistrants(components, ref, addRegistrant(registrant));
 
 /** There is interest in a component while at least one consumer shows it. */
 export const hasRegistrants = <TStats>({ registrants }: StatsComponentState<TStats>): boolean =>
@@ -98,52 +80,35 @@ const pruneUnusedKind = <TStats>(record: ComponentRecord<TStats>): ComponentReco
       hasRegistrants(state) || (state.entry !== undefined && state.entry.status !== 'loading')
   );
 
-const isWindowEmpty = ({ destination, processor }: StatsWindowState): boolean =>
-  Object.keys(destination).length === 0 && Object.keys(processor).length === 0;
-
-/** Removes every component that has nothing to keep, then every window left with nothing. */
-export const pruneUnusedWindows = (windows: StatsWindows): StatsWindows =>
-  pickBy(
-    mapValues(windows, (windowState) => ({
-      ...windowState,
-      destination: pruneUnusedKind(windowState.destination),
-      processor: pruneUnusedKind(windowState.processor),
-    })),
-    (windowState) => !isWindowEmpty(windowState)
-  );
+/** Removes every component that has nothing to keep. */
+export const pruneUnusedComponents = (components: StatsComponents): StatsComponents => ({
+  destination: pruneUnusedKind(components.destination),
+  processor: pruneUnusedKind(components.processor),
+});
 
 /**
  * Removes the interest of one registrant. A value that was fetched stays cached, so a node that
- * comes back shows it at once. A window left with nothing is removed.
+ * comes back shows it at once.
  */
 export const unregisterComponent = (
-  windows: StatsWindows,
+  components: StatsComponents,
   ref: StreamsUnit.StatsComponentRef,
-  window: StatsWindow,
   registrant: string
-): StatsWindows => {
-  const windowKey = getWindowKey(window);
-  const windowState = windows[windowKey];
-  if (!windowState) return windows;
+): StatsComponents =>
+  pruneUnusedComponents(withComponentRegistrants(components, ref, removeRegistrant(registrant)));
 
-  return pruneUnusedWindows({
-    ...windows,
-    [windowKey]: withComponentRegistrants(windowState, ref, removeRegistrant(registrant)),
-  });
-};
-
-/** Whether any consumer still shows this component in this window. */
+/** Whether any consumer still shows this component. */
 export const isRegistered = (
-  windowState: StatsWindowState | undefined,
+  components: StatsComponents,
   ref: StreamsUnit.StatsComponentRef
 ): boolean => {
   switch (ref.kind) {
     case 'destination': {
-      const state = windowState?.destination[ref.id];
+      const state = components.destination[ref.id];
       return state !== undefined && hasRegistrants(state);
     }
     case 'processor': {
-      const state = windowState?.processor[ref.id];
+      const state = components.processor[ref.id];
       return state !== undefined && hasRegistrants(state);
     }
     default:

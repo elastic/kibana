@@ -10,19 +10,23 @@ import { MAX_STREAMS_UNIT_STATS_COMPONENTS } from '@kbn/streams-schema';
 import type { DestinationStatsView, StatsWindow } from '../../../services/unit_stats_client/types';
 import { isBatchWanted, planBatches } from './stats_batching';
 import type { DueOptions } from './stats_batching';
-import { getWindowKey, registerComponent, unregisterComponent } from './stats_registration';
-import type { StatsEntry, StatsWindows } from './types';
+import { registerComponent, unregisterComponent } from './stats_registration';
+import type { StatsComponents, StatsEntry } from './types';
 
-const DEFAULT_WINDOW: StatsWindow = { kind: 'default' };
-const RANGE_WINDOW: StatsWindow = {
+const WINDOW: StatsWindow = {
   kind: 'range',
   start: '2026-10-27T12:00:00.000Z',
   end: '2026-10-27T12:15:00.000Z',
 };
 
+const EMPTY: StatsComponents = { destination: {}, processor: {} };
+
 const FRESHNESS_MS = 30_000;
 const NOW = 100_000;
 const DUE_OPTIONS: DueOptions = { now: NOW, freshnessMs: FRESHNESS_MS, force: false };
+
+const plan = (components: StatsComponents, options: DueOptions = DUE_OPTIONS) =>
+  planBatches(components, WINDOW, options);
 
 const destination = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'destination', id });
 const processor = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'processor', id });
@@ -38,153 +42,142 @@ const READY_ENTRY: StatsEntry<DestinationStatsView> = {
   },
 };
 
-const registerAll = (
-  refs: StreamsUnit.StatsComponentRef[],
-  window: StatsWindow = DEFAULT_WINDOW,
-  windows: StatsWindows = {}
-): StatsWindows =>
+const registerAll = (refs: StreamsUnit.StatsComponentRef[]): StatsComponents =>
   refs.reduce(
-    (current, ref) => registerComponent(current, ref, window, `registrant-${ref.kind}-${ref.id}`),
-    windows
+    (current, ref) => registerComponent(current, ref, `registrant-${ref.kind}-${ref.id}`),
+    EMPTY
   );
 
-/** Sets the value state of a destination that is already registered in the default window. */
+/** Sets the value state of a destination that is already registered. */
 const withDestinationValue = (
-  windows: StatsWindows,
+  components: StatsComponents,
   id: string,
   entry: StatsEntry<DestinationStatsView>,
   fetchedAt?: number
-): StatsWindows => ({
-  ...windows,
-  default: {
-    ...windows.default,
-    destination: {
-      ...windows.default.destination,
-      [id]: { ...windows.default.destination[id], entry, fetchedAt },
-    },
+): StatsComponents => ({
+  ...components,
+  destination: {
+    ...components.destination,
+    [id]: { ...components.destination[id], entry, fetchedAt },
   },
 });
 
 describe('planBatches', () => {
   it('plans nothing when nothing is registered', () => {
-    expect(planBatches({}, DUE_OPTIONS)).toEqual([]);
+    expect(plan(EMPTY)).toEqual([]);
   });
 
   it('requests a registered component that has no value', () => {
-    const windows = registerAll([destination('es-prod')]);
-
-    expect(planBatches(windows, DUE_OPTIONS)).toEqual([
-      { windowKey: 'default', window: DEFAULT_WINDOW, components: [destination('es-prod')] },
+    expect(plan(registerAll([destination('es-prod')]))).toEqual([
+      { window: WINDOW, components: [destination('es-prod')] },
     ]);
   });
 
-  it('puts destinations and processors of a window in the same batch', () => {
-    const windows = registerAll([processor('shout'), destination('es-prod')]);
-
-    expect(planBatches(windows, DUE_OPTIONS)).toEqual([
-      {
-        windowKey: 'default',
-        window: DEFAULT_WINDOW,
-        components: [destination('es-prod'), processor('shout')],
-      },
+  it('puts destinations and processors in the same batch', () => {
+    expect(plan(registerAll([processor('shout'), destination('es-prod')]))).toEqual([
+      { window: WINDOW, components: [destination('es-prod'), processor('shout')] },
     ]);
   });
 
   it('requests a processor shown by two registrants once', () => {
-    let windows = registerComponent({}, processor('shout'), DEFAULT_WINDOW, 'slot-a');
-    windows = registerComponent(windows, processor('shout'), DEFAULT_WINDOW, 'slot-b');
+    let components = registerComponent(EMPTY, processor('shout'), 'slot-a');
+    components = registerComponent(components, processor('shout'), 'slot-b');
 
-    expect(planBatches(windows, DUE_OPTIONS)[0].components).toEqual([processor('shout')]);
+    expect(plan(components)[0].components).toEqual([processor('shout')]);
   });
 
   it('does not request a component that nobody shows any more, even when its value is old', () => {
-    let windows = registerAll([destination('es-prod')]);
-    windows = withDestinationValue(windows, 'es-prod', READY_ENTRY, 0);
-    windows = unregisterComponent(
-      windows,
+    let components = registerAll([destination('es-prod')]);
+    components = withDestinationValue(components, 'es-prod', READY_ENTRY, 0);
+    components = unregisterComponent(
+      components,
       destination('es-prod'),
-      DEFAULT_WINDOW,
       'registrant-destination-es-prod'
     );
 
-    expect(planBatches(windows, DUE_OPTIONS)).toEqual([]);
+    expect(plan(components)).toEqual([]);
   });
 
   describe('freshness', () => {
     it('does not request a fresh value', () => {
-      const windows = withDestinationValue(
+      const components = withDestinationValue(
         registerAll([destination('es-prod')]),
         'es-prod',
         READY_ENTRY,
         NOW - FRESHNESS_MS + 1
       );
 
-      expect(planBatches(windows, DUE_OPTIONS)).toEqual([]);
+      expect(plan(components)).toEqual([]);
     });
 
     it('requests a value that is as old as the freshness period', () => {
-      const windows = withDestinationValue(
+      const components = withDestinationValue(
         registerAll([destination('es-prod')]),
         'es-prod',
         READY_ENTRY,
         NOW - FRESHNESS_MS
       );
 
-      expect(planBatches(windows, DUE_OPTIONS)).toHaveLength(1);
+      expect(plan(components)).toHaveLength(1);
     });
 
     it('requests a fresh value when forced', () => {
-      const windows = withDestinationValue(
+      const components = withDestinationValue(
         registerAll([destination('es-prod')]),
         'es-prod',
         READY_ENTRY,
         NOW
       );
 
-      expect(planBatches(windows, { ...DUE_OPTIONS, force: true })).toHaveLength(1);
+      expect(plan(components, { ...DUE_OPTIONS, force: true })).toHaveLength(1);
     });
 
     it('requests a component whose request is in flight, so a new batch replaces that request', () => {
-      const windows = withDestinationValue(registerAll([destination('es-prod')]), 'es-prod', {
+      const components = withDestinationValue(registerAll([destination('es-prod')]), 'es-prod', {
         status: 'loading',
       });
 
-      expect(planBatches(windows, DUE_OPTIONS)).toHaveLength(1);
+      expect(plan(components)).toHaveLength(1);
     });
 
     it('does not request a fresh component error again before it expires', () => {
-      const windows = withDestinationValue(
+      const components = withDestinationValue(
         registerAll([destination('es-prod')]),
         'es-prod',
         { status: 'error', error: { code: 'unavailable', reason: 'Elasticsearch is unavailable' } },
         NOW
       );
 
-      expect(planBatches(windows, DUE_OPTIONS)).toEqual([]);
+      expect(plan(components)).toEqual([]);
     });
   });
 
-  describe('windows and the request limit', () => {
-    it('plans one batch per window, and never mixes windows', () => {
-      let windows = registerAll([destination('es-prod')], DEFAULT_WINDOW);
-      windows = registerAll([destination('es-prod'), processor('shout')], RANGE_WINDOW, windows);
+  describe('the window and the request limit', () => {
+    it('gives every batch the window the caller resolved', () => {
+      const refs = Array.from({ length: 250 }, (_, index) => destination(`destination-${index}`));
+      const batches = plan(registerAll(refs));
 
-      expect(planBatches(windows, DUE_OPTIONS)).toEqual([
-        { windowKey: 'default', window: DEFAULT_WINDOW, components: [destination('es-prod')] },
-        {
-          windowKey: getWindowKey(RANGE_WINDOW),
-          window: RANGE_WINDOW,
-          components: [destination('es-prod'), processor('shout')],
-        },
-      ]);
+      expect(batches).toHaveLength(3);
+      expect(batches.every(({ window }) => window === WINDOW)).toBe(true);
     });
 
-    it('splits 250 components of a window into batches of at most 100', () => {
+    it('uses the window of each call, so every flush can resolve it again', () => {
+      const components = registerAll([destination('es-prod')]);
+      const slid: StatsWindow = {
+        kind: 'range',
+        start: '2026-10-27T12:00:30.000Z',
+        end: '2026-10-27T12:15:30.000Z',
+      };
+
+      expect(planBatches(components, WINDOW, DUE_OPTIONS)[0].window).toBe(WINDOW);
+      expect(planBatches(components, slid, DUE_OPTIONS)[0].window).toBe(slid);
+    });
+
+    it('splits 250 components into batches of at most 100', () => {
       const refs = Array.from({ length: 250 }, (_, index) => destination(`destination-${index}`));
-      const batches = planBatches(registerAll(refs), DUE_OPTIONS);
+      const batches = plan(registerAll(refs));
 
       expect(batches.map(({ components }) => components.length)).toEqual([100, 100, 50]);
-      expect(batches.every(({ windowKey }) => windowKey === 'default')).toBe(true);
       expect(Math.max(...batches.map(({ components }) => components.length))).toBe(
         MAX_STREAMS_UNIT_STATS_COMPONENTS
       );
@@ -196,16 +189,14 @@ describe('planBatches', () => {
         ...Array.from({ length: 150 }, (_, index) => processor(`processor-${index}`)),
       ];
 
-      expect(
-        planBatches(registerAll(refs), DUE_OPTIONS).map(({ components }) => components.length)
-      ).toEqual([100, 100, 100]);
+      expect(plan(registerAll(refs)).map(({ components }) => components.length)).toEqual([
+        100, 100, 100,
+      ]);
     });
 
     it('requests every component once across the chunks', () => {
       const refs = Array.from({ length: 250 }, (_, index) => destination(`destination-${index}`));
-      const requested = planBatches(registerAll(refs), DUE_OPTIONS).flatMap(
-        ({ components }) => components
-      );
+      const requested = plan(registerAll(refs)).flatMap(({ components }) => components);
 
       expect(requested).toEqual(refs);
     });
@@ -213,52 +204,40 @@ describe('planBatches', () => {
 });
 
 describe('isBatchWanted', () => {
-  const batch = {
-    windowKey: 'default',
-    components: [destination('es-prod'), processor('shout')],
-  };
+  const batch = { components: [destination('es-prod'), processor('shout')] };
 
   it('is wanted while any component of the request is shown', () => {
     expect(isBatchWanted(registerAll([processor('shout')]), batch)).toBe(true);
   });
 
   it('is wanted when only some of its components are still shown', () => {
-    let windows = registerAll([destination('es-prod'), processor('shout')]);
-    windows = unregisterComponent(
-      windows,
+    let components = registerAll([destination('es-prod'), processor('shout')]);
+    components = unregisterComponent(
+      components,
       destination('es-prod'),
-      DEFAULT_WINDOW,
       'registrant-destination-es-prod'
     );
 
-    expect(isBatchWanted(windows, batch)).toBe(true);
+    expect(isBatchWanted(components, batch)).toBe(true);
   });
 
   it('is not wanted once none of its components is shown', () => {
-    let windows = registerAll([destination('es-prod'), processor('shout')]);
-    windows = unregisterComponent(
-      windows,
+    let components = registerAll([destination('es-prod'), processor('shout')]);
+    components = unregisterComponent(
+      components,
       destination('es-prod'),
-      DEFAULT_WINDOW,
       'registrant-destination-es-prod'
     );
-    windows = unregisterComponent(
-      windows,
-      processor('shout'),
-      DEFAULT_WINDOW,
-      'registrant-processor-shout'
-    );
+    components = unregisterComponent(components, processor('shout'), 'registrant-processor-shout');
 
-    expect(isBatchWanted(windows, batch)).toBe(false);
+    expect(isBatchWanted(components, batch)).toBe(false);
   });
 
-  it('is not wanted when the window is gone', () => {
-    expect(isBatchWanted({}, batch)).toBe(false);
+  it('is not wanted when nothing is registered', () => {
+    expect(isBatchWanted(EMPTY, batch)).toBe(false);
   });
 
-  it('looks only at its own window', () => {
-    const windows = registerAll([destination('es-prod')], RANGE_WINDOW);
-
-    expect(isBatchWanted(windows, batch)).toBe(false);
+  it('is not wanted when only other components are shown', () => {
+    expect(isBatchWanted(registerAll([destination('other')]), batch)).toBe(false);
   });
 });
