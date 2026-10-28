@@ -205,9 +205,9 @@ overrides:
   isomorphic-fetch>node-fetch: 2.7.0
   langchain: 1.2.30
   pixelmatch: 5.3.0
-  qs: 6.16.1
+  qs: 6.17.0
   remark-parse>trim: 1.0.1
-  serialize-javascript: 7.1.2
+  serialize-javascript: 7.1.3
   sharp: 0.35.5
   typescript: 6.0.3
   util: 0.12.5
@@ -332,7 +332,7 @@ importers:
         version: 2.0.10(react-router-dom@5.3.4(react@18.2.0))(react@18.2.0)
       '@elastic/charts':
         specifier: 71.5.4
-        version: 71.5.4(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment-timezone@0.6.1)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(reselect@4.1.8)
+        version: 71.5.4(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment-timezone@0.6.2)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(reselect@4.1.8)
       '@elastic/datemath':
         specifier: 5.0.3
         version: 5.0.3(moment@2.31.0)
@@ -4051,8 +4051,8 @@ importers:
         specifier: 3.6.0
         version: 3.6.0
       dompurify:
-        specifier: 3.4.14
-        version: 3.4.14
+        specifier: 3.4.17
+        version: 3.4.17
       elastic-apm-node:
         specifier: 4.18.0
         version: 4.18.0(supports-color@10.2.2)
@@ -4225,8 +4225,8 @@ importers:
         specifier: 2.3.2
         version: 2.3.2
       moment-timezone:
-        specifier: 0.6.1
-        version: 0.6.1
+        specifier: 0.6.2
+        version: 0.6.2
       monaco-editor:
         specifier: 0.44.0
         version: 0.44.0
@@ -6109,9 +6109,6 @@ importers:
       eslint-plugin-testing-library:
         specifier: 7.1.1
         version: 7.1.1(eslint@8.57.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
-      eslint-traverse:
-        specifier: 1.0.0
-        version: 1.0.0
       exit-hook:
         specifier: 2.2.0
         version: 2.2.0
@@ -6142,9 +6139,6 @@ importers:
       globby:
         specifier: 11.1.0
         version: 11.1.0
-      gulp-brotli:
-        specifier: 3.0.0
-        version: 3.0.0
       gulp-postcss:
         specifier: 10.0.0
         version: 10.0.0(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.13)
@@ -6314,8 +6308,8 @@ importers:
         specifier: 2.1.1
         version: 2.1.1(supports-color@10.2.2)
       qs:
-        specifier: 6.16.1
-        version: 6.16.1
+        specifier: 6.17.0
+        version: 6.17.0
       react-element-to-jsx-string:
         specifier: 15.0.0
         version: 15.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -17389,8 +17383,8 @@ packages:
     resolution: {integrity: sha512-cgwlv/1iFQiFnU96XXgROh8xTeetsnJiDsTc7TYCLFd9+/WNkIqPTxiM/8pSd8VIrhXGTf1Ny1q1hquVqDJB5w==}
     engines: {node: '>= 4'}
 
-  dompurify@3.4.14:
-    resolution: {integrity: sha512-dVoH9z+MY+C9IilgGCk3YfFqjLi3fChm2OiKJMzh6axrJ5qwxqWaZamgmHrpv22CN/KdbZJuGEGgfQoL00LTdg==}
+  dompurify@3.4.17:
+    resolution: {integrity: sha512-B/pSlYVHQ58kqISD/yDjuJ1yfzI34m1gF4lAod2bwSRhiN4K5Cl3H8Af7hqB2PmTL911tdEudnnXn5FnhRoz0w==}
 
   domutils@2.8.0:
     resolution: {integrity: sha512-w96Cjofp72M5IIhpjgobBimYEfoPjx1Vx0BSX9P30WBdZW2WIKU0T1Bd0kz2eNZ9ikjKgHbEyKx8BB6H1L3h3A==}
@@ -17836,9 +17830,6 @@ packages:
   eslint-scope@7.2.2:
     resolution: {integrity: sha512-dOt21O7lTMhDM+X9mB4GX+DZrZtCUJPL/wlcTqxyrx5IvO0IYtILdtrQGQp+8n5S0gwSVmOf9NQrjMOgfQZlIg==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
-
-  eslint-traverse@1.0.0:
-    resolution: {integrity: sha512-bSp37rQs93LF8rZ409EI369DGCI4tELbFVmFNxI6QbuveS7VRxYVyUhwDafKN/enMyUh88HQQ7ZoGUHtPuGdcw==}
 
   eslint-utils@2.1.0:
     resolution: {integrity: sha512-w94dQYoauyvlDc43XnGB8lU3Zt713vNChgt4EWwhXAP2XkBvndfxF0AgIqKOOasjPIPzj9JqgwkwbCYD0/V3Zg==}
@@ -18620,10 +18611,6 @@ packages:
   graphql@16.13.2:
     resolution: {integrity: sha512-5bJ+nf/UCpAjHM8i06fl7eLyVC9iuNAjm9qzkiu2ZGhM0VscSvS6WDPfAwkdkBuoXGM9FJSbKl6wylMwP9Ktig==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
-
-  gulp-brotli@3.0.0:
-    resolution: {integrity: sha512-AkGR+FRn4Nrf9Ocx8/WXgNNX+owk4FN4xU4kRrso41DWWd9v1KXO8EyG1cGcwt4364Ax68b7ANcP9Em+/RM2OQ==}
-    engines: {node: '>=10.17.0'}
 
   gulp-postcss@10.0.0:
     resolution: {integrity: sha512-z1RF2RJEX/BvFsKN11PXai8lRmihZTiHnlJf7Zu8uHaA/Q7Om4IeN8z1NtMAW5OiLwUY02H0DIFl9tHl0CNSgA==}
@@ -20878,8 +20865,8 @@ packages:
   moment-duration-format@2.3.2:
     resolution: {integrity: sha512-cBMXjSW+fjOb4tyaVHuaVE/A5TqkukDWiOfxxAjY+PEqmmBQlLwn+8OzwPiG3brouXKY5Un4pBjAeB6UToXHaQ==}
 
-  moment-timezone@0.6.1:
-    resolution: {integrity: sha512-1B9lmAhB9D9/sHaPC1N7wLFEVUoFldxOpOO96lOD1PvJ43vCd0ozDPbu0FEL3++VvawOlDkq8YD373tJmP5JHw==}
+  moment-timezone@0.6.2:
+    resolution: {integrity: sha512-lDsQv8FoGdBUdf0+TjGsq2orxKuXdwFlQ6Zw6TX3xIcTwTfEpCLyKqvEauvCHJ8iu3KBV8+uPhlv70YsNGdUBQ==}
 
   moment@2.31.0:
     resolution: {integrity: sha512-0acOTfMiWOheYS4eoWb80yYMb/JLvVv9SHbs2PehaDzfUG0Bw855SKyk0IKTnPGa5+U2bmi3W68l1+sGLX/pvw==}
@@ -22067,8 +22054,8 @@ packages:
     resolution: {integrity: sha512-+Owyggi9IxT1ePKGafcI87ubSmxol6smwJ+RAHDQlx9+9cPwFWDiKFFCPuWhr9ignlGpZ9vDQLw67N4dcTVFEA==}
     engines: {node: '>=20'}
 
-  qs@6.16.1:
-    resolution: {integrity: sha512-5Px6J7rfHBAGUhNQ3es4YzcOdBBw0SDcVtThJml4RdnKw4tKs2epA0kPZ+K8X+WiHktT93RHVcQ/3ym5aTCgtg==}
+  qs@6.17.0:
+    resolution: {integrity: sha512-5LK5BZ2XDHMvcUJaf0CQ5HL3aVgKbpklvByC7qLSxYkfE8COEEbJg5xCHWCTqzqi0Gs4Jn5Mv5v3R38W6edscA==}
     engines: {node: '>=0.6'}
 
   query-string@9.5.1:
@@ -23203,8 +23190,8 @@ packages:
     resolution: {integrity: sha512-1gnZf7DFcoIcajTjTwjwuDjzuz4PPcY2StKPlsGAQ1+YH20IRVrBaXSWmdjowTJ6u8Rc01PoYOGHXfP1mYcZNQ==}
     engines: {node: '>= 18'}
 
-  serialize-javascript@7.1.2:
-    resolution: {integrity: sha512-GL2BWwVa6JydKO6l/ljVgjAZF4QJ3S7dWDWi53s5GZT8PJzD2fNxi67HANQGKAqPrwEpL5ba7gUBGi0Ls/sEoQ==}
+  serialize-javascript@7.1.3:
+    resolution: {integrity: sha512-kYEnegpAxWFjUw3dSYdSM9zVlTrsxDbsSkq/qd3B7VanqyJ+JdDy6qVyuqVGBhSfuD/rLZQEKuXsO5KZFCrVYQ==}
     engines: {node: '>=20.0.0'}
 
   serve-index@1.9.2:
@@ -23963,9 +23950,6 @@ packages:
 
   through2@2.0.5:
     resolution: {integrity: sha512-/mrRod8xqpA+IHSLyGCQ2s8SPHiCDEeQJSep1jqLYeEUClOFG2Qsh+4FU6G9VeqpZnGW/Su8LQGc4YKni5rYSQ==}
-
-  through2@3.0.2:
-    resolution: {integrity: sha512-enaDQ4MUyP2W6ZyT6EsMzqBPZaM/avg8iuo+l2d3QCs0J+6RaqkHV/2/lOwDTueBHeJ/2LG9lrLW3d5rWPucuQ==}
 
   through2@4.0.2:
     resolution: {integrity: sha512-iOqSav00cVxEEICeD7TjLB1sueEL+81Wpzp2bY17uZjZN0pWZPuo4suZ/61VujxmqSGFfgOcNuTZ85QJwNZQpw==}
@@ -26738,7 +26722,7 @@ snapshots:
       json-stringify-safe: 5.0.1
       mime-types: 2.1.35
       performance-now: 2.1.0
-      qs: 6.16.1
+      qs: 6.17.0
       safe-buffer: 5.2.1
       tough-cookie: 5.1.2
       tunnel-agent: 0.6.0
@@ -26836,7 +26820,7 @@ snapshots:
     dependencies:
       object-hash: 1.3.1
 
-  '@elastic/charts@71.5.4(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment-timezone@0.6.1)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(reselect@4.1.8)':
+  '@elastic/charts@71.5.4(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment-timezone@0.6.2)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(reselect@4.1.8)':
     dependencies:
       '@popperjs/core': 2.11.8
       '@reduxjs/toolkit': 1.9.7(react-redux@8.1.3(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@4.2.1))(react@18.2.0)
@@ -26852,7 +26836,7 @@ snapshots:
       immer: 9.0.21
       luxon: 1.28.1
       moment: 2.31.0
-      moment-timezone: 0.6.1
+      moment-timezone: 0.6.2
       prop-types: 15.8.1
       re-reselect: 4.0.1(reselect@4.1.8)
       react: 18.2.0
@@ -27164,14 +27148,14 @@ snapshots:
       date-fns: 1.30.1
       deep-equal: 1.1.2
       history: 4.9.0
-      qs: 6.16.1
+      qs: 6.17.0
 
   '@elastic/search-ui@1.24.2':
     dependencies:
       date-fns: 1.30.1
       deep-equal: 1.1.2
       history: 4.9.0
-      qs: 6.16.1
+      qs: 6.17.0
 
   '@elastic/transport@8.11.0(supports-color@10.2.2)':
     dependencies:
@@ -33409,7 +33393,7 @@ snapshots:
       http-errors: 2.0.1
       iconv-lite: 0.4.24
       on-finished: 2.4.1
-      qs: 6.16.1
+      qs: 6.17.0
       raw-body: 2.5.3
       type-is: 1.6.18
       unpipe: 1.0.0
@@ -33424,7 +33408,7 @@ snapshots:
       http-errors: 2.0.1
       iconv-lite: 0.7.3
       on-finished: 2.4.1
-      qs: 6.16.1
+      qs: 6.17.0
       raw-body: 3.0.2
       type-is: 2.1.0
     transitivePeerDependencies:
@@ -35158,7 +35142,7 @@ snapshots:
     dependencies:
       domelementtype: 2.3.0
 
-  dompurify@3.4.14:
+  dompurify@3.4.17:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
 
@@ -35808,8 +35792,6 @@ snapshots:
       esrecurse: 4.3.0
       estraverse: 5.3.0
 
-  eslint-traverse@1.0.0: {}
-
   eslint-utils@2.1.0:
     dependencies:
       eslint-visitor-keys: 1.3.0
@@ -36016,7 +35998,7 @@ snapshots:
       parseurl: 1.3.3
       path-to-regexp: 0.1.13
       proxy-addr: 2.0.8
-      qs: 6.16.1
+      qs: 6.17.0
       range-parser: 1.2.1
       safe-buffer: 5.2.1
       send: 0.19.2(supports-color@10.2.2)
@@ -36052,7 +36034,7 @@ snapshots:
       parseurl: 1.3.3
       path-to-regexp: 0.1.13
       proxy-addr: 2.0.8
-      qs: 6.16.1
+      qs: 6.17.0
       range-parser: 1.2.1
       safe-buffer: 5.2.1
       send: 0.19.2(supports-color@10.2.2)
@@ -36088,7 +36070,7 @@ snapshots:
       once: 1.4.0
       parseurl: 1.3.3
       proxy-addr: 2.0.8
-      qs: 6.16.1
+      qs: 6.17.0
       range-parser: 1.3.0
       router: 2.2.0(supports-color@10.2.2)
       send: 1.2.1(supports-color@10.2.2)
@@ -36859,11 +36841,6 @@ snapshots:
       lodash: 4.18.1
 
   graphql@16.13.2: {}
-
-  gulp-brotli@3.0.0:
-    dependencies:
-      plugin-error: 1.0.1
-      through2: 3.0.2
 
   gulp-postcss@10.0.0(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.13):
     dependencies:
@@ -39687,7 +39664,7 @@ snapshots:
       minimatch: 5.1.9
       ms: 2.1.3
       picocolors: 1.1.1
-      serialize-javascript: 7.1.2
+      serialize-javascript: 7.1.3
       strip-json-comments: 3.1.1
       supports-color: 8.1.1
       workerpool: 6.5.1
@@ -39763,7 +39740,7 @@ snapshots:
 
   moment-duration-format@2.3.2: {}
 
-  moment-timezone@0.6.1:
+  moment-timezone@0.6.2:
     dependencies:
       moment: 2.31.0
 
@@ -41113,7 +41090,7 @@ snapshots:
     dependencies:
       hookified: 2.2.0
 
-  qs@6.16.1:
+  qs@6.17.0:
     dependencies:
       es-define-property: 1.0.1
       side-channel: 1.1.1
@@ -42435,7 +42412,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  serialize-javascript@7.1.2: {}
+  serialize-javascript@7.1.3: {}
 
   serve-index@1.9.2(supports-color@10.2.2):
     dependencies:
@@ -43185,7 +43162,7 @@ snapshots:
       formidable: 3.5.4
       methods: 1.1.2
       mime: 2.6.0
-      qs: 6.16.1
+      qs: 6.17.0
     transitivePeerDependencies:
       - supports-color
 
@@ -43438,11 +43415,6 @@ snapshots:
     dependencies:
       readable-stream: 2.3.8
       xtend: 4.0.2
-
-  through2@3.0.2:
-    dependencies:
-      inherits: 2.0.4
-      readable-stream: 3.6.2
 
   through2@4.0.2:
     dependencies:
@@ -44010,7 +43982,7 @@ snapshots:
   url@0.11.4:
     dependencies:
       punycode: 1.4.1
-      qs: 6.16.1
+      qs: 6.17.0
 
   use-callback-ref@1.3.3(@types/react@18.2.79)(react@18.2.0):
     dependencies:
