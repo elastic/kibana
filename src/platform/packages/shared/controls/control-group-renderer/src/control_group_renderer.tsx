@@ -8,7 +8,15 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { BehaviorSubject, Subject, Subscription, combineLatest, map } from 'rxjs';
+import deepEqual from 'fast-deep-equal';
+import {
+  BehaviorSubject,
+  Subject,
+  Subscription,
+  combineLatest,
+  distinctUntilChanged,
+  map,
+} from 'rxjs';
 
 import { ControlsRenderer, type ControlsRendererParentApi } from '@kbn/controls-renderer';
 import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
@@ -148,7 +156,9 @@ export const ControlGroupRenderer = ({
             } as ControlPanelState;
           });
           return { initialChildControlState: combinedState };
-        })
+        }),
+        // a control can publish its latest state without changing it
+        distinctUntilChanged(deepEqual)
       )
       .subscribe((currentState) => {
         input$.next(currentState);
