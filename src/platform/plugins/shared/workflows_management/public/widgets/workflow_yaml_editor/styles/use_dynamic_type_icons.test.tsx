@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import {
@@ -257,6 +257,34 @@ describe('useDynamicTypeIcons', () => {
     expect(triggerRule).not.toContain('mask-image: none');
     expect(triggerRule).not.toContain('-webkit-mask-image: none');
     expect(triggerRule).not.toContain('background-color: transparent');
+
+    unmount();
+  });
+
+  it('does not start another icon pass while one is still in flight', async () => {
+    jest.mocked(getIconBase64).mockReturnValue(new Promise(() => {}));
+    const services = createStartServicesMock();
+    const connectorsData: ConnectorsResponse = {
+      totalConnectors: 0,
+      connectorTypes: {
+        '.notion': connectorTypeStub('.notion'),
+        '.datadog': connectorTypeStub('.datadog'),
+      },
+    };
+
+    jest.useFakeTimers();
+    const { unmount } = renderHook(() => useDynamicTypeIcons(connectorsData, undefined, true), {
+      wrapper: getTestProvider({ services }),
+    });
+
+    const lookupsFromFirstPass = jest.mocked(getIconBase64).mock.calls.length;
+    expect(lookupsFromFirstPass).toBeGreaterThan(0);
+
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(9000);
+    });
+
+    expect(getIconBase64).toHaveBeenCalledTimes(lookupsFromFirstPass);
 
     unmount();
   });
