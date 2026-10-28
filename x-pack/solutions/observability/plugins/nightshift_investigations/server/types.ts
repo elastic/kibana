@@ -12,6 +12,7 @@ import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
@@ -78,6 +79,8 @@ export interface NightshiftInvestigationsStartDeps {
   agentBuilder?: AgentBuilderPluginStart;
   agenticInvestigations?: AgenticInvestigationsPluginStart;
   alertingVTwo?: AlertingV2ServerStart;
+  /** Hosts the runtime that renders investigation Slack messages. */
+  isomer: IsomerPluginStart;
   proposals?: ProposalsPluginStart;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
   inference?: InferenceServerStart;

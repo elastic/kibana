@@ -15,6 +15,9 @@
   "kbn_references": [
     "@kbn/dev-cli-runner",
     "@kbn/share-plugin",
+    "@kbn/isomer-plugin",
+    "@kbn/isomer",
+    "@kbn/isomer-components",
     "@kbn/deeplinks-observability",
     "@kbn/nightshift-decision-trees",
     "@kbn/config-schema",

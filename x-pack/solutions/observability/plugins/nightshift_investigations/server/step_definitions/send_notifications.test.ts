@@ -7,6 +7,7 @@
 
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { isomerPluginMock } from '@kbn/isomer-plugin/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import { decompressFromBase64 } from 'lz-string';
@@ -67,12 +68,14 @@ const setup = (
     investigationLocator,
     getInvestigationsClient,
     getActions: () => ({ getActionsClientWithRequestInSpace } as never),
+    getRuntime: isomerPluginMock.createStartContract().getRuntime,
     getRoutingClient,
   });
   const failureDefinition = handleInvestigationFailureStepDefinition({
     investigationLocator,
     getInvestigationsClient,
     getActions: () => ({ getActionsClientWithRequestInSpace } as never),
+    getRuntime: isomerPluginMock.createStartContract().getRuntime,
     getRoutingClient,
     getTriggerEmitter: () => emitter,
   });
@@ -129,10 +132,13 @@ describe('nightshift.sendNotifications step', () => {
       expect(getInvestigationExecutionContext).toHaveBeenCalledWith('inv-1', 'exec-follow-up');
       expect(getActionsClientWithRequestInSpace).toHaveBeenCalledWith(request, spaceId);
       expect(execute).toHaveBeenCalledWith(expect.objectContaining({ actionId: 'saved-slack' }));
-      const params = execute.mock.calls[0][0].params.subActionParams as { text: string };
+      const params = execute.mock.calls[0][0].params.subActionParams as {
+        text: string;
+        blocks: Array<{ type: string; elements?: Array<{ url?: string }> }>;
+      };
       const prefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
       expect(params.text).toContain(`https://kibana.example${prefix}/app/r?`);
-      const locatorUrl = params.text.match(/<(https:\/\/[^|]+)\|/)?.[1];
+      const locatorUrl = params.blocks.find(({ type }) => type === 'actions')?.elements?.[0]?.url;
       if (!locatorUrl) {
         throw new Error('Missing locator URL');
       }
@@ -389,7 +395,9 @@ describe('nightshift.handleInvestigationFailure step', () => {
       })
     );
     expect(execute.mock.calls[0][0].params.subActionParams).toMatchObject({
-      text: expect.stringContaining('Investigation failed: Model unavailable'),
+      text: expect.stringMatching(
+        /⚠️ Investigation failed\n\nWhat went wrong\n\nModel unavailable/
+      ),
     });
     expect((await routing.client.get())?.destinations[0].thread?.thread_ts).toBe('1.2');
   });
