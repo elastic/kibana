@@ -2003,6 +2003,9 @@ export class WorkflowsExecutionEnginePlugin
         spaceId,
         fakeRequest: request,
         isUserInteractive: options?.isUserInteractive,
+        // Only a person's approval replaces the parked key. Wake and timer polls
+        // resume this task without the flag and keep the stored key.
+        regenerateApiKey: options?.isUserInteractive === true,
       });
     };
 
