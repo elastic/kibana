@@ -116,12 +116,15 @@ export const resolveConfiguredScopedModel = async ({
   featureId,
   request,
   logger,
+  chatModelOptions = {},
 }: {
   inference: InferenceServerStart | undefined;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   featureId: string;
   request: KibanaRequest;
   logger: Logger;
+  /** Passed to the chat model, e.g. telemetry metadata that attributes its token usage. */
+  chatModelOptions?: ChatModelOptions;
 }): Promise<ScopedModel | undefined> => {
   if (!inference || !searchInferenceEndpoints) return undefined;
   if (searchInferenceEndpoints.features.get(featureId) == null) return undefined;
@@ -134,7 +137,7 @@ export const resolveConfiguredScopedModel = async ({
     );
     const connectorId = endpoints[0]?.connectorId;
     if (!connectorId) return undefined;
-    return await buildScopedModel({ inference, request, connectorId });
+    return await buildScopedModel({ inference, request, connectorId, chatModelOptions });
   } catch (err) {
     logger.warn(
       `[hunt:connector] configured feature '${featureId}' could not be built. ${

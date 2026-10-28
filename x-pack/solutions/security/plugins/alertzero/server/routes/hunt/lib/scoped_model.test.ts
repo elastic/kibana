@@ -204,7 +204,35 @@ describe('resolveScopedModel', () => {
 
       expect(result?.connector).toBe(mockConnector);
       expect(mockInference.getConnectorById).toHaveBeenCalledWith('daybreak', mockRequest);
+      expect(mockInference.getChatModel).toHaveBeenCalledWith({
+        request: mockRequest,
+        connectorId: 'daybreak',
+        chatModelOptions: {},
+      });
       expect(mockInference.getDefaultConnector).not.toHaveBeenCalled();
+    });
+
+    it('passes the chat model options to the saved connector it builds', async () => {
+      mockSearchInferenceEndpoints.features.get.mockReturnValue({ featureId });
+      mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({
+        endpoints: [{ connectorId: 'daybreak' }],
+      });
+      const chatModelOptions = { telemetryMetadata: { pluginId: 'test_plugin' } };
+
+      await resolveConfiguredScopedModel({
+        inference: mockInference as never,
+        searchInferenceEndpoints: mockSearchInferenceEndpoints as never,
+        featureId,
+        request: mockRequest,
+        logger,
+        chatModelOptions,
+      });
+
+      expect(mockInference.getChatModel).toHaveBeenCalledWith({
+        request: mockRequest,
+        connectorId: 'daybreak',
+        chatModelOptions,
+      });
     });
   });
 
