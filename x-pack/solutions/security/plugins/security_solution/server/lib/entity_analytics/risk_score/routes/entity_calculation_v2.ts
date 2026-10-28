@@ -11,6 +11,7 @@ import type {
   KibanaResponseFactory,
   Logger,
 } from '@kbn/core/server';
+import { checkEntityStoreIndexPrivileges } from '@kbn/entity-store/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -18,13 +19,15 @@ import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import type { RiskScoresEntityCalculationResponse } from '../../../../../common/api/entity_analytics';
 import { RiskScoresEntityCalculationRequest } from '../../../../../common/api/entity_analytics';
 import { APP_ID, RISK_SCORE_ENTITY_CALCULATION_V2_URL } from '../../../../../common/constants';
+import { RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES } from '../../../../../common/entity_analytics/risk_engine';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskScoreAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
-import { withRiskEnginePrivilegeCheck } from '../../risk_engine/risk_engine_privileges';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
+import { checkAndFormatPrivileges } from '../../utils/check_and_format_privileges';
 import { getIsIdBasedRiskScoringEnabled } from '../is_id_based_risk_scoring_enabled';
 import { recalculateEntityRiskScore } from '../recalculate_entity_risk_score';
+import { getLookupIndexName } from '../maintainer/lookup/lookup_index';
 import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan } from '../../telemetry/traces';
 
 type Handler = (
@@ -33,7 +36,10 @@ type Handler = (
   response: KibanaResponseFactory
 ) => Promise<IKibanaResponse<RiskScoresEntityCalculationResponse>>;
 
-const handler: (logger: Logger) => Handler = (logger) => async (context, request, response) => {
+const handler: (
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  logger: Logger
+) => Handler = (getStartServices, logger) => async (context, request, response) => {
   const securityContext = await context.securitySolution;
   const coreContext = await context.core;
   const securityConfig = securityContext.getConfig();
@@ -55,6 +61,35 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
     });
   }
 
+  const namespace = securityContext.getSpaceId();
+  const [, { security }] = await getStartServices();
+
+  // Check privileges by the indices the calculation reads and writes.
+  const [riskScorePrivileges, entityStorePrivileges] = await Promise.all([
+    checkAndFormatPrivileges({
+      request,
+      security,
+      privilegesToCheck: {
+        elasticsearch: {
+          cluster: [],
+          index: {
+            ...RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
+            [getLookupIndexName(namespace)]: ['read'],
+          },
+        },
+      },
+    }),
+    checkEntityStoreIndexPrivileges({ request, security, spaceId: namespace }),
+  ]);
+  const { has_read_permissions: canReadEntityStore, has_write_permissions: canWriteEntityStore } =
+    entityStorePrivileges;
+  if (!riskScorePrivileges.has_all_required || !canReadEntityStore || !canWriteEntityStore) {
+    return siemResponse.error({
+      statusCode: 403,
+      body: 'You do not have the index privileges required to calculate risk scores.',
+    });
+  }
+
   securityContext.getAuditLogger()?.log({
     message: 'User triggered custom manual scoring',
     event: {
@@ -67,7 +102,6 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
 
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asCurrentUser;
-  const namespace = securityContext.getSpaceId();
 
   try {
     const idBasedRiskScoringEnabled = await getIsIdBasedRiskScoringEnabled(
@@ -133,9 +167,6 @@ export const riskScoreEntityCalculationRouteV2 = (
           },
         },
       },
-      withMinimumLicense(
-        withRiskEnginePrivilegeCheck(getStartServices, handler(logger)),
-        'platinum'
-      )
+      withMinimumLicense(handler(getStartServices, logger), 'platinum')
     );
 };
