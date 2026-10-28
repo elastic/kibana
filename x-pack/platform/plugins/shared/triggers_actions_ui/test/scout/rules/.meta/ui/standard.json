@@ -1,5 +1,5 @@
 {
-  "sha1": "f82351aae3c1b2fa4e73b1bb31e10f098cd7ba8a",
+  "sha1": "717f8d7cf7fec1d276c5705c16a01da17a77db94",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -128,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
-        "line": 19,
-        "column": 45
+        "line": 49,
+        "column": 8
       }
     },
     {
@@ -142,8 +142,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
-        "line": 52,
-        "column": 13
+        "line": 82,
+        "column": 10
       }
     },
     {
@@ -156,8 +156,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
-        "line": 89,
-        "column": 85
+        "line": 122,
+        "column": 5
       }
     },
     {
@@ -170,8 +170,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
-        "line": 124,
-        "column": 24
+        "line": 152,
+        "column": 8
       }
     },
     {
@@ -184,8 +184,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
-        "line": 164,
-        "column": 24
+        "line": 185,
+        "column": 22
       }
     },
     {
@@ -198,8 +198,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_bulk_actions.spec.ts",
-        "line": 193,
-        "column": 5
+        "line": 217,
+        "column": 23
       }
     },
     {
@@ -477,7 +477,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_settings.spec.ts",
-        "line": 35,
+        "line": 37,
         "column": 65
       }
     },

@@ -42,6 +42,8 @@ import { cypressOverrides } from './cypress.mts';
 import { dependRules } from './depend.mts';
 import { eslintCommentsOverrides } from './eslint_comments.mts';
 import { euiRules } from './eui.mts';
+import { formatjsOverrides } from './formatjs.mts';
+import { mochaOverrides } from './mocha.mts';
 import { nOverrides } from './n.mts';
 import { playwrightOverrides, playwrightSettings } from './playwright.mts';
 import { testingLibraryOverrides } from './testing_library.mts';
@@ -56,6 +58,8 @@ const movedFromEslintOverrides: OxlintOverride[] = [
   ...jestOverrides,
   ...teamOverrides,
   ...restrictedImportsOverrides,
+  ...formatjsOverrides,
+  ...mochaOverrides,
   ...nestedConfigOverrides,
 ];
 
@@ -103,6 +107,10 @@ export default defineConfig<OxlintConfig>({
     'eslint-plugin-n',
     'eslint-plugin-playwright',
     'eslint-plugin-testing-library',
+    // ESLint 8 plugins, wrapped so they run on Oxlint's ESLint 9 rule context
+    { name: 'formatjs', specifier: './packages/kbn-eslint-plugin-compat/formatjs.js' },
+    { name: 'mocha', specifier: './packages/kbn-eslint-plugin-compat/mocha.js' },
+    { name: 'no-unsanitized', specifier: './packages/kbn-eslint-plugin-compat/no_unsanitized.js' },
   ],
   categories: {
     correctness: 'off',

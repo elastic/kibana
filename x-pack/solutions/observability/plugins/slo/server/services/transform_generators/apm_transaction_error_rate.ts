@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ALL_VALUE, is, apmTransactionErrorRateIndicatorSchemaZod } from '@kbn/slo-schema';
+import { ALL_VALUE, is, apmTransactionErrorRateIndicatorSchema } from '@kbn/slo-schema';
 import { TransformGenerator, getElasticsearchQueryOrThrow } from '.';
 import {
   SLI_DESTINATION_INDEX_NAME,
@@ -21,7 +21,7 @@ import { getFilterRange, getTimesliceTargetComparator, parseIndex } from './comm
 
 export class ApmTransactionErrorRateTransformGenerator extends TransformGenerator {
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
-    if (!is(apmTransactionErrorRateIndicatorSchemaZod, slo.indicator)) {
+    if (!is(apmTransactionErrorRateIndicatorSchema, slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 

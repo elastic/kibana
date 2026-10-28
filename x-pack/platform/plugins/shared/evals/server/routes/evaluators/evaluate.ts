@@ -14,16 +14,9 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
-import {
-  findDuplicateEvaluatorNames,
-  getDuplicateEvaluatorNamesMessage,
-} from '../../lib/duplicate_evaluator_names';
+import { EvaluationExecutionError } from '../../evaluation/evaluation_execution_error';
+import { createEvaluationService } from '../../evaluation/evaluation_service';
 import type { RouteDependencies } from '../register_routes';
-import {
-  EvaluationExecutionError,
-  executeEvaluators,
-  type ResolvedEvaluator,
-} from './shared/execute_evaluators';
 
 export const registerEvaluateRoute = ({
   router,
@@ -32,6 +25,12 @@ export const registerEvaluateRoute = ({
   getInferenceStart,
   getSpaceId,
 }: RouteDependencies) => {
+  const evaluationService = createEvaluationService({
+    evaluatorRegistry,
+    logger,
+    getInferenceStart,
+  });
+
   router.versioned
     .post({
       path: EVALS_EVALUATE_URL,
@@ -53,37 +52,14 @@ export const registerEvaluateRoute = ({
       },
       async (context, request, response) => {
         const { subject, evaluators } = request.body;
-        const duplicateEvaluatorNames = findDuplicateEvaluatorNames(evaluators);
-        if (duplicateEvaluatorNames.length > 0) {
-          return response.badRequest({
-            body: { message: getDuplicateEvaluatorNamesMessage(duplicateEvaluatorNames) },
-          });
-        }
-
         const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
-        const scopedRegistry = evaluatorRegistry.asScoped({ spaceId });
-        const resolvedEvaluators: ResolvedEvaluator[] = [];
-
-        for (const config of evaluators) {
-          const definition = await scopedRegistry.get(config.name, config.version);
-          if (!definition) {
-            const message = config.version
-              ? `Evaluator not found: ${config.name}@${config.version}`
-              : `Evaluator not found: ${config.name}`;
-            return response.badRequest({ body: { message } });
-          }
-          resolvedEvaluators.push({ definition, connectorId: config.connector_id });
-        }
-
         const coreContext = await context.core;
         try {
-          const results = await executeEvaluators({
-            coreContext,
+          const results = await evaluationService.evaluate({
             request,
+            spaceId,
             subject,
-            evaluators: resolvedEvaluators,
-            logger,
-            getInferenceStart,
+            evaluators,
             // Unchanged from before this route was refactored: experiment runs reach here
             // through a workflow's fake request, so scoping the read to the caller needs
             // its own change. Only persisted evaluators run here, so the prompt is not

@@ -6,7 +6,12 @@
  */
 
 import type { HuntBehaviorResponse } from '@kbn/alertzero-common';
-import { API_VERSIONS, HuntBehaviorRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
+import {
+  ALERTZERO_HUNT_TIER2_TELEMETRY_PLUGIN_ID,
+  API_VERSIONS,
+  HuntBehaviorRequestBody,
+  INTERNAL_API_ACCESS,
+} from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
@@ -60,6 +65,7 @@ export const registerHuntBehaviorRoute = ({
           const { models, failures } = await resolveHuntModels({
             inference: getInference(),
             searchInferenceEndpoints: getSearchInferenceEndpoints(),
+            telemetryPluginId: ALERTZERO_HUNT_TIER2_TELEMETRY_PLUGIN_ID,
             request,
             uiSettingsClient: core.uiSettings.client,
             logger,

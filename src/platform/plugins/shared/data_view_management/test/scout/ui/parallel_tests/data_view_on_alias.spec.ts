@@ -14,40 +14,53 @@ import { spaceTest } from '../fixtures';
 const aliasName = (alias: 1 | 2, spaceId: string) => `dvm-alias${alias}-${spaceId}`;
 const sourceIndex = (n: number, spaceId: string) => `dvm-alias-source${n}-${spaceId}`;
 
-// alias1 groups four indices with one document each and no time field; alias2 groups five
+// alias1 groups two indices with one document each and no time field; alias2 groups two
 // indices with one dated document each.
-const ALIAS1_INDICES = [1, 2, 3, 4];
-const ALIAS2_INDICES = [5, 6, 7, 8, 9];
+const ALIAS1_INDICES = [1, 2];
+const ALIAS2_INDICES = [3, 4];
 
 spaceTest.describe('Data views on index aliases', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ esClient, scoutSpace }) => {
-    await esClient.bulk({
-      refresh: 'wait_for',
-      operations: [
-        ...ALIAS1_INDICES.flatMap((n) => [
-          { index: { _index: sourceIndex(n, scoutSpace.id) } },
-          { message: 'woza' },
-        ]),
-        ...ALIAS2_INDICES.flatMap((n) => [
-          { index: { _index: sourceIndex(n, scoutSpace.id) } },
-          { date: `2016-11-${String(9 + n)}` },
-        ]),
-      ],
-    });
-    await esClient.indices.updateAliases({
-      actions: [
-        ...ALIAS1_INDICES.map((n) => ({
-          add: { index: sourceIndex(n, scoutSpace.id), alias: aliasName(1, scoutSpace.id) },
-        })),
-        ...ALIAS2_INDICES.map((n) => ({
-          add: { index: sourceIndex(n, scoutSpace.id), alias: aliasName(2, scoutSpace.id) },
-        })),
-      ],
-    });
-    await scoutSpace.uiSettings.setDefaultTime({
-      from: 'Nov 12, 2016 @ 05:00:00.000',
-      to: 'Nov 19, 2016 @ 05:00:00.000',
-    });
+    const { id: spaceId } = scoutSpace;
+
+    const setUpIndicesAndDocs = async () => {
+      // Creating the indices together with their alias saves a separate updateAliases call.
+      await Promise.all([
+        ...ALIAS1_INDICES.map((n) =>
+          esClient.indices.create({
+            index: sourceIndex(n, spaceId),
+            aliases: { [aliasName(1, spaceId)]: {} },
+          })
+        ),
+        ...ALIAS2_INDICES.map((n) =>
+          esClient.indices.create({
+            index: sourceIndex(n, spaceId),
+            aliases: { [aliasName(2, spaceId)]: {} },
+          })
+        ),
+      ]);
+      await esClient.bulk({
+        refresh: true,
+        operations: [
+          ...ALIAS1_INDICES.flatMap((n) => [
+            { index: { _index: sourceIndex(n, spaceId) } },
+            { message: 'woza' },
+          ]),
+          ...ALIAS2_INDICES.flatMap((n, i) => [
+            { index: { _index: sourceIndex(n, spaceId) } },
+            { date: `2016-11-${String(13 + i)}` },
+          ]),
+        ],
+      });
+    };
+
+    await Promise.all([
+      setUpIndicesAndDocs(),
+      scoutSpace.uiSettings.setDefaultTime({
+        from: 'Nov 12, 2016 @ 05:00:00.000',
+        to: 'Nov 19, 2016 @ 05:00:00.000',
+      }),
+    ]);
   });
 
   // Can read the aliases but not their backing indices.
@@ -94,7 +107,7 @@ spaceTest.describe('Data views on index aliases', { tag: tags.deploymentAgnostic
         await pageObjects.discover.selectDataView(title, { createAdHocIfMissing: false });
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
-        await expect(pageObjects.discover.getHitCountLocator()).toHaveText('4');
+        await expect(pageObjects.discover.getHitCountLocator()).toHaveText('2');
       });
     }
   );
@@ -117,7 +130,7 @@ spaceTest.describe('Data views on index aliases', { tag: tags.deploymentAgnostic
         await pageObjects.discover.selectDataView(title, { createAdHocIfMissing: false });
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
-        await expect(pageObjects.discover.getHitCountLocator()).toHaveText('5');
+        await expect(pageObjects.discover.getHitCountLocator()).toHaveText('2');
       });
     }
   );

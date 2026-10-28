@@ -1,0 +1,7 @@
+summary: The attachment version is out of date.
+value:
+  {
+    "error": "Conflict",
+    "message": "This attachment has been updated. Please refresh before saving additional updates.",
+    "statusCode": 409
+  }

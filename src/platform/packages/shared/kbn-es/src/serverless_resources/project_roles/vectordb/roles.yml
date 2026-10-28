@@ -1,6 +1,9 @@
 # -----
 # Copy from internal roles config in elasticsearch-controller
 # -----
+
+# Predefined roles for "VectorDB" project types
+
 viewer:
   metadata:
     _public: true
@@ -12,10 +15,17 @@ viewer:
       privileges:
         - 'read'
         - 'view_index_metadata'
+        - 'read_view_metadata'
   applications:
     - application: 'kibana-.kibana'
       privileges:
         - 'read'
+      resources:
+        - '*'
+    # TODO temporary workaround for https://github.com/elastic/kibana/issues/264219 ; remove once resolved
+    - application: 'kibana-.kibana'
+      privileges:
+        - 'api:cluster:monitor/project_routing/get'
       resources:
         - '*'
 developer:
@@ -32,6 +42,12 @@ developer:
     - application: 'kibana-.kibana'
       privileges:
         - 'all'
+      resources:
+        - '*'
+    # TODO temporary workaround for https://github.com/elastic/kibana/issues/264219 ; remove once resolved
+    - application: 'kibana-.kibana'
+      privileges:
+        - 'api:cluster:monitor/project_routing/get'
       resources:
         - '*'
 

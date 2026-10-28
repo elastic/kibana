@@ -1,0 +1,39 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: jest-tooling
+language: javascript
+toolchains:
+  default: node
+
+workspace:
+  inheritedTasks:
+    include: []
+
+fileGroups:
+  shared:
+    - '/scripts/jest.js'
+    - '/scripts/jest_integration.js'
+    - '/scripts/moon_jest.js'
+    - '/scripts/moon_test_configs.js'
+    - '/package.json'
+    - '/pnpm-lock.yaml'
+    - '/.nvmrc'
+    - '/tsconfig*.json'
+    - '/src/setup_node_env/**/*'
+    - '/packages/kbn-babel-preset/**/*'
+    - '/src/platform/packages/shared/kbn-repo-info/**/*'
+    - '/src/platform/packages/shared/kbn-jest/jest-preset.js'
+    - '/src/platform/packages/shared/kbn-jest/src/**/*'
+    - '/packages/kbn-moon/src/test_config_selection.ts'
+    - '!/src/platform/packages/shared/kbn-jest/src/**/*.test.*'
+    - '!/src/platform/packages/shared/kbn-jest/src/**/__fixtures__/**/*'
+    - '/src/platform/packages/private/kbn-scout-reporting/src/reporting/jest/**/*'
+    - '/src/platform/packages/private/kbn-jest-serializers/**/*'
+    - '/src/platform/packages/shared/react/kibana_mount/test_helpers/react_mount_serializer.ts'
+
+tasks:
+  hash:
+    command: 'true'
+    inputs:
+      - '@group(shared)'
+    options:
+      internal: true

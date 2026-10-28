@@ -21,6 +21,7 @@ const setup = ({
   billingUrl,
   billingRejected = false,
   serviceAccountsEnabled = true,
+  spaceSupported = true,
 }: {
   enabled?: boolean;
   canRead?: boolean;
@@ -28,10 +29,12 @@ const setup = ({
   billingUrl?: string;
   billingRejected?: boolean;
   serviceAccountsEnabled?: boolean;
+  spaceSupported?: boolean;
 } = {}) => {
   const core = coreMock.createStart();
   const enabled$ = new BehaviorSubject(enabled);
   const availability$ = new BehaviorSubject<SubscriptionAvailability>(subscription);
+  const spaceSupported$ = new BehaviorSubject(spaceSupported);
   core.uiSettings.get$.mockReturnValue(enabled$);
   core.application.capabilities = {
     ...core.application.capabilities,
@@ -62,6 +65,7 @@ const setup = ({
       >
         <AccessBoundary
           availability$={availability$}
+          spaceSupported$={spaceSupported$}
           serviceAccountsEnabled={serviceAccountsEnabled}
         >
           <Content />
@@ -69,7 +73,7 @@ const setup = ({
       </KibanaContextProvider>
     </I18nProvider>
   );
-  return { contentMounted, availability$, enabled$, getPrivilegedUrls };
+  return { contentMounted, availability$, enabled$, spaceSupported$, getPrivilegedUrls };
 };
 
 describe('AlertZero access boundary', () => {
@@ -102,6 +106,31 @@ describe('AlertZero access boundary', () => {
     const { contentMounted } = setup({ serviceAccountsEnabled: false });
     expect(contentMounted).not.toHaveBeenCalled();
     expect(screen.getByText('AlertZero is unavailable')).toBeInTheDocument();
+  });
+
+  it('explains that AlertZero needs a Security solution space for a direct URL in a Classic space', () => {
+    const { contentMounted } = setup({ spaceSupported: false });
+    expect(contentMounted).not.toHaveBeenCalled();
+    expect(screen.getByText('AlertZero is not available in this space')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'AlertZero, Escalations, and Watches are available only in a Security solution space.'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('shows the Classic space message before the setting, subscription and privilege gates', () => {
+    setup({ spaceSupported: false, enabled: false, canRead: false, subscription: 'license' });
+    expect(screen.getByText('AlertZero is not available in this space')).toBeInTheDocument();
+    expect(screen.queryByText('AlertZero is not enabled')).not.toBeInTheDocument();
+    expect(screen.queryByText('Upgrade your license')).not.toBeInTheDocument();
+  });
+
+  it('removes content when the space stops being supported', () => {
+    const { spaceSupported$ } = setup();
+    expect(screen.getByText('Feature content')).toBeInTheDocument();
+    act(() => spaceSupported$.next(false));
+    expect(screen.queryByText('Feature content')).not.toBeInTheDocument();
   });
 
   it('allows other pages without Proposals privileges', () => {
