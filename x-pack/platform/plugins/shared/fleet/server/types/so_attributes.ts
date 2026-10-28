@@ -56,6 +56,7 @@ import type {
 } from '../../common/types/models/cloud_connector';
 import type {
   CloudOnboardingDeploymentAuthMethod,
+  CloudOnboardingInstance,
   DeploymentMethod,
   CloudOnboardingDeploymentStatus,
 } from '../../common/types/models/cloud_onboarding_deployment';
@@ -410,6 +411,14 @@ export interface CloudOnboardingDeploymentSOAttributes {
   serviceVars?: Record<string, Record<string, unknown>>;
   /** Global AWS region from the Service Settings step. Used to re-run deploy on retry and to hydrate the onboarding flow on resume. */
   globalRegion?: string;
+  /** Integration name as entered in the Service settings step, before any per-package suffix is applied. Used to identify the onboarding session. */
+  integrationName?: string;
+  /** Integration description as entered in the Service settings step. Set on every package policy created by the deploy. */
+  description?: string;
+  /** Global data stream namespace from the Service settings step. Absent or empty means each policy inherits its agent policy's namespace. */
+  namespace?: string;
+  /** The service instances (originals and duplicates) of the last deploy. Hydrated into the Service settings step on resume so duplicates and their names come back. */
+  instances?: CloudOnboardingInstance[];
   /** Data format selected in the Services step: 'ecs' or 'otel'. Used to hydrate the services step on resume so service filtering is consistent. */
   dataFormat?: 'ecs' | 'otel';
   /**

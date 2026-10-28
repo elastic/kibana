@@ -101,7 +101,9 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   const [defaultEndDateValue] = useState<string>(moment().add(30, 'minutes').toISOString());
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isSaveWithoutScopeModalVisible, setIsSaveWithoutScopeModalVisible] = useState(false);
+  const [applyToAllAlertsModalBody, setApplyToAllAlertsModalBody] = useState<string | null>(null);
   const userConfirmedSaveWithoutScopeRef = useRef(false);
+  const userConfirmedApplyToAllAlertsRef = useRef(false);
   const { defaultTimezone } = useDefaultTimezone();
   const { services } = useKibana();
   const isUniversalAlertingEnabled = isAlertingV2Enabled(services);
@@ -185,6 +187,22 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           : null
         : undefined;
 
+      const enabledScopes = [alertingV1.enabled, alertingV2.enabled].filter(Boolean);
+      const enabledFilters = [v1Payload, v2Payload].filter(Boolean);
+
+      if (enabledFilters.length < enabledScopes.length) {
+        if (userConfirmedApplyToAllAlertsRef.current) {
+          userConfirmedApplyToAllAlertsRef.current = false;
+        } else {
+          setApplyToAllAlertsModalBody(
+            enabledFilters.length === 0
+              ? i18n.APPLY_TO_ALL_ALERTS_MODAL_BODY
+              : i18n.APPLY_TO_ALL_ALERTS_SCOPED_MODAL_BODY
+          );
+          return;
+        }
+      }
+
       // Build scope: key absent = not selected; { enabled: true } = selected, no filter.
       const scope: Record<string, unknown> = {};
       if (alertingV1.enabled) {
@@ -251,6 +269,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   const modalTitleId = useGeneratedHtmlId();
   const saveWithoutScopeModalTitleId = useGeneratedHtmlId();
+  const applyToAllAlertsModalTitleId = useGeneratedHtmlId();
 
   return (
     <Form form={form} data-test-subj="createMaintenanceWindowForm">
@@ -464,7 +483,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
         {isSaveWithoutScopeModalVisible && (
           <EuiConfirmModal
             aria-labelledby={saveWithoutScopeModalTitleId}
-            title={i18n.SAVE_WITHOUT_FILTERS_MODAL_TITLE}
+            title={i18n.SAVE_WITHOUT_SCOPES_MODAL_TITLE}
             titleProps={{ id: saveWithoutScopeModalTitleId }}
             onCancel={() => setIsSaveWithoutScopeModalVisible(false)}
             onConfirm={() => {
@@ -473,10 +492,28 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
               form.submit();
             }}
             cancelButtonText={i18n.CANCEL}
-            confirmButtonText={i18n.SAVE_WITHOUT_FILTERS_MODAL_CONFIRM}
-            data-test-subj="saveWithoutFiltersConfirmModal"
+            confirmButtonText={i18n.SAVE_WITHOUT_SCOPES_MODAL_CONFIRM}
+            data-test-subj="saveWithoutScopesConfirmModal"
           >
-            <p>{i18n.SAVE_WITHOUT_FILTERS_MODAL_SUBTITLE}</p>
+            <p>{i18n.SAVE_WITHOUT_SCOPES_MODAL_SUBTITLE}</p>
+          </EuiConfirmModal>
+        )}
+        {applyToAllAlertsModalBody !== null && (
+          <EuiConfirmModal
+            aria-labelledby={applyToAllAlertsModalTitleId}
+            title={i18n.APPLY_TO_ALL_ALERTS_MODAL_TITLE}
+            titleProps={{ id: applyToAllAlertsModalTitleId }}
+            onCancel={() => setApplyToAllAlertsModalBody(null)}
+            onConfirm={() => {
+              userConfirmedApplyToAllAlertsRef.current = true;
+              setApplyToAllAlertsModalBody(null);
+              form.submit();
+            }}
+            cancelButtonText={i18n.CANCEL}
+            confirmButtonText={i18n.APPLY_TO_ALL_ALERTS_MODAL_CONFIRM}
+            data-test-subj="applyToAllAlertsConfirmModal"
+          >
+            <p>{applyToAllAlertsModalBody}</p>
           </EuiConfirmModal>
         )}
         <EuiFlexItem grow={false}>

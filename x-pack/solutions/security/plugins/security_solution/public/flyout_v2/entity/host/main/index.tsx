@@ -56,7 +56,7 @@ import {
 import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
-import type { EntityViewMode } from '../../../../flyout/entity_details/shared/types';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export interface HostProps {
   /**
@@ -158,7 +158,7 @@ export const Host: FC<HostProps> = memo(function Host({
     entityType: 'host',
     skip: !entityStoreV2Enabled || isInitializing,
   });
-  const { aliasRecords } = entityFromStoreResult;
+  const { aliasRecords, aliasCount } = entityFromStoreResult;
   const isGroupView = isEntityGroupView(aliasRecords);
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
@@ -269,6 +269,7 @@ export const Host: FC<HostProps> = memo(function Host({
 
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
     entityRecord: observedHost.entityRecord ?? null,
+    isGroupView,
   });
 
   const tabsNode = tabs ? (
@@ -348,6 +349,8 @@ export const Host: FC<HostProps> = memo(function Host({
             entityType: EntityType.host,
             value: hostName,
             entityId: entityStoreEntityId,
+            mode,
+            scopeId,
             onOpenEntity: onShowHost,
             title: hostName,
             origin: FLYOUT_ORIGIN.ANOMALIES_SECTION,
@@ -405,6 +408,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityType: 'host',
             entityName: hostName,
             scopeId,
+            mode,
             onShowEntity: onShowHost,
             onShowRelatedEntity: onShowRelatedEntityFromResolution,
             title: hostName,
@@ -442,6 +446,7 @@ export const Host: FC<HostProps> = memo(function Host({
           lastSeen={observedHost.lastSeen}
           entityId={panelDisplayEntityId}
           aliasRecords={aliasRecords}
+          aliasCount={aliasCount}
           mode={mode}
           identityFields={documentEntityIdentifiers}
           isEntityInStore={!!observedHost.entityRecord}
@@ -478,8 +483,10 @@ export const Host: FC<HostProps> = memo(function Host({
             entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
             aliasRecords={aliasRecords}
             noEntityInStore={noEntityInStore}
+            isEntityRecordLoading={entityStoreV2Enabled && entityFromStoreResult.isLoading}
             entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
+            mode={mode}
             onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons
             riskScoreQueryId={HOST_PANEL_RISK_SCORE_QUERY_ID}

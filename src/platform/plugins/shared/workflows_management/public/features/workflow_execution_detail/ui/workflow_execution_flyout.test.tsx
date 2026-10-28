@@ -9,7 +9,9 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ExecutionStatus } from '@kbn/workflows';
+import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { WorkflowExecutionFlyout } from './workflow_execution_flyout';
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
@@ -78,10 +80,17 @@ jest.mock('./resume_execution_button', () => ({
 jest.mock('./workflow_step_execution_tree', () => ({
   WorkflowStepExecutionTree: ({
     onStepExecutionClick,
+    waitingAction,
   }: {
     onStepExecutionClick: (id: string) => void;
+    waitingAction?: { autoOpen?: boolean; stepExecutionId?: string };
   }) => (
     <>
+      <div
+        data-test-subj="tree-waiting-action"
+        data-auto-open={String(Boolean(waitingAction?.autoOpen))}
+        data-waiting-step={waitingAction?.stepExecutionId ?? ''}
+      />
       <button
         type="button"
         data-test-subj="select-waiting-step"
@@ -204,34 +213,46 @@ describe('WorkflowExecutionFlyout resume', () => {
     expect(screen.queryByTestId('resume-execution-button')).not.toBeInTheDocument();
   });
 
-  it('shows Provide action on the run and honors ?resume=true', () => {
+  it('shows Provide action in Result and honors ?resume=true on the tree row', () => {
     mockWaitingStepResume.waitingStepExecutionId = 'step-wait';
     mockWaitingStepResume.waitingStepStartedAt = '2024-01-01T00:00:00Z';
     mockWaitingStepResume.resumeMessage = 'Approve this';
     renderFlyout('?resume=true');
 
-    const resumeButtons = screen.getAllByTestId('resume-execution-button');
-    expect(resumeButtons).toHaveLength(1);
-    expect(resumeButtons[0]).toHaveAttribute('data-auto-open', 'true');
-    expect(resumeButtons[0]).toHaveAttribute('data-waiting-step', 'step-wait');
+    expect(screen.getByTestId('workflowExecutionFlyoutResultLink')).toHaveTextContent(
+      'Provide action'
+    );
+    expect(screen.queryByTestId('waitForInputCallout')).not.toBeInTheDocument();
+    const treeWaiting = screen.getByTestId('tree-waiting-action');
+    expect(treeWaiting).toHaveAttribute('data-auto-open', 'true');
+    expect(treeWaiting).toHaveAttribute('data-waiting-step', 'step-wait');
   });
 
-  it('also shows resume on the waiting step Input section', () => {
+  it('keeps resume on the tree row when the waiting step is selected', () => {
     mockWaitingStepResume.waitingStepExecutionId = 'step-wait';
     mockWaitingStepResume.waitingStepStartedAt = '2024-01-01T00:00:00Z';
 
     renderFlyout();
     fireEvent.click(screen.getByTestId('select-waiting-step'));
 
-    const resumeButtons = screen.getAllByTestId('resume-execution-button');
-    expect(resumeButtons).toHaveLength(2);
-    expect(resumeButtons.map((button) => button.getAttribute('data-waiting-step'))).toEqual([
-      'step-wait',
-      'step-wait',
-    ]);
-    // Only the always-visible run control auto-opens from ?resume=true.
-    expect(resumeButtons[0]).toHaveAttribute('data-auto-open', 'false');
-    expect(resumeButtons[1]).toHaveAttribute('data-auto-open', 'false');
+    expect(screen.queryByTestId('resume-execution-button')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('waitForInputCallout')).not.toBeInTheDocument();
+    const treeWaiting = screen.getByTestId('tree-waiting-action');
+    expect(treeWaiting).toHaveAttribute('data-waiting-step', 'step-wait');
+    expect(treeWaiting).toHaveAttribute('data-auto-open', 'false');
+  });
+
+  it('keeps ?resume=true auto-opening on the tree row when the waiting step is selected', () => {
+    mockWaitingStepResume.waitingStepExecutionId = 'step-wait';
+    mockWaitingStepResume.waitingStepStartedAt = '2024-01-01T00:00:00Z';
+
+    renderFlyout('?resume=true');
+    fireEvent.click(screen.getByTestId('select-waiting-step'));
+
+    const treeWaiting = screen.getByTestId('tree-waiting-action');
+    expect(treeWaiting).toHaveAttribute('data-auto-open', 'true');
+    expect(treeWaiting).toHaveAttribute('data-waiting-step', 'step-wait');
+    expect(screen.queryByTestId('resume-execution-button')).not.toBeInTheDocument();
   });
 });
 
@@ -422,5 +443,106 @@ describe('WorkflowExecutionFlyout child workflow steps', () => {
     expect(resumeButton).toHaveAttribute('data-execution-id', 'child-exec-1');
     expect(resumeButton).toHaveAttribute('data-approve-label', '');
     expect(resumeButton).toHaveAttribute('data-schema-fields', 'reason');
+  });
+});
+
+describe('WorkflowExecutionFlyout triggered by', () => {
+  const profileUid = 'u_mGBROF_q5bm_A5E_0';
+  const profile: UserProfileWithAvatar = {
+    uid: profileUid,
+    enabled: true,
+    user: { username: 'elastic' },
+    data: {},
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockChildExecutions.clear();
+    mockPollingResult.error = null;
+    mockPollingResult.workflowExecution = createMockWorkflowExecutionDto({
+      id: 'exec-1',
+      executedBy: profileUid,
+    });
+  });
+
+  const createServices = ({
+    showExecutor = true,
+    isServerless = false,
+  }: { showExecutor?: boolean; isServerless?: boolean } = {}) => {
+    const services = createStartServicesMock();
+    services.settings.client.get.mockImplementation((key: string, defaultValue?: unknown) =>
+      key === WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID ? showExecutor : defaultValue
+    );
+    services.cloud.isServerlessEnabled = isServerless;
+    return services;
+  };
+
+  const renderFlyout = (services = createServices()) => {
+    render(<WorkflowExecutionFlyout executionId="exec-1" onClose={jest.fn()} />, {
+      wrapper: getTestProvider({ services }),
+    });
+    return services;
+  };
+
+  const withResolvedProfile = () => {
+    mockPollingResult.workflowExecution = createMockWorkflowExecutionDto({
+      id: 'exec-1',
+      executedBy: profileUid,
+      executedByProfile: profile,
+    });
+  };
+
+  it('shows the user display name resolved by the server, without a client profile lookup', () => {
+    withResolvedProfile();
+    const services = renderFlyout();
+
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).toHaveTextContent('elastic');
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).not.toHaveTextContent(
+      profileUid
+    );
+    expect(services.userProfile.bulkGet).not.toHaveBeenCalled();
+  });
+
+  it('keeps the raw UID when the profile cannot be resolved', () => {
+    renderFlyout();
+
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).toHaveTextContent(profileUid);
+  });
+
+  it('shows a service account id on serverless when it is not a profile UID', () => {
+    const serviceAccountId = 'sa-nightshift-relay';
+    mockPollingResult.workflowExecution = createMockWorkflowExecutionDto({
+      id: 'exec-1',
+      executedBy: serviceAccountId,
+    });
+
+    renderFlyout(createServices({ isServerless: true }));
+
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).toHaveTextContent(
+      serviceAccountId
+    );
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedByCopy')).toBeInTheDocument();
+  });
+
+  it('hides the unresolved UID on serverless, like the execution list', () => {
+    renderFlyout(createServices({ isServerless: true }));
+
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).not.toHaveTextContent(
+      profileUid
+    );
+    expect(screen.queryByTestId('workflowExecutionFlyoutExecutedByCopy')).not.toBeInTheDocument();
+  });
+
+  it('does not show the user when the show executor setting is off', () => {
+    withResolvedProfile();
+    renderFlyout(createServices({ showExecutor: false }));
+
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).not.toHaveTextContent(
+      profileUid
+    );
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).not.toHaveTextContent(
+      'elastic'
+    );
+    expect(screen.queryByTestId('workflowExecutionFlyoutExecutedByCopy')).not.toBeInTheDocument();
   });
 });

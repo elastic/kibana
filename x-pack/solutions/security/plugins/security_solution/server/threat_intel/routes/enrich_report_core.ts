@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
+import {
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+  ALERTZERO_THREAT_INTEL_ENRICH_REPORT_TELEMETRY_PLUGIN_ID,
+} from '@kbn/alertzero-common';
 import {
   ENRICH_REPORT_CORE_MAX_BODY_BYTES,
   ENRICH_REPORT_CORE_API_PATH,
@@ -51,6 +54,7 @@ export const registerEnrichReportCoreRoute = ({
           request,
           uiSettingsClient: core.uiSettings.client,
           featureId: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+          telemetryPluginId: ALERTZERO_THREAT_INTEL_ENRICH_REPORT_TELEMETRY_PLUGIN_ID,
           logger,
         });
         if (!modelOutcome.ok) {

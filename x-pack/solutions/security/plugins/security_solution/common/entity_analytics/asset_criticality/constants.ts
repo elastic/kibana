@@ -59,6 +59,22 @@ export const CriticalityModifiers: Record<CriticalityLevels, number> = {
   [CriticalityLevels.LOW_IMPACT]: 0.5,
 };
 
+/**
+ * Severity rank of each assigned criticality level; a higher number is more critical.
+ */
+export const CRITICALITY_LEVEL_RANK: Record<CriticalityLevels, number> = {
+  [CriticalityLevels.EXTREME_IMPACT]: 4,
+  [CriticalityLevels.HIGH_IMPACT]: 3,
+  [CriticalityLevels.MEDIUM_IMPACT]: 2,
+  [CriticalityLevels.LOW_IMPACT]: 1,
+};
+
+/**
+ * Severity rank of a criticality value; `0` for `unassigned`, missing or unknown values.
+ */
+export const getCriticalityRank = (level?: string | null): number =>
+  (level != null && (CRITICALITY_LEVEL_RANK as Record<string, number>)[level]) || 0;
+
 export const CRITICALITY_CSV_MAX_SIZE_BYTES = 1024 * 1024; // 1MB
 export const CRITICALITY_CSV_SIZE_TOLERANCE_BYTES = 1024 * 50; // ~= 50kb
 export const CRITICALITY_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE =

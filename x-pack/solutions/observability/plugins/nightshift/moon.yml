@@ -17,9 +17,12 @@ project:
   owner: '@elastic/nightshift'
   sourceRoot: x-pack/solutions/observability/plugins/nightshift
 dependsOn:
+  - '@kbn/actions-types'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/alerts-ui-shared'
+  - '@kbn/connector-specs'
   - '@kbn/app-header'
   - '@kbn/calculate-auto'
   - '@kbn/charts-plugin'
@@ -45,6 +48,7 @@ dependsOn:
   - '@kbn/esql'
   - '@kbn/esql-utils'
   - '@kbn/features-plugin'
+  - '@kbn/flyout-template'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/inference-common'
@@ -83,6 +87,7 @@ dependsOn:
   - '@kbn/streams-schema'
   - '@kbn/tooling-log'
   - '@kbn/ui-callout'
+  - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/unified-search-plugin'
   - '@kbn/unsaved-changes-prompt'
 tags:
@@ -91,6 +96,7 @@ tags:
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -99,6 +105,4 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -175,13 +175,6 @@ export class ApiService {
       method: 'delete',
     });
   }
-
-  public useLoadManageProcessorsPrivileges() {
-    return this.useRequest<{ hasAllPrivileges: boolean }>({
-      path: `${API_BASE_PATH}/privileges/manage_processors`,
-      method: 'get',
-    });
-  }
 }
 
 export const apiService = new ApiService();

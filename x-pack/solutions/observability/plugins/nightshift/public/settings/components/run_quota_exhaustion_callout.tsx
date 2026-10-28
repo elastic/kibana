@@ -7,11 +7,14 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import type { RunQuotaGroup } from '@kbn/significant-events-plugin/common';
+import { isRunQuotaReached, type RunQuotaGroup } from '@kbn/significant-events-plugin/common';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import { isFiniteRunLimit, type RunLimitDraft } from './run_limit_draft';
-import { RUN_QUOTA_GROUP_LABELS } from './run_limit_row';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const RunQuotaExhaustionCallout = ({
   enabled,
@@ -20,31 +23,22 @@ export const RunQuotaExhaustionCallout = ({
   groups,
 }: {
   enabled: boolean;
-  limits: Record<RunQuotaGroup, RunLimitDraft>;
+  limits: Record<RunQuotaGroup, number>;
   counts: Record<RunQuotaGroup, number>;
   groups: readonly RunQuotaGroup[];
 }) => {
-  const exhaustedGroups = enabled
-    ? groups.filter((group) => isFiniteRunLimit(limits[group]) && counts[group] >= limits[group])
-    : [];
+  const { application, featureFlags, nightshiftInvestigations } = useKibana().services;
+  const nightshiftEnabled = featureFlags.useBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false);
+  const canUseAutomations =
+    nightshiftEnabled && nightshiftInvestigations?.investigationsClient != null;
+  const automationsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/automations' });
+  const exhaustedGroups = groups.filter((group) =>
+    isRunQuotaReached({ enabled, limit: limits[group], count: counts[group] })
+  );
 
   if (exhaustedGroups.length === 0) {
     return null;
   }
-
-  const reached = i18n.formatList(
-    'conjunction',
-    exhaustedGroups.map((group) =>
-      i18n.translate('xpack.nightshift.settings.runLimits.reachedGroupDetail', {
-        defaultMessage: '{group}: {count} counted scheduled admissions, daily limit {limit}',
-        values: {
-          group: RUN_QUOTA_GROUP_LABELS[group],
-          count: counts[group],
-          limit: limits[group],
-        },
-      })
-    )
-  );
 
   return (
     <>
@@ -54,13 +48,36 @@ export const RunQuotaExhaustionCallout = ({
         size="s"
         data-test-subj="nightshiftRunLimitsBanner"
         title={i18n.translate('xpack.nightshift.settings.runLimits.exhaustionTitle', {
-          defaultMessage: 'Scheduled automation has reached a daily run limit',
+          defaultMessage: 'Automations reached a daily run limit for this deployment.',
         })}
         text={i18n.translate('xpack.nightshift.settings.runLimits.exhaustionDescription', {
           defaultMessage:
-            'Reached limits: {reached}. New scheduled admissions in these categories can be denied until the UTC day resets. Manual runs are not limited.',
-          values: { reached },
+            'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue. You can still trigger investigations manually',
         })}
+        actionProps={
+          canUseAutomations
+            ? {
+                primary: {
+                  children: i18n.translate(
+                    'xpack.nightshift.settings.runLimits.openAutomationsButton',
+                    {
+                      defaultMessage: 'Open automations',
+                    }
+                  ),
+                  href: automationsHref,
+                  onClick: (event: React.MouseEvent) => {
+                    event.preventDefault();
+                    application.navigateToUrl(automationsHref);
+                  },
+                  'data-test-subj': 'nightshiftRunLimitsOpenAutomations',
+                  ...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.VIEW_AUTOMATIONS,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                  }),
+                },
+              }
+            : undefined
+        }
       />
       <EuiSpacer />
     </>

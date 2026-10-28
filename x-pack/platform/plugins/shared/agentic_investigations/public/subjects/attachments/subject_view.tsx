@@ -10,12 +10,15 @@ import { FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 import { EuiIcon, EuiPanel, EuiText, euiTextTruncate, useEuiTheme } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   InvestigationSubject,
   InvestigationSubjectType,
 } from '../../../common/subjects/subject';
 import type { InvestigationAttachmentContentProps } from '../../investigation_attachments';
 import { getSubjectTitle, type SubjectRowData } from './subject_title';
+import { isModifiedClick, useAlertsListLink, useSubjectLink } from './subject_link';
+import { canOpenSubjectFlyout, type SubjectServices } from './subject_services';
 import {
   OPENS_IN_NEW_TAB,
   TRIGGER_LABEL,
@@ -37,30 +40,6 @@ const SUBJECT_ICON_TONES: Record<InvestigationSubjectType, SubjectIconTone> = {
   significant_event: 'danger',
   manual: 'neutral',
   slack_thread: 'logo',
-};
-
-/**
- * Alert URLs come from the rule type: a Kibana path or an absolute URL. Anything else (for
- * example a `javascript:` URL) is not rendered as a link.
- */
-const isSafeHref = (url: string): boolean =>
-  (url.startsWith('/') && !url.startsWith('//')) || /^https?:\/\//i.test(url);
-
-/** Slack permalinks are validated as HTTPS on write; checked again because the row is a raw link. */
-const isSafeSlackHref = (url: string): boolean => /^https:\/\//i.test(url);
-
-/**
- * Where a click on the row goes: the alert's `kibana.alert.url` (whatever the rule type writes
- * there, for example a Discover link) or the Slack thread.
- */
-const getSubjectHref = ({ type, snapshot, slack }: SubjectRowData): string | undefined => {
-  if (type === 'alert') {
-    return snapshot?.url && isSafeHref(snapshot.url) ? snapshot.url : undefined;
-  }
-  if (type === 'slack_thread') {
-    return slack?.permalink && isSafeSlackHref(slack.permalink) ? slack.permalink : undefined;
-  }
-  return undefined;
 };
 
 const SubjectIcon = ({ iconType, tone }: { iconType: IconType; tone: SubjectIconTone }) => {
@@ -109,6 +88,8 @@ interface CompactRowProps {
   /** Makes the row a link; Slack threads open in a new tab. */
   href?: string;
   isExternal?: boolean;
+  /** Opens `href` inside Kibana instead of loading the page again. */
+  onLinkClick?: (event: React.MouseEvent) => void;
   /** Makes the row a button that shows or hides more rows. */
   onToggle?: () => void;
   isExpanded?: boolean;
@@ -128,6 +109,7 @@ const CompactRow = ({
   description,
   href,
   isExternal = false,
+  onLinkClick,
   onToggle,
   isExpanded,
   isNested = false,
@@ -218,6 +200,7 @@ const CompactRow = ({
     return (
       <a
         href={href}
+        onClick={onLinkClick}
         css={rowStyles}
         data-test-subj={dataTestSubj}
         {...(isExternal && { target: '_blank', rel: 'noopener noreferrer' })}
@@ -282,36 +265,103 @@ const getSubjectDescription = (
 
 /**
  * One compact row per subject: an icon for its type, what it is called, and "Trigger · <type>".
- * Alerts link to their `kibana.alert.url` and Slack threads to the thread; other subjects do not link.
+ * The row links where `useSubjectLink` says (the subject's page, else its own link); without a
+ * link it is plain text.
  */
 export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean }> = ({
   subject,
   isNested = false,
 }) => {
-  const href = getSubjectHref(subject);
+  const { href, onClick: onLinkClick, isExternal } = useSubjectLink(subject);
+  const { services } = useKibana<SubjectServices>();
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const source = subject.snapshot?.source;
+  // An alert opens next to the investigation; everything else keeps its link.
+  const opensFlyout = subject.type === 'alert' && canOpenSubjectFlyout(services, source);
+
+  const onRowClick = (event: React.MouseEvent) => {
+    if (!opensFlyout) {
+      onLinkClick?.(event);
+      return;
+    }
+    // A new-tab or new-window click keeps the browser's own behavior, so `href` still matters.
+    if (isModifiedClick(event)) {
+      return;
+    }
+    event.preventDefault();
+    setIsFlyoutOpen(true);
+  };
+
   return (
-    <CompactRow
-      iconType={SUBJECT_ICONS[subject.type]}
-      tone={SUBJECT_ICON_TONES[subject.type]}
-      title={getSubjectTitle(subject)}
-      description={getSubjectDescription(subject, isNested)}
-      href={href}
-      isExternal={href !== undefined && subject.type === 'slack_thread'}
-      isNested={isNested}
-      data-test-subj={`investigationSubject-${subject.type}`}
-    />
+    <>
+      <CompactRow
+        iconType={SUBJECT_ICONS[subject.type]}
+        tone={SUBJECT_ICON_TONES[subject.type]}
+        title={getSubjectTitle(subject)}
+        description={getSubjectDescription(subject, isNested)}
+        href={href}
+        isExternal={isExternal}
+        onLinkClick={href === undefined ? undefined : onRowClick}
+        isNested={isNested}
+        data-test-subj={`investigationSubject-${subject.type}`}
+      />
+      {isFlyoutOpen && (
+        <React.Suspense fallback={null}>
+          <LazySubjectDetailsFlyout
+            alertId={subject.id}
+            source={source}
+            detailsHref={href}
+            onClose={() => setIsFlyoutOpen(false)}
+            services={services}
+          />
+        </React.Suspense>
+      )}
+    </>
   );
 };
+
+/** The flyout pulls in the alerting v2 episode UI, so it loads when a subject is clicked. */
+const LazySubjectDetailsFlyout = React.lazy(async () => {
+  const { SubjectDetailsFlyout } = await import('./subject_details_flyout');
+  return { default: SubjectDetailsFlyout };
+});
 
 const subjectKey = ({ type, id }: SubjectRowData): string => `${type}:${id}`;
 
 /**
+ * The alerts an investigation is about, as one "N alerts" row that opens the alerts list filtered
+ * to them. Without that list (alerting v2 not available) the row lists the alerts inline instead.
+ */
+const AlertsSubjectRows: React.FC<{ alerts: SubjectRowData[] }> = ({ alerts }) => {
+  const { href, onClick } = useAlertsListLink(alerts);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <>
+      <CompactRow
+        iconType={SUBJECT_ICONS.alert}
+        tone={SUBJECT_ICON_TONES.alert}
+        title={alertsCountLabel(alerts.length)}
+        description={TRIGGER_LABEL}
+        href={href}
+        onLinkClick={onClick}
+        onToggle={href === undefined ? () => setIsExpanded((expanded) => !expanded) : undefined}
+        isExpanded={href === undefined ? isExpanded : undefined}
+        data-test-subj="investigationSubject-alerts"
+      />
+      {href === undefined &&
+        isExpanded &&
+        alerts.map((alert) => <SubjectRow key={subjectKey(alert)} subject={alert} isNested />)}
+    </>
+  );
+};
+
+/**
  * An investigation's subjects in one bordered list. Several alerts collapse into one "N alerts"
- * row that shows them when clicked, since they have no shared page to link to.
+ * row, which opens the alerts list filtered to them.
  */
 export const SubjectList: React.FC<{ subjects: SubjectRowData[] }> = ({ subjects }) => {
   const { euiTheme } = useEuiTheme();
-  const [isAlertsExpanded, setIsAlertsExpanded] = useState(false);
   const alerts = useMemo(() => subjects.filter(({ type }) => type === 'alert'), [subjects]);
 
   const rows = useMemo(() => {
@@ -323,23 +373,9 @@ export const SubjectList: React.FC<{ subjects: SubjectRowData[] }> = ({ subjects
       if (subject !== firstAlert) {
         return [];
       }
-      return [
-        <CompactRow
-          key="alerts"
-          iconType={SUBJECT_ICONS.alert}
-          tone={SUBJECT_ICON_TONES.alert}
-          title={alertsCountLabel(alerts.length)}
-          description={TRIGGER_LABEL}
-          onToggle={() => setIsAlertsExpanded((expanded) => !expanded)}
-          isExpanded={isAlertsExpanded}
-          data-test-subj="investigationSubject-alerts"
-        />,
-        ...(isAlertsExpanded
-          ? alerts.map((alert) => <SubjectRow key={subjectKey(alert)} subject={alert} isNested />)
-          : []),
-      ];
+      return [<AlertsSubjectRows key="alerts" alerts={alerts} />];
     });
-  }, [subjects, alerts, isAlertsExpanded]);
+  }, [subjects, alerts]);
 
   return (
     <EuiPanel

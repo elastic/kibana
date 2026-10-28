@@ -15,6 +15,14 @@ export const NO_BEHAVIORS_EUID = 'host:bc68f2b9-4293-41a0-8c01-2b7ab6f6e514';
 export const OR_SEMANTICS_HOST_ID = 'e5f6789012345678901234abcdef0123ab';
 export const OR_SEMANTICS_HOST_NAME = 'WIN-APP03';
 export const OR_SEMANTICS_HOST_EUID = `host:${OR_SEMANTICS_HOST_ID}`;
+// Dedicated user whose only anomaly is a population-analysis record (detector with
+// `over_field_name`). Such records carry `actual` / `typical` per cause instead of at the top
+// level, so the summary must read them from `causes[0]` rather than drop the record.
+export const HENRY_HOST_ID = 'f6789012345678901234abcdef012345ab';
+export const HENRY_EUID = `user:henry.clark@${HENRY_HOST_ID}@local`;
+export const POPULATION_ANOMALY_RECORD_ID = 'auth_rare_hour_for_a_user_ea_record_population_1';
+export const POPULATION_ANOMALY_ACTUAL = 11460;
+export const POPULATION_ANOMALY_TYPICAL = 46800;
 
 export const entityTestData = [
   {
@@ -85,11 +93,48 @@ export const entityTestData = [
       source: 'security',
       id: DAVID_EUID,
       type: 'Identity',
+      // David is an alias in Carol's resolution group; `mode: 'resolved'` requests for Carol
+      // include his anomalies.
       relationships: {
         resolution: {
-          resolved_to: 'user:david.martinez@a1b2c3d4e5f6789012345678901234ab@local',
+          resolved_to: CAROL_EUID,
         },
       },
+    },
+  },
+  {
+    '@timestamp': '2026-05-19T13:41:58.725Z',
+    data_stream: { dataset: 'windows.forwarded' },
+    host: { name: 'WIN-APP04', id: HENRY_HOST_ID },
+    event: {
+      kind: 'event',
+      module: 'security',
+      category: ['authentication'],
+      type: ['start'],
+      dataset: 'windows.forwarded',
+      outcome: 'success',
+    },
+    user: {
+      domain: 'CORP',
+      name: 'henry.clark',
+      id: '3f9c1d2e4b5a6978c0d1e2f3a4b5c6d7',
+      email: 'henry.clark@corp.example.com',
+    },
+    entity: {
+      lifecycle: {
+        first_seen: '2026-04-19T22:22:57.000Z',
+        last_seen: '2026-05-19T12:38:12.000Z',
+      },
+      EngineMetadata: {
+        Type: 'user',
+        UntypedId: `henry.clark@${HENRY_HOST_ID}@local`,
+      },
+      confidence: 'medium',
+      namespace: 'local',
+      name: 'henry.clark@WIN-APP04',
+      source: 'security',
+      id: HENRY_EUID,
+      type: 'Identity',
     },
   },
   {
@@ -761,6 +806,56 @@ export const sourceTestData = () => [
   },
 ];
 
+// David's geo events resolve into Carol's group in `mode: 'resolved'`. Four 'Texas' events outrank
+// Carol's three 'New York' events, and the 'Crimea' event adds to the anomalous value count, so
+// the combined baseline differs from Carol's single-entity baseline.
+const DAVID_GEO_EVENTS = [
+  { id: 'f1a2b3c4d5e60718293a4b5c6d7e8f01', hours: 3, region: 'Texas', city: 'Austin' },
+  { id: 'f1a2b3c4d5e60718293a4b5c6d7e8f02', hours: 4, region: 'Texas', city: 'Austin' },
+  { id: 'f1a2b3c4d5e60718293a4b5c6d7e8f03', hours: 5, region: 'Texas', city: 'Dallas' },
+  { id: 'f1a2b3c4d5e60718293a4b5c6d7e8f04', hours: 7, region: 'Texas', city: 'Dallas' },
+  { id: 'f1a2b3c4d5e60718293a4b5c6d7e8f05', hours: 8, region: 'Crimea', city: 'Sevastopol' },
+] as const;
+
+export const DAVID_GEO_EVENT_IDS = DAVID_GEO_EVENTS.map(({ id }) => id);
+
+export const davidGeoSourceTestData = () =>
+  DAVID_GEO_EVENTS.map(({ id, hours, region, city }) => ({
+    '@timestamp': hoursAgo(hours),
+    data_stream: { dataset: 'windows.forwarded', namespace: 'default', type: 'logs' },
+    event: {
+      action: 'logged-in-special',
+      category: ['iam'],
+      code: '4672',
+      dataset: 'windows.forwarded',
+      id,
+      kind: 'event',
+      module: 'security',
+      outcome: 'success',
+      provider: 'Microsoft-Windows-Security-Auditing',
+      type: ['admin'],
+    },
+    host: {
+      id: 'd4e5f6789012345678901234abcdef01',
+      name: 'WIN-APP01',
+      os: { family: 'windows', platform: 'windows', type: 'windows' },
+    },
+    process: { name: 'lsass.exe' },
+    source: { geo: { city_name: city, country_name: 'United States', region_name: region } },
+    user: { domain: 'CORP', id: 'dffc432dcedd35657c7f310037179a27', name: 'david.martinez' },
+    winlog: {
+      channel: 'Security',
+      event_data: {
+        PrivilegeList: 'SeSecurityPrivilege',
+        SubjectDomainName: 'CORP',
+        SubjectUserName: 'david.martinez',
+        TargetUserName: 'david.martinez',
+      },
+      event_id: '4672',
+      provider_name: 'Microsoft-Windows-Security-Auditing',
+    },
+  }));
+
 export const anomalyTestData = () => [
   {
     _id: 'pad_windows_rare_region_name_by_user_ea_record_1779192000000_3600_0_-103491946261268334286430206369177126287_17',
@@ -1068,6 +1163,66 @@ export const anomalyTestData = () => [
     'host.name': [OR_SEMANTICS_HOST_NAME],
     'host.id': [OR_SEMANTICS_HOST_ID],
   },
+  // Population analysis (by + over fields): as ML writes it, the parent record carries
+  // `by_field_name` but no `by_field_value`, `actual` or `typical`; those live on each cause.
+  // The cause for the requested entity (henry.clark) is deliberately not the first one.
+  {
+    _id: POPULATION_ANOMALY_RECORD_ID,
+    job_id: 'auth_rare_hour_for_a_user_ea',
+    result_type: 'record',
+    probability: 0.0004127113983262128,
+    multi_bucket_impact: 0,
+    record_score: 81.2,
+    initial_record_score: 81.2,
+    bucket_span: 900,
+    detector_index: 0,
+    is_interim: false,
+    timestamp: Date.now(),
+    by_field_name: 'user.name',
+    over_field_name: 'source.geo.region_iso_code',
+    over_field_value: 'US-CA',
+    function: 'time_of_day',
+    function_description: 'time_of_day',
+    causes: [
+      {
+        probability: 0.0021,
+        by_field_name: 'user.name',
+        by_field_value: 'olivia.perez',
+        over_field_name: 'source.geo.region_iso_code',
+        over_field_value: 'US-CA',
+        function: 'time_of_day',
+        function_description: 'time_of_day',
+        typical: [50400],
+        actual: [7200],
+      },
+      {
+        probability: 0.0004127113983262128,
+        by_field_name: 'user.name',
+        by_field_value: 'henry.clark',
+        over_field_name: 'source.geo.region_iso_code',
+        over_field_value: 'US-CA',
+        function: 'time_of_day',
+        function_description: 'time_of_day',
+        typical: [POPULATION_ANOMALY_TYPICAL],
+        actual: [POPULATION_ANOMALY_ACTUAL],
+      },
+    ],
+    influencers: [
+      { influencer_field_name: 'user.name', influencer_field_values: ['henry.clark'] },
+      { influencer_field_name: 'host.id', influencer_field_values: [HENRY_HOST_ID] },
+      { influencer_field_name: 'host.name', influencer_field_values: ['WIN-APP04'] },
+      {
+        influencer_field_name: 'user.id',
+        influencer_field_values: ['3f9c1d2e4b5a6978c0d1e2f3a4b5c6d7'],
+      },
+    ],
+    'event.module': ['security'],
+    'user.id': ['3f9c1d2e4b5a6978c0d1e2f3a4b5c6d7'],
+    'user.name': ['henry.clark'],
+    'host.name': ['WIN-APP04'],
+    'host.id': [HENRY_HOST_ID],
+    'source.geo.region_iso_code': ['US-CA'],
+  },
 ];
 
 export const ANOMALY_RECORD_IDS = [
@@ -1078,6 +1233,7 @@ export const ANOMALY_RECORD_IDS = [
   'or_semantics_test_record_low',
   'or_semantics_test_record_gap',
   'or_semantics_test_record_high',
+  POPULATION_ANOMALY_RECORD_ID,
 ] as const;
 
 export const SOURCE_EVENT_IDS = [

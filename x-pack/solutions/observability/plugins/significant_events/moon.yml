@@ -84,12 +84,14 @@ dependsOn:
   - '@kbn/nightshift-investigations-plugin'
   - '@kbn/agentic-investigations-plugin'
   - '@kbn/core-elasticsearch-server-mocks'
+  - '@kbn/core-http-server-mocks'
 tags:
   - plugin
   - prod
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -98,6 +100,4 @@ fileGroups:
     - public/**/*
     - test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

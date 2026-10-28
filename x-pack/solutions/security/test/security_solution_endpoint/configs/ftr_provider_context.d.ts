@@ -6,6 +6,7 @@
  */
 
 import type { GenericFtrProviderContext } from '@kbn/test';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports -- `extends` needs the value
 import { GenericFtrService } from '@kbn/test';
 
 import type { pageObjects, svlPageObjects } from '../page_objects';

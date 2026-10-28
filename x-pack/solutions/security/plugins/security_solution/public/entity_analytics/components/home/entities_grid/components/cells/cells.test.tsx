@@ -38,17 +38,24 @@ describe('DefaultCell', () => {
 });
 
 describe('RiskScoreChangeCell', () => {
-  it.each([
-    ['no value', undefined],
-    ['zero', 0],
-  ])('renders a dash for %s', (_, value) => {
-    const { container } = renderInProviders(<RiskScoreChangeCell value={value} />);
+  it('renders a dash for no value', () => {
+    const { container } = renderInProviders(<RiskScoreChangeCell value={undefined} />);
     expect(container.textContent).toBe('—');
   });
 
   it.each([
-    ['a rise as an up arrow, said as an increase', 12.6, 'Increased by 13%', 'sortUp'],
-    ['a drop as a down arrow, said as a decrease', -7.2, 'Decreased by 7%', 'sortDown'],
+    ['zero', 0],
+    ['a rise that rounds to zero', 0.4],
+    ['a drop that rounds to zero', -0.4],
+  ])('renders a neutral 0 without an arrow for %s', (_, value) => {
+    const { container } = renderInProviders(<RiskScoreChangeCell value={value} />);
+    expect(container.textContent).toBe('0');
+    expect(container.querySelector('[data-euiicon-type]')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['a rise as an up arrow, said as an increase', 12.6, 'Increased by 13', 'sortUp'],
+    ['a drop as a down arrow, said as a decrease', -7.2, 'Decreased by 7', 'sortDown'],
   ])('renders %s', (_, value, text, icon) => {
     const { container } = renderInProviders(<RiskScoreChangeCell value={value} />);
     expect(container.textContent).toBe(text);
@@ -155,16 +162,18 @@ describe('cells with a click handler', () => {
 });
 
 describe('RowActionsCell', () => {
-  const renderActions = () => {
+  const renderActions = ({ canAddToChat = true } = {}) => {
     const onInvestigateInTimeline = jest.fn();
     const onOpenEntityGraph = jest.fn();
+    const onAddToChat = jest.fn();
     renderInProviders(
       <RowActionsCell
         onInvestigateInTimeline={onInvestigateInTimeline}
         onOpenEntityGraph={onOpenEntityGraph}
+        onAddToChat={canAddToChat ? onAddToChat : undefined}
       />
     );
-    return { onInvestigateInTimeline, onOpenEntityGraph };
+    return { onInvestigateInTimeline, onOpenEntityGraph, onAddToChat };
   };
 
   it.each([
@@ -178,14 +187,26 @@ describe('RowActionsCell', () => {
 
   it('opens and closes the more actions menu', async () => {
     renderActions();
-    const moreActions = screen.getByRole('button', { name: 'More actions' });
+    const getMoreActions = () => screen.getByRole('button', { name: 'More actions' });
     expect(screen.queryByText('Add to chat')).not.toBeInTheDocument();
 
-    fireEvent.click(moreActions);
+    fireEvent.click(getMoreActions());
     expect(await screen.findByText('Add to chat')).toBeInTheDocument();
 
-    fireEvent.click(moreActions);
+    fireEvent.click(getMoreActions());
     await waitFor(() => expect(screen.queryByText('Add to chat')).not.toBeInTheDocument());
+  });
+
+  it('adds the entity to chat from the more actions menu', async () => {
+    const { onAddToChat } = renderActions();
+    fireEvent.click(screen.getByRole('button', { name: 'More actions' }));
+    fireEvent.click(await screen.findByText('Add to chat'));
+    expect(onAddToChat).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides the more actions menu without the agent chat', () => {
+    renderActions({ canAddToChat: false });
+    expect(screen.queryByRole('button', { name: 'More actions' })).not.toBeInTheDocument();
   });
 });
 

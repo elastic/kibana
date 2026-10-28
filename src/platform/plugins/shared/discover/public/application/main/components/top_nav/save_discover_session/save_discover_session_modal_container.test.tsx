@@ -70,7 +70,7 @@ const getOnSaveProps = (
 const setup = async ({
   additionalPersistedTabs,
   dataViewsList,
-  draftSessionTitle,
+  initialTitle,
   initialCopyOnSave,
   initialTabDataView,
   isEmbedded = false,
@@ -87,7 +87,7 @@ const setup = async ({
 }: {
   additionalPersistedTabs?: DiscoverSessionTab[];
   dataViewsList?: DataView[];
-  draftSessionTitle?: string;
+  initialTitle?: string;
   initialCopyOnSave?: boolean;
   initialTabDataView?: DataView;
   isEmbedded?: boolean;
@@ -131,12 +131,6 @@ const setup = async ({
   await toolkit.initializeTabs({ persistedDiscoverSession: finalPersistedSession });
   await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
 
-  if (draftSessionTitle) {
-    await toolkit.internalState
-      .dispatch(internalStateActions.renameDiscoverSession({ newTitle: draftSessionTitle }))
-      .unwrap();
-  }
-
   if (initialTabDataView) {
     toolkit.internalState.dispatch(
       internalStateActions.setDataView({
@@ -163,6 +157,7 @@ const setup = async ({
     <DiscoverToolkitTestProvider toolkit={toolkit}>
       <DiscoverSessionSaveModalContainer
         initialCopyOnSave={initialCopyOnSave}
+        initialTitle={initialTitle}
         onClose={onClose}
         onSaveCb={onSaveCb}
         services={services}
@@ -335,10 +330,10 @@ describe('DiscoverSessionSaveModalContainer', () => {
       });
     });
 
-    it('should prefill the title with the draft name of a new session', async () => {
+    it('should prefill the title with the initial title of a new session', async () => {
       const { modalProps } = await setup({
         persistedDiscoverSession: false,
-        draftSessionTitle: 'My draft',
+        initialTitle: 'My draft',
       });
 
       expect(modalProps?.title).toBe('My draft');
@@ -672,6 +667,36 @@ describe('DiscoverSessionSaveModalContainer', () => {
           id: toolkit.getCurrentTab().id,
         },
       });
+    });
+
+    it('should close the modal only after navigating to a new Discover session', async () => {
+      const services = createDiscoverServicesMock();
+      let finishNavigation: () => void = () => {};
+      jest.spyOn(services.locator, 'navigate').mockImplementation(
+        () =>
+          new Promise<void>((resolve) => {
+            finishNavigation = resolve;
+          })
+      );
+      const { modalProps, onClose } = await setup({
+        persistedDiscoverSession: false,
+        services,
+      });
+
+      let savePromise: Promise<void> | undefined;
+      await act(async () => {
+        savePromise = modalProps?.onSave(getOnSaveProps());
+      });
+
+      expect(services.locator.navigate).toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
+
+      await act(async () => {
+        finishNavigation();
+        await savePromise;
+      });
+
+      expect(onClose).toHaveBeenCalled();
     });
 
     it('should include the resolved profile state when navigating to a newly saved session', async () => {

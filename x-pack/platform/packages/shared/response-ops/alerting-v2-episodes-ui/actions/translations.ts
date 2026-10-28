@@ -7,122 +7,178 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const VIEW_DETAILS = i18n.translate('xpack.alertingV2.episodesUi.actions.viewDetailsLabel', {
-  defaultMessage: 'View details',
-});
+export const VIEW_DETAILS = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.actions.viewDetailsLabel',
+  {
+    defaultMessage: 'View details',
+  }
+);
 
-export const ACK = i18n.translate('xpack.alertingV2.episodesUi.acknowledgeAction.acknowledge', {
-  defaultMessage: 'Acknowledge',
-});
+export const ACK = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.acknowledgeAction.acknowledge',
+  {
+    defaultMessage: 'Acknowledge',
+  }
+);
 
-export const UNACK = i18n.translate('xpack.alertingV2.episodesUi.acknowledgeAction.unacknowledge', {
-  defaultMessage: 'Unacknowledge',
-});
+export const UNACK = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.acknowledgeAction.unacknowledge',
+  {
+    defaultMessage: 'Unacknowledge',
+  }
+);
 
-export const SNOOZE = i18n.translate('xpack.alertingV2.episodesUi.snoozeAction.snooze', {
+export const SNOOZE = i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.snoozeAction.snooze', {
   defaultMessage: 'Snooze',
 });
 
-export const UNSNOOZE = i18n.translate('xpack.alertingV2.episodesUi.snoozeAction.unsnooze', {
-  defaultMessage: 'Unsnooze',
-});
+export const UNSNOOZE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.snoozeAction.unsnooze',
+  {
+    defaultMessage: 'Unsnooze',
+  }
+);
 
-export const RESOLVE = i18n.translate('xpack.alertingV2.episodesUi.resolveAction.deactivate', {
-  defaultMessage: 'Resolve',
-});
+export const RESOLVE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.resolveAction.deactivate',
+  {
+    defaultMessage: 'Resolve',
+  }
+);
 
-export const UNRESOLVE = i18n.translate('xpack.alertingV2.episodesUi.resolveAction.activate', {
-  defaultMessage: 'Unresolve',
-});
+export const UNRESOLVE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.resolveAction.activate',
+  {
+    defaultMessage: 'Unresolve',
+  }
+);
 
-export const EDIT_TAGS = i18n.translate('xpack.alertingV2.episodesUi.tagsAction.editTags', {
-  defaultMessage: 'Edit alert tags',
-});
+export const EDIT_TAGS = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.tagsAction.editTags',
+  {
+    defaultMessage: 'Edit alert tags',
+  }
+);
 
 export const EDIT_ASSIGNEE = i18n.translate(
-  'xpack.alertingV2.episodesUi.assigneeAction.editAssignee',
+  'xpack.alertingV2EpisodesUi.episodesUi.assigneeAction.editAssignee',
   {
     defaultMessage: 'Edit assignee',
   }
 );
 
 export const OPEN_IN_DISCOVER = i18n.translate(
-  'xpack.alertingV2.episodesUi.actions.openInDiscoverLabel',
+  'xpack.alertingV2EpisodesUi.episodesUi.actions.openInDiscoverLabel',
   {
     defaultMessage: 'Open in Discover',
   }
 );
 
+export const OPEN_ALERT_EVENTS_HISTORY = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.actions.openAlertEventsHistoryLabel',
+  {
+    defaultMessage: 'Open alert events history',
+  }
+);
+
+export const OPEN_ALERT_EVENTS_HISTORY_UNAVAILABLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.actions.openAlertEventsHistoryUnavailableTooltip',
+  {
+    defaultMessage: 'Discover with ES|QL is required to open alert events history.',
+  }
+);
+
 export const TAGS_FLYOUT_TITLE = i18n.translate(
-  'xpack.alertingV2.episodesUi.tagsAction.flyoutTitle',
+  'xpack.alertingV2EpisodesUi.episodesUi.tagsAction.flyoutTitle',
   {
     defaultMessage: 'Edit alert tags',
   }
 );
 
-export const CANCEL = i18n.translate('xpack.alertingV2.episodesUi.tagsAction.cancel', {
+export const CANCEL = i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.tagsAction.cancel', {
   defaultMessage: 'Cancel',
 });
 
 export const RESOLVE_ACTION_REASON = i18n.translate(
-  'xpack.alertingV2.episodesUi.resolveAction.reason',
+  'xpack.alertingV2EpisodesUi.episodesUi.resolveAction.reason',
   {
     defaultMessage: 'Updated from alerts actions UI',
   }
 );
 
 export const getBulkErrorDetailsHeading = (failed: number): string =>
-  i18n.translate('xpack.alertingV2Episodes.actions.bulkErrorDetailsHeadingErrorMessage', {
+  i18n.translate('xpack.alertingV2EpisodesUi.actions.bulkErrorDetailsHeadingErrorMessage', {
     defaultMessage: 'The action failed for {failed, plural, one {# alert} other {# alerts}}.',
     values: { failed },
   });
 
 export const getBulkTotalFailureToast = (actionName: string, failed: number): string =>
-  i18n.translate('xpack.alertingV2Episodes.actions.bulkTotalFailureToastErrorMessage', {
+  i18n.translate('xpack.alertingV2EpisodesUi.actions.bulkTotalFailureToastErrorMessage', {
     defaultMessage: '{actionName} failed for {failed, plural, one {# alert} other {# alerts}}.',
     values: { actionName, failed },
   });
 
 export const getBulkPartialFailureToast = (actionName: string, failed: number): string =>
-  i18n.translate('xpack.alertingV2Episodes.actions.bulkPartialFailureToastErrorMessage', {
+  i18n.translate('xpack.alertingV2EpisodesUi.actions.bulkPartialFailureToastErrorMessage', {
     defaultMessage: '{actionName} completed with {failed, plural, one {# error} other {# errors}}.',
     values: { actionName, failed },
   });
 
 export const getBulkFailureReason = (reason: string, additionalReasons: number): string =>
-  i18n.translate('xpack.alertingV2Episodes.actions.bulkFailureReasonErrorMessage', {
+  i18n.translate('xpack.alertingV2EpisodesUi.actions.bulkFailureReasonErrorMessage', {
     defaultMessage:
       '{reason}{additionalReasons, plural, =0 {} one { (+# more reason)} other { (+# more reasons)}}',
     values: { reason, additionalReasons },
   });
 
 export const UNKNOWN_ERROR = i18n.translate(
-  'xpack.alertingV2Episodes.actions.unknownBulkErrorMessage',
+  'xpack.alertingV2EpisodesUi.actions.unknownBulkErrorMessage',
   { defaultMessage: 'Unknown error' }
 );
 
 export const getBulkSuccessToast = (processed: number): string =>
-  i18n.translate('xpack.alertingV2Episodes.actions.bulkSuccessToast', {
+  i18n.translate('xpack.alertingV2EpisodesUi.actions.bulkSuccessToast', {
     defaultMessage: '{processed, plural, one {# alert} other {# alerts}} updated successfully.',
     values: { processed },
   });
 
 export const BULK_NO_CHANGES_TOAST = i18n.translate(
-  'xpack.alertingV2Episodes.actions.bulkNoChangesToast',
+  'xpack.alertingV2EpisodesUi.actions.bulkNoChangesToast',
   {
     defaultMessage: 'No changes were needed.',
   }
 );
 
 export const UNRESOLVE_NOT_AVAILABLE = i18n.translate(
-  'xpack.alertingV2Episodes.actions.unresolveNotAvailable',
+  'xpack.alertingV2EpisodesUi.actions.unresolveNotAvailable',
   {
     defaultMessage: 'Unresolve is not available for classic alerts',
   }
 );
 
+export const ADD_TO_CASE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.addToCaseAction.addToCase',
+  {
+    defaultMessage: 'Add to case',
+  }
+);
+
+export const NO_ALERTS_ADDED_TO_CASE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.addToCaseAction.noAlertsAddedTitle',
+  {
+    defaultMessage: 'No alerts added to the case',
+  }
+);
+
+export const ALERTS_ALREADY_ATTACHED_TO_CASE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.addToCaseAction.alertsAlreadyAttached',
+  {
+    defaultMessage: 'All selected alerts are already attached to the case',
+  }
+);
+
 export const EDIT_ASSIGNEE_NOT_AVAILABLE = i18n.translate(
-  'xpack.alertingV2Episodes.actions.editAssigneeNotAvailable',
+  'xpack.alertingV2EpisodesUi.actions.editAssigneeNotAvailable',
   {
     defaultMessage: 'Edit assignee is not available for classic alerts',
   }

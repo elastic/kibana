@@ -19,6 +19,7 @@ import type {
   ScreenshotResult,
   ScreenshottingStart,
 } from '@kbn/screenshotting-plugin/server';
+import { RenderRequestRejectedError } from '@kbn/reporting-common';
 import { buildRenderPageRequest } from './render/build_payload';
 import { renderPage } from './render/client';
 import type { RenderPageResult } from './render/types';
@@ -91,7 +92,8 @@ export function createGetScreenshots({
           createToken: async (signal) => {
             const systemIdentity = getSystemIdentity();
             if (!systemIdentity) {
-              throw new Error(
+              // A configuration error: retrying cannot help.
+              throw new RenderRequestRejectedError(
                 'Cannot authenticate to page-render-service: xpack.security.uiam is not configured'
               );
             }
@@ -99,7 +101,11 @@ export function createGetScreenshots({
           },
           dispatcher: getDispatcher(),
         },
-        options.taskInstanceFields.retryAt,
+        {
+          retryAt: options.taskInstanceFields.retryAt,
+          report: options.taskInstanceFields.report,
+          canHandBack: options.taskInstanceFields.canHandBack,
+        },
         logger
       );
 

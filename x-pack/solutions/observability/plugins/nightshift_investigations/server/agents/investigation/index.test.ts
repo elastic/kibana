@@ -82,7 +82,11 @@ describe('Nightshift investigation agent type', () => {
     expect(base.instructions).toContain('Affected entity');
     expect(base.instructions).not.toContain('inputs.context.alerts');
     expect(base.instructions).toContain('`- <slug> (id <id>): FROM <view_name>`');
-    expect(base.instructions).toContain('FROM <view_name> | LIMIT 0');
+    expect(base.instructions).toContain('FROM <view_name> | KEEP <prefix>* | LIMIT 0');
+    expect(base.instructions).toContain('see <knowledge_cortex>');
+    expect(base.instructions).toContain('/workspace/cortex/README.md');
+    expect(base.instructions).not.toContain('{{cortex_load_step}}');
+    expect(base.instructions).not.toContain('{{knowledge_cortex_section}}');
   });
 
   it('adds Semantic Memory context and workflows when memory is enabled', () => {
@@ -129,6 +133,10 @@ describe('Nightshift investigation agent type', () => {
 
     expect(base.workflow_ids).toBeUndefined();
     expect(base.post_execution_workflow_ids).toBeUndefined();
+    expect(base.instructions).not.toContain('/workspace/cortex/');
+    expect(base.instructions).not.toContain('<knowledge_cortex>');
+    expect(base.instructions).not.toContain('{{cortex_load_step}}');
+    expect(base.instructions).not.toContain('{{knowledge_cortex_section}}');
   });
 
   it('drops the pre-execution workflow when cortex is on but the sandbox is not configured', () => {
@@ -184,12 +192,33 @@ describe('Nightshift investigation agent type', () => {
       expect(instructions).toContain(`\`${tool}\``);
     }
     expect(instructions).toContain('"origin": "nightshift"');
-    for (const category of ['mitigate', 'remediate', 'investigate', 'escalate']) {
-      expect(instructions).toContain(`\`${category}\``);
-    }
+    expect(instructions).toContain('"category": "todo"');
     expect(instructions).toContain('**Check before you finish.**');
     expect(instructions).not.toContain('blind_spots');
     expect(instructions).not.toMatch(/\d0-(critical|high|medium|low)/);
+  });
+
+  it('runs its hooks through the workflows the resolver names for the space', async () => {
+    const type = getInvestigationAgentType({
+      sandboxEnabled: true,
+      cortexEnabled: true,
+      ...ALL_PLUGINS,
+      resolveHookWorkflowId: async (id, { spaceId }) => `${id}-bound-${spaceId}`,
+    });
+    if (typeof type.baseConfiguration !== 'function') {
+      throw new Error('expected a dynamic base configuration');
+    }
+    const base = await type.baseConfiguration({
+      request: httpServerMock.createKibanaRequest(),
+      spaceId: 'sa-a',
+    });
+
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-sandbox-materialize-workspace-bound-sa-a',
+    ]);
+    expect(base.post_execution_workflow_ids).toEqual([
+      'system-nightshift-agent-optimize-bound-sa-a',
+    ]);
   });
 
   describe('custom context', () => {

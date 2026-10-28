@@ -244,7 +244,7 @@ These routes use `access: internal` and are **not** included in the public OpenA
 | GET | `/internal/workflows/config` | Execution engine feature flags for the plugin. |
 | POST | `/internal/workflows/disable` | Disable all workflows (administrative). |
 | POST | `/api/workflows/validate` | Validate a workflow YAML definition without saving. |
-| GET | `/internal/workflows/library/templates` | List Workflow Template Library catalog rows (optional `solution` / `category` / `search` filters). Gated by the `workflowsManagement:library:enabled` global uiSetting; returns `503` when off. |
+| GET | `/internal/workflows/library/templates` | List Workflow Template library catalog rows (optional `solution` / `category` / `search` filters). Gated by the `workflowsManagement:library:enabled` global uiSetting; returns `503` when off. |
 | GET | `/internal/workflows/library/templates/{slug}` | Get the parsed template body (metadata + workflow body + raw YAML) for a catalog slug. `404` when the slug is missing, `503` when the library is disabled. |
 | GET | `/internal/workflows/library/health` | Diagnostic — returns the cache's `sourceMode`, `lastRefreshAt`, and `lastError`. Not gated by the library toggle so admins can reach it while the feature is off. |
 
@@ -410,6 +410,13 @@ cannot open X or its execution history through the Workflows UI or APIs. If Bob
 has Read Workflow Execution in that space, he can still query the permitted
 execution and step fields through Elasticsearch. Marking an index as hidden does
 not enforce the workflow ACL.
+
+The same applies to anything else built on the execution data, such as dashboards
+and options-list controls. The filter controls on the Executions page are the one
+exception: until the execution data enforces workflow ACLs, the Workflows UI scopes
+their options and counts to the workflows the user can read, to non-step
+executions, and, without Read Managed Workflow Execution, to unmanaged
+executions, so they match the executions list.
 
 This is a known technical preview limitation. Enforcing workflow ACLs for
 queryable execution data is planned follow-up work. Until then, do not rely on

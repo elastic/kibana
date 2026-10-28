@@ -30,6 +30,7 @@ export class RunRuleRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Run a rule now',
     oasOperationObject: runRuleOasExamples,
   } as const;

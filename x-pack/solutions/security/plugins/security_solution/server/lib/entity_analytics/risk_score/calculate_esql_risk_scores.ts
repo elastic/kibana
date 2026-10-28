@@ -41,7 +41,7 @@ import {
   DEFAULT_ALERT_SAMPLE_SIZE,
   MAX_INPUTS_COUNT,
   RIEMANN_ZETA_S_VALUE,
-  RIEMANN_ZETA_VALUE,
+  getRiemannZetaValue,
 } from './constants';
 
 import { filterFromRange } from './helpers';
@@ -207,10 +207,11 @@ export const calculateScoresWithESQL = async (
           upper: afterKey?.[(EntityTypeToIdentifierField as Record<string, string>)[entityType]],
         };
 
+        const sampleSize = params.alertSampleSizePerShard || DEFAULT_ALERT_SAMPLE_SIZE;
         const query = getESQL(
           entityType as EntityType,
           bounds,
-          params.alertSampleSizePerShard || DEFAULT_ALERT_SAMPLE_SIZE,
+          sampleSize,
           params.pageSize,
           params.index
         );
@@ -221,7 +222,9 @@ export const calculateScoresWithESQL = async (
             query,
             filter: { bool: { filter: entityFilter } },
           })
-          .then((rs) => rs.values.map(buildRiskScoreBucket(entityType as EntityType, params.index)))
+          .then((rs) =>
+            rs.values.map(buildRiskScoreBucket(entityType as EntityType, params.index, sampleSize))
+          )
 
           .then(async (riskScoreBuckets) => {
             const results = await applyScoreModifiers({
@@ -416,9 +419,10 @@ export const getESQL = (
 };
 
 export const buildRiskScoreBucket =
-  (entityType: EntityType, index: string) =>
+  (entityType: EntityType, index: string, sampleSize: number) =>
   (row: FieldValue[]): RiskScoreBucket => {
     const [count, score, _inputs, entity] = row as [number, number, string | string[], string];
+    const zetaValue = getRiemannZetaValue(sampleSize);
 
     const inputs = [_inputs].flat().map((input, i) => {
       let parsedRiskInputData = JSON.parse('{}');
@@ -459,7 +463,7 @@ export const buildRiskScoreBucket =
         rule_name: ruleName,
         category,
         score: value,
-        contribution: currentScore / RIEMANN_ZETA_VALUE,
+        contribution: currentScore / zetaValue,
         index,
       };
     });
@@ -472,7 +476,7 @@ export const buildRiskScoreBucket =
         risk_details: {
           value: {
             score,
-            normalized_score: score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
+            normalized_score: score / zetaValue, // normalize value to be between 0-100
             notes: [],
             category_1_score: score, // Don't normalize here - will be normalized in calculate_risk_scores.ts
             category_1_count: count,
@@ -735,20 +739,28 @@ export const getResolutionScoreESQLByIds = (
  * ES|QL evaluates `IN (<literals>)` on a computed column by comparing every row against every
  * literal, which at 10k targets and ~1M alerts takes minutes of CPU per page. A range costs the
  * same per row whatever the page size. It relies on Phase 0 writing a lookup row for every
- * resolution target as well as for every alias, so `resolution_target_id IS NOT NULL` keeps
- * exactly the group members and drops entities that are in no resolution group, even when their
- * own ID falls inside the range.
+ * resolution target as well as for every alias, so keeping only joined rows keeps exactly the
+ * group members and drops entities that are in no resolution group, even when their own ID falls
+ * inside the range.
+ *
+ * Only rows written by this run count. The lookup index is pruned after scoring, so the previous
+ * run's rows are still there: a target whose aliases have all moved elsewhere keeps its old row,
+ * and without the run filter it would be scored again as a group of one, taking a slot under the
+ * page's LIMIT from a current group.
  */
 export const getResolutionScoreESQLByRange = (
   entityType: EntityType,
   bounds: { lower?: string; upper: string },
+  calculationRunId: string,
   sampleSize: number,
   pageSize: number,
   alertsIndex: string,
   lookupIndex: string
 ): string => {
   assertEsqlInterpolatableIds(
-    [bounds.lower, bounds.upper].filter((value): value is string => value !== undefined)
+    [bounds.lower, bounds.upper, calculationRunId].filter(
+      (value): value is string => value !== undefined
+    )
   );
 
   const rangeClause = [
@@ -760,7 +772,10 @@ export const getResolutionScoreESQLByRange = (
 
   return buildResolutionScoreESQL({
     entityType,
-    membershipClause: `| WHERE resolution_target_id IS NOT NULL AND ${rangeClause}`,
+    // Alerts with no lookup row have a null run ID after the join, so this also drops them.
+    membershipClause: `| WHERE calculation_run_id == "${escapeEsqlStringLiteral(
+      calculationRunId
+    )}" AND ${rangeClause}`,
     sampleSize,
     pageSize,
     alertsIndex,
