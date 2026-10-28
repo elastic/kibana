@@ -289,6 +289,25 @@ describe('registerHuntBehaviorRoute', () => {
     );
   });
 
+  it('forwards excluded_iocs to the service when present', async () => {
+    const { handler, context } = makeDeps();
+    const excluded = [{ type: 'ip', value: '169.254.169.254' }];
+
+    await handler(
+      context,
+      requestFor({ iocs: [{ type: 'hash', value: 'abc' }], excluded_iocs: excluded }),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(huntBehaviorMock).toHaveBeenCalledWith(
+      { extraction: model, esql: model },
+      expect.anything(),
+      expect.objectContaining({ excluded_iocs: excluded }),
+      expect.anything(),
+      mitreDataClient
+    );
+  });
+
   it('logs and returns a generic 500 when extraction throws', async () => {
     huntBehaviorMock.mockRejectedValue(new Error('model timed out'));
     const { handler, context, logger } = makeDeps();

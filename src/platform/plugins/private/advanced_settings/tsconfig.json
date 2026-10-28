@@ -21,7 +21,8 @@
     "@kbn/management-settings-application",
     "@kbn/management-settings-ids",
     "@kbn/spaces-plugin",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/serverless-common-settings"
   ],
   "exclude": [
     "target/**/*",

@@ -63,6 +63,8 @@ export {
 
 export {
   SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
+  toLifecycleDetection,
+  type LifecycleDetectionInput,
   type SignificantEventDetectionAttachment,
 } from './significant_event_detection_attachment';
 
