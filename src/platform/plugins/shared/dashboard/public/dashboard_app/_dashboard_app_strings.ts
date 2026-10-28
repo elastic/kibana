@@ -205,11 +205,6 @@ export const topNavStrings = {
       defaultMessage: 'Quick save your dashboard without any prompts',
     }),
   },
-  quickSaveError: {
-    title: i18n.translate('dashboard.topNave.quickSaveErrorTitle', {
-      defaultMessage: 'Unable to save dashboard',
-    }),
-  },
   resetChangesError: {
     title: i18n.translate('dashboard.topNave.resetChangesErrorTitle', {
       defaultMessage: 'Unable to reset dashboard changes',
