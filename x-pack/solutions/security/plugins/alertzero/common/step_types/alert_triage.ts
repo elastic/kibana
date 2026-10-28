@@ -202,8 +202,12 @@ export const triageTagPatternKeysStepCommonDefinition: CommonStepDefinition<
 };
 
 const proposalTextInputShape = {
-  rule_name: z.string().max(1024).describe('Name of the rule, quoted in the proposal comment.'),
-  confidence_floor: z.number().min(0).max(1).describe('Confidence floor, quoted in the comment.'),
+  rule_name: lazySchema(() =>
+    z.string().max(1024).describe('Name of the rule, quoted in the proposal comment.')
+  ),
+  confidence_floor: lazySchema(() =>
+    z.number().min(0).max(1).describe('Confidence floor, quoted in the comment.')
+  ),
 };
 
 const groupFpCandidatesInputSchema = lazySchema(() =>
