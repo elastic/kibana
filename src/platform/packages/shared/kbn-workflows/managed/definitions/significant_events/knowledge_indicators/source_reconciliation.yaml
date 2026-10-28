@@ -17,13 +17,6 @@ triggers:
       - name: sourceSlug
         type: string
         required: true
-      - name: onboardImmediately
-        type: boolean
-        default: true
-        description: "Start onboarding the current query once the change is applied."
-      - name: sourceRevision
-        type: string
-        description: "Query revision (esql_updated_at) the write that queued this run produced. Onboarding starts only while the source is still at it; a newer revision is decided by its own run. Without it, onboarding starts for whatever revision the source has."
 steps:
   - name: reconcile_source
     type: kibana.request
@@ -34,8 +27,6 @@ steps:
         x-elastic-internal-origin: "kibana"
       body:
         sourceSlug: "${{ inputs.sourceSlug }}"
-        onboardImmediately: "${{ inputs.onboardImmediately }}"
-        sourceRevision: "${{ inputs.sourceRevision }}"
     on-failure:
       retry:
         max-attempts: 240

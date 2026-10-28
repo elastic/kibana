@@ -108,11 +108,7 @@ export class SourcesClient {
 
   async create(input: CreateSourceRequest): Promise<NightshiftSource> {
     const { soClient, viewsClient, username } = this.deps;
-    // `onboard_immediately` is about this write, so it is kept out of the stored attributes.
-    const { onboard_immediately: onboardImmediately, ...parsed } = parseSourceWrite(
-      createSourceRequestSchema,
-      input
-    );
+    const parsed = parseSourceWrite(createSourceRequestSchema, input);
     const { type } = await this.validateQuery({ esql: parsed.esql });
 
     const slug = await this.allocateSlug(parsed.title);
@@ -123,7 +119,6 @@ export class SourcesClient {
       type,
       slug,
       view_name: getNightshiftSourceViewName(this.deps.spaceId, slug),
-      enabled: true,
       created_by: username,
       created_at: now,
       updated_at: now,
@@ -150,16 +145,13 @@ export class SourcesClient {
     }
 
     const source = toSource(id, attributes);
-    await this.deps.onChange({ type: 'created', source, onboardImmediately });
+    await this.deps.onChange({ type: 'created', source });
     return source;
   }
 
   async update(id: string, input: UpdateSourceRequest): Promise<NightshiftSource> {
     const { soClient, viewsClient } = this.deps;
-    const { onboard_immediately: onboardImmediately, ...parsed } = parseSourceWrite(
-      updateSourceRequestSchema,
-      input
-    );
+    const parsed = parseSourceWrite(updateSourceRequestSchema, input);
     const so = await this.getSavedObject(id);
     const { attributes: previous } = so;
     const esqlChanged = !hasSameEsql(parsed.esql, previous.esql);
@@ -210,12 +202,7 @@ export class SourcesClient {
     }
 
     const source = toSource(id, attributes);
-    await this.deps.onChange({
-      type: 'updated',
-      source,
-      previous: toSource(id, previous),
-      onboardImmediately,
-    });
+    await this.deps.onChange({ type: 'updated', source, previous: toSource(id, previous) });
     return source;
   }
 
@@ -397,13 +384,7 @@ export class SourcesClient {
       version: so.version,
     });
     const source = toSource(id, attributes);
-    // Toggling a source applies its rules and runs; it never starts a new onboarding run.
-    await this.deps.onChange({
-      type: 'updated',
-      source,
-      previous: toSource(id, so.attributes),
-      onboardImmediately: false,
-    });
+    await this.deps.onChange({ type: 'updated', source, previous: toSource(id, so.attributes) });
     return source;
   }
 

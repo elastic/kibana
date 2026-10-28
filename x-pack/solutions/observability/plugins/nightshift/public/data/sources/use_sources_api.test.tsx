@@ -16,7 +16,6 @@ import {
   SOURCES_QUERY_KEY,
 } from '../query_keys';
 import { useKibana } from '../../hooks/use_kibana';
-import { hasSkippedOnboarding } from './skipped_onboarding';
 import { useSourcesApi } from './use_sources_api';
 
 jest.mock('../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
@@ -75,7 +74,7 @@ const setup = () => {
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
   const { result } = renderHook(() => useSourcesApi(), { wrapper });
-  return { result, invalidateQueries, fetch, addSuccess, queryClient };
+  return { result, invalidateQueries, fetch, addSuccess };
 };
 
 describe('useSourcesApi requests', () => {
@@ -147,53 +146,6 @@ describe('useSourcesApi requests', () => {
       params: { path: { sourceId: 'source-1' } },
       signal: null,
     });
-  });
-});
-
-describe('useSourcesApi saves with onboarding off', () => {
-  it('remembers a created source saved with onboarding off, by its query version', async () => {
-    const { result, queryClient } = setup();
-
-    act(() => result.current.createSource.mutate({ ...UPDATE_BODY, onboard_immediately: false }));
-
-    await waitFor(() => expect(result.current.createSource.isSuccess).toBe(true));
-    expect(hasSkippedOnboarding(queryClient, nginxSource)).toBe(true);
-    expect(
-      hasSkippedOnboarding(queryClient, { ...nginxSource, esql_updated_at: '2026-09-02T00:00:00Z' })
-    ).toBe(false);
-  });
-
-  it('remembers an edited source saved with onboarding off', async () => {
-    const { result, queryClient } = setup();
-
-    act(() =>
-      result.current.updateSource.mutate({
-        sourceId: 'source-1',
-        body: { ...UPDATE_BODY, onboard_immediately: false },
-      })
-    );
-
-    await waitFor(() => expect(result.current.updateSource.isSuccess).toBe(true));
-    expect(hasSkippedOnboarding(queryClient, nginxSource)).toBe(true);
-  });
-
-  it.each([
-    ['omitted', {}],
-    ['true', { onboard_immediately: true }],
-  ])('remembers nothing when onboarding is %s', async (_, option) => {
-    const { result, queryClient } = setup();
-
-    act(() => result.current.createSource.mutate({ ...UPDATE_BODY, ...option }));
-    await waitFor(() => expect(result.current.createSource.isSuccess).toBe(true));
-    act(() =>
-      result.current.updateSource.mutate({
-        sourceId: 'source-1',
-        body: { ...UPDATE_BODY, ...option },
-      })
-    );
-    await waitFor(() => expect(result.current.updateSource.isSuccess).toBe(true));
-
-    expect(hasSkippedOnboarding(queryClient, nginxSource)).toBe(false);
   });
 });
 

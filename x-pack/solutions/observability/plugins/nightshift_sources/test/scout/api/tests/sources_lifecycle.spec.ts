@@ -157,38 +157,6 @@ apiTest.describe(
     );
 
     apiTest(
-      'takes onboard_immediately on create and update without storing it',
-      async ({ apiClient }) => {
-        const body = {
-          title: `${TITLE_PREFIX}-${suffix}-onboard`,
-          tags: [],
-          esql: `FROM ${index}`,
-        };
-        const created = await createSource(apiClient, manager.cookieHeader, {
-          ...body,
-          onboard_immediately: false,
-        });
-        expect(created).toHaveStatusCode(200);
-        const { source } = created.body;
-        expect(source.onboard_immediately).toBeUndefined();
-
-        const updated = await updateSource(apiClient, manager.cookieHeader, source.id, {
-          ...body,
-          esql: `FROM ${index} | WHERE status >= 500`,
-          onboard_immediately: false,
-        });
-        expect(updated).toHaveStatusCode(200);
-        expect(updated.body.source.onboard_immediately).toBeUndefined();
-
-        const fetched = await getSource(apiClient, manager.cookieHeader, source.id);
-        expect(fetched).toHaveStatusCode(200);
-        expect(fetched.body.source.onboard_immediately).toBeUndefined();
-
-        await deleteSource(apiClient, manager.cookieHeader, source.id);
-      }
-    );
-
-    apiTest(
       'bumps esql_updated_at only when the query changes',
       async ({ apiClient, esClient }) => {
         const body = {
@@ -240,6 +208,34 @@ apiTest.describe(
         await deleteSource(apiClient, manager.cookieHeader, source.id);
       }
     );
+
+    apiTest('creates a disabled source and ignores enabled on update', async ({ apiClient }) => {
+      const title = `${TITLE_PREFIX}-${suffix}-created-disabled`;
+      const created = await createSource(apiClient, manager.cookieHeader, {
+        title,
+        esql: `FROM ${index}`,
+        enabled: false,
+      });
+      expect(created).toHaveStatusCode(200);
+      const { source } = created.body;
+      expect(source.enabled).toBe(false);
+
+      const onlyDisabled = await listSources(
+        apiClient,
+        manager.cookieHeader,
+        `search=${encodeURIComponent(title)}&enabled=false`
+      );
+      expect(onlyDisabled).toHaveStatusCode(200);
+      expect(listedIds(onlyDisabled.body)).toContain(source.id);
+
+      // `UpdateSourceRequest` has no `enabled`, so the body is built outside the typed call.
+      const body = { title, tags: [], esql: `FROM ${index}`, enabled: true };
+      const updated = await updateSource(apiClient, manager.cookieHeader, source.id, body);
+      expect(updated).toHaveStatusCode(200);
+      expect(updated.body.source.enabled).toBe(false);
+
+      await deleteSource(apiClient, manager.cookieHeader, source.id);
+    });
 
     apiTest('flips enabled through _disable and _enable', async ({ apiClient }) => {
       const created = await createSource(apiClient, manager.cookieHeader, {

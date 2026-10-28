@@ -630,20 +630,13 @@ describe('createSourceChangeListener', () => {
   };
 
   it.each<SourceChangeEvent>([
-    { type: 'created', source, onboardImmediately: true, request },
+    { type: 'created', source, request },
     { type: 'deleted', source, request },
-    {
-      type: 'updated',
-      source: { ...source, enabled: false },
-      previous: source,
-      onboardImmediately: true,
-      request,
-    },
+    { type: 'updated', source: { ...source, enabled: false }, previous: source, request },
     {
       type: 'updated',
       source: { ...source, esql_updated_at: 'new revision' },
       previous: source,
-      onboardImmediately: true,
       request,
     },
   ])('queues a $type change in its request space', async (event) => {
@@ -653,45 +646,26 @@ describe('createSourceChangeListener', () => {
     expect(enqueueReconciliation).toHaveBeenCalledWith({
       sourceId: source.id,
       sourceSlug: source.slug,
-      sourceRevision: event.source.esql_updated_at,
-      onboardImmediately: true,
       request: otherRequest,
     });
     expect(ensurePeriodicReconciliation).toHaveBeenCalledWith(otherRequest);
   });
 
-  it.each<SourceChangeEvent>([
-    { type: 'created', source, onboardImmediately: false, request },
-    {
-      type: 'updated',
-      source: { ...source, esql_updated_at: 'new revision' },
-      previous: source,
-      onboardImmediately: false,
-      request,
-    },
-  ])('passes the opt-out of a $type change to the queued reconciliation', async (event) => {
-    const { listener, enqueueReconciliation } = setup();
-    await listener(event);
-    expect(enqueueReconciliation).toHaveBeenCalledWith(
-      expect.objectContaining({ onboardImmediately: false })
-    );
-  });
-
   it('retains queued cleanup when periodic recovery setup fails', async () => {
     const { listener, enqueueReconciliation, ensurePeriodicReconciliation } = setup();
     ensurePeriodicReconciliation.mockRejectedValue(new Error('workflow installation unavailable'));
-    await expect(
-      listener({ type: 'created', source, onboardImmediately: true, request })
-    ).rejects.toThrow('workflow installation unavailable');
+    await expect(listener({ type: 'created', source, request })).rejects.toThrow(
+      'workflow installation unavailable'
+    );
     expect(enqueueReconciliation).toHaveBeenCalledTimes(1);
   });
 
   it('enables periodic recovery when enqueueing the immediate job fails', async () => {
     const { listener, enqueueReconciliation, ensurePeriodicReconciliation } = setup();
     enqueueReconciliation.mockRejectedValue(new Error('queue unavailable'));
-    await expect(
-      listener({ type: 'created', source, onboardImmediately: true, request })
-    ).rejects.toThrow('queue unavailable');
+    await expect(listener({ type: 'created', source, request })).rejects.toThrow(
+      'queue unavailable'
+    );
     expect(ensurePeriodicReconciliation).toHaveBeenCalledWith(request);
   });
 
@@ -701,7 +675,6 @@ describe('createSourceChangeListener', () => {
       type: 'updated',
       source: { ...source, title: 'Renamed' },
       previous: source,
-      onboardImmediately: true,
       request,
     });
     expect(enqueueReconciliation).not.toHaveBeenCalled();

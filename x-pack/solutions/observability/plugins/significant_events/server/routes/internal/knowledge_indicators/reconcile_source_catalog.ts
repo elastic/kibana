@@ -305,10 +305,6 @@ export const createSourceChangeListener =
     enqueueReconciliation: (args: {
       sourceId: string;
       sourceSlug: string;
-      /** Query revision the change left the source at. The choice below only binds that revision. */
-      sourceRevision: string;
-      /** Whether this change may start an onboarding run. A deleted source never does. */
-      onboardImmediately: boolean;
       request: KibanaRequest;
     }) => Promise<void>;
     ensurePeriodicReconciliation: (request: KibanaRequest) => Promise<void>;
@@ -325,8 +321,6 @@ export const createSourceChangeListener =
       enqueueReconciliation({
         sourceId: event.source.id,
         sourceSlug: event.source.slug,
-        sourceRevision: event.source.esql_updated_at,
-        onboardImmediately: event.type === 'deleted' || event.onboardImmediately,
         request: event.request,
       }),
       ensurePeriodicReconciliation(event.request),

@@ -13,7 +13,6 @@ import {
   KIS_ONBOARDING_IN_PROGRESS_STATUSES,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
-import { useQueryClient } from '@kbn/react-query';
 import React, {
   createContext,
   useCallback,
@@ -24,7 +23,6 @@ import React, {
   useState,
 } from 'react';
 import { useBlocksNewActivity } from '../../data/maintenance/use_significant_events_maintenance';
-import { hasSkippedOnboarding } from '../../data/sources/skipped_onboarding';
 import { useFetchSources } from '../../data/sources/use_fetch_sources';
 import type { ScheduleOnboardingOptions } from '../../data/sources/use_onboarding_api';
 import { useBulkOnboarding } from './use_bulk_onboarding';
@@ -116,7 +114,6 @@ export function KiGenerationProvider({
     },
   });
 
-  const queryClient = useQueryClient();
   const sourcesFetch = useFetchSources();
   const fetchedSources = sourcesFetch.data;
   const isSourcesLoading = sourcesFetch.isLoading;
@@ -197,22 +194,11 @@ export function KiGenerationProvider({
         // or edited. The server starts its onboarding asynchronously, so keep polling for it. A
         // paused space starts none.
         if (!isPaused && enabled && (knownVersion !== undefined || !isFirstSourceList)) {
-          // Saved with onboarding off: no run is coming, so no spinner. A new source has no
-          // knowledge to wait for either. An edit still drops the knowledge of the old query in the
-          // background, so its counts, and its previous status, wait out the grace period.
-          const isSkipped = hasSkippedOnboarding(queryClient, {
-            id,
-            esql_updated_at: queryVersion,
-          });
-          if (!isSkipped || knownVersion !== undefined) {
-            expectOnboardingStart(id);
-            setAwaitingRunSources((current) => new Set(current).add(id));
-          }
-          if (!isSkipped) {
-            // Optimistic: show the spinner now. The status poll clears it when the grace period
-            // ends without a run, and keeps it while a run is going.
-            setGeneratingSources((current) => new Set(current).add(id));
-          }
+          expectOnboardingStart(id);
+          // Optimistic: show the spinner now. The status poll clears it when the grace period
+          // ends without a run, and keeps it while a run is going.
+          setGeneratingSources((current) => new Set(current).add(id));
+          setAwaitingRunSources((current) => new Set(current).add(id));
         }
         enqueuedQueryVersionsRef.current.set(id, queryVersion);
         onboardingStatusUpdateQueue.add(id);
@@ -230,7 +216,6 @@ export function KiGenerationProvider({
     onboardingStatusUpdateQueue,
     processStatusUpdateQueue,
     expectOnboardingStart,
-    queryClient,
   ]);
 
   const isGenerating = generatingSources.size > 0;

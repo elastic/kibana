@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { NIGHTSHIFT_API_PRIVILEGES, type NightshiftSource } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import {
@@ -88,23 +88,7 @@ const reconcileSourceRoute = createServerRoute({
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
   params: z.object({
     path: z.object({ sourceId: z.string().min(1).max(255) }),
-    body: z.object({
-      sourceSlug: z.string().min(1).max(255),
-      onboardImmediately: z
-        .boolean()
-        .default(true)
-        .describe(
-          'Whether this change may start an onboarding run. Knowledge of a replaced query is reset either way.'
-        ),
-      sourceRevision: z
-        .string()
-        .min(1)
-        .max(255)
-        .optional()
-        .describe(
-          'Query revision (esql_updated_at) the change produced. A run starts only while the source is still at it. Without it, a run starts for whatever revision the source has.'
-        ),
-    }),
+    body: z.object({ sourceSlug: z.string().min(1).max(255) }),
   }),
   handler: async ({
     params,
@@ -157,25 +141,15 @@ const reconcileSourceRoute = createServerRoute({
       }
       return { reconciled: true };
     }
-    const { onboardImmediately, sourceRevision } = params.body;
-    // A created or edited source gets its one-time onboarding even with continuous onboarding off,
-    // unless its writer opted out. Without a scheduler the revision is still applied.
-    // Reconciles are queued per source and read the source when they run, so the source can already
-    // be at a newer query than this write produced. That newer write queued its own reconcile with
-    // its own choice, so this one must not start a run for it.
-    const scheduleForWriter = onboardImmediately
-      ? async (scheduled: NightshiftSource): Promise<boolean> =>
-          sourceRevision !== undefined && scheduled.esql_updated_at !== sourceRevision
-            ? false
-            : scheduleSourceOnboarding(scheduled, { ignoreContinuousSetting: true })
-      : undefined;
     await reconcileSourceRevision({
       source,
       sourcesClient,
       kiClient,
       onboardingClient,
       sourceKnowledgeState,
-      scheduleSourceOnboarding: scheduleForWriter,
+      // A created or edited source gets its one-time onboarding even with continuous onboarding off.
+      scheduleSourceOnboarding: (scheduled) =>
+        scheduleSourceOnboarding(scheduled, { ignoreContinuousSetting: true }),
       request,
     });
     await applySourceEnabled({

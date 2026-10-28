@@ -30,10 +30,6 @@ jest.mock('../../data/sources/use_sources_api', () => ({
     updateSource: { mutateAsync: mockUpdateSource, isLoading: false },
   }),
 }));
-let mockIsPaused = false;
-jest.mock('../../data/maintenance/use_significant_events_maintenance', () => ({
-  useBlocksNewActivity: () => ({ isBlocked: mockIsPaused }),
-}));
 jest.mock('./source_preview', () => ({ SourcePreview: () => null }));
 jest.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: ({
@@ -71,7 +67,7 @@ const source: NightshiftSource = {
   esql_updated_at: '2026-09-01T00:00:00.000Z',
 };
 
-const renderFlyout = (props: { source?: NightshiftSource; readOnly?: boolean } = {}) =>
+const renderFlyout = (props: { source?: NightshiftSource } = {}) =>
   render(
     <QueryClientProvider client={new QueryClient()}>
       <SourceFlyout {...props} onClose={jest.fn()} />
@@ -146,20 +142,14 @@ describe('SourceFlyout query validation', () => {
   });
 });
 
-describe('SourceFlyout onboard immediately', () => {
-  const ONBOARD_LABEL = 'Onboard source immediately';
-  // Generated ids are constant in Jest, so the label cannot be resolved through its `for` id.
-  const checkbox = () =>
-    screen.getByTestId('significantEventsAppSourceFlyoutOnboardImmediatelyCheckbox');
-  const queryCheckbox = () =>
-    screen.queryByTestId('significantEventsAppSourceFlyoutOnboardImmediatelyCheckbox');
+describe('SourceFlyout enabled switch', () => {
+  const enabledSwitch = () => screen.getByTestId('significantEventsAppSourceFlyoutEnabledSwitch');
 
   beforeEach(() => {
     jest.useFakeTimers();
     mockFetch.mockReset();
     mockCreateSource.mockReset();
     mockUpdateSource.mockReset();
-    mockIsPaused = false;
     mockFetch.mockResolvedValue({ valid: true, type: 'logs', index_exists: true });
   });
 
@@ -176,11 +166,11 @@ describe('SourceFlyout onboard immediately', () => {
     await waitFor(() => expect(saveButton()).toBeEnabled());
   };
 
-  it('is on by default and creates the source with onboarding requested', async () => {
+  it('is on by default, says what the source is enabled for and creates an enabled source', async () => {
     renderFlyout();
-    expect(checkbox()).toBeChecked();
-    expect(screen.getByText(ONBOARD_LABEL)).toBeVisible();
-    expect(screen.getByText('Starts onboarding as soon as you save the source.')).toBeVisible();
+    expect(screen.getByText('Enabled')).toBeVisible();
+    expect(enabledSwitch()).toBeChecked();
+    expect(screen.getByText(/Onboarding starts as soon as the source is created/)).toBeVisible();
 
     await fillNewSource();
     fireEvent.click(saveButton());
@@ -191,66 +181,41 @@ describe('SourceFlyout onboard immediately', () => {
         description: undefined,
         tags: [],
         esql: 'FROM logs-nginx',
-        onboard_immediately: true,
+        enabled: true,
       })
     );
   });
 
-  it('creates the source without onboarding when the user clears it', async () => {
+  it('creates a disabled source when switched off, and says nothing runs on it', async () => {
     renderFlyout();
     await fillNewSource();
-    fireEvent.click(checkbox());
-    expect(checkbox()).not.toBeChecked();
+    fireEvent.click(enabledSwitch());
+
+    expect(enabledSwitch()).not.toBeChecked();
+    expect(screen.getByText(/nothing runs on it/)).toBeVisible();
+    expect(screen.queryByText(/Onboarding starts as soon as/)).not.toBeInTheDocument();
+
     fireEvent.click(saveButton());
 
     await waitFor(() =>
-      expect(mockCreateSource).toHaveBeenCalledWith(
-        expect.objectContaining({ onboard_immediately: false })
-      )
+      expect(mockCreateSource).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }))
     );
   });
 
-  it('is only offered on an edit once the query changed, and starts on', () => {
-    renderFlyout({ source });
-    expect(queryCheckbox()).not.toBeInTheDocument();
+  it.each([true, false])(
+    'is not offered for an existing source, and saving it sends no enabled state (enabled: %s)',
+    async (enabled) => {
+      renderFlyout({ source: { ...source, enabled } });
+      expect(screen.queryByTestId('significantEventsAppSourceFlyoutEnabledSwitch')).toBeNull();
 
-    typeQuery('FROM logs-other');
-    expect(checkbox()).toBeChecked();
-  });
+      fireEvent.change(screen.getByTestId('significantEventsAppSourceFlyoutTitleInput'), {
+        target: { value: 'Renamed' },
+      });
+      await waitOutDebounce();
+      fireEvent.click(saveButton());
 
-  it('saves a changed query without onboarding when the user clears it', async () => {
-    renderFlyout({ source });
-    typeQuery('FROM logs-other');
-    await waitOutDebounce();
-    await waitFor(() => expect(saveButton()).toBeEnabled());
-    fireEvent.click(checkbox());
-    fireEvent.click(saveButton());
-    fireEvent.click(await screen.findByText('Save and reset knowledge'));
-
-    await waitFor(() =>
-      expect(mockUpdateSource).toHaveBeenCalledWith({
-        sourceId: source.id,
-        body: expect.objectContaining({ esql: 'FROM logs-other', onboard_immediately: false }),
-      })
-    );
-  });
-
-  it('is hidden for a disabled source, which no save onboards', () => {
-    renderFlyout({ source: { ...source, enabled: false } });
-    typeQuery('FROM logs-other');
-
-    expect(queryCheckbox()).not.toBeInTheDocument();
-  });
-
-  it('is hidden in a paused space, which starts no run', () => {
-    mockIsPaused = true;
-    renderFlyout();
-
-    expect(queryCheckbox()).not.toBeInTheDocument();
-  });
-
-  it('is hidden when the flyout is read only', () => {
-    renderFlyout({ source, readOnly: true });
-    expect(queryCheckbox()).not.toBeInTheDocument();
-  });
+      await waitFor(() => expect(mockUpdateSource).toHaveBeenCalledTimes(1));
+      expect(mockUpdateSource.mock.calls[0][0].body).not.toHaveProperty('enabled');
+    }
+  );
 });

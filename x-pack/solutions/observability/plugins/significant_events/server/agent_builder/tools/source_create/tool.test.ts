@@ -26,6 +26,7 @@ describe('source_create tool', () => {
     description: 'Checkout logs',
     tags: ['prod'],
     esql: 'FROM logs-checkout-*',
+    enabled: true,
   };
   const checkout = sourceWithSlug('checkout', { ...params, type: 'logs' });
 
@@ -72,6 +73,20 @@ describe('source_create tool', () => {
     });
     expect(paused).toEqual({
       results: [{ type: 'other', data: expect.objectContaining({ onboarding_paused: true }) }],
+    });
+  });
+
+  it('creates the source switched off when asked', async () => {
+    const create = jest.fn().mockResolvedValue({ ...checkout, enabled: false });
+
+    const result = await createTool({ create }).handler(
+      { ...params, enabled: false },
+      createMockToolContext()
+    );
+
+    expect(create).toHaveBeenCalledWith({ ...params, enabled: false });
+    expect(result).toEqual({
+      results: [{ type: 'other', data: expect.objectContaining({ enabled: false }) }],
     });
   });
 

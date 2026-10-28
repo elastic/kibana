@@ -8,19 +8,10 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 
-/**
- * A committed catalog write, as `SourcesClient` reports it. `onboardImmediately` is what the
- * writer asked for this one write; it is not stored on the source. `_enable` and `_disable` do
- * not take the option and report `false`: toggling a source never starts an onboarding run.
- */
+/** A committed catalog write, as `SourcesClient` reports it. */
 export type SourceChange =
-  | { type: 'created'; source: NightshiftSource; onboardImmediately: boolean }
-  | {
-      type: 'updated';
-      source: NightshiftSource;
-      previous: NightshiftSource;
-      onboardImmediately: boolean;
-    }
+  | { type: 'created'; source: NightshiftSource }
+  | { type: 'updated'; source: NightshiftSource; previous: NightshiftSource }
   | { type: 'deleted'; source: NightshiftSource };
 
 /** A committed catalog write plus the request that made it, so listeners act in its space. */

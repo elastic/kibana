@@ -18,10 +18,10 @@ gated by the Nightshift feature privileges: reads need `read_nightshift`, writes
 | Method | Path | Privilege | Notes |
 | --- | --- | --- | --- |
 | `GET` | `/internal/nightshift/sources?page&per_page&search&enabled` | read | Paginated catalog, sorted by title. Does not fetch views. |
-| `POST` | `/internal/nightshift/sources` | manage | Validates the query, derives `type`, writes the saved object, creates the view. Takes `onboard_immediately` (see [Onboarding choice](#onboarding-choice)) |
+| `POST` | `/internal/nightshift/sources` | manage | Validates the query, derives `type`, writes the saved object, creates the view. Takes `enabled` (default `true`) to create the source switched off |
 | `POST` | `/internal/nightshift/sources/_validate` | manage | Runs the create checks on `{ esql }` without writing; answers `{ valid: true, type, index_exists }` or `{ valid: false, error }` |
 | `GET` | `/internal/nightshift/sources/{sourceId}` | read | Source plus view health, including a `FROM <view> \| LIMIT 0` probe for `unresolvable` |
-| `PUT` | `/internal/nightshift/sources/{sourceId}` | manage | Full replace of `title`, `description`, `tags`, `esql`; always re-puts the view. Takes `onboard_immediately` |
+| `PUT` | `/internal/nightshift/sources/{sourceId}` | manage | Full replace of `title`, `description`, `tags`, `esql`; always re-puts the view. Ignores `enabled` |
 | `DELETE` | `/internal/nightshift/sources/{sourceId}` | manage | Deletes the view (404 ignored), then the saved object. The engine knowledge of the source is cleaned up asynchronously; a failed cleanup is logged and retried by the sync sweep, which does not run while maintenance is paused |
 | `POST` | `/internal/nightshift/sources/{sourceId}/_enable` | manage | Flips `enabled` only |
 | `POST` | `/internal/nightshift/sources/{sourceId}/_disable` | manage | Flips `enabled` only |
@@ -48,8 +48,7 @@ blank title still 400s.
 
 `setup.onSourceChange(listener)` subscribes an engine to every committed write: `created`,
 `updated` (with `previous`, which covers `_enable` and `_disable`) and `deleted`, each with the
-request that made it. `created` and `updated` also carry `onboardImmediately`, the choice the
-writer made for that write (see [Onboarding choice](#onboarding-choice)). The write awaits every listener before it returns, so an engine can
+request that made it. The write awaits every listener before it returns, so an engine can
 clean up after a deleted source before the caller refetches. A listener that throws is logged;
 the write already happened and is not undone. Rolled-back writes are not reported.
 
@@ -120,25 +119,10 @@ The plugin cannot call engines directly without reintroducing the dependency cyc
 avoid. Engines that need to react right away subscribe through `setup.onSourceChange` (see
 [Engine access](#engine-access)); the reconcile stays as the safety net.
 
-## Onboarding choice
-
-`POST` and `PUT` accept `onboard_immediately` (boolean, default `true`): whether the engines may
-start onboarding the source because of this write. On `PUT` it only matters when the query
-changed, since that is the only edit that onboards a source again. The flag is not stored on the
-source and no read returns it. It travels with the `created` and `updated` events as
-`onboardImmediately`, so the engine skips the onboarding run of that one write and nothing else:
-a replaced query still resets the source's knowledge, and later writes, the sync sweep and
-continuous onboarding behave as before. `_enable` and `_disable` have no such option and report
-`onboardImmediately: false`: toggling a source applies its rules and cancels a run on disable, but
-never starts one. A source that was never onboarded stays that way until someone onboards it, or
-until the sync sweep does with continuous onboarding on.
-
-Reconciles are queued per source and each one reads the source when it runs, not as it was when it
-was queued. So each one carries the `esql_updated_at` its write produced and starts a run only while
-the source is still at that revision. If write A (on) is queued and write B (off) arrives, A's
-reconcile sees B's revision and starts nothing; B's own reconcile decides, and it opted out. A
-reconcile without a revision, such as one queued before this existed, starts a run for whatever
-revision the source has.
+A source is created enabled unless `POST` sends `enabled: false`. Engines see a source created
+disabled like any other disabled source, and start onboarding it when it is enabled later. `PUT`
+ignores `enabled` and keeps the stored state; `_enable` and `_disable` are the only way to change
+it afterwards.
 
 ## Elasticsearch privileges
 

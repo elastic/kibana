@@ -57,17 +57,6 @@ const sourceTagsSchema = z
   .array(z.string().trim().min(1).max(MAX_SOURCE_TAG_LENGTH))
   .max(MAX_SOURCE_TAGS);
 
-/**
- * A choice about this write only: it is never stored, so it does not change what later writes,
- * sweeps or continuous onboarding do with the source.
- */
-const onboardImmediatelySchema = z
-  .boolean()
-  .default(true)
-  .describe(
-    'Start onboarding the source right after this write. On update it only applies when the query changed. Not stored on the source. Defaults to true.'
-  );
-
 const nightshiftSourceSchema = z.object({
   id: z.string(),
   title: sourceTitleSchema,
@@ -97,7 +86,8 @@ export const createSourceRequestSchema = z.object({
   description: sourceDescriptionSchema.optional(),
   tags: sourceTagsSchema.default([]),
   esql: sourceEsqlSchema,
-  onboard_immediately: onboardImmediatelySchema,
+  /** Create only. An update keeps the stored state; `_enable` and `_disable` change it. */
+  enabled: z.boolean().default(true),
 });
 
 /** Wire shape callers send; `tags` may be omitted on create (defaults to `[]`). */
@@ -112,7 +102,6 @@ export const updateSourceRequestSchema = z.object({
   description: sourceDescriptionSchema.optional(),
   tags: sourceTagsSchema,
   esql: sourceEsqlSchema,
-  onboard_immediately: onboardImmediatelySchema,
 });
 
 export type UpdateSourceRequest = z.input<typeof updateSourceRequestSchema>;

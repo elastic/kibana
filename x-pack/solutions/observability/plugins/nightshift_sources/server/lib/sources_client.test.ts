@@ -397,6 +397,25 @@ describe('SourcesClient', () => {
       );
     });
 
+    it('creates a disabled source, with its view, when asked', async () => {
+      const { client, soClient, viewsClient } = setup();
+
+      const source = await client.create({
+        title: 'nginx errors',
+        tags: [],
+        esql: 'FROM logs-*',
+        enabled: false,
+      });
+
+      expect(source.enabled).toBe(false);
+      expect(soClient.create).toHaveBeenCalledWith(
+        NIGHTSHIFT_SOURCE_SO_TYPE,
+        expect.objectContaining({ enabled: false }),
+        { id: source.id }
+      );
+      expect(viewsClient.putView).toHaveBeenCalledWith(source.view_name, 'FROM logs-*');
+    });
+
     it('loads the space view names once, then checks suffixes in memory', async () => {
       const { client, soClient } = setup();
 
@@ -866,6 +885,28 @@ describe('SourcesClient', () => {
       expect(updated.view_name).toBe(NGINX_VIEW_NAME);
     });
 
+    it.each([false, true])('keeps the stored enabled state when the body says %s', async (sent) => {
+      const { client, soClient } = setup();
+      const stored = !sent;
+      soClient.get.mockResolvedValue(makeSavedObject(makeAttributes({ enabled: stored })));
+      const body = {
+        title: 'nginx errors',
+        tags: ['nginx'],
+        esql: makeAttributes().esql,
+        enabled: sent,
+      };
+
+      const updated = await client.update('source-1', body);
+
+      expect(updated.enabled).toBe(stored);
+      expect(soClient.update).toHaveBeenCalledWith(
+        NIGHTSHIFT_SOURCE_SO_TYPE,
+        'source-1',
+        expect.objectContaining({ enabled: stored }),
+        expect.anything()
+      );
+    });
+
     it('always re-puts the view so PUT doubles as repair', async () => {
       const { client, soClient, viewsClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
@@ -1147,22 +1188,7 @@ describe('SourcesClient', () => {
       const source = await client.create({ title: 'nginx errors', tags: [], esql: 'FROM logs-*' });
 
       expect(onChange).toHaveBeenCalledTimes(1);
-      expect(onChange).toHaveBeenCalledWith({ type: 'created', source, onboardImmediately: true });
-    });
-
-    it('reports a create that opted out of onboarding without storing the choice', async () => {
-      const { client, soClient, onChange } = setup();
-
-      const source = await client.create({
-        title: 'nginx errors',
-        tags: [],
-        esql: 'FROM logs-*',
-        onboard_immediately: false,
-      });
-
-      expect(onChange).toHaveBeenCalledWith({ type: 'created', source, onboardImmediately: false });
-      expect(source).not.toHaveProperty('onboard_immediately');
-      expect(soClient.create.mock.calls[0][1]).not.toHaveProperty('onboard_immediately');
+      expect(onChange).toHaveBeenCalledWith({ type: 'created', source });
     });
 
     it('does not report a create that was rolled back', async () => {
@@ -1190,29 +1216,7 @@ describe('SourcesClient', () => {
         type: 'updated',
         source,
         previous: makeSource(),
-        onboardImmediately: true,
       });
-    });
-
-    it('reports an update that opted out of onboarding without storing the choice', async () => {
-      const { client, soClient, onChange } = setup();
-      soClient.get.mockResolvedValue(makeSavedObject());
-
-      const source = await client.update('source-1', {
-        title: 'nginx errors',
-        tags: ['nginx'],
-        esql: 'FROM logs-other-*',
-        onboard_immediately: false,
-      });
-
-      expect(onChange).toHaveBeenCalledWith({
-        type: 'updated',
-        source,
-        previous: makeSource(),
-        onboardImmediately: false,
-      });
-      expect(source).not.toHaveProperty('onboard_immediately');
-      expect(soClient.update.mock.calls[0][2]).not.toHaveProperty('onboard_immediately');
     });
 
     it('does not report an update that was restored', async () => {
@@ -1238,21 +1242,6 @@ describe('SourcesClient', () => {
         type: 'updated',
         source,
         previous: makeSource(),
-        onboardImmediately: false,
-      });
-    });
-
-    it('reports an enable without asking for an onboarding run', async () => {
-      const { client, soClient, onChange } = setup();
-      soClient.get.mockResolvedValue(makeSavedObject(makeAttributes({ enabled: false })));
-
-      const source = await client.setEnabled('source-1', true);
-
-      expect(onChange).toHaveBeenCalledWith({
-        type: 'updated',
-        source,
-        previous: makeSource({ enabled: false }),
-        onboardImmediately: false,
       });
     });
 

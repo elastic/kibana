@@ -21,7 +21,6 @@ import {
 } from '../query_keys';
 import { useKibana } from '../../hooks/use_kibana';
 import { useBlocksNewActivity } from '../maintenance/use_significant_events_maintenance';
-import { rememberSkippedOnboarding } from './skipped_onboarding';
 
 // Query key prefixes of everything a source's knowledge feeds. The source id follows each prefix.
 const SOURCE_KNOWLEDGE_QUERY_KEYS = [
@@ -60,11 +59,7 @@ export function useSourcesApi() {
       });
       return source;
     },
-    onSuccess: (source, body) => {
-      // Before the list refetch below, which is when the table decides to expect a run.
-      if (body.onboard_immediately === false) {
-        rememberSkippedOnboarding(queryClient, source);
-      }
+    onSuccess: (source) => {
       toasts.addSuccess({
         title: getSourceCreatedToastTitle(source.title),
         text: isPaused ? ONBOARDING_PAUSED_TOAST_TEXT : undefined,
@@ -86,11 +81,7 @@ export function useSourcesApi() {
       });
       return source;
     },
-    onSuccess: (source, { body }) => {
-      // Before `onSettled` refetches the list, which is when the table decides to expect a run.
-      if (body.onboard_immediately === false) {
-        rememberSkippedOnboarding(queryClient, source);
-      }
+    onSuccess: (source) => {
       toasts.addSuccess({ title: getSourceSavedToastTitle(source.title) });
     },
     // A changed query retires the source's knowledge. The source stays in the mounted Sources

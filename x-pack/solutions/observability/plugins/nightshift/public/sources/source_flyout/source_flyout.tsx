@@ -8,7 +8,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCheckbox,
   EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
@@ -20,6 +19,7 @@ import {
   EuiFormRow,
   EuiResizableContainer,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTextArea,
   EuiTitle,
@@ -40,7 +40,6 @@ import { hasSameEsql } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useKibana } from '../../hooks/use_kibana';
-import { useBlocksNewActivity } from '../../data/maintenance/use_significant_events_maintenance';
 import { useSourcesApi } from '../../data/sources/use_sources_api';
 import { getFormattedError } from '../../common/errors';
 import { ConfirmSourceActionModal } from '../confirm_source_action_modal';
@@ -52,8 +51,8 @@ interface SourceFormValues {
   description: string;
   tags: string[];
   esql: string;
-  /** A choice about this save only. The source does not store it, so every form opens with it on. */
-  onboardImmediately: boolean;
+  /** Only sent when creating. An existing source is enabled or disabled from the table. */
+  enabled: boolean;
 }
 
 interface SourceFlyoutProps {
@@ -73,10 +72,7 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
     notifications: { toasts },
   } = useKibana().services;
   const { createSource, updateSource } = useSourcesApi();
-  // Only a known pause: while the state loads or fails, the server may still start the run.
-  const { isBlocked: isPaused } = useBlocksNewActivity();
   const titleId = useGeneratedHtmlId();
-  const onboardImmediatelyId = useGeneratedHtmlId();
   // Only the query the user ran is previewed, so typing does not search on every keystroke.
   // `runId` changes on every run, so running an unchanged query still refetches it.
   const [preview, setPreview] = useState({ esql: source?.esql ?? '', runId: 0 });
@@ -88,7 +84,7 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
         description: source?.description ?? '',
         tags: source?.tags ?? [],
         esql: source?.esql ?? '',
-        onboardImmediately: true,
+        enabled: true,
       },
     });
 
@@ -104,30 +100,19 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
     enabled: !readOnly && !isQueryUnchanged,
   });
   const canSave = isQueryUnchanged || queryValidation.status === 'valid';
-  // Saving only starts onboarding for a new source or a new query, of an enabled source, in a space
-  // that is not paused. The choice is hidden otherwise, and in the read-only view.
-  const canChooseOnboarding =
-    !readOnly && !isQueryUnchanged && !isPaused && source?.enabled !== false;
 
-  const persist = async ({
-    title,
-    description,
-    tags,
-    esql,
-    onboardImmediately,
-  }: SourceFormValues) => {
+  const persist = async ({ title, description, tags, esql, enabled }: SourceFormValues) => {
     const body = {
       title,
       description: description.trim() === '' ? undefined : description,
       tags,
       esql,
-      onboard_immediately: onboardImmediately,
     };
     try {
       if (source) {
         await updateSource.mutateAsync({ sourceId: source.id, body });
       } else {
-        await createSource.mutateAsync(body);
+        await createSource.mutateAsync({ ...body, enabled });
       }
       onClose();
     } catch (error) {
@@ -347,16 +332,15 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
                       </EuiButton>
                     </EuiFlexItem>
                   </EuiFlexGroup>
-                  {canChooseOnboarding && (
+                  {!source && (
                     <Controller
-                      name="onboardImmediately"
+                      name="enabled"
                       control={control}
                       render={({ field }) => (
-                        <EuiFormRow helpText={ONBOARD_IMMEDIATELY_HELP_TEXT}>
-                          <EuiCheckbox
-                            id={onboardImmediatelyId}
-                            data-test-subj="significantEventsAppSourceFlyoutOnboardImmediatelyCheckbox"
-                            label={ONBOARD_IMMEDIATELY_LABEL}
+                        <EuiFormRow helpText={field.value ? ENABLED_HELP_TEXT : DISABLED_HELP_TEXT}>
+                          <EuiSwitch
+                            data-test-subj="significantEventsAppSourceFlyoutEnabledSwitch"
+                            label={ENABLED_LABEL}
                             checked={field.value}
                             onChange={(event) => field.onChange(event.target.checked)}
                           />
@@ -474,15 +458,19 @@ const RUN_QUERY_LABEL = i18n.translate('xpack.nightshift.sources.flyout.runQuery
   defaultMessage: 'Run query',
 });
 
-const ONBOARD_IMMEDIATELY_LABEL = i18n.translate(
-  'xpack.nightshift.sources.flyout.onboardImmediatelyLabel',
-  { defaultMessage: 'Onboard source immediately' }
-);
+const ENABLED_LABEL = i18n.translate('xpack.nightshift.sources.flyout.enabledLabel', {
+  defaultMessage: 'Enabled',
+});
 
-const ONBOARD_IMMEDIATELY_HELP_TEXT = i18n.translate(
-  'xpack.nightshift.sources.flyout.onboardImmediatelyHelpText',
-  { defaultMessage: 'Starts onboarding as soon as you save the source.' }
-);
+const ENABLED_HELP_TEXT = i18n.translate('xpack.nightshift.sources.flyout.enabledHelpText', {
+  defaultMessage:
+    'Onboarding starts as soon as the source is created, so Nightshift can learn its knowledge indicators and watch it for significant events.',
+});
+
+const DISABLED_HELP_TEXT = i18n.translate('xpack.nightshift.sources.flyout.disabledHelpText', {
+  defaultMessage:
+    'The source is created but nothing runs on it. Turn it on from the Sources table to start onboarding it.',
+});
 
 const CANCEL_LABEL = i18n.translate('xpack.nightshift.sources.flyout.cancelLabel', {
   defaultMessage: 'Cancel',

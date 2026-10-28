@@ -8,13 +8,11 @@
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   NIGHTSHIFT_DEFAULT_MODELS,
   SignificantEventsWorkflowStatus,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
-import { rememberSkippedOnboarding } from '../../data/sources/skipped_onboarding';
 import { KiGenerationProvider, useKiGeneration } from './ki_generation_context';
 
 const mockBulkOnboarding = {
@@ -93,17 +91,13 @@ const ContextProbe = () => {
   );
 };
 
-let queryClient = new QueryClient();
-
-const withProvider = (children: React.ReactNode) => (
-  <QueryClientProvider client={queryClient}>
-    <KiGenerationProvider>{children}</KiGenerationProvider>
-  </QueryClientProvider>
-);
-
 describe('KiGenerationProvider model defaults', () => {
   it('uses the static Nightshift defaults without a loading state', async () => {
-    render(withProvider(<ContextProbe />));
+    render(
+      <KiGenerationProvider>
+        <ContextProbe />
+      </KiGenerationProvider>
+    );
 
     await waitFor(() => {
       expect(screen.getByTestId('features-connector')).toHaveTextContent(
@@ -120,7 +114,6 @@ describe('KiGenerationProvider model defaults', () => {
 
 describe('KiGenerationProvider status polling', () => {
   beforeEach(() => {
-    queryClient = new QueryClient();
     mockBulkOnboarding.onboardingStatusUpdateQueue.add.mockClear();
     mockBulkOnboarding.expectOnboardingStart.mockClear();
     mockSources = [];
@@ -129,26 +122,34 @@ describe('KiGenerationProvider status polling', () => {
 
   it('enqueues a source once and again only when its query version changes', () => {
     mockSources = [createSource('2026-09-01T00:00:00.000Z')];
-    const { rerender } = render(withProvider(null));
+    const { rerender } = render(<KiGenerationProvider>{null}</KiGenerationProvider>);
     expect(mockBulkOnboarding.onboardingStatusUpdateQueue.add).toHaveBeenCalledTimes(1);
 
     mockSources = [createSource('2026-09-01T00:00:00.000Z')];
-    rerender(withProvider(null));
+    rerender(<KiGenerationProvider>{null}</KiGenerationProvider>);
     expect(mockBulkOnboarding.onboardingStatusUpdateQueue.add).toHaveBeenCalledTimes(1);
 
     mockSources = [createSource('2026-09-02T00:00:00.000Z')];
-    rerender(withProvider(null));
+    rerender(<KiGenerationProvider>{null}</KiGenerationProvider>);
     expect(mockBulkOnboarding.onboardingStatusUpdateQueue.add).toHaveBeenCalledTimes(2);
     expect(mockBulkOnboarding.onboardingStatusUpdateQueue.add).toHaveBeenLastCalledWith('source-1');
   });
 
   it('marks an edited source as awaiting its run until a status is reported', () => {
     mockSources = [createSource('2026-09-01T00:00:00.000Z')];
-    const { rerender } = render(withProvider(<AwaitingRunProbe />));
+    const { rerender } = render(
+      <KiGenerationProvider>
+        <AwaitingRunProbe />
+      </KiGenerationProvider>
+    );
     expect(screen.getByTestId('awaiting-run')).toHaveTextContent('');
 
     mockSources = [createSource('2026-09-02T00:00:00.000Z')];
-    rerender(withProvider(<AwaitingRunProbe />));
+    rerender(
+      <KiGenerationProvider>
+        <AwaitingRunProbe />
+      </KiGenerationProvider>
+    );
     expect(screen.getByTestId('awaiting-run')).toHaveTextContent('source-1');
 
     act(() => {
@@ -162,65 +163,20 @@ describe('KiGenerationProvider status polling', () => {
 
   it('expects no run for a source created in a paused space', () => {
     mockIsPaused = true;
-    const { rerender } = render(withProvider(<AwaitingRunProbe />));
+    const { rerender } = render(
+      <KiGenerationProvider>
+        <AwaitingRunProbe />
+      </KiGenerationProvider>
+    );
 
     mockSources = [createSource('2026-09-01T00:00:00.000Z')];
-    rerender(withProvider(<AwaitingRunProbe />));
+    rerender(
+      <KiGenerationProvider>
+        <AwaitingRunProbe />
+      </KiGenerationProvider>
+    );
     expect(screen.getByTestId('generating')).toHaveTextContent('');
     expect(screen.getByTestId('awaiting-run')).toHaveTextContent('');
     expect(mockBulkOnboarding.expectOnboardingStart).not.toHaveBeenCalled();
-  });
-
-  it('expects no run, and shows no spinner, for a source created with onboarding off', () => {
-    const { rerender } = render(withProvider(<AwaitingRunProbe />));
-
-    const created = createSource('2026-09-01T00:00:00.000Z');
-    rememberSkippedOnboarding(queryClient, created);
-    mockSources = [created];
-    rerender(withProvider(<AwaitingRunProbe />));
-
-    expect(screen.getByTestId('generating')).toHaveTextContent('');
-    expect(screen.getByTestId('awaiting-run')).toHaveTextContent('');
-    expect(mockBulkOnboarding.expectOnboardingStart).not.toHaveBeenCalled();
-    expect(mockBulkOnboarding.onboardingStatusUpdateQueue.add).toHaveBeenCalledWith('source-1');
-  });
-
-  it('shows a spinner for a source created with onboarding on', () => {
-    const { rerender } = render(withProvider(<AwaitingRunProbe />));
-
-    mockSources = [createSource('2026-09-01T00:00:00.000Z')];
-    rerender(withProvider(<AwaitingRunProbe />));
-
-    expect(screen.getByTestId('generating')).toHaveTextContent('source-1');
-    expect(mockBulkOnboarding.expectOnboardingStart).toHaveBeenCalledWith('source-1');
-  });
-
-  it('holds the counts of a query edit saved with onboarding off, without a spinner', () => {
-    mockSources = [createSource('2026-09-01T00:00:00.000Z')];
-    const { rerender } = render(withProvider(<AwaitingRunProbe />));
-
-    const edited = createSource('2026-09-02T00:00:00.000Z');
-    rememberSkippedOnboarding(queryClient, edited);
-    mockSources = [edited];
-    rerender(withProvider(<AwaitingRunProbe />));
-
-    expect(screen.getByTestId('generating')).toHaveTextContent('');
-    expect(screen.getByTestId('awaiting-run')).toHaveTextContent('source-1');
-    expect(mockBulkOnboarding.expectOnboardingStart).toHaveBeenCalledWith('source-1');
-  });
-
-  it('expects a run again for a later edit saved with onboarding on', () => {
-    mockSources = [createSource('2026-09-01T00:00:00.000Z')];
-    const { rerender } = render(withProvider(<AwaitingRunProbe />));
-
-    const skipped = createSource('2026-09-02T00:00:00.000Z');
-    rememberSkippedOnboarding(queryClient, skipped);
-    mockSources = [skipped];
-    rerender(withProvider(<AwaitingRunProbe />));
-
-    mockSources = [createSource('2026-09-03T00:00:00.000Z')];
-    rerender(withProvider(<AwaitingRunProbe />));
-
-    expect(screen.getByTestId('generating')).toHaveTextContent('source-1');
   });
 });
