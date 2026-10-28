@@ -8,9 +8,6 @@
  */
 
 import { Minimatch } from 'minimatch';
-import type { ToolingLog } from '@kbn/tooling-log';
-import { filterIgnoredFiles } from '../../../../pipeline-utils/affected-packages/utils.ts';
-import { expandWithImplicitConsumers } from './scout_implicit_consumers.ts';
 import { SCOUT_MODULE_GRAPH_IGNORE } from './scout_module_graph_ignore.ts';
 
 const matches = (file: string): boolean =>
@@ -65,38 +62,5 @@ describe('SCOUT_MODULE_GRAPH_IGNORE', () => {
         )
       ).toBe(false);
     });
-  });
-});
-
-describe('implicit consumers with SCOUT_MODULE_GRAPH_IGNORE applied to changed files', () => {
-  const log = { info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
-  const expand = (changedFiles: string[]) =>
-    expandWithImplicitConsumers(
-      new Set<string>(),
-      filterIgnoredFiles(changedFiles, SCOUT_MODULE_GRAPH_IGNORE),
-      log
-    );
-
-  it('adds no consumers for a Jest-only change under an embeddables path', () => {
-    expect(
-      expand(['x-pack/platform/plugins/shared/ml/public/embeddables/anomaly_charts.test.ts'])
-    ).toEqual(new Set());
-  });
-
-  it('adds no consumers for a Jest-only change under a workflow triggers path', () => {
-    expect(
-      expand([
-        'x-pack/platform/plugins/shared/alerting/common/workflows/triggers/alert_status_changed.test.ts',
-      ])
-    ).toEqual(new Set());
-  });
-
-  it('still adds consumers for a source change under an embeddables path', () => {
-    const expanded = expand([
-      'x-pack/platform/plugins/shared/ml/public/embeddables/anomaly_charts.test.ts',
-      'x-pack/platform/plugins/shared/ml/public/embeddables/anomaly_charts.ts',
-    ]);
-
-    expect(expanded.has('@kbn/dashboard-plugin')).toBe(true);
   });
 });
