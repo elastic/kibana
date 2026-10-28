@@ -9,7 +9,7 @@
 
 import React from 'react';
 import {
-  EuiBetaBadge,
+  EuiBadge,
   EuiContextMenuItem,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,7 +17,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 
 interface Props {
   closePopover: () => void;
@@ -42,23 +41,12 @@ export const CustomizeNavigationUserMenuLink = ({ closePopover, onClick }: Props
             defaultMessage: 'Customize navigation',
           })}
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            line-height: 0;
-          `}
-        >
-          <EuiBetaBadge
-            css={css`
-              background-color: ${euiTheme.colors.backgroundFilledPrimary};
-              color: ${euiTheme.colors.textInverse};
-              border: none;
-            `}
-            size="s"
-            label={i18n.translate('navigationCustomizationComponents.userMenuLinkBadgeLabel', {
+        <EuiFlexItem grow={false}>
+          <EuiBadge color={euiTheme.colors.backgroundFilledPrimary}>
+            {i18n.translate('navigationCustomizationComponents.userMenuLinkBadgeLabel', {
               defaultMessage: 'New',
             })}
-          />
+          </EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiContextMenuItem>

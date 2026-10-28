@@ -6,9 +6,9 @@
  */
 
 import type { sloTemplateSchema, storedSloTemplateSchema } from '@kbn/slo-schema';
-import type * as t from 'io-ts';
+import type { z } from '@kbn/zod';
 
-type SLOTemplate = t.TypeOf<typeof sloTemplateSchema>;
-type StoredSLOTemplate = t.TypeOf<typeof storedSloTemplateSchema>;
+type SLOTemplate = z.output<typeof sloTemplateSchema>;
+type StoredSLOTemplate = z.output<typeof storedSloTemplateSchema>;
 
 export type { SLOTemplate, StoredSLOTemplate };

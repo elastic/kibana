@@ -30,6 +30,8 @@ import { AgentUpgradeAgentModal } from './agent_upgrade_modal';
 type Props = EuiBadgeProps & {
   agent: Agent;
   fromDetails?: boolean;
+  /** Shown in the check-in tooltip, after the check-in details. */
+  tooltipExtraContent?: React.ReactNode;
 };
 
 function getStatusComponent({
@@ -134,6 +136,7 @@ const WrappedWarningCallout = styled(KbnWarningCallout)`
 export const AgentHealth: React.FunctionComponent<Props> = ({
   agent,
   fromDetails,
+  tooltipExtraContent,
   ...restOfProps
 }) => {
   const { last_checkin: lastCheckIn, last_checkin_message: lastCheckInMessage } = agent;
@@ -177,6 +180,33 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
 
   const { docLinks } = useStartServices();
 
+  const badge =
+    isStuckInUpdating(agent) && !fromDetails ? (
+      <div className="eui-textNoWrap">
+        {getStatusComponent({
+          status: agent.status,
+          upgradeDetails: agent.upgrade_details,
+          ...restOfProps,
+        })}
+        &nbsp;
+        <EuiIcon type="warning" color="warning" aria-hidden={true} />
+      </div>
+    ) : (
+      <>
+        {getStatusComponent({
+          status: agent.status,
+          upgradeDetails: agent.upgrade_details,
+          ...restOfProps,
+        })}
+        {previousToOfflineStatus
+          ? getStatusComponent({
+              status: previousToOfflineStatus,
+              ...restOfProps,
+            })
+          : null}
+      </>
+    );
+
   return (
     <>
       <EuiToolTip
@@ -200,34 +230,11 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
                 </p>
               )
             ) : null}
+            {tooltipExtraContent}
           </>
         }
       >
-        {isStuckInUpdating(agent) && !fromDetails ? (
-          <div className="eui-textNoWrap">
-            {getStatusComponent({
-              status: agent.status,
-              upgradeDetails: agent.upgrade_details,
-              ...restOfProps,
-            })}
-            &nbsp;
-            <EuiIcon type="warning" color="warning" aria-hidden={true} />
-          </div>
-        ) : (
-          <>
-            {getStatusComponent({
-              status: agent.status,
-              upgradeDetails: agent.upgrade_details,
-              ...restOfProps,
-            })}
-            {previousToOfflineStatus
-              ? getStatusComponent({
-                  status: previousToOfflineStatus,
-                  ...restOfProps,
-                })
-              : null}
-          </>
-        )}
+        {badge}
       </EuiToolTip>
       {fromDetails && isStuckInUpdating(agent) ? (
         <>

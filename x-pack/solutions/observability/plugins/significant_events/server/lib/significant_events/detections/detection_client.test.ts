@@ -141,6 +141,32 @@ describe('DetectionClient', () => {
       expect(dataQuery).not.toContain('BY detection_id');
     });
 
+    it('filters by escaped rule-name search and change type before picking the latest rule row', async () => {
+      const { client, query } = createClient({
+        detections: [
+          createDetection({ '@timestamp': '2026-01-02T00:00:00.000Z', detection_id: 'f-1' }),
+        ],
+        processedIds: [],
+      });
+
+      await client.findLatestPaginated({
+        search: 'Peak*?\\Load',
+        change_point_type: ['spike', 'dip'],
+      });
+
+      const dataQuery =
+        queriesFrom(query).find((q) => !q.includes('STATS total') && !q.includes('processed_by')) ??
+        '';
+      expect(dataQuery).toContain('TO_LOWER(rule_name) LIKE "*peak\\\\*\\\\?\\\\\\\\load*"');
+      expect(dataQuery).toContain('change_point_type IN ("spike", "dip")');
+      expect(dataQuery.indexOf('TO_LOWER(rule_name)')).toBeLessThan(
+        dataQuery.indexOf('INLINE STATS latest_ts')
+      );
+      expect(dataQuery.indexOf('change_point_type IN')).toBeLessThan(
+        dataQuery.indexOf('INLINE STATS latest_ts')
+      );
+    });
+
     it('derives processed=true only for detections whose id has a marker', async () => {
       const { client } = createClient({
         detections: [
@@ -257,6 +283,23 @@ describe('DetectionClient', () => {
 
       expect(result.hits).toHaveLength(1);
       expect(result.hits[0].processed).toBe(true);
+    });
+  });
+
+  describe('findByIds', () => {
+    it('limits the lookup to the number of requested detection IDs', async () => {
+      const { client, query } = createClient({
+        detections: [
+          createDetection({ '@timestamp': '2026-01-02T00:00:00.000Z', detection_id: 'f-1' }),
+          createDetection({ '@timestamp': '2026-01-02T00:00:00.000Z', detection_id: 'f-2' }),
+        ],
+        processedIds: [],
+      });
+
+      await client.findByIds(['f-1', 'f-2']);
+
+      const dataQuery = queriesFrom(query).find((q) => !q.includes('processed_by'));
+      expect(dataQuery).toContain('LIMIT 2');
     });
   });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { listStreamsRoute } from './route';
+import { listStreamsRoute, resolveIndexPatternsRoute } from './route';
 
 jest.mock('../../../../lib/streams/stream_crud', () => ({
   getDataStreamLifecycle: jest.fn((dataStream: { name: string } | null) => ({
@@ -109,5 +109,40 @@ describe('GET /internal/streams', () => {
     expect(byName['logs-a'].privileges).toEqual({ read_failure_store: false });
     expect(byName['logs-b'].effective_failure_store).toEqual({ failureStoreFor: 'logs-b' });
     expect(byName['logs-b'].privileges).toEqual({ read_failure_store: true });
+  });
+});
+
+const resolveRoute = resolveIndexPatternsRoute['POST /internal/streams/_resolve_index_patterns'];
+
+type ResolveHandlerParams = Parameters<typeof resolveRoute.handler>[0];
+
+describe('POST /internal/streams/_resolve_index_patterns', () => {
+  it('returns user-facing names from resolveIndex', async () => {
+    const resolveIndex = jest.fn().mockResolvedValue({
+      data_streams: [{ name: 'logs-application.otel-prod' }],
+      indices: [{ name: '.ds-logs-application.otel-prod-000001' }, { name: 'custom-logs' }],
+    });
+
+    const result = await resolveRoute.handler({
+      request: {},
+      params: { body: { patterns: ['logs-*-*', 'metrics-*-*'] } },
+      getScopedClients: jest.fn().mockResolvedValue({
+        scopedClusterClient: { asCurrentUser: { indices: { resolveIndex } } },
+      }),
+      telemetry: {
+        startTrackingEndpointLatency: jest.fn().mockReturnValue(jest.fn()),
+        reportStreamsStateError: jest.fn(),
+      },
+    } as unknown as ResolveHandlerParams);
+
+    expect(resolveIndex).toHaveBeenCalledWith({
+      name: 'logs-*-*,metrics-*-*',
+      expand_wildcards: 'open',
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+    expect(result).toEqual({
+      indices: ['custom-logs', 'logs-application.otel-prod'],
+    });
   });
 });

@@ -8,16 +8,18 @@
  */
 
 import {
+  ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW,
   ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW,
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW,
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW,
 } from '.';
 import {
-  describeCloseReports,
+  closesWithNextStep,
   describeReportStep,
   evalGuard,
   renderReport,
   stepNamed,
+  stepsOf,
   topLevelSteps,
 } from './worker_reports.test_helpers';
 
@@ -29,22 +31,56 @@ import {
  */
 
 describe('Endpoint Analysis close reports', () => {
-  // Only the proposal gate closes an Investigation, through the Agentic Investigations status
-  // route. The route writes no close reason, so the report sends `other`.
-  describeCloseReports({
-    closeReports: [
-      {
-        closeReason: 'other',
-        closeStep: 'close_if_settled',
-        definition: ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW,
-        reportStep: 'report_investigation_closed_settled',
-      },
-    ],
-    definitions: [
+  // No Worker-chain workflow closes an Investigation: the close is the always-gated Close
+  // Investigation action's, run as the approver. The close gate reports it instead, from the
+  // decision it reads back, because the report step verifies every ancestor is AlertZero-managed
+  // and the action's chain passes through the platform's proposal workflow.
+  it('no Worker workflow closes an Investigation itself', () => {
+    const closes = [
       ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW,
       ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW,
       ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW,
-    ],
+      ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW,
+    ].flatMap((definition) =>
+      closesWithNextStep(stepsOf(definition)).map(({ close }) => `${definition.id}: ${close.name}`)
+    );
+
+    expect(closes).toEqual([]);
+  });
+
+  describe('the close gate (forensics_close_investigation_gate.yaml)', () => {
+    const steps = topLevelSteps(ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW.yaml);
+    const report = stepNamed(steps, 'report_investigation_closed');
+
+    describeReportStep(
+      steps,
+      'report_investigation_closed',
+      'worker_investigation_closed',
+      'journal_outcome'
+    );
+
+    const decided = (resolved: Record<string, boolean>) => ({
+      inputs: { closeReason: 'false_positive', investigationConversationId: 'inv-1' },
+      steps: { resolve_decision: { output: resolved } },
+    });
+
+    // `approved` is already "decision approved and action succeeded", so a dismissal, an
+    // expiry, or an approval whose action failed sends nothing.
+    it.each([
+      ['the approved action succeeded', { approved: true }, true],
+      ['the analyst dismissed', { dismissed: true }, false],
+      ['the proposal expired', { expired: true }, false],
+      ['the approved action failed', {}, false],
+    ])('runs only when %s', (_label, resolved, expected) => {
+      expect(evalGuard(report, decided(resolved)) === true).toBe(expected);
+    });
+
+    it('reports the reason the analysis decided, on the Investigation it asked about', () => {
+      expect(renderReport(report, decided({ approved: true }))).toEqual({
+        close_reason: 'false_positive',
+        investigation_id: 'inv-1',
+      });
+    });
   });
 });
 
@@ -408,12 +444,12 @@ describe('Endpoint Analysis managed versions', () => {
     [
       ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.id,
       ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.version,
-      11,
+      15,
     ],
     [
       ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.id,
       ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.version,
-      2,
+      5,
     ],
   ])('bumps %s to the version that carries its reports', (_id, version, expected) => {
     expect(version).toBe(expected);
