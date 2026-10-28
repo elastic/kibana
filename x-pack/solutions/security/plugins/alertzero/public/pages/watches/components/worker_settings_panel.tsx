@@ -41,6 +41,8 @@ import { SettingRow } from './setting_row';
 import { FeatureSettingsLink } from './feature_settings_link';
 import { ViewExecutionsLink } from '../../../components/view_executions_link/view_executions_link';
 import { ThreatIntelSupplySection } from './threat_intel_supply_section';
+import { HuntIndexCoverageCallout } from './hunt_index_coverage_callout';
+import { useHuntWorkerIndexCoverage } from '../../../hooks/hunt/use_hunt_worker_index_coverage';
 import { getWorkerCustomSettingsComponent } from '../custom_settings/registry';
 import * as settingsI18n from '../settings_translations';
 import { workerDescription, workerName } from '../workers/translations';
@@ -107,6 +109,8 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       : undefined;
   const controlsDisabled = settingsLocked || isSaving || !canWrite;
   const isHuntWorker = worker.id === SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
+  // The accordion body is always mounted, so `enabled` keeps the route idle while collapsed.
+  const { data: indexCoverage } = useHuntWorkerIndexCoverage(isHuntWorker && isExpanded);
   // Start locked until supply status says the hard-gate is ok. Already-on workers can
   // still turn off because cannotEnable requires !enabled.
   const [hardGateOk, setHardGateOk] = useState(false);
@@ -321,6 +325,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           </EuiText>
         </>
       ) : null}
+      {isHuntWorker ? <HuntIndexCoverageCallout coverage={indexCoverage} /> : null}
       {isHuntWorker ? (
         <ThreatIntelSupplySection
           canWrite={canWrite}
