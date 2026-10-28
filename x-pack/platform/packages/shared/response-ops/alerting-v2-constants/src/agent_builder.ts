@@ -18,6 +18,7 @@ export const ALERTING_TOOL_IDS = {
   manageRule: alertingTool('manage_rule'),
   manageActionPolicy: alertingTool('manage_action_policy'),
   getClassicRule: alertingTool('get_classic_rule'),
+  getMigrationDraft: alertingTool('get_migration_draft'),
 } as const;
 
 export const RULE_AUTHORING_SKILL_ID = 'rule-authoring';

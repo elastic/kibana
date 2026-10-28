@@ -15,6 +15,7 @@ describe('registerSkills', () => {
     logger: loggingSystemMock.createLogger(),
     getClassicRulesClient: jest.fn(),
     isMigratable: jest.fn(),
+    getMigrationDefinition: jest.fn(),
     availability: {
       cacheMode: 'none' as const,
       handler: async () => ({ status: 'available' as const }),

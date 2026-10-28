@@ -17,4 +17,6 @@ export const MIGRATION_LOG_CODES = {
   AGENT_BUILDER_SKILL_REGISTER_FAILED: 'AGENT_BUILDER_SKILL_REGISTER_FAILED',
   /** The get_classic_rule tool failed with an unexpected (non-403/404) error. */
   AGENT_BUILDER_GET_CLASSIC_RULE_FAILED: 'AGENT_BUILDER_GET_CLASSIC_RULE_FAILED',
+  /** The get_migration_draft tool failed with an unexpected (non-403/404) error. */
+  AGENT_BUILDER_GET_MIGRATION_DRAFT_FAILED: 'AGENT_BUILDER_GET_MIGRATION_DRAFT_FAILED',
 } as const;

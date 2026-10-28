@@ -56,6 +56,7 @@ export class AlertingV2MigrationPlugin
         getClassicRulesClient: async (request) =>
           (await getStartPlugins()).alerting.getRulesClientWithRequest(request),
         isMigratable: (ruleTypeId) => this.registry.has(ruleTypeId),
+        getMigrationDefinition: (ruleTypeId) => this.registry.get(ruleTypeId),
         availability: createAlertingV2Availability({
           getActiveSpace: async (request) =>
             (await getStartPlugins()).spaces.spacesService.getActiveSpace(request),

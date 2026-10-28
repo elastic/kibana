@@ -15,10 +15,13 @@ import {
 } from '@kbn/alerting-v2-constants';
 import type { GetClassicRuleToolDeps } from '../tools/get_classic_rule';
 import { getClassicRuleTool } from '../tools/get_classic_rule';
+import type { GetMigrationDraftToolDeps } from '../tools/get_migration_draft';
+import { getMigrationDraftTool } from '../tools/get_migration_draft';
 
-export type ClassicToUniversalRuleMigrationSkillDeps = GetClassicRuleToolDeps & {
-  availability: AvailabilityConfig;
-};
+export type ClassicToUniversalRuleMigrationSkillDeps = GetClassicRuleToolDeps &
+  GetMigrationDraftToolDeps & {
+    availability: AvailabilityConfig;
+  };
 
 export const createClassicToUniversalRuleMigrationSkill = (
   deps: ClassicToUniversalRuleMigrationSkillDeps
@@ -41,13 +44,26 @@ Do **not** use this skill for:
 
 ## Current Capabilities
 
-This skill is a stub. It can only fetch a classic rule by id with ${ALERTING_TOOL_IDS.getClassicRule}. It cannot convert or create rules yet.
+This skill is a stub. It can fetch a classic rule by id with ${ALERTING_TOOL_IDS.getClassicRule} and draft its conversion as a rule attachment with ${ALERTING_TOOL_IDS.getMigrationDraft}. It cannot create rules itself.
 
 ## Fetching a Classic Rule
 
 - Call ${ALERTING_TOOL_IDS.getClassicRule} with the classic rule \`id\`. If the user does not know the id, ask for it.
 - The rule is read with the user's own classic alerting privileges. If the tool returns an unauthorized error, tell the user they lack the privilege to read that rule; do not retry.
 - Summarize the rule in plain language: name, rule type, consumer, schedule, enabled state, and number of actions.
-- Report \`migratable\`: when \`false\`, tell the user the rule's type has no migration to universal alerting yet.`,
-    getInlineTools: () => [getClassicRuleTool(deps)],
+- Report \`migratable\`: when \`false\`, tell the user the rule's type has no migration to universal alerting yet.
+
+## Drafting a Migration
+
+- Call ${ALERTING_TOOL_IDS.getMigrationDraft} with the classic rule \`id\`. It adds the universal rule the classic rule would become to the conversation as a rule attachment. No rule is saved and the classic rule is unchanged.
+- Errors carry \`metadata.status_code\`: 403 means the user lacks the privilege to read the rule, 404 means it does not exist in this space, and 400 means its rule type has no migration. Explain the cause; do not retry.
+- **Always** render the draft inline with the attachment id and version from the tool result. The \`version\` attribute is required, even when it is \`1\`:
+
+\`\`\`
+<render_attachment id="<ruleAttachment.id>" version="<version>" />
+\`\`\`
+
+- Summarize the draft: the converted query and schedule, each action policy (and its \`notes\`, such as a connector that must be picked), and each skipped action with its reason. Action policies are not part of the attachment.
+- Direct the user to the attachment's **Create rule** button to save the universal rule. To change the draft, load the \`${RULE_AUTHORING_SKILL_ID}\` skill and pass \`ruleAttachment.id\` to its manage rule tool.`,
+    getInlineTools: () => [getClassicRuleTool(deps), getMigrationDraftTool(deps)],
   });

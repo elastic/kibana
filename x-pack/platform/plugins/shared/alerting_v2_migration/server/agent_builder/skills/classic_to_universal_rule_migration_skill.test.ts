@@ -26,6 +26,7 @@ describe('createClassicToUniversalRuleMigrationSkill', () => {
       logger: loggingSystemMock.createLogger(),
       getClassicRulesClient: jest.fn(),
       isMigratable: jest.fn(),
+      getMigrationDefinition: jest.fn(),
       availability,
     });
 
@@ -39,10 +40,14 @@ describe('createClassicToUniversalRuleMigrationSkill', () => {
     await expect(validateSkillDefinition(skill)).resolves.toBeDefined();
   });
 
-  it('exposes only the get_classic_rule inline tool', async () => {
+  it('exposes the get_classic_rule and get_migration_draft inline tools', async () => {
     const tools = await createSkill().getInlineTools?.();
 
-    expect(tools?.map(({ id }) => id)).toEqual([ALERTING_TOOL_IDS.getClassicRule]);
+    expect(tools?.map(({ id }) => id)).toEqual([
+      ALERTING_TOOL_IDS.getClassicRule,
+      ALERTING_TOOL_IDS.getMigrationDraft,
+    ]);
     expect(isAllowedBuiltinTool(ALERTING_TOOL_IDS.getClassicRule)).toBe(true);
+    expect(isAllowedBuiltinTool(ALERTING_TOOL_IDS.getMigrationDraft)).toBe(true);
   });
 });
