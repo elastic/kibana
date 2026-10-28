@@ -259,14 +259,17 @@ describe('AgentRegistry', () => {
       });
     });
 
-    it('refuses a built-in agent, which can never be bound', async () => {
-      const registry = createRegistry({
-        builtinAgents: [createMockedInternalAgent({ id: 'builtin', readonly: true })],
-      });
+    it('resolves the agent without the access-checked existence lookup', async () => {
+      const agent = createMockedInternalAgent({ id: 'investigator' });
+      const persistedProvider = createPersistedProviderMock([agent]);
+      // A private agent looks absent to the account, which holds no read access to it.
+      persistedProvider.has.mockResolvedValue(false);
+      const registry = createRegistry({ persistedProvider });
 
       await expect(
-        registry.get('builtin', { access: 'use', runAs: 'kibana/sa-1' })
-      ).rejects.toMatchObject({ meta: { statusCode: 403 } });
+        registry.get('investigator', { access: 'use', runAs: 'kibana/sa-1' })
+      ).resolves.toMatchObject({ id: 'investigator' });
+      expect(persistedProvider.has).not.toHaveBeenCalled();
     });
   });
 });

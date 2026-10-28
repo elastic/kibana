@@ -279,6 +279,7 @@ const handleConversationExecution = async ({
       connectorId,
       reasoningLevel,
       telemetryMetadata: roundTelemetryMetadata,
+      runAs: execution.runAs?.serviceAccountId,
       request,
       ...deps,
     });
@@ -684,6 +685,7 @@ const handleStandaloneExecution = async ({
     connectorId: execution.agentParams.connectorId,
     reasoningLevel,
     telemetryMetadata: roundTelemetryMetadata,
+    runAs: execution.runAs?.serviceAccountId,
     request,
     ...deps,
   });
@@ -695,6 +697,8 @@ const handleStandaloneExecution = async ({
     nextInput: execution.agentParams.nextInput,
     structuredOutput,
     outputSchema,
+    // Only a bound run swaps credentials; an unbound run's request already is the owner.
+    ...(execution.runAs ? { owner: execution.owner, runAs: execution.runAs } : {}),
     abortSignal,
     conversation: undefined,
     defaultConnectorId: selectedConnectorId,

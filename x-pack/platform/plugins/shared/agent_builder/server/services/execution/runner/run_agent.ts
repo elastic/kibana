@@ -99,6 +99,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   return {
     request,
     spaceId,
+    runAs: runAs?.serviceAccountId,
     deployment,
     defaultConnectorId: manager.deps.defaultConnectorId,
     logger,

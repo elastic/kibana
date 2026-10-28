@@ -103,7 +103,11 @@ const createPersistedProvider = async ({
           availabilityCache,
         });
       } catch (e) {
-        if (agentId === agentBuilderDefaultAgentId && isAgentNotFoundError(e)) {
+        if (
+          agentId === agentBuilderDefaultAgentId &&
+          opts?.runAs === undefined &&
+          isAgentNotFoundError(e)
+        ) {
           const definition = await ensureDefaultAgent(client);
           return toInternalDefinition({
             definition,

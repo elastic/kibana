@@ -242,6 +242,10 @@ export interface AgentHandlerContext {
    */
   spaceId: string;
   /**
+   * Service account the execution runs as; see `GetAgentOptions.runAs`.
+   */
+  runAs?: string;
+  /**
    * Information about the deployment (environment, version, license...) the agent runs in.
    */
   deployment: DeploymentContext;
