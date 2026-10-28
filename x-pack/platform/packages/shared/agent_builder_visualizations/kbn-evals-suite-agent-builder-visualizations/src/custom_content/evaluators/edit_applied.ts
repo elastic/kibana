@@ -5,39 +5,40 @@
  * 2.0.
  */
 
+import { BasicPrettyPrinter, Parser, Walker, type ESQLFunction } from '@elastic/esql';
 import type { EsqlQueryRunner } from '../../evaluators/esql_query_runner';
 import { skippedResult } from '../../evaluator_utils';
 import type { CustomContentEvaluator } from '../types';
+import { readColumnReferences } from './template_column_references';
 
 export const CUSTOM_CONTENT_EDIT_APPLIED_EVALUATOR_NAME = 'Custom Content Data Edit Applied';
 
-const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-const IDENTIFIER = /^[A-Za-z_]\w*$/;
-
-/** Whether the template reads the column, as `row["name"]` or, for a plain name, `row.name`. */
-export const templateReadsColumn = (template: string, column: string): boolean =>
-  new RegExp(`\\[\\s*["']${escapeRegExp(column)}["']\\s*\\]`).test(template) ||
-  (IDENTIFIER.test(column) && new RegExp(`\\w\\.${escapeRegExp(column)}(?!\\w)`).test(template));
-
-const withoutQuoting = (query: string): string => query.replace(/`/g, '').replace(/\s+/g, ' ');
+const simplify = (text: string): string => text.replace(/[\s`]/g, '').toLowerCase();
 
 /**
- * The names a query gives to the measure written as `expression`, such as `avg_bytes` for
- * `avg_bytes = AVG(bytes)`. Found from the expression, so a column the edit renamed is not mistaken
- * for the measure it added.
+ * The names a query gives to the measure written as `measure`, such as `avg_bytes` for
+ * `avg_bytes = AVG(bytes)`. Found from the measure, not from the column names, so a column the
+ * edit renamed is not mistaken for the measure it added.
  */
-export const findMeasureAliases = (query: string, expression: string): string[] => {
-  const measure = escapeRegExp(withoutQuoting(expression).trim())
-    .replace(/\\\(\s*/g, '\\(\\s*')
-    .replace(/\s*\\\)/g, '\\s*\\)');
-  const assignment = new RegExp(
-    `(?:^|[,|]|\\b(?:STATS|EVAL)\\b)\\s*([^,|=]+?)\\s*=\\s*[^,|]*?${measure}`,
-    'gi'
-  );
-  return [...withoutQuoting(query).matchAll(assignment)].map((match) =>
-    match[1].trim().replace(/^(?:STATS|EVAL)\s+/i, '')
-  );
+export const findMeasureAliases = (query: string, measure: string): string[] => {
+  const { root } = Parser.parse(query);
+  const assignments: ESQLFunction[] = [];
+  Walker.walk(root, {
+    visitFunction: (fn) => {
+      if (fn.name === '=') {
+        assignments.push(fn);
+      }
+    },
+  });
+  return assignments.flatMap(({ args: [alias, assigned] }) => {
+    const [expression] = Array.isArray(assigned) ? assigned : [assigned];
+    return !Array.isArray(alias) &&
+      alias.type === 'column' &&
+      !Array.isArray(expression) &&
+      simplify(BasicPrettyPrinter.expression(expression)).includes(simplify(measure))
+      ? [alias.name]
+      : [];
+  });
 };
 
 /**
@@ -70,14 +71,28 @@ export const createDataEditAppliedEvaluator = ({
       return skippedResult('The query did not run; the execution evaluator reports that.');
     }
 
-    const aliases = findMeasureAliases(query, measure).filter((alias) => columns.includes(alias));
+    const computed = findMeasureAliases(query, measure);
+    if (computed.length === 0) {
+      return {
+        score: 0,
+        label: 'measure-not-in-query',
+        explanation: `The edited query does not compute ${measure}.`,
+      };
+    }
+    const aliases = computed.filter((alias) => columns.includes(alias));
     if (aliases.length === 0) {
-      return skippedResult(
-        `The query has no returned column for ${measure}; the query contents evaluator reports that.`
-      );
+      return {
+        score: 0,
+        label: 'measure-not-returned',
+        explanation: `The query computes ${measure} as ${computed.join(
+          ', '
+        )} but does not return it, for example because a KEEP drops it.`,
+        metadata: { computed, columns },
+      };
     }
 
-    const shown = aliases.filter((alias) => templateReadsColumn(template, alias));
+    const read = readColumnReferences(template);
+    const shown = aliases.filter((alias) => read.includes(alias));
     return shown.length > 0
       ? {
           score: 1,

@@ -12,12 +12,9 @@ import { createEditEvaluator } from './edit';
 import { createQueryContentsEvaluator } from './query_contents';
 import { createRowLimitEvaluator, readLimit } from './row_limit';
 import { createRowOrderEvaluator, labelsInOrder } from './row_order';
-import { createTemplateColumnsEvaluator, readColumnReferences } from './template_columns';
-import {
-  createDataEditAppliedEvaluator,
-  findMeasureAliases,
-  templateReadsColumn,
-} from './edit_applied';
+import { createTemplateColumnsEvaluator } from './template_columns';
+import { readColumnReferences } from './template_column_references';
+import { createDataEditAppliedEvaluator, findMeasureAliases } from './edit_applied';
 import { createStyleEditJudge } from './style_edit_judge';
 import { createTemplateValidityEvaluator } from './template_validity';
 
@@ -293,6 +290,22 @@ describe('Custom Content Template Columns', () => {
     ).toEqual(['Request Count', 'Error Rate']);
   });
 
+  it('reads columns with dot access and any loop variable name, never a cell property', () => {
+    expect(
+      readColumnReferences(
+        '{% for r in rows %}{{ r.requests.value }} {{ r.avg_bytes.pct }}{% endfor %}'
+      )
+    ).toEqual(['requests', 'avg_bytes']);
+    expect(
+      readColumnReferences('{% for row in rows %}{{ row.requests.value }}{% endfor %}')
+    ).not.toContain('value');
+  });
+
+  it('reads nothing from a template that does not parse or does not loop over rows', () => {
+    expect(readColumnReferences('<div>{% if true %}x</div>')).toEqual([]);
+    expect(readColumnReferences('<p>{{ rows.size }}</p>')).toEqual([]);
+  });
+
   const withColumns = (names: string[]) =>
     createTemplateColumnsEvaluator({
       runQuery: jest
@@ -317,13 +330,14 @@ describe('Custom Content Template Columns', () => {
     expect(result.metadata).toMatchObject({ missing: ['Error Rate'] });
   });
 
-  it('says when a template reads columns by dot access, which it does not check', async () => {
-    const result = await run(
-      withColumns(['host']),
-      outputWith({ esql: 'FROM logs', template: '<p>{{ row.host.value }}</p>' })
-    );
-    expect(result.score).toBeNull();
-    expect(result.explanation).toContain('dot access');
+  it('checks columns read with dot access too', async () => {
+    const template = '{% for r in rows %}<p>{{ r.host.value }}</p>{% endfor %}';
+    expect(
+      (await run(withColumns(['host']), outputWith({ esql: 'FROM logs', template }))).score
+    ).toBe(1);
+    expect(
+      (await run(withColumns(['other']), outputWith({ esql: 'FROM logs', template }))).score
+    ).toBe(0);
   });
 
   it('skips a static panel and a template that reads no columns', async () => {
@@ -530,6 +544,10 @@ describe('Custom Content Data Edit Applied', () => {
       'host',
     ],
     'FROM logs | STATS total = COUNT(*)': ['total'],
+    'FROM logs | STATS requests = COUNT(*), avg_bytes = AVG(bytes) BY host | KEEP host, requests': [
+      'host',
+      'requests',
+    ],
     'FROM logs | STATS `Avg Bytes` = AVG( `bytes` ) BY host': ['Avg Bytes', 'host'],
   };
   const runQuery = jest.fn(async (query: string) => {
@@ -540,15 +558,6 @@ describe('Custom Content Data Edit Applied', () => {
   const gold = { data: 'query' as const, edit: 'data' as const, addsMeasure: 'AVG(bytes)' };
   const AFTER = 'FROM logs | STATS requests = COUNT(*), avg_bytes = AVG(bytes) BY host';
   const after = (template: string, esql = AFTER) => outputWith({ esql, template });
-
-  it('reads a column through bracket access with either quote, or dot access for a plain name', () => {
-    expect(templateReadsColumn('{{ row["avg_bytes"].value }}', 'avg_bytes')).toBe(true);
-    expect(templateReadsColumn("{{ r['avg_bytes'].value }}", 'avg_bytes')).toBe(true);
-    expect(templateReadsColumn('{{ row.avg_bytes.value }}', 'avg_bytes')).toBe(true);
-    expect(templateReadsColumn('{{ row.avg_bytes_total.value }}', 'avg_bytes')).toBe(false);
-    expect(templateReadsColumn('{{ row.value }}', 'avg_bytes')).toBe(false);
-    expect(templateReadsColumn('{{ row["Avg Bytes"].value }}', 'Avg Bytes')).toBe(true);
-  });
 
   it('finds the alias of a measure however the query spells it', () => {
     expect(findMeasureAliases(AFTER, 'AVG(bytes)')).toEqual(['avg_bytes']);
@@ -581,6 +590,17 @@ describe('Custom Content Data Edit Applied', () => {
     expect(result).toMatchObject({ score: 0, label: 'new-measure-not-shown' });
   });
 
+  it('is not fooled by a cell property named like the measure', async () => {
+    const query = 'FROM logs | STATS requests = COUNT(*), value = AVG(bytes) BY host';
+    columnsByQuery[query] = ['requests', 'value', 'host'];
+    const result = await run(
+      evaluator,
+      after('{% for row in rows %}{{ row.requests.value }}{% endfor %}', query),
+      gold
+    );
+    expect(result).toMatchObject({ score: 0, label: 'new-measure-not-shown' });
+  });
+
   it('is not fooled by a column the edit renamed', async () => {
     const result = await run(
       evaluator,
@@ -607,11 +627,25 @@ describe('Custom Content Data Edit Applied', () => {
     expect(result.score).toBe(1);
   });
 
-  it('skips when the query does not run or does not return the measure', async () => {
+  it('fails when the query never computes the measure', async () => {
+    const result = await run(evaluator, after('<p/>', 'FROM logs | STATS total = COUNT(*)'), gold);
+    expect(result).toMatchObject({ score: 0, label: 'measure-not-in-query' });
+  });
+
+  it('fails when the query computes the measure and then drops it', async () => {
+    const result = await run(
+      evaluator,
+      after(
+        '<b>{{ row["requests"].value }}</b>',
+        'FROM logs | STATS requests = COUNT(*), avg_bytes = AVG(bytes) BY host | KEEP host, requests'
+      ),
+      gold
+    );
+    expect(result).toMatchObject({ score: 0, label: 'measure-not-returned' });
+  });
+
+  it('skips when the query does not run', async () => {
     expect((await run(evaluator, after('<p/>', 'FROM nowhere'), gold)).score).toBeNull();
-    expect(
-      (await run(evaluator, after('<p/>', 'FROM logs | STATS total = COUNT(*)'), gold)).score
-    ).toBeNull();
   });
 });
 
