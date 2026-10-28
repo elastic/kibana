@@ -10,7 +10,7 @@ import { createActor, waitFor, type Actor, type AnyActorRef } from 'xstate';
 import { createDefaultUnit } from '../../../../services/unit_repository';
 import type { DestinationApiKeyGenerationDeps } from '../destination_api_keys';
 import type { UnitDestination } from '../destination_models';
-import { REMOTE_ELASTICSEARCH_TYPE } from '../remote_elasticsearch_constants';
+import { REMOTE_ELASTICSEARCH_TYPE } from '../types';
 import {
   createDestinationsMachineImplementations,
   destinationsStateMachine,

@@ -34,7 +34,6 @@ import {
   getTargetedIndexCount,
 } from './destination_grid_cell';
 import { DestinationIndicesTable } from './destination_indices_table';
-import { hasLocalIndices } from './destination_models';
 import { RemoteElasticsearchDestinationDetails } from './remote_elasticsearch_destination_details';
 import { S3DestinationDetails } from './s3_destination_details';
 import type { ResolvedIndicesStatus } from './state_machines/destinations_state_machine';
@@ -97,9 +96,8 @@ interface DestinationsGridProps {
   onRequestDelete: (destination: DestinationViewModel) => void;
 }
 
-const getExpandAriaLabel = (destination: DestinationViewModel, isExpanded: boolean) => {
-  const { name } = destination;
-  if (!hasLocalIndices(destination)) {
+const getExpandAriaLabel = ({ name, type }: DestinationViewModel, isExpanded: boolean) => {
+  if (type !== 'elasticsearch') {
     return isExpanded
       ? i18n.translate('xpack.streams.destinations.table.collapseDetailsAriaLabel', {
           defaultMessage: 'Collapse details for {name}',
@@ -240,7 +238,7 @@ const DestinationsGridTable = ({
   });
 
   const toggleExpanded = useCallback((destination: DestinationViewModel) => {
-    if (hasLocalIndices(destination)) {
+    if (destination.type === 'elasticsearch') {
       setStatsRequested(true);
     }
     setExpandedDestinationIds((current) => {
@@ -369,7 +367,7 @@ const DestinationsGridTable = ({
                   min-width: 100%;
                 `}
               >
-                {hasLocalIndices(destination) ? (
+                {destination.type === 'elasticsearch' ? (
                   <DestinationIndicesTable
                     indices={resolvedIndicesByDestination[destination.id] ?? []}
                     status={resolvedIndicesStatus}

@@ -102,7 +102,6 @@ import { CreateDestinationModal } from '../../../streams_layout/destinations/cre
 import { UnitDestinationFlyout } from '../../../streams_layout/destinations/unit_destination_flyout';
 import type { DestinationViewModel } from '../../../streams_layout/destinations/types';
 import { DESTINATION_SIGNAL_LABELS } from '../../../streams_layout/destinations/destination_type_config';
-import { REMOTE_ELASTICSEARCH_TYPE } from '../../../streams_layout/destinations/remote_elasticsearch_constants';
 import {
   getUnitDestinations,
   withUnitDestinations,
@@ -909,45 +908,19 @@ export const buildConfiguredDestinationNode = (
     'xpack.streams.canvas.configuredDestinationNode.noSourceLabel',
     { defaultMessage: 'No source' }
   );
-  if (destination.type === 's3') {
+  if (destination.type !== 'elasticsearch') {
     return {
       id: configuredDestinationNodeId(destination.id),
       type: DESTINATION_NODE_TYPE,
       position: { x: 0, y: 0 },
       deletable: true,
       ariaLabel: hasConnectedSource
-        ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.s3AriaLabel', {
+        ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.nonLocalAriaLabel', {
             defaultMessage: 'Destination: {name}, {signal}',
             values: { name: destination.name, signal },
           })
-        : i18n.translate('xpack.streams.canvas.configuredDestinationNode.s3NoSourceAriaLabel', {
-            defaultMessage: 'Destination: {name}, {signal}, no source',
-            values: { name: destination.name, signal },
-          }),
-      data: {
-        destinationId: destination.id,
-        signals: destination.signals,
-        title: destination.name,
-        subtitle: !hasConnectedSource ? noSourceLabel : destination.bucket,
-      },
-    };
-  }
-  if (destination.type === REMOTE_ELASTICSEARCH_TYPE) {
-    return {
-      id: configuredDestinationNodeId(destination.id),
-      type: DESTINATION_NODE_TYPE,
-      position: { x: 0, y: 0 },
-      deletable: true,
-      ariaLabel: hasConnectedSource
-        ? i18n.translate(
-            'xpack.streams.canvas.configuredDestinationNode.remoteElasticsearchAriaLabel',
-            {
-              defaultMessage: 'Destination: {name}, {signal}',
-              values: { name: destination.name, signal },
-            }
-          )
         : i18n.translate(
-            'xpack.streams.canvas.configuredDestinationNode.remoteElasticsearchNoSourceAriaLabel',
+            'xpack.streams.canvas.configuredDestinationNode.nonLocalNoSourceAriaLabel',
             {
               defaultMessage: 'Destination: {name}, {signal}, no source',
               values: { name: destination.name, signal },
@@ -957,7 +930,11 @@ export const buildConfiguredDestinationNode = (
         destinationId: destination.id,
         signals: destination.signals,
         title: destination.name,
-        subtitle: !hasConnectedSource ? noSourceLabel : getEndpointHost(destination.endpoint),
+        subtitle: !hasConnectedSource
+          ? noSourceLabel
+          : destination.type === 's3'
+          ? destination.bucket
+          : getEndpointHost(destination.endpoint),
       },
     };
   }

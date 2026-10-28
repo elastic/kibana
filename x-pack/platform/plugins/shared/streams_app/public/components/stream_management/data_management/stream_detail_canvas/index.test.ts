@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { REMOTE_ELASTICSEARCH_TYPE } from '../../../streams_layout/destinations/remote_elasticsearch_constants';
-import type {
-  RemoteElasticsearchDestinationViewModel,
-  S3DestinationViewModel,
+import {
+  REMOTE_ELASTICSEARCH_TYPE,
+  type RemoteElasticsearchDestinationViewModel,
+  type S3DestinationViewModel,
 } from '../../../streams_layout/destinations/types';
 import { buildConfiguredDestinationNode } from '.';
 

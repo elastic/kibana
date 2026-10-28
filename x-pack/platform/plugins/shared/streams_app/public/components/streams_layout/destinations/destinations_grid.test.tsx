@@ -13,13 +13,12 @@ import {
   DestinationsGrid,
   getDestinationSortableValue,
 } from './destinations_grid';
-import { toDestinationViewModel } from './destination_models';
-import { createRemoteElasticsearchUnitDestination } from './remote_elasticsearch_destination_models';
-import type {
-  DestinationViewModel,
-  ElasticsearchDestinationFormData,
-  ElasticsearchDestinationViewModel,
-  S3DestinationViewModel,
+import {
+  REMOTE_ELASTICSEARCH_TYPE,
+  type DestinationViewModel,
+  type ElasticsearchDestinationViewModel,
+  type RemoteElasticsearchDestinationViewModel,
+  type S3DestinationViewModel,
 } from './types';
 
 const mockUseDestinationIndexStats = jest.fn((_options: { enabled: boolean }) => ({}));
@@ -66,25 +65,17 @@ describe('DestinationsGrid', () => {
   };
 
   const remoteDestination = (
-    routing: Partial<ElasticsearchDestinationFormData> = {}
-  ): DestinationViewModel => {
-    const viewModel = toDestinationViewModel(
-      createRemoteElasticsearchUnitDestination({
-        id: 'backup',
-        name: 'Backup',
-        endpoint: 'https://my-cluster.es.example.com:9243',
-        auto: true,
-        logsIndex: '',
-        metricsIndex: '',
-        tracesIndex: '',
-        ...routing,
-      })
-    );
-    if (!viewModel) {
-      throw new Error('Expected a remote view model');
-    }
-    return viewModel;
-  };
+    partial: Partial<RemoteElasticsearchDestinationViewModel> = {}
+  ): RemoteElasticsearchDestinationViewModel => ({
+    id: 'backup',
+    name: 'Backup',
+    type: REMOTE_ELASTICSEARCH_TYPE,
+    signals: ['logs', 'metrics', 'traces'],
+    endpoint: 'https://my-cluster.es.example.com:9243',
+    mode: 'auto',
+    indexBySignal: {},
+    ...partial,
+  });
 
   const renderGrid = (destinations: DestinationViewModel[]) =>
     render(
@@ -184,7 +175,11 @@ describe('DestinationsGrid', () => {
 
   it('expands a remote Fixed row to show each signal and its index', async () => {
     renderGrid([
-      remoteDestination({ auto: false, logsIndex: 'remote-logs', tracesIndex: 'remote-traces' }),
+      remoteDestination({
+        signals: ['logs', 'traces'],
+        mode: 'static',
+        indexBySignal: { logs: 'remote-logs', traces: 'remote-traces' },
+      }),
     ]);
 
     await userEvent.click(screen.getByRole('button', { name: 'Expand details for Backup' }));

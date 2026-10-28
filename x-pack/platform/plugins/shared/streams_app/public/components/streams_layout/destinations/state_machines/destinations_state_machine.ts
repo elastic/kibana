@@ -28,10 +28,13 @@ import {
   toDestinationViewModel,
   toRemoteElasticsearchDestinationViewModel,
   toS3DestinationViewModel,
+  type UnitDestination,
   withUnitDestinations,
 } from '../destination_models';
-import { remoteElasticsearchCredentialName } from '../remote_elasticsearch_constants';
-import { createRemoteElasticsearchUnitDestination } from '../remote_elasticsearch_destination_models';
+import {
+  createRemoteElasticsearchUnitDestination,
+  remoteElasticsearchCredentialName,
+} from '../remote_elasticsearch_destination_models';
 import { createS3UnitDestination, s3CredentialNames } from '../s3_destination_models';
 import {
   createDestinationApiKeyServices,
@@ -204,6 +207,39 @@ const getCreateSecrets = (
       throw new Error(`Unexpected storage kind ${storageKind}`);
     }
   }
+};
+
+/** Adds a node built from the form, for types that persist without a Kibana-minted key. */
+const stageCreatedDestination = (
+  context: DestinationsStateContext,
+  toViewModel: (node: UnitDestination) => DestinationViewModel,
+  createNode: (id: string, name: string, formData: DestinationCreationFormData) => UnitDestination
+): Partial<DestinationsStateContext> => {
+  if (!context.creationContext) {
+    return {};
+  }
+  const { formData } = context.creationContext;
+  const name = formData.destinationName.trim();
+  const id = createDestinationId({
+    name,
+    existingIds: collectUnitComponentIds(context.unitDefinition.unit),
+  });
+  const node = createNode(id, name, formData);
+  return {
+    creationContext: {
+      ...context.creationContext,
+      createdDestinations: [toViewModel(node)],
+      // A failed local key mint leaves its pending ids behind, and a later persist failure would
+      // otherwise revoke them.
+      pendingDestinations: undefined,
+    },
+    unitDefinition: withUnitDestinations(context.unitDefinition, [
+      ...getUnitDestinations(context.unitDefinition),
+      node,
+    ]),
+    persistenceError: undefined,
+    apiKeyError: undefined,
+  };
 };
 
 /** Keep an empty name quiet until the name field has already shown a required error. */
@@ -453,74 +489,25 @@ export const destinationsStateMachine = setup({
         },
       };
     }),
-    stageCreatedS3Destination: assign(({ context }) => {
-      if (!context.creationContext) {
-        return {};
-      }
-      const { destinationName, s3 } = context.creationContext.formData;
-      const name = destinationName.trim();
-      const id = createDestinationId({
-        name,
-        existingIds: collectUnitComponentIds(context.unitDefinition.unit),
-      });
-      const node = createS3UnitDestination({
-        id,
-        name,
-        region: s3.region.trim(),
-        bucket: s3.bucket.trim(),
-        prefix: s3.prefix.trim(),
-      });
-      return {
-        creationContext: {
-          ...context.creationContext,
-          createdDestinations: [toS3DestinationViewModel(node)],
-          // A failed Elasticsearch key mint leaves its pending ids behind, and a later
-          // S3 persist failure would otherwise revoke them.
-          pendingDestinations: undefined,
-        },
-        unitDefinition: withUnitDestinations(context.unitDefinition, [
-          ...getUnitDestinations(context.unitDefinition),
-          node,
-        ]),
-        persistenceError: undefined,
-        apiKeyError: undefined,
-      };
-    }),
-    stageCreatedRemoteElasticsearchDestination: assign(({ context }) => {
-      if (!context.creationContext) {
-        return {};
-      }
-      const { destinationName, remoteElasticsearch } = context.creationContext.formData;
-      const name = destinationName.trim();
-      const id = createDestinationId({
-        name,
-        existingIds: collectUnitComponentIds(context.unitDefinition.unit),
-      });
-      const node = createRemoteElasticsearchUnitDestination({
-        id,
-        name,
-        endpoint: remoteElasticsearch.endpoint,
-        auto: remoteElasticsearch.auto,
-        logsIndex: remoteElasticsearch.logsIndex,
-        metricsIndex: remoteElasticsearch.metricsIndex,
-        tracesIndex: remoteElasticsearch.tracesIndex,
-      });
-      return {
-        creationContext: {
-          ...context.creationContext,
-          createdDestinations: [toRemoteElasticsearchDestinationViewModel(node)],
-          // A failed local key mint leaves its pending ids behind, and a failed remote persist
-          // would otherwise revoke them.
-          pendingDestinations: undefined,
-        },
-        unitDefinition: withUnitDestinations(context.unitDefinition, [
-          ...getUnitDestinations(context.unitDefinition),
-          node,
-        ]),
-        persistenceError: undefined,
-        apiKeyError: undefined,
-      };
-    }),
+    stageCreatedS3Destination: assign(({ context }) =>
+      stageCreatedDestination(context, toS3DestinationViewModel, (id, name, { s3 }) =>
+        createS3UnitDestination({
+          id,
+          name,
+          region: s3.region.trim(),
+          bucket: s3.bucket.trim(),
+          prefix: s3.prefix.trim(),
+        })
+      )
+    ),
+    stageCreatedRemoteElasticsearchDestination: assign(({ context }) =>
+      stageCreatedDestination(
+        context,
+        toRemoteElasticsearchDestinationViewModel,
+        (id, name, { remoteElasticsearch }) =>
+          createRemoteElasticsearchUnitDestination({ id, name, ...remoteElasticsearch })
+      )
+    ),
     assignPendingDestination: assign(({ context }) => {
       if (!context.creationContext) {
         return {};

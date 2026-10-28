@@ -8,15 +8,13 @@
 import type { UnitDestination } from './destination_models';
 import { DESTINATION_SIGNALS, SIGNAL_INDEX_FIELDS } from './destination_models';
 import {
-  REMOTE_ELASTICSEARCH_ENDPOINT_ENTRY,
   REMOTE_ELASTICSEARCH_TYPE,
-  remoteElasticsearchCredentialName,
-} from './remote_elasticsearch_constants';
-import type {
-  DestinationSignal,
-  ElasticsearchDestinationFormData,
-  RemoteElasticsearchDestinationFormData,
+  type DestinationSignal,
+  type ElasticsearchDestinationFormData,
+  type RemoteElasticsearchDestinationFormData,
 } from './types';
+
+export const remoteElasticsearchCredentialName = (id: string): string => `${id}-api-key`;
 
 /** Trimmed index name for each filled signal in Fixed. Empty in Auto. */
 export const getRemoteIndexBySignal = (
@@ -67,7 +65,7 @@ export const createRemoteElasticsearchUnitDestination = ({
     type: REMOTE_ELASTICSEARCH_TYPE,
     supported_telemetry: auto ? [...DESTINATION_SIGNALS] : indexed.map(({ signal }) => signal),
     config: [
-      { name: REMOTE_ELASTICSEARCH_ENDPOINT_ENTRY, value: endpoint.trim() },
+      { name: 'endpoint', value: endpoint.trim() },
       ...indexEntries,
       { name: 'api_key', value: { credential: remoteElasticsearchCredentialName(id) } },
     ],

@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
-import { hasLocalIndices } from './destination_models';
 import { DESTINATION_SIGNAL_LABELS, getDestinationTypeLabel } from './destination_type_config';
 import type { ResolvedIndicesStatus } from './state_machines/destinations_state_machine';
 import type { DestinationViewModel } from './types';
@@ -53,7 +52,7 @@ export const DestinationGridCell = ({
         </EuiFlexGroup>
       );
     case 'indices':
-      if (!hasLocalIndices(destination)) {
+      if (destination.type !== 'elasticsearch') {
         return '-';
       }
       if (resolvedIndicesStatus === 'loading' && targetedIndexCount === 0) {

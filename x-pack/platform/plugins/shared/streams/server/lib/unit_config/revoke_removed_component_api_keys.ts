@@ -14,14 +14,12 @@ interface UnitComponentIds {
   destinations?: Array<{ id?: string; type?: string }>;
 }
 
-// Kibana mints API keys only for local Elasticsearch destinations.
-const KEY_MINTED_DESTINATION_TYPE = 'elasticsearch';
-
 const componentIds = (components: Array<{ id?: string }> | undefined): Set<string> =>
   new Set((components ?? []).flatMap((component) => (component.id ? [component.id] : [])));
 
+// Kibana mints API keys only for local Elasticsearch destinations.
 const keyMintedDestinationIds = (destinations: UnitComponentIds['destinations']): Set<string> =>
-  componentIds(destinations?.filter(({ type }) => type === KEY_MINTED_DESTINATION_TYPE));
+  componentIds(destinations?.filter(({ type }) => type === 'elasticsearch'));
 
 const removedIds = (previous: Set<string>, next: Set<string>): string[] =>
   [...previous].filter((id) => !next.has(id));

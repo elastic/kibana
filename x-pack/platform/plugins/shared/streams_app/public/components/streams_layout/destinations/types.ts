@@ -7,7 +7,6 @@
 
 import type { StreamsV2 } from '@kbn/streams-schema';
 import type { DestinationNameValidationError } from './destination_helpers';
-import type { REMOTE_ELASTICSEARCH_TYPE } from './remote_elasticsearch_constants';
 
 /**
  * Destination storage choices shown in the create form.
@@ -17,6 +16,9 @@ export type DestinationStorageKind =
   | 'local_elasticsearch'
   | 'remote_elasticsearch'
   | 'external_storage';
+
+/** Working name until the backend settles it: https://github.com/elastic/ingest-dev/issues/10236 */
+export const REMOTE_ELASTICSEARCH_TYPE = 'remote_elasticsearch' as const;
 
 /** Unit destination types the UI can list and create. */
 export type DestinationType = 'elasticsearch' | typeof REMOTE_ELASTICSEARCH_TYPE | 's3';

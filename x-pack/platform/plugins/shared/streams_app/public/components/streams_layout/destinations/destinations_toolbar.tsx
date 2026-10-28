@@ -26,8 +26,7 @@ import {
   LOCAL_ELASTICSEARCH_LABEL,
   REMOTE_ELASTICSEARCH_LABEL,
 } from './destination_type_config';
-import { REMOTE_ELASTICSEARCH_TYPE } from './remote_elasticsearch_constants';
-import type { DestinationType } from './types';
+import { REMOTE_ELASTICSEARCH_TYPE, type DestinationType } from './types';
 
 interface DestinationsToolbarProps {
   query: string;

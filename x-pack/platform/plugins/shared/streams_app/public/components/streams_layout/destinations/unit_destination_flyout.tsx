@@ -16,7 +16,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DeleteDestinationConfirmation } from './delete_destination_confirmation';
 import { DestinationIndicesList } from './destination_indices_list';
-import { hasLocalIndices } from './destination_models';
 import { RemoteElasticsearchDestinationDetails } from './remote_elasticsearch_destination_details';
 import { S3DestinationDetails } from './s3_destination_details';
 import type { ResolvedIndicesStatus } from './state_machines/destinations_state_machine';
@@ -90,7 +89,7 @@ export const UnitDestinationFlyout = ({
       data-test-subj="streamsUnitDestinationFlyout"
     >
       <EuiFlyoutBody>
-        {hasLocalIndices(destination) ? (
+        {destination.type === 'elasticsearch' ? (
           <DestinationIndicesList
             destination={destination}
             indices={indices}

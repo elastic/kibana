@@ -16,8 +16,10 @@ import {
   validateStaticSignalIndex,
 } from './destination_models';
 import { getDestinationTypeDefinition } from './destination_type_registry';
-import { remoteElasticsearchCredentialName } from './remote_elasticsearch_constants';
-import { getRemoteIndexBySignal } from './remote_elasticsearch_destination_models';
+import {
+  getRemoteIndexBySignal,
+  remoteElasticsearchCredentialName,
+} from './remote_elasticsearch_destination_models';
 import { s3CredentialNames } from './s3_destination_models';
 import type {
   DestinationCreationFormData,
@@ -40,7 +42,6 @@ const MAX_CREDENTIAL_NAME_LENGTH = 256;
 const MAX_REMOTE_ENDPOINT_LENGTH = 2048;
 // Format and default-ignorable characters are invisible, and `new URL()` drops them from the host.
 const REMOTE_ENDPOINT_RAW_INVALID_CHARACTERS = /[\p{Cc}\p{Cf}\p{Default_Ignorable_Code_Point}\\]/u;
-const REMOTE_ENDPOINT_WHITESPACE = /\p{White_Space}/u;
 // `new URL()` repairs `https:example.com`, drops tabs and accepts `%` escapes that Go's `url.Parse`
 // downstream rejects, so the raw shape is checked first.
 const REMOTE_ENDPOINT_SHAPE = /^https:\/\/[^\s/?#@%]+(\/(?:[^\s?#%]|%[0-9A-Fa-f]{2})*)?$/;
@@ -101,10 +102,10 @@ const getCredentialNameError = ({
   return credentialNames.some((name) => referenced.has(name)) ? 'credentialConflict' : undefined;
 };
 
-const isPlainHttpsUrl = (endpoint: string): boolean => {
+// Not `URL.canParse`, which the jsdom that Jest runs on does not have.
+const canParseUrl = (endpoint: string): boolean => {
   try {
-    const { protocol, username, password, search, hash } = new URL(endpoint);
-    return protocol === 'https:' && !username && !password && !search && !hash;
+    return Boolean(new URL(endpoint));
   } catch {
     return false;
   }
@@ -132,14 +133,10 @@ export const validateRemoteEndpoint = (value: string): 'required' | 'invalid' | 
   if (!endpoint) {
     return 'required';
   }
-  if (
-    endpoint.length > MAX_REMOTE_ENDPOINT_LENGTH ||
-    REMOTE_ENDPOINT_WHITESPACE.test(endpoint) ||
-    !REMOTE_ENDPOINT_SHAPE.test(endpoint)
-  ) {
+  if (endpoint.length > MAX_REMOTE_ENDPOINT_LENGTH || !REMOTE_ENDPOINT_SHAPE.test(endpoint)) {
     return 'invalid';
   }
-  return isPlainHttpsUrl(endpoint) ? undefined : 'invalid';
+  return canParseUrl(endpoint) ? undefined : 'invalid';
 };
 
 /** Matches the saved node's supported_telemetry: all three in Auto, the filled ones in Fixed. */

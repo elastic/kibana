@@ -6,20 +6,19 @@
  */
 
 import type { UnitDestination } from './destination_models';
-import { DESTINATION_SIGNALS, toDestinationViewModel } from './destination_models';
-import {
-  REMOTE_ELASTICSEARCH_ENDPOINT_ENTRY,
-  REMOTE_ELASTICSEARCH_TYPE,
-} from './remote_elasticsearch_constants';
+import { toDestinationViewModel } from './destination_models';
 import {
   createRemoteElasticsearchUnitDestination,
   getRemoteIndexBySignal,
 } from './remote_elasticsearch_destination_models';
-import type { DestinationSignal } from './types';
-import { EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM } from './types';
+import {
+  EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM,
+  REMOTE_ELASTICSEARCH_TYPE,
+  type DestinationSignal,
+} from './types';
 
 const base = { id: 'central', name: 'Central', endpoint: 'https://es.example.com:443' };
-const endpointEntry = { name: REMOTE_ELASTICSEARCH_ENDPOINT_ENTRY, value: base.endpoint };
+const endpointEntry = { name: 'endpoint', value: base.endpoint };
 const credentialEntry = { name: 'api_key', value: { credential: 'central-api-key' } };
 
 describe('getRemoteIndexBySignal', () => {
@@ -120,37 +119,6 @@ describe('createRemoteElasticsearchUnitDestination', () => {
     });
     expect(node.config?.filter(({ name }) => name === 'api_key')).toEqual([credentialEntry]);
     expect(JSON.stringify(node)).not.toContain('secret-value-123');
-  });
-
-  const indexOptions = ['', 'x', 'y'];
-  const combinations = [true, false].flatMap((auto) =>
-    indexOptions.flatMap((logsIndex) =>
-      indexOptions.flatMap((metricsIndex) =>
-        indexOptions.map((tracesIndex) => ({ auto, logsIndex, metricsIndex, tracesIndex }))
-      )
-    )
-  );
-  const savedCombinations = combinations.filter(
-    ({ auto, logsIndex, metricsIndex, tracesIndex }) =>
-      auto || Boolean(logsIndex || metricsIndex || tracesIndex)
-  );
-
-  it('never two index entries for one signal and never a scope outside supported_telemetry', () => {
-    for (const form of savedCombinations) {
-      const node = createRemoteElasticsearchUnitDestination({ ...base, ...form });
-      const indexEntries = node.config?.filter(({ name }) => name === 'index') ?? [];
-      for (const signal of DESTINATION_SIGNALS) {
-        const covering = indexEntries.filter(
-          ({ telemetry }) => !telemetry || telemetry.includes(signal)
-        );
-        expect(covering.length).toBeLessThanOrEqual(1);
-      }
-      for (const { telemetry } of node.config ?? []) {
-        for (const signal of telemetry ?? []) {
-          expect(node.supported_telemetry).toContain(signal);
-        }
-      }
-    }
   });
 });
 

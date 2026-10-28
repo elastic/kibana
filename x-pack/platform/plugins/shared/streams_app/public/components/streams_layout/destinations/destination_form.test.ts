@@ -12,12 +12,12 @@ import {
   validateRemoteEndpoint,
 } from './destination_form';
 import { validateRemoteIndex, validateStaticSignalIndex } from './destination_models';
-import { REMOTE_ELASTICSEARCH_TYPE } from './remote_elasticsearch_constants';
 import type { RemoteElasticsearchDestinationFormData } from './types';
 import {
   EMPTY_ELASTICSEARCH_DESTINATION_FORM,
   EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM,
   EMPTY_S3_DESTINATION_FORM,
+  REMOTE_ELASTICSEARCH_TYPE,
 } from './types';
 
 const unitDefinition: StreamsUnit.GetResponse = {

@@ -8,8 +8,7 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { REMOTE_ELASTICSEARCH_TYPE } from './remote_elasticsearch_constants';
-import type { RemoteElasticsearchDestinationViewModel } from './types';
+import { REMOTE_ELASTICSEARCH_TYPE, type RemoteElasticsearchDestinationViewModel } from './types';
 import { UnitDestinationFlyout } from './unit_destination_flyout';
 
 const renderFlyout = (destination: RemoteElasticsearchDestinationViewModel) =>

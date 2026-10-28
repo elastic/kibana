@@ -13,11 +13,8 @@ import {
 import type { StreamsUnit } from '@kbn/streams-schema';
 import type { Unit } from '../../../services/unit_repository';
 import {
-  REMOTE_ELASTICSEARCH_ENDPOINT_ENTRY,
-  REMOTE_ELASTICSEARCH_TYPE,
-} from './remote_elasticsearch_constants';
-import {
   AUTO_INDEX_PATTERNS,
+  REMOTE_ELASTICSEARCH_TYPE,
   type AutoWritePatternValidationError,
   type DestinationSignal,
   type DestinationViewModel,
@@ -244,17 +241,11 @@ export const toRemoteElasticsearchDestinationViewModel = (
     name: destination.name ?? destination.id,
     type: REMOTE_ELASTICSEARCH_TYPE,
     signals,
-    endpoint: readConfigString(destination, REMOTE_ELASTICSEARCH_ENDPOINT_ENTRY) ?? '',
+    endpoint: readConfigString(destination, 'endpoint') ?? '',
     mode: Object.keys(indexBySignal).length > 0 ? 'static' : 'auto',
     indexBySignal,
   };
 };
-
-/** The destination writes to indices on this cluster, so index lookups and stats apply. */
-export const hasLocalIndices = (
-  destination: DestinationViewModel
-): destination is ElasticsearchDestinationViewModel =>
-  destination.type === LOCAL_ELASTICSEARCH_TYPE;
 
 export const toDestinationViewModel = (
   destination: UnitDestination

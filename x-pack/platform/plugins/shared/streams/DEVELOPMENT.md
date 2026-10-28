@@ -73,7 +73,7 @@ Plaintext secrets live in the configuration SO `secrets` map (`{ "<name>": "<val
 
 Names follow the unit identifier grammar (`^[a-z0-9]([a-z0-9-]*[a-z0-9])?$`, at most 256 characters). The same name is the reference, the key in `secrets`, and the `credentials[].name` sent to the distributor. The UI convention is `<nodeId>-<field>` with `_` turned into `-`, for example `s3-archive-secret-access-key`. That convention can collide (`a-b` + `c` and `a` + `b_c` both give `a-b-c`), so the UI must check before saving. Two nodes that reference the same name share one secret. The S3 destination modal is the first client sender: it writes `{ credential: <id>-access-key-id }` and `{ credential: <id>-secret-access-key }` into the node and sends both plaintext values in `secrets` on the same PUT.
 
-The remote Elasticsearch destination modal does the same with one key: it writes `{ credential: <id>-api-key }` into the node and sends the user's key in `secrets`. Kibana never mints or revokes that key. A remote create sends the whole unit, so once streams-transpiler#253 is deployed it fails validation on a unit that still has a local Auto destination with `index_patterns` write targets. kibana#301180 (open) writes new local destinations with `write_patterns`. Stored `index_patterns` still need a migration.
+The remote Elasticsearch destination modal does the same with one key: it writes `{ credential: <id>-api-key }` into the node and sends the user's key in `secrets`. Kibana never mints or revokes that key.
 
 A JSON envelope that stores a secret references it from the node and sends the value next to the unit:
 
