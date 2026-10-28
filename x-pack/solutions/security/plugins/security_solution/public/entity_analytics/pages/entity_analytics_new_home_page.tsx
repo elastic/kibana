@@ -255,6 +255,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   const { hasIndexRead: hasAlertsIndexRead, loading: isAlertsPrivilegesLoading } =
     useAlertsPrivileges();
   const { cases } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
 
   const alerts = getReadAccess({
     isLoading: isAlertsPrivilegesLoading,
@@ -293,13 +294,23 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   return (
     <>
-      <EntityAnalyticsReadPrivilegesCallout
-        riskEngineReadPrivileges={riskEngineReadPrivileges}
-        entityEnginePrivileges={entityEnginePrivilegesQuery.data}
-        anomalyPrivileges={anomalyPrivilegesQuery.data}
-        alertsIndexPrivileges={alertsPrivilegesResult?.index}
-        id="entity-analytics-home"
-      />
+      <div
+        data-test-subj="entityAnalyticsPrivilegesCalloutWrapper"
+        css={css`
+          padding: ${euiTheme.size.base} ${euiTheme.size.base} 0;
+          &:empty {
+            display: none;
+          }
+        `}
+      >
+        <EntityAnalyticsReadPrivilegesCallout
+          riskEngineReadPrivileges={riskEngineReadPrivileges}
+          entityEnginePrivileges={entityEnginePrivilegesQuery.data}
+          anomalyPrivileges={anomalyPrivilegesQuery.data}
+          alertsIndexPrivileges={alertsPrivilegesResult?.index}
+          id="entity-analytics-home"
+        />
+      </div>
       {noPrivileges ? (
         <>
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsNewHomePage">
