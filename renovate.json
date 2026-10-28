@@ -1,5 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": ["CI port verification, DO NOT MERGE"],
   "extends": [
     "config:recommended",
     "helpers:pinGitHubActionDigests",
