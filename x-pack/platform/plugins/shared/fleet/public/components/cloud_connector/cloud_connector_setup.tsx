@@ -71,9 +71,12 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   const templateSha =
     cloudConnectors?.find(({ id }) => id === newPolicy.cloud_connector_id)?.iac_key ?? undefined;
   const [selectedTabId, setSelectedTabId] = useState<string>(TABS.NEW_CONNECTION);
+  const [hasAttachedCloudConnector] = useState<boolean>(
+    () => isEditPage && Boolean(newPolicy.cloud_connector_id)
+  );
 
   useEffect(() => {
-    if (isEditPage) {
+    if (hasAttachedCloudConnector) {
       setSelectedTabId(TABS.EXISTING_CONNECTION);
     } else {
       setSelectedTabId(
@@ -82,7 +85,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           : TABS.NEW_CONNECTION
       );
     }
-  }, [cloudConnectorsCount, isEditPage]);
+  }, [cloudConnectorsCount, hasAttachedCloudConnector]);
 
   // Ensure root-level supports_cloud_connector is true when this component is rendered
   // NOTE: This must be in a useEffect, NOT during render, to avoid React errors
@@ -216,7 +219,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           tabs={tabs}
           selectedTabId={selectedTabId}
           onTabClick={onTabClick}
-          isEditPage={isEditPage}
+          hasAttachedCloudConnector={hasAttachedCloudConnector}
           cloudProvider={cloudProvider}
           cloudConnectorsCount={cloudConnectorsCount || 0}
         />

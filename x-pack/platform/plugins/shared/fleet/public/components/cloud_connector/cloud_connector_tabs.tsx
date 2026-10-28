@@ -23,7 +23,7 @@ export interface CloudConnectorTabsProps {
   tabs: CloudConnectorTab[];
   selectedTabId: string;
   onTabClick: (tab: CloudConnectorTab) => void;
-  isEditPage: boolean;
+  hasAttachedCloudConnector: boolean;
   cloudProvider?: CloudProvider;
   cloudConnectorsCount: number;
 }
@@ -33,7 +33,7 @@ export const CloudConnectorTabs: React.FC<CloudConnectorTabsProps> = ({
   selectedTabId,
   onTabClick,
   cloudConnectorsCount,
-  isEditPage,
+  hasAttachedCloudConnector,
 }) => {
   return (
     <>
@@ -47,8 +47,10 @@ export const CloudConnectorTabs: React.FC<CloudConnectorTabsProps> = ({
             }}
             isSelected={tab.id === selectedTabId}
             disabled={
-              (tab.id === TABS.EXISTING_CONNECTION && !cloudConnectorsCount && !isEditPage) ||
-              (isEditPage && tab.id === TABS.NEW_CONNECTION)
+              (tab.id === TABS.EXISTING_CONNECTION &&
+                !cloudConnectorsCount &&
+                !hasAttachedCloudConnector) ||
+              (hasAttachedCloudConnector && tab.id === TABS.NEW_CONNECTION)
             }
           >
             <FormattedMessage
