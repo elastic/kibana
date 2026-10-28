@@ -15,7 +15,7 @@ const path = require('path');
 const v8 = require('node:v8');
 
 const MIB_PER_KIB = 1 / 1024;
-const SIXTY_FOUR_MIB = BigInt(64 * 1024 * 1024);
+const SIXTY_FOUR_MIB = 64 * 1024 * 1024;
 const TOP_GROUPS = 30;
 const TOP_ANON_MAPPINGS = 25;
 
@@ -87,7 +87,8 @@ const parseSmaps = (text) => {
         perms: current.perms,
         sizeKib: current.Size ?? 0,
         rssKib: current.Rss ?? 0,
-        startsOn64MiB: BigInt(`0x${current.start}`) % SIXTY_FOUR_MIB === BigInt(0),
+        // User-space addresses are below 2^47, so they are exact in a double.
+        startsOn64MiB: parseInt(current.start, 16) % SIXTY_FOUR_MIB === 0,
       });
     }
   };
