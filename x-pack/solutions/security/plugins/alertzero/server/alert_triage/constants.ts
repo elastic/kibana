@@ -125,6 +125,13 @@ export const TRIAGE_WOULD_SKIP_TAG_PREFIX = 'az:would_skip:';
 export const TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX = 'az:closed_by_decision:';
 /** Added with `az:inconclusive` to an alert a dismissed pattern kept out of analysis. */
 export const TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX = 'az:skipped_by_decision:';
+/**
+ * Notes one sweep writes at most. Each note is one call and takes about a second, 20 at a time, so
+ * this bounds the step to about a minute. Alerts past it are still closed or skipped, without a note.
+ */
+export const DECISION_NOTES_PER_SWEEP = 1000;
+/** Notes written in parallel. The batch workflow writes its verdict notes at the same width. */
+export const NOTE_CONCURRENCY = 20;
 /** Pages of 10,000 alerts a revoke puts back at most. Run it again for more. */
 export const MAX_REVOKE_PAGES = 10;
 /** Most alerts one decision may close in 24 hours. A starting value, to size from shadow data. */

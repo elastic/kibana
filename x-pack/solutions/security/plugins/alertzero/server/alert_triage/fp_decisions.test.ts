@@ -244,6 +244,29 @@ describe('readActiveDecision', () => {
     });
   });
 
+  it('carries who approved it, when and in which proposal, for the note on an alert', () => {
+    expect(
+      readActiveDecision({
+        id: 'd',
+        source: source({
+          attributes: {
+            decision: 'false_positive',
+            approver: 'ana',
+            decided_at: '2026-10-20T08:00:00.000Z',
+            proposal_id: 'prop-1',
+          },
+        }),
+        now,
+      })
+    ).toEqual({
+      id: 'd',
+      kind: 'false_positive',
+      approver: 'ana',
+      decidedAt: '2026-10-20T08:00:00.000Z',
+      proposalId: 'prop-1',
+    });
+  });
+
   it('ignores an expired decision', () => {
     expect(
       readActiveDecision({

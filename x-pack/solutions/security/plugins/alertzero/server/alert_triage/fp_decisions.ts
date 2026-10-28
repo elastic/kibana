@@ -204,8 +204,8 @@ export const buildDecisionDocument = ({
       decided_at: decidedAt,
       proposal_id: proposalId,
       investigation_id: investigationId,
-      // The approver saw a grouped proposal, not this condition. The matcher treats these as
-      // shadow-only until a person confirms the decision.
+      // The approver saw a grouped proposal, not this condition. Kept for the audit trail only: the
+      // flag is the one switch, and no per-decision confirmation exists.
       approved_via: 'group',
       producer: 'alertzero.triage.fpDecisions.v1',
     },
@@ -220,6 +220,10 @@ export const buildDecisionDocument = ({
 export interface StoredDecision {
   id: string;
   kind: FpDecisionKind;
+  /** Who approved it, when and in which proposal: what an alert's note tells the analyst. */
+  approver?: string;
+  decidedAt?: string;
+  proposalId?: string;
 }
 
 /**
@@ -242,8 +246,22 @@ export const readActiveDecision = ({
   const expiresAt = typeof source.expires_at === 'string' ? Date.parse(source.expires_at) : NaN;
   // An item with no expiry would never lapse. Decisions always set one, so one without it is not ours.
   if (!(expiresAt > now)) return undefined;
-  const kind = (source.attributes as { decision?: string } | undefined)?.decision;
-  return kind === 'false_positive' || kind === 'do_not_propose' ? { id, kind } : undefined;
+  const attributes = (source.attributes ?? {}) as Record<string, unknown>;
+  const kind = attributes.decision;
+  if (kind !== 'false_positive' && kind !== 'do_not_propose') return undefined;
+  const text = (value: unknown) => (typeof value === 'string' && value !== '' ? value : undefined);
+  const [approver, decidedAt, proposalId] = [
+    text(attributes.approver),
+    text(attributes.decided_at),
+    text(attributes.proposal_id),
+  ];
+  return {
+    id,
+    kind,
+    ...(approver ? { approver } : {}),
+    ...(decidedAt ? { decidedAt } : {}),
+    ...(proposalId ? { proposalId } : {}),
+  };
 };
 
 export interface MatchCandidate {
