@@ -61,7 +61,7 @@ paths:
           schema:
             description: 'The field that is used to sort the results.'
             example: 'agent.name'
-            default: '@timestamp'
+            default: createdAt
             type: string
             maxLength: 256
             nullable: true
@@ -164,7 +164,7 @@ paths:
           schema:
             description: 'The field that is used to sort the results.'
             example: 'agent.name'
-            default: '@timestamp'
+            default: createdAt
             type: string
             maxLength: 256
             nullable: true

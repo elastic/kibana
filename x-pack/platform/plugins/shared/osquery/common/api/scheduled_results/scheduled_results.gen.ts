@@ -110,7 +110,7 @@ export const OsqueryGetScheduledActionResultsRequestQuery = lazySchema(() =>
       .max(256)
       .nullable()
       .optional()
-      .default('@timestamp')
+      .default('createdAt')
       .describe('The field that is used to sort the results.'),
     /**
      * Specifies the sort order.
@@ -179,7 +179,7 @@ export const OsqueryGetScheduledQueryResultsRequestQuery = lazySchema(() =>
       .max(256)
       .nullable()
       .optional()
-      .default('@timestamp')
+      .default('createdAt')
       .describe('The field that is used to sort the results.'),
     /**
      * Specifies the sort order.

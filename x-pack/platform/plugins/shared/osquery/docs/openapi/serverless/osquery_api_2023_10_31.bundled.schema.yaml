@@ -1210,7 +1210,7 @@ paths:
           name: sort
           required: false
           schema:
-            default: '@timestamp'
+            default: createdAt
             description: The field that is used to sort the results.
             example: agent.name
             maxLength: 256
@@ -1452,7 +1452,7 @@ paths:
           name: sort
           required: false
           schema:
-            default: '@timestamp'
+            default: createdAt
             description: The field that is used to sort the results.
             example: agent.name
             maxLength: 256
