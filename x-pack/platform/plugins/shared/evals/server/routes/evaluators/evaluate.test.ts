@@ -26,7 +26,7 @@ import { awaitTraceReady, TraceReadinessError } from '../../evaluators/trace_rea
 import type { EvidenceRound, InstrumentationProfile } from '../../evaluators/evidence/types';
 import { withEvaluatorNameBaggage } from '../../evaluators/evaluator_tracing_context';
 import { registerEvaluateRoute } from './evaluate';
-import { EVALUATOR_CONCURRENCY } from './shared/execute_evaluators';
+import { EVALUATOR_CONCURRENCY } from '../../evaluation/execute_evaluators';
 import {
   buildClaudeCodeApiResponseDoc,
   buildClaudeCodeToolSpanDoc,

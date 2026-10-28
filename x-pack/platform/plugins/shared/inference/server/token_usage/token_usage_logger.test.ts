@@ -38,7 +38,6 @@ describe('TokenUsageLogger', () => {
 
   describe('log', () => {
     it('should create the index template and data stream if they do not exist, then index the document', async () => {
-      esClient.indices.existsIndexTemplate.mockResolvedValue(false);
       esClient.indices.putIndexTemplate.mockResolvedValue({} as any);
       esClient.indices.exists.mockResolvedValue(false);
       esClient.indices.createDataStream.mockResolvedValue({} as any);
@@ -50,9 +49,6 @@ describe('TokenUsageLogger', () => {
         context: defaultContext,
       });
 
-      expect(esClient.indices.existsIndexTemplate).toHaveBeenCalledWith({
-        name: '.kibana-inference-token-usage-template',
-      });
       expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
         expect.objectContaining({
           name: '.kibana-inference-token-usage-template',
@@ -73,6 +69,7 @@ describe('TokenUsageLogger', () => {
       expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
         name: '.kibana-inference-token-usage',
       });
+      expect(esClient.indices.putMapping).not.toHaveBeenCalled();
 
       expect(esClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -100,8 +97,7 @@ describe('TokenUsageLogger', () => {
       );
     });
 
-    it('should skip data stream creation if it already exists', async () => {
-      esClient.indices.existsIndexTemplate.mockResolvedValue(true);
+    it('should update the index template and data stream mappings if the data stream already exists', async () => {
       esClient.indices.exists.mockResolvedValue(true);
       esClient.index.mockResolvedValue({} as any);
 
@@ -110,25 +106,46 @@ describe('TokenUsageLogger', () => {
         context: defaultContext,
       });
 
-      expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: '.kibana-inference-token-usage-template' })
+      );
+      expect(esClient.indices.putMapping).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: '.kibana-inference-token-usage',
+          properties: expect.objectContaining({
+            inference: expect.any(Object),
+          }),
+        })
+      );
       expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
       expect(esClient.index).toHaveBeenCalled();
     });
 
+    it('should still index the document if updating the data stream mappings fails', async () => {
+      esClient.indices.exists.mockResolvedValue(true);
+      esClient.indices.putMapping.mockRejectedValue(new Error('mapping conflict'));
+      esClient.index.mockResolvedValue({} as any);
+
+      await tokenUsageLogger.log({ tokens: defaultTokens, context: defaultContext });
+
+      expect(logger.get('token_usage').warn).toHaveBeenCalledWith(
+        'Failed to update mappings of data stream .kibana-inference-token-usage: mapping conflict'
+      );
+      expect(esClient.index).toHaveBeenCalled();
+    });
+
     it('should not check data stream existence again after it has been confirmed', async () => {
-      esClient.indices.existsIndexTemplate.mockResolvedValue(true);
       esClient.indices.exists.mockResolvedValue(true);
       esClient.index.mockResolvedValue({} as any);
 
       await tokenUsageLogger.log({ tokens: defaultTokens, context: defaultContext });
       await tokenUsageLogger.log({ tokens: defaultTokens, context: defaultContext });
 
-      expect(esClient.indices.existsIndexTemplate).toHaveBeenCalledTimes(1);
+      expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
       expect(esClient.index).toHaveBeenCalledTimes(2);
     });
 
     it('should handle resource_already_exists_exception gracefully', async () => {
-      esClient.indices.existsIndexTemplate.mockResolvedValue(false);
       esClient.indices.putIndexTemplate.mockResolvedValue({} as any);
       esClient.indices.exists.mockResolvedValue(false);
       esClient.indices.createDataStream.mockRejectedValue({
@@ -142,7 +159,6 @@ describe('TokenUsageLogger', () => {
     });
 
     it('should use context modelId when model param is not provided', async () => {
-      esClient.indices.existsIndexTemplate.mockResolvedValue(true);
       esClient.indices.exists.mockResolvedValue(true);
       esClient.index.mockResolvedValue({} as any);
 
@@ -163,7 +179,6 @@ describe('TokenUsageLogger', () => {
     });
 
     it('should store model_name from context', async () => {
-      esClient.indices.existsIndexTemplate.mockResolvedValue(true);
       esClient.indices.exists.mockResolvedValue(true);
       esClient.index.mockResolvedValue({} as any);
 
@@ -184,7 +199,6 @@ describe('TokenUsageLogger', () => {
     });
 
     it('should prefer the model param over context modelId', async () => {
-      esClient.indices.existsIndexTemplate.mockResolvedValue(true);
       esClient.indices.exists.mockResolvedValue(true);
       esClient.index.mockResolvedValue({} as any);
 
@@ -206,7 +220,6 @@ describe('TokenUsageLogger', () => {
     });
 
     it('should include optional token fields when present', async () => {
-      esClient.indices.existsIndexTemplate.mockResolvedValue(true);
       esClient.indices.exists.mockResolvedValue(true);
       esClient.index.mockResolvedValue({} as any);
 
@@ -244,7 +257,6 @@ describe('TokenUsageLogger', () => {
     });
 
     it('should reset dataStreamReady when index is not found, allowing re-creation on next call', async () => {
-      esClient.indices.existsIndexTemplate.mockResolvedValue(true);
       esClient.indices.exists.mockResolvedValue(true);
       esClient.index.mockRejectedValueOnce({ meta: { statusCode: 404 } });
       esClient.index.mockResolvedValueOnce({} as any);
@@ -255,12 +267,11 @@ describe('TokenUsageLogger', () => {
       // Second call: should re-check index existence and succeed
       await tokenUsageLogger.log({ tokens: defaultTokens, context: defaultContext });
 
-      expect(esClient.indices.existsIndexTemplate).toHaveBeenCalledTimes(2);
+      expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
       expect(esClient.index).toHaveBeenCalledTimes(2);
     });
 
     it('should log an error and not throw when indexing fails', async () => {
-      esClient.indices.existsIndexTemplate.mockResolvedValue(true);
       esClient.indices.exists.mockResolvedValue(true);
       esClient.index.mockRejectedValue(new Error('index write failed'));
 
@@ -271,6 +282,60 @@ describe('TokenUsageLogger', () => {
       expect(logger.get('token_usage').error).toHaveBeenCalledWith(
         'Failed to log token usage: index write failed'
       );
+    });
+  });
+
+  describe('updateExistingDataStream', () => {
+    it('should put the index template and data stream mappings if the data stream exists', async () => {
+      esClient.indices.exists.mockResolvedValue(true);
+
+      await tokenUsageLogger.updateExistingDataStream();
+
+      expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: '.kibana-inference-token-usage-template' })
+      );
+      expect(esClient.indices.putMapping).toHaveBeenCalledWith(
+        expect.objectContaining({ index: '.kibana-inference-token-usage' })
+      );
+      expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
+    });
+
+    it('should not create anything if the data stream does not exist', async () => {
+      esClient.indices.exists.mockResolvedValue(false);
+
+      await tokenUsageLogger.updateExistingDataStream();
+
+      expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+      expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
+    });
+
+    it('should warn and not throw if updating the mappings fails', async () => {
+      esClient.indices.exists.mockResolvedValue(true);
+      esClient.indices.putMapping.mockRejectedValue(new Error('mapping conflict'));
+
+      await expect(tokenUsageLogger.updateExistingDataStream()).resolves.toBeUndefined();
+
+      expect(logger.get('token_usage').warn).toHaveBeenCalledWith(
+        'Failed to update mappings of data stream .kibana-inference-token-usage: mapping conflict'
+      );
+    });
+
+    it('should do nothing if the ES client is not initialized', async () => {
+      const uninitializedLogger = new TokenUsageLogger(logger);
+
+      await expect(uninitializedLogger.updateExistingDataStream()).resolves.toBeUndefined();
+    });
+
+    it('should leave the lazy setup in place for the first write', async () => {
+      esClient.indices.exists.mockResolvedValue(true);
+      esClient.index.mockResolvedValue({} as any);
+
+      await tokenUsageLogger.updateExistingDataStream();
+      await tokenUsageLogger.log({ tokens: defaultTokens, context: defaultContext });
+
+      expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
+      expect(esClient.index).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -126,7 +126,7 @@ export const VegaEditorFlyout = ({
   const [publishedQuery, publishedFilters, publishedDataViews] = useBatchedPublishingSubjects(
     api.query$,
     api.filters$,
-    api.dataViews$
+    api.dataSources$
   );
   // Like Visualize's search bar, fall back to the default data view when the spec names none.
   const dataViews = publishedDataViews?.length

@@ -271,6 +271,7 @@ export const User: FC<UserProps> = memo(function User({
 
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
     entityRecord: observedUser.entityRecord ?? null,
+    isGroupView,
   });
 
   const tabsNode = tabs ? (

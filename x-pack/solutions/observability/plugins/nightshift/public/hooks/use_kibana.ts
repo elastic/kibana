@@ -16,6 +16,8 @@ import type { NightshiftStartDependencies } from '../types';
  */
 export type StartServices = CoreStart &
   NightshiftStartDependencies & {
+    /** Set by the app root; false outside it, for example in a test that does not provide it. */
+    isServerless?: boolean;
     appParams: {
       history: ScopedHistory;
     };
