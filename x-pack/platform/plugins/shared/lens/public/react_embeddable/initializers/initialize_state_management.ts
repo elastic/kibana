@@ -60,26 +60,41 @@ const omitUndefinedKeys = (value: unknown): unknown => {
  * Due to inline editing we need something advanced to handle the state
  * management at the embeddable level, so here's the initializers for it
  */
+const resolveAttributes = (
+  value: LensSerializedState['attributes'] | undefined,
+  state?: LensWireAPIConfig
+) => {
+  if (value !== undefined) return value;
+  if (state && 'attributes' in state && state.attributes) {
+    return state.attributes;
+  }
+  if (state && isFlattenedAPIConfig(state)) {
+    return unflattenAPIConfig(state).attributes;
+  }
+  return value;
+};
+
+/** Compares the attributes of a by-value panel; a library panel saves them on its own. */
+export const getStateComparators = (
+  refId: string | undefined
+): StateComparators<Pick<LensSerializedState, 'attributes' | 'ref_id'>> => ({
+  attributes:
+    refId === undefined
+      ? (lastValue, currentValue, lastState, currentState) => {
+          const lastAttributes = resolveAttributes(lastValue, lastState);
+          const currentAttributes = resolveAttributes(currentValue, currentState);
+          return deepEqual(omitUndefinedKeys(lastAttributes), omitUndefinedKeys(currentAttributes));
+        }
+      : 'skip',
+  ref_id: 'skip',
+});
+
 export function initializeStateManagement(
   initialState: LensRuntimeState,
   internalApi: LensInternalApi
 ): StateManagementConfig {
   // savedObjectId$ exposed for PublishesSavedObjectId compatibility, sourced from ref_id in state
   const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState.ref_id);
-
-  const resolveAttributes = (
-    value: LensSerializedState['attributes'] | undefined,
-    state?: LensWireAPIConfig
-  ) => {
-    if (value !== undefined) return value;
-    if (state && 'attributes' in state && state.attributes) {
-      return state.attributes;
-    }
-    if (state && isFlattenedAPIConfig(state)) {
-      return unflattenAPIConfig(state).attributes;
-    }
-    return value;
-  };
 
   const publicRenderCount$ = new BehaviorSubject(internalApi.renderCount$.getValue() + 1);
   const renderCountSubscription = internalApi.renderCount$.subscribe((count) =>
@@ -103,22 +118,7 @@ export function initializeStateManagement(
         map(() => undefined)
       )
     ),
-    getComparators: () => {
-      return {
-        attributes:
-          initialState.ref_id === undefined
-            ? (lastValue, currentValue, lastState, currentState) => {
-                const lastAttributes = resolveAttributes(lastValue, lastState);
-                const currentAttributes = resolveAttributes(currentValue, currentState);
-                return deepEqual(
-                  omitUndefinedKeys(lastAttributes),
-                  omitUndefinedKeys(currentAttributes)
-                );
-              }
-            : 'skip',
-        ref_id: 'skip',
-      };
-    },
+    getComparators: () => getStateComparators(initialState.ref_id),
     getLatestState: () => {
       return {
         attributes: internalApi.attributes$.getValue(),
