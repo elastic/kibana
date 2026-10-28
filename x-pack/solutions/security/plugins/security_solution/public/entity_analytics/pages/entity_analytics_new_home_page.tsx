@@ -252,15 +252,20 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   const {
     detectionEnginePrivileges: { error: alertsPrivilegesError, result: alertsPrivilegesResult },
   } = useUserPrivileges();
-  const { hasIndexRead: hasAlertsIndexRead, loading: isAlertsPrivilegesLoading } =
-    useAlertsPrivileges();
+  // `hasAlertsRead` needs both the Security > Alerts feature privilege and read on the alerts
+  // index; `hasIndexRead` is null until the index privileges are known.
+  const {
+    hasIndexRead: hasAlertsIndexRead,
+    hasAlertsRead,
+    loading: isAlertsPrivilegesLoading,
+  } = useAlertsPrivileges();
   const { cases } = useKibana().services;
   const { euiTheme } = useEuiTheme();
 
   const alerts = getReadAccess({
     isLoading: isAlertsPrivilegesLoading,
     isError: alertsPrivilegesError != null,
-    canRead: hasAlertsIndexRead ?? undefined,
+    canRead: hasAlertsIndexRead == null ? undefined : hasAlertsRead,
   });
   const risk = getReadAccess({
     isLoading: riskEngineReadPrivileges.isLoading,
