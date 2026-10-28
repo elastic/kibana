@@ -281,7 +281,7 @@ steps:
           **Create a new ES|QL detection rule for this gap**
 
           **Rule:** {{ steps.draft_creation.output.structured_output.rule.name }}
-          **Recommended action:** Create the rule in the disabled state
+          **Recommended action:** Create the rule
 
           {% if inputs.review_context != blank %}{{ inputs.review_context }}
           {% else %}**Detection gap**
@@ -301,7 +301,7 @@ steps:
           Backtest errors: {{ steps.preview_creation.output.error_text }}{% endif %}
 
           **On approval**
-          If you approve, the agent creates the rule in the disabled state under your identity. Review the rule and enable it on the rules page. If you dismiss, the agent discards the draft.
+          If you approve, the agent creates the rule under your identity. Review the rule and its state on the rules page. If you dismiss, the agent discards the draft.
         actionWorkflowId: system-alertzero-action-create-rule
         actionInput: "${{ steps.draft_creation.output.structured_output.rule }}"
         impact: low
