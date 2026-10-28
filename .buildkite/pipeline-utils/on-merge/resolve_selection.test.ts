@@ -220,10 +220,34 @@ describe('resolveOnMergeSelection', () => {
     await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({
       suites: {
         ...allSelective,
-        ftr: { mode: 'full', reason: 'failed in previous build #99' },
+        ftr: { mode: 'full', reason: 'did not pass in previous build #99' },
       },
     });
   });
+
+  it.each(['broken', 'canceled'] as const)(
+    'runs a suite in full when its previous job was %s',
+    async (state) => {
+      const deps = createDeps({
+        getPreviousFinishedBuild: jest.fn().mockResolvedValue(
+          previousBuild({
+            jobs: [
+              job('jest'),
+              job('jest-integration'),
+              job('scout_test_lane_1'),
+              job('ftr_configs_0', { state }),
+            ],
+          })
+        ),
+      });
+      await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({
+        suites: {
+          ...allSelective,
+          ftr: { mode: 'full', reason: 'did not pass in previous build #99' },
+        },
+      });
+    }
+  );
 
   it('runs ES-dependent suites in full when the ES snapshot changed', async () => {
     const deps = createDeps({ esSnapshotManifest: 'https://example.com/new.json' });

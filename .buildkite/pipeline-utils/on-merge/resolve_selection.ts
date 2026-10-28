@@ -18,7 +18,15 @@ const FULL_SHA = /^[0-9a-f]{40}$/i;
 const NULL_SHA = /^0{40}$/;
 
 const ES_DEPENDENT_SUITES: ReadonlySet<OnMergeSuite> = new Set(['scout', 'jestIntegration', 'ftr']);
-const FAILED_JOB_STATES: ReadonlySet<string> = new Set(['failed', 'timed_out', 'timing_out']);
+// A job that never ran is not evidence the suite passed, and this build's range won't cover
+// the commits it skipped. `broken` = a dependency failed, `canceled` = build stopped part-way.
+const UNPROVEN_JOB_STATES: ReadonlySet<string> = new Set([
+  'failed',
+  'timed_out',
+  'timing_out',
+  'broken',
+  'canceled',
+]);
 
 const SUITE_STEP_KEY_MATCHERS: Record<OnMergeSuite, (stepKey: string) => boolean> = {
   scout: (stepKey) => stepKey.startsWith('scout_test_lane_'),
@@ -81,19 +89,19 @@ const resolveBase = async ({
   return { reason: `cannot resolve base (commit has ${parents.length} parents)` };
 };
 
-const isFailedJob = (job: Job): boolean =>
-  job.type === 'script' && !job.retried && !job.soft_failed && FAILED_JOB_STATES.has(job.state);
+const isUnprovenJob = (job: Job): boolean =>
+  job.type === 'script' && !job.retried && !job.soft_failed && UNPROVEN_JOB_STATES.has(job.state);
 
 const decideSuite = (
   suite: OnMergeSuite,
   previousBuild: Build,
   esSnapshotChanged: boolean
 ): OnMergeSuiteDecision => {
-  const failedInPreviousBuild = previousBuild.jobs?.some(
-    (job) => job.step_key && SUITE_STEP_KEY_MATCHERS[suite](job.step_key) && isFailedJob(job)
+  const unprovenInPreviousBuild = previousBuild.jobs?.some(
+    (job) => job.step_key && SUITE_STEP_KEY_MATCHERS[suite](job.step_key) && isUnprovenJob(job)
   );
-  if (failedInPreviousBuild) {
-    return { mode: 'full', reason: `failed in previous build #${previousBuild.number}` };
+  if (unprovenInPreviousBuild) {
+    return { mode: 'full', reason: `did not pass in previous build #${previousBuild.number}` };
   }
   if (esSnapshotChanged && ES_DEPENDENT_SUITES.has(suite)) {
     return { mode: 'full', reason: 'ES snapshot changed' };
