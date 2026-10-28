@@ -6,7 +6,7 @@
  */
 
 import { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
-import { Direction } from '../../../../../../common/search_strategy';
+import { Direction } from '@kbn/securitysolution-timeline-common';
 import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
 
 describe('buildTimelineEventsAllQuery', () => {
