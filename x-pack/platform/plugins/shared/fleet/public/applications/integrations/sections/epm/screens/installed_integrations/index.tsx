@@ -12,13 +12,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
 import { Loading } from '../../../../../../components';
-import { MAX_CLOUD_ONBOARDING_DEPLOYMENTS, useUrlPagination } from '../../../../../../hooks';
+import {
+  MAX_CLOUD_ONBOARDING_DEPLOYMENTS,
+  useGetPackageInfoByKeyQuery,
+  useUrlPagination,
+} from '../../../../../../hooks';
 
 import { InstalledIntegrationsTable } from './components/installed_integrations_table';
 import { useInstalledIntegrations } from './hooks/use_installed_integrations';
 import { useUrlFilters, useViewInstances, useViewPolicies } from './hooks/use_url_filters';
 import { InstalledIntegrationsSearchBar } from './components/installed_integrations_search_bar';
-import type { InstalledPackageUIPackageListItem } from './types';
+import type { InstalledPackageUIPackageListItem, PanelPackage } from './types';
 import { useInstalledIntegrationsActions } from './hooks/use_installed_integrations_actions';
 import { BulkActionContextProvider } from './hooks/use_bulk_actions_context';
 import { PackagePoliciesPanel } from './components/package_policies_panel';
@@ -67,13 +71,28 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
     [selectedPackageViewPolicies, installedPackages]
   );
 
-  const instancesSelectedItem = useMemo(
+  const instancesItemOnPage = useMemo(
     () =>
       selectedPackageViewInstances
         ? installedPackages.find((item) => item.name === selectedPackageViewInstances)
-        : null,
+        : undefined,
     [selectedPackageViewInstances, installedPackages]
   );
+  // A link from outside, like Finish in the AWS onboarding flow, can name a package that is not on
+  // the current page of the table: read its title and icon from the package itself. The instances
+  // come from the full list either way.
+  const { data: instancesPackageInfo } = useGetPackageInfoByKeyQuery(
+    selectedPackageViewInstances ?? '',
+    undefined,
+    undefined,
+    { enabled: !!selectedPackageViewInstances && !instancesItemOnPage }
+  );
+  const instancesSelectedItem: PanelPackage | undefined = useMemo(() => {
+    if (instancesItemOnPage) return instancesItemOnPage;
+    const item = instancesPackageInfo?.item;
+    if (!selectedPackageViewInstances || item?.name !== selectedPackageViewInstances) return;
+    return { name: item.name, title: item.title, version: item.version, icons: item.icons };
+  }, [instancesItemOnPage, instancesPackageInfo, selectedPackageViewInstances]);
 
   const instanceCounts = useMemo(
     () =>

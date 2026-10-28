@@ -31,3 +31,9 @@ export interface InstalledIntegrationsFilter {
   customIntegrations?: boolean;
   q?: string;
 }
+
+/** What a bottom panel needs to show its package in the title. */
+export type PanelPackage = Pick<
+  InstalledPackageUIPackageListItem,
+  'name' | 'title' | 'version' | 'icons'
+>;

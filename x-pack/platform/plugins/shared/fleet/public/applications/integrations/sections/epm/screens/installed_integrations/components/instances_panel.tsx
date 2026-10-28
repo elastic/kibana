@@ -10,7 +10,7 @@ import React from 'react';
 import { useEuiPaddingCSS } from '@elastic/eui';
 
 import type { CloudOnboardingDeploymentListItem } from '../../../../../../../../common/types';
-import type { InstalledPackageUIPackageListItem } from '../types';
+import type { PanelPackage } from '../types';
 import { useViewInstances } from '../hooks/use_url_filters';
 
 import { InstancesTable } from './instances_table';
@@ -18,7 +18,7 @@ import { PackagePanelTitle } from './package_panel_title';
 import { ResizablePanel } from './resizable_panel';
 
 export const InstancesPanel: React.FunctionComponent<{
-  installedPackage: InstalledPackageUIPackageListItem;
+  installedPackage: PanelPackage;
   instances: CloudOnboardingDeploymentListItem[];
 }> = ({ installedPackage, instances }) => {
   const { addViewInstances } = useViewInstances();

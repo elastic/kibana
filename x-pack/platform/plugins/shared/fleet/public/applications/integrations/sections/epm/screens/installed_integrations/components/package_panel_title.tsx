@@ -10,10 +10,10 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { TableIcon } from '../../../../../../../components/package_icon';
-import type { InstalledPackageUIPackageListItem } from '../types';
+import type { PanelPackage } from '../types';
 
 export const PackagePanelTitle: React.FunctionComponent<{
-  installedPackage: InstalledPackageUIPackageListItem;
+  installedPackage: PanelPackage;
 }> = ({ installedPackage }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
