@@ -9,9 +9,9 @@
 
 require('@kbn/setup-node-env');
 
-// eslint-disable-next-line no-restricted-modules
+// eslint-disable-next-line @kbn/compat/eslint-no-restricted-modules
 const template = require('lodash/template');
-// eslint-disable-next-line no-restricted-modules
+// eslint-disable-next-line @kbn/compat/eslint-no-restricted-modules
 const fpTemplate = require('lodash/fp/template');
 const test = require('node:test');
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable camelcase */
+/* eslint-disable @kbn/compat/eslint-camelcase */
 
 export const pre_6_1 = {
   title: 'metrics test',

@@ -62,7 +62,7 @@ describe('Rules Endpoint response actions validators', () => {
     rulePayload = { response_actions: [createRulePayloadResponseActionMock()] };
     existingRule = getRuleMock(getQueryRuleParams());
     // @ts-expect-error assignment to readonly is ok here
-    // eslint-disable-next-line require-atomic-updates
+    // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
     endpointService.experimentalFeatures.responseActionsEndpointAutomatedRunScript = true;
   });
 
