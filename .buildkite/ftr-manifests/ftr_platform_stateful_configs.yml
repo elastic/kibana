@@ -220,8 +220,6 @@ enabled:
       testChannels: ['ci-batch-3h']
   - x-pack/platform/test/functional/apps/logstash/config.ts
   - x-pack/platform/test/functional/apps/managed_content/config.ts
-  - x-pack/platform/test/functional/apps/maps/group1/config.ts
-  - x-pack/platform/test/functional/apps/maps/group6/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group1/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group2/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group3/config.ts
