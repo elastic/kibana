@@ -95,7 +95,7 @@ import type { SecuritySolutionRequestHandlerContext } from './types';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
 import type { ITelemetryEventsSender } from './lib/telemetry/sender';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
-import { type IAsyncTelemetryEventsSender } from './lib/telemetry/async_sender.types';
+import type { IAsyncTelemetryEventsSender } from './lib/telemetry/async_sender.types';
 import {
   AsyncTelemetryEventsSender,
   DEFAULT_QUEUE_CONFIG,
@@ -183,6 +183,7 @@ import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
+import { registerEndpointWorkflowSteps } from './workflows/step_types/endpoint/register_workflow_steps';
 import { setFingerprintCreateAllowed } from './workflows/step_types/match_attack_fingerprints/match_attack_fingerprints';
 import {
   registerSecurityManagedWorkflowOwner,
@@ -897,6 +898,13 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     if (plugins.workflowsExtensions) {
       registerWorkflowSteps(plugins.workflowsExtensions);
+      registerEndpointWorkflowSteps(plugins.workflowsExtensions, {
+        experimentalFeatures: config.experimentalFeatures,
+        getInternalEsClient: async () => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.elasticsearch.client.asInternalUser;
+        },
+      });
       registerSecurityWorkflowTriggers(plugins.workflowsExtensions);
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
     }
