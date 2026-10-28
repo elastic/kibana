@@ -65,16 +65,6 @@ jest.mock('../../../hooks', () => ({
   useGetUrlParams: () => ({ dateRangeStart: 'now-24h', dateRangeEnd: 'now' }),
 }));
 
-const mockCpsLinkedProjects = {
-  cpsReady: true,
-  hasLinkedProjects: false,
-  statusIncludesLinkedProjects: true,
-};
-
-jest.mock('../../../hooks/use_cps_linked_projects', () => ({
-  useCpsLinkedProjects: () => mockCpsLinkedProjects,
-}));
-
 jest.mock('../../../../../hooks/use_capabilities', () => ({
   useCanEditSynthetics: () => true,
 }));
@@ -125,8 +115,6 @@ describe('useSyntheticsAppHeaderMenu', () => {
     mockMonitorList.loaded = true;
     mockMonitorList.data.absoluteTotal = 2;
     mockOverviewStatus.allConfigs = [{ origin: 'ui' }];
-    mockCpsLinkedProjects.hasLinkedProjects = false;
-    mockCpsLinkedProjects.statusIncludesLinkedProjects = true;
     mockUiSettingsGet.mockReturnValue(true);
     settings.canManagePrivateLocations = true;
   });
@@ -173,31 +161,21 @@ describe('useSyntheticsAppHeaderMenu', () => {
     );
   });
 
-  it('omits Create monitor when the listing is empty', () => {
+  it('shows Create monitor when the listing is empty', () => {
     mockMonitorList.data.absoluteTotal = 0;
     mockOverviewStatus.allConfigs = [];
-
-    const { result } = renderMenuHook({ showCreateMonitor: true });
-    expect(result.current.menu.primaryActionItem).toBeUndefined();
-    expect(findItem(result.current.menu.items, 'alerts')).toEqual(
-      expect.objectContaining({
-        disableButton: true,
-        tooltipContent: 'Create a monitor to set up alerts and rules.',
-      })
-    );
-  });
-
-  it('shows Create monitor when linked projects were not included in the status query', () => {
-    mockMonitorList.data.absoluteTotal = 0;
-    mockOverviewStatus.allConfigs = [];
-    mockCpsLinkedProjects.hasLinkedProjects = true;
-    mockCpsLinkedProjects.statusIncludesLinkedProjects = false;
 
     const { result } = renderMenuHook({ showCreateMonitor: true });
     expect(result.current.menu.primaryActionItem).toEqual(
       expect.objectContaining({
         id: 'createMonitor',
         testId: 'syntheticsAddMonitorBtn',
+      })
+    );
+    expect(findItem(result.current.menu.items, 'alerts')).toEqual(
+      expect.objectContaining({
+        disableButton: true,
+        tooltipContent: 'Create a monitor to set up alerts and rules.',
       })
     );
   });

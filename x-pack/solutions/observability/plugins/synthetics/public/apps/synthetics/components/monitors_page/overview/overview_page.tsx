@@ -93,7 +93,7 @@ export const OverviewPage: React.FC = () => {
   } = useOverviewStatus({
     scopeStatusByLocation: true,
   });
-  const { cpsReady, hasLinkedProjects, statusIncludesLinkedProjects } = useCpsLinkedProjects();
+  const { cpsReady, hasLinkedProjects } = useCpsLinkedProjects();
 
   const pageState = useSelector(selectOverviewPageState);
 
@@ -152,7 +152,6 @@ export const OverviewPage: React.FC = () => {
       hasExternalMonitors: allConfigs.some(isExternalOverviewMonitor),
       cpsReady,
       hasLinkedProjects,
-      statusIncludesLinkedProjects,
     });
 
   if (hasNoMonitors && !monitorsLoading && isEnabled) {
