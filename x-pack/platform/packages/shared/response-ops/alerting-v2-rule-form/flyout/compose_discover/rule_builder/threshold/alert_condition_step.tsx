@@ -156,6 +156,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     http: services.http,
     dataViews: services.dataViews,
     search: services.data.search.search,
+    projectRouting: services.cps?.cpsManager?.getDefaultProjectRouting(),
   });
 
   const esqlQuery = useMemo(() => buildThresholdEsql(thresholdValues), [thresholdValues]);
