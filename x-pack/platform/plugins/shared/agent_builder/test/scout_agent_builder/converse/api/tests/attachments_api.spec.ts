@@ -200,6 +200,7 @@ apiTest.describe(
         current_version: 1,
         render_inline: true,
         source: 'http_api',
+        format: 2,
       });
     });
 
@@ -222,6 +223,7 @@ apiTest.describe(
         current_version: 2,
         render_inline: false,
         source: 'http_api',
+        format: 2,
       });
     });
 
@@ -257,9 +259,36 @@ apiTest.describe(
           attachment_type: 'text',
           hard_delete: false,
           source: 'http_api',
+          format: 2,
         });
       }
     );
+
+    apiTest('POST _restore persists an attachment_restored event', async ({ asAdmin }) => {
+      const conversationId = await createConversation(asAdmin);
+      const attachment = await createTextAttachment(asAdmin, conversationId);
+      await asAdmin.delete(attachmentUrl(conversationId, attachment.id), { responseType: 'json' });
+
+      const response = await asAdmin.post(
+        `${attachmentUrl(conversationId, attachment.id)}/_restore`,
+        { responseType: 'json' }
+      );
+      expect(response).toHaveStatusCode(200);
+
+      const events = await getAttachmentEvents(asAdmin, conversationId);
+      expect(events.map((e) => e.type)).toStrictEqual([
+        'attachment_added',
+        'attachment_deleted',
+        'attachment_restored',
+      ]);
+      expect(events[2].data).toStrictEqual({
+        attachment_id: attachment.id,
+        attachment_type: 'text',
+        current_version: 1,
+        source: 'http_api',
+        format: 2,
+      });
+    });
 
     apiTest(
       'DELETE ?permanent=true removes the attachment and persists hard_delete=true',
@@ -291,6 +320,7 @@ apiTest.describe(
           attachment_type: 'text',
           hard_delete: true,
           source: 'http_api',
+          format: 2,
         });
       }
     );

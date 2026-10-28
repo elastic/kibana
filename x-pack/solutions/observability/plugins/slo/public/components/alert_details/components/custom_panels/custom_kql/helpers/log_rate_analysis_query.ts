@@ -9,7 +9,7 @@ import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/observability-plugin/public';
 import type { GroupingsSchema, KQLCustomIndicator } from '@kbn/slo-schema';
-import { is, kqlWithFiltersSchemaZod } from '@kbn/slo-schema';
+import { is, kqlWithFiltersSchema } from '@kbn/slo-schema';
 
 export const getESQueryForLogRateAnalysis = (
   params: KQLCustomIndicator['params'],
@@ -17,18 +17,18 @@ export const getESQueryForLogRateAnalysis = (
 ): QueryDslQueryContainer => {
   const { filter, good, total } = params;
 
-  const filterKuery = is(kqlWithFiltersSchemaZod, filter) ? filter.kqlQuery : filter;
+  const filterKuery = is(kqlWithFiltersSchema, filter) ? filter.kqlQuery : filter;
 
   const filterFilters: Filter[] = [];
-  if (is(kqlWithFiltersSchemaZod, filter)) {
+  if (is(kqlWithFiltersSchema, filter)) {
     filter.filters.forEach((i) => filterFilters.push(i));
   }
 
-  const goodKuery = is(kqlWithFiltersSchemaZod, good) ? good.kqlQuery : good;
-  const goodFilters = is(kqlWithFiltersSchemaZod, good) ? good.filters : [];
+  const goodKuery = is(kqlWithFiltersSchema, good) ? good.kqlQuery : good;
+  const goodFilters = is(kqlWithFiltersSchema, good) ? good.filters : [];
 
-  const totalKuery = is(kqlWithFiltersSchemaZod, total) ? total.kqlQuery : total;
-  const totalFilters = is(kqlWithFiltersSchemaZod, total) ? total.filters : [];
+  const totalKuery = is(kqlWithFiltersSchema, total) ? total.kqlQuery : total;
+  const totalFilters = is(kqlWithFiltersSchema, total) ? total.filters : [];
 
   const customGoodFilter = buildEsQuery({ kuery: goodKuery, filters: goodFilters });
   const customTotalFilter = buildEsQuery({ kuery: totalKuery, filters: totalFilters });
