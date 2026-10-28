@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
-import { EuiBasicTable, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiBasicTable, EuiLink, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedRelative } from '@kbn/i18n-react';
@@ -19,14 +19,22 @@ import type {
 import {
   sendDeleteCloudOnboardingDeployment,
   useAuthz,
+  useLink,
   useStartServices,
 } from '../../../../../../../hooks';
+import { AGENTS_PREFIX } from '../../../../../../../../common/constants';
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../../../../../../../common/services';
 import {
   ONBOARDING_APP_ID,
   ONBOARDING_AWS_PATH,
 } from '../../../../../../../services/aws_onboarding_override';
 
+import { useInstancesAgents } from '../hooks/use_instances_agents';
+import type { InstanceAgent } from '../hooks/use_instances_agents';
+
 import { DeleteInstanceModal } from './delete_instance_modal';
+import { InstanceAgentFlyout } from './instance_agent_flyout';
+import { InstanceStatusCell } from './instance_status_cell';
 
 const EMPTY_CELL = '-';
 
@@ -92,8 +100,26 @@ export const InstancesTable: React.FunctionComponent<{
 }> = ({ instances, packageName }) => {
   const { application, notifications } = useStartServices();
   const authz = useAuthz();
+  const { getHref } = useLink();
   // Matches the authz of DELETE /api/fleet/cloud_onboarding_deployments/{id}.
   const canDelete = authz.fleet.allAgentPolicies || authz.integrations.all;
+  const canReadAgents = authz.fleet.readAgents;
+  const {
+    agentsByInstance,
+    agentPolicyIdsByInstance,
+    isLoading: isAgentsLoading,
+    error: agentsError,
+  } = useInstancesAgents(instances, { enabled: canReadAgents });
+  const [flyoutAgent, setFlyoutAgent] = useState<InstanceAgent | null>(null);
+
+  useEffect(() => {
+    if (!agentsError) return;
+    notifications.toasts.addError(agentsError, {
+      title: i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.statusError', {
+        defaultMessage: 'Could not load the agent status of the instances',
+      }),
+    });
+  }, [agentsError, notifications.toasts]);
   const queryClient = useQueryClient();
   const [instanceToDelete, setInstanceToDelete] =
     useState<CloudOnboardingDeploymentListItem | null>(null);
@@ -196,12 +222,46 @@ export const InstancesTable: React.FunctionComponent<{
           EMPTY_CELL
         ),
     },
+    ...(canReadAgents
+      ? [
+          {
+            name: i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.statusColumn', {
+              defaultMessage: 'Status',
+            }),
+            render: (item: CloudOnboardingDeploymentListItem) =>
+              isAgentsLoading ? (
+                <EuiLoadingSpinner size="s" />
+              ) : (
+                <InstanceStatusCell
+                  agents={agentsByInstance.get(item.id) ?? []}
+                  onOpen={setFlyoutAgent}
+                />
+              ),
+          },
+        ]
+      : []),
     {
       field: 'agentCount',
       name: i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.agentsColumn', {
         defaultMessage: 'Agents',
       }),
-      render: (agentCount: number) => (agentCount > 0 ? agentCount : EMPTY_CELL),
+      render: (agentCount: number, item: CloudOnboardingDeploymentListItem) => {
+        if (agentCount === 0) return EMPTY_CELL;
+        const agentPolicyIds = agentPolicyIdsByInstance.get(item.id) ?? [];
+        if (!canReadAgents || agentPolicyIds.length === 0) return agentCount;
+        // Base ids with a fallback, like the agent count, so agents on version-specific
+        // policies (`<id>#9.3`) are listed too.
+        const kuery = buildPolicyBaseIdsWithFallbackKuery(
+          agentPolicyIds,
+          `${AGENTS_PREFIX}.policy_base_id`,
+          `${AGENTS_PREFIX}.policy_id`
+        );
+        return (
+          <EuiLink href={getHref('agent_list', { kuery })} data-test-subj="instanceAgentsLink">
+            {agentCount}
+          </EuiLink>
+        );
+      },
     },
     ...(canDelete
       ? [
@@ -245,6 +305,13 @@ export const InstancesTable: React.FunctionComponent<{
         )}
         rowProps={{ 'data-test-subj': 'instancesTableRow' }}
       />
+      {flyoutAgent?.packagePolicy ? (
+        <InstanceAgentFlyout
+          agentPolicyId={flyoutAgent.agentPolicyId}
+          packagePolicy={flyoutAgent.packagePolicy}
+          onClose={() => setFlyoutAgent(null)}
+        />
+      ) : null}
       {instanceToDelete ? (
         <DeleteInstanceModal
           instanceName={getInstanceName(instanceToDelete)}

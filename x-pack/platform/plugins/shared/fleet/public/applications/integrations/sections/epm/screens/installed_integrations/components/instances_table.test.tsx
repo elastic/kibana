@@ -26,17 +26,40 @@ jest.mock('../../../../../../../hooks', () => {
       notifications: { toasts: { addSuccess: mockAddSuccess, addError: mockAddError } },
     })),
     useAuthz: jest.fn(),
+    useLink: jest.fn(() => ({
+      getHref: (page: string, values?: { kuery?: string }) =>
+        `/app/fleet/${page}?kuery=${encodeURIComponent(values?.kuery ?? '')}`,
+    })),
     sendDeleteCloudOnboardingDeployment: jest.fn(),
   };
 });
 
+jest.mock('./instance_agent_flyout', () => ({
+  InstanceAgentFlyout: (props: { agentPolicyId: string; packagePolicy: { name: string } }) => (
+    <div data-test-subj="instanceAgentFlyout">
+      {props.agentPolicyId} {props.packagePolicy.name}
+    </div>
+  ),
+}));
+
+jest.mock('../hooks/use_instances_agents', () => ({
+  useInstancesAgents: jest.fn(),
+}));
+
 import { sendDeleteCloudOnboardingDeployment, useAuthz } from '../../../../../../../hooks';
+import { useInstancesAgents } from '../hooks/use_instances_agents';
 
 const mockUseAuthz = useAuthz as jest.Mock;
 const mockSendDelete = sendDeleteCloudOnboardingDeployment as jest.Mock;
 
-const authzWith = ({ allAgentPolicies = false, allIntegrations = false } = {}) => ({
-  fleet: { allAgentPolicies },
+const mockUseInstancesAgents = useInstancesAgents as jest.Mock;
+
+const authzWith = ({
+  allAgentPolicies = false,
+  allIntegrations = false,
+  readAgents = false,
+} = {}) => ({
+  fleet: { allAgentPolicies, readAgents },
   integrations: { all: allIntegrations },
 });
 
@@ -77,6 +100,12 @@ describe('InstancesTable', () => {
     jest.clearAllMocks();
     mockUseAuthz.mockReturnValue(authzWith({ allAgentPolicies: true }));
     mockSendDelete.mockResolvedValue({ id: 'deployment-1' });
+    mockUseInstancesAgents.mockReturnValue({
+      agentsByInstance: new Map(),
+      agentPolicyIdsByInstance: new Map(),
+      isLoading: false,
+      error: null,
+    });
   });
 
   it('renders one row per instance with its name, user and agents', () => {
@@ -270,6 +299,102 @@ describe('InstancesTable', () => {
         title: 'Could not delete instance AWS-collection-1',
       });
       expect(screen.getByTestId('deleteInstanceModal')).toBeInTheDocument();
+    });
+  });
+
+  describe('status column', () => {
+    const packagePolicy = {
+      id: 'pp1',
+      name: 'aws-1',
+      policy_ids: ['agentless-1'],
+      package: { name: 'aws', version: '8.11.0' },
+      inputs: [],
+    };
+
+    beforeEach(() => {
+      mockUseAuthz.mockReturnValue(authzWith({ readAgents: true }));
+      mockUseInstancesAgents.mockReturnValue({
+        agentsByInstance: new Map([
+          [
+            'deployment-1',
+            [
+              {
+                agent: { id: 'a1', status: 'online', local_metadata: { host: { hostname: 'h1' } } },
+                agentPolicyId: 'agentless-1',
+                packagePolicy,
+              },
+            ],
+          ],
+        ]),
+        agentPolicyIdsByInstance: new Map([['deployment-1', ['agentless-1', 'agentless-2']]]),
+        isLoading: false,
+        error: null,
+      });
+    });
+
+    it('is shown to users who can read agents', () => {
+      renderTable([makeInstance()]);
+
+      expect(screen.getByText('Status')).toBeInTheDocument();
+      expect(screen.getByTestId('instanceAgentStatus')).toBeInTheDocument();
+      expect(mockUseInstancesAgents).toHaveBeenCalledWith(expect.any(Array), { enabled: true });
+    });
+
+    it('is hidden from users who cannot read agents', () => {
+      mockUseAuthz.mockReturnValue(authzWith());
+      renderTable([makeInstance()]);
+
+      expect(screen.queryByText('Status')).not.toBeInTheDocument();
+      expect(mockUseInstancesAgents).toHaveBeenCalledWith(expect.any(Array), { enabled: false });
+    });
+
+    it('opens the status flyout of the shown agent', async () => {
+      renderTable([makeInstance()]);
+
+      await act(async () => {
+        screen.getByTestId('instanceAgentStatus').click();
+      });
+
+      expect(screen.getByTestId('instanceAgentFlyout')).toHaveTextContent('agentless-1 aws-1');
+    });
+
+    it('reports an agent loading error', () => {
+      const error = new Error('boom');
+      mockUseInstancesAgents.mockReturnValue({
+        agentsByInstance: new Map(),
+        agentPolicyIdsByInstance: new Map(),
+        isLoading: false,
+        error,
+      });
+      renderTable([makeInstance()]);
+
+      expect(mockAddError).toHaveBeenCalledWith(error, {
+        title: 'Could not load the agent status of the instances',
+      });
+    });
+
+    it('links the agent count to the Fleet agent list of the instance agent policies', () => {
+      renderTable([makeInstance()]);
+
+      const link = screen.getByTestId('instanceAgentsLink');
+      expect(link).toHaveTextContent('5');
+      const href = decodeURIComponent(link.getAttribute('href') ?? '');
+      expect(href).toContain('agentless-1');
+      expect(href).toContain('agentless-2');
+    });
+
+    it('shows the agent count without a link to users who cannot read agents', () => {
+      mockUseAuthz.mockReturnValue(authzWith());
+      renderTable([makeInstance()]);
+
+      expect(screen.queryByTestId('instanceAgentsLink')).not.toBeInTheDocument();
+      expect(screen.getByText('5')).toBeInTheDocument();
+    });
+
+    it('shows a dash instead of a link without agents', () => {
+      renderTable([makeInstance({ agentCount: 0 })]);
+
+      expect(screen.queryByTestId('instanceAgentsLink')).not.toBeInTheDocument();
     });
   });
 });
