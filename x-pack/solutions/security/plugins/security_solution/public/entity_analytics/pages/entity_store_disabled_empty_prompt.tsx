@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiImage, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiEmptyPrompt, EuiFlexGroup, EuiImage, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { SecurityPageName } from '../../../common/constants';
@@ -32,15 +32,22 @@ export const EntityStoreDisabledEmptyPromptBody = React.memo(() => {
   const { application } = useKibana().services;
   const canReadIntegrations = application.capabilities.fleet?.read === true;
   const addIntegrationsUrl = application.getUrlForApp(INTEGRATIONS_PLUGIN_ID, {
-    path: '/browse/advanced_analytics_ueba',
+    path: '/browse/security/advanced_analytics_ueba',
   });
+  const onAddIntegrationsClick = useCallback(
+    (event: React.MouseEvent) => {
+      event.preventDefault();
+      application.navigateToUrl(addIntegrationsUrl);
+    },
+    [application, addIntegrationsUrl]
+  );
 
   return (
     <EuiEmptyPrompt
       color="plain"
       css={css`
         .euiEmptyPrompt__icon {
-          min-inline-size: 224px;
+          min-inline-size: 228px;
           text-align: center;
         }
         .euiEmptyPrompt__content {
@@ -48,7 +55,7 @@ export const EntityStoreDisabledEmptyPromptBody = React.memo(() => {
         }
       `}
       data-test-subj="entityStoreDisabledEmptyPrompt"
-      icon={<EuiImage size={192} alt="" url={illustrationSearchAnalytics} />}
+      icon={<EuiImage size={196} alt="" url={illustrationSearchAnalytics} />}
       layout="horizontal"
       style={{ maxWidth: 800 }}
       title={
@@ -70,9 +77,6 @@ export const EntityStoreDisabledEmptyPromptBody = React.memo(() => {
           key="enable"
           fill
           deepLinkId={SecurityPageName.entityAnalyticsManagement}
-          iconType="external"
-          iconSide="right"
-          target="_blank"
         >
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics.action"
@@ -81,19 +85,18 @@ export const EntityStoreDisabledEmptyPromptBody = React.memo(() => {
         </SecuritySolutionLinkButton>,
         ...(canReadIntegrations
           ? [
-              <EuiButton
+              <EuiButtonEmpty
                 key="addIntegrations"
                 href={addIntegrationsUrl}
-                iconType="external"
-                iconSide="right"
-                target="_blank"
+                onClick={onAddIntegrationsClick}
+                iconType="tablePlus"
                 data-test-subj="entityStoreDisabledEmptyPromptAddIntegrations"
               >
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics.addIntegrations"
                   defaultMessage="Add integrations"
                 />
-              </EuiButton>,
+              </EuiButtonEmpty>,
             ]
           : []),
       ]}
@@ -112,7 +115,7 @@ export const EntityStoreDisabledEmptyPromptBody = React.memo(() => {
                 title={
                   <FormattedMessage
                     id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics.footerLink"
-                    defaultMessage="Read the docs"
+                    defaultMessage="Read documentation"
                   />
                 }
               />
