@@ -16,11 +16,9 @@ import {
 } from '@kbn/core/server/mocks';
 import { getSession } from '../sessions/get_session';
 import { listSessions } from '../sessions/list_sessions';
-import {
-  SessionsPrivilegesError,
-  enableSessions,
-  getSessionsStatus,
-} from '../sessions/sessions_setup';
+import { enableSessions, getSessionsStatus } from '../sessions/sessions_setup';
+import { SessionsPrivilegesError } from '../sessions/sessions_privileges_error';
+import { SessionsRestrictedReadError } from '../sessions/sessions_restricted_read_error';
 import { SESSIONS_API_BASE_PATH, registerSessionsRoutes } from './sessions_routes';
 
 jest.mock('../sessions/get_session');
@@ -86,7 +84,6 @@ describe('sessions routes', () => {
   });
 
   it.each<[Method, string, string]>([
-    ['get', `${SESSIONS_API_BASE_PATH}/sessions/status`, 'read_digital_experience'],
     ['post', `${SESSIONS_API_BASE_PATH}/sessions/enable`, 'manage_digital_experience_sessions'],
     [
       'get',
@@ -103,17 +100,118 @@ describe('sessions routes', () => {
     expect(config.security).toEqual({ authz: { requiredPrivileges: [privilege] } });
   });
 
-  it('enables sessions with the scoped client and returns the status', async () => {
+  it('requires read for status, and checks the manage sessions privilege to show the enabler', () => {
+    const { config } = setup().route('get', `${SESSIONS_API_BASE_PATH}/sessions/status`);
+    expect(config.security).toEqual({
+      authz: {
+        requiredPrivileges: ['read_digital_experience'],
+        extendedPrivileges: ['manage_digital_experience_sessions'],
+      },
+    });
+  });
+
+  describe('status', () => {
+    const enabled = {
+      ...status,
+      enabledBy: 'ana',
+      enabledAt: '2026-10-27T11:00:00.000Z',
+      authorization: { roles: ['superuser'], apiKeyName: null, serviceAccount: null },
+      transforms: [
+        {
+          id: 'digital-experience-sessions-1',
+          enabledBy: 'ana',
+          enabledAt: '2026-10-27T11:00:00.000Z',
+          authorization: { roles: ['superuser'], apiKeyName: null, serviceAccount: null },
+        },
+      ],
+    };
+
+    it.each([
+      [true, enabled],
+      [
+        false,
+        {
+          ...enabled,
+          enabledBy: null,
+          enabledAt: null,
+          authorization: null,
+          transforms: [
+            {
+              id: 'digital-experience-sessions-1',
+              enabledBy: null,
+              enabledAt: null,
+              authorization: null,
+            },
+          ],
+        },
+      ],
+    ])(
+      'shows who enabled sessions only to managers (manage sessions: %s)',
+      async (canManage, body) => {
+        jest.mocked(getSessionsStatus).mockResolvedValue(enabled as never);
+        const { context, route } = setup();
+        const response = httpServerMock.createResponseFactory();
+        // The router fills `authzResult` from the route's extended privileges.
+        const request = Object.assign(httpServerMock.createKibanaRequest(), {
+          authzResult: { manage_digital_experience_sessions: canManage },
+        });
+
+        await route('get', `${SESSIONS_API_BASE_PATH}/sessions/status`).handler(
+          context,
+          request,
+          response
+        );
+
+        expect(response.ok).toHaveBeenCalledWith({ body });
+      }
+    );
+  });
+
+  it('enables sessions as the current user, records them, audits it and returns the status', async () => {
     const { coreContext, context, route } = setup();
+    coreContext.security.authc.getCurrentUser.mockReturnValue({ username: 'ana' } as never);
     const { handler } = route('post', `${SESSIONS_API_BASE_PATH}/sessions/enable`);
     const response = httpServerMock.createResponseFactory();
 
     await handler(context, httpServerMock.createKibanaRequest(), response);
 
     expect(enableSessions).toHaveBeenCalledWith(
-      expect.objectContaining({ esClient: coreContext.elasticsearch.client })
+      expect.objectContaining({ esClient: coreContext.elasticsearch.client, enabledBy: 'ana' })
+    );
+    expect(coreContext.security.audit.logger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'User [ana] enabled Digital Experience sessions',
+        event: expect.objectContaining({
+          action: 'digital_experience_sessions_enable',
+          outcome: 'success',
+        }),
+      })
     );
     expect(response.ok).toHaveBeenCalledWith({ body: status });
+  });
+
+  it('returns 403, and audits the failure, when the source read is filtered', async () => {
+    jest
+      .mocked(enableSessions)
+      .mockRejectedValue(new SessionsRestrictedReadError(['logs-*.otel-*'], 'filtered'));
+    const { coreContext, context, route } = setup();
+    const response = httpServerMock.createResponseFactory();
+
+    await route('post', `${SESSIONS_API_BASE_PATH}/sessions/enable`).handler(
+      context,
+      httpServerMock.createKibanaRequest(),
+      response
+    );
+
+    expect(response.forbidden).toHaveBeenCalledWith({
+      body: {
+        message: expect.stringContaining('without document- or field-level security'),
+        attributes: { restrictedIndices: ['logs-*.otel-*'], reason: 'filtered' },
+      },
+    });
+    expect(coreContext.security.audit.logger.log).toHaveBeenCalledWith(
+      expect.objectContaining({ event: expect.objectContaining({ outcome: 'failure' }) })
+    );
   });
 
   it('returns 403 with the missing privileges instead of a partial setup', async () => {

@@ -58,6 +58,13 @@ export interface SessionsSettings {
   partitions: number;
 }
 
+/** Whose credentials a transform runs with, as Elasticsearch recorded them on the last update. */
+export interface SessionsTransformAuthorization {
+  roles: string[] | null;
+  apiKeyName: string | null;
+  serviceAccount: string | null;
+}
+
 export interface SessionsTransformStatus {
   id: string;
   partition: number | null;
@@ -67,6 +74,10 @@ export interface SessionsTransformStatus {
   health: SessionsTransformHealth;
   lagSeconds: number | null;
   reason: string | null;
+  /** Username of whoever last enabled sessions, as Kibana recorded it. */
+  enabledBy: string | null;
+  enabledAt: string | null;
+  authorization: SessionsTransformAuthorization | null;
 }
 
 export interface SessionsStatus {
@@ -83,6 +94,10 @@ export interface SessionsStatus {
   lagSeconds: number | null;
   configured: SessionsSettings;
   installedPartitions: number;
+  /** Who last enabled sessions, and the credentials the transforms run with since. */
+  enabledBy: string | null;
+  enabledAt: string | null;
+  authorization: SessionsTransformAuthorization | null;
   transforms: SessionsTransformStatus[];
 }
 

@@ -33,6 +33,9 @@ const healthyStatus: SessionsStatus = {
   lagSeconds: 30,
   configured: settings,
   installedPartitions: 1,
+  enabledBy: 'ana',
+  enabledAt: '2026-10-27T11:00:00.000Z',
+  authorization: { roles: ['superuser'], apiKeyName: null, serviceAccount: null },
   transforms: [],
 };
 

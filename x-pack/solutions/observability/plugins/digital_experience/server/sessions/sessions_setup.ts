@@ -6,10 +6,14 @@
  */
 
 import type {
+  SecurityFieldSecurity,
+  SecurityUserIndicesPrivileges,
   TransformGetTransformStatsTransformStats,
   TransformGetTransformTransformSummary,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
+import { isResponseError } from '@kbn/es-errors';
+import { escapeRegExp } from 'lodash';
 import {
   SESSIONS_DEFAULT_FREQUENCY,
   SESSIONS_INDEX_PATTERN,
@@ -20,6 +24,7 @@ import {
   sessionsLagThresholdSeconds,
   type SessionsSettings,
   type SessionsStatus,
+  type SessionsTransformAuthorization,
   type SessionsTransformHealth,
   type SessionsTransformStatus,
 } from '../../common/sessions';
@@ -28,6 +33,8 @@ import {
   sessionsDestPipeline,
   sessionsIndexTemplate,
 } from './sessions_spec';
+import { SessionsPrivilegesError } from './sessions_privileges_error';
+import { SessionsRestrictedReadError } from './sessions_restricted_read_error';
 
 export const REQUIRED_CLUSTER_PRIVILEGES = [
   'manage_transform',
@@ -42,16 +49,6 @@ export const REQUIRED_DEST_INDEX_PRIVILEGES = [
   'delete',
   'delete_index',
 ] as const;
-
-/** Thrown before any setup write when the enabling user lacks a required privilege. */
-export class SessionsPrivilegesError extends Error {
-  constructor(public readonly missingPrivileges: string[]) {
-    super(
-      `Enabling sessions requires these Elasticsearch privileges: ${missingPrivileges.join(', ')}`
-    );
-    this.name = 'SessionsPrivilegesError';
-  }
-}
 
 export const getMissingSessionsPrivileges = async (
   client: ElasticsearchClient
@@ -75,6 +72,65 @@ export const getMissingSessionsPrivileges = async (
       .map(([privilege]) => `index:${index}:${privilege}`)
   );
   return [...missingCluster, ...missingIndex];
+};
+
+const READ_PRIVILEGES = new Set(['read', 'all']);
+
+const asArray = <T>(value: T | T[] | undefined): T[] =>
+  value === undefined ? [] : Array.isArray(value) ? value : [value];
+
+/**
+ * Whether an index pattern from a role covers `pattern`: only the role's `*` may absorb the
+ * pattern's own `*`, read literally, as `?` and plain characters match one character of a name.
+ * Regular expression names (`/.../`) never count.
+ */
+export const indexPatternCovers = (rolePattern: string, pattern: string): boolean => {
+  if (rolePattern.startsWith('/')) {
+    return false;
+  }
+  const regex = rolePattern
+    .split('')
+    .map((char) => (char === '*' ? '.*' : char === '?' ? '[^*]' : escapeRegExp(char)))
+    .join('');
+  return new RegExp(`^${regex}$`).test(pattern);
+};
+
+const grantsAllFields = (fieldSecurity: SecurityFieldSecurity[] | undefined): boolean =>
+  fieldSecurity === undefined ||
+  fieldSecurity.length === 0 ||
+  fieldSecurity.some(
+    ({ grant, except }) => asArray(grant).includes('*') && asArray(except).length === 0
+  );
+
+const isUnrestrictedReadOf = (entry: SecurityUserIndicesPrivileges, pattern: string): boolean =>
+  entry.privileges.some((privilege) => READ_PRIVILEGES.has(privilege)) &&
+  asArray(entry.query).length === 0 &&
+  grantsAllFields(entry.field_security) &&
+  asArray(entry.names).some((name) => indexPatternCovers(name, pattern));
+
+/**
+ * Source index patterns the user can't read in full. Elasticsearch merges the user's roles per
+ * index pattern, so one role with unrestricted read on a pattern lifts another role's
+ * document- or field-level security there.
+ */
+export const getRestrictedSourceIndices = async (
+  client: ElasticsearchClient
+): Promise<{ indices: string[]; reason: 'filtered' | 'unverifiable' }> => {
+  try {
+    const { indices: entries } = await client.security.getUserPrivileges();
+    return {
+      indices: SESSIONS_SOURCE_INDICES.filter(
+        (pattern) => !entries.some((entry) => isUnrestrictedReadOf(entry, pattern))
+      ),
+      reason: 'filtered',
+    };
+  } catch (error) {
+    // API keys with their own role descriptors: Elasticsearch answers 400 instead of privileges.
+    if (isResponseError(error) && error.statusCode === 400) {
+      return { indices: [...SESSIONS_SOURCE_INDICES], reason: 'unverifiable' };
+    }
+    throw error;
+  }
 };
 
 const managedTransforms = async (
@@ -108,21 +164,35 @@ export const enableSessions = async ({
   esClient,
   logger,
   settings,
+  enabledBy,
+  now = new Date(),
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
   settings: SessionsSettings;
+  /** Username recorded on the transforms, so status can show whose access they run with. */
+  enabledBy: string | null;
+  now?: Date;
 }): Promise<void> => {
   const missingPrivileges = await getMissingSessionsPrivileges(esClient.asCurrentUser);
   if (missingPrivileges.length > 0) {
     throw new SessionsPrivilegesError(missingPrivileges);
+  }
+  // `has_privileges` doesn't see document- or field-level security, so check it separately.
+  const restricted = await getRestrictedSourceIndices(esClient.asCurrentUser);
+  if (restricted.indices.length > 0) {
+    throw new SessionsRestrictedReadError(restricted.indices, restricted.reason);
   }
 
   const client = esClient.asSecondaryAuthUser;
   await client.ingest.putPipeline(sessionsDestPipeline);
   await client.indices.putIndexTemplate(sessionsIndexTemplate);
 
-  const desired = buildSessionsTransforms(settings);
+  const enabledMeta = { enabled_by: enabledBy, enabled_at: now.toISOString() };
+  const desired = buildSessionsTransforms(settings).map((transform) => ({
+    ...transform,
+    _meta: { ...transform._meta, ...enabledMeta },
+  }));
   const desiredIds = new Set(desired.map(({ transform_id: id }) => id));
   const installed = await managedTransforms(client);
 
@@ -201,6 +271,20 @@ export const lagSecondsOf = (
   return typeof reference === 'number' ? Math.max(0, Math.round((now - reference) / 1000)) : null;
 };
 
+const stringOrNull = (value: unknown): string | null =>
+  typeof value === 'string' && value.length > 0 ? value : null;
+
+const authorizationOf = ({
+  authorization,
+}: TransformGetTransformTransformSummary): SessionsTransformAuthorization | null =>
+  authorization
+    ? {
+        roles: authorization.roles ?? null,
+        apiKeyName: authorization.api_key?.name ?? null,
+        serviceAccount: authorization.service_account ?? null,
+      }
+    : null;
+
 const transformStatus = (
   transform: TransformGetTransformTransformSummary,
   stats: TransformGetTransformStatsTransformStats | undefined,
@@ -240,6 +324,22 @@ const transformStatus = (
     health,
     lagSeconds,
     reason,
+    enabledBy: stringOrNull(transform._meta?.enabled_by),
+    enabledAt: stringOrNull(transform._meta?.enabled_at),
+    authorization: authorizationOf(transform),
+  };
+};
+
+const latestEnabled = (
+  statuses: SessionsTransformStatus[]
+): Pick<SessionsStatus, 'enabledBy' | 'enabledAt' | 'authorization'> => {
+  const [latest] = [...statuses].sort((a, b) =>
+    (b.enabledAt ?? '').localeCompare(a.enabledAt ?? '')
+  );
+  return {
+    enabledBy: latest?.enabledBy ?? null,
+    enabledAt: latest?.enabledAt ?? null,
+    authorization: latest?.authorization ?? null,
   };
 };
 
@@ -269,6 +369,9 @@ export const getSessionsStatus = async (
       reason: null,
       lagSeconds: null,
       installedPartitions: 0,
+      enabledBy: null,
+      enabledAt: null,
+      authorization: null,
       transforms: [],
     };
   }
@@ -318,6 +421,8 @@ export const getSessionsStatus = async (
         : updateReason ?? worst.reason,
     lagSeconds: lags.length > 0 ? Math.max(...lags) : null,
     installedPartitions: current.length,
+    // Enabling stamps every partition together; the most recent stamp is the one in effect.
+    ...latestEnabled(statuses),
     transforms: statuses,
   };
 };

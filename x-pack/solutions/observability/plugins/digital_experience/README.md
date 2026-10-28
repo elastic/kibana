@@ -79,6 +79,21 @@ before anything is written:
 - `traces-*.otel-*`, `logs-*.otel-*`: `read`, `view_index_metadata`
 - `digital-experience-sessions-*`: `read`, `index`, `create_index`, `delete`, `delete_index`
 
+The read on `traces-*.otel-*` and `logs-*.otel-*` must also be unrestricted: no document- or
+field-level security. Otherwise the transforms would only see that user's slice of the data, so
+every other application's sessions (or fields) would silently stop updating for everyone, and
+retention would then delete them. `has_privileges` doesn't report these restrictions, so enabling
+also reads the user's roles (`GET _security/user/_privileges`) and fails with a 403 naming the
+affected patterns. One role with unrestricted read on a pattern is enough, even if another role
+filters it. Elasticsearch can't report the privileges of an API key with its own role descriptors,
+so such keys are refused too; enable sessions as a user, or with an API key without role
+descriptors.
+
+Each enable records the username and time on the transforms (`_meta.enabled_by`,
+`_meta.enabled_at`) and writes a `digital_experience_sessions_enable` audit event, successful or
+not. The status route reports who last enabled sessions, and the roles or API key the transforms
+run with, only to users who can set sessions up.
+
 Enabling again is safe. It refreshes the transforms' stored credentials to the enabling user,
 restarts failed transforms, replaces transforms left over from a previous version, and applies a
 changed `frequency` or partition count.

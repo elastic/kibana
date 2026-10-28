@@ -15,14 +15,13 @@ import {
   SESSION_SORT_FIELDS,
   type SessionSortField,
   type SessionsSettings,
+  type SessionsStatus,
 } from '../../common/sessions';
 import { getSession } from '../sessions/get_session';
 import { listSessions } from '../sessions/list_sessions';
-import {
-  SessionsPrivilegesError,
-  enableSessions,
-  getSessionsStatus,
-} from '../sessions/sessions_setup';
+import { enableSessions, getSessionsStatus } from '../sessions/sessions_setup';
+import { SessionsPrivilegesError } from '../sessions/sessions_privileges_error';
+import { SessionsRestrictedReadError } from '../sessions/sessions_restricted_read_error';
 
 export const SESSIONS_API_BASE_PATH = '/internal/digital_experience';
 
@@ -69,6 +68,26 @@ const withSessionsAccess = async (
 const readSecurity = {
   authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read] },
 };
+const statusSecurity = {
+  authz: {
+    requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read],
+    // Only users who can set sessions up also see who did, and whose access the transforms use.
+    extendedPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions],
+  },
+};
+
+const withoutEnabler = (status: SessionsStatus): SessionsStatus => ({
+  ...status,
+  enabledBy: null,
+  enabledAt: null,
+  authorization: null,
+  transforms: status.transforms.map((transform) => ({
+    ...transform,
+    enabledBy: null,
+    enabledAt: null,
+    authorization: null,
+  })),
+});
 const manageSecurity = {
   authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] },
 };
@@ -87,15 +106,17 @@ export const registerSessionsRoutes = ({
   router.get(
     {
       path: `${SESSIONS_API_BASE_PATH}/sessions/status`,
-      security: readSecurity,
+      security: statusSecurity,
       options: { access: 'internal' },
       validate: false,
     },
-    async (context, _request, response) => {
+    async (context, request, response) => {
       const { elasticsearch } = await context.core;
       // Transform metadata only; no session data is read with the internal user.
       const status = await getSessionsStatus(elasticsearch.client.asInternalUser, { settings });
-      return response.ok({ body: status });
+      const canManage =
+        request.authzResult?.[DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] === true;
+      return response.ok({ body: canManage ? status : withoutEnabler(status) });
     }
   );
 
@@ -107,10 +128,27 @@ export const registerSessionsRoutes = ({
       validate: false,
     },
     async (context, _request, response) => {
-      const { elasticsearch } = await context.core;
+      const { elasticsearch, security } = await context.core;
+      const enabledBy = security.authc.getCurrentUser()?.username ?? null;
+      const audit = (outcome: 'success' | 'failure', error?: Error) =>
+        security.audit.logger.log({
+          message:
+            outcome === 'success'
+              ? `User [${enabledBy}] enabled Digital Experience sessions`
+              : `Failed attempt by user [${enabledBy}] to enable Digital Experience sessions`,
+          event: {
+            action: 'digital_experience_sessions_enable',
+            category: ['configuration'],
+            type: ['change'],
+            outcome,
+          },
+          ...(error ? { error: { code: error.name, message: error.message } } : {}),
+        });
+
       try {
-        await enableSessions({ esClient: elasticsearch.client, logger, settings });
+        await enableSessions({ esClient: elasticsearch.client, logger, settings, enabledBy });
       } catch (error) {
+        audit('failure', error);
         if (error instanceof SessionsPrivilegesError) {
           return response.forbidden({
             body: {
@@ -119,8 +157,18 @@ export const registerSessionsRoutes = ({
             },
           });
         }
+        if (error instanceof SessionsRestrictedReadError) {
+          return response.forbidden({
+            body: {
+              message: error.message,
+              attributes: { restrictedIndices: error.restrictedIndices, reason: error.reason },
+            },
+          });
+        }
         throw error;
       }
+      audit('success');
+      logger.info(`Sessions enabled by [${enabledBy}]`);
       const status = await getSessionsStatus(elasticsearch.client.asInternalUser, { settings });
       return response.ok({ body: status });
     }
