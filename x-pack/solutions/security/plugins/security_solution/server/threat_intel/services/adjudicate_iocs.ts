@@ -7,6 +7,7 @@
 
 import { createHash } from 'node:crypto';
 import { MAX_IOC_TIER_BASIS_LENGTH } from '../../../common/threat_intel/contracts/enrichment';
+import type { IocType } from '../../../common/threat_intel';
 import type { ExtractedIoc, ExtractIocsResult, IocTier } from './extract_iocs';
 
 const SEMANTIC_INDICATOR_PREFIX = 'semantic_indicator:';
@@ -130,8 +131,23 @@ const isSameOrigin = (ioc: ExtractedIoc, articleUrl?: string): boolean => {
   return ioc.type === 'domain' && ioc.value.toLowerCase() === articleHost;
 };
 
+const SEMANTIC_CANDIDATE_TYPES: ReadonlySet<IocType> = new Set(['url', 'domain', 'hash']);
+const isSemanticCandidateType = (type: IocType): boolean => SEMANTIC_CANDIDATE_TYPES.has(type);
+
+/**
+ * Hash tier bases the extractor assigns from prose alone. A hash under an IOC heading
+ * (`ioc_section`) or written defanged (`defanged_source`) is attributed by its placement and
+ * stays deterministic: the model would judge it from a window holding only neighbouring hashes,
+ * and a rejection is stored as `reference` with nothing to re-review it. Only a bare high-entropy
+ * hash in prose, the commit-SHA case, goes to review.
+ */
+const PROSE_HASH_BASES: ReadonlySet<string> = new Set(['hash_high_entropy']);
+
+/** Whether this IOC, at its extract-time tier and basis, is one the model pass judges. */
 const isSemanticCandidate = (ioc: ExtractedIoc): boolean =>
-  (ioc.type === 'url' || ioc.type === 'domain') && PROMOTABLE_TIERS.has(ioc.tier);
+  isSemanticCandidateType(ioc.type) &&
+  PROMOTABLE_TIERS.has(ioc.tier) &&
+  (ioc.type !== 'hash' || PROSE_HASH_BASES.has(ioc.tier_basis));
 
 const tierPriority = (tier: IocTier): number => {
   if (tier === 'discriminating') return 0;
@@ -394,12 +410,17 @@ export const reconcileIocAdjudication = (
         );
   }
 
-  // Deferred URL/domain candidates keep heuristic tiers in `iocs`, but stay out
-  // of anchors / promotion until a model pass reviews them. Correlation hash is separate.
+  // Deferred URL/domain/prose-hash candidates keep heuristic tiers in `iocs`, but
+  // stay out of anchors / promotion until a model pass reviews them. Candidacy is
+  // read off the pre-verdict output, since a verdict rewrites the basis. Correlation
+  // hash is separate.
+  const candidateIndexes = new Set(
+    prepared.output.flatMap((ioc, index) => (isSemanticCandidate(ioc) ? [index] : []))
+  );
   for (let index = 0; index < output.length; index++) {
     const ioc = output[index];
     if (
-      (ioc.type === 'url' || ioc.type === 'domain') &&
+      candidateIndexes.has(index) &&
       PROMOTABLE_TIERS.has(ioc.tier) &&
       !reviewedIndexes.has(index)
     ) {
@@ -414,7 +435,7 @@ export const reconcileIocAdjudication = (
 
   const anchorIocs = strippedOutput.filter((ioc, index) => {
     if (!PROMOTABLE_TIERS.has(ioc.tier)) return false;
-    if ((ioc.type === 'url' || ioc.type === 'domain') && !reviewedIndexes.has(index)) {
+    if (candidateIndexes.has(index) && !reviewedIndexes.has(index)) {
       return false;
     }
     return true;
