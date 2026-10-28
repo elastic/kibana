@@ -47,4 +47,5 @@ export const findRulesOptionsSchema = schema.object(
 
 export const findRulesParamsSchema = schema.object({
   options: schema.maybe(findRulesOptionsSchema),
+  allowPartialResults: schema.maybe(schema.boolean()),
 });
