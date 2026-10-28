@@ -103,6 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
       );
       await testSubjects.click('lnsMetric_background_chart_line');
+      await lens.waitForVisualization('mtrVis');
       await lens.closeDimensionEditor();
 
       await inspector.open('lnsApp_inspectButton');
