@@ -20,6 +20,7 @@ import {
 } from '@kbn/nightshift-investigations-plugin/common';
 import { isHttpClientError } from '../common/http_error';
 import { useKibana } from '../hooks/use_kibana';
+import { NIGHTSHIFT_ONBOARDING_QUERY_KEY } from '../onboarding/use_onboarding';
 import { createBrowserServiceAccountsApi } from './browser_service_accounts_api';
 
 const QUERY_KEY = ['nightshift.investigatorServiceAccount'] as const;
@@ -86,8 +87,10 @@ export const useInvestigatorServiceAccount = (): UseQueryResult<
 };
 
 /**
- * Sets up Nightshift in the current space: finds the deployment's Nightshift service accounts by
- * name, or creates them, as the current user, then binds the space's workflows to them.
+ * Enables Nightshift in the current space, in one step: finds the deployment's Nightshift service
+ * accounts by name, or creates them, as the current user, binds the space's workflows to them,
+ * then installs the investigation agent. Both halves are idempotent, so a retry after a partial
+ * failure completes the setup.
  */
 export const useSetUpNightshiftServiceAccount = (): UseMutationResult<
   InvestigatorServiceAccountStatus,
@@ -113,20 +116,32 @@ export const useSetUpNightshiftServiceAccount = (): UseMutationResult<
         createBrowserServiceAccountsApi({ http, serviceAccounts: security.serviceAccounts }),
         { isServerless }
       );
-      return investigationsClient.fetch(
+      const status = await investigationsClient.fetch(
         'POST /internal/nightshift/investigations/service_account/_enable',
         { signal: null, params: { body: { serviceAccountIds } } }
       );
+      // The space's agent runs as the account the step above bound, so it is installed last.
+      await investigationsClient.fetch('POST /internal/nightshift/onboarding/enable', {
+        signal: null,
+      });
+      return status;
     },
     onSuccess: (status) => {
       queryClient.setQueryData(QUERY_KEY, status);
+      queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_ONBOARDING_QUERY_KEY });
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.nightshift.serviceAccount.enabledToastTitle', {
+          defaultMessage: 'Elastic Nightshift enabled',
+        }),
+      });
     },
     onError: (error) => {
       // A failed setup may have done part of its work; read the status again.
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_ONBOARDING_QUERY_KEY });
       notifications.toasts.addError(toError(error, { isServerless }), {
         title: i18n.translate('xpack.nightshift.serviceAccount.setupErrorToastTitle', {
-          defaultMessage: 'Failed to set up the Nightshift service account',
+          defaultMessage: 'Could not enable Elastic Nightshift',
         }),
       });
     },

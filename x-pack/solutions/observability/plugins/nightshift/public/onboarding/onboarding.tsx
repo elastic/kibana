@@ -33,7 +33,8 @@ import {
   type OnboardingStepId,
   type OnboardingStepState,
 } from './onboarding_steps';
-import { OnboardingEnableStep } from './enable_step';
+import { NightshiftSetupPrompt } from '../service_account/nightshift_setup_prompt';
+import { useInvestigatorServiceAccount } from '../service_account/use_investigator_service_account';
 import { OnboardingConnectStep } from './connect_step';
 import { OnboardingFirstInvestigationStep } from './first_investigation_step';
 import { OnboardingAutomationStep } from './automation_step';
@@ -81,6 +82,8 @@ export function NightshiftOnboarding({
   const history = useHistory();
   const { search } = useLocation();
   const { data, isInitialLoading } = useOnboarding();
+  // The enable step binds the space's service accounts and installs the agent in one click.
+  const serviceAccount = useInvestigatorServiceAccount();
   const startSuggestions = useStartOnboardingSuggestions();
   const [stepOverride, setStepOverride] = useState<StepOverride>();
 
@@ -290,7 +293,7 @@ export function NightshiftOnboarding({
           {isInitialLoading ? (
             <EuiLoadingSpinner size="l" />
           ) : step === 'enable' ? (
-            <OnboardingEnableStep />
+            <NightshiftSetupPrompt status={serviceAccount.data} />
           ) : step === 'connect' || !execution ? (
             <OnboardingConnectStep />
           ) : step === 'investigate' || !latestInvestigation ? (
