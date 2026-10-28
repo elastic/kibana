@@ -286,6 +286,9 @@ reads it without adding Nightshift fields to the shared CLI or global config sch
     "url": "https://telemetry.example.com",
     "apiKey": "...",
     "readableIndices": "Read remote-a:logs-service-*"
+  },
+  "pagerduty": {
+    "apiKey": "..."
   }
 }
 ```
@@ -299,6 +302,7 @@ URL and key are configured, and requires sandbox credentials for remote investig
 | `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL`     | Remote Elasticsearch endpoint. Requires the API key below.                                                     |
 | `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY` | Encoded restricted API key, without the `ApiKey` prefix. Requires the URL above.                               |
 | `NIGHTSHIFT_SANDBOX_READABLE_INDICES`      | Optional manifest guidance naming readable index patterns and explicit remote names (up to 10,000 characters). |
+| `NIGHTSHIFT_PAGERDUTY_API_KEY`             | PagerDuty REST API token, without the `Token token=` prefix. Optional. Requires sandbox credentials.         |
 | `NIGHTSHIFT_EXAMPLES_FILE`                 | The same file format documented above; only questions and stable case IDs are required.                        |
 
 With those variables and the sandbox credentials configured:
@@ -313,6 +317,12 @@ The committed [`scout/kibana.telemetry.yml`](scout/kibana.telemetry.yml) creates
 `Authorization` header. The existing credential resolver authorizes connector access and execution,
 checks the agent's allow-list, and exposes the API key only to the requesting sandbox command.
 Remote telemetry and sandbox credentials are supplied through the hook environment.
+[`scout/kibana.pagerduty.yml`](scout/kibana.pagerduty.yml) does the same for an optional PagerDuty
+REST token (`nightshift.pagerduty.apiKey` or `NIGHTSHIFT_PAGERDUTY_API_KEY`). The hook loads it
+only when the token is set, and the investigator's allow-list then includes
+`nightshift-evals-pagerduty`. The value is a REST API token, not an Events API routing key, and
+it stays in the Nightshift Vault secret rather than in git. Until that secret has the key, a run
+simply has no PagerDuty connector.
 `/workspace/elastic.md` contains variable names and query guidance, never credential values. Its
 examples bound requests by time and advise using explicit remote names and narrow index patterns.
 These are instructions for the agent; the API key's privileges enforce the read restrictions.

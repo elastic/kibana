@@ -95,6 +95,8 @@ export interface InvestigationAgentTypeOptions {
   /** The proposals plugin is enabled, so `proposals.create` is registered. */
   proposalsEnabled: boolean;
   telemetryConnectorId?: string;
+  /** PagerDuty REST connector, allow-listed beside telemetry when configured. */
+  pagerdutyConnectorId?: string;
   /** Resolves the space's custom context block, appended to the instructions on every run. */
   getCustomContextInstructions?: (ctx: AgentConfigContext) => Promise<string>;
   logger?: Logger;
@@ -139,11 +141,15 @@ export const buildNightshiftAgentConfiguration = ({
   investigationToolsEnabled,
   proposalsEnabled,
   telemetryConnectorId,
+  pagerdutyConnectorId,
   getCustomContextInstructions,
   logger,
 }: NightshiftAgentTypeOptions & {
   instructions: string;
 }): AgentTypeDefinition['baseConfiguration'] => {
+  const connectorIds = [telemetryConnectorId, pagerdutyConnectorId].filter(
+    (id): id is string => Boolean(id)
+  );
   const baseConfiguration = {
     instructions: agentInstructions,
     skill_ids: [],
@@ -157,7 +163,7 @@ export const buildNightshiftAgentConfiguration = ({
       },
     ],
     enable_elastic_capabilities: false,
-    connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
+    connector_ids: connectorIds,
     ...(() => {
       // Decision trees are no longer a separate before-agent hook: they hydrate as a third
       // parallel branch of the combined materialize workflow, which already carries the
@@ -224,6 +230,7 @@ export const registerInvestigationAgentType = (
     investigationToolsEnabled,
     proposalsEnabled,
     telemetryConnectorId,
+    pagerdutyConnectorId,
     getCustomContextInstructions,
     logger,
   }: InvestigationAgentTypeOptions
@@ -237,6 +244,7 @@ export const registerInvestigationAgentType = (
       investigationToolsEnabled,
       proposalsEnabled,
       telemetryConnectorId,
+      pagerdutyConnectorId,
       getCustomContextInstructions,
       logger,
     })

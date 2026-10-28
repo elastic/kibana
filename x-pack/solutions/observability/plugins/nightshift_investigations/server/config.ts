@@ -18,6 +18,12 @@ const sandboxConfigSchema = schema.object({
   telemetry_connector_id: schema.maybe(schema.string()),
   // Operator-supplied readable index patterns and remote names for the telemetry manifest.
   telemetry_readable_indices: schema.maybe(schema.string({ maxLength: 10_000 })),
+  /**
+   * Id of the preconfigured connector holding a PagerDuty REST API token. It is added to the
+   * investigator's connector allow-list. The token is read-only in practice when the PagerDuty
+   * user cannot write, and it is injected per command only when the agent asks for it.
+   */
+  pagerduty_connector_id: schema.maybe(schema.string()),
 });
 
 const cortexConfigSchema = schema.object({
