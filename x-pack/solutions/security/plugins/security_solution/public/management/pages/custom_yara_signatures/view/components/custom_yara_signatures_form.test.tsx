@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { IHttpFetchError } from '@kbn/core/public';
@@ -25,7 +25,10 @@ import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../../common/endpo
 import { CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE } from '../../../../../../common/endpoint/constants';
 import { OS_TITLES } from '../../../../common/translations';
 import { VALIDATE_CUSTOM_YARA_SIGNATURE_DEBOUNCE_MS } from '../../hooks/use_validate_custom_yara_signature';
+import { MAX_COMMENT_LENGTH } from '../../../../../../common/constants';
+import { ExceptionsListItemGenerator } from '../../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import {
+  COMMENTS_DESCRIPTION,
   DEFINITION_DESCRIPTION,
   DEFINITION_TITLE,
   DETAILS_DESCRIPTION,
@@ -220,6 +223,80 @@ describe('Custom YARA signatures form', () => {
     expect(await screen.findByText(POLICY_ASSIGNMENT_INFO_TOOLTIP)).toBeInTheDocument();
   });
 
+  describe('comments', () => {
+    it('should render the comments section after policy assignment', () => {
+      render();
+
+      expect(screen.getByTestId('customYaraSignatures-form-commentsAbout')).toHaveTextContent(
+        COMMENTS_DESCRIPTION
+      );
+      expect(
+        within(screen.getByTestId('customYaraSignatures-form-comments')).getByLabelText(
+          'Comment Input'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('should add the new comment to the item', async () => {
+      render();
+      await user.type(screen.getByLabelText('Comment Input'), 'z');
+
+      expect(onChangeSpy).toHaveBeenCalledWith(
+        createOnChangeArgs({
+          item: createItem({ comments: [{ comment: 'z' }] }),
+          isValid: false,
+        })
+      );
+    });
+
+    it('should disable the comment input when the form is disabled', () => {
+      render(createProps({ disabled: true }));
+
+      expect(screen.getByLabelText('Comment Input')).toBeDisabled();
+    });
+
+    it('should list existing comments when editing', () => {
+      const item = new ExceptionsListItemGenerator('seed').generateCustomYaraSignature({
+        comments: [
+          {
+            id: 'comment-1',
+            comment: 'Existing comment',
+            created_at: '2025-12-01T10:00:00.000Z',
+            created_by: 'jane.doe',
+          },
+        ],
+      });
+      render(createProps({ mode: 'edit', item }));
+
+      expect(screen.getByTestId('customYaraSignatures-form-comments')).toHaveTextContent(
+        'Existing comment'
+      );
+    });
+
+    it('should be invalid when the comment is too long', async () => {
+      const signature = 'rule Example { condition: true }';
+      render(
+        createProps({
+          item: createItem({ name: 'test name', entries: [createYaraEntry(signature)] }),
+        })
+      );
+      act(() => {
+        jest.advanceTimersByTime(VALIDATE_CUSTOM_YARA_SIGNATURE_DEBOUNCE_MS);
+      });
+      await waitFor(() => {
+        expect(onChangeSpy).toHaveBeenLastCalledWith(expect.objectContaining({ isValid: true }));
+      });
+
+      act(() => {
+        fireEvent.change(screen.getByLabelText('Comment Input'), {
+          target: { value: 'a'.repeat(MAX_COMMENT_LENGTH + 1) },
+        });
+      });
+
+      expect(onChangeSpy).toHaveBeenLastCalledWith(expect.objectContaining({ isValid: false }));
+    });
+  });
+
   describe('operating system selector', () => {
     const formPrefix = 'customYaraSignatures-form';
 
@@ -332,7 +409,7 @@ describe('Custom YARA signatures form', () => {
         (title.textContent || '').trim()
       );
 
-      expect(titles).toEqual(['Details', 'Definition']);
+      expect(titles).toEqual(['Details', 'Definition', 'Comments']);
     });
 
     it('should render a vertically resizable editor container', () => {
