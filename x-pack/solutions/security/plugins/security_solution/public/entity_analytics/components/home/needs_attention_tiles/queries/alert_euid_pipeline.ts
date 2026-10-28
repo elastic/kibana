@@ -43,17 +43,30 @@ const KEEP_COLUMNS = '_ea_entity_id, `kibana.alert.severity`';
 export const ALERT_BUCKET_COLUMN = 'bucket';
 
 /**
- * Alerts that carry an identity field of any allowed type. The fields are not cast: the alerts and
- * the entity index map them the same way, and a cast would keep ES|QL from pushing the filter
- * down to Lucene.
+ * Alerts the entity store accepts as that type's entity (its `documentsFilter`). The fields are not
+ * cast: the alerts and the entity index map them the same way, and a cast would keep ES|QL from
+ * pushing the filter down to Lucene.
  */
+const buildEntityAcceptanceCondition = (
+  entityType: (typeof ALLOWED_ENTITY_TYPES)[number]
+): string =>
+  `(${getEuidEsqlDocumentsContainsIdFilter(getBuiltInEntityDefinition(entityType), {
+    castFields: false,
+  })})`;
+
+/** Alerts accepted as at least one allowed type, so alerts with no identity skip the EVALs. */
 const buildAnyEntityIdentityCondition = (): string =>
-  ALLOWED_ENTITY_TYPES.map(
+  ALLOWED_ENTITY_TYPES.map(buildEntityAcceptanceCondition).join(' OR ');
+
+/**
+ * The OR above only says that some type accepts the alert, so each EUID is nulled unless its own
+ * type accepts it. Otherwise a host field would keep a failed-outcome user alert counted as a user.
+ */
+const evalAcceptedTypedEuids = (): string =>
+  `| EVAL ${ALLOWED_ENTITY_TYPES.map(
     (entityType) =>
-      `(${getEuidEsqlDocumentsContainsIdFilter(getBuiltInEntityDefinition(entityType), {
-        castFields: false,
-      })})`
-  ).join(' OR ');
+      `${entityType}_euid = CASE(${buildEntityAcceptanceCondition(entityType)}, ${entityType}_euid)`
+  ).join(', ')}`;
 
 export interface AlertEuidPipelineOptions {
   /**
@@ -83,6 +96,7 @@ export const buildAlertEuidPipeline = (
       `(${buildAnyEntityIdentityCondition()})`,
     ].join(' AND ')}`,
     ...buildPerTypeEuidEvals(),
+    evalAcceptedTypedEuids(),
     evalGuardedTypedEuids('_ea_entity_id'),
     `| KEEP ${keepColumns}`,
   ];
