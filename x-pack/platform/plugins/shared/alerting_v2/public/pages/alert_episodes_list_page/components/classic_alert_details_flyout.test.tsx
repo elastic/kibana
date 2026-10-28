@@ -190,7 +190,7 @@ describe('ClassicAlertDetailsFlyout', () => {
     expect(onClose).toHaveBeenCalledTimes(3);
   });
 
-  it('shows a loading spinner while the classic alert is being fetched', () => {
+  it('shows a loading skeleton while the classic alert is being fetched', () => {
     mockFetchClassicAlertById.mockReturnValue(new Promise(() => {}));
 
     renderFlyout();
@@ -234,7 +234,7 @@ describe('ClassicAlertDetailsFlyout', () => {
     expect(viewDetails).toHaveTextContent('View details');
   });
 
-  it('omits the "View details" button for non-observability (stack) alerts', async () => {
+  it('omits the take action menu for non-observability (stack) alerts without actions', async () => {
     mockFetchClassicAlertById.mockResolvedValue({
       _index: '.internal.alerts-stack.alerts-default-000001',
       _id: 'alert-1',
@@ -296,7 +296,7 @@ describe('ClassicAlertDetailsFlyout', () => {
     expect(screen.queryByTestId('classicAlertEpisodeDetailsTabs')).not.toBeInTheDocument();
   });
 
-  it('renders EpisodeFooterActionMenu when actions are provided', async () => {
+  it('renders the take action menu when actions are provided', async () => {
     const mockAction = {
       id: 'test-action',
       order: 1,
