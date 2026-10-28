@@ -54,6 +54,7 @@ This will walk through 12 tasks: generating code, reviewing it, activating the c
 | `/create-connector <name>` | Generate just the connector spec, workflows, tests, and docs (no activation or testing) |
 | `/activate-connector <type>` | Create a connector instance in a running Kibana via the Actions API |
 | `/review-connector` | Review connector spec changes against a quality checklist |
+| `/update-connector <id> [issue]` | Follow a vendor API change: fix a drift issue from the weekly check, refresh the connector's vendor API artifacts and open a draft PR |
 
 ## Alternate: Generate a New Connector Spec
 
@@ -732,7 +733,7 @@ A connector the check can't run on at all is reported with an `error` instead.
 node scripts/connector_vendor_api --surface --report target/drift.json --github-repo elastic/kibana --dry-run
 ```
 
-Each connector whose outcome is `issue` gets one issue labelled `connector-validation`, found again on later runs by a marker in its body. The issue reports the two-mock result, the classified changes, the problems and the stale overlay actions, and mentions the CODEOWNERS of the connector's folder. A later run updates it when the findings change, reopens it when the connector drifts again, and closes it once the connector is healthy. The summary (`--summary`, default `target/connector_vendor_api/drift_summary.json`) lists the connectors to refresh, with the body of the refresh PR. `--dry-run` reads the issues but only logs what it would write.
+Each connector whose outcome is `issue` gets one issue labelled `connector-validation`, found again on later runs by a marker in its body. The issue reports the two-mock result, the classified changes, the problems and the stale overlay actions, and mentions the CODEOWNERS of the connector's folder. A later run updates it when the findings change, reopens it when the connector drifts again, and closes it once the connector is healthy. The issue points to the `/update-connector` skill, which fixes the connector. The summary (`--summary`, default `target/connector_vendor_api/drift_summary.json`) lists the connectors to refresh, with the body of the refresh PR. `--dry-run` reads the issues but only logs what it would write.
 
 The `kibana / connector vendor API drift` Buildkite pipeline (`.buildkite/pipelines/connector_vendor_api_drift.yml`) runs both weekly, and refreshes the artifacts of the `refresh` connectors in a single bot PR. Start a build by hand to check now; set `CONNECTOR_VENDOR_API_CONNECTOR` on the build to check one connector. `CONNECTOR_VENDOR_API_GITHUB_REPO` in its resource definition switches it from a dry run (empty) to a sandbox repository or to `elastic/kibana`.
 
