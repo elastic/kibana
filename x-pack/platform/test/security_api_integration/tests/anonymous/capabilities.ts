@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -20,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
   async function getAnonymousCapabilities(spaceId?: string) {
     const apiResponse = await supertest
       .get(`${spaceId ? `/s/${spaceId}` : ''}/internal/security/anonymous_access/capabilities`)
-      .set('x-elastic-internal-origin', 'kibana')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .expect(200);
 
     return Object.fromEntries(

@@ -9,6 +9,7 @@ import { JSDOM } from 'jsdom';
 import type { Cookie } from 'tough-cookie';
 import { format as formatURL } from 'url';
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 import {
@@ -30,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
       beforeEach(async () => {
         const handshakeResponse = await supertest
           .post('/internal/security/login')
-          .set('x-elastic-internal-origin', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .set('kbn-xsrf', 'xxx')
           .send({
             providerType: 'oidc',

@@ -10,6 +10,7 @@ import { expect } from 'expect';
 import type { Case, CasePostRequest } from '@kbn/cases-plugin/common';
 import { CaseSeverity, ConnectorTypes } from '@kbn/cases-plugin/common';
 import type { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type {
   FeatureKibanaPrivilegesReference,
   KibanaFeatureConfig,
@@ -180,7 +181,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('all deprecated features are known', async () => {
       const { body: features } = await supertest
         .get('/internal/features_provider/features')
-        .set('x-elastic-internal-origin', 'kibana')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200);
 
       // **NOTE**: This test is to ensure the AppEx Security team has a chance to review all features marked as
@@ -219,7 +220,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('all deprecated features are replaced by a single feature only or explicitly specify replacement features', async () => {
       const featuresResponse = await supertest
         .get('/internal/features_provider/features')
-        .set('x-elastic-internal-origin', 'kibana')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200);
       const features = featuresResponse.body as KibanaFeatureConfig[];
 
@@ -292,7 +293,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Fetch all features first.
       const featuresResponse = await supertest
         .get('/internal/features_provider/features')
-        .set('x-elastic-internal-origin', 'kibana')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200);
       const features = featuresResponse.body as KibanaFeatureConfig[];
 
@@ -369,7 +370,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('replaced UI actions are properly set for deprecated privileges', async () => {
       const { body: capabilities } = await supertestWithoutAuth
         .post('/api/core/capabilities')
-        .set('x-elastic-internal-origin', 'kibana')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('Authorization', getUserCredentials('case_2_a_deprecated'))
         .set('kbn-xsrf', 'xxx')
         .send({ applications: [] })

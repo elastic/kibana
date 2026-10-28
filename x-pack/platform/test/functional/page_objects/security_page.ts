@@ -14,6 +14,7 @@ import type {
 } from '@kbn/security-plugin/common';
 import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
 import { Key } from 'selenium-webdriver';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrService } from '../ftr_provider_context';
 
 interface LoginOptions {
@@ -322,7 +323,7 @@ export class SecurityPageObject extends FtrService {
 
     const { body: user } = await this.supertest
       .get('/internal/security/me')
-      .set('x-elastic-internal-origin', 'kibana')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .set('kbn-xsrf', 'xxx')
       .set('Cookie', `sid=${sidCookie.value}`)
       .expect(200);

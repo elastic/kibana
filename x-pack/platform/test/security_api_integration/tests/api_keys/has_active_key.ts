@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -37,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('detects when user has no API Keys', async () => {
       await supertest
         .get('/internal/security/api_key/_has_active')
-        .set('x-elastic-internal-origin', 'kibana')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxx')
         .expect(200, { hasApiKeys: false });
     });

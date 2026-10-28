@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 
@@ -25,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body: user, headers } = await supertest
         .get('/internal/security/me')
-        .set('x-elastic-internal-origin', 'kibana')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxx')
         .set('Authorization', `Basic ${credentials}`)
         .expect(200);

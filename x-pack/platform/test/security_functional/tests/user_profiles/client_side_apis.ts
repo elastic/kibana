@@ -7,6 +7,7 @@
 
 import { parse as parseCookie } from 'tough-cookie';
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 
@@ -36,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       for (const userPrefix of ['one', 'two', 'three']) {
         const response = await supertestWithoutAuth
           .post('/internal/security/login')
-          .set('x-elastic-internal-origin', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .set('kbn-xsrf', 'xxx')
           .send({
             providerType: 'basic',
