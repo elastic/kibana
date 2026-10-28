@@ -193,9 +193,45 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
         };
       `,
     },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod/v4';
+        const marked = z.any().describe('Pass through any value');
+        Object.defineProperty(marked, 'kbnTypeName', { value: 'PassThroughAny' });
+      `,
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod/v4';
+        const marked = z.union([z.string(), z.boolean()]);
+        Reflect.defineProperty(marked, 'kbnTypeName', { value: 'BooleanFromString' });
+      `,
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod/v4';
+        const marked = z.object({ id: z.string() });
+        Object.assign(marked, { kbnTypeName: 'Custom' });
+      `,
+    },
   ],
 
   invalid: [
+    {
+      code: dedent`
+        import { z } from '@kbn/zod/v4';
+        const marked = z.any();
+        Object.defineProperty(marked, 'kbnTypeName', { value: 'PassThroughAny' });
+        const ordinary = z.string();
+      `,
+      errors: [EAGER],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod/v4';
+        const marked = z.any();
+        Object.defineProperty(marked, 'kbnTypeName', { value: 'PassThroughAny' });
+        const ordinary = lazySchema(() => z.string());
+      `,
+    },
     {
       code: dedent`
         import { z, lazySchema } from '@kbn/zod';

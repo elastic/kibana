@@ -516,6 +516,42 @@ const isModuleScopeDeclarator = (node, ancestors) => {
 };
 
 /**
+ * A lazySchema proxy rejects writes, so a schema augmented after creation cannot be wrapped.
+ * @param {VariableDeclarator} node
+ * @param {import('eslint').SourceCode} sourceCode
+ * @returns {boolean}
+ */
+const isSchemaAugmented = (node, sourceCode) => {
+  if (node.id.type !== esTypes.Identifier) {
+    return false;
+  }
+  const binding = sourceCode.getScope(node).set.get(node.id.name);
+  return Boolean(
+    binding?.references.some(({ identifier }) => {
+      const call = identifier.parent;
+      if (call?.type !== esTypes.CallExpression || call.arguments[0] !== identifier) {
+        return false;
+      }
+      const callee = unwrapExpression(call.callee);
+      if (
+        callee?.type !== esTypes.MemberExpression ||
+        callee.computed ||
+        callee.object.type !== esTypes.Identifier ||
+        callee.property.type !== esTypes.Identifier
+      ) {
+        return false;
+      }
+      const method = callee.property.name;
+      return (
+        (callee.object.name === 'Object' &&
+          (method === 'defineProperty' || method === 'defineProperties' || method === 'assign')) ||
+        (callee.object.name === 'Reflect' && method === 'defineProperty')
+      );
+    })
+  );
+};
+
+/**
  * @param {Node[]} ancestors
  * @param {FileState} state
  * @returns {boolean}
@@ -720,6 +756,11 @@ module.exports = {
         }
         const ancestors = sourceCode.getAncestors(node);
         if (!isModuleScopeDeclarator(declarator, ancestors)) {
+          return;
+        }
+
+        if (isSchemaAugmented(declarator, sourceCode)) {
+          recordSchemaBinding(declarator, state, sourceCode);
           return;
         }
 
