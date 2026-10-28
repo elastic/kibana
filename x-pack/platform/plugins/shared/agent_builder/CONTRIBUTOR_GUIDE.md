@@ -1181,6 +1181,19 @@ agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation',
 }));
 ```
 
+### Conversation details flyout width
+
+Every conversation details flyout — the in-chat one and the ones opened with
+`openConversationDetails` — is resizable and uses the same width rules, so it opens at the same
+width in every consuming app:
+
+- Default width 480px, minimum 400px, maximum 640px.
+- When the user drags the flyout, that width is remembered (in `localStorage`) and used on the
+  next open, wherever the flyout is opened from. The flyout menu's reset action returns it to the
+  default.
+
+The width is not configurable per template or per caller: all surfaces share one setting.
+
 ### Conversation details menu actions
 
 Menu actions are icon buttons rendered in the flyout menu bar before the close button. Each entry
