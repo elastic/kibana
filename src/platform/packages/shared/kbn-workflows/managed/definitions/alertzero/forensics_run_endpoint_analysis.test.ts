@@ -1903,6 +1903,10 @@ describe('Endpoint analysis run', () => {
       expect(render({ attack_acknowledged: false }, 'open')).toContain(
         'The attack could not be acknowledged and is still open. [See execution](https://kibana/exec-1).'
       );
+      // A failed re-read leaves the status blank: the attack may well be open, so it is not called "already" anything.
+      expect(render({ attack_acknowledged: false }, '')).toContain(
+        "Could not read the attack's status after the analysis, so it was left as it was. [See execution](https://kibana/exec-1)."
+      );
       expect(render({ read: false })).toContain('Could not read its 3 detection alert(s) back');
       expect(render({}, 'open', false)).toBe(
         'Acknowledged the attack while this Investigation waits for a decision. It lists no detection alerts.'

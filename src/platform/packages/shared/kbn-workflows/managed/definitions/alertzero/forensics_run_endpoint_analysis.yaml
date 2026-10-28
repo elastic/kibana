@@ -1147,7 +1147,8 @@ steps:
                   {%- assign retired = steps.resolve_attack_alerts_retired.output -%}
                   {%- if retired.attack_acknowledged == true -%}Acknowledged the attack while this Investigation waits for a decision.
                   {%- elsif steps.resolve_attack_alerts.output.attack_status == 'open' -%}The attack could not be acknowledged and is still open. [See execution]({{ execution.url }}).
-                  {%- else -%}The attack was already `{{ steps.resolve_attack_alerts.output.attack_status | default: 'not open' }}` and was left as it was.
+                  {%- elsif steps.resolve_attack_alerts.output.attack_status == blank -%}Could not read the attack's status after the analysis, so it was left as it was. [See execution]({{ execution.url }}).
+                  {%- else -%}The attack was already `{{ steps.resolve_attack_alerts.output.attack_status }}` and was left as it was.
                   {%- endif -%}
                   {%- if steps.resolve_attack_alerts.output.has_alerts != true %} It lists no detection alerts.
                   {%- elsif retired.read != true %} Could not read its {{ retired.requested }} detection alert(s) back, so whether they were tagged `{{ consts.endpoint_analyzed_tag }}` and acknowledged is unknown. [See execution]({{ execution.url }}).
