@@ -428,7 +428,12 @@ export const readKeyHistory = async (
         verdicts: {
           filters: {
             filters: {
-              falsePositive: { term: { [ALERT_FIELDS.tags]: 'az:false_positive' } },
+              // Expiry and a failed closure swap `az:false_positive` for `az:inconclusive` and keep
+              // `az:model_fp`, so the model's earlier judgement is still counted. An alert with both
+              // tags matches once.
+              falsePositive: {
+                terms: { [ALERT_FIELDS.tags]: ['az:false_positive', 'az:model_fp'] },
+              },
               truePositive: { term: { [ALERT_FIELDS.tags]: 'az:true_positive' } },
             },
           },

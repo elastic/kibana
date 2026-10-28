@@ -11,6 +11,7 @@ import {
   fetchTriageAlerts,
   listLiveExecutionIds,
   loadAlertsByIds,
+  readKeyHistory,
   tagAlerts,
   type TriageFilters,
 } from './ports';
@@ -91,6 +92,23 @@ describe('tagAlerts on a version conflict', () => {
 
     await expect(run(callKibanaApi)).rejects.toThrow('HTTP 500');
     expect(callKibanaApi).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('readKeyHistory', () => {
+  it('counts the preserved model judgement as well as the legacy false-positive tag', async () => {
+    const callKibanaApi = jest.fn().mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: { aggregations: { verdicts: { buckets: {} } } },
+    });
+
+    await readKeyHistory({ callKibanaApi }, { strictKeyTags: ['k'], excludeIds: [], since: 0 });
+
+    const { aggs } = callKibanaApi.mock.calls[0][0].body;
+    expect(aggs.verdicts.filters.filters.falsePositive).toEqual({
+      terms: { 'kibana.alert.workflow_tags': ['az:false_positive', 'az:model_fp'] },
+    });
   });
 });
 
