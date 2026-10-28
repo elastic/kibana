@@ -42,11 +42,11 @@ groups:
         description: |
           Makes the {{esql}}-based Universal Alerting system available in {{product.kibana}}, including its rules, action policies, and APIs. When this setting is off, {{product.kibana}} hides the **Universal Alerting** interface and rejects requests to its APIs, but rules and action policies that already exist keep running. Disable your rules before you turn this setting off.
 
-          For the steps to turn the system on, confirm that it is available, and stop rules from running, refer to [Set up Universal Alerting](docs-content://explore-analyze/alerting/experimental-alerting-system/get-started/setup.md).
+          For the steps to turn the system on, confirm that it is available, and stop rules from running, refer to [Set up Universal Alerting](docs-content://explore-analyze/alerting/esql/setup.md).
         datatype: bool
         default: true
         applies_to:
-          stack: experimental =9.5, ga 9.6+
+          stack: ga 9.6+
           ech: ga
           ece: ga
           eck: ga
