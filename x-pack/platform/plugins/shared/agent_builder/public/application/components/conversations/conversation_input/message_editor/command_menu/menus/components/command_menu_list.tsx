@@ -19,6 +19,7 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   useEuiTheme,
   keys,
 } from '@elastic/eui';
@@ -28,6 +29,8 @@ import type { CommandMenuHandle } from '../../types';
 
 const MENU_WIDTH = 280;
 const MENU_MAX_HEIGHT = 240;
+// EuiSelectable rows are 32px high by default
+const MENU_ROW_HEIGHT = 32;
 
 const loadingLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.commandMenu.list.loading',
@@ -60,6 +63,10 @@ interface CommandMenuListProps {
   readonly 'data-test-subj'?: string;
   /** When true, Space also selects the highlighted option, like Enter. */
   readonly spaceSelection?: boolean;
+  /** Rows shown before the list scrolls. Defaults to a fixed height of 240px. */
+  readonly maxVisibleRows?: number;
+  /** When true, the highlighted row shows an Enter key hint. */
+  readonly showEnterHint?: boolean;
 }
 
 export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProps>(
@@ -71,6 +78,8 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       width: menuWidth = MENU_WIDTH,
       'data-test-subj': dataTestSubj = 'commandMenuList',
       spaceSelection,
+      maxVisibleRows,
+      showEnterHint,
     },
     ref
   ) => {
@@ -151,6 +160,16 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       width: ${menuWidth}px;
     `;
 
+    const maxHeight = maxVisibleRows ? maxVisibleRows * MENU_ROW_HEIGHT : MENU_MAX_HEIGHT;
+    const activeKey = options[activeIndex]?.key;
+
+    const rowStyles = css`
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: ${euiTheme.size.s};
+    `;
+
     const activeHighlightStyles = css`
       .euiSelectableListItem:nth-child(${activeIndex + 1}) {
         background-color: ${euiTheme.focus.backgroundColor};
@@ -188,14 +207,25 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
         <EuiSelectable
           options={selectableOptions}
           singleSelection
-          renderOption={(option: CommandMenuListSelectableRow) =>
-            option.renderLabel ?? option.label
-          }
+          renderOption={(option: CommandMenuListSelectableRow) => {
+            const label = option.renderLabel ?? option.label;
+            if (!showEnterHint) {
+              return label;
+            }
+            return (
+              <span css={rowStyles}>
+                {label}
+                {option.key === activeKey && (
+                  <EuiIcon type="return" size="s" color="subdued" aria-hidden={true} />
+                )}
+              </span>
+            );
+          }}
           listProps={{
             showIcons: false,
             bordered: false,
             css: css`
-              max-height: ${MENU_MAX_HEIGHT}px;
+              max-height: ${maxHeight}px;
             `,
           }}
           onChange={(_newOptions, _event, changedOption) => {

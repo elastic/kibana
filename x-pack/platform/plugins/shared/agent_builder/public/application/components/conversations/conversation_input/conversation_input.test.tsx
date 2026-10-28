@@ -22,6 +22,7 @@ import {
   useHasActiveConversation,
   useIsSharedConversation,
 } from '../../../hooks/use_conversation';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useIsAwaitingPrompt } from '../../../hooks/use_is_awaiting_prompt';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
@@ -29,6 +30,7 @@ import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { useToasts } from '../../../hooks/use_toasts';
 import { useMessageEditor } from './message_editor';
+import { CommandId } from './message_editor/command_menu/types';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useInputDraft } from '../../../hooks/use_input_draft';
@@ -54,6 +56,9 @@ jest.mock('../../../hooks/use_conversation', () => ({
   useConversationTitle: jest.fn(),
   useHasActiveConversation: jest.fn(),
   useIsSharedConversation: jest.fn(),
+}));
+jest.mock('../../../hooks/use_experimental_features', () => ({
+  useExperimentalFeatures: jest.fn(),
 }));
 jest.mock('../../../hooks/use_is_awaiting_prompt', () => ({
   useIsAwaitingPrompt: jest.fn(),
@@ -173,6 +178,7 @@ const mockedUseConversationReadOnly = jest.mocked(useConversationReadOnly);
 const mockedUseConversationTitle = jest.mocked(useConversationTitle);
 const mockedUseHasActiveConversation = jest.mocked(useHasActiveConversation);
 const mockedUseIsSharedConversation = jest.mocked(useIsSharedConversation);
+const mockedUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
 const mockedUseIsAwaitingPrompt = jest.mocked(useIsAwaitingPrompt);
 const mockedUseConversationId = jest.mocked(useConversationId);
 const mockedUseConversationContext = jest.mocked(useConversationContext);
@@ -229,6 +235,7 @@ describe('ConversationInput', () => {
     mockedUseConversationTitle.mockReturnValue({ title: '', isLoading: false } as never);
     mockedUseHasActiveConversation.mockReturnValue(false);
     mockedUseIsSharedConversation.mockReturnValue(false);
+    mockedUseExperimentalFeatures.mockReturnValue(false);
     mockedUseIsAwaitingPrompt.mockReturnValue(false);
     mockedUseConversationId.mockReturnValue(undefined);
     mockedUseConversationContext.mockReturnValue({
@@ -451,6 +458,45 @@ describe('ConversationInput', () => {
 
       expect(submitMessage).toHaveBeenCalledWith('hello agent');
       expect(sendUserMessage).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('mentions', () => {
+    const lastExcludedCommandIds = () =>
+      mockedUseMessageEditor.mock.calls[mockedUseMessageEditor.mock.calls.length - 1][0]
+        ?.excludedCommandIds;
+
+    it('turns the mention menu off with the experimental flag off', () => {
+      mockedUseIsSharedConversation.mockReturnValue(true);
+      renderInput(<ConversationInput />);
+
+      expect(lastExcludedCommandIds()).toEqual([CommandId.Mention]);
+    });
+
+    it('turns the mention menu off in a chat that is not shared', () => {
+      mockedUseExperimentalFeatures.mockReturnValue(true);
+      renderInput(<ConversationInput />);
+
+      expect(lastExcludedCommandIds()).toEqual([CommandId.Mention]);
+    });
+
+    it('turns the mention menu on in a shared chat with the experimental flag on', () => {
+      mockedUseExperimentalFeatures.mockReturnValue(true);
+      mockedUseIsSharedConversation.mockReturnValue(true);
+      renderInput(<ConversationInput />);
+
+      expect(lastExcludedCommandIds()).toEqual([]);
+    });
+
+    it('turns the mention menu on when the chat becomes shared, without a remount', () => {
+      mockedUseExperimentalFeatures.mockReturnValue(true);
+      const { rerender } = renderInput(<ConversationInput />);
+      expect(lastExcludedCommandIds()).toEqual([CommandId.Mention]);
+
+      mockedUseIsSharedConversation.mockReturnValue(true);
+      rerenderInput(rerender);
+
+      expect(lastExcludedCommandIds()).toEqual([]);
     });
   });
 

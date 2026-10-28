@@ -45,6 +45,8 @@ import {
 } from '../../../hooks/use_conversation';
 import { useIsAwaitingPrompt } from '../../../hooks/use_is_awaiting_prompt';
 import { MessageEditor, useMessageEditor, CommandBadgeSerializationError } from './message_editor';
+import { CommandId } from './message_editor/command_menu/types';
+import { useCanMention } from './mentions/use_can_mention';
 import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
@@ -248,6 +250,9 @@ const getMessageEditorAriaLabel = ({
   });
 };
 
+const MENTION_EXCLUDED_COMMAND_IDS: readonly CommandId[] = [CommandId.Mention];
+const NO_EXCLUDED_COMMAND_IDS: readonly CommandId[] = [];
+
 const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   onSubmit,
   onEditorFocus,
@@ -291,6 +296,8 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     }
   }, [saveDraft]);
 
+  const canMention = useCanMention();
+
   const {
     messageEditor,
     controller: messageEditorController,
@@ -299,6 +306,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     onEditorFocus,
     onContentChange: handleContentChange,
     maxLength: CHAT_MESSAGE_MAX_LENGTH,
+    excludedCommandIds: canMention ? NO_EXCLUDED_COMMAND_IDS : MENTION_EXCLUDED_COMMAND_IDS,
   });
   messageEditorControllerRef.current = messageEditorController;
 

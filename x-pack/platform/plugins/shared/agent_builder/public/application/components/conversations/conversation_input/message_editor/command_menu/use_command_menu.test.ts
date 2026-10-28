@@ -124,6 +124,24 @@ describe('useCommandMenuCommand', () => {
     expect(result.current.match.activeCommand?.command.id).toBe(CommandId.Sml);
   });
 
+  it('"@" opens the mention menu, unless the mention command is excluded', () => {
+    mockGetTextBeforeCursor.mockReturnValue('hi @jul');
+
+    const { result: allowed } = renderHook(() => useCommandMenu());
+    act(() => {
+      allowed.current.checkInputForCommand(mockElement);
+    });
+    expect(allowed.current.match.activeCommand?.command.id).toBe(CommandId.Mention);
+    expect(allowed.current.match.activeCommand?.query).toBe('jul');
+
+    const excludedCommandIds = [CommandId.Mention];
+    const { result: excluded } = renderHook(() => useCommandMenu({ excludedCommandIds }));
+    act(() => {
+      excluded.current.checkInputForCommand(mockElement);
+    });
+    expect(excluded.current.match.isActive).toBe(false);
+  });
+
   describe('no stickiness — a later trigger always wins immediately', () => {
     it('lets a "/" elsewhere in the text win outright, with no memory of an earlier "#" mention', () => {
       mockGetTextBeforeCursor.mockReturnValue('#connector/no_match');
