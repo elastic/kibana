@@ -43,7 +43,7 @@ jest.mock('../../data/sources/use_fetch_sources', () => ({
   }),
 }));
 
-const createSource = (esqlUpdatedAt: string, enabled = true): NightshiftSource => ({
+const createSource = (esqlUpdatedAt: string): NightshiftSource => ({
   id: 'source-1',
   title: 'Nginx errors',
   tags: [],
@@ -51,7 +51,7 @@ const createSource = (esqlUpdatedAt: string, enabled = true): NightshiftSource =
   type: 'logs',
   slug: 'nginx-errors',
   view_name: '$.nightshift.sources.default.nginx-errors',
-  enabled,
+  enabled: true,
   created_by: 'marco',
   created_at: '2026-09-01T00:00:00.000Z',
   updated_at: esqlUpdatedAt,
@@ -178,79 +178,5 @@ describe('KiGenerationProvider status polling', () => {
     expect(screen.getByTestId('generating')).toHaveTextContent('');
     expect(screen.getByTestId('awaiting-run')).toHaveTextContent('');
     expect(mockBulkOnboarding.expectOnboardingStart).not.toHaveBeenCalled();
-  });
-
-  describe('when a source is enabled', () => {
-    const VERSION = '2026-09-01T00:00:00.000Z';
-
-    it('polls a source that was listed disabled, without showing a spinner', () => {
-      mockSources = [createSource(VERSION, false)];
-      const { rerender } = render(
-        <KiGenerationProvider>
-          <AwaitingRunProbe />
-        </KiGenerationProvider>
-      );
-      mockBulkOnboarding.onboardingStatusUpdateQueue.add.mockClear();
-      mockBulkOnboarding.expectOnboardingStart.mockClear();
-
-      mockSources = [createSource(VERSION, true)];
-      rerender(
-        <KiGenerationProvider>
-          <AwaitingRunProbe />
-        </KiGenerationProvider>
-      );
-
-      expect(mockBulkOnboarding.expectOnboardingStart).toHaveBeenCalledWith('source-1');
-      expect(mockBulkOnboarding.onboardingStatusUpdateQueue.add).toHaveBeenCalledWith('source-1');
-      expect(screen.getByTestId('generating')).toHaveTextContent('');
-      expect(screen.getByTestId('awaiting-run')).toHaveTextContent('');
-    });
-
-    it.each([
-      ['stays enabled', true],
-      ['stays disabled', false],
-    ])('does not poll a source that %s', (_, enabled) => {
-      mockSources = [createSource(VERSION, enabled)];
-      const { rerender } = render(<KiGenerationProvider>{null}</KiGenerationProvider>);
-      mockBulkOnboarding.onboardingStatusUpdateQueue.add.mockClear();
-
-      mockSources = [createSource(VERSION, enabled)];
-      rerender(<KiGenerationProvider>{null}</KiGenerationProvider>);
-
-      expect(mockBulkOnboarding.onboardingStatusUpdateQueue.add).not.toHaveBeenCalled();
-      expect(mockBulkOnboarding.expectOnboardingStart).not.toHaveBeenCalled();
-    });
-
-    it('expects no run in a paused space', () => {
-      mockIsPaused = true;
-      mockSources = [createSource(VERSION, false)];
-      const { rerender } = render(<KiGenerationProvider>{null}</KiGenerationProvider>);
-
-      mockSources = [createSource(VERSION, true)];
-      rerender(<KiGenerationProvider>{null}</KiGenerationProvider>);
-
-      expect(mockBulkOnboarding.expectOnboardingStart).not.toHaveBeenCalled();
-    });
-  });
-
-  it('announces a failure once, and again only for a new run', () => {
-    const onFailed = jest.fn();
-    const { rerender } = render(
-      <KiGenerationProvider onFailed={onFailed}>{null}</KiGenerationProvider>
-    );
-    mockSources = [createSource('2026-09-01T00:00:00.000Z')];
-    rerender(<KiGenerationProvider onFailed={onFailed}>{null}</KiGenerationProvider>);
-
-    const failed: SignificantEventsWorkflowStatusResult = {
-      status: SignificantEventsWorkflowStatus.Failed,
-      executionId: 'run-1',
-      error: 'boom',
-    };
-    act(() => reportStatus('source-1', failed));
-    act(() => reportStatus('source-1', failed));
-    expect(onFailed).toHaveBeenCalledTimes(1);
-
-    act(() => reportStatus('source-1', { ...failed, executionId: 'run-2' }));
-    expect(onFailed).toHaveBeenCalledTimes(2);
   });
 });

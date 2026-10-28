@@ -105,11 +105,6 @@ export function KiGenerationProvider({
   // (`esql_updated_at`) it was enqueued with, so only new sources and sources whose query changed
   // (which resets their onboarding status) trigger network calls.
   const enqueuedQueryVersionsRef = useRef<Map<string, string>>(new Map());
-  // Enabling a source keeps its query version, so the guard above would never poll it again. The
-  // last `enabled` seen per source lets the effect notice the flip.
-  const seenEnabledRef = useRef<Map<string, boolean>>(new Map());
-  // The last status reported per source, so a status that did not change is not announced twice.
-  const reportedStatusKeysRef = useRef<Map<string, string>>(new Map());
 
   const [onboardingConfig, setOnboardingConfig] = useState<OnboardingConfig>({
     steps: [KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration],
@@ -157,13 +152,7 @@ export function KiGenerationProvider({
         return next;
       });
 
-      // A source waiting for a run that never comes is reported again once the wait ends, with the
-      // status it already had. Announcing that would repeat an old failure or completion.
-      const statusKey = `${statusResult.status}:${statusResult.executionId ?? ''}`;
-      const isNewStatus = reportedStatusKeysRef.current.get(sourceId) !== statusKey;
-      reportedStatusKeysRef.current.set(sourceId, statusKey);
-
-      if (initialStatusFetchDoneRef.current && isNewStatus) {
+      if (initialStatusFetchDoneRef.current) {
         if (statusResult.status === SignificantEventsWorkflowStatus.Failed) {
           onFailed?.(statusResult.error ?? 'Unknown error');
         }
@@ -200,16 +189,6 @@ export function KiGenerationProvider({
     let hasNew = false;
     fetchedSources.forEach(({ id, enabled, esql_updated_at: queryVersion }) => {
       const knownVersion = enqueuedQueryVersionsRef.current.get(id);
-      const wasDisabled = seenEnabledRef.current.get(id) === false;
-      seenEnabledRef.current.set(id, enabled);
-      if (knownVersion === queryVersion && wasDisabled && enabled && !isPaused) {
-        // Enabling starts a run only for a source that never had one scheduled, which the list
-        // cannot tell. Poll until one shows up or the wait ends. No spinner meanwhile: a source
-        // that already ran starts nothing, and a run that does start is reported by the poll.
-        expectOnboardingStart(id);
-        onboardingStatusUpdateQueue.add(id);
-        hasNew = true;
-      }
       if (knownVersion !== queryVersion) {
         // After the first load, a new id or a new query version is a source the user just created
         // or edited. The server starts its onboarding asynchronously, so keep polling for it. A
