@@ -183,3 +183,24 @@ export const EDIT_ASSIGNEE_NOT_AVAILABLE = i18n.translate(
     defaultMessage: 'Edit assignee is not available for classic alerts',
   }
 );
+
+export const VIEW_IN_APP = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.viewInAppAction.viewInApp',
+  {
+    defaultMessage: 'View in app',
+  }
+);
+
+export const VIEW_IN_APP_NO_LINK = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.viewInAppAction.noLinkTitle',
+  {
+    defaultMessage: 'No app view is available for this alert',
+  }
+);
+
+export const VIEW_IN_APP_ERROR = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.viewInAppAction.errorTitle',
+  {
+    defaultMessage: 'Unable to open the alert in its app',
+  }
+);

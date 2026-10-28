@@ -15,6 +15,7 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
+import type { AlertFormatter } from '@kbn/alerts-ui-shared';
 import type { EpisodeActionExtension, EpisodeDataSource } from '../types/episode_data_source';
 import type { EpisodeAction } from './types';
 import { createAckAction } from './ack';
@@ -27,6 +28,7 @@ import { createEditTagsAction } from './edit_tags';
 import { createEditAssigneeAction } from './edit_assignee';
 import { createOpenInDiscoverAction } from './open_in_discover';
 import { createOpenAlertEventsHistoryAction } from './open_alert_events_history';
+import { createViewInAppAction } from './view_in_app';
 
 export interface EpisodeActionsDeps {
   http: HttpStart;
@@ -57,6 +59,8 @@ export interface EpisodeActionsDeps {
    * `getAlertEventsHistoryHref`; omitted or false hides the action.
    */
   isAlertEventsHistoryAvailable?: () => boolean;
+  /** Returns the rule type's alert formatter; enables "View in app" for classic alerts when provided. */
+  getAlertFormatter?: (ruleTypeId: string) => AlertFormatter | undefined;
   additionalDataSource?: EpisodeDataSource;
 }
 
@@ -98,6 +102,15 @@ export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] 
             spaces: deps.spaces,
             getAlertEventsHistoryHref: deps.getAlertEventsHistoryHref,
             isAvailable: deps.isAlertEventsHistoryAvailable ?? (() => false),
+          }),
+        ]
+      : []),
+    ...(deps.getAlertFormatter
+      ? [
+          createViewInAppAction({
+            http: deps.http,
+            notifications: deps.notifications,
+            getAlertFormatter: deps.getAlertFormatter,
           }),
         ]
       : []),

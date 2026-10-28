@@ -17,6 +17,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 
 /**
  * Kibana context services for the alerts management UI
@@ -36,4 +37,5 @@ export type AlertsKibanaServices = CoreStart & {
   unifiedDocViewer: UnifiedDocViewerStart;
   userProfile: CoreStart['userProfile'];
   spaces: SpacesPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 };

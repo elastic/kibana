@@ -24,6 +24,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { AppHeaderTab } from '@kbn/app-header';
 import type { EpisodeAction, EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
 import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
@@ -206,6 +207,9 @@ export const AlertingV2EpisodesPage = ({
       toastNotifications: coreStart.notifications.toasts,
       unifiedDocViewer: container.get(PluginStart('unifiedDocViewer')) as UnifiedDocViewerStart,
       spaces: container.get(PluginStart('spaces')) as SpacesPluginStart,
+      triggersActionsUi: container.get(
+        PluginStart('triggersActionsUi')
+      ) as TriggersAndActionsUIPublicPluginStart,
     }),
     [coreStart, container]
   );

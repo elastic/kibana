@@ -35,6 +35,9 @@ export {
   createOpenAlertEventsHistoryAction,
   OPEN_ALERT_EVENTS_HISTORY_ACTION_ID,
 } from './open_alert_events_history';
+export { createViewInAppAction } from './view_in_app';
+export { VIEW_V1_ALERT_IN_APP_ACTION_ID } from './view_in_app_action_id';
+export type { ViewInAppActionDeps } from './view_in_app';
 export {
   createCompositeEpisodeAction,
   type CompositeActionDef,

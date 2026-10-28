@@ -21,15 +21,18 @@ import type { EpisodeDataSource } from '../types/episode_data_source';
 import { createAddToCaseAction } from './add_to_case';
 import { ADD_TO_CASE_EPISODE_ACTION_ID } from './add_to_case_action_id';
 import { createEpisodeActions } from './create_episode_actions';
+import { VIEW_V1_ALERT_IN_APP_ACTION_ID } from './view_in_app_action_id';
 
 const buildActions = ({
   additionalDataSource,
   includeHistory = true,
   isAlertEventsHistoryAvailable = true,
+  includeViewInApp = false,
 }: {
   additionalDataSource?: EpisodeDataSource;
   includeHistory?: boolean;
   isAlertEventsHistoryAvailable?: boolean;
+  includeViewInApp?: boolean;
 } = {}) =>
   createEpisodeActions({
     http: httpServiceMock.createStartContract(),
@@ -50,6 +53,7 @@ const buildActions = ({
           isAlertEventsHistoryAvailable: () => isAlertEventsHistoryAvailable,
         }
       : {}),
+    ...(includeViewInApp ? { getAlertFormatter: () => undefined } : {}),
     additionalDataSource,
   });
 
@@ -68,6 +72,18 @@ describe('createEpisodeActions', () => {
       'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER',
       'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER',
     ]);
+  });
+
+  it('adds View in app after snooze actions when the surface provides a formatter getter', () => {
+    const ids = buildActions({ includeViewInApp: true }).map((action) => action.id);
+
+    expect(ids.indexOf(VIEW_V1_ALERT_IN_APP_ACTION_ID)).toBe(
+      ids.indexOf('ALERTING_V2_UNSNOOZE_EPISODE') + 1
+    );
+  });
+
+  it('omits View in app when the surface does not provide a formatter getter', () => {
+    expect(buildActions().map((action) => action.id)).not.toContain(VIEW_V1_ALERT_IN_APP_ACTION_ID);
   });
 
   it('omits alert events history when the surface does not provide its resolver', () => {
