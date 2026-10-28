@@ -151,22 +151,6 @@ KBN_EVALS_SKIP_CONNECTOR_SETUP=true node scripts/evals run --suite <id>
 </details>
 
 <details>
-<summary>Running without a terminal prompt (a script or an agent)</summary>
-
-`start` asks which profile and which connectors to use when it has a terminal. Without one it needs both up front:
-
-```bash
-export KIBANA_TESTING_INFERENCE_ENDPOINTS="$(node -e "const c=require(process.env.HOME+'/.elastic/eis-connectors-cache.json').connectors;process.stdout.write(Buffer.from(JSON.stringify(c)).toString('base64'))")"
-node scripts/evals start --profile local --suite <id> --model <connector> --judge <connector>
-```
-
-- `--profile local` is required. The connectors cache at `~/.elastic/eis-connectors-cache.json` is written by `node scripts/evals init`, which does need a terminal once.
-- With the `local` profile, datasets are read from the Kibana in `evaluationsKbn.url` of `scripts/vault/config.local.json`, so that Kibana must be running with `xpack.evals.enabled: true`. If you start it with a random base path, the URL has to include it and changes on every restart; `--no-base-path` avoids that. A run that fails with "Evaluations plugin is not enabled on the target Kibana" usually has the wrong URL, not a disabled plugin.
-- If the log says "Scout server already running -- reusing", the run measures whatever build that stack was started from. `node scripts/evals stop` first when you switch branches.
-
-</details>
-
-<details>
 <summary>Running against your local/dev Kibana</summary>
 
 We recommend using Scout (the default). If you must target your own Kibana instance, create `.scout/servers/local.json`:

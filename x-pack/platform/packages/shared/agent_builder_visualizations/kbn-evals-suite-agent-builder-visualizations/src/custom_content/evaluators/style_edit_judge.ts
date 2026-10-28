@@ -12,8 +12,8 @@ import type { CustomContentEvaluator } from '../types';
 export const CUSTOM_CONTENT_STYLE_EDIT_EVALUATOR_NAME = 'Custom Content Style Edit';
 
 const STYLE_EDIT_CRITERIA = [
-  'The template after the edit does what the instruction asks for.',
-  'The edit changes nothing the instruction did not ask for: the text, the layout and the data bindings stay as they were.',
+  'The template after the edit does what the instruction asks for. Colors are theme tokens, not hex values: var(--cc-color-primary) is the theme blue, var(--cc-color-danger) is red, var(--cc-color-warning) is yellow or orange, and var(--cc-vis-0) to var(--cc-vis-9) are the data colors. Using the token of the requested color counts as that color.',
+  'Styling the instruction does not mention stays as it was, and the text, the layout and the data bindings are unchanged.',
 ];
 
 /**
