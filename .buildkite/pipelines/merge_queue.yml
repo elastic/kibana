@@ -92,6 +92,8 @@ steps:
       spotZones: asia-south2-a,asia-south2-b,asia-south2-c,europe-west2-a,europe-west2-b,europe-west2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c
       diskSizeGb: 130
     key: check_oas_snapshot
+    env:
+      CHECK_GATE: 'true'
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -107,6 +109,8 @@ steps:
       machineType: n2d-standard-8
       zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
     key: quick_checks
+    env:
+      CHECK_GATE: 'true'
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -123,6 +127,8 @@ steps:
       preemptible: true
       spotZones: asia-south2-a,asia-south2-b,asia-south2-c,europe-west2-a,europe-west2-b,europe-west2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c
     key: checks
+    env:
+      CHECK_GATE: 'true'
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -139,6 +145,8 @@ steps:
       diskType: hyperdisk-balanced
       preemptible: true
     key: linting
+    env:
+      CHECK_GATE: 'true'
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -155,6 +163,8 @@ steps:
       diskType: hyperdisk-balanced
       preemptible: true
     key: linting_with_types
+    env:
+      CHECK_GATE: 'true'
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -173,6 +183,7 @@ steps:
     key: check_types
     timeout_in_minutes: 60
     env:
+      CHECK_GATE: 'true'
       RESTORE_ARCHIVE: 'true'
       UPLOAD_ARCHIVE: 'true'
     retry:
