@@ -259,6 +259,15 @@ trigger and uses the same notification routing and delivery claims as `nightshif
 Notification errors do not replace the original workflow error. Lifecycle trigger emission remains
 best effort; Slack delivery claims suppress replayed sends.
 
+Once the conversation exists, the handler also appends an `investigation_run_failed` timeline event
+with the run's execution ID, original request when available, and failure reason. This happens before
+subject recovery so an attachment error does not erase the explanation. The entry is visible in Agent
+Builder even when the agent never recorded a chat round, and is available as historical context to a
+later agent run. Request and reason text are each capped at 10,000 characters. A failed timeline write
+is logged and does not block the existing notification path. The custom-event API assigns fresh IDs,
+so replay or concurrent handling can produce duplicate timeline entries; Slack deduplication is
+unchanged. Existing failed conversations are not backfilled.
+
 Workflow-level timeout, cancellation, Task Manager interruption, and resume-scheduling failure bypass
 these fallbacks. Reporting those outcomes needs a durable Workflows terminal-outcome mechanism,
 coordinated with recovery (#1677), before #1820 can be closed. Future intentional-cancellation messages

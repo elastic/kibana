@@ -7,7 +7,8 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { EventActorType } from '@kbn/agent-builder-common';
-import { investigationSeverityChangedEventType } from '.';
+import { investigationRunFailedEventType, investigationSeverityChangedEventType } from '.';
+import { INVESTIGATION_RUN_FAILED_EVENT_TYPE } from '../../../common/investigations/run_failure';
 
 const format = (data: { severity: 'low' | 'high'; previous_severity?: 'low' | 'high' }) =>
   investigationSeverityChangedEventType.format!(
@@ -41,4 +42,29 @@ describe('investigationSeverityChangedEventType', () => {
       investigationSeverityChangedEventType.payloadSchema.safeParse({ severity: 'urgent' }).success
     ).toBe(false);
   });
+});
+
+describe('investigationRunFailedEventType', () => {
+  it.each([undefined, 'Why is checkout slow?'])(
+    'formats a historical failure with request %p',
+    async (request) => {
+      const result = await investigationRunFailedEventType.format?.(
+        {
+          id: 'event-1',
+          created_at: '2026-01-01T00:00:00.000Z',
+          type: INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+          actor: { type: EventActorType.user, id: 'workflow-user' },
+          data: { execution_id: 'workflow-exec-1', request, reason: 'Permission denied' },
+        },
+        { request: httpServerMock.createKibanaRequest(), spaceId: 'default' }
+      );
+
+      expect(result?.value).toContain('workflow-exec-1');
+      expect(result?.value).toContain(
+        'historical failure report, not a successful investigation result'
+      );
+      expect(result?.value).toContain(request ?? 'Original request unavailable.');
+      expect(result?.value).toContain('Permission denied');
+    }
+  );
 });

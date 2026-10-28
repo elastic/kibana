@@ -86,3 +86,11 @@ export const ERROR_MESSAGE = i18n.translate('xpack.nightshift.detectionPage.rule
 export const RETRY_LABEL = i18n.translate('xpack.nightshift.detectionPage.rules.retryLabel', {
   defaultMessage: 'Retry',
 });
+
+export const DETECTION_SCOPE_HELP_TEXT = i18n.translate(
+  'xpack.nightshift.detectionPage.rules.detectionScopeHelpText',
+  {
+    defaultMessage:
+      'Rules run across all projects linked through cross-project search, regardless of the project scope configured for this space.',
+  }
+);

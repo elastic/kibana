@@ -23,7 +23,11 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import type { SlackThreadSubject } from '@kbn/agentic-investigations-plugin/common';
-import { MAX_SLACK_SEEN_EVENTS } from '@kbn/agentic-investigations-plugin/common';
+import {
+  MAX_SLACK_SEEN_EVENTS,
+  INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+  MAX_INVESTIGATION_RUN_FAILURE_TEXT_LENGTH,
+} from '@kbn/agentic-investigations-plugin/common';
 import {
   NIGHTSHIFT_DEFAULT_MODELS,
   NightshiftModelNotFoundError,
@@ -75,6 +79,7 @@ const conversations = {
   bulkGet: jest.fn(),
   create: jest.fn(),
   patchMetadata: jest.fn(),
+  addEvents: jest.fn(),
 };
 
 const mockAgentBuilder = {
@@ -230,6 +235,7 @@ beforeEach(() => {
       })
   );
   conversations.patchMetadata.mockResolvedValue({ conversation: {}, changedFields: ['status'] });
+  conversations.addEvents.mockResolvedValue([]);
   subjectsClient.upsertSubjects.mockResolvedValue([]);
   subjectsClient.findConversationIdsBySubjects.mockResolvedValue([]);
   subjectsClient.listByConversationIds.mockResolvedValue([]);
@@ -1713,7 +1719,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       withExecution();
       withConversations(makeConversation({ id: 'inv-1', status }));
       installInvestigationAgentMock.mockRejectedValue(new Error('Agent setup unavailable'));
-      await makeClient().ensureForFailure('inv-1', 'exec-1');
+      await makeClient().ensureForFailure('inv-1', 'exec-1', 'Permission denied');
       expect(installInvestigationAgentMock).not.toHaveBeenCalled();
       expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
         workflow_execution_ids: ['exec-1'],
@@ -1723,7 +1729,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
 
   it('materializes an early failure and allows failed-run replay', async () => {
     withExecution({ status: ExecutionStatus.FAILED });
-    await makeClient().ensureForFailure('inv-1', 'exec-1');
+    await makeClient().ensureForFailure('inv-1', 'exec-1', 'Permission denied');
     expect(installInvestigationAgentMock).toHaveBeenCalledWith({
       agentBuilder: mockAgentBuilder,
       spaceId: SPACE_ID,
@@ -1736,12 +1742,143 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
   });
 
+  it('records the validated request and failure before attaching subjects', async () => {
+    withExecution({
+      inputs: {
+        investigation_id: 'inv-1',
+        message: 'Why is checkout slow?\nCheck recent deployments.',
+        subjects,
+        context: { token: 'must-not-be-copied' },
+      },
+    });
+
+    await makeClient().ensureForFailure('inv-1', 'exec-1', 'Permission denied');
+
+    expect(conversations.addEvents).toHaveBeenCalledWith({
+      conversationId: 'inv-1',
+      events: [
+        {
+          type: INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+          data: {
+            execution_id: 'exec-1',
+            request: 'Why is checkout slow?\nCheck recent deployments.',
+            reason: 'Permission denied',
+          },
+        },
+      ],
+    });
+    expect(conversations.addEvents.mock.invocationCallOrder[0]).toBeLessThan(
+      subjectsClient.upsertSubjects.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('retains the failure entry when subject attachment fails', async () => {
+    withExecution();
+    subjectsClient.upsertSubjects.mockRejectedValueOnce(new Error('Subject access denied'));
+
+    await expect(
+      makeClient().ensureForFailure('inv-1', 'exec-1', 'Permission denied')
+    ).rejects.toThrow('Subject access denied');
+    expect(conversations.addEvents).toHaveBeenCalledTimes(1);
+  });
+
+  it('logs a rejected timeline write and still records subjects and execution association', async () => {
+    withExecution();
+    withConversations(makeConversation({ id: 'inv-1', status: 'closed' }));
+    conversations.addEvents.mockRejectedValueOnce(new Error('Timeline access denied'));
+
+    await expect(
+      makeClient().ensureForFailure('inv-1', 'exec-1', 'Permission denied')
+    ).resolves.toBe('inv-1');
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
+    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
+      workflow_execution_ids: ['exec-1'],
+    });
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Timeline access denied'));
+  });
+
+  it.each([undefined, '', ' \n '])(
+    'omits an unavailable request (%p) and defaults an empty reason',
+    async (message) => {
+      withExecution({ inputs: { investigation_id: 'inv-1', message } });
+
+      await makeClient().ensureForFailure('inv-1', 'exec-1', '  ');
+
+      expect(conversations.addEvents).toHaveBeenCalledWith({
+        conversationId: 'inv-1',
+        events: [
+          {
+            type: INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+            data: { execution_id: 'exec-1', reason: 'Investigation failed' },
+          },
+        ],
+      });
+    }
+  );
+
+  it('bounds request and reason text recovered from a workflow execution', async () => {
+    withExecution({
+      inputs: { investigation_id: 'inv-1', message: 'x'.repeat(20_000) },
+    });
+
+    await makeClient().ensureForFailure('inv-1', 'exec-1', 'y'.repeat(20_000));
+
+    expect(conversations.addEvents).toHaveBeenCalledWith({
+      conversationId: 'inv-1',
+      events: [
+        {
+          type: INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+          data: {
+            execution_id: 'exec-1',
+            request: 'x'.repeat(MAX_INVESTIGATION_RUN_FAILURE_TEXT_LENGTH),
+            reason: 'y'.repeat(MAX_INVESTIGATION_RUN_FAILURE_TEXT_LENGTH),
+          },
+        },
+      ],
+    });
+  });
+
+  it.each([
+    ['another investigation', { investigation_id: 'inv-2' }],
+    ['another workflow', { investigation_id: 'inv-1' }],
+  ])('does not record failure for a run of %s', async (label, inputs) => {
+    withExecution({ inputs, ...(label === 'another workflow' ? { workflowId: 'other' } : {}) });
+
+    await expect(
+      makeClient().ensureForFailure('inv-1', 'exec-1', 'Permission denied')
+    ).rejects.toThrow(InvestigationNotFoundError);
+    expect(conversations.addEvents).not.toHaveBeenCalled();
+  });
+
+  it('does not record failure when the execution is missing or inaccessible in this space', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(null);
+
+    await expect(
+      makeClient().ensureForFailure('inv-1', 'exec-1', 'Permission denied')
+    ).rejects.toThrow(InvestigationNotFoundError);
+    expect(mockManagement.getWorkflowExecution).toHaveBeenCalledWith('exec-1', SPACE_ID, {
+      includeOutput: false,
+      request: mockRequest,
+    });
+    expect(conversations.addEvents).not.toHaveBeenCalled();
+  });
+
+  it('does not record failure when conversation access is denied', async () => {
+    withExecution();
+    conversations.bulkGet.mockRejectedValueOnce(new Error('Conversation access denied'));
+
+    await expect(
+      makeClient().ensureForFailure('inv-1', 'exec-1', 'Permission denied')
+    ).rejects.toThrow('Conversation access denied');
+    expect(conversations.addEvents).not.toHaveBeenCalled();
+  });
+
   it('waits for a newly installed agent to become visible when recording an early failure', async () => {
     withExecution();
     conversations.create.mockRejectedValueOnce(
       createAgentNotFoundError({ agentId: 'nightshift.investigation' })
     );
-    await makeClient().ensureForFailure('inv-1', 'exec-1');
+    await makeClient().ensureForFailure('inv-1', 'exec-1', 'Permission denied');
     expect(installInvestigationAgentMock).toHaveBeenCalledTimes(1);
     expect(conversations.create).toHaveBeenCalledTimes(2);
     expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
@@ -1751,9 +1888,9 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     'does not materialize failure for an execution already %s',
     async (status) => {
       withExecution({ status });
-      await expect(makeClient().ensureForFailure('inv-1', 'exec-1')).rejects.toThrow(
-        InvestigationNotFoundError
-      );
+      await expect(
+        makeClient().ensureForFailure('inv-1', 'exec-1', 'Permission denied')
+      ).rejects.toThrow(InvestigationNotFoundError);
       expect(conversations.create).not.toHaveBeenCalled();
     }
   );
@@ -1791,9 +1928,13 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
           withConversations(makeConversation({ id: 'inv-1', status: 'closed' }));
         }
 
-        await expect(makeClient()[method]('inv-1', 'exec-1')).rejects.toThrow(
-          InvestigationNotFoundError
-        );
+        const client = makeClient();
+        const result =
+          method === 'ensureForFailure'
+            ? client.ensureForFailure('inv-1', 'exec-1', 'Permission denied')
+            : client.ensureOrCreate('inv-1', 'exec-1');
+
+        await expect(result).rejects.toThrow(InvestigationNotFoundError);
 
         expect(conversations.create).not.toHaveBeenCalled();
         expect(conversations.patchMetadata).not.toHaveBeenCalled();

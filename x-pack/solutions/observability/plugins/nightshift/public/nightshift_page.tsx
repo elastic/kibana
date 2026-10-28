@@ -12,8 +12,13 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import { Redirect, useHistory, useLocation, useParams } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { NIGHTSHIFT_APP_ID, OBSERVABILITY_OVERVIEW_APP_ID } from '@kbn/deeplinks-observability';
-import { getNightshiftCapabilities, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import {
+  getNightshiftCapabilities,
+  NIGHTSHIFT_ENABLED_FLAG,
+  SETTINGS_TAB_IDS,
+} from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
 import { NightshiftApp } from './app/app';
 import {
@@ -35,10 +40,34 @@ import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
 } from './service_account/use_investigator_service_account';
-import { isDetectionTabId } from './pages/detection/detection_tabs';
+import { DETECTION_TAB_IDS, isDetectionTabId } from './pages/detection/detection_tabs';
+import { KNOWLEDGE_TAB_IDS } from './knowledge/knowledge_tabs';
 
 /** Onboarding has a second column for the "Get started" card. */
 const ONBOARDING_MAX_WIDTH = '1040px';
+
+/** Fixed page names, so ids and query strings never reach execution context. */
+const getExecutionContextPage = (pathname: string, canUseAutomationsPage: boolean): string => {
+  const [, section, tab] = pathname.split('/');
+  const withTab = (tabs: readonly string[]) =>
+    tab && tabs.includes(tab) ? `${section}/${tab}` : section;
+
+  switch (section) {
+    case 'detections':
+      return withTab(DETECTION_TAB_IDS);
+    case 'knowledge':
+      return withTab(KNOWLEDGE_TAB_IDS);
+    case 'settings':
+      return withTab(SETTINGS_TAB_IDS);
+    case 'sources':
+      return 'sources';
+    case 'automations':
+      return canUseAutomationsPage ? 'automations' : 'landing';
+    default:
+      return 'landing';
+  }
+};
+
 const KnowledgePage = React.lazy(() =>
   import('./knowledge/page').then(({ KnowledgePage: Page }) => ({ default: Page }))
 );
@@ -71,6 +100,7 @@ export function NightshiftPage(): React.ReactElement | null {
   const { euiTheme } = useEuiTheme();
   const {
     application,
+    executionContext,
     featureFlags,
     http: { basePath },
     serverless,
@@ -87,7 +117,7 @@ export function NightshiftPage(): React.ReactElement | null {
     path: '/settings',
   });
   const detectionSettingsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
-    path: '/settings/detections',
+    path: '/settings/detections?origin=detections',
   });
   const knowledgeHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/knowledge',
@@ -202,6 +232,12 @@ export function NightshiftPage(): React.ReactElement | null {
     ],
     { serverless }
   );
+
+  useExecutionContext(executionContext, {
+    type: 'application',
+    name: NIGHTSHIFT_APP_ID,
+    page: getExecutionContextPage(pathname, canUseAutomationsPage),
+  });
 
   useEffect(() => {
     if (!isAvailabilityLoading && !isAvailable) {

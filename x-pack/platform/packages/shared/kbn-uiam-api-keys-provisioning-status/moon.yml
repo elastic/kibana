@@ -16,7 +16,8 @@ project:
   channel: ''
   owner: '@elastic/response-ops'
   sourceRoot: x-pack/platform/packages/shared/kbn-uiam-api-keys-provisioning-status
-dependsOn: []
+dependsOn:
+  - '@kbn/core-security-common'
 tags:
   - shared-common
   - package

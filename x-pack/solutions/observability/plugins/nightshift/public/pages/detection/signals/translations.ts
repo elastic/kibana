@@ -34,16 +34,6 @@ export const DISCOVERY_COLUMN_TOOLTIP = i18n.translate(
   'xpack.nightshift.detectionPage.signals.discoveryColumnTooltip',
   { defaultMessage: 'Whether the discovery pipeline has ingested this detection.' }
 );
-export const PROCESSED_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.signals.processedLabel',
-  { defaultMessage: 'Processed' }
-);
-export const PENDING_LABEL = i18n.translate('xpack.nightshift.detectionPage.signals.pendingLabel', {
-  defaultMessage: 'Pending',
-});
-export const SKIPPED_LABEL = i18n.translate('xpack.nightshift.detectionPage.signals.skippedLabel', {
-  defaultMessage: 'Skipped',
-});
 export const TABLE_CAPTION = i18n.translate('xpack.nightshift.detectionPage.signals.tableCaption', {
   defaultMessage: 'Signals',
 });

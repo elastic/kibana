@@ -34,6 +34,7 @@ jest.mock('./rules/rules_tab', () => ({
 jest.mock('./signals/signals_tab', () => ({
   SignalsTab: () => <div data-test-subj="signalsTabStub" />,
 }));
+jest.mock('./run_limits_banner', () => ({ RunLimitsBanner: () => null }));
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
