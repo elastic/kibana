@@ -70,7 +70,7 @@ test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
     const { cloudLinks } = pageObjects;
     await cloudLinks.openUserMenu();
 
-    // URLs come from the mocked `cloud_links` server config set. Configs under `test/scout_*`
+    // URLs and the organization ID come from the mocked Scout server config. Configs under `test/scout_*`
     // are excluded from ECH/MKI runs, so asserting exact values is safe here.
     const externalLinks = [
       {
@@ -81,12 +81,12 @@ test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
       {
         link: cloudLinks.billingLink,
         label: 'Billing and subscription',
-        href: 'https://cloud.elastic.co/billing',
+        href: 'https://cloud.elastic.co/billing#uTargetOrganizationId=org1234567890',
       },
       {
         link: cloudLinks.organizationLink,
         label: 'Organization',
-        href: 'https://cloud.elastic.co/organization/organizationId',
+        href: 'https://cloud.elastic.co/organization/organizationId#uTargetOrganizationId=org1234567890',
       },
     ];
 

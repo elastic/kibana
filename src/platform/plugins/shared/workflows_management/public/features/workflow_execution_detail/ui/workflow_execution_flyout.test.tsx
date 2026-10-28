@@ -80,10 +80,17 @@ jest.mock('./resume_execution_button', () => ({
 jest.mock('./workflow_step_execution_tree', () => ({
   WorkflowStepExecutionTree: ({
     onStepExecutionClick,
+    waitingAction,
   }: {
     onStepExecutionClick: (id: string) => void;
+    waitingAction?: { autoOpen?: boolean; stepExecutionId?: string };
   }) => (
     <>
+      <div
+        data-test-subj="tree-waiting-action"
+        data-auto-open={String(Boolean(waitingAction?.autoOpen))}
+        data-waiting-step={waitingAction?.stepExecutionId ?? ''}
+      />
       <button
         type="button"
         data-test-subj="select-waiting-step"
@@ -206,39 +213,46 @@ describe('WorkflowExecutionFlyout resume', () => {
     expect(screen.queryByTestId('resume-execution-button')).not.toBeInTheDocument();
   });
 
-  it('shows Provide action on the run and honors ?resume=true', () => {
+  it('shows Provide action in Result and honors ?resume=true on the tree row', () => {
     mockWaitingStepResume.waitingStepExecutionId = 'step-wait';
     mockWaitingStepResume.waitingStepStartedAt = '2024-01-01T00:00:00Z';
     mockWaitingStepResume.resumeMessage = 'Approve this';
     renderFlyout('?resume=true');
 
-    const resumeButtons = screen.getAllByTestId('resume-execution-button');
-    expect(resumeButtons).toHaveLength(1);
-    expect(resumeButtons[0]).toHaveAttribute('data-auto-open', 'true');
-    expect(resumeButtons[0]).toHaveAttribute('data-waiting-step', 'step-wait');
+    expect(screen.getByTestId('workflowExecutionFlyoutResultLink')).toHaveTextContent(
+      'Provide action'
+    );
+    expect(screen.queryByTestId('waitForInputCallout')).not.toBeInTheDocument();
+    const treeWaiting = screen.getByTestId('tree-waiting-action');
+    expect(treeWaiting).toHaveAttribute('data-auto-open', 'true');
+    expect(treeWaiting).toHaveAttribute('data-waiting-step', 'step-wait');
   });
 
-  it('shows a single resume control when the waiting step is selected', () => {
+  it('keeps resume on the tree row when the waiting step is selected', () => {
     mockWaitingStepResume.waitingStepExecutionId = 'step-wait';
     mockWaitingStepResume.waitingStepStartedAt = '2024-01-01T00:00:00Z';
 
     renderFlyout();
     fireEvent.click(screen.getByTestId('select-waiting-step'));
 
-    const resumeButton = screen.getByTestId('resume-execution-button');
-    expect(resumeButton).toHaveAttribute('data-waiting-step', 'step-wait');
-    expect(resumeButton).toHaveAttribute('data-execution-id', 'exec-1');
+    expect(screen.queryByTestId('resume-execution-button')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('waitForInputCallout')).not.toBeInTheDocument();
+    const treeWaiting = screen.getByTestId('tree-waiting-action');
+    expect(treeWaiting).toHaveAttribute('data-waiting-step', 'step-wait');
+    expect(treeWaiting).toHaveAttribute('data-auto-open', 'false');
   });
 
-  it('keeps ?resume=true auto-opening when the waiting step is selected', () => {
+  it('keeps ?resume=true auto-opening on the tree row when the waiting step is selected', () => {
     mockWaitingStepResume.waitingStepExecutionId = 'step-wait';
     mockWaitingStepResume.waitingStepStartedAt = '2024-01-01T00:00:00Z';
 
     renderFlyout('?resume=true');
     fireEvent.click(screen.getByTestId('select-waiting-step'));
 
-    const resumeButton = screen.getByTestId('resume-execution-button');
-    expect(resumeButton).toHaveAttribute('data-auto-open', 'true');
+    const treeWaiting = screen.getByTestId('tree-waiting-action');
+    expect(treeWaiting).toHaveAttribute('data-auto-open', 'true');
+    expect(treeWaiting).toHaveAttribute('data-waiting-step', 'step-wait');
+    expect(screen.queryByTestId('resume-execution-button')).not.toBeInTheDocument();
   });
 });
 
@@ -500,6 +514,27 @@ describe('WorkflowExecutionFlyout triggered by', () => {
     });
 
     expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).toHaveTextContent(profileUid);
+  });
+
+  it('shows a service account id on serverless when it is not a profile UID', async () => {
+    const serviceAccountId = 'sa-nightshift-relay';
+    mockPollingResult.workflowExecution = createMockWorkflowExecutionDto({
+      id: 'exec-1',
+      executedBy: serviceAccountId,
+    });
+    const services = createServices({ isServerless: true });
+    services.userProfile.bulkGet.mockResolvedValue([]);
+
+    renderFlyout(services);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).toHaveTextContent(
+      serviceAccountId
+    );
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedByCopy')).toBeInTheDocument();
   });
 
   it('hides the unresolved UID on serverless, like the execution list', async () => {
