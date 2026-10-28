@@ -7,6 +7,7 @@
 
 import { readFile } from 'fs/promises';
 
+import * as openpgp from 'openpgp';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 const mockLoggerFactory = loggingSystemMock.create();
@@ -90,5 +91,32 @@ describe('_readGpgKey', () => {
     mockGetConfig.mockReturnValue({ packageVerification: { gpgKeyPath: 'somePath' } });
     expect(await _readGpgKey()).toEqual(undefined);
     expect(mockedReadFile).toHaveBeenCalledWith('somePath');
+  });
+  it('should return the key without warning if it can be used for verification', async () => {
+    mockedReadFile.mockResolvedValue(testGpgKeyFileContent);
+    mockGetConfig.mockReturnValue({ packageVerification: { gpgKeyPath: 'somePath' } });
+
+    const key = await _readGpgKey();
+
+    expect(key?.getKeyID().toHex()).toEqual(testGpgKeyId);
+    expect(mockLogger.warn).not.toHaveBeenCalled();
+  });
+  it('should return the key and warn if it cannot be used for verification', async () => {
+    // RSA keys shorter than 2047 bits are rejected by openpgp's default config
+    const { publicKey: weakKey } = await openpgp.generateKey({
+      type: 'rsa',
+      rsaBits: 1024,
+      userIDs: [{ name: 'Weak Key' }],
+      config: { minRSABits: 1024 },
+    });
+    mockedReadFile.mockResolvedValue(Buffer.from(weakKey));
+    mockGetConfig.mockReturnValue({ packageVerification: { gpgKeyPath: 'somePath' } });
+
+    const key = await _readGpgKey();
+
+    expect(key).toBeDefined();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining("GPG key from 'somePath' cannot be used to verify package signatures")
+    );
   });
 });
