@@ -219,7 +219,7 @@ export class CasesWorkflowRunService {
       }
       // Only attachment origins consume `theCase.comments`; fetching them for every other
       // origin type would load all case attachments from ES (up to MAX_DOCS_PER_PAGE) and
-      // io-ts-decode the full case, only to discard the result immediately.
+      // zod-decode the full case, only to discard the result immediately.
       const needsComments =
         body.origin.type === ATTACHMENT_WORKFLOW_ORIGIN_TYPE ||
         body.origin.type === ATTACHMENTS_WORKFLOW_ORIGIN_TYPE;
@@ -254,7 +254,7 @@ export class CasesWorkflowRunService {
     // Fail fast before anything irreversible: check the per-case user-action limit for all cases.
     await workflowOperations.preflightWorkflowExecution({ caseIds });
 
-    const workflow = await this.management.getWorkflow(workflowId, spaceId);
+    const workflow = await this.management.getWorkflow(workflowId, spaceId, request);
     if (!workflow) {
       throw Boom.notFound(`Workflow "${workflowId}" was not found.`);
     }
@@ -299,15 +299,20 @@ export class CasesWorkflowRunService {
     // document to appear even when waitForCompletion=false, which adds measurable latency to
     // every interactive "run workflow from a case" click.
     //
-    // eventOverrides injects the server-owned caseIds into `event` *after* alert preprocessing
-    // runs. preprocessAlertInputs replaces the whole `event` object with the alert-event shape,
-    // so pre-merging caseIds into event (before the call) would silently drop them on alert runs.
+    // eventOverrides injects the server-owned caseIds into `event` *after* trigger preprocessing
+    // runs. Alert preprocessing replaces the whole `event` object with the alert-event shape
+    // (document preprocessing only swaps `documentIds` for `documents`), so pre-merging caseIds
+    // into event (before the call) would silently drop them on alert runs.
+    //
+    // expandSelections lists only the compact selections checked against case membership above,
+    // so a kind the workflows server learns to expand later is not expanded on a case's behalf.
     const { workflowExecutionId } = await this.management.runWorkflowWithAlertPreprocessing({
       workflow: toWorkflowExecutionEngineModel(workflow),
       spaceId,
       inputs: sanitizedInputs,
       request,
       preprocessingContext: context,
+      expandSelections: ['alertIds', 'documentIds'],
       metadata,
       eventOverrides: {
         caseIds,

@@ -16,12 +16,12 @@ import { WorkflowExecutionsPageContent } from './workflow_executions_page_conten
 import { useTelemetry } from '../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 
-const executionsPageTitle = i18n.translate('workflowsManagement.executionsPage.pageTitle', {
+const executionsPageTitle = i18n.translate('workflows.executionsPage.pageTitle', {
   defaultMessage: 'Executions',
 });
 
 const executionsPageExperimentalBadgeLabel = i18n.translate(
-  'workflowsManagement.executionsPage.experimentalBadge',
+  'workflows.executionsPage.experimentalBadge',
   {
     defaultMessage: 'EXPERIMENTAL',
   }

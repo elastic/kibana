@@ -73,7 +73,7 @@ export const DURATION_LOWER_BOUND_TOOLTIP = i18n.translate(
   'xpack.alertingV2EpisodesUi.durationCell.lowerBoundTooltip',
   {
     defaultMessage:
-      'The episode started before the selected time range, so its actual duration is longer. Widen the time range or open the episode to see it.',
+      'The alert started before the selected time range, so its actual duration is longer. Widen the time range or open the alert to see it.',
   }
 );
 
@@ -81,5 +81,12 @@ export const RULE_CELL_RULE_ID_COPIED = i18n.translate(
   'xpack.alertingV2EpisodesUi.ruleCell.ruleIdCopied',
   {
     defaultMessage: 'Rule ID copied',
+  }
+);
+
+export const SUPPRESSED_BY_MAINTENANCE_WINDOW = i18n.translate(
+  'xpack.alertingV2EpisodesUi.suppressedCell.suppressedByMWBadge',
+  {
+    defaultMessage: 'Suppressed by maintenance window',
   }
 );

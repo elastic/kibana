@@ -13,6 +13,7 @@ import {
   API_VERSIONS,
 } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { hasConnectedRemoteClusters, prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
 import { getUnifiedHistoryRoute } from './get_unified_history_route';
 
 jest.mock('../../utils/get_internal_saved_object_client', () => ({
@@ -121,6 +122,19 @@ describe('getUnifiedHistoryRoute', () => {
         )
       ).toBe(false);
     });
+
+    it('does not probe or add CCS remote patterns for the fanned-out reads', async () => {
+      setupRoute();
+
+      await routeHandler(
+        {} as never,
+        httpServerMock.createKibanaRequest({ query: {} }),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(hasConnectedRemoteClusters).not.toHaveBeenCalled();
+      expect(prefixIndexPatternsWithCcs).toHaveBeenCalledWith(`${ACTIONS_INDEX}*`, false);
+    });
   });
 
   describe('when CPS is disabled', () => {
@@ -141,6 +155,19 @@ describe('getUnifiedHistoryRoute', () => {
 
       expect(mockEsClient.search).toHaveBeenCalledTimes(2);
       expect(mockScopedEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('adds CCS remote patterns when remote clusters are connected', async () => {
+      (hasConnectedRemoteClusters as jest.Mock).mockResolvedValueOnce(true);
+      setupRoute();
+
+      await routeHandler(
+        {} as never,
+        httpServerMock.createKibanaRequest({ query: {} }),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(prefixIndexPatternsWithCcs).toHaveBeenCalledWith(`${ACTIONS_INDEX}*`, true);
     });
   });
 

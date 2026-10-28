@@ -26,9 +26,11 @@ import {
   SUMMARY_SERIES_STATUS,
   useChangePointSummarySeries,
   type ChangePointSummaryFetchParams,
+  type ChangePointSummarySeriesCache,
 } from './change_point_summary_series';
+import type { ChangePointSummaryContext } from './change_point_context';
 
-export interface ChangePointSummaryCellContext {
+export interface ChangePointSummaryCellContext extends ChangePointSummaryContext {
   typeColumnId: string;
   pvalueColumnId: string;
 }
@@ -58,6 +60,7 @@ interface ChangePointSummaryCellInnerProps {
   charts: ChartsPluginStart;
   fetchParams: ChangePointSummaryFetchParams;
   data: DataPublicPluginStart;
+  summarySeriesCache: ChangePointSummarySeriesCache;
 }
 
 const seriesLoadErrorMessage = i18n.translate(
@@ -114,8 +117,9 @@ const ChangePointSummaryCellInner: FC<ChangePointSummaryCellInnerProps> = ({
   charts,
   fetchParams,
   data,
+  summarySeriesCache,
 }) => {
-  const seriesState = useChangePointSummarySeries(fetchParams, data);
+  const seriesState = useChangePointSummarySeries(fetchParams, data, summarySeriesCache);
 
   const cards =
     seriesState.status === SUMMARY_SERIES_STATUS.IDLE ||
@@ -235,6 +239,7 @@ export const ChangePointSummaryCell: FC<ChangePointSummaryCellProps> = ({
         charts={charts}
         fetchParams={fetchParams}
         data={data}
+        summarySeriesCache={context.summarySeriesCache}
       />
     );
   }

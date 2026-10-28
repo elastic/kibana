@@ -73,6 +73,29 @@ describe('fetchEvents', () => {
     expect(result).toEqual({ columns: [], records: [{ id: 'dummy' }] });
   });
 
+  it('keeps principal-subject enrichment behind all existing actor identity types', async () => {
+    await fetchEvents({
+      esClient,
+      logger,
+      start: 0,
+      end: 1000,
+      originEventIds: [],
+      showUnknownTarget: false,
+      indexPatterns: ['valid_index'],
+      spaceId: 'default',
+      esQuery: undefined,
+    });
+    const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+    const query = args.query ?? '';
+    const resolution =
+      'actorEntityId = COALESCE(_actor_user_euid, _actor_host_euid, _actor_service_euid, `entity.id`)';
+    expect(query).toContain(resolution);
+    expect(query).toContain('gcp.vertexai.audit.authentication_info.principal_subject');
+    expect(query.indexOf('gcp.vertexai.audit.authentication_info.principal_subject')).toBeLessThan(
+      query.indexOf(resolution)
+    );
+  });
+
   it('casts user.id to keyword before the enrichment EVAL to prevent CASE type conflicts', () => {
     // When user.id is mapped as "long" (e.g. aws_bedrock.invocation), the merged enrichment
     // CASE has a preserve branch "user.id IS NOT NULL, user.id" that returns long, while all
@@ -117,6 +140,28 @@ describe('fetchEvents', () => {
 
     const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
     expect(args.query).not.toContain('EVAL user.id = TO_STRING(user.id)');
+  });
+
+  it('expands and casts user.entity.id and user.target.entity.id for EUID resolution', async () => {
+    await fetchEvents({
+      esClient,
+      logger,
+      start: 0,
+      end: 1000,
+      originEventIds: [] as OriginEventId[],
+      showUnknownTarget: true,
+      indexPatterns: ['valid_index'],
+      spaceId: 'default',
+      esQuery: undefined,
+    });
+
+    const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+    expect(args.query).toContain('| MV_EXPAND `user.entity.id`');
+    expect(args.query).toContain('| MV_EXPAND `user.target.entity.id`');
+    expect(args.query).toContain('| EVAL `user.entity.id` = TO_STRING(`user.entity.id`)');
+    expect(args.query).toContain(
+      '| EVAL `user.target.entity.id` = TO_STRING(`user.target.entity.id`)'
+    );
   });
 
   it('should include origin event parameters when originEventIds are provided', async () => {

@@ -119,6 +119,7 @@ const baseHeaderData = {
   severity: null,
   episodeAction: undefined,
   groupAction: undefined,
+  isActionStateLoaded: true,
   isFlapping: false,
 };
 
@@ -175,6 +176,37 @@ describe('AlertEpisodeDetailsFlyout', () => {
     );
   });
 
+  it('hosts an action that renders its own menu entry and lets it close the menu', () => {
+    mockUseEpisodeDetailsHeaderData.mockReturnValue({ ...baseHeaderData, episode: mockEpisode });
+    const renderMenuItem = jest.fn(({ closeMenu }) => (
+      <button type="button" data-test-subj="ownMenuEntry" onClick={closeMenu}>
+        {'Own entry'}
+      </button>
+    ));
+    const ownEntryAction = { ...mockEditAssigneeAction, renderMenuItem } as EpisodeAction;
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} actions={[ownEntryAction]} />, {
+      wrapper: Wrapper,
+    });
+    const trigger = screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton');
+    fireEvent.click(trigger);
+
+    // The template flips the trigger chevron with its open state.
+    expect(trigger.querySelector('[data-euiicon-type="chevronSingleUp"]')).toBeInTheDocument();
+    expect(renderMenuItem).toHaveBeenCalledWith(
+      expect.objectContaining({
+        episodes: [mockEpisode],
+        surface: 'details_flyout',
+        closeMenu: expect.any(Function),
+      })
+    );
+
+    fireEvent.click(screen.getByTestId('ownMenuEntry'));
+
+    expect(trigger.querySelector('[data-euiicon-type="chevronSingleDown"]')).toBeInTheDocument();
+    expect(ownEntryAction.execute).not.toHaveBeenCalled();
+  });
+
   it('switches to the timeline tab', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
     fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabTimeline'));
@@ -183,7 +215,9 @@ describe('AlertEpisodeDetailsFlyout', () => {
 
   it('switches to the metadata tab when the rule is loaded', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
-    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabMetadata'));
+    const dataContainerTab = screen.getByTestId('alertingV2EpisodeFlyoutTabMetadata');
+    expect(dataContainerTab).toHaveTextContent('Data container');
+    fireEvent.click(dataContainerTab);
     expect(screen.getByTestId('metadataSectionStub')).toBeInTheDocument();
   });
 
@@ -332,13 +366,40 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(screen.getByTestId('runbookSectionStub')).toBeInTheDocument();
   });
 
-  it('renders the severity header value as a colored dot with its label', () => {
+  it('renders Related for an episode from an external source that has no rule', () => {
+    mockUseEpisodeDetailsHeaderData.mockReturnValue({
+      ...baseHeaderData,
+      ruleState: { status: RuleStateStatus.idle },
+      episode: { ...mockEpisode, source: 'zabbix' } as AlertEpisode,
+    });
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(screen.getByTestId('relatedSectionStub')).toBeInTheDocument();
+    expect(screen.queryByTestId('runbookSectionStub')).not.toBeInTheDocument();
+  });
+
+  it('hides the Investigation accordion for an episode with neither a rule nor an external source', () => {
+    mockUseEpisodeDetailsHeaderData.mockReturnValue({
+      ...baseHeaderData,
+      ruleState: { status: RuleStateStatus.idle },
+      episode: mockEpisode,
+    });
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(
+      screen.queryByTestId('alertingV2EpisodeFlyoutAccordionInvestigation')
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders the severity header value as a soft badge with its label', () => {
     mockUseEpisodeDetailsHeaderData.mockReturnValue({ ...baseHeaderData, severity: 'high' });
 
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
 
     const severity = screen.getByTestId('alertingV2EpisodeFlyoutSeverity');
-    expect(severity.querySelector('[data-euiicon-type="dot"]')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingV2EpisodeSeverityBadge-high')).toBeInTheDocument();
     expect(severity).toHaveTextContent('High');
   });
 
@@ -361,11 +422,28 @@ describe('AlertEpisodeDetailsFlyout', () => {
 
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
 
-    expect(screen.getByText('Source')).toBeInTheDocument();
+    expect(screen.getByText('Alert URL')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeFlyoutAlertUrl')).toHaveAttribute(
       'href',
       'https://monitoring.example/alerts/1'
     );
+  });
+
+  it('shows the alerting system as the Source for native Universal alerts', () => {
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(screen.getByTestId('alertingV2EpisodeFlyoutSourceBadge')).toHaveTextContent('Universal');
+  });
+
+  it('shows the connector as the Source for alerts ingested from an external system', () => {
+    mockUseEpisodeDetailsHeaderData.mockReturnValue({
+      ...baseHeaderData,
+      episode: { ...mockEpisode, source: 'zabbix' } as AlertEpisode,
+    });
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(screen.getByTestId('alertingV2EpisodeFlyoutSourceBadge')).toHaveTextContent('zabbix');
   });
 
   it.each([
@@ -383,6 +461,28 @@ describe('AlertEpisodeDetailsFlyout', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
 
     expect(screen.queryByTestId('alertingV2EpisodeFlyoutAlertUrl')).not.toBeInTheDocument();
+  });
+
+  it('shows the tags of the alert as header badges', () => {
+    mockUseEpisodeDetailsHeaderData.mockReturnValue({
+      ...baseHeaderData,
+      episodeAction: {
+        episodeId: 'ep-1',
+        ruleId: 'rule-1',
+        groupHash: 'gh-1',
+        lastAckAction: null,
+        lastAssigneeUid: null,
+        lastAckActor: null,
+        lastDeactivateAction: null,
+        lastDeactivateActor: null,
+        tags: ['tag-a', 'tag-b'],
+      },
+    });
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(screen.getByText('tag-a')).toBeInTheDocument();
+    expect(screen.getByText('tag-b')).toBeInTheDocument();
   });
 
   it('shows who acknowledged the episode in an info block', () => {
@@ -427,8 +527,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
         lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
         lastDeactivateActor: null,
         lastSnoozeAction: null,
-        snoozeExpiry: null,
-        tags: [],
+        snoozedUntil: null,
         lastSnoozeActor: null,
       },
     });
@@ -473,8 +572,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
         lastDeactivateActor: null,
         lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
         lastSnoozeActor: 'user-snoozer',
-        snoozeExpiry: '2030-01-01T00:00:00.000Z',
-        tags: [],
+        snoozedUntil: '2030-01-01T00:00:00.000Z',
       },
     });
 
@@ -482,6 +580,54 @@ describe('AlertEpisodeDetailsFlyout', () => {
 
     expect(screen.getByText('Snoozed by')).toBeInTheDocument();
     expect(screen.getByText('user-snoozer')).toBeInTheDocument();
+  });
+
+  describe('while the action state loads', () => {
+    const mockAckAction = {
+      id: 'ACK',
+      order: 10,
+      displayName: 'Acknowledge',
+      iconType: 'check',
+      isCompatible: () => true,
+      execute: jest.fn(),
+    } as unknown as EpisodeAction;
+
+    it('holds back the take action items until the action state loads', () => {
+      mockUseEpisodeDetailsHeaderData.mockReturnValue({
+        ...baseHeaderData,
+        episode: mockEpisode,
+        isActionStateLoaded: false,
+      });
+
+      const { rerender } = render(
+        <AlertEpisodeDetailsFlyout {...baseProps} actions={[mockAckAction]} />,
+        { wrapper: Wrapper }
+      );
+      fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton'));
+
+      expect(screen.queryByTestId('alertingV2EpisodeTakeAction-ACK')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertingV2EpisodeTakeAction-viewDetails')).toBeInTheDocument();
+
+      mockUseEpisodeDetailsHeaderData.mockReturnValue({ ...baseHeaderData, episode: mockEpisode });
+      rerender(<AlertEpisodeDetailsFlyout {...baseProps} actions={[mockAckAction]} />);
+
+      expect(screen.getByTestId('alertingV2EpisodeTakeAction-ACK')).toBeInTheDocument();
+    });
+
+    it('shows the plain assignee until the action state loads', () => {
+      mockUseEpisodeDetailsHeaderData.mockReturnValue({
+        ...baseHeaderData,
+        episode: mockEpisode,
+        isActionStateLoaded: false,
+      });
+
+      render(<AlertEpisodeDetailsFlyout {...baseProps} actions={[mockEditAssigneeAction]} />, {
+        wrapper: Wrapper,
+      });
+
+      expect(screen.queryByTestId('assigneeInlineControlStub')).not.toBeInTheDocument();
+      expect(mockRenderInlineControl).not.toHaveBeenCalled();
+    });
   });
 
   describe('assignee header value', () => {
@@ -586,8 +732,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
         ruleId: 'rule-1',
         lastDeactivateAction: null,
         lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-        snoozeExpiry: '2035-06-15T14:30:00.000Z',
-        tags: [],
+        snoozedUntil: '2035-06-15T14:30:00.000Z',
         lastSnoozeActor: null,
         lastDeactivateActor: null,
       },

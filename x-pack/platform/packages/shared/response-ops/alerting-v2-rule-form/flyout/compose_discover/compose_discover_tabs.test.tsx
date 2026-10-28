@@ -195,13 +195,11 @@ describe('isAlertTabDisabled', () => {
     expect(isAlertTabDisabled(['recovery'], '')).toBe(false);
   });
 
-  it('allows the alert tab for standalone queries with breach content', () => {
+  it('reads the base off a rule query object', () => {
     expect(
-      isAlertTabDisabled(['base', 'alert'], {
-        format: 'standalone',
-        breach: { query: 'FROM kbn*' },
-      })
+      isAlertTabDisabled(['base', 'alert'], { base: 'FROM kbn*', breach: { segment: '' } })
     ).toBe(false);
+    expect(isAlertTabDisabled(['base', 'alert'], { base: '', breach: { segment: '' } })).toBe(true);
   });
 });
 

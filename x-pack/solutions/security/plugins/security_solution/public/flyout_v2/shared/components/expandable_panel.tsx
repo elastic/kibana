@@ -9,19 +9,18 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { useMemo, useState, useCallback } from 'react';
 import type { EuiPanelProps, IconType } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiSplitPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiIcon,
-  EuiLink,
   EuiTitle,
   EuiText,
   useEuiTheme,
   EuiToolTip,
   EuiSkeletonText,
-  useEuiFontSize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -137,7 +136,6 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
   );
 
   const { euiTheme } = useEuiTheme();
-  const xsFontSize = useEuiFontSize('xs').fontSize;
 
   const headerLeftSection = useMemo(
     () => (
@@ -170,16 +168,18 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
           <EuiFlexItem grow={false}>
             {link?.callback ? (
               <EuiToolTip content={link?.tooltip}>
-                <EuiLink
+                <EuiButtonEmpty
+                  color="primary"
+                  flush="both"
+                  size="xs"
                   css={css`
-                    font-size: ${xsFontSize};
                     font-weight: ${euiTheme.font.weight.bold};
                   `}
                   data-test-subj={`${dataTestSubj}TitleLink`}
                   onClick={link?.callback}
                 >
                   {title}
-                </EuiLink>
+                </EuiButtonEmpty>
               </EuiToolTip>
             ) : (
               <EuiTitle size="xxxs">
@@ -201,7 +201,6 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
       iconType,
       link?.callback,
       link?.tooltip,
-      xsFontSize,
       title,
     ]
   );
@@ -251,7 +250,12 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
       </EuiSplitPanel.Inner>
       {showContent && (
         <EuiSplitPanel.Inner paddingSize="none">
-          <EuiPanel paddingSize={contentPaddingSize} data-test-subj={`${dataTestSubj}Content`}>
+          <EuiPanel
+            hasBorder={false}
+            borderRadius="none"
+            paddingSize={contentPaddingSize}
+            data-test-subj={`${dataTestSubj}Content`}
+          >
             {content}
           </EuiPanel>
         </EuiSplitPanel.Inner>

@@ -1,5 +1,5 @@
 {
-  "sha1": "bea40de9cfa9723818922a0ccda7c37fe91ddabb",
+  "sha1": "6045299e69514986e5498dd4fa8deceec5d85525",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -21,8 +21,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -49,8 +47,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -77,8 +73,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -105,8 +99,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -133,8 +125,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -161,8 +151,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -189,8 +177,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -217,8 +203,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -245,8 +229,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -273,8 +255,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -301,8 +281,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -329,8 +307,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -357,8 +333,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -385,14 +359,50 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_invalidate_session.spec.ts",
         "line": 58,
+        "column": 25
+      }
+    },
+    {
+      "id": "26e841eed7d5649-93028d84c37a40e",
+      "title": "[NON-MKI] Core security.authc.getPrincipal with UIAM credentials classifies a session-authenticated request as a user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_principal.spec.ts",
+        "line": 18,
+        "column": 1
+      }
+    },
+    {
+      "id": "26e841eed7d5649-fb67ddb14300b0f",
+      "title": "[NON-MKI] Core security.authc.getPrincipal with UIAM credentials classifies an external UIAM API key as a UIAM API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_principal.spec.ts",
+        "line": 46,
         "column": 25
       }
     },
@@ -413,8 +423,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -441,8 +449,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -469,8 +475,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -478,6 +482,44 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
         "line": 91,
         "column": 21
+      }
+    },
+    {
+      "id": "c4c9212de6726a5-25bfdde0cc2a1f6",
+      "title": "[NON-MKI] Genuine Kibana self-call UIAM attestation Kibana-minted internal UIAM API key self-call stamps and the receiver attaches the ES secret",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_self_call_attestation.spec.ts",
+        "line": 76,
+        "column": 21
+      }
+    },
+    {
+      "id": "c4c9212de6726a5-641c7b2f3eba339",
+      "title": "[NON-MKI] Genuine Kibana self-call UIAM attestation Cookie session on the UI Run path (not Task Manager worker) stamps and the acceptUiamOAuth receiver skips exchange",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_self_call_attestation.spec.ts",
+        "line": 111,
+        "column": 7
       }
     },
     {
@@ -497,8 +539,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -525,8 +565,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -553,8 +591,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -581,8 +617,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -609,8 +643,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -637,8 +669,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -665,8 +695,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -693,8 +721,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -721,8 +747,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -749,8 +773,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -777,8 +799,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -805,8 +825,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -833,8 +851,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -861,8 +877,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],
@@ -889,8 +903,6 @@
         "@cloud-serverless-security_essentials",
         "@local-serverless-security_ease",
         "@cloud-serverless-security_ease",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],

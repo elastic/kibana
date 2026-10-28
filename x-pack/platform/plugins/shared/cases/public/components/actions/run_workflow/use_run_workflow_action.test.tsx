@@ -29,9 +29,13 @@ jest.mock('@kbn/workflows-ui', () => ({
 jest.mock('../../workflows/use_run_workflow_on_cases', () => ({
   useRunWorkflowOnCases: jest.fn().mockReturnValue(jest.fn()),
 }));
+jest.mock('../../../containers/configure/use_get_case_configuration');
 
 const { useCasesContext } = jest.requireMock('../../cases_context/use_cases_context');
 const { useCasesConfig } = jest.requireMock('../../../common/lib/kibana');
+const { useGetCaseConfiguration } = jest.requireMock(
+  '../../../containers/configure/use_get_case_configuration'
+);
 
 const setupMocks = ({
   permissionsUpdate = true,
@@ -39,10 +43,14 @@ const setupMocks = ({
   workflowsUIEnabled = true,
   canExecuteWorkflow = true,
 } = {}) => {
-  useCasesContext.mockReturnValue({ permissions: { update: permissionsUpdate } });
+  useCasesContext.mockReturnValue({
+    owner: ['securitySolution'],
+    permissions: { update: permissionsUpdate },
+  });
   useCasesConfig.mockReturnValue({ runWorkflowsEnabled });
   mockUseWorkflowsCapabilities.mockReturnValue({ canExecuteWorkflow });
   mockUseWorkflowsUIEnabledSetting.mockReturnValue(workflowsUIEnabled);
+  useGetCaseConfiguration.mockReturnValue({ data: { workflowTags: [] } });
   mockCanRunWorkflow.mockReturnValue(
     permissionsUpdate && runWorkflowsEnabled && workflowsUIEnabled && canExecuteWorkflow
   );
@@ -193,12 +201,19 @@ describe('useRunWorkflowAction', () => {
       expect(typeof modalProps.sortWorkflow).toBe('function');
     });
 
-    it('sets showSuccessToast=false so the executor always owns the success toast', () => {
+    it('reports a cases-list run over the selected cases', () => {
       const { result } = renderAction();
       act(() => {
-        (result.current.getAction([basicCase]).onClick as () => void)();
+        (
+          result.current.getAction([basicCase, { ...basicCase, id: 'case-2' }])
+            .onClick as () => void
+        )();
       });
-      expect(result.current.modalProps.showSuccessToast).toBe(false);
+      expect(result.current.modalProps.telemetry).toEqual({
+        origin: 'cases.cases',
+        itemCount: 2,
+        owner: 'securitySolution',
+      });
     });
   });
 });

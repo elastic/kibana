@@ -9,12 +9,12 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { CreateOnlineEvalFlyout } from '.';
 import { useCreateOnlineEvalWorkflow } from '../../hooks/use_online_eval_workflows';
-import { useEvaluators } from '../../hooks/use_experiments_api';
+import { useEvaluators } from '../../hooks/use_evaluators_api';
 import { useModelConnectors } from '../../hooks/use_model_connectors';
 import { parseOnlineEvalWorkflowYaml } from '../../../common/online_evals/workflow_yaml';
 
 jest.mock('../../hooks/use_online_eval_workflows');
-jest.mock('../../hooks/use_experiments_api');
+jest.mock('../../hooks/use_evaluators_api');
 jest.mock('../../hooks/use_model_connectors');
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -258,5 +258,43 @@ describe('CreateOnlineEvalFlyout', () => {
       )
     ).toBeInTheDocument();
     expect(mutateAsync).not.toHaveBeenCalled();
+  });
+
+  it('says why an evaluator that needs reference data cannot be picked', () => {
+    mockedUseEvaluators.mockReturnValue({
+      data: {
+        evaluators: [
+          {
+            name: 'factual-match',
+            version: '1.0.0',
+            kind: 'llm',
+            description: 'Compares the answer with an expected one',
+            reference_data_schema: { type: 'object', required: ['expected'] },
+          },
+          { name: 'cost', version: '0.1.0', kind: 'code', description: 'Estimates costs' },
+        ],
+      },
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useEvaluators>);
+    ({ container } = render(<CreateOnlineEvalFlyout onClose={onClose} />));
+
+    const combo = getByTestSubj('onlineEvalCreateEvaluatorsCombo') as HTMLSelectElement;
+    const optionFor = (value: string) =>
+      Array.from(combo.options).find((option) => option.value === value);
+
+    expect(optionFor('factual-match')?.disabled).toBe(true);
+    expect(optionFor('cost')?.disabled).toBe(false);
+    expect(
+      screen.getByText(/Evaluators that require reference data are unavailable here/)
+    ).toBeInTheDocument();
+  });
+
+  it('adds no reference data note when every evaluator can run online', () => {
+    ({ container } = render(<CreateOnlineEvalFlyout onClose={onClose} />));
+
+    expect(
+      screen.queryByText(/Evaluators that require reference data are unavailable here/)
+    ).not.toBeInTheDocument();
   });
 });

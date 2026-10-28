@@ -9,33 +9,60 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { renderElasticManifest, writeElasticManifest } from './elastic_manifest';
 
+const connector = (connectorId: string) => ({ kind: 'connector' as const, connectorId });
+
 describe('renderElasticManifest', () => {
   it('tells the agent which connector id unlocks the credentials', () => {
-    const content = renderElasticManifest('elasticsearch-telemetry');
+    const content = renderElasticManifest(connector('elasticsearch-telemetry'));
 
     expect(content).toContain('`connector_id: "elasticsearch-telemetry"`');
     expect(content).toContain('`CONNECTOR_CONFIG_URL`');
-    expect(content).toContain('`CONNECTOR_SECRET_PASSWORD`');
+    expect(content).toContain('`CONNECTOR_HEADER_AUTHORIZATION`');
     expect(content).toContain('never hard-code their values');
   });
 
   it('documents the readable indices and a query example', () => {
-    const content = renderElasticManifest('elasticsearch-telemetry');
+    const content = renderElasticManifest(connector('elasticsearch-telemetry'));
 
     expect(content).toContain('`logs-*`, `metrics-*`, `traces-*`');
     expect(content).toContain('"$CONNECTOR_CONFIG_URL/_remote/info"');
-    expect(content).toContain('"$CONNECTOR_CONFIG_URL/_query"');
+    expect(content).toContain('"$CONNECTOR_CONFIG_URL/_query?format=txt"');
+  });
+
+  it('uses operator-supplied remote index guidance and bounds telemetry queries', () => {
+    const content = renderElasticManifest(connector('remote-telemetry'), {
+      readableIndices: 'Read `logging-region:logs-service-*`; no local telemetry is available.',
+    });
+
+    expect(content).toContain('Read `logging-region:logs-service-*`');
+    expect(content).not.toContain('FROM *:logs-*');
+    expect(content).toContain('--max-time 120');
+    expect(content).toContain('@timestamp');
+    expect(content).toContain('Name each remote explicitly');
+    expect(content).toContain('never use wildcard remote names');
+    expect(content).toContain("jq -n --arg q '<ES|QL>'");
+    expect(content).toContain('there is no `python`');
+    expect(content).toContain('`Unknown column [x]` means no index in the `FROM` pattern');
+    expect(content).toContain('include_unmapped=true');
+  });
+
+  it('steers remote queries to a specific data stream instead of logs-*', () => {
+    const content = renderElasticManifest(connector('remote-telemetry'));
+
+    expect(content).toContain('/_resolve/index/<remote>:logs-*nginx*');
+    expect(content).toContain('FROM $1:logs-nginx.error-*');
+    expect(content).not.toContain('FROM $1:logs-* ');
   });
 });
 
 describe('writeElasticManifest', () => {
   it('writes the manifest to /workspace/elastic.md', async () => {
-    const writeFiles = jest.fn().mockResolvedValue(undefined);
+    const writeFiles = jest.fn().mockResolvedValue([{ bytes_written: 100, success: true }]);
     const session = { writeFiles } as unknown as SandboxSession;
 
     await writeElasticManifest({
       session,
-      connectorId: 'elasticsearch-telemetry',
+      credentials: connector('elasticsearch-telemetry'),
       logger: loggingSystemMock.createLogger(),
     });
 
@@ -45,4 +72,18 @@ describe('writeElasticManifest', () => {
     const [files] = writeFiles.mock.calls[0];
     expect(files[0].content.toString('utf8')).toContain('# Elasticsearch telemetry');
   });
+  it.each([{ results: [] }, { results: [{ bytes_written: 0, success: false }] }])(
+    'rejects an unsuccessful per-file response %j',
+    async ({ results }) => {
+      const writeFiles = jest.fn().mockResolvedValue(results);
+      const session = { writeFiles } as unknown as SandboxSession;
+      await expect(
+        writeElasticManifest({
+          session,
+          credentials: connector('telemetry'),
+          logger: loggingSystemMock.createLogger(),
+        })
+      ).rejects.toThrow('Failed to write sandbox telemetry guidance');
+    }
+  );
 });

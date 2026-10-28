@@ -8,25 +8,115 @@
 import { i18n } from '@kbn/i18n';
 
 export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
-  warningLabel: i18n.translate('xpack.proposals.approvalModal.warningLabel', {
-    defaultMessage: 'APPROVAL REQUIRED',
-  }),
-  actionImpactTitle: i18n.translate('xpack.proposals.approvalModal.actionImpactTitle', {
-    defaultMessage: 'Impact',
-  }),
   approve: i18n.translate('xpack.proposals.approvalModal.approve', {
     defaultMessage: 'Approve',
   }),
-  dismiss: i18n.translate('xpack.proposals.approvalModal.dismiss', {
-    defaultMessage: 'Dismiss',
+  /** The single decision a to-do proposal offers: the human did what it proposes. */
+  markApplied: i18n.translate('xpack.proposals.approvalModal.markApplied', {
+    defaultMessage: "I've applied",
   }),
-  noAction: i18n.translate('xpack.proposals.approvalModal.noAction', {
-    defaultMessage: 'No automated action',
+  /** Takes back a to-do proposal's "I've applied", re-offering it. */
+  markNotApplied: i18n.translate('xpack.proposals.approvalModal.markNotApplied', {
+    defaultMessage: 'Mark as not applied',
+  }),
+  dismiss: i18n.translate('xpack.proposals.approvalModal.dismiss', {
+    defaultMessage: 'Decline',
+  }),
+  cancelDecline: i18n.translate('xpack.proposals.approvalModal.cancelDecline', {
+    defaultMessage: 'Cancel',
   }),
   modalAriaLabel: i18n.translate('xpack.proposals.approvalModal.ariaLabel', {
     defaultMessage: 'Approval required modal',
   }),
   alwaysAllowAriaLabel: i18n.translate('xpack.proposals.approvalModal.alwaysAllow.ariaLabel', {
     defaultMessage: 'Always allow this action',
+  }),
+  needsReviewBadge: i18n.translate('xpack.proposals.approvalModal.needsReviewBadge', {
+    defaultMessage: 'Needs review',
+  }),
+  appliedBadge: i18n.translate('xpack.proposals.approvalModal.appliedBadge', {
+    defaultMessage: 'Applied',
+  }),
+  declinedBadge: i18n.translate('xpack.proposals.approvalModal.declinedBadge', {
+    defaultMessage: 'Declined',
+  }),
+  failedBadge: i18n.translate('xpack.proposals.approvalModal.failedBadge', {
+    defaultMessage: 'Failed',
+  }),
+  /**
+   * Distinct from `appliedBadge`: an approved proposal that carries no action never runs
+   * anything, so labeling it "Applied" would claim an automated action succeeded when none
+   * was ever going to happen.
+   */
+  noActionBadge: i18n.translate('xpack.proposals.approvalModal.noActionBadge', {
+    defaultMessage: 'Approved',
+  }),
+  /** A to-do proposal the analyst marked as applied: they carried it out, nothing automated ran. */
+  markedAppliedBadge: i18n.translate('xpack.proposals.approvalModal.markedAppliedBadge', {
+    defaultMessage: 'Applied',
+  }),
+  expiredBadge: i18n.translate('xpack.proposals.approvalModal.expiredBadge', {
+    defaultMessage: 'Expired',
+  }),
+  applyingBadge: i18n.translate('xpack.proposals.approvalModal.applyingBadge', {
+    defaultMessage: 'Applying',
+  }),
+  decliningBadge: i18n.translate('xpack.proposals.approvalModal.decliningBadge', {
+    defaultMessage: 'Declining',
+  }),
+  reversible: i18n.translate('xpack.proposals.approvalModal.caption.reversible', {
+    defaultMessage: 'Reversible',
+  }),
+  irreversible: i18n.translate('xpack.proposals.approvalModal.caption.irreversible', {
+    defaultMessage: 'Irreversible',
+  }),
+  appliedBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.appliedTitle', {
+    defaultMessage: 'Applied successfully',
+  }),
+  declinedBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.declinedTitle', {
+    defaultMessage: 'Declined',
+  }),
+  applyingBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.applyingTitle', {
+    defaultMessage: 'Applying',
+  }),
+  decliningBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.decliningTitle', {
+    defaultMessage: 'Declining',
+  }),
+  failedBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.failedTitle', {
+    defaultMessage: 'Action failed',
+  }),
+  noActionBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.noActionTitle', {
+    defaultMessage: 'Approved',
+  }),
+  markedAppliedBannerTitle: i18n.translate(
+    'xpack.proposals.approvalModal.outcome.markedAppliedTitle',
+    { defaultMessage: 'Marked as applied' }
+  ),
+  /** The caption's name for the to-do category, which reads oddly sentence-cased as "Todo". */
+  todoCategory: i18n.translate('xpack.proposals.approvalModal.caption.todoCategory', {
+    defaultMessage: 'To do',
+  }),
+  actionErrorTitle: i18n.translate('xpack.proposals.approvalModal.outcome.actionError', {
+    defaultMessage: 'Could not record the decision. Try again.',
+  }),
+  currentActorFallback: i18n.translate('xpack.proposals.approvalModal.outcome.currentActor', {
+    defaultMessage: 'You',
+  }),
+  unknownActorFallback: i18n.translate('xpack.proposals.approvalModal.outcome.unknownActor', {
+    defaultMessage: 'Someone',
+  }),
+  previousFailureCalloutTitle: i18n.translate(
+    'xpack.proposals.approvalModal.previousFailureCallout',
+    { defaultMessage: 'A previous attempt at this action failed' }
+  ),
+  failedAttemptCalloutTitle: i18n.translate('xpack.proposals.approvalModal.failedAttemptCallout', {
+    defaultMessage: 'This attempt failed to execute the action',
+  }),
+  // Deliberately silent on *why* it expired: `isProposalExpired` is true both once the deadline
+  // passes and when the workflow settles a proposal as `status: 'expired'` beforehand (e.g. after
+  // exhausting its retry attempts), and this wording has to be true for either cause.
+  expiredCalloutTitle: i18n.translate('xpack.proposals.approvalModal.expiredCallout', {
+    defaultMessage:
+      'This proposal expired before a decision was made and can no longer be actioned.',
   }),
 });

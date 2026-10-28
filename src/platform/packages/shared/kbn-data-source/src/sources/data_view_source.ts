@@ -13,6 +13,7 @@ import type { DataViewFieldBase } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { Column, DataSourceBase, SerializedDataSource } from '../types';
 import { columnFromDataViewField } from '../to_column';
+import type { FilterableSource } from '../filterable_source';
 
 /**
  * `DataSource` implementation backed by a {@link DataView}.
@@ -71,6 +72,14 @@ export class DataViewSource implements DataSourceBase {
   public getColumn(name: string): Column | undefined {
     const field = this.dataView.fields.getByName(name);
     return field ? columnFromDataViewField(field) : undefined;
+  }
+
+  public async getFilterableFields(): Promise<readonly Column[]> {
+    return this.getColumns();
+  }
+
+  public toFilterableSource(): Promise<FilterableSource> {
+    return Promise.resolve(this.dataView);
   }
 
   public isTimeBased(): boolean {

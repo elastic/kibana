@@ -1752,7 +1752,7 @@ finishes and then call this operation once.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Returns time-bucketed anomaly counts and tactic distribution for a given entity.
+   * Returns time-bucketed anomaly counts and tactic distribution for a given entity. In `resolved` mode the entity's resolution group is combined.
    */
   async getAnomalyOverview(props: GetAnomalyOverviewProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetAnomalyOverview`);
@@ -1771,7 +1771,7 @@ finishes and then call this operation once.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity.
+   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity. In `resolved` mode the entity's resolution group is combined.
    */
   async getAnomalySummary(props: GetAnomalySummaryProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetAnomalySummary`);
@@ -2337,7 +2337,7 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
 - The `Content-Type: multipart/form-data` HTTP header.
 - A link to the `.ndjson` file containing the rules.
 > warn
-> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+> When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the created or updated rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 > info

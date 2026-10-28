@@ -13,7 +13,6 @@ import type {
   ResetTransformsRequestSchema,
   ResetTransformsResponseSchema,
 } from '../../../server/routes/api_schemas/reset_transforms';
-import { addInternalBasePath } from '../../../common/constants';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
@@ -29,7 +28,7 @@ export const useResetTransforms = () => {
 
   const mutation = useMutation({
     mutationFn: (reqBody: ResetTransformsRequestSchema) =>
-      http.post<ResetTransformsResponseSchema>(addInternalBasePath('reset_transforms'), {
+      http.post<ResetTransformsResponseSchema>('/internal/transform/reset_transforms', {
         body: JSON.stringify(reqBody),
         version: '1',
       }),

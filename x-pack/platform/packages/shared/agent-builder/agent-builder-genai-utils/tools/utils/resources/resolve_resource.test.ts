@@ -293,6 +293,64 @@ describe('resolveResource', () => {
       });
     });
 
+    it('falls back to an ES|QL view when resolveIndex throws not_found', async () => {
+      esClient.indices.resolveIndex.mockRejectedValue(
+        new esErrors.ResponseError({ statusCode: 404 } as any)
+      );
+      esClient.esql.getView.mockResolvedValue({
+        views: [
+          {
+            name: 'logs-proxy-parsed',
+            query: 'FROM logs-* | KEEP status',
+            description: 'Parsed proxy logs',
+          },
+        ],
+      } as never);
+      esClient.esql.query.mockResolvedValue({
+        columns: [
+          { name: 'status', type: 'integer' },
+          { name: 'host.name', type: 'keyword' },
+        ],
+        values: [],
+      });
+
+      const result = await resolveResourceForEsql({
+        resourceName: 'logs-proxy-parsed',
+        esClient,
+        includeViews: true,
+      });
+
+      expect(esClient.esql.query).toHaveBeenCalledWith(
+        expect.objectContaining({ query: 'FROM logs-proxy-parsed | LIMIT 0' }),
+        expect.anything()
+      );
+      expect(result).toEqual({
+        name: 'logs-proxy-parsed',
+        type: EsResourceType.view,
+        fields: [
+          { path: 'status', type: 'integer', meta: {} },
+          { path: 'host.name', type: 'keyword', meta: {} },
+        ],
+        description: 'Parsed proxy logs',
+        query: 'FROM logs-* | KEEP status',
+        isTsdb: false,
+      });
+    });
+
+    it('does not resolve views when includeViews is not set', async () => {
+      esClient.indices.resolveIndex.mockRejectedValue(
+        new esErrors.ResponseError({ statusCode: 404 } as any)
+      );
+      esClient.esql.getView.mockResolvedValue({
+        views: [{ name: 'logs-proxy-parsed', query: 'FROM logs-*' }],
+      } as never);
+
+      await expect(
+        resolveResourceForEsql({ resourceName: 'logs-proxy-parsed', esClient })
+      ).rejects.toThrow("No resource found for 'logs-proxy-parsed'");
+      expect(esClient.esql.getView).not.toHaveBeenCalled();
+    });
+
     it('falls back to an external ES|QL dataset when resolveIndex finds no resources', async () => {
       esClient.indices.resolveIndex.mockResolvedValue({
         indices: [],
@@ -430,6 +488,94 @@ describe('resolveResource', () => {
       expect(result.name).toBe('logs-*');
       expect(result.fields).toEqual(
         expect.arrayContaining([expect.objectContaining({ path: '@timestamp', type: 'date' })])
+      );
+    });
+  });
+
+  describe('resolveResourceForEsql with only the read index privilege', () => {
+    // `read` grants _resolve/index and _field_caps, but not the metadata APIs
+    // (_data_stream, _mapping, _settings), which need view_index_metadata.
+    const forbidden = (action: string) =>
+      new esErrors.ResponseError({
+        statusCode: 403,
+        body: {
+          error: { type: 'security_exception', reason: `action [${action}] is unauthorized` },
+        },
+      } as any);
+
+    beforeEach(() => {
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['.ds-logs-okta.system-default-001'],
+        fields: {
+          'user.name': { keyword: { type: 'keyword', searchable: true, aggregatable: true } },
+        },
+      });
+      esClient.indices.getDataStream.mockRejectedValue(forbidden('indices:admin/data_stream/get'));
+      esClient.indices.getMapping.mockRejectedValue(forbidden('indices:admin/mappings/get'));
+      esClient.indices.getSettings.mockRejectedValue(forbidden('indices:monitor/settings/get'));
+    });
+
+    it('resolves a pattern that matches a single data stream', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [],
+        aliases: [],
+        data_streams: [
+          {
+            name: 'logs-okta.system-default',
+            backing_indices: ['.ds-logs-okta.system-default-001'],
+            timestamp_field: '@timestamp',
+          },
+        ],
+      });
+
+      const result = await resolveResourceForEsql({
+        resourceName: 'logs-okta.system-*',
+        esClient,
+      });
+
+      expect(result.type).toBe(EsResourceType.indexPattern);
+      expect(result.fields).toEqual([expect.objectContaining({ path: 'user.name' })]);
+    });
+
+    it('resolves a pattern that matches a single index', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [{ name: 'logs-okta-legacy', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+
+      const result = await resolveResourceForEsql({
+        resourceName: 'logs-okta-legacy*',
+        esClient,
+      });
+
+      expect(result.type).toBe(EsResourceType.indexPattern);
+      expect(result.fields).toEqual([expect.objectContaining({ path: 'user.name' })]);
+    });
+
+    it('rethrows errors other than 403', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [{ name: 'logs-okta-legacy', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+      esClient.indices.getMapping.mockRejectedValue(new Error('connection reset'));
+      esClient.indices.getSettings.mockResolvedValue({});
+
+      await expect(
+        resolveResourceForEsql({ resourceName: 'logs-okta-legacy', esClient })
+      ).rejects.toThrow('connection reset');
+    });
+
+    it('does not change resolveResource, which needs exact mapping types', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [{ name: 'logs-okta-legacy', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+
+      await expect(resolveResource({ resourceName: 'logs-okta-legacy', esClient })).rejects.toThrow(
+        'security_exception'
       );
     });
   });

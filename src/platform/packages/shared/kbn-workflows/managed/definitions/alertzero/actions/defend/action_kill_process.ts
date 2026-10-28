@@ -17,10 +17,10 @@ import {
 export const ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID = 'system-alertzero-action-kill-process';
 
 export const ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 2,
+  version: 6,
   yaml: ACTION_KILL_PROCESS_YAML,
 } as const satisfies ManagedWorkflowDefinition;

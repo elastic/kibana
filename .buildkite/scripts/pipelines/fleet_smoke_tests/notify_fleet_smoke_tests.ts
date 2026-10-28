@@ -42,7 +42,12 @@ function getThreshold(): number {
 function sendSlackNotification(message: string): void {
   const channel = process.env.SLACK_NOTIFICATIONS_CHANNEL;
 
-  if (DRY_RUN || process.env.KIBANA_SLACK_NOTIFICATIONS_ENABLED !== 'true' || !channel) {
+  if (
+    DRY_RUN ||
+    (process.env.ELASTIC_SLACK_NOTIFICATIONS_ENABLED !== 'true' &&
+      process.env.KIBANA_SLACK_NOTIFICATIONS_ENABLED !== 'true') ||
+    !channel
+  ) {
     console.log(`Not sending slack message (DRY_RUN=${DRY_RUN}, channel=${channel}):\n${message}`);
     return;
   }
@@ -57,7 +62,7 @@ function sendSlackNotification(message: string): void {
     '  - label: ":slack: Fleet Smoke Tests Failure Alert"',
     `    command: "echo 'Fleet smoke tests failure alert sent to Slack'"`,
     '    agents:',
-    '      image: family/kibana-ubuntu-2404',
+    '      image: family/kibana-minimal-ubuntu-2604',
     '      imageProject: elastic-images-prod',
     '      provider: gcp',
     '      machineType: n2-standard-2',

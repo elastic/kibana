@@ -75,11 +75,6 @@ const NOT_ENABLED_BODY_MESSAGES: Record<NotEnabledReason, () => string> = {
       defaultMessage:
         'Significant events relies on Workflows, which is not available in this environment.',
     }),
-  searchInferenceEndpoints: () =>
-    i18n.translate('xpack.significantEventsApp.notEnabledPrompt.inferenceBody', {
-      defaultMessage:
-        'Significant events requires inference connectors, which are not available in this environment.',
-    }),
   agentBuilder: () =>
     i18n.translate('xpack.significantEventsApp.notEnabledPrompt.agentBuilderBody', {
       defaultMessage:

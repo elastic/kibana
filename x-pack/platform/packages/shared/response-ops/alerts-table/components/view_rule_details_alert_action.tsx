@@ -45,7 +45,7 @@ export const ViewRuleDetailsAlertAction = typedMemo(
         href={linkToRule}
         target={openLinksInNewTab ? '_blank' : undefined}
       >
-        {i18n.translate('xpack.triggersActionsUI.alertsTable.viewRuleDetails', {
+        {i18n.translate('xpack.responseOpsAlertsTable.alertsTable.viewRuleDetails', {
           defaultMessage: 'View rule details',
         })}
       </EuiContextMenuItem>

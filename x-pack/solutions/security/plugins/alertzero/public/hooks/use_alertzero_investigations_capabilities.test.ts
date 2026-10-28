@@ -1,0 +1,127 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Capabilities } from '@kbn/core/public';
+import { getAlertZeroInvestigationsCapabilities } from './use_alertzero_investigations_capabilities';
+
+const caps = (
+  overrides: {
+    showEscalations?: unknown;
+    manageEscalations?: unknown;
+    readInvestigations?: unknown;
+    manageInvestigations?: unknown;
+  } = {}
+): Capabilities =>
+  ({
+    alertzero: { show: true, write: true },
+    navLinks: {},
+    management: {},
+    catalogue: {},
+    agenticInvestigations: {
+      readInvestigations: false,
+      ...('readInvestigations' in overrides
+        ? { readInvestigations: overrides.readInvestigations }
+        : {}),
+      manageInvestigations: false,
+      ...('manageInvestigations' in overrides
+        ? { manageInvestigations: overrides.manageInvestigations }
+        : {}),
+      showEscalations: false,
+      manageEscalations: false,
+      ...('showEscalations' in overrides ? { showEscalations: overrides.showEscalations } : {}),
+      ...('manageEscalations' in overrides
+        ? { manageEscalations: overrides.manageEscalations }
+        : {}),
+    },
+  } as unknown as Capabilities);
+
+describe('getAlertZeroInvestigationsCapabilities', () => {
+  it('returns all false when no capabilities are set', () => {
+    expect(getAlertZeroInvestigationsCapabilities({} as Capabilities)).toEqual({
+      showEscalations: false,
+      manageEscalations: false,
+      readInvestigations: false,
+      manageInvestigations: false,
+      canAccessAgentBuilder: false,
+    });
+  });
+
+  it('maps canAccessAgentBuilder from the Agent Builder show capability', () => {
+    const withAgentBuilder = (show: unknown) =>
+      getAlertZeroInvestigationsCapabilities({
+        ...caps(),
+        agentBuilder: { show },
+      } as unknown as Capabilities);
+
+    expect(withAgentBuilder(true).canAccessAgentBuilder).toBe(true);
+    expect(withAgentBuilder(false).canAccessAgentBuilder).toBe(false);
+  });
+
+  it('maps showEscalations correctly', () => {
+    expect(getAlertZeroInvestigationsCapabilities(caps({ showEscalations: true }))).toMatchObject({
+      showEscalations: true,
+    });
+  });
+
+  it('maps manageEscalations correctly', () => {
+    expect(getAlertZeroInvestigationsCapabilities(caps({ manageEscalations: true }))).toMatchObject(
+      {
+        manageEscalations: true,
+      }
+    );
+  });
+
+  it('maps manageInvestigations correctly', () => {
+    expect(
+      getAlertZeroInvestigationsCapabilities(caps({ manageInvestigations: true }))
+    ).toMatchObject({
+      manageInvestigations: true,
+    });
+  });
+
+  it('returns false when a capability is a non-boolean truthy value', () => {
+    // Kibana stores capabilities as booleans; treat anything that is not exactly `true` as false.
+    expect(getAlertZeroInvestigationsCapabilities(caps({ showEscalations: 1 }))).toMatchObject({
+      showEscalations: false,
+    });
+  });
+
+  it('maps readInvestigations correctly', () => {
+    expect(
+      getAlertZeroInvestigationsCapabilities(caps({ readInvestigations: true }))
+    ).toMatchObject({ readInvestigations: true });
+  });
+
+  it('returns all flags for a fully granted capabilities object', () => {
+    expect(
+      getAlertZeroInvestigationsCapabilities(
+        caps({
+          showEscalations: true,
+          manageEscalations: true,
+          readInvestigations: true,
+          manageInvestigations: true,
+        })
+      )
+    ).toEqual({
+      showEscalations: true,
+      manageEscalations: true,
+      readInvestigations: true,
+      manageInvestigations: true,
+      canAccessAgentBuilder: false,
+    });
+  });
+
+  it('does not depend on AlertZero privileges', () => {
+    const capabilities = caps({ manageEscalations: true, manageInvestigations: true });
+    expect(
+      getAlertZeroInvestigationsCapabilities({
+        ...capabilities,
+        alertzero: { show: true, write: false },
+      })
+    ).toMatchObject({ manageEscalations: true, manageInvestigations: true });
+  });
+});

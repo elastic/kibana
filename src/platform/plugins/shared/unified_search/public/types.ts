@@ -25,6 +25,7 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { EsqlPluginStart } from '@kbn/esql/public';
+import type { SearchSessionsManagementPluginStart } from '@kbn/search-sessions-management-plugin/public';
 import type { IndexPatternSelectProps, StatefulSearchBarProps } from '.';
 import type { FiltersBuilderProps } from './filters_builder/filters_builder';
 import type { StatefulSearchBarDeps } from './search_bar/create_search_bar';
@@ -54,6 +55,7 @@ export interface UnifiedSearchStartDependencies {
   kql: KqlPluginStart;
   esql?: EsqlPluginStart;
   licensing?: LicensingPluginStart;
+  searchSessionsManagement?: SearchSessionsManagementPluginStart;
 }
 
 type AggQuerySearchBarComp = <QT extends Query | AggregateQuery = Query>(
@@ -116,4 +118,5 @@ export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
   cps: CPSPluginStart;
   esql?: EsqlPluginStart;
   licensing?: LicensingPluginStart;
+  searchSessionsManagement?: SearchSessionsManagementPluginStart;
 }

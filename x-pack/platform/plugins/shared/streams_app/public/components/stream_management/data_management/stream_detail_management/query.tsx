@@ -142,7 +142,7 @@ export function QueryStreamDetailManagement({
           label: i18n.translate('xpack.streams.streamDetailView.viewInDiscoverLabel', {
             defaultMessage: 'View in Discover',
           }),
-          iconType: 'discoverApp',
+          iconType: 'productDiscover',
           href: discoverHref,
           testId: `streamsDiscoverActionButton-${definition.stream.name}`,
         }

@@ -16,11 +16,13 @@ export interface InjectedMetadataOptions {
   basePath?: string;
   serverBasePath?: string;
   publicBaseUrl?: string;
+  spaceId?: string;
   elasticsearchClusterUuid?: string;
   elasticsearchClusterName?: string;
   elasticsearchClusterVersion?: string;
   themeDarkMode?: 'light' | 'dark';
   themeName?: string;
+  locale?: string;
 }
 
 /**
@@ -49,11 +51,13 @@ export function createInjectedMetadata(
     basePath = '',
     serverBasePath = '',
     publicBaseUrl = '',
+    spaceId = 'default',
     elasticsearchClusterUuid = 'test-cluster-uuid',
     elasticsearchClusterName = 'test-cluster-name',
     elasticsearchClusterVersion = '8.0.0',
     themeDarkMode = 'light',
     themeName = 'default',
+    locale = 'en',
   } = options;
 
   return {
@@ -63,16 +67,23 @@ export function createInjectedMetadata(
     getBasePath: () => basePath,
     getServerBasePath: () => serverBasePath,
     getPublicBaseUrl: () => publicBaseUrl,
+    getSpaceId: () => spaceId,
     getElasticsearchInfo: () => ({
       cluster_uuid: elasticsearchClusterUuid,
       cluster_name: elasticsearchClusterName,
       cluster_version: elasticsearchClusterVersion,
       cluster_build_flavor: 'development',
     }),
+    getI18nInfo: () => ({
+      locale,
+      browserPreferredLocale: undefined,
+      localeSource: 'default',
+      configDefaultLocale: locale,
+    }),
     getCspConfig: () =>
       ({
         warnLegacyBrowsers: true,
-      } as unknown),
+      } as unknown as ReturnType<InternalInjectedMetadataSetup['getCspConfig']>),
     getTheme: () =>
       ({
         darkMode: themeDarkMode,
@@ -82,7 +93,7 @@ export function createInjectedMetadata(
           default: [],
           dark: [],
         },
-      } as unknown),
+      } as unknown as ReturnType<InternalInjectedMetadataSetup['getTheme']>),
     getExternalUrlConfig: () => ({
       policy: [
         {
@@ -110,5 +121,9 @@ export function createInjectedMetadata(
       overrides: {},
       initialFeatureFlags: {},
     }),
-  } as unknown as InternalInjectedMetadataSetup;
+    getUserStorage: () => ({
+      available: false,
+      values: {},
+    }),
+  };
 }

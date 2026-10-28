@@ -11,6 +11,7 @@ import {
   AUDIT_TYPE,
   AgentBuilderAuditAction,
   agentAuditEvent,
+  conversationAuditEvent,
   toolAuditEvent,
 } from './audit_events';
 
@@ -106,6 +107,26 @@ describe('Agent Builder audit event builders', () => {
           action: AgentBuilderAuditAction.TOOL_DELETE,
           category: [AUDIT_CATEGORY.DATABASE],
           type: [AUDIT_TYPE.DELETION],
+          outcome: AUDIT_OUTCOME.SUCCESS,
+        },
+      });
+    });
+  });
+
+  describe('conversationAuditEvent', () => {
+    it('returns a creation audit event naming the conversation and its agent', () => {
+      const event = conversationAuditEvent({
+        action: AgentBuilderAuditAction.CONVERSATION_CREATE,
+        conversationId: 'conv-1',
+        agentId: 'agent-1',
+      });
+
+      expect(event).toMatchObject({
+        message: 'User has created conversation [id=conv-1, agent=agent-1]',
+        event: {
+          action: AgentBuilderAuditAction.CONVERSATION_CREATE,
+          category: [AUDIT_CATEGORY.DATABASE],
+          type: [AUDIT_TYPE.CREATION],
           outcome: AUDIT_OUTCOME.SUCCESS,
         },
       });

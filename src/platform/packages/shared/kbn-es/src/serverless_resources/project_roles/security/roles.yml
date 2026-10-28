@@ -1,22 +1,38 @@
-# ----- Copy from internal roles config in elasticsearch-controller
-# Read-tier Dashboard/Discover grants: elastic/elasticsearch-controller#2058
+# -----
+# Copy from internal roles config in elasticsearch-controller
+# -----
+
+# Predefined roles for "Security" project types
+
+#--------------------------------------------------------------------------------------------------
+#
+# >>> IMPORTANT <<<
+#
+# Updates to predefined roles must also be done in Kibana. The file is currently located here:
+#
+# src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml
+#
+# Please ensure a PR is opened to update the above as well.
+#
+#--------------------------------------------------------------------------------------------------
+
 # modeled after the t1_analyst minus osquery run saved queries privilege, plus endpoint exceptions read
 viewer:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
     - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
+        - '.metrics-endpoint.metadata_united_default*'
+        - 'metrics-endpoint.policy-*'
       privileges:
-        - read
+        - 'read'
       allow_restricted_indices: false
     - names:
-        - .logs-osquery_manager.actions-*
-        - .logs-osquery_manager.action.responses-*
+        - '.logs-osquery_manager.actions-*'
+        - '.logs-osquery_manager.action.responses-*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -57,13 +73,15 @@ viewer:
         - '.entities.v1.updates.security_*'
         - '.entities.v1.history.*.security_*'
         - '.entities.v2.latest.*'
+        - '.entities.v2.updates.*'
+        - '.entities.v2.history.*'
         - '.entities.v2.metadata.*'
         - 'entities-latest-*'
         - 'entities-metadata-*'
         - '.ml-anomalies-*'
-        - '.entity_analytics.entity-leads*'
-        - '.entity_analytics.watchlists.*'
         - security_solution-*.misconfiguration_latest*
+        - .entity_analytics.entity-leads*
+        - .entity_analytics.watchlists.*
       privileges:
         - read
     # Threat intel indicators. Only the per-space filtered aliases are granted, so the
@@ -80,6 +98,7 @@ viewer:
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
         - feature_siemV5.endpoint_exceptions_read
+        - feature_siemV5.custom_yara_signatures_read
         - feature_siemV5.scripts_management_read
         - feature_securitySolutionRulesV2.read
         - feature_securitySolutionCases.read
@@ -101,36 +120,39 @@ viewer:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.read
         - feature_workflowsManagement.read
+        - feature_alertzero.read
+        - feature_agenticInvestigations.read
+        - feature_proposals.read
       resources: '*'
   run_as: []
 
 # modeled after t3_analyst
 editor:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
     - names:
-        - metrics-endpoint.metadata_current_*
+        - 'metrics-endpoint.metadata_current_*'
       privileges:
-        - read
+        - 'read'
     - names:
-        - .logs-endpoint.actions-*
-        - .logs-endpoint.action.responses-*
+        - '.logs-endpoint.actions-*'
+        - '.logs-endpoint.action.responses-*'
       privileges:
-        - read
+        - 'read'
       allow_restricted_indices: false
     - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
+        - '.metrics-endpoint.metadata_united_default*'
+        - 'metrics-endpoint.policy-*'
       privileges:
-        - read
+        - 'read'
       allow_restricted_indices: false
     - names:
-        - .logs-osquery_manager.actions-*
-        - .logs-osquery_manager.action.responses-*
+        - '.logs-osquery_manager.actions-*'
+        - '.logs-osquery_manager.action.responses-*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -180,15 +202,23 @@ editor:
         - '.entities.v1.history.*.security_*'
         - '.entities.v1.reset*'
         - '.entities.v2.latest.*'
-        - '.entities.v2.metadata.*'
-        - 'entities-latest-*'
-        - 'entities-metadata-*'
+        - '.entities.v2.updates.*'
         - '.entity_analytics.watchlists.*'
         - '.entity_analytics.entity-leads*'
       privileges:
         - 'read'
-        - 'view_index_metadata'
         - 'write'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - '.entities.v2.metadata.*'
+        - 'entities-latest-*'
+        - 'entities-metadata-*'
+      privileges:
+        - 'read'
+        - 'write'
+        - 'view_index_metadata'
+        - 'manage'
       allow_restricted_indices: false
     - names:
         - '.ml-anomalies-*'
@@ -221,6 +251,7 @@ editor:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.policy_management_read # Elastic Defend Policy Management
         - feature_siemV5.host_isolation_all
         - feature_siemV5.process_operations_all
@@ -230,7 +261,7 @@ editor:
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -244,25 +275,30 @@ editor:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
   run_as: []
 
 t1_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
     - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
+        - '.metrics-endpoint.metadata_united_default*'
+        - 'metrics-endpoint.policy-*'
       privileges:
-        - read
+        - 'read'
       allow_restricted_indices: false
     - names:
-        - .logs-osquery_manager.actions-*
-        - .logs-osquery_manager.action.responses-*
+        - '.logs-osquery_manager.actions-*'
+        - '.logs-osquery_manager.action.responses-*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -308,12 +344,14 @@ t1_analyst:
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
         - .entity_analytics.monitoring*
-        - '.entity_analytics.watchlists.*'
-        - '.entity_analytics.entity-leads*'
+        - .entity_analytics.entity-leads*
+        - .entity_analytics.watchlists.*
       privileges:
         - read
     - names:
         - '.entities.v2.latest.*'
+        - '.entities.v2.updates.*'
+        - '.entities.v2.history.*'
         - '.entities.v2.metadata.*'
       privileges:
         - read
@@ -331,6 +369,7 @@ t1_analyst:
         - feature_ml.read
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
+        - feature_siemV5.custom_yara_signatures_read
         - feature_siemV5.scripts_management_read
         - feature_securitySolutionRulesV2.read
         - feature_securitySolutionCases.read
@@ -351,24 +390,28 @@ t1_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
       resources: '*'
 
 t2_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
     - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
+        - '.metrics-endpoint.metadata_united_default*'
+        - 'metrics-endpoint.policy-*'
       privileges:
-        - read
+        - 'read'
       allow_restricted_indices: false
     - names:
-        - .logs-osquery_manager.actions-*
-        - .logs-osquery_manager.action.responses-*
+        - '.logs-osquery_manager.actions-*'
+        - '.logs-osquery_manager.action.responses-*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -407,6 +450,10 @@ t2_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.updates.*'
+        - '.entities.v2.history.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
         - 'entities-metadata-*'
         - '.ml-anomalies-*'
@@ -417,14 +464,12 @@ t2_analyst:
     - names:
         - .asset-criticality.asset-criticality-*
         - '.entities.v2.latest.*'
-        - '.entities.v2.metadata.*'
         - '.entity_analytics.watchlists.*'
         - '.entity_analytics.entity-leads*'
-        - 'entities-latest-*'
       privileges:
         - read
-        - view_index_metadata
         - write
+        - view_index_metadata
     # Threat intel indicators. Only the per-space filtered aliases are granted, so the
     # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
     - names:
@@ -438,11 +483,12 @@ t2_analyst:
         - feature_ml.read
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
+        - feature_siemV5.custom_yara_signatures_read
         - feature_siemV5.scripts_management_read
         - feature_securitySolutionRulesV2.read
         - feature_securitySolutionTimeline.read
         - feature_securitySolutionNotes.read
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.minimal_all
         - feature_actions.read
@@ -458,30 +504,34 @@ t2_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
       resources: '*'
 
 t3_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
     - names:
-        - .logs-endpoint.actions-*
-        - .logs-endpoint.action.responses-*
+        - '.logs-endpoint.actions-*'
+        - '.logs-endpoint.action.responses-*'
       privileges:
-        - read
+        - 'read'
       allow_restricted_indices: false
     - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
+        - '.metrics-endpoint.metadata_united_default*'
+        - 'metrics-endpoint.policy-*'
       privileges:
-        - read
+        - 'read'
       allow_restricted_indices: false
     - names:
-        - .logs-osquery_manager.actions-*
-        - .logs-osquery_manager.action.responses-*
+        - '.logs-osquery_manager.actions-*'
+        - '.logs-osquery_manager.action.responses-*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -497,15 +547,11 @@ t3_analyst:
         - winlogbeat-*
         - logstash-*
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.*'
-        - '.entities.v2.metadata.*'
         - '.entity_analytics.watchlists.*'
         - '.entity_analytics.entity-leads*'
-        - 'entities-latest-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
-        - view_index_metadata
         - write
     - names:
         - .alerts-security*
@@ -537,12 +583,21 @@ t3_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.updates.*'
+        - '.entities.v2.history.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
         - 'entities-metadata-*'
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
         - read
+    - names:
+        - '.entities.v2.latest.*'
+      privileges:
+        - write
+        - view_index_metadata
     # Threat intel indicators. Only the per-space filtered aliases are granted, so the
     # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
     - names:
@@ -563,6 +618,7 @@ t3_analyst:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.policy_management_read # Elastic Defend Policy Management
         - feature_siemV5.host_isolation_all
         - feature_siemV5.process_operations_all
@@ -574,7 +630,7 @@ t3_analyst:
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -588,24 +644,29 @@ t3_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 threat_intelligence_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
     - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
+        - '.metrics-endpoint.metadata_united_default*'
+        - 'metrics-endpoint.policy-*'
       privileges:
-        - read
+        - 'read'
       allow_restricted_indices: false
     - names:
-        - .logs-osquery_manager.actions-*
-        - .logs-osquery_manager.action.responses-*
+        - '.logs-osquery_manager.actions-*'
+        - '.logs-osquery_manager.action.responses-*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -625,11 +686,8 @@ threat_intelligence_analyst:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.*'
-        - '.entities.v2.metadata.*'
       privileges:
         - read
-        - view_index_metadata
         - write
     - names:
         - .lists*
@@ -661,10 +719,22 @@ threat_intelligence_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.updates.*'
+        - '.entities.v2.history.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
         - '.ml-anomalies-*'
+        - .entity_analytics.entity-leads*
+        - .entity_analytics.watchlists.*
       privileges:
         - read
+    - names:
+        - '.entities.v2.latest.*'
+      privileges:
+        - write
+        - view_index_metadata
     # Threat intel indicators. Only the per-space filtered aliases are granted, so the
     # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
     - names:
@@ -681,10 +751,11 @@ threat_intelligence_analyst:
         - feature_siemV5.global_artifact_management_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_read
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -697,30 +768,34 @@ threat_intelligence_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
       resources: '*'
 
 rule_author:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
     - names:
-        - .logs-endpoint.actions-*
-        - .logs-endpoint.action.responses-*
+        - '.logs-endpoint.actions-*'
+        - '.logs-endpoint.action.responses-*'
       privileges:
-        - read
+        - 'read'
       allow_restricted_indices: false
     - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
+        - '.metrics-endpoint.metadata_united_default*'
+        - 'metrics-endpoint.policy-*'
       privileges:
-        - read
+        - 'read'
       allow_restricted_indices: false
     - names:
-        - .logs-osquery_manager.actions-*
-        - .logs-osquery_manager.action.responses-*
+        - '.logs-osquery_manager.actions-*'
+        - '.logs-osquery_manager.action.responses-*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -736,12 +811,9 @@ rule_author:
         - winlogbeat-*
         - logstash-*
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.*'
-        - '.entities.v2.metadata.*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
-        - view_index_metadata
         - write
     - names:
         - .alerts-security*
@@ -771,11 +843,23 @@ rule_author:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.updates.*'
+        - '.entities.v2.history.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
+        - .entity_analytics.entity-leads*
+        - .entity_analytics.watchlists.*
       privileges:
         - read
+    - names:
+        - '.entities.v2.latest.*'
+      privileges:
+        - write
+        - view_index_metadata
     # Threat intel indicators. Only the per-space filtered aliases are granted, so the
     # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
     - names:
@@ -797,12 +881,13 @@ rule_author:
         - feature_siemV5.host_isolation_exceptions_read
         - feature_siemV5.blocklist_all # Elastic Defend Policy Management
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.actions_log_management_read
         - feature_siemV5.workflow_insights_all
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -815,30 +900,35 @@ rule_author:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 soc_manager:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
     - names:
-        - .logs-endpoint.actions-*
-        - .logs-endpoint.action.responses-*
+        - '.logs-endpoint.actions-*'
+        - '.logs-endpoint.action.responses-*'
       privileges:
-        - read
+        - 'read'
       allow_restricted_indices: false
     - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
+        - '.metrics-endpoint.metadata_united_default*'
+        - 'metrics-endpoint.policy-*'
       privileges:
-        - read
+        - 'read'
       allow_restricted_indices: false
     - names:
-        - .logs-osquery_manager.actions-*
-        - .logs-osquery_manager.action.responses-*
+        - '.logs-osquery_manager.actions-*'
+        - '.logs-osquery_manager.action.responses-*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -858,11 +948,11 @@ soc_manager:
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
         - '.entities.v2.latest.*'
+        - '.entities.v2.updates.*'
+        - '.entities.v2.history.*'
         - '.entities.v2.metadata.*'
         - 'entities-latest-*'
         - 'entities-metadata-*'
-        - '.entity_analytics.watchlists.*'
-        - '.entity_analytics.entity-leads*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -888,6 +978,8 @@ soc_manager:
         - view_index_metadata
     - names:
         - risk-score.risk-score-*
+        - '.entity_analytics.watchlists.*'
+        - '.entity_analytics.entity-leads*'
       privileges:
         - read
         - write
@@ -899,6 +991,10 @@ soc_manager:
         - .entity_analytics.monitoring*
       privileges:
         - read
+    - names:
+        - '.entities.v2.latest.*'
+      privileges:
+        - view_index_metadata
     # Threat intel indicators. Only the per-space filtered aliases are granted, so the
     # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
     - names:
@@ -920,6 +1016,7 @@ soc_manager:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.host_isolation_all
         - feature_siemV5.process_operations_all
         - feature_siemV5.actions_log_management_all
@@ -930,7 +1027,7 @@ soc_manager:
         - feature_siemV5.workflow_insights_all
         - feature_siemV5.soc_management_all
         - feature_securitySolutionRulesV2.all
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_securitySolutionTimeline.all
@@ -947,17 +1044,22 @@ soc_manager:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 detections_admin:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster: ['manage_index_templates', 'manage_transform', 'read_project_routing']
   indices:
     - names:
-        - .logs-osquery_manager.actions-*
-        - .logs-osquery_manager.action.responses-*
+        - '.logs-osquery_manager.actions-*'
+        - '.logs-osquery_manager.action.responses-*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -992,6 +1094,8 @@ detections_admin:
         - .fleet-actions*
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
+        - .entity_analytics.entity-leads*
+        - .entity_analytics.watchlists.*
       privileges:
         - read
     - names:
@@ -1004,11 +1108,15 @@ detections_admin:
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
         - '.entities.v2.latest.*'
+        - '.entities.v2.updates.*'
+        - '.entities.v2.history.*'
         - '.entities.v2.metadata.*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
       privileges:
         - read
         - write
+        - view_index_metadata
     # Threat intel indicators. Only the per-space filtered aliases are granted, so the
     # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
     - names:
@@ -1023,10 +1131,11 @@ detections_admin:
         - feature_siemV5.all
         - feature_siemV5.global_artifact_management_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -1039,35 +1148,40 @@ detections_admin:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 platform_engineer:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - manage
     - 'read_project_routing'
   indices:
     - names:
-        - metrics-endpoint.metadata_current_*
+        - 'metrics-endpoint.metadata_current_*'
       privileges:
-        - read
+        - 'read'
     - names:
-        - .logs-endpoint.actions-*
-        - .logs-endpoint.action.responses-*
+        - '.logs-endpoint.actions-*'
+        - '.logs-endpoint.action.responses-*'
       privileges:
-        - read
+        - 'read'
       allow_restricted_indices: false
     - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
+        - '.metrics-endpoint.metadata_united_default*'
+        - 'metrics-endpoint.policy-*'
       privileges:
-        - read
+        - 'read'
       allow_restricted_indices: false
     - names:
-        - .logs-osquery_manager.actions-*
-        - .logs-osquery_manager.action.responses-*
+        - '.logs-osquery_manager.actions-*'
+        - '.logs-osquery_manager.action.responses-*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -1085,7 +1199,6 @@ platform_engineer:
         - .lists*
         - .items*
         - .alerts-security*
-        - .internal.alerts-security.alerts-*
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
@@ -1103,15 +1216,23 @@ platform_engineer:
         - '.entities.v1.history.*.security_*'
         - '.entities.v1.reset*'
         - '.entities.v2.latest.*'
-        - '.entities.v2.metadata.*'
-        - 'entities-latest-*'
-        - 'entities-metadata-*'
+        - '.entities.v2.updates.*'
+        - '.entities.v2.history.*'
         - '.entity_analytics.watchlists.*'
         - '.entity_analytics.entity-leads*'
       privileges:
         - read
-        - view_index_metadata
         - write
+        - view_index_metadata
+    - names:
+        - '.entities.v2.metadata.*'
+        - 'entities-latest-*'
+        - 'entities-metadata-*'
+      privileges:
+        - read
+        - write
+        - view_index_metadata
+        - manage
     - names:
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
@@ -1138,13 +1259,14 @@ platform_engineer:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all # Elastic Defend Policy Management
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_read
         - feature_siemV5.actions_log_management_read
         - feature_siemV5.scripts_management_read
         - feature_siemV5.workflow_insights_all
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -1160,30 +1282,35 @@ platform_engineer:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.all
+        - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
+        - feature_workflowsManagement.workflow_update_managed
       resources: '*'
 
 endpoint_operations_analyst:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
     - names:
-        - .logs-endpoint.actions-*
-        - .logs-endpoint.action.responses-*
+        - '.logs-endpoint.actions-*'
+        - '.logs-endpoint.action.responses-*'
       privileges:
-        - read
+        - 'read'
       allow_restricted_indices: false
     - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
+        - '.metrics-endpoint.metadata_united_default*'
+        - 'metrics-endpoint.policy-*'
       privileges:
-        - read
+        - 'read'
       allow_restricted_indices: false
     - names:
-        - .logs-osquery_manager.actions-*
-        - .logs-osquery_manager.action.responses-*
+        - '.logs-osquery_manager.actions-*'
+        - '.logs-osquery_manager.action.responses-*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -1210,9 +1337,16 @@ endpoint_operations_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.updates.*'
+        - '.entities.v2.history.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
+        - .entity_analytics.entity-leads*
+        - .entity_analytics.watchlists.*
       privileges:
         - read
     - names:
@@ -1236,11 +1370,10 @@ endpoint_operations_analyst:
     - names:
         - .asset-criticality.asset-criticality-*
         - '.entities.v2.latest.*'
-        - '.entities.v2.metadata.*'
       privileges:
         - read
-        - view_index_metadata
         - write
+        - view_index_metadata
     # Threat intel indicators. Only the per-space filtered aliases are granted, so the
     # trailing hyphen is load-bearing: it never matches the bare .threat-intel-indicators index.
     - names:
@@ -1263,6 +1396,7 @@ endpoint_operations_analyst:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_read
         - feature_siemV5.host_isolation_all
         - feature_siemV5.process_operations_all
         - feature_siemV5.actions_log_management_all
@@ -1274,7 +1408,7 @@ endpoint_operations_analyst:
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -1290,24 +1424,28 @@ endpoint_operations_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
       resources: '*'
 
 endpoint_policy_manager:
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - 'read_project_routing'
   indices:
     - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
+        - '.metrics-endpoint.metadata_united_default*'
+        - 'metrics-endpoint.policy-*'
       privileges:
-        - read
+        - 'read'
       allow_restricted_indices: false
     - names:
-        - .logs-osquery_manager.actions-*
-        - .logs-osquery_manager.action.responses-*
+        - '.logs-osquery_manager.actions-*'
+        - '.logs-osquery_manager.action.responses-*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -1332,19 +1470,25 @@ endpoint_policy_manager:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.updates.*'
+        - '.entities.v2.history.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
+        - .entity_analytics.entity-leads*
+        - .entity_analytics.watchlists.*
       privileges:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
         - '.entities.v2.latest.*'
-        - '.entities.v2.metadata.*'
       privileges:
         - read
-        - view_index_metadata
         - write
+        - view_index_metadata
     - names:
         - .lists*
         - .items*
@@ -1385,9 +1529,10 @@ endpoint_policy_manager:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all # Elastic Defend Policy Management
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.workflow_insights_all
         - feature_securitySolutionRulesV2.all
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV3.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_securitySolutionTimeline.all
@@ -1404,10 +1549,431 @@ endpoint_policy_manager:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
+        - feature_alertzero.read
+        - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
+      resources: '*'
+
+# AlertZero worker roles: each is assigned only to its worker's service account (alertzero_<worker>),
+# which AlertZero creates when the worker is enabled. Not meant for users.
+_alertzero_alert_triage:
+  description: 'Privileges for the service account of the AlertZero Alert Triage worker. Assigned by AlertZero; do not assign to users.'
+  metadata:
+    _public: true
+    _reserved: true
+  cluster:
+    - 'monitor_inference'
+    - 'read_project_routing'
+  indices:
+    - names:
+        - 'ai-index-idx-security-investigations'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'index'
+        - 'auto_configure'
+      allow_restricted_indices: false
+    - names:
+        - '.ai-index-idx-elastic-index'
+      privileges:
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - '.alerts-security.alerts-*'
+      privileges:
+        - 'read'
+        - 'index'
+        - 'maintenance'
+      allow_restricted_indices: false
+    - names:
+        - '.internal.alerts-security.alerts-*'
+      privileges:
+        - 'index'
+        - 'maintenance'
+      allow_restricted_indices: false
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
+        - feature_agentBuilder.read
+        - feature_contextEngine.all
+        - feature_proposals.all
+        - feature_actions.read
+        - feature_workflowsManagement.minimal_read
+        - feature_workflowsManagement.workflow_read
+        - feature_workflowsManagement.workflow_read_managed
+        - feature_workflowsManagement.workflow_execution_read
+        - feature_workflowsManagement.workflow_execution_read_managed
+        - feature_workflowsManagement.workflow_execute
+        - feature_workflowsManagement.workflow_execution_cancel
+        - feature_securitySolutionRulesV4.minimal_read
+        - feature_securitySolutionNotes.all
+        - feature_securitySolutionAlertsV1.all
+      resources: '*'
+
+_alertzero_attack_discovery:
+  description: 'Privileges for the service account of the AlertZero Attack Discovery worker. Assigned by AlertZero; do not assign to users.'
+  metadata:
+    _public: true
+    _reserved: true
+  cluster:
+    - 'monitor_inference'
+    - 'read_project_routing'
+  indices:
+    - names:
+        - 'ai-index-idx-security-investigations'
+        - 'ai-index-idx-security-attack-fingerprints'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'index'
+        - 'auto_configure'
+      allow_restricted_indices: false
+    - names:
+        - '.ai-index-idx-elastic-index'
+      privileges:
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - '.alerts-security.attack.discovery.alerts-*'
+        - '.adhoc.alerts-security.attack.discovery.alerts-*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'index'
+        - 'maintenance'
+      allow_restricted_indices: false
+    - names:
+        - '.internal.alerts-security.attack.discovery.alerts-*'
+        - '.internal.adhoc.alerts-security.attack.discovery.alerts-*'
+      privileges:
+        - 'index'
+        - 'maintenance'
+      allow_restricted_indices: false
+    - names:
+        - '.alerts-security.alerts-*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'index'
+        - 'maintenance'
+      allow_restricted_indices: false
+    - names:
+        - '.internal.alerts-security.alerts-*'
+      privileges:
+        - 'index'
+        - 'maintenance'
+      allow_restricted_indices: false
+    - names:
+        - '.kibana-elastic-ai-assistant-anonymization-fields-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
+    - names:
+        - 'logs-endpoint.events.*'
+        - 'entities-latest-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
+    - names:
+        - 'apm-*-transaction*'
+        - 'auditbeat-*'
+        - 'endgame-*'
+        - 'filebeat-*'
+        - 'logs-*'
+        - 'packetbeat-*'
+        - 'traces-apm*'
+        - 'winlogbeat-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
+        - feature_agentBuilder.read
+        - feature_contextEngine.all
+        - feature_proposals.all
+        - feature_actions.read
+        - feature_workflowsManagement.minimal_read
+        - feature_workflowsManagement.workflow_read
+        - feature_workflowsManagement.workflow_read_managed
+        - feature_workflowsManagement.workflow_execution_read
+        - feature_workflowsManagement.workflow_execution_read_managed
+        - feature_workflowsManagement.workflow_execute
+        - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionAlertsV1.all
+      resources: '*'
+
+_alertzero_endpoint_analysis:
+  description: 'Privileges for the service account of the AlertZero Endpoint analysis worker. Assigned by AlertZero; do not assign to users.'
+  metadata:
+    _public: true
+    _reserved: true
+  cluster:
+    - 'monitor_inference'
+    - 'read_project_routing'
+  indices:
+    - names:
+        - 'ai-index-idx-security-investigations'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'index'
+        - 'auto_configure'
+      allow_restricted_indices: false
+    - names:
+        - '.ai-index-idx-elastic-index'
+      privileges:
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - '.alerts-security.attack.discovery.alerts-*'
+        - '.adhoc.alerts-security.attack.discovery.alerts-*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'index'
+        - 'maintenance'
+      allow_restricted_indices: false
+    - names:
+        - '.internal.alerts-security.attack.discovery.alerts-*'
+        - '.internal.adhoc.alerts-security.attack.discovery.alerts-*'
+      privileges:
+        - 'index'
+        - 'maintenance'
+      allow_restricted_indices: false
+    - names:
+        - '.alerts-security.alerts-*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'index'
+        - 'maintenance'
+      allow_restricted_indices: false
+    - names:
+        - '.internal.alerts-security.alerts-*'
+      privileges:
+        - 'index'
+        - 'maintenance'
+      allow_restricted_indices: false
+    - names:
+        - 'logs-endpoint.events.process-*'
+        - 'logs-endpoint.events.network-*'
+        - 'logs-endpoint.events.file-*'
+        - 'logs-endpoint.events.registry-*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
+        - feature_agentBuilder.read
+        - feature_contextEngine.all
+        - feature_proposals.all
+        - feature_actions.read
+        - feature_siemV5.minimal_read
+        - feature_siemV5.host_isolation_all
+        - feature_siemV5.process_operations_all
+        - feature_siemV5.actions_log_management_read
+        - feature_securitySolutionAlertsV1.all
+      resources: '*'
+
+_alertzero_threat_hunt:
+  description: 'Privileges for the service account of the AlertZero Continuous Threat Hunt worker. Assigned by AlertZero; do not assign to users.'
+  metadata:
+    _public: true
+    _reserved: true
+  cluster:
+    - 'monitor_inference'
+    - 'read_project_routing'
+  indices:
+    - names:
+        - 'ai-index-idx-security-investigations'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'index'
+        - 'auto_configure'
+      allow_restricted_indices: false
+    - names:
+        - '.ai-index-idx-elastic-index'
+      privileges:
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - 'apm-*-transaction*'
+        - 'auditbeat-*'
+        - 'endgame-*'
+        - 'filebeat-*'
+        - 'logs-*'
+        - 'packetbeat-*'
+        - 'traces-apm*'
+        - 'winlogbeat-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
+    - names:
+        - 'metrics-endpoint.metadata_current_*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
+        - feature_agentBuilder.read
+        - feature_contextEngine.all
+        - feature_proposals.all
+        - feature_actions.read
+        - feature_siemV5.minimal_read
+        - feature_siemV5.host_isolation_all
+        - feature_siemV5.process_operations_all
+        - feature_siemV5.actions_log_management_read
+      resources: '*'
+
+_alertzero_rule_tuning:
+  description: 'Privileges for the service account of the AlertZero Rule Tuning worker. Assigned by AlertZero; do not assign to users.'
+  metadata:
+    _public: true
+    _reserved: true
+  cluster:
+    - 'monitor_inference'
+    - 'read_project_routing'
+  indices:
+    - names:
+        - 'ai-index-idx-security-investigations'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'index'
+        - 'auto_configure'
+      allow_restricted_indices: false
+    - names:
+        - '.ai-index-idx-elastic-index'
+      privileges:
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - '.alerts-security.alerts-*'
+      privileges:
+        - 'read'
+        - 'index'
+        - 'maintenance'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - '.internal.alerts-security.alerts-*'
+      privileges:
+        - 'index'
+        - 'maintenance'
+      allow_restricted_indices: false
+    - names:
+        - '.preview.alerts-security.alerts-*'
+        - '.internal.preview.alerts-security.alerts-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
+    - names:
+        - 'apm-*-transaction*'
+        - 'auditbeat-*'
+        - 'endgame-*'
+        - 'filebeat-*'
+        - 'logs-*'
+        - 'packetbeat-*'
+        - 'traces-apm*'
+        - 'winlogbeat-*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
+        - feature_agentBuilder.read
+        - feature_contextEngine.all
+        - feature_proposals.all
+        - feature_actions.read
+        - feature_workflowsManagement.read
+        - feature_securitySolutionRulesV4.read
+        - feature_securitySolutionAlertsV1.all
+      resources: '*'
+
+_alertzero_rule_coverage:
+  description: 'Privileges for the service account of the AlertZero Rule Coverage worker. Assigned by AlertZero; do not assign to users.'
+  metadata:
+    _public: true
+    _reserved: true
+  cluster:
+    - 'monitor_inference'
+    - 'read_project_routing'
+  indices:
+    - names:
+        - 'ai-index-idx-security-investigations'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'index'
+        - 'auto_configure'
+      allow_restricted_indices: false
+    - names:
+        - '.ai-index-idx-elastic-index'
+      privileges:
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - '.preview.alerts-security.alerts-*'
+        - '.internal.preview.alerts-security.alerts-*'
+      privileges:
+        - 'read'
+      allow_restricted_indices: false
+    - names:
+        - 'apm-*-transaction*'
+        - 'auditbeat-*'
+        - 'endgame-*'
+        - 'filebeat-*'
+        - 'logs-*'
+        - 'packetbeat-*'
+        - 'traces-apm*'
+        - 'winlogbeat-*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
+        - feature_agentBuilder.read
+        - feature_contextEngine.all
+        - feature_proposals.all
+        - feature_actions.read
+        - feature_workflowsManagement.read
+        - feature_securitySolutionRulesV4.all
+        - feature_fleet.read
       resources: '*'
 
 # admin role defined in elasticsearch controller
 admin:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ['all']
   indices:
     - names: ['*']

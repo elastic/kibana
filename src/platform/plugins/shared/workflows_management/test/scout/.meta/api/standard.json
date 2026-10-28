@@ -1,5 +1,5 @@
 {
-  "sha1": "8277678f4c680be5a41a09817962567cb07ec91c",
+  "sha1": "67c4dc18de66ff9cbfecb75bfe897cadeea3f3ef",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -253,6 +253,19 @@
       }
     },
     {
+      "id": "024271a574dcab2-39184ccd1e5f851",
+      "title": "HITL resume across executions with restricted access rejects a step of a private execution the caller cannot access and leaves it resumable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/hitl_cross_execution_resume.spec.ts",
+        "line": 112,
+        "column": 27
+      }
+    },
+    {
       "id": "852fb4b9089c63d-f656cc23e02e8c9",
       "title": "HITL waitForInput resume pauses for input and completes with the submitted response",
       "expectedStatus": "passed",
@@ -290,6 +303,26 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/hitl_wait_for_input.spec.ts",
         "line": 119,
         "column": 26
+      }
+    },
+    {
+      "id": "852fb4b9089c63d-d0c78d37bfde096",
+      "title": "HITL waitForInput resume rejects a step execution id that belongs to another execution",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/hitl_wait_for_input.spec.ts",
+        "line": 181,
+        "column": 5
       }
     },
     {
@@ -519,16 +552,13 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 159,
+        "line": 173,
         "column": 29
       }
     },
@@ -539,17 +569,14 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 189,
-        "column": 33
+        "line": 200,
+        "column": 54
       }
     },
     {
@@ -559,17 +586,14 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 198,
-        "column": 13
+        "line": 212,
+        "column": 16
       }
     },
     {
@@ -579,17 +603,14 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 220,
-        "column": 21
+        "line": 230,
+        "column": 24
       }
     },
     {
@@ -599,17 +620,527 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-search"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 237,
-        "column": 78
+        "line": 252,
+        "column": 26
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-1950cc515ca7ee6",
+      "title": "Workflow access control enforces private, viewer, executor, editor, and public access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 115,
+        "column": 14
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-bf497c54223577a",
+      "title": "Workflow access control allows a non-owner to force-delete a public workflow without ACL confirmation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 374,
+        "column": 30
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-fa7cbfb1dc4b17b",
+      "title": "Workflow access control tests a disabled saved workflow without granting draft or edit access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 396,
+        "column": 20
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-815ae7daf57179f",
+      "title": "Workflow access control Executor runs a saved parent and private child with workflow.execute",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 473,
+        "column": 1
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-7721c3c3a12e62e",
+      "title": "Workflow access control Executor tests a saved parent and private child with workflow.execute",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 473,
+        "column": 1
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-9009714dc8f60d9",
+      "title": "Workflow access control Executor runs a saved parent and private child with workflow.executeAsync",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 473,
+        "column": 1
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-aefa37f27ad5b20",
+      "title": "Workflow access control Executor tests a saved parent and private child with workflow.executeAsync",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 473,
+        "column": 1
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-3f1d15429ca3c43",
+      "title": "Workflow access control runs a private workflow on its schedule using the stored API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 593,
+        "column": 56
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-09949cdee1501cc",
+      "title": "Workflow access control checks suggestions and grants for no Workflows access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 671,
+        "column": 10
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-5c0d49efa111779",
+      "title": "Workflow access control checks suggestions and grants for Workflows access in another space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 671,
+        "column": 10
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-07bcdf600e79031",
+      "title": "Workflow access control checks suggestions and grants for Workflows Read access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 671,
+        "column": 10
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-2c41833648d10f1",
+      "title": "Workflow access control checks suggestions and grants for custom Workflows Read and Execute access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 671,
+        "column": 10
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-63fe0d9b399f10d",
+      "title": "Workflow access control checks suggestions and grants for Workflows All access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 671,
+        "column": 10
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-0e5434178f486e7",
+      "title": "Workflow access control passes the caller identity through Agent Builder status and execution lists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 728,
+        "column": 17
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-07fef929d678526",
+      "title": "Workflow access control resumes private executions through Agent Builder and reads the resulting state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 843,
+        "column": 25
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-ab238d0dcfae6cd",
+      "title": "Workflow access control allows revocation and permission decreases after another recipient loses RBAC",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 923,
+        "column": 79
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-ea77319a1643c87",
+      "title": "Workflow access control retains ACLs after soft delete and requires confirmation for hard delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 1016,
+        "column": 16
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-e57b4c708ec173f",
+      "title": "Workflow access control retains change history after soft deletion (public, shared=false)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 1130,
+        "column": 80
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-dae631657f39ad7",
+      "title": "Workflow access control retains change history after soft deletion (private, shared=false)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 1130,
+        "column": 80
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-9f42cd7e541538a",
+      "title": "Workflow access control retains change history after soft deletion (private, shared=true)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 1130,
+        "column": 80
+      }
+    },
+    {
+      "id": "9a5eb2af77da2f1-522e9edeac7a3a9",
+      "title": "Workflow access control keeps unsaved test executions accessible",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
+        "line": 1346,
+        "column": 24
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-8909064156ddf1c",
+      "title": "Workflow administrator recovery Workflows All cannot read or change another owner's private access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 117,
+        "column": 90
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-5f3500d67fe4760",
+      "title": "Workflow administrator recovery a wildcard admin role can manage access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 129,
+        "column": 67
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-fe558398b876389",
+      "title": "Workflow administrator recovery an administrator API key does not get an override",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 151,
+        "column": 7
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-28c6d0bce8b85b7",
+      "title": "Workflow administrator recovery a Workflows API key does not get an override",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 157,
+        "column": 38
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-2f4bd81f41a99a9",
+      "title": "Workflow administrator recovery an administrator can recover an offboarded owner without an execution grant",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 163,
+        "column": 51
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-f3b3e0f2389b79a",
+      "title": "Workflow administrator recovery an administrator cannot test a saved workflow without an ACL grant",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 179,
+        "column": 18
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-9cc8182edc139a7",
+      "title": "Workflow administrator recovery an administrator cannot test a draft without an ACL grant",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 187,
+        "column": 25
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-5d0bfab88ee69be",
+      "title": "Workflow administrator recovery an administrator cannot test a step without an ACL grant",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 197,
+        "column": 5
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-2b742810edc7f43",
+      "title": "Workflow administrator recovery an administrator can hard-delete a private workflow without an ACL grant",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 209,
+        "column": 68
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-9ae5265b9dc09fa",
+      "title": "Workflow administrator recovery an administrator needs an Editor grant to change the workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 219,
+        "column": 11
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-c38f99a8e4afccd",
+      "title": "Workflow administrator recovery an administrator can grant and revoke execution access without changing the owner",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 259,
+        "column": 14
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-7c361f8834980a4",
+      "title": "Workflow administrator recovery an administrator can restore public access without changing the owner",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 322,
+        "column": 27
       }
     },
     {

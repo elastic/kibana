@@ -16,13 +16,19 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   useAssignEscalation,
+  useEscalationImpactPills,
   useListEscalations,
   useUserProfiles,
   useSuggestUserProfiles,
+  useOpenInChat,
 } from '@kbn/agentic-investigations-plugin/public';
-import { useInvestigationDetails } from '../conversations/use_investigation_details';
+import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
 import { useConversationsUrlParams } from '../conversations/conversations_url_params';
+import { useInvestigationDetails } from '../conversations/use_investigation_details';
 import { EscalationsPage } from './escalations_page';
+
+jest.mock('../../hooks/use_alertzero_investigations_capabilities');
+const mockUseCapabilities = useAlertZeroInvestigationsCapabilities as jest.Mock;
 
 // These hooks open the Agent Builder flyout and manage the URL; stub them out here.
 jest.mock('../conversations/use_investigation_details', () => ({
@@ -35,9 +41,11 @@ jest.mock('../conversations/conversations_url_params', () => ({
 jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
   useAssignEscalation: jest.fn(),
+  useEscalationImpactPills: jest.fn(),
   useListEscalations: jest.fn(),
   useUserProfiles: jest.fn(),
   useSuggestUserProfiles: jest.fn(),
+  useOpenInChat: jest.fn(),
 }));
 
 // Replace AssignToUsers with a minimal stub: clicking the "assign" button calls
@@ -80,17 +88,32 @@ jest.mock('../../hooks/use_alertzero_doc_title', () => ({
 
 const mockUseAssignEscalation = useAssignEscalation as jest.Mock;
 const mockUseListEscalations = useListEscalations as jest.Mock;
+const mockUseEscalationImpactPills = useEscalationImpactPills as jest.Mock;
+
+/** What the pills hook returns once the server has sent every pill. */
+const pagedPills = (pills: Array<{ entityId: string; count: number }>) => ({
+  pills,
+  total: pills.length,
+  remaining: 0,
+  canShowMore: true,
+  reachLimit: 10_000,
+  loadFailed: false,
+  isLoadingMore: false,
+  showMore: jest.fn(),
+});
 const mockUseUserProfiles = useUserProfiles as jest.Mock;
 const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
-const mockUseInvestigationDetails = useInvestigationDetails as jest.Mock;
+const mockUseOpenInChat = useOpenInChat as jest.Mock;
 const mockUseConversationsUrlParams = useConversationsUrlParams as jest.Mock;
-
-// Stable URL-param spies — recreated in beforeEach so jest.clearAllMocks() can track calls.
+const mockUseInvestigationDetails = useInvestigationDetails as jest.Mock;
 let selectConversation: jest.Mock;
 let clearSelectedConversation: jest.Mock;
 
+let openChat: jest.Mock;
+
 const openEscalation = {
   id: 'esc-open-1',
+  agent_id: 'agent-1',
   title: 'Suspicious login',
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-02T00:00:00Z',
@@ -99,6 +122,7 @@ const openEscalation = {
 
 const closedEscalation = {
   id: 'esc-closed-1',
+  agent_id: 'agent-1',
   title: 'Resolved threat',
   created_at: '2024-01-03T00:00:00Z',
   updated_at: '2024-01-04T00:00:00Z',
@@ -107,14 +131,24 @@ const closedEscalation = {
 
 const assignMutate = jest.fn().mockResolvedValue({});
 
-const renderPage = (overrides: { capabilities?: object } = {}) => {
-  const core = coreMock.createStart();
-  // Grant both show and manage by default.
-  (core.application.capabilities as Record<string, unknown>).agenticInvestigations = {
+const renderPage = (
+  overrides: {
+    capabilities?: {
+      showEscalations?: boolean;
+      manageEscalations?: boolean;
+      canAccessAgentBuilder?: boolean;
+    };
+  } = {}
+) => {
+  mockUseCapabilities.mockReturnValue({
     showEscalations: true,
     manageEscalations: true,
-    ...((overrides.capabilities as object | undefined) ?? {}),
-  };
+    readInvestigations: true,
+    manageInvestigations: true,
+    canAccessAgentBuilder: true,
+    ...overrides.capabilities,
+  });
+  const core = coreMock.createStart();
   const history = createMemoryHistory();
   // A fresh client per test so cache from one test never bleeds into the next.
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -139,9 +173,22 @@ const renderPage = (overrides: { capabilities?: object } = {}) => {
   return { core, rerender };
 };
 
+let getChatHref: jest.Mock;
+
 beforeEach(() => {
+  openChat = jest.fn();
+  getChatHref = jest.fn((id?: string, agentId?: string) =>
+    id ? `/mock-chat/${agentId}/${id}` : undefined
+  );
+  mockUseOpenInChat.mockReturnValue({ getChatHref, openChat });
   selectConversation = jest.fn();
   clearSelectedConversation = jest.fn();
+  mockUseCapabilities.mockReturnValue({
+    showEscalations: true,
+    manageEscalations: true,
+    readInvestigations: true,
+    manageInvestigations: true,
+  });
   mockUseConversationsUrlParams.mockReturnValue({
     selectedConversationId: undefined,
     selectConversation,
@@ -149,6 +196,7 @@ beforeEach(() => {
   });
   mockUseInvestigationDetails.mockImplementation(() => undefined);
   mockUseAssignEscalation.mockReturnValue({ mutateAsync: assignMutate });
+  mockUseEscalationImpactPills.mockReturnValue(pagedPills([]));
   mockUseUserProfiles.mockReturnValue({ data: [], isLoading: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
 });
@@ -202,6 +250,31 @@ describe('EscalationsPage', () => {
     expect(screen.getByTestId('escalationQueue-closed')).toBeInTheDocument();
   });
 
+  it('does not show the Alert Zero note in the Open section when there are open escalations', () => {
+    mockBothQueues([openEscalation], [closedEscalation]);
+    renderPage();
+
+    expect(screen.queryByTestId('alertZeroEscalationsOpenNote')).not.toBeInTheDocument();
+  });
+
+  it('says there are no open escalations when the Open list is empty', () => {
+    mockBothQueues([], [closedEscalation]);
+    renderPage();
+
+    expect(screen.getByTestId('alertZeroEscalationsOpenNote')).toHaveTextContent(
+      'No open escalations'
+    );
+  });
+
+  it('links to the Alert Zero page from the Open section note', () => {
+    mockBothQueues([], [closedEscalation]);
+    renderPage();
+
+    expect(screen.getByTestId('alertZeroEscalationsOpenNoteLink')).toHaveTextContent(
+      'Alert Zero page'
+    );
+  });
+
   it('shows the open escalation title', () => {
     mockBothQueues([openEscalation], []);
     renderPage();
@@ -216,12 +289,21 @@ describe('EscalationsPage', () => {
     expect(screen.getByText('Resolved threat')).toBeInTheDocument();
   });
 
-  it('shows "No escalations" when both queues are empty', () => {
+  it('shows only the explainer banner when there are no escalations at all', () => {
     mockBothQueues([], []);
     renderPage();
 
-    // Both groups render their own empty state, so there are two "No escalations" labels.
-    expect(screen.getAllByText('No escalations')).toHaveLength(2);
+    expect(screen.getByTestId('alertZeroEscalationsEmptyBanner')).toBeInTheDocument();
+    expect(screen.queryByTestId('escalationsPageHeader')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('escalationQueue-open')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('escalationQueue-closed')).not.toBeInTheDocument();
+  });
+
+  it('hides the explainer banner when any escalation exists', () => {
+    mockBothQueues([openEscalation], []);
+    renderPage();
+
+    expect(screen.queryByTestId('alertZeroEscalationsEmptyBanner')).not.toBeInTheDocument();
   });
 
   it('renders the hero header with the open-escalation count', () => {
@@ -308,6 +390,36 @@ describe('EscalationsPage', () => {
     expect(screen.queryByTestId('mock-assign-esc-open-1')).not.toBeInTheDocument();
   });
 
+  describe('without the Agent Builder privilege', () => {
+    it('explains which features are unavailable in a callout', () => {
+      mockBothQueues([openEscalation], []);
+      renderPage({ capabilities: { canAccessAgentBuilder: false } });
+
+      expect(screen.getByTestId('alertZeroAgentBuilderPrivilegeCallout')).toHaveTextContent(
+        'You need the Agent Builder Kibana privilege to open investigations and chats'
+      );
+    });
+
+    it('leaves the cards inert and hides the assignees', () => {
+      mockBothQueues([openEscalation], []);
+      renderPage({ capabilities: { canAccessAgentBuilder: false } });
+
+      fireEvent.click(screen.getByTestId('escalationCard-esc-open-1'));
+
+      expect(openChat).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('escalationCardLink-esc-open-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-assign-esc-open-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-assignees-readonly-esc-open-1')).not.toBeInTheDocument();
+    });
+  });
+
+  it('shows no privilege callout when Agent Builder is accessible', () => {
+    mockBothQueues([openEscalation], []);
+    renderPage();
+
+    expect(screen.queryByTestId('alertZeroAgentBuilderPrivilegeCallout')).not.toBeInTheDocument();
+  });
+
   it('shows the server total in the bucket badge even when the page holds fewer items', () => {
     // Server says there are 75 open escalations but only 50 are returned per page.
     mockBothQueues([openEscalation], [], { openTotal: 75 });
@@ -352,30 +464,22 @@ describe('EscalationsPage', () => {
     expect(screen.getByText('Failed to load escalations')).toBeInTheDocument();
   });
 
-  it('opens the flyout when a row card is clicked', () => {
+  it('navigates to Agent Builder when a row card is clicked', () => {
     mockBothQueues([openEscalation], []);
     renderPage();
 
     fireEvent.click(screen.getByTestId('escalationCard-esc-open-1'));
 
-    expect(selectConversation).toHaveBeenCalledWith('esc-open-1');
+    expect(openChat).toHaveBeenCalledWith('esc-open-1', 'agent-1');
   });
 
-  it('clears the URL when the flyout closes', () => {
-    // Capture the onClose passed to the details hook so we can invoke it.
-    let capturedOnClose: (() => void) | undefined;
-    mockUseInvestigationDetails.mockImplementation(({ onClose }: { onClose: () => void }) => {
-      capturedOnClose = onClose;
-    });
-
+  it('renders card titles as links with hrefs from getChatHref', () => {
     mockBothQueues([openEscalation], []);
     renderPage();
 
-    act(() => {
-      capturedOnClose?.();
-    });
-
-    expect(clearSelectedConversation).toHaveBeenCalled();
+    expect(getChatHref).toHaveBeenCalledWith('esc-open-1', 'agent-1');
+    const link = screen.getByTestId('escalationCardLink-esc-open-1');
+    expect(link).toHaveAttribute('href', '/mock-chat/agent-1/esc-open-1');
   });
 
   it('does not duplicate rows when the same page 2 data is re-delivered (refetch regression)', async () => {
@@ -384,6 +488,7 @@ describe('EscalationsPage', () => {
     // The new page-keyed state replaces the entry instead, preventing duplication.
     const page2Item = {
       id: 'esc-p2',
+      agent_id: 'agent-1',
       title: 'Page 2 escalation',
       created_at: '2024-02-01T00:00:00Z',
       updated_at: '2024-02-02T00:00:00Z',
@@ -442,5 +547,122 @@ describe('EscalationsPage', () => {
     // Both items still present exactly once — page-keyed state replaces, not appends.
     expect(screen.getByText('Suspicious login')).toBeInTheDocument();
     expect(screen.getAllByText('Page 2 escalation')).toHaveLength(1);
+  });
+
+  describe('Impact filter', () => {
+    const impactOpen = { ...openEscalation, entity_ids: ['FIN-DC-01', 'Sales-NAS'] };
+    const impactClosed = { ...closedEscalation, entity_ids: ['FIN-DC-01'] };
+    const pills = [
+      { entityId: 'FIN-DC-01', count: 2 },
+      { entityId: 'Sales-NAS', count: 1 },
+    ];
+
+    /** The server applies the entity filter, so the fake narrows the rows the same way. */
+    const mockServerFiltering = (open: object[], closed: object[], openTotal?: number) => {
+      const results = new Map<string, object>();
+      mockUseListEscalations.mockImplementation(
+        ({ status, entity }: { status: string; entity?: string | null }) => {
+          const rows = (status === 'open' ? open : closed).filter(
+            (row) => !entity || (row as { entity_ids?: string[] }).entity_ids?.includes(entity)
+          );
+          const key = `${status}-${entity ?? ''}`;
+          if (!results.has(key)) {
+            results.set(key, {
+              data: {
+                results: rows,
+                pagination: {
+                  total: !entity && status === 'open' ? openTotal ?? rows.length : rows.length,
+                  page: 1,
+                  per_page: 50,
+                },
+              },
+              isLoading: false,
+              error: null,
+            });
+          }
+          return results.get(key);
+        }
+      );
+    };
+
+    beforeEach(() => {
+      mockUseEscalationImpactPills.mockReturnValue(pagedPills(pills));
+    });
+
+    it('renders one pill per entity the pills query returns', () => {
+      mockBothQueues([impactOpen], [impactClosed]);
+      renderPage();
+
+      expect(screen.getByRole('button', { name: 'FIN-DC-01' })).toHaveTextContent('2');
+      expect(screen.getByRole('button', { name: 'Sales-NAS' })).toHaveTextContent('1');
+    });
+
+    it('renders no pills when no escalation has an impact', () => {
+      mockUseEscalationImpactPills.mockReturnValue(pagedPills([]));
+      mockBothQueues([openEscalation], [closedEscalation]);
+      renderPage();
+
+      expect(screen.queryByText('Impact')).not.toBeInTheDocument();
+    });
+
+    it('asks both queues for the selected entity and restores them on a second click', () => {
+      mockServerFiltering([impactOpen], [impactClosed]);
+      renderPage();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Sales-NAS' }));
+
+      expect(mockUseListEscalations).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'open', entity: 'Sales-NAS' })
+      );
+      expect(mockUseListEscalations).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'closed', entity: 'Sales-NAS' })
+      );
+      expect(screen.getByText('Suspicious login')).toBeInTheDocument();
+      expect(screen.queryByText('Resolved threat')).not.toBeInTheDocument();
+      expect(screen.getByText('No escalations match the current filter.')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Sales-NAS' }));
+      expect(screen.getByText('Suspicious login')).toBeInTheDocument();
+      expect(screen.getByText('Resolved threat')).toBeInTheDocument();
+    });
+
+    it('keeps the unfiltered open count in the header while filtered', () => {
+      mockServerFiltering([impactOpen], [impactClosed], 7);
+      renderPage();
+      expect(screen.getByText(/7 open escalations/)).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Sales-NAS' }));
+
+      expect(screen.getByText(/7 open escalations/)).toBeInTheDocument();
+    });
+
+    it('loads the next page of pills from the +n pill', () => {
+      const showMore = jest.fn();
+      mockUseEscalationImpactPills.mockReturnValue({
+        ...pagedPills(pills),
+        remaining: 40,
+        showMore,
+      });
+      mockBothQueues([impactOpen], [impactClosed]);
+      renderPage();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Show 40 more' }));
+
+      expect(showMore).toHaveBeenCalledTimes(1);
+    });
+
+    it('starts both queues over at page 1 when the filter changes', () => {
+      mockServerFiltering([impactOpen], [impactClosed]);
+      renderPage();
+      mockUseListEscalations.mockClear();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Sales-NAS' }));
+
+      const filteredCalls = mockUseListEscalations.mock.calls
+        .map(([options]) => options)
+        .filter(({ entity }) => entity === 'Sales-NAS');
+      expect(filteredCalls.length).toBeGreaterThan(0);
+      expect(filteredCalls.every(({ page }) => page === 1)).toBe(true);
+    });
   });
 });

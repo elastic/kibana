@@ -7,8 +7,16 @@
 
 import React from 'react';
 import type { CSSObject } from '@emotion/react';
-import type { EuiSuperSelectOption, UseEuiTheme } from '@elastic/eui';
+import type { EuiSuperSelectOption, EuiSuperSelectProps, UseEuiTheme } from '@elastic/eui';
 import { EuiHealth, EuiIcon } from '@elastic/eui';
+
+/**
+ * Closes an OS-row select's list on page scroll: a list left open offscreen makes EUI's focus
+ * restore scroll Kibana's non-scrollable document when another select opens, distorting the page.
+ */
+export const OS_CONTROL_SELECT_POPOVER_PROPS: EuiSuperSelectProps['popoverProps'] = {
+  closeOnScroll: true,
+};
 
 export interface OsControlSelectOptionSpec<TValue extends string> {
   value: TValue;

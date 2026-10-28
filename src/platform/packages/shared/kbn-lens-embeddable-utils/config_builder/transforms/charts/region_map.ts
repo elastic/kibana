@@ -18,6 +18,7 @@ import type {
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import { DatasourceUnsupportedError } from '../../errors';
 import type {
   LensApiConfig,
   RegionMapConfig,
@@ -83,7 +84,7 @@ function getRegionMapDataset(
   );
 
   if (!dataSource || dataSource.type == null) {
-    throw new Error('Unsupported DataSource type');
+    throw new DatasourceUnsupportedError();
   }
 
   return dataSource;

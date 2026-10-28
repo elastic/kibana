@@ -102,6 +102,7 @@ Options:
 - `testDir` (required) -- directory containing `.spec.ts` files
 - `timeout` (optional, default `5 * 60_000`) -- per-test timeout in ms
 - `repetitions` (optional, default `1`) -- overridable via `EVAL_REPETITIONS` env var
+- `concurrency` (optional, default `5`) -- examples each experiment runs at once; overridable via `--concurrency` / `EVAL_CONCURRENCY`, and a spec's own `concurrency` passed to `runExperiment` wins
 
 ### `src/evaluate.ts`
 

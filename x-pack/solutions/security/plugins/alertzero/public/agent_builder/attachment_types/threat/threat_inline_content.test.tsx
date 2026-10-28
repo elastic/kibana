@@ -29,6 +29,7 @@ const mockShare = createMockShare();
 
 const defaultNavigation = {
   spaceId: 'default',
+  prependPath: (path: string) => path,
 };
 
 const renderProps = (
@@ -133,7 +134,7 @@ describe('ThreatAttachmentInlineContent', () => {
         rank_score: 90,
         source: { name: 'Enriched Source' },
         extracted: {
-          iocs: [{ type: 'ip', value: '203.0.113.5', tier: 'high' }],
+          iocs: [{ type: 'ip', value: '203.0.113.5', tier: 'discriminating' }],
           ttps: { tactics: ['Initial Access'], techniques: ['T1078'] },
           categories: ['credential-access'],
           diamond: {
@@ -146,7 +147,7 @@ describe('ThreatAttachmentInlineContent', () => {
         geography: { regions: ['us-east-1'] },
         evidence: {
           alert_hits_total: 5,
-          last_hunt_status: 'completed',
+          last_hunt_status: 'hit',
           corroborated_rank_score: 0.71,
         },
       }),
@@ -172,7 +173,7 @@ describe('ThreatAttachmentInlineContent', () => {
     // Evidence stats and MITRE technique link.
     expect(screen.getByText('5')).toBeInTheDocument();
     expect(screen.getByText('Alert hits')).toBeInTheDocument();
-    expect(screen.getByText('completed')).toBeInTheDocument();
+    expect(screen.getByText('Environment hits found')).toBeInTheDocument();
     expect(screen.getByText('Last hunt status')).toBeInTheDocument();
     expect(screen.getByText('0.71')).toBeInTheDocument();
     expect(screen.getByText('Corroborated rank')).toBeInTheDocument();
@@ -487,6 +488,173 @@ describe('ThreatAttachmentInlineContent', () => {
       screen.queryByTestId('alertzeroThreatAttachmentIocLink-ipv4-addr-8')
     ).not.toBeInTheDocument();
     expect(screen.getByText('+2 more')).toBeInTheDocument();
+    // Overflow count is eligible-only (all ten are tier-less, so all eligible).
+    expect(screen.getByText('10 indicators')).toBeInTheDocument();
+  });
+
+  it('drops denied IOCs and omits the Indicators section when only denied remain', async () => {
+    const http = {
+      fetch: jest.fn().mockResolvedValue({
+        reportId: 'r-denied',
+        content: { title: 'Denied Only' },
+        extracted: {
+          iocs: [
+            { type: 'domain', value: 'process.name', tier: 'denied' },
+            { type: 'domain', value: 'host.name', tier: 'denied' },
+          ],
+        },
+      }),
+    } as unknown as HttpStart;
+    render(
+      <ThreatAttachmentInlineContent
+        {...renderProps(buildAttachment({ report_id: 'r-denied' }), http)}
+      />
+    );
+    await waitFor(() => {
+      expect(screen.getByText('Denied Only')).toBeInTheDocument();
+    });
+    expect(screen.queryByText('Indicators')).not.toBeInTheDocument();
+    expect(screen.queryByText('process.name')).not.toBeInTheDocument();
+    expect(screen.queryByText('host.name')).not.toBeInTheDocument();
+  });
+
+  it('keeps reference and deferred IOCs collapsed under Not hunted', async () => {
+    const http = {
+      fetch: jest.fn().mockResolvedValue({
+        reportId: 'r-not-hunted',
+        content: { title: 'Mixed IOCs' },
+        extracted: {
+          iocs: [
+            { type: 'hash', value: 'abc12345deadbeef', tier: 'discriminating' },
+            { type: 'ip', value: '169.254.169.254', tier: 'reference' },
+            {
+              type: 'domain',
+              value: 'pending.example',
+              tier: 'discriminating',
+              deferred_unreviewed: true,
+            },
+            { type: 'domain', value: 'process.name', tier: 'denied' },
+          ],
+        },
+      }),
+    } as unknown as HttpStart;
+    render(
+      <ThreatAttachmentInlineContent
+        {...renderProps(buildAttachment({ report_id: 'r-not-hunted' }), http)}
+      />
+    );
+    await waitFor(() => {
+      expect(screen.getByText('abc12345deadbeef')).toBeInTheDocument();
+    });
+    expect(screen.getByText('1 indicator')).toBeInTheDocument();
+    expect(screen.getByTestId('alertzeroThreatAttachmentIocTable')).toBeInTheDocument();
+    expect(screen.queryByText('169.254.169.254')).not.toBeInTheDocument();
+    expect(screen.queryByText('pending.example')).not.toBeInTheDocument();
+    expect(screen.queryByText('process.name')).not.toBeInTheDocument();
+
+    const toggle = screen.getByTestId('alertzeroThreatAttachmentIocNotHuntedToggle');
+    expect(toggle).toHaveTextContent('Show (2)');
+    expect(
+      screen.queryByTestId('alertzeroThreatAttachmentIocNotHuntedTable')
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(toggle);
+    expect(toggle).toHaveTextContent('Hide (2)');
+    expect(screen.getByTestId('alertzeroThreatAttachmentIocNotHuntedTable')).toBeInTheDocument();
+    expect(screen.getByText('169.254.169.254')).toBeInTheDocument();
+    expect(screen.getByText('pending.example')).toBeInTheDocument();
+  });
+
+  it('still renders Indicators with 0 count when only not-hunted IOCs remain', async () => {
+    const http = {
+      fetch: jest.fn().mockResolvedValue({
+        reportId: 'r-ref-only',
+        content: { title: 'Reference Only' },
+        extracted: {
+          iocs: [
+            { type: 'ip', value: '169.254.169.254', tier: 'reference' },
+            { type: 'domain', value: 'kubernetes.io', tier: 'reference' },
+          ],
+        },
+      }),
+    } as unknown as HttpStart;
+    render(
+      <ThreatAttachmentInlineContent
+        {...renderProps(buildAttachment({ report_id: 'r-ref-only' }), http)}
+      />
+    );
+    await waitFor(() => {
+      expect(screen.getByText('Indicators')).toBeInTheDocument();
+    });
+    expect(screen.getByText('0 indicators')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertzeroThreatAttachmentIocTable')).not.toBeInTheDocument();
+    expect(screen.getByTestId('alertzeroThreatAttachmentIocNotHuntedToggle')).toHaveTextContent(
+      'Show (2)'
+    );
+  });
+
+  it('renders a tier-less IOC in the main Indicators table', async () => {
+    const http = {
+      fetch: jest.fn().mockResolvedValue({
+        reportId: 'r-tierless',
+        content: { title: 'Legacy IOC' },
+        extracted: { iocs: [{ type: 'domain', value: 'legacy.example' }] },
+      }),
+    } as unknown as HttpStart;
+    render(
+      <ThreatAttachmentInlineContent
+        {...renderProps(buildAttachment({ report_id: 'r-tierless' }), http)}
+      />
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId('alertzeroThreatAttachmentIocTable')).toBeInTheDocument();
+    });
+    expect(screen.getByText('legacy.example')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('alertzeroThreatAttachmentIocNotHuntedToggle')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows translated tier labels on IOC badge tooltips', async () => {
+    const http = {
+      fetch: jest.fn().mockResolvedValue({
+        reportId: 'r-tooltips',
+        content: { title: 'Tier Tooltips' },
+        extracted: {
+          iocs: [
+            { type: 'hash', value: 'hash-disc', tier: 'discriminating' },
+            { type: 'domain', value: 'uncert.example', tier: 'uncertain' },
+            { type: 'ip', value: '203.0.113.9', tier: 'reference' },
+            {
+              type: 'domain',
+              value: 'pending.example',
+              tier: 'contextual',
+              deferred_unreviewed: true,
+            },
+          ],
+        },
+      }),
+    } as unknown as HttpStart;
+    render(
+      <ThreatAttachmentInlineContent
+        {...renderProps(buildAttachment({ report_id: 'r-tooltips' }), http)}
+      />
+    );
+    await waitFor(() => {
+      expect(screen.getByText('hash-disc')).toBeInTheDocument();
+    });
+
+    fireEvent.mouseOver(screen.getByText('hash-disc'));
+    expect(await screen.findByText('Discriminating')).toBeInTheDocument();
+
+    fireEvent.mouseOver(screen.getByText('uncert.example'));
+    expect(await screen.findByText('Uncertain')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('alertzeroThreatAttachmentIocNotHuntedToggle'));
+    fireEvent.mouseOver(screen.getByText('203.0.113.9'));
+    expect(await screen.findByText('Reference')).toBeInTheDocument();
+    fireEvent.mouseOver(screen.getByText('pending.example'));
+    expect(await screen.findByText('Pending review')).toBeInTheDocument();
   });
 
   it('renders an external reference URL as an anchor', async () => {
@@ -570,7 +738,7 @@ describe('ThreatAttachmentInlineContent', () => {
         source: { name: 'Source' },
         evidence: {
           alert_hits_total: 5,
-          last_hunt_status: 'completed',
+          last_hunt_status: 'hit',
           corroborated_rank_score: 0.71,
         },
       }),
@@ -585,6 +753,34 @@ describe('ThreatAttachmentInlineContent', () => {
 
     expect(screen.getByText('Alert hits')).toBeInTheDocument();
     expect(screen.queryByText(/alert_hits_total=/)).not.toBeInTheDocument();
+  });
+
+  // The hunt's evidence step writes the collapsed values, so those are what this has to
+  // label; keying the map on the raw Tier 1 statuses left every real value unlabelled.
+  it.each([
+    ['hit', 'Environment hits found'],
+    ['clean', 'No environment hits'],
+    ['incomplete', 'Not fully searched'],
+  ])('labels the %s hunt status the evidence step writes', async (status, expectedLabel) => {
+    const http = {
+      fetch: jest.fn().mockResolvedValue({
+        reportId: 'r-hunt-status',
+        content: { title: 'Hunt Status Title' },
+        severity: { level: 'high' },
+        rank_score: 33,
+        source: { name: 'Source' },
+        evidence: { last_hunt_status: status },
+      }),
+    } as unknown as HttpStart;
+    const attachment = buildAttachment({ report_id: 'r-hunt-status' });
+
+    render(<ThreatAttachmentInlineContent {...renderProps(attachment, http)} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Last hunt status')).toBeInTheDocument();
+    });
+    expect(screen.getByText(expectedLabel)).toBeInTheDocument();
+    expect(screen.queryByText(status)).not.toBeInTheDocument();
   });
 
   it('shows a relative "Last hunted" stat when lastHuntedAt is present', async () => {

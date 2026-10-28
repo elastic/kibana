@@ -22,7 +22,7 @@ interface ToolErrorResultProps {
 export const ToolErrorResult: React.FC<ToolErrorResultProps> = ({ result: { data } }) => {
   const { euiTheme } = useEuiTheme();
   return (
-    <EuiSplitPanel.Outer hasBorder hasShadow={false}>
+    <EuiSplitPanel.Outer hasBorder hasShadow={false} borderRadius="m">
       <EuiSplitPanel.Inner color="danger" grow={false} paddingSize="m">
         <EuiText size="s" color="danger">
           <strong>{label}</strong>

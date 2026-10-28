@@ -6,7 +6,7 @@
  */
 
 import path from 'node:path';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
@@ -16,11 +16,13 @@ import { wrapMiddlewares } from '../../middleware';
 import { enterpriseLicenseMiddleware } from '../../middleware/enterprise_license';
 import { EntitiesNotFoundError, ResolutionSearchTruncatedError } from '../../../domain/errors';
 import { ENTITY_STORE_RESOLUTION_GROUP_VIEW_EVENT } from '../../../telemetry/events';
-import { reportResolutionError } from './utils/resolution_telemetry';
+import { reportResolutionError } from '../../../domain/resolution/resolution_telemetry';
 
-const querySchema = z.object({
-  entity_id: z.string().describe('The entity identifier to look up the resolution group for.'),
-});
+const querySchema = lazySchema(() =>
+  z.object({
+    entity_id: z.string().describe('The entity identifier to look up the resolution group for.'),
+  })
+);
 
 type GroupRequestQuery = z.infer<typeof querySchema>;
 

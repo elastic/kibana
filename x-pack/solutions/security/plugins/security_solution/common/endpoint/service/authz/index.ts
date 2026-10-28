@@ -11,6 +11,7 @@ export {
   satisfiesEndpointAuthzRequirement,
   ENDPOINT_METADATA_LIST_REQUIRED_AUTHZ,
   ENDPOINT_POLICY_READ_REQUIRED_AUTHZ,
+  ENDPOINT_POLICY_WRITE_REQUIRED_AUTHZ,
   ENDPOINT_POLICY_AND_METADATA_READ_REQUIRED_AUTHZ,
 } from './authz';
 export type { EndpointAuthzRequirement } from './authz';

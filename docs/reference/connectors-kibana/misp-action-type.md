@@ -11,6 +11,8 @@ applies_to:
 
 The MISP connector uses the [Malware Information Sharing Platform (MISP) automation API](https://www.circl.lu/doc/misp/automation/) so workflow authors and agents can enrich detections from a self-hosted MISP instance and write sightings, events, attributes, and tags back.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-misp-ui]
 
 Create an MISP connector from the **{{connectors-ui}}** page. To open the page, find **{{connectors-ui}}** in the navigation or under **Alerts and Insights / Connectors** in the [global search bar](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).

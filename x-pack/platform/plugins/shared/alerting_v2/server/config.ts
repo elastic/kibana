@@ -11,31 +11,37 @@ import { DEFAULT_MINIMUM_SCHEDULE_INTERVAL, MIN_SCHEDULE_INTERVAL } from '@kbn/a
 import { parseDurationToMs, validateDuration } from './lib/duration';
 import type { EsqlResponseFormat } from './lib/services/query_service/formats';
 
-/** Default value of `xpack.alerting_v2.rules.minimumScheduleInterval`. */
 const MINIMUM_SCHEDULE_INTERVAL_DEFAULT = DEFAULT_MINIMUM_SCHEDULE_INTERVAL;
 /**
- * Lowest value `xpack.alerting_v2.rules.minimumScheduleInterval` may be set to.
- * Tied to the absolute minimum a rule `schedule.every` can be, so functional
- * tests can relax the guardrail and run rules every few seconds. The default
- * remains 1m, so production deployments keep the 1m minimum unless an operator
- * deliberately lowers it.
+ * Lower bound for `minimumScheduleInterval`. Set below the default so
+ * functional tests can relax the guardrail and run rules every few seconds.
  */
 const MINIMUM_SCHEDULE_INTERVAL_FLOOR = MIN_SCHEDULE_INTERVAL;
-/** Highest value `xpack.alerting_v2.rules.minimumScheduleInterval` may be set to. */
 const MAX_MINIMUM_SCHEDULE_INTERVAL = '30d';
 
-/** Default and highest value of `xpack.alerting_v2.rules.run.alerts.max`. */
+/** Default and maximum value of `xpack.alerting_v2.rules.run.alerts.max`. */
 const MAX_ALERTS_PER_RUN = 10000;
-/** Default cap on the ES response body size for non-streaming rule queries. */
 const DEFAULT_MAX_QUERY_RESPONSE_SIZE = '50mb';
-/** Anything smaller than this cannot hold a single ES|QL row with metadata. */
+/** Minimum that can still hold a single ES|QL row with metadata. */
 const MIN_MAX_QUERY_RESPONSE_SIZE = '1kb';
+const MAX_MAX_QUERY_RESPONSE_SIZE = '200mb';
 
 const rulesRunSchema = schema.object({
   alerts: schema.object({
+    // default === max: can only be tightened; loosening would be breaking (v1 has no ceiling).
     max: schema.number({ defaultValue: MAX_ALERTS_PER_RUN, min: 1, max: MAX_ALERTS_PER_RUN }),
   }),
-  /** Distinct groups per run can never exceed rows per run, so the ceiling is tied to `alerts.max`. */
+  /**
+   * Cap on distinct groups a single execution may introduce. Applies to all
+   * grouped rule types (new episodes for stateful rules, signal events for
+   * signal rules). Already-active groups pass through but their hashes are
+   * added to the counter, so available capacity for new groups is
+   * `maxGroupsPerExecution − active_groups_already_encountered`.
+   *
+   * default === max: can only be tightened; tied to `alerts.max` as the upper
+   * bound. With the `json` response format the effective row ceiling is 1000,
+   * so this cap only fires when explicitly lowered below that.
+   */
   maxGroupsPerExecution: schema.number({
     defaultValue: MAX_ALERTS_PER_RUN,
     min: 1,
@@ -44,21 +50,19 @@ const rulesRunSchema = schema.object({
   timeout: schema.maybe(schema.string({ validate: validateDuration })),
   query: schema.object({
     /**
-     * Maximum allowed Elasticsearch response body size (in bytes) for
-     * non-streaming rule queries: the breach query on the JSON response path,
-     * plus the recovery and data-presence queries. Queries whose response
-     * exceeds this limit are aborted and the execution fails as a user error
-     * so the rule owner can narrow the query (KEEP / STATS) or raise the limit.
+     * Maximum ES response body size for non-streaming rule queries. Each
+     * execution transiently holds roughly 4× this value in heap; size this as
+     * `heap budget / (capacity × 4)`. Accepted range is 1kb–200mb; defaults to
+     * 50mb, and `config/serverless.yml` lowers it to 10mb for Serverless.
      *
-     * Every execution transiently holds roughly 4x the response size in heap,
-     * and Task Manager capacity decides how many run at once, so size this as
-     * `heap budget / (capacity x 4)`. Accepts a byte-size string (`10mb`, `512kb`)
-     * or a plain number of bytes. Defaults to 50mb; `config/serverless.yml`
-     * lowers it to 10mb for the default Serverless background-tasks pod.
+     * Applies to all non-streaming queries: recovery and data-presence queries
+     * always use JSON regardless of the feature flag; the breach query uses JSON
+     * only when `alertingV2.esqlResponseFormat` resolves to `json`.
      */
     maxResponseSize: schema.byteSize({
       defaultValue: DEFAULT_MAX_QUERY_RESPONSE_SIZE,
       min: MIN_MAX_QUERY_RESPONSE_SIZE,
+      max: MAX_MAX_QUERY_RESPONSE_SIZE,
     }),
   }),
 });
@@ -87,16 +91,125 @@ const rulesSchema = schema.object({
     },
   }),
   /**
-   * Upper bound on the combined number of rule runs per minute across all
-   * spaces. Creating, updating or enabling a rule that would push the total
-   * past this limit is rejected.
+   * Combined rule runs per minute cap across all spaces. Creating enabled rules,
+   * enabling existing rules, or shortening an enabled rule's schedule is rejected
+   * when it would exceed the limit; creating disabled rules is always allowed.
    *
-   * The default matches the alerting v1 hosted budget (`xpack.alerting.rules.maxScheduledPerMinute`).
-   * Serverless projects are capped at 400 via `config/serverless.yml`, mirroring v1.
+   * `0` is a freeze mode: those operations are all rejected while existing rules
+   * keep running. Defaults to 32000 (v1 hosted budget); `config/serverless.yml`
+   * overrides to 400 for Serverless.
    */
   maxScheduledPerMinute: schema.number({ defaultValue: 32000, min: 0, max: 32000 }),
-  /** Per-execution guardrails applied while a rule runs. */
   run: rulesRunSchema,
+});
+
+/**
+ * Lower bound for `dataRetention`, so a rule's last event outlives the longest
+ * configurable minimum schedule interval.
+ */
+const MIN_DATA_RETENTION = MAX_MINIMUM_SCHEDULE_INTERVAL;
+
+const validateDataRetention = (duration: string): string | undefined => {
+  const formatError = validateDuration(duration);
+  if (formatError) {
+    return formatError;
+  }
+  if (duration.endsWith('w')) {
+    return 'weeks are not supported by Elasticsearch; use days instead, e.g. 90d';
+  }
+  if (parseDurationToMs(duration) < parseDurationToMs(MIN_DATA_RETENTION)) {
+    return `duration cannot be less than ${MIN_DATA_RETENTION}`;
+  }
+};
+
+const MIN_DISPATCHER_ACTIONS_RETENTION = '1d';
+
+const validateDispatcherActionsRetention = (duration: string): string | undefined => {
+  const formatError = validateDuration(duration);
+  if (formatError) {
+    return formatError;
+  }
+  if (parseDurationToMs(duration) < parseDurationToMs(MIN_DISPATCHER_ACTIONS_RETENTION)) {
+    return `duration cannot be less than ${MIN_DISPATCHER_ACTIONS_RETENTION}`;
+  }
+};
+
+const retentionSchema = schema.object({
+  ruleEvents: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    dataRetention: schema.string({ defaultValue: '90d', validate: validateDataRetention }),
+  }),
+  alertActions: schema.object({
+    dispatcher: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      dataRetention: schema.string({
+        defaultValue: '90d',
+        validate: validateDispatcherActionsRetention,
+      }),
+    }),
+  }),
+});
+
+const MIN_DISPATCHER_TIMEOUT = '1m';
+const MAX_DISPATCHER_TIMEOUT = '5m';
+const MIN_DISPATCHER_ALERTS_PER_TICK = 1000;
+const MAX_DISPATCHER_ALERTS_PER_TICK = 10000;
+
+const validateDispatcherTimeout = (duration: string): string | undefined => {
+  const formatError = validateDuration(duration);
+  if (formatError) {
+    return formatError;
+  }
+
+  const durationMs = parseDurationToMs(duration);
+  if (durationMs < parseDurationToMs(MIN_DISPATCHER_TIMEOUT)) {
+    return `duration cannot be less than ${MIN_DISPATCHER_TIMEOUT}`;
+  }
+  if (durationMs > parseDurationToMs(MAX_DISPATCHER_TIMEOUT)) {
+    return `duration cannot exceed ${MAX_DISPATCHER_TIMEOUT}`;
+  }
+};
+
+const dispatcherSchema = schema.object({
+  /**
+   * Operator kill switch. While true, every dispatcher tick is a no-op: no
+   * alert is scanned or notified and the watermark is held, so the backlog is
+   * dispatched late once the switch is removed. Without a persisted watermark
+   * (first tick after a deploy) resume cold-starts and older events are lost.
+   * Logged once per Kibana start as `DISPATCHER_PAUSED`; revert the override
+   * after the incident.
+   */
+  paused: schema.boolean({ defaultValue: false }),
+  run: schema.object({
+    /**
+     * Task Manager timeout for one dispatcher tick. The tick's soft deadline
+     * is 15s before it. Raise it when slow Elasticsearch responses make
+     * ticks hit `DISPATCHER_TICK_DEADLINE_EXCEEDED`. The default is the floor:
+     * the timeout can only be raised, up to 5m.
+     */
+    timeout: schema.string({
+      defaultValue: MIN_DISPATCHER_TIMEOUT,
+      validate: validateDispatcherTimeout,
+    }),
+    alerts: schema.object({
+      /**
+       * Alerts scanned per dispatcher tick. Lower it when ticks cannot finish
+       * before their deadline under alert overload: smaller batches complete
+       * and the watermark keeps advancing. The drain rate is roughly this many
+       * alerts per ~5 s tick, so too low a value lets lag grow under sustained
+       * load. Below the alerts one rule run writes with the same `@timestamp`,
+       * the truncation edge cannot pass them; the 1000 floor makes that rarer.
+       * Defaults to the ES|QL maximum of 10000.
+       */
+      max: schema.number({
+        defaultValue: MAX_DISPATCHER_ALERTS_PER_TICK,
+        min: MIN_DISPATCHER_ALERTS_PER_TICK,
+        max: MAX_DISPATCHER_ALERTS_PER_TICK,
+        validate: (value: number): string | undefined =>
+          Number.isInteger(value) ? undefined : 'value must be an integer',
+      }),
+    }),
+  }),
 });
 
 export const configSchema = schema.object({
@@ -106,10 +219,14 @@ export const configSchema = schema.object({
     removalDelay: schema.string({ defaultValue: '1h', validate: validateDuration }),
   }),
   rules: rulesSchema,
+  retention: retentionSchema,
+  dispatcher: dispatcherSchema,
 });
 
 export type PluginConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
+export type RetentionConfig = TypeOf<typeof retentionSchema>;
+export type DispatcherConfig = TypeOf<typeof dispatcherSchema>;
 
 /**
  * Rows a single execution may request: the product-level `alerts.max` ceiling,

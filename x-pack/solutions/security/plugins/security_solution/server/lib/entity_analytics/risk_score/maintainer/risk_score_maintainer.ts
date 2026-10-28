@@ -40,6 +40,10 @@ import { buildAlertFilters } from './steps/build_alert_filters';
 import { scoreBaseEntities } from './steps/score_base_entities';
 import type { MaintainerErrorKind } from './telemetry_reporter';
 import { createRiskScoreMaintainerTelemetryReporter } from './telemetry_reporter';
+import {
+  getRiskScoreBaseDistribution,
+  getRiskScoreResolutionDistribution,
+} from './risk_score_distribution';
 import { fetchWatchlistConfigs } from './utils/fetch_watchlist_configs';
 import { withLogContext } from './utils/with_log_context';
 import { ensureLookupIndex, getLookupIndexName } from './lookup/lookup_index';
@@ -47,6 +51,7 @@ import { pruneLookupIndex } from './lookup/prune_lookup_index';
 import { runResolutionScoringStep } from './steps/run_resolution_scoring_step';
 import { createRunMetricsTracker } from './utils/run_metrics_tracker';
 import { buildLookupIndex } from './steps/build_lookup_index';
+import { DEFAULT_ALERT_SAMPLE_SIZE } from '../constants';
 import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan, wrapTaskRun } from '../../telemetry/traces';
 import {
   buildRiskScoreEntityMaintainerRunSummary,
@@ -450,7 +455,7 @@ const loadRunConfiguration = async ({
   const sampleSize =
     configuration.alertSampleSizePerShard ??
     entityAnalyticsConfig?.riskEngine?.alertSampleSizePerShard ??
-    10000;
+    DEFAULT_ALERT_SAMPLE_SIZE;
   const pageSize = configuration.pageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
   const entityTypes = configuration.identifierType
     ? [configuration.identifierType]
@@ -628,6 +633,7 @@ const executeEntityTypeRun = async ({
             abortSignal,
             idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
             writer: runConfig.writer,
+            alertFilters,
           }),
       });
       metricsTracker.recordResolution(runMetrics, resolutionResult);
@@ -675,6 +681,9 @@ const executeEntityTypeRun = async ({
   }
 
   checkAbortBetweenStages();
+
+  let baseScoreDistribution: Awaited<ReturnType<typeof getRiskScoreBaseDistribution>>;
+  let resolutionScoreDistribution: Awaited<ReturnType<typeof getRiskScoreResolutionDistribution>>;
 
   if (!skipRemainingStages) {
     // Refresh the risk score data stream so reset-to-zero can see scores written in phases 1 & 2.
@@ -745,6 +754,30 @@ const executeEntityTypeRun = async ({
         skipReason: 'reset_to_zero_disabled',
       });
     }
+
+    // Refresh so the distribution queries see zero-score records written by reset-to-zero above.
+    // Wrapped in try/catch: a refresh failure must not abort the run — scoring and reset already
+    // completed successfully, and the distributions are optional telemetry.
+    try {
+      await runContext.esClient.indices.refresh({ index: riskScoreAlias });
+      const distributionQuery = {
+        esClient: runContext.esClient,
+        namespace: runContext.namespace,
+        entityType,
+        calculationRunId,
+        logger: runLogger,
+      };
+      [baseScoreDistribution, resolutionScoreDistribution] = await Promise.all([
+        getRiskScoreBaseDistribution(distributionQuery),
+        getRiskScoreResolutionDistribution(distributionQuery),
+      ]);
+    } catch (error) {
+      runLogger.warn(
+        `Failed to refresh before collecting score distributions; distributions will be omitted from the run summary: ${telemetryReporter.getErrorMessage(
+          error
+        )}`
+      );
+    }
   } else {
     frameworkTelemetryStages.push({
       name: 'reset_to_zero',
@@ -777,8 +810,6 @@ const executeEntityTypeRun = async ({
     }
   }
 
-  // Keep risk-score-specific reporter event fields explicit so framework-only counters
-  // are not leaked into risk_score_maintainer_run_summary
   runTelemetry.completionSummary({
     runStatus,
     runErrorKind,
@@ -787,6 +818,8 @@ const executeEntityTypeRun = async ({
     scoresWrittenResetToZero: runMetrics.scoresWrittenRiskIndexResetToZero,
     pagesProcessed: runMetrics.pagesProcessed,
     lookupPrunedDocs: runMetrics.lookupPrunedDocs,
+    baseScoreDistribution,
+    resolutionScoreDistribution,
   });
 
   frameworkTelemetry.report(

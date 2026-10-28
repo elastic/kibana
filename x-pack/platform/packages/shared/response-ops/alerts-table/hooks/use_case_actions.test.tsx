@@ -19,20 +19,26 @@ const mockAlert: Alert = {
   'kibana.alert.rule.name': ['Test rule'],
 };
 
+const mockAttachments = [
+  {
+    type: 'stack.alert',
+    attachmentId: ['alert-id-1'],
+    metadata: { index: ['.alerts-default-000001'], rule: { id: 'rule-id', name: 'Test rule' } },
+  },
+];
+
 describe('useCaseActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    casesServiceMock.helpers.getRuleIdFromEvent.mockReturnValue({
-      id: 'rule-id',
-      name: 'Test rule',
-    });
+    casesServiceMock.helpers.groupAlertsByRule.mockReturnValue(mockAttachments);
   });
 
-  it('opens the case modal with alert attachments', () => {
+  it('opens the case modal with attachments for the selected case owner', () => {
     const { result } = renderHook(() =>
       useCaseActions({
         alerts: [mockAlert],
         cases: casesServiceMock,
+        owner: ['cases'],
       })
     );
 
@@ -45,14 +51,39 @@ describe('useCaseActions', () => {
     });
 
     const { getAttachments } = openAddToExistingCaseModalMock.mock.calls[0][0];
-    expect(getAttachments()).toEqual([
-      expect.objectContaining({
-        alertId: 'alert-id-1',
-        index: '.alerts-default-000001',
-        type: 'alert',
-        rule: { id: 'rule-id', name: 'Test rule' },
-      }),
-    ]);
+    expect(getAttachments({ theCase: { id: 'case-id', owner: 'observability' } })).toEqual(
+      mockAttachments
+    );
+    expect(casesServiceMock.helpers.groupAlertsByRule).toHaveBeenCalledWith(
+      [
+        {
+          ecs: { _id: 'alert-id-1', _index: '.alerts-default-000001' },
+          data: expect.arrayContaining([{ field: 'kibana.alert.rule.name', value: ['Test rule'] }]),
+        },
+      ],
+      'observability'
+    );
+  });
+
+  it('falls back to the first configured owner when no case is selected', () => {
+    const { result } = renderHook(() =>
+      useCaseActions({
+        alerts: [mockAlert],
+        cases: casesServiceMock,
+        owner: ['securitySolution'],
+      })
+    );
+
+    act(() => {
+      result.current.handleAddToCaseClick();
+    });
+
+    const { getAttachments } = openAddToExistingCaseModalMock.mock.calls[0][0];
+    getAttachments({});
+    expect(casesServiceMock.helpers.groupAlertsByRule).toHaveBeenCalledWith(
+      expect.any(Array),
+      'securitySolution'
+    );
   });
 
   it.each([true, false])('reports the modal case path: isNewCase=%s', (isNewCase) => {
@@ -62,6 +93,7 @@ describe('useCaseActions', () => {
       useCaseActions({
         alerts: [mockAlert],
         cases: casesServiceMock,
+        owner: ['cases'],
         onAddToCase,
       })
     );
@@ -81,6 +113,7 @@ describe('useCaseActions', () => {
       useCaseActions({
         alerts: [mockAlert],
         cases: undefined,
+        owner: ['cases'],
       })
     );
 
@@ -91,7 +124,7 @@ describe('useCaseActions', () => {
     expect(openAddToExistingCaseModalMock).not.toHaveBeenCalled();
   });
 
-  it('builds attachments for multiple alerts', () => {
+  it('groups multiple alerts in a single call', () => {
     const secondAlert: Alert = {
       _id: 'alert-id-2',
       _index: '.alerts-default-000002',
@@ -102,6 +135,7 @@ describe('useCaseActions', () => {
       useCaseActions({
         alerts: [mockAlert, secondAlert],
         cases: casesServiceMock,
+        owner: ['cases'],
       })
     );
 
@@ -110,9 +144,15 @@ describe('useCaseActions', () => {
     });
 
     const { getAttachments } = openAddToExistingCaseModalMock.mock.calls[0][0];
-    const attachments = getAttachments();
-    expect(attachments).toHaveLength(2);
-    expect(attachments[0].alertId).toBe('alert-id-1');
-    expect(attachments[1].alertId).toBe('alert-id-2');
+    getAttachments({ theCase: { id: 'case-id', owner: 'cases' } });
+
+    expect(casesServiceMock.helpers.groupAlertsByRule).toHaveBeenCalledTimes(1);
+    expect(casesServiceMock.helpers.groupAlertsByRule).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({ ecs: { _id: 'alert-id-1', _index: '.alerts-default-000001' } }),
+        expect.objectContaining({ ecs: { _id: 'alert-id-2', _index: '.alerts-default-000002' } }),
+      ],
+      'cases'
+    );
   });
 });

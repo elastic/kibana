@@ -15,6 +15,7 @@ import {
   relayResolveChannelId,
   relaySendMessage,
   relayTest,
+  relayUpdateMessage,
   slackRelay,
 } from './relay';
 
@@ -84,7 +85,6 @@ describe('relaySendMessage', () => {
   it("forwards a channel id and returns Relay's resolved channel", async () => {
     const trigger = jest.fn().mockResolvedValue({
       ref: '1700.0001',
-      tenantKey: 'team-A',
       channel: CHANNEL_ID,
     });
     const listBindings = jest.fn();
@@ -107,7 +107,6 @@ describe('relaySendMessage', () => {
   it("forwards a channel name and returns Relay's resolved channel id", async () => {
     const trigger = jest.fn().mockResolvedValue({
       ref: '1700.0003',
-      tenantKey: 'team-A',
       channel: CHANNEL_ID,
     });
     const listBindings = jest.fn();
@@ -127,16 +126,43 @@ describe('relaySendMessage', () => {
     expect(listBindings).not.toHaveBeenCalled();
   });
 
+  it("returns the Relay's conversation key for the posted thread", async () => {
+    const trigger = jest.fn().mockResolvedValue({
+      ref: '1700.0001',
+      channel: CHANNEL_ID,
+      externalConversationId: `slack:team-A:${CHANNEL_ID}:1700.0001`,
+    });
+
+    await expect(send({ channel: CHANNEL_ID, text: 'hello' }, { trigger })).resolves.toEqual({
+      ok: true,
+      channel: CHANNEL_ID,
+      ts: '1700.0001',
+      externalConversationId: `slack:team-A:${CHANNEL_ID}:1700.0001`,
+    });
+  });
+
   it('forwards threadTs when replying in a thread', async () => {
     const trigger = jest.fn().mockResolvedValue({
       ref: '1700.0002',
-      tenantKey: 'team-A',
       channel: CHANNEL_ID,
     });
 
     await send({ channel: CHANNEL_ID, text: 'reply', threadTs: '1700.0001' }, { trigger });
 
     expect(trigger).toHaveBeenCalledWith(expect.objectContaining({ threadTs: '1700.0001' }));
+  });
+
+  it('forwards Block Kit blocks', async () => {
+    const trigger = jest.fn().mockResolvedValue({
+      ref: '1700.0002',
+      tenantKey: 'team-A',
+      channel: CHANNEL_ID,
+    });
+    const blocks = [{ type: 'section', text: { type: 'mrkdwn', text: 'hi' } }];
+
+    await send({ channel: CHANNEL_ID, text: 'hi', blocks }, { trigger });
+
+    expect(trigger).toHaveBeenCalledWith(expect.objectContaining({ message: 'hi', blocks }));
   });
 
   it('rejects a blank channel before calling Relay', async () => {
@@ -154,7 +180,6 @@ describe('relaySendMessage', () => {
   it('trims the channel before forwarding it', async () => {
     const trigger = jest.fn().mockResolvedValue({
       ref: '1700.0004',
-      tenantKey: 'team-A',
       channel: CHANNEL_ID,
     });
 
@@ -199,6 +224,66 @@ describe('relaySendMessage', () => {
     const trigger = jest.fn().mockRejectedValue(cause);
 
     await expect(send({ channel: CHANNEL_ID, text: 'hello' }, { trigger })).rejects.toBe(cause);
+  });
+});
+
+describe('relayUpdateMessage', () => {
+  const CHANNEL_ID = 'C0123456789';
+
+  const update = async (input: Record<string, unknown>, trigger: jest.Mock) => {
+    const relay = { trigger };
+    return relayUpdateMessage(
+      { client: relay as never, tenantKey: 'team-A' },
+      createContext(relaySecrets, relay),
+      input as Parameters<typeof relayUpdateMessage>[2]
+    );
+  };
+
+  it('forwards messageTs and no threadTs, returning the edited message ts', async () => {
+    const trigger = jest.fn().mockResolvedValue({
+      ref: '1700.0002',
+      channel: CHANNEL_ID,
+    });
+
+    await expect(
+      update({ channel: '#general', messageTs: '1700.0002', text: 'edited' }, trigger)
+    ).resolves.toEqual({ ok: true, channel: CHANNEL_ID, ts: '1700.0002' });
+    expect(trigger).toHaveBeenCalledWith({
+      tenantKey: 'team-A',
+      channel: '#general',
+      message: 'edited',
+      messageTs: '1700.0002',
+    });
+  });
+
+  it('forwards Block Kit blocks so the edit keeps its layout', async () => {
+    const trigger = jest.fn().mockResolvedValue({
+      ref: '1700.0002',
+      tenantKey: 'team-A',
+      channel: CHANNEL_ID,
+    });
+    const blocks = [{ type: 'header', text: { type: 'plain_text', text: 'Done' } }];
+
+    await update({ channel: CHANNEL_ID, messageTs: '1700.0002', text: 'Done', blocks }, trigger);
+
+    expect(trigger).toHaveBeenCalledWith(expect.objectContaining({ blocks }));
+  });
+
+  it('rejects a blank channel before calling Relay', async () => {
+    const trigger = jest.fn();
+
+    await expect(
+      update({ channel: ' # ', messageTs: '1700.0002', text: 'x' }, trigger)
+    ).rejects.toThrow('Channel is required.');
+    expect(trigger).not.toHaveBeenCalled();
+  });
+
+  it('restates a 403 as an unconnected channel', async () => {
+    const trigger = jest.fn().mockRejectedValue(relayError(403));
+
+    await expect(
+      update({ channel: CHANNEL_ID, messageTs: '1700.0002', text: 'edited' }, trigger)
+    ).rejects.toThrow(`Channel ${CHANNEL_ID} is not connected.`);
   });
 });
 
@@ -445,7 +530,7 @@ describe('slackRelay.assertNotSupported', () => {
         'searchMessages'
       )
     ).toThrow(
-      'searchMessages is not available through the Elastic Slack app. Supported actions: sendMessage, listChannels, resolveChannelId.'
+      'searchMessages is not available through the Elastic Slack app. Supported actions: sendMessage, updateMessage, listChannels, resolveChannelId.'
     );
   });
 });

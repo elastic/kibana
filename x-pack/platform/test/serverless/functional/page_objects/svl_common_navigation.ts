@@ -31,7 +31,7 @@ class SvlNavigationSearchPageObject extends NavigationalSearchPageObject {
 
   async showSearch() {
     const testSubjects = this.ctx.getService('testSubjects');
-    if (await testSubjects.exists(SEARCH_MODAL, { timeout: 0 })) return;
+    if (await testSubjects.exists(SEARCH_MODAL)) return;
     await testSubjects.click(SEARCH_BUTTON);
     await testSubjects.existOrFail(SEARCH_MODAL);
   }
@@ -39,7 +39,7 @@ class SvlNavigationSearchPageObject extends NavigationalSearchPageObject {
   async hideSearch() {
     const testSubjects = this.ctx.getService('testSubjects');
     const browser = this.ctx.getService('browser');
-    if (await testSubjects.exists(SEARCH_MODAL, { timeout: 0 })) {
+    if (await testSubjects.exists(SEARCH_MODAL)) {
       // The open modal renders an overlay mask above the header, which intercepts clicks
       // on the search button. Press Escape to close the modal instead.
       // (Selecting a result already closes the modal, so this only runs if still open.)

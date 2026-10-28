@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { withTimeout } from '@kbn/std';
 import type { Benchmark, LoadedBenchConfig } from '../config/types';
 import { getFileBaseDir } from '../filesystem/get_file_base_dir';
 import type { GlobalRunContext } from '../types';
@@ -36,24 +37,24 @@ function createCallbackWrapper(
 
     context.log.debug(`Starting ${name}`);
 
-    return Promise.race([
-      Promise.resolve(cb(context))
-        .then((val) => {
-          context.log.debug(`Completed ${name}`);
-          return val;
-        })
-        .catch((error) => {
-          context.log.warning(`${name} failed with ${error}`);
-          throw error;
-        }),
-      new Promise<never>((_, reject) => {
-        setTimeout(() => {
-          reject(
-            new Error(`Timeout ${name}: timeout of ${timeout}ms reached before promise resolved`)
-          );
-        }, timeout).unref();
-      }),
-    ]);
+    const work = Promise.resolve(cb(context))
+      .then((val) => {
+        context.log.debug(`Completed ${name}`);
+        return val;
+      })
+      .catch((error) => {
+        context.log.warning(`${name} failed with ${error}`);
+        throw error;
+      });
+
+    // unref so the deadline does not hold the process open once the benchmark's own
+    // handles are gone. withTimeout still clears the timer when the work finishes.
+    return withTimeout({ promise: work, timeoutMs: timeout, unref: true }).then((outcome) => {
+      if (outcome.timedout) {
+        throw new Error(`Timeout ${name}: timeout of ${timeout}ms reached before promise resolved`);
+      }
+      return outcome.value;
+    });
   };
 }
 

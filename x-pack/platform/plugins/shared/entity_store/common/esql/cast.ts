@@ -26,7 +26,7 @@ const fieldTypeMap: ReadonlyMap<string, string> = (() => {
     serviceEntityDefinition,
     genericEntityDefinition,
   ]) {
-    for (const field of def.fields) {
+    for (const field of def.extraction.fields) {
       if (field.mapping?.type && !map.has(field.source)) {
         map.set(field.source, field.mapping.type);
       }

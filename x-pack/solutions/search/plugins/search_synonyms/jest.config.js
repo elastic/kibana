@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/solutions/search/plugins/search_synonyms'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/search_synonyms',

@@ -9,7 +9,10 @@ import { getFlattenedObject } from '@kbn/std';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
 import { getEuidSourceFields } from '../../../common/domain/euid';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
-import { getEntityDefinition } from '../../../common/domain/definitions/registry';
+import {
+  getEntityDefinition,
+  getBuiltInEntityDefinition,
+} from '../../../common/domain/definitions/registry';
 import type { EntityType } from '../../../common';
 import type {
   EntityField,
@@ -98,7 +101,7 @@ function getFieldDescriptions(
   flatProps: Record<string, unknown>,
   description: ManagedEntityDefinition
 ): Record<string, EntityField & { value: unknown }> {
-  const allFieldDescriptions = description.fields.reduce((obj, field) => {
+  const allFieldDescriptions = description.extraction.fields.reduce((obj, field) => {
     obj[field.destination || field.source] = field;
     return obj;
   }, {} as Record<string, EntityField>);
@@ -106,7 +109,9 @@ function getFieldDescriptions(
   const invalid: string[] = [];
   const descriptions: Record<string, EntityField & { value: unknown }> = {};
 
-  const identitySourceFields = getEuidSourceFields(description.type).identitySourceFields;
+  const identitySourceFields = getEuidSourceFields(
+    getBuiltInEntityDefinition(description.type)
+  ).identitySourceFields;
   for (const [key, value] of Object.entries(flatProps)) {
     if (key === ENTITY_ID_FIELD || identitySourceFields.includes(key)) {
       continue;

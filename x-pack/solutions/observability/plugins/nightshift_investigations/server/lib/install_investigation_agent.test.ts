@@ -8,13 +8,13 @@
 import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import {
-  SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
+  NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+  NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
 } from '../agents/investigation';
 import { installInvestigationAgent } from './install_investigation_agent';
 
 describe('installInvestigationAgent', () => {
-  it('ensures a system-owned persisted typed agent in the requested space', async () => {
+  it('ensures a system-owned persisted typed agent in the requested space, visible in the agent picker', async () => {
     const agentBuilder = agentBuilderMocks.createStart();
     const availability = { cacheMode: 'space' as const, handler: jest.fn() };
 
@@ -23,12 +23,13 @@ describe('installInvestigationAgent', () => {
     expect(agentBuilder.agents.ensure).toHaveBeenCalledWith({
       spaceId: 'space-1',
       availability,
+      hidden: false,
       agent: {
-        id: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
-        type: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
+        id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+        type: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
         name: 'Nightshift Investigator',
         description: expect.any(String),
-        labels: ['observability', 'streams', 'significant-events', 'investigation', 'root-cause'],
+        labels: ['observability', 'significant-events', 'investigation', 'cortex', 'sandbox'],
         avatar_symbol: 'NI',
         access_control: { access_mode: AgentAccessControlMode.Public },
         configuration: {

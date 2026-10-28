@@ -12,7 +12,7 @@ import { AgentBuilderStorybookProvider } from '../../../../__storybook__/agent_b
 import { AskUserQuestionPrompt } from './ask_user_question_prompt';
 
 const meta: Meta<typeof AskUserQuestionPrompt> = {
-  title: 'HITL/Ask User Question Prompt',
+  title: 'Conversations/Timeline/Prompts/Ask User Question',
   component: AskUserQuestionPrompt,
   // Disable auto-action detection to prevent double-logging alongside the explicit action below
   parameters: { actions: { argTypesRegex: '' } },

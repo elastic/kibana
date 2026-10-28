@@ -8,12 +8,12 @@
 import {
   significantEventInvestigationSchema,
   significantEventStatusSchema,
+  significantEventManualStatusSchema,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   CHANGE_POINT_TYPES,
   severitySchema,
   MAX_ID_LENGTH,
-  MAX_ASSESSMENT_NOTE_LENGTH,
-  triggerFeedbackSchema,
+  MAX_TEXT_LENGTH,
   type ChangePointType,
   type Detection,
   type InvestigationRunStatus,
@@ -23,23 +23,35 @@ import {
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
 import { notFound, serverUnavailable } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
-import {
-  attachInvestigationToEvent,
-  type SignificantEventTriggerFeedback,
-} from '../../../lib/significant_events/events/attach_investigation';
-import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
+import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
 import {
   cleanupStaleEvents,
   type CleanupStaleEventsResult,
 } from '../../../lib/significant_events/events/cleanup_stale_events';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
 import { resolveInvestigationStatuses } from '../../../lib/significant_events/events/resolve_investigation_status';
+import type { DetectionClient } from '../../../lib/significant_events/detections';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
+import type { EventsFilterOptions } from '../../../lib/significant_events/events/types';
+import {
+  MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH,
+  SIGNIFICANT_EVENT_INVESTIGATION_STATES,
+  SIGNIFICANT_EVENTS_SORT_FIELDS,
+  SIGNIFICANT_EVENTS_SORT_ORDERS,
+  type SignificantEventsFacets,
+} from '../../../../common/events_list';
 import { createServerRoute } from '../../create_server_route';
 import { assertNotPaused } from '../../utils/assert_not_paused';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { MAX_SOURCE_IDS_PER_REQUEST, sourceIdsQuerySchema } from '../../utils/resolve_source_ids';
+import { StatusChange } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
+import { getLiveEntities } from '../../../lib/significant_events/entities/get_live_entities';
+import { filterReadableSourceIds } from '../../utils/resolve_source_ids';
+import { listAllSources } from '../../utils/list_all_sources';
+import type { RouteHandlerScopedClients } from '../../types';
 
 const toArray = <T extends string>(val: T | T[] | undefined): T[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
@@ -55,6 +67,24 @@ const parseChangePointType = (value: string | undefined): ChangePointType | unde
     : undefined;
 };
 
+/** A stored detection as the lifecycle lists it; what the detection lacks comes from `fallback`. */
+const toLifecycleDetection = (
+  hit: Detection,
+  fallback: { rule_name?: string; source_id?: string } = {}
+): LifecycleDetection | undefined => {
+  const changePointType = parseChangePointType(hit.change_point_type);
+  return changePointType
+    ? {
+        detection_id: hit.detection_id,
+        rule_name: hit.rule_name ?? fallback.rule_name ?? hit.rule_uuid,
+        rule_uuid: hit.rule_uuid,
+        source_id: hit.source_id ?? fallback.source_id,
+        change_point_type: changePointType,
+        '@timestamp': hit['@timestamp'],
+      }
+    : undefined;
+};
+
 const collectEmbeddedDetections = (events: SignificantEvent[]) => {
   const seen = new Set<string>();
   const result: Array<Omit<LifecycleDetection, '@timestamp'>> = [];
@@ -63,28 +93,125 @@ const collectEmbeddedDetections = (events: SignificantEvent[]) => {
     for (const signal of event.signals ?? []) {
       if (signal.type !== 'detection') continue;
       const { detection_id, rule_name, change_point_type } = signal.metadata;
-      const streamName = signal.stream_name;
       const parsedChangePointType = parseChangePointType(change_point_type);
-      if (
-        !detection_id ||
-        !rule_name ||
-        !streamName ||
-        !parsedChangePointType ||
-        seen.has(detection_id)
-      ) {
+      if (!detection_id || !rule_name || !parsedChangePointType || seen.has(detection_id)) {
         continue;
       }
       seen.add(detection_id);
       result.push({
         detection_id,
         rule_name,
-        stream_name: streamName,
+        source_id: signal.source_id,
         change_point_type: parsedChangePointType,
       });
     }
   }
 
   return result;
+};
+
+const investigationStateSchema = z.enum(SIGNIFICANT_EVENT_INVESTIGATION_STATES);
+
+/** Filters shared by the list and facet reads, so their counts always describe the same set. */
+const eventsFilterQuerySchema = z.object({
+  from: isoDateTime().optional(),
+  to: isoDateTime().optional(),
+  status: z
+    .union([
+      significantEventStatusSchema,
+      z.array(significantEventStatusSchema).max(SIGNIFICANT_EVENT_STATUS_OPTIONS.length),
+    ])
+    .optional(),
+  source_id: sourceIdsQuerySchema(MAX_SOURCE_IDS_PER_REQUEST).describe(
+    'Source ids to filter events by. One id or a repeated list.'
+  ),
+  search: z.string().max(MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH).optional(),
+  severity: z.union([severitySchema, z.array(severitySchema).max(4)]).optional(),
+  // Same cap as the agent `event_search` tool; the UI lets users select any number of services.
+  topology_feature_id: z
+    .union([z.string().max(255), z.array(z.string().max(255)).max(100)])
+    .optional(),
+  unassigned_entities: BooleanFromString.optional(),
+  investigation_state: z
+    .union([
+      investigationStateSchema,
+      z.array(investigationStateSchema).max(SIGNIFICANT_EVENT_INVESTIGATION_STATES.length),
+    ])
+    .optional(),
+});
+
+const toEventsFilterOptions = async (
+  {
+    from,
+    to,
+    status,
+    source_id: sourceIdFilter,
+    search,
+    severity,
+    topology_feature_id: topologyFeatureId,
+    investigation_state: investigationState,
+    unassigned_entities: unassignedEntities,
+  }: z.infer<typeof eventsFilterQuerySchema>,
+  scopedClients: RouteHandlerScopedClients
+): Promise<
+  EventsFilterOptions & {
+    from?: string;
+    to?: string;
+  }
+> => {
+  let unassignedEntityIds: string[] | undefined;
+  if (unassignedEntities) {
+    const { sourcesClient, getKnowledgeIndicatorClient } = scopedClients;
+    const sources = await listAllSources(sourcesClient);
+    const sourceIds = await filterReadableSourceIds(
+      sources.map(({ id }) => id),
+      sourcesClient
+    );
+    const { entities, truncated } = await getLiveEntities(
+      await getKnowledgeIndicatorClient(),
+      sourceIds
+    );
+    // A truncated live set would misreport entities past the cap as unassigned, so skip the filter.
+    if (!truncated) {
+      unassignedEntityIds = entities.map(({ id }) => id);
+    }
+  }
+  return {
+    from,
+    to,
+    status: toArray(status),
+    sourceIds: toArray(sourceIdFilter),
+    severity: toArray(severity),
+    topologyFeatureIds: toArray(topologyFeatureId),
+    ...(unassignedEntityIds ? { unassignedEntityIds } : {}),
+    investigationStates: toArray(investigationState),
+    search: search || undefined,
+  };
+};
+
+/**
+ * The detections the classifier closed without the agent on the strength of this event. They are in
+ * no signal, so they are found by the event their skip marker names; each marker says why.
+ */
+const findSkippedDetections = async ({
+  detectionClient,
+  eventId,
+  known,
+}: {
+  detectionClient: Pick<DetectionClient, 'findSkippedForEvent'>;
+  eventId: string;
+  known: ReadonlySet<string>;
+}): Promise<{ detections: LifecycleDetection[]; truncated: boolean }> => {
+  const { hits, truncated } = await detectionClient.findSkippedForEvent(eventId);
+  const detections = hits
+    .flatMap((hit) => {
+      const detection = toLifecycleDetection(hit);
+      return detection && hit.skip && !known.has(hit.detection_id)
+        ? [{ ...detection, skip: hit.skip }]
+        : [];
+    })
+    .sort((a, b) => a['@timestamp'].localeCompare(b['@timestamp']));
+  return { detections, truncated };
 };
 
 const eventsSearchRoute = createServerRoute({
@@ -100,21 +227,12 @@ const eventsSearchRoute = createServerRoute({
     },
   },
   params: z.object({
-    query: z.object({
-      from: z.iso.datetime().optional(),
-      to: z.iso.datetime().optional(),
+    query: eventsFilterQuerySchema.extend({
       page: z.coerce.number().int().min(1).optional(),
       perPage: z.coerce.number().int().min(1).max(1000).optional(),
-      status: z
-        .union([
-          significantEventStatusSchema,
-          z.array(significantEventStatusSchema).max(SIGNIFICANT_EVENT_STATUS_OPTIONS.length),
-        ])
-        .optional(),
-      stream: z.union([z.string().max(255), z.array(z.string().max(255)).max(50)]).optional(),
-      search: z.string().max(500).optional(),
       event_id: z.string().max(255).optional(),
-      severity: z.union([severitySchema, z.array(severitySchema).max(4)]).optional(),
+      sort_field: z.enum(SIGNIFICANT_EVENTS_SORT_FIELDS).optional(),
+      sort_order: z.enum(SIGNIFICANT_EVENTS_SORT_ORDERS).optional(),
     }),
   }),
   handler: async ({
@@ -123,32 +241,61 @@ const eventsSearchRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<PaginatedResponse<SignificantEventResponse>> => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
+    const scopedClients = await getScopedClients({ request });
+    const { getEventSearchClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
     const {
-      status,
-      stream,
-      search,
-      severity,
-      from,
-      to,
+      page,
+      perPage,
       event_id: eventId,
-      ...rest
+      sort_field: sortField,
+      sort_order: sortOrder,
+      ...filters
     } = params.query ?? {};
 
-    const eventClient = await getEventClient();
+    const eventClient = await getEventSearchClient();
     return eventClient.findLatestByCurrentStatePaginated({
-      ...rest,
-      from,
-      to,
-      status: toArray(status),
-      stream: toArray(stream),
-      severity: toArray(severity),
-      search: search || undefined,
+      ...(await toEventsFilterOptions(filters, scopedClients)),
+      page,
+      perPage,
+      sortField,
+      sortOrder,
       ...(eventId ? { eventIds: [eventId] } : {}),
     });
+  },
+});
+
+const eventsFacetsRoute = createServerRoute({
+  endpoint: 'GET /internal/significant_events/events/_facets',
+  options: {
+    access: 'internal',
+    summary: 'Count events per filter option',
+    description:
+      'Count the latest event states per severity, status and investigation state. Each dimension ignores its own filter.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    query: eventsFilterQuerySchema,
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<SignificantEventsFacets> => {
+    const scopedClients = await getScopedClients({ request });
+    const { getEventSearchClient, licensing } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing });
+
+    const eventClient = await getEventSearchClient();
+    return eventClient.countFacets(await toEventsFilterOptions(params.query ?? {}, scopedClients));
   },
 });
 
@@ -169,6 +316,16 @@ const eventsLifecycleRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
+    query: z
+      .object({
+        include_skipped: z
+          .enum(['true', 'false'])
+          .optional()
+          .describe(
+            'Also list the detections the classifier closed without the agent, with why. Off by default.'
+          ),
+      })
+      .optional(),
   }),
   handler: async ({
     params,
@@ -176,18 +333,14 @@ const eventsLifecycleRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<EventLifecycleResponse> => {
-    const { getEventClient, getDetectionClient, licensing } = await getScopedClients({ request });
+    const { getEventSearchClient, getDetectionClient, licensing } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const eventClient = await getEventClient();
-    const { hits: initialHits } = await eventClient.findByEventUuid(params.path.id);
-    if (initialHits.length === 0) {
-      return { detections: [], events: [] };
-    }
-
-    const { event_id: eventId } = initialHits[0];
-    const { hits: events } = await eventClient.findByEventId(eventId);
+    const eventClient = await getEventSearchClient();
+    const { hits: events } = await eventClient.findByEventId(params.path.id);
     if (events.length === 0) {
       return { detections: [], events: [] };
     }
@@ -201,32 +354,27 @@ const eventsLifecycleRoute = createServerRoute({
       allDetectionHits.filter(hasChangePointType).map((h) => [h.detection_id, h])
     );
 
-    const detections: LifecycleDetection[] = embedded.flatMap(
-      ({ detection_id, rule_name, stream_name, change_point_type }) => {
-        const hit = hitsByDetectionId.get(detection_id);
-        if (!hit) {
-          return [];
-        }
+    const detections = embedded.flatMap(({ detection_id, rule_name, source_id }) => {
+      const hit = hitsByDetectionId.get(detection_id);
+      const detection = hit && toLifecycleDetection(hit, { rule_name, source_id });
+      return detection ? [detection] : [];
+    });
 
-        const hitChangePointType = parseChangePointType(hit.change_point_type);
-        if (!hitChangePointType) {
-          return [];
-        }
+    if (params.query?.include_skipped !== 'true') {
+      return { detections, events };
+    }
 
-        return [
-          {
-            detection_id,
-            rule_name: hit.rule_name ?? rule_name,
-            rule_uuid: hit.rule_uuid,
-            stream_name: hit.stream_name ?? stream_name,
-            change_point_type: hitChangePointType,
-            '@timestamp': hit['@timestamp'],
-          },
-        ];
-      }
-    );
+    const skipped = await findSkippedDetections({
+      detectionClient,
+      eventId: params.path.id,
+      known: new Set(detections.map(({ detection_id: id }) => id)),
+    });
 
-    return { detections, events };
+    return {
+      detections: [...detections, ...skipped.detections],
+      events,
+      ...(skipped.truncated ? { skipped_truncated: true } : {}),
+    };
   },
 });
 
@@ -236,8 +384,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Attach investigation to event',
-    description:
-      'Record a completed investigation against a significant event and apply any trigger feedback in the same append-only version.',
+    description: 'Record a completed or failed investigation against a significant event.',
   },
   security: {
     authz: {
@@ -248,25 +395,20 @@ const eventsAttachInvestigationRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
-    body: significantEventInvestigationSchema
-      .extend({
-        trigger_feedback: z.array(triggerFeedbackSchema).max(3).optional(),
-      })
-      .required({ completed_at: true }),
+    body: significantEventInvestigationSchema.required({ completed_at: true }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
-    const { getEventClient, getAlertEventsClient, licensing } = await getScopedClients({ request });
+    const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } =
+      await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const { trigger_feedback: triggerFeedback, ...investigation } = params.body;
-
     return attachInvestigationToEvent({
-      eventClient: await getEventClient(),
+      eventSearchClient: await getEventSearchClient(),
       eventId: params.path.id,
-      investigation,
-      triggerFeedback: triggerFeedback as SignificantEventTriggerFeedback | undefined,
+      investigation: params.body,
       alertEventsClient: await getAlertEventsClient(),
+      emitTrigger,
       logger,
     });
   },
@@ -278,7 +420,7 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     access: 'internal',
     summary: 'Trigger investigation workflow for a significant event',
     description:
-      'Starts the managed investigation workflow for the given significant event and returns the workflow execution id.',
+      'Starts the managed investigation workflow for the given significant event, records the running investigation, and returns the workflow execution id.',
   },
   security: {
     authz: {
@@ -298,14 +440,15 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     logger,
     maintenanceService,
   }): Promise<{ executionId: string }> => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
+    const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } =
+      await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
-    const eventClient = await getEventClient();
-    const { hits } = await eventClient.findByEventUuid(params.path.id);
-    if (hits.length === 0) {
+    const eventClient = await getEventSearchClient();
+    const latest = await eventClient.findLatestByEventId(params.path.id);
+    if (!latest) {
       throw notFound(`Significant event "${params.path.id}" not found.`);
     }
 
@@ -313,12 +456,35 @@ const eventsTriggerInvestigationRoute = createServerRoute({
       nightshiftInvestigations: server.nightshiftInvestigations,
       request,
       logger,
-      event: hits[0],
+      // Latest version, not the first — a caller-supplied id must never pin the workflow to a
+      // stale revision.
+      event: latest,
     });
 
     if (!executionId) {
       throw serverUnavailable(
         'Investigation workflow is not available. Ensure workflows management is enabled and Kibana has finished installing managed workflows.'
+      );
+    }
+
+    try {
+      await attachInvestigationToEvent({
+        eventSearchClient: eventClient,
+        eventId: params.path.id,
+        investigation: {
+          workflow_execution_id: executionId,
+          started_at: new Date().toISOString(),
+        },
+        alertEventsClient: await getAlertEventsClient(),
+        emitTrigger,
+        logger,
+      });
+    } catch (error) {
+      // The investigation already started, so a failed attachment must not fail the request.
+      logger.warn(
+        `Could not attach running investigation to event "${params.path.id}": ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
     }
 
@@ -331,7 +497,7 @@ const eventsGetRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Get a significant event',
-    description: 'Fetch the latest version of a single significant event by its event_uuid.',
+    description: 'Fetch the latest version of a single significant event by its event_id.',
   },
   security: {
     authz: {
@@ -349,23 +515,15 @@ const eventsGetRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventResponse> => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
+    const { getEventSearchClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const eventClient = await getEventClient();
-    const { hits: uuidHits } = await eventClient.findByEventUuid(params.path.id);
-    if (uuidHits.length === 0) {
+    const eventClient = await getEventSearchClient();
+    const event = await eventClient.findLatestByEventId(params.path.id);
+    if (!event) {
       throw notFound(`Significant event "${params.path.id}" not found.`);
     }
-
-    const { event_id: eventId } = uuidHits[0];
-    const { hits: versionHits } = await eventClient.findByEventId(eventId);
-    if (versionHits.length === 0) {
-      throw notFound(`Significant event "${params.path.id}" not found.`);
-    }
-
-    const event = versionHits.at(-1)!;
 
     return event;
   },
@@ -388,33 +546,20 @@ const eventsUpdateRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
-    body: z
-      .object({
-        status: significantEventStatusSchema,
-        assessment_note: z.string().max(MAX_ASSESSMENT_NOTE_LENGTH).optional(),
-      })
-      .superRefine((val, ctx) => {
-        if (val.status === 'dismissed' && !val.assessment_note?.trim()) {
-          ctx.addIssue({
-            code: 'custom',
-            path: ['assessment_note'],
-            message: 'assessment_note is required when dismissing an event',
-          });
-        }
-      }),
+    body: z.object({
+      status: significantEventManualStatusSchema,
+      assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
+    }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
-    const { getEventClient, getAlertEventsClient, licensing } = await getScopedClients({ request });
+    const { getEventSearchClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    return updateSignificantEventStatus({
-      eventClient: await getEventClient(),
-      eventUuid: params.path.id,
-      status: params.body.status,
+    return (await getEventSearchClient()).updateEventStatus({
+      eventId: params.path.id,
+      change: StatusChange.byOperator(params.body.status),
       assessmentNote: params.body.assessment_note,
-      alertEventsClient: await getAlertEventsClient(),
-      logger,
     });
   },
 });
@@ -446,18 +591,16 @@ const cleanupStaleEventsRoute = createServerRoute({
     logger,
   }): Promise<CleanupStaleEventsResult> => {
     const scopedClients = await getScopedClients({ request });
-    const { getEventClient, getAlertEventsClient, licensing } = scopedClients;
+    const { getEventSearchClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
     const { rulesClient } = await scopedClients.getSignificantEventsAlertingContext();
 
     return cleanupStaleEvents({
-      eventClient: await getEventClient(),
+      eventSearchClient: await getEventSearchClient(),
       rulesClient,
       candidateRuleIds: params?.body?.candidateRuleIds,
-      alertEventsClient: await getAlertEventsClient(),
-      logger,
     });
   },
 });
@@ -468,7 +611,7 @@ const investigationStatusesRoute = createServerRoute({
     access: 'internal',
     summary: 'Resolve the outcome of investigation runs',
     description:
-      'Reports whether each investigation run is pending, complete, failed, or unavailable, resolved from its workflow execution. Missing executions are omitted from the response.',
+      'Reports whether each investigation is pending (an agent works on it) or complete, from the shared investigations API. The ids are the investigation ids a significant event records in `workflow_execution_id`. Investigations that do not exist or cannot be read are omitted.',
   },
   security: {
     authz: {
@@ -486,16 +629,15 @@ const investigationStatusesRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-    getSpaceId,
   }): Promise<{ statuses: Record<string, InvestigationRunStatus> }> => {
     const { licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
     const statuses = await resolveInvestigationStatuses({
-      workflowsManagement: server.workflowsManagement,
-      spaceId: await getSpaceId(request),
-      workflowExecutionIds: params.body.workflow_execution_ids,
+      request,
+      agenticInvestigations: server.agenticInvestigations,
+      investigationIds: params.body.workflow_execution_ids,
       logger,
     });
 
@@ -505,6 +647,7 @@ const investigationStatusesRoute = createServerRoute({
 
 export const internalEventsRoutes = {
   ...eventsSearchRoute,
+  ...eventsFacetsRoute,
   ...eventsGetRoute,
   ...eventsLifecycleRoute,
   ...eventsAttachInvestigationRoute,

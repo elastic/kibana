@@ -35,18 +35,21 @@ import type {
   FullAgentPolicyInput,
   FullAgentPolicyMonitoring,
   FullAgentPolicyOutputPermissions,
+  KafkaOutput,
   PackageInfo,
 } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
 
 import {
   dataTypes,
+  kafkaAuthType,
   kafkaCompressionType,
   OTEL_COLLECTOR_INPUT_TYPE,
   outputType,
   PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
 } from '../../../common/constants';
 import { createManagedBulkOutputMatcher } from '../preconfiguration/outputs';
+import { buildKafkaAuthData, buildKafkaSecrets } from '../outputs/kafka_auth';
 import { getSettingsValuesForAgentPolicy } from '../form_settings';
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
@@ -70,9 +73,13 @@ import {
 import { fetchRelatedSavedObjects } from './related_saved_objects';
 import { generateOtelcolConfig } from './otel_collector';
 
-async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string) {
+async function fetchAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  id: string,
+  options?: { spaceId?: string }
+) {
   try {
-    return await agentPolicyService.get(soClient, id);
+    return await agentPolicyService.get(soClient, id, true, { spaceId: options?.spaceId });
   } catch (err) {
     if (!err.isBoom || err.output.statusCode !== 404) {
       throw err;
@@ -90,6 +97,7 @@ export async function getFullAgentPolicy(
     agentVersion?: string;
     /** When true, redact proxy_headers and ssl.key from all proxy references in the response */
     redactProxySecrets?: boolean;
+    spaceId?: string;
   }
 ): Promise<FullAgentPolicy | null> {
   const logger = appContextService.getLogger().get('getFullAgentPolicy');
@@ -109,7 +117,11 @@ export async function getFullAgentPolicy(
     agentPolicy = options.agentPolicy;
   } else {
     logger.debug(`Fetching agent policy doc for [${id}]`);
-    agentPolicy = await fetchAgentPolicy(soClient, id);
+    agentPolicy = await fetchAgentPolicy(
+      soClient,
+      id,
+      options?.spaceId ? { spaceId: options.spaceId } : {}
+    );
   }
 
   if (!agentPolicy) {
@@ -164,6 +176,17 @@ export async function getFullAgentPolicy(
 
   logger.debug(() => `Fetching agent inputs for policy [${id}]`);
 
+  // For cross-space callers (spaceId '*'), derive the actual SO namespace from the policy's
+  // own space_ids so that package-policy reads/writes are scoped to the right namespace.
+  // When space_ids[0] is '*' (policy shared to all spaces), pass undefined: shared-policy
+  // package policies are accessible from any namespace and soClient.get rejects '*' as a namespace.
+  const packagePoliciesNamespace =
+    options?.spaceId === '*'
+      ? agentPolicy.space_ids?.[0] === '*'
+        ? undefined
+        : agentPolicy.space_ids?.[0]
+      : options?.spaceId;
+
   const agentInputs = await storedPackagePoliciesToAgentInputs(
     agentPolicy.package_policies as PackagePolicy[],
     packageInfoCache,
@@ -172,7 +195,8 @@ export async function getFullAgentPolicy(
     agentPolicy.global_data_tags,
     options?.agentVersion,
     soClient,
-    agentPolicy.has_agent_version_conditions
+    agentPolicy.has_agent_version_conditions,
+    packagePoliciesNamespace
   );
 
   let otelcolConfig;
@@ -651,6 +675,14 @@ export function transformOutputToFullPolicyOutput(
 
   const configJs = config_yaml ? parse(config_yaml) : {};
 
+  const outputSecrets =
+    type === outputType.Kafka
+      ? buildKafkaSecrets({
+          auth_type: (output as KafkaOutput).auth_type,
+          secrets: (output as KafkaOutput).secrets,
+        })
+      : secrets;
+
   // build logic to read config_yaml and transform it with the new shipper data
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
   let shipperDiskQueueData = {};
@@ -664,9 +696,12 @@ export function transformOutputToFullPolicyOutput(
       key,
       compression,
       compression_level,
+      auth_type,
       username,
       password,
       sasl,
+      oauth2,
+      kerberos,
       partition,
       random,
       round_robin,
@@ -709,13 +744,13 @@ export function transformOutputToFullPolicyOutput(
       key,
       compression,
       ...(compression === kafkaCompressionType.Gzip ? { compression_level } : {}),
-      ...(username ? { username } : {}),
-      ...(password ? { password } : {}),
-      ...(sasl ? { sasl } : {}),
+      ...buildKafkaAuthData({ auth_type, username, password, sasl, oauth2, kerberos }),
       partition: transformPartition(),
       topic,
       headers: (headers ?? []).filter((item) => item.key !== '' || item.value !== ''),
-      timeout,
+      // the agent runs a Kafka output with OAuth2 in the OTel collector, which does not support
+      // this setting: it would fall back to the Beats runtime, that cannot do OAuth2
+      ...(auth_type === kafkaAuthType.OAuth2 ? {} : { timeout }),
       broker_timeout,
       required_acks,
     };
@@ -751,7 +786,7 @@ export function transformOutputToFullPolicyOutput(
     ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
-    ...(secrets ? { secrets } : {}),
+    ...(outputSecrets ? { secrets: outputSecrets } : {}),
   };
   if (ssl) {
     newOutput.ssl = {

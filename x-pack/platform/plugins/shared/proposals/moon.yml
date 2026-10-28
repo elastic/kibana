@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/proposals-common'
   - '@kbn/proposals-ui'
+  - '@kbn/user-profile-components'
 tags:
   - plugin
   - prod
@@ -56,6 +57,4 @@ fileGroups:
     - server/**/*
     - integration_tests/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

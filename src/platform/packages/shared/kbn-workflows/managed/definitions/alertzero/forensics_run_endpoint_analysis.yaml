@@ -3,9 +3,14 @@ name: Endpoint analysis run
 description: >
   Given an `analyze_endpoint` knowledge indicator, resolves the associated
   Attack Discovery alert and host, runs a forensic agent to reconstruct the
-  attack timeline and extract IoCs, attaches the findings and a containment
-  assessment to the investigation, and proposes any justified containment
-  actions for human approval.
+  attack timeline and extract IoCs, attaches the findings to the investigation,
+  journals the verdict and assessment, acknowledges the attack and its alerts,
+  and proposes any justified containment actions. Manual autonomy waits for
+  approval; supervised carries them out. A `not_an_incident` verdict proposes
+  no containment and offers to close everything as a false positive. Once every
+  proposal is decided, or right away when nothing was proposed, the analyst is
+  asked whether to close the Investigation; that question is gated in every
+  autonomy mode.
 enabled: true
 tags:
   - security
@@ -54,13 +59,35 @@ outputs:
       type: boolean
     attachments_written:
       type: boolean
+    proposals_submitted:
+      type: number
+    proposals_converged:
+      type: number
 
 consts:
-  # Common system workflow to append a plain message to the investigation
-  # without waking its agent (`trigger_mode: never`). Used for the narrative this run
-  # produces about itself — what it could not do and why
-  # Installed in the same global set as this workflow, so it is always resolvable.
-  journal_note: system-alertzero-journal-note
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Endpoint Analysis worker"
+  # Journal notes call `system-alertzero-journal-note` by literal id, not a const:
+  # `run-as-mode: inherit` runs the note as this workflow's service account, and the
+  # engine only allows that for a literal `workflow-id`.
+
+  # Cap on the number of containment actions this run can propose.
+  max_recommended_actions: 8
+  # Fallback when the KI carries no `attributes.autonomy`.
+  default_autonomy: manual
+  # Written on the attack's detection alerts once the analysis has run, so an
+  # alert can be traced to this Worker.
+  endpoint_analyzed_tag: az:endpoint_analyzed
+  # Hours added on each side of the incident window (earliest to latest cited
+  # alert) for the agent's searches. Kept narrow so older activity on the host
+  # does not read as this incident; the agent widens from inside the window by
+  # following a tie (process tree, file, hash, destination, account, initial access).
+  incident_margin_hours: 2
+  # How far before the incident the telemetry check looks. It asks whether the
+  # host ships Defend telemetry at all, not what happened in the incident, so it
+  # is much wider than the agent's margin and open-ended toward now.
+  telemetry_gate_lookback_hours: 72
 
 steps:
   # A read error fails the run, leaving the indicator pending for the next
@@ -74,12 +101,26 @@ steps:
     with:
       index: "ai-index-idx-{{ inputs.ai_index_id }}"
       size: 1
+      sort:
+        - "@timestamp":
+            order: desc
+            unmapped_type: date
       query:
         bool:
           filter:
-            - ids:
-                values:
-                  - "{{ inputs.ki_id }}"
+            - bool:
+                should:
+                  - term:
+                      id: "{{ inputs.ki_id }}"
+                  - bool:
+                      filter:
+                        - ids:
+                            values:
+                              - "{{ inputs.ki_id }}"
+                      must_not:
+                        - exists:
+                            field: id
+                minimum_should_match: 1
             - term:
                 type: security.analyze_endpoint
             - term:
@@ -95,6 +136,9 @@ steps:
       # Set by an earlier run of this workflow, before the agent. Blank means this
       # indicator has not been analyzed yet.
       forensic_attempted_at: "{{ steps.read_ki.output.hits.hits[0]._source.attributes.forensic_attempted_at | default: '' }}"
+      # The FP/TP verdict the handoff carried. Fallback when the verdict attachment
+      # cannot be read.
+      classification: "{{ steps.read_ki.output.hits.hits[0]._source.attributes.classification | default: '' }}"
       # Explicitly set whether we have the data we need to continue
       has_request: >-
         ${{ steps.read_ki.output.hits.hits[0]._source.attributes.attack_discovery_alert_id != blank
@@ -117,7 +161,6 @@ steps:
     with:
       timeline: "forensic-timeline-{{ inputs.ki_id }}"
       iocs: "forensic-iocs-{{ inputs.ki_id }}"
-      assessment: "forensic-assessment-{{ inputs.ki_id }}"
 
   - name: when_ki_valid
     type: if
@@ -125,13 +168,21 @@ steps:
       ${{ steps.resolve_request.output.has_request == true
         and steps.verify_investigation.output.metadata != null }}
     steps:
-      # All three of this indicator's findings mean an earlier run finished the
+      - name: append_workflow_execution
+        type: investigations.appendWorkflowExecutionId
+        with:
+          conversationId: "{{ steps.resolve_request.output.investigation_id }}"
+          workflowExecutionId: "{{ execution.id }}"
+        on-failure:
+          continue: true
+
+      # Both of this indicator's attachments mean an earlier run finished the
       # analysis but could not retire the indicator. Finding them lets this run
-      # skip the agent and retry just the write. Fewer than three after an attempt
+      # skip the agent and retry just the write. Fewer than both after an attempt
       # was already recorded skips the agent too: a later run does not start
-      # another 15m analysis. Another indicator's files do not count.
+      # another 30m analysis. Another indicator's files do not count.
       #
-      # Listing rather than reading the assessment by id, because `ai.attachment.read`
+      # Listing rather than reading an attachment by id, because `ai.attachment.read`
       # reports "no such attachment" and "the attachment service is broken" the same
       # way: it catches every error and returns no output, so a null version cannot
       # tell "no prior analysis" from "could not find out".
@@ -143,10 +194,10 @@ steps:
       - name: resolve_prior_assessment
         type: data.set
         with:
-          # A finished run leaves all three ids, including an empty timeline or an
-          # empty IoC list. Fewer than three is a partial write from this indicator.
+          # A finished run leaves both ids, including an empty timeline or an
+          # empty IoC list. One of the two is a partial write from this indicator.
           count: >-
-            ${{ steps.list_prior_findings.output.attachments | map: 'id' | where_exp: 'attachment_id', 'attachment_id == steps.finding_ids.output.timeline or attachment_id == steps.finding_ids.output.iocs or attachment_id == steps.finding_ids.output.assessment' | size }}
+            ${{ steps.list_prior_findings.output.attachments | map: 'id' | where_exp: 'attachment_id', 'attachment_id == steps.finding_ids.output.timeline or attachment_id == steps.finding_ids.output.iocs' | size }}
 
       # `workflow.spaceId` is the space of the worker that dispatched this run, not
       # the global space this workflow is installed in: a child execution inherits
@@ -165,9 +216,16 @@ steps:
           index: ".alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}"
           ignore_unavailable: true
           size: 1
+          # The `_with_replacements` fields carry real host and user names, which is
+          # what the agent queries on. `@timestamp` is the window fallback.
           _source:
+            - "@timestamp"
             - host.name
             - kibana.alert.attack_discovery.alert_ids
+            - kibana.alert.workflow_status
+            - kibana.alert.attack_discovery.title_with_replacements
+            - kibana.alert.attack_discovery.summary_markdown_with_replacements
+            - kibana.alert.attack_discovery.details_markdown_with_replacements
           query:
             bool:
               should:
@@ -178,6 +236,8 @@ steps:
                     kibana.alert.uuid: "{{ steps.resolve_request.output.attack_discovery_alert_id }}"
               minimum_should_match: 1
 
+      # The host the cited alerts agree on, and the span of the incident: the
+      # earliest and latest `kibana.alert.original_time` across those alerts.
       - name: extract_host_from_ad_constituent_alerts
         type: elasticsearch.search
         if: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] != blank }}"
@@ -193,6 +253,12 @@ steps:
               terms:
                 field: host.name
                 size: 1
+            incident_start:
+              min:
+                field: kibana.alert.original_time
+            incident_end:
+              max:
+                field: kibana.alert.original_time
 
       # Only the not-found case reaches here now: a read error failed the run above. A
       # missing alert is permanent — the discovery this indicator names is gone — so it
@@ -203,8 +269,10 @@ steps:
         type: workflow.execute
         if: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._id == blank }}"
         with:
-          workflow-id: "{{ consts.journal_note }}"
+          workflow-id: system-alertzero-journal-note
+          run-as-mode: inherit
           inputs:
+            author_name: "{{ consts.author_name }}"
             conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
             message: >-
               No Attack Discovery alert matching `{{ steps.resolve_request.output.attack_discovery_alert_id }}`
@@ -217,50 +285,181 @@ steps:
         type: data.set
         with:
           host_name: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source.host.name | default: steps.extract_host_from_ad_constituent_alerts.output.aggregations.host_name.buckets[0].key | default: '' }}"
+
+      # The incident window the telemetry check and the agent anchor on. From the
+      # cited alerts when they carry `original_time`; otherwise the discovery's own
+      # `@timestamp`, so a window always exists once the alert was found. The
+      # margin is applied by the consumers, not here: Liquid has no date math.
+      - name: resolve_incident_window
+        type: data.set
+        with:
+          start: "{{ steps.extract_host_from_ad_constituent_alerts.output.aggregations.incident_start.value_as_string | default: steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['@timestamp'] | default: '' }}"
+          end: "{{ steps.extract_host_from_ad_constituent_alerts.output.aggregations.incident_end.value_as_string | default: steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['@timestamp'] | default: '' }}"
+          from_alerts: "${{ steps.extract_host_from_ad_constituent_alerts.output.aggregations.incident_start.value_as_string != blank }}"
+
       - name: when_host_known
         type: if
         condition: "${{ steps.resolve_host.output.host_name != blank }}"
         steps:
+          # Whether there is anything for the agent to reconstruct. The Hunt Watch
+          # worker makes the same check (`check_index_scope`) before it selects a
+          # report. The forensic skill resolves `logs-endpoint.events.*` only once
+          # the agent is running, so without this a host with no Elastic Defend
+          # telemetry spends the indicator's single attempt on a 30m run that can
+          # only report nothing.
+          #
+          # Telemetry existence check. Looks back over a longer time window
+          # because a miss here retires the indicator with no retry.
+          #
+          # Gated like the agent, so a retry of a finished analysis does not depend
+          # on telemetry still being there. Fails the run on a read error, like the
+          # alert lookups above: a read error is a gap, not "no telemetry", and the
+          # indicator stays pending for a cheap retry since this is before the agent.
+          - name: check_endpoint_telemetry
+            type: elasticsearch.search
+            if: "${{ steps.resolve_prior_assessment.output.count != 2 and steps.resolve_request.output.forensic_attempted_at == blank }}"
+            with:
+              index: "logs-endpoint.events.*"
+              ignore_unavailable: true
+              size: 1
+              _source: false
+              query:
+                bool:
+                  filter:
+                    - term:
+                        host.name: "{{ steps.resolve_host.output.host_name }}"
+                    - range:
+                        "@timestamp":
+                          gte: "{{ steps.resolve_incident_window.output.start }}||-{{ consts.telemetry_gate_lookback_hours }}h"
+
+          # `checked` tells "no telemetry" apart from "did not look": a skipped step
+          # has no output, and that must not read as an empty index.
+          - name: resolve_endpoint_telemetry
+            type: data.set
+            with:
+              checked: "${{ steps.check_endpoint_telemetry.output != null }}"
+              present: "${{ steps.check_endpoint_telemetry.output.hits.hits[0]._id != blank }}"
+
+          # Before the agent and before the attempt is recorded, so a failed note
+          # fails the run and the next sweep re-checks, the same as `journal_no_host`.
+          - name: journal_no_telemetry
+            type: workflow.execute
+            if: >-
+              ${{ steps.resolve_endpoint_telemetry.output.checked == true
+                and steps.resolve_endpoint_telemetry.output.present != true }}
+            with:
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
+              inputs:
+                author_name: "{{ consts.author_name }}"
+                conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+                message: >-
+                  No Elastic Defend telemetry was found for `{{ steps.resolve_host.output.host_name }}`
+                  in `logs-endpoint.events.*` from {{ consts.telemetry_gate_lookback_hours }}h before the
+                  incident window (`{{ steps.resolve_incident_window.output.start }}` to
+                  `{{ steps.resolve_incident_window.output.end }}`) until now, so endpoint analysis was not run.
+
           # Record the attempt before the agent. A later run reads it back from the
           # indicator and does not start another analysis. `attributes` merges, so
           # this does not change `status`. A failed write fails the run here, before
           # the agent, and the indicator stays pending for one more try.
+          #
+          # `present` already implies the check ran, which only happens on the path
+          # where the agent would, so it is the whole telemetry condition here.
           - name: mark_attempted
             type: context-engine.updateKi
-            if: "${{ steps.resolve_prior_assessment.output.count != 3 and steps.resolve_request.output.forensic_attempted_at == blank }}"
+            if: >-
+              ${{ steps.resolve_prior_assessment.output.count != 2
+                and steps.resolve_request.output.forensic_attempted_at == blank
+                and steps.resolve_endpoint_telemetry.output.present == true }}
             with:
               ai_index_id: "{{ inputs.ai_index_id }}"
               ki_id: "{{ inputs.ki_id }}"
               ki:
                 attributes:
                   forensic_attempted_at: "{{ execution.startedAt }}"
+          # Mark the start of the analysis in the journal. Continue on
+          # failure: this note is before the agent, but a rejected note must not skip
+          # the analysis or leave the indicator pending
+          - name: journal_analysis_started
+            type: workflow.execute
+            if: >-
+              ${{ steps.resolve_prior_assessment.output.count != 2
+                and steps.resolve_request.output.forensic_attempted_at == blank
+                and steps.resolve_endpoint_telemetry.output.present == true }}
+            on-failure:
+              continue: true
+            with:
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
+              inputs:
+                author_name: "{{ consts.author_name }}"
+                conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+                message: >-
+                  Starting endpoint analysis of `{{ steps.resolve_host.output.host_name }}` for the
+                  incident window `{{ steps.resolve_incident_window.output.start }}` to
+                  `{{ steps.resolve_incident_window.output.end }}` (plus {{ consts.incident_margin_hours }}h on each side).
+
+          # The AD review's verdict, read from the fixed-id attachment it writes on the
+          # investigation. Context for the agent only: the KI's `classification` is the
+          # fallback, and nothing downstream decides on this read, so a failed read is
+          # not a reason to skip the analysis.
+          - name: read_ad_verdict
+            type: ai.attachment.read
+            if: >-
+              ${{ steps.resolve_prior_assessment.output.count != 2
+                and steps.resolve_request.output.forensic_attempted_at == blank
+                and steps.resolve_endpoint_telemetry.output.present == true }}
+            on-failure:
+              continue: true
+            with:
+              conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+              attachment_id: analysis-verdict
+
+          # Everything the agent is told about the incident, resolved once so the
+          # message below stays readable.
+          - name: resolve_incident_context
+            type: data.set
+            with:
+              title: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.title_with_replacements'] | default: '' }}"
+              summary: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.summary_markdown_with_replacements'] | default: '' }}"
+              details: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.details_markdown_with_replacements'] | default: '' }}"
+              verdict: "{{ steps.read_ad_verdict.output.data.verdict | default: steps.resolve_request.output.classification }}"
+              verdict_summary: "{{ steps.read_ad_verdict.output.data.summary_markdown | default: '' }}"
+              verdict_rationale: "{{ steps.read_ad_verdict.output.data.rationale_markdown | default: '' }}"
+
           - name: forensic_analysis
             type: ai.agent
-            # Runs once per indicator: only when findings are still missing and no
-            # earlier run has recorded an attempt. All three findings, or a recorded
-            # attempt with any still missing, skips the agent.
-            if: "${{ steps.resolve_prior_assessment.output.count != 3 and steps.resolve_request.output.forensic_attempted_at == blank }}"
+            # Runs once per indicator: only when findings are still missing, no
+            # earlier run has recorded an attempt, and the host has Defend telemetry.
+            # Both attachments, or a recorded attempt with either still missing,
+            # skips the agent.
+            if: >-
+              ${{ steps.resolve_prior_assessment.output.count != 2
+                and steps.resolve_request.output.forensic_attempted_at == blank
+                and steps.resolve_endpoint_telemetry.output.present == true }}
             # Continues on failure so the run still reaches its terminal write.
             # If this step failed the run instead, the indicator would stay
-            # `pending`, and the sweep would re-run this 15m agent every minute
+            # `pending`, and the sweep would re-run this 30m agent every minute
             # for the rest of the lookback window. Continuing instead lets
             # `journal_analysis_problem` log what happened and `mark_failed`
             # retire the indicator, at the cost of one handoff instead of a
-            # 15m run every minute for the sweep lookback.
+            # 30m run every minute for the sweep lookback.
             on-failure:
               continue: true
             agent-id: alertzero-thin-agent
-            # Keep in sync with ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
-            # Agentic rather than reasoning: this is a tool-driven reconstruction that
+            # Keep in sync with ALERTZERO_BALANCED_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+            # Balanced rather than frontier: this is a tool-driven reconstruction that
             # iterates over telemetry and then calls the action catalog, so its cost scales
             # with the round count rather than with one long answer.
-            connector-id-by-feature: alertzero_agentic
+            connector-id-by-feature: alertzero_balanced
             # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
             plugin-id: alertzero_endpoint_analysis
             aggregate-by: alertzero_parent
-            timeout: "15m"
+            timeout: "30m"
             create-conversation: false
             with:
+              author_name: "{{ consts.author_name }}"
               configuration_overrides:
                 skill_ids:
                   - endpoint-forensic-analysis
@@ -268,39 +467,111 @@ steps:
                   - tool_ids:
                       - security.alertzero.actions.list
               message: >
-                I have an alert on {{ steps.resolve_host.output.host_name }}.
-                Perform forensic analysis and extract all IoCs.
-                Write the reconstruction to `timeline.events` and the indicators to `iocs`,
-                matching this step's schema. Use `rationale` only for the assessment:
-                - Whether this is a real incident, which other hosts are affected, what the
-                  data gaps are, and why the evidence supports any actions you recommend.
-                  Do not restate `timeline` or `iocs` there.
+                Perform forensic analysis of one incident on `{{ steps.resolve_host.output.host_name }}` and
+                extract all IoCs. Write the reconstruction to `timeline.events`, the range you searched to
+                `timeline.window`, and the indicators to `iocs`, matching this step's schema. Use `rationale`
+                only for the assessment.
+
+                ## The incident
+
+                Attack Discovery `{{ steps.resolve_request.output.attack_discovery_alert_id }}`:
+                {{ steps.resolve_incident_context.output.title }}
+
+                Summary: {{ steps.resolve_incident_context.output.summary }}
+
+                Details: {{ steps.resolve_incident_context.output.details }}
+
+                Attack Discovery verdict: {{ steps.resolve_incident_context.output.verdict }}.
+                {{ steps.resolve_incident_context.output.verdict_summary }}
+                {%- if steps.resolve_incident_context.output.verdict_rationale != blank %}
+
+                Verdict rationale:
+                {{ steps.resolve_incident_context.output.verdict_rationale }}
+                {%- endif %}
+
+                Incident window: `{{ steps.resolve_incident_window.output.start }}` to
+                `{{ steps.resolve_incident_window.output.end }}`
+                {%- if steps.resolve_incident_window.output.from_alerts == true -%}
+                , the earliest to the latest cited alert `kibana.alert.original_time`.
+                {%- else -%}
+                , the discovery's own time: its cited alerts carried no `kibana.alert.original_time`.
+                {%- endif %}
+                Margin: {{ consts.incident_margin_hours }} hours on each side.
+
+                ## Scope
+
+                - Call the skill's tools with `start`, `end`, and `margin_hours` set to the incident window and
+                  margin above. Do not use `time_window_hours`. Do not do date arithmetic yourself: the tools
+                  return the exact `searched_window`. Copy its `start` and `end` into `timeline.window`.
+                - Scope every ES|QL query to that `searched_window`. Widen a query only to follow a tie from
+                  inside the window: the same process tree, file, hash, destination, or account,
+                  or the initial access that led to it (how the earliest in-window process or file got onto
+                  the host). Say that you widened, and how far.
+                - Evidence inside the window is this incident.
+                  Evidence you reached by following such a tie is this incident too, even when it is earlier
+                  than the window: put it in `timeline.events` with its real timestamp, and name the tie in
+                  its `description`. Patient zero is often before the window.
+                - Evidence outside the window with no tie is history. Report it under `## Earlier activity` in
+                  `rationale`, with its dates, and say it is outside the window. Keep it out of `timeline.events`.
+                  History alone does not make this a real incident and does not justify containment.
+                - Containment based on history needs a concrete tie to this incident: the same process tree,
+                  file, hash, destination, or account seen inside the window. Name the tie in that action's
+                  `comment`. Without one, do not propose the action.
+
+                Write `rationale` as markdown, in ASD-STE100 Simplified Technical English.
+                Use short sentences. Put one idea in each sentence.
+                - One paragraph first. State whether this is a real incident and give the strongest reason.
+                  Say why the evidence supports containment, or why it does not. Name the window you searched.
+                - Then these headings, each with a bullet list. Omit a heading that has nothing to report:
+                  - `## Affected hosts`. One bullet per host. Name the host and its role.
+                  - `## Earlier activity`. One bullet per finding outside the incident window that you could
+                    not tie to this incident. Give its date and what it was.
+                    Tied findings belong in `timeline.events`, not here.
+                  - `## Data gaps`. One bullet per gap. Name the telemetry that is missing.
+                - Do not list the actions. `recommendedActions` carries each action, and each card's
+                  `title` and `comment` name its target and the evidence.
+                - Do not restate `timeline` or `iocs`. Do not repeat the journal label as a heading.
 
                 After the forensic reconstruction,
+                - Set `verdict` first. `confirmed_incident` when the in-window evidence shows real
+                  malicious activity. `not_an_incident` only when the evidence explains the activity
+                  as benign or expected; then set propose=false and return no `recommendedActions`.
+                  `unclear` when the telemetry supports neither call; say why under `## Data gaps`.
+                  Older activity outside the incident window is history, not grounds for a verdict.
                 - Assess whether this represents a real incident that warrants containment.
                 - Call `security.alertzero.actions.list` with categories `["respond"]` before proposing anything.
-                  Use the returned catalog as the only allowed actions. Set each `actionId` to a catalog
+                  Use the returned catalog as the only allowed actions. Set each `actionWorkflowId` to a catalog
                   `workflowId`. Do not invent workflow ids and do not recommend an action that is not in the
                   catalog. If the catalog is empty, set propose=false and return an empty `recommendedActions` list.
                 - If this reconstruction justifies containment, recommend specific containment actions in
                   `recommendedActions` from that catalog. Recommend only what you can tie to the timeline
                   and indicators you returned.
 
-                Each catalog entry carries an `inputSchema`: the JSON Schema of the inputs that action
-                accepts. Set `actionInput` to an object satisfying that entry's `inputSchema`. It is the
-                contract — read it per action rather than assuming a shape from the action's description,
-                from another entry, or from what an action required previously. Fill every property it
-                marks required, and take the values only from the evidence: Elastic Defend `agent.id`
-                for endpoint ids, telemetry pids and entity_ids for process selectors.
+                Each catalog entry carries an `inputSchema`: the JSON Schema of that action's manual
+                trigger. The proposal checks `actionInput` against `inputSchema.properties.actionInput`,
+                not against `inputSchema` itself. Set `actionInput` to an object that satisfies that
+                inner schema. Do not wrap it in another `actionInput` key. Read that inner schema per
+                action rather than assuming a shape from the action's description, from another entry,
+                or from what an action required previously. Fill every property it marks required, and
+                take the values only from the evidence: Elastic Defend `agent.id` for endpoint ids,
+                telemetry pids and entity_ids for process selectors.
 
                 Rules
                 - Pick the most specific catalog action the evidence supports. Prefer kill/suspend when a process
                   entity_id or pid is present; isolate when only the host is known.
-                - If the evidence cannot fill what an entry's `inputSchema` requires, drop that action. Set
+                - If the evidence cannot fill what an entry's `inputSchema.properties.actionInput` requires, drop that action. Set
                   propose=false when that leaves nothing. Never guess an id, pid, path, or command that is
                   not in the evidence.
-                - Cite hosts, process/path, tactics, and why this action now in rationale.
-                - Optionally add a short comment (one sentence) explaining why you chose this action.
+                - Set `title` on every recommendation to a short plain-text label of that one action
+                  and its target, using the catalog entry's `name`. A host action names the host
+                  (`Isolate host WIN-ANALYST01`). A process action names the process and the host
+                  (`Kill powershell.exe (PID 4212) on WIN-ANALYST01`). Include the target so two of
+                  the same action still read as different cards.
+                - Set `comment` on every recommendation to one or two sentences for the analyst
+                  approving that one card: the evidence this action rests on and what it stops
+                  (`powershell.exe (PID 4212) spawned from winword.exe and is encrypting files
+                  under C:\Users; killing it stops the encryption`). Specific to this action and
+                  target. Do not restate the assessment from `rationale`.
                 - Set `confidence` per action, not for the reconstruction as a whole: how sure you are
                   that this action hits the right host or process and that the evidence justifies it
                   now. Identifiers read directly from the telemetry support high; an inference about
@@ -309,28 +580,42 @@ steps:
               schema:
                 type: object
                 required:
+                  - verdict
                   - propose
                   - rationale
                   - timeline
                   - iocs
                   - recommendedActions
                 properties:
+                  # The one structured call this run acts on: `not_an_incident` proposes no
+                  # containment and makes the close question a false-positive one. Required,
+                  # so an analysis cannot leave the Investigation's close reason to a guess.
+                  verdict:
+                    type: string
+                    enum: [confirmed_incident, not_an_incident, unclear]
+                    description: >
+                      The analysis's conclusion. `confirmed_incident`: in-window evidence shows real
+                      malicious activity. `not_an_incident`: the activity is benign or expected.
+                      `unclear`: the telemetry supports neither call.
                   propose:
                     type: boolean
                     description: >
-                      True only when the agent recommends one or more specific containment actions
+                      True only when the agent recommends one or more containment actions.
+                      Always false when `verdict` is `not_an_incident`.
                   # Required and non-empty: `timeline` and `iocs` can legitimately both be
                   # empty, so this rationale is the one thing a completed analysis always
-                  # writes. `settled` below relies on that to tell "analyzed the host and
-                  # found nothing" apart from a run that produced nothing at all.
+                  # writes. It is journaled, and the journal note rejects a message
+                  # longer than 8000 characters. Set less than 8000 to allow journal note
+                  # to include additional text
                   rationale:
                     type: string
                     minLength: 1
-                    maxLength: 10000
+                    maxLength: 7900
                     description: >
-                      Assessment only: whether this is a real incident, other affected hosts,
-                      data gaps, and why the evidence supports the recommended actions. The
-                      reconstruction itself belongs in `timeline`, the indicators in `iocs`.
+                      Assessment only, as markdown in ASD-STE100 Simplified Technical English: an opening
+                      paragraph, then `## Affected hosts`, `## Earlier activity` and `## Data gaps` bullets
+                      (omit an empty heading).
+                      Do not list the actions, the timeline, or the IoCs.
                   # `timeline` and `iocs` mirror the `security.investigation.timeline` and
                   # `security.investigation.iocs` attachment payloads exactly, so the attach steps
                   # below can pass them through untouched. Changing a field name here without
@@ -342,11 +627,30 @@ steps:
                     type: object
                     required:
                       - events
+                      - window
                     description: >
                       Chronological attack reconstruction. Same shape as the
-                      `security.investigation.timeline` attachment payload, so the attach
-                      step can pass it through untouched.
+                      `security.investigation.timeline` attachment payload.
                     properties:
+                      window:
+                        type: object
+                        required:
+                          - start
+                          - end
+                        description: >
+                          The `searched_window` the skill's tools returned: the exact range the
+                          telemetry was searched over, incident window plus margin.
+                        properties:
+                          start:
+                            type: string
+                            minLength: 1
+                            maxLength: 64
+                            description: ISO-8601 start of the searched range, copied verbatim.
+                          end:
+                            type: string
+                            minLength: 1
+                            maxLength: 64
+                            description: ISO-8601 end of the searched range, copied verbatim.
                       events:
                         type: array
                         maxItems: 50
@@ -373,13 +677,12 @@ steps:
                               minLength: 1
                               maxLength: 2000
                               description: >
-                                What happened, with the specifics an analyst can act on: process and parent
-                                names, PIDs, acting user, command line, file paths, destination address and
-                                port, registry key, alert rule name, MITRE technique.
+                                What happened, with specifics an analyst can act on: process names, PIDs,
+                                user, command line, file paths, destination address, MITRE technique.
                   iocs:
                     type: object
                     description: >
-                      Indicators of compromise, grouped by category. Omit a category entirely when the
+                      Indicators of compromise, grouped by category. Omit a category when the
                       reconstruction found nothing in it.
                     properties:
                       # Every category is the same { value, comment } list. The shape is repeated rather
@@ -476,34 +779,49 @@ steps:
                             comment:
                               type: string
                               maxLength: 1000
-                              description: >
-                                This host's role — patient zero, encrypted domain controller,
-                                spread with no alert coverage.
+                              description: This host's role, such as patient zero or an encrypted domain controller.
                   # Required but may be empty, same as `timeline` and `iocs`.
                   recommendedActions:
                     type: array
-                    maxItems: 8
+                    maxItems: "${{ consts.max_recommended_actions }}"
                     description: >
-                      Containment this reconstruction justifies, taken from
-                      `security.alertzero.actions.list`. Empty when the evidence
-                      justifies none or the catalog returned nothing.
+                      Containment the evidence justifies, taken from `security.alertzero.actions.list`.
+                      Empty when none is justified or the catalog returned nothing.
                     items:
                       type: object
                       required:
-                        - actionId
+                        - actionWorkflowId
                         - actionInput
+                        - title
+                        - comment
                         - confidence
                       properties:
-                        actionId:
+                        actionWorkflowId:
                           type: string
+                          minLength: 1
                           maxLength: 256
                           description: >
-                            workflowId from `security.alertzero.actions.list`. Must match a catalog
+                            `workflowId` from `security.alertzero.actions.list`. Must match a catalog
                             entry exactly. Never invent an id.
+                        # 256 is the proposal step's title limit. A longer one fails the dispatch.
+                        title:
+                          type: string
+                          minLength: 1
+                          maxLength: 256
+                          description: >
+                            Short plain-text label of this action and its target, using the catalog
+                            entry's name, e.g. `Isolate host WIN-ANALYST01` or
+                            `Kill powershell.exe (PID 4212) on WIN-ANALYST01`.
+                        # Required and bounded: this is the body of the approval card. The
+                        # full assessment is in `rationale`, which is journaled once on the
+                        # investigation; a card that repeats it is too long to review.
                         comment:
                           type: string
+                          minLength: 1
                           maxLength: 500
-                          description: One sentence explaining why this action is justified.
+                          description: >
+                            One or two sentences for the analyst approving this action: the evidence
+                            it rests on and what it stops. Do not restate `rationale`.
                         # Set per action, not per run: a run can be certain about one host and
                         # only suspect another, and each action becomes its own approval card.
                         # Required because the analyst is deciding whether to disrupt a
@@ -516,28 +834,58 @@ steps:
                             How sure the agent is that this action targets the right host or process
                             and that the evidence justifies taking it now.
                         # Deliberately unconstrained: this schema is fixed before the turn begins,
-                        # but each action's real input contract (`inputSchema` on its catalog entry)
-                        # is only known after the model calls `security.alertzero.actions.list`, and
-                        # varies per action. Restating a shape here would either not fit every action
-                        # (e.g. a required `endpoint_ids` for one that takes none) or drift from the
-                        # real schema over time. `assertActionInputValid` validates the input against
-                        # the real `inputSchema` when the proposal is created instead.
+                        # but each action's real input contract (`inputSchema.properties.actionInput`
+                        # on its catalog entry) is only known after the model calls
+                        # `security.alertzero.actions.list`, and varies per action. Restating a shape
+                        # here would either not fit every action (e.g. a required `endpoint_ids` for
+                        # one that takes none) or drift from the real schema over time.
+                        # `assertActionInputValid` validates the input against that inner schema when
+                        # the proposal is created instead.
                         actionInput:
                           type: object
                           additionalProperties: true
                           description: >
-                            Input for the catalog action, shaped to satisfy that entry's `inputSchema`.
+                            Input for the catalog action, shaped to satisfy that entry's
+                            `inputSchema.properties.actionInput`. Do not wrap it in another `actionInput`.
 
-          # Timeline and IoCs are attached to the investigation; the forensic agent
-          # run itself is ephemeral (no conversation), so its ES|QL transcript never
-          # lands there. Continues on failure so a rejected attachment payload
-          # doesn't also block the assessment notes or containment proposals below.
+          # Timeline and IoCs are attached to the investigation; the assessment is a
+          # journal note rather than an attachment. The forensic agent run itself is
+          # ephemeral (no conversation), so its ES|QL transcript never lands there.
+          # Continues on failure so a rejected attachment payload doesn't also block
+          # the assessment note or containment proposals below.
           #
           # An empty reconstruction attaches too. "No events were reconstructed from the
           # available telemetry" is the answer to the question this run was dispatched to
           # ask, and both attachment types render exactly that sentence for an empty
-          # payload. Skipping the attach would leave the investigation silent instead,
-          # and silent reads as "not analyzed" rather than "analyzed, nothing found".
+          # payload.
+          - name: resolve_finding_presence
+            type: data.set
+            with:
+              timeline: "${{ steps.forensic_analysis.output.structured_output.timeline.events.size > 0 }}"
+              iocs: >-
+                ${{ steps.forensic_analysis.output.structured_output.iocs.shas.size > 0
+                  or steps.forensic_analysis.output.structured_output.iocs.ips.size > 0
+                  or steps.forensic_analysis.output.structured_output.iocs.file_paths.size > 0
+                  or steps.forensic_analysis.output.structured_output.iocs.ransom_note.size > 0
+                  or steps.forensic_analysis.output.structured_output.iocs.encryption_marker.size > 0
+                  or steps.forensic_analysis.output.structured_output.iocs.malicious_commands.size > 0
+                  or steps.forensic_analysis.output.structured_output.iocs.compromised_identities.size > 0
+                  or steps.forensic_analysis.output.structured_output.iocs.affected_hosts.size > 0 }}
+
+          - name: journal_timeline
+            type: workflow.execute
+            if: "${{ steps.resolve_finding_presence.output.timeline == true }}"
+            on-failure:
+              continue: true
+            with:
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
+              inputs:
+                author_name: "{{ consts.author_name }}"
+                conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+                message: >-
+                  Reconstructed forensic timeline for `{{ steps.resolve_host.output.host_name }}`.
+
           - name: attach_timeline
             type: ai.attachment.add
             if: >-
@@ -549,8 +897,22 @@ steps:
               id: "{{ steps.finding_ids.output.timeline }}"
               render_inline: true
               type: security.investigation.timeline
-              description: "Attack timeline: {{ steps.resolve_host.output.host_name }}"
+              description: "Attack timeline: {{ steps.resolve_host.output.host_name }} ({{ steps.forensic_analysis.output.structured_output.timeline.window.start }} to {{ steps.forensic_analysis.output.structured_output.timeline.window.end }})"
               data: "${{ steps.forensic_analysis.output.structured_output.timeline }}"
+
+          - name: journal_iocs
+            type: workflow.execute
+            if: "${{ steps.resolve_finding_presence.output.iocs == true }}"
+            on-failure:
+              continue: true
+            with:
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
+              inputs:
+                author_name: "{{ consts.author_name }}"
+                conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+                message: >-
+                  Extracted IoCs during forensic analysis of `{{ steps.resolve_host.output.host_name }}`.
 
           - name: attach_iocs
             type: ai.attachment.add
@@ -566,46 +928,193 @@ steps:
               description: Extracted indicators of compromise
               data: "${{ steps.forensic_analysis.output.structured_output.iocs }}"
 
-          - name: attach_rationale
-            type: ai.attachment.add
+          - name: journal_rationale
+            type: workflow.execute
             if: >-
               ${{ steps.forensic_analysis.error == null
                 and steps.forensic_analysis.output.structured_output.rationale != blank }}
             on-failure:
               continue: true
             with:
-              conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
-              id: "{{ steps.finding_ids.output.assessment }}"
-              render_inline: true
-              type: text
-              description: Forensic assessment
-              data:
-                content: "{{ steps.forensic_analysis.output.structured_output.rationale }}"
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
+              inputs:
+                author_name: "{{ consts.author_name }}"
+                conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+                # `#` renders larger than the `##` sections inside `rationale`. A blank line
+                # after it keeps the first section on its own line. The journal renders
+                # this user message as markdown.
+                message: |-
+                  # Endpoint analysis verdict: {{ steps.forensic_analysis.output.structured_output.verdict | default: 'unclear' | replace: '_', ' ' }}
 
-          # Containment is proposed on the investigation, not returned as run output.
-          # `executeAsync` so this run does not sit in the 72h approval gate; each
-          # proposal workflow parks on its own. Continue on failure so a single bad
-          # action cannot fail the run.
-          - name: propose_actions
-            type: foreach
-            if: "${{ steps.forensic_analysis.error == null and steps.forensic_analysis.output.structured_output.propose == true }}"
-            foreach: "${{ steps.forensic_analysis.output.structured_output.recommendedActions | default: [] }}"
-            steps:
-              - name: propose_action
-                type: workflow.executeAsync
-                with:
-                  workflow-id: system-create-investigation-proposal
-                  inputs:
-                    conversationId: "{{ steps.resolve_request.output.investigation_id }}"
-                    comment: "{{ foreach.item.comment | default: steps.forensic_analysis.output.structured_output.rationale }}"
-                    actionWorkflowId: "{{ foreach.item.actionId }}"
-                    actionInput: '${{ foreach.item.actionInput }}'
-                    # `impact` and `category` are deliberately not passed: both would override what
-                    # the action declares, and for containment they are intrinsic to the action
-                    # rather than to this run
-                    confidence: "{{ foreach.item.confidence | default: '' }}"
+                  {{ steps.forensic_analysis.output.structured_output.rationale }}
+
+          # The attack and its detection alerts are acknowledged once the analysis
+          # has run. Only `open` attacks and `open` alerts are acknowledged.
+          #
+          # The status is read again here, not taken from the fetch before the agent
+          # ran: an analyst may close the attack during the analysis, and the status
+          # route would then reopen it and drop the closing reason. The attack route
+          # has no by-query form like the alerts one, so this narrows the window
+          # without closing it. A failed read leaves the status blank, which skips
+          # the acknowledgement.
+          - name: reread_attack_status
+            type: elasticsearch.search
+            if: "${{ steps.forensic_analysis.output != null }}"
+            with:
+              index: ".alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}"
+              ignore_unavailable: true
+              size: 1
+              _source:
+                - kibana.alert.workflow_status
+              query:
+                ids:
+                  values:
+                    - "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._id }}"
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+              continue: true
+
+          - name: resolve_attack_alerts
+            type: data.set
+            with:
+              analyzed: "${{ steps.forensic_analysis.output != null }}"
+              attack_id: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._id }}"
+              attack_status: "{{ steps.reread_attack_status.output.hits.hits[0]._source['kibana.alert.workflow_status'] }}"
+              has_alerts: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] != blank }}"
+              alert_ids: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] }}"
+
+          - name: acknowledge_attack
+            type: security.setAttackStatus
+            if: >-
+              ${{ steps.resolve_attack_alerts.output.analyzed == true
+                and steps.resolve_attack_alerts.output.attack_status == 'open' }}
+            with:
+              ids:
+                - "{{ steps.resolve_attack_alerts.output.attack_id }}"
+              status: acknowledged
+              # `update_related_alerts` is false because the alerts are
+              # acknowledged below, when we can check their status first
+              update_related_alerts: false
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+              continue: true
+
+          # All related alerts, including closed ones, are tagged. Tagging does not change status.
+          - name: tag_attack_alerts
+            type: security.setAlertTags
+            if: >-
+              ${{ steps.resolve_attack_alerts.output.analyzed == true
+                and steps.resolve_attack_alerts.output.has_alerts == true }}
+            with:
+              alert_ids: "${{ steps.resolve_attack_alerts.output.alert_ids }}"
+              tags_to_add:
+                - "{{ consts.endpoint_analyzed_tag }}"
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+              continue: true
+
+          # By query, so the status check and the write are one update-by-query
+          - name: acknowledge_attack_alerts
+            type: kibana.SetAlertsStatus
+            if: >-
+              ${{ steps.resolve_attack_alerts.output.analyzed == true
+                and steps.resolve_attack_alerts.output.has_alerts == true }}
+            timeout: "60s"
+            with:
+              status: acknowledged
+              conflicts: proceed
+              query:
+                bool:
+                  filter:
+                    - ids:
+                        values: "${{ steps.resolve_attack_alerts.output.alert_ids }}"
+                    - term:
+                        kibana.alert.workflow_status: open
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+              continue: true
+
+          - name: verify_attack_alerts
+            type: elasticsearch.search
+            if: >-
+              ${{ steps.resolve_attack_alerts.output.analyzed == true
+                and steps.resolve_attack_alerts.output.has_alerts == true }}
+            with:
+              index: ".alerts-security.alerts-{{ workflow.spaceId }}"
+              size: 0
+              track_total_hits: true
+              query:
+                ids:
+                  values: "${{ steps.resolve_attack_alerts.output.alert_ids }}"
+              aggregations:
+                tagged:
+                  filter:
+                    term:
+                      kibana.alert.workflow_tags: "{{ consts.endpoint_analyzed_tag }}"
+                open:
+                  filter:
+                    term:
+                      kibana.alert.workflow_status: open
+                acknowledged:
+                  filter:
+                    term:
+                      kibana.alert.workflow_status: acknowledged
+                closed:
+                  filter:
+                    term:
+                      kibana.alert.workflow_status: closed
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+              continue: true
+
+          # Counts the alerts that were resolved
+          - name: resolve_attack_alerts_retired
+            type: data.set
+            with:
+              read: "${{ steps.verify_attack_alerts.output.hits != null }}"
+              requested: "${{ steps.resolve_attack_alerts.output.alert_ids | size | default: 0 }}"
+              tagged: "${{ steps.verify_attack_alerts.output.aggregations.tagged.doc_count | default: 0 }}"
+              open: "${{ steps.verify_attack_alerts.output.aggregations.open.doc_count | default: 0 }}"
+              acknowledged: "${{ steps.verify_attack_alerts.output.aggregations.acknowledged.doc_count | default: 0 }}"
+              closed: "${{ steps.verify_attack_alerts.output.aggregations.closed.doc_count | default: 0 }}"
+              attack_acknowledged: "${{ steps.acknowledge_attack.output.success == true }}"
+
+          # Records the counts
+          - name: journal_attack_alerts
+            type: workflow.execute
+            if: "${{ steps.resolve_attack_alerts.output.analyzed == true }}"
             on-failure:
               continue: true
+            with:
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
+              inputs:
+                author_name: "{{ consts.author_name }}"
+                conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+                message: >-
+                  {%- assign retired = steps.resolve_attack_alerts_retired.output -%}
+                  {%- if retired.attack_acknowledged == true -%}Acknowledged the attack while this Investigation waits for a decision.
+                  {%- elsif steps.resolve_attack_alerts.output.attack_status == 'open' -%}The attack could not be acknowledged and is still open. See execution `{{ execution.id }}`.
+                  {%- else -%}The attack was already `{{ steps.resolve_attack_alerts.output.attack_status | default: 'not open' }}` and was left as it was.
+                  {%- endif -%}
+                  {%- if steps.resolve_attack_alerts.output.has_alerts != true %} It lists no detection alerts.
+                  {%- elsif retired.read != true %} Could not read its {{ retired.requested }} detection alert(s) back, so whether they were tagged `{{ consts.endpoint_analyzed_tag }}` and acknowledged is unknown. See execution `{{ execution.id }}`.
+                  {%- else %} Tagged {{ retired.tagged }} of its {{ retired.requested }} detection alert(s) `{{ consts.endpoint_analyzed_tag }}`. Acknowledged: {{ retired.acknowledged }}
+                  {%- if retired.closed > 0 %}; already closed and left as they were: {{ retired.closed }}{% endif -%}
+                  {%- if retired.open > 0 %}; still open, because acknowledging them did not land: {{ retired.open }}{% endif %}.
+                  {%- if retired.tagged < retired.requested or retired.open > 0 %} See execution `{{ execution.id }}`.{% endif -%}
+                  {%- endif -%}
 
         else:
           - name: journal_no_host
@@ -615,8 +1124,10 @@ steps:
             # sweep retries this lookup, which is still before the agent.
             if: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._id != blank }}"
             with:
-              workflow-id: "{{ consts.journal_note }}"
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
               inputs:
+                author_name: "{{ consts.author_name }}"
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 message: >-
                   Could not resolve a host for Attack Discovery alert `{{ steps.resolve_request.output.attack_discovery_alert_id }}`.
@@ -638,8 +1149,10 @@ steps:
         on-failure:
           continue: true
         with:
-          workflow-id: "{{ consts.journal_note }}"
+          workflow-id: system-alertzero-journal-note
+          run-as-mode: inherit
           inputs:
+            author_name: "{{ consts.author_name }}"
             conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
             message: >-
               Indicator `{{ inputs.ki_id }}` names no Attack Discovery alert, so endpoint
@@ -661,21 +1174,21 @@ steps:
               status: invalid
               invalid_reason: "Missing attack_discovery_alert_id or investigation_id"
 
-      # The other way into this branch: the indicator is well-formed, but its
-      # investigation could not be read. `failed` rather than `invalid` since
-      # the problem is on the investigation's end, not the indicator's. Still
-      # retired, since a retry won't fix a deleted or unshared investigation,
-      # and leaving it pending would keep re-dispatching it every minute.
-      - name: mark_unreachable
-        type: context-engine.updateKi
-        if: "${{ steps.resolve_request.output.has_request == true }}"
-        with:
-          ai_index_id: "{{ inputs.ai_index_id }}"
-          ki_id: "{{ inputs.ki_id }}"
-          ki:
-            attributes:
-              status: failed
-              failure_reason: "Could not read investigation {{ steps.resolve_request.output.investigation_id }}"
+  # Indicator is well-formed, but its investigation could not be read. Mark
+  # `failed` rather than `invalid` since the problem is on the investigation's end.
+  # Still retired, since a retry won't fix a deleted or unshared investigation
+  - name: mark_unreachable
+    type: context-engine.updateKi
+    if: >-
+      ${{ steps.resolve_request.output.has_request == true
+        and steps.verify_investigation.output.metadata == null }}
+    with:
+      ai_index_id: "{{ inputs.ai_index_id }}"
+      ki_id: "{{ inputs.ki_id }}"
+      ki:
+        attributes:
+          status: failed
+          failure_reason: "Could not read investigation {{ steps.resolve_request.output.investigation_id }}"
 
   # Reads back what's actually on the investigation instead of trusting the
   # add steps' output, because the adds continue on failure so we cannot
@@ -696,45 +1209,508 @@ steps:
     with:
       attached: >-
         ${{ steps.resolve_written_findings.output.ids contains steps.finding_ids.output.timeline
-          and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs
-          and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.assessment }}
-      # Findings only exist when a host was known, since that's the only branch
-      # where the agent runs. So no host means no findings is the correct
+          and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs }}
+      # Findings only exist when a host was known and had Defend telemetry, since
+      # that's the only path where the agent runs. So no host, or a host with
+      # nothing in `logs-endpoint.events.*`, means no findings is the correct
       # outcome, not a failure — and no retry will resolve a host that the
-      # discovery and its constituent alerts never named. One or two of this
-      # indicator's attachments is a partial write, not a finished run.
+      # discovery and its constituent alerts never named, or produce telemetry
+      # that was never shipped. `checked` keeps a run that did not look (findings
+      # already attached, or a recorded attempt) from reading as "no telemetry".
+      # One of this indicator's attachments is a partial write, not a finished
+      # run. The assessment is a journal note and is not part of this check.
       settled: >-
         ${{ (steps.resolve_written_findings.output.ids contains steps.finding_ids.output.timeline
+          and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs)
+          or steps.resolve_host.output.host_name == blank
+          or (steps.resolve_endpoint_telemetry.output.checked == true
+            and steps.resolve_endpoint_telemetry.output.present != true) }}
+      # Both findings are on the investigation, but not from this run: an
+      # earlier run attached them and never recorded how it ended, whether
+      # because its verdict write failed or because it died between the
+      # attachments and the verdict. This run has no agent output to check the
+      # proposals against, so it cannot vouch for them, and must not retire the
+      # indicator as `processed` on their behalf.
+      outcome_unrecorded: >-
+        ${{ steps.resolve_written_findings.output.ids contains steps.finding_ids.output.timeline
           and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs
-          and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.assessment)
-          or steps.resolve_host.output.host_name == blank }}
+          and steps.forensic_analysis.output == null }}
+
+  # The worker writes this onto the indicator before dispatch. A missing
+  # attribute fails closed to manual.
+  - name: resolve_autonomy
+    type: data.set
+    with:
+      level: "{{ steps.read_ki.output.hits.hits[0]._source.attributes.autonomy | default: consts.default_autonomy }}"
+
+  # Turns the agent's verdict into the values the later steps need.
+  #
+  # A `not_an_incident` verdict does two things:
+  #   - No containment is proposed (see `resolve_proposal_slots`).
+  #   - The analyst is asked whether to close the investigation as a false
+  #     positive.
+  #
+  # If the analyst approves the close, it is recorded with these reasons, which
+  # the close gate shows on its card:
+  #   - `not_an_incident`: `false_positive` for the case and the alerts.
+  #   - `confirmed_incident`: `resolved` for the case, `true_positive` for the
+  #     alerts.
+  #   - `unclear`, or no verdict: `other` for both.
+  - name: resolve_verdict
+    type: data.set
+    with:
+      value: "{% if steps.forensic_analysis.output != null %}{{ steps.forensic_analysis.output.structured_output.verdict | default: 'unclear' }}{% endif %}"
+      not_an_incident: "${{ steps.forensic_analysis.output.structured_output.verdict == 'not_an_incident' }}"
+      close_reason: "{% assign verdict = steps.forensic_analysis.output.structured_output.verdict %}{% if verdict == 'not_an_incident' %}false_positive{% elsif verdict == 'confirmed_incident' %}resolved{% else %}other{% endif %}"
+      attack_reason: "{% assign verdict = steps.forensic_analysis.output.structured_output.verdict %}{% if verdict == 'not_an_incident' %}false_positive{% elsif verdict == 'confirmed_incident' %}true_positive{% else %}other{% endif %}"
+      assessment: "{{ steps.forensic_analysis.output.structured_output.rationale | split: '## ' | first | strip | truncate: 500 }}"
+      # How many detection alerts an approved close can reach, for the card.
+      attack_alert_count: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] | size | default: 0 }}"
+
+  # Two Investigations can reach the same host and recommend the same
+  # containment. For each recommendation, this step checks whether a live
+  # AlertZero Proposal already holds it, from any Investigation, Hunt or
+  # Forensics. It returns `proposals` to create (each with its id), `converged`
+  # to leave alone (each with a journal line), and `expectedProposalCount`, the
+  # gate's creation barrier, which is at least the approved handoff that
+  # requested this analysis. Same code Hunt's packaging runs.
+  #
+  # Fails closed: if existing Proposals cannot be read (or the step throws),
+  # `mintSuppression` is `check_failed`, nothing is created, and
+  # `resolve_proposals` below retires the indicator as failed.
+  #
+  # Skipped when verdict is `not_an_incident` verdict
+  - name: resolve_proposal_slots
+    type: alertzero.resolveProposals
+    if: >-
+      ${{ steps.resolve_run_outcome.output.attached == true
+        and steps.resolve_verdict.output.not_an_incident != true
+        and steps.forensic_analysis.output.structured_output.propose == true
+        and steps.forensic_analysis.output.structured_output.recommendedActions.size > 0 }}
+    with:
+      investigationConversationId: "{{ steps.resolve_request.output.investigation_id }}"
+      proposals: "${{ steps.forensic_analysis.output.structured_output.recommendedActions }}"
+    on-failure:
+      continue: true
+
+  # Every later step keys off these. All `0`/`false` when the step above was
+  # skipped, so none of them fires.
+  - name: resolve_proposal_counts
+    type: data.set
+    with:
+      new_count: "${{ steps.resolve_proposal_slots.output.proposals | size }}"
+      converged_count: "${{ steps.resolve_proposal_slots.output.converged | size }}"
+      already_open_count: "${{ steps.resolve_proposal_slots.output.alreadyOpenCount | default: 0 }}"
+      check_failed: >-
+        ${{ steps.resolve_proposal_slots.output.mintSuppression == 'check_failed'
+          or (steps.resolve_proposal_slots.error != nil and steps.resolve_proposal_slots.error != empty) }}
+
+  # Written before any proposal starts. Each proposal posts its own comment as
+  # soon as it reaches the approval gate, and those runs are asynchronous, so a
+  # note after the dispatch lands among them. The count is the list about to be
+  # queued; a rejection after this is `journal_proposals_lost`.
+  #
+  # Also where the dedup totals are reported. A failed check is journaled by
+  # `journal_proposals_lost` instead.
+  - name: journal_proposals_queued
+    type: workflow.execute
+    if: >-
+      ${{ steps.resolve_request.output.has_request == true
+        and steps.verify_investigation.output.metadata != null
+        and steps.resolve_run_outcome.output.attached == true
+        and steps.resolve_verdict.output.not_an_incident != true
+        and steps.forensic_analysis.output.structured_output.propose == true
+        and steps.forensic_analysis.output.structured_output.recommendedActions.size > 0
+        and steps.resolve_proposal_counts.output.check_failed != true }}
+    on-failure:
+      continue: true
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        author_name: "{{ consts.author_name }}"
+        conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+        message: |-
+          {%- assign new_count = steps.resolve_proposal_counts.output.new_count -%}
+          {%- assign converged_count = steps.resolve_proposal_counts.output.converged_count -%}
+          {%- assign already_open_count = steps.resolve_proposal_counts.output.already_open_count -%}
+          {%- if new_count > 0 -%}
+          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` is submitting {{ new_count }} containment proposal(s)
+          {%- if steps.resolve_autonomy.output.level == 'supervised' %} for auto-approval{% else %} for analyst approval{% endif %}.
+          {%- else -%}
+          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` found containment worth proposing, but every proposal it would have raised already exists, so none was created.
+          {%- endif -%}
+          {%- if converged_count > 0 %} {{ converged_count }} already raised by another Investigation.{% endif -%}
+          {%- if already_open_count > 0 %} {{ already_open_count }} already open on this investigation.{% endif -%}
+          {%- if new_count > 0 or already_open_count > 0 %} Once every proposal on it has been decided, you are asked whether to close the investigation.{% else %} You are asked next whether to close the investigation.{% endif -%}
+
+  # Containment is proposed on the investigation, not returned as run output.
+  # `executeAsync` so this run does not sit in the 72h approval gate; each
+  # gate parks on its own. Continue on failure so a single bad action cannot
+  # fail the run. Runs after investigation items are attached. `parallel` with
+  # `settled` keeps every dispatch's outcome: `foreach` would keep only the last
+  # one, and continuing on failure would clear a rejection.
+  #
+  # The `if` gates the whole step, including `foreach`. `| default: []` does not
+  # produce an array in this engine, and `foreach` hard-fails when its source is
+  # missing. The step runs only when the list has items, so a missing or empty
+  # list skips the fan-out instead of failing the run after the agent.
+  #
+  # Iterates what `resolve_proposal_slots` returned to create, not the agent's
+  # list: a recommendation a live Proposal already holds is not dispatched.
+  - name: propose_actions
+    type: parallel
+    if: "${{ steps.resolve_proposal_counts.output.new_count > 0 }}"
+    foreach: "${{ steps.resolve_proposal_slots.output.proposals }}"
+    mode: settled
+    concurrency:
+      # must use a literal until https://github.com/elastic/security-team/issues/19967 is fixed
+      max: 8
+    steps:
+      - name: propose_action
+        type: workflow.executeAsync
+        with:
+          # The gate rather than the bridge: it wraps the bridge (so `origin` is
+          # still stamped there) and, once every proposal on the investigation is
+          # approved, dismissed or otherwise settled, asks the analyst whether to
+          # close it. Without it the investigation stayed open after the last
+          # decision with nobody asked.
+          workflow-id: system-security-forensics-proposal-gate
+          run-as-mode: inherit
+          inputs:
+            conversationId: "{{ steps.resolve_request.output.investigation_id }}"
+            investigationConversationId: "{{ steps.resolve_request.output.investigation_id }}"
+            # The deterministic id the slot was resolved under. Two runs that race over
+            # one subject compute the same id, and the Proposals service lets only one
+            # create it. Without it the next run could never find this Proposal.
+            proposalId: "{{ foreach.item.proposalId }}"
+            expectedProposalCount: "${{ steps.resolve_proposal_slots.output.expectedProposalCount }}"
+            # Without this the proposal stores the action's own name, so two isolates
+            # of different hosts share one label. Truncated to the proposal step's
+            # title limit: a longer one fails the dispatch.
+            title: '{{ foreach.item.title | truncate: 256, "" }}'
+            # The per-action comment, not the run's `rationale`: the rationale is the
+            # whole assessment (up to 7900 characters) and is already journaled on the
+            # investigation, so repeating it on each card buries the one sentence the
+            # analyst needs. The schema requires a non-empty comment; the fallback only
+            # keeps a card readable if a blank slips through, since the bridge rejects
+            # a proposal with no comment.
+            comment: "{{ foreach.item.comment | default: foreach.item.title }}"
+            actionWorkflowId: "{{ foreach.item.actionWorkflowId }}"
+            actionInput: '${{ foreach.item.actionInput }}'
+            # `impact` and `category` are deliberately not passed: both would override what
+            # the action declares, and for containment they are intrinsic to the action
+            # rather than to this run
+            confidence: "{{ foreach.item.confidence | default: '' }}"
+            autoApprove: "${{ steps.resolve_autonomy.output.level == 'supervised' }}"
+            # For the close question the gate asks once everything has settled:
+            # which attack goes with the investigation, and what an approved close
+            # records. The question itself is gated whatever `autoApprove` says.
+            attackDiscoveryId: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._id }}"
+            closeReason: "{{ steps.resolve_verdict.output.close_reason }}"
+            attackReason: "{{ steps.resolve_verdict.output.attack_reason }}"
+            assessment: "{{ steps.resolve_verdict.output.assessment }}"
+            attackAlertCount: "${{ steps.resolve_verdict.output.attack_alert_count }}"
+
+  # Journals a note for each recommendation that was not created because a live
+  # Proposal from another Investigation already holds it. `resolve_proposal_slots`
+  # wrote each note's text: which Proposal took the recommendation, and whether
+  # this Investigation was added to that Proposal's comment. This step only posts
+  # the notes. `mode: settled` so one failed note does not stop the others.
+  - name: write_convergence_notes
+    type: parallel
+    if: "${{ steps.resolve_proposal_counts.output.converged_count > 0 }}"
+    foreach: "${{ steps.resolve_proposal_slots.output.converged }}"
+    mode: settled
+    concurrency:
+      max: 5
+    steps:
+      - name: write_convergence_note
+        type: workflow.execute
+        with:
+          workflow-id: system-alertzero-journal-note
+          run-as-mode: inherit
+          inputs:
+            author_name: "{{ consts.author_name }}"
+            conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+            message: "{{ foreach.item.note }}"
+
+  # The agent said `not_an_incident` and still listed containment.
+  # Do not propose any containment actions, but journal that they were listed.
+  - name: journal_verdict_dropped_actions
+    type: workflow.execute
+    if: >-
+      ${{ steps.resolve_run_outcome.output.attached == true
+        and steps.resolve_verdict.output.not_an_incident == true
+        and steps.forensic_analysis.output.structured_output.recommendedActions.size > 0 }}
+    on-failure:
+      continue: true
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        author_name: "{{ consts.author_name }}"
+        conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+        message: >-
+          Verdict was not an incident; {{ steps.forensic_analysis.output.structured_output.recommendedActions | size }}
+          recommended action(s) were not proposed.
+
+  # When the agent proposes no new actions or the verdict is `not_an_incident`,
+  # ask the close question here. Otherwise the close question will get asked by
+  # the containment gate once its proposals are all decided.
+  - name: journal_close_question
+    type: workflow.execute
+    if: >-
+      ${{ steps.resolve_run_outcome.output.attached == true
+        and steps.forensic_analysis.output != null
+        and steps.resolve_proposal_counts.output.new_count == 0
+        and steps.resolve_proposal_counts.output.already_open_count == 0
+        and steps.resolve_proposal_counts.output.check_failed != true }}
+    on-failure:
+      continue: true
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        author_name: "{{ consts.author_name }}"
+        conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+        message: >-
+          {%- if steps.resolve_verdict.output.not_an_incident == true -%}
+          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` found no real incident, so
+          no containment was proposed. You are asked next whether to close this investigation, the
+          attack and its alerts as a false positive.
+          {%- else -%}
+          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` is done and queued no
+          containment proposal here. You are asked next whether to close this investigation.
+          {%- endif -%}
+
+  - name: dispatch_close_gate
+    type: workflow.executeAsync
+    if: >-
+      ${{ steps.resolve_run_outcome.output.attached == true
+        and steps.forensic_analysis.output != null
+        and steps.resolve_proposal_counts.output.new_count == 0
+        and steps.resolve_proposal_counts.output.already_open_count == 0
+        and steps.resolve_proposal_counts.output.check_failed != true }}
+    on-failure:
+      continue: true
+    with:
+      workflow-id: system-security-forensics-close-investigation-gate
+      run-as-mode: inherit
+      inputs:
+        investigationConversationId: "{{ steps.resolve_request.output.investigation_id }}"
+        attackDiscoveryId: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._id }}"
+        closeReason: "{{ steps.resolve_verdict.output.close_reason }}"
+        attackReason: "{{ steps.resolve_verdict.output.attack_reason }}"
+        assessment: "{{ steps.resolve_verdict.output.assessment }}"
+        attackAlertCount: "${{ steps.resolve_verdict.output.attack_alert_count }}"
+
+  # `0` when the step did not run: no host, findings did not land, the agent
+  # did not propose, or the list was empty. A later check treats only a real
+  # rejection as lost.
+  - name: resolve_proposal_dispatch
+    type: data.set
+    with:
+      failed: "${{ steps.propose_actions.output.failed | default: 0 }}"
+
+  # Counted after the dispatch. Putting this on `resolve_run_outcome` would
+  # always see zero failures, and a rejected proposal would still retire the
+  # indicator as processed. The recommendation exists only in this agent
+  # output, so a later sweep would skip the agent and never queue it.
+  #
+  # A failed dedup check counts as lost for the same reason: nothing was
+  # created, and a retry would skip the agent and never queue it either.
+  - name: resolve_proposals
+    type: data.set
+    with:
+      proposals_lost: >-
+        ${{ steps.forensic_analysis.output.structured_output.propose == true
+          and (steps.resolve_proposal_dispatch.output.failed > 0
+            or steps.resolve_proposal_counts.output.check_failed == true) }}
+
+  # Telemetry: the verdict this run reached, decided by this point and in the same order as the
+  # `mark_*` writes below. Before them because a write that fails the run would otherwise lose
+  # the report of the run that did the work; its retry then reports again, as reused.
+  - name: report_analysis_completed
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: endpoint_analysis_completed
+      analysis_outcome: |-
+        {%- if steps.read_ki.output.hits.hits[0]._id == blank -%}
+        not_pending
+        {%- elsif steps.resolve_request.output.has_request != true -%}
+        invalid
+        {%- elsif steps.verify_investigation.output.metadata == null -%}
+        unreachable
+        {%- elsif steps.resolve_run_outcome.output.settled != true -%}
+        failed
+        {%- elsif steps.resolve_proposals.output.proposals_lost == true -%}
+        proposals_lost
+        {%- elsif steps.resolve_run_outcome.output.outcome_unrecorded == true -%}
+        failed
+        {%- elsif steps.resolve_host.output.host_name == blank -%}
+        no_host
+        {%- else -%}
+        processed
+        {%- endif -%}
+      reused_prior_assessment: "${{ steps.resolve_prior_assessment.output.count == 2 }}"
+      host_resolved: "${{ steps.resolve_host.output.host_name != blank }}"
+      agent_failed: "${{ steps.forensic_analysis.error != null }}"
+      timeline_found: "${{ steps.resolve_finding_presence.output.timeline == true }}"
+      iocs_found: "${{ steps.resolve_finding_presence.output.iocs == true }}"
+      findings_attached: "${{ steps.resolve_run_outcome.output.attached == true }}"
+      actions_recommended: "${{ steps.forensic_analysis.output.structured_output.recommendedActions | size }}"
+      proposals_dispatched: "${{ steps.propose_actions.output.succeeded | default: 0 }}"
+      proposals_dispatch_failed: "${{ steps.resolve_proposal_dispatch.output.failed | default: 0 }}"
+      # Only a gate a proposal reached was asked to auto-approve.
+      auto_approve_requested: "${{ steps.resolve_autonomy.output.level == 'supervised' and steps.propose_actions.output.succeeded > 0 }}"
 
   # Retiring the indicator so that the sweep stops picking it up.
-  # Do this before the four terminal writes which do NOT continue on failure.
-  # Instead of swallowing these failures and reporting a falsely-completed
-  # run, the we fail the run. The failure shows up in the execution record,
-  # and the next sweep retries just the write. This is cheap since
-  # `resolve_prior_assessment` skips the agent once findings are already attached.
-
-  # Only `attributes.status` is written. `attributes` merges on update; `tags`
-  # is a list and a partial update would replace the full list.
+  # The verdict writes below do not continue on failure. Instead of swallowing
+  # these failures and reporting a falsely-completed run, we fail the run. The
+  # failure shows up in the execution record, and the next sweep re-dispatches.
+  # That retry skips the agent (`resolve_prior_assessment` finds both findings),
+  # but it also has nothing to check the assessment or the proposals against,
+  # so it lands on `mark_outcome_unrecorded` rather than here. Each verdict
+  # write therefore retries in place first: a short context-engine blip should
+  # not cost the verdict.
+  # `attributes` merges on update; `tags` is a list and a partial update would
+  # replace the full list. The verdict goes on the indicator with the status, so
+  # a false positive the analysis determined is on record even before the
+  # analyst answers the close question. Blank when no analysis ran.
   - name: mark_processed
     type: context-engine.updateKi
     if: >-
       ${{ steps.resolve_request.output.has_request == true
         and steps.verify_investigation.output.metadata != null
-        and steps.resolve_run_outcome.output.settled == true }}
+        and steps.resolve_run_outcome.output.settled == true
+        and steps.resolve_run_outcome.output.outcome_unrecorded != true
+        and steps.resolve_proposals.output.proposals_lost != true }}
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
     with:
       ai_index_id: "{{ inputs.ai_index_id }}"
       ki_id: "{{ inputs.ki_id }}"
       ki:
         attributes:
           status: processed
+          forensic_verdict: "{{ steps.resolve_verdict.output.value }}"
+
+  # Findings are on the investigation, but at least one containment proposal
+  # never reached the queue. Document this then retire the indicator.
+  - name: journal_proposals_lost
+    type: workflow.execute
+    if: >-
+      ${{ steps.resolve_request.output.has_request == true
+        and steps.verify_investigation.output.metadata != null
+        and steps.resolve_run_outcome.output.settled == true
+        and steps.resolve_proposals.output.proposals_lost == true }}
+    on-failure:
+      continue: true
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        author_name: "{{ consts.author_name }}"
+        conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+        message: >-
+          {%- if steps.resolve_proposal_counts.output.check_failed == true -%}
+          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` attached its findings
+          and found containment worth proposing, but could not check whether those proposals
+          already exist, so none was created. The indicator was retired and will not be retried.
+          {%- else -%}
+          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` attached its findings,
+          but {{ steps.resolve_proposal_dispatch.output.failed }} containment proposal(s) did not
+          reach the approval queue. The indicator was retired and will not be retried.
+          {%- endif -%}
+
+  - name: mark_proposals_failed
+    type: context-engine.updateKi
+    if: >-
+      ${{ steps.resolve_request.output.has_request == true
+        and steps.verify_investigation.output.metadata != null
+        and steps.resolve_run_outcome.output.settled == true
+        and steps.resolve_proposals.output.proposals_lost == true }}
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
+    with:
+      ai_index_id: "{{ inputs.ai_index_id }}"
+      ki_id: "{{ inputs.ki_id }}"
+      ki:
+        attributes:
+          status: failed
+          failure_reason: >-
+            {%- if steps.resolve_proposal_counts.output.check_failed == true -%}
+            Could not check for existing proposals on investigation
+            {{ steps.resolve_request.output.investigation_id }}, so none was created
+            {%- else -%}
+            Containment proposals did not reach the queue for investigation
+            {{ steps.resolve_request.output.investigation_id }}
+            {%- endif -%}
+
+  # An earlier run attached the findings and never recorded its verdict. The
+  # assessment note and the containment proposals exist only in that run's
+  # agent output; this run cannot re-check or redo them (a redo would duplicate
+  # whichever proposals did land). So it does not claim `processed`: it says
+  # what it knows and retires the indicator as `failed` so someone looks.
+  # The investigation already holds whatever that run managed to write.
+  - name: journal_outcome_unrecorded
+    type: workflow.execute
+    if: >-
+      ${{ steps.resolve_request.output.has_request == true
+        and steps.verify_investigation.output.metadata != null
+        and steps.resolve_run_outcome.output.outcome_unrecorded == true }}
+    on-failure:
+      continue: true
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        author_name: "{{ consts.author_name }}"
+        conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+        message: >-
+          An earlier endpoint analysis of `{{ steps.resolve_host.output.host_name }}` attached its
+          findings here but did not record how it ended. Its assessment and any containment
+          proposals should be checked against the notes above. The indicator was retired and
+          will not be retried.
+
+  - name: mark_outcome_unrecorded
+    type: context-engine.updateKi
+    if: >-
+      ${{ steps.resolve_request.output.has_request == true
+        and steps.verify_investigation.output.metadata != null
+        and steps.resolve_run_outcome.output.outcome_unrecorded == true }}
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
+    with:
+      ai_index_id: "{{ inputs.ai_index_id }}"
+      ki_id: "{{ inputs.ki_id }}"
+      ki:
+        attributes:
+          status: failed
+          failure_reason: >-
+            Findings reached investigation {{ steps.resolve_request.output.investigation_id }}
+            from an earlier run that did not record its outcome; assessment and proposals unverified
 
   # The investigation needs to hear how this analysis ended — every other
   # problem path already narrates itself, but this one didn't, even though
-  # it's the step that takes 15m and is most likely to fail. Without this,
+  # it's the step that takes 30m and is most likely to fail. Without this,
   # silence would read as "never analyzed" instead of "analyzed, found nothing."
+  #
+  # The note names which case it was and links the execution. It does not include
+  # `error.message`: a later agent round reads this journal as user input, and the
+  # error itself stays on the execution.
   - name: journal_analysis_problem
     type: workflow.execute
     if: >-
@@ -744,12 +1720,15 @@ steps:
     on-failure:
       continue: true
     with:
-      workflow-id: "{{ consts.journal_note }}"
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
         message: >-
           Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` left no findings on this investigation.
-          {% if steps.forensic_analysis.error != null %}The forensic agent failed: {{ steps.forensic_analysis.error.message }}{% elsif steps.resolve_request.output.forensic_attempted_at != blank %}A previous attempt did not finish, so this run did not start another analysis.{% else %}The analysis finished but none of its findings could be attached.{% endif %}
+          {% if steps.forensic_analysis.error != null %}The forensic agent failed.{% elsif steps.resolve_request.output.forensic_attempted_at != blank %}A previous attempt did not finish, so this run did not start another analysis.{% else %}The analysis finished but none of its findings could be attached.{% endif %}
+          See execution `{{ execution.id }}` ([full per-stage detail]({{ execution.url }})).
 
   # The run had a host to analyze but still landed no findings — e.g. no
   # OWNER access on the conversation, a deleted investigation, a rejected
@@ -762,6 +1741,11 @@ steps:
       ${{ steps.resolve_request.output.has_request == true
         and steps.verify_investigation.output.metadata != null
         and steps.resolve_run_outcome.output.settled != true }}
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
     with:
       ai_index_id: "{{ inputs.ai_index_id }}"
       ki_id: "{{ inputs.ki_id }}"
@@ -779,3 +1763,8 @@ steps:
       # Reported so a run that analyzed a host but landed nothing on the investigation
       # is visible from its own output, which is what makes the handoff desk-testable.
       attachments_written: "${{ steps.resolve_run_outcome.output.attached == true }}"
+      # How the recommendations split: created on this investigation, or already
+      # held by another Investigation's Proposal. Submitted excludes the ones the
+      # dispatch rejected, so it is what reached the queue, not what was dispatched.
+      proposals_submitted: "${{ steps.resolve_proposal_counts.output.new_count | default: 0 | minus: steps.resolve_proposal_dispatch.output.failed | at_least: 0 }}"
+      proposals_converged: "${{ steps.resolve_proposal_counts.output.converged_count | default: 0 }}"

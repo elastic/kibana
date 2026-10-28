@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import type { SignificantEventsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
+import type { SignificantEventsMaintenanceService } from '../lib/maintenance/maintenance_service';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { registerAgentBuilderAttachments } from './attachments/register_attachments';
 
@@ -31,19 +32,22 @@ export const registerStreamsAgentBuilder = async ({
   server,
   logger,
   telemetry,
+  maintenanceService,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: SignificantEventsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
+  maintenanceService: Pick<SignificantEventsMaintenanceService, 'getState'>;
 }): Promise<void> => {
-  registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
+  registerAgentBuilderAttachments({ agentBuilder, getScopedClients, server, logger });
   registerAgentBuilderTools({
     agentBuilder,
     getScopedClients,
     server,
     logger,
     telemetry,
+    maintenanceService,
   });
 };

@@ -52,11 +52,11 @@ export const useTriggerInvestigation = ({
   const queryClient = useQueryClient();
 
   const mutation = useMutation<TriggerInvestigationResult, Error, string>({
-    mutationFn: (eventUuid: string) =>
+    mutationFn: (eventId: string) =>
       significantEventsRepositoryClient.fetch(
         'POST /internal/significant_events/events/{id}/investigate',
         {
-          params: { path: { id: eventUuid } },
+          params: { path: { id: eventId } },
           signal: null,
         }
       ),
@@ -79,7 +79,7 @@ export const useTriggerInvestigation = ({
   });
 
   return {
-    triggerInvestigation: (eventUuid: string) => mutation.mutate(eventUuid),
+    triggerInvestigation: (eventId: string) => mutation.mutate(eventId),
     isTriggering: mutation.isLoading,
   };
 };

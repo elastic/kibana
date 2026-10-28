@@ -12,6 +12,10 @@ import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onb
 import { cancelKiIdentificationToolHandler } from './handler';
 
 describe('cancelKiIdentificationToolHandler', () => {
+  const getSourcesClient = jest.fn().mockResolvedValue({
+    get: jest.fn().mockResolvedValue({ source: { id: 'logs.nginx', slug: 'logs-nginx' } }),
+  });
+
   it('cancels the latest workflow execution and returns cancel status', async () => {
     const managementApi = {
       getWorkflowExecutions: jest.fn().mockResolvedValue({
@@ -21,13 +25,15 @@ describe('cancelKiIdentificationToolHandler', () => {
     };
     const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
-      managementApi: managementApi as never,
+      managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry,
+      getSourcesClient,
     });
     const request = httpServerMock.createKibanaRequest();
 
     const result = await cancelKiIdentificationToolHandler({
-      streamName: 'logs.nginx',
+      sourceId: 'logs.nginx',
+      sourceSlug: 'logs-nginx',
       streamsKIsOnboardingClient,
       request,
     });
@@ -38,7 +44,6 @@ describe('cancelKiIdentificationToolHandler', () => {
       request
     );
     expect(result).toEqual({
-      stream_name: 'logs.nginx',
       execution_id: 'exec-1',
       status: SignificantEventsWorkflowStatus.Canceled,
     });
@@ -51,20 +56,21 @@ describe('cancelKiIdentificationToolHandler', () => {
     };
     const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
-      managementApi: managementApi as never,
+      managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry,
+      getSourcesClient,
     });
     const request = httpServerMock.createKibanaRequest();
 
     const result = await cancelKiIdentificationToolHandler({
-      streamName: 'logs.nginx',
+      sourceId: 'logs.nginx',
+      sourceSlug: 'logs-nginx',
       streamsKIsOnboardingClient,
       request,
     });
 
     expect(managementApi.cancelWorkflowExecution).not.toHaveBeenCalled();
     expect(result).toEqual({
-      stream_name: 'logs.nginx',
       execution_id: null,
       status: SignificantEventsWorkflowStatus.Canceled,
     });

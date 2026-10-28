@@ -15,7 +15,24 @@ it('returns the centralized investigation availability result', async () => {
   const request = {};
 
   await expect(
-    handler({ request, getInvestigationsClient: () => ({ isAvailable }) } as never)
+    handler({
+      request,
+      params: {},
+      getInvestigationsClient: () => ({ isAvailable }),
+    } as never)
   ).resolves.toEqual({ available: true });
-  expect(isAvailable).toHaveBeenCalled();
+  expect(isAvailable).toHaveBeenCalledWith(undefined);
+});
+
+it('honors connector_id and reports an unknown model as unavailable', async () => {
+  const isAvailable = jest.fn().mockResolvedValue(false);
+
+  await expect(
+    handler({
+      request: {},
+      params: { query: { connector_id: 'missing-model' } },
+      getInvestigationsClient: () => ({ isAvailable }),
+    } as never)
+  ).resolves.toEqual({ available: false });
+  expect(isAvailable).toHaveBeenCalledWith('missing-model');
 });

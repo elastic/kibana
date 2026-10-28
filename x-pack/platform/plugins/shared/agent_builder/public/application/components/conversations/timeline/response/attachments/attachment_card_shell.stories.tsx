@@ -118,7 +118,7 @@ const defaultActions = [
 ];
 
 const meta: Meta<typeof Shell> = {
-  title: 'Agent Builder Attachment Cards/Card Shell',
+  title: 'Conversations/Timeline/Attachments/Card Shell',
   component: Shell,
 };
 export default meta;

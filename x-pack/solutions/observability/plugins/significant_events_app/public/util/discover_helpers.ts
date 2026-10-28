@@ -7,8 +7,9 @@
 
 import { esql } from '@elastic/esql';
 import type { TimeState } from '@kbn/es-query';
-import { getSourcesForStream, type Streams } from '@kbn/streams-schema';
-import { conditionToESQLAst, type Condition } from '@kbn/streamlang';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
+import { conditionToESQLFilterAst } from '@kbn/nightshift-shared';
+import type { Condition } from '@kbn/streamlang';
 import type { TimeRange } from '@kbn/es-query';
 
 export function buildDiscoverParams(esqlQuery: string, timeRange: TimeRange) {
@@ -24,13 +25,13 @@ export function buildDiscoverParams(esqlQuery: string, timeRange: TimeRange) {
   };
 }
 
+/** Opens a feature in Discover over the source's view, so the source's own filters apply. */
 export function buildFeatureDiscoverParams(
-  stream: Streams.all.Definition,
+  source: Pick<NightshiftSource, 'view_name'>,
   filter: Condition,
   timeState: TimeState
 ) {
-  const sources = getSourcesForStream(stream);
-  const query = esql.from(sources).pipe`WHERE ${conditionToESQLAst(filter)}`;
+  const query = esql.from([source.view_name]).pipe`WHERE ${conditionToESQLFilterAst(filter)}`;
   query.addSetCommand('unmapped_fields', 'LOAD');
 
   return {

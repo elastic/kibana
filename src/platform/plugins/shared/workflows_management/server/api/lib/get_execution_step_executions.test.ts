@@ -133,9 +133,24 @@ describe('getExecutionStepExecutions', () => {
     expect(result.stepExecutionListResult).toEqual({ results: [], total: 1, page: 2, size: 100 });
   });
 
-  it('returns empty results with full total when the page mget exceeds the size limit', async () => {
+  it('propagates a page mget size error instead of returning a successful empty page', async () => {
     mockParent(['a', 'b']);
-    mockStepDataClient.getByIds.mockRejectedValue(sizeExceededError());
+    const error = sizeExceededError();
+    mockStepDataClient.getByIds.mockRejectedValue(error);
+
+    await expect(
+      getExecutionStepExecutions({
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
+        logger: mockLogger,
+        ...baseParams,
+      })
+    ).rejects.toBe(error);
+  });
+
+  it('preserves a successful empty mget page when step documents are missing', async () => {
+    mockParent(['a', 'b']);
+    mockStepDataClient.getByIds.mockResolvedValue(createMockGetExecutionsByIdsResponse([]));
 
     const result = await getExecutionStepExecutions({
       workflowExecutionsDataClient: mockWorkflowDataClient,
@@ -144,11 +159,7 @@ describe('getExecutionStepExecutions', () => {
       ...baseParams,
     });
 
-    expect(result.stepExecutionListResult.results).toEqual([]);
-    expect(result.stepExecutionListResult.total).toBe(2);
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      'Failed to get workflow execution exec-1 with steps: Elasticsearch response exceeded the maximum size Kibana can process (page=1, size=100)'
-    );
+    expect(result.stepExecutionListResult).toEqual({ results: [], total: 2, page: 1, size: 100 });
   });
 
   it('throws WorkflowHistoryPaginationError when legacy from plus size exceeds the result window', async () => {
@@ -218,21 +229,19 @@ describe('getExecutionStepExecutions', () => {
     expect(result.stepExecutionListResult.size).toBe(100);
   });
 
-  it('returns empty results without a total when search fallback hits a size abort', async () => {
+  it('propagates a size error from the legacy search fallback', async () => {
     mockParent(undefined);
-    mockStepDataClient.search.mockRejectedValue(sizeExceededError());
+    const error = sizeExceededError();
+    mockStepDataClient.search.mockRejectedValue(error);
 
-    const result = await getExecutionStepExecutions({
-      workflowExecutionsDataClient: mockWorkflowDataClient,
-      stepExecutionsDataClient: mockStepDataClient,
-      logger: mockLogger,
-      ...baseParams,
-    });
-
-    expect(result.stepExecutionListResult).toEqual({ results: [], total: 0, page: 1, size: 100 });
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      'Failed to get workflow execution exec-1 with steps: Elasticsearch response exceeded the maximum size Kibana can process (page=1, size=100)'
-    );
+    await expect(
+      getExecutionStepExecutions({
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
+        logger: mockLogger,
+        ...baseParams,
+      })
+    ).rejects.toBe(error);
   });
 
   it('throws when the execution is missing or in another space', async () => {

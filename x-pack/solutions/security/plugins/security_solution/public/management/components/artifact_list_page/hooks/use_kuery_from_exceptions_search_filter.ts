@@ -6,18 +6,21 @@
  */
 
 import { useMemo } from 'react';
+import type { ArtifactEnabledStatus } from '../../../common/utils';
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../../common/utils';
 import type { MaybeImmutable } from '../../../../../common/endpoint/types';
 
 export const useKueryFromExceptionsSearchFilter = (
   filter: string | undefined,
   fields: MaybeImmutable<string[]>,
-  policies: string | undefined
+  policies: string | undefined,
+  enabledStatus?: ArtifactEnabledStatus
 ): string | undefined => {
   return useMemo<string | undefined>(() => {
     return parsePoliciesAndFilterToKql({
       kuery: parseQueryFilterToKQL(filter, fields),
       policies: policies ? policies.split(',') : [],
+      enabledStatus,
     });
-  }, [fields, filter, policies]);
+  }, [enabledStatus, fields, filter, policies]);
 };

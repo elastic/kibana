@@ -48,8 +48,8 @@ import {
 } from '../../../metrics_explorer/components/helpers/calculate_domain';
 import type { InfraFormatter } from '../../../../../common/inventory/types';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
-import { DEFAULT_SCHEMA } from '../../../../../../common/constants';
 import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';
+import { getInventoryRequestSchema } from '../../lib/get_inventory_request_schema';
 
 interface Props {
   interval: string;
@@ -104,7 +104,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     metric: anomalyMetricName,
   };
 
-  const effectiveSchema = preferredSchema ?? DEFAULT_SCHEMA;
+  const effectiveSchema = getInventoryRequestSchema(preferredSchema);
 
   const { metricsHostsAnomalies } = useMetricsHostsAnomaliesResults(
     { ...anomalyParams, schema: effectiveSchema },
@@ -113,7 +113,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     }
   );
   const { metricsK8sAnomalies } = useMetricsK8sAnomaliesResults(anomalyParams, {
-    active: nodeType === 'pod',
+    active: nodeType === 'pod' && effectiveSchema !== 'semconv',
   });
 
   const anomalies = useMemo(() => {

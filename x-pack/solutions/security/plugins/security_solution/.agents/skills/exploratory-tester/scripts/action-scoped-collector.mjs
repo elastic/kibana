@@ -417,9 +417,9 @@ export function reduceAction(action, priorState) {
     const redacted = redactUrl(url);
 
     if (isPolling(path)) {
-      for (const ev of events) {
-        suppressed.push({ type: 'noise', text: `${method} ${redacted} (known polling endpoint)` });
-      }
+      suppressed.push(
+        ...events.map(() => ({ type: 'noise', text: `${method} ${redacted} (known polling endpoint)` }))
+      );
       // Silent-server-error detection above already ran for polling paths —
       // suppressing duplicate noise is not the same as hiding a real outage.
     }
@@ -436,15 +436,15 @@ export function reduceAction(action, priorState) {
     // `abandonedByNavigation` so they read as "the page moved on", not as an
     // ever-worsening "stuck" signal across subsequent checklist steps.
     const abandoned = events.filter((ev) => ev.abandonedByNavigation && ev.respondedAt == null && ev.failure == null);
-    for (const ev of abandoned) {
-      level3.push({
+    level3.push(
+      ...abandoned.map(() => ({
         type: 'request_abandoned_by_navigation',
         method,
         path,
         url: redacted,
         text: `${method} ${redacted} was still in flight when the page navigated away — not counted as stuck`,
-      });
-    }
+      }))
+    );
 
     const pendingNow = events.filter(
       (ev) => ev.respondedAt == null && ev.failure == null && !ev.abandonedByNavigation

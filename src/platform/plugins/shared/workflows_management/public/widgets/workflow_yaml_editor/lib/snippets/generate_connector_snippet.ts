@@ -13,6 +13,7 @@ import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { isBuiltInStepType } from '@kbn/workflows';
 import { getZodTypeName } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
+import { getCachedInferenceConnectorInstances } from '../../../../../common/schema';
 import { getConnectorInstancesForType } from '../autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';
 import { getCachedAllConnectors } from '../connectors_cache';
 import { getRequiredParamsForConnector } from '../get_required_params_for_connector';
@@ -45,7 +46,11 @@ export function generateConnectorSnippet(
   // Generate smart connector-id value based on available instances
   let connectorIdValue: string | undefined;
   if (isConnectorIdRequired) {
-    const instances = getConnectorInstancesForType(connectorType, dynamicConnectorTypes);
+    const instances = getConnectorInstancesForType(
+      connectorType,
+      dynamicConnectorTypes,
+      getCachedInferenceConnectorInstances()
+    );
     if (instances.length > 0) {
       // Use the first non-deprecated instance as default, or first instance if all are deprecated
       const defaultInstance = instances.find((i) => !i.isDeprecated) || instances[0];

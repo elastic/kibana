@@ -47,11 +47,26 @@ export interface EvalSuiteMetadata {
   tags?: string[];
   ciLabels?: string[];
   serverConfigSet?: string;
+  /** Scout `--arch` for the suite's stack (`stateful` or `serverless`), stateful by default. */
+  scoutArch?: string;
+  /** Scout `--domain` for the suite's stack (e.g. `observability_complete`), `classic` by default. */
+  scoutDomain?: string;
   /**
    * Repo-relative bash script that adds env for the suite's Scout server and Playwright run.
    * It reads the evals config JSON on stdin and prints `{ "env"?: {...} }`.
    */
   scoutHook?: string;
+  /**
+   * Name of the suite's own kbn-evals Vault secret (`kv/ci-shared/kbn-evals/<name>` in ci-prod,
+   * `secret/kibana-issues/dev/kbn-evals/<name>` in dev). When set, `scoutHook` reads this secret
+   * instead of the general config, so the suite's credentials rotate independently.
+   */
+  vaultSecret?: string;
+  /**
+   * Judge connector id used when no `models:judge:` label,
+   * `--evaluation-connector-id` or `EVAL_CONNECTOR_ID` is given, ahead of the Vault default.
+   */
+  defaultJudge?: string;
   shards?: EvalSuiteShard[];
   stepTimeoutInMinutes?: number;
 }
@@ -68,7 +83,11 @@ export interface EvalSuiteDefinition {
   description?: string;
   source: 'metadata' | 'discovery';
   serverConfigSet?: string;
+  scoutArch?: string;
+  scoutDomain?: string;
   scoutHook?: string;
+  vaultSecret?: string;
+  defaultJudge?: string;
   shards?: EvalSuiteShard[];
   stepTimeoutInMinutes?: number;
 }
@@ -176,7 +195,11 @@ const normalizeSuite = (
     description: metadata?.description,
     source: metadata ? 'metadata' : 'discovery',
     serverConfigSet: metadata?.serverConfigSet,
+    scoutArch: metadata?.scoutArch,
+    scoutDomain: metadata?.scoutDomain,
     scoutHook: metadata?.scoutHook,
+    vaultSecret: metadata?.vaultSecret,
+    defaultJudge: metadata?.defaultJudge,
     shards: metadata?.shards,
     stepTimeoutInMinutes: metadata?.stepTimeoutInMinutes,
   };

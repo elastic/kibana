@@ -6,7 +6,6 @@
  */
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
@@ -24,7 +23,7 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import type { EisModelStatus, CspRegion } from '../common/types';
+import type { EisModelStatus } from '../common/types';
 
 export * from '../common/types';
 
@@ -46,7 +45,6 @@ export interface AppPluginStartDependencies {
 }
 
 export interface AppPluginSetupDependencies {
-  actions: ActionsPublicPluginSetup;
   cloud?: CloudSetup;
   console?: ConsolePluginSetup;
   features: FeaturesPluginSetup;
@@ -102,6 +100,8 @@ export const GEO_ORDER = ['apac', 'eu', 'us', 'other'] as const;
 /** Whether the region policy is expressed as geo zones or specific CSP regions. Mutually exclusive. */
 export type PolicyMode = 'geo' | 'regions';
 
+export type EisViewMode = 'card' | 'table';
+
 export type RegionPolicyConflictArtifactType = 'index' | 'pipeline';
 
 export interface RegionPolicyConflictArtifact {
@@ -110,11 +110,7 @@ export interface RegionPolicyConflictArtifact {
   endpointIds: string[];
 }
 
-export interface RegionZoneCount {
-  geo: string;
-  modelCount: number;
-  totalCount: number;
-  modelRegions: CspRegion[];
-  /** True when the model only has geo-level availability (no csp+region data). Show badge without counter. */
-  geoOnly: boolean;
+export interface RegionOption {
+  key: string;
+  label: string;
 }

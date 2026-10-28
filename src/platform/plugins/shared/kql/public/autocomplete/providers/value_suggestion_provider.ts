@@ -12,16 +12,16 @@ import dateMath from '@kbn/datemath';
 import { memoize } from 'lodash';
 import type { ValueSuggestionsMethod } from '@kbn/data-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { TimefilterSetup } from '@kbn/data-plugin/public';
 import { buildQueryFromFilters } from '@kbn/es-query';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { AutocompleteUsageCollector } from '../collectors';
 
 export type ValueSuggestionsGetFn = (args: ValueSuggestionsGetFnArgs) => Promise<any[]>;
 
 interface ValueSuggestionsGetFnArgs {
-  indexPattern: DataView;
-  field: DataViewField;
+  indexPattern: FilterableSource;
+  field: FilterableField;
   query: string;
   useTimeRange?: boolean;
   boolFilter?: any[];
@@ -30,7 +30,10 @@ interface ValueSuggestionsGetFnArgs {
   querySuggestionKey?: 'rules' | 'cases' | 'alerts' | 'endpoints' | 'alerting/v2';
 }
 
-const getAutocompleteTimefilter = ({ timefilter }: TimefilterSetup, indexPattern: DataView) => {
+const getAutocompleteTimefilter = (
+  { timefilter }: TimefilterSetup,
+  indexPattern: FilterableSource
+) => {
   const timeRange = timefilter.getTime();
 
   // Use a rounded timerange so that memoizing works properly
@@ -50,7 +53,7 @@ export const setupValueSuggestionProvider = (
     usageCollector,
   }: { timefilter: TimefilterSetup; usageCollector?: AutocompleteUsageCollector }
 ): ValueSuggestionsGetFn => {
-  function resolver(title: string, field: DataViewField, query: string, filters: any[]) {
+  function resolver(title: string, field: FilterableField, query: string, filters: any[]) {
     // Only cache results for a minute
     const ttl = Math.floor(Date.now() / 1000 / 60);
     return [ttl, query, title, field.name, JSON.stringify(filters)].join('|');
@@ -59,7 +62,7 @@ export const setupValueSuggestionProvider = (
   const requestSuggestions = memoize(
     <T = unknown>(
       index: string,
-      field: DataViewField,
+      field: FilterableField,
       query: string,
       filters: any = [],
       signal?: AbortSignal,

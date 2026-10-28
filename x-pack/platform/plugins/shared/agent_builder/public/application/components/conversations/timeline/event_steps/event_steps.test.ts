@@ -20,7 +20,7 @@ const makeReasoningStep = (text: string) => createReasoningStep({ reasoning: tex
 
 const makeCompactionStep = (): CompactionStep => ({
   type: ConversationRoundStepType.compaction,
-  summarized_round_count: 2,
+  summarized_cycle_count: 2,
   token_count_before: 1000,
   token_count_after: 400,
 });

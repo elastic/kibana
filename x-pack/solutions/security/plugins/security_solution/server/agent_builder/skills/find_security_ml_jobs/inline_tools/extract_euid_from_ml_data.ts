@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { compact } from 'lodash';
 
 const ALLOWED_ENTITY_TYPES = ['host', 'user'] as const;
 
 export const EXTRACT_EUID_FROM_SECURITY_ML_JOBS_INLINE_TOOL = `find.security.ml.jobs.extract_euid`;
 
-export const extractEuidToolSchema = z.object({
-  anomalyRecords: z
-    .array(z.record(z.string(), z.unknown()))
-    .describe('Array of anomaly records from ML jobs'),
-});
+export const extractEuidToolSchema = lazySchema(() =>
+  z.object({
+    anomalyRecords: z
+      .array(z.record(z.string(), z.unknown()))
+      .describe('Array of anomaly records from ML jobs'),
+  })
+);
 
 export type ExtractEuidToolType = z.infer<typeof extractEuidToolSchema>;
 
@@ -36,7 +38,9 @@ export const extractEuidFromMlDataTool = (): SkillBoundedTool => ({
       const euids = [];
       for (const record of anomalyRecords) {
         const ids: string[] = compact(
-          ALLOWED_ENTITY_TYPES.map((entityType) => euid.getEuidFromObject(entityType, record))
+          ALLOWED_ENTITY_TYPES.map((entityType) =>
+            euid.getEuidFromObject(getBuiltInEntityDefinition(entityType), record)
+          )
         );
         if (!ids.length) {
           euids.push(undefined);

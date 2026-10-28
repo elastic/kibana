@@ -85,8 +85,10 @@ export type S3DataSource = DataSourceCommon<'s3', S3DataSourceSettings>;
 export type S3DataSourceWithSecrets = DataSourceCommon<'s3', S3DataSourceSettingsWithSecrets>;
 
 export interface S3DataSourceSettings {
+  // region is no longer used, but still accepted for backwards compatibility
   region?: string;
   endpoint?: string;
+  addressing_style?: string;
   auth?: string;
 }
 

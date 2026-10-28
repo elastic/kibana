@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { DocLinks } from '@kbn/doc-links';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -32,7 +33,7 @@ import { GLOBAL_ARTIFACT_TAG } from '../../../../../common/endpoint/service/arti
 import { useMarkInsightAsRemediated } from '../hooks/use_mark_workflow_insight_as_remediated';
 import type { WorkflowInsightRouteState } from '../../../pages/endpoint_hosts/types';
 import { useUrlParams } from '../../../hooks/use_url_params';
-import { useIsFlyoutOpened } from '../hooks/use_is_flyout_opened';
+import { useIsCreateEditFlyoutOpened } from '../hooks/use_is_create_edit_flyout_opened';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useSetUrlParams } from '../hooks/use_set_url_params';
 import type {
@@ -53,6 +54,13 @@ import { useGetArtifact } from '../../../hooks/artifacts';
 import { ArtifactConfirmModal } from './artifact_confirm_modal';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useCreateOrUpdateArtifact } from '../hooks/use_artifact_update_or_create';
+
+const FOOTER_CONTAINER_NAME = 'artifactFlyoutFooter';
+/** Below this footer width the cancel and the two create buttons no longer fit in a single row */
+const STACKED_FOOTER_BUTTONS_MAX_WIDTH = 640;
+const footerCss = css`
+  container: ${FOOTER_CONTAINER_NAME} / inline-size;
+`;
 
 export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
   flyoutEditTitle: i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditTitle', {
@@ -217,6 +225,15 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
       () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 4}` }), // we need this flyout to be above the timeline flyout (which has a z-index of 1003)
       [euiTheme.levels.flyout]
     );
+    const stackedFooterButtonsCss = useMemo(
+      () => css`
+        @container ${FOOTER_CONTAINER_NAME} (max-width: ${STACKED_FOOTER_BUTTONS_MAX_WIDTH}px) {
+          flex-direction: column;
+          gap: ${euiTheme.size.s};
+        }
+      `,
+      [euiTheme.size.s]
+    );
 
     const location = useLocation<WorkflowInsightRouteState>();
     const [sourceInsight, setSourceInsight] = useState<{ id: string; back_url: string } | null>(
@@ -224,7 +241,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     );
     const getTestId = useTestIdGenerator(dataTestSubj);
     const toasts = useToasts();
-    const isFlyoutOpened = useIsFlyoutOpened();
+    const isFlyoutOpened = useIsCreateEditFlyoutOpened();
     const setUrlParams = useSetUrlParams();
     const { urlParams } = useUrlParams<ArtifactListPageUrlParams>();
     const isMounted = useIsMounted();
@@ -240,6 +257,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
 
     const isEditFlow = urlParams.show === 'edit';
     const formMode: ArtifactFormComponentProps['mode'] = isEditFlow ? 'edit' : 'create';
+    const showCreateWithoutEnablingButton = canCreateArtifactAsDisabled && !isEditFlow;
 
     const [submitError, setSubmitError] = useState<IHttpFetchError | undefined>(undefined);
     const { isLoading: isSubmittingData, createOrUpdateArtifact } =
@@ -538,8 +556,11 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
           )}
         </EuiFlyoutBody>
         {!isInitializing && (
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlyoutFooter css={footerCss}>
+            <EuiFlexGroup
+              justifyContent="spaceBetween"
+              css={showCreateWithoutEnablingButton ? stackedFooterButtonsCss : undefined}
+            >
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj={getTestId('cancelButton')}
@@ -550,8 +571,13 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {canCreateArtifactAsDisabled && !isEditFlow ? (
-                  <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
+                {showCreateWithoutEnablingButton ? (
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    responsive={false}
+                    justifyContent="flexEnd"
+                    css={stackedFooterButtonsCss}
+                  >
                     <EuiFlexItem grow={false}>
                       <EuiButton
                         data-test-subj={getTestId('submitWithoutEnablingButton')}

@@ -9,6 +9,7 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import { emitHitlLifecycle } from './hitl_lifecycle_auditor';
+import { RESUME_INPUT_TAKEN_FOR_KEY } from '../../repositories/resume_context_revert';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
@@ -52,7 +53,14 @@ export function resumeHitlWaitStep({
 
   if (context != null && typeof context === 'object' && 'resumeInput' in context) {
     // ES merges partial context updates; omitting the key would retain the consumed approval.
-    stepExecutionRuntime.updateWorkflowExecution({ context: { ...context, resumeInput: null } });
+    stepExecutionRuntime.updateWorkflowExecution({
+      context: {
+        ...context,
+        resumeInput: null,
+        pendingInteractiveResume: false,
+        [RESUME_INPUT_TAKEN_FOR_KEY]: null,
+      },
+    });
   }
 
   workflowLogger.logDebug(`Workflow ${executionId} resumed by ${resumedBy}`, {
@@ -124,7 +132,7 @@ export function failHitlWaitOnTimeout(params: {
 
 function enrichHitlStepOutput(
   stepOutput: unknown,
-  hitl: { channel?: string; respondedAt?: string } | undefined
+  hitl: { channel?: string; respondedAt?: string } | null | undefined
 ): unknown {
   if (!hitl || stepOutput == null || typeof stepOutput !== 'object' || Array.isArray(stepOutput)) {
     return stepOutput;

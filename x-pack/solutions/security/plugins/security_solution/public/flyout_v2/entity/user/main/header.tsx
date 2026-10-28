@@ -23,12 +23,18 @@ import { UsersTableType } from '../../../../explore/users/store/model';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
+import { FlyoutHeaderActions } from '../../../shared/components/flyout_header_actions';
 import type { FirstLastSeenData } from '../../shared/components/observed_entity/types';
 import type { ManagedUserData } from '../../../../flyout/entity_details/shared/hooks/use_managed_user';
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { EntitySourceBadge } from '../../../../flyout/entity_details/shared/components/entity_source_badge';
+import { getResolvedFromRecordCount } from '../../../../flyout/entity_details/shared/entity_store_group_utils';
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { RiskLevelBadge } from '../../../../flyout/entity_details/shared/components/risk_level_badge';
+import { EntityAnalyticsFlyoutCopyLink } from '../../shared/components/entity_analytics_flyout_copy_link';
+import { toEntityDescriptorMode } from '../../../shared/url_state/flyout_v2_url_param';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export interface HeaderProps {
   /** User name displayed as the flyout title. */
@@ -39,12 +45,22 @@ export interface HeaderProps {
   lastSeen: FirstLastSeenData;
   /** Entity store entity ID, used for the entity source badge. */
   entityId?: string;
+  /** Records resolving to `entityId` (aliases); when known, the "Resolved from N" badge counts them. */
+  aliasRecords?: readonly EntityStoreRecord[];
+  /** Total number of aliases in the store, so the badge is right when `aliasRecords` is capped. */
+  aliasCount?: number;
   /** Key-value map of identity fields used to resolve the user. */
   identityFields?: IdentityFields;
   /** Whether the user exists in the entity store. */
   isEntityInStore?: boolean;
   /** Risk severity level for the user. */
   riskLevel?: RiskSeverity;
+  /** Scope id included in the copied Entity Analytics flyout link. */
+  scopeId?: string;
+  /** Entity-store lookup mode included in the copied Entity Analytics flyout link. */
+  mode?: EntityViewMode;
+  /** Shows the copy-link button. Set only by the new flyout; the button still hides when the feature flag is off. */
+  showEntityAnalyticsCopyLink?: boolean;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
@@ -55,9 +71,14 @@ export const Header = ({
   managedUser,
   lastSeen,
   entityId,
+  aliasRecords,
+  aliasCount,
   identityFields,
   isEntityInStore,
   riskLevel,
+  scopeId,
+  mode,
+  showEntityAnalyticsCopyLink,
 }: HeaderProps) => {
   const oktaTimestamp = managedUser.data?.[ManagedUserDatasetKey.OKTA]?.fields?.[
     '@timestamp'
@@ -69,6 +90,7 @@ export const Header = ({
   const isLoading = lastSeen?.isLoading ?? false;
 
   const isManaged = !!oktaTimestamp || !!entraTimestamp;
+  const resolvedFromCount = getResolvedFromRecordCount(aliasRecords, aliasCount);
   const lastSeenDate = useMemo(
     () =>
       max(
@@ -78,102 +100,118 @@ export const Header = ({
   );
 
   return (
-    <div data-test-subj="user-panel-header">
-      <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
-        {!isEntityInStore && (
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" data-test-subj={'user-panel-header-lastSeen'}>
-              {isLoading ? (
-                <EuiSkeletonText
-                  lines={1}
-                  size="xs"
-                  data-test-subj="user-panel-header-lastSeen-loading"
-                />
-              ) : (
-                lastSeenDate && <PreferenceFormattedDate value={lastSeenDate} />
-              )}
-              <EuiSpacer size="xs" />
-            </EuiText>
-          </EuiFlexItem>
+    <>
+      <FlyoutHeaderActions>
+        {showEntityAnalyticsCopyLink && (
+          <EntityAnalyticsFlyoutCopyLink
+            target={{
+              kind: 'user',
+              userName,
+              entityId,
+              scopeId,
+              mode: toEntityDescriptorMode(mode),
+            }}
+          />
         )}
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            gutterSize="xs"
-            responsive={false}
-            direction="column"
-            alignItems="flexStart"
-          >
+      </FlyoutHeaderActions>
+      <div data-test-subj="user-panel-header">
+        <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
+          {!isEntityInStore && (
             <EuiFlexItem grow={false}>
-              {isEntityInStore ? (
-                <FlyoutTitle title={userName} iconType={'user'} />
-              ) : (
-                <SecuritySolutionLinkAnchor
-                  deepLinkId={SecurityPageName.users}
-                  path={getTabsOnUsersDetailsUrl(
-                    userName,
-                    UsersTableType.events,
-                    undefined,
-                    entityId,
-                    identityFields && Object.keys(identityFields).length > 0
-                      ? identityFields
-                      : undefined
-                  )}
-                  target={'_blank'}
-                  external={false}
-                  css={linkTitleCSS}
-                  override={urlParamOverride}
-                >
-                  <FlyoutTitle title={userName} iconType={'user'} isLink />
-                </SecuritySolutionLinkAnchor>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        {isLoading ? (
-          <EuiFlexItem grow={true}>
-            <EuiSkeletonText
-              lines={1}
-              size="xs"
-              data-test-subj="user-panel-header-observed-badge-loading"
-            />
-          </EuiFlexItem>
-        ) : (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiBadge data-test-subj="user-panel-header-entity-type-badge" color="hollow">
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.user.entityTypeBadge"
-                    defaultMessage="User"
+              <EuiText size="xs" data-test-subj={'user-panel-header-lastSeen'}>
+                {isLoading ? (
+                  <EuiSkeletonText
+                    lines={1}
+                    size="xs"
+                    data-test-subj="user-panel-header-lastSeen-loading"
                   />
-                </EuiBadge>
-              </EuiFlexItem>
+                ) : (
+                  lastSeenDate && <PreferenceFormattedDate value={lastSeenDate} />
+                )}
+                <EuiSpacer size="xs" />
+              </EuiText>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              gutterSize="xs"
+              responsive={false}
+              direction="column"
+              alignItems="flexStart"
+            >
               <EuiFlexItem grow={false}>
-                <EntitySourceBadge
-                  isEntityInStore={!!isEntityInStore}
-                  hasLastSeenDate={!!observedUserLastSeenDate}
-                  data-test-subj="user-panel-header-observed-badge"
-                />
+                {isEntityInStore ? (
+                  <FlyoutTitle title={userName} iconType={'user'} />
+                ) : (
+                  <SecuritySolutionLinkAnchor
+                    deepLinkId={SecurityPageName.users}
+                    path={getTabsOnUsersDetailsUrl(
+                      userName,
+                      UsersTableType.events,
+                      undefined,
+                      entityId,
+                      identityFields && Object.keys(identityFields).length > 0
+                        ? identityFields
+                        : undefined
+                    )}
+                    target={'_blank'}
+                    external={false}
+                    css={linkTitleCSS}
+                    override={urlParamOverride}
+                  >
+                    <FlyoutTitle title={userName} iconType={'user'} isLink />
+                  </SecuritySolutionLinkAnchor>
+                )}
               </EuiFlexItem>
-              {isManaged && (
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          {isLoading ? (
+            <EuiFlexItem grow={true}>
+              <EuiSkeletonText
+                lines={1}
+                size="xs"
+                data-test-subj="user-panel-header-observed-badge-loading"
+              />
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge data-test-subj="user-panel-header-managed-badge" color="hollow">
+                  <EuiBadge data-test-subj="user-panel-header-entity-type-badge" color="hollow">
                     <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.user.managedBadge"
-                      defaultMessage="Managed"
+                      id="xpack.securitySolution.flyout.entityDetails.user.entityTypeBadge"
+                      defaultMessage="User"
                     />
                   </EuiBadge>
                 </EuiFlexItem>
-              )}
-              {isEntityInStore && riskLevel && (
                 <EuiFlexItem grow={false}>
-                  <RiskLevelBadge riskLevel={riskLevel} />
+                  <EntitySourceBadge
+                    isEntityInStore={!!isEntityInStore}
+                    hasLastSeenDate={!!observedUserLastSeenDate}
+                    resolvedFromCount={resolvedFromCount}
+                    data-test-subj="user-panel-header-observed-badge"
+                  />
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </div>
+                {isManaged && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge data-test-subj="user-panel-header-managed-badge" color="hollow">
+                      <FormattedMessage
+                        id="xpack.securitySolution.flyout.entityDetails.user.managedBadge"
+                        defaultMessage="Managed"
+                      />
+                    </EuiBadge>
+                  </EuiFlexItem>
+                )}
+                {isEntityInStore && riskLevel && (
+                  <EuiFlexItem grow={false}>
+                    <RiskLevelBadge riskLevel={riskLevel} />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </div>
+    </>
   );
 };

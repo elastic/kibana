@@ -516,7 +516,7 @@ describe('invokeValidationWorkflow', () => {
       expect(mockWorkflowsManagementApi.getWorkflowExecution).toHaveBeenCalledWith(
         'workflow-run-id',
         'default',
-        { includeOutput: true }
+        { includeOutput: true, request: mockRequest }
       );
     });
   });
@@ -800,7 +800,8 @@ describe('invokeValidationWorkflow', () => {
 
       expect(mockWorkflowsManagementApi.getWorkflow).toHaveBeenCalledWith(
         defaultValidationWorkflowId,
-        'default'
+        'default',
+        mockRequest
       );
     });
 
@@ -856,7 +857,8 @@ describe('invokeValidationWorkflow', () => {
 
       expect(mockWorkflowsManagementApi.getWorkflow).toHaveBeenCalledWith(
         'custom-validation-workflow',
-        'default'
+        'default',
+        mockRequest
       );
     });
 

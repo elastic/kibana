@@ -15,22 +15,21 @@ import {
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
   event_id: 'evt-1',
-  event_uuid: 'evt-uuid-1',
-  status: 'open',
-  stream_names: ['service-a'],
+  status: 'active',
+  source_ids: ['service-a'],
   title: 'Event',
   summary: 'Summary',
-  severity: '40-medium',
+  severity: 'medium',
   confidence: 0.9,
   ...overrides,
 });
 
-const entityEntry = (featureId: string, name: string, streamName = 'logs.checkout') => ({
+const entityEntry = (featureId: string, name: string, sourceId = 'logs.checkout') => ({
   type: 'entity' as const,
   subtype: 'service',
   feature_id: featureId,
   name,
-  stream_name: streamName,
+  source_id: sourceId,
 });
 
 describe('impacted_services_chips', () => {
@@ -44,7 +43,7 @@ describe('impacted_services_chips', () => {
 
   it('renders no chips when no topology entry is a service entity', () => {
     const events = [
-      mockEvent({ stream_names: ['service-a', 'service-b'] }),
+      mockEvent({ source_ids: ['service-a', 'service-b'] }),
       mockEvent({
         event_id: '2',
         blast_radius: [{ ...entityEntry('feat-database', 'orders-db'), subtype: 'database' }],
@@ -91,7 +90,7 @@ describe('impacted_services_chips', () => {
             type: 'entity',
             subtype: 'service',
             name: 'Checkout-API',
-            stream_name: 'logs.checkout',
+            source_id: 'logs.checkout',
           },
         ],
       }),
@@ -103,7 +102,7 @@ describe('impacted_services_chips', () => {
   it('filters events by chip key', () => {
     const events = [
       mockEvent({ event_id: '1', blast_radius: [entityEntry('f1', 'checkout-api')] }),
-      mockEvent({ event_id: '2', stream_names: ['other-service'] }),
+      mockEvent({ event_id: '2', source_ids: ['other-service'] }),
     ];
 
     expect(filterEventsByImpactedServiceChip(events, 'entity:checkout-api')).toHaveLength(1);

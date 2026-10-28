@@ -36,6 +36,12 @@ describe('BraveSearchConnector', () => {
     mockClient.get.mockResolvedValue(createMockResponse());
   });
 
+  it('supports Context Engine alongside workflows and Agent Builder', () => {
+    expect(BraveSearchConnector.metadata.supportedFeatureIds).toContain('workflows');
+    expect(BraveSearchConnector.metadata.supportedFeatureIds).toContain('agentBuilder');
+    expect(BraveSearchConnector.metadata.supportedFeatureIds).toContain('contextEngine');
+  });
+
   describe('webSearch action', () => {
     it('should perform a basic web search with default parameters and return correct structure', async () => {
       const mockResponse = createMockResponse({

@@ -9,6 +9,12 @@ tags:
   - watch
   - watch-floor
 settings:
+  __WORKER_RUN_AS_LINE__:
+  # The engine default is 6h. A slow 10k scan takes about 8h20m, and a workflow
+  # timeout cancels the runner this worker is waiting on, which skips review
+  # dispatch. 12h covers that scan and still ends before the next 24h run.
+  # Reviews are dispatched detached, so this budget is not waiting on a person.
+  timeout: "12h"
   # This worker is installed per space, so the key needs no space component.
   #
   # `cancel-in-progress` with max 1: the newest discoveries are the ones worth
@@ -40,6 +46,9 @@ consts:
     settingsVersion: __WORKER_SETTINGS_VERSION__
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
     scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
+    # Computed from the interval at render time: Liquid cannot parse `24h` into
+    # minutes, and the runner reads this number rather than the interval string.
+    maxAlerts: __WORKER_MAX_ALERTS__
 steps:
   # Synchronous on purpose: #19276 requires that when generation fails after its
   # built-in retries, this worker run remains failed and hands off nothing.
@@ -56,13 +65,17 @@ steps:
     type: workflow.execute
     with:
       workflow-id: system-security-attack-discovery-worker
+      # Runs the global runner, and every child it starts, as this worker's service
+      # account. Requires `run_as`; the worker cannot be enabled without one.
+      run-as-mode: inherit
       inputs:
-        # All three worker settings are forwarded. `autonomy` decides how the child's
-        # review handles a true-positive verdict; the other two are traceability only
-        # and are echoed in the child's output.
+        # `autonomy` decides how the child's review handles a true-positive verdict.
+        # `max_alerts` is the retrieval cap prorated to this worker's interval. The
+        # other two settings are traceability only and are echoed in the child's output.
         # `${{ }}` preserves the value's type so the editor does not type-check the
-        # template source against the child's enum / maxLength constraints.
+        # template source against the child's enum / maxLength / integer constraints.
         autonomy: "${{ consts.worker_settings.autonomy }}"
         settings_version: "${{ consts.worker_settings.settingsVersion }}"
         schedule_interval: "${{ consts.worker_settings.scheduleInterval }}"
+        max_alerts: "${{ consts.worker_settings.maxAlerts }}"
         parent_run_id: "{{ execution.id }}"

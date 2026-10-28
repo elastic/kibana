@@ -7,10 +7,10 @@
 
 import { useQuery } from '@kbn/react-query';
 
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { buildPath, type IHttpFetchError } from '@kbn/core-http-browser';
 
 import type { GetTransformsStatsResponseSchema } from '../../../server/routes/api_schemas/transforms_stats';
-import { addInternalBasePath, TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
+import { TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
 import type { TransformId } from '../../../common/types/transform';
 
 import { useAppDependencies } from '../app_dependencies';
@@ -27,7 +27,7 @@ export const useGetTransformStats = (
     [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORM_STATS, transformId],
     ({ signal }) =>
       http.get<GetTransformsStatsResponseSchema>(
-        addInternalBasePath(`transforms/${transformId}/_stats`),
+        buildPath('/internal/transform/transforms/{transformId}/_stats', { transformId }),
         {
           query: { basic },
           version: '1',
@@ -52,7 +52,7 @@ export const useGetTransformsStats = ({
   return useQuery<GetTransformsStatsResponseSchema, IHttpFetchError>(
     [TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORMS_STATS],
     ({ signal }) =>
-      http.get<GetTransformsStatsResponseSchema>(addInternalBasePath(`transforms/_stats`), {
+      http.get<GetTransformsStatsResponseSchema>('/internal/transform/transforms/_stats', {
         query: { basic },
         version: '1',
         asSystemRequest: true,

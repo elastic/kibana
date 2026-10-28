@@ -6,6 +6,7 @@
  */
 
 import type { ComponentType, RefAttributes } from 'react';
+import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import type {
   AttachmentInput,
   ConversationAttachment,
@@ -143,6 +144,14 @@ export interface PublicEmbeddableConversationInputProps {
    * Agent the input is bound to. Defaults to `agentBuilderDefaultAgentId` when omitted.
    */
   agentId?: string;
+  /**
+   * Optional override for the submit action. When provided, submitting the
+   * input calls this handler with the message and its attachments (e.g. pasted
+   * images) instead of navigating to the Agent Builder app. Use this when
+   * embedding the input in a host UI that handles the message locally (e.g.
+   * via `openChat`).
+   */
+  onSubmit?: (message: string, attachments: ConversationAttachment[]) => void;
 }
 
 /**
@@ -162,6 +171,8 @@ export interface OpenConversationSidebarOptions extends EmbeddableConversationPr
 export interface OpenConversationDetailsOptions {
   conversationId: string;
   onClose?: () => void;
+  /** Icon buttons rendered in the flyout menu bar, before the close button (e.g. copy link). */
+  trailingActions?: EuiFlyoutMenuAction[];
 }
 
 /**
@@ -322,5 +333,9 @@ export interface AgentBuilderPluginStart {
   EmbeddableConversationInput: ComponentType<
     PublicEmbeddableConversationInputProps & RefAttributes<EmbeddableConversationInputRef>
   >;
+  /**
+   * Opens the conversation details flyout. Flyouts opened from its content stack on top of it with
+   * a Back button when opened with `session: 'start'` and `CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY`.
+   */
   openConversationDetails: (options: OpenConversationDetailsOptions) => Promise<() => void>;
 }

@@ -11,24 +11,11 @@ import type {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { EuiContextMenu, EuiWrappingPopover } from '@elastic/eui';
-import { partition } from 'lodash';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import type { FlyoutFooterMenuCustomItem, FlyoutFooterMenuItem } from '@kbn/flyout-template';
 import type { EpisodeAction } from '../../actions/types';
+import { buildEpisodeMenuPanels } from './build_episode_menu_panels';
 import * as i18n from './translations';
-
-/**
- * Episode workflow actions, grouped together right below "View details". Every other
- * action (edit tags, open in Discover) is grouped after them.
- */
-const WORKFLOW_ACTION_IDS: ReadonlySet<string> = new Set([
-  'ALERTING_V2_ACK_EPISODE',
-  'ALERTING_V2_UNACK_EPISODE',
-  'ALERTING_V2_SNOOZE_EPISODE',
-  'ALERTING_V2_UNSNOOZE_EPISODE',
-  'ALERTING_V2_RESOLVE_EPISODE',
-  'ALERTING_V2_UNRESOLVE_EPISODE',
-  'ALERTING_V2_EDIT_EPISODE_ASSIGNEE',
-]);
 
 export interface EpisodeFooterActionMenuProps {
   /** DOM node to anchor the popover to (the footer primary action button). */
@@ -36,15 +23,29 @@ export interface EpisodeFooterActionMenuProps {
   /** Whether the popover is currently open. */
   isOpen: boolean;
   onClose: () => void;
-  /** Already filtered to compatible actions. The menu does not re-filter. */
+  /**
+   * Actions to list. Compatible actions are enabled. An action that fails
+   * `isCompatible` is rendered disabled (with `disabledTooltip`) so a caller
+   * can keep it visible via `showWhenDisabled`.
+   */
   actions: EpisodeAction[];
   episodes: AlertEpisode[];
-  /** Full episode details page href, rendered as the first menu item. */
-  viewDetailsHref: string;
+  /** Full episode details page href, rendered as the first menu item when present. */
+  viewDetailsHref?: string | null;
   onSuccess?: () => void;
 }
 
-/** Primary flyout footer control listing every action available for an episode. */
+const isCustomItem = (item: FlyoutFooterMenuItem): item is FlyoutFooterMenuCustomItem =>
+  typeof item.renderItem === 'function';
+
+/**
+ * Primary flyout footer control listing every action available for an episode, for flyouts not
+ * built on `FlyoutTemplate`. It repeats the item handling of `FlyoutTemplate.Footer.PrimaryActionMenu`
+ * without that component's custom item render boundary, custom item key prefix, or modified-click
+ * handling for `href` items. A flyout that migrates to `FlyoutTemplate` can render
+ * `buildEpisodeMenuPanels` output in `Footer.PrimaryActionMenu` directly, which would make this
+ * component removable.
+ */
 export const EpisodeFooterActionMenu = ({
   anchor,
   isOpen,
@@ -54,56 +55,33 @@ export const EpisodeFooterActionMenu = ({
   viewDetailsHref,
   onSuccess,
 }: EpisodeFooterActionMenuProps) => {
-  const [workflowActions, otherActions] = partition(actions, ({ id }) =>
-    WORKFLOW_ACTION_IDS.has(id)
-  );
-
-  const toMenuItem = (action: EpisodeAction): EuiContextMenuPanelItemDescriptor => {
-    // An action that renders its own entry owns the click too, so it can anchor a
-    // nested popover to it. A plain descriptor item closes the menu on click,
-    // which would unmount the anchor before the popover could show.
-    if (action.renderMenuItem) {
+  const panels: EuiContextMenuPanelDescriptor[] = buildEpisodeMenuPanels({
+    actions,
+    episodes,
+    viewDetailsHref,
+    onSuccess,
+  }).map((panel) => ({
+    ...panel,
+    items: panel.items.map((item): EuiContextMenuPanelItemDescriptor => {
+      if (isCustomItem(item)) {
+        return { key: item.key, renderItem: () => item.renderItem({ closeMenu: onClose }) };
+      }
+      if (item.isSeparator) {
+        return item;
+      }
+      const { onClick } = item;
+      if (!onClick) {
+        return item;
+      }
       return {
-        key: action.id,
-        renderItem: () => action.renderMenuItem!({ episodes, onSuccess, closeMenu: onClose }),
+        ...item,
+        onClick: (event: React.MouseEvent) => {
+          onClose();
+          onClick(event);
+        },
       };
-    }
-
-    return {
-      name: action.displayName,
-      icon: action.iconType,
-      'data-test-subj': `alertingV2EpisodeTakeAction-${action.id}`,
-      onClick: () => {
-        onClose();
-        action.execute({ episodes, onSuccess });
-      },
-    };
-  };
-
-  const viewDetailsGroup: EuiContextMenuPanelItemDescriptor[] = [
-    {
-      name: i18n.FLYOUT_VIEW_DETAILS,
-      icon: 'eye',
-      href: viewDetailsHref,
-      'data-test-subj': 'alertingV2EpisodeTakeAction-viewDetails',
-    },
-  ];
-
-  const nonEmptyGroups = [
-    viewDetailsGroup,
-    workflowActions.map(toMenuItem),
-    otherActions.map(toMenuItem),
-  ].filter((group) => group.length > 0);
-
-  const items = nonEmptyGroups.reduce<EuiContextMenuPanelItemDescriptor[]>(
-    (acc, group, index) =>
-      index === 0
-        ? [...acc, ...group]
-        : [...acc, { isSeparator: true as const, key: `separator-${index}` }, ...group],
-    []
-  );
-
-  const panels: EuiContextMenuPanelDescriptor[] = [{ id: 0, items }];
+    }),
+  }));
 
   return (
     <EuiWrappingPopover
@@ -112,7 +90,7 @@ export const EpisodeFooterActionMenu = ({
       closePopover={onClose}
       aria-label={i18n.FLYOUT_TAKE_ACTION}
       anchorPosition="upRight"
-      panelPaddingSize="s"
+      panelPaddingSize="none"
       data-test-subj="alertingV2EpisodeFlyoutTakeAction"
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />

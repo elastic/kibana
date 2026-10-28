@@ -78,5 +78,6 @@ export const buildDeleteAttachment =
       savedObjectsClient: soClient,
       logger,
       ...(params.ingestionMethod !== undefined ? { ingestionMethod: params.ingestionMethod } : {}),
+      ...(params.strict !== undefined ? { strict: params.strict } : {}),
     });
   };

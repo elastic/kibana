@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_HUNT_ID,
@@ -21,19 +22,32 @@ import { WatchesSectionLayout } from './watches_section_layout';
 
 jest.mock('../../../hooks/use_watches_api');
 
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: jest.fn(),
+}));
+
 /**
- * Chrome `AppHeader` reads Kibana chrome hooks. The stub records `spacing` so the shell test can
- * assert compact without mounting that tree.
+ * Chrome `AppHeader` reads Kibana chrome hooks. The stub records `spacing` and `docLink` so the
+ * shell test can assert compact spacing and the Documentation link without mounting that tree.
  */
 jest.mock('@kbn/app-header', () => ({
-  AppHeader: ({ title, spacing }: { title: string; spacing?: string }) => (
-    <header data-test-subj="appHeader" data-spacing={spacing}>
+  AppHeader: ({
+    title,
+    spacing,
+    docLink,
+  }: {
+    title: string;
+    spacing?: string;
+    docLink?: string;
+  }) => (
+    <header data-test-subj="appHeader" data-spacing={spacing} data-doc-link={docLink}>
       <h1>{title}</h1>
     </header>
   ),
 }));
 
 const mockUseWatches = jest.mocked(useWatches);
+const mockUseKibana = jest.mocked(useKibana);
 
 const catalogWatches = SYSTEM_SECURITY_WATCH_IDS.map((id) => createCatalogWatchPlaceholder(id));
 
@@ -61,6 +75,11 @@ const renderShell = (active = SYSTEM_SECURITY_WATCH_FLOOR_ID) => {
 describe('WatchesSectionLayout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseKibana.mockReturnValue({
+      services: {
+        docLinks: { links: { siem: { guide: 'https://www.elastic.co/guide' } } },
+      },
+    } as never);
   });
 
   it('keeps the sidebar, compact header, and page body on one shell', () => {
@@ -96,5 +115,15 @@ describe('WatchesSectionLayout', () => {
       within(nav).getByTestId(`alertZeroWatchesSubnav-${SYSTEM_SECURITY_WATCH_HUNT_ID}`)
     );
     expect(history.location.pathname).toBe(`/watches/${SYSTEM_SECURITY_WATCH_HUNT_ID}`);
+  });
+
+  // WatchesSectionLayout renders its own compact header; it must still pass the documentation link through.
+  it('passes the Security solution documentation link to the header', () => {
+    renderShell();
+
+    expect(screen.getByTestId('appHeader')).toHaveAttribute(
+      'data-doc-link',
+      'https://www.elastic.co/guide'
+    );
   });
 });

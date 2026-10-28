@@ -1,5 +1,5 @@
 {
-  "sha1": "9df86faca1d24ea90d5b73dbe9e10ff3acd688aa",
+  "sha1": "71def235926c842105554d554ef91f2413379488",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/get_notifications.spec.ts",
-        "line": 50,
-        "column": 31
+        "line": 45,
+        "column": 52
       }
     },
     {
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/get_notifications.spec.ts",
-        "line": 54,
-        "column": 83
+        "line": 50,
+        "column": 24
       }
     },
     {
@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/get_notifications.spec.ts",
-        "line": 75,
-        "column": 20
+        "line": 71,
+        "column": 16
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/get_notifications.spec.ts",
-        "line": 84,
-        "column": 26
+        "line": 82,
+        "column": 14
       }
     },
     {
@@ -210,7 +210,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/read_annotation.spec.ts",
-        "line": 76,
+        "line": 73,
         "column": 18
       }
     },
@@ -224,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/read_annotation.spec.ts",
-        "line": 110,
+        "line": 107,
         "column": 36
       }
     },
@@ -238,7 +238,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/read_annotation.spec.ts",
-        "line": 119,
+        "line": 116,
         "column": 14
       }
     },
@@ -252,7 +252,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/unread_status.spec.ts",
-        "line": 35,
+        "line": 34,
         "column": 5
       }
     }

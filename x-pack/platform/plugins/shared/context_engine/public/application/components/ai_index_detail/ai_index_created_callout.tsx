@@ -14,12 +14,26 @@ import { useKibana } from '../../hooks/use_kibana';
 
 interface AiIndexCreatedCalloutProps {
   onDismiss: () => void;
+  showMemory: boolean;
 }
 
-export const AiIndexCreatedCallout = ({ onDismiss }: AiIndexCreatedCalloutProps) => {
+export const AiIndexCreatedCallout = ({ onDismiss, showMemory }: AiIndexCreatedCalloutProps) => {
   const {
     services: { docLinks },
   } = useKibana();
+
+  const documentationLink = (
+    <EuiLink
+      href={docLinks.links.contextEngine.overview}
+      target="_blank"
+      data-test-subj="contextAiIndexCreatedCalloutDocumentationLink"
+    >
+      <FormattedMessage
+        id="xpack.contextEngine.aiIndexDetail.createdCallout.documentation"
+        defaultMessage="Documentation"
+      />
+    </EuiLink>
+  );
 
   return (
     <>
@@ -35,24 +49,19 @@ export const AiIndexCreatedCallout = ({ onDismiss }: AiIndexCreatedCalloutProps)
           defaultMessage: 'Your AI index is ready',
         })}
         text={
-          <FormattedMessage
-            id="xpack.contextEngine.aiIndexDetail.createdCallout.body"
-            defaultMessage="Add sources to build agent context from your data, or use it to store agent memory. Refer to {documentationLink} to learn more."
-            values={{
-              documentationLink: (
-                <EuiLink
-                  href={docLinks.links.contextEngine.overview}
-                  target="_blank"
-                  data-test-subj="contextAiIndexCreatedCalloutDocumentationLink"
-                >
-                  <FormattedMessage
-                    id="xpack.contextEngine.aiIndexDetail.createdCallout.documentation"
-                    defaultMessage="Documentation"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
+          showMemory ? (
+            <FormattedMessage
+              id="xpack.contextEngine.aiIndexDetail.createdCallout.body"
+              defaultMessage="Add sources to build agent context from your data, or use it to store agent memory. Refer to {documentationLink} to learn more."
+              values={{ documentationLink }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.contextEngine.aiIndexDetail.createdCallout.bodyWithoutMemory"
+              defaultMessage="Add sources to build agent context from your data. Refer to {documentationLink} to learn more."
+              values={{ documentationLink }}
+            />
+          )
         }
       />
       <EuiSpacer size="m" />

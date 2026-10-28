@@ -21,6 +21,10 @@ export const REFERENCE_URL_FIELD_NAME = 'reference.url';
 export const EVENT_URL_FIELD_NAME = 'event.url';
 export const SIGNAL_RULE_NAME_FIELD_NAME = 'kibana.alert.rule.name';
 export const LEGACY_SIGNAL_RULE_NAME_FIELD_NAME = 'signal.rule.name';
+export const CUSTOM_YARA_SIGNATURE_ENTRY_NAME_FIELD_NAME = 'rule.custom_yara_signature.entry_name';
+export const CUSTOM_YARA_SIGNATURE_RULE_IDENTIFIER_FIELD_NAME =
+  'rule.custom_yara_signature.rule_identifier';
+export const CUSTOM_YARA_SIGNATURE_ENTRY_ID_FIELD_NAME = 'rule.custom_yara_signature.entry_id';
 export const SIGNAL_STATUS_FIELD_NAME = 'kibana.alert.workflow_status';
 export const AGENT_STATUS_FIELD_NAME = 'agent.status';
 export const QUARANTINED_PATH_FIELD_NAME = 'quarantined.path';

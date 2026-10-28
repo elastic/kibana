@@ -215,14 +215,14 @@ describe('getESQLQuery', () => {
       expect(result).not.toContain(SERVICE_ENVIRONMENT);
     });
 
-    it('should skip environment filter for ENVIRONMENT_NOT_DEFINED_VALUE', () => {
+    it('should add a NOT exists KQL predicate for ENVIRONMENT_NOT_DEFINED_VALUE', () => {
       const result = getESQLQuery({
         indexType: 'traces',
         params: { environment: ENVIRONMENT_NOT_DEFINED_VALUE },
         indexSettings: createMockIndexSettings(),
       });
 
-      expect(result).not.toContain(SERVICE_ENVIRONMENT);
+      expect(result).toContain(`NOT ${SERVICE_ENVIRONMENT} : *`);
     });
   });
 

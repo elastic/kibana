@@ -11,6 +11,8 @@ applies_to:
 
 The ThreatQ connector searches and updates intelligence in a hosted or on-premises ThreatQ instance through its REST API. Use it in Workflows or Agent Builder to read indicator context, record investigation findings, and link objects. Workflows can also run configured ThreatQ operations.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Before you begin
 
 The connector supports OAuth 2.0 API credentials (recommended), user authentication, and bearer tokens. The account needs read access to the requested objects. Changes require write access, and plugin actions require permission to run the selected operation.
@@ -112,7 +114,7 @@ Search criteria and filters use ThreatQ's structured query format. Optional `fie
 }
 ```
 
-Each query object accepts at most 20,000 characters, 50 entries per object or array, and five nested collection levels beneath its keys. Individual strings accept at most 2,000 characters.
+Each query object accepts at most 20,000 characters, 50 entries per object or array, and five nested collection levels beneath its keys. Individual strings accept at most 10,000 characters.
 
 Pass `with` as an array of relationship names. The connector sends a comma-separated parameter. Relationship names depend on the object definitions and ThreatQ version. For example, an adversary can use `description`; some instances expose `descriptions`, `ttp`, and `attack_pattern`. Confirm the names supported by your instance. Report detail requests use the singular `report` endpoint. Use the search endpoint name supported by your instance. `objectType` and `relatedType` accept custom endpoint names with lowercase letters, digits, and underscores.
 

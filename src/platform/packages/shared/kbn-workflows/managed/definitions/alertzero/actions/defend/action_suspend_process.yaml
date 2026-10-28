@@ -20,7 +20,8 @@ consts:
     category: respond
     impact: medium
     reversible: false
-    approvalPolicy: always-gate
+    approvalPolicy: autonomy-dependent
+    subject: process
   actionLabel: Suspend process
   # Sentinel id used only to probe Actions-log privilege before suspending.
   # A 404 means the privilege is present; anything else must fail closed.
@@ -93,6 +94,9 @@ steps:
     on-failure:
       continue: true
     with:
+      # Legacy path: fail on an auth proxy's sign-in redirect instead of passing with HTML (the self client already rejects redirects). See elastic/security-team#20135.
+      fetcher:
+        follow_redirects: false
       method: GET
       path: "/s/{{ workflow.spaceId }}/api/endpoint/action/{{ consts.privilege_probe_action_id }}"
       headers:
@@ -124,6 +128,9 @@ steps:
   - name: dispatch
     type: kibana.request
     with:
+      # Legacy path: fail on an auth proxy's sign-in redirect instead of passing with HTML (the self client already rejects redirects). See elastic/security-team#20135.
+      fetcher:
+        follow_redirects: false
       method: POST
       path: "/s/{{ workflow.spaceId }}/api/endpoint/action/suspend_process"
       headers:
@@ -153,6 +160,9 @@ steps:
             max-attempts: 3
             delay: 5s
         with:
+          # Legacy path: fail on an auth proxy's sign-in redirect instead of passing with HTML (the self client already rejects redirects). See elastic/security-team#20135.
+          fetcher:
+            follow_redirects: false
           method: GET
           path: "/s/{{ workflow.spaceId }}/api/endpoint/action/{{ steps.dispatch.output.data.id }}"
           headers:

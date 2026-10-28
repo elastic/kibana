@@ -548,7 +548,8 @@ describe('OtelAppender', () => {
           'envDetector',
           'hostDetector',
           'osDetector',
-          'processDetector',
+          // buildOtelResources passes its own process detector instead of the SDK sentinel.
+          expect.objectContaining({ detect: expect.any(Function) }),
         ]),
       });
     });

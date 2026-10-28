@@ -196,6 +196,8 @@ const ebtAction = {
     EXTERNAL_LINK_CONFIRM: 'external_link_confirm',
     EXTERNAL_LINK_CANCEL: 'external_link_cancel',
     OPEN_ROUND_METADATA: 'open_round_metadata',
+    VIEW_ROUND_METADATA_TOTAL: 'view_round_metadata_total',
+    VIEW_ROUND_METADATA_BY_MODEL: 'view_round_metadata_by_model',
     EXPAND_TOOL_CALL_STEP: 'expand_tool_call_step',
     EXPAND_TOOL_CALL_GROUP: 'expand_tool_call_group',
     EXPAND_EXECUTION_ERROR: 'expand_execution_error',
@@ -209,6 +211,8 @@ const ebtAction = {
     FEEDBACK_MODAL_CANCEL: 'feedback_modal_cancel',
     FEEDBACK_INVITE_TELL_US_MORE: 'feedback_invite_tell_us_more',
     FEEDBACK_INVITE_DISMISSED: 'feedback_invite_dismissed',
+    DOWNLOAD_CONVERSATION: 'download_conversation',
+    LOAD_TRACE_FROM_FILE: 'load_trace_from_file',
   },
   libraryPanel: {
     MANAGE_ALL: 'manage_all',

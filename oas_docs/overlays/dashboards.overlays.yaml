@@ -17,6 +17,16 @@ actions:
         - Use this API to define a complete, self-contained dashboard in a single payload, including inline visualizations (both data view and ES|QL based), controls, and filters.
         - Use the [Visualizations API](visualizations#tag/Visualizations/operation/create-visualization) to create reusable charts saved to your [visualization library](https://www.elastic.co/docs/explore-analyze/visualize/visualize-library). You can then embed them in dashboards as linked panels using their ID.
 
+        ## Stability
+
+        | 9.4 | 9.5 | Serverless |
+        | --- | --- | --- |
+        | Experimental | Generally available ¹ | Generally available ² |
+
+        ¹ This version introduces breaking changes. Refer to the [Kibana release notes](https://www.elastic.co/docs/release-notes/kibana/breaking-changes).
+
+        ² On July 13, 2026, a new version of this API released on Elastic Cloud Serverless and introduced breaking changes. Refer to the [Elastic Cloud Serverless release notes](https://www.elastic.co/docs/release-notes/cloud-serverless/breaking-changes).
+
         ## Get started
 
         Before you begin:
@@ -136,6 +146,27 @@ actions:
         > info
         > The following panel types are supported in the Kibana UI but not yet by the REST API: `map`, `legacy_vis`, `alerts_table`. Write operations (`POST`, `PUT`) return a `400` error when these panel types are included. Read operations (`GET`) strip these panels from the response and include them in a list of warnings.
 
+        ### Panel type availability
+
+        You can specify a panel **inline** so it exists only in that dashboard, or reference a panel already saved to the library and link it from multiple dashboards. Support for some panel types is added over time, so the available types depend on your Kibana version.
+
+        | Panel type | Inline | Linked from library |
+        | --- | --- | --- |
+        | Visualizations | Since 9.4 | Since 9.4 |
+        | Discover sessions | Since 9.4 | Since 9.4 |
+        | Images | Since 9.4 | N/A |
+        | Markdown | Since 9.4 | Since 9.4 |
+        | Links | Since 9.5 | Since 9.5 |
+        | Controls | Since 9.4 | N/A |
+        | SLO | Since 9.4 | N/A |
+        | Synthetics | Since 9.4 | N/A |
+        | APM service map | Since 9.5 | N/A |
+        | Machine learning and AIOps | Since 9.5 | N/A |
+        | Maps | Coming soon | Coming soon |
+        | Vega | Coming soon | Coming soon |
+        | Alerts table | Coming soon | N/A |
+        | Legacy visualizations | N/A | N/A |
+
         ### Embedding library items
 
         `vis`, `discover_session`, `markdown`, and `links` panels can be embedded **inline** (full config stored in the dashboard) or **linked from library** (references a library item by ID).
@@ -227,36 +258,3 @@ actions:
         description: Dashboards documentation
         url: https://www.elastic.co/docs/explore-analyze/dashboards
       x-displayName: Dashboards
-
-  # ──────────────────────────────────────────────
-  # Operation IDs
-  # ──────────────────────────────────────────────
-  # Pin every operationId to a stable, human-readable name.
-  #
-  # Without these actions the router generates the ID from the method and the
-  # path, which produces names like `put-dashboards-id`. Those names ship to
-  # SDK and CLI code generators, where they become command and method names.
-  #
-  # These pins must survive the retirement of the bump-slim overlay. See
-  # https://github.com/elastic/kibana/issues/266195. The bump-slim overlay sets
-  # the same IDs today. Keep the two files in agreement until it is retired.
-  - target: "$.paths['/api/dashboards'].get"
-    description: "Pin operationId for GET /api/dashboards"
-    update:
-      operationId: search-dashboards
-  - target: "$.paths['/api/dashboards'].post"
-    description: "Pin operationId for POST /api/dashboards"
-    update:
-      operationId: create-dashboard
-  - target: "$.paths['/api/dashboards/{id}'].get"
-    description: "Pin operationId for GET /api/dashboards/{id}"
-    update:
-      operationId: get-dashboard
-  - target: "$.paths['/api/dashboards/{id}'].put"
-    description: "Pin operationId for PUT /api/dashboards/{id}"
-    update:
-      operationId: upsert-dashboard
-  - target: "$.paths['/api/dashboards/{id}'].delete"
-    description: "Pin operationId for DELETE /api/dashboards/{id}"
-    update:
-      operationId: delete-dashboard

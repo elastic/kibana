@@ -16,8 +16,8 @@ export const queryKeys = {
   groupActions: (spaceId: string, groupHashes: string[]) =>
     [...queryKeys.groupActionsAll(), spaceId, ...groupHashes] as const,
   actionsHistoryAll: () => [...queryKeys.all, 'actions-history'] as const,
-  actionsHistory: (spaceId: string, episodeId: string, groupHash: string) =>
-    [...queryKeys.actionsHistoryAll(), spaceId, episodeId, groupHash] as const,
+  actionsHistory: (spaceId: string, episodeId: string, seriesId: string) =>
+    [...queryKeys.actionsHistoryAll(), spaceId, episodeId, seriesId] as const,
   listAll: () => [...queryKeys.all, 'list'] as const,
   list: (
     spaceId: string,
@@ -25,7 +25,8 @@ export const queryKeys = {
     filterState?: EpisodesFilterState,
     sortState?: EpisodesSortState,
     timeRange?: { from: string; to: string } | null,
-    additionalSourceId?: string
+    additionalSourceId?: string,
+    queryV2Source?: boolean
   ) =>
     [
       ...queryKeys.listAll(),
@@ -35,10 +36,17 @@ export const queryKeys = {
       sortState,
       timeRange,
       additionalSourceId,
+      queryV2Source,
     ] as const,
   episodeAll: () => [...queryKeys.all, 'episode'] as const,
   episode: (spaceId: string, episodeId: string) =>
     [...queryKeys.episodeAll(), spaceId, episodeId] as const,
+  episodeDataAll: () => [...queryKeys.all, 'episode-data'] as const,
+  episodeData: (spaceId: string, episodeId: string) =>
+    [...queryKeys.episodeDataAll(), spaceId, episodeId] as const,
+  // `batch` keeps a single id list apart from `episodeData`, which caches another shape.
+  episodesData: (spaceId: string, episodeIds: string[]) =>
+    [...queryKeys.episodeDataAll(), spaceId, 'batch', ...episodeIds] as const,
   episodeEventsAll: () => [...queryKeys.all, 'episode-events'] as const,
   episodeEvents: (spaceId: string, episodeId: string) =>
     [...queryKeys.episodeEventsAll(), spaceId, episodeId] as const,
@@ -50,7 +58,7 @@ export const queryKeys = {
     [...queryKeys.episodeTrendAll(), spaceId, episodeId, ...metricLabels] as const,
   relatedSameGroupEpisodes: (
     spaceId: string,
-    ruleId: string,
+    scopeKey: string,
     groupHash: string,
     pageSize: number
   ) =>
@@ -58,13 +66,13 @@ export const queryKeys = {
       ...queryKeys.all,
       'related-episodes-same-group',
       spaceId,
-      ruleId,
+      scopeKey,
       groupHash,
       pageSize,
     ] as const,
   relatedOtherEpisodes: (
     spaceId: string,
-    ruleId: string,
+    scopeKey: string,
     pageSize: number,
     currentGroupKey: string,
     excludeEpisodeId: string
@@ -73,20 +81,19 @@ export const queryKeys = {
       ...queryKeys.all,
       'related-episodes-other',
       spaceId,
-      ruleId,
+      scopeKey,
       pageSize,
       currentGroupKey,
       excludeEpisodeId,
     ] as const,
-  episodeEventDataAll: () => [...queryKeys.all, 'episode-event-data'] as const,
-  episodeEventData: (spaceId: string, episodeId: string) =>
-    [...queryKeys.episodeEventDataAll(), spaceId, episodeId] as const,
   tagOptionsAll: () => [...queryKeys.all, 'tag-options'] as const,
   tagOptions: (
     spaceId: string,
     timeRange?: { from: string; to: string } | null,
-    additionalSourceId?: string
-  ) => [...queryKeys.tagOptionsAll(), spaceId, timeRange, additionalSourceId] as const,
+    additionalSourceId?: string,
+    queryV2Source?: boolean
+  ) =>
+    [...queryKeys.tagOptionsAll(), spaceId, timeRange, additionalSourceId, queryV2Source] as const,
   tagSuggestionsAll: () => [...queryKeys.all, 'tag-suggestions'] as const,
   tagSuggestions: (spaceId: string) => [...queryKeys.tagSuggestionsAll(), spaceId] as const,
   assigneeSuggestions: (searchTerm: string) =>
@@ -101,7 +108,8 @@ export const queryKeys = {
     filterState: EpisodesFilterState,
     timeRange: TimeRange | undefined,
     breakdownField: string | undefined,
-    additionalSourceId?: string
+    additionalSourceId?: string,
+    queryV2Source?: boolean
   ) =>
     [
       ...queryKeys.histogramAll(),
@@ -110,6 +118,7 @@ export const queryKeys = {
       timeRange,
       breakdownField,
       additionalSourceId,
+      queryV2Source,
     ] as const,
   currentUserProfile: () => [...queryKeys.all, 'current-user-profile'] as const,
   kpisAll: () => [...queryKeys.all, 'kpis'] as const,
@@ -118,7 +127,8 @@ export const queryKeys = {
     filterState?: EpisodesFilterState,
     timeRange?: { from: string; to: string } | null,
     currentUserUid?: string,
-    additionalSourceId?: string
+    additionalSourceId?: string,
+    queryV2Source?: boolean
   ) =>
     [
       ...queryKeys.kpisAll(),
@@ -127,5 +137,6 @@ export const queryKeys = {
       timeRange,
       currentUserUid,
       additionalSourceId,
+      queryV2Source,
     ] as const,
 };

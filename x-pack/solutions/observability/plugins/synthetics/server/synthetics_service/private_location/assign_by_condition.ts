@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { assignShard, balanceShardsByCost } from './assign_shards';
+import { assignShard, balanceShardsByCost, UNASSIGNED_AGENT_ID } from './assign_shards';
 
 /**
  * ── Scalable private locations: one agent policy + many agents ────────────────
@@ -47,10 +47,6 @@ import { assignShard, balanceShardsByCost } from './assign_shards';
  * *binding* differs — a `condition` string instead of a moved `policy_id`.
  */
 
-/** A private location is scalable when it opts into condition-based sharding. */
-export const isConditionShardedLocation = (location: { isAgentSharding?: boolean }): boolean =>
-  Boolean(location.isAgentSharding);
-
 // Elastic Agent EQL single-quoted string literals have NO escape sequences (see
 // elastic-agent `internal/pkg/eql/Eql.g4`: `STEXT: '\'' ~[\r\n']* '\''`), so a
 // value containing a single quote, backslash or control char cannot be embedded
@@ -69,7 +65,7 @@ export const isEqlSafeLiteral = (value: string): boolean =>
  * cause). The next create/edit pass or rebalance replaces it with a real agent
  * condition.
  */
-export const UNASSIGNED_CONDITION = "${agent.id} == '__synthetics_unassigned__'";
+export const UNASSIGNED_CONDITION = `\${agent.id} == '${UNASSIGNED_AGENT_ID}'`;
 
 /** Builds the Elastic Agent condition that targets exactly one enrolled agent. */
 export const agentIdCondition = (agentId: string): string => {

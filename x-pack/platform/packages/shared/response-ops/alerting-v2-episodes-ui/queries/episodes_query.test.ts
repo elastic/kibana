@@ -60,26 +60,27 @@ describe('buildEpisodesKpisQuery', () => {
     expect(output).toContain('last_ack_action == "ack"');
   });
 
-  it('counts indefinitely snoozed episodes (snooze_expiry IS NULL) as snoozed', () => {
+  it('counts indefinitely snoozed episodes (snoozed_until IS NULL) as snoozed', () => {
     const output = buildEpisodesKpisQuery(SPACE, UID);
     expect(output).toContain('last_snooze_action == "snooze"');
-    expect(output).toContain('snooze_expiry IS NULL');
+    expect(output).toContain('snoozed_until IS NULL');
   });
 
-  it('excludes expired snoozes (snooze_expiry in the past) from the snoozed count', () => {
+  it('excludes expired snoozes (snoozed_until in the past) from the snoozed count', () => {
     const output = buildEpisodesKpisQuery(SPACE, UID);
-    expect(output).toContain('TO_DATETIME(snooze_expiry) > NOW()');
+    expect(output).toContain('TO_DATETIME(snoozed_until) > NOW()');
   });
 
   it('applies queryString filter when provided', () => {
-    const output = buildEpisodesKpisQuery(SPACE, UID, { queryString: 'alert.name: "cpu"' });
-    expect(output).toContain('QSTR(');
+    const output = buildEpisodesKpisQuery(SPACE, UID, { queryString: 'severity: critical' });
+    expect(output).toContain('| WHERE severity == "critical"');
   });
 
   it('does not include SORT or LIMIT', () => {
     const output = buildEpisodesKpisQuery(SPACE, UID);
     expect(output.toUpperCase()).not.toContain('SORT');
-    expect(output.toUpperCase()).not.toContain('LIMIT');
+    // `LIMIT 1 BY` only keeps one row per episode, it doesn't cap the counts
+    expect(output).not.toMatch(/LIMIT \d+(?! BY)/i);
   });
 
   it('applies status filter when provided', () => {

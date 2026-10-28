@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AlertZeroPublicStart } from '@kbn/alertzero-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type {
   PluginSetup as SecuritySolutionPluginSetup,
@@ -41,4 +42,5 @@ export interface SecuritySolutionServerlessPluginStartDeps {
   cloud: CloudStart;
   automaticImport?: AutomaticImportPluginStart;
   workflowsManagement?: WorkflowsPublicPluginStart;
+  alertzero?: AlertZeroPublicStart;
 }

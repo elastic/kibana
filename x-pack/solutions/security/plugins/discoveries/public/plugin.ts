@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
@@ -49,9 +50,11 @@ export class DiscoveriesPublicPlugin
       <T>(definition: T) =>
       async (): Promise<T | undefined> => {
         const [coreStart] = await core.getStartServices();
-        const enabled = await coreStart.featureFlags.getBooleanValue(
-          ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG,
-          true
+        const enabled = await firstValueFrom(
+          coreStart.featureFlags.getBooleanValue$(
+            ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG,
+            true
+          )
         );
         return enabled ? definition : undefined;
       };

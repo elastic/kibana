@@ -50,6 +50,22 @@ describe('LibraryCatalogBrowserPage', () => {
     expect(screen.getByTestId('mockCatalogBrowserSelectButton')).toBeInTheDocument();
   });
 
+  it('links to the request and contribution issue forms', () => {
+    const services = buildEnabledServices();
+
+    render(<LibraryCatalogBrowserPage />, { wrapper: getTestProvider({ services }) });
+
+    fireEvent.click(screen.getByRole('button', { name: 'More' }));
+    expect(screen.getByTestId('workflowLibraryContributeLink')).toHaveAttribute(
+      'href',
+      'https://github.com/elastic/workflows/issues/new?template=template_contribution.yml'
+    );
+    expect(screen.getByTestId('workflowLibraryRequestLink')).toHaveAttribute(
+      'href',
+      'https://github.com/elastic/workflows/issues/new?template=template_request.yml'
+    );
+  });
+
   it('navigates to the template detail route via the library deep link when a template is selected', () => {
     const services = buildEnabledServices();
 

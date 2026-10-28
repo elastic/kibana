@@ -11,9 +11,11 @@ applies_to:
 
 The UniFi connector reads and controls a Ubiquiti UniFi console — a Dream Machine, Cloud Gateway, or UNVR — through both applications it hosts. It lets a workflow or agent inventory sites, devices, clients, networks, and WAN uplinks from UniFi Network, inspect cameras, sensors, lights, and the NVR from UniFi Protect, and act on what it finds by restarting a device, power-cycling a PoE port, authorizing a guest, or repositioning a PTZ camera.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Overview
 
-This is a **custom connector** that talks to the UniFi Network and UniFi Protect integration APIs. Both applications run on the same console behind separate reverse-proxy prefixes and share one API key, so a single connector covers both:
+The UniFi connector talks to the UniFi Network and UniFi Protect integration APIs. Both applications run on the same console behind separate reverse-proxy prefixes and share one API key, so a single connector covers both:
 
 * `{console URL}/proxy/network/integration/v1/…` — UniFi Network
 * `{console URL}/proxy/protect/integration/v1/…` — UniFi Protect

@@ -6,6 +6,16 @@
  */
 
 export {
-  nightshiftInvestigationSavedObjectType,
-  NIGHTSHIFT_INVESTIGATION_SO_TYPE,
-} from './investigation_saved_object';
+  nightshiftCustomContextSavedObjectType,
+  NIGHTSHIFT_CUSTOM_CONTEXT_SO_TYPE,
+  NIGHTSHIFT_CUSTOM_CONTEXT_SO_ID,
+  type NightshiftCustomContextAttributes,
+} from './custom_context_saved_object';
+export {
+  nightshiftAutomationSavedObjectType,
+  NIGHTSHIFT_AUTOMATION_SO_TYPE,
+} from './automation_saved_object';
+export {
+  nightshiftAutomationBudgetSavedObjectType,
+  NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE,
+} from './automation_budget_saved_object';

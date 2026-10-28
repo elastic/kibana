@@ -56,33 +56,35 @@ spaceTest.describe(
     spaceTest(
       'should retain the control when unlinking a library panel from the library',
       async ({ page, pageObjects }) => {
-        await spaceTest.step('add the library Discover session to a new dashboard', async () => {
-          await pageObjects.dashboard.openNewDashboard();
-          await pageObjects.dashboard.addSavedSearch(testData.SESSION_WITH_CONTROL_TITLE);
-          await pageObjects.dashboard.waitForRenderComplete();
+        const { controls, dashboard } = pageObjects;
 
-          await expect(pageObjects.dashboard.getDashboardControlsLocator()).toHaveCount(1);
-          const controlId = await pageObjects.dashboard.getDashboardControlId();
-          await expect(pageObjects.dashboard.getOptionsListSelectionsLocator(controlId)).toHaveText(
+        await spaceTest.step('add the library Discover session to a new dashboard', async () => {
+          await dashboard.openNewDashboard();
+          await dashboard.addSavedSearch(testData.SESSION_WITH_CONTROL_TITLE);
+          await dashboard.waitForRenderComplete();
+
+          await expect(dashboard.getDashboardControlsLocator()).toHaveCount(1);
+          const controlId = await dashboard.getDashboardControlId();
+          await expect(controls.optionsList.getSelectionsLocator(controlId)).toHaveText(
             INITIAL_SELECTION
           );
         });
 
         await spaceTest.step('unlink it, converting the panel to by-value', async () => {
           // `unlinkFromLibrary` asserts the panel is no longer library-linked.
-          await pageObjects.dashboard.unlinkFromLibrary(testData.SESSION_WITH_CONTROL_TITLE);
-          await pageObjects.dashboard.waitForRenderComplete();
+          await dashboard.unlinkFromLibrary(testData.SESSION_WITH_CONTROL_TITLE);
+          await dashboard.waitForRenderComplete();
 
           // The ES|QL control survives the by-value conversion, selection intact.
-          await expect(pageObjects.dashboard.getDashboardControlsLocator()).toHaveCount(1);
-          const controlId = await pageObjects.dashboard.getDashboardControlId();
-          await expect(pageObjects.dashboard.getOptionsListSelectionsLocator(controlId)).toHaveText(
+          await expect(dashboard.getDashboardControlsLocator()).toHaveCount(1);
+          const controlId = await dashboard.getDashboardControlId();
+          await expect(controls.optionsList.getSelectionsLocator(controlId)).toHaveText(
             INITIAL_SELECTION
           );
         });
 
         await spaceTest.step('save the dashboard and re-open the panel in Discover', async () => {
-          await pageObjects.dashboard.saveDashboard(UNLINKED_DASHBOARD_TITLE);
+          await dashboard.saveDashboard(UNLINKED_DASHBOARD_TITLE);
 
           // Saving leaves the dashboard in edit mode, and "View Discover session" below is
           // a view-mode action. `ensureViewMode()` cannot do this: it waits for
@@ -92,16 +94,14 @@ spaceTest.describe(
           await expect(page.testSubj.locator('dashboardEditMode')).toBeVisible();
 
           // "View Discover session" navigates to Discover in the same tab.
-          await pageObjects.dashboard.clickPanelAction(
+          await dashboard.clickPanelAction(
             'embeddablePanelAction-ACTION_VIEW_SAVED_SEARCH',
             testData.SESSION_WITH_CONTROL_TITLE
           );
           await pageObjects.discover.waitUntilTabIsLoaded();
 
           await expect(
-            pageObjects.discover.controls.getSelectionsLocator(
-              await pageObjects.dashboard.getOnlyControlId()
-            )
+            controls.optionsList.getSelectionsLocator(await controls.getOnlyControlId())
           ).toHaveText(INITIAL_SELECTION);
         });
       }
@@ -109,6 +109,8 @@ spaceTest.describe(
 
     /** Opens the by-value panel in the embedded Discover editor, asserting the starting selection. */
     const openPanelEditor = async (discoverScoutSpace: ScoutSpace, pageObjects: PageObjects) => {
+      const { controls, dashboard } = pageObjects;
+
       await spaceTest.step('open the by-value panel in the Discover editor', async () => {
         // A fresh copy per test: these tests save panel edits back to the dashboard. The
         // archive is imported with `createNewCopies`, so the id is read back from the
@@ -116,41 +118,38 @@ spaceTest.describe(
         const imported = await discoverScoutSpace.savedObjects.load(
           testData.ESQL_CONTROLS_BY_VALUE_DASHBOARD_KBN_ARCHIVE
         );
-        const [dashboard] = imported.filter(({ type }) => type === 'dashboard');
-        await pageObjects.dashboard.openDashboardWithId(dashboard.id);
-        await pageObjects.dashboard.ensureEditMode();
+        const [dashboardSO] = imported.filter(({ type }) => type === 'dashboard');
+        await dashboard.openDashboardWithId(dashboardSO.id);
+        await dashboard.ensureEditMode();
 
-        await expect(pageObjects.dashboard.getDashboardControlsLocator()).toHaveCount(1);
-        const controlId = await pageObjects.dashboard.getDashboardControlId();
-        await expect(pageObjects.dashboard.getOptionsListSelectionsLocator(controlId)).toHaveText(
+        await expect(dashboard.getDashboardControlsLocator()).toHaveCount(1);
+        const controlId = await dashboard.getDashboardControlId();
+        await expect(controls.optionsList.getSelectionsLocator(controlId)).toHaveText(
           INITIAL_SELECTION
         );
 
-        await pageObjects.dashboard.clickPanelAction(
+        await dashboard.clickPanelAction(
           'embeddablePanelAction-editPanel',
           testData.SESSION_WITH_CONTROL_TITLE
         );
         await pageObjects.discover.waitUntilTabIsLoaded();
 
         await expect(
-          pageObjects.discover.controls.getSelectionsLocator(
-            await pageObjects.dashboard.getOnlyControlId()
-          )
+          controls.optionsList.getSelectionsLocator(await controls.getOnlyControlId())
         ).toHaveText(INITIAL_SELECTION);
       });
     };
 
     /** Switches the control in the Discover editor to {@link UPDATED_SELECTION}. */
     const selectControlOption = async (pageObjects: PageObjects) => {
-      const controlId = await pageObjects.dashboard.getOnlyControlId();
-      // The options-list control is a shared component; its Scout interaction helpers
-      // live on `DashboardApp` regardless of which app renders it.
-      await pageObjects.dashboard.optionsListOpenPopover(controlId);
-      await pageObjects.dashboard.optionsListPopoverSelectOption(UPDATED_SELECTION);
-      await pageObjects.dashboard.optionsListEnsurePopoverIsClosed();
+      const { controls } = pageObjects;
+      const controlId = await controls.getOnlyControlId();
+      await controls.optionsList.openPopover(controlId);
+      await controls.optionsList.selectOption(UPDATED_SELECTION);
+      await controls.optionsList.ensurePopoverIsClosed();
       await pageObjects.discover.waitUntilTabIsLoaded();
 
-      await expect(pageObjects.discover.controls.getSelectionsLocator(controlId)).toHaveText(
+      await expect(controls.optionsList.getSelectionsLocator(controlId)).toHaveText(
         UPDATED_SELECTION
       );
     };
@@ -158,6 +157,8 @@ spaceTest.describe(
     spaceTest(
       'should persist updated control selections after saving',
       async ({ discoverScoutSpace, pageObjects }) => {
+        const { controls, dashboard } = pageObjects;
+
         await openPanelEditor(discoverScoutSpace, pageObjects);
 
         await spaceTest.step(`change the control selection to ${UPDATED_SELECTION}`, async () => {
@@ -166,14 +167,14 @@ spaceTest.describe(
 
         await spaceTest.step('save and return, keeping the new selection', async () => {
           await pageObjects.discover.saveAndReturnToEditor();
-          await pageObjects.dashboard.waitForRenderComplete();
+          await dashboard.waitForRenderComplete();
 
           await expect(
-            pageObjects.dashboard.getPanelHoverActionsLocator(testData.SESSION_WITH_CONTROL_TITLE)
+            dashboard.getPanelHoverActionsLocator(testData.SESSION_WITH_CONTROL_TITLE)
           ).toBeVisible();
-          await expect(pageObjects.dashboard.getDashboardControlsLocator()).toHaveCount(1);
-          const controlId = await pageObjects.dashboard.getDashboardControlId();
-          await expect(pageObjects.dashboard.getOptionsListSelectionsLocator(controlId)).toHaveText(
+          await expect(dashboard.getDashboardControlsLocator()).toHaveCount(1);
+          const controlId = await dashboard.getDashboardControlId();
+          await expect(controls.optionsList.getSelectionsLocator(controlId)).toHaveText(
             UPDATED_SELECTION
           );
         });
@@ -183,6 +184,8 @@ spaceTest.describe(
     spaceTest(
       'should discard control selection changes after cancelling',
       async ({ discoverScoutSpace, pageObjects }) => {
+        const { controls, dashboard } = pageObjects;
+
         await openPanelEditor(discoverScoutSpace, pageObjects);
 
         await spaceTest.step(`change the control selection to ${UPDATED_SELECTION}`, async () => {
@@ -191,14 +194,14 @@ spaceTest.describe(
 
         await spaceTest.step('cancel, reverting to the original selection', async () => {
           await pageObjects.discover.cancelEditorChanges();
-          await pageObjects.dashboard.waitForRenderComplete();
+          await dashboard.waitForRenderComplete();
 
           await expect(
-            pageObjects.dashboard.getPanelHoverActionsLocator(testData.SESSION_WITH_CONTROL_TITLE)
+            dashboard.getPanelHoverActionsLocator(testData.SESSION_WITH_CONTROL_TITLE)
           ).toBeVisible();
-          await expect(pageObjects.dashboard.getDashboardControlsLocator()).toHaveCount(1);
-          const controlId = await pageObjects.dashboard.getDashboardControlId();
-          await expect(pageObjects.dashboard.getOptionsListSelectionsLocator(controlId)).toHaveText(
+          await expect(dashboard.getDashboardControlsLocator()).toHaveCount(1);
+          const controlId = await dashboard.getDashboardControlId();
+          await expect(controls.optionsList.getSelectionsLocator(controlId)).toHaveText(
             INITIAL_SELECTION
           );
         });

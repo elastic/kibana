@@ -42,14 +42,17 @@ const mockTimeRange = {
   to: '2024-01-01T02:00:00.000Z',
 };
 
-const createWrapper = (dataSource?: ReturnType<typeof createTestEpisodeSource>) => {
+const createWrapper = (
+  dataSource?: ReturnType<typeof createTestEpisodeSource>,
+  queryV2Source = true
+) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
   return ({ children }: { children: React.ReactNode }) => {
     const qcProvider = React.createElement(QueryClientProvider, { client: queryClient }, children);
-    return dataSource
-      ? React.createElement(EpisodeDataSourceProvider, { dataSource }, qcProvider)
+    return dataSource || !queryV2Source
+      ? React.createElement(EpisodeDataSourceProvider, { dataSource, queryV2Source }, qcProvider)
       : qcProvider;
   };
 };
@@ -314,6 +317,36 @@ describe('useEpisodesHistogramQuery', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.isCapHit).toBe(true);
+  });
+
+  it('skips the v2 query and builds the table from source rows when queryV2Source is false', async () => {
+    const sourceRow: HistogramEpisodeRow = {
+      first_timestamp: '2024-01-01T01:00:00.000Z',
+      last_timestamp: '2024-01-01T01:30:00.000Z',
+      'episode.status': 'active',
+    };
+
+    const { result } = renderHook(
+      () =>
+        useEpisodesHistogramQuery({
+          services: mockServices,
+          filterState: {},
+          timeRange: mockTimeRange,
+          bucketInterval: '1h',
+        }),
+      {
+        wrapper: createWrapper(
+          sourceWithHistogram(jest.fn().mockResolvedValue({ rows: [sourceRow], isCapHit: false })),
+          false
+        ),
+      }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+    expect(result.current.sourceErrors).toEqual([]);
+    expect(result.current.table?.rows.some((row) => row.count > 0)).toBe(true);
   });
 
   it('returns v2-only rows when a source fetch fails', async () => {

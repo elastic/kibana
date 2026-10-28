@@ -37,6 +37,7 @@ const makeClassicEpisode = (id: string, status = 'acknowledged'): AlertEpisode =
       ruleId: 'r1',
       workflowStatus: status,
       workflowTags: [],
+      caseIds: [],
     } as ClassicAlertActionContext,
   });
 
@@ -89,7 +90,7 @@ describe('createUnackAction', () => {
     expect(createUnackAction(makeDeps()).isCompatible({ episodes: [] })).toBe(false);
   });
 
-  it('execute: POSTs per-episode UNACK items with distinct episode_ids, toasts, calls onSuccess', async () => {
+  it('execute: POSTs per-episode UNACK items with distinct alert_ids, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
     jest
       .spyOn(bulk, 'bulkUnackEpisodeActions')
@@ -103,8 +104,8 @@ describe('createUnackAction', () => {
       onSuccess,
     });
     expect(bulk.bulkUnackEpisodeActions).toHaveBeenCalledWith(deps.http, [
-      { episode_id: 'e1' },
-      { episode_id: 'e2' },
+      { alert_id: 'e1' },
+      { alert_id: 'e2' },
     ]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();
@@ -137,7 +138,7 @@ describe('createUnackAction', () => {
     expect(onSuccess).toHaveBeenCalled();
   });
 
-  it('execute: error path calls notifications.toasts.addDanger with BULK_ERROR_TOAST', async () => {
+  it('execute: error path calls notifications.toasts.addError', async () => {
     const deps = makeDeps();
     jest.spyOn(bulk, 'bulkUnackEpisodeActions').mockRejectedValue(new Error('network error'));
     const onSuccess = jest.fn();
@@ -145,7 +146,7 @@ describe('createUnackAction', () => {
       episodes: [makeEpisode({ last_ack_action: 'ack' })],
       onSuccess,
     });
-    expect(deps.notifications.toasts.addDanger).toHaveBeenCalled();
+    expect(deps.notifications.toasts.addError).toHaveBeenCalled();
     expect(onSuccess).not.toHaveBeenCalled();
   });
 });

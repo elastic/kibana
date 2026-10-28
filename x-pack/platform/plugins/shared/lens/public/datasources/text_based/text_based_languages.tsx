@@ -16,12 +16,11 @@ import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { Reference } from '@kbn/content-management-utils';
 import type { ExpressionsStart, Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
-import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import memoizeOne from 'memoize-one';
 import { flatten, isEqual } from 'lodash';
@@ -412,28 +411,9 @@ export function getTextBasedDatasource({
       });
 
       const initState = state ?? { layers: {} };
-      const hydratedLayers: typeof initState.layers = {};
-
-      // Validate the layers without a timeField configured at runtime.
-      // The ad-hoc DataView specs are regenerated at initialization (with time field
-      // detection via HTTP), but the persisted layer state may not have a timeField (if comes from the API)
-      // This ensures each layer picks up the correct timeFieldName so that
-      // time-based filtering works correctly for ES|QL visualizations.
-      for (const [layerId, layer] of Object.entries(initState.layers)) {
-        if (layer.timeField || !indexPatterns) {
-          hydratedLayers[layerId] = layer;
-          continue;
-        }
-
-        const matchedIndexPattern = layer.index ? indexPatterns[layer.index] : undefined;
-        hydratedLayers[layerId] = matchedIndexPattern?.timeFieldName
-          ? { ...layer, timeField: matchedIndexPattern.timeFieldName }
-          : layer;
-      }
 
       return {
         ...initState,
-        layers: hydratedLayers,
         indexPatternRefs: refs,
         initialContext: context,
       };
@@ -471,11 +451,15 @@ export function getTextBasedDatasource({
           .filter((c): c is TextBasedLayerColumn => Boolean(c))
           .map((c) => c.fieldName);
 
+        // The source (main) layer is authoritative after a query/index change.
+        // The trendline layer can still hold a previous index's time field.
+        const sourceTimeField = fromLayer.timeField ?? toLayer.timeField;
+
         const groupByColumns = trendlineLayerLinks
           .filter((l) => l.from.groupId === LENS_METRIC_GROUP_ID.BREAKDOWN_BY)
           .map((l) => fromLayer.columns.find((c) => c.columnId === l.from.columnId))
           .filter((c): c is TextBasedLayerColumn => Boolean(c))
-          .filter((c) => c.fieldName !== toLayer.timeField);
+          .filter((c) => c.fieldName !== sourceTimeField);
         const groupByFields = groupByColumns.map((c) => c.fieldName);
 
         // Sync the trendline layer's query from the source layer.
@@ -484,11 +468,11 @@ export function getTextBasedDatasource({
         let updatedQuery = toLayer.query;
         let metricFieldMap = new Map<string, string>();
         let trendlineTimeField: string | undefined;
-        if (fromLayer.query && isOfAggregateQueryType(fromLayer.query) && toLayer.timeField) {
+        if (fromLayer.query && isOfAggregateQueryType(fromLayer.query) && sourceTimeField) {
           try {
             const trendlineQueryResult = buildTrendlineQueryWithMetricFieldMap(
               fromLayer.query.esql,
-              toLayer.timeField,
+              sourceTimeField,
               metricFields,
               groupByFields
             );
@@ -502,7 +486,15 @@ export function getTextBasedDatasource({
               updatedQuery = { esql: trendlineQueryResult.query };
             }
           } catch {
-            // If the query can't be parsed, keep the existing query unchanged
+            // Empty columns prevent execution and rendering of an obsolete trendline.
+            newState = {
+              ...newState,
+              layers: {
+                ...newState.layers,
+                [link.to.layerId]: { ...toLayer, query: undefined, columns: [] },
+              },
+            };
+            continue;
           }
         }
 
@@ -548,8 +540,18 @@ export function getTextBasedDatasource({
           );
         }
 
+        const updatedTimeField = sourceTimeField ?? toLayer.timeField;
+        const updatedIndex = fromLayer.index ?? toLayer.index;
+
         // Skip if nothing changed
-        if (updatedColumns === toLayer.columns && updatedQuery === toLayer.query) continue;
+        if (
+          updatedColumns === toLayer.columns &&
+          updatedQuery === toLayer.query &&
+          updatedTimeField === toLayer.timeField &&
+          updatedIndex === toLayer.index
+        ) {
+          continue;
+        }
 
         newState = {
           ...newState,
@@ -559,6 +561,8 @@ export function getTextBasedDatasource({
               ...toLayer,
               columns: updatedColumns,
               query: updatedQuery,
+              timeField: updatedTimeField,
+              index: updatedIndex,
             },
           },
         };
@@ -658,8 +662,22 @@ export function getTextBasedDatasource({
     },
 
     cloneLayer(state, layerId, newLayerId, getNewId) {
+      const layer = state.layers[layerId];
+      if (!layer) {
+        return state;
+      }
       return {
         ...state,
+        layers: {
+          ...state.layers,
+          [newLayerId]: {
+            ...layer,
+            columns: layer.columns.map((column) => ({
+              ...column,
+              columnId: getNewId(column.columnId),
+            })),
+          },
+        },
       };
     },
 
@@ -911,27 +929,11 @@ export function getTextBasedDatasource({
           ...persistableState2,
         }
       ),
-    getDatasourceInfo: async (state, references, dataViewsService) => {
-      if (!dataViewsService) {
-        return [];
-      }
-      const indexPatterns: DataView[] = [];
-
-      for (const { query } of Object.values(state.layers)) {
-        if (query) {
-          const esqlAdhocDataview = await getESQLAdHocDataview({
-            dataViewsService,
-            query: query.esql,
-            options: { skipFetchFields: true },
-          });
-          indexPatterns.push(esqlAdhocDataview);
-        }
-      }
-
+    getDatasourceInfo: async (state) => {
       return Object.entries(state.layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
-        const columns = Object.entries(layer.columns).map(([colId, col]) => {
+        const columns = layer.columns.map((col) => {
           return {
-            id: colId,
+            id: col.columnId,
             role: isNotNumeric(col) ? ('split' as const) : ('metric' as const),
             operation: {
               dataType: col?.meta?.type as DataType,
@@ -946,11 +948,7 @@ export function getTextBasedDatasource({
           };
         });
 
-        acc.push({
-          layerId: key,
-          columns,
-          dataView: indexPatterns?.find((dataView) => dataView.id === layer.index),
-        });
+        acc.push({ layerId: key, columns });
 
         return acc;
       }, []);

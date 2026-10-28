@@ -7,10 +7,8 @@
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import {
-  OBSERVABILITY_ALERTING_BASE_PATH,
-  OBSERVABILITY_ALERTING_RULES_V1_PATH,
-} from '../../../../../public/constants';
+import { OBSERVABILITY_ALERTING_BASE_PATH } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ALERTING_RULES_V1_PATH } from '../../../../../public/constants';
 
 const V1_BASE = `${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V1_PATH}`;
 const escapeRe = (value: string) => value.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -18,13 +16,15 @@ const V1_BASE_RE = escapeRe(V1_BASE);
 
 export const OBS_V1_LIST_URL_RE = new RegExp(`${V1_BASE_RE}\\/?(?:\\?|#|$)`);
 export const OBS_V1_LOGS_URL_RE = new RegExp(`${V1_BASE_RE}\\/logs(\\/|$|\\?|#)`);
+export const OBS_V1_SETTINGS_URL_RE = new RegExp(`${V1_BASE_RE}\\/settings(\\/|$|\\?|#)`);
 export const OBS_V1_CREATE_URL_RE = new RegExp(`${V1_BASE_RE}\\/create\\/`);
 export const OBS_V1_EDIT_URL_RE = new RegExp(`${V1_BASE_RE}\\/edit\\/`);
 export const OBS_V1_DETAILS_URL_RE = new RegExp(`${V1_BASE_RE}\\/rule\\/[^/?#]+`);
-export const OBS_V1_RULE_NAME_HREF_RE = /\/observability\/alerting\/rules\/v1\/rule\//;
-export const OBS_V1_LIST_HREF_RE = /\/observability\/alerting\/rules\/v1\/?(?:\?|#|$)/;
-/** `/rules/v1` is the list; an extra `/rules` segment is the old TAU redirect path. */
-export const OBS_V1_NESTED_RULES_URL_RE = /\/observability\/alerting\/rules\/v1\/rules(\/|$|\?|#)/;
+export const OBS_V1_RULE_NAME_HREF_RE = /\/observability\/alerting\/rules\/classic\/rule\//;
+export const OBS_V1_LIST_HREF_RE = /\/observability\/alerting\/rules\/classic\/?(?:\?|#|$)/;
+/** `/rules/classic` is the list; an extra `/rules` segment is the old TAU redirect path. */
+export const OBS_V1_NESTED_RULES_URL_RE =
+  /\/observability\/alerting\/rules\/classic\/rules(\/|$|\?|#)/;
 
 /** Stack Management classic (v1) Rules tree — observability host-aware nav must not land here. */
 export const MANAGEMENT_CLASSIC_RULES_URL_RE =
@@ -33,7 +33,7 @@ export const STANDALONE_RULES_APP_URL_RE = /\/app\/rules(\/|$|\?|#)/;
 
 /**
  * Drives the classic (v1) Rules page on the Observability Alerting mount
- * (`/app/observability/alerting/rules/v1`).
+ * (`/app/observability/alerting/rules/classic`).
  */
 export class ObservabilityClassicRulesPage {
   public readonly pageTitle: Locator;
@@ -49,7 +49,7 @@ export class ObservabilityClassicRulesPage {
   public readonly searchField: Locator;
   public readonly logsLink: Locator;
   public readonly settingsLink: Locator;
-  public readonly settingsFlyout: Locator;
+  public readonly settingsPage: Locator;
   public readonly overflowButton: Locator;
   public readonly editFromDetailsButton: Locator;
   public readonly alertsTab: Locator;
@@ -73,7 +73,7 @@ export class ObservabilityClassicRulesPage {
     this.searchField = this.page.testSubj.locator('ruleSearchField');
     this.logsLink = this.page.testSubj.locator('rulesLogsLink');
     this.settingsLink = this.page.testSubj.locator('rulesSettingsLink');
-    this.settingsFlyout = this.page.testSubj.locator('rulesSettingsFlyout');
+    this.settingsPage = this.page.testSubj.locator('rulesSettingsPage');
     this.overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
     this.editFromDetailsButton = this.page.testSubj.locator('openEditRuleFlyoutButton');
     this.alertsTab = this.page.testSubj.locator('ruleAlertListTab');
@@ -165,15 +165,16 @@ export class ObservabilityClassicRulesPage {
     await this.page.waitForURL(OBS_V1_LOGS_URL_RE);
   }
 
-  async openSettingsFlyout(): Promise<void> {
+  async openSettingsPage(): Promise<void> {
     await this.revealMenuItem(this.settingsLink);
     await this.settingsLink.click();
-    await this.settingsFlyout.waitFor({ state: 'visible' });
+    await this.page.waitForURL(OBS_V1_SETTINGS_URL_RE);
+    await this.settingsPage.waitFor({ state: 'visible' });
   }
 
-  async closeSettingsFlyout(): Promise<void> {
-    await this.page.testSubj.click('rulesSettingsFlyoutCancelButton');
-    await this.settingsFlyout.waitFor({ state: 'hidden' });
+  async cancelSettingsPage(): Promise<void> {
+    await this.page.testSubj.click('rulesSettingsPageCancelButton');
+    await this.settingsPage.waitFor({ state: 'hidden' });
   }
 
   async openEditFromList(ruleId: string): Promise<void> {

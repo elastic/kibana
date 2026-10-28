@@ -238,6 +238,115 @@ describe('buildStepExecutionsTree', () => {
     });
   });
 
+  describe('with runtime foreach-iteration steps', () => {
+    it('nests consoles under real iteration steps, not scopeId indices', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-foreach',
+          stepId: 'loop',
+          stepType: 'foreach',
+          status: ExecutionStatus.RUNNING,
+          stepExecutionIndex: 0,
+          scopeStack: [],
+        }),
+        createStepExecution({
+          id: 'exec-iter-0',
+          stepId: 'iteration-0',
+          stepType: 'foreach-iteration',
+          status: ExecutionStatus.COMPLETED,
+          stepExecutionIndex: 0,
+          scopeStack: [
+            {
+              stepId: 'loop',
+              nestedScopes: [{ nodeId: 'enterForeach_loop', nodeType: 'enter-foreach' }],
+            },
+          ],
+        }),
+        createStepExecution({
+          id: 'exec-console-0',
+          stepId: 'log',
+          stepType: 'console',
+          status: ExecutionStatus.COMPLETED,
+          stepExecutionIndex: 0,
+          scopeStack: [
+            {
+              stepId: 'loop',
+              nestedScopes: [{ nodeId: 'enterForeach_loop', nodeType: 'enter-foreach' }],
+            },
+            {
+              stepId: 'iteration-0',
+              nestedScopes: [
+                { nodeId: 'enterSynthetic_iteration-0', nodeType: 'enter-foreach-iteration' },
+              ],
+            },
+          ],
+        }),
+        createStepExecution({
+          id: 'exec-iter-1',
+          stepId: 'iteration-1',
+          stepType: 'foreach-iteration',
+          status: ExecutionStatus.COMPLETED,
+          stepExecutionIndex: 1,
+          scopeStack: [
+            {
+              stepId: 'loop',
+              nestedScopes: [{ nodeId: 'enterForeach_loop', nodeType: 'enter-foreach' }],
+            },
+          ],
+        }),
+        createStepExecution({
+          id: 'exec-console-1',
+          stepId: 'log',
+          stepType: 'console',
+          status: ExecutionStatus.COMPLETED,
+          stepExecutionIndex: 1,
+          scopeStack: [
+            {
+              stepId: 'loop',
+              nestedScopes: [{ nodeId: 'enterForeach_loop', nodeType: 'enter-foreach' }],
+            },
+            {
+              stepId: 'iteration-1',
+              nestedScopes: [
+                { nodeId: 'enterSynthetic_iteration-1', nodeType: 'enter-foreach-iteration' },
+              ],
+            },
+          ],
+        }),
+      ];
+
+      const result = buildStepExecutionsTree(stepExecutions);
+
+      expect(result[0].children).toHaveLength(2);
+      expect(result[0].children[0]).toEqual(
+        expect.objectContaining({
+          stepId: 'iteration-0',
+          stepType: 'foreach-iteration',
+          stepExecutionId: 'exec-iter-0',
+          children: [
+            expect.objectContaining({
+              stepId: 'log',
+              stepExecutionId: 'exec-console-0',
+            }),
+          ],
+        })
+      );
+      expect(result[0].children[1]).toEqual(
+        expect.objectContaining({
+          stepId: 'iteration-1',
+          stepType: 'foreach-iteration',
+          stepExecutionId: 'exec-iter-1',
+          children: [
+            expect.objectContaining({
+              stepId: 'log',
+              stepExecutionId: 'exec-console-1',
+            }),
+          ],
+        })
+      );
+    });
+  });
+
   describe('with nested if/else steps', () => {
     it('should build tree with if parent and branch children', () => {
       const stepExecutions: WorkflowStepExecutionDto[] = [
@@ -927,6 +1036,72 @@ describe('buildStepExecutionsTree', () => {
       expect(result[0].retryAttemptCount).toBeUndefined();
       expect(result[0].isRetryAttempt).toBeUndefined();
       expect(result[0].attemptNumber).toBeUndefined();
+    });
+
+    it('transforms attempts and keeps the fallback scope after them', () => {
+      const tryBlockScopes = [
+        { nodeId: 'enterTryBlock_http_call', nodeType: 'enter-try-block' },
+        { nodeId: 'enterNormalPath_http_call', nodeType: 'enter-normal-path' },
+      ];
+      const attempt = (id: string, scopeId: string, index: number) =>
+        createStepExecution({
+          id,
+          stepId: 'http_call',
+          stepType: 'http',
+          status: ExecutionStatus.FAILED,
+          stepExecutionIndex: index,
+          scopeStack: [
+            {
+              stepId: 'http_call',
+              nestedScopes: [
+                ...tryBlockScopes,
+                { nodeId: 'enterRetry_http_call', nodeType: 'enter-retry', scopeId },
+              ],
+            },
+          ],
+        });
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-retry',
+          stepId: 'http_call',
+          stepType: 'retry',
+          status: ExecutionStatus.FAILED,
+          scopeStack: [{ stepId: 'http_call', nestedScopes: tryBlockScopes }],
+        }),
+        attempt('exec-attempt-1', '1-attempt', 0),
+        attempt('exec-attempt-2', '2-attempt', 1),
+        createStepExecution({
+          id: 'exec-fallback-step',
+          stepId: 'log_fallback',
+          stepType: 'console',
+          status: ExecutionStatus.COMPLETED,
+          scopeStack: [
+            {
+              stepId: 'http_call',
+              nestedScopes: [
+                { nodeId: 'enterTryBlock_http_call', nodeType: 'enter-try-block' },
+                {
+                  nodeId: 'enterFallbackPath_http_call',
+                  nodeType: 'enter-fallback-path',
+                  scopeId: 'fallback',
+                },
+              ],
+            },
+          ],
+        }),
+      ];
+
+      const [retryParent] = buildStepExecutionsTree(stepExecutions);
+
+      expect(retryParent).toMatchObject({ stepId: 'http_call', retryAttemptCount: 2 });
+      expect(retryParent.children.map((child) => child.stepExecutionId ?? child.stepId)).toEqual([
+        'exec-attempt-1',
+        'exec-attempt-2',
+        'fallback',
+      ]);
+      expect(retryParent.children[2].children[0]).toMatchObject({
+        stepExecutionId: 'exec-fallback-step',
+      });
     });
   });
 

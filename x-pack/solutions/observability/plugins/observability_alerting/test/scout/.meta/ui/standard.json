@@ -1,5 +1,5 @@
 {
-  "sha1": "b872a3bf7ba4773872c69b75336d71784f15c0d9",
+  "sha1": "8a2bd45788b8f3c8a7e86fc156a6082a9bbf4179",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -18,6 +18,90 @@
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/global.setup.ts",
         "line": 5,
         "column": 1
+      }
+    },
+    {
+      "id": "36b89cf202f1730-f8fbe94a65f4879",
+      "title": "Observability Alerting - add to case for classic alerts adds an alert to a new case from the row action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
+        "line": 84,
+        "column": 19
+      }
+    },
+    {
+      "id": "36b89cf202f1730-ff33e714a90b693",
+      "title": "Observability Alerting - add to case for classic alerts adds an alert to an existing case from the row action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
+        "line": 97,
+        "column": 36
+      }
+    },
+    {
+      "id": "36b89cf202f1730-f6a980ed1a94583",
+      "title": "Observability Alerting - add to case for classic alerts adds the selected alerts to a new case from the bulk action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
+        "line": 107,
+        "column": 17
+      }
+    },
+    {
+      "id": "36b89cf202f1730-7accd2cf377d2fd",
+      "title": "Observability Alerting - add to case for classic alerts adds the selected alerts to an existing case, which is then offered as already attached",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
+        "line": 116,
+        "column": 60
+      }
+    },
+    {
+      "id": "36b89cf202f1730-5a17a77d3fc99e7",
+      "title": "Observability Alerting - add to case for classic alerts skips the alerts already attached to the chosen case",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
+        "line": 136,
+        "column": 11
+      }
+    },
+    {
+      "id": "36b89cf202f1730-5ee4f5fe3fa3f6a",
+      "title": "Observability Alerting - add to case for classic alerts hides the add to case actions without cases privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/add_to_case.spec.ts",
+        "line": 156,
+        "column": 11
       }
     },
     {
@@ -49,7 +133,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/inbox_view_details.spec.ts",
         "line": 53,
-        "column": 91
+        "column": 83
       }
     },
     {
@@ -65,7 +149,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/inbox_view_details.spec.ts",
         "line": 81,
-        "column": 82
+        "column": 74
       }
     },
     {
@@ -73,12 +157,27 @@
       "title": "Observability Alerting - privilege-based page access user with logs read privilege sees the full inbox page",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
-        "line": 231,
-        "column": 25
+        "line": 276,
+        "column": 26
+      }
+    },
+    {
+      "id": "7f75bff6a1b2961-8ee577e2b4802e2",
+      "title": "Observability Alerting - privilege-based page access user with logs read privilege and only classic index access sees no error toasts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
+        "line": 292,
+        "column": 77
       }
     },
     {
@@ -86,11 +185,12 @@
       "title": "Observability Alerting - privilege-based page access user with alerting_v2_alerts read privilege sees the full inbox page",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
-        "line": 217,
+        "line": 275,
         "column": 24
       }
     },
@@ -99,17 +199,18 @@
       "title": "Observability Alerting - privilege-based page access user with no alerting privileges is blocked",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout/ui/tests/observability_alerting_privileges.spec.ts",
-        "line": 224,
+        "line": 287,
         "column": 24
       }
     },
     {
-      "id": "648c81c97fb0579-c98c179092568db",
-      "title": "Observability Alerting URLs returns app not found for Inbox (/inbox) when alerting v2 is disabled",
+      "id": "648c81c97fb0579-86187c5049f93b9",
+      "title": "Observability Alerting URLs returns app not found for Alerts (/alerts) when alerting v2 is disabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -124,8 +225,8 @@
       }
     },
     {
-      "id": "648c81c97fb0579-99c04cee2e65cb7",
-      "title": "Observability Alerting URLs loads Inbox (/inbox) when alerting v2 is enabled",
+      "id": "648c81c97fb0579-7e476fc709c72f3",
+      "title": "Observability Alerting URLs loads Alerts (/alerts) when alerting v2 is enabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -140,8 +241,8 @@
       }
     },
     {
-      "id": "648c81c97fb0579-cb20ab0acc1e0a2",
-      "title": "Observability Alerting URLs returns app not found for Rules (v1) (/rules/v1) when alerting v2 is disabled",
+      "id": "648c81c97fb0579-1c60ad5eaefbcf8",
+      "title": "Observability Alerting URLs returns app not found for Rules (V1) (/rules/classic) when alerting v2 is disabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -156,8 +257,8 @@
       }
     },
     {
-      "id": "648c81c97fb0579-92e4d3add9be7ef",
-      "title": "Observability Alerting URLs loads Rules (v1) (/rules/v1) when alerting v2 is enabled",
+      "id": "648c81c97fb0579-177d731ed743731",
+      "title": "Observability Alerting URLs loads Rules (V1) (/rules/classic) when alerting v2 is enabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -172,8 +273,8 @@
       }
     },
     {
-      "id": "648c81c97fb0579-559bab69cdfd1bb",
-      "title": "Observability Alerting URLs returns app not found for Rules (/rules/v2) when alerting v2 is disabled",
+      "id": "648c81c97fb0579-28f97f8d6ebe0f7",
+      "title": "Observability Alerting URLs returns app not found for Rules (/rules/universal) when alerting v2 is disabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -188,8 +289,8 @@
       }
     },
     {
-      "id": "648c81c97fb0579-139a5f2c0f56362",
-      "title": "Observability Alerting URLs loads Rules (/rules/v2) when alerting v2 is enabled",
+      "id": "648c81c97fb0579-c80b64e3b849cc1",
+      "title": "Observability Alerting URLs loads Rules (/rules/universal) when alerting v2 is enabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -412,8 +513,8 @@
       }
     },
     {
-      "id": "648c81c97fb0579-3200306d454ad51",
-      "title": "Observability Alerting URLs settings flyout does not leave Observability Alerting",
+      "id": "648c81c97fb0579-da3e9492e872e0a",
+      "title": "Observability Alerting URLs settings page does not leave Observability Alerting",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -460,8 +561,8 @@
       }
     },
     {
-      "id": "648c81c97fb0579-c8f03d58511bccc",
-      "title": "Observability Alerting URLs settings from logs does not leave Observability Alerting",
+      "id": "648c81c97fb0579-c9d4c6da5c29c1b",
+      "title": "Observability Alerting URLs settings from logs stays under Observability Alerting",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

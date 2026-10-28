@@ -22,6 +22,7 @@ import { CONVERSATION_CARD_ACTIONS } from '../conversation_card/translations';
 import { ActionButton } from './action_button';
 import { ACTIONS_TRANSLATIONS } from './translations';
 import { getActionButtonIconProps, isDecided } from '../helpers';
+import { COPY_LINK_ACTION } from './copy_link_action';
 
 interface ActionConfig {
   key: string;
@@ -43,10 +44,18 @@ const useContextMenuItems = (
       actions.flatMap(({ key, icon, color = 'text', name, onClick, separator }) => {
         const item = (
           <EuiContextMenuItem
-            style={{
+            css={{
               padding: `${euiTheme.size.xs} ${euiTheme.size.m}`,
+              borderRadius: 0,
+              '&:first-of-type': {
+                borderRadius: `${euiTheme.size.m} ${euiTheme.size.m} 0 0`,
+              },
+              '&:last-of-type': {
+                borderRadius: `0 0 ${euiTheme.size.m} ${euiTheme.size.m}`,
+              },
             }}
             key={key}
+            role="menuitem"
             icon={icon}
             color={color}
             onClick={(ev) => {
@@ -66,17 +75,8 @@ const useContextMenuItems = (
   );
 };
 
-export type CardActionType = 'createEscalation' | 'addToEscalation' | 'close' | 'assign';
+export type CardActionType = 'createEscalation' | 'attachToEscalation' | 'close' | 'reopen';
 
-/**
- * Returns true when at least one action will appear in the menu for this investigation.
- * Use this to decide whether to render the menu trigger at all; an empty menu should not
- * be reachable.
- */
-export const hasAvailableActions = (
-  investigation: Investigation,
-  canManageEscalations = false
-): boolean => !isDecided(investigation) || canManageEscalations;
 export interface BaseActionsProps {
   investigation: Investigation;
   isFlyout?: boolean;
@@ -84,6 +84,16 @@ export interface BaseActionsProps {
   onClickRecommendedAction?: ConversationsActionsGroupProps['onClickRecommendedAction'];
   /** When true the escalation actions (create / add-to) appear in the menu. Requires the manage capability. */
   canManageEscalations?: boolean;
+  /**
+   * When true the menu offers "Close investigation", or "Open investigation" once the
+   * investigation is closed. Should only be true when the caller handles both actions and
+   * performs the HTTP mutation. Without it the fallback modal does nothing.
+   */
+  canCloseInvestigation?: boolean;
+  /** Always offered, including on a decided investigation, so the menu is never empty. */
+  onCopyLink: (id: Investigation['id']) => void;
+  /** When false the menu trigger is disabled and its tooltip names the missing privilege. */
+  canOpenInvestigationDetails?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -94,6 +104,9 @@ export const BaseActions = memo<BaseActionsProps>(
     onClickAction,
     onClickRecommendedAction,
     canManageEscalations = false,
+    canCloseInvestigation = false,
+    onCopyLink,
+    canOpenInvestigationDetails = true,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -107,6 +120,7 @@ export const BaseActions = memo<BaseActionsProps>(
         fill
         iconType="chevronSingleDown"
         iconSide="right"
+        isDisabled={!canOpenInvestigationDetails}
         onClick={handleToggle}
         data-test-subj={dataTestSubj ? `${dataTestSubj}-button` : undefined}
       >
@@ -116,7 +130,12 @@ export const BaseActions = memo<BaseActionsProps>(
       <ActionButton
         data-test-subj={dataTestSubj ? `${dataTestSubj}-button` : undefined}
         iconType="boxesVertical"
-        tooltipContent={ACTIONS_TRANSLATIONS.tooltips.openMenu}
+        tooltipContent={
+          canOpenInvestigationDetails
+            ? ACTIONS_TRANSLATIONS.tooltips.openMenu
+            : ACTIONS_TRANSLATIONS.tooltips.proposalsAgentBuilderPrivilegeRequired
+        }
+        isDisabled={!canOpenInvestigationDetails}
         onClick={handleToggle}
       />
     );
@@ -152,32 +171,60 @@ export const BaseActions = memo<BaseActionsProps>(
                 onClick: () => onClickAction('createEscalation', investigation.recordId),
               },
               {
-                key: 'addToEscalation',
-                icon: 'link' as IconType,
-                name: ACTIONS_TRANSLATIONS.buttons.addToEscalation,
-                onClick: () => onClickAction('addToEscalation', investigation.recordId),
+                key: 'attachToEscalation',
+                icon: 'branch' as IconType,
+                name: ACTIONS_TRANSLATIONS.buttons.attachToEscalation,
+                onClick: () => onClickAction('attachToEscalation', investigation.recordId),
+              },
+            ]
+          : []),
+        {
+          key: 'copyLink',
+          icon: COPY_LINK_ACTION.iconType as IconType,
+          name: COPY_LINK_ACTION.label,
+          onClick: () => onCopyLink(investigation.id),
+          separator: true,
+        },
+        ...(canCloseInvestigation && investigation.conversationStatus === 'closed'
+          ? [
+              {
+                key: 'reopen',
+                icon: 'refresh' as IconType,
+                name: ACTIONS_TRANSLATIONS.buttons.reopen,
+                onClick: () => onClickAction('reopen', investigation.recordId),
               },
             ]
           : []),
         ...(decided
           ? []
           : [
-              {
-                key: 'assign',
-                icon: 'user',
-                name: ACTIONS_TRANSLATIONS.buttons.assign,
-                onClick: () => onClickAction('assign', investigation.recordId),
-              },
-              {
-                key: 'close',
-                icon: 'cross',
-                name: ACTIONS_TRANSLATIONS.buttons.close,
-                onClick: () => onClickAction('close', investigation.recordId),
-                separator: true,
-              },
+              // Only show Close when the caller has the capability AND the investigation is not
+              // already closed. Flyout investigations are conversation-derived and have no
+              // `recommendedAction`, so `isDecided` alone is not a reliable gate; we also
+              // check `status` to prevent offering a Close that would submit a redundant mutation.
+              ...(canCloseInvestigation &&
+              investigation.conversationStatus !== 'closed' &&
+              investigation.status !== 'closed'
+                ? [
+                    {
+                      key: 'close',
+                      icon: 'cross' as IconType,
+                      name: ACTIONS_TRANSLATIONS.buttons.close,
+                      onClick: () => onClickAction('close', investigation.recordId),
+                    },
+                  ]
+                : []),
             ]),
       ],
-      [onClickRecommendedAction, decided, investigation, onClickAction, canManageEscalations]
+      [
+        onClickRecommendedAction,
+        decided,
+        investigation,
+        onClickAction,
+        canManageEscalations,
+        canCloseInvestigation,
+        onCopyLink,
+      ]
     );
 
     const items = useContextMenuItems(actionConfigs, handleClose);

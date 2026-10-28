@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
+import { RULES_UI_EDIT_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import { BulkActions } from './bulk_actions';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import {
@@ -16,7 +17,10 @@ import {
 import { useKibana } from '../../../../../common/lib/kibana';
 import type { SiemMigrationsService } from '../../../../service';
 import { getRuleMigrationRuleMock } from '../../../../../../common/siem_migrations/model/__mocks__';
-import { getRuleMigrationTranslationStatsMock } from '../../../__mocks__';
+import {
+  getRuleMigrationStatsMock,
+  getRuleMigrationTranslationStatsMock,
+} from '../../../__mocks__';
 
 jest.mock('../../../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -26,6 +30,8 @@ const mockSiemMigrationsService = {
     getMissingCapabilities: jest.fn(),
   },
 } as unknown as jest.MockedObjectDeep<SiemMigrationsService>;
+
+const mockMigrationStats = getRuleMigrationStatsMock();
 
 describe('BulkActions', () => {
   beforeEach(() => {
@@ -66,6 +72,7 @@ describe('BulkActions', () => {
           selectedRules={[]}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />
       </TestProviders>
@@ -99,6 +106,7 @@ describe('BulkActions', () => {
           selectedRules={[]}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />
       </TestProviders>
@@ -132,6 +140,7 @@ describe('BulkActions', () => {
           selectedRules={[]}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           reprocessFailedRules={reprocessFailedRules}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />
@@ -173,6 +182,7 @@ describe('BulkActions', () => {
           selectedRules={selectedRules}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />
       </TestProviders>
@@ -206,6 +216,7 @@ describe('BulkActions', () => {
           selectedRules={[]}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />
       </TestProviders>
@@ -239,6 +250,7 @@ describe('BulkActions', () => {
           selectedRules={[]}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           installTranslatedRule={installTranslatedRule}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />
@@ -247,6 +259,39 @@ describe('BulkActions', () => {
 
     fireEvent.click(getByTestId('installTranslatedItemsButton'));
     expect(installTranslatedRule).toHaveBeenCalled();
+  });
+
+  it('should disable the install translated button when the user lacks Rules: All privilege', () => {
+    mockSiemMigrationsService.rules.getMissingCapabilities.mockReturnValue([
+      { capability: RULES_UI_EDIT_PRIVILEGE, description: 'Security > Rules: All' },
+    ]);
+    const mockTranslationStats = getRuleMigrationTranslationStatsMock({
+      rules: {
+        total: 13,
+        success: {
+          total: 11,
+          result: { full: 3, partial: 1, untranslatable: 7 },
+          installable: 3,
+          missing_index: 0,
+          prebuilt: 0,
+        },
+        failed: 2,
+      },
+    });
+    const { getByTestId } = render(
+      <TestProviders>
+        <BulkActions
+          selectedRules={[]}
+          translationStats={mockTranslationStats}
+          isTableLoading={false}
+          migrationStats={mockMigrationStats}
+          installTranslatedRule={jest.fn()}
+          setMissingIndexPatternFlyoutOpen={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('installTranslatedItemsButton')).toBeDisabled();
   });
 
   it('renders the install selected button', () => {
@@ -280,6 +325,7 @@ describe('BulkActions', () => {
           selectedRules={selectedRules}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />
       </TestProviders>
@@ -320,6 +366,7 @@ describe('BulkActions', () => {
           selectedRules={selectedRules}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           installSelectedRule={installSelectedRule}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />
@@ -361,6 +408,7 @@ describe('BulkActions', () => {
           selectedRules={selectedRules}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           installSelectedRule={jest.fn()}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />
@@ -406,6 +454,7 @@ describe('BulkActions', () => {
           selectedRules={selectedRules}
           translationStats={mockTranslationStats}
           isTableLoading={false}
+          migrationStats={mockMigrationStats}
           installSelectedRule={jest.fn()}
           setMissingIndexPatternFlyoutOpen={jest.fn()}
         />

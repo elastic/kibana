@@ -54,3 +54,14 @@ export const ALERTS_EMPTY_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.cases.alertAttachment.alertsEmptyDescription',
   { defaultMessage: 'No alerts have been added to this case.' }
 );
+
+export const ALERTS_COUNT = (count: number) =>
+  i18n.translate('xpack.securitySolution.cases.alertAttachment.alertsCount', {
+    defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
+    values: { count },
+  });
+
+export const REMOVE_FROM_CASE = i18n.translate(
+  'xpack.securitySolution.cases.alertAttachment.removeFromCase',
+  { defaultMessage: 'Remove from case' }
+);

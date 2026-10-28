@@ -22,6 +22,10 @@ export const updateKiInputSchema = z.object({
     .optional()
     .describe('The lifecycle status to set'),
   force: z.boolean().optional().describe('Update the knowledge indicator even if it is deleted'),
+  refresh: z
+    .boolean()
+    .optional()
+    .describe('Wait for the write to become searchable before the step completes (default false)'),
 });
 
 export const updateKiOutputSchema = z.object({

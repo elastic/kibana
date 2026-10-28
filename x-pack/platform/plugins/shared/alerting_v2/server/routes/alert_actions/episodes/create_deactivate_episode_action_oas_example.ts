@@ -10,6 +10,7 @@ import type { AlertingOasOperationObject } from '../../oas_types';
 import { buildOasOperation } from '../../oas_utils';
 import {
   ALERT_EPISODE_NOT_FOUND_RESPONSE,
+  ALERT_EPISODE_NOT_LATEST_RESPONSE,
   INVALID_EPISODE_ACTION_PARAMS_RESPONSE,
 } from '../alert_oas_shared_examples';
 
@@ -20,12 +21,13 @@ export const CREATE_DEACTIVATE_EPISODE_ACTION_REQUEST: CreateDeactivateEpisodeAc
 export const createDeactivateEpisodeActionOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     requestBody: {
-      name: 'createDeactivateEpisodeActionRequest',
+      name: 'createDeactivateAlertActionRequest',
       summary: 'Deactivate as a false positive',
       value: CREATE_DEACTIVATE_EPISODE_ACTION_REQUEST,
     },
     responses: {
       400: INVALID_EPISODE_ACTION_PARAMS_RESPONSE,
       404: ALERT_EPISODE_NOT_FOUND_RESPONSE,
+      409: ALERT_EPISODE_NOT_LATEST_RESPONSE,
     },
   });

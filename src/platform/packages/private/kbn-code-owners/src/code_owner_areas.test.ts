@@ -52,12 +52,13 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/response-ops',
     'elastic/rna-project-team',
     'elastic/stack-monitoring',
+    'elastic/workchat-eng',
     'elastic/workflows-eng',
   ],
   search: ['elastic/jinastic', 'elastic/search-design', 'elastic/search-ml-ux'],
   observability: [
-    'elastic/actionable-obs-team',
     'elastic/apm-agent-approvers',
+    'elastic/nightshift',
     'elastic/nightshift-context-and-research-team',
     'elastic/nightshift-investigations-team',
     'elastic/nightshift-sre-agent-team',
@@ -67,17 +68,19 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/obs-knowledge-team',
     'elastic/obs-onboarding-team',
     'elastic/obs-signals-traces-team',
-    'elastic/obs-ux-management-team',
-    'elastic/observability-bi',
+    'elastic/obs-bi-team',
     'elastic/observability-design',
     'elastic/observability-ui',
     'elastic/obs-signals-logs-team',
     'elastic/obs-signals-metrics-team',
+    'elastic/obs-signals-rum-team',
     'elastic/observablt-robots',
     'elastic/streams-program-team',
     'elastic/streams-ui',
   ],
   security: [
+    'elastic/alertzero-common-layer',
+    'elastic/automatic-migrations',
     'elastic/contextual-security-apps',
     'elastic/core-analysis',
     'elastic/siem-conduit',
@@ -87,18 +90,17 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/security-design',
     'elastic/security-detection-engine',
     'elastic/security-detection-engineering',
-    'elastic/security-detection-platform',
     'elastic/security-detection-rule-management',
     'elastic/security-engineering-productivity',
     'elastic/security-entity-analytics',
     'elastic/security-generative-ai',
+    'elastic/security-investigations',
     'elastic/security-pds-deployment',
     'elastic/security-service-integrations',
     'elastic/security-solution',
     'elastic/security-threat-hunting',
     'elastic/security-threat-hunting-investigations',
   ],
-  workplaceai: ['elastic/search-ml-ux', 'elastic/workchat-eng'],
   vectordb: ['elastic/search-ml-ux'],
 };
 
@@ -128,8 +130,8 @@ describe('code owner areas (registry-backed)', () => {
     it.each(CODE_OWNER_AREAS)(
       'contains exactly the historical handles for area %s (incl. multi-area teams)',
       (area) => {
-        // Multi-area teams (e.g. elastic/search-ml-ux under search, workplaceai
-        // and vectordb) must still appear under every one of their areas.
+        // Multi-area teams (e.g. elastic/search-ml-ux under search, vectordb
+        // and platform) must still appear under every one of their areas.
         expect([...getCodeOwnerAreaMappings()[area]].sort()).toEqual(
           [...LEGACY_CODE_OWNER_AREA_MAPPINGS[area]].sort()
         );

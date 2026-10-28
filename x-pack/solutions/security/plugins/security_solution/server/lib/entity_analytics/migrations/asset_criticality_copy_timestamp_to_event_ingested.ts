@@ -7,6 +7,7 @@
 
 import type { EntityAnalyticsMigrationsParams } from '.';
 import { AssetCriticalityMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../execution_context';
 
 const TASK_TYPE = 'security-solution-ea-asset-criticality-copy-timestamp-to-event-ingested';
 const TASK_ID = `${TASK_TYPE}-task-id`;
@@ -66,23 +67,28 @@ export const createMigrationTask =
     return {
       run: async () => {
         const [coreStart] = await getStartServices();
-        const esClient = coreStart.elasticsearch.client.asInternalUser;
-        const assetCrticalityClient = new AssetCriticalityMigrationClient({
-          esClient,
-          logger,
-          auditLogger,
-        });
+        return coreStart.executionContext.withContext(
+          buildEaExecutionContext(EA_EXECUTION_CONTEXT_NAMES.ASSET_CRITICALITY_MIGRATION, TASK_ID),
+          async () => {
+            const esClient = coreStart.elasticsearch.client.asInternalUser;
+            const assetCrticalityClient = new AssetCriticalityMigrationClient({
+              esClient,
+              logger,
+              auditLogger,
+            });
 
-        const assetCriticalityResponse =
-          await assetCrticalityClient.copyTimestampToEventIngestedForAssetCriticality(signal);
+            const assetCriticalityResponse =
+              await assetCrticalityClient.copyTimestampToEventIngestedForAssetCriticality(signal);
 
-        const failures = assetCriticalityResponse.failures?.map((failure) => failure.cause);
-        const hasFailures = failures && failures?.length > 0;
+            const failures = assetCriticalityResponse.failures?.map((failure) => failure.cause);
+            const hasFailures = failures && failures?.length > 0;
 
-        logger.info(
-          `Task "${TASK_TYPE}" finished. Updated documents: ${
-            assetCriticalityResponse.updated
-          }, failures: ${hasFailures ? failures.join('\n') : 0}`
+            logger.info(
+              `Task "${TASK_TYPE}" finished. Updated documents: ${
+                assetCriticalityResponse.updated
+              }, failures: ${hasFailures ? failures.join('\n') : 0}`
+            );
+          }
         );
       },
 

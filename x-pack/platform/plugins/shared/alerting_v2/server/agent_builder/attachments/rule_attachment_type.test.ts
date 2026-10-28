@@ -30,11 +30,9 @@ const baseRuleData: RuleAttachmentData = {
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
-  },
-  state_transition: null,
+  query: { base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
+  recovery: { strategy: 'no_breach' },
+  no_data: { strategy: 'ignore' },
   created_at: '2026-04-01T00:00:00.000Z',
   updated_at: '2026-04-10T00:00:00.000Z',
 };
@@ -103,7 +101,7 @@ describe('createRuleAttachmentType', () => {
         metadata: { name: 'New' },
         time_field: '@timestamp',
         schedule: { every: '1m' },
-        query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+        query: { base: 'FROM logs-*' },
       };
       const result = await definition.validate(proposed);
       expect(result.valid).toBe(true);
@@ -314,17 +312,17 @@ describe('createRuleAttachmentType', () => {
   });
 
   describe('getAgentDescription', () => {
-    it('mentions rule attachment, persistence states, and the rule-management skill', () => {
+    it('mentions rule attachment, persistence states, and the rule-authoring skill', () => {
       const description = definition.getAgentDescription!();
-      expect(description).toContain('Alerting v2 rule');
+      expect(description).toContain('Universal Rule');
       expect(description).toContain('proposed');
       expect(description).toContain('saved rule');
-      expect(description).toContain('rule-management');
+      expect(description).toContain('rule-authoring');
     });
 
     it('does not mention non-existent tools or skills', () => {
       const description = definition.getAgentDescription!();
-      expect(description).not.toContain('rule-authoring');
+      expect(description).not.toContain('rule-management');
       expect(description).not.toContain('enable_rule');
       expect(description).not.toContain('disable_rule');
     });

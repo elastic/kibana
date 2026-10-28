@@ -14,7 +14,7 @@ import { AgentTypeBadge, isPreconfiguredAgentType } from './agent_type_badge';
 const renderWithIntl = (ui: React.ReactElement) =>
   render(<IntlProvider locale="en">{ui}</IntlProvider>);
 
-const managedType = 'platform.sig_events.investigation-type';
+const managedType = 'platform.nightshift.investigation-type';
 
 describe('isPreconfiguredAgentType', () => {
   it('is false for the default chat agent type', () => {

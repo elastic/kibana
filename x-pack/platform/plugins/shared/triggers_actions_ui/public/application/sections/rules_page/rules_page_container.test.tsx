@@ -15,11 +15,13 @@ import * as React from 'react';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
-import { ALERTING_V2_RULES_BASE_PATH } from '@kbn/alerting-v2-constants';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import RulesPage from './rules_page_container';
 import { hasShowActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
+import { AppStatus } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
+import { BehaviorSubject } from 'rxjs';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/get_experimental_features');
@@ -39,11 +41,10 @@ jest.mock('../rule_details/components/global_rule_event_log_list', () => {
   return () => <div data-test-subj="globalRuleEventLogList">{'Render Logs list component'}</div>;
 });
 
-jest.mock('../../components/rules_setting/rules_settings_flyout', () => ({
-  RulesSettingsFlyout: ({ isVisible }: { isVisible: boolean }) =>
-    isVisible ? (
-      <div data-test-subj="rulesSettingsFlyout">{'Render Rules Settings Flyout component'}</div>
-    ) : null,
+jest.mock('../rules_settings_page/rules_settings_page', () => ({
+  RulesSettingsPageContainer: () => (
+    <div data-test-subj="rulesSettingsPage">{'Render Rules Settings page component'}</div>
+  ),
 }));
 
 jest.mock('@kbn/response-ops-rule-form', () => ({
@@ -83,6 +84,12 @@ const renderRulesPage = (history = createMemoryHistory({ initialEntries: ['/'] }
     </IntlProvider>
   );
 
+const useSetAlertsAppStatus = (status: AppStatus) => {
+  useKibanaMock().services.application.applications$ = new BehaviorSubject(
+    new Map([['observability-overview', { status }]])
+  ) as unknown as ApplicationStart['applications$'];
+};
+
 describe('rulesPage', () => {
   beforeEach(() => {
     (hasShowActionsCapability as jest.Mock).mockClear();
@@ -95,6 +102,7 @@ describe('rulesPage', () => {
     useKibanaMock().services.http.basePath.prepend = jest.fn(
       (path: string) => `${MOCK_BASE_PATH}${path}`
     );
+    useSetAlertsAppStatus(AppStatus.accessible);
     useKibanaMock().services.hideListBackButton = undefined;
     useKibanaMock().services.tabs = undefined;
   });
@@ -135,6 +143,15 @@ describe('rulesPage', () => {
 
   it('omits the list back button when hideListBackButton is set', async () => {
     useKibanaMock().services.hideListBackButton = true;
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+    renderRulesPage(history);
+
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rules');
+    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
+  });
+
+  it('omits the list back button when the observability-overview app is inaccessible', async () => {
+    useSetAlertsAppStatus(AppStatus.inaccessible);
     const history = createMemoryHistory({ initialEntries: ['/'] });
     renderRulesPage(history);
 
@@ -226,21 +243,36 @@ describe('rulesPage', () => {
       expect(await screen.findByTestId('ruleTypeModal')).toBeInTheDocument();
     });
 
-    it('opens the settings flyout from the header menu', async () => {
+    it('navigates to the settings sub-page from the header menu', async () => {
       const history = createMemoryHistory({ initialEntries: ['/'] });
       renderRulesPage(history);
 
-      expect(screen.queryByTestId('rulesSettingsFlyout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('rulesSettingsPage')).not.toBeInTheDocument();
       await openAppMenuOverflow();
       // EUI overflow popovers set pointer-events: none in jsdom; fireEvent still invokes run.
       fireEvent.click(await screen.findByTestId('rulesSettingsLink'));
-      expect(await screen.findByTestId('rulesSettingsFlyout')).toBeInTheDocument();
+      expect(await screen.findByTestId('rulesSettingsPage')).toBeInTheDocument();
+      expect(history.location.pathname).toBe('/settings');
+      expect(history.location.state).toEqual({ returnPath: '/' });
+    });
+
+    it('remembers the Logs page when opening settings from it', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/logs'] });
+      renderRulesPage(history);
+
+      await openAppMenuOverflow();
+      fireEvent.click(await screen.findByTestId('rulesSettingsLink'));
+      expect(await screen.findByTestId('rulesSettingsPage')).toBeInTheDocument();
+      expect(history.location.state).toEqual({ returnPath: '/logs' });
     });
   });
 
   describe('when alerting v2 is enabled', () => {
     beforeEach(() => {
       (useKibanaMock().services.settings.globalClient.get as jest.Mock).mockReturnValue(true);
+      (useKibanaMock().services.settings.globalClient.isDeclared as jest.Mock).mockReturnValue(
+        true
+      );
     });
 
     describe('and the user can read v2 rules', () => {
@@ -251,46 +283,16 @@ describe('rulesPage', () => {
         };
       });
 
-      it('replaces the Rules/Logs tabs with V1 rules/V2 rules tabs', async () => {
+      it('hides the V2 rules tab and the classic Rules/Logs tabs', async () => {
         const history = createMemoryHistory({ initialEntries: ['/'] });
         renderRulesPage(history);
 
-        expect(await screen.findByTestId('v1RulesTab')).toBeInTheDocument();
-        expect(await screen.findByTestId('v2RulesTab')).toBeInTheDocument();
+        await screen.findByTestId('rulesListComponents');
+        expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('v1RulesTab')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('v2RulesTab')).not.toBeInTheDocument();
         expect(screen.queryByTestId('rulesTab')).not.toBeInTheDocument();
         expect(screen.queryByTestId('logsTab')).not.toBeInTheDocument();
-        expect(await screen.findAllByRole('tab')).toHaveLength(2);
-      });
-
-      it('selects the V1 rules tab on the rules list', async () => {
-        const history = createMemoryHistory({ initialEntries: ['/'] });
-        renderRulesPage(history);
-
-        expect(await screen.findByTestId('v1RulesTab')).toHaveAttribute('aria-selected', 'true');
-        expect(await screen.findByTestId('v2RulesTab')).toHaveAttribute('aria-selected', 'false');
-      });
-
-      it('orders the V2 rules tab before the V1 rules tab', async () => {
-        const history = createMemoryHistory({ initialEntries: ['/'] });
-        renderRulesPage(history);
-
-        const tabs = await screen.findAllByRole('tab');
-
-        expect(tabs.map((tab) => tab.getAttribute('data-test-subj'))).toEqual([
-          'v2RulesTab',
-          'v1RulesTab',
-        ]);
-      });
-
-      it('points each tab at its own app, under the server base path', async () => {
-        const history = createMemoryHistory({ initialEntries: ['/'] });
-        renderRulesPage(history);
-
-        expect(await screen.findByTestId('v1RulesTab')).toHaveAttribute('href', BOUND_RULES_HREF);
-        expect(await screen.findByTestId('v2RulesTab')).toHaveAttribute(
-          'href',
-          `${MOCK_BASE_PATH}${ALERTING_V2_RULES_BASE_PATH}`
-        );
       });
 
       it('renders host-provided tabs instead of management hrefs', async () => {

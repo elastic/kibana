@@ -21,8 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const findService = getService('find');
   const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/253005
-  describe.skip('visual builder', function describeIndexTests() {
+  describe('visual builder', function describeIndexTests() {
     before(async () => {
       await visualize.initTests();
     });
@@ -66,7 +65,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await visualBuilder.setLabel('Cardinality');
         await visualBuilder.selectAggType('Cardinality');
+        const prevRenderingCount = await visChart.getVisualizationRenderingCount();
         await visualBuilder.setFieldForAggregation('machine.ram');
+        await visChart.waitForRenderingCount(prevRenderingCount + 1);
+
         const isFieldForAggregationValid = await visualBuilder.checkFieldForAggregationValidity();
         const tableData = await visualBuilder.getViewTable();
         expect(isFieldForAggregationValid).to.be(true);

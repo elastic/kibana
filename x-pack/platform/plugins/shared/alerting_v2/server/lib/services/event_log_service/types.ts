@@ -51,9 +51,8 @@ export interface RuleExecutionTimings {
  *     a version. It will be populated once the rule executor writes its
  *     own provider event with `rule.version` inline. The nested shape
  *     also leaves room for `rule.name` later, without breaking callers.
- *   - `timings` groups the duration / schedule-delay pair so the unit
- *     (ms) is implicit at the parent level rather than smeared across
- *     suffixes.
+ *   - `timings` groups the duration / schedule-delay pair. Both are in
+ *     milliseconds; the HTTP shape says so in the field names.
  *   - `outcome` and `reason` are passed through from `event.outcome` and
  *     `event.reason` respectively. Task Manager writes `event.reason` as a
  *     human-readable sentence (e.g. `Task "<id>" was cancelled.`); we do
@@ -86,7 +85,7 @@ export interface FindRuleExecutionsQuery {
   outcomes?: RuleExecutionOutcome[];
   from?: string;
   to?: string;
-  sort?: RuleExecutionSortField;
+  sortField?: RuleExecutionSortField;
   sortOrder?: RuleExecutionSortOrder;
   page: number;
   perPage: number;

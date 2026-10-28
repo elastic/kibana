@@ -116,6 +116,7 @@ async function snoozeAlertInstanceWithOCC(
   const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
   const updatedAt = new Date().toISOString();
   const updatedBy = await context.getUserName();
+  const updatedByProfileUid = await context.getProfileUid();
 
   const snapshotFields = getPerAlertSnoozeSnapshotFields(body);
   let snoozeSnapshot: Record<string, unknown> | undefined;
@@ -198,6 +199,7 @@ async function snoozeAlertInstanceWithOCC(
     updateRuleAttributes: updateMeta(context, {
       snoozedInstances,
       updatedBy,
+      updatedByProfileUid,
       updatedAt,
     }),
   });

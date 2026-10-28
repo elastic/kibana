@@ -18,6 +18,11 @@ project:
   sourceRoot: src/platform/plugins/private/vis_types/vega
 dependsOn:
   - '@kbn/core'
+  - '@kbn/vega-sandbox'
+  - '@kbn/as-code-filters-schema'
+  - '@kbn/as-code-filters-transforms'
+  - '@kbn/as-code-shared-schemas'
+  - '@kbn/as-code-shared-transforms'
   - '@kbn/data-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/visualizations-plugin'
@@ -47,6 +52,7 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/embeddable-plugin'
   - '@kbn/ui-actions-plugin'
+  - '@kbn/unified-search-plugin'
   - '@kbn/css-utils'
   - '@kbn/visualizations-common'
   - '@kbn/es-types'
@@ -56,6 +62,12 @@ dependsOn:
   - '@kbn/presentation-util'
   - '@kbn/zod'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/as-code-shared-telemetry'
+  - '@kbn/as-code-utils'
+  - '@kbn/as-code-filters-constants'
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/core-feature-flags-server'
+  - '@kbn/core-http-server'
 tags:
   - plugin
   - prod
@@ -73,6 +85,4 @@ fileGroups:
     - public/test_utils/vegalite_graph.json
     - public/test_utils/vega_graph.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

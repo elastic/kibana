@@ -13,6 +13,7 @@ import React, { useRef, useMemo } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import { useCardUrlRewrite } from './use_card_url_rewrite';
 import { PackageList } from '../package_list/package_list';
+import { buildPackageList } from './build_package_list';
 
 interface Props {
   searchQuery: string;
@@ -53,15 +54,15 @@ const PackageListGridWrapper = ({
   });
   const rewriteUrl = useCardUrlRewrite({ category: flowCategory, search: searchQuery });
 
-  const list: IntegrationCardItem[] = useMemo(() => {
-    return (customCards ?? [])
-      .concat(integrationCards)
-      .filter((card) =>
-        card.categories.some((category) => ['observability', 'os_system'].includes(category))
-      )
-      .filter((card) => !excludePackageIdList.includes(card.id))
-      .map(rewriteUrl);
-  }, [customCards, excludePackageIdList, integrationCards, rewriteUrl]);
+  const list: IntegrationCardItem[] = useMemo(
+    () =>
+      buildPackageList({
+        customCards: customCards ?? [],
+        fleetCards: integrationCards,
+        excludePackageIdList,
+      }).map(rewriteUrl),
+    [customCards, excludePackageIdList, integrationCards, rewriteUrl]
+  );
 
   if (isLoading) return <Loading />;
 

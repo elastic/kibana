@@ -86,12 +86,23 @@ export const getAttackDiscoveryGenerationRoute = (
 
           const currentUser = await checkResponse.currentUser;
 
+          // A generation written by a service account (e.g. an AlertZero Worker) has no human
+          // owner, so its discoveries are returned to every user who can see the generation, as
+          // the Attacks page does. Only a positively tagged generation qualifies, so a guessed
+          // execution UUID never exposes another user's discoveries.
+          const includeAllAuthors = await dataClient.isServiceAccountGeneration({
+            eventLogIndex,
+            executionUuid,
+            spaceId,
+          });
+
           const findResponse = await dataClient.findAttackDiscoveryAlerts({
             authenticatedUser: currentUser,
             esClient: ctx.core.elasticsearch.client.asCurrentUser,
             findAttackDiscoveryAlertsParams: {
               enableFieldRendering,
               executionUuid,
+              includeAllAuthors,
               page: 1,
               perPage: PER_PAGE,
               sortField: '@timestamp',

@@ -283,6 +283,61 @@ describe('bulkEdit()', () => {
             attributes: expect.objectContaining({
               tags: ['foo', 'test-1'],
               revision: 1,
+              updatedByProfileUid: null,
+            }),
+          }),
+        ],
+        { overwrite: true }
+      );
+    });
+
+    test('stamps updatedByProfileUid when the actor has a profile uid', async () => {
+      rulesClientParams.getProfileUid.mockResolvedValueOnce('u_profile_1');
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {
+              enabled: true,
+              tags: ['foo', 'test-1'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
+              params: {},
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+              revision: 1,
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
+
+      expect(rulesClientParams.getProfileUid).toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              updatedByProfileUid: 'u_profile_1',
             }),
           }),
         ],
@@ -628,6 +683,7 @@ describe('bulkEdit()', () => {
               ],
               apiKey: null,
               apiKeyOwner: null,
+              apiKeyOwnerProfileUid: null,
               apiKeyCreatedByUser: null,
               isSnoozedUntil: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
@@ -635,6 +691,7 @@ describe('bulkEdit()', () => {
               enabled: false,
               updatedAt: '2019-02-12T21:01:22.479Z',
               updatedBy: 'elastic',
+              updatedByProfileUid: null,
               tags: ['foo'],
               revision: 1,
             },
@@ -854,6 +911,7 @@ describe('bulkEdit()', () => {
               ],
               apiKey: null,
               apiKeyOwner: null,
+              apiKeyOwnerProfileUid: null,
               apiKeyCreatedByUser: null,
               isSnoozedUntil: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
@@ -861,6 +919,7 @@ describe('bulkEdit()', () => {
               enabled: false,
               updatedAt: '2019-02-12T21:01:22.479Z',
               updatedBy: 'elastic',
+              updatedByProfileUid: null,
               tags: ['foo'],
               revision: 1,
             },
@@ -1003,6 +1062,7 @@ describe('bulkEdit()', () => {
               ],
               apiKey: null,
               apiKeyOwner: null,
+              apiKeyOwnerProfileUid: null,
               apiKeyCreatedByUser: null,
               isSnoozedUntil: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
@@ -1010,6 +1070,7 @@ describe('bulkEdit()', () => {
               enabled: false,
               updatedAt: '2019-02-12T21:01:22.479Z',
               updatedBy: 'elastic',
+              updatedByProfileUid: null,
               tags: ['foo'],
               revision: 1,
             },
@@ -1176,6 +1237,7 @@ describe('bulkEdit()', () => {
               },
               apiKey: null,
               apiKeyOwner: null,
+              apiKeyOwnerProfileUid: null,
               apiKeyCreatedByUser: null,
               isSnoozedUntil: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
@@ -1183,6 +1245,7 @@ describe('bulkEdit()', () => {
               enabled: false,
               updatedAt: '2019-02-12T21:01:22.479Z',
               updatedBy: 'elastic',
+              updatedByProfileUid: null,
               tags: ['foo'],
               revision: 1,
             },
@@ -2723,6 +2786,66 @@ describe('bulkEdit()', () => {
       );
     });
 
+    describe('UIAM-only rules', () => {
+      const oldUiamApiKey = Buffer.from('222:essu_old').toString('base64');
+      const newUiamApiKey = Buffer.from('333:essu_new').toString('base64');
+
+      beforeEach(() => {
+        createAPIKeyMock.mockReset();
+        createAPIKeyMock.mockResolvedValueOnce({
+          apiKeysEnabled: true,
+          uiamResult: { id: '333', name: '333', api_key: 'essu_new' },
+        });
+        mockCreatePointInTimeFinderAsInternalUser({
+          saved_objects: [
+            {
+              ...existingDecryptedRule,
+              attributes: {
+                ...existingDecryptedRule.attributes,
+                enabled: true,
+                apiKey: null,
+                apiKeyCreatedByUser: false,
+                uiamApiKey: oldUiamApiKey,
+              },
+            },
+          ],
+        });
+      });
+
+      test('invalidates the UIAM key the rule held before the edit', async () => {
+        await rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+        });
+
+        expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+          { apiKeys: [oldUiamApiKey] },
+          expect.any(Object),
+          expect.any(Object)
+        );
+      });
+
+      test('invalidates the new UIAM key if bulkCreate failed', async () => {
+        unsecuredSavedObjectsClient.bulkCreate.mockImplementation(() => {
+          throw new Error('Fail');
+        });
+
+        await expect(
+          rulesClient.bulkEdit({
+            filter: 'alert.attributes.tags: "APM"',
+            operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+          })
+        ).rejects.toThrow('Fail');
+
+        expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+        expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+          { apiKeys: [newUiamApiKey] },
+          expect.any(Object),
+          expect.any(Object)
+        );
+      });
+    });
+
     test('should call bulkMarkApiKeysForInvalidation to invalidate unused keys if bulkCreate failed', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockImplementation(() => {
         throw new Error('Fail');
@@ -2959,6 +3082,62 @@ describe('bulkEdit()', () => {
         expect(rulesClientParams.getAuthenticationAPIKey).toHaveBeenCalledWith(
           'Alerting: myType/my rule name-user-created'
         );
+      });
+    });
+
+    describe('declared borrowed key on a rule with a user provided key', () => {
+      beforeEach(() => {
+        isAuthenticationTypeApiKeyMock.mockReturnValue(true);
+        rulesClientParams.cloneAPIKey.mockResolvedValue({
+          apiKeysEnabled: true,
+          result: { id: 'cloned-id', name: 'cloned', api_key: 'cloned-secret' },
+        });
+        mockCreatePointInTimeFinderAsInternalUser({
+          saved_objects: [
+            {
+              ...existingDecryptedRule,
+              attributes: {
+                ...existingDecryptedRule.attributes,
+                enabled: true,
+                apiKeyCreatedByUser: true,
+              },
+            },
+          ],
+        });
+      });
+
+      test('clones a framework-managed key instead of persisting the caller key and leaves the user key alone', async () => {
+        const borrowedKeyRulesClient = new RulesClient({
+          ...rulesClientParams,
+          cloneApiKeysOnCreate: true,
+        });
+
+        await borrowedKeyRulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          operations: [
+            {
+              field: 'tags',
+              operation: 'add',
+              value: ['test-1'],
+            },
+          ],
+        });
+
+        expect(rulesClientParams.cloneAPIKey).toHaveBeenCalledWith('Alerting: myType/my rule name');
+        expect(rulesClientParams.getAuthenticationAPIKey).not.toHaveBeenCalled();
+        expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+          [
+            expect.objectContaining({
+              attributes: expect.objectContaining({
+                apiKey: Buffer.from('cloned-id:cloned-secret').toString('base64'),
+                apiKeyCreatedByUser: false,
+              }),
+            }),
+          ],
+          { overwrite: true }
+        );
+        // The replaced key was the user's, not ours to revoke.
+        expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
       });
     });
   });

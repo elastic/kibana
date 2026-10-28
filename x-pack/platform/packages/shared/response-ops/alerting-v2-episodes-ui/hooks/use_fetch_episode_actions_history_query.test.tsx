@@ -21,8 +21,9 @@ const ACTIONS_COLUMNS = [
   { name: '_id', type: 'keyword' },
   { name: '@timestamp', type: 'date' },
   { name: 'action_type', type: 'keyword' },
-  { name: 'actor', type: 'keyword' },
-  { name: 'episode_id', type: 'keyword' },
+  { name: 'actor.type', type: 'keyword' },
+  { name: 'actor.profile_uid', type: 'keyword' },
+  { name: 'alert_id', type: 'keyword' },
   { name: 'group_hash', type: 'keyword' },
   { name: 'tags', type: 'keyword' },
   { name: 'assignee_uid', type: 'keyword' },
@@ -34,6 +35,7 @@ const makeActionRow = (id: string, ts: string) => [
   id,
   ts,
   'ack',
+  'user',
   'user-uid-1',
   'ep-1',
   'hash-1',
@@ -49,6 +51,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
   const queryClient = createTestQueryClient();
   const wrapper = createQueryClientWrapper(queryClient);
   const episodeId = 'ep-1';
+  const seriesId = 'series-1';
   const groupHash = 'hash-1';
 
   beforeEach(() => {
@@ -59,11 +62,12 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
     queryClient.clear();
   });
 
-  it('does not run when episodeId or groupHash is undefined', () => {
+  it('does not run when episodeId or seriesId is undefined', () => {
     const { result } = renderHook(
       () =>
         useFetchEpisodeActionsHistoryQuery({
           episodeId: undefined,
+          seriesId,
           groupHash,
           services: { data, spaces: mockSpaces },
         }),
@@ -77,6 +81,44 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
     expect(result.current.isLoading).toBe(false);
   });
 
+  it('does not run until the group hash is known when the episode has a series', () => {
+    const { result } = renderHook(
+      () =>
+        useFetchEpisodeActionsHistoryQuery({
+          episodeId,
+          seriesId,
+          groupHash: undefined,
+          services: { data, spaces: mockSpaces },
+        }),
+      { wrapper }
+    );
+
+    expect(runEsqlAsyncSearchMock).not.toHaveBeenCalled();
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('fetches only the episode-level actions when the episode has no series identity', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue({ columns: ACTIONS_COLUMNS, values: [] });
+
+    const { result } = renderHook(
+      () =>
+        useFetchEpisodeActionsHistoryQuery({
+          episodeId,
+          seriesId: null,
+          groupHash,
+          services: { data, spaces: mockSpaces },
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(runEsqlAsyncSearchMock).toHaveBeenCalledTimes(1);
+    const { query } = runEsqlAsyncSearchMock.mock.calls[0][0].params;
+    expect(query).toContain(`alert_id == "${episodeId}"`);
+    expect(query).not.toContain('series_id');
+  });
+
   it('loads the first page and maps rows', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: ACTIONS_COLUMNS,
@@ -87,6 +129,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
       () =>
         useFetchEpisodeActionsHistoryQuery({
           episodeId,
+          seriesId,
           groupHash,
           services: { data, spaces: mockSpaces },
           pageSize: 2,
@@ -100,9 +143,14 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
       expect.objectContaining({
         data,
         params: expect.objectContaining({
-          query: buildEpisodeActionsHistoryQuery(DEFAULT_SPACE_ID, episodeId, groupHash, {
-            limit: 2,
-          }).print('basic'),
+          query: buildEpisodeActionsHistoryQuery(
+            DEFAULT_SPACE_ID,
+            episodeId,
+            { seriesId, groupHash },
+            {
+              limit: 2,
+            }
+          ).print('basic'),
           time_zone: 'UTC',
         }),
       })
@@ -111,6 +159,45 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
       expect.objectContaining({ _id: 'id-1', '@timestamp': '2024-01-02T00:00:00.000Z' }),
     ]);
     expect(result.current.hasNextPage).toBe(false);
+  });
+
+  it('folds the actor leaf columns into an actor object', async () => {
+    const internalRow = [
+      'id-internal',
+      '2024-01-02T00:00:00.000Z',
+      'suppress',
+      'internal',
+      null,
+      'ep-1',
+      'hash-1',
+      null,
+      null,
+      null,
+      null,
+    ];
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: ACTIONS_COLUMNS,
+      values: [makeActionRow('id-user', '2024-01-02T00:01:00.000Z'), internalRow],
+    });
+
+    const { result } = renderHook(
+      () =>
+        useFetchEpisodeActionsHistoryQuery({
+          episodeId,
+          seriesId,
+          groupHash,
+          services: { data, spaces: mockSpaces },
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.entries.map((entry) => entry.actor)).toEqual([
+      { type: 'user', profile_uid: 'user-uid-1' },
+      { type: 'internal', profile_uid: null },
+    ]);
+    expect(result.current.entries[0]).not.toHaveProperty(['actor.type']);
+    expect(result.current.entries[0]).not.toHaveProperty(['actor.profile_uid']);
   });
 
   it('offers a next page when the page comes back full, none when short', async () => {
@@ -126,6 +213,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
       () =>
         useFetchEpisodeActionsHistoryQuery({
           episodeId,
+          seriesId,
           groupHash,
           services: { data, spaces: mockSpaces },
           pageSize: 2,
@@ -160,6 +248,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
       'id-1',
       '2024-01-02T00:00:00.000Z',
       'tag',
+      'user',
       'user-uid-1',
       'ep-1',
       'hash-1',
@@ -177,6 +266,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
       () =>
         useFetchEpisodeActionsHistoryQuery({
           episodeId,
+          seriesId,
           groupHash,
           services: { data, spaces: mockSpaces },
           pageSize: 2,
@@ -201,6 +291,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
       () =>
         useFetchEpisodeActionsHistoryQuery({
           episodeId,
+          seriesId,
           groupHash,
           services: { data, spaces: mockSpaces },
           pageSize: 2,

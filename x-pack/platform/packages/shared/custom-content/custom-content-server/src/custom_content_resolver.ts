@@ -64,7 +64,7 @@ Emit nothing before this comment — no markdown fence, no blank line.`;
 const SANDBOX_GUIDANCE = `ABSOLUTE, NON-NEGOTIABLE RULE: the template renders inside a sandboxed iframe with scripting disabled. ANY JavaScript you write — a <script> tag, an inline event handler (onclick, onmouseover, ...), or building any part of the markup at runtime via document.getElementById/innerHTML/addEventListener/JSON.parse/fetch — will NEVER RUN. It is completely dead code and will render as a BLANK PANEL.
 - Write every element directly as static HTML/SVG — never assemble markup as a string in JavaScript and inject it via innerHTML.
 - If the prompt asks for hover interactivity (e.g. tooltips), this IS possible with CSS :hover alone — do NOT reach for JavaScript. Use a nested element that is invisible by default (\`opacity: 0\`) and reveal it with a \`:hover\` rule.
-- Do NOT use <a> anchor tags or href attributes of any kind.
+- Links are only allowed to Dashboards and Discover, as <a href="/app/dashboards..."> or <a href="/app/discover..."> (for example /app/dashboards#/view/<id> or /app/discover). Never include a host, a protocol, or a base path. Any other href, including links to other apps and external URLs, is removed at render time, so do not write one. Use no other attribute on <a>.
 - Do NOT load any external resources. No CDN scripts, no Google Fonts, no image URLs.
 - Do NOT use <img> tags with an external \`src\` — the panel's CSP blocks all outbound network requests. For images, icons, or illustrations draw them with inline SVG, pure CSS shapes, or a Unicode emoji/symbol instead.
 - For diagrams and progress indicators, use pure CSS or inline SVG.`;
@@ -110,7 +110,7 @@ const describeSamplingFailure = (error: unknown): string => {
       : undefined;
 
   if (type === 'verification_exception' || type === 'parsing_exception') {
-    return `ES|QL query is invalid: ${reason}. Build the query with the generate_esql tool instead of writing it directly, then retry.`;
+    return `ES|QL query is invalid: ${reason}. If you supplied the query, correct it or ask the user for a valid one; if it was generated, retry with a more specific description or an exact index.`;
   }
   if (type === 'security_exception') {
     return `No access to the index targeted by this ES|QL query: ${reason}. Use an index the current user can read.`;
@@ -196,23 +196,21 @@ export interface ResolvedCustomContentTemplate {
   height: number;
 }
 
+/** Generates a custom content template, or refines `existingTemplate` when one is given. */
+export type CustomContentTemplateResolver = (params: {
+  prompt: string;
+  esqlQuery?: string;
+  existingTemplate?: string;
+  /** True when the panel already has an ES|QL query that is not changing. Selects the Liquid system prompt without re-sampling. */
+  hasExistingQuery?: boolean;
+}) => Promise<ResolvedCustomContentTemplate>;
+
 export const createCustomContentTemplateResolver = ({
   modelProvider,
   esClient,
   logger,
-}: CustomContentTemplateResolverDeps) => {
-  return async ({
-    prompt,
-    esqlQuery,
-    existingTemplate,
-    hasExistingQuery,
-  }: {
-    prompt: string;
-    esqlQuery?: string;
-    existingTemplate?: string;
-    /** True when the panel already has an ES|QL query that is not changing. Selects the Liquid system prompt without re-sampling. */
-    hasExistingQuery?: boolean;
-  }): Promise<ResolvedCustomContentTemplate> => {
+}: CustomContentTemplateResolverDeps): CustomContentTemplateResolver => {
+  return async ({ prompt, esqlQuery, existingTemplate, hasExistingQuery }) => {
     let columns: Array<{ name: string; type: string }> = [];
     let values: unknown[][] = [];
 
