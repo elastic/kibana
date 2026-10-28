@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
-import { buildAlertsPagePath } from '@kbn/securitysolution-alerts-page-url';
+import { buildAlertsPagePath, buildAlertsPageTagPath } from '@kbn/securitysolution-alerts-page-url';
 import { ExecutionStatus } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
@@ -379,7 +379,10 @@ export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsSte
               conversation_id: join.conversationId,
               alert_ids: join.alertIds,
               total_alerts: join.totalAlerts,
-              alerts_page_query: buildAlertsPagePath(join.alertIds, new Date().toISOString()),
+              alerts_page_query: buildAlertsPageTagPath(
+                `az:proposal:${join.rootProposalId}`,
+                new Date().toISOString()
+              ),
               impacted_entities: entitiesOf(join.alertIds),
             })),
             alerts_joined: plan.joins.reduce((sum, { alertIds }) => sum + alertIds.length, 0),

@@ -915,7 +915,7 @@ steps:
             **Why:** {{ v.rationale }}
             {%- assign shown = shown | plus: 1 -%}{%- endif -%}{%- endfor %}
 
-            [View the added alert{% if steps.process_joins.item.alert_ids.size != 1 %}s{% endif %}](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.process_joins.item.alerts_page_query }})
+            [View all {{ steps.process_joins.item.total_alerts }} alerts of this proposal](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.process_joins.item.alerts_page_query }})
 
   # ---------------------------------------------------------------------------
   # 7c. The alerts that are in no proposal (true positives, inconclusive verdicts, false positives

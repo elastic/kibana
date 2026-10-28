@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { decode } from '@kbn/rison';
-import { buildAlertsPagePath } from './build_alerts_page_path';
+import { buildAlertsPagePath, buildAlertsPageTagPath } from './build_alerts_page_path';
 
 describe('buildAlertsPagePath', () => {
   it('keeps ids with reserved characters inside their own parameter', () => {
@@ -36,5 +36,27 @@ describe('buildAlertsPagePath', () => {
       query: { bool: { filter: { ids: { values: string[] } } } };
     }>;
     expect(filter.query.bool.filter.ids.values).toEqual(['a', 'b']);
+  });
+});
+
+describe('buildAlertsPageTagPath', () => {
+  const createdAt = '2026-09-01T00:00:00.000Z';
+
+  it('filters on the tag', () => {
+    const path = buildAlertsPageTagPath('az:proposal:abc', createdAt);
+
+    const [filter] = decode(new URLSearchParams(path).get('filters') ?? '') as Array<{
+      query: { match_phrase: Record<string, string> };
+    }>;
+    expect(filter.query.match_phrase).toEqual({ 'kibana.alert.workflow_tags': 'az:proposal:abc' });
+  });
+
+  it('is the same size for any number of alerts and keeps the page params of the ids link', () => {
+    const path = buildAlertsPageTagPath('az:proposal:abc', createdAt);
+
+    expect(path.length).toBeLessThan(1500);
+    expect([...new URLSearchParams(path).keys()]).toEqual([
+      ...new URLSearchParams(buildAlertsPagePath(['a'], createdAt)).keys(),
+    ]);
   });
 });

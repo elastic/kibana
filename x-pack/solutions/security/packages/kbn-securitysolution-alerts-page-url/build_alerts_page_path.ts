@@ -34,11 +34,33 @@ const ALL_STATUSES_PAGE_FILTER = encode(
   ])
 );
 
-export const buildAlertsPagePath = (alertIds: readonly string[], createdAt: string): string =>
+const WORKFLOW_TAGS_FIELD = 'kibana.alert.workflow_tags';
+
+const buildTagFilter = (tag: string): Filter => ({
+  meta: {
+    alias: null,
+    disabled: false,
+    negate: false,
+    type: 'phrase',
+    key: WORKFLOW_TAGS_FIELD,
+    params: { query: tag },
+  },
+  query: { match_phrase: { [WORKFLOW_TAGS_FIELD]: tag } },
+  $state: { store: FilterStateStore.APP_STATE },
+});
+
+const buildPagePath = (filter: Filter, createdAt: string): string =>
   [
-    [URL_PARAM_KEY.filters, encode([buildIdsFilter(alertIds)])],
+    [URL_PARAM_KEY.filters, encode([filter])],
     [URL_PARAM_KEY.timerange, buildPageTimerange(createdAt)],
     [URL_PARAM_KEY.pageFilter, ALL_STATUSES_PAGE_FILTER],
   ]
     .map(([key, value], index) => `${index === 0 ? '?' : '&'}${key}=${encodePageParam(value)}`)
     .join('');
+
+export const buildAlertsPagePath = (alertIds: readonly string[], createdAt: string): string =>
+  buildPagePath(buildIdsFilter(alertIds), createdAt);
+
+/** Same page as `buildAlertsPagePath`, filtered on one alert tag, so the link is the same size for any number of alerts. */
+export const buildAlertsPageTagPath = (tag: string, createdAt: string): string =>
+  buildPagePath(buildTagFilter(tag), createdAt);

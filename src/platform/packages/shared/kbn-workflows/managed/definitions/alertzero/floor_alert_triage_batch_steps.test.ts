@@ -1508,11 +1508,16 @@ describe('floor_alert_triage_batch — grouping', () => {
         inputs: { rule_name: 'Rule A' },
         steps: {
           process_joins: {
-            item: { alert_ids: ['a', 'b'], revision: 2, alerts_page_query: '?filters=x' },
+            item: {
+              alert_ids: ['a', 'b'],
+              total_alerts: 42,
+              revision: 2,
+              alerts_page_query: '?filters=x',
+            },
           },
         },
       })
-    ).toContain('[View the added alerts](/s/team/app/security/alerts?filters=x)');
+    ).toContain('[View all 42 alerts of this proposal](/s/team/app/security/alerts?filters=x)');
   });
 
   it('reports whether the batch created a conversation, for a proposal, a failure or its own alerts', () => {

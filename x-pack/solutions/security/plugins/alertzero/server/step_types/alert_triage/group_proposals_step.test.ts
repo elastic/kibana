@@ -273,7 +273,8 @@ describe('triage group false positives step', () => {
             conversation_id: 'conv-owner',
             alert_ids: ['a1', 'a2'],
             total_alerts: 3,
-            alerts_page_query: expect.stringContaining('filters='),
+            // The tag, not the ids, so the link stays the same size for a proposal of 1,000 alerts.
+            alerts_page_query: expect.stringContaining(`az:proposal:${GEN0}`),
             impacted_entities: [],
           },
         ],
