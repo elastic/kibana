@@ -53,8 +53,6 @@ import 'monaco-editor/languages/definitions/xml/register'; // Needed for basic x
 import 'monaco-editor/languages/definitions/yaml/register'; // Needed for yaml support
 import 'monaco-editor/languages/definitions/liquid/register'; // Needed for liquid template support
 
-import { ensureCompactHoverLabelStyle } from './compact_hover_label_style';
-
 // config for supported base languages
 export {
   conf as cssConf,
@@ -78,6 +76,3 @@ export {
 export { HoverParticipantRegistry } from 'monaco-editor/editor/contrib/hover/browser/hoverTypes.js';
 export { isCancellationError, CancellationError } from 'monaco-editor/base/common/errors.js';
 export { monaco };
-
-// The find widget's close tooltip wraps over its icon unless compact labels stay on one line.
-ensureCompactHoverLabelStyle();
