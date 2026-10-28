@@ -8,7 +8,14 @@ import React, { useContext, useRef, useMemo } from 'react';
 import { createActorContext } from '@xstate/react';
 import type { XYPosition } from '@xyflow/react';
 import type { Unit } from '../../../../../services/unit_repository';
-import type { CanvasCreateHistoryHandlers, CanvasStateServiceDeps, RouteEditModes } from './types';
+import type { ProcessingNodeRef, UnitLine } from '../../../../../services/unit_graph';
+import type { ProcessingStepPosition } from '../../../../stream_processing_flyout/state_management/processing_flyout_machine';
+import type {
+  CanvasCreateHistoryHandlers,
+  CanvasFlyoutKind,
+  CanvasStateServiceDeps,
+  RouteEditModes,
+} from './types';
 import { canvasStateMachine, createCanvasMachineImplementations } from './canvas_state_machine';
 
 const CanvasStateContext = createActorContext(canvasStateMachine);
@@ -17,7 +24,7 @@ const CanvasCreateHistoryContext =
 
 const noopCreateHistory: CanvasCreateHistoryHandlers = {
   hold: () => {},
-  commit: () => {},
+  reset: () => {},
   discard: () => {},
 };
 
@@ -97,14 +104,18 @@ export const useCanvasRoutingFlyout = () => {
   return useCanvasStateSelector((state) => state.context.editingRoute);
 };
 
+export const useCanvasProcessingFlyout = () => {
+  return useCanvasStateSelector((state) => state.context.processingFlyout);
+};
+
 export const useCanvasEvents = () => {
   const service = CanvasStateContext.useActorRef();
 
   return useMemo(
     () => ({
       service,
-      openFlyout: (flyoutName: string) => {
-        service.send({ type: 'flyout.open', flyoutName });
+      openFlyout: (flyoutName: string, flyoutKind?: CanvasFlyoutKind) => {
+        service.send({ type: 'flyout.open', flyoutName, flyoutKind });
       },
       closeFlyout: () => {
         service.send({ type: 'flyout.close' });
@@ -129,6 +140,15 @@ export const useCanvasEvents = () => {
       },
       closeRoutingFlyout: () => {
         service.send({ type: 'routing.edit.close' });
+      },
+      openProcessingFlyout: (slot: ProcessingNodeRef, position?: ProcessingStepPosition) => {
+        service.send({ type: 'processing.open', slot, position });
+      },
+      openLineProcessingFlyout: (line: UnitLine) => {
+        service.send({ type: 'processing.open', line });
+      },
+      closeProcessingFlyout: () => {
+        service.send({ type: 'processing.close' });
       },
     }),
     [service]

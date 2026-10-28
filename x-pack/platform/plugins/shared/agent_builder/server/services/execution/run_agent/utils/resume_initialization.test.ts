@@ -8,6 +8,7 @@
 import {
   ChatEventType,
   ConversationRoundStepType,
+  ToolCallInvocation,
   ToolResultType,
   createAskUserQuestionStep,
   type ConversationRoundStep,
@@ -15,6 +16,7 @@ import {
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
+import { internalTools } from '@kbn/agent-builder-common/tools';
 import {
   AgentPromptType,
   type AskUserQuestionAnswer,
@@ -312,5 +314,40 @@ describe('buildResumeInitialization', () => {
     expect(init.consumedPromptIds).toEqual(['s1']);
     expect(init.steps[1]).toMatchObject({ answers: [{ choice: [2] }] });
     expect(init.researchOutcome).toMatchObject({ type: 'tool_calls', toolCallGroupId: 'g' });
+  });
+
+  it('re-runs a pending dynamic call as the execute_dynamic_tool call the model made', () => {
+    const turn = makeTurn({
+      steps: [
+        doneCall('d1', { tool_id: 'skill.tool', invocation: ToolCallInvocation.dynamic }),
+        pendingCall('c1', {
+          tool_id: 'skill.tool',
+          params: { q: 1 },
+          invocation: ToolCallInvocation.dynamic,
+          tool_call_group_id: 'g',
+        }),
+      ],
+      pendingPrompts: [confirmPrompt('confirm')],
+      state: roundState([node('c1', 'skill.tool')]),
+    });
+
+    const init = build(turn);
+
+    expect(init.toolRenderState).toEqual({
+      d1: { toolName: internalTools.executeDynamicTool, kind: 'server' },
+      c1: { toolName: internalTools.executeDynamicTool, kind: 'server' },
+    });
+    expect(init.researchOutcome).toEqual({
+      type: 'tool_calls',
+      toolCallGroupId: 'g',
+      toolCalls: [
+        {
+          toolCallId: 'c1',
+          toolName: internalTools.executeDynamicTool,
+          args: { tool_id: 'skill.tool', params: { q: 1 } },
+          reasoning: undefined,
+        },
+      ],
+    });
   });
 });

@@ -48,6 +48,26 @@ describe('latencyOverallSpanDistributionRoute params', () => {
     ]);
   });
 
+  it('accepts the destination resources of a connection', () => {
+    const result = latencyOverallSpanDistributionRoute.params!.shape.body.safeParse({
+      ...baseBody,
+      serviceName: 'opbeans-java',
+      spanDestinationServiceResources: ['redis', 'postgresql'],
+    });
+
+    expectParseSuccess(result);
+    expect(result.data.spanDestinationServiceResources).toEqual(['redis', 'postgresql']);
+  });
+
+  it('rejects destination resources that are not a list of strings', () => {
+    expectParseError(
+      latencyOverallSpanDistributionRoute.params!.shape.body.safeParse({
+        ...baseBody,
+        spanDestinationServiceResources: 'redis',
+      })
+    );
+  });
+
   it('rejects a missing percentileThreshold', () => {
     const { percentileThreshold, ...withoutThreshold } = baseBody;
 

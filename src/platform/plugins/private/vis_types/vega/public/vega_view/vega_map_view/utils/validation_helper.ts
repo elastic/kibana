@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 function validate(
   name: string,
-  value: number,
+  value: number | undefined,
   defaultValue: number,
   min: number,
   max: number,
@@ -41,8 +41,8 @@ function validate(
 
 export function validateZoomSettings(
   mapConfig: {
-    maxZoom: number;
-    minZoom: number;
+    maxZoom?: number;
+    minZoom?: number;
     zoom?: number;
   },
   limits: {

@@ -93,6 +93,7 @@ dependsOn:
   - '@kbn/content-packs-schema'
   - '@kbn/streamlang'
   - '@kbn/ai-anonymization-common'
+  - '@kbn/zod'
 tags:
   - test-helper
   - package

@@ -24,6 +24,7 @@ import {
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
 import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
+import knowledgeCortexSection from './instructions/knowledge_cortex.text';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
@@ -51,6 +52,9 @@ export const INVESTIGATION_AGENT_DESCRIPTION =
   'Answers an arbitrary investigation question by reasoning from cluster telemetry it queries ' +
   'inside a sandbox and, when Cortex is enabled, records what it learns in the Nightshift Cortex wiki.';
 
+/** Interpolated only when the materialize workflow will actually write `/workspace/cortex/`. */
+const CORTEX_LOAD_STEP = ' Also read the Knowledge Cortex — see <knowledge_cortex>.';
+
 /** Interpolated only when hydrate will actually write `/workspace/decision-trees/`. */
 const DECISION_TREES_LOAD_STEP =
   ' Also check `/workspace/decision-trees/monitors.md` for a prior decision tree matching this symptom — see <decision_trees>.';
@@ -60,13 +64,20 @@ const SEMANTIC_MEMORY_LOAD_STEP = ` Also inspect this turn's Semantic Memory pat
 observations and verify them against current telemetry before relying on them.`;
 
 const fillContextInstructions = ({
+  includeCortex,
   includeDecisionTrees,
   includeMemory,
 }: {
+  includeCortex: boolean;
   includeDecisionTrees: boolean;
   includeMemory: boolean;
 }): string =>
   instructions
+    .replace('{{cortex_load_step}}', includeCortex ? CORTEX_LOAD_STEP : '')
+    .replace(
+      '{{knowledge_cortex_section}}',
+      includeCortex ? `\n${knowledgeCortexSection.trimEnd()}\n` : ''
+    )
     .replace('{{decision_trees_load_step}}', includeDecisionTrees ? DECISION_TREES_LOAD_STEP : '')
     .replace('{{semantic_memory_load_step}}', includeMemory ? SEMANTIC_MEMORY_LOAD_STEP : '')
     .replace(
@@ -74,7 +85,7 @@ const fillContextInstructions = ({
       includeDecisionTrees ? `\n${decisionTreesSection.trimEnd()}\n` : ''
     );
 
-interface InvestigationAgentTypeOptions {
+export interface InvestigationAgentTypeOptions {
   sandboxEnabled: boolean;
   cortexEnabled: boolean;
   memoryEnabled?: boolean;
@@ -110,27 +121,31 @@ const appendCustomContext = async ({
   }
 };
 
+/** Options of the Nightshift agent types that share the investigator's tools and hooks. */
+export type NightshiftAgentTypeOptions = Omit<
+  InvestigationAgentTypeOptions,
+  'decisionTreesEnabled'
+>;
+
 /**
- * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
- * standalone prompt and no Elastic tools. Telemetry is reached through `telemetryConnectorId` as
- * described in `/workspace/elastic.md`.
+ * Builds the configuration every Nightshift agent type shares: tools, connectors, the Cortex and
+ * Memory hooks and the space's custom context. Only the instructions differ between types.
  */
-export const getInvestigationAgentType = ({
+export const buildNightshiftAgentConfiguration = ({
+  instructions: agentInstructions,
   sandboxEnabled,
   cortexEnabled,
   memoryEnabled = false,
-  decisionTreesEnabled = false,
   investigationToolsEnabled,
   proposalsEnabled,
   telemetryConnectorId,
   getCustomContextInstructions,
   logger,
-}: InvestigationAgentTypeOptions): AgentTypeDefinition => {
+}: NightshiftAgentTypeOptions & {
+  instructions: string;
+}): AgentTypeDefinition['baseConfiguration'] => {
   const baseConfiguration = {
-    instructions: fillContextInstructions({
-      includeDecisionTrees: sandboxEnabled && decisionTreesEnabled,
-      includeMemory: sandboxEnabled && memoryEnabled,
-    }),
+    instructions: agentInstructions,
     skill_ids: [],
     tools: [
       {
@@ -163,24 +178,41 @@ export const getInvestigationAgentType = ({
       : {}),
   } satisfies AgentBaseConfiguration;
 
-  return {
-    id: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
-    name: INVESTIGATION_AGENT_NAME,
-    description: INVESTIGATION_AGENT_DESCRIPTION,
-    avatar_icon: 'logoElastic',
-    baseConfiguration: getCustomContextInstructions
-      ? async (ctx) => ({
-          ...baseConfiguration,
-          instructions: await appendCustomContext({
-            instructions: baseConfiguration.instructions,
-            ctx,
-            getCustomContextInstructions,
-            logger,
-          }),
-        })
-      : baseConfiguration,
-  };
+  return getCustomContextInstructions
+    ? async (ctx) => ({
+        ...baseConfiguration,
+        instructions: await appendCustomContext({
+          instructions: baseConfiguration.instructions,
+          ctx,
+          getCustomContextInstructions,
+          logger,
+        }),
+      })
+    : baseConfiguration;
 };
+
+/**
+ * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
+ * standalone prompt and no Elastic tools. Telemetry is reached through `telemetryConnectorId` as
+ * described in `/workspace/elastic.md`.
+ */
+export const getInvestigationAgentType = ({
+  decisionTreesEnabled = false,
+  ...options
+}: InvestigationAgentTypeOptions): AgentTypeDefinition => ({
+  id: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
+  name: INVESTIGATION_AGENT_NAME,
+  description: INVESTIGATION_AGENT_DESCRIPTION,
+  avatar_icon: 'logoElastic',
+  baseConfiguration: buildNightshiftAgentConfiguration({
+    ...options,
+    instructions: fillContextInstructions({
+      includeCortex: options.sandboxEnabled && options.cortexEnabled,
+      includeDecisionTrees: options.sandboxEnabled && decisionTreesEnabled,
+      includeMemory: options.sandboxEnabled && (options.memoryEnabled ?? false),
+    }),
+  }),
+});
 
 export const registerInvestigationAgentType = (
   agentBuilder: AgentBuilderPluginSetup,

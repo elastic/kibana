@@ -28,6 +28,11 @@ jest.mock('./components/apps_section', () => ({
     <div data-test-subj="apps-section" data-can-edit={canEdit ? 'true' : 'false'} />
   ),
 }));
+jest.mock('./components/knowledge_purge_section', () => ({
+  KnowledgePurgeSection: ({ canManage }: { canManage: boolean }) => (
+    <div data-test-subj="knowledge-purge-section" data-can-manage={canManage ? 'true' : 'false'} />
+  ),
+}));
 
 const mockUseDeveloperMode = useDeveloperMode as jest.MockedFunction<typeof useDeveloperMode>;
 const setDeveloperMode = jest.fn();
@@ -116,6 +121,37 @@ describe('GeneralSettingsTab', () => {
     });
 
     expect(screen.getByTestId('nightshiftDeveloperModeSwitch')).toBeDisabled();
+  });
+
+  it('hides the knowledge purge until developer mode is on', () => {
+    renderTab({
+      nightshift: {
+        [NIGHTSHIFT_UI_PRIVILEGES.manage]: true,
+        [NIGHTSHIFT_UI_PRIVILEGES.configure]: true,
+      },
+    });
+
+    expect(screen.queryByTestId('knowledge-purge-section')).not.toBeInTheDocument();
+  });
+
+  it('shows the knowledge purge in developer mode, gated on manage and configure', () => {
+    mockUseDeveloperMode.mockReturnValue({
+      isDeveloperMode: true,
+      isSaving: false,
+      setDeveloperMode,
+    });
+    renderTab({
+      nightshift: {
+        [NIGHTSHIFT_UI_PRIVILEGES.manage]: true,
+        [NIGHTSHIFT_UI_PRIVILEGES.configure]: true,
+      },
+    });
+
+    expect(screen.getByTestId('nightshiftKnowledgeSettingsSection')).toHaveTextContent('Knowledge');
+    expect(screen.getByTestId('knowledge-purge-section')).toHaveAttribute(
+      'data-can-manage',
+      'true'
+    );
   });
 
   it('disables developer mode without permission to save advanced settings', () => {

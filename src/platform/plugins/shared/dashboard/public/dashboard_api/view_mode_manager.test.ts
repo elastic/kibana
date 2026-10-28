@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { initializeViewModeManager } from './view_mode_manager';
 import { mockDashboardBackupService } from '../services/mocks';
 import { coreServices } from '../services/kibana_services';
+
+const incomingEmbeddable: EmbeddablePackageState = {
+  type: 'testEmbeddable',
+  serializedState: {},
+  embeddableId: 'panel1',
+};
 
 describe('initializeViewModeManager', () => {
   beforeEach(() => {
@@ -44,7 +51,7 @@ describe('initializeViewModeManager', () => {
       const { api } = initializeViewModeManager({
         isManaged: false,
         savedObjectId: 'dashboard1',
-        incomingEmbeddables: [{ embeddableId: 'panel1' } as any],
+        incomingEmbeddables: [incomingEmbeddable],
         viewMode: 'non-interactive',
       });
 
@@ -62,6 +69,49 @@ describe('initializeViewModeManager', () => {
     });
   });
 
+  describe('creating in print mode', () => {
+    test('is print when explicitly requested', () => {
+      const { api } = initializeViewModeManager({
+        isManaged: false,
+        savedObjectId: 'dashboard1',
+        viewMode: 'print',
+      });
+
+      expect(api.viewMode$.getValue()).toBe('print');
+    });
+
+    test('takes precedence over an unsaved dashboard that would otherwise force edit mode', () => {
+      const { api } = initializeViewModeManager({
+        isManaged: false,
+        savedObjectId: undefined,
+        viewMode: 'print',
+      });
+
+      expect(api.viewMode$.getValue()).toBe('print');
+    });
+
+    test('takes precedence over incoming embeddables that would otherwise force edit mode', () => {
+      const { api } = initializeViewModeManager({
+        isManaged: false,
+        savedObjectId: 'dashboard1',
+        incomingEmbeddables: [incomingEmbeddable],
+        viewMode: 'print',
+      });
+
+      expect(api.viewMode$.getValue()).toBe('print');
+    });
+
+    test('disableTriggers$ stays false', () => {
+      const { api } = initializeViewModeManager({
+        isManaged: false,
+        savedObjectId: 'dashboard1',
+        viewMode: 'print',
+      });
+
+      expect(api.disableTriggers$.getValue()).toBe(false);
+    });
+  });
+
   describe('creating a managed or read-only dashboard', () => {
     test('managed dashboards default to view mode', () => {
       const { api } = initializeViewModeManager({
@@ -76,7 +126,7 @@ describe('initializeViewModeManager', () => {
       const { api } = initializeViewModeManager({
         isManaged: true,
         savedObjectId: 'dashboard1',
-        incomingEmbeddables: [{ embeddableId: 'panel1' } as any],
+        incomingEmbeddables: [incomingEmbeddable],
       });
 
       expect(api.viewMode$.getValue()).toBe('view');
@@ -127,7 +177,7 @@ describe('initializeViewModeManager', () => {
       const { api } = initializeViewModeManager({
         isManaged: false,
         savedObjectId: 'dashboard1',
-        incomingEmbeddables: [{ embeddableId: 'panel1' } as any],
+        incomingEmbeddables: [incomingEmbeddable],
       });
 
       expect(api.viewMode$.getValue()).toBe('edit');

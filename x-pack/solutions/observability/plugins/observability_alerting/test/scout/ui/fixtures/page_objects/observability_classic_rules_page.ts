@@ -16,6 +16,7 @@ const V1_BASE_RE = escapeRe(V1_BASE);
 
 export const OBS_V1_LIST_URL_RE = new RegExp(`${V1_BASE_RE}\\/?(?:\\?|#|$)`);
 export const OBS_V1_LOGS_URL_RE = new RegExp(`${V1_BASE_RE}\\/logs(\\/|$|\\?|#)`);
+export const OBS_V1_SETTINGS_URL_RE = new RegExp(`${V1_BASE_RE}\\/settings(\\/|$|\\?|#)`);
 export const OBS_V1_CREATE_URL_RE = new RegExp(`${V1_BASE_RE}\\/create\\/`);
 export const OBS_V1_EDIT_URL_RE = new RegExp(`${V1_BASE_RE}\\/edit\\/`);
 export const OBS_V1_DETAILS_URL_RE = new RegExp(`${V1_BASE_RE}\\/rule\\/[^/?#]+`);
@@ -48,7 +49,7 @@ export class ObservabilityClassicRulesPage {
   public readonly searchField: Locator;
   public readonly logsLink: Locator;
   public readonly settingsLink: Locator;
-  public readonly settingsFlyout: Locator;
+  public readonly settingsPage: Locator;
   public readonly overflowButton: Locator;
   public readonly editFromDetailsButton: Locator;
   public readonly alertsTab: Locator;
@@ -72,7 +73,7 @@ export class ObservabilityClassicRulesPage {
     this.searchField = this.page.testSubj.locator('ruleSearchField');
     this.logsLink = this.page.testSubj.locator('rulesLogsLink');
     this.settingsLink = this.page.testSubj.locator('rulesSettingsLink');
-    this.settingsFlyout = this.page.testSubj.locator('rulesSettingsFlyout');
+    this.settingsPage = this.page.testSubj.locator('rulesSettingsPage');
     this.overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
     this.editFromDetailsButton = this.page.testSubj.locator('openEditRuleFlyoutButton');
     this.alertsTab = this.page.testSubj.locator('ruleAlertListTab');
@@ -164,15 +165,16 @@ export class ObservabilityClassicRulesPage {
     await this.page.waitForURL(OBS_V1_LOGS_URL_RE);
   }
 
-  async openSettingsFlyout(): Promise<void> {
+  async openSettingsPage(): Promise<void> {
     await this.revealMenuItem(this.settingsLink);
     await this.settingsLink.click();
-    await this.settingsFlyout.waitFor({ state: 'visible' });
+    await this.page.waitForURL(OBS_V1_SETTINGS_URL_RE);
+    await this.settingsPage.waitFor({ state: 'visible' });
   }
 
-  async closeSettingsFlyout(): Promise<void> {
-    await this.page.testSubj.click('rulesSettingsFlyoutCancelButton');
-    await this.settingsFlyout.waitFor({ state: 'hidden' });
+  async cancelSettingsPage(): Promise<void> {
+    await this.page.testSubj.click('rulesSettingsPageCancelButton');
+    await this.settingsPage.waitFor({ state: 'hidden' });
   }
 
   async openEditFromList(ruleId: string): Promise<void> {
