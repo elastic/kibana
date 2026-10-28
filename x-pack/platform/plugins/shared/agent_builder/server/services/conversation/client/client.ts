@@ -17,7 +17,7 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   ConversationOrigin,
   ConversationRoundAuthor,
-  ConversationRoundFeedback,
+  ConversationRoundAuthorDecoration,
   ConversationUpdatedTriggerEvent,
   ConversationWriteSource,
   FeedbackChipId,
@@ -94,7 +94,7 @@ import { buildConversationIdsFilter } from './build_ids_filter';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationProperties, ConversationStorage } from './storage';
 import { agentActor } from './rounds_to_events';
-import { eventsToRounds, withStoredRoundFeedback } from './events_to_rounds';
+import { eventsToRounds } from './events_to_rounds';
 import {
   type ActivityContext,
   type ActivityEnvelope,
@@ -187,7 +187,7 @@ export interface ConversationClient {
   setPinned(conversationId: string, pinned: boolean): Promise<Conversation>;
   updateRoundFeedback(
     conversationId: string,
-    roundId: string,
+    executionId: string,
     feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
   ): Promise<void>;
   list(options?: ConversationListOptions): Promise<ConversationListResult>;
@@ -233,7 +233,10 @@ export interface ConversationClient {
     options: ConversationWriteOptions & { access?: ConversationAccess; activity?: ActivityContext }
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
   getUser(): CurrentUser;
-  getAuthor(originAuthor?: ConversationRoundAuthor): ConversationRoundAuthor | undefined;
+  getAuthor(
+    originAuthor?: ConversationRoundAuthor,
+    decoration?: ConversationRoundAuthorDecoration
+  ): ConversationRoundAuthor | undefined;
 }
 
 /**
@@ -478,7 +481,9 @@ class ConversationClientImpl implements ConversationClient {
     if (!this.eventEmitter) {
       return;
     }
-    const attachmentEvents = writtenEvents.filter(isAttachmentEvent);
+    const attachmentEvents = writtenEvents
+      .filter(isAttachmentEvent)
+      .filter((event) => !event.data.hidden);
     if (attachmentEvents.length === 0) {
       return;
     }
@@ -724,36 +729,54 @@ class ConversationClientImpl implements ConversationClient {
     ];
   }
 
-  /** Maps a list/search ES response to the shared `{ results, total }` shape. */
-  private mapListResponse(response: ConversationListEsResponse): ConversationListResult {
-    const hitsTotal = response.hits.total;
-    const total = Math.min(
-      typeof hitsTotal === 'number' ? hitsTotal : hitsTotal?.value ?? 0,
-      MAX_RESULT_WINDOW
-    );
-
-    const results = response.hits.hits.map((hit) => {
-      if (!isConversationDocument(hit)) {
-        throw createInternalError('Conversation list search returned an incomplete hit');
-      }
-
-      return toResponseConversationWithoutRounds({
-        document: hit,
-        user: this.getUser(),
-        resolveTemplate: getTemplate,
-      });
-    });
-
-    return { results, total };
-  }
-
   async get(conversationId: string): Promise<ConversationWithPermissions> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
-
-    return toResponseConversation({
+    const conversation = await toResponseConversation({
       document,
       user: this.getUser(),
       resolveTemplate: getTemplate,
+    });
+    const isOwner = hasConversationOwnerAccess({ conversation, user: this.getUser() });
+    if (!isOwner) {
+      const { feedback: _feedback, ...conversationWithoutFeedback } = conversation;
+      return conversationWithoutFeedback;
+    }
+    return conversation;
+  }
+
+  async updateRoundFeedback(
+    conversationId: string,
+    executionId: string,
+    feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
+  ): Promise<void> {
+    await this.writeConversation({
+      conversationId,
+      access: 'owner',
+      emit: false,
+      fields: (current) => {
+        const existing = current.feedback ?? {};
+        if (feedback.vote === null) {
+          if (!existing[executionId]) {
+            throw skipWrite(current);
+          }
+          const { [executionId]: _removed, ...remaining } = existing;
+          return { feedback: remaining };
+        }
+        if (!hasTerminalEventFor(current, executionId)) {
+          throw createConversationNotFoundError({ conversationId });
+        }
+        return {
+          feedback: {
+            ...existing,
+            [executionId]: {
+              vote: feedback.vote,
+              chips: feedback.chips,
+              comment: feedback.comment,
+              submitted_at: new Date().toISOString(),
+            },
+          },
+        };
+      },
     });
   }
 
@@ -1062,8 +1085,7 @@ class ConversationClientImpl implements ConversationClient {
         ];
         return {
           events: appended,
-          // Rebuilt from events, which carry no feedback: keep the stored rounds' feedback.
-          rounds: withStoredRoundFeedback(eventsToRounds(appended), current.rounds),
+          rounds: eventsToRounds(appended),
           schema_version: CONVERSATION_SCHEMA_VERSION,
           ...(title !== undefined ? { title } : {}),
           ...(status ? { status } : {}),
@@ -1144,10 +1166,7 @@ class ConversationClientImpl implements ConversationClient {
         ];
         return {
           events: replaced,
-          // The rewritten round's feedback was about its previous answer; the other rounds keep theirs.
-          rounds: withStoredRoundFeedback(eventsToRounds(replaced), current.rounds, {
-            exceptRoundId: roundId,
-          }),
+          rounds: eventsToRounds(replaced),
           schema_version: CONVERSATION_SCHEMA_VERSION,
           ...(title !== undefined ? { title } : {}),
           ...(status ? { status } : {}),
@@ -1205,46 +1224,27 @@ class ConversationClientImpl implements ConversationClient {
     });
   }
 
-  async updateRoundFeedback(
-    conversationId: string,
-    roundId: string,
-    feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
-  ): Promise<void> {
-    await this.writeConversation({
-      conversationId,
-      access: 'owner',
-      // Per-user state only: never reported to `ai.conversation.updated`.
-      emit: false,
-      fields: (current) => {
-        const roundIndex = current.rounds.findIndex((r) => r.id === roundId);
+  /** Maps a list/search ES response to the shared `{ results, total }` shape. */
+  private mapListResponse(response: ConversationListEsResponse): ConversationListResult {
+    const hitsTotal = response.hits.total;
+    const total = Math.min(
+      typeof hitsTotal === 'number' ? hitsTotal : hitsTotal?.value ?? 0,
+      MAX_RESULT_WINDOW
+    );
 
-        if (roundIndex === -1) {
-          throw createConversationNotFoundError({ conversationId });
-        }
+    const results = response.hits.hits.map((hit) => {
+      if (!isConversationDocument(hit)) {
+        throw createInternalError('Conversation list search returned an incomplete hit');
+      }
 
-        const round = current.rounds[roundIndex];
-        const { feedback: _removed, ...roundWithoutFeedback } = round;
-
-        const updatedRound =
-          feedback.vote === null
-            ? roundWithoutFeedback
-            : {
-                ...round,
-                feedback: {
-                  vote: feedback.vote,
-                  chips: feedback.chips ?? [],
-                  comment: feedback.comment ?? '',
-                  submitted_at: new Date().toISOString(),
-                  connector_id: round.model_usage?.connector_id,
-                  model: round.model_usage?.model,
-                } satisfies ConversationRoundFeedback,
-              };
-
-        return {
-          rounds: current.rounds.map((r, i) => (i === roundIndex ? updatedRound : r)),
-        };
-      },
+      return toResponseConversationWithoutRounds({
+        document: hit,
+        user: this.getUser(),
+        resolveTemplate: getTemplate,
+      });
     });
+
+    return { results, total };
   }
 
   async delete(conversationId: string): Promise<boolean> {
@@ -1572,14 +1572,27 @@ class ConversationClientImpl implements ConversationClient {
     return this.user;
   }
 
-  getAuthor(originAuthor?: ConversationRoundAuthor): ConversationRoundAuthor | undefined {
+  getAuthor(
+    originAuthor?: ConversationRoundAuthor,
+    decoration?: ConversationRoundAuthorDecoration
+  ): ConversationRoundAuthor | undefined {
     if (originAuthor) {
       return originAuthor;
     }
 
     const { id, username, type } = this.getUser();
+    if (id === undefined) {
+      return undefined;
+    }
 
-    return id === undefined ? undefined : { id, username, ...(type ? { type } : {}) };
+    const fullName = type === 'service_account' ? decoration?.full_name : undefined;
+
+    return {
+      id,
+      username,
+      ...(type ? { type } : {}),
+      ...(fullName ? { full_name: fullName } : {}),
+    };
   }
 
   private async getDocument(conversationId: string): Promise<Document | undefined> {

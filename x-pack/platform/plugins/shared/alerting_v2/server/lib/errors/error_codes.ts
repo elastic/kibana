@@ -130,14 +130,29 @@ export const ALERTING_ERROR_CODES = {
    * snoozing and deleting existing policies stay available.
    */
   ACTION_POLICY_LICENSE_NOT_SUPPORTED: 'ACTION_POLICY_LICENSE_NOT_SUPPORTED',
+  /**
+   * An action policy was written with a user-created Cloud API key (a raw `essu_`
+   * credential). Such a key has no key id and cannot be stored or used by the
+   * dispatcher, so create / update / upsert / API key rotation are rejected.
+   */
+  ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED: 'ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED',
 
   // ──────────────────────── Alert actions ────────────────────
-  /** No alert event matched the supplied `group_hash` (and `alert_id`). */
+  /**
+   * The supplied `series_id` is not a well-formed series identifier: not
+   * base64url, an unsupported version or an unparseable payload.
+   */
+  INVALID_SERIES_ID: 'INVALID_SERIES_ID',
+  /**
+   * No alert event matched the supplied `series_id` in the request's space
+   * (this includes a series id minted for another space).
+   */
   ALERT_EVENT_NOT_FOUND: 'ALERT_EVENT_NOT_FOUND',
   /**
-   * No alert event matched the supplied `group_hash`. Bulk-only refinement of
-   * `ALERT_EVENT_NOT_FOUND` that pins the miss to the group (rather than a
-   * superseded episode) so a client can tell the two apart per item.
+   * No alert event matched the supplied `series_id` in the request's space.
+   * Bulk-only refinement of `ALERT_EVENT_NOT_FOUND` that pins the miss to the
+   * series (rather than a superseded episode) so a client can tell the two
+   * apart per item.
    */
   ALERT_GROUP_NOT_FOUND: 'ALERT_GROUP_NOT_FOUND',
   /**
@@ -199,7 +214,7 @@ export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALE
  * filter a whole area with a prefix: `RULE_*` (rule executor / rules client),
  * `DIRECTOR_*`, `DISPATCH_*`, `POLICY_*`, `EXECUTION_HISTORY_*`, `EVENTS_*`,
  * `STORAGE_*`, `QUERY_*`, `RESOURCES_*`, `MAINTENANCE_WINDOW_*`,
- * `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`, `TASKS_*`.
+ * `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`, `TASKS_*`, `TELEMETRY_*`.
  *
  * The suffix encodes the outcome, from a closed vocabulary:
  * - `warn` (degraded but continued): `_FAILED`, `_SKIPPED`, `_TIMED_OUT`,
@@ -335,6 +350,20 @@ export const ALERTING_LOG_CODES = {
    * the action-type vocabulary grows ahead of the publisher's mapping.
    */
   EVENTS_ALERT_ACTION_TYPE_UNMAPPED: 'EVENTS_ALERT_ACTION_TYPE_UNMAPPED',
+  /**
+   * The action policy client could not read the policies around a bulk write
+   * or a bulk delete. The write already succeeded; its domain events are
+   * published with the policy ids only, so subscribers receive no policy fields.
+   */
+  EVENTS_ACTION_POLICY_READ_FAILED: 'EVENTS_ACTION_POLICY_READ_FAILED',
+
+  // ───────────────────── Event-based telemetry (EBT) ─────────────────────
+  /**
+   * Core analytics refused an EBT event: the event type was not registered or,
+   * in dev mode, the payload did not match its schema. The operation that
+   * produced the event already succeeded; only the telemetry event was lost.
+   */
+  TELEMETRY_EBT_REPORT_FAILED: 'TELEMETRY_EBT_REPORT_FAILED',
 
   // ──────────────────────────── Dispatcher ───────────────────────────
   /**
@@ -355,6 +384,21 @@ export const ALERTING_LOG_CODES = {
   DISPATCH_WORKFLOW_DISABLED: 'DISPATCH_WORKFLOW_DISABLED',
   /** Scheduling a workflow execution for a dispatch group failed. */
   DISPATCH_WORKFLOW_SCHEDULE_FAILED: 'DISPATCH_WORKFLOW_SCHEDULE_FAILED',
+  /**
+   * Writing the `.alert-actions` records of a dispatch commit failed (the
+   * request threw, or Elasticsearch rejected every record), so scheduling
+   * stopped and the tick halts `commit_failed` with the watermark held. The
+   * groups of that commit were dispatched but not recorded, and the next tick
+   * dispatches them again.
+   */
+  DISPATCH_COMMIT_FAILED: 'DISPATCH_COMMIT_FAILED',
+  /**
+   * Elasticsearch rejected some, but not all, records of a dispatch commit;
+   * scheduling continues. Their series are
+   * fetched again on the next tick, and a group whose `notified` record was
+   * rejected can be dispatched again.
+   */
+  DISPATCH_COMMIT_DEGRADED: 'DISPATCH_COMMIT_DEGRADED',
   /**
    * The cluster license does not allow action policies. Alert actions are still
    * recorded, but no workflow is scheduled until the license is upgraded.
@@ -384,15 +428,10 @@ export const ALERTING_LOG_CODES = {
    */
   DISPATCH_POLICY_LOOKUP_FAILED: 'DISPATCH_POLICY_LOOKUP_FAILED',
   /**
-   * The dispatcher has no persisted event watermark (cold start or wiped task
-   * state). The first scan starts from `startedAt − OVERLAP_WINDOW_MINUTES`.
-   * Rule events older than that will not be dispatched.
-   */
-  DISPATCHER_COLD_START: 'DISPATCHER_COLD_START',
-  /**
-   * The self-imposed tick deadline (TICK_DEADLINE_MS) fired before the pipeline
-   * completed. The pipeline was aborted cooperatively; the returned watermark is
-   * safe. This is expected under sustained high load — it is not an error.
+   * The self-imposed tick deadline (15s before
+   * `xpack.alerting_v2.dispatcher.run.timeout`) fired before the pipeline
+   * completed. The pipeline was aborted cooperatively; the returned watermark
+   * is safe. This is expected under sustained high load — it is not an error.
    */
   DISPATCHER_TICK_DEADLINE_EXCEEDED: 'DISPATCHER_TICK_DEADLINE_EXCEEDED',
   /**
@@ -438,6 +477,14 @@ export const ALERTING_LOG_CODES = {
    * the dispatcher README for the recovery timeline.
    */
   DISPATCHER_INLINE_STATS_TOO_LARGE: 'DISPATCHER_INLINE_STATS_TOO_LARGE',
+  /**
+   * `xpack.alerting_v2.dispatcher.paused` is true: every dispatcher tick is a
+   * no-op and the watermark is held, so no alerting v2 notification is sent.
+   * The backlog is dispatched late once the setting is removed, except events
+   * older than the cold-start seed when no watermark was persisted yet.
+   * Logged once per Kibana start; remove the override after the incident.
+   */
+  DISPATCHER_PAUSED: 'DISPATCHER_PAUSED',
 
   // ────────────────────────────── Director ───────────────────────────
   /**
@@ -576,6 +623,11 @@ export const ALERTING_LOG_CODES = {
    * page; get maps it to not-found. Operator should investigate package drift.
    */
   RULE_TEMPLATE_VALIDATION_FAILED: 'RULE_TEMPLATE_VALIDATION_FAILED',
+  /**
+   * Counting the rules created from each listed template failed. Find returns the
+   * templates without `rule_count` instead of failing the whole listing.
+   */
+  RULE_TEMPLATE_RULE_COUNT_FAILED: 'RULE_TEMPLATE_RULE_COUNT_FAILED',
 
   // ─────────────────────────── Agent Builder ─────────────────────────
   /** `refresh_alert` failed; tool returns an error result. */

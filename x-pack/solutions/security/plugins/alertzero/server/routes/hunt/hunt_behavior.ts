@@ -55,9 +55,8 @@ export const registerHuntBehaviorRoute = ({
           const { getInference, getSearchInferenceEndpoints, mitreDataClient } = getHuntServices();
 
           // Resolved by tier, not the deployment default — see resolveScopedModel's doc for
-          // why that distinction matters. Tier 2 needs both of its tiers (Frontier for
-          // extraction, Balanced for ES|QL generation) and the route cannot run half of it, so
-          // either one missing fails the request.
+          // why that distinction matters. Both Tier 2 jobs run on the Frontier tier, so a
+          // missing Frontier model fails the request.
           const { models, failures } = await resolveHuntModels({
             inference: getInference(),
             searchInferenceEndpoints: getSearchInferenceEndpoints(),
@@ -67,7 +66,7 @@ export const registerHuntBehaviorRoute = ({
             tiers: TIER2_MODEL_TIERS,
           });
 
-          if (!models.frontier || !models.balanced) {
+          if (!models.frontier) {
             const failure = mostSevereFailure(failures);
             return response.customError({
               // A resolution that threw is ours to fix, not a missing connector the caller can add.
@@ -87,19 +86,27 @@ export const registerHuntBehaviorRoute = ({
             });
           }
 
-          const { text, report_id, llm_confidence_threshold, iocs, article_context } = request.body;
+          const {
+            text,
+            report_id,
+            llm_confidence_threshold,
+            iocs,
+            excluded_iocs,
+            article_context,
+          } = request.body;
           const esClient = core.elasticsearch.client.asCurrentUser;
           // What the generated query may read: the same default data view Tier 1 searches.
           const indexPatterns = await resolveHuntUniverse(context, logger);
 
           const body: HuntBehaviorResponse = await huntBehavior(
-            { extraction: models.frontier, esql: models.balanced },
+            { extraction: models.frontier, esql: models.frontier },
             logger,
             {
               text,
               report_id,
               llm_confidence_threshold,
               iocs,
+              ...(excluded_iocs !== undefined ? { excluded_iocs } : {}),
               article_context,
               allowed_indices: indexPatterns,
             },

@@ -17,6 +17,8 @@ export type { CoreAuditService } from './src/audit';
 export type {
   CoreServiceAccountsService,
   CreateServiceAccountServerParams,
+  DeleteServiceAccountOptions,
+  DeleteServiceAccountResult,
   ServiceAccountPlatformAssumer,
 } from './src/service_accounts';
 export type {
@@ -43,6 +45,7 @@ export type {
   ServiceAccountWorkloadRef,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
+  ServiceAccountBoundWorkload,
 } from '@kbn/core-security-common';
 export type {
   CoreSecurityDelegateContract,
@@ -86,6 +89,7 @@ export {
   deriveInternalCallerAttestation,
   markExternalUiamCredential,
   isExternalUiamCredential,
+  resolveUiamClientAuthentication,
 } from './src/uiam';
 export type { CoreFipsService } from './src/fips';
 export {
@@ -96,4 +100,4 @@ export {
   flattenSecurityPrivileges,
 } from './src/authz';
 export { ApiPrivileges, ApiOperation } from './src/api_privileges';
-export type { UiamProjectType } from './src/uiam';
+export type { UiamProjectType, UiamClientAuthenticationParams } from './src/uiam';

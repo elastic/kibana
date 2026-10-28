@@ -45,6 +45,20 @@ export default function getConnectorSpecTests({ getService }: FtrProviderContext
         expect(secretsAuthTypes[0].properties).to.have.property('X-OTX-API-KEY');
       });
 
+      it('returns spec for a connector type registered at runtime (test.single_file_connector)', async () => {
+        const response = await supertest
+          .get(
+            `${getUrlPrefix(
+              'space1'
+            )}/internal/actions/connector_types/test.single_file_connector/spec`
+          )
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+
+        expect(response.body.metadata).to.have.property('id', 'test.single_file_connector');
+        expect(response.body).to.have.property('is_testable', false);
+      });
+
       it('returns 404 for non-spec connector (.server-log)', async () => {
         await supertest
           .get(`${getUrlPrefix('space1')}/internal/actions/connector_types/.server-log/spec`)

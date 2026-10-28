@@ -68,7 +68,7 @@ function TraceOverviewContent({
       primaryActionItem: {
         id: 'exploreTraces',
         label: exploreTracesLabel,
-        iconType: 'discoverApp',
+        iconType: 'productDiscover',
         testId: 'apmTracesExploreInDiscoverButton',
         ebt: {
           action: APM_EBT_ACTIONS.EXPLORE_TRACES,

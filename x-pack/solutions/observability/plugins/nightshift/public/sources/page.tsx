@@ -12,8 +12,7 @@ import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import React, { useCallback } from 'react';
 import { NightshiftAppHeader } from '../app/app_header';
-import type { NightshiftAppHeaderProps } from '../app/app_header';
-import { getFormattedError } from '../common/errors';
+import { getWorkflowFailureMessage } from '../common/errors';
 import { SignificantEventsPageProvider } from '../data/discovery/significant_events_page_context';
 import { useBlocksNewActivity } from '../data/maintenance/use_significant_events_maintenance';
 import { useKibana } from '../hooks/use_kibana';
@@ -22,18 +21,7 @@ import { PausedActivityCallout } from './paused_activity_callout';
 import { SourcesView } from './sources_view';
 import { ONBOARDING_FAILURE_TITLE } from './translations';
 
-export type SourcesPageHeaderProps = Pick<
-  NightshiftAppHeaderProps,
-  | 'onManagementClick'
-  | 'managementHref'
-  | 'onKnowledgeClick'
-  | 'knowledgeHref'
-  | 'onSettingsClick'
-  | 'settingsHref'
-  | 'onSandboxSecretsClick'
-  | 'onAutomationsClick'
-  | 'automationsHref'
->;
+export type SourcesPageHeaderProps = Record<string, never>;
 
 export function SourcesPage({
   headerProps,
@@ -56,7 +44,9 @@ export function SourcesPage({
   });
   const onOnboardingFailed = useCallback(
     (error: string) => {
-      toasts.addError(getFormattedError(new Error(error)), { title: ONBOARDING_FAILURE_TITLE });
+      toasts.addError(new Error(getWorkflowFailureMessage(error)), {
+        title: ONBOARDING_FAILURE_TITLE,
+      });
     },
     [toasts]
   );
@@ -67,9 +57,9 @@ export function SourcesPage({
         {...headerProps}
         page="sources"
         back={{
-          href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' }),
-          label: i18n.translate('xpack.nightshift.sourcesPage.backToNightshiftLabel', {
-            defaultMessage: 'Nightshift',
+          href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/detections/events' }),
+          label: i18n.translate('xpack.nightshift.sourcesPage.backToDetectionsLabel', {
+            defaultMessage: 'Detections',
           }),
         }}
       />

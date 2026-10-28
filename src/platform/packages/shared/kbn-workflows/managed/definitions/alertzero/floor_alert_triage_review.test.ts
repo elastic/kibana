@@ -126,6 +126,38 @@ describe('floor_alert_triage_review — proposal comment', () => {
     ).toBe('Close 1 alert as false positive');
   });
 
+  describe('title with the entities behind the alerts', () => {
+    const titleFor = (count: number, entitySummary?: string) =>
+      renderString(proposalInputs.title, {
+        inputs: { ...context.inputs, entity_summary: entitySummary },
+        variables: { fp_candidate_count: count },
+      });
+
+    it('inserts the entity summary between the count and the reason', () => {
+      expect(titleFor(12, 'on build-agent-01, build-agent-02')).toBe(
+        'Close 12 alerts on build-agent-01, build-agent-02 as false positive'
+      );
+      expect(titleFor(6, 'on DC-01 (svc-backup)')).toBe(
+        'Close 6 alerts on DC-01 (svc-backup) as false positive'
+      );
+      expect(titleFor(8, 'for svc-backup, jdoe')).toBe(
+        'Close 8 alerts for svc-backup, jdoe as false positive'
+      );
+    });
+
+    it('drops the number for a single alert that names an entity', () => {
+      expect(titleFor(1, 'on build-agent-01')).toBe(
+        'Close alert on build-agent-01 as false positive'
+      );
+    });
+
+    it("keeps today's title when there is no summary, empty or omitted", () => {
+      expect(titleFor(5, '')).toBe('Close 5 alerts as false positive');
+      expect(titleFor(5, undefined)).toBe('Close 5 alerts as false positive');
+      expect(titleFor(1, undefined)).toBe('Close 1 alert as false positive');
+    });
+  });
+
   it('closes exactly the candidate ids it was given', () => {
     expect(proposal?.with?.['workflow-id']).toBe('system-create-alertzero-proposal');
     expect(proposalInputs.actionWorkflowId).toBe('system-alertzero-action-close-alerts-fp');

@@ -48,7 +48,7 @@ import { nodeBuilder } from '@kbn/es-query';
 import type { ExecutionContextStart } from '@kbn/core/server';
 
 import type { Result } from './lib/result_type';
-import { asOk, asErr, unwrap } from './lib/result_type';
+import { asOk, asErr } from './lib/result_type';
 import type { ExecutionContextRunner } from './lib/execution_context';
 import { getExecutionContextRunner } from './lib/execution_context';
 
@@ -72,7 +72,7 @@ import { TaskValidator } from './task_validator';
 import { claimSort } from './queries/mark_available_tasks_as_claimed';
 import { MAX_PARTITIONS } from './lib/task_partitioner';
 import type { ErrorOutput } from './lib/bulk_operation_buffer';
-import { BulkUpdateError, MsearchError } from './lib/errors';
+import { BulkUpdateError, MsearchError, getUnreadableTaskError } from './lib/errors';
 import { TASK_SO_NAME, INVALIDATE_API_KEY_SO_NAME } from './saved_objects';
 import type { ApiKeyStrategy, ApiKeySOFields, InvalidationTarget } from './api_key_strategy';
 import { getFirstRunAt } from './lib/get_first_run_at';
@@ -440,6 +440,7 @@ export class TaskStore {
       return await this.apiKeyStrategy.grantApiKeys(taskInstances, request, this.security, {
         ...(options?.onEsKey === true ? { onEsKey: true } : {}),
         ...(options?.cloneApiKey === true ? { cloneApiKey: true } : {}),
+        ...(options?.refreshApiKey !== undefined ? { refreshApiKey: options.refreshApiKey } : {}),
         onApiKeyCreated: (target) => createdTargets.push(target),
       });
     } catch (e) {
@@ -1341,13 +1342,22 @@ export class TaskStore {
   }
 
   private async _bulkRemove(taskIds: string[]): Promise<SavedObjectsBulkDeleteResponse> {
-    const taskInstances = await this._bulkGet(taskIds);
+    const result = await this.bulkGetTaskSavedObjects(taskIds);
+
+    // Unlike bulkGet, a task that can't be read fails the whole removal: deleting it would leave
+    // its API keys referenced by nothing, and never invalidated.
+    const tasks: ConcreteTaskInstance[] = [];
+    result.saved_objects.forEach((task) => {
+      if (!isSavedObjectErrorResult(task)) {
+        tasks.push(savedObjectToConcreteTaskInstance(task));
+      }
+    });
+    const taskInstances = await this.bulkGetAndMergeTasksWithDecryptedApiKey(tasks);
     const allInvalidationTargets: InvalidationTarget[] = [];
 
     taskInstances.forEach((taskInstance) => {
-      const unwrappedTaskInstance = unwrap(taskInstance) as ConcreteTaskInstance;
-      if (docHasEncryptedApiKey(unwrappedTaskInstance)) {
-        const targets = this.apiKeyStrategy.getApiKeyIdsForInvalidation(unwrappedTaskInstance);
+      if (docHasEncryptedApiKey(taskInstance)) {
+        const targets = this.apiKeyStrategy.getApiKeyIdsForInvalidation(taskInstance);
         allInvalidationTargets.push(...targets);
       }
     });
@@ -1509,24 +1519,46 @@ export class TaskStore {
     });
   }
 
-  private async _bulkGet(ids: string[]): Promise<BulkGetResult> {
-    let result;
+  private async bulkGetTaskSavedObjects(ids: string[]) {
     try {
-      result = await this.savedObjectsRepository.bulkGet<SerializedConcreteTaskInstance>(
+      return await this.savedObjectsRepository.bulkGet<SerializedConcreteTaskInstance>(
         ids.map((id) => ({ type: 'task', id }))
       );
     } catch (e) {
       this.errors$.next(e);
       throw e;
     }
+  }
+
+  private async _bulkGet(ids: string[]): Promise<BulkGetResult> {
+    const result = await this.bulkGetTaskSavedObjects(ids);
 
     const tasks: ConcreteTaskInstance[] = [];
+    const taskErrors = new Map<string, SavedObjectError>();
     result.saved_objects.forEach((task) => {
       if (!isSavedObjectErrorResult(task)) {
-        tasks.push(savedObjectToConcreteTaskInstance(task));
+        try {
+          tasks.push(savedObjectToConcreteTaskInstance(task));
+        } catch (e) {
+          taskErrors.set(task.id, getUnreadableTaskError(e.message));
+        }
       }
     });
-    const tasksWithDecryptedApiKeys = await this.bulkGetAndMergeTasksWithDecryptedApiKey(tasks);
+
+    let tasksWithDecryptedApiKeys = tasks;
+    try {
+      tasksWithDecryptedApiKeys = await this.bulkGetAndMergeTasksWithDecryptedApiKey(tasks);
+    } catch (e) {
+      this.errors$.next(e);
+      const decryptionError: SavedObjectError = {
+        error: 'Internal Server Error',
+        message: `Unable to decrypt the task's API keys: ${e.message}`,
+        statusCode: 500,
+      };
+      tasks
+        .filter((task) => task.apiKey || task.uiamApiKey)
+        .forEach((task) => taskErrors.set(task.id, decryptionError));
+    }
 
     const taskMap = new Map();
     tasksWithDecryptedApiKeys.forEach((task) => taskMap.set(task.id, task));
@@ -1534,6 +1566,10 @@ export class TaskStore {
     return result.saved_objects.map((task) => {
       if (isSavedObjectErrorResult(task)) {
         return asErr({ id: task.id, type: task.type, error: task.error });
+      }
+      const error = taskErrors.get(task.id);
+      if (error) {
+        return asErr({ id: task.id, type: task.type, error });
       }
       return asOk(taskMap.get(task.id));
     });

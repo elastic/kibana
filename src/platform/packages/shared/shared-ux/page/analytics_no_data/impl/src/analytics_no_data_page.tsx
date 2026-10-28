@@ -22,6 +22,7 @@ export const AnalyticsNoDataPage = ({
   onDataViewCreated,
   allowAdHocDataView,
   onTryESQL,
+  isTryESQLDisabled,
   onESQLNavigationComplete,
 }: AnalyticsNoDataPageProps) => {
   const { customBranding, ...services } = useServices();
@@ -35,6 +36,7 @@ export const AnalyticsNoDataPage = ({
       onDataViewCreated={onDataViewCreated}
       onESQLNavigationComplete={onESQLNavigationComplete}
       onTryESQL={onTryESQL}
+      isTryESQLDisabled={isTryESQLDisabled}
     />
   );
 };

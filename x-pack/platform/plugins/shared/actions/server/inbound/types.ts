@@ -6,16 +6,19 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 
 export interface ConnectorEventEmitParams {
   eventId: string;
   payload: Record<string, unknown>;
-  spaceId: string;
+  spaceId: SpaceId;
   connectorId: string;
   connectorTypeId: string;
   correlationKey?: string;
   /** Last-saver identity. Required for emit; never a space-only request. */
   request: KibanaRequest;
+  /** Principal authenticated on ingress; supplied only for resolved service-account bearers. */
+  authenticatedUser?: string;
 }
 
 /**

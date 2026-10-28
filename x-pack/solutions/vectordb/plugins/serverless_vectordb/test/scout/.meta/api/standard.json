@@ -1,5 +1,5 @@
 {
-  "sha1": "ceca5c5c5398dd161bce063fc56a92ab62c5b01c",
+  "sha1": "83c4fb2426a02c08e392fba2aad4a9e39c30755b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -224,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/starred_dashboards_count.spec.ts",
-        "line": 90,
+        "line": 91,
         "column": 20
       }
     },
@@ -238,7 +238,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/api/tests/starred_dashboards_count.spec.ts",
-        "line": 102,
+        "line": 103,
         "column": 27
       }
     }

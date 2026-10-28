@@ -97,16 +97,11 @@ export const allowedExperimentalValues = Object.freeze({
   defendCrossProjectSearch: true,
 
   /**
-   * AI Agent chat-first endpoint response actions skill (read-only: list endpoints,
-   * endpoint status, response action status)
-   * Release: TBD
+   * AI Agent chat-first endpoint response actions skill (isolate, unisolate, etc.)
    *
-   * Ships disabled: it surfaces endpoint response-action state to chat and is
-   * the landing spot for the upcoming dispatch tools, so it must not be enabled
-   * by default on any branch. Enable it explicitly via config (or a Scout
-   * evals config) for local/CI testing.
+   * Release: 9.6.0
    */
-  endpointResponseActionsSkill: false,
+  endpointResponseActionsSkill: true,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -218,7 +213,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables custom YARA signature management in Elastic Defend.
    */
-  customYaraSignaturesEnabled: false,
+  customYaraSignaturesEnabled: true,
 
   /**
    * Enables the ability to import and migration dashboards through automatic migration service
@@ -239,7 +234,7 @@ export const allowedExperimentalValues = Object.freeze({
    * the Attacks page and the attack flyout, and registers the `security.attack` unified
    * cases attachment type on the server.
    */
-  attackAttachmentsEnabled: false,
+  attackAttachments: true,
   /**
    *  Enables the QRadar rules import feature
    */
@@ -301,10 +296,9 @@ export const allowedExperimentalValues = Object.freeze({
   endpointForensicAnalysisSkill: true,
 
   /**
-   * Enables the Elastic Defend Policy Management Agent Builder skill (read-only prose workflows).
-   * Shipped dark by default; enable per environment via config.
+   * Enables the Elastic Defend Policy Management Agent Builder skill
    */
-  elasticDefendPolicyManagementSkill: false,
+  elasticDefendPolicyManagementSkill: true,
 
   /**
    * Enables the investigate-rule Agent Builder skill.
@@ -374,7 +368,7 @@ export const allowedExperimentalValues = Object.freeze({
    * per-operating-system protection configuration.
    * Release: 9.6
    */
-  perOsPolicySettings: false,
+  perOsPolicySettings: true,
 
   /**
    * Enables ransomware protection for Linux in Elastic Defend policies.
@@ -384,7 +378,21 @@ export const allowedExperimentalValues = Object.freeze({
    * feature is treated as disabled unless both flags are on (`isLinuxRansomwareProtectionEnabled`).
    * Release: 9.6
    */
-  linuxRansomwareProtection: false,
+  linuxRansomwareProtection: true,
+
+  /**
+   * Enables the AI Data Collection card in the per-OS Elastic Defend policy settings form and
+   * turns AI event enrichment on by default for new policies (requires `perOsPolicySettings`).
+   * Release: 9.6
+   */
+  endpointAiDataCollection: true,
+
+  /**
+   * Enables the Registry credential hardening toggle in the Elastic Defend policy
+   * Attack Surface Reduction section (`windows.attack_surface_reduction.registry_credential_hardening`).
+   * Release: 9.6
+   */
+  registryCredentialHardening: true,
 
   /**
    * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's

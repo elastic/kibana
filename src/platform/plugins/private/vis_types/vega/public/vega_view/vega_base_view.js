@@ -7,44 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment from 'moment';
-import dateMath from '@kbn/datemath';
 import { loader, logger, Warn, expressionFunction } from 'vega';
 import { expressionInterpreter } from 'vega-interpreter';
 import { Utils } from '../data_model/utils';
 import { i18n } from '@kbn/i18n';
-import { buildQueryFilter, compareFilters } from '@kbn/es-query';
 import { TooltipHandler } from './vega_tooltip';
 
-import { getEnableExternalUrls, getDataViews } from '../services';
-import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
-import { normalizeDate, normalizeString, normalizeObject } from './utils';
-import { VEGA_EVENT_APPLY_FILTER } from '../constants';
+import { getEnableExternalUrls } from '../services';
+import { VEGA_FUNCTION_NAMES } from '@kbn/vega-sandbox';
 
-// Vega's extension functions are global. When called,
-// we forward execution to the instance-specific handler
-// This functions must be declared in the VegaBaseView class
-const vegaFunctions = {
-  kibanaAddFilter: 'addFilterHandler',
-  kibanaRemoveFilter: 'removeFilterHandler',
-  kibanaRemoveAllFilters: 'removeAllFiltersHandler',
-  kibanaSetTimeFilter: 'setTimeFilterHandler',
-};
-
-for (const funcName of Object.keys(vegaFunctions)) {
+// Vega's extension functions are global. When called, we forward the call to the instance's
+// parent as a filter action; the parent validates it, so the view never builds filters itself.
+for (const funcName of VEGA_FUNCTION_NAMES) {
   if (!expressionFunction(funcName)) {
     expressionFunction(funcName, function handlerFwd(...args) {
       const view = this.context.dataflow;
-      view.runAfter(() => view._kibanaView.vegaFunctionsHandler(funcName, ...args));
+      view.runAfter(() => view._kibanaView.emitFilterAction(funcName, args));
     });
   }
-}
-
-const bypassToken = Symbol();
-
-export function bypassExternalUrlCheck(url) {
-  // processed in the  loader.sanitize  below
-  return { url, bypassToken };
 }
 
 const getExternalUrlsAreNotEnabledError = () =>
@@ -75,11 +55,12 @@ const getExternalUrlServiceError = (uri) =>
 export class VegaBaseView {
   constructor(opts) {
     this._parentEl = opts.parentEl;
-    this._parser = opts.vegaParser;
+    this._descriptor = opts.descriptor;
+    this._trustedDataUrls = new Set(opts.descriptor.trustedDataUrls);
+    this._onError = opts.onError;
+    this._onViewCreated = opts.onViewCreated;
     this._serviceSettings = opts.serviceSettings;
-    this._filterManager = opts.filterManager;
-    this._fireEvent = opts.fireEvent;
-    this._timefilter = opts.timefilter;
+    this._onFilterAction = opts.onFilterAction;
     this._view = null;
     this._vegaViewConfig = null;
     this._messages = null;
@@ -96,22 +77,22 @@ export class VegaBaseView {
     this._initialized = true;
 
     try {
-      if (this._parser.useResize) {
+      if (this._descriptor.useResize) {
         this._parentEl.classList.add('vgaVis--autoresize');
       } else {
         this._parentEl.classList.remove('vgaVis--autoresize');
       }
       this._parentEl.replaceChildren();
       this._parentEl.classList.add('vgaVis');
-      this._parentEl.style.flexDirection = this._parser.containerDir;
+      this._parentEl.style.flexDirection = this._descriptor.containerDir;
 
       // bypass the onWarn warning checks - in some cases warnings may still need to be shown despite being disabled
-      for (const warn of this._parser.warnings) {
+      for (const warn of this._descriptor.warnings) {
         this._addMessage('warn', warn);
       }
 
-      if (this._parser.error) {
-        this.onError(this._parser.error);
+      if (this._descriptor.error) {
+        this.onError(this._descriptor.error);
         return;
       }
 
@@ -122,7 +103,7 @@ export class VegaBaseView {
       this._controls = document.createElement('div');
       this._controls.classList.add(
         `vgaVis__controls`,
-        `vgaVis__controls--${this._parser.controlsDir}`
+        `vgaVis__controls--${this._descriptor.controlsDir}`
       );
       this._parentEl.append(this._controls);
 
@@ -159,48 +140,6 @@ export class VegaBaseView {
     }
   }
 
-  /**
-   * Find index pattern by its title, if not given, gets it from spec or a defaults one
-   * @param {string} [index]
-   * @returns {Promise<string>} index id
-   */
-  async findIndex(index) {
-    const dataViews = getDataViews();
-    let idxObj;
-
-    if (index) {
-      [idxObj] = await dataViews.find(index, 1);
-      if (!idxObj) {
-        throw new Error(
-          i18n.translate('visTypeVega.vegaParser.baseView.indexNotFoundErrorMessage', {
-            defaultMessage: 'Index {index} not found',
-            values: { index: `"${index}"` },
-          })
-        );
-      }
-    } else {
-      [idxObj] = await extractIndexPatternsFromSpec(
-        this._parser.isVegaLite ? this._parser.vlspec : this._parser.spec
-      );
-
-      if (!idxObj) {
-        const defaultIdx = await dataViews.getDefault();
-
-        if (defaultIdx) {
-          idxObj = defaultIdx;
-        } else {
-          throw new Error(
-            i18n.translate('visTypeVega.vegaParser.baseView.unableToFindDefaultIndexErrorMessage', {
-              defaultMessage: 'Unable to find default index',
-            })
-          );
-        }
-      }
-    }
-
-    return idxObj.id;
-  }
-
   handleExternalUrlError(externalUrlError) {
     this.onError(externalUrlError);
     throw externalUrlError;
@@ -209,18 +148,16 @@ export class VegaBaseView {
   createViewConfig() {
     const config = {
       expr: expressionInterpreter,
-      renderer: this._parser.renderer,
+      renderer: this._descriptor.renderer,
     };
 
     // Override URL sanitizer to prevent external data loading (if disabled)
     const vegaLoader = loader();
     const originalSanitize = vegaLoader.sanitize.bind(vegaLoader);
     vegaLoader.sanitize = async (uri, options) => {
-      if (uri.bypassToken === bypassToken) {
-        // If uri has a bypass token, the uri was encoded by bypassExternalUrlCheck() above.
-        // because user can only supply pure JSON data structure.
-        uri = uri.url;
-      } else if (!this._externalUrl.isInternalUrl(uri)) {
+      // URLs Kibana resolved on the spec's behalf (e.g. EMS files) skip the check.
+      const isTrustedUrl = this._trustedDataUrls.has(uri);
+      if (!isTrustedUrl && !this._externalUrl.isInternalUrl(uri)) {
         if (!this._enableExternalUrls) {
           this.handleExternalUrlError(getExternalUrlsAreNotEnabledError());
         } else if (!this._externalUrl.validateUrl(uri)) {
@@ -234,7 +171,7 @@ export class VegaBaseView {
       return result;
     };
 
-    const vegaSpec = this._parser.isVegaLite ? this._parser.vlspec : this._parser.spec;
+    const vegaSpec = this._descriptor.isVegaLite ? this._descriptor.vlspec : this._descriptor.spec;
     const usermetaLoaderOptions = vegaSpec.usermeta?.embedOptions?.loader;
     const ALLOWED_LOADER_OPTIONS = ['target', 'rel'];
     const sanitizedLoaderOptions = {};
@@ -266,11 +203,11 @@ export class VegaBaseView {
   onError(...args) {
     const error = Utils.formatErrorToStr(...args);
     this._addMessage('err', error);
-    this._parser.searchAPI.inspectorAdapters?.vega.setError(error);
+    this._onError(error);
   }
 
   onWarn(...args) {
-    if (this._showWarnings && (!this._parser || !this._parser.hideWarnings)) {
+    if (this._showWarnings && (!this._descriptor || !this._descriptor.hideWarnings)) {
       this._addMessage('warn', Utils.formatWarningToStr(...args));
     }
   }
@@ -283,7 +220,7 @@ export class VegaBaseView {
     }
     const isMessageAlreadyDisplayed = [
       ...this._messages.querySelectorAll(`:scope pre.vgaVis__messageCode`),
-    ].filter((index, element) => element.textContent === text).length;
+    ].some((element) => element.textContent === text);
     if (!isMessageAlreadyDisplayed) {
       const messageCodeEl = document.createElement('pre');
       messageCodeEl.classList.add('vgaVis__messageCode');
@@ -298,7 +235,7 @@ export class VegaBaseView {
   }
 
   async resize(dimensions) {
-    if (this._parser.useResize && this._view) {
+    if (this._descriptor.useResize && this._view) {
       this.updateVegaSize(this._view, dimensions);
       await this._view.runAsync();
 
@@ -331,10 +268,10 @@ export class VegaBaseView {
       // Global vega expression handler uses it to call custom functions
       view._kibanaView = this;
 
-      if (this._parser.tooltips) {
+      if (this._descriptor.tooltips) {
         // position and padding can be specified with
         // {config:{kibana:{tooltips: {position: 'top', padding: 15 } }}}
-        const tthandler = new TooltipHandler(this._container, view, this._parser.tooltips);
+        const tthandler = new TooltipHandler(this._container, view, this._descriptor.tooltips);
 
         // Vega bug workaround - need to destroy tooltip by hand
         this._addDestroyHandler(() => tthandler.hideTooltip());
@@ -351,167 +288,17 @@ export class VegaBaseView {
   }
 
   /**
-   * Handle
-   * @param funcName
-   * @param args
+   * Forwards a filter action raised by the spec to the parent, displaying any error it reports.
+   * @param {string} fn
+   * @param {unknown[]} args
    * @returns {Promise<void>}
    */
-  async vegaFunctionsHandler(funcName, ...args) {
+  async emitFilterAction(fn, args) {
     try {
-      const handlerFunc = vegaFunctions[funcName];
-      if (!handlerFunc || !this[handlerFunc]) {
-        // in case functions don't match the list above
-        throw new Error(
-          i18n.translate(
-            'visTypeVega.vegaParser.baseView.functionIsNotDefinedForGraphErrorMessage',
-            {
-              defaultMessage: '{funcName} is not defined for this graph',
-              values: { funcName: `${funcName}()` },
-            }
-          )
-        );
-      }
-      await this[handlerFunc](...args);
+      await this._onFilterAction({ fn, args });
     } catch (err) {
       this.onError(err);
     }
-  }
-
-  /**
-   * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
-   * @param {string} [index] as defined in Kibana, or default if missing
-   * @param {string} Elastic Query DSL's Custom label for kibanaAddFilter, as used in '+ Add Filter'
-   */
-  async addFilterHandler(query, index, alias) {
-    const normalizedQuery = normalizeObject(query);
-    const normalizedIndex = normalizeString(index);
-    const normalizedAlias = normalizeString(alias);
-    const indexId = await this.findIndex(normalizedIndex);
-    const filter = buildQueryFilter(normalizedQuery, indexId, normalizedAlias);
-
-    this._fireEvent({ name: VEGA_EVENT_APPLY_FILTER, data: { filters: [filter] } });
-  }
-
-  /**
-   * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
-   * @param {string} [index] as defined in Kibana, or default if missing
-   */
-  async removeFilterHandler(query, index) {
-    const normalizedQuery = normalizeObject(query);
-    const normalizedIndex = normalizeString(index);
-    const indexId = await this.findIndex(normalizedIndex);
-    const filterToRemove = buildQueryFilter(normalizedQuery, indexId);
-
-    const currentFilters = this._filterManager.getFilters();
-    const existingFilter = currentFilters.find((filter) => compareFilters(filter, filterToRemove));
-
-    if (!existingFilter) return;
-
-    try {
-      this._filterManager.removeFilter(existingFilter);
-    } catch (err) {
-      this.onError(err);
-    }
-  }
-
-  removeAllFiltersHandler() {
-    this._filterManager.removeAll();
-  }
-
-  /**
-   * Update dashboard time filter to the new values
-   * @param {number|string|Date} start
-   * @param {number|string|Date} end
-   */
-  setTimeFilterHandler(start, end) {
-    const normalizedStart = normalizeDate(start);
-    const normalizedEnd = normalizeDate(end);
-    const { from, to, mode } = VegaBaseView._parseTimeRange(normalizedStart, normalizedEnd);
-
-    this._fireEvent({
-      name: VEGA_EVENT_APPLY_FILTER,
-      data: {
-        timeFieldName: '*',
-        filters: [
-          {
-            query: {
-              range: {
-                '*': {
-                  mode,
-                  gte: from,
-                  lte: to,
-                },
-              },
-            },
-          },
-        ],
-      },
-    });
-  }
-
-  /**
-   * Parse start and end values, determining the mode, and if order should be reversed
-   * @internal
-   */
-  static _parseTimeRange(start, end) {
-    const absStart = moment(start);
-    const absEnd = moment(end);
-    const isValidAbsStart = absStart.isValid();
-    const isValidAbsEnd = absEnd.isValid();
-    let mode = 'absolute';
-    let from;
-    let to;
-    let reverse;
-
-    if (isValidAbsStart && isValidAbsEnd) {
-      // Both are valid absolute dates.
-      from = absStart;
-      to = absEnd;
-      reverse = absStart.isAfter(absEnd);
-    } else {
-      // Try to parse as relative dates too (absolute dates will also be accepted)
-      const startDate = dateMath.parse(start);
-      const endDate = dateMath.parse(end);
-      if (!startDate || !endDate || !startDate.isValid() || !endDate.isValid()) {
-        throw new Error(
-          i18n.translate('visTypeVega.vegaParser.baseView.timeValuesTypeErrorMessage', {
-            defaultMessage:
-              'Error setting time filter: both time values must be either relative or absolute dates. {start}, {end}',
-            values: {
-              start: `start=${JSON.stringify(start)}`,
-              end: `end=${JSON.stringify(end)}`,
-            },
-          })
-        );
-      }
-      reverse = startDate.isAfter(endDate);
-      if (isValidAbsStart || isValidAbsEnd) {
-        // Mixing relative and absolute - treat them as absolute
-        from = startDate;
-        to = endDate;
-      } else {
-        // Both dates are relative
-        mode = 'relative';
-        from = start;
-        to = end;
-      }
-    }
-
-    if (reverse) {
-      [from, to] = [to, from];
-    }
-
-    return { from, to, mode };
-  }
-
-  /**
-   * Set global debug variable to simplify vega debugging in console. Show info message first time
-   */
-  setDebugValues(view, spec, vlspec) {
-    this._parser.searchAPI.inspectorAdapters?.vega.bindInspectValues({
-      view,
-      spec: vlspec || spec,
-    });
   }
 
   destroy() {

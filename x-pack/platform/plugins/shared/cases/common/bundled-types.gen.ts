@@ -2174,6 +2174,166 @@ export const AlertResponseProperties = lazySchema(() =>
 export type AlertResponseProperties = z.infer<typeof AlertResponseProperties>;
 
 /**
+  * The ID of the attached item, such as an alert or a dashboard. To attach several alerts, use an array. This isn't the attachment's own ID (`id`).
+
+  */
+export const UnifiedAttachmentAttachmentId = lazySchema(() =>
+  z.union([z.string(), z.array(z.string())])
+);
+export type UnifiedAttachmentAttachmentId = z.infer<typeof UnifiedAttachmentAttachmentId>;
+
+/**
+  * The attachment's content. Required for comments, where `content` is the comment text (up to 30,000 characters).
+
+  */
+export const UnifiedAttachmentData = lazySchema(() =>
+  z.object({}).catchall(z.unknown()).nullable()
+);
+export type UnifiedAttachmentData = z.infer<typeof UnifiedAttachmentData>;
+
+/**
+  * Extra details about the attachment. For alerts, this is the alert's index and rule. Required for some types, such as `dashboard`.
+
+  */
+export const UnifiedAttachmentMetadata = lazySchema(() =>
+  z.object({}).catchall(z.unknown()).nullable()
+);
+export type UnifiedAttachmentMetadata = z.infer<typeof UnifiedAttachmentMetadata>;
+
+/**
+  * The attachment type, such as `comment`, `security.alert`, `observability.alert`, `stack.alert`, `security.event`, `lens`, `dashboard`, or `file`. `security.*` types only work on Security cases, `observability.*` on Observability cases, and `stack.*` on Stack Management cases. Use `comment` (not the legacy `user` type) and a `*.alert` type (not `alert`). You can't add or replace file attachments with this API. To add a file, use `POST /api/cases/{caseId}/files`.
+
+  */
+export const UnifiedAttachmentType = lazySchema(() => z.string());
+export type UnifiedAttachmentType = z.infer<typeof UnifiedAttachmentType>;
+
+export const UnifiedAttachmentResponse = lazySchema(() =>
+  z.object({
+    attachmentId: UnifiedAttachmentAttachmentId.optional(),
+    created_at: isoDateTime(),
+    created_by: CaseResponseCreatedByProperties,
+    data: UnifiedAttachmentData.optional(),
+    /**
+     * The attachment identifier.
+     */
+    id: z.string().describe('The attachment identifier.'),
+    metadata: UnifiedAttachmentMetadata.optional(),
+    owner: Owner,
+    /**
+      * When this attachment was last pushed to an external system, such as Jira. Is `null` if it hasn't been pushed.
+
+      */
+    pushed_at: isoDateTime()
+      .nullable()
+      .describe(
+        "When this attachment was last pushed to an external system, such as Jira. Is `null` if it hasn't been pushed.\n"
+      ),
+    pushed_by: CaseResponsePushedByProperties,
+    type: UnifiedAttachmentType,
+    updated_at: isoDateTime().nullable(),
+    updated_by: CaseResponseUpdatedByProperties,
+    /**
+     * The attachment's current version. Include it when you replace the attachment.
+     */
+    version: z
+      .string()
+      .describe("The attachment's current version. Include it when you replace the attachment."),
+  })
+);
+export type UnifiedAttachmentResponse = z.infer<typeof UnifiedAttachmentResponse>;
+
+export const UnifiedAttachmentsFindResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The attachments on the requested page.
+     */
+    data: z.array(UnifiedAttachmentResponse).describe('The attachments on the requested page.'),
+    /**
+     * The current page number.
+     */
+    page: z.number().int().describe('The current page number.'),
+    /**
+     * The number of items per page.
+     */
+    per_page: z.number().int().describe('The number of items per page.'),
+    /**
+      * The total number of matching attachments you can access. Attachments with invalid or unsupported data are counted but not returned, so a page can have fewer than `per_page` items.
+
+      */
+    total: z
+      .number()
+      .int()
+      .describe(
+        'The total number of matching attachments you can access. Attachments with invalid or unsupported data are counted but not returned, so a page can have fewer than `per_page` items.\n'
+      ),
+  })
+);
+export type UnifiedAttachmentsFindResponse = z.infer<typeof UnifiedAttachmentsFindResponse>;
+
+/**
+  * The attachment to add to the case. Reference attachment types, such as alerts, require `attachmentId`. Value attachment types, such as comments, require `data` and don't accept `attachmentId`. The `owner` must match the owner of the case. Unknown properties are rejected.
+
+  */
+export const UnifiedAttachmentRequest = lazySchema(() =>
+  z.union([
+    z
+      .object({
+        attachmentId: UnifiedAttachmentAttachmentId,
+        data: UnifiedAttachmentData.optional(),
+        metadata: UnifiedAttachmentMetadata.optional(),
+        owner: Owner,
+        type: UnifiedAttachmentType,
+      })
+      .strict(),
+    z
+      .object({
+        data: UnifiedAttachmentData,
+        metadata: UnifiedAttachmentMetadata.optional(),
+        owner: Owner,
+        type: UnifiedAttachmentType,
+      })
+      .strict(),
+  ])
+);
+export type UnifiedAttachmentRequest = z.infer<typeof UnifiedAttachmentRequest>;
+
+/**
+  * The current version of the attachment. To retrieve it, use the get case attachment API. If the attachment changed since you read it, the request fails with a 409 status code.
+
+  */
+export const UnifiedAttachmentVersion = lazySchema(() => z.string());
+export type UnifiedAttachmentVersion = z.infer<typeof UnifiedAttachmentVersion>;
+
+/**
+  * The full replacement for the attachment. The `type` and `owner` must match the existing attachment. Reference attachment types require `attachmentId`. Value attachment types require `data` and don't accept `attachmentId`. Unknown properties are rejected.
+
+  */
+export const UnifiedAttachmentPutRequest = lazySchema(() =>
+  z.union([
+    z
+      .object({
+        attachmentId: UnifiedAttachmentAttachmentId,
+        data: UnifiedAttachmentData.optional(),
+        metadata: UnifiedAttachmentMetadata.optional(),
+        owner: Owner,
+        type: UnifiedAttachmentType,
+        version: UnifiedAttachmentVersion,
+      })
+      .strict(),
+    z
+      .object({
+        data: UnifiedAttachmentData,
+        metadata: UnifiedAttachmentMetadata.optional(),
+        owner: Owner,
+        type: UnifiedAttachmentType,
+        version: UnifiedAttachmentVersion,
+      })
+      .strict(),
+  ])
+);
+export type UnifiedAttachmentPutRequest = z.infer<typeof UnifiedAttachmentPutRequest>;
+
+/**
   * The alert identifiers. It is required only when `type` is `alert`. You can use an array of strings to add multiple alerts to a case, provided that they all relate to the same rule; `index` must also be an array with the same length or number of elements. Adding multiple alerts in this manner is recommended rather than calling the API multiple times. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
   */
@@ -2403,6 +2563,27 @@ export const PayloadAssignees = lazySchema(() =>
   })
 );
 export type PayloadAssignees = z.infer<typeof PayloadAssignees>;
+
+/**
+ * The payload for a bulk attachments user action, recorded when a user removes one or more attachments of the same type from a case in a single action.
+ */
+export const PayloadBulkAttachments = lazySchema(() =>
+  z.object({
+    bulkAttachments: z.object({
+      /**
+       * The attachment type, such as `security.alert` or `file`.
+       */
+      attachmentType: z
+        .string()
+        .describe('The attachment type, such as `security.alert` or `file`.'),
+      /**
+       * The number of attachments of this type.
+       */
+      count: z.number().int().describe('The number of attachments of this type.'),
+    }),
+  })
+);
+export type PayloadBulkAttachments = z.infer<typeof PayloadBulkAttachments>;
 
 export const PayloadConnector = lazySchema(() =>
   z.object({
@@ -2908,6 +3089,7 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
     payload: z.union([
       PayloadAlertComment,
       PayloadAssignees,
+      PayloadBulkAttachments,
       PayloadConnector,
       PayloadCreateCase,
       PayloadDelete,
@@ -2928,6 +3110,7 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
     type: z
       .enum([
         'assignees',
+        'bulkAttachments',
         'category',
         'comment',
         'connector',

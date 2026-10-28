@@ -7,7 +7,7 @@
 
 import { getStackAlertAttachmentType } from '.';
 import { STACK_ALERT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
-import { StackAlertAttachmentPayloadSchema } from '../../../../common/types/domain_zod/attachment/alert/v2';
+import { StackAlertAttachmentPayloadSchema } from '../../../../common/types/domain/attachment/alert/v2';
 
 describe('getStackAlertAttachmentType', () => {
   const registration = getStackAlertAttachmentType();
@@ -18,6 +18,11 @@ describe('getStackAlertAttachmentType', () => {
 
   it('registers the zod payload schema', () => {
     expect(registration.schema).toBe(StackAlertAttachmentPayloadSchema);
+  });
+
+  it('labels a count of alerts', () => {
+    expect(registration.getCountLabel?.({ count: 1 })).toBe('1 alert');
+    expect(registration.getCountLabel?.({ count: 3 })).toBe('3 alerts');
   });
 
   describe('getRemovalActivity', () => {

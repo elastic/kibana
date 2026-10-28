@@ -9,6 +9,7 @@ import { isBoom } from '@hapi/boom';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import pLimit from 'p-limit';
 import { uniq } from 'lodash';
+import { deleteRules } from '../../../significant_events/rules/bulk_rule_operations';
 import { compileMatchCountBreachQuery } from '../../../significant_events/rules/match_count_query_compiler';
 import { withAllProjectsRouting } from '../../../significant_events/rules/project_routing';
 import {
@@ -133,12 +134,10 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   }
 
   async bulkDeleteRules(ids: string[]): Promise<void> {
-    if (ids.length === 0) return;
-    const { errors } = await this.rulesClient.bulkDeleteRules({ ids });
-    const fatal = errors.filter((e) => e.error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND);
-    if (fatal.length > 0) {
-      const detail = fatal.map((e) => `${e.id}: ${e.error.message}`).join('; ');
-      throw new Error(`V2 bulk delete failed for ${fatal.length} rule(s): ${detail}`);
+    const { failures } = await deleteRules(this.rulesClient, ids);
+    if (failures.length > 0) {
+      const detail = failures.map(({ id, message }) => `${id}: ${message}`).join('; ');
+      throw new Error(`V2 bulk delete failed for ${failures.length} rule(s): ${detail}`);
     }
   }
 
@@ -153,6 +152,19 @@ export class RulesAdapterV2 implements IRulesManagementClient {
       const detail = fatal.map((e) => `${e.id}: ${e.error.message}`).join('; ');
       throw new Error(`V2 bulk ${action} failed for ${fatal.length} rule(s): ${detail}`);
     }
+  }
+
+  async findRuleEnabledStates(ids: string[]): Promise<Map<string, boolean>> {
+    const enabledById = new Map<string, boolean>();
+    for (let start = 0; start < ids.length; start += FIND_PAGE_SIZE) {
+      const chunk = ids.slice(start, start + FIND_PAGE_SIZE);
+      const { items } = await this.rulesClient.findRules({
+        filter: chunk.map((id) => `id: "${id}"`).join(' or '),
+        perPage: chunk.length,
+      });
+      items.forEach(({ id, enabled }) => enabledById.set(id, enabled));
+    }
+    return enabledById;
   }
 
   async findExistingRuleIds(ids: string[]): Promise<string[]> {
@@ -245,7 +257,10 @@ export class RulesAdapterV2 implements IRulesManagementClient {
     const conflicts = errors.filter(
       ({ error }) => error.code === ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
     );
-    const conflictIds = [...knownConflicts.map(({ id }) => id), ...conflicts.map(({ id }) => id)];
+    const conflictIds: string[] = [
+      ...knownConflicts.map(({ id }) => id),
+      ...conflicts.map(({ id }) => id).filter((id) => id !== undefined),
+    ];
     const fatal = errors.filter(
       ({ error }) => error.code !== ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
     );
@@ -257,7 +272,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
         new Error(`V2 bulk create failed for ${fatal.length} rule(s): ${detail}`),
         createdIds,
         conflictIds,
-        fatal.map(({ id }) => id)
+        fatal.map(({ id }) => id).filter((id) => id !== undefined)
       );
     }
 

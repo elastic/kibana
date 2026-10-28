@@ -200,6 +200,99 @@ describe('create-investigation-proposal workflow execution', () => {
     });
   });
 
+  describe('attributing a decision', () => {
+    const approver = {
+      username: 'analyst',
+      fullName: 'Alice Analyst',
+      email: 'alice@example.com',
+      profileUid: 'u_analyst',
+    };
+
+    it('should record the profile of the user the resolution runs as', async () => {
+      await fixture.start();
+      fixture.setExecutingUser(approver);
+
+      await fixture.resume(true, 'analyst');
+
+      expect(fixture.onlyProposal().decidedBy).toEqual(approver);
+    });
+
+    it('should fall back to the responder when the resolution runs as no user', async () => {
+      await fixture.start();
+      fixture.setExecutingUser(undefined);
+
+      await fixture.resume(true, 'analyst');
+
+      expect(fixture.onlyProposal().decidedBy).toEqual({
+        username: 'analyst',
+        fullName: null,
+        email: null,
+      });
+    });
+  });
+
+  describe('a resolution that fails', () => {
+    it('should park again for a human when it failed before deciding', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+      fixture.failNextRead();
+
+      await fixture.resume(true);
+
+      const proposal = fixture.onlyProposal();
+      expect(proposal.decision).toBeUndefined();
+      expect(proposal.status).toBe('pending');
+      expect(fixture.stepExecutions('await_decision', 'waitForApproval')).toHaveLength(2);
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+    });
+
+    it('should let the next answer decide the proposal it parked again on', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+      fixture.failNextRead();
+      await fixture.resume(true);
+
+      await fixture.resume(false, 'second-analyst');
+
+      expect(fixture.onlyProposal()).toMatchObject({
+        decision: 'dismissed',
+        status: 'no_action',
+        decidedBy: { username: 'second-analyst' },
+      });
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('should park for a human when an auto-approval failed before deciding', async () => {
+      fixture.failNextRead();
+
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });
+
+      // Nothing was written, so the proposal is not re-offered: the same one
+      // waits for a human.
+      const proposal = fixture.onlyProposal();
+      expect(proposal.decision).toBeUndefined();
+      expect(proposal.status).toBe('pending');
+      expect(fixture.stepExecutions('await_decision', 'waitForApproval')).toHaveLength(1);
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+    });
+
+    it('should record an approval caught mid-action as failed and re-offer it', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+      fixture.failNextStatusWrite('failed');
+
+      await fixture.resume(true);
+
+      const [original, clone] = fixture.proposals();
+      expect(original).toMatchObject({
+        decision: 'approved',
+        status: 'failed',
+        supersededBy: clone.id,
+      });
+      expect(original.executionError).toEqual(expect.stringContaining('may have run'));
+      expect(clone.status).toBe('pending');
+      expect(clone.workflowExecutionId).toBe('fake_workflow_execution_id');
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+    });
+  });
+
   describe('approving a proposal with no action', () => {
     it('should settle as approved with no action rather than staying awaiting', async () => {
       // Approval is the whole lifecycle when there is nothing to run, so
@@ -282,7 +375,7 @@ describe('create-investigation-proposal workflow execution', () => {
       await fixture.revise({ actionInput: { name: 'analyst-corrected-name' } });
       await fixture.resume(true);
 
-      const executions = fixture.stepExecutions('execute_action', 'workflow.execute');
+      const executions = fixture.stepExecutions('execute_as_approver', 'workflow.execute');
       expect(executions).toHaveLength(1);
       // The trigger's static `inputs.actionInput` still reads `original-name`;
       // asserting on the executed step's own recorded input, not on the
@@ -431,6 +524,52 @@ describe('create-investigation-proposal workflow execution', () => {
       expect(clone.decision).toBe('dismissed');
       expect(clone.status).toBe('no_action');
       expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
+    });
+  });
+
+  // A failed auto-approved attempt is re-offered to a human, and the retry runs from
+  // the other execute step. A step that did not run on a pass keeps its previous
+  // output, so the retry must settle on its own result, never the worker's stale one.
+  // This harness has no workflow registry, so both attempts fail; each error names the
+  // step that ran, which is what shows whose result was adopted.
+  describe('an auto-approved action that fails, then a human retry', () => {
+    beforeEach(async () => {
+      fixture.setActionMetadata({
+        name: 'Close alerts',
+        category: 'respond',
+        approvalPolicy: 'autonomy-dependent',
+      });
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });
+    });
+
+    it('runs the first attempt as the worker and parks the clone for a human', () => {
+      const [first, clone] = fixture.proposals();
+
+      expect(fixture.stepExecutions('execute_as_worker', 'workflow.execute')).toHaveLength(1);
+      expect(fixture.stepExecutions('execute_as_approver', 'workflow.execute')).toHaveLength(0);
+      expect(first.status).toBe('failed');
+      expect(first.executionError).toContain('"execute_as_worker"');
+      expect(clone.status).toBe('pending');
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+    });
+
+    it('runs the retry as the approver without re-running the worker step', async () => {
+      await fixture.resume(true);
+
+      expect(fixture.stepExecutions('execute_as_worker', 'workflow.execute')).toHaveLength(1);
+      expect(fixture.stepExecutions('execute_as_approver', 'workflow.execute')).toHaveLength(1);
+      // Only the first pass adopted a worker result.
+      expect(fixture.stepExecutions('adopt_worker_result', 'data.set')).toHaveLength(1);
+    });
+
+    it("settles the retry on the approver's own result, not the worker's stale error", async () => {
+      await fixture.resume(true);
+
+      const [, retry] = fixture.proposals();
+      expect(retry.decision).toBe('approved');
+      expect(retry.status).toBe('failed');
+      expect(retry.executionError).toContain('"execute_as_approver"');
+      expect(retry.executionError).not.toContain('"execute_as_worker"');
     });
   });
 
@@ -585,9 +724,20 @@ describe('create-investigation-proposal workflow execution', () => {
 
       await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });
 
-      // Declaring the policy explicitly must behave like declaring nothing;
-      // only `always-gate` overrides the caller.
+      // Only `always-gate` overrides the caller.
       expect(fixture.proposals()[0].decision).toBe('approved');
+    });
+
+    it('should gate an action that declares no approval policy', async () => {
+      fixture.setActionMetadata({ name: 'Create rule', category: 'tune' });
+
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });
+
+      // The policy is required, so metadata without one is invalid and reads
+      // as unresolved: an action whose author never said it may run unattended
+      // waits for a human.
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.onlyProposal().decision).toBeUndefined();
     });
   });
 });

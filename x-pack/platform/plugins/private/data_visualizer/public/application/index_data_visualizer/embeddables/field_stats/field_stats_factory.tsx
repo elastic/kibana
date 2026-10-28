@@ -19,6 +19,8 @@ import {
   useFetchContext,
   titleComparators,
   timeRangeComparators,
+  getViewModeSubject,
+  type ViewMode,
 } from '@kbn/presentation-publishing';
 import { initializeStateApi } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
@@ -100,6 +102,9 @@ export const getFieldStatsChartEmbeddableFactory = (
         fieldFormats,
         ...startServices,
       };
+
+      const viewMode$ = getViewModeSubject(parentApi) ?? new BehaviorSubject<ViewMode>('view');
+
       const timeRangeManager = initializeTimeRangeManager(initialState);
       const titleManager = initializeTitleManager(initialState);
 
@@ -143,7 +148,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         }
       }
 
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
+      const dataSources$ = new BehaviorSubject<DataView[] | undefined>(
         initialDataView ? [initialDataView] : undefined
       );
 
@@ -166,7 +171,7 @@ export const getFieldStatsChartEmbeddableFactory = (
             )
             .subscribe((nextSelectedDataView) => {
               if (nextSelectedDataView) {
-                dataViews$.next([nextSelectedDataView]);
+                dataSources$.next([nextSelectedDataView]);
               }
             })
         );
@@ -241,7 +246,7 @@ export const getFieldStatsChartEmbeddableFactory = (
             },
           });
         },
-        dataViews$,
+        dataSources$,
       });
 
       const reload$ = fetch$(api).pipe(
@@ -300,9 +305,10 @@ export const getFieldStatsChartEmbeddableFactory = (
           }
 
           const { filters: globalFilters, query: globalQuery, timeRange } = useFetchContext(api);
-          const [dataViews, esqlQuery, viewType, showPreviewByDefault] =
+          const [viewMode, dataViews, esqlQuery, viewType, showPreviewByDefault] =
             useBatchedPublishingSubjects(
-              api.dataViews$,
+              viewMode$,
+              api.dataSources$,
               api.query$,
               api.viewType$,
               api.showDistributions$
@@ -404,6 +410,7 @@ export const getFieldStatsChartEmbeddableFactory = (
                 resetData$={reset$}
                 timeRange={timeRange}
                 onRenderComplete={dataLoadingApi.onRenderComplete}
+                isInteractive={viewMode !== 'non-interactive'}
               />
             </EuiFlexItem>
           );

@@ -280,7 +280,7 @@ export interface RelayActionClient {
     threadTs?: string;
     /** Edits this previously posted message instead of posting a new one. */
     messageTs?: string;
-  }): Promise<{ ref: string; tenantKey: string; channel: string }>;
+  }): Promise<{ ref: string; channel: string; externalConversationId?: string }>;
   /** One page of the channels this deployment has connected; follow `nextCursor` for the rest. */
   listBindings(
     tenantKey: string,

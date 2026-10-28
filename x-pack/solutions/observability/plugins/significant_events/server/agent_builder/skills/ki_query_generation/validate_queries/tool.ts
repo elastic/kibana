@@ -10,7 +10,12 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { Logger } from '@kbn/core/server';
 import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
-import { MAX_ID_LENGTH, MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
+import {
+  MAX_ID_LENGTH,
+  MAX_TEXT_LENGTH,
+  MAX_TITLE_LENGTH,
+  significantEventTypeSchema,
+} from '@kbn/significant-events-schema';
 import {
   createQueryValidationContext,
   QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
@@ -26,7 +31,7 @@ import { getRequestAbortSignal } from '../../../../routes/utils/get_request_abor
 import { sourceToAnalysisTarget } from '../../../../lib/significant_events/source_to_analysis_target';
 import {
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
   toSourceRef,
 } from '../../../utils/resolve_source_slugs';
 
@@ -56,9 +61,9 @@ const candidateQuerySchema = lazySchema(() =>
       .describe(
         'A semantically searchable description explaining what the query detects and why it matters. Should be 1-2 sentences that help users find this query when searching by concept or intent.'
       ),
-    category: z
-      .enum(['operational', 'configuration', 'resource_health', 'error', 'security'])
-      .describe('Significant event category the query belongs to.'),
+    category: significantEventTypeSchema.describe(
+      'Significant event category the query belongs to.'
+    ),
     severity_score: z
       .number()
       .min(0)
@@ -129,7 +134,7 @@ export const createValidateQueriesTool = ({
 
         const scopedClients = await getScopedClients({ request: context.request });
         const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
-        const [source] = resolveSourcesBySlug(catalog, [slug]);
+        const [source] = resolveSourcesBySlugOrId(catalog, [slug]);
         // Stored features and queries are read as the internal user, and the results tell whether a
         // feature or a query exists, so check the caller's own data access first.
         await scopedClients.sourcesClient.assertReadable(source.id);

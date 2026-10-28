@@ -8,7 +8,7 @@
 import type { DashboardAgentTaskOutput } from './types';
 import { dashboardRoutingEvaluator } from './evaluators/dashboard_routing';
 import {
-  dashboardSkillActivatedEvaluator,
+  dashboardSkillWithoutVisualizationEvaluator,
   dashboardSkillNotActivatedEvaluator,
   getSkillReadPaths,
   getToolIds,
@@ -22,7 +22,7 @@ const createOutput = (steps: DashboardAgentTaskOutput['steps']): DashboardAgentT
 });
 
 const evaluateOutput = async (
-  evaluator: typeof dashboardSkillActivatedEvaluator,
+  evaluator: typeof dashboardSkillWithoutVisualizationEvaluator,
   output: DashboardAgentTaskOutput
 ) =>
   evaluator.evaluate({
@@ -107,7 +107,7 @@ describe('skill selection evaluators', () => {
 
   it('passes when dashboard skill is loaded for dashboard requests', async () => {
     const result = await evaluateOutput(
-      dashboardSkillActivatedEvaluator,
+      dashboardSkillWithoutVisualizationEvaluator,
       createOutput([
         {
           type: 'tool_call',
@@ -119,6 +119,24 @@ describe('skill selection evaluators', () => {
 
     expect(result.score).toBe(1);
     expect(result.label).toBe('PASS');
+  });
+
+  it('fails dashboard routing when the visualization skill is also loaded', async () => {
+    const result = await dashboardRoutingEvaluator.evaluate({
+      input: { question: 'Create a dashboard to monitor my logs' },
+      expected: { route: 'dashboard' },
+      metadata: undefined,
+      output: createOutput([
+        { type: 'tool_call', tool_id: 'load_skill', params: { skill: 'dashboards' } },
+        { type: 'tool_call', tool_id: 'load_skill', params: { skill: 'visualization-creation' } },
+        { type: 'tool_call', tool_id: 'platform.dashboard.generate_dashboard' },
+      ]),
+    });
+
+    expect(result.score).toBe(0);
+    expect(result.metadata).toEqual(
+      expect.objectContaining({ dashboardSkillLoaded: true, visualizationSkillLoaded: true })
+    );
   });
 
   it('passes when visualization skill loads without the dashboards skill', async () => {

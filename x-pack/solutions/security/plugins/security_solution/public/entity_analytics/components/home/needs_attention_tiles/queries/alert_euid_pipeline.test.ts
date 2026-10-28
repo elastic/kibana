@@ -32,6 +32,53 @@ describe('buildAlertEuidPipeline', () => {
     expect(derived).toContain('_ea_entity_id = MV_DEDUPE(MV_APPEND(MV_APPEND(');
   });
 
+  describe('unstamped branch identity filter', () => {
+    const unstampedWhere = (): string =>
+      pipelineText()
+        .split('\n')
+        .find((line) => line.includes('`kibana.alert.entity.id` IS NULL')) ?? '';
+
+    it('keeps only alerts that could resolve to a user, host or service EUID', () => {
+      const where = unstampedWhere();
+      expect(where).toContain('user.name IS NOT NULL');
+      expect(where).toContain('host.name IS NOT NULL');
+      expect(where).toContain('service.name IS NOT NULL');
+    });
+
+    it('does not cast the fields, so ES|QL can push the filter down to Lucene', () => {
+      expect(unstampedWhere()).not.toMatch(/\bTO_[A-Z]+\(/);
+    });
+
+    it('skips failed-outcome user alerts, as risk scoring does', () => {
+      expect(unstampedWhere()).toContain('event.outcome != "failure"');
+    });
+
+    it('nulls each EUID unless its own type accepts the alert', () => {
+      const derived = pipelineText().split('WHERE `kibana.alert.entity.id` IS NULL')[1];
+      const guard = derived.split('\n').find((line) => line.includes('user_euid = CASE(')) ?? '';
+      expect(guard).toContain('user_euid = CASE(');
+      expect(guard).toContain('host_euid = CASE(');
+      expect(guard).toContain('service_euid = CASE(');
+      // The user guard keeps the failure exclusion, so a host field cannot let a failed user alert in.
+      const userGuard = guard.slice(0, guard.indexOf('host_euid = CASE('));
+      expect(userGuard).toContain('event.outcome != "failure"');
+      expect(derived.indexOf('user_euid = CASE(')).toBeGreaterThan(derived.indexOf('user_euid ='));
+      expect(derived.indexOf('user_euid = CASE(')).toBeLessThan(derived.indexOf('MV_DEDUPE'));
+    });
+
+    it('filters before the EUID evals', () => {
+      const query = pipelineText();
+      expect(query.indexOf('user.name IS NOT NULL')).toBeLessThan(query.indexOf('user_euid ='));
+    });
+
+    it('does not filter the stamped branch', () => {
+      const stamped = pipelineText()
+        .split('\n')
+        .find((line) => line.includes('IS NOT NULL'));
+      expect(stamped).toBe('    WHERE `kibana.alert.entity.id` IS NOT NULL');
+    });
+  });
+
   it('expands _ea_entity_id, filters nulls, deduplicates, then renames to entity.id for the JOIN', () => {
     const pipeline = buildAlertEuidPipeline();
     expect(pipeline).toContain('| MV_EXPAND _ea_entity_id');
@@ -90,6 +137,43 @@ describe('buildAlertEuidPipeline', () => {
         `| STATS has_severe_alert = MAX(is_severe_alert) BY ${ALERT_BUCKET_COLUMN}, _ea_entity_id`
       );
       expect(bucketed()).toContain('| RENAME _ea_entity_id AS `entity.id`');
+    });
+  });
+
+  describe('with the alias rows of the entity index in the same FROM', () => {
+    const withAliases = (bucket?: string): string =>
+      buildAlertEuidPipeline(bucket, {
+        alertBranchCondition: 'NOT _index == "e"',
+        extraBranch: {
+          steps: ['WHERE _index == "e"', '| EVAL _ea_entity_id = x', '| KEEP _ea_entity_id'],
+          aggregations: ['alias_watchlisted = MAX(alias_watchlisted)'],
+        },
+      }).join('\n');
+
+    it('keeps the entity rows out of both alert branches', () => {
+      const query = withAliases();
+      expect(query).toContain('WHERE (NOT _index == "e") AND `kibana.alert.entity.id` IS NOT NULL');
+      expect(query).toContain('WHERE (NOT _index == "e") AND `kibana.alert.entity.id` IS NULL');
+    });
+
+    it('adds the extra FORK branch after the two alert branches', () => {
+      const query = withAliases();
+      expect(query.indexOf('WHERE _index == "e"')).toBeGreaterThan(
+        query.indexOf('(NOT _index == "e") AND `kibana.alert.entity.id` IS NULL')
+      );
+    });
+
+    it('tells an alert row from the other rows, and adds the extra aggregations', () => {
+      const query = withAliases();
+      expect(query).toContain('| EVAL is_alert_row = `kibana.alert.severity` IS NOT NULL');
+      expect(query).toContain(
+        '| STATS has_severe_alert = MAX(is_severe_alert), has_alert = MAX(is_alert_row), alias_watchlisted = MAX(alias_watchlisted) BY _ea_entity_id'
+      );
+    });
+
+    it('is unchanged without the options', () => {
+      expect(pipelineText()).not.toContain('is_alert_row');
+      expect(pipelineText()).not.toContain('_index');
     });
   });
 });

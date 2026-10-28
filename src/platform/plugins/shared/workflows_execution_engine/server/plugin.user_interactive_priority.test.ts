@@ -13,6 +13,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ExecutionStatus, type WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { WorkflowResumeNotAppliedError } from '@kbn/workflows/common/errors';
 import { WorkflowsExecutionEnginePlugin } from './plugin';
 import { getWorkflowWakeTaskId } from './workflow_task_manager/workflow_task_manager';
 
@@ -35,12 +36,14 @@ const mockBulkCreateWorkflowExecutions = jest.fn();
 const mockCreateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
 const mockGetWorkflowExecutionById = jest.fn();
 const mockUpdateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+const mockTryRevertResumeContext = jest.fn();
 jest.mock('./repositories/workflow_execution_repository', () => ({
   WorkflowExecutionRepository: jest.fn().mockImplementation(() => ({
     bulkCreateWorkflowExecutions: mockBulkCreateWorkflowExecutions,
     createWorkflowExecution: mockCreateWorkflowExecution,
     getWorkflowExecutionById: mockGetWorkflowExecutionById,
     updateWorkflowExecution: mockUpdateWorkflowExecution,
+    tryRevertResumeContext: mockTryRevertResumeContext,
   })),
 }));
 
@@ -124,7 +127,8 @@ describe('user-interactive task priority', () => {
 
     const coreStart = coreMock.createStart();
     taskManager = taskManagerMock.createStart();
-    taskManager.schedule.mockResolvedValue({ id: 'scheduled-task' } as any);
+    taskManager.schedule.mockImplementation(async (task) => task as any);
+    taskManager.bulkSchedule.mockImplementation(async (tasks) => tasks as any);
     taskManager.ensureScheduled.mockResolvedValue({ id: 'scheduled-task' } as any);
     taskManager.runSoon.mockResolvedValue({ id: 'scheduled-task', conflict: false } as any);
     pluginStart = plugin.start(coreStart, {
@@ -249,6 +253,26 @@ describe('user-interactive task priority', () => {
       expect(mockUpdateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({
           context: expect.objectContaining({ pendingInteractiveResume: true }),
+        })
+      );
+    });
+
+    it('reverts the response when the resume cannot be handed to Task Manager', async () => {
+      mockGetWorkflowExecutionById.mockResolvedValue(waitingExecution);
+      mockTryRevertResumeContext.mockResolvedValue('reverted');
+      taskManager.ensureScheduled.mockRejectedValue(new Error('the API key could not be granted'));
+      taskManager.bulkGet.mockResolvedValue([]);
+
+      await expect(
+        pluginStart.resumeWorkflowExecution('exec-hitl', 'default', { approved: true }, request)
+      ).rejects.toBeInstanceOf(WorkflowResumeNotAppliedError);
+
+      expect(taskManager.ensureScheduled).toHaveBeenCalledTimes(3);
+      expect(mockTryRevertResumeContext).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowExecutionId: 'exec-hitl',
+          spaceId: 'default',
+          resumedBy: 'test-user',
         })
       );
     });

@@ -266,11 +266,9 @@ export default function (providerContext: FtrProviderContextWithServices) {
       const recentlyUpgraded = new Date().toISOString();
       const longAgoUpgraded = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
 
-      // Agents without `policy_base_id` are agents enrolled by an older fleet-server. The agents that
-      // stay are of 8.17 on the 8.16 policy: a policy that does not match their version, which the task
-      // leaves alone unless they were upgraded in the last 30 minutes. Not of 8.18, the version the other
-      // agents are moved to: deploying that policy also schedules the reassignment of the agents of that
-      // version that were upgraded at any time, which is another selection.
+      // Agents without `policy_base_id` are agents enrolled by an older fleet-server. The agents of 8.17
+      // on the 8.16 policy, a policy that does not match their version, are moved to the 8.17 policy
+      // whenever they were upgraded. The agents of 8.16 on the 8.16 policy stay.
       const agents: Array<{
         id: string;
         policy: string;
@@ -278,6 +276,8 @@ export default function (providerContext: FtrProviderContextWithServices) {
         extra: Record<string, unknown>;
         // the policy the task leaves the agent on, undefined when it is moved to the policy of its version
         stays?: string;
+        // the minor of the policy the agent is moved to, when it is not 8.18
+        movesTo?: string;
       }> = [
         { id: 'plain', policy: policyId, version: '8.18.0', extra: {} },
         {
@@ -310,20 +310,34 @@ export default function (providerContext: FtrProviderContextWithServices) {
           policy: variant(policyId, '8.16'),
           version: '8.17.0',
           extra: { upgraded_at: longAgoUpgraded },
-          stays: variant(policyId, '8.16'),
+          movesTo: '8.17',
         },
         {
           id: 'old-upgrade-variant-with-base',
           policy: variant(policyId, '8.16'),
           version: '8.17.0',
           extra: { upgraded_at: longAgoUpgraded, policy_base_id: policyId },
-          stays: variant(policyId, '8.16'),
+          movesTo: '8.17',
         },
         {
           id: 'variant-never-upgraded',
           policy: variant(policyId, '8.16'),
           version: '8.17.0',
           extra: {},
+          movesTo: '8.17',
+        },
+        {
+          id: 'matching-variant',
+          policy: variant(policyId, '8.16'),
+          version: '8.16.1',
+          extra: { upgraded_at: longAgoUpgraded },
+          stays: variant(policyId, '8.16'),
+        },
+        {
+          id: 'matching-variant-with-base',
+          policy: variant(policyId, '8.16'),
+          version: '8.16.1',
+          extra: { policy_base_id: policyId },
           stays: variant(policyId, '8.16'),
         },
         {
@@ -367,10 +381,10 @@ export default function (providerContext: FtrProviderContextWithServices) {
 
         // the selected agents are moved to the policy of their version
         await retry.tryForTime(60000, async () => {
-          for (const { id, policy, stays } of agents) {
+          for (const { id, policy, stays, movesTo = '8.18' } of agents) {
             if (stays !== undefined) continue;
             const base = policy.split(AGENT_POLICY_VERSION_SEPARATOR)[0];
-            expect((await getAgent(id)).policy_id).to.be(variant(base, '8.18'));
+            expect((await getAgent(id)).policy_id).to.be(variant(base, movesTo));
           }
         });
 
@@ -391,6 +405,23 @@ export default function (providerContext: FtrProviderContextWithServices) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
       }
+    });
+
+    it('should not move OpAMP collectors', async () => {
+      // collectors get no policy action to acknowledge, so a moved collector would stay updating
+      await createAgentDoc(providerContext, 'agent1', policyId, '8.18.0');
+      await createAgentDoc(providerContext, 'collector', policyId, '8.18.0', true, {
+        type: 'OPAMP',
+      });
+      await waitForTask();
+
+      await retry.tryForTime(30000, async () => {
+        const agent = await getAgent('agent1');
+        expect(agent.policy_id).to.be(`${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`);
+      });
+
+      // the collectors are left on the policy, in the same run of the task
+      expect((await getAgent('collector')).policy_id).to.be(policyId);
     });
 
     it('should handle agents with unparseable/invalid version gracefully', async () => {
@@ -582,6 +613,13 @@ export default function (providerContext: FtrProviderContextWithServices) {
       const staleVariantId = `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}7.17`;
       const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
 
+      // Create an agent already assigned to the stale variant (simulates a downlevel enrolled agent).
+      // policy_base_id is set so the deploy path can also find it via getAgentAssignedVersionsForPolicies.
+      // Indexed before the variant document so no sweep can observe the variant with zero agents.
+      await createAgentDoc(providerContext, 'agent-stale', staleVariantId, '7.17.0', true, {
+        policy_base_id: policyId,
+      });
+
       await es.index({
         index: '.fleet-policies',
         id: `${staleVariantId}:1`,
@@ -593,12 +631,6 @@ export default function (providerContext: FtrProviderContextWithServices) {
           data: { id: staleVariantId, revision: 1, inputs: [], agent: { monitoring: {} } },
         },
         refresh: 'wait_for',
-      });
-
-      // Create an agent already assigned to the stale variant (simulates a downlevel enrolled agent).
-      // policy_base_id is set so the deploy path can also find it via getAgentAssignedVersionsForPolicies.
-      await createAgentDoc(providerContext, 'agent-stale', staleVariantId, '7.17.0', true, {
-        policy_base_id: policyId,
       });
 
       await waitForTask();
