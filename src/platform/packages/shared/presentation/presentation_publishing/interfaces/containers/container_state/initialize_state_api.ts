@@ -26,37 +26,19 @@ export const initializeStateApi = <StateType extends object = object>({
   defaultState,
   serializeState,
   anyStateChange$,
-  normalizeSerializedState,
 }: Omit<HasSerializableState<StateType>, 'latestState$'> &
   HasUniqueId &
   HasParentApi & {
     getComparators: () => StateComparators<StateType>;
     defaultState?: Partial<StateType>;
-    /**
-     * Rewrites serialized state the way the embeddable does when it loads it, so
-     * `compareSerializedState` compares what the embeddable would show.
-     */
-    normalizeSerializedState?: (state: StateType) => StateType;
   }): PublishesUnsavedChanges &
   HasSerializableState<StateType> &
   ComparesSerializedState<StateType> => {
-  const normalize = (state: Partial<StateType> | undefined) =>
-    state && normalizeSerializedState
-      ? normalizeSerializedState(state as StateType)
-      : (state as StateType | undefined);
-
   const compareSerializedState = (
     baseline: Partial<StateType> | undefined,
     current: Partial<StateType> | undefined,
     getLogLabel?: (key: string) => string
-  ) =>
-    areComparatorsEqual(
-      getComparators(),
-      normalize(baseline),
-      normalize(current),
-      defaultState,
-      getLogLabel
-    );
+  ) => areComparatorsEqual(getComparators(), baseline, current, defaultState, getLogLabel);
 
   const latestState$ = anyStateChange$.pipe(
     debounceTime(0), // combine all state changes
