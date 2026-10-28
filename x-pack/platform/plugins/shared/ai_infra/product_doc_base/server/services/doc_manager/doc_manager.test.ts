@@ -698,7 +698,7 @@ describe('DocumentationManager', () => {
       let now = 1_000_000;
       const nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
       // Each wait consumes up to 30 minutes of the fake clock
-      waitUntilTaskCompletedMock.mockImplementation(async ({ timeout }) => {
+      waitUntilTaskCompletedMock.mockImplementation(async ({ timeout = 0 }) => {
         now += Math.min(timeout, 30 * MINUTE);
       });
       docInstallClient.getInstallationStatus
