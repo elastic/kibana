@@ -45,6 +45,7 @@ export interface RuleCreateOptionsFlyoutProps {
   onCreateEsqlRule: () => void;
   onCreateWithAgent: () => void;
   onCreateThresholdRule?: () => void;
+  onBuildSequence?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
   /**
    * Shared EUI flyout history key. When set, this flyout is the first entry of a stacked
@@ -64,6 +65,7 @@ export const RuleCreateOptionsFlyout = ({
   onCreateEsqlRule,
   onCreateWithAgent,
   onCreateThresholdRule,
+  onBuildSequence,
   legacyRuleTypes,
   historyKey,
   retainOnCascade = false,
@@ -154,6 +156,7 @@ export const RuleCreateOptionsFlyout = ({
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
           onCreateThresholdRule={onCreateThresholdRule}
+          onBuildSequence={onBuildSequence}
           legacyRuleTypes={legacyRuleTypes}
         />
       </EuiFlyoutBody>

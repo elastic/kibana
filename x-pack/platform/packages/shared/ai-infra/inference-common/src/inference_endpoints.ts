@@ -35,6 +35,7 @@ export const defaultInferenceEndpoints = {
   KIBANA_DEFAULT_CHAT_COMPLETION: '.anthropic-claude-4.6-sonnet-chat_completion',
   OPENAI_GPT_5_2: '.openai-gpt-5.2-chat_completion',
   OPENAI_GPT_5_4: '.openai-gpt-5.4-chat_completion',
+  OPENAI_GPT_6_LUNA_PRO: '.openai-gpt-6-luna-pro-chat_completion',
   OPENAI_GPT_OSS_120B: '.openai-gpt-oss-120b-chat_completion',
   ANTHROPIC_CLAUDE_4_6_OPUS: '.anthropic-claude-4.6-opus-chat_completion',
   ANTHROPIC_CLAUDE_4_6_SONNET: '.anthropic-claude-4.6-sonnet-chat_completion',
@@ -87,6 +88,13 @@ export interface EisInferenceEndpointCapabilities {
   context_window?: {
     max_input_tokens?: number;
     max_output_tokens?: number;
+  };
+  /**
+   * Present only when this endpoint rejects caller-authored messages.
+   * The only value is `required`. An omitted block means templates are optional.
+   */
+  templates?: {
+    policy: 'required';
   };
 }
 

@@ -108,12 +108,45 @@ export const CHILD_ROWS_COLUMNS = getColumnsWithout(
   'entity.relationships.resolution.resolved_to'
 );
 
-const getEnrichers = (columns: readonly EuiDataGridColumn[]): readonly PageEnricher[] =>
-  columns.flatMap(({ id }) => getQuerySpec(id)?.enricher ?? []);
+/**
+ * Whether the user can read each source the page queries: `undefined` while its check loads, and
+ * `true` when the check fails, so the page still works.
+ */
+export interface ReadAccess {
+  alerts?: boolean;
+  risk?: boolean;
+  anomalies?: boolean;
+  cases?: boolean;
+}
 
-/** Enrichers of the columns each kind of row shows. */
-export const PAGE_ENRICHERS: Readonly<Record<RowsMode | 'child', readonly PageEnricher[]>> = {
-  resolved: getEnrichers(RESOLVED_ROWS_COLUMNS),
-  individual: getEnrichers(INDIVIDUAL_ROWS_COLUMNS),
-  child: getEnrichers(CHILD_ROWS_COLUMNS),
+const SOURCE_COLUMNS: Readonly<Record<keyof ReadAccess, readonly GridColumnId[]>> = {
+  alerts: ['alert_count', 'last_seen_alert'],
+  risk: ['risk_score_change'],
+  anomalies: ['anomaly_count'],
+  cases: ['case_count'],
 };
+
+/** The columns whose sources the user can read; a source still being checked shows none yet. */
+export const getReadableColumns = (
+  columns: readonly EuiDataGridColumn[],
+  readAccess: ReadAccess
+): readonly EuiDataGridColumn[] => {
+  const hidden = (Object.keys(SOURCE_COLUMNS) as Array<keyof ReadAccess>).flatMap((source) =>
+    readAccess[source] ? [] : SOURCE_COLUMNS[source]
+  );
+  return columns.filter(({ id }) => !isOneOf(hidden, id));
+};
+
+const ROWS_MODE_COLUMNS: Readonly<Record<RowsMode, readonly EuiDataGridColumn[]>> = {
+  resolved: RESOLVED_ROWS_COLUMNS,
+  individual: INDIVIDUAL_ROWS_COLUMNS,
+};
+
+/** Enrichers of the columns a view shows, so a column the user can't read runs no query. */
+export const getPageEnrichers = (
+  rowsMode: RowsMode,
+  columnIds: readonly string[]
+): readonly PageEnricher[] =>
+  ROWS_MODE_COLUMNS[rowsMode].flatMap(({ id }) =>
+    columnIds.includes(id) ? getQuerySpec(id)?.enricher ?? [] : []
+  );

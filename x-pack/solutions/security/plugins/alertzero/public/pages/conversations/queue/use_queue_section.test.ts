@@ -66,6 +66,24 @@ describe('useCategoryQueueSection load-more failures', () => {
     expect(result.current.hasLoadMoreError).toBe(true);
   });
 
+  it('exposes the failed Show more error, for its telemetry class', async () => {
+    const error = new Error('nope');
+    mockPages.mockReturnValue(pagesQuery({ fetchNextPage: jest.fn().mockRejectedValue(error) }));
+
+    const { result } = renderHook(() => useCategoryQueueSection('respond'), { wrapper });
+    await act(async () => result.current.loadMore());
+
+    expect(result.current.loadMoreError).toBe(error);
+  });
+
+  it('exposes no Show more error before one fails', () => {
+    mockPages.mockReturnValue(pagesQuery());
+
+    const { result } = renderHook(() => useCategoryQueueSection('respond'), { wrapper });
+
+    expect(result.current.loadMoreError).toBeUndefined();
+  });
+
   it('stays quiet when it was a poll that failed, which nobody asked for', () => {
     // React Query keeps the loaded rows and sets `error` when a background
     // refetch fails, which is indistinguishable from a failed next page.

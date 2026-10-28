@@ -76,6 +76,7 @@ const TABLE_CAPTION = i18n.translate('xpack.securitySolution.attackDiscovery.cas
 export const AttackTabContent: React.FC<CommonAttachmentListViewProps> = ({
   caseData,
   searchTerm,
+  onRemove,
 }) => {
   const attachments = useMemo<AttackCaseAttachmentRow[]>(
     () =>
@@ -113,7 +114,7 @@ export const AttackTabContent: React.FC<CommonAttachmentListViewProps> = ({
     );
   }
 
-  return <AttackTabTable attachments={attachments} searchTerm={searchTerm} />;
+  return <AttackTabTable attachments={attachments} searchTerm={searchTerm} onRemove={onRemove} />;
 };
 
 AttackTabContent.displayName = 'AttackTabContent';
@@ -122,9 +123,11 @@ AttackTabContent.displayName = 'AttackTabContent';
 const AttackTabTable = ({
   attachments,
   searchTerm,
+  onRemove,
 }: {
   attachments: AttackCaseAttachmentRow[];
   searchTerm: CommonAttachmentListViewProps['searchTerm'];
+  onRemove: CommonAttachmentListViewProps['onRemove'];
 }) => {
   const { http, storage } = useKibana().services;
   const { isAssistantEnabled } = useAssistantAvailability();
@@ -278,11 +281,27 @@ const AttackTabTable = ({
     );
   }, [areAllRowsSelected, selectableRows]);
 
+  const onRemoveAttack = useMemo(
+    () =>
+      onRemove != null ? (attackId: string) => onRemove({ attachmentIds: [attackId] }) : undefined,
+    [onRemove]
+  );
+
+  const onRemoveSelected = useMemo(
+    () =>
+      onRemove != null
+        ? (selectedAttackIds: string[]) =>
+            onRemove({ attachmentIds: selectedAttackIds }, { onSuccess: clearSelection })
+        : undefined,
+    [clearSelection, onRemove]
+  );
+
   const cellContext = useMemo<AttackGridCellContextValue>(
     () => ({
       areAllRowsSelected,
       canInvestigateInTimeline,
       investigateAttackInTimeline,
+      onRemoveAttack,
       rows,
       selectableRowCount: selectableRows.length,
       selectedRowCount,
@@ -294,6 +313,7 @@ const AttackTabTable = ({
       areAllRowsSelected,
       canInvestigateInTimeline,
       investigateAttackInTimeline,
+      onRemoveAttack,
       rows,
       selectableRows.length,
       selectedRowCount,
@@ -322,6 +342,7 @@ const AttackTabTable = ({
             <AttackTabBulkActions
               areAllAttacksSelected={areAllRowsSelected}
               onActionSuccess={clearSelection}
+              onRemove={onRemoveSelected}
               onToggleSelectAll={toggleAllRowsSelected}
               selectedAttacks={selectedAttacks}
               totalAttacks={selectableRows.length}
@@ -333,6 +354,7 @@ const AttackTabTable = ({
     [
       areAllRowsSelected,
       clearSelection,
+      onRemoveSelected,
       selectableRows.length,
       selectedAttacks,
       toggleAllRowsSelected,

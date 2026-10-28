@@ -15,6 +15,12 @@ export const ADDED_DASHBOARD = i18n.translate('xpack.cases.caseView.dashboard.ad
   defaultMessage: 'added dashboard',
 });
 
+export const DASHBOARDS_COUNT = (count: number) =>
+  i18n.translate('xpack.cases.caseView.dashboard.dashboardsCount', {
+    defaultMessage: '{count, plural, one {# dashboard} other {# dashboards}}',
+    values: { count },
+  });
+
 export const REMOVED_DASHBOARD = i18n.translate('xpack.cases.caseView.dashboard.removedDashboard', {
   defaultMessage: 'removed dashboard',
 });

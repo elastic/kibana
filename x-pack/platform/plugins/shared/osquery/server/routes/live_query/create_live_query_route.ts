@@ -135,6 +135,13 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
             return response.forbidden();
           }
 
+          // Investigation guides embed inline SQL and never name a pack or saved query. A denied
+          // reference must not be recovered here, or the action document would attribute the run
+          // to an object the caller cannot read.
+          if (request.body.pack_id?.trim() || request.body.saved_query_id?.trim()) {
+            return response.forbidden();
+          }
+
           try {
             const justifyingAlert = alertData;
             const investigationGuide = justifyingAlert?.['kibana.alert.rule.note'];
