@@ -84,6 +84,8 @@ describe('createInvestigateEpisodeAction', () => {
     jest.clearAllMocks();
     mockUseInvestigateAlert.mockReturnValue({
       ...ebtProps,
+      hasInvestigation: false,
+      isStarting: false,
       showInvestigateAction: true,
       showInvestigateButton: true,
       showViewInvestigation: false,
@@ -129,6 +131,8 @@ describe('createInvestigateEpisodeAction', () => {
     const handleInvestigate = jest.fn();
     mockUseInvestigateAlert.mockReturnValue({
       ...ebtProps,
+      hasInvestigation: false,
+      isStarting: false,
       showInvestigateAction: true,
       showInvestigateButton: true,
       showViewInvestigation: false,
@@ -185,6 +189,8 @@ describe('createInvestigateEpisodeAction', () => {
     const action = createInvestigateEpisodeAction();
     mockUseInvestigateAlert.mockReturnValue({
       ...ebtProps,
+      hasInvestigation: true,
+      isStarting: false,
       showInvestigateAction: true,
       showInvestigateButton: false,
       showViewInvestigation: false,
@@ -219,6 +225,8 @@ describe('createInvestigateEpisodeAction', () => {
     const markInvestigationViewed = jest.fn();
     mockUseInvestigateAlert.mockReturnValue({
       ...ebtProps,
+      hasInvestigation: true,
+      isStarting: false,
       showInvestigateAction: true,
       showInvestigateButton: false,
       showViewInvestigation: true,
@@ -250,6 +258,8 @@ describe('createInvestigateEpisodeAction', () => {
     const markInvestigationViewed = jest.fn();
     mockUseInvestigateAlert.mockReturnValue({
       ...ebtProps,
+      hasInvestigation: true,
+      isStarting: false,
       showInvestigateAction: true,
       showInvestigateButton: true,
       showViewInvestigation: true,
@@ -286,6 +296,8 @@ describe('createInvestigateEpisodeAction', () => {
     const action = createInvestigateEpisodeAction();
     mockUseInvestigateAlert.mockReturnValue({
       ...ebtProps,
+      hasInvestigation: false,
+      isStarting: false,
       showInvestigateAction: false,
       showInvestigateButton: false,
       showViewInvestigation: false,
