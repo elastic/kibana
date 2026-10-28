@@ -192,6 +192,10 @@ export class MyPlugin implements Plugin {
 
 `get$` never errors. When a poll fails, {{kib}} skips that poll and keeps the last value. The observable completes when {{kib}} stops.
 
+The first read uses the client's saved objects client. Later polls share one read per space on each {{kib}} node, which may use another subscriber's client.
+
+A subscription doesn't end with the request that created it. Inside a route handler, prefer `get()`. To follow changes while the request is open, subscribe before responding and use `takeUntil(request.events.completed$)`. `completed$` never fires for fake requests.
+
 `get$` throws if the setting was registered with `getValue`, because that default depends on the request. Read those settings with `get(key, { request })`.
 
 ## Client-side usage [client-side-usage]
