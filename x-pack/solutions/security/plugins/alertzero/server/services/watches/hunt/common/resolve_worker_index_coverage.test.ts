@@ -158,6 +158,28 @@ describe('resolveWorkerIndexCoverage', () => {
       await expect(run()).resolves.toMatchObject({ unreadable_by_worker: [] });
     });
 
+    it('keeps a project-qualified miss on Serverless even when the local role covers its pattern', async () => {
+      const { esClient, run } = setup({
+        universe: ['logs-*', 'linked:logs-*'],
+        callerResolves: resolved('logs-x', 'linked:logs-x'),
+        sweep: {
+          scope: sweepScope({
+            index_patterns: ['logs-*', 'linked:logs-*'],
+            missing: ['linked:logs-*'],
+          }),
+        },
+      });
+      esClient.security.queryRole.mockResolvedValue({
+        roles: [
+          { name: 'alertzero_threat_hunt', indices: [{ names: ['logs-*'], privileges: ['read'] }] },
+        ],
+      } as never);
+      await expect(run({ isServerless: true })).resolves.toMatchObject({
+        source: 'last_sweep',
+        unreadable_by_worker: ['linked:logs-*'],
+      });
+    });
+
     it('applies the plain subtraction when the role is unreadable', async () => {
       const { run } = setup({
         callerResolves: resolved('logs-x', 'custom-a'),

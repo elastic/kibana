@@ -131,7 +131,11 @@ export const resolveWorkerIndexCoverage = async ({
           const role = await readRole();
           if (role) {
             const uncovered = uncoveredPatterns({ role, patterns: universe, isServerless });
-            sweepMissing = sweepMissing.filter((pattern) => uncovered.includes(pattern));
+            // On Serverless the local role cannot show that a project-qualified miss is stale: the
+            // linked project may not be searchable by the worker whatever `logs-*` grants locally.
+            sweepMissing = sweepMissing.filter(
+              (pattern) => uncovered.includes(pattern) || (isServerless && pattern.includes(':'))
+            );
           }
         } catch (err) {
           logger.warn(

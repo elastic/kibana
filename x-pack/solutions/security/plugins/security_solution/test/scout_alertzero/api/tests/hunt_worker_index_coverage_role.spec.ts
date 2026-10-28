@@ -45,6 +45,7 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ apiServices, samlAuth, apiClient, esClient }) => {
       await apiServices.spaces.create({ id: SPACE, name: SPACE });
+      await apiServices.spaces.setSolutionView({ id: SPACE, solution: 'security' });
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminHeaders = withHuntHeaders(cookieHeader);
       await enableAlertZeroInSpace({ apiClient, headers: adminHeaders, spaceId: SPACE });
@@ -107,7 +108,8 @@ apiTest.describe(
 
     apiTest(
       'is role_unreadable for a caller without read_security',
-      async ({ samlAuth, apiClient }) => {
+      async ({ samlAuth, apiClient, esClient }) => {
+        await esClient.index({ index: CUSTOM_INDEX, document: document(), refresh: true });
         const { cookieHeader } = await samlAuth.asInteractiveUser(ALERTZERO_READ_NO_SECURITY_ROLE);
 
         const response = await apiClient.get(spaceUrl(HUNT_WORKER_INDEX_COVERAGE_URL, SPACE), {

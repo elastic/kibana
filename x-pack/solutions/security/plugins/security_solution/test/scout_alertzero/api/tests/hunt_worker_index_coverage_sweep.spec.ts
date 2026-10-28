@@ -10,21 +10,24 @@ import { ALERTZERO_WORKERS_URL, HUNT_WORKER_INDEX_COVERAGE_URL } from '@kbn/aler
 import { expect } from '@kbn/scout-security/api';
 import {
   apiTest,
+  readSupplyStatus,
   runCleanupSteps,
   setDefaultIndexInSpace,
   setHuntEnabled,
+  setSupplyWorkflowEnabled,
   setupHuntPrerequisites,
   spaceUrl,
   tags,
   waitForFinishedSweepGate,
   withHuntHeaders,
 } from '../fixtures';
-import type { HuntPrerequisites } from '../fixtures';
+import type { HuntPrerequisites, SupplyWorkflowKey } from '../fixtures';
 
 const RUN = Date.now();
 const SPACE = `hunt-cov-sweep-${RUN}`;
 const CUSTOM_PATTERN = `custom-edr-b-${RUN}-*`;
 const CUSTOM_INDEX = `custom-edr-b-${RUN}-1`;
+const DEPLOYMENT_SUPPLY_KEYS: readonly SupplyWorkflowKey[] = ['ingest', 'enrich'];
 const HUNT_WORKER_ID_FRAGMENT = 'hunt-continuous-threat-hunt';
 
 interface WorkerRow {
@@ -46,9 +49,11 @@ apiTest.describe(
   () => {
     let adminHeaders: Record<string, string>;
     let prerequisites: HuntPrerequisites;
+    const initialSupplyEnabled: Partial<Record<SupplyWorkflowKey, boolean>> = {};
 
     apiTest.beforeAll(async ({ apiServices, samlAuth, apiClient, esClient }) => {
       await apiServices.spaces.create({ id: SPACE, name: SPACE });
+      await apiServices.spaces.setSolutionView({ id: SPACE, solution: 'security' });
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminHeaders = withHuntHeaders(cookieHeader);
       await esClient.index({
@@ -61,6 +66,13 @@ apiTest.describe(
         headers: adminHeaders,
         spaceId: SPACE,
       });
+      // Enabling Hunt turns the deployment-wide ingest and enrich workflows on, and disabling it
+      // turns them off when no other space hunts. Record them so afterAll puts them back.
+      const baseline = await readSupplyStatus(apiClient, adminHeaders, SPACE);
+      expect(baseline.statusCode).toBe(200);
+      for (const key of DEPLOYMENT_SUPPLY_KEYS) {
+        initialSupplyEnabled[key] = baseline.body.workflows.find((row) => row.key === key)?.enabled;
+      }
       await setDefaultIndexInSpace({
         apiClient,
         headers: adminHeaders,
@@ -75,6 +87,27 @@ apiTest.describe(
           name: 'disable the hunt worker',
           run: () =>
             setHuntEnabled({ apiClient, headers: adminHeaders, spaceId: SPACE, enabled: false }),
+        },
+        {
+          name: 'restore deployment supply rows',
+          run: async () => {
+            const after = await readSupplyStatus(apiClient, adminHeaders, SPACE);
+            for (const key of DEPLOYMENT_SUPPLY_KEYS) {
+              const initial = initialSupplyEnabled[key];
+              const current =
+                after.statusCode === 200
+                  ? after.body.workflows.find((row) => row.key === key)
+                  : undefined;
+              if (initial !== undefined && current?.installed && current.enabled !== initial) {
+                await setSupplyWorkflowEnabled({
+                  apiClient,
+                  headers: adminHeaders,
+                  key,
+                  enabled: initial,
+                });
+              }
+            }
+          },
         },
         {
           name: 'delete the custom index',
