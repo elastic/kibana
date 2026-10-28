@@ -244,7 +244,7 @@ describe('floor_alert_triage_review — live revision', () => {
     expect(evalExpr(expr, { inputs, steps: { get_live_revision: {} } })).toEqual(['a']);
   });
 
-  it('re-tags the live alerts and the ones the review started with, so removed alerts are not stranded', () => {
+  it('passes the live alerts and the ones the review started with, so removed alerts are not stranded', () => {
     const expr = stepByName('resolve_retag_alerts')?.with?.retag_alert_ids as string;
     // a and b started the review, an analyst removed b, and c joined later
     expect(
@@ -271,7 +271,6 @@ describe('floor_alert_triage_review — live revision', () => {
 describe('floor_alert_triage_review — kibana.SetAlertTags calls', () => {
   it('send both tag lists, so none is rejected by the route', () => {
     const calls = allSteps.filter((step) => step.type === 'kibana.SetAlertTags');
-    expect(calls.length).toBeGreaterThan(0);
     calls.forEach((step) => {
       const tags = step.with?.tags as Record<string, unknown>;
       expect({ step: step.name, add: Array.isArray(tags?.tags_to_add) }).toEqual({
@@ -320,15 +319,15 @@ describe('floor_alert_triage_review — dismiss mapping', () => {
     expect(evaluateDismissedTag(undefined)).toBe('az:inconclusive');
   });
 
-  it('retag_dismissed_chunk never removes the tag it adds', () => {
-    const tags = stepByName('retag_dismissed_chunk')?.with?.tags as {
-      tags_to_remove?: string[];
-      tags_to_add?: string[];
-    };
-
-    expect(tags?.tags_to_remove).toEqual(['az:false_positive', 'az:model_fp']);
-    // dismissed_tag is a variable, so check the value it resolves to.
-    expect(tags?.tags_to_remove).not.toContain(evaluateDismissedTag(undefined));
+  it('only a dismissal removes az:model_fp, because a human disagreed with the verdict', () => {
+    expect(stepByName('retag_dismissed_alerts')?.with?.drop_model_fp).toBe(true);
+    [
+      'retag_approved_leftovers',
+      'retag_dismissed_read_failed',
+      'retag_expired_alerts',
+      'retag_unknown_alerts',
+      'retag_proposal_failed',
+    ].forEach((name) => expect(stepByName(name)?.with?.drop_model_fp).toBeUndefined());
   });
 });
 
@@ -464,147 +463,36 @@ describe('floor_alert_triage_review — post_comment_outcome_dismissed', () => {
 });
 
 // ---------------------------------------------------------------------------
-// retag_dismissed_alerts — per-alert tag-update failures are counted, not
-// silently swallowed by `continue: true` on the tag steps
+// The re-tag step: failures are counted, not swallowed by `continue: true`
 // ---------------------------------------------------------------------------
 
-describe('floor_alert_triage_review — retag_dismissed_alerts failure tracking', () => {
-  it('initializes the failure counter alongside the dismissed_tag mapping', () => {
-    const mapStep = stepByName('map_dismiss_reason_to_tag');
-    expect(mapStep?.with?.failed_retag_count).toBe(0);
+describe('floor_alert_triage_review — re-tag failure tracking', () => {
+  it('initializes the failure counter once, for every outcome', () => {
+    expect(stepByName('resolve_retag_alerts')?.with?.failed_retag_count).toBe(0);
   });
 
-  it('retries retag_dismissed_chunk, then continues past a persistent failure', () => {
-    const retag = stepByName('retag_dismissed_chunk');
-
+  it('retries the re-tag step, then continues past a persistent failure', () => {
+    const retag = stepByName('retag_dismissed_alerts');
+    expect(retag?.type).toBe('alertzero.triage.retagProposalAlerts');
     expect(retag?.['on-failure']?.retry?.['max-attempts']).toBe(3);
     expect(retag?.['on-failure']?.continue).toBe(true);
   });
 
-  // `continue: true` on a foreach exits the whole loop at the first inner failure, so the
-  // remaining candidates would never be re-tagged and the shortfall counters would never run.
-  it('does not put continue on the loop itself, which would abandon the remaining candidates', () => {
-    const loop = stepByName('retag_dismissed_alerts');
-
-    expect(loop?.['on-failure']).toBeUndefined();
-  });
-
-  it('increments the counter when the tag call recorded an error', () => {
-    const recordFailure = stepByName('record_retag_step_failure');
-    expect(recordFailure?.type).toBe('data.set');
-    expect(recordFailure?.if).toBe('${{ steps.retag_dismissed_chunk.error != blank }}');
-
-    const noError = { steps: { retag_dismissed_chunk: { output: { updated: 1 } } } };
-    const failed = { steps: { retag_dismissed_chunk: { error: { message: 'x' } } } };
-
-    expect(evalExpr(recordFailure!.if!, noError)).toBe(false);
-    expect(evalExpr(recordFailure!.if!, failed)).toBe(true);
-
-    expect(
-      evalExpr(recordFailure!.with!.failed_retag_count as string, {
-        variables: { failed_retag_count: 1 },
-        foreach: { item: ['a'] },
-      })
-    ).toBe(2);
-  });
-
-  it('increments the counter when update-by-query succeeds but updates fewer alerts than requested', () => {
-    const recordPartial = stepByName('record_retag_partial_failure');
-    expect(recordPartial?.type).toBe('data.set');
-
-    const partial = {
-      steps: {
-        retag_dismissed_chunk: {
-          output: { updated: 3, failures: [{ id: 'd' }], version_conflicts: 0 },
-        },
-      },
-      foreach: { item: ['a', 'b', 'c', 'd'] },
-    };
-    const full = {
-      steps: { retag_dismissed_chunk: { output: { updated: 4, failures: [] } } },
-      foreach: { item: ['a', 'b', 'c', 'd'] },
-    };
-    const stepError = {
-      steps: { retag_dismissed_chunk: { error: { message: 'x' }, output: { updated: 2 } } },
-      foreach: { item: ['a', 'b', 'c', 'd'] },
-    };
-
-    expect(evalExpr(recordPartial!.if!, partial)).toBe(true);
-    expect(evalExpr(recordPartial!.if!, full)).toBe(false);
-    // HTTP error is owned by record_retag_step_failure — do not double-count via a stale updated.
-    expect(evalExpr(recordPartial!.if!, stepError)).toBe(false);
-
-    // Accumulator 2 + (4 requested - 3 updated) = 3.
-    expect(
-      evalExpr(recordPartial!.with!.failed_retag_count as string, {
-        variables: { failed_retag_count: 2 },
-        ...partial,
-      })
-    ).toBe(3);
-  });
-
-  it('counts every alert of a failed chunk, so the comment reports alerts rather than calls', () => {
-    const recordFailure = stepByName('record_retag_step_failure');
-    expect(
-      evalExpr(recordFailure?.with?.failed_retag_count as string, {
-        variables: { failed_retag_count: 3 },
-        foreach: { item: Array.from({ length: 500 }, (_, i) => `alert-${i}`) },
-      })
-    ).toBe(503);
-  });
-
-  it('counts only the shortfall when some alerts in the chunk updated', () => {
-    const recordPartial = stepByName('record_retag_partial_failure');
-    expect(
-      evalExpr(recordPartial?.with?.failed_retag_count as string, {
-        variables: { failed_retag_count: 0 },
-        foreach: { item: Array.from({ length: 500 }, (_, i) => `alert-${i}`) },
-        steps: { retag_dismissed_chunk: { output: { updated: 497, failures: [{}] } } },
-      })
-    ).toBe(3);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// retag_dismissed_alerts — candidates are re-tagged in bulk, not one call per alert
-// ---------------------------------------------------------------------------
-
-describe('floor_alert_triage_review — retag_dismissed_alerts chunking', () => {
-  const loop = stepByName('retag_dismissed_alerts');
-  const candidateIds = (count: number): string[] =>
-    Array.from({ length: count }, (_, i) => `alert-${i + 1}`);
-
-  const renderChunks = (ids: string[]): string[][] =>
-    JSON.parse(
-      renderString((loop?.foreach ?? '').replace(/^\$\{\{/, '{{').trim(), {
-        variables: { retag_alert_ids: ids },
-      })
+  it.each([
+    ['record_retag_failures', 'retag_dismissed_alerts'],
+    ['record_expired_retag_failures', 'retag_expired_alerts'],
+  ])('%s counts the failed alerts, or every candidate when the step failed', (name, retagName) => {
+    const expr = stepByName(name)?.with?.failed_retag_count as string;
+    const variables = { fp_candidate_count: 7 };
+    expect(evalExpr(expr, { variables, steps: { [retagName]: { output: { failed: 2 } } } })).toBe(
+      2
     );
-
-  it('iterates chunks of the candidate list rather than single ids', () => {
-    expect(loop?.type).toBe('foreach');
-    expect(loop?.foreach).toContain('variables.retag_alert_ids');
-    expect(loop?.foreach).toContain('chunk: 500');
-  });
-
-  it('passes the whole chunk as the ids of the tag call', () => {
-    expect(stepByName('retag_dismissed_chunk')?.with?.ids).toBe('${{ foreach.item }}');
-  });
-
-  it('makes one call for a typical batch instead of one per alert', () => {
-    expect(renderChunks(candidateIds(50))).toHaveLength(1);
-    expect(renderChunks(candidateIds(500))).toHaveLength(1);
-  });
-
-  it('bounds the loop at 20 iterations for the largest accepted candidate list', () => {
-    const inputs = parsed.triggers.find(({ type }) => type === 'manual')?.inputs?.properties as {
-      fp_candidate_ids: { maxItems: number };
-    };
-    const chunks = renderChunks(candidateIds(inputs.fp_candidate_ids.maxItems));
-
-    expect(chunks).toHaveLength(20);
-    expect(chunks.flat()).toEqual(candidateIds(inputs.fp_candidate_ids.maxItems));
-    chunks.forEach((chunk) => expect(chunk.length).toBeLessThanOrEqual(500));
+    expect(evalExpr(expr, { variables, steps: { [retagName]: { output: { failed: 0 } } } })).toBe(
+      0
+    );
+    expect(evalExpr(expr, { variables, steps: { [retagName]: { error: { message: 'x' } } } })).toBe(
+      7
+    );
   });
 });
 
@@ -694,42 +582,66 @@ describe('floor_alert_triage_review — proposal outcomes', () => {
     expect(branchStepNames('handle_proposal_failed')).toContain('retag_proposal_failed');
   });
 
-  it('never re-tags an approved closure, whose alerts are closed', () => {
+  // The approved alerts are closed and keep az:false_positive. What the approval did not close
+  // (an analyst removed it from the proposal) must not stay az:false_positive for good.
+  it('re-tags only what an approval did not close', () => {
+    const retag = stepByName('retag_approved_leftovers');
+    expect(branchStepNames('handle_approved')).toContain('retag_approved_leftovers');
+    expect(retag?.type).toBe('alertzero.triage.retagProposalAlerts');
+    expect(retag?.with?.exclude_alert_ids).toBe('${{ variables.live_alert_ids }}');
+  });
+
+  it('reports a failed sweep of the leftovers in the count and the comment', () => {
+    const expr = stepByName('record_approved_retag_failures')?.with?.failed_retag_count as string;
+    expect(evalExpr(expr, { steps: { retag_approved_leftovers: { output: { failed: 3 } } } })).toBe(
+      3
+    );
+    const template = (stepByName('post_comment_outcome_approved')?.with as { message: string })
+      .message;
+    const render = (context: Record<string, unknown>) =>
+      renderString(template, {
+        variables: { fp_candidate_count: 2, failed_retag_count: 0 },
+        ...context,
+      });
     expect(
-      flatten(stepByName('handle_approved')?.steps ?? []).some(
-        (step) => step.type === 'kibana.SetAlertTags'
-      )
-    ).toBe(false);
+      render({ steps: { retag_approved_leftovers: { error: { message: 'x' } }, get_proposal: {} } })
+    ).toContain('did not fully succeed');
+    expect(
+      render({
+        steps: {
+          retag_approved_leftovers: { output: { matched: 0, failed: 0 } },
+          get_proposal: {},
+        },
+      })
+    ).not.toContain('did not fully succeed');
   });
 
-  // The model's judgement must survive for Rule Tuning. Only a human dismissal removes it.
-  it.each([
-    'retag_proposal_failed',
-    'retag_dismissed_read_failed',
-    'retag_expired_alerts',
-    'retag_unknown_alerts',
-  ])('"%s" leaves az:false_positive for az:inconclusive and keeps az:model_fp', (name) => {
-    const retag = stepByName(name);
-    expect(retag?.foreach).toContain(
-      name === 'retag_proposal_failed'
-        ? 'inputs.fp_candidate_ids | chunk: 500'
-        : 'variables.retag_alert_ids | chunk: 500'
-    );
-    expect(retag?.steps?.[0].with?.tags).toEqual({
-      tags_to_remove: ['az:false_positive'],
-      tags_to_add: ['az:inconclusive'],
+  it('re-tags by the proposal tag and by id, in every outcome that uses the live revision', () => {
+    [
+      'retag_approved_leftovers',
+      'retag_dismissed_alerts',
+      'retag_dismissed_read_failed',
+      'retag_expired_alerts',
+      'retag_unknown_alerts',
+    ].forEach((name) => {
+      const retag = stepByName(name);
+      expect(retag?.type).toBe('alertzero.triage.retagProposalAlerts');
+      expect(retag?.with?.proposal_id).toContain('inputs.proposal_id');
+      expect(retag?.with?.alert_ids).toBe('${{ variables.retag_alert_ids }}');
+      expect(retag?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+      expect(retag?.['on-failure']?.continue).toBe(true);
     });
-    expect(retag?.steps?.[0]['on-failure']?.continue).toBe(true);
   });
 
-  it('tracks expiry re-tag failures the same way dismissal does', () => {
-    expect(stepByName('init_expired_retag_count')?.with?.failed_retag_count).toBe(0);
-    expect(stepByName('record_expired_retag_step_failure')?.if).toBe(
-      '${{ steps.retag_expired_alerts_call.error != blank }}'
-    );
-    expect(stepByName('record_expired_retag_partial_failure')?.if).toBe(
-      '${{ steps.retag_expired_alerts_call.error == blank and (steps.retag_expired_alerts_call.output.updated | default: 0) != foreach.item.size }}'
-    );
+  // After a collision the proposal id belongs to another batch's proposal: its alerts keep their tag.
+  it('re-tags a failed create by id only', () => {
+    const retag = stepByName('retag_proposal_failed');
+    expect(retag?.with?.proposal_id).toBeUndefined();
+    expect(retag?.with?.alert_ids).toBe('${{ inputs.fp_candidate_ids }}');
+  });
+
+  it('keeps no kibana.SetAlertTags step: the typed step does every re-tag', () => {
+    expect(allSteps.some((step) => step.type === 'kibana.SetAlertTags')).toBe(false);
   });
 
   it.each([

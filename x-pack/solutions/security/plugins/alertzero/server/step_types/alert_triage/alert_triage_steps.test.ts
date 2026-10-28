@@ -13,12 +13,14 @@ import {
   getTriageLoadAlertsStepDefinition,
   getTriageTagPatternKeysStepDefinition,
   getTriagePlanSweepStepDefinition,
+  getTriageRetagProposalAlertsStepDefinition,
 } from './alert_triage_steps';
 
 const createContext = (input: Record<string, unknown>, callKibanaApi: jest.Mock) =>
   ({
     input,
     contextManager: { callKibanaApi },
+    logger: { warn: jest.fn() },
   } as unknown as StepHandlerContext<unknown, unknown>);
 
 const taskManagerWithLag = (lagMs: number | 'fails') =>
@@ -313,5 +315,150 @@ describe('triage tag pattern keys step', () => {
         )
       )
     ).rejects.toThrow('not fully applied');
+  });
+});
+
+describe('triage retag proposal alerts step', () => {
+  const searchOf = (ids: string[]) => ({
+    status: 200,
+    headers: {},
+    body: { hits: { hits: ids.map((_id) => ({ _id })) } },
+  });
+  const tagResponse = { status: 200, headers: {}, body: { updated: 1, failures: [] } };
+
+  it('finds the open false positives by the proposal tag or by id, and swaps the tags', async () => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValueOnce(searchOf(['removed', 'listed']))
+      .mockResolvedValue(tagResponse);
+
+    const { output } = await getTriageRetagProposalAlertsStepDefinition().handler(
+      createContext(
+        { proposal_id: 'p1', alert_ids: ['listed'], exclude_alert_ids: ['closed'] },
+        callKibanaApi
+      )
+    );
+
+    const { body: search } = callKibanaApi.mock.calls[0][0];
+    expect(search.query.bool.should).toEqual([
+      { term: { 'kibana.alert.workflow_tags': 'az:proposal:p1' } },
+      { ids: { values: ['listed'] } },
+    ]);
+    expect(search.query.bool.minimum_should_match).toBe(1);
+    expect(search.query.bool.filter).toContainEqual({
+      term: { 'kibana.alert.workflow_tags': 'az:false_positive' },
+    });
+    expect(search.query.bool.must_not).toEqual([{ ids: { values: ['closed'] } }]);
+    expect(callKibanaApi.mock.calls[1][0].body).toEqual({
+      ids: ['removed', 'listed'],
+      tags: { tags_to_add: ['az:inconclusive'], tags_to_remove: ['az:false_positive'] },
+    });
+    expect(output).toEqual({ matched: 2, failed: 0 });
+  });
+
+  it('also removes az:model_fp when a human disagreed', async () => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValueOnce(searchOf(['a']))
+      .mockResolvedValue(tagResponse);
+
+    await getTriageRetagProposalAlertsStepDefinition().handler(
+      createContext({ proposal_id: 'p1', drop_model_fp: true }, callKibanaApi)
+    );
+
+    expect(callKibanaApi.mock.calls[1][0].body.tags.tags_to_remove).toEqual([
+      'az:false_positive',
+      'az:model_fp',
+    ]);
+  });
+
+  it('searches by id only when there is no proposal id', async () => {
+    const callKibanaApi = jest.fn().mockResolvedValueOnce(searchOf([]));
+
+    const { output } = await getTriageRetagProposalAlertsStepDefinition().handler(
+      createContext({ alert_ids: ['a'] }, callKibanaApi)
+    );
+
+    expect(callKibanaApi.mock.calls[0][0].body.query.bool.should).toEqual([
+      { ids: { values: ['a'] } },
+    ]);
+    expect(callKibanaApi).toHaveBeenCalledTimes(1);
+    expect(output).toEqual({ matched: 0, failed: 0 });
+  });
+
+  it('counts a failed chunk and still re-tags the others', async () => {
+    const ids = Array.from({ length: 501 }, (_, i) => `a${i}`);
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValueOnce(searchOf(ids))
+      .mockRejectedValueOnce(new Error('boom'))
+      .mockResolvedValue(tagResponse);
+
+    const { output } = await getTriageRetagProposalAlertsStepDefinition().handler(
+      createContext({ proposal_id: 'p1' }, callKibanaApi)
+    );
+
+    // The search, the two chunks, and the search that finds nothing new.
+    expect(callKibanaApi).toHaveBeenCalledTimes(4);
+    expect(output).toEqual({ matched: 501, failed: 500 });
+  });
+
+  // A fake index: the search returns up to 10,000 open alerts, and a tag call closes them to the query.
+  const indexWith = (open: Set<string>, { tagsApply = true }: { tagsApply?: boolean } = {}) =>
+    jest.fn(async ({ path, body }: { path: string; body: { ids?: string[] } }) => {
+      if (path.endsWith('/signals/search')) return searchOf([...open].slice(0, 10_000));
+      if (tagsApply) body.ids?.forEach((id) => open.delete(id));
+      return tagResponse;
+    });
+
+  it('searches again after a full page, so no alert beyond the search limit is skipped', async () => {
+    const open = new Set(Array.from({ length: 10_001 }, (_, i) => `a${i}`));
+
+    const { output } = await getTriageRetagProposalAlertsStepDefinition().handler(
+      createContext({ proposal_id: 'p1' }, indexWith(open))
+    );
+
+    expect(output).toEqual({ matched: 10_001, failed: 0 });
+    expect(open.size).toBe(0);
+  });
+
+  it('counts an alert the update left unchanged as failed, because the last search still finds it', async () => {
+    const open = new Set(['a']);
+
+    const { output } = await getTriageRetagProposalAlertsStepDefinition().handler(
+      createContext({ proposal_id: 'p1' }, indexWith(open, { tagsApply: false }))
+    );
+
+    expect(output).toEqual({ matched: 1, failed: 1 });
+  });
+
+  it('stops when a search returns only alerts it already tried, so a failing chunk cannot loop', async () => {
+    const page = Array.from({ length: 10_000 }, (_, i) => `a${i}`);
+    const callKibanaApi = jest.fn(async ({ path }: { path: string }) => {
+      if (path.endsWith('/signals/search')) return searchOf(page);
+      throw new Error('boom');
+    });
+
+    const { output } = await getTriageRetagProposalAlertsStepDefinition().handler(
+      createContext({ proposal_id: 'p1' }, callKibanaApi)
+    );
+
+    expect(output).toEqual({ matched: 10_000, failed: 10_000 });
+    expect(callKibanaApi).toHaveBeenCalledTimes(1 + 20 + 1);
+  });
+
+  it('accepts as many candidates as the review workflow does', () => {
+    const { alert_ids: alertIds } = getTriageRetagProposalAlertsStepDefinition().inputSchema.parse({
+      alert_ids: Array.from({ length: 11_000 }, (_, i) => `a${i}`),
+    });
+    expect(alertIds).toHaveLength(11_000);
+  });
+
+  it('fails when the search fails, so the review retries it', async () => {
+    await expect(
+      getTriageRetagProposalAlertsStepDefinition().handler(
+        createContext({ proposal_id: 'p1' }, jest.fn().mockRejectedValue(new Error('down')))
+      )
+    ).rejects.toThrow('down');
   });
 });

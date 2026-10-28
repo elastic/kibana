@@ -15,6 +15,7 @@ import {
   getTriageHeadroomStepDefinition,
   getTriageLoadAlertsStepDefinition,
   getTriagePlanSweepStepDefinition,
+  getTriageRetagProposalAlertsStepDefinition,
   getTriageTagPatternKeysStepDefinition,
 } from './alert_triage/alert_triage_steps';
 import { getPackageReportStepDefinition } from './package_report';
@@ -90,6 +91,7 @@ export const registerStepDefinitions = ({
   workflowsExtensions.registerStepDefinition(getTriagePlanSweepStepDefinition());
   workflowsExtensions.registerStepDefinition(getTriageLoadAlertsStepDefinition());
   workflowsExtensions.registerStepDefinition(getTriageTagPatternKeysStepDefinition());
+  workflowsExtensions.registerStepDefinition(getTriageRetagProposalAlertsStepDefinition());
   const groupingDeps = { ...grouping, getConversations, logger };
   workflowsExtensions.registerStepDefinition(
     getTriageGroupFpCandidatesStepDefinition(groupingDeps)

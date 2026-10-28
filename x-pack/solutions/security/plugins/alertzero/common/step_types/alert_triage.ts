@@ -16,8 +16,24 @@ export const TRIAGE_LOAD_ALERTS_STEP_ID = 'alertzero.triage.loadAlerts' as const
 export const TRIAGE_TAG_PATTERN_KEYS_STEP_ID = 'alertzero.triage.tagPatternKeys' as const;
 export const TRIAGE_GROUP_FP_CANDIDATES_STEP_ID = 'alertzero.triage.groupFpCandidates' as const;
 export const TRIAGE_JOIN_PROPOSAL_STEP_ID = 'alertzero.triage.joinProposal' as const;
+export const TRIAGE_RETAG_PROPOSAL_ALERTS_STEP_ID = 'alertzero.triage.retagProposalAlerts' as const;
 
 const idSchema = z.string().trim().min(1).max(256);
+
+const impactedEntityOutputSchema = () =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    type: z.enum(['host', 'user']),
+  });
+
+// Bounded on input only: an output is built from alert fields, and a long one must not fail the step.
+const impactedEntityInputSchema = () =>
+  z.object({
+    id: z.string().max(512),
+    name: z.string().max(512),
+    type: z.enum(['host', 'user']),
+  });
 
 /** The longest sweep interval the Worker settings accept: `WorkerScheduleInterval` is at most five digits and a unit, so `99999d`. */
 const MAX_INTERVAL_MINUTES = 99_999 * 24 * 60;
@@ -201,7 +217,7 @@ const groupFpCandidatesInputSchema = lazySchema(() =>
     autonomy: z.enum(['manual', 'supervised']),
     space_id: idSchema.describe('Space of the alerts. It is part of every key hash.'),
     impacted_entities: z
-      .array(z.object({ id: z.string(), name: z.string(), type: z.enum(['host', 'user']) }))
+      .array(impactedEntityInputSchema())
       .max(100)
       .optional()
       .describe('Entities the analysis found. Each new proposal keeps those its alerts name.'),
@@ -233,9 +249,7 @@ const groupFpCandidatesOutputSchema = lazySchema(() =>
           kind: z.enum(['keyed', 'pooled', 'overflow', 'failed_join', 'batch']),
           title: z.string(),
           comment: z.string(),
-          impacted_entities: z.array(
-            z.object({ id: z.string(), name: z.string(), type: z.enum(['host', 'user']) })
-          ),
+          impacted_entities: z.array(impactedEntityOutputSchema()),
         })
       )
       .describe('New proposals, one review each.'),
@@ -252,7 +266,7 @@ const groupFpCandidatesOutputSchema = lazySchema(() =>
             .string()
             .describe('Query string of the Alerts page link that shows just the added alerts.'),
           impacted_entities: z
-            .array(z.object({ id: z.string(), name: z.string(), type: z.enum(['host', 'user']) }))
+            .array(impactedEntityOutputSchema())
             .describe('Entities the added alerts name, for the owner Investigation.'),
         })
       )
@@ -266,7 +280,7 @@ const groupFpCandidatesOutputSchema = lazySchema(() =>
     proposals_created: z.number(),
     missing_alert_ids: z.array(z.string()).describe('Ids that no longer match an alert.'),
     other_impacted_entities: z
-      .array(z.object({ id: z.string(), name: z.string(), type: z.enum(['host', 'user']) }))
+      .array(impactedEntityOutputSchema())
       .describe('Entities that the alerts in `other_alert_ids` name. Empty if none could be read.'),
     inconclusive_alerts_page_query: z
       .string()
@@ -336,4 +350,58 @@ export const triageJoinProposalStepCommonDefinition: CommonStepDefinition<
   stability: 'tech_preview',
   inputSchema: joinProposalInputSchema,
   outputSchema: joinProposalOutputSchema,
+};
+
+const retagProposalAlertsInputSchema = lazySchema(() =>
+  z
+    .object({
+      proposal_id: idSchema
+        .optional()
+        .describe('Root id of the proposal. Open alerts tagged `az:proposal:<id>` are re-tagged.'),
+      alert_ids: z
+        .array(idSchema)
+        .max(20_000)
+        .optional()
+        .describe('Alerts to re-tag as well, for those that may lack the proposal tag.'),
+      exclude_alert_ids: z
+        .array(idSchema)
+        .max(10_000)
+        .optional()
+        .describe('Alerts to leave alone, such as the ones an approved proposal just closed.'),
+      drop_model_fp: z
+        .boolean()
+        .optional()
+        .describe('Also remove `az:model_fp`, when a human disagreed with the verdict.'),
+    })
+    .refine(({ proposal_id: proposalId, alert_ids: alertIds }) => proposalId || alertIds?.length, {
+      message: 'Either proposal_id or alert_ids is required',
+    })
+);
+
+const retagProposalAlertsOutputSchema = lazySchema(() =>
+  z.object({
+    matched: z.number().describe('Open alerts that still carried `az:false_positive`.'),
+    failed: z.number().describe('Alerts whose re-tag failed.'),
+  })
+);
+
+export const triageRetagProposalAlertsStepCommonDefinition: CommonStepDefinition<
+  typeof retagProposalAlertsInputSchema,
+  typeof retagProposalAlertsOutputSchema
+> = {
+  id: TRIAGE_RETAG_PROPOSAL_ALERTS_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageRetagProposalAlerts.label', {
+    defaultMessage: 'Re-tag the alerts a proposal left behind',
+  }),
+  description: i18n.translate(
+    'xpack.alertzero.workflows.steps.triageRetagProposalAlerts.description',
+    {
+      defaultMessage:
+        'Re-tags open alerts of a proposal that are still false positives as inconclusive, whether or not the proposal still lists them.',
+    }
+  ),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: retagProposalAlertsInputSchema,
+  outputSchema: retagProposalAlertsOutputSchema,
 };

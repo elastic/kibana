@@ -12,8 +12,10 @@ import {
   triageHeadroomStepCommonDefinition,
   triageLoadAlertsStepCommonDefinition,
   triagePlanSweepStepCommonDefinition,
+  triageRetagProposalAlertsStepCommonDefinition,
   triageTagPatternKeysStepCommonDefinition,
 } from '../../../common/step_types/alert_triage';
+import { TAG_CHUNK_SIZE } from '../../alert_triage/constants';
 import { readHeadroom } from '../../alert_triage/headroom';
 import { planKeyTags } from '../../alert_triage/key_tags';
 import { planSweep, tagInChunks } from '../../alert_triage/plan_sweep';
@@ -21,6 +23,7 @@ import type { HeadroomResult } from '../../alert_triage/types';
 import {
   countAgedOutAlerts,
   fetchTriageAlerts,
+  findLeftoverFalsePositiveIds,
   listLiveExecutionIds,
   loadAlertsByIds,
   readWorkflowRunLagMs,
@@ -188,6 +191,55 @@ export const getTriageTagPatternKeysStepDefinition = () =>
         };
       } catch (error) {
         throw toApiError(error, 'tag triage alerts with their pattern keys');
+      }
+    },
+  });
+
+export const getTriageRetagProposalAlertsStepDefinition = () =>
+  createServerStepDefinition({
+    ...triageRetagProposalAlertsStepCommonDefinition,
+    handler: async ({ input, contextManager, logger }) => {
+      try {
+        const query = {
+          proposalTag: input.proposal_id ? `az:proposal:${input.proposal_id}` : undefined,
+          ids: input.alert_ids ?? [],
+          excludeIds: input.exclude_alert_ids ?? [],
+        };
+        const write = tagAlerts(contextManager);
+        const remove = input.drop_model_fp
+          ? ['az:false_positive', 'az:model_fp']
+          : ['az:false_positive'];
+        const seen = new Set<string>();
+        const failedIds = new Set<string>();
+        // Re-tagged alerts leave the query, so searching again finds the rest of a full page. The
+        // loop ends on a search with nothing new. What that search still finds was attempted and
+        // did not change (a version conflict or a skipped update), so it counts as failed too.
+        for (;;) {
+          const page = await findLeftoverFalsePositiveIds(contextManager, query);
+          const fresh = page.filter((id) => !seen.has(id));
+          if (fresh.length === 0) {
+            page.forEach((id) => failedIds.add(id));
+            break;
+          }
+          fresh.forEach((id) => seen.add(id));
+          // A chunk that fails must not stop the others, so each one is counted.
+          for (let start = 0; start < fresh.length; start += TAG_CHUNK_SIZE) {
+            const ids = fresh.slice(start, start + TAG_CHUNK_SIZE);
+            try {
+              await write({ alertIds: ids, add: ['az:inconclusive'], remove });
+            } catch (error) {
+              ids.forEach((id) => failedIds.add(id));
+              logger.warn(
+                `Re-tagging ${ids.length} alert(s) of proposal ${
+                  input.proposal_id ?? '(by id)'
+                } failed: ${error instanceof Error ? error.message : String(error)}`
+              );
+            }
+          }
+        }
+        return { output: { matched: seen.size, failed: failedIds.size } };
+      } catch (error) {
+        throw toApiError(error, 're-tag the alerts of a triage proposal');
       }
     },
   });
