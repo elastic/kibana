@@ -19,6 +19,8 @@ export interface ArtifactFormCommentsProps {
    */
   onChange: (comments: CreateCommentsArray) => void;
   onErrorChange: (hasError: boolean) => void;
+  /** Disables the new comment text area. */
+  isDisabled?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -29,7 +31,7 @@ const getExistingComments = (item: ArtifactFormComponentProps['item']): Comments
  * Lists the existing comments of an artifact and lets the user add a new one.
  */
 export const ArtifactFormComments = memo<ArtifactFormCommentsProps>(
-  ({ item, onChange, onErrorChange, 'data-test-subj': dataTestSubj }) => {
+  ({ item, onChange, onErrorChange, isDisabled = false, 'data-test-subj': dataTestSubj }) => {
     const [existingComments] = useState(() => getExistingComments(item));
     const [newComment, setNewComment] = useState('');
 
@@ -48,6 +50,7 @@ export const ArtifactFormComments = memo<ArtifactFormCommentsProps>(
           newCommentValue={newComment}
           newCommentOnChange={handleOnNewCommentChange}
           setCommentError={onErrorChange}
+          isDisabled={isDisabled}
         />
       </div>
     );

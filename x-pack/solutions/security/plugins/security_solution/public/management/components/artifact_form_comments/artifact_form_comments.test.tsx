@@ -96,6 +96,12 @@ describe('ArtifactFormComments', () => {
     expect(onChange).toHaveBeenLastCalledWith([]);
   });
 
+  it('disables the comment input when isDisabled is true', () => {
+    render({ isDisabled: true });
+
+    expect(getCommentInput()).toBeDisabled();
+  });
+
   it('reports an error when the new comment is too long', () => {
     render();
 

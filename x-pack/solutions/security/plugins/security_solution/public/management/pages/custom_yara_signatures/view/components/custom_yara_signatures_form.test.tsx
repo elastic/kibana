@@ -249,6 +249,12 @@ describe('Custom YARA signatures form', () => {
       );
     });
 
+    it('should disable the comment input when the form is disabled', () => {
+      render(createProps({ disabled: true }));
+
+      expect(screen.getByLabelText('Comment Input')).toBeDisabled();
+    });
+
     it('should list existing comments when editing', () => {
       const item = new ExceptionsListItemGenerator('seed').generateCustomYaraSignature({
         comments: [

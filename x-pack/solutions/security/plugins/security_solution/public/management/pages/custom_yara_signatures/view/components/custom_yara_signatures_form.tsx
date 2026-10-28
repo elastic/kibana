@@ -474,6 +474,7 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
           onChange={handleOnCommentsChange}
           onErrorChange={setHasCommentError}
           data-test-subj={getTestId('comments')}
+          isDisabled={disabled}
         />
       </EuiForm>
     );
