@@ -29,14 +29,16 @@ const renderAtPath = (path: string) => {
 };
 
 describe('EntityInventoryApp', () => {
-  it('renders the page shell and title for the entity type of the current route', () => {
+  it('renders the page shell and title for the entity category of the current route', () => {
     renderAtPath('/hosts');
 
     expect(screen.getByTestId('entityInventoryPageShell')).toHaveAttribute(
-      'data-entity-type',
+      'data-entity-category',
       'hosts'
     );
-    const hostsPage = ENTITY_INVENTORY_PAGES.find(({ entityType }) => entityType === 'hosts');
+    const hostsPage = ENTITY_INVENTORY_PAGES.find(
+      ({ entityCategory }) => entityCategory === 'hosts'
+    );
     expect(screen.getByRole('heading', { name: hostsPage?.title })).toBeInTheDocument();
     expect(screen.getByTestId('mockSearchBar')).toBeInTheDocument();
     expect(screen.getByTestId('entityInventoryPlaceholder')).toHaveTextContent(
@@ -49,7 +51,7 @@ describe('EntityInventoryApp', () => {
 
     expect(history.location.pathname).toBe('/all-resources');
     expect(screen.getByTestId('entityInventoryPageShell')).toHaveAttribute(
-      'data-entity-type',
+      'data-entity-category',
       'all'
     );
   });
@@ -69,7 +71,7 @@ describe('renderApp', () => {
     expect(core.rendering.addContext).toHaveBeenCalledTimes(1);
     expect(
       params.element.querySelector('[data-test-subj="entityInventoryPageShell"]')
-    ).toHaveAttribute('data-entity-type', 'kubernetes');
+    ).toHaveAttribute('data-entity-category', 'kubernetes');
 
     act(() => unmount());
 

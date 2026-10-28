@@ -21,7 +21,7 @@ const renderSearchHook = () => {
   const core = coreMock.createStart();
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <KibanaContextProvider services={core}>
-      <EntityInventorySearchProvider entityType="kubernetes">
+      <EntityInventorySearchProvider entityCategory="kubernetes">
         {children}
       </EntityInventorySearchProvider>
     </KibanaContextProvider>
@@ -33,10 +33,10 @@ const renderSearchHook = () => {
 const kuery = (query: string) => ({ language: 'kuery', query });
 
 describe('EntityInventorySearchProvider', () => {
-  it('exposes the default search state and the entity type', () => {
+  it('exposes the default search state and the entity category', () => {
     const { result } = renderSearchHook();
 
-    expect(result.current.entityType).toBe('kubernetes');
+    expect(result.current.entityCategory).toBe('kubernetes');
     expect(result.current.query).toEqual(kuery(''));
     expect(result.current.filters).toEqual([]);
     expect(result.current.dateRange).toEqual(DEFAULT_TIME_RANGE);

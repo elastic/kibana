@@ -12,7 +12,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import type { EntityInventoryEntityType } from '../../types';
+import type { EntityInventoryEntityCategory } from '../../types';
 import { ENTITY_INVENTORY_APP_NAME } from '../constants';
 import { EntityInventorySearchProvider } from '../context/entity_inventory_search_context';
 import { MAX_TIME_RANGE_HINT, SEARCH_BAR_PLACEHOLDERS } from '../translations';
@@ -40,13 +40,13 @@ const lastSearchBarProps = (): StatefulSearchBarProps => {
   return calls[calls.length - 1][0];
 };
 
-const renderSearchBar = (entityType: EntityInventoryEntityType = 'all') => {
+const renderSearchBar = (entityCategory: EntityInventoryEntityCategory = 'all') => {
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
   unifiedSearch.ui.SearchBar = MockSearchBar;
 
   return render(
     <KibanaContextProvider services={{ ...coreMock.createStart(), unifiedSearch }}>
-      <EntityInventorySearchProvider entityType={entityType}>
+      <EntityInventorySearchProvider entityCategory={entityCategory}>
         <EntityInventorySearchBar />
       </EntityInventorySearchProvider>
     </KibanaContextProvider>
@@ -83,11 +83,11 @@ describe('EntityInventorySearchBar', () => {
   });
 
   it.each(['all', 'hosts', 'kubernetes'] as const)(
-    'uses the %s placeholder for the entity type',
-    (entityType) => {
-      renderSearchBar(entityType);
+    'uses the %s placeholder for the entity category',
+    (entityCategory) => {
+      renderSearchBar(entityCategory);
 
-      expect(lastSearchBarProps().placeholder).toBe(SEARCH_BAR_PLACEHOLDERS[entityType]);
+      expect(lastSearchBarProps().placeholder).toBe(SEARCH_BAR_PLACEHOLDERS[entityCategory]);
     }
   );
 

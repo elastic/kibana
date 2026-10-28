@@ -10,7 +10,7 @@ import { render, screen, within } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import type { EntityInventoryEntityType } from '../../types';
+import type { EntityInventoryEntityCategory } from '../../types';
 import { useEntityInventorySearch } from '../context/entity_inventory_search_context';
 import { EntityInventoryPageShell } from './entity_inventory_page_shell';
 
@@ -25,16 +25,16 @@ const renderWithServices = (ui: React.ReactElement) => {
   );
 };
 
-const EntityTypeReader = () => {
-  const { entityType } = useEntityInventorySearch();
-  return <span data-test-subj="entityTypeReader">{entityType}</span>;
+const EntityCategoryReader = () => {
+  const { entityCategory } = useEntityInventorySearch();
+  return <span data-test-subj="entityCategoryReader">{entityCategory}</span>;
 };
 
 describe('EntityInventoryPageShell', () => {
   it('renders the search bar, secondary controls and content slot', () => {
     renderWithServices(
       <EntityInventoryPageShell
-        entityType="all"
+        entityCategory="all"
         secondaryControls={<div data-test-subj="secondaryControl" />}
       >
         <div data-test-subj="slotContent" />
@@ -51,25 +51,25 @@ describe('EntityInventoryPageShell', () => {
   });
 
   it('omits the secondary controls row when none are provided', () => {
-    renderWithServices(<EntityInventoryPageShell entityType="all" />);
+    renderWithServices(<EntityInventoryPageShell entityCategory="all" />);
 
     expect(screen.queryByTestId('entityInventorySecondaryControls')).not.toBeInTheDocument();
   });
 
-  it.each(['all', 'hosts', 'kubernetes'] as EntityInventoryEntityType[])(
-    'renders for the %s entity type and exposes it to content via context',
-    (entityType) => {
+  it.each(['all', 'hosts', 'kubernetes'] as EntityInventoryEntityCategory[])(
+    'renders for the %s entity category and exposes it to content via context',
+    (entityCategory) => {
       renderWithServices(
-        <EntityInventoryPageShell entityType={entityType}>
-          <EntityTypeReader />
+        <EntityInventoryPageShell entityCategory={entityCategory}>
+          <EntityCategoryReader />
         </EntityInventoryPageShell>
       );
 
       expect(screen.getByTestId('entityInventoryPageShell')).toHaveAttribute(
-        'data-entity-type',
-        entityType
+        'data-entity-category',
+        entityCategory
       );
-      expect(screen.getByTestId('entityTypeReader')).toHaveTextContent(entityType);
+      expect(screen.getByTestId('entityCategoryReader')).toHaveTextContent(entityCategory);
     }
   );
 });

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { EntityInventoryEntityType } from './types';
+import type { EntityInventoryEntityCategory } from './types';
 
 export const ENTITY_INVENTORY_TITLE = i18n.translate('xpack.entityInventoryApp.appTitle', {
   defaultMessage: 'Entity Inventory',
@@ -21,7 +21,7 @@ export const ENTITY_INVENTORY_TITLE = i18n.translate('xpack.entityInventoryApp.a
 export const ENTITY_INVENTORY_PAGES = [
   {
     deepLinkId: 'allResources',
-    entityType: 'all' satisfies EntityInventoryEntityType,
+    entityCategory: 'all' satisfies EntityInventoryEntityCategory,
     path: '/all-resources',
     title: i18n.translate('xpack.entityInventoryApp.pages.allResourcesTitle', {
       defaultMessage: 'All resources',
@@ -29,7 +29,7 @@ export const ENTITY_INVENTORY_PAGES = [
   },
   {
     deepLinkId: 'hosts',
-    entityType: 'hosts' satisfies EntityInventoryEntityType,
+    entityCategory: 'hosts' satisfies EntityInventoryEntityCategory,
     path: '/hosts',
     title: i18n.translate('xpack.entityInventoryApp.pages.hostsTitle', {
       defaultMessage: 'Hosts',
@@ -37,7 +37,7 @@ export const ENTITY_INVENTORY_PAGES = [
   },
   {
     deepLinkId: 'kubernetes',
-    entityType: 'kubernetes' satisfies EntityInventoryEntityType,
+    entityCategory: 'kubernetes' satisfies EntityInventoryEntityCategory,
     path: '/kubernetes',
     title: i18n.translate('xpack.entityInventoryApp.pages.kubernetesTitle', {
       defaultMessage: 'Kubernetes',

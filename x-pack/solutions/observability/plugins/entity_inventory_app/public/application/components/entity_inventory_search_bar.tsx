@@ -20,7 +20,8 @@ export const EntityInventorySearchBar = () => {
   const {
     services: { unifiedSearch },
   } = useEntityInventoryKibana();
-  const { entityType, query, filters, dateRange, setFilters, submit } = useEntityInventorySearch();
+  const { entityCategory, query, filters, dateRange, setFilters, submit } =
+    useEntityInventorySearch();
   const { dataView } = useEntityInventoryDataView();
   // SearchBar only resyncs its picker when the range props change, so remount it whenever the
   // committed range differs from the submitted one (e.g. a repeated over-limit pick).
@@ -47,7 +48,7 @@ export const EntityInventorySearchBar = () => {
           dataTestSubj="entityInventorySearchBar"
           displayStyle="inPage"
           iconType="magnify"
-          placeholder={SEARCH_BAR_PLACEHOLDERS[entityType]}
+          placeholder={SEARCH_BAR_PLACEHOLDERS[entityCategory]}
           indexPatterns={dataView ? [dataView] : undefined}
           useDefaultBehaviors={false}
           enableDateRangePicker={false}

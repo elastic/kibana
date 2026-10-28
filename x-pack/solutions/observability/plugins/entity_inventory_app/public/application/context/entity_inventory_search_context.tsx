@@ -9,7 +9,7 @@ import React, { createContext, useCallback, useContext, useMemo, useState } from
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import { UI_SETTINGS } from '@kbn/data-service';
-import type { EntityInventoryEntityType } from '../../types';
+import type { EntityInventoryEntityCategory } from '../../types';
 import { DEFAULT_TIME_RANGE, ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../constants';
 import { useEntityInventoryKibana } from '../hooks/use_kibana';
 import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_CLAMPED_TOAST_TITLE } from '../translations';
@@ -21,7 +21,7 @@ export interface EntityInventorySearchSubmitPayload {
 }
 
 export interface EntityInventorySearchContextValue {
-  entityType: EntityInventoryEntityType;
+  entityCategory: EntityInventoryEntityCategory;
   query: Query;
   filters: Filter[];
   dateRange: TimeRange;
@@ -36,10 +36,10 @@ const EntityInventorySearchContext = createContext<EntityInventorySearchContextV
 
 /** Holds the page's controlled search state; it never writes to the global query services. */
 export const EntityInventorySearchProvider = ({
-  entityType,
+  entityCategory,
   children,
 }: {
-  entityType: EntityInventoryEntityType;
+  entityCategory: EntityInventoryEntityCategory;
   children?: React.ReactNode;
 }) => {
   const {
@@ -83,8 +83,8 @@ export const EntityInventorySearchProvider = ({
   );
 
   const value = useMemo(
-    () => ({ entityType, query, filters, dateRange, setFilters, submit }),
-    [entityType, query, filters, dateRange, submit]
+    () => ({ entityCategory, query, filters, dateRange, setFilters, submit }),
+    [entityCategory, query, filters, dateRange, submit]
   );
 
   return (

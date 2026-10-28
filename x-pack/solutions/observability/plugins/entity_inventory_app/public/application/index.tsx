@@ -16,7 +16,7 @@ import { Redirect, useLocation } from 'react-router-dom';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import { ENTITY_INVENTORY_PAGES, ENTITY_INVENTORY_TITLE } from '../pages';
-import type { EntityInventoryAppStartDependencies, EntityInventoryEntityType } from '../types';
+import type { EntityInventoryAppStartDependencies, EntityInventoryEntityCategory } from '../types';
 import { EntityInventoryPageShell } from './components/entity_inventory_page_shell';
 import { ENTITY_LIST_PLACEHOLDER } from './translations';
 
@@ -44,8 +44,12 @@ const TECH_PREVIEW_BADGE: AppHeaderBadge[] = [
   },
 ];
 
-const EntityInventoryPage = ({ entityType }: { entityType: EntityInventoryEntityType }) => (
-  <EntityInventoryPageShell entityType={entityType}>
+const EntityInventoryPage = ({
+  entityCategory,
+}: {
+  entityCategory: EntityInventoryEntityCategory;
+}) => (
+  <EntityInventoryPageShell entityCategory={entityCategory}>
     <EuiText color="subdued" data-test-subj="entityInventoryPlaceholder">
       <p>{ENTITY_LIST_PLACEHOLDER}</p>
     </EuiText>
@@ -71,11 +75,11 @@ export const EntityInventoryApp = ({ core, plugins }: EntityInventoryAppProps) =
         <AppHeader title={title} badges={TECH_PREVIEW_BADGE} menu={{}} spacing="standard" />
         <EuiPageSection paddingSize="m" grow restrictWidth={false}>
           <Routes>
-            {ENTITY_INVENTORY_PAGES.map(({ entityType, path }) => (
+            {ENTITY_INVENTORY_PAGES.map(({ entityCategory, path }) => (
               <Route
                 key={path}
                 path={path}
-                render={() => <EntityInventoryPage entityType={entityType} />}
+                render={() => <EntityInventoryPage entityCategory={entityCategory} />}
               />
             ))}
             <Redirect from="/" to={DEFAULT_PAGE_PATH} />

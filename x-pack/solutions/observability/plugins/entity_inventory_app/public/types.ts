@@ -10,7 +10,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
-export type EntityInventoryEntityType = 'all' | 'hosts' | 'kubernetes';
+export type EntityInventoryEntityCategory = 'all' | 'hosts' | 'kubernetes';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityInventoryAppSetupDependencies {}

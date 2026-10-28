@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { EntityInventoryEntityType } from '../types';
+import type { EntityInventoryEntityCategory } from '../types';
 import { ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from './constants';
 
 export const TIME_RANGE_CLAMPED_TOAST_TITLE = i18n.translate(
@@ -30,7 +30,7 @@ export const MAX_TIME_RANGE_HINT = i18n.translate(
   }
 );
 
-export const SEARCH_BAR_PLACEHOLDERS: Readonly<Record<EntityInventoryEntityType, string>> = {
+export const SEARCH_BAR_PLACEHOLDERS: Readonly<Record<EntityInventoryEntityCategory, string>> = {
   all: i18n.translate('xpack.entityInventoryApp.searchBar.placeholder.all', {
     defaultMessage: 'Search resources — e.g. team:platform',
   }),

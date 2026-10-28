@@ -42,7 +42,7 @@ describe('EntityInventoryAppPlugin setup', () => {
 
     expect(
       mountParams.element.querySelector('[data-test-subj="entityInventoryPageShell"]')
-    ).toHaveAttribute('data-entity-type', 'hosts');
+    ).toHaveAttribute('data-entity-category', 'hosts');
     expect(mountParams.element.querySelector('[data-test-subj="mockSearchBar"]')).not.toBeNull();
 
     act(() => unmount());
