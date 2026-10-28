@@ -13,6 +13,9 @@ import {
   buildDecisionDocument,
   decisionId,
   groupByStrictKey,
+  hashCandidates,
+  matchDecisions,
+  readActiveDecision,
   selectDecisionKeys,
   type StrictKeyGroup,
 } from './fp_decisions';
@@ -222,5 +225,158 @@ describe('buildDecisionDocument', () => {
     }) as { attributes: Record<string, unknown> };
 
     expect(doc.attributes).not.toHaveProperty('approver');
+  });
+});
+
+describe('readActiveDecision', () => {
+  const now = Date.parse('2026-10-27T12:00:00.000Z');
+  const source = (overrides: Record<string, unknown> = {}) => ({
+    type: 'security.fp_decision',
+    expires_at: '2026-11-01T00:00:00.000Z',
+    attributes: { decision: 'false_positive' },
+    ...overrides,
+  });
+
+  it('reads a decision that has not expired', () => {
+    expect(readActiveDecision({ id: 'd', source: source(), now })).toEqual({
+      id: 'd',
+      kind: 'false_positive',
+    });
+  });
+
+  it('ignores an expired decision', () => {
+    expect(
+      readActiveDecision({
+        id: 'd',
+        source: source({ expires_at: '2026-10-27T11:59:59.000Z' }),
+        now,
+      })
+    ).toBeUndefined();
+  });
+
+  it('ignores a decision with no expiry, which is not one of ours', () => {
+    expect(
+      readActiveDecision({ id: 'd', source: source({ expires_at: undefined }), now })
+    ).toBeUndefined();
+  });
+
+  it('ignores a decision that was revoked', () => {
+    expect(
+      readActiveDecision({
+        id: 'd',
+        source: source({ governance: { lifecycle: { status: 'deleted' } } }),
+        now,
+      })
+    ).toBeUndefined();
+  });
+
+  it('ignores another type of item and a missing document', () => {
+    expect(
+      readActiveDecision({ id: 'd', source: source({ type: 'security.coverage' }), now })
+    ).toBe(undefined);
+    expect(readActiveDecision({ id: 'd', source: undefined, now })).toBeUndefined();
+  });
+});
+
+describe('matchDecisions', () => {
+  const candidate = (id: string, executable: string, severity?: string) => ({
+    id,
+    doc: processDoc(executable),
+    ...(severity ? { severity } : {}),
+  });
+  const hashOf = (executable: string) => group(executable, 1).hash;
+  const run = ({
+    candidates,
+    decisions,
+  }: {
+    candidates: ReturnType<typeof candidate>[];
+    decisions: Array<[string, Array<{ id: string; kind: 'false_positive' | 'do_not_propose' }>]>;
+  }) =>
+    matchDecisions({
+      candidates,
+      hashes: hashCandidates(candidates, 'default'),
+      decisionsByHash: new Map(decisions.map(([executable, found]) => [hashOf(executable), found])),
+      severities: ['low', 'medium'],
+    });
+
+  it('matches only the alerts with the exact pattern of the decision', () => {
+    const { wouldClose } = run({
+      candidates: [
+        candidate('a', 'C:\\Tools\\one.exe', 'low'),
+        candidate('b', 'C:\\Tools\\two.exe', 'low'),
+      ],
+      decisions: [['C:\\Tools\\one.exe', [{ id: 'd1', kind: 'false_positive' }]]],
+    });
+
+    expect(wouldClose).toEqual(new Map([['d1', ['a']]]));
+  });
+
+  it('does not match an alert of another rule revision', () => {
+    const decision = [{ id: 'd1', kind: 'false_positive' as const }];
+    const next = { id: 'a', doc: processDoc('C:\\x.exe', { 'kibana.alert.rule.revision': 4 }) };
+
+    const { wouldClose } = matchDecisions({
+      candidates: [next],
+      hashes: hashCandidates([next], 'default'),
+      decisionsByHash: new Map([[hashOf('C:\\x.exe'), decision]]),
+      severities: ['low'],
+    });
+
+    expect(wouldClose.size).toBe(0);
+  });
+
+  it('keeps high and critical alerts with a human and counts them', () => {
+    const { wouldClose, excludedBySeverity } = run({
+      candidates: [
+        candidate('a', 'C:\\x.exe', 'high'),
+        candidate('b', 'C:\\x.exe', 'critical'),
+        candidate('c', 'C:\\x.exe', 'medium'),
+      ],
+      decisions: [['C:\\x.exe', [{ id: 'd1', kind: 'false_positive' }]]],
+    });
+
+    expect(wouldClose).toEqual(new Map([['d1', ['c']]]));
+    expect(excludedBySeverity).toBe(2);
+  });
+
+  it('keeps an alert with no known severity with a human, as closing needs one to vouch for', () => {
+    const { wouldClose, excludedBySeverity } = run({
+      candidates: [candidate('a', 'C:\\x.exe')],
+      decisions: [['C:\\x.exe', [{ id: 'd1', kind: 'false_positive' }]]],
+    });
+
+    expect(wouldClose.size).toBe(0);
+    expect(excludedBySeverity).toBe(1);
+  });
+
+  it('lets a dismissal win over an approval of the same pattern', () => {
+    const { wouldClose, wouldSkip } = run({
+      candidates: [candidate('a', 'C:\\x.exe', 'low')],
+      decisions: [
+        [
+          'C:\\x.exe',
+          [
+            { id: 'approved', kind: 'false_positive' },
+            { id: 'dismissed', kind: 'do_not_propose' },
+          ],
+        ],
+      ],
+    });
+
+    expect(wouldClose.size).toBe(0);
+    expect(wouldSkip).toEqual(new Map([['dismissed', ['a']]]));
+  });
+
+  it('skips alerts with no strict key, which no decision can match', () => {
+    const cloud = { id: 'a', doc: { 'kibana.alert.rule.uuid': 'cloud', user: { name: 'u' } } };
+
+    const { wouldClose } = matchDecisions({
+      candidates: [cloud],
+      hashes: hashCandidates([cloud], 'default'),
+      decisionsByHash: new Map(),
+      severities: ['low'],
+    });
+
+    expect(wouldClose.size).toBe(0);
   });
 });

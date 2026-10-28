@@ -212,3 +212,112 @@ export const buildDecisionDocument = ({
     expires_at: new Date(now.getTime() + ttl).toISOString(),
   };
 };
+
+// ---------------------------------------------------------------------------
+// Matching
+// ---------------------------------------------------------------------------
+
+export interface StoredDecision {
+  id: string;
+  kind: FpDecisionKind;
+}
+
+/**
+ * A stored decision, if it is still in force. The Context Engine enforces expiry and lifecycle only
+ * on its query route, and the sweep reads the backing index directly, so both are checked here.
+ */
+export const readActiveDecision = ({
+  id,
+  source,
+  now,
+}: {
+  id: string;
+  source: Record<string, unknown> | undefined;
+  now: number;
+}): StoredDecision | undefined => {
+  if (source === undefined || source.type !== FP_DECISION_KI_TYPE) return undefined;
+  const lifecycle = (source.governance as { lifecycle?: { status?: string } } | undefined)
+    ?.lifecycle?.status;
+  if (lifecycle !== undefined && lifecycle !== 'active') return undefined;
+  const expiresAt = typeof source.expires_at === 'string' ? Date.parse(source.expires_at) : NaN;
+  // An item with no expiry would never lapse. Decisions always set one, so one without it is not ours.
+  if (!(expiresAt > now)) return undefined;
+  const kind = (source.attributes as { decision?: string } | undefined)?.decision;
+  return kind === 'false_positive' || kind === 'do_not_propose' ? { id, kind } : undefined;
+};
+
+export interface MatchCandidate {
+  id: string;
+  doc: AlertDocument;
+  severity?: string;
+}
+
+export interface DecisionMatches {
+  /** Alert ids by decision id: what `on` would close. */
+  wouldClose: Map<string, string[]>;
+  /** Alert ids by decision id: alerts of a pattern an analyst dismissed. */
+  wouldSkip: Map<string, string[]>;
+  /** Matches of a false positive decision that the severity guard keeps with a human. */
+  excludedBySeverity: number;
+}
+
+/** The strict key hash of each candidate that has one. */
+export const hashCandidates = (
+  candidates: readonly MatchCandidate[],
+  spaceId: string
+): Map<string, string> => {
+  const hashes = new Map<string, string>();
+  for (const { id, doc } of candidates) {
+    const { strict } = buildPatternKeys(doc);
+    if (strict !== undefined) hashes.set(id, hashKey(spaceId, strict));
+  }
+  return hashes;
+};
+
+/**
+ * Which candidates an active decision matches. The match is the exact strict key hash, which
+ * already covers the space, rule, rule revision, detection and condition, so a decision never
+ * applies to another rule, another revision or a neighbouring file.
+ *
+ * - A dismissal wins over an approval of the same pattern: the later human act is the safe one.
+ * - A false positive match only counts when the alert's severity may be auto-closed. An alert with
+ *   no known severity stays with a human: closing without a model needs a severity to vouch for.
+ */
+export const matchDecisions = ({
+  candidates,
+  hashes,
+  decisionsByHash,
+  severities,
+}: {
+  candidates: readonly MatchCandidate[];
+  hashes: ReadonlyMap<string, string>;
+  decisionsByHash: ReadonlyMap<string, readonly StoredDecision[]>;
+  severities: readonly string[];
+}): DecisionMatches => {
+  const matches: DecisionMatches = {
+    wouldClose: new Map(),
+    wouldSkip: new Map(),
+    excludedBySeverity: 0,
+  };
+  const add = (map: Map<string, string[]>, id_: string, alertId: string) =>
+    map.set(id_, [...(map.get(id_) ?? []), alertId]);
+
+  for (const { id, severity } of candidates) {
+    const hash = hashes.get(id);
+    const decisions = hash === undefined ? undefined : decisionsByHash.get(hash);
+    if (decisions === undefined || decisions.length === 0) continue;
+    const dismissal = decisions.find(({ kind }) => kind === 'do_not_propose');
+    if (dismissal !== undefined) {
+      add(matches.wouldSkip, dismissal.id, id);
+      continue;
+    }
+    const approval = decisions.find(({ kind }) => kind === 'false_positive');
+    if (approval === undefined) continue;
+    if (severity === undefined || !severities.includes(severity)) {
+      matches.excludedBySeverity++;
+    } else {
+      add(matches.wouldClose, approval.id, id);
+    }
+  }
+  return matches;
+};
