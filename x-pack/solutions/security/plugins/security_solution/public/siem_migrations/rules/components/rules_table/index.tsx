@@ -349,12 +349,11 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [prebuiltRules]
     );
 
-    const getMigrationRuleData = useCallback(
-      (ruleId: string) => {
-        if (!isRulesLoading && migrationRules.length) {
-          const migrationRule = migrationRules.find((item) => item.id === ruleId);
+    const getRuleIntegrations = useCallback(
+      (migrationRule: RuleMigrationRule) => {
+        if (!isRulesLoading) {
           let relatedIntegrations: RelatedIntegration[] = [];
-          const integrationIds = migrationRule?.elastic_rule?.integration_ids;
+          const integrationIds = migrationRule.elastic_rule?.integration_ids;
           if (integrations && integrationIds) {
             relatedIntegrations = integrationIds
               .map((integrationId) => integrations[integrationId])
@@ -363,7 +362,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
           return { relatedIntegrations, isIntegrationsLoading };
         }
       },
-      [integrations, isIntegrationsLoading, isRulesLoading, migrationRules]
+      [integrations, isIntegrationsLoading, isRulesLoading]
     );
 
     const {
@@ -413,7 +412,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       disableActions: isTableLoading,
       openMigrationRuleDetails: openRulePreview,
       installMigrationRule: installSingleRule,
-      getMigrationRuleData,
+      getRuleIntegrations,
     });
 
     return (
