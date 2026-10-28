@@ -61,11 +61,12 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
           request: {
             query: schema.object({
               pageSize: schema.number({ defaultValue: 20, min: 1, max: 100 }),
-              nextPage: schema.maybe(schema.string()),
-              kuery: schema.maybe(schema.string()),
-              userIds: schema.maybe(schema.string()),
+              nextPage: schema.maybe(schema.string({ maxLength: 4096 })),
+              kuery: schema.maybe(schema.searchFilter()),
+              userIds: schema.maybe(schema.string({ maxLength: 10_000 })),
               sourceFilters: schema.maybe(
                 schema.string({
+                  maxLength: 64,
                   validate: (value) => {
                     const tokens = value.split(',').filter(Boolean);
                     const invalid = tokens.filter((t) => !VALID_SOURCE_FILTERS.has(t));
@@ -77,9 +78,9 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                   },
                 })
               ),
-              startDate: schema.maybe(schema.string()),
-              endDate: schema.maybe(schema.string()),
-              tags: schema.maybe(schema.string()),
+              startDate: schema.maybe(schema.string({ maxLength: 64 })),
+              endDate: schema.maybe(schema.string({ maxLength: 64 })),
+              tags: schema.maybe(schema.string({ maxLength: 10_000 })),
               sortDirection: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
                 defaultValue: 'desc',
               }),

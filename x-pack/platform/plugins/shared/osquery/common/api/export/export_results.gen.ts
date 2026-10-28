@@ -38,6 +38,7 @@ export const ExportRequestBody = lazySchema(() =>
       */
       kuery: z
         .string()
+        .max(10000)
         .nullable()
         .optional()
         .describe(
@@ -48,7 +49,7 @@ export const ExportRequestBody = lazySchema(() =>
 
       */
       agentIds: z
-        .array(z.string())
+        .array(z.string().max(1024))
         .nullable()
         .optional()
         .describe(

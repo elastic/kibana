@@ -31,6 +31,7 @@ paths:
           schema:
             description: 'A base64-encoded cursor for pagination. Use the value from the previous response to fetch the next page.'
             type: string
+            maxLength: 4096
         - name: kuery
           in: query
           required: false
@@ -38,6 +39,7 @@ paths:
           schema:
             description: 'A search string to filter history entries by pack name, query text, or query ID.'
             type: string
+            maxLength: 10000
         - name: userIds
           in: query
           required: false
@@ -46,6 +48,7 @@ paths:
             description: 'Comma-separated list of user IDs to filter live query history.'
             example: 'elastic,admin'
             type: string
+            maxLength: 10000
         - name: sourceFilters
           in: query
           required: false
@@ -54,6 +57,7 @@ paths:
             description: 'Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.'
             example: 'live,scheduled'
             type: string
+            maxLength: 64
         - name: startDate
           in: query
           required: false
@@ -62,6 +66,7 @@ paths:
             description: 'The start of the time range filter (ISO 8601).'
             example: '2024-01-01T00:00:00Z'
             type: string
+            maxLength: 64
         - name: endDate
           in: query
           required: false
@@ -70,6 +75,7 @@ paths:
             description: 'The end of the time range filter (ISO 8601).'
             example: '2024-12-31T23:59:59Z'
             type: string
+            maxLength: 64
       responses:
         '200':
           description: Indicates a successful call.

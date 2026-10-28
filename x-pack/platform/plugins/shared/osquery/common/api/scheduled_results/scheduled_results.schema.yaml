@@ -22,6 +22,7 @@ paths:
           schema:
             description: 'The schedule ID of the scheduled query.'
             type: string
+            maxLength: 1024
             example: 'pack_my_pack_uptime'
         - name: executionCount
           in: path
@@ -36,7 +37,11 @@ paths:
           required: false
           description: 'The kuery to filter the results by.'
           schema:
-            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/KueryOrUndefined'
+            description: 'The kuery to filter the results by.'
+            example: 'agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13'
+            type: string
+            maxLength: 10000
+            nullable: true
         - name: page
           in: query
           required: false
@@ -54,7 +59,12 @@ paths:
           required: false
           description: 'The field that is used to sort the results.'
           schema:
-            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
+            description: 'The field that is used to sort the results.'
+            example: 'agent.name'
+            default: '@timestamp'
+            type: string
+            maxLength: 256
+            nullable: true
         - name: sortOrder
           in: query
           required: false
@@ -115,6 +125,7 @@ paths:
           schema:
             description: 'The schedule ID of the scheduled query.'
             type: string
+            maxLength: 1024
             example: 'pack_my_pack_uptime'
         - name: executionCount
           in: path
@@ -129,7 +140,11 @@ paths:
           required: false
           description: 'The kuery to filter the results by.'
           schema:
-            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/KueryOrUndefined'
+            description: 'The kuery to filter the results by.'
+            example: 'agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13'
+            type: string
+            maxLength: 10000
+            nullable: true
         - name: page
           in: query
           required: false
@@ -147,7 +162,12 @@ paths:
           required: false
           description: 'The field that is used to sort the results.'
           schema:
-            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
+            description: 'The field that is used to sort the results.'
+            example: 'agent.name'
+            default: '@timestamp'
+            type: string
+            maxLength: 256
+            nullable: true
         - name: sortOrder
           in: query
           required: false
@@ -162,6 +182,7 @@ paths:
             description: 'The start date filter (ISO 8601) to narrow down results.'
             example: '2024-01-01T00:00:00Z'
             type: string
+            maxLength: 64
       responses:
         '200':
           description: Indicates a successful call.
@@ -203,6 +224,7 @@ paths:
           schema:
             description: 'The schedule ID of the scheduled query.'
             type: string
+            maxLength: 1024
             example: '90f342ee-9c05-4844-849b-173993234f22'
         - name: executionCount
           in: path

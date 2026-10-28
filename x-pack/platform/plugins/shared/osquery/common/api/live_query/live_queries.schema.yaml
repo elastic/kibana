@@ -213,6 +213,7 @@ paths:
           schema:
             description: 'The ID of the live query.'
             type: string
+            maxLength: 1024
             example: '3c42c847-eb30-4452-80e0-728584042334'
         - name: actionId
           in: path
@@ -221,6 +222,7 @@ paths:
           schema:
             description: 'The ID of the query action.'
             type: string
+            maxLength: 1024
             example: '609c4c66-ba3d-43fa-afdd-53e244577aa0'
         - name: format
           in: query

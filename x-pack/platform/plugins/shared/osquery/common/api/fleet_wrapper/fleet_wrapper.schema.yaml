@@ -38,6 +38,7 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 1024
       responses:
         '200':
           description: OK
@@ -76,6 +77,7 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 1024
       responses:
         '200':
           description: OK

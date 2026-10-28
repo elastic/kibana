@@ -18,7 +18,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 export const GetAgentDetailsRequestParams = lazySchema(() =>
   z.object({
-    id: z.string(),
+    id: z.string().max(1024),
   })
 );
 export type GetAgentDetailsRequestParams = z.infer<typeof GetAgentDetailsRequestParams>;
@@ -35,7 +35,7 @@ export type GetAgentPoliciesResponse = z.infer<typeof GetAgentPoliciesResponse>;
 
 export const GetAgentPolicyRequestParams = lazySchema(() =>
   z.object({
-    id: z.string(),
+    id: z.string().max(1024),
   })
 );
 export type GetAgentPolicyRequestParams = z.infer<typeof GetAgentPolicyRequestParams>;

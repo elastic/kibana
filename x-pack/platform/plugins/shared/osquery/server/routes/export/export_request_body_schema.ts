@@ -14,9 +14,9 @@ import { schema } from '@kbn/config-schema';
 export const exportRequestBodySchema = schema.nullable(
   schema.object({
     /** Optional KQL filter appended to the base action/schedule filter. */
-    kuery: schema.maybe(schema.string()),
+    kuery: schema.maybe(schema.searchFilter()),
     /** Optional agent-id allowlist. When provided only these agents' rows are exported. */
-    agentIds: schema.maybe(schema.arrayOf(schema.string())),
+    agentIds: schema.maybe(schema.arrayOf(schema.string({ maxLength: 1024 }))),
     /** Optional SearchBar filter pills serialised as a JSON array. Capped at 100 to limit DoS surface. */
     esFilters: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 100 })),
   })
@@ -31,12 +31,12 @@ export const exportQuerySchema = schema.object({
 
 /** Route params schema for the live query export route. */
 export const exportLiveQueryParamsSchema = schema.object({
-  id: schema.string(),
-  actionId: schema.string(),
+  id: schema.string({ maxLength: 1024 }),
+  actionId: schema.string({ maxLength: 1024 }),
 });
 
 /** Route params schema for the scheduled query export route. */
 export const exportScheduledQueryParamsSchema = schema.object({
-  scheduleId: schema.string(),
+  scheduleId: schema.string({ maxLength: 1024 }),
   executionCount: schema.number({ min: 0 }),
 });

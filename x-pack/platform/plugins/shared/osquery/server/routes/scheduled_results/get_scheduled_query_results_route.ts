@@ -45,19 +45,20 @@ export const getScheduledQueryResultsRoute = (
         validate: {
           request: {
             params: schema.object({
-              scheduleId: schema.string(),
+              scheduleId: schema.string({ maxLength: 1024 }),
               executionCount: schema.number(),
             }),
             query: schema.object({
               page: schema.maybe(schema.number()),
               pageSize: schema.maybe(schema.number()),
-              sort: schema.maybe(schema.string()),
+              sort: schema.maybe(schema.querySortField()),
               sortOrder: schema.maybe(
                 schema.oneOf([schema.literal('asc'), schema.literal('desc')])
               ),
-              kuery: schema.maybe(schema.string()),
-              esFilters: schema.maybe(schema.string()),
-              startDate: schema.maybe(schema.string()),
+              kuery: schema.maybe(schema.searchFilter()),
+              // Serialized filter pills repeat each value three times (meta.value, meta.params, query).
+              esFilters: schema.maybe(schema.searchFilter({ maxLength: 16_384 })),
+              startDate: schema.maybe(schema.string({ maxLength: 64 })),
             }),
           },
         },

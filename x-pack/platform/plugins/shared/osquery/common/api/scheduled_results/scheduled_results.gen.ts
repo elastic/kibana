@@ -17,10 +17,8 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
-  KueryOrUndefined,
   PageOrUndefined,
   PageSizeOrUndefined,
-  SortOrUndefined,
   SortOrderOrUndefined,
 } from '../model/schema/common_attributes.gen';
 import { GetScheduledActionResultsResponse } from './get_scheduled_action_results.gen';
@@ -47,7 +45,7 @@ export const OsqueryExportScheduledQueryResultsRequestParams = lazySchema(() =>
     /**
      * The schedule ID of the scheduled query.
      */
-    scheduleId: z.string().describe('The schedule ID of the scheduled query.'),
+    scheduleId: z.string().max(1024).describe('The schedule ID of the scheduled query.'),
     /**
      * The execution counter for the scheduled query run whose results are exported. Must be a non-negative integer.
      */
@@ -88,7 +86,12 @@ export const OsqueryGetScheduledActionResultsRequestQuery = lazySchema(() =>
     /**
      * The kuery to filter the results by.
      */
-    kuery: KueryOrUndefined.optional().describe('The kuery to filter the results by.'),
+    kuery: z
+      .string()
+      .max(10000)
+      .nullable()
+      .optional()
+      .describe('The kuery to filter the results by.'),
     /**
      * The page number to return. The default is 1.
      */
@@ -102,7 +105,13 @@ export const OsqueryGetScheduledActionResultsRequestQuery = lazySchema(() =>
     /**
      * The field that is used to sort the results.
      */
-    sort: SortOrUndefined.optional().describe('The field that is used to sort the results.'),
+    sort: z
+      .string()
+      .max(256)
+      .nullable()
+      .optional()
+      .default('@timestamp')
+      .describe('The field that is used to sort the results.'),
     /**
      * Specifies the sort order.
      */
@@ -121,7 +130,7 @@ export const OsqueryGetScheduledActionResultsRequestParams = lazySchema(() =>
     /**
      * The schedule ID of the scheduled query.
      */
-    scheduleId: z.string().describe('The schedule ID of the scheduled query.'),
+    scheduleId: z.string().max(1024).describe('The schedule ID of the scheduled query.'),
     /**
      * The execution count for this scheduled query run.
      */
@@ -146,7 +155,12 @@ export const OsqueryGetScheduledQueryResultsRequestQuery = lazySchema(() =>
     /**
      * The kuery to filter the results by.
      */
-    kuery: KueryOrUndefined.optional().describe('The kuery to filter the results by.'),
+    kuery: z
+      .string()
+      .max(10000)
+      .nullable()
+      .optional()
+      .describe('The kuery to filter the results by.'),
     /**
      * The page number to return. The default is 1.
      */
@@ -160,7 +174,13 @@ export const OsqueryGetScheduledQueryResultsRequestQuery = lazySchema(() =>
     /**
      * The field that is used to sort the results.
      */
-    sort: SortOrUndefined.optional().describe('The field that is used to sort the results.'),
+    sort: z
+      .string()
+      .max(256)
+      .nullable()
+      .optional()
+      .default('@timestamp')
+      .describe('The field that is used to sort the results.'),
     /**
      * Specifies the sort order.
      */
@@ -170,6 +190,7 @@ export const OsqueryGetScheduledQueryResultsRequestQuery = lazySchema(() =>
      */
     startDate: z
       .string()
+      .max(64)
       .optional()
       .describe('The start date filter (ISO 8601) to narrow down results.'),
   })
@@ -186,7 +207,7 @@ export const OsqueryGetScheduledQueryResultsRequestParams = lazySchema(() =>
     /**
      * The schedule ID of the scheduled query.
      */
-    scheduleId: z.string().describe('The schedule ID of the scheduled query.'),
+    scheduleId: z.string().max(1024).describe('The schedule ID of the scheduled query.'),
     /**
      * The execution count for this scheduled query run.
      */
