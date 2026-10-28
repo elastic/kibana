@@ -14,6 +14,7 @@ import {
   readStoredCustomContent,
   readStoredCustomContentFromDashboard,
   toStoredCustomContent,
+  toLoggedVisualizations,
 } from './custom_content_output';
 
 const customContentData = (overrides: Record<string, unknown> = {}) => ({
@@ -254,5 +255,27 @@ describe('getToolErrors', () => {
   it('returns nothing when no tool failed', () => {
     expect(getToolErrors(undefined)).toEqual([]);
     expect(getToolErrors([{ type: 'reasoning' }])).toEqual([]);
+  });
+});
+
+describe('toLoggedVisualizations', () => {
+  it('shows the stored panel with its query and a template excerpt', () => {
+    const [visualization] = toLoggedVisualizations(
+      { esql: 'FROM logs', template: 'x'.repeat(300), height: 320 },
+      'attachment-1'
+    );
+
+    expect(visualization).toMatchObject({
+      esql: 'FROM logs',
+      renderer: 'custom_content',
+      attachmentId: 'attachment-1',
+    });
+    expect(visualization.visualization?.height).toBe(320);
+    expect(String(visualization.visualization?.template)).toHaveLength(201);
+  });
+
+  it('shows a static panel with an empty query, and nothing when no panel was stored', () => {
+    expect(toLoggedVisualizations({ template: '<p/>' }, undefined)[0].esql).toBe('');
+    expect(toLoggedVisualizations(undefined, undefined)).toEqual([]);
   });
 });

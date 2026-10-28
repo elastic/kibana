@@ -9,8 +9,9 @@ import type { Conversation } from '@kbn/agent-builder-common';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { isRecord } from '../evaluator_utils';
-import { extractVisualizations } from '../extract_visualization';
+import { extractVisualizations, type ExtractedVisualization } from '../extract_visualization';
 
 /** A custom content panel as stored in the visualization attachment. */
 export interface StoredCustomContent {
@@ -34,6 +35,10 @@ export interface CustomContentTaskOutput {
   storedIn: 'visualization' | 'dashboard' | 'none';
   /** Tool ids the agent called, in order, for diagnosing a run that produced no panel. */
   toolIds: string[];
+  /** Tool ids of the follow-up turn alone; undefined for a single-turn example. */
+  followUpToolIds?: string[];
+  /** The stored panel in the shape the low-score log prints, whichever attachment holds it. */
+  visualizations: ExtractedVisualization[];
   /** Renderers of other visualizations the agent created instead (`lens`, `vega`). */
   otherRenderers: string[];
   agentTraceId?: string;
@@ -192,6 +197,28 @@ export const getOtherRenderers = (steps: Array<Record<string, unknown>> | undefi
 ];
 
 /** Why a run has no custom content panel, naming what the agent did instead. */
+const TEMPLATE_EXCERPT_LENGTH = 200;
+
+export const toLoggedVisualizations = (
+  stored: StoredCustomContent | undefined,
+  attachmentId: string | undefined
+): ExtractedVisualization[] =>
+  stored
+    ? [
+        {
+          esql: stored.esql ?? '',
+          renderer: 'custom_content',
+          attachmentId,
+          visualization: {
+            height: stored.height,
+            template: `${(stored.template ?? '').slice(0, TEMPLATE_EXCERPT_LENGTH)}${
+              (stored.template ?? '').length > TEMPLATE_EXCERPT_LENGTH ? '…' : ''
+            }`,
+          },
+        },
+      ]
+    : [];
+
 export const describeMissingPanel = (output: CustomContentTaskOutput): string => {
   const instead =
     output.otherRenderers.length > 0 ? ` It created: ${output.otherRenderers.join(', ')}.` : '';
@@ -206,7 +233,7 @@ export const getToolErrors = (steps: Array<Record<string, unknown>> | undefined)
       return [];
     }
     return step.results.flatMap((result: unknown) =>
-      isRecord(result) && result.type === 'error' && isRecord(result.data)
+      isRecord(result) && result.type === ToolResultType.error && isRecord(result.data)
         ? [`${String(step.tool_id)}: ${String(result.data.message ?? '').slice(0, 200)}`]
         : []
     );

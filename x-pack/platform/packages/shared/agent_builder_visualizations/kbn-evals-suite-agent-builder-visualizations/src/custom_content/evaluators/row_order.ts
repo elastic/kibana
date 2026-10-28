@@ -13,16 +13,17 @@ export const CUSTOM_CONTENT_ROW_ORDER_EVALUATOR_NAME = 'Custom Content Row Order
 
 const TEXT_TYPES = new Set(['keyword', 'text']);
 
+const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /**
- * Whether `labels` appear in `values` in order, ignoring case. A label matches any value that
- * contains it, so "Total flights" matches "1. Total Flights".
+ * Whether `labels` appear in `values` in order, ignoring case. A label matches a value that
+ * contains it as a whole word, so "total" matches "1. Total Flights" but not "Subtotal".
  */
 export const labelsInOrder = (values: string[], labels: string[]): boolean => {
   let from = 0;
   for (const label of labels) {
-    const index = values.findIndex(
-      (value, i) => i >= from && value.toLowerCase().includes(label.toLowerCase())
-    );
+    const word = new RegExp(`(?<!\\w)${escapeRegExp(label)}(?!\\w)`, 'i');
+    const index = values.findIndex((value, i) => i >= from && word.test(value));
     if (index === -1) {
       return false;
     }
@@ -65,7 +66,7 @@ export const createRowOrderEvaluator = ({
     }
 
     const { columns = [], values = [] } = result;
-    const ordered = columns.some(({ name, type }, columnIndex) => {
+    const ordered = columns.some(({ type }, columnIndex) => {
       if (!TEXT_TYPES.has(type)) {
         return false;
       }

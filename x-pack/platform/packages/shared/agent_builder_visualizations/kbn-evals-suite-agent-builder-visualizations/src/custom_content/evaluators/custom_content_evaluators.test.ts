@@ -27,6 +27,7 @@ const outputWith = (
   turns: 1,
   storedIn: 'visualization' as const,
   toolIds: [] as string[],
+  visualizations: [],
   otherRenderers: [] as string[],
   prompts: [],
   ...overrides,
@@ -182,6 +183,11 @@ describe('Custom Content Row Order', () => {
     expect(labelsInOrder(['Total', 'Delayed'], ['total', 'delayed', 'cancelled'])).toBe(false);
   });
 
+  it('matches whole words only', () => {
+    expect(labelsInOrder(['Subtotal', 'Delayed', 'Cancelled'], ['total', 'delayed'])).toBe(false);
+    expect(labelsInOrder(['Total (all)', 'Delayed'], ['total (all)', 'delayed'])).toBe(true);
+  });
+
   const expected = { data: 'query' as const, rowOrder: ['total', 'delayed', 'cancelled'] };
   const runWith = (result: {
     columns: Array<{ name: string; type: string }>;
@@ -277,6 +283,15 @@ describe('Custom Content Template Columns', () => {
     expect(result.metadata).toMatchObject({ missing: ['Error Rate'] });
   });
 
+  it('says when a template reads columns by dot access, which it does not check', async () => {
+    const result = await run(
+      withColumns(['host']),
+      outputWith({ esql: 'FROM logs', template: '<p>{{ row.host.value }}</p>' })
+    );
+    expect(result.score).toBeNull();
+    expect(result.explanation).toContain('dot access');
+  });
+
   it('skips a static panel and a template that reads no columns', async () => {
     expect((await run(withColumns([]), outputWith({ template: '<p/>' }))).score).toBeNull();
     expect(
@@ -299,6 +314,28 @@ describe('Custom Content Edit', () => {
       edit: 'style',
     });
     expect(result).toMatchObject({ score: 0, label: 'not-stored-as-edit' });
+  });
+
+  it('fails a follow-up that made no tool call, even when the stored panel has several versions', async () => {
+    const result = await run(
+      evaluator,
+      outputWith(before, { before, versionCount: 3, followUpToolIds: [] }),
+      { data: 'query', edit: 'data' }
+    );
+    expect(result).toMatchObject({ score: 0, label: 'no-follow-up-tool-call' });
+  });
+
+  it('judges the edit itself when the follow-up called a tool', async () => {
+    const result = await run(
+      evaluator,
+      outputWith(before, {
+        before,
+        versionCount: 2,
+        followUpToolIds: ['platform.dashboard.generate_dashboard'],
+      }),
+      { data: 'query', edit: 'data' }
+    );
+    expect(result).toMatchObject({ score: 0, label: 'data-edit-failed' });
   });
 
   it('passes a style edit that changes the template and keeps the query', async () => {

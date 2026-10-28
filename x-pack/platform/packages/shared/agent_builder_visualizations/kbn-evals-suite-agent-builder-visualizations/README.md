@@ -57,9 +57,9 @@ Each positive example carries a partial Lens Config API gold (`config`): chart `
 - **ES|QL Execution Validity** (`CODE`, shared) — the stored query parses and runs.
 - **Custom Content Query Contents** (`CODE`) — the final query contains the expected text (a user-supplied query verbatim, or a grouping kept across a data edit); case and whitespace are ignored.
 - **Custom Content Row Limit** (`CODE`) — with a declared limit the query ends with exactly it; otherwise only the chart default `LIMIT 10`, which truncates a board or diagram, is rejected.
-- **Custom Content Row Order** (`CODE`) — runs the query and checks that a text column lists the expected labels, as rows, in the requested order (a funnel sorted by value or returned as one wide row scores 0).
-- **Custom Content Template Columns** (`CODE`) — every `row["…"]` / `max["…"]` the template reads is a column the query returns.
-- **Custom Content Edit** (`CODE`) — the follow-up stored a new version of the same panel; a style edit changed the template and kept the query, a data edit changed the query.
+- **Custom Content Row Order** (`CODE`) — runs the query and checks that a text column lists the expected labels (whole words, ignoring case), as rows, in the requested order (a funnel sorted by value or returned as one wide row scores 0).
+- **Custom Content Template Columns** (`CODE`) — every `row["…"]` / `max["…"]` the template reads is a column the query returns. Templates that read columns with dot access (`row.col`) are not checked and are reported as skipped.
+- **Custom Content Edit** (`CODE`) — the follow-up stored a new version of the same panel; a style edit changed the template and kept the query, a data edit changed the query. A follow-up that called no tool scores 0 (`no-follow-up-tool-call`).
 - **Trajectory** and **Trace-based** — as above (tokens, latency, tool calls), which makes the cost of a custom panel repeatable.
 
 Run only this spec with `node scripts/evals run --suite agent-builder-visualizations --grep "Custom Content"`.

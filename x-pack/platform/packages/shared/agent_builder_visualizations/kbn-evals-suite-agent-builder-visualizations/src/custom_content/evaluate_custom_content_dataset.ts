@@ -27,6 +27,7 @@ import {
   getToolErrors,
   readStoredCustomContent,
   readStoredCustomContentFromDashboard,
+  toLoggedVisualizations,
   type CustomContentTaskOutput,
 } from './custom_content_output';
 import { createDataExpectationEvaluator } from './evaluators/data_expectation';
@@ -150,11 +151,13 @@ export function createEvaluateCustomContentDataset({
       }
 
       const toolIds = getToolIds({ steps });
+      const followUpToolIds = followUp ? getToolIds({ steps: last.steps ?? [] }) : undefined;
       const otherRenderers = getOtherRenderers(steps);
       log.info(
         `[custom content eval] "${(input?.question ?? '').slice(0, 60)}": stored in ${storedIn}` +
           `${otherRenderers.length > 0 ? `, also created ${otherRenderers.join('/')}` : ''}; ` +
-          `tools: ${toolIds.join(' > ')}`
+          `tools: ${getToolIds({ steps: first.steps ?? [] }).join(' > ') || '(none)'}` +
+          `${followUpToolIds ? ` | follow-up: ${followUpToolIds.join(' > ') || '(none)'}` : ''}`
       );
       getToolErrors(steps).forEach((error) =>
         log.info(`[custom content eval]   tool error: ${error}`)
@@ -165,6 +168,8 @@ export function createEvaluateCustomContentDataset({
         messages: [{ message: last.message }],
         steps,
         toolIds,
+        followUpToolIds,
+        visualizations: toLoggedVisualizations(stored.after, attachmentId),
         otherRenderers,
         after: stored.after,
         before: stored.before,

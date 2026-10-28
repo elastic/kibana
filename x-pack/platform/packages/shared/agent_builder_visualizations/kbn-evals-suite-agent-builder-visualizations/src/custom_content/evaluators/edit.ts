@@ -24,7 +24,16 @@ export const createEditEvaluator = (): CustomContentEvaluator => ({
       return skippedResult('This example is not an edit.');
     }
 
-    const { before, after, versionCount } = output;
+    const { before, after, versionCount, followUpToolIds } = output;
+    if (followUpToolIds?.length === 0) {
+      return {
+        score: 0,
+        label: 'no-follow-up-tool-call',
+        explanation:
+          'The agent answered the follow-up without calling a tool, so nothing was edited.',
+        metadata: { versionCount },
+      };
+    }
     if (!before || !after || versionCount < 2) {
       return {
         score: 0,
