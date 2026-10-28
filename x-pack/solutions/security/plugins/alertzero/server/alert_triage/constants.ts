@@ -109,3 +109,16 @@ export const GROUPED_PROPOSAL_LIST_HEADS_TERMS = 10_000;
 
 /** Feature flag that turns Alert Triage grouping off: every batch then mints its own proposal. */
 export const TRIAGE_GROUPING_FLAG = 'alertzero.triageGrouping';
+
+/**
+ * Decisions in the sweep. In `shadow` a matching alert is only tagged, and still goes through
+ * analysis. `off` is the kill switch. The default is `shadow`, so nothing is closed until a
+ * deployment is switched on explicitly.
+ */
+export const TRIAGE_DECISION_AUTO_CLOSE_FLAG = 'alertzero.triageDecisionAutoClose';
+export type DecisionAutoCloseMode = 'off' | 'shadow';
+export const TRIAGE_WOULD_CLOSE_TAG_PREFIX = 'az:would_close:';
+export const TRIAGE_WOULD_SKIP_TAG_PREFIX = 'az:would_skip:';
+
+/** Severities a decision may close. High and critical stay with a human unless a deployment opts in. */
+export const DECISION_AUTO_CLOSE_SEVERITIES: readonly string[] = ['low', 'medium'];

@@ -59,7 +59,7 @@ const createCoreStart = (indices: { putIndexTemplate: jest.Mock; exists?: jest.M
         },
       },
     },
-    featureFlags: { getBooleanValue$: () => of(true) },
+    featureFlags: { getBooleanValue$: () => of(true), getStringValue$: () => of('shadow') },
     security: { serviceAccounts: { isEnabled: () => false } },
   } as unknown as CoreStart);
 
