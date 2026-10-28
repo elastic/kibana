@@ -190,7 +190,8 @@ describe('NightshiftApp', () => {
         analytics,
         application: {
           capabilities: { nightshift: manageCapabilities },
-          getUrlForApp: () => '/app/significant_events/significant_events',
+          getUrlForApp: (appId: string, { path }: { path?: string } = {}) =>
+            `/app/${appId}${path ?? ''}`,
         },
         nightshiftInvestigations: { investigationsClient: {} },
         agenticInvestigations: { InvestigationCard },
@@ -211,6 +212,10 @@ describe('NightshiftApp', () => {
   it('renders investigations and reports the page ready metrics', () => {
     renderApp();
 
+    expect(screen.getByTestId('o11yNightshiftAppShowAllLink')).toHaveAttribute(
+      'href',
+      '/app/nightshift/detections/events'
+    );
     expect(screen.getByText('Checkout errors are elevated')).toBeInTheDocument();
     expect(screen.getByText('Investigations are underway')).toBeInTheDocument();
     expect(mockUsePageReady).toHaveBeenCalledWith(
@@ -235,7 +240,8 @@ describe('NightshiftApp', () => {
         analytics,
         application: {
           capabilities: { nightshift: manageCapabilities },
-          getUrlForApp: () => '/app/significant_events/significant_events',
+          getUrlForApp: (appId: string, { path }: { path?: string } = {}) =>
+            `/app/${appId}${path ?? ''}`,
         },
         notifications: { toasts: { addSuccess: jest.fn() } },
       },
