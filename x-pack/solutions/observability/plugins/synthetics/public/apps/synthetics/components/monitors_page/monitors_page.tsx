@@ -49,7 +49,7 @@ export const MonitorManagementPage: React.FC = () => {
   } = useOverviewStatus({
     scopeStatusByLocation: false,
   });
-  const { cpsReady, hasLinkedProjects } = useCpsLinkedProjects();
+  const { cpsReady, hasLinkedProjects, statusIncludesLinkedProjects } = useCpsLinkedProjects();
 
   const pageState = useSelector(selectOverviewPageState);
 
@@ -93,6 +93,7 @@ export const MonitorManagementPage: React.FC = () => {
     hasExternalMonitors: allConfigs.some(isExternalOverviewMonitor),
     cpsReady,
     hasLinkedProjects,
+    statusIncludesLinkedProjects,
   });
 
   if (isEnabled && !monitorsLoading && loaded && hasNoMonitors) {

@@ -24,6 +24,7 @@ import { useCanEditSynthetics } from '../../../../../hooks/use_capabilities';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useEnablement, useGetUrlParams } from '../../../hooks';
+import { useCpsLinkedProjects } from '../../../hooks/use_cps_linked_projects';
 import {
   selectAlertFlyoutVisibility,
   selectMonitorListState,
@@ -130,13 +131,17 @@ export function useSyntheticsAppHeaderMenu(
   const hasSavedMonitors = Boolean(loaded && monitors.absoluteTotal && monitors.absoluteTotal > 0);
   const hasExternalMonitors = (allConfigs ?? []).some(isExternalOverviewMonitor);
   const hasMonitors = hasSavedMonitors || hasExternalMonitors;
+  const { hasLinkedProjects, statusIncludesLinkedProjects } = useCpsLinkedProjects();
+  // Origin-only status cannot see linked-project monitors, so Getting Started
+  // stays closed. The header button is the remaining way to create one.
+  const showCreateOnUnsearchedLinks = hasLinkedProjects && !statusIncludesLinkedProjects;
 
   const { loading, defaultRules, EditAlertFlyout, NewRuleFlyout } = useSyntheticsRules(true);
   const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
   const statusRuleExists = Boolean(defaultRules?.statusRule);
   const tlsRuleExists = Boolean(defaultRules?.tlsRule);
 
-  const showCreateMonitor = enableCreateMonitor && hasMonitors;
+  const showCreateMonitor = enableCreateMonitor && (hasMonitors || showCreateOnUnsearchedLinks);
 
   const exploreHref = useMemo(
     () =>

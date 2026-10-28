@@ -15,6 +15,7 @@ const emptyOrigin = {
   hasExternalMonitors: false,
   cpsReady: true,
   hasLinkedProjects: false,
+  statusIncludesLinkedProjects: true,
 };
 
 describe('shouldRedirectToGettingStarted', () => {
@@ -48,7 +49,23 @@ describe('shouldRedirectToGettingStarted', () => {
     expect(shouldRedirectToGettingStarted({ ...emptyOrigin, cpsReady: false })).toBe(false);
   });
 
-  it('does not onboard away when linked projects exist (remotes have no local SO)', () => {
-    expect(shouldRedirectToGettingStarted({ ...emptyOrigin, hasLinkedProjects: true })).toBe(false);
+  it('does not onboard when linked projects exist but status did not search them', () => {
+    expect(
+      shouldRedirectToGettingStarted({
+        ...emptyOrigin,
+        hasLinkedProjects: true,
+        statusIncludesLinkedProjects: false,
+      })
+    ).toBe(false);
+  });
+
+  it('redirects when linked projects exist but the all-projects status is empty', () => {
+    expect(
+      shouldRedirectToGettingStarted({
+        ...emptyOrigin,
+        hasLinkedProjects: true,
+        statusIncludesLinkedProjects: true,
+      })
+    ).toBe(true);
   });
 });

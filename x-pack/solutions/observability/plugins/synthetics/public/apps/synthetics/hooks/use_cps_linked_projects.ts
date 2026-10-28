@@ -6,14 +6,21 @@
  */
 
 import { useEffect, useState } from 'react';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { kibanaService } from '../../../utils/kibana_service';
 
 /**
  * Whether CPS has finished loading the project list, and whether any linked
  * projects exist. Used so Getting Started cannot treat an origin-only empty
  * SO list as a fresh install while linked-project pings may still arrive.
+ * `_alias:*` status results do include those pings, so an empty one is a real
+ * empty install.
  */
-export const useCpsLinkedProjects = (): { cpsReady: boolean; hasLinkedProjects: boolean } => {
+export const useCpsLinkedProjects = (): {
+  cpsReady: boolean;
+  hasLinkedProjects: boolean;
+  statusIncludesLinkedProjects: boolean;
+} => {
   const cpsManager = kibanaService.startPlugins?.cps?.cpsManager;
   const [cpsReady, setCpsReady] = useState(!cpsManager);
 
@@ -37,5 +44,6 @@ export const useCpsLinkedProjects = (): { cpsReady: boolean; hasLinkedProjects: 
   return {
     cpsReady,
     hasLinkedProjects: Boolean(cpsManager?.hasLinkedProjects()),
+    statusIncludesLinkedProjects: cpsManager?.getProjectRouting() === PROJECT_ROUTING.ALL,
   };
 };
