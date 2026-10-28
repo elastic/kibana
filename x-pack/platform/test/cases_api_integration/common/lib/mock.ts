@@ -305,7 +305,7 @@ export const postCaseResp = (
 ): Partial<Case> => {
   // `template` is an optional field on the case response and is only present when the case was
   // created from a template. transformNewCase deliberately keeps an absent template absent (rather
-  // than writing `template: null`), and CaseRt models it as an optional key — so a case created
+  // than writing `template: null`), and `CaseSchema` models it as an optional key — so a case created
   // without a template has no `template` key at all. None of these mocks supply one, so it is
   // destructured out of the spread here (rather than left as `template: null`) to match the decoded
   // response: absent, not null. Destructuring also drops the request-shape `version?: number`,
