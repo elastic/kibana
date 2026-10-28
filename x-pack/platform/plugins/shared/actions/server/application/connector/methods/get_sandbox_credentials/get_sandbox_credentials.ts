@@ -64,7 +64,12 @@ export async function getSandboxCredentials(
   }
 
   // Fail closed: the credential proxy sends a secret with no hosts to any host.
-  const hosts = getConnectorSandboxHosts({ actionType, config });
+  const hosts = getConnectorSandboxHosts({
+    actionType,
+    config,
+    connectorId,
+    logger: context.logger,
+  });
   if (hosts.length === 0) {
     throw new Error(
       `Unable to get sandbox credentials for connector "${connectorId}" (${actionTypeId}): it has no valid sandbox hosts. ` +

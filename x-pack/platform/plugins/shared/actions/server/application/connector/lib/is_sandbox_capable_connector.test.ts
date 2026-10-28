@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ActionType } from '../../../types';
 import type { ActionTypeRegistry } from '../../../action_type_registry';
 import { hasSandboxCapableAuth, isSandboxCapableConnector } from './is_sandbox_capable_connector';
@@ -65,6 +66,24 @@ describe('isSandboxCapableConnector', () => {
       ).toBe(true);
     }
   );
+
+  it('returns false and logs when getSandboxHosts throws', () => {
+    const logger = loggingSystemMock.createLogger();
+    expect(
+      isSandboxCapableConnector({
+        actionTypeId: '.github',
+        connectorId: 'github-1',
+        config: { authType: 'bearer' },
+        actionTypeRegistry: createRegistry({
+          getSandboxHosts: () => {
+            throw new Error('boom');
+          },
+        }),
+        logger,
+      })
+    ).toBe(false);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('"github-1"'));
+  });
 
   it('passes the connector config to getSandboxHosts', () => {
     const getSandboxHosts = jest.fn().mockReturnValue(['cluster.example.com']);

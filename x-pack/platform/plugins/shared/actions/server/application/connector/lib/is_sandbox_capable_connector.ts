@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { ActionTypeRegistry } from '../../../action_type_registry';
 import { getConnectorSandboxHosts } from './get_connector_sandbox_hosts';
 
 interface SandboxCapableConnectorOptions {
   actionTypeId: string;
+  /** Used to name the connector in the log when its sandbox hosts cannot be resolved. */
+  connectorId?: string;
+  logger?: Logger;
   config?: Record<string, unknown>;
   /** Persisted connector lists omit secrets; credential resolution supplies validated secrets. */
   secrets?: Record<string, unknown>;
@@ -61,4 +65,6 @@ export const isSandboxCapableConnector = (options: SandboxCapableConnectorOption
   getConnectorSandboxHosts({
     actionType: options.actionTypeRegistry.get(options.actionTypeId),
     config: options.config,
+    connectorId: options.connectorId,
+    logger: options.logger,
   }).length > 0;
