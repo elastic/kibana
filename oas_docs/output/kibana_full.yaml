@@ -185130,6 +185130,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
         shipper:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
@@ -185458,6 +185459,7 @@ components:
                   required:
                     - id
                 - type: string
+              nullable: true
             ssl:
               additionalProperties: false
               type: object
@@ -185474,6 +185476,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
               required:
                 - key
         shipper:
@@ -185565,6 +185568,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
         shipper:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
@@ -185632,6 +185636,7 @@ components:
                           required:
                             - id
                         - type: string
+                      nullable: true
                     tpm:
                       additionalProperties: false
                       type: object
@@ -185648,6 +185653,7 @@ components:
                               required:
                                 - id
                             - type: string
+                          nullable: true
                         owner_auth:
                           anyOf:
                             - additionalProperties: false
@@ -185660,6 +185666,7 @@ components:
                               required:
                                 - id
                             - type: string
+                          nullable: true
         type:
           enum:
             - otlp
@@ -185743,6 +185750,7 @@ components:
                   required:
                     - id
                 - type: string
+              nullable: true
             ssl:
               additionalProperties: false
               type: object
@@ -185759,6 +185767,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
         service_token:
           nullable: true
           type: string
