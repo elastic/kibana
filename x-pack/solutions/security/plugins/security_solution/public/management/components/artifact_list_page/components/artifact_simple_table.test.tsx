@@ -302,6 +302,12 @@ describe('ArtifactSimpleTable', () => {
     expect(onChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 10 });
   });
 
+  it('invokes onChange with the last page when the current page is out of range', () => {
+    render({ items: [], pagination: { ...pagination, pageIndex: 2, totalItemCount: 20 } });
+
+    expect(onChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 10 });
+  });
+
   it('invokes onChange with sort when a sortable column header is clicked', () => {
     render();
 
