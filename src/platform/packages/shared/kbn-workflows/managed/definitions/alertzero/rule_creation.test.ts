@@ -220,6 +220,15 @@ describe('Detection Rule Creation worker', () => {
 
       const counted = render({ succeeded: true, is_aborted: false, alert_count: 4 });
       expect(counted).toContain('4 expected matches over 3 simulated runs');
+
+      const capped = render({
+        succeeded: true,
+        is_aborted: false,
+        alert_count: 300,
+        alert_limit_reached: true,
+      });
+      expect(capped).toContain('At least 300 expected matches over 3 simulated runs');
+      expect(capped).toContain('maximum alerts per execution');
     });
 
     // The preview informs the analyst; it does not gate the proposal.

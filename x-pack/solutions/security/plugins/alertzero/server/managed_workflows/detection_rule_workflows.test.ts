@@ -1561,6 +1561,84 @@ describe('detection rule workflows', () => {
         }
       });
 
+      // An invocation that stops at max_signals still counts, but the count is a floor.
+      // The verdict stays valid; the flag lets the proposal say "at least".
+      it('flags a preview that stopped at the alert limit without failing it', () => {
+        const preview = parse(getManagedYaml(ALERTZERO_RULE_PREVIEW_WORKFLOW_ID)) as WorkflowYaml;
+        const previewSteps = flattenSteps(preview.steps as unknown as NestedStep[]);
+        const byName = (name: string) => previewSteps.find((step) => step.name === name)!;
+        const emit = byName('emit_result').with as Record<string, string>;
+        const warning =
+          'This rule reached the maximum alert limit for the rule execution. Some alerts were not created.';
+
+        for (const [step, source, flag] of [
+          ['collect_errors', 'preview_rule', 'alert_limit_reached'],
+          ['collect_proposed_errors', 'preview_proposed', 'proposed_alert_limit_reached'],
+        ]) {
+          const collect = byName(step).with as Record<string, string>;
+          const render = (logs: unknown[]) =>
+            createWorkflowLiquidEngine().parseAndRenderSync(String(collect.limit_hits), {
+              steps: { [source]: { output: { logs } } },
+            });
+
+          const capped = render([
+            { errors: [], warnings: [] },
+            { errors: [], warnings: [warning] },
+          ]);
+          expect(capped).not.toBe('');
+          expect(
+            resolveExpression(emit[flag], { steps: { [step]: { output: { limit_hits: capped } } } })
+          ).toBe(true);
+          expect(
+            resolveExpression(emit[flag], {
+              steps: { [step]: { output: { limit_hits: render([{ errors: [], warnings: [] }]) } } },
+            })
+          ).toBe(false);
+        }
+        expect(emit.succeeded).not.toContain('limit_hits');
+        expect(emit.proposed_succeeded).not.toContain('limit_hits');
+      });
+
+      it('marks capped counts as a floor and never claims a reduction from one', async () => {
+        const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
+        const comment = String((compose.with as Record<string, string>).comment);
+        const report = reviewSteps.find(({ name }) => name === 'report_review_completed')!
+          .with as Record<string, string>;
+        const outcome = (limits: Record<string, boolean>) => ({
+          current_succeeded: true,
+          current_is_aborted: false,
+          current_alert_count: 200,
+          proposed_succeeded: true,
+          proposed_is_aborted: false,
+          proposed_alert_count: 120,
+          ...limits,
+        });
+
+        const rendered = await createWorkflowLiquidEngine().parseAndRender(comment, {
+          inputs: {},
+          consts: {},
+          steps: {
+            fetch_rule: { output: { type: 'query', name: 'r', id: 'id', max_signals: 100 } },
+            diagnose_rule: { output: { structured_output: { change_type: 'query' } } },
+            can_preview_query_change: { output: { supported: true } },
+            record_preview_outcome: {
+              output: outcome({ current_limit_reached: true, proposed_limit_reached: true }),
+            },
+          },
+        });
+        expect(rendered).toContain('Alerts with the current rule: at least 200');
+        expect(rendered).toContain('Alerts with the proposed change: at least 120');
+        expect(rendered).toContain('maximum alerts per execution (100)');
+
+        const reduced = (limits: Record<string, boolean>) =>
+          resolveExpression(report.backtest_reduced_alerts, {
+            steps: { record_preview_outcome: { output: outcome(limits) } },
+          });
+        expect(reduced({})).toBe(true);
+        expect(reduced({ current_limit_reached: true })).toBe(true);
+        expect(reduced({ proposed_limit_reached: true })).toBe(false);
+      });
+
       // The rule's `index`, plus `threat_index` for indicator match. An ES|QL rule
       // names its indices in the query and a data view rule in the view, so neither
       // has any to check and the probe is skipped rather than failed.

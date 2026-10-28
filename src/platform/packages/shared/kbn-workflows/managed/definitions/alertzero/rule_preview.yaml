@@ -61,6 +61,10 @@ outputs:
     type: boolean
   - name: proposed_no_matching_indices
     type: boolean
+  - name: alert_limit_reached
+    type: boolean
+  - name: proposed_alert_limit_reached
+    type: boolean
 steps:
   # The preview runs as the caller's identity, usually a worker's service account
   # whose role reads a fixed set of index patterns. An index it cannot read is
@@ -141,6 +145,14 @@ steps:
         {%- if warn contains 'Unable to find matching' -%}{{ warn }}; {% endif -%}
         {%- endfor -%}
         {%- endfor -%}
+      # Non-empty when an invocation stopped at the rule's max_signals: the count is
+      # then a floor, not the number of alerts the rule would have produced.
+      limit_hits: |-
+        {%- for log in steps.preview_rule.output.logs -%}
+        {%- for warn in log.warnings -%}
+        {%- if warn contains 'reached the maximum alert limit' -%}x{%- endif -%}
+        {%- endfor -%}
+        {%- endfor -%}
 
   # The second body runs inside this same execution on purpose: two consecutive
   # synchronous child workflows in a caller share one immediate-resume slot, and a
@@ -188,6 +200,12 @@ steps:
         {%- if warn contains 'Unable to find matching' -%}{{ warn }}; {% endif -%}
         {%- endfor -%}
         {%- endfor -%}
+      limit_hits: |-
+        {%- for log in steps.preview_proposed.output.logs -%}
+        {%- for warn in log.warnings -%}
+        {%- if warn contains 'reached the maximum alert limit' -%}x{%- endif -%}
+        {%- endfor -%}
+        {%- endfor -%}
 
   # A partial or timed-out count could report fewer alerts than the preview produced,
   # so it fails the verdict rather than understating a backtest.
@@ -221,3 +239,5 @@ steps:
       unreadable_indices: "{{ steps.resolve_privileges.output.unreadable_indices | remove_first: ', ' }}"
       no_matching_indices: "${{ steps.collect_errors.output.error_text contains 'Unable to find matching' }}"
       proposed_no_matching_indices: "${{ steps.collect_proposed_errors.output.error_text contains 'Unable to find matching' }}"
+      alert_limit_reached: "${{ steps.collect_errors.output.limit_hits != blank }}"
+      proposed_alert_limit_reached: "${{ steps.collect_proposed_errors.output.limit_hits != blank }}"

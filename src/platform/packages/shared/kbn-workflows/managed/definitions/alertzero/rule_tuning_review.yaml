@@ -901,6 +901,8 @@ steps:
       no_matching_indices: >-
         ${{ steps.run_previews.output.no_matching_indices == true
           or steps.run_previews.output.proposed_no_matching_indices == true }}
+      current_limit_reached: "${{ steps.run_previews.output.alert_limit_reached == true }}"
+      proposed_limit_reached: "${{ steps.run_previews.output.proposed_alert_limit_reached == true }}"
 
   # Diagnosis notes go to the investigation rather than into the proposal, which
   # keeps only what the decision needs. `ai.conversation.add_user_message` appends
@@ -1062,8 +1064,11 @@ steps:
         The proposed schedule ran {{ steps.compute_schedule_preview_runs.output.proposed_invocation_count }} simulated executions with interval {{ steps.diagnose_rule.output.structured_output.proposed_interval }} and lookback {{ steps.diagnose_rule.output.structured_output.proposed_from }}, over the same time span.
         {% endif %}
 
-        Alerts with the current rule: {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %}
-        Alerts with the proposed change: {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}
+        Alerts with the current rule: {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{% if steps.record_preview_outcome.output.current_limit_reached == true %}at least {% endif %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %}
+        Alerts with the proposed change: {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{% if steps.record_preview_outcome.output.proposed_limit_reached == true %}at least {% endif %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}
+        {% if steps.record_preview_outcome.output.current_limit_reached == true or steps.record_preview_outcome.output.proposed_limit_reached == true %}
+        A count marked "at least" stopped at the rule's maximum alerts per execution ({{ steps.fetch_rule.output.max_signals }}), so the real number is higher and the two counts may not be comparable.
+        {% endif %}
         {% if steps.record_preview_outcome.output.current_error_text != '' %}
         Current preview errors: {{ steps.record_preview_outcome.output.current_error_text }}
         {% endif %}
@@ -1484,7 +1489,8 @@ steps:
           and steps.propose_manual.output.decision != 'approved'
           and steps.resolve_applied.output.landed != true }}
       backtest_ran: "${{ steps.record_preview_outcome.output.current_succeeded == true and steps.record_preview_outcome.output.proposed_succeeded == true }}"
-      backtest_reduced_alerts: "${{ steps.record_preview_outcome.output.current_succeeded == true and steps.record_preview_outcome.output.proposed_succeeded == true and steps.record_preview_outcome.output.proposed_alert_count < steps.record_preview_outcome.output.current_alert_count }}"
+      # A proposed count that stopped at max_signals is a floor, so it cannot show a reduction.
+      backtest_reduced_alerts: "${{ steps.record_preview_outcome.output.current_succeeded == true and steps.record_preview_outcome.output.proposed_succeeded == true and steps.record_preview_outcome.output.proposed_limit_reached != true and steps.record_preview_outcome.output.proposed_alert_count < steps.record_preview_outcome.output.current_alert_count }}"
       rule_unavailable: "${{ steps.fetch_rule.error != null or steps.fetch_rule.output.enabled != true }}"
       # The rule's own type; the step maps it to the event's vocabulary.
       rule_type: "{{ steps.fetch_rule.output.type }}"
