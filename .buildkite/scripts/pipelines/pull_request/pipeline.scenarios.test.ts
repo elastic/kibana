@@ -160,31 +160,45 @@ const SCENARIOS: Scenario[] = [
   },
   {
     name: 'security solution ai_assistant step path',
-    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/security_solution/ai_assistant.ts'],
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/ai_assistant.ts',
+    ],
   },
   {
     name: 'security solution asset_inventory step path',
-    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/security_solution/asset_inventory.ts'],
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/asset_inventory.ts',
+    ],
   },
   {
     name: 'security solution cloud_security_posture step path',
-    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/security_solution/cloud_security_posture.ts'],
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/cloud_security_posture.ts',
+    ],
   },
   {
     name: 'security solution cypress_burn step path',
-    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/security_solution/cypress_burn.ts'],
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/cypress_burn.ts',
+    ],
   },
   {
     name: 'security solution defend_workflows step path',
-    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/security_solution/defend_workflows.ts'],
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/defend_workflows.ts',
+    ],
   },
   {
     name: 'security solution detection_engine step path',
-    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/security_solution/detection_engine.ts'],
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/detection_engine.ts',
+    ],
   },
   {
     name: 'security solution entity_analytics step path',
-    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/security_solution/entity_analytics.ts'],
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/entity_analytics.ts',
+    ],
   },
   {
     name: 'security solution explore step path',
@@ -192,15 +206,21 @@ const SCENARIOS: Scenario[] = [
   },
   {
     name: 'security solution investigations step path',
-    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/security_solution/investigations.ts'],
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/investigations.ts',
+    ],
   },
   {
     name: 'security solution osquery_cypress step path',
-    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/security_solution/osquery_cypress.ts'],
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/osquery_cypress.ts',
+    ],
   },
   {
     name: 'security solution rule_management step path',
-    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/security_solution/rule_management.ts'],
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/rule_management.ts',
+    ],
   },
   { name: 'edr real fleet path', changedFiles: ['fleet_packages.json'] },
   {
