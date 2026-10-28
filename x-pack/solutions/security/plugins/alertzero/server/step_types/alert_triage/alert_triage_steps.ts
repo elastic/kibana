@@ -195,6 +195,8 @@ export const getTriageTagPatternKeysStepDefinition = () =>
     },
   });
 
+const RETAG_ATTEMPTS = 3;
+
 export const getTriageRetagProposalAlertsStepDefinition = () =>
   createServerStepDefinition({
     ...triageRetagProposalAlertsStepCommonDefinition,
@@ -206,37 +208,62 @@ export const getTriageRetagProposalAlertsStepDefinition = () =>
           excludeIds: input.exclude_alert_ids ?? [],
         };
         const write = tagAlerts(contextManager);
-        const remove = input.drop_model_fp
-          ? ['az:false_positive', 'az:model_fp']
-          : ['az:false_positive'];
-        const seen = new Set<string>();
-        const failedIds = new Set<string>();
-        // Re-tagged alerts leave the query, so searching again finds the rest of a full page. The
-        // loop ends on a search with nothing new. What that search still finds was attempted and
-        // did not change (a version conflict or a skipped update), so it counts as failed too.
-        for (;;) {
-          const page = await findLeftoverFalsePositiveIds(contextManager, query);
-          const fresh = page.filter((id) => !seen.has(id));
-          if (fresh.length === 0) {
-            page.forEach((id) => failedIds.add(id));
-            break;
-          }
-          fresh.forEach((id) => seen.add(id));
-          // A chunk that fails must not stop the others, so each one is counted.
-          for (let start = 0; start < fresh.length; start += TAG_CHUNK_SIZE) {
-            const ids = fresh.slice(start, start + TAG_CHUNK_SIZE);
-            try {
-              await write({ alertIds: ids, add: ['az:inconclusive'], remove });
-            } catch (error) {
-              ids.forEach((id) => failedIds.add(id));
-              logger.warn(
-                `Re-tagging ${ids.length} alert(s) of proposal ${
-                  input.proposal_id ?? '(by id)'
-                } failed: ${error instanceof Error ? error.message : String(error)}`
-              );
+        const describe = input.proposal_id ?? '(by id)';
+        // Re-tagged alerts leave the query, so searching again finds the rest of a full page.
+        // What a search finds again after a write was attempted and did not change (a version
+        // conflict or a skipped update): it counts as failed and is left out of the next search.
+        // Each pass either tags new alerts or fails more of them, so the loop ends.
+        const sweep = async (
+          modelMarkerOnly: boolean,
+          update: { add: string[]; remove: string[] }
+        ) => {
+          const seen = new Set<string>();
+          const failed = new Set<string>();
+          for (;;) {
+            const page = await findLeftoverFalsePositiveIds(contextManager, {
+              ...query,
+              excludeIds: [...query.excludeIds, ...failed],
+              modelMarkerOnly,
+            });
+            const failedBefore = failed.size;
+            const fresh = page.filter((id) => !seen.has(id));
+            page.filter((id) => seen.has(id)).forEach((id) => failed.add(id));
+            if (fresh.length === 0 && failed.size === failedBefore) break;
+            fresh.forEach((id) => seen.add(id));
+            // A chunk that fails must not stop the others, so each one is counted.
+            for (let start = 0; start < fresh.length; start += TAG_CHUNK_SIZE) {
+              const ids = fresh.slice(start, start + TAG_CHUNK_SIZE);
+              for (let attempt = 1; attempt <= RETAG_ATTEMPTS; attempt++) {
+                try {
+                  await write({ alertIds: ids, ...update });
+                  break;
+                } catch (error) {
+                  if (attempt < RETAG_ATTEMPTS) continue;
+                  ids.forEach((id) => failed.add(id));
+                  logger.warn(
+                    `Re-tagging ${ids.length} alert(s) of proposal ${describe} failed: ${
+                      error instanceof Error ? error.message : String(error)
+                    }`
+                  );
+                }
+              }
             }
           }
-        }
+          return { seen, failed };
+        };
+        const open = await sweep(false, {
+          add: ['az:inconclusive'],
+          remove: input.drop_model_fp
+            ? ['az:false_positive', 'az:model_fp']
+            : ['az:false_positive'],
+        });
+        // A candidate closed before the dismissal is out of the open query but must still lose
+        // the rejected model judgement, or Rule Tuning keeps counting it as a false positive.
+        const marked = input.drop_model_fp
+          ? await sweep(true, { add: [], remove: ['az:model_fp'] })
+          : { seen: new Set<string>(), failed: new Set<string>() };
+        const seen = new Set([...open.seen, ...marked.seen]);
+        const failedIds = new Set([...open.failed, ...marked.failed]);
         return { output: { matched: seen.size, failed: failedIds.size } };
       } catch (error) {
         throw toApiError(error, 're-tag the alerts of a triage proposal');

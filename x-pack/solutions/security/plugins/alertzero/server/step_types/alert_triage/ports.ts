@@ -455,7 +455,8 @@ const SEARCH_RESULT_LIMIT = 10_000;
 
 /**
  * Open alerts that still carry `az:false_positive` and belong to a proposal: they carry its
- * `az:proposal` tag or are in `ids`. Alerts in `excludeIds` are left out.
+ * `az:proposal` tag or are in `ids`. Alerts in `excludeIds` are left out. With `modelMarkerOnly`
+ * it finds alerts of any status that carry `az:model_fp` instead.
  */
 export const findLeftoverFalsePositiveIds = async (
   { callKibanaApi }: KibanaApi,
@@ -463,7 +464,13 @@ export const findLeftoverFalsePositiveIds = async (
     proposalTag,
     ids,
     excludeIds,
-  }: { proposalTag?: string; ids: readonly string[]; excludeIds: readonly string[] }
+    modelMarkerOnly = false,
+  }: {
+    proposalTag?: string;
+    ids: readonly string[];
+    excludeIds: readonly string[];
+    modelMarkerOnly?: boolean;
+  }
 ): Promise<string[]> => {
   const should = [
     ...(proposalTag ? [{ term: { [ALERT_FIELDS.tags]: proposalTag } }] : []),
@@ -478,8 +485,12 @@ export const findLeftoverFalsePositiveIds = async (
       query: {
         bool: {
           filter: [
-            { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } },
-            { term: { [ALERT_FIELDS.tags]: 'az:false_positive' } },
+            ...(modelMarkerOnly
+              ? [{ term: { [ALERT_FIELDS.tags]: 'az:model_fp' } }]
+              : [
+                  { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } },
+                  { term: { [ALERT_FIELDS.tags]: 'az:false_positive' } },
+                ]),
           ],
           should,
           minimum_should_match: 1,

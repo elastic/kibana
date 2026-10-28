@@ -386,11 +386,27 @@ describe('triage retag proposal alerts step', () => {
     expect(output).toEqual({ matched: 0, failed: 0 });
   });
 
-  it('counts a failed chunk and still re-tags the others', async () => {
+  it('retries a failed chunk before counting it', async () => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValueOnce(searchOf(['a']))
+      .mockRejectedValueOnce(new Error('conflict'))
+      .mockResolvedValue(tagResponse);
+
+    const { output } = await getTriageRetagProposalAlertsStepDefinition().handler(
+      createContext({ proposal_id: 'p1' }, callKibanaApi)
+    );
+
+    expect(output).toEqual({ matched: 1, failed: 0 });
+  });
+
+  it('counts a chunk that keeps failing and still re-tags the others', async () => {
     const ids = Array.from({ length: 501 }, (_, i) => `a${i}`);
     const callKibanaApi = jest
       .fn()
       .mockResolvedValueOnce(searchOf(ids))
+      .mockRejectedValueOnce(new Error('boom'))
+      .mockRejectedValueOnce(new Error('boom'))
       .mockRejectedValueOnce(new Error('boom'))
       .mockResolvedValue(tagResponse);
 
@@ -398,9 +414,29 @@ describe('triage retag proposal alerts step', () => {
       createContext({ proposal_id: 'p1' }, callKibanaApi)
     );
 
-    // The search, the two chunks, and the search that finds nothing new.
-    expect(callKibanaApi).toHaveBeenCalledTimes(4);
     expect(output).toEqual({ matched: 501, failed: 500 });
+  });
+
+  it('also removes az:model_fp from candidates that were closed before the dismissal', async () => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValueOnce(searchOf([]))
+      .mockResolvedValueOnce(searchOf(['closed']))
+      .mockResolvedValue(tagResponse);
+
+    const { output } = await getTriageRetagProposalAlertsStepDefinition().handler(
+      createContext({ proposal_id: 'p1', drop_model_fp: true }, callKibanaApi)
+    );
+
+    const { body: search } = callKibanaApi.mock.calls[1][0];
+    expect(search.query.bool.filter).toEqual([
+      { term: { 'kibana.alert.workflow_tags': 'az:model_fp' } },
+    ]);
+    expect(callKibanaApi.mock.calls[2][0].body).toEqual({
+      ids: ['closed'],
+      tags: { tags_to_add: [], tags_to_remove: ['az:model_fp'] },
+    });
+    expect(output).toEqual({ matched: 1, failed: 0 });
   });
 
   // A fake index: the search returns up to 10,000 open alerts, and a tag call closes them to the query.
@@ -432,8 +468,34 @@ describe('triage retag proposal alerts step', () => {
     expect(output).toEqual({ matched: 1, failed: 1 });
   });
 
-  it('stops when a search returns only alerts it already tried, so a failing chunk cannot loop', async () => {
-    const page = Array.from({ length: 10_000 }, (_, i) => `a${i}`);
+  it('searches past alerts that failed, so one that sorts later is still attempted', async () => {
+    const failing = Array.from({ length: 10_000 }, (_, i) => `f${i}`);
+    const later = new Set(['z']);
+    const callKibanaApi = jest.fn(
+      async ({ path, body }: { path: string; body: { ids?: string[]; query?: any } }) => {
+        if (path.endsWith('/signals/search')) {
+          const excluded = new Set<string>(body.query.bool.must_not[0].ids.values);
+          return searchOf(
+            [...failing, ...later].filter((id) => !excluded.has(id)).slice(0, 10_000)
+          );
+        }
+        if (body.ids?.includes('z')) {
+          later.delete('z');
+          return tagResponse;
+        }
+        throw new Error('boom');
+      }
+    );
+
+    const { output } = await getTriageRetagProposalAlertsStepDefinition().handler(
+      createContext({ proposal_id: 'p1' }, callKibanaApi)
+    );
+
+    expect(output).toEqual({ matched: 10_001, failed: 10_000 });
+  });
+
+  it('stops when searches keep returning alerts it already tried', async () => {
+    const page = ['a', 'b'];
     const callKibanaApi = jest.fn(async ({ path }: { path: string }) => {
       if (path.endsWith('/signals/search')) return searchOf(page);
       throw new Error('boom');
@@ -443,8 +505,7 @@ describe('triage retag proposal alerts step', () => {
       createContext({ proposal_id: 'p1' }, callKibanaApi)
     );
 
-    expect(output).toEqual({ matched: 10_000, failed: 10_000 });
-    expect(callKibanaApi).toHaveBeenCalledTimes(1 + 20 + 1);
+    expect(output).toEqual({ matched: 2, failed: 2 });
   });
 
   it('accepts as many candidates as the review workflow does', () => {
