@@ -23,7 +23,7 @@ type MarkdownFieldProps = Omit<
 export const MarkdownField = forwardRef<MarkdownEditorRef, MarkdownFieldProps>(
   ({ name, ...props }, ref) => {
     const {
-      field: { value, onChange },
+      field: { value, onChange, onBlur },
       fieldState: { error },
     } = useController<Record<string, string | undefined>>({ name });
 
@@ -34,6 +34,7 @@ export const MarkdownField = forwardRef<MarkdownEditorRef, MarkdownFieldProps>(
         {...props}
         ref={ref}
         control={control}
+        onBlur={onBlur}
         isInvalid={Boolean(error)}
         errorMessage={error?.message ?? null}
       />

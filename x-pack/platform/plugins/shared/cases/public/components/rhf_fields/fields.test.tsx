@@ -13,6 +13,7 @@ import {
   ComboBoxField,
   HiddenField,
   NumberField,
+  emptyToUndefined,
   SelectField,
   TextareaField,
   TextField,
@@ -185,9 +186,11 @@ describe('rhf_fields', () => {
   });
 
   describe('NumberField', () => {
-    const schema = z.object({ count: z.number().min(1, 'At least 1').optional() });
+    const schema = z.object({
+      count: z.preprocess(emptyToUndefined, z.number().min(1, 'At least 1').optional()),
+    });
 
-    it('stores numbers, and undefined when empty', async () => {
+    it('stores numbers, and an empty string when empty', async () => {
       const { form } = renderWithForm({
         schema,
         children: <NumberField name="count" label="Count" data-test-subj="count" />,
@@ -197,7 +200,24 @@ describe('rhf_fields', () => {
       expect(form().getValues('count')).toBe(5);
 
       await userEvent.clear(screen.getByTestId('count'));
-      expect(form().getValues('count')).toBeUndefined();
+      expect(form().getValues('count')).toBe('');
+    });
+
+    it('stays empty when an initialized number is cleared', async () => {
+      const { onValid } = renderWithForm({
+        schema,
+        defaultValues: { count: 5 },
+        children: <NumberField name="count" label="Count" data-test-subj="count" />,
+      });
+
+      expect(screen.getByTestId('count')).toHaveValue(5);
+      await userEvent.clear(screen.getByTestId('count'));
+      expect(screen.getByTestId('count')).toHaveValue(null);
+
+      await submit();
+      await waitFor(() =>
+        expect(onValid).toHaveBeenCalledWith({ count: undefined }, expect.anything())
+      );
     });
 
     it('shows the schema error', async () => {

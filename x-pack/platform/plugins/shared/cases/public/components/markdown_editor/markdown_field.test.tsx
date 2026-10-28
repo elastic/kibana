@@ -81,11 +81,39 @@ describe('MarkdownField', () => {
     );
   });
 
+  it('validates on blur when the form mode is onBlur', async () => {
+    renderWithForm({
+      schema,
+      defaultValues: { description: '' },
+      mode: 'onBlur',
+      wrapper: TestProviders,
+      children: (
+        <MarkdownField
+          name="description"
+          id="description"
+          dataTestSubj="caseDescription"
+          idAria="caseDescription"
+        />
+      ),
+    });
+
+    await userEvent.click(screen.getByTestId('euiMarkdownEditorTextArea'));
+    await userEvent.tab();
+
+    expect(await screen.findByText('Description is required')).toBeInTheDocument();
+  });
+
   it('restores a draft from session storage', async () => {
     sessionStorage.setItem('draftKey', 'draft text');
 
     const { form } = renderField({ description: '' }, 'draftKey');
 
     await waitFor(() => expect(form().getValues('description')).toBe('draft text'));
+    await waitFor(() =>
+      expect(screen.getByTestId('euiMarkdownEditorTextArea')).toHaveValue('draft text')
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    expect(sessionStorage.getItem('draftKey')).toContain('draft text');
   });
 });

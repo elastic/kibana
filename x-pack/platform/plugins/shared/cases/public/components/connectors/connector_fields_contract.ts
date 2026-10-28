@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { z } from '@kbn/zod/v4';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { ConnectorTypes } from '../../../common/types/domain';
@@ -68,13 +68,26 @@ export const getConnectorDefaultFields = (
 export const useConnectorFields = <TFields>(): TFields | null | undefined =>
   useWatch({ name: CONNECTOR_FIELDS_NAME }) as TFields | null | undefined;
 
-/** Returns a function that replaces `fields` with the defaults of the newly selected connector. */
+/**
+ * Returns a function that replaces `fields` with the defaults of the newly selected connector,
+ * drops the previous connector's errors and revalidates once the parent has installed the new schema.
+ */
 export const useResetConnectorFields = (): ((connector: CaseActionConnector | null) => void) => {
-  const { setValue } = useFormContext();
+  const { setValue, clearErrors, trigger } = useFormContext();
+  const [resetCount, setResetCount] = useState(0);
+
+  useEffect(() => {
+    if (resetCount > 0) {
+      trigger(CONNECTOR_FIELDS_NAME);
+    }
+  }, [resetCount, trigger]);
 
   return useCallback(
-    (connector) =>
-      setValue(CONNECTOR_FIELDS_NAME, getConnectorDefaultFields(connector), { shouldDirty: true }),
-    [setValue]
+    (connector) => {
+      setValue(CONNECTOR_FIELDS_NAME, getConnectorDefaultFields(connector), { shouldDirty: true });
+      clearErrors(CONNECTOR_FIELDS_NAME);
+      setResetCount((count) => count + 1);
+    },
+    [setValue, clearErrors]
   );
 };

@@ -12,7 +12,7 @@ Each reads the form from `FormProvider` and takes `name`, `label`, `labelAppend`
 `FieldRow`, so they look the same everywhere.
 
 Value types: text/textarea/select/hidden `string`, combobox `string[]` (labels), toggle `boolean`,
-number `number | undefined` (empty input).
+number `number | ''` (empty input; wrap the schema in `z.preprocess(emptyToUndefined, ...)`).
 
 ## Conventions (instead of `useFormData`, `useForm` from the lib)
 

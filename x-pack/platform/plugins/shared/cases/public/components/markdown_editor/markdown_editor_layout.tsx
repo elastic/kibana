@@ -38,6 +38,7 @@ export interface MarkdownEditorLayoutProps {
   draftStorageKey?: string;
   disabledUiPlugins?: string[];
   initialValue?: string;
+  onBlur?: () => void;
 }
 
 /** Form-library agnostic markdown editor row; `MarkdownEditorForm` and `MarkdownField` adapt to it. */
@@ -61,6 +62,7 @@ export const MarkdownEditorLayout = React.memo(
         draftStorageKey,
         disabledUiPlugins,
         initialValue,
+        onBlur,
       },
       ref
     ) => {
@@ -96,6 +98,7 @@ export const MarkdownEditorLayout = React.memo(
             isInvalid={isInvalid}
             label={label}
             labelAppend={labelAppend}
+            onBlur={onBlur}
           >
             <CommentEditor
               ariaLabel={idAria}

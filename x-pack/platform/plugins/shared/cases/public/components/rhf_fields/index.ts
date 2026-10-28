@@ -10,7 +10,7 @@ export { AssigneesField, assigneesFieldSchema } from './assignees_field';
 export { ComboBoxField } from './combobox_field';
 export { FieldRow } from './field_row';
 export { HiddenField } from './hidden_field';
-export { NumberField } from './number_field';
+export { NumberField, emptyToUndefined } from './number_field';
 export { SelectField } from './select_field';
 export { TextField } from './text_field';
 export { TextareaField } from './textarea_field';

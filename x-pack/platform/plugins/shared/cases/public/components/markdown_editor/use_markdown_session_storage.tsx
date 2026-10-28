@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { isEmpty } from 'lodash';
 import useDebounce from 'react-use/lib/useDebounce';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
@@ -25,18 +25,29 @@ export const useMarkdownSessionStorage = ({
   initialValue,
 }: SessionStorageType) => {
   const [hasConflicts, setHasConflicts] = useState<boolean>(false);
-  const isFirstRender = useRef(true);
   const initialValueRef = useRef(initialValue);
 
   const [sessionValue, setSessionValue] = useSessionStorage(sessionKey, '', true);
 
-  if (!isEmpty(sessionValue) && !isEmpty(sessionKey) && isFirstRender.current) {
-    field.setValue(sessionValue);
-  }
+  // Restored after mount, not during render or in the first effect pass: react-hook-form only
+  // subscribes to field changes in effects that run after this component's own.
+  const [isMounted, setIsMounted] = useState(false);
+  const restoreDraft = useRef(() => {
+    if (!isEmpty(sessionValue) && !isEmpty(sessionKey)) {
+      field.setValue(sessionValue);
+    }
+  });
 
-  if (isFirstRender.current) {
-    isFirstRender.current = false;
-  }
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isMounted) {
+      restoreDraft.current();
+      restoreDraft.current = () => {};
+    }
+  }, [isMounted]);
 
   if (initialValue !== initialValueRef.current && initialValue !== field.value) {
     initialValueRef.current = initialValue;

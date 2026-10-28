@@ -16,9 +16,15 @@ type NumberFieldProps = BaseFieldProps & {
   euiFieldProps?: Omit<EuiFieldNumberProps, 'name' | 'value' | 'onChange' | 'onBlur' | 'isInvalid'>;
 };
 
-/** The form value is a `number`, or `undefined` while the input is empty. */
+/** Maps the empty-input value `''` to `undefined`; use it with `z.preprocess` in the field schema. */
+export const emptyToUndefined = (value: unknown): unknown => (value === '' ? undefined : value);
+
+/**
+ * The form value is a `number`, or `''` while the input is empty (`undefined` would make react-hook-form
+ * fall back to the default value). Wrap the schema in `z.preprocess(emptyToUndefined, ...)`.
+ */
 export const NumberField = ({ name, euiFieldProps, ...rowProps }: NumberFieldProps) => {
-  const { field, fieldState } = useController<Record<string, number | undefined>>({ name });
+  const { field, fieldState } = useController<Record<string, number | ''>>({ name });
 
   return (
     <FieldRow fieldState={fieldState} {...rowProps}>
@@ -29,9 +35,7 @@ export const NumberField = ({ name, euiFieldProps, ...rowProps }: NumberFieldPro
         inputRef={field.ref}
         name={field.name}
         value={field.value ?? ''}
-        onChange={({ target: { value } }) =>
-          field.onChange(value === '' ? undefined : Number(value))
-        }
+        onChange={({ target: { value } }) => field.onChange(value === '' ? '' : Number(value))}
         onBlur={field.onBlur}
         isInvalid={Boolean(fieldState.error)}
       />
