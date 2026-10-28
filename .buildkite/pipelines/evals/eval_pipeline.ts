@@ -349,7 +349,9 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   };
 
   const resolveJudge = (suite: EvalsSuiteMetadataEntry): EvalJudge => {
-    const evaluationConnectorId = labelEvaluationConnectorId ?? suite.defaultJudge;
+    const evaluationConnectorId =
+      labelEvaluationConnectorId ??
+      (suite.defaultJudge ? normalizeEvaluationConnectorId(suite.defaultJudge) : undefined);
     return {
       evaluationConnectorId,
       hasEisJudge:
