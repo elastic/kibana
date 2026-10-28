@@ -1291,15 +1291,6 @@
       "enabled": true
     },
     {
-      "groupName": "package.json/pnpm-lock.yaml utils",
-      "matchDepNames": ["sort-package-json"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "aggregate-error",
       "matchDepNames": ["aggregate-error"],
       "reviewers": ["team:kibana-operations"],
