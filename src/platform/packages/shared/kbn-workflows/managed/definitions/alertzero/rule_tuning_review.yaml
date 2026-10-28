@@ -128,6 +128,11 @@ consts:
   applied_tag: detection-watch:tuning-applied
   acknowledged_tag: detection-watch:tuning-acknowledged
   no_items: []
+  # Mirror the platform exception schema's maxItems for an exception's entries and
+  # for one entry's `values`. Applied by bound_exception_entries, not in the agent
+  # schema (see the note above exception_entries).
+  max_exception_entries: 100
+  max_exception_values: 1000
   # Mirrors ALERTS_BATCH_MAX_SIZE. `security.alerts` rejects a longer `alertIds`
   # list. The attachment shows the first 20 ids. The proposal text does not.
   alerts_per_attachment: 20
@@ -480,14 +485,15 @@ steps:
               confidence:
                 type: string
                 enum: [low, medium, high]
-              # Bounds mirror the platform exception schema, which the action and
-              # the step validate against. An unbounded recommendation here is
-              # rejected when the proposal is created, so the review fails and the
-              # alerts wait for the next sweep instead of reaching an analyst.
+              # Field-level bounds mirror the platform exception schema, which the
+              # action and the step validate against. No maxItems on this array or on
+              # `values` on purpose: Gemini answers 400 to this schema when either cap
+              # is present next to the per-field bounds. Both caps are applied after
+              # parsing, in bound_exception_entries (consts.max_exception_entries and
+              # consts.max_exception_values), before any step consumes the entries.
               exception_entries:
                 type: array
                 minItems: 1
-                maxItems: 100
                 items:
                   oneOf:
                     - type: object
@@ -520,7 +526,6 @@ steps:
                             minLength: 1
                             maxLength: 1024
                           minItems: 1
-                          maxItems: 1000
                       required: [field, operator, values]
                     - type: object
                       properties:
@@ -656,6 +661,59 @@ steps:
   # can be backtested the same way a query change is below. Only the entries matter here;
   # eligibility to actually run the backtest is decided by can_preview_query_change, same
   # gate the query arm uses, since both reuse the same preview mechanism.
+  # The agent schema carries no maxItems (Gemini rejects the schema with either
+  # cap present, see the note above exception_entries), so a recommendation can
+  # exceed the platform bounds. Entries are ANDed, so an over-cap entry list or a
+  # sliced is_not_one_of values list would silently broaden the exception: the
+  # dropped constraints would make entities the recommendation excluded eligible
+  # for suppression. An oversized exception therefore fails the run (fail-closed,
+  # see reject_oversized_exception below) instead of being truncated.
+  - name: check_exception_entries
+    type: data.set
+    if: >-
+      ${{ steps.fetch_rule.error == null
+        and steps.fetch_rule.output.enabled == true
+        and steps.diagnose_rule.output.structured_output.change_type == 'exception' }}
+    with:
+      # Renders exactly "true" when the recommendation exceeds either platform
+      # bound, however many violations there are: the gate compares with == 'true',
+      # so per-violation output ("truetrue") would skip the fail-closed gate.
+      overflow: >-
+        {%- assign entries = steps.diagnose_rule.output.structured_output.exception_entries -%}{%- assign exceeded = false -%}{%- if entries.size > consts.max_exception_entries -%}{%- assign exceeded = true -%}{%- endif -%}{%- for entry in entries -%}{%- if entry.values != nil and entry.values.size > consts.max_exception_values -%}{%- assign exceeded = true -%}{%- endif -%}{%- endfor -%}{%- if exceeded -%}true{%- endif -%}
+
+  # Fail-closed: an oversized exception must never reach the filter step, the
+  # attachment, the proposal text or the action. The run fails before
+  # bound_exception_entries runs, so no truncated variant of the recommendation
+  # is proposed or persisted. The failing run leaves the alerts unreviewed (the
+  # tag steps are skipped), so the next sweep retries the rule.
+  - name: reject_oversized_exception
+    type: workflow.fail
+    if: "${{ steps.check_exception_entries.output.overflow == 'true' }}"
+    with:
+      message: "diagnose_rule proposed an exception exceeding the platform bounds (more than {{ consts.max_exception_entries }} entries or more than {{ consts.max_exception_values }} values in one entry); refusing to truncate it into a broader exception"
+
+  # Caps the agent's exception entries (and each entry's values) to the platform
+  # bounds. Reached only when check_exception_entries reported no overflow, so
+  # the caps never drop a constraint; they exist to normalize, not to truncate.
+  - name: bound_exception_entries
+    type: data.set
+    if: >-
+      ${{ steps.fetch_rule.error == null
+        and steps.fetch_rule.output.enabled == true
+        and steps.diagnose_rule.output.structured_output.change_type == 'exception' }}
+    with:
+      entries_json: |-
+        [
+        {%- for entry in steps.diagnose_rule.output.structured_output.exception_entries limit: consts.max_exception_entries -%}
+        {%- unless forloop.first -%},{%- endunless -%}
+        {%- if entry.values -%}
+        {"field":{{ entry.field | json }},"operator":{{ entry.operator | json }},"values":{{ entry.values | slice: 0, consts.max_exception_values | json }}}
+        {%- else -%}
+        {{ entry | json }}
+        {%- endif -%}
+        {%- endfor -%}
+        ]
+
   - name: build_exception_filter
     type: security.buildExceptionEntriesFilter
     if: >-
@@ -664,7 +722,7 @@ steps:
         and steps.diagnose_rule.output.structured_output.change_type == 'exception' }}
     with:
       existing_filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
-      entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+      entries: "${{ steps.bound_exception_entries.output.entries_json | json_parse }}"
     on-failure:
       continue: true
 
@@ -996,7 +1054,7 @@ steps:
         ```
         {% when "exception" %}
         Proposed exception:
-        {% for entry in steps.diagnose_rule.output.structured_output.exception_entries %}
+        {% for entry in steps.bound_exception_entries.output.entries_json | json_parse %}
         - {{ entry.field }} {{ entry.operator }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
         {% endfor %}
         Approve to add the exception to the exception list of the rule. You can remove it in the Detection Rules UI.
@@ -1134,7 +1192,7 @@ steps:
               data:
                 name: "Tuning: {{ steps.fetch_rule.output.name }}"
                 description: "Exception proposed by the rule tuning workflow after reviewing {{ inputs.fp_count }} false-positive alerts."
-                entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+                entries: "${{ steps.bound_exception_entries.output.entries_json | json_parse }}"
               description: "Proposed exception for rule: {{ steps.fetch_rule.output.name }}"
               render_inline: true
             on-failure:
@@ -1155,7 +1213,7 @@ steps:
                   name: "Tuning: {{ steps.fetch_rule.output.name }}"
                   description: "Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed."
                   # `${{ }}` keeps the entries as objects.
-                  entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+                  entries: "${{ steps.bound_exception_entries.output.entries_json | json_parse }}"
                 # Same as a query edit: an exception changes how many alerts the
                 # rule produces, so it can lose a detection. Re-ranking cannot,
                 # which is why the risk score arm is lower.
