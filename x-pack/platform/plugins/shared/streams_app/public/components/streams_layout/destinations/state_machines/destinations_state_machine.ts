@@ -8,14 +8,14 @@
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { and, assign, fromPromise, sendTo, setup, stateIn } from 'xstate';
+import { and, assign, fromPromise, not, sendTo, setup, stateIn } from 'xstate';
 import type { ActorRefFrom, AnyActorRef, MachineImplementationsFrom } from 'xstate';
 import {
   STREAMS_DEFAULT_UNIT_ID,
   type ResolveUnitIndicesResponse,
   type ResolvedDestinationIndex,
 } from '@kbn/streams-plugin/common';
-import { collectUnitComponentIds } from '@kbn/streams-schema';
+import { collectUnitComponentIds, type StreamsUnit } from '@kbn/streams-schema';
 import { notifyUnitUpdated } from '../../notify_unit_updated';
 import { createDestinationId } from '../destination_helpers';
 import { canSubmitDestinationForm, getDestinationCreationFormErrors } from '../destination_form';
@@ -26,8 +26,10 @@ import {
   getDestinationCreateSpecs,
   getUnitDestinations,
   toDestinationViewModel,
+  toS3DestinationViewModel,
   withUnitDestinations,
 } from '../destination_models';
+import { createS3UnitDestination, s3CredentialNames } from '../s3_destination_models';
 import {
   createDestinationApiKeyServices,
   type DestinationApiKey,
@@ -41,7 +43,7 @@ import type {
   DestinationStorageKind,
   DestinationViewModel,
 } from '../types';
-import { EMPTY_ELASTICSEARCH_DESTINATION_FORM } from '../types';
+import { EMPTY_ELASTICSEARCH_DESTINATION_FORM, EMPTY_S3_DESTINATION_FORM } from '../types';
 import { removeComponentFromPipelines } from '../../../../services/unit_connections';
 import type { Unit } from '../../../../services/unit_repository';
 import { getFormattedError } from '../../../../util/errors';
@@ -53,6 +55,7 @@ export interface DestinationsParentEvent {
   unitDefinition: Unit;
   destinationIds: string[];
   intent: 'create' | 'delete';
+  secrets?: StreamsUnit.Secrets;
 }
 
 export interface DestinationsStateInput {
@@ -115,6 +118,14 @@ export type DestinationsStateEvent =
       logsIndex?: string;
       metricsIndex?: string;
       tracesIndex?: string;
+    }
+  | {
+      type: 's3.change';
+      region?: string;
+      bucket?: string;
+      prefix?: string;
+      accessKeyId?: string;
+      secretAccessKey?: string;
     }
   | { type: 'creationForm.blur' }
   | { type: 'modal.openCreate' }
@@ -244,6 +255,7 @@ export const destinationsStateMachine = setup({
           storageKind: 'local_elasticsearch' as const,
           destinationName: '',
           elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM },
+          s3: { ...EMPTY_S3_DESTINATION_FORM },
         },
         formErrors: {},
       },
@@ -341,6 +353,70 @@ export const destinationsStateMachine = setup({
         apiKeyError: undefined,
       };
     }),
+    updateS3Form: assign(({ context, event }) => {
+      if (event.type !== 's3.change' || !context.creationContext) {
+        return {};
+      }
+      const formData: DestinationCreationFormData = {
+        ...context.creationContext.formData,
+        s3: {
+          ...context.creationContext.formData.s3,
+          ...(event.region !== undefined ? { region: event.region } : {}),
+          ...(event.bucket !== undefined ? { bucket: event.bucket } : {}),
+          ...(event.prefix !== undefined ? { prefix: event.prefix } : {}),
+          ...(event.accessKeyId !== undefined ? { accessKeyId: event.accessKeyId } : {}),
+          ...(event.secretAccessKey !== undefined
+            ? { secretAccessKey: event.secretAccessKey }
+            : {}),
+        },
+      };
+      return {
+        creationContext: {
+          ...context.creationContext,
+          formData,
+          formErrors: withoutUnrevealedRequiredErrors(
+            getCreationFormErrors({
+              formData,
+              unitDefinition: context.unitDefinition,
+            }),
+            context.creationContext.formErrors
+          ),
+        },
+      };
+    }),
+    stageCreatedS3Destination: assign(({ context }) => {
+      if (!context.creationContext) {
+        return {};
+      }
+      const { destinationName, s3 } = context.creationContext.formData;
+      const name = destinationName.trim();
+      const id = createDestinationId({
+        name,
+        existingIds: collectUnitComponentIds(context.unitDefinition.unit),
+      });
+      const node = createS3UnitDestination({
+        id,
+        name,
+        region: s3.region.trim(),
+        bucket: s3.bucket.trim(),
+        prefix: s3.prefix.trim(),
+      });
+      return {
+        creationContext: {
+          ...context.creationContext,
+          createdDestinations: [toS3DestinationViewModel(node)],
+          // A failed Elasticsearch key mint leaves its pending ids behind, and a later
+          // S3 persist failure would otherwise revoke them.
+          pendingDestinations: undefined,
+        },
+        unitDefinition: withUnitDestinations(context.unitDefinition, [
+          ...getUnitDestinations(context.unitDefinition),
+          node,
+        ]),
+        persistenceError: undefined,
+        apiKeyError: undefined,
+      };
+    }),
     assignPendingDestination: assign(({ context }) => {
       if (!context.creationContext) {
         return {};
@@ -428,14 +504,23 @@ export const destinationsStateMachine = setup({
       ({ context }) => context.parentRef,
       ({ context }): DestinationsParentEvent => {
         const destinationIds = context.creationContext?.createdDestinations?.map(({ id }) => id);
-        if (!destinationIds?.length) {
+        if (!context.creationContext || !destinationIds?.length) {
           throw new Error('Expected created destinations');
         }
+        const { storageKind, s3 } = context.creationContext.formData;
+        const names = s3CredentialNames(destinationIds[0]);
         return {
           type: 'unit.changed',
           unitDefinition: context.unitDefinition,
           destinationIds,
           intent: 'create',
+          secrets:
+            storageKind === 'external_storage'
+              ? {
+                  [names.accessKeyId]: s3.accessKeyId.trim(),
+                  [names.secretAccessKey]: s3.secretAccessKey.trim(),
+                }
+              : undefined,
         };
       }
     ),
@@ -488,9 +573,25 @@ export const destinationsStateMachine = setup({
       selectedDestinationId: undefined,
       persistenceError: undefined,
     }),
-    storePersistenceError: assign(({ event }) =>
+    storePersistenceError: assign(({ context, event }) =>
       event.type === 'unit.persistenceFailed'
-        ? { unitDefinition: event.unitDefinition, persistenceError: event.message }
+        ? {
+            unitDefinition: event.unitDefinition,
+            persistenceError: event.message,
+            creationContext: context.creationContext
+              ? {
+                  ...context.creationContext,
+                  formData: {
+                    ...context.creationContext.formData,
+                    s3: {
+                      ...context.creationContext.formData.s3,
+                      accessKeyId: '',
+                      secretAccessKey: '',
+                    },
+                  },
+                }
+              : undefined,
+          }
         : {}
     ),
     restoreUnitAfterPersistenceFailure: assign(({ event }) =>
@@ -529,6 +630,8 @@ export const destinationsStateMachine = setup({
             ({ id }) => id === context.selectedDestinationId
           )
       ),
+    isExternalStorage: ({ context }) =>
+      context.creationContext?.formData.storageKind === 'external_storage',
     isDeletePersistenceFailure: ({ event }) =>
       event.type === 'unit.persistenceFailed' && event.intent === 'delete',
     unitSaveIsIdle: stateIn('#destinationsUnitSaveIdle'),
@@ -577,11 +680,17 @@ export const destinationsStateMachine = setup({
             'storageKind.select': { actions: 'selectStorageKind' },
             'destinationName.change': { actions: 'updateDestinationName' },
             'elasticsearch.change': { actions: 'updateElasticsearchForm' },
+            's3.change': { actions: 'updateS3Form' },
             'creationForm.blur': { actions: 'validateCreationForm' },
             'destination.create': [
               {
+                target: 'persisting',
+                guard: and(['isExternalStorage', 'canCreateDestination', 'unitSaveIsIdle']),
+                actions: ['stageCreatedS3Destination', 'notifyParentCreate'],
+              },
+              {
                 target: 'mintingApiKey',
-                guard: and(['canCreateDestination', 'unitSaveIsIdle']),
+                guard: and(['canCreateDestination', 'unitSaveIsIdle', not('isExternalStorage')]),
                 actions: 'assignPendingDestination',
               },
               { actions: 'validateCreationForm' },

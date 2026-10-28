@@ -9,6 +9,7 @@
 
 export {
   WorkflowsUiServicesProvider,
+  useOptionalWorkflowsUiServices,
   useWorkflowsUiServices,
   type WorkflowsUiServices,
   type WorkflowsUiServicesProviderProps,
