@@ -47,10 +47,18 @@ export const createResolveHookWorkflowId =
         management.getWorkflow(boundHookWorkflowId, spaceId, request),
       ]);
       // The hook runs as the space's agent account: the one its entry point is bound to.
-      return isEntryPointReady(entryPoint) &&
-        boundHook?.definition?.settings?.run_as === getEntryPointServiceAccountId(entryPoint)
-        ? boundHookWorkflowId
-        : hookWorkflowId;
+      if (!isEntryPointReady(entryPoint)) {
+        return hookWorkflowId;
+      }
+      if (boundHook?.definition?.settings?.run_as !== getEntryPointServiceAccountId(entryPoint)) {
+        // The space is set up, so the investigation runs as the agent account, but its hook does
+        // not: falling back to the global hook runs it as the user who started the run.
+        logger.warn(
+          `Nightshift space [${spaceId}] is set up, but its bound hook workflow [${boundHookWorkflowId}] is missing or not bound to the space's agent account. Running [${hookWorkflowId}] as the caller instead.`
+        );
+        return hookWorkflowId;
+      }
+      return boundHookWorkflowId;
     } catch (error) {
       logger.debug(`Could not read the Nightshift setup of space [${spaceId}]: ${error}`);
       return hookWorkflowId;
