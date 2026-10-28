@@ -185,6 +185,14 @@ describe('readStoredCustomContentFromDashboard', () => {
     expect(versionCount).toBe(1);
   });
 
+  it('returns the id of the panel it read', () => {
+    const conversation = dashboardConversation([
+      { panels: [customContentPanel('p1', 'FROM logs'), customContentPanel('p2', 'FROM other')] },
+    ]);
+
+    expect(readStoredCustomContentFromDashboard(conversation, 'dash-1').panelId).toBe('p2');
+  });
+
   it('compares the first and latest version of the same panel after an edit', () => {
     const conversation = dashboardConversation([
       {

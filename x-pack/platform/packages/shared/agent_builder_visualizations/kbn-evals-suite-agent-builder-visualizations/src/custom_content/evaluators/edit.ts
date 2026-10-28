@@ -24,7 +24,7 @@ export const createEditEvaluator = (): CustomContentEvaluator => ({
       return skippedResult('This example is not an edit.');
     }
 
-    const { after, attachmentId, versionCount, baseline, followUpToolIds } = output;
+    const { after, attachmentId, panelId, versionCount, baseline, followUpToolIds } = output;
     if (followUpToolIds?.length === 0) {
       return {
         score: 0,
@@ -42,7 +42,7 @@ export const createEditEvaluator = (): CustomContentEvaluator => ({
         explanation: 'There is no panel from the first turn and the follow-up to compare.',
       };
     }
-    if (baseline.attachmentId !== attachmentId) {
+    if (baseline.attachmentId !== attachmentId || baseline.panelId !== panelId) {
       return {
         score: 0,
         label: 'new-panel-instead-of-edit',

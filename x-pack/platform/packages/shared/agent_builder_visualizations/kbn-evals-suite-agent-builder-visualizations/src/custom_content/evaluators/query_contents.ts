@@ -10,8 +10,8 @@ import type { CustomContentEvaluator } from '../types';
 
 export const CUSTOM_CONTENT_QUERY_CONTENTS_EVALUATOR_NAME = 'Custom Content Query Contents';
 
-export const normalizeQuery = (query: string): string =>
-  query.replace(/\s+/g, ' ').trim().toLowerCase();
+/** Ignores case, whitespace and the backticks that quote a name, so `AVG( \`bytes\` )` matches `avg(bytes)`. */
+export const normalizeQuery = (query: string): string => query.replace(/[`\s]/g, '').toLowerCase();
 
 /** The final query contains the expected text, for a user-supplied query or a kept grouping. */
 export const createQueryContentsEvaluator = (): CustomContentEvaluator => ({

@@ -142,6 +142,15 @@ describe('Custom Content Query Contents', () => {
     expect(result.score).toBe(1);
   });
 
+  it('ignores backticks and spacing inside an expression', async () => {
+    const result = await run(
+      evaluator,
+      outputWith({ esql: 'FROM logs | STATS avg_bytes = AVG( `bytes` ) BY `machine.os`' }),
+      { data: 'query', queryContains: ['AVG(bytes)', 'machine.os'] }
+    );
+    expect(result.score).toBe(1);
+  });
+
   it('reports the missing text', async () => {
     const result = await run(evaluator, outputWith({ esql: QUERY }), {
       data: 'query',
@@ -388,6 +397,50 @@ describe('Custom Content Edit', () => {
       style
     );
     expect(result).toMatchObject({ score: 0, label: 'new-panel-instead-of-edit' });
+  });
+
+  it('fails when the follow-up added a second panel to the same dashboard', async () => {
+    const result = await run(
+      evaluator,
+      outputWith(
+        { esql: 'FROM other', template: '<p>new</p>' },
+        {
+          attachmentId: 'dash-1',
+          panelId: 'panel-2',
+          versionCount: 2,
+          baseline: {
+            attachmentId: 'dash-1',
+            panelId: 'panel-1',
+            content: before,
+            versionCount: 1,
+          },
+        }
+      ),
+      data
+    );
+    expect(result).toMatchObject({ score: 0, label: 'new-panel-instead-of-edit' });
+  });
+
+  it('passes an edit of the same panel inside a dashboard', async () => {
+    const result = await run(
+      evaluator,
+      outputWith(
+        { esql: `${QUERY} | KEEP host`, template: '<p>new</p>' },
+        {
+          attachmentId: 'dash-1',
+          panelId: 'panel-1',
+          versionCount: 2,
+          baseline: {
+            attachmentId: 'dash-1',
+            panelId: 'panel-1',
+            content: before,
+            versionCount: 1,
+          },
+        }
+      ),
+      data
+    );
+    expect(result.score).toBe(1);
   });
 
   it('fails a follow-up that made no tool call, even when the stored panel has several versions', async () => {

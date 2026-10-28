@@ -164,9 +164,11 @@ export function createEvaluateCustomContentDataset({
         otherRenderers,
         after: stored?.content,
         attachmentId: stored?.attachmentId,
+        panelId: stored?.panelId,
         versionCount: stored?.versionCount ?? 0,
         baseline: baseline && {
           attachmentId: baseline.attachmentId,
+          panelId: baseline.panelId,
           content: baseline.content,
           versionCount: baseline.versionCount,
         },

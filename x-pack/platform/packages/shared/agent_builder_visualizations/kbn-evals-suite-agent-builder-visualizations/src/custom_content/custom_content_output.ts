@@ -24,6 +24,8 @@ export interface StoredCustomContent {
 /** A panel's attachment as it stood at one point of the conversation. */
 export interface StoredPanelSnapshot {
   attachmentId?: string;
+  /** The panel inside a dashboard attachment, which holds many panels; absent for a visualization. */
+  panelId?: string;
   content?: StoredCustomContent;
   versionCount: number;
 }
@@ -36,6 +38,8 @@ export interface CustomContentTaskOutput {
   after?: StoredCustomContent;
   /** The attachment holding `after`. */
   attachmentId?: string;
+  /** The dashboard panel `after` was read from, when the attachment is a dashboard. */
+  panelId?: string;
   /** Stored versions of that attachment after the last turn. */
   versionCount: number;
   /** The panel as it stood after the first turn; only for an example with a follow-up. */
@@ -175,7 +179,12 @@ const toStoredFromPanel = (panel: DashboardPanel | undefined): StoredCustomConte
 export const readStoredCustomContentFromDashboard = (
   conversation: Conversation,
   attachmentId: string
-): { before?: StoredCustomContent; after?: StoredCustomContent; versionCount: number } => {
+): {
+  before?: StoredCustomContent;
+  after?: StoredCustomContent;
+  versionCount: number;
+  panelId?: string;
+} => {
   const attachment = conversation.attachments?.find(
     ({ id, type }) => id === attachmentId && type === DASHBOARD_ATTACHMENT_TYPE
   );
@@ -193,6 +202,7 @@ export const readStoredCustomContentFromDashboard = (
     before: toStoredFromPanel(first),
     after: toStoredFromPanel(latest),
     versionCount: attachment.versions.length,
+    panelId: latest?.id,
   };
 };
 
@@ -226,8 +236,17 @@ export const findStoredPanel = (
   }
   const dashboardId = getLastWrittenDashboardId(steps);
   if (dashboardId) {
-    const { after, versionCount } = readStoredCustomContentFromDashboard(conversation, dashboardId);
-    return { attachmentId: dashboardId, content: after, versionCount, storedIn: 'dashboard' };
+    const { after, versionCount, panelId } = readStoredCustomContentFromDashboard(
+      conversation,
+      dashboardId
+    );
+    return {
+      attachmentId: dashboardId,
+      panelId,
+      content: after,
+      versionCount,
+      storedIn: 'dashboard',
+    };
   }
   return { versionCount: 0, storedIn: 'none' };
 };
