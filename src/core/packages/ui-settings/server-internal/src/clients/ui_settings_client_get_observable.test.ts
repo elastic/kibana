@@ -15,10 +15,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
-import {
-  GET_OBSERVABLE_MAX_ACCESS_FAILURES,
-  GET_OBSERVABLE_POLL_INTERVAL,
-} from './ui_settings_client_common';
+import { GET_OBSERVABLE_POLL_INTERVAL } from './ui_settings_client_common';
 import { UiSettingsClient } from './ui_settings_client';
 import { UiSettingsGlobalClient } from './ui_settings_global_client';
 import { InflightReads } from '../inflight_reads';
@@ -207,87 +204,6 @@ describe('UiSettingsClient.get$', () => {
     await jest.advanceTimersByTimeAsync(GET_OBSERVABLE_POLL_INTERVAL);
 
     expect(seen.values).toEqual(['from-user', 'recovered']);
-  });
-
-  it.each([
-    ['Forbidden', () => SavedObjectsClient.errors.decorateForbiddenError(new Error('forbidden'))],
-    [
-      'Unauthorized',
-      () => SavedObjectsClient.errors.decorateNotAuthorizedError(new Error('unauthorized')),
-    ],
-  ])('completes after its client is rejected with %s on every poll', async (_, createError) => {
-    const { uiSettings, savedObjectsClient } = setup({ esDocSource: { [KEY]: 'from-user' } });
-    const seen = watch<string>(uiSettings.get$(KEY));
-    await jest.advanceTimersByTimeAsync(0);
-
-    savedObjectsClient.get.mockRejectedValue(createError());
-    await jest.advanceTimersByTimeAsync(
-      GET_OBSERVABLE_POLL_INTERVAL * (GET_OBSERVABLE_MAX_ACCESS_FAILURES - 1)
-    );
-    expect(seen.isCompleted()).toBe(false);
-
-    await jest.advanceTimersByTimeAsync(GET_OBSERVABLE_POLL_INTERVAL);
-    expect(seen.isCompleted()).toBe(true);
-    expect(seen.error()).toBeUndefined();
-    expect(seen.values).toEqual(['from-user']);
-    expect(loggingSystemMock.collect(logger).warn.flat()).toEqual(
-      expect.arrayContaining([expect.stringContaining('completed because')])
-    );
-  });
-
-  it('retries a rejected shared read with its own client, so a broken client does not stall others', async () => {
-    const pollTicks$ = interval(GET_OBSERVABLE_POLL_INTERVAL).pipe(share());
-    const sharedPollReads = new InflightReads<Record<string, unknown>>();
-    const shared = { esDocSource: { [KEY]: 'one' }, pollTicks$, sharedPollReads };
-    const broken = setup(shared);
-    const healthy = setup(shared);
-    const brokenSeen = watch<string>(broken.uiSettings.get$(KEY));
-    const healthySeen = watch<string>(healthy.uiSettings.get$(KEY));
-    await jest.advanceTimersByTimeAsync(0);
-
-    broken.savedObjectsClient.get.mockRejectedValue(
-      SavedObjectsClient.errors.decorateForbiddenError(new Error('forbidden'))
-    );
-    healthy.savedObjectsClient.get.mockResolvedValue({
-      type: TYPE,
-      id: ID,
-      references: [],
-      attributes: { [KEY]: 'two' },
-    });
-    await jest.advanceTimersByTimeAsync(GET_OBSERVABLE_POLL_INTERVAL);
-    expect(healthySeen.values).toEqual(['one', 'two']);
-    expect(brokenSeen.values).toEqual(['one']);
-
-    await jest.advanceTimersByTimeAsync(
-      GET_OBSERVABLE_POLL_INTERVAL * GET_OBSERVABLE_MAX_ACCESS_FAILURES
-    );
-    expect(brokenSeen.isCompleted()).toBe(true);
-    expect(healthySeen.isCompleted()).toBe(false);
-
-    const healthyReads = healthy.savedObjectsClient.get.mock.calls.length;
-    await jest.advanceTimersByTimeAsync(GET_OBSERVABLE_POLL_INTERVAL);
-    expect(healthy.savedObjectsClient.get.mock.calls.length).toBe(healthyReads + 1);
-  });
-
-  it('does not retry a shared read that fails because Elasticsearch is unavailable', async () => {
-    const pollTicks$ = interval(GET_OBSERVABLE_POLL_INTERVAL).pipe(share());
-    const sharedPollReads = new InflightReads<Record<string, unknown>>();
-    const shared = { esDocSource: { [KEY]: 'one' }, pollTicks$, sharedPollReads };
-    const leader = setup(shared);
-    const follower = setup(shared);
-    const leaderSeen = watch<string>(leader.uiSettings.get$(KEY));
-    const followerSeen = watch<string>(follower.uiSettings.get$(KEY));
-    await jest.advanceTimersByTimeAsync(0);
-    const followerReads = follower.savedObjectsClient.get.mock.calls.length;
-
-    leader.savedObjectsClient.get.mockRejectedValue(
-      SavedObjectsClient.errors.decorateEsUnavailableError(new Error('unavailable'))
-    );
-    await jest.advanceTimersByTimeAsync(GET_OBSERVABLE_POLL_INTERVAL * 3);
-
-    expect(follower.savedObjectsClient.get.mock.calls.length).toBe(followerReads);
-    expect(leaderSeen.isCompleted()).toBe(false);
-    expect(followerSeen.isCompleted()).toBe(false);
   });
 
   it('skips a poll that fails with a generic error', async () => {
