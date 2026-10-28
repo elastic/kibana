@@ -8,7 +8,8 @@
  */
 
 /**
- * Helpers for driving an elastic/kibana PR through review and CI rounds. Talks to GitHub through the `gh` CLI.
+ * Drives an elastic/kibana PR through review and CI rounds. Talks to GitHub through the `gh` CLI; the
+ * helpers live in helpers.mjs.
  *
  * Usage:
  *   node .agents/skills/pr-babysit/scripts/pr.mjs signals <pr>
@@ -37,97 +38,30 @@
  * resolve  Marks a review thread as resolved and prints the new isResolved value.
  */
 
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
-
-const execFileAsync = promisify(execFile);
-
-const REPO = 'elastic/kibana';
-const [OWNER, NAME] = REPO.split('/');
-const LIBRA_LOGIN = 'infra-vault-gh-plugin-prod';
-const POLL_INTERVAL_MS = 30_000;
-const DEFAULT_WAIT_SECONDS = 300;
-const GH_ATTEMPTS = 3;
-
-// How long after the commit (or --since) a signal may stay silent before it's reported as `none`, and how long
-// it may stay pending before it's reported as `timeout`. Libra starts within a minute or two; a full CI build
-// takes about an hour.
-const LIBRA_STARTUP_MS = 5 * 60_000;
-const LIBRA_TIMEOUT_MS = 20 * 60_000;
-const CI_STARTUP_MS = 15 * 60_000;
-const CI_TIMEOUT_MS = 2 * 60 * 60_000;
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const fail = (message) => {
-  console.error(`pr.mjs: ${message}`);
-  process.exit(2);
-};
-
-/** Runs `gh` and returns stdout. Retries transient failures, then throws with gh's own message. */
-const gh = async (args) => {
-  let lastError;
-  for (let attempt = 1; attempt <= GH_ATTEMPTS; attempt++) {
-    try {
-      const { stdout } = await execFileAsync('gh', args, {
-        env: { ...process.env, GH_PAGER: 'cat' },
-        maxBuffer: 64 * 1024 * 1024,
-      });
-      return stdout;
-    } catch (error) {
-      lastError = error;
-      if (attempt < GH_ATTEMPTS) await sleep(attempt * 2000);
-    }
-  }
-  const stderr = (lastError.stderr ?? '').toString().trim();
-  throw new Error(`gh ${args.slice(0, 2).join(' ')} failed: ${stderr || lastError.message}`);
-};
-
-const ghJson = async (args) => JSON.parse(await gh(args));
-
-/** Fetches every page of a list endpoint and returns the pages as an array. */
-const ghPages = async (endpoint) =>
-  ghJson(['api', endpoint, '--paginate', '--slurp', '-X', 'GET']);
-
-const parseOptions = (args, allowed) => {
-  const options = {};
-  for (let i = 0; i < args.length; i += 2) {
-    const flag = args[i];
-    if (!allowed.includes(flag) || args[i + 1] === undefined) fail(`unknown or incomplete option: ${flag}`);
-    options[flag.slice(2)] = args[i + 1];
-  }
-  return options;
-};
-
-const requirePr = (value, command) => {
-  if (!/^\d+$/.test(value ?? '')) fail(`${command} requires a PR number`);
-  return value;
-};
-
-const formatLine = (signal, { state, sha, detail, extra }) =>
-  `${signal}=${state} sha=${sha} detail="${detail}"${extra ? ` ${extra}` : ''}`;
-
-const commitDates = new Map();
-const getCommitDate = async (sha) => {
-  if (!commitDates.has(sha)) {
-    const commit = await ghJson(['api', `repos/${REPO}/commits/${sha}`]);
-    commitDates.set(sha, Date.parse(commit.commit.committer.date));
-  }
-  return commitDates.get(sha);
-};
-
-const getCombinedStatuses = async (sha) => {
-  const pages = await ghPages(`repos/${REPO}/commits/${sha}/status?per_page=100`);
-  return pages.flatMap((page) => page.statuses);
-};
-
-const getDefaultSha = async (pr) => {
-  // kibanamachine fix-up commits aren't reviewed by Libra, so the PR head can be a commit that never gets a review.
-  const pages = await ghPages(`repos/${REPO}/pulls/${pr}/commits?per_page=100`);
-  const reviewable = pages.flat().filter((commit) => commit.author?.login !== 'kibanamachine');
-  if (reviewable.length === 0) fail(`no commit on PR ${pr} that a reviewer would review`);
-  return reviewable.at(-1).sha;
-};
+import {
+  CI_TIMING,
+  DEFAULT_WAIT_SECONDS,
+  LIBRA_TIMING,
+  NAME,
+  OWNER,
+  POLL_INTERVAL_MS,
+  REPO,
+  RESOLVE_MUTATION,
+  THREADS_QUERY,
+  checkCi,
+  checkLibra,
+  fail,
+  formatLine,
+  getCommitDate,
+  getDefaultSha,
+  getHeadSha,
+  ghJson,
+  isLibra,
+  parseOptions,
+  requirePr,
+  settle,
+  sleep,
+} from './helpers.mjs';
 
 const signals = async (pr) => {
   const view = await ghJson([
@@ -147,60 +81,6 @@ const signals = async (pr) => {
   console.log(line('libra', libraOff));
   console.log(line('ci', ciOff));
   console.log(`mergeable=${view.mergeable} base=${view.baseRefName} head=${view.headRefName}`);
-};
-
-// Each check returns { state, detail, extra? } once the signal has a result, `missing` while nothing has been
-// reported yet, or `pending` while a result is on its way.
-
-const checkLibra = async (sha) => {
-  // The combined status keeps only the newest status per context.
-  const status = (await getCombinedStatuses(sha)).find(({ context }) => context === 'Libra');
-  if (!status) return { state: 'missing' };
-  const detail = status.description ?? '';
-  switch (status.state) {
-    case 'success':
-      if (detail.includes('noop')) return { state: 'clean', detail };
-      if (/skipped/i.test(detail)) return { state: 'skipped', detail };
-      return { state: 'findings', detail };
-    case 'failure':
-    case 'error':
-      return { state: 'error', detail };
-    default:
-      return { state: 'pending' };
-  }
-};
-
-const checkCi = async (head, sinceMs) => {
-  const status = (await getCombinedStatuses(head)).find(({ context }) => context === 'kibana-ci');
-  if (!status) return { state: 'missing' };
-  // A retry doesn't clear the old status, so until the new attempt reports, the status still describes the old one.
-  if (sinceMs !== null && Date.parse(status.updated_at) < sinceMs) return { state: 'pending' };
-  const extra = `url=${status.target_url ?? '-'}`;
-  switch (status.state) {
-    case 'success':
-      return { state: 'passed', detail: 'build passed', extra };
-    case 'failure':
-    case 'error':
-      return { state: 'failed', detail: `build ${status.state}`, extra };
-    default:
-      return { state: 'pending' };
-  }
-};
-
-/** Turns a check result into a final result, or undefined while the signal should keep being polled. */
-const settle = (result, { sinceMs, startupMs, timeoutMs, label }) => {
-  const age = Date.now() - sinceMs;
-  if (result.state === 'missing') {
-    return age >= startupMs
-      ? { state: 'none', detail: `no ${label} result ${Math.round(startupMs / 1000)}s after the commit` }
-      : undefined;
-  }
-  if (result.state === 'pending') {
-    return age >= timeoutMs
-      ? { state: 'timeout', detail: `no ${label} result ${Math.round(timeoutMs / 1000)}s after the commit` }
-      : undefined;
-  }
-  return result;
 };
 
 const wait = async (pr, rest) => {
@@ -224,16 +104,14 @@ const wait = async (pr, rest) => {
 
   for (;;) {
     if (wanted.has('libra') && !results.has('libra')) {
-      const final = settle(await checkLibra(libraSha), {
-        sinceMs: libraSinceMs, startupMs: LIBRA_STARTUP_MS, timeoutMs: LIBRA_TIMEOUT_MS, label: 'Libra',
-      });
+      const final = settle(await checkLibra(libraSha), { ...LIBRA_TIMING, sinceMs: libraSinceMs });
       if (final) results.set('libra', { ...final, sha: libraSha });
     }
 
     if (wanted.has('ci')) {
       // Keep following the head until the call ends: a kibanamachine push after CI finished makes the stored
       // result describe a commit that is no longer the head.
-      const { head } = await ghJson(['api', `repos/${REPO}/pulls/${pr}`, '--jq', '{head: .head.sha}']);
+      const head = await getHeadSha(pr);
       if (head !== ciHead) {
         ciHead = head;
         results.delete('ci');
@@ -241,8 +119,8 @@ const wait = async (pr, rest) => {
       if (!results.has('ci')) {
         const headDate = await getCommitDate(head);
         const final = settle(await checkCi(head, sinceMs), {
+          ...CI_TIMING,
           sinceMs: Math.max(headDate, sinceMs ?? 0),
-          startupMs: CI_STARTUP_MS, timeoutMs: CI_TIMEOUT_MS, label: 'kibana-ci',
         });
         if (final) results.set('ci', { ...final, sha: head });
       }
@@ -260,37 +138,12 @@ const wait = async (pr, rest) => {
   }
 };
 
-const THREADS_QUERY = `
-  query($owner: String!, $repo: String!, $pr: Int!, $endCursor: String) {
-    repository(owner: $owner, name: $repo) {
-      pullRequest(number: $pr) {
-        reviewThreads(first: 100, after: $endCursor) {
-          pageInfo { hasNextPage endCursor }
-          nodes {
-            id
-            isResolved
-            isOutdated
-            path
-            line
-            opener: comments(first: 1) {
-              nodes { databaseId url body author { login __typename } }
-            }
-            comments(first: 100) { nodes { author { login __typename } } }
-            latest: comments(last: 1) { nodes { databaseId body author { login __typename } } }
-          }
-        }
-      }
-    }
-  }`;
-
 const threads = async (pr) => {
   const pages = await ghJson([
     'api', 'graphql', '--paginate', '--slurp',
     '-F', `owner=${OWNER}`, '-F', `repo=${NAME}`, '-F', `pr=${pr}`,
     '-f', `query=${THREADS_QUERY}`,
   ]);
-  // GraphQL drops the `[bot]` suffix that REST shows; the type check keeps user accounts with the same name out.
-  const isLibra = (author) => author?.__typename === 'Bot' && author.login === LIBRA_LOGIN;
 
   for (const page of pages) {
     for (const thread of page.data.repository.pullRequest.reviewThreads.nodes) {
@@ -319,10 +172,7 @@ const threads = async (pr) => {
 };
 
 const resolveThread = async (threadId) => {
-  const result = await ghJson([
-    'api', 'graphql', '-F', `id=${threadId}`,
-    '-f', 'query=mutation($id: ID!) { resolveReviewThread(input: { threadId: $id }) { thread { isResolved } } }',
-  ]);
+  const result = await ghJson(['api', 'graphql', '-F', `id=${threadId}`, '-f', `query=${RESOLVE_MUTATION}`]);
   console.log(result.data.resolveReviewThread.thread.isResolved);
 };
 
