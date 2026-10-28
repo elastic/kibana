@@ -62,7 +62,10 @@ triggers:
           type: string
           minLength: 1
           maxLength: 512
-          description: Proposal title, built by the grouping step together with `comment`.
+          description: >-
+            Proposal title, built by the grouping step together with `comment`. A batch started
+            before the grouping step sent it gives `entity_summary` instead, and the review
+            builds the text itself.
         comment:
           type: string
           minLength: 1
@@ -70,6 +73,12 @@ triggers:
           description: >-
             Proposal comment: what the proposal closes and what is inside it. Built by the
             grouping step, which also rebuilds it on every join.
+        entity_summary:
+          type: string
+          maxLength: 256
+          description: >-
+            Hosts and users behind the candidates. Only batches started before the grouping step
+            built `title` and `comment` send it; it is used when `title` is missing.
         proposal_id:
           type: string
           maxLength: 64
@@ -91,8 +100,6 @@ triggers:
         - conversation_id
         - rule_id
         - fp_candidate_ids
-        - title
-        - comment
         - confidence_floor
       additionalProperties: false
 
@@ -174,8 +181,8 @@ steps:
       run-as-mode: inherit
       inputs:
         conversationId: "{{ inputs.conversation_id }}"
-        title: "{{ inputs.title }}"
-        comment: "{{ inputs.comment }}"
+        title: "{% if inputs.title != blank %}{{ inputs.title }}{% else %}Close {% if variables.fp_candidate_count == 1 and inputs.entity_summary != blank %}alert{% elsif variables.fp_candidate_count == 1 %}1 alert{% else %}{{ variables.fp_candidate_count }} alerts{% endif %}{% if inputs.entity_summary != blank %} {{ inputs.entity_summary }}{% endif %} as false positive{% endif %}"
+        comment: "{% if inputs.comment != blank %}{{ inputs.comment }}{% else %}{{ variables.fp_candidate_count }} alert(s) from rule \"{{ inputs.rule_name }}\" {% if variables.fp_candidate_count == 1 %}was{% else %}were{% endif %} classified as false positives at or above the configured confidence floor ({{ inputs.confidence_floor }}). Approving this proposal will close them with workflow_reason=false_positive.{% endif %}"
         actionWorkflowId: system-alertzero-action-close-alerts-fp
         actionInput:
           alertIds: "${{ inputs.fp_candidate_ids }}"

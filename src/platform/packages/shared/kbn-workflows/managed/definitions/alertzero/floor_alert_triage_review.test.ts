@@ -118,8 +118,22 @@ describe('floor_alert_triage_review — proposal', () => {
     expect(renderString(proposalInputs.comment, { inputs: { comment: 'Because.' } })).toBe(
       'Because.'
     );
+  });
+
+  // A batch started before the upgrade sends `entity_summary` and no title or comment.
+  it('builds the text itself for a batch that sends no title or comment', () => {
+    const context = {
+      inputs: { entity_summary: 'on host-1', rule_name: 'R', confidence_floor: 0.8 },
+      variables: { fp_candidate_count: 1 },
+    };
+    expect(renderString(proposalInputs.title, context)).toBe(
+      'Close alert on host-1 as false positive'
+    );
+    expect(renderString(proposalInputs.comment, context)).toContain(
+      '1 alert(s) from rule "R" was classified as false positives'
+    );
     const trigger = parsed.triggers.find(({ type }) => type === 'manual');
-    expect(trigger?.inputs?.required).toEqual(expect.arrayContaining(['title', 'comment']));
+    expect(trigger?.inputs?.required).not.toContain('title');
   });
 
   it('creates the proposal under the id the batch chose, so the batch knows its root id', () => {
