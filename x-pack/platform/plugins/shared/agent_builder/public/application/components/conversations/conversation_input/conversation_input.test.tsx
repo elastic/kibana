@@ -106,8 +106,8 @@ jest.mock('./input_actions', () => ({
         value={triggerMode}
         onChange={(event) => onTriggerModeChange(event.target.value)}
       >
-        <option value="always">Include agent</option>
-        <option value="never">Skip agent</option>
+        <option value="always">Ask agent</option>
+        <option value="never">Post to team</option>
       </select>
     ) : null,
 }));
@@ -375,7 +375,7 @@ describe('ConversationInput', () => {
       selectTalkToUsers();
 
       expect(header).toHaveAttribute('aria-hidden', 'false');
-      expect(header).toHaveTextContent('Leaving a post to the team');
+      expect(header).toHaveTextContent("Posting to the team · Agent won't respond.");
     });
 
     it('falls back to running the agent once the conversation is no longer shared', () => {
