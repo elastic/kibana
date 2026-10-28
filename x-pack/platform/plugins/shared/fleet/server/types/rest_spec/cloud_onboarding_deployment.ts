@@ -373,8 +373,8 @@ export const GetCloudOnboardingDeploymentsByConnectorIdResponseSchema = schema.o
 const CloudOnboardingDeploymentListItemSchema = CloudOnboardingDeploymentItemSchema.extends({
   packages: schema.arrayOf(
     schema.object({
-      name: schema.string({ meta: { description: 'Package name.' } }),
-      title: schema.string({ meta: { description: 'Package title.' } }),
+      name: schema.string({ meta: { description: 'Name of the integration package, for example `aws`.' } }),
+      title: schema.string({ meta: { description: 'Display title of the integration package, for example `AWS`.' } }),
       version: schema.string({
         meta: { description: 'Package version the deployment policies run.' },
       }),
