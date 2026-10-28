@@ -28,13 +28,10 @@ import type {
   ClassicRuleAction,
   CreateRuleFlyoutProps,
   MigratedRule,
-  RuleMigration,
 } from '@kbn/alerting-v2-plugin/public';
 import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { OriginalRuleQueryLanguage } from './get_original_rule_summary';
 import { getOriginalRuleSummary } from './get_original_rule_summary';
-import type { ConnectorNames } from './action_summaries';
-import { ActionPolicyList, ClassicActionList } from './action_summaries';
 
 export interface OriginalRule {
   name: string;
@@ -53,7 +50,7 @@ export interface OriginalRule {
 export interface RuleMigrationState {
   loading: boolean;
   error?: Error;
-  result?: RuleMigration;
+  rule?: MigratedRule;
 }
 
 /** Rows pair a classic field with the Universal field it maps to, so both sides line up. */
@@ -69,7 +66,6 @@ const ROW_KEYS = [
   'recovery',
   'noData',
   'status',
-  'actions',
 ] as const;
 
 type RowKey = (typeof ROW_KEYS)[number];
@@ -89,7 +85,6 @@ const ROW_STEPS: Record<RowKey, RuleFormStepId> = {
   runbook: 'details',
   dashboards: 'details',
   status: 'details',
-  actions: 'notifications',
 };
 
 interface Field {
@@ -147,13 +142,6 @@ const LABELS = {
   }),
   status: i18n.translate('xpack.observabilityAlerting.migrateRule.comparison.status', {
     defaultMessage: 'Status',
-  }),
-  actionPolicies: i18n.translate(
-    'xpack.observabilityAlerting.migrateRule.comparison.actionPolicies',
-    { defaultMessage: 'Action policies' }
-  ),
-  actions: i18n.translate('xpack.observabilityAlerting.migrateRule.comparison.actions', {
-    defaultMessage: 'Actions',
   }),
 };
 
@@ -256,7 +244,7 @@ const QueryBlock = ({
   </EuiCodeBlock>
 );
 
-const getClassicFields = (rule: OriginalRule, connectorNames: ConnectorNames): Fields => {
+const getClassicFields = (rule: OriginalRule): Fields => {
   const { query, timeField, timeWindow } = getOriginalRuleSummary(rule.params);
   const hasInvestigationGuide = Boolean(rule.artifacts?.investigation_guide?.blob.trim());
 
@@ -300,17 +288,10 @@ const getClassicFields = (rule: OriginalRule, connectorNames: ConnectorNames): F
             defaultMessage: 'Disabled',
           }),
     },
-    actions: {
-      label: LABELS.actions,
-      value: <ClassicActionList actions={rule.actions} connectorNames={connectorNames} />,
-    },
   };
 };
 
-const getUniversalFields = (
-  { rule, actionPolicies, skippedActions }: RuleMigration,
-  connectorNames: ConnectorNames
-): Fields => {
+const getUniversalFields = (rule: MigratedRule): Fields => {
   const { schedule, query, grouping, recovery, no_data: noData, artifacts } = rule;
   const breachSegment = query.breach?.segment.trim();
   const countArtifacts = (type: string) =>
@@ -374,20 +355,6 @@ const getUniversalFields = (
       ? { recovery: { label: LABELS.recovery, value: RECOVERY_LABELS[recovery.strategy] } }
       : {}),
     ...(noData ? { noData: { label: LABELS.noData, value: NO_DATA_LABELS[noData.strategy] } } : {}),
-    ...(actionPolicies.length || skippedActions.length
-      ? {
-          actions: {
-            label: LABELS.actionPolicies,
-            value: (
-              <ActionPolicyList
-                actionPolicies={actionPolicies}
-                skippedActions={skippedActions}
-                connectorNames={connectorNames}
-              />
-            ),
-          },
-        }
-      : {}),
   };
 };
 
@@ -547,27 +514,21 @@ export const RuleComparison = ({
   migration,
   newRuleActions,
   onEditField,
-  connectorNames,
 }: {
   originalRule: OriginalRule;
   migration: RuleMigrationState;
-  connectorNames: ConnectorNames;
   /** Rendered beside the new rule heading. */
   newRuleActions?: ReactNode;
   /** Opens the form on the step that owns a field; edit icons are hidden when omitted. */
   onEditField?: (stepId: RuleFormStepId) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { result } = migration;
-  const migratedRule = result?.rule;
+  const { rule: migratedRule } = migration;
 
-  const classicFields = useMemo(
-    () => getClassicFields(originalRule, connectorNames),
-    [originalRule, connectorNames]
-  );
+  const classicFields = useMemo(() => getClassicFields(originalRule), [originalRule]);
   const universalFields = useMemo(
-    () => (result ? getUniversalFields(result, connectorNames) : undefined),
-    [result, connectorNames]
+    () => (migratedRule ? getUniversalFields(migratedRule) : undefined),
+    [migratedRule]
   );
 
   const gridCss = css`

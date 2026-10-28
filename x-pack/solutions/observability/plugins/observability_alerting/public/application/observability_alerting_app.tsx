@@ -127,9 +127,11 @@ const ClassicRulesV1Route = ({
   setBreadcrumbs,
   tabs,
   showClassicBadge,
+  canMigrateRule,
 }: {
   coreStart: CoreStart;
   getClassicRulesPage: TriggersAndActionsUIPublicPluginStart['getClassicRulesPage'];
+  canMigrateRule: AlertingV2PublicStart['canMigrateRule'];
   history: ScopedHistory;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   tabs: AppHeaderTab[];
@@ -157,6 +159,7 @@ const ClassicRulesV1Route = ({
     tabs,
     showClassicBadge,
     onMigrateRule,
+    canMigrateRule,
   });
 };
 
@@ -176,8 +179,11 @@ export const ObservabilityAlertingApp = ({
     ActionPoliciesPage,
     ExecutionHistoryPage,
     CreateRuleFlyout,
+    canMigrateRule,
     migrateRule,
     createMigratedRule,
+    createMigratedActionPolicies,
+    isMigratedActionPolicyReady,
     createAlertingV2HostApp: createHost,
   } = alertingVTwo;
 
@@ -269,6 +275,7 @@ export const ObservabilityAlertingApp = ({
               setBreadcrumbs={setBreadcrumbs}
               tabs={rulesV1Tabs}
               showClassicBadge={hasV2Rules}
+              canMigrateRule={canMigrateRule}
             />
           </EuiPageSection>
         </Route>
@@ -280,6 +287,8 @@ export const ObservabilityAlertingApp = ({
               CreateRuleFlyout={CreateRuleFlyout}
               migrateRule={migrateRule}
               createMigratedRule={createMigratedRule}
+              createMigratedActionPolicies={createMigratedActionPolicies}
+              isMigratedActionPolicyReady={isMigratedActionPolicyReady}
               onRuleCreated={navigateToUniversalRules}
             />
           </EuiPageSection>

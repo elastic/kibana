@@ -43,7 +43,9 @@ const CreateRuleFlyout = jest.fn(({ flyoutType, onClose }: CreateRuleFlyoutProps
 ));
 
 const migrateRule = jest.fn(async () => undefined);
-const createMigratedRule = jest.fn(async () => ({ ruleId: 'v2-rule-1', actionPolicyIds: [] }));
+const createMigratedRule = jest.fn(async () => 'v2-rule-1');
+const createMigratedActionPolicies = jest.fn(async () => []);
+const isMigratedActionPolicyReady = jest.fn(() => true);
 
 const renderPage = () => {
   const setBreadcrumbs = jest.fn();
@@ -60,6 +62,8 @@ const renderPage = () => {
             CreateRuleFlyout={CreateRuleFlyout}
             migrateRule={migrateRule}
             createMigratedRule={createMigratedRule}
+            createMigratedActionPolicies={createMigratedActionPolicies}
+            isMigratedActionPolicyReady={isMigratedActionPolicyReady}
             onRuleCreated={onRuleCreated}
           />
         </Route>

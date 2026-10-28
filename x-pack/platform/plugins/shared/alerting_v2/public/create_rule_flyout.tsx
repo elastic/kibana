@@ -10,7 +10,7 @@ import { EuiErrorBoundary, EuiFlyout, EuiFlyoutBody, EuiLoadingSpinner } from '@
 import useAsync from 'react-use/lib/useAsync';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { ComposeDiscoverFlyoutProps } from '@kbn/alerting-v2-rule-form';
 import { Context } from '@kbn/core-di-browser';
 import {
@@ -18,8 +18,6 @@ import {
   loadComposeDiscoverModules,
   useCreateRuleSubmit,
 } from './compose_discover_flyout_loader';
-import type { ClassicRule } from './migration/types';
-import { migrateRule } from './migration/migrate_rule';
 
 export interface CreateRuleFlyoutProps {
   onClose: () => void;
@@ -27,24 +25,21 @@ export interface CreateRuleFlyoutProps {
   onRuleCreated?: (rule: RuleResponse) => void;
   /** `push` keeps the host page visible beside the form. Defaults to `overlay`. */
   flyoutType?: 'overlay' | 'push';
-  /** Classic rule to convert and prefill the form with; read on mount only. */
-  classicRule?: ClassicRule;
+  /** Rule to prefill the form with (e.g. a migrated classic rule); read on mount only. */
+  initialRule?: CreateRuleData;
   /** Step to open on; pass a new object to jump to a step while the flyout is open. */
   stepRequest?: ComposeDiscoverFlyoutProps['stepRequest'];
 }
 
-const toSyntheticRule = (classicRule: ClassicRule): RuleResponse | undefined => {
-  const migration = migrateRule(classicRule);
-  if (!migration) return undefined;
-
+const toSyntheticRule = (rule: CreateRuleData): RuleResponse => {
   const now = new Date().toISOString();
   const {
     state_transition: stateTransition,
     metadata: { routing_tags: _routingTags, ...metadata },
-    ...rule
-  } = migration.rule;
+    ...ruleData
+  } = rule;
   return {
-    ...rule,
+    ...ruleData,
     metadata,
     state_transition: stateTransition ?? undefined,
     id: '',
@@ -61,12 +56,14 @@ const CreateRuleFlyoutInner = ({
   onClose,
   onRuleCreated,
   flyoutType,
-  classicRule,
+  initialRule: initialRuleData,
   stepRequest,
 }: CreateRuleFlyoutProps) => {
   const { loading, value } = useAsync(loadComposeDiscoverModules, []);
   const historyKey = useMemo(() => Symbol('createRule'), []);
-  const [initialRule] = useState(() => (classicRule ? toSyntheticRule(classicRule) : undefined));
+  const [initialRule] = useState(() =>
+    initialRuleData ? toSyntheticRule(initialRuleData) : undefined
+  );
   const closeRequestRef = useRef<(() => void) | null>(null);
 
   const handleCreated = useCallback(

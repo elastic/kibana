@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Container, ContainerModule } from 'inversify';
-import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
+import { OnSetup, PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
 import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-browser';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
@@ -32,7 +32,9 @@ import { registerTriggerDefinitions } from './lib/workflow_extensions/register_t
 import { registerCreateAlertEventStep } from './lib/workflow_extensions/register_create_alert_event_step';
 import { setKibanaServices } from './kibana_services';
 import type { AlertingV2UIConfig } from './kibana_services';
-import type { AlertingV2PublicStart } from './types';
+import type { AlertingV2PublicSetup, AlertingV2PublicStart } from './types';
+import { RuleMigrationRegistry } from './migration/rule_migration_registry';
+import { isMigratedActionPolicyReady } from './migration/is_migrated_action_policy_ready';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 import type { CreateRuleFlyoutProps } from './create_rule_flyout';
 import type { AlertingV2PageProps } from './application/composable_pages';
@@ -94,6 +96,7 @@ const lazyPageWithContainer = (
 };
 
 export type {
+  AlertingV2PublicSetup,
   AlertingV2PublicStart,
   CreateRuleOptionsFlyoutLegacyItem,
   AlertingV2PageProps,
@@ -101,9 +104,13 @@ export type {
   PrivilegeCheck,
   ActionMigrationNote,
   ClassicRuleAction,
-  CreatedRuleMigration,
+  ConvertRuleParams,
+  DefaultActionPolicy,
   MigratedActionPolicy,
   RuleMigration,
+  RuleMigrationDefinition,
+  RuleParamsConversion,
+  RuleTypeMigration,
   SkippedClassicAction,
 } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
@@ -132,20 +139,40 @@ const pluginModule = new ContainerModule(({ bind }) => {
   bind(WorkflowApi)
     .toDynamicValue(({ get }) => new WorkflowApi(get(CoreStart('http'))))
     .inSingletonScope();
+  bind(RuleMigrationRegistry).toConstantValue(new RuleMigrationRegistry());
+  bind(Setup)
+    .toDynamicValue(({ get }) => {
+      const ruleMigrationRegistry = get(RuleMigrationRegistry);
+      return {
+        ruleMigrations: {
+          register: (definition) => ruleMigrationRegistry.register(definition),
+        },
+      } satisfies AlertingV2PublicSetup;
+    })
+    .inSingletonScope();
   bind(Start)
     .toDynamicValue(({ get }) => {
       const container = get(Container);
+      const ruleMigrationRegistry = get(RuleMigrationRegistry);
       return {
         CreateRuleOptionsFlyout,
         CreateRuleFlyout,
+        canMigrateRule: (ruleTypeId) => ruleMigrationRegistry.has(ruleTypeId),
         migrateRule: async (rule) => {
+          const ruleTypeMigration = await ruleMigrationRegistry.getMigration(rule.ruleTypeId);
+          if (!ruleTypeMigration) return undefined;
           const { migrateRule } = await import('./migration/migrate_rule');
-          return migrateRule(rule);
+          return migrateRule(rule, ruleTypeMigration);
         },
-        createMigratedRule: async (migration) => {
+        createMigratedRule: async (rule) => {
           const { createMigratedRule } = await import('./migration/migrate_rule');
-          return createMigratedRule(get(CoreStart('http')), migration);
+          return createMigratedRule(get(CoreStart('http')), rule);
         },
+        createMigratedActionPolicies: async (actionPolicies) => {
+          const { createMigratedActionPolicies } = await import('./migration/migrate_rule');
+          return createMigratedActionPolicies(get(CoreStart('http')), actionPolicies);
+        },
+        isMigratedActionPolicyReady,
         RulesPage: lazyPageWithContainer(
           () =>
             import('./application/composable_pages').then((m) => ({

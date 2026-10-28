@@ -106,6 +106,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   host?: LocatorHost;
   showClassicBadge?: boolean;
   onMigrateRule?: (ruleId: string) => void;
+  canMigrateRule?: (ruleTypeId: string) => boolean;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {

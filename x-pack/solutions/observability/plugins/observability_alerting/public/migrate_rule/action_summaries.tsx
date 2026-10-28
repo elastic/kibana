@@ -10,6 +10,8 @@ import type { ReactNode } from 'react';
 import {
   EuiBadge,
   EuiBadgeGroup,
+  EuiCodeBlock,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -18,6 +20,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { parse } from 'yaml';
 import type {
   ActionMigrationNote,
   ClassicRuleAction,
@@ -83,7 +86,7 @@ const CLASSIC_NOTIFY_WHEN_LABELS: Record<string, string> = {
 const NOTE_LABELS: Record<ActionMigrationNote, string> = {
   templates_replaced: i18n.translate(
     'xpack.observabilityAlerting.migrateRule.actions.note.templatesReplaced',
-    { defaultMessage: 'Message replaced with the default alert summary' }
+    { defaultMessage: 'Message replaced with the rule type default' }
   ),
   connector_required: i18n.translate(
     'xpack.observabilityAlerting.migrateRule.actions.note.connectorRequired',
@@ -114,31 +117,118 @@ const getRecord = (value: unknown): Record<string, unknown> =>
     ? Object.fromEntries(Object.entries(value))
     : {};
 
-/** Who a classic action notifies: email recipients or a Slack channel. */
-const getClassicTarget = ({ actionTypeId, params }: ClassicRuleAction): string | undefined => {
-  if (actionTypeId === '.email') return getStrings(params.to).join(', ') || undefined;
+const getString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.trim() ? value : undefined;
+
+const parseParams = (params: string): Record<string, unknown> => {
+  try {
+    return getRecord(parse(params));
+  } catch {
+    return {};
+  }
+};
+
+const toChannel = (channel: string | undefined): string | undefined =>
+  channel ? `#${channel.replace(/^#/, '')}` : undefined;
+
+interface MessageConfig {
+  recipients: Array<{ title: string; value: string }>;
+  subject?: string;
+  message?: string;
+}
+
+const LIST_LABELS = {
+  to: i18n.translate('xpack.observabilityAlerting.migrateRule.actions.field.to', {
+    defaultMessage: 'To',
+  }),
+  cc: i18n.translate('xpack.observabilityAlerting.migrateRule.actions.field.cc', {
+    defaultMessage: 'Cc',
+  }),
+  bcc: i18n.translate('xpack.observabilityAlerting.migrateRule.actions.field.bcc', {
+    defaultMessage: 'Bcc',
+  }),
+  channel: i18n.translate('xpack.observabilityAlerting.migrateRule.actions.field.channel', {
+    defaultMessage: 'Channel',
+  }),
+  connector: i18n.translate('xpack.observabilityAlerting.migrateRule.actions.field.connector', {
+    defaultMessage: 'Connector',
+  }),
+  actionGroup: i18n.translate('xpack.observabilityAlerting.migrateRule.actions.field.actionGroup', {
+    defaultMessage: 'Runs on',
+  }),
+  scope: i18n.translate('xpack.observabilityAlerting.migrateRule.actions.field.scope', {
+    defaultMessage: 'Sends',
+  }),
+  fires: i18n.translate('xpack.observabilityAlerting.migrateRule.actions.field.fires', {
+    defaultMessage: 'Fires',
+  }),
+  alertFilter: i18n.translate('xpack.observabilityAlerting.migrateRule.actions.field.alertFilter', {
+    defaultMessage: 'Alert filter',
+  }),
+  matches: i18n.translate('xpack.observabilityAlerting.migrateRule.actions.field.matches', {
+    defaultMessage: 'Matches',
+  }),
+  destination: i18n.translate('xpack.observabilityAlerting.migrateRule.actions.field.destination', {
+    defaultMessage: 'Destination',
+  }),
+  subject: i18n.translate('xpack.observabilityAlerting.migrateRule.actions.field.subject', {
+    defaultMessage: 'Subject',
+  }),
+  message: i18n.translate('xpack.observabilityAlerting.migrateRule.actions.field.message', {
+    defaultMessage: 'Message',
+  }),
+};
+
+const getEmailConfig = (params: Record<string, unknown>): MessageConfig => ({
+  recipients: (['to', 'cc', 'bcc'] as const).flatMap((key) => {
+    const value = getStrings(params[key]).join(', ');
+    return value ? [{ title: LIST_LABELS[key], value }] : [];
+  }),
+  subject: getString(params.subject),
+  message: getString(params.message),
+});
+
+const getSlackConfig = (channel: string | undefined, message: unknown): MessageConfig => ({
+  recipients: channel ? [{ title: LIST_LABELS.channel, value: channel }] : [],
+  message: getString(message),
+});
+
+/** What a classic action sends and to whom. */
+const getClassicMessageConfig = ({ actionTypeId, params }: ClassicRuleAction): MessageConfig => {
+  if (actionTypeId === '.email') return getEmailConfig(params);
+  if (actionTypeId === '.slack') return getSlackConfig(undefined, params.message);
   const subActionParams = getRecord(params.subActionParams);
   const channel =
     getStrings(subActionParams.channelIds)[0] ??
     getStrings(subActionParams.channels)[0] ??
     getStrings(subActionParams.channelNames)[0] ??
-    (typeof subActionParams.channel === 'string' ? subActionParams.channel : undefined);
-  return channel ? `#${channel.replace(/^#/, '')}` : undefined;
+    getString(subActionParams.channel);
+  return getSlackConfig(toChannel(channel), subActionParams.text ?? params.message);
 };
 
-const getClassicFrequency = ({ frequency }: ClassicRuleAction): string => {
-  const scope = frequency?.summary
+/** What a converted workflow step sends and to whom. */
+const getPolicyMessageConfig = ({ stepType, params }: MigratedActionPolicy): MessageConfig => {
+  const stepParams = parseParams(params);
+  return stepType === 'email'
+    ? getEmailConfig(stepParams)
+    : getSlackConfig(toChannel(getString(stepParams.channel)), stepParams.text);
+};
+
+const getClassicScope = ({ frequency }: ClassicRuleAction): string =>
+  frequency?.summary
     ? i18n.translate('xpack.observabilityAlerting.migrateRule.actions.summary', {
         defaultMessage: 'Summary of alerts',
       })
     : i18n.translate('xpack.observabilityAlerting.migrateRule.actions.perAlert', {
         defaultMessage: 'For each alert',
       });
+
+const getClassicFires = ({ frequency }: ClassicRuleAction): string => {
   const notifyWhen = frequency?.notifyWhen ?? 'onActionGroupChange';
   const when = CLASSIC_NOTIFY_WHEN_LABELS[notifyWhen] ?? notifyWhen;
-  const throttle =
-    notifyWhen === 'onThrottleInterval' && frequency?.throttle ? ` (${frequency.throttle})` : '';
-  return `${scope} · ${when}${throttle}`;
+  return notifyWhen === 'onThrottleInterval' && frequency?.throttle
+    ? `${when} (${frequency.throttle})`
+    : when;
 };
 
 const getGroupingLabel = (grouping: Policy['grouping']): string => {
@@ -186,22 +276,51 @@ const getThrottleLabel = (throttle: Policy['throttle']): string => {
   }
 };
 
+interface DetailRow {
+  title: string;
+  description: ReactNode;
+}
+
+const getMessageRows = ({ recipients, subject, message }: MessageConfig): DetailRow[] => [
+  ...recipients.map(({ title, value }) => ({ title, description: value })),
+  ...(subject ? [{ title: LIST_LABELS.subject, description: subject }] : []),
+  ...(message
+    ? [
+        {
+          title: LIST_LABELS.message,
+          description: (
+            <EuiCodeBlock
+              language="text"
+              fontSize="s"
+              paddingSize="s"
+              overflowHeight={240}
+              whiteSpace="pre-wrap"
+              isCopyable
+            >
+              {message}
+            </EuiCodeBlock>
+          ),
+        },
+      ]
+    : []),
+];
+
 const ActionCard = ({
   iconType,
   title,
   subtitle,
-  details,
+  rows,
   badges,
   testSubj,
 }: {
   iconType: string;
   title: string;
   subtitle: string;
-  details: Array<string | undefined>;
+  rows: DetailRow[];
   badges?: ReactNode;
   testSubj: string;
 }) => (
-  <EuiPanel hasBorder paddingSize="s" data-test-subj={testSubj}>
+  <EuiPanel hasBorder paddingSize="m" data-test-subj={testSubj}>
     <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIcon type={iconType} size="m" aria-hidden={true} />
@@ -213,13 +332,6 @@ const ActionCard = ({
         <EuiText size="xs" color="subdued">
           {subtitle}
         </EuiText>
-        {details
-          .filter((detail): detail is string => Boolean(detail))
-          .map((detail) => (
-            <EuiText key={detail} size="xs">
-              {detail}
-            </EuiText>
-          ))}
         {badges && (
           <>
             <EuiSpacer size="xs" />
@@ -228,6 +340,18 @@ const ActionCard = ({
         )}
       </EuiFlexItem>
     </EuiFlexGroup>
+    {rows.length > 0 && (
+      <>
+        <EuiSpacer size="s" />
+        <EuiDescriptionList
+          type="column"
+          compressed
+          rowGutterSize="s"
+          columnWidths={[1, 3]}
+          listItems={rows}
+        />
+      </>
+    )}
   </EuiPanel>
 );
 
@@ -259,13 +383,32 @@ export const ClassicActionList = ({
     <CardList>
       {actions.map((action) => {
         const { label, iconType } = getConnectorType(action.actionTypeId);
+        const connectorName = connectorNames.get(action.id);
         return (
           <ActionCard
             key={action.uuid ?? action.id}
             iconType={iconType}
-            title={connectorNames.get(action.id) ?? label}
-            subtitle={label}
-            details={[getClassicTarget(action), getClassicFrequency(action)]}
+            title={connectorName ?? label}
+            subtitle={i18n.translate(
+              'xpack.observabilityAlerting.migrateRule.actions.classicType',
+              { defaultMessage: '{connectorType} action', values: { connectorType: label } }
+            )}
+            rows={[
+              ...(action.group
+                ? [{ title: LIST_LABELS.actionGroup, description: action.group }]
+                : []),
+              { title: LIST_LABELS.scope, description: getClassicScope(action) },
+              { title: LIST_LABELS.fires, description: getClassicFires(action) },
+              ...(action.alertsFilter
+                ? [
+                    {
+                      title: LIST_LABELS.alertFilter,
+                      description: JSON.stringify(action.alertsFilter),
+                    },
+                  ]
+                : []),
+              ...getMessageRows(getClassicMessageConfig(action)),
+            ]}
             testSubj="migrateRuleClassicAction"
           />
         );
@@ -284,8 +427,12 @@ export const ActionPolicyList = ({
   connectorNames: ConnectorNames;
 }) => (
   <CardList>
-    {actionPolicies.map(({ sourceActionId, stepType, connectorId, policy, notes }) => {
+    {actionPolicies.map((actionPolicy) => {
+      const { sourceActionId, stepType, connectorId, policy, notes } = actionPolicy;
       const { label } = getConnectorType(STEP_CONNECTOR_TYPES[stepType]);
+      const connectorName = connectorId
+        ? connectorNames.get(connectorId) ?? connectorId
+        : undefined;
       return (
         <ActionCard
           key={sourceActionId}
@@ -295,9 +442,26 @@ export const ActionPolicyList = ({
             defaultMessage: 'Action policy · {connectorType} workflow',
             values: { connectorType: label },
           })}
-          details={[
-            connectorId ? connectorNames.get(connectorId) : undefined,
-            `${getGroupingLabel(policy.grouping)} · ${getThrottleLabel(policy.throttle)}`,
+          rows={[
+            ...(policy.matcher?.tags?.length
+              ? [{ title: LIST_LABELS.matches, description: policy.matcher.tags.join(', ') }]
+              : []),
+            { title: LIST_LABELS.scope, description: getGroupingLabel(policy.grouping) },
+            { title: LIST_LABELS.fires, description: getThrottleLabel(policy.throttle) },
+            {
+              title: LIST_LABELS.destination,
+              description: i18n.translate(
+                'xpack.observabilityAlerting.migrateRule.actions.destinationValue',
+                {
+                  defaultMessage: 'New {connectorType} workflow',
+                  values: { connectorType: label },
+                }
+              ),
+            },
+            ...(connectorName
+              ? [{ title: LIST_LABELS.connector, description: connectorName }]
+              : []),
+            ...getMessageRows(getPolicyMessageConfig(actionPolicy)),
           ]}
           badges={
             notes.length > 0 && (
@@ -325,7 +489,7 @@ export const ActionPolicyList = ({
             values: { connectorType: label },
           })}
           subtitle={SKIPPED_REASON_LABELS[reason]}
-          details={[]}
+          rows={[]}
           testSubj="migrateRuleSkippedAction"
         />
       );

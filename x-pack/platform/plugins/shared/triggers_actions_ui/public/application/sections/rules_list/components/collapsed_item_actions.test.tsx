@@ -463,9 +463,11 @@ describe('CollapsedItemActions', () => {
       const getKibanaMock = jest.mocked(useKibana);
 
       const onMigrateRule = jest.fn();
+      const canMigrateRule = (ruleTypeId: string) => ruleTypeId === '.es-query';
 
       afterEach(() => {
         delete getKibanaMock().services.onMigrateRule;
+        delete getKibanaMock().services.canMigrateRule;
         onMigrateRule.mockClear();
       });
 
@@ -480,6 +482,7 @@ describe('CollapsedItemActions', () => {
 
       test('is shown for Elasticsearch query rules when enabled', async () => {
         getKibanaMock().services.onMigrateRule = onMigrateRule;
+        getKibanaMock().services.canMigrateRule = canMigrateRule;
         render(<CollapsedItemActions {...getPropsWithRule({ ruleTypeId: '.es-query' })} />);
 
         await userEvent.click(screen.getByTestId('selectActionButton'));
@@ -498,6 +501,7 @@ describe('CollapsedItemActions', () => {
 
       test('is hidden for other rule types when enabled', async () => {
         getKibanaMock().services.onMigrateRule = onMigrateRule;
+        getKibanaMock().services.canMigrateRule = canMigrateRule;
         render(<CollapsedItemActions {...getPropsWithRule()} />);
 
         await userEvent.click(screen.getByTestId('selectActionButton'));

@@ -46,9 +46,34 @@ export type RuleParamsConversion = Pick<CreateRuleData, 'query'> &
   };
 
 /** Converts the params of one classic rule type into v2 rule fields. */
-export interface RuleConverter {
+export type ConvertRuleParams = (params: Record<string, unknown>) => RuleParamsConversion;
+
+/**
+ * Liquid templates over the action policy workflow payload (`inputs.payload`), used for
+ * migrated actions whose classic mustache templates cannot be converted.
+ */
+export interface DefaultActionPolicy {
+  /** Email subject. */
+  subject: string;
+  /** Email message and Slack text. */
+  message: string;
+}
+
+/** How one classic rule type migrates to v2. */
+export interface RuleTypeMigration {
+  convertParams: ConvertRuleParams;
+  /** The rule type's v2 counterpart of its classic default action message. */
+  defaultActionPolicy?: DefaultActionPolicy;
+}
+
+/**
+ * Registered by a classic rule type's owner to make its rules migratable. Rule-level fields
+ * (name, tags, schedule, alert delay, artifacts, actions) are converted by alerting v2.
+ */
+export interface RuleMigrationDefinition {
   ruleTypeId: string;
-  convertParams: (params: Record<string, unknown>) => RuleParamsConversion;
+  /** Loads the migration on demand so it stays out of the page-load bundle. */
+  load: () => Promise<RuleTypeMigration>;
 }
 
 export type ActionMigrationNote =
@@ -86,9 +111,4 @@ export interface RuleMigration {
   rule: CreateRuleData;
   actionPolicies: MigratedActionPolicy[];
   skippedActions: SkippedClassicAction[];
-}
-
-export interface CreatedRuleMigration {
-  ruleId: string;
-  actionPolicyIds: string[];
 }

@@ -12,13 +12,12 @@ import {
 } from '@kbn/alerting-v2-constants';
 import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { resolveArtifactId } from '@kbn/alerting-v2-utils';
-import { esQueryRuleConverter } from './converters/es_query_rule_converter';
 import { getNonEmptyString } from './converters/utils';
 import {
   convertClassicActions,
   getMigrationRoutingTag,
 } from './converters/action_policy_converter';
-import type { ClassicRule, RuleConverter, RuleMigration } from './types';
+import type { ClassicRule, ConvertRuleParams, RuleMigration, RuleTypeMigration } from './types';
 
 const getArtifacts = ({ artifacts }: ClassicRule): CreateRuleData['artifacts'] => {
   if (!artifacts) return undefined;
@@ -45,49 +44,35 @@ const getArtifacts = ({ artifacts }: ClassicRule): CreateRuleData['artifacts'] =
 };
 
 /**
- * Converts classic rules into v2 alert rules. Rule-level fields (name, schedule, alert
- * delay, artifacts) are mapped here; each registered converter maps its rule type's params.
+ * Converts a classic rule into a v2 alert rule plus simple action policies. Rule-level fields
+ * (name, schedule, alert delay, artifacts, actions) are mapped here; the rule type's migration
+ * maps its params and supplies default action messages.
  */
-export class RuleMigrationService {
-  private readonly converters = new Map<string, RuleConverter>();
-
-  public register(converter: RuleConverter): void {
-    if (this.converters.has(converter.ruleTypeId)) {
-      throw new Error(`A rule converter is already registered for "${converter.ruleTypeId}"`);
-    }
-    this.converters.set(converter.ruleTypeId, converter);
-  }
-
-  public canMigrate(ruleTypeId: string): boolean {
-    return this.converters.has(ruleTypeId);
-  }
-
-  /** Returns `undefined` when no converter is registered for the rule's type. */
-  public migrate(rule: ClassicRule): RuleMigration | undefined {
-    const converter = this.converters.get(rule.ruleTypeId);
-    if (!converter) return undefined;
-
-    const routingTag = getMigrationRoutingTag(rule.id);
-    const { actionPolicies, skippedActions } = convertClassicActions({
-      actions: rule.actions ?? [],
-      ruleName: rule.name,
-      routingTag,
-    });
-
-    return {
-      rule: convertRule(rule, converter, actionPolicies.length ? [routingTag] : []),
-      actionPolicies,
-      skippedActions,
-    };
-  }
-}
-
-const convertRule = (
+export const convertClassicRule = (
   rule: ClassicRule,
-  converter: RuleConverter,
+  { convertParams, defaultActionPolicy }: RuleTypeMigration
+): RuleMigration => {
+  const routingTag = getMigrationRoutingTag(rule.id);
+  const { actionPolicies, skippedActions } = convertClassicActions({
+    actions: rule.actions ?? [],
+    ruleName: rule.name,
+    routingTag,
+    defaultActionPolicy,
+  });
+
+  return {
+    rule: convertRule(rule, convertParams, actionPolicies.length ? [routingTag] : []),
+    actionPolicies,
+    skippedActions,
+  };
+};
+
+function convertRule(
+  rule: ClassicRule,
+  convertParams: ConvertRuleParams,
   routingTags: string[]
-): CreateRuleData => {
-  const { lookback, time_field: timeField, ...converted } = converter.convertParams(rule.params);
+): CreateRuleData {
+  const { lookback, time_field: timeField, ...converted } = convertParams(rule.params);
   const artifacts = getArtifacts(rule);
 
   return {
@@ -111,10 +96,4 @@ const convertRule = (
     ...converted,
     ...(artifacts ? { artifacts } : {}),
   };
-};
-
-export const createRuleMigrationService = (): RuleMigrationService => {
-  const service = new RuleMigrationService();
-  service.register(esQueryRuleConverter);
-  return service;
-};
+}

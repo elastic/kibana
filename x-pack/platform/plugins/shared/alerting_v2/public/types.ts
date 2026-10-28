@@ -7,7 +7,12 @@
 
 import type { ComponentType } from 'react';
 import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
-import type { ClassicRule, CreatedRuleMigration, RuleMigration } from './migration/types';
+import type {
+  ClassicRule,
+  MigratedActionPolicy,
+  RuleMigration,
+  RuleMigrationDefinition,
+} from './migration/types';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 import type { CreateRuleFlyoutProps } from './create_rule_flyout';
 import type { AlertingV2PageProps } from './application/composable_pages';
@@ -23,22 +28,39 @@ export type MigratedRule = CreateRuleData;
 export type {
   ActionMigrationNote,
   ClassicRuleAction,
-  CreatedRuleMigration,
+  ConvertRuleParams,
+  DefaultActionPolicy,
   MigratedActionPolicy,
+  RuleMigrationDefinition,
+  RuleParamsConversion,
+  RuleTypeMigration,
   RuleMigration,
   SkippedClassicAction,
 } from './migration/types';
 
+export interface AlertingV2PublicSetup {
+  ruleMigrations: {
+    /** Makes a classic rule type migratable to v2; throws when the type is already registered. */
+    register: (definition: RuleMigrationDefinition) => void;
+  };
+}
+
 export interface AlertingV2PublicStart {
   CreateRuleOptionsFlyout: ComponentType<CreateRuleOptionsFlyoutProps>;
   CreateRuleFlyout: ComponentType<CreateRuleFlyoutProps>;
+  /** Whether the rule type has a registered migration. */
+  canMigrateRule: (ruleTypeId: string) => boolean;
   /**
    * Converts a classic rule to a v2 rule and simple action policies; resolves `undefined`
-   * when its type has no converter.
+   * when its type has no registered migration.
    */
   migrateRule: (rule: ClassicRule) => Promise<RuleMigration | undefined>;
-  /** Creates the migrated rule and the action policies that are ready to create. */
-  createMigratedRule: (migration: RuleMigration) => Promise<CreatedRuleMigration>;
+  /** Creates the migrated rule and resolves its id. */
+  createMigratedRule: (rule: MigratedRule) => Promise<string>;
+  /** Creates a workflow and action policy for each converted action that is ready; resolves their ids. */
+  createMigratedActionPolicies: (actionPolicies: MigratedActionPolicy[]) => Promise<string[]>;
+  /** Whether a converted action has everything it needs to be created. */
+  isMigratedActionPolicyReady: (actionPolicy: MigratedActionPolicy) => boolean;
   RulesPage: ComponentType<AlertingV2PageProps>;
   RuleLibraryPage: ComponentType<AlertingV2PageProps>;
   EpisodesPage: ComponentType<AlertingV2PageProps>;

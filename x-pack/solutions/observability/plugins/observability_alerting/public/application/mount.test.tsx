@@ -34,8 +34,11 @@ describe('mountObservabilityAlertingApp', () => {
       ExecutionHistoryPage: () => null,
       CreateRuleOptionsFlyout: () => null,
       CreateRuleFlyout: () => null,
+      canMigrateRule: jest.fn(() => false),
       migrateRule: jest.fn(async () => undefined),
-      createMigratedRule: jest.fn(async () => ({ ruleId: 'v2-rule-1', actionPolicyIds: [] })),
+      createMigratedRule: jest.fn(async () => 'v2-rule-1'),
+      createMigratedActionPolicies: jest.fn(async () => []),
+      isMigratedActionPolicyReady: jest.fn(() => true),
       createAlertingV2HostApp: mockCreateAlertingV2HostApp,
     };
     const triggersActionsUi = {

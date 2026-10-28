@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertConsumers, ES_QUERY_ID } from '@kbn/rule-data-utils';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { asyncScheduler } from 'rxjs';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -68,6 +68,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     ruleTypeRegistry,
     notifications: { toasts },
     onMigrateRule,
+    canMigrateRule,
   } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
@@ -244,7 +245,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   });
 
   const migratePanelItem =
-    onMigrateRule && item.ruleTypeId === ES_QUERY_ID
+    onMigrateRule && canMigrateRule?.(item.ruleTypeId)
       ? [
           {
             disabled: !item.isEditable,

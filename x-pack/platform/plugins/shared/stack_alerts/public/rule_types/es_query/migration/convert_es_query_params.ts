@@ -6,10 +6,14 @@
  */
 
 import { Parser } from '@elastic/esql';
-import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { getGroupByColumnsFromQuery, splitResultToRuleQuery } from '@kbn/alerting-v2-rule-form';
-import type { RuleConverter, RuleParamsConversion } from '../types';
-import { getNonEmptyString, isRecord } from './utils';
+import type { ConvertRuleParams, RuleParamsConversion } from '@kbn/alerting-v2-plugin/public';
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const getNonEmptyString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.trim() ? value.trim() : undefined;
 
 const getIndices = (value: unknown): string[] => {
   if (typeof value === 'string') return value.trim() ? [value.trim()] : [];
@@ -56,19 +60,17 @@ const getRuleQuery = (params: Record<string, unknown>): RuleParamsConversion['qu
   return { base: indices.length ? `FROM ${indices.join(', ')}` : '' };
 };
 
-export const esQueryRuleConverter: RuleConverter = {
-  ruleTypeId: ES_QUERY_ID,
-  convertParams: (params) => {
-    const query = getRuleQuery(params);
-    const groupingFields = getGroupByColumnsFromQuery(query.base);
-    const timeField = getNonEmptyString(params.timeField);
-    const lookback = getLookback(params);
+/** Converts Elasticsearch query rule params into a v2 query, time field, lookback and grouping. */
+export const convertEsQueryParams: ConvertRuleParams = (params) => {
+  const query = getRuleQuery(params);
+  const groupingFields = getGroupByColumnsFromQuery(query.base);
+  const timeField = getNonEmptyString(params.timeField);
+  const lookback = getLookback(params);
 
-    return {
-      query,
-      ...(timeField ? { time_field: timeField } : {}),
-      ...(lookback ? { lookback } : {}),
-      ...(groupingFields.length ? { grouping: { fields: groupingFields } } : {}),
-    };
-  },
+  return {
+    query,
+    ...(timeField ? { time_field: timeField } : {}),
+    ...(lookback ? { lookback } : {}),
+    ...(groupingFields.length ? { grouping: { fields: groupingFields } } : {}),
+  };
 };

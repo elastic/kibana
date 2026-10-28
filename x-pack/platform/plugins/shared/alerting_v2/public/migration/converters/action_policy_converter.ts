@@ -10,6 +10,7 @@ import { getInlineActionStepDefinition } from '@kbn/alerting-v2-rule-form';
 import type {
   ActionMigrationNote,
   ClassicRuleAction,
+  DefaultActionPolicy,
   MigratedActionPolicy,
   SkippedClassicAction,
 } from '../types';
@@ -40,7 +41,7 @@ const getDefaultTemplate = (stepType: MigratedActionPolicy['stepType'], field: s
 /**
  * Classic actions use mustache over `context.*`; workflows use liquid over `inputs.payload`.
  * The rule name is the only variable with a fixed value, so it is inlined and any other
- * template falls back to the step's default alert summary.
+ * template falls back to the rule type's default message, or the step's default alert summary.
  */
 const convertTemplate = (
   value: unknown,
@@ -86,10 +87,26 @@ interface StepConversion {
   notes: ActionMigrationNote[];
 }
 
-const convertEmail = (action: ClassicRuleAction, ruleName: string): StepConversion => {
+interface ConversionContext {
+  ruleName: string;
+  defaultActionPolicy?: DefaultActionPolicy;
+}
+
+const convertEmail = (
+  action: ClassicRuleAction,
+  { ruleName, defaultActionPolicy }: ConversionContext
+): StepConversion => {
   const { params } = action;
-  const subject = convertTemplate(params.subject, ruleName, `[${ruleName}] Alert`);
-  const message = convertTemplate(params.message, ruleName, getDefaultTemplate('email', 'message'));
+  const subject = convertTemplate(
+    params.subject,
+    ruleName,
+    defaultActionPolicy?.subject ?? `[${ruleName}] Alert`
+  );
+  const message = convertTemplate(
+    params.message,
+    ruleName,
+    defaultActionPolicy?.message ?? getDefaultTemplate('email', 'message')
+  );
   const cc = getStrings(params.cc);
   const bcc = getStrings(params.bcc);
 
@@ -113,7 +130,10 @@ const getSlackApiChannel = (subActionParams: Record<string, unknown>): string =>
   getStrings(subActionParams.channelNames)[0] ??
   '';
 
-const convertSlack = (action: ClassicRuleAction, ruleName: string): StepConversion => {
+const convertSlack = (
+  action: ClassicRuleAction,
+  { ruleName, defaultActionPolicy }: ConversionContext
+): StepConversion => {
   const { params, actionTypeId } = action;
   const subActionParams = isRecord(params.subActionParams) ? params.subActionParams : params;
   const isSlackV2 = actionTypeId === '.slack2';
@@ -123,7 +143,7 @@ const convertSlack = (action: ClassicRuleAction, ruleName: string): StepConversi
   const text = convertTemplate(
     subActionParams.text,
     ruleName,
-    getDefaultTemplate('slack2.sendMessage', 'text')
+    defaultActionPolicy?.message ?? getDefaultTemplate('slack2.sendMessage', 'text')
   );
 
   const notes: ActionMigrationNote[] = [];
@@ -140,7 +160,7 @@ const convertSlack = (action: ClassicRuleAction, ruleName: string): StepConversi
 
 const STEP_CONVERTERS: Record<
   string,
-  (action: ClassicRuleAction, ruleName: string) => StepConversion
+  (action: ClassicRuleAction, context: ConversionContext) => StepConversion
 > = {
   '.email': convertEmail,
   '.slack_api': convertSlack,
@@ -158,10 +178,12 @@ export const convertClassicActions = ({
   actions,
   ruleName,
   routingTag,
+  defaultActionPolicy,
 }: {
   actions: ClassicRuleAction[];
   ruleName: string;
   routingTag: string;
+  defaultActionPolicy?: DefaultActionPolicy;
 }): { actionPolicies: MigratedActionPolicy[]; skippedActions: SkippedClassicAction[] } => {
   const actionPolicies: MigratedActionPolicy[] = [];
   const skippedActions: SkippedClassicAction[] = [];
@@ -187,7 +209,10 @@ export const convertClassicActions = ({
       continue;
     }
 
-    const { stepType, connectorId, params, notes } = converter(action, ruleName);
+    const { stepType, connectorId, params, notes } = converter(action, {
+      ruleName,
+      defaultActionPolicy,
+    });
     actionPolicies.push({
       sourceActionId,
       sourceConnectorId: action.id,

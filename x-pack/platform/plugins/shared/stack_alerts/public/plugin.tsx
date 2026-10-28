@@ -8,6 +8,8 @@
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import type { AlertingV2PublicSetup } from '@kbn/alerting-v2-plugin/public';
+import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { registerRuleTypes } from './rule_types';
 
 export type Setup = void;
@@ -16,6 +18,7 @@ export type Start = void;
 export interface StackAlertsPublicSetupDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   alerting: AlertingSetup;
+  alertingVTwo?: AlertingV2PublicSetup;
 }
 
 export class StackAlertsPublicPlugin implements Plugin<Setup, Start, StackAlertsPublicSetupDeps> {
@@ -24,7 +27,10 @@ export class StackAlertsPublicPlugin implements Plugin<Setup, Start, StackAlerts
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
-  public setup(core: CoreSetup, { triggersActionsUi, alerting }: StackAlertsPublicSetupDeps) {
+  public setup(
+    core: CoreSetup,
+    { triggersActionsUi, alerting, alertingVTwo }: StackAlertsPublicSetupDeps
+  ) {
     registerRuleTypes(
       {
         ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
@@ -32,6 +38,14 @@ export class StackAlertsPublicPlugin implements Plugin<Setup, Start, StackAlerts
       },
       this.isServerless
     );
+
+    alertingVTwo?.ruleMigrations.register({
+      ruleTypeId: ES_QUERY_ID,
+      load: () =>
+        import('./rule_types/es_query/migration/es_query_migration').then(
+          ({ esQueryRuleMigration }) => esQueryRuleMigration
+        ),
+    });
   }
 
   public start() {}

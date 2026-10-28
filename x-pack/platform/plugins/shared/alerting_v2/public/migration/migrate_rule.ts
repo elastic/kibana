@@ -10,25 +10,17 @@ import {
   ALERTING_V2_ACTION_POLICY_API_PATH,
   ALERTING_V2_RULE_API_PATH,
 } from '@kbn/alerting-v2-constants';
-import type { ActionPolicyResponse, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { ActionPolicyResponse, CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { buildInlineWorkflowYaml } from '@kbn/alerting-v2-rule-form';
 import { WorkflowApi } from '@kbn/workflows-ui';
-import { createRuleMigrationService } from './rule_migration_service';
-import type {
-  ClassicRule,
-  CreatedRuleMigration,
-  MigratedActionPolicy,
-  RuleMigration,
-} from './types';
+import { convertClassicRule } from './convert_classic_rule';
+import { isMigratedActionPolicyReady } from './is_migrated_action_policy_ready';
+import type { ClassicRule, MigratedActionPolicy, RuleMigration, RuleTypeMigration } from './types';
 
-const ruleMigrationService = createRuleMigrationService();
-
-export const migrateRule = (rule: ClassicRule): RuleMigration | undefined =>
-  ruleMigrationService.migrate(rule);
-
-/** Policies whose workflow step has everything it needs; the rest need user input first. */
-export const isActionPolicyReady = ({ connectorId, notes }: MigratedActionPolicy): boolean =>
-  connectorId !== null && !notes.includes('connector_required');
+export const migrateRule = (
+  rule: ClassicRule,
+  ruleTypeMigration: RuleTypeMigration
+): RuleMigration => convertClassicRule(rule, ruleTypeMigration);
 
 const createActionPolicy = async (
   http: HttpStart,
@@ -56,23 +48,28 @@ const createActionPolicy = async (
   }
 };
 
-/**
- * Creates the migrated rule, then a single-step workflow and action policy for each ready
- * converted action. Policies that still need input (e.g. a Slack v2 connector) are skipped.
- */
 export const createMigratedRule = async (
   http: HttpStart,
-  { rule, actionPolicies }: RuleMigration
-): Promise<CreatedRuleMigration> => {
-  const { id: ruleId } = await http.post<RuleResponse>(ALERTING_V2_RULE_API_PATH, {
+  rule: CreateRuleData
+): Promise<string> => {
+  const { id } = await http.post<RuleResponse>(ALERTING_V2_RULE_API_PATH, {
     body: JSON.stringify(rule),
   });
+  return id;
+};
 
+/**
+ * Creates a single-step workflow and action policy for each ready converted action. Policies
+ * that still need input (e.g. a Slack v2 connector) are skipped.
+ */
+export const createMigratedActionPolicies = async (
+  http: HttpStart,
+  actionPolicies: MigratedActionPolicy[]
+): Promise<string[]> => {
   const workflowApi = new WorkflowApi(http);
   const actionPolicyIds: string[] = [];
-  for (const actionPolicy of actionPolicies.filter(isActionPolicyReady)) {
+  for (const actionPolicy of actionPolicies.filter(isMigratedActionPolicyReady)) {
     actionPolicyIds.push(await createActionPolicy(http, workflowApi, actionPolicy));
   }
-
-  return { ruleId, actionPolicyIds };
+  return actionPolicyIds;
 };

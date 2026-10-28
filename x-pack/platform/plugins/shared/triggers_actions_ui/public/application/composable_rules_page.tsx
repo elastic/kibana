@@ -24,6 +24,7 @@ export const ComposableClassicRulesPage = ({
   tabs,
   showClassicBadge,
   onMigrateRule,
+  canMigrateRule,
   internalDeps,
 }: ClassicRulesPageProps & { internalDeps: ClassicRulesPageInternalDeps }) => {
   const { pluginsStart } = internalDeps;
@@ -91,6 +92,7 @@ export const ComposableClassicRulesPage = ({
       tabs,
       showClassicBadge,
       onMigrateRule,
+      canMigrateRule,
     }),
     [
       coreStart,
@@ -104,6 +106,7 @@ export const ComposableClassicRulesPage = ({
       tabs,
       showClassicBadge,
       onMigrateRule,
+      canMigrateRule,
     ]
   );
 
