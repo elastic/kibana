@@ -266,7 +266,10 @@ describe('rule_tuning_review proposed change', () => {
         })
         .trim();
       expect(comment).not.toMatch(/\n\n\n/);
-      expect(comment).toMatch(/\*\*Proposed change\*\*\n\S/);
+      // Each section heading is followed directly by its text.
+      expect(comment).not.toMatch(
+        /\*\*(Why this rule needs tuning|Summary|Proposed change|Backtest)\*\*\n\n/
+      );
       if (structuredOutput.change_type !== 'manual') {
         expect(comment).toMatch(/\S\n\nApprove to /);
       }
