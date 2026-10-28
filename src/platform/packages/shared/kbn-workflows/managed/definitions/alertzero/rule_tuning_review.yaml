@@ -1067,7 +1067,7 @@ steps:
         Alerts with the current rule: {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{% if steps.record_preview_outcome.output.current_limit_reached == true %}at least {% endif %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %}
         Alerts with the proposed change: {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{% if steps.record_preview_outcome.output.proposed_limit_reached == true %}at least {% endif %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}
         {% if steps.record_preview_outcome.output.current_limit_reached == true or steps.record_preview_outcome.output.proposed_limit_reached == true %}
-        A count marked "at least" stopped at the rule's maximum alerts per execution ({{ steps.fetch_rule.output.max_signals }}), so the real number is higher and the two counts may not be comparable.
+        A count marked "at least" stopped at the rule's maximum alerts per execution ({{ steps.fetch_rule.output.max_signals }}), so the real number is higher.
         {% endif %}
         {% if steps.record_preview_outcome.output.current_error_text != '' %}
         Current preview errors: {{ steps.record_preview_outcome.output.current_error_text }}
