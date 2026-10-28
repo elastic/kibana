@@ -261,7 +261,6 @@ export function initializeActionApi(
 ): {
   api: ViewInDiscoverCallbacks & Partial<HasDrilldowns>;
   anyStateChange$: Observable<void>;
-  getComparators: () => DrilldownsManager['comparators'];
   getLatestState: () => ReturnType<DrilldownsManager['getLatestState']>;
   cleanup: () => void;
   reinitializeState: (lastSaved?: LensWireAPIConfig) => void;
@@ -278,9 +277,6 @@ export function initializeActionApi(
       ),
     },
     anyStateChange$: drilldownsManager.anyStateChange$,
-    getComparators: () => ({
-      ...drilldownsManager.comparators,
-    }),
     getLatestState: drilldownsManager.getLatestState,
     cleanup: () => {
       drilldownsManager.cleanup();
