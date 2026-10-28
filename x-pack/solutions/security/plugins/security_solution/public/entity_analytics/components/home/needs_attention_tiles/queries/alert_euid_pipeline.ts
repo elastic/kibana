@@ -69,7 +69,9 @@ export const buildAlertEuidPipeline = (
   const fork = [
     '| FORK (',
     `    WHERE ${[...guard, '`kibana.alert.entity.id` IS NOT NULL'].join(' AND ')}`,
-    '    | EVAL _ea_entity_id = `kibana.alert.entity.id`',
+    // An unmapped alerts field is nullified to NULL. FORK then rejects the branch because the
+    // derived EUIDs are KEYWORD. The cast keeps this branch KEYWORD when the alerts index is absent.
+    '    | EVAL _ea_entity_id = `kibana.alert.entity.id`::KEYWORD',
     `    | KEEP ${keepColumns}`,
     '  )',
     '  (',

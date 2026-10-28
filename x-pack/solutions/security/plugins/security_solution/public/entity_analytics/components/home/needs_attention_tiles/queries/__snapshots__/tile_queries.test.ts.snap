@@ -6,7 +6,7 @@ FROM .alerts-security.alerts-default, .entities.v2.latest.default-00001 METADATA
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND @timestamp >= NOW() - 1 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND \`entity.relationships.resolution.resolved_to\` IS NOT NULL)
 | FORK (
     WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
-    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
+    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`::KEYWORD
     | KEEP _ea_entity_id, \`kibana.alert.severity\`
   )
   (
@@ -239,7 +239,7 @@ FROM .alerts-security.alerts-default, .entities.v2.latest.default-00001 METADATA
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND @timestamp >= NOW() - 30 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND \`entity.relationships.resolution.resolved_to\` IS NOT NULL)
 | FORK (
     WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
-    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
+    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`::KEYWORD
     | KEEP _ea_entity_id, \`kibana.alert.severity\`
   )
   (
