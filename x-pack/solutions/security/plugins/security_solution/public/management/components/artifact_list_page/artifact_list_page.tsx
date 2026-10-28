@@ -116,6 +116,11 @@ interface ArtifactListPageWithSimpleTableProps {
    */
   showEnabledColumn?: boolean;
   /**
+   * When true, the view flyout lists the artifact's comments.
+   * Only applicable when `showAsSimpleTable` is true.
+   */
+  showCommentsInViewFlyout?: boolean;
+  /**
    * Renders the artifact-specific definition in the view flyout.
    * Receives the full artifact item.
    */
@@ -153,6 +158,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     additionalActions,
     showAsSimpleTable = false,
     showEnabledColumn = false,
+    showCommentsInViewFlyout = false,
     ViewModeComponent,
     policyAssignmentInfoTooltip,
   }) => {
@@ -509,6 +515,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               size={flyoutSize}
               labels={labels}
               showEnabledSwitch={showEnabledColumn}
+              showComments={showCommentsInViewFlyout}
               allowCardEditAction={allowCardEditAction}
               allowCardDeleteAction={allowCardDeleteAction}
               onTakeAction={handleOnCardActionClick}
@@ -524,6 +531,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               itemId={itemId}
               size={flyoutSize}
               labels={labels}
+              showComments={showCommentsInViewFlyout}
               allowCardEditAction={allowCardEditAction}
               allowCardDeleteAction={allowCardDeleteAction}
               onTakeAction={handleOnCardActionClick}
