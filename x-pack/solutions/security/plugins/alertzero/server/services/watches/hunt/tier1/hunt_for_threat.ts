@@ -12,6 +12,7 @@ import type {
   HuntIncompleteness,
   HuntIoc,
 } from '@kbn/alertzero-common';
+import { isIndexExclusion } from '../../../../../common/remote_cluster';
 import { assertHuntWindow } from '../common/assert_hunt_window';
 import { summarizeHit } from '../common/summarize_hit';
 import {
@@ -295,7 +296,7 @@ export const huntForThreat = async (
 
   // An empty index list would search every index rather than none, and a list of
   // exclusions alone resolves to none: neither is a universe to hunt.
-  if (!scope.search_patterns.some((pattern) => !pattern.startsWith('-'))) {
+  if (!scope.search_patterns.some((pattern) => !isIndexExclusion(pattern))) {
     return emptyHuntForThreatResult(
       'scope_blocked',
       iocs,
