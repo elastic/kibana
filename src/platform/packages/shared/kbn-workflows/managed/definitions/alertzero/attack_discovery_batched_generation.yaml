@@ -201,7 +201,8 @@ steps:
           # Keeps this Worker's attacks from deduplicating against an analyst's
           # Attack Discovery run over the same alerts. The hash is otherwise the same
           # for both whenever the same user ran the Worker, because ad hoc attacks
-          # are owned by the user. Keep in sync with `watch_floor_ad_worker`.
+          # are owned by the user. Keep in sync with
+          # ALERTZERO_ATTACK_DISCOVERY_WORKER_GENERATION_SOURCE.
           generation_source: watch_floor_ad_worker
           # The discoveries are read back from the index below instead. They
           # dominate this step's output, and an output above the engine's

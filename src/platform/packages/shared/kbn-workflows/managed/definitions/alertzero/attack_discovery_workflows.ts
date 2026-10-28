@@ -29,6 +29,14 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID =
   'system-security-attack-discovery-review';
 export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID =
   'system-security-attack-discovery-batched-generation';
+/**
+ * The `generation_source` the Worker's batched generation passes to
+ * `security.attack-discovery.run`. It contributes to the attack hash, so the
+ * Worker's attacks never dedupe against a manual Attack Discovery run by the same
+ * user. YAML cannot import this: keep the literal in
+ * `attack_discovery_batched_generation.yaml` equal to it (a test checks).
+ */
+export const ALERTZERO_ATTACK_DISCOVERY_WORKER_GENERATION_SOURCE = 'watch_floor_ad_worker';
 export const ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID =
   'system-security-attack-discovery-fp-tp-analysis';
 export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID =
@@ -144,7 +152,9 @@ export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW = {
  * run step's ground-truth gate, so false-positive triage happens only in the
  * review's FP/TP analysis. Version 5 skips alerts the review tagged
  * `az:ad_correlated`. Version 6 gives the child a 12h workflow timeout and
- * limits retrieval to the prorated alert cap. Each bump is a deliberate
+ * limits retrieval to the prorated alert cap. Version 7 marks the workflow billable.
+ * Version 8 passes `generation_source`, so the Worker's attacks stop deduplicating
+ * against a manual run by the same user. Each bump is a deliberate
  * rollout signal; the YAML change alone already rolls out through `definitionHash`.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
@@ -152,7 +162,7 @@ export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
   id: ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 7,
+  version: 8,
   yaml: ATTACK_DISCOVERY_BATCHED_GENERATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

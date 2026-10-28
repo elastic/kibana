@@ -280,8 +280,10 @@ steps:
   #
   # kibana-d7aa: still no pre-create lookup, and none is needed — the id is derived
   # rather than discovered. Uniqueness across producers is the persist 409 on the
-  # attack hash; a regrouped alert set, and Kibana scheduled AD vs this Worker, are
-  # intentional producer splits. `generation_source` exists but is not passed yet.
+  # attack hash; a regrouped alert set, Kibana scheduled AD vs this Worker, and a manual
+  # run vs this Worker are intentional producer splits. The Worker passes
+  # `generation_source`, which is what splits it from a manual run by the user who
+  # last saved the Worker (same `ownerId`).
   - name: open_investigation
     type: ai.conversation.create
     with:
