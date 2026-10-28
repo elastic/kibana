@@ -15,15 +15,20 @@ import { createIndexEsqlQuery, hasSelectedEsqlQuery } from '../../utils/sources'
 import { SelectedSourcesList } from '../selected_sources_list';
 import { SourceTypePanel } from '../source_type_panel';
 import { ConnectorsTab } from './connectors_tab';
-import { ElasticsearchSourcesTab } from './elasticsearch_sources_tab';
+import { ElasticsearchSourcesPanel } from './elasticsearch_sources_panel';
 import type { SelectedSource } from './types';
 
 interface SourcePickerProps {
   selectedSources: SelectedSource[];
   onChange: (sources: SelectedSource[]) => void;
+  disabled?: boolean;
 }
 
-export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) => {
+export const SourcePicker = ({
+  selectedSources,
+  onChange,
+  disabled = false,
+}: SourcePickerProps) => {
   const hasRendered = useHasRendered();
 
   const esqlSources = useMemo(
@@ -91,10 +96,11 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
           />
         }
       >
-        <ElasticsearchSourcesTab
+        <ElasticsearchSourcesPanel
           selectedSources={selectedSources}
           onAddIndex={addIndexSource}
           onAddEsql={addEsqlSource}
+          disabled={disabled}
         />
         {esqlSources.length > 0 && (
           <>
@@ -104,6 +110,7 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
               connectorNameById={connectorNameById}
               connectorActionTypeById={connectorActionTypeById}
               onRemove={removeSource}
+              disabled={disabled}
               animateOnMount={hasRendered}
             />
           </>
@@ -125,6 +132,7 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
         <ConnectorsTab
           selectedConnectorIds={selectedConnectorIds}
           onToggle={toggleConnectorSource}
+          disabled={disabled}
         />
         {connectorSources.length > 0 && (
           <>
@@ -134,6 +142,7 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
               connectorNameById={connectorNameById}
               connectorActionTypeById={connectorActionTypeById}
               onRemove={removeSource}
+              disabled={disabled}
               animateOnMount={hasRendered}
             />
           </>

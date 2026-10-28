@@ -21,6 +21,7 @@ interface SourceRowProps {
   icon: ReactNode;
   children?: ReactNode;
   onRemove?: () => void;
+  disabled?: boolean;
   sourceType?: SourceType;
   animateOnMount?: boolean;
   'data-test-subj'?: string;
@@ -32,6 +33,7 @@ export const SourceRow = ({
   icon,
   children,
   onRemove,
+  disabled = false,
   sourceType,
   animateOnMount = false,
   'data-test-subj': dataTestSubj,
@@ -61,6 +63,7 @@ export const SourceRow = ({
               iconType="cross"
               color="text"
               onClick={onRemove}
+              isDisabled={disabled}
               aria-label={removeLabel}
               data-test-subj="contextRemoveSourceButton"
               {...getEbtProps({

@@ -33,17 +33,19 @@ const SEARCH_DEBOUNCE_MS = 300;
 
 const getEsqlQuery = (query: AggregateQuery): string => ('esql' in query ? query.esql : '');
 
-interface ElasticsearchSourcesTabProps {
+interface ElasticsearchSourcesPanelProps {
   selectedSources: SelectedSource[];
   onAddIndex: (indexName: string) => void;
   onAddEsql: (query: string) => void;
+  disabled?: boolean;
 }
 
-export const ElasticsearchSourcesTab = ({
+export const ElasticsearchSourcesPanel = ({
   selectedSources,
   onAddIndex,
   onAddEsql,
-}: ElasticsearchSourcesTabProps) => {
+  disabled = false,
+}: ElasticsearchSourcesPanelProps) => {
   const accordionId = useId();
   const [searchValue, setSearchValue] = useState('');
   const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
@@ -93,7 +95,7 @@ export const ElasticsearchSourcesTab = ({
   };
 
   return (
-    <div data-test-subj="contextElasticsearchSourcesTab">
+    <div data-test-subj="contextElasticsearchSourcesPanel">
       <EuiProgress
         size="xs"
         color="accent"
@@ -122,6 +124,7 @@ export const ElasticsearchSourcesTab = ({
           sortMatchesBy="startsWith"
           selectedOptions={[]}
           isClearable={false}
+          isDisabled={disabled}
           aria-label={i18n.translate('xpack.contextEngine.sourcePicker.index.comboAriaLabel', {
             defaultMessage: 'Select an index, data stream or alias',
           })}
@@ -150,7 +153,7 @@ export const ElasticsearchSourcesTab = ({
         }
         paddingSize="m"
       >
-        <div data-test-subj="contextEsqlTab">
+        <div data-test-subj="contextAdvancedEsqlEditor">
           <EuiFormRow fullWidth>
             <div css={{ minHeight: EDITOR_INLINE_MIN_HEIGHT }}>
               <ESQLLangEditor
@@ -172,7 +175,7 @@ export const ElasticsearchSourcesTab = ({
               <EuiButton
                 iconType="plusCircle"
                 onClick={handleAddEsql}
-                isDisabled={!trimmedEsqlQuery}
+                isDisabled={!trimmedEsqlQuery || disabled}
                 data-test-subj="contextAddEsqlSourceButton"
                 {...getEbtProps({
                   element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,

@@ -33,9 +33,21 @@ interface Draft {
   selectedSources: SelectedSource[];
 }
 
+/** Rebuilds a fresh draft from an AI index's persisted sources. */
+const reseedDraft = (aiIndex: GetAiIndexResponse): Draft => {
+  const initialSources = toSelectedSources(aiIndex.sources);
+  return {
+    aiIndexId: aiIndex.id,
+    persistedSources: aiIndex.sources,
+    initialSources,
+    selectedSources: initialSources,
+  };
+};
+
 /**
- * sources. The draft is seeded from `aiIndex` as soon as it loads (or reloads under a different id),
- * and survives saves so the picker stays editable without a separate view mode.
+ * Manages a local draft of an AI index's sources for editing. The draft is seeded from `aiIndex`
+ * as soon as it loads (or reloads under a different id), and survives saves so the picker stays
+ * editable without a separate view mode.
  */
 export const useSourcesEditor = ({
   aiIndex,
@@ -48,23 +60,14 @@ export const useSourcesEditor = ({
     if (draft !== undefined) {
       setDraft(undefined);
     }
-  } else {
-    const isDifferentIndex = draft?.aiIndexId !== aiIndex.id;
+  } else if (draft === undefined || draft.aiIndexId !== aiIndex.id) {
+    // No draft yet, or switched to a different AI index: start from its persisted sources.
+    setDraft(reseedDraft(aiIndex));
+  } else if (draft.persistedSources !== aiIndex.sources) {
     // Reference check, not content: avoids reverting to stale sources on the re-render right after save.
-    const isStaleFetch = draft?.persistedSources !== aiIndex.sources;
-    const isUnedited =
-      draft !== undefined && areSourceSelectionsEqual(draft.selectedSources, draft.initialSources);
-
-    // Never resync over unsaved edits.
-    if (isDifferentIndex || (isStaleFetch && isUnedited)) {
-      const initialSources = toSelectedSources(aiIndex.sources);
-      setDraft({
-        aiIndexId: aiIndex.id,
-        persistedSources: aiIndex.sources,
-        initialSources,
-        selectedSources: initialSources,
-      });
-    }
+    const isUnedited = areSourceSelectionsEqual(draft.selectedSources, draft.initialSources);
+    // Only resync over unedited drafts; never clobber unsaved edits.
+    setDraft(isUnedited ? reseedDraft(aiIndex) : { ...draft, persistedSources: aiIndex.sources });
   }
 
   const cancel = useCallback(() => {
@@ -73,15 +76,9 @@ export const useSourcesEditor = ({
     );
   }, []);
 
-  const setSelectedSources = useCallback(
-    (selectedSources: SelectedSource[]) => {
-      if (isSaving) {
-        return;
-      }
-      setDraft((current) => (current ? { ...current, selectedSources } : current));
-    },
-    [isSaving]
-  );
+  const setSelectedSources = useCallback((selectedSources: SelectedSource[]) => {
+    setDraft((current) => (current ? { ...current, selectedSources } : current));
+  }, []);
 
   const hasChanges = useMemo(() => {
     if (!draft) {
@@ -91,7 +88,7 @@ export const useSourcesEditor = ({
   }, [draft]);
 
   const save = useCallback(async () => {
-    if (!draft || !aiIndex) {
+    if (!draft || !aiIndex || isSaving) {
       return;
     }
     const startedDraft = draft;
@@ -102,7 +99,7 @@ export const useSourcesEditor = ({
       );
       onSaved();
     }
-  }, [aiIndex, draft, onSaved, saveSources]);
+  }, [aiIndex, draft, isSaving, onSaved, saveSources]);
 
   return {
     selectedSources: draft?.selectedSources ?? [],

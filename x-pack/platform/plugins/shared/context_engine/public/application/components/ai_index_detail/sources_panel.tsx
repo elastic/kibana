@@ -110,7 +110,11 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
       )}
       {!isLoading && !isManaged && (
         <div data-test-subj="contextEditSourcesInlineEditor">
-          <SourcePicker selectedSources={selectedSources} onChange={setSelectedSources} />
+          <SourcePicker
+            selectedSources={selectedSources}
+            onChange={setSelectedSources}
+            disabled={isSaving}
+          />
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -136,7 +140,7 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
                 size="s"
                 onClick={save}
                 isLoading={isSaving}
-                isDisabled={!hasChanges}
+                isDisabled={!hasChanges || isSaving}
                 data-test-subj="contextEditSourcesDoneButton"
                 {...getEbtProps({
                   element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSourcesPanel,

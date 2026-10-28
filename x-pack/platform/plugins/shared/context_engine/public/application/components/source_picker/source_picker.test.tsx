@@ -180,7 +180,7 @@ describe('SourcePicker', () => {
     renderWithProviders(<Harness />);
 
     expect(screen.getByTestId('contextElasticsearchDataPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('contextElasticsearchSourcesTab')).toBeInTheDocument();
+    expect(screen.getByTestId('contextElasticsearchSourcesPanel')).toBeInTheDocument();
     expect(screen.getByTestId('contextConnectorsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('contextConnectorsTab')).toBeInTheDocument();
     expect(screen.getByTestId('contextIndexComboBox')).toBeInTheDocument();

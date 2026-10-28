@@ -16,6 +16,7 @@ interface SelectedSourcesListProps {
   connectorNameById: Map<string, string>;
   connectorActionTypeById: Map<string, string>;
   onRemove: (source: SelectedSource) => void;
+  disabled?: boolean;
   animateOnMount?: boolean;
 }
 
@@ -27,6 +28,7 @@ export const SelectedSourcesList = ({
   connectorNameById,
   connectorActionTypeById,
   onRemove,
+  disabled = false,
   animateOnMount = false,
 }: SelectedSourcesListProps) => (
   <EuiFlexGroup direction="column" gutterSize="s">
@@ -45,6 +47,7 @@ export const SelectedSourcesList = ({
             icon={icon}
             sourceType={source.type}
             onRemove={() => onRemove(source)}
+            disabled={disabled}
             data-test-subj={`contextSelectedSource-${source.type}-${index}`}
           >
             {content}
