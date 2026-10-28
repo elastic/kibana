@@ -18,11 +18,13 @@ const installTokenUsageDashboardRoute = createGenAiSettingsServerRoute({
     const { request, plugins } = resources;
 
     const coreStart = await plugins.core.start();
-    const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
+    const globalUiSettingsClient = coreStart.uiSettings.globalAsScopedToClient(
       coreStart.savedObjects.getScopedClient(request)
     );
 
-    const isEnabled = await uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING);
+    const isEnabled = await globalUiSettingsClient.get<boolean>(
+      GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING
+    );
     if (!isEnabled) {
       return { installed: false };
     }

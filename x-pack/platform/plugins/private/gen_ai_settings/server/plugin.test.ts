@@ -7,7 +7,10 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
-import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
+} from '@kbn/management-settings-ids';
 import { NO_DEFAULT_CONNECTOR, FALLBACK_DEFAULT_CONNECTOR_ID } from '../common/constants';
 import { GenAiSettingsPlugin } from './plugin';
 
@@ -63,6 +66,17 @@ describe('GenAiSettingsPlugin', () => {
     );
     return registeredSettings![0][GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR].getValue;
   };
+
+  it('registers the token usage tracking setting globally so every space shares it', () => {
+    const { coreSetup } = setupPlugin();
+
+    expect(coreSetup.uiSettings.registerGlobal).toHaveBeenCalledWith({
+      [GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING]: expect.objectContaining({ value: false }),
+    });
+    expect(coreSetup.uiSettings.register).not.toHaveBeenCalledWith({
+      [GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING]: expect.anything(),
+    });
+  });
 
   describe('default AI connector getValue()', () => {
     it('returns FALLBACK_DEFAULT_CONNECTOR_ID when the preferred connector exists', async () => {

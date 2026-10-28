@@ -128,7 +128,7 @@ export class GenAiSettingsPlugin
       },
     });
 
-    core.uiSettings.register({
+    core.uiSettings.registerGlobal({
       [GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING]: {
         name: i18n.translate('xpack.genAiSettings.tokenUsageTracking.name', {
           defaultMessage: 'Token usage tracking',

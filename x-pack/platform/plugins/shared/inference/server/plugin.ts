@@ -185,8 +185,10 @@ export class InferencePlugin
     const installDashboardIfTokenUsageTrackingEnabled = async () => {
       const internalRepository = core.savedObjects.createInternalRepository();
       const internalClient = new SavedObjectsClient(internalRepository);
-      const uiSettingsClient = core.uiSettings.asScopedToClient(internalClient);
-      const isEnabled = await uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING);
+      const globalUiSettingsClient = core.uiSettings.globalAsScopedToClient(internalClient);
+      const isEnabled = await globalUiSettingsClient.get<boolean>(
+        GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING
+      );
       if (!isEnabled) {
         return;
       }
@@ -337,8 +339,9 @@ export class InferencePlugin
       return async () => {
         try {
           const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
-          const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
-          return await uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING);
+          const globalUiSettingsClient =
+            core.uiSettings.globalAsScopedToClient(scopedSavedObjectsClient);
+          return await globalUiSettingsClient.get<boolean>(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING);
         } catch (e) {
           return false;
         }

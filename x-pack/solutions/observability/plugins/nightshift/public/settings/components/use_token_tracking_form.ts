@@ -18,15 +18,15 @@ export type TokenTrackingSaveResult = 'saved' | 'failed' | 'noop';
 
 export const useTokenTrackingForm = ({ isEnabled }: { isEnabled: boolean }) => {
   const { application, http, notifications, settings } = useKibana().services;
-  const settingsClient = settings.client;
+  const globalSettingsClient = settings.globalClient;
   const canEdit = isEnabled && application.capabilities.advancedSettings?.save === true;
   const tracking$ = useMemo(
-    () => settingsClient.get$<boolean>(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING, false),
-    [settingsClient]
+    () => globalSettingsClient.get$<boolean>(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING, false),
+    [globalSettingsClient]
   );
   const observedEnabled = useObservable(
     tracking$,
-    settingsClient.get<boolean>(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING, false)
+    globalSettingsClient.get<boolean>(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING, false)
   );
   const [savedEnabled, setSavedEnabled] = useState(observedEnabled);
   const [draftEnabled, setDraftEnabled] = useState<boolean>();
@@ -70,12 +70,15 @@ export const useTokenTrackingForm = ({ isEnabled }: { isEnabled: boolean }) => {
     saveInProgress.current = true;
     setIsSaving(true);
     let updateError: Error | undefined;
-    const updateErrorSubscription = settingsClient.getUpdateErrors$().subscribe((error) => {
+    const updateErrorSubscription = globalSettingsClient.getUpdateErrors$().subscribe((error) => {
       updateError = error;
     });
 
     try {
-      const wasSaved = await settingsClient.set(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING, nextEnabled);
+      const wasSaved = await globalSettingsClient.set(
+        GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
+        nextEnabled
+      );
       if (!wasSaved) {
         throw (
           updateError ??
@@ -126,7 +129,7 @@ export const useTokenTrackingForm = ({ isEnabled }: { isEnabled: boolean }) => {
       updateErrorSubscription.unsubscribe();
       setIsSaving(false);
     }
-  }, [draftEnabled, http, isDirty, notifications.toasts, settingsClient]);
+  }, [draftEnabled, http, isDirty, notifications.toasts, globalSettingsClient]);
 
   return {
     enabled,

@@ -6,25 +6,17 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING } from '@kbn/management-settings-ids';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SignificantEventsServer } from '../../types';
 import { resolveTokenTrackingCoverage } from './token_tracking_coverage';
-
-jest.mock('@kbn/core-http-server-utils', () => ({
-  kibanaRequestFactory: jest.fn((rawRequest) => rawRequest),
-}));
 
 const request = { headers: { authorization: 'test' } } as unknown as KibanaRequest;
 const logger = loggerMock.create();
 const getAll = jest.fn();
 const getSetting = jest.fn();
-const enabledBySpace = new Map<string, boolean>();
-const getScopedClient = jest.fn((spaceRequest: { spaceId: string }) => ({
-  spaceId: spaceRequest.spaceId,
-}));
-const asScopedToClient = jest.fn((soClient: { spaceId: string }) => ({
-  get: () => getSetting(soClient.spaceId),
-}));
+const getScopedClient = jest.fn((rawRequest: KibanaRequest) => rawRequest);
+const globalAsScopedToClient = jest.fn(() => ({ get: getSetting }));
 
 const createServer = ({ spacesAvailable = true }: { spacesAvailable?: boolean } = {}) =>
   ({
@@ -37,51 +29,32 @@ const createServer = ({ spacesAvailable = true }: { spacesAvailable?: boolean } 
       : undefined,
     core: {
       savedObjects: { getScopedClient },
-      uiSettings: { asScopedToClient },
+      uiSettings: { globalAsScopedToClient },
     },
   } as unknown as SignificantEventsServer);
 
 describe('resolveTokenTrackingCoverage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    enabledBySpace.clear();
-    getSetting.mockImplementation(async (spaceId: string) => enabledBySpace.get(spaceId) ?? false);
+    getSetting.mockResolvedValue(false);
   });
 
-  it('counts enabled settings across every space and deduplicates the default space', async () => {
+  it('reports full coverage across every space when the global setting is on', async () => {
     getAll.mockResolvedValue([{ id: 'default' }, { id: 'engineering' }, { id: 'security' }]);
-    enabledBySpace.set('default', true);
-    enabledBySpace.set('engineering', false);
-    enabledBySpace.set('security', true);
+    getSetting.mockResolvedValue(true);
 
-    await expect(
-      resolveTokenTrackingCoverage({ request, server: createServer(), logger })
-    ).resolves.toEqual({
-      status: 'partial',
-      enabledSpaceCount: 2,
-      totalSpaceCount: 3,
-    });
-    expect(getSetting.mock.calls.map(([spaceId]) => spaceId).sort()).toEqual([
-      'default',
-      'engineering',
-      'security',
-    ]);
-  });
-
-  it('reports full and empty coverage', async () => {
-    getAll.mockResolvedValue([{ id: 'default' }, { id: 'engineering' }]);
-    enabledBySpace.set('default', true);
-    enabledBySpace.set('engineering', true);
     await expect(
       resolveTokenTrackingCoverage({ request, server: createServer(), logger })
     ).resolves.toEqual({
       status: 'full',
-      enabledSpaceCount: 2,
-      totalSpaceCount: 2,
+      enabledSpaceCount: 3,
+      totalSpaceCount: 3,
     });
+  });
 
-    enabledBySpace.set('default', false);
-    enabledBySpace.set('engineering', false);
+  it('reports no coverage when the global setting is off', async () => {
+    getAll.mockResolvedValue([{ id: 'default' }, { id: 'engineering' }]);
+
     await expect(
       resolveTokenTrackingCoverage({ request, server: createServer(), logger })
     ).resolves.toEqual({
@@ -91,8 +64,32 @@ describe('resolveTokenTrackingCoverage', () => {
     });
   });
 
-  it('checks only the default space when Spaces is unavailable', async () => {
-    enabledBySpace.set('default', true);
+  it('reads the global setting once instead of once per space', async () => {
+    getAll.mockResolvedValue([{ id: 'default' }, { id: 'engineering' }, { id: 'security' }]);
+
+    await resolveTokenTrackingCoverage({ request, server: createServer(), logger });
+
+    expect(globalAsScopedToClient).toHaveBeenCalledTimes(1);
+    expect(getSetting).toHaveBeenCalledTimes(1);
+    expect(getSetting).toHaveBeenCalledWith(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING);
+  });
+
+  it('counts the default space once when it is also listed', async () => {
+    getAll.mockResolvedValue([{ id: 'default' }, { id: 'engineering' }]);
+    getSetting.mockResolvedValue(true);
+
+    await expect(
+      resolveTokenTrackingCoverage({ request, server: createServer(), logger })
+    ).resolves.toEqual({
+      status: 'full',
+      enabledSpaceCount: 2,
+      totalSpaceCount: 2,
+    });
+  });
+
+  it('counts only the default space when Spaces is unavailable', async () => {
+    getSetting.mockResolvedValue(true);
+
     await expect(
       resolveTokenTrackingCoverage({
         request,
@@ -106,9 +103,10 @@ describe('resolveTokenTrackingCoverage', () => {
     });
   });
 
-  it('checks the default space when enumeration returns no spaces', async () => {
+  it('counts the default space when enumeration returns no spaces', async () => {
     getAll.mockResolvedValue([]);
-    enabledBySpace.set('default', true);
+    getSetting.mockResolvedValue(true);
+
     await expect(
       resolveTokenTrackingCoverage({ request, server: createServer(), logger })
     ).resolves.toEqual({
@@ -118,41 +116,10 @@ describe('resolveTokenTrackingCoverage', () => {
     });
   });
 
-  it('limits concurrent settings reads across spaces', async () => {
-    getAll.mockResolvedValue([
-      { id: 'default' },
-      ...Array.from({ length: 11 }, (_, index) => ({ id: `space-${index + 1}` })),
-    ]);
-    let activeReads = 0;
-    let maximumActiveReads = 0;
-    let releaseReads: () => void = () => {};
-    const readGate = new Promise<void>((resolve) => {
-      releaseReads = resolve;
-    });
-    getSetting.mockImplementation(async () => {
-      activeReads += 1;
-      maximumActiveReads = Math.max(maximumActiveReads, activeReads);
-      if (getSetting.mock.calls.length === 10) {
-        releaseReads();
-      }
-      await readGate;
-      activeReads -= 1;
-      return true;
-    });
-
-    await expect(
-      resolveTokenTrackingCoverage({ request, server: createServer(), logger })
-    ).resolves.toEqual({
-      status: 'full',
-      enabledSpaceCount: 12,
-      totalSpaceCount: 12,
-    });
-    expect(maximumActiveReads).toBe(10);
-  });
-
-  it('returns unavailable coverage when a space setting cannot be read', async () => {
+  it('returns unavailable coverage when the setting cannot be read', async () => {
     getAll.mockResolvedValue([{ id: 'default' }]);
     getSetting.mockRejectedValue(new Error('settings failed'));
+
     await expect(
       resolveTokenTrackingCoverage({ request, server: createServer(), logger })
     ).resolves.toEqual({
@@ -167,6 +134,7 @@ describe('resolveTokenTrackingCoverage', () => {
 
   it('returns unavailable coverage when spaces cannot be enumerated', async () => {
     getAll.mockRejectedValue(new Error('spaces failed'));
+
     await expect(
       resolveTokenTrackingCoverage({ request, server: createServer(), logger })
     ).resolves.toEqual({

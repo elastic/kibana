@@ -74,6 +74,9 @@ const SETTING_KEYS = [
   AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID,
 ];
 
+// Settings read and written at the global scope, shared by all spaces.
+const GLOBAL_SETTING_KEYS = [GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING];
+
 export const SettingsContextProvider = ({ children }: { children: React.ReactNode }) => {
   const value = useSettings({ settingsKeys: SETTING_KEYS });
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
@@ -87,24 +90,30 @@ function combineErrors(errors: Error[]): Error {
 function getSettingsFields({
   settingsKeys,
   uiSettings,
+  globalUiSettings,
 }: {
   settingsKeys: string[];
   uiSettings?: IUiSettingsClient;
+  globalUiSettings?: IUiSettingsClient;
 }) {
-  if (!uiSettings) {
+  if (!uiSettings || !globalUiSettings) {
     return {};
   }
 
-  const uiSettingsDefinition = uiSettings.getAll();
-  const normalizedSettings = normalizeSettings(uiSettingsDefinition);
+  const normalizedSettings = normalizeSettings(uiSettings.getAll());
+  const normalizedGlobalSettings = normalizeSettings(globalUiSettings.getAll());
 
   return settingsKeys.reduce<Record<string, FieldDefinition>>((acc, key) => {
-    const setting: UiSettingMetadata = normalizedSettings[key];
+    const isGlobal = GLOBAL_SETTING_KEYS.includes(key);
+    const client = isGlobal ? globalUiSettings : uiSettings;
+    const setting: UiSettingMetadata = (isGlobal ? normalizedGlobalSettings : normalizedSettings)[
+      key
+    ];
     if (setting) {
       const field = getFieldDefinition({
         id: key,
         setting,
-        params: { isCustom: uiSettings.isCustom(key), isOverridden: uiSettings.isOverridden(key) },
+        params: { isCustom: client.isCustom(key), isOverridden: client.isOverridden(key) },
       });
       acc[key] = field;
     }
@@ -116,6 +125,9 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
   const {
     services: { settings, notifications },
   } = useKibana();
+
+  const getClientForKey = (key: string): IUiSettingsClient =>
+    GLOBAL_SETTING_KEYS.includes(key) ? settings.globalClient : settings.client;
 
   const [unsavedChanges, setUnsavedChanges] = React.useState<Record<string, UnsavedFieldChange>>(
     {}
@@ -129,28 +141,34 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
   const fieldsQuery = useQuery({
     queryKey: ['settingsFields', settingsKeys],
     queryFn: async () => {
-      return getSettingsFields({ settingsKeys, uiSettings: settings?.client });
+      return getSettingsFields({
+        settingsKeys,
+        uiSettings: settings?.client,
+        globalUiSettings: settings?.globalClient,
+      });
     },
     refetchOnWindowFocus: true,
   });
 
   // Subscribe to UI settings changes to update in real-time when values change
   React.useEffect(() => {
-    if (!settings?.client) {
+    if (!settings?.client || !settings?.globalClient) {
       return;
     }
 
-    const subscription = settings.client.getUpdate$().subscribe(({ key }) => {
-      // If the changed setting is one we're tracking, invalidate the query to refetch
-      if (settingsKeys.includes(key)) {
-        queryClient.invalidateQueries({ queryKey: ['settingsFields', settingsKeys] });
-      }
-    });
+    const subscriptions = [settings.client, settings.globalClient].map((client) =>
+      client.getUpdate$().subscribe(({ key }) => {
+        // If the changed setting is one we're tracking, invalidate the query to refetch
+        if (settingsKeys.includes(key)) {
+          queryClient.invalidateQueries({ queryKey: ['settingsFields', settingsKeys] });
+        }
+      })
+    );
 
     return () => {
-      subscription.unsubscribe();
+      subscriptions.forEach((subscription) => subscription.unsubscribe());
     };
-  }, [settings?.client, settingsKeys, queryClient]);
+  }, [settings?.client, settings?.globalClient, settingsKeys, queryClient]);
 
   const saveSingleSettingMutation = useMutation({
     mutationFn: async ({
@@ -160,7 +178,7 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
       id: string;
       change: UnsavedFieldChange<UiSettingsType>['unsavedValue'];
     }) => {
-      await settings.client.set(id, change);
+      await getClientForKey(id).set(id, change);
       queryClient.invalidateQueries({ queryKey: ['settingsFields', settingsKeys] });
     },
   });
@@ -175,9 +193,11 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
         }
 
         const updateErrors: Error[] = [];
-        const subscription = settings.client.getUpdateErrors$().subscribe((error) => {
-          updateErrors.push(error);
-        });
+        const subscriptions = [settings.client, settings.globalClient].map((client) =>
+          client.getUpdateErrors$().subscribe((error) => {
+            updateErrors.push(error);
+          })
+        );
         try {
           const fieldsMap = fieldsQuery.data ?? {};
           const requiresReload = Object.keys(unsavedChanges).some(
@@ -185,7 +205,7 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
           );
           await Promise.all(
             Object.entries(unsavedChanges).map(([key, value]) => {
-              return settings.client.set(key, value.unsavedValue);
+              return getClientForKey(key).set(key, value.unsavedValue);
             })
           );
           queryClient.invalidateQueries({ queryKey: ['settingsFields', settingsKeys] });
@@ -195,9 +215,7 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
           }
           return requiresReload;
         } finally {
-          if (subscription) {
-            subscription.unsubscribe();
-          }
+          subscriptions.forEach((subscription) => subscription.unsubscribe());
         }
       }
       return false;
