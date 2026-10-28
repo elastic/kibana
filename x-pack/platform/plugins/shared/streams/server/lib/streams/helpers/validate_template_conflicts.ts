@@ -5,49 +5,7 @@
  * 2.0.
  */
 
-/**
- * Converts an index pattern to a regular expression.
- *
- * Rules:
- * - Escapes all special regex characters except *
- * - Converts * to .* for wildcard matching
- *
- * @param pattern The index pattern (e.g., "logs-*-*", "foo-logs-bar-*")
- * @returns A RegExp that can be used to test if an index name matches the pattern
- *
- * @example
- * ```typescript
- * const regex = indexPatternToRegex('logs-*-*');
- * regex.test('logs-app-default'); // true
- * regex.test('metrics-app-default'); // false
- * ```
- */
-export function indexPatternToRegex(pattern: string): RegExp {
-  // Escape special regex characters except for *
-  const escapedPattern = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
-  // Replace * with .* for wildcard matching
-  const regexPattern = escapedPattern.replace(/\*/g, '.*');
-  return new RegExp(`^${regexPattern}$`);
-}
-
-/**
- * Checks if an index name matches an index pattern.
- *
- * @param indexName The name of the index to test (e.g., "logs-app-default")
- * @param pattern The index pattern from an index template (e.g., "logs-*-*")
- * @returns true if the index name matches the index pattern, false otherwise
- *
- * @example
- * ```typescript
- * matchesPattern('logs-app-default', 'logs-*-*'); // true
- * matchesPattern('foo-logs-bar-baz', 'foo-logs-bar-*'); // true
- * matchesPattern('metrics-app-default', 'logs-*-*'); // false
- * ```
- */
-export function matchesPattern(indexName: string, pattern: string): boolean {
-  const regex = indexPatternToRegex(pattern);
-  return regex.test(indexName);
-}
+import { matchesIndexPattern } from '../../../../common/matches_index_pattern';
 
 interface IndexTemplate {
   name: string;
@@ -116,7 +74,7 @@ export function findConflictingTemplates(
       }
 
       // Check if at least one pattern matches the stream name
-      return patternsArray.some((pattern: string) => matchesPattern(streamName, pattern));
+      return patternsArray.some((pattern: string) => matchesIndexPattern(streamName, pattern));
     })
     .map((templateEntry) => {
       const templatePatterns = templateEntry.index_template.index_patterns || [];
@@ -124,7 +82,7 @@ export function findConflictingTemplates(
 
       // Filter to only include patterns that match
       const matchingPatterns = patternsArray.filter((pattern: string) =>
-        matchesPattern(streamName, pattern)
+        matchesIndexPattern(streamName, pattern)
       );
 
       return {

@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH } from '../../../common/constants';
+
 // ── Shared schema primitives reused across V1 and V2 ─────────────────────────
 
 const ProviderSchema = schema.oneOf([
@@ -91,6 +93,23 @@ export const CloudOnboardingDeploymentSchemaV2 = schema.object({
   agentPolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
   policyIdsByInstance: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   ...SharedFields,
+});
+
+// ── V3: integrationName + description ────────────────────────────────────────
+// Common integration settings entered in the Service settings step. Neither field is in
+// mappings.properties (dynamic: false), so no mapping change is needed.
+export const CloudOnboardingDeploymentSchemaV3 = CloudOnboardingDeploymentSchemaV2.extends({
+  integrationName: schema.maybe(
+    schema.string({ maxLength: CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH })
+  ),
+  description: schema.maybe(schema.string({ maxLength: 2048 })),
+});
+
+// ── V4: namespace ────────────────────────────────────────────────────────────
+// Global data stream namespace from the Service settings step. Not in mappings.properties
+// (dynamic: false), so no mapping change is needed.
+export const CloudOnboardingDeploymentSchemaV4 = CloudOnboardingDeploymentSchemaV3.extends({
+  namespace: schema.maybe(schema.string({ maxLength: 100 })),
 });
 
 // ── V1 ───────────────────────────────────────────────────────────────────────
