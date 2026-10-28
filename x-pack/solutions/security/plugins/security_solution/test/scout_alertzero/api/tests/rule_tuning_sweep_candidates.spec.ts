@@ -295,6 +295,17 @@ apiTest.describe.serial(
         })),
         { name: 'delete seeded alerts', run: () => clearAlerts(esClient) },
         { name: `delete space ${SPACE_ID}`, run: () => apiServices.spaces.delete(SPACE_ID) },
+        // Deleting the space leaves its alerts index behind. Resolved by name: wildcard
+        // deletes are refused by default.
+        {
+          name: 'delete the space alerts index',
+          run: async () => {
+            const backing = Object.keys(
+              await esClient.indices.get({ index: ALERTS_INDEX, ignore_unavailable: true })
+            );
+            if (backing.length > 0) await esClient.indices.delete({ index: backing });
+          },
+        },
       ]);
     });
 
