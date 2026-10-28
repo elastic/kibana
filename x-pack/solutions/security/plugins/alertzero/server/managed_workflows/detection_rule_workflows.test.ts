@@ -745,11 +745,24 @@ describe('detection rule workflows', () => {
         expect(path).toContain(
           "{{ 'alert.attributes.enabled: true and alert.attributes.consumer: siem' | url_encode }}"
         );
-        expect(path).toContain('per_page=10000');
+        expect(path).toContain('per_page={{ consts.enabled_rules_page_size }}');
         expect(path).toContain('fields=revision');
         expect(lookup['on-failure']).toEqual({ continue: true });
         expect(String(resolveEnabled.with?.rule_uuids)).toContain(
           "steps.list_enabled_rules.output.data | default: consts.no_rows | map: 'id'"
+        );
+        // The result window is the saved-objects page cap; a fuller space is reported.
+        const consts = (tuning as unknown as { consts: Record<string, number> }).consts;
+        expect(consts.enabled_rules_page_size).toBe(10000);
+        expect(String(resolveEnabled.with?.truncated)).toBe(
+          '${{ steps.list_enabled_rules.output.total > consts.enabled_rules_page_size }}'
+        );
+        const report = tuningSteps.find(({ name }) => name === 'report_worker_run_completed')!;
+        expect(String(report.with?.degraded_reason)).toContain(
+          '{% elsif steps.resolve_enabled_rules.output.truncated %}capacity'
+        );
+        expect(String(report.with?.run_outcome)).toContain(
+          '{%- elsif steps.resolve_enabled_rules.output.truncated -%}\ndegraded_partial'
         );
 
         const rowsExpr = String(rows.with?.rows);
@@ -1851,6 +1864,7 @@ describe('detection rule workflows', () => {
           'lookup_failed',
           'reviews_in_flight',
           'reviews_requested',
+          'rules_truncated',
         ]);
         expect(outputs.reviews_requested).toContain('steps.resolve_fanout_rows.output.rows');
         expect(outputs.reviews_in_flight).toContain('steps.collect_active_rules.output.expected');
@@ -1858,6 +1872,9 @@ describe('detection rule workflows', () => {
         expect(outputs.harvest_failed).toContain('steps.screen_rule_fp_rates.error != null');
         expect(outputs.harvest_failed).toContain('steps.harvest_fp_alerts_by_rule.error != null');
         expect(outputs.lookup_failed).toContain('steps.list_active_reviews.error != null');
+        expect(outputs.rules_truncated).toBe(
+          '${{ steps.resolve_enabled_rules.output.truncated | default: false }}'
+        );
       });
     });
 

@@ -99,6 +99,7 @@ describe('Rule Tuning outcome reports', () => {
       lookupFailed = false,
       requested = 0,
       rulesLookupFailed = false,
+      rulesTruncated = false,
       screenFailed = false,
     }: {
       activeReviews?: number;
@@ -110,6 +111,8 @@ describe('Rule Tuning outcome reports', () => {
       lookupFailed?: boolean;
       requested?: number;
       rulesLookupFailed?: boolean;
+      /** More enabled rules than the lookup's page holds. */
+      rulesTruncated?: boolean;
       screenFailed?: boolean;
     }): Record<string, unknown> => {
       const eligibleKeys = Array.from({ length: eligible }, (_, index) => `rule-${index}@1`);
@@ -138,7 +141,10 @@ describe('Rule Tuning outcome reports', () => {
             ? {}
             : {
                 resolve_enabled_rules: {
-                  output: { rule_revision_keys: `,${eligibleKeys.join(',')},` },
+                  output: {
+                    rule_revision_keys: `,${eligibleKeys.join(',')},`,
+                    truncated: rulesTruncated,
+                  },
                 },
               }),
           resolve_fanout_rows: {
@@ -231,6 +237,21 @@ describe('Rule Tuning outcome reports', () => {
           lookup_failed: false,
           run_outcome: 'failed_source_unavailable',
           source_read_failed: true,
+        },
+      ],
+      [
+        // The first page of enabled rules was full: the rules past it were never
+        // screened, so the reviews it did start are only part of the picture.
+        'a space with more enabled rules than one lookup page holds',
+        { eligible: 2, requested: 2, rulesTruncated: true },
+        {
+          candidates_found: 2,
+          degraded_reason: 'capacity',
+          items_dispatched: 2,
+          items_in_flight: '2',
+          lookup_failed: false,
+          run_outcome: 'degraded_partial',
+          source_read_failed: false,
         },
       ],
       [

@@ -8,14 +8,16 @@
 import type { ApiClientFixture } from '@kbn/scout-security';
 import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
+import { spaceUrl } from './helpers';
 
 export const runWorkflow = async (
   apiClient: ApiClientFixture,
   headers: Record<string, string>,
   workflowId: string,
-  inputs: Record<string, unknown> = {}
+  inputs: Record<string, unknown> = {},
+  spaceId?: string
 ): Promise<string> => {
-  const res = await apiClient.post(`/api/workflows/workflow/${workflowId}/run`, {
+  const res = await apiClient.post(spaceUrl(`api/workflows/workflow/${workflowId}/run`, spaceId), {
     headers,
     responseType: 'json',
     body: { inputs },
@@ -30,12 +32,13 @@ export const waitForExecution = async (
   apiClient: ApiClientFixture,
   headers: Record<string, string>,
   workflowExecutionId: string,
-  timeoutMs: number
+  timeoutMs: number,
+  spaceId?: string
 ): Promise<WorkflowExecutionDto> => {
   const deadline = Date.now() + timeoutMs;
   for (;;) {
     const res = await apiClient.get(
-      `/api/workflows/executions/${workflowExecutionId}?includeOutput=true`,
+      spaceUrl(`api/workflows/executions/${workflowExecutionId}?includeOutput=true`, spaceId),
       { headers, responseType: 'json' }
     );
     if (res.statusCode !== 200) {

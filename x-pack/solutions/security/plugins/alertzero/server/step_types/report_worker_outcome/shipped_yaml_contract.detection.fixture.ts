@@ -53,6 +53,14 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
         consts: { no_rows: [] },
         steps: { screen_rule_fp_rates: { error: { message: 'search failed' } } },
       },
+      {
+        consts: { no_rows: [] },
+        steps: {
+          list_enabled_rules: { output: { data: [], total: 10001 } },
+          resolve_enabled_rules: { output: { rule_revision_keys: ',', truncated: true } },
+          resolve_fanout_rows: { output: { rows: [['rule-1']] } },
+        },
+      },
     ],
     workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
     workflowId: ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID,

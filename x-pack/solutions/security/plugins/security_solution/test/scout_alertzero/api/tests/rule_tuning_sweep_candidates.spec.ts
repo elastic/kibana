@@ -14,18 +14,15 @@ import {
   tags,
   enableAlertZeroInSpace,
   findStepOutput,
-  readAlertZeroEnabledInSpace,
   runCleanupSteps,
   runWorkflow,
-  setAlertZeroEnabledInSpace,
+  spaceUrl,
   waitForExecution,
 } from '../fixtures';
 
 // Inlined: Playwright's esbuild cannot load the managed YAML behind @kbn/workflows/managed.
 const RULE_TUNING_SWEEP_WORKFLOW_ID = 'system-security-rule-tuning-worker';
 const REVIEWED_TAG = 'detection-watch:tuning-reviewed';
-const ALERTS_INDEX = '.alerts-security.alerts-default';
-const RULES_URL = '/api/detection_engine/rules';
 const RULE_HEADERS = { 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' };
 
 const SETUP_TIMEOUT_MS = 180_000;
@@ -35,6 +32,10 @@ const WORKFLOW_READY_TIMEOUT_MS = 30_000;
 
 const RUN = Date.now();
 const namePrefix = `scout-tuning-${RUN}`;
+// The sweep screens every enabled rule of its space, so the suite gets a space of its own.
+const SPACE_ID = namePrefix;
+const ALERTS_INDEX = `.alerts-security.alerts-${SPACE_ID}`;
+const RULES_URL = spaceUrl('api/detection_engine/rules', SPACE_ID);
 
 const SWEEP_INPUTS = {
   autonomy_level: 'manual',
@@ -74,7 +75,7 @@ const buildAlerts = ({
       doc: {
         '@timestamp': timestamp,
         'event.kind': 'signal',
-        'kibana.space_ids': ['default'],
+        'kibana.space_ids': [SPACE_ID],
         'kibana.alert.uuid': uuid,
         'kibana.alert.start': timestamp,
         'kibana.alert.rule.uuid': ruleId,
@@ -170,6 +171,7 @@ const sweepResult = (execution: SweepExecution) =>
     reviews_in_flight: number;
     harvest_failed: boolean;
     lookup_failed: boolean;
+    rules_truncated: boolean;
   };
 
 /**
@@ -188,15 +190,14 @@ const startedReviews = (execution: SweepExecution) =>
 /**
  * Runs the Rule Tuning sweep against seeded alerts and checks which rules it launches
  * reviews for. Reviews start under `autonomy_level: manual`, so they park at their
- * analyst gate and call no model. Shares the default space's alerts index; every seeded
- * alert carries a run-unique rule name and is deleted afterwards.
+ * analyst gate and call no model. Everything lives in a space created for the run and
+ * deleted afterwards, so no other rule of the deployment can reach the sweep.
  */
 apiTest.describe.serial(
   'Rule Tuning sweep - candidate rules',
   { tag: [...tags.stateful.classic] },
   () => {
     let adminHeaders: Record<string, string>;
-    let alertZeroBaseline: boolean | undefined;
     const ruleIds: string[] = [];
     const reviewExecutionIds: string[] = [];
 
@@ -211,13 +212,15 @@ apiTest.describe.serial(
         {
           ...SWEEP_INPUTS,
           ...inputs,
-        }
+        },
+        SPACE_ID
       );
       const execution = await waitForExecution(
         apiClient,
         adminHeaders,
         executionId,
-        SWEEP_TIMEOUT_MS
+        SWEEP_TIMEOUT_MS,
+        SPACE_ID
       );
       reviewExecutionIds.push(...startedReviews(execution));
       return execution;
@@ -229,19 +232,15 @@ apiTest.describe.serial(
       return rule;
     };
 
-    apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
+    apiTest.beforeAll(async ({ apiServices, samlAuth, apiClient }) => {
       apiTest.setTimeout(SETUP_TIMEOUT_MS);
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminHeaders = { ...cookieHeader, 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' };
 
-      alertZeroBaseline = await readAlertZeroEnabledInSpace({
-        apiClient,
-        headers: adminHeaders,
-        spaceId: 'default',
-      });
-      await enableAlertZeroInSpace({ apiClient, headers: adminHeaders, spaceId: 'default' });
+      await apiServices.spaces.create({ id: SPACE_ID, name: SPACE_ID });
+      await enableAlertZeroInSpace({ apiClient, headers: adminHeaders, spaceId: SPACE_ID });
 
-      const index = await apiClient.post('/api/detection_engine/index', {
+      const index = await apiClient.post(spaceUrl('api/detection_engine/index', SPACE_ID), {
         headers: { ...adminHeaders, ...RULE_HEADERS },
         responseType: 'json',
       });
@@ -255,7 +254,7 @@ apiTest.describe.serial(
         .poll(
           async () => {
             const response = await apiClient.get(
-              `/api/workflows/workflow/${RULE_TUNING_SWEEP_WORKFLOW_ID}`,
+              spaceUrl(`api/workflows/workflow/${RULE_TUNING_SWEEP_WORKFLOW_ID}`, SPACE_ID),
               { headers: adminHeaders, responseType: 'json' }
             );
             return response.statusCode === 200 && (response.body as { valid?: boolean }).valid;
@@ -270,7 +269,7 @@ apiTest.describe.serial(
       await clearAlerts(esClient);
     });
 
-    apiTest.afterAll(async ({ apiClient, esClient }) => {
+    apiTest.afterAll(async ({ apiServices, apiClient, esClient }) => {
       apiTest.setTimeout(SETUP_TIMEOUT_MS);
       await runCleanupSteps([
         {
@@ -289,24 +288,13 @@ apiTest.describe.serial(
         ...reviewExecutionIds.map((id) => ({
           name: `cancel review ${id}`,
           run: async () => {
-            await apiClient.post(`/api/workflows/executions/${id}/cancel`, {
+            await apiClient.post(spaceUrl(`api/workflows/executions/${id}/cancel`, SPACE_ID), {
               headers: adminHeaders,
             });
           },
         })),
         { name: 'delete seeded alerts', run: () => clearAlerts(esClient) },
-        {
-          name: 'restore default space AlertZero setting',
-          run: async () => {
-            if (!adminHeaders || alertZeroBaseline === undefined) return;
-            await setAlertZeroEnabledInSpace({
-              apiClient,
-              headers: adminHeaders,
-              spaceId: 'default',
-              enabled: alertZeroBaseline,
-            });
-          },
-        },
+        { name: `delete space ${SPACE_ID}`, run: () => apiServices.spaces.delete(SPACE_ID) },
       ]);
     });
 
@@ -501,6 +489,7 @@ apiTest.describe.serial(
               reviews_requested: 3,
               harvest_failed: false,
               lookup_failed: false,
+              rules_truncated: false,
             });
           }
         );
