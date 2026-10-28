@@ -133,8 +133,9 @@ export function SparkPlotItem({
     );
   }
 
-  if (hasValidTimeseries(series)) {
-    const trimmedSeries = trimPartialTrailingBucket(series);
+  const trimmedSeries = trimPartialTrailingBucket(series);
+
+  if (hasValidTimeseries(trimmedSeries)) {
     const trimmedComparisonSeries = trimPartialTrailingBucket(comparisonSeries);
 
     const { mainSegments, leadingEdge, trailingEdge, interiorEdges } =
