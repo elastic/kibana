@@ -1523,11 +1523,14 @@ class ConversationClientImpl implements ConversationClient {
   ): Promise<{ conversation: Conversation; changedFields: string[] }> {
     // The write callback is replayed on conflict and must stay free of side effects, so the
     // privilege check runs once, against the template on the document, before the write.
+    // The write then rejects a template that is not the one that was checked: a concurrent
+    // applyTemplate can attach a gated template between this read and the mutation.
+    let authorizedTemplateId: string | undefined;
     if (this.authorizeMetadataUpdate) {
       const accessible = await this.getDocumentWithAccess({ conversationId, access });
-      const templateId = accessible._source?.template_id;
-      if (templateId) {
-        await this.authorizeMetadataUpdate({ templateId, updates });
+      authorizedTemplateId = accessible._source?.template_id;
+      if (authorizedTemplateId) {
+        await this.authorizeMetadataUpdate({ templateId: authorizedTemplateId, updates });
       }
     }
 
@@ -1539,6 +1542,10 @@ class ConversationClientImpl implements ConversationClient {
       access,
       source,
       fields: (current) => {
+        if (this.authorizeMetadataUpdate && current.template_id !== authorizedTemplateId) {
+          throw createConversationWriteConflictError({ conversationId });
+        }
+
         if (!current.template_id) {
           throw createBadRequestError(
             `Conversation "${conversationId}" has no template — apply a template before writing metadata`

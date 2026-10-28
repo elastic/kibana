@@ -2373,6 +2373,71 @@ describe('ConversationClient', () => {
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
+    it('does not write when the template changes after it was authorized', async () => {
+      const authorizeMetadataUpdate = jest.fn().mockResolvedValue(undefined);
+      const guarded = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
+        user: { id: 'user-1', username: 'test-user', isAdmin: false },
+        authorizeMetadataUpdate,
+      });
+      getTemplateMock.mockReturnValue(
+        makeTemplate('escalation', {
+          status: { input_type: 'SELECT', options: ['open', 'closed'] },
+        })
+      );
+      mockGetDocumentResponseOnce(
+        createConversationDocumentWithTemplate({
+          templateId: 'notes',
+          metadata: { status: 'open' },
+        })
+      );
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({
+          templateId: 'escalation',
+          metadata: { status: 'open' },
+        })
+      );
+
+      await expect(
+        guarded.patchMetadata('conversation-1', { status: 'closed' }, { source: 'execution' })
+      ).rejects.toMatchObject({ code: 'conversationWriteConflict' });
+      expect(authorizeMetadataUpdate).toHaveBeenCalledWith({
+        templateId: 'notes',
+        updates: { status: 'closed' },
+      });
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('does not write when a template appears after the authorization preflight', async () => {
+      const authorizeMetadataUpdate = jest.fn().mockResolvedValue(undefined);
+      const guarded = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
+        user: { id: 'user-1', username: 'test-user', isAdmin: false },
+        authorizeMetadataUpdate,
+      });
+      mockGetDocumentResponseOnce(createConversationDocumentWithTemplate());
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({
+          templateId: 'escalation',
+          metadata: { status: 'open' },
+        })
+      );
+
+      await expect(
+        guarded.patchMetadata('conversation-1', { status: 'closed' }, { source: 'execution' })
+      ).rejects.toMatchObject({ code: 'conversationWriteConflict' });
+      expect(authorizeMetadataUpdate).not.toHaveBeenCalled();
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
     it('throws when the conversation has no template', async () => {
       mockGetDocumentResponse(createConversationDocumentWithTemplate());
 
