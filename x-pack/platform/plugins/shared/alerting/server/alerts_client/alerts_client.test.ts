@@ -2585,82 +2585,92 @@ describe('Alerts Client', () => {
           );
         });
 
-        test('should retry alerts that failed with a retryable error', async () => {
-          jest.spyOn(Math, 'random').mockReturnValue(0);
-          clusterClient.bulk.mockResponseOnce({
-            errors: true,
-            took: 1,
-            items: [
-              {
-                create: {
-                  _index: '.internal.alerts-test.alerts-default-000001',
-                  status: 201,
-                  _seq_no: 0,
-                  _primary_term: 1,
-                },
-              },
-              {
-                create: {
-                  _index: '.internal.alerts-test.alerts-default-000001',
-                  status: 429,
-                  error: {
-                    type: 'es_rejected_execution_exception',
-                    reason: 'rejected execution of coordinating operation',
+        test.each([
+          { isServerless: false, refresh: 'wait_for' },
+          { isServerless: true, refresh: true },
+        ])(
+          'should retry alerts that failed with a retryable error (isServerless: $isServerless)',
+          async ({ isServerless, refresh }) => {
+            jest.spyOn(Math, 'random').mockReturnValue(0);
+            clusterClient.bulk.mockResponseOnce({
+              errors: true,
+              took: 1,
+              items: [
+                {
+                  create: {
+                    _index: '.internal.alerts-test.alerts-default-000001',
+                    status: 201,
+                    _seq_no: 0,
+                    _primary_term: 1,
                   },
                 },
-              },
-            ],
-          });
-          clusterClient.bulk.mockResponseOnce({
-            errors: false,
-            took: 1,
-            items: [
-              {
-                create: {
-                  _index: '.internal.alerts-test.alerts-default-000001',
-                  status: 201,
-                  _seq_no: 1,
-                  _primary_term: 1,
+                {
+                  create: {
+                    _index: '.internal.alerts-test.alerts-default-000001',
+                    status: 429,
+                    error: {
+                      type: 'es_rejected_execution_exception',
+                      reason: 'rejected execution of coordinating operation',
+                    },
+                  },
                 },
-              },
-            ],
-          });
+              ],
+            });
+            clusterClient.bulk.mockResponseOnce({
+              errors: false,
+              took: 1,
+              items: [
+                {
+                  create: {
+                    _index: '.internal.alerts-test.alerts-default-000001',
+                    status: 201,
+                    _seq_no: 1,
+                    _primary_term: 1,
+                  },
+                },
+              ],
+            });
 
-          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
-            alertsClientParams
-          );
+            const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+              ...alertsClientParams,
+              isServerless,
+            });
 
-          await alertsClient.initializeExecution(defaultExecutionOpts);
+            await alertsClient.initializeExecution(defaultExecutionOpts);
 
-          const alertExecutorService = alertsClient.factory();
-          alertExecutorService.create('1').scheduleActions('default');
-          alertExecutorService.create('2').scheduleActions('default');
+            const alertExecutorService = alertsClient.factory();
+            alertExecutorService.create('1').scheduleActions('default');
+            alertExecutorService.create('2').scheduleActions('default');
 
-          await alertsClient.processAlerts();
-          alertsClient.determineFlappingAlerts();
-          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
-          alertsClient.logAlerts(logAlertsOpts);
+            await alertsClient.processAlerts();
+            alertsClient.determineFlappingAlerts();
+            alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+            alertsClient.logAlerts(logAlertsOpts);
 
-          const persistPromise = alertsClient.persistAlerts();
-          await jest.runAllTimersAsync();
-          await persistPromise;
+            const persistPromise = alertsClient.persistAlerts();
+            await jest.runAllTimersAsync();
+            await persistPromise;
 
-          const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
-          const uuid2 = rawActiveAlerts['2'].meta?.uuid;
+            const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+            const uuid2 = rawActiveAlerts['2'].meta?.uuid;
 
-          expect(clusterClient.bulk).toHaveBeenCalledTimes(2);
-          expect(clusterClient.bulk).toHaveBeenNthCalledWith(2, {
-            index: '.alerts-test.alerts-default',
-            refresh: 'wait_for',
-            require_alias: !useDataStreamForAlerts,
-            operations: [
-              {
-                create: { _id: uuid2, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
-              },
-              getNewIndexedAlertDoc({ [ALERT_UUID]: uuid2, [ALERT_INSTANCE_ID]: '2' }),
-            ],
-          });
-        });
+            expect(clusterClient.bulk).toHaveBeenCalledTimes(2);
+            expect(clusterClient.bulk).toHaveBeenNthCalledWith(2, {
+              index: '.alerts-test.alerts-default',
+              refresh,
+              require_alias: !useDataStreamForAlerts,
+              operations: [
+                {
+                  create: {
+                    _id: uuid2,
+                    ...(useDataStreamForAlerts ? {} : { require_alias: true }),
+                  },
+                },
+                getNewIndexedAlertDoc({ [ALERT_UUID]: uuid2, [ALERT_INSTANCE_ID]: '2' }),
+              ],
+            });
+          }
+        );
 
         test('should throw if alerts still fail with a retryable error after all retries', async () => {
           jest.spyOn(Math, 'random').mockReturnValue(0);

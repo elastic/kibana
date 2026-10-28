@@ -477,7 +477,7 @@ export class AlertsClient<
             logger: this.options.logger,
             esClient,
             bulkRequest: {
-              refresh: 'wait_for',
+              refresh: this.isServerless ? true : 'wait_for',
               index: this.indexTemplateAndPattern.alias,
               require_alias: !this.isUsingDataStreams(),
               operations: bulkBody,
