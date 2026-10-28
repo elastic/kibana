@@ -13,7 +13,7 @@ import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
-import type { DashboardWriteScope } from '../write_scope';
+import type { DashboardRequestServices } from '../types';
 import type { DashboardCreateResponseBody } from './types';
 import {
   addToHistory,
@@ -25,14 +25,15 @@ import {
 export interface CreateOptions {
   id?: string;
   serverTiming?: RequestTiming;
+  spaceId?: string;
   isDashboardAppRequest?: boolean;
 }
 
 export async function create(
-  { savedObjectsClient, supportsAccessControl, user, spaceId }: DashboardWriteScope,
+  services: DashboardRequestServices,
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   createBody: DashboardState,
-  { id, serverTiming, isDashboardAppRequest = false }: CreateOptions = {}
+  { id, serverTiming, spaceId, isDashboardAppRequest = false }: CreateOptions = {}
 ): Promise<DashboardCreateResponseBody> {
   const { access_control: accessControl, ...restOfData } = createBody;
 
@@ -42,12 +43,16 @@ export async function create(
     serverTiming
   );
 
+  const supportsAccessControl = services.savedObjects.typeRegistry.supportsAccessControl(
+    DASHBOARD_SAVED_OBJECT_TYPE
+  );
+
   // a recreated ID may still have history from a deleted dashboard, so continue from it
   const historySequence = id
     ? await getNextHistorySequence({ spaceId, dashboardId: id, currentSequence: undefined })
     : INITIAL_HISTORY_SEQUENCE;
 
-  const savedObject = await savedObjectsClient.create(
+  const savedObject = await services.savedObjects.client.create(
     DASHBOARD_SAVED_OBJECT_TYPE,
     { ...soAttributes, historySequence },
     {
@@ -71,7 +76,7 @@ export async function create(
   });
   if (snapshot) {
     await addToHistory({
-      user,
+      user: services.security.authc.getCurrentUser(),
       dashboardId: savedObject.id,
       snapshot,
       spaceId,

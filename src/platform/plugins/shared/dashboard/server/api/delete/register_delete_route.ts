@@ -19,8 +19,8 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { getRouteConfig } from '../get_route_config';
 import { trackDeleteDashboardAction } from '../../user_activity';
 import { deleteDashboard } from './delete';
+import { spacesService } from '../../kibana_services';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { getWriteScopeFromContext } from '../write_scope';
 
 export function registerDeleteRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -79,10 +79,12 @@ export function registerDeleteRoute(
     async (ctx, req, res) =>
       telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
+          const { core } = await ctx.resolve(['core']);
           const result = await deleteDashboard(
-            await getWriteScopeFromContext(ctx, req),
+            core,
             req.params.id,
-            getCachedDashboardStateSchema()
+            getCachedDashboardStateSchema(),
+            spacesService?.getSpaceId(req)
           );
           try {
             await trackDeleteDashboardAction(result, req);

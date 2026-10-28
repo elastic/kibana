@@ -11,7 +11,7 @@ import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { transformDashboardOut } from '../transforms';
-import type { DashboardWriteScope } from '../write_scope';
+import type { DashboardRequestServices } from '../types';
 import type { DashboardDeleteResponseBody } from './types';
 import {
   addToHistory,
@@ -20,11 +20,15 @@ import {
 } from '../../change_history/utils';
 
 export async function deleteDashboard(
-  { savedObjectsClient, user, spaceId }: DashboardWriteScope,
+  services: DashboardRequestServices,
   id: string,
-  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
+  spaceId?: string
 ): Promise<DashboardDeleteResponseBody> {
-  const savedObject = await savedObjectsClient.get<DashboardSavedObjectAttributes>('dashboard', id);
+  const savedObject = await services.savedObjects.client.get<DashboardSavedObjectAttributes>(
+    'dashboard',
+    id
+  );
   const {
     dashboardState: { title, tags },
   } = transformDashboardOut(
@@ -33,7 +37,7 @@ export async function deleteDashboard(
     undefined,
     strictValidationSchema
   );
-  await savedObjectsClient.delete(DASHBOARD_SAVED_OBJECT_TYPE, id);
+  await services.savedObjects.client.delete(DASHBOARD_SAVED_OBJECT_TYPE, id);
   const deletedAt = new Date().toISOString(); // SO client does not provide deletedAt timestamp, so this is the next-best thing
 
   const snapshot = getHistorySnapshot({
@@ -49,7 +53,7 @@ export async function deleteDashboard(
       currentSequence: savedObject.attributes.historySequence,
     });
     await addToHistory({
-      user,
+      user: services.security.authc.getCurrentUser(),
       dashboardId: id,
       snapshot,
       spaceId,

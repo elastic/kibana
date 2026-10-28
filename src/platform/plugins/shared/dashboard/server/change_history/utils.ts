@@ -15,6 +15,7 @@ import { omit } from 'lodash';
 import type { ObjectChange } from '@kbn/change-history';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
+  AuthenticatedUser,
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandlerContext,
@@ -25,7 +26,6 @@ import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import type { getDashboardStateSchema } from '../api/dashboard_state_schemas';
-import type { DashboardWriteScope } from '../api/write_scope';
 import { transformDashboardOut } from '../api/transforms';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { logger, securityService, spacesService } from '../kibana_services';
@@ -137,7 +137,8 @@ export const addToHistory = async ({
   restoredFrom,
   type = 'update',
 }: {
-  user: DashboardWriteScope['user'];
+  /** Null when security is disabled; the change is then recorded without an actor. */
+  user: Pick<AuthenticatedUser, 'username' | 'profile_uid'> | null;
   spaceId: string | undefined;
   dashboardId: string;
   snapshot: DashboardState;

@@ -8,16 +8,17 @@
  */
 
 import { once } from 'lodash';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { z } from '@kbn/zod';
 import type { DashboardState, DashboardStateInput } from '@kbn/as-code-dashboard-schema';
 import { create } from './api/create/create';
 import { getDashboardStateSchema } from './api/dashboard_state_schemas';
 import { TransformPanelsInError } from './api/transforms/in/transform_panels_in_error';
+import type { DashboardRequestServices } from './api/types';
 import { InvalidDashboardIdError, update } from './api/update/update';
-import { getWriteScopeFromRequest } from './api/write_scope';
 import type { DashboardValidationIssue } from './dashboard_validation_error';
 import { DashboardValidationError } from './dashboard_validation_error';
-import { logger } from './kibana_services';
+import { coreServices, logger, spacesService } from './kibana_services';
 import type { DashboardServerClient } from './types';
 import { trackCreateDashboardAction, trackUpdateDashboardAction } from './user_activity';
 
@@ -74,6 +75,16 @@ const withPreSaveValidationErrors = async <T>(write: () => Promise<T>): Promise<
   }
 };
 
+const getRequestServices = (request: KibanaRequest): DashboardRequestServices => ({
+  savedObjects: {
+    client: coreServices.savedObjects.getScopedClient(request),
+    typeRegistry: coreServices.savedObjects.getTypeRegistry(),
+  },
+  security: {
+    authc: { getCurrentUser: () => coreServices.security.authc.getCurrentUser(request) },
+  },
+});
+
 const trackBestEffort = async (track: () => Promise<void>): Promise<void> => {
   try {
     await track();
@@ -108,7 +119,8 @@ export const createDashboardWriteClient = (
     create: async (request, state, { isDashboardAppRequest = false } = {}) => {
       const createBody = parseState(state, isDashboardAppRequest);
       const body = await withPreSaveValidationErrors(() =>
-        create(getWriteScopeFromRequest(request), getStrictSchema(), createBody, {
+        create(getRequestServices(request), getStrictSchema(), createBody, {
+          spaceId: spacesService?.getSpaceId(request),
           isDashboardAppRequest,
         })
       );
@@ -118,7 +130,8 @@ export const createDashboardWriteClient = (
     update: async (request, id, state, { isDashboardAppRequest = false } = {}) => {
       const updateBody = parseState(state, isDashboardAppRequest);
       const result = await withPreSaveValidationErrors(() =>
-        update(getWriteScopeFromRequest(request), getStrictSchema(), id, updateBody, {
+        update(getRequestServices(request), getStrictSchema(), id, updateBody, {
+          spaceId: spacesService?.getSpaceId(request),
           isDashboardAppRequest,
         })
       );

@@ -15,7 +15,6 @@ import { getDashboardStateSchema } from '../api/dashboard_state_schemas';
 import { DASHBOARD_CHANGE_HISTORY_API_PATH } from '../../common/constants';
 import { CHANGE_HISTORY_ROUTE_SECURITY, getChangeHistoryContext } from './utils';
 import { update } from '../api/update/update';
-import { getWriteScopeFromContext } from '../api/write_scope';
 
 export type RestoreChangeResponse = DashboardState;
 
@@ -57,12 +56,13 @@ export const registerRestoreChangeRoute = (router: IRouter<RequestHandlerContext
         return res.notFound();
       }
 
+      const { core } = await ctx.resolve(['core']);
       const result = await update(
-        await getWriteScopeFromContext(ctx, req),
+        core,
         getDashboardStateSchema(true, true),
         req.params.id,
         item.object.snapshot as DashboardState,
-        { isDashboardAppRequest: true, restoredFrom: item.object.sequence }
+        { spaceId, isDashboardAppRequest: true, restoredFrom: item.object.sequence }
       );
       return res.ok({ body: result.body.data });
     }
