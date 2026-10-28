@@ -98,7 +98,9 @@ const toField = ({ field, children }: FieldNode): ReferenceField =>
 const readFieldTable = (lines: readonly string[]): ReferenceField[] => {
   const roots: FieldNode[] = [];
   const nodes = new Map<string, FieldNode>();
-  const childrenOf = (key: string): FieldNode[] => {
+  // `parentPath` is a parent's dotted path; a trailing `[]` marks it as an array of objects.
+  const childrenOf = (parentPath: string): FieldNode[] => {
+    const key = parentPath.replace(/(\[\])+$/, '');
     if (key === '') {
       return roots;
     }
@@ -106,15 +108,22 @@ const readFieldTable = (lines: readonly string[]): ReferenceField[] => {
     if (existing) {
       return existing.children;
     }
-    // A parent the table doesn't list, which is an optional object.
+    // A parent the table doesn't list, which is an optional object, or array of them.
+    const arrayDepth = (parentPath.length - key.length) / 2;
     const separator = key.lastIndexOf('.');
+    const object: FieldType = { kind: 'object' };
     const implicit: FieldNode = {
-      field: { name: key.slice(separator + 1), type: { kind: 'object' }, required: false },
+      field: {
+        name: key.slice(separator + 1),
+        type: Array.from({ length: arrayDepth }).reduce<FieldType>(
+          (items) => ({ kind: 'array', items }),
+          object
+        ),
+        required: false,
+      },
       children: [],
     };
-    childrenOf(separator === -1 ? '' : key.slice(0, separator).replace(/(\[\])+$/, '')).push(
-      implicit
-    );
+    childrenOf(separator === -1 ? '' : key.slice(0, separator)).push(implicit);
     nodes.set(key, implicit);
     return implicit.children;
   };
@@ -137,7 +146,7 @@ const readFieldTable = (lines: readonly string[]): ReferenceField[] => {
       },
       children: [],
     };
-    childrenOf(separator === -1 ? '' : name.slice(0, separator).replace(/(\[\])+$/, '')).push(node);
+    childrenOf(separator === -1 ? '' : name.slice(0, separator)).push(node);
     nodes.set(name, node);
   }
   return roots.map(toField);

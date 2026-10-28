@@ -293,6 +293,64 @@ describe('convertMarkdownReference: brave-markdown', () => {
     });
   });
 
+  it('makes an unlisted parent an array of objects when its children are under `[]`', () => {
+    const markdown = [
+      '# Items',
+      '',
+      '`GET` `/v1/items`',
+      '',
+      '**Base URL:** `https://api.search.brave.com/res`',
+      '',
+      '## Responses',
+      '',
+      '### 200',
+      'Successful Response',
+      '',
+      ...FIELD_HEADER,
+      '| `web.results[].url` | string | The URL. |',
+      '| `web.results[].icons[].href` | string |  |',
+      '',
+    ].join('\n');
+
+    const document = convertMarkdownReference({
+      format: 'brave-markdown',
+      pages: [{ url: 'https://example.com/items/index.html.md', markdown }],
+    });
+    const response = (document.paths as Paths)['/v1/items'].get.responses as Record<
+      string,
+      { content: { 'application/json': { schema: unknown } } }
+    >;
+
+    expect(response['200'].content['application/json'].schema).toEqual({
+      type: 'object',
+      properties: {
+        web: {
+          type: 'object',
+          properties: {
+            results: {
+              type: 'array',
+              items: {
+                type: 'object',
+                required: ['url'],
+                properties: {
+                  url: { type: 'string', description: 'The URL.' },
+                  icons: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      required: ['href'],
+                      properties: { href: { type: 'string' } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
   it('reads the request body table and whether the body is required', () => {
     const { requestBody } = (convert().paths as Paths)['/v1/chat/completions'].post;
 
