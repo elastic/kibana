@@ -31,10 +31,9 @@ const DEPLOYMENT_METHOD_LABELS: Record<DeploymentMethod, string> = {
   ecf: i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.ecfMethod', {
     defaultMessage: 'Elastic Cloud Forwarder',
   }),
-  agent_based: i18n.translate(
-    'xpack.fleet.epmInstalledIntegrations.instances.agentBasedMethod',
-    { defaultMessage: 'Agent-based' }
-  ),
+  agent_based: i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.agentBasedMethod', {
+    defaultMessage: 'Agent-based',
+  }),
 };
 
 /** Services named in a Services tooltip before the rest are only counted. */
@@ -106,10 +105,9 @@ export const InstancesTable: React.FunctionComponent<{
       ),
     },
     {
-      name: i18n.translate(
-        'xpack.fleet.epmInstalledIntegrations.instances.servicesColumn',
-        { defaultMessage: 'Services' }
-      ),
+      name: i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.servicesColumn', {
+        defaultMessage: 'Services',
+      }),
       render: (item: CloudOnboardingDeploymentListItem) => (
         <SlashSeparatedValues
           values={DEPLOYMENT_METHOD_ORDER.flatMap((method) => {
@@ -130,27 +128,24 @@ export const InstancesTable: React.FunctionComponent<{
       ),
     },
     {
-      name: i18n.translate(
-        'xpack.fleet.epmInstalledIntegrations.instances.versionColumn',
-        { defaultMessage: 'Version' }
-      ),
+      name: i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.versionColumn', {
+        defaultMessage: 'Version',
+      }),
       render: (item: CloudOnboardingDeploymentListItem) =>
         item.packages.find((pkg) => pkg.name === packageName)?.version ?? EMPTY_CELL,
     },
     {
       field: 'updatedBy',
-      name: i18n.translate(
-        'xpack.fleet.epmInstalledIntegrations.instances.updatedByColumn',
-        { defaultMessage: 'Last updated by' }
-      ),
+      name: i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.updatedByColumn', {
+        defaultMessage: 'Last updated by',
+      }),
       render: (updatedBy?: string) => updatedBy ?? EMPTY_CELL,
     },
     {
       field: 'updatedAt',
-      name: i18n.translate(
-        'xpack.fleet.epmInstalledIntegrations.instances.updatedAtColumn',
-        { defaultMessage: 'Last updated' }
-      ),
+      name: i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.updatedAtColumn', {
+        defaultMessage: 'Last updated',
+      }),
       render: (updatedAt?: string) =>
         updatedAt ? (
           <>
@@ -163,10 +158,9 @@ export const InstancesTable: React.FunctionComponent<{
     },
     {
       field: 'agentCount',
-      name: i18n.translate(
-        'xpack.fleet.epmInstalledIntegrations.instances.agentsColumn',
-        { defaultMessage: 'Agents' }
-      ),
+      name: i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.agentsColumn', {
+        defaultMessage: 'Agents',
+      }),
       render: (agentCount: number) => (agentCount > 0 ? agentCount : EMPTY_CELL),
     },
   ];
@@ -176,10 +170,9 @@ export const InstancesTable: React.FunctionComponent<{
       items={instances}
       itemId="id"
       columns={columns}
-      tableCaption={i18n.translate(
-        'xpack.fleet.epmInstalledIntegrations.instances.tableCaption',
-        { defaultMessage: 'Instances' }
-      )}
+      tableCaption={i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.tableCaption', {
+        defaultMessage: 'Instances',
+      })}
       rowProps={{ 'data-test-subj': 'instancesTableRow' }}
     />
   );

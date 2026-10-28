@@ -109,12 +109,9 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
               iconType="warning"
               size="s"
               data-test-subj="instancesLoadError"
-              title={i18n.translate(
-                'xpack.fleet.epmInstalledIntegrations.instancesError',
-                {
-                  defaultMessage: 'Could not load the instances',
-                }
-              )}
+              title={i18n.translate('xpack.fleet.epmInstalledIntegrations.instancesError', {
+                defaultMessage: 'Could not load the instances',
+              })}
             >
               <EuiButton
                 size="s"

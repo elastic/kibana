@@ -252,9 +252,7 @@ describe('InstalledIntegrationsTable', () => {
       renderComponent([basePackage], { instanceCounts: new Map([['test-package', 2]]) });
 
       await act(async () => {
-        screen
-          .getByTestId('installedIntegrationsTable.instancesLink.test-package')
-          .click();
+        screen.getByTestId('installedIntegrationsTable.instancesLink.test-package').click();
       });
 
       expect(addViewInstances).toHaveBeenCalledWith('test-package');
