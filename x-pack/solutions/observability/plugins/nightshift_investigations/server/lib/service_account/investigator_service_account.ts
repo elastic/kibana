@@ -21,6 +21,9 @@ import {
   type NightshiftServiceAccountIds,
   type NightshiftServiceAccountInfo,
 } from '../../../common';
+import type { NightshiftInvestigationsStartDeps } from '../../types';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
+import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../../agents/decision_tree_reinforcement';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from '../managed_workflows/constants';
 import { BOUND_WORKFLOW_IDS, type BoundWorkflowId } from './bound_workflows';
 import { AUTOMATIONS_SERVICE_ACCOUNT_ID_VALUE, getBoundInvestigationWorkflowId } from './constants';
@@ -36,6 +39,8 @@ interface Deps {
   /** Reads the template values a bound workflow was installed with. */
   getInstalledWorkflowState?: PluginScopedManagedWorkflows['getInstalledWorkflowState'];
   spaces?: SpacesPluginStart;
+  /** Binds the Nightshift agents to the space's agent account; Agent Builder starts after us. */
+  getAgentBuilder?: () => NightshiftInvestigationsStartDeps['agentBuilder'] | undefined;
   /** Serverless accounts hold the `_`-prefixed predefined roles. */
   isServerless: boolean;
   logger: Logger;
@@ -73,6 +78,7 @@ export const createInvestigatorServiceAccountService = ({
   workflowsManagement,
   getInstalledWorkflowState,
   spaces,
+  getAgentBuilder,
   isServerless,
   logger,
 }: Deps) => {
@@ -283,6 +289,32 @@ export const createInvestigatorServiceAccountService = ({
     }
   };
 
+  /**
+   * Pins the Nightshift agents to the space's agent account, so every run of them - a workflow's,
+   * a hook's or a user's chat - executes as that account. Core only binds for an authenticated
+   * caller with `manage_security`, which `runEnable` has already checked.
+   */
+  const bindAgents = async (
+    request: KibanaRequest,
+    spaceId: string,
+    agentServiceAccountId: string
+  ): Promise<void> => {
+    const agentBuilder = getAgentBuilder?.();
+    if (!agentBuilder) {
+      throw Boom.serverUnavailable('Agent Builder is not available; cannot bind the agents.');
+    }
+    const registry = await agentBuilder.agents.getRegistry({ request });
+    for (const agentId of [
+      NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+      NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
+    ]) {
+      await registry.setServiceAccount(agentId, agentServiceAccountId);
+    }
+    logger.info(
+      `Nightshift agents in space [${spaceId}] run as service account [${agentServiceAccountId}]`
+    );
+  };
+
   const runEnable = async (
     request: KibanaRequest,
     spaceId: string,
@@ -301,6 +333,7 @@ export const createInvestigatorServiceAccountService = ({
     await assertSpaceExists(request, spaceId);
 
     await installBoundWorkflows(request, spaceId, serviceAccountIds);
+    await bindAgents(request, spaceId, serviceAccountIds.agent);
 
     let status = await getStatus(request, spaceId);
     if (await enableDisabledWorkflows(request, spaceId, status)) {
