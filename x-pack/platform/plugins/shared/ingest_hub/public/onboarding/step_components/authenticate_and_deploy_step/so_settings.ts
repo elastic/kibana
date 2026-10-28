@@ -17,7 +17,11 @@ interface SOSettingsSource {
 /**
  * The service instances as the saved object stores them: only the fields a resume needs to rebuild
  * the Service settings rows. Left out when there are none, so a write never clears a stored list
- * with an empty one.
+ * with an empty one. The list is empty only when nothing could be reconciled yet: on a resume of a
+ * record saved without instances, while the services map is still loading, no service has a base
+ * row. Clearing the stored list then would lose its duplicates, while leaving it can at worst keep
+ * a stale one, and the deploy write also sends `services`, so a resume drops the instances of any
+ * service that is no longer selected.
  */
 const toSOInstances = (
   instances: ServiceInstance[] | undefined
