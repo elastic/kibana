@@ -1,6 +1,6 @@
 {
   "name": "@kbn/alerting-v2-utils",
-  "description": "Shared browser-side utilities for the Alerting v2 plugin and its consumers.",
+  "description": "Shared browser- and server-side utilities for the Alerting v2 plugin and its consumers.",
   "private": true,
   "version": "1.0.0",
   "license": "Elastic License 2.0",

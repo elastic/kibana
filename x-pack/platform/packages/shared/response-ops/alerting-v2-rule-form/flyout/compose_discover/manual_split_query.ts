@@ -7,7 +7,7 @@
 
 import type { RuleQuery } from '../../form/types';
 import { getBreachQuery } from '../../form/utils/query_helpers';
-import { splitResultToRuleQuery } from './use_heuristic_split';
+import { splitResultToRuleQuery } from '@kbn/alerting-v2-utils';
 
 /**
  * Sandbox query shape when opting into manual split.

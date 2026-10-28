@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { parse } from 'yaml';
-import type { InlineActionStepDefinition } from '../registry';
+import type { InlineActionStep } from './inline_action_steps';
 
 export interface ParsedInlineParams {
   params?: Record<string, unknown>;
@@ -67,7 +67,7 @@ const unknownFields = (fields: string[]): string =>
  * params schema, returning the parsed params or user-facing error messages.
  */
 export const parseInlineParams = (
-  definition: InlineActionStepDefinition,
+  definition: Pick<InlineActionStep, 'paramsSchema'>,
   params: string
 ): ParsedInlineParams => {
   let parsed: unknown;

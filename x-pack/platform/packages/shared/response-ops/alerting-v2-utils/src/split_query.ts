@@ -6,7 +6,12 @@
  */
 
 import { Parser } from '@elastic/esql';
-import type { RuleQuery } from '../../form/types';
+
+/** An ES|QL rule query split into its base query and the alert-condition segment. */
+export interface RuleQuery {
+  base: string;
+  breach: { segment: string };
+}
 
 export type SplitConfidence = 'high' | 'low' | 'none';
 

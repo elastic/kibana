@@ -68,7 +68,7 @@ import {
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
 import { EvaluationExpressionField } from './evaluation_expression_field';
 import { SeveritySection } from './severity_section';
-import { splitQuery } from '../../use_heuristic_split';
+import { splitQuery } from '@kbn/alerting-v2-utils';
 import { OPTIONAL_LABEL } from '../../../../form/optional_field_label';
 import {
   AGGREGATION_OPTIONS,

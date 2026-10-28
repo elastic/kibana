@@ -79,7 +79,7 @@ import {
   guessRecoveryBlock,
   discoverQueryToRuleQuery,
   splitResultToRuleQuery,
-} from './use_heuristic_split';
+} from '@kbn/alerting-v2-utils';
 import { useSandboxEditorMounts } from './use_sandbox_editor_mounts';
 import { getTimeFieldResolutionQuery } from './get_time_field_resolution_query';
 import { useResolveTimeField } from './use_resolve_time_field';

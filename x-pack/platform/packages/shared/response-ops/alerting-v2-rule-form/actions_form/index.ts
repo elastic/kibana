@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-export { INLINE_WORKFLOW_TAG } from './constants';
 export {
   buildInlineWorkflowYaml,
+  INLINE_WORKFLOW_TAG,
   InvalidInlineWorkflowError,
-} from './helpers/build_inline_workflow_yaml';
+} from '@kbn/alerting-v2-utils';
 export {
   DISPATCH_PAYLOAD_VARIABLES,
   INLINE_ACTION_STEP_DEFINITIONS,

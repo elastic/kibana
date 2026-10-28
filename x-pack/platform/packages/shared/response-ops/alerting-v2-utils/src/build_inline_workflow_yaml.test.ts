@@ -10,8 +10,8 @@ import {
   KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
 } from '@kbn/workflows';
 import { parse } from 'yaml';
-import { INLINE_WORKFLOW_TAG } from '../constants';
-import type { InlineWorkflowActionDraft } from '../types';
+import { INLINE_WORKFLOW_TAG } from './inline_action_steps';
+import type { InlineWorkflowStepDraft } from './inline_action_steps';
 import {
   buildInlineWorkflowYaml,
   InvalidInlineWorkflowError,
@@ -34,8 +34,6 @@ const EXPECTED_TRIGGER = {
 describe('buildInlineWorkflowYaml', () => {
   it('builds a valid email workflow YAML', () => {
     const yaml = buildInlineWorkflowYaml({
-      id: 't1',
-      source: 'inline',
       stepType: 'email',
       connectorId: 'my-email-connector',
       params: 'to:\n  - "ops@example.com"\nsubject: "Alert"\nmessage: "Body"',
@@ -56,8 +54,6 @@ describe('buildInlineWorkflowYaml', () => {
 
   it('builds a valid slack workflow YAML', () => {
     const yaml = buildInlineWorkflowYaml({
-      id: 't2',
-      source: 'inline',
       stepType: 'slack2.sendMessage',
       connectorId: 'my-slack-connector',
       params: 'channel: "my-channel"\ntext: "Hello {{ policyId }}"',
@@ -73,8 +69,6 @@ describe('buildInlineWorkflowYaml', () => {
 
   it('uses the step definition label as the workflow name', () => {
     const yaml = buildInlineWorkflowYaml({
-      id: 't3',
-      source: 'inline',
       stepType: 'email',
       connectorId: 'c1',
       params: 'to:\n  - ops@example.com\nsubject: Alert\nmessage: Body',
@@ -83,10 +77,8 @@ describe('buildInlineWorkflowYaml', () => {
   });
 
   describe('invalid drafts', () => {
-    const build = (overrides: Partial<InlineWorkflowActionDraft>) =>
+    const build = (overrides: Partial<InlineWorkflowStepDraft>) =>
       buildInlineWorkflowYaml({
-        id: 't',
-        source: 'inline',
         stepType: 'email',
         connectorId: 'c1',
         params: 'to:\n  - ops@example.com\nsubject: Alert\nmessage: Body',
@@ -112,8 +104,6 @@ describe('buildInlineWorkflowYaml', () => {
 
   it('builds a valid slack v2 workflow YAML', () => {
     const yaml = buildInlineWorkflowYaml({
-      id: 't8',
-      source: 'inline',
       stepType: 'slack2.sendMessage',
       connectorId: 'my-slackv2-connector',
       params: 'channel: "channel"\ntext: "Hello {{ policyId }}"',

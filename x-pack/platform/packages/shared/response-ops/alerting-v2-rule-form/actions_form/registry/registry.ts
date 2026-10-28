@@ -6,34 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { INLINE_ACTION_STEPS } from '@kbn/alerting-v2-utils';
 import type { InlineActionStepType } from '../types';
 import type { InlineActionStepDefinition } from './types';
 import { SlackChannelSelectorWrapper } from '../components/slack_channel_selector';
-import { EMAIL_PARAMS_SCHEMA, SLACK2_PARAMS_SCHEMA } from './params_schemas';
 
-const EMAIL_PARAMS_TEMPLATE = `to: 
-  - ""
-subject: ""
-message: |
-  {% for alert in inputs.payload.alerts %}
-  - {{ inputs.payload.rules[alert.rule_id].name | default: "Alert" }} ({{ alert.alert_status }}): {{ alert.alert_url }}
-  {% endfor %}
-`;
-
-// ToDo: add a channel selector to the Slack (v2) step form
-const SLACK2_PARAMS_TEMPLATE = `channel: ""
-text: |
-  {% for alert in inputs.payload.alerts %}
-  - {{ inputs.payload.rules[alert.rule_id].name | default: "Alert" }} ({{ alert.alert_status }}): <{{ alert.alert_url }}|View alert>
-  {% endfor %}
-`;
-
-export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition[] = [
-  {
-    id: 'email',
-    label: i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.stepType.email.label', {
-      defaultMessage: 'Email',
-    }),
+const STEP_UI: Record<
+  InlineActionStepType,
+  Pick<InlineActionStepDefinition, 'description' | 'iconType' | 'CustomComponent'>
+> = {
+  email: {
     description: i18n.translate(
       'xpack.alertingV2.alertingV2RuleForm.actionForm.stepType.email.description',
       {
@@ -41,15 +23,8 @@ export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition
       }
     ),
     iconType: 'mail',
-    connectorTypeId: '.email',
-    paramsTemplate: EMAIL_PARAMS_TEMPLATE,
-    paramsSchema: EMAIL_PARAMS_SCHEMA,
   },
-  {
-    id: 'slack2.sendMessage',
-    label: i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.stepType.slack2.label', {
-      defaultMessage: 'Slack',
-    }),
+  'slack2.sendMessage': {
     description: i18n.translate(
       'xpack.alertingV2.alertingV2RuleForm.actionForm.stepType.slack2.description',
       {
@@ -57,13 +32,12 @@ export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition
       }
     ),
     iconType: 'logoSlack',
-    connectorTypeId: '.slack2',
-    connectorTypeSubAction: 'sendMessage',
-    paramsTemplate: SLACK2_PARAMS_TEMPLATE,
-    paramsSchema: SLACK2_PARAMS_SCHEMA,
     CustomComponent: SlackChannelSelectorWrapper,
   },
-];
+};
+
+export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition[] =
+  INLINE_ACTION_STEPS.map((step) => ({ ...step, ...STEP_UI[step.id] }));
 
 export const getInlineActionStepDefinition = (
   id: InlineActionStepType

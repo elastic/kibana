@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { parseInlineParams } from '@kbn/alerting-v2-utils';
 import { getInlineActionStepDefinition } from '../registry';
 import type { ActionDraft, InlineWorkflowActionDraft } from '../types';
-import { parseInlineParams } from './parse_inline_params';
 
 export interface InlineActionErrors {
   readonly connector?: string;

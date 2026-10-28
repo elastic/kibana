@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EMAIL_PARAMS_SCHEMA, SLACK2_PARAMS_SCHEMA } from './params_schemas';
+import { EMAIL_PARAMS_SCHEMA, SLACK2_PARAMS_SCHEMA } from './inline_action_params_schemas';
 
 const validEmail = { to: ['ops@example.com'], subject: 'Alert', message: 'Body' };
 const validSlack = { channel: 'C123', text: 'Hello' };

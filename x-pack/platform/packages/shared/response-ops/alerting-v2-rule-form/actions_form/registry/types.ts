@@ -5,21 +5,12 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod/v4';
-import type { InlineActionStepType, InlineWorkflowActionDraft } from '../types';
+import type { InlineActionStep } from '@kbn/alerting-v2-utils';
+import type { InlineWorkflowActionDraft } from '../types';
 
-type Slack2SubAction = 'sendMessage';
-type ConnectorTypeSubAction = Slack2SubAction | (string & {});
-
-export interface InlineActionStepDefinition {
-  id: InlineActionStepType;
-  label: string;
+export interface InlineActionStepDefinition extends InlineActionStep {
   description?: string;
   iconType?: string;
-  connectorTypeId: string;
-  connectorTypeSubAction?: ConnectorTypeSubAction;
-  paramsTemplate: string;
-  paramsSchema: z.ZodObject<Record<string, z.ZodType>, z.core.$strict>;
   CustomComponent?: React.ComponentType<{
     value: InlineWorkflowActionDraft;
     onChange: (value: InlineWorkflowActionDraft) => void;

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export type InlineActionStepType = 'slack2.sendMessage' | 'email';
+import type { InlineActionStepType } from '@kbn/alerting-v2-utils';
+
+export type { InlineActionStepType };
 export type ActionSource = 'existing' | 'inline';
 export type ConnectorCreationConfig =
   | { readonly mode: 'flyout' }

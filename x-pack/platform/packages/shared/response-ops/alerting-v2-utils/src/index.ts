@@ -28,6 +28,33 @@ export { resolveAlertLabel, type ResolveAlertLabelParams } from './resolve_alert
 export { buildRulePayload } from './rule_mappers';
 export { attachmentDataToActionPolicyPayload } from './action_policy_mappers';
 export {
+  splitQuery,
+  discoverQueryToRuleQuery,
+  splitResultToRuleQuery,
+  guessRecoveryBlock,
+  type RuleQuery,
+  type SplitConfidence,
+  type SplitResult,
+  type SplitOutcome,
+  type SplitRuleQueryResult,
+} from './split_query';
+export { getGroupByColumnsFromQuery } from './get_group_by_columns_from_query';
+export {
+  INLINE_ACTION_STEPS,
+  INLINE_WORKFLOW_TAG,
+  getInlineActionStep,
+  type InlineActionStep,
+  type InlineActionStepType,
+  type InlineWorkflowStepDraft,
+} from './inline_action_steps';
+export { EMAIL_PARAMS_SCHEMA, SLACK2_PARAMS_SCHEMA } from './inline_action_params_schemas';
+export { parseInlineParams, type ParsedInlineParams } from './parse_inline_params';
+export {
+  buildInlineWorkflowYaml,
+  InvalidInlineWorkflowError,
+  stepTypeFromConnectorType,
+} from './build_inline_workflow_yaml';
+export {
   encodeSeriesId,
   decodeSeriesId,
   InvalidSeriesIdError,

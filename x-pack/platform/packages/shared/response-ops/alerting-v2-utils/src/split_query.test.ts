@@ -10,7 +10,7 @@ import {
   guessRecoveryBlock,
   discoverQueryToRuleQuery,
   splitResultToRuleQuery,
-} from './use_heuristic_split';
+} from './split_query';
 
 // ── splitQuery ────────────────────────────────────────────────────────────────
 

@@ -15,11 +15,13 @@ export type {
 } from '@kbn/alerting-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup as AlertingV2ServerSetup } from '@kbn/alerting-v2-plugin/server';
 
 // this plugin's dependendencies
 export interface StackAlertsDeps {
   alerting: AlertingServerSetup;
   features: FeaturesPluginSetup;
+  alertingVTwo?: AlertingV2ServerSetup;
 }
 
 export interface StackAlertsStartDeps {

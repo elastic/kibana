@@ -52,7 +52,22 @@ export type {
   InternalRulesClientApi,
   ActionPolicyClientApi,
   AlertEventsClientApi,
+  RuleMigrationClientApi,
 } from './types';
+export type {
+  ActionMigrationNote,
+  ClassicRule,
+  ClassicRuleAction,
+  ConvertRuleParams,
+  DefaultActionPolicy,
+  MigratedActionPolicy,
+  RuleMigration,
+  RuleMigrationDefinition,
+  RuleMigrationResult,
+  RuleParamsConversion,
+  SkippedActionReason,
+  SkippedClassicAction,
+} from './lib/rule_migration';
 export type { ArtifactTypeDefinition, ArtifactReferenceDescriptor } from './lib/artifact_types';
 export type { FindRulesArgs, CreateRulesClientOptions } from './lib/rules_client';
 export type { FindActionPoliciesArgs } from './lib/action_policy_client';

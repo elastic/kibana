@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getInlineActionStepDefinition } from '../registry';
+import { getInlineActionStep } from './inline_action_steps';
 import { parseInlineParams } from './parse_inline_params';
 
-const email = getInlineActionStepDefinition('email');
-const slack = getInlineActionStepDefinition('slack2.sendMessage');
+const email = getInlineActionStep('email');
+const slack = getInlineActionStep('slack2.sendMessage');
 
 if (!email || !slack) {
   throw new Error('Expected the email and slack2 step definitions to be registered.');

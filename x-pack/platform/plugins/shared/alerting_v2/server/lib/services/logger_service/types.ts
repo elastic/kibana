@@ -63,7 +63,8 @@ export type AlertingSubsystemName =
   | 'savedObjects'
   | 'agentBuilder'
   | 'events'
-  | 'telemetry';
+  | 'telemetry'
+  | 'ruleMigration';
 
 export interface DebugParams {
   message: LogMessageSource;

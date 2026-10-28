@@ -25,6 +25,9 @@
       "dataViews",
       "kibanaUtils"
     ],
+    "optionalPlugins": [
+      "alertingVTwo"
+    ],
     "requiredBundles": [
       "esUiShared",
       "esql"

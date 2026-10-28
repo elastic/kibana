@@ -16,6 +16,8 @@ import { AlertEventsClient } from '../lib/alert_events_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { InternalRulesClient } from '../lib/internal_rules_client';
+import { RuleMigrationClient, RuleMigrationRegistry } from '../lib/rule_migration';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AlertingServerSetup, AlertingServerStart } from '../types';
 import { bindContract } from './bind_contract';
 import { asSpaceId } from '@kbn/core-spaces-common';
@@ -31,6 +33,7 @@ describe('bindContract', () => {
   let mockAlertEventsClient: Partial<AlertEventsClient>;
   let fork: jest.Mock;
   let mockInternalRulesClient: Partial<InternalRulesClient>;
+  let ruleMigrationClient: RuleMigrationClient;
 
   beforeEach(() => {
     container = new Container();
@@ -44,6 +47,8 @@ describe('bindContract', () => {
     scope.bind(RulesClient).toConstantValue(mockRulesClient as RulesClient);
     scope.bind(ActionPolicyClient).toConstantValue(mockActionPolicyClient as ActionPolicyClient);
     scope.bind(AlertEventsClient).toConstantValue(mockAlertEventsClient as AlertEventsClient);
+    ruleMigrationClient = Object.create(RuleMigrationClient.prototype);
+    scope.bind(RuleMigrationClient).toConstantValue(ruleMigrationClient);
 
     fork = jest.fn(() => scope);
     container.bind(CoreStart('injection')).toConstantValue({
@@ -51,6 +56,7 @@ describe('bindContract', () => {
       getContainer: jest.fn(() => container),
     } as never);
     container.bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
+    container.bind(RuleMigrationRegistry).toSelf().inSingletonScope();
     mockInternalRulesClient = { bulkDisableRules: jest.fn() };
     container
       .bind(InternalRulesClient)
@@ -59,11 +65,22 @@ describe('bindContract', () => {
     container.load(new ContainerModule((options) => bindContract(options)));
   });
 
-  it('exposes registerArtifactType on the setup contract', () => {
+  it('exposes registerArtifactType and ruleMigrations on the setup contract', () => {
     const setup = container.get(AlertingSetupToken);
     expect(setup).toEqual({
       registerArtifactType: expect.any(Function),
+      ruleMigrations: { register: expect.any(Function) },
     });
+  });
+
+  it('registers rule migrations in the singleton registry', () => {
+    const setup = container.get(AlertingSetupToken);
+    setup.ruleMigrations.register({
+      ruleTypeId: '.es-query',
+      convertParams: () => ({ query: { base: 'FROM logs-*' } }),
+    });
+
+    expect(container.get(RuleMigrationRegistry).has('.es-query')).toBe(true);
   });
 
   it('exposes all client factories on the start contract', () => {
@@ -75,7 +92,19 @@ describe('bindContract', () => {
       getActionPolicyClientWithRequest: expect.any(Function),
       getActionPolicyClientWithRequestInSpace: expect.any(Function),
       getAlertEventsClientWithRequest: expect.any(Function),
+      getRuleMigrationClientWithRequest: expect.any(Function),
     });
+  });
+
+  it('returns the ruleMigrationClient resolved with the request when getRuleMigrationClientWithRequest is called', async () => {
+    const fakeRequest = httpServerMock.createKibanaRequest();
+    const start = container.get(AlertingStartToken);
+
+    const client = await start.getRuleMigrationClientWithRequest(fakeRequest);
+
+    expect(client).toBe(ruleMigrationClient);
+    expect(fork).toHaveBeenCalledTimes(1);
+    expect(scope.get(Request)).toBe(fakeRequest);
   });
 
   it('returns the rulesClient resolved with the request when getRulesClientWithRequest is called', async () => {

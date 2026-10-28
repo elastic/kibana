@@ -10,9 +10,8 @@ import {
   KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
 } from '@kbn/workflows';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
-import { INLINE_WORKFLOW_TAG } from '../constants';
-import { getInlineActionStepDefinition } from '../registry';
-import type { InlineWorkflowActionDraft } from '../types';
+import { INLINE_WORKFLOW_TAG, getInlineActionStep } from './inline_action_steps';
+import type { InlineWorkflowStepDraft } from './inline_action_steps';
 import { parseInlineParams } from './parse_inline_params';
 
 export class InvalidInlineWorkflowError extends Error {
@@ -27,8 +26,8 @@ export const stepTypeFromConnectorType = (connectorTypeId: string, subAction?: s
   return subAction ? `${typeId}.${subAction}` : typeId;
 };
 
-export const buildInlineWorkflowYaml = (action: InlineWorkflowActionDraft): string => {
-  const definition = getInlineActionStepDefinition(action.stepType);
+export const buildInlineWorkflowYaml = (action: InlineWorkflowStepDraft): string => {
+  const definition = getInlineActionStep(action.stepType);
   if (!definition) {
     throw new InvalidInlineWorkflowError(`Unknown inline action step type: ${action.stepType}`);
   }
