@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
 import type { QueryLink, StreamQuery } from '@kbn/significant-events-schema';
 import { deriveQueryType, hasSameEsql } from '@kbn/streams-schema';
@@ -37,6 +38,8 @@ export interface PromoteQueriesResult {
   /** MATCH KIs that are not filter-only, so no count series can be compiled. */
   skipped_ineligible: number;
 }
+
+const PROMOTE_SOURCE_CONCURRENCY = 3;
 
 const EMPTY_PROMOTE_RESULT: PromoteQueriesResult = {
   promoted: 0,
@@ -479,19 +482,32 @@ export class QueryRuleOrchestrator {
     }
 
     const knownSourceIds = new Set(sourceIds);
-    const totals: PromoteQueriesResult = { ...EMPTY_PROMOTE_RESULT };
-    for (const [sourceId, ids] of bySource) {
-      if (!knownSourceIds.has(sourceId)) {
-        this.logger.warn(`Skipping promotion for source ${sourceId}: missing or disabled`);
-        continue;
-      }
-      const result = await promote(sourceId, ids);
-      totals.promoted += result.promoted;
-      totals.skipped_stats += result.skipped_stats;
-      totals.skipped_ineligible += result.skipped_ineligible;
+    const promotableEntries = [...bySource].filter(([sourceId]) => {
+      if (knownSourceIds.has(sourceId)) return true;
+      this.logger.warn(`Skipping promotion for source ${sourceId}: missing or disabled`);
+      return false;
+    });
+
+    // Each source may wait for its write lease, so promote a few at a time rather than one after another.
+    const limiter = pLimit(PROMOTE_SOURCE_CONCURRENCY);
+    // A failing source must not stop the others, so wait for every source before surfacing the first failure.
+    const settled = await Promise.allSettled(
+      promotableEntries.map(([sourceId, ids]) => limiter(() => promote(sourceId, ids)))
+    );
+    const results: PromoteQueriesResult[] = [];
+    for (const outcome of settled) {
+      if (outcome.status === 'rejected') throw outcome.reason;
+      results.push(outcome.value);
     }
 
-    return totals;
+    return results.reduce<PromoteQueriesResult>(
+      (totals, result) => ({
+        promoted: totals.promoted + result.promoted,
+        skipped_stats: totals.skipped_stats + result.skipped_stats,
+        skipped_ineligible: totals.skipped_ineligible + result.skipped_ineligible,
+      }),
+      { ...EMPTY_PROMOTE_RESULT }
+    );
   }
 
   async deleteQueries(

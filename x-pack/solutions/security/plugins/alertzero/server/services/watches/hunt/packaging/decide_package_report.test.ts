@@ -301,6 +301,21 @@ describe('decidePackageReport', () => {
     expect(result.proposals[0].comment).toContain('ghost');
   });
 
+  it('mints no executable action for a run whose evidence is all on a remote cluster', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({
+        hosts: [{ name: 'ubuntu', enrolled: false, capabilities: [] }],
+        allEventsActionable: false,
+        hasProcessBearingEvent: false,
+      }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    expect(result.proposals).toHaveLength(1);
+    expect(result.proposals[0].actionWorkflowId).toBeUndefined();
+    expect(result.proposals[0].title).toBe('Analyst recommendation');
+  });
+
   it('mints executable plus a recommendation when some hosts are unenrolled (trigger: partial enrollment)', () => {
     const result = decidePackageReport({
       conversationId,

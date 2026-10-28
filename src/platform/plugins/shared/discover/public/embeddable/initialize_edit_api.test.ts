@@ -92,7 +92,7 @@ describe('initialize edit api', () => {
           .mockResolvedValueOnce({ app: 'discover', path: '/mock-url', state: {} });
       }
 
-      mockedApi.dataViews$.next([currentDataView]);
+      mockedApi.dataSources$.next([currentDataView]);
       mockedApi.savedObjectId$.next(currentSavedObjectId);
 
       await waitOneTick();
@@ -185,7 +185,7 @@ describe('initialize edit api', () => {
       discoverServiceMock.embeddable.getStateTransfer = jest.fn().mockReturnValue({
         navigateToEditor: mockedNavigate,
       });
-      mockedApi.dataViews$.next([dataViewMock]);
+      mockedApi.dataSources$.next([dataViewMock]);
       mockedApi.savedObjectId$.next('test-id');
 
       getLocationMock = jest.mocked(discoverServiceMock.locator.getLocation);

@@ -62,6 +62,11 @@ export interface EvalSuiteMetadata {
    * instead of the general config, so the suite's credentials rotate independently.
    */
   vaultSecret?: string;
+  /**
+   * Judge connector id used when no `models:judge:` label,
+   * `--evaluation-connector-id` or `EVAL_CONNECTOR_ID` is given, ahead of the Vault default.
+   */
+  defaultJudge?: string;
   shards?: EvalSuiteShard[];
   stepTimeoutInMinutes?: number;
 }
@@ -82,6 +87,7 @@ export interface EvalSuiteDefinition {
   scoutDomain?: string;
   scoutHook?: string;
   vaultSecret?: string;
+  defaultJudge?: string;
   shards?: EvalSuiteShard[];
   stepTimeoutInMinutes?: number;
 }
@@ -193,6 +199,7 @@ const normalizeSuite = (
     scoutDomain: metadata?.scoutDomain,
     scoutHook: metadata?.scoutHook,
     vaultSecret: metadata?.vaultSecret,
+    defaultJudge: metadata?.defaultJudge,
     shards: metadata?.shards,
     stepTimeoutInMinutes: metadata?.stepTimeoutInMinutes,
   };

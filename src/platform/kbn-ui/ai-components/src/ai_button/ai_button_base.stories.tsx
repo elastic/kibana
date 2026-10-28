@@ -21,6 +21,7 @@ const ICON_OPTIONS: AiButtonIconType[] = [
   'sparkles',
   'productAgent',
   'addToChat',
+  'inspect',
 ];
 
 interface CommonStoryArgs {

@@ -173,8 +173,13 @@ TRUE, _euid_branch_2_formula, NULL))
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
 | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
-| EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
-| WHERE \`entity.id\` IS NOT NULL
+| EVAL derived_euids = MV_DEDUPE(MV_APPEND(MV_APPEND(
+  COALESCE(user_euid, host_euid, service_euid),
+  COALESCE(host_euid, service_euid, user_euid)),
+  COALESCE(service_euid, user_euid, host_euid)))
+| MV_EXPAND derived_euids
+| WHERE derived_euids IS NOT NULL
+| RENAME derived_euids AS \`entity.id\`
 | WHERE \`entity.id\` IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
@@ -525,8 +530,13 @@ TRUE, _euid_branch_2_formula, NULL))
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
 | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
-| EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
-| WHERE \`entity.id\` IS NOT NULL
+| EVAL derived_euids = MV_DEDUPE(MV_APPEND(MV_APPEND(
+  COALESCE(user_euid, host_euid, service_euid),
+  COALESCE(host_euid, service_euid, user_euid)),
+  COALESCE(service_euid, user_euid, host_euid)))
+| MV_EXPAND derived_euids
+| WHERE derived_euids IS NOT NULL
+| RENAME derived_euids AS \`entity.id\`
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
@@ -604,8 +614,13 @@ TRUE, _euid_branch_2_formula, NULL))
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
 | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
-| EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
-| WHERE \`entity.id\` IS NOT NULL
+| EVAL derived_euids = MV_DEDUPE(MV_APPEND(MV_APPEND(
+  COALESCE(user_euid, host_euid, service_euid),
+  COALESCE(host_euid, service_euid, user_euid)),
+  COALESCE(service_euid, user_euid, host_euid)))
+| MV_EXPAND derived_euids
+| WHERE derived_euids IS NOT NULL
+| RENAME derived_euids AS \`entity.id\`
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
@@ -1778,8 +1793,13 @@ TRUE, _euid_branch_2_formula, NULL))
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
 | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
-| EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
-| WHERE \`entity.id\` IS NOT NULL
+| EVAL derived_euids = MV_DEDUPE(MV_APPEND(MV_APPEND(
+  COALESCE(user_euid, host_euid, service_euid),
+  COALESCE(host_euid, service_euid, user_euid)),
+  COALESCE(service_euid, user_euid, host_euid)))
+| MV_EXPAND derived_euids
+| WHERE derived_euids IS NOT NULL
+| RENAME derived_euids AS \`entity.id\`
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
@@ -1859,8 +1879,13 @@ TRUE, _euid_branch_2_formula, NULL))
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
 | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
-| EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
-| WHERE \`entity.id\` IS NOT NULL
+| EVAL derived_euids = MV_DEDUPE(MV_APPEND(MV_APPEND(
+  COALESCE(user_euid, host_euid, service_euid),
+  COALESCE(host_euid, service_euid, user_euid)),
+  COALESCE(service_euid, user_euid, host_euid)))
+| MV_EXPAND derived_euids
+| WHERE derived_euids IS NOT NULL
+| RENAME derived_euids AS \`entity.id\`
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)
@@ -1953,8 +1978,13 @@ TRUE, _euid_branch_2_formula, NULL))
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
 | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
-| EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
-| WHERE \`entity.id\` IS NOT NULL
+| EVAL derived_euids = MV_DEDUPE(MV_APPEND(MV_APPEND(
+  COALESCE(user_euid, host_euid, service_euid),
+  COALESCE(host_euid, service_euid, user_euid)),
+  COALESCE(service_euid, user_euid, host_euid)))
+| MV_EXPAND derived_euids
+| WHERE derived_euids IS NOT NULL
+| RENAME derived_euids AS \`entity.id\`
 | WHERE \`entity.id\` IN (\\"host:h-1\\", \\"host:h-1\\")
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
@@ -2019,8 +2049,13 @@ TRUE, _euid_branch_2_formula, NULL))
  _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
 | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
-| EVAL \`entity.id\` = COALESCE(user_euid, host_euid, service_euid)
-| WHERE \`entity.id\` IS NOT NULL
+| EVAL derived_euids = MV_DEDUPE(MV_APPEND(MV_APPEND(
+  COALESCE(user_euid, host_euid, service_euid),
+  COALESCE(host_euid, service_euid, user_euid)),
+  COALESCE(service_euid, user_euid, host_euid)))
+| MV_EXPAND derived_euids
+| WHERE derived_euids IS NOT NULL
+| RENAME derived_euids AS \`entity.id\`
 | STATS anomaly_count = COUNT(*) BY \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | EVAL \`entity.id\` = COALESCE(entity.relationships.resolution.resolved_to, \`entity.id\`)

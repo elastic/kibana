@@ -11,6 +11,7 @@ import {
   routeToConnectors,
   routeToRules,
   routeToLogs,
+  routeToSettings,
   legacyRouteToAlerts,
 } from '../constants';
 
@@ -28,6 +29,17 @@ export const getAlertingSectionBreadcrumb = (
         ...(returnHref
           ? {
               href: `${routeToLogs}`,
+            }
+          : {}),
+      };
+    case 'settings':
+      return {
+        text: i18n.translate('xpack.triggersActionsUI.rulesSettings.breadcrumbTitle', {
+          defaultMessage: 'Settings',
+        }),
+        ...(returnHref
+          ? {
+              href: `${routeToSettings}`,
             }
           : {}),
       };
