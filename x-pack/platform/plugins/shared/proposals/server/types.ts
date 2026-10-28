@@ -16,6 +16,7 @@ import type {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ProposalsService } from './services/proposals_service';
+import type { ProposalCreator } from './services/create_proposal';
 import type { ProposalPrivilegesChecker } from './services/check_proposal_privileges';
 import type { ResolveProposalUser } from './services/resolve_proposal_user';
 
@@ -56,6 +57,11 @@ export interface ProposalsPluginStart {
   getProposalsService: () => ProposalsService;
   /** For in-process callers (Agent Builder tools) that bypass the route's `security.authz`. */
   getProposalPrivileges: () => ProposalPrivilegesChecker;
+  /**
+   * Proposes an action in a conversation as the user behind the request, for callers that propose
+   * without an agent run (for example a hook). Checks the user's proposal privilege.
+   */
+  createProposal: ProposalCreator;
 }
 
 export type ProposalsPluginSetup = Record<string, never>;
