@@ -33,6 +33,7 @@ import {
   wrapWithSimulatedFunctionCalling,
 } from '../../simulated_function_calling';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
+import { resolveToolChoice } from '../../utils/forced_tool_choice';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
 import { ensureToolsWhenHistoryHasToolUse } from '../../utils/ensure_tools_when_history_has_tool_use';
 import { resolveChatCompletionReasoning } from '../../utils/resolve_chat_completion_reasoning';
@@ -129,6 +130,7 @@ export const inferenceEndpointAdapter = {
       provider,
       cacheControl,
       sessionId,
+      logger,
     });
 
     return defer(() =>
@@ -161,6 +163,7 @@ const createEndpointRequest = ({
   provider,
   cacheControl,
   sessionId,
+  logger,
 }: {
   system?: string;
   messages: Message[];
@@ -174,6 +177,7 @@ const createEndpointRequest = ({
   provider?: string;
   cacheControl?: ChatCompleteCacheControl;
   sessionId?: string;
+  logger?: Logger;
 }): InferenceEndpointRequest => {
   const temperatureOptions = getTemperatureIfValid(temperature, {
     modelId: endpointModelId ?? modelName,
@@ -229,7 +233,9 @@ const createEndpointRequest = ({
     messages: messagesToOpenAI({ system, messages }),
     ...(hasTools
       ? {
-          tool_choice: toolChoiceToOpenAI(toolChoice),
+          tool_choice: toolChoiceToOpenAI(
+            resolveToolChoice({ toolChoice, modelId: endpointModelId ?? modelName, logger })
+          ),
           tools: openAiTools,
         }
       : {}),

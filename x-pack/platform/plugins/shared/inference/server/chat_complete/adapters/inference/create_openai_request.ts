@@ -12,6 +12,7 @@ import type { CreateOpenAIRequestOptions } from './types';
 import { applyProviderTransforms } from './providers';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
 import { resolveChatCompletionReasoning } from '../../utils/resolve_chat_completion_reasoning';
+import { resolveToolChoice } from '../../utils/forced_tool_choice';
 import { getModelId } from './utils';
 
 export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIRequest => {
@@ -24,6 +25,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
     temperature = 0,
     modelName,
     reasoning,
+    logger,
   } = applyProviderTransforms(options);
 
   // Preconfigured EIS connectors carry no model_id, so fall back to the inference endpoint id.
@@ -63,7 +65,9 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
       messages: messagesToOpenAI({ system, messages }),
       ...(hasTools
         ? {
-            tool_choice: toolChoiceToOpenAI(toolChoice),
+            tool_choice: toolChoiceToOpenAI(
+              resolveToolChoice({ toolChoice, modelId: model, logger })
+            ),
             tools: openAiTools,
           }
         : {}),
