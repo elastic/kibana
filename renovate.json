@@ -971,7 +971,6 @@
         "eslint-plugin-react-hooks",
         "eslint-plugin-react-perf",
         "eslint-plugin-testing-library",
-        "eslint-traverse",
         "@types/eslint"
       ],
       "reviewers": ["team:kibana-operations"],
@@ -1989,10 +1988,7 @@
     },
     {
       "groupName": "minify",
-      "matchDepNames": [
-        "gulp-brotli",
-        "terser-webpack-plugin"
-      ],
+      "matchDepNames": ["terser-webpack-plugin"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
