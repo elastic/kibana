@@ -1021,6 +1021,7 @@ export const buildConfiguredDestinationNode = (
           }),
       data: {
         destinationId: destination.id,
+        destinationType: destination.type,
         signals: destination.signals,
         bucket: destination.bucket,
         title: destination.name,
@@ -1056,6 +1057,7 @@ export const buildConfiguredDestinationNode = (
         }),
     data: {
       destinationId: destination.id,
+      destinationType: destination.type,
       signals: destination.signals,
       streamName: getDestinationIndices(destination).join(' ') || undefined,
       indexCount: targetedIndexNames.length,
