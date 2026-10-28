@@ -18,8 +18,19 @@ export const KI_EXTRACTION_SERVICE_ACCOUNT_NAME = 'nightshift_ki_extraction';
 export const KI_EXTRACTION_SERVICE_ACCOUNT_ROLE: Omit<estypes.SecurityPutRoleRequest, 'name'> = {
   description:
     'Privileges for the service account that runs knowledge indicator extraction. Assigned by Kibana; do not assign to users.',
-  cluster: [],
-  indices: [],
+  // Calls the LLM through an inference endpoint (feature identification, query generation).
+  cluster: ['monitor_inference'],
+  indices: [
+    {
+      // Source data. A source is any ES|QL query, read through the source's view, which checks
+      // the caller's read on the indices behind it (without it the view returns no documents, and
+      // no error). Sources can name any index, so the account reads every non-system index.
+      // TODO: refuse to save a source whose author cannot read what it queries.
+      names: ['*'],
+      privileges: ['read'],
+      allow_restricted_indices: false,
+    },
+  ],
   applications: [
     {
       application: 'kibana-.kibana',
