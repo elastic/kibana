@@ -13,7 +13,9 @@ import {
   evalRunFlags,
   loadScoutHookConfig,
   readConcurrencyFlag,
+  resolveEvaluationConnectorId,
 } from './run_helpers';
+import type { EvalSuiteDefinition } from './suites';
 import { loadVaultConfig, readSuiteSecretFromDevVault } from './profiles';
 
 jest.mock('./profiles', () => ({
@@ -208,5 +210,47 @@ describe('--concurrency forwarding', () => {
     });
 
     expect(args).toEqual(expect.arrayContaining(['--concurrency', '8']));
+  });
+});
+
+describe('resolveEvaluationConnectorId', () => {
+  const originalConnectorId = process.env.EVAL_CONNECTOR_ID;
+  const log = new ToolingLog();
+  const suite = { id: 'pinned', defaultJudge: 'eis-pinned' } as EvalSuiteDefinition;
+
+  const resolve = (argv: string[], withSuite?: EvalSuiteDefinition) =>
+    resolveEvaluationConnectorId('/repo', log, readFlags(argv), withSuite);
+
+  beforeEach(() => {
+    delete process.env.EVAL_CONNECTOR_ID;
+  });
+
+  afterEach(() => {
+    if (originalConnectorId === undefined) {
+      delete process.env.EVAL_CONNECTOR_ID;
+    } else {
+      process.env.EVAL_CONNECTOR_ID = originalConnectorId;
+    }
+  });
+
+  it('prefers --evaluation-connector-id over the env var and the suite default', async () => {
+    process.env.EVAL_CONNECTOR_ID = 'from-env';
+    await expect(resolve(['--evaluation-connector-id', 'from-flag'], suite)).resolves.toBe(
+      'from-flag'
+    );
+  });
+
+  it('prefers EVAL_CONNECTOR_ID over the suite default', async () => {
+    process.env.EVAL_CONNECTOR_ID = 'from-env';
+    await expect(resolve([], suite)).resolves.toBe('from-env');
+  });
+
+  it('falls back to the suite defaultJudge, including for an empty EVAL_CONNECTOR_ID', async () => {
+    process.env.EVAL_CONNECTOR_ID = '';
+    await expect(resolve([], suite)).resolves.toBe('eis-pinned');
+  });
+
+  it('requires a judge when neither a flag, the env var nor a suite default is set', async () => {
+    await expect(resolve([])).rejects.toThrow('EVAL_CONNECTOR_ID is required');
   });
 });
