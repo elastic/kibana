@@ -157,6 +157,15 @@ export const typescriptOverrides: OxlintOverride[] = [
           modifiers: ['requiresQuotes'],
         },
       ],
+      '@kbn/compat/eslint-no-restricted-syntax': [
+        'error',
+        {
+          selector: 'TSEnumDeclaration[const=true]',
+          message: 'Do not use `const` with enum declarations',
+        },
+      ],
+      '@kbn/compat/eslint-no-undef-init': 'error',
+      '@kbn/compat/eslint-spaced-comment': ['error', 'always', { exceptions: ['/'] }],
       eqeqeq: ['error', 'always', { null: 'ignore' }],
       'max-classes-per-file': ['error', 1],
       'no-bitwise': 'error',

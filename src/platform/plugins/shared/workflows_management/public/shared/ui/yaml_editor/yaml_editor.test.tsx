@@ -34,7 +34,7 @@ jest.mock('./yaml_language_service', () => {
         if (!mockState.instance) {
           // Initialize if not already done
           const { configureMonacoYamlSchema } = jest.requireMock('@kbn/monaco');
-          // eslint-disable-next-line require-atomic-updates
+          // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
           mockState.instance = await configureMonacoYamlSchema(schemas);
           // @ts-expect-error - mockState.instance is not typed
         } else if (mockState.instance.update) {
