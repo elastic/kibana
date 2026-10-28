@@ -809,6 +809,7 @@ src/platform/packages/shared/shared-ux/code_editor/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/column-presets @elastic/eui-team @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker @elastic/appex-sharedux @elastic/eui-team
+src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker-full-data @elastic/appex-sharedux @elastic/eui-team
 src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker-presets @elastic/appex-sharedux @elastic/eui-team
 src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker-presets-common @elastic/appex-sharedux @elastic/eui-team
 src/platform/packages/shared/shared-ux/display/kbn-announcement-banner @elastic/appex-sharedux @elastic/eui-team

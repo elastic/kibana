@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiIcon,
   EuiLink,
+  EuiLoadingSpinner,
   EuiMarkdownFormat,
   EuiText,
   useEuiFontSize,
@@ -273,6 +274,16 @@ interface PanelNavItemProps {
   buttonProps?: Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'>;
   /** Duh */
   icon?: IconType;
+  /**
+   * Replaces the icon with a spinner and disables the button.
+   * @default false
+   */
+  isLoading?: boolean;
+  /**
+   * Shows the trailing chevron. Hide it for items that run an action instead of navigating.
+   * @default true
+   */
+  showChevron?: boolean;
 }
 
 /** A navigation item within the panel body that links to another panel. */
@@ -280,6 +291,8 @@ export const PanelNavItem = ({
   onClick,
   buttonProps,
   icon,
+  isLoading = false,
+  showChevron = true,
   className,
   'data-test-subj': dataTestSubj,
   children,
@@ -289,12 +302,24 @@ export const PanelNavItem = ({
 
   return (
     <li css={styles.root} className={className} data-test-subj={dataTestSubj}>
-      <button css={styles.button} {...buttonProps} onClick={onClick}>
+      <button
+        css={styles.button}
+        {...buttonProps}
+        disabled={isLoading || buttonProps?.disabled}
+        aria-busy={isLoading || undefined}
+        onClick={onClick}
+      >
         <span css={styles.label}>
-          {icon && <EuiIcon type={icon} size="m" aria-hidden="true" />}
+          {isLoading ? (
+            <EuiLoadingSpinner size="m" />
+          ) : (
+            icon && <EuiIcon type={icon} size="m" aria-hidden="true" />
+          )}
           {children}
         </span>
-        <EuiIcon type="chevronSingleRight" size="m" color="subdued" aria-hidden="true" />
+        {showChevron && (
+          <EuiIcon type="chevronSingleRight" size="m" color="subdued" aria-hidden="true" />
+        )}
       </button>
     </li>
   );

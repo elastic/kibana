@@ -1901,6 +1901,9 @@ importers:
       '@kbn/date-range-picker':
         specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker
+      '@kbn/date-range-picker-full-data':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker-full-data
       '@kbn/date-range-picker-presets':
         specifier: workspace:*
         version: link:src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker-presets
@@ -8515,6 +8518,8 @@ importers:
   src/platform/packages/shared/shared-ux/column-presets: {}
 
   src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker: {}
+
+  src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker-full-data: {}
 
   src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker-presets: {}
 

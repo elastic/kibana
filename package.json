@@ -658,6 +658,7 @@
     "@kbn/data-visualizer-server-schemas": "workspace:*",
     "@kbn/dataset-quality-plugin": "workspace:*",
     "@kbn/date-range-picker": "workspace:*",
+    "@kbn/date-range-picker-full-data": "workspace:*",
     "@kbn/date-range-picker-presets": "workspace:*",
     "@kbn/date-range-picker-presets-common": "workspace:*",
     "@kbn/datemath": "workspace:*",
