@@ -578,6 +578,15 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('After ensuring the rule is `kind: alert`');
     });
 
+    it('covers linking a rule to an existing action policy', () => {
+      const doc = generateNotificationsOverviewDoc();
+      expect(doc).toContain('## Linking a Rule to an Existing Action Policy');
+      expect(doc).toContain('platform.alerting.link_rule_to_action_policy');
+      expect(doc).toContain('Do not set `routing_tags` by hand');
+      expect(doc).toContain('{actionPolicyAttachment.id}');
+      expect(doc).toContain('rule_saved');
+    });
+
     it('links sibling references without a ./references/ prefix', () => {
       const doc = generateNotificationsOverviewDoc();
       expect(doc).toContain('(./rule-kind.md)');
