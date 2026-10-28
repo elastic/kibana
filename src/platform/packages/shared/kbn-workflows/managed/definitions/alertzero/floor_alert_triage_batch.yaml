@@ -132,14 +132,40 @@ steps:
   # 1b. Load the batch's alert documents. The sweep passes ids only, so the batch loads the
   #     documents Alert Analysis takes instead of the sweep pushing up to 100 documents through the
   #     engine. An alert deleted since planning is missing from the result; if none can be loaded the
-  #     run marks them failed and stops.
+  #     run marks them failed and stops. Only the fields Alert Analysis and the pattern keys read
+  #     are loaded. A size error is the same on every attempt, so it is not retried and its alerts
+  #     are marked failed. Any other error leaves the claim for the next sweep to reclaim.
   # ---------------------------------------------------------------------------
   - name: load_alerts
     type: alertzero.triage.loadAlerts
     on-failure:
       retry:
+        condition: "${{ error.type != 'StepSizeLimitExceeded' }}"
         max-attempts: 3
         delay: 5s
+      fallback:
+        - name: release_claims_load_failed
+          type: kibana.SetAlertTags
+          # Nothing removes `az:triage_failed`, so tagging on a transient error would take the
+          # alerts out of triage for good.
+          if: "${{ error.type == 'StepSizeLimitExceeded' }}"
+          # shortcut: if this tagging fails the claim stays and a later sweep repeats the size error, upgrade if seen.
+          on-failure:
+            continue: true
+          with:
+            ids: "${{ inputs.alert_ids }}"
+            tags:
+              tags_to_add:
+                - "az:triage_failed"
+              tags_to_remove:
+                - "az:triage_pending"
+                - "az:triage_exec:{{ execution.id }}"
+
+        # A fallback clears the error, so without this fail the run would go on without load_alerts output.
+        - name: abort_load_failed
+          type: workflow.fail
+          with:
+            message: "Alert Triage could not load the alerts of this batch: {{ error.message }}"
     with:
       alert_ids: "${{ inputs.alert_ids }}"
 

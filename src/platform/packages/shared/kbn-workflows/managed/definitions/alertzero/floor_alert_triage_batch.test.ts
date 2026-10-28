@@ -94,6 +94,27 @@ describe('Alert Triage batch workflow', () => {
       const names = batchSteps.map(({ name }) => name);
       expect(names.indexOf('load_alerts')).toBeLessThan(names.indexOf('classify_alerts'));
     });
+
+    it('does not retry a size error, and marks the alerts failed only for it', () => {
+      const { 'on-failure': onFailure } = stepByName('load_alerts') as YamlStep & {
+        'on-failure': { retry: { condition: string } };
+      };
+      expect(onFailure.retry.condition).toBe("${{ error.type != 'StepSizeLimitExceeded' }}");
+      expect(stepByName('release_claims_load_failed')).toEqual(
+        expect.objectContaining({ if: "${{ error.type == 'StepSizeLimitExceeded' }}" })
+      );
+    });
+
+    it('ends the run after the load fallback, since a fallback clears the error', () => {
+      const { 'on-failure': onFailure } = stepByName('load_alerts') as YamlStep & {
+        'on-failure': { fallback: Array<{ name: string }> };
+      };
+      expect(onFailure.fallback.map(({ name }) => name)).toEqual([
+        'release_claims_load_failed',
+        'abort_load_failed',
+      ]);
+      expect(stepByName('abort_load_failed').type).toBe('workflow.fail');
+    });
   });
 
   describe('concurrency', () => {
@@ -180,6 +201,7 @@ describe('Alert Triage batch workflow', () => {
     it.each([
       'release_claims_no_alerts',
       'release_claims_analysis_disabled',
+      'release_claims_load_failed',
       'release_claims_classify_failed',
       'release_unverdicted_claims_call',
     ])('%s marks the alerts failed and removes the claim, so no sweep retries them', (name) => {
