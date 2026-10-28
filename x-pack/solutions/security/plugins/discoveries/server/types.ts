@@ -46,12 +46,7 @@ export interface ElasticAssistantPluginSetup {
   ) => void;
 }
 
-/**
- * Minimal contract for the elastic_assistant plugin start: the slice the
- * discoveries package itself consumes (defined there, next to its consumer),
- * so the two cannot drift apart. The full contract lives in the
- * elastic_assistant plugin's own types.
- */
+/** The slice of the elastic_assistant start contract that `@kbn/discoveries` consumes. */
 export type ElasticAssistantPluginStart = ElasticAssistantStart;
 
 export interface DiscoveriesPluginSetupDeps {

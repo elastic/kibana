@@ -594,14 +594,9 @@ export class AIAssistantService {
   }
 
   /**
-   * Installs the space-level resources (including the per-space anonymization fields data
-   * stream and its default fields) if they are not installed yet, retrying a failed install.
-   *
-   * Callers that read these resources without creating an AI Assistant data client, such as
-   * Attack Discovery generation, call this first so a space that never opened the AI
-   * Assistant still has them. Deliberately no license check; see the plugin start contract.
-   *
-   * @returns `false` when the install failed and the retry failed too.
+   * Installs the space-level resources if missing, retrying a failed install. No license
+   * check; see `ensureSpaceResources` on the plugin start contract.
+   * @returns `false` when the install and its retry both failed.
    */
   public async ensureSpaceResources(spaceId: string): Promise<boolean> {
     // Check if resources installation has succeeded
