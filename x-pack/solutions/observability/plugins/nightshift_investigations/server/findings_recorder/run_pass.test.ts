@@ -11,7 +11,12 @@ import { MessageRole } from '@kbn/inference-common';
 import { createOptimizeModel } from '../lib/create_optimize_model';
 import type { RecorderMemory } from './coordinator';
 import { FINAL_INSTRUCTION, FINDINGS_RECORDER_SYSTEM_PROMPT, LIVE_INSTRUCTION } from './prompt';
-import { limitToOneConfirmed, runFindingsPass, type FindingsPassDeps } from './run_pass';
+import {
+  limitToOneConfirmed,
+  runFindingsPass,
+  toImpactEntities,
+  type FindingsPassDeps,
+} from './run_pass';
 
 jest.mock('../lib/create_optimize_model', () => ({ createOptimizeModel: jest.fn() }));
 
@@ -62,7 +67,7 @@ describe('runFindingsPass', () => {
     const writer = {
       setHypotheses: jest.fn().mockResolvedValue(undefined),
       setImpact: jest.fn().mockResolvedValue(undefined),
-      getFindings: jest.fn().mockResolvedValue({ hypotheses: [] }),
+      getFindings: jest.fn().mockResolvedValue({ hypotheses: [], impactEntities: [] }),
     };
     const patchMetadata = jest.fn().mockResolvedValue(undefined);
     const chatComplete = jest.fn();
@@ -161,6 +166,7 @@ describe('runFindingsPass', () => {
   it('starts a follow-up round from the stored record, in its own conversation only', async () => {
     const { deps, writer, memory } = setup();
     writer.getFindings.mockResolvedValue({
+      impactEntities: [],
       hypotheses: [
         {
           candidate: 'Pool leak',
@@ -253,6 +259,7 @@ describe('runFindingsPass', () => {
   it('starts a follow-up round with the evidence already stored', async () => {
     const { deps, writer, memory } = setup();
     writer.getFindings.mockResolvedValue({
+      impactEntities: [],
       hypotheses: [
         {
           candidate: 'Pool leak',
@@ -349,6 +356,72 @@ describe('runFindingsPass', () => {
 
     expect(createOptimizeModel).toHaveBeenCalledWith(
       expect.objectContaining({ roundConnectorId: 'custom-connector' })
+    );
+  });
+
+  it('writes each entity with its own evidence', async () => {
+    const evidence = { description: 'Checkout error rate rose to 40%.' };
+    const { deps, writer, memory } = setup({
+      answers: [
+        answerWith({
+          ...output,
+          impact_entities: [{ name: 'checkout', evidence }, { name: 'payments' }],
+        }),
+      ],
+    });
+
+    await run(deps, memory);
+
+    const [{ entities }] = writer.setImpact.mock.calls[0];
+    expect(entities).toEqual([
+      { id: 'checkout', name: 'checkout', evidence },
+      { id: 'payments', name: 'payments' },
+    ]);
+  });
+
+  it('keeps the stored evidence of an entity the model lists again without any', async () => {
+    const stored = { description: 'Payments timeouts began at 01:12.' };
+    const { deps, writer, memory } = setup({
+      answers: [
+        answerWith({ ...output, impact_entities: [{ name: 'checkout' }, { name: 'payments' }] }),
+      ],
+    });
+    writer.getFindings.mockResolvedValue({
+      hypotheses: [],
+      impactEntities: [{ id: 'payments', name: 'payments', evidence: stored }],
+    });
+
+    await run(deps, memory);
+
+    const [{ entities }] = writer.setImpact.mock.calls[0];
+    expect(entities).toEqual([
+      { id: 'checkout', name: 'checkout' },
+      { id: 'payments', name: 'payments', evidence: stored },
+    ]);
+  });
+
+  it('starts a follow-up round with the stored entities and their evidence', async () => {
+    const { deps, writer, memory } = setup();
+    writer.getFindings.mockResolvedValue({
+      hypotheses: [{ candidate: 'Pool leak', confidence: 0.4, status: 'investigating' }],
+      impactSummary: 'Checkout is slow',
+      impactEntities: [
+        { id: 'checkout', name: 'Checkout', type: 'service', evidence: { description: 'Slow.' } },
+        { id: 'db' },
+      ],
+    });
+
+    await run(deps, memory);
+
+    expect(memory.remember).toHaveBeenCalledWith(
+      expect.objectContaining({
+        answer: expect.objectContaining({
+          impact_entities: [
+            { name: 'Checkout', type: 'service', evidence: { description: 'Slow.' } },
+            { name: 'db' },
+          ],
+        }),
+      })
     );
   });
 
@@ -456,5 +529,23 @@ describe('runFindingsPass', () => {
     await expect(run({ ...deps, getAgenticInvestigations: () => undefined }, memory)).resolves.toBe(
       false
     );
+  });
+});
+
+describe('toImpactEntities', () => {
+  it('prefers the evidence the model sent over the stored evidence', () => {
+    const sent = { description: 'New.' };
+    expect(
+      toImpactEntities(
+        [{ name: 'checkout', evidence: sent }],
+        [{ id: 'checkout', evidence: { description: 'Old.' } }]
+      )
+    ).toEqual([{ id: 'checkout', name: 'checkout', evidence: sent }]);
+  });
+
+  it('does not carry evidence over to an entity that was not stored', () => {
+    expect(
+      toImpactEntities([{ name: 'new' }], [{ id: 'other', evidence: { description: 'x' } }])
+    ).toEqual([{ id: 'new', name: 'new' }]);
   });
 });

@@ -71,12 +71,16 @@ describe('createFindingsWriter', () => {
     impactService.findByConversationId.mockResolvedValue({
       summary: 'Checkout is slow',
       evidence: { description: 'Error rate doubled.' },
+      entities: [{ id: 'checkout', name: 'checkout', evidence: { description: 'Errors rose.' } }],
     });
 
     await expect(writer.getFindings({ conversationId: 'conv-1' })).resolves.toEqual({
       hypotheses,
       impactSummary: 'Checkout is slow',
       impactEvidence: { description: 'Error rate doubled.' },
+      impactEntities: [
+        { id: 'checkout', name: 'checkout', evidence: { description: 'Errors rose.' } },
+      ],
     });
     expect(hypothesesService.findByConversationId).toHaveBeenCalledWith('conv-1', 'space-a');
   });
@@ -88,6 +92,7 @@ describe('createFindingsWriter', () => {
       hypotheses: [],
       impactSummary: undefined,
       impactEvidence: undefined,
+      impactEntities: [],
     });
   });
 

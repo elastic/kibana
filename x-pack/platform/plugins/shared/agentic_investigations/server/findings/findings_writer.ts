@@ -33,11 +33,12 @@ export interface FindingsWriter {
     evidence?: InvestigationEvidence | null;
     entities?: ImpactEntity[];
   }) => Promise<void>;
-  /** The findings stored for the conversation: its hypotheses and the impact summary, if any. */
+  /** The findings stored for the conversation: its hypotheses and impact, if any. */
   getFindings: (params: { conversationId: string }) => Promise<{
     hypotheses: Hypothesis[];
     impactSummary?: string;
     impactEvidence?: InvestigationEvidence;
+    impactEntities: ImpactEntity[];
   }>;
 }
 
@@ -85,6 +86,7 @@ export const createFindingsWriter =
           hypotheses: stored?.hypotheses ?? [],
           impactSummary: impact?.summary,
           impactEvidence: impact?.evidence,
+          impactEntities: impact?.entities ?? [],
         };
       },
       setHypotheses: async ({ conversationId, hypotheses }) => {

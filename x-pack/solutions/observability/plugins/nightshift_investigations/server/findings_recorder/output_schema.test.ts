@@ -151,6 +151,43 @@ describe('evidence', () => {
   });
 });
 
+describe('entity evidence', () => {
+  it('trims the evidence of each entity to what the stores accept', () => {
+    const many = Array.from({ length: 300 }, (_, i) => ({ x: `2026-08-09T01:${i}`, y: i }));
+    const parsed = findingsOutputSchema.safeParse({
+      summary: 's',
+      impact_summary: 'x',
+      impact_entities: [
+        {
+          name: 'checkout',
+          evidence: {
+            description: 'Errors rose.',
+            chart: {
+              type: 'line',
+              title: 'Errors per minute',
+              x_axis: { type: 'time' },
+              y_axis: { unit: 'number' },
+              series: [{ name: 'errors', points: many }],
+            },
+          },
+        },
+        {
+          name: 'payments',
+          evidence: {
+            chart: { type: 'line', title: 't', x_axis: { type: 'time' }, y_axis: {}, series: [] },
+          },
+        },
+      ],
+      hypotheses: [],
+    });
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    const [checkout, payments] = limitFindings(parsed.data).impact_entities ?? [];
+    expect(checkout.evidence?.chart?.series[0].points).toHaveLength(100);
+    expect(payments.evidence).toBeUndefined();
+  });
+});
+
 describe('entityIdFor', () => {
   it('uses the name when it fits the id limit', () => {
     expect(entityIdFor('checkout')).toBe('checkout');

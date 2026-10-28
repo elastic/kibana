@@ -10,7 +10,7 @@ import { getEventActorDisplayName, type ConversationRoundStep } from '@kbn/agent
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE } from '@kbn/agentic-investigations-plugin/common';
-import type { Hypothesis } from '@kbn/agentic-investigations-plugin/common';
+import type { Hypothesis, ImpactEntity } from '@kbn/agentic-investigations-plugin/common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import { createOptimizeModel } from '../lib/create_optimize_model';
 import { createInvestigationUsageTelemetry } from '../lib/investigation_usage_telemetry';
@@ -114,6 +114,24 @@ const severityNotices = ({ events = [] }: ConversationLike): string[] =>
  * the stored hypotheses with whatever the follow-up looked at. It lives only in the recorder's
  * conversation: nothing is added to the agent's.
  */
+type RecordEntity = NonNullable<FindingsRecord['impact_entities']>[number];
+
+/**
+ * The entities to store. An entity the model lists again without evidence keeps the evidence
+ * already stored for it, since a write replaces the whole list.
+ */
+export const toImpactEntities = (
+  entities: readonly RecordEntity[],
+  stored: readonly ImpactEntity[]
+): ImpactEntity[] => {
+  const storedById = new Map(stored.map((entity) => [entity.id, entity]));
+  return entities.map(({ name, type, evidence }) => {
+    const id = entityIdFor(name);
+    const kept = evidence ?? storedById.get(id)?.evidence;
+    return { id, name, ...(type ? { type } : {}), ...(kept ? { evidence: kept } : {}) };
+  });
+};
+
 const storedRecord = async (
   agenticInvestigations: AgenticInvestigationsPluginStart,
   request: KibanaRequest,
@@ -121,9 +139,8 @@ const storedRecord = async (
   conversation: ConversationLike
 ): Promise<Record<string, unknown> | undefined> => {
   try {
-    const { hypotheses, impactSummary, impactEvidence } = await agenticInvestigations
-      .getFindingsWriter(request)
-      .getFindings({ conversationId });
+    const { hypotheses, impactSummary, impactEvidence, impactEntities } =
+      await agenticInvestigations.getFindingsWriter(request).getFindings({ conversationId });
     const { summary, severity, verdict } = conversation.metadata ?? {};
     if (hypotheses.length === 0 && typeof summary !== 'string') return undefined;
     return {
@@ -132,6 +149,15 @@ const storedRecord = async (
       ...(typeof severity === 'string' && severity ? { severity } : {}),
       ...(impactSummary ? { impact_summary: impactSummary } : {}),
       ...(impactEvidence ? { impact_evidence: impactEvidence } : {}),
+      ...(impactEntities.length
+        ? {
+            impact_entities: impactEntities.map(({ id, name, type, evidence }) => ({
+              name: name ?? id,
+              ...(type ? { type } : {}),
+              ...(evidence ? { evidence } : {}),
+            })),
+          }
+        : {}),
       hypotheses: hypotheses.map(({ candidate, confidence, status, reason, evidence }) => ({
         candidate,
         confidence,
@@ -315,8 +341,16 @@ export const runFindingsPass = async (
       } = output;
       writes.push([
         'impact',
-        () =>
-          writer.setImpact({
+        async () => {
+          // A write replaces the entity list, so what is stored is read first to keep its evidence.
+          const stored =
+            entities !== undefined && entities.length >= 2
+              ? await writer
+                  .getFindings({ conversationId })
+                  .then(({ impactEntities }) => impactEntities ?? [])
+                  .catch(() => [])
+              : [];
+          return writer.setImpact({
             conversationId,
             summary: impactSummary,
             // Omitted keeps the stored evidence; `null` removes it.
@@ -325,17 +359,11 @@ export const runFindingsPass = async (
             // affected in different ways, so a shorter list clears it.
             ...(entities !== undefined
               ? {
-                  entities:
-                    entities.length >= 2
-                      ? entities.map(({ name, type }) => ({
-                          id: entityIdFor(name),
-                          name,
-                          ...(type ? { type } : {}),
-                        }))
-                      : [],
+                  entities: entities.length >= 2 ? toImpactEntities(entities, stored) : [],
                 }
               : {}),
-          }),
+          });
+        },
       ]);
     }
   }

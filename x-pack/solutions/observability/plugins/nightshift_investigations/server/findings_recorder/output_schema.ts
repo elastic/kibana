@@ -86,6 +86,7 @@ export const findingsOutputSchema = lazySchema(() => {
         z.object({
           name: z.string().min(1),
           type: z.string().min(1).optional(),
+          evidence: evidenceSchema.optional(),
         })
       )
       .optional(),
@@ -182,9 +183,13 @@ export const limitEvidence = (raw: RawEvidence): InvestigationEvidence | undefin
 };
 
 /** A parsed record with its evidence trimmed to what the stores accept. */
-export type FindingsRecord = Omit<FindingsOutput, 'impact_evidence' | 'hypotheses'> & {
+export type FindingsRecord = Omit<
+  FindingsOutput,
+  'impact_evidence' | 'impact_entities' | 'hypotheses'
+> & {
   /** `null` retracts the stored evidence. */
   impact_evidence?: InvestigationEvidence | null;
+  impact_entities?: Array<{ name: string; type?: string; evidence?: InvestigationEvidence }>;
   hypotheses: Array<
     Omit<FindingsOutput['hypotheses'][number], 'evidence'> & { evidence?: InvestigationEvidence[] }
   >;
@@ -209,10 +214,14 @@ export const limitFindings = (output: FindingsOutput): FindingsRecord => {
       ? {
           impact_entities: output.impact_entities
             .slice(0, MAX_IMPACT_TOOL_ENTITIES)
-            .map(({ name, type }) => ({
-              name: truncate(name, MAX_ENTITY_NAME_LENGTH),
-              ...(type !== undefined ? { type: truncate(type, MAX_ENTITY_ID_LENGTH) } : {}),
-            })),
+            .map(({ name, type, evidence }) => {
+              const kept = evidence ? limitEvidence(evidence) : undefined;
+              return {
+                name: truncate(name, MAX_ENTITY_NAME_LENGTH),
+                ...(type !== undefined ? { type: truncate(type, MAX_ENTITY_ID_LENGTH) } : {}),
+                ...(kept ? { evidence: kept } : {}),
+              };
+            }),
         }
       : {}),
     hypotheses: output.hypotheses.slice(0, MAX_HYPOTHESES).map(({ evidence, ...hypothesis }) => {
@@ -350,6 +359,11 @@ export const FINDINGS_JSON_SCHEMA = {
         properties: {
           name: { type: 'string' },
           type: { type: 'string', description: 'For example service, host or database.' },
+          evidence: {
+            ...EVIDENCE_JSON_SCHEMA,
+            description:
+              'How this entity was affected: a short description, a small chart of its own failure signal, or both. Keep the stored evidence when you list the entity again.',
+          },
         },
         required: ['name'],
       },
