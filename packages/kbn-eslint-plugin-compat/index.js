@@ -12,6 +12,7 @@
 module.exports = {
   rules: {
     ...require('./rules/eslint'),
+    ...require('./rules/import'),
     ...require('./rules/react'),
     ...require('./rules/typescript'),
   },

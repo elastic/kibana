@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable no-console*/
-/* eslint-disable import/no-extraneous-dependencies*/
+/* eslint-disable @kbn/compat/import-no-extraneous-dependencies*/
 
 const execa = require('execa');
 const { Listr } = require('listr2');

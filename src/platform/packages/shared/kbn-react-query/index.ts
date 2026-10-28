@@ -9,7 +9,7 @@
 
 /* eslint-disable @kbn/eslint/module_migration */
 import type { QueryClientConfig } from '@tanstack/react-query';
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 import { QueryClient as TanstackQueryClient } from '@tanstack/query-core';
 
 class QueryClient extends TanstackQueryClient {

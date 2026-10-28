@@ -147,7 +147,7 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
     // HTTP TLS configuration
     if (opts.ssl || opts.http2) {
       // @kbn/dev-utils is part of devDependencies
-      // eslint-disable-next-line import/no-extraneous-dependencies
+      // eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
       const { CA_CERT_PATH, KBN_KEY_PATH, KBN_CERT_PATH } = require('@kbn/dev-utils');
 
       ensureNotDefined('server.ssl.certificate');
@@ -166,7 +166,7 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
   // Kib/ES encryption
   if (opts.ssl || isServerlessSamlSupported) {
     // @kbn/dev-utils is part of devDependencies
-    // eslint-disable-next-line import/no-extraneous-dependencies
+    // eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
     const { CA_CERT_PATH } = require('@kbn/dev-utils');
 
     const customElasticsearchHosts = opts.elasticsearch
