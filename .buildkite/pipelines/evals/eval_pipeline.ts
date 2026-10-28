@@ -10,7 +10,6 @@
 import { execFileSync } from 'child_process';
 import Fs from 'fs';
 import Path from 'path';
-import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images.ts';
 
 const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 
@@ -159,11 +158,11 @@ function normalizeEvaluationConnectorId(raw: string): string {
 
 /**
  * Boot disk (GB) for eval agents. These steps spell out their own agent block, so they do not
- * inherit the repo-wide agent defaults. `undefined` uses the agent image default; set a number
- * (here or in `DEFAULT_AGENT_IMAGE_CONFIG`) to override it. Keep `EVAL_AGENT_DISK_SIZE_GB` in
- * `steps/evals/run_suite.sh` and `llm_evals.yml` in sync.
+ * inherit the repo-wide agent defaults. `undefined` uses the agent manager default; set a number
+ * to override it. Keep `EVAL_AGENT_DISK_SIZE_GB` in `steps/evals/run_suite.sh` and
+ * `llm_evals.yml` in sync.
  */
-const EVAL_AGENT_DISK_SIZE_GB = DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb;
+const EVAL_AGENT_DISK_SIZE_GB: number | undefined = undefined;
 
 /**
  * Whether heavy eval steps run on preemptible (spot) agents. Defaults to `true` (weekly/on-demand);

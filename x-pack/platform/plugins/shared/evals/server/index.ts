@@ -20,6 +20,13 @@ export type {
   EvaluatorSummary,
   ModelConnectorSummary,
 } from './types';
+export type {
+  EvaluatorContext,
+  EvaluatorResult,
+  RegisteredEvaluatorDefinition,
+  TraceAccessor,
+} from './evaluators/types';
+export type { EvidenceRound, ToolCallEvidence } from './evaluators/evidence/types';
 
 export {
   generateExperimentRun,
