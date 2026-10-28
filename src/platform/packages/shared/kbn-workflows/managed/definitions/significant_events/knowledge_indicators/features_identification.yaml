@@ -78,6 +78,10 @@ triggers:
       - name: maxEntityFilters
         type: number
         description: "Maximum number of entity filters applied during sampling."
+      - name: computedFeaturesTimeoutMs
+        type: number
+        default: 60000
+        description: "Deadline (ms) for the whole computed-feature generation pass."
       - name: maxPreviouslyIdentifiedFeatures
         type: number
         description: "Maximum number of previously identified features sent in the LLM prompt."
@@ -234,6 +238,7 @@ steps:
         end: "${{ inputs.end }}"
         runId: "${{ execution.id }}"
         featureTtlDays: "${{ inputs.featureTtlDays }}"
+        computedFeaturesTimeoutMs: "${{ inputs.computedFeaturesTimeoutMs }}"
 
   # -----------------------------------------------------------------------
   # Step 5: Output results.

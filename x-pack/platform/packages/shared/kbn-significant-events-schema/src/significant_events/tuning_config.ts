@@ -29,7 +29,6 @@ export const significantEventsTuningConfigSchema = lazySchema(() =>
     rrf_rank_constant: z.number(),
     sampling_timeout_ms: z.number(),
     query_validation_timeout_ms: z.number(),
-    computed_features_timeout_ms: z.number(),
   })
 );
 
@@ -49,7 +48,6 @@ export const SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS: Record<
   rrf_rank_constant: { min: 1, max: 100, integer: true },
   sampling_timeout_ms: { min: 1000, max: 240_000, integer: true },
   query_validation_timeout_ms: { min: 1000, max: 240_000, integer: true },
-  computed_features_timeout_ms: { min: 1000, max: 240_000, integer: true },
 };
 
 export const DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG: SignificantEventsTuningConfig = {
@@ -63,7 +61,6 @@ export const DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG: SignificantEventsTuningCo
   rrf_rank_constant: 20,
   sampling_timeout_ms: 60_000,
   query_validation_timeout_ms: 10_000,
-  computed_features_timeout_ms: 60_000,
 };
 
 /**

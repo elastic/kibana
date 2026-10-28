@@ -82,6 +82,10 @@ triggers:
       - name: featuresMaxEntityFilters
         type: number
         description: "Max entity filters applied during features identification sampling."
+      - name: featuresComputedTimeoutMs
+        type: number
+        default: 60000
+        description: "Deadline (ms) for the whole computed-feature generation pass during features identification."
       - name: featuresMaxPreviouslyIdentified
         type: number
         description: "Max previously identified features sent in LLM prompt during features identification."
@@ -200,6 +204,7 @@ steps:
             diverseRatio: "${{ inputs.featuresDiverseRatio }}"
             maxExcludedFeaturesInPrompt: "${{ inputs.featuresMaxExcludedInPrompt }}"
             maxEntityFilters: "${{ inputs.featuresMaxEntityFilters }}"
+            computedFeaturesTimeoutMs: "${{ inputs.featuresComputedTimeoutMs }}"
             maxPreviouslyIdentifiedFeatures: "${{ inputs.featuresMaxPreviouslyIdentified }}"
       - name: save_features_output
         type: data.set
