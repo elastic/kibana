@@ -11,6 +11,8 @@
     "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/agent-builder-plugin",
     "@kbn/alerts-ui-shared",
+    "@kbn/alerting-v2-episodes-ui",
+    "@kbn/alerting-v2-schemas",
     "@kbn/connector-specs",
     "@kbn/app-header",
     "@kbn/calculate-auto",

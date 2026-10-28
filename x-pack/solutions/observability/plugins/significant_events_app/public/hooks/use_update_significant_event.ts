@@ -7,101 +7,115 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type {
-  SignificantEventManualStatus,
-  SignificantEventStatus,
-} from '@kbn/significant-events-schema';
+import type { IHttpFetchError } from '@kbn/core/public';
+import { bulkDeactivateEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
+import { INVALID_ALERT_STATE_TRANSITION_CODE } from '@kbn/alerting-v2-schemas';
+import { operatorFallbackAssessmentNote } from '@kbn/significant-events-schema';
 import { useKibana } from './use_kibana';
 
-interface UpdateSignificantEventArgs {
-  eventId: string;
-  /** A person sets active or inactive; recovering belongs to the status workflow. */
-  status: SignificantEventManualStatus;
-  assessmentNote?: string;
-}
-
-interface UpdateSignificantEventResult {
-  updated: number;
-  ignored: number;
-  status: SignificantEventStatus;
+interface DeactivateSignificantEventArgs {
+  /** The `alert.id` of the series' latest version, which `deactivate` takes as its target. */
+  episodeId?: string;
+  /** Closure note; when empty or whitespace-only, a standard note is recorded. */
   reason?: string;
 }
 
-const UPDATE_SUCCESS_TOAST_TITLE = i18n.translate(
+type DeactivateOutcome = 'deactivated' | 'already_inactive';
+
+const DEACTIVATE_SUCCESS_TOAST_TITLE = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.updateEvent.successToastTitle',
   {
-    defaultMessage: 'Significant event updated',
+    defaultMessage: 'Significant event marked inactive',
   }
 );
 
-const UPDATE_NO_CHANGE_TOAST_TITLE = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.updateEvent.noChangeToastTitle',
+const DEACTIVATE_ALREADY_INACTIVE_TOAST_TITLE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.updateEvent.alreadyInactiveToastTitle',
   {
     defaultMessage:
-      'No change made: the significant event already has that status or no longer exists',
+      'No change made: the significant event is already inactive or was changed by another update',
   }
 );
 
-const UPDATE_SUPERSEDED_TOAST_TITLE = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.updateEvent.supersededToastTitle',
+const DEACTIVATE_FORBIDDEN_TOAST_TITLE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.updateEvent.forbiddenToastTitle',
   {
     defaultMessage:
-      'The significant event changed while you were updating it. Review it and try again.',
+      'Marking a significant event inactive requires the Alerting v2 "alerts write" privilege',
   }
 );
 
-const UPDATE_ERROR_TOAST_TITLE = i18n.translate(
+const DEACTIVATE_MISSING_EPISODE_MESSAGE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.updateEvent.missingEpisodeMessage',
+  {
+    defaultMessage:
+      'Refresh the list and try again. This event has no Alerting v2 episode to mark inactive.',
+  }
+);
+
+const DEACTIVATE_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.updateEvent.errorToastTitle',
   {
-    defaultMessage: 'Failed to update significant event',
+    defaultMessage: 'Failed to mark significant event inactive',
   }
 );
+
+const DEACTIVATE_FALLBACK_ERROR_MESSAGE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.updateEvent.fallbackErrorMessage',
+  {
+    defaultMessage: 'Refresh the list and try again.',
+  }
+);
+
+const isForbidden = (error: Error): boolean => {
+  const { response } = error as Partial<IHttpFetchError>;
+  return response?.status === 403;
+};
 
 export const useUpdateSignificantEvent = ({
   onUpdateSuccess,
 }: { onUpdateSuccess?: () => void } = {}) => {
   const {
     core: {
+      http,
       notifications: { toasts },
-    },
-    dependencies: {
-      start: {
-        significantEvents: { significantEventsRepositoryClient },
-      },
     },
   } = useKibana();
   const queryClient = useQueryClient();
 
-  const mutation = useMutation<UpdateSignificantEventResult, Error, UpdateSignificantEventArgs>({
-    mutationFn: ({ eventId, status, assessmentNote }: UpdateSignificantEventArgs) =>
-      significantEventsRepositoryClient.fetch(
-        'POST /internal/significant_events/events/{id}/update',
+  const mutation = useMutation<
+    DeactivateOutcome,
+    Error,
+    DeactivateSignificantEventArgs & { episodeId: string }
+  >({
+    mutationFn: async ({ episodeId, reason }) => {
+      const { affected_count: affectedCount, errors } = await bulkDeactivateEpisodeActions(http, [
         {
-          params: {
-            path: { id: eventId },
-            body: {
-              status,
-              ...(assessmentNote !== undefined ? { assessment_note: assessmentNote } : {}),
-            },
-          },
-          signal: null,
-        }
-      ),
-    onSuccess: ({ updated, reason }) => {
-      if (reason === 'superseded') {
-        // Keep the caller's UI (and any entered rationale) so the operator can retry.
-        toasts.addWarning({ title: UPDATE_SUPERSEDED_TOAST_TITLE });
-        return;
+          alert_id: episodeId,
+          reason: reason?.trim() || operatorFallbackAssessmentNote('inactive'),
+        },
+      ]);
+      if (affectedCount > 0) {
+        return 'deactivated';
       }
-      if (updated === 0) {
-        toasts.addInfo({ title: UPDATE_NO_CHANGE_TOAST_TITLE });
+      const [firstError] = errors;
+      if (firstError?.error.code === INVALID_ALERT_STATE_TRANSITION_CODE) {
+        return 'already_inactive';
+      }
+      throw new Error(firstError?.error.message ?? DEACTIVATE_FALLBACK_ERROR_MESSAGE);
+    },
+    onSuccess: (outcome) => {
+      if (outcome === 'already_inactive') {
+        toasts.addInfo({ title: DEACTIVATE_ALREADY_INACTIVE_TOAST_TITLE });
       } else {
-        toasts.addSuccess({ title: UPDATE_SUCCESS_TOAST_TITLE });
+        toasts.addSuccess({ title: DEACTIVATE_SUCCESS_TOAST_TITLE });
       }
       onUpdateSuccess?.();
     },
     onError: (error) => {
-      toasts.addError(error, { title: UPDATE_ERROR_TOAST_TITLE });
+      toasts.addError(error, {
+        title: isForbidden(error) ? DEACTIVATE_FORBIDDEN_TOAST_TITLE : DEACTIVATE_ERROR_TOAST_TITLE,
+      });
     },
     onSettled: async () => {
       await Promise.all([
@@ -112,7 +126,15 @@ export const useUpdateSignificantEvent = ({
   });
 
   return {
-    updateEventStatus: (args: UpdateSignificantEventArgs) => mutation.mutate(args),
+    deactivateEvent: ({ episodeId, reason }: DeactivateSignificantEventArgs) => {
+      if (!episodeId) {
+        toasts.addError(new Error(DEACTIVATE_MISSING_EPISODE_MESSAGE), {
+          title: DEACTIVATE_ERROR_TOAST_TITLE,
+        });
+        return;
+      }
+      mutation.mutate({ episodeId, reason });
+    },
     isUpdating: mutation.isLoading,
   };
 };

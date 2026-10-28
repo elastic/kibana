@@ -128,7 +128,7 @@ const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
   );
 };
 
-const DismissEventCell = ({ event }: { event: SignificantEvent }) => {
+const DismissEventCell = ({ event }: { event: SignificantEventResponse }) => {
   const {
     core: {
       application: {
@@ -159,7 +159,11 @@ const DismissEventCell = ({ event }: { event: SignificantEvent }) => {
         />
       </EuiToolTip>
       {isDismissModalOpen && (
-        <DismissEventModal eventId={event.event_id} onClose={() => setIsDismissModalOpen(false)} />
+        <DismissEventModal
+          eventId={event.event_id}
+          episodeId={event.episode_id}
+          onClose={() => setIsDismissModalOpen(false)}
+        />
       )}
     </>
   );
@@ -346,7 +350,7 @@ export const getSignificantEventTableColumns = ({
     name: '',
     width: '112px',
     align: 'right' as const,
-    render: (item: SignificantEvent) => (
+    render: (item: SignificantEventResponse) => (
       <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
           <RunInvestigationCell event={item} />

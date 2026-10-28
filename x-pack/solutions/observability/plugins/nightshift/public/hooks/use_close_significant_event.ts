@@ -8,6 +8,10 @@
 import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { bulkDeactivateEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
+import { INVALID_ALERT_STATE_TRANSITION_CODE } from '@kbn/alerting-v2-schemas';
+import { operatorFallbackAssessmentNote } from '@kbn/significant-events-schema';
 import { useKibana } from './use_kibana';
 import { invalidateSignificantEventQueries } from '../data/significant_events/invalidate_significant_event_queries';
 import {
@@ -19,10 +23,11 @@ const CLOSE_SUCCESS_TOAST_TITLE = i18n.translate('xpack.nightshift.closeEvent.su
   defaultMessage: 'Significant event marked inactive',
 });
 
-const CLOSE_NO_CHANGE_TOAST_TITLE = i18n.translate(
-  'xpack.nightshift.closeEvent.noChangeToastTitle',
+const CLOSE_ALREADY_INACTIVE_TOAST_TITLE = i18n.translate(
+  'xpack.nightshift.closeEvent.alreadyInactiveToastTitle',
   {
-    defaultMessage: 'No change made: the significant event is already inactive or no longer exists',
+    defaultMessage:
+      'No change made: the significant event is already inactive or was changed by another update',
   }
 );
 
@@ -30,11 +35,49 @@ const CLOSE_ERROR_TOAST_TITLE = i18n.translate('xpack.nightshift.closeEvent.erro
   defaultMessage: 'Failed to mark significant event inactive',
 });
 
+const CLOSE_FORBIDDEN_TOAST_TITLE = i18n.translate(
+  'xpack.nightshift.closeEvent.forbiddenToastTitle',
+  {
+    defaultMessage:
+      'Marking a significant event inactive requires the Alerting v2 "alerts write" privilege',
+  }
+);
+
+const CLOSE_MISSING_EPISODE_MESSAGE = i18n.translate(
+  'xpack.nightshift.closeEvent.missingEpisodeMessage',
+  {
+    defaultMessage:
+      'Refresh the list and try again. This event has no Alerting v2 episode to mark inactive.',
+  }
+);
+
+const CLOSE_FALLBACK_ERROR_MESSAGE = i18n.translate(
+  'xpack.nightshift.closeEvent.fallbackErrorMessage',
+  {
+    defaultMessage: 'Refresh the list and try again.',
+  }
+);
+
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
+const isForbidden = (error: Error): boolean => {
+  const { response } = error as Partial<IHttpFetchError>;
+  return response?.status === 403;
+};
+
+type CloseOutcome = 'closed' | 'already_inactive';
+
+interface CloseSignificantEventArgs {
+  eventId: string;
+  /** The `alert.id` of the series' latest version, which `deactivate` takes as its target. */
+  episodeId?: string;
+  /** When empty or whitespace-only, a standard note is recorded instead. */
+  reason?: string;
+}
+
 interface UseCloseSignificantEventResult {
-  closeSignificantEvent: (eventId: string, assessmentNote?: string) => void;
+  closeSignificantEvent: (args: CloseSignificantEventArgs) => void;
   closingEventId?: string;
 }
 
@@ -43,37 +86,38 @@ export const useCloseSignificantEvent = ({
 }: {
   onClosed?: () => void;
 } = {}): UseCloseSignificantEventResult => {
-  const {
-    notifications,
-    significantEvents: { significantEventsRepositoryClient },
-  } = useKibana().services;
+  const { notifications, http } = useKibana().services;
   const queryClient = useQueryClient();
   const [closingEventId, setClosingEventId] = useState<string>();
 
-  const mutation = useMutation({
-    mutationFn: ({ eventId, assessmentNote }: { eventId: string; assessmentNote?: string }) =>
-      significantEventsRepositoryClient.fetch(
-        'POST /internal/significant_events/events/{id}/update',
+  const mutation = useMutation<
+    CloseOutcome,
+    Error,
+    CloseSignificantEventArgs & { episodeId: string }
+  >({
+    mutationFn: async ({ episodeId, reason }) => {
+      const { affected_count: affectedCount, errors } = await bulkDeactivateEpisodeActions(http, [
         {
-          params: {
-            path: { id: eventId },
-            body: {
-              status: 'inactive',
-              ...(assessmentNote !== undefined ? { assessment_note: assessmentNote } : {}),
-            },
-          },
-          // Unmounting the list must not abort an update that is already in flight.
-          signal: null,
-        }
-      ),
+          alert_id: episodeId,
+          reason: reason?.trim() || operatorFallbackAssessmentNote('inactive'),
+        },
+      ]);
+      if (affectedCount > 0) {
+        return 'closed';
+      }
+      const [firstError] = errors;
+      if (firstError?.error.code === INVALID_ALERT_STATE_TRANSITION_CODE) {
+        return 'already_inactive';
+      }
+      throw new Error(firstError?.error.message ?? CLOSE_FALLBACK_ERROR_MESSAGE);
+    },
     onMutate: ({ eventId }) => {
       setClosingEventId(eventId);
     },
-    onSuccess: ({ updated }, { eventId }) => {
-      // Nothing was written when `updated` is 0 (already inactive, or no such event); the
-      // invalidation in `onSettled` refetches the list.
-      if (updated === 0) {
-        notifications.toasts.addInfo({ title: CLOSE_NO_CHANGE_TOAST_TITLE });
+    onSuccess: (outcome, { eventId }) => {
+      // The invalidation in `onSettled` refetches the list.
+      if (outcome === 'already_inactive') {
+        notifications.toasts.addInfo({ title: CLOSE_ALREADY_INACTIVE_TOAST_TITLE });
         onClosed?.();
         return;
       }
@@ -98,7 +142,12 @@ export const useCloseSignificantEvent = ({
       onClosed?.();
     },
     onError: (error: unknown) => {
-      notifications.toasts.addError(toError(error), { title: CLOSE_ERROR_TOAST_TITLE });
+      const normalized = toError(error);
+      if (isForbidden(normalized)) {
+        notifications.toasts.addError(normalized, { title: CLOSE_FORBIDDEN_TOAST_TITLE });
+        return;
+      }
+      notifications.toasts.addError(normalized, { title: CLOSE_ERROR_TOAST_TITLE });
     },
     onSettled: async () => {
       setClosingEventId(undefined);
@@ -107,8 +156,15 @@ export const useCloseSignificantEvent = ({
   });
 
   return {
-    closeSignificantEvent: (eventId, assessmentNote) =>
-      mutation.mutate({ eventId, assessmentNote: assessmentNote?.trim() || undefined }),
+    closeSignificantEvent: ({ eventId, episodeId, reason }) => {
+      if (!episodeId) {
+        notifications.toasts.addError(new Error(CLOSE_MISSING_EPISODE_MESSAGE), {
+          title: CLOSE_ERROR_TOAST_TITLE,
+        });
+        return;
+      }
+      mutation.mutate({ eventId, episodeId, reason });
+    },
     closingEventId,
   };
 };
