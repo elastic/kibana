@@ -18,7 +18,7 @@ import {
   testData,
 } from '../fixtures';
 
-export const getSnoozeDate = (offsetMs: number = 86_400_000): string =>
+const getSnoozeDate = (offsetMs: number = 86_400_000): string =>
   new Date(Date.now() + offsetMs).toISOString();
 
 apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' }, () => {
