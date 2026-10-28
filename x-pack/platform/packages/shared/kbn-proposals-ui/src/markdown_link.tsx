@@ -40,6 +40,16 @@ export const resolveAppHref = (href: string, basePath?: IBasePath): string => {
   // The space helpers only understand a bare path; the query and hash ride along unchanged.
   const [path, suffix] = splitPath(href);
   const { spaceId, pathname, hasExplicitSpaceIdentifier } = getSpaceIdFromPath(path);
+  // Core's parser stops a space id at the first character outside [a-z0-9_-] without checking
+  // that it stopped on a `/`, so `/s/mySpace/app/x` comes back as space `my` with pathname
+  // `Space/app/x`, and `addSpaceIdToPath` throws on a pathname with no leading slash. Core never
+  // meets that input, because the spaces plugin only ever creates lowercase ids. This renderer
+  // does, because a comment is arbitrary markdown: an agent revising a proposal can write a space
+  // name by hand, and `mySpace` is a natural guess at an id for a space called "My Space". Such a
+  // link cannot point at a real space either way, so it is left as authored rather than thrown on.
+  if (hasExplicitSpaceIdentifier && !pathname.startsWith('/')) {
+    return href;
+  }
   const resolved = hasExplicitSpaceIdentifier
     ? addSpaceIdToPath(basePath.serverBasePath, spaceId, pathname)
     : basePath.prepend(path);

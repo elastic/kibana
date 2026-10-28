@@ -77,6 +77,14 @@ describe('resolveAppHref', () => {
     expect(resolveAppHref('/s/default?tab=1', basePath)).toBe('/kbn/?tab=1');
   });
 
+  it('leaves a link with a mixed-case space id as authored rather than throwing', () => {
+    // Core's parser reads this as space `my` with pathname `Space/app/...`.
+    expect(resolveAppHref('/s/mySpace/app/security/rules/id/abc', basePath)).toBe(
+      '/s/mySpace/app/security/rules/id/abc'
+    );
+    expect(basePath.prepend).not.toHaveBeenCalled();
+  });
+
   it.each(['https://example.com/runbook', '//example.com/x', 'mailto:soc@example.com'])(
     'leaves %s untouched',
     (href) => {
