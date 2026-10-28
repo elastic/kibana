@@ -15,6 +15,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import { RULE_ATTACHMENT_TYPE, ruleAttachmentDataSchema } from '@kbn/alerting-v2-schemas';
 import { ensureToolPrivilege } from '../../common/unauthorized_tool_result';
+import { createAttachmentsClient } from '../../../lib/attachments_client';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { RulesClient } from '../../../lib/rules_client';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
@@ -55,9 +56,8 @@ export const attachRuleTool = ({
       return unauthorized;
     }
 
-    const existing = attachments
-      .getActive()
-      .find(({ type, origin }) => type === RULE_ATTACHMENT_TYPE && origin === ruleId);
+    const { rules } = createAttachmentsClient(attachments);
+    const existing = rules.list().find(({ origin }) => origin === ruleId);
     if (existing) {
       return {
         results: [

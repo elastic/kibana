@@ -107,7 +107,13 @@ describe('attachRuleTool', () => {
 
     it('returns the existing attachment instead of adding the rule again', async () => {
       ctx.attachments.getActive.mockReturnValue([
-        { id: 'existing-1', type: RULE_ATTACHMENT_TYPE, origin: 'rule-1' },
+        {
+          id: 'existing-1',
+          type: RULE_ATTACHMENT_TYPE,
+          origin: 'rule-1',
+          current_version: 1,
+          versions: [{ version: 1, data: rule }],
+        },
       ] as never);
 
       const result = await createTool().handler({ ruleId: 'rule-1' }, ctx);
