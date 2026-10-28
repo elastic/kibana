@@ -15,6 +15,7 @@ import type {
   ImportExceptionsListSchema,
   ImportExceptionsResponseSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { withSpan } from '@kbn/apm-utils';
 import { createPromiseFromStreams } from '@kbn/utils';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { chunk } from 'lodash/fp';
@@ -147,19 +148,27 @@ export const importExceptions = async ({
 
   // where the magic happens - purposely importing parent exception
   // containers first, items second
-  const importExceptionListsResponse = await importExceptionLists({
-    generateNewListId,
-    isOverwrite: overwrite,
-    listsChunks: chunkParsedListObjects,
-    savedObjectsClient,
-    user,
-  });
-  const importExceptionListItemsResponse = await importExceptionListItems({
-    isOverwrite: overwrite,
-    itemsChunks: chunkParsedItemsObjects,
-    savedObjectsClient,
-    user,
-  });
+  const importExceptionListsResponse = await withSpan(
+    { name: 'importExceptionLists', type: 'lists' },
+    () =>
+      importExceptionLists({
+        generateNewListId,
+        isOverwrite: overwrite,
+        listsChunks: chunkParsedListObjects,
+        savedObjectsClient,
+        user,
+      })
+  );
+  const importExceptionListItemsResponse = await withSpan(
+    { name: 'importExceptionListItems', type: 'lists' },
+    () =>
+      importExceptionListItems({
+        isOverwrite: overwrite,
+        itemsChunks: chunkParsedItemsObjects,
+        savedObjectsClient,
+        user,
+      })
+  );
 
   const importsSummary = {
     errors: [

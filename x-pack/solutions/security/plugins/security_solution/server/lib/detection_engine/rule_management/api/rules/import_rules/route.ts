@@ -42,6 +42,7 @@ import {
 } from '../../constants';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { ensureLatestRulesPackageInstalled } from '../../../../prebuilt_rules/logic/integrations/ensure_latest_rules_package_installed';
+import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 
 export const importRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -122,8 +123,9 @@ export const importRulesRoute = (
           const objectLimit = config.maxRuleImportExportSize;
 
           // parse file to separate out exceptions from rules
-          const [{ exceptions, rules, actionConnectors }] = await createPromiseFromRuleImportStream(
-            { stream: file, objectLimit }
+          const [{ exceptions, rules, actionConnectors }] = await withSecuritySpan(
+            'route.createPromiseFromRuleImportStream',
+            () => createPromiseFromRuleImportStream({ stream: file, objectLimit })
           );
 
           // import exceptions, includes validation
@@ -131,12 +133,14 @@ export const importRulesRoute = (
             errors: exceptionsErrors,
             successCount: exceptionsSuccessCount,
             success: exceptionsSuccess,
-          } = await importRuleExceptions({
-            exceptions,
-            exceptionsClient,
-            overwrite: request.query.overwrite_exceptions,
-            maxExceptionsImportSize: objectLimit,
-          });
+          } = await withSecuritySpan('route.importRuleExceptions', () =>
+            importRuleExceptions({
+              exceptions,
+              exceptionsClient,
+              overwrite: request.query.overwrite_exceptions,
+              maxExceptionsImportSize: objectLimit,
+            })
+          );
           // report on duplicate rules
           const [duplicateIdErrors, rulesToImportOrErrors] =
             getTupleDuplicateErrorsAndUniqueRules(rules);
@@ -147,24 +151,27 @@ export const importRulesRoute = (
             success: actionConnectorSuccess,
             warnings: actionConnectorWarnings,
             errors: actionConnectorErrors,
-          } = await importRuleActionConnectors({
-            actionConnectors,
-            actionsImporter,
-            overwrite: request.query.overwrite_action_connectors,
-          });
+          } = await withSecuritySpan('route.importActionConnectors', () =>
+            importRuleActionConnectors({
+              actionConnectors,
+              actionsImporter,
+              overwrite: request.query.overwrite_action_connectors,
+            })
+          );
 
-          const migratedRulesToImportOrErrors = await migrateLegacyActionsIds(
-            rulesToImportOrErrors,
-            actionSOClient,
-            actionsClient
+          const migratedRulesToImportOrErrors = await withSecuritySpan(
+            'route.migrateLegacyActionsIds',
+            () => migrateLegacyActionsIds(rulesToImportOrErrors, actionSOClient, actionsClient)
           );
 
           // Ensure the prebuilt rules package is installed once per request so
           // the import path can look up prebuilt assets during rule_source calc.
-          await ensureLatestRulesPackageInstalled(
-            createPrebuiltRuleAssetsClient(savedObjectsClient),
-            ctx.securitySolution,
-            logger
+          await withSecuritySpan('route.ensurePrebuiltPackage', () =>
+            ensureLatestRulesPackageInstalled(
+              createPrebuiltRuleAssetsClient(savedObjectsClient),
+              ctx.securitySolution,
+              logger
+            )
           );
 
           const [parsedRules, parsedRuleErrors] = partition(
@@ -175,21 +182,27 @@ export const importRulesRoute = (
           // After importing the actions and migrating action IDs on rules to import,
           // validate that all actions referenced by rules exist
           // Filter out rules that reference non-existent actions
-          const { validatedActionRules, missingActionErrors } = await validateRuleActions({
-            actionsClient,
-            rules: parsedRules,
-          });
+          const { validatedActionRules, missingActionErrors } = await withSecuritySpan(
+            'route.validateRuleActions',
+            () =>
+              validateRuleActions({
+                actionsClient,
+                rules: parsedRules,
+              })
+          );
 
           // Validate that Response Actions are valid
           const { valid: validatedResponseActionsRules, errors: responseActionsErrors } =
-            await validateRuleImportResponseActions({
-              endpointAuthz,
-              endpointService,
-              spaceId,
-              rulesToImport: validatedActionRules,
-              checkOsqueryResponseActionAuthz:
-                ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
-            });
+            await withSecuritySpan('route.validateResponseActions', () =>
+              validateRuleImportResponseActions({
+                endpointAuthz,
+                endpointService,
+                spaceId,
+                rulesToImport: validatedActionRules,
+                checkOsqueryResponseActionAuthz:
+                  ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
+              })
+            );
 
           const successes: ImportRuleSuccess[] = [];
           const importErrors: ImportRuleError[] = [];

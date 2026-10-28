@@ -6,6 +6,7 @@
  */
 
 import type { ImportExceptionListSchemaDecoded } from '@kbn/securitysolution-io-ts-list-types';
+import { withSpan } from '@kbn/apm-utils';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { ImportDataResponse, ImportResponse } from '../../import_exception_list_and_items';
@@ -65,22 +66,34 @@ export const importExceptionLists = async ({
       });
 
     // lists to bulk create/update
-    const bulkCreateResponse = await bulkCreateImportedLists({
-      listsToCreate,
-      savedObjectsClient,
-    });
-    // lists that are to be updated where overwrite is true, need to have
-    // existing items removed. By selecting to overwrite, user selects to
-    // overwrite entire list + items
-    await deleteListItemsToBeOverwritten({
-      listsOfItemsToDelete: listItemsToDelete,
-      savedObjectsClient,
-    });
+    const bulkCreateResponse = await withSpan(
+      { name: 'importExceptionLists.bulkCreateImportedLists', type: 'lists' },
+      () =>
+        bulkCreateImportedLists({
+          listsToCreate,
+          savedObjectsClient,
+        })
+    );
+    await withSpan(
+      { name: 'importExceptionLists.deleteListItemsToBeOverwritten', type: 'lists' },
+      () =>
+        // lists that are to be updated where overwrite is true, need to have
+        // existing items removed. By selecting to overwrite, user selects to
+        // overwrite entire list + items
+        deleteListItemsToBeOverwritten({
+          listsOfItemsToDelete: listItemsToDelete,
+          savedObjectsClient,
+        })
+    );
 
-    const bulkUpdateResponse = await bulkUpdateImportedLists({
-      listsToUpdate,
-      savedObjectsClient,
-    });
+    const bulkUpdateResponse = await withSpan(
+      { name: 'importExceptionLists.bulkUpdateImportedLists', type: 'lists' },
+      () =>
+        bulkUpdateImportedLists({
+          listsToUpdate,
+          savedObjectsClient,
+        })
+    );
 
     importExceptionListsResponse = [
       ...importExceptionListsResponse,

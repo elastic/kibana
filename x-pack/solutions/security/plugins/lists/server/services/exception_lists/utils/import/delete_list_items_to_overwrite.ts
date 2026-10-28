@@ -7,6 +7,7 @@
 
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 
 import { deleteExceptionListItemByList } from '../../delete_exception_list_items_by_list';
 
@@ -25,10 +26,18 @@ export const deleteListItemsToBeOverwritten = async ({
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<void> => {
   for await (const list of listsOfItemsToDelete) {
-    await deleteExceptionListItemByList({
-      listId: list[0],
-      namespaceType: list[1],
-      savedObjectsClient,
-    });
+    await withSpan(
+      {
+        labels: { listId: list[0], namespaceType: list[1] },
+        name: 'exceptionItems.deleteForOverwrite.list',
+        type: 'lists',
+      },
+      () =>
+        deleteExceptionListItemByList({
+          listId: list[0],
+          namespaceType: list[1],
+          savedObjectsClient,
+        })
+    );
   }
 };

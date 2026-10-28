@@ -9,6 +9,7 @@ import type {
   ImportExceptionListItemSchemaDecoded,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { withSpan } from '@kbn/apm-utils';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { ImportDataResponse, ImportResponse } from '../../import_exception_list_and_items';
@@ -77,17 +78,23 @@ export const importExceptionListItems = async ({
       user,
     });
 
-    // Items to bulk create
-    const bulkCreateResponse = await bulkCreateImportedItems({
-      itemsToCreate,
-      savedObjectsClient,
-    });
+    const bulkCreateResponse = await withSpan(
+      { name: 'importExceptionListItems.bulkCreateImportedItems', type: 'lists' },
+      () =>
+        bulkCreateImportedItems({
+          itemsToCreate,
+          savedObjectsClient,
+        })
+    );
 
-    // Items to bulk update
-    const bulkUpdateResponse = await bulkUpdateImportedItems({
-      itemsToUpdate,
-      savedObjectsClient,
-    });
+    const bulkUpdateResponse = await withSpan(
+      { name: 'importExceptionListItems.bulkUpdateImportedItems', type: 'lists' },
+      () =>
+        bulkUpdateImportedItems({
+          itemsToUpdate,
+          savedObjectsClient,
+        })
+    );
 
     importExceptionListItemsResponse = [
       ...importExceptionListItemsResponse,

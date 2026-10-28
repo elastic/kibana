@@ -59,21 +59,27 @@ export async function importRules({
   try {
     // Step 1: Fetch data
     const [existingExceptionLists, prebuiltContext, existingRules] = await withSecuritySpan(
-      'fetchImportContext',
+      'importRules.fetchImportContext',
       () =>
         Promise.all([
-          getReferencedExceptionLists({ rules, savedObjectsClient }),
-          fetchPrebuiltImportContext({ rules, ruleAssetsClient: prebuiltRuleAssetClient }),
-          findInstalledRulesBySignatureIds({
-            rulesClient,
-            ruleIds: rules.map((r) => r.rule_id),
-          }),
+          withSecuritySpan('importRules.fetchImportContext.getReferencedExceptionLists', () =>
+            getReferencedExceptionLists({ rules, savedObjectsClient })
+          ),
+          withSecuritySpan('importRules.fetchImportContext.fetchPrebuiltImportContext', () =>
+            fetchPrebuiltImportContext({ rules, ruleAssetsClient: prebuiltRuleAssetClient })
+          ),
+          withSecuritySpan('importRules.fetchImportContext.findInstalledRulesBySignatureIds', () =>
+            findInstalledRulesBySignatureIds({
+              rulesClient,
+              ruleIds: rules.map((r) => r.rule_id),
+            })
+          ),
         ])
     );
 
     // Step 2: Validate
     const { importableRules, errors: validationErrors } = await withSecuritySpan(
-      'validateRulesToImport',
+      'importRules.validateRulesToImport',
       () =>
         validateRulesToImport({
           rules,
