@@ -112,6 +112,22 @@ export const CloudOnboardingDeploymentSchemaV4 = CloudOnboardingDeploymentSchema
   namespace: schema.maybe(schema.string({ maxLength: 100 })),
 });
 
+// ── V5: pendingAgentlessPolicies ─────────────────────────────────────────────
+// Agentless-policy requests stored at Launch and replayed by the server when the stack reports
+// back. Not indexed (dynamic: false); the request body is validated by the route, not here.
+export const CloudOnboardingDeploymentSchemaV5 = CloudOnboardingDeploymentSchemaV4.extends({
+  pendingAgentlessPolicies: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        id: schema.string({ minLength: 1, maxLength: 256 }),
+        instanceIds: schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 }),
+        request: schema.object({}, { unknowns: 'allow' }),
+      }),
+      { maxSize: 100 }
+    )
+  ),
+});
+
 // ── V1 ───────────────────────────────────────────────────────────────────────
 export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   provider: ProviderSchema,

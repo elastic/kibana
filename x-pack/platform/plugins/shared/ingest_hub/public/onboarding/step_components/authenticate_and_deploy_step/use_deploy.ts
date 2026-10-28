@@ -9,7 +9,11 @@ import { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { sendUpdateCloudConnector, sendVerifyCloudConnectorIacKey } from '@kbn/fleet-plugin/public';
+import {
+  sendGetCloudOnboardingDeployment,
+  sendUpdateCloudConnector,
+  sendVerifyCloudConnectorIacKey,
+} from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
@@ -20,6 +24,10 @@ import type { DeployGroup } from './deploy_groups';
 import { buildIacIntegrations } from './package_inputs';
 import { useOnboardingSO } from './use_onboarding_so';
 import { useMiDeploy } from './use_mi_deploy';
+import { useLaunchDeployIntent } from './use_launch_deploy_intent';
+import { useAutoDeployOutcome } from './use_auto_deploy_outcome';
+import type { UseAutoDeployOutcomeResult } from './use_auto_deploy_outcome';
+import type { UseLaunchDeployIntentResult } from './use_launch_deploy_intent';
 import {
   buildLiveStalePolicyIds,
   buildEffectivePendingCleanup,
@@ -52,6 +60,12 @@ export interface UseDeployResult {
   isCleanupOnly: boolean;
   /** Credential fields already stored as secrets on the deployed policies; kept unless replaced. */
   storedSecretFields: StaticKeyField[];
+  /** True when Launch may deploy automatically once the stack reports back. */
+  canAutoDeploy: UseLaunchDeployIntentResult['canAutoDeploy'];
+  /** Stores what Launch would deploy; handed to the identity form as `onPrepareLaunch`. */
+  prepareLaunch: UseLaunchDeployIntentResult['prepareLaunch'];
+  /** Applies a finished automatic deploy as a Deploy click would. */
+  applyAutoDeployOutcome: UseAutoDeployOutcomeResult['applyOutcome'];
   /** True until the stored-secret lookup of the deployed policies has settled. */
   isStoredSecretsLoading: boolean;
 }
@@ -290,7 +304,19 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     [selectedServiceIds, servicesMap]
   );
 
-  const handleDeploy = useMiDeploy({
+  const { canAutoDeploy, prepareLaunch } = useLaunchDeployIntent({
+    deployGroups,
+    serviceSettings,
+    hasEcfServices,
+  });
+  const { applyOutcome: applyAutoDeployOutcome } = useAutoDeployOutcome({
+    deployGroups,
+    updateDetectAndReviewStep,
+    persistDeploymentId,
+    setFailedInstances,
+  });
+
+  const handleMiDeploy = useMiDeploy({
     deployGroups,
     nonAgentlessServices,
     serviceSettings,
@@ -320,6 +346,47 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     isAuthDirty: detectAndReviewStep.isAuthDirty ?? false,
   });
 
+  // After a reload during an automatic deploy the lock is gone but the pending deployment's id
+  // is not. An initial Deploy must not create what the server is creating or has created.
+  const handleDeploy = useCallback(
+    async (instanceIds?: string[]): Promise<{ cleanupFailed: boolean }> => {
+      const { onboardingDeploymentId } = detectAndReviewStep;
+      const hasPolicies = Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).length > 0;
+      if (instanceIds === undefined && onboardingDeploymentId && !hasPolicies) {
+        try {
+          const { item } = await sendGetCloudOnboardingDeployment(onboardingDeploymentId);
+          if (item.status === 'deploying') {
+            services.notifications.toasts.addDanger({
+              title: i18n.translate(
+                'xpack.ingestHub.authenticateAndDeployStep.autoDeployInProgress.title',
+                { defaultMessage: 'Your integrations are still being deployed' }
+              ),
+              text: i18n.translate(
+                'xpack.ingestHub.authenticateAndDeployStep.autoDeployInProgress.text',
+                {
+                  defaultMessage:
+                    'The CloudFormation stack reported back and Kibana is deploying the integrations. Wait a moment and reload this page.',
+                }
+              ),
+            });
+            return { cleanupFailed: false };
+          }
+          if (
+            item.status === 'succeeded' &&
+            Object.keys(item.policyIdsByInstance ?? {}).length > 0
+          ) {
+            await applyAutoDeployOutcome({ status: 'deployed', onboardingDeploymentId });
+            return { cleanupFailed: false };
+          }
+        } catch {
+          // The deployment could not be read; deploy as before.
+        }
+      }
+      return handleMiDeploy(instanceIds);
+    },
+    [detectAndReviewStep, services, applyAutoDeployOutcome, handleMiDeploy]
+  );
+
   return {
     isDeploying,
     failedInstances,
@@ -329,5 +396,8 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     isCleanupOnly,
     storedSecretFields,
     isStoredSecretsLoading,
+    canAutoDeploy,
+    prepareLaunch,
+    applyAutoDeployOutcome,
   };
 }

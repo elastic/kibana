@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { CreateAgentlessPolicyRequestSchema } from '../../../common/types/rest_spec/agentless_policy';
 import { CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH } from '../../../common/constants';
 
 // --- Shared primitives ---
@@ -305,6 +306,24 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
             'Agent policy IDs for agent_based existing-policy deploys. Provided on create so that a mid-deploy tab-close leaves a record that hydrates back into existing mode.',
         },
       })
+    ),
+    pendingAgentlessPolicies: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          id: schema.string({ minLength: 1, maxLength: 256 }),
+          instanceIds: schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {
+            maxSize: 100,
+          }),
+          request: CreateAgentlessPolicyRequestSchema.body,
+        }),
+        {
+          maxSize: 100,
+          meta: {
+            description:
+              'Agentless policies to create once the CloudFormation stack launched from this deployment reports back. Each is the body the create-agentless-policy API would receive, without the cloud connector, which the server adds. Requires the same privileges as that API. Never returned.',
+          },
+        }
+      )
     ),
   }),
 };

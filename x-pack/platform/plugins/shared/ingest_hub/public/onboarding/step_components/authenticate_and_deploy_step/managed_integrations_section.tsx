@@ -77,6 +77,10 @@ interface ManagedIntegrationsSectionProps {
    * the callout when there is no underlying service-var drift.
    */
   onReplaceFormDirtyChange?: (dirty: boolean) => void;
+  /** Automatic deploy after the stack reports back; see the identity form's props of the same names. */
+  onPrepareLaunch?: React.ComponentProps<typeof LazyAwsIdentityFederationSetup>['onPrepareLaunch'];
+  onDeployOutcome?: React.ComponentProps<typeof LazyAwsIdentityFederationSetup>['onDeployOutcome'];
+  onWaitingChange?: React.ComponentProps<typeof LazyAwsIdentityFederationSetup>['onWaitingChange'];
 }
 
 const NO_STORED_SECRET_FIELDS: NonNullable<ManagedIntegrationsSectionProps['storedSecretFields']> =
@@ -95,6 +99,9 @@ export function ManagedIntegrationsSection({
   isStoredSecretsLoading = false,
   isDirty = false,
   onReplaceFormDirtyChange,
+  onPrepareLaunch,
+  onDeployOutcome,
+  onWaitingChange,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudSetupForCloudConnector }>();
   const {
@@ -103,6 +110,7 @@ export function ManagedIntegrationsSection({
     clearStagedStaticKeys,
     setPendingIacTemplate,
     authenticateAndDeployStep,
+    isLaunchLocked,
   } = useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
 
@@ -173,6 +181,10 @@ export function ManagedIntegrationsSection({
   // stored keys, which is also the case right after a deploy in the same session. Typing into a
   // key field there, replacing a stored one or not, is a change to deploy; keeping every stored
   // value is not. Emptying the fields again clears the change.
+  // On the identity form's New Identity tab the only click is Launch; Deploy belongs to the
+  // manual fallback there, next to Create Identity. Everywhere else it sits below the form.
+  const [isNewIdentityTab, setIsNewIdentityTab] = useState(true);
+  const isDeployInManualSection = preferredMethod === 'identity_federation' && isNewIdentityTab;
   const isEditingDeployedKeys = isStaticKeysEditMode || storedSecretFields.length > 0;
   const handleStoredKeysFormChange = useCallback(
     (fields: AwsStaticKeyCredentials | undefined) => {
@@ -245,6 +257,39 @@ export function ManagedIntegrationsSection({
     cursor: pointer;
     border-bottom: ${isOpen ? `1px solid ${euiTheme.colors.borderBaseSubdued}` : 'none'};
   `;
+
+  const deployButton =
+    !hasFailed && !isDone ? (
+      <EuiButton
+        isDisabled={
+          isLaunchLocked ||
+          isDeploying ||
+          (!isDeployReady &&
+            !isCleanupOnly &&
+            !(
+              isDirty &&
+              isStaticKeysEditMode &&
+              !!authenticateAndDeployStep.staticKeys?.access_key_id &&
+              !!authenticateAndDeployStep.staticKeys?.secret_access_key
+            ))
+        }
+        isLoading={isDeploying}
+        onClick={onDeploy}
+        data-test-subj="managedIntegrationsSection-deployButton"
+      >
+        {isDeploying ? (
+          <FormattedMessage
+            id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.deployingButton"
+            defaultMessage="Deploying integrations..."
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.deployButton"
+            defaultMessage="Deploy integrations"
+          />
+        )}
+      </EuiButton>
+    ) : undefined;
 
   return (
     <EuiPanel
@@ -333,6 +378,7 @@ export function ManagedIntegrationsSection({
                     name="managedIntegrationsPreferredMethod"
                     options={radioOptions}
                     idSelected={preferredMethod}
+                    disabled={isLaunchLocked}
                     onChange={(id) => {
                       setPreferredMethod(id as PreferredMethod);
                       setIsDeployReady(false);
@@ -383,6 +429,11 @@ export function ManagedIntegrationsSection({
                   onConnectorIdChange={handleIdentityFedConnectorChange}
                   onIacTemplateRecorded={handleIacTemplateRecorded}
                   initialConnectorId={initialConnectorId}
+                  onPrepareLaunch={onPrepareLaunch}
+                  onDeployOutcome={onDeployOutcome}
+                  onWaitingChange={onWaitingChange}
+                  manualEntryActions={isDeployInManualSection ? deployButton : undefined}
+                  onNewIdentityTabChange={setIsNewIdentityTab}
                 />
               ) : isStoredSecretsLoading ? (
                 <EuiLoadingSpinner />
@@ -421,13 +472,14 @@ export function ManagedIntegrationsSection({
                   color="danger"
                   onClick={onDeploy}
                   isDisabled={
-                    !isDeployReady &&
-                    !(
-                      isDirty &&
-                      isStaticKeysEditMode &&
-                      !!authenticateAndDeployStep.staticKeys?.access_key_id &&
-                      !!authenticateAndDeployStep.staticKeys?.secret_access_key
-                    )
+                    isLaunchLocked ||
+                    (!isDeployReady &&
+                      !(
+                        isDirty &&
+                        isStaticKeysEditMode &&
+                        !!authenticateAndDeployStep.staticKeys?.access_key_id &&
+                        !!authenticateAndDeployStep.staticKeys?.secret_access_key
+                      ))
                   }
                   data-test-subj="managedIntegrationsSection-retryButton"
                 >
@@ -450,36 +502,7 @@ export function ManagedIntegrationsSection({
               </EuiText>
             )}
 
-            {!hasFailed && !isDone && (
-              <EuiButton
-                isDisabled={
-                  isDeploying ||
-                  (!isDeployReady &&
-                    !isCleanupOnly &&
-                    !(
-                      isDirty &&
-                      isStaticKeysEditMode &&
-                      !!authenticateAndDeployStep.staticKeys?.access_key_id &&
-                      !!authenticateAndDeployStep.staticKeys?.secret_access_key
-                    ))
-                }
-                isLoading={isDeploying}
-                onClick={onDeploy}
-                data-test-subj="managedIntegrationsSection-deployButton"
-              >
-                {isDeploying ? (
-                  <FormattedMessage
-                    id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.deployingButton"
-                    defaultMessage="Deploying integrations..."
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.deployButton"
-                    defaultMessage="Deploy integrations"
-                  />
-                )}
-              </EuiButton>
-            )}
+            {!hasFailed && !isDone && !isDeployInManualSection && deployButton}
           </EuiPanel>
         </div>
       )}

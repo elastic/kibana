@@ -1,0 +1,69 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        receiveProvisioningCallbackRequestExample:
+          summary: Report a created IAM role
+          description: 'The report the launched CloudFormation stack sends once its IAM role exists'
+          value:
+            role_arn: 'arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc123'
+            stack_arn: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-identity/11111111-2222-3333-4444-555555555555'
+responses:
+  200:
+    description: 'The values were stored, or were already stored'
+    content:
+      application/json:
+        examples:
+          receiveProvisioningCallbackExample:
+            summary: Identity created
+            description: 'The report was applied and the federated identity exists'
+            value:
+              status: 'received'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            summary: Role and stack accounts differ
+            description: 'The role and the stack are in different AWS accounts'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'role_arn and stack_arn must be in the same AWS account'
+  404:
+    description: 'Not Found'
+    content:
+      application/json:
+        examples:
+          notFoundExample:
+            summary: Unknown callback or token
+            description: 'No record has this ID, or the token is not the one issued for it'
+            value:
+              statusCode: 404
+              error: 'Not Found'
+              message: 'Callback not found'
+  409:
+    description: 'Conflict'
+    content:
+      application/json:
+        examples:
+          conflictExample:
+            summary: Different values already received
+            description: 'A report with different values was already received'
+            value:
+              statusCode: 409
+              error: 'Conflict'
+              message: 'Callback already received with different values'
+  410:
+    description: 'Gone'
+    content:
+      application/json:
+        examples:
+          goneExample:
+            summary: Callback expired or cancelled
+            description: 'The record expired or was cancelled before the report arrived'
+            value:
+              statusCode: 410
+              error: 'Gone'
+              message: 'Callback is no longer accepting values'

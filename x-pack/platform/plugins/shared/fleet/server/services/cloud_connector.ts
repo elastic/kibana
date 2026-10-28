@@ -86,10 +86,16 @@ export const iacAttributesFromConfirm = (
   return attrs;
 };
 
+export interface CreateCloudConnectorOptions {
+  /** Id for the saved object. Lets a caller retry a create without producing a second connector. */
+  id?: string;
+}
+
 export interface CloudConnectorServiceInterface {
   create(
     soClient: SavedObjectsClientContract,
-    cloudConnector: CreateCloudConnectorRequest
+    cloudConnector: CreateCloudConnectorRequest,
+    options?: CreateCloudConnectorOptions
   ): Promise<CloudConnector>;
   getList(
     soClient: SavedObjectsClientContract,
@@ -252,7 +258,8 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
   async create(
     soClient: SavedObjectsClientContract,
-    cloudConnector: CreateCloudConnectorRequest
+    cloudConnector: CreateCloudConnectorRequest,
+    options?: CreateCloudConnectorOptions
   ): Promise<CloudConnector> {
     const logger = this.getLogger('create');
 
@@ -293,10 +300,16 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         ...iacAttributesFromConfirm(cloudConnector),
       };
 
-      const savedObject = await soClient.create<CloudConnectorSOAttributes>(
-        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-        cloudConnectorAttributes
-      );
+      const savedObject = options?.id
+        ? await soClient.create<CloudConnectorSOAttributes>(
+            CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+            cloudConnectorAttributes,
+            { id: options.id }
+          )
+        : await soClient.create<CloudConnectorSOAttributes>(
+            CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+            cloudConnectorAttributes
+          );
 
       logger.info('Successfully created cloud connector');
 

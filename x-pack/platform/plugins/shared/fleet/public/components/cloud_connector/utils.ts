@@ -772,6 +772,10 @@ export interface ArtifactLaunchUrlParams {
 
 const TEMPLATE_URL_PARAM_REGEX = /([?&])templateURL=[^&]*/;
 
+/** Whether stack parameters can be added to this static URL (a quick-create link). */
+export const isQuickCreateLaunchUrl = (url: string | undefined): url is string =>
+  !!url && TEMPLATE_URL_PARAM_REGEX.test(url);
+
 const getQuickCreateUrl = (artifactUrl: string, staticUrl: string | undefined): string => {
   const templateUrlParam = `templateURL=${encodeURIComponent(artifactUrl)}`;
   if (staticUrl && TEMPLATE_URL_PARAM_REGEX.test(staticUrl)) {
@@ -826,7 +830,7 @@ export const getStaticLaunchUrl = ({
   if (provider !== AWS_PROVIDER || !staticUrl) {
     return undefined;
   }
-  if (!TEMPLATE_URL_PARAM_REGEX.test(staticUrl)) {
+  if (!isQuickCreateLaunchUrl(staticUrl)) {
     return staticUrl;
   }
   return setQuickCreateStackParams(staticUrl, stackParams);

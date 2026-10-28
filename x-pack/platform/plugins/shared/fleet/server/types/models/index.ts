@@ -17,3 +17,4 @@ export * from './custom_integrations';
 export * from './epm_packages';
 export * from './cloud_connector';
 export * from './cloud_onboarding_deployment';
+export * from './provisioning_callback';

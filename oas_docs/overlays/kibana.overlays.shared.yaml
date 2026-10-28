@@ -190,6 +190,12 @@ actions:
       description: >
         Fleet cloud connectors APIs enable you to manage Fleet cloud connectors, including creating, updating, and deleting cloud connector configurations for Fleet integrations.
       x-displayName: 'Fleet cloud connectors'
+  - target: '$.tags[?(@.name=="Fleet IaC provisioner")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Fleet infrastructure-as-code (IaC) provisioner APIs, including the CloudFormation callback that reports a created IAM role back to Kibana.
+      x-displayName: 'Fleet IaC provisioner'
   - target: '$.tags[?(@.name=="Elastic Package Manager (EPM)")]'
     description: Change tag description and displayName
     update:

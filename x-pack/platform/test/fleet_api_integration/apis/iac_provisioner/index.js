@@ -9,6 +9,7 @@ export default function loadTests({ loadTestFile }) {
   describe('IaC Provisioner', () => {
     loadTestFile(require.resolve('./verify_iac_key'));
     loadTestFile(require.resolve('./render_template'));
+    loadTestFile(require.resolve('./callbacks'));
     loadTestFile(require.resolve('./privileges'));
   });
 }

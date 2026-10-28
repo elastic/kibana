@@ -12,6 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 interface StepFooterProps {
   onBack?: () => void;
+  /** Keeps Back in place but inert, for the moments a step must not be left. */
+  isBackDisabled?: boolean;
   /** Forward actions (Next, Finish, ...), rendered on the right. */
   children: React.ReactNode;
 }
@@ -20,7 +22,7 @@ interface StepFooterProps {
  * Back / forward actions in a bottom bar fixed to the bottom of the viewport, so they stay in the
  * same place whatever the height of the step content. Render it as the last child of the step.
  */
-export function StepFooter({ onBack, children }: StepFooterProps) {
+export function StepFooter({ onBack, isBackDisabled = false, children }: StepFooterProps) {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -42,6 +44,7 @@ export function StepFooter({ onBack, children }: StepFooterProps) {
                 iconType="chevronSingleLeft"
                 iconSide="left"
                 onClick={onBack}
+                isDisabled={isBackDisabled}
                 data-test-subj="onboardingStepFooter-backButton"
               >
                 <FormattedMessage

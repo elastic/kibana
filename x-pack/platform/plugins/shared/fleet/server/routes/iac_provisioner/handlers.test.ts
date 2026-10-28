@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { AuthenticatedUser } from '@kbn/core/server';
 
 import {
   IacProvisionerRequestError,
@@ -14,15 +15,28 @@ import {
 } from '../../errors';
 import { appContextService } from '../../services/app_context';
 import { iacProvisionerService } from '../../services';
+import { provisioningCallbackService } from '../../services/provisioning_callback';
 import { getPackageInfo } from '../../services/epm/packages';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
+import { isAwsIdentityFederationEnabled } from '../../services/utils/aws_identity_federation';
+import { getProvisioningCallbackAvailability } from '../../services/utils/provisioning_callback_availability';
+import { deployProvisioningCallback } from '../../services/provisioning_callback_deploy';
 import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
+import { PROVISIONING_CALLBACK_TOKEN_HEADER } from '../../../common/constants';
+import type { CloudConnectorCallback } from '../../../common/types/models/provisioning_callback';
 import {
   reportIacProvisionerRenderCompleted,
   reportIacProvisionerRenderRequested,
 } from '../../services/telemetry/iac_provisioner_telemetry';
 
-import { renderIacTemplateHandler } from './handlers';
+import {
+  createProvisioningCallbackHandler,
+  getProvisioningCallbackAvailabilityHandler,
+  deleteProvisioningCallbackHandler,
+  getProvisioningCallbackHandler,
+  receiveProvisioningCallbackHandler,
+  renderIacTemplateHandler,
+} from './handlers';
 
 jest.mock('../../services/app_context');
 jest.mock('../../services', () => ({
@@ -30,11 +44,25 @@ jest.mock('../../services', () => ({
 }));
 jest.mock('../../services/epm/packages');
 jest.mock('../../services/utils/iac_provisioner');
+jest.mock('../../services/utils/aws_identity_federation');
+jest.mock('../../services/utils/provisioning_callback_availability');
 jest.mock('../../services/telemetry/iac_provisioner_telemetry');
+jest.mock('../../services/provisioning_callback_deploy');
+jest.mock('../../services/provisioning_callback', () => ({
+  provisioningCallbackService: {
+    create: jest.fn(),
+    get: jest.fn(),
+    cancel: jest.fn(),
+    receive: jest.fn(),
+  },
+}));
 
 const mockedRenderTemplate = jest.mocked(iacProvisionerService.renderTemplate);
 const mockedGetPackageInfo = jest.mocked(getPackageInfo);
 const mockedIsEnabled = jest.mocked(isIacProvisionerEnabled);
+const mockedIsAwsIdentityFederationEnabled = jest.mocked(isAwsIdentityFederationEnabled);
+const mockedGetAvailability = jest.mocked(getProvisioningCallbackAvailability);
+const mockedDeploy = jest.mocked(deployProvisioningCallback);
 
 const buildContext = () =>
   ({
@@ -435,5 +463,466 @@ describe('renderIacTemplateHandler', () => {
     await renderIacTemplateHandler(buildContext(), buildRequest(renderBody()), response);
 
     expect(response.ok).toHaveBeenCalledWith({ body: alreadyCurrent });
+  });
+});
+
+const mockedService = jest.mocked(provisioningCallbackService);
+const mockedAppContext = jest.mocked(appContextService);
+
+const PAYLOAD = {
+  role_arn: 'arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc',
+  stack_arn: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic/uuid-1',
+};
+
+const ITEM: CloudConnectorCallback = {
+  id: 'cb-1',
+  provider: 'aws',
+  status: 'pending',
+  created_at: '2026-10-13T10:00:00.000Z',
+  created_by: 'elastic',
+  space_id: 'default',
+  expires_at: '2026-10-13T12:00:00.000Z',
+};
+
+const realmUser = () =>
+  ({ username: 'elastic', authentication_type: 'realm' } as unknown as AuthenticatedUser);
+
+const buildCallbackContext = (
+  spaceId = 'default',
+  authz: { writeIntegrationPolicies: boolean } = { writeIntegrationPolicies: true }
+) =>
+  ({
+    fleet: Promise.resolve({
+      spaceId,
+      internalSoClient: {},
+      authz: {
+        // Fleet All is deliberately false: the create-agentless-policy route does not need it.
+        fleet: { all: false },
+        integrations: { all: true, writeIntegrationPolicies: authz.writeIntegrationPolicies },
+      },
+    }),
+  } as any);
+
+describe('Provisioning callback handlers', () => {
+  let response: ReturnType<typeof httpServerMock.createResponseFactory>;
+  let getCurrentUser: jest.Mock;
+  const soClient = { tag: 'internal-so-client' };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    response = httpServerMock.createResponseFactory();
+    getCurrentUser = jest.fn();
+    mockedAppContext.getLogger.mockReturnValue(loggingSystemMock.createLogger());
+    mockedAppContext.getSecurityCore.mockReturnValue({ authc: { getCurrentUser } } as any);
+    mockedAppContext.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(soClient as any);
+    mockedIsAwsIdentityFederationEnabled.mockResolvedValue(true);
+    mockedGetAvailability.mockReturnValue({
+      available: true,
+      kibanaUrl: 'https://kb.example.com',
+    });
+  });
+
+  describe('getProvisioningCallbackAvailabilityHandler', () => {
+    it('returns 404 when AWS identity federation is not enabled', async () => {
+      mockedIsAwsIdentityFederationEnabled.mockResolvedValue(false);
+
+      await getProvisioningCallbackAvailabilityHandler(
+        buildCallbackContext(),
+        httpServerMock.createKibanaRequest(),
+        response
+      );
+
+      expect(response.notFound).toHaveBeenCalledWith({
+        body: { message: 'AWS identity federation is not enabled' },
+      });
+      expect(mockedGetAvailability).not.toHaveBeenCalled();
+    });
+
+    it('returns the URL the stack is given when the callback is available', async () => {
+      await getProvisioningCallbackAvailabilityHandler(
+        buildCallbackContext(),
+        httpServerMock.createKibanaRequest(),
+        response
+      );
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { available: true, kibana_url: 'https://kb.example.com' },
+      });
+    });
+
+    it('returns the reason when the callback is not available', async () => {
+      mockedGetAvailability.mockReturnValue({
+        available: false,
+        kibanaUrl: 'http://kb.example.com',
+        reason:
+          'The public Kibana URL http://kb.example.com is not https. CloudFormation only accepts an https callback URL.',
+      });
+
+      await getProvisioningCallbackAvailabilityHandler(
+        buildCallbackContext(),
+        httpServerMock.createKibanaRequest(),
+        response
+      );
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          available: false,
+          kibana_url: 'http://kb.example.com',
+          reason:
+            'The public Kibana URL http://kb.example.com is not https. CloudFormation only accepts an https callback URL.',
+        },
+      });
+    });
+  });
+
+  describe('createProvisioningCallbackHandler', () => {
+    it('returns 412 and mints nothing when the public URL is not https', async () => {
+      mockedGetAvailability.mockReturnValue({
+        available: false,
+        kibanaUrl: 'http://kb.example.com',
+        reason:
+          'The public Kibana URL http://kb.example.com is not https. CloudFormation only accepts an https callback URL.',
+      });
+      const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
+
+      await createProvisioningCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 412,
+        body: {
+          message:
+            'The public Kibana URL http://kb.example.com is not https. CloudFormation only accepts an https callback URL.',
+        },
+      });
+      expect(mockedService.create).not.toHaveBeenCalled();
+    });
+
+    it('creates the record when no public URL is configured, since there is nothing to check', async () => {
+      mockedGetAvailability.mockReturnValue({
+        available: false,
+        reason: 'Kibana has no public URL: server.publicBaseUrl is not set.',
+      });
+      getCurrentUser.mockReturnValue(realmUser());
+      mockedService.create.mockResolvedValue({ item: ITEM, token: 'tok-1' });
+      const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
+
+      await createProvisioningCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(mockedService.create).toHaveBeenCalled();
+      expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM, token: 'tok-1' } });
+    });
+
+    it('returns 404 when AWS identity federation is not enabled', async () => {
+      mockedIsAwsIdentityFederationEnabled.mockResolvedValue(false);
+      const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
+
+      await createProvisioningCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(response.notFound).toHaveBeenCalledWith({
+        body: { message: 'AWS identity federation is not enabled' },
+      });
+      expect(mockedService.create).not.toHaveBeenCalled();
+    });
+
+    it('creates the record when the IaC Provisioner is off', async () => {
+      mockedIsEnabled.mockResolvedValue(false);
+      getCurrentUser.mockReturnValue(realmUser());
+      mockedService.create.mockResolvedValue({ item: ITEM, token: 'tok-1' });
+      const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
+
+      await createProvisioningCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(mockedService.create).toHaveBeenCalled();
+      expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM, token: 'tok-1' } });
+    });
+
+    it('creates the record for the request, tagged with the caller and space', async () => {
+      getCurrentUser.mockReturnValue(realmUser());
+      mockedService.create.mockResolvedValue({ item: ITEM, token: 'tok-1' });
+      const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
+
+      await createProvisioningCallbackHandler(buildCallbackContext('marketing'), request, response);
+
+      expect(mockedService.create).toHaveBeenCalledWith(soClient, {
+        provider: 'aws',
+        createdBy: 'elastic',
+        spaceId: 'marketing',
+        identity: {},
+      });
+      expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM, token: 'tok-1' } });
+    });
+
+    it('passes an attached onboarding deployment to the record', async () => {
+      getCurrentUser.mockReturnValue(realmUser());
+      mockedService.create.mockResolvedValue({ item: ITEM, token: 'tok-1' });
+      const request = httpServerMock.createKibanaRequest({
+        body: { provider: 'aws', onboarding_deployment_id: 'dep-1' },
+      });
+
+      await createProvisioningCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(mockedService.create).toHaveBeenCalledWith(
+        soClient,
+        expect.objectContaining({ identity: { onboarding_deployment_id: 'dep-1' } })
+      );
+    });
+
+    it('refuses a deployment id without the privilege to write integration policies', async () => {
+      getCurrentUser.mockReturnValue(realmUser());
+      const request = httpServerMock.createKibanaRequest({
+        body: { provider: 'aws', onboarding_deployment_id: 'dep-1' },
+      });
+
+      await createProvisioningCallbackHandler(
+        buildCallbackContext('default', { writeIntegrationPolicies: false }),
+        request,
+        response
+      );
+
+      expect(response.forbidden).toHaveBeenCalled();
+      expect(mockedService.create).not.toHaveBeenCalled();
+    });
+
+    it('passes the name, account type and template details to the record', async () => {
+      getCurrentUser.mockReturnValue(realmUser());
+      mockedService.create.mockResolvedValue({ item: ITEM, token: 'tok-1' });
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          provider: 'aws',
+          connector_name: 'my-identity',
+          account_type: 'single-account',
+          iac_key: 'sha256:abc',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: '1.0.0',
+        },
+      });
+
+      await createProvisioningCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(mockedService.create).toHaveBeenCalledWith(
+        soClient,
+        expect.objectContaining({
+          provider: 'aws',
+          identity: {
+            connector_name: 'my-identity',
+            account_type: 'single-account',
+            iac_key: 'sha256:abc',
+            iac_blueprint_id: 'federated-identity',
+            iac_blueprint_version: '1.0.0',
+          },
+        })
+      );
+    });
+  });
+
+  describe('getProvisioningCallbackHandler', () => {
+    it('returns the item without any key material', async () => {
+      mockedService.get.mockResolvedValue(ITEM);
+      const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
+
+      await getProvisioningCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(mockedService.get).toHaveBeenCalledWith(soClient, 'cb-1');
+      expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM } });
+    });
+
+    it('returns 404 for a record created in another space', async () => {
+      mockedService.get.mockResolvedValue({ ...ITEM, space_id: 'marketing' });
+      const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
+
+      await getProvisioningCallbackHandler(buildCallbackContext('default'), request, response);
+
+      expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
+    });
+
+    it('returns 404 for an unknown record', async () => {
+      mockedService.get.mockResolvedValue(undefined);
+      const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'nope' } });
+
+      await getProvisioningCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
+    });
+  });
+
+  describe('deleteProvisioningCallbackHandler', () => {
+    it('cancels the record and returns it', async () => {
+      mockedService.get.mockResolvedValue(ITEM);
+      mockedService.cancel.mockResolvedValue({ ...ITEM, status: 'cancelled' });
+      const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
+
+      await deleteProvisioningCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(mockedService.cancel).toHaveBeenCalledWith(soClient, 'cb-1');
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: { ...ITEM, status: 'cancelled' } },
+      });
+    });
+
+    it('returns the record as the stack left it when it had already reported', async () => {
+      const received = {
+        ...ITEM,
+        status: 'received' as const,
+        ...PAYLOAD,
+        cloud_connector_id: 'cb-1',
+      };
+      mockedService.get.mockResolvedValue(ITEM);
+      mockedService.cancel.mockResolvedValue(received);
+      const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
+
+      await deleteProvisioningCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({ body: { item: received } });
+    });
+
+    it('returns 404 for a record created in another space without cancelling it', async () => {
+      mockedService.get.mockResolvedValue({ ...ITEM, space_id: 'marketing' });
+      const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
+
+      await deleteProvisioningCallbackHandler(buildCallbackContext('default'), request, response);
+
+      expect(mockedService.cancel).not.toHaveBeenCalled();
+      expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
+    });
+
+    it('returns 404 for an unknown record', async () => {
+      mockedService.get.mockResolvedValue(undefined);
+      const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'nope' } });
+
+      await deleteProvisioningCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
+    });
+  });
+
+  describe('receiveProvisioningCallbackHandler', () => {
+    // The route is not authenticated: the handler only sees the record's token, in a header.
+    const receive = (headers: Record<string, string | string[]> = {}) => {
+      getCurrentUser.mockReturnValue(null);
+      const request = httpServerMock.createKibanaRequest({
+        params: { callbackId: 'cb-1' },
+        body: PAYLOAD,
+        // A repeated header reaches the handler as an array; the mock's type only knows strings.
+        headers: headers as Record<string, string>,
+      });
+      return receiveProvisioningCallbackHandler(buildCallbackContext(), request, response);
+    };
+    const withToken = { [PROVISIONING_CALLBACK_TOKEN_HEADER]: 'tok-1' };
+
+    it('passes the presented token to the service and answers 200 on receive', async () => {
+      mockedService.receive.mockResolvedValue({
+        outcome: 'received',
+        item: { ...ITEM, status: 'received' },
+      });
+
+      await receive(withToken);
+
+      expect(mockedService.receive).toHaveBeenCalledWith(soClient, 'cb-1', {
+        token: 'tok-1',
+        payload: PAYLOAD,
+      });
+      expect(response.ok).toHaveBeenCalledWith({ body: { status: 'received' } });
+    });
+
+    it('never logs the token', async () => {
+      const logger = loggingSystemMock.createLogger();
+      mockedAppContext.getLogger.mockReturnValue(logger);
+      mockedService.receive.mockResolvedValue({ outcome: 'not_found' });
+
+      await receive(withToken);
+
+      expect(JSON.stringify(loggingSystemMock.collect(logger))).not.toContain('tok-1');
+    });
+
+    it('starts the deploy after answering when the record carries a deployment', async () => {
+      mockedDeploy.mockResolvedValue(undefined);
+      mockedService.receive.mockResolvedValue({
+        outcome: 'received',
+        item: {
+          ...ITEM,
+          status: 'received',
+          onboarding_deployment_id: 'dep-1',
+          deploy_status: 'pending',
+        },
+      });
+
+      await receive(withToken);
+
+      expect(response.ok).toHaveBeenCalledWith({ body: { status: 'received' } });
+      expect(mockedDeploy).toHaveBeenCalledWith('cb-1');
+    });
+
+    it('does not start a deploy for a record without a deployment', async () => {
+      mockedService.receive.mockResolvedValue({
+        outcome: 'received',
+        item: { ...ITEM, status: 'received' },
+      });
+
+      await receive(withToken);
+
+      expect(mockedDeploy).not.toHaveBeenCalled();
+    });
+
+    it('does not start a deploy again for a record already deploying', async () => {
+      mockedService.receive.mockResolvedValue({
+        outcome: 'received',
+        item: {
+          ...ITEM,
+          status: 'received',
+          onboarding_deployment_id: 'dep-1',
+          deploy_status: 'deploying',
+        },
+      });
+
+      await receive(withToken);
+
+      expect(mockedDeploy).not.toHaveBeenCalled();
+    });
+
+    it('passes no token when the header is missing', async () => {
+      mockedService.receive.mockResolvedValue({ outcome: 'not_found' });
+
+      await receive();
+
+      expect(mockedService.receive).toHaveBeenCalledWith(soClient, 'cb-1', {
+        token: undefined,
+        payload: PAYLOAD,
+      });
+      expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
+    });
+
+    it('passes no token when the header is repeated', async () => {
+      mockedService.receive.mockResolvedValue({ outcome: 'not_found' });
+
+      await receive({ [PROVISIONING_CALLBACK_TOKEN_HEADER]: ['tok-1', 'tok-2'] });
+
+      expect(mockedService.receive).toHaveBeenCalledWith(soClient, 'cb-1', {
+        token: undefined,
+        payload: PAYLOAD,
+      });
+    });
+
+    it('answers 409 on a conflicting payload', async () => {
+      mockedService.receive.mockResolvedValue({ outcome: 'conflict', item: ITEM });
+      await receive(withToken);
+      expect(response.conflict).toHaveBeenCalledWith({
+        body: { message: 'Callback already received with different values' },
+      });
+    });
+
+    it('answers 410 when the record has expired', async () => {
+      mockedService.receive.mockResolvedValue({ outcome: 'gone' });
+      await receive(withToken);
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 410,
+        body: { message: 'Callback is no longer accepting values' },
+      });
+    });
+
+    it('answers 400 on cross-field validation failure', async () => {
+      mockedService.receive.mockResolvedValue({ outcome: 'invalid', message: 'mismatch' });
+      await receive(withToken);
+      expect(response.badRequest).toHaveBeenCalledWith({ body: { message: 'mismatch' } });
+    });
   });
 });

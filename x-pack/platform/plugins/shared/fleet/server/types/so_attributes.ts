@@ -59,6 +59,7 @@ import type {
   DeploymentMethod,
   CloudOnboardingDeploymentStatus,
 } from '../../common/types/models/cloud_onboarding_deployment';
+import type { CloudConnectorCallback } from '../../common/types/models/provisioning_callback';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -433,4 +434,10 @@ export interface CloudOnboardingDeploymentSOAttributes {
   agentPolicyIds?: string[];
   /** Elasticsearch API key ID for push mechanisms (ecf). Set by the backend after key creation; used to identify the key for rotation/revocation. */
   apiKeyId?: string;
+}
+
+/** Stored shape of a callback record: the item without its id, plus the token binding. */
+export interface ProvisioningCallbackSOAttributes extends Omit<CloudConnectorCallback, 'id'> {
+  /** Keyed hash of the record's token, bound to its id, space and expiry. The token itself is never stored. */
+  token_hash: string;
 }

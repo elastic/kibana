@@ -13,6 +13,7 @@ export const CLOUD_CONNECTOR_SAVED_OBJECT_TYPE = 'fleet-cloud-connector';
 
 export const CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE = 'fleet-cloud-onboarding-deployment';
 
+export const PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE = 'fleet-provisioning-callback';
 /**
  * Longest integration name an onboarding deployment stores. A policy name is the integration name
  * plus `-<suffix>` of at most 88 characters, and Fleet limits policy names to 255, so a longer

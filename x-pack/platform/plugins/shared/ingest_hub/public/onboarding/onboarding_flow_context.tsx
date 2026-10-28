@@ -173,6 +173,13 @@ export interface AgentBasedDeploymentState {
 }
 
 interface OnboardingFlowState {
+  /**
+   * True from Launch until the launched stack has reported back (and its deploy finished), the
+   * wait ran out, or the user stopped waiting. Steps cannot be navigated or edited meanwhile. Not
+   * persisted: a reload ends the lock together with the wait it belongs to.
+   */
+  isLaunchLocked: boolean;
+  setLaunchLocked: (locked: boolean) => void;
   authenticateAndDeployStep: AuthenticateAndDeployStepState;
   setConnectorId: (id: string | undefined, name?: string) => void;
   setStaticKeys: (keys: AwsStaticKeyCredentials | undefined) => void;
@@ -366,6 +373,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
 
   // isDeploying is intentionally not persisted — it resets to false on page reload
   const [isDeploying, setIsDeploying] = useState(false);
+  const [isLaunchLocked, setLaunchLocked] = useState(false);
 
   // Ref always holds the latest persisted value so updateDetectAndReviewStep
   // reads current state even when called after an await (stale closure prevention).
@@ -638,6 +646,8 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   return (
     <OnboardingFlowContext.Provider
       value={{
+        isLaunchLocked,
+        setLaunchLocked,
         authenticateAndDeployStep,
         setConnectorId,
         setStaticKeys,

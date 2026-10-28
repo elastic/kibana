@@ -30,6 +30,7 @@ function makeVarDef(
 jest.mock('react-router-dom', () => ({
   useHistory: jest.fn(),
   useParams: jest.fn(),
+  useLocation: jest.fn(() => ({ search: '' })),
 }));
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -41,6 +42,7 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   sendGetPackageInfoByKey: jest.fn(),
   sendCreateCloudOnboardingDeployment: jest.fn(),
   sendUpdateCloudOnboardingDeployment: jest.fn(),
+  sendGetCloudOnboardingDeployment: jest.fn(),
   sendGetAgentlessPolicy: jest.fn(),
   sendUpdateCloudConnector: jest.fn(),
   sendVerifyCloudConnectorIacKey: jest.fn(),
@@ -155,6 +157,7 @@ import {
   sendGetPackageInfoByKey,
   sendCreateCloudOnboardingDeployment,
   sendUpdateCloudOnboardingDeployment,
+  sendGetCloudOnboardingDeployment,
   sendUpdateCloudConnector,
   sendVerifyCloudConnectorIacKey,
 } from '@kbn/fleet-plugin/public';
@@ -172,6 +175,7 @@ const mockCleanupManagedIntegrationsPolicies = cleanupManagedIntegrationsPolicie
 const mockSendGetPackageInfoByKey = sendGetPackageInfoByKey as jest.Mock;
 const mockSendCreateCloudOnboardingDeployment = sendCreateCloudOnboardingDeployment as jest.Mock;
 const mockSendUpdateCloudOnboardingDeployment = sendUpdateCloudOnboardingDeployment as jest.Mock;
+const mockSendGetCloudOnboardingDeployment = sendGetCloudOnboardingDeployment as jest.Mock;
 const mockSendUpdateCloudConnector = sendUpdateCloudConnector as jest.Mock;
 const mockSendVerifyCloudConnectorIacKey = sendVerifyCloudConnectorIacKey as jest.Mock;
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
@@ -786,6 +790,48 @@ describe('useDeploy', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCleanupManagedIntegrationsPolicies.mockResolvedValue({ toDelete: [], toUpdate: [] });
+  });
+
+  describe('after a reload during an automatic deploy', () => {
+    // The lock is gone after a reload, but the pending deployment's id survives in the flow.
+    const resumed = () =>
+      setupMocks({
+        selectedServiceIds: ['ec2'],
+        connectorId: 'cc-1',
+        detectAndReviewStep: { onboardingDeploymentId: 'so-dep-123', policyIdsByInstance: {} },
+      });
+
+    it('refuses an initial Deploy while the server is still deploying that deployment', async () => {
+      resumed();
+      mockSendGetCloudOnboardingDeployment.mockResolvedValue({
+        item: { id: 'so-dep-123', status: 'deploying' },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      expect(mockSendCreateAgentlessPolicy).not.toHaveBeenCalled();
+      expect(mockUseKibana().services.notifications.toasts.addDanger).toHaveBeenCalled();
+    });
+
+    it('adopts the policies the server already deployed instead of creating them again', async () => {
+      resumed();
+      mockSendGetCloudOnboardingDeployment.mockResolvedValue({
+        item: { id: 'so-dep-123', status: 'succeeded', policyIdsByInstance: { ec2: 'pp-1' } },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      expect(mockSendCreateAgentlessPolicy).not.toHaveBeenCalled();
+      expect(mockUseOnboardingFlow().updateDetectAndReviewStep).toHaveBeenCalledWith(
+        expect.objectContaining({ policyIdsByInstance: { ec2: 'pp-1' }, failedInstances: [] })
+      );
+    });
   });
 
   it('initializes in idle state', () => {

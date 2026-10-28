@@ -36,6 +36,21 @@ describe('StepFooter', () => {
     expect(onBack).toHaveBeenCalledTimes(1);
   });
 
+  it('keeps the Back button but disables it while going back is not allowed', () => {
+    const onBack = jest.fn();
+    render(
+      <I18nProvider>
+        <StepFooter onBack={onBack} isBackDisabled>
+          <button>Next</button>
+        </StepFooter>
+      </I18nProvider>
+    );
+    const back = screen.getByTestId('onboardingStepFooter-backButton');
+    expect(back).toBeDisabled();
+    fireEvent.click(back);
+    expect(onBack).not.toHaveBeenCalled();
+  });
+
   it('omits the Back button when there is no previous step', () => {
     render(
       <I18nProvider>

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 // ─── Mocks ──────────────────────────────────────────────────────────────────
@@ -78,6 +78,7 @@ import { useIsSelfManaged } from '../use_is_self_managed';
 import { AuthenticateAndDeployStep } from './authenticate_and_deploy_step';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
+const mockSetLaunchLocked = jest.fn();
 const mockUseDeploy = useDeploy as jest.Mock;
 const MockDeploymentMethodCard = DeploymentMethodCard as unknown as jest.Mock;
 const mockUseOnboardingSO = useOnboardingSO as jest.Mock;
@@ -91,7 +92,7 @@ const mockBuildIacIntegrations = buildIacIntegrations as jest.Mock;
 const mockUseAwsIdentityFederationEnabled = useAwsIdentityFederationEnabled as jest.Mock;
 const mockUseIsSelfManaged = useIsSelfManaged as jest.Mock;
 
-function getLastMiSectionProps(): { showIdentityFederation: boolean } {
+function getLastMiSectionProps(): React.ComponentProps<typeof ManagedIntegrationsSection> {
   const { calls } = MockManagedIntegrationsSection.mock;
   return calls[calls.length - 1][0];
 }
@@ -140,6 +141,9 @@ function makeDeployReturn(
     failedInstances?: string[];
     isAlreadyDeployed?: boolean;
     deployGroups?: unknown[];
+    canAutoDeploy?: boolean;
+    prepareLaunch?: jest.Mock;
+    applyAutoDeployOutcome?: jest.Mock;
   } = {}
 ) {
   return {
@@ -148,6 +152,9 @@ function makeDeployReturn(
     failedInstances: overrides.failedInstances ?? [],
     isAlreadyDeployed: overrides.isAlreadyDeployed ?? false,
     deployGroups: overrides.deployGroups ?? [],
+    canAutoDeploy: overrides.canAutoDeploy ?? false,
+    prepareLaunch: overrides.prepareLaunch ?? jest.fn(),
+    applyAutoDeployOutcome: overrides.applyAutoDeployOutcome ?? jest.fn(),
   };
 }
 
@@ -227,6 +234,8 @@ describe('AuthenticateAndDeployStep', () => {
       },
       updateDetectAndReviewStep: jest.fn(),
       removeDeployInstances: jest.fn(),
+      isLaunchLocked: false,
+      setLaunchLocked: mockSetLaunchLocked,
     });
     mockUseOnboardingSO.mockReturnValue({
       createDeployment: jest.fn().mockResolvedValue(null),
@@ -270,6 +279,90 @@ describe('AuthenticateAndDeployStep', () => {
         </div>
       )
     );
+  });
+
+  describe('automatic deploy', () => {
+    it('lets the identity form lock and unlock the flow while it waits', () => {
+      renderStep();
+      act(() => getLastMiSectionProps().onWaitingChange?.(true));
+      expect(mockSetLaunchLocked).toHaveBeenLastCalledWith(true);
+      act(() => getLastMiSectionProps().onWaitingChange?.(false));
+      expect(mockSetLaunchLocked).toHaveBeenLastCalledWith(false);
+    });
+
+    it('keeps the flow locked until the deploy outcome has been applied', async () => {
+      let finishApply: () => void = () => {};
+      const applyAutoDeployOutcome = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            finishApply = resolve;
+          })
+      );
+      mockUseDeploy.mockReturnValue(makeDeployReturn({ applyAutoDeployOutcome }));
+      renderStep();
+      const outcome = { status: 'deployed' as const, onboardingDeploymentId: 'dep-1' };
+
+      act(() => {
+        // The form reports the wait over and the outcome in the same commit.
+        getLastMiSectionProps().onWaitingChange?.(false);
+        getLastMiSectionProps().onDeployOutcome?.(outcome);
+      });
+      expect(mockSetLaunchLocked).toHaveBeenLastCalledWith(true);
+
+      await act(async () => {
+        finishApply();
+        await Promise.resolve();
+      });
+      expect(mockSetLaunchLocked).toHaveBeenLastCalledWith(false);
+    });
+
+    it('disables the deployment method choice while a launch is pending', () => {
+      mockUseOnboardingFlow.mockReturnValue({
+        ...mockUseOnboardingFlow(),
+        isLaunchLocked: true,
+      });
+      renderStep();
+      const { calls } = (DeploymentMethodCard as unknown as jest.Mock).mock;
+      expect(calls[calls.length - 1][0].disabled).toBe(true);
+    });
+
+    it('disables Back and Next while a launch is pending', () => {
+      mockUseOnboardingFlow.mockReturnValue({
+        ...mockUseOnboardingFlow(),
+        isLaunchLocked: true,
+      });
+      renderStep(jest.fn(), jest.fn());
+
+      expect(screen.getByRole('button', { name: 'Back' })).toBeDisabled();
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).toBeDisabled();
+    });
+
+    it('hands launch preparation to the section only when the deploy can be automatic', () => {
+      const prepareLaunch = jest.fn();
+      mockUseDeploy.mockReturnValue(makeDeployReturn({ canAutoDeploy: true, prepareLaunch }));
+      const { unmount } = renderStep();
+      expect(getLastMiSectionProps().onPrepareLaunch).toBe(prepareLaunch);
+      unmount();
+
+      mockUseDeploy.mockReturnValue(makeDeployReturn({ canAutoDeploy: false, prepareLaunch }));
+      renderStep();
+      expect(getLastMiSectionProps().onPrepareLaunch).toBeUndefined();
+    });
+
+    it('applies the deploy outcome like a Deploy click and enables Next', async () => {
+      const applyAutoDeployOutcome = jest.fn().mockResolvedValue(undefined);
+      mockUseDeploy.mockReturnValue(makeDeployReturn({ applyAutoDeployOutcome }));
+      renderStep();
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).toBeDisabled();
+
+      const outcome = { status: 'deployed' as const, onboardingDeploymentId: 'dep-1' };
+      await act(async () => {
+        await getLastMiSectionProps().onDeployOutcome?.(outcome);
+      });
+
+      expect(applyAutoDeployOutcome).toHaveBeenCalledWith(outcome);
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).not.toBeDisabled();
+    });
   });
 
   describe('Next button gating — MI services present', () => {

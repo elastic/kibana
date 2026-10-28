@@ -71,6 +71,7 @@ function setupMocks({
   authMethod = undefined,
   staticKeys = undefined,
   searchParams = '',
+  isLaunchLocked = false,
 }: {
   cloud?: object;
   setConnectorId?: jest.Mock;
@@ -81,6 +82,7 @@ function setupMocks({
   authMethod?: 'identity_federation' | 'static_keys';
   staticKeys?: { access_key_id?: string; secret_access_key?: string };
   searchParams?: string;
+  isLaunchLocked?: boolean;
 } = {}) {
   mockUseKibana.mockReturnValue({
     services: {
@@ -97,6 +99,7 @@ function setupMocks({
     clearStagedStaticKeys,
     setPendingIacTemplate,
     authenticateAndDeployStep: { connectorId, authMethod, staticKeys },
+    isLaunchLocked,
     awsServicesMap: new Map([
       [
         'guardduty',
@@ -117,7 +120,11 @@ function setupMocks({
       onConnectorIdChange,
       onIacTemplateRecorded,
       initialConnectorId: initId,
+      manualEntryActions,
+      onNewIdentityTabChange,
     }: {
+      manualEntryActions?: React.ReactNode;
+      onNewIdentityTabChange?: (isNewIdentityTab: boolean) => void;
       onReadyChange?: (v: boolean) => void;
       onConnectorIdChange?: (id: string | undefined, name?: string) => void;
       onIacTemplateRecorded?: (
@@ -135,6 +142,9 @@ function setupMocks({
         <button onClick={() => onReadyChange?.(true)}>mark-ready</button>
         <button onClick={() => onReadyChange?.(false)}>mark-not-ready</button>
         <button onClick={() => onConnectorIdChange?.('id-1', 'my-connector')}>mark-named</button>
+        <button onClick={() => onNewIdentityTabChange?.(true)}>tab-new</button>
+        <button onClick={() => onNewIdentityTabChange?.(false)}>tab-existing</button>
+        <div data-test-subj="manual-entry-actions">{manualEntryActions}</div>
         <button
           onClick={() =>
             onIacTemplateRecorded?.(
@@ -186,6 +196,9 @@ function renderSection(
     storedSecretFields?: Array<'access_key_id' | 'secret_access_key'>;
     isStoredSecretsLoading?: boolean;
     onReplaceFormDirtyChange?: jest.Mock;
+    onPrepareLaunch?: jest.Mock;
+    onDeployOutcome?: jest.Mock;
+    onWaitingChange?: jest.Mock;
   } = {}
 ) {
   return render(
@@ -203,6 +216,9 @@ function renderSection(
           storedSecretFields={props.storedSecretFields}
           isStoredSecretsLoading={props.isStoredSecretsLoading}
           onReplaceFormDirtyChange={props.onReplaceFormDirtyChange}
+          onPrepareLaunch={props.onPrepareLaunch}
+          onDeployOutcome={props.onDeployOutcome}
+          onWaitingChange={props.onWaitingChange}
         />
       </React.Suspense>
     </I18nProvider>
@@ -212,6 +228,60 @@ function renderSection(
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
 describe('ManagedIntegrationsSection', () => {
+  describe('automatic deploy', () => {
+    it('keeps Deploy and Retry unreachable while a launch is pending', () => {
+      setupMocks({ isLaunchLocked: true });
+      const { unmount } = renderSection({ showIdentityFederation: true });
+      fireEvent.click(screen.getByText('mark-ready'));
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
+      unmount();
+
+      setupMocks({ isLaunchLocked: true, connectorId: 'cc-1', authMethod: 'identity_federation' });
+      renderSection({ showIdentityFederation: true, hasFailed: true });
+      fireEvent.click(screen.getByText('mark-ready'));
+      expect(screen.getByTestId('managedIntegrationsSection-retryButton')).toBeDisabled();
+    });
+
+    it('disables the authentication method choice while a launch is pending', () => {
+      setupMocks({ isLaunchLocked: true });
+      renderSection({ showIdentityFederation: true });
+
+      const radios = screen
+        .getByTestId('managedIntegrationsSection-preferredMethodRadio')
+        .querySelectorAll('input[type="radio"]');
+      expect(radios.length).toBeGreaterThan(0);
+      radios.forEach((radio) => expect(radio).toBeDisabled());
+    });
+
+    it('shows Deploy inside the manual section of the identity form on the New Identity tab, below it otherwise', () => {
+      setupMocks();
+      renderSection({ showIdentityFederation: true });
+
+      fireEvent.click(screen.getByText('tab-new'));
+      expect(screen.getByTestId('manual-entry-actions')).toContainElement(
+        screen.getByTestId('managedIntegrationsSection-deployButton')
+      );
+
+      fireEvent.click(screen.getByText('tab-existing'));
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeInTheDocument();
+      expect(screen.getByTestId('manual-entry-actions')).toBeEmptyDOMElement();
+    });
+
+    it('passes the launch preparation, outcome and waiting callbacks to the identity form', () => {
+      setupMocks();
+      const onPrepareLaunch = jest.fn();
+      const onDeployOutcome = jest.fn();
+      const onWaitingChange = jest.fn();
+
+      renderSection({ onPrepareLaunch, onDeployOutcome, onWaitingChange });
+
+      const formProps = MockIdentityFederation.mock.calls.at(-1)![0];
+      expect(formProps.onPrepareLaunch).toBe(onPrepareLaunch);
+      expect(formProps.onDeployOutcome).toBe(onDeployOutcome);
+      expect(formProps.onWaitingChange).toBe(onWaitingChange);
+    });
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     setupMocks();

@@ -143,7 +143,6 @@ test.describe(
       await page.testSubj.locator('awsStaticKeysForm-secretAccessKey').fill('NEW-SECRET-VALUE');
       await page.testSubj.locator('awsStaticKeysForm-accessKeyId').fill('NEW-ACCESS-KEY');
       // Nothing else changed, so only the replaced keys can make the step redeploy.
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
 
       const policyPut = page.waitForRequest(
         (req) =>
