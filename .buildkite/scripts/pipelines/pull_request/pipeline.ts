@@ -37,10 +37,16 @@ import {
 } from '#pipeline-utils';
 import {
   buildFipsImage,
+  buildCloudFipsImageSteps,
+  buildCloudImageSteps,
+  buildProjectSteps,
   checkNextDocs,
   checkOasSnapshot,
   checkSavedObjects,
   cpsTests,
+  deployCloudSteps,
+  deployProjectSteps,
+  entityStorePerformanceSteps,
   localCheck,
   prBaseEnv,
   prBaseSteps,
@@ -326,9 +332,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       !GITHUB_PR_LABELS.includes('ci:cloud-deploy') &&
       !GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/build_cloud_image.yml', cancelable)
-      );
+      pipeline.push(renderSteps(buildCloudImageSteps(), cancelOnGate));
     }
 
     if (
@@ -337,9 +341,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       !GITHUB_PR_LABELS.includes('ci:cloud-deploy') &&
       !GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/build_cloud_fips_image.yml', cancelable)
-      );
+      pipeline.push(renderSteps(buildCloudFipsImageSteps(), cancelOnGate));
     }
 
     if (
@@ -347,7 +349,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       GITHUB_PR_LABELS.includes('ci:cloud-deploy') ||
       GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_cloud.yml', cancelable));
+      pipeline.push(renderSteps(deployCloudSteps(), cancelOnGate));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:build-docker-fips')) {
@@ -355,12 +357,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     if (GITHUB_PR_LABELS.includes('ci:entity-store-performance')) {
-      pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/trigger_entity_store_performance.yml',
-          cancelable
-        )
-      );
+      pipeline.push(renderSteps(entityStorePerformanceSteps(), cancelOnGate));
     }
 
     if (
@@ -371,11 +368,9 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         GITHUB_PR_LABELS.includes('ci:project-deploy-security') ||
         GITHUB_PR_LABELS.includes('ci:project-deploy-ai4soc'))
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml', cancelable)
-      );
+      pipeline.push(renderSteps(deployProjectSteps(), cancelOnGate));
     } else if (GITHUB_PR_LABELS.includes('ci:build-serverless-image')) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/build_project.yml', cancelable));
+      pipeline.push(renderSteps(buildProjectSteps(), cancelOnGate));
     }
 
     if (
