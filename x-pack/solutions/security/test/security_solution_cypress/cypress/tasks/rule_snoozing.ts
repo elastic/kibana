@@ -119,7 +119,15 @@ export function expectSnoozeDisabledOnDetailsPage(tooltip?: string): void {
   openAppMenuOverflow();
   cy.get(RULE_DETAILS_SET_SNOOZE_BUTTON).should('be.disabled');
   if (tooltip) {
-    cy.get(RULE_DETAILS_SET_SNOOZE_BUTTON).trigger('mouseover', { force: true }); // Have to force because button element is disabled
+    // The item is disabled while snooze settings load too, and gets its tooltip only once the
+    // request fails. Hover again until the tooltip shows. Force because the item is disabled.
+    cy.waitUntil(
+      () => {
+        cy.get(RULE_DETAILS_SET_SNOOZE_BUTTON).trigger('mouseover', { force: true });
+        return cy.document().then((doc) => doc.querySelector(TOOLTIP) !== null);
+      },
+      { interval: 1000, timeout: 30000 }
+    );
     cy.get(TOOLTIP).contains(tooltip);
   }
 }
