@@ -101,7 +101,7 @@ describe('SubscriptionStatusPlugin', () => {
 
       license$.next(licensingMock.createLicense({ license: { type: 'platinum' } }));
 
-      expect(set).toHaveBeenLastCalledWith(undefined);
+      await waitFor(() => expect(set).toHaveBeenLastCalledWith(undefined));
     });
   });
 });
