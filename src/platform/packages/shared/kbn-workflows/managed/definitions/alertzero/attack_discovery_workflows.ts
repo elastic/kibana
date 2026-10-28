@@ -91,13 +91,15 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
  * Version 14 journals a built-in account link separately from a closed false
  * positive. A match that is only SYSTEM, Administrator, or root on one host
  * is reviewed on its own.
+ *
+ * Version 16 journals impact as separate host and user counts from this attack.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
   billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 15,
+  version: 16,
   yaml: ATTACK_DISCOVERY_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -118,13 +120,16 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
  * Version 5 keeps that wait open for 15 minutes, the same window the matcher
  * treats a missing Investigation as in flight. The YAML change rolls out
  * through `definitionHash`; the bump is the deliberate signal.
+ *
+ * Version 7 journals impact as separate host and user counts from this attack,
+ * merged into the Investigation's impact.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW = {
   billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 6,
+  version: 7,
   yaml: ATTACK_DISCOVERY_ATTACH_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
