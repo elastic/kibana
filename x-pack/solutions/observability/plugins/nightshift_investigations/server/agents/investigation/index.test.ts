@@ -154,7 +154,8 @@ describe('Nightshift investigation agent type', () => {
 
     expect(instructions).not.toContain('reply_user');
     expect(instructions).toContain('untrusted data');
-    expect(instructions).toContain('<system-reminder>');
+    // Tool output is never a source of instructions, with no exception for platform tags.
+    expect(instructions).not.toContain('<system-reminder>');
     expect(instructions).toContain('final message');
     for (const tool of [
       'set_conversation_metadata',

@@ -11,7 +11,10 @@ import { getEventActorDisplayName, type ConversationRoundStep } from '@kbn/agent
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { MessageRole, type Message, type ToolCall } from '@kbn/inference-common';
-import { INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE } from '@kbn/agentic-investigations-plugin/common';
+import {
+  INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE,
+  INVESTIGATION_TEMPLATE_ID,
+} from '@kbn/agentic-investigations-plugin/common';
 import type { Hypothesis, ImpactEntity } from '@kbn/agentic-investigations-plugin/common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import { createOptimizeModel } from '../lib/create_optimize_model';
@@ -138,6 +141,8 @@ interface ConversationEventLike {
 }
 
 interface ConversationLike {
+  /** Set to the investigation template for an investigation. Ask mode has none. */
+  template_id?: string;
   events?: ConversationEventLike[];
   metadata?: { summary?: unknown; severity?: unknown; verdict?: unknown };
 }
@@ -238,6 +243,15 @@ export const runFindingsPass = async (
   const agenticInvestigations = deps.getAgenticInvestigations();
   if (!agentBuilder || !agenticInvestigations) return false;
 
+  // The record belongs to an investigation. The agent can also be chatted with outside one (ask
+  // mode, with no investigation template, and a conversation that may not be saved yet), where
+  // there is nothing to write to, so the pass has no work and no warning to log.
+  const conversation = await readConversation(agentBuilder, request, conversationId);
+  if (conversation.template_id !== INVESTIGATION_TEMPLATE_ID) {
+    logger.debug(`Findings recorder skipped ${conversationId}: not an investigation conversation`);
+    return false;
+  }
+
   let output: FindingsRecord | undefined;
   try {
     const model = await createOptimizeModel({
@@ -252,7 +266,6 @@ export const runFindingsPass = async (
     });
     if (!model) return false;
 
-    const conversation = await readConversation(agentBuilder, request, conversationId);
     if (memory.turns().length === 0) {
       const stored = await storedRecord(
         agenticInvestigations,
@@ -323,8 +336,11 @@ export const runFindingsPass = async (
     );
     const answerTool = {
       [STRUCTURED_OUTPUT_TOOL]: {
-        description:
-          "Use the following schema to respond to the user's request in structured data, so it can be parsed and handled.",
+        // A description that says what the answer is. With the generic one ("respond in structured
+        // data") Claude Sonnet 5.5 returned nothing at all to a live pass, every time.
+        description: final
+          ? 'Record the final findings of the investigation: summary, verdict, severity, impact, evidence and hypotheses.'
+          : 'Record the summary and the hypotheses of the investigation so far.',
         // While the investigation runs the record is only the summary and the hypotheses.
         schema: final ? FINDINGS_JSON_SCHEMA : LIVE_FINDINGS_JSON_SCHEMA,
       },

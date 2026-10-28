@@ -82,7 +82,10 @@ describe('runFindingsPass', () => {
       getAgentBuilder: () =>
         ({
           conversations: {
-            getScopedClient: async () => ({ patchMetadata, get: async () => ({ events }) }),
+            getScopedClient: async () => ({
+              patchMetadata,
+              get: async () => ({ template_id: 'investigation', events }),
+            }),
           },
         } as never),
       getInference: () => ({} as never),
@@ -336,6 +339,27 @@ describe('runFindingsPass', () => {
     );
   });
 
+  it('describes the answer tool by what it records, not generically', async () => {
+    // The generic description ("respond in structured data") made Claude Sonnet 5.5 return nothing
+    // to every live pass: with one that says what is recorded it answers.
+    const live = setup();
+    await run(live.deps, live.memory);
+    const final = setup();
+    await run(final.deps, final.memory, { answer: 'Root cause: bad deploy' });
+
+    const descriptionOf = (chatComplete: jest.Mock) =>
+      chatComplete.mock.calls[0][0].tools.structuredOutput.description;
+    expect(descriptionOf(live.chatComplete)).toBe(
+      'Record the summary and the hypotheses of the investigation so far.'
+    );
+    expect(descriptionOf(final.chatComplete)).toContain('final findings');
+    for (const description of [live, final].map(({ chatComplete }) =>
+      descriptionOf(chatComplete)
+    )) {
+      expect(description).not.toContain('structured data');
+    }
+  });
+
   it('keeps stored hypothesis evidence through a live pass, which carries none', async () => {
     const stored = { description: 'Pool at 100%.' };
     const { deps, writer, memory } = setup({
@@ -504,6 +528,43 @@ describe('runFindingsPass', () => {
     );
   });
 
+  it('does nothing, quietly, outside an investigation conversation (ask mode)', async () => {
+    const { deps, writer, patchMetadata, chatComplete, memory } = setup();
+    // Ask mode: the conversation has no investigation template.
+    jest.spyOn(deps, 'getAgentBuilder').mockReturnValue({
+      conversations: {
+        getScopedClient: async () => ({ patchMetadata, get: async () => ({ events: [] }) }),
+      },
+    } as never);
+
+    await expect(run(deps, memory, { answer: 'Done.' })).resolves.toBe(false);
+
+    expect(createOptimizeModel).not.toHaveBeenCalled();
+    expect(chatComplete).not.toHaveBeenCalled();
+    expect(patchMetadata).not.toHaveBeenCalled();
+    expect(writer.setHypotheses).not.toHaveBeenCalled();
+    expect(deps.logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('does nothing, quietly, when the conversation cannot be found', async () => {
+    const { deps, writer, chatComplete, memory } = setup();
+    jest.spyOn(deps, 'getAgentBuilder').mockReturnValue({
+      conversations: {
+        getScopedClient: async () => ({
+          get: async () => {
+            throw new Error('Conversation c1 not found');
+          },
+        }),
+      },
+    } as never);
+
+    await expect(run(deps, memory)).resolves.toBe(false);
+
+    expect(chatComplete).not.toHaveBeenCalled();
+    expect(writer.setHypotheses).not.toHaveBeenCalled();
+    expect(deps.logger.warn).not.toHaveBeenCalled();
+  });
+
   it('keeps its answer in the conversation for the next pass', async () => {
     const { deps, memory } = setup();
 
@@ -655,7 +716,7 @@ describe('runFindingsPass with workspace files', () => {
           conversations: {
             getScopedClient: async () => ({
               patchMetadata: jest.fn().mockResolvedValue(undefined),
-              get: async () => ({ events: [] }),
+              get: async () => ({ template_id: 'investigation', events: [] }),
             }),
           },
         } as never),
