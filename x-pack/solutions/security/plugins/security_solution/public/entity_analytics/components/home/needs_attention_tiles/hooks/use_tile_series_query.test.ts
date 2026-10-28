@@ -155,6 +155,15 @@ describe('getTileTrend', () => {
     expect(getTileTrend(base)).toEqual({ trend: [1, 2, 9], isTrendLoading: false });
   });
 
+  it('starts the line on the delta baseline when there is one', () => {
+    expect(getTileTrend({ ...base, deltaBaseline: 7 })).toEqual({
+      trend: [7, 1, 2, 9],
+      isTrendLoading: false,
+    });
+    // 0 is a real baseline. A truthy check would drop it and start the line on the first dot.
+    expect(getTileTrend({ ...base, deltaBaseline: 0 }).trend).toEqual([0, 1, 2, 9]);
+  });
+
   it('shows a spinner and no line while loading, also for a stale range', () => {
     expect(getTileTrend({ ...base, dots: undefined })).toEqual({
       trend: undefined,
