@@ -511,20 +511,23 @@ apiTest.describe(
     apiTest(
       'gives the account no access of its own to the private agent',
       async ({ apiClient }) => {
-        const read = await apiClient.get(AGENT_PATH(privateAgentId), {
-          headers: { ...COMMON_HEADERS, ...relayAccount.authHeader },
-          responseType: 'json',
-        });
-        expect(read).toHaveStatusCode(404);
+        // The bound account runs the agent but holds no access to it; neither does any other.
+        for (const account of [serviceAccount, relayAccount]) {
+          const read = await apiClient.get(AGENT_PATH(privateAgentId), {
+            headers: { ...COMMON_HEADERS, ...account.authHeader },
+            responseType: 'json',
+          });
+          expect(read).toHaveStatusCode(404);
 
-        const list = await apiClient.get(AGENTS_PATH, {
-          headers: { ...COMMON_HEADERS, ...relayAccount.authHeader },
-          responseType: 'json',
-        });
-        expect(list).toHaveStatusCode(200);
-        const ids = (list.body as ListAgentResponse).results.map(({ id }) => id);
-        expect(ids).toContain(agentId);
-        expect(ids).not.toContain(privateAgentId);
+          const list = await apiClient.get(AGENTS_PATH, {
+            headers: { ...COMMON_HEADERS, ...account.authHeader },
+            responseType: 'json',
+          });
+          expect(list).toHaveStatusCode(200);
+          const ids = (list.body as ListAgentResponse).results.map(({ id }) => id);
+          expect(ids).toContain(agentId);
+          expect(ids).not.toContain(privateAgentId);
+        }
       }
     );
 
