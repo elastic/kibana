@@ -6,8 +6,8 @@
  */
 import { z } from '@kbn/zod';
 
-import { budgetingMethodSchema, objectiveSchema, sloIdSchema } from '../../schema/zod/slo';
-import { timeWindowSchema } from '../../schema/zod/time_window';
+import { budgetingMethodSchema, objectiveSchema, sloIdSchema } from '../../schema/slo';
+import { timeWindowSchema } from '../../schema/time_window';
 import {
   allOrAnyString,
   allOrAnyStringOrArray,
@@ -15,7 +15,7 @@ import {
   dateType,
   errorBudgetSchema,
   statusSchema,
-} from '../../schema/zod/common';
+} from '../../schema/common';
 
 const fetchHistoricalSummaryParamsSchema = z.object({
   body: z.object({

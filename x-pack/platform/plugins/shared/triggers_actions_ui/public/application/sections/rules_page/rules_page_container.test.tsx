@@ -38,11 +38,10 @@ jest.mock('../rule_details/components/global_rule_event_log_list', () => {
   return () => <div data-test-subj="globalRuleEventLogList">{'Render Logs list component'}</div>;
 });
 
-jest.mock('../../components/rules_setting/rules_settings_flyout', () => ({
-  RulesSettingsFlyout: ({ isVisible }: { isVisible: boolean }) =>
-    isVisible ? (
-      <div data-test-subj="rulesSettingsFlyout">{'Render Rules Settings Flyout component'}</div>
-    ) : null,
+jest.mock('../rules_settings_page/rules_settings_page', () => ({
+  RulesSettingsPageContainer: () => (
+    <div data-test-subj="rulesSettingsPage">{'Render Rules Settings page component'}</div>
+  ),
 }));
 
 jest.mock('@kbn/response-ops-rule-form', () => ({
@@ -225,15 +224,27 @@ describe('rulesPage', () => {
       expect(await screen.findByTestId('ruleTypeModal')).toBeInTheDocument();
     });
 
-    it('opens the settings flyout from the header menu', async () => {
+    it('navigates to the settings sub-page from the header menu', async () => {
       const history = createMemoryHistory({ initialEntries: ['/'] });
       renderRulesPage(history);
 
-      expect(screen.queryByTestId('rulesSettingsFlyout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('rulesSettingsPage')).not.toBeInTheDocument();
       await openAppMenuOverflow();
       // EUI overflow popovers set pointer-events: none in jsdom; fireEvent still invokes run.
       fireEvent.click(await screen.findByTestId('rulesSettingsLink'));
-      expect(await screen.findByTestId('rulesSettingsFlyout')).toBeInTheDocument();
+      expect(await screen.findByTestId('rulesSettingsPage')).toBeInTheDocument();
+      expect(history.location.pathname).toBe('/settings');
+      expect(history.location.state).toEqual({ returnPath: '/' });
+    });
+
+    it('remembers the Logs page when opening settings from it', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/logs'] });
+      renderRulesPage(history);
+
+      await openAppMenuOverflow();
+      fireEvent.click(await screen.findByTestId('rulesSettingsLink'));
+      expect(await screen.findByTestId('rulesSettingsPage')).toBeInTheDocument();
+      expect(history.location.state).toEqual({ returnPath: '/logs' });
     });
   });
 
