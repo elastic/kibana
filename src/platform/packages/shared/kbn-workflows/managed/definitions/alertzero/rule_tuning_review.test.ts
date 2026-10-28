@@ -349,29 +349,49 @@ describe('rule_tuning_review proposed change', () => {
     expect(renderLookbacks('5m', 'now-3m', '5m', 'now-6m')).toBe('');
   });
 
-  it('says the exception is added and uses the exceptions UI operator names', () => {
-    expect(
+  describe('exception', () => {
+    const renderException = (entries: unknown[]): string =>
       renderProposedChange(
         { change_type: 'exception' },
         {},
-        {
-          bound_exception_entries: {
-            output: {
-              entries_json: JSON.stringify([
-                { field: 'host.name', operator: 'is_one_of', values: ['admin-04', 'build-02'] },
-              ]),
-            },
-          },
-        }
-      )
-    ).toBe(
-      [
-        '**Proposed change**',
-        'Add exception: `host.name` is one of `admin-04`, `build-02`',
-        '',
-        "Approve to add the exception to the exception list of the rule. You can remove it in the rule's Exceptions tab.",
-      ].join('\n')
-    );
+        { bound_exception_entries: { output: { entries_json: JSON.stringify(entries) } } }
+      );
+
+    it('shows the added exception in a code block with the exceptions UI operator names', () => {
+      expect(
+        renderException([
+          { field: 'host.name', operator: 'is_one_of', values: ['admin-04', 'build-02'] },
+        ])
+      ).toBe(
+        [
+          '**Proposed change**',
+          'Add exception:',
+          '```',
+          'host.name is one of admin-04, build-02',
+          '```',
+          '',
+          "Approve to add the exception to the exception list of the rule. You can remove it in the rule's Exceptions tab.",
+        ].join('\n')
+      );
+    });
+
+    it('joins several conditions with AND, one per line', () => {
+      expect(
+        renderException([
+          { field: 'host.name', operator: 'is', value: 'admin-04' },
+          { field: 'process.name', operator: 'is_not_one_of', values: ['a.exe', 'b.exe'] },
+          { field: 'user.name', operator: 'does_not_exist' },
+        ])
+      ).toContain(
+        [
+          '```',
+          'host.name is admin-04',
+          'AND process.name is not one of a.exe, b.exe',
+          'AND user.name does not exist',
+          '```',
+        ].join('\n')
+      );
+    });
   });
 
   it('ends every change type that edits the rule with how to undo it', () => {

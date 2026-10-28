@@ -1126,17 +1126,12 @@ steps:
         {%- assign undo = "Approve to change the query of the rule. " | append: restore %}
         {%- when "exception" %}
         {%- assign entries = steps.bound_exception_entries.output.entries_json | json_parse %}
-        {%- if entries.size > 1 %}
-        Add exception, matching all of these conditions:
-        {%- endif %}
+        Add exception:
+        ```
         {%- for entry in entries %}
-        {%- capture condition %}`{{ entry.field }}` {{ entry.operator | replace: "_", " " }}{% if entry.values %} `{{ entry.values | join: "`, `" }}`{% elsif entry.value %} `{{ entry.value }}`{% endif %}{% endcapture %}
-        {%- if entries.size > 1 %}
-        - {{ condition }}
-        {%- else %}
-        Add exception: {{ condition }}
-        {%- endif %}
+        {% unless forloop.first %}AND {% endunless %}{{ entry.field }} {{ entry.operator | replace: "_", " " }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
         {%- endfor %}
+        ```
         {%- assign undo = "Approve to add the exception to the exception list of the rule. You can remove it in the rule's Exceptions tab." %}
         {%- when "risk_score" %}
         {%- if proposal.proposed_risk_score != rule.risk_score %}
