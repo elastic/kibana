@@ -13,11 +13,13 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
+import { useQuery } from '@kbn/react-query';
+import type { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useAppUrl, useHttp } from '../../../../common/lib/kibana';
 import { getCustomYaraSignaturesListPath } from '../../../../management/common/routing';
-import { useGetArtifact } from '../../../../management/hooks/artifacts/use_get_artifact';
 import { CustomYaraSignaturesApiClient } from '../../../../management/pages/custom_yara_signatures/service/api_client';
 import {
   CUSTOM_YARA_SIGNATURE_ENTRY_ID_FIELD_NAME,
@@ -32,25 +34,13 @@ import {
 const SIGNATURE_NOT_FOUND_TOOLTIP = i18n.translate(
   'xpack.securitySolution.flyout.highlightedFields.customYaraSignatureNotFoundTooltip',
   {
-    defaultMessage: 'YARA signature does not exist.',
+    defaultMessage: 'YARA signature does not exist in the current space.',
   }
 );
 
-const isArtifactNotFound = (fetchError: IHttpFetchError<Error> | null): boolean => {
-  if (!fetchError) {
-    return false;
-  }
-
-  const statusCode =
-    typeof fetchError.body === 'object' &&
-    fetchError.body !== null &&
-    'statusCode' in fetchError.body &&
-    typeof fetchError.body.statusCode === 'number'
-      ? fetchError.body.statusCode
-      : undefined;
-
-  return statusCode === 404 || fetchError.response?.status === 404;
-};
+// The saved objects `_id` is prefixed with the saved object type
+const buildEntryIdFilter = (entryId: string): string =>
+  `${EXCEPTION_LIST_NAMESPACE_AGNOSTIC}.id:"${EXCEPTION_LIST_NAMESPACE_AGNOSTIC}:${entryId}"`;
 
 export const isCustomYaraSignatureHighlightedField = (field: string): boolean =>
   [
@@ -77,8 +67,8 @@ export interface CustomYaraSignatureHighlightedFieldLinkProps {
 
 /**
  * Renders a highlighted-field value as a link that opens the Custom YARA Signatures view page
- * in a new tab when the user can read CYS, the feature is enabled, and the signature still exists.
- * When the signature cannot be found, shows an info tooltip instead of the link.
+ * in a new tab when the user can read CYS, the feature is enabled, and the signature is visible in the active space.
+ * When the signature cannot be found in the active space, shows an info tooltip instead of the link.
  * Falls back to plain text otherwise.
  */
 export const CustomYaraSignatureHighlightedFieldLink: FC<
@@ -122,12 +112,17 @@ const CustomYaraSignatureHighlightedFieldLinkContent: FC<
   const http = useHttp();
   const apiClient = useMemo(() => CustomYaraSignaturesApiClient.getInstance(http), [http]);
 
-  const { isSuccess, error, data } = useGetArtifact(apiClient, undefined, entryId, {
-    retry: false,
-    // History keeps earlier alert flyouts mounted, so window focus would refetch every one of them.
-    refetchOnWindowFocus: false,
-  });
-  const itemId = data?.item_id;
+  // `find` is used instead of `get` because only `find` scopes results to artifacts visible in the active space
+  const { isSuccess, data } = useQuery<FoundExceptionListItemSchema, IHttpFetchError>(
+    ['findCustomYaraSignatureByEntryId', apiClient, entryId],
+    () => apiClient.find({ perPage: 1, filter: buildEntryIdFilter(entryId) }),
+    {
+      retry: false,
+      // History keeps earlier alert flyouts mounted, so window focus would refetch every one of them.
+      refetchOnWindowFocus: false,
+    }
+  );
+  const itemId = data?.data[0]?.item_id;
 
   const toRouteUrl = useMemo(() => {
     if (!itemId) {
@@ -137,7 +132,7 @@ const CustomYaraSignatureHighlightedFieldLinkContent: FC<
     return getAppUrl({ path: getCustomYaraSignaturesListPath({ show: 'view', itemId }) });
   }, [getAppUrl, itemId]);
 
-  if (isArtifactNotFound(error)) {
+  if (isSuccess && !itemId) {
     return (
       <span
         // The highlighted-field cell sets margin-bottom on every div, which pushes this icon

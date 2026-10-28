@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getExecutedByLabel, useUserProfilesByUid } from './model/use_user_profiles_by_uid';
+export {
+  executedByFallbackLabel,
+  getExecutedByLabel,
+  useUserProfilesByUid,
+} from './model/use_user_profiles_by_uid';
