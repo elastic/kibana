@@ -153,12 +153,7 @@ export const Page: FC = () => {
     {
       onClick: () =>
         navigateToManagementPath(`/jobs/new_job/single_metric${getJobTypeUrlParams()}`),
-      icon: {
-        type: 'createSingleMetricJob',
-        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.singleMetricAriaLabel', {
-          defaultMessage: 'Single metric job',
-        }),
-      },
+      iconType: 'createSingleMetricJob',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.singleMetricTitle', {
         defaultMessage: 'Single metric',
       }),
@@ -169,12 +164,7 @@ export const Page: FC = () => {
     },
     {
       onClick: () => navigateToManagementPath(`/jobs/new_job/multi_metric${getJobTypeUrlParams()}`),
-      icon: {
-        type: 'createMultiMetricJob',
-        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.multiMetricAriaLabel', {
-          defaultMessage: 'Multi-metric job',
-        }),
-      },
+      iconType: 'createMultiMetricJob',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.multiMetricTitle', {
         defaultMessage: 'Multi-metric',
       }),
@@ -186,12 +176,7 @@ export const Page: FC = () => {
     },
     {
       onClick: () => navigateToManagementPath(`/jobs/new_job/population${getJobTypeUrlParams()}`),
-      icon: {
-        type: 'createPopulationJob',
-        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.populationAriaLabel', {
-          defaultMessage: 'Population job',
-        }),
-      },
+      iconType: 'createPopulationJob',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.populationTitle', {
         defaultMessage: 'Population',
       }),
@@ -203,12 +188,7 @@ export const Page: FC = () => {
     },
     {
       onClick: () => navigateToManagementPath(`/jobs/new_job/advanced${getJobTypeUrlParams()}`),
-      icon: {
-        type: 'createAdvancedJob',
-        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.advancedAriaLabel', {
-          defaultMessage: 'Advanced job',
-        }),
-      },
+      iconType: 'createAdvancedJob',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.advancedTitle', {
         defaultMessage: 'Advanced',
       }),
@@ -221,12 +201,7 @@ export const Page: FC = () => {
     {
       onClick: () =>
         navigateToManagementPath(`/jobs/new_job/categorization${getJobTypeUrlParams()}`),
-      icon: {
-        type: 'createGenericJob',
-        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationAriaLabel', {
-          defaultMessage: 'Categorization job',
-        }),
-      },
+      iconType: 'createGenericJob',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationTitle', {
         defaultMessage: 'Categorization',
       }),
@@ -237,12 +212,7 @@ export const Page: FC = () => {
     },
     {
       onClick: () => navigateToManagementPath(`/jobs/new_job/rare${getJobTypeUrlParams()}`),
-      icon: {
-        type: 'createGenericJob',
-        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.rareAriaLabel', {
-          defaultMessage: 'Rare job',
-        }),
-      },
+      iconType: 'createGenericJob',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.rareTitle', {
         defaultMessage: 'Rare',
       }),
@@ -256,12 +226,7 @@ export const Page: FC = () => {
   if (hasGeoFields) {
     jobTypes.push({
       onClick: () => navigateToManagementPath(`/jobs/new_job/geo${getJobTypeUrlParams()}`),
-      icon: {
-        type: 'createGeoJob',
-        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.geoAriaLabel', {
-          defaultMessage: 'Geo job',
-        }),
-      },
+      iconType: 'createGeoJob',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.geoTitle', {
         defaultMessage: 'Geo',
       }),
@@ -359,12 +324,12 @@ export const Page: FC = () => {
           recognizerResultsCount === null ? 'loading' : 'loaded'
         }`}
       >
-        {jobTypes.map(({ onClick, icon, title, description, id }) => (
+        {jobTypes.map(({ onClick, iconType, title, description, id }) => (
           <EuiFlexItem key={id}>
             <LinkCard
               data-test-subj={id}
               onClick={onClick}
-              icon={<EuiIcon size="xl" type={icon.type} aria-label={icon.ariaLabel} />}
+              icon={<EuiIcon size="xl" type={iconType} />}
               title={title}
               description={description}
               isDisabled={!isTimeBasedIndex}
@@ -396,18 +361,7 @@ export const Page: FC = () => {
       <EuiFlexGrid gutterSize="l" columns={4}>
         <EuiFlexItem>
           <LinkCard
-            icon={
-              <EuiIcon
-                size="xl"
-                type="dataVisualizer"
-                aria-label={i18n.translate(
-                  'xpack.ml.newJob.wizard.jobType.dataVisualizerAriaLabel',
-                  {
-                    defaultMessage: 'Data Visualizer',
-                  }
-                )}
-              />
-            }
+            icon={<EuiIcon size="xl" type="dataVisualizer" />}
             title={i18n.translate('xpack.ml.newJob.wizard.jobType.dataVisualizerTitle', {
               defaultMessage: 'Data Visualizer',
             })}
