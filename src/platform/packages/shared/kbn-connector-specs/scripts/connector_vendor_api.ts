@@ -13,7 +13,11 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { findConnector } from '../src/test/vendor_api/find_connector';
+import { inspectVendorApi } from '../src/test/vendor_api/inspect_vendor_api';
+import { createSpecCache } from '../src/test/vendor_api/spec_cache';
 import { updateVendorApi } from '../src/test/vendor_api/update_vendor_api';
+
+const SPEC_CACHE = path.join(REPO_ROOT, 'data', 'connector_vendor_api');
 
 const parseSource = (flag: string): [string, string] => {
   const separator = flag.indexOf('=');
@@ -33,12 +37,44 @@ const fetchText = async (url: string): Promise<string> => {
 
 run(
   async ({ log, flagsReader }) => {
-    const id = flagsReader.requiredString('connector');
     const check = flagsReader.boolean('check');
+    const refresh = flagsReader.boolean('refresh');
     const sources = Object.fromEntries(
       (flagsReader.arrayOfStrings('source') ?? []).map(parseSource)
     );
+    const now = () => new Date();
+    const cache = createSpecCache({ directory: SPEC_CACHE, fetchText, refresh, now, log });
 
+    if (flagsReader.boolean('inspect')) {
+      if (check) {
+        throw createFlagError('--inspect checks nothing; leave out --check');
+      }
+      const inspectedId = flagsReader.string('connector');
+      const directory = inspectedId ? (await findConnector(inspectedId)).directory : undefined;
+      const { output, manifestUpdated, problems } = await inspectVendorApi({
+        sources,
+        directory,
+        operations: flagsReader.arrayOfStrings('operation') ?? [],
+        grep: flagsReader.string('grep'),
+        depth: flagsReader.number('depth'),
+        fetchText: cache.fetchText,
+        fetchedAt: cache.fetchedAt,
+        now,
+        log,
+      });
+      log.write(output);
+      if (directory && manifestUpdated) {
+        log.info(
+          `Added the sources to ${path.relative(REPO_ROOT, path.join(directory, 'manifest.json'))}`
+        );
+      }
+      if (problems.length > 0) {
+        throw createFailError(problems.join('\n'));
+      }
+      return;
+    }
+
+    const id = flagsReader.requiredString('connector');
     const { connector, directory } = await findConnector(id);
     if (Object.keys(sources).length === 0 && !existsSync(path.join(directory, 'manifest.json'))) {
       throw createFlagError(
@@ -49,10 +85,11 @@ run(
       connector,
       directory,
       sources,
-      refresh: flagsReader.boolean('refresh'),
+      refresh,
       check,
-      fetchText,
-      now: () => new Date(),
+      fetchText: cache.fetchText,
+      fetchedAt: cache.fetchedAt,
+      now,
       log,
     });
 
@@ -79,15 +116,26 @@ run(
   {
     description: `Records which vendor API operations a connector calls and writes its vendor_api artifacts.
 
-      Without --source or --refresh, records offline against the committed snapshots.`,
+      Without --source or --refresh, records offline against the committed snapshots.
+      With --inspect, shows what the vendor specs offer instead, before or while writing the connector.
+
+      Fetched specs are kept in data/connector_vendor_api, so a spec inspected before writing a
+      connector is the one it is recorded against. --refresh fetches them again.`,
     flags: {
-      string: ['connector', 'source'],
-      boolean: ['refresh', 'check'],
+      string: ['connector', 'source', 'operation', 'grep', 'depth'],
+      boolean: ['refresh', 'check', 'inspect'],
       help: `
-        --connector  Connector metadata.id, for example datadog or .datadog (required)
-        --source     name=url of a vendor spec to add or move; repeatable. Fetches every source.
-        --refresh    Fetch every source URL in manifest.json again
+        --connector  Connector metadata.id, for example datadog or .datadog (required unless --inspect)
+        --source     name=url of a vendor spec to add or move; repeatable. Loads every source.
+        --refresh    Fetch every source URL again, instead of using the specs fetched before
         --check      Write nothing; fail if artifacts would change or problems are found
+        --inspect    List the operations of the --source specs, or of the connector's manifest
+                     sources, with its overlay applied. With --connector, adds new --source specs
+                     to its manifest.json, so recording needs no --source
+        --operation  With --inspect, describe this operation instead: "METHOD /path" or an
+                     operationId; repeatable
+        --grep       With --inspect, list only operations matching this case-insensitive pattern
+        --depth      With --inspect, how many $refs deep to inline schemas (default 4)
       `,
     },
   }

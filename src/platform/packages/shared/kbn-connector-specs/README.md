@@ -591,8 +591,12 @@ Each connector can have a `vendor_api/` folder next to its spec, recording the v
 The vendor spec rejecting any of them fails recording, so the action's schema has to be at least as strict as the vendor's: a limit the vendor doesn't have is fine, a looser one isn't.
 
 ```sh
-# First run: name each vendor spec; YAML or JSON, external $refs are bundled
-node scripts/connector_vendor_api --connector datadog --source v1=https://… --source v2=https://…
+# Before writing the connector: list what a vendor spec offers, which adds it to manifest.json
+node scripts/connector_vendor_api --inspect --connector datadog --source v1=https://… --grep monitor
+# Then describe the operations to call
+node scripts/connector_vendor_api --inspect --connector datadog --operation 'GET /api/v1/monitor'
+# First recording: against the inspected sources, or name each vendor spec; YAML or JSON, external $refs are bundled
+node scripts/connector_vendor_api --connector datadog [--source v1=https://… --source v2=https://…]
 # After changing the connector: record offline against the committed snapshots
 node scripts/connector_vendor_api --connector datadog
 # Pick up vendor changes: fetch every source in manifest.json again
@@ -602,6 +606,10 @@ node scripts/connector_vendor_api --connector datadog --check
 # Specs of tens of megabytes, such as Microsoft Graph's, need a larger heap to fetch
 NODE_OPTIONS=--max-old-space-size=8192 node scripts/connector_vendor_api --connector microsoft-teams --refresh
 ```
+
+Fetched documents are kept by URL in `data/connector_vendor_api` (not committed), and the manifest's `fetchedAt` says when. A spec inspected before writing a connector is then the one it is recorded against, even when the vendor publishes it from a moving branch. `--refresh` fetches every source again.
+
+`--inspect` needs no connector code, so it can run before any exists. It loads specs the way recording does (converted to OpenAPI 3, `$ref`s bundled, and with `--connector`, the connector's manifest sources and overlay). With `--connector`, `--source` specs the manifest doesn't have yet are added to it, so the source is declared once; a source it has can only be moved by recording with `--source`. It then either lists operations (`METHOD path operationId summary`, up to 200 per source; narrow with `--grep`) or, for each `--operation` (`METHOD /path` or an `operationId`), prints as YAML what an action needs to call it: servers, security schemes and required scopes, every parameter with its location and effective `style`/`explode`, the request body and success response schemas with `$ref`s inlined `--depth` levels deep (default 4), and the `pagination` descriptor recording would propose. Examples and `x-` extensions are left out and descriptions shortened, so even a large spec gives a short answer.
 
 The folder holds:
 
@@ -697,6 +705,19 @@ Per action:
 - `responses`: served by the mock for the action's runs instead of sampled responses, so handlers that branch on a response take the intended path. A `source` restricts an override to one spec. Overrides that break the spec, or name an operation it lacks, are reported.
 
 `vendorApiFixturesSchema` is the schema.
+
+### Running a connector in Kibana against its contract mock
+
+`node scripts/connector_emulate` serves a connector's contract mock as an HTTP forward proxy (see the server mode section of `@kbn/connector-emulate`'s README), so a running Kibana can execute the connector without vendor credentials:
+
+```bash
+# Answers from the committed snapshots, with the overlay applied
+node scripts/connector_emulate --connector firecrawl
+# Answers from each source's current vendor spec instead
+node scripts/connector_emulate --connector firecrawl --spec latest --port 5691
+```
+
+The mock answers with the manifest's pagination, but not with the per-action `responses` in `fixtures.json`, because a proxied request doesn't say which action sent it. It logs every request with its status, and the violations of failed ones. On startup it prints the Kibana settings to use: `xpack.actions.proxyUrl` pointing at the proxy, and `xpack.actions.customHostSettings` entries that trust its CA for the vendor hosts in the specs. Vendor hosts that come from connector config, such as a tenant's subdomain, need the CA trusted for every host instead, by starting Kibana with `NODE_EXTRA_CA_CERTS=data/connector_emulate/ca.crt`. The CA is created there on first use and reused afterwards, so Kibana keeps trusting it when the mock restarts.
 
 ## Related Documentation
 
