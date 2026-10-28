@@ -13,7 +13,6 @@ test.describe('Maps - add to dashboard save flow', { tag: tags.deploymentAgnosti
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.maps.gotoNewMap();
-    await pageObjects.maps.waitForLayersToLoad();
   });
 
   test.afterAll(async ({ kbnClient }) => {
