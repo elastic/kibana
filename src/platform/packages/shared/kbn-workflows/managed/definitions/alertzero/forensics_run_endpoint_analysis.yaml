@@ -848,6 +848,15 @@ steps:
                             Input for the catalog action, shaped to satisfy that entry's
                             `inputSchema.properties.actionInput`. Do not wrap it in another `actionInput`.
 
+          # Whether the agent produced an analysis. A failed agent step still carries
+          # partial output (an empty message and usage metadata) next to its error, so
+          # `output != null` does not mean it finished. Everything that rests on the
+          # analysis reads this instead; a skipped agent leaves it unset.
+          - name: resolve_agent_result
+            type: data.set
+            with:
+              completed: "${{ steps.forensic_analysis.error == null and steps.forensic_analysis.output.structured_output != null }}"
+
           # Timeline and IoCs are attached to the investigation; the assessment is a
           # journal note rather than an attachment. The forensic agent run itself is
           # ephemeral (no conversation), so its ES|QL transcript never lands there.
@@ -940,7 +949,7 @@ steps:
           - name: journal_findings_not_attached
             type: workflow.execute
             if: >-
-              ${{ steps.forensic_analysis.output != null
+              ${{ steps.resolve_agent_result.output.completed == true
                 and (steps.attach_timeline.error != null or steps.attach_iocs.error != null) }}
             on-failure:
               continue: true
@@ -992,7 +1001,7 @@ steps:
           # the acknowledgement.
           - name: reread_attack_status
             type: elasticsearch.search
-            if: "${{ steps.forensic_analysis.output != null }}"
+            if: "${{ steps.resolve_agent_result.output.completed == true }}"
             with:
               index: ".alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}"
               ignore_unavailable: true
@@ -1012,7 +1021,7 @@ steps:
           - name: resolve_attack_alerts
             type: data.set
             with:
-              analyzed: "${{ steps.forensic_analysis.output != null }}"
+              analyzed: "${{ steps.resolve_agent_result.output.completed == true }}"
               attack_id: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._id }}"
               attack_status: "{{ steps.reread_attack_status.output.hits.hits[0]._source['kibana.alert.workflow_status'] }}"
               has_alerts: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] != blank }}"
@@ -1246,7 +1255,7 @@ steps:
       # the containment rest on that output, not on the attachments, so a rejected
       # attachment is narrated (`journal_findings_not_attached`) and the analysis
       # still counts. `attached` stays the marker a later run uses to skip the agent.
-      analyzed: "${{ steps.forensic_analysis.output != null }}"
+      analyzed: "${{ steps.resolve_agent_result.output.completed == true }}"
       # Findings only exist when a host was known and had Defend telemetry, since
       # that's the only path where the agent runs. So no host, or a host with
       # nothing in `logs-endpoint.events.*`, means no findings is the correct
@@ -1259,7 +1268,7 @@ steps:
       settled: >-
         ${{ steps.resolve_written_findings.output.ids contains steps.finding_ids.output.timeline
           or steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs
-          or steps.forensic_analysis.output != null
+          or steps.resolve_agent_result.output.completed == true
           or steps.resolve_host.output.host_name == blank
           or (steps.resolve_endpoint_telemetry.output.checked == true
             and steps.resolve_endpoint_telemetry.output.present != true) }}
@@ -1275,7 +1284,7 @@ steps:
       outcome_unrecorded: >-
         ${{ (steps.resolve_written_findings.output.ids contains steps.finding_ids.output.timeline
           or steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs)
-          and steps.forensic_analysis.output == null }}
+          and steps.resolve_agent_result.output.completed != true }}
 
   # The worker writes this onto the indicator before dispatch. A missing
   # attribute fails closed to manual.
@@ -1300,7 +1309,7 @@ steps:
   - name: resolve_verdict
     type: data.set
     with:
-      value: "{% if steps.forensic_analysis.output != null %}{{ steps.forensic_analysis.output.structured_output.verdict | default: 'unclear' }}{% endif %}"
+      value: "{% if steps.resolve_agent_result.output.completed == true %}{{ steps.forensic_analysis.output.structured_output.verdict | default: 'unclear' }}{% endif %}"
       not_an_incident: "${{ steps.forensic_analysis.output.structured_output.verdict == 'not_an_incident' }}"
       close_reason: "{% assign verdict = steps.forensic_analysis.output.structured_output.verdict %}{% if verdict == 'not_an_incident' %}false_positive{% elsif verdict == 'confirmed_incident' %}resolved{% else %}other{% endif %}"
       attack_reason: "{% assign verdict = steps.forensic_analysis.output.structured_output.verdict %}{% if verdict == 'not_an_incident' %}false_positive{% elsif verdict == 'confirmed_incident' %}true_positive{% else %}other{% endif %}"
@@ -1564,7 +1573,7 @@ steps:
     with:
       after_analysis: >-
         ${{ steps.resolve_run_outcome.output.analyzed == true
-          and steps.forensic_analysis.output != null
+          and steps.resolve_agent_result.output.completed == true
           and steps.resolve_proposal_counts.output.already_open_count == 0
           and steps.resolve_proposal_counts.output.new_count <= steps.resolve_proposal_dispatch.output.failed }}
       after_unrecorded: >-

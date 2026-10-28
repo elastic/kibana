@@ -73,6 +73,28 @@ const evaluate = (expression: string, context: Record<string, unknown>): unknown
     context
   );
 
+// `resolve_agent_result` runs after the agent, so a fixture that sets `forensic_analysis`
+// gets the value the real step would compute from it.
+const withAgentResult = ({
+  steps,
+  ...rest
+}: {
+  steps: Record<string, unknown>;
+  [key: string]: unknown;
+}) => ({
+  ...rest,
+  steps: {
+    ...steps,
+    resolve_agent_result: {
+      output: {
+        completed: evaluate(String(stepByName('resolve_agent_result')?.with?.completed), {
+          steps,
+        }),
+      },
+    },
+  },
+});
+
 describe('Endpoint analysis run', () => {
   it('records the forensic execution on the verified investigation before processing it', () => {
     const validRequest = stepByName('when_ki_valid');
@@ -421,17 +443,30 @@ describe('Endpoint analysis run', () => {
         hostName?: string;
         telemetry?: { checked: boolean; present: boolean };
         analyzed?: boolean;
+        agentFailed?: boolean;
       }
     ): unknown =>
-      evaluate(String(stepByName('resolve_run_outcome')?.with?.[field]), {
-        steps: {
-          ...(found.analyzed ? { forensic_analysis: { output: { structured_output: {} } } } : {}),
-          finding_ids: { output: thisIndicator },
-          resolve_written_findings: { output: { ids: found.ids } },
-          resolve_host: { output: { host_name: found.hostName } },
-          resolve_endpoint_telemetry: { output: found.telemetry ?? {} },
-        },
-      });
+      evaluate(
+        String(stepByName('resolve_run_outcome')?.with?.[field]),
+        withAgentResult({
+          steps: {
+            ...(found.analyzed ? { forensic_analysis: { output: { structured_output: {} } } } : {}),
+            // A failed agent step keeps the partial output the handler returns with its error.
+            ...(found.agentFailed
+              ? {
+                  forensic_analysis: {
+                    error: { message: 'boom' },
+                    output: { message: '', metadata: { usage: {} } },
+                  },
+                }
+              : {}),
+            finding_ids: { output: thisIndicator },
+            resolve_written_findings: { output: { ids: found.ids } },
+            resolve_host: { output: { host_name: found.hostName } },
+            resolve_endpoint_telemetry: { output: found.telemetry ?? {} },
+          },
+        })
+      );
 
     it('settles a run whose timeline and indicators for this indicator are on the investigation', () => {
       const ids = [thisIndicator.timeline, thisIndicator.iocs];
@@ -493,6 +528,24 @@ describe('Endpoint analysis run', () => {
         expect(outcome('analyzed', { ids, hostName: 'host-a', analyzed: true })).toBe(true);
         expect(outcome('attached', { ids, hostName: 'host-a', analyzed: true })).toBe(false);
       }
+    });
+
+    // A failed agent step still carries partial output next to its error. It is not an
+    // analysis: the run is neither analyzed nor settled, so it is journaled and retired
+    // as failed instead of asking a close question on a verdict nobody reached.
+    it('does not count a failed agent, whatever partial output it left', () => {
+      for (const ids of [[], [thisIndicator.iocs]]) {
+        const found = { ids, hostName: 'host-a', agentFailed: true };
+        expect(outcome('analyzed', found)).toBe(false);
+        expect(outcome('attached', found)).toBe(false);
+      }
+      expect(outcome('settled', { ids: [], hostName: 'host-a', agentFailed: true })).toBe(false);
+      // An agent that returned no structured output did not finish either.
+      expect(
+        evaluate(String(stepByName('resolve_agent_result')?.with?.completed), {
+          steps: { forensic_analysis: { output: { message: '' } } },
+        })
+      ).toBe(false);
     });
 
     // Retired as processed, not failed. A missing read is a 404 here rather than a fault,
@@ -846,15 +899,16 @@ describe('Endpoint analysis run', () => {
       );
       expect(step?.['on-failure']).toEqual({ continue: true });
 
-      const context = (timelineRejected: boolean, iocsRejected: boolean) => ({
-        execution: { id: 'exec-1', url: 'https://kibana/exec-1' },
-        steps: {
-          resolve_host: { output: { host_name: 'host-a' } },
-          forensic_analysis: { output: { structured_output: {} } },
-          attach_timeline: timelineRejected ? { error: { message: 'rejected' } } : { output: {} },
-          attach_iocs: iocsRejected ? { error: { message: 'rejected' } } : { output: {} },
-        },
-      });
+      const context = (timelineRejected: boolean, iocsRejected: boolean) =>
+        withAgentResult({
+          execution: { id: 'exec-1', url: 'https://kibana/exec-1' },
+          steps: {
+            resolve_host: { output: { host_name: 'host-a' } },
+            forensic_analysis: { output: { structured_output: {} } },
+            attach_timeline: timelineRejected ? { error: { message: 'rejected' } } : { output: {} },
+            attach_iocs: iocsRejected ? { error: { message: 'rejected' } } : { output: {} },
+          },
+        });
       const condition = String(step?.if);
       expect(evaluate(condition, context(false, false))).toBe(false);
       expect(evaluate(condition, context(true, false))).toBe(true);
@@ -1045,13 +1099,16 @@ describe('Endpoint analysis run', () => {
       const thisIndicator = { timeline: 'forensic-timeline-ki-1', iocs: 'forensic-iocs-ki-1' };
       const unrecorded = String(stepByName('resolve_run_outcome')?.with?.outcome_unrecorded);
       const unrecordedWhen = (ids: string[], agentOutput?: Record<string, unknown>): unknown =>
-        evaluate(unrecorded, {
-          steps: {
-            finding_ids: { output: thisIndicator },
-            resolve_written_findings: { output: { ids } },
-            forensic_analysis: agentOutput === undefined ? {} : { output: agentOutput },
-          },
-        });
+        evaluate(
+          unrecorded,
+          withAgentResult({
+            steps: {
+              finding_ids: { output: thisIndicator },
+              resolve_written_findings: { output: { ids } },
+              forensic_analysis: agentOutput === undefined ? {} : { output: agentOutput },
+            },
+          })
+        );
       const both = [thisIndicator.timeline, thisIndicator.iocs];
 
       // Both attached, agent skipped this run: the retry case after a full analysis.
@@ -1666,21 +1723,22 @@ describe('Endpoint analysis run', () => {
       status?: string;
       currentStatus?: string;
       alertIds?: string[];
-    }) => ({
-      steps: {
-        forensic_analysis:
-          overrides.analyzed === false ? {} : { output: { structured_output: {} } },
-        fetch_attack_discovery_alert: {
-          output: { hits: { hits: [attackHit(overrides.status ?? 'open', overrides.alertIds)] } },
-        },
-        // Read after the analysis, so it wins over the fetch before the agent ran.
-        reread_attack_status: {
-          output: {
-            hits: { hits: [attackHit(overrides.currentStatus ?? overrides.status ?? 'open')] },
+    }) =>
+      withAgentResult({
+        steps: {
+          forensic_analysis:
+            overrides.analyzed === false ? {} : { output: { structured_output: {} } },
+          fetch_attack_discovery_alert: {
+            output: { hits: { hits: [attackHit(overrides.status ?? 'open', overrides.alertIds)] } },
+          },
+          // Read after the analysis, so it wins over the fetch before the agent ran.
+          reread_attack_status: {
+            output: {
+              hits: { hits: [attackHit(overrides.currentStatus ?? overrides.status ?? 'open')] },
+            },
           },
         },
-      },
-    });
+      });
 
     it('reads the attack status it needs together with the alert ids', () => {
       const source = stepByName('fetch_attack_discovery_alert')?.with?._source as string[];
@@ -1691,6 +1749,20 @@ describe('Endpoint analysis run', () => {
     it('acts only when the agent ran in this execution', () => {
       expect(evaluate(resolve.analyzed, when({}))).toBe(true);
       expect(evaluate(resolve.analyzed, when({ analyzed: false }))).toBe(false);
+      // A failed agent leaves partial output next to its error; nothing is acted on.
+      expect(
+        evaluate(
+          resolve.analyzed,
+          withAgentResult({
+            steps: {
+              forensic_analysis: {
+                error: { message: 'boom' },
+                output: { message: '', metadata: { usage: {} } },
+              },
+            },
+          })
+        )
+      ).toBe(false);
       for (const step of [attackStep, tagStep, ackStep, verifyStep, note]) {
         expect(String(step?.if)).toContain('steps.resolve_attack_alerts.output.analyzed == true');
       }
@@ -1700,7 +1772,7 @@ describe('Endpoint analysis run', () => {
     it('decides on the status read after the analysis, not the one fetched before it', () => {
       const reread = stepByName('reread_attack_status');
       expect(reread?.type).toBe('elasticsearch.search');
-      expect(String(reread?.if)).toContain('steps.forensic_analysis.output != null');
+      expect(String(reread?.if)).toContain('steps.resolve_agent_result.output.completed == true');
       expect(reread?.['on-failure']).toEqual({
         retry: { 'max-attempts': 3, delay: '5s' },
         continue: true,
@@ -2164,12 +2236,13 @@ describe('Endpoint analysis run', () => {
         properties?: { verdict?: { type?: string; enum?: string[] } };
       };
       const verdictStep = stepByName('resolve_verdict')?.with as Record<string, string>;
-      const analysis = (verdict: string | undefined, extra: Record<string, unknown> = {}) => ({
-        steps: {
-          forensic_analysis: { output: { structured_output: { verdict, ...extra } } },
-          ...extra,
-        },
-      });
+      const analysis = (verdict: string | undefined, extra: Record<string, unknown> = {}) =>
+        withAgentResult({
+          steps: {
+            forensic_analysis: { output: { structured_output: { verdict, ...extra } } },
+            ...extra,
+          },
+        });
       const render = (key: string, verdict: string | undefined, rationale?: string) =>
         liquid.parseAndRenderSync(verdictStep[key], analysis(verdict, { rationale }));
 
@@ -2263,27 +2336,28 @@ describe('Endpoint analysis run', () => {
         const slotsIf = String(stepByName('resolve_proposal_slots')?.if);
         const queuedIf = String(stepByName('journal_proposals_queued')?.if);
         const askIf = String(stepByName('resolve_close_question')?.with?.after_analysis);
-        const context = (verdict: string) => ({
-          steps: {
-            resolve_proposal_dispatch: { output: { failed: 0 } },
-            resolve_request: { output: { has_request: true } },
-            verify_investigation: { output: { metadata: {} } },
-            resolve_run_outcome: { output: { analyzed: true } },
-            resolve_verdict: { output: { not_an_incident: verdict === 'not_an_incident' } },
-            forensic_analysis: {
-              output: {
-                structured_output: {
-                  verdict,
-                  propose: true,
-                  recommendedActions: [{ actionWorkflowId: 'isolate' }],
+        const context = (verdict: string) =>
+          withAgentResult({
+            steps: {
+              resolve_proposal_dispatch: { output: { failed: 0 } },
+              resolve_request: { output: { has_request: true } },
+              verify_investigation: { output: { metadata: {} } },
+              resolve_run_outcome: { output: { analyzed: true } },
+              resolve_verdict: { output: { not_an_incident: verdict === 'not_an_incident' } },
+              forensic_analysis: {
+                output: {
+                  structured_output: {
+                    verdict,
+                    propose: true,
+                    recommendedActions: [{ actionWorkflowId: 'isolate' }],
+                  },
                 },
               },
+              resolve_proposal_counts: {
+                output: { new_count: 0, already_open_count: 0, check_failed: false },
+              },
             },
-            resolve_proposal_counts: {
-              output: { new_count: 0, already_open_count: 0, check_failed: false },
-            },
-          },
-        });
+          });
 
         expect(evaluate(slotsIf, context('confirmed_incident'))).toBe(true);
         expect(evaluate(queuedIf, context('confirmed_incident'))).toBe(true);
@@ -2465,23 +2539,24 @@ describe('Endpoint analysis run', () => {
           newCount?: number;
           failed?: number;
           alreadyOpen?: number;
-        }) => ({
-          steps: {
-            // A partial attach does not hold the close question back.
-            resolve_run_outcome: {
-              output: { analyzed: overrides.analyzed ?? true, attached: false },
-            },
-            forensic_analysis:
-              overrides.analyzed === false ? {} : { output: { structured_output: {} } },
-            resolve_proposal_counts: {
-              output: {
-                new_count: overrides.newCount ?? 0,
-                already_open_count: overrides.alreadyOpen ?? 0,
+        }) =>
+          withAgentResult({
+            steps: {
+              // A partial attach does not hold the close question back.
+              resolve_run_outcome: {
+                output: { analyzed: overrides.analyzed ?? true, attached: false },
               },
+              forensic_analysis:
+                overrides.analyzed === false ? {} : { output: { structured_output: {} } },
+              resolve_proposal_counts: {
+                output: {
+                  new_count: overrides.newCount ?? 0,
+                  already_open_count: overrides.alreadyOpen ?? 0,
+                },
+              },
+              resolve_proposal_dispatch: { output: { failed: overrides.failed ?? 0 } },
             },
-            resolve_proposal_dispatch: { output: { failed: overrides.failed ?? 0 } },
-          },
-        });
+          });
 
         // Proposed nothing, every recommendation converged elsewhere, or the dedup check
         // failed (it creates nothing, so `new_count` is 0).
