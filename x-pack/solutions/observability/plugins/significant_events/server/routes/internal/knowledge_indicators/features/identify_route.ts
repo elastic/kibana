@@ -116,14 +116,14 @@ const prepareInferredSamplingRoute = createServerRoute({
         sampleSize: z.number().int().min(1).max(100),
         entityFilteredRatio: z.number().min(0).max(1),
         diverseRatio: z.number().min(0).max(1),
-        maxEntityFilters: z.number().int().min(1).max(50).optional(),
+        maxEntityFilters: z.number().int().min(1).max(50),
         samplingTimeoutMs: z.number().int().min(1_000).max(240_000),
       }),
     })
   ),
   handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
     const scopedClients = await getScopedClients({ request });
-    const { streamDataEsClient, sourcesClient, tuningConfig, licensing } = scopedClients;
+    const { streamDataEsClient, sourcesClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
@@ -139,7 +139,7 @@ const prepareInferredSamplingRoute = createServerRoute({
       sampleSize,
       entityFilteredRatio,
       diverseRatio,
-      maxEntityFilters = tuningConfig.max_entity_filters,
+      maxEntityFilters,
       samplingTimeoutMs,
     } = params.body;
     const resolvedRunId = runId?.trim() || uuidv4();
