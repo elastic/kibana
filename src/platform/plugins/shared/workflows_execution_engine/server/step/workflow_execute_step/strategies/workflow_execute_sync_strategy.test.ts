@@ -408,6 +408,27 @@ describe('WorkflowExecuteSyncStrategy', () => {
       expect(result.error!.message).toBe('child failed');
     });
 
+    it('should keep the error type of a failed child workflow', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
+        id: 'child-exec-1',
+        status: ExecutionStatus.FAILED,
+        error: { type: 'NonRetryableError', message: 'process is gone' },
+      } as any);
+
+      const result = await strategy.execute(
+        createMockWorkflow(),
+        {},
+        'default',
+        mockRequest,
+        0,
+        false,
+        'sync-step-1'
+      );
+
+      expect(result.status).toBe('failed');
+      expect(result.error).toMatchObject({ type: 'NonRetryableError', message: 'process is gone' });
+    });
+
     it('should return failed when child workflow is cancelled', async () => {
       mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
         id: 'child-exec-1',
