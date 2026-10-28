@@ -298,6 +298,7 @@ steps:
     with:
       fp_threshold_expr: "v.confidence_score >= {{ inputs.confidence_floor }}"
       fp_below_floor_expr: "v.confidence_score < {{ inputs.confidence_floor }}"
+      fp_candidate_expr: "v.classification == 'false_positive' and v.confidence_score >= {{ inputs.confidence_floor }}"
 
   - name: compute_fp_candidates
     type: data.set
@@ -678,13 +679,15 @@ steps:
       started_alert_count: 0
 
   # The alerts that are in no proposal (true positives, inconclusive verdicts, false positives below the
-  # floor), routed to an Investigation after the grouping.
+  # floor), routed to an Investigation after the grouping. The filter is a pre-rendered predicate, as
+  # above: a quoted `variables.fp_candidate_ids contains ...` inside `reject_exp` rejected nothing
+  # in the engine, so every alert counted as being in no proposal.
   - name: compute_other_alerts
     type: data.set
     with:
       other_alert_ids: >-
         ${{ steps.classify_alerts.output.verdicts
-            | reject_exp: 'v', 'variables.fp_candidate_ids contains v.alert_id'
+            | reject_exp: 'v', variables.fp_candidate_expr
             | map: 'alert_id' }}
 
   - name: count_other_alerts

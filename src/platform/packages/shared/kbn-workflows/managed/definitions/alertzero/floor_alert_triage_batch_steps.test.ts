@@ -1709,3 +1709,58 @@ describe('floor_alert_triage_batch — tag_pattern_keys', () => {
     expect(run(0)).toBe(false);
   });
 });
+
+describe('floor_alert_triage_batch — compute_other_alerts', () => {
+  const verdicts = [
+    { alert_id: 'candidate', classification: 'false_positive', confidence_score: 0.95 },
+    { alert_id: 'at-floor', classification: 'false_positive', confidence_score: 0.85 },
+    { alert_id: 'below-floor', classification: 'false_positive', confidence_score: 0.5 },
+    { alert_id: 'true-positive', classification: 'true_positive', confidence_score: 0.99 },
+    { alert_id: 'inconclusive', classification: 'inconclusive', confidence_score: 0.3 },
+  ];
+  const buildExprs = (confidenceFloor: number) => {
+    const withBlock = stepByName('build_fp_threshold_expr')?.with as Record<string, string>;
+    return {
+      fp_threshold_expr: renderString(withBlock.fp_threshold_expr, {
+        inputs: { confidence_floor: confidenceFloor },
+      }).trim(),
+      fp_candidate_expr: renderString(withBlock.fp_candidate_expr, {
+        inputs: { confidence_floor: confidenceFloor },
+      }).trim(),
+    };
+  };
+  const compute = (batch: typeof verdicts) => {
+    const context = {
+      steps: { classify_alerts: { output: { verdicts: batch } } },
+      variables: buildExprs(0.85),
+    };
+    const candidates = evalExpr(
+      stepByName('compute_fp_candidates')?.with?.fp_candidate_ids as string,
+      context
+    );
+    const others = evalExpr(stepByName('compute_other_alerts')?.with?.other_alert_ids as string, {
+      ...context,
+      variables: { ...context.variables, fp_candidate_ids: candidates },
+    });
+    return { candidates, others };
+  };
+
+  it('keeps every alert that is not a candidate, and none of the candidates', () => {
+    const { candidates, others } = compute(verdicts);
+
+    expect(candidates).toEqual(['candidate', 'at-floor']);
+    expect(others).toEqual(['below-floor', 'true-positive', 'inconclusive']);
+  });
+
+  it('leaves none when every alert is a candidate', () => {
+    expect(compute(verdicts.slice(0, 2)).others).toEqual([]);
+  });
+
+  it('splits the batch exactly: a candidate and an other alert never overlap or go missing', () => {
+    const { candidates, others } = compute(verdicts);
+
+    expect([...(candidates as string[]), ...(others as string[])].sort()).toEqual(
+      verdicts.map(({ alert_id: id }) => id).sort()
+    );
+  });
+});
