@@ -531,9 +531,9 @@ describe('ConversationInput', () => {
       const modeValue = () => screen.getByTestId('mock-trigger-mode-selector');
       const type = (content: string) => {
         editorController.getContent.mockReturnValue(content);
-        const { onContentChange } =
-          mockedUseMessageEditor.mock.calls[mockedUseMessageEditor.mock.calls.length - 1][0] ?? {};
-        act(() => onContentChange?.());
+        const lastOptions =
+          mockedUseMessageEditor.mock.calls[mockedUseMessageEditor.mock.calls.length - 1][0];
+        act(() => lastOptions?.onContentChange?.());
       };
 
       beforeEach(() => {
