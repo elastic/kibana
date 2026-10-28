@@ -6,6 +6,7 @@
  */
 
 import {
+  exportLiveQueryParamsSchema,
   exportQuerySchema,
   exportRequestBodySchema,
   exportScheduledQueryParamsSchema,
@@ -82,6 +83,26 @@ describe('exportRequestBodySchema', () => {
       /array size is \[101\]/
     );
   });
+
+  it('accepts a kuery of exactly 10,000 characters', () => {
+    expect(() => exportRequestBodySchema.validate({ kuery: 'a'.repeat(10_000) })).not.toThrow();
+  });
+
+  it('rejects a kuery longer than 10,000 characters', () => {
+    expect(() => exportRequestBodySchema.validate({ kuery: 'a'.repeat(10_001) })).toThrow(
+      /maximum length of \[10000\]/
+    );
+  });
+
+  it('accepts an agent ID of exactly 1,024 characters', () => {
+    expect(() => exportRequestBodySchema.validate({ agentIds: ['a'.repeat(1024)] })).not.toThrow();
+  });
+
+  it('rejects an agent ID longer than 1,024 characters', () => {
+    expect(() => exportRequestBodySchema.validate({ agentIds: ['a'.repeat(1025)] })).toThrow(
+      /maximum length of \[1024\]/
+    );
+  });
 });
 
 describe('exportQuerySchema', () => {
@@ -116,5 +137,39 @@ describe('exportScheduledQueryParamsSchema', () => {
 
   it('rejects a missing scheduleId', () => {
     expect(() => exportScheduledQueryParamsSchema.validate({ executionCount: 1 })).toThrow();
+  });
+
+  it('accepts a scheduleId of exactly 1,024 characters', () => {
+    expect(() =>
+      exportScheduledQueryParamsSchema.validate({ scheduleId: 'a'.repeat(1024), executionCount: 1 })
+    ).not.toThrow();
+  });
+
+  it('rejects a scheduleId longer than 1,024 characters', () => {
+    expect(() =>
+      exportScheduledQueryParamsSchema.validate({ scheduleId: 'a'.repeat(1025), executionCount: 1 })
+    ).toThrow(/maximum length of \[1024\]/);
+  });
+});
+
+describe('exportLiveQueryParamsSchema', () => {
+  it.each(['id', 'actionId'] as const)('accepts %s of exactly 1,024 characters', (field) => {
+    expect(() =>
+      exportLiveQueryParamsSchema.validate({
+        id: 'live-1',
+        actionId: 'action-1',
+        [field]: 'a'.repeat(1024),
+      })
+    ).not.toThrow();
+  });
+
+  it.each(['id', 'actionId'] as const)('rejects %s longer than 1,024 characters', (field) => {
+    expect(() =>
+      exportLiveQueryParamsSchema.validate({
+        id: 'live-1',
+        actionId: 'action-1',
+        [field]: 'a'.repeat(1025),
+      })
+    ).toThrow(new RegExp(`\\[${field}\\].*maximum length of \\[1024\\]`));
   });
 });
