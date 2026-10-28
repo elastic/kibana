@@ -186,7 +186,6 @@ function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsService
   return {
     id: 'test_service',
     name: 'Test Service',
-    category: 'compute',
     signalTypes: ['logs'],
     dataStreams: ['test_service'],
     packageName: 'aws',
@@ -1516,6 +1515,98 @@ describe('useDeploy', () => {
       expect(mockSendUpdateCloudOnboardingDeployment).not.toHaveBeenCalled();
     });
 
+    describe('instances', () => {
+      const original = {
+        instanceId: 'ec2',
+        serviceId: 'ec2',
+        name: 'Amazon EC2',
+        isDuplicate: false,
+      };
+      const duplicate = {
+        instanceId: 'ec2__dup-1',
+        serviceId: 'ec2',
+        name: 'EC2 prod',
+        isDuplicate: true,
+      };
+
+      it('creates the SO with the instances, duplicates included', async () => {
+        setupMocks({
+          selectedServiceIds: ['ec2'],
+          connectorId: 'connector-abc',
+          instances: [original, duplicate],
+        });
+        const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+        await act(async () => {
+          await result.current.handleDeploy();
+        });
+
+        expect(mockSendCreateCloudOnboardingDeployment).toHaveBeenCalledWith(
+          expect.objectContaining({ instances: [original, duplicate] })
+        );
+      });
+
+      it('saves a base instance per selected service even when Step 2 stored none', async () => {
+        // Step 2 was skipped or never persisted its list: the deploy reconciles it, and the SO
+        // must still describe what was deployed.
+        setupMocks({
+          selectedServiceIds: ['ec2'],
+          connectorId: 'connector-abc',
+          instances: undefined,
+        });
+        const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+        await act(async () => {
+          await result.current.handleDeploy();
+        });
+
+        const { instances } = mockSendCreateCloudOnboardingDeployment.mock.calls[0][0];
+        expect(instances).toEqual([
+          expect.objectContaining({ instanceId: 'ec2', serviceId: 'ec2', isDuplicate: false }),
+        ]);
+      });
+
+      it('updates the SO with the instances after a deploy', async () => {
+        setupMocks({
+          selectedServiceIds: ['ec2'],
+          connectorId: 'connector-abc',
+          instances: [original, duplicate],
+          detectAndReviewStep: { onboardingDeploymentId: 'existing-dep-id' },
+        });
+        const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+        await act(async () => {
+          await result.current.handleDeploy(['ec2']);
+        });
+
+        expect(mockSendCreateCloudOnboardingDeployment).not.toHaveBeenCalled();
+        expect(mockSendUpdateCloudOnboardingDeployment).toHaveBeenCalledWith(
+          'existing-dep-id',
+          expect.objectContaining({ instances: [original, duplicate] })
+        );
+      });
+
+      it('keeps the instances in the update when the deploy fails, so a retry after resume has them', async () => {
+        setupMocks({
+          selectedServiceIds: ['ec2'],
+          connectorId: 'connector-abc',
+          instances: [original, duplicate],
+          detectAndReviewStep: { onboardingDeploymentId: 'existing-dep-id' },
+        });
+        mockSendCreateAgentlessPolicy.mockRejectedValue(new Error('API error'));
+        const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+        await act(async () => {
+          await result.current.handleDeploy(['ec2']);
+        });
+
+        expect(mockSendUpdateCloudOnboardingDeployment).toHaveBeenCalledWith(
+          'existing-dep-id',
+          expect.objectContaining({ status: 'failed', instances: [original, duplicate] })
+        );
+      });
+    });
+
     it('uses existing onboardingDeploymentId on retry without creating a new SO', async () => {
       setupMocks({
         selectedServiceIds: ['ec2'],
@@ -1937,7 +2028,6 @@ describe('toSOServiceVars', () => {
     return {
       id: 'svc',
       name: 'Svc',
-      category: 'compute',
       signalTypes: ['logs'],
       dataStreams: ['svc'],
       packageName: 'aws',

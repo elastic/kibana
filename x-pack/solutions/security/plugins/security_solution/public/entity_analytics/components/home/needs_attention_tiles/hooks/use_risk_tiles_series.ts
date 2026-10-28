@@ -31,6 +31,9 @@ interface RiskTilesSeriesOptions {
   /** The live counts, which replace the newest dot so each line ends on the number shown. */
   riskMoversCount: number;
   newlyHighCriticalCount: number;
+  /** From each tile's delta hook (its `previous`): the delta's baseline, which starts the line. */
+  riskMoversBaseline: number | undefined;
+  newlyHighCriticalBaseline: number | undefined;
 }
 
 /**
@@ -52,6 +55,8 @@ export const useRiskTilesSeries = ({
   newlyHighCriticalReachesBack,
   riskMoversCount,
   newlyHighCriticalCount,
+  riskMoversBaseline,
+  newlyHighCriticalBaseline,
 }: RiskTilesSeriesOptions): {
   riskMoversTrend: number[] | undefined;
   newlyHighCriticalTrend: number[] | undefined;
@@ -101,12 +106,14 @@ export const useRiskTilesSeries = ({
     ...state,
     dots: series?.riskMovers,
     liveCount: riskMoversCount,
+    deltaBaseline: riskMoversBaseline,
     isHidden: moversGate.isHidden,
   });
   const newlyHighCritical = getTileTrend({
     ...state,
     dots: series?.newlyHighCritical,
     liveCount: newlyHighCriticalCount,
+    deltaBaseline: newlyHighCriticalBaseline,
     isHidden: newlyHighGate.isHidden,
   });
 

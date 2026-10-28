@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   HasParentApi,
   PublishesDataLoading,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishesUnifiedSearch,
   PublishesWritableUnifiedSearch,
   SerializedTimeRange,
@@ -22,7 +23,7 @@ import type {
 export type SearchSerializedState = SerializedTimeRange;
 
 export type SearchApi = DefaultEmbeddableApi<SearchSerializedState> &
-  PublishesDataViews &
+  PublishesDataSources<DataView> &
   PublishesDataLoading &
   Pick<PublishesWritableUnifiedSearch, 'timeRange$' | 'setTimeRange'> &
   Partial<HasParentApi<PublishesUnifiedSearch>>;

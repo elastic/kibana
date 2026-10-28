@@ -1,5 +1,5 @@
 {
-  "sha1": "7c8755fee8a83b22b08b02c0f257c34d0451219d",
+  "sha1": "b0d5d7a9372a6dfd25642c36417847e1a0ea565d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 97,
+        "line": 98,
         "column": 9
       }
     },
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 106,
+        "line": 107,
         "column": 25
       }
     },
@@ -125,8 +125,21 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_internal_api_restriction.spec.ts",
-        "line": 19,
+        "line": 22,
         "column": 11
+      }
+    },
+    {
+      "id": "973daa931f715ba-b0b528d1b9196a7",
+      "title": "Hunt Watch - internal API restriction returns 400 on the worker coverage route when an admin omits the internal-origin header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_internal_api_restriction.spec.ts",
+        "line": 32,
+        "column": 13
       }
     },
     {
@@ -197,6 +210,90 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
         "line": 266,
         "column": 22
+      }
+    },
+    {
+      "id": "ed905cd2fa0d352-3acdc75d6f1a836",
+      "title": "Hunt Watch - worker index coverage, role path reads the role for an admin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
+        "line": 70,
+        "column": 31
+      }
+    },
+    {
+      "id": "ed905cd2fa0d352-1576276a1486f88",
+      "title": "Hunt Watch - worker index coverage, role path lists a custom pattern with data that the built-in role cannot read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
+        "line": 84,
+        "column": 20
+      }
+    },
+    {
+      "id": "ed905cd2fa0d352-c87c5abb67d2c59",
+      "title": "Hunt Watch - worker index coverage, role path is role_unreadable for a caller without read_security",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
+        "line": 98,
+        "column": 25
+      }
+    },
+    {
+      "id": "ed905cd2fa0d352-dbe8df5c5620640",
+      "title": "Hunt Watch - worker index coverage, role path is caller_unreadable for a caller with no index privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
+        "line": 113,
+        "column": 26
+      }
+    },
+    {
+      "id": "ed905cd2fa0d352-9877194a7e3479d",
+      "title": "Hunt Watch - worker index coverage, role path is discovery_failed when a pattern names a remote that is not configured",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
+        "line": 130,
+        "column": 26
+      }
+    },
+    {
+      "id": "e77deae9c51c1b5-daa728213d52cfc",
+      "title": "Hunt Watch - worker index coverage, sweep path reads the last sweep and reports the worker as degraded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_sweep.spec.ts",
+        "line": 83,
+        "column": 60
       }
     },
     {

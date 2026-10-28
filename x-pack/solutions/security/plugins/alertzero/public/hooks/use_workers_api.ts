@@ -18,7 +18,7 @@ import type {
   Worker,
 } from '@kbn/alertzero-common';
 import { retryOnTransientError } from './retry_on_transient_error';
-import { invalidateHuntThreatIntelSupplyStatus } from './use_hunt_threat_intel_supply';
+import { invalidateHuntThreatIntelSupplyStatus } from './hunt/use_hunt_threat_intel_supply';
 import { queryKeys } from '../query_keys';
 import type { ReportToastError } from '../telemetry';
 import { classifyError, useReportToastError } from '../telemetry';
@@ -129,6 +129,8 @@ export const useUpdateWorker = () => {
       await queryClient.invalidateQueries({ queryKey });
       // Hunt enable/disable/settings can change TI supply; refresh when present.
       await invalidateHuntThreatIntelSupplyStatus(queryClient);
+      // The coverage answer switches between the last sweep and the role as the worker changes.
+      await queryClient.invalidateQueries({ queryKey: queryKeys.huntWorkerIndexCoverage.all });
     },
   });
 };

@@ -11,7 +11,9 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import type { MemoryHistory } from 'history';
 import { act, renderHook } from '@testing-library/react';
+import qs from 'query-string';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
+import { encodeQueryString } from '../../../../../common/utils/global_query_string/helpers';
 import {
   MAX_EXPANDED_ENTITY_IDS,
   useEntityAnalyticsUrlState,
@@ -168,12 +170,22 @@ describe('useEntityAnalyticsUrlState', () => {
     act(() => result.current.toggleExpandedId('user:a,b@corp'));
     act(() => result.current.toggleExpandedId('host:h-1'));
     expect(result.current.expandedIds).toEqual(['user:a,b@corp', 'host:h-1']);
-    // One param per id, encoded once.
-    expect(history.location.search).toBe('?eaExpanded=user%3Aa%2Cb%40corp&eaExpanded=host%3Ah-1');
 
     act(() => result.current.toggleExpandedId('user:a,b@corp'));
     expect(result.current.expandedIds).toEqual(['host:h-1']);
     expect(history.length).toBe(1);
+  });
+
+  it("keeps expanded ids through the app's URL sync rewrite", () => {
+    const { result, history } = renderUrlState();
+    act(() => result.current.toggleExpandedId('user:a,b@corp'));
+    act(() => result.current.toggleExpandedId('host:h-1'));
+
+    // What the Security app's global URL sync writes back.
+    const rewritten = encodeQueryString(qs.parse(history.location.search, { sort: false }));
+    act(() => history.replace({ search: rewritten }));
+
+    expect(result.current.expandedIds).toEqual(['user:a,b@corp', 'host:h-1']);
   });
 
   it('keeps the most recently expanded ids up to the cap', () => {

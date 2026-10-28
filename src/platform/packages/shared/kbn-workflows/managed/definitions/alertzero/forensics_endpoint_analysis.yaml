@@ -121,7 +121,7 @@ steps:
   # `workflow.executeAsync` looks for the child in this worker's space first,
   # falling back to the global space where the analysis is actually installed
   # so it still runs with this space's id. Async because a forensic run takes
-  # up to 15m, and a synchronous call would hold this worker's only concurrency
+  # up to 30m, and a synchronous call would hold this worker's only concurrency
   # slot that whole time, queuing every later tick behind it.
   #
   # An indicator stays pending until the child retires it, so the next tick
@@ -207,7 +207,7 @@ steps:
       # Dispatches accepted, not analyses begun: a dropped duplicate still marks
       # the child SKIPPED and returns normally, so `executeAsync` succeeds and
       # counts here too. That means the same indicator gets counted again on
-      # every tick while its 15m analysis holds the slot. Read this as
+      # every tick while its 30m analysis holds the slot. Read this as
       # hand-off attempts that weren't outright rejected, and look at the
       # child's own execution records for the actual analyses. An empty
       # batch just reports 0 here, with no special-casing needed.

@@ -34,6 +34,7 @@ tags:
   - prod
   - group-platform
   - private
+  - scout-tests
 fileGroups:
   src:
     - common/**/*

@@ -109,6 +109,7 @@ dependsOn:
   - '@kbn/test-eui-helpers'
   - '@kbn/shared-ux-utility'
   - '@kbn/esql-utils'
+  - '@kbn/esql-controls-utils'
   - '@kbn/data-source'
   - '@kbn/data-view-utils'
   - '@kbn/std'
@@ -173,6 +174,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - '*.ts'
@@ -182,6 +184,4 @@ fileGroups:
     - test/scout/**/*
     - test/scout_search_sessions/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

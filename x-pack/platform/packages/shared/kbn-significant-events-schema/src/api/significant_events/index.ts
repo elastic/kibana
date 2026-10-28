@@ -19,7 +19,7 @@ import {
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
 } from '../../significant_events/constants';
-import type { ChangePointType } from '../../significant_events/detections';
+import type { ChangePointType, DetectionSkip } from '../../significant_events/detections';
 import type { SignificantEventResponse } from '../../significant_events/events';
 
 type ChangePointsValue = Partial<{
@@ -43,6 +43,8 @@ type QueryWithOccurrences = StreamQuery & {
     type: Partial<Record<ChangePointType, ChangePointsValue>>;
   };
   rule_backed: boolean;
+  /** Enabled state of the backing alerting rule, omitted when lookup fails. */
+  rule_enabled?: boolean;
 };
 
 interface QueryOccurrencesResponse {
@@ -80,11 +82,15 @@ interface LifecycleDetection {
   source_id?: string;
   change_point_type: ChangePointType;
   '@timestamp': string;
+  /** Set when the classifier closed this detection of the event's rule without the agent. */
+  skip?: DetectionSkip;
 }
 
 interface EventLifecycleResponse {
   detections: LifecycleDetection[];
   events: SignificantEventResponse[];
+  /** Set when the event has more skipped detections than the response carries. */
+  skipped_truncated?: boolean;
 }
 
 export type {

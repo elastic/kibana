@@ -44,7 +44,7 @@ describe('ListKiPanel', () => {
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
 
     expect(screen.getByTestId('contextListKiPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('contextListKiPanelSummary')).toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiSearchBox')).toBeInTheDocument();
     expect(screen.getByTestId('contextListKiRows')).toBeInTheDocument();
     expect(screen.getByTestId('contextListKiLoadMoreButton')).toBeInTheDocument();
   });

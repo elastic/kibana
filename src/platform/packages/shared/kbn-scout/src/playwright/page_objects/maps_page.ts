@@ -309,8 +309,14 @@ export class MapsPage {
   /**
    * Opens the inspector, selects a request by name, reads its raw JSON response,
    * closes the inspector, and returns the parsed response body.
+   *
+   * @param waitForFocusQuiet - Forwarded to `inspector.close`. Set when the caller types
+   *   right after, so restored focus can't swallow its keystrokes. Defaults to `false`.
    */
-  async getResponse(requestName: string): ReturnType<typeof this.inspector.getResponse> {
+  async getResponse(
+    requestName: string,
+    waitForFocusQuiet: boolean = false
+  ): ReturnType<typeof this.inspector.getResponse> {
     await this.inspector.open();
     try {
       await this.inspector.openInspectorRequestsView();
@@ -320,7 +326,7 @@ export class MapsPage {
 
       return await this.inspector.getResponse();
     } finally {
-      await this.inspector.close();
+      await this.inspector.close(waitForFocusQuiet);
     }
   }
 
@@ -328,10 +334,14 @@ export class MapsPage {
    * Opens the inspector, switches to the Requests view, optionally selects `requestName`,
    * switches to the statistics tab, calls `getStat` to read a value, closes the inspector,
    * and returns the result.
+   *
+   * @param waitForFocusQuiet - Forwarded to `inspector.close`. Set when the caller types
+   *   right after, so restored focus can't swallow its keystrokes. Defaults to `false`.
    */
   private async getRequestStat(
     getStat: () => Promise<string>,
-    requestName?: string
+    requestName?: string,
+    waitForFocusQuiet: boolean = false
   ): Promise<string> {
     await this.inspector.open();
     try {
@@ -344,7 +354,7 @@ export class MapsPage {
       await this.inspector.openRequestsStatisticsTab();
       return await getStat();
     } finally {
-      await this.inspector.close();
+      await this.inspector.close(waitForFocusQuiet);
     }
   }
 
@@ -352,16 +362,23 @@ export class MapsPage {
    * Opens the inspector, reads "Hits" from the statistics tab of the optionally
    * selected `requestName`, closes the inspector, and returns the value.
    */
-  async getHits(requestName?: string): Promise<string> {
-    return this.getRequestStat(() => this.inspector.getHits(), requestName);
+  async getHits(requestName?: string, waitForFocusQuiet: boolean = false): Promise<string> {
+    return this.getRequestStat(() => this.inspector.getHits(), requestName, waitForFocusQuiet);
   }
 
   /**
    * Opens the inspector, reads "Request timestamp" from the statistics tab of the
    * optionally selected `requestName`, closes the inspector, and returns the value.
    */
-  async getRequestTimestamp(requestName?: string): Promise<string> {
-    return this.getRequestStat(() => this.inspector.getRequestTimestamp(), requestName);
+  async getRequestTimestamp(
+    requestName?: string,
+    waitForFocusQuiet: boolean = false
+  ): Promise<string> {
+    return this.getRequestStat(
+      () => this.inspector.getRequestTimestamp(),
+      requestName,
+      waitForFocusQuiet
+    );
   }
 
   /** Opens the map settings panel and enables "Auto fit map to data bounds". */
@@ -403,8 +420,11 @@ export class MapsPage {
    * Opens the inspector, switches to the "Map details" view, reads the Mapbox GL
    * style JSON from the mapboxStyleContainer, closes the inspector, and returns the
    * parsed style object.
+   *
+   * @param waitForFocusQuiet - Forwarded to `inspector.close`. Set when the caller acts on the
+   *   page right after, so restored focus can't swallow its keystrokes. Defaults to `false`.
    */
-  async getMapboxStyle(): Promise<Record<string, any>> {
+  async getMapboxStyle(waitForFocusQuiet: boolean = false): Promise<Record<string, any>> {
     await this.inspector.open();
     try {
       // openInspectorView skips the view switch when the chooser is not rendered yet,
@@ -421,7 +441,7 @@ export class MapsPage {
       const json = await container.locator('code').innerText();
       return JSON.parse(json);
     } finally {
-      await this.inspector.close();
+      await this.inspector.close(waitForFocusQuiet);
     }
   }
 
@@ -457,6 +477,21 @@ export class MapsPage {
       .locator(`layerTocActionsPanel${escapedName}`)
       .waitFor({ state: 'visible' });
     await this.page.testSubj.click('layerSettingsButton');
+    await this.waitForLayersToLoad();
+  }
+
+  /** Opens the layer settings panel, sets the layer filter query, and applies it. */
+  async setLayerQuery(layerName: string, query: string) {
+    await this.openLayerPanel(layerName);
+    await this.page.testSubj.click('mapLayerPanelOpenFilterEditorButton');
+    const queryInput = this.page.locator(
+      '[data-test-subj="mapFilterEditor"] [data-test-subj="queryInput"]'
+    );
+    await queryInput.clear();
+    await queryInput.pressSequentially(query);
+    // Dismiss any open autocomplete dropdown before clicking submit.
+    await queryInput.press('Escape');
+    await this.page.testSubj.click('mapFilterEditorSubmitButton');
     await this.waitForLayersToLoad();
   }
 

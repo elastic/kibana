@@ -2,7 +2,14 @@ env:
   GITHUB_COMMIT_STATUS_ENABLED: 'true'
   GITHUB_COMMIT_STATUS_CONTEXT: 'kibana-ci'
 steps:
-  - command: .buildkite/scripts/lifecycle/pre_build.sh
+  # Registers every long-running step for cancel-on-gate-failure, so a failing
+  # CHECK_GATE step ends the build (and releases the merge queue) right away.
+  # Gate steps only start after pre_build, so registration always comes first.
+  - command:
+      - .buildkite/scripts/lifecycle/pre_build.sh
+      - |
+        buildkite-agent meta-data set cancel_on_gate_failure_batch:merge_queue \
+          '["pick_test_group_run_order","build","check_oas_snapshot","quick_checks","checks","linting","linting_with_types","check_types"]'
     label: Pre-Build
     key: pre_build
     timeout_in_minutes: 10
@@ -70,8 +77,7 @@ steps:
       image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c4d-standard-16
-      diskType: hyperdisk-balanced
+      machineType: n2d-custom-16-32768
       diskSizeGb: 50
       buildDirectory: /dev/shm/bk
       zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
@@ -90,9 +96,11 @@ steps:
       provider: gcp
       machineType: n2d-highmem-4
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,europe-west2-a,europe-west2-b,europe-west2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c
       diskSizeGb: 130
     key: check_oas_snapshot
+    env:
+      CHECK_GATE: 'true'
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -106,7 +114,10 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2d-standard-8
+      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
     key: quick_checks
+    env:
+      CHECK_GATE: 'true'
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -121,8 +132,10 @@ steps:
       provider: gcp
       machineType: n2d-standard-2
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,europe-west2-a,europe-west2-b,europe-west2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c
     key: checks
+    env:
+      CHECK_GATE: 'true'
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -139,6 +152,8 @@ steps:
       diskType: hyperdisk-balanced
       preemptible: true
     key: linting
+    env:
+      CHECK_GATE: 'true'
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -155,6 +170,8 @@ steps:
       diskType: hyperdisk-balanced
       preemptible: true
     key: linting_with_types
+    env:
+      CHECK_GATE: 'true'
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -173,6 +190,7 @@ steps:
     key: check_types
     timeout_in_minutes: 60
     env:
+      CHECK_GATE: 'true'
       RESTORE_ARCHIVE: 'true'
       UPLOAD_ARCHIVE: 'true'
     retry:
@@ -209,7 +227,7 @@ steps:
       - sparse-checkout#v1.6.0:
           paths:
             - .buildkite
-            - .node-version
+            - .nvmrc
             - package.json
             - tsconfig.base.json
             - versions.json

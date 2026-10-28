@@ -12,7 +12,7 @@ import type { AlertZeroRequestHandlerContext } from '../types';
 
 /**
  * Gates an AlertZero route on subscription eligibility and the per-space `securitySolution:enableAlertZero` advanced setting.
- * While the setting is off the route 404s as if it had never been registered.
+ * While the setting is off, or the space uses the Classic solution view, the route 404s as if it had never been registered.
  *
  * The setting is registered next to the routes, inside the `xpack.alertzero.enabled` guard in
  * `server/plugin.ts`, so a deployment with the kill switch off registers neither. Should the key be
@@ -25,10 +25,10 @@ export const withAlertZeroEnabled =
   async (context, request, response) => {
     const { uiSettings } = await context.core;
     const isEnabled = await uiSettings.client.get<boolean>(ALERTZERO_ENABLED_SETTING_ID);
-    if (!isEnabled) {
+    const { subscription, hasRequiredDependencies, isSpaceSupported } = await context.alertzero;
+    if (!isEnabled || !isSpaceSupported) {
       return response.notFound();
     }
-    const { subscription, hasRequiredDependencies } = await context.alertzero;
     if (subscription !== 'available') {
       return response.forbidden({
         body: {

@@ -6,20 +6,36 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { LocalElasticsearchFields } from './local_elasticsearch_fields';
-import type { DestinationCreationFormErrors, DestinationStorageKind } from './types';
+import { S3Fields } from './s3_fields';
+import type {
+  DestinationCreationFormErrors,
+  DestinationStorageKind,
+  ElasticsearchDestinationFormData,
+  S3DestinationFormData,
+  S3FieldsErrors,
+} from './types';
 
 interface DestinationTypeFieldsProps {
   storageKind: DestinationStorageKind;
-  index: string;
-  indexPatterns: string;
-  indexError?: DestinationCreationFormErrors['index'];
-  indexPatternsError?: DestinationCreationFormErrors['indexPatterns'];
+  auto: boolean;
+  logsIndex: string;
+  metricsIndex: string;
+  tracesIndex: string;
+  staticIndexesError?: DestinationCreationFormErrors['staticIndexes'];
+  logsIndexError?: DestinationCreationFormErrors['logsIndex'];
+  metricsIndexError?: DestinationCreationFormErrors['metricsIndex'];
+  tracesIndexError?: DestinationCreationFormErrors['tracesIndex'];
   disabled: boolean;
-  onIndexChange: (index: string) => void;
-  onIndexPatternsChange: (indexPatterns: string) => void;
+  onAutoChange: (auto: boolean) => void;
+  onIndexesChange: (
+    indexes: Partial<
+      Pick<ElasticsearchDestinationFormData, 'logsIndex' | 'metricsIndex' | 'tracesIndex'>
+    >
+  ) => void;
+  s3Form: S3DestinationFormData;
+  s3Errors: S3FieldsErrors;
+  onS3Change: (changes: Partial<S3DestinationFormData>) => void;
   onBlur: () => void;
 }
 
@@ -27,18 +43,25 @@ interface DestinationTypeFieldsProps {
  * Renders the form section for the selected destination type.
  * Add a case and a fields component when a new type becomes available.
  */
-export const DestinationTypeFields = ({ storageKind, ...fields }: DestinationTypeFieldsProps) => {
+export const DestinationTypeFields = ({
+  storageKind,
+  s3Form,
+  s3Errors,
+  onS3Change,
+  ...fields
+}: DestinationTypeFieldsProps) => {
   switch (storageKind) {
     case 'local_elasticsearch':
       return <LocalElasticsearchFields {...fields} />;
     case 'external_storage':
       return (
-        <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="xpack.streams.destinations.externalStorageUnavailableDescription"
-            defaultMessage="External storage isn't available yet."
-          />
-        </EuiText>
+        <S3Fields
+          values={s3Form}
+          errors={s3Errors}
+          disabled={fields.disabled}
+          onChange={onS3Change}
+          onBlur={fields.onBlur}
+        />
       );
   }
 };
