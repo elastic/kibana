@@ -34,7 +34,11 @@ import type { SubscriptionAvailability } from '../common/availability';
 
 export type AlertZeroRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
-  alertzero: { subscription: SubscriptionAvailability; hasRequiredDependencies: boolean };
+  alertzero: {
+    subscription: SubscriptionAvailability;
+    hasRequiredDependencies: boolean;
+    isSpaceSupported: boolean;
+  };
 }>;
 
 /**
