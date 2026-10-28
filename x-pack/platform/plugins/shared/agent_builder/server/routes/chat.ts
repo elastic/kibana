@@ -365,6 +365,14 @@ export const callbackConversePayloadSchema = conversePayloadSchema.extends({
         }
       },
     }),
+    surface_assets: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'Whether the caller uploads the files on `surface_payload.assets` before posting `surface_payload.blocks`. When set, images in the reply become `image` blocks referencing those files; otherwise they render as text.',
+        },
+      })
+    ),
   }),
 });
 

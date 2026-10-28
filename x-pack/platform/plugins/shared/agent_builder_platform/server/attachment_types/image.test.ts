@@ -13,6 +13,7 @@ import {
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
 } from '@kbn/agent-builder-common/attachments';
 import { FileNotFoundError, type FilesStart } from '@kbn/files-plugin/server';
+import { isomerPluginMock } from '@kbn/isomer-plugin/server/mocks';
 import { createImageAttachmentType } from './image';
 
 const validImage: ImageAttachmentData = {
@@ -146,6 +147,60 @@ describe('image attachment type', () => {
       const repr = await formatted.getRepresentation?.();
       if (repr?.type !== 'image') throw new Error('expected image representation');
       await expect(repr.getBase64()).rejects.toThrow('image file not found');
+    });
+  });
+
+  describe('toSurfaceComposition', () => {
+    const toComposition = async (
+      attachment: Attachment<AttachmentType.image, ImageAttachmentData>
+    ) => {
+      const { plugin, asScoped } = createFilesPluginStub(Buffer.from('hello'));
+      const definition = createImageAttachmentType({ getFilesPlugin: async () => plugin });
+      const { toSurfaceComposition } = definition;
+      if (!toSurfaceComposition) throw new Error('expected toSurfaceComposition');
+      const composition = await toSurfaceComposition(attachment, formatContext);
+      expect(asScoped).not.toHaveBeenCalled();
+      return composition;
+    };
+
+    it('maps the attachment to an image node the isomer runtime accepts, without reading the file', async () => {
+      const runtime = await isomerPluginMock.createStartContract().getRuntime();
+      const composition = await toComposition({
+        ...buildAttachment(validImage),
+        description: 'The checkout error page',
+      });
+
+      expect(composition).toEqual({
+        type: 'view',
+        body: [
+          {
+            type: 'image',
+            fileId: 'file-abc',
+            alt: 'The checkout error page',
+            name: 'screenshot.png',
+          },
+        ],
+      });
+      expect(runtime.validate(composition).valid).toBe(true);
+    });
+
+    it('uses the file name as alt text without a description', async () => {
+      const composition = await toComposition({ ...buildAttachment(validImage), description: ' ' });
+
+      expect(composition.body).toEqual([
+        { type: 'image', fileId: 'file-abc', alt: 'screenshot.png', name: 'screenshot.png' },
+      ]);
+    });
+
+    it('cuts a long description to Slack’s alt text limit', async () => {
+      const runtime = await isomerPluginMock.createStartContract().getRuntime();
+      const composition = await toComposition({
+        ...buildAttachment(validImage),
+        description: 'a'.repeat(2048),
+      });
+
+      expect(composition.body).toEqual([expect.objectContaining({ alt: 'a'.repeat(2000) })]);
+      expect(runtime.validate(composition).valid).toBe(true);
     });
   });
 });

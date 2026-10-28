@@ -199,4 +199,68 @@ describe('renderPayload', () => {
     ).resolves.toBeUndefined();
     expect(isomer.getRuntime).not.toHaveBeenCalled();
   });
+
+  describe('image attachments', () => {
+    const imageAttachment: VersionedAttachment = {
+      id: 'img-1',
+      type: 'image',
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: { file_id: 'file-1', name: 'chart.png', mime_type: 'image/png' },
+          created_at: '2026-10-06T00:00:00.000Z',
+          content_hash: 'hash',
+        },
+      ],
+    };
+    const imageAttachmentsService = {
+      getTypeDefinition: () => ({
+        toSurfaceComposition: ({ data }: { data: { file_id: string; name: string } }) => ({
+          type: 'view',
+          body: [{ type: 'image', fileId: data.file_id, alt: data.name, name: data.name }],
+        }),
+      }),
+    } as unknown as AttachmentServiceStart;
+    const event = createRoundCompleteEvent('The chart: <render_attachment id="img-1" />', [
+      imageAttachment,
+    ]);
+    const load = jest.fn(async () => ({
+      data: Buffer.from('png'),
+      mimeType: 'image/png',
+      filename: 'chart.png',
+    }));
+    const render = (assets: boolean) =>
+      new SurfacesServiceImpl({
+        attachmentsService: imageAttachmentsService,
+        logger: loggerMock.create(),
+        isomer: isomerPluginMock.createStartContract(),
+        assetSources: [{ nodeType: 'image', load }],
+      }).renderPayload(event, { originType: ConversationOriginType.Slack, assets, ...context });
+
+    beforeEach(() => load.mockClear());
+
+    it('ships the image for upload in place of its tag when the poster uploads assets', async () => {
+      const payload = await render(true);
+
+      expect(payload?.blocks).toContainEqual(
+        expect.objectContaining({ type: 'image', slack_file: { ref: 'kibana-0' } })
+      );
+      expect(payload?.assets).toEqual([
+        expect.objectContaining({ ref: 'kibana-0', data: Buffer.from('png').toString('base64') }),
+      ]);
+      expect(load).toHaveBeenCalledWith(
+        expect.objectContaining({ fileId: 'file-1' }),
+        expect.objectContaining(context)
+      );
+    });
+
+    it('shows the image’s name, and loads nothing, when the poster doesn’t', async () => {
+      const payload = await render(false);
+
+      expect(JSON.stringify(payload?.blocks)).toContain('Image: chart.png');
+      expect(payload).not.toHaveProperty('assets');
+      expect(load).not.toHaveBeenCalled();
+    });
+  });
 });

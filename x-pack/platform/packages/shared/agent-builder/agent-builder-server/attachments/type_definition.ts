@@ -13,6 +13,7 @@ import type {
   DividerNode,
   FieldsNode,
   HeaderNode,
+  ImageNode,
   LinkNode,
   MarkdownNode,
   QuoteNode,
@@ -176,7 +177,8 @@ export type SurfaceNode =
   | LinkNode
   | FieldsNode
   | CodeNode
-  | TableNode;
+  | TableNode
+  | ImageNode;
 
 /**
  * An [Isomer](https://github.com/elastic/isomer) composition built from Agent Builder's node
@@ -185,7 +187,7 @@ export type SurfaceNode =
  */
 export type SurfaceComposition = Composition<SurfaceNode>;
 
-export type { MarkdownNode };
+export type { ImageNode, MarkdownNode };
 
 /**
  * Return type for attachment's validation handlers.
