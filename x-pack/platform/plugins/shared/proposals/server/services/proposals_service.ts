@@ -111,6 +111,12 @@ export interface ProposalsServiceDeps {
 /** How long `reopen` waits for the gate workflow to create the successor. */
 const REOPEN_WAIT = { timeoutMs: 15_000, intervalMs: 250 };
 
+/**
+ * The most proposals one `bulkDismiss` releases. Each release waits for a refresh and schedules a
+ * gate resume, so a full batch takes well over a minute.
+ */
+const MAX_BULK_DISMISS = 1_000;
+
 const gateEndedError = (status: ExecutionStatus): string =>
   `The gate execution ended as ${status} before it settled the proposal.`;
 
@@ -467,11 +473,16 @@ export class ProposalsService {
    * The caller is expected to have been authorized already — the routes do it
    * declaratively, and the workflow re-checks the resumer behind the gate.
    */
-  async releaseGate(
-    id: string,
+  async releaseGate(id: string, params: ReleaseGateParams): Promise<Proposal> {
+    return this.releaseLoaded(await this.load(id, params.spaceId), params);
+  }
+
+  /** `releaseGate` against a record already loaded, written under that load's sequence number. */
+  private async releaseLoaded(
+    { proposal, seqNo, primaryTerm }: StoredProposal,
     { approved, actionInput, dismissReason, rationale, spaceId, request }: ReleaseGateParams
   ): Promise<Proposal> {
-    const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
+    const { id } = proposal;
 
     // Every refusal comes first, so a rejected release never leaves an
     // annotation behind. Ordering matters more than it looks: an annotation
@@ -535,6 +546,96 @@ export class ProposalsService {
     }
 
     return stripRanks(released.proposal);
+  }
+
+  /**
+   * `releaseGate` down the dismissal branch for many proposals at once, with one reason and
+   * rationale for all, for an in-process caller such as closing an investigation. As with a single
+   * release, each decision lands behind its gate afterwards, so a released proposal still reads
+   * undecided when this returns.
+   *
+   * The proposals are loaded in one search, and one that can no longer be dismissed is skipped
+   * without its gate being read. A lost race is retried once; any other failure is reported for
+   * its id and does not stop the rest. There is no bulk approval: an approval answers the action
+   * input its approver was shown, one proposal at a time.
+   */
+  async bulkDismiss(
+    { ids, dismissReason, rationale }: BulkDismissParams,
+    { spaceId, request }: { spaceId: string; request: KibanaRequest }
+  ): Promise<BulkDismissResult> {
+    const result: BulkDismissResult = { released: [], skipped: [], failed: [] };
+    const uniqueIds = [...new Set(ids.filter((id) => blankToUndefined(id) !== undefined))];
+    if (uniqueIds.length === 0) {
+      return result;
+    }
+    if (uniqueIds.length > MAX_BULK_DISMISS) {
+      throw new Error(
+        `Cannot dismiss ${uniqueIds.length} proposals at once: the limit is ${MAX_BULK_DISMISS}`
+      );
+    }
+
+    const loaded = await this.loadMany(uniqueIds, spaceId);
+    const params: ReleaseGateParams = {
+      approved: false,
+      dismissReason,
+      rationale,
+      spaceId,
+      request,
+    };
+    const outcomes = await asyncMapWithLimit(uniqueIds, 10, (id) =>
+      this.dismissOne(id, loaded.get(id), params)
+    );
+
+    for (const outcome of outcomes) {
+      if (outcome.outcome === 'released') {
+        result.released.push(outcome.id);
+      } else if (outcome.outcome === 'skipped') {
+        result.skipped.push({ id: outcome.id, reason: outcome.reason });
+      } else {
+        result.failed.push({ id: outcome.id, error: outcome.error });
+      }
+    }
+    return result;
+  }
+
+  /** One proposal of `bulkDismiss`. Never throws: a failure is reported for its id. */
+  private async dismissOne(
+    id: string,
+    loaded: StoredProposal | undefined,
+    params: ReleaseGateParams
+  ): Promise<BulkDismissOutcome> {
+    try {
+      return await this.dismissStored(id, loaded, params);
+    } catch (error) {
+      if (!(error instanceof ProposalConflictError)) {
+        return dismissFailure(id, error);
+      }
+    }
+
+    // A conflict means the proposal or its gate moved since it was loaded. The reload tells
+    // whether it can still be dismissed, and if it can, it gets one more attempt.
+    try {
+      return await this.dismissStored(id, await this.findStored(id, params.spaceId), params);
+    } catch (error) {
+      return dismissFailure(id, error);
+    }
+  }
+
+  /** Skips a proposal that can no longer be dismissed, and releases the gate of one that can. */
+  private async dismissStored(
+    id: string,
+    stored: StoredProposal | undefined,
+    params: ReleaseGateParams
+  ): Promise<BulkDismissOutcome> {
+    if (stored === undefined) {
+      return { id, outcome: 'skipped', reason: 'not_found' };
+    }
+    const reason = whyNotDismissable(stored.proposal, Date.now());
+    if (reason !== undefined) {
+      return { id, outcome: 'skipped', reason };
+    }
+    await this.releaseLoaded(stored, params);
+    return { id, outcome: 'released' };
   }
 
   /**
@@ -1311,6 +1412,40 @@ export class ProposalsService {
     };
   }
 
+  /** `load` for many ids in one search. An id nothing is under is absent from the map. */
+  private async loadMany(ids: string[], spaceId: string): Promise<Map<string, StoredProposal>> {
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: ids.length,
+      seq_no_primary_term: true,
+      query: { bool: { filter: [{ ids: { values: ids } }, { term: { spaceId } }] } },
+    });
+
+    const stored = new Map<string, StoredProposal>();
+    for (const hit of response.hits.hits) {
+      if (hit._id !== undefined) {
+        stored.set(hit._id, {
+          proposal: { id: hit._id, ...hit._source },
+          seqNo: hit._seq_no,
+          primaryTerm: hit._primary_term,
+        });
+      }
+    }
+    return stored;
+  }
+
+  /** `load`, with an id nothing is under read as `undefined`. */
+  private async findStored(id: string, spaceId: string): Promise<StoredProposal | undefined> {
+    try {
+      return await this.load(id, spaceId);
+    } catch (error) {
+      if (error instanceof ProposalNotFoundError) {
+        return undefined;
+      }
+      throw error;
+    }
+  }
+
   /**
    * Whether a decision can still be made. Both axes have to be checked, for
    * different reasons.
@@ -1588,6 +1723,32 @@ export interface ReleaseGateParams {
   request: KibanaRequest;
 }
 
+export interface BulkDismissParams {
+  ids: string[];
+  dismissReason: DismissReason;
+  rationale?: string;
+}
+
+/** Why `bulkDismiss` left a proposal alone, decided from the record alone. */
+export type BulkDismissSkipReason =
+  | 'not_found'
+  | 'decided'
+  | 'superseded'
+  | 'settled'
+  | 'past_deadline';
+
+export interface BulkDismissResult {
+  /** Gates released down the dismissal branch; each decision lands behind its gate afterwards. */
+  released: string[];
+  skipped: Array<{ id: string; reason: BulkDismissSkipReason }>;
+  failed: Array<{ id: string; error: string }>;
+}
+
+type BulkDismissOutcome =
+  | { id: string; outcome: 'released' }
+  | { id: string; outcome: 'skipped'; reason: BulkDismissSkipReason }
+  | { id: string; outcome: 'failed'; error: string };
+
 export interface CloneProposalParams {
   id: string;
   /** Why the original failed, recorded alongside the supersession. */
@@ -1686,6 +1847,26 @@ const isUnsettled = ({ status, supersededBy }: Proposal): boolean =>
 /** Only an undecided proposal has a deadline to pass: an executing action runs past it. */
 const isPastDeadline = ({ status, expiresAt }: Proposal, now: number): boolean =>
   status === 'pending' && expiresAt !== undefined && Date.parse(expiresAt) <= now;
+
+/** The refusals of `releaseGate` that the record alone answers, without reading the gate. */
+const whyNotDismissable = (proposal: Proposal, now: number): BulkDismissSkipReason | undefined => {
+  if (proposal.decision !== undefined) {
+    return 'decided';
+  }
+  if (proposal.supersededBy !== undefined) {
+    return 'superseded';
+  }
+  if (proposal.status !== 'pending') {
+    return 'settled';
+  }
+  return isPastDeadline(proposal, now) ? 'past_deadline' : undefined;
+};
+
+const dismissFailure = (id: string, error: unknown): BulkDismissOutcome => ({
+  id,
+  outcome: 'failed',
+  error: error instanceof Error ? error.message : String(error),
+});
 
 /**
  * The only legal decision/status pairs. Exhaustive on purpose: the two axes are

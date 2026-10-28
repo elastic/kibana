@@ -468,6 +468,8 @@ A resume the engine turns away — the gate step was claimed by someone else, or
 
 The service surface follows from that: `releaseGate()` makes that one write, `clone()` re-offers a failed proposal, and `update()` is the workflow's entry point. There is no `approve()` or `dismiss()`, and the only rollback is that revert — with no decision written before the resume, there is no decision to roll back.
 
+`bulkDismiss()` is `releaseGate()` down the negative branch for many proposals at once, with one reason and rationale, for an in-process caller such as closing an investigation. It loads them in one search, skips those missing, already decided, superseded, settled or past their deadline without reading their gates, releases the rest ten at a time, retries a lost race once, and reports each id as released, skipped or failed. Each decision still lands behind its gate. There is no bulk approval: an approval answers the action input its approver was shown.
+
 ### Settling orphaned proposals
 
 A cancelled or timed-out gate execution runs no handler, so nothing in the workflow settles its proposal; a parent whose own timeout cancels the gate is enough ([#20138](https://github.com/elastic/security-team/issues/20138)). The service settles those proposals itself, whenever they are read (`get`, `list`) or decided (`releaseGate`):

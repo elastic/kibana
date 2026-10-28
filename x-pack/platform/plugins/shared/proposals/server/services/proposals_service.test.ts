@@ -1433,6 +1433,233 @@ describe('ProposalsService', () => {
     });
   });
 
+  describe('bulkDismiss', () => {
+    /** Answers every search with the documents among the ids it asks for. */
+    const storageWith = (documents: Record<string, ProposalDocument>) => {
+      const storage = createStorage();
+      storage.search.mockImplementation(
+        async ({
+          query,
+        }: {
+          query: { bool: { filter: Array<{ ids?: { values: string[] } }> } };
+        }) => {
+          const ids = query.bool.filter.find((clause) => clause.ids)?.ids?.values ?? [];
+          const hits = ids
+            .filter((id) => documents[id] !== undefined)
+            .map((id) => searchHit(documents[id], id));
+          return { hits: { hits, total: { value: hits.length } } };
+        }
+      );
+      return storage;
+    };
+    const versionConflict = () => Object.assign(new Error('version conflict'), { statusCode: 409 });
+    const dismissing = { spaceId: SPACE_ID, request };
+
+    it('should load every proposal in one search and release each gate down the dismissal branch', async () => {
+      const storage = storageWith({ 'p-1': baseDocument(), 'p-2': baseDocument() });
+      const { service, workflowsApi } = createService(storage);
+
+      const result = await service.bulkDismiss(
+        { ids: ['p-1', 'p-2', 'p-1', ' '], dismissReason: 'false_positive', rationale: 'Benign' },
+        dismissing
+      );
+
+      expect(result).toEqual({ released: ['p-1', 'p-2'], skipped: [], failed: [] });
+      expect(storage.search).toHaveBeenCalledTimes(1);
+      const [[searchRequest]] = storage.search.mock.calls;
+      expect(searchRequest).toMatchObject({ seq_no_primary_term: true, size: 2 });
+      expect(searchRequest.query.bool.filter).toEqual([
+        { ids: { values: ['p-1', 'p-2'] } },
+        { term: { spaceId: SPACE_ID } },
+      ]);
+      expect(storage.index).toHaveBeenCalledTimes(2);
+      for (const [indexArgs] of storage.index.mock.calls) {
+        expect(indexArgs).toMatchObject({
+          if_seq_no: 7,
+          if_primary_term: 1,
+          document: {
+            dismissReason: 'false_positive',
+            rationale: 'Benign',
+            gateReleasedAt: expect.any(String),
+          },
+        });
+      }
+      expect(workflowsApi.resumeWorkflowExecution).toHaveBeenCalledTimes(2);
+      expect(workflowsApi.resumeWorkflowExecution).toHaveBeenCalledWith(
+        EXECUTION_ID,
+        SPACE_ID,
+        { approved: false },
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('should skip what can no longer be dismissed without reading its gate', async () => {
+      const storage = storageWith({
+        decided: baseDocument({ decision: 'approved', status: 'executing' }),
+        superseded: baseDocument({ status: 'superseded', supersededBy: 'revision-2' }),
+        settled: baseDocument({ status: 'expired' }),
+        late: baseDocument({ expiresAt: PAST_DEADLINE }),
+      });
+      const { service, workflowsApi } = createService(storage);
+
+      const result = await service.bulkDismiss(
+        {
+          ids: ['decided', 'superseded', 'settled', 'late', 'missing'],
+          dismissReason: 'no_reason',
+        },
+        dismissing
+      );
+
+      expect(result).toEqual({
+        released: [],
+        skipped: [
+          { id: 'decided', reason: 'decided' },
+          { id: 'superseded', reason: 'superseded' },
+          { id: 'settled', reason: 'settled' },
+          { id: 'late', reason: 'past_deadline' },
+          { id: 'missing', reason: 'not_found' },
+        ],
+        failed: [],
+      });
+      expect(workflowsApi.getWorkflowExecution).not.toHaveBeenCalled();
+      expect(storage.index).not.toHaveBeenCalled();
+    });
+
+    it('should retry once when its release write loses a race and it can still be dismissed', async () => {
+      const storage = storageWith({ 'p-1': baseDocument() });
+      storage.index.mockRejectedValueOnce(versionConflict());
+      const { service, workflowsApi } = createService(storage);
+
+      const result = await service.bulkDismiss(
+        { ids: ['p-1'], dismissReason: 'no_reason' },
+        dismissing
+      );
+
+      expect(result).toEqual({ released: ['p-1'], skipped: [], failed: [] });
+      // The batch load, then the reload after the conflict.
+      expect(storage.search).toHaveBeenCalledTimes(2);
+      expect(workflowsApi.resumeWorkflowExecution).toHaveBeenCalledTimes(1);
+    });
+
+    it('should skip a proposal someone else decided while it was being dismissed', async () => {
+      const storage = createStorage();
+      storage.search
+        .mockResolvedValueOnce({
+          hits: { hits: [searchHit(baseDocument(), 'p-1')], total: { value: 1 } },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [searchHit(baseDocument({ decision: 'approved', status: 'executing' }), 'p-1')],
+            total: { value: 1 },
+          },
+        });
+      storage.index.mockRejectedValueOnce(versionConflict());
+      const { service, workflowsApi } = createService(storage);
+
+      const result = await service.bulkDismiss(
+        { ids: ['p-1'], dismissReason: 'no_reason' },
+        dismissing
+      );
+
+      expect(result).toEqual({
+        released: [],
+        skipped: [{ id: 'p-1', reason: 'decided' }],
+        failed: [],
+      });
+      expect(workflowsApi.resumeWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('should skip a proposal that was deleted while it was being dismissed', async () => {
+      const storage = createStorage();
+      storage.search
+        .mockResolvedValueOnce({
+          hits: { hits: [searchHit(baseDocument(), 'p-1')], total: { value: 1 } },
+        })
+        .mockResolvedValueOnce({ hits: { hits: [], total: { value: 0 } } });
+      storage.index.mockRejectedValueOnce(versionConflict());
+      const { service } = createService(storage);
+
+      const result = await service.bulkDismiss(
+        { ids: ['p-1'], dismissReason: 'no_reason' },
+        dismissing
+      );
+
+      expect(result).toEqual({
+        released: [],
+        skipped: [{ id: 'p-1', reason: 'not_found' }],
+        failed: [],
+      });
+    });
+
+    it('should report what fails without stopping the rest', async () => {
+      const storage = storageWith({
+        racing: baseDocument(),
+        unreachable: baseDocument({ workflowExecutionId: 'exec-2' }),
+        fine: baseDocument(),
+      });
+      // `racing` loses the race for its release write on both attempts.
+      storage.index.mockImplementation(async ({ id }: { id: string }) => {
+        if (id === 'racing') {
+          throw versionConflict();
+        }
+        return { _id: id, _seq_no: 8, _primary_term: 1 };
+      });
+      const { service, workflowsApi } = createService(storage);
+      const gate = await createWorkflowsApi().getWorkflowExecution();
+      workflowsApi.getWorkflowExecution.mockImplementation(async (executionId: string) => {
+        if (executionId === 'exec-2') {
+          throw new Error('cluster unavailable');
+        }
+        return gate;
+      });
+
+      const result = await service.bulkDismiss(
+        { ids: ['racing', 'unreachable', 'fine'], dismissReason: 'no_reason' },
+        dismissing
+      );
+
+      expect(result).toEqual({
+        released: ['fine'],
+        skipped: [],
+        failed: [
+          { id: 'racing', error: 'Proposal [racing] was modified by another actor first' },
+          { id: 'unreachable', error: 'cluster unavailable' },
+        ],
+      });
+      // The batch load, and one reload for `racing`: a failure other than a conflict is not retried.
+      expect(storage.search).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not search when no id is given', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await expect(
+        service.bulkDismiss({ ids: ['', ' '], dismissReason: 'no_reason' }, dismissing)
+      ).resolves.toEqual({ released: [], skipped: [], failed: [] });
+      expect(storage.search).not.toHaveBeenCalled();
+    });
+
+    it('should take up to 1,000 proposals at once and refuse more without loading any', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+      const ids = Array.from({ length: 1_000 }, (_, i) => `p-${i}`);
+
+      // A duplicate and a blank do not count towards the limit.
+      await service.bulkDismiss(
+        { ids: [...ids, 'p-0', ''], dismissReason: 'no_reason' },
+        dismissing
+      );
+      expect(storage.search).toHaveBeenCalledTimes(1);
+
+      await expect(
+        service.bulkDismiss({ ids: [...ids, 'p-1000'], dismissReason: 'no_reason' }, dismissing)
+      ).rejects.toThrow('the limit is 1000');
+      expect(storage.search).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('update', () => {
     it('should record the decision and stamp who and when', async () => {
       const storage = createStorage(baseDocument());
