@@ -13,6 +13,7 @@ import { getRulesPageMenu } from '../rules_page/get_rules_page_menu';
 export interface LogsListHeaderProps {
   backHref: string;
   shouldShowSettings: boolean;
+  showClassicBadge?: boolean;
   docLink: string;
   onOpenSettings: () => void;
 }
@@ -43,6 +44,7 @@ const CLASSIC_RULES_ONLY_BADGE: AppHeaderBadge = {
 export const LogsListHeader = ({
   backHref,
   shouldShowSettings,
+  showClassicBadge,
   docLink,
   onOpenSettings,
 }: LogsListHeaderProps) => {
@@ -59,7 +61,7 @@ export const LogsListHeader = ({
   return (
     <AppHeader
       title={LOGS_PAGE_TITLE}
-      badges={[CLASSIC_RULES_ONLY_BADGE]}
+      badges={showClassicBadge ? [CLASSIC_RULES_ONLY_BADGE] : undefined}
       spacing="bleed"
       back={{ href: backHref, label: BACK_TO_RULES_LABEL }}
       docLink={docLink}

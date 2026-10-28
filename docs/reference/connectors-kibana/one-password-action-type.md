@@ -37,7 +37,7 @@ The 1Password connector has the following actions:
 List Users
 :   List users in the 1Password account, optionally filtered by state.
     - **filter** (optional): Filter expression — `user.isActive()` or `user.isSuspended()`. Omit to return all users.
-    - **maxPageSize** (optional): Maximum number of users to return in a single response.
+    - **maxPageSize** (optional): Maximum number of users to return in a single response, from 1 to 1000. Defaults to 25.
     - **pageToken** (optional): Token to fetch the next page of results.
 
 Get User

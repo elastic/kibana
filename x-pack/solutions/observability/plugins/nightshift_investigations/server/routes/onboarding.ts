@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import { badRequest, serverUnavailable } from '@hapi/boom';
+import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type {
+  EnableOnboardingResponse,
   GetOnboardingResponse,
   StartOnboardingSuggestionsResponse,
 } from '../../common/onboarding';
-import {
-  OnboardingUnavailableError,
-  OnboardingValidationError,
-} from '../onboarding/onboarding_client';
+import { OnboardingUnavailableError } from '../onboarding/onboarding_client';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 const rethrowOnboardingError = (error: unknown): never => {
-  if (error instanceof OnboardingValidationError) {
-    throw badRequest(error.message);
-  }
   if (error instanceof OnboardingUnavailableError) {
     throw serverUnavailable(error.message);
   }
@@ -47,13 +42,33 @@ const getOnboardingRoute = createNightshiftInvestigationsServerRoute({
   },
 });
 
+const enableOnboardingRoute = createNightshiftInvestigationsServerRoute({
+  endpoint: 'POST /internal/nightshift/onboarding/enable',
+  options: {
+    access: 'internal',
+    summary: 'Enable Nightshift in the space',
+    description:
+      'The first onboarding step: installs the investigation agent in the current space, so it ' +
+      'can be configured in Agent Builder and run investigations there. Idempotent.',
+  },
+  security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
+  params: z.object({}),
+  handler: async ({ request, onboardingClient }): Promise<EnableOnboardingResponse> => {
+    try {
+      return await onboardingClient.enable(request);
+    } catch (error) {
+      return rethrowOnboardingError(error);
+    }
+  },
+});
+
 const startOnboardingSuggestionsRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/onboarding/suggestions',
   options: {
     access: 'internal',
     summary: 'Suggest first investigations',
     description:
-      'Starts the onboarding suggestions workflow: the investigation agent explores the space from its sandbox and suggests first investigations. Requires at least one sandbox secret.',
+      'Starts the onboarding suggestions workflow: the investigation agent explores the space from its sandbox and suggests first investigations.',
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
   params: z.object({}),
@@ -68,5 +83,6 @@ const startOnboardingSuggestionsRoute = createNightshiftInvestigationsServerRout
 
 export const onboardingRoutes = {
   ...getOnboardingRoute,
+  ...enableOnboardingRoute,
   ...startOnboardingSuggestionsRoute,
 };
