@@ -200,6 +200,99 @@ describe('create-investigation-proposal workflow execution', () => {
     });
   });
 
+  describe('attributing a decision', () => {
+    const approver = {
+      username: 'analyst',
+      fullName: 'Alice Analyst',
+      email: 'alice@example.com',
+      profileUid: 'u_analyst',
+    };
+
+    it('should record the profile of the user the resolution runs as', async () => {
+      await fixture.start();
+      fixture.setExecutingUser(approver);
+
+      await fixture.resume(true, 'analyst');
+
+      expect(fixture.onlyProposal().decidedBy).toEqual(approver);
+    });
+
+    it('should fall back to the responder when the resolution runs as no user', async () => {
+      await fixture.start();
+      fixture.setExecutingUser(undefined);
+
+      await fixture.resume(true, 'analyst');
+
+      expect(fixture.onlyProposal().decidedBy).toEqual({
+        username: 'analyst',
+        fullName: null,
+        email: null,
+      });
+    });
+  });
+
+  describe('a resolution that fails', () => {
+    it('should park again for a human when it failed before deciding', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+      fixture.failNextRead();
+
+      await fixture.resume(true);
+
+      const proposal = fixture.onlyProposal();
+      expect(proposal.decision).toBeUndefined();
+      expect(proposal.status).toBe('pending');
+      expect(fixture.stepExecutions('await_decision', 'waitForApproval')).toHaveLength(2);
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+    });
+
+    it('should let the next answer decide the proposal it parked again on', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+      fixture.failNextRead();
+      await fixture.resume(true);
+
+      await fixture.resume(false, 'second-analyst');
+
+      expect(fixture.onlyProposal()).toMatchObject({
+        decision: 'dismissed',
+        status: 'no_action',
+        decidedBy: { username: 'second-analyst' },
+      });
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('should park for a human when an auto-approval failed before deciding', async () => {
+      fixture.failNextRead();
+
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });
+
+      // Nothing was written, so the proposal is not re-offered: the same one
+      // waits for a human.
+      const proposal = fixture.onlyProposal();
+      expect(proposal.decision).toBeUndefined();
+      expect(proposal.status).toBe('pending');
+      expect(fixture.stepExecutions('await_decision', 'waitForApproval')).toHaveLength(1);
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+    });
+
+    it('should record an approval caught mid-action as failed and re-offer it', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+      fixture.failNextStatusWrite('failed');
+
+      await fixture.resume(true);
+
+      const [original, clone] = fixture.proposals();
+      expect(original).toMatchObject({
+        decision: 'approved',
+        status: 'failed',
+        supersededBy: clone.id,
+      });
+      expect(original.executionError).toEqual(expect.stringContaining('may have run'));
+      expect(clone.status).toBe('pending');
+      expect(clone.workflowExecutionId).toBe('fake_workflow_execution_id');
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+    });
+  });
+
   describe('approving a proposal with no action', () => {
     it('should settle as approved with no action rather than staying awaiting', async () => {
       // Approval is the whole lifecycle when there is nothing to run, so

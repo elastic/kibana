@@ -76,7 +76,7 @@ import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW } from './nightshift_investi
 import { NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW } from './nightshift_investigations/sandbox_materialize_workspace';
 import { NIGHTSHIFT_SLACK_THREAD_WORKFLOW } from './nightshift_investigations/slack_thread';
 import { NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW } from './nightshift_investigations/slack_thread/bound_slack_thread';
-import { CREATE_PROPOSAL_WORKFLOW } from './proposals';
+import { CREATE_PROPOSAL_WORKFLOW, RESOLVE_PROPOSAL_WORKFLOW } from './proposals';
 import {
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW,
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW,
@@ -168,7 +168,7 @@ export {
   type NightshiftBoundHookTemplateValues,
 } from './nightshift_investigations/bound_hooks';
 export { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from './nightshift_investigations/onboarding_suggestions';
-export { CREATE_PROPOSAL_WORKFLOW_ID } from './proposals';
+export { CREATE_PROPOSAL_WORKFLOW_ID, RESOLVE_PROPOSAL_WORKFLOW_ID } from './proposals';
 export {
   ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
   ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID,
@@ -311,8 +311,10 @@ export const managedWorkflowDefinitions = [
   ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW,
   // AlertZero's bridge to the gate below, which stamps `origin: alertzero`.
   ALERTZERO_CREATE_PROPOSAL_WORKFLOW,
-  // Generic proposal gate, owned by the proposals plugin.
+  // Generic proposal gate, owned by the proposals plugin, and the child it
+  // resolves each answer in.
   CREATE_PROPOSAL_WORKFLOW,
+  RESOLVE_PROPOSAL_WORKFLOW,
   // AlertZero action catalog. The forensics handoff installs unconditionally even
   // though `context-engine.createKi` needs `contextEngine:enabled`: a definition is
   // inert until executed, and the setting is only read inside the step handler.
