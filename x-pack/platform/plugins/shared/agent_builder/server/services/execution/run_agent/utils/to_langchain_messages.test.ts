@@ -1319,6 +1319,43 @@ describe('prepareMessages', () => {
   });
 
   describe('with attachment events', () => {
+    describe('for an agent that cannot act on attachments', () => {
+      const withStandaloneEvents = (includeAttachmentNotices?: boolean) =>
+        ({
+          timeline: [
+            attachmentEventFixture({ id: 'before-first-round' }),
+            ...timelineFromRounds([
+              { id: 'r1', input: makeRoundInput('Q1'), response: { message: 'A1' } },
+            ]),
+            attachmentEventFixture({ id: 'between-rounds', kind: 'updated', version: 2 }),
+          ],
+          nextInput: makeRoundInput('Q2'),
+          attachmentTypes: [{ type: 'text', description: 'Plain text' }],
+          attachmentStateManager: createAttachmentStateManager([], {
+            getTypeDefinition: () => undefined,
+          }),
+          ...(includeAttachmentNotices === undefined ? {} : { includeAttachmentNotices }),
+        } as ProcessedConversation);
+
+      it('shows the events written between rounds by default', async () => {
+        const messages = await prepareMessages({ conversation: withStandaloneEvents() });
+
+        const rendered = JSON.stringify(messages.map((m) => m.content));
+        expect(rendered.match(/<conversation_event/g)).toHaveLength(2);
+      });
+
+      it('leaves them out, and the history is just the conversation', async () => {
+        const messages = await prepareMessages({ conversation: withStandaloneEvents(false) });
+
+        expect(JSON.stringify(messages.map((m) => m.content))).not.toContain('conversation_event');
+        expect(messages.map((m) => String(m.content))).toEqual([
+          expect.stringContaining('Q1'),
+          expect.stringContaining('A1'),
+          expect.stringContaining('Q2'),
+        ]);
+      });
+    });
+
     it('renders a legacy message exactly as before, and its unmarked events not at all', async () => {
       const legacyTimeline = [
         ...timelineFromRounds([

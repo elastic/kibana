@@ -154,6 +154,11 @@ export const prepareMessages = async ({
       continue;
     }
     if (isTimelineStandaloneEvent(entry)) {
+      // An agent that cannot act on attachments is not told what happened to them, whoever did it.
+      // A custom event is meant for the agent, so it stays.
+      if (conversation.includeAttachmentNotices === false && isAttachmentEvent(entry.event)) {
+        continue;
+      }
       messages.push(standaloneEventToLangchain(entry.event, notices));
       continue;
     }
