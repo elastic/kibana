@@ -295,7 +295,7 @@ const describeCoverage = (result: HuntCoordinatorCoreResult): string[] => {
   const lines: string[] = [
     result.completeness === 'incomplete_retryable'
       ? result.has_confirmed_hit
-        ? '**Coverage: incomplete, retryable.** The confirmed hit is recorded on the report, but part of the search did not run for a transient reason, so this run is not a statement about everything the report describes.'
+        ? '**Coverage: incomplete, retryable.** The confirmed hit stands, but part of the search did not run for a transient reason, so this run is not a statement about everything the report describes.'
         : '**Coverage: incomplete, retryable.** Part of the search did not run for a transient reason, so the report is not marked as hunted, stays eligible for a later sweep, and this run is not a statement that the environment is clean.'
       : '**Coverage: incomplete.** Part of the search cannot run in this space, and repeating the run would not change that; the report is retired, but this run is not a statement that the environment is clean.',
   ];
