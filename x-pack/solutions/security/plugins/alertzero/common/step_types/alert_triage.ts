@@ -251,6 +251,11 @@ const groupFpCandidatesOutputSchema = lazySchema(() =>
           proposal_id: z.string().describe('The id the proposal is created under.'),
           alert_ids: z.array(z.string()),
           kind: z.enum(['keyed', 'pooled', 'overflow', 'failed_join', 'batch']),
+          proposal_alerts_page_query: z
+            .string()
+            .describe(
+              'Query string of the Alerts page link that shows every alert of the proposal, by its `az:proposal` tag.'
+            ),
           title: z.string(),
           comment: z.string(),
           impacted_entities: z.array(impactedEntityOutputSchema()),
@@ -268,9 +273,7 @@ const groupFpCandidatesOutputSchema = lazySchema(() =>
           total_alerts: z.number().describe('How many alerts the proposal holds after this join.'),
           alerts_page_query: z
             .string()
-            .describe(
-              'Query string of the Alerts page link that shows every alert of the proposal, by its `az:proposal` tag.'
-            ),
+            .describe('Query string of the Alerts page link that shows just the added alerts.'),
           impacted_entities: z
             .array(impactedEntityOutputSchema())
             .describe('Entities the added alerts name, for the owner Investigation.'),

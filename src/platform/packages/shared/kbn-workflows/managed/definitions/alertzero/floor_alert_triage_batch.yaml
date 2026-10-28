@@ -879,6 +879,8 @@ steps:
                 **Why:** {{ v.rationale }}
                 {%- assign shown = shown | plus: 1 -%}{%- endif -%}{%- endfor %}
 
+                [View all alerts of this proposal](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.process_mints.item.proposal_alerts_page_query }})
+
                 {% if steps.process_mints.item.kind == 'keyed' %}If more alerts match this pattern while the proposal is open, they are added here and noted in a separate message.{% endif %}
 
                 {% if variables.failed_attach_chunk_count > 0 %}⚠️ {{ variables.failed_attach_chunk_count }} of {{ variables.total_attach_chunk_count }} alert chunk(s) failed to attach after retries; some alerts are not visible in this Investigation.{% endif %}
@@ -998,7 +1000,7 @@ steps:
             **Why:** {{ v.rationale }}
             {%- assign shown = shown | plus: 1 -%}{%- endif -%}{%- endfor %}
 
-            [View all {{ steps.process_joins.item.total_alerts }} alerts of this proposal](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.process_joins.item.alerts_page_query }})
+            [View the added alert{% if steps.process_joins.item.alert_ids.size != 1 %}s{% endif %}](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.process_joins.item.alerts_page_query }})
 
             {% if variables.failed_attach_chunk_count > 0 %}⚠️ {{ variables.failed_attach_chunk_count }} of {{ variables.total_attach_chunk_count }} alert chunk(s) failed to attach after retries; some alerts are not visible in this Investigation.{% endif %}
 

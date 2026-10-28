@@ -281,8 +281,7 @@ describe('triage group false positives step', () => {
             conversation_id: 'conv-owner',
             alert_ids: ['a1', 'a2'],
             total_alerts: 3,
-            // The tag, not the ids, so the link stays the same size for a proposal of 1,000 alerts.
-            alerts_page_query: expect.stringContaining(`az:proposal:${GEN0}`),
+            alerts_page_query: expect.stringContaining('filters='),
             impacted_entities: [],
           },
         ],
@@ -309,6 +308,16 @@ describe('triage group false positives step', () => {
 
     expect(service.revise).not.toHaveBeenCalled();
     expect(output.mints[0].proposal_id).toBe(GEN1);
+  });
+
+  it('links a minted proposal to all of its alerts by tag', async () => {
+    const { group } = setup();
+
+    const output = await group({ ...baseInput, fp_candidate_ids: ['a1', 'a2'] });
+
+    expect(output.mints[0].proposal_alerts_page_query).toContain(
+      `az:proposal:${output.mints[0].proposal_id}`
+    );
   });
 
   describe('earlier verdicts of the pattern', () => {

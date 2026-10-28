@@ -72,6 +72,9 @@ export interface GroupProposalsStepDependencies {
 
 type Context = StepHandlerContext<unknown, unknown>;
 
+const buildProposalAlertsPagePath = (proposalId: string): string =>
+  buildAlertsPageTagPath(`az:proposal:${proposalId}`, new Date().toISOString());
+
 const toApiError = (error: unknown, action: string): ExecutionError =>
   error instanceof ExecutionError
     ? error
@@ -338,15 +341,17 @@ export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsSte
         const supervised = input.autonomy !== 'manual';
         const grouped = !supervised && (await deps.isGroupingEnabled());
         if (!grouped) {
+          const proposalId = uuidv4();
           return {
             output: {
               ...empty,
               grouping: supervised ? ('supervised' as const) : ('flag_off' as const),
               mints: [
                 {
-                  proposal_id: uuidv4(),
+                  proposal_id: proposalId,
                   alert_ids: foundIds,
                   kind: 'batch' as const,
+                  proposal_alerts_page_query: buildProposalAlertsPagePath(proposalId),
                   ...(await textFor(foundIds, 'batch')),
                   impacted_entities: entitiesOf(foundIds),
                 },
@@ -391,6 +396,7 @@ export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsSte
                 proposal_id: proposalId,
                 alert_ids: alertIds,
                 kind,
+                proposal_alerts_page_query: buildProposalAlertsPagePath(proposalId),
                 ...(await textFor(alertIds, kind)),
                 impacted_entities: entitiesOf(alertIds),
               }))
@@ -402,10 +408,7 @@ export const getTriageGroupFpCandidatesStepDefinition = (deps: GroupProposalsSte
               conversation_id: join.conversationId,
               alert_ids: join.alertIds,
               total_alerts: join.totalAlerts,
-              alerts_page_query: buildAlertsPageTagPath(
-                `az:proposal:${join.rootProposalId}`,
-                new Date().toISOString()
-              ),
+              alerts_page_query: buildAlertsPagePath(join.alertIds, new Date().toISOString()),
               impacted_entities: entitiesOf(join.alertIds),
             })),
             alerts_joined: plan.joins.reduce((sum, { alertIds }) => sum + alertIds.length, 0),
