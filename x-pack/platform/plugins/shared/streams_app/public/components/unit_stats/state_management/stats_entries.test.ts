@@ -12,6 +12,7 @@ import { mapStatsResponse } from '../../../services/unit_stats_client/map_stats_
 import type { StatsWindow } from '../../../services/unit_stats_client/types';
 import { STATS_REQUEST_FAILED_ERROR_CODE } from './constants';
 import {
+  clearValues,
   dropRemovedComponents,
   markBatchFailed,
   markBatchLoading,
@@ -358,5 +359,58 @@ describe('dropRemovedComponents', () => {
     );
 
     expect(components.destination['es-prod']).toBeUndefined();
+  });
+});
+
+describe('clearValues', () => {
+  const fetchedComponents = () =>
+    mergeFetchedStats(registerAll(REFS), batchOf(REFS), responseFor('data', REFS), MERGED_AT);
+
+  it('drops the value and when it was fetched, and keeps who shows the component', () => {
+    const components = clearValues(fetchedComponents());
+
+    expect(components.destination['es-prod']).toEqual({
+      registrants: ['registrant-destination-es-prod'],
+    });
+    expect(components.processor['uppercase-message']).toEqual({
+      registrants: ['registrant-processor-uppercase-message'],
+    });
+  });
+
+  it('drops a loading placeholder and an error of a component that is shown', () => {
+    const refs = [destination('es-prod'), destination('es-dev')];
+    const loading = markBatchLoading(registerAll(refs), batchOf(refs));
+    const failed = markBatchFailed(loading, batchOf([destination('es-dev')]), 'unavailable');
+    expect(failed.destination['es-prod'].entry?.status).toBe('loading');
+    expect(failed.destination['es-dev'].entry?.status).toBe('error');
+
+    const components = clearValues(failed);
+
+    expect(components.destination['es-prod'].entry).toBeUndefined();
+    expect(components.destination['es-dev'].entry).toBeUndefined();
+  });
+
+  it('drops a cached value that nobody shows, with the component', () => {
+    const unshown = unregisterComponent(
+      fetchedComponents(),
+      destination('es-prod'),
+      'registrant-destination-es-prod'
+    );
+    expect(unshown.destination['es-prod'].entry?.status).toBe('ready');
+
+    const components = clearValues(unshown);
+
+    expect(components.destination['es-prod']).toBeUndefined();
+    expect(components.processor['uppercase-message']).toBeDefined();
+  });
+
+  it('leaves a shown component that has no value as it is', () => {
+    const registered = registerAll(REFS);
+
+    expect(clearValues(registered)).toEqual(registered);
+  });
+
+  it('leaves nothing when nothing is registered', () => {
+    expect(clearValues(EMPTY)).toEqual(EMPTY);
   });
 });

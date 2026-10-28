@@ -263,20 +263,32 @@ export const statsManagerMachine = setup({
     // Joins registrations that arrive close together into one request.
     batching: {
       initial: 'idle',
-      on: {
-        // Every registration restarts the debounce, so a burst of registrations is one flush.
-        'stats.register': {
-          target: '.debouncing',
-          reenter: true,
-          actions: {
-            type: 'register',
-            params: ({ event }) => ({ ref: event.ref, registrant: event.registrant }),
+      states: {
+        idle: {
+          on: {
+            'stats.register': {
+              target: 'debouncing',
+              actions: {
+                type: 'register',
+                params: ({ event }) => ({ ref: event.ref, registrant: event.registrant }),
+              },
+            },
           },
         },
-      },
-      states: {
-        idle: {},
         debouncing: {
+          on: {
+            // Every registration restarts the debounce, so a burst of registrations is one flush.
+            // The re-entry is on this state, not on `batching`: re-entering a child of a parallel
+            // state would exit and re-enter every region, which stops the request in flight.
+            'stats.register': {
+              target: 'debouncing',
+              reenter: true,
+              actions: {
+                type: 'register',
+                params: ({ event }) => ({ ref: event.ref, registrant: event.registrant }),
+              },
+            },
+          },
           after: {
             batchDebounce: { target: 'idle', actions: raise({ type: 'stats.fetchDue' }) },
           },
