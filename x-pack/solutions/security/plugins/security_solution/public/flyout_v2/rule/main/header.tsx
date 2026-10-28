@@ -6,7 +6,16 @@
  */
 
 import React, { memo } from 'react';
-import { EuiTitle, EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiText,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  EuiLink,
+} from '@elastic/eui';
+import { DELETED_RULE } from '../../../detection_engine/rule_details_ui/pages/rule_details/translations';
 import { CreatedBy, UpdatedBy } from '../../../detections/components/rules/rule_info';
 import { useRuleAuthorDisplayNames } from '../../../detection_engine/rule_management/logic/use_rule_author_display_names';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
@@ -16,6 +25,7 @@ import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actio
 import {
   RULE_DETAILS_TITLE_TEST_ID,
   RULE_DETAILS_TITLE_LINK_TEST_ID,
+  RULE_DETAILS_SUPPRESSED_TEST_ID,
   RULE_DETAILS_CREATED_BY_TEST_ID,
   RULE_DETAILS_UPDATED_BY_TEST_ID,
 } from './test_ids';
@@ -27,9 +37,13 @@ export interface HeaderProps {
    * Rule object that represents relevant information about a rule
    */
   rule: RuleResponse;
+  /**
+   * Whether the rule has been deleted. When true, a "Deleted rule" badge is shown.
+   * */
+  isSuppressed: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = memo(({ rule }) => {
+export const Header: React.FC<HeaderProps> = memo(({ rule, isSuppressed }) => {
   const href = useRuleDetailsLink({ ruleId: rule.id }, urlParamOverride);
   const { createdBy, updatedBy } = useRuleAuthorDisplayNames({
     createdBy: rule?.created_by,
@@ -61,6 +75,14 @@ export const Header: React.FC<HeaderProps> = memo(({ rule }) => {
         </EuiTitle>
       )}
 
+      {isSuppressed && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiBadge data-test-subj={RULE_DETAILS_SUPPRESSED_TEST_ID} title="">
+            {DELETED_RULE}
+          </EuiBadge>
+        </>
+      )}
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="xs" direction="column">
         <EuiFlexItem data-test-subj={RULE_DETAILS_CREATED_BY_TEST_ID}>

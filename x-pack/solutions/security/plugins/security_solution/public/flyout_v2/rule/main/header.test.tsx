@@ -16,6 +16,7 @@ import type { RuleResponse } from '../../../../common/api/detection_engine';
 import {
   RULE_DETAILS_TITLE_TEST_ID,
   RULE_DETAILS_TITLE_LINK_TEST_ID,
+  RULE_DETAILS_SUPPRESSED_TEST_ID,
   RULE_DETAILS_CREATED_BY_TEST_ID,
   RULE_DETAILS_UPDATED_BY_TEST_ID,
 } from './test_ids';
@@ -31,6 +32,7 @@ jest.mock('../../shared/components/flyout_header_actions', () => ({
 
 const defaultProps: HeaderProps = {
   rule: { id: 'id', name: 'rule name' } as RuleResponse,
+  isSuppressed: false,
 };
 
 const renderHeader = (props: HeaderProps = defaultProps) =>
@@ -53,6 +55,7 @@ describe('<Header />', () => {
     expect(getByTestId(RULE_DETAILS_TITLE_LINK_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RULE_DETAILS_CREATED_BY_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RULE_DETAILS_UPDATED_BY_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(RULE_DETAILS_SUPPRESSED_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId('mockFlyoutHeaderActions')).toBeInTheDocument();
   });
 
@@ -62,6 +65,13 @@ describe('<Header />', () => {
 
     expect(getByTestId(RULE_DETAILS_TITLE_TEST_ID)).toHaveTextContent('rule name');
     expect(queryByTestId(RULE_DETAILS_TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should render deleted rule badge when suppressed', () => {
+    (useRuleDetailsLink as jest.Mock).mockReturnValue('rule_details_link');
+    const { getByTestId } = renderHeader({ ...defaultProps, isSuppressed: true });
+
+    expect(getByTestId(RULE_DETAILS_SUPPRESSED_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render the resolved display names of the rule authors', () => {

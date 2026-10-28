@@ -48,7 +48,7 @@ export const RuleDetails: FC<RuleDetailsProps> = memo(({ ruleId }) => {
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <Header rule={rule} />
+        <Header rule={rule} isSuppressed={!isExistingRule} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <Content rule={rule} />
