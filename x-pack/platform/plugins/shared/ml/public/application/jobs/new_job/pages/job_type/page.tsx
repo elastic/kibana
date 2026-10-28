@@ -329,7 +329,7 @@ export const Page: FC = () => {
             <LinkCard
               data-test-subj={id}
               onClick={onClick}
-              icon={<EuiIcon size="xl" type={iconType} />}
+              icon={<EuiIcon size="xl" type={iconType} aria-hidden={true} />}
               title={title}
               description={description}
               isDisabled={!isTimeBasedIndex}
@@ -361,7 +361,7 @@ export const Page: FC = () => {
       <EuiFlexGrid gutterSize="l" columns={4}>
         <EuiFlexItem>
           <LinkCard
-            icon={<EuiIcon size="xl" type="dataVisualizer" />}
+            icon={<EuiIcon size="xl" type="dataVisualizer" aria-hidden={true} />}
             title={i18n.translate('xpack.ml.newJob.wizard.jobType.dataVisualizerTitle', {
               defaultMessage: 'Data Visualizer',
             })}
