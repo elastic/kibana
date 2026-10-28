@@ -35,7 +35,7 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.deploymentAgn
 
   const createAndAddMapByValue = async (pageObjects: PageObjects) => {
     await pageObjects.dashboard.addMapPanel();
-    await pageObjects.maps.waitForRenderComplete();
+    await pageObjects.maps.waitForLayersToLoad();
     await pageObjects.maps.saveAndReturnButton.click();
     await pageObjects.dashboard.waitForRenderComplete();
   };
@@ -43,7 +43,7 @@ spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.deploymentAgn
   const openMapEditorAndAddLayer = async (pageObjects: PageObjects) => {
     const [panelTitle] = await pageObjects.dashboard.getPanelTitles();
     await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel', panelTitle);
-    await pageObjects.maps.waitForRenderComplete();
+    await pageObjects.maps.waitForLayersToLoad();
 
     await pageObjects.maps.addLayerButton.click();
     await pageObjects.maps.layerAddForm.waitFor({ state: 'visible' });

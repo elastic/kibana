@@ -20,7 +20,6 @@ const DEFAULT_MAP_LOADING_TIMEOUT = 20_000;
 
 export class MapsPage {
   public readonly mapsPlugin;
-  public readonly mapRenderComplete;
   public readonly saveAndReturnButton;
   public readonly saveButton;
   public readonly addLayerButton;
@@ -43,8 +42,6 @@ export class MapsPage {
   constructor(private readonly page: ScoutPage) {
     // Only present when Maps is the top-level app (standalone). Not available in embeddable contexts (e.g. dashboard panels).
     this.mapsPlugin = this.page.locator('#maps-plugin');
-    // Only present when Maps is the top-level app (standalone). Not available in embeddable contexts (e.g. dashboard panels).
-    this.mapRenderComplete = this.page.locator('#maps-plugin[data-map-loaded="true"]');
     this.saveAndReturnButton = this.page.testSubj.locator('mapSaveAndReturnButton');
     this.saveButton = this.page.testSubj.locator('mapSaveButton');
     this.addLayerButton = this.page.testSubj.locator('addLayerButton');
@@ -66,7 +63,7 @@ export class MapsPage {
 
   async gotoNewMap() {
     await this.page.gotoApp('maps/map');
-    await this.waitForRenderComplete();
+    await this.waitForLayersToLoad();
   }
 
   /** Opens the AppHeader overflow menu when Full screen is not inline. */
@@ -83,16 +80,6 @@ export class MapsPage {
   async clickSaveButton() {
     await this.appMenu.revealItem(this.saveButton);
     await this.saveButton.click();
-  }
-
-  async waitForRenderComplete() {
-    // first wait for the top level container to be present
-    await this.mapsPlugin.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
-    // then wait for the map to be fully rendered
-    return this.mapRenderComplete.waitFor({
-      state: 'attached',
-      timeout: DEFAULT_MAP_LOADING_TIMEOUT,
-    });
   }
 
   async expectOnMapPage() {
@@ -174,7 +161,7 @@ export class MapsPage {
     await this.documentsItem.click();
     await this.selectGeoIndexPatternLayer(indexPattern);
     await this.importFileButton.click();
-    await this.waitForRenderComplete();
+    await this.waitForLayersToLoad();
     await this.saveAndReturnButton.click();
   }
 
