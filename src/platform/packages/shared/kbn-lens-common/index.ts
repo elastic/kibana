@@ -324,7 +324,6 @@ export {
   INDEX_PATTERN_TYPE,
   LENS_DOCUMENT_FIELD_NAME,
   LENS_RANGE_MODES,
-  staticValueOperationName,
 } from './datasources/constants';
 export {
   LENS_UNKNOWN_VIS,

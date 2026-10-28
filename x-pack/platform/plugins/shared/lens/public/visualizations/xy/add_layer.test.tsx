@@ -105,7 +105,7 @@ describe.skip('AddLayerButton', () => {
     clickVisualizationButton();
     await waitForSeriesOptions();
     clickSeriesOptionsButton('line');
-    expect(addLayer).toHaveBeenCalledWith(LayerTypes.DATA, undefined, undefined, 'line');
+    expect(addLayer).toHaveBeenCalledWith(LayerTypes.DATA, { seriesType: 'line' });
   });
 });
 
@@ -140,13 +140,10 @@ describe('Reference layer source selection', () => {
       const addLayer = renderReferenceMenu(true);
       expect(addLayer).not.toHaveBeenCalled();
       fireEvent.click(await screen.findByTestId(`lnsReferenceLineLayer_${source}`));
-      expect(addLayer).toHaveBeenCalledWith(
-        LayerTypes.REFERENCELINE,
-        undefined,
+      expect(addLayer).toHaveBeenCalledWith(LayerTypes.REFERENCELINE, {
         ignoreInitialValues,
-        undefined,
-        datasourceId
-      );
+        datasourceId,
+      });
     }
   );
 

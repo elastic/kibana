@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 import { NameInput } from '@kbn/visualization-ui-components';
-import { staticValueOperationName } from '@kbn/lens-common';
 import type {
   GenericIndexPatternColumn,
   FieldBasedIndexPatternColumn,
@@ -67,6 +66,7 @@ import {
   isQuickFunction,
   getParamEditor,
   formulaOperationName,
+  staticValueOperationName,
   DimensionEditorButtonGroups,
   CalloutWarning,
   isLayerChangingDueToDecimalsPercentile,

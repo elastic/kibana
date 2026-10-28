@@ -81,7 +81,10 @@ export const useAddLayerButton = (
   );
 
   const addLayer: AddLayerFunction = useCallback(
-    (layerType, extraArg, ignoreInitialValues, seriesType, requestedDatasourceId) => {
+    (
+      layerType,
+      { extraArg, ignoreInitialValues, seriesType, datasourceId: requestedDatasourceId } = {}
+    ) => {
       const layerId = generateId();
       const selectedLayerDatasourceId = (
         visualization.selectedLayerId

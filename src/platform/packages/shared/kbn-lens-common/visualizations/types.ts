@@ -120,10 +120,12 @@ interface VisualizationStateFromContextChangeProps<T = unknown> {
 
 export type AddLayerFunction<T = unknown> = (
   layerType: LensLayerType,
-  extraArg?: T,
-  ignoreInitialValues?: boolean,
-  seriesType?: SeriesType,
-  datasourceId?: LensDatasourceId
+  options?: {
+    extraArg?: T;
+    ignoreInitialValues?: boolean;
+    seriesType?: SeriesType;
+    datasourceId?: LensDatasourceId;
+  }
 ) => void;
 
 export interface VisualizationLayerDescription {

@@ -918,8 +918,11 @@ export const getXyVisualization = ({
       <AddLayerButton
         {...props}
         eventAnnotationService={eventAnnotationService}
-        addLayer={async (type, loadedGroupInfo, ignoreInitialValues, seriesType, datasourceId) => {
-          if (type === LayerTypes.ANNOTATIONS && loadedGroupInfo) {
+        addLayer={async (
+          layerType,
+          { extraArg: loadedGroupInfo, ignoreInitialValues, seriesType, datasourceId } = {}
+        ) => {
+          if (layerType === LayerTypes.ANNOTATIONS && loadedGroupInfo) {
             await props.ensureIndexPattern(
               loadedGroupInfo.dataViewSpec ?? loadedGroupInfo.indexPatternId
             );
@@ -929,13 +932,12 @@ export const getXyVisualization = ({
               group: loadedGroupInfo,
             });
           }
-          props.addLayer(
-            type,
-            loadedGroupInfo,
-            ignoreInitialValues || !!loadedGroupInfo,
+          props.addLayer(layerType, {
+            extraArg: loadedGroupInfo,
+            ignoreInitialValues: ignoreInitialValues || !!loadedGroupInfo,
             seriesType,
-            datasourceId
-          );
+            datasourceId,
+          });
         }}
       />
     );

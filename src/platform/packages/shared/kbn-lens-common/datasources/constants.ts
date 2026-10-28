@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const staticValueOperationName = 'static_value';
-
 export const INDEX_PATTERN_TYPE = 'index-pattern';
 export const LENS_DOCUMENT_FIELD_NAME = '___records___';
 

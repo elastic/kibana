@@ -220,13 +220,10 @@ export function AddLayerButton({
                   icon: 'number',
                   'data-test-subj': 'lnsReferenceLineLayer_static',
                   onClick: () => {
-                    addLayer(
-                      LayerTypes.REFERENCELINE,
-                      undefined,
-                      false,
-                      undefined,
-                      LENS_DATASOURCE_ID.FORM_BASED
-                    );
+                    addLayer(LayerTypes.REFERENCELINE, {
+                      ignoreInitialValues: false,
+                      datasourceId: LENS_DATASOURCE_ID.FORM_BASED,
+                    });
                     toggleLayersChoice(false);
                   },
                 },
@@ -237,13 +234,10 @@ export function AddLayerButton({
                   icon: 'code',
                   'data-test-subj': 'lnsReferenceLineLayer_esql',
                   onClick: () => {
-                    addLayer(
-                      LayerTypes.REFERENCELINE,
-                      undefined,
-                      true,
-                      undefined,
-                      LENS_DATASOURCE_ID.TEXT_BASED
-                    );
+                    addLayer(LayerTypes.REFERENCELINE, {
+                      ignoreInitialValues: true,
+                      datasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
+                    });
                     toggleLayersChoice(false);
                   },
                 },
@@ -297,14 +291,11 @@ export function AddLayerButton({
                       icon={<EuiIcon type={t.icon} aria-hidden={true} />}
                       data-test-subj={`lnsXY_seriesType-${t.id}`}
                       onClick={() => {
-                        addLayer(
-                          LayerTypes.DATA,
-                          undefined,
-                          undefined,
-                          canInitializeWithSubtype
+                        addLayer(LayerTypes.DATA, {
+                          seriesType: canInitializeWithSubtype
                             ? firstLayerSubtype
-                            : (t.subtypes?.[0] as SeriesType)
-                        );
+                            : (t.subtypes?.[0] as SeriesType),
+                        });
                         toggleLayersChoice(false);
                       }}
                     >
@@ -329,7 +320,7 @@ export function AddLayerButton({
           eventAnnotationService={eventAnnotationService}
           isInlineEditing={isInlineEditing}
           addLayer={(extraArg) => {
-            addLayer(LayerTypes.ANNOTATIONS, extraArg);
+            addLayer(LayerTypes.ANNOTATIONS, { extraArg });
           }}
         />
       )}

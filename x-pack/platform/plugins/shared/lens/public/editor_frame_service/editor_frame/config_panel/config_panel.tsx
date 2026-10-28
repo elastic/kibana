@@ -279,7 +279,7 @@ export function ConfigPanel(
   // This will be used only in dimension editors like metric charts which adds a hidden layer.
   // That's why we don't update the currently selected or focused layer.
   const addLayer: AddLayerFunction = useCallback(
-    (layerType, extraArg, ignoreInitialValues, seriesType) => {
+    (layerType, { extraArg, ignoreInitialValues, seriesType } = {}) => {
       const layerId = generateId();
       dispatchLens(
         addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues, seriesType })
