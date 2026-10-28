@@ -198,13 +198,10 @@ export const setupHuntPrerequisites = async ({
   apiClient,
   headers,
   spaceId,
-  isServerless = false,
 }: {
   apiClient: ApiClientFixture;
   headers: Record<string, string>;
   spaceId: string;
-  /** Serverless built-in worker roles carry a `_` prefix. */
-  isServerless?: boolean;
 }): Promise<HuntPrerequisites> => {
   await enableAlertZeroInSpace({ apiClient, headers, spaceId });
 
@@ -281,7 +278,7 @@ export const setupHuntPrerequisites = async ({
 
   const accountName =
     WORKER_SERVICE_ACCOUNT_NAMES[SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID];
-  const roleName = getWorkerRoleName(accountName, { isServerless });
+  const roleName = getWorkerRoleName(accountName, { isServerless: false });
   // Unique per space/run so two spaces do not race on the same reserved account name when
   // the built-in account already exists from a prior failed cleanup.
   const scoutAccountName = `${accountName}_scout_${suffix}`.slice(0, 50);
