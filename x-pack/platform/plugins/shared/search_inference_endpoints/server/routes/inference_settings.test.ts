@@ -15,6 +15,7 @@ import {
 } from '../../common/constants';
 import { APIRoutes } from '../../common/types';
 import { MockRouter } from '../../__mocks__/router.mock';
+import { InferenceFeatureRegistry } from '../inference_feature_registry';
 import { defineInferenceSettingsRoutes } from './inference_settings';
 
 const mockFeatureRegistry = {
@@ -139,6 +140,62 @@ describe('Inference Settings API', () => {
       mockSOClient.get.mockRejectedValue(error);
 
       await expect(mockRouter.callRoute({})).rejects.toThrow(error);
+    });
+
+    it('should skip hidden features when checking for invalid endpoints', async () => {
+      const featureRegistry = new InferenceFeatureRegistry(mockLogger);
+      featureRegistry.register({
+        featureId: 'parent',
+        featureName: 'Parent',
+        featureDescription: 'Parent.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
+      featureRegistry.register({
+        featureId: 'visible_child',
+        parentFeatureId: 'parent',
+        featureName: 'Visible child',
+        featureDescription: 'Visible child.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: ['.visible-recommended'],
+      });
+      featureRegistry.register({
+        featureId: 'hidden_child',
+        parentFeatureId: 'parent',
+        featureName: 'Hidden child',
+        featureDescription: 'Hidden child.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: ['.hidden-recommended'],
+        isHidden: true,
+      });
+      const router = new MockRouter({
+        context,
+        method: 'get',
+        path: APIRoutes.GET_INFERENCE_SETTINGS,
+        version: ROUTE_VERSIONS.v1,
+      });
+      defineInferenceSettingsRoutes({
+        logger: mockLogger,
+        router: router.router,
+        featureRegistry,
+        getConnectorById,
+      });
+      mockSOClient.get.mockResolvedValue({
+        id: INFERENCE_SETTINGS_ID,
+        type: INFERENCE_SETTINGS_SO_TYPE,
+        attributes: {
+          features: [{ feature_id: 'visible_child', endpoints: [{ id: '.visible-saved' }] }],
+        },
+        references: [],
+      });
+
+      await router.callRoute({});
+
+      expect(router.response.ok).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({ invalidEndpoints: ['.visible-saved'] }),
+        })
+      );
     });
 
     it('should use hidden types client', async () => {
@@ -349,6 +406,56 @@ describe('Inference Settings API', () => {
             errors: expect.arrayContaining([
               expect.stringContaining('Duplicate endpoints in feature "agent_builder"'),
             ]),
+          },
+        },
+      });
+    });
+
+    it('should reject saving models for hidden features', async () => {
+      const featureRegistry = new InferenceFeatureRegistry(mockLogger);
+      featureRegistry.register({
+        featureId: 'visible_feature',
+        featureName: 'Visible',
+        featureDescription: 'Visible.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: ['.endpoint-a'],
+      });
+      featureRegistry.register({
+        featureId: 'hidden_feature',
+        featureName: 'Hidden',
+        featureDescription: 'Hidden.',
+        taskType: 'chat_completion',
+        recommendedEndpoints: ['.endpoint-b'],
+        isHidden: true,
+      });
+      const router = new MockRouter({
+        context,
+        method: 'put',
+        path: APIRoutes.PUT_INFERENCE_SETTINGS,
+        version: ROUTE_VERSIONS.v1,
+      });
+      defineInferenceSettingsRoutes({
+        logger: mockLogger,
+        router: router.router,
+        featureRegistry,
+        getConnectorById,
+      });
+
+      await router.callRoute({
+        body: {
+          features: [
+            { feature_id: 'visible_feature', endpoints: [{ id: '.endpoint-a' }] },
+            { feature_id: 'hidden_feature', endpoints: [{ id: '.endpoint-c' }] },
+          ],
+        },
+      });
+
+      expect(mockSOClient.create).not.toHaveBeenCalled();
+      expect(router.response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: 'Invalid inference settings',
+          attributes: {
+            errors: ['Models for hidden features cannot be changed: hidden_feature'],
           },
         },
       });

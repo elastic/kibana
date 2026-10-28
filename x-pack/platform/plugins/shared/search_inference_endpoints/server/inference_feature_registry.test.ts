@@ -131,6 +131,44 @@ describe('InferenceFeatureRegistry', () => {
       expect(registry.getAll()).toHaveLength(2);
     });
 
+    it('stores isHidden on a hidden feature', () => {
+      const result = registry.register(createValidFeature({ isHidden: true }));
+
+      expect(result).toEqual({ ok: true });
+      expect(registry.get('test_feature')?.isHidden).toBe(true);
+    });
+
+    it('returns error for a visible child of a hidden parent', () => {
+      registry.register(createValidFeature({ featureId: 'parent', isHidden: true }));
+      const result = registry.register(
+        createValidFeature({ featureId: 'child', parentFeatureId: 'parent' })
+      );
+
+      expect(result).toEqual({
+        ok: false,
+        error: 'Feature "child" must be hidden because its parent "parent" is hidden.',
+      });
+      expect(registry.get('child')).toBeUndefined();
+    });
+
+    it('accepts a hidden child of a hidden parent', () => {
+      registry.register(createValidFeature({ featureId: 'parent', isHidden: true }));
+      const result = registry.register(
+        createValidFeature({ featureId: 'child', parentFeatureId: 'parent', isHidden: true })
+      );
+
+      expect(result).toEqual({ ok: true });
+    });
+
+    it('accepts a hidden child of a visible parent', () => {
+      registry.register(createValidFeature({ featureId: 'parent' }));
+      const result = registry.register(
+        createValidFeature({ featureId: 'child', parentFeatureId: 'parent', isHidden: true })
+      );
+
+      expect(result).toEqual({ ok: true });
+    });
+
     it('allows registration at any time', () => {
       registry.register(createValidFeature({ featureId: 'a' }));
       expect(registry.getAll()).toHaveLength(1);

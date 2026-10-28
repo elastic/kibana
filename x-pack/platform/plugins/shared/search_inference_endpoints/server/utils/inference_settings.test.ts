@@ -6,8 +6,10 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { INFERENCE_SETTINGS_SO_TYPE } from '../../common/constants';
 import type { InferenceSettingsAttributes } from '../../common/types';
+import { InferenceFeatureRegistry } from '../inference_feature_registry';
 import { parseInferenceSettingsSO, validateInferenceSettings } from './inference_settings';
 
 describe('Inference Settings utils', () => {
@@ -61,6 +63,12 @@ describe('Inference Settings utils', () => {
   });
 
   describe('validateInferenceSettings', () => {
+    let featureRegistry: InferenceFeatureRegistry;
+
+    beforeEach(() => {
+      featureRegistry = new InferenceFeatureRegistry(loggingSystemMock.createLogger());
+    });
+
     it('should return empty array for valid settings', () => {
       const attrs: InferenceSettingsAttributes = {
         features: [
@@ -69,11 +77,11 @@ describe('Inference Settings utils', () => {
         ],
       };
 
-      expect(validateInferenceSettings(attrs)).toEqual([]);
+      expect(validateInferenceSettings(attrs, featureRegistry)).toEqual([]);
     });
 
     it('should return empty array for empty features', () => {
-      expect(validateInferenceSettings({ features: [] })).toEqual([]);
+      expect(validateInferenceSettings({ features: [] }, featureRegistry)).toEqual([]);
     });
 
     it('should detect duplicate feature_id values', () => {
@@ -84,7 +92,7 @@ describe('Inference Settings utils', () => {
         ],
       };
 
-      const errors = validateInferenceSettings(attrs);
+      const errors = validateInferenceSettings(attrs, featureRegistry);
       expect(errors).toHaveLength(1);
       expect(errors[0]).toContain('Duplicate feature_id values: agent_builder');
     });
@@ -99,7 +107,7 @@ describe('Inference Settings utils', () => {
         ],
       };
 
-      const errors = validateInferenceSettings(attrs);
+      const errors = validateInferenceSettings(attrs, featureRegistry);
       expect(errors).toHaveLength(1);
       expect(errors[0]).toContain('Duplicate endpoints in feature "agent_builder"');
     });
@@ -115,8 +123,37 @@ describe('Inference Settings utils', () => {
         ],
       };
 
-      const errors = validateInferenceSettings(attrs);
+      const errors = validateInferenceSettings(attrs, featureRegistry);
       expect(errors).toHaveLength(2);
+    });
+
+    it('should reject hidden features and accept visible ones', () => {
+      const feature = {
+        featureName: 'Feature',
+        featureDescription: 'Feature.',
+        taskType: 'chat_completion' as const,
+        recommendedEndpoints: ['.endpoint-a'],
+      };
+      featureRegistry.register({ ...feature, featureId: 'visible_feature' });
+      featureRegistry.register({ ...feature, featureId: 'hidden_feature', isHidden: true });
+
+      expect(
+        validateInferenceSettings(
+          { features: [{ feature_id: 'visible_feature', endpoints: [{ id: '.endpoint-a' }] }] },
+          featureRegistry
+        )
+      ).toEqual([]);
+      expect(
+        validateInferenceSettings(
+          {
+            features: [
+              { feature_id: 'visible_feature', endpoints: [{ id: '.endpoint-a' }] },
+              { feature_id: 'hidden_feature', endpoints: [{ id: '.endpoint-b' }] },
+            ],
+          },
+          featureRegistry
+        )
+      ).toEqual(['Models for hidden features cannot be changed: hidden_feature']);
     });
   });
 });

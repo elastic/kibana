@@ -38,7 +38,7 @@ const resolveAllEndpointIds = (
 
   const resolvedEndpointIds = featureRegistry
     .getAll()
-    .filter((f) => f.parentFeatureId !== undefined)
+    .filter((f) => f.parentFeatureId !== undefined && !f.isHidden)
     .flatMap((f) =>
       resolveFeatureEndpoints(featureRegistry, soFeaturesMap, f.featureId, logger).endpoints.map(
         ({ id }) => id
@@ -165,7 +165,7 @@ export const defineInferenceSettingsRoutes = ({
       errorHandler(logger)(async (context, request, response) => {
         const attrs = request.body;
 
-        const validationErrors = validateInferenceSettings(attrs);
+        const validationErrors = validateInferenceSettings(attrs, featureRegistry);
         if (validationErrors.length > 0) {
           return response.badRequest({
             body: {

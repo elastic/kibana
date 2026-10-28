@@ -8,6 +8,7 @@
 import type { SavedObject } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { InferenceSettingsAttributes, InferenceSettingsResponse } from '../../common/types';
+import type { InferenceFeatureRegistry } from '../inference_feature_registry';
 
 export const parseInferenceSettingsSO = (
   so: SavedObject<InferenceSettingsAttributes>
@@ -24,7 +25,10 @@ export const parseInferenceSettingsSO = (
   };
 };
 
-export const validateInferenceSettings = (attrs: InferenceSettingsAttributes): string[] => {
+export const validateInferenceSettings = (
+  attrs: InferenceSettingsAttributes,
+  featureRegistry: Pick<InferenceFeatureRegistry, 'get'>
+): string[] => {
   const errors: string[] = [];
 
   const featureIds = attrs.features.map((f) => f.feature_id);
@@ -34,6 +38,16 @@ export const validateInferenceSettings = (attrs: InferenceSettingsAttributes): s
       i18n.translate('xpack.searchInferenceEndpoints.settings.duplicateFeatureIds', {
         defaultMessage: 'Duplicate feature_id values: {ids}',
         values: { ids: [...new Set(duplicateFeatureIds)].join(', ') },
+      })
+    );
+  }
+
+  const hiddenFeatureIds = featureIds.filter((id) => featureRegistry.get(id)?.isHidden);
+  if (hiddenFeatureIds.length > 0) {
+    errors.push(
+      i18n.translate('xpack.searchInferenceEndpoints.settings.hiddenFeatureIds', {
+        defaultMessage: 'Models for hidden features cannot be changed: {ids}',
+        values: { ids: [...new Set(hiddenFeatureIds)].join(', ') },
       })
     );
   }

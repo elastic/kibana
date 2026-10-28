@@ -103,6 +103,7 @@ interface ResolvedFeatureEndpoints {
  * 4. Kibana default chat-completion endpoint
  *
  * Only recommendedEndpoints carry parameters; SO override endpoints are returned without them.
+ * Hidden features skip SO overrides at every level.
  */
 export const resolveFeatureEndpoints = (
   registry: InferenceFeatureRegistry,
@@ -121,6 +122,7 @@ export const resolveFeatureEndpoints = (
     );
     return { endpoints: [], warnings: [], soEntryFound: false };
   }
+  const soOverrides: typeof soFeaturesMap = current.isHidden ? new Map() : soFeaturesMap;
   let recEntry = current.recommendedEndpoints?.length
     ? { featureId: current.featureId, recommendedEndpoints: current.recommendedEndpoints }
     : undefined;
@@ -133,7 +135,7 @@ export const resolveFeatureEndpoints = (
   const visited = new Set<string>();
   let currentId = featureId;
 
-  const initialSoEntry = soFeaturesMap.get(currentId);
+  const initialSoEntry = soOverrides.get(currentId);
   if (initialSoEntry && initialSoEntry.endpoints.length > 0) {
     return {
       endpoints: initialSoEntry.endpoints.map(({ id }) => ({ id })),
@@ -176,7 +178,7 @@ export const resolveFeatureEndpoints = (
         };
       }
 
-      const soEntry = soFeaturesMap.get(currentId);
+      const soEntry = soOverrides.get(currentId);
       if (soEntry && soEntry.endpoints.length > 0) {
         return {
           endpoints: soEntry.endpoints.map(({ id }) => ({ id })),
