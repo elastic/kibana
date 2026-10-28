@@ -26,6 +26,7 @@ import {
   isExecutionStartedEvent,
   isExecutionTerminatedEvent,
   isMessageChunkEvent,
+  isModelReasoningChunkEvent,
   isRoundCompleteEvent,
   isToolCallEvent,
   type ChatCallbackEvent,
@@ -137,6 +138,7 @@ export const deliverCallbackEvents = ({
         filter(
           (event) =>
             !isMessageChunkEvent(event) &&
+            !isModelReasoningChunkEvent(event) &&
             !isExecutionStartedEvent(event) &&
             // The failure callback is the only terminal representation of a failed or aborted run.
             !isExecutionFailedEvent(event) &&
