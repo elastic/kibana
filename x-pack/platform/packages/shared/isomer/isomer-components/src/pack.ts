@@ -7,9 +7,17 @@
 
 import { definePrimitivePack } from '@elastic/isomer-sdk';
 import { ISOMER_STYLE_COLLECTOR, isomerStyleAdapter } from '@kbn/isomer-theme';
-import { markdown } from './primitives';
+import { actions, context, divider, header, markdown, quote, section } from './primitives';
 
-export const componentsPrimitives = [markdown] as const;
+export const componentsPrimitives = [
+  markdown,
+  header,
+  section,
+  context,
+  divider,
+  quote,
+  actions,
+] as const;
 
 /** Kibana's content and layout primitives. */
 export const componentsPack = definePrimitivePack({
@@ -18,6 +26,12 @@ export const componentsPack = definePrimitivePack({
   styleAdapter: isomerStyleAdapter,
   styleCollector: ISOMER_STYLE_COLLECTOR,
   authoring: {
-    groups: [{ title: 'Narrative and content', types: ['markdown'] }],
+    groups: [
+      { title: 'Narrative and content', types: ['markdown'] },
+      {
+        title: 'Message layout',
+        types: ['header', 'section', 'context', 'divider', 'quote', 'actions'],
+      },
+    ],
   },
 });
