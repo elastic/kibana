@@ -548,17 +548,43 @@ describe('makeRehydrateProcessSelectors', () => {
       expect(selectors.find((s) => s.entityId === 'ent-live')).not.toHaveProperty('exitedAt');
       expect(esClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: 'logs-endpoint.events.process-*',
+          index: ['logs-endpoint.events.process-*'],
           query: {
             bool: {
               filter: [
                 { terms: { 'process.entity_id': ['ent-exited', 'ent-live'] } },
+                { term: { 'event.category': 'process' } },
                 { term: { 'event.type': 'end' } },
                 // Seven days before the earliest observation.
                 { range: { '@timestamp': { gte: '2026-09-19T10:00:00.000Z' } } },
               ],
             },
           },
+        })
+      );
+    });
+
+    it('also searches the plain Defend indices the hunt read, and no other index it read', async () => {
+      const packIndex = 'logs-endpoint.events.00e5ea78.2026.10.08';
+      const esClient = esClientWith(
+        Array.from({ length: 5 }, (_, i) =>
+          startDoc(`ev-${i}`, `ent-${i}`, '2026-10-08T10:00:00.000Z')
+        )
+      );
+      await makeRehydrateProcessSelectors(esClient)({
+        alerts: [{ alert_id: 'ev-4', index: '.internal.alerts-security.alerts-default-000001' }],
+        events: [
+          eventRef(packIndex, 'ev-0'),
+          eventRef(packIndex, 'ev-1'),
+          eventRef('.ds-logs-endpoint.events.network-default-2026.10.08-000001', 'ev-2'),
+          eventRef('winlogbeat-2026.10.08', 'ev-3'),
+        ],
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: ['logs-endpoint.events.process-*', packIndex],
+          ignore_unavailable: true,
         })
       );
     });

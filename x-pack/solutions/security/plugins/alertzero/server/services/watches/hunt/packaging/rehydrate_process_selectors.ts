@@ -29,8 +29,10 @@ export type RehydrateProcessSelectors = (args: {
 const MAX_REHYDRATE_DOCS = 100;
 /** Bounds fan-out; an isolate-host-sized proposal count per host was already a lot. */
 const MAX_PROCESS_SELECTORS_PER_HOST = 5;
-/** Elastic Defend's process events: the only source whose entity_id a Defend action accepts. */
+/** Only Defend's own entity_id works in a Defend response action. */
 const DEFEND_PROCESS_EVENTS_INDEX = 'logs-endpoint.events.process-*';
+/** Defend data loaded outside a data stream, e.g. `logs-endpoint.events.00e5ea78.2026.10.08`. */
+const DEFEND_PLAIN_EVENTS_INDEX_PREFIX = 'logs-endpoint.events.';
 
 const REHYDRATE_SOURCE_FIELDS = [
   '@timestamp',
@@ -125,13 +127,11 @@ const isBetterCandidate = (next: Candidate, current: Candidate): boolean =>
     ? Boolean(next.techniqueId)
     : next.rankTimestamp > current.rankTimestamp;
 
-/**
- * entity_id → when Defend recorded the process's `end` event, for the candidates that have
- * exited. Fails open: on any error the processes are treated as live.
- */
+/** Maps entity_id to exit time for processes that have exited. On error, treats all as live. */
 const findExitedAt = async (
   esClient: ElasticsearchClient,
   candidates: Candidate[],
+  refIndices: string[],
   logger?: Logger
 ): Promise<Map<string, string>> => {
   const entityIds = candidates.flatMap(({ entityId }) => (entityId ? [entityId] : []));
@@ -139,18 +139,26 @@ const findExitedAt = async (
     return new Map();
   }
   try {
-    // An alert ref's timestamp is when the alert was created, which can be after the process
-    // ended, so the lower bound leaves a full stale window of slack.
+    // An alert can be created after its process ended, so search from well before it.
     const earliestObservedAt = Math.min(
       ...candidates.map(({ timestamp }) => Date.parse(timestamp))
     );
     const response = await esClient.search<unknown, ExitedAggregations>({
-      index: DEFEND_PROCESS_EVENTS_INDEX,
+      index: [
+        DEFEND_PROCESS_EVENTS_INDEX,
+        ...new Set(
+          refIndices.filter((index) => index.startsWith(DEFEND_PLAIN_EVENTS_INDEX_PREFIX))
+        ),
+      ],
+      // A missing plain index should not fail the whole lookup.
+      ignore_unavailable: true,
       size: 0,
       query: {
         bool: {
           filter: [
             { terms: { 'process.entity_id': entityIds } },
+            // Network disconnects are `end` events too.
+            { term: { 'event.category': 'process' } },
             { term: { 'event.type': 'end' } },
             {
               range: {
@@ -169,7 +177,7 @@ const findExitedAt = async (
         },
       },
     });
-    // A wildcard silently skips indices the user cannot read, so no shards means no answer.
+    // Unreadable indices are skipped silently, so no shards means no answer.
     if (response._shards.total === 0) {
       logger?.warn(
         'rehydrateProcessSelectors: no readable Defend process events index, treating processes as live'
@@ -281,7 +289,12 @@ export const makeRehydrateProcessSelectors = (
       });
     }
 
-    const exitedAtByEntityId = await findExitedAt(esClient, [...byKey.values()], logger);
+    const exitedAtByEntityId = await findExitedAt(
+      esClient,
+      [...byKey.values()],
+      refs.map(({ index }) => index),
+      logger
+    );
     const exitedAtOf = ({ entityId }: Candidate): string | undefined =>
       entityId === undefined ? undefined : exitedAtByEntityId.get(entityId);
 
@@ -294,7 +307,7 @@ export const makeRehydrateProcessSelectors = (
 
     const selectors: ProcessSelector[] = [];
     for (const list of byHost.values()) {
-      // Live before exited, so exited processes never crowd a live one out of the cap.
+      // Live first, so exited processes never push a live one out of the cap.
       const capped = list
         .sort(
           (a, b) =>
