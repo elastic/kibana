@@ -195,6 +195,17 @@ revision to hold them to.
 Every stored proposal carries `rootProposalId` and `revision`. The plugin is
 unshipped, so legacy records without these fields are not supported.
 
+`getLatestRevisions` is the same read for many chains at once, for an in-process
+caller that already holds many root ids, such as AlertZero's Alert Triage. It
+returns the live revision of each chain keyed by its root id, and leaves out a
+root with no live revision, or one whose live revision `origin` or
+`excludeExpired` filters out. A chain caught between the two writes of a revision
+has two live rows for a moment; the released one is kept, as above, and otherwise
+the later revision. It never returns a partial answer: asked for more than 10,000
+chains, or matching more live rows than one search returns, it throws
+`ProposalLookupTruncatedError`, because a caller that reads a missing chain as
+free would create a duplicate.
+
 ### Caller-supplied ids
 
 `create()` takes an optional `id`, and a UUID is required. Without one it mints a
