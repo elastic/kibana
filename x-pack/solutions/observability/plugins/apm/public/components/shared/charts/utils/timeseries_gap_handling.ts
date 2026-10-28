@@ -118,18 +118,8 @@ export function splitSeriesAtNullGaps(
 }
 
 /**
- * Drops the final data point of a coordinate series.
- *
- * The last bucket of an APM time series is only partially covered whenever the
- * selected time range does not align to a full bucket boundary (most relative
- * ranges, e.g. "Last 1 hour"). That partial bucket holds a fraction of a full
- * bucket's worth of data, so plotting it at face value makes the line appear to
- * drop toward ~0 at the right edge even though throughput/latency is steady.
- *
- * The full-size charts flag this bucket with the `__endzones__` annotation, but
- * sparklines have no room for an annotation, so they trim the partial bucket
- * instead. A series of one point or fewer is returned unchanged, since trimming
- * it would leave nothing to render.
+ * Drops the final, partially-covered bucket of a coordinate series (returning a
+ * series of one point or fewer unchanged so there is still something to render).
  */
 export function trimPartialTrailingBucket(
   data?: ReadonlyArray<Coordinate> | null
