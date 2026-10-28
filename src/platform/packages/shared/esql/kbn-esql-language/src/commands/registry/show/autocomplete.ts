@@ -32,7 +32,7 @@ export async function autocomplete(
   return [
     {
       text: 'INFO',
-      detail: i18n.translate('kbn-esql-language.esql.show.info.detail', {
+      detail: i18n.translate('esqlLanguage.esql.show.info.detail', {
         defaultMessage: 'Get information about the Elasticsearch cluster.',
       }),
       kind: 'Method',

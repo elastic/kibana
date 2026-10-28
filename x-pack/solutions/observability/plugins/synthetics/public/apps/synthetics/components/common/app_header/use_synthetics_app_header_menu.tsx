@@ -136,7 +136,7 @@ export function useSyntheticsAppHeaderMenu(
   const statusRuleExists = Boolean(defaultRules?.statusRule);
   const tlsRuleExists = Boolean(defaultRules?.tlsRule);
 
-  const showCreateMonitor = enableCreateMonitor && hasMonitors;
+  const showCreateMonitor = enableCreateMonitor;
 
   const exploreHref = useMemo(
     () =>

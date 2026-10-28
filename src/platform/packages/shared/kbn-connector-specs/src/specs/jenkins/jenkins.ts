@@ -483,7 +483,7 @@ export const Jenkins: ConnectorSpec = {
   metadata: {
     id: '.jenkins',
     displayName: 'Jenkins',
-    description: i18n.translate('core.kibanaConnectorSpecs.jenkins.metadata.description', {
+    description: i18n.translate('connectorSpecs.jenkins.metadata.description', {
       defaultMessage:
         'Trigger, monitor, and stop Jenkins builds, and manage jobs, test reports, and the build queue',
     }),
@@ -499,33 +499,26 @@ export const Jenkins: ConnectorSpec = {
         isRecommended: true,
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.jenkins.auth.basic.label', {
+          label: i18n.translate('connectorSpecs.jenkins.auth.basic.label', {
             defaultMessage: 'Username and API token',
           }),
           meta: {
             username: {
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.jenkins.auth.basic.usernameHelpText',
-                {
-                  defaultMessage:
-                    'The Jenkins account username that every connector action runs as.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.jenkins.auth.basic.usernameHelpText', {
+                defaultMessage: 'The Jenkins account username that every connector action runs as.',
+              }),
             },
             password: {
-              label: i18n.translate('core.kibanaConnectorSpecs.jenkins.auth.basic.passwordLabel', {
+              label: i18n.translate('connectorSpecs.jenkins.auth.basic.passwordLabel', {
                 defaultMessage: 'API token',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.jenkins.auth.basic.passwordHelpText',
-                {
-                  defaultMessage:
-                    'Generate a token from the user profile page in Jenkins (click your name, then ' +
-                    '"Security", then "Add new Token"). Use an API token, not the account password — ' +
-                    'this connector relies on Jenkins exempting token-authenticated requests from CSRF ' +
-                    'crumb checks, which does not apply to password authentication.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.jenkins.auth.basic.passwordHelpText', {
+                defaultMessage:
+                  'Generate a token from the user profile page in Jenkins (click your name, then ' +
+                  '"Security", then "Add new Token"). Use an API token, not the account password — ' +
+                  'this connector relies on Jenkins exempting token-authenticated requests from CSRF ' +
+                  'crumb checks, which does not apply to password authentication.',
+              }),
             },
           },
         },
@@ -538,7 +531,7 @@ export const Jenkins: ConnectorSpec = {
       baseUrl: UISchemas.url('https://jenkins.example.com')
         .describe('The base URL of the Jenkins controller (no trailing slash needed).')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.jenkins.config.baseUrl.label', {
+          label: i18n.translate('connectorSpecs.jenkins.config.baseUrl.label', {
             defaultMessage: 'Jenkins URL',
           }),
           validate: { allowedHosts: true },
@@ -875,7 +868,7 @@ export const Jenkins: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.jenkins.test.description', {
+    description: i18n.translate('connectorSpecs.jenkins.test.description', {
       defaultMessage: 'Verifies connectivity and credentials by calling the Jenkins whoAmI API',
     }),
     handler: async (ctx) => {

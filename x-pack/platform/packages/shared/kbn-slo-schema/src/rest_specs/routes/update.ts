@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { allOrAnyStringOrArray } from '../../schema/zod/common';
-import { indicatorSchema } from '../../schema/zod/indicators';
+import { allOrAnyStringOrArray } from '../../schema/common';
+import { indicatorSchema } from '../../schema/indicators';
 import {
   budgetingMethodSchema,
   dashboardsWithIdSchema,
@@ -15,8 +15,8 @@ import {
   sloDefinitionSchema,
   sloIdSchema,
   tagsSchema,
-} from '../../schema/zod/slo';
-import { timeWindowSchema } from '../../schema/zod/time_window';
+} from '../../schema/slo';
+import { timeWindowSchema } from '../../schema/time_window';
 
 const updateSLOParamsSchema = z.object({
   path: z.object({

@@ -23,7 +23,7 @@ jest.mock('@elastic/charts', () => ({
   },
   Position: { Left: 'left' },
   ScaleType: { Linear: 'linear' },
-  CurveType: { CURVE_STEP_AFTER: 'curveStepAfter' },
+  CurveType: { CURVE_STEP: 'curveStep' },
 }));
 
 const card = (overrides: Partial<SignalCardData> = {}): SignalCardData => ({
@@ -62,11 +62,32 @@ describe('SignalCard', () => {
   });
 
   it('shows the title, the description and the formatted count', () => {
-    renderCard();
+    renderCard({ value: 5678 });
     const tile = screen.getByTestId('eaFaceliftSignalCard-newEntity');
     expect(tile).toHaveTextContent('New entity');
     expect(tile).toHaveTextContent('First seen in the last 7 days');
-    expect(tile).toHaveTextContent((12345).toLocaleString());
+    expect(tile).toHaveTextContent('5,678');
+  });
+
+  it.each([
+    [9999, '9,999'],
+    [10000, '10K'],
+    [10500, '10.5K'],
+    [12345, '12.3K'],
+    [1234567, '1.2M'],
+  ])('shortens the count from 10,000 on: %d shows as %s', (value, shown) => {
+    renderCard({ value });
+    expect(screen.getByTestId('eaFaceliftSignalCard-newEntity')).toHaveTextContent(shown);
+  });
+
+  it.each([
+    [9999, '+9,999↑'],
+    [10000, '+10K↑'],
+    [10500, '+10.5K↑'],
+    [-12345, '-12.3K↓'],
+  ])('shortens the change from 10,000 on: %d shows as %s', (delta, shown) => {
+    renderCard({ value: 50000, delta });
+    expect(screen.getByTestId('eaFaceliftSignalCardDeltaBadge')).toHaveTextContent(shown);
   });
 
   it('shows an increase as +n with an up arrow, and a decrease as -n with a down arrow', () => {
@@ -153,6 +174,15 @@ describe('SignalCard', () => {
       expect(tile()).toHaveAttribute(
         'aria-label',
         'New entity. Down 3 compared with the previous period'
+      );
+    });
+
+    it('says the exact change where the badge shortens it', () => {
+      renderCard({ value: 50000, delta: 10512 });
+      expect(screen.getByTestId('eaFaceliftSignalCardDeltaBadge')).toHaveTextContent('+10.5K↑');
+      expect(tile()).toHaveAttribute(
+        'aria-label',
+        'New entity. Up 10,512 compared with the previous period'
       );
     });
 

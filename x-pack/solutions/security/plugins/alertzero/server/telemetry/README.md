@@ -291,7 +291,7 @@ The epic's sweep counts (reports swept, Tier 2 invoked, findings reviewable or c
 
 ### `alertzero_endpoint_analysis_completed`
 
-Emitted by one Endpoint Analysis run for one indicator, when it ends. The run works on the Attack Discovery Investigation named by the indicator and never opens one of its own. The Worker's proposal gate closes that Investigation once every containment Proposal is decided.
+Emitted by one Endpoint Analysis run for one indicator, once it has reached its verdict and before it writes it to the indicator. The run works on the Attack Discovery Investigation named by the indicator and never opens one of its own. The Worker's proposal gate closes that Investigation once every containment Proposal is decided.
 
 | Field | Type | Required | Description |
 |---|---|---|---|

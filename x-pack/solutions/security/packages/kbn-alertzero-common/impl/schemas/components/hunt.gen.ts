@@ -25,7 +25,7 @@ export type IndexScopeStatusEnum = typeof IndexScopeStatus.enum;
 export const IndexScopeStatusEnum = IndexScopeStatus.enum;
 
 /**
- * Why a hunt could not corroborate part of what it was asked to look at, or could not show what it found. Eight are transient, named rather than counted so this list stays honest as reasons are added: `search_partial`, `index_unavailable`, `generation_failed`, `execute_failed`, `catalog_unavailable` (the managed ATT&CK data was unavailable, so a later run can extract and verify the report's techniques), and the three that mean a model's output was refused — `query_out_of_scope`, `query_ungrounded`, `quote_ungrounded`. Those three are transient because generation and extraction vary between runs, so a technique refused once is still unsearched and a later run may produce a usable query or quote. The rest are deterministic: repeating the run produces the same gap, so retrying only re-spends it. `collapsed` is the generation budget's gap for a technique whose evidence names the same report artifacts as another technique's: the other one generated first, its query was seen to filter on those artifacts, and the budget ran out before this one got a query of its own. The artifacts were searched; this technique's own behavior was not. The same report and quotes reproduce it. `input_truncated` means the report carried more IOCs, techniques or text than a hunt accepts, so only a prefix of it was hunted.
+ * Why a hunt could not corroborate part of what it was asked to look at, or could not show what it found. Nine are transient, named rather than counted so this list stays honest as reasons are added: `search_partial`, `index_unavailable`, `generation_failed`, `execute_failed`, `extraction_pending` (the report's enrichment has not finished, so a later sweep will have terms this one did not), `catalog_unavailable` (the managed ATT&CK data was unavailable, so a later run can extract and verify the report's techniques), and the three that mean a model's output was refused — `query_out_of_scope`, `query_ungrounded`, `quote_ungrounded`. Those three are transient because generation and extraction vary between runs, so a technique refused once is still unsearched and a later run may produce a usable query or quote. The rest are deterministic: repeating the run produces the same gap, so retrying only re-spends it. `collapsed` is the generation budget's gap for a technique whose evidence names the same report artifacts as another technique's: the other one generated first, its query was seen to filter on those artifacts, and the budget ran out before this one got a query of its own. The artifacts were searched; this technique's own behavior was not. The same report and quotes reproduce it. `input_truncated` means the report carried more IOCs, techniques or text than a hunt accepts, so only a prefix of it was hunted.
  */
 export const HuntIncompleteReason = lazySchema(() =>
   z.enum([
@@ -44,6 +44,7 @@ export const HuntIncompleteReason = lazySchema(() =>
     'refs_unavailable',
     'nothing_searched',
     'input_truncated',
+    'extraction_pending',
   ])
 );
 export type HuntIncompleteReason = z.infer<typeof HuntIncompleteReason>;

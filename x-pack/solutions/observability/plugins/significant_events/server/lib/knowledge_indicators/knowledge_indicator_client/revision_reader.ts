@@ -48,9 +48,11 @@ export class RevisionReader {
     private readonly space: string
   ) {}
 
+  /** Counts latest revisions, or the distinct values of `distinctColumn` among them. */
   async countLatestRevisions(
     where?: LatestSourceWhereCondition,
-    postGroupingWhere?: LatestSourceWhereCondition
+    postGroupingWhere?: LatestSourceWhereCondition,
+    distinctColumn?: string
   ): Promise<number> {
     let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id']).where`${inSpace(
       this.space
@@ -58,7 +60,13 @@ export class RevisionReader {
     query = withWhere(query, where);
     query = pickLatestPerGroup(query, REVISION_GROUP_KEY);
     query = withWhere(query, postGroupingWhere);
-    query = query.pipe`STATS total = COUNT(*)`.keep('total').limit(1);
+    query = (
+      distinctColumn
+        ? query.pipe`STATS total = COUNT_DISTINCT(${esql.col(distinctColumn)})`
+        : query.pipe`STATS total = COUNT(*)`
+    )
+      .keep('total')
+      .limit(1);
 
     return executeCountQuery({ esClient: this.esClient, query });
   }

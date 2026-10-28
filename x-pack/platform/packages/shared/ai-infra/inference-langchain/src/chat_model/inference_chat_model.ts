@@ -90,6 +90,8 @@ type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'strea
 /**
  * Langchain chatModel utilizing the inference API under the hood for communication with the LLM.
  *
+ * Reasoning text (`additional_kwargs.reasoning_content`) is only included when streaming.
+ *
  * @example
  * ```ts
  * const chatModel = new InferenceChatModel({
@@ -284,7 +286,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
           ? {
               tokenUsage: {
                 promptTokens: response.tokens.prompt,
-                completionTokens: response.tokens.completion,
+                completionTokens: response.tokens.completion + (response.tokens.thinking ?? 0),
                 totalTokens: response.tokens.total,
               },
             }

@@ -15,7 +15,7 @@ apiTest.describe(
   () => {
     const managePipelineRole = {
       elasticsearch: {
-        cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'],
+        cluster: ['manage_pipeline'],
       },
       kibana: [],
     };

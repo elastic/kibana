@@ -31,7 +31,7 @@ jest.mock('@xyflow/react', () => {
     ...actual,
     // Render labels inline so they appear in the normal DOM tree.
     // Use data-test-subj because Kibana's RTL setup configures testIdAttribute
-    // to 'data-test-subj' (see kbn-test/src/jest/setup/react_testing_library.js).
+    // to 'data-test-subj' (see kbn-jest/src/setup/react_testing_library.js).
     EdgeLabelRenderer: ({ children }: { children: React.ReactNode }) => (
       <div data-test-subj="edge-label-renderer">{children}</div>
     ),

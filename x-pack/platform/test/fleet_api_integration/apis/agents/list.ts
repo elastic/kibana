@@ -543,7 +543,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .post(`/api/fleet/agent_policies/delete`)
         .set('kbn-xsrf', 'xxxx')
-        .send({ agentPolicyId: agentlessPolicyId })
+        .send({ agentPolicyId: agentlessPolicyId, force: true })
         .expect(200);
     });
 

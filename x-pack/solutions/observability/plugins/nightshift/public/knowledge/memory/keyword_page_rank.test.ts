@@ -39,6 +39,44 @@ const storeOfSize = (pages: number, tagsPerPage: number): KeywordEntry[] =>
     })
   );
 
+const WARMUP_RUNS = 2;
+const TIMED_RUNS = 10;
+const CALIBRATION_RUNS = 15;
+
+/**
+ * A fixed CPU-bound workload, used to measure how much CPU this worker is being given right
+ * now. Deliberately independent of `computeKeywordPageRank`: calibrating against the code
+ * under test would let a regression inflate its own budget and hide itself.
+ */
+const calibrationWorkload = (): void => {
+  const counts = new Map<string, number>();
+  let tail = '';
+  for (let i = 0; i < 20_000; i++) {
+    const key = `k${i % 997}`;
+    counts.set(key, (counts.get(key) ?? 0) + Math.sqrt(i));
+    if (i % 100 === 0) tail = `${tail}${key}`.slice(-64);
+  }
+  // Prevent dead-code elimination.
+  if (tail.length === 0 || counts.size === 0) throw new Error('dead-code-eliminated');
+};
+
+/** Fastest of `runs`, so a busy agent's scheduling counts less than the work itself. */
+const fastestOf = (runs: number, work: () => void): number => {
+  let fastest = Infinity;
+  for (let run = 0; run < runs; run++) {
+    const started = performance.now();
+    work();
+    fastest = Math.min(fastest, performance.now() - started);
+  }
+  return fastest;
+};
+
+/** Measured cost of ranking the largest store, expressed in calibration workloads. */
+const RANKING_COST_IN_CALIBRATIONS = 6;
+
+/** How many times its measured cost the ranking may take before this is a regression. */
+const BUDGET_MULTIPLIER = 2;
+
 describe('computeKeywordPageRank', () => {
   it('returns empty scores for empty entries', () => {
     expect(computeKeywordPageRank([])).toEqual({});
@@ -167,19 +205,23 @@ describe('computeKeywordPageRank', () => {
 
   it('ranks the largest store the keyword query fetches fast enough for the main thread', () => {
     const entries = storeOfSize(MEMORY_KEYWORD_SIZE * MEMORY_KEYWORD_MAX_REQUESTS, 25);
-
-    // The fastest of several runs, so a busy CI agent measures the algorithm
-    // rather than its own scheduling.
-    let fastest = Infinity;
     let scores: Record<string, number> = {};
-    for (let run = 0; run < 5; run++) {
-      const started = performance.now();
+    const rank = () => {
       scores = computeKeywordPageRank(entries, { maxKeywords: MAX_RANKED_KEYWORDS });
-      fastest = Math.min(fastest, performance.now() - started);
-    }
+    };
+
+    fastestOf(WARMUP_RUNS, rank);
+    const fastestMs = fastestOf(TIMED_RUNS, rank);
+
+    fastestOf(WARMUP_RUNS, calibrationWorkload);
+    const calibrationMs = fastestOf(CALIBRATION_RUNS, calibrationWorkload);
 
     expect(Object.keys(scores).length).toBeGreaterThan(0);
-    expect(fastest).toBeLessThan(100);
+    // Relative to this machine, so the budget measures the algorithm and not how much
+    // CPU the Jest worker happened to get.
+    expect(fastestMs / calibrationMs).toBeLessThan(
+      RANKING_COST_IN_CALIBRATIONS * BUDGET_MULTIPLIER
+    );
   });
 });
 

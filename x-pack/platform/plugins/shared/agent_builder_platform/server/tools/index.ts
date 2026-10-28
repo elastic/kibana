@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { StaticToolRegistration } from '@kbn/agent-builder-server';
 import { productDocumentationTool } from './product_documentation';
 import { integrationKnowledgeTool } from './integration_knowledge';
 import type {
@@ -31,7 +31,7 @@ export const registerTools = ({
 }) => {
   const { agentBuilder, cloud } = setupDeps;
 
-  const tools: Array<BuiltinToolDefinition<any>> = [
+  const tools: Array<StaticToolRegistration<any>> = [
     searchTool({ coreSetup, topSnippetsDefaults: agentBuilder.topSnippets }),
     getDocumentByIdTool(),
     executeEsqlTool(),

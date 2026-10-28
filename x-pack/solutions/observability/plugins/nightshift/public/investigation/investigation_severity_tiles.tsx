@@ -20,9 +20,11 @@ import {
   type UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { Severity, SeverityCounts } from '@kbn/nightshift-investigations-plugin/common';
 import { getSeverityLabel, SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { SEVERITY_TILE_ICON, SEVERITY_TILE_ICON_COLORS } from '../common/severity';
 
 /** A muted tier has no section to scroll to, so its tile reads as a figure rather than a control. */
@@ -152,6 +154,14 @@ export const InvestigationSeverityTiles = ({
               css={stateStyles.panel}
               data-test-subj={`nightshiftSeverityTile-${severity}`}
               onClick={isMuted ? undefined : () => onSeverityClick(severity)}
+              {...(isMuted
+                ? {}
+                : getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SEVERITY_INVESTIGATIONS,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.SEVERITY_TILES,
+                    // The tier is the point of the click; the count rides on the page-view event.
+                    detail: severity,
+                  }))}
             >
               <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>

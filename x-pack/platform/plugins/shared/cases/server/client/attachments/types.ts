@@ -72,6 +72,11 @@ export type BulkDeleteArgs = {
    * The id of the case
    */
   caseId: string;
+  /**
+   * Whether the attachments that the deleted types take along with them are removed too.
+   * Defaults to true.
+   */
+  includeRelated?: boolean;
 } & (
   | {
       /**

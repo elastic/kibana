@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { EntityAnalyticsNewHomePage } from './entity_analytics_new_home_page';
 import * as tileHooks from '../components/home/needs_attention_tiles/hooks';
@@ -33,6 +33,9 @@ jest.mock('../components/home/needs_attention_tiles/hooks', () => ({
   useRiskMoversCount: jest.fn(),
   useRiskMoversDelta: jest.fn(),
   useRiskTilesSeries: jest.fn(),
+  useTilesLoadTelemetry: jest.fn(),
+  useTilesTimeoutNotice: jest.fn(),
+  TILE_TIMEOUT_MESSAGE: 'Timed out',
 }));
 jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
   useEntityStoreStatus: jest.fn(),
@@ -102,6 +105,9 @@ jest.mock('../components/home/entities_table', () => ({
   EntitiesTableSection: () => null,
 }));
 jest.mock('./entity_analytics_home_header', () => ({ EntityAnalyticsHomeHeader: () => null }));
+jest.mock('../components/home/ai_brief/generate_ai_brief_button', () => ({
+  GenerateAiBriefButton: () => null,
+}));
 jest.mock('./entity_store_disabled_empty_prompt', () => ({
   EntityStoreDisabledEmptyPrompt: () => null,
 }));
@@ -333,6 +339,30 @@ describe('EntityAnalyticsNewHomePage: privileges', () => {
     expect(hooks.useNewEntityCount).toHaveBeenCalled();
   });
 
+  it('renders the missing privileges callout inside the padded wrapper', () => {
+    mockPrivileges();
+    (useMissingRiskEnginePrivileges as jest.Mock).mockReturnValue({
+      isLoading: false,
+      hasAllRequiredPrivileges: false,
+      missingPrivileges: {
+        indexPrivileges: [['risk-score.risk-score-*', ['read']]],
+        clusterPrivileges: { enable: [], run: [] },
+      },
+    });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    const wrapper = screen.getByTestId('entityAnalyticsPrivilegesCalloutWrapper');
+    expect(within(wrapper).getByText('Insufficient privileges')).toBeInTheDocument();
+    expect(within(wrapper).getByText('risk-score.risk-score-*')).toBeInTheDocument();
+  });
+
+  it('leaves the callout wrapper empty when no privilege is missing', () => {
+    mockPrivileges();
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(screen.getByTestId('entityAnalyticsPrivilegesCalloutWrapper')).toBeEmptyDOMElement();
+  });
+
   it.each([
     ['alerts', ['alerts'], ['entitiesWithAlerts', 'watchlisted']],
     ['anomalies', ['anomalies'], ['entitiesWithAnomalies']],
@@ -430,6 +460,35 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
       mockTiles({ [tile]: { reachesBack: undefined } });
       render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
       expect(seriesReachesBack(tile)).toBeUndefined();
+    });
+  });
+
+  describe('when a count times out', () => {
+    it('says so on its tiles, warns once for the page, and reports the timeout', () => {
+      mockTiles();
+      hooks.useAlertBasedTiles.mockReturnValue({
+        severeAlertsCount: 0,
+        severeAlertsEntityIds: [],
+        watchlistedCount: 0,
+        watchlistedEntityIds: [],
+        isLoading: false,
+        isCountPending: false,
+        isTimedOut: true,
+      });
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      const messageOf = (id: SignalCardData['id']) => getCard(id)?.noDataMessage;
+      expect(messageOf('entitiesWithAlerts')).toBe('Timed out');
+      expect(messageOf('watchlisted')).toBe('Timed out');
+      expect(messageOf('newEntity')).toBeUndefined();
+      expect(lastOptions('useTilesTimeoutNotice')).toBe(true);
+      expect(lastOptions('useTilesLoadTelemetry').tiles.alerts.isTimedOut).toBe(true);
+    });
+
+    it('warns for nothing when no count timed out', () => {
+      mockTiles();
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+      expect(lastOptions('useTilesTimeoutNotice')).toBeFalsy();
     });
   });
 

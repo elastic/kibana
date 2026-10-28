@@ -33,7 +33,8 @@ export const SecurityAppHeader = React.memo<AppHeaderProps>((props) => {
     }
 
     if (menuItems.length === 0) {
-      return props.menu;
+      // An undefined menu makes AppHeader render the legacy action menu, which drops Feedback and Docs.
+      return props.menu ?? { items: [] };
     }
 
     return {

@@ -82,11 +82,10 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

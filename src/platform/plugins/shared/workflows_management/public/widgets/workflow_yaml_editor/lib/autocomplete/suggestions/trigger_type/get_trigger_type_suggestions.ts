@@ -88,6 +88,9 @@ export function getTriggerTypeSuggestions(
 
     const isEventDriven = !isTriggerType(triggerType.type);
     const sortPrefix = isEventDriven ? '1_' : '0_';
+    // Label is the technical id (`alert`, `alerting.actions.alertAcked`). The
+    // display name (connector name plus event title) stays in detail. filterText
+    // is the same id so YAML schema suggestions dedupe on that key.
     suggestions.push({
       label: triggerType.type,
       kind: triggerType.icon,

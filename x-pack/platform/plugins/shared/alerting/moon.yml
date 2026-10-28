@@ -100,6 +100,8 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - server/**/*
@@ -108,6 +110,4 @@ fileGroups:
     - common/**/*
     - test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

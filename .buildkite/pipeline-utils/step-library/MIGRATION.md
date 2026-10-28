@@ -11,7 +11,11 @@ fragment is ported. For how steps are written once ported, see the
    "Writing a step" in the README for helpers, presets and where it lives. Carry
    the YAML's comments over as `//` comments above the step they describe. Use
    `genericStep` only if no helper fits, and say why in a comment. Export the
-   function from `index.ts`, which is what `pipeline.ts` imports.
+   function from `index.ts`, which is what `pipeline.ts` imports. A fragment
+   under `pull_request/<area>/` (e.g., `pull_request/security_solution/`) goes in
+   the matching `steps/<area>/` subfolder, keeping its name: the YAML at
+   `pull_request/security_solution/explore.yml` becomes
+   `steps/security_solution/explore.ts`. Do not prefix filenames.
 2. In `pull_request/pipeline.ts`, replace the fragment's `getPipeline` call
    using the table below. Keep the call where it is: the order of the emitted
    steps must not change.

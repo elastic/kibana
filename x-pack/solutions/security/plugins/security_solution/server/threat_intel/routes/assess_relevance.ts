@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
+import {
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+  ALERTZERO_THREAT_INTEL_ASSESS_RELEVANCE_TELEMETRY_PLUGIN_ID,
+} from '@kbn/alertzero-common';
 import {
   ASSESS_RELEVANCE_API_PATH,
   assessRelevanceBodySchema,
@@ -52,6 +55,7 @@ export const registerAssessRelevanceRoute = ({
           request,
           uiSettingsClient: core.uiSettings.client,
           featureId: ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+          telemetryPluginId: ALERTZERO_THREAT_INTEL_ASSESS_RELEVANCE_TELEMETRY_PLUGIN_ID,
           logger,
         });
         if (!modelOutcome.ok) {
