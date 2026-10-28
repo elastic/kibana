@@ -41,13 +41,18 @@ import {
   checkOasSnapshot,
   checkSavedObjects,
   cpsTests,
+  ftrBenchSteps,
+  jestBenchSteps,
   localCheck,
+  pageLoadBenchSteps,
+  postBuildSteps,
   prBaseEnv,
   prBaseSteps,
   renderSteps,
   renovateValidation,
   storybooks,
   verifyFipsEnabled,
+  warmStartMemoryBenchSteps,
   ai4dsocSteps,
   aiAssistantSteps,
   assetInventorySteps,
@@ -767,24 +772,20 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     if (GITHUB_PR_LABELS.includes('ci:bench-jest')) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml', cancelable));
+      pipeline.push(renderSteps(jestBenchSteps(), cancelOnGate));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:bench-ftr')) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ftr_bench.yml', cancelable));
+      pipeline.push(renderSteps(ftrBenchSteps(), cancelOnGate));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:bench-page-load')) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/page_load_bench.yml', cancelable)
-      );
+      pipeline.push(renderSteps(pageLoadBenchSteps(), cancelOnGate));
     }
 
     // Run the warm-start memory check systematically; it is non-blocking.
     if (!scoutTestsOnly) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/warm_start_memory_bench.yml', cancelable)
-      );
+      pipeline.push(renderSteps(warmStartMemoryBenchSteps(), cancelOnGate));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:run-code-quality')) {
@@ -792,7 +793,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     // post_build is not cancelable — cleanup/reporting should always run
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
+    pipeline.push(renderSteps(postBuildSteps()));
 
     flushCancelOnGateFailureMetadata();
     emitPipeline(pipeline);

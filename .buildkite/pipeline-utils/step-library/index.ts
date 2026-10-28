@@ -16,7 +16,14 @@ export { checkNextDocs } from './steps/check_next_docs.ts';
 export { checkOasSnapshot } from './steps/check_oas_snapshot.ts';
 export { checkSavedObjects } from './steps/check_saved_objects.ts';
 export { cpsTests } from './steps/cps_testing.ts';
+export {
+  ftrBenchSteps,
+  jestBenchSteps,
+  pageLoadBenchSteps,
+  warmStartMemoryBenchSteps,
+} from './steps/benchmarks.ts';
 export { localCheck } from './steps/local_check.ts';
+export { postBuildSteps } from './steps/post_build.ts';
 export { renovateValidation } from './steps/renovate.ts';
 export { storybooks } from './steps/storybooks.ts';
 export { verifyFipsEnabled } from './steps/verify_fips_enabled.ts';
