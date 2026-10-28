@@ -342,16 +342,6 @@ export class EvalsPlugin
         }));
       },
       onlineScoreService: this.onlineScoreService,
-      evaluate: createEvaluateContract({
-        evaluationService: createEvaluationService({
-          evaluatorRegistry,
-          logger: this.logger,
-          getInferenceStart: async () => plugins.inference,
-        }),
-        getSpaceId: (request) =>
-          plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
-        getTraceReader: (request) => coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
-      }),
     };
   }
 }
