@@ -8,8 +8,15 @@
  */
 
 import React, { useMemo, type ReactElement } from 'react';
-import { EuiContextMenu, EuiPopover, EuiToolTip, type PopoverAnchorPosition } from '@elastic/eui';
-import { getPopoverPanels, getTooltip } from '../utils';
+import {
+  EuiContextMenu,
+  EuiPopover,
+  EuiToolTip,
+  type EuiContextMenuPanelDescriptor,
+  type PopoverAnchorPosition,
+} from '@elastic/eui';
+import { getPopoverPanels, getSwitchesPanelItems, getTooltip } from '../utils';
+import { DEFAULT_POPOVER_WIDTH } from '../constants';
 import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 import type {
   AppMenuItemType,
@@ -24,6 +31,10 @@ interface AppMenuContextMenuProps {
   anchorElement: ReactElement;
   anchorDomElement?: HTMLElement;
   items: AppMenuPopoverItem[];
+  /**
+   * When provided, the popover lists these switches instead of `items`.
+   */
+  switches?: AppMenuSwitch[];
   staticItems?: AppMenuItemType[];
   isOpen: boolean;
   popoverWidth?: number;
@@ -38,6 +49,7 @@ interface AppMenuContextMenuProps {
 
 export const AppMenuPopover = ({
   items,
+  switches,
   staticItems,
   anchorElement,
   anchorDomElement,
@@ -54,20 +66,30 @@ export const AppMenuPopover = ({
   onCloseOverflowButton,
 }: AppMenuContextMenuProps) => {
   const panels = useMemo(
-    () =>
-      getPopoverPanels({
-        items,
-        staticItems,
-        primaryActionItem,
-        switchConfig,
-        rootPanelWidth: popoverWidth,
-        rootPopoverTestId: popoverTestId,
-        onClose,
-        onCloseOverflowButton,
-        anchorDomElement,
-      }),
+    (): EuiContextMenuPanelDescriptor[] =>
+      switches && switches.length > 0
+        ? [
+            {
+              id: 0,
+              'data-test-subj': popoverTestId,
+              width: popoverWidth ?? DEFAULT_POPOVER_WIDTH,
+              items: getSwitchesPanelItems(switches),
+            },
+          ]
+        : getPopoverPanels({
+            items,
+            staticItems,
+            primaryActionItem,
+            switchConfig,
+            rootPanelWidth: popoverWidth,
+            rootPopoverTestId: popoverTestId,
+            onClose,
+            onCloseOverflowButton,
+            anchorDomElement,
+          }),
     [
       items,
+      switches,
       staticItems,
       primaryActionItem,
       switchConfig,

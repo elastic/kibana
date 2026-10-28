@@ -6,7 +6,7 @@
  */
 
 import type { AppHeaderMenu } from '@kbn/app-header';
-import type { AppMenuRunActionParams } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuSwitch } from '@kbn/app-menu';
 import type { CasesPermissions } from '../../../../../../common';
 import * as i18n from '../../../translations';
 import * as commonI18n from '../../../../../common/translations';
@@ -21,15 +21,14 @@ interface ExternalIncident {
 interface GetMenuArgs {
   permissions: CasesPermissions;
   /**
-   * Whether the current solution enables any case setting (alert syncing, observable extraction, or
-   * metrics). When false the settings popover would be empty, so the button is omitted entirely.
+   * Case settings enabled by the current solution (alert syncing, observable extraction, or
+   * metrics). When empty the settings item is omitted entirely.
    */
-  hasCaseSettings: boolean;
+  settingsSwitches: AppMenuSwitch[];
   caseId: string;
   currentExternalIncident: ExternalIncident | null;
   chat: { addToChat: () => void; summarizeCase: () => void; isAddToChatAvailable: boolean };
   onRefresh: () => void;
-  onOpenSettings: (anchor: HTMLElement) => void;
   onCopyId: () => Promise<void>;
   onOpenDeleteModal: () => void;
   /** When provided, adds a "Run workflow" item gated on `canRunWorkflow`. */
@@ -38,12 +37,11 @@ interface GetMenuArgs {
 
 export const getMenu = ({
   permissions,
-  hasCaseSettings,
+  settingsSwitches,
   caseId,
   chat,
   currentExternalIncident,
   onRefresh,
-  onOpenSettings,
   onCopyId,
   onOpenDeleteModal,
   runWorkflow,
@@ -57,24 +55,6 @@ export const getMenu = ({
       testId: 'case-refresh',
       order: 100,
     },
-    // Ordered ahead of "Run workflow" so it keeps an inline slot: its popover is anchored to the
-    // trigger element, which unmounts when the item is rendered inside the "More" popover.
-    ...(permissions.update && hasCaseSettings
-      ? [
-          {
-            id: 'caseSettings',
-            label: i18n.CASE_SETTINGS,
-            iconType: 'gear' as const,
-            run: (params?: AppMenuRunActionParams) => {
-              if (params?.triggerElement) {
-                onOpenSettings(params.triggerElement);
-              }
-            },
-            testId: 'case-settings-button',
-            order: 200,
-          },
-        ]
-      : []),
     ...(runWorkflow?.canRunWorkflow
       ? [
           {
@@ -83,7 +63,20 @@ export const getMenu = ({
             iconType: 'play' as const,
             run: () => runWorkflow.onOpen(),
             testId: 'case-run-workflow-button',
-            order: 250,
+            order: 150,
+          },
+        ]
+      : []),
+    ...(permissions.update && settingsSwitches.length > 0
+      ? [
+          {
+            id: 'caseSettings',
+            label: i18n.CASE_SETTINGS,
+            iconType: 'gear' as const,
+            switches: settingsSwitches,
+            testId: 'case-settings-button',
+            popoverTestId: 'case-settings-popover',
+            order: 200,
           },
         ]
       : []),

@@ -91,6 +91,40 @@ describe('AppMenuItem', () => {
     expect(defaultProps.onPopoverToggle).toHaveBeenCalledTimes(1);
   });
 
+  it('should open a popover listing the switches of an item with switches', async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+
+    render(
+      <AppMenuItem
+        {...defaultProps}
+        testId="test-item-with-switches"
+        popoverTestId="test-switches-popover"
+        isPopoverOpen
+        switches={[
+          {
+            id: 'switch1',
+            label: 'Switch 1',
+            checked: false,
+            onChange,
+            'data-test-subj': 'test-switch',
+          },
+        ]}
+      />
+    );
+
+    expect(screen.getByTestId('test-item-with-switches')).toHaveAttribute(
+      'aria-haspopup',
+      'dialog'
+    );
+    expect(await screen.findByTestId('test-switches-popover')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('test-switch'));
+
+    expect(onChange).toHaveBeenCalledWith(true);
+    expect(defaultProps.onPopoverClose).not.toHaveBeenCalled();
+  });
+
   it('should capitalize the label text', () => {
     render(<AppMenuItem {...buttonProps} label="settings" />);
 

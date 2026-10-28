@@ -21,6 +21,7 @@ import {
   EuiLoadingSpinner,
   EuiSwitch,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { AppMenuBadge } from './components/app_menu_badge';
 import { AppMenuItemLabel } from './components/app_menu_item_label';
@@ -392,47 +393,70 @@ export const getPopoverActionItems = ({
  * Generate switch items for the popover menu. The switch is rendered as the very last item
  * with a separator above it.
  */
-export const getPopoverSwitchItems = ({
-  switchConfig,
-}: {
-  switchConfig: AppMenuSwitch;
-}): EuiContextMenuPanelItemDescriptor[] => {
-  const separator = createSeparatorItem('switch-separator');
+const renderPopoverSwitch = (switchConfig: AppMenuSwitch) => {
   const { title, content } = getTooltip({
     tooltipContent: switchConfig.tooltipContent,
     tooltipTitle: switchConfig.tooltipTitle,
   });
-  const showTooltip = Boolean(content || title);
 
-  return [
-    separator,
-    {
-      key: `switch-${switchConfig.id}`,
-      renderItem: () => {
-        const switchElement = (
-          <EuiSwitch
-            id={switchConfig.id}
-            label={asPlainText(switchConfig.label)}
-            labelProps={switchConfig.labelProps}
-            checked={switchConfig.checked}
-            onChange={(e) => switchConfig.onChange(e.target.checked)}
-            disabled={switchConfig.disabled}
-            compressed
-            data-test-subj={switchConfig['data-test-subj'] ?? APP_MENU_TEST_SUBJECTS.switch}
-          />
-        );
+  const switchElement = (
+    <EuiSwitch
+      id={switchConfig.id}
+      label={asPlainText(switchConfig.label)}
+      labelProps={switchConfig.labelProps}
+      checked={switchConfig.checked}
+      onChange={(e) => switchConfig.onChange(e.target.checked)}
+      disabled={switchConfig.disabled}
+      compressed
+      data-test-subj={switchConfig['data-test-subj'] ?? APP_MENU_TEST_SUBJECTS.switch}
+    />
+  );
 
-        return showTooltip ? (
-          <EuiToolTip content={content} title={title}>
-            {switchElement}
-          </EuiToolTip>
-        ) : (
-          switchElement
-        );
-      },
-    },
-  ];
+  return content || title ? (
+    <EuiToolTip content={content} title={title}>
+      {switchElement}
+    </EuiToolTip>
+  ) : (
+    switchElement
+  );
 };
+
+export const getPopoverSwitchItems = ({
+  switchConfig,
+}: {
+  switchConfig: AppMenuSwitch;
+}): EuiContextMenuPanelItemDescriptor[] => [
+  createSeparatorItem('switch-separator'),
+  {
+    key: `switch-${switchConfig.id}`,
+    renderItem: () => renderPopoverSwitch(switchConfig),
+  },
+];
+
+const SwitchesPanelItem = ({ children }: { children: React.ReactNode }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div
+      css={css`
+        padding: ${euiTheme.size.s};
+      `}
+    >
+      {children}
+    </div>
+  );
+};
+
+/**
+ * Generate the items of a panel listing an item's `switches`.
+ */
+export const getSwitchesPanelItems = (
+  switches: AppMenuSwitch[]
+): EuiContextMenuPanelItemDescriptor[] =>
+  switches.map((switchConfig) => ({
+    key: `switch-${switchConfig.id}`,
+    renderItem: () => <SwitchesPanelItem>{renderPopoverSwitch(switchConfig)}</SwitchesPanelItem>,
+  }));
 
 /**
  * Recursively generate EUI context menu panels from the provided menu items.
@@ -487,13 +511,34 @@ export const getPopoverPanels = ({
         panelItems.push(createSeparatorItem(`separator-${item.id}`));
       }
 
-      if (item.items && item.items.length > 0) {
+      // popoverWidth may exist on items that are AppMenuItemType (e.g., overflow items)
+      const itemPopoverWidth =
+        'popoverWidth' in item ? (item as { popoverWidth?: number }).popoverWidth : undefined;
+
+      if (item.switches && item.switches.length > 0) {
         currentPanelId++;
         const childPanelId = currentPanelId;
 
-        // popoverWidth may exist on items that are AppMenuItemType (e.g., overflow items)
-        const itemPopoverWidth =
-          'popoverWidth' in item ? (item as { popoverWidth?: number }).popoverWidth : undefined;
+        panels.push({
+          id: childPanelId,
+          title: upperFirst(asPlainText(item.label)),
+          ...(item.popoverTestId && { 'data-test-subj': item.popoverTestId }),
+          width: itemPopoverWidth ?? DEFAULT_POPOVER_WIDTH,
+          items: getSwitchesPanelItems(item.switches),
+        });
+        panelItems.push(
+          mapAppMenuItemToPanelItem(
+            item,
+            childPanelId,
+            onClose,
+            onCloseOverflowButton,
+            anchorDomElement
+          )
+        );
+      } else if (item.items && item.items.length > 0) {
+        currentPanelId++;
+        const childPanelId = currentPanelId;
+
         processItems({
           itemsToProcess: item.items,
           panelId: childPanelId,

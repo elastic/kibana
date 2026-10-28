@@ -28,6 +28,25 @@ viewport breakpoint using the previous viewport mapping: `xs` and `s` collapse, 
 the medium layout, and `xl` shows the full menu. Menus that should preserve viewport-based behavior,
 such as the Classic and legacy Project Chrome headers, set `breakpointSource="viewport"`.
 
+## Settings switches
+
+Give an item `switches` instead of `run` or `items` to show a list of toggles, such as per-page
+settings. Inline, the item opens a popover with the switches. In the overflow ("More") menu, the
+switches are shown in a nested panel. Toggling a switch keeps the menu open.
+
+```tsx
+const settingsItem: AppMenuItemType = {
+  id: 'settings',
+  label: 'Settings',
+  iconType: 'gear',
+  overflow: true,
+  switches: [{ id: 'syncAlerts', label: 'Sync alerts', checked, onChange: setChecked }],
+};
+```
+
+Don't open your own popover from `run`: its `triggerElement` is unmounted when the item is rendered
+inside the overflow menu.
+
 ## Loading skeleton
 
 `AppMenuLoading` skeletons the same responsive layouts. Mount it in the same slot as

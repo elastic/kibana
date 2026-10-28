@@ -15,8 +15,15 @@ import { useGetCaseConnectors } from '../../../../../containers/use_get_case_con
 import { useDeleteCases } from '../../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../../actions/status/use_should_disable_status';
 import { useCasesConfig } from '../../../../../common/lib/kibana';
+import { useLicense } from '../../../../../common/use_license';
 import type { CaseUI } from '../../../../../../common';
+import { CaseMetricsFeature } from '../../../../../../common/types/api';
 
+const { useLicense: actualUseLicense } = jest.requireActual('../../../../../common/use_license');
+
+jest.mock('../../../../../common/use_license', () => ({
+  useLicense: jest.fn(jest.requireActual('../../../../../common/use_license').useLicense),
+}));
 jest.mock('../../../../../containers/use_get_case_connectors');
 jest.mock('../../../../../containers/use_delete_cases');
 jest.mock('../../../../actions/status/use_should_disable_status');
@@ -37,6 +44,7 @@ jest.mock('@kbn/workflows-ui', () => {
   };
 });
 
+const useLicenseMock = useLicense as jest.Mock;
 const mockDeleteCases = jest.fn();
 const mockOnStatusChanged = jest.fn();
 const mockOnSeverityChanged = jest.fn();
@@ -50,11 +58,14 @@ const wrapper = ({ children }: { children: React.ReactNode }) =>
 
 describe('useCaseViewHeader', () => {
   const onUpdateField = jest.fn();
+  const onShowMetricsChange = jest.fn();
   const defaultArgs = {
     caseData: basicCase,
     onUpdateField,
     onStatusChanged: mockOnStatusChanged,
     onSeverityChanged: mockOnSeverityChanged,
+    showMetrics: true,
+    onShowMetricsChange,
   };
 
   beforeEach(() => {
@@ -370,22 +381,107 @@ describe('useCaseViewHeader', () => {
     );
   });
 
-  it('toggles settings open state when settings action is triggered', () => {
-    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
-      wrapper,
+  describe('case settings switches', () => {
+    afterEach(() => {
+      useLicenseMock.mockImplementation(actualUseLicense);
     });
 
-    expect(result.current.isSettingsOpen).toBe(false);
+    const metricsWrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(
+        TestProviders,
+        { features: { metrics: [CaseMetricsFeature.ALERTS_COUNT] } } as React.ComponentProps<
+          typeof TestProviders
+        >,
+        children
+      );
 
-    const mockElement = document.createElement('button');
+    const getSettingsSwitch = (
+      menu: ReturnType<typeof useCaseViewHeader>['menu'],
+      testSubj: string
+    ) =>
+      menu
+        .items!.find((item) => item.id === 'caseSettings')
+        ?.switches?.find((settingsSwitch) => settingsSwitch['data-test-subj'] === testSubj);
 
-    act(() => {
-      const settingsItem = result.current.menu.items!.find((item) => item.id === 'caseSettings');
-      settingsItem?.run?.({ triggerElement: mockElement, returnFocus: jest.fn() });
+    it('renders the case settings as switches reflecting the current values', () => {
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+        wrapper: metricsWrapper,
+      });
+
+      expect(getSettingsSwitch(result.current.menu, 'case-settings-sync-alerts-switch')).toEqual(
+        expect.objectContaining({ checked: basicCase.settings.syncAlerts })
+      );
+      expect(getSettingsSwitch(result.current.menu, 'case-settings-show-metrics-switch')).toEqual(
+        expect.objectContaining({ checked: true })
+      );
     });
 
-    expect(result.current.isSettingsOpen).toBe(true);
-    expect(result.current.settingsAnchor).toBe(mockElement);
+    it('updates the case settings when the sync alerts switch is toggled', () => {
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+
+      act(() => {
+        getSettingsSwitch(result.current.menu, 'case-settings-sync-alerts-switch')?.onChange(false);
+      });
+
+      expect(onUpdateField).toHaveBeenCalledWith({
+        key: 'settings',
+        value: { ...basicCase.settings, syncAlerts: false },
+      });
+    });
+
+    it('omits the show metrics switch when no metrics features are configured', () => {
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+
+      expect(
+        getSettingsSwitch(result.current.menu, 'case-settings-show-metrics-switch')
+      ).toBeUndefined();
+    });
+
+    it('omits the extract observables switch without a platinum+ license', () => {
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+
+      expect(
+        getSettingsSwitch(result.current.menu, 'case-settings-extract-observables-switch')
+      ).toBeUndefined();
+    });
+
+    it('updates the case settings when the extract observables switch is toggled', () => {
+      useLicenseMock.mockReturnValue({
+        isAtLeast: () => true,
+        isAtLeastPlatinum: () => true,
+        isAtLeastGold: () => true,
+        isAtLeastEnterprise: () => true,
+        getLicense: () => null,
+      });
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+
+      act(() => {
+        getSettingsSwitch(
+          result.current.menu,
+          'case-settings-extract-observables-switch'
+        )?.onChange(true);
+      });
+
+      expect(onUpdateField).toHaveBeenCalledWith({
+        key: 'settings',
+        value: { ...basicCase.settings, extractObservables: true },
+      });
+    });
+
+    it('calls onShowMetricsChange when the show metrics switch is toggled', () => {
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+        wrapper: metricsWrapper,
+      });
+
+      act(() => {
+        getSettingsSwitch(result.current.menu, 'case-settings-show-metrics-switch')?.onChange(
+          false
+        );
+      });
+
+      expect(onShowMetricsChange).toHaveBeenCalledWith(false);
+    });
   });
 
   it('calls onStatusChanged when status badge item is clicked', () => {

@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
-import { APP_MENU_TEST_SUBJECTS } from '@kbn/core-chrome-app-menu-components';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-menu';
 
 import { CaseDetailsAppHeader } from './case_details_app_header';
 import { renderWithTestingProviders } from '../../../../common/mock';
@@ -19,7 +19,6 @@ import { useDeleteCases } from '../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../actions/status/use_should_disable_status';
 import { useStatusAction } from '../../../actions/status/use_status_action';
 import { useAddCaseToChat } from '../../../../agent_builder/use_add_case_to_chat';
-import { useCasesConfig } from '../../../../common/lib/kibana';
 
 jest.mock('../../../../containers/use_get_case_connectors');
 jest.mock('../../../../containers/use_delete_cases');
@@ -33,23 +32,6 @@ jest.mock('../../use_on_refresh_case_view_page');
 jest.mock('../../../confirm_delete_case', () => ({
   ConfirmDeleteCaseModal: () => <div data-test-subj="confirm-delete-modal" />,
 }));
-
-jest.mock('./case_settings_popover', () => ({
-  CaseSettingsPopover: () => <div data-test-subj="case-settings-popover" />,
-}));
-
-const mockCanExecuteWorkflow = jest.fn(() => false);
-
-jest.mock('@kbn/workflows-ui', () => {
-  const actual = jest.requireActual('@kbn/workflows-ui');
-  return {
-    ...actual,
-    useWorkflowsCapabilities: () => ({
-      ...actual.useWorkflowsCapabilities(),
-      canExecuteWorkflow: mockCanExecuteWorkflow(),
-    }),
-  };
-});
 
 (useGetCaseConnectors as jest.Mock).mockReturnValue({ data: {} });
 (useDeleteCases as jest.Mock).mockReturnValue({ mutate: jest.fn() });
@@ -150,39 +132,20 @@ describe('CaseDetailsAppHeader', () => {
     });
   });
 
-  describe('when running workflows is available', () => {
-    const mockUseCasesConfig = useCasesConfig as jest.Mock;
-    const defaultCasesConfig = mockUseCasesConfig();
-    const originalInnerWidth = window.innerWidth;
+  it('toggles case settings from the overflow menu without closing it', async () => {
+    renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
 
-    beforeEach(() => {
-      mockUseCasesConfig.mockReturnValue({ ...defaultCasesConfig, runWorkflowsEnabled: true });
-      mockCanExecuteWorkflow.mockReturnValue(true);
-      // The app menu only renders items inline at the `xl` breakpoint.
-      window.innerWidth = 1400;
+    await userEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+    fireEvent.click(await screen.findByTestId('case-settings-button'));
+
+    const settingsPanel = await screen.findByTestId('case-settings-popover');
+    fireEvent.click(within(settingsPanel).getByTestId('case-settings-sync-alerts-switch'));
+
+    expect(onUpdateField).toHaveBeenCalledWith({
+      key: 'settings',
+      value: { ...basicCase.settings, syncAlerts: !basicCase.settings.syncAlerts },
     });
-
-    afterEach(() => {
-      mockUseCasesConfig.mockReturnValue(defaultCasesConfig);
-      mockCanExecuteWorkflow.mockReturnValue(false);
-      window.innerWidth = originalInnerWidth;
-    });
-
-    it('keeps case settings inline and moves run workflow to the overflow menu', async () => {
-      renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
-
-      const appMenu = await screen.findByTestId(APP_MENU_TEST_SUBJECTS.root);
-      expect(within(appMenu).getByTestId('case-settings-button')).toBeInTheDocument();
-      expect(within(appMenu).queryByTestId('case-run-workflow-button')).not.toBeInTheDocument();
-
-      await userEvent.click(within(appMenu).getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
-
-      expect(
-        within(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.popover)).getByTestId(
-          'case-run-workflow-button'
-        )
-      ).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('case-settings-popover')).toBeInTheDocument();
   });
 
   it('adds the case to chat from the chat actions dropdown', async () => {

@@ -755,6 +755,53 @@ describe('utils', () => {
       expect(childPanel?.title).toBe('Parent');
     });
 
+    it('should create a nested panel listing the switches of items with switches', () => {
+      const items: AppMenuPopoverItem[] = [
+        {
+          id: 'settings',
+          label: 'settings',
+          popoverTestId: 'settings-panel',
+          switches: [defaultSwitch, { ...defaultSwitch, id: 'other-switch' }],
+        },
+      ];
+
+      const panels = getPopoverPanels({ items });
+
+      expect(panels).toHaveLength(2);
+      const mainPanel = panels.find((p) => p.id === 0);
+      const childPanel = panels.find((p) => p.id === 1);
+
+      expect(mainPanel?.items?.[0]).toEqual(expect.objectContaining({ key: 'settings', panel: 1 }));
+      expect(childPanel).toEqual(
+        expect.objectContaining({ title: 'Settings', 'data-test-subj': 'settings-panel' })
+      );
+      expect(childPanel?.items?.map((item) => item.key)).toEqual([
+        'switch-test-switch',
+        'switch-other-switch',
+      ]);
+    });
+
+    it('should render switches of items with switches that toggle without closing the popover', () => {
+      const onChange = jest.fn();
+      const onClose = jest.fn();
+      const items: AppMenuPopoverItem[] = [
+        {
+          id: 'settings',
+          label: 'Settings',
+          switches: [{ ...defaultSwitch, onChange, 'data-test-subj': 'settings-switch' }],
+        },
+      ];
+
+      const panels = getPopoverPanels({ items, onClose });
+      const childPanel = panels.find((p) => p.id === 1);
+      const { getByTestId } = render(childPanel?.items?.[0]?.renderItem?.() as ReactElement);
+
+      getByTestId('settings-switch').click();
+
+      expect(onChange).toHaveBeenCalledWith(true);
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
     it('should add separator above item when separator is "above"', () => {
       const items: AppMenuPopoverItem[] = [
         { id: '1', label: 'Item 1', run: jest.fn(), order: 1, separator: 'above' },

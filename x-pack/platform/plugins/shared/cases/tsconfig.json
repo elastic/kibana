@@ -124,7 +124,7 @@
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/core-spaces-common",
     "@kbn/app-header",
-    "@kbn/core-chrome-app-menu-components",
+    "@kbn/app-menu",
     "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
     "@kbn/core-http-common",

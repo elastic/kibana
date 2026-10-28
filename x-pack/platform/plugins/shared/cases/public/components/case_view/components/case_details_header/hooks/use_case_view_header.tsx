@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment-timezone';
 import type { AppHeaderMetadataItems, AppHeaderTitle } from '@kbn/app-header';
+import type { AppMenuSwitch } from '@kbn/app-menu';
 import type { CaseSeverity, CaseStatuses } from '../../../../../../common/types/domain';
 import type { CaseUI } from '../../../../../../common';
 import type { OnUpdateFields } from '../../../types';
@@ -27,6 +28,8 @@ import {
   CREATED_ON,
   UNKNOWN_REPORTER,
   EDIT_CASE_NAME_ARIA,
+  SHOW_METRICS,
+  SYNC_ALERTS,
 } from '../../../translations';
 import { getBadges } from '../utils/header_badges';
 import { getMenu } from '../utils/header_menu';
@@ -38,6 +41,8 @@ interface UseCaseViewHeaderArgs {
   onStatusChanged: (status: CaseStatuses) => void;
   onSeverityChanged: (severity: CaseSeverity) => void;
   onUpdateField: (args: OnUpdateFields) => void;
+  showMetrics: boolean;
+  onShowMetricsChange: (enabled: boolean) => void;
 }
 
 export const useCaseViewHeader = ({
@@ -45,9 +50,16 @@ export const useCaseViewHeader = ({
   onStatusChanged,
   onSeverityChanged,
   onUpdateField,
+  showMetrics,
+  onShowMetricsChange,
 }: UseCaseViewHeaderArgs) => {
   const { permissions } = useCasesContext();
-  const { hasCaseSettings } = useCasesFeatures();
+  const {
+    isSyncAlertsEnabled,
+    observablesAuthorized,
+    isExtractObservablesEnabled,
+    metricsFeatures,
+  } = useCasesFeatures();
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
   const { showSuccessToast, showErrorToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
@@ -68,8 +80,6 @@ export const useCaseViewHeader = ({
   } = useRunCaseWorkflow({ caseData });
 
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [settingsAnchor, setSettingsAnchor] = useState<HTMLElement | null>(null);
 
   const shouldDisableStatusFn = useShouldDisableStatus();
   const isStatusMenuDisabled = useMemo(() => {
@@ -158,10 +168,59 @@ export const useCaseViewHeader = ({
     [caseConnectors, caseData.connector.id]
   );
 
-  const onOpenSettings = useCallback((anchor: HTMLElement) => {
-    setSettingsAnchor(anchor);
-    setIsSettingsOpen((prev) => !prev);
-  }, []);
+  const settingsSwitches = useMemo((): AppMenuSwitch[] => {
+    const { settings } = caseData;
+
+    return [
+      ...(isSyncAlertsEnabled
+        ? [
+            {
+              id: 'caseSettingsSyncAlerts',
+              label: SYNC_ALERTS,
+              checked: settings.syncAlerts,
+              onChange: (checked: boolean) =>
+                onUpdateField({ key: 'settings', value: { ...settings, syncAlerts: checked } }),
+              'data-test-subj': 'case-settings-sync-alerts-switch',
+            },
+          ]
+        : []),
+      ...(observablesAuthorized && isExtractObservablesEnabled
+        ? [
+            {
+              id: 'caseSettingsExtractObservables',
+              label: commonI18n.EXTRACT_OBSERVABLES_LABEL,
+              checked: settings.extractObservables ?? false,
+              onChange: (checked: boolean) =>
+                onUpdateField({
+                  key: 'settings',
+                  value: { ...settings, extractObservables: checked },
+                }),
+              'data-test-subj': 'case-settings-extract-observables-switch',
+            },
+          ]
+        : []),
+      ...(metricsFeatures.length > 0
+        ? [
+            {
+              id: 'caseSettingsShowMetrics',
+              label: SHOW_METRICS,
+              checked: showMetrics,
+              onChange: onShowMetricsChange,
+              'data-test-subj': 'case-settings-show-metrics-switch',
+            },
+          ]
+        : []),
+    ];
+  }, [
+    caseData,
+    isSyncAlertsEnabled,
+    observablesAuthorized,
+    isExtractObservablesEnabled,
+    metricsFeatures,
+    showMetrics,
+    onShowMetricsChange,
+    onUpdateField,
+  ]);
 
   const onCopyId = useCallback(async () => {
     try {
@@ -180,7 +239,7 @@ export const useCaseViewHeader = ({
     () =>
       getMenu({
         permissions,
-        hasCaseSettings,
+        settingsSwitches,
         caseId: caseData.id,
         chat: {
           addToChat,
@@ -189,7 +248,6 @@ export const useCaseViewHeader = ({
         },
         currentExternalIncident,
         onRefresh: refreshCaseViewPage,
-        onOpenSettings,
         onCopyId,
         onOpenDeleteModal,
         runWorkflow: { canRunWorkflow, onOpen: openRunWorkflowModal },
@@ -201,11 +259,10 @@ export const useCaseViewHeader = ({
       summarizeCase,
       isAddToChatAvailable,
       permissions,
-      hasCaseSettings,
+      settingsSwitches,
       caseData.id,
       currentExternalIncident,
       refreshCaseViewPage,
-      onOpenSettings,
       onCopyId,
       onOpenDeleteModal,
     ]
@@ -241,8 +298,5 @@ export const useCaseViewHeader = ({
     isDeleteModalVisible,
     setIsDeleteModalVisible,
     onConfirmDeletion,
-    isSettingsOpen,
-    setIsSettingsOpen,
-    settingsAnchor,
   };
 };
