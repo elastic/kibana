@@ -12,6 +12,7 @@ This document contains all usage examples for `@kbn/synthtrace`. See the [README
   - [Infrastructure Scenarios](#infrastructure-scenarios)
   - [Combined Scenarios](#combined-scenarios)
   - [Specialized Scenarios](#specialized-scenarios)
+  - [Digital Experience Scenarios](#digital-experience-scenarios)
   - [SRE Incident Scenarios](#sre-incident-scenarios)
 - [Advanced Usage Examples](#advanced-usage-examples)
 
@@ -894,6 +895,59 @@ Generates data for testing agent configuration.
 
 ```sh
 node scripts/synthtrace agent_config --live
+```
+
+### Digital Experience Scenarios
+
+These scenarios generate browser Real User Monitoring data for Digital Experience. EDOT Browser data is OTel-native, as stored by the Elasticsearch exporter, with no APM enrichment:
+
+- `logs-generic.otel-default`: `browser.navigation`, `browser.navigation_timing`, `browser.resource_timing`, `browser.web_vital` (LCP, INP, CLS, FCP, TTFB), `browser.user_action.click` and `exception` events
+- `traces-generic.otel-default`: fetch/XHR `CLIENT` spans
+
+Non-zero timings and web vital values always have a fractional part, so dynamic mapping types them as `float`. Like EDOT Browser, timings of phases that didn't happen are written as `0`.
+
+The data is written through the `otelEsClient`, which indexes documents as-is. In code and Scout tests, use the `edotBrowser` DSL from `@kbn/synthtrace-client` (`edotBrowser.app()`, `edotBrowser.session()`) with the `otelSynthtraceEsClient` fixture from `@kbn/scout-synthtrace`. For exact values in a test, pass `random: createSeededRandom('my-test')` (from `@kbn/synthtrace-client`) and a fixed `start` or `end` to `edotBrowser.session()`, which makes the whole session, trace and span IDs included, reproducible. Unlike the scenarios' `seed` option, it doesn't fix the session and tab IDs: pass those to `app.client()` yourself.
+
+> **Warning:** `--clean` (and `otelEsClient.clean()` in code and Scout tests) deletes every `logs-*.otel-*` and `traces-*.otel-*` data stream, not only the EDOT Browser data. On a shared cluster, that also removes other OTel data.
+
+**Options (both scenarios):**
+
+- `withSessionId` (boolean, default `true`): writes `attributes.session.id`, with the tab ID and `session.start` that come with sessions. Set it to `false` to match EDOT Browser 0.3.0 and earlier, which don't emit them. The apps then report distro version `0.3.0`, and `0.4.0` otherwise.
+- `includeRawAttribution` (boolean, default `false`): writes the web-vitals attribution as a JSON string body on `browser.web_vital` events, as the web-vitals instrumentation does when its experimental `includeRawAttribution` option is on.
+- `scale` (number, default `1`): multiplies the number of sessions per minute of every app. Fractions of a session add up over time, so a scale below 1 thins out every app in proportion.
+- `seed` (string or number, default random): makes the data reproducible. Every session, with its session, trace and span IDs, browser, page views and events, derives from the seed, its app and its number since the epoch, so the same seed generates the same sessions at the same times, however the time range is split into batches. Sessions are spread evenly over time. The classic RUM page loads of `digital_experience_mixed` take their timings from the seed too, but not their document IDs.
+
+#### `digital_experience_browser`
+
+Generates EDOT Browser data for five apps in different states of health:
+
+| `service.name`       | Health   | Notes                                               |
+| -------------------- | -------- | --------------------------------------------------- |
+| `storefront-web`     | healthy  | high traffic, good vitals                           |
+| `checkout-web`       | erroring | failing `POST /api/payment`, frequent JS errors     |
+| `media-portal-web`   | slow     | poor LCP from large images and render-blocking CSS  |
+| `support-center-web` | critical | poor INP/CLS, high error and request failure rate   |
+| `docs-web`           | healthy  | low traffic, mostly desktop, no environment         |
+
+With session IDs, most sessions are a single visit in a new tab. About 15% are a second visit to a session that is still running, in the same tab or in another one. Another 15% come back after the previous session expired: the tab kept sending background requests with `browser.tab.id` but no `session.id`, and the new session points to the expired one with `session.previous_id`. Each session has one `session.start` log. Earlier visits can be up to an hour and a half before the end of their session, so at the start of a run, where data before `--from` is cut off, some sessions have no `session.start` and some `session.previous_id` values point to nothing.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace digital_experience_browser --from=now-30m --to=now
+node scripts/synthtrace digital_experience_browser --live --scenarioOpts withSessionId=false
+node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts scale=3
+node scripts/synthtrace digital_experience_browser --from=2026-10-16T12:00:00Z --to=2026-10-16T13:00:00Z --scenarioOpts seed=my-seed
+```
+
+#### `digital_experience_mixed`
+
+Generates the `digital_experience_browser` apps plus a classic Elastic APM RUM (`rum-js`) app in `traces-apm.rum-default`. The classic app is named `storefront-web` like one of the OTel apps, so that lists that match classic and OTel apps by name can show them together. Use it to test lists that show both OTel and classic browser apps. The classic RUM data is minimal: page-load transactions with one XHR span each, and no marks or experience metrics. Page loads end within the time range, so the first ones of a run may start a few seconds before `--from`.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace digital_experience_mixed --from=now-30m --to=now
 ```
 
 ### SRE Incident Scenarios

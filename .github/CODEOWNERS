@@ -2039,6 +2039,13 @@ x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/s
 /x-pack/solutions/observability/test/fixtures/es_archives/uptime @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/test/api_integration/apis/uptime @elastic/obs-signals-logs-team
 
+# Digital Experience (RUM)
+/src/platform/packages/shared/kbn-synthtrace-client/src/lib/edot_browser/ @elastic/obs-signals-rum-team
+/src/platform/packages/shared/kbn-synthtrace/src/lib/otel/otel_synthtrace_es_client* @elastic/obs-signals-rum-team
+/src/platform/packages/shared/kbn-synthtrace/src/scenarios/digital_experience_* @elastic/obs-signals-rum-team
+/src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/digital_experience_apps* @elastic/obs-signals-rum-team
+/src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/classic_rum_page_loads* @elastic/obs-signals-rum-team
+
 # Observability-ui folder level permissions (need to be before individual files inside the folder)
 /x-pack/solutions/observability/test/serverless/functional/test_suites @elastic/observability-ui
 
