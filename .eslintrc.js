@@ -910,17 +910,6 @@ module.exports = {
         ecmaVersion: 2022,
       },
     },
-
-    {
-      // The OpenAPI generator writes these API client bundles with duplicate and unused imports and
-      // relies on these two fixes to clean them up. Both run here, in one ESLint fix pass, so the
-      // generator output stays the same on every machine. Oxlint turns both off for these files.
-      files: ['x-pack/solutions/security/packages/test-api-clients/{supertest,scout}/*.gen.ts'],
-      rules: {
-        '@kbn/imports/no_unused_imports': 'error',
-        'import/no-duplicates': 'error',
-      },
-    },
   ],
 };
 

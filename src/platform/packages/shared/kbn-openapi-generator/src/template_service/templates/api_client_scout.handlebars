@@ -9,18 +9,20 @@
 
 import type { ApiClientFixture, ApiClientOptions, ApiClientResponse } from '@kbn/scout';
 import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+{{#if (some operations 'requestParams')}}
 import { encodePathParams, replaceParams } from '@kbn/openapi-common/shared';
+{{/if}}
 import queryString from 'query-string';
 
-{{#each operations}}
-{{#if (or requestQuery requestParams requestBody response)}}
+{{#each (groupBySourcePath operations 'requestQuery' 'requestParams' 'requestBody' 'response')}}
 import type {
+  {{~#each operations}}
   {{~#if requestQuery}}{{operationId}}RequestQueryInput,{{/if}}
   {{~#if requestParams}}{{operationId}}RequestParamsInput,{{/if}}
   {{~#if requestBody}}{{operationId}}RequestBodyInput,{{/if}}
   {{~#if response}}{{operationId}}Response,{{/if}}
+  {{~/each}}
 } from '{{replace sourcePath 'schema.yaml' 'gen'}}';
-{{/if}}
 {{/each}}
 
 export type ScoutResponseType = NonNullable<ApiClientOptions['responseType']>;

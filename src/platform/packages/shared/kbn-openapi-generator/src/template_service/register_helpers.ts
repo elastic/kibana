@@ -70,6 +70,38 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
     }
   );
 
+  handlebarsInstance.registerHelper(
+    'some',
+    (items: Array<Record<string, unknown>>, field: string) => {
+      return items.some((item) => item[field]);
+    }
+  );
+
+  /**
+   * Groups operations by the schema they come from, in the order they appear, keeping only those
+   * with at least one of the given fields. Templates use it to write one import per schema.
+   */
+  handlebarsInstance.registerHelper(
+    'groupBySourcePath',
+    (operations: Array<Record<string, unknown>>, ...args) => {
+      // Last arguments is the handlebars context, so we ignore it
+      const fields = args.slice(0, -1) as string[];
+      const groups = new Map<string, Array<Record<string, unknown>>>();
+      for (const operation of operations) {
+        if (fields.some((field) => operation[field])) {
+          const sourcePath = operation.sourcePath as string;
+          const group = groups.get(sourcePath) ?? [];
+          group.push(operation);
+          groups.set(sourcePath, group);
+        }
+      }
+      return [...groups].map(([sourcePath, groupOperations]) => ({
+        sourcePath,
+        operations: groupOperations,
+      }));
+    }
+  );
+
   /**
    * Checks whether provided reference is a known circular reference or a part of circular chain.
    *
