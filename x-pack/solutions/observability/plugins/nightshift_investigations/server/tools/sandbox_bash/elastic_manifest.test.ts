@@ -56,7 +56,7 @@ describe('renderElasticManifest', () => {
 });
 
 describe('writeElasticManifest', () => {
-  it('writes the manifest to /workspace/elastic.md', async () => {
+  it('writes the manifest to /workspace/.connector-docs/elastic.md', async () => {
     const writeFiles = jest.fn().mockResolvedValue([{ bytes_written: 100, success: true }]);
     const session = { writeFiles } as unknown as SandboxSession;
 
@@ -67,7 +67,7 @@ describe('writeElasticManifest', () => {
     });
 
     expect(writeFiles).toHaveBeenCalledWith([
-      { path: '/workspace/elastic.md', content: expect.any(Buffer) },
+      { path: '/workspace/.connector-docs/elastic.md', content: expect.any(Buffer) },
     ]);
     const [files] = writeFiles.mock.calls[0];
     expect(files[0].content.toString('utf8')).toContain('# Elasticsearch telemetry');

@@ -75,7 +75,7 @@ describe('Nightshift investigation agent type', () => {
     ]);
     expect(base.tools?.[0]?.tool_ids).not.toContain(platformCoreTools.executeEsql);
     // Its own prompt, not the significant-events one: it documents the sandbox query path.
-    expect(base.instructions).toContain('/workspace/elastic.md');
+    expect(base.instructions).toContain('/workspace/.connector-docs/elastic.md');
     expect(base.instructions).not.toContain('platform_core_execute_esql');
     expect(base.instructions).not.toContain('/workspace/decision-trees/monitors.md');
     expect(base.instructions).toContain('<alert_data>');

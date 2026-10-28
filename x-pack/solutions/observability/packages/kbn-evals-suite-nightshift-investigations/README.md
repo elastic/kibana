@@ -313,7 +313,7 @@ The committed [`scout/kibana.telemetry.yml`](scout/kibana.telemetry.yml) creates
 `Authorization` header. The existing credential resolver authorizes connector access and execution,
 checks the agent's allow-list, and exposes the API key only to the requesting sandbox command.
 Remote telemetry and sandbox credentials are supplied through the hook environment.
-`/workspace/elastic.md` contains variable names and query guidance, never credential values. Its
+`/workspace/.connector-docs/elastic.md` contains variable names and query guidance, never credential values. Its
 examples bound requests by time and advise using explicit remote names and narrow index patterns.
 These are instructions for the agent; the API key's privileges enforce the read restrictions.
 

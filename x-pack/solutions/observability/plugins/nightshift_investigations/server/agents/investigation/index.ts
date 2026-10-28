@@ -225,7 +225,7 @@ export const buildNightshiftAgentConfiguration = ({
 /**
  * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
  * standalone prompt and no Elastic tools. Telemetry is reached through `telemetryConnectorId` as
- * described in `/workspace/elastic.md`.
+ * described in `/workspace/.connector-docs/elastic.md`.
  */
 export const getInvestigationAgentType = ({
   decisionTreesEnabled = false,

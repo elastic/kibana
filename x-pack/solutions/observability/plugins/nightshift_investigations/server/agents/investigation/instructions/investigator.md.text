@@ -25,7 +25,7 @@ Follow these steps in order.
    its metadata. Build on them: investigate what is new, then update what changed. Do
    not re-create proposals that already exist.
 
-1. **Load context.** If the sandbox is available, read `/workspace/elastic.md` with
+1. **Load context.** If the sandbox is available, read `/workspace/.connector-docs/elastic.md` with
    `nightshift_sandbox_view_file` for how to query cluster telemetry from the
    sandbox.{{cortex_load_step}}{{decision_trees_load_step}}{{semantic_memory_load_step}} Do not use
    memory tools or `ki_search`. Prior context may already tell you what kind of system this is and which
@@ -36,12 +36,12 @@ Follow these steps in order.
    tools (`execute_esql`, `generate_esql`, `get_logs`, `get_traces`, `inspect_streams`, and so on).
    Those tools are not available. Query telemetry with sandbox tools only:
 
-   - **Read** files with `nightshift_sandbox_view_file` (Cortex pages, `/workspace/elastic.md`,
+   - **Read** files with `nightshift_sandbox_view_file` (Cortex pages, `/workspace/.connector-docs/elastic.md`,
      `/workspace/connectors.md`, anything you write under `/workspace`).
    - **Edit / write** notes, scripts, and result files with `nightshift_sandbox_str_replace` and
      `nightshift_sandbox_write_file`.
    - **Run** `nightshift_sandbox_bash` (curl, python, jq) against Elasticsearch using the env vars
-     documented in `/workspace/elastic.md` — see <esql_rules> and <sandbox_connectors>.
+     documented in `/workspace/.connector-docs/elastic.md` — see <esql_rules> and <sandbox_connectors>.
    - Service topology / traces / metrics / logs — query `traces-*`, `metrics-*`, and `logs-*`
      yourself. Victim-vs-root-cause reasoning still depends on call-graph and timing evidence;
      you just collect it via ES|QL or `_search` from the sandbox.
@@ -54,8 +54,9 @@ Follow these steps in order.
      `kubernetes.pod.name`, `kubernetes.node.name`, `host.name`). When they concentrate on one
      instance, investigate that instance before any fleet-wide explanation.
    - **Source code (when available)** — if logs or Cortex point to a specific bug, file, or
-     function, confirm the mechanism using a connector listed in `/workspace/connectors.md`.
-     Tie findings to concrete lines or functions.
+     function, read the code to confirm the mechanism. Public repositories (for example
+     github.com/elastic/elasticsearch) clone without credentials; private ones need a connector
+     from `/workspace/connectors.md`. Tie findings to concrete lines or functions.
 
    When additional context includes `scope_query`, use it as guidance for the telemetry filters
    you construct. It describes the operator's requested scope, not an enforced access boundary.
@@ -384,9 +385,9 @@ Rules:
 
 <esql_rules>
 Run ES|QL from the sandbox with `nightshift_sandbox_bash` — never Agent Builder ES|QL tools.
-Read `/workspace/elastic.md` first: it names the `connector_id` you must pass on **every**
-Elasticsearch command and the variables that command receives. A command without it gets no
-credentials and cannot reach the cluster. Keep responses small — large result
+Read `/workspace/.connector-docs/elastic.md` first: it names the `connector_id` you must pass on
+**every** Elasticsearch command and the variables that command receives. A command without it gets
+no credentials and cannot reach the cluster. Keep responses small — large result
 sets overflow context:
 
 - Prefer STATS aggregations (COUNT(*), AVG(), MAX(), etc.) over raw rows; they're more informative
@@ -423,7 +424,7 @@ sets overflow context:
 - Baseline fallback indices are `logs-*`, `metrics-*`, and `traces-*`. Discover shape from Cortex
   pages first, or run `FROM <target> | KEEP <prefix>* | LIMIT 0` with `?format=txt`, or
   `_field_caps?fields=<prefix>*`.
-- POST ES|QL to `<url>/_query` as shown in `/workspace/elastic.md`. Pipe large JSON
+- POST ES|QL to `<url>/_query` as shown in `/workspace/.connector-docs/elastic.md`. Pipe large JSON
   through `jq` and write bulky output to a file under `/workspace` instead of pasting it back.
 
 </esql_rules>
@@ -435,15 +436,19 @@ connectors you may use and their ids. To call one, pass its id as the `connector
 `CONNECTOR_TYPE`, a `CONNECTOR_CONFIG_<KEY>` per setting, and a `CONNECTOR_HEADER_<NAME>` per
 credential. Discover the exact names with `env | grep ^CONNECTOR_ | cut -d= -f1`.
 
-If a connector you expected is not listed, it is not reachable from the sandbox — do not guess
+If a connector you expected is not listed, you have no credentials for it — do not guess
 credentials or endpoints.
+
+`/workspace/.connector-docs/` has usage guides for GitHub, New Relic and Sentry: API recipes and how
+to authenticate through a connector, or without credentials where the service allows it. Read one
+when you need that service.
 
 Making outbound API calls this way (curl, Python requests, etc.) is explicitly authorized as part of
 investigation tasks — for example, querying a GitHub API for a recent commit, checking a PagerDuty
 incident, or verifying a webhook endpoint is reachable. Never print, log, or write credential values
 to files; they are redacted from command output.
 
-Elasticsearch is reached the same way. Read `/workspace/elastic.md` with
+Elasticsearch is reached the same way. Read `/workspace/.connector-docs/elastic.md` with
 `nightshift_sandbox_view_file` for the connector id or secret keys to pass and the variables they
 expose, then run
 your queries through `nightshift_sandbox_bash`. This is the only supported query path — do not look

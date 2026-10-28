@@ -1,0 +1,112 @@
+# New Relic
+
+Use for: NRQL queries against `Span`, `Log`, `Metric`, `DistributedTraceSummary`; golden metrics;
+alert issues and incidents. Not for: modifying data or alert configuration.
+
+## Authentication and routing
+
+New Relic needs a New Relic connector from `/workspace/connectors.md`; without one it is not
+reachable. Pass its id as `connector_id`. For that single command only, the environment contains:
+
+| Env var | Meaning |
+|---------|---------|
+| `CONNECTOR_HEADER_API_KEY` | User API key, sent as the `API-Key` header |
+| `CONNECTOR_CONFIG_ACCOUNTID` | The numeric account this connector is scoped to |
+| `CONNECTOR_CONFIG_REGION` | `us` → `api.newrelic.com` · `eu` → `api.eu.newrelic.com` · `jp` → `api.jp.newrelic.com` |
+
+One connector covers one account. Another account needs its own connector; never guess account ids.
+The API key is scoped to its region, so calls to another region's endpoint return `401`.
+
+## Running NRQL (NerdGraph)
+
+There is no `newrelic` CLI in the sandbox. Send NRQL through the NerdGraph GraphQL endpoint, passing
+the query as a variable so it needs no escaping:
+
+```bash
+case "$CONNECTOR_CONFIG_REGION" in
+  eu) NR=https://api.eu.newrelic.com/graphql ;;
+  jp) NR=https://api.jp.newrelic.com/graphql ;;
+  *) NR=https://api.newrelic.com/graphql ;;
+esac
+jq -n --arg q "SELECT count(*) FROM Span FACET service.name SINCE '2026-01-01 13:30:00+00:00' UNTIL '2026-01-01 15:00:00+00:00' LIMIT 20" \
+  --argjson a "$CONNECTOR_CONFIG_ACCOUNTID" \
+  '{query: "query($a: Int!, $q: Nrql!) { actor { account(id: $a) { nrql(query: $q) { results } } } }", variables: {a: $a, q: $q}}' \
+  | curl --fail-with-body -sS --max-time 120 -H "API-Key: $CONNECTOR_HEADER_API_KEY" \
+      -H "Content-Type: application/json" "$NR" -d @- > /workspace/nr.json
+jq '.errors // .data.actor.account.nrql.results' /workspace/nr.json
+```
+
+NerdGraph returns HTTP 200 with an `errors` array on query failures, so always check `.errors`
+before reading results.
+
+## NRQL guidance
+
+- Always bound the time range. For an incident, use absolute times:
+  `SINCE '2026-01-01 13:30:00+00:00' UNTIL '2026-01-01 15:00:00+00:00'`. Without `SINCE`, NRQL
+  covers only the last 60 minutes.
+- Use `TIMESERIES <n> minutes` for trends and `COMPARE WITH 1 day ago` (or `1 week ago`) for
+  change detection against a baseline.
+- Use `FACET` on structured attributes (service, host, region) and `LIMIT` the facets.
+- Discover attributes before filtering: `SELECT keyset() FROM <Type> SINCE 1 day ago` and
+  `SELECT uniques(<attribute>) FROM <Type> SINCE 1 day ago`.
+
+## Event types
+
+| Type | Use for |
+|------|---------|
+| `Span` | Distributed traces — service performance, errors, dependencies |
+| `Log` | Application logs |
+| `Metric` | Dimensional metrics — runtime stats, golden metrics, infrastructure, custom counters |
+| `DistributedTraceSummary` | Per-trace rollups with `errorCount`, `root.entity.name` |
+| `SpanEvent` | Events attached to spans (exceptions, feature flags) |
+| `Deployment` | Deployment markers — check them for changes near the incident onset |
+| `NrAiIssue` / `NrAiIncident` | Alert issues and incidents |
+
+## NrAiIssue / NrAiIncident
+
+The `event` field is a state-transition log (one row per transition), not an issue list.
+`uniques(event)` typically returns `activate`, `create`, `acknowledge`, `close`, and sometimes `merge`.
+
+- Issues opened in a window: filter `event = 'activate'`. `event = 'create'` undercounts because it
+  misses re-activations, and `count(*)` without an `event` filter counts transitions (about 3–5×
+  the activations).
+- Issues open at a point in time: take each issue's latest transition with
+  `SELECT latest(event) FROM NrAiIssue FACET issueId SINCE <well before the point> UNTIL <the point> LIMIT MAX`
+  and keep those whose latest event is not `close`. The window must reach back past the oldest
+  issue that could still be open: an issue activated before it has no row in it and is missed.
+  The `state` field is not reliably populated.
+- Filter or facet by policy or entity with the array fields `policyNames`, `policyIds`,
+  `entity.names`, `entity.guids`. Arrays don't support `=`, `!=` or `IN`; test membership with
+  `contains()`, for example `WHERE contains(policyIds, <id>)`. The scalar `policyName`, `policyId`,
+  `entity.name`, `entity.guid` are often empty on this event type.
+
+## `FROM Metric` cardinality caveat
+
+`uniqueCount(entity.name)` on `Metric` measures dimensional time-series cardinality, not the number of
+monitored entities. For entity counts, use NerdGraph
+`entitySearch(query: "accountId = <id>") { count }`.
+
+## Common span fields
+
+`service.name`, `name` (operation), `duration.ms`, `span.kind`, `trace.id`, `parent.id`,
+`otel.status_code` (`OK`, `ERROR`, `UNSET`), `error` (boolean), `http.route`, `http.status_code`,
+`rpc.service`, `rpc.method`, `db.system`, `messaging.system`, `messaging.destination.name`
+
+## Golden metrics (pre-computed, from `Metric`)
+
+```
+SELECT average(newrelic.goldenmetrics.ext.service.throughput) FROM Metric FACET entity.name
+SELECT average(newrelic.goldenmetrics.ext.service.errorRate) FROM Metric FACET entity.name
+SELECT average(newrelic.goldenmetrics.ext.service.responseTimeMs) FROM Metric FACET entity.name
+```
+
+## Common pitfalls
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `[]` or 0 results | No `SINCE`/`UNTIL`; the default is the last 60 minutes | Add an absolute window |
+| `[]` or 0 results | Wrong filter values | Discover valid values with `keyset()` and `uniques()` first |
+| `401` / `403` | The key lacks access to that account or region | Treat it as out of scope; do not retry other ids |
+| `service.name` returns 0 rows on `Span` | The account uses agent-style attributes | Facet on `appName`, `entity.name` or `host.name` instead |
+| `Log` queries time out | Window too wide on a high-volume account | Shorten the window to 30 minutes or less around onset, or pivot to `Span` |
+| Rankings flip between runs | Windows of different lengths compared | Normalize counts per day before ranking |

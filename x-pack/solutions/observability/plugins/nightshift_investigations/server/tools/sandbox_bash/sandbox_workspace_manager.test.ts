@@ -132,7 +132,7 @@ describe('createSandboxWorkspaceManager', () => {
 
     expect(mockWriteConnectorManifest).not.toHaveBeenCalled();
     expect(session.statFiles).toHaveBeenCalledWith([
-      '/workspace/elastic.md',
+      '/workspace/.connector-docs/elastic.md',
       '/workspace/connectors.md',
     ]);
   });
@@ -145,7 +145,7 @@ describe('createSandboxWorkspaceManager', () => {
     mockWriteConnectorManifest.mockClear();
     (session.statFiles as jest.Mock).mockResolvedValue([
       {
-        path: '/workspace/elastic.md',
+        path: '/workspace/.connector-docs/elastic.md',
         exists: false,
         is_dir: false,
         size: 0,
@@ -334,7 +334,7 @@ describe('createSandboxWorkspaceManager', () => {
       expect(mockWriteElasticManifest).not.toHaveBeenCalled();
       expect(session.writeFiles).toHaveBeenCalledWith([
         {
-          path: '/workspace/elastic.md',
+          path: '/workspace/.connector-docs/elastic.md',
           content: Buffer.from('No telemetry connector is available.\n'),
         },
       ]);
@@ -379,7 +379,7 @@ describe('createSandboxWorkspaceManager', () => {
       expect(mockWriteElasticManifest).not.toHaveBeenCalled();
       expect(session.writeFiles).toHaveBeenCalledWith([
         {
-          path: '/workspace/elastic.md',
+          path: '/workspace/.connector-docs/elastic.md',
           content: Buffer.from('No telemetry connector is available.\n'),
         },
       ]);
@@ -399,7 +399,7 @@ describe('createSandboxWorkspaceManager', () => {
       expect(mockWriteElasticManifest).not.toHaveBeenCalled();
       expect(session.writeFiles).toHaveBeenCalledWith([
         {
-          path: '/workspace/elastic.md',
+          path: '/workspace/.connector-docs/elastic.md',
           content: Buffer.from('No telemetry connector is available.\n'),
         },
       ]);
