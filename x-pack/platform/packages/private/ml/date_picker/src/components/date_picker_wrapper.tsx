@@ -403,16 +403,17 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
             onInputChange={onDateRangeInputChange}
             isInvalid={isDateRangeInvalid}
             disabled={isDisabled}
-            readOnly={isAutoRefreshOnlyMode}
             width={isAutoRefreshOnlyMode ? 'restricted' : width}
             css={isAutoRefreshOnlyMode ? autoRefreshOnlyPickerStyles : undefined}
             compressed={false}
             showTimeWindowButtons={isAutoRefreshOnlyMode ? false : { showZoomIn: true }}
             collapsed={isAutoRefreshOnlyMode}
-            presets={dateRangePickerPresets.presets}
+            presets={isAutoRefreshOnlyMode ? undefined : dateRangePickerPresets.presets}
             recent={recentRanges}
-            onPresetSave={dateRangePickerPresets.onPresetSave}
-            onPresetDelete={dateRangePickerPresets.onPresetDelete}
+            onPresetSave={isAutoRefreshOnlyMode ? undefined : dateRangePickerPresets.onPresetSave}
+            onPresetDelete={
+              isAutoRefreshOnlyMode ? undefined : dateRangePickerPresets.onPresetDelete
+            }
             settings={dateRangePickerSettingsWithAutoRefresh}
             onSettingsChange={onDateRangePickerSettingsChange}
             onRefresh={handleRefresh}

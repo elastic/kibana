@@ -265,6 +265,9 @@ describe('<DatePickerWrapper />', () => {
     expect(calledWith.className).toEqual(expect.stringContaining('css-'));
     expect(calledWith.collapsed).toBe(true);
     expect(calledWith.showTimeWindowButtons).toBe(false);
+    expect(calledWith.presets).toBeUndefined();
+    expect(calledWith.onPresetSave).toBeUndefined();
+    expect(calledWith.onPresetDelete).toBeUndefined();
     expect(MockedEuiButton).not.toHaveBeenCalled();
     const buttonProps = MockedEuiButtonIcon.mock.calls[0][0];
     expect(buttonProps.iconType).toBe('refresh');
