@@ -31,6 +31,7 @@ import { processOpenAIStream } from './process_openai_stream';
 import { processOpenAIResponse } from './process_openai_response';
 import { emitTokenCountEstimateIfMissing } from './emit_token_count_if_missing';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
+import { resolveToolChoice } from '../../utils/forced_tool_choice';
 
 export const openAIAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -83,10 +84,17 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         messages: messagesToOpenAI({ system, messages }),
         ...(hasTools
           ? {
-              tool_choice: toolChoiceToOpenAI(toolChoice, {
-                connector,
-                tools: toolsForRequest,
-              }),
+              tool_choice: toolChoiceToOpenAI(
+                resolveToolChoice({
+                  toolChoice,
+                  modelId: modelName ?? connector.config?.defaultModel,
+                  logger,
+                }),
+                {
+                  connector,
+                  tools: toolsForRequest,
+                }
+              ),
               tools: openAiTools,
             }
           : {}),
