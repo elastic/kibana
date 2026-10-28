@@ -393,7 +393,13 @@ describe('Workflows Connector', () => {
       const schedule = await getScheduleService();
 
       await expect(
-        schedule('system-security-attack-discovery-worker', 'default', { event: {} }, 'alert')
+        schedule(
+          'system-security-attack-discovery-worker',
+          'default',
+          { event: {} },
+          'alert',
+          mockRequest
+        )
       ).rejects.toBeInstanceOf(WorkflowRequiresDelegatedIdentityError);
       expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledTimes(1);
       expect(mockWorkflowsManagementApi.runWorkflow).not.toHaveBeenCalled();
