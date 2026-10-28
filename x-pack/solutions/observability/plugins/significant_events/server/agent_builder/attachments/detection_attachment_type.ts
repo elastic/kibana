@@ -11,8 +11,11 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Logger } from '@kbn/core/server';
-import type { Detection, LifecycleDetection } from '@kbn/significant-events-schema';
-import { SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE } from '../../../common/significant_event_detection_attachment';
+import type { LifecycleDetection } from '@kbn/significant-events-schema';
+import {
+  SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
+  toLifecycleDetection,
+} from '../../../common/significant_event_detection_attachment';
 import { lifecycleDetectionAttachmentSchema } from '../../../common/significant_event_detection_attachment_schema';
 import type { GetScopedClients } from '../../routes/types';
 import { canReadSignificantEvents } from '../../routes/utils/assert_can_manage_significant_events';
@@ -23,21 +26,6 @@ interface CreateSignificantEventDetectionAttachmentTypeOptions {
   getScopedClients: GetScopedClients;
   server: Pick<SignificantEventsServer, 'security'>;
 }
-
-const toLifecycleDetection = (detection: Detection): LifecycleDetection | undefined => {
-  if (!detection.rule_name) {
-    return undefined;
-  }
-
-  return {
-    '@timestamp': detection['@timestamp'],
-    detection_id: detection.detection_id,
-    rule_name: detection.rule_name,
-    rule_uuid: detection.rule_uuid,
-    source_id: detection.source_id,
-    change_point_type: detection.change_point_type,
-  };
-};
 
 export const formatDetectionAsText = (detection: LifecycleDetection): string => {
   return [
