@@ -203,10 +203,6 @@ export async function createCustomStatusRule({
           notify_when: 'onActionGroupChange',
           throttle: null,
           summary: false,
-        } as unknown as {
-          summary: boolean;
-          notifyWhen: string;
-          throttle?: string;
         },
       },
       {
@@ -228,10 +224,6 @@ export async function createCustomStatusRule({
           notify_when: 'onActionGroupChange',
           throttle: null,
           summary: false,
-        } as unknown as {
-          summary: boolean;
-          notifyWhen: string;
-          throttle?: string;
         },
       },
     ],
@@ -551,7 +543,7 @@ export async function waitUntilMonitorLocationsPending({
 export function buildExpectedErrorLink(
   kibanaBaseUrl: string,
   monitorId: string,
-  locationId = 'dev'
+  locationId: string
 ) {
   const normalizedBaseUrl = kibanaBaseUrl.replace(/\/$/, '');
   return `- Link: ${normalizedBaseUrl}/app/synthetics/monitor/${monitorId}/errors/Test%20private%20location-18524a3d9a7-0?locationId=${locationId}`;

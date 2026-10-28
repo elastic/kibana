@@ -263,11 +263,13 @@ apiTest.describe(
             const lastTwoHits = downResponse.hits.hits.slice(-2).map((hit) => hit._source);
 
             for (const hit of lastTwoHits) {
+              const locationId = hit?.locationId;
+              expect(locationId).toBeDefined();
               expect(hit?.reason).toBe(
                 `Monitor "${monitor.name}" from ${hit?.locationNames} is down. Monitor is down 1 time within the last 1 checks. Alert when 1 out of the last 1 checks are down from at least 1 location.`
               );
               expect(hit?.linkMessage).toBe(
-                buildExpectedErrorLink(kibanaBaseUrl, monitor.id, hit?.locationId)
+                buildExpectedErrorLink(kibanaBaseUrl, monitor.id, locationId as string)
               );
             }
           }
