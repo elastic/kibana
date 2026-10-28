@@ -31,4 +31,18 @@ describe('SetMap', () => {
       }
     `);
   });
+
+  it('iterates over each key and its unique values', () => {
+    const setMap = new SetMap<string, string>();
+
+    setMap.add('first', 'one');
+    setMap.add('first', 'one');
+    setMap.add('first', 'two');
+    setMap.add('second', 'three');
+
+    expect([...setMap]).toEqual([
+      ['first', new Set(['one', 'two'])],
+      ['second', new Set(['three'])],
+    ]);
+  });
 });
