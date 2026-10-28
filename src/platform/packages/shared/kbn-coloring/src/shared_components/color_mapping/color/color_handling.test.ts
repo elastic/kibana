@@ -76,6 +76,31 @@ describe('Color mapping - color generation', () => {
     colorsSpy.mockRestore();
   });
 
+  it('uses the switched theme colors in a new color factory', () => {
+    const categories = { type: 'categories' as const, categories: ['catA'] };
+    const neutralColor = (darkMode: boolean) => {
+      const themePalettes = getKbnPalettes({ name: 'borealis', darkMode });
+      const expected = themePalettes
+        .get(KbnPalette.Neutral)
+        .getColor(DEFAULT_NEUTRAL_PALETTE_INDEX)
+        .toLowerCase();
+      const colorFactory = getColorFactory(
+        DEFAULT_COLOR_MAPPING_CONFIG,
+        themePalettes,
+        darkMode,
+        categories
+      );
+      return { expected, actual: colorFactory('not_available') };
+    };
+
+    const light = neutralColor(false);
+    const dark = neutralColor(true);
+    // the neutral palette is theme-aware: its colors differ in dark mode
+    expect(dark.expected).not.toBe(light.expected);
+    expect(light.actual).toBe(light.expected);
+    expect(dark.actual).toBe(dark.expected);
+  });
+
   it('by default loops colors defined in palette', () => {
     const colorFactory = getColorFactory(
       {
