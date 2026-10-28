@@ -58,6 +58,10 @@ apiTest.describe.serial(
     apiTest.beforeAll(async ({ apiServices, samlAuth, apiClient }) => {
       await apiServices.spaces.create({ id: SPACE_A, name: SPACE_A });
       await apiServices.spaces.create({ id: SPACE_B, name: SPACE_B });
+      await apiServices.spaces.setSolutionView({ id: SPACE_A, solution: 'security' });
+      await apiServices.spaces.setSolutionView({ id: SPACE_B, solution: 'security' });
+      // AlertZero works only in a Security solution space. The default space is Classic.
+      await apiServices.spaces.setSolutionView({ id: 'default', solution: 'security' });
 
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminHeaders = withHuntHeaders(cookieHeader);
@@ -141,6 +145,10 @@ apiTest.describe.serial(
         { name: `clean up prerequisites in ${SPACE_B}`, run: () => prereqB?.cleanup() },
         { name: `delete space ${SPACE_A}`, run: () => apiServices.spaces.delete(SPACE_A) },
         { name: `delete space ${SPACE_B}`, run: () => apiServices.spaces.delete(SPACE_B) },
+        {
+          name: 'reset default space to the Classic solution view',
+          run: () => apiServices.spaces.resetViewToClassic('default'),
+        },
         {
           name: 'restore default space AlertZero setting',
           run: async () => {
