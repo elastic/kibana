@@ -5,8 +5,20 @@
  * 2.0.
  */
 
-import type { S3DestinationViewModel } from '../../../streams_layout/destinations/types';
+import type {
+  ElasticsearchDestinationViewModel,
+  S3DestinationViewModel,
+} from '../../../streams_layout/destinations/types';
 import { buildConfiguredDestinationNode } from '.';
+
+const elasticsearchDestination: ElasticsearchDestinationViewModel = {
+  id: 'es-prod',
+  name: 'Production',
+  type: 'elasticsearch',
+  signals: ['logs'],
+  mode: 'static',
+  index: 'logs-prod',
+};
 
 const s3Destination: S3DestinationViewModel = {
   id: 'archive',
@@ -30,5 +42,50 @@ describe('buildConfiguredDestinationNode', () => {
 
     expect(node.ariaLabel).toBe('Destination: Archive, Logs');
     expect(node.data.subtitle).toBe('my-archive');
+  });
+
+  describe('destinationType', () => {
+    it('is set to elasticsearch for an Elasticsearch destination', () => {
+      const node = buildConfiguredDestinationNode(elasticsearchDestination, true, ['logs-prod']);
+
+      expect(node.data.destinationType).toBe('elasticsearch');
+    });
+
+    it('is set to s3 for an S3 destination', () => {
+      const node = buildConfiguredDestinationNode(s3Destination, true, []);
+
+      expect(node.data.destinationType).toBe('s3');
+    });
+  });
+
+  // Stats come from the stats manager. They never enter the node data, because a change to the
+  // data rebuilds the graph and runs the layout again.
+  describe('node data', () => {
+    it('holds configuration only, for an Elasticsearch destination', () => {
+      const node = buildConfiguredDestinationNode(elasticsearchDestination, true, ['logs-prod']);
+
+      expect(Object.keys(node.data).sort()).toEqual([
+        'destinationId',
+        'destinationType',
+        'indexCount',
+        'signals',
+        'streamName',
+        'subtitle',
+        'targetedIndexNames',
+        'title',
+      ]);
+    });
+
+    it('holds configuration only, for an S3 destination', () => {
+      const node = buildConfiguredDestinationNode(s3Destination, true, []);
+
+      expect(Object.keys(node.data).sort()).toEqual([
+        'destinationId',
+        'destinationType',
+        'signals',
+        'subtitle',
+        'title',
+      ]);
+    });
   });
 });

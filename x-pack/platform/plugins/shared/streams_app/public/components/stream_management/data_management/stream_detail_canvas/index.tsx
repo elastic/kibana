@@ -925,6 +925,7 @@ export const buildConfiguredDestinationNode = (
           }),
       data: {
         destinationId: destination.id,
+        destinationType: destination.type,
         signals: destination.signals,
         title: destination.name,
         subtitle: !hasConnectedSource ? noSourceLabel : destination.bucket,
@@ -957,6 +958,7 @@ export const buildConfiguredDestinationNode = (
         }),
     data: {
       destinationId: destination.id,
+      destinationType: destination.type,
       signals: destination.signals,
       streamName: destination.index,
       indexCount: targetedIndexNames.length,

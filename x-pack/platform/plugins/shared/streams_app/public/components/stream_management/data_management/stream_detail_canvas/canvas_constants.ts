@@ -50,14 +50,17 @@ export const PAN_MARGIN = 500;
 /** Fixed card widths (px) for each node kind; the single source of truth used
  * by both the node components and the pan-bound estimate below. */
 export const SOURCE_NODE_WIDTH = 246;
-export const DESTINATION_NODE_WIDTH = 220;
+// Wide enough for the stats footer: a status, a rate and an index count on one row.
+export const DESTINATION_NODE_WIDTH = 260;
 export const PROCESSING_NODE_WIDTH = 140;
 
 /**
  * Revisit whenever a card gains or loses a content row.
  */
 export const SOURCE_NODE_HEIGHT = 74;
-export const DESTINATION_NODE_HEIGHT = 78;
+// The stats footer of an Elasticsearch destination adds 28 (a 24 row and a 4 margin). An S3
+// destination has no footer, so its card is shorter than the height the layout reserves.
+export const DESTINATION_NODE_HEIGHT = 106;
 export const PROCESSING_NODE_HEIGHT = 44;
 
 export const NODE_HEIGHT_BY_TYPE: Readonly<Record<string, number>> = {
@@ -72,7 +75,7 @@ export const NODE_HEIGHT_BY_TYPE: Readonly<Record<string, number>> = {
  * estimate never undershoots the real content.
  */
 export const NODE_WIDTH_ESTIMATE = Math.max(SOURCE_NODE_WIDTH, DESTINATION_NODE_WIDTH);
-export const NODE_HEIGHT_ESTIMATE = 80;
+export const NODE_HEIGHT_ESTIMATE = Math.max(SOURCE_NODE_HEIGHT, DESTINATION_NODE_HEIGHT);
 
 /** Minimap overview dimensions (px), matching the prototype. */
 export const MINIMAP_WIDTH = 150;

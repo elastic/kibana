@@ -7,12 +7,13 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiPanel, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiBadge, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { Position, type NodeProps } from '@xyflow/react';
 import { ConnectionHandle } from './connection_handle';
 import type { DestinationNode as DestinationNodeType } from '../types';
 import { DESTINATION_NODE_WIDTH } from '../canvas_constants';
+import { DestinationNodeStats } from './destination_node_stats';
+import { DESTINATION_TYPES_WITH_STATS } from './destination_stats_status';
 import { getNodeCardStyles } from './node_card_styles';
 import { DESTINATION_SIGNAL_LABELS } from '../../../../streams_layout/destinations/destination_type_config';
 
@@ -75,26 +76,6 @@ export function DestinationNode({ data, selected, dragging }: NodeProps<Destinat
                   {DESTINATION_SIGNAL_LABELS[signal]}
                 </EuiBadge>
               ))}
-              {typeof data.indexCount === 'number' && data.indexCount > 0 && (
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.streams.canvas.destinationNode.indexCountTooltip',
-                    {
-                      defaultMessage: '{indexCount, plural, one {# index} other {# indices}}',
-                      values: { indexCount: data.indexCount },
-                    }
-                  )}
-                  disableScreenReaderOutput
-                >
-                  <EuiBadge
-                    color="hollow"
-                    tabIndex={0}
-                    data-test-subj="streamsCanvasDestinationIndexCountBadge"
-                  >
-                    {data.indexCount}
-                  </EuiBadge>
-                </EuiToolTip>
-              )}
             </div>
             {data.subtitle && (
               <EuiText size="s" color="subdued">
@@ -103,6 +84,11 @@ export function DestinationNode({ data, selected, dragging }: NodeProps<Destinat
             )}
           </div>
         </div>
+        {data.destinationId &&
+          data.destinationType &&
+          DESTINATION_TYPES_WITH_STATS.includes(data.destinationType) && (
+            <DestinationNodeStats destinationId={data.destinationId} indexCount={data.indexCount} />
+          )}
       </EuiPanel>
     </>
   );
