@@ -1516,7 +1516,10 @@ steps:
   # An earlier run left findings here and never recorded how it ended, so it may
   # or may not have reached its close question. Its containment gates ask once
   # their proposals settle, so the close question is only raised for it when
-  # nothing is pending. A failed read counts as pending, so nothing is asked.
+  # nothing is pending or executing: an approved containment action is no longer
+  # pending while it runs, and may fail and re-park for approval. The route takes
+  # one `status` per request, hence a read for each. A failed read counts as
+  # open, so nothing is asked.
   - name: check_pending_proposals
     type: kibana.request
     if: "${{ steps.resolve_run_outcome.output.outcome_unrecorded == true }}"
@@ -1532,13 +1535,29 @@ steps:
     on-failure:
       continue: true
 
+  - name: check_executing_proposals
+    type: kibana.request
+    if: "${{ steps.resolve_run_outcome.output.outcome_unrecorded == true }}"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals"
+      headers:
+        elastic-api-version: "1"
+      query:
+        conversationId: "{{ steps.resolve_request.output.investigation_id }}"
+        status: executing
+        size: 1
+    on-failure:
+      continue: true
+
   # When this run asks whether to close the Investigation. No gate on it will:
   #   - `after_analysis`: this run analyzed, nothing is open here, and none of its
   #     new proposals reached the queue. That covers nothing proposed, every
   #     recommendation held elsewhere, a failed dedup check, and every dispatch
   #     rejected; the last two are also journaled as lost.
-  #   - `after_unrecorded`: an earlier run's outcome is unrecorded and nothing is
-  #     pending. The close gate's own dedup keeps this to one close question.
+  #   - `after_unrecorded`: an earlier run's outcome is unrecorded, nothing is
+  #     pending or executing, and the Investigation is still open. An analyst may
+  #     have closed it already, and the close gate's proposal would reopen it. The close gate's own dedup keeps this to one close question.
   # A partial dispatch is not covered: its surviving gates ask.
   - name: resolve_close_question
     type: data.set
@@ -1550,7 +1569,9 @@ steps:
           and steps.resolve_proposal_counts.output.new_count <= steps.resolve_proposal_dispatch.output.failed }}
       after_unrecorded: >-
         ${{ steps.resolve_run_outcome.output.outcome_unrecorded == true
-          and steps.check_pending_proposals.output.total == 0 }}
+          and steps.verify_investigation.output.metadata.status != 'closed'
+          and steps.check_pending_proposals.output.total == 0
+          and steps.check_executing_proposals.output.total == 0 }}
       # What went wrong before the close question, shown first on its card. Approving
       # a close while containment never reached the queue would drop it silently, so
       # the card names what to raise by hand. Blank when nothing went wrong.
@@ -1749,18 +1770,26 @@ steps:
           {% for action in steps.forensic_analysis.output.structured_output.recommendedActions %}
           - {{ action.title }} (`{{ action.actionWorkflowId }}`)
           {%- endfor %}
+          {%- if steps.resolve_proposals.output.close_gate_failed == true %}
+
+          The question whether to close this investigation could not be raised either, so nothing will ask it.
+          {%- endif %}
 
           The indicator was retired and will not be retried.
-          {%- elsif steps.resolve_proposals.output.close_gate_failed == true -%}
-          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` is done, but the question whether to close this investigation could not be raised, so nothing will ask it. The indicator was retired and will not be retried.
-          {%- else -%}
+          {%- elsif steps.resolve_proposal_dispatch.output.failed > 0 -%}
           {%- assign lost = steps.propose_actions.output.results | where_exp: 'result', "result.status == 'failed' or result.output.status == 'failed'" -%}
           Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` finished, but {{ steps.resolve_proposal_dispatch.output.failed }} containment proposal(s) did not reach the approval queue:
           {% for result in lost %}
           - {{ result.key.title }} (`{{ result.key.actionWorkflowId }}`){% if result.output.executionId != blank %}: its approval gate failed. [See the gate execution]({{ kibanaUrl }}{% if workflow.spaceId != 'default' %}/s/{{ workflow.spaceId }}{% endif %}/app/workflows/{{ result.output.workflowId }}?executionId={{ result.output.executionId }}&tab=executions){% endif %}.
           {%- endfor %}
+          {%- if steps.resolve_proposals.output.close_gate_failed == true %}
+
+          The question whether to close this investigation could not be raised either, so nothing will ask it.
+          {%- endif %}
 
           The indicator was retired and will not be retried.
+          {%- else -%}
+          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` is done, but the question whether to close this investigation could not be raised, so nothing will ask it. The indicator was retired and will not be retried.
           {%- endif -%}
 
   - name: mark_proposals_failed
@@ -1785,11 +1814,17 @@ steps:
             {%- if steps.resolve_proposal_counts.output.check_failed == true -%}
             Could not check for existing proposals on investigation
             {{ steps.resolve_request.output.investigation_id }}, so none was created
-            {%- elsif steps.resolve_proposals.output.close_gate_failed == true -%}
-            Could not raise the close question on investigation
-            {{ steps.resolve_request.output.investigation_id }}
-            {%- else -%}
+            {%- if steps.resolve_proposals.output.close_gate_failed == true %}
+            and could not raise the close question
+            {%- endif -%}
+            {%- elsif steps.resolve_proposal_dispatch.output.failed > 0 -%}
             Containment proposals did not reach the queue for investigation
+            {{ steps.resolve_request.output.investigation_id }}
+            {%- if steps.resolve_proposals.output.close_gate_failed == true %}
+            and could not raise the close question
+            {%- endif -%}
+            {%- else -%}
+            Could not raise the close question on investigation
             {{ steps.resolve_request.output.investigation_id }}
             {%- endif -%}
 

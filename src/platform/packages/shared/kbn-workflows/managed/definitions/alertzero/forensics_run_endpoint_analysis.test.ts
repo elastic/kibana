@@ -2451,6 +2451,7 @@ describe('Endpoint analysis run', () => {
           ['propose_actions', 'resolve_proposal_dispatch'],
           ['resolve_proposal_dispatch', 'resolve_close_question'],
           ['check_pending_proposals', 'resolve_close_question'],
+          ['check_executing_proposals', 'resolve_close_question'],
           ['resolve_close_question', 'journal_close_question'],
           ['journal_close_question', 'dispatch_close_gate'],
           ['dispatch_close_gate', 'resolve_proposals'],
@@ -2494,25 +2495,47 @@ describe('Endpoint analysis run', () => {
         // Nothing to ask about when this run analyzed nothing.
         expect(evaluate(afterAnalysis, when({ analyzed: false }))).toBe(false);
 
-        // An earlier run's outcome is unrecorded: ask only when nothing is pending. A failed
-        // read leaves no total, which does not read as "nothing pending".
+        // An earlier run's outcome is unrecorded: ask only when nothing is pending or
+        // executing. A failed read leaves no total, which does not read as "nothing open".
         const afterUnrecorded = String(
           stepByName('resolve_close_question')?.with?.after_unrecorded
         );
-        const unrecorded = (unrec: boolean, pending?: Record<string, unknown>) => ({
+        const unrecorded = (
+          unrec: boolean,
+          pending?: Record<string, unknown>,
+          executing?: Record<string, unknown>,
+          investigationStatus = 'open'
+        ) => ({
           steps: {
+            verify_investigation: { output: { metadata: { status: investigationStatus } } },
             resolve_run_outcome: { output: { outcome_unrecorded: unrec } },
             check_pending_proposals: pending ?? {},
+            check_executing_proposals: executing ?? {},
           },
         });
-        expect(evaluate(afterUnrecorded, unrecorded(true, { output: { total: 0 } }))).toBe(true);
-        expect(evaluate(afterUnrecorded, unrecorded(true, { output: { total: 1 } }))).toBe(false);
-        expect(evaluate(afterUnrecorded, unrecorded(true))).toBe(false);
-        expect(evaluate(afterUnrecorded, unrecorded(false, { output: { total: 0 } }))).toBe(false);
-        expect(stepByName('check_pending_proposals')?.if).toBe(
-          '${{ steps.resolve_run_outcome.output.outcome_unrecorded == true }}'
+        const total = (value: number) => ({ output: { total: value } });
+        expect(evaluate(afterUnrecorded, unrecorded(true, total(0), total(0)))).toBe(true);
+        expect(evaluate(afterUnrecorded, unrecorded(true, total(1), total(0)))).toBe(false);
+        // An approved action still running is not pending, but is not settled either.
+        expect(evaluate(afterUnrecorded, unrecorded(true, total(0), total(1)))).toBe(false);
+        // An analyst already closed it: asking would reopen it.
+        expect(evaluate(afterUnrecorded, unrecorded(true, total(0), total(0), 'closed'))).toBe(
+          false
         );
-        expect(stepByName('check_pending_proposals')?.['on-failure']).toEqual({ continue: true });
+        expect(evaluate(afterUnrecorded, unrecorded(true, undefined, total(0)))).toBe(false);
+        expect(evaluate(afterUnrecorded, unrecorded(true, total(0)))).toBe(false);
+        expect(evaluate(afterUnrecorded, unrecorded(false, total(0), total(0)))).toBe(false);
+        for (const [name, status] of [
+          ['check_pending_proposals', 'pending'],
+          ['check_executing_proposals', 'executing'],
+        ]) {
+          const step = stepByName(name);
+          expect(step?.if).toBe(
+            '${{ steps.resolve_run_outcome.output.outcome_unrecorded == true }}'
+          );
+          expect(step?.['on-failure']).toEqual({ continue: true });
+          expect((step?.with as { query?: { status?: string } })?.query?.status).toBe(status);
+        }
       });
 
       it('says so on the investigation first, and runs after the containment dispatch', () => {
@@ -2887,6 +2910,51 @@ describe('Endpoint analysis run', () => {
           },
         })
       ).toContain('the question whether to close this investigation could not be raised');
+      // The close dispatch failing too must not replace the lost list: the close card that
+      // would have carried it never exists.
+      const closeFailed = { resolve_proposals: { output: { close_gate_failed: true } } };
+      const rejected = liquid.parseAndRenderSync(lostMessage, {
+        kibanaUrl: 'https://kibana',
+        workflow: { spaceId: 'default' },
+        steps: {
+          resolve_host: { output: { host_name: 'web-01' } },
+          resolve_proposal_counts: { output: { check_failed: false } },
+          resolve_proposal_dispatch: { output: { failed: 1 } },
+          propose_actions: {
+            output: {
+              results: [
+                {
+                  status: 'completed',
+                  key: { title: 'Isolate host web-01', actionWorkflowId: 'isolate' },
+                  output: { status: 'failed', executionId: 'gate-1', workflowId: 'gate' },
+                },
+              ],
+            },
+          },
+          ...closeFailed,
+        },
+      });
+      expect(rejected).toContain('- Isolate host web-01 (`isolate`)');
+      expect(rejected).toContain('executionId=gate-1');
+      expect(rejected).toContain('could not be raised either, so nothing will ask it.');
+      expect(rejected.match(/The indicator was retired/g)).toHaveLength(1);
+      const checkFailedAndClose = liquid.parseAndRenderSync(lostMessage, {
+        steps: {
+          resolve_host: { output: { host_name: 'web-01' } },
+          resolve_proposal_counts: { output: { check_failed: true } },
+          forensic_analysis: {
+            output: {
+              structured_output: {
+                recommendedActions: [{ title: 'Isolate host web-01', actionWorkflowId: 'isolate' }],
+              },
+            },
+          },
+          ...closeFailed,
+        },
+      });
+      expect(checkFailedAndClose).toContain('- Isolate host web-01 (`isolate`)');
+      expect(checkFailedAndClose).toContain('could not be raised either, so nothing will ask it.');
+      expect(checkFailedAndClose.match(/The indicator was retired/g)).toHaveLength(1);
       const reason = String(
         (
           stepByName('mark_proposals_failed')?.with as {
@@ -2904,6 +2972,31 @@ describe('Endpoint analysis run', () => {
           })
           .replace(/\s+/g, ' ')
       ).toBe('Could not raise the close question on investigation inv-1');
+      const reasonWith = (steps: Record<string, unknown>) =>
+        liquid
+          .parseAndRenderSync(reason, {
+            steps: { resolve_request: { output: { investigation_id: 'inv-1' } }, ...steps },
+          })
+          .replace(/\s+/g, ' ');
+      expect(
+        reasonWith({
+          resolve_proposal_dispatch: { output: { failed: 2 } },
+          ...closeFailed,
+        })
+      ).toBe(
+        'Containment proposals did not reach the queue for investigation inv-1 and could not raise the close question'
+      );
+      expect(
+        reasonWith({
+          resolve_proposal_counts: { output: { check_failed: true } },
+          ...closeFailed,
+        })
+      ).toBe(
+        'Could not check for existing proposals on investigation inv-1, so none was created and could not raise the close question'
+      );
+      expect(reasonWith({ resolve_proposal_dispatch: { output: { failed: 2 } } })).toBe(
+        'Containment proposals did not reach the queue for investigation inv-1'
+      );
 
       const processed = String(stepByName('mark_processed')?.if);
       const retired = String(stepByName('mark_proposals_failed')?.if);
