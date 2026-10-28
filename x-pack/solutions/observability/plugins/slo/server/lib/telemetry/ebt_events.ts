@@ -60,7 +60,7 @@ const eventOriginEbtSchema: SchemaObject<EventOrigin> = {
 const sloDefinitionEbtSchema: RootSchema<WithOrigin<SloDefinitionEbtData>> = {
   slo_id: {
     type: 'keyword',
-    _meta: { description: 'The id of the SLO.' },
+    _meta: { description: 'The SHA-256 hash of the SLO id.' },
   },
   revision: {
     type: 'long',

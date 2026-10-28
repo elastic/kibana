@@ -13,6 +13,7 @@ import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SloTelemetryReporter } from '../lib/telemetry';
+import { hashSloId } from '../lib/telemetry/build_slo_ebt_data';
 import {
   createSloTelemetryReporterMock,
   getReportedEvents,
@@ -86,7 +87,7 @@ describe('DeleteSLO', () => {
       expect(getReportedEvents(mockTelemetry)).toEqual([
         [
           'slo_deleted',
-          expect.objectContaining({ slo_id: 'irrelevant', enabled: false, bulk: false }),
+          expect.objectContaining({ slo_id: hashSloId('irrelevant'), enabled: false, bulk: false }),
         ],
       ]);
     });
@@ -102,7 +103,7 @@ describe('DeleteSLO', () => {
       });
 
       expect(getReportedEvents(mockTelemetry)).toEqual([
-        ['slo_deleted', expect.objectContaining({ slo_id: 'irrelevant', bulk: true })],
+        ['slo_deleted', expect.objectContaining({ slo_id: hashSloId('irrelevant'), bulk: true })],
       ]);
     });
   });
@@ -118,7 +119,7 @@ describe('DeleteSLO', () => {
       await expect(deleteSLO.execute(slo.id)).rejects.toThrow('cleanup failure');
 
       expect(getReportedEvents(mockTelemetry)).toEqual([
-        ['slo_deleted', expect.objectContaining({ slo_id: 'irrelevant', bulk: false })],
+        ['slo_deleted', expect.objectContaining({ slo_id: hashSloId('irrelevant'), bulk: false })],
       ]);
     });
 

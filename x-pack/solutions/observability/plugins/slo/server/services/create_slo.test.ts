@@ -19,6 +19,7 @@ import { SUMMARY_TEMP_INDEX_NAME } from '../../common/constants';
 import { ALL_PROJECT_ROUTING, LOCAL_PROJECT_ROUTING } from '../../common/project_routings';
 import type { SLODefinition } from '../domain/models';
 import type { SloTelemetryReporter } from '../lib/telemetry';
+import { hashSloId } from '../lib/telemetry/build_slo_ebt_data';
 import {
   createSloTelemetryReporterMock,
   getReportedEvents,
@@ -94,7 +95,7 @@ describe('CreateSLO', () => {
         [
           'slo_created',
           expect.objectContaining({
-            slo_id: 'unique-id',
+            slo_id: hashSloId('unique-id'),
             revision: 1,
             indicator_type: 'sli.apm.transactionErrorRate',
             budgeting_method: sloParams.budgetingMethod,

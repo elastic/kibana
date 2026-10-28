@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { isEqual } from 'lodash';
 import type { SLODefinition } from '../../domain/models';
 import type { SloChangedField, SloDefinitionEbtData } from './ebt_event_types';
 import { SLO_CHANGED_FIELDS } from './ebt_event_types';
 
+/** SLO ids can be caller-supplied descriptive strings, so only a stable hash of the id is reported. */
+export const hashSloId = (sloId: string): string =>
+  createHash('sha256').update(sloId).digest('hex');
+
 /** Projects an SLO definition into the attributes reported by the SLO EBT events. */
 export const toSloDefinitionEbtData = (slo: SLODefinition): SloDefinitionEbtData => {
   const { objective, settings, timeWindow } = slo;
 
   return {
-    slo_id: slo.id,
+    slo_id: hashSloId(slo.id),
     revision: slo.revision,
     indicator_type: slo.indicator.type,
     budgeting_method: slo.budgetingMethod,

@@ -26,6 +26,7 @@ import {
 } from '../../common/constants';
 import type { SLODefinition } from '../domain/models';
 import type { SloTelemetryReporter } from '../lib/telemetry';
+import { hashSloId } from '../lib/telemetry/build_slo_ebt_data';
 import {
   createSloTelemetryReporterMock,
   getReportedEvents,
@@ -236,7 +237,7 @@ describe('UpdateSLO', () => {
           [
             'slo_updated',
             expect.objectContaining({
-              slo_id: slo.id,
+              slo_id: hashSloId(slo.id),
               revision: slo.revision,
               tags_count: 1,
               revision_bumped: false,
@@ -302,7 +303,7 @@ describe('UpdateSLO', () => {
         [
           'slo_updated',
           expect.objectContaining({
-            slo_id: slo.id,
+            slo_id: hashSloId(slo.id),
             revision: slo.revision + 1,
             group_by_count: 1,
             revision_bumped: true,

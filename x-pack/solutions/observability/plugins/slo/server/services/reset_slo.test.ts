@@ -29,6 +29,7 @@ import {
   createTransformManagerMock,
 } from './mocks';
 import type { SloTelemetryReporter } from '../lib/telemetry';
+import { hashSloId } from '../lib/telemetry/build_slo_ebt_data';
 import {
   createSloTelemetryReporterMock,
   getReportedEvents,
@@ -113,7 +114,7 @@ describe('ResetSLO', () => {
       expect(getReportedEvents(mockTelemetry)).toEqual([
         [
           'slo_reset',
-          expect.objectContaining({ slo_id: 'irrelevant', revision: slo.revision + 1 }),
+          expect.objectContaining({ slo_id: hashSloId('irrelevant'), revision: slo.revision + 1 }),
         ],
       ]);
     });

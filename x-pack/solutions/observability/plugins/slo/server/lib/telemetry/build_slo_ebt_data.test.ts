@@ -13,16 +13,29 @@ import {
   createSLOWithCalendarTimeWindow,
   createSLOWithTimeslicesBudgetingMethod,
 } from '../../services/fixtures/slo';
-import { getChangedFields, toSloDefinitionEbtData } from './build_slo_ebt_data';
+import { getChangedFields, hashSloId, toSloDefinitionEbtData } from './build_slo_ebt_data';
 
 const CREATED_AT = new Date('2026-10-01T10:00:00.000Z');
+
+describe('hashSloId', () => {
+  it('returns a stable SHA-256 hex digest that does not contain the id', () => {
+    const sloId = 'payments-customer-acme-prod';
+
+    expect(hashSloId(sloId)).toMatch(/^[0-9a-f]{64}$/);
+    expect(hashSloId(sloId)).toBe(hashSloId(sloId));
+    expect(hashSloId(sloId)).not.toContain(sloId);
+    expect(hashSloId('slo-1')).toBe(
+      '9cd2c28eb846530755ca1826b281783c2a1d2e23b051248ebb590a85fb6631d3'
+    );
+  });
+});
 
 describe('toSloDefinitionEbtData', () => {
   it('projects the default SLO definition', () => {
     const slo = createSLO({ id: 'slo-1', createdAt: CREATED_AT });
 
     expect(toSloDefinitionEbtData(slo)).toEqual({
-      slo_id: 'slo-1',
+      slo_id: '9cd2c28eb846530755ca1826b281783c2a1d2e23b051248ebb590a85fb6631d3',
       revision: 1,
       indicator_type: 'sli.apm.transactionDuration',
       budgeting_method: 'occurrences',
