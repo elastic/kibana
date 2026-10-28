@@ -27,6 +27,7 @@ import {
   isDOMNode,
   keys,
   useEuiTheme,
+  useGeneratedHtmlId,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -40,6 +41,7 @@ import { FlyoutHistoryKeyContext } from './flyout_history_key_context';
 import { OriginDocTypeContext } from './origin_doc_type_context';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
+import { useDocViewerFlyoutSession } from './use_doc_viewer_flyout_session';
 import { UnresolvedDocument, type RequestStateMeta } from './unresolved_document';
 
 export interface UnifiedDocViewerFlyoutProps
@@ -261,12 +263,16 @@ export function UnifiedDocViewerFlyout({
   // the same back-button navigation history, enabling "Back" to return the user
   // from the Trace Waterfall to the Document Viewer.
   const historyKey = DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const flyoutId = useGeneratedHtmlId({ prefix: 'docViewerFlyout' });
+
+  useDocViewerFlyoutSession({ flyoutId, historyKey, hitId: actualHit?.id, onClose });
 
   return (
     <FlyoutHistoryKeyContext.Provider value={historyKey}>
       <OriginDocTypeContext.Provider value={originDocType}>
         <EuiPortal>
           <EuiFlyout
+            id={flyoutId}
             session="start"
             historyKey={historyKey}
             flyoutMenuProps={{
