@@ -1703,9 +1703,12 @@ describe('detection rule workflows', () => {
               'compose_proposal',
             ])
           );
+          // check_exception_entries is the overflow gate: it reads the raw entries
+          // to fail the run on overflow, before bound_exception_entries normalizes.
           const rawUsers = reviewSteps.filter(
             ({ name, with: w }) =>
-              name !== 'bound_exception_entries' && JSON.stringify(w ?? {}).includes(raw)
+              !['bound_exception_entries', 'check_exception_entries'].includes(name) &&
+              JSON.stringify(w ?? {}).includes(raw)
           );
           expect(rawUsers.map(({ name }) => name)).toEqual([]);
           expect(bound.if).toContain("change_type == 'exception'");
