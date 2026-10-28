@@ -34,7 +34,7 @@ interface SetupOptions {
   esDocSource?: Record<string, unknown>;
   overrides?: Record<string, unknown>;
   namespace?: string;
-  pollTicks$?: Observable<unknown>;
+  pollTicks$?: Observable<number>;
   sharedPollReads?: InflightReads<Record<string, unknown>>;
   sharedUserProvidedCache?: NamespacedCache<Record<string, unknown>>;
   type?: 'config' | 'config-global';
@@ -280,6 +280,48 @@ describe('UiSettingsClient.get$', () => {
     await jest.advanceTimersByTimeAsync(slowReadMs);
     expect(warm.values).toEqual(['before']);
     await jest.advanceTimersByTimeAsync(GET_OBSERVABLE_POLL_INTERVAL);
+    expect(warm.values).toEqual(['before', 'after']);
+  });
+
+  it('does not let a subscription join a shared read left over from an earlier tick', async () => {
+    let stored = 'before';
+    let holdNextRead = false;
+    const pollTicks$ = interval(GET_OBSERVABLE_POLL_INTERVAL).pipe(share());
+    const sharedPollReads = new InflightReads<Record<string, unknown>>();
+    const savedObjectsClient = savedObjectsClientMock.create();
+    const slowReadMs = GET_OBSERVABLE_POLL_INTERVAL * 1.5;
+    savedObjectsClient.get.mockImplementation(() => {
+      const response = { type: TYPE, id: ID, references: [], attributes: { [KEY]: stored } };
+      if (holdNextRead) {
+        holdNextRead = false;
+        return new Promise((resolve) => setTimeout(() => resolve(response), slowReadMs));
+      }
+      return Promise.resolve(response);
+    });
+
+    const shared = {
+      pollTicks$,
+      sharedPollReads,
+      savedObjectsClient,
+      preserveSavedObjectsMock: true,
+    };
+    const warm = watch<string>(setup(shared).uiSettings.get$(KEY));
+    await jest.advanceTimersByTimeAsync(0);
+    expect(warm.values).toEqual(['before']);
+
+    holdNextRead = true;
+    await jest.advanceTimersByTimeAsync(GET_OBSERVABLE_POLL_INTERVAL);
+    stored = 'after';
+    const late = watch<string>(setup(shared).uiSettings.get$(KEY));
+    await jest.advanceTimersByTimeAsync(0);
+    expect(late.values).toEqual(['after']);
+
+    await jest.advanceTimersByTimeAsync(slowReadMs);
+    expect(late.values).toEqual(['after']);
+    expect(warm.values).toEqual(['before']);
+
+    await jest.advanceTimersByTimeAsync(GET_OBSERVABLE_POLL_INTERVAL);
+    expect(late.values).toEqual(['after']);
     expect(warm.values).toEqual(['before', 'after']);
   });
 

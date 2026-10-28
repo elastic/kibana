@@ -68,9 +68,10 @@ export class UiSettingsService
   private allowlist: Set<string> | null = null;
   private readonly sharedUserProvidedCache = new NamespacedCache<Record<string, any>>();
   private readonly stop$ = new ReplaySubject<void>(1);
+  // Tick numbers key shared reads, so the count must not restart when subscribers drop to zero.
   private readonly pollTicks$ = interval(GET_OBSERVABLE_POLL_INTERVAL).pipe(
     takeUntil(this.stop$),
-    share()
+    share({ resetOnRefCountZero: false })
   );
   private readonly sharedPollReads = new InflightReads<Record<string, unknown>>();
 

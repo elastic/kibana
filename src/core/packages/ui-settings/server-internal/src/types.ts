@@ -47,7 +47,7 @@ export interface UiSettingsServiceOptions {
   /** Namespace for cache keys (typically space ID) */
   namespace: string;
   /** Shared poll clock for `get$` */
-  pollTicks$?: Observable<unknown>;
+  pollTicks$?: Observable<number>;
   /** In-flight `get$` reads shared across clients on this node */
   sharedPollReads?: InflightReads<Record<string, unknown>>;
 }

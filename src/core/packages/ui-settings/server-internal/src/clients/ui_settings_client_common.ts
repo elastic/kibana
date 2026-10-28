@@ -41,7 +41,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   private readonly savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
   private readonly sharedUserProvidedCache?: UiSettingsServiceOptions['sharedUserProvidedCache'];
   private readonly sharedPollReads?: UiSettingsServiceOptions['sharedPollReads'];
-  private readonly pollTicks$: Observable<unknown>;
+  private readonly pollTicks$: Observable<number>;
   private readonly namespace: string;
 
   constructor(options: UiSettingsServiceOptions) {
@@ -69,9 +69,9 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   get$<T = any>(key: string): Observable<T> {
     this.assertObservableKey(key);
 
-    return merge(of('first'), this.pollTicks$).pipe(
+    return merge(of(undefined), this.pollTicks$).pipe(
       exhaustMap((tick) =>
-        defer(() => this.pollUserProvided({ shared: tick !== 'first' })).pipe(
+        defer(() => this.pollUserProvided(tick)).pipe(
           map((userProvided) => this.staticValue<T>(key, userProvided)),
           catchError((error) => {
             this.log.warn(`[UiSettings] get$("${key}") skipped a poll: ${error}`);
@@ -83,11 +83,15 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     );
   }
 
-  private async pollUserProvided({ shared }: { shared: boolean }): Promise<UserProvided> {
+  /**
+   * Reads for `get$`. Only reads for the same tick are shared, and the first read
+   * after subscribing (no tick) is never shared.
+   */
+  private async pollUserProvided(tick: number | undefined): Promise<UserProvided> {
     const read = () => this.read({ ignoreErrors: false });
     const attributes =
-      shared && this.sharedPollReads
-        ? this.sharedPollReads.run(`${this.type}:${this.namespace}`, read)
+      tick !== undefined && this.sharedPollReads
+        ? this.sharedPollReads.run(`${this.type}:${this.namespace}:${tick}`, read)
         : read();
     return this.applyOverrides(this.onReadHook(await attributes));
   }
