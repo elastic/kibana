@@ -4725,8 +4725,8 @@ importers:
         specifier: 4.104.0
         version: 4.104.0(ws@8.22.0)(zod@4.6.5)
       openpgp:
-        specifier: 5.11.3
-        version: 5.11.3
+        specifier: 6.3.1
+        version: 6.3.1
       ora:
         specifier: 4.1.1
         version: 4.1.1
@@ -16402,9 +16402,6 @@ packages:
   asn1.js@4.10.1:
     resolution: {integrity: sha512-p32cOF5q0Zqs9uBiONKYLm6BClCoBCM5O9JfeUSlnQLBTxYdTK+pW+nXflm8UkKd2UYlEbYz5qEi0JuZR9ckSw==}
 
-  asn1.js@5.4.1:
-    resolution: {integrity: sha512-+I//4cYPccV8LdmBLiX8CYvf9Sp3vQsrqu2QNXRcrbiWvcx/UdlFiqUJJzxRQxgsZmvhXhn4cSKeSmoFjVdupA==}
-
   asn1@0.2.6:
     resolution: {integrity: sha512-ix/FxPn0MDjeyJ7i/yoHGFt/EX6LyNbxSEhPPXODPL+KB0VPk86UYfL0lMdy+KCnv+fmvIzySwaK5COwqVbWTQ==}
 
@@ -22195,10 +22192,14 @@ packages:
     resolution: {integrity: sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==}
     hasBin: true
 
-  openpgp@5.11.3:
-    resolution: {integrity: sha512-jXOPfIteBUQ2zSmRG4+Y6PNntIIDEAvoM/lOYCnvpXAByJEruzrHQZWE/0CGOKHbubwUuty2HoPHsqBzyKHOpA==}
-    engines: {node: '>= 8.0.0'}
-    deprecated: This version is deprecated and will no longer receive security patches. Please refer to https://github.com/openpgpjs/openpgpjs/wiki/Updating-from-previous-versions for details on how to upgrade to a newer supported version.
+  openpgp@6.3.1:
+    resolution: {integrity: sha512-7oSPvmlKPojxFoyelT5DWPIAVmqWZh4qU/5pO6bdoShEtRpCw9Sye9IXUQj6EFM3XpgGssqccAr705YtTcLNQw==}
+    engines: {node: '>= 18.0.0', typescript: '>= 5.0.0'}
+    peerDependencies:
+      '@openpgp/web-stream-tools': ~0.3.0
+    peerDependenciesMeta:
+      '@openpgp/web-stream-tools':
+        optional: true
 
   opentracing@0.14.7:
     resolution: {integrity: sha512-vz9iS7MJ5+Bp1URw8Khvdyw1H/hGvzHWlKQ7eRrQojSCDL1/SrWfrY9QebLw97n2deyRtzHRC3MkQfVNUCo91Q==}
@@ -33904,13 +33905,6 @@ snapshots:
       inherits: 2.0.4
       minimalistic-assert: 1.0.1
 
-  asn1.js@5.4.1:
-    dependencies:
-      bn.js: 4.12.5
-      inherits: 2.0.4
-      minimalistic-assert: 1.0.1
-      safer-buffer: 2.1.2
-
   asn1@0.2.6:
     dependencies:
       safer-buffer: 2.1.2
@@ -41007,9 +41001,7 @@ snapshots:
 
   opener@1.5.2: {}
 
-  openpgp@5.11.3:
-    dependencies:
-      asn1.js: 5.4.1
+  openpgp@6.3.1: {}
 
   opentracing@0.14.7: {}
 

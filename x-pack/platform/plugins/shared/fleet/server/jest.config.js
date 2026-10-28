@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/jest',
+  preset: '@kbn/jest/jest_node',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/fleet/server'],
   coverageDirectory:
