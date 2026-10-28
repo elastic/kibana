@@ -35,7 +35,9 @@ export type Zone =
 
 // Add a machine type here when a ported step first uses it.
 export type MachineType =
+  | 'n2-highmem-4'
   | 'n2-standard-2'
+  | 'n2-standard-4'
   | 'n2-standard-8'
   | 'n2d-custom-16-32768'
   | 'n2d-standard-2'
@@ -110,3 +112,17 @@ export const spotAgent = (machineType: MachineType, zones: readonly Zone[]): Age
   preemptible: true,
   spotZones: zones.join(','),
 });
+
+export const mainTargetBranchOnly = "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'";
+
+export const securitySolutionCypressDefaults = {
+  agents: spotAgent('n2-standard-4', spotZones.centralFCA),
+  depends_on: ['build'],
+  timeout_in_minutes: 60,
+  retry: retry.agentLossOrAnyOnce,
+};
+
+export const securitySolutionHighMemoryCypressDefaults = {
+  ...securitySolutionCypressDefaults,
+  agents: spotAgent('n2-highmem-4', spotZones.centralFCA),
+};
