@@ -9,13 +9,9 @@ import { getCredentialWithAuth } from '../../../../lib/get_axios_instance';
 import { isSystemAction } from '../../../../lib/is_system_action';
 import type { ActionsClientContext } from '../../../../actions_client';
 import { getConnectorAuth } from '../../lib/get_connector_auth';
-import { isSandboxCapableConnector } from '../../lib/is_sandbox_capable_connector';
+import { hasSandboxCapableAuth } from '../../lib/is_sandbox_capable_connector';
+import { getConnectorSandboxHosts } from '../../lib/get_connector_sandbox_hosts';
 import type { GetSandboxCredentialsOptions, ResolvedSandboxCredentials } from './types';
-
-// Hosts the sandbox credential proxy accepts: lowercase letters, digits, '.' and '-', not at
-// either end, at most 253 characters. It rejects the whole command for any other entry, such
-// as an IPv6 literal or '_', and treats '*' as any host, so those entries are dropped here.
-const SANDBOX_HOST_PATTERN = /^(?![.-])[a-z0-9.-]{1,253}(?<![.-])$/;
 
 const getSelectedAuthTypeId = (secrets: Record<string, unknown>): string | undefined => {
   const { authType } = secrets;
@@ -52,7 +48,7 @@ export async function getSandboxCredentials(
   }
 
   if (
-    !isSandboxCapableConnector({
+    !hasSandboxCapableAuth({
       actionTypeId,
       config,
       secrets: validatedSecrets,
@@ -68,16 +64,11 @@ export async function getSandboxCredentials(
   }
 
   // Fail closed: the credential proxy sends a secret with no hosts to any host.
-  const hosts = [
-    ...new Set(
-      (actionType.getSandboxHosts?.({ config }) ?? [])
-        .map((host) => host.trim().toLowerCase())
-        .filter((host) => SANDBOX_HOST_PATTERN.test(host))
-    ),
-  ];
+  const hosts = getConnectorSandboxHosts({ actionType, config });
   if (hosts.length === 0) {
     throw new Error(
-      `Unable to get sandbox credentials for ${actionTypeId}: the connector declares no sandbox hosts`
+      `Unable to get sandbox credentials for connector "${connectorId}" (${actionTypeId}): it has no valid sandbox hosts. ` +
+        `Sandbox hosts must be hostnames made of lowercase letters, digits, "." and "-"; IPv6 addresses and names with "_" are not supported.`
     );
   }
 

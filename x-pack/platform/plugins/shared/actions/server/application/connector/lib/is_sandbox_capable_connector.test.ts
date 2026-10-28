@@ -7,7 +7,7 @@
 
 import type { ActionType } from '../../../types';
 import type { ActionTypeRegistry } from '../../../action_type_registry';
-import { isSandboxCapableConnector } from './is_sandbox_capable_connector';
+import { hasSandboxCapableAuth, isSandboxCapableConnector } from './is_sandbox_capable_connector';
 
 describe('isSandboxCapableConnector', () => {
   const createRegistry = ({
@@ -15,18 +15,69 @@ describe('isSandboxCapableConnector', () => {
     sandboxSupportedAuthTypes = ['bearer'],
     isSandboxCapable,
     isSystemActionType = false,
+    getSandboxHosts = () => ['api.example.com'],
   }: {
     has?: boolean;
     sandboxSupportedAuthTypes?: readonly string[];
     isSandboxCapable?: ActionType['isSandboxCapable'];
     isSystemActionType?: boolean;
+    getSandboxHosts?: ActionType['getSandboxHosts'];
   } = {}): Pick<ActionTypeRegistry, 'has' | 'get'> => ({
     has: jest.fn().mockReturnValue(has),
     get: jest.fn().mockReturnValue({
       sandboxSupportedAuthTypes,
       isSandboxCapable,
       isSystemActionType,
+      getSandboxHosts,
     }),
+  });
+
+  it.each([
+    ['declares no getSandboxHosts hook', undefined],
+    ['resolves to no hosts', () => []],
+    [
+      'only resolves to hosts the credential proxy rejects',
+      () => ['[::1]', 'under_score.example.com', '*'],
+    ],
+  ])(
+    'returns false when the auth is sandbox capable but the connector %s',
+    (_name, getSandboxHosts) => {
+      const actionTypeRegistry = createRegistry();
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue({
+        sandboxSupportedAuthTypes: ['bearer'],
+        isSystemActionType: false,
+        getSandboxHosts,
+      });
+
+      expect(
+        isSandboxCapableConnector({
+          actionTypeId: '.github',
+          config: { authType: 'bearer' },
+          actionTypeRegistry,
+        })
+      ).toBe(false);
+      expect(
+        hasSandboxCapableAuth({
+          actionTypeId: '.github',
+          config: { authType: 'bearer' },
+          actionTypeRegistry,
+        })
+      ).toBe(true);
+    }
+  );
+
+  it('passes the connector config to getSandboxHosts', () => {
+    const getSandboxHosts = jest.fn().mockReturnValue(['cluster.example.com']);
+    expect(
+      isSandboxCapableConnector({
+        actionTypeId: '.http',
+        config: { authType: 'bearer', url: 'https://cluster.example.com' },
+        actionTypeRegistry: createRegistry({ getSandboxHosts }),
+      })
+    ).toBe(true);
+    expect(getSandboxHosts).toHaveBeenCalledWith({
+      config: { authType: 'bearer', url: 'https://cluster.example.com' },
+    });
   });
 
   it('returns true when config.authType is in sandboxSupportedAuthTypes', () => {

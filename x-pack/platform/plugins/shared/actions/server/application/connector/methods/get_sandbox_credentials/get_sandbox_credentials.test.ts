@@ -493,7 +493,7 @@ describe('getSandboxCredentials()', () => {
 
       await expect(
         actionsClient.getSandboxCredentials({ id: inMemoryConnectorId })
-      ).rejects.toThrow(/the connector declares no sandbox hosts/);
+      ).rejects.toThrow(/it has no valid sandbox hosts\. Sandbox hosts must be hostnames/);
     });
   });
 

@@ -6,23 +6,27 @@
  */
 
 import type { ActionTypeRegistry } from '../../../action_type_registry';
+import { getConnectorSandboxHosts } from './get_connector_sandbox_hosts';
 
-/**
- * True when the connector can use sandbox credential injection: either the action type opts in
- * via isSandboxCapable, or config.authType is in sandboxSupportedAuthTypes (spec auth opt-in).
- */
-export const isSandboxCapableConnector = ({
-  actionTypeId,
-  config,
-  secrets,
-  actionTypeRegistry,
-}: {
+interface SandboxCapableConnectorOptions {
   actionTypeId: string;
   config?: Record<string, unknown>;
   /** Persisted connector lists omit secrets; credential resolution supplies validated secrets. */
   secrets?: Record<string, unknown>;
   actionTypeRegistry: Pick<ActionTypeRegistry, 'has' | 'get'>;
-}): boolean => {
+}
+
+/**
+ * True when the connector's auth supports sandbox credential injection: either the action type
+ * opts in via isSandboxCapable, or config.authType is in sandboxSupportedAuthTypes (spec auth
+ * opt-in). Does not check sandbox hosts; see isSandboxCapableConnector.
+ */
+export const hasSandboxCapableAuth = ({
+  actionTypeId,
+  config,
+  secrets,
+  actionTypeRegistry,
+}: SandboxCapableConnectorOptions): boolean => {
   if (!actionTypeRegistry.has(actionTypeId)) {
     return false;
   }
@@ -46,3 +50,15 @@ export const isSandboxCapableConnector = ({
     sandboxSupportedAuthTypes.includes(authType)
   );
 };
+
+/**
+ * True when the connector can use sandbox credential injection: its auth supports it and it
+ * resolves to at least one sandbox host the credential proxy accepts. A connector with no valid
+ * hosts is left out of sandbox connector lists, so it cannot break sandbox use for others.
+ */
+export const isSandboxCapableConnector = (options: SandboxCapableConnectorOptions): boolean =>
+  hasSandboxCapableAuth(options) &&
+  getConnectorSandboxHosts({
+    actionType: options.actionTypeRegistry.get(options.actionTypeId),
+    config: options.config,
+  }).length > 0;
