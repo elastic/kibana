@@ -49581,10 +49581,10 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List cloud onboarding deployments, newest first. Optionally filter by package name or provider.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+        List cloud onboarding deployment instances, newest first. Optionally filter by package name or provider.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
       operationId: get-fleet-cloud-onboarding-deployments
       parameters:
-        - description: Only list deployments that cover this package.
+        - description: Only list deployment instances that cover this package.
           in: query
           name: packageName
           required: false
@@ -49602,7 +49602,7 @@ paths:
               - azure
               - gcp
             type: string
-        - description: The page of deployments to return, starting at 1.
+        - description: The page of deployment instances to return, starting at 1.
           in: query
           name: page
           required: false
@@ -49611,7 +49611,7 @@ paths:
             maximum: 1000
             minimum: 1
             type: number
-        - description: The number of deployments per page.
+        - description: The number of deployment instances per page.
           in: query
           name: perPage
           required: false
@@ -49626,7 +49626,7 @@ paths:
             application/json:
               examples:
                 getCloudOnboardingDeploymentsExample:
-                  description: Page of cloud onboarding deployments that cover the aws package
+                  description: Page of cloud onboarding deployment instances that cover the aws package
                   value:
                     items:
                       - agentCount: 1
@@ -49670,7 +49670,7 @@ paths:
                       type: object
                       properties:
                         agentCount:
-                          description: Agents enrolled in the deployment agent policies.
+                          description: Number of agents enrolled in the deployment instance agent policies. Only agent policies in the current space are counted.
                           minimum: 0
                           type: number
                         agentPolicyIds:
@@ -49793,19 +49793,19 @@ paths:
                           maxItems: 1000
                           type: array
                         packages:
-                          description: Packages of the deployment package policies with their deployed versions. Empty for ECF-only deployments.
+                          description: Packages of the deployment instance package policies with their deployed versions. Empty for ECF-only deployment instances.
                           items:
                             additionalProperties: false
                             type: object
                             properties:
                               name:
-                                description: Package name.
+                                description: Name of the integration package, for example `aws`.
                                 type: string
                               title:
-                                description: Package title.
+                                description: Display title of the integration package, for example `AWS`.
                                 type: string
                               version:
-                                description: Package version the deployment policies run.
+                                description: Package version the deployment instance policies run.
                                 type: string
                             required:
                               - name
@@ -49935,7 +49935,7 @@ paths:
                   - message
                   - attributes
           description: Bad Request
-      summary: Get cloud onboarding deployments
+      summary: Get cloud onboarding deployment instances
       tags:
         - Fleet cloud onboarding deployments
       x-state: Experimental
