@@ -61,7 +61,7 @@ export const MigrateRulePage = ({
 }: MigrateRulePageProps) => {
   const { ruleId } = useParams<{ ruleId: string }>();
   const history = useHistory();
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(true);
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const [stepRequest, setStepRequest] = useState<{ stepId: RuleFormStepId }>();
   const openFlyout = useCallback(() => {
     setStepRequest(undefined);
