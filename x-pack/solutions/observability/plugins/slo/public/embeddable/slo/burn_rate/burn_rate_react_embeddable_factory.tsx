@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
+import { drilldownsComparators } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
@@ -16,8 +17,10 @@ import {
   fetch$,
   initializeStateManager,
   initializeTitleManager,
+  areComparatorsEqual,
   titleComparators,
   useBatchedPublishingSubjects,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
@@ -35,6 +38,14 @@ const getTitle = () =>
     defaultMessage: 'SLO Burn Rate',
   });
 
+const comparators: StateComparators<BurnRateEmbeddableState> = {
+  ...titleComparators,
+  ...drilldownsComparators,
+  slo_id: 'referenceEquality',
+  slo_instance_id: 'referenceEquality',
+  duration: 'referenceEquality',
+};
+
 export const getBurnRateEmbeddableFactory = ({
   coreStart,
   pluginsStart,
@@ -46,6 +57,8 @@ export const getBurnRateEmbeddableFactory = ({
 }) => {
   const factory: EmbeddablePublicDefinition<BurnRateEmbeddableState, BurnRateApi> = {
     type: SLO_BURN_RATE_EMBEDDABLE_ID,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(comparators, baseline, current),
     getPlacementHints: () => {
       return { width: 14, height: 7 };
     },
@@ -81,13 +94,7 @@ export const getBurnRateEmbeddableFactory = ({
           ...sloBurnRateManager.getLatestState(),
           ...drilldownsManager.getLatestState(),
         }),
-        getComparators: () => ({
-          ...titleComparators,
-          ...drilldownsManager.comparators,
-          slo_id: 'referenceEquality',
-          slo_instance_id: 'referenceEquality',
-          duration: 'referenceEquality',
-        }),
+        getComparators: () => comparators,
         applySerializedState: (nextState) => {
           sloBurnRateManager.reinitializeState(nextState);
           titleManager.reinitializeState(nextState);

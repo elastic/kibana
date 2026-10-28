@@ -7,6 +7,7 @@
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
+import { drilldownsComparators } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -16,8 +17,10 @@ import {
   getViewModeSubject,
   initializeStateManager,
   initializeTitleManager,
+  areComparatorsEqual,
   titleComparators,
   useBatchedPublishingSubjects,
+  type StateComparators,
   useFetchContext,
 } from '@kbn/presentation-publishing';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -41,6 +44,12 @@ export const getAlertsPanelTitle = () =>
     defaultMessage: 'SLO Alerts',
   });
 
+const comparators: StateComparators<SloAlertsEmbeddableState> = {
+  ...titleComparators,
+  ...drilldownsComparators,
+  slos: 'referenceEquality',
+};
+
 export function getAlertsEmbeddableFactory({
   coreStart,
   pluginsStart,
@@ -54,6 +63,8 @@ export function getAlertsEmbeddableFactory({
 }) {
   const factory: EmbeddablePublicDefinition<SloAlertsEmbeddableState, SloAlertsApi> = {
     type: SLO_ALERTS_EMBEDDABLE_ID,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(comparators, baseline, current),
     buildEmbeddable: async ({
       initializeDrilldownsManager,
       initialState,
@@ -99,11 +110,7 @@ export function getAlertsEmbeddableFactory({
           titleManager.anyStateChange$,
           sloAlertsStateManager.anyStateChange$
         ),
-        getComparators: () => ({
-          ...titleComparators,
-          ...drilldownsManager.comparators,
-          slos: 'referenceEquality',
-        }),
+        getComparators: () => comparators,
         applySerializedState: (nextState) => {
           drilldownsManager.reinitializeState(nextState);
           titleManager.reinitializeState(nextState);
