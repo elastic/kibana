@@ -2986,25 +2986,6 @@ describe('ProposalsService', () => {
       );
     });
 
-    it('should restrict to a set of chains by root id for in-process callers', async () => {
-      const storage = createStorage(baseDocument());
-      const { service } = createService(storage);
-
-      await service.list(
-        { ...listQuery({ excludeSuperseded: true }), rootProposalIds: ['root-1', 'root-2'] },
-        SPACE_ID,
-        request
-      );
-
-      const [[searchArgs]] = storage.search.mock.calls;
-      expect(searchArgs.query.bool.filter).toEqual(
-        expect.arrayContaining([
-          { terms: { rootProposalId: ['root-1', 'root-2'] } },
-          { bool: { must_not: { exists: { field: 'supersededBy' } } } },
-        ])
-      );
-    });
-
     it('should order by rank in Elasticsearch rather than after the fetch', async () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);

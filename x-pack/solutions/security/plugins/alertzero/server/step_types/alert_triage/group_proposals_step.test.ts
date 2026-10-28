@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ProposalLookupTruncatedError } from '@kbn/proposals-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { generationIds } from '../../alert_triage/group_proposals';
@@ -66,7 +67,14 @@ const setup = ({
     assertCanManage: jest.fn(),
   };
   const service = {
-    list: jest.fn().mockResolvedValue({ proposals: heads, total: heads.length }),
+    getLatestRevisions: jest.fn(
+      async (rootIds: string[]) =>
+        new Map(
+          heads
+            .filter(({ rootProposalId }) => rootIds.includes(rootProposalId as string))
+            .map((head) => [head.rootProposalId, head])
+        )
+    ),
     revise: jest.fn().mockResolvedValue({ proposalId: 'revision-id', revision: 2 }),
   };
   const management = {
@@ -164,7 +172,7 @@ describe('triage group false positives step', () => {
 
       const output = await group({ ...baseInput, ...input, fp_candidate_ids: ['a1', 'a2'] });
 
-      expect(service.list).not.toHaveBeenCalled();
+      expect(service.getLatestRevisions).not.toHaveBeenCalled();
       expect(output).toEqual(
         expect.objectContaining({ grouped: false, grouping, joins: [], proposals_created: 1 })
       );
@@ -352,9 +360,11 @@ describe('triage group false positives step', () => {
     });
   });
 
-  it('does not group a batch when the lookup returns fewer proposals than matched', async () => {
+  it('does not group a batch when the lookup cannot return every proposal', async () => {
     const { group, service } = setup({ heads: [openHead()] });
-    service.list.mockResolvedValue({ proposals: [openHead()], total: 3 });
+    service.getLatestRevisions.mockRejectedValue(
+      new ProposalLookupTruncatedError('too many chains')
+    );
 
     const output = await group({ ...baseInput, fp_candidate_ids: ['a1', 'a2'] });
 
@@ -383,7 +393,9 @@ describe('triage group false positives step', () => {
 
   it('does not repeat the lookup warning when the proposal lookup was incomplete', async () => {
     const { group, service, logger } = setup({ heads: [openHead()] });
-    service.list.mockResolvedValue({ proposals: [openHead()], total: 3 });
+    service.getLatestRevisions.mockRejectedValue(
+      new ProposalLookupTruncatedError('too many chains')
+    );
 
     await group({ ...baseInput, fp_candidate_ids: ['a1', 'a2'] });
 
@@ -418,7 +430,7 @@ describe('triage join proposal step', () => {
 
     const output = await join(input);
 
-    expect(service.list.mock.calls[0][0].rootProposalIds).toEqual([GEN0]);
+    expect(service.getLatestRevisions.mock.calls[0][0]).toEqual([GEN0]);
     expect(output).toEqual({
       joined: true,
       proposal_id: 'revision-id',

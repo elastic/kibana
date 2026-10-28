@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { ProposalLookupTruncatedError } from '@kbn/proposals-plugin/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { buildAlertsPagePath, buildAlertsPageTagPath } from '@kbn/securitysolution-alerts-page-url';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -59,9 +60,6 @@ const readHistory = async (
     return undefined;
   }
 };
-
-/** The most heads one lookup reads: the index's default `max_result_window`. */
-const MAX_HEADS = 10_000;
 
 export interface GroupProposalsStepDependencies {
   getProposals: () => ProposalsPluginStart;
@@ -136,26 +134,21 @@ const createRuntime = async (
 
   const groupingDeps: GroupingDeps = {
     listHeads: async (rootIds) => {
-      const { proposals, total } = await service.list(
-        {
-          rootProposalIds: rootIds,
+      try {
+        const heads = await service.getLatestRevisions(rootIds, spaceId, {
           origin: ALERTZERO_PROPOSAL_ORIGIN,
-          excludeSuperseded: true,
-          excludeExpired: false,
-          size: MAX_HEADS,
-          from: 0,
-        },
-        spaceId,
-        request
-      );
-      // A page that stops short of the total would hide heads, and a join or a derived id decided
-      // without them could duplicate a proposal.
-      if (total > proposals.length) {
-        throw new HeadsTruncatedError(
-          `The proposal lookup matched ${total} proposals and returned ${proposals.length}, so the batch is not grouped`
-        );
+        });
+        return [...heads.values()].map(toHead);
+      } catch (error) {
+        // A lookup that cannot return every head would hide proposals, and a join or a derived id
+        // decided without them could duplicate one, so the batch is not grouped.
+        if (error instanceof ProposalLookupTruncatedError) {
+          throw new HeadsTruncatedError(
+            `The proposal lookup could not return every head, so the batch is not grouped: ${error.message}`
+          );
+        }
+        throw error;
       }
-      return proposals.map(toHead);
     },
     // The gate check of `releaseGate`: a gate that no longer waits has been approved, and a revise
     // now would be closed without the approver having seen it.
