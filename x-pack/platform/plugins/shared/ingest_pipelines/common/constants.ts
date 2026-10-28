@@ -17,4 +17,4 @@ export const PLUGIN_MIN_LICENSE_TYPE = basicLicense;
 
 export const API_BASE_PATH = '/api/ingest_pipelines';
 
-export const APP_CLUSTER_REQUIRED_PRIVILEGES = ['manage_pipeline', 'cluster:monitor/nodes/info'];
+export const APP_CLUSTER_REQUIRED_PRIVILEGES = ['manage_pipeline'];

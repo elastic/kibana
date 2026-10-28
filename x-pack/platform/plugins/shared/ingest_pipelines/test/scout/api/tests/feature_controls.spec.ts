@@ -16,7 +16,7 @@ apiTest.describe('Ingest pipelines feature controls', { tag: tags.stateful.class
   };
 
   const dashboardReadWithIngest = {
-    elasticsearch: { cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'] },
+    elasticsearch: { cluster: ['manage_pipeline'] },
     kibana: [
       { base: [], feature: { advancedSettings: ['read'], dashboard: ['read'] }, spaces: ['*'] },
     ],
