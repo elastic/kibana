@@ -41,6 +41,7 @@ export const useChangeHistoryDetail = ({
       objectId,
       changeId: changeId ?? '__none__',
       scope,
+      supports,
     }),
     ({ signal }) => {
       if (!changeId) {

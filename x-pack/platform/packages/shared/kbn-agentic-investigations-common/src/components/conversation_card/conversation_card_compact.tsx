@@ -58,6 +58,8 @@ interface ConversationCardCompactProps {
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
+  /** When false the card is inert and its chat control and menu are disabled. Defaults to true. */
+  canOpenInvestigationDetails?: boolean;
   chatHref?: string;
   onCopyLink: BaseActionsProps['onCopyLink'];
 }
@@ -75,6 +77,7 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
     onClickAction,
     onClickCard,
     onOpenChat,
+    canOpenInvestigationDetails = true,
     chatHref,
     onCopyLink,
   }) => {
@@ -84,22 +87,22 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
     return (
       <StyledEuiPanel
         paddingSize="none"
-        role="button"
-        tabIndex={0}
+        role={canOpenInvestigationDetails ? 'button' : undefined}
+        tabIndex={canOpenInvestigationDetails ? 0 : undefined}
         aria-label={investigation.title}
         aria-current={isSelected || undefined}
         borderRadius="none"
         $isSelected={isSelected}
         hasBorder={false}
         hasShadow={false}
-        onClick={() => onClickCard(investigation.id)}
+        onClick={canOpenInvestigationDetails ? () => onClickCard(investigation.id) : undefined}
         onKeyDown={(event: React.KeyboardEvent) => {
           // Only the panel itself: the nested controls handle their own keys, and
           // preventDefault here would swallow them.
           if (event.target !== event.currentTarget) {
             return;
           }
-          if (event.key === 'Enter' || event.key === ' ') {
+          if (canOpenInvestigationDetails && (event.key === 'Enter' || event.key === ' ')) {
             event.preventDefault();
             onClickCard(investigation.id);
           }
@@ -162,6 +165,7 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
                   onClickAction={onClickAction}
                   onOpenChat={() => onOpenChat(investigation.id)}
                   chatHref={chatHref}
+                  canOpenInvestigationDetails={canOpenInvestigationDetails}
                   onCopyLink={onCopyLink}
                 />
               </EuiFlexItem>

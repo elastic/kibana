@@ -78,6 +78,12 @@ export class StreamsApp {
   public readonly canvasEmptyState;
   public readonly canvasSearch;
   public readonly canvasSearchNoMatches;
+  public readonly canvasEdgeMenuButton;
+  public readonly canvasEdgeMenuAddProcessing;
+  public readonly canvasEdgeMenuAddRouting;
+  public readonly canvasProcessingNode;
+  public readonly processingFlyout;
+  public readonly processingFlyoutSave;
   public readonly canvasDataStreamsNode;
   // Streams layout
   public readonly streamsSourcesTable;
@@ -154,6 +160,14 @@ export class StreamsApp {
     this.canvasEmptyState = this.page.testSubj.locator('streamsCanvasEmptyState');
     this.canvasSearch = this.page.testSubj.locator('streamsCanvasSearch');
     this.canvasSearchNoMatches = this.page.testSubj.locator('streamsCanvasSearchNoMatches');
+    this.canvasEdgeMenuButton = this.page.testSubj.locator('streamsCanvasEdgeMenuButton');
+    this.canvasEdgeMenuAddProcessing = this.page.testSubj.locator(
+      'streamsCanvasEdgeMenu-addProcessing'
+    );
+    this.canvasEdgeMenuAddRouting = this.page.testSubj.locator('streamsCanvasEdgeMenu-addRouting');
+    this.canvasProcessingNode = this.page.testSubj.locator('streamsCanvasProcessingNode');
+    this.processingFlyout = this.page.testSubj.locator('streamsProcessingFlyout');
+    this.processingFlyoutSave = this.page.testSubj.locator('streamsProcessingFlyoutSave');
     this.canvasDataStreamsNode = this.page.testSubj.locator('streamsCanvasDataStreamsNode');
     // Streams layout locators
     this.streamsSourcesTable = this.page.testSubj.locator('streamsSourcesTable');
@@ -245,6 +259,38 @@ export class StreamsApp {
 
   getCanvasNodeByAriaLabel(ariaLabel: string) {
     return this.page.locator(`.react-flow__node[aria-label="${ariaLabel}"]`);
+  }
+
+  /** Edge ids contain `->`, which `testSubj` selectors would read as a child combinator. */
+  getCanvasEdge(edgeId: string) {
+    return this.page.locator(`[data-test-subj="streamsCanvasEdge-${edgeId}"]`);
+  }
+
+  /**
+   * Hovers a canvas line and opens its "Add processing / Add routing" menu. A
+   * smooth-step line always passes through the centre of its bounding box, which
+   * is where the pointer goes.
+   */
+  async openCanvasEdgeMenu(edgeId: string) {
+    const line = this.getCanvasEdge(edgeId).getByTestId('streamsCanvasBasicEdge');
+    await line.waitFor({ state: 'attached' });
+    const box = await line.boundingBox();
+    if (!box) {
+      throw new Error(`Canvas edge ${edgeId} is not rendered`);
+    }
+    await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await this.canvasEdgeMenuButton.click();
+  }
+
+  /** Adds an `add_fields` processor that upserts a literal value at a record path. */
+  async addAddFieldsProcessor(path: string, value: string) {
+    const pathInput = this.processingFlyout
+      .getByTestId('componentDefinitionFormPath-path')
+      .getByRole('combobox');
+    await pathInput.fill(path);
+    await pathInput.press('Enter');
+    await this.processingFlyout.getByTestId('componentDefinitionFormLiteral-value').fill(value);
+    await this.processingFlyout.getByTestId('streamsProcessingFlyoutEditorSubmit').click();
   }
 
   /**
