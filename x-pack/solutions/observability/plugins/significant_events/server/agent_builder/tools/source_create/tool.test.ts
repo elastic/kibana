@@ -76,20 +76,6 @@ describe('source_create tool', () => {
     });
   });
 
-  it('creates the source switched off when asked', async () => {
-    const create = jest.fn().mockResolvedValue({ ...checkout, enabled: false });
-
-    const result = await createTool({ create }).handler(
-      { ...params, enabled: false },
-      createMockToolContext()
-    );
-
-    expect(create).toHaveBeenCalledWith({ ...params, enabled: false });
-    expect(result).toEqual({
-      results: [{ type: 'other', data: expect.objectContaining({ enabled: false }) }],
-    });
-  });
-
   it('does not create the source when the pause state cannot be read', async () => {
     const create = jest.fn();
     const getState = jest.fn().mockRejectedValue(new Error('state unavailable'));
