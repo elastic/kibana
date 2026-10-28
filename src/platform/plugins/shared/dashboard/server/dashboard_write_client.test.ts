@@ -178,24 +178,22 @@ describe('dashboard server client writes', () => {
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
     });
 
-    it('passes a forbidden error from saved objects through unchanged', async () => {
-      const forbidden = SavedObjectsErrorHelpers.decorateForbiddenError(new Error('forbidden'));
-      savedObjectsClient.create.mockRejectedValue(forbidden);
-      const client = startClient();
+    it.each([
+      ['forbidden', SavedObjectsErrorHelpers.decorateForbiddenError(new Error('forbidden'))],
+      ['conflict', SavedObjectsErrorHelpers.createConflictError('dashboard', 'dash-1')],
+      ['Zod', z.string().safeParse(1).error],
+    ])(
+      'passes a %s error from the saved objects write through unchanged',
+      async (_, writeError) => {
+        savedObjectsClient.create.mockRejectedValue(writeError);
+        const client = startClient();
 
-      await expect(client.create(request, { title: 'My dashboard' })).rejects.toBe(forbidden);
-    });
+        const error = await client.create(request, { title: 'My dashboard' }).catch((e) => e);
 
-    it('does not relabel a ZodError thrown by the saved objects write', async () => {
-      const zodError = z.string().safeParse(1).error;
-      savedObjectsClient.create.mockRejectedValue(zodError);
-      const client = startClient();
-
-      const error = await client.create(request, { title: 'My dashboard' }).catch((e) => e);
-
-      expect(error).toBe(zodError);
-      expect(error).not.toBeInstanceOf(DashboardValidationError);
-    });
+        expect(error).toBe(writeError);
+        expect(error).not.toBeInstanceOf(DashboardValidationError);
+      }
+    );
 
     it("records history for the request's user and space", async () => {
       const client = startClient();
@@ -306,15 +304,6 @@ describe('dashboard server client writes', () => {
           spaceId: 'my-space',
         })
       );
-    });
-
-    it('passes a conflict error from saved objects through unchanged', async () => {
-      mockExistingDashboard('dash-1');
-      const conflict = SavedObjectsErrorHelpers.createConflictError('dashboard', 'dash-1');
-      savedObjectsClient.update.mockRejectedValue(conflict);
-      const client = startClient();
-
-      await expect(client.update(request, 'dash-1', { title: 'Renamed' })).rejects.toBe(conflict);
     });
 
     it('passes the bad request for unsupported access control through and saves nothing', async () => {
