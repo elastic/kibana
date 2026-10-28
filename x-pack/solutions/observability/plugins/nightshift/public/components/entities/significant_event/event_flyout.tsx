@@ -420,6 +420,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
       {isMarkInactiveModalOpen ? (
         <MarkSignificantEventInactiveModal
           eventId={event.event_id}
+          episodeId={event.episode_id}
           onClose={() => setIsMarkInactiveModalOpen(false)}
           onSuccess={onClose}
         />

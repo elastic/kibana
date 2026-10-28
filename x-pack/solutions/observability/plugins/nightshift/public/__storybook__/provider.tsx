@@ -108,6 +108,9 @@ const getEventsResponse = (
   };
 };
 
+/** Storybook episode ids are the event id behind this prefix, so the mock can map them back. */
+const EPISODE_ID_PREFIX = 'episode-';
+
 const createServices = ({
   lifecycleScenario,
   scenario,
@@ -139,9 +142,11 @@ const createServices = ({
         const requestedEventId = options?.params?.query?.event_id;
         const hits = response.hits
           .filter((event) => !requestedEventId || event.event_id === requestedEventId)
-          .map((event) =>
-            inactiveEventIds.has(event.event_id) ? { ...event, status: 'inactive' as const } : event
-          );
+          .map((event) => ({
+            ...event,
+            episode_id: `${EPISODE_ID_PREFIX}${event.event_id}`,
+            ...(inactiveEventIds.has(event.event_id) ? { status: 'inactive' as const } : {}),
+          }));
         return { ...response, hits, total: hits.length };
       }
 
@@ -156,17 +161,6 @@ const createServices = ({
           return { detections: [], events: [checkoutEvent] };
         }
         return checkoutLifecycle;
-      }
-
-      const eventId = options?.params?.path?.id;
-      if (route === 'POST /internal/significant_events/events/{id}/update' && eventId) {
-        inactiveEventIds.add(eventId);
-        return {
-          event_id: eventId,
-          updated: 1,
-          ignored: 0,
-          status: 'inactive',
-        };
       }
 
       if (route === 'GET /internal/streams/_query_occurrences') {
@@ -229,6 +223,16 @@ const createServices = ({
       basePath: {
         prepend: (path: string) => path,
       },
+      // Alerting v2 `_bulk_deactivate`: marks the event inactive in the Storybook fixtures.
+      post: async (_path: string, options?: { body?: string }) => {
+        const items: Array<{ alert_id: string }> = JSON.parse(
+          options?.body ?? '{"items":[]}'
+        ).items;
+        items.forEach(({ alert_id: episodeId }) => {
+          inactiveEventIds.add(episodeId.replace(EPISODE_ID_PREFIX, ''));
+        });
+        return { affected_count: items.length, errors: [] };
+      },
     },
     lens: {
       EmbeddableComponent: StorybookLensEmbeddable,
@@ -237,6 +241,8 @@ const createServices = ({
       toasts: {
         addError: () => undefined,
         addSuccess: () => undefined,
+        addInfo: () => undefined,
+        addDanger: () => undefined,
       },
     },
     share: {
