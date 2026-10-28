@@ -364,3 +364,68 @@ describe('AWS JSON services: mixins', () => {
     expect((await send({ NextToken: 't' })).status).toBe(200);
   });
 });
+
+describe('AWS JSON services: nulls', () => {
+  const sparse: SmithyModel = {
+    smithy: '2.0',
+    shapes: {
+      [id('Metrics_20240101')]: {
+        type: 'service',
+        version: '2024-01-01',
+        operations: [ref('PutTags')],
+        traits: {
+          'aws.api#service': { sdkId: 'Metrics', endpointPrefix: 'metrics' },
+          'aws.auth#sigv4': { name: 'metrics' },
+          'aws.protocols#awsJson1_0': {},
+        },
+      },
+      [id('PutTags')]: { type: 'operation', input: ref('PutTagsInput') },
+      [id('PutTagsInput')]: {
+        type: 'structure',
+        members: {
+          Name: { target: 'smithy.api#String', traits: required },
+          Tags: { target: id('Tags'), traits: { 'smithy.api#length': { min: 1 } } },
+          Detail: { target: id('Detail') },
+        },
+      },
+      [id('Tags')]: {
+        type: 'map',
+        key: ref('smithy.api#String'),
+        value: ref('smithy.api#String'),
+        traits: { 'smithy.api#sparse': {} },
+      },
+      [id('Detail')]: {
+        type: 'structure',
+        members: { Note: { target: 'smithy.api#String' } },
+      },
+    },
+  };
+
+  const send = async (body: unknown) => {
+    const { fetch, calls } = createEmulatorFetch({ specs: [sparse] });
+    const response = await fetch('https://metrics.eu-west-1.amazonaws.com/', {
+      method: 'POST',
+      headers: {
+        authorization: 'AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20240101/eu-west-1/metrics',
+        'content-type': 'application/x-amz-json-1.0',
+        'x-amz-target': 'Metrics_20240101.PutTags',
+      },
+      body: JSON.stringify(body),
+    });
+    return { response, calls };
+  };
+
+  it('keeps the nulls of sparse maps, which count towards their length', async () => {
+    const { response } = await send({ Name: 'n', Tags: { owner: null } });
+
+    expect(response.status).toBe(200);
+  });
+
+  it('drops null structure members as absent, so a null required member is missing', async () => {
+    const optional = await send({ Name: 'n', Detail: { Note: null }, Tags: { a: 'b' } });
+    const missing = await send({ Name: null });
+
+    expect(optional.response.status).toBe(200);
+    expect(missing.response.status).toBe(400);
+  });
+});

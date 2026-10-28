@@ -66,22 +66,6 @@ export interface AwsJsonService {
 
 const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-// Servers treat null structure members as absent. Nulls in lists, which sparse lists allow,
-// stay; nulls in sparse maps are dropped too, which validation doesn't notice.
-const withoutNulls = (value: unknown): unknown => {
-  if (Array.isArray(value)) {
-    return value.map(withoutNulls);
-  }
-  if (!isRecord(value)) {
-    return value;
-  }
-  return Object.fromEntries(
-    Object.entries(value).flatMap(([key, member]) =>
-      member === null ? [] : [[key, withoutNulls(member)]]
-    )
-  );
-};
-
 /** Whether a model's service (the only one, or the given one) uses awsJson1_0 or awsJson1_1. */
 export const isAwsJsonModel = (model: SmithyModel, service?: string): boolean =>
   protocolsOf(pickService(model, service)[1]).some((protocol) => protocol in AWS_JSON_VERSIONS);
@@ -116,6 +100,46 @@ export const createAwsJsonService = (
   // awsJson documents name members as modeled, ignoring `@jsonName`.
   const converter = createShapeConverter(model, { jsonNames: false, nonNumericFloats: true });
   const { components } = converter;
+
+  const resolveSchema = (schema: unknown, depth = 0): JsonSchema => {
+    if (!isRecord(schema) || depth > 32) {
+      return {};
+    }
+    if (typeof schema.$ref === 'string') {
+      return resolveSchema(components[schema.$ref.split('/').pop() ?? ''], depth + 1);
+    }
+    return Array.isArray(schema.allOf) && schema.allOf.length === 1
+      ? resolveSchema(schema.allOf[0], depth + 1)
+      : schema;
+  };
+
+  // Servers treat null structure and union members as absent. Nulls in lists, sparse maps and
+  // documents are values, and stay.
+  const withoutNulls = (value: unknown, schema: unknown): unknown => {
+    const target = resolveSchema(schema);
+    if (Array.isArray(value)) {
+      return value.map((item) => withoutNulls(item, target.items));
+    }
+    if (!isRecord(value)) {
+      return value;
+    }
+    const variants = Array.isArray(target.oneOf)
+      ? target.oneOf.map((variant) => resolveSchema(variant))
+      : [];
+    const isStructure = isRecord(target.properties) || variants.length > 0;
+    const properties: Record<string, unknown> = isRecord(target.properties)
+      ? target.properties
+      : Object.assign({}, ...variants.map(({ properties: own }) => (isRecord(own) ? own : {})));
+    return Object.fromEntries(
+      Object.entries(value).flatMap(([key, member]) =>
+        isStructure
+          ? member === null
+            ? []
+            : [[key, withoutNulls(member, properties[key])]]
+          : [[key, withoutNulls(member, target.additionalProperties)]]
+      )
+    );
+  };
 
   // A structure's members as a JSON document, registered as a component; error documents also
   // carry their `__type`.
@@ -266,7 +290,14 @@ export const createAwsJsonService = (
       const routed = new URL(url);
       routed.hostname = host.exec(url.hostname)?.[1] ?? url.hostname;
       routed.pathname = `/${name}`;
-      return { operation: name, request: { ...request, url: routed, body: withoutNulls(body) } };
+      return {
+        operation: name,
+        request: {
+          ...request,
+          url: routed,
+          body: withoutNulls(body, components[`${name}RequestContent`]),
+        },
+      };
     },
     reject: (rejection, violations) =>
       rejection === 'unauthenticated'
