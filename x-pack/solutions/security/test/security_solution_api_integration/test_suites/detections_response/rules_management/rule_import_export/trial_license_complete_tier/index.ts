@@ -18,6 +18,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./import_rules_with_overwrite'));
     loadTestFile(require.resolve('./import_rules_conflicts'));
     loadTestFile(require.resolve('./import_rules_response_actions'));
+    loadTestFile(require.resolve('./import_rules_response_actions_via_saved_objects_api'));
     loadTestFile(require.resolve('./import_rules_ess'));
     loadTestFile(require.resolve('./import_connectors'));
     loadTestFile(require.resolve('./import_rules_at_batch_boundary'));

@@ -22,6 +22,7 @@ import {
   scheduleTask,
   bulkMigrateLegacyActions,
 } from '../../../../rules_client/lib';
+import { validateRuleTypeParams, authorizeRuleTypeParams } from '../../../../lib';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -112,6 +113,19 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
   }
 
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
+
+  // Re-authorize the persisted params against the acting user's privileges before
+  // activating them. A disabled rule's params may have been written through a path
+  // that stores them without running the rule type's authorizer (for example Saved
+  // Objects import), so create/update authorization cannot be assumed here.
+  const validatedRuleTypeParams = validateRuleTypeParams(
+    attributes.params,
+    ruleType.validate.params
+  );
+  await authorizeRuleTypeParams(validatedRuleTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+  });
+
   const { autoRecoverAlerts: isLifecycleAlert } = ruleType;
   const indices = context.getAlertIndicesAlias([ruleType.id], context.spaceId);
 

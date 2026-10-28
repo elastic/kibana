@@ -26,7 +26,11 @@ import { bulkCreateRulesSo } from '../../../../data/rule';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import type { RawRule } from '../../../../types';
 import type { RuleDomain, RuleParams } from '../../types';
-import { convertRuleIdsToKueryNode } from '../../../../lib';
+import {
+  convertRuleIdsToKueryNode,
+  validateRuleTypeParams,
+  authorizeRuleTypeParams,
+} from '../../../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
   retryIfBulkOperationConflicts,
@@ -223,6 +227,19 @@ const bulkEnableRulesWithOCC = async (
           const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
           const { autoRecoverAlerts: isLifecycleAlert } = ruleType;
           try {
+            // Re-authorize the persisted params against the acting user's privileges
+            // before activating them. A disabled rule's params may have been written
+            // through a path that stores them without running the rule type's
+            // authorizer (for example Saved Objects import), so create/update
+            // authorization cannot be assumed here.
+            const validatedRuleTypeParams = validateRuleTypeParams(
+              rule.attributes.params,
+              ruleType.validate.params
+            );
+            await authorizeRuleTypeParams(validatedRuleTypeParams, ruleType.authorize?.params, {
+              request: context.request,
+            });
+
             if (scheduleValidationError) {
               throw Error(scheduleValidationError);
             }

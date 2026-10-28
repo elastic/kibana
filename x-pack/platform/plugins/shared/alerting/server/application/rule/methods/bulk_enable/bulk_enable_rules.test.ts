@@ -583,6 +583,56 @@ describe('bulkEnableRules', () => {
     });
   });
 
+  test('skips a rule and records an error when the rule type params authorizer denies its persisted params', async () => {
+    // Simulates a rule whose privileged params were persisted through a path that
+    // never ran the rule type's authorizer (for example Saved Objects import):
+    // bulk enabling it must still re-authorize those params before activating them,
+    // without failing the rest of the batch.
+    const persistedParams = { responseActions: [{ actionTypeId: '.endpoint' }] };
+    const disabledRuleWithPrivilegedParams: SavedObject<RawRule> = {
+      ...disabledRule1,
+      attributes: { ...disabledRule1.attributes, params: persistedParams },
+    } as unknown as SavedObject<RawRule>;
+
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [disabledRuleWithPrivilegedParams, disabledRule2],
+    });
+
+    const authorizeParams = jest
+      .fn()
+      .mockImplementation((params: unknown) =>
+        params === persistedParams
+          ? Promise.reject(new Error('Unauthorized to enable a privileged param'))
+          : Promise.resolve()
+      );
+    (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
+      id: 'fakeType',
+      validate: { params: { validate: (params: unknown) => params } },
+      authorize: { params: { authorize: authorizeParams } },
+    });
+
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [enabledRuleForBulkOps2],
+    });
+
+    const result = await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+    expect(authorizeParams).toHaveBeenCalledWith(
+      persistedParams,
+      expect.objectContaining({ request: rulesClientParams.request })
+    );
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [expect.objectContaining({ id: 'id2' })],
+      { overwrite: true }
+    );
+    expect(result.errors).toEqual([
+      {
+        message: 'Unauthorized to enable a privileged param',
+        rule: { id: 'id1', name: 'fakeName' },
+      },
+    ]);
+  });
+
   test('should return both rules if one is already enabled and one is disabled when bulk enable is based on ids', async () => {
     mockCreatePointInTimeFinderAsInternalUser({
       saved_objects: [disabledRule1, enabledRuleForBulkOps2],
@@ -684,11 +734,13 @@ describe('bulkEnableRules', () => {
     (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValueOnce({
       autoRecoverAlerts: true,
       id: 'fakeType1',
+      validate: { params: { validate: (params: unknown) => params } },
     });
 
     (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValueOnce({
       autoRecoverAlerts: true,
       id: 'fakeType2',
+      validate: { params: { validate: (params: unknown) => params } },
     });
 
     const result = await rulesClient.bulkEnableRules({
@@ -725,6 +777,7 @@ describe('bulkEnableRules', () => {
 
     (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
       autoRecoverAlerts: true,
+      validate: { params: { validate: (params: unknown) => params } },
     });
 
     (rulesClientParams.alertsService?.clearAlertFlappingHistory as jest.Mock).mockRejectedValue(
@@ -764,6 +817,7 @@ describe('bulkEnableRules', () => {
 
     (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
       autoRecoverAlerts: false,
+      validate: { params: { validate: (params: unknown) => params } },
     });
 
     const result = await rulesClient.bulkEnableRules({
@@ -802,6 +856,7 @@ describe('bulkEnableRules', () => {
 
     (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
       autoRecoverAlerts: true,
+      validate: { params: { validate: (params: unknown) => params } },
     });
 
     const result = await rulesClient.bulkEnableRules({

@@ -148,6 +148,36 @@ describe('enable()', () => {
         ruleTypeId: 'myType',
       });
     });
+
+    test('rejects enabling the rule when the rule type params authorizer denies the persisted params', async () => {
+      // Simulates a rule whose privileged params were persisted through a path that
+      // never ran the rule type's authorizer (for example Saved Objects import):
+      // enabling it must still re-authorize those params before activating them.
+      const persistedParams = { responseActions: [{ actionTypeId: '.endpoint' }] };
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        ...existingRule,
+        attributes: { ...existingRule.attributes, params: persistedParams },
+      });
+      const authorizeParams = jest
+        .fn()
+        .mockRejectedValue(new Error('Unauthorized to enable a privileged param'));
+      (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
+        validate: { params: { validate: (params: unknown) => params } },
+        authorize: { params: { authorize: authorizeParams } },
+      });
+
+      await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unauthorized to enable a privileged param"`
+      );
+
+      expect(authorizeParams).toHaveBeenCalledWith(
+        persistedParams,
+        expect.objectContaining({ request: rulesClientParams.request })
+      );
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(taskManager.schedule).not.toHaveBeenCalled();
+      expect(taskManager.bulkEnable).not.toHaveBeenCalled();
+    });
   });
 
   describe('auditLogger', () => {
@@ -879,6 +909,7 @@ describe('enable()', () => {
     rulesClientParams.getAlertIndicesAlias.mockReturnValue(['test-index']);
     (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
       autoRecoverAlerts: true,
+      validate: { params: { validate: (params: unknown) => params } },
     });
 
     await rulesClient.enableRule({ id: '1' });
@@ -894,6 +925,7 @@ describe('enable()', () => {
     rulesClientParams.getAlertIndicesAlias.mockReturnValue(['test-index']);
     (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
       autoRecoverAlerts: true,
+      validate: { params: { validate: (params: unknown) => params } },
     });
 
     (rulesClientParams.alertsService?.clearAlertFlappingHistory as jest.Mock).mockRejectedValue(
@@ -913,6 +945,7 @@ describe('enable()', () => {
     rulesClientParams.getAlertIndicesAlias.mockReturnValue(['test-index']);
     (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
       autoRecoverAlerts: false,
+      validate: { params: { validate: (params: unknown) => params } },
     });
 
     await rulesClient.enableRule({ id: '1' });
