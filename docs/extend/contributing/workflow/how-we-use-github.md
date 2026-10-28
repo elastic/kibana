@@ -192,13 +192,37 @@ node scripts/backport --sha <commit-sha> --branch 9.2 --branch 9.1
 
 ## Release notes
 
-{{kib}} publishes [Release Notes](/release-notes/index.md) for major and minor releases, and for every Serverless rollout. Release Notes summarize merged PRs in user-friendly language. A script generates these notes by collecting merged PRs for each release.
+{{kib}} publishes [Release Notes](/release-notes/index.md) for major and minor releases, and for every Serverless rollout. Release Notes summarize merged PRs in user-friendly language. They are generated from your PR's labels, title, and description, so you do not write a changelog file by hand.
 
 PRs that are included in release notes must have clear and concise titles and descriptions that are informative and well-written.
 
-Features, enhancements and fixes are sourced from your PR title and will include a link back to the PR. Deprecations, breaking changes and known issues require additional context. Include the impact, action and workarounds needed within the PR description and this will be included in the release notes when published.
+### How a PR becomes a release note
 
-You can optionally provide a custom paragraph within the PR description. Use a `Release note:` or `## Release note` header, followed by the text. This is the place to give a clear, user-focussed summary, rather than technical implementation detail.
+The `release-notes` GitHub workflow (`.github/workflows/release-notes.yml`) runs on every PR and drives the process. It uses the rules in `docs/changelog.yml`, which map labels to the entry type, area, and product. To include your PR in release notes:
+
+1. Add a type label to your PR, which are prefixed by `release_note:`, e.g., `release_note:fix`, `release_note:enhancement`, or `release_note:feature`. Use `release_note:skip` to leave the PR out of the release notes. Team and feature labels set the area and product (for example, a `Team:` label for a solution implies both {{kib}} and Serverless).
+2. If desired, provide a custom paragraph within the PR description under a `Release note:` or `## Release note` header. This text will be included verbatim in the generated changelog, and this is the place to provide a clear, user-focused summary of your changes.
+3. The `release-notes / validate` check runs automatically when the PR is opened, updated, edited, labeled, or unlabeled, as well as when a Draft is marked Ready for Review. This check fails when:
+    - the type label is missing or ambiguous
+    - a product label is missing
+    - the PR has the `release_note:breaking` label and no Impact and Action (see [Breaking changes](#breaking-changes))
+
+If any errors occur when validating release notes, then a bot will leave a comment which explains the errors. This comment is updated in-place over the lifetime of the PR. Typically, these errors will be related to missing labels or important description sections; once you've fixed them, the validation check will automatically re-run.
+
+When your PR is merged to `main`, a changelog entry will be built from the PR's labels, linked issues, any `Release note:` section, and title—with any square-bracket prefix such as `[Docs]` or `[CI]` removed. This entry is synced to an upstream S3 bucket and is not committed to the repository.
+
+Release automation collects all synced entries into bundles for each product and then publish them to the [Release Notes](/release-notes/index.md). Entries of type `docs` and entries in the `Context Engine` area are excluded. For Serverless releases, a quality-gate build triggers an additional workflow to generate the Serverless changelog after a rollout.
+
+### Breaking changes
+
+Deprecations, breaking changes and known issues require additional context. A PR labeled `release_note:breaking` fails the `release-notes / validate` check unless it says who is affected and what to do. Add these to the PR description:
+
+1. An `## Impact` section that says who is affected.
+2. An `## Action` section that says what users must do.
+
+A section that holds only an HTML comment, such as an unfilled template, counts as missing. A heading inside a fenced code block does not start a section. If the PR also has a `docs/changelog/*.yaml` entry, its `impact:` and `action:` fields win, and a description section that differs from them fails the check as a conflict. Keep them in one place, or make them match.
+
+Editing the description re-runs the check, and the bot comment shows the text it captured so you can check it before it reaches the release notes.
 
 When creating a PR title:
 - Use sentence case.
