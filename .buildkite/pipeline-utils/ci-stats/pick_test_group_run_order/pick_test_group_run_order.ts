@@ -10,7 +10,6 @@
 import * as Fs from 'fs';
 
 import { minimatch } from 'minimatch';
-import { getAffectedPackages } from '../../affected-packages/index.ts';
 import type { BuildkiteStep } from '../../buildkite/index.ts';
 import { BuildkiteClient } from '../../buildkite/index.ts';
 import { getTrackedBranch } from '../../utils.ts';
@@ -26,6 +25,7 @@ import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_
 import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups.ts';
 import {
   FTR_SHARED_DOMAINS,
+  getFtrRelevantModules,
   isPlatformOwnedFtrConfig,
   resolveAffectedFtrDomains,
   shouldSkipFtrTests,
@@ -98,15 +98,7 @@ export async function pickTestGroupRunOrder() {
   if (!ftrConfigsIncluded) ftrManifestEntriesByQueue.clear();
 
   if (selectiveChangedFiles !== null) {
-    const directlyAffected = await getAffectedPackages(undefined, {
-      changedFiles: selectiveChangedFiles,
-      strategy: 'git',
-      includeDownstream: false,
-      ignoreUncategorizedChanges: true,
-    }).catch((error) => {
-      console.error('Error getting affected packages for FTR skip check', error);
-      return null;
-    });
+    const directlyAffected = await getFtrRelevantModules(selectiveChangedFiles);
 
     if (directlyAffected !== null && shouldSkipFtrTests(directlyAffected, selectiveChangedFiles)) {
       console.log(
