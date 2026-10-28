@@ -313,11 +313,20 @@ steps:
     with:
       proposalId: "{{ steps.create_fp_proposal.output.proposalId }}"
 
-  - name: resolve_live_alerts
+  # `default` replaces an empty list too, so an analyst who revised every alert out of the proposal
+  # would get the original candidates back. The input list is the fallback only when the read failed.
+  - name: resolve_live_alerts_fallback
     type: data.set
     with:
-      live_alert_ids: "${{ steps.get_live_revision.output.actionInput.alertIds | default: inputs.fp_candidate_ids }}"
-      live_revision: "${{ steps.get_live_revision.output.revision | default: 1 }}"
+      live_alert_ids: "${{ inputs.fp_candidate_ids }}"
+      live_revision: 1
+
+  - name: resolve_live_alerts
+    type: data.set
+    if: "${{ steps.get_live_revision.error == blank }}"
+    with:
+      live_alert_ids: "${{ steps.get_live_revision.output.actionInput.alertIds }}"
+      live_revision: "${{ steps.get_live_revision.output.revision }}"
 
   - name: count_live_alerts
     type: data.set

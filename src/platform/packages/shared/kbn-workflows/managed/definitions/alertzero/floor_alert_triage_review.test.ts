@@ -232,16 +232,24 @@ describe('floor_alert_triage_review — live revision', () => {
     );
   });
 
-  it('takes the alerts of the live revision, or the input list when it could not be read', () => {
-    const expr = stepByName('resolve_live_alerts')?.with?.live_alert_ids as string;
-    const inputs = { fp_candidate_ids: ['a'] };
+  it('takes the alerts of the live revision, even when it is empty, and the input list only when it could not be read', () => {
+    const fallback = stepByName('resolve_live_alerts_fallback');
+    expect(
+      evalExpr(fallback?.with?.live_alert_ids as string, { inputs: { fp_candidate_ids: ['a'] } })
+    ).toEqual(['a']);
+    const live = stepByName('resolve_live_alerts');
+    expect(live?.if).toBe('${{ steps.get_live_revision.error == blank }}');
+    const expr = live?.with?.live_alert_ids as string;
     expect(
       evalExpr(expr, {
-        inputs,
         steps: { get_live_revision: { output: { actionInput: { alertIds: ['a', 'b'] } } } },
       })
     ).toEqual(['a', 'b']);
-    expect(evalExpr(expr, { inputs, steps: { get_live_revision: {} } })).toEqual(['a']);
+    expect(
+      evalExpr(expr, {
+        steps: { get_live_revision: { output: { actionInput: { alertIds: [] } } } },
+      })
+    ).toEqual([]);
   });
 
   it('passes the live alerts and the ones the review started with, so removed alerts are not stranded', () => {
