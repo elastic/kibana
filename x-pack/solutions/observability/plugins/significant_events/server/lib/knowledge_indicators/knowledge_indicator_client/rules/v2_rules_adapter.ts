@@ -154,6 +154,19 @@ export class RulesAdapterV2 implements IRulesManagementClient {
     }
   }
 
+  async findRuleEnabledStates(ids: string[]): Promise<Map<string, boolean>> {
+    const enabledById = new Map<string, boolean>();
+    for (let start = 0; start < ids.length; start += FIND_PAGE_SIZE) {
+      const chunk = ids.slice(start, start + FIND_PAGE_SIZE);
+      const { items } = await this.rulesClient.findRules({
+        filter: chunk.map((id) => `id: "${id}"`).join(' or '),
+        perPage: chunk.length,
+      });
+      items.forEach(({ id, enabled }) => enabledById.set(id, enabled));
+    }
+    return enabledById;
+  }
+
   async findExistingRuleIds(ids: string[]): Promise<string[]> {
     const limit = pLimit(RULE_EXISTS_CONCURRENCY);
     const results = await Promise.all(
@@ -244,7 +257,10 @@ export class RulesAdapterV2 implements IRulesManagementClient {
     const conflicts = errors.filter(
       ({ error }) => error.code === ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
     );
-    const conflictIds = [...knownConflicts.map(({ id }) => id), ...conflicts.map(({ id }) => id)];
+    const conflictIds: string[] = [
+      ...knownConflicts.map(({ id }) => id),
+      ...conflicts.map(({ id }) => id).filter((id) => id !== undefined),
+    ];
     const fatal = errors.filter(
       ({ error }) => error.code !== ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
     );
@@ -256,7 +272,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
         new Error(`V2 bulk create failed for ${fatal.length} rule(s): ${detail}`),
         createdIds,
         conflictIds,
-        fatal.map(({ id }) => id)
+        fatal.map(({ id }) => id).filter((id) => id !== undefined)
       );
     }
 

@@ -35,6 +35,7 @@ import { InlineReleaseBadge } from '../../../components';
 import { useStartServices } from '../../../hooks';
 import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../constants';
 import { VariantCountBadge } from '../screens/home/components/variant_count_badge';
+import { CollectionSizeBadge } from '../screens/home/components/collection_size_badge';
 
 import {
   InstallationStatus,
@@ -72,6 +73,7 @@ export function PackageCard({
   installStatus,
   onCardClick: onClickProp = undefined,
   isCollectionCard = false,
+  collectionSize,
   groupMembers,
   titleLineClamp,
   titleBadge,
@@ -180,6 +182,15 @@ export function PackageCard({
         <EuiSpacer size="xs" />
         <span>
           <VariantCountBadge count={groupMembers.length} />
+        </span>
+      </EuiFlexItem>
+    );
+  } else if (collectionSize) {
+    collectionBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <CollectionSizeBadge count={collectionSize} />
         </span>
       </EuiFlexItem>
     );

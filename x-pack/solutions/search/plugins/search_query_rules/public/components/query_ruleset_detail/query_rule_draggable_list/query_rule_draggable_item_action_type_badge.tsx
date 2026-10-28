@@ -34,12 +34,12 @@ export const QueryRuleDraggableListItemActionTypeBadge: React.FC<{
           <EuiBadge iconType={queryRule.type === 'exclude' ? 'eyeSlash' : 'pinFill'}>
             {queryRule.type === 'exclude' ? (
               <FormattedMessage
-                id="xpack.search.queryRulesetDetail.draggableList.excludeLabel"
+                id="xpack.queryRules.queryRulesetDetail.draggableList.excludeLabel"
                 defaultMessage="Exclude"
               />
             ) : (
               <FormattedMessage
-                id="xpack.search.queryRulesetDetail.draggableList.pinLabel"
+                id="xpack.queryRules.queryRulesetDetail.draggableList.pinLabel"
                 defaultMessage="Pin"
               />
             )}
@@ -52,7 +52,7 @@ export const QueryRuleDraggableListItemActionTypeBadge: React.FC<{
             <EuiIcon
               type="documents"
               aria-label={i18n.translate(
-                'xpack.search.queryRulesetDetail.queryRuleDraggableList.documentsIconAriaLabel',
+                'xpack.queryRules.queryRulesetDetail.queryRuleDraggableList.documentsIconAriaLabel',
                 { defaultMessage: 'Documents' }
               )}
             />

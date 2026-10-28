@@ -6,7 +6,15 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   getPolicyIdsFromArtifact,
@@ -14,6 +22,7 @@ import {
 } from '../../../../../common/endpoint/service/artifacts';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { WithContextMenu } from '../../artifact_entry_card/components/effect_scope';
+import { POLICY_DETAILS_NOT_ACCESSIBLE_IN_ACTIVE_SPACE } from '../../artifact_entry_card/components/translations';
 import type { MenuItemPropsByPolicyId } from '../../artifact_entry_card';
 import type { ContextMenuItemNavByRouterProps } from '../../context_menu_with_router_support';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -55,6 +64,7 @@ PolicyAssignmentCell.displayName = 'PolicyAssignmentCell';
 export const PolicyAssignmentCellWithAssignedPolicies = memo<PolicyAssignmentCellProps>(
   ({ item, policies, loadingPoliciesList = false, labels, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const { euiTheme } = useEuiTheme();
     const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
     const policyNavLinks = useMemo<ContextMenuItemNavByRouterProps[]>(() => {
@@ -75,6 +85,7 @@ export const PolicyAssignmentCellWithAssignedPolicies = memo<PolicyAssignmentCel
 
     const additionalCount = policyNavLinks.length - 1;
     const isFirstPolicyClickable = Boolean(canReadPolicyManagement && firstPolicy.href);
+    const isFirstPolicyAccessible = loadingPoliciesList || Boolean(firstPolicy.href);
 
     return (
       <EuiFlexGroup
@@ -85,7 +96,15 @@ export const PolicyAssignmentCellWithAssignedPolicies = memo<PolicyAssignmentCel
         data-test-subj={dataTestSubj}
       >
         <EuiFlexItem grow={false} className="eui-textTruncate">
-          <EuiToolTip content={firstPolicy.children} anchorClassName="eui-textTruncate">
+          <EuiToolTip
+            title={isFirstPolicyAccessible ? undefined : firstPolicy.children}
+            content={
+              isFirstPolicyAccessible
+                ? firstPolicy.children
+                : POLICY_DETAILS_NOT_ACCESSIBLE_IN_ACTIVE_SPACE
+            }
+            anchorClassName="eui-textTruncate"
+          >
             {isFirstPolicyClickable ? (
               <EuiLink
                 href={firstPolicy.href}
@@ -98,6 +117,7 @@ export const PolicyAssignmentCellWithAssignedPolicies = memo<PolicyAssignmentCel
             ) : (
               <EuiText
                 size="s"
+                color={isFirstPolicyAccessible ? undefined : euiTheme.colors.textDisabled}
                 className="eui-textTruncate"
                 tabIndex={0}
                 data-test-subj={getTestId('firstPolicy')}

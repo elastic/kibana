@@ -176,6 +176,37 @@ describe('AlertEpisodeDetailsFlyout', () => {
     );
   });
 
+  it('hosts an action that renders its own menu entry and lets it close the menu', () => {
+    mockUseEpisodeDetailsHeaderData.mockReturnValue({ ...baseHeaderData, episode: mockEpisode });
+    const renderMenuItem = jest.fn(({ closeMenu }) => (
+      <button type="button" data-test-subj="ownMenuEntry" onClick={closeMenu}>
+        {'Own entry'}
+      </button>
+    ));
+    const ownEntryAction = { ...mockEditAssigneeAction, renderMenuItem } as EpisodeAction;
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} actions={[ownEntryAction]} />, {
+      wrapper: Wrapper,
+    });
+    const trigger = screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton');
+    fireEvent.click(trigger);
+
+    // The template flips the trigger chevron with its open state.
+    expect(trigger.querySelector('[data-euiicon-type="chevronSingleUp"]')).toBeInTheDocument();
+    expect(renderMenuItem).toHaveBeenCalledWith(
+      expect.objectContaining({
+        episodes: [mockEpisode],
+        surface: 'details_flyout',
+        closeMenu: expect.any(Function),
+      })
+    );
+
+    fireEvent.click(screen.getByTestId('ownMenuEntry'));
+
+    expect(trigger.querySelector('[data-euiicon-type="chevronSingleDown"]')).toBeInTheDocument();
+    expect(ownEntryAction.execute).not.toHaveBeenCalled();
+  });
+
   it('switches to the timeline tab', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
     fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabTimeline'));
@@ -362,13 +393,13 @@ describe('AlertEpisodeDetailsFlyout', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('renders the severity header value as a colored dot with its label', () => {
+  it('renders the severity header value as a soft badge with its label', () => {
     mockUseEpisodeDetailsHeaderData.mockReturnValue({ ...baseHeaderData, severity: 'high' });
 
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
 
     const severity = screen.getByTestId('alertingV2EpisodeFlyoutSeverity');
-    expect(severity.querySelector('[data-euiicon-type="dot"]')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingV2EpisodeSeverityBadge-high')).toBeInTheDocument();
     expect(severity).toHaveTextContent('High');
   });
 

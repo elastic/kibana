@@ -42,9 +42,8 @@ interface ProposedActionRowProps {
  * inside the list's `.map`.
  */
 const ProposedActionRow = ({ proposal, onDecisionError }: ProposedActionRowProps) => {
-  const { readOnly, isSubmitting, currentActorName, approve, dismiss } = useProposalDecision(
-    proposal.id
-  );
+  const { readOnly, isSubmitting, currentActorName, approve, dismiss, reopen, isReopening } =
+    useProposalDecision(proposal.id);
 
   return (
     <ProposedActionButton
@@ -67,6 +66,15 @@ const ProposedActionRow = ({ proposal, onDecisionError }: ProposedActionRowProps
           throw err;
         }
       }}
+      onReopen={async () => {
+        try {
+          await reopen();
+        } catch (err) {
+          onDecisionError(err);
+          throw err;
+        }
+      }}
+      isReopening={isReopening}
       currentActorName={currentActorName}
       data-test-subj={`investigationFlyoutProposedAction-${proposal.id}`}
     />
@@ -125,7 +133,8 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
         <ProposedActionsList data-test-subj="investigationFlyoutProposedActionsList">
           {proposals.map((proposal) => (
             <ProposedActionRow
-              key={proposal.id}
+              // A retry gets a new id but keeps the root id, so its row and open modal stay mounted.
+              key={proposal.rootProposalId ?? proposal.id}
               proposal={proposal}
               onDecisionError={onDecisionError}
             />
