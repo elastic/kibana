@@ -119,7 +119,7 @@ describe('AlertActionTelemetrySubscriber', () => {
     it('reports one event with alert_count 1 for a single action', async () => {
       subscriber.start();
 
-      handler()(acked(), context);
+      await handler()(acked(), context);
       await flushAsync();
 
       expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
@@ -137,9 +137,9 @@ describe('AlertActionTelemetrySubscriber', () => {
     it('reports one event whose alert_count is the number of actions for one rule', async () => {
       subscriber.start();
 
-      handler()(acked({ episodeId: 'episode-1' }), context);
-      handler()(acked({ episodeId: 'episode-2' }), context);
-      handler()(acked({ episodeId: 'episode-3' }), context);
+      await handler()(acked({ episodeId: 'episode-1' }), context);
+      await handler()(acked({ episodeId: 'episode-2' }), context);
+      await handler()(acked({ episodeId: 'episode-3' }), context);
       await flushAsync();
 
       expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
@@ -152,9 +152,9 @@ describe('AlertActionTelemetrySubscriber', () => {
     it('reports one event per rule in a batch', async () => {
       subscriber.start();
 
-      handler()(acked({ ruleId: 'rule-a', episodeId: 'episode-1' }), context);
-      handler()(acked({ ruleId: 'rule-a', episodeId: 'episode-2' }), context);
-      handler()(acked({ ruleId: 'rule-b', episodeId: 'episode-3' }), context);
+      await handler()(acked({ ruleId: 'rule-a', episodeId: 'episode-1' }), context);
+      await handler()(acked({ ruleId: 'rule-a', episodeId: 'episode-2' }), context);
+      await handler()(acked({ ruleId: 'rule-b', episodeId: 'episode-3' }), context);
       await flushAsync();
 
       expect(ebtService.reportEvent.mock.calls.map((call) => call[1])).toEqual([
@@ -176,7 +176,7 @@ describe('AlertActionTelemetrySubscriber', () => {
     it('reports assign and clear-assignee as one assign event', async () => {
       subscriber.start();
 
-      handler(EPISODE_ASSIGNED_EVENT_TYPE)(
+      await handler(EPISODE_ASSIGNED_EVENT_TYPE)(
         {
           type: EPISODE_ASSIGNED_EVENT_TYPE,
           ...envelope,
@@ -184,7 +184,7 @@ describe('AlertActionTelemetrySubscriber', () => {
         },
         context
       );
-      handler(EPISODE_UNASSIGNED_EVENT_TYPE)(
+      await handler(EPISODE_UNASSIGNED_EVENT_TYPE)(
         {
           type: EPISODE_UNASSIGNED_EVENT_TYPE,
           ...envelope,
@@ -210,7 +210,7 @@ describe('AlertActionTelemetrySubscriber', () => {
     it('omits rule_id when the alert has no rule id', async () => {
       subscriber.start();
 
-      handler()(acked({ ruleId: null }), context);
+      await handler()(acked({ ruleId: null }), context);
       await flushAsync();
 
       expect(ebtService.reportEvent).toHaveBeenCalledWith(
@@ -226,7 +226,7 @@ describe('AlertActionTelemetrySubscriber', () => {
     it('forwards the publisher context origin', async () => {
       subscriber.start();
 
-      handler()(acked(), {
+      await handler()(acked(), {
         ...context,
         origin: { actor: 'internal', channel: 'system' },
       });
@@ -241,9 +241,9 @@ describe('AlertActionTelemetrySubscriber', () => {
     it('does not merge events that arrive in different turns', async () => {
       subscriber.start();
 
-      handler()(acked({ episodeId: 'episode-1' }), context);
+      await handler()(acked({ episodeId: 'episode-1' }), context);
       await flushAsync();
-      handler()(acked({ episodeId: 'episode-2' }), context);
+      await handler()(acked({ episodeId: 'episode-2' }), context);
       await flushAsync();
 
       expect(ebtService.reportEvent).toHaveBeenCalledTimes(2);
@@ -262,8 +262,8 @@ describe('AlertActionTelemetrySubscriber', () => {
     it('keeps events with different origins in separate reports', async () => {
       subscriber.start();
 
-      handler()(acked({ episodeId: 'episode-1' }), context);
-      handler()(acked({ episodeId: 'episode-2' }), {
+      await handler()(acked({ episodeId: 'episode-1' }), context);
+      await handler()(acked({ episodeId: 'episode-2' }), {
         ...context,
         origin: { actor: 'internal', channel: 'system' },
       });
@@ -286,7 +286,7 @@ describe('AlertActionTelemetrySubscriber', () => {
       });
       subscriber.start();
 
-      expect(() => handler()(acked(), context)).not.toThrow();
+      await handler()(acked(), context);
       await flushAsync();
 
       expect(mockLogger.error).toHaveBeenCalledWith(
@@ -328,7 +328,7 @@ describe('AlertActionTelemetrySubscriber', () => {
 
     it('drops a buffered batch that has not been reported yet', async () => {
       subscriber.start();
-      handler()(acked(), context);
+      await handler()(acked(), context);
       subscriber.stop();
       await flushAsync();
 
