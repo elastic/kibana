@@ -1,5 +1,5 @@
 {
-  "sha1": "c0adbbe5bf791a929a6cd7670ab16a87525b7590",
+  "sha1": "67e6a4c84878155c5da21ee14c5934d4eaef42bb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -77,6 +77,38 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/attachments.spec.ts",
         "line": 163,
         "column": 7
+      }
+    },
+    {
+      "id": "9639991af5c40c2-e06a7848fd31c3d",
+      "title": "Stream canvas - processing adds a processing node between a source and a destination",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_processing.spec.ts",
+        "line": 129,
+        "column": 19
+      }
+    },
+    {
+      "id": "9639991af5c40c2-e5ec5164283ca8c",
+      "title": "Stream canvas - processing processes one fan-out line on a pipeline of its own",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_processing.spec.ts",
+        "line": 172,
+        "column": 14
       }
     },
     {

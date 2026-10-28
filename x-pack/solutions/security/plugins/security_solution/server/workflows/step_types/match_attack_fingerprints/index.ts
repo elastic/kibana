@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const DEFAULT_INDEX_PATTERNS = 'logs*';
+export { matchAttackFingerprintsStepDefinition } from './match_attack_fingerprints_step';
