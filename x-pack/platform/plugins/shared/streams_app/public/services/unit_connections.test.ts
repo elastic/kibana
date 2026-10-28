@@ -863,6 +863,43 @@ describe('routing rule connections', () => {
     ]);
   });
 
+  it("only routes a rule to destinations that accept the rule's telemetry", () => {
+    const routed = unitWith([
+      {
+        id: 'main',
+        supported_telemetry: ['logs', 'traces'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          {
+            name: 'routes',
+            value: [
+              { telemetry: ['logs'], destinations: ['es-logs'] },
+              { destinations: ['debug-out'] },
+            ],
+          },
+        ],
+      },
+    ]);
+    routed.unit.destinations = [
+      { id: 'es-logs', type: 'elasticsearch', supported_telemetry: ['logs'] },
+      { id: 'es-traces', type: 'elasticsearch', supported_telemetry: ['traces'] },
+      { id: 'debug-out', type: 'debug', supported_telemetry: ['logs', 'traces'] },
+    ];
+    const logsRule = { pipelineId: 'main', ruleIndex: 0 };
+    const catchAll = { pipelineId: 'main', ruleIndex: 1 };
+
+    expect(canConnectRouteToTarget(routed, logsRule, destination('es-traces'))).toBe(false);
+    expect(canConnectRouteToTarget(routed, catchAll, destination('es-traces'))).toBe(true);
+    expect(
+      moveRouteConnection(routed, {
+        previousRule: logsRule,
+        previousTarget: destination('es-logs'),
+        rule: logsRule,
+        target: destination('es-traces'),
+      })
+    ).toBe(routed);
+  });
+
   it('refuses destinations on a rule that forwards to pipelines', () => {
     const routed = unitWith([
       {

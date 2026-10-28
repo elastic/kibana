@@ -25,6 +25,7 @@ import {
   allocateComponentId,
   isDelegatingRoute,
   hasScopedWiring,
+  intersectSignals,
   pipelineForwards,
   pruneUnit,
   readEntryIds,
@@ -957,23 +958,27 @@ const withRuleTargets = (
   );
 };
 
+/** Signals a rule carries: its own `telemetry` within the pipeline's, or all of the pipeline's. */
+const ruleSignals = (pipeline: UnitPipeline, ruleIndex: number): UnitSignal[] =>
+  intersectSignals(pipeline.supported_telemetry, readRoutes(pipeline.config)[ruleIndex]?.telemetry);
+
 const routeFitsTarget = (
   unit: Unit,
   pipeline: UnitPipeline,
+  ruleIndex: number,
   { kind, id }: RouteTarget
 ): boolean => {
+  const signals = ruleSignals(pipeline, ruleIndex);
   if (kind === 'pipeline') {
     const target = unit.unit.pipelines.find((item) => item.id === id);
     return (
       target !== undefined &&
       !pipelineReaches(unit, id, pipeline.id) &&
-      sharesSignal(pipeline.supported_telemetry, target.supported_telemetry)
+      sharesSignal(signals, target.supported_telemetry)
     );
   }
   const destination = unit.unit.destinations?.find((item) => item.id === id);
-  return (
-    !destination || sharesSignal(pipeline.supported_telemetry, destination.supported_telemetry)
-  );
+  return !destination || sharesSignal(signals, destination.supported_telemetry);
 };
 
 /**
@@ -1009,7 +1014,7 @@ export const connectRouteToTarget = (unit: Unit, rule: RouteRuleRef, target: Rou
     !pipeline ||
     !targets ||
     targets.some((item) => isSameTarget(item, target)) ||
-    !routeFitsTarget(unit, pipeline, target)
+    !routeFitsTarget(unit, pipeline, rule.ruleIndex, target)
   ) {
     return unit;
   }
@@ -1063,7 +1068,7 @@ export const moveRouteConnection = (
     !pipeline ||
     !targets?.some((item) => isSameTarget(item, previousTarget)) ||
     targets.some((item) => isSameTarget(item, target)) ||
-    !routeFitsTarget(unit, pipeline, target)
+    !routeFitsTarget(unit, pipeline, rule.ruleIndex, target)
   ) {
     return unit;
   }
