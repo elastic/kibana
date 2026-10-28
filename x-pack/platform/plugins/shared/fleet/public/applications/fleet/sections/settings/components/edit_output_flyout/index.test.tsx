@@ -1376,6 +1376,83 @@ describe('EditOutputFlyout', () => {
     expect(mockSendPutOutput).not.toHaveBeenCalled();
   });
 
+  it('should remove the stored secret key of an elasticsearch output when the user clears it', async () => {
+    // the API keeps a stored secret an update leaves out, so a cleared one is sent as null
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ enableSSLSecrets: true } as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'elasticsearch',
+      name: 'elasticsearch output',
+      id: 'outputES',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['http://localhost:9200'],
+      ssl: { certificate: 'cert', certificate_authorities: [] },
+      secrets: { ssl: { key: { id: 'stored-key-id' } } },
+    });
+
+    fireEvent.click(utils.getByText('Replace Client SSL certificate key'));
+    fireEvent.change(utils.getByDisplayValue('cert'), { target: { value: '' } });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputES',
+        expect.objectContaining({
+          secrets: { ssl: { key: null } },
+          ssl: { certificate: '', certificate_authorities: [] },
+        })
+      );
+    });
+  });
+
+  it('should keep the stored secret key of an elasticsearch output the user does not change', async () => {
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ enableSSLSecrets: true } as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'elasticsearch',
+      name: 'elasticsearch output',
+      id: 'outputES',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['http://localhost:9200'],
+      ssl: { certificate: 'cert', certificate_authorities: [] },
+      secrets: { ssl: { key: { id: 'stored-key-id' } } },
+    });
+
+    fireEvent.change(utils.getByDisplayValue('elasticsearch output'), {
+      target: { value: 'elasticsearch output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputES',
+        expect.objectContaining({
+          secrets: { ssl: { key: { id: 'stored-key-id' } } },
+        })
+      );
+    });
+  });
+
   it('should show a callout in the flyout if the selected output is logstash and no encrypted key is set', async () => {
     mockedUseFleetStatus.mockReturnValue({
       missingOptionalFeatures: ['encrypted_saved_object_encryption_key_required'],

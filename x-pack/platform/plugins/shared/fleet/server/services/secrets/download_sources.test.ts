@@ -109,7 +109,7 @@ describe('Download source secrets', () => {
         },
       });
       expect(res.secretReferences).toEqual([{ id: expect.anything() }]);
-      expect(res.secretsToDelete).toEqual([{ id: undefined }]);
+      expect(res.secretsToDelete).toEqual([{ id: undefined, path: 'secrets.ssl.key' }]);
       expect(esClientMock.transport.request.mock.calls).toEqual([
         [
           {
@@ -356,7 +356,9 @@ describe('Download source secrets', () => {
           },
         });
         // Old password should be marked for deletion
-        expect(res.secretsToDelete).toEqual([{ id: 'old-password-id' }]);
+        expect(res.secretsToDelete).toEqual([
+          { id: 'old-password-id', path: 'secrets.auth.password' },
+        ]);
         // New api_key should be created
         expect(esClientMock.transport.request.mock.calls).toEqual([
           [
@@ -406,7 +408,9 @@ describe('Download source secrets', () => {
           },
         });
         // Old api_key should be marked for deletion
-        expect(res.secretsToDelete).toEqual([{ id: 'old-api-key-id' }]);
+        expect(res.secretsToDelete).toEqual([
+          { id: 'old-api-key-id', path: 'secrets.auth.api_key' },
+        ]);
       });
     });
   });
