@@ -146,7 +146,6 @@ export function initializeTrackPanel(
           })
           .catch(() => {
             // highlighting is cosmetic; ignore panels that fail to load
-            panelRef.classList.remove('dshDashboardGrid__item--highlighted');
           });
 
         highlightPanelId$.next(undefined);
