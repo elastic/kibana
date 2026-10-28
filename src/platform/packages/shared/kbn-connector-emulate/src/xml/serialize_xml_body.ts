@@ -10,10 +10,16 @@
 import type { ContractResponse } from '../contract/types';
 import type { ContractOperation } from '../openapi/types';
 import { findResponse } from '../openapi/validate_response';
-import { isXmlMediaType, toXml } from './xml_codec';
+import { isBareXmlValue, isXmlMediaType, toXml } from './xml_codec';
 
 const mediaTypeOf = (contentType: string | undefined): string =>
   (contentType ?? '').split(';')[0].trim().toLowerCase();
+
+const getHeader = (
+  headers: Readonly<Record<string, string>> | undefined,
+  name: string
+): string | undefined =>
+  Object.entries(headers ?? {}).find(([key]) => key.toLowerCase() === name)?.[1];
 
 /**
  * Writes an XML response's body as XML when it is a value, as samples and fixtures give it,
@@ -23,20 +29,19 @@ export const serializeXmlBody = (
   operation: ContractOperation,
   response: ContractResponse
 ): ContractResponse => {
-  const mediaType = mediaTypeOf(response.headers?.['content-type']);
+  const mediaType = mediaTypeOf(getHeader(response.headers, 'content-type'));
   const { body } = response;
-  if (
-    !isXmlMediaType(mediaType) ||
-    body === undefined ||
-    body === null ||
-    typeof body === 'string'
-  ) {
+  if (!isXmlMediaType(mediaType) || body === undefined || body === null) {
     return response;
   }
   const content = findResponse(operation.responses, response.statusCode)?.contents.find(
     (candidate) => mediaTypeOf(candidate.mediaType) === mediaType
   );
-  return content?.schema
-    ? { ...response, body: toXml(body, content.schema.schema, operation.spec.document) }
-    : response;
+  const schema = content?.schema?.schema;
+  const { document } = operation.spec;
+  // Strings are XML text already, unless the schema describes a scalar and the text isn't XML.
+  if (!schema || (typeof body === 'string' && !isBareXmlValue(body, schema, document))) {
+    return response;
+  }
+  return { ...response, body: toXml(body, schema, document) };
 };

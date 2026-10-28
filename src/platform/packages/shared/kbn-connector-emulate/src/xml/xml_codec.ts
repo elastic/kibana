@@ -95,8 +95,21 @@ const createCodec = (document: OpenApiDocument) => {
   const xmlMap = (schema: JsonSchema): XmlMap | undefined =>
     isRecord(schema[XML_MAP]) ? (schema[XML_MAP] as unknown as XmlMap) : undefined;
   const isArray = (schema: JsonSchema) => schema.type === 'array';
+  // The structures of a union: `oneOf` members, or `anyOf` ones where they are objects, which
+  // is how several modeled errors with one status are described.
+  const unionVariants = (schema: JsonSchema): JsonSchema[] => {
+    const variants = (Array.isArray(schema.oneOf) ? schema.oneOf : schema.anyOf) as unknown;
+    const resolved = Array.isArray(variants) ? variants.map((variant) => resolve(variant)) : [];
+    return Array.isArray(schema.oneOf) ||
+      resolved.some((variant) => variant.type === 'object' || isRecord(variant.properties))
+      ? resolved
+      : [];
+  };
   const isObject = (schema: JsonSchema) =>
-    schema.type === 'object' || isRecord(schema.properties) || Array.isArray(schema.oneOf);
+    schema.type === 'object' ||
+    isRecord(schema.properties) ||
+    Array.isArray(schema.oneOf) ||
+    unionVariants(schema).length > 0;
 
   const childrenNamed = (element: XmlElement, name: string) =>
     element.children.filter((child) => localName(child.name) === localName(name));
@@ -140,15 +153,11 @@ const createCodec = (document: OpenApiDocument) => {
       const itemName = ownXml(target.items).name ?? 'member';
       return childrenNamed(element, itemName).map((item) => decode(item, target.items));
     }
-    if (Array.isArray(target.oneOf)) {
-      // A union: the variant whose member the element has.
-      for (const variant of target.oneOf.map((option) => resolve(option))) {
-        const decoded = decodeStructure(element, variant);
-        if (Object.keys(decoded).length > 0) {
-          return decoded;
-        }
-      }
-      return {};
+    const variants = unionVariants(target);
+    if (variants.length > 0) {
+      // A union has the members the element has; all are kept, so validation can see a union
+      // that sets more than one.
+      return Object.assign({}, ...variants.map((variant) => decodeStructure(element, variant)));
     }
     return isObject(target) ? decodeStructure(element, target) : decodeScalar(element.text, target);
   }
@@ -249,11 +258,13 @@ const createCodec = (document: OpenApiDocument) => {
     if (!isObject(target)) {
       return `<${open}>${escape(scalarText(value))}</${name}>`;
     }
-    const properties = Array.isArray(target.oneOf)
-      ? Object.assign({}, ...target.oneOf.map((variant) => resolve(variant).properties ?? {}))
-      : isRecord(target.properties)
-      ? target.properties
-      : {};
+    const variants = unionVariants(target);
+    const properties =
+      variants.length > 0
+        ? Object.assign({}, ...variants.map((variant) => variant.properties ?? {}))
+        : isRecord(target.properties)
+        ? target.properties
+        : {};
     const values = isRecord(value) ? value : {};
     let attributes = '';
     let children = '';
@@ -284,6 +295,10 @@ const createCodec = (document: OpenApiDocument) => {
   }
 
   return {
+    isScalar: (schema: unknown): boolean => {
+      const target = resolve(schema);
+      return !isObject(target) && !isArray(target) && !xmlMap(target);
+    },
     decode: (text: string, schema: unknown): { value: unknown } | { error: string } => {
       const root = parseXml(text);
       return root instanceof Error ? { error: root.message } : { value: decode(root, schema) };
@@ -317,3 +332,11 @@ export const fromXml = (
 /** Writes a value as the XML document its schema describes; the inverse of `fromXml`. */
 export const toXml = (value: unknown, schema: unknown, document: OpenApiDocument): string =>
   codecFor(document).encode(value, schema);
+
+/**
+ * Whether a string body is a bare value rather than XML text: the schema describes a scalar,
+ * such as S3's `GetBucketLocation` output, and the text isn't a document, as a fixture or
+ * sample gives it.
+ */
+export const isBareXmlValue = (text: string, schema: unknown, document: OpenApiDocument): boolean =>
+  !text.trimStart().startsWith('<') && codecFor(document).isScalar(schema);

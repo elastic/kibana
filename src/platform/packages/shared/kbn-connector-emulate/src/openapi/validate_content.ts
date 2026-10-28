@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fromXml, isXmlMediaType } from '../xml/xml_codec';
+import { fromXml, isBareXmlValue, isXmlMediaType } from '../xml/xml_codec';
 import { coerceValue } from './coerce_value';
 import type { Direction } from './schema_violations';
 import { validateValue } from './schema_violations';
@@ -86,7 +86,9 @@ export const validateContent = (
   }
   // XML documents are read as the value their schema describes; fixtures may give it directly.
   const xml =
-    isXmlMediaType(mediaType) && typeof body === 'string'
+    isXmlMediaType(mediaType) &&
+    typeof body === 'string' &&
+    !isBareXmlValue(body, content.schema?.schema, operation.spec.document)
       ? fromXml(body, content.schema?.schema, operation.spec.document)
       : undefined;
   if (xml && 'error' in xml) {

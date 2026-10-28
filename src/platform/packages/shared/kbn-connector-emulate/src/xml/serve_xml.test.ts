@@ -201,4 +201,85 @@ describe('serving XML and host-addressed APIs', () => {
     );
     expect(await parts.text()).toBe('<Tagging><TagSet/></Tagging>');
   });
+
+  it('writes value fixtures as XML whatever the case of their Content-Type header', async () => {
+    const { fetch, rejectedResponses } = createEmulatorFetch({
+      specs: [spec],
+      fixtures: [
+        {
+          operation: { method: 'put', path: '/{bucket}/{key}' },
+          response: {
+            status: 200,
+            headers: { 'Content-Type': 'application/xml' },
+            body: { tags: [{ key: 'mixed-case' }] },
+          },
+        },
+      ],
+    });
+
+    const put = await fetch('https://storage.example.com/logs/app.log', {
+      method: 'PUT',
+      headers: { 'content-type': 'application/xml' },
+      body: '<Tagging><TagSet/></Tagging>',
+    });
+
+    expect(rejectedResponses).toEqual([]);
+    expect(await put.text()).toBe(
+      '<Tagging><TagSet><Tag><Key>mixed-case</Key></Tag></TagSet></Tagging>'
+    );
+  });
+
+  it('serves a scalar XML response, such as a location, from its sample or as a bare value', async () => {
+    const location = {
+      openapi: '3.0.3',
+      info: { title: 'Storage', version: '1' },
+      servers: [{ url: 'https://storage.example.com' }],
+      paths: {
+        '/{bucket}': {
+          get: {
+            operationId: 'GetBucketLocation',
+            parameters: [
+              { name: 'bucket', in: 'path', required: true, schema: { type: 'string' } },
+            ],
+            responses: {
+              '200': {
+                description: 'ok',
+                content: {
+                  'application/xml': {
+                    schema: {
+                      type: 'string',
+                      enum: ['us-west-2'],
+                      xml: { name: 'LocationConstraint' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const sample = createEmulatorFetch({ specs: [location] });
+    const fixture = createEmulatorFetch({
+      specs: [location],
+      fixtures: [
+        {
+          operation: { method: 'get', path: '/{bucket}' },
+          response: {
+            status: 200,
+            headers: { 'content-type': 'application/xml' },
+            body: 'us-west-2',
+          },
+        },
+      ],
+    });
+
+    const fromSample = await sample.fetch('https://storage.example.com/logs');
+    const fromFixture = await fixture.fetch('https://storage.example.com/logs');
+
+    expect(await fromSample.text()).toBe('<LocationConstraint>us-west-2</LocationConstraint>');
+    expect(await fromFixture.text()).toBe('<LocationConstraint>us-west-2</LocationConstraint>');
+    expect(fixture.rejectedResponses).toEqual([]);
+    expect(fixture.calls.flatMap(({ responseViolations }) => responseViolations)).toEqual([]);
+  });
 });

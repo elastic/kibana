@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fromXml, isXmlMediaType, toXml } from './xml_codec';
+import { fromXml, isBareXmlValue, isXmlMediaType, toXml } from './xml_codec';
 
 const document = {
   openapi: '3.0.3',
@@ -137,5 +137,74 @@ describe('xml codec', () => {
     ['application/xml-dtd', false],
   ])('recognizes %s as XML: %s', (mediaType, expected) => {
     expect(isXmlMediaType(mediaType)).toBe(expected);
+  });
+});
+
+describe('xml codec: unions, alternatives and bare values', () => {
+  const alternatives = {
+    openapi: '3.0.3',
+    components: {
+      schemas: {
+        Location: { type: 'string', enum: ['us-west-2'], xml: { name: 'LocationConstraint' } },
+        NoSuchBucket: {
+          type: 'object',
+          properties: { message: { type: 'string', xml: { name: 'Message' } } },
+        },
+        AccessDenied: {
+          type: 'object',
+          properties: {
+            message: { type: 'string', xml: { name: 'Message' } },
+            host: { type: 'string', xml: { name: 'HostId' } },
+          },
+        },
+        Errors: {
+          anyOf: [
+            { $ref: '#/components/schemas/NoSuchBucket' },
+            { $ref: '#/components/schemas/AccessDenied' },
+          ],
+          xml: { name: 'Error' },
+        },
+        Choice: {
+          type: 'object',
+          xml: { name: 'Choice' },
+          oneOf: [
+            { type: 'object', properties: { a: { type: 'string' } } },
+            { type: 'object', properties: { b: { type: 'string' } } },
+          ],
+        },
+      },
+    },
+  };
+  const errors = { $ref: '#/components/schemas/Errors' };
+
+  it('reads and writes `anyOf` structures, such as several modeled errors with one status', () => {
+    const error = { message: 'gone', host: 'h1' };
+    const written = toXml(error, errors, alternatives);
+
+    expect(written).toBe('<Error><Message>gone</Message><HostId>h1</HostId></Error>');
+    expect(fromXml(written, errors, alternatives)).toEqual({ value: error });
+  });
+
+  it('keeps every member a union element has, so validation can reject more than one', () => {
+    expect(
+      fromXml(
+        '<Choice><a>1</a><b>2</b></Choice>',
+        { $ref: '#/components/schemas/Choice' },
+        alternatives
+      )
+    ).toEqual({ value: { a: '1', b: '2' } });
+  });
+
+  it('tells bare scalar values from XML text', () => {
+    const location = { $ref: '#/components/schemas/Location' };
+
+    expect(isBareXmlValue('us-west-2', location, alternatives)).toBe(true);
+    expect(
+      isBareXmlValue('<LocationConstraint>us-west-2</LocationConstraint>', location, alternatives)
+    ).toBe(false);
+    expect(isBareXmlValue('us-west-2', errors, alternatives)).toBe(false);
+    expect(toXml('us-west-2', location, alternatives)).toBe(
+      '<LocationConstraint>us-west-2</LocationConstraint>'
+    );
   });
 });
