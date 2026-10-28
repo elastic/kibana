@@ -6,7 +6,8 @@
  */
 
 import type { BehaviorExecution, ValidatedBehavior } from './types';
-import { getSearchedTechniqueIds, MAX_SEARCHED_TECHNIQUE_IDS } from './searched_technique_ids';
+import { MAX_HUNT_TECHNIQUE_IDS } from '../common/hunt_technique_limit';
+import { getSearchedTechniqueIds } from './searched_technique_ids';
 
 const behavior = (techniqueId: string, execution?: BehaviorExecution): ValidatedBehavior =>
   ({ technique_id: techniqueId, execution } as ValidatedBehavior);
@@ -36,13 +37,23 @@ describe('getSearchedTechniqueIds', () => {
     ).toEqual([]);
   });
 
-  it('leaves out an executed behavior whose result says nothing about the environment', () => {
+  it('counts an executed behavior whose inconclusive result a retry would reproduce', () => {
+    // `rows_unclassifiable` and `refs_unavailable` are final in `completeness.ts`: the same query
+    // returns the same rows, so leaving the technique out would re-spend a budget slot on it every run.
     expect(
       getSearchedTechniqueIds({
         behaviors: [
           behavior('T1001', { ...executed, inconclusive_reason: 'rows_unclassifiable' }),
           behavior('T1002', { ...executed, inconclusive_reason: 'refs_unavailable' }),
         ],
+      })
+    ).toEqual(['T1001', 'T1002']);
+  });
+
+  it('leaves out an executed behavior whose inconclusive result a retry could change', () => {
+    expect(
+      getSearchedTechniqueIds({
+        behaviors: [behavior('T1001', { ...executed, inconclusive_reason: 'execute_failed' })],
       })
     ).toEqual([]);
   });
@@ -79,10 +90,10 @@ describe('getSearchedTechniqueIds', () => {
   });
 
   it('caps the list at the contract bound', () => {
-    const behaviors = Array.from({ length: MAX_SEARCHED_TECHNIQUE_IDS + 5 }, (_, i) =>
+    const behaviors = Array.from({ length: MAX_HUNT_TECHNIQUE_IDS + 5 }, (_, i) =>
       behavior(`T${2000 + i}`, executed)
     );
 
-    expect(getSearchedTechniqueIds({ behaviors })).toHaveLength(MAX_SEARCHED_TECHNIQUE_IDS);
+    expect(getSearchedTechniqueIds({ behaviors })).toHaveLength(MAX_HUNT_TECHNIQUE_IDS);
   });
 });

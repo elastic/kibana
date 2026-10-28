@@ -1061,8 +1061,11 @@ export const huntBehavior = async (
     // filter on the shared artifacts and still not express what the sibling's technique does
     // with them. So every deferred sibling gets its own generation while budget remains. Only
     // one that loses to the budget is settled on what its survivor did: `collapsed` when the
-    // survivor published a query seen to filter on every shared artifact, since the artifacts
-    // were at least searched, and `generation_budget` otherwise, since nothing searched them.
+    // survivor published a query seen to filter on every shared artifact and that query executed
+    // with a result that says something about the environment, since the artifacts were then
+    // searched, and `generation_budget` otherwise, since nothing searched them. A survivor whose
+    // query failed, returned an inconclusive result, or never ran (no window or client) searched
+    // nothing, and recording its siblings as searched would skip them on every later run.
     const remainingBudget = Math.max(0, MAX_GENERATED_BEHAVIORS - generationTargets.length);
     const secondWave = deferredSiblings
       .map(({ behavior }) => behavior)
@@ -1074,8 +1077,10 @@ export const huntBehavior = async (
     for (const { behavior, survivor, key } of deferredSiblings) {
       if (secondWaveIds.has(behavior.technique_id)) continue;
       const survivorEsql = published.get(survivor.technique_id);
+      const survivorSearched =
+        survivor.execution?.executed === true && !survivor.execution.inconclusive_reason;
       const sharedValues = key.split('\u0000').join(', ');
-      if (survivorEsql && queryHuntsArtifacts(survivorEsql, key)) {
+      if (survivorEsql && survivorSearched && queryHuntsArtifacts(survivorEsql, key)) {
         collapsedCount += 1;
         behavior.execution = notExecuted('collapsed');
         gap(

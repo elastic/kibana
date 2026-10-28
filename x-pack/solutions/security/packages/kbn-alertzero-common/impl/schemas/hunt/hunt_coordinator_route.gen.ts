@@ -253,14 +253,14 @@ export const HuntCoordinatorResult = lazySchema(() =>
         'Whether this run is done with the report and it can be retired: true when nothing a later sweep would cover is missing. Derived from `completeness`: false only for `incomplete_retryable`, where repeating the run could cover what this one missed. True for `incomplete_final` as well as `complete`, because a deterministic gap returns identically every run, so retrying only re-spends the budget. A caller that writes "clean" off this flag alone will record a clean environment for a run that could not search it — use `completeness` for that.'
       ),
     /**
-     * Technique ids this run actually searched in Tier 2: behaviors whose query executed without an inconclusive reason, plus techniques collapsed into an executed sibling. Techniques that were skipped, failed or lost to the behavior budget are not listed. Absent or empty when Tier 2 did not run. The caller records these so a later run can skip them.
+     * Technique ids this run settled in Tier 2: behaviors whose query executed and whose result a retry would not change (a conclusive result, or an inconclusive one the completeness classifier treats as final), plus techniques collapsed into a sibling whose query executed conclusively. Techniques that were skipped, failed, lost to the behavior budget, or whose sibling did not execute conclusively are not listed. Absent or empty when Tier 2 did not run. The caller records these so a later run can skip them.
      */
     searched_technique_ids: z
       .array(z.string().min(1).max(32))
       .max(100)
       .optional()
       .describe(
-        'Technique ids this run actually searched in Tier 2: behaviors whose query executed without an inconclusive reason, plus techniques collapsed into an executed sibling. Techniques that were skipped, failed or lost to the behavior budget are not listed. Absent or empty when Tier 2 did not run. The caller records these so a later run can skip them.'
+        'Technique ids this run settled in Tier 2: behaviors whose query executed and whose result a retry would not change (a conclusive result, or an inconclusive one the completeness classifier treats as final), plus techniques collapsed into a sibling whose query executed conclusively. Techniques that were skipped, failed, lost to the behavior budget, or whose sibling did not execute conclusively are not listed. Absent or empty when Tier 2 did not run. The caller records these so a later run can skip them.'
       ),
     /**
      * The coordinator's own coverage gaps — input this run had to truncate, and a Tier 2 that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the Tier-1-only paths, not even that. Absent or empty means the coordinator itself found nothing to report here.

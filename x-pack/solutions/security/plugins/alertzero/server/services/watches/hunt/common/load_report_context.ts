@@ -10,6 +10,7 @@ import type { HuntIoc } from '@kbn/alertzero-common';
 import { HuntIocType, isHuntEligibleIoc } from '@kbn/alertzero-common';
 import { HUNT_REPORTS_INDEX } from '../../../../../common/constants';
 import { buildHuntSpaceFilterTerms } from './space_filter';
+import { MAX_HUNT_TECHNIQUE_IDS } from './hunt_technique_limit';
 
 /** What a hunt needs from a threat report: the IOCs and techniques Tier 1 searches for and the text Tier 2 reads. */
 export interface ReportHuntContext {
@@ -89,8 +90,6 @@ const MAX_HUNT_IOC_VALUE_CHARS = 2048;
  * Matches `MAX_IOCS_PER_REPORT` in the extract_iocs service, the most a stored report holds.
  */
 const MAX_HUNT_EXCLUDED_IOCS = 5_000;
-/** Matches the OpenAPI `techniques` maxItems and item maxLength. */
-export const MAX_HUNT_REPORT_TECHNIQUES = 100;
 const MAX_HUNT_TECHNIQUE_CHARS = 32;
 /** A vendor or product name is a short label; anything longer is malformed extraction, not a name. */
 const MAX_HUNT_VENDOR_PRODUCT_CHARS = 256;
@@ -237,10 +236,10 @@ export const loadReportHuntContext = async ({
         ...(oversizedIocs > 0 && { oversized: oversizedIocs }),
       },
     }),
-    ...(validTechniques.length > MAX_HUNT_REPORT_TECHNIQUES && {
+    ...(validTechniques.length > MAX_HUNT_TECHNIQUE_IDS && {
       techniques: {
-        kept: MAX_HUNT_REPORT_TECHNIQUES,
-        dropped: validTechniques.length - MAX_HUNT_REPORT_TECHNIQUES,
+        kept: MAX_HUNT_TECHNIQUE_IDS,
+        dropped: validTechniques.length - MAX_HUNT_TECHNIQUE_IDS,
       },
     }),
     ...(hasText &&
@@ -270,7 +269,7 @@ export const loadReportHuntContext = async ({
     ...(publishedAt !== undefined ? { published_at: publishedAt } : {}),
     ...(severity !== undefined ? { severity } : {}),
     iocs: mappableIocs.slice(0, MAX_HUNT_REPORT_IOCS).map(({ type, value }) => ({ type, value })),
-    techniques: validTechniques.slice(0, MAX_HUNT_REPORT_TECHNIQUES),
+    techniques: validTechniques.slice(0, MAX_HUNT_TECHNIQUE_IDS),
     ...(text !== undefined ? { text } : {}),
     ...(vendor !== undefined ? { vendor } : {}),
     ...(product !== undefined ? { product } : {}),

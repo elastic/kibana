@@ -437,12 +437,14 @@ components:
           type: array
           maxItems: 100
           description: >-
-            Technique ids this run actually searched in Tier 2: behaviors
-            whose query executed without an inconclusive reason, plus
-            techniques collapsed into an executed sibling. Techniques that
-            were skipped, failed or lost to the behavior budget are not
-            listed. Absent or empty when Tier 2 did not run. The caller
-            records these so a later run can skip them.
+            Technique ids this run settled in Tier 2: behaviors whose query
+            executed and whose result a retry would not change (a conclusive
+            result, or an inconclusive one the completeness classifier treats
+            as final), plus techniques collapsed into a sibling whose query
+            executed conclusively. Techniques that were skipped, failed,
+            lost to the behavior budget, or whose sibling did not execute
+            conclusively are not listed. Absent or empty when Tier 2 did not
+            run. The caller records these so a later run can skip them.
           items:
             type: string
             minLength: 1
