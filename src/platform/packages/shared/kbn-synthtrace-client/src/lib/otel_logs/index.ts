@@ -12,9 +12,17 @@ import { Serializable } from '../serializable';
 export const LONG_FIELD_NAME =
   'thisisaverylongfieldnamethatevendoesnotcontainanyspaceswhyitcouldpotentiallybreakouruiinseveralplaces';
 
+export interface OtelScope {
+  name: string;
+  version?: string;
+  attributes?: Record<string, unknown>;
+}
+
 export type OtelLogDocument = Fields &
   Partial<{
     _index?: string;
+    event_name?: string;
+    scope?: OtelScope;
     trace_id?: string;
     span_id?: string;
     attributes?: Record<string, unknown>;
@@ -31,7 +39,7 @@ export type OtelLogDocument = Fields &
     observed_timestamp?: number;
   }>;
 
-class OtelLog extends Serializable<OtelLogDocument> {
+export class OtelLog extends Serializable<OtelLogDocument> {
   constructor(fields: OtelLogDocument) {
     super({
       ...fields,
@@ -65,6 +73,24 @@ class OtelLog extends Serializable<OtelLogDocument> {
 
   logLevel(level: string) {
     this.fields.severity_text = level;
+    return this;
+  }
+
+  eventName(name: string) {
+    this.fields.event_name = name;
+    return this;
+  }
+
+  severity(severityNumber: number, severityText?: string) {
+    this.fields.severity_number = severityNumber;
+    if (severityText !== undefined) {
+      this.fields.severity_text = severityText;
+    }
+    return this;
+  }
+
+  scope(scope: OtelScope) {
+    this.fields.scope = scope;
     return this;
   }
 

@@ -25,8 +25,18 @@ export type {
   EvaluateFn,
   EvaluateParams,
 } from './evaluation/create_evaluate_contract';
-export type { TranscriptMessage } from './evaluators/evidence/types';
 export { EvaluationExecutionError } from './evaluation/evaluation_execution_error';
+export type {
+  EvaluatorContext,
+  EvaluatorResult,
+  RegisteredEvaluatorDefinition,
+  TraceAccessor,
+} from './evaluators/types';
+export type {
+  EvidenceRound,
+  ToolCallEvidence,
+  TranscriptMessage,
+} from './evaluators/evidence/types';
 
 export {
   generateExperimentRun,
@@ -54,3 +64,4 @@ export const plugin: PluginInitializer<
 };
 
 export { config } from './config';
+export type { EvalsMode } from './config';

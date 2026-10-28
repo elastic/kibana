@@ -9,6 +9,7 @@
 
 export { isUiamCredential, isUiamBearerCredential } from './utils';
 export { isMissingApiKey, isRevokedApiKey } from './errors';
+export { UIAM_ERROR_CODES } from '@kbn/core-security-common';
 export {
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
   ES_CLIENT_AUTHENTICATION_HEADER,

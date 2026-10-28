@@ -10,6 +10,7 @@ import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
 import { isAttachmentNotFoundError } from '@kbn/agent-builder-common';
 import type { HuntCoordinatorResponse, HuntCoordinatorResult } from '@kbn/alertzero-common';
 import {
+  ALERTZERO_HUNT_SWEEP_TELEMETRY_PLUGIN_ID,
   API_VERSIONS,
   HuntCoordinatorRequestBody,
   INTERNAL_API_ACCESS,
@@ -220,6 +221,7 @@ export const registerHuntCoordinatorRoute = ({
             searchInferenceEndpoints: getSearchInferenceEndpoints(),
             request,
             uiSettingsClient: core.uiSettings.client,
+            telemetryPluginId: ALERTZERO_HUNT_SWEEP_TELEMETRY_PLUGIN_ID,
             logger,
           });
           for (const failure of failures) {

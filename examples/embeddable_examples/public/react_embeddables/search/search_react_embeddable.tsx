@@ -31,7 +31,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const timeRangeManager = initializeTimeRangeManager(initialState);
       const defaultDataView = await services.dataViews.getDefaultDataView();
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
+      const dataSources$ = new BehaviorSubject<DataView[] | undefined>(
         defaultDataView ? [defaultDataView] : undefined
       );
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
@@ -76,7 +76,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
 
       const api = finalizeApi({
         blockingError$,
-        dataViews$,
+        dataSources$,
         dataLoading$,
         ...stateApi,
         ...timeRangeManager.api,

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import type { EvaluatorDefinitionClient } from '../storage/evaluators/evaluator_definition_client';
 import type { EvaluatorDefinitionDocument, LlmJudgeConfig } from './user_defined/types';
 import { createEvaluatorRegistry } from './registry';
+import type { RegisteredEvaluatorDefinition } from './types';
 
 const JUDGE: LlmJudgeConfig = {
   prompt: 'Rate {{{agent_response}}}',
@@ -204,6 +206,140 @@ describe('createEvaluatorRegistry', () => {
       expect(listed.filter(({ name }) => name === 'correctness')).toEqual([
         expect.objectContaining({ origin: 'built_in' }),
       ]);
+    });
+  });
+
+  describe('registered evaluators', () => {
+    const registered = (
+      overrides: Partial<RegisteredEvaluatorDefinition> = {}
+    ): RegisteredEvaluatorDefinition => ({
+      name: 'rca_quality',
+      version: '1.0.0',
+      kind: 'llm',
+      description: 'Grades a root cause analysis',
+      direction: 'maximize',
+      evaluate: jest.fn(),
+      ...overrides,
+    });
+
+    it('resolves them as built-in in every space, without reaching the store', async () => {
+      const definitionClient = createDefinitionClient([]);
+      const registry = createEvaluatorRegistry({ getDefinitionClient: () => definitionClient });
+      registry.register(registered());
+
+      for (const spaceId of ['default', 'marketing']) {
+        const scoped = registry.asScoped({ spaceId });
+        await expect(scoped.get('rca_quality')).resolves.toEqual(
+          expect.objectContaining({ name: 'rca_quality', origin: 'built_in' })
+        );
+        expect((await scoped.list()).map(({ name }) => name)).toContain('rca_quality');
+      }
+      expect(definitionClient.getLatest).not.toHaveBeenCalled();
+      expect(registry.isBuiltIn('rca_quality')).toBe(true);
+    });
+
+    it('resolves the latest version unless one is pinned', async () => {
+      const { registry, scoped } = createRegistry();
+      registry.register(registered({ version: '1.0.0' }));
+      registry.register(registered({ version: '1.1.0' }));
+
+      await expect(scoped.get('rca_quality')).resolves.toEqual(
+        expect.objectContaining({ version: '1.1.0' })
+      );
+      await expect(scoped.get('rca_quality', '1.0.0')).resolves.toEqual(
+        expect.objectContaining({ version: '1.0.0' })
+      );
+    });
+
+    it('keeps a stored definition with the same name from shadowing it', async () => {
+      const { registry, scoped } = createRegistry([
+        storedDefinition({ name: 'rca_quality', description: 'Impostor' }),
+      ]);
+      registry.register(registered());
+
+      await expect(scoped.get('rca_quality')).resolves.toEqual(
+        expect.objectContaining({ origin: 'built_in', description: 'Grades a root cause analysis' })
+      );
+      expect((await scoped.list()).filter(({ name }) => name === 'rca_quality')).toHaveLength(1);
+    });
+
+    it('rejects a name and version that is already registered', () => {
+      const { registry } = createRegistry();
+      registry.register(registered());
+
+      expect(() => registry.register(registered())).toThrow(
+        'Cannot register evaluator "rca_quality@1.0.0": it is already registered'
+      );
+    });
+
+    it('rejects the name of an evaluator Kibana ships, whatever the version', () => {
+      const { registry } = createRegistry();
+
+      expect(() =>
+        registry.register(registered({ name: 'correctness', version: '9.0.0' }))
+      ).toThrow(
+        'Cannot register evaluator "correctness": the name belongs to an evaluator that ships with Kibana'
+      );
+    });
+
+    it('rejects a name a user-defined evaluator could not have', () => {
+      const { registry } = createRegistry();
+
+      expect(() => registry.register(registered({ name: 'RCA Quality' }))).toThrow(
+        'Invalid evaluator name "RCA Quality"'
+      );
+    });
+
+    it('rejects a semver version longer than the API accepts', () => {
+      const { registry } = createRegistry();
+      const version = `1.0.0+${'a'.repeat(60)}`;
+
+      expect(() => registry.register(registered({ version }))).toThrow(
+        'Cannot register evaluator "rca_quality": version must be at most 64 characters'
+      );
+    });
+
+    it('keeps every schema a registered evaluator declares', async () => {
+      const referenceDataSchema = z.object({ expected: z.string() });
+      const contextSchema = z.object({ decision_tree: z.string() });
+      const evidenceSchema = z.object({ response: z.object({ message: z.string().min(1) }) });
+      const { registry, scoped } = createRegistry();
+      registry.register(registered({ referenceDataSchema, contextSchema, evidenceSchema }));
+
+      await expect(scoped.get('rca_quality')).resolves.toEqual(
+        expect.objectContaining({ referenceDataSchema, contextSchema, evidenceSchema })
+      );
+    });
+
+    it('runs an evaluator written as a class with its own receiver', async () => {
+      class RcaQualityEvaluator implements RegisteredEvaluatorDefinition {
+        readonly name = 'rca_quality';
+        readonly version = '1.0.0';
+        readonly kind = 'code' as const;
+        readonly description = 'Grades a root cause analysis';
+        readonly direction = 'maximize' as const;
+        private readonly scoreName = 'rca_quality';
+
+        async evaluate() {
+          return { scores: [{ name: this.scoreName, score: 1 }] };
+        }
+      }
+      const { registry, scoped } = createRegistry();
+      registry.register(new RcaQualityEvaluator());
+
+      const definition = await scoped.get('rca_quality');
+
+      await expect(
+        definition?.evaluate({} as Parameters<RegisteredEvaluatorDefinition['evaluate']>[0])
+      ).resolves.toEqual({ scores: [{ name: 'rca_quality', score: 1 }] });
+    });
+
+    it('rejects a version that is not semver', () => {
+      const { registry } = createRegistry();
+
+      expect(() => registry.register(registered({ version: 'v1' }))).toThrow(
+        'Cannot register evaluator "rca_quality": version "v1" is not a semver version'
+      );
     });
   });
 
