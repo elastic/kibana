@@ -135,7 +135,7 @@ describe('Mentions', () => {
   it('shows the Enter hint on the highlighted row only', () => {
     const { container } = renderMentions();
 
-    expect(container.querySelectorAll('[data-euiicon-type="returnKey"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-euiicon-type="return"]')).toHaveLength(1);
   });
 
   describe('reporting content presence via onContentChange', () => {

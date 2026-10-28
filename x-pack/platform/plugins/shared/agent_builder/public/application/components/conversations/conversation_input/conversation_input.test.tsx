@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { CHAT_MESSAGE_MAX_LENGTH } from '@kbn/agent-builder-common';
 import { ConversationInput } from './conversation_input';
@@ -522,6 +522,168 @@ describe('ConversationInput', () => {
       fireEvent.click(screen.getByTestId('mock-mention-button'));
 
       expect(editorController.insertText).toHaveBeenCalledWith('@');
+    });
+
+    describe('switching the trigger mode with a mention at the start', () => {
+      const julian = '[@Julian Rosado](mention://u_julian_0?kind=user)';
+      const agent = '[@Elastic AI Agent](mention://elastic-ai-agent?kind=agent)';
+
+      const modeValue = () => screen.getByTestId('mock-trigger-mode-selector');
+      const type = (content: string) => {
+        editorController.getContent.mockReturnValue(content);
+        const { onContentChange } =
+          mockedUseMessageEditor.mock.calls[mockedUseMessageEditor.mock.calls.length - 1][0] ?? {};
+        act(() => onContentChange?.());
+      };
+
+      beforeEach(() => {
+        mockedUseInputDraft.mockReturnValue({
+          draft: null,
+          saveDraft: jest.fn(),
+          clearDraft: jest.fn(),
+        });
+        mockedUseConversationId.mockReturnValue('conv-1');
+        mockedUseExperimentalFeatures.mockReturnValue(true);
+        mockedUseIsSharedConversation.mockReturnValue(true);
+      });
+
+      it('posts to the team when the message starts with a user', () => {
+        renderInput(<ConversationInput />);
+
+        type(`${julian} look`);
+
+        expect(modeValue()).toHaveValue('never');
+        expect(screen.getByTestId('agentBuilderConversationInputPostToTeamHeader')).toHaveAttribute(
+          'aria-hidden',
+          'false'
+        );
+      });
+
+      it('asks the agent when the message starts with the agent, also after posting to the team', async () => {
+        renderInput(<ConversationInput />);
+        fireEvent.change(modeValue(), { target: { value: 'never' } });
+        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+        await waitFor(() => expect(editorController.clear).toHaveBeenCalled());
+        expect(modeValue()).toHaveValue('never');
+
+        type(`${agent} summarize`);
+
+        expect(modeValue()).toHaveValue('always');
+      });
+
+      it('ignores spaces and new lines before the mention', () => {
+        renderInput(<ConversationInput />);
+
+        type(`  \n${julian} look`);
+
+        expect(modeValue()).toHaveValue('never');
+      });
+
+      it.each([
+        ['text before it', `hey ${julian} look`],
+        ['an image before it', `[photo.png](image://photo.png) ${julian}`],
+        ['typed @name text', '@julian look'],
+      ])('does not switch with %s', (_name, content) => {
+        renderInput(<ConversationInput />);
+
+        type(content);
+
+        expect(modeValue()).toHaveValue('always');
+      });
+
+      it('goes back to the earlier mode once the message stops starting with a mention', () => {
+        renderInput(<ConversationInput />);
+
+        type(`${julian}, talk to ${agent} please`);
+        expect(modeValue()).toHaveValue('never');
+
+        type(`, talk to ${agent} please`);
+        expect(modeValue()).toHaveValue('always');
+      });
+
+      it('stops switching once the user flips the toggle by hand, until the message is sent', async () => {
+        renderInput(<ConversationInput />);
+
+        fireEvent.change(modeValue(), { target: { value: 'always' } });
+        type(`${julian} look`);
+        expect(modeValue()).toHaveValue('always');
+
+        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+        type(`${julian} look again`);
+        expect(modeValue()).toHaveValue('never');
+      });
+
+      it('locks the toggle when it is flipped in an empty input', () => {
+        renderInput(<ConversationInput />);
+
+        fireEvent.change(modeValue(), { target: { value: 'never' } });
+        type(`${agent} summarize`);
+
+        expect(modeValue()).toHaveValue('never');
+      });
+
+      it('keeps the mode after the message is sent', async () => {
+        renderInput(<ConversationInput />);
+
+        type(`${julian} look`);
+        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+        expect(sendUserMessage).toHaveBeenCalledWith(`${julian} look`);
+        await waitFor(() => expect(editorController.clear).toHaveBeenCalled());
+        expect(modeValue()).toHaveValue('never');
+      });
+
+      it('keeps the mention switch when the send fails', async () => {
+        sendUserMessage.mockRejectedValue(new Error('boom'));
+        renderInput(<ConversationInput />);
+
+        type(`${julian} look`);
+        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+        await waitFor(() => expect(addErrorToast).toHaveBeenCalled());
+        expect(modeValue()).toHaveValue('never');
+      });
+
+      it('checks a restored draft once, after it loads', () => {
+        mockedUseInputDraft.mockReturnValue({
+          draft: `${julian} look`,
+          saveDraft: jest.fn(),
+          clearDraft: jest.fn(),
+        });
+
+        renderInput(<ConversationInput />);
+
+        expect(editorController.setContent).toHaveBeenCalledWith(`${julian} look`);
+        expect(modeValue()).toHaveValue('never');
+      });
+
+      it('does not carry the switch over to another conversation', () => {
+        const { rerender } = renderInput(<ConversationInput />);
+        type(`${julian} look`);
+
+        mockedUseConversationId.mockReturnValue('conv-2');
+        rerenderInput(rerender);
+
+        expect(modeValue()).toHaveValue('always');
+      });
+
+      it('does not switch with the experimental flag off', () => {
+        mockedUseExperimentalFeatures.mockReturnValue(false);
+        renderInput(<ConversationInput />);
+
+        type(`${julian} look`);
+
+        expect(modeValue()).toHaveValue('always');
+      });
+
+      it('still lets the user flip the toggle by hand with the experimental flag off', () => {
+        mockedUseExperimentalFeatures.mockReturnValue(false);
+        renderInput(<ConversationInput />);
+
+        fireEvent.change(modeValue(), { target: { value: 'never' } });
+
+        expect(modeValue()).toHaveValue('never');
+      });
     });
 
     it('turns the mention menu on when the chat becomes shared, without a remount', () => {
