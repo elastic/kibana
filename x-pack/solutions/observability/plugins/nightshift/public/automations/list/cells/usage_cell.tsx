@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getDailyUsageTone } from '../../utils/daily_usage';
+import { triggerLabels } from '../../flyouts/form/triggers/translations';
 import { listLabels } from '../translations';
 
 export const AutomationUsageCell = ({
@@ -29,17 +30,22 @@ export const AutomationUsageCell = ({
   isRateLimited: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
-  if (limit === undefined || used === undefined) return <>—</>;
+  if (used === undefined) return <>—</>;
 
-  const isLimitReached = used >= limit;
-  const isLimitHigh = getDailyUsageTone(used, limit) !== 'healthy';
+  const isLimitReached = limit !== undefined && used >= limit;
+  const isLimitHigh = limit !== undefined && getDailyUsageTone(used, limit) !== 'healthy';
   const limitColor = euiTheme.colors.vis.euiColorVisWarning0;
   return (
     <div css={{ width: '100%' }}>
       <EuiToolTip
         display="block"
         content={
-          isLimitReached
+          limit === undefined
+            ? i18n.translate('xpack.nightshift.automations.usageCellNoLimitTooltip', {
+                defaultMessage: 'No daily limit. {used} runs today.',
+                values: { used },
+              })
+            : isLimitReached
             ? i18n.translate('xpack.nightshift.automations.usageCellLimitReachedTooltip', {
                 defaultMessage: 'Daily limit reached · no more runs until midnight (UTC)',
               })
@@ -77,16 +83,18 @@ export const AutomationUsageCell = ({
                   fontVariantNumeric: 'tabular-nums',
                 }}
               >
-                {used} / {limit}
+                {used} / {limit ?? triggerLabels.noLimit}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiProgress
-            value={Math.min(used, limit)}
-            max={limit}
-            size="s"
-            color={isLimitHigh ? limitColor : 'success'}
-          />
+          {limit !== undefined && (
+            <EuiProgress
+              value={Math.min(used, limit)}
+              max={limit}
+              size="s"
+              color={isLimitHigh ? limitColor : 'success'}
+            />
+          )}
         </div>
       </EuiToolTip>
     </div>

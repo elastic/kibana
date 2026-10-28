@@ -45,6 +45,7 @@ import {
   type AutomationFormValues,
 } from '../flyouts/form/automation_form_values';
 import { canSaveAutomation, getSaveBlocker, isTriggerValid } from '../flyouts/form/validation';
+import { triggerLabels } from '../flyouts/form/triggers/translations';
 import { toAutomationUpdateBody } from '../flyouts/form/to_automation_request';
 import { SectionHeader, FormSection } from '../flyouts/form/section_header';
 import {
@@ -479,14 +480,18 @@ export const AutomationDetailFlyout = ({
                               color: isLimitHigh ? euiTheme.colors.textWarning : undefined,
                             }}
                           >
-                            {usedToday} / {automation.runtime.dailyDispatchLimit ?? '—'}
-                            <EuiSpacer size="xs" />
-                            <EuiProgress
-                              size="s"
-                              color={isLimitHigh ? limitColor : 'success'}
-                              value={usedToday}
-                              max={automation.runtime.dailyDispatchLimit ?? 1}
-                            />
+                            {usedToday} / {dailyLimit ?? triggerLabels.noLimit}
+                            {dailyLimit !== undefined && (
+                              <>
+                                <EuiSpacer size="xs" />
+                                <EuiProgress
+                                  size="s"
+                                  color={isLimitHigh ? limitColor : 'success'}
+                                  value={usedToday}
+                                  max={dailyLimit}
+                                />
+                              </>
+                            )}
                           </div>
                         ),
                       },
@@ -519,7 +524,7 @@ export const AutomationDetailFlyout = ({
                     values={values}
                     tagSuggestions={automations.flatMap(({ tags }) => tags ?? [])}
                     isNameInvalid={isNameInvalid}
-                    savedLimit={Number(originalValues.dailyDispatchLimit)}
+                    savedLimit={dailyLimit}
                     onChange={(changes) => {
                       setValues((current) => ({ ...current, ...changes }));
                       if ('name' in changes) setIsNameInvalid(false);

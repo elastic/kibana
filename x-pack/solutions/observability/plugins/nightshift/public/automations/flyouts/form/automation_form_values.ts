@@ -10,6 +10,7 @@ import {
   type PresetSchedule,
 } from '@kbn/nightshift-investigations-plugin/common';
 import type { Automation } from '../../hooks/use_automations';
+import { UNLIMITED_DAILY_LIMIT } from '../../utils/daily_usage';
 
 export type ScheduleUnit = 'hour' | 'day' | 'week';
 export type InstructionMode = 'ask' | 'investigate';
@@ -185,7 +186,10 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
     tags: automation.tags ?? [],
     description: automation.description ?? '',
     trigger,
-    dailyDispatchLimit: String(automation.runtime.dailyDispatchLimit ?? 20),
+    dailyDispatchLimit:
+      automation.runtime.dailyDispatchLimit === undefined
+        ? UNLIMITED_DAILY_LIMIT
+        : String(automation.runtime.dailyDispatchLimit),
     instructions: automation.execution.promptTemplate ?? '',
     mode: automation.execution.reasoningMode === 'investigate' ? 'investigate' : 'ask',
     slackAction:

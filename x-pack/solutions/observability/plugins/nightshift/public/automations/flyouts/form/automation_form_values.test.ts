@@ -101,6 +101,10 @@ describe('automation form values', () => {
       author: 'elastic',
     };
 
+    expect(toAutomationFormValues({ ...automation, runtime: {} }).dailyDispatchLimit).toBe(
+      'unlimited'
+    );
+
     expect(toAutomationFormValues(automation)).toEqual({
       name: 'Triage',
       tags: ['oncall'],

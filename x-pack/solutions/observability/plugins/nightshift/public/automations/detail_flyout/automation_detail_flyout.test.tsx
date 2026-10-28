@@ -80,14 +80,20 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
     canManage = true,
     usedToday = 0,
     editDisabledReason,
-  }: { canManage?: boolean; usedToday?: number; editDisabledReason?: string } = {}) => {
+    target = automation,
+  }: {
+    canManage?: boolean;
+    usedToday?: number;
+    editDisabledReason?: string;
+    target?: Automation;
+  } = {}) => {
     const history = createMemoryHistory({ initialEntries: ['/automations/automation-1'] });
     render(
       <I18nProvider>
         <Router history={history}>
           <AutomationDetailFlyout
-            automations={[automation]}
-            automation={automation}
+            automations={[target]}
+            automation={target}
             canManage={canManage}
             editDisabledReason={editDisabledReason}
             usedToday={usedToday}
@@ -106,6 +112,17 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
   const startEditing = () => fireEvent.click(screen.getByTestId('automationEditButton'));
   const renameTo = (name: string) =>
     fireEvent.change(screen.getByTestId('automationName'), { target: { value: name } });
+
+  it('keeps an unlimited automation unlimited without an unsaved limit callout', () => {
+    renderFlyout({
+      target: { ...automation, runtime: {} } as Automation,
+      usedToday: 3,
+    });
+    startEditing();
+
+    expect(screen.getByTestId('automationDailyLimitUnlimited')).toBeChecked();
+    expect(screen.queryByTestId('automationDailyLimitUnsavedCallout')).not.toBeInTheDocument();
+  });
 
   it('shows edit disabled, with the reason, when only a privilege is missing', async () => {
     renderFlyout({ canManage: false, editDisabledReason: 'Requires manage_security' });
