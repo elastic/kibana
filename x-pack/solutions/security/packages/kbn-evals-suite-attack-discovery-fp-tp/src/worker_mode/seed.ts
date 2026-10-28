@@ -348,7 +348,12 @@ export const cleanupWorkerModeSpace = async ({
     // The stream pattern spans every space, so the sweep is held to this namespace.
     const { data_streams: streams } = await esClient.indices
       .getDataStream({ name: targets.eventsIndexPattern })
-      .catch(() => ({ data_streams: [] as Array<{ name: string }> }));
+      .catch((error: { statusCode?: number }) => {
+        if (error?.statusCode !== 404) {
+          throw error;
+        }
+        return { data_streams: [] as Array<{ name: string }> };
+      });
     for (const index of rawEventIndexNames(streams.map(({ name }) => ({ index: name })))) {
       await esClient.deleteByQuery({
         index,

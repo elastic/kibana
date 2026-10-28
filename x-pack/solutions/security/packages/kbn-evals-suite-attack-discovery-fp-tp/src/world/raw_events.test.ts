@@ -138,6 +138,16 @@ describe('rawEventIngestPipeline', () => {
       expect.objectContaining({ id: FP_TP_RAW_EVENT_INGEST_PIPELINE })
     );
   });
+
+  it('sends the processors as top-level request params, not under a legacy body', async () => {
+    const putPipeline = jest.fn().mockResolvedValue({ acknowledged: true });
+
+    await ensureFpTpRawEventPipeline({ ingest: { putPipeline } } as unknown as EsClient);
+
+    const [request] = putPipeline.mock.calls[0];
+    expect(request).not.toHaveProperty('body');
+    expect(request.processors).toEqual(rawEventIngestPipeline().processors);
+  });
 });
 
 describe('ensureFpTpRawEventStore', () => {

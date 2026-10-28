@@ -1076,22 +1076,21 @@ export const seedTwinLiveServerless = async ({
     // The seeder-owned streams must exist (through the seeder-owned template)
     // before the bulk, and every event passes the pipeline so @timestamp is a
     // real date and event.ingested reflects ingest time.
-    if (plan.eventOperations.length > 0) {
-      await ensureFpTpRawEventStore(esClient, rawEventIndexNames(plan.serverlessEvents));
-    }
-
     assertBulkOk(
       'alerts',
       await esClient.bulk({ refresh: 'wait_for', operations: plan.alertOperations })
     );
-    assertBulkOk(
-      'events',
-      await esClient.bulk({
-        refresh: 'wait_for',
-        operations: plan.eventOperations,
-        pipeline: FP_TP_RAW_EVENT_INGEST_PIPELINE,
-      })
-    );
+    if (plan.eventOperations.length > 0) {
+      await ensureFpTpRawEventStore(esClient, rawEventIndexNames(plan.serverlessEvents));
+      assertBulkOk(
+        'events',
+        await esClient.bulk({
+          refresh: 'wait_for',
+          operations: plan.eventOperations,
+          pipeline: FP_TP_RAW_EVENT_INGEST_PIPELINE,
+        })
+      );
+    }
 
     for (const entity of plan.entities) {
       await createEntity(kbnRequest, entity);

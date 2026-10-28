@@ -13,8 +13,8 @@ import {
 } from './constants';
 
 /**
- * Field budget for the seeded raw-event streams. The generic `logs` template is
- * composed into ours and does not raise the default (1000); ECS endpoint
+ * Field budget for the seeded raw-event streams. The composed `logs@mappings`
+ * and `ecs@mappings` components do not raise the default (1000); ECS endpoint
  * documents carry a lot of fields, so a scenario with a rich `process`/
  * `network` payload would otherwise trip `limit of total fields` mid-seed.
  */
@@ -22,15 +22,14 @@ export const FP_TP_RAW_EVENT_TOTAL_FIELDS_LIMIT = 6000;
 
 /**
  * Priority of the seeder-owned index template. Above the generic `logs`
- * template (priority 100) so our settings win, and below the per-dataset
- * `logs-endpoint.events.<category>` templates (priority 200) which do not cover
- * these names anyway.
+ * template (priority 100) and the Endpoint `logs-endpoint.events.<category>`
+ * templates (priority 200), so ours is the template that applies to these names.
  */
 export const FP_TP_RAW_EVENT_TEMPLATE_PRIORITY = 250;
 
 /**
- * Settings for a seeded raw-event stream. Only the field budget is ours; refresh
- * and lifecycle come from the composed `logs` template.
+ * Settings for a seeded raw-event stream. Only the field budget is set; the
+ * composed components carry mappings only, so other settings stay at defaults.
  */
 export const rawEventIndexSettings = (): Record<string, unknown> => ({
   'index.mapping.total_fields.limit': FP_TP_RAW_EVENT_TOTAL_FIELDS_LIMIT,
@@ -127,7 +126,7 @@ export const ensureFpTpRawEventTemplate = async (esClient: EsClient): Promise<vo
     // querying logs-endpoint.events.* fail verification with
     // "mapped as [2] incompatible types" — live incident: rule 8a1b0278
     // (SUID/SGID) never alerted on the golden serverless env. Explicit
-    // mappings below win conflicts (higher-priority composable template).
+    // mappings below win conflicts (a template's own mappings override its components).
     composed_of: ['logs@mappings', 'ecs@mappings'],
     data_stream: {},
     template: {
@@ -156,7 +155,7 @@ export const ensureFpTpRawEventIndices = async (
 export const ensureFpTpRawEventPipeline = async (esClient: EsClient): Promise<void> => {
   await esClient.ingest.putPipeline({
     id: FP_TP_RAW_EVENT_INGEST_PIPELINE,
-    body: rawEventIngestPipeline(),
+    ...rawEventIngestPipeline(),
   });
 };
 

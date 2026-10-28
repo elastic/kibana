@@ -570,6 +570,25 @@ describe('seedTwinLiveServerless', () => {
     expect(eventsBulkAt).toBeGreaterThan(0);
   });
 
+  it('skips the events bulk and the raw-event store when the twin has no events', async () => {
+    skipSleeps();
+    const s = setup();
+
+    await seedTwinLiveServerless({
+      esClient: s.esClient,
+      kbnRequest: s.kbnRequest,
+      twin: { ...twin, events: [] },
+      space: SPACE,
+      reasoningConnectorId: 'conn-1',
+      now: NOW,
+    });
+
+    const es = s.esClient as unknown as { ingest: { putPipeline: jest.Mock } };
+    expect(s.order.some((entry) => entry.startsWith('bulk:logs-endpoint.events.'))).toBe(false);
+    expect(s.order).toContain(`bulk:.alerts-security.alerts-${SPACE}`);
+    expect(es.ingest.putPipeline).not.toHaveBeenCalled();
+  });
+
   it('passes the inference action type to the validate workflow', async () => {
     skipSleeps();
     const s = setup();

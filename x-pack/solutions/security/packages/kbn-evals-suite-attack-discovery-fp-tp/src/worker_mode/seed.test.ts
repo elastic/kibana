@@ -127,6 +127,33 @@ describe('cleanupWorkerModeSpace', () => {
       })
     );
   });
+
+  it.each([
+    [404, 'resolves'],
+    [403, 'rejects'],
+  ])('on a %s from the data stream lookup, %s', async (statusCode, outcome) => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+      deleteByQuery: jest.fn().mockResolvedValue({}),
+      indices: {
+        getDataStream: jest.fn().mockRejectedValue(Object.assign(new Error('es'), { statusCode })),
+      },
+    };
+    const cleanup = cleanupWorkerModeSpace({
+      esClient: esClient as unknown as EsClient,
+      kbnRequest: okKbnRequest(),
+      space: 'qa-fp',
+      serverless: true,
+    });
+    if (outcome === 'resolves') {
+      await expect(cleanup).resolves.toEqual({ alerts: 0, hostIds: [] });
+      expect(esClient.deleteByQuery).not.toHaveBeenCalledWith(
+        expect.objectContaining({ index: expect.stringMatching(/^logs-endpoint\.events\./) })
+      );
+    } else {
+      await expect(cleanup).rejects.toThrow('es');
+    }
+  });
 });
 
 describe('seedWorkerModePlan', () => {
