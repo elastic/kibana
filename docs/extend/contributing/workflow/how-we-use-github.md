@@ -200,14 +200,14 @@ PRs that are included in release notes must have clear and concise titles and de
 
 The `release-notes` GitHub workflow (`.github/workflows/release-notes.yml`) runs on every PR and drives the process. It uses the rules in `docs/changelog.yml`, which map labels to the entry type, area, and product. To include your PR in release notes:
 
-1. Add a type label to your PR, which are prefixed by `release_note:`, e.g., `release_note:fix`, `release_note:enhancement`, or `release_note:feature`. Use `release_note:skip` to leave the PR out of the release notes. Team and feature labels set the area and product (for example, a `Team:` label for a solution implies both {{kib}} and Serverless).
+1. Add a type label to your PR, which are prefixed by `release_note:`, such as `release_note:fix`, `release_note:enhancement`, or `release_note:feature`. Use `release_note:skip` to leave the PR out of the release notes. Team and feature labels set the area and product (for example, a `Team:` label for a solution implies both {{kib}} and Serverless).
 2. If desired, provide a custom paragraph within the PR description under a `Release note:` or `## Release note` header. This text will be included verbatim in the generated changelog, and this is the place to provide a clear, user-focused summary of your changes.
 3. The `release-notes / validate` check runs automatically when the PR is opened, updated, edited, labeled, or unlabeled, as well as when a Draft is marked Ready for Review. This check fails when:
     - the type label is missing or ambiguous
     - a product label is missing
     - the PR has the `release_note:breaking` label and no Impact and Action (see [Breaking changes](#breaking-changes))
 
-If any errors occur when validating release notes, then a bot will leave a comment which explains the errors. This comment is updated in-place over the lifetime of the PR. Typically, these errors will be related to missing labels or important description sections; once you've fixed them, the validation check will automatically re-run.
+If any errors occur when validating release notes, then a bot will leave a comment which explains the errors. This comment is updated in-place over the lifetime of the PR. Typically, these errors will be related to missing labels or important description sections. Once you've fixed them, the validation check will automatically re-run.
 
 When your PR is merged to `main`, a changelog entry will be built from the PR's labels, linked issues, any `Release note:` section, and title—with any square-bracket prefix such as `[Docs]` or `[CI]` removed. This entry is synced to an upstream S3 bucket and is not committed to the repository.
 
@@ -229,4 +229,3 @@ When creating a PR title:
 - Start PR titles with action words such as `Add`, `Fix`, `Improve`, `Show`, `Deprecate`, `Prevent`
 - Keep it short. Be clear. Be concise. Aim to keep the title less than 80 characters.
 - Describe what was fixed. (for example `Fix timeout` is not informative; this is better described as `Fix duplicate API call to prevent initialization timeout`)
-
