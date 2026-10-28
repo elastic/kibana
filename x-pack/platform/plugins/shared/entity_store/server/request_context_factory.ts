@@ -30,7 +30,7 @@ import { ResolutionRulesClient } from './domain/resolution/rules';
 import { CustomResolutionRulesClient } from './domain/resolution/rules';
 import type { TelemetryReporter } from './telemetry/events';
 import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
-import { GraphTraversalClient } from './domain/graph_traversal';
+import { EsqlGraphTraversalClient, GraphTraversalClient } from './domain/graph_traversal';
 import type { GraphTraversalClientDeps } from './domain/graph_traversal';
 
 interface EntityStoreApiRequestHandlerContextDeps {
@@ -171,6 +171,11 @@ export async function createRequestHandlerContext({
       logger,
       namespace,
       getWorkflowsManagement,
+    }),
+    graphTraversalEsqlClient: new EsqlGraphTraversalClient({
+      logger,
+      namespace,
+      esClient: core.elasticsearch.client.asCurrentUser,
     }),
     featureFlags: new FeatureFlags(core.uiSettings.client),
     isDualProcessEnabled: () => isDualProcessEnabled(coreStart.featureFlags),

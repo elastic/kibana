@@ -36,6 +36,11 @@ export interface RunGraphTraversalRequestBody {
   lookback?: string;
   max_hops?: number;
   exclusions?: GraphTraversalExclusion[];
+  /**
+   * Run the scenario as one ES|QL `GRAPH EXPAND` statement instead of the workflow. Needs an
+   * Elasticsearch snapshot build that has the command.
+   */
+  esql?: boolean;
 }
 
 /** What the entity store knows about a traversed node, from the workflow's resolve step. */
@@ -96,7 +101,10 @@ export interface GraphTraversalOutput {
 }
 
 export interface RunGraphTraversalResponse {
+  /** `esql` when the run was one GRAPH EXPAND statement; otherwise the workflow execution id. */
   execution_id: string;
+  /** How the traversal ran; absent means the workflow. */
+  engine?: 'workflow' | 'esql';
   /** Terminal workflow execution status: `completed`, `failed`, `cancelled` or `timed_out`. */
   status: string;
   /** Present when the execution completed. */

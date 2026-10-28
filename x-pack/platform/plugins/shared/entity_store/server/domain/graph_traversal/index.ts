@@ -7,6 +7,10 @@
 
 export { GraphTraversalClient, DEFAULT_GRAPH_TRAVERSAL_TIMEOUT_MS } from './graph_traversal_client';
 export { GraphTraversalError } from './graph_traversal_error';
+export {
+  EsqlGraphTraversalClient,
+  ESQL_GRAPH_TRAVERSAL_EXECUTION_ID,
+} from './esql/esql_graph_traversal_client';
 export type {
   GraphTraversalClientDeps,
   GraphTraversalWorkflowRunner,

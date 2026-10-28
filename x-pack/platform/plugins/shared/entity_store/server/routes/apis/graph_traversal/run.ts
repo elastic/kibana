@@ -54,6 +54,8 @@ export const runGraphTraversalBodySchema = lazySchema(() =>
       )
       .max(50)
       .optional(),
+    /** Run as one ES|QL GRAPH EXPAND statement instead of the workflow (snapshot builds only). */
+    esql: z.boolean().optional(),
   })
 );
 
@@ -86,7 +88,8 @@ export function registerRunGraphTraversal(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { assetManagerClient, graphTraversalClient } = entityStoreCtx;
+        const { assetManagerClient, graphTraversalClient, graphTraversalEsqlClient } =
+          entityStoreCtx;
 
         const forbidden = await enforceEntityStorePrivileges(assetManagerClient, req, res);
         if (forbidden) return forbidden;
@@ -97,14 +100,26 @@ export function registerRunGraphTraversal(router: EntityStorePluginRouter) {
           lookback,
           max_hops: maxHops,
           exclusions,
+          esql,
         } = req.body;
+        const effectiveScenarioId = scenarioId ?? getDefaultGraphTraversalScenarioId(entityId);
 
         try {
+          if (esql) {
+            const body: RunGraphTraversalResponse = await graphTraversalEsqlClient.run({
+              scenarioId: effectiveScenarioId,
+              seedId: entityId,
+              lookback,
+              maxHops,
+              exclusions,
+            });
+            return res.ok({ body });
+          }
           const body: RunGraphTraversalResponse = await graphTraversalClient.run({
             workflowId: SECURITY_ENTITY_GRAPH_TRAVERSAL_WORKFLOW_ID,
             request: req,
             inputs: {
-              scenario_id: scenarioId ?? getDefaultGraphTraversalScenarioId(entityId),
+              scenario_id: effectiveScenarioId,
               seed_id: entityId,
               ...(lookback !== undefined && { lookback }),
               ...(maxHops !== undefined && { max_hops: maxHops }),
