@@ -402,7 +402,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
 
     if (
       (await doAnySuiteRelevantChangesMatch([
-        /^\.buildkite\/pipeline-utils\/step-library\/steps\/cypress_burn\.ts/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/security_solution\/cypress_burn\.ts/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:cypress-burn') ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
@@ -419,7 +419,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/solutions\/security\/test\/defend_workflows_cypress/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
         /^fleet_packages\.json/,
-        /^\.buildkite\/pipeline-utils\/step-library\/steps\/defend_workflows\.ts/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/security_solution\/defend_workflows\.ts/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -452,11 +452,11 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
-        /^\.buildkite\/pipeline-utils\/step-library\/steps\/ai_assistant\.ts/,
-        /^\.buildkite\/pipeline-utils\/step-library\/steps\/ai4dsoc\.ts/,
-        /^\.buildkite\/pipeline-utils\/step-library\/steps\/detection_engine\.ts/,
-        /^\.buildkite\/pipeline-utils\/step-library\/steps\/entity_analytics\.ts/,
-        /^\.buildkite\/pipeline-utils\/step-library\/steps\/rule_management\.ts/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/security_solution\/ai_assistant\.ts/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/security_solution\/ai4dsoc\.ts/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/security_solution\/detection_engine\.ts/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/security_solution\/entity_analytics\.ts/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/security_solution\/rule_management\.ts/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -528,7 +528,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
-        /^\.buildkite\/pipeline-utils\/step-library\/steps\/explore\.ts/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/security_solution\/explore\.ts/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -593,7 +593,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
-        /^\.buildkite\/pipeline-utils\/step-library\/steps\/investigations\.ts/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/security_solution\/investigations\.ts/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -606,7 +606,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/platform\/plugins\/shared\/osquery/,
         /^x-pack\/solutions\/security\/test\/osquery_cypress/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
-        /^\.buildkite\/pipeline-utils\/step-library\/steps\/osquery_cypress\.ts/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/security_solution\/osquery_cypress\.ts/,
       ])) ||
         GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
         ALL_UI_TEST_SUITES) &&
@@ -621,7 +621,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
-        /^\.buildkite\/pipeline-utils\/step-library\/steps\/cloud_security_posture\.ts/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/security_solution\/cloud_security_posture\.ts/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -713,7 +713,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       (await doAnySuiteRelevantChangesMatch([
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/asset_inventory/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
-        /^\.buildkite\/pipeline-utils\/step-library\/steps\/asset_inventory\.ts/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/security_solution\/asset_inventory\.ts/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
