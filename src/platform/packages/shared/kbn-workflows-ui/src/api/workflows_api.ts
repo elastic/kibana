@@ -51,6 +51,7 @@ import type {
   GetWorkflowStepExecutionsParams,
   InstallTemplateResponse,
   MgetWorkflowsParams,
+  ReadableWorkflowIdsResponse,
   RestoreWorkflowVersionParams,
   RestoreWorkflowVersionResponseDto,
   ResumeExecutionParams,
@@ -345,6 +346,12 @@ export class WorkflowApi {
 
   async getConfig(): Promise<WorkflowsConfig> {
     return this.http.get(`${INTERNAL_BASE}/config`, {
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
+  async getReadableWorkflowIds(): Promise<ReadableWorkflowIdsResponse> {
+    return this.http.get(`${INTERNAL_BASE}/readable_workflow_ids`, {
       version: INTERNAL_API_VERSION,
     });
   }

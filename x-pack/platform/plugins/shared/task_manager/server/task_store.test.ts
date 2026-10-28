@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { estypes } from '@elastic/elasticsearch';
 import _ from 'lodash';
-import { first } from 'rxjs';
+import { first, firstValueFrom } from 'rxjs';
 
 import type {
   TaskInstance,
@@ -36,10 +36,11 @@ import { SavedObjectsErrorHelpers, SPACES_EXTENSION_ID } from '@kbn/core/server'
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
-import { mockLogger } from './test_utils';
+import { createEsResponseError, mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr, asOk, isOk } from './lib/result_type';
 import { MsearchError } from './lib/errors';
+import { getBackpressureReason } from './lib/backpressure_reason';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
 import type {
   EncryptedSavedObjectsClient,
@@ -1121,6 +1122,42 @@ describe('TaskStore', () => {
       expect(await firstErrorPromise).toMatchInlineSnapshot(
         `[Error: Unexpected status code from taskStore::msearch: 429]`
       );
+    });
+
+    test('pushes a request-level error to errors$ once and rethrows it', async () => {
+      const emittedErrors: Error[] = [];
+      const subscription = store.errors$.subscribe((e) => emittedErrors.push(e));
+      const requestError = createEsResponseError(503, 'unavailable');
+      esClient.msearch.mockRejectedValue(requestError);
+
+      await expect(store.msearch([{}])).rejects.toBe(requestError);
+
+      expect(emittedErrors).toEqual([requestError]);
+      expect(getBackpressureReason(requestError)).toBe('es_unavailable');
+      subscription.unsubscribe();
+    });
+
+    test('pushes a single MsearchError to errors$ when a search in the response fails', async () => {
+      const emittedErrors: Error[] = [];
+      const subscription = store.errors$.subscribe((e) => emittedErrors.push(e));
+      esClient.msearch.mockResponse({
+        took: 0,
+        responses: [
+          {
+            took: 0,
+            _shards: { failed: 0, successful: 1, total: 1 },
+            timed_out: false,
+            status: 503,
+          },
+        ],
+      } as estypes.MsearchResponse);
+
+      await expect(store.msearch([{}])).rejects.toBeInstanceOf(MsearchError);
+
+      expect(emittedErrors).toHaveLength(1);
+      expect(emittedErrors[0]).toBeInstanceOf(MsearchError);
+      expect(getBackpressureReason(emittedErrors[0])).toBe('msearch_5xx');
+      subscription.unsubscribe();
     });
   });
 
@@ -3346,6 +3383,50 @@ describe('TaskStore', () => {
       await store.bulkPartialUpdate([task]);
 
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: malformed response]`);
+    });
+
+    test('pushes a rejected bulk request to errors$ as a too_many_requests error', async () => {
+      const task = {
+        id: '324242',
+        version: 'WzQsMV0=',
+        attempts: 3,
+      };
+      const requestError = createEsResponseError(429, 'es_rejected_execution_exception');
+      const firstError = firstValueFrom(store.errors$);
+      esClient.bulk.mockRejectedValue(requestError);
+
+      await expect(store.bulkPartialUpdate([task])).rejects.toBe(requestError);
+
+      const emittedError = await firstError;
+      expect(emittedError).toBe(requestError);
+      expect(getBackpressureReason(emittedError)).toBe('too_many_requests');
+    });
+
+    test('pushes a rejected bulk item to errors$ as a too_many_requests error', async () => {
+      const task = {
+        id: '324242',
+        version: 'WzQsMV0=',
+        attempts: 3,
+      };
+      const firstError = firstValueFrom(store.errors$);
+      esClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          {
+            update: {
+              _id: 'task:324242',
+              _index: 'test-index',
+              status: 429,
+              error: { reason: 'rejected execution', type: 'es_rejected_execution_exception' },
+            },
+          },
+        ],
+        took: 10,
+      });
+
+      await store.bulkPartialUpdate([task]);
+
+      expect(getBackpressureReason(await firstError)).toBe('too_many_requests');
     });
 
     test('skips the update with invalid interval', async () => {

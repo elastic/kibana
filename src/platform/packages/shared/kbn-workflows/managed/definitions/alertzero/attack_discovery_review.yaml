@@ -525,6 +525,8 @@ steps:
   # A failed attach is described by its error type, never its message: an internal
   # failure's message would land in the Investigation, where every later agent round
   # reads it as user input. The execution history keeps the message.
+  #
+  # Counts only hosts and users: `collect_impact_entities` keeps the step's default entity types.
   - name: journal_impact_recorded
     type: workflow.execute
     with:
@@ -534,10 +536,14 @@ steps:
         author_name: "{{ consts.author_name }}"
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
-          {% if steps.attach_impact.output.entities != blank %}Recorded impact:
-          {{ steps.collect_impact_entities.output.entities | size }} host(s) and user(s){% if
-          steps.collect_impact_entities.output.truncated == true %} (the most alerted of
-          {{ steps.collect_impact_entities.output.total }}){% endif %}.{% elsif
+          {%- assign impact_hosts = steps.collect_impact_entities.output.entities | where:
+          'type', 'host' | size -%}{%- assign impact_users =
+          steps.collect_impact_entities.output.entities | where: 'type', 'user' | size
+          -%}{% if steps.attach_impact.output.entities != blank %}Recorded impact from this
+          attack: {{ impact_hosts }} host{% if impact_hosts != 1 %}s{% endif %},
+          {{ impact_users }} user{% if impact_users != 1 %}s{% endif %}{% if
+          steps.collect_impact_entities.output.truncated == true %} (only its most
+          alerted were recorded){% endif %}.{% elsif
           steps.attach_impact.error != blank %}Could not record impact{% case
           steps.attach_impact.error.type %}{% when 'PermissionError' %}: the review's
           principal lacks the Manage investigations privilege.{% when 'NotFoundError'
