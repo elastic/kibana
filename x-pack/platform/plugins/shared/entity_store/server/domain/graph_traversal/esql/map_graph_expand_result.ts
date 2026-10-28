@@ -11,6 +11,7 @@ import type {
   GraphTraversalNode,
   GraphTraversalOutput,
 } from '../../../../common/graph_traversal';
+import { traceGraphTraversalRoutes } from '../../../../common/graph_traversal';
 import {
   GRAPH_EXPAND_COUNT_COLUMN,
   graphExpandPayloadColumn,
@@ -131,7 +132,16 @@ export const mapGraphExpandResult = (
   }
 
   const truncated = hubs.length > 0;
-  const stopReason = hopsExecuted >= statement.maxHops ? 'max_hops' : 'frontier_exhausted';
+  // UNTIL ends the walk on the hop that admits a matching node; the mapper reads that off the
+  // admitted nodes rather than trusting the hop count.
+  const wanted = new Set(statement.untilIds);
+  const untilMatches = nodes.filter((n) => n.hop > 0 && wanted.has(n.id)).map((n) => n.id);
+  const stopReason =
+    untilMatches.length > 0
+      ? 'until_matched'
+      : hopsExecuted >= statement.maxHops
+      ? 'max_hops'
+      : 'frontier_exhausted';
   return {
     output: {
       hops_planned: statement.maxHops,
@@ -142,6 +152,10 @@ export const mapGraphExpandResult = (
       edge_count: edges.length,
       nodes,
       edges,
+      ...(statement.untilIds.length > 0 && {
+        until_matches: untilMatches,
+        routes: traceGraphTraversalRoutes(seedId, edges, untilMatches),
+      }),
     },
     hubs,
   };

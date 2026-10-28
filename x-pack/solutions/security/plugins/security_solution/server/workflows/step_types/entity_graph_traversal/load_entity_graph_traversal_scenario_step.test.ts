@@ -61,6 +61,23 @@ describe('security.loadEntityGraphTraversalScenario', () => {
     });
   });
 
+  it('appends the run stop conditions to the scenario ones', async () => {
+    const result = await loadEntityGraphTraversalScenarioStepDefinition.handler(
+      createContext({
+        scenario_id: 'okta-user-to-aws-resources',
+        until: [{ field: 'entity.id', values: ['arn:aws:s3:::acme-data-lake'] }],
+      })
+    );
+    expect(result.error).toBeUndefined();
+    expect(result.output?.until).toEqual([
+      { field: 'entity.id', values: ['arn:aws:s3:::acme-data-lake'] },
+    ]);
+    const none = await loadEntityGraphTraversalScenarioStepDefinition.handler(
+      createContext({ scenario_id: 'okta-user-to-aws-resources', until: '' })
+    );
+    expect(none.output?.until).toEqual([]);
+  });
+
   it('fails with the list of available scenarios for an unknown id', async () => {
     const result = await loadEntityGraphTraversalScenarioStepDefinition.handler(
       createContext({ scenario_id: 'nope' })

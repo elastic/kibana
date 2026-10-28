@@ -29,6 +29,7 @@ import { getAlertEntitiesStepDefinition } from './get_alert_entities_step';
 import {
   loadEntityGraphTraversalScenarioStepDefinition,
   resolveEntityGraphTraversalNodesStepDefinition,
+  traceEntityGraphTraversalRoutesStepDefinition,
   runEntityGraphTraversalHopStepDefinition,
 } from './entity_graph_traversal';
 
@@ -61,4 +62,5 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(loadEntityGraphTraversalScenarioStepDefinition);
   workflowsExtensions.registerStepDefinition(runEntityGraphTraversalHopStepDefinition);
   workflowsExtensions.registerStepDefinition(resolveEntityGraphTraversalNodesStepDefinition);
+  workflowsExtensions.registerStepDefinition(traceEntityGraphTraversalRoutesStepDefinition);
 };

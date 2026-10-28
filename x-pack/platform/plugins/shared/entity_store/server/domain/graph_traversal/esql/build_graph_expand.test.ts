@@ -52,6 +52,7 @@ describe('buildGraphExpandStatement', () => {
       );
       expect(statement.query).toContain('"max_hops":6');
       expect(statement.query).toContain('"hub_degree":200');
+      expect(statement.query).not.toContain('"exclude"');
       expect(statement.payloadFields).toEqual(['process.name', 'event.action']);
       expect(statement.maxHops).toBe(6);
     });
@@ -104,6 +105,7 @@ describe('buildGraphExpandStatement', () => {
         '| WHERE `entity.sub_type` IS NULL OR NOT (MV_CONTAINS(`entity.sub_type`, ?))'
       );
       expect(statement.query).toContain('| WHERE NOT __id IN (?)');
+      expect(statement.query).toContain('"exclude":["arn:aws:iam::1:role/skip"]');
       expect(statement.params).toEqual([
         'user:john.doe@acmecrm.com@okta',
         'AWS S3 Bucket',
@@ -111,6 +113,44 @@ describe('buildGraphExpandStatement', () => {
       ]);
       expect(statement.excludedIds).toEqual(['arn:aws:iam::1:role/skip']);
     });
+  });
+
+  it('turns node-id stop conditions into UNTIL on the reached node, bound after every other parameter', () => {
+    const statement = buildGraphExpandStatement({
+      plan: plan('okta-user-to-aws-resources'),
+      seedId: 'user:john.doe@acmecrm.com@okta',
+      exclusions: [{ field: 'entity.id', values: ['arn:aws:iam::1:role/skip'] }],
+      until: [
+        {
+          field: 'entity.id',
+          values: ['arn:aws:s3:::acme-data-lake', 'arn:aws:s3:::acme-web-assets'],
+        },
+      ],
+    });
+    const lines = statement.query.split('\n');
+    const untilAt = lines.findIndex((l) => l.startsWith('  UNTIL node_reached IN (?, ?)'));
+    expect(untilAt).toBeGreaterThan(lines.findIndex((l) => l.startsWith('  STATS ')));
+    expect(lines[untilAt + 1]).toMatch(/^ {2}WITH /);
+    expect(statement.params).toEqual([
+      'user:john.doe@acmecrm.com@okta',
+      'arn:aws:iam::1:role/skip',
+      'arn:aws:s3:::acme-data-lake',
+      'arn:aws:s3:::acme-web-assets',
+    ]);
+    expect(statement.untilIds).toEqual([
+      'arn:aws:s3:::acme-data-lake',
+      'arn:aws:s3:::acme-web-assets',
+    ]);
+  });
+
+  it('refuses a stop condition on a payload field', () => {
+    expect(() =>
+      buildGraphExpandStatement({
+        plan: plan('okta-user-to-aws-resources'),
+        seedId: 'user:a',
+        until: [{ field: 'entity.sub_type', values: ['AWS S3 Bucket'] }],
+      })
+    ).toThrow('only supports stop conditions on entity.id');
   });
 
   it('applies a lookback to every distinct time field, null-safe', () => {

@@ -8,3 +8,4 @@
 export { loadEntityGraphTraversalScenarioStepDefinition } from './load_entity_graph_traversal_scenario_step';
 export { runEntityGraphTraversalHopStepDefinition } from './run_entity_graph_traversal_hop_step';
 export { resolveEntityGraphTraversalNodesStepDefinition } from './resolve_entity_graph_traversal_nodes_step';
+export { traceEntityGraphTraversalRoutesStepDefinition } from './trace_entity_graph_traversal_routes_step';

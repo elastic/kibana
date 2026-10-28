@@ -201,6 +201,18 @@ export const entityGraphTraversalHopSchema = lazySchema(() =>
 
 export type EntityGraphTraversalHopSpec = z.infer<typeof entityGraphTraversalHopSchema>;
 
+/** Stop the walk once a node matching one of these is admitted; same shape as an exclusion. */
+export const entityGraphTraversalStopConditionSchema = lazySchema(() =>
+  z.object({
+    field: esqlFieldName(),
+    values: z.array(z.string().min(1).max(2_048)).min(1).max(100),
+  })
+);
+
+export type EntityGraphTraversalStopCondition = z.infer<
+  typeof entityGraphTraversalStopConditionSchema
+>;
+
 export const entityGraphTraversalScenarioSchema = lazySchema(() =>
   z.object({
     version: z.literal('1'),
@@ -217,6 +229,12 @@ export const entityGraphTraversalScenarioSchema = lazySchema(() =>
     }),
     limits: entityGraphTraversalLimitOverridesSchema.optional(),
     hops: z.array(entityGraphTraversalHopSchema).min(1).max(MAX_HOP_SPECS_PER_SCENARIO),
+    /**
+     * Stop conditions the scenario itself declares (a reachability scenario). On `entity.id`
+     * the values are node ids; on another field they are matched against the payload of the
+     * edge that reached the node, so the field must be a `payload_fields` entry of some hop.
+     */
+    until: z.array(entityGraphTraversalStopConditionSchema).max(50).optional(),
   })
 );
 
@@ -252,6 +270,8 @@ export interface EntityGraphTraversalPlan {
   seed: EntityGraphTraversalScenario['seed'];
   limits: EntityGraphTraversalLimits;
   hops: EntityGraphTraversalExpandedHop[];
+  /** The scenario's stop conditions; empty when it declares none. */
+  until: EntityGraphTraversalStopCondition[];
 }
 
 /**
@@ -333,5 +353,6 @@ export const buildEntityGraphTraversalPlan = (
     seed: scenario.seed,
     limits,
     hops: expandEntityGraphTraversalHops(scenario, limits),
+    until: scenario.until ?? [],
   };
 };

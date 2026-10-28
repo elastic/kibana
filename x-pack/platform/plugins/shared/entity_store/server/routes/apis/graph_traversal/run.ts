@@ -27,6 +27,16 @@ import {
 /** Keep the socket open past the traversal's own deadline so the timeout error can be returned. */
 const RUN_GRAPH_TRAVERSAL_SOCKET_TIMEOUT_MS = DEFAULT_GRAPH_TRAVERSAL_TIMEOUT_MS + 60 * 1000;
 
+const fieldValuesSchema = () =>
+  z.object({
+    field: z
+      .string()
+      .min(1)
+      .max(256)
+      .regex(/^[A-Za-z_@][A-Za-z0-9_.@-]*$/),
+    values: z.array(z.string().min(1).max(2048)).min(1).max(100),
+  });
+
 export const runGraphTraversalBodySchema = lazySchema(() =>
   z.object({
     entity_id: z.string().min(1).max(2048),
@@ -41,19 +51,9 @@ export const runGraphTraversalBodySchema = lazySchema(() =>
       .regex(/^[0-9]{1,5}(m|h|d)$/)
       .optional(),
     max_hops: z.number().int().min(1).max(20).optional(),
-    exclusions: z
-      .array(
-        z.object({
-          field: z
-            .string()
-            .min(1)
-            .max(256)
-            .regex(/^[A-Za-z_@][A-Za-z0-9_.@-]*$/),
-          values: z.array(z.string().min(1).max(2048)).min(1).max(100),
-        })
-      )
-      .max(50)
-      .optional(),
+    exclusions: z.array(fieldValuesSchema()).max(50).optional(),
+    /** Stop once a node matching one of these is reached; added to the scenario's own. */
+    until: z.array(fieldValuesSchema()).max(50).optional(),
     /** Run as one ES|QL GRAPH EXPAND statement instead of the workflow (snapshot builds only). */
     esql: z.boolean().optional(),
   })
@@ -100,6 +100,7 @@ export function registerRunGraphTraversal(router: EntityStorePluginRouter) {
           lookback,
           max_hops: maxHops,
           exclusions,
+          until,
           esql,
         } = req.body;
         const effectiveScenarioId = scenarioId ?? getDefaultGraphTraversalScenarioId(entityId);
@@ -112,6 +113,7 @@ export function registerRunGraphTraversal(router: EntityStorePluginRouter) {
               lookback,
               maxHops,
               exclusions,
+              until,
             });
             return res.ok({ body });
           }
@@ -124,6 +126,7 @@ export function registerRunGraphTraversal(router: EntityStorePluginRouter) {
               ...(lookback !== undefined && { lookback }),
               ...(maxHops !== undefined && { max_hops: maxHops }),
               ...(exclusions !== undefined && { exclusions }),
+              ...(until !== undefined && { until }),
             },
           });
           return res.ok({ body });

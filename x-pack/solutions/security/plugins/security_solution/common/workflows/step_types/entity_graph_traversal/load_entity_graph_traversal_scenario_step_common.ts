@@ -13,6 +13,8 @@ import {
   traversalHopSchema,
   traversalLimitOverridesSchema,
   traversalLimitsSchema,
+  traversalStopConditionSchema,
+  traversalStopConditionsSchema,
 } from './entity_graph_traversal_common';
 
 export const loadEntityGraphTraversalScenarioInputSchema = lazySchema(() =>
@@ -27,6 +29,9 @@ export const loadEntityGraphTraversalScenarioInputSchema = lazySchema(() =>
       .describe(
         'Per-run limit overrides. Each value is clamped to the hard ceiling; omitted or empty values keep the scenario default.'
       ),
+    until: traversalStopConditionsSchema().describe(
+      'Stop conditions for this run, added to the ones the scenario declares.'
+    ),
   })
 );
 
@@ -38,6 +43,8 @@ export const loadEntityGraphTraversalScenarioOutputSchema = lazySchema(() =>
     seed: z.object({ type: z.string(), description: z.string().optional() }),
     limits: traversalLimitsSchema,
     hops: z.array(traversalHopSchema),
+    /** The scenario's stop conditions followed by the run's. */
+    until: z.array(traversalStopConditionSchema),
   })
 );
 

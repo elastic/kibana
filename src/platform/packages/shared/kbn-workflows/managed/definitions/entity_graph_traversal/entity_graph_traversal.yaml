@@ -101,6 +101,32 @@ triggers:
                   type: string
                   minLength: 1
                   maxLength: 2048
+        until:
+          type: array
+          maxItems: 50
+          description: >-
+            Stop conditions added to the scenario's own: the traversal ends (stop_reason
+            until_matched) once a hop admits a node whose id (field entity.id) or whose reaching
+            edge payload carries one of the values. The output then holds the matched ids and a
+            route from the seed to each.
+          items:
+            type: object
+            required:
+              - field
+              - values
+            properties:
+              field:
+                type: string
+                minLength: 1
+                maxLength: 256
+              values:
+                type: array
+                minItems: 1
+                maxItems: 100
+                items:
+                  type: string
+                  minLength: 1
+                  maxLength: 2048
 consts:
   empty: []
 steps:
@@ -108,6 +134,7 @@ steps:
     type: security.loadEntityGraphTraversalScenario
     with:
       scenario_id: '{{ inputs.scenario_id }}'
+      until: '${{ inputs.until }}'
       overrides:
         max_hops: '${{ inputs.max_hops }}'
         max_nodes: '${{ inputs.max_nodes }}'
@@ -131,6 +158,7 @@ steps:
       hops_executed: 0
       truncated: false
       stop_reason: ''
+      until_matches: '${{ consts.empty }}'
 
   # One iteration per expanded hop. The hop step reports `stop_reason` when the frontier is
   # exhausted or a cap fires, which is what ends the loop; `max-iterations` is the same value
@@ -153,6 +181,7 @@ steps:
           limits: '${{ steps.load_scenario.output.limits }}'
           lookback: '{{ inputs.lookback }}'
           exclusions: '${{ inputs.exclusions }}'
+          until: '${{ steps.load_scenario.output.until }}'
 
       - name: advance
         type: data.set
@@ -164,6 +193,7 @@ steps:
           hops_executed: '${{ variables.hops_executed | plus: 1 }}'
           truncated: '${{ steps.run_hop.output.truncated }}'
           stop_reason: '{{ steps.run_hop.output.stop_reason }}'
+          until_matches: '${{ variables.until_matches | concat: steps.run_hop.output.until_matches }}'
 
   # Annotate every admitted node with what the entity store of the execution space knows
   # about it: its EUID, whether the store has it, the canonical entity for aliases, and the
@@ -173,6 +203,14 @@ steps:
     with:
       nodes: '${{ variables.nodes }}'
 
+  # The route from the seed to every node that matched a stop condition, over the kept edges.
+  - name: trace_routes
+    type: security.traceEntityGraphTraversalRoutes
+    with:
+      seed_id: '{{ inputs.seed_id }}'
+      edges: '${{ variables.edges }}'
+      targets: '${{ variables.until_matches }}'
+
   - name: emit
     type: workflow.output
     with:
@@ -180,6 +218,9 @@ steps:
       scenario_name: '{{ steps.load_scenario.output.name }}'
       seed_id: '{{ inputs.seed_id }}'
       exclusions: '${{ inputs.exclusions | default: consts.empty }}'
+      until: '${{ steps.load_scenario.output.until }}'
+      until_matches: '${{ variables.until_matches }}'
+      routes: '${{ steps.trace_routes.output.routes }}'
       limits: '${{ steps.load_scenario.output.limits }}'
       hops_planned: '${{ steps.load_scenario.output.hops.size }}'
       hops_executed: '${{ variables.hops_executed }}'

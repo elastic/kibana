@@ -120,4 +120,10 @@ export const registerWorkflowSteps = (
       (m) => m.resolveEntityGraphTraversalNodesStepDefinition
     )
   );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./entity_graph_traversal/trace_entity_graph_traversal_routes_step').then(
+      (m) => m.traceEntityGraphTraversalRoutesStepDefinition
+    )
+  );
 };

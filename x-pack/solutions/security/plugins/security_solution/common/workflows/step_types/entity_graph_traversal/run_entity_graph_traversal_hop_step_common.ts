@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import {
   traversalEdgeSchema,
   traversalExclusionsSchema,
+  traversalStopConditionsSchema,
   traversalHopSchema,
   traversalIdListSchema,
   traversalLimitsSchema,
@@ -42,6 +43,9 @@ export const runEntityGraphTraversalHopInputSchema = lazySchema(() =>
     exclusions: traversalExclusionsSchema().describe(
       'Field/values pairs to leave out: documents carrying one of the values are not read, and values on entity.id are removed from the frontier and from the targets'
     ),
+    until: traversalStopConditionsSchema().describe(
+      'Stop conditions: the hop ends the traversal (stop_reason until_matched) when it admits a node whose id, or whose reaching edge payload, carries one of the values'
+    ),
   })
 );
 
@@ -52,6 +56,8 @@ export const runEntityGraphTraversalHopOutputSchema = lazySchema(() =>
     edges: z.array(traversalEdgeSchema),
     nodes: z.array(traversalNodeSchema),
     next_frontier: z.array(z.string()),
+    /** Ids of nodes admitted this hop that matched a stop condition. */
+    until_matches: z.array(z.string()),
     visited: z.array(z.string()),
     truncated: z.boolean(),
     stop_reason: traversalStopReasonSchema,
@@ -65,6 +71,7 @@ export const runEntityGraphTraversalHopOutputSchema = lazySchema(() =>
       dropped_edges: z.number().int(),
       excluded_frontier: z.number().int(),
       excluded_edges: z.number().int(),
+      until_matched: z.number().int(),
       closing_edges: z.number().int(),
       new_nodes: z.number().int(),
       hubs_skipped: z.array(z.string()),
@@ -115,6 +122,7 @@ export const runEntityGraphTraversalHopStepCommonDefinition: BaseStepDefinition<
     limits: "\${{ steps.load_scenario.output.limits }}"
     lookback: "{{ inputs.lookback }}"
     exclusions: "\${{ inputs.exclusions }}"
+    until: "\${{ steps.load_scenario.output.until }}"
 \`\`\``,
     ],
   },

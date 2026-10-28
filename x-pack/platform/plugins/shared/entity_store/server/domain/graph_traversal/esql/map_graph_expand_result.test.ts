@@ -150,6 +150,28 @@ describe('mapGraphExpandResult', () => {
     expect(output.hops_executed).toBe(3);
   });
 
+  it('reports stop-condition matches with their routes and the until_matched stop reason', () => {
+    const stopping = buildGraphExpandStatement({
+      plan,
+      seedId: seed,
+      until: [{ field: 'entity.id', values: ['host:WIN-FIN-03', 'host:NEVER'] }],
+    });
+    const { output } = mapGraphExpandResult(
+      result([
+        [seed, HASH, HASH, 1, '__rel_0', 1, null, null, null],
+        ['host:WIN-FIN-03', HASH, 'host:WIN-FIN-03', 2, '__rel_0', 1, null, null, null],
+      ]),
+      stopping,
+      plan,
+      seed
+    );
+    expect(output.stop_reason).toBe('until_matched');
+    expect(output.until_matches).toEqual(['host:WIN-FIN-03']);
+    expect(output.routes).toEqual([
+      { id: 'host:WIN-FIN-03', route: [seed, HASH, 'host:WIN-FIN-03'] },
+    ]);
+  });
+
   it('refuses a result without the walk columns', () => {
     expect(() =>
       mapGraphExpandResult(

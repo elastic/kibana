@@ -12,8 +12,17 @@ import { runHop, type EsqlResult, type ExecuteHopQuery } from './run_hop';
 export const runEntityGraphTraversalHopStepDefinition = createServerStepDefinition({
   ...runEntityGraphTraversalHopStepCommonDefinition,
   handler: async (context) => {
-    const { hop, frontier, visited, edges_so_far, truncated_so_far, limits, lookback, exclusions } =
-      context.input;
+    const {
+      hop,
+      frontier,
+      visited,
+      edges_so_far,
+      truncated_so_far,
+      limits,
+      lookback,
+      exclusions,
+      until,
+    } = context.input;
     const esClient = context.contextManager.getScopedEsClient();
     const { logger, abortSignal } = context;
 
@@ -46,6 +55,7 @@ export const runEntityGraphTraversalHopStepDefinition = createServerStepDefiniti
           limits,
           lookback,
           exclusions,
+          until,
         },
         execute
       );

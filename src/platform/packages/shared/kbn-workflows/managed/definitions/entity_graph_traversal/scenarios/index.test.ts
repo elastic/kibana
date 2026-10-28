@@ -227,6 +227,20 @@ describe('entity graph traversal scenarios', () => {
       expect(entityGraphTraversalScenarioSchema.safeParse(scenario).success).toBe(false);
     });
 
+    it('accepts scenario stop conditions and exposes them on the plan', () => {
+      const scenario = valid();
+      scenario.until = [{ field: 'entity.id', values: ['arn:aws:s3:::crown-jewels'] }];
+      const parsed = entityGraphTraversalScenarioSchema.safeParse(scenario);
+      expect(parsed.success).toBe(true);
+      expect(loadEntityGraphTraversalPlan(OKTA_USER_TO_AWS_RESOURCES_SCENARIO_ID)?.until).toEqual(
+        []
+      );
+
+      const bad = valid();
+      bad.until = [{ field: 'entity.id', values: [] }];
+      expect(entityGraphTraversalScenarioSchema.safeParse(bad).success).toBe(false);
+    });
+
     it('rejects limits above the hard ceiling', () => {
       const scenario = valid();
       scenario.limits = { max_nodes: ENTITY_GRAPH_TRAVERSAL_HARD_LIMITS.max_nodes + 1 };

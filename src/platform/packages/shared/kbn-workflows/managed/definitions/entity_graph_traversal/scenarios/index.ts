@@ -35,6 +35,7 @@ export {
   entityGraphTraversalLimitOverridesSchema,
   entityGraphTraversalLimitsSchema,
   entityGraphTraversalScenarioSchema,
+  entityGraphTraversalStopConditionSchema,
   expandEntityGraphTraversalHops,
   resolveEntityGraphTraversalLimits,
 } from './scenario_schema';
@@ -46,6 +47,7 @@ export type {
   EntityGraphTraversalLimits,
   EntityGraphTraversalPlan,
   EntityGraphTraversalScenario,
+  EntityGraphTraversalStopCondition,
 } from './scenario_schema';
 
 /**

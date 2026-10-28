@@ -237,11 +237,14 @@ export {
   DEFAULT_GRAPH_TRAVERSAL_SCENARIO_ID,
   HOST_GRAPH_TRAVERSAL_SCENARIO_ID,
   getDefaultGraphTraversalScenarioId,
+  traceGraphTraversalRoutes,
 } from './graph_traversal';
 export type {
   GraphTraversalEdge,
   GraphTraversalEntity,
   GraphTraversalExclusion,
+  GraphTraversalStopCondition,
+  GraphTraversalRoute,
   GraphTraversalNode,
   GraphTraversalOutput,
   RunGraphTraversalRequestBody,

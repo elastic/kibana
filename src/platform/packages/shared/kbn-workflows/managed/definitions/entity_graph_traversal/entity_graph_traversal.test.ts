@@ -136,6 +136,9 @@ describe('SECURITY_ENTITY_GRAPH_TRAVERSAL_WORKFLOW', () => {
     const runHop = findStepByName(parsed.steps, 'run_hop');
     expect(runHop?.type).toBe('security.runEntityGraphTraversalHop');
     expect((runHop?.with as Record<string, string>).exclusions).toBe('${{ inputs.exclusions }}');
+    expect((runHop?.with as Record<string, string>).until).toBe(
+      '${{ steps.load_scenario.output.until }}'
+    );
 
     const resolve = findStepByName(parsed.steps, 'resolve_nodes');
     expect(resolve?.type).toBe('security.resolveEntityGraphTraversalNodes');
@@ -181,5 +184,30 @@ describe('SECURITY_ENTITY_GRAPH_TRAVERSAL_WORKFLOW', () => {
       const hopTemplate = (runHop.with as Record<string, string>).hop;
       expect(evaluate(engine, hopTemplate, context({ hops_executed: 1 }))).toEqual(hops[1]);
     });
+  });
+
+  it('traces routes to the stop-condition matches and emits them', () => {
+    const steps = parsed.steps as Array<{
+      name: string;
+      type: string;
+      with: Record<string, unknown>;
+    }>;
+    const trace = steps.find((s) => s.name === 'trace_routes');
+    expect(trace?.type).toBe('security.traceEntityGraphTraversalRoutes');
+    expect(trace?.with).toEqual({
+      seed_id: '{{ inputs.seed_id }}',
+      edges: '${{ variables.edges }}',
+      targets: '${{ variables.until_matches }}',
+    });
+    const emit = steps.find((s) => s.name === 'emit');
+    expect(emit?.with).toMatchObject({
+      until: '${{ steps.load_scenario.output.until }}',
+      until_matches: '${{ variables.until_matches }}',
+      routes: '${{ steps.trace_routes.output.routes }}',
+    });
+    const inputs = (
+      parsed.triggers as Array<{ inputs: { properties: Record<string, unknown> } }>
+    )[0].inputs.properties;
+    expect(inputs.until).toMatchObject({ type: 'array', maxItems: 50 });
   });
 });

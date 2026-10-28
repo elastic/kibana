@@ -447,4 +447,52 @@ describe('runHop', () => {
     expect(out.edges).toEqual([]);
     expect(out.stop_reason).toBe('frontier_exhausted');
   });
+
+  it('ends the traversal when a hop admits a node matching a stop condition, by id or by payload', async () => {
+    const execute = executor([
+      result([
+        ['role-a', 'bucket-1', 1, 'acme-data-lake'],
+        ['role-a', 'role-b', 1, 'other'],
+      ]),
+      result([]),
+    ]);
+    const out = await runHop(
+      {
+        hop,
+        frontier: ['role-a'],
+        visited: ['role-a'],
+        edgesSoFar: 0,
+        truncatedSoFar: false,
+        limits,
+        until: [
+          { field: 'entity.id', values: ['bucket-1'] },
+          { field: 'entity.name', values: ['other'] },
+        ],
+      },
+      execute
+    );
+    // The whole hop is kept: both nodes are admitted, both matched, and nothing follows.
+    expect(out.nodes.map((n) => n.id)).toEqual(['bucket-1', 'role-b']);
+    expect(out.until_matches).toEqual(['bucket-1', 'role-b']);
+    expect(out.stop_reason).toBe('until_matched');
+    expect(out.stats.until_matched).toBe(2);
+  });
+
+  it('does not stop on a closing edge to a node admitted earlier', async () => {
+    const execute = executor([result([['role-a', 'role-x']]), result([])]);
+    const out = await runHop(
+      {
+        hop,
+        frontier: ['role-a'],
+        visited: ['role-a', 'role-x'],
+        edgesSoFar: 0,
+        truncatedSoFar: false,
+        limits,
+        until: [{ field: 'entity.id', values: ['role-x'] }],
+      },
+      execute
+    );
+    expect(out.until_matches).toEqual([]);
+    expect(out.stop_reason).toBe('frontier_exhausted');
+  });
 });

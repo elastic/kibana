@@ -162,6 +162,22 @@ export const traversalExclusionsSchema = () =>
     z.array(traversalExclusionSchema).max(MAX_EXCLUSIONS)
   );
 
+/**
+ * Stop the walk once a node matching one of these is admitted. On `entity.id` the values are
+ * node ids; on any other field they are matched against the payload of the edge that reached
+ * the node, so the field must be one of the hop's `payload_fields`. Same shape as an exclusion.
+ */
+export const traversalStopConditionSchema = traversalExclusionSchema;
+
+export type TraversalStopCondition = TraversalExclusion;
+
+/** Accepts a missing `${{ inputs.until }}` (undefined, null or empty string) as none. */
+export const traversalStopConditionsSchema = () =>
+  z.preprocess(
+    (value) => (value === '' || value === null || value === undefined ? [] : value),
+    z.array(traversalStopConditionSchema).max(MAX_EXCLUSIONS)
+  );
+
 export const traversalIdListSchema = lazySchema(() =>
   z.array(z.string().min(1).max(MAX_ID_LENGTH)).max(MAX_IDS)
 );
@@ -232,6 +248,7 @@ export const TRAVERSAL_STOP_REASONS = [
   'frontier_exhausted',
   'max_nodes',
   'max_edges_total',
+  'until_matched',
 ] as const;
 
 export type TraversalStopReason = (typeof TRAVERSAL_STOP_REASONS)[number];

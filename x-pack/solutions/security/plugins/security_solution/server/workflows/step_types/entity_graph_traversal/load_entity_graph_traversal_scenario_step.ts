@@ -15,7 +15,7 @@ import { loadEntityGraphTraversalScenarioStepCommonDefinition } from '../../../.
 export const loadEntityGraphTraversalScenarioStepDefinition = createServerStepDefinition({
   ...loadEntityGraphTraversalScenarioStepCommonDefinition,
   handler: async (context) => {
-    const { scenario_id, overrides } = context.input;
+    const { scenario_id, overrides, until } = context.input;
     try {
       const plan = loadEntityGraphTraversalPlan(scenario_id, overrides);
       if (!plan) {
@@ -32,7 +32,7 @@ export const loadEntityGraphTraversalScenarioStepDefinition = createServerStepDe
           plan.hops.length
         } hops, limits ${JSON.stringify(plan.limits)}`
       );
-      return { output: plan };
+      return { output: { ...plan, until: [...plan.until, ...until] } };
     } catch (error) {
       return { error: error instanceof Error ? error : new Error(String(error)) };
     }

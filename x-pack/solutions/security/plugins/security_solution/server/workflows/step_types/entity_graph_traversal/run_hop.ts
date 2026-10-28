@@ -7,6 +7,7 @@
 
 import type {
   TraversalExclusion,
+  TraversalStopCondition,
   TraversalEdge,
   TraversalHop,
   TraversalLimits,
@@ -41,6 +42,7 @@ export interface RunHopInput {
   limits: TraversalLimits;
   lookback?: string;
   exclusions?: TraversalExclusion[];
+  until?: TraversalStopCondition[];
 }
 
 export interface RunHopStats {
@@ -55,6 +57,8 @@ export interface RunHopStats {
   excluded_frontier: number;
   /** Edges removed because their target is excluded on `entity.id`. */
   excluded_edges: number;
+  /** Nodes admitted this hop that matched a stop condition. */
+  until_matched: number;
   closing_edges: number;
   new_nodes: number;
   hubs_skipped: string[];
@@ -67,6 +71,7 @@ export interface RunHopResult {
   nodes: TraversalNode[];
   next_frontier: string[];
   visited: string[];
+  until_matches: string[];
   truncated: boolean;
   stop_reason: TraversalStopReason;
   stats: RunHopStats;
@@ -133,6 +138,19 @@ const parseRows = ({
   return edges;
 };
 
+/**
+ * Whether the node an edge admits matches a stop condition: by id on `entity.id`, otherwise
+ * by a value of that field in the edge payload (the hop's `payload_fields`).
+ */
+const matchesStopCondition = (edge: TraversalEdge, until: TraversalStopCondition[]): boolean =>
+  until.some(({ field, values }) => {
+    if (field === TRAVERSAL_NODE_ID_FIELD) return values.includes(edge.target);
+    const payload = edge.payload?.[field];
+    return (
+      Array.isArray(payload) && payload.some((v) => typeof v === 'string' && values.includes(v))
+    );
+  });
+
 /** Sources with more distinct targets than `hubDegree`. */
 const findHubs = (edges: TraversalEdge[], hubDegree: number): Set<string> => {
   const targetsBySource = new Map<string, Set<string>>();
@@ -179,7 +197,7 @@ export const runHop = async (
   input: RunHopInput,
   execute: ExecuteHopQuery
 ): Promise<RunHopResult> => {
-  const { hop, limits, lookback, exclusions = [] } = input;
+  const { hop, limits, lookback, exclusions = [], until = [] } = input;
   const visitedSet = new Set(input.visited);
   const excludedIds = new Set(
     exclusions.filter((e) => e.field === TRAVERSAL_NODE_ID_FIELD).flatMap((e) => e.values)
@@ -199,11 +217,13 @@ export const runHop = async (
     dropped_edges: 0,
     excluded_frontier: distinctFrontier.length - uniqueFrontier.length,
     excluded_edges: 0,
+    until_matched: 0,
     closing_edges: 0,
     new_nodes: 0,
     hubs_skipped: [],
   };
 
+  const untilMatches: string[] = [];
   const finish = (edges: TraversalEdge[], nodes: TraversalNode[]): RunHopResult => ({
     hop_number: hop.hop_number,
     hop_name: hop.name,
@@ -211,6 +231,7 @@ export const runHop = async (
     nodes,
     next_frontier: nodes.map((n) => n.id),
     visited: Array.from(visitedSet),
+    until_matches: untilMatches,
     truncated,
     stop_reason: stopReason,
     stats,
@@ -306,11 +327,20 @@ export const runHop = async (
           via: edge.relation,
           ...(hop.target_type && { type: hop.target_type }),
         });
+        if (until.length > 0 && matchesStopCondition(edge, until)) {
+          untilMatches.push(edge.target);
+        }
       }
     }
   }
   for (const node of nodes) visitedSet.add(node.id);
   stats.new_nodes = nodes.length;
+  // 8. Stop conditions: the hop that admits a matching node is the last one. The whole hop is
+  //    kept (hops are unordered), so the result holds the match and its context.
+  stats.until_matched = untilMatches.length;
+  if (untilMatches.length > 0) {
+    stopReason = 'until_matched';
+  }
   if (nodeCapHit) {
     truncated = true;
     if (stopReason === '') stopReason = 'max_nodes';

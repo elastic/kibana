@@ -9,6 +9,7 @@ import {
   DEFAULT_GRAPH_TRAVERSAL_SCENARIO_ID,
   getDefaultGraphTraversalScenarioId,
   HOST_GRAPH_TRAVERSAL_SCENARIO_ID,
+  traceGraphTraversalRoutes,
 } from './graph_traversal';
 
 describe('getDefaultGraphTraversalScenarioId', () => {
@@ -25,5 +26,29 @@ describe('getDefaultGraphTraversalScenarioId', () => {
     expect(getDefaultGraphTraversalScenarioId('arn:aws:iam::1:role/x')).toBe(
       DEFAULT_GRAPH_TRAVERSAL_SCENARIO_ID
     );
+  });
+});
+
+describe('traceGraphTraversalRoutes', () => {
+  const edges = [
+    { source: 'seed', target: 'hash' },
+    { source: 'host:B', target: 'hash' },
+    { source: 'host:B', target: 'c2' },
+    { source: 'seed', target: 'c2' },
+    { source: 'host:C', target: 'hash' },
+  ];
+
+  it('walks edges in both directions and returns a shortest route per target', () => {
+    expect(traceGraphTraversalRoutes('seed', edges, ['host:B', 'host:C'])).toEqual([
+      { id: 'host:B', route: ['seed', 'hash', 'host:B'] },
+      { id: 'host:C', route: ['seed', 'hash', 'host:C'] },
+    ]);
+  });
+
+  it('skips targets the edges do not connect to the seed, and the seed itself is a one-node route', () => {
+    expect(traceGraphTraversalRoutes('seed', edges, ['nowhere', 'seed'])).toEqual([
+      { id: 'seed', route: ['seed'] },
+    ]);
+    expect(traceGraphTraversalRoutes('seed', edges, [])).toEqual([]);
   });
 });

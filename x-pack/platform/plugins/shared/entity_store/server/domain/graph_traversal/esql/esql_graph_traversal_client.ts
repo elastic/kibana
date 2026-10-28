@@ -14,6 +14,7 @@ import { getLatestEntityIndexPattern } from '../../../../common/domain/entity_in
 import type {
   GraphTraversalExclusion,
   GraphTraversalNode,
+  GraphTraversalStopCondition,
   RunGraphTraversalResponse,
 } from '../../../../common/graph_traversal';
 import { GraphTraversalError } from '../graph_traversal_error';
@@ -35,6 +36,7 @@ export interface RunEsqlGraphTraversalParams {
   lookback?: string;
   maxHops?: number;
   exclusions?: GraphTraversalExclusion[];
+  until?: GraphTraversalStopCondition[];
 }
 
 /**
@@ -61,6 +63,7 @@ export class EsqlGraphTraversalClient {
     lookback,
     maxHops,
     exclusions,
+    until,
   }: RunEsqlGraphTraversalParams): Promise<RunGraphTraversalResponse> {
     const startedAt = Date.now();
     const plan = loadEntityGraphTraversalPlan(
@@ -75,7 +78,7 @@ export class EsqlGraphTraversalClient {
         400
       );
     }
-    const statement = buildGraphExpandStatement({ plan, seedId, lookback, exclusions });
+    const statement = buildGraphExpandStatement({ plan, seedId, lookback, exclusions, until });
     this.logger.debug(
       `entity graph traversal (ES|QL) scenario "${plan.id}" from ${seedId}:\n${statement.query}`
     );
@@ -101,6 +104,7 @@ export class EsqlGraphTraversalClient {
         nodes,
         limits: plan.limits,
         ...(exclusions !== undefined && { exclusions }),
+        until: [...plan.until, ...(until ?? [])],
       },
       duration_ms: Date.now() - startedAt,
     };

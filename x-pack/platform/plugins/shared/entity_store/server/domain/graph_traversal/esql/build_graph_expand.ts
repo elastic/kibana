@@ -11,7 +11,11 @@ import type {
 } from '@kbn/workflows/managed';
 import { getFieldEvaluationsEsql } from '../../../../common/domain/euid';
 import { euid, getBuiltInEntityDefinition } from '../../../../common/euid_helpers';
-import type { GraphTraversalExclusion } from '../../../../common/graph_traversal';
+import type {
+  GraphTraversalExclusion,
+  GraphTraversalStopCondition,
+} from '../../../../common/graph_traversal';
+import { GraphTraversalError } from '../graph_traversal_error';
 
 /** Node ids are entity ids; an exclusion on this field removes nodes, not only documents. */
 export const NODE_ID_EXCLUSION_FIELD = 'entity.id';
@@ -53,6 +57,8 @@ export interface GraphExpandStatement {
   payloadFields: string[];
   /** Node ids the run excludes; edges to or from them are dropped from the result. */
   excludedIds: string[];
+  /** Node ids the walk stops at (the scenario's and the run's stop conditions). */
+  untilIds: string[];
   maxHops: number;
 }
 
@@ -61,6 +67,8 @@ export interface BuildGraphExpandParams {
   seedId: string;
   lookback?: string;
   exclusions?: GraphTraversalExclusion[];
+  /** Added to the plan's own stop conditions. */
+  until?: GraphTraversalStopCondition[];
 }
 
 /** The distinct hop specs of a plan, in first-seen order (`repeat` unrolls specs consecutively). */
@@ -124,6 +132,7 @@ export const buildGraphExpandStatement = ({
   seedId,
   lookback,
   exclusions = [],
+  until = [],
 }: BuildGraphExpandParams): GraphExpandStatement => {
   const specs = distinctSpecs(plan);
   if (specs.length === 0) {
@@ -238,7 +247,7 @@ export const buildGraphExpandStatement = ({
     ),
   ];
   lines.push(`    | EVAL ${assignments.join(',\n           ')}`);
-  // Excluded nodes expand nothing: their documents leave the edge set before the walk.
+  // Excluded nodes' own documents leave the edge set before the walk reads them.
   if (excludedIds.length > 0) {
     lines.push(`    | WHERE NOT ${GRAPH_EXPAND_ID_COLUMN} IN (${placeholders(excludedIds)})`);
   }
@@ -250,21 +259,39 @@ export const buildGraphExpandStatement = ({
       (field, index) => `${graphExpandPayloadColumn(index)} = VALUES(${quoteField(field)})`
     ),
   ];
+  // Stop conditions become UNTIL on the reached node. Only node ids translate: a condition on a
+  // payload field would have to test a multi-valued STATS column, which IN cannot.
+  const stopConditions = [...plan.until, ...until];
+  const unsupported = stopConditions.find((c) => c.field !== NODE_ID_EXCLUSION_FIELD);
+  if (unsupported) {
+    throw new GraphTraversalError(
+      `The ES|QL traversal only supports stop conditions on ${NODE_ID_EXCLUSION_FIELD}; got ${unsupported.field}`,
+      400
+    );
+  }
+  const untilIds = Array.from(new Set(stopConditions.flatMap((c) => c.values)));
+
   const { limits } = plan;
+  // Excluded node ids are also handed to the walk itself: an edge touching one is dropped
+  // before it is admitted, so nothing beyond it is visited and no budget is spent on it.
   const options = {
     max_hops: limits.max_hops,
     max_nodes: limits.max_nodes,
     max_frontier: limits.max_frontier,
     hub_degree: limits.hub_degree,
     direction,
+    ...(excludedIds.length > 0 && { exclude: excludedIds }),
   };
   lines.push(
     `  ) ON node_id == ${GRAPH_EXPAND_ID_COLUMN} TO (${relations
       .map((_, index) => relationColumn(index))
       .join(', ')})`,
-    `  STATS ${stats.join(', ')}`,
-    `  WITH ${JSON.stringify(options)}`
+    `  STATS ${stats.join(', ')}`
   );
+  if (untilIds.length > 0) {
+    lines.push(`  UNTIL node_reached IN (${placeholders(untilIds)})`);
+  }
+  lines.push(`  WITH ${JSON.stringify(options)}`);
 
   return {
     query: lines.join('\n'),
@@ -274,6 +301,7 @@ export const buildGraphExpandStatement = ({
     relationTypes,
     payloadFields,
     excludedIds,
+    untilIds,
     maxHops: limits.max_hops,
   };
 };
