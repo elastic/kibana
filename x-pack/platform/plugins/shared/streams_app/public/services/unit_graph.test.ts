@@ -9,6 +9,7 @@ import type { Unit } from './unit_repository';
 import {
   buildUnitGraph,
   endpointKey,
+  getSlotProcessorIds,
   processingNodeId,
   type ProcessingNodeRef,
   type UnitEdgeProcessingTarget,
@@ -351,5 +352,103 @@ describe('buildUnitGraph', () => {
       new Set(['es'])
     );
     expect(graph.edges).toEqual([]);
+  });
+});
+
+describe('getSlotProcessorIds', () => {
+  const routedUnit = unitWith([
+    {
+      id: 'main',
+      supported_telemetry: ['logs'],
+      config: [
+        { name: 'sources', value: ['in'] },
+        { name: 'processors', value: ['parse', 'enrich'] },
+        {
+          name: 'routes',
+          value: [
+            { when: 'a', processors: ['tag-a'], pipelines: ['child'] },
+            { when: 'b', processors: ['tag-b1', 'tag-b2'], destinations: ['out-b'] },
+            { destinations: ['fallback-out'] },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'child',
+      supported_telemetry: ['logs'],
+      config: [
+        { name: 'processors', value: ['child-step'] },
+        { name: 'destinations', value: ['es-child'] },
+      ],
+    },
+  ]);
+
+  it('returns the processors of a pipeline slot, in order', () => {
+    expect(getSlotProcessorIds(routedUnit, pipelineSlot('main'))).toEqual(['parse', 'enrich']);
+    expect(getSlotProcessorIds(routedUnit, pipelineSlot('child'))).toEqual(['child-step']);
+  });
+
+  it('returns the processors of a route slot, in order', () => {
+    expect(
+      getSlotProcessorIds(routedUnit, { kind: 'route', pipelineId: 'main', routeIndex: 0 })
+    ).toEqual(['tag-a']);
+    expect(
+      getSlotProcessorIds(routedUnit, { kind: 'route', pipelineId: 'main', routeIndex: 1 })
+    ).toEqual(['tag-b1', 'tag-b2']);
+  });
+
+  it('returns none for a route without processors', () => {
+    expect(
+      getSlotProcessorIds(routedUnit, { kind: 'route', pipelineId: 'main', routeIndex: 2 })
+    ).toEqual([]);
+  });
+
+  it('returns none for a slot that does not exist', () => {
+    expect(getSlotProcessorIds(routedUnit, pipelineSlot('missing'))).toEqual([]);
+    expect(
+      getSlotProcessorIds(routedUnit, { kind: 'route', pipelineId: 'main', routeIndex: 9 })
+    ).toEqual([]);
+    expect(
+      getSlotProcessorIds(routedUnit, { kind: 'route', pipelineId: 'missing', routeIndex: 0 })
+    ).toEqual([]);
+  });
+
+  it('returns a copy, so a caller cannot change the unit', () => {
+    const ids = getSlotProcessorIds(routedUnit, {
+      kind: 'route',
+      pipelineId: 'main',
+      routeIndex: 0,
+    });
+    ids.push('changed');
+
+    expect(
+      getSlotProcessorIds(routedUnit, { kind: 'route', pipelineId: 'main', routeIndex: 0 })
+    ).toEqual(['tag-a']);
+  });
+
+  it('joins the per-telemetry entries of a pipeline slot, as the graph does', () => {
+    const unit = unitWith([
+      {
+        id: 'main',
+        supported_telemetry: ['logs', 'traces'],
+        config: [
+          { name: 'sources', value: ['in'] },
+          { name: 'processors', value: ['a'], telemetry: ['logs'] },
+          { name: 'processors', value: ['b'], telemetry: ['traces'] },
+          { name: 'destinations', value: ['out'] },
+        ],
+      },
+    ]);
+
+    expect(getSlotProcessorIds(unit, pipelineSlot('main'))).toEqual(['a', 'b']);
+  });
+
+  it('agrees with the processor ids that the graph records for every slot', () => {
+    const graph = buildUnitGraph(routedUnit, new Set(['in']), new Set(['out-b', 'es-child']));
+
+    expect(graph.processingNodes.length).toBeGreaterThan(0);
+    graph.processingNodes.forEach(({ ref, processorIds }) => {
+      expect(getSlotProcessorIds(routedUnit, ref)).toEqual(processorIds);
+    });
   });
 });

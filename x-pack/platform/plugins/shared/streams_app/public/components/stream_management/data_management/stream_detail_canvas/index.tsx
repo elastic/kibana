@@ -54,6 +54,7 @@ import { applyLayout } from './layout';
 import { getGraphNodeIds, syncCanvasNodeMetadata } from './sync_graph_nodes';
 import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
 import { useCanvasHistory } from './use_canvas_history';
+import { useSyncStatsWithSavedUnit } from './use_sync_stats_with_saved_unit';
 import { IndexInspectFlyout } from '../../../index_inspect/index_inspect_flyout';
 import type { IndexInspectTabId } from '../../../index_inspect/types';
 import {
@@ -184,6 +185,7 @@ export function StreamsCanvas() {
 }
 
 function StreamsCanvasInner() {
+  useSyncStatsWithSavedUnit();
   const { euiTheme } = useEuiTheme();
   const { flyoutName, flyoutKind, flyoutTab, query } = useCanvasUrlRef();
   const {
