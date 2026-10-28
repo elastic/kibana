@@ -85,7 +85,7 @@ export const AccessBoundary = ({
   children,
 }: React.PropsWithChildren<{
   availability$: Observable<SubscriptionAvailability>;
-  /** Emits `false` when the active space uses the Classic solution view. */
+  /** Emits `false` when the active space does not use the Security solution view. */
   spaceSupported$: Observable<boolean>;
   /**
    * From core security, read before the Kibana context replaces `security` with the

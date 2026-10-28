@@ -14,9 +14,9 @@ interface IsSpaceSupportedParams {
 }
 
 /**
- * Emits once with `false` when the active space uses the Classic solution view. A space without a
- * solution is a Classic space. Serverless projects have no Classic space, so the answer is `true`
- * there. When the active space cannot be read, the answer is `false`: no access is the safe default.
+ * Emits once with `true` only when the active space uses the Security solution view. A space
+ * without a solution is a Classic space. Serverless projects have no spaces with a solution view,
+ * so the answer is `true` there. When the active space cannot be read, the answer is `false`: no access is the safe default.
  *
  * Mirrors `isSpaceSupported` in the server.
  */
@@ -31,7 +31,7 @@ export const isSpaceSupported$ = ({
     return of(false);
   }
   return from(spaces.getActiveSpace()).pipe(
-    map(({ solution = 'classic' }) => solution !== 'classic'),
+    map(({ solution }) => solution === 'security'),
     catchError(() => of(false))
   );
 };

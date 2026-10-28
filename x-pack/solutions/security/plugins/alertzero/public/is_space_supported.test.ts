@@ -27,14 +27,22 @@ const createSpaces = (space: Partial<Space> | Error) => {
 };
 
 describe('isSpaceSupported$', () => {
-  it.each([['security'], ['oblt'], ['es']] as const)(
-    'supports a space with the %s solution',
-    async (solution) => {
-      const spaces = createSpaces({ solution });
+  it('supports a space with the security solution', async () => {
+    const spaces = createSpaces({ solution: 'security' });
+
+    await expect(firstValueFrom(isSpaceSupported$({ isServerless: false, spaces }))).resolves.toBe(
+      true
+    );
+  });
+
+  it.each([[{ solution: 'oblt' as const }], [{ solution: 'es' as const }]])(
+    'does not support a space with another solution (%j)',
+    async (space) => {
+      const spaces = createSpaces(space);
 
       await expect(
         firstValueFrom(isSpaceSupported$({ isServerless: false, spaces }))
-      ).resolves.toBe(true);
+      ).resolves.toBe(false);
     }
   );
 
