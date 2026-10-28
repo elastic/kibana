@@ -5,7 +5,7 @@ The `ingest_pipelines` plugin provides Kibana support for [Elasticsearch's inges
 
 This plugin allows Kibana to create, edit, clone and delete ingest pipelines. It also provides support to simulate a pipeline.
 
-It requires a Basic license. Users with the `read_pipeline` cluster privilege can view pipelines in a read-only mode. Creating, editing, cloning and deleting pipelines requires the following cluster privileges: `manage_pipeline` and `cluster:monitor/nodes/info`.
+It requires a Basic license. Users with the `read_pipeline` cluster privilege can view pipelines in a read-only mode. Creating, editing, cloning and deleting pipelines requires the `manage_pipeline` cluster privilege.
 
 ---
 

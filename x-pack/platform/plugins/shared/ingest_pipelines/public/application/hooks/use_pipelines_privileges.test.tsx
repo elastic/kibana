@@ -5,76 +5,65 @@
  * 2.0.
  */
 
-import type { FunctionComponent, PropsWithChildren } from 'react';
-import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { AuthorizationContext } from '@kbn/es-ui-shared-plugin/public';
 
 import { usePipelinesPrivileges } from './use_pipelines_privileges';
 
-const renderWithMissingClusterPrivileges = (missingClusterPrivileges: string[]) => {
-  const wrapper: FunctionComponent<PropsWithChildren> = ({ children }) => (
-    <AuthorizationContext.Provider
-      value={{
-        isLoading: false,
-        apiError: null,
-        privileges: {
-          hasAllPrivileges: missingClusterPrivileges.length === 0,
-          missingPrivileges: { cluster: missingClusterPrivileges },
-        },
-      }}
-    >
-      {children}
-    </AuthorizationContext.Provider>
-  );
+const mockUseKibana = jest.fn();
 
-  return renderHook(() => usePipelinesPrivileges(), { wrapper }).result.current;
+jest.mock('../../shared_imports', () => ({
+  ...jest.requireActual('../../shared_imports'),
+  useKibana: () => mockUseKibana(),
+}));
+
+const renderWithCapabilities = ({
+  canRead,
+  canManage,
+}: {
+  canRead: boolean;
+  canManage: boolean;
+}) => {
+  mockUseKibana.mockReturnValue({
+    services: { config: { enableManageProcessors: false, canRead, canManage } },
+  });
+
+  return renderHook(() => usePipelinesPrivileges()).result.current;
 };
 
 describe('usePipelinesPrivileges', () => {
-  describe('WHEN the user has all privileges', () => {
+  describe('WHEN the user has the read and manage capabilities', () => {
     it('SHOULD allow reading and managing', () => {
-      expect(renderWithMissingClusterPrivileges([])).toEqual({
+      expect(renderWithCapabilities({ canRead: true, canManage: true })).toEqual({
         canRead: true,
         canManage: true,
       });
     });
   });
 
-  describe('WHEN the user only has read_pipeline', () => {
+  describe('WHEN the user only has the read capability', () => {
     it('SHOULD allow reading but not managing', () => {
-      expect(
-        renderWithMissingClusterPrivileges(['manage_pipeline', 'cluster:monitor/nodes/info'])
-      ).toEqual({ canRead: true, canManage: false });
+      expect(renderWithCapabilities({ canRead: true, canManage: false })).toEqual({
+        canRead: true,
+        canManage: false,
+      });
     });
   });
 
-  describe('WHEN the user has manage privileges but read_pipeline is reported missing', () => {
+  describe('WHEN the user has the manage capability but not the read capability', () => {
     it('SHOULD allow reading and managing', () => {
-      expect(renderWithMissingClusterPrivileges(['read_pipeline'])).toEqual({
+      expect(renderWithCapabilities({ canRead: false, canManage: true })).toEqual({
         canRead: true,
         canManage: true,
       });
     });
   });
 
-  describe('WHEN cluster:monitor/nodes/info and read_pipeline are missing', () => {
+  describe('WHEN the user has no pipeline capabilities', () => {
     it('SHOULD allow neither reading nor managing', () => {
-      expect(
-        renderWithMissingClusterPrivileges(['cluster:monitor/nodes/info', 'read_pipeline'])
-      ).toEqual({ canRead: false, canManage: false });
-    });
-  });
-
-  describe('WHEN the user has no pipeline privileges', () => {
-    it('SHOULD allow neither reading nor managing', () => {
-      expect(
-        renderWithMissingClusterPrivileges([
-          'manage_pipeline',
-          'cluster:monitor/nodes/info',
-          'read_pipeline',
-        ])
-      ).toEqual({ canRead: false, canManage: false });
+      expect(renderWithCapabilities({ canRead: false, canManage: false })).toEqual({
+        canRead: false,
+        canManage: false,
+      });
     });
   });
 });

@@ -26,11 +26,16 @@ jest.mock('../../context_awareness', () => ({
 }));
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
-import { DataLoadingState, type UnifiedDataTableProps } from '@kbn/unified-data-table';
+import {
+  DataLoadingState,
+  type DataGridRenderMode,
+  type UnifiedDataTableProps,
+} from '@kbn/unified-data-table';
 import { DiscoverGridEmbeddable } from './saved_search_grid';
+import { SearchEmbeddableToolbarProvider } from './search_embeddable_toolbar_context';
 
 const services = {
   storage: { get: jest.fn() },
@@ -70,7 +75,7 @@ const baseProps: React.ComponentProps<typeof DiscoverGridEmbeddable> = {
   expandedDoc: undefined,
   initialDocViewerTabId: undefined,
   docViewerRef: React.createRef<DocViewerApi>(),
-  isInteractive: true,
+  renderMode: 'interactive',
 };
 
 describe('DiscoverGridEmbeddable renderCustomToolbar', () => {
@@ -79,14 +84,36 @@ describe('DiscoverGridEmbeddable renderCustomToolbar', () => {
   });
 
   it('passes a renderCustomToolbar function to DiscoverGrid when interactive', () => {
-    render(<DiscoverGridEmbeddable {...baseProps} isInteractive={true} />);
+    render(<DiscoverGridEmbeddable {...baseProps} renderMode="interactive" />);
     const lastProps = mockDiscoverGrid.mock.calls.at(-1)?.[0];
     expect(typeof lastProps?.renderCustomToolbar).toBe('function');
   });
 
   it('omits renderCustomToolbar from DiscoverGrid when not interactive', () => {
-    render(<DiscoverGridEmbeddable {...baseProps} isInteractive={false} />);
+    render(<DiscoverGridEmbeddable {...baseProps} renderMode="non-interactive" />);
     const lastProps = mockDiscoverGrid.mock.calls.at(-1)?.[0];
     expect(lastProps?.renderCustomToolbar).toBeUndefined();
+  });
+});
+
+// The toolbar slot is provided by embedders (e.g. the Agent Builder chat view) and holds interactive controls.
+describe('DiscoverGridEmbeddable toolbar slot without rows', () => {
+  const renderWithToolbarSlot = (renderMode: DataGridRenderMode) =>
+    render(
+      <SearchEmbeddableToolbarProvider
+        value={{ leftSide: <button data-test-subj="toolbarSlotControl" /> }}
+      >
+        <DiscoverGridEmbeddable {...baseProps} renderMode={renderMode} />
+      </SearchEmbeddableToolbarProvider>
+    );
+
+  it('renders toolbar slot controls outside the grid when interactive', () => {
+    renderWithToolbarSlot('interactive');
+    expect(screen.getByTestId('toolbarSlotControl')).toBeInTheDocument();
+  });
+
+  it('does not render toolbar slot controls in print mode', () => {
+    renderWithToolbarSlot('print');
+    expect(screen.queryByTestId('toolbarSlotControl')).not.toBeInTheDocument();
   });
 });

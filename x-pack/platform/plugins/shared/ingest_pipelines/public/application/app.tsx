@@ -13,9 +13,7 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { useKibana } from '../shared_imports';
 
-import { APP_CLUSTER_MANAGE_PRIVILEGES, APP_CLUSTER_READ_PRIVILEGES } from '../../common/constants';
-
-import { SectionError, useAuthorizationContext, SectionLoading } from '../shared_imports';
+import { APP_CLUSTER_READ_PRIVILEGE, APP_CLUSTER_REQUIRED_PRIVILEGE } from '../../common/constants';
 
 import {
   PipelinesList,
@@ -48,34 +46,8 @@ export const AppWithoutRouter = () => {
 };
 
 export const App: FunctionComponent = () => {
-  const { apiError, isLoading } = useAuthorizationContext();
   const { canRead } = usePipelinesPrivileges();
   const { history } = useKibana().services;
-
-  if (apiError) {
-    return (
-      <SectionError
-        title={
-          <FormattedMessage
-            id="xpack.ingestPipelines.app.checkingPrivilegesErrorMessage"
-            defaultMessage="Error fetching user privileges from the server."
-          />
-        }
-        error={apiError}
-      />
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.ingestPipelines.app.checkingPrivilegesDescription"
-          defaultMessage="Checking privileges…"
-        />
-      </SectionLoading>
-    );
-  }
 
   if (!canRead) {
     return (
@@ -93,10 +65,10 @@ export const App: FunctionComponent = () => {
           <p>
             <FormattedMessage
               id="xpack.ingestPipelines.app.deniedReadOrManagePrivilegeDescription"
-              defaultMessage="To view Ingest Pipelines, you must have the {readPrivileges} cluster privilege. To manage them, you must have {managePrivileges}."
+              defaultMessage="To view Ingest Pipelines, you must have the {readPrivilege} cluster privilege. To manage them, you must have the {managePrivilege} cluster privilege."
               values={{
-                readPrivileges: APP_CLUSTER_READ_PRIVILEGES.join(', '),
-                managePrivileges: APP_CLUSTER_MANAGE_PRIVILEGES.join(', '),
+                readPrivilege: APP_CLUSTER_READ_PRIVILEGE,
+                managePrivilege: APP_CLUSTER_REQUIRED_PRIVILEGE,
               }}
             />
           </p>

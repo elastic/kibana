@@ -11,7 +11,13 @@ import type { IngestPipelinesConfigType } from './config';
 import { ApiRoutes } from './routes';
 import { handleEsError } from './shared_imports';
 import type { Dependencies } from './types';
-import { APP_CLUSTER_MANAGE_PRIVILEGES, APP_CLUSTER_READ_PRIVILEGES } from '../common/constants';
+import {
+  APP_CAPABILITIES,
+  APP_CLUSTER_READ_PRIVILEGE,
+  APP_CLUSTER_REQUIRED_PRIVILEGE,
+  MANAGE_PROCESSORS_CLUSTER_REQUIRED_PRIVILEGE,
+  PLUGIN_ID,
+} from '../common/constants';
 
 export class IngestPipelinesPlugin implements Plugin<void, void, any, any> {
   private readonly apiRoutes: ApiRoutes;
@@ -26,18 +32,22 @@ export class IngestPipelinesPlugin implements Plugin<void, void, any, any> {
     const router = http.createRouter();
 
     features.registerElasticsearchFeature({
-      id: 'ingest_pipelines',
+      id: PLUGIN_ID,
       management: {
-        ingest: ['ingest_pipelines'],
+        ingest: [PLUGIN_ID],
       },
       privileges: [
         {
-          ui: [],
-          requiredClusterPrivileges: APP_CLUSTER_MANAGE_PRIVILEGES,
+          ui: [APP_CAPABILITIES.read, APP_CAPABILITIES.manage],
+          requiredClusterPrivileges: [APP_CLUSTER_REQUIRED_PRIVILEGE],
         },
         {
-          ui: [],
-          requiredClusterPrivileges: APP_CLUSTER_READ_PRIVILEGES,
+          ui: [APP_CAPABILITIES.read],
+          requiredClusterPrivileges: [APP_CLUSTER_READ_PRIVILEGE],
+        },
+        {
+          ui: [APP_CAPABILITIES.manageProcessors],
+          requiredClusterPrivileges: [MANAGE_PROCESSORS_CLUSTER_REQUIRED_PRIVILEGE],
         },
       ],
     });

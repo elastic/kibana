@@ -32,6 +32,7 @@ import type {
   IngestPipelinesPluginStart,
   IngestPipelineFlyoutProps,
 } from './types';
+import { APP_CAPABILITIES } from '../common/constants';
 import { IngestPipelinesLocatorDefinition } from './locator';
 import { IngestPipelineFlyout } from './application/sections/pipelines_list/ingest_pipeline_flyout_embeddable';
 
@@ -76,7 +77,13 @@ export class IngestPipelinesPlugin
           ...params,
           license: this.license,
           config: {
-            enableManageProcessors: this.config.enableManageProcessors !== false,
+            enableManageProcessors:
+              this.config.enableManageProcessors !== false &&
+              coreStart.application.capabilities[PLUGIN_ID]?.[APP_CAPABILITIES.manage] === true,
+            canManage:
+              coreStart.application.capabilities[PLUGIN_ID]?.[APP_CAPABILITIES.manage] === true,
+            canRead:
+              coreStart.application.capabilities[PLUGIN_ID]?.[APP_CAPABILITIES.read] === true,
           },
         });
 
@@ -126,7 +133,11 @@ export class IngestPipelinesPlugin
           overlays,
           http: core.http,
           config: {
-            enableManageProcessors: this.config.enableManageProcessors !== false,
+            enableManageProcessors:
+              this.config.enableManageProcessors !== false &&
+              application.capabilities[PLUGIN_ID]?.[APP_CAPABILITIES.manage] === true,
+            canManage: application.capabilities[PLUGIN_ID]?.[APP_CAPABILITIES.manage] === true,
+            canRead: application.capabilities[PLUGIN_ID]?.[APP_CAPABILITIES.read] === true,
           },
         };
 

@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { useAuthorizationContext } from '../../shared_imports';
-import {
-  APP_CLUSTER_MANAGE_PRIVILEGES,
-  APP_CLUSTER_READ_PRIVILEGES,
-} from '../../../common/constants';
+import { useKibana } from '../../shared_imports';
 
 export interface PipelinesPrivileges {
   canRead: boolean;
@@ -17,19 +13,15 @@ export interface PipelinesPrivileges {
 }
 
 /**
- * Derives whether the current user can view and/or manage ingest pipelines from the authorization context.
+ * Derives whether the current user can view and/or manage ingest pipelines from the UI capabilities.
  */
 export const usePipelinesPrivileges = (): PipelinesPrivileges => {
-  const { privileges } = useAuthorizationContext();
-  const missingClusterPrivileges = privileges.missingPrivileges.cluster ?? [];
-
-  const hasAll = (required: readonly string[]): boolean =>
-    required.every((privilege) => !missingClusterPrivileges.includes(privilege));
-
-  const canManage = hasAll(APP_CLUSTER_MANAGE_PRIVILEGES);
+  const {
+    config: { canManage, canRead },
+  } = useKibana().services;
 
   return {
     canManage,
-    canRead: canManage || hasAll(APP_CLUSTER_READ_PRIVILEGES),
+    canRead: canManage || canRead,
   };
 };

@@ -6,12 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DestinationSignal } from './types';
+import type { DestinationSignal, DestinationType } from './types';
 
 export const LOCAL_ELASTICSEARCH_LABEL = i18n.translate(
   'xpack.streams.destinations.localElasticsearchTypeLabel',
   { defaultMessage: 'Local Elasticsearch' }
 );
+
+export const AMAZON_S3_LABEL = i18n.translate('xpack.streams.destinations.s3TypeLabel', {
+  defaultMessage: 'Amazon S3',
+});
+
+export const getDestinationTypeLabel = (type: DestinationType): string =>
+  type === 's3' ? AMAZON_S3_LABEL : LOCAL_ELASTICSEARCH_LABEL;
 
 export const DESTINATION_AUTO_MODE_LABEL = i18n.translate(
   'xpack.streams.destinations.autoModeLabel',

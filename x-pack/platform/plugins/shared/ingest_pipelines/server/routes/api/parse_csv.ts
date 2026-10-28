@@ -8,7 +8,7 @@
 import type { TypeOf, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-import { API_BASE_PATH, APP_CLUSTER_MANAGE_PRIVILEGES } from '../../../common/constants';
+import { API_BASE_PATH, APP_CLUSTER_REQUIRED_PRIVILEGE } from '../../../common/constants';
 import type { FieldCopyAction } from '../../../common/types';
 import { csvToIngestPipeline } from '../../lib';
 import type { RouteDependencies } from '../../types';
@@ -53,7 +53,7 @@ export const registerParseCsvRoute = ({ router }: RouteDependencies): void => {
         await contxt.core
       ).elasticsearch.client.asCurrentUser.security.hasPrivileges({
         // same as privs for ingest pipelines management
-        cluster: APP_CLUSTER_MANAGE_PRIVILEGES,
+        cluster: [APP_CLUSTER_REQUIRED_PRIVILEGE],
       });
       if (!privResult.has_all_requested) {
         return res.unauthorized();

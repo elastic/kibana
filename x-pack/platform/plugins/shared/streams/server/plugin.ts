@@ -37,6 +37,7 @@ import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
 import { StreamsService } from './lib/streams/service';
+import { UnitStatsService } from './lib/unit_stats/service';
 import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
 import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types';
@@ -156,6 +157,7 @@ export class StreamsPlugin
     this.attachmentService = attachmentService;
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     this.streamsService = streamsService;
+    const unitStatsService = new UnitStatsService(this.logger);
     const contentService = new ContentService(core, this.logger);
 
     this.streamsGetScopedClients = async ({
@@ -216,6 +218,9 @@ export class StreamsPlugin
         canEncrypt: this.canEncrypt,
         attachmentClient,
         streamsClient,
+        unitStatsClient: unitStatsService.getClient({
+          esClient: scopedClusterClient.asCurrentUser,
+        }),
         inferenceClient,
         contentClient,
         fieldsMetadataClient,

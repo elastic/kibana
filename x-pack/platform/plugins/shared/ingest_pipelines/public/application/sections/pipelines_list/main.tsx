@@ -15,6 +15,7 @@ import { EuiButton, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 import type { Location } from 'history';
 
 import type { Pipeline } from '../../../../common/types';
+import { APP_CAPABILITIES, PLUGIN_ID } from '../../../../common/constants';
 import { useKibana, SectionLoading } from '../../../shared_imports';
 import { UIM_PIPELINES_LIST_LOAD } from '../../constants';
 import {
@@ -25,7 +26,6 @@ import {
   getManageProcessorsPath,
 } from '../../services/navigation';
 import { ingestPipelinesListTitle } from '../../components';
-import { useCheckManageProcessorsPrivileges } from '../manage_processors';
 import { usePipelinesPrivileges } from '../../hooks';
 
 import { EmptyList } from './empty_list';
@@ -83,7 +83,8 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
 
   const { data, isLoading, error, resendRequest } = services.api.useLoadPipelines();
 
-  const hasManageProcessorsPrivileges = useCheckManageProcessorsPrivileges();
+  const hasManageProcessorsPrivileges =
+    services.application.capabilities[PLUGIN_ID]?.[APP_CAPABILITIES.manageProcessors] === true;
   const { canManage } = usePipelinesPrivileges();
   // Track component loaded
   useEffect(() => {
@@ -158,7 +159,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
       },
     };
 
-    if (services.config.enableManageProcessors && hasManageProcessorsPrivileges) {
+    if (canManage && services.config.enableManageProcessors && hasManageProcessorsPrivileges) {
       menu.items = [
         {
           id: 'manageProcessors',
