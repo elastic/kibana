@@ -27,6 +27,8 @@ import { z } from '@kbn/zod/v4';
  *    child's result;
  * 5. may fail with {@link ACTION_NON_RETRYABLE_ERROR_TYPE} when another attempt
  *    cannot succeed, so the proposal gate settles instead of re-offering it.
+ *    The gate then reports `decision: approved` with `status: failed`, so check
+ *    that every caller running the action reads `status`, not `decision` alone.
  */
 export const ACTION_WORKFLOW_TAG = 'action' as const;
 
