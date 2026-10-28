@@ -30,6 +30,7 @@ import illustrationSearchAnalytics from '../../common/images/illustration_search
  */
 export const EntityStoreDisabledEmptyPromptBody = React.memo(() => {
   const { application } = useKibana().services;
+  const canReadIntegrations = application.capabilities.fleet?.read === true;
   const addIntegrationsUrl = application.getUrlForApp(INTEGRATIONS_PLUGIN_ID, {
     path: '/browse/advanced_analytics_ueba',
   });
@@ -78,19 +79,23 @@ export const EntityStoreDisabledEmptyPromptBody = React.memo(() => {
             defaultMessage="Enable Entity analytics"
           />
         </SecuritySolutionLinkButton>,
-        <EuiButton
-          key="addIntegrations"
-          href={addIntegrationsUrl}
-          iconType="external"
-          iconSide="right"
-          target="_blank"
-          data-test-subj="entityStoreDisabledEmptyPromptAddIntegrations"
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics.addIntegrations"
-            defaultMessage="Add integrations"
-          />
-        </EuiButton>,
+        ...(canReadIntegrations
+          ? [
+              <EuiButton
+                key="addIntegrations"
+                href={addIntegrationsUrl}
+                iconType="external"
+                iconSide="right"
+                target="_blank"
+                data-test-subj="entityStoreDisabledEmptyPromptAddIntegrations"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics.addIntegrations"
+                  defaultMessage="Add integrations"
+                />
+              </EuiButton>,
+            ]
+          : []),
       ]}
       footer={
         <FormattedMessage
