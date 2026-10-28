@@ -336,9 +336,8 @@ exports[`pull_request fragments pull_request/base 1`] = `
     },
     {
       "agents": {
-        "image": "docker.elastic.co/ci-agent-images/kibana/ci-minimal",
-        "imageUID": 1000,
-        "provider": "k8s",
+        "image": "family/kibana-minimal-ubuntu-2604",
+        "machineType": "n2-standard-2",
       },
       "command": ".buildkite/scripts/steps/test/pick_test_group_run_order.sh",
       "env": {
@@ -350,33 +349,6 @@ exports[`pull_request fragments pull_request/base 1`] = `
       },
       "key": "pick_test_group_run_order",
       "label": "Pick Test Group Run Order",
-      "plugins": [
-        {
-          "sparse-checkout#v1.6.0": {
-            "cleanup_sparse_state": true,
-            "no_cone": true,
-            "paths": [
-              "/.buildkite/",
-              "/.nvmrc",
-              "/package.json",
-              "/tsconfig.base.json",
-              "/versions.json",
-              "/kibana.jsonc",
-              "**/kibana.jsonc",
-              "**/tsconfig.json",
-              "**/jest.config.js",
-              "**/jest.integration.config.js",
-              "**/*.test.js",
-              "**/*.test.mjs",
-              "**/*.test.ts",
-              "**/*.test.tsx",
-            ],
-            "post_checkout": {
-              "unshallow": true,
-            },
-          },
-        },
-      ],
       "retry": {
         "automatic": [
           {

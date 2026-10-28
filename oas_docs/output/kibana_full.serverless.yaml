@@ -62,8 +62,8 @@ tags:
     x-displayName: Alerting
   - name: alerting-v2
     description: |
-      Alerting V2 is an ES|QL-first alerting API for managing rules, alert actions, and action policies. Use these endpoints to create and manage detection rules, act on alerts, and control when and how notifications are delivered. These APIs are experimental.
-    x-displayName: Alerting V2
+      Universal Alerting is an ES|QL-first alerting API for managing rules, alert actions, and action policies. Use these endpoints to create and manage detection rules, act on alerts, and control when and how notifications are delivered.
+    x-displayName: Universal Alerting
   - description: |
       Adjust APM agent configuration without need to redeploy your application.
     name: APM agent configuration
@@ -146394,6 +146394,7 @@ components:
       in: query
       name: search
       schema:
+        maxLength: 30000
         type: string
     Cases_searchFields:
       description: The fields to perform the simple_query_string parsed query against.

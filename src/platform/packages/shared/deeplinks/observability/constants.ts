@@ -46,6 +46,8 @@ export const ONBOARDING_APP_ID = 'onboarding';
 
 export const NIGHTSHIFT_APP_ID = 'nightshift';
 
+export const ENTITY_INVENTORY_APP_ID = 'entityInventoryApp';
+
 export const OBSERVABILITY_ALERTING_APP_ID = 'observabilityAlerting';
 export const OBSERVABILITY_ALERTING_APP_ROUTE = 'observability/alerting';
 export const OBSERVABILITY_ALERTING_BASE_PATH = `/app/${OBSERVABILITY_ALERTING_APP_ROUTE}`;
