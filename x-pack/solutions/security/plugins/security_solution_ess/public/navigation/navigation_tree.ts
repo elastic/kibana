@@ -16,7 +16,8 @@ import { type Services } from '../common/services';
 
 export const createNavigationTree = (
   services: Services,
-  chatExperience: AIChatExperience = AIChatExperience.Classic
+  chatExperience: AIChatExperience = AIChatExperience.Classic,
+  alertZeroEnabled: boolean = false
 ): NavigationTreeDefinition => {
   const showAgentBuilder = chatExperience === AIChatExperience.Agent;
 
@@ -31,11 +32,16 @@ export const createNavigationTree = (
 
   return {
     body: [
-      // AlertZero body (nodes omitted when securitySolution:enableAlertZero is off)
-      ...defaultNavigationTree.alertZero(),
-      ...(showAgentBuilder ? [agentBuilderLink] : []),
-      ...defaultNavigationTree.alertZeroSecondary(),
-      contextEngineLink,
+      // Without Agents, Context Engine stays at the top. With AlertZero on, Agents and Context Engine
+      // sit between Escalations and Watches. With it off, they follow Workflows.
+      ...(showAgentBuilder ? [] : [contextEngineLink]),
+      ...(alertZeroEnabled
+        ? [
+            ...defaultNavigationTree.alertZero(),
+            ...(showAgentBuilder ? [agentBuilderLink, contextEngineLink] : []),
+            ...defaultNavigationTree.alertZeroSecondary(),
+          ]
+        : []),
       {
         link: 'inbox' as AppDeepLinkId,
         icon: 'mail',
@@ -54,6 +60,7 @@ export const createNavigationTree = (
             link: securityLink(SecurityPageName.alerts),
           },
       ...getWorkflowsNavPanel(services),
+      ...(!alertZeroEnabled && showAgentBuilder ? [agentBuilderLink, contextEngineLink] : []),
       {
         id: SecurityPageName.attackDiscovery,
         icon: 'bolt',

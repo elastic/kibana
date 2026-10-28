@@ -32,7 +32,8 @@ describe('createNavigationTree', () => {
   it('places Escalations right under AlertZero, with Watches after them', async () => {
     const { body } = (await createNavigationTree(
       createServices(),
-      AIChatExperience.Agent
+      AIChatExperience.Agent,
+      true
     )) as NavigationTreeDefinition;
 
     const links = body.map((item) => item.link);
@@ -45,10 +46,11 @@ describe('createNavigationTree', () => {
     expect(watchesIndex).toBeGreaterThan(escalationsIndex);
   });
 
-  it('includes context engine after the AlertZero entries in classic chat experience, with no agent builder link', async () => {
+  it('keeps context engine at the top before the AlertZero entries in classic chat experience, with no agent builder link', async () => {
     const { body } = (await createNavigationTree(
       createServices(),
-      AIChatExperience.Classic
+      AIChatExperience.Classic,
+      true
     )) as NavigationTreeDefinition;
 
     const contextEngineIndex = body.findIndex((item) => item.link === 'context_engine');
@@ -58,23 +60,52 @@ describe('createNavigationTree', () => {
       icon: 'tableSparkles',
       link: 'context_engine',
     });
-    expect(contextEngineIndex).toBe(
-      body.findIndex((item) => item.link === alertZeroLink(SecurityPageName.alertZeroWatches)) + 1
-    );
+    expect(contextEngineIndex).toBe(0);
+    expect(body[1].link).toBe(alertZeroLink());
     expect(agentBuilderNode).toBeUndefined();
   });
 
-  it('places agent builder between Escalations and Watches when the chat experience is Agent', async () => {
+  it('places agent builder and context engine between Escalations and Watches when the chat experience is Agent', async () => {
     const { body } = (await createNavigationTree(
       createServices(),
-      AIChatExperience.Agent
+      AIChatExperience.Agent,
+      true
     )) as NavigationTreeDefinition;
 
     const links = body.map((item) => item.link);
     const escalationsIndex = links.indexOf(alertZeroLink(SecurityPageName.alertZeroEscalations));
 
     expect(links[escalationsIndex + 1]).toBe('agent_builder');
-    expect(links[escalationsIndex + 2]).toBe(alertZeroLink(SecurityPageName.alertZeroWatches));
+    expect(links[escalationsIndex + 2]).toBe('context_engine');
+    expect(links[escalationsIndex + 3]).toBe(alertZeroLink(SecurityPageName.alertZeroWatches));
+  });
+
+  describe('when AlertZero is disabled', () => {
+    it('keeps the original order with Agents and Context Engine after Workflows in Agent chat experience', async () => {
+      const { body } = (await createNavigationTree(
+        createServices(),
+        AIChatExperience.Agent,
+        false
+      )) as NavigationTreeDefinition;
+
+      const links = body.map((item) => item.link);
+      const agentBuilderIndex = links.indexOf('agent_builder');
+
+      expect(links.indexOf('discover')).toBeLessThan(agentBuilderIndex);
+      expect(links[agentBuilderIndex + 1]).toBe('context_engine');
+      expect(links).not.toContain(alertZeroLink());
+    });
+
+    it('keeps Context Engine at the top in classic chat experience', async () => {
+      const { body } = (await createNavigationTree(
+        createServices(),
+        AIChatExperience.Classic,
+        false
+      )) as NavigationTreeDefinition;
+
+      expect(body[0].link).toBe('context_engine');
+      expect(body.some((item) => item.link === 'agent_builder')).toBe(false);
+    });
   });
 
   it('includes Stack Rules in project settings > Alerts and Insights', async () => {
