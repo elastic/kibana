@@ -1578,6 +1578,50 @@ describe('LayerPanel', () => {
     });
   });
 
+  describe('layer settings visibility', () => {
+    it.each([
+      { chartIsEsql: true, referenceIsTextBased: false, settingsVisible: false },
+      { chartIsEsql: true, referenceIsTextBased: true, settingsVisible: true },
+      { chartIsEsql: false, referenceIsTextBased: false, settingsVisible: true },
+    ])(
+      'shows settings=$settingsVisible for reference lines with ES|QL chart=$chartIsEsql and text-based source=$referenceIsTextBased',
+      ({ chartIsEsql, referenceIsTextBased, settingsVisible }) => {
+        mockVisualization.getLayerType.mockReturnValue('referenceLine');
+        const referenceDatasource = referenceIsTextBased ? mockTextBasedDatasource : mockDatasource;
+        referenceDatasource.LayerSettingsComponent = jest.fn(() => <div />);
+        renderLayerPanel({
+          propsOverrides: {
+            layerId: 'referenceLine',
+            isOnlyLayer: false,
+            framePublicAPI: {
+              ...createMockFramePublicAPI(),
+              datasourceLayers: {
+                data: chartIsEsql
+                  ? mockTextBasedDatasource.publicAPIMock
+                  : mockDatasource.publicAPIMock,
+                referenceLine: referenceDatasource.publicAPIMock,
+              },
+            } as FramePublicAPI,
+          },
+          preloadedState: {
+            datasourceStates: {
+              [referenceIsTextBased ? 'textBased' : 'formBased']: {
+                isLoading: false,
+                state: { layers: { referenceLine: { columns: [] } } },
+              },
+            },
+          },
+        });
+
+        if (settingsVisible) {
+          expect(screen.getByTestId('lnsLayerSettings')).toBeInTheDocument();
+        } else {
+          expect(screen.queryByTestId('lnsLayerSettings')).not.toBeInTheDocument();
+        }
+      }
+    );
+  });
+
   describe('layer data view picker visibility', () => {
     // On ES|QL charts, form-based reference line layers must not expose the
     // data view switcher (rendered via the datasource LayerPanelComponent).

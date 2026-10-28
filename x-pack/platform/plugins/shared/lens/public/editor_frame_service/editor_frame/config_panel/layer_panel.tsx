@@ -24,7 +24,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { isTextBasedAttributes, LENS_LAYER_TYPES } from '@kbn/lens-common';
+import { isTextBasedAttributes, LENS_LAYER_TYPES, LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import { getTabIdAttribute } from '@kbn/unified-tabs';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -422,11 +422,17 @@ export function LayerPanel(props: LayerPanelProps) {
     [activeVisualization, layerId, props.framePublicAPI, visualizationState]
   );
 
-  const hasLayerSettings = Boolean(
-    (Object.values(visualizationLayerSettings).some(Boolean) &&
-      activeVisualization.LayerSettingsComponent) ||
-      layerDatasource?.LayerSettingsComponent
-  );
+  const isStaticReferenceLineOnEsqlChart =
+    layerType === LENS_LAYER_TYPES.REFERENCELINE &&
+    datasourceId === LENS_DATASOURCE_ID.FORM_BASED &&
+    isEsqlChart(props.framePublicAPI.datasourceLayers);
+  const hasLayerSettings =
+    !isStaticReferenceLineOnEsqlChart &&
+    Boolean(
+      (Object.values(visualizationLayerSettings).some(Boolean) &&
+        activeVisualization.LayerSettingsComponent) ||
+        layerDatasource?.LayerSettingsComponent
+    );
 
   const layerSettingsAction = useMemo(
     () =>
