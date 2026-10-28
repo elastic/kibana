@@ -29,10 +29,13 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
         consts: { no_rows: [] },
         steps: {
           collect_active_rules: { output: { expected: 1 } },
-          collect_candidates: { output: { count: 3 } },
           harvest_fp_alerts_by_rule: { output: { values: [] } },
           list_active_reviews: { output: { results: [] } },
+          list_enabled_rules: { output: { data: [] } },
+          resolve_enabled_rules: { output: { rule_revision_keys: ',' } },
           resolve_fanout_rows: { output: { rows: [['rule-1'], ['rule-2']] } },
+          resolve_screened_rules: { output: { count: 2 } },
+          screen_rule_fp_rates: { output: { values: [] } },
         },
       },
       {
@@ -40,6 +43,22 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
         steps: {
           harvest_fp_alerts_by_rule: { error: { message: 'search failed' } },
           list_active_reviews: { error: { message: 'HTTP 500' } },
+        },
+      },
+      {
+        consts: { no_rows: [] },
+        steps: { list_enabled_rules: { error: { message: 'HTTP 500' } } },
+      },
+      {
+        consts: { no_rows: [] },
+        steps: { screen_rule_fp_rates: { error: { message: 'search failed' } } },
+      },
+      {
+        consts: { no_rows: [] },
+        steps: {
+          list_enabled_rules: { output: { data: [], total: 10001 } },
+          resolve_enabled_rules: { output: { rule_revision_keys: ',', truncated: true } },
+          resolve_fanout_rows: { output: { rows: [['rule-1']] } },
         },
       },
     ],
