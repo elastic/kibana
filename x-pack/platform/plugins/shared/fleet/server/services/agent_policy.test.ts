@@ -25,6 +25,7 @@ import {
   FleetUnauthorizedError,
   HostedAgentPolicyRestrictionRelatedError,
   AgentPolicyInvalidError,
+  FleetError,
 } from '../errors';
 import type {
   AgentPolicy,
@@ -1165,16 +1166,32 @@ describe('Agent policy', () => {
       expect(mockedPackagePolicyService.bulkUpdate).not.toHaveBeenCalled();
     });
 
-    it('should not delete the agent policy when removing it from a shared package policy fails', async () => {
+    it('should remove the agent policy from shared package policies before deleting the others', async () => {
       mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
-        {
-          id: 'package-1',
-          version: 'WzEsMV0=',
-          policy_id: 'policy_1',
-          policy_ids: ['policy_1', 'int_policy_2'],
-        },
+        { id: 'package-1', policy_ids: ['policy_1', 'policy_2'] },
+        { id: 'package-2', policy_ids: ['policy_1'] },
       ] as any);
-      mockedPackagePolicyService.bulkUpdatePartial.mockResolvedValue({
+      const callOrder: string[] = [];
+      mockedPackagePolicyService.bulkUpdatePartial.mockImplementationOnce(async () => {
+        callOrder.push('bulkUpdatePartial');
+        return { updatedPolicies: [{ id: 'package-1' }] as any, failedPolicies: [] };
+      });
+      mockedPackagePolicyService.delete.mockImplementationOnce(async () => {
+        callOrder.push('delete');
+        return [];
+      });
+
+      await agentPolicyService.delete(soClient, esClient, 'policy_1');
+
+      expect(callOrder).toEqual(['bulkUpdatePartial', 'delete']);
+    });
+
+    it('should not delete the agent policy when removing it from shared package policies fails', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        { id: 'package-1', policy_ids: ['policy_1', 'policy_2'] },
+        { id: 'package-2', policy_ids: ['policy_1'] },
+      ] as any);
+      mockedPackagePolicyService.bulkUpdatePartial.mockResolvedValueOnce({
         updatedPolicies: [],
         failedPolicies: [
           {
@@ -1183,42 +1200,36 @@ describe('Agent policy', () => {
           },
         ],
       });
+      mockedPackagePolicyService.delete.mockClear();
+      esClient.deleteByQuery.mockClear();
 
       await expect(agentPolicyService.delete(soClient, esClient, 'policy_1')).rejects.toThrow(
         'Cannot delete agent policy [policy_1]: failed to remove it from shared package policies [package-1]: version conflict'
       );
+
+      expect(mockedPackagePolicyService.delete).not.toHaveBeenCalled();
       expect(esClient.deleteByQuery).not.toHaveBeenCalled();
       expect(soClient.delete).not.toHaveBeenCalled();
     });
 
-    it('should not delete exclusive package policies when removing it from a shared package policy fails', async () => {
+    it('should not delete the agent policy with force when removing it from shared package policies fails', async () => {
       mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
-        {
-          id: 'package-1',
-          version: 'WzEsMV0=',
-          policy_id: 'policy_1',
-          policy_ids: ['policy_1', 'int_policy_2'],
-        },
-        {
-          id: 'package-2',
-          policy_id: 'policy_1',
-          policy_ids: ['policy_1'],
-        },
+        { id: 'package-1', policy_ids: ['policy_1', 'policy_2'] },
       ] as any);
-      mockedPackagePolicyService.bulkUpdatePartial.mockResolvedValue({
+      mockedPackagePolicyService.bulkUpdatePartial.mockResolvedValueOnce({
         updatedPolicies: [],
         failedPolicies: [
           {
             update: { id: 'package-1', version: 'WzEsMV0=', attributes: {} },
-            error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+            error: { error: 'Conflict', message: 'failed', statusCode: 409 },
           },
         ],
       });
 
-      await expect(agentPolicyService.delete(soClient, esClient, 'policy_1')).rejects.toThrow(
-        'Cannot delete agent policy [policy_1]: failed to remove it from shared package policies [package-1]: version conflict'
-      );
-      expect(mockedPackagePolicyService.delete).not.toHaveBeenCalled();
+      await expect(
+        agentPolicyService.delete(soClient, esClient, 'policy_1', { force: true })
+      ).rejects.toThrow(FleetError);
+
       expect(soClient.delete).not.toHaveBeenCalled();
     });
 
