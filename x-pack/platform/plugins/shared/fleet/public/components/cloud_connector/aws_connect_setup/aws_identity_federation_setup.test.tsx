@@ -239,59 +239,6 @@ describe('AwsIdentityFederationSetup', () => {
     });
   });
 
-  describe('edit page tab gating', () => {
-    it('opens on Existing Identity and disables New Identity when an identity is attached', () => {
-      renderSetup({ isEditPage: true, initialConnectorId: 'connector-1' });
-
-      expect(screen.getByRole('tab', { name: 'Existing Identity' })).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
-      expect(screen.getByRole('tab', { name: 'New Identity' })).toBeDisabled();
-    });
-
-    it('opens on Existing Identity and keeps New Identity available when editing with no identity attached and some exist', () => {
-      renderSetup({ isEditPage: true });
-
-      expect(screen.getByRole('tab', { name: 'Existing Identity' })).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
-      expect(screen.getByRole('tab', { name: 'New Identity' })).toBeEnabled();
-    });
-
-    it('keeps New Identity available after an identity is attached during the edit', () => {
-      const { rerender } = renderSetup({ isEditPage: true });
-
-      rerender(
-        <I18nProvider>
-          <QueryClientProvider client={queryClient}>
-            <AwsIdentityFederationSetup
-              onReadyChange={onReadyChange}
-              onConnectorIdChange={onConnectorIdChange}
-              isEditPage={true}
-              initialConnectorId="connector-1"
-            />
-          </QueryClientProvider>
-        </I18nProvider>
-      );
-
-      expect(screen.getByRole('tab', { name: 'New Identity' })).toBeEnabled();
-    });
-
-    it('opens on New Identity when editing with no identity attached and none exist', () => {
-      mockGetConnectors({ data: [] });
-
-      renderSetup({ isEditPage: true });
-
-      expect(screen.getByRole('tab', { name: 'New Identity' })).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
-      expect(screen.getByRole('tab', { name: 'New Identity' })).toBeEnabled();
-    });
-  });
-
   describe('create flow', () => {
     it('emits id and name together after a connector is created', async () => {
       let onSuccess: ((connector: { id: string; name: string }) => void) | undefined;

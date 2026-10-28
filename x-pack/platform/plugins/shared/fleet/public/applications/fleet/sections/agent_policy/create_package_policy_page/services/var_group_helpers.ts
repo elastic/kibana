@@ -156,7 +156,35 @@ export function getHiddenVarGroupOptionsForDisabledProviders(
   disabledProviders: readonly CloudProvider[],
   savedSelections?: VarGroupSelection
 ): Record<string, string[]> | undefined {
-  if (!varGroups?.length || !disabledProviders.length) {
+  if (!disabledProviders.length) {
+    return undefined;
+  }
+  return getHiddenIdentityFederationOptions(
+    varGroups,
+    (provider) => disabledProviders.includes(provider),
+    savedSelections
+  );
+}
+
+/**
+ * Compute the var_group options to hide when editing a policy that was not set up with
+ * identity federation. Every identity federation option is hidden unless it is the saved
+ * selection for its var_group, so a policy created with identity federation keeps it while
+ * any other policy cannot be switched to it after creation.
+ */
+export function getHiddenIdentityFederationOptionsForEditPage(
+  varGroups: RegistryVarGroup[] | undefined,
+  savedSelections?: VarGroupSelection
+): Record<string, string[]> | undefined {
+  return getHiddenIdentityFederationOptions(varGroups, () => true, savedSelections);
+}
+
+function getHiddenIdentityFederationOptions(
+  varGroups: RegistryVarGroup[] | undefined,
+  shouldHideProvider: (provider: CloudProvider) => boolean,
+  savedSelections?: VarGroupSelection
+): Record<string, string[]> | undefined {
+  if (!varGroups?.length) {
     return undefined;
   }
 
@@ -166,7 +194,7 @@ export function getHiddenVarGroupOptionsForDisabledProviders(
       .filter(
         (option) =>
           isCloudProvider(option.provider) &&
-          disabledProviders.includes(option.provider) &&
+          shouldHideProvider(option.provider) &&
           savedSelections?.[varGroup.name] !== option.name
       )
       .map((option) => option.name);

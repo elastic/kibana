@@ -317,6 +317,30 @@ describe('useVarGroupSelections', () => {
       expect(result.current.selections).toEqual({ auth_method: 'api_key' });
     });
 
+    it('should not infer a hidden option on the edit page', () => {
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: mockVarGroups,
+          savedSelections: undefined,
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: {
+            vars: {
+              client_id: { type: 'text', value: 'my-client' },
+              client_secret: { type: 'password', value: 'shhh' },
+            },
+          } as any,
+          hideInVarGroupOptions: { auth_method: ['oauth'] },
+          isEditPage: true,
+        })
+      );
+
+      expect(result.current.selections).toEqual({ auth_method: 'api_key' });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: { auth_method: 'api_key' },
+      });
+    });
+
     it('should fall back to defaults on the edit page when no vars are populated', () => {
       const { result } = renderHook(() =>
         useVarGroupSelections({

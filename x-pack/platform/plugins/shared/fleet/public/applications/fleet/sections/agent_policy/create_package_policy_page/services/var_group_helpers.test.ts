@@ -8,6 +8,7 @@
 import type { PackageInfo, RegistryVarGroup } from '../../../../types';
 
 import {
+  getHiddenIdentityFederationOptionsForEditPage,
   getHiddenVarGroupOptionsForDisabledProviders,
   getHiddenVarGroupOptionsForPolicyTemplate,
   mergeHiddenVarGroupOptions,
@@ -60,6 +61,61 @@ describe('getHiddenVarGroupOptionsForDisabledProviders', () => {
     expect(getHiddenVarGroupOptionsForDisabledProviders(varGroups, [])).toBeUndefined();
     expect(getHiddenVarGroupOptionsForDisabledProviders(undefined, ['aws'])).toBeUndefined();
     expect(getHiddenVarGroupOptionsForDisabledProviders([], ['aws'])).toBeUndefined();
+  });
+});
+
+describe('getHiddenIdentityFederationOptionsForEditPage', () => {
+  const varGroups: RegistryVarGroup[] = [
+    {
+      name: 'credential_type',
+      title: 'Setup Access',
+      selector_title: 'Preferred method',
+      options: [
+        { name: 'identity_federation', title: 'Identity Federation', vars: [], provider: 'aws' },
+        { name: 'direct_access_key', title: 'Direct Access Keys', vars: [] },
+        { name: 'temporary_keys', title: 'Temporary Keys', vars: [] },
+      ],
+    },
+    {
+      name: 'other_group',
+      title: 'Other',
+      selector_title: 'Other',
+      options: [
+        { name: 'azure_if', title: 'Azure IF', vars: [], provider: 'azure' },
+        { name: 'plain', title: 'Plain', vars: [] },
+      ],
+    },
+  ];
+
+  it('hides every identity federation option when the policy has no saved selections', () => {
+    expect(getHiddenIdentityFederationOptionsForEditPage(varGroups)).toEqual({
+      credential_type: ['identity_federation'],
+      other_group: ['azure_if'],
+    });
+  });
+
+  it('hides identity federation when the policy was saved with another option', () => {
+    expect(
+      getHiddenIdentityFederationOptionsForEditPage(varGroups, {
+        credential_type: 'direct_access_key',
+      })
+    ).toEqual({
+      credential_type: ['identity_federation'],
+      other_group: ['azure_if'],
+    });
+  });
+
+  it('keeps identity federation visible for the var_group it was saved with', () => {
+    expect(
+      getHiddenIdentityFederationOptionsForEditPage(varGroups, {
+        credential_type: 'identity_federation',
+      })
+    ).toEqual({ other_group: ['azure_if'] });
+  });
+
+  it('returns undefined when there are no var_groups', () => {
+    expect(getHiddenIdentityFederationOptionsForEditPage(undefined)).toBeUndefined();
+    expect(getHiddenIdentityFederationOptionsForEditPage([])).toBeUndefined();
   });
 });
 

@@ -54,6 +54,7 @@ import {
   isAdvancedVar,
   shouldShowVar,
   isVarRequiredByVarGroup,
+  getHiddenIdentityFederationOptionsForEditPage,
   getHiddenVarGroupOptionsForDisabledProviders,
   mergeHiddenVarGroupOptions,
 } from '../../services';
@@ -127,6 +128,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
     // Identity federation options for CSPs switched off via LaunchDarkly are hidden alongside
     // any options the caller already hides (e.g. unsupported by the scoped policy template).
+    // On the edit page identity federation is only offered to policies already saved with it.
     const disabledIdentityFederationProviders = useDisabledIdentityFederationProviders();
     const effectiveHideInVarGroupOptions = useMemo(
       () =>
@@ -136,13 +138,20 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             varGroups,
             disabledIdentityFederationProviders,
             packagePolicy.var_group_selections
-          )
+          ),
+          isEditPage
+            ? getHiddenIdentityFederationOptionsForEditPage(
+                varGroups,
+                packagePolicy.var_group_selections
+              )
+            : undefined
         ),
       [
         hideInVarGroupOptions,
         varGroups,
         disabledIdentityFederationProviders,
         packagePolicy.var_group_selections,
+        isEditPage,
       ]
     );
 

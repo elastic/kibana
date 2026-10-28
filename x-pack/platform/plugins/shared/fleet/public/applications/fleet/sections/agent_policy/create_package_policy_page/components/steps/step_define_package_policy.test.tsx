@@ -585,6 +585,67 @@ describe('StepDefinePackagePolicy', () => {
     });
   });
 
+  describe('identity federation on the edit page', () => {
+    const packageInfoWithIdentityFederation: PackageInfo = {
+      ...packageInfo,
+      var_groups: [
+        {
+          name: 'credential_type',
+          title: 'Setup Access',
+          selector_title: 'Preferred method',
+          options: [
+            {
+              name: 'identity_federation',
+              title: 'Identity Federation',
+              vars: ['role_arn'],
+              provider: 'aws',
+            },
+            { name: 'direct_access_key', title: 'Direct Access Keys', vars: ['access_key_id'] },
+            { name: 'temporary_keys', title: 'Temporary Keys', vars: ['session_token'] },
+          ],
+        },
+      ],
+    };
+
+    const renderWithSelection = (selection: string, isEditPage: boolean) =>
+      testRenderer.render(
+        <StepDefinePackagePolicy
+          packageInfo={packageInfoWithIdentityFederation}
+          packagePolicy={{
+            ...packagePolicy,
+            var_group_selections: { credential_type: selection },
+          }}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={validationResults}
+          submitAttempted={false}
+          isEditPage={isEditPage}
+        />
+      );
+
+    const optionNames = () =>
+      Array.from(
+        renderResult.getByTestId('varGroupSelector-credential_type').querySelectorAll('option')
+      ).map((option) => option.getAttribute('value'));
+
+    it('does not offer identity federation when editing a policy saved with another option', () => {
+      renderResult = renderWithSelection('direct_access_key', true);
+
+      expect(optionNames()).toEqual(['direct_access_key', 'temporary_keys']);
+    });
+
+    it('keeps identity federation when editing a policy saved with it', () => {
+      renderResult = renderWithSelection('identity_federation', true);
+
+      expect(optionNames()).toEqual(['identity_federation', 'direct_access_key', 'temporary_keys']);
+    });
+
+    it('offers identity federation when creating a policy', () => {
+      renderResult = renderWithSelection('direct_access_key', false);
+
+      expect(optionNames()).toEqual(['identity_federation', 'direct_access_key', 'temporary_keys']);
+    });
+  });
+
   describe('namespace customization toggle', () => {
     const mockUseSpaceSettingsContext = useSpaceSettingsContext as jest.Mock;
 

@@ -149,7 +149,15 @@ export function useVarGroupSelections({
       return defaults;
     }
     const inferred = inferVarGroupSelections(varGroups, packagePolicy?.vars);
-    return inferred ? { ...defaults, ...inferred } : defaults;
+    if (!inferred) {
+      return defaults;
+    }
+    const visibleInferred = Object.fromEntries(
+      Object.entries(inferred).filter(
+        ([groupName, optionName]) => !hideInVarGroupOptions?.[groupName]?.includes(optionName)
+      )
+    );
+    return { ...defaults, ...visibleInferred };
   }, [varGroups, isAgentlessEnabled, hideInVarGroupOptions, isEditPage, packagePolicy?.vars]);
 
   // Derive current selections from saved or compute them

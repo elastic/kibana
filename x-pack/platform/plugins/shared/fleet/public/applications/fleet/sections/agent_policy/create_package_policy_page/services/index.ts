@@ -21,6 +21,7 @@ export {
   getSelectedOption,
   getHiddenVarGroupOptionsForPolicyTemplate,
   getHiddenVarGroupOptionsForDisabledProviders,
+  getHiddenIdentityFederationOptionsForEditPage,
   mergeHiddenVarGroupOptions,
   isInputCompatibleWithVarGroupSelections,
   isInputVisibleForVarGroupSelections,
