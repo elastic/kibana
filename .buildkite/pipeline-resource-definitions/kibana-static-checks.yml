@@ -2,10 +2,10 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: bk-kibana-quick-checks-from-pr
-  description: 'Run only the quick CI checks for a PR'
+  name: bk-kibana-static-checks
+  description: 'Runs the static code checks for a PR, without the Kibana build and test suites'
   links:
-    - url: 'https://buildkite.com/elastic/kibana-quick-checks-from-pr'
+    - url: 'https://buildkite.com/elastic/kibana-static-checks'
       title: Pipeline link
 spec:
   type: buildkite-pipeline
@@ -15,26 +15,26 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana / quick checks from PR
-      description: 'Runs Quick Checks, Checks, Linting and Check Types for a PR, without the full build and test suites.'
+      name: kibana / static checks
+      description: 'Runs the static code checks (linting, type checks and other validations) for a PR, without the Kibana build and test suites.'
     spec:
       env:
         ELASTIC_PR_COMMENTS_ENABLED: 'true'
         ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
-        GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-quick-checks-from-pr
+        GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-static-checks
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
       allow_rebuilds: true
       branch_configuration: ''
       cancel_intermediate_builds: true
       default_branch: main
       repository: elastic/kibana
-      pipeline_file: .buildkite/scripts/pipelines/quick_checks_from_pr/pipeline.sh
+      pipeline_file: .buildkite/scripts/pipelines/static_checks/pipeline.sh
       initial_step_plugins:
         - sparse-checkout#v1.6.0:
             no_cone: true
             paths:
               - .buildkite
-              - .node-version
+              - .nvmrc
               - package.json
               - tsconfig.base.json
               - versions.json

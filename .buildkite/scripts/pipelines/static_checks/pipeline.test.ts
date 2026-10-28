@@ -13,7 +13,14 @@ import { parse } from 'yaml';
 
 const mockEmitPipeline = jest.fn();
 const mockRunPreBuild = jest.fn();
-const mockGetPipeline = jest.fn();
+
+// Same behavior as the real getPipeline without options: the file, minus its leading `steps:`.
+const mockGetPipeline = jest.fn((filename: string) =>
+  fs
+    .readFileSync(Path.resolve(__dirname, '../../../..', filename))
+    .toString()
+    .replace(/^steps:/, '')
+);
 
 jest.mock('#pipeline-utils', () => ({
   emitPipeline: mockEmitPipeline,
@@ -34,34 +41,37 @@ const importPipelineModule = async () => {
   await flushPromises();
 };
 
-describe('quick_checks_from_pr pipeline generation', () => {
+describe('static_checks pipeline generation', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     mockRunPreBuild.mockResolvedValue(undefined);
   });
 
-  it('emits only the quick gate steps from base.yml', async () => {
-    mockGetPipeline.mockReturnValue(
-      fs
-        .readFileSync(Path.resolve(__dirname, '../../../pipelines/pull_request/base.yml'))
-        .toString()
-    );
-
+  it('emits the static check steps and the post-build step, without the build or test suites', async () => {
     await importPipelineModule();
 
     expect(mockEmitPipeline).toHaveBeenCalledTimes(1);
-    const [[, stepsYaml]] = mockEmitPipeline.mock.calls[0];
-    const { steps } = parse(stepsYaml);
-    expect(steps.map(({ key }: { key: string }) => key)).toEqual([
+    const [chunks] = mockEmitPipeline.mock.calls[0];
+    const { steps } = parse(chunks.join('\n'));
+
+    const names = steps.map(
+      ({ key, label, wait }: { key?: string; label?: string; wait?: null }) =>
+        key ?? label ?? (wait === null ? 'wait' : undefined)
+    );
+
+    expect(names).toEqual([
       'quick_checks',
       'checks',
       'linting',
       'check_types',
+      'check',
+      'wait',
+      'Post-Build',
     ]);
   });
 
-  it('fails when a quick gate step is missing from base.yml', async () => {
-    mockGetPipeline.mockReturnValue('steps:\n  - label: Other\n    key: other\n');
+  it('fails when pre_build fails', async () => {
+    mockRunPreBuild.mockRejectedValue(new Error('pre_build failed'));
     const exit = jest.spyOn(process, 'exit').mockImplementation((() => undefined) as never);
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
 
