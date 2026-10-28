@@ -64,7 +64,9 @@ describe('RunLimitsBanner', () => {
     );
 
     const callout = screen.getByTestId('nightshiftRunQuotaReached-detection');
-    expect(callout).toHaveTextContent('Discovery reached daily run limit of 100 for this deployment');
+    expect(callout).toHaveTextContent(
+      'Discovery reached daily run limit of 100 for this deployment'
+    );
     expect(callout).toHaveTextContent(
       'Further scheduled runs will be paused until the limit resets at midnight (UTC). You can still trigger discovery process manually.'
     );
