@@ -272,6 +272,94 @@ it.each([
   expect(result.runs[0]).toMatchObject({ title: triggeredBy, investigationId: `inv-${stepId}` });
 });
 
+it.each([
+  [
+    { investigation_id: 'inv-1' },
+    { status: 'succeeded', investigationId: 'inv-1', skipReason: null },
+  ],
+  [
+    { skip_reason: 'no_open_investigation' },
+    { status: 'skipped', investigationId: undefined, skipReason: 'no_open_investigation' },
+  ],
+])('reports a recovery follow-up with output %j', async (output, expected) => {
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [{ id: 'exec-1', status: 'completed', triggeredBy: 'alerting.v1.alertStatusChanged' }],
+    total: 1,
+  });
+  mockSearchStepExecutions.mockImplementation(async ({ stepId }) => ({
+    results: stepId === 'follow_up_recovered_alert' ? [{ workflowRunId: 'exec-1', output }] : [],
+  }));
+
+  const result = await call('auto-1');
+  expect(result.runs[0]).toMatchObject(expected);
+});
+
+it('links activation and recovery runs of an alert-only workflow to their own steps', async () => {
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [
+      { id: 'exec-active', status: 'completed', triggeredBy: 'alerting.v1.alertStatusChanged' },
+      { id: 'exec-recovered', status: 'completed', triggeredBy: 'alerting.v1.alertStatusChanged' },
+    ],
+    total: 2,
+  });
+  mockSearchStepExecutions.mockImplementation(async ({ stepId }) => ({
+    results:
+      stepId === 'trigger_investigation'
+        ? [
+            {
+              workflowRunId: 'exec-active',
+              input: { title: 'Latency is too high' },
+              output: { investigation_id: 'inv-1' },
+            },
+          ]
+        : stepId === 'follow_up_recovered_alert'
+        ? [
+            {
+              workflowRunId: 'exec-recovered',
+              output: { investigation_id: 'inv-1', execution_id: 'exec-round' },
+            },
+          ]
+        : [],
+  }));
+
+  const result = await call('auto-1');
+  expect(result.runs).toEqual([
+    expect.objectContaining({
+      id: 'exec-active',
+      status: 'succeeded',
+      title: 'Latency is too high',
+      investigationId: 'inv-1',
+    }),
+    expect.objectContaining({
+      id: 'exec-recovered',
+      status: 'succeeded',
+      title: undefined,
+      investigationId: 'inv-1',
+      skipReason: null,
+    }),
+  ]);
+});
+
+it('reports a recovery follow-up that failed as failed, not skipped', async () => {
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [{ id: 'exec-1', status: 'failed', triggeredBy: 'alerting.v1.alertStatusChanged' }],
+    total: 1,
+  });
+  mockSearchStepExecutions.mockImplementation(async ({ stepId }) => ({
+    results: stepId === 'follow_up_recovered_alert' ? [{ workflowRunId: 'exec-1' }] : [],
+  }));
+
+  const result = await call('auto-1');
+  expect(result.runs[0]).toMatchObject({
+    status: 'failed',
+    investigationId: undefined,
+    skipReason: null,
+  });
+});
+
 it('reports budget denials as skipped, preserving the limit at dispatch and excluding them from usage', async () => {
   mockGet.mockResolvedValueOnce({
     attributes: { workflowId: 'wf-1', runtime: { dailyDispatchLimit: 10 } },
@@ -296,4 +384,23 @@ it('reports budget denials as skipped, preserving the limit at dispatch and excl
     runs: [{ status: 'skipped', skipReason: 'daily_limit', dailyLimit: 2 }],
   });
   expect(result.runs[0].investigationId).toBeUndefined();
+});
+
+it('reports global investigation-limit denials as skipped with their own reason', async () => {
+  mockGet.mockResolvedValueOnce({
+    attributes: { workflowId: 'wf-1', runtime: { dailyDispatchLimit: 10 } },
+  });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [{ id: 'exec-1', status: 'completed', triggeredBy: 'scheduled' }],
+    total: 1,
+    page: 1,
+    size: 20,
+  });
+  mockSearchStepExecutions.mockResolvedValue({
+    results: [{ workflowRunId: 'exec-1', output: { skip_reason: 'investigation_limit' } }],
+  });
+
+  const result = await call('auto-1');
+  expect(result.runs[0]).toMatchObject({ status: 'skipped', skipReason: 'investigation_limit' });
+  expect(result.runs[0].dailyLimit).toBeUndefined();
 });
