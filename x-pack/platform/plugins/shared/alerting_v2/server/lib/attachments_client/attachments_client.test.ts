@@ -9,6 +9,7 @@ jest.mock('uuid', () => ({
   v4: () => 'generated-attachment-id',
 }));
 
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
 import { ACTION_POLICY_ATTACHMENT_TYPE, RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
@@ -251,14 +252,59 @@ describe('createAttachmentsClient', () => {
 
       const result = await rules.saveDraft(rules.getDraft(), data);
 
-      expect(attachments.add).toHaveBeenCalledWith({
-        id: 'generated-attachment-id',
-        type: RULE_ATTACHMENT_TYPE,
-        description: 'Rule: CPU high',
-        data,
-      });
+      expect(attachments.add).toHaveBeenCalledWith(
+        {
+          id: 'generated-attachment-id',
+          type: RULE_ATTACHMENT_TYPE,
+          description: 'Rule: CPU high',
+          data,
+        },
+        undefined
+      );
       expect(attachments.update).not.toHaveBeenCalled();
       expect(result).toEqual({ id: 'added', current_version: 1 });
+    });
+
+    it('links a new attachment to the draft origin and attributes it to the given actor', async () => {
+      const { rules } = createAttachmentsClient(attachments);
+      const data = { metadata: { name: 'CPU high' } };
+
+      await rules.saveDraft(
+        { ...rules.getDraft(), origin: 'rule-1' },
+        data,
+        ATTACHMENT_REF_ACTOR.agent
+      );
+
+      expect(attachments.add).toHaveBeenCalledWith(
+        {
+          id: 'generated-attachment-id',
+          type: RULE_ATTACHMENT_TYPE,
+          description: 'Rule: CPU high',
+          data,
+          origin: 'rule-1',
+        },
+        ATTACHMENT_REF_ACTOR.agent
+      );
+    });
+
+    it('attributes an update to the given actor', async () => {
+      attachments.getAttachmentRecord.mockReturnValue(
+        record('policy-att', ACTION_POLICY_ATTACHMENT_TYPE, { name: 'Original' })
+      );
+      attachments.update.mockResolvedValue({ id: 'policy-att', current_version: 2 } as never);
+      const { actionPolicies } = createAttachmentsClient(attachments);
+
+      await actionPolicies.saveDraft(
+        actionPolicies.getDraft('policy-att'),
+        { name: 'Renamed' },
+        ATTACHMENT_REF_ACTOR.agent
+      );
+
+      expect(attachments.update).toHaveBeenCalledWith(
+        'policy-att',
+        { data: { name: 'Renamed' }, description: 'Action Policy: Renamed' },
+        ATTACHMENT_REF_ACTOR.agent
+      );
     });
 
     it('updates an existing attachment', async () => {
@@ -270,10 +316,11 @@ describe('createAttachmentsClient', () => {
 
       await actionPolicies.saveDraft(actionPolicies.getDraft('policy-att'), data);
 
-      expect(attachments.update).toHaveBeenCalledWith('policy-att', {
-        data,
-        description: 'Action Policy: Renamed',
-      });
+      expect(attachments.update).toHaveBeenCalledWith(
+        'policy-att',
+        { data, description: 'Action Policy: Renamed' },
+        undefined
+      );
       expect(attachments.add).not.toHaveBeenCalled();
     });
 
@@ -286,7 +333,8 @@ describe('createAttachmentsClient', () => {
         expect.objectContaining({
           type: WORKFLOW_YAML_ATTACHMENT_TYPE,
           description: 'Workflow: generated-attachment-id',
-        })
+        }),
+        undefined
       );
     });
 
