@@ -1,5 +1,5 @@
 {
-  "sha1": "0910950779d0c2a16f9576d809fea107a3025687",
+  "sha1": "492140c31c577267eb186f9744de2910857a6ab4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -752,8 +752,8 @@
       }
     },
     {
-      "id": "77cb8a6df1d9f58-3470d1f1a36241a",
-      "title": "Rules Page - Header should open settings flyout, verify buttons state, and close successfully",
+      "id": "77cb8a6df1d9f58-4e0a804531fa0f0",
+      "title": "Rules Page - Header should open settings page, verify buttons state, and cancel successfully",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

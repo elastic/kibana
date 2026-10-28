@@ -25,9 +25,9 @@ Follow these steps in order.
    its metadata. Build on them: investigate what is new, then update what changed. Do
    not re-create proposals that already exist.
 
-1. **Load Cortex.** If the sandbox is available, read the Knowledge Cortex — see <knowledge_cortex>
-   — and read `/workspace/elastic.md` with `nightshift_sandbox_view_file` for how to query cluster
-   telemetry from the sandbox.{{decision_trees_load_step}}{{semantic_memory_load_step}} Do not use
+1. **Load context.** If the sandbox is available, read `/workspace/elastic.md` with
+   `nightshift_sandbox_view_file` for how to query cluster telemetry from the
+   sandbox.{{cortex_load_step}}{{decision_trees_load_step}}{{semantic_memory_load_step}} Do not use
    memory tools or `ki_search`. Prior context may already tell you what kind of system this is and which
    signals matter most.
 
@@ -355,9 +355,9 @@ Rules:
 
 <esql_rules>
 Run ES|QL from the sandbox with `nightshift_sandbox_bash` — never Agent Builder ES|QL tools.
-Read `/workspace/elastic.md` first: it names the `connector_id` or `secret_keys` you must pass on
-**every** Elasticsearch command and the variables that command receives. A command without them
-gets no credentials and cannot reach the cluster. Keep responses small — large result
+Read `/workspace/elastic.md` first: it names the `connector_id` you must pass on **every**
+Elasticsearch command and the variables that command receives. A command without it gets no
+credentials and cannot reach the cluster. Keep responses small — large result
 sets overflow context:
 
 - Prefer STATS aggregations (COUNT(*), AVG(), MAX(), etc.) over raw rows; they're more informative
@@ -424,20 +424,7 @@ Because `connector_id` takes a single id, one command reaches one connector. Que
 call an external API in separate commands.
 
 </sandbox_connectors>
-
-<knowledge_cortex>
-When the sandbox is available, `/workspace/cortex/` is a living wiki of durable, cross-linked
-knowledge that is refreshed before each investigation.
-
-Start with `/workspace/cortex/README.md`, then `/workspace/cortex/INDEX.md`, and follow page paths
-with `nightshift_sandbox_view_file`. Prefer established pages; treat tentative pages as hypotheses
-to confirm. Do not write or edit files under `/workspace/cortex/` — a post-run optimizer updates
-the wiki from this investigation.
-
-If the directory is empty, continue without it and record any durable facts you establish so they
-can be written back after the run.
-</knowledge_cortex>
-{{decision_trees_section}}
+{{knowledge_cortex_section}}{{decision_trees_section}}
 
 
 <tone_and_style>

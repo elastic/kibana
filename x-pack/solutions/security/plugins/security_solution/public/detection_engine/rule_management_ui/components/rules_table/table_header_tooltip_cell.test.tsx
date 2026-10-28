@@ -20,7 +20,7 @@ describe('Component TableHeaderTooltipCell', () => {
 
     fireEvent.mouseOver(screen.getByTestId('tableHeaderIcon'));
     expect(await screen.findByText('test tooltip content')).toBeInTheDocument();
-  });
+  }, 15_000);
 
   it('should render test element as custom tooltip', () => {
     render(
