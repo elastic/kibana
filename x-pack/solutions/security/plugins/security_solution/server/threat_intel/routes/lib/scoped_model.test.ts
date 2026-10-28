@@ -152,7 +152,12 @@ describe('resolveScopedModel', () => {
 
     expect(outcome.ok).toBe(true);
     expect(inference.getChatModel).toHaveBeenCalledWith(
-      expect.objectContaining({ connectorId: 'genai-default' })
+      expect.objectContaining({
+        connectorId: 'genai-default',
+        chatModelOptions: {
+          telemetryMetadata: { pluginId: TELEMETRY_PLUGIN_ID, aggregateBy: 'alertzero_parent' },
+        },
+      })
     );
   });
 

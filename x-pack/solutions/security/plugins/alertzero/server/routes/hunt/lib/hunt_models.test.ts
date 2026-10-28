@@ -69,6 +69,7 @@ describe('resolveHuntModels', () => {
   it('attributes every resolved tier model to the caller-provided telemetry plugin id', async () => {
     await resolve();
 
+    expect(resolveScopedModelMock).toHaveBeenCalledTimes(2);
     for (const call of resolveScopedModelMock.mock.calls) {
       expect(call[0].chatModelOptions).toEqual({
         telemetryMetadata: {
