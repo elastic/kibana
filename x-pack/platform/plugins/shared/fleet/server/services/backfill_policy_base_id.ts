@@ -64,6 +64,32 @@ export const BACKFILL_TARGETS: BackfillTarget[] = [
 // where this one stopped. Both indices fit in the timeout of the Fleet setup task.
 export const BACKFILL_TIME_BUDGET_MS = 4 * 60 * 1000;
 
+// Requests rejected by a circuit breaker (429) or answered by an overloaded node are retried within the
+// time budget, with a growing delay, rather than on the next Fleet setup: setup requests are rejected
+// by the same breaker and may never get to schedule the task again. Updated documents are not selected
+// again, so retrying a batch is safe.
+export const BACKFILL_RETRY_BASE_DELAY_MS = 2000;
+const BACKFILL_RETRY_MAX_DELAY_MS = 30 * 1000;
+const RETRYABLE_STATUS_CODES = [429, 502, 503, 504];
+
+const isRetryable = (err: unknown) =>
+  RETRYABLE_STATUS_CODES.includes((err as { statusCode?: number } | undefined)?.statusCode ?? 0);
+
+// Resolves early when the signal is aborted
+const sleep = (ms: number, signal?: AbortSignal) =>
+  new Promise<void>((resolve) => {
+    if (signal?.aborted) {
+      return resolve();
+    }
+    const done = () => {
+      clearTimeout(timer);
+      signal?.removeEventListener('abort', done);
+      resolve();
+    };
+    const timer = setTimeout(done, ms);
+    signal?.addEventListener('abort', done);
+  });
+
 const BACKFILL_QUERY = {
   bool: {
     must: [{ exists: { field: 'policy_id' } }],
@@ -83,6 +109,7 @@ interface BackfillOptions {
   logger: Logger;
   signal?: AbortSignal;
   timeBudgetMs?: number;
+  retryBaseDelayMs?: number;
 }
 
 const countDocumentsToBackfill = async (
@@ -104,9 +131,41 @@ const countDocumentsToBackfill = async (
 export async function backfillIndex(
   esClient: ElasticsearchClient,
   { index, label, scrollSize, maxDocs }: BackfillTarget,
-  { logger, signal, timeBudgetMs = BACKFILL_TIME_BUDGET_MS }: BackfillOptions
+  {
+    logger,
+    signal,
+    timeBudgetMs = BACKFILL_TIME_BUDGET_MS,
+    retryBaseDelayMs = BACKFILL_RETRY_BASE_DELAY_MS,
+  }: BackfillOptions
 ): Promise<BackfillResult> {
   let updated = 0;
+  const deadline = Date.now() + timeBudgetMs;
+  let retries = 0;
+  // Retries a request that was rejected as transient while there is time left in the budget
+  const withRetries = async <T>(request: () => Promise<T>): Promise<T> => {
+    for (;;) {
+      try {
+        const response = await request();
+        retries = 0;
+        return response;
+      } catch (err) {
+        const delay = Math.min(retryBaseDelayMs * 2 ** retries, BACKFILL_RETRY_MAX_DELAY_MS);
+        if (signal?.aborted || !isRetryable(err) || Date.now() + delay >= deadline) {
+          throw err;
+        }
+        retries++;
+        logger.warn(
+          `Retrying the policy_base_id backfill of ${label} in ${delay}ms after updating ${updated} documents: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+        await sleep(delay, signal);
+        if (signal?.aborted) {
+          throw err;
+        }
+      }
+    }
+  };
   const partial = (detail: string): BackfillResult => {
     logger.info(
       `Backfilled policy_base_id on ${updated} ${label} documents: partial, ${detail}, continuing on the next Fleet setup`
@@ -115,33 +174,34 @@ export async function backfillIndex(
   };
   try {
     // Cheap check, so that a setup after a completed backfill does not update anything
-    if ((await countDocumentsToBackfill(esClient, index, signal)) === 0) {
+    if ((await withRetries(() => countDocumentsToBackfill(esClient, index, signal))) === 0) {
       logger.debug(`No ${label} documents without policy_base_id to backfill`);
       return { label, status: 'completed', updated };
     }
 
-    const deadline = Date.now() + timeBudgetMs;
     while (!signal?.aborted && Date.now() < deadline) {
-      const result = await esClient.updateByQuery(
-        {
-          index,
-          ignore_unavailable: true,
-          conflicts: 'proceed',
-          max_docs: maxDocs,
-          scroll_size: scrollSize,
-          // The next batch must not select the documents of this one again
-          refresh: true,
-          script: {
-            lang: 'painless',
-            source: BACKFILL_SCRIPT,
-            params: {
-              separator: AGENT_POLICY_VERSION_SEPARATOR,
-              sentinelVersion: AGENT_POLICY_SENTINEL_VERSION,
+      const result = await withRetries(() =>
+        esClient.updateByQuery(
+          {
+            index,
+            ignore_unavailable: true,
+            conflicts: 'proceed',
+            max_docs: maxDocs,
+            scroll_size: scrollSize,
+            // The next batch must not select the documents of this one again
+            refresh: true,
+            script: {
+              lang: 'painless',
+              source: BACKFILL_SCRIPT,
+              params: {
+                separator: AGENT_POLICY_VERSION_SEPARATOR,
+                sentinelVersion: AGENT_POLICY_SENTINEL_VERSION,
+              },
             },
+            query: BACKFILL_QUERY,
           },
-          query: BACKFILL_QUERY,
-        },
-        { signal }
+          { signal }
+        )
       );
       const batchUpdated = result.updated ?? 0;
       updated += batchUpdated;
@@ -149,7 +209,7 @@ export async function backfillIndex(
       // conflict: the next batch selects them again
       if (
         (result.total ?? 0) < maxDocs &&
-        (await countDocumentsToBackfill(esClient, index, signal)) === 0
+        (await withRetries(() => countDocumentsToBackfill(esClient, index, signal))) === 0
       ) {
         logger.info(`Backfilled policy_base_id on ${updated} ${label} documents: completed`);
         return { label, status: 'completed', updated };
@@ -163,7 +223,7 @@ export async function backfillIndex(
     if (signal?.aborted) {
       return partial('task cancelled');
     }
-    const remaining = await countDocumentsToBackfill(esClient, index, signal);
+    const remaining = await withRetries(() => countDocumentsToBackfill(esClient, index, signal));
     return partial(`${remaining} remaining`);
   } catch (err) {
     if (signal?.aborted) {

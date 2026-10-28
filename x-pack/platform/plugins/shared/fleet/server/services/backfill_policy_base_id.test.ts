@@ -270,6 +270,123 @@ describe('backfillIndex', () => {
   });
 });
 
+describe('backfillIndex retries', () => {
+  const target: BackfillTarget = {
+    index: AGENT_POLICY_INDEX,
+    label: 'fleet-policies',
+    scrollSize: 10,
+    maxDocs: 50,
+  };
+  const rejected = (statusCode: number, message = 'circuit_breaking_exception') =>
+    Object.assign(new Error(message), { statusCode });
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    logger = loggingSystemMock.createLogger();
+  });
+
+  it('retries a batch rejected by a circuit breaker instead of waiting for the next setup', async () => {
+    esClient.count
+      .mockResolvedValueOnce({ count: 10 } as any)
+      .mockResolvedValueOnce({ count: 0 } as any);
+    esClient.updateByQuery
+      .mockRejectedValueOnce(rejected(429, '[parent] Data too large'))
+      .mockRejectedValueOnce(rejected(429, '[parent] Data too large'))
+      .mockResolvedValueOnce({ total: 10, updated: 10 } as any);
+
+    const result = await backfillIndex(esClient, target, { logger, retryBaseDelayMs: 0 });
+
+    expect(result).toEqual({ label: 'fleet-policies', status: 'completed', updated: 10 });
+    expect(esClient.updateByQuery).toHaveBeenCalledTimes(3);
+    expect(logger.warn).toHaveBeenCalledTimes(2);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Retrying the policy_base_id backfill of fleet-policies in 0ms after updating 0 documents: [parent] Data too large'
+    );
+  });
+
+  it('retries the counts', async () => {
+    esClient.count
+      .mockRejectedValueOnce(rejected(429))
+      .mockResolvedValueOnce({ count: 10 } as any)
+      .mockRejectedValueOnce(rejected(503))
+      .mockResolvedValueOnce({ count: 0 } as any);
+    esClient.updateByQuery.mockResolvedValue({ total: 10, updated: 10 } as any);
+
+    const result = await backfillIndex(esClient, target, { logger, retryBaseDelayMs: 0 });
+
+    expect(result.status).toBe('completed');
+    expect(esClient.count).toHaveBeenCalledTimes(4);
+  });
+
+  it('doubles the delay of consecutive retries and starts over after a success', async () => {
+    esClient.count.mockResolvedValue({ count: 100 } as any);
+    esClient.updateByQuery
+      .mockRejectedValueOnce(rejected(429))
+      .mockRejectedValueOnce(rejected(429))
+      .mockResolvedValueOnce({ total: 50, updated: 50 } as any)
+      .mockRejectedValueOnce(rejected(429))
+      .mockRejectedValueOnce(new Error('stop'));
+    jest.useFakeTimers();
+    try {
+      const promise = backfillIndex(esClient, target, { logger, retryBaseDelayMs: 1000 });
+      await jest.advanceTimersByTimeAsync(10000);
+      await promise;
+    } finally {
+      jest.useRealTimers();
+    }
+
+    const delays = logger.warn.mock.calls
+      .map(([message]) => /^Retrying .* in (\d+)ms/.exec(message as string)?.[1])
+      .filter(Boolean);
+    expect(delays).toEqual(['1000', '2000', '1000']);
+  });
+
+  it('does not retry an error that is not transient', async () => {
+    esClient.count.mockResolvedValue({ count: 10 } as any);
+    esClient.updateByQuery.mockRejectedValue(rejected(400, 'script_exception'));
+
+    const result = await backfillIndex(esClient, target, { logger, retryBaseDelayMs: 0 });
+
+    expect(result.status).toBe('failed');
+    expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
+  });
+
+  it('gives up when the delay does not fit in the time budget', async () => {
+    esClient.count.mockResolvedValue({ count: 10 } as any);
+    esClient.updateByQuery.mockRejectedValue(rejected(429));
+
+    const result = await backfillIndex(esClient, target, {
+      logger,
+      timeBudgetMs: 1000,
+      retryBaseDelayMs: 5000,
+    });
+
+    expect(result.status).toBe('failed');
+    expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to backfill policy_base_id on fleet-policies')
+    );
+  });
+
+  it('stops waiting to retry when the signal is aborted', async () => {
+    esClient.count.mockResolvedValue({ count: 10 } as any);
+    esClient.updateByQuery.mockRejectedValue(rejected(429));
+    const controller = new AbortController();
+    setImmediate(() => controller.abort());
+
+    const result = await backfillIndex(esClient, target, {
+      logger,
+      signal: controller.signal,
+      retryBaseDelayMs: 60 * 1000,
+    });
+
+    expect(result).toEqual({ label: 'fleet-policies', status: 'partial', updated: 0 });
+    expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('backfillPolicyBaseId', () => {
   it('backfills the indices one after the other with their batch sizes', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
