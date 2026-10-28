@@ -117,20 +117,44 @@ const SCENARIOS: Scenario[] = [
     changedFiles: ['x-pack/platform/plugins/shared/alerting/server/index.ts'],
   },
   {
+    name: 'response ops step definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/response_ops.ts'],
+  },
+  {
     name: 'cases path',
     changedFiles: ['x-pack/platform/plugins/shared/cases/server/index.ts'],
+  },
+  {
+    name: 'response ops cases step definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/response_ops_cases.ts'],
   },
   {
     name: 'fleet path',
     changedFiles: ['x-pack/platform/plugins/shared/fleet/server/index.ts'],
   },
   {
+    name: 'fleet cypress step definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/fleet_cypress.ts'],
+  },
+  {
+    name: 'scout fleet real agent step definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/scout_fleet_real_agent.ts'],
+  },
+  {
     name: 'ai infra path',
     changedFiles: ['x-pack/platform/plugins/shared/inference/server/index.ts'],
   },
   {
+    name: 'ai infra gen ai step definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/ai_infra_gen_ai.ts'],
+  },
+  {
     name: 'agent builder path',
     changedFiles: ['x-pack/platform/plugins/shared/agent_builder/server/index.ts'],
+  },
+  {
+    name: 'agent builder smoke tests step definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/agent_builder_smoke_tests.ts'],
   },
   {
     name: 'security solution path',
@@ -224,6 +248,18 @@ const SCENARIOS: Scenario[] = [
   },
   { name: 'edr real fleet path', changedFiles: ['fleet_packages.json'] },
   {
+    name: 'cspm agentless scout step definition path',
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/cspm_agentless_scout.ts',
+    ],
+  },
+  {
+    name: 'scout edr real fleet step definition path',
+    changedFiles: [
+      '.buildkite/pipeline-utils/step-library/steps/security_solution/scout_edr_real_fleet.ts',
+    ],
+  },
+  {
     name: 'prompt change path',
     changedFiles: [
       'x-pack/solutions/security/plugins/elastic_assistant/server/lib/prompt/prompts.ts',
@@ -232,6 +268,10 @@ const SCENARIOS: Scenario[] = [
   {
     name: 'workflows schema path',
     changedFiles: ['src/platform/plugins/shared/workflows_management/common/schema/index.ts'],
+  },
+  {
+    name: 'workflows oom testing step definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/workflows_oom_testing.ts'],
   },
   { name: 'storybook path', changedFiles: ['x-pack/example/button.stories.tsx'] },
   { name: 'storybook lockfile path', changedFiles: ['pnpm-lock.yaml'] },

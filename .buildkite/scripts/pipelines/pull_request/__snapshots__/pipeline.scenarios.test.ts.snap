@@ -72,6 +72,55 @@ exports[`pull_request pipeline scenarios agent builder smoke tests skipped 1`] =
 ]
 `;
 
+exports[`pull_request pipeline scenarios agent builder smoke tests step definition path 1`] = `
+[
+  "build",
+  "quick_checks",
+  "checks",
+  "linting",
+  "linting_with_types",
+  "check_types",
+  "pick_test_group_run_order",
+  "build_scout_tests",
+  "ci_stats_ready",
+  "report_package_metrics",
+  "check",
+  "check_oas_snapshot",
+  "check_api_contracts",
+  "group:Agent Builder Smoke Tests",
+  "> discover-eis-models",
+  "> scout-agent-builder-smoke-tests",
+  "check_saved_objects",
+  "warm_start_memory_bench",
+  "wait",
+  "Post-Build",
+]
+`;
+
+exports[`pull_request pipeline scenarios ai infra gen ai step definition path 1`] = `
+[
+  "build",
+  "quick_checks",
+  "checks",
+  "linting",
+  "linting_with_types",
+  "check_types",
+  "pick_test_group_run_order",
+  "build_scout_tests",
+  "ci_stats_ready",
+  "report_package_metrics",
+  "check",
+  "check_oas_snapshot",
+  "check_api_contracts",
+  "group:AppEx AI-Infra genAI tests",
+  "> ai-infra-gen-ai-inference-api",
+  "check_saved_objects",
+  "warm_start_memory_bench",
+  "wait",
+  "Post-Build",
+]
+`;
+
 exports[`pull_request pipeline scenarios ai infra path 1`] = `
 [
   "build",
@@ -530,6 +579,29 @@ exports[`pull_request pipeline scenarios cps test 1`] = `
 ]
 `;
 
+exports[`pull_request pipeline scenarios cspm agentless scout step definition path 1`] = `
+[
+  "build",
+  "quick_checks",
+  "checks",
+  "linting",
+  "linting_with_types",
+  "check_types",
+  "pick_test_group_run_order",
+  "build_scout_tests",
+  "ci_stats_ready",
+  "report_package_metrics",
+  "check",
+  "check_oas_snapshot",
+  "check_api_contracts",
+  "cspm-agentless-scout",
+  "check_saved_objects",
+  "warm_start_memory_bench",
+  "wait",
+  "Post-Build",
+]
+`;
+
 exports[`pull_request pipeline scenarios cypress burn 1`] = `
 [
   "build",
@@ -781,6 +853,29 @@ exports[`pull_request pipeline scenarios fips verification 1`] = `
   "check_oas_snapshot",
   "check_api_contracts",
   "verify_fips_enabled",
+  "check_saved_objects",
+  "warm_start_memory_bench",
+  "wait",
+  "Post-Build",
+]
+`;
+
+exports[`pull_request pipeline scenarios fleet cypress step definition path 1`] = `
+[
+  "build",
+  "quick_checks",
+  "checks",
+  "linting",
+  "linting_with_types",
+  "check_types",
+  "pick_test_group_run_order",
+  "build_scout_tests",
+  "ci_stats_ready",
+  "report_package_metrics",
+  "check",
+  "check_oas_snapshot",
+  "check_api_contracts",
+  "fleet-cypress",
   "check_saved_objects",
   "warm_start_memory_bench",
   "wait",
@@ -1086,6 +1181,29 @@ exports[`pull_request pipeline scenarios renovate.json is the only change 1`] = 
 ]
 `;
 
+exports[`pull_request pipeline scenarios response ops cases step definition path 1`] = `
+[
+  "build",
+  "quick_checks",
+  "checks",
+  "linting",
+  "linting_with_types",
+  "check_types",
+  "pick_test_group_run_order",
+  "build_scout_tests",
+  "ci_stats_ready",
+  "report_package_metrics",
+  "check",
+  "check_oas_snapshot",
+  "check_api_contracts",
+  "response-ops-cases",
+  "check_saved_objects",
+  "warm_start_memory_bench",
+  "wait",
+  "Post-Build",
+]
+`;
+
 exports[`pull_request pipeline scenarios response ops path 1`] = `
 [
   "build",
@@ -1125,6 +1243,29 @@ exports[`pull_request pipeline scenarios response ops path 1`] = `
   "security-serverless-explore",
   "security-investigations",
   "security-serverless-investigations",
+  "check_saved_objects",
+  "warm_start_memory_bench",
+  "wait",
+  "Post-Build",
+]
+`;
+
+exports[`pull_request pipeline scenarios response ops step definition path 1`] = `
+[
+  "build",
+  "quick_checks",
+  "checks",
+  "linting",
+  "linting_with_types",
+  "check_types",
+  "pick_test_group_run_order",
+  "build_scout_tests",
+  "ci_stats_ready",
+  "report_package_metrics",
+  "check",
+  "check_oas_snapshot",
+  "check_api_contracts",
+  "response-ops",
   "check_saved_objects",
   "warm_start_memory_bench",
   "wait",
@@ -1172,6 +1313,53 @@ exports[`pull_request pipeline scenarios scout edr label 1`] = `
   "check_api_contracts",
   "scout-edr-real-fleet-ech",
   "scout-edr-real-fleet-serverless",
+  "check_saved_objects",
+  "warm_start_memory_bench",
+  "wait",
+  "Post-Build",
+]
+`;
+
+exports[`pull_request pipeline scenarios scout edr real fleet step definition path 1`] = `
+[
+  "build",
+  "quick_checks",
+  "checks",
+  "linting",
+  "linting_with_types",
+  "check_types",
+  "pick_test_group_run_order",
+  "build_scout_tests",
+  "ci_stats_ready",
+  "report_package_metrics",
+  "check",
+  "check_oas_snapshot",
+  "check_api_contracts",
+  "scout-edr-real-fleet-ech",
+  "scout-edr-real-fleet-serverless",
+  "check_saved_objects",
+  "warm_start_memory_bench",
+  "wait",
+  "Post-Build",
+]
+`;
+
+exports[`pull_request pipeline scenarios scout fleet real agent step definition path 1`] = `
+[
+  "build",
+  "quick_checks",
+  "checks",
+  "linting",
+  "linting_with_types",
+  "check_types",
+  "pick_test_group_run_order",
+  "build_scout_tests",
+  "ci_stats_ready",
+  "report_package_metrics",
+  "check",
+  "check_oas_snapshot",
+  "check_api_contracts",
+  "scout-fleet-real-agent",
   "check_saved_objects",
   "warm_start_memory_bench",
   "wait",
@@ -1765,6 +1953,29 @@ exports[`pull_request pipeline scenarios sync model labels 1`] = `
 `;
 
 exports[`pull_request pipeline scenarios workflow oom label 1`] = `
+[
+  "build",
+  "quick_checks",
+  "checks",
+  "linting",
+  "linting_with_types",
+  "check_types",
+  "pick_test_group_run_order",
+  "build_scout_tests",
+  "ci_stats_ready",
+  "report_package_metrics",
+  "check",
+  "check_oas_snapshot",
+  "check_api_contracts",
+  "check_saved_objects",
+  "workflows-oom-testing",
+  "warm_start_memory_bench",
+  "wait",
+  "Post-Build",
+]
+`;
+
+exports[`pull_request pipeline scenarios workflows oom testing step definition path 1`] = `
 [
   "build",
   "quick_checks",

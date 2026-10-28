@@ -36,30 +36,40 @@ import {
   isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
 import {
+  agentBuilderSmokeTestsSteps,
+  aiInfraGenAiSteps,
   buildFipsImage,
   checkNextDocs,
   checkOasSnapshot,
   checkSavedObjects,
   cpsTests,
+  fleetCypressSteps,
   localCheck,
   prBaseEnv,
   prBaseSteps,
   renderSteps,
   renovateValidation,
+  responseOpsCasesSteps,
+  responseOpsSteps,
+  scoutFleetRealAgentSteps,
   storybooks,
   verifyFipsEnabled,
+  workflowsOomTestingSteps,
   ai4dsocSteps,
   aiAssistantSteps,
   assetInventorySteps,
   cloudSecurityPostureSteps,
+  cspmAgentlessScoutSteps,
   cypressBurnSteps,
   defendWorkflowsSteps,
   detectionEngineSteps,
   entityAnalyticsSteps,
   exploreSteps,
+  securitySolutionGenAiEvalsSteps,
   investigationsSteps,
   osqueryCypressSteps,
   ruleManagementSteps,
+  scoutEdrRealFleetSteps,
 } from '#pipeline-utils/step-library';
 
 const prConfigs =
@@ -216,37 +226,35 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/platform\/plugins\/shared\/event_log/,
         /^x-pack\/platform\/plugins\/shared\/rule_registry/,
         /^x-pack\/platform\/plugins\/shared\/task_manager/,
-        /^\.buildkite\/pipelines\/pull_request\/response_ops\.yml/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/response_ops\.ts/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops.yml', cancelable));
+      pipeline.push(renderSteps(responseOpsSteps(), cancelOnGate));
     }
 
     if (
       (await doAnySuiteRelevantChangesMatch([
         /^x-pack\/platform\/plugins\/shared\/cases/,
-        /^\.buildkite\/pipelines\/pull_request\/response_ops_cases\.yml/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/response_ops_cases\.ts/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/response_ops_cases.yml', cancelable)
-      );
+      pipeline.push(renderSteps(responseOpsCasesSteps(), cancelOnGate));
     }
 
     if (
       (await doAnySuiteRelevantChangesMatch([
         /^x-pack\/platform\/plugins\/shared\/fleet/,
         /^x-pack\/test\/fleet_cypress/,
-        /^\.buildkite\/pipelines\/pull_request\/fleet_cypress\.yml/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/fleet_cypress\.ts/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml', cancelable));
+      pipeline.push(renderSteps(fleetCypressSteps(), cancelOnGate));
     }
 
     // Docker Fleet Server + Elastic Agent: only for the policy version code paths and this suite,
@@ -261,15 +269,13 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/platform\/plugins\/shared\/fleet\/common\/services\/version_specific_polic/,
         /^x-pack\/platform\/plugins\/shared\/fleet\/test\/scout_fleet_real_agent/,
         /^src\/platform\/packages\/shared\/kbn-scout\/src\/servers\/configs\/config_sets\/fleet_real_agent/,
-        /^\.buildkite\/pipelines\/pull_request\/scout_fleet_real_agent\.yml/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/scout_fleet_real_agent\.ts/,
         /^\.buildkite\/scripts\/steps\/test\/scout_fleet_real_agent\.sh/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:scout-fleet-real-agent') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/scout_fleet_real_agent.yml', cancelable)
-      );
+      pipeline.push(renderSteps(scoutFleetRealAgentSteps(), cancelOnGate));
     }
 
     const aiInfraPaths = [
@@ -292,14 +298,12 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       (await doAnySuiteRelevantChangesMatch([
         ...aiInfraPaths,
         ...aiConnectorPaths,
-        /^\.buildkite\/pipelines\/pull_request\/ai_infra_gen_ai\.yml/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/ai_infra_gen_ai\.ts/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/ai_infra_gen_ai.yml', cancelable)
-      );
+      pipeline.push(renderSteps(aiInfraGenAiSteps(), cancelOnGate));
     }
 
     if (
@@ -308,16 +312,14 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         ...aiInfraPaths,
         ...aiConnectorPaths,
         ...agentBuilderPaths,
-        /^\.buildkite\/pipelines\/pull_request\/agent_builder_smoke_tests\.yml/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/agent_builder_smoke_tests\.ts/,
       ])) ||
         GITHUB_PR_LABELS.includes('agent-builder:run-smoke-tests') ||
         GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites') ||
         ALL_UI_TEST_SUITES) &&
       !GITHUB_PR_LABELS.includes('agent-builder:skip-smoke-tests')
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/agent_builder_smoke_tests.yml', cancelable)
-      );
+      pipeline.push(renderSteps(agentBuilderSmokeTestsSteps(), cancelOnGate));
     }
 
     if (
@@ -641,17 +643,12 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^src\/platform\/packages\/shared\/kbn-scout\/src\/servers\/configs\/custom\/cspm_agentless/,
-        /^\.buildkite\/pipelines\/pull_request\/security_solution\/cspm_agentless_scout\.yml/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/security_solution\/cspm_agentless_scout\.ts/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:cloud-security-posture-scout') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/cspm_agentless_scout.yml',
-          cancelable
-        )
-      );
+      pipeline.push(renderSteps(cspmAgentlessScoutSteps(), cancelOnGate));
     }
 
     if (
@@ -671,7 +668,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/common\/components\/response_actions/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/test\/scout_edr_real_fleet/,
         /^src\/platform\/packages\/shared\/kbn-scout\/src\/servers\/configs\/config_sets\/edr_real_fleet/,
-        /^\.buildkite\/pipelines\/pull_request\/security_solution\/scout_edr_real_fleet\.yml/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/security_solution\/scout_edr_real_fleet\.ts/,
         /^\.buildkite\/pipelines\/security_solution\/scout_edr_real_fleet\.yml/,
         /^\.buildkite\/pipeline-resource-definitions\/kibana-scout-edr-real-fleet\.yml/,
         /^\.buildkite\/scripts\/steps\/test\/scout_edr_real_fleet\.sh/,
@@ -679,12 +676,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       GITHUB_PR_LABELS.includes('ci:scout-edr-real-fleet') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/scout_edr_real_fleet.yml',
-          cancelable
-        )
-      );
+      pipeline.push(renderSteps(scoutEdrRealFleetSteps(), cancelOnGate));
     }
 
     if (
@@ -692,12 +684,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       GITHUB_PR_LABELS.includes('ci:security-genai-run-evals-local-prompts') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/gen_ai_evals.yml',
-          cancelable
-        )
-      );
+      pipeline.push(renderSteps(securitySolutionGenAiEvalsSteps(), cancelOnGate));
     }
 
     // On matching labels, hand LLM evals to the dedicated `kibana-evals-pr-llm-evals` pipeline via a
@@ -753,13 +740,11 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^src\/platform\/plugins\/shared\/workflows_management\/common\/schema/,
         /^src\/platform\/plugins\/shared\/workflows_management\/server\/.*internal_actions/,
         /^src\/platform\/packages\/shared\/workflows\//,
-        /^\.buildkite\/pipelines\/pull_request\/workflows_oom_testing\.yml/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/workflows_oom_testing\.ts/,
         /^\.buildkite\/scripts\/steps\/test\/scout\/workflows_oom_testing\.sh/,
       ]))
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/workflows_oom_testing.yml', cancelable)
-      );
+      pipeline.push(renderSteps(workflowsOomTestingSteps(), cancelOnGate));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:cps-test')) {
