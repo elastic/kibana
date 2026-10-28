@@ -20,10 +20,7 @@ import type { SchemasSettings } from 'monaco-yaml';
 import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Document } from 'yaml';
-import {
-  type ChangeHistoryCompareMode,
-  getChangeHistoryValidationDisplayOptions,
-} from '@kbn/change-history-ui';
+import { type ChangeHistoryCompareMode } from '@kbn/change-history-ui';
 import { monaco } from '@kbn/code-editor';
 import { validationResultsFingerprint, type YamlValidationResult } from '@kbn/workflows-yaml';
 import {
@@ -169,7 +166,11 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
 
   const syncValidationDisplay = useCallback(
     (highlight: boolean) => {
-      const displayOptions = getChangeHistoryValidationDisplayOptions(highlight);
+      // Read-only editors hide validation squiggles and hovers unless explicitly enabled.
+      const displayOptions = {
+        renderValidationDecorations: highlight ? 'on' : 'off',
+        hover: { enabled: highlight ? 'on' : 'off' },
+      } as const;
 
       if (editorRef.current) {
         editorRef.current.updateOptions(displayOptions);

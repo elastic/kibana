@@ -205,17 +205,21 @@ export const ChangeHistoryPreview = ({
           onDiffNavigationChange={setDiffNavigation}
         />
 
-        <ChangeHistoryPreviewFooter data-test-subj={`${dataTestSubj}Footer`}>
+        <ChangeHistoryPreviewFooter
+          data-test-subj={`${dataTestSubj}Footer`}
+          actions={
+            hasSettings ? (
+              <ChangeHistoryPreviewSettingsPopover
+                modes={modes}
+                selectedModeId={compareMode}
+                onModeChange={handleModeChange}
+              >
+                {extraSettings}
+              </ChangeHistoryPreviewSettingsPopover>
+            ) : null
+          }
+        >
           {renderFooter ? renderFooter(editorContext) : <ChangeHistoryPreviewFooterSpacer />}
-          {hasSettings ? (
-            <ChangeHistoryPreviewSettingsPopover
-              modes={modes}
-              selectedModeId={compareMode}
-              onModeChange={handleModeChange}
-            >
-              {extraSettings}
-            </ChangeHistoryPreviewSettingsPopover>
-          ) : null}
         </ChangeHistoryPreviewFooter>
       </div>
       {isCompareMode && diffNavigation && (

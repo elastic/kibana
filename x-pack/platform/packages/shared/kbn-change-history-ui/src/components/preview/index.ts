@@ -16,4 +16,3 @@ export type {
   ChangeHistoryMonacoLanguage,
   ChangeHistoryPreviewEditorContext,
 } from './change_history_preview';
-export { getChangeHistoryValidationDisplayOptions } from './monaco_options';

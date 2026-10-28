@@ -26,7 +26,6 @@ export {
   ChangeHistoryPreview,
   ChangeHistoryPreviewFooterSpacer,
   ChangeHistoryPreviewSettingsSection,
-  getChangeHistoryValidationDisplayOptions,
 } from './src/components/preview';
 export type {
   ChangeHistoryPreviewProps,

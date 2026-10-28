@@ -17,13 +17,20 @@ export const CHANGE_HISTORY_PREVIEW_FOOTER_HEIGHT = '48px';
 const previewFooterStyles = {
   bar: ({ euiTheme }: UseEuiTheme) =>
     css({
+      position: 'relative',
       width: '100%',
+      minHeight: CHANGE_HISTORY_PREVIEW_FOOTER_HEIGHT,
+      borderTop: euiTheme.border.thin,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    }),
+  actions: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'absolute',
+      top: 0,
+      right: euiTheme.size.m,
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'space-between',
       height: CHANGE_HISTORY_PREVIEW_FOOTER_HEIGHT,
-      borderTop: euiTheme.border.thin,
-      padding: `0 ${euiTheme.size.m}`,
     }),
   spacer: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -40,12 +47,17 @@ export const ChangeHistoryPreviewFooterSpacer = (): JSX.Element => {
   return <div css={styles.spacer} aria-hidden={true} />;
 };
 
-/** Footer bar hosting `children` (e.g. a mode toggle); used by `ChangeHistoryPreview` and by consumers that render their own content. */
+/**
+ * Footer bar hosting `children`, which can grow taller than the collapsed row (e.g. an accordion).
+ * `actions` stay pinned to the top-right of the first row.
+ */
 export const ChangeHistoryPreviewFooter = ({
   children,
+  actions,
   'data-test-subj': dataTestSubj,
 }: {
   children?: ReactNode;
+  actions?: ReactNode;
   'data-test-subj'?: string;
 }): JSX.Element => {
   const styles = useMemoCss(previewFooterStyles);
@@ -53,6 +65,7 @@ export const ChangeHistoryPreviewFooter = ({
   return (
     <div css={styles.bar} data-test-subj={dataTestSubj}>
       {children}
+      {actions ? <div css={styles.actions}>{actions}</div> : null}
     </div>
   );
 };

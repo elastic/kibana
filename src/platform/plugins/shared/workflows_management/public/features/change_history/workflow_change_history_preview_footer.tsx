@@ -12,7 +12,10 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
-import { WorkflowYamlValidationAccordion } from '../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accordion';
+import {
+  WORKFLOW_YAML_VALIDATION_ACCORDION_CLASS,
+  WorkflowYamlValidationAccordion,
+} from '../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accordion';
 
 /** Space reserved for the fixed settings button (icon + right padding). */
 export const WORKFLOW_CHANGE_HISTORY_PREVIEW_SETTINGS_RESERVE_PX = 48;
@@ -55,5 +58,10 @@ const componentStyles = {
   validationAccordion: ({ euiTheme }: UseEuiTheme) =>
     css({
       paddingRight: `calc(${euiTheme.size.m} + ${WORKFLOW_CHANGE_HISTORY_PREVIEW_SETTINGS_RESERVE_PX}px)`,
+
+      // Let the footer's subdued surface show through instead of the accordion's plain background.
+      [`.${WORKFLOW_YAML_VALIDATION_ACCORDION_CLASS}`]: {
+        backgroundColor: 'transparent',
+      },
     }),
 };

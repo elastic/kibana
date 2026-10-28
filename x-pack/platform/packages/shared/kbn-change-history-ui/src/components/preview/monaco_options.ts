@@ -42,14 +42,6 @@ export const CHANGE_HISTORY_PREVIEW_MONACO_OPTIONS: monaco.editor.IStandaloneEdi
     parameterHints: { enabled: false },
   };
 
-/** Read-only editors need explicit squiggle + hover options; Monaco defaults hide them when readOnly. */
-export const getChangeHistoryValidationDisplayOptions = (
-  highlightValidationErrors: boolean
-): monaco.editor.IEditorOptions => ({
-  renderValidationDecorations: highlightValidationErrors ? 'on' : 'off',
-  hover: { enabled: highlightValidationErrors ? 'on' : 'off' },
-});
-
 /** Global editor options applied to diff child editors via `updateOptions`. */
 export const CHANGE_HISTORY_DIFF_GLOBAL_EDITOR_OPTIONS: Pick<
   monaco.editor.IGlobalEditorOptions,

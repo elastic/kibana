@@ -12,11 +12,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo, useState } from 'react';
 import type { ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
-import {
-  ChangeHistoryPreview,
-  ChangeHistoryPreviewFooterSpacer,
-  getChangeHistoryValidationDisplayOptions,
-} from '@kbn/change-history-ui';
+import { ChangeHistoryPreview, ChangeHistoryPreviewFooterSpacer } from '@kbn/change-history-ui';
 import { getWorkflowYamlFromSnapshot } from './get_workflow_yaml_from_snapshot';
 import { WorkflowChangeHistoryPreviewSettings } from './workflow_change_history_preview_settings';
 import { WorkflowChangeHistoryPreviewValidation } from './workflow_change_history_preview_validation';
@@ -65,7 +61,11 @@ const WorkflowChangeHistoryPreview = ({
   const [highlightValidationErrors, setHighlightValidationErrors] = useState(false);
   // Read-only editors hide validation squiggles and hovers unless explicitly enabled.
   const editorOptions = useMemo(
-    () => getChangeHistoryValidationDisplayOptions(highlightValidationErrors),
+    () =>
+      ({
+        renderValidationDecorations: highlightValidationErrors ? 'on' : 'off',
+        hover: { enabled: highlightValidationErrors ? 'on' : 'off' },
+      } as const),
     [highlightValidationErrors]
   );
 
