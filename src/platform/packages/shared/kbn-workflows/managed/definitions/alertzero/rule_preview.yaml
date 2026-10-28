@@ -29,7 +29,8 @@ triggers:
             type: string
           description: >-
             Source indices the bodies read. Checked for `read` as the running identity
-            before any preview; an unreadable one skips both previews.
+            before any preview; an unreadable one skips both previews. Exclusion
+            patterns (`-name`) are ignored.
       required:
         - preview_body
         - space_id
@@ -70,15 +71,28 @@ steps:
   # whose role reads a fixed set of index patterns. An index it cannot read is
   # invisible to the preview, which then reports zero alerts as if the rule matched
   # nothing. Asked up front so the caller can say which indices are the problem.
+  #
+  # A `-name` entry excludes indices from the search; `_has_privileges` would read it
+  # as an index name the identity cannot access. Rendered as a JSON array body, since
+  # Liquid cannot filter an array on a prefix any other way.
+  - name: probe_names
+    type: data.set
+    with:
+      csv: >-
+        {%- for name in inputs.indices -%}
+        {%- assign first = name | slice: 0, 1 -%}
+        {%- if first != '-' -%},{{ name | json }}{%- endif -%}
+        {%- endfor -%}
+
   - name: probe_privileges
     type: elasticsearch.request
-    if: "${{ inputs.indices != blank }}"
+    if: "${{ steps.probe_names.output.csv != blank }}"
     with:
       method: POST
       path: /_security/user/_has_privileges
       body:
         index:
-          - names: "${{ inputs.indices }}"
+          - names: "${{ steps.probe_names.output.csv | remove_first: ',' | prepend: '[' | append: ']' | json_parse }}"
             privileges:
               - read
     on-failure:

@@ -1490,7 +1490,26 @@ describe('detection rule workflows', () => {
 
         expect(probe.type).toBe('elasticsearch.request');
         expect(probe.with?.path).toBe('/_security/user/_has_privileges');
-        expect(String(probe.if)).toContain('inputs.indices != blank');
+        expect(String(probe.if)).toContain('steps.probe_names.output.csv != blank');
+
+        // `-name` entries exclude indices from the search and are not index names the
+        // identity could hold a privilege on, so they stay out of the probe.
+        const csvOf = (indices: unknown) =>
+          createWorkflowLiquidEngine().parseAndRenderSync(
+            String((byName('probe_names').with as Record<string, string>).csv),
+            { inputs: { indices } }
+          );
+        const namesOf = (csv: string) =>
+          resolveExpression(
+            (probe.with?.body as { index: Array<{ names: string }> }).index[0].names,
+            { steps: { probe_names: { output: { csv } } } }
+          );
+        expect(namesOf(csvOf(['logs-*', '-*elastic-cloud-logs-*', 'custom-edr-*']))).toEqual([
+          'logs-*',
+          'custom-edr-*',
+        ]);
+        expect(csvOf(['-*elastic-cloud-logs-*'])).toBe('');
+        expect(csvOf(undefined)).toBe('');
         for (const name of ['preview_rule', 'preview_proposed']) {
           expect(String(byName(name).if)).toContain(
             'steps.resolve_privileges.output.unreadable_indices == blank'
@@ -1641,16 +1660,23 @@ describe('detection rule workflows', () => {
       });
 
       // The rule's `index`, plus `threat_index` for indicator match. An ES|QL rule
-      // names its indices in the query and a data view rule in the view, so neither
-      // has any to check and the probe is skipped rather than failed.
+      // names its indices in the query, so it has none to check. A rule with a data
+      // view searches the view and ignores its own `index`, so that is left out too;
+      // the threat index is searched either way.
       it('hands the preview worker the indices the rule reads', () => {
+        const probe = reviewSteps.find(({ name }) => name === 'probe_indices')!;
         const previews = reviewSteps.find(({ name }) => name === 'run_previews')!;
         const indices = (previews.with?.inputs as Record<string, unknown>).indices;
-        const resolve = (rule: Record<string, unknown>) =>
-          resolveExpression(indices, {
-            consts: { no_items: [] },
-            steps: { fetch_rule: { output: rule } },
+        const resolve = (rule: Record<string, unknown>) => {
+          const context = { consts: { no_items: [] }, steps: { fetch_rule: { output: rule } } };
+          const probed = resolveExpression(probe.if, context)
+            ? { output: { index: resolveExpression(probe.with?.index, context) } }
+            : {};
+          return resolveExpression(indices, {
+            ...context,
+            steps: { ...context.steps, probe_indices: probed },
           });
+        };
 
         expect(resolve({ index: ['logs-*', 'custom-edr-*'], threat_index: ['ti-*'] })).toEqual([
           'logs-*',
@@ -1659,7 +1685,10 @@ describe('detection rule workflows', () => {
         ]);
         expect(resolve({ index: ['custom-edr-*'] })).toEqual(['custom-edr-*']);
         expect(resolve({ type: 'esql', query: 'FROM custom-edr-*' })).toEqual([]);
-        expect(resolve({ data_view_id: 'dv' })).toEqual([]);
+        expect(resolve({ data_view_id: 'dv', index: ['legacy-*'] })).toEqual([]);
+        expect(
+          resolve({ data_view_id: 'dv', index: ['legacy-*'], threat_index: ['ti-*'] })
+        ).toEqual(['ti-*']);
       });
 
       it.each([

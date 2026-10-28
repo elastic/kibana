@@ -803,6 +803,14 @@ steps:
         {%- assign period = cs | times: runs -%}
         {{- period | times: 1.0 | divided_by: ps | ceil | at_least: 1 -}}
 
+  # A rule with a data view searches the view's indices and ignores its own `index`,
+  # so only a rule without one has an index list worth checking.
+  - name: probe_indices
+    type: data.set
+    if: "${{ steps.fetch_rule.output.data_view_id == blank }}"
+    with:
+      index: "${{ steps.fetch_rule.output.index | default: consts.no_items }}"
+
   # One preview worker run backtests both queries. A single synchronous child per
   # wake-up cycle is safe; two consecutive child calls share one immediate-resume
   # slot and a lost resume strands this run in waiting_for_child.
@@ -818,9 +826,9 @@ steps:
         space_id: "{{ workflow.spaceId }}"
         # An ES|QL rule names its indices in the query and a data view rule in the
         # view, so neither has an `index` to check; both rely on the preview's own
-        # missing-indices warning instead.
+        # missing-indices warning instead. The threat index is searched either way.
         indices: >-
-          ${{ steps.fetch_rule.output.index
+          ${{ steps.probe_indices.output.index
             | default: consts.no_items
             | concat: steps.fetch_rule.output.threat_index }}
         preview_body:
