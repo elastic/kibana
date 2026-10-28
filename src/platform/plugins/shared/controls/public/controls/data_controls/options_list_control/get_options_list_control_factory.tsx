@@ -38,6 +38,8 @@ import {
   getViewModeSubject,
   type ViewMode,
   useStateFromPublishingSubject,
+  areComparatorsEqual,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
@@ -70,6 +72,21 @@ import {
 } from './utils/selection_utils';
 import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../../constants';
 
+const optionsListComparators: StateComparators<OptionsListDSLControlState> = {
+  ...defaultDataControlComparators,
+  ...selectionComparators,
+  ...editorComparators,
+  // This state cannot currently be changed after the control is created
+  display_settings: 'skip',
+};
+
+const OPTIONS_LIST_DEFAULT_STATE: Partial<OptionsListDSLControlState> = {
+  search_technique: DEFAULT_DSL_OPTIONS_LIST_STATE.search_technique,
+  sort: DEFAULT_DSL_OPTIONS_LIST_STATE.sort,
+  exclude: false,
+  exists_selected: false,
+};
+
 // TODO Remove when we're able to get accurate document counts for ES|QL-source controls and can reenable doc-count sorting on them
 const normalizeEsqlSort = (
   controlState: OptionsListDSLControlState
@@ -98,6 +115,8 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
     type: OPTIONS_LIST_CONTROL,
     getPlacementHints,
     layoutConstraints: LAYOUT_CONSTRAINTS,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(optionsListComparators, baseline, current, OPTIONS_LIST_DEFAULT_STATE),
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = normalizeEsqlSort(initialState);
 
@@ -287,21 +306,8 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
           selectionsManager.anyStateChange$,
           editorStateManager.anyStateChange$
         ).pipe(map(() => undefined)),
-        getComparators: () => {
-          return {
-            ...defaultDataControlComparators,
-            ...selectionComparators,
-            ...editorComparators,
-            // This state cannot currently be changed after the control is created
-            display_settings: 'skip',
-          };
-        },
-        defaultState: {
-          search_technique: DEFAULT_DSL_OPTIONS_LIST_STATE.search_technique,
-          sort: DEFAULT_DSL_OPTIONS_LIST_STATE.sort,
-          exclude: false,
-          exists_selected: false,
-        },
+        getComparators: () => optionsListComparators,
+        defaultState: OPTIONS_LIST_DEFAULT_STATE,
         applySerializedState: (nextState) => {
           const normalizedState = normalizeEsqlSort(nextState);
           dataControlManager.reinitializeState(normalizedState);

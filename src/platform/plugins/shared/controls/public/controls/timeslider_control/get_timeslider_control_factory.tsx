@@ -12,7 +12,7 @@ import { BehaviorSubject, debounceTime, first, map, merge, pairwise, skip } from
 
 import { EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
+import type { PublishingSubject, StateComparators, ViewMode } from '@kbn/presentation-publishing';
 import {
   apiPublishesDataLoading,
   getViewModeSubject,
@@ -21,6 +21,7 @@ import {
   initializeRelatedPanels,
   initializeStateApi,
   apiHasUseGlobalFiltersSetting,
+  areComparatorsEqual,
 } from '@kbn/presentation-publishing';
 
 import { DEFAULT_TIME_SLIDER_STATE, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
@@ -49,12 +50,19 @@ const displayName = i18n.translate('controls.timesliderControl.displayName', {
   defaultMessage: 'Time slider',
 });
 
+const timeSliderComparators: StateComparators<TimeSliderControlState> = {
+  ...timeRangePercentageComparators,
+  is_anchored: 'referenceEquality',
+};
+
 export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
   TimeSliderControlState,
   TimeSliderControlApi
 > => {
   return {
     type: TIME_SLIDER_CONTROL,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(timeSliderComparators, baseline, current),
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
 
@@ -239,13 +247,7 @@ export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
             map(() => undefined)
           )
         ),
-        getComparators: () => {
-          return {
-            ...timeRangePercentageComparators,
-            width: 'skip',
-            is_anchored: 'referenceEquality',
-          };
-        },
+        getComparators: () => timeSliderComparators,
         applySerializedState: (nextState) => {
           timeRangePercentage.reinitializeState(nextState);
           setIsAnchored(nextState.is_anchored ?? DEFAULT_TIME_SLIDER_STATE.is_anchored);
