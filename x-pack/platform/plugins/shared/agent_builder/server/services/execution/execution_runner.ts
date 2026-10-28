@@ -334,7 +334,7 @@ const handleConversationExecution = async ({
 
     const title$ = (
       titleChatModel
-        ? generateTitle({ chatModel: titleChatModel, conversation, nextInput })
+        ? generateTitle({ chatModel: titleChatModel, conversation, nextInput, logger })
         : of(conversation.title)
     ).pipe(shareReplay(1));
 

@@ -20,7 +20,10 @@ import {
   createGenAiConnectorForProxy,
   deleteConnectorById,
 } from '../../../../scout_agent_builder_shared/lib/connector_kbn';
-import { setupAgentDirectAnswer } from '../../../../scout_agent_builder_shared/lib/proxy_scenario';
+import {
+  setupAgentDirectAnswer,
+  setupAgentDirectAnswerWithTextTitle,
+} from '../../../../scout_agent_builder_shared/lib/proxy_scenario';
 import { apiTest, API_AGENT_BUILDER, CHAT_CONVERSATIONS_INDEX } from '../fixtures';
 
 apiTest.describe(
@@ -465,5 +468,36 @@ apiTest.describe(
       );
       expect(get404).toHaveStatusCode(404);
     });
+
+    apiTest(
+      'converse falls back to a plain-text title when forced tool choice is rejected',
+      async ({ asAdmin }) => {
+        const testTitle = 'Plain Text Fallback Title';
+        await setupAgentDirectAnswerWithTextTitle({
+          proxy: llmProxy,
+          title: testTitle,
+          response: 'Response to: fallback title test',
+        });
+
+        const res = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
+          body: {
+            input: 'fallback title test',
+            connector_id: connectorId,
+            _execution_mode: 'local',
+          },
+          responseType: 'json',
+        });
+        expect(res).toHaveStatusCode(200);
+        const conversationId = (res.body as ChatResponse).conversation_id;
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        const getRes = await asAdmin.get(
+          `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`,
+          { responseType: 'json' }
+        );
+        expect(getRes).toHaveStatusCode(200);
+        expect((getRes.body as Conversation).title).toBe(testTitle);
+      }
+    );
   }
 );

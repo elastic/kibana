@@ -36,18 +36,53 @@ export const mockTitleGeneration = (llmProxy: LlmProxy, title: string) => {
 };
 
 export const mockTitleGenerationWithError = (llmProxy: LlmProxy, error: LLmError) => {
+  // When the structured call fails, title generation retries once with a plain-text call,
+  // so both attempts need to be intercepted.
+  for (const name of ['set_title', 'set_title:text_fallback']) {
+    void llmProxy
+      .intercept({
+        name,
+        when: (body) => {
+          const systemMessage = body.messages.find((m) => m.role === 'system');
+          const systemText = String(systemMessage?.content ?? '');
+          return (
+            getToolChoiceFunctionName(body.tool_choice) === 'set_title' ||
+            systemText.includes('You are a title-generation utility')
+          );
+        },
+        responseMock: error,
+      })
+      .completeAfterIntercept();
+  }
+};
+
+/**
+ * Simulates a model that rejects forced tool choice (e.g. Claude 5.5 on Bedrock): the
+ * structured `set_title` call fails and the plain-text fallback returns the title.
+ */
+export const mockTitleGenerationWithTextFallback = (llmProxy: LlmProxy, title: string) => {
+  const isTitleRequest = (body: { messages: Array<{ role: string; content?: unknown }> }) => {
+    const systemMessage = body.messages.find((m) => m.role === 'system');
+    return String(systemMessage?.content ?? '').includes('You are a title-generation utility');
+  };
+
   void llmProxy
     .intercept({
       name: 'set_title',
-      when: (body) => {
-        const systemMessage = body.messages.find((m) => m.role === 'system');
-        const systemText = String(systemMessage?.content ?? '');
-        return (
-          getToolChoiceFunctionName(body.tool_choice) === 'set_title' ||
-          systemText.includes('You are a title-generation utility')
-        );
+      when: (body) => isTitleRequest(body) && Boolean(body.tools?.length),
+      responseMock: {
+        type: 'error',
+        statusCode: 400,
+        errorMsg: 'tool_choice: type "tool" and "any" are not supported for this model.',
       },
-      responseMock: error,
+    })
+    .completeAfterIntercept();
+
+  void llmProxy
+    .intercept({
+      name: 'set_title:text_fallback',
+      when: (body) => isTitleRequest(body) && !body.tools?.length,
+      responseMock: title,
     })
     .completeAfterIntercept();
 };

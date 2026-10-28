@@ -8,6 +8,7 @@
 export {
   setupAgentDirectAnswer,
   setupAgentDirectError,
+  setupAgentDirectAnswerWithTextTitle,
   setupAgentHangingAnswer,
   setupAgentCallTool,
   setupAgentCallToolThenAnswer,

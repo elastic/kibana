@@ -9,6 +9,7 @@ import type { LlmProxy, LLmError } from '@kbn/ftr-llm-proxy';
 import {
   mockTitleGeneration,
   mockTitleGenerationWithError,
+  mockTitleGenerationWithTextFallback,
   mockFinalAnswer,
   mockHangingFinalAnswer,
   mockAgentToolCall,
@@ -54,6 +55,23 @@ export const setupAgentDirectError = async ({
     mockTitleGenerationWithError(proxy, titleError ?? error);
   }
   mockFinalAnswer(proxy, error);
+};
+
+/**
+ * Simple request scenario - the structured title call is rejected (forced tool choice not
+ * supported), the plain-text title fallback succeeds, then the agent answers directly
+ */
+export const setupAgentDirectAnswerWithTextTitle = async ({
+  response,
+  proxy,
+  title,
+}: {
+  response: string;
+  title: string;
+  proxy: LlmProxy;
+}) => {
+  mockTitleGenerationWithTextFallback(proxy, title);
+  mockFinalAnswer(proxy, response);
 };
 
 /**
