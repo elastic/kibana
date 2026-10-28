@@ -113,7 +113,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
       const controlFetch$ = fetch$({ uuid, parentApi });
       const { minMax$: minMaxObservable$, cancelRequests: cancelMinMaxRequests } = minMax$({
         controlFetch$,
-        dataViews$: dataControlManager.api.dataViews$,
+        dataSources$: dataControlManager.api.dataSources$,
         fieldName$: dataControlManager.api.fieldName$,
         esqlQuery$: dataControlManager.api.esqlQuery$,
         valuesSource$: dataControlManager.api.valuesSource$,
@@ -205,7 +205,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
       const sectionId$ = apiHasSections(parentApi) ? parentApi.panelSection$(uuid) : of(undefined);
 
       const outputFilterSubscription = combineLatest([
-        dataControlManager.api.dataViews$,
+        dataControlManager.api.dataSources$,
         dataControlManager.api.fieldName$,
         selections.value$,
         sectionId$,
