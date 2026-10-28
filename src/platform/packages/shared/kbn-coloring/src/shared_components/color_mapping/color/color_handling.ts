@@ -23,6 +23,33 @@ import { getOtherAssignmentColor } from '../config/utils';
 
 const FALLBACK_ASSIGNMENT_COLOR = 'red';
 
+/**
+ * Returns the color at `colorIndex` of the palette `paletteId`
+ */
+export type PaletteColorLookup = (paletteId: KbnPaletteId, colorIndex: number) => string;
+
+const uncachedPaletteColorLookup =
+  (palettes: KbnPalettes): PaletteColorLookup =>
+  (paletteId, colorIndex) =>
+    palettes.get(paletteId).getColor(colorIndex);
+
+/**
+ * Returns a palette color lookup that generates each palette's colors only once, for as long as the
+ * lookup is referenced. Palette `getColor` regenerates all colors on every call, which is costly when a
+ * chart asks for a color per series.
+ */
+function cachedPaletteColorLookup(palettes: KbnPalettes): PaletteColorLookup {
+  const colorsByPaletteId = new Map<KbnPaletteId, string[]>();
+  return (paletteId, colorIndex) => {
+    let colors = colorsByPaletteId.get(paletteId);
+    if (!colors) {
+      colors = palettes.get(paletteId).colors();
+      colorsByPaletteId.set(paletteId, colors);
+    }
+    return colors[colorIndex % colors.length];
+  };
+}
+
 export function getAssignmentColor(
   colorMode: ColorMapping.Config['colorMode'],
   color:
@@ -31,13 +58,14 @@ export function getAssignmentColor(
   palettes: KbnPalettes,
   isDarkMode: boolean,
   index: number,
-  total: number
+  total: number,
+  paletteColor: PaletteColorLookup = uncachedPaletteColorLookup(palettes)
 ): string {
   switch (color.type) {
     case 'colorCode':
     case 'categorical':
     case 'loop':
-      return getColor(color, palettes);
+      return getColor(color, palettes, paletteColor);
     case 'gradient': {
       if (colorMode.type === 'categorical') {
         return FALLBACK_ASSIGNMENT_COLOR;
@@ -59,11 +87,12 @@ export function getColor(
     | ColorMapping.ColorCode
     | ColorMapping.CategoricalColor
     | (ColorMapping.LoopColor & { paletteId: KbnPaletteId; colorIndex: number }),
-  palettes: KbnPalettes
+  palettes: KbnPalettes,
+  paletteColor: PaletteColorLookup = uncachedPaletteColorLookup(palettes)
 ): string {
   return color.type === 'colorCode'
     ? color.colorCode
-    : getValidColor(palettes.get(color.paletteId).getColor(color.colorIndex)).hex();
+    : getValidColor(paletteColor(color.paletteId, color.colorIndex)).hex();
 }
 
 /**
@@ -89,6 +118,8 @@ export function getColorFactory(
     }));
 
   const assignmentMatcher = getColorAssignmentMatcher(assignments);
+  // The returned function is called per category (e.g. per chart series): generate each palette's colors once
+  const paletteColor = cachedPaletteColorLookup(palettes);
   // find all categories that don't match with an assignment
   const unassignedAutoAssignmentsMap = new Map(
     data.type === 'categories'
@@ -125,7 +156,8 @@ export function getColorFactory(
           palettes,
           isDarkMode,
           assignmentIndex,
-          assignments.length
+          assignments.length,
+          paletteColor
         );
       }
 
@@ -150,7 +182,8 @@ export function getColorFactory(
         palettes,
         isDarkMode,
         indexIfGradient,
-        totalColorsIfGradient
+        totalColorsIfGradient,
+        paletteColor
       );
     }
 
@@ -165,7 +198,8 @@ export function getColorFactory(
         palettes,
         isDarkMode,
         matchingAssignmentIndex,
-        assignments.length
+        assignments.length,
+        paletteColor
       );
     }
     return getColor(
@@ -174,7 +208,8 @@ export function getColorFactory(
         paletteId: KbnPalette.Neutral,
         colorIndex: DEFAULT_NEUTRAL_PALETTE_INDEX,
       },
-      palettes
+      palettes,
+      paletteColor
     );
   };
 }

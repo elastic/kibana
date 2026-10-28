@@ -13,7 +13,7 @@ import type {
   CanAccessViewMode,
   EmbeddableApiContext,
   HasParentApi,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishesWritableUnifiedSearch,
   PublishesWritableDescription,
   PublishesWritableTitle,
@@ -23,7 +23,7 @@ import type {
 } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
-  apiPublishesDataViews,
+  apiPublishesDataSources,
   apiPublishesUnifiedSearch,
   apiPublishesTitle,
   getInheritedViewMode,
@@ -38,7 +38,7 @@ import { ACTION_CUSTOMIZE_PANEL } from './constants';
 export type CustomizePanelActionApi = CanAccessViewMode &
   IsCustomizable &
   Partial<
-    PublishesDataViews &
+    PublishesDataSources &
       PublishesWritableUnifiedSearch &
       PublishesWritableDescription &
       PublishesWritableTitle &
@@ -51,7 +51,7 @@ export const isApiCompatibleWithCustomizePanelAction = (
 ): api is CustomizePanelActionApi =>
   apiCanBeCustomized(api) &&
   apiCanAccessViewMode(api) &&
-  (apiPublishesDataViews(api) || apiPublishesTitle(api));
+  (apiPublishesDataSources(api) || apiPublishesTitle(api));
 
 export class CustomizePanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CUSTOMIZE_PANEL;

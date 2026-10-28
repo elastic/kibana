@@ -1011,7 +1011,7 @@ describe('Outputs preconfiguration', () => {
         expect.objectContaining({
           is_preconfigured: true,
         }),
-        { fromPreconfiguration: true, secretHashes: expect.anything() }
+        { fromPreconfiguration: true, secretHashes: expect.anything(), declaresAllSecrets: true }
       );
       expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });

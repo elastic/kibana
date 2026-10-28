@@ -23,7 +23,7 @@ jest.mock('@elastic/charts', () => ({
   },
   Position: { Left: 'left' },
   ScaleType: { Linear: 'linear' },
-  CurveType: { CURVE_STEP_AFTER: 'curveStepAfter' },
+  CurveType: { CURVE_STEP: 'curveStep' },
 }));
 
 const card = (overrides: Partial<SignalCardData> = {}): SignalCardData => ({
