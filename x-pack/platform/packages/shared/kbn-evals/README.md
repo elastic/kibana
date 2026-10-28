@@ -198,6 +198,16 @@ Add GitHub labels to trigger evals in PR CI:
 
 Model groups follow the pattern `eis/<modelId>` for EIS or `openrouter/<provider>-<model>` for OpenRouter.
 
+A suite whose results are only comparable under one fixed judge (e.g. one scored against a pinned baseline) can set `defaultJudge` to a judge connector id in its `evals.suites.json` entry:
+
+```json
+"defaultJudge": "eis-abc-1"
+```
+
+The judge is resolved in this order: `models:judge:` label (locally `--evaluation-connector-id`, then `EVAL_CONNECTOR_ID`), then the suite's `defaultJudge`, then the Vault `evaluationConnectorId`.
+
+`defaultJudge` applies to PR (label-triggered) runs and the local CLI. Weekly and on-demand runs go straight to `run_suite.sh`, where the Vault default is already exported, so they use `EVAL_CONNECTOR_ID` or the Vault default and ignore the `defaultJudge`.
+
 PRs touching the eval framework get `evals:smoke-tests` automatically
 ([`.github/paths-labeller.yml`](../../../../../.github/paths-labeller.yml)). Add
 `evals:skip-smoke-tests` to skip it.
@@ -242,7 +252,7 @@ suite config. Drop `KBN_EVALS_WEEKLY=1` to see the PR / on-demand fanout.
 
 ```bash
 CI=x-pack/platform/packages/shared/kbn-evals/scripts/ci
-export EVAL_SUITE_INFO="$(node $CI/get_suite_info.js significant-events)"
+export EVAL_SUITE_INFO="$(node $CI/get_suite_info.js nightshift-investigations)"
 export EVAL_MODEL_GROUPS="$(jq -r '.weeklyEisModelGroups | join(",")' <<<"$EVAL_SUITE_INFO")"
 export KIBANA_TESTING_INFERENCE_ENDPOINTS="$(jq -c '[.weeklyEisModelGroups[] | ltrimstr("eis/")]
   | map({ key: ("eis-" + gsub("[^a-zA-Z0-9]+"; "-")), value: { provider: "elastic", providerConfig: { model_id: . } } })

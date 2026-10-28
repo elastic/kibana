@@ -38,7 +38,6 @@ import { GlobalRuleEventLogListSandbox } from './components/global_rule_event_lo
 import { RuleStatusDropdownSandbox } from './components/rule_status_dropdown_sandbox';
 import { RuleStatusFilterSandbox } from './components/rule_status_filter_sandbox';
 import { AlertsTableSandbox } from './components/alerts_table_sandbox';
-import { RulesSettingsLinkSandbox } from './components/rules_settings_link_sandbox';
 import { TaskWithApiKeySandbox } from './components/task_with_api_key_sandbox';
 
 export interface TriggersActionsUiExampleComponentParams {
@@ -188,15 +187,6 @@ const TriggersActionsUiExampleApp = ({
                     settings,
                   }}
                 />
-              </Page>
-            )}
-          />
-          <Route
-            exact
-            path="/rules_settings_link"
-            render={() => (
-              <Page title="Rules Settings Link">
-                <RulesSettingsLinkSandbox triggersActionsUi={triggersActionsUi} />
               </Page>
             )}
           />

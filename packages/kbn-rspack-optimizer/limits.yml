@@ -1,7 +1,7 @@
 pageLoadAssetSize:
   actions: 3928
   advancedSettings: 1981
-  agentBuilder: 644
+  agentBuilder: 745
   agentBuilderDashboards: 3743
   agentBuilderPlatform: 23882
   agentBuilderSml: 597
@@ -67,7 +67,7 @@ pageLoadAssetSize:
   embeddable: 990
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
-  entityInventoryApp: 1216
+  entityInventoryApp: 2682
   entityStore: 2508
   esql: 382
   esqlDataGrid: 215
@@ -106,7 +106,7 @@ pageLoadAssetSize:
   indexManagement: 583
   inference: 5940
   inferenceWorkflows: 1139
-  infra: 45799
+  infra: 45553
   ingestHub: 8059
   ingestPipelines: 534
   inputControlVis: 3213
@@ -137,7 +137,7 @@ pageLoadAssetSize:
   monitoring: 22416
   navigation: 332
   newsfeed: 10708
-  nightshift: 3160
+  nightshift: 3666
   nightshiftInvestigations: 9405
   nightshiftSources: 3928
   noDataPage: 630

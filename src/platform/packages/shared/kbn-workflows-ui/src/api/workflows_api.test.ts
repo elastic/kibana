@@ -247,6 +247,16 @@ describe('WorkflowApi', () => {
     });
   });
 
+  describe('getReadableWorkflowIds', () => {
+    it('should call GET /internal/workflows/readable_workflow_ids with version 1', async () => {
+      await api.getReadableWorkflowIds();
+
+      expect(http.get).toHaveBeenCalledWith('/internal/workflows/readable_workflow_ids', {
+        version: '1',
+      });
+    });
+  });
+
   describe('searchTriggerEvents', () => {
     it('should call POST /internal/workflows/trigger_events/_search with body', async () => {
       const params = {
