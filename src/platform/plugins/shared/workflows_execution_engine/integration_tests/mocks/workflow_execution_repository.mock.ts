@@ -276,14 +276,15 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     concurrencyGroupKey: string,
     spaceId: string,
     excludeExecutionId?: string,
-    size: number = 5000
+    size?: number,
+    statuses: readonly ExecutionStatus[] = ConcurrencySlotOccupyingExecutionStatuses
   ): Promise<string[]> {
     const results = Array.from(this.workflowExecutions.values())
       .filter(
         (exec) =>
           exec.concurrencyGroupKey === concurrencyGroupKey &&
           exec.spaceId === spaceId &&
-          ConcurrencySlotOccupyingExecutionStatuses.includes(exec.status) &&
+          statuses.includes(exec.status) &&
           (!excludeExecutionId || exec.id !== excludeExecutionId)
       )
       .sort((a, b) => {
@@ -292,7 +293,7 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
         return aTime - bTime !== 0 ? aTime - bTime : a.id.localeCompare(b.id);
       })
       .map((exec) => exec.id)
-      .slice(0, Math.min(size, 10000)); // Cap at ES default max_result_window
+      .slice(0, Math.min(size ?? 5000, 10000)); // Cap at ES default max_result_window
 
     return results;
   }

@@ -468,13 +468,15 @@ export class WorkflowExecutionRepository {
    * @param spaceId - The ID of the space associated with the workflow execution.
    * @param excludeExecutionId - Optional execution ID to exclude from results (e.g., current execution).
    * @param size - Optional limit on the number of results to return. Defaults to 5000.
+   * @param statuses - Statuses to include. Defaults to slot-occupying statuses, which omit `queued`.
    * @returns A promise that resolves to an array of execution IDs sorted by createdAt (oldest first).
    */
   public async getRunningExecutionsByConcurrencyGroup(
     concurrencyGroupKey: string,
     spaceId: string,
     excludeExecutionId?: string,
-    size: number = 5000
+    size?: number,
+    statuses: readonly ExecutionStatus[] = ConcurrencySlotOccupyingExecutionStatuses
   ): Promise<string[]> {
     const filterClauses: Array<Record<string, unknown>> = [
       { term: { concurrencyGroupKey } },
@@ -482,7 +484,7 @@ export class WorkflowExecutionRepository {
       // Direct match on in-progress statuses is faster than must_not on terminal statuses
       {
         terms: {
-          status: ConcurrencySlotOccupyingExecutionStatuses,
+          status: statuses,
         },
       },
     ];
@@ -510,7 +512,7 @@ export class WorkflowExecutionRepository {
         { createdAt: { order: 'asc' } },
         { id: { order: 'asc' } }, // Tie-break for determinism when createdAt collides; not chronological order
       ],
-      size: Math.min(size, 10000), // Cap at ES default max_result_window for validation
+      size: Math.min(size ?? 5000, 10000), // Cap at ES default max_result_window for validation
     });
 
     return response.hits.hits
