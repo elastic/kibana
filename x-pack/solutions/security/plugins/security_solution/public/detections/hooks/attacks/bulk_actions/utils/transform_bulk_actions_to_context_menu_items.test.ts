@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import React from 'react';
 import { transformBulkActionsToContextMenuItems } from './transform_bulk_actions_to_context_menu_items';
 import type { BulkAttackActionItems } from '../types';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BrowserFields } from '@kbn/timelines-plugin/common';
+import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
 
 /**
  * Mock the browserFields object

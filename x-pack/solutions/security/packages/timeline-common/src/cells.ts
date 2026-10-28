@@ -8,8 +8,10 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { ColumnHeaderOptions, DeprecatedRowRenderer } from '../..';
-import type { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
+import type { ColumnHeaderOptions } from './columns';
+import type { DeprecatedRowRenderer } from './rows';
+import type { BrowserFields } from './fields';
+import type { TimelineNonEcsData } from './timeline_item';
 
 /**
  * The following props are provided to the function called by `renderCellValue`.

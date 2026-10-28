@@ -8,7 +8,7 @@
 import type { EuiDataGridCustomBodyProps, EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { type EuiTheme } from '@kbn/react-kibana-context-styled';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import type { CSSProperties, FC, PropsWithChildren } from 'react';
 import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';

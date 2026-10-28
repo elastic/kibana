@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table/translations';
 import type { CustomBulkAction } from '../../../../../common/types';
