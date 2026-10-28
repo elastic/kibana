@@ -248,7 +248,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
       const sectionId$ = apiHasSections(parentApi) ? parentApi.panelSection$(uuid) : of(undefined);
 
       const outputFilterSubscription = combineLatest([
-        dataControlManager.api.dataViews$,
+        dataControlManager.api.dataSources$,
         dataControlManager.api.fieldName$,
         selectionsManager.api.selectedOptions$,
         selectionsManager.api.existsSelected$,

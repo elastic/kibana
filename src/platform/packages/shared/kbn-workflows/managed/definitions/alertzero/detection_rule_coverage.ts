@@ -23,11 +23,11 @@ export const ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID =
   'system-security-detection-rule-coverage';
 
 export const ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 4,
+  version: 5,
   yamlTemplate: (values: RuleCoverageWorkerTemplateValues): string =>
     renderRuleCoverageWorkerYaml(
       DETECTION_RULE_COVERAGE_YAML,

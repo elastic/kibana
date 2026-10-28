@@ -108,6 +108,32 @@ export const scheduleIntervalToMinutes = (interval: string): number => {
   return Number(match[1]) * MINUTES_PER_UNIT[match[2] as keyof typeof MINUTES_PER_UNIT];
 };
 
+/** One day's retrieval. Also the hard ceiling: a longer interval does not raise it. */
+const ATTACK_DISCOVERY_ALERTS_PER_DAY = 10_000;
+/** One batch. Shorter intervals stay at a single batch rather than a partial one. */
+const ATTACK_DISCOVERY_MIN_ALERTS = 100;
+const MINUTES_PER_DAY = 24 * 60;
+
+/**
+ * Alerts one Attack Discovery run may retrieve, prorated to its schedule interval.
+ * 10,000 per 24h, at least 100, and never more than 10,000.
+ */
+export const attackDiscoveryMaxAlerts = (interval: string): number => {
+  const prorated = Math.floor(
+    (ATTACK_DISCOVERY_ALERTS_PER_DAY * scheduleIntervalToMinutes(interval)) / MINUTES_PER_DAY
+  );
+  return Math.min(ATTACK_DISCOVERY_ALERTS_PER_DAY, Math.max(ATTACK_DISCOVERY_MIN_ALERTS, prorated));
+};
+
+export const renderAttackDiscoveryWorkerYaml = (
+  yaml: string,
+  values: ScheduledWorkerTemplateValues
+): string =>
+  renderScheduledWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_MAX_ALERTS__',
+    String(attackDiscoveryMaxAlerts(values.scheduleInterval))
+  );
+
 export const renderAlertTriageWorkerYaml = (
   yaml: string,
   values: AlertTriageWorkerTemplateValues
