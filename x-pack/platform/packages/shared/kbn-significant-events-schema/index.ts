@@ -35,6 +35,7 @@ export {
 } from './src/queries';
 
 export type {
+  EventDeactivation,
   EventLifecycleResponse,
   GeneratedSignificantEventQuery,
   LifecycleDetection,
