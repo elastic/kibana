@@ -121,34 +121,6 @@ on_exit() {
 
 trap on_exit EXIT
 
-# A suite's `scoutHook` reads the evals config on stdin and prints `{ env }`, exported for Scout and
-# Playwright so the suite's server config set can read it. Runs before connector generation
-# because a hook may set EVAL_CONNECTOR_ID (e.g. a suite pinning its judge), which the EIS
-# connector decisions below must see. A suite with a `vaultSecret` gets its own
-# secret instead of the general config, so its credentials rotate without touching other suites.
-EVAL_SUITE_SCOUT_HOOK="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutHook // empty' 2>/dev/null || true)"
-EVAL_SUITE_VAULT_SECRET="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.vaultSecret // empty' 2>/dev/null || true)"
-if [[ -n "$EVAL_SUITE_SCOUT_HOOK" ]]; then
-  if [[ -n "$EVAL_SUITE_VAULT_SECRET" ]]; then
-    if [[ ! "$EVAL_SUITE_VAULT_SECRET" =~ ^[a-z0-9][a-z0-9_-]*$ ]]; then
-      echo "Invalid vaultSecret \"$EVAL_SUITE_VAULT_SECRET\" in evals.suites.json" >&2
-      exit 1
-    fi
-    _scout_hook_config="$(retry 5 5 vault kv get -field=config "kv/ci-shared/kbn-evals/$EVAL_SUITE_VAULT_SECRET" | base64 -d)"
-  elif [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
-    _scout_hook_config="$(printf '%s' "$KBN_EVALS_CONFIG_B64" | base64 -d)"
-  else
-    _scout_hook_config='{}'
-  fi
-  _scout_hook_output="$(printf '%s' "$_scout_hook_config" | bash "$EVAL_SUITE_SCOUT_HOOK")"
-  # Piped, not `<<<`: older bash backs here-strings with a temp file, and this holds the private key.
-  while IFS= read -r _scout_hook_name; do
-    [[ -z "$_scout_hook_name" ]] && continue
-    export "$_scout_hook_name=$(printf '%s' "$_scout_hook_output" | jq -r --arg name "$_scout_hook_name" '.env[$name]')"
-  done < <(printf '%s' "$_scout_hook_output" | jq -r '(.env // {}) | keys[]')
-  unset _scout_hook_config _scout_hook_output _scout_hook_name
-fi
-
 # Generate OpenRouter connectors (or skip when only EIS models are requested).
 # This must run after bootstrap so Node is available for the generator script.
 source .buildkite/scripts/steps/evals/setup_connectors.sh
@@ -522,6 +494,32 @@ fi
 echo "--- Disk usage before starting Scout"
 df -h .
 du -sh .es node_modules "${KIBANA_BUILD_LOCATION:-}" 2>/dev/null || true
+
+# A suite's `scoutHook` reads the evals config on stdin and prints `{ env }`, exported for Scout and
+# Playwright so the suite's server config set can read it. A suite with a `vaultSecret` gets its own
+# secret instead of the general config, so its credentials rotate without touching other suites.
+EVAL_SUITE_SCOUT_HOOK="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.scoutHook // empty' 2>/dev/null || true)"
+EVAL_SUITE_VAULT_SECRET="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.vaultSecret // empty' 2>/dev/null || true)"
+if [[ -n "$EVAL_SUITE_SCOUT_HOOK" ]]; then
+  if [[ -n "$EVAL_SUITE_VAULT_SECRET" ]]; then
+    if [[ ! "$EVAL_SUITE_VAULT_SECRET" =~ ^[a-z0-9][a-z0-9_-]*$ ]]; then
+      echo "Invalid vaultSecret \"$EVAL_SUITE_VAULT_SECRET\" in evals.suites.json" >&2
+      exit 1
+    fi
+    _scout_hook_config="$(retry 5 5 vault kv get -field=config "kv/ci-shared/kbn-evals/$EVAL_SUITE_VAULT_SECRET" | base64 -d)"
+  elif [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
+    _scout_hook_config="$(printf '%s' "$KBN_EVALS_CONFIG_B64" | base64 -d)"
+  else
+    _scout_hook_config='{}'
+  fi
+  _scout_hook_output="$(printf '%s' "$_scout_hook_config" | bash "$EVAL_SUITE_SCOUT_HOOK")"
+  # Piped, not `<<<`: older bash backs here-strings with a temp file, and this holds the private key.
+  while IFS= read -r _scout_hook_name; do
+    [[ -z "$_scout_hook_name" ]] && continue
+    export "$_scout_hook_name=$(printf '%s' "$_scout_hook_output" | jq -r --arg name "$_scout_hook_name" '.env[$name]')"
+  done < <(printf '%s' "$_scout_hook_output" | jq -r '(.env // {}) | keys[]')
+  unset _scout_hook_config _scout_hook_output _scout_hook_name
+fi
 
 # Scout arch/domain come from the suite's scoutArch/scoutDomain (EVAL_SCOUT_ARCH/EVAL_SCOUT_DOMAIN),
 # stateful/classic by default.

@@ -36,8 +36,8 @@
       "slackChannel": "#agent-builder-alerts",
       "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/regression.playwright.config.ts",
       "serverConfigSet": "evals_agent_builder",
-      "scoutHook": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/scout/scout_hook.sh",
-      "description": "Fixed regression datasets run per-PR to detect cost/speed/quality regressions (elastic/search-team#16080).",
+      "defaultJudge": "eis-zai-glm-5-2",
+      "description": "Fixed regression datasets run per-PR to detect cost/speed/quality regressions.",
       "tags": [
         "platform",
         "agent-builder",
