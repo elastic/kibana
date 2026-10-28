@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { splitRemoteCluster } from '../../../../../common/remote_cluster';
 import type { ProcessSelector } from './types';
 
 /**
@@ -133,7 +134,11 @@ export const makeRehydrateProcessSelectors = (
         matched: event.matched,
       })),
       ...alerts.map((alert) => ({ index: alert.index, id: alert.alert_id })),
-    ].slice(0, MAX_REHYDRATE_DOCS);
+    ]
+      // `_mget` cannot read across clusters, so one remote ref would fail the whole call and
+      // lose the local selectors too. A remote host has no local Fleet agent to act on anyway.
+      .filter((ref) => splitRemoteCluster(ref.index).cluster === undefined)
+      .slice(0, MAX_REHYDRATE_DOCS);
 
     if (refs.length === 0) {
       return [];

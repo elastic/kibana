@@ -146,7 +146,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
         ...chartsManager.api,
         ...chartsManager.dataLoadingApi,
         ...stateApi,
-        dataViews$: buildDataViewPublishingApi(
+        dataSources$: buildDataViewPublishingApi(
           {
             anomalyDetectorService: mlServices.anomalyDetectorService,
             dataViewsService: pluginsStartServices.data.dataViews,

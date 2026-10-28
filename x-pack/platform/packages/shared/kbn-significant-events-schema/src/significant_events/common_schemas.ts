@@ -23,6 +23,9 @@ import { detectionSchema } from './detections';
 
 const FEATURE_ID_COPY_RULE = 'Copy it exactly as ki_search returns it.';
 
+const KI_SUBTYPE_DESCRIPTION =
+  'Copied verbatim from the subtype of the Knowledge Indicator named by feature_id; a snapshot, never re-synced.';
+
 const blastRadiusDependencySchema = lazySchema(() =>
   z.object({
     type: z.literal('dependency'),
@@ -32,13 +35,7 @@ const blastRadiusDependencySchema = lazySchema(() =>
       .describe(
         `The feature.id value of the Knowledge Indicator this dependency entry is based on. ${FEATURE_ID_COPY_RULE}`
       ),
-    subtype: z
-      .string()
-      .max(MAX_ID_LENGTH)
-      .optional()
-      .describe(
-        "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
-      ),
+    subtype: z.string().max(MAX_ID_LENGTH).optional().describe(KI_SUBTYPE_DESCRIPTION),
     source: z
       .string()
       .max(MAX_TITLE_LENGTH)
@@ -61,6 +58,7 @@ const blastRadiusDependencySchema = lazySchema(() =>
     source_id: z
       .string()
       .max(MAX_ID_LENGTH)
+      .optional()
       .describe('Nightshift source id associated with this dependency.'),
   })
 );
@@ -74,13 +72,7 @@ const blastRadiusInfrastructureSchema = lazySchema(() =>
       .describe(
         `The feature.id value of the Knowledge Indicator this infrastructure entry is based on. ${FEATURE_ID_COPY_RULE}`
       ),
-    subtype: z
-      .string()
-      .max(MAX_ID_LENGTH)
-      .optional()
-      .describe(
-        "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
-      ),
+    subtype: z.string().max(MAX_ID_LENGTH).optional().describe(KI_SUBTYPE_DESCRIPTION),
     title: z
       .string()
       .max(MAX_TITLE_LENGTH)
@@ -96,6 +88,7 @@ const blastRadiusInfrastructureSchema = lazySchema(() =>
     source_id: z
       .string()
       .max(MAX_ID_LENGTH)
+      .optional()
       .describe('Nightshift source id associated with this infrastructure component.'),
   })
 );
@@ -109,17 +102,12 @@ const blastRadiusEntitySchema = lazySchema(() =>
       .describe(
         `The feature.id value of the Knowledge Indicator this entity entry is based on. ${FEATURE_ID_COPY_RULE}`
       ),
-    subtype: z
-      .string()
-      .max(MAX_ID_LENGTH)
-      .optional()
-      .describe(
-        "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
-      ),
+    subtype: z.string().max(MAX_ID_LENGTH).optional().describe(KI_SUBTYPE_DESCRIPTION),
     name: z.string().max(MAX_TITLE_LENGTH).describe('Human-readable name of the affected entity.'),
     source_id: z
       .string()
       .max(MAX_ID_LENGTH)
+      .optional()
       .describe('Nightshift source id associated with this entity.'),
   })
 );
@@ -159,13 +147,7 @@ export const causalFeatureSchema = lazySchema(() =>
       .describe(
         'The type of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator\'s own type field — one of "entity", "infrastructure", "technology", "dependency", or "schema". This is the Knowledge Indicator\'s own type, not the blast_radius row discriminator, which shares the name but only distinguishes the three blast radius shapes. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified.'
       ),
-    subtype: z
-      .string()
-      .max(MAX_ID_LENGTH)
-      .optional()
-      .describe(
-        "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
-      ),
+    subtype: z.string().max(MAX_ID_LENGTH).optional().describe(KI_SUBTYPE_DESCRIPTION),
     name: z
       .string()
       .max(MAX_TITLE_LENGTH)
@@ -225,11 +207,7 @@ const signalBaseSchema = lazySchema(() =>
       .max(MAX_TEXT_LENGTH)
       .describe(
         dedent`
-      What this signal's queries observed and what it affects, in plain prose a reader can act on, in at most three sentences.
-
-      Name the concrete row signature and failing target — or, when nothing matched, what was looked for and what was found instead — then who or what is affected, how badly, for how long, and how broadly (the share of the operation, the number and share of parties, regions), using the numbers measured. Say whether the rows show the operation failing, slow, completing, or not settled, and name any sensitive data the rows expose by type. Report only what the queries observed: the verdict is recorded separately, and this text neither states it nor depends on it. Never say only that rows were returned.
-
-      Do not name dependency chains, upstream causes, or topology here — use causal_features and blast_radius for that.
+      What this signal's queries observed and what it affects, as written by grounding. Keep it exactly as grounding wrote it: never shorten, merge, or reword it, and never add what the queries did not observe.
       ${NO_RAW_SENSITIVE_VALUES_RULE}
     `
       ),

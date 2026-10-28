@@ -14,6 +14,8 @@ import {
   emptyAssets,
 } from '@kbn/streams-schema';
 import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
+import { getComponentTemplateName } from '@kbn/streams-plugin/server/lib/streams/component_templates/name';
+import { getIndexTemplateName } from '@kbn/streams-plugin/server/lib/streams/index_templates/name';
 import type { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
 import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import { get, omit } from 'lodash';
@@ -48,26 +50,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const status = 'enabled' as RoutingStatus;
 
   interface Resources {
-    indices: string[];
     componentTemplates: string[];
     indexTemplates: string[];
   }
 
   function getResources(): Promise<Resources> {
     return Promise.all([
-      esClient.indices.get({
-        index: ['logs*'],
-        allow_no_indices: true,
-      }),
       esClient.cluster.getComponentTemplate({
         name: 'logs*',
       }),
       esClient.indices.getIndexTemplate({
         name: 'logs*',
       }),
-    ]).then(([indicesResponse, componentTemplateResponse, indexTemplateResponse]) => {
+    ]).then(([componentTemplateResponse, indexTemplateResponse]) => {
       return {
-        indices: Object.keys(indicesResponse.indices ?? {}),
         componentTemplates: componentTemplateResponse.component_templates.map(
           (template) => template.name
         ),
@@ -76,31 +72,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
   }
 
-  /** ES assets installed for wired roots (see getComponentTemplateName / getIndexTemplateName). */
-  const WIRED_ROOT_ELASTICSEARCH_ASSETS = [
-    `${LOGS_OTEL_STREAM_NAME}@stream.layer`,
-    `${LOGS_ECS_STREAM_NAME}@stream.layer`,
-    `${LOGS_OTEL_STREAM_NAME}@stream`,
-    `${LOGS_ECS_STREAM_NAME}@stream`,
-  ];
-
-  function resourcesExcludingWiredRootAssets(r: Resources): Resources {
-    const exclude = new Set(WIRED_ROOT_ELASTICSEARCH_ASSETS);
-    return {
-      indices: r.indices,
-      componentTemplates: r.componentTemplates.filter((name) => !exclude.has(name)),
-      indexTemplates: r.indexTemplates.filter((name) => !exclude.has(name)),
-    };
-  }
-
-  /** ES APIs do not guarantee stable ordering; normalize before deep equality checks. */
-  function sortResourceLists(r: Resources): Resources {
-    return {
-      indices: [...r.indices].sort((a, b) => a.localeCompare(b)),
-      componentTemplates: [...r.componentTemplates].sort((a, b) => a.localeCompare(b)),
-      indexTemplates: [...r.indexTemplates].sort((a, b) => a.localeCompare(b)),
-    };
-  }
+  const STREAM_COMPONENT_TEMPLATE_SUFFIX = getComponentTemplateName('');
+  const STREAM_INDEX_TEMPLATE_SUFFIX = getIndexTemplateName('');
 
   describe('Basic functionality', () => {
     async function getWiredStatus() {
@@ -144,12 +117,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('initially', () => {
-      let resources: Resources;
-
-      before(async () => {
-        resources = await getResources();
-      });
-
       it('is enabled by default', async () => {
         // Wired roots may be enabled asynchronously after Kibana starts; poll until status settles.
         await retry.tryForTime(
@@ -299,18 +266,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           it('cleans up all the resources', async () => {
-            const afterDisable = await getResources();
-            // Wired roots are on by default, so the initial snapshot includes their index and
-            // component templates; disableStreams removes them. Everything else should match.
-            expect(sortResourceLists(resourcesExcludingWiredRootAssets(afterDisable))).to.eql(
-              sortResourceLists(resourcesExcludingWiredRootAssets(resources))
-            );
-            const templateNames = [
-              ...afterDisable.componentTemplates,
-              ...afterDisable.indexTemplates,
-            ];
-            for (const name of WIRED_ROOT_ELASTICSEARCH_ASSETS) {
-              expect(templateNames.includes(name)).to.eql(false);
+            const { componentTemplates, indexTemplates } = await getResources();
+            expect(
+              componentTemplates.filter((name) => name.endsWith(STREAM_COMPONENT_TEMPLATE_SUFFIX))
+            ).to.eql([]);
+            expect(
+              indexTemplates.filter((name) => name.endsWith(STREAM_INDEX_TEMPLATE_SUFFIX))
+            ).to.eql([]);
+            for (const streamName of [LOGS_ECS_STREAM_NAME, LOGS_OTEL_STREAM_NAME]) {
+              await esClient.indices.getDataStream({ name: streamName }).then(
+                () => {
+                  throw new Error(`Expected ${streamName} data stream to not exist`);
+                },
+                (err) => {
+                  expect(err.meta?.body?.error?.type).to.eql('index_not_found_exception');
+                }
+              );
             }
           });
 

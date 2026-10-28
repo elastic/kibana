@@ -346,6 +346,25 @@ ${esqlStep('inner', 'FROM logs-app | WHERE', '      ')}`);
     expect(notChecked).toEqual([expect.stringContaining('step "huge": it is longer than')]);
   });
 
+  it('validates only the first maxSteps steps and says so in notChecked', async () => {
+    const steps = [
+      esqlStep('first', 'FROM logs-app'),
+      esqlStep('second', 'FROM logs-app'),
+      esqlStep('third', 'FROM logs-app | WHERE'),
+    ].join('');
+
+    const { diagnostics, notChecked } = await collectEsqlDiagnostics(
+      workflow(steps),
+      schemaCallbacks,
+      2
+    );
+
+    expect(diagnostics).toEqual([]);
+    expect(notChecked).toEqual([
+      'ES|QL queries of 1 steps: only the first 2 ES|QL steps are validated.',
+    ]);
+  });
+
   it('reports the step in notChecked when a callback throws', async () => {
     const yaml = workflow(esqlStep('boom', 'FROM logs-app | LIMIT 1'));
     const { diagnostics, notChecked } = await collectEsqlDiagnostics(yaml, {
