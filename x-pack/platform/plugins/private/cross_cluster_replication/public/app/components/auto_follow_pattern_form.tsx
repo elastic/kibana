@@ -43,6 +43,7 @@ import {
   type AutoFollowPatternValidationErrors,
   type MessageError,
   validateAutoFollowPattern,
+  validateLeaderIndexExclusionPatterns,
   validateLeaderIndexPattern,
 } from '../services/auto_follow_pattern_validators';
 
@@ -246,6 +247,17 @@ export class AutoFollowPatternForm extends PureComponent<Props, State> {
     this.onFieldsChange({
       leaderIndexExclusionPatterns: indexPatterns.map(({ label }) => label),
     });
+  };
+
+  onLeaderIndexExclusionPatternInputChange = (leaderIndexExclusionPattern: string) => {
+    const { leaderIndexExclusionPatterns } = this.state.autoFollowPattern;
+    const errors = validateLeaderIndexExclusionPatterns(
+      leaderIndexExclusionPattern.trim()
+        ? [...leaderIndexExclusionPatterns, leaderIndexExclusionPattern]
+        : leaderIndexExclusionPatterns
+    );
+
+    this.onFieldsErrorChange({ leaderIndexExclusionPatterns: errors });
   };
 
   onLeaderIndexPatternInputChange = (leaderIndexPattern: string) => {
@@ -609,6 +621,7 @@ export class AutoFollowPatternForm extends PureComponent<Props, State> {
               selectedOptions={leaderIndexExclusionPatterns.map((pattern) => ({ label: pattern }))}
               onCreateOption={this.onCreateLeaderIndexExclusionPattern}
               onChange={this.onLeaderIndexExclusionPatternChange}
+              onSearchChange={this.onLeaderIndexExclusionPatternInputChange}
               fullWidth
               data-test-subj="leaderIndexExclusionPatternInput"
             />

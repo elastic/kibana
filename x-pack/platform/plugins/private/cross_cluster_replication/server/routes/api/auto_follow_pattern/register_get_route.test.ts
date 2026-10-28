@@ -41,6 +41,7 @@ describe('[CCR API] Get one auto-follow pattern', () => {
             active: true,
             remote_cluster: 'remoteCluster',
             leader_index_patterns: ['leader*'],
+            leader_index_exclusion_patterns: [],
             follow_index_pattern: 'follow',
           },
         },
@@ -59,6 +60,7 @@ describe('[CCR API] Get one auto-follow pattern', () => {
       active: true,
       followIndexPattern: 'follow',
       leaderIndexPatterns: ['leader*'],
+      leaderIndexExclusionPatterns: [],
       name: 'autoFollowPattern',
       remoteCluster: 'remoteCluster',
     });

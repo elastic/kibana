@@ -13,6 +13,7 @@ type AutoFollowPatternMockParams = Partial<{
   active: boolean;
   remoteCluster: string;
   leaderIndexPatterns: string[];
+  leaderIndexExclusionPatterns: string[];
   followIndexPattern: string;
 }>;
 
@@ -21,11 +22,13 @@ export const getAutoFollowPatternMock = ({
   active = false,
   remoteCluster = getRandomString(),
   leaderIndexPatterns = [`${getRandomString()}-*`],
+  leaderIndexExclusionPatterns = [],
   followIndexPattern = getRandomString(),
 }: AutoFollowPatternMockParams = {}): AutoFollowPattern => ({
   name,
   active,
   remoteCluster,
   leaderIndexPatterns,
+  leaderIndexExclusionPatterns,
   followIndexPattern,
 });

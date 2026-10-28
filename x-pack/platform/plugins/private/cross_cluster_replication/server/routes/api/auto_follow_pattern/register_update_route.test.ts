@@ -45,6 +45,7 @@ describe('[CCR API] Update auto-follow pattern', () => {
       body: {
         remoteCluster: 'bar1',
         leaderIndexPatterns: ['bar2'],
+        leaderIndexExclusionPatterns: [],
         followIndexPattern: 'bar3',
       },
     });
@@ -55,6 +56,7 @@ describe('[CCR API] Update auto-follow pattern', () => {
       name: 'foo',
       remote_cluster: 'bar1',
       leader_index_patterns: ['bar2'],
+      leader_index_exclusion_patterns: [],
       follow_index_pattern: 'bar3',
     });
   });
