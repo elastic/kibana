@@ -30,8 +30,8 @@
  *          follows the PR head, because kibanamachine fix-up commits restart CI.
  *          --since (UTC, e.g. 2026-10-02T10:00:00Z) makes ci ignore a status last updated before that time,
  *          so a wait after a retry doesn't return the failure that was retried.
- *          none and timeout are measured from the commit's date (or --since for ci), so they stay correct
- *          across repeated calls. --timeout 0 polls once.
+ *          none and timeout are measured from when wait first watched the signal, kept in a temp file, so
+ *          they stay correct across repeated calls. --timeout 0 polls once.
  * threads  Prints one JSON object per unresolved thread opened by Libra whose latest comment is Libra's.
  *          followUp is true when Libra is answering a reply; otherReplies counts the non-Libra comments in the
  *          thread, and latestCommentId/latestBody hold Libra's answer.
@@ -52,7 +52,7 @@ import {
   checkLibra,
   fail,
   formatLine,
-  getCommitDate,
+  getFirstSeen,
   getDefaultSha,
   getHeadSha,
   ghJson,
@@ -97,7 +97,7 @@ const wait = async (pr, rest) => {
   if (options.since && Number.isNaN(sinceMs)) fail(`invalid --since: ${options.since}`);
 
   const libraSha = wanted.has('libra') ? options.sha ?? (await getDefaultSha(pr)) : null;
-  const libraSinceMs = libraSha ? await getCommitDate(libraSha) : null;
+  const libraSinceMs = libraSha ? getFirstSeen(pr, `libra:${libraSha}`) : null;
 
   const results = new Map();
   let ciHead = null;
@@ -117,10 +117,9 @@ const wait = async (pr, rest) => {
         results.delete('ci');
       }
       if (!results.has('ci')) {
-        const headDate = await getCommitDate(head);
         const final = settle(await checkCi(head, sinceMs), {
           ...CI_TIMING,
-          sinceMs: Math.max(headDate, sinceMs ?? 0),
+          sinceMs: getFirstSeen(pr, `ci:${head}:${options.since ?? ''}`),
         });
         if (final) results.set('ci', { ...final, sha: head });
       }

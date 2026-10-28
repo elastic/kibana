@@ -12,6 +12,9 @@
  */
 
 import { execFile } from 'node:child_process';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
@@ -23,7 +26,7 @@ export const POLL_INTERVAL_MS = 30_000;
 export const DEFAULT_WAIT_SECONDS = 300;
 const GH_ATTEMPTS = 3;
 
-// How long after the commit (or --since) a signal may stay silent before it's reported as `none`, and how long
+// How long after a signal was first watched (see getFirstSeen) it may stay silent before it's reported as `none`, and how long
 // it may stay pending before it's reported as `timeout`. Libra starts within a minute or two; a full CI build
 // takes about an hour.
 export const LIBRA_TIMING = { startupMs: 5 * 60_000, timeoutMs: 20 * 60_000, label: 'Libra' };
@@ -108,13 +111,27 @@ export const formatLine = (signal, { state, sha, detail, extra }) =>
 // GraphQL drops the `[bot]` suffix that REST shows; the type check keeps user accounts with the same name out.
 export const isLibra = (author) => author?.__typename === 'Bot' && author.login === LIBRA_LOGIN;
 
-const commitDates = new Map();
-export const getCommitDate = async (sha) => {
-  if (!commitDates.has(sha)) {
-    const commit = await ghJson(['api', `repos/${REPO}/commits/${sha}`]);
-    commitDates.set(sha, Date.parse(commit.commit.committer.date));
+/**
+ * Returns when `wait` first watched this signal, persisted in a temp file so repeated calls share one clock.
+ * The commit date can't serve here: a commit made yesterday may be pushed, or its draft marked ready, today.
+ */
+export const getFirstSeen = (pr, key) => {
+  const file = join(tmpdir(), `pr-babysit-${pr}.json`);
+  let seen = {};
+  try {
+    seen = JSON.parse(readFileSync(file, 'utf8'));
+  } catch {
+    // No state yet, or it is unreadable: start the clock now.
   }
-  return commitDates.get(sha);
+  if (!(key in seen)) {
+    seen[key] = Date.now();
+    try {
+      writeFileSync(file, JSON.stringify(seen));
+    } catch {
+      // Without a writable temp dir the clock restarts on every call; waiting longer is the safe failure.
+    }
+  }
+  return seen[key];
 };
 
 export const getHeadSha = async (pr) => {
@@ -145,7 +162,7 @@ export const checkLibra = async (sha) => {
   const detail = status.description ?? '';
   switch (status.state) {
     case 'success':
-      if (detail.includes('noop')) return { state: 'clean', detail };
+      if (/noop|no reported findings/i.test(detail)) return { state: 'clean', detail };
       if (/skipped/i.test(detail)) return { state: 'skipped', detail };
       return { state: 'findings', detail };
     case 'failure':
@@ -178,12 +195,12 @@ export const settle = (result, { sinceMs, startupMs, timeoutMs, label }) => {
   const age = Date.now() - sinceMs;
   if (result.state === 'missing') {
     return age >= startupMs
-      ? { state: 'none', detail: `no ${label} result ${Math.round(startupMs / 1000)}s after the commit` }
+      ? { state: 'none', detail: `no ${label} result ${Math.round(startupMs / 1000)}s after it was first watched` }
       : undefined;
   }
   if (result.state === 'pending') {
     return age >= timeoutMs
-      ? { state: 'timeout', detail: `no ${label} result ${Math.round(timeoutMs / 1000)}s after the commit` }
+      ? { state: 'timeout', detail: `no ${label} result ${Math.round(timeoutMs / 1000)}s after it was first watched` }
       : undefined;
   }
   return result;
