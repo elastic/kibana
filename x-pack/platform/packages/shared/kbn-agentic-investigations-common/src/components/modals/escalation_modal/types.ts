@@ -12,6 +12,6 @@ export interface EscalationSummary {
   title: string;
   linkedInvestigationCount: number;
   alreadyLinked: boolean;
-  /** False when the caller is a participant but not the owner; patchMetadata requires owner access. */
+  /** False when the caller neither owns the escalation nor is a listed participant. */
   canManage: boolean;
 }

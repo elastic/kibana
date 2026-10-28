@@ -13,6 +13,8 @@ import { SourceFlyout } from './source_flyout';
 import { SOURCE_QUERY_VALIDATION_DEBOUNCE_MS } from './use_source_query_validation';
 
 const mockFetch = jest.fn<Promise<ValidateSourceQueryResponse>, [string, unknown]>();
+const mockCreateSource = jest.fn();
+const mockUpdateSource = jest.fn();
 
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
@@ -24,8 +26,8 @@ jest.mock('../../hooks/use_kibana', () => ({
 }));
 jest.mock('../../data/sources/use_sources_api', () => ({
   useSourcesApi: () => ({
-    createSource: { mutateAsync: jest.fn() },
-    updateSource: { mutateAsync: jest.fn(), isLoading: false },
+    createSource: { mutateAsync: mockCreateSource },
+    updateSource: { mutateAsync: mockUpdateSource, isLoading: false },
   }),
 }));
 jest.mock('./source_preview', () => ({ SourcePreview: () => null }));
@@ -138,4 +140,82 @@ describe('SourceFlyout query validation', () => {
     expect(saveButton()).toBeEnabled();
     expect(mockFetch).not.toHaveBeenCalled();
   });
+});
+
+describe('SourceFlyout enabled switch', () => {
+  const enabledSwitch = () => screen.getByTestId('significantEventsAppSourceFlyoutEnabledSwitch');
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    mockFetch.mockReset();
+    mockCreateSource.mockReset();
+    mockUpdateSource.mockReset();
+    mockFetch.mockResolvedValue({ valid: true, type: 'logs', index_exists: true });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  const fillNewSource = async () => {
+    fireEvent.change(screen.getByTestId('significantEventsAppSourceFlyoutTitleInput'), {
+      target: { value: 'Nginx' },
+    });
+    typeQuery('FROM logs-nginx');
+    await waitOutDebounce();
+    await waitFor(() => expect(saveButton()).toBeEnabled());
+  };
+
+  it('is on by default, says what the source is enabled for and creates an enabled source', async () => {
+    renderFlyout();
+    expect(screen.getByText('Enabled')).toBeVisible();
+    expect(enabledSwitch()).toBeChecked();
+    expect(screen.getByText(/Onboarding starts as soon as the source is created/)).toBeVisible();
+
+    await fillNewSource();
+    fireEvent.click(saveButton());
+
+    await waitFor(() =>
+      expect(mockCreateSource).toHaveBeenCalledWith({
+        title: 'Nginx',
+        description: undefined,
+        tags: [],
+        esql: 'FROM logs-nginx',
+        enabled: true,
+      })
+    );
+  });
+
+  it('creates a disabled source when switched off, and says nothing runs on it', async () => {
+    renderFlyout();
+    await fillNewSource();
+    fireEvent.click(enabledSwitch());
+
+    expect(enabledSwitch()).not.toBeChecked();
+    expect(screen.getByText(/nothing runs on it/)).toBeVisible();
+    expect(screen.queryByText(/Onboarding starts as soon as/)).not.toBeInTheDocument();
+
+    fireEvent.click(saveButton());
+
+    await waitFor(() =>
+      expect(mockCreateSource).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }))
+    );
+  });
+
+  it.each([true, false])(
+    'is not offered for an existing source, and saving it sends no enabled state (enabled: %s)',
+    async (enabled) => {
+      renderFlyout({ source: { ...source, enabled } });
+      expect(screen.queryByTestId('significantEventsAppSourceFlyoutEnabledSwitch')).toBeNull();
+
+      fireEvent.change(screen.getByTestId('significantEventsAppSourceFlyoutTitleInput'), {
+        target: { value: 'Renamed' },
+      });
+      await waitOutDebounce();
+      fireEvent.click(saveButton());
+
+      await waitFor(() => expect(mockUpdateSource).toHaveBeenCalledTimes(1));
+      expect(mockUpdateSource.mock.calls[0][0].body).not.toHaveProperty('enabled');
+    }
+  );
 });

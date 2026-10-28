@@ -476,6 +476,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       attacksPage: `${ELASTIC_DOCS}solutions/security/ai/attack-discovery/manage-discoveries-from-attacks-page`,
       dashboardsPage: `${ELASTIC_DOCS}solutions/security/dashboards`,
       detectionResponsePage: `${ELASTIC_DOCS}solutions/security/dashboards/detection-response-dashboard`,
+      alertSummaryPage: `${ELASTIC_DOCS}solutions/security/ai/ease/ease-alerts`,
       notesPage: `${ELASTIC_DOCS}solutions/security/investigate/notes`,
       timelinesPage: `${ELASTIC_DOCS}solutions/security/investigate/timeline`,
       runAttackDiscoveryInWorkflow: `${ELASTIC_DOCS}solutions/security/ai/attack-discovery/run-attack-discovery-in-a-workflow`,

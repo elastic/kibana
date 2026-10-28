@@ -81,7 +81,7 @@ export const syntheticsMonitorLocationQueryLocatorID =
 export const syntheticsEditMonitorLocatorID = 'SYNTHETICS_EDIT_MONITOR_LOCATOR';
 export const syntheticsAddMonitorLocatorID = 'SYNTHETICS_ADD_MONITOR_LOCATOR';
 export const syntheticsSettingsLocatorID = 'SYNTHETICS_SETTINGS';
-export const alertsLocatorID = 'ALERTS_LOCATOR';
+export { ALERTS_LOCATOR_ID as alertsLocatorID } from '@kbn/deeplinks-observability';
 
 import { paths } from './locators/paths';
 export const observabilityPaths = paths.observability;

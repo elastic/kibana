@@ -7,10 +7,7 @@
 
 import { assertNever } from '@kbn/std';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type {
-  BulkPurgeRollupParams,
-  BulkPurgeRollupResponse,
-} from '@kbn/slo-schema/src/rest_specs/routes/bulk_purge_rollup';
+import type { BulkPurgeRollupParams, BulkPurgeRollupResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import type { SLODefinition } from '../domain/models';

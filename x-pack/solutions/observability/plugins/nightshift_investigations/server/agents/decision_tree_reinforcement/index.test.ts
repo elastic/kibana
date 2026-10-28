@@ -70,4 +70,15 @@ describe('Nightshift decision tree reinforcement agent type', () => {
       expect(toolIds).not.toContain(toolId);
     }
   });
+
+  it('hydrates through the hook workflow the resolver names for the space', async () => {
+    const type = getDecisionTreeReinforcementAgentType({
+      resolveHookWorkflowId: async (id, { spaceId }) => `${id}-bound-${spaceId}`,
+    });
+    if (typeof type.baseConfiguration !== 'function') {
+      throw new Error('expected a dynamic base configuration');
+    }
+    const base = await type.baseConfiguration({ spaceId: 'sa-a' } as never);
+    expect(base.workflow_ids).toEqual(['system-nightshift-decision-tree-hydrate-bound-sa-a']);
+  });
 });
