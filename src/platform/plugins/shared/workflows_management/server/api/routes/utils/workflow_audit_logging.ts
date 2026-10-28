@@ -486,14 +486,18 @@ export class WorkflowManagementAuditLog {
       /** Present on success; mirrors execution context written by the engine. */
       resumedBy?: string;
       channel?: string;
+      /** Present on failure when releasing the step claim was attempted. */
+      claimReleased?: boolean;
     }
   ): void {
-    const { executionId, error, resumedBy, channel } = params;
+    const { executionId, error, resumedBy, channel, claimReleased } = params;
     const actor = this.getActor(request);
     const channelPart = channel !== undefined ? ` [channel=${channel}]` : '';
     let message: string;
     if (error !== undefined) {
-      message = `${actor} failed to resume workflow execution [executionId=${executionId}]${channelPart}`;
+      const claimReleasedPart =
+        claimReleased !== undefined ? ` [claimReleased=${claimReleased}]` : '';
+      message = `${actor} failed to resume workflow execution [executionId=${executionId}]${channelPart}${claimReleasedPart}`;
     } else {
       const responderPart = resumedBy !== undefined ? ` [responder=${resumedBy}]` : '';
       message = `${actor} resumed workflow execution [executionId=${executionId}]${responderPart}${channelPart}`;

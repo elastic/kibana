@@ -112,6 +112,138 @@ describe('createCommentUserActionBuilder', () => {
 
       expect(screen.getByText('edited comment')).toBeInTheDocument();
     });
+
+    it('names the attachment type when editing an alert', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        ...getStackAlertAttachmentType(),
+        id: SECURITY_ALERT_ATTACHMENT_TYPE,
+      });
+
+      const userAction = getAlertUserAction({ action: UserActionActions.update });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('edited 1 alert')).toBeInTheDocument();
+    });
+
+    it('counts the referenced ids when editing multiple alerts', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        ...getStackAlertAttachmentType(),
+        id: SECURITY_ALERT_ATTACHMENT_TYPE,
+      });
+
+      const userAction = getMultipleAlertsUserAction({ action: UserActionActions.update });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('edited 2 alerts')).toBeInTheDocument();
+    });
+
+    it('counts a value attachment as 1 when editing it', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        id: 'lens',
+        getLabel: () => 'Visualizations',
+        getIcon: () => 'lensApp',
+        getCreationActivity: () => ({ event: 'added a visualization' }),
+        getCountLabel: ({ count }) => (count === 1 ? '1 visualization' : `${count} visualizations`),
+        schema: z.object({}),
+      });
+
+      const userAction = getPersistableStateUserAction({
+        action: UserActionActions.update,
+        payload: {
+          comment: {
+            type: 'lens',
+            data: { state: { test_foo: 'foo' } },
+            owner: 'securitySolution',
+          },
+        },
+      });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('edited 1 visualization')).toBeInTheDocument();
+    });
+
+    it('falls back to the common label for a registered type without a count label', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        id: 'security.event',
+        getLabel: () => 'Event',
+        getIcon: () => 'bell',
+        getCreationActivity: () => ({ event: 'added an event' }),
+        schema: z.object({}),
+      });
+
+      const userAction = getEventUserAction({
+        action: UserActionActions.update,
+        payload: {
+          comment: {
+            type: 'security.event',
+            attachmentId: 'event-id-1',
+            metadata: { index: 'event-index-1' },
+            owner: 'securitySolution',
+          },
+        },
+      });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('edited attachment')).toBeInTheDocument();
+    });
+
+    it('falls back to the common label for an unregistered type', async () => {
+      const userAction = getPersistableStateUserAction({
+        action: UserActionActions.update,
+        payload: {
+          comment: {
+            type: 'lens',
+            data: { state: { test_foo: 'foo' } },
+            owner: 'securitySolution',
+          },
+        },
+      });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('edited attachment')).toBeInTheDocument();
+    });
   });
 
   describe('deletions', () => {
