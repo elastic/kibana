@@ -221,7 +221,7 @@ describe('When using the ArtifactListPage component', () => {
           });
         });
 
-        it('should reset to the first page when the status changes', async () => {
+        it('should keep the current page when the status changes', async () => {
           history.push('somepage?page=2');
           const { getByTestId } = await renderWithListData({
             showAsSimpleTable: true,
@@ -231,13 +231,13 @@ describe('When using the ArtifactListPage component', () => {
           await userEvent.click(getByTestId('enabledStatusFilter-disabled'));
 
           await waitFor(() => {
-            expect(history.location.search).toMatch(/page=1(&|$)/);
             expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenLastCalledWith(
               expect.objectContaining({
-                query: expect.objectContaining({ page: 1, filter: DISABLED_KQL }),
+                query: expect.objectContaining({ page: 2, filter: DISABLED_KQL }),
               })
             );
           });
+          expect(history.location.search).toMatch(/page=2(&|$)/);
         });
 
         it('should clear the filter when the selected button is clicked again', async () => {
@@ -590,6 +590,26 @@ describe('When using the ArtifactListPage component', () => {
           );
         });
       });
+
+      it('should request only the first page when the sort changes on a later page', async () => {
+        history.push('somepage?page=2');
+        const { getByText } = await renderWithListData({ showAsSimpleTable: true });
+
+        await userEvent.click(getByText('Name'));
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              query: expect.objectContaining({ page: 1, sort_field: 'name' }),
+            })
+          );
+        });
+        expect(mockedApi.responseProvider.trustedAppsList).not.toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({ page: 2, sort_field: 'name' }),
+          })
+        );
+      });
     });
 
     it('should show card actions', async () => {
@@ -705,6 +725,68 @@ describe('When using the ArtifactListPage component', () => {
           expect(history.location.search).toMatch(/page=2/);
           expect(getAllByTestId('testPage-simpleTable-rowActions-button')).toHaveLength(10);
         });
+      });
+    });
+
+    describe('and navigating back from a smaller result set to a later page', () => {
+      beforeEach(() => {
+        const { trustedAppsList } = mockedApi.responseProvider;
+        const defaultListImplementation = trustedAppsList.getMockImplementation();
+
+        trustedAppsList.mockImplementation((options) => {
+          const response = defaultListImplementation?.(options) as ReturnType<
+            typeof trustedAppsList
+          >;
+          const { filter } = options.query as { filter?: string };
+          const total = filter ? 5 : 30;
+          const itemsBeforePage = (response.page - 1) * response.per_page;
+
+          return {
+            ...response,
+            total,
+            data: response.data.slice(0, Math.max(0, total - itemsBeforePage)),
+          };
+        });
+
+        history.push('somepage?page=3');
+      });
+
+      const navigateToFilteredListAndBack = async (getItems: () => HTMLElement[]) => {
+        await waitFor(() => {
+          expect(getItems()).toHaveLength(10);
+        });
+
+        act(() => {
+          history.push('somepage?page=1&filter=fooFooFoo');
+        });
+        await waitFor(() => {
+          expect(getItems()).toHaveLength(5);
+        });
+
+        act(() => {
+          history.goBack();
+        });
+        await waitFor(() => {
+          expect(getItems()).toHaveLength(10);
+        });
+      };
+
+      it('should stay on the restored page when shown as cards', async () => {
+        const { queryAllByTestId } = await renderWithListData();
+
+        await navigateToFilteredListAndBack(() => queryAllByTestId('testPage-card'));
+
+        expect(history.location.search).toBe('?page=3');
+      });
+
+      it('should stay on the restored page when shown as simple table', async () => {
+        const { queryAllByTestId } = await renderWithListData({ showAsSimpleTable: true });
+
+        await navigateToFilteredListAndBack(() =>
+          queryAllByTestId('testPage-simpleTable-rowActions-button')
+        );
+
+        expect(history.location.search).toBe('?page=3');
       });
     });
 
@@ -961,11 +1043,11 @@ describe('When using the ArtifactListPage component', () => {
     });
 
     describe('and the search bar is used on a later page', () => {
-      const expectFirstPageRequested = async () => {
+      const expectPageRequested = async (page: number) => {
         await waitFor(() => {
-          expect(history.location.search).toMatch(/page=1(&|$)/);
+          expect(history.location.search).toMatch(new RegExp(`page=${page}(&|$)`));
           expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenLastCalledWith(
-            expect.objectContaining({ query: expect.objectContaining({ page: 1 }) })
+            expect.objectContaining({ query: expect.objectContaining({ page }) })
           );
         });
       };
@@ -975,7 +1057,7 @@ describe('When using the ArtifactListPage component', () => {
         await renderWithListData();
       });
 
-      it('should reset to the first page when the policy filter changes', async () => {
+      it('should keep the current page when the policy filter changes', async () => {
         const policyId = mockedApi.responseProvider.endpointPackagePolicyList().items[0].id;
         const firstPolicyTestId = `policiesSelectorButton-policySelector-policy-${policyId}`;
 
@@ -985,14 +1067,36 @@ describe('When using the ArtifactListPage component', () => {
         });
         await userEvent.click(renderResult.getAllByTestId(firstPolicyTestId)[0]);
 
-        await expectFirstPageRequested();
-        expect(history.location.search).toMatch(new RegExp(`includedPolicies=${policyId}`));
+        await waitFor(() => {
+          expect(history.location.search).toMatch(new RegExp(`includedPolicies=${policyId}`));
+        });
+        await expectPageRequested(2);
       });
 
-      it('should reset to the first page when the search filter changes', async () => {
+      it('should keep the current page when the search filter changes', async () => {
         await userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo{enter}');
 
-        await expectFirstPageRequested();
+        await waitFor(() => {
+          expect(history.location.search).toMatch(/fooFooFoo/);
+        });
+        await expectPageRequested(2);
+      });
+
+      it('should move to the last page when the filtered results no longer reach the current page', async () => {
+        const { trustedAppsList } = mockedApi.responseProvider;
+        const defaultListImplementation = trustedAppsList.getMockImplementation();
+        trustedAppsList.mockImplementation((options) => {
+          const response = defaultListImplementation?.(options) as ReturnType<
+            typeof trustedAppsList
+          >;
+          const { filter } = options.query as { filter?: string };
+
+          return filter ? { ...response, total: 5, data: response.data.slice(0, 5) } : response;
+        });
+
+        await userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo{enter}');
+
+        await expectPageRequested(1);
         expect(history.location.search).toMatch(/fooFooFoo/);
       });
 

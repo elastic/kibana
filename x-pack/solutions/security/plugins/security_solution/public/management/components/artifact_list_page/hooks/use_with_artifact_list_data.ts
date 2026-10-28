@@ -22,7 +22,7 @@ import type { MaybeImmutable } from '../../../../../common/endpoint/types';
 import type { ArtifactEnabledStatus } from '../../../common/utils';
 import { useKueryFromExceptionsSearchFilter } from './use_kuery_from_exceptions_search_filter';
 import { useListArtifact } from '../../../hooks/artifacts';
-import { useUrlPagination } from '../../../hooks/use_url_pagination';
+import { paginationFromUrlParams } from '../../../hooks/use_url_pagination';
 
 type WithArtifactListDataInterface = ReturnType<typeof useListArtifact> & {
   /**
@@ -50,13 +50,17 @@ export const useWithArtifactListData = (
 ): WithArtifactListDataInterface => {
   const isMounted = useIsMounted();
 
+  const { urlParams } = useUrlParams<ArtifactListPageUrlParams>();
   const {
-    urlParams: { filter, includedPolicies, sortField: sortFieldParam, sortOrder: sortOrderParam },
-  } = useUrlParams<ArtifactListPageUrlParams>();
+    filter,
+    includedPolicies,
+    sortField: sortFieldParam,
+    sortOrder: sortOrderParam,
+  } = urlParams;
 
-  const {
-    pagination: { page, pageSize },
-  } = useUrlPagination();
+  // Not using `useUrlPagination`: its state lags one render behind the URL, which would send
+  // a request with the new filter/sort but the old page.
+  const { page, pageSize } = useMemo(() => paginationFromUrlParams(urlParams), [urlParams]);
 
   // Used to determine if the `does data exist` check should be done.
   const kuery = useKueryFromExceptionsSearchFilter(
@@ -80,17 +84,12 @@ export const useWithArtifactListData = (
     }
   );
 
-  const [totalItemCount, setTotalItemCount] = useState(0);
-
-  const uiPagination = useMemo<Pagination>(
-    () => ({
-      totalItemCount,
-      pageSize,
-      pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
-      pageIndex: page - 1,
-    }),
-    [page, pageSize, totalItemCount]
-  );
+  const [uiPagination, setUiPagination] = useState<Pagination>({
+    totalItemCount: 0,
+    pageSize,
+    pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
+    pageIndex: page - 1,
+  });
 
   const [isPageInitializing, setIsPageInitializing] = useState(true);
 
@@ -135,10 +134,18 @@ export const useWithArtifactListData = (
     }
   }, [isLoadingDataExists, isMounted, isPageInitializing]);
 
-  // Update the total item count once the query succeeds
+  // Update the uiPagination once the query succeeds. Page and total must come from the same
+  // response, otherwise page correction could run against the total of a different result set.
   useEffect(() => {
     if (isMounted() && listData && !isLoadingListData && isSuccessListData) {
-      setTotalItemCount(listData.total);
+      setUiPagination((prevState) => {
+        return {
+          ...prevState,
+          pageIndex: listData.page - 1,
+          pageSize: listData.per_page,
+          totalItemCount: listData.total,
+        };
+      });
     }
   }, [isLoadingListData, isMounted, isSuccessListData, listData]);
 
