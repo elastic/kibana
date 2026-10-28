@@ -287,10 +287,7 @@ steps:
       fanout_limit: "${{ inputs.max_rules_per_sweep | default: consts.max_rules_per_sweep }}"
 
   # Only false positives of screened rules reach ES|QL, so INLINE STATS's two passes
-  # and the TOP key are bounded by their FP volume. The screen's rule@revision keys
-  # pin the revision too: a rule restored from an older history snapshot comes back
-  # at a lower revision than its old alerts carry, so MAX(revision) would pick those.
-  # Security alerts are indexed with
+  # and the TOP key are bounded by their FP volume. Security alerts are indexed with
   # `_id = kibana.alert.uuid`, so the uuid is read from doc values instead of the
   # stored-fields loader `METADATA _id` needs.
   # `allow_partial_results: false` because a partial aggregation would both undercount
@@ -323,12 +320,12 @@ steps:
                 field: kibana.alert.group.index
       query: |-
         FROM .alerts-security.alerts-{{ workflow.spaceId }}
-        | EVAL rule_revision_key = CONCAT(",", `kibana.alert.rule.uuid`, "@", TO_STRING(`kibana.alert.rule.revision`), ",")
-        | WHERE rule_revision_key IN ({% for row in steps.resolve_screened_rules.output.rows %}"{{ row[3] }}"{% unless forloop.last %}, {% endunless %}{% endfor %})
         | INLINE STATS reviewed_watermark = MAX(@timestamp)
-            WHERE MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
+            WHERE MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}"),
+            latest_revision = MAX(`kibana.alert.rule.revision`)
           BY `kibana.alert.rule.uuid`
-        | WHERE (reviewed_watermark IS NULL OR @timestamp > reviewed_watermark)
+        | WHERE `kibana.alert.rule.revision` == latest_revision
+          AND (reviewed_watermark IS NULL OR @timestamp > reviewed_watermark)
         | EVAL fp_recency_key = CONCAT(DATE_FORMAT("yyyyMMddHHmmssSSS", @timestamp), "|", `kibana.alert.uuid`)
         | STATS fp_count = COUNT(*),
             last_fp_at = MAX(@timestamp),
@@ -349,11 +346,15 @@ steps:
     on-failure:
       continue: true
 
-  # The harvest reads only the screened rule@revision pairs, so its rows need no revision check.
+  # The revision check is repeated on the harvest rows: `latest_revision` there is the
+  # max among the rule's FPs, which lags the current revision when the new revision
+  # has no FPs yet. The engine's rehydration planner cannot see step paths inside
+  # the quoted where_exp argument, so the keys are referenced directly as well.
   - name: resolve_fanout_rows
     type: data.set
     with:
-      rows: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | slice: 0, steps.resolve_screened_rules.output.fanout_limit }}"
+      rule_revision_keys: "${{ steps.resolve_enabled_rules.output.rule_revision_keys }}"
+      rows: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_enabled_rules.output.rule_revision_keys contains row[4]' | slice: 0, steps.resolve_screened_rules.output.fanout_limit }}"
 
   # One review execution per rule, started without waiting. Each child parks on
   # its own approval gate for up to 72h; joining on them here would park this sweep
@@ -399,7 +400,7 @@ steps:
       continue: true
     with:
       event: worker_run_completed
-      candidates_found: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | size }}"
+      candidates_found: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_enabled_rules.output.rule_revision_keys contains row[4]' | size }}"
       items_dispatched: "${{ steps.resolve_fanout_rows.output.rows | default: consts.no_rows | size }}"
       # Reviews already running plus the ones this sweep started, as the coverage sweep counts.
       items_in_flight: |-

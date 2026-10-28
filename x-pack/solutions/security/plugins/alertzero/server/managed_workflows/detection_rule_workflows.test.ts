@@ -765,22 +765,22 @@ describe('detection rule workflows', () => {
           '{%- elsif steps.resolve_enabled_rules.output.truncated -%}\ndegraded_partial'
         );
 
-        expect(String(resolveScreened.with?.rows)).toContain(
-          "where_exp: 'row', 'steps.resolve_enabled_rules.output.rule_revision_keys contains row[3]'"
+        const rowsExpr = String(rows.with?.rows);
+        expect(rowsExpr).toContain(
+          "where_exp: 'row', 'steps.resolve_enabled_rules.output.rule_revision_keys contains row[4]'"
         );
         // No `default` after where_exp: an empty filtered array is legitimate and a
         // default would resurrect every disabled candidate.
+        expect(rowsExpr).not.toMatch(/where_exp:.*\| default:/);
         expect(String(resolveScreened.with?.rows)).not.toMatch(/where_exp:.*\| default:/);
         // The engine's rehydration planner cannot see step paths inside the quoted
         // where_exp argument. This direct reference keeps the keys resident.
-        expect(String(resolveScreened.with?.rule_revision_keys)).toContain(
+        expect(String(rows.with?.rule_revision_keys)).toContain(
           '${{ steps.resolve_enabled_rules.output.rule_revision_keys }}'
         );
-        // The harvest reads only screened rules, so the fan-out takes its rows as they come.
-        expect(String(rows.with?.rows)).toBe(
-          '${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | slice: 0, steps.resolve_screened_rules.output.fanout_limit }}'
-        );
-        expect(rows.with?.rule_revision_keys).toBeUndefined();
+        // Slice after the enabled filter: the pool overscans the launch cap so
+        // disabled candidates cannot starve enabled rules ranked below them.
+        expect(rowsExpr).toContain('| slice: 0, steps.resolve_screened_rules.output.fanout_limit');
         expect(String(resolveScreened.with?.fanout_limit)).toContain(
           'inputs.max_rules_per_sweep | default: consts.max_rules_per_sweep'
         );
@@ -837,32 +837,7 @@ describe('detection rule workflows', () => {
         });
         expect(screenedRows).toEqual([['rule-b', 20, 15, ',rule-b@5,']]);
 
-        // The harvest reads only the screened rule@revision pairs, so neither rule A nor
-        // older alerts of rule B reach it. A rule restored from an older history snapshot
-        // comes back below its old alerts' revision, so MAX(revision) is not enough.
-        expect(harvestQuery).not.toContain('latest_revision');
-        const renderedHarvest = createWorkflowLiquidEngine().parseAndRenderSync(harvestQuery, {
-          consts: tuning.consts,
-          steps: { resolve_screened_rules: { output: { rows: screenedRows } } },
-          workflow: { spaceId: 'default' },
-        });
-        expect(renderedHarvest).toContain('| WHERE rule_revision_key IN (",rule-b@5,")');
-        const renderedTwo = createWorkflowLiquidEngine().parseAndRenderSync(harvestQuery, {
-          consts: tuning.consts,
-          steps: {
-            resolve_screened_rules: {
-              output: {
-                rows: [
-                  ['rule-a', 20, 12, ',rule-a@2,'],
-                  ['rule-b', 20, 15, ',rule-b@5,'],
-                ],
-              },
-            },
-          },
-          workflow: { spaceId: 'default' },
-        });
-        expect(renderedTwo).toContain('| WHERE rule_revision_key IN (",rule-a@2,", ",rule-b@5,")');
-
+        const ruleAOldVersion = ['rule-a', 12, '2026-10-01T00:00:00.000Z', ['a1'], ',rule-a@1,'];
         const ruleBCurrentVersion = [
           'rule-b',
           15,
@@ -874,7 +849,9 @@ describe('detection rule workflows', () => {
           consts: tuning.consts,
           steps: {
             ...steps,
-            harvest_fp_alerts_by_rule: { output: { values: [ruleBCurrentVersion] } },
+            harvest_fp_alerts_by_rule: {
+              output: { values: [ruleAOldVersion, ruleBCurrentVersion] },
+            },
           },
         });
         expect(reviewedRows).toEqual([ruleBCurrentVersion]);
