@@ -17,6 +17,7 @@ project:
   owner: '@elastic/observability-ui'
   sourceRoot: x-pack/solutions/observability/plugins/observability
 dependsOn:
+  - '@kbn/entity-inventory-app-plugin'
   - '@kbn/rule-data-utils'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/i18n'

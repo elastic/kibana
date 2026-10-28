@@ -125,7 +125,8 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
         <ProposedActionsList data-test-subj="investigationFlyoutProposedActionsList">
           {proposals.map((proposal) => (
             <ProposedActionRow
-              key={proposal.id}
+              // A retry gets a new id but keeps the root id, so its row and open modal stay mounted.
+              key={proposal.rootProposalId ?? proposal.id}
               proposal={proposal}
               onDecisionError={onDecisionError}
             />

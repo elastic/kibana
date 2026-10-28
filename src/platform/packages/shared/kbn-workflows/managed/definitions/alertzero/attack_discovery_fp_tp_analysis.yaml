@@ -118,6 +118,9 @@ outputs:
     - verdict
     - summary_markdown
 consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Attack Discovery worker"
   # Enforced by `require_supported_verdict`. `failed` is absent deliberately: it is
   # an execution state the review derives, not a classification.
   supported_verdicts:
@@ -269,14 +272,23 @@ steps:
       index: entities-latest-{{ workflow.spaceId }}
       size: 50
       # The template caps this string at 200k characters.
+      # entity.sub_type, entity.name, and the asset fields are what entity_role
+      # uses to tell a management host from a workstation.
       _source:
         - entity.id
         - entity.type
+        - entity.sub_type
+        - entity.name
         - host.name
         - host.id
         - user.name
         - user.id
         - asset.criticality
+        - asset.environment
+        - asset.name
+        - asset.model
+        - asset.owner
+        - asset.vendor
       query:
         bool:
           minimum_should_match: 1
@@ -401,6 +413,7 @@ steps:
     create-conversation: true
     timeout: "8m"
     with:
+      author_name: "{{ consts.author_name }}"
       configuration_overrides:
         enable_elastic_capabilities: false
         tools: []

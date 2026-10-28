@@ -67,7 +67,7 @@ pageLoadAssetSize:
   embeddable: 990
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
-  entityInventoryApp: 1216
+  entityInventoryApp: 2682
   entityStore: 2508
   esql: 382
   esqlDataGrid: 215
@@ -106,7 +106,7 @@ pageLoadAssetSize:
   indexManagement: 583
   inference: 5940
   inferenceWorkflows: 1139
-  infra: 45799
+  infra: 45553
   ingestHub: 8059
   ingestPipelines: 534
   inputControlVis: 3213
@@ -240,4 +240,4 @@ pageLoadAssetSize:
   visualizations: 1147
   watcher: 5497
   workflowsExtensions: 38186
-  workflowsManagement: 36613
+  workflowsManagement: 41727
