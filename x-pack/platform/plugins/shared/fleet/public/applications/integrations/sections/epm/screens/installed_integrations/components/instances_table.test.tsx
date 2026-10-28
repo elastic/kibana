@@ -373,8 +373,8 @@ describe('InstancesTable', () => {
       });
     });
 
-    it('links the agent count to the Fleet agent list of the instance agent policies', () => {
-      renderTable([makeInstance()]);
+    it('links the agent count of an agent-based instance to the Fleet agent list of its agent policies', () => {
+      renderTable([makeInstance({ mechanisms: ['agent_based'] })]);
 
       const link = screen.getByTestId('instanceAgentsLink');
       expect(link).toHaveTextContent('5');
@@ -383,9 +383,35 @@ describe('InstancesTable', () => {
       expect(href).toContain('agentless-2');
     });
 
+    it('shows the agent count of a managed instance without a link, since Fleet hides agentless agents', () => {
+      renderTable([makeInstance({ mechanisms: ['managed_integration'] })]);
+
+      expect(screen.queryByTestId('instanceAgentsLink')).not.toBeInTheDocument();
+      expect(screen.getByText('5')).toBeInTheDocument();
+    });
+
+    it('warns when not every agent could be loaded', () => {
+      mockUseInstancesAgents.mockReturnValue({
+        agentsByInstance: new Map(),
+        agentPolicyIdsByInstance: new Map(),
+        isTruncated: true,
+        isLoading: false,
+        error: null,
+      });
+      renderTable([makeInstance()]);
+
+      expect(screen.getByTestId('instancesAgentsTruncated')).toBeInTheDocument();
+    });
+
+    it('does not warn when every agent was loaded', () => {
+      renderTable([makeInstance()]);
+
+      expect(screen.queryByTestId('instancesAgentsTruncated')).not.toBeInTheDocument();
+    });
+
     it('shows the agent count without a link to users who cannot read agents', () => {
       mockUseAuthz.mockReturnValue(authzWith());
-      renderTable([makeInstance()]);
+      renderTable([makeInstance({ mechanisms: ['agent_based'] })]);
 
       expect(screen.queryByTestId('instanceAgentsLink')).not.toBeInTheDocument();
       expect(screen.getByText('5')).toBeInTheDocument();

@@ -45,7 +45,11 @@ export function useInstancesAgents(
     () => [...new Set(instances.flatMap((instance) => instance.packagePolicyIds ?? []))],
     [instances]
   );
-  const { data: packagePoliciesData, isInitialLoading: isPackagePoliciesLoading } = useQuery(
+  const {
+    data: packagePoliciesData,
+    isInitialLoading: isPackagePoliciesLoading,
+    error: packagePoliciesError,
+  } = useQuery<BulkGetPackagePoliciesResponse, Error>(
     ['instances_package_policies', packagePolicyIds],
     () =>
       sendRequestForRq<BulkGetPackagePoliciesResponse>({
@@ -85,8 +89,9 @@ export function useInstancesAgents(
   // Waits for the package policies, so the agentless agent policies are part of the first query.
   const {
     agents,
+    isTruncated,
     isLoading: isAgentsLoading,
-    error,
+    error: agentsError,
   } = useAgentsForPolicyIds(allAgentPolicyIds, {
     enabled: enabled && !isPackagePoliciesLoading,
     refetchInterval: REFRESH_INTERVAL_MS,
@@ -125,7 +130,11 @@ export function useInstancesAgents(
   return {
     agentsByInstance,
     agentPolicyIdsByInstance,
+    /** True when not every agent was fetched, so some instances may miss agents. */
+    isTruncated,
     isLoading: enabled && (isPackagePoliciesLoading || isAgentsLoading),
-    error,
+    // Without the package policies, managed instances have no agent policies to query, so their
+    // missing agents would look like no agents at all.
+    error: packagePoliciesError ?? agentsError,
   };
 }

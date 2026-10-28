@@ -109,6 +109,32 @@ describe('useInstancesAgents', () => {
     expect(agentBasedAgent.packagePolicy?.id).toBe('pp-agent');
   });
 
+  it('reports a failed package policies request, which leaves managed instances without agents', async () => {
+    const error = new Error('bulk get failed');
+    mockSendRequest.mockRejectedValue(error);
+
+    const { result } = renderUseInstancesAgents([instance('mi', { packagePolicyIds: ['pp-aws'] })]);
+
+    await waitFor(() => expect(result.current.error).toBe(error));
+  });
+
+  it('reports a failed agents request', async () => {
+    const error = new Error('agents failed');
+    mockUseAgents.mockReturnValue({ agents: [], isTruncated: false, isLoading: false, error });
+
+    const { result } = renderUseInstancesAgents([instance('mi', { packagePolicyIds: ['pp-aws'] })]);
+
+    await waitFor(() => expect(result.current.error).toBe(error));
+  });
+
+  it('passes on that not every agent was fetched', () => {
+    mockUseAgents.mockReturnValue({ agents: [], isTruncated: true, isLoading: false, error: null });
+
+    const { result } = renderUseInstancesAgents([instance('mi')]);
+
+    expect(result.current.isTruncated).toBe(true);
+  });
+
   it('does not query anything when disabled', () => {
     renderUseInstancesAgents([instance('mi', { packagePolicyIds: ['pp-aws'] })], false);
 

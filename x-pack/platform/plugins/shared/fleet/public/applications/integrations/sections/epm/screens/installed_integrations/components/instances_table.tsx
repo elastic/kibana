@@ -7,7 +7,14 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
-import { EuiBasicTable, EuiLink, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiCallOut,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedRelative } from '@kbn/i18n-react';
@@ -107,6 +114,7 @@ export const InstancesTable: React.FunctionComponent<{
   const {
     agentsByInstance,
     agentPolicyIdsByInstance,
+    isTruncated: isAgentsTruncated,
     isLoading: isAgentsLoading,
     error: agentsError,
   } = useInstancesAgents(instances, { enabled: canReadAgents });
@@ -248,7 +256,16 @@ export const InstancesTable: React.FunctionComponent<{
       render: (agentCount: number, item: CloudOnboardingDeploymentListItem) => {
         if (agentCount === 0) return EMPTY_CELL;
         const agentPolicyIds = agentPolicyIdsByInstance.get(item.id) ?? [];
-        if (!canReadAgents || agentPolicyIds.length === 0) return agentCount;
+        // Only agent-based agents: the Fleet agent list hides agentless ones unless an
+        // agentless resources toggle is on, so a managed instance would open an empty list.
+        // Their status badge opens the details of each agent instead.
+        if (
+          !canReadAgents ||
+          !item.mechanisms.includes('agent_based') ||
+          agentPolicyIds.length === 0
+        ) {
+          return agentCount;
+        }
         // Base ids with a fallback, like the agent count, so agents on version-specific
         // policies (`<id>#9.3`) are listed too.
         const kuery = buildPolicyBaseIdsWithFallbackKuery(
@@ -293,6 +310,25 @@ export const InstancesTable: React.FunctionComponent<{
 
   return (
     <>
+      {isAgentsTruncated ? (
+        <>
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="warning"
+            iconType="warning"
+            data-test-subj="instancesAgentsTruncated"
+            title={i18n.translate(
+              'xpack.fleet.epmInstalledIntegrations.instances.agentsTruncated',
+              {
+                defaultMessage:
+                  'Not every agent could be loaded, so the status of some instances may be incomplete.',
+              }
+            )}
+          />
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
       <EuiBasicTable
         items={instances}
         itemId="id"
