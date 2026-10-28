@@ -16,29 +16,38 @@ export const CUSTOM_CONTENT_EDIT_APPLIED_EVALUATOR_NAME = 'Custom Content Data E
 const simplify = (text: string): string => text.replace(/[\s`]/g, '').toLowerCase();
 
 /**
- * The names a query gives to the measure written as `measure`, such as `avg_bytes` for
- * `avg_bytes = AVG(bytes)`. Found from the measure, not from the column names, so a column the
- * edit renamed is not mistaken for the measure it added.
+ * Where the measure written as `measure` is in a query. `computed` is whether the query computes
+ * it at all, and `returned` the columns of the result that hold it: the name given in an
+ * assignment (`avg_bytes = AVG(bytes)`) or, with no name, the expression itself (`AVG(bytes)`).
+ * It is found from the measure, not from the column names, so a column the edit renamed is not
+ * mistaken for the measure it added.
  */
-export const findMeasureAliases = (query: string, measure: string): string[] => {
-  const { root } = Parser.parse(query);
-  const assignments: ESQLFunction[] = [];
-  Walker.walk(root, {
-    visitFunction: (fn) => {
-      if (fn.name === '=') {
-        assignments.push(fn);
+export const findMeasureColumns = (
+  query: string,
+  measure: string,
+  columns: string[]
+): { computed: boolean; returned: string[] } => {
+  const wanted = simplify(measure);
+  const aliases: string[] = [];
+  let computed = false;
+
+  Walker.walk(Parser.parse(query).root, {
+    visitFunction: (fn: ESQLFunction) => {
+      if (!simplify(BasicPrettyPrinter.expression(fn)).includes(wanted)) {
+        return;
+      }
+      computed = true;
+      const [alias] = fn.args;
+      if (fn.name === '=' && !Array.isArray(alias) && alias.type === 'column') {
+        aliases.push(alias.name);
       }
     },
   });
-  return assignments.flatMap(({ args: [alias, assigned] }) => {
-    const [expression] = Array.isArray(assigned) ? assigned : [assigned];
-    return !Array.isArray(alias) &&
-      alias.type === 'column' &&
-      !Array.isArray(expression) &&
-      simplify(BasicPrettyPrinter.expression(expression)).includes(simplify(measure))
-      ? [alias.name]
-      : [];
-  });
+
+  const returned = columns.filter(
+    (column) => aliases.includes(column) || simplify(column).includes(wanted)
+  );
+  return { computed: computed || returned.length > 0, returned };
 };
 
 /**
@@ -71,28 +80,25 @@ export const createDataEditAppliedEvaluator = ({
       return skippedResult('The query did not run; the execution evaluator reports that.');
     }
 
-    const computed = findMeasureAliases(query, measure);
-    if (computed.length === 0) {
+    const { computed, returned } = findMeasureColumns(query, measure, columns);
+    if (!computed) {
       return {
         score: 0,
         label: 'measure-not-in-query',
         explanation: `The edited query does not compute ${measure}.`,
       };
     }
-    const aliases = computed.filter((alias) => columns.includes(alias));
-    if (aliases.length === 0) {
+    if (returned.length === 0) {
       return {
         score: 0,
         label: 'measure-not-returned',
-        explanation: `The query computes ${measure} as ${computed.join(
-          ', '
-        )} but does not return it, for example because a KEEP drops it.`,
-        metadata: { computed, columns },
+        explanation: `The query computes ${measure} but does not return it, for example because a KEEP drops it.`,
+        metadata: { columns },
       };
     }
 
     const read = readColumnReferences(template);
-    const shown = aliases.filter((alias) => read.includes(alias));
+    const shown = returned.filter((column) => read.includes(column));
     return shown.length > 0
       ? {
           score: 1,
@@ -102,10 +108,10 @@ export const createDataEditAppliedEvaluator = ({
       : {
           score: 0,
           label: 'new-measure-not-shown',
-          explanation: `The query returns ${measure} as ${aliases.join(
+          explanation: `The query returns ${measure} as ${returned.join(
             ', '
           )} but the template does not read it.`,
-          metadata: { aliases, columns },
+          metadata: { returned, columns },
         };
   },
 });

@@ -14,7 +14,7 @@ import { createRowLimitEvaluator, readLimit } from './row_limit';
 import { createRowOrderEvaluator, labelsInOrder } from './row_order';
 import { createTemplateColumnsEvaluator } from './template_columns';
 import { readColumnReferences } from './template_column_references';
-import { createDataEditAppliedEvaluator, findMeasureAliases } from './edit_applied';
+import { createDataEditAppliedEvaluator, findMeasureColumns } from './edit_applied';
 import { createStyleEditJudge } from './style_edit_judge';
 import { createTemplateValidityEvaluator } from './template_validity';
 
@@ -301,6 +301,22 @@ describe('Custom Content Template Columns', () => {
     ).not.toContain('value');
   });
 
+  it('does not take loop counters or assigned cells for columns', () => {
+    expect(
+      readColumnReferences(
+        '{% for r in rows %}#{{ forloop.index }} {{ r["host"].value }}{% assign cell = r["bytes"] %}{{ cell.value }}{% endfor %}'
+      )
+    ).toEqual(['host', 'bytes']);
+  });
+
+  it('reads columns of an indexed row', () => {
+    expect(
+      readColumnReferences(
+        '{{ rows[0]["host"].value }} {{ rows.first.bytes.value }} {{ rows.size }}'
+      )
+    ).toEqual(['host', 'bytes']);
+  });
+
   it('reads nothing from a template that does not parse or does not loop over rows', () => {
     expect(readColumnReferences('<div>{% if true %}x</div>')).toEqual([]);
     expect(readColumnReferences('<p>{{ rows.size }}</p>')).toEqual([]);
@@ -544,6 +560,7 @@ describe('Custom Content Data Edit Applied', () => {
       'host',
     ],
     'FROM logs | STATS total = COUNT(*)': ['total'],
+    'FROM logs | STATS AVG(bytes) BY host': ['AVG(bytes)', 'host'],
     'FROM logs | STATS requests = COUNT(*), avg_bytes = AVG(bytes) BY host | KEEP host, requests': [
       'host',
       'requests',
@@ -557,15 +574,35 @@ describe('Custom Content Data Edit Applied', () => {
   const evaluator = createDataEditAppliedEvaluator({ runQuery: runQuery as never });
   const gold = { data: 'query' as const, edit: 'data' as const, addsMeasure: 'AVG(bytes)' };
   const AFTER = 'FROM logs | STATS requests = COUNT(*), avg_bytes = AVG(bytes) BY host';
-  const after = (template: string, esql = AFTER) => outputWith({ esql, template });
+  const inLoop = (body: string) => `{% for row in rows %}${body}{% endfor %}`;
+  const after = (template: string, esql = AFTER) =>
+    outputWith({ esql, template: template.includes('{% for') ? template : inLoop(template) });
 
-  it('finds the alias of a measure however the query spells it', () => {
-    expect(findMeasureAliases(AFTER, 'AVG(bytes)')).toEqual(['avg_bytes']);
+  it('finds the column of a measure however the query spells it', () => {
+    const find = (query: string, measure: string) =>
+      findMeasureColumns(query, measure, columnsByQuery[query] ?? []);
+    expect(find(AFTER, 'AVG(bytes)')).toEqual({ computed: true, returned: ['avg_bytes'] });
+    expect(find('FROM logs | STATS `Avg Bytes` = AVG( `bytes` ) BY host', 'AVG(bytes)')).toEqual({
+      computed: true,
+      returned: ['Avg Bytes'],
+    });
+    expect(find('FROM logs | STATS total = COUNT(*)', 'COUNT(')).toEqual({
+      computed: true,
+      returned: ['total'],
+    });
+    expect(find(AFTER, 'MAX(bytes)')).toEqual({ computed: false, returned: [] });
+  });
+
+  it('finds a measure that has no name, by the expression the column is called', () => {
     expect(
-      findMeasureAliases('FROM logs | STATS `Avg Bytes` = AVG( `bytes` ) BY host', 'AVG(bytes)')
-    ).toEqual(['Avg Bytes']);
-    expect(findMeasureAliases('FROM logs | STATS total = COUNT(*)', 'COUNT(')).toEqual(['total']);
-    expect(findMeasureAliases(AFTER, 'MAX(bytes)')).toEqual([]);
+      findMeasureColumns('FROM logs | STATS AVG(bytes) BY host', 'AVG(bytes)', [
+        'AVG(bytes)',
+        'host',
+      ])
+    ).toEqual({ computed: true, returned: ['AVG(bytes)'] });
+    expect(
+      findMeasureColumns('FROM logs | STATS AVG(bytes) BY host | KEEP host', 'AVG(bytes)', ['host'])
+    ).toEqual({ computed: true, returned: [] });
   });
 
   it('skips examples that are not a data edit that names a measure', async () => {
@@ -625,6 +662,15 @@ describe('Custom Content Data Edit Applied', () => {
       { data: 'query', edit: 'data', addsMeasure: 'COUNT(' }
     );
     expect(result.score).toBe(1);
+  });
+
+  it('passes a measure the query does not name, when the template reads it by its expression', async () => {
+    const result = await run(
+      evaluator,
+      after('{{ row["AVG(bytes)"].value }}', 'FROM logs | STATS AVG(bytes) BY host'),
+      gold
+    );
+    expect(result).toMatchObject({ score: 1, label: 'new-measure-shown' });
   });
 
   it('fails when the query never computes the measure', async () => {
