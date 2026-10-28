@@ -18,26 +18,30 @@ export type DetectionRunQuotaGroup = Extract<RunQuotaGroup, 'detection' | 'ki_ex
 export const isDetectionRunQuotaGroup = (group: RunQuotaGroup): group is DetectionRunQuotaGroup =>
   group === 'detection' || group === 'ki_extraction';
 
-const getCalloutTitle = (group: DetectionRunQuotaGroup): string =>
+const getCalloutTitle = (group: DetectionRunQuotaGroup, limit: number): string =>
   group === 'detection'
     ? i18n.translate('xpack.nightshift.runQuotaReachedCallout.discoveryTitle', {
-        defaultMessage: 'Discovery reached daily run limit for this deployment',
+        defaultMessage: 'Discovery reached daily run limit of {limit} for this deployment',
+        values: { limit },
       })
     : i18n.translate('xpack.nightshift.runQuotaReachedCallout.knowledgeIndicatorExtractionTitle', {
         defaultMessage:
-          'Knowledge indicators extraction reached daily run limit for this deployment',
+          'Knowledge indicators extraction reached daily run limit of {limit} for this deployment',
+        values: { limit },
       });
 
 export const RunQuotaReachedCallout = ({
   group,
+  limit,
 }: {
   group: DetectionRunQuotaGroup;
+  limit: number;
 }): React.ReactElement => (
   <KbnWarningCallout
     announceOnMount
     size="s"
     data-test-subj={`nightshiftRunQuotaReached-${group}`}
-    title={getCalloutTitle(group)}
+    title={getCalloutTitle(group, limit)}
     text={i18n.translate('xpack.nightshift.runQuotaReachedCallout.manualRunDescription', {
       defaultMessage:
         'Further scheduled runs will be paused until the limit resets at midnight (UTC). You can still trigger discovery process manually.',
@@ -67,7 +71,7 @@ export const RunQuotaReachedBanner = ({
 
   return (
     <>
-      <RunQuotaReachedCallout group={group} />
+      <RunQuotaReachedCallout group={group} limit={data.limits[group]} />
       <EuiSpacer size="m" />
     </>
   );

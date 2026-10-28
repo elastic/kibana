@@ -417,7 +417,7 @@ describe('AutomationsPage', () => {
       renderPage();
 
       expect(screen.getByTestId('automationsRateLimitBanner')).toHaveTextContent(
-        '1 automation reached its daily trigger limit'
+        '1 automation reached daily run limit'
       );
       fireEvent.click(screen.getByTestId('automationsShowRateLimited'));
       expect(screen.queryByTestId('automationsShowRateLimited')).not.toBeInTheDocument();

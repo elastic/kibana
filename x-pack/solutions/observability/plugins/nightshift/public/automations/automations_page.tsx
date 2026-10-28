@@ -159,9 +159,12 @@ export const AutomationsPage = (): React.ReactElement => {
     <>
       {!isEmpty && (
         <>
-          {isGlobalLimitReached && (
+          {isGlobalLimitReached && quotas && (
             <>
-              <GlobalLimitCallout settingsHref={globalLimitSettingsHref} />
+              <GlobalLimitCallout
+                limit={quotas.limits.investigation}
+                settingsHref={globalLimitSettingsHref}
+              />
               <EuiSpacer size="m" />
             </>
           )}
