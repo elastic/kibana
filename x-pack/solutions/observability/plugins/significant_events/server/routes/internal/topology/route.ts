@@ -23,7 +23,7 @@ const getTopologyRoute = createServerRoute({
     access: 'internal',
     summary: 'Get the service topology',
     description:
-      'Computes the service topology from the entity, infrastructure and dependency knowledge indicators of the requested sources, or of every source the caller can read.',
+      'Computes the service topology from the entity and dependency knowledge indicators of the requested sources, or of every source the caller can read.',
   },
   security: {
     authz: {

@@ -44,7 +44,7 @@ const build = (features: Feature[], sourceIds = ['src-a']) =>
   buildTopologySnapshot({ features, sourceIds, builtAt: BUILT_AT });
 
 describe('buildTopologySnapshot', () => {
-  it('merges nodes with the same slug across sources and keeps every contributor in provenance', () => {
+  it('merges same-slug entities across sources with provenance and ignores non-entity types', () => {
     const snapshot = build(
       [
         entity('Checkout', {
@@ -57,6 +57,8 @@ describe('buildTopologySnapshot', () => {
           confidence: 90,
           properties: { name: 'checkout', technology: 'java' },
         }),
+        feature({ id: 'aws', type: 'infrastructure' }),
+        feature({ id: 'log4j', type: 'technology' }),
       ],
       ['src-a', 'src-b']
     );
@@ -110,18 +112,6 @@ describe('buildTopologySnapshot', () => {
       'orders-db',
     ]);
     expect(topologySnapshotPropertiesSchema.safeParse(snapshot).success).toBe(true);
-  });
-
-  it('accepts infrastructure as nodes and ignores other feature types', () => {
-    const snapshot = build([
-      feature({ id: 'aws', type: 'infrastructure', subtype: 'cloud_deployment' }),
-      feature({ id: 'log4j', type: 'technology' }),
-      feature({ id: 'ecs', type: 'schema' }),
-    ]);
-
-    expect(snapshot.nodes).toEqual([
-      expect.objectContaining({ node_id: 'aws', node_type: 'infrastructure' }),
-    ]);
   });
 
   it('is deterministic regardless of input order', () => {

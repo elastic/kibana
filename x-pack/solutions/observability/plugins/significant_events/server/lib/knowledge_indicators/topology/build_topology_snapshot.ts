@@ -24,7 +24,7 @@ import {
   normalizeFeatureSlug,
 } from '@kbn/significant-events-schema';
 
-export const TOPOLOGY_INPUT_FEATURE_TYPES = ['entity', 'infrastructure', 'dependency'] as const;
+export const TOPOLOGY_INPUT_FEATURE_TYPES = ['entity', 'dependency'] as const;
 
 const NODE_TYPE_SET = new Set<string>(TOPOLOGY_NODE_TYPES);
 
@@ -181,7 +181,7 @@ function buildEdges(features: Feature[], index: NodeIndex): TopologyEdge[] {
   return edges;
 }
 
-/** Builds the topology from entity, infrastructure and dependency features; output is independent of input order. */
+/** Builds the topology from entity and dependency features; output is independent of input order. */
 export function buildTopologySnapshot({
   features,
   sourceIds,

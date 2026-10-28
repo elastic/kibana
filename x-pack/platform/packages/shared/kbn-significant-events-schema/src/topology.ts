@@ -12,7 +12,7 @@ export const MAX_TOPOLOGY_NODES = 2_000;
 export const MAX_TOPOLOGY_EDGES = 5_000;
 export const MAX_TOPOLOGY_PROVENANCE = 20;
 
-export const TOPOLOGY_NODE_TYPES = ['entity', 'infrastructure'] as const;
+export const TOPOLOGY_NODE_TYPES = ['entity'] as const;
 export type TopologyNodeType = (typeof TOPOLOGY_NODE_TYPES)[number];
 
 /** How a dependency endpoint was matched to a node, strongest first. */
@@ -63,7 +63,7 @@ export const topologyEdgeSchema = lazySchema(() =>
 
 export type TopologyEdge = z.infer<typeof topologyEdgeSchema>;
 
-/** Service topology computed from the entity, infrastructure and dependency KIs of `source_ids`. */
+/** Service topology computed from the entity and dependency KIs of `source_ids`. */
 export const topologySnapshotPropertiesSchema = lazySchema(() =>
   z.object({
     built_at: isoDateTime(),

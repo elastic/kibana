@@ -48,7 +48,7 @@ describe('TopologySnapshotClient', () => {
     const snapshot = await client.get(['src-a', 'src-b']);
 
     expect(getFeatures).toHaveBeenCalledWith(['src-a', 'src-b'], {
-      type: ['entity', 'infrastructure', 'dependency'],
+      type: ['entity', 'dependency'],
       limit: expect.any(Number),
     });
     expect(snapshot).toEqual(
