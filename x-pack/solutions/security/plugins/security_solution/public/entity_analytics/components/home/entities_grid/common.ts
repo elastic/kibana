@@ -20,6 +20,9 @@ export const ALLOWED_ENTITY_TYPES = [
   'service',
 ] as const satisfies readonly EntityStoreEntityType[];
 
+/** Prefix of every grid query, to invalidate them all when the entities they read change. */
+export const ENTITY_GRID_QUERY_KEY = 'entity-grid';
+
 export const ENTITY_ID_FIELD = 'entity.id';
 export const ENTITY_TYPE_FIELD = 'entity.EngineMetadata.Type';
 export const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
