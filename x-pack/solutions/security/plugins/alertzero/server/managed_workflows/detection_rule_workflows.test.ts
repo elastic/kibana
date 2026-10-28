@@ -837,7 +837,32 @@ describe('detection rule workflows', () => {
         });
         expect(screenedRows).toEqual([['rule-b', 20, 15, ',rule-b@5,']]);
 
-        // The harvest reads only the screened rules, so rule A never reaches it.
+        // The harvest reads only the screened rule@revision pairs, so neither rule A nor
+        // older alerts of rule B reach it. A rule restored from an older history snapshot
+        // comes back below its old alerts' revision, so MAX(revision) is not enough.
+        expect(harvestQuery).not.toContain('latest_revision');
+        const renderedHarvest = createWorkflowLiquidEngine().parseAndRenderSync(harvestQuery, {
+          consts: tuning.consts,
+          steps: { resolve_screened_rules: { output: { rows: screenedRows } } },
+          workflow: { spaceId: 'default' },
+        });
+        expect(renderedHarvest).toContain('| WHERE rule_revision_key IN (",rule-b@5,")');
+        const renderedTwo = createWorkflowLiquidEngine().parseAndRenderSync(harvestQuery, {
+          consts: tuning.consts,
+          steps: {
+            resolve_screened_rules: {
+              output: {
+                rows: [
+                  ['rule-a', 20, 12, ',rule-a@2,'],
+                  ['rule-b', 20, 15, ',rule-b@5,'],
+                ],
+              },
+            },
+          },
+          workflow: { spaceId: 'default' },
+        });
+        expect(renderedTwo).toContain('| WHERE rule_revision_key IN (",rule-a@2,", ",rule-b@5,")');
+
         const ruleBCurrentVersion = [
           'rule-b',
           15,
