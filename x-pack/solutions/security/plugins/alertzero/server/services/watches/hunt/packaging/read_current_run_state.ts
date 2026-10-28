@@ -256,9 +256,10 @@ export const readCurrentRunState = async ({
 
   // Enrollment is resolved by host name against this deployment's Fleet, so a remote host
   // sharing a name with a local agent (`ubuntu`, `ip-10-0-0-12`) would resolve to that
-  // unrelated agent. Entities carry no provenance, so the only safe cut is run-wide: when
-  // every hit this run saw is on a remote cluster, no host is resolved. A run with no hit
-  // indices, or a truncated `per_index`, is not proven remote and resolves as before.
+  // unrelated agent. Entities carry no provenance, so the cut is run-wide and resolves only
+  // on positive local evidence: an alert ref (always local), a local hit index, or a
+  // truncated `per_index` that may hide one. A run with no hit index has nothing to back an
+  // action, so it resolves nothing. A mixed local/remote run still resolves every host.
   const hitIndices = [
     ...currentRun.flatMap((sse) =>
       (sse.hunt_result?.tier1.per_index ?? [])
@@ -267,17 +268,16 @@ export const readCurrentRunState = async ({
     ),
     ...eventRefs.map((e) => e.source_index),
   ];
-  const evidenceIsRemoteOnly =
-    alertRefs.length === 0 &&
-    hitIndices.length > 0 &&
-    !currentRun.some((sse) => sse.hunt_result?.tier1.per_index_truncated === true) &&
-    hitIndices.every((index) => splitRemoteCluster(index).cluster !== undefined);
+  const hasLocalEvidence =
+    alertRefs.length > 0 ||
+    currentRun.some((sse) => sse.hunt_result?.tier1.per_index_truncated === true) ||
+    hitIndices.some((index) => splitRemoteCluster(index).cluster === undefined);
 
   const hosts: CurrentRunHost[] = [];
   for (const name of hostNames) {
-    const enrollment = evidenceIsRemoteOnly
-      ? { enrolled: false as const }
-      : await resolveHostEnrollment(name);
+    const enrollment = hasLocalEvidence
+      ? await resolveHostEnrollment(name)
+      : { enrolled: false as const };
     if (enrollment.enrolled) {
       hosts.push({
         name,

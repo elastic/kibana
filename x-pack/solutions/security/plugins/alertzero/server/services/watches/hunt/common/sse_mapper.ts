@@ -352,13 +352,17 @@ const toEventMatched = (
  * - include hits with `matched.technique_id === onlyTechniqueId`
  * - include IOC-only / unscoped hits (no technique_id) as shared context
  * - exclude hits attributed to a different technique
+ *
+ * `unlinkedCount` counts in-scope remote alert hits, which get no ref but are still Tier 1
+ * evidence for this entry.
  */
 const splitHits = (
   result: HuntCoordinatorCoreResult,
   onlyTechniqueId?: string
-): { events: SseEventRef[]; alerts: SseAlertRef[] } => {
+): { events: SseEventRef[]; alerts: SseAlertRef[]; unlinkedCount: number } => {
   const events: SseEventRef[] = [];
   const alerts: SseAlertRef[] = [];
+  let unlinkedCount = 0;
   for (const hit of result.tier1.hits) {
     const attributedTechnique = hit.matched?.technique_id?.toUpperCase();
     if (
@@ -368,7 +372,10 @@ const splitHits = (
     ) {
       continue;
     }
-    if (isRemoteAlertsIndex(hit.index)) continue;
+    if (isRemoteAlertsIndex(hit.index)) {
+      unlinkedCount += 1;
+      continue;
+    }
     const timestamp = hitTimestamp(hit);
     const matched = toEventMatched(hit.matched);
     if (isAlertsIndex(hit.index)) {
@@ -386,7 +393,7 @@ const splitHits = (
       });
     }
   }
-  return { events, alerts };
+  return { events, alerts, unlinkedCount };
 };
 
 /** Tier 2 execute hits as refs, split the same way Tier 1's are. */
@@ -426,7 +433,8 @@ const behaviorHitRefs = (
  * Tier 1 returns up to the coordinator's `size: 100`, so appending Tier 2 after it
  * could drop every ref to the behavior that confirmed the technique, leaving its
  * SSE with no navigable evidence of its own hit. `tier1RefCount` counts the Tier 1
- * refs the entry ends up carrying, not the ones offered.
+ * refs the entry ends up carrying, not the ones offered. `tier1UnlinkedCount` counts the
+ * in-scope Tier 1 hits that could get no ref (remote alerts).
  */
 const mergeTierHitRefs = ({
   result,
@@ -434,8 +442,17 @@ const mergeTierHitRefs = ({
 }: {
   result: HuntCoordinatorCoreResult;
   onlyTechniqueId?: string;
-}): { events: SseEventRef[]; alerts: SseAlertRef[]; tier1RefCount: number } => {
-  const { events: tier1Events, alerts: tier1Alerts } = splitHits(result, onlyTechniqueId);
+}): {
+  events: SseEventRef[];
+  alerts: SseAlertRef[];
+  tier1RefCount: number;
+  tier1UnlinkedCount: number;
+} => {
+  const {
+    events: tier1Events,
+    alerts: tier1Alerts,
+    unlinkedCount,
+  } = splitHits(result, onlyTechniqueId);
   const { events: tier2Events, alerts: tier2Alerts } = behaviorHitRefs(
     scopedBehaviors(result, onlyTechniqueId)
   );
@@ -457,6 +474,7 @@ const mergeTierHitRefs = ({
     events: events.taken,
     alerts: alerts.taken,
     tier1RefCount: events.tier1Count + alerts.tier1Count,
+    tier1UnlinkedCount: unlinkedCount,
   };
 };
 
@@ -504,20 +522,20 @@ const mapBehavior = (behavior: CoordinatorBehavior): SseBehavior => ({
 const resolveHitSources = ({
   result,
   onlyTechniqueId,
-  tier1RefCount,
+  tier1EvidenceCount,
 }: {
   result: HuntCoordinatorCoreResult;
   onlyTechniqueId?: string;
-  tier1RefCount: number;
+  tier1EvidenceCount: number;
 }): { has_confirmed_hit: boolean; hit_sources: SseHitSource[] } => {
   const sources: SseHitSource[] = [];
 
   const tier1Source =
     result.tier1.has_confirmed_hit &&
     // Report-scoped: any Tier 1 confirmed hit counts.
-    // Technique-scoped: only when this entry still carries Tier 1 refs
-    // (technique-attributed or shared IOC-only).
-    (!onlyTechniqueId || tier1RefCount > 0);
+    // Technique-scoped: only when this entry still has Tier 1 evidence
+    // (technique-attributed or shared IOC-only), whether or not it could carry a ref.
+    (!onlyTechniqueId || tier1EvidenceCount > 0);
   if (tier1Source) {
     sources.push('tier1');
   }
@@ -539,11 +557,12 @@ const buildHuntResult = (
   result: HuntCoordinatorCoreResult,
   {
     onlyTechniqueId,
-    tier1RefCount,
+    tier1EvidenceCount,
     forceNow,
   }: {
     onlyTechniqueId?: string;
-    tier1RefCount: number;
+    /** Tier 1 refs the entry carries plus in-scope hits that could get no ref. */
+    tier1EvidenceCount: number;
     forceNow: Date;
   }
 ): SseHuntResult => {
@@ -552,7 +571,7 @@ const buildHuntResult = (
   const { has_confirmed_hit, hit_sources } = resolveHitSources({
     result,
     onlyTechniqueId,
-    tier1RefCount,
+    tier1EvidenceCount,
   });
 
   // Tier 1 orders its buckets by doc count, so a list that overflows the schema cap
@@ -784,14 +803,14 @@ const buildEntry = ({
    */
   forceNow: Date;
 }): SseEntry => {
-  const { events, alerts, tier1RefCount } = mergeTierHitRefs({
+  const { events, alerts, tier1RefCount, tier1UnlinkedCount } = mergeTierHitRefs({
     result,
     onlyTechniqueId: techniqueId,
   });
   const { entities, truncated, originalCount } = buildEntities(result, techniqueId);
   const huntResult = buildHuntResult(result, {
     onlyTechniqueId: techniqueId,
-    tier1RefCount,
+    tier1EvidenceCount: tier1RefCount + tier1UnlinkedCount,
     forceNow,
   });
   const behavior = techniqueId

@@ -285,10 +285,23 @@ describe('readCurrentRunState', () => {
       expect(resolve).not.toHaveBeenCalled();
     });
 
+    it('resolves no host when the run has no hit index at all', async () => {
+      const resolve = jest.fn(resolveHostEnrollment);
+      const state = await readCurrentRunState({
+        attachments: [sseAttachment({ tier1Indices: [], events: [] })],
+        reportId,
+        runId,
+        resolveHostEnrollment: resolve,
+        rehydrateProcessSelectors,
+      });
+
+      expect(resolve).not.toHaveBeenCalled();
+      expect(state?.hosts).toEqual([{ name: 'host-a', enrolled: false, capabilities: [] }]);
+    });
+
     it.each([
       ['a local Tier 1 hit index', [remoteIndex, localIndex], [remoteIndex]],
       ['a local event ref', [remoteIndex], [remoteIndex, localIndex]],
-      ['no hit index at all', [], []],
     ])('still resolves hosts when the run has %s', async (_label, tier1Indices, sources) => {
       const resolve = jest.fn(resolveHostEnrollment);
       const state = await readCurrentRunState({

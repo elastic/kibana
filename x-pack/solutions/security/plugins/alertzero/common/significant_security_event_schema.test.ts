@@ -98,6 +98,7 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
       'remote:.alerts-security.alerts-default',
       'remote:.ds-.alerts-security.alerts-default',
       'a:b:logs-default',
+      '_coordinator:logs-default',
       ':logs-default',
       'remote:',
       '-remote:logs-default',
