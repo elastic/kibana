@@ -17,6 +17,7 @@ import {
   createSource,
   createTestIndex,
   deleteSource,
+  deleteSourceChecked,
   deleteTestIndex,
   findListed,
   getSource,
@@ -344,6 +345,93 @@ apiTest.describe(
         await deleteSource(apiClient, manager.cookieHeader, id);
       }
     });
+
+    apiTest('searches titles by their words, also among the given ids', async ({ apiClient }) => {
+      const base = `${TITLE_PREFIX}-${suffix}`;
+      const [checkout, proxy, thai, tokyo] = [
+        `${base} Checkout-prod nginx`,
+        `${base} nginx proxy`,
+        `${base} ภาษาไทย`,
+        `${base} 東京都 cdn`,
+      ];
+      const ids: string[] = [];
+      for (const title of [checkout, proxy, thai, tokyo]) {
+        const created = await createSource(apiClient, manager.cookieHeader, {
+          title,
+          esql: `FROM ${index}`,
+        });
+        expect(created).toHaveStatusCode(200);
+        ids.push(created.body.source.id);
+      }
+      const [checkoutId, proxyId, thaiId, tokyoId] = ids;
+
+      const search = async (text: string, sourceIds: string[] = []) => {
+        const query = [...sourceIds.map((id) => `ids=${id}`), `search=${encodeURIComponent(text)}`];
+        const response = await listSources(apiClient, manager.cookieHeader, query.join('&'));
+        expect(response).toHaveStatusCode(200);
+        return listedIds(response.body);
+      };
+
+      // Every word has to be in the title, in any order, ignoring case, and the last may be partial.
+      // A hyphenated word counts as the words it is made of, wherever it is in the search.
+      expect(await search(`${suffix} Checkout-prod nginx`)).toStrictEqual([checkoutId]);
+      expect(await search(`nginx checkout-prod ${suffix}`)).toStrictEqual([checkoutId]);
+      expect(await search(`${suffix} nginx prod-checkout`)).toStrictEqual([checkoutId]);
+      expect(await search(`${suffix} nginx checkout-pr`)).toStrictEqual([checkoutId]);
+      expect(await search(`${suffix} CHECKOUT ngi`)).toStrictEqual([checkoutId]);
+      expect(await search(`${suffix} nginx`)).toStrictEqual([checkoutId, proxyId]);
+      expect(await search(`${suffix} checkout proxy`)).toStrictEqual([]);
+      // Thai and Chinese text have no spaces between words: the index keeps Thai as one word and
+      // splits Chinese into characters, and the search matches either, also as its last word.
+      expect(await search(`ภาษาไทย ${suffix}`)).toStrictEqual([thaiId]);
+      expect(await search(`${suffix} ภาษาไทย`)).toStrictEqual([thaiId]);
+      expect(await search(`${suffix} cdn 東京都`)).toStrictEqual([tokyoId]);
+
+      // `ids` narrows the list, and the search applies to the sources it names.
+      expect(await search('nginx', [checkoutId, proxyId, randomUUID()])).toStrictEqual([
+        checkoutId,
+        proxyId,
+      ]);
+      expect(await search('nginx', [checkoutId, randomUUID()])).toStrictEqual([checkoutId]);
+      expect(await search('checkout', [proxyId])).toStrictEqual([]);
+
+      for (const id of ids) {
+        await deleteSource(apiClient, manager.cookieHeader, id);
+      }
+    });
+
+    apiTest(
+      'lists a source by id only in the space it belongs to',
+      async ({ apiClient, apiServices }) => {
+        const spaceId = `ns-ids-${suffix}`;
+        await apiServices.spaces.create({ id: spaceId, name: spaceId });
+        try {
+          const created = await createSource(
+            apiClient,
+            manager.cookieHeader,
+            { title: `${TITLE_PREFIX}-${suffix}-space`, esql: `FROM ${index}` },
+            { spaceId }
+          );
+          expect(created).toHaveStatusCode(200);
+          const { id } = created.body.source;
+          try {
+            const there = await listSources(apiClient, manager.cookieHeader, `ids=${id}`, {
+              spaceId,
+            });
+            expect(there).toHaveStatusCode(200);
+            expect(listedIds(there.body)).toStrictEqual([id]);
+
+            const here = await listSources(apiClient, manager.cookieHeader, `ids=${id}`);
+            expect(here).toHaveStatusCode(200);
+            expect(listedIds(here.body)).toStrictEqual([]);
+          } finally {
+            await deleteSourceChecked(apiClient, manager.cookieHeader, id, { spaceId });
+          }
+        } finally {
+          await apiServices.spaces.delete(spaceId);
+        }
+      }
+    );
 
     apiTest('returns 404 for an unknown source', async ({ apiClient }) => {
       const unknownId = randomUUID();

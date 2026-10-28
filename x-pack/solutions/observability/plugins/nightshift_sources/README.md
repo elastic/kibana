@@ -17,7 +17,7 @@ gated by the Nightshift feature privileges: reads need `read_nightshift`, writes
 
 | Method | Path | Privilege | Notes |
 | --- | --- | --- | --- |
-| `GET` | `/internal/nightshift/sources?page&per_page&search&enabled` | read | Paginated catalog, sorted by title. Does not fetch views. |
+| `GET` | `/internal/nightshift/sources?page&per_page&search&enabled` | read | Paginated catalog, sorted by title. Does not fetch views. `search` matches titles that contain every word, in any order, ignoring case; the last word may be a partial word. `ids` narrows the list to those sources; `search`, `enabled` and paging apply to them. |
 | `POST` | `/internal/nightshift/sources` | manage | Validates the query, derives `type`, writes the saved object, creates the view. Takes `enabled` (default `true`) to create the source switched off |
 | `POST` | `/internal/nightshift/sources/_validate` | manage | Runs the create checks on `{ esql }` without writing; answers `{ valid: true, type, index_exists }` or `{ valid: false, error }` |
 | `GET` | `/internal/nightshift/sources/{sourceId}` | read | Source plus view health, including a `FROM <view> \| LIMIT 0` probe for `unresolvable` |
@@ -127,7 +127,8 @@ afterwards.
 
 ## Elasticsearch privileges
 
-The plugin runs every Elasticsearch call as the current user. Kibana feature privileges are
+The plugin runs every Elasticsearch call as the current user, except that list tokenizes its
+`search` with `_analyze` as `kibana_system`, which reads no index. Kibana feature privileges are
 not enough on their own; users also need index privileges on the view names and on the data
 the query reads. ES|QL view operations are index privileges applied to the view name.
 
