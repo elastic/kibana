@@ -784,6 +784,18 @@ steps:
         field: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_field }}"
         cardinality: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality | default: consts.no_items }}"
 
+  # Approving replaces the whole threshold, so an empty proposed cardinality would
+  # write `cardinality: []` to a rule that never had one. Runs only when there is a
+  # cardinality to clear; otherwise the action's cardinality stays undefined and
+  # is left out of the patch.
+  - name: clear_threshold_cardinality
+    type: data.set
+    if: >-
+      ${{ steps.diagnose_rule.output.structured_output.change_type == 'threshold'
+        and steps.fetch_rule.output.threshold.cardinality.size > 0 }}
+    with:
+      cardinality: "${{ consts.no_items }}"
+
   # A schedule change alters how much history each simulated run covers, so the
   # proposed run count is scaled to keep both previews over the same period:
   # period = runs x current interval; proposed runs = ceil(period / proposed interval),
@@ -802,6 +814,60 @@ steps:
         {%- assign runs = inputs.preview_invocation_count | default: consts.preview_invocation_count -%}
         {%- assign period = cs | times: runs -%}
         {{- period | times: 1.0 | divided_by: ps | ceil | at_least: 1 -}}
+
+  # The rule details page shows a schedule's `from` as "Additional look-back time":
+  # `from` minus the interval, in the largest whole unit (now-65m every 5m is 1h).
+  # Renders "<current>,<proposed>", or nothing when either `from` is not plain
+  # now-<n><unit> or starts after its interval, so the proposal falls back to `from`.
+  # Every change type is backtested on a schedule, so this runs for all of them;
+  # only a schedule change has a proposed schedule that differs from the current one.
+  - name: compute_schedule_lookbacks
+    type: data.set
+    with:
+      lookbacks: >-
+        {%- capture schedules -%}
+        now-{{ steps.fetch_rule.output.interval }}|{{ steps.fetch_rule.output.from }}|
+        {%- if steps.diagnose_rule.output.structured_output.change_type == 'schedule' -%}
+        now-{{ steps.diagnose_rule.output.structured_output.proposed_interval }}|{{ steps.diagnose_rule.output.structured_output.proposed_from }}
+        {%- else -%}
+        now-{{ steps.fetch_rule.output.interval }}|{{ steps.fetch_rule.output.from }}
+        {%- endif -%}
+        {%- endcapture -%}
+        {%- assign schedules = schedules | split: "|" -%}
+        {%- assign valid = true -%}
+        {%- if schedules.size != 4 %}{% assign valid = false %}{% endif -%}
+        {%- assign lookbacks = "" -%}
+        {%- for expression in schedules -%}
+        {%- assign unit = expression | slice: -1 -%}
+        {%- assign amount = expression | slice: 4, 64 | remove_last: unit | plus: 0 -%}
+        {%- capture rebuilt %}now-{{ amount }}{{ unit }}{% endcapture -%}
+        {%- case unit -%}
+        {%- when "d" %}{% assign seconds = amount | times: 86400 -%}
+        {%- when "h" %}{% assign seconds = amount | times: 3600 -%}
+        {%- when "m" %}{% assign seconds = amount | times: 60 -%}
+        {%- when "s" %}{% assign seconds = amount -%}
+        {%- else %}{% assign valid = false -%}
+        {%- endcase -%}
+        {%- if rebuilt != expression %}{% assign valid = false %}{% endif -%}
+        {%- assign is_interval = forloop.index0 | modulo: 2 -%}
+        {%- if is_interval == 0 -%}
+        {%- assign interval_seconds = seconds -%}
+        {%- else -%}
+        {%- assign lookback = seconds | minus: interval_seconds -%}
+        {%- assign days = lookback | modulo: 86400 -%}
+        {%- assign hours = lookback | modulo: 3600 -%}
+        {%- assign minutes = lookback | modulo: 60 -%}
+        {%- if lookback < 0 %}{% assign valid = false %}{% endif -%}
+        {%- if lookback == 0 %}{% assign lookback = "0s" -%}
+        {%- elsif days == 0 %}{% assign lookback = lookback | divided_by: 86400 | append: "d" -%}
+        {%- elsif hours == 0 %}{% assign lookback = lookback | divided_by: 3600 | append: "h" -%}
+        {%- elsif minutes == 0 %}{% assign lookback = lookback | divided_by: 60 | append: "m" -%}
+        {%- else %}{% assign lookback = lookback | append: "s" -%}
+        {%- endif -%}
+        {%- assign lookbacks = lookbacks | append: lookback | append: "," -%}
+        {%- endif -%}
+        {%- endfor -%}
+        {%- if valid %}{{ lookbacks | remove_last: "," }}{% endif -%}
 
   # One preview worker run backtests both queries. A single synchronous child per
   # wake-up cycle is safe; two consecutive child calls share one immediate-resume
@@ -1041,48 +1107,75 @@ steps:
         {% endif %}
 
         **Proposed change**
-        {% case steps.diagnose_rule.output.structured_output.change_type %}
-        {% when "query" %}
+        {%- assign rule = steps.fetch_rule.output %}
+        {%- assign proposal = steps.diagnose_rule.output.structured_output %}
+        {%- assign lookbacks = steps.compute_schedule_lookbacks.output.lookbacks | split: "," %}
+        {%- case proposal.change_type %}
+        {%- when "query" %}
         Current query:
         ```
-        {{ steps.fetch_rule.output.query }}
+        {{ rule.query }}
         ```
 
         Proposed query:
         ```
-        {{ steps.diagnose_rule.output.structured_output.proposed_query }}
+        {{ proposal.proposed_query }}
         ```
-        {% when "exception" %}
-        Proposed exception:
-        {% for entry in steps.bound_exception_entries.output.entries_json | json_parse %}
-        - {{ entry.field }} {{ entry.operator }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
-        {% endfor %}
-        Approve to add the exception to the exception list of the rule. You can remove it in the Detection Rules UI.
-        {% when "risk_score" %}
-        Current risk score: {{ steps.fetch_rule.output.risk_score }} ({{ steps.fetch_rule.output.severity }})
-        Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }} ({{ steps.diagnose_rule.output.structured_output.proposed_severity }})
-        Approve to change the risk score and severity of the rule. You can change them back in the Detection Rules UI.
-        {% when "threshold" %}
-        Current threshold value: {{ steps.fetch_rule.output.threshold.value }}
-        Proposed threshold value: {{ steps.diagnose_rule.output.structured_output.proposed_threshold_value }}
-        {% if steps.diagnose_rule.output.structured_output.proposed_threshold_field != nil %}
-        Current threshold field: {{ steps.fetch_rule.output.threshold.field | json }}
-        Proposed threshold field: {{ steps.diagnose_rule.output.structured_output.proposed_threshold_field | json }}
-        {% endif %}
-        Current threshold cardinality: {% if steps.fetch_rule.output.threshold.cardinality %}{% for entry in steps.fetch_rule.output.threshold.cardinality %}- {{ entry.field }} >= {{ entry.value }} {% endfor %}{% else %}none{% endif %}
-        Proposed threshold cardinality: {% if steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality %}{% for entry in steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality %}- {{ entry.field }} >= {{ entry.value }} {% endfor %}{% else %}none{% endif %}
-        Approve to change the threshold settings of the rule. You can change them back in the Detection Rules UI.
-        {% when "schedule" %}
-        Current interval: {{ steps.fetch_rule.output.interval }}
-        Proposed interval: {{ steps.diagnose_rule.output.structured_output.proposed_interval }}
-        Current lookback (from): {{ steps.fetch_rule.output.from }}
-        Proposed lookback (from): {{ steps.diagnose_rule.output.structured_output.proposed_from }}
-        Approve to change the schedule settings of the rule. You can change them back in the Detection Rules UI.
-        {% else %}
+        Approve to change the query of the rule. You can restore the previous version using History on the rule details page.
+        {%- when "exception" %}
+        {%- assign entries = steps.bound_exception_entries.output.entries_json | json_parse %}
+        {%- if entries.size > 1 %}
+        Add exception, matching all of these conditions:
+        {%- endif %}
+        {%- for entry in entries %}
+        {%- capture condition %}`{{ entry.field }}` {{ entry.operator | replace: "_", " " }}{% if entry.values %} `{{ entry.values | join: "`, `" }}`{% elsif entry.value %} `{{ entry.value }}`{% endif %}{% endcapture %}
+        {%- if entries.size > 1 %}
+        - {{ condition }}
+        {%- else %}
+        Add exception: {{ condition }}
+        {%- endif %}
+        {%- endfor %}
+        Approve to add the exception to the exception list of the rule. You can remove it in the rule's Exceptions tab.
+        {%- when "risk_score" %}
+        {%- if proposal.proposed_risk_score != rule.risk_score %}
+        Risk score: `{{ rule.risk_score }}` → `{{ proposal.proposed_risk_score }}`
+        {%- endif %}
+        {%- if proposal.proposed_severity != rule.severity %}
+        Severity: `{{ rule.severity }}` → `{{ proposal.proposed_severity }}`
+        {%- endif %}
+        Approve to change the risk score and severity of the rule. You can restore the previous version using History on the rule details page.
+        {%- when "threshold" %}
+        {%- assign current_fields = rule.threshold.field | join: ", " %}
+        {%- assign proposed_fields = proposal.proposed_threshold_field | join: ", " %}
+        {%- capture current_cardinality %}{% for entry in rule.threshold.cardinality %}{% unless forloop.first %}, {% endunless %}{{ entry.field }} >= {{ entry.value }}{% endfor %}{% endcapture %}
+        {%- capture proposed_cardinality %}{% for entry in proposal.proposed_threshold_cardinality %}{% unless forloop.first %}, {% endunless %}{{ entry.field }} >= {{ entry.value }}{% endfor %}{% endcapture %}
+        {%- if proposal.proposed_threshold_value != rule.threshold.value %}
+        Threshold: `{{ rule.threshold.value }}` → `{{ proposal.proposed_threshold_value }}`
+        {%- endif %}
+        {%- if proposed_fields != current_fields %}
+        Group by: `{{ current_fields | default: "none" }}` → `{{ proposed_fields | default: "none" }}`
+        {%- endif %}
+        {%- if proposed_cardinality != current_cardinality %}
+        Unique values count: `{{ current_cardinality | default: "none" }}` → `{{ proposed_cardinality | default: "none" }}`
+        {%- endif %}
+        Approve to change the threshold settings of the rule. You can restore the previous version using History on the rule details page.
+        {%- when "schedule" %}
+        {%- if proposal.proposed_interval != rule.interval %}
+        Runs every: `{{ rule.interval }}` → `{{ proposal.proposed_interval }}`
+        {%- endif %}
+        {%- if lookbacks.size == 2 %}
+        {%- if lookbacks.first != lookbacks.last %}
+        Additional look-back time: `{{ lookbacks.first }}` → `{{ lookbacks.last }}`
+        {%- endif %}
+        {%- elsif proposal.proposed_from != rule.from %}
+        Analyzed time range starts at: `{{ rule.from }}` → `{{ proposal.proposed_from }}`
+        {%- endif %}
+        Approve to change the schedule settings of the rule. You can restore the previous version using History on the rule details page.
+        {%- else %}
         No automated change is safe for this rule.
         Approving records the handoff. The agent makes no change to the rule.
         Apply the recommended change in the Detection Rules UI.
-        {% endcase %}
+        {%- endcase %}
 
         {% if steps.diagnose_rule.output.structured_output.change_type == "query"
           or steps.diagnose_rule.output.structured_output.change_type == "exception"
@@ -1091,11 +1184,11 @@ steps:
         {% if steps.can_preview_query_change.output.supported %}
         **Backtest**
 
-        The backtest ran {{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions with interval {{ steps.fetch_rule.output.interval }}
-        and lookback {{ steps.fetch_rule.output.from }}. It ends at the newest false positive, {{ inputs.last_fp_at }}.
+        The backtest ran {{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions, running every `{{ rule.interval }}` {% if lookbacks.size == 2 %}with `{{ lookbacks.first }}` additional look-back time{% else %}and looking back from `{{ rule.from }}`{% endif %}.
+        It ends at the newest false positive, {{ inputs.last_fp_at }}.
         This time span is usually much shorter than the span of the false positives.
-        {% if steps.diagnose_rule.output.structured_output.change_type == 'schedule' %}
-        The proposed schedule ran {{ steps.compute_schedule_preview_runs.output.proposed_invocation_count }} simulated executions with interval {{ steps.diagnose_rule.output.structured_output.proposed_interval }} and lookback {{ steps.diagnose_rule.output.structured_output.proposed_from }}, over the same time span.
+        {% if proposal.change_type == 'schedule' %}
+        The proposed schedule ran {{ steps.compute_schedule_preview_runs.output.proposed_invocation_count }} simulated executions, running every `{{ proposal.proposed_interval }}` {% if lookbacks.size == 2 %}with `{{ lookbacks.last }}` additional look-back time{% else %}and looking back from `{{ proposal.proposed_from }}`{% endif %}, over the same time span.
         {% endif %}
 
         Alerts with the current rule: {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %}
@@ -1247,7 +1340,8 @@ steps:
                   threshold:
                     value: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_value }}"
                     field: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_field }}"
-                    cardinality: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality }}"
+                    # `default` treats [] as empty, so an empty proposal falls back to the clearing value.
+                    cardinality: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality | default: steps.clear_threshold_cardinality.output.cardinality }}"
                 impact: medium
                 confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
                 autoApprove: false
