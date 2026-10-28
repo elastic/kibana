@@ -181,11 +181,10 @@ describe('scripts/generate_plugin', () => {
     const publicFiles = files.filter((f) => f.includes('target/public/'));
     expect(publicFiles.length).toBeGreaterThanOrEqual(1);
 
-    const mainBundle = publicFiles.find(
-      (f) => f.endsWith('.plugin.js') || f.endsWith('.plugin.js.br')
-    );
+    const mainBundle = publicFiles.find((f) => f.endsWith('.plugin.js'));
     expect(mainBundle).toBeDefined();
 
+    const bundleContent = Fs.readFileSync(Path.resolve(TMP_DIR, mainBundle!), 'utf-8');
     const compressedBundle = Fs.readFileSync(Path.resolve(TMP_DIR, `${mainBundle!}.br`));
     expect(Zlib.brotliDecompressSync(compressedBundle).toString('utf-8')).toBe(bundleContent);
 
