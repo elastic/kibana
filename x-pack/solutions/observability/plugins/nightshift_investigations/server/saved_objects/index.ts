@@ -6,13 +6,6 @@
  */
 
 export {
-  nightshiftSecretsSavedObjectType,
-  nightshiftSecretsEncryptionParams,
-  NIGHTSHIFT_SECRETS_SO_TYPE,
-  NIGHTSHIFT_SECRETS_SO_ID,
-  type NightshiftSecretsAttributes,
-} from './sandbox_secrets_saved_object';
-export {
   nightshiftCustomContextSavedObjectType,
   NIGHTSHIFT_CUSTOM_CONTEXT_SO_TYPE,
   NIGHTSHIFT_CUSTOM_CONTEXT_SO_ID,

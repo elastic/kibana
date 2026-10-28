@@ -6,27 +6,27 @@
  */
 
 import { useQuery, type UseQueryResult } from '@kbn/react-query';
-import type { GetSandboxSecretsResponse } from '@kbn/nightshift-investigations-plugin/common';
+import type { SandboxConnectorType } from '@kbn/nightshift-investigations-plugin/common';
 import { isHttpClientError } from '../common/http_error';
 import { useKibana } from '../hooks/use_kibana';
 
-export const NIGHTSHIFT_SANDBOX_SECRETS_QUERY_KEY = ['nightshift.sandboxSecrets'] as const;
+const NIGHTSHIFT_SANDBOX_CONNECTOR_TYPES_QUERY_KEY = ['nightshift.sandboxConnectorTypes'] as const;
 
-export const useFetchSandboxSecrets = ({
-  enabled = true,
-}: { enabled?: boolean } = {}): UseQueryResult<GetSandboxSecretsResponse, Error> => {
+/** The connector types the investigation agent can use from its sandbox. */
+export const useFetchSandboxConnectorTypes = (): UseQueryResult<SandboxConnectorType[], Error> => {
   const investigationsClient = useKibana().services.nightshiftInvestigations?.investigationsClient;
-
-  return useQuery<GetSandboxSecretsResponse, Error>({
-    queryKey: NIGHTSHIFT_SANDBOX_SECRETS_QUERY_KEY,
-    enabled: enabled && investigationsClient != null,
+  return useQuery<SandboxConnectorType[], Error>({
+    queryKey: NIGHTSHIFT_SANDBOX_CONNECTOR_TYPES_QUERY_KEY,
+    enabled: investigationsClient != null,
     queryFn: async ({ signal }) => {
       if (!investigationsClient) {
         throw new Error('Nightshift investigations plugin is unavailable');
       }
-      return investigationsClient.fetch('GET /internal/nightshift/sandbox_secrets', {
-        signal: signal ?? null,
-      });
+      const { connector_types: connectorTypes } = await investigationsClient.fetch(
+        'GET /internal/nightshift/sandbox_connector_types',
+        { signal: signal ?? null }
+      );
+      return connectorTypes;
     },
     retry: (failureCount, error) => !isHttpClientError(error) && failureCount < 3,
   });

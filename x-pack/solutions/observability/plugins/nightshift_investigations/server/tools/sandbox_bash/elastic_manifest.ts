@@ -9,43 +9,20 @@ import type { Logger } from '@kbn/core/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { SANDBOX_BASH_TOOL_ID } from './tool';
 
-/** Where the sandbox gets Elasticsearch credentials: the telemetry connector or a secret pair. */
-export type ElasticCredentials =
-  | { kind: 'connector'; connectorId: string }
-  | { kind: 'secrets'; urlKey: string; apiKeyKey: string };
+/** Where the sandbox gets Elasticsearch credentials: the telemetry connector. */
+export interface ElasticCredentials {
+  kind: 'connector';
+  connectorId: string;
+}
 
-const SECRET_API_KEY = 'ELASTICSEARCH_API_KEY';
-const SECRET_URL_KEYS = ['ELASTICSEARCH_URL', 'ELASTICSEARCH_ENDPOINT'] as const;
-
-/** The Elasticsearch URL and API key sandbox secrets, when both are configured. */
-export const findElasticSecretCredentials = (
-  secretKeys: readonly string[]
-): ElasticCredentials | undefined => {
-  const urlKey = SECRET_URL_KEYS.find((key) => secretKeys.includes(key));
-  if (!urlKey || !secretKeys.includes(SECRET_API_KEY)) return undefined;
-  return { kind: 'secrets', urlKey, apiKeyKey: SECRET_API_KEY };
-};
-
-const describeCredentials = (credentials: ElasticCredentials) => {
-  if (credentials.kind === 'connector') {
-    return {
-      urlVar: 'CONNECTOR_CONFIG_URL',
-      authVar: 'CONNECTOR_HEADER_AUTHORIZATION',
-      authDescription: 'full Authorization header value (`ApiKey <key>`)',
-      authHeader: '$CONNECTOR_HEADER_AUTHORIZATION',
-      parameterName: 'connector_id',
-      parameter: `connector_id: "${credentials.connectorId}"`,
-    };
-  }
-  return {
-    urlVar: credentials.urlKey,
-    authVar: credentials.apiKeyKey,
-    authDescription: 'Elasticsearch API key, used as `Authorization: ApiKey <key>`',
-    authHeader: `ApiKey $${credentials.apiKeyKey}`,
-    parameterName: 'secret_keys',
-    parameter: `secret_keys: ["${credentials.urlKey}", "${credentials.apiKeyKey}"]`,
-  };
-};
+const describeCredentials = (credentials: ElasticCredentials) => ({
+  urlVar: 'CONNECTOR_CONFIG_URL',
+  authVar: 'CONNECTOR_HEADER_AUTHORIZATION',
+  authDescription: 'full Authorization header value (`ApiKey <key>`)',
+  authHeader: '$CONNECTOR_HEADER_AUTHORIZATION',
+  parameterName: 'connector_id',
+  parameter: `connector_id: "${credentials.connectorId}"`,
+});
 
 /** How to query cluster telemetry from the sandbox. Names env vars; never embeds secrets. */
 export const renderElasticManifest = (
