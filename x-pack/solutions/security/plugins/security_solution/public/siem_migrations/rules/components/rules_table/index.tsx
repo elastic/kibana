@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiButton,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -27,6 +26,7 @@ import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/r
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { type RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { AddMigrationRuleToChatButton } from '../rule_details_flyout/add_to_chat_button';
+import { InstallMigrationRuleButton } from '../rule_details_flyout/install_button';
 import { useMigrationRulesTableColumns } from '../../hooks/use_migration_rules_table_columns';
 import { useMigrationRuleDetailsFlyout } from '../../hooks/use_migration_rule_preview_flyout';
 import { useInstallMigrationRule } from '../../logic/use_install_migration_rule';
@@ -307,8 +307,8 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
               </EuiFlexItem>
             )}
             <EuiFlexItem>
-              <EuiButton
-                disabled={!canMigrationRuleBeInstalled}
+              <InstallMigrationRuleButton
+                isDisabled={!canMigrationRuleBeInstalled}
                 onClick={() => {
                   installSingleRule(migrationRule);
                   closeRulePreview();
@@ -316,12 +316,12 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                 data-test-subj="installMigrationRuleFromFlyoutButton"
               >
                 {i18n.INSTALL_WITHOUT_ENABLING_BUTTON_LABEL}
-              </EuiButton>
+              </InstallMigrationRuleButton>
             </EuiFlexItem>
             {isMigrationPrebuiltRule(migrationRule.elastic_rule) && (
               <EuiFlexItem>
-                <EuiButton
-                  disabled={!canMigrationRuleBeInstalled}
+                <InstallMigrationRuleButton
+                  isDisabled={!canMigrationRuleBeInstalled}
                   onClick={() => {
                     installSingleRule(migrationRule, true);
                     closeRulePreview();
@@ -330,7 +330,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                   data-test-subj="installAndEnableMigrationRuleFromFlyoutButton"
                 >
                   {i18n.INSTALL_AND_ENABLE_BUTTON_LABEL}
-                </EuiButton>
+                </InstallMigrationRuleButton>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
