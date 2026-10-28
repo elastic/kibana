@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-env jest */
-
 // IntersectionObserver is not implemented in JSDOM.  Provide a minimal stub so
 // tests that render components using useInfiniteScroll don't crash.
 global.IntersectionObserver = jest.fn(() => ({

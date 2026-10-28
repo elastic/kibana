@@ -8,7 +8,6 @@
  */
 
 /* eslint-disable no-console, no-var */
-/* global __KBN_HMR_PORT__, __webpack_hash__ */
 
 var LOG_PREFIX = '[@kbn/rspack-optimizer][hmr]';
 var lastHash;

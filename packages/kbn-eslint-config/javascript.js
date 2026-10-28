@@ -62,7 +62,6 @@ module.exports = {
         'no-restricted-modules': [2, RESTRICTED_MODULES],
         'no-return-assign': 'off',
         'no-shadow': 'off',
-        'no-undef': 'error',
         'no-underscore-dangle': 'off',
         'no-unsanitized/method': 'error',
         'no-unsanitized/property': 'error',

@@ -164,9 +164,6 @@ module.exports = {
               default: ['public-static-field', 'static-field', 'instance-field'],
             },
           ],
-          // rely on typescript
-          'no-undef': 'off',
-
           '@typescript-eslint/no-var-requires': 'error',
           'import/order': [
             'error',
