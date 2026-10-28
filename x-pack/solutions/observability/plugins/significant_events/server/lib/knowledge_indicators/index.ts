@@ -25,3 +25,4 @@ export {
   isStoredQueryKnowledgeIndicator,
 } from './data_stream';
 export { KI_TYPE_FEATURE, KI_TYPE_QUERY, type KnowledgeIndicatorType } from './fields';
+export { TopologySnapshotClient } from './topology/topology_snapshot_client';

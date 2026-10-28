@@ -212,20 +212,49 @@ async function fetchQueryIndicators(
   return links.map(queryLinkToKnowledgeIndicatorQuery);
 }
 
+// `snapshot` ids are already expanded, so membership is exact; `in_memory`
+// expands the raw seeds one hop through the fetched dependency features.
+type FeatureIdMatcher =
+  | { mode: 'snapshot'; featureIds: Set<string> }
+  | { mode: 'in_memory'; featureIds: Set<string>; connectedEndpoints: Set<string> };
+
+function buildFeatureIdMatcher(
+  indicators: KnowledgeIndicator[],
+  params: SearchKnowledgeIndicatorsInput,
+  expandedFeatureIds: string[] | undefined
+): FeatureIdMatcher | undefined {
+  if (expandedFeatureIds) {
+    return { mode: 'snapshot', featureIds: new Set(expandedFeatureIds) };
+  }
+  if (!params.feature_ids?.length) {
+    return undefined;
+  }
+  const featureIds = new Set(params.feature_ids);
+  return {
+    mode: 'in_memory',
+    featureIds,
+    connectedEndpoints: buildConnectedEndpoints(indicators, featureIds),
+  };
+}
+
+function featureMatchesIds(indicator: KnowledgeIndicatorFeature, matcher: FeatureIdMatcher) {
+  return matcher.mode === 'snapshot'
+    ? matcher.featureIds.has(indicator.feature.id)
+    : featureMatchesTopology(indicator, matcher.featureIds, matcher.connectedEndpoints);
+}
+
 function filterIndicators(
   indicators: KnowledgeIndicator[],
-  params: SearchKnowledgeIndicatorsInput
+  params: SearchKnowledgeIndicatorsInput,
+  expandedFeatureIds: string[] | undefined
 ): KnowledgeIndicator[] {
-  const featureIdSet = params.feature_ids?.length ? new Set(params.feature_ids) : undefined;
-  const connectedEndpoints = featureIdSet
-    ? buildConnectedEndpoints(indicators, featureIdSet)
-    : new Set<string>();
+  const matcher = buildFeatureIdMatcher(indicators, params, expandedFeatureIds);
 
   return indicators.filter((indicator) => {
     if (isFeatureIndicator(indicator)) {
       return (
         (!params.feature_types?.length || params.feature_types.includes(indicator.feature.type)) &&
-        (!featureIdSet || featureMatchesTopology(indicator, featureIdSet, connectedEndpoints))
+        (!matcher || featureMatchesIds(indicator, matcher))
       );
     }
 
@@ -255,12 +284,15 @@ export async function searchKnowledgeIndicators({
   getSourceSlug,
   getFeatures,
   getQueries,
+  resolveTopologySeeds,
   onFeatureFetchError,
   params,
 }: {
   getSourceIds(): Promise<string[]>;
   /** Slug of a source id, used to order results. Ids sort as is when it is omitted. */
   getSourceSlug?(sourceId: string): string | undefined;
+  /** Expands `feature_ids` through the topology of `sourceIds`; `undefined` falls back to in-memory expansion. */
+  resolveTopologySeeds?(seedIds: string[], sourceIds: string[]): Promise<string[] | undefined>;
   getFeatures(
     sourceId: string,
     options: {
@@ -301,19 +333,27 @@ export async function searchKnowledgeIndicators({
     };
   }
 
-  // Step 3: Fetch features.
+  // Step 3: Expand topology seeds through the snapshot.
+  const seedIds = params.feature_ids?.length ? uniq(params.feature_ids) : undefined;
+  const expandedFeatureIds =
+    normalized.includeFeatures && seedIds && resolveTopologySeeds
+      ? await resolveTopologySeeds(seedIds, sourceIds)
+      : undefined;
+
+  // Step 4: Fetch features. Without a snapshot the in-memory expansion needs the
+  // dependency features of unknown neighbours, so only a text search narrows to the seeds.
   const features = normalized.includeFeatures
     ? await fetchFeatureIndicators({
         sourceIds,
         searchText: normalized.searchText,
         featureTypes: params.feature_types,
-        featureIds: params.feature_ids,
+        featureIds: expandedFeatureIds ?? (normalized.searchText ? seedIds : undefined),
         getFeatures,
         onFeatureFetchError,
       })
     : [];
 
-  // Step 4: Fetch queries.
+  // Step 5: Fetch queries.
   const queries = normalized.includeQueries
     ? await fetchQueryIndicators(
         sourceIds,
@@ -328,9 +368,9 @@ export async function searchKnowledgeIndicators({
       )
     : [];
 
-  // Step 5: Filter defensively, sort deterministically, and paginate.
+  // Step 6: Filter defensively, sort deterministically, and paginate.
   const sorted = sortIndicators(
-    filterIndicators([...features, ...queries], params),
+    filterIndicators([...features, ...queries], params, expandedFeatureIds),
     (sourceId) => getSourceSlug?.(sourceId) ?? sourceId
   );
   const offset = (normalized.page - 1) * normalized.perPage;

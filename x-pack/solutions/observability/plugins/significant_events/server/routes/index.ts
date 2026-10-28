@@ -27,6 +27,7 @@ import { internalCostRoutes } from './internal/cost/route';
 import { reconcileRoutes } from './internal/knowledge_indicators/reconcile_route';
 import { syncRoutes } from './internal/knowledge_indicators/sync_route';
 import { internalScheduledDiscoveryRoutes } from './internal/scheduled_discovery/route';
+import { internalTopologyRoutes } from './internal/topology/route';
 
 export const significantEventsRouteRepository = {
   // internal APIs
@@ -52,6 +53,7 @@ export const significantEventsRouteRepository = {
   ...reconcileRoutes,
   ...syncRoutes,
   ...internalScheduledDiscoveryRoutes,
+  ...internalTopologyRoutes,
 };
 
 export type SignificantEventsRouteRepository = typeof significantEventsRouteRepository;

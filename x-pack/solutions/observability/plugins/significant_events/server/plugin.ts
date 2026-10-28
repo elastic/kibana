@@ -86,6 +86,7 @@ import {
   type KnowledgeIndicatorClient,
   KnowledgeIndicatorService,
   knowledgeIndicatorsDataStream,
+  TopologySnapshotClient,
 } from './lib/knowledge_indicators';
 import {
   createSignificantEventsClients,
@@ -160,7 +161,6 @@ export class SignificantEventsPlugin
   private managedWorkflowsInstaller?: ManagedWorkflowsInstaller;
   private removeLegacyWorkflows?: () => Promise<void>;
   private maintenanceService?: SignificantEventsMaintenanceService;
-
   constructor(context: PluginInitializerContext) {
     this.isDev = context.env.mode.dev;
     this.logger = context.logger.get();
@@ -319,6 +319,12 @@ export class SignificantEventsPlugin
         return kiClientPromise;
       };
 
+      const getTopologySnapshotClient = async (): Promise<TopologySnapshotClient> =>
+        new TopologySnapshotClient({
+          reader: await getKnowledgeIndicatorClient(),
+          logger: this.logger.get('topology'),
+        });
+
       const license = await licensing.getLicense();
       const isSecurityEnabled = license.getFeature('security').isEnabled;
 
@@ -329,6 +335,7 @@ export class SignificantEventsPlugin
         space,
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
+        getTopologySnapshotClient,
         sourceKnowledgeState,
         scheduleSourceOnboarding: async (
           source: NightshiftSource,

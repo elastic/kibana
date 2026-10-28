@@ -407,6 +407,107 @@ describe('searchKnowledgeIndicators', () => {
     expect(ids).not.toContain('some-entity');
   });
 
+  describe('topology snapshot expansion', () => {
+    const dependency = makeFeature({
+      id: 'orders-api-storage',
+      type: 'dependency',
+      properties: { source: 'orders-api', target: 'storage' },
+    });
+    const storage = makeFeature({
+      id: 'storage',
+      type: 'entity',
+      properties: { name: 'storage', technology: 'redis' },
+    });
+    const byNameOnly = makeFeature({
+      id: 'storage-entity',
+      type: 'entity',
+      properties: { name: 'storage', technology: 'redis' },
+    });
+    const unrelated = makeFeature({
+      id: 'unrelated-entity',
+      type: 'entity',
+      properties: { name: 'identity-service' },
+    });
+
+    it('pushes the expanded ids to the feature fetch and matches them exactly', async () => {
+      const resolveTopologySeeds = jest
+        .fn()
+        .mockResolvedValue(['orders-api', 'orders-api-storage', 'storage']);
+      const getFeatures = jest.fn(async () => [dependency, storage, byNameOnly, unrelated]);
+
+      const res = await searchKnowledgeIndicators({
+        params: {
+          kind: ['feature'],
+          feature_types: ['dependency', 'entity'],
+          feature_ids: ['orders-api', 'orders-api'],
+        },
+        getSourceIds: async () => ['logs.test'],
+        getFeatures,
+        getQueries: async () => [],
+        resolveTopologySeeds,
+      });
+
+      expect(resolveTopologySeeds).toHaveBeenCalledWith(['orders-api'], ['logs.test']);
+      expect(getFeatures).toHaveBeenCalledWith('logs.test', {
+        searchText: undefined,
+        featureTypes: ['dependency', 'entity'],
+        featureIds: ['orders-api', 'orders-api-storage', 'storage'],
+      });
+      const ids = res.knowledge_indicators.map((ki) =>
+        ki.kind === 'feature' ? ki.feature.id : null
+      );
+      expect(ids).toEqual(['orders-api-storage', 'storage']);
+    });
+
+    it('falls back to the in-memory one-hop expansion when no snapshot is available', async () => {
+      const resolveTopologySeeds = jest.fn().mockResolvedValue(undefined);
+      const getFeatures = jest.fn(async () => [dependency, storage, byNameOnly, unrelated]);
+
+      const res = await searchKnowledgeIndicators({
+        params: {
+          kind: ['feature'],
+          feature_types: ['dependency', 'entity'],
+          feature_ids: ['orders-api'],
+        },
+        getSourceIds: async () => ['logs.test'],
+        getFeatures,
+        getQueries: async () => [],
+        resolveTopologySeeds,
+      });
+
+      expect(getFeatures).toHaveBeenCalledWith('logs.test', {
+        searchText: undefined,
+        featureTypes: ['dependency', 'entity'],
+        featureIds: undefined,
+      });
+      const ids = res.knowledge_indicators.map((ki) =>
+        ki.kind === 'feature' ? ki.feature.id : null
+      );
+      expect(ids).toEqual(['orders-api-storage', 'storage', 'storage-entity']);
+    });
+
+    it('narrows a text search to the seeds when falling back', async () => {
+      const getFeatures = jest.fn(async () => [dependency]);
+
+      await searchKnowledgeIndicators({
+        params: {
+          kind: ['feature'],
+          search_text: 'orders',
+          feature_ids: ['orders-api'],
+        },
+        getSourceIds: async () => ['logs.test'],
+        getFeatures,
+        getQueries: async () => [],
+      });
+
+      expect(getFeatures).toHaveBeenCalledWith('logs.test', {
+        searchText: 'orders',
+        featureTypes: undefined,
+        featureIds: ['orders-api'],
+      });
+    });
+  });
+
   it('calls onFeatureFetchError when a stream feature fetch fails', async () => {
     const onFeatureFetchError = jest.fn();
 

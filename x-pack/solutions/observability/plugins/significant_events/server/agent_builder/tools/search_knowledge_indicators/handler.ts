@@ -12,7 +12,7 @@ import type {
   KnowledgeIndicatorQuery,
   SearchKnowledgeIndicatorsInput,
 } from '@kbn/nightshift-ai';
-import type { Feature, StreamQuery } from '@kbn/significant-events-schema';
+import type { Feature, StreamQuery, TopologySnapshotSummary } from '@kbn/significant-events-schema';
 import {
   COMPUTED_FEATURE_TYPES,
   INFERRED_FEATURE_TYPES,
@@ -23,6 +23,7 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type {
   KnowledgeIndicatorClient,
   RuleUnbackedFilter,
+  TopologySnapshotClient,
 } from '../../../lib/knowledge_indicators';
 import type { SourceCatalog } from '../../utils/resolve_source_slugs';
 import { presentSlug, toSourceRef } from '../../utils/resolve_source_slugs';
@@ -62,6 +63,11 @@ export type CompactKnowledgeIndicator =
   | CompactKnowledgeIndicatorFeature
   | CompactKnowledgeIndicatorQuery;
 
+export type KISearchTopologySnapshot = Pick<
+  TopologySnapshotSummary,
+  'built_at' | 'node_count' | 'edge_count'
+>;
+
 interface KISearchEnvelope {
   page: number;
   per_page: number;
@@ -70,6 +76,8 @@ interface KISearchEnvelope {
   has_more: boolean;
   next_page: number | null;
   sources: Array<ReturnType<typeof toSourceRef>>;
+  /** Present when `feature_ids` seeded the search; `null` when the topology could not be computed. */
+  topology_snapshot?: KISearchTopologySnapshot | null;
 }
 
 export type KISearchOutput =
@@ -251,6 +259,7 @@ export async function searchKnowledgeIndicatorsToolHandler({
   catalog,
   sources,
   kiClient,
+  topologySnapshotClient,
   logger,
   params,
   view,
@@ -259,10 +268,13 @@ export async function searchKnowledgeIndicatorsToolHandler({
   /** Sources the caller resolved from slugs. Omitted when the search covers the whole space. */
   sources?: readonly NightshiftSource[];
   kiClient: KnowledgeIndicatorClient;
+  topologySnapshotClient?: Pick<TopologySnapshotClient, 'neighborhood'>;
   logger: Logger;
   params: SearchKnowledgeIndicatorsInput;
   view: KISearchView;
 }): Promise<KISearchOutput> {
+  let topologySnapshot: KISearchTopologySnapshot | null = null;
+
   const output = await searchKnowledgeIndicators({
     params,
     onFeatureFetchError: (sourceId, error) => {
@@ -272,13 +284,34 @@ export async function searchKnowledgeIndicatorsToolHandler({
     },
     getSourceIds: async () => [...catalog.byId.keys()],
     getSourceSlug: (sourceId) => catalog.byId.get(sourceId)?.slug,
+    resolveTopologySeeds: topologySnapshotClient
+      ? async (seedIds, sourceIds) => {
+          try {
+            const neighborhood = await topologySnapshotClient.neighborhood(seedIds, sourceIds);
+            const {
+              built_at: builtAt,
+              node_count: nodeCount,
+              edge_count: edgeCount,
+            } = neighborhood.snapshot;
+            topologySnapshot = { built_at: builtAt, node_count: nodeCount, edge_count: edgeCount };
+            return neighborhood.featureIds;
+          } catch (error) {
+            logger.warn(
+              `ki_search: topology unavailable, expanding in memory: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+            return undefined;
+          }
+        }
+      : undefined,
     getFeatures: async (sourceId, { searchText, featureTypes, featureIds }) => {
       if (searchText) {
         return (await kiClient.findFeatures(sourceId, searchText, { featureTypes, featureIds }))
           .hits;
       }
 
-      return (await kiClient.getFeatures(sourceId, { type: featureTypes })).hits;
+      return (await kiClient.getFeatures(sourceId, { type: featureTypes, featureIds })).hits;
     },
     getQueries: async (sourceIds, { searchText, queryTypes, queryIds, ruleIds, ruleBacked }) => {
       const ruleUnbacked: RuleUnbackedFilter =
@@ -299,6 +332,7 @@ export async function searchKnowledgeIndicatorsToolHandler({
     has_more: output.has_more,
     next_page: output.next_page,
     sources: (sources ?? sourcesInResults(catalog, output.knowledge_indicators)).map(toSourceRef),
+    ...(params.feature_ids?.length ? { topology_snapshot: topologySnapshot } : {}),
   };
 
   const knowledgeIndicators = output.knowledge_indicators.map((indicator) =>

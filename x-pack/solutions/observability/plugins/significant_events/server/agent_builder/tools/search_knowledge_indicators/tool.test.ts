@@ -121,6 +121,7 @@ describe('ki_search tool', () => {
         licensing: {},
         sourcesClient: mockSourcesClient([]),
         getKnowledgeIndicatorClient,
+        getTopologySnapshotClient: jest.fn().mockResolvedValue({ neighborhood: jest.fn() }),
       } as unknown as RouteHandlerScopedClients;
     }) as unknown as jest.MockedFunction<GetScopedClients>;
     const tool = createSearchKnowledgeIndicatorsTool({
@@ -154,6 +155,7 @@ describe('ki_search tool', () => {
         licensing: {},
         sourcesClient,
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getQueryLinks, getFeatures }),
+        getTopologySnapshotClient: jest.fn().mockResolvedValue({ neighborhood: jest.fn() }),
       } as unknown as RouteHandlerScopedClients;
     }) as unknown as jest.MockedFunction<GetScopedClients>;
     const tool = createSearchKnowledgeIndicatorsTool({

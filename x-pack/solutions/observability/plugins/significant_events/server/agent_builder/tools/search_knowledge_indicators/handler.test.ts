@@ -261,6 +261,78 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     });
   });
 
+  describe('topology snapshot', () => {
+    const snapshot = { built_at: '2026-03-01T00:00:00.000Z', node_count: 12, edge_count: 7 };
+    const neighborhood = {
+      featureIds: ['orders-api', 'orders-api-storage', 'storage'],
+      snapshot: { ...snapshot, truncated: false },
+    };
+
+    it('expands seeds through the snapshot and pushes the ids to the feature fetch', async () => {
+      const topologySnapshotClient = { neighborhood: jest.fn().mockResolvedValue(neighborhood) };
+      kiClient.getFeatures = jest.fn().mockResolvedValue({
+        hits: [
+          makeFeature({
+            id: 'orders-api-storage',
+            type: 'dependency',
+            properties: { source: 'orders-api', target: 'storage' },
+          }),
+          makeFeature({ id: 'storage', type: 'entity', properties: { name: 'storage' } }),
+        ],
+        total: 2,
+      });
+
+      const result = await searchKnowledgeIndicatorsToolHandler({
+        catalog,
+        kiClient,
+        topologySnapshotClient,
+        logger,
+        params: {
+          kind: ['feature'],
+          feature_types: ['dependency', 'entity'],
+          feature_ids: ['orders-api'],
+        },
+        view: 'compact',
+      });
+
+      expect(topologySnapshotClient.neighborhood).toHaveBeenCalledWith(
+        ['orders-api'],
+        ['logs.test']
+      );
+      expect(kiClient.getFeatures).toHaveBeenCalledWith('logs.test', {
+        type: ['dependency', 'entity'],
+        featureIds: ['orders-api', 'orders-api-storage', 'storage'],
+      });
+      expect(result.topology_snapshot).toEqual(snapshot);
+      expect(
+        result.knowledge_indicators.map((ki) => (ki.kind === 'feature' ? ki.feature.id : null))
+      ).toEqual(['orders-api-storage', 'storage']);
+    });
+
+    it('falls back to in-memory expansion with a warning when the topology cannot be computed', async () => {
+      const topologySnapshotClient = {
+        neighborhood: jest.fn().mockRejectedValue(new Error('topology failed')),
+      };
+      kiClient.getFeatures = jest.fn().mockResolvedValue({ hits: [], total: 0 });
+
+      const result = await searchKnowledgeIndicatorsToolHandler({
+        catalog,
+        kiClient,
+        topologySnapshotClient,
+        logger,
+        params: { kind: ['feature'], feature_types: ['dependency'], feature_ids: ['orders-api'] },
+        view: 'compact',
+      });
+
+      expect(kiClient.getFeatures).toHaveBeenCalledWith('logs.test', {
+        type: ['dependency'],
+        featureIds: undefined,
+      });
+      expect(result.topology_snapshot).toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('topology failed'));
+    });
+  });
+
   it('presents a stored source id as its slug and includes view_name on the envelope', async () => {
     const source: NightshiftSource = {
       id: 'source-uuid',

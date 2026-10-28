@@ -77,6 +77,25 @@ export {
 
 export { FeatureAccumulator } from './src/feature_accumulator';
 
+export {
+  type TopologyEdge,
+  type TopologyEdgeResolution,
+  type TopologyNode,
+  type TopologyNodeType,
+  type TopologyProvenance,
+  type TopologySnapshotProperties,
+  type TopologySnapshotSummary,
+  MAX_TOPOLOGY_EDGES,
+  MAX_TOPOLOGY_NODES,
+  MAX_TOPOLOGY_PROVENANCE,
+  TOPOLOGY_EDGE_RESOLUTIONS,
+  TOPOLOGY_NODE_TYPES,
+  topologyEdgeSchema,
+  topologyNodeSchema,
+  topologyProvenanceSchema,
+  topologySnapshotPropertiesSchema,
+} from './src/topology';
+
 export type { IterationResult } from './src/api/features';
 
 export { tokenCountSchema, iterationResultSchema } from './src/api/features';
