@@ -187,6 +187,7 @@ export const resolveTier2Targets = async ({
   tier1,
   report,
   model,
+  messagesFallback,
   logger,
 }: {
   scope: Pick<
@@ -196,6 +197,8 @@ export const resolveTier2Targets = async ({
   tier1: Pick<HuntForThreatResult, 'per_index'>;
   report?: HuntScopeReportContext;
   model?: ScopedModel;
+  /** Tier model used when the gateway rejects the dataset-match template. */
+  messagesFallback?: ScopedModel;
   logger?: Logger;
 }): Promise<Tier2Targets> => {
   const reportMatches = scope.report_matches;
@@ -205,6 +208,7 @@ export const resolveTier2Targets = async ({
   if (model && report && needsModelDatasetMatch({ scope, tier1, report })) {
     const matched = await matchDatasetsWithModel({
       model,
+      ...(messagesFallback ? { messagesFallback } : {}),
       datasets: scope.discovered,
       report,
       logger,

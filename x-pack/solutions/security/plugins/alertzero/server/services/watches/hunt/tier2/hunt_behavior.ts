@@ -35,7 +35,10 @@ import { assertEsqlGroundedInReport, isEvidenceQuoteGrounded } from './report_gr
 import { invokeHuntStructured } from '../common/invoke_hunt_structured';
 import {
   HUNT_BEHAVIOR_EXTRACTION_TEMPLATE_ID,
+  HUNT_EXTRACTION_ENVIRONMENT_CONTEXT_MAX_CHARS,
+  HUNT_EXTRACTION_REPORT_TEXT_MAX_CHARS,
   HUNT_PROMPT_TEMPLATE_VERSION,
+  clampHuntTemplateString,
 } from '../common/hunt_prompt_templates';
 import { prepareEsqlForExecute } from './prepare_esql_for_execute';
 import type {
@@ -752,14 +755,21 @@ export const huntBehavior = async (
   const contextBlock = renderArticleContext(articleContext);
   const result = await invokeHuntStructured({
     model: models.extraction,
+    // ES|QL stays on a messages model when extraction's connector requires a
+    // template, so it can take the call if the gateway rejects that template.
+    messagesFallback: models.esql,
     schema: huntBehaviorLlmExtractionSchema,
     prompt: `${EXTRACTION_PROMPT}${contextBlock}\n\n--- REPORT TEXT ---\n${text}`,
+    logger,
     template: {
       id: HUNT_BEHAVIOR_EXTRACTION_TEMPLATE_ID,
       version: HUNT_PROMPT_TEMPLATE_VERSION,
       variables: {
-        environment_context: contextBlock,
-        report_text: text,
+        environment_context: clampHuntTemplateString(
+          contextBlock,
+          HUNT_EXTRACTION_ENVIRONMENT_CONTEXT_MAX_CHARS
+        ),
+        report_text: clampHuntTemplateString(text, HUNT_EXTRACTION_REPORT_TEXT_MAX_CHARS),
       },
     },
   });

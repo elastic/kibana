@@ -12,7 +12,9 @@ import type { HuntCoordinatorCoreResult } from '../hunt_coordinator';
 import { invokeHuntStructured } from './invoke_hunt_structured';
 import {
   HUNT_PROMPT_TEMPLATE_VERSION,
+  HUNT_RECOMMENDATIONS_CONTEXT_MAX_CHARS,
   HUNT_RECOMMENDATIONS_TEMPLATE_ID,
+  clampHuntTemplateString,
 } from './hunt_prompt_templates';
 
 /** Schema cap: `manual_remediation` on the SSE accepts up to 50, but a hunt should stay short. */
@@ -160,11 +162,14 @@ export const templateRecommendations = (result: HuntCoordinatorCoreResult): stri
  */
 export const generateRecommendations = async ({
   model,
+  messagesFallback,
   logger,
   result,
   context,
 }: {
   model: ScopedModel | undefined;
+  /** Tier model used when the gateway rejects the pinned template. */
+  messagesFallback?: ScopedModel;
   logger: Logger;
   result: HuntCoordinatorCoreResult;
   /** Report-derived text (narrative excerpt, behavior evidence) the model reads alongside the prompt. */
@@ -176,12 +181,16 @@ export const generateRecommendations = async ({
   try {
     const parsed = await invokeHuntStructured({
       model,
+      messagesFallback,
       schema: recommendationsExtractionSchema,
       prompt: `${RECOMMENDATIONS_PROMPT}\n\n--- CONTEXT ---\n${context}`,
+      logger,
       template: {
         id: HUNT_RECOMMENDATIONS_TEMPLATE_ID,
         version: HUNT_PROMPT_TEMPLATE_VERSION,
-        variables: { context },
+        variables: {
+          context: clampHuntTemplateString(context, HUNT_RECOMMENDATIONS_CONTEXT_MAX_CHARS),
+        },
       },
     });
     const allowed = buildAllowedEntitySet(result);

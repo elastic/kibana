@@ -531,4 +531,36 @@ describe('matchDatasetsWithModel', () => {
     expect(prompt).toContain('A'.repeat(6000));
     expect(prompt).not.toContain('A'.repeat(6001));
   });
+
+  it('clamps template variables to the gateway maxLengths', async () => {
+    const chatComplete = jest.fn().mockResolvedValue({
+      content: '{"datasets":[{"dataset":"okta.system","confidence":1}]}',
+    });
+    const model = {
+      chatModel: { withStructuredOutput: jest.fn() },
+      inferenceClient: { chatComplete },
+      connector: {
+        connectorId: 'daybreak',
+        metadata: { capabilities: { templates: { policy: 'required' } } },
+      },
+    } as unknown as ScopedModel;
+
+    await matchDatasetsWithModel({
+      model,
+      datasets,
+      report: {
+        vendor: 'V'.repeat(600),
+        product: 'P'.repeat(600),
+        techniques: ['T1078'],
+        text: 'A'.repeat(7000),
+      },
+    });
+
+    const variables = chatComplete.mock.calls[0][0].template.variables;
+    expect(variables.vendor).toHaveLength(512);
+    expect(variables.product).toHaveLength(512);
+    expect(variables.report_text).toHaveLength(6000);
+    expect(variables.datasets).toContain('okta.system');
+    expect(chatComplete.mock.calls[0][0].template.id).toBe('.hunt-dataset-match');
+  });
 });

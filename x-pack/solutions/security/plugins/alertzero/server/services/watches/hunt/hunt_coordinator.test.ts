@@ -379,6 +379,59 @@ describe('huntCoordinator', () => {
         expect(result.completed_successfully).toBe(false);
       });
 
+      it('retires as no_tier2_targets when the cyber model chose where to hunt and found nothing', async () => {
+        nothingElsePointsAnywhere();
+        const cyber = {
+          chatModel: { withStructuredOutput },
+          connector: { connectorId: 'daybreak', metadata: {} },
+        } as unknown as ScopedModel;
+
+        const result = await huntCoordinator(
+          { esClient, reportsEsClient: esClient },
+          { frontier, cyber },
+          logger,
+          {
+            spaceId: 'default',
+            indexPatterns: INDEX_PATTERNS,
+            trigger: 'scheduled',
+            run_id: 'run-cyber-no-targets',
+            tier2_when: 'always',
+            iocs: [{ type: 'ip', value: '192.0.2.30' }],
+            text: 'report text',
+          }
+        );
+
+        expect(mockModelMatch.mock.calls[0][0].model).toBe(cyber);
+        expect(result.tier2_skipped_reason).toBe('no_tier2_targets');
+        expect(result.completeness).toBe('complete');
+      });
+
+      it('does not report Efficient as unavailable when the cyber model covers it', async () => {
+        mockT1.mockResolvedValueOnce(tier1(false));
+        const cyber = {
+          chatModel: { withStructuredOutput },
+          connector: { connectorId: 'daybreak', metadata: {} },
+        } as unknown as ScopedModel;
+
+        const result = await huntCoordinator(
+          { esClient, reportsEsClient: esClient },
+          { frontier, cyber },
+          logger,
+          {
+            spaceId: 'default',
+            indexPatterns: INDEX_PATTERNS,
+            trigger: 'scheduled',
+            run_id: 'run-cyber-tier2',
+            tier2_when: 'always',
+            iocs: [{ type: 'ip', value: '192.0.2.30' }],
+            text: 'report text',
+          }
+        );
+
+        expect(mockT2.mock.calls[0][0].extraction).toBe(cyber);
+        expect(result.unavailable_model_tiers).toBeUndefined();
+      });
+
       it('still skips as no_tier2_targets, and completes, when the efficient model ran and found nothing', async () => {
         nothingElsePointsAnywhere();
 

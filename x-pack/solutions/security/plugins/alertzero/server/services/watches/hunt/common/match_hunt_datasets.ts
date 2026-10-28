@@ -12,8 +12,15 @@ import type { HuntIoc } from '@kbn/alertzero-common';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
 import { invokeHuntStructured } from './invoke_hunt_structured';
 import {
+  HUNT_DATASET_MATCH_DATASETS_MAX_CHARS,
+  HUNT_DATASET_MATCH_IOCS_MAX_CHARS,
+  HUNT_DATASET_MATCH_PRODUCT_MAX_CHARS,
+  HUNT_DATASET_MATCH_REPORT_TEXT_MAX_CHARS,
+  HUNT_DATASET_MATCH_TECHNIQUES_MAX_CHARS,
   HUNT_DATASET_MATCH_TEMPLATE_ID,
+  HUNT_DATASET_MATCH_VENDOR_MAX_CHARS,
   HUNT_PROMPT_TEMPLATE_VERSION,
+  clampHuntTemplateString,
 } from './hunt_prompt_templates';
 
 /** What a report contributes to scope matching. All optional. */
@@ -74,7 +81,7 @@ export const rankOptionsForModel = (
     [
       report.vendor ?? '',
       report.product ?? '',
-      report.text?.slice(0, MAX_PROMPT_TEXT_CHARS) ?? '',
+      report.text?.slice(0, HUNT_DATASET_MATCH_REPORT_TEXT_MAX_CHARS) ?? '',
       ...(report.iocs ?? []).slice(0, MAX_PROMPT_IOCS).map((ioc) => ioc.value),
     ].join(' ')
   );
@@ -88,7 +95,6 @@ export const rankOptionsForModel = (
     );
   return [...datasets.filter(mentioned), ...datasets.filter((dataset) => !mentioned(dataset))];
 };
-const MAX_PROMPT_TEXT_CHARS = 6000;
 
 /** Lower-cases and strips everything that is not `[a-z0-9]`, so 'Cisco ASA' and 'cisco_asa' compare equal. */
 export const normalizeVendorToken = (value: string): string =>
@@ -225,7 +231,9 @@ const buildPrompt = (datasets: DiscoveredDataset[], report: HuntScopeReportConte
   }
 
   if (report.text) {
-    sections.push(`--- REPORT TEXT ---\n${report.text.slice(0, MAX_PROMPT_TEXT_CHARS)}`);
+    sections.push(
+      `--- REPORT TEXT ---\n${report.text.slice(0, HUNT_DATASET_MATCH_REPORT_TEXT_MAX_CHARS)}`
+    );
   }
 
   return sections.join('\n\n');
@@ -242,11 +250,14 @@ const buildPrompt = (datasets: DiscoveredDataset[], report: HuntScopeReportConte
  */
 export const matchDatasetsWithModel = async ({
   model,
+  messagesFallback,
   datasets,
   report,
   logger,
 }: {
   model: ScopedModel;
+  /** Tier model used when the gateway rejects the pinned template. */
+  messagesFallback?: ScopedModel;
   datasets: DiscoveredDataset[];
   report: HuntScopeReportContext;
   logger?: Logger;
@@ -266,23 +277,38 @@ export const matchDatasetsWithModel = async ({
   try {
     output = await invokeHuntStructured({
       model,
+      messagesFallback,
       schema: datasetMatchSchema,
       prompt: buildPrompt(options, report),
+      logger,
       template: {
         id: HUNT_DATASET_MATCH_TEMPLATE_ID,
         version: HUNT_PROMPT_TEMPLATE_VERSION,
         variables: {
-          vendor: report.vendor ?? '',
-          product: report.product ?? '',
-          datasets: options
-            .map((dataset) => `${dataset.dataset} | ${dataset.index_pattern}`)
-            .join('\n'),
-          techniques: (report.techniques ?? []).join(', '),
-          iocs: (report.iocs ?? [])
-            .slice(0, MAX_PROMPT_IOCS)
-            .map((ioc) => ioc.value)
-            .join(', '),
-          report_text: report.text?.slice(0, MAX_PROMPT_TEXT_CHARS) ?? '',
+          vendor: clampHuntTemplateString(report.vendor ?? '', HUNT_DATASET_MATCH_VENDOR_MAX_CHARS),
+          product: clampHuntTemplateString(
+            report.product ?? '',
+            HUNT_DATASET_MATCH_PRODUCT_MAX_CHARS
+          ),
+          datasets: clampHuntTemplateString(
+            options.map((dataset) => `${dataset.dataset} | ${dataset.index_pattern}`).join('\n'),
+            HUNT_DATASET_MATCH_DATASETS_MAX_CHARS
+          ),
+          techniques: clampHuntTemplateString(
+            (report.techniques ?? []).join(', '),
+            HUNT_DATASET_MATCH_TECHNIQUES_MAX_CHARS
+          ),
+          iocs: clampHuntTemplateString(
+            (report.iocs ?? [])
+              .slice(0, MAX_PROMPT_IOCS)
+              .map((ioc) => ioc.value)
+              .join(', '),
+            HUNT_DATASET_MATCH_IOCS_MAX_CHARS
+          ),
+          report_text: clampHuntTemplateString(
+            report.text ?? '',
+            HUNT_DATASET_MATCH_REPORT_TEXT_MAX_CHARS
+          ),
         },
       },
     });
