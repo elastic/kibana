@@ -74,8 +74,6 @@ const pushIndexed = (index: Map<string, TopologyNode[]>, key: string, node: Topo
   }
 };
 
-// Same slug across sources collapses into one node; identity attributes come
-// from the highest-confidence contributor.
 function buildNodes(features: Feature[]): NodeIndex {
   const grouped = new Map<string, Feature[]>();
   for (const feature of features) {
@@ -186,10 +184,12 @@ export function buildTopologySnapshot({
   features,
   sourceIds,
   builtAt,
+  inputTruncated = false,
 }: {
   features: Feature[];
   sourceIds: string[];
   builtAt: string;
+  inputTruncated?: boolean;
 }): TopologySnapshotProperties {
   const index = buildNodes(features);
   const allNodes = [...index.bySlug.values()].sort((a, b) => a.node_id.localeCompare(b.node_id));
@@ -205,11 +205,11 @@ export function buildTopologySnapshot({
     edges,
     node_count: allNodes.length,
     edge_count: allEdges.length,
-    truncated: nodes.length < allNodes.length || edges.length < allEdges.length,
+    truncated: inputTruncated || nodes.length < allNodes.length || edges.length < allEdges.length,
   };
 }
 
-/** Node and edge slugs reachable from the seeds; seeds missing from the snapshot are kept so the caller still fetches them directly. */
+/** Returns node and edge slugs reachable from the seeds. */
 export function topologyNeighborhood({
   snapshot,
   seedIds,

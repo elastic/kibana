@@ -81,7 +81,6 @@ describe('buildTopologySnapshot', () => {
       dependency('checkout-orders', 'checkout', 'postgres'),
       dependency('checkout-redis', 'checkout', 'redis'),
       dependency('checkout-by-name', 'checkout', 'orders database'),
-      dependency('checkout-unknown', 'checkout', 'mystery'),
     ]);
 
     const edgesById = new Map(snapshot.edges.map((edge) => [edge.edge_id, edge]));
@@ -100,10 +99,6 @@ describe('buildTopologySnapshot', () => {
       target_node_id: null,
       target_resolution: 'unresolved',
       target_ref: 'redis',
-    });
-    expect(edgesById.get('checkout-unknown')).toMatchObject({
-      target_node_id: null,
-      target_resolution: 'unresolved',
     });
     expect(snapshot.nodes.map((n) => n.node_id)).toEqual([
       'cache-1',

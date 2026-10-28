@@ -9,6 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { Feature } from '@kbn/significant-events-schema';
 import { TopologySnapshotClient } from './topology_snapshot_client';
 import { buildTopologySnapshot } from './build_topology_snapshot';
+import { REVISION_SIZE_LIMIT } from '../knowledge_indicator_client/revision_reader';
 
 const BUILT_AT = '2026-10-21T10:00:00.000Z';
 
@@ -31,14 +32,15 @@ const inputFeatures: Feature[] = [
   }),
 ];
 
-function makeClient() {
-  const getFeatures = jest.fn(async () => ({ hits: inputFeatures }));
+function makeClient(features = inputFeatures) {
+  const getFeatures = jest.fn(async () => ({ hits: features }));
+  const logger = loggerMock.create();
   const client = new TopologySnapshotClient({
     reader: { getFeatures },
-    logger: loggerMock.create(),
+    logger,
     now: () => new Date(BUILT_AT),
   });
-  return { client, getFeatures };
+  return { client, getFeatures, logger };
 }
 
 describe('TopologySnapshotClient', () => {
@@ -67,5 +69,15 @@ describe('TopologySnapshotClient', () => {
 
     expect(getFeatures).not.toHaveBeenCalled();
     expect(snapshot).toMatchObject({ nodes: [], edges: [], node_count: 0, edge_count: 0 });
+  });
+
+  it('marks the snapshot as truncated when the feature read reaches its limit', async () => {
+    const features = Array.from({ length: REVISION_SIZE_LIMIT }, () => inputFeatures[0]);
+    const { client, logger } = makeClient(features);
+
+    const snapshot = await client.get(['src-a']);
+
+    expect(snapshot).toMatchObject({ node_count: 1, truncated: true });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('snapshot may be incomplete'));
   });
 });

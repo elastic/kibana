@@ -6,11 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type {
-  Feature,
-  TopologySnapshotProperties,
-  TopologySnapshotSummary,
-} from '@kbn/significant-events-schema';
+import type { Feature, TopologySnapshotProperties } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicator_client';
 import { REVISION_SIZE_LIMIT } from '../knowledge_indicator_client/revision_reader';
 import {
@@ -19,7 +15,7 @@ import {
   topologyNeighborhood,
 } from './build_topology_snapshot';
 
-/** Computes the topology from the KIs of the given sources; KIs are read as the internal user, so callers pass sources the user can read. */
+/** Computes topology snapshots from source KIs. */
 export class TopologySnapshotClient {
   constructor(
     private readonly deps: {
@@ -46,7 +42,12 @@ export class TopologySnapshotClient {
       }
     }
 
-    const snapshot = buildTopologySnapshot({ features, sourceIds, builtAt });
+    const snapshot = buildTopologySnapshot({
+      features,
+      sourceIds,
+      builtAt,
+      inputTruncated: features.length >= REVISION_SIZE_LIMIT,
+    });
     logger.debug(
       `Topology computed: ${snapshot.node_count} nodes, ${snapshot.edge_count} edges from ${
         features.length
@@ -58,12 +59,11 @@ export class TopologySnapshotClient {
   async neighborhood(
     seedIds: string[],
     sourceIds: string[]
-  ): Promise<{ featureIds: string[]; snapshot: TopologySnapshotSummary }> {
+  ): Promise<{ featureIds: string[]; truncated: boolean }> {
     const snapshot = await this.get(sourceIds);
-    const { built_at: builtAt, node_count: nodeCount, edge_count: edgeCount, truncated } = snapshot;
     return {
       featureIds: topologyNeighborhood({ snapshot, seedIds }),
-      snapshot: { built_at: builtAt, node_count: nodeCount, edge_count: edgeCount, truncated },
+      truncated: snapshot.truncated,
     };
   }
 }

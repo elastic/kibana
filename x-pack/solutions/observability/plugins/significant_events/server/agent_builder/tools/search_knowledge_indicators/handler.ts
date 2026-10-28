@@ -12,7 +12,7 @@ import type {
   KnowledgeIndicatorQuery,
   SearchKnowledgeIndicatorsInput,
 } from '@kbn/nightshift-ai';
-import type { Feature, StreamQuery, TopologySnapshotSummary } from '@kbn/significant-events-schema';
+import type { Feature, StreamQuery } from '@kbn/significant-events-schema';
 import {
   COMPUTED_FEATURE_TYPES,
   INFERRED_FEATURE_TYPES,
@@ -63,10 +63,9 @@ export type CompactKnowledgeIndicator =
   | CompactKnowledgeIndicatorFeature
   | CompactKnowledgeIndicatorQuery;
 
-export type KISearchTopologySnapshot = Pick<
-  TopologySnapshotSummary,
-  'built_at' | 'node_count' | 'edge_count'
->;
+export interface KISearchTopologyExpansion {
+  truncated: boolean;
+}
 
 interface KISearchEnvelope {
   page: number;
@@ -76,8 +75,7 @@ interface KISearchEnvelope {
   has_more: boolean;
   next_page: number | null;
   sources: Array<ReturnType<typeof toSourceRef>>;
-  /** Present when `feature_ids` seeded the search; `null` when the topology could not be computed. */
-  topology_snapshot?: KISearchTopologySnapshot | null;
+  topology_expansion?: KISearchTopologyExpansion | null;
 }
 
 export type KISearchOutput =
@@ -273,7 +271,7 @@ export async function searchKnowledgeIndicatorsToolHandler({
   params: SearchKnowledgeIndicatorsInput;
   view: KISearchView;
 }): Promise<KISearchOutput> {
-  let topologySnapshot: KISearchTopologySnapshot | null = null;
+  let topologyExpansion: KISearchTopologyExpansion | null = null;
 
   const output = await searchKnowledgeIndicators({
     params,
@@ -288,12 +286,7 @@ export async function searchKnowledgeIndicatorsToolHandler({
       ? async (seedIds, sourceIds) => {
           try {
             const neighborhood = await topologySnapshotClient.neighborhood(seedIds, sourceIds);
-            const {
-              built_at: builtAt,
-              node_count: nodeCount,
-              edge_count: edgeCount,
-            } = neighborhood.snapshot;
-            topologySnapshot = { built_at: builtAt, node_count: nodeCount, edge_count: edgeCount };
+            topologyExpansion = { truncated: neighborhood.truncated };
             return neighborhood.featureIds;
           } catch (error) {
             logger.warn(
@@ -332,7 +325,7 @@ export async function searchKnowledgeIndicatorsToolHandler({
     has_more: output.has_more,
     next_page: output.next_page,
     sources: (sources ?? sourcesInResults(catalog, output.knowledge_indicators)).map(toSourceRef),
-    ...(params.feature_ids?.length ? { topology_snapshot: topologySnapshot } : {}),
+    ...(params.feature_ids?.length ? { topology_expansion: topologyExpansion } : {}),
   };
 
   const knowledgeIndicators = output.knowledge_indicators.map((indicator) =>

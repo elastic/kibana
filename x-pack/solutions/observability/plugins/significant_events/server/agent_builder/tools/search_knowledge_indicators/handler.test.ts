@@ -261,11 +261,10 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     });
   });
 
-  describe('topology snapshot', () => {
-    const snapshot = { built_at: '2026-03-01T00:00:00.000Z', node_count: 12, edge_count: 7 };
+  describe('topology expansion', () => {
     const neighborhood = {
       featureIds: ['orders-api', 'orders-api-storage', 'storage'],
-      snapshot: { ...snapshot, truncated: false },
+      truncated: true,
     };
 
     it('expands seeds through the snapshot and pushes the ids to the feature fetch', async () => {
@@ -303,7 +302,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
         type: ['dependency', 'entity'],
         featureIds: ['orders-api', 'orders-api-storage', 'storage'],
       });
-      expect(result.topology_snapshot).toEqual(snapshot);
+      expect(result.topology_expansion).toEqual({ truncated: true });
       expect(
         result.knowledge_indicators.map((ki) => (ki.kind === 'feature' ? ki.feature.id : null))
       ).toEqual(['orders-api-storage', 'storage']);
@@ -328,7 +327,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
         type: ['dependency'],
         featureIds: undefined,
       });
-      expect(result.topology_snapshot).toBeNull();
+      expect(result.topology_expansion).toBeNull();
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('topology failed'));
     });
   });

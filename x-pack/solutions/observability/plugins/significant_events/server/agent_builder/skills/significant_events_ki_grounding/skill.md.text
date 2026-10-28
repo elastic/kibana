@@ -27,6 +27,10 @@ ki_search, feature kind (Step 1):
 ```
 
 Response shape: `{ "knowledge_indicators": [...], "sources": [{ "slug": "...", "title": "...", "view_name": "..." }], "page": 1, "per_page": 50, "returned": 2, "total": 2, "has_more": false, "next_page": null }`.
+When `feature_ids` seeds a feature search, the response also has
+`"topology_expansion": { "truncated": false }`. It is `null` when topology computation failed and
+the search used its in-memory fallback. When `truncated` is true, related features may be missing;
+use only returned KIs and treat missing topology as unknown, not as evidence that no relation exists.
 
 ES|QL call, with the modifications from `<query_rules>` applied:
 ```json

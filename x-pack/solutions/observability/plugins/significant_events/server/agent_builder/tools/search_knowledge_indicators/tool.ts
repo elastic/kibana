@@ -78,7 +78,7 @@ const searchKnowledgeIndicatorsSchema = lazySchema(() =>
       .array(z.string().max(MAX_ID_LENGTH))
       .optional()
       .describe(
-        'Seed the topology search with these IDs. Features whose feature.id matches are always returned. When `feature_types` includes `"dependency"` and `"entity"`, dependency features matching these IDs by source or target endpoint are also returned, along with entity features connected through those dependency edges. Expansion uses the service topology of the searched sources (`topology_snapshot` in the response reports its size and `built_at`). Use only when `kind: ["feature"]` is specified.'
+        'Seed the topology search with these IDs. Features whose feature.id matches are always returned. When `feature_types` includes `"dependency"` and `"entity"`, dependency features matching these IDs by source or target endpoint are also returned, along with entity features connected through those dependency edges. Expansion uses the service topology of the searched sources; `topology_expansion.truncated` reports whether related features may be missing. Use only when `kind: ["feature"]` is specified.'
       ),
     query_types: z
       .array(z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]))

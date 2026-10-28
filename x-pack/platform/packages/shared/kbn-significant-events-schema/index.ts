@@ -84,7 +84,6 @@ export {
   type TopologyNodeType,
   type TopologyProvenance,
   type TopologySnapshotProperties,
-  type TopologySnapshotSummary,
   MAX_TOPOLOGY_EDGES,
   MAX_TOPOLOGY_NODES,
   MAX_TOPOLOGY_PROVENANCE,

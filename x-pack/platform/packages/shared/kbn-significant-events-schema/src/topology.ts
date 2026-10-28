@@ -77,10 +77,3 @@ export const topologySnapshotPropertiesSchema = lazySchema(() =>
 );
 
 export type TopologySnapshotProperties = z.infer<typeof topologySnapshotPropertiesSchema>;
-
-export interface TopologySnapshotSummary {
-  built_at: string;
-  node_count: number;
-  edge_count: number;
-  truncated: boolean;
-}
