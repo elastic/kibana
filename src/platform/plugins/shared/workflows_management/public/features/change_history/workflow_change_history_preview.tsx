@@ -7,95 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transparentize } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import type { ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
-import { ChangeHistoryPreview, ChangeHistoryPreviewFooterSpacer } from '@kbn/change-history-ui';
-import { getWorkflowValidationDisplayOptions } from '@kbn/workflows-ui';
 import { getWorkflowYamlFromSnapshot } from './get_workflow_yaml_from_snapshot';
-import { WorkflowChangeHistoryPreviewSettings } from './workflow_change_history_preview_settings';
-import { WorkflowChangeHistoryPreviewValidation } from './workflow_change_history_preview_validation';
+import { WorkflowChangeHistoryMonacoPreview } from './workflow_change_history_monaco_preview';
 
 const getYamlFromChange = (change: Parameters<ChangeHistoryPreviewRenderFn>[0]['change']): string =>
   getWorkflowYamlFromSnapshot(change.snapshot);
-
-const highlightStyle = (euiTheme: UseEuiTheme['euiTheme']) => ({
-  backgroundColor: transparentize(euiTheme.colors.vis.euiColorVisWarning1, 0.24),
-  borderRadius: '2px',
-});
-
-/** Styles for the validation decoration classes applied by the workflow YAML validation. */
-const validationDecorationStyles = ({ euiTheme }: UseEuiTheme) =>
-  css({
-    '.template-variable-error': {
-      ...highlightStyle(euiTheme),
-      color: euiTheme.colors.severity.danger,
-    },
-    '.template-variable-warning': highlightStyle(euiTheme),
-    '.liquid-template-error': {
-      ...highlightStyle(euiTheme),
-      color: euiTheme.colors.severity.danger,
-    },
-    '.liquid-template-warning': highlightStyle(euiTheme),
-    '.duplicate-step-name-error': {
-      backgroundColor: euiTheme.colors.backgroundLightDanger,
-    },
-    '.yaml-error': highlightStyle(euiTheme),
-    '.yaml-warning': highlightStyle(euiTheme),
-  });
-
-interface WorkflowChangeHistoryPreviewProps {
-  baselineYaml?: string;
-  targetYaml: string;
-  compareSpec?: Parameters<ChangeHistoryPreviewRenderFn>[0]['compareSpec'];
-  diffTelemetry?: Parameters<ChangeHistoryPreviewRenderFn>[0]['diffTelemetry'];
-}
-
-const WorkflowChangeHistoryPreview = ({
-  baselineYaml,
-  targetYaml,
-  compareSpec,
-  diffTelemetry,
-}: WorkflowChangeHistoryPreviewProps): JSX.Element => {
-  const [highlightValidationErrors, setHighlightValidationErrors] = useState(false);
-  // Read-only editors hide validation squiggles and hovers unless explicitly enabled.
-  const editorOptions = useMemo(
-    () => getWorkflowValidationDisplayOptions(highlightValidationErrors),
-    [highlightValidationErrors]
-  );
-
-  return (
-    <ChangeHistoryPreview
-      baseline={baselineYaml}
-      target={targetYaml}
-      language="yaml"
-      diffTelemetry={diffTelemetry}
-      compareSpec={compareSpec}
-      containerStyles={validationDecorationStyles}
-      editorOptions={editorOptions}
-      extraSettings={
-        <WorkflowChangeHistoryPreviewSettings
-          highlightValidationErrors={highlightValidationErrors}
-          onHighlightValidationErrorsChange={setHighlightValidationErrors}
-        />
-      }
-      renderFooter={(context) =>
-        context ? (
-          <WorkflowChangeHistoryPreviewValidation
-            context={context}
-            highlightValidationErrors={highlightValidationErrors}
-            validationYaml={targetYaml}
-          />
-        ) : (
-          <ChangeHistoryPreviewFooterSpacer />
-        )
-      }
-      data-test-subj="workflowChangeHistoryMonacoPreview"
-    />
-  );
-};
 
 export const renderWorkflowChangeHistoryPreview: ChangeHistoryPreviewRenderFn = ({
   change,
@@ -104,19 +22,19 @@ export const renderWorkflowChangeHistoryPreview: ChangeHistoryPreviewRenderFn = 
   diffTelemetry,
 }) => {
   if (!compareSpec) {
-    return <WorkflowChangeHistoryPreview targetYaml={getYamlFromChange(change)} />;
+    return <WorkflowChangeHistoryMonacoPreview targetYaml={getYamlFromChange(change)} />;
   }
 
   const baselineYaml = getYamlFromChange(compareSpec.baseline);
   const targetYaml = getYamlFromChange(compareSpec.target);
 
   if (isLoadingCompareContext) {
-    return <WorkflowChangeHistoryPreview targetYaml={targetYaml} />;
+    return <WorkflowChangeHistoryMonacoPreview targetYaml={targetYaml} />;
   }
 
   // Monaco diff: original (baseline) → modified (target), same as `git diff baseline target`.
   return (
-    <WorkflowChangeHistoryPreview
+    <WorkflowChangeHistoryMonacoPreview
       baselineYaml={baselineYaml}
       targetYaml={targetYaml}
       diffTelemetry={diffTelemetry}

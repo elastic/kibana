@@ -6,7 +6,6 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
 import type { Interpolation, Theme } from '@emotion/react';
 import { css } from '@emotion/react';
 import type { MutableRefObject, ReactNode } from 'react';
@@ -84,7 +83,7 @@ export interface ChangeHistoryPreviewProps {
    */
   extraSettings?: ReactNode;
   /** Extra Emotion styles for the preview root, e.g. to style validation decoration classes. */
-  containerStyles?: (theme: UseEuiTheme) => Interpolation<Theme>;
+  containerCss?: Interpolation<Theme>;
 
   'data-test-subj'?: string;
 }
@@ -118,11 +117,10 @@ export const ChangeHistoryPreview = ({
   editorOptions,
   renderFooter,
   extraSettings,
-  containerStyles,
+  containerCss,
   'data-test-subj': dataTestSubj = 'changeHistoryMonacoPreview',
 }: ChangeHistoryPreviewProps): JSX.Element => {
   const styles = useMemoCss(monacoDiffPreviewStyles);
-  const euiThemeContext = useEuiTheme();
   const baselineComparison = useMemo(
     () => (baseline === undefined ? undefined : toText(baseline)),
     [baseline]
@@ -167,7 +165,7 @@ export const ChangeHistoryPreview = ({
       <div
         data-test-subj={dataTestSubj}
         css={[
-          containerStyles?.(euiThemeContext),
+          containerCss,
           css`
             display: grid;
             grid-template-rows: auto 1fr auto; /* Header, Content (fills space), Footer */
