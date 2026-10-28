@@ -68,8 +68,9 @@ apiTest.describe.serial(
       adminHeaders = withHuntHeaders(cookieHeader);
 
       // AlertZero works only in a Security solution space. The default space may be Classic.
+      // Spaces is a public API: it takes the public API version, not the internal one.
       const defaultSpace = await apiClient.get('/api/spaces/space/default', {
-        headers: adminHeaders,
+        headers: { ...adminHeaders, 'elastic-api-version': '2023-10-31' },
         responseType: 'json',
       });
       expect(defaultSpace.statusCode).toBe(200);
