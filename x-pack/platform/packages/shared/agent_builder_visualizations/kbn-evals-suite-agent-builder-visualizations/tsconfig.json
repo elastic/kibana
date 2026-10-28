@@ -8,8 +8,10 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/agent-builder-common",
+    "@kbn/agent-builder-dashboards-common",
     "@kbn/agent-builder-visualizations-common",
     "@kbn/core",
+    "@kbn/custom-content-common",
     "@kbn/esql-language",
     "@kbn/evals",
     "@kbn/inference-common",
