@@ -526,7 +526,7 @@ describe('bulk_delete', () => {
 
       it('throws when the attachment ids are empty', async () => {
         await expect(deleteAlerts([])).rejects.toThrow(
-          'Failed to bulk delete attachments for case: mock-id-1: Error: The length of the field attachmentIds is too short. Array must be of length >= 1'
+          'Failed to bulk delete attachments for case: mock-id-1: Error: attachmentIds: The length of the field attachmentIds is too short. Array must be of length >= 1'
         );
       });
     });
@@ -701,7 +701,7 @@ describe('bulk_delete', () => {
         await expect(
           bulkDeleteAttachments({ caseId: 'mock-id-1', savedObjectIds }, clientArgs)
         ).rejects.toThrow(
-          `Failed to bulk delete attachments for case: mock-id-1: Error: The length of the field ids is too long. Array must be of length <= ${MAX_BULK_DELETE_ATTACHMENTS}`
+          `Failed to bulk delete attachments for case: mock-id-1: Error: ids: The length of the field ids is too long. Array must be of length <= ${MAX_BULK_DELETE_ATTACHMENTS}`
         );
       });
 
@@ -709,7 +709,7 @@ describe('bulk_delete', () => {
         await expect(
           bulkDeleteAttachments({ caseId: 'mock-id-1', savedObjectIds: [] }, clientArgs)
         ).rejects.toThrow(
-          'Failed to bulk delete attachments for case: mock-id-1: Error: The length of the field ids is too short. Array must be of length >= 1'
+          'Failed to bulk delete attachments for case: mock-id-1: Error: ids: The length of the field ids is too short. Array must be of length >= 1'
         );
       });
 
@@ -806,7 +806,7 @@ describe('bulk_delete', () => {
       await expect(
         bulkDeleteFileAttachments({ caseId: 'mock-id', fileIds }, clientArgs, casesClient)
       ).rejects.toThrow(
-        'Failed to delete file attachments for case: mock-id: Error: The length of the field ids is too long. Array must be of length <= 10'
+        'Failed to delete file attachments for case: mock-id: Error: ids: The length of the field ids is too long. Array must be of length <= 10'
       );
     });
 

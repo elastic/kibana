@@ -14,6 +14,7 @@ import {
   INVESTIGATOR_PROMPT_PATH,
   createGenerationCache,
   createWriteupTask,
+  fillCortex,
   loadPromptArm,
   replayReply,
 } from './task';
@@ -159,6 +160,17 @@ describe('createWriteupTask', () => {
       cache,
     });
     await expect(rerun(example)).resolves.toMatchObject({ reply: first.reply, cached: true });
+  });
+});
+
+describe('fillCortex', () => {
+  it('fills the load step and the section as the agent type does with Cortex on', () => {
+    const prompt =
+      '1. Read the guide.{{cortex_load_step}} Then start.\n</x>\n{{knowledge_cortex_section}}{{decision_trees_section}}';
+    expect(fillCortex(prompt, '<knowledge_cortex>\nRead it.\n</knowledge_cortex>\n\n')).toBe(
+      '1. Read the guide. Also read the Knowledge Cortex — see <knowledge_cortex>. Then start.\n</x>\n' +
+        '\n<knowledge_cortex>\nRead it.\n</knowledge_cortex>\n{{decision_trees_section}}'
+    );
   });
 });
 

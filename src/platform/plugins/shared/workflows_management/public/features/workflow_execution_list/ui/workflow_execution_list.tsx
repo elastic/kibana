@@ -33,7 +33,11 @@ import {
 } from './workflow_execution_list_filters';
 import { WorkflowExecutionListFooter } from './workflow_execution_list_footer';
 import type { ExecutionListFiltersQueryParams } from './workflow_execution_list_stateful';
-import { getExecutedByLabel, useUserProfilesByUid } from '../../../entities/user_profiles';
+import {
+  executedByFallbackLabel,
+  getExecutedByLabel,
+  getExecutedByProfiles,
+} from '../../../entities/user_profiles';
 import { useKibana } from '../../../hooks/use_kibana';
 
 export interface WorkflowExecutionListProps {
@@ -93,16 +97,19 @@ export const WorkflowExecutionList = ({
     return Array.from(uniqueUsers).sort();
   }, [executions, filters.executedBy]);
 
-  const { data: executedByUserProfiles = EMPTY_EXECUTED_BY_USER_PROFILES } = useUserProfilesByUid({
-    enabled: showExecutor,
-    uids: executedByValuesToResolve,
-  });
+  const executedByUserProfiles = useMemo(
+    () =>
+      showExecutor
+        ? getExecutedByProfiles(executions?.results ?? [])
+        : EMPTY_EXECUTED_BY_USER_PROFILES,
+    [executions, showExecutor]
+  );
 
   const availableExecutedByOptions = useMemo<ExecutedByFilterOption[]>(() => {
     const options = executedByValuesToResolve.flatMap((executedBy) => {
       const label = getExecutedByLabel(
         executedByUserProfiles.get(executedBy),
-        showUnresolvedExecutors ? executedBy : undefined
+        executedByFallbackLabel(executedBy, showUnresolvedExecutors)
       );
 
       return label ? [{ label, value: executedBy }] : [];
@@ -232,10 +239,9 @@ export const WorkflowExecutionList = ({
               'data-selected': isSelected ? 'true' : 'false',
               'data-last-viewed': isLastViewed ? 'true' : 'false',
               'data-started-at': execution.startedAt || 'null',
-              'data-executed-by-label':
-                showExecutor && showUnresolvedExecutors && execution.executedBy
-                  ? execution.executedBy
-                  : undefined,
+              'data-executed-by-label': showExecutor
+                ? executedByFallbackLabel(execution.executedBy, showUnresolvedExecutors)
+                : undefined,
               onClick: () => handleRowClick(execution),
               onKeyDown: (e: React.KeyboardEvent) => {
                 if (e.key === 'Enter' || e.key === ' ') {

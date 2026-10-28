@@ -178,6 +178,7 @@ export type {
   RegisterLibraryAnnotationGroupFunction,
   AxesSettingsConfig,
   LensEditContextMapping,
+  DefaultVisualizationOverrides,
 } from './visualizations/types';
 export type {
   LensDatatableSortingState,

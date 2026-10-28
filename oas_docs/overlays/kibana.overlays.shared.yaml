@@ -30,10 +30,10 @@ actions:
     description: Change tag description and displayName
     update:
       description: >
-        Alerting V2 is an ES|QL-first alerting API for managing rules, alert actions, and action policies.
+        Universal Alerting is an ES|QL-first alerting API for managing rules, alert actions, and action policies.
         Use these endpoints to create and manage detection rules, act on alerts, and control when and how
-        notifications are delivered. These APIs are experimental.
-      x-displayName: 'Alerting V2'
+        notifications are delivered.
+      x-displayName: 'Universal Alerting'
   - target: '$.tags[?(@.name=="connectors")]'
     description: Change tag description and displayName
     update:

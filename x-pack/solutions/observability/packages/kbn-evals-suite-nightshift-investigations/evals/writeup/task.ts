@@ -31,6 +31,21 @@ import {
 
 export const INVESTIGATOR_PROMPT_PATH =
   'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions/investigator.md.text';
+export const KNOWLEDGE_CORTEX_SECTION_PATH =
+  'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions/knowledge_cortex.text';
+
+/** As the agent type fills `{{cortex_load_step}}` when Cortex is enabled (`agents/investigation/index.ts`). */
+export const CORTEX_LOAD_STEP = ' Also read the Knowledge Cortex — see <knowledge_cortex>.';
+
+/**
+ * Fills the Cortex placeholders the way the agent type does with Cortex enabled. The recorded
+ * investigations ran with it on, so their replays should too. A prompt from before the placeholders
+ * existed has the section inline and passes through unchanged.
+ */
+export const fillCortex = (prompt: string, section: string): string =>
+  prompt
+    .replace('{{cortex_load_step}}', CORTEX_LOAD_STEP)
+    .replace('{{knowledge_cortex_section}}', `\n${section.trimEnd()}\n`);
 
 /** Generations are cached here (gitignored), so a re-run with another judge only makes judge calls. */
 export const WRITEUP_DATA_DIR = join(REPO_ROOT, 'data', 'nightshift_writeup');
@@ -51,20 +66,24 @@ export const hashText = (text: string): string =>
  * read with `git show`.
  */
 export const loadPromptArm = (spec?: string, repoRoot = REPO_ROOT): PromptArm => {
+  const fromTree = (path: string) => readFileSync(join(repoRoot, path), 'utf8');
+  const fromRef = (ref: string, path: string) =>
+    execFileSync('git', ['show', `${ref}:${path}`], { cwd: repoRoot, encoding: 'utf8' });
   let label = 'current';
   let prompt: string;
+  // The Cortex section comes from the same place as the prompt; a prompt file uses the checkout's.
+  let section = () => fromTree(KNOWLEDGE_CORTEX_SECTION_PATH);
   if (!spec) {
-    prompt = readFileSync(join(repoRoot, INVESTIGATOR_PROMPT_PATH), 'utf8');
+    prompt = fromTree(INVESTIGATOR_PROMPT_PATH);
   } else if (existsSync(resolve(spec))) {
     label = spec.split('/').at(-1)!;
     prompt = readFileSync(resolve(spec), 'utf8');
   } else {
     label = spec;
-    prompt = execFileSync('git', ['show', `${spec}:${INVESTIGATOR_PROMPT_PATH}`], {
-      cwd: repoRoot,
-      encoding: 'utf8',
-    });
+    prompt = fromRef(spec, INVESTIGATOR_PROMPT_PATH);
+    section = () => fromRef(spec, KNOWLEDGE_CORTEX_SECTION_PATH);
   }
+  if (prompt.includes('{{knowledge_cortex_section}}')) prompt = fillCortex(prompt, section());
   return { label, prompt, hash: hashText(prompt) };
 };
 

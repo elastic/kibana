@@ -38,7 +38,8 @@ export interface Replay {
 
 /**
  * The investigator prompt as the agent type builds it for a run without decision trees or Semantic
- * Memory, which is how the eval clusters run. Custom context isn't appended.
+ * Memory, which is how the eval clusters run. Custom context isn't appended. The Cortex
+ * placeholders are filled when the prompt is loaded (`loadPromptArm`), from the same ref.
  */
 export const fillPrompt = (prompt: string): string =>
   prompt

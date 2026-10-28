@@ -40,6 +40,7 @@ import {
 } from '../constants';
 import type { ObservabilityAlertingCases } from '../types';
 import { createInvestigateEpisodeAction } from '../actions/investigate_episode_action';
+import { useInvestigateEpisodeHeaderMenuItems } from '../actions/use_investigate_episode_header_menu_items';
 import {
   getObservabilityRulesTabVisibility,
   hasObservabilityAlertingCapabilities,
@@ -123,12 +124,14 @@ const ClassicRulesV1Route = ({
   history,
   setBreadcrumbs,
   tabs,
+  showClassicBadge,
 }: {
   coreStart: CoreStart;
   getClassicRulesPage: TriggersAndActionsUIPublicPluginStart['getClassicRulesPage'];
   history: ScopedHistory;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   tabs: AppHeaderTab[];
+  showClassicBadge?: boolean;
 }) => {
   const classicRulesHistory = useMemo(
     () => history.createSubHistory(OBSERVABILITY_ALERTING_RULES_V1_PATH),
@@ -145,6 +148,7 @@ const ClassicRulesV1Route = ({
       pathPrefix: OBSERVABILITY_ALERTING_RULES_V1_PATH,
     },
     tabs,
+    showClassicBadge,
   });
 };
 
@@ -232,6 +236,7 @@ export const ObservabilityAlertingApp = ({
               hostApp={hostApp}
               privilegeCheck={privilegeCheck}
               createActions={createActions}
+              useAdditionalEpisodeDetailsHeaderMenuItems={useInvestigateEpisodeHeaderMenuItems}
               manageRulesHref={manageRulesHref}
             />
             <Route exact path={OBSERVABILITY_ALERTING_ALERTS_PATH}>
@@ -247,6 +252,7 @@ export const ObservabilityAlertingApp = ({
               history={history}
               setBreadcrumbs={setBreadcrumbs}
               tabs={rulesV1Tabs}
+              showClassicBadge={hasV2Rules}
             />
           </EuiPageSection>
         </Route>

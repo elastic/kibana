@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Evaluator } from '@kbn/evals';
 
 /**
@@ -35,61 +35,67 @@ export const isLongReplyType = (type: ReplyType) => LONG_REPLY_TYPES.includes(ty
 export const defaultReplyType = (roundIndex: number): ReplyType =>
   roundIndex === 0 ? 'wrapup' : 'answer';
 
-const stepSchema = z
-  .object({
-    type: z.string().optional(),
-    reasoning: z.string().optional(),
-    tool_id: z.string().optional(),
-    tool_call_id: z.string().optional(),
-    params: z.record(z.string(), z.unknown()).optional(),
-    results: z.array(z.object({ type: z.string().optional(), data: z.unknown() })).optional(),
-  })
-  .passthrough();
+const stepSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.string().optional(),
+      reasoning: z.string().optional(),
+      tool_id: z.string().optional(),
+      tool_call_id: z.string().optional(),
+      params: z.record(z.string(), z.unknown()).optional(),
+      results: z.array(z.object({ type: z.string().optional(), data: z.unknown() })).optional(),
+    })
+    .passthrough()
+);
 
 /** One Agent Builder conversation round, reduced to what a replay reads. */
-export const recordedRoundSchema = z
-  .object({
-    id: z.string().optional(),
-    input: z.object({ message: z.string() }),
-    steps: z.array(stepSchema),
-    response: z.object({ message: z.string() }).optional(),
-    /**
-     * Numbers that were in this round's tool results before they were clipped for storage, so the
-     * grounding gate still knows the agent saw them.
-     */
-    clipped_numbers: z.array(z.string()).optional(),
-  })
-  .passthrough();
+export const recordedRoundSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().optional(),
+      input: z.object({ message: z.string() }),
+      steps: z.array(stepSchema),
+      response: z.object({ message: z.string() }).optional(),
+      /**
+       * Numbers that were in this round's tool results before they were clipped for storage, so the
+       * grounding gate still knows the agent saw them.
+       */
+      clipped_numbers: z.array(z.string()).optional(),
+    })
+    .passthrough()
+);
 export type RecordedRound = z.infer<typeof recordedRoundSchema>;
 
 /**
  * One replayed round: the conversation up to and including round `round_index`, with that
  * round's reply held out. Earlier rounds keep the reply the agent sent.
  */
-export const writeupExampleSchema = z.object({
-  input: z.object({
-    rounds: z.array(recordedRoundSchema).min(1),
-    round_index: z.number().int().min(0),
-  }),
-  output: z.object({
-    /**
-     * The reply production sent at the end of the replayed round; empty for a follow-up question
-     * added to a recorded conversation, which production never answered.
-     */
-    recorded_reply: z.string(),
-    /** An approved reply for the round, if one exists. */
-    golden: z.string().optional(),
-  }),
-  metadata: z
-    .object({
-      case_id: z.string().min(1),
-      conversation_case_id: z.string().min(1),
+export const writeupExampleSchema = lazySchema(() =>
+  z.object({
+    input: z.object({
+      rounds: z.array(recordedRoundSchema).min(1),
       round_index: z.number().int().min(0),
-      /** Defaults by round: see `defaultReplyType`. */
-      reply_type: z.enum(REPLY_TYPES).optional(),
-    })
-    .passthrough(),
-});
+    }),
+    output: z.object({
+      /**
+       * The reply production sent at the end of the replayed round; empty for a follow-up question
+       * added to a recorded conversation, which production never answered.
+       */
+      recorded_reply: z.string(),
+      /** An approved reply for the round, if one exists. */
+      golden: z.string().optional(),
+    }),
+    metadata: z
+      .object({
+        case_id: z.string().min(1),
+        conversation_case_id: z.string().min(1),
+        round_index: z.number().int().min(0),
+        /** Defaults by round: see `defaultReplyType`. */
+        reply_type: z.enum(REPLY_TYPES).optional(),
+      })
+      .passthrough(),
+  })
+);
 export type WriteupExample = z.infer<typeof writeupExampleSchema>;
 
 /** An attachment the agent created, so a judge can read what a `<render_attachment>` tag shows. */

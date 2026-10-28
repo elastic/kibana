@@ -7,7 +7,7 @@
 
 import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { EvaluationDataset, EvalsClient } from '@kbn/evals';
 import { DatasetTags } from '@kbn/evals-common';
 import {
@@ -25,45 +25,51 @@ export const ORCA_WRITEUP_DATASET = 'nightshift/writeup';
 /** The dataset upsert route caps a request at 5 MiB; leave room for the envelope. */
 export const MAX_DATASET_BYTES = 4.5 * 1024 * 1024;
 
-const goldenSchema = z.object({
-  round_index: z.number().int().min(0),
-  reply: z.string().min(1),
-  /** Where the golden came from, for example `variant-b` or `approved:<run>`. */
-  source: z.string().min(1),
-});
+const goldenSchema = lazySchema(() =>
+  z.object({
+    round_index: z.number().int().min(0),
+    reply: z.string().min(1),
+    /** Where the golden came from, for example `variant-b` or `approved:<run>`. */
+    source: z.string().min(1),
+  })
+);
 
 /** One recorded conversation and the approved replies for its rounds. */
-export const writeupConversationSchema = z.object({
-  case_id: z.string().min(1),
-  rounds: z.array(recordedRoundSchema).min(1),
-  goldens: z.array(goldenSchema).default([]),
-  /** Rounds whose question calls for something other than the default (see `defaultReplyType`). */
-  reply_types: z
-    .array(z.object({ round_index: z.number().int().min(0), type: z.enum(REPLY_TYPES) }))
-    .optional(),
-  /**
-   * Questions added after the last recorded round, for requests no real conversation made (a
-   * walk-through, the queries, a chart). The context is real; only the question is added.
-   */
-  follow_ups: z
-    .array(z.object({ message: z.string().min(1), type: z.enum(REPLY_TYPES) }))
-    .optional(),
-});
+export const writeupConversationSchema = lazySchema(() =>
+  z.object({
+    case_id: z.string().min(1),
+    rounds: z.array(recordedRoundSchema).min(1),
+    goldens: z.array(goldenSchema).default([]),
+    /** Rounds whose question calls for something other than the default (see `defaultReplyType`). */
+    reply_types: z
+      .array(z.object({ round_index: z.number().int().min(0), type: z.enum(REPLY_TYPES) }))
+      .optional(),
+    /**
+     * Questions added after the last recorded round, for requests no real conversation made (a
+     * walk-through, the queries, a chart). The context is real; only the question is added.
+     */
+    follow_ups: z
+      .array(z.object({ message: z.string().min(1), type: z.enum(REPLY_TYPES) }))
+      .optional(),
+  })
+);
 export type WriteupConversation = z.infer<typeof writeupConversationSchema>;
 
 /** A file of conversations, the form Customer 0 writeup data is kept in outside the repository. */
-export const writeupFileSchema = z.object({
-  dataset: z
-    .string()
-    .min('nightshift/'.length + 1)
-    .max(200)
-    .startsWith('nightshift/'),
-  description: z.string().max(2_000).optional(),
-  tags: DatasetTags.default([]),
-  /** `last` rewrites only each conversation's final reply, as the prototype did. */
-  rounds: z.enum(['all', 'last']).default('all'),
-  conversations: z.array(writeupConversationSchema).min(1),
-});
+export const writeupFileSchema = lazySchema(() =>
+  z.object({
+    dataset: z
+      .string()
+      .min('nightshift/'.length + 1)
+      .max(200)
+      .startsWith('nightshift/'),
+    description: z.string().max(2_000).optional(),
+    tags: DatasetTags.default([]),
+    /** `last` rewrites only each conversation's final reply, as the prototype did. */
+    rounds: z.enum(['all', 'last']).default('all'),
+    conversations: z.array(writeupConversationSchema).min(1),
+  })
+);
 export type WriteupFile = z.infer<typeof writeupFileSchema>;
 
 /**
