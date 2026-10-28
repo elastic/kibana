@@ -108,20 +108,17 @@ const prepareInferredSamplingRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
-    body: z
-      .object({
-        start: z.number().optional(),
-        end: z.number().optional(),
-        runId: z.string().max(MAX_ID_LENGTH).optional(),
-        iteration: z.number().int().min(1).optional(),
-        sampleSize: z.number().int().min(1).max(100).optional(),
-        entityFilteredRatio: z.number().min(0).max(1).optional(),
-        diverseRatio: z.number().min(0).max(1).optional(),
-        maxEntityFilters: z.number().int().min(1).max(50).optional(),
-        samplingTimeoutMs: z.number().int().min(1_000).max(240_000).optional(),
-      })
-      .nullable()
-      .optional(),
+    body: z.object({
+      start: z.number().optional(),
+      end: z.number().optional(),
+      runId: z.string().max(MAX_ID_LENGTH).optional(),
+      iteration: z.number().int().min(1).optional(),
+      sampleSize: z.number().int().min(1).max(100),
+      entityFilteredRatio: z.number().min(0).max(1).optional(),
+      diverseRatio: z.number().min(0).max(1).optional(),
+      maxEntityFilters: z.number().int().min(1).max(50).optional(),
+      samplingTimeoutMs: z.number().int().min(1_000).max(240_000).optional(),
+    }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
     const scopedClients = await getScopedClients({ request });
@@ -138,12 +135,12 @@ const prepareInferredSamplingRoute = createServerRoute({
       end = now,
       runId,
       iteration = 1,
-      sampleSize = tuningConfig.sample_size,
+      sampleSize,
       entityFilteredRatio = tuningConfig.entity_filtered_ratio,
       diverseRatio = tuningConfig.diverse_ratio,
       maxEntityFilters = tuningConfig.max_entity_filters,
       samplingTimeoutMs = tuningConfig.sampling_timeout_ms,
-    } = params.body ?? {};
+    } = params.body;
     const resolvedRunId = runId?.trim() || uuidv4();
 
     const { source } = await sourcesClient.get(sourceId);

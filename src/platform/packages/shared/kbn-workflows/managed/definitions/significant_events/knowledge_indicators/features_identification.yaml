@@ -61,6 +61,7 @@ triggers:
         description: "Stop the loop after this many healthy-successful passes without a new feature (degraded iterations are neutral and not counted)."
       - name: sampleSize
         type: number
+        default: 20
         description: "Number of documents sampled per iteration."
       - name: featureTtlDays
         type: number
