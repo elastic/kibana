@@ -92,17 +92,27 @@ const setup = ({
     spacesService: { createSpacesClient: () => ({ get: getSpace }) },
   } as unknown as SpacesPluginStart;
 
+  const setServiceAccount = jest.fn().mockResolvedValue(undefined);
+  const agentBuilder = {
+    agents: { getRegistry: jest.fn().mockResolvedValue({ setServiceAccount }) },
+  } as unknown as NonNullable<
+    ReturnType<
+      NonNullable<Parameters<typeof createInvestigatorServiceAccountService>[0]['getAgentBuilder']>
+    >
+  >;
   const service = createInvestigatorServiceAccountService({
     core,
     workflowsExtensions,
     workflowsManagement,
     getInstalledWorkflowState,
     spaces,
+    getAgentBuilder: () => agentBuilder,
     isServerless,
     logger: loggingSystemMock.createLogger(),
   });
   return {
     service,
+    setServiceAccount,
     esClient,
     serviceAccounts,
     managedWorkflows,
@@ -168,6 +178,17 @@ describe('createInvestigatorServiceAccountService', () => {
     expect(status.serviceAccounts.map(({ role }) => role)).toEqual([
       '_nightshift_agent',
       '_nightshift_automations',
+    ]);
+  });
+
+  it('pins the Nightshift agents to the space agent account', async () => {
+    const { service, setServiceAccount } = setup();
+
+    await service.enable(request, SPACE_ID, IDS);
+
+    expect(setServiceAccount.mock.calls).toEqual([
+      ['nightshift.investigation', AGENT_ACCOUNT],
+      ['significant-events.decision-tree-reinforcement', AGENT_ACCOUNT],
     ]);
   });
 
