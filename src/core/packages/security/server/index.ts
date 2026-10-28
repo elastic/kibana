@@ -46,6 +46,7 @@ export type {
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
   ServiceAccountBoundWorkload,
+  ServiceAccountSummary,
 } from '@kbn/core-security-common';
 export type {
   CoreSecurityDelegateContract,
