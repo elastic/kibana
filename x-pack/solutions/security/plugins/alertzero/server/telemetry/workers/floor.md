@@ -6,6 +6,7 @@ Each batch the sweep starts reports how its alerts were classified and how its r
 |---|---|---|---|
 | `floor_alert_triage_batch.yaml` | `report_batch_classified` | `alert_triage_batch_classified` | After the false-positive candidates are counted |
 | `floor_alert_triage_batch.yaml` | `report_batch_grouped` | `alert_triage_batch_grouped` | Right after `tag_pattern_keys`, which tags every classified alert with its pattern keys. Skipped when that step fails |
+| `floor_alert_triage.yaml` | `report_decisions_matched` | `alert_triage_decisions_matched` | Right after `match_fp_decisions`. Skipped when the match did not run |
 | `floor_alert_triage_batch.yaml` | `report_worker_run_completed` | `worker_run_completed` | The last step, so it sees whether the closure review started |
 | `floor_alert_triage_review.yaml` | `report_investigation_closed_after_approval`, `_after_dismissal`, `_after_expiry`, `_after_join` | `worker_investigation_closed` | Right after each close |
 | `floor_alert_triage_review.yaml` | `report_closure_resolved` | `alert_triage_closure_resolved` | The last step, after every outcome branch |

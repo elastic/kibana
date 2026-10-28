@@ -86,6 +86,7 @@ describe('floor_alert_triage — the scheduled sweep', () => {
         'require_analysis_enabled',
         'read_headroom',
         'match_fp_decisions',
+        'report_decisions_matched',
         'plan_sweep',
         'start_batches',
         'emit_result',

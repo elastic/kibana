@@ -112,6 +112,19 @@ describe('reportOutcome', () => {
       },
     ],
     [
+      ALERTZERO_TELEMETRY_EVENTS.AlertTriageDecisionsMatched,
+      {
+        candidates: 120,
+        decisions_matched: 3,
+        excluded_by_severity: 4,
+        match_failed: false,
+        tag_failures: 0,
+        would_close: 30,
+        would_skip: 2,
+        event: 'alert_triage_decisions_matched' as const,
+      },
+    ],
+    [
       ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved,
       {
         alerts_proposed: 1,

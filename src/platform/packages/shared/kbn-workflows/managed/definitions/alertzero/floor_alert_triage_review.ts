@@ -27,7 +27,7 @@ export const ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW = {
   id: ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 15,
+  version: 16,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'floor_alert_triage_review.yaml');
   },

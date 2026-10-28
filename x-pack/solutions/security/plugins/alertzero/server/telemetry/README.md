@@ -78,6 +78,7 @@ The `alertzero.reportWorkerOutcome` workflow step emits these events from Worker
 | `alertzero_ad_worker_run_completed`, `_review_started`, `_analysis_completed`, `_handoff_resolved` | Attack Discovery | Run, or reviewed attack |
 | `alertzero_alert_triage_batch_classified` | Alert Triage | Classified alert batch |
 | `alertzero_alert_triage_batch_grouped` | Alert Triage | Classified alert batch |
+| `alertzero_alert_triage_decisions_matched` | Alert Triage | Sweep that matched decisions |
 | `alertzero_alert_triage_closure_resolved` | Alert Triage | Settled closure proposal |
 | `alertzero_rule_tuning_review_completed` | Rule Tuning | Reviewed rule |
 | `alertzero_rule_coverage_review_completed` | Rule Coverage | Reviewed detection gap |
@@ -229,6 +230,21 @@ Emitted by the Alert Triage Worker once for each classified batch, after it tagg
 | `proposals_created` | long | yes | New closure proposals the batch raised. `0` when grouping is off |
 | `alerts_pooled` | long | yes | Alerts pooled into one shared proposal. `0` when grouping is off |
 | `conversation_created` | boolean | yes | Whether the batch created a conversation: one for each new proposal, and one for a failure that does not end the run (no verdicts, or some alerts without one). A batch that only joins proposals or has no false positive to propose creates none |
+
+### `alertzero_alert_triage_decisions_matched`
+
+Emitted by the Alert Triage sweep once each time it matched the open backlog against the stored decisions, whether the match worked or failed. It is not sent when the match did not run: the `alertzero.triageDecisionAutoClose` kill switch is `off`, the Context Engine is off in the space, or Task Manager is behind. The event carries counts only: no rule id, decision id or key.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| envelope | | | See above |
+| `candidates` | long | yes | Open, untriaged alerts the sweep checked, up to 100,000 a sweep |
+| `decisions_matched` | long | yes | Distinct decisions that matched at least one alert |
+| `would_close` | long | yes | Alerts an approved decision matched. In shadow mode they are only tagged `az:would_close:<id>` |
+| `would_skip` | long | yes | Alerts a dismissed pattern matched. In shadow mode they are only tagged `az:would_skip:<id>` |
+| `excluded_by_severity` | long | yes | Alerts of an approved pattern that their severity keeps with a human: high, critical, or unknown |
+| `tag_failures` | long | yes | Decisions whose alerts could not be tagged |
+| `match_failed` | boolean | yes | Whether the match failed. A failed match leaves every alert for analysis |
 
 ### `alertzero_alert_triage_closure_resolved`
 
