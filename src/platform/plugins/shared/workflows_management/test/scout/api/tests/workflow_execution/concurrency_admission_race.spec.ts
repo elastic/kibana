@@ -18,6 +18,7 @@ import { spaceTest } from '../../fixtures';
 
 const QUEUE_SIZE = 2;
 const SIMULTANEOUS_QUEUE_RUNS = 5;
+const SIMULTANEOUS_DROP_RUNS = 5;
 const SIMULTANEOUS_CANCEL_RUNS = 3;
 const ADMISSION_SETTLE_TIMEOUT_MS = 25_000;
 const CANCEL_TERMINATION_TIMEOUT_MS = 30_000;
@@ -88,6 +89,24 @@ steps:
       message: done
 `;
 
+const dropWorkflowYaml = (isolationKey: string) => `
+name: Scout concurrency admission race
+enabled: true
+description: Simultaneous runs share one concurrency group
+triggers:
+  - type: manual
+settings:
+  concurrency:
+    key: "drop-race-${isolationKey}"
+    strategy: drop
+    max: 1
+steps:
+  - name: hold
+    type: waitForInput
+    with:
+      message: hold the slot
+`;
+
 const startTogether = async (
   workflowsApi: WorkflowsApiService,
   workflowId: string,
@@ -145,6 +164,27 @@ spaceTest.describe(
           [ExecutionStatus.WAITING_FOR_INPUT]: 1,
           [ExecutionStatus.QUEUED]: QUEUE_SIZE,
           [ExecutionStatus.SKIPPED]: SIMULTANEOUS_QUEUE_RUNS - 1 - QUEUE_SIZE,
+        });
+      }
+    );
+
+    spaceTest(
+      'drop admits one run and skips the rest when runs start together',
+      async ({ apiServices }) => {
+        const isolationKey = randomUUID();
+        const workflow = await apiServices.workflowsApi.create(dropWorkflowYaml(isolationKey));
+
+        await startTogether(apiServices.workflowsApi, workflow.id, SIMULTANEOUS_DROP_RUNS);
+
+        const executions = await waitForAdmissionToSettle(
+          apiServices.workflowsApi,
+          workflow.id,
+          SIMULTANEOUS_DROP_RUNS
+        );
+
+        expect(countByStatus(executions)).toStrictEqual({
+          [ExecutionStatus.WAITING_FOR_INPUT]: 1,
+          [ExecutionStatus.SKIPPED]: SIMULTANEOUS_DROP_RUNS - 1,
         });
       }
     );
