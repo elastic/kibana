@@ -10,8 +10,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { i18n } from '@kbn/i18n';
-
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
@@ -115,14 +113,8 @@ export const DashboardListingPage = ({
             useReplace: true,
           });
         })
-        .catch((error) => {
-          if (canceled) return;
-          coreServices.notifications.toasts.addError(error, {
-            title: i18n.translate('dashboard.listing.findByTitleError', {
-              defaultMessage: 'Unable to find dashboard "{title}"',
-              values: { title },
-            }),
-          });
+        .catch(() => {
+          // show the listing filtered by title if the dashboard can not be looked up
         });
     }
 
