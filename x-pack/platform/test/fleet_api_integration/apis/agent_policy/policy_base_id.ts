@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { AGENTS_INDEX, AGENT_POLICY_INDEX } from '@kbn/fleet-plugin/common';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry, waitForPolicyBaseIdBackfill } from '../../helpers';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
@@ -238,6 +238,8 @@ export default function (providerContext: FtrProviderContext) {
       before(async () => {
         await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
         await fleetAndAgents.setup();
+        // A running backfill would miss the agents below, and the next setup would not schedule another
+        await waitForPolicyBaseIdBackfill(providerContext);
 
         // Insert agents without policy_base_id to simulate old fleet-server enrollment
         await es.index({
@@ -283,6 +285,7 @@ export default function (providerContext: FtrProviderContext) {
 
         // Trigger Fleet setup to run the self-limiting backfill
         await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'xxxx').expect(200);
+        await waitForPolicyBaseIdBackfill(providerContext);
       });
 
       after(async () => {
@@ -316,6 +319,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should not backfill agents that already have policy_base_id on subsequent setup calls', async () => {
         // Run setup again — self-limiting query should process 0 docs
         await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'xxxx').expect(200);
+        await waitForPolicyBaseIdBackfill(providerContext);
 
         // Agents should still have correct policy_base_id (unchanged)
         const agent = await es.get({ index: AGENTS_INDEX, id: agentId });

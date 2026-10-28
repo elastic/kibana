@@ -294,7 +294,9 @@ const CornerControl: React.FC<{
 
 /**
  * Decorative area sparkline behind the value: highlighted fill with a 1px peak line on top.
- * The series is a headcount, so it is drawn as steps over a y-axis anchored at zero.
+ * The series is a headcount, so it is drawn as steps over a y-axis anchored at zero. The steps are
+ * centred on each point, so the first and last points (the delta's baseline and the live count)
+ * keep half a step of width instead of the last one vanishing at the edge.
  */
 const Sparkline: React.FC<{ values: number[]; title: string }> = ({ values, title }) => {
   const { euiTheme } = useEuiTheme();
@@ -352,7 +354,7 @@ const Sparkline: React.FC<{ values: number[]; title: string }> = ({ values, titl
         xAccessor="x"
         yAccessors={['y']}
         data={data}
-        curve={CurveType.CURVE_STEP_AFTER}
+        curve={CurveType.CURVE_STEP}
         color={stroke}
         areaSeriesStyle={{
           area: { opacity: 1, visible: true, fill },

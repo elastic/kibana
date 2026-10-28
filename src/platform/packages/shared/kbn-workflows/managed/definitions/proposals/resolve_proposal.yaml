@@ -1,0 +1,265 @@
+version: '1'
+name: Resolve proposal
+description: >
+  Applies the answer the proposal gate (`system-create-proposal`) received:
+  checks that the decider may decide, records the decision on the live
+  revision, and runs the approved action. Runs under the decider's identity —
+  the approver when a human answered (`run-as-mode: default`), the caller's
+  service account when its autonomy approved (`run-as-mode: inherit`) — so
+  every privilege check and every attribution sees that identity rather than
+  the gate's.
+
+  Never parks and never re-offers. The gate owns the loop, the deadline and the
+  clone of a failed attempt, and branches on `resolution`.
+enabled: true
+tags:
+  - proposals
+
+settings:
+  # A sentinel, for the same reason the gate's own is one. This run waits on
+  # the action workflow, which its own timeout bounds; a ceiling that fired
+  # first would end this run while the action kept going, and the gate would
+  # re-offer an action that may still succeed.
+  timeout: '52w'
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        proposalId:
+          type: string
+          description: >
+            The proposal the gate holds. A revision may have replaced it while
+            the gate was parked; the live revision is what gets decided.
+        actionWorkflowId:
+          type: string
+          description: Managed action workflow to run on approval. Blank for a proposal with no action.
+        approved:
+          type: boolean
+          description: The gate's answer.
+        decidedBy:
+          type: string
+          description: >
+            Who answered the gate, as its `respondedBy`. Blank when the caller's
+            autonomy approved, which attributes the decision to the service
+            account this run inherited.
+        autoApproved:
+          type: boolean
+          description: >
+            Set when the caller's autonomy approved. Skips the decide check,
+            which has no decider to authorize, and runs the action as the
+            inherited service account.
+      required:
+        - proposalId
+        - approved
+      additionalProperties: false
+
+# What the gate branches on:
+# - `settled`: the decision and its outcome are recorded; the gate is done.
+# - `refused`: the decider may not decide and nothing was written; the gate re-parks.
+# - `action_failed`: the approval is recorded and its action failed; the gate re-offers a clone.
+outputs:
+  - name: resolution
+    type: string
+  - name: proposalId
+    type: string
+  - name: status
+    type: string
+  - name: decision
+    type: string
+
+steps:
+  - name: authorize_decision
+    type: if
+    condition: '${{ inputs.autoApproved != true }}'
+    steps:
+      # Before any read or write, so a refusal leaves the proposal exactly as a
+      # privileged approver will find it.
+      - name: check_privileges
+        type: proposals.checkDecidePrivileges
+        with:
+          proposalId: '{{ inputs.proposalId }}'
+          # After an external resume this run executes as the workflow runner
+          # rather than as the person who clicked the link. `respondedBy` is
+          # the only thing that tells the two apart.
+          respondedBy: '{{ inputs.decidedBy }}'
+
+      - name: reject_unprivileged
+        type: if
+        condition: '${{ steps.check_privileges.output.canDecide != true }}'
+        steps:
+          - name: output_refused
+            type: workflow.output
+            status: completed
+            with:
+              resolution: refused
+              proposalId: '{{ inputs.proposalId }}'
+
+  # A revision appended while the gate was parked moves the chain head, and
+  # `updateProposal` refuses a superseded row. Carried in variables because
+  # this run resumes after the action, and a step output does not survive a
+  # task resumption.
+  - name: get_last_revision
+    type: proposals.getLatestRevision
+    with:
+      proposalId: '{{ inputs.proposalId }}'
+
+  - name: adopt_last_revision
+    type: data.set
+    with:
+      proposal_id: '{{ steps.get_last_revision.output.proposalId }}'
+      # The revision's own input, not the trigger's: an analyst who approved a
+      # corrected revision approved those parameters.
+      action_input: '${{ steps.get_last_revision.output.actionInput }}'
+
+  - name: handle_dismissal
+    type: if
+    condition: '${{ inputs.approved != true }}'
+    steps:
+      - name: record_dismissal
+        type: proposals.updateProposal
+        with:
+          proposalId: '{{ variables.proposal_id }}'
+          decision: dismissed
+          decidedBy: '{{ inputs.decidedBy }}'
+          # The dismiss reason and rationale are written by the route before it
+          # releases the gate, because `waitForApproval` reduces its resume
+          # payload to a bare boolean.
+          status: no_action
+      - name: output_dismissed
+        type: workflow.output
+        status: completed
+        with:
+          resolution: settled
+          proposalId: '{{ variables.proposal_id }}'
+          status: no_action
+          decision: dismissed
+
+  # Decision and status are written together, one call per branch: `approved`
+  # + `pending` is not a legal pair, so a decision-only write would leave the
+  # record claiming an approval with no outcome.
+  - name: approve_without_action
+    type: if
+    # No action means the analyst carries it out themselves, so the approval is
+    # the whole lifecycle.
+    condition: '${{ inputs.actionWorkflowId == blank }}'
+    steps:
+      - name: record_approval_no_action
+        type: proposals.updateProposal
+        with:
+          proposalId: '{{ variables.proposal_id }}'
+          decision: approved
+          decidedBy: '{{ inputs.decidedBy }}'
+          status: no_action
+      - name: output_no_action
+        type: workflow.output
+        status: completed
+        with:
+          resolution: settled
+          proposalId: '{{ variables.proposal_id }}'
+          status: no_action
+          decision: approved
+
+  - name: record_approval_executing
+    type: proposals.updateProposal
+    with:
+      proposalId: '{{ variables.proposal_id }}'
+      decision: approved
+      decidedBy: '{{ inputs.decidedBy }}'
+      status: executing
+
+  # `run-as-mode` has to be literal: the engine reads the identity choice from
+  # the saved definition, never from a rendered value. Each outcome is adopted
+  # by a `data.set` in its own branch, since only one of the two steps runs.
+  - name: execute_by_approval_mode
+    type: if
+    condition: '${{ inputs.autoApproved != true }}'
+    steps:
+      # Human-approved: this run executes as the approver, and the default mode
+      # passes that identity on to the action.
+      - name: execute_as_approver
+        type: workflow.execute
+        on-failure:
+          # Keeps the failure inside this run so the gate can re-offer it.
+          continue: true
+        with:
+          workflow-id: '{{ inputs.actionWorkflowId }}'
+          inputs:
+            # Every action workflow takes one `actionInput` object, so this
+            # workflow never needs to know an action's parameter names.
+            actionInput: '${{ variables.action_input }}'
+
+      - name: adopt_approver_result
+        type: data.set
+        with:
+          action_failed: '${{ steps.execute_as_approver.error != blank }}'
+          action_error_message: '{{ steps.execute_as_approver.error.message }}'
+    else:
+      # Auto-approved: this run inherited the caller's service account, and the
+      # default mode would run the action as the original caller instead.
+      - name: execute_as_worker
+        type: workflow.execute
+        on-failure:
+          # Same reason as `execute_as_approver`.
+          continue: true
+        with:
+          workflow-id: '{{ inputs.actionWorkflowId }}'
+          run-as-mode: inherit
+          # Only action workflows may inherit the service account. The gate
+          # already holds back `always-gate` actions, so this only stops a
+          # target that is not an action at all: it fails this step without
+          # starting, and the gate re-offers the clone to a human.
+          allowed-workflow-tags:
+            - action
+          inputs:
+            # Same as `execute_as_approver`.
+            actionInput: '${{ variables.action_input }}'
+
+      - name: adopt_worker_result
+        type: data.set
+        with:
+          action_failed: '${{ steps.execute_as_worker.error != blank }}'
+          action_error_message: '{{ steps.execute_as_worker.error.message }}'
+
+  - name: handle_action_failure
+    type: if
+    condition: '${{ variables.action_failed == true }}'
+    steps:
+      - name: record_action_failure
+        type: proposals.updateProposal
+        with:
+          proposalId: '{{ variables.proposal_id }}'
+          status: failed
+          executionError: '{{ variables.action_error_message }}'
+      - name: output_action_failed
+        type: workflow.output
+        status: completed
+        with:
+          resolution: action_failed
+          proposalId: '{{ variables.proposal_id }}'
+          status: failed
+          decision: approved
+
+  # The action has run, so a lost write must not fail this run: the gate reads
+  # the `executing` it would leave behind as an interrupted action and re-offers
+  # it. A write that never lands leaves the record to the service, which settles
+  # it as `failed`, without a re-offer, once the gate has ended.
+  - name: record_success
+    type: proposals.updateProposal
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: '1s'
+      continue: true
+    with:
+      proposalId: '{{ variables.proposal_id }}'
+      status: succeeded
+
+  - name: output_succeeded
+    type: workflow.output
+    status: completed
+    with:
+      resolution: settled
+      proposalId: '{{ variables.proposal_id }}'
+      status: succeeded
+      decision: approved

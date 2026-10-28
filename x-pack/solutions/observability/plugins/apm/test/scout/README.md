@@ -21,3 +21,40 @@ node scripts/playwright test --project local --config x-pack/solutions/observabi
 ```
 
 Test results are available in `x-pack/solutions/observability/plugins/apm/test/scout/ui/output`
+
+## Tests behind the service map grouping flag
+
+Service map grouping is behind the `apm.serviceMapGroupingEnabled` feature flag, which is off by default. To turn it on locally, add this to `config/kibana.dev.yml`:
+
+```yaml
+feature_flags.overrides:
+  apm.serviceMapGroupingEnabled: true
+```
+
+In Scout, turn the flag on at runtime with the helpers exported from `shared/`:
+
+```ts
+import { enableServiceMapGrouping, removeServiceMapGroupingOverride } from '../../shared';
+
+test.describe(
+  'Service map grouping',
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  () => {
+    test.beforeAll(async ({ apiServices }) => {
+      await enableServiceMapGrouping(apiServices);
+    });
+
+    test.afterAll(async ({ apiServices }) => {
+      await removeServiceMapGroupingOverride(apiServices);
+    });
+
+    // ...
+  }
+);
+```
+
+- These tests can only run on local servers, so tag them with the `@local-*` tags as above rather than `tags.stateful.classic` or `tags.serverless.observability.complete`. The helpers call `PUT /internal/core/_settings`, which only exists when Kibana runs with `coreApp.allowDynamicConfigOverrides: true`. Local Scout servers set it, but Cloud deployments (ECH and MKI) don't, so the request fails with a 404 there.
+- Be mindful of adding these tests in parallel suites. Feature flag overrides apply to the whole Kibana server, so enabling the flag from `ui/parallel_tests/` would also affect the other workers.
+- Always remove the override in teardown, so it doesn't leak into the next suite that runs on the same server.
+
+This section, the helpers and the flag are removed in https://github.com/elastic/kibana/issues/300607.

@@ -27,4 +27,11 @@ describe('createKIQueryGenerationSkill', () => {
     ]);
     expect(skill.getRegistryTools?.()).toEqual([platformSignificantEventsTools.searchEvent]);
   });
+
+  it('is hidden from the skill library and not gated by the experimental features setting', () => {
+    const skill = createKIQueryGenerationSkill(createOptions());
+
+    expect(skill.hidden).toBe(true);
+    expect(skill.experimental).toBeUndefined();
+  });
 });
