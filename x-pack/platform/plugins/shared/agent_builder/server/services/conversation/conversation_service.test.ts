@@ -28,11 +28,13 @@ const createService = ({
   attachments = { getTypeDefinition: jest.fn() },
   eventBus,
   auditLogService = { logConversationCreated: jest.fn() },
+  metadataAuthorizers = [],
 }: {
   agents?: object;
   attachments?: object;
   eventBus?: object;
   auditLogService?: object;
+  metadataAuthorizers?: Array<{ authorize: jest.Mock }>;
 } = {}) => {
   return new ConversationServiceImpl({
     logger: loggingSystemMock.createLogger(),
@@ -46,6 +48,7 @@ const createService = ({
     conversationEvents: { getDefinition: jest.fn(), list: jest.fn().mockReturnValue([]) },
     ...(eventBus ? { eventBus: eventBus as never } : {}),
     auditLogService: auditLogService as never,
+    metadataAuthorizers,
   });
 };
 
@@ -70,6 +73,25 @@ describe('ConversationServiceImpl', () => {
 
       expect(eventBus.emitMetadataPatched).toHaveBeenCalledWith(request, metadataPayload);
       expect(eventBus.emitAttachmentEvents).toHaveBeenCalledWith(request, attachmentPayload);
+    });
+
+    it('asks registered metadata authorizers with the scoped request', async () => {
+      const authorize = jest.fn();
+      await createService({
+        agents,
+        metadataAuthorizers: [{ authorize }],
+      }).getScopedClient({ request });
+
+      const { authorizeMetadataUpdate } = createClientMock.mock.calls[0][0];
+      await authorizeMetadataUpdate!({
+        templateId: 'escalation',
+        updates: { status: 'closed' },
+      });
+
+      expect(authorize).toHaveBeenCalledWith(request, {
+        templateId: 'escalation',
+        updates: { status: 'closed' },
+      });
     });
 
     it('leaves eventEmitter undefined without an event bus', async () => {

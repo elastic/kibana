@@ -10,7 +10,10 @@ import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { ConversationUpdatedOptIn } from '@kbn/agent-builder-server';
+import type {
+  ConversationMetadataAuthorizer,
+  ConversationUpdatedOptIn,
+} from '@kbn/agent-builder-server';
 import {
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
   SUPPORTED_IMAGE_MIME_TYPES,
@@ -79,6 +82,7 @@ export class AgentBuilderPlugin
   private startDeps?: AgentBuilderStartDependencies;
   private readonly conversationEventBus = createConversationEventBus();
   private readonly conversationUpdatedOptIns: ConversationUpdatedOptIn[] = [];
+  private readonly metadataAuthorizers: ConversationMetadataAuthorizer[] = [];
   private recommendedEndpointsPoller?: RecommendedEndpointsPoller;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
@@ -323,6 +327,9 @@ export class AgentBuilderPlugin
         enableUpdatedTrigger: (optIn) => {
           this.conversationUpdatedOptIns.push(optIn);
         },
+        registerMetadataAuthorizer: (authorizer) => {
+          this.metadataAuthorizers.push(authorizer);
+        },
       },
       callbacks: {
         registerConversationResolver: serviceSetups.callbacks.registerConversationResolver,
@@ -387,6 +394,7 @@ export class AgentBuilderPlugin
       deductiveRegister: this.config.deductive?.register ?? false,
       isomer,
       conversationEventBus: this.conversationEventBus,
+      metadataAuthorizers: this.metadataAuthorizers,
     });
 
     registerConversationWorkflowEventBridge(

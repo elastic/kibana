@@ -50,6 +50,7 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     },
     conversations: {
       enableUpdatedTrigger: jest.fn(),
+      registerMetadataAuthorizer: jest.fn(),
     },
     callbacks: {
       registerConversationResolver: jest.fn(),

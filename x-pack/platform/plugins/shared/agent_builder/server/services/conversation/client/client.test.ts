@@ -19,6 +19,7 @@ import {
   TimelineTriggerType,
   createAgentNotFoundError,
   createAgentUnavailableError,
+  createForbiddenError,
   isConversationWriteConflictError,
 } from '@kbn/agent-builder-common';
 import type { ConversationAccessControlEntry } from '@kbn/agent-builder-common/chat/access_control';
@@ -2332,6 +2333,44 @@ describe('ConversationClient', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+    });
+
+    it('does not write when the metadata authorizer rejects the update', async () => {
+      const authorizeMetadataUpdate = jest
+        .fn()
+        .mockRejectedValue(createForbiddenError('The user is not allowed to change status.'));
+      const guarded = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
+        user: { id: 'user-1', username: 'test-user', isAdmin: false },
+        authorizeMetadataUpdate,
+      });
+      getTemplateMock.mockReturnValue(
+        makeTemplate('escalation', {
+          status: { input_type: 'SELECT', options: ['open', 'closed'] },
+        })
+      );
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({
+          templateId: 'escalation',
+          metadata: { status: 'open' },
+        })
+      );
+
+      await expect(
+        guarded.patchMetadata('conversation-1', { status: 'closed' }, { source: 'execution' })
+      ).rejects.toMatchObject({
+        code: 'forbidden',
+        message: 'The user is not allowed to change status.',
+      });
+      expect(authorizeMetadataUpdate).toHaveBeenCalledWith({
+        templateId: 'escalation',
+        updates: { status: 'closed' },
+      });
+      expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
     it('throws when the conversation has no template', async () => {

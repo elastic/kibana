@@ -64,6 +64,7 @@ const setupPlugin = ({ escalationsEnabled }: { escalationsEnabled?: boolean } = 
     attachments: { registerType: jest.fn() },
     callbacks: { registerConversationResolver: jest.fn() },
     conversationEvents: { register: jest.fn() },
+    conversations: { registerMetadataAuthorizer: jest.fn() },
     tools: { register: jest.fn() },
   };
 
@@ -260,6 +261,12 @@ describe('AgenticInvestigationsPlugin', () => {
       expect(
         JSON.stringify(registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID))
       ).not.toMatch(/proposals/i);
+    });
+
+    it('registers the metadata authorizer that gates escalation and investigation fields', () => {
+      const { agentBuilder } = setupPlugin();
+
+      expect(agentBuilder.conversations.registerMetadataAuthorizer).toHaveBeenCalledTimes(1);
     });
 
     it('registers the investigation and escalation timeline event types', () => {

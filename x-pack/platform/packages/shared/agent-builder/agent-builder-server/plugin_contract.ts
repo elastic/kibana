@@ -249,6 +249,16 @@ export interface ConversationUpdatedOptIn {
 }
 
 /**
+ * Rejects a conversation metadata write the caller may not make. Throw to fail the write.
+ */
+export interface ConversationMetadataAuthorizer {
+  authorize(
+    request: KibanaRequest,
+    update: { templateId: string; updates: Record<string, unknown> }
+  ): Promise<void>;
+}
+
+/**
  * AgentBuilder conversations service's setup contract.
  */
 export interface ConversationsSetup {
@@ -258,6 +268,11 @@ export interface ConversationsSetup {
    * performed it. Without a matching opt-in, the trigger is never emitted.
    */
   enableUpdatedTrigger(optIn: ConversationUpdatedOptIn): void;
+  /**
+   * Rejects metadata writes the caller may not make. Every registered authorizer runs before
+   * `patchMetadata` writes. With none registered, metadata writes keep converse access only.
+   */
+  registerMetadataAuthorizer(authorizer: ConversationMetadataAuthorizer): void;
 }
 
 /**

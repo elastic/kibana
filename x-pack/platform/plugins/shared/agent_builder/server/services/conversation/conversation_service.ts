@@ -12,6 +12,7 @@ import type {
   ElasticsearchServiceStart,
 } from '@kbn/core/server';
 import type { CurrentUser } from '@kbn/agent-builder-common';
+import type { ConversationMetadataAuthorizer } from '@kbn/agent-builder-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getUserFromRequest } from '../utils';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -42,6 +43,7 @@ interface ConversationServiceDeps {
   conversationEvents: ConversationEventsServiceStart;
   auditLogService: AuditLogService;
   analyticsService?: AnalyticsService;
+  metadataAuthorizers?: readonly ConversationMetadataAuthorizer[];
 }
 
 export class ConversationServiceImpl implements ConversationService {
@@ -54,6 +56,7 @@ export class ConversationServiceImpl implements ConversationService {
   private readonly conversationEvents: ConversationEventsServiceStart;
   private readonly auditLogService: AuditLogService;
   private readonly analyticsService?: AnalyticsService;
+  private readonly metadataAuthorizers: readonly ConversationMetadataAuthorizer[];
 
   constructor({
     logger,
@@ -65,6 +68,7 @@ export class ConversationServiceImpl implements ConversationService {
     conversationEvents,
     auditLogService,
     analyticsService,
+    metadataAuthorizers = [],
   }: ConversationServiceDeps) {
     this.logger = logger;
     this.security = security;
@@ -75,6 +79,7 @@ export class ConversationServiceImpl implements ConversationService {
     this.conversationEvents = conversationEvents;
     this.auditLogService = auditLogService;
     this.analyticsService = analyticsService;
+    this.metadataAuthorizers = metadataAuthorizers;
   }
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
@@ -123,6 +128,14 @@ export class ConversationServiceImpl implements ConversationService {
       reportFieldsChange: analyticsService
         ? (params) => analyticsService.reportConversationFieldsChanged(params)
         : undefined,
+      authorizeMetadataUpdate:
+        this.metadataAuthorizers.length > 0
+          ? async (update) => {
+              for (const authorizer of this.metadataAuthorizers) {
+                await authorizer.authorize(request, update);
+              }
+            }
+          : undefined,
     });
   }
 

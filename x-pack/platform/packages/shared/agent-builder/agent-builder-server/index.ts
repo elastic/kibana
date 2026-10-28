@@ -199,6 +199,7 @@ export type {
   PluginsStart,
   RuntimeStart,
   ConversationsSetup,
+  ConversationMetadataAuthorizer,
   ConversationUpdatedOptIn,
   ConversationsStart,
   CallbacksSetup,

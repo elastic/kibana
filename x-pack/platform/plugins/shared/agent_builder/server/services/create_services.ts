@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Runner } from '@kbn/agent-builder-server';
+import type { ConversationMetadataAuthorizer, Runner } from '@kbn/agent-builder-server';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { AgentBuilderConfig } from '../config';
 import type {
@@ -140,7 +140,11 @@ export class ServiceManager {
     deductiveRegister,
     isomer,
     conversationEventBus,
-  }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
+    metadataAuthorizers = [],
+  }: ServicesStartDeps & {
+    conversationEventBus?: ConversationEventBus;
+    metadataAuthorizers?: readonly ConversationMetadataAuthorizer[];
+  }): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
     }
@@ -229,6 +233,7 @@ export class ServiceManager {
       conversationEvents,
       auditLogService,
       analyticsService,
+      metadataAuthorizers,
     });
 
     const runnerFactory = new RunnerFactoryImpl({

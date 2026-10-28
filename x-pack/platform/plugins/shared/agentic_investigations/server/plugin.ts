@@ -19,6 +19,7 @@ import type { AgenticInvestigationsConfig } from './config';
 import { registerFeatures } from './features';
 import { registerImpactAttachment } from './impact/attachments';
 import { registerImpactRoutes } from './impact/routes/register_routes';
+import { createConversationMetadataAuthorizer } from './conversation_metadata_authorizer';
 import { createInvestigationsPrivilegesChecker } from './investigations/services/check_investigations_privileges';
 import { createImpactClient } from './impact/services/impact_client';
 import { createEntityStoreNameLookup } from './impact/services/entity_store_names';
@@ -103,6 +104,14 @@ export class AgenticInvestigationsPlugin
   ): AgenticInvestigationsPluginSetup {
     this.workflowsManagement = workflowsManagement?.management;
     registerFeatures({ features, escalationsEnabled: this.escalationsEnabled });
+
+    agentBuilder.conversations.registerMetadataAuthorizer(
+      createConversationMetadataAuthorizer({
+        getSecurity: async () => (await coreSetup.getStartServices())[1].security,
+        logger: this.logger,
+        escalationsEnabled: this.escalationsEnabled,
+      })
+    );
 
     registerInvestigationConversationEvents(agentBuilder);
     if (this.escalationsEnabled) {
