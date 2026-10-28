@@ -17,6 +17,8 @@ project:
   owner: '@elastic/security-solution'
   sourceRoot: x-pack/solutions/security/plugins/security_solution
 dependsOn:
+  - '@kbn/data-source'
+  - '@kbn/securitysolution-alerts-page-url'
   - '@kbn/setup-node-env'
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -326,6 +328,9 @@ tags:
   - prod
   - group-security
   - private
+  - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*

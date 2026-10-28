@@ -19,4 +19,4 @@ export {
   attacksTitle,
   rulesTitle,
 } from './translations';
-export { buildPageTimerange, encodePageParam } from './page_url';
+export { buildPageTimerange, encodePageParam } from '@kbn/securitysolution-alerts-page-url';

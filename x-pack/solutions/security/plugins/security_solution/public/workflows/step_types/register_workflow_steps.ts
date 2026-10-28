@@ -104,6 +104,12 @@ export const registerWorkflowSteps = (
   );
 
   workflowsExtensions.registerStepDefinition(() =>
+    import('./match_attack_fingerprints/match_attack_fingerprints_step').then(
+      (m) => m.matchAttackFingerprintsStepDefinition
+    )
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
     import('./entity_graph_traversal/load_entity_graph_traversal_scenario_step').then(
       (m) => m.loadEntityGraphTraversalScenarioStepDefinition
     )

@@ -26,6 +26,7 @@ import { updateNoteStepDefinition } from './update_note_step/update_note_step';
 import { createRuleStepDefinition } from './create_rule_step/create_rule_step';
 import { patchRuleStepDefinition } from './patch_rule_step/patch_rule_step';
 import { getAlertEntitiesStepDefinition } from './get_alert_entities_step';
+import { matchAttackFingerprintsStepDefinition } from './match_attack_fingerprints';
 
 const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
 
@@ -35,7 +36,7 @@ describe('registerWorkflowSteps (server)', () => {
 
     registerWorkflowSteps(workflowsExtensions);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(24);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(25);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       renderAlertNarrativeStepDefinition
     );
@@ -90,6 +91,9 @@ describe('registerWorkflowSteps (server)', () => {
     );
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       getAlertEntitiesStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      matchAttackFingerprintsStepDefinition
     );
   });
 });

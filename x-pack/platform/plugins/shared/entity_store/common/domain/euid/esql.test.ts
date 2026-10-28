@@ -248,6 +248,33 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
 
     expect(result).toMatchSnapshot();
   });
+
+  describe('with castFields: false', () => {
+    const entityTypes = ['generic', 'host', 'service', 'user'] as const;
+
+    it.each(entityTypes)('references the raw fields, with no cast, for %s', (entityType) => {
+      const result = getEuidEsqlDocumentsContainsIdFilter(getBuiltInEntityDefinition(entityType), {
+        castFields: false,
+      });
+
+      expect(result).not.toMatch(/\bTO_[A-Z]+\(/);
+    });
+
+    it.each(entityTypes)(
+      'is the default filter with only the casts removed for %s',
+      (entityType) => {
+        const definition = getBuiltInEntityDefinition(entityType);
+        const withoutCasts = getEuidEsqlDocumentsContainsIdFilter(definition).replace(
+          /\bTO_[A-Z]+\(([^()]+)\)/g,
+          '$1'
+        );
+
+        expect(getEuidEsqlDocumentsContainsIdFilter(definition, { castFields: false })).toBe(
+          withoutCasts
+        );
+      }
+    );
+  });
 });
 
 describe('getFieldEvaluationsEsql', () => {

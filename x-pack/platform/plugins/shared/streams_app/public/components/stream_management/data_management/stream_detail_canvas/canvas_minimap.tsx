@@ -17,7 +17,7 @@ import {
   MINIMAP_MASK_COLOR,
   MINIMAP_WIDTH,
 } from './canvas_constants';
-import { DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
+import { DESTINATION_NODE_TYPE, PROCESSING_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
 import { MapFoldedIcon } from './map_folded_icon';
 
 /**
@@ -32,6 +32,8 @@ const getNodeColor =
         return euiTheme.colors.primary;
       case DESTINATION_NODE_TYPE:
         return euiTheme.colors.success;
+      case PROCESSING_NODE_TYPE:
+        return euiTheme.colors.accent;
       default:
         return euiTheme.colors.warning;
     }

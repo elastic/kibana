@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
+export KBN_BOOTSTRAP_NO_PREBUILT=true
+source .buildkite/scripts/bootstrap.sh
 
 STORE_CACHE=${STORE_CACHE:-false}
 STORE_CACHE_OUTPUT=$(mktemp)

@@ -43,7 +43,8 @@ export const kibanaOverrides: OxlintOverride[] = [
   {
     files: ['**/*.{js,mjs,ts,tsx}'],
     rules: {
-      'no-restricted-imports': [
+      // A separate rule, so these stay warnings next to the error-level `no-restricted-imports`.
+      '@kbn/eslint/no_deprecated_imports': [
         'warn',
         {
           paths: [
@@ -178,7 +179,7 @@ export const kibanaOverrides: OxlintOverride[] = [
       'src/platform/packages/shared/kbn-zod/**',
     ],
     rules: {
-      '@kbn/eslint/require_lazy_zod_schema': 'warn',
+      '@kbn/eslint/require_lazy_zod_schema': 'error',
     },
   },
   {

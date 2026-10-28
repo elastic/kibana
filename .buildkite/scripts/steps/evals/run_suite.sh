@@ -448,7 +448,7 @@ EOF
           KBN_EVALS: "1"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_SUITE_IDS: "${EVAL_SUITE_ID}"
-          GITHUB_PR_NUMBER: "${EVAL_PR_NUMBER:-}"
+          EVAL_PR_NUMBER: "${EVAL_PR_NUMBER:-}"
           FRESH_BASELINE_PR_EXPERIMENT_ID: "${FRESH_BASELINE_PR_EXPERIMENT_ID}"
         depends_on:
 EOF

@@ -44,6 +44,7 @@ tags:
   - prod
   - group-security
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - index.ts

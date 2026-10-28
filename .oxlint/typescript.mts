@@ -168,6 +168,7 @@ export const typescriptOverrides: OxlintOverride[] = [
       'no-console': 'error',
       'no-throw-literal': 'error',
       'no-unsafe-finally': 'error',
+      'no-unsanitized/property': 'error',
       '@typescript-eslint/no-unused-expressions': ['error', { allowTaggedTemplates: true }],
       'no-var': 'error',
       'object-shorthand': 'error',

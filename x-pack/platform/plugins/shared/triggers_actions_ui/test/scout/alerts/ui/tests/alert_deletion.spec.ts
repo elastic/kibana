@@ -121,10 +121,10 @@ test.describe('Alert deletion', { tag: tags.stateful.classic }, () => {
 
   test('schedules a deletion task and removes old alerts', async ({ page, esClient }) => {
     await page.testSubj.click('rulesSettingsLink');
-    const settingsFlyout = page.testSubj.locator('rulesSettingsFlyout');
-    await expect(settingsFlyout).toBeVisible();
+    const settingsPage = page.testSubj.locator('rulesSettingsPage');
+    await expect(settingsPage).toBeVisible();
 
-    await settingsFlyout.getByTestId('alert-delete-open-modal-button').click();
+    await settingsPage.getByTestId('alert-delete-open-modal-button').click();
     await expect(page.testSubj.locator('alert-delete-modal')).toBeVisible();
 
     await page.testSubj.click('alert-delete-active-checkbox');

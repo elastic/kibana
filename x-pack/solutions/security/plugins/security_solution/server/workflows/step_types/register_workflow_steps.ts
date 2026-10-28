@@ -32,6 +32,7 @@ import {
   traceEntityGraphTraversalRoutesStepDefinition,
   runEntityGraphTraversalHopStepDefinition,
 } from './entity_graph_traversal';
+import { matchAttackFingerprintsStepDefinition } from './match_attack_fingerprints';
 
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin.
@@ -63,4 +64,5 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(runEntityGraphTraversalHopStepDefinition);
   workflowsExtensions.registerStepDefinition(resolveEntityGraphTraversalNodesStepDefinition);
   workflowsExtensions.registerStepDefinition(traceEntityGraphTraversalRoutesStepDefinition);
+  workflowsExtensions.registerStepDefinition(matchAttackFingerprintsStepDefinition);
 };

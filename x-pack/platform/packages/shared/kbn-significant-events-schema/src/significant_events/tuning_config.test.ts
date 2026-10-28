@@ -7,24 +7,32 @@
 
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
+  SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
   resolveSignificantEventsTuningConfig,
   validateSignificantEventsTuningConfig,
 } from './tuning_config';
 
+// These generic validator tests only need *some* bounded tuning field to exercise the
+// number / integer / range checks. Derive one from the bounds map so they never need
+// updating when individual fields (such as the former `sample_size`) are added or removed.
+const integerFieldEntry = Object.entries(SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS).find(
+  ([, bounds]) => bounds.integer === true && typeof bounds.max === 'number'
+);
+if (!integerFieldEntry) {
+  throw new Error('Expected an integer-bounded tuning field with a max to drive these tests');
+}
+const [INTEGER_FIELD, integerFieldBounds] = integerFieldEntry;
+const { min: FIELD_MIN, max: FIELD_MAX } = integerFieldBounds;
+if (typeof FIELD_MAX !== 'number') {
+  throw new Error('Expected the derived tuning field to have a numeric max');
+}
+const VALID_OVERRIDE = FIELD_MIN + 1;
+
 describe('validateSignificantEventsTuningConfig', () => {
   it('returns no errors for a valid config', () => {
-    const errors = validateSignificantEventsTuningConfig({
-      sample_size: 50,
-      max_iterations: 10,
-      feature_ttl_days: 30,
-      entity_filtered_ratio: 0.4,
-      diverse_ratio: 0.4,
-      max_excluded_features_in_prompt: 10,
-      max_entity_filters: 5,
-      semantic_min_score: 0.15,
-      rrf_rank_constant: 20,
-    });
-    expect(errors).toEqual([]);
+    expect(validateSignificantEventsTuningConfig(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG)).toEqual(
+      []
+    );
   });
 
   it('returns no errors for an empty config (all defaults)', () => {
@@ -37,8 +45,8 @@ describe('validateSignificantEventsTuningConfig', () => {
   });
 
   it('reports non-number values', () => {
-    const errors = validateSignificantEventsTuningConfig({ sample_size: 'abc' });
-    expect(errors).toEqual(['"sample_size" must be a number, got string']);
+    const errors = validateSignificantEventsTuningConfig({ [INTEGER_FIELD]: 'abc' });
+    expect(errors).toEqual([`"${INTEGER_FIELD}" must be a number, got string`]);
   });
 
   it('reports NaN values', () => {
@@ -55,18 +63,18 @@ describe('validateSignificantEventsTuningConfig', () => {
   });
 
   it('reports NaN for integer fields', () => {
-    const errors = validateSignificantEventsTuningConfig({ sample_size: NaN });
-    expect(errors).toEqual(['"sample_size" must be a number, got NaN']);
+    const errors = validateSignificantEventsTuningConfig({ [INTEGER_FIELD]: NaN });
+    expect(errors).toEqual([`"${INTEGER_FIELD}" must be a number, got NaN`]);
   });
 
   it('reports non-integer values for integer fields', () => {
-    const errors = validateSignificantEventsTuningConfig({ sample_size: 1.5 });
-    expect(errors).toEqual(['"sample_size" must be an integer']);
+    const errors = validateSignificantEventsTuningConfig({ [INTEGER_FIELD]: FIELD_MIN + 0.5 });
+    expect(errors).toEqual([`"${INTEGER_FIELD}" must be an integer`]);
   });
 
   it('reports out-of-bounds values', () => {
-    const errors = validateSignificantEventsTuningConfig({ sample_size: 200 });
-    expect(errors).toEqual(['"sample_size" must be between 1 and 100']);
+    const errors = validateSignificantEventsTuningConfig({ [INTEGER_FIELD]: FIELD_MAX + 1 });
+    expect(errors).toEqual([`"${INTEGER_FIELD}" must be between ${FIELD_MIN} and ${FIELD_MAX}`]);
   });
 
   it('reports cross-field ratio violation', () => {
@@ -82,25 +90,29 @@ describe('validateSignificantEventsTuningConfig', () => {
 
 describe('resolveSignificantEventsTuningConfig', () => {
   it('merges stored values over defaults for missing keys', () => {
-    expect(resolveSignificantEventsTuningConfig({ sample_size: 50 })).toEqual({
+    expect(resolveSignificantEventsTuningConfig({ [INTEGER_FIELD]: VALID_OVERRIDE })).toEqual({
       ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
-      sample_size: 50,
+      [INTEGER_FIELD]: VALID_OVERRIDE,
     });
   });
 
   it('drops unknown keys without falling back to defaults', () => {
     const logger = { warn: jest.fn() };
     const result = resolveSignificantEventsTuningConfig(
-      { sample_size: 30, legacy_field: 99 },
+      // `sample_size` was a tuning key before it moved into the features identification workflow.
+      { [INTEGER_FIELD]: VALID_OVERRIDE, sample_size: 30, legacy_field: 99 },
       logger
     );
-    expect(result).toEqual({ ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, sample_size: 30 });
+    expect(result).toEqual({
+      ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
+      [INTEGER_FIELD]: VALID_OVERRIDE,
+    });
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('falls back to full defaults and warns on an out-of-bounds value', () => {
     const logger = { warn: jest.fn() };
-    const result = resolveSignificantEventsTuningConfig({ sample_size: 500 }, logger);
+    const result = resolveSignificantEventsTuningConfig({ [INTEGER_FIELD]: FIELD_MAX + 1 }, logger);
     expect(result).toEqual(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('invalid'));
   });
