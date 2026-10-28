@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, renderHook } from '@testing-library/react';
+import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { APP_MENU_TEST_SUBJECTS } from '@kbn/core-chrome-app-menu-components';
 
 import { useCaseViewHeader } from './use_case_view_header';
@@ -389,33 +389,79 @@ describe('useCaseViewHeader', () => {
     expect(result.current.settingsAnchor).toBe(mockElement);
   });
 
-  describe('when the settings item is rendered in the app menu overflow popover', () => {
-    const overflowButton = document.createElement('button');
-    const overflowPopover = document.createElement('div');
-    const overflowMenuItem = document.createElement('button');
+  describe('settings popover anchor', () => {
+    const createOverflowButton = ({ isPressed }: { isPressed: boolean }) => {
+      const button = document.createElement('button');
+      button.setAttribute('data-test-subj', APP_MENU_TEST_SUBJECTS.overflowButton);
+      button.setAttribute('aria-pressed', String(isPressed));
+      document.body.appendChild(button);
+      return button;
+    };
 
-    beforeEach(() => {
-      overflowButton.setAttribute('data-test-subj', APP_MENU_TEST_SUBJECTS.overflowButton);
-      overflowPopover.setAttribute('data-test-subj', APP_MENU_TEST_SUBJECTS.popover);
-      overflowPopover.appendChild(overflowMenuItem);
-      document.body.append(overflowButton, overflowPopover);
-    });
-
-    afterEach(() => {
-      overflowButton.remove();
-      overflowPopover.remove();
-    });
-
-    it('anchors the settings popover to the overflow button', () => {
-      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
-
+    const openSettings = (
+      result: { current: ReturnType<typeof useCaseViewHeader> },
+      triggerElement: HTMLElement
+    ) =>
       act(() => {
         const settingsItem = result.current.menu.items!.find((item) => item.id === 'caseSettings');
-        settingsItem?.run?.({ triggerElement: overflowMenuItem, returnFocus: jest.fn() });
+        settingsItem?.run?.({ triggerElement, returnFocus: jest.fn() });
       });
 
+    afterEach(() => {
+      // Unmount the hook first so removing the anchors does not trigger state updates.
+      cleanup();
+      document.body.innerHTML = '';
+    });
+
+    it('anchors to the overflow button whose popover is open when the trigger is in the overflow menu', () => {
+      createOverflowButton({ isPressed: false });
+      const openOverflowButton = createOverflowButton({ isPressed: true });
+      const overflowMenuItem = document.createElement('button');
+      document.body.appendChild(overflowMenuItem);
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+      openSettings(result, overflowMenuItem);
+
       expect(result.current.isSettingsOpen).toBe(true);
+      expect(result.current.settingsAnchor).toBe(openOverflowButton);
+    });
+
+    it('anchors to the trigger when no overflow popover is open', () => {
+      createOverflowButton({ isPressed: false });
+      const inlineButton = document.createElement('button');
+      document.body.appendChild(inlineButton);
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+      openSettings(result, inlineButton);
+
+      expect(result.current.settingsAnchor).toBe(inlineButton);
+    });
+
+    it('keeps the anchor when the settings popover is closed by triggering the action again', () => {
+      const overflowButton = createOverflowButton({ isPressed: true });
+      const inlineButton = document.createElement('button');
+      document.body.appendChild(inlineButton);
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+      openSettings(result, document.createElement('button'));
+      openSettings(result, inlineButton);
+
+      expect(result.current.isSettingsOpen).toBe(false);
       expect(result.current.settingsAnchor).toBe(overflowButton);
+    });
+
+    it('closes the settings popover when its anchor is removed from the DOM', async () => {
+      const overflowButton = createOverflowButton({ isPressed: true });
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+      openSettings(result, document.createElement('button'));
+      expect(result.current.isSettingsOpen).toBe(true);
+
+      act(() => {
+        overflowButton.remove();
+      });
+
+      await waitFor(() => expect(result.current.isSettingsOpen).toBe(false));
     });
   });
 

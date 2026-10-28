@@ -33,13 +33,13 @@ jest.mock('../../../confirm_delete_case', () => ({
   ConfirmDeleteCaseModal: () => <div data-test-subj="confirm-delete-modal" />,
 }));
 
+const mockCaseSettingsPopover = jest.fn();
+
 jest.mock('./case_settings_popover', () => ({
-  CaseSettingsPopover: ({ anchorElement }: { anchorElement: HTMLElement }) => (
-    <div
-      data-test-subj="case-settings-popover"
-      data-anchor-test-subj={anchorElement.getAttribute('data-test-subj')}
-    />
-  ),
+  CaseSettingsPopover: (props: Record<string, unknown>) => {
+    mockCaseSettingsPopover(props);
+    return <div data-test-subj="case-settings-popover" />;
+  },
 }));
 
 (useGetCaseConnectors as jest.Mock).mockReturnValue({ data: {} });
@@ -141,7 +141,7 @@ describe('CaseDetailsAppHeader', () => {
     });
   });
 
-  it('anchors the settings popover to the overflow button when opened from the overflow menu', async () => {
+  it('keeps the settings popover anchored to the overflow button after the overflow menu closes', async () => {
     renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
 
     await userEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
@@ -151,10 +151,16 @@ describe('CaseDetailsAppHeader', () => {
       )
     );
 
-    expect(await screen.findByTestId('case-settings-popover')).toHaveAttribute(
-      'data-anchor-test-subj',
-      APP_MENU_TEST_SUBJECTS.overflowButton
+    await waitFor(() =>
+      expect(screen.queryByTestId(APP_MENU_TEST_SUBJECTS.popover)).not.toBeInTheDocument()
     );
+
+    // The menu item that triggered the action is gone by now; the anchor must still be mounted so the
+    // popover does not jump to the top-left corner when it repositions (e.g. after toggling a setting).
+    expect(await screen.findByTestId('case-settings-popover')).toBeInTheDocument();
+    const { anchorElement } = mockCaseSettingsPopover.mock.lastCall[0];
+    expect(anchorElement).toHaveAttribute('data-test-subj', APP_MENU_TEST_SUBJECTS.overflowButton);
+    expect(anchorElement.isConnected).toBe(true);
   });
 
   it('adds the case to chat from the chat actions dropdown', async () => {

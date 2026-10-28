@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment-timezone';
 import type { AppHeaderMetadataItems, AppHeaderTitle } from '@kbn/app-header';
 import { APP_MENU_TEST_SUBJECTS } from '@kbn/core-chrome-app-menu-components';
@@ -37,22 +37,13 @@ import { RunCaseWorkflowModal } from '../../../../workflows/run_case_workflow_mo
 /**
  * Returns an element that stays mounted while the settings popover is open. When the settings item
  * is rendered inside the app menu "More" popover, its trigger is unmounted as soon as that popover
- * closes, so the settings popover is anchored to the "More" button instead.
+ * closes, so the settings popover is anchored to the "More" button instead. The open "More" button
+ * is the only one marked as pressed, which also keeps this correct with several app menus on the page.
  */
-const getSettingsAnchor = (triggerElement: HTMLElement): HTMLElement => {
-  const isInOverflowMenu =
-    triggerElement.closest(`[data-test-subj="${APP_MENU_TEST_SUBJECTS.popover}"]`) !== null;
-
-  if (!isInOverflowMenu) {
-    return triggerElement;
-  }
-
-  return (
-    document.querySelector<HTMLElement>(
-      `[data-test-subj="${APP_MENU_TEST_SUBJECTS.overflowButton}"]`
-    ) ?? triggerElement
-  );
-};
+const getSettingsAnchor = (triggerElement: HTMLElement): HTMLElement =>
+  document.querySelector<HTMLElement>(
+    `[data-test-subj="${APP_MENU_TEST_SUBJECTS.overflowButton}"][aria-pressed="true"]`
+  ) ?? triggerElement;
 
 interface UseCaseViewHeaderArgs {
   caseData: CaseUI;
@@ -179,10 +170,34 @@ export const useCaseViewHeader = ({
     [caseConnectors, caseData.connector.id]
   );
 
-  const onOpenSettings = useCallback((triggerElement: HTMLElement) => {
-    setSettingsAnchor(getSettingsAnchor(triggerElement));
-    setIsSettingsOpen((prev) => !prev);
-  }, []);
+  const onOpenSettings = useCallback(
+    (triggerElement: HTMLElement) => {
+      if (isSettingsOpen) {
+        setIsSettingsOpen(false);
+        return;
+      }
+      setSettingsAnchor(getSettingsAnchor(triggerElement));
+      setIsSettingsOpen(true);
+    },
+    [isSettingsOpen]
+  );
+
+  // The anchor can leave the DOM while the popover is open (e.g. the header switches between the
+  // overflow and inline layouts). A detached anchor would reposition the popover to (0, 0), so close it.
+  useEffect(() => {
+    if (!isSettingsOpen || !settingsAnchor) {
+      return;
+    }
+
+    const observer = new MutationObserver(() => {
+      if (!settingsAnchor.isConnected) {
+        setIsSettingsOpen(false);
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => observer.disconnect();
+  }, [isSettingsOpen, settingsAnchor]);
 
   const onCopyId = useCallback(async () => {
     try {
