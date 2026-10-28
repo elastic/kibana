@@ -24,8 +24,14 @@ export interface TransformApiService {
     options?: { ignoreErrors?: boolean }
   ) => Promise<void>;
   cleanTransformIndices: () => Promise<void>;
+  deleteTransforms: (transformIds: string[]) => Promise<void>;
   deleteIndices: (request: estypes.IndicesDeleteRequest) => Promise<void>;
+  startTransform: (transformId: string, options?: { ignoreErrors?: boolean }) => Promise<void>;
+  createAndRunTransform: (request: estypes.TransformPutTransformRequest) => Promise<void>;
 }
+
+const TRANSFORM_STATE_TIMEOUT_MS = 2 * 60 * 1000;
+const TRANSFORM_STATE_POLL_INTERVAL_MS = 1000;
 
 export function getTransformApiService(esClient: Client): TransformApiService {
   return {
@@ -76,20 +82,19 @@ export function getTransformApiService(esClient: Client): TransformApiService {
       options?: { ignoreErrors?: boolean }
     ) {
       try {
-        // Stop the transform first
-        await esClient.transform.stopTransform({
-          ...request,
-          force: true,
-          wait_for_completion: true,
-        });
-
-        // Then delete it
-        await esClient.transform.deleteTransform(request);
+        // A forced delete works in any state, so there's no need to stop the transform first.
+        await esClient.transform.deleteTransform({ ...request, force: true });
       } catch (error) {
         if (options?.ignoreErrors) {
           return;
         }
         throw new Error(`Failed to delete transform ${request.transform_id}: ${error}`);
+      }
+    },
+
+    async deleteTransforms(transformIds: string[]) {
+      for (const transformId of transformIds) {
+        await this.deleteTransform({ transform_id: transformId }, { ignoreErrors: true });
       }
     },
 
@@ -141,6 +146,41 @@ export function getTransformApiService(esClient: Client): TransformApiService {
         });
       } catch (error) {
         throw new Error(`Failed to delete indices ${request.index}: ${error}`);
+      }
+    },
+
+    async startTransform(transformId: string, options?: { ignoreErrors?: boolean }) {
+      try {
+        await esClient.transform.startTransform({ transform_id: transformId });
+      } catch (error) {
+        if (options?.ignoreErrors) {
+          return;
+        }
+        throw new Error(`Failed to start transform ${transformId}: ${error}`);
+      }
+    },
+
+    async createAndRunTransform(request: estypes.TransformPutTransformRequest) {
+      const transformId = request.transform_id;
+      await this.createTransform(request);
+      await this.startTransform(transformId);
+
+      // Batch transforms stop on their own after the first checkpoint; continuous ones keep running.
+      const isDone = (stats: estypes.TransformGetTransformStatsTransformStats) =>
+        request.sync === undefined
+          ? stats.state === 'stopped' && stats.checkpointing.last.checkpoint === 1
+          : stats.state !== 'stopped';
+
+      const deadline = Date.now() + TRANSFORM_STATE_TIMEOUT_MS;
+      let stats = await this.getTransformStats({ transform_id: transformId });
+      while (!isDone(stats)) {
+        if (Date.now() > deadline) {
+          throw new Error(
+            `Transform ${transformId} did not reach the expected state (state: ${stats.state}, checkpoint: ${stats.checkpointing.last.checkpoint})`
+          );
+        }
+        await new Promise((resolve) => setTimeout(resolve, TRANSFORM_STATE_POLL_INTERVAL_MS));
+        stats = await this.getTransformStats({ transform_id: transformId });
       }
     },
   };

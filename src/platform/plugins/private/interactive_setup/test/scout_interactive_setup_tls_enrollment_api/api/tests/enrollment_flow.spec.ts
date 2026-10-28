@@ -13,6 +13,7 @@ import { expect } from '@kbn/scout/api';
 import { ERROR_ENROLL_FAILURE, ERROR_OUTSIDE_PREBOOT_STAGE } from '../../../../common';
 import {
   ENROLLMENT_API_KEY_NAME,
+  INTERNAL_API_HEADERS,
   KIBANA_BOOT_TIMEOUT_MS,
   SETUP_SPEC_TIMEOUT_MS,
 } from '../../../helpers/constants';
@@ -61,7 +62,7 @@ apiTest.describe(
 
     apiTest('rejects enrollment with an invalid verification code', async ({ apiClient }) => {
       const response = await apiClient.post(ENROLL_ROUTE, {
-        headers: { 'kbn-xsrf': 'xxx' },
+        headers: INTERNAL_API_HEADERS,
         body: {
           apiKey: enrollmentApiKey,
           code: '000000',
@@ -80,7 +81,7 @@ apiTest.describe(
 
     apiTest('rejects enrollment with a mismatched CA fingerprint', async ({ apiClient }) => {
       const response = await apiClient.post(ENROLL_ROUTE, {
-        headers: { 'kbn-xsrf': 'xxx' },
+        headers: INTERNAL_API_HEADERS,
         body: {
           apiKey: enrollmentApiKey,
           code: verificationCode,
@@ -105,7 +106,7 @@ apiTest.describe(
       await esClient.security.invalidateApiKey({ name: ENROLLMENT_API_KEY_NAME });
 
       const response = await apiClient.post(ENROLL_ROUTE, {
-        headers: { 'kbn-xsrf': 'xxx' },
+        headers: INTERNAL_API_HEADERS,
         body: {
           apiKey: enrollmentApiKey,
           code: verificationCode,
@@ -137,7 +138,7 @@ apiTest.describe(
 
       await apiTest.step('enrollment is accepted', async () => {
         const response = await apiClient.post(ENROLL_ROUTE, {
-          headers: { 'kbn-xsrf': 'xxx' },
+          headers: INTERNAL_API_HEADERS,
           body: payload,
         });
 
@@ -146,7 +147,7 @@ apiTest.describe(
 
       await apiTest.step('a second attempt is rejected as outside the preboot stage', async () => {
         const response = await apiClient.post(ENROLL_ROUTE, {
-          headers: { 'kbn-xsrf': 'xxx' },
+          headers: INTERNAL_API_HEADERS,
           body: payload,
         });
 
