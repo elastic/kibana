@@ -67,4 +67,78 @@ describe('WatchWorkflowsManagementClientImpl', () => {
       'space'
     );
   });
+
+  it('reads the newest finished execution, never a skipped or in-progress one', async () => {
+    const newest = { id: 'run-1', status: ExecutionStatus.FAILED };
+    const searchExecutionsView = jest.fn().mockResolvedValue({ results: [newest], total: 1 });
+    const client = new WatchWorkflowsManagementClientImpl({
+      searchExecutionsView,
+    } as unknown as NonNullable<WorkflowsServerPluginSetup['management']>);
+    const request = httpServerMock.createKibanaRequest();
+
+    await expect(
+      client.getLatestFinishedWorkflowExecution('worker-default', 'space', request)
+    ).resolves.toBe(newest);
+
+    expect(searchExecutionsView).toHaveBeenCalledWith(
+      {
+        request,
+        includeManagedExecutions: true,
+        statuses: [
+          ExecutionStatus.COMPLETED,
+          ExecutionStatus.FAILED,
+          ExecutionStatus.CANCELLED,
+          ExecutionStatus.TIMED_OUT,
+        ],
+        query: { bool: { filter: [{ term: { workflowId: 'worker-default' } }] } },
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+        page: 1,
+        size: 1,
+      },
+      'space'
+    );
+  });
+
+  it('returns undefined when no execution has finished', async () => {
+    const searchExecutionsView = jest.fn().mockResolvedValue({ results: [], total: 0 });
+    const client = new WatchWorkflowsManagementClientImpl({
+      searchExecutionsView,
+    } as unknown as NonNullable<WorkflowsServerPluginSetup['management']>);
+
+    await expect(
+      client.getLatestFinishedWorkflowExecution(
+        'worker-default',
+        'space',
+        httpServerMock.createKibanaRequest()
+      )
+    ).resolves.toBeUndefined();
+  });
+
+  describe('getWorkflowExecution', () => {
+    const setup = () => {
+      const getWorkflowExecution = jest.fn().mockResolvedValue(null);
+      const management = {
+        getClient: jest.fn().mockReturnValue({ getWorkflowExecution }),
+      };
+      const client = new WatchWorkflowsManagementClientImpl(
+        management as unknown as NonNullable<WorkflowsServerPluginSetup['management']>
+      );
+      return { client, getWorkflowExecution };
+    };
+
+    it('passes includeOutput through to the underlying client', async () => {
+      const { client, getWorkflowExecution } = setup();
+      await client.getWorkflowExecution('exec', 'space', httpServerMock.createKibanaRequest(), {
+        includeOutput: true,
+      });
+      expect(getWorkflowExecution).toHaveBeenCalledWith('exec', 'space', { includeOutput: true });
+    });
+
+    it('passes no options when none are given', async () => {
+      const { client, getWorkflowExecution } = setup();
+      await client.getWorkflowExecution('exec', 'space', httpServerMock.createKibanaRequest());
+      expect(getWorkflowExecution).toHaveBeenCalledWith('exec', 'space', undefined);
+    });
+  });
 });

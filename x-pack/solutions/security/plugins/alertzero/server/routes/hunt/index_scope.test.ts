@@ -149,6 +149,57 @@ describe('registerHuntIndexScopeRoute', () => {
     );
   });
 
+  it('warns once with the missing patterns for blocked:empty_universe', async () => {
+    resolveHuntScopeMock.mockResolvedValue({
+      ...okScope,
+      status: 'blocked',
+      resolution: 'blocked:empty_universe',
+      index_patterns: [],
+      missing: ['infosec_zocalo:logs-*', 'custom-edr-*'],
+    });
+    const { handler, context, logger } = makeDeps();
+
+    await handler(
+      context,
+      httpServerMock.createKibanaRequest(),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('infosec_zocalo:logs-*, custom-edr-*')
+    );
+  });
+
+  it('does not warn for an ok scope', async () => {
+    const { handler, context, logger } = makeDeps();
+
+    await handler(
+      context,
+      httpServerMock.createKibanaRequest(),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('does not warn again for blocked:discovery_failed', async () => {
+    resolveHuntScopeMock.mockResolvedValue({
+      ...okScope,
+      status: 'blocked',
+      resolution: 'blocked:discovery_failed',
+      index_patterns: [],
+    });
+    const { handler, context, logger } = makeDeps();
+
+    await handler(
+      context,
+      httpServerMock.createKibanaRequest(),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
   it('logs and returns a generic 500 when resolution throws', async () => {
     resolveHuntScopeMock.mockRejectedValue(new Error('cluster down'));
     const { handler, context, logger } = makeDeps();

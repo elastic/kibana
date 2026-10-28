@@ -67,10 +67,21 @@ export interface WatchWorkflowsManagementClient {
     request: KibanaRequest
   ): Promise<WorkflowExecutionListDto['results'][number] | undefined>;
 
+  /**
+   * The newest execution of one workflow that reached a final status. `skipped` (dropped by the
+   * concurrency rule) and in-progress executions never count, so this is "the last sweep".
+   */
+  getLatestFinishedWorkflowExecution(
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowExecutionListDto['results'][number] | undefined>;
+
   getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { includeOutput?: boolean }
   ): Promise<WorkflowExecutionDto | null>;
 
   cancelAllActiveWorkflowExecutions(
@@ -182,12 +193,41 @@ export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagem
     return results[0];
   }
 
+  async getLatestFinishedWorkflowExecution(
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowExecutionListDto['results'][number] | undefined> {
+    const { results } = await this.management.searchExecutionsView(
+      {
+        request,
+        includeManagedExecutions: true,
+        statuses: [
+          ExecutionStatus.COMPLETED,
+          ExecutionStatus.FAILED,
+          ExecutionStatus.CANCELLED,
+          ExecutionStatus.TIMED_OUT,
+        ],
+        query: { bool: { filter: [{ term: { workflowId } }] } },
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+        page: 1,
+        size: 1,
+      },
+      spaceId
+    );
+    return results[0];
+  }
+
   getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { includeOutput?: boolean }
   ): Promise<WorkflowExecutionDto | null> {
-    return this.management.getClient(request).getWorkflowExecution(workflowExecutionId, spaceId);
+    return this.management
+      .getClient(request)
+      .getWorkflowExecution(workflowExecutionId, spaceId, options);
   }
 
   cancelAllActiveWorkflowExecutions(

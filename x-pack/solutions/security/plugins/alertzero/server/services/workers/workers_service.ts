@@ -38,6 +38,8 @@ import {
   ThreatIntelSupplyNotInstalledError,
   type ThreatIntelSupplyService,
 } from '../threat_intel_supply';
+import { getHuntAccountLabel } from '../watches/hunt/common/resolve_worker_index_coverage';
+import { readLastSweepIndexScope } from '../watches/hunt/common/read_last_sweep_index_scope';
 import type { GetWorkerBlockingReasons } from './worker_blocking_reasons';
 
 /**
@@ -238,6 +240,54 @@ export class WorkersService {
       this.getBlockingReasons(request),
     ]);
     return this.projectWorker(registration, spaceId, request, blockingReasons, agentLookup);
+  }
+
+  /**
+   * The Hunt worker's installed workflow id and stored service account id, for the index
+   * coverage route. Reads only the install status and settings: it never writes through
+   * `ensureAgent` and never reads an execution.
+   */
+  async getHuntCoverageInputs(
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<{ workflowId: string | null; serviceAccountId: string | null }> {
+    const none = { workflowId: null, serviceAccountId: null };
+    const registration = workerRegistry.get(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID);
+    if (!registration) return none;
+
+    let workflowId: string;
+    try {
+      if ((await this.hiddenWorkerIds(request)).has(registration.id)) return none;
+      const managedWorkflows = await this.requireManagedWorkflows();
+      const status = await managedWorkflows.getWorkflowStatus(registration.id, {
+        spaceId,
+        workflowIdSuffix: spaceId,
+      });
+      if (!status.installed || status.status === 'not_managed') return none;
+      workflowId = status.workflowId;
+    } catch (error) {
+      this.logger.debug(
+        `Failed to read the hunt worker status: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return none;
+    }
+
+    try {
+      const managedWorkflows = await this.requireManagedWorkflows();
+      const state = await managedWorkflows.getInstalledWorkflowState(workflowId, spaceId);
+      if (!state?.templateValues) return { workflowId, serviceAccountId: null };
+      const { serviceAccountId } = registration.settings.toSettings(state.templateValues);
+      return { workflowId, serviceAccountId: serviceAccountId ?? null };
+    } catch (error) {
+      this.logger.debug(
+        `Failed to read the hunt worker settings: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return { workflowId, serviceAccountId: null };
+    }
   }
 
   async update(
@@ -455,6 +505,53 @@ export class WorkersService {
     return { outcome: 'updated', response: { worker } };
   }
 
+  /**
+   * Why the Hunt worker's last finished sweep was blocked at its index scope gate, or undefined
+   * when it was not (or the sweep cannot be read). A blocked sweep is a worker state, not a
+   * hidden telemetry value.
+   */
+  private async readHuntBlockedReason({
+    workflowId,
+    spaceId,
+    request,
+    serviceAccountId,
+  }: {
+    workflowId: string;
+    spaceId: string;
+    request: KibanaRequest;
+    serviceAccountId: string | undefined;
+  }): Promise<string | undefined> {
+    try {
+      const management = this.requireManagement();
+      const latest = await management.getLatestFinishedWorkflowExecution(
+        workflowId,
+        spaceId,
+        request
+      );
+      if (!latest) return undefined;
+      const sweep = await readLastSweepIndexScope({
+        management,
+        executionId: latest.id,
+        spaceId,
+        request,
+        logger: this.logger,
+      });
+      const scope = sweep?.scope;
+      if (!sweep || scope?.status !== 'blocked') return undefined;
+      const account = getHuntAccountLabel({ serviceAccountId });
+      return scope.resolution === 'blocked:discovery_failed'
+        ? `The sweep at ${sweep.checkedAt} running as ${account} could not resolve this space's default data view`
+        : `The sweep at ${sweep.checkedAt} running as ${account} could not see any index in this space's default data view`;
+    } catch (error) {
+      this.logger.debug(
+        `Failed to read the last hunt sweep: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return undefined;
+    }
+  }
+
   private async projectWorker(
     registration: WorkerRegistration,
     spaceId: string,
@@ -475,6 +572,7 @@ export class WorkersService {
     let settings = registration.settings.toSettings(registration.settings.createDefaultValues());
     let settingsUnavailable = false;
     let definition: WorkflowYaml | null = null;
+    let degradedReason: string | undefined;
 
     if (status.installed) {
       enabled = Boolean(status.enabled);
@@ -515,6 +613,19 @@ export class WorkersService {
           }`
         );
       }
+
+      if (
+        registration.id === SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID &&
+        enabled &&
+        !settingsUnavailable
+      ) {
+        degradedReason = await this.readHuntBlockedReason({
+          workflowId: status.workflowId,
+          spaceId,
+          request,
+          serviceAccountId: settings.serviceAccountId,
+        });
+      }
     } else {
       definition = getDefinitionFromTemplate(registration);
     }
@@ -525,9 +636,17 @@ export class WorkersService {
       watchIds: [registration.catalog.watchId],
       enabled,
       lastRun,
-      state: settingsUnavailable ? 'unavailable' : enabled ? 'ok' : 'paused',
+      state: settingsUnavailable
+        ? 'unavailable'
+        : degradedReason
+        ? 'degraded'
+        : enabled
+        ? 'ok'
+        : 'paused',
       ...(settingsUnavailable
         ? { stateReason: 'Worker settings could not be read from durable storage' }
+        : degradedReason
+        ? { stateReason: degradedReason }
         : {}),
       settings,
       settingsRevision,

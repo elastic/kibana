@@ -171,6 +171,7 @@ const createPersistentHarness = () => {
     getWorkflows: jest.fn(),
     getWorkflowExecutions: jest.fn(async () => ({ results: [], page: 1, size: 10, total: 0 })),
     getWorkflowExecution: jest.fn(async () => null),
+    getLatestFinishedWorkflowExecution: jest.fn(async () => undefined),
     cancelAllActiveWorkflowExecutions: jest.fn(async () => undefined),
     updateWorkflow,
   } as unknown as WatchWorkflowsManagementClient;
@@ -1823,6 +1824,231 @@ describe('WorkersService', () => {
       it('returns the expected result', async () => {
         expect((await run(row)).result).toEqual(row.expectedResult);
       });
+    });
+  });
+});
+
+describe('WorkersService Hunt index coverage', () => {
+  const ACCOUNT = 'kibana/alertzero_threat_hunt';
+  const noopSupply = {
+    assertHardGate: jest.fn(async () => undefined),
+    ensureSupplyForSpace: jest.fn(async () => undefined),
+    teardownSupplyForSpace: jest.fn(async () => undefined),
+  } as unknown as ThreatIntelSupplyService;
+
+  const blockedScope = (resolution: string) => ({
+    status: 'blocked',
+    resolution,
+    index_patterns: [],
+    missing: ['logs-*'],
+    report_matches: [],
+    actionable_indices: [],
+    window: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-31T00:00:00.000Z' },
+    row_limit: 25,
+  });
+
+  const setup = async ({ enabled = true }: { enabled?: boolean } = {}) => {
+    const harness = createPersistentHarness();
+    const logger = loggingSystemMock.createLogger() as Logger;
+    const service = new WorkersService(
+      harness.management,
+      Promise.resolve(harness.managedWorkflows),
+      logger,
+      {},
+      async (_request, registration, options) => {
+        await harness.install(registration.id, options);
+      },
+      async () => [],
+      noopSupply
+    );
+    await service.update(
+      HUNT,
+      { enabled, settings: { serviceAccountId: ACCOUNT }, settingsRevision: null },
+      SPACE,
+      request
+    );
+    const mocks = harness.management as unknown as {
+      getLatestFinishedWorkflowExecution: jest.Mock;
+      getWorkflowExecution: jest.Mock;
+      getWorkflowExecutions: jest.Mock;
+    };
+    mocks.getLatestFinishedWorkflowExecution.mockClear();
+    mocks.getWorkflowExecution.mockClear();
+    return { harness, service, mocks, logger };
+  };
+
+  const huntOf = async (service: WorkersService) =>
+    (await service.list(request, SPACE)).workers.find(({ id }) => id === HUNT);
+
+  const finishedSweep = (
+    mocks: { getLatestFinishedWorkflowExecution: jest.Mock; getWorkflowExecution: jest.Mock },
+    scope: unknown
+  ) => {
+    mocks.getLatestFinishedWorkflowExecution.mockResolvedValue({ id: 'exec-finished' });
+    mocks.getWorkflowExecution.mockResolvedValue({
+      startedAt: 's',
+      finishedAt: 'f',
+      stepExecutions: [
+        {
+          stepId: 'check_index_scope',
+          startedAt: 's',
+          finishedAt: '2026-10-28T10:00:00.000Z',
+          output: scope,
+        },
+      ],
+    });
+  };
+
+  describe('degraded state', () => {
+    it('is degraded with the empty-universe reason after a blocked:empty_universe sweep', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, blockedScope('blocked:empty_universe'));
+
+      const hunt = await huntOf(service);
+
+      expect(hunt).toMatchObject({
+        state: 'degraded',
+        stateReason: `The sweep at 2026-10-28T10:00:00.000Z running as ${ACCOUNT} could not see any index in this space's default data view`,
+      });
+    });
+
+    it('is degraded with the resolve reason after a blocked:discovery_failed sweep', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, blockedScope('blocked:discovery_failed'));
+
+      const hunt = await huntOf(service);
+
+      expect(hunt?.stateReason).toContain("could not resolve this space's default data view");
+    });
+
+    it('stays ok after a sweep that resolved', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, {
+        ...blockedScope('universe'),
+        status: 'ok',
+        index_patterns: ['logs-*'],
+      });
+
+      expect((await huntOf(service))?.state).toBe('ok');
+    });
+
+    it('reads the execution named by the finished-execution lookup', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, blockedScope('blocked:empty_universe'));
+      mocks.getWorkflowExecutions.mockResolvedValue({
+        results: [{ id: 'exec-skipped', status: 'skipped', startedAt: '2026-10-28T11:00:00.000Z' }],
+        page: 1,
+        size: 1,
+        total: 1,
+      });
+
+      const hunt = await huntOf(service);
+
+      expect(mocks.getWorkflowExecution).toHaveBeenCalledWith('exec-finished', SPACE, request, {
+        includeOutput: true,
+      });
+      expect(hunt?.state).toBe('degraded');
+    });
+
+    it('keeps lastRun from the newest execution of any status', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, blockedScope('blocked:empty_universe'));
+      mocks.getWorkflowExecutions.mockResolvedValue({
+        results: [{ id: 'exec-skipped', status: 'skipped', startedAt: '2026-10-28T11:00:00.000Z' }],
+        page: 1,
+        size: 1,
+        total: 1,
+      });
+
+      expect((await huntOf(service))?.lastRun).toBe('2026-10-28T11:00:00.000Z');
+    });
+
+    it('stays ok when the sweep read throws', async () => {
+      const { service, mocks } = await setup();
+      mocks.getLatestFinishedWorkflowExecution.mockRejectedValue(new Error('boom'));
+
+      expect((await huntOf(service))?.state).toBe('ok');
+    });
+
+    it('stays paused and reads nothing when the hunt worker is disabled', async () => {
+      const { service, mocks } = await setup({ enabled: false });
+      finishedSweep(mocks, blockedScope('blocked:empty_universe'));
+
+      expect((await huntOf(service))?.state).toBe('paused');
+      expect(mocks.getLatestFinishedWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('never reads a sweep for another worker', async () => {
+      const { service, mocks } = await setup();
+      mocks.getLatestFinishedWorkflowExecution.mockClear();
+
+      await service.get(TRIAGE, request, SPACE);
+
+      expect(mocks.getLatestFinishedWorkflowExecution).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getHuntCoverageInputs', () => {
+    it('returns the workflow id and the stored account id', async () => {
+      const { service } = await setup();
+
+      await expect(service.getHuntCoverageInputs(SPACE, request)).resolves.toEqual({
+        workflowId: expect.any(String),
+        serviceAccountId: ACCOUNT,
+      });
+    });
+
+    it('returns nulls when the hunt worker is not installed', async () => {
+      const harness = createPersistentHarness();
+
+      await expect(harness.createService().getHuntCoverageInputs(SPACE, request)).resolves.toEqual({
+        workflowId: null,
+        serviceAccountId: null,
+      });
+    });
+
+    it('returns nulls when the status read throws', async () => {
+      const { harness, service } = await setup();
+      (harness.managedWorkflows.getWorkflowStatus as jest.Mock).mockRejectedValue(
+        new Error('boom')
+      );
+
+      await expect(service.getHuntCoverageInputs(SPACE, request)).resolves.toEqual({
+        workflowId: null,
+        serviceAccountId: null,
+      });
+    });
+
+    it('keeps the workflow id with a null account when the state has no template values', async () => {
+      const { harness, service } = await setup();
+      (harness.managedWorkflows.getInstalledWorkflowState as jest.Mock).mockResolvedValue({
+        templateValues: null,
+      });
+
+      await expect(service.getHuntCoverageInputs(SPACE, request)).resolves.toEqual({
+        workflowId: expect.any(String),
+        serviceAccountId: null,
+      });
+    });
+
+    it('keeps the workflow id with a null account when the state read throws', async () => {
+      const { harness, service } = await setup();
+      (harness.managedWorkflows.getInstalledWorkflowState as jest.Mock).mockRejectedValue(
+        new Error('boom')
+      );
+
+      await expect(service.getHuntCoverageInputs(SPACE, request)).resolves.toEqual({
+        workflowId: expect.any(String),
+        serviceAccountId: null,
+      });
+    });
+
+    it('never reads an execution', async () => {
+      const { service, mocks } = await setup();
+
+      await service.getHuntCoverageInputs(SPACE, request);
+
+      expect(mocks.getWorkflowExecution).not.toHaveBeenCalled();
     });
   });
 });

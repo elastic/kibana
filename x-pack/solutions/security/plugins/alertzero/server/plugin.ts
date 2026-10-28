@@ -314,6 +314,11 @@ export class AlertZeroPlugin
       getHuntServices: () => this.requireHuntServices(),
       getScanFailuresService: () => this.requireScanFailuresService(),
       getThreatIntelSupplyService: () => this.threatIntelSupplyService,
+      isServerless: this.isServerless,
+      getWorkflowsManagement: () =>
+        this.workflowsManagementApi
+          ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)
+          : undefined,
       reportTelemetryEvent: createAlertZeroTelemetryReporter({
         analytics: coreSetup.analytics,
         logger: this.logger.get('telemetry'),
