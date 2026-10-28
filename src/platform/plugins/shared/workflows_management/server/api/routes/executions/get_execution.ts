@@ -13,6 +13,7 @@ import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { i18n } from '@kbn/i18n';
 import { WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT } from '../../../../common';
 import type { RouteDependencies } from '../types';
+import { resolveExecutedByProfiles } from '../utils/resolve_executed_by_profiles';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
@@ -22,7 +23,13 @@ import {
 import { executionIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerGetExecutionRoute({ router, api, spaces }: RouteDependencies) {
+export function registerGetExecutionRoute({
+  router,
+  api,
+  spaces,
+  workflowsService,
+  logger,
+}: RouteDependencies) {
   router.versioned
     .get({
       path: '/api/workflows/executions/{executionId}',
@@ -78,7 +85,10 @@ export function registerGetExecutionRoute({ router, api, spaces }: RouteDependen
             return response.notFound();
           }
           assertCanReadManagedWorkflowExecution(request, workflowExecution);
-          return response.ok({ body: workflowExecution });
+          const [body] = await resolveExecutedByProfiles({ workflowsService, logger }, [
+            workflowExecution,
+          ]);
+          return response.ok({ body });
         } catch (error) {
           if (isMaximumResponseSizeExceededError(error)) {
             return response.customError({
