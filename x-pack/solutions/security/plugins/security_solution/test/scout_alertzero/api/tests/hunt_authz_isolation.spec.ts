@@ -6,7 +6,6 @@
  */
 
 import {
-  HUNT_INDEX_SCOPE_URL,
   HUNT_THREAT_INTEL_SUPPLY_RESTORE_URL,
   HUNT_THREAT_INTEL_SUPPLY_URL,
 } from '@kbn/alertzero-common';
@@ -22,6 +21,7 @@ import {
   cleanupThreatReportsByIds,
   enableAlertZeroInSpace,
   HUNT_ALL_ROUTES,
+  HUNT_GET_ROUTES,
   HUNT_READ_ROUTES,
   HUNT_WORKER_URL,
   HUNT_WRITE_ROUTES,
@@ -39,6 +39,7 @@ const SPACE_B = `hunt-authz-b-${RUN}`;
 const REPORT_ID = `scout-evidence-${RUN}`;
 const REPORT_SOURCE_NAME = `scout-isolation-${RUN}`;
 const HUNT_READ_ROUTE_SET: ReadonlySet<string> = new Set(HUNT_READ_ROUTES);
+const HUNT_GET_ROUTE_SET: ReadonlySet<string> = new Set(HUNT_GET_ROUTES);
 
 interface ErrorBody {
   message?: string;
@@ -108,14 +109,13 @@ apiTest.describe(
         const headers = withHuntHeaders(cookieHeader);
 
         for (const path of HUNT_ALL_ROUTES) {
-          const response =
-            path === HUNT_INDEX_SCOPE_URL
-              ? await apiClient.get(spaceUrl(path, SPACE_B), { headers, responseType: 'json' })
-              : await apiClient.post(spaceUrl(path, SPACE_B), {
-                  headers,
-                  responseType: 'json',
-                  body: {},
-                });
+          const response = HUNT_GET_ROUTE_SET.has(path)
+            ? await apiClient.get(spaceUrl(path, SPACE_B), { headers, responseType: 'json' })
+            : await apiClient.post(spaceUrl(path, SPACE_B), {
+                headers,
+                responseType: 'json',
+                body: {},
+              });
           expectMissingKibanaPrivilege(
             response,
             HUNT_READ_ROUTE_SET.has(path) ? 'alertzero_read' : 'alertzero_write'
