@@ -20,6 +20,7 @@ import type { DecisionTreeStore } from '../decision_trees/store';
 import type { MemoryPageStore } from '../memory/page_store';
 import type { KnowledgePurgeClient } from '../purge/purge_client';
 import type { GetTriggerEmitter } from '../types';
+import type { InvestigatorServiceAccountService } from '../lib/service_account/investigator_service_account';
 
 export type GetInvestigationsClient = (
   request: KibanaRequest,
@@ -70,5 +71,7 @@ export interface NightshiftInvestigationsRouteHandlerResources
   isDecisionTreesEnabled: () => boolean;
   getMemoryPageStore: GetMemoryPageStore;
   isMemoryEnabled: () => boolean;
+  getInvestigatorServiceAccountService: () => InvestigatorServiceAccountService;
+  getSpaceId: (request: KibanaRequest) => string;
   getKnowledgePurgeClient: GetKnowledgePurgeClient;
 }
