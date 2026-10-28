@@ -10,6 +10,7 @@ import { FillPoolResult } from '../lib/fill_pool';
 import { asOk, asErr } from '../lib/result_type';
 import { PollingError, PollingErrorType } from '../polling';
 import { asTaskPollingCycleEvent } from '../task_events';
+import { taskManagerMetricsTelemetry } from '../otel/task_metrics_telemetry';
 import { TaskClaimMetricsAggregator } from './task_claim_metrics_aggregator';
 
 export const taskClaimSuccessEvent = asTaskPollingCycleEvent<string>(
@@ -110,5 +111,21 @@ describe('TaskClaimMetricsAggregator', () => {
       duration: { counts: [], values: [] },
       duration_values: [],
     });
+  });
+
+  test('records claims to OTel telemetry', () => {
+    const recordSpy = jest
+      .spyOn(taskManagerMetricsTelemetry, 'recordTaskClaim')
+      .mockImplementation(() => {});
+    try {
+      taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimSuccessEvent);
+      taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimFailureEvent);
+      expect(recordSpy.mock.calls).toEqual([
+        [{ success: true, durationMs: 10 }],
+        [{ success: false, durationMs: undefined }],
+      ]);
+    } finally {
+      recordSpy.mockRestore();
+    }
   });
 });

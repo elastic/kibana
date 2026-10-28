@@ -10,6 +10,7 @@ import { asTaskManagerMetricEvent } from '../task_events';
 import type { TaskManagerMetrics } from './task_metrics_collector';
 import { TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
+import { taskManagerMetricsTelemetry } from '../otel/task_metrics_telemetry';
 
 export const getTaskManagerMetricEvent = (value: TaskManagerMetrics) => {
   return asTaskManagerMetricEvent(asOk(value));
@@ -309,5 +310,24 @@ describe('TaskOverdueMetricsAggregator', () => {
         },
       },
     });
+  });
+
+  test('records the overdue snapshot to OTel telemetry', () => {
+    const recordSpy = jest
+      .spyOn(taskManagerMetricsTelemetry, 'recordTaskOverdue')
+      .mockImplementation(() => {});
+    try {
+      const numOverdueTasks = {
+        'actions:.email': [{ key: 0, doc_count: 1 }],
+        total: [{ key: 0, doc_count: 1 }],
+      };
+      taskOverdueMetricsAggregator.processTaskLifecycleEvent(
+        getTaskManagerMetricEvent({ numOverdueTasks })
+      );
+      expect(recordSpy).toHaveBeenCalledTimes(1);
+      expect(recordSpy).toHaveBeenCalledWith(numOverdueTasks, expect.anything());
+    } finally {
+      recordSpy.mockRestore();
+    }
   });
 });

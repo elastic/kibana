@@ -70,6 +70,7 @@ import {
 import type { TaskManagerConfig } from '../config';
 import type { ApiKeyStrategy } from '../api_key_strategy';
 import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
+import { taskManagerMetricsTelemetry } from '../otel/task_metrics_telemetry';
 import { TaskValidator } from '../task_validator';
 import { getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt, getRRuleScheduleDurationMs } from '../lib/get_next_run_at';
@@ -443,11 +444,12 @@ export class TaskManagerRunner implements TaskRunner {
           executionUuid: this.uuid,
         });
 
-        this.onTaskEvent(
-          asTaskManagerStatEvent(
-            'runDelay',
-            asOk(getTaskDelayInSeconds(this.instance.task.scheduledAt))
-          )
+        const runDelaySeconds = getTaskDelayInSeconds(this.instance.task.scheduledAt);
+        this.onTaskEvent(asTaskManagerStatEvent('runDelay', asOk(runDelaySeconds)));
+        taskManagerMetricsTelemetry.recordTaskRunDelay(
+          this.taskType,
+          runDelaySeconds,
+          this.definition?.taskTypeGroup
         );
 
         // For long running tasks, update retryAt on an interval to allow for quicker task recovery
