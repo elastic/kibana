@@ -6,30 +6,21 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useContext } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
+import { ChangeHistoryConfigContext } from '../../provider/change_history_config_context';
+import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
+import { ChangeHistoryActionBadge } from '../timeline/change_history_action_badge';
 import { changeHistoryPreviewTypography } from './change_history_preview_typography';
 
-export type ChangeHistoryCompareBadgeColor = 'hollow' | 'warning';
-
-/** Version labels for the compare headers. Baseline = older side; current = newer / selected side. */
-export interface ChangeHistoryCompareIndicator {
-  baselineVersion?: number;
-  currentVersion?: number;
-  currentBadgeLabel?: string;
-  currentBadgeColor?: ChangeHistoryCompareBadgeColor;
-}
-
+/** The compared rows. Baseline = older side; target = newer / selected side. */
 export interface ChangeHistoryCompareIndicatorProps {
-  indicator: ChangeHistoryCompareIndicator;
+  baseline: ChangeHistoryListItem;
+  target: ChangeHistoryListItem;
 }
-
-const versionBadgeStyle = css({
-  fontWeight: 500,
-});
 
 const compareHeaderBaseStyle = ({ euiTheme }: UseEuiTheme) =>
   css(changeHistoryPreviewTypography, {
@@ -61,53 +52,16 @@ const compareIndicatorStyles = {
     }),
 };
 
-const VersionBadge = ({
-  version,
-  badgeLabel,
-  badgeColor = 'hollow',
-  testSubj,
-}: {
-  version?: number;
-  badgeLabel?: string;
-  badgeColor?: ChangeHistoryCompareBadgeColor;
-  testSubj: string;
-}): JSX.Element | null => {
-  const { euiTheme } = useEuiTheme();
+/** Renders the host's `renderBadge` for the row, falling back to the default action badge. */
+const CompareRowBadge = ({ item }: { item: ChangeHistoryListItem }): JSX.Element => {
+  const renderBadge = useContext(ChangeHistoryConfigContext)?.renderBadge;
 
-  if (version != null) {
-    return (
-      <EuiBadge color="hollow" css={versionBadgeStyle} data-test-subj={testSubj}>
-        {i18n.translate('xpack.changeHistoryUi.preview.versionBadge', {
-          defaultMessage: 'v{version}',
-          values: { version },
-        })}
-      </EuiBadge>
-    );
-  }
-
-  if (badgeLabel) {
-    return (
-      <EuiBadge
-        color={badgeColor === 'warning' ? euiTheme.colors.backgroundLightWarning : 'hollow'}
-        css={versionBadgeStyle}
-        data-test-subj={testSubj}
-      >
-        {badgeLabel}
-      </EuiBadge>
-    );
-  }
-
-  return (
-    <EuiText size="s" color="subdued" data-test-subj={testSubj}>
-      {i18n.translate('xpack.changeHistoryUi.preview.versionBadgeFallback', {
-        defaultMessage: 'Selected version',
-      })}
-    </EuiText>
-  );
+  return <>{renderBadge ? renderBadge({ item }) : <ChangeHistoryActionBadge item={item} />}</>;
 };
 
 export const ChangeHistoryCompareIndicatorBar = ({
-  indicator,
+  baseline,
+  target,
 }: ChangeHistoryCompareIndicatorProps): JSX.Element => {
   const styles = useMemoCss(compareIndicatorStyles);
 
@@ -127,17 +81,15 @@ export const ChangeHistoryCompareIndicatorBar = ({
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <VersionBadge
-          version={indicator.baselineVersion}
-          testSubj="changeHistoryCompareIndicatorBadge"
-        />
+        <CompareRowBadge item={baseline} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
 export const ChangeHistoryCompareSplitPaneLabels = ({
-  indicator,
+  baseline,
+  target,
 }: ChangeHistoryCompareIndicatorProps): JSX.Element => {
   const styles = useMemoCss(compareIndicatorStyles);
 
@@ -158,10 +110,7 @@ export const ChangeHistoryCompareSplitPaneLabels = ({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <VersionBadge
-              version={indicator.baselineVersion}
-              testSubj="changeHistoryCompareSplitBaselineBadge"
-            />
+            <CompareRowBadge item={baseline} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -175,12 +124,7 @@ export const ChangeHistoryCompareSplitPaneLabels = ({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <VersionBadge
-              version={indicator.currentVersion}
-              badgeLabel={indicator.currentBadgeLabel}
-              badgeColor={indicator.currentBadgeColor}
-              testSubj="changeHistoryCompareSplitCurrentBadge"
-            />
+            <CompareRowBadge item={target} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

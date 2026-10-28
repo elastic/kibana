@@ -14,9 +14,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { monaco } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { ChangeHistoryCompareMode } from '../../telemetry';
-import type { ChangeHistoryDiffTelemetry } from '../../types';
+import type { ChangeHistoryCompareSpec, ChangeHistoryDiffTelemetry } from '../../types';
 import { useChangeHistoryDiffModeOptions } from './change_history_compare_mode_setting';
-import type { ChangeHistoryCompareIndicator } from './change_history_compare_indicator';
 import {
   ChangeHistoryCompareIndicatorBar,
   ChangeHistoryCompareSplitPaneLabels,
@@ -65,8 +64,8 @@ export interface ChangeHistoryPreviewProps {
   /** Monaco language id. Defaults to `json`. */
   language?: ChangeHistoryMonacoLanguage;
   diffTelemetry?: ChangeHistoryDiffTelemetry;
-  /** Version labels shown above the diff panes. */
-  compareIndicator?: ChangeHistoryCompareIndicator;
+  /** When provided, the compared rows are labelled above the diff panes using the host's `renderBadge`. */
+  compareSpec?: ChangeHistoryCompareSpec;
   /**
    * Extra Monaco options applied to the editors (and both diff panes), e.g. to show validation
    * squiggles. Keep the identity stable (memoize) to avoid reapplying on every render.
@@ -115,7 +114,7 @@ export const ChangeHistoryPreview = ({
   target,
   language = 'json',
   diffTelemetry,
-  compareIndicator,
+  compareSpec,
   editorOptions,
   renderFooter,
   extraSettings,
@@ -177,11 +176,17 @@ export const ChangeHistoryPreview = ({
           `,
         ]}
       >
-        {isCompareMode && compareIndicator ? (
+        {isCompareMode && compareSpec ? (
           compareMode === 'split' ? (
-            <ChangeHistoryCompareSplitPaneLabels indicator={compareIndicator} />
+            <ChangeHistoryCompareSplitPaneLabels
+              baseline={compareSpec.baseline}
+              target={compareSpec.target}
+            />
           ) : (
-            <ChangeHistoryCompareIndicatorBar indicator={compareIndicator} />
+            <ChangeHistoryCompareIndicatorBar
+              baseline={compareSpec.baseline}
+              target={compareSpec.target}
+            />
           )
         ) : (
           // Keeps the header grid row occupied so the content and footer stay in their rows.

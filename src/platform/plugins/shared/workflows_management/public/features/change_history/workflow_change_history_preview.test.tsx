@@ -133,7 +133,6 @@ describe('workflow change history preview', () => {
     expect(monaco.editor.createModel).toHaveBeenNthCalledWith(2, 'name: current\n', 'yaml');
     expect(screen.getByTestId('changeHistoryCompareIndicator')).toBeInTheDocument();
     expect(screen.getByText('Comparing with:')).toBeInTheDocument();
-    expect(screen.getByTestId('changeHistoryCompareIndicatorBadge')).toHaveTextContent('v1');
   });
 
   it('shows target yaml while compare context is loading', () => {

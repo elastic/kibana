@@ -9,10 +9,21 @@ import '@testing-library/jest-dom';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { monaco } from '@kbn/code-editor';
+import type { ChangeHistoryConfigValue } from '../../provider/change_history_config_context';
+import { ChangeHistoryConfigContext } from '../../provider/change_history_config_context';
+import type { ChangeHistoryDetail, ChangeHistoryListItem } from '../../types';
 import { TestProvider } from '../../test_utils/test_providers';
 import type { ChangeHistoryPreviewEditorContext } from './change_history_preview';
 import { ChangeHistoryPreview } from './change_history_preview';
 import { ChangeHistoryPreviewSettingsSection } from './change_history_preview_settings_popover';
+
+const detail: ChangeHistoryDetail = {
+  id: 'change-1',
+  timestamp: '2026-06-16T12:00:00.000Z',
+  actor: { name: 'Alice' },
+  action: 'update',
+  snapshot: {},
+};
 
 const mockFooterContext = jest.fn();
 
@@ -160,15 +171,18 @@ describe('ChangeHistoryPreview', () => {
     renderPreview({
       target: 'name: same\n',
       baseline: 'name: same\n',
-      compareIndicator: {
-        baselineVersion: 69,
-        currentVersion: 71,
+      compareSpec: {
+        comparisonType: 'vs_previous',
+        baseline: { ...detail, action: 'baseline-action' },
+        target: { ...detail, action: 'target-action' },
       },
     });
 
     expect(screen.getByTestId('changeHistoryCompareIndicator')).toBeInTheDocument();
     expect(screen.getByText('Comparing with:')).toBeInTheDocument();
-    expect(screen.getByTestId('changeHistoryCompareIndicatorBadge')).toHaveTextContent('v69');
+    expect(screen.getByTestId('changeHistoryCompareIndicator')).toHaveTextContent(
+      'baseline-action'
+    );
     expect(mockCreateDiffEditor).toHaveBeenCalled();
     expect(screen.getByTestId('changeHistoryDiffNavigator')).toHaveTextContent('No changes');
 
@@ -259,15 +273,18 @@ describe('ChangeHistoryPreview', () => {
     renderPreview({
       target: 'name: current\n',
       baseline: 'name: original\n',
-      compareIndicator: {
-        baselineVersion: 5,
-        currentVersion: 8,
+      compareSpec: {
+        comparisonType: 'vs_previous',
+        baseline: { ...detail, action: 'baseline-action' },
+        target: { ...detail, action: 'target-action' },
       },
     });
 
     expect(screen.getByTestId('changeHistoryCompareIndicator')).toBeInTheDocument();
     expect(screen.getByText('Comparing with:')).toBeInTheDocument();
-    expect(screen.getByTestId('changeHistoryCompareIndicatorBadge')).toHaveTextContent('v5');
+    expect(screen.getByTestId('changeHistoryCompareIndicator')).toHaveTextContent(
+      'baseline-action'
+    );
   });
 
   it('shows split pane labels when compare mode is split', () => {
@@ -275,9 +292,10 @@ describe('ChangeHistoryPreview', () => {
     renderPreview({
       target: 'name: current\n',
       baseline: 'name: original\n',
-      compareIndicator: {
-        baselineVersion: 5,
-        currentVersion: 8,
+      compareSpec: {
+        comparisonType: 'vs_previous',
+        baseline: { ...detail, action: 'baseline-action' },
+        target: { ...detail, action: 'target-action' },
       },
     });
 
@@ -287,30 +305,45 @@ describe('ChangeHistoryPreview', () => {
     expect(screen.getByTestId('changeHistoryCompareSplitPaneLabels')).toBeInTheDocument();
     expect(screen.getByText('Previous version:')).toBeInTheDocument();
     expect(screen.getByText('Selected version:')).toBeInTheDocument();
-    expect(screen.getByTestId('changeHistoryCompareSplitBaselineBadge')).toHaveTextContent('v5');
-    expect(screen.getByTestId('changeHistoryCompareSplitCurrentBadge')).toHaveTextContent('v8');
+    expect(screen.getByTestId('changeHistoryCompareSplitPaneLabels')).toHaveTextContent(
+      'baseline-action'
+    );
+    expect(screen.getByTestId('changeHistoryCompareSplitPaneLabels')).toHaveTextContent(
+      'target-action'
+    );
     expect(screen.queryByTestId('changeHistoryCompareIndicator')).not.toBeInTheDocument();
   });
 
-  it('shows the unsaved changes badge for the selected pane when there is no version', () => {
+  it('renders the host renderBadge for each compared row', () => {
     jest.useFakeTimers();
-    renderPreview({
-      target: 'name: draft\n',
-      baseline: 'name: original\n',
-      compareIndicator: {
-        baselineVersion: 2,
-        currentBadgeLabel: 'Unsaved changes',
-        currentBadgeColor: 'warning',
-      },
-    });
+    render(
+      <TestProvider>
+        <ChangeHistoryConfigContext.Provider
+          value={
+            {
+              renderBadge: ({ item }: { item: ChangeHistoryListItem }) => `custom:${item.action}`,
+            } as ChangeHistoryConfigValue
+          }
+        >
+          <ChangeHistoryPreview
+            target="name: draft\n"
+            baseline="name: original\n"
+            compareSpec={{
+              comparisonType: 'vs_previous',
+              baseline: { ...detail, action: 'baseline-action' },
+              target: { ...detail, action: 'target-action' },
+            }}
+          />
+        </ChangeHistoryConfigContext.Provider>
+      </TestProvider>
+    );
 
     fireEvent.click(screen.getByTestId('changeHistoryPreviewSettingsButton'));
     fireEvent.click(screen.getByTestId('changeHistoryCompareSplit'));
 
-    expect(screen.getByTestId('changeHistoryCompareSplitCurrentBadge')).toHaveTextContent(
-      'Unsaved changes'
-    );
-    expect(screen.getByText('Selected version:')).toBeInTheDocument();
+    const labels = screen.getByTestId('changeHistoryCompareSplitPaneLabels');
+    expect(labels).toHaveTextContent('custom:baseline-action');
+    expect(labels).toHaveTextContent('custom:target-action');
   });
 
   it('scrolls to the first diff when diff computation completes', () => {

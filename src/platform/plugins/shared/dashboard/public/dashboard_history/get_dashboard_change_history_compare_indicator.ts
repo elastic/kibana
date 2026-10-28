@@ -20,7 +20,7 @@ import { unsavedChangesBadgeStrings } from '../dashboard_app/_dashboard_app_stri
 const getVersion = ({ metadata }: ChangeHistoryDetail): number | undefined =>
   typeof metadata?.version === 'number' ? metadata.version : undefined;
 
-/** Version labels for the diff headers. Baseline = older side; target = newer / selected side. */
+/** version labels for the diff headers. Baseline = older side; target = newer / selected side. */
 export const getDashboardChangeHistoryCompareIndicator = ({
   baseline,
   target,

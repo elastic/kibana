@@ -17,7 +17,6 @@ import {
   ChangeHistoryPreviewFooterSpacer,
   getChangeHistoryValidationDisplayOptions,
 } from '@kbn/change-history-ui';
-import { getWorkflowChangeHistoryCompareIndicator } from './get_workflow_change_history_compare_indicator';
 import { getWorkflowYamlFromSnapshot } from './get_workflow_yaml_from_snapshot';
 import { WorkflowChangeHistoryPreviewSettings } from './workflow_change_history_preview_settings';
 import { WorkflowChangeHistoryPreviewValidation } from './workflow_change_history_preview_validation';
@@ -53,14 +52,14 @@ const validationDecorationStyles = ({ euiTheme }: UseEuiTheme) =>
 interface WorkflowChangeHistoryPreviewProps {
   baselineYaml?: string;
   targetYaml: string;
-  compareIndicator?: ReturnType<typeof getWorkflowChangeHistoryCompareIndicator>;
+  compareSpec?: Parameters<ChangeHistoryPreviewRenderFn>[0]['compareSpec'];
   diffTelemetry?: Parameters<ChangeHistoryPreviewRenderFn>[0]['diffTelemetry'];
 }
 
 const WorkflowChangeHistoryPreview = ({
   baselineYaml,
   targetYaml,
-  compareIndicator,
+  compareSpec,
   diffTelemetry,
 }: WorkflowChangeHistoryPreviewProps): JSX.Element => {
   const [highlightValidationErrors, setHighlightValidationErrors] = useState(false);
@@ -76,7 +75,7 @@ const WorkflowChangeHistoryPreview = ({
       target={targetYaml}
       language="yaml"
       diffTelemetry={diffTelemetry}
-      compareIndicator={compareIndicator}
+      compareSpec={compareSpec}
       containerStyles={validationDecorationStyles}
       editorOptions={editorOptions}
       extraSettings={
@@ -124,7 +123,7 @@ export const renderWorkflowChangeHistoryPreview: ChangeHistoryPreviewRenderFn = 
       baselineYaml={baselineYaml}
       targetYaml={targetYaml}
       diffTelemetry={diffTelemetry}
-      compareIndicator={getWorkflowChangeHistoryCompareIndicator(compareSpec)}
+      compareSpec={compareSpec}
     />
   );
 };

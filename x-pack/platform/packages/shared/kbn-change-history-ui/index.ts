@@ -29,8 +29,6 @@ export {
   getChangeHistoryValidationDisplayOptions,
 } from './src/components/preview';
 export type {
-  ChangeHistoryCompareBadgeColor,
-  ChangeHistoryCompareIndicator,
   ChangeHistoryPreviewProps,
   ChangeHistoryMonacoLanguage,
   ChangeHistoryPreviewEditorContext,

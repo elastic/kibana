@@ -16,8 +16,4 @@ export type {
   ChangeHistoryMonacoLanguage,
   ChangeHistoryPreviewEditorContext,
 } from './change_history_preview';
-export type {
-  ChangeHistoryCompareBadgeColor,
-  ChangeHistoryCompareIndicator,
-} from './change_history_compare_indicator';
 export { getChangeHistoryValidationDisplayOptions } from './monaco_options';

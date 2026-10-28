@@ -15,8 +15,6 @@ import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
 import { ChangeHistoryPreview } from '@kbn/change-history-ui';
 
-import { getDashboardChangeHistoryCompareIndicator } from './get_dashboard_change_history_compare_indicator';
-
 /** the preview embeds a second dashboard renderer, so only load it once a change is previewed */
 const LazyDashboardPreview = lazy(async () => {
   const { DashboardPreview } = await import('./dashboard_preview');
@@ -46,7 +44,7 @@ export const DashboardChangeHistoryView = ({
       <ChangeHistoryPreview
         baseline={compareSpec.baseline.snapshot as object}
         target={compareSpec.target.snapshot as object}
-        compareIndicator={getDashboardChangeHistoryCompareIndicator(compareSpec)}
+        compareSpec={compareSpec}
         diffTelemetry={diffTelemetry}
         language="json"
       />

@@ -500,10 +500,16 @@ describe('WorkflowChangeHistoryListItem', () => {
     });
 
     expect(screen.getByText('Selected version:')).toBeInTheDocument();
-    expect(screen.getByTestId('changeHistoryCompareSplitCurrentBadge')).toHaveTextContent(
-      UNSAVED_CHANGES_ACTION
-    );
-    expect(screen.getByTestId('changeHistoryCompareSplitBaselineBadge')).toHaveTextContent('v3');
+    expect(
+      within(screen.getByTestId('changeHistoryCompareSplitPaneLabels')).getByTestId(
+        'workflowChangeHistoryUnsavedChangesBadge'
+      )
+    ).toHaveTextContent(UNSAVED_CHANGES_ACTION);
+    expect(
+      within(screen.getByTestId('changeHistoryCompareSplitPaneLabels')).getByTestId(
+        'workflowChangeHistoryVersionBadge'
+      )
+    ).toHaveTextContent('v3');
   });
 
   it('warns when restoring with unsaved workflow changes', async () => {
