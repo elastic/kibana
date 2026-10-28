@@ -14,12 +14,15 @@ import type {
   RunQuotasResponse,
 } from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
-import { useRunQuotas, useUpdateRunQuotas } from '../hooks/use_significant_events_run_quotas';
+import {
+  useRunQuotas,
+  useUpdateRunQuotas,
+} from '../../data/run_quotas/use_significant_events_run_quotas';
 import { RunLimitsSection } from './run_limits_section';
 import { SettingsSaveBar } from './settings_save_bar';
 import { useRunLimitsForm } from './use_run_limits_form';
 
-jest.mock('../hooks/use_significant_events_run_quotas');
+jest.mock('../../data/run_quotas/use_significant_events_run_quotas');
 jest.mock('../../hooks/use_kibana');
 
 const navigateToUrl = jest.fn();
@@ -65,7 +68,13 @@ const setQueryResponse = (data: RunQuotasResponse) => {
 
 const ALL_GROUPS = ['detection', 'investigation', 'ki_extraction'] as const;
 
-const TestRunLimits = ({ groups = ALL_GROUPS }: { groups?: readonly RunQuotaGroup[] }) => {
+const TestRunLimits = ({
+  groups = ALL_GROUPS,
+  exhaustionCallouts = 'automations',
+}: {
+  groups?: readonly RunQuotaGroup[];
+  exhaustionCallouts?: 'automations' | 'groups';
+}) => {
   const form = useRunLimitsForm({ groups });
   const onSave = async () => {
     await form.requestSave();
@@ -76,7 +85,13 @@ const TestRunLimits = ({ groups = ALL_GROUPS }: { groups?: readonly RunQuotaGrou
 
   return (
     <>
-      <RunLimitsSection groups={groups} form={form} onSave={onSave} onConfirmSave={onConfirmSave} />
+      <RunLimitsSection
+        groups={groups}
+        form={form}
+        exhaustionCallouts={exhaustionCallouts}
+        onSave={onSave}
+        onConfirmSave={onConfirmSave}
+      />
       <SettingsSaveBar
         hasChanges={form.isDirty}
         isSaving={form.isSaving}
@@ -88,14 +103,18 @@ const TestRunLimits = ({ groups = ALL_GROUPS }: { groups?: readonly RunQuotaGrou
   );
 };
 
-const setup = (data: RunQuotasResponse = response(), groups?: readonly RunQuotaGroup[]) => {
+const setup = (
+  data: RunQuotasResponse = response(),
+  groups?: readonly RunQuotaGroup[],
+  exhaustionCallouts?: 'automations' | 'groups'
+) => {
   setQueryResponse(data);
   mockUseUpdateRunQuotas.mockReturnValue({ save, isSaving: updateIsSaving });
   save.mockResolvedValue(data);
 
   return render(
     <I18nProvider>
-      <TestRunLimits groups={groups} />
+      <TestRunLimits groups={groups} exhaustionCallouts={exhaustionCallouts} />
     </I18nProvider>
   );
 };
@@ -199,6 +218,40 @@ describe('RunLimitsSection', () => {
       ['investigation']
     );
 
+    expect(screen.queryByTestId('nightshiftRunLimitsBanner')).not.toBeInTheDocument();
+  });
+
+  it('shows each reached detection callout above its limit', () => {
+    setup(
+      response({
+        counts: {
+          detection: 100,
+          investigation: 3,
+          ki_extraction: 20,
+        },
+      }),
+      ['detection', 'ki_extraction'],
+      'groups'
+    );
+
+    const discoveryCallout = screen.getByTestId('nightshiftRunQuotaReached-detection');
+    const extractionCallout = screen.getByTestId('nightshiftRunQuotaReached-ki_extraction');
+    expect(discoveryCallout).toHaveTextContent(
+      'Discovery reached daily run limit for this deployment'
+    );
+    expect(extractionCallout).toHaveTextContent(
+      'Knowledge indicators extraction reached daily run limit for this deployment'
+    );
+    expect(
+      discoveryCallout.compareDocumentPosition(
+        screen.getByTestId('nightshiftRunLimitRow-detection')
+      )
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(
+      extractionCallout.compareDocumentPosition(
+        screen.getByTestId('nightshiftRunLimitRow-ki_extraction')
+      )
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(screen.queryByTestId('nightshiftRunLimitsBanner')).not.toBeInTheDocument();
   });
 
@@ -325,6 +378,11 @@ describe('RunLimitsSection', () => {
       })
     );
 
+    const callout = screen.getByTestId('nightshiftRunLimitsBanner');
+    expect(callout).toHaveTextContent('Automations reached a daily run limit for this deployment.');
+    expect(callout).toHaveTextContent(
+      'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue. You can still trigger investigations manually'
+    );
     fireEvent.click(screen.getByTestId('nightshiftRunLimitsOpenAutomations'));
 
     expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/automations');

@@ -118,7 +118,7 @@ export type StreamsLinkId = 'overview';
 
 export type SignificantEventsLinkId = 'events' | 'rules';
 
-export type NightshiftLinkId = 'detections' | 'knowledge_indicators' | 'sources';
+export type NightshiftLinkId = 'detections' | 'knowledge_indicators' | 'rules' | 'sources';
 
 export type ObservabilityAlertingLinkId =
   | 'alerts'

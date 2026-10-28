@@ -16,7 +16,7 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
-import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
@@ -121,8 +121,8 @@ export function NightshiftApp(): React.ReactElement {
     [search]
   );
 
-  const showAllEventsHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
-    deepLinkId: 'events',
+  const showAllEventsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+    path: '/detections/events',
   });
 
   const handleInvestigationClick = useCallback(

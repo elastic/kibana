@@ -18,14 +18,12 @@ import React, { useMemo } from 'react';
 import { useFormatTimestamp } from '../../../common/format_timestamp';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { getChangePointLabel } from '../../../common/change_point';
+import { DetectionDiscoveryStatus } from '../../../components/entities/detection/detection_discovery_status';
 import {
   CHANGE_LABEL,
   DISCOVERY_COLUMN_LABEL,
   DISCOVERY_COLUMN_TOOLTIP,
   LOADING_SIGNALS_MESSAGE,
-  PENDING_LABEL,
-  PROCESSED_LABEL,
-  SKIPPED_LABEL,
   RULE_COLUMN_LABEL,
   SOURCE_COLUMN_LABEL,
   TABLE_CAPTION,
@@ -112,16 +110,9 @@ export const SignalsTable = ({
         name: DISCOVERY_COLUMN_LABEL,
         nameTooltip: { content: DISCOVERY_COLUMN_TOOLTIP },
         width: '110px',
-        render: (processed: boolean, detection: Detection) => {
-          if (detection.skip) {
-            return <EuiBadge color="primary">{SKIPPED_LABEL}</EuiBadge>;
-          }
-          return (
-            <EuiBadge color={processed ? 'success' : 'hollow'}>
-              {processed ? PROCESSED_LABEL : PENDING_LABEL}
-            </EuiBadge>
-          );
-        },
+        render: (_processed: boolean, signal: Detection) => (
+          <DetectionDiscoveryStatus detection={signal} />
+        ),
       },
     ],
     [formatTimestamp, getSourceTitle, onOpenLinkMount, onSignalClick]
