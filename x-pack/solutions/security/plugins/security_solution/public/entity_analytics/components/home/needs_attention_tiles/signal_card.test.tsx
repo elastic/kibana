@@ -241,18 +241,23 @@ describe('SignalCard', () => {
     expect(onToggle).toHaveBeenCalledTimes(3);
   });
 
-  it('shows a clear button on the selected tile that toggles the filter off', () => {
+  it('keeps one control per tile: no button nested in the selected tile, which clears the filter itself', () => {
     const onToggle = jest.fn();
     renderCard({}, { selected: true, onToggle });
+    const tile = screen.getByTestId('eaFaceliftSignalCard-newEntity');
 
     expect(screen.getByTestId('eaFaceliftSignalCardSelectedDot')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('eaFaceliftSignalCardClearFilter'));
+    expect(screen.queryByTestId('eaFaceliftSignalCardClearFilter')).not.toBeInTheDocument();
+    // The tile is the only interactive element, and the only tab stop, inside it.
+    expect(
+      tile.querySelectorAll('button, a, input, select, textarea, [role], [tabindex]')
+    ).toHaveLength(0);
+    expect(tile).toHaveAttribute('tabindex', '0');
+    expect(tile).toHaveAttribute('aria-pressed', 'true');
 
-    expect(onToggle).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId('eaFaceliftSignalCard-newEntity')).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    );
+    fireEvent.keyDown(tile, { key: 'Enter' });
+    fireEvent.click(tile);
+    expect(onToggle).toHaveBeenCalledTimes(2);
   });
 
   it('shows a dash and a spinner while the count loads, and is not clickable', () => {
