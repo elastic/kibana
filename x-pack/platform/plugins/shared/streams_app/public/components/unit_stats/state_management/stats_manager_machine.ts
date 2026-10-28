@@ -15,7 +15,12 @@ import type {
   StatsWindow,
   UnitStatsClient,
 } from '../../../services/unit_stats_client/types';
-import { STATS_BATCH_DEBOUNCE_MS, STATS_FRESHNESS_MS, STATS_POLL_INTERVAL_MS } from './constants';
+import {
+  STATS_BATCH_DEBOUNCE_MS,
+  STATS_FRESHNESS_MS,
+  STATS_MAX_CONSECUTIVE_FAILURES,
+  STATS_POLL_INTERVAL_MS,
+} from './constants';
 import { isBatchWanted, planBatches } from './stats_batching';
 import { markBatchFailed, markBatchLoading, mergeFetchedStats } from './stats_entries';
 import { registerComponent, unregisterComponent } from './stats_registration';
@@ -27,10 +32,16 @@ export interface StatsManagerInput {
    * flush shares one window, and a relative range such as "last 15 minutes" slides with each poll.
    */
   getWindow: () => StatsWindow;
+  /**
+   * How often to ask for every shown component again. Omit it for no polling: components are then
+   * fetched when they register and when the user refreshes.
+   */
+  pollIntervalMs?: number;
 }
 
 export interface StatsManagerContext {
   getWindow: () => StatsWindow;
+  pollIntervalMs?: number;
   /** Every component that is shown or cached, by kind and id. */
   components: StatsComponents;
   /**
@@ -194,8 +205,11 @@ export const statsManagerMachine = setup({
       consecutiveFailures: context.consecutiveFailures + 1,
     })),
     clearRequest: assign({ request: NO_REQUEST }),
+    resetFailures: assign({ consecutiveFailures: 0 }),
   },
   guards: {
+    pollingEnabled: ({ context }) => context.pollIntervalMs !== undefined,
+    tooManyFailures: ({ context }) => context.consecutiveFailures >= STATS_MAX_CONSECUTIVE_FAILURES,
     /** Whether the event that is being handled leaves something to request. */
     hasDueBatch: ({ context, event }) => planNextBatch(context, event) !== undefined,
     /** Whether no shown component wants the request in flight any more. */
@@ -203,12 +217,14 @@ export const statsManagerMachine = setup({
   },
   delays: {
     batchDebounce: STATS_BATCH_DEBOUNCE_MS,
-    pollInterval: STATS_POLL_INTERVAL_MS,
+    // Only used while polling is enabled, so the fallback is never reached.
+    pollInterval: ({ context }) => context.pollIntervalMs ?? STATS_POLL_INTERVAL_MS,
   },
 }).createMachine({
   id: 'statsManager',
   context: ({ input }) => ({
     getWindow: input.getWindow,
+    pollIntervalMs: input.pollIntervalMs,
     components: { destination: {}, processor: {} },
     request: NO_REQUEST,
     consecutiveFailures: 0,
@@ -288,19 +304,38 @@ export const statsManagerMachine = setup({
           // No shown component wants the request any more: leaving the state aborts it.
           always: { guard: 'requestUnwanted', target: 'idle', actions: 'clearRequest' },
           on: {
-            // `stats.fetchDue` is not handled here, so a request in flight is left to finish.
-            // A refresh or a poll replaces it.
+            // `stats.fetchDue` and `stats.poll` are not handled here, so a request in flight is
+            // left to finish. Only the user's refresh replaces it. A poll that replaced it would
+            // restart a slow request on every tick, and it would never finish.
             'stats.refresh': { guard: 'hasDueBatch', target: 'fetching', reenter: true },
-            'stats.poll': { guard: 'hasDueBatch', target: 'fetching', reenter: true },
           },
         },
       },
     },
-    // Refreshes on an interval, and stops after repeated failures until the user refreshes.
+    // Optional. Asks for every shown component again on an interval, and stops after repeated
+    // failures until the user refreshes.
     polling: {
-      initial: 'active',
+      initial: 'checking',
       states: {
-        active: {},
+        checking: {
+          always: [{ guard: 'pollingEnabled', target: 'active' }, { target: 'disabled' }],
+        },
+        // No interval was given: only a registration or a refresh fetches.
+        disabled: {},
+        active: {
+          after: {
+            pollInterval: {
+              target: 'active',
+              reenter: true,
+              actions: raise({ type: 'stats.poll' }),
+            },
+          },
+          always: { guard: 'tooManyFailures', target: 'stopped' },
+          on: { 'stats.refresh': { actions: 'resetFailures' } },
+        },
+        stopped: {
+          on: { 'stats.refresh': { target: 'active', actions: 'resetFailures' } },
+        },
       },
     },
   },
