@@ -152,6 +152,46 @@ describe('ChangePasswordModal', () => {
     });
   });
 
+  describe('while the current user is refetched in the background', () => {
+    const coreStart = coreMock.createStart();
+    const authc = securityMock.createSetup().authc;
+    const history = createMemoryHistory({ initialEntries: ['/users'] });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('keeps the form mounted with the values entered so far', async () => {
+      const user = currentUserMock.createCurrentUser({ username: 'currentuser' });
+      useCurrentUserMock.mockReturnValue(currentUserMock.createResult({ user }));
+
+      const modal = () =>
+        coreStart.rendering.addContext(
+          <Providers services={coreStart} authc={authc} history={history}>
+            <ChangePasswordModal username="currentuser" onCancel={jest.fn()} />
+          </Providers>
+        );
+      const { rerender, unmount } = render(modal());
+
+      const currentPasswordInput = screen.getByTestId('editUserChangePasswordCurrentPasswordInput');
+      fireEvent.change(currentPasswordInput, { target: { value: 'curpwd' } });
+      await waitFor(() => {
+        expect(currentPasswordInput).toHaveValue('curpwd');
+      });
+
+      // A profile write, such as priming the user's locale, makes `useCurrentUser` refetch.
+      useCurrentUserMock.mockReturnValue(currentUserMock.createResult({ user, isLoading: true }));
+      rerender(modal());
+
+      expect(screen.getByTestId('editUserChangePasswordCurrentPasswordInput')).toBe(
+        currentPasswordInput
+      );
+      expect(currentPasswordInput).toHaveValue('curpwd');
+
+      unmount();
+    });
+  });
+
   // FLAKY: https://github.com/elastic/kibana/issues/254057
   describe.skip('render', () => {
     const coreStart = coreMock.createStart();
