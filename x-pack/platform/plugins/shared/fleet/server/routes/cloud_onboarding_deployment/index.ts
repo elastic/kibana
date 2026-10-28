@@ -104,9 +104,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: 'Get cloud onboarding deployments',
+      summary: 'Get cloud onboarding deployment instances',
       description:
-        'List cloud onboarding deployments, newest first. Optionally filter by package name or provider.',
+        'List cloud onboarding deployment instances, newest first. Optionally filter by package name or provider.',
       options: {
         tags: ['oas-tag:Fleet cloud onboarding deployments'],
         availability: {

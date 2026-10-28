@@ -5,7 +5,7 @@ responses:
       application/json:
         examples:
           getCloudOnboardingDeploymentsExample:
-            description: 'Page of cloud onboarding deployments that cover the aws package'
+            description: 'Page of cloud onboarding deployment instances that cover the aws package'
             value:
               items:
                 - id: 'onboarding-deployment-id-1'

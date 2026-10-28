@@ -373,17 +373,21 @@ export const GetCloudOnboardingDeploymentsByConnectorIdResponseSchema = schema.o
 const CloudOnboardingDeploymentListItemSchema = CloudOnboardingDeploymentItemSchema.extends({
   packages: schema.arrayOf(
     schema.object({
-      name: schema.string({ meta: { description: 'Name of the integration package, for example `aws`.' } }),
-      title: schema.string({ meta: { description: 'Display title of the integration package, for example `AWS`.' } }),
+      name: schema.string({
+        meta: { description: 'Name of the integration package, for example `aws`.' },
+      }),
+      title: schema.string({
+        meta: { description: 'Display title of the integration package, for example `AWS`.' },
+      }),
       version: schema.string({
-        meta: { description: 'Package version the deployment policies run.' },
+        meta: { description: 'Package version the deployment instance policies run.' },
       }),
     }),
     {
       maxSize: 100,
       meta: {
         description:
-          'Packages of the deployment package policies with their deployed versions. Empty for ECF-only deployments.',
+          'Packages of the deployment instance package policies with their deployed versions. Empty for ECF-only deployment instances.',
       },
     }
   ),
@@ -397,7 +401,10 @@ const CloudOnboardingDeploymentListItemSchema = CloudOnboardingDeploymentItemSch
   ),
   agentCount: schema.number({
     min: 0,
-    meta: { description: 'Number of agents enrolled in the deployment agent policies. Only agent policies in the current space are counted.' },
+    meta: {
+      description:
+        'Number of agents enrolled in the deployment instance agent policies. Only agent policies in the current space are counted.',
+    },
   }),
 });
 
@@ -407,7 +414,7 @@ export const GetCloudOnboardingDeploymentsRequestSchema = {
       schema.string({
         minLength: 1,
         maxLength: 255,
-        meta: { description: 'Only list deployments that cover this package.' },
+        meta: { description: 'Only list deployment instances that cover this package.' },
       })
     ),
     provider: schema.maybe(CloudOnboardingDeploymentProviderSchema),
@@ -415,13 +422,13 @@ export const GetCloudOnboardingDeploymentsRequestSchema = {
       defaultValue: 1,
       min: 1,
       max: 1000,
-      meta: { description: 'The page of deployments to return, starting at 1.' },
+      meta: { description: 'The page of deployment instances to return, starting at 1.' },
     }),
     perPage: schema.number({
       defaultValue: 20,
       min: 1,
       max: 100,
-      meta: { description: 'The number of deployments per page.' },
+      meta: { description: 'The number of deployment instances per page.' },
     }),
   }),
 };
