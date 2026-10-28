@@ -29,6 +29,7 @@ import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { StatusError } from '../errors/status_error';
+import { createNotSetUpError } from '../service_accounts/detection_engine_account';
 import { isStartedBefore, WorkflowExecutionService } from './workflow_execution_service';
 import { pollUntil } from './poll_until';
 import type { EbtTelemetryClient } from '../telemetry/ebt/client';
@@ -366,7 +367,7 @@ export class SignificantEventsKIsOnboardingClient {
     }
     const sourceSlug = source.slug;
     if (!(await this.isSetUp(request))) {
-      throw new StatusError('Nightshift is not set up in this space', 503);
+      throw createNotSetUpError();
     }
     const executionId = await this.getEntryPointService(request.spaceId).execute({
       executionSpaceId: request.spaceId,

@@ -19,6 +19,8 @@ import {
   reassignRulesToAccount,
 } from './detection_engine_account';
 import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from '../workflows/managed_workflow_owner';
+import type { SignificantEventsMaintenanceService } from '../maintenance/maintenance_service';
+import type { SignificantEventsMaintenanceSummary } from '../../../common/maintenance/types';
 
 /** The ids of the accounts a space is set up with, as the service accounts backend assigned them. */
 export interface DetectionEngineServiceAccountIds {
@@ -64,12 +66,14 @@ export const createServiceAccountSetupService = ({
   workflowsExtensions,
   onboardingClient,
   getScopedClients,
+  maintenanceService,
 }: {
   core: CoreStart;
   spaces: SpacesPluginStart | undefined;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
   onboardingClient: SignificantEventsKIsOnboardingClient | undefined;
   getScopedClients: GetScopedClients;
+  maintenanceService: Pick<SignificantEventsMaintenanceService, 'pause'>;
 }) => {
   /** Refuses before anything is written: 400 when service accounts are off, 403, then 404. */
   const assertCanSetUp = async (request: KibanaRequest, spaceId: string): Promise<void> => {
@@ -131,9 +135,10 @@ export const createServiceAccountSetupService = ({
   };
 
   /**
-   * Removes the space's setup: uninstalls the bound entry point, which also unbinds it from the
-   * account, so the space can no longer run KI extraction. The account is shared by every space
-   * and is kept.
+   * Removes the space's setup: pauses the space, so its rules and scheduled workflows stop, then
+   * uninstalls the bound entry point and unbinds the detection engine, so nothing in the space can
+   * run as the account. Resume is refused until the space is set up again. The account is shared
+   * by every space and is kept.
    */
   const disable = async ({
     request,
@@ -141,11 +146,16 @@ export const createServiceAccountSetupService = ({
   }: {
     request: KibanaRequest;
     spaceId: string;
-  }): Promise<{ spaceId: string }> => {
+  }): Promise<{ spaceId: string; pause: SignificantEventsMaintenanceSummary }> => {
     await assertCanSetUp(request, spaceId);
     if (!workflowsExtensions || !onboardingClient) {
       throw new StatusError('Workflows are not available', 400);
     }
+    // Without the account the rules would keep running on its keys, so the space is paused first.
+    const pause = await maintenanceService.pause({
+      request,
+      updatedBy: core.security.authc.getCurrentUser(request)?.username,
+    });
     // A workflow bound to a service account cannot be deleted while it runs.
     await onboardingClient.stopEntryPointRuns({ request });
     const client = await workflowsExtensions.getClient(request);
@@ -158,7 +168,7 @@ export const createServiceAccountSetupService = ({
       workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
       workloadId: DETECTION_ENGINE_WORKLOAD_ID,
     });
-    return { spaceId };
+    return { spaceId, pause };
   };
 
   return { enable, disable };

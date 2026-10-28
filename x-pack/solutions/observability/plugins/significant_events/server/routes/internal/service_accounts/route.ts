@@ -12,6 +12,7 @@ import {
   createServiceAccountSetupService,
   type DetectionEngineServiceAccountIds,
 } from '../../../lib/service_accounts/service_account_setup';
+import type { SignificantEventsMaintenanceSummary } from '../../../../common/maintenance/types';
 
 // Ids are opaque: `kibana/<name>` on stateful, a generated id on Serverless.
 const SERVICE_ACCOUNT_ID_MAX_LENGTH = 1024;
@@ -48,6 +49,7 @@ const enableServiceAccountsRoute = createServerRoute({
     getScopedClients,
     getSpaceId,
     workflowClients,
+    maintenanceService,
   }): Promise<{
     spaceId: string;
     serviceAccountIds: DetectionEngineServiceAccountIds;
@@ -62,6 +64,7 @@ const enableServiceAccountsRoute = createServerRoute({
       workflowsExtensions: server.workflowsExtensions,
       onboardingClient: workflowClients.streamsKIsOnboardingClient,
       getScopedClients,
+      maintenanceService,
     }).enable({
       request,
       spaceId: await getSpaceId(request),
@@ -84,7 +87,8 @@ const disableServiceAccountsRoute = createServerRoute({
     getScopedClients,
     getSpaceId,
     workflowClients,
-  }): Promise<{ spaceId: string }> => {
+    maintenanceService,
+  }): Promise<{ spaceId: string; pause: SignificantEventsMaintenanceSummary }> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -94,6 +98,7 @@ const disableServiceAccountsRoute = createServerRoute({
       workflowsExtensions: server.workflowsExtensions,
       onboardingClient: workflowClients.streamsKIsOnboardingClient,
       getScopedClients,
+      maintenanceService,
     }).disable({ request, spaceId: await getSpaceId(request) });
   },
 });

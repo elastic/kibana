@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { CoreSetup, CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { GetScopedClients } from '../../routes/types';
 import { runRulesInBatches } from '../maintenance/rules';
+import { StatusError } from '../errors/status_error';
 
 /**
  * What the detection engine does outside a workflow run, such as turning its rules on, runs as the
@@ -25,6 +26,29 @@ export const registerDetectionEngineWorkloadType = (core: CoreSetup): void => {
     description:
       'Changes the Nightshift detection engine makes outside workflow runs, such as turning its rules on.',
   });
+};
+
+/** The refusal for detection engine work in a space that is not set up to run as its accounts. */
+export const createNotSetUpError = (): StatusError =>
+  new StatusError('Nightshift is not set up in this space', 503);
+
+/** Whether the space's detection engine has an account to run as. */
+export const isDetectionEngineSetUp = async ({
+  core,
+  spaceId,
+}: {
+  core: CoreStart;
+  spaceId: string;
+}): Promise<boolean> => {
+  if (!core.security.serviceAccounts.isEnabled()) {
+    return false;
+  }
+  const binding = await core.security.serviceAccounts.getWorkloadBinding({
+    workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
+    workloadId: DETECTION_ENGINE_WORKLOAD_ID,
+    spaceId,
+  });
+  return binding !== null;
 };
 
 /** Runs `fn` with a request authenticated as the account bound to the space's detection engine. */
