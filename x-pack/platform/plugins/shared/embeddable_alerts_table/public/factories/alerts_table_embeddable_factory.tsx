@@ -10,6 +10,7 @@ import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
+  areComparatorsEqual,
   getViewModeSubject,
   initializeTimeRangeManager,
   initializeTitleManager,
@@ -17,6 +18,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
   useFetchContext,
+  type StateComparators,
   type ViewMode,
 } from '@kbn/presentation-publishing';
 import { QueryClientProvider } from '@kbn/react-query';
@@ -36,11 +38,19 @@ import { EMBEDDABLE_ALERTS_TABLE_ID, PERSISTED_TABLE_CONFIG_KEY_PREFIX } from '.
 import { EmbeddableAlertsTable } from '../components/embeddable_alerts_table';
 import { queryClient } from '../query_client';
 
+const alertsTableComparators: StateComparators<EmbeddableAlertsTableSerializedState> = {
+  ...titleComparators,
+  ...timeRangeComparators,
+  tableConfig: 'deepEquality',
+};
+
 export const getAlertsTableEmbeddableFactory = (
   coreServices: CoreStart,
   deps: EmbeddableAlertsTablePublicStartDependencies
 ): EmbeddablePublicDefinition<EmbeddableAlertsTableSerializedState, EmbeddableAlertsTableApi> => ({
   type: EMBEDDABLE_ALERTS_TABLE_ID,
+  compareSerializedState: (baseline, current) =>
+    areComparatorsEqual(alertsTableComparators, baseline, current),
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const timeRangeManager = initializeTimeRangeManager(initialState);
     const titleManager = initializeTitleManager(initialState ?? {});
@@ -69,11 +79,7 @@ export const getAlertsTableEmbeddableFactory = (
         ...timeRangeManager.getLatestState(),
         tableConfig: tableConfig$.getValue(),
       }),
-      getComparators: () => ({
-        ...titleComparators,
-        ...timeRangeComparators,
-        tableConfig: 'deepEquality',
-      }),
+      getComparators: () => alertsTableComparators,
       applySerializedState: (nextState) => {
         titleManager.reinitializeState(nextState);
         timeRangeManager.reinitializeState(nextState);
