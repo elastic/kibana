@@ -20,6 +20,7 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-connector-specs
 dependsOn:
   - '@kbn/zod'
+  - '@kbn/connector-schemas'
   - '@kbn/logging'
   - '@kbn/licensing-types'
   - '@kbn/actions-utils'

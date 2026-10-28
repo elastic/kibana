@@ -19,6 +19,7 @@
   ],
   "kbn_references": [
     "@kbn/zod",
+    "@kbn/connector-schemas",
     "@kbn/logging",
     "@kbn/licensing-types",
     "@kbn/actions-utils",

@@ -57,7 +57,7 @@ describe('Stack Connectors Plugin', () => {
           (!spec.signingKey ||
             Boolean(actionsConfigurationUtilities.isConnectorSigningKeysEnabled()))
       );
-      const builtInConnectorTypesCount = 18;
+      const builtInConnectorTypesCount = 19;
 
       expect(actionsSetup.registerType).toHaveBeenCalledTimes(
         builtInConnectorTypesCount + specConnectorTypes.length
@@ -181,6 +181,14 @@ describe('Stack Connectors Plugin', () => {
           name: 'Torq',
         })
       );
+      expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
+        19,
+        expect.objectContaining({
+          id: '.mcp',
+          name: 'MCP',
+          source: 'stack',
+        })
+      );
 
       // Spec Connector Types registered
       specConnectorTypes.forEach((spec, index) => {
@@ -194,7 +202,7 @@ describe('Stack Connectors Plugin', () => {
       });
 
       // SubAction Connectors
-      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(15);
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(14);
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -268,19 +276,12 @@ describe('Stack Connectors Plugin', () => {
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         11,
         expect.objectContaining({
-          id: '.mcp',
-          name: 'MCP',
-        })
-      );
-      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        12,
-        expect.objectContaining({
           id: '.sentinelone',
           name: 'Sentinel One',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        13,
+        12,
         expect.objectContaining({
           id: '.crowdstrike',
           name: 'CrowdStrike',

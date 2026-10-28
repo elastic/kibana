@@ -810,4 +810,113 @@ describe('createConnectorTypeFromSpec', () => {
       );
     });
   });
+
+  describe('stackCompat', () => {
+    const stackCompat = {
+      configSchema: z4.object({
+        serverUrl: z4.string(),
+        hasAuth: z4.boolean().default(true),
+      }),
+      secretsSchema: z4.object({
+        token: z4.string().optional(),
+      }),
+      getAuthHeaders: jest.fn().mockResolvedValue({}),
+    };
+
+    const createCompatSpec = (overrides: Partial<ConnectorSpec> = {}): ConnectorSpec =>
+      createMockSpec({
+        schema: undefined,
+        auth: undefined,
+        test: { handler: jest.fn(), enabled: false },
+        stackCompat,
+        ...overrides,
+      });
+
+    it('validates legacy-shaped config and secrets and keeps source stack', () => {
+      const spec = createCompatSpec();
+      const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+      expect(connectorType.source).toBe(ACTION_TYPE_SOURCES.stack);
+      expect(connectorType.spec).toBe(spec);
+      expect(connectorType.sandboxSupportedAuthTypes).toEqual([]);
+      expect(
+        connectorType.validate.config.schema.parse({ serverUrl: 'https://mcp.example.com' })
+      ).toEqual({
+        serverUrl: 'https://mcp.example.com',
+        hasAuth: true,
+      });
+      expect(
+        connectorType.validate.config.schema.parse({
+          serverUrl: 'https://mcp.example.com',
+          extra: true,
+        })
+      ).toEqual({ serverUrl: 'https://mcp.example.com', hasAuth: true });
+      expect(connectorType.validate.secrets.schema.parse({})).toEqual({});
+      expect(
+        connectorType.validate.secrets.schema.parse({ token: 'abc', authType: 'bearer' })
+      ).toEqual({
+        token: 'abc',
+      });
+    });
+
+    it('keeps the legacy loose params schema and does not register _test', () => {
+      const connectorType = createConnectorTypeFromSpec(createCompatSpec(), mockActionsPlugin);
+
+      expect(
+        connectorType.validate.params!.schema.parse({
+          subAction: 'testAction',
+          subActionParams: { test: 'ok' },
+        })
+      ).toEqual({
+        subAction: 'testAction',
+        subActionParams: { test: 'ok' },
+      });
+      // The public schema accepts any subAction string. The executor rejects unknown ones.
+      expect(
+        connectorType.validate.params!.schema.parse({
+          subAction: TEST_CONNECTOR_SUB_ACTION,
+          subActionParams: {},
+        })
+      ).toEqual({
+        subAction: TEST_CONNECTOR_SUB_ACTION,
+        subActionParams: {},
+      });
+      expect(connectorType.validate.params!.schema.parse({ subAction: 'listTools' })).toEqual({
+        subAction: 'listTools',
+        subActionParams: {},
+      });
+      expect(connectorType.description).toBeUndefined();
+      expect(connectorType.isExperimental).toBeUndefined();
+    });
+
+    it.each([
+      ['test.enabled', { test: { handler: jest.fn(), enabled: true } }],
+      ['auth', { auth: { types: ['none'] } }],
+      ['schema', { schema: z4.object({ serverUrl: z4.string() }) }],
+      [
+        'events',
+        {
+          events: {
+            definitions: {
+              received: {
+                eventId: 'test.received',
+                title: 'Received',
+                description: 'Inbound event',
+                eventSchema: z4.object({ body: z4.unknown() }),
+              },
+            },
+            handleEvents: async () => ({ type: 'emit' as const, events: [] }),
+          },
+        },
+      ],
+      ['signingKey', { signingKey: { jwtType: 'test' } }],
+    ] as const)('throws when stackCompat is combined with %s', (_label, overrides) => {
+      expect(() =>
+        createConnectorTypeFromSpec(
+          createCompatSpec(overrides as Partial<ConnectorSpec>),
+          mockActionsPlugin
+        )
+      ).toThrow(/cannot combine stackCompat/);
+    });
+  });
 });

@@ -17,6 +17,17 @@ const fetchOptionsSchema = z4
   .strict()
   .optional();
 
+/**
+ * Params validator used by legacy sub-action connectors.
+ * Per-action schemas run in the executor so error text stays `Request validation failed (...)`.
+ */
+export const generateCompatParamsSchema = (): ValidatorType<ActionTypeParams> => ({
+  schema: z4.object({
+    subAction: z4.string(),
+    subActionParams: z4.object({}).passthrough().default({}),
+  }),
+});
+
 export const generateParamsSchema = (
   actions: ConnectorSpec['actions']
 ): ValidatorType<ActionTypeParams> => {

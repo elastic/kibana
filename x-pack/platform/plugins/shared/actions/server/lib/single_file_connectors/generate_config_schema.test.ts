@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { generateConfigSchema } from './generate_config_schema';
+import { generateCompatConfigSchema, generateConfigSchema } from './generate_config_schema';
 import { actionsConfigMock } from '../../actions_config.mock';
 
 const mockConfigUtils = actionsConfigMock.create();
@@ -229,5 +229,87 @@ describe('generateConfigSchema', () => {
         'https://not-allowed.example.com/webhook'
       );
     });
+  });
+});
+
+describe('generateCompatConfigSchema', () => {
+  it('does not add authType or selectedActions', () => {
+    const result = generateCompatConfigSchema(z.object({ serverUrl: z.string() }));
+
+    expect(result.schema.parse({ serverUrl: 'https://example.com' })).toEqual({
+      serverUrl: 'https://example.com',
+    });
+    expect(
+      result.schema.parse({
+        serverUrl: 'https://example.com',
+        authType: 'basic',
+        selectedActions: ['test'],
+      })
+    ).toEqual({ serverUrl: 'https://example.com' });
+  });
+
+  it('keeps enum constraints from the legacy schema', () => {
+    const result = generateCompatConfigSchema(
+      z.object({
+        serverUrl: z.string(),
+        authType: z.enum(['none', 'bearer', 'apiKey', 'basic']).optional(),
+      })
+    );
+
+    expect(result.schema.parse({ serverUrl: 'https://example.com', authType: 'apiKey' })).toEqual({
+      serverUrl: 'https://example.com',
+      authType: 'apiKey',
+    });
+    expect(() =>
+      result.schema.parse({ serverUrl: 'https://example.com', authType: 'oauth' })
+    ).toThrow();
+  });
+
+  it('strips unknown keys', () => {
+    const result = generateCompatConfigSchema(z.object({ serverUrl: z.string() }));
+
+    expect(result.schema.parse({ serverUrl: 'https://example.com', extra: true })).toEqual({
+      serverUrl: 'https://example.com',
+    });
+  });
+
+  it('runs the allowed-hosts validator and ignores other config checks', () => {
+    const result = generateCompatConfigSchema(
+      z.object({
+        serverUrl: z.url().meta({ validate: { allowedHosts: true } }),
+      })
+    );
+
+    result.customValidator!({ serverUrl: 'https://service.example.com/api' }, validatorServices);
+
+    expect(mockConfigUtils.ensureUriAllowed).toHaveBeenCalledWith(
+      'https://service.example.com/api'
+    );
+    expect(() =>
+      result.customValidator!(
+        { serverUrl: 'https://service.example.com', selectedActions: [] },
+        validatorServices
+      )
+    ).not.toThrow();
+  });
+
+  it('throws when an allowed-hosts URL is rejected', () => {
+    mockConfigUtils.ensureUriAllowed.mockImplementation(() => {
+      throw new Error(
+        'target url "https://not-allowed.example.com" is not added to the Kibana config xpack.actions.allowedHosts'
+      );
+    });
+
+    const result = generateCompatConfigSchema(
+      z.object({
+        serverUrl: z.url().meta({ validate: { allowedHosts: true } }),
+      })
+    );
+
+    expect(() =>
+      result.customValidator!({ serverUrl: 'https://not-allowed.example.com' }, validatorServices)
+    ).toThrow(
+      'target url "https://not-allowed.example.com" is not added to the Kibana config xpack.actions.allowedHosts'
+    );
   });
 });

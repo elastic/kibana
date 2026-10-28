@@ -1,28 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MCPConnectorSecrets, MCPConnectorConfig } from '@kbn/connector-schemas/mcp';
+import type { MCPConnectorConfig, MCPConnectorSecrets } from '@kbn/connector-schemas/mcp';
 import { API_KEY_PLACEHOLDER, MCPAuthType } from '@kbn/connector-schemas/mcp';
-import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
+
+const getBasicAuthHeader = ({
+  username,
+  password,
+}: {
+  username: string;
+  password: string;
+}): Record<string, string> => {
+  const header = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+  return { Authorization: header };
+};
 
 /**
  * Builds HTTP headers from MCP connector config and secrets based on the authentication type.
- *
- * @param secrets - The MCP connector secrets (flat structure)
- * @param config - The MCP connector config (hasAuth, authType, apiKeyHeaderName, apiKeyHeaderValue)
- * @returns Record of HTTP headers to use for authentication
  */
-export function buildHeadersFromSecrets(
+export const buildHeadersFromSecrets = (
   secrets: MCPConnectorSecrets,
   config: MCPConnectorConfig
-): Record<string, string> {
+): Record<string, string> => {
   const headers: Record<string, string> = {};
 
-  // If no authentication is configured, return empty headers
   if (!config.hasAuth) {
     return headers;
   }
@@ -55,14 +62,25 @@ export function buildHeadersFromSecrets(
       break;
 
     default:
-      // No specific auth type configured - this is valid when hasAuth is false
       break;
   }
 
-  // Add any secret headers
   if (secrets.secretHeaders) {
     Object.assign(headers, secrets.secretHeaders);
   }
 
   return headers;
-}
+};
+
+/** Config headers first, then auth headers. Auth and secret headers win on conflict. */
+export const buildMcpAuthHeaders = async (
+  config: Record<string, unknown>,
+  secrets: Record<string, unknown>
+): Promise<Record<string, string>> => {
+  const typedConfig = config as MCPConnectorConfig;
+  const typedSecrets = secrets as MCPConnectorSecrets;
+  return {
+    ...(typedConfig.headers ?? {}),
+    ...buildHeadersFromSecrets(typedSecrets, typedConfig),
+  };
+};

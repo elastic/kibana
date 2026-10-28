@@ -6,6 +6,7 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
+import type { z } from '@kbn/zod/v4';
 import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs/src/lib/generate_secrets_schema_from_spec';
 import { isEarsExperimentalAuthType } from '@kbn/connector-specs/src/lib/ears_experimental_utils';
 import { getSchemaForAuthType } from '@kbn/connector-specs/src/lib/get_schema_for_auth_type';
@@ -25,6 +26,13 @@ const buildAllowedHostsFieldsByAuthType = (authSpec: ConnectorSpec['auth']) => {
   }
 
   return allowedHostsFieldsByAuthType;
+};
+
+/** Secrets validator for stack-compat specs. The schema is used as-is, with no auth-type union. */
+export const generateCompatSecretsSchema = (
+  schema: z.ZodObject
+): ValidatorType<ActionTypeSecrets> => {
+  return { schema };
 };
 
 export const generateSecretsSchema = (

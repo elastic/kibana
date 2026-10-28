@@ -295,6 +295,14 @@ export interface RelayActionClient {
   }>;
 }
 
+/**
+ * Subset of the actions usage collector that spec handlers may call.
+ * Kept structural so this package does not import the actions plugin.
+ */
+export interface ConnectorUsageCollectorLike {
+  addRequestBodyBytes(result?: unknown, body?: string | object): void;
+}
+
 export interface ActionContext {
   client: AxiosInstance;
   /**
@@ -309,7 +317,9 @@ export interface ActionContext {
    */
   getClient: <K extends ClientTypeId>(id: K) => Promise<ClientRegistry[K]>;
   config?: Record<string, unknown>;
-  connectorUsageCollector?: unknown;
+  /** Saved-object id of the connector being executed. */
+  connectorId?: string;
+  connectorUsageCollector?: ConnectorUsageCollectorLike;
   log: Logger;
   secrets?: Record<string, unknown>;
   /**
@@ -381,6 +391,41 @@ export interface ConnectorSigningKey {
 // MAIN CONNECTOR DEFINITION
 // ============================================================================
 
+/**
+ * Stack compatibility mode for a legacy stack connector served by the spec executor.
+ *
+ * Compat mode means `source: 'stack'`, the legacy loose params schema (no reserved
+ * `_test` action), and handler errors rethrown the same way the sub-action framework does.
+ */
+export interface ConnectorSpecStackCompat {
+  /** Legacy config schema, used as-is. Not extended with `authType` or `selectedActions`. */
+  configSchema: z.ZodObject;
+  /** Legacy secrets schema, used as-is. Not wrapped in an auth-type union. */
+  secretsSchema: z.ZodObject;
+  /**
+   * Config fields checked with the legacy URL allow-list validator.
+   * Kept off the schema so the public config JSON schema does not change.
+   */
+  allowedHostsKeys?: readonly string[];
+  /**
+   * Sub-actions that build a client outside the lease pool and always terminate it.
+   * Defaults to `test` and `_test`.
+   */
+  isolatedClientSubActions?: readonly string[];
+  /** Debug line when an isolated client fails to terminate. */
+  formatIsolatedTerminateFailure?(err: unknown): string;
+  /** Auth headers for native clients, built from legacy config and secrets. */
+  getAuthHeaders(
+    config: Record<string, unknown>,
+    secrets: Record<string, unknown>
+  ): Promise<Record<string, string>>;
+  /**
+   * Classifies a handler error so the executor can rethrow a task-run error.
+   * `undefined` rethrows the raw error.
+   */
+  classifyError?(err: unknown): 'user' | 'framework' | undefined;
+}
+
 export interface AuthTypeDef {
   type: string;
   /** When true, renders a "Recommended" badge in the picker to highlight the preferred auth option. */
@@ -436,6 +481,12 @@ export interface ConnectorSpec {
   // included in the connector's agent attachment representation so the LLM
   // has richer context about how to use the connector's sub-actions.
   skill?: string;
+
+  /**
+   * When set, the connector is registered as a stack type with legacy validators.
+   * See {@link ConnectorSpecStackCompat}.
+   */
+  stackCompat?: ConnectorSpecStackCompat;
 }
 
 // ============================================================================
