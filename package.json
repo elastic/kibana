@@ -1321,6 +1321,7 @@
     "@kbn/timerange": "workspace:*",
     "@kbn/tinymath": "workspace:*",
     "@kbn/tour-queue": "workspace:*",
+    "@kbn/trace-latency-map": "workspace:*",
     "@kbn/traced-es-client": "workspace:*",
     "@kbn/tracing": "workspace:*",
     "@kbn/tracing-config": "workspace:*",

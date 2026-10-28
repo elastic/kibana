@@ -3890,6 +3890,9 @@ importers:
       '@kbn/tour-queue':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-tour-queue
+      '@kbn/trace-latency-map':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-trace-latency-map
       '@kbn/traced-es-client':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-traced-es-client
@@ -8384,6 +8387,8 @@ importers:
   src/platform/packages/shared/kbn-tooling-log: {}
 
   src/platform/packages/shared/kbn-tour-queue: {}
+
+  src/platform/packages/shared/kbn-trace-latency-map: {}
 
   src/platform/packages/shared/kbn-traced-es-client: {}
 

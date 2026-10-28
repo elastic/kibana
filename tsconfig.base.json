@@ -2827,6 +2827,8 @@
       "@kbn/tooling-log/*": ["./src/platform/packages/shared/kbn-tooling-log/*"],
       "@kbn/tour-queue": ["./src/platform/packages/shared/kbn-tour-queue"],
       "@kbn/tour-queue/*": ["./src/platform/packages/shared/kbn-tour-queue/*"],
+      "@kbn/trace-latency-map": ["./src/platform/packages/shared/kbn-trace-latency-map"],
+      "@kbn/trace-latency-map/*": ["./src/platform/packages/shared/kbn-trace-latency-map/*"],
       "@kbn/traced-es-client": ["./src/platform/packages/shared/kbn-traced-es-client"],
       "@kbn/traced-es-client/*": ["./src/platform/packages/shared/kbn-traced-es-client/*"],
       "@kbn/tracing": ["./src/platform/packages/shared/kbn-tracing"],

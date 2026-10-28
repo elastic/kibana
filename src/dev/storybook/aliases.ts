@@ -76,6 +76,7 @@ export const storybookAliases = {
   shared_ux: 'src/platform/packages/private/shared-ux/storybook/config',
   streams_app: 'x-pack/platform/plugins/shared/streams_app/.storybook',
   subscription_status: 'x-pack/platform/plugins/private/subscription_status/.storybook',
+  trace_latency_map: 'src/platform/packages/shared/kbn-trace-latency-map/.storybook',
   triggers_actions_ui: 'x-pack/platform/plugins/shared/triggers_actions_ui/.storybook',
   unified_data_table: 'src/platform/packages/shared/kbn-unified-data-table/.storybook',
   unified_doc_viewer: 'src/platform/plugins/shared/unified_doc_viewer/.storybook',

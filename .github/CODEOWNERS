@@ -745,6 +745,7 @@ src/platform/packages/shared/kbn-test-subj-selector @elastic/kibana-operations @
 src/platform/packages/shared/kbn-timerange @elastic/streams-ui
 src/platform/packages/shared/kbn-tooling-log @elastic/kibana-operations
 src/platform/packages/shared/kbn-tour-queue @elastic/appex-sharedux
+src/platform/packages/shared/kbn-trace-latency-map @elastic/obs-signals-traces-team
 src/platform/packages/shared/kbn-traced-es-client @elastic/observability-ui
 src/platform/packages/shared/kbn-tracing @elastic/kibana-core @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-tracing-config @elastic/kibana-core
