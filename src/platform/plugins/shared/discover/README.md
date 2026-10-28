@@ -178,3 +178,5 @@ Discover also exposes plugin config options, defined in [server/config.ts](./ser
 | `discover.enableUiSettingsValidations`    | `boolean`  | Enables validation of Discover related UI settings.   |
 | `discover.experimental.enabledProfiles`   | `string[]` | Experimental context awareness profile IDs to enable. |
 | `discover.experimental.ruleFormV2Enabled` | `boolean`  | Enables the v2 rule form in Discover (obsolete).      |
+
+<!-- Test change for the release notes PR comment. Do not merge. -->
