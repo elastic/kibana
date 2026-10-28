@@ -49,10 +49,10 @@ const buildTagFilter = (tag: string): Filter => ({
   $state: { store: FilterStateStore.APP_STATE },
 });
 
-const buildPagePath = (filter: Filter, createdAt: string): string =>
+const buildPagePath = (filter: Filter, createdAt: string, keepOpenForMs?: number): string =>
   [
     [URL_PARAM_KEY.filters, encode([filter])],
-    [URL_PARAM_KEY.timerange, buildPageTimerange(createdAt)],
+    [URL_PARAM_KEY.timerange, buildPageTimerange(createdAt, keepOpenForMs)],
     [URL_PARAM_KEY.pageFilter, ALL_STATUSES_PAGE_FILTER],
   ]
     .map(([key, value], index) => `${index === 0 ? '?' : '&'}${key}=${encodePageParam(value)}`)
@@ -61,6 +61,12 @@ const buildPagePath = (filter: Filter, createdAt: string): string =>
 export const buildAlertsPagePath = (alertIds: readonly string[], createdAt: string): string =>
   buildPagePath(buildIdsFilter(alertIds), createdAt);
 
-/** Same page as `buildAlertsPagePath`, filtered on one alert tag, so the link is the same size for any number of alerts. */
-export const buildAlertsPageTagPath = (tag: string, createdAt: string): string =>
-  buildPagePath(buildTagFilter(tag), createdAt);
+/**
+ * Same page as `buildAlertsPagePath`, filtered on one alert tag, so the link is the same size for any
+ * number of alerts. `keepOpenForMs` keeps the time range open for alerts that get the tag later.
+ */
+export const buildAlertsPageTagPath = (
+  tag: string,
+  createdAt: string,
+  keepOpenForMs?: number
+): string => buildPagePath(buildTagFilter(tag), createdAt, keepOpenForMs);

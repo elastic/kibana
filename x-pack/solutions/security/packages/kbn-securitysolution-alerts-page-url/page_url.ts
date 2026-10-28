@@ -10,10 +10,17 @@ import { encode } from '@kbn/rison';
 const WINDOW_BEFORE_CREATION_MS = 28 * 24 * 60 * 60 * 1000;
 const WINDOW_AFTER_NOW_MS = 60 * 60 * 1000;
 
-/** Rison-encoded global and timeline time range around `createdAt`: 28 days before, up to now. */
-export const buildPageTimerange = (createdAt: string): string => {
-  const from = new Date(new Date(createdAt).getTime() - WINDOW_BEFORE_CREATION_MS).toISOString();
-  const to = new Date(Date.now() + WINDOW_AFTER_NOW_MS).toISOString();
+/**
+ * Rison-encoded global and timeline time range around `createdAt`: 28 days before, up to now. A
+ * link to alerts that arrive later passes `keepOpenForMs`, so the range reaches at least that far
+ * past `createdAt`.
+ */
+export const buildPageTimerange = (createdAt: string, keepOpenForMs = 0): string => {
+  const created = new Date(createdAt).getTime();
+  const from = new Date(created - WINDOW_BEFORE_CREATION_MS).toISOString();
+  const to = new Date(
+    Math.max(Date.now() + WINDOW_AFTER_NOW_MS, created + keepOpenForMs)
+  ).toISOString();
   return encode({
     global: { linkTo: [], timerange: { from, kind: 'absolute', to } },
     timeline: { linkTo: [], timerange: { from, kind: 'absolute', to } },

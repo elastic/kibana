@@ -59,4 +59,16 @@ describe('buildAlertsPageTagPath', () => {
       ...new URLSearchParams(buildAlertsPagePath(['a'], createdAt)).keys(),
     ]);
   });
+
+  it('keeps the time range open for alerts that get the tag after the link is made', () => {
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const now = new Date().toISOString();
+
+    const path = buildAlertsPageTagPath('az:proposal:abc', now, 3 * DAY_MS);
+
+    const { global } = decode(new URLSearchParams(path).get('timerange') ?? '') as {
+      global: { timerange: { to: string } };
+    };
+    expect(Date.parse(global.timerange.to)).toBeGreaterThanOrEqual(Date.parse(now) + 3 * DAY_MS);
+  });
 });

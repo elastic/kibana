@@ -20,6 +20,7 @@ import {
   triageJoinProposalStepCommonDefinition,
 } from '../../../common/step_types/alert_triage';
 import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../common/proposals/origin';
+import { GROUPED_PROPOSAL_EXPIRY_MS } from '../../alert_triage/constants';
 import { hashKey, strictKeyTags } from '../../alert_triage/key_tags';
 import {
   groupFpCandidates,
@@ -73,7 +74,11 @@ export interface GroupProposalsStepDependencies {
 type Context = StepHandlerContext<unknown, unknown>;
 
 const buildProposalAlertsPagePath = (proposalId: string): string =>
-  buildAlertsPageTagPath(`az:proposal:${proposalId}`, new Date().toISOString());
+  buildAlertsPageTagPath(
+    `az:proposal:${proposalId}`,
+    new Date().toISOString(),
+    GROUPED_PROPOSAL_EXPIRY_MS
+  );
 
 const toApiError = (error: unknown, action: string): ExecutionError =>
   error instanceof ExecutionError
