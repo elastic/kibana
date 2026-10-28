@@ -8,9 +8,11 @@ import React from 'react';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
+  areComparatorsEqual,
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 import { initializeStateApi } from '@kbn/presentation-publishing';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
@@ -20,12 +22,28 @@ import type { EmbeddableDeps } from '../../types';
 import { ApmEmbeddableContext } from '../../embeddable_context';
 import { APMAlertingFailedTransactionsChart } from './chart';
 
+const comparators: StateComparators<EmbeddableApmAlertingVizProps> = {
+  ...titleComparators,
+  serviceName: 'referenceEquality',
+  transactionType: 'referenceEquality',
+  transactionName: 'referenceEquality',
+  environment: 'referenceEquality',
+  rangeFrom: 'referenceEquality',
+  rangeTo: 'referenceEquality',
+  rule: 'referenceEquality',
+  alert: 'referenceEquality',
+  kuery: 'referenceEquality',
+  filters: 'referenceEquality',
+};
+
 export const getApmAlertingFailedTransactionsChartEmbeddableFactory = (deps: EmbeddableDeps) => {
   const factory: EmbeddablePublicDefinition<
     EmbeddableApmAlertingVizProps,
     DefaultEmbeddableApi<EmbeddableApmAlertingVizProps>
   > = {
     type: APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(comparators, baseline, current),
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
       const titleManager = initializeTitleManager(state);
@@ -99,19 +117,7 @@ export const getApmAlertingFailedTransactionsChartEmbeddableFactory = (deps: Emb
             map(() => undefined)
           )
         ),
-        getComparators: () => ({
-          ...titleComparators,
-          serviceName: 'referenceEquality',
-          transactionType: 'referenceEquality',
-          transactionName: 'referenceEquality',
-          environment: 'referenceEquality',
-          rangeFrom: 'referenceEquality',
-          rangeTo: 'referenceEquality',
-          rule: 'referenceEquality',
-          alert: 'referenceEquality',
-          kuery: 'referenceEquality',
-          filters: 'referenceEquality',
-        }),
+        getComparators: () => comparators,
         applySerializedState: (nextState) => {
           titleManager.reinitializeState(nextState);
           serviceName$.next(nextState.serviceName ?? '');

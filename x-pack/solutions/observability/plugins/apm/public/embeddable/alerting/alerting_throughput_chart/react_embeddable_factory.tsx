@@ -9,9 +9,11 @@ import type {
   EmbeddablePublicDefinition,
 } from '@kbn/embeddable-plugin/public';
 import {
+  areComparatorsEqual,
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 import { initializeStateApi } from '@kbn/presentation-publishing';
 import React from 'react';
@@ -22,12 +24,28 @@ import type { EmbeddableDeps } from '../../types';
 import type { EmbeddableApmAlertingVizProps } from '../types';
 import { APMAlertingThroughputChart } from './chart';
 
+const comparators: StateComparators<EmbeddableApmAlertingVizProps> = {
+  ...titleComparators,
+  serviceName: 'referenceEquality',
+  transactionType: 'referenceEquality',
+  transactionName: 'referenceEquality',
+  environment: 'referenceEquality',
+  rangeFrom: 'referenceEquality',
+  rangeTo: 'referenceEquality',
+  rule: 'referenceEquality',
+  alert: 'referenceEquality',
+  kuery: 'referenceEquality',
+  filters: 'referenceEquality',
+};
+
 export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableDeps) => {
   const factory: EmbeddablePublicDefinition<
     EmbeddableApmAlertingVizProps,
     DefaultEmbeddableApi<EmbeddableApmAlertingVizProps>
   > = {
     type: APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(comparators, baseline, current),
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
       const titleManager = initializeTitleManager(state);
@@ -101,19 +119,7 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
             map(() => undefined)
           )
         ),
-        getComparators: () => ({
-          ...titleComparators,
-          serviceName: 'referenceEquality',
-          transactionType: 'referenceEquality',
-          transactionName: 'referenceEquality',
-          environment: 'referenceEquality',
-          rangeFrom: 'referenceEquality',
-          rangeTo: 'referenceEquality',
-          rule: 'referenceEquality',
-          alert: 'referenceEquality',
-          kuery: 'referenceEquality',
-          filters: 'referenceEquality',
-        }),
+        getComparators: () => comparators,
         applySerializedState: (nextState) => {
           titleManager.reinitializeState(nextState);
           serviceName$.next(nextState.serviceName ?? '');
