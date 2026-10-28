@@ -1,0 +1,6 @@
+type: object
+nullable: true
+additionalProperties: true
+description: >
+  Extra details about the attachment. For alerts, this is the alert's index and rule. Required
+  for some types, such as `dashboard`.

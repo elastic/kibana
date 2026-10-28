@@ -36,7 +36,7 @@ export const createKIQueryGenerationSkill = (options: KIQueryGenerationSkillOpti
     id: KI_QUERY_GENERATION_SKILL_ID,
     name: 'ki-query-generation',
     basePath: 'skills/platform/streams',
-    experimental: true,
+    hidden: true,
     excludeFromElasticCapabilities: true,
     description,
     content,

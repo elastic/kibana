@@ -50,6 +50,20 @@ export const assertEsqlSourcesAllowed = (
     return { ok: false, reason: 'FROM has no sources' };
   }
 
+  // Walk the whole tree, not just top-level commands, so an `ENRICH` nested in a `FORK`
+  // branch is refused too.
+  let enrichPolicy: string | undefined;
+  Walker.walk(root, {
+    visitCommand: (command) => {
+      if (command.name === 'enrich' && enrichPolicy === undefined) {
+        enrichPolicy = sourcesOf(command)[0] ?? '';
+      }
+    },
+  });
+  if (enrichPolicy !== undefined) {
+    return { ok: false, reason: `ENRICH policy "${enrichPolicy}" is not allowed in a hunt query` };
+  }
+
   for (const command of root.commands) {
     if (command.name === 'enrich') {
       const [policy = ''] = sourcesOf(command);

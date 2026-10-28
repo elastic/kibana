@@ -73,6 +73,8 @@ apiTest.describe(
     apiTest.beforeAll(async ({ apiServices, samlAuth, apiClient, esClient }) => {
       await apiServices.spaces.create({ id: SPACE_A, name: SPACE_A });
       await apiServices.spaces.create({ id: SPACE_B, name: SPACE_B });
+      await apiServices.spaces.setSolutionView({ id: SPACE_A, solution: 'security' });
+      await apiServices.spaces.setSolutionView({ id: SPACE_B, solution: 'security' });
 
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminHeaders = withHuntHeaders(cookieHeader);

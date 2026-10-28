@@ -130,6 +130,15 @@ describe('assertEsqlSourcesAllowed', () => {
       ).toEqual({ ok: false, reason: expect.stringContaining('ENRICH policy "logs-policy"') });
     });
 
+    it('returns not ok for an ENRICH nested in a FORK branch', () => {
+      expect(
+        assertEsqlSourcesAllowed(
+          'FROM logs-aws.x | FORK (WHERE a == 1) (ENRICH logs-policy ON host.name)',
+          ['logs-*']
+        )
+      ).toEqual({ ok: false, reason: expect.stringContaining('ENRICH policy "logs-policy"') });
+    });
+
     it.each([
       'FROM remote:logs-events | LOOKUP JOIN _coordinator:logs-lookup ON id',
       'FROM remote:logs-events | ENRICH _any:logs-policy ON host.name',
