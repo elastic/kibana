@@ -29,7 +29,11 @@ const RESTORE_RECOVERY_MAX_BYTES_PER_SEC = '500mb';
 const ACTIVE_WAIT_ATTEMPTS = 20;
 const ACTIVE_WAIT_TIMEOUT_SECONDS = 60;
 
-const waitForActiveShards = async ({
+// `yellow`, not `wait_for_active_shards: 'all'`: a corpus is searchable once every
+// primary is active. Preloaded indices may keep replica settings that can never
+// allocate on a single-node cluster, which would make an all-shards wait spin forever
+// on an otherwise usable corpus.
+const waitForSearchablePrimaries = async ({
   esClient,
   log,
   suite,
@@ -44,7 +48,7 @@ const waitForActiveShards = async ({
     const health = await esClient.cluster.health(
       {
         index: corpus.indices.join(','),
-        wait_for_active_shards: 'all',
+        wait_for_status: 'yellow',
         timeout: `${ACTIVE_WAIT_TIMEOUT_SECONDS}s`,
       },
       { ignore: [408], requestTimeout: (ACTIVE_WAIT_TIMEOUT_SECONDS + 10) * 1000 }
@@ -53,12 +57,12 @@ const waitForActiveShards = async ({
       return;
     }
     log.info(
-      `[${suite}] waiting for "${corpus.name}" corpus shards to become active ` +
+      `[${suite}] waiting for "${corpus.name}" corpus primaries to become active ` +
         `(attempt ${attempt}/${ACTIVE_WAIT_ATTEMPTS})`
     );
   }
   throw new Error(
-    `[${suite}] "${corpus.name}" corpus indices did not become active within ` +
+    `[${suite}] "${corpus.name}" corpus primaries did not become active within ` +
       `${ACTIVE_WAIT_ATTEMPTS * ACTIVE_WAIT_TIMEOUT_SECONDS} seconds`
   );
 };
@@ -108,8 +112,8 @@ const ensureCorpus = async ({
   }
   if (missing.length === 0) {
     // Present is not the same as ready: another worker's restore creates the indices at
-    // recovery start, so wait until every shard is active before any example runs.
-    await waitForActiveShards({ esClient, log, suite, corpus });
+    // recovery start, so wait until every primary is active before any example runs.
+    await waitForSearchablePrimaries({ esClient, log, suite, corpus });
     log.info(
       `[${suite}] all ${corpus.indices.length} "${corpus.name}" corpus indices present and active`
     );
@@ -162,7 +166,7 @@ const ensureCorpus = async ({
     log.info(
       `[${suite}] "${corpus.name}" corpus is being restored by another worker; waiting for it`
     );
-    await waitForActiveShards({ esClient, log, suite, corpus });
+    await waitForSearchablePrimaries({ esClient, log, suite, corpus });
   }
 };
 
