@@ -1089,27 +1089,29 @@ steps:
 
         **Why this rule needs tuning**
         {{ steps.compose_evidence.output.fp_summary }}
-        {% if inputs.fp_count > inputs.alert_ids.size %}
+        {%- if inputs.fp_count > inputs.alert_ids.size %}
         The agent examined the newest {{ inputs.alert_ids.size }} of the {{ inputs.fp_count }} false positives. Your decision tags these {{ inputs.alert_ids.size }} alerts. The tag also removes the older alerts from future sweeps.
-        {% endif %}
+        {%- endif %}
 
         **Summary**
         {{ steps.diagnose_rule.output.structured_output.summary }}
-        {% if steps.post_fp_pattern.error %}
+        {%- if steps.post_fp_pattern.error %}
 
         **False positive pattern**
         {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
-        {% endif %}
-        {% if steps.post_reasoning.error %}
+        {%- endif %}
+        {%- if steps.post_reasoning.error %}
 
         **Reasoning**
         {{ steps.diagnose_rule.output.structured_output.reasoning }}
-        {% endif %}
+        {%- endif %}
 
         **Proposed change**
         {%- assign rule = steps.fetch_rule.output %}
         {%- assign proposal = steps.diagnose_rule.output.structured_output %}
         {%- assign lookbacks = steps.compute_schedule_lookbacks.output.lookbacks | split: "," %}
+        {%- assign restore = "You can restore the previous version using History on the rule details page." %}
+        {%- assign undo = "" %}
         {%- case proposal.change_type %}
         {%- when "query" %}
         Current query:
@@ -1121,7 +1123,7 @@ steps:
         ```
         {{ proposal.proposed_query }}
         ```
-        Approve to change the query of the rule. You can restore the previous version using History on the rule details page.
+        {%- assign undo = "Approve to change the query of the rule. " | append: restore %}
         {%- when "exception" %}
         {%- assign entries = steps.bound_exception_entries.output.entries_json | json_parse %}
         {%- if entries.size > 1 %}
@@ -1135,7 +1137,7 @@ steps:
         Add exception: {{ condition }}
         {%- endif %}
         {%- endfor %}
-        Approve to add the exception to the exception list of the rule. You can remove it in the rule's Exceptions tab.
+        {%- assign undo = "Approve to add the exception to the exception list of the rule. You can remove it in the rule's Exceptions tab." %}
         {%- when "risk_score" %}
         {%- if proposal.proposed_risk_score != rule.risk_score %}
         Risk score: `{{ rule.risk_score }}` → `{{ proposal.proposed_risk_score }}`
@@ -1143,7 +1145,7 @@ steps:
         {%- if proposal.proposed_severity != rule.severity %}
         Severity: `{{ rule.severity }}` → `{{ proposal.proposed_severity }}`
         {%- endif %}
-        Approve to change the risk score and severity of the rule. You can restore the previous version using History on the rule details page.
+        {%- assign undo = "Approve to change the risk score and severity of the rule. " | append: restore %}
         {%- when "threshold" %}
         {%- assign current_fields = rule.threshold.field | join: ", " %}
         {%- assign proposed_fields = proposal.proposed_threshold_field | join: ", " %}
@@ -1158,7 +1160,7 @@ steps:
         {%- if proposed_cardinality != current_cardinality %}
         Unique values count: `{{ current_cardinality | default: "none" }}` → `{{ proposed_cardinality | default: "none" }}`
         {%- endif %}
-        Approve to change the threshold settings of the rule. You can restore the previous version using History on the rule details page.
+        {%- assign undo = "Approve to change the threshold settings of the rule. " | append: restore %}
         {%- when "schedule" %}
         {%- if proposal.proposed_interval != rule.interval %}
         Runs every: `{{ rule.interval }}` → `{{ proposal.proposed_interval }}`
@@ -1170,50 +1172,56 @@ steps:
         {%- elsif proposal.proposed_from != rule.from %}
         Analyzed time range starts at: `{{ rule.from }}` → `{{ proposal.proposed_from }}`
         {%- endif %}
-        Approve to change the schedule settings of the rule. You can restore the previous version using History on the rule details page.
+        {%- assign undo = "Approve to change the schedule settings of the rule. " | append: restore %}
         {%- else %}
         No automated change is safe for this rule.
         Approving records the handoff. The agent makes no change to the rule.
         Apply the recommended change in the Detection Rules UI.
         {%- endcase %}
+        {%- if undo != "" %}
 
-        {% if steps.diagnose_rule.output.structured_output.change_type == "query"
-          or steps.diagnose_rule.output.structured_output.change_type == "exception"
-          or steps.diagnose_rule.output.structured_output.change_type == "threshold"
-          or steps.diagnose_rule.output.structured_output.change_type == "schedule" %}
-        {% if steps.can_preview_query_change.output.supported %}
+        {{ undo }}
+        {%- endif %}
+        {%- if proposal.change_type == "query"
+          or proposal.change_type == "exception"
+          or proposal.change_type == "threshold"
+          or proposal.change_type == "schedule" %}
+        {%- if steps.can_preview_query_change.output.supported %}
+
         **Backtest**
 
         The backtest ran {{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions, running every `{{ rule.interval }}` {% if lookbacks.size == 2 %}with `{{ lookbacks.first }}` additional look-back time{% else %}and looking back from `{{ rule.from }}`{% endif %}.
         It ends at the newest false positive, {{ inputs.last_fp_at | date: "%B %-d, %Y at %H:%M UTC", "UTC" }}.
         This time span is usually much shorter than the span of the false positives.
-        {% if proposal.change_type == 'schedule' %}
+        {%- if proposal.change_type == 'schedule' %}
+
         The proposed schedule ran {{ steps.compute_schedule_preview_runs.output.proposed_invocation_count }} simulated executions, running every `{{ proposal.proposed_interval }}` {% if lookbacks.size == 2 %}with `{{ lookbacks.last }}` additional look-back time{% else %}and looking back from `{{ proposal.proposed_from }}`{% endif %}, over the same time span.
-        {% endif %}
+        {%- endif %}
 
         Alerts with the current rule: {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %}
         Alerts with the proposed change: {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}
-        {% if steps.record_preview_outcome.output.current_error_text != '' %}
+        {%- if steps.record_preview_outcome.output.current_error_text != '' %}
         Current preview errors: {{ steps.record_preview_outcome.output.current_error_text }}
-        {% endif %}
-        {% if steps.record_preview_outcome.output.proposed_error_text != '' %}
+        {%- endif %}
+        {%- if steps.record_preview_outcome.output.proposed_error_text != '' %}
         Proposed preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
-        {% endif %}
-        {% else %}
+        {%- endif %}
+        {%- else %}
+
         No backtest is available for this change.
-        {% if steps.fetch_rule.output.type == 'saved_query' or steps.fetch_rule.output.type == 'machine_learning' %}
+        {%- if rule.type == 'saved_query' or rule.type == 'machine_learning' %}
         The preview does not support saved query rules or machine learning rules.
-        {% elsif steps.diagnose_rule.output.structured_output.change_type == 'exception' and steps.fetch_rule.output.type == 'esql' %}
+        {%- elsif proposal.change_type == 'exception' and rule.type == 'esql' %}
         The preview cannot apply an exception to an ES|QL rule, which has no filters.
-        {% elsif steps.diagnose_rule.output.structured_output.change_type == 'exception' %}
+        {%- elsif proposal.change_type == 'exception' %}
         The agent could not convert the proposed exception into a preview filter.
-        {% else %}
-        The preview does not support this change on a {{ steps.fetch_rule.output.type }} rule.
-        {% endif %}
+        {%- else %}
+        The preview does not support this change on a {{ rule.type }} rule.
+        {%- endif %}
         Approving still applies the proposed change.
         Judge it on the change and on the false positives above, not on a simulated alert count.
-        {% endif %}
-        {% endif %}
+        {%- endif %}
+        {%- endif %}
 
   # One switch, four exclusive arms, one gate call each. Separate arms because a
   # YAML object cannot be assembled conditionally. The manual arm is the default.

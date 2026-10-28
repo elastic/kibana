@@ -133,7 +133,8 @@ describe('rule_tuning_review proposed change', () => {
       },
     });
     const start = comment.indexOf('**Proposed change**');
-    return comment.slice(start, comment.indexOf('\n', comment.indexOf('\nApprove', start) + 1));
+    const end = comment.indexOf('\n', comment.indexOf('\nApprove', start) + 1);
+    return comment.slice(start, end === -1 ? undefined : end);
   };
 
   const renderLookbacks = (
@@ -172,6 +173,7 @@ describe('rule_tuning_review proposed change', () => {
       [
         '**Proposed change**',
         'Threshold: `3` → `10`',
+        '',
         'Approve to change the threshold settings of the rule. You can restore the previous version using History on the rule details page.',
       ].join('\n')
     );
@@ -202,6 +204,7 @@ describe('rule_tuning_review proposed change', () => {
       [
         '**Proposed change**',
         'Additional look-back time: `1h` → `1m`',
+        '',
         'Approve to change the schedule settings of the rule. You can restore the previous version using History on the rule details page.',
       ].join('\n')
     );
@@ -215,6 +218,59 @@ describe('rule_tuning_review proposed change', () => {
         { compute_schedule_lookbacks: { output: { lookbacks: '' } } }
       )
     ).toContain('Runs every: `5m` → `10m`\nAnalyzed time range starts at: `now-1h/d` → `now-11m`');
+  });
+
+  it('separates every section with exactly one blank line', () => {
+    const backtest = {
+      compose_evidence: { output: { rule_line: '**Rule:** Example', fp_summary: '12 FPs.' } },
+      can_preview_query_change: { output: { supported: true } },
+      compute_schedule_lookbacks: { output: { lookbacks: '1h,1m' } },
+      record_preview_outcome: {
+        output: { current_error_text: '', proposed_error_text: '' },
+      },
+    };
+    const proposals: Array<[Record<string, unknown>, Record<string, unknown>]> = [
+      [{ change_type: 'query', proposed_query: 'a and not b' }, { query: 'a' }],
+      [
+        { change_type: 'risk_score', proposed_risk_score: 21, proposed_severity: 'low' },
+        { risk_score: 47, severity: 'medium' },
+      ],
+      [
+        {
+          change_type: 'threshold',
+          proposed_threshold_value: 10,
+          proposed_threshold_field: ['host.name'],
+          proposed_threshold_cardinality: [],
+        },
+        { threshold: { value: 3, field: ['host.name'] } },
+      ],
+      [
+        { change_type: 'schedule', proposed_interval: '5m', proposed_from: 'now-6m' },
+        { interval: '5m', from: 'now-65m' },
+      ],
+      [{ change_type: 'manual' }, {}],
+    ];
+
+    for (const [structuredOutput, rule] of proposals) {
+      const comment = engine
+        .parseAndRenderSync(commentTemplate, {
+          inputs: { fp_count: 1, alert_ids: ['a'] },
+          consts: definition.consts,
+          steps: {
+            diagnose_rule: {
+              output: { structured_output: { ...structuredOutput, summary: 'Too noisy.' } },
+            },
+            fetch_rule: { output: rule },
+            ...backtest,
+          },
+        })
+        .trim();
+      expect(comment).not.toMatch(/\n\n\n/);
+      expect(comment).toMatch(/\*\*Proposed change\*\*\n\S/);
+      if (structuredOutput.change_type !== 'manual') {
+        expect(comment).toMatch(/\S\n\nApprove to /);
+      }
+    }
   });
 
   it('describes the backtest schedule with the look-back instead of date math', () => {
@@ -279,6 +335,7 @@ describe('rule_tuning_review proposed change', () => {
       [
         '**Proposed change**',
         'Add exception: `host.name` is one of `admin-04`, `build-02`',
+        '',
         "Approve to add the exception to the exception list of the rule. You can remove it in the rule's Exceptions tab.",
       ].join('\n')
     );
@@ -300,6 +357,7 @@ describe('rule_tuning_review proposed change', () => {
         '**Proposed change**',
         'Risk score: `47` → `21`',
         'Severity: `medium` → `low`',
+        '',
         'Approve to change the risk score and severity of the rule. You can restore the previous version using History on the rule details page.',
       ].join('\n')
     );
