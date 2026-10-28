@@ -11,13 +11,16 @@ import React, { useEffect } from 'react';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
+import { drilldownsComparators } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import {
   apiHasDisableTriggers,
+  areComparatorsEqual,
   initializeStateApi,
   initializeTitleManager,
   titleComparators,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 
 import type { ImageEmbeddableState } from '../../server';
@@ -27,12 +30,20 @@ import { coreServices, filesService } from '../services/kibana_services';
 import { IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS, IMAGE_EMBEDDABLE_TYPE } from '../../common/constants';
 import type { ImageConfig, ImageEmbeddableApi } from '../types';
 
+const imageComparators: StateComparators<ImageEmbeddableState> = {
+  ...drilldownsComparators,
+  ...titleComparators,
+  image_config: 'deepEquality',
+};
+
 export const getImageEmbeddableFactory = () => {
   const imageEmbeddableFactory: EmbeddablePublicDefinition<
     ImageEmbeddableState,
     ImageEmbeddableApi
   > = {
     type: IMAGE_EMBEDDABLE_TYPE,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(imageComparators, baseline, current),
     buildEmbeddable: async ({
       initializeDrilldownsManager,
       initialState,
@@ -64,13 +75,7 @@ export const getImageEmbeddableFactory = () => {
           ),
           drilldownsManager.anyStateChange$
         ),
-        getComparators: () => {
-          return {
-            ...drilldownsManager.comparators,
-            ...titleComparators,
-            image_config: 'deepEquality',
-          };
-        },
+        getComparators: () => imageComparators,
         applySerializedState: (nextState) => {
           titleManager.reinitializeState(nextState);
           drilldownsManager.reinitializeState(nextState);
