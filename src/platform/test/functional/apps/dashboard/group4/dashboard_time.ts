@@ -53,8 +53,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('is saved with time', async function () {
         await dashboard.switchToEditMode();
         await timePicker.setDefaultAbsoluteRange();
-        await dashboard.saveDashboard(dashboardName, {
+        await dashboard.modifySettings({
           storeTimeWithDashboard: true,
+        });
+        await dashboard.saveDashboard(dashboardName, {
           saveAsNew: false,
         });
         await dashboard.expectUnsavedChangesListingDoesNotExist(dashboardName);

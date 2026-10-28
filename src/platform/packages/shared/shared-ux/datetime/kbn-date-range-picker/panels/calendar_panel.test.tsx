@@ -8,15 +8,19 @@
  */
 
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
 import { CalendarPanel } from './calendar_panel';
 import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from '../constants';
-import { formatDateRange, formatAbsoluteDate } from '../utils';
+import { formatDateRange, formatInputDateRange } from '../utils';
 import { textToTimeRange } from '../parse';
+import moment from 'moment-timezone';
 
 const mockUseDateRangePickerContext = jest.fn();
+const mockCalendarRangeSpy = jest.fn();
+const mockCalendarTimeZoneSpy = jest.fn();
 
 jest.mock('../date_range_picker_context', () => ({
   useDateRangePickerContext: () => mockUseDateRangePickerContext(),
@@ -54,20 +58,27 @@ jest.mock('../date_range_picker_panel_ui', () => ({
 /**
  * Calendar mock: renders numbered day buttons for February 2026 (days 1-28).
  * Clicking a day simulates DayPicker's range selection state machine using the
- * current `range` prop.
+ * current `range` prop, and mirrors how DayPicker types the dates it emits:
+ * a `TZDate` when a time zone is configured, a local `Date` otherwise.
  */
 jest.mock('../calendar', () => {
   const mockReact = jest.requireActual('react');
+  const { TZDate: MockTZDate } = jest.requireActual('react-day-picker');
 
   function MockCalendar({
     range,
     onRangeChange,
+    timeZone,
   }: {
     range: { from?: Date; to?: Date } | undefined;
     onRangeChange: (r: { from?: Date; to?: Date } | undefined) => void;
+    timeZone?: string;
   }) {
+    mockCalendarRangeSpy(range);
+    mockCalendarTimeZoneSpy(timeZone);
+
     const handleClick = (day: number) => {
-      const date = new Date(2026, 1, day);
+      const date = timeZone ? new MockTZDate(2026, 1, day, timeZone) : new Date(2026, 1, day);
 
       if (range?.from && !range.to) {
         onRangeChange({ from: range.from, to: date });
@@ -92,19 +103,12 @@ jest.mock('../calendar', () => {
 const feb2026 = (day: number, h: number, m: number, s = 0, ms = 0) =>
   new Date(2026, 1, day, h, m, s, ms);
 
-/** Builds the formatted display string for a given Feb 2026 date. */
-const feb2026Display = (day: number, h: number, m: number, s = 0, ms = 0) =>
-  formatAbsoluteDate(feb2026(day, h, m, s, ms));
-
-/** Builds the UTC ISO string for a given Feb 2026 date. */
-const feb2026ISO = (day: number, h: number, m: number, s = 0, ms = 0) =>
-  feb2026(day, h, m, s, ms).toISOString();
-
-/** Click a day by its number in the February 2026 calendar. */
-const clickDay = (day: number) =>
-  fireEvent.click(screen.getByRole('button', { name: String(day) }));
-
 describe('CalendarPanel', () => {
+  let user: ReturnType<typeof userEvent.setup>;
+
+  /** Click a day by its number in the February 2026 calendar. */
+  const clickDay = (day: number) => user.click(screen.getByRole('button', { name: String(day) }));
+
   const applyRange = jest.fn();
   const onPresetSave = jest.fn();
   const setText = jest.fn((newText: string) => {
@@ -119,6 +123,7 @@ describe('CalendarPanel', () => {
   });
 
   const defaultSettings = { roundRelativeTime: true };
+  const defaultTransformOptions = {};
 
   /** Context with computed dates. */
   const makeContext = (
@@ -130,6 +135,7 @@ describe('CalendarPanel', () => {
     onPresetSave,
     setText,
     settings: defaultSettings,
+    transformOptions: defaultTransformOptions,
     text: formatDateRange(startDate, endDate),
     timeRange: {
       startDate,
@@ -145,6 +151,7 @@ describe('CalendarPanel', () => {
     onPresetSave,
     setText,
     settings: defaultSettings,
+    transformOptions: defaultTransformOptions,
     text: '',
     timeRange: {
       startDate: null,
@@ -155,12 +162,19 @@ describe('CalendarPanel', () => {
   });
 
   beforeEach(() => {
+    user = userEvent.setup();
     applyRange.mockClear();
     onPresetSave.mockClear();
     setText.mockClear();
+    mockCalendarRangeSpy.mockClear();
+    mockCalendarTimeZoneSpy.mockClear();
     mockUseDateRangePickerContext.mockReturnValue(
       makeContext([DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE])
     );
+  });
+
+  afterEach(() => {
+    moment.tz.setDefault();
   });
 
   describe('initialization', () => {
@@ -168,7 +182,7 @@ describe('CalendarPanel', () => {
       renderWithEuiTheme(<CalendarPanel />);
 
       expect(setText).toHaveBeenCalledWith(
-        formatDateRange(feb2026(1, 10, 15, 30, 500), feb2026(2, 12, 45, 0, 0))
+        formatInputDateRange(feb2026(1, 10, 15, 30, 500), feb2026(2, 12, 45, 0, 0))
       );
     });
 
@@ -181,7 +195,7 @@ describe('CalendarPanel', () => {
   });
 
   describe('date normalization', () => {
-    it('always uses start/end of day when selecting new dates', () => {
+    it('always uses start/end of day when selecting new dates', async () => {
       mockUseDateRangePickerContext.mockReturnValue(
         makeContext(
           [DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE],
@@ -191,50 +205,95 @@ describe('CalendarPanel', () => {
       );
       renderWithEuiTheme(<CalendarPanel />);
 
-      clickDay(10);
-      clickDay(15);
+      await clickDay(10);
+      await clickDay(15);
 
       expect(setText).toHaveBeenLastCalledWith(
-        formatDateRange(feb2026(10, 0, 0, 0, 0), feb2026(15, 23, 59, 59, 999))
+        formatInputDateRange(feb2026(10, 0, 0, 0, 0), feb2026(15, 23, 59, 59, 999))
       );
     });
 
-    it('uses start/end of day when selecting the same day twice', () => {
+    it('uses start/end of day when selecting the same day twice', async () => {
       mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
       renderWithEuiTheme(<CalendarPanel />);
 
-      clickDay(10);
-      clickDay(10);
+      await clickDay(10);
+      await clickDay(10);
 
       expect(setText).toHaveBeenLastCalledWith(
-        formatDateRange(feb2026(10, 0, 0, 0, 0), feb2026(10, 23, 59, 59, 999))
+        formatInputDateRange(feb2026(10, 0, 0, 0, 0), feb2026(10, 23, 59, 59, 999))
+      );
+    });
+
+    it('uses the configured time zone for the selected day boundaries and displayed range', async () => {
+      moment.tz.setDefault('Japan');
+
+      mockUseDateRangePickerContext.mockReturnValue({
+        ...makeContextNoDates(),
+        timeZone: 'Japan',
+      });
+
+      renderWithEuiTheme(<CalendarPanel />);
+
+      await clickDay(10);
+
+      expect(mockCalendarTimeZoneSpy).toHaveBeenLastCalledWith('Japan');
+
+      expect(setText).toHaveBeenLastCalledWith(
+        'Feb 10, 2026, 00:00:00.000 to Feb 10, 2026, 23:59:59.999'
+      );
+
+      const expectedStart = new Date('2026-02-10T00:00:00.000+09:00');
+      const expectedEnd = new Date('2026-02-10T23:59:59.999+09:00');
+
+      const { startDate, endDate } = mockUseDateRangePickerContext().timeRange;
+
+      expect(startDate?.getTime()).toBe(expectedStart.getTime());
+      expect(endDate?.getTime()).toBe(expectedEnd.getTime());
+    });
+
+    it('treats the Browser time zone as no time zone', async () => {
+      mockUseDateRangePickerContext.mockReturnValue({
+        ...makeContextNoDates(),
+        timeZone: 'Browser',
+      });
+
+      renderWithEuiTheme(<CalendarPanel />);
+
+      await clickDay(10);
+
+      expect(mockCalendarTimeZoneSpy).toHaveBeenLastCalledWith(undefined);
+      expect(setText).toHaveBeenLastCalledWith(
+        formatInputDateRange(feb2026(10, 0, 0, 0, 0), feb2026(10, 23, 59, 59, 999))
       );
     });
   });
 
   describe('date selection', () => {
-    it('calls setText with just the start date when only the first date is clicked', () => {
+    it('calls setText with a full-day range when only the first date is clicked', async () => {
       mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
       renderWithEuiTheme(<CalendarPanel />);
 
-      clickDay(10);
+      await clickDay(10);
 
-      expect(setText).toHaveBeenCalledWith(feb2026Display(10, 0, 0));
-    });
-
-    it('calls setText with the formatted range after both dates are selected', () => {
-      mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
-      renderWithEuiTheme(<CalendarPanel />);
-
-      clickDay(10);
-      clickDay(15);
-
-      expect(setText).toHaveBeenLastCalledWith(
-        formatDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59, 59, 999))
+      expect(setText).toHaveBeenCalledWith(
+        formatInputDateRange(feb2026(10, 0, 0), feb2026(10, 23, 59, 59, 999))
       );
     });
 
-    it('resets range and shows new start date when clicking after a complete selection', () => {
+    it('calls setText with the formatted range after both dates are selected', async () => {
+      mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
+      renderWithEuiTheme(<CalendarPanel />);
+
+      await clickDay(10);
+      await clickDay(15);
+
+      expect(setText).toHaveBeenLastCalledWith(
+        formatInputDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59, 59, 999))
+      );
+    });
+
+    it('resets to a new full-day range when clicking after a complete selection', async () => {
       mockUseDateRangePickerContext.mockReturnValue(
         makeContext(
           [DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE],
@@ -244,9 +303,65 @@ describe('CalendarPanel', () => {
       );
       renderWithEuiTheme(<CalendarPanel />);
 
-      clickDay(20);
+      await clickDay(20);
 
-      expect(setText).toHaveBeenCalledWith(feb2026Display(20, 0, 0, 0, 0));
+      expect(setText).toHaveBeenCalledWith(
+        formatInputDateRange(feb2026(20, 0, 0), feb2026(20, 23, 59, 59, 999))
+      );
+    });
+  });
+
+  describe('timePrecision', () => {
+    it.each(['none', 's'] as const)(
+      'keeps the full day up to 23:59:59.999 when the display precision is %s',
+      async (timePrecision) => {
+        mockUseDateRangePickerContext.mockReturnValue({
+          ...makeContextNoDates(),
+          transformOptions: { ...defaultTransformOptions, timePrecision },
+        });
+        renderWithEuiTheme(<CalendarPanel />);
+
+        await clickDay(10);
+        await clickDay(15);
+
+        expect(setText).toHaveBeenLastCalledWith(
+          formatInputDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59, 59, 999))
+        );
+        expect(mockUseDateRangePickerContext().timeRange.endDate).toEqual(
+          feb2026(15, 23, 59, 59, 999)
+        );
+      }
+    );
+
+    it('does not truncate the existing range when converting to absolute text on mount', () => {
+      mockUseDateRangePickerContext.mockReturnValue({
+        ...makeContext([DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE]),
+        transformOptions: { ...defaultTransformOptions, timePrecision: 'none' },
+      });
+      renderWithEuiTheme(<CalendarPanel />);
+
+      expect(setText).toHaveBeenCalledWith(
+        formatInputDateRange(feb2026(1, 10, 15, 30, 500), feb2026(2, 12, 45, 0, 0))
+      );
+    });
+  });
+
+  describe('invalid range', () => {
+    it('leaves the calendar unselected when the range is invalid', () => {
+      // End date in the future
+      mockUseDateRangePickerContext.mockReturnValue({
+        ...makeContext([DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW]),
+        timeRange: {
+          startDate: feb2026(20, 0, 0),
+          endDate: feb2026(15, 23, 59, 59, 999),
+          type: [DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW] as [string, string],
+          isInvalid: true,
+        },
+      });
+
+      renderWithEuiTheme(<CalendarPanel />);
+
+      expect(mockCalendarRangeSpy).toHaveBeenLastCalledWith(undefined);
     });
   });
 
@@ -258,25 +373,13 @@ describe('CalendarPanel', () => {
       expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled();
     });
 
-    it('is disabled when only the start date is selected', () => {
+    it('is enabled after a single day is selected (full-day range)', async () => {
       mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
       renderWithEuiTheme(<CalendarPanel />);
 
-      clickDay(10);
+      await clickDay(10);
 
-      expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled();
-    });
-
-    it('shows tooltip when disabled due to missing end date', () => {
-      mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
-      renderWithEuiTheme(<CalendarPanel />);
-
-      clickDay(10);
-
-      const applyButton = screen.getByRole('button', { name: 'Apply' });
-      expect(
-        applyButton.closest('[class*="euiToolTip"]') || applyButton.parentElement
-      ).toBeTruthy();
+      expect(screen.getByRole('button', { name: 'Apply' })).not.toBeDisabled();
     });
 
     it('is enabled when initialized with a valid date range', () => {
@@ -285,64 +388,91 @@ describe('CalendarPanel', () => {
       expect(screen.getByRole('button', { name: 'Apply' })).not.toBeDisabled();
     });
 
-    it('becomes enabled after both dates are selected', () => {
+    it('becomes enabled as soon as a day is selected and stays enabled for a range', async () => {
       mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
       renderWithEuiTheme(<CalendarPanel />);
 
       expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled();
 
-      clickDay(10);
-      expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled();
+      await clickDay(10);
+      expect(screen.getByRole('button', { name: 'Apply' })).not.toBeDisabled();
 
-      clickDay(15);
+      await clickDay(15);
       expect(screen.getByRole('button', { name: 'Apply' })).not.toBeDisabled();
     });
 
-    it('calls applyRange with UTC ISO bounds and formatted display text', () => {
+    it('delegates to applyRange() so the current input range is applied', async () => {
       mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
       renderWithEuiTheme(<CalendarPanel />);
 
-      clickDay(10);
-      clickDay(15);
-      fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
+      await clickDay(10);
+      await clickDay(15);
+      await user.click(screen.getByRole('button', { name: 'Apply' }));
 
-      expect(applyRange).toHaveBeenCalledWith(
-        {
-          start: feb2026ISO(10, 0, 0),
-          end: feb2026ISO(15, 23, 59, 59, 999),
-        },
-        formatDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59, 59, 999))
-      );
+      // Applies the resolved range from `text` (matching the Enter key)
+      expect(applyRange).toHaveBeenCalledWith();
     });
 
-    it('calls onPresetSave when Save as preset is checked', () => {
-      mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
+    it('calls onPresetSave with a precision-aware display label when Save as preset is checked', async () => {
+      mockUseDateRangePickerContext.mockReturnValue({
+        ...makeContextNoDates(),
+        transformOptions: { ...defaultTransformOptions, timePrecision: 'none' },
+      });
       renderWithEuiTheme(<CalendarPanel />);
 
-      fireEvent.click(screen.getByRole('checkbox', { name: 'Save as preset' }));
-      clickDay(10);
-      clickDay(15);
-      fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
+      await user.click(screen.getByRole('checkbox', { name: 'Save as preset' }));
+      await clickDay(10);
+      await clickDay(15);
+      await user.click(screen.getByRole('button', { name: 'Apply' }));
 
+      // 'none' precision drops the seconds, and the label is display-only (uses the → delimiter).
       expect(onPresetSave).toHaveBeenCalledWith(
-        expect.objectContaining({ label: expect.any(String) })
+        expect.objectContaining({
+          label: expect.stringMatching(/^Feb 10(?:, 2026)?, 00:00 → Feb 15(?:, 2026)?, 23:59$/),
+        })
       );
     });
 
-    it('does not call onPresetSave when Save as preset is unchecked', () => {
+    it('does not call onPresetSave when Save as preset is unchecked', async () => {
       mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
       renderWithEuiTheme(<CalendarPanel />);
 
-      clickDay(10);
-      clickDay(15);
-      fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
+      await clickDay(10);
+      await clickDay(15);
+      await user.click(screen.getByRole('button', { name: 'Apply' }));
 
       expect(onPresetSave).not.toHaveBeenCalled();
+    });
+
+    it('preserves manually edited times when applying (does not floor to day boundaries)', async () => {
+      // Mid-day times, clearly distinct from the 00:00:00 / 23:59:59 day
+      // boundaries, simulate the user editing the time in the input after
+      // selecting days in the calendar.
+      const editedStart = feb2026(11, 9, 15, 42, 0);
+      const editedEnd = feb2026(13, 17, 48, 8, 0);
+
+      mockUseDateRangePickerContext.mockReturnValue(
+        makeContext([DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE], editedStart, editedEnd)
+      );
+      renderWithEuiTheme(<CalendarPanel />);
+
+      await user.click(screen.getByRole('checkbox', { name: 'Save as preset' }));
+      await user.click(screen.getByRole('button', { name: 'Apply' }));
+
+      expect(applyRange).toHaveBeenCalledWith();
+
+      // The edited times are preserved when saving as a preset, not floored
+      expect(onPresetSave).toHaveBeenCalledWith(
+        expect.objectContaining({
+          start: editedStart.toISOString(),
+          end: editedEnd.toISOString(),
+        })
+      );
     });
   });
 
   describe('back navigation', () => {
-    it('restores original text when going back', () => {
+    it('restores original text when going back', async () => {
       const originalText = 'Last 15 minutes';
 
       mockUseDateRangePickerContext.mockReturnValue({
@@ -354,7 +484,7 @@ describe('CalendarPanel', () => {
 
       setText.mockClear();
 
-      fireEvent.click(screen.getByTestId('back-button'));
+      await user.click(screen.getByTestId('back-button'));
 
       expect(setText).toHaveBeenCalledWith(originalText);
     });

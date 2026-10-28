@@ -11,6 +11,7 @@ import {
   TASK_DESCRIPTION,
   type GetTranslateSplToEsqlParams,
 } from '../../../../../../../common/task/agent/helpers/translate_spl_to_esql';
+import { formatLookupResourcesContext } from '../../../../../../../common/task/util/format_lookup_resource';
 import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/constants';
 import { TRANSLATION_INDEX_PATTERN } from '../../../../constants';
 import { hasValidIndexPattern } from '../../../../helpers/has_valid_index_pattern';
@@ -33,6 +34,10 @@ Specific Panel description: "${state.description}"`;
     const indexResourceContext = state.resolved_resource
       ? formatResourceWithSampledValues({ resource: state.resolved_resource })
       : undefined;
+    const lookupResourcesContext = formatLookupResourcesContext(state.resources?.lookup ?? []);
+    const knowledgeBase = [indexResourceContext ?? '', lookupResourcesContext]
+      .filter((value) => value.trim() !== '')
+      .join('\n\n');
 
     const { esqlQuery, comments } = await translateSplToEsql({
       title: state.parsed_panel.title,
@@ -40,7 +45,7 @@ Specific Panel description: "${state.description}"`;
       taskDescription: TASK_DESCRIPTION.migrate_dashboard,
       inlineQuery: state.inline_query,
       indexPattern,
-      knowledgeBase: indexResourceContext ?? '',
+      knowledgeBase,
     });
 
     if (!esqlQuery) {

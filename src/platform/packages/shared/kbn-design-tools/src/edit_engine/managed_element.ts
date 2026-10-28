@@ -8,6 +8,7 @@
  */
 
 import { DEVTOOL_LIVE_ATTR } from '../lib/constants';
+import { isScreenReaderOnly } from './is_screen_reader_only';
 
 /**
  * Returns the meaningful content root for a managed element.
@@ -39,13 +40,14 @@ export const getContentRoot = (target: HTMLElement): HTMLElement => {
  * Check whether an element is a non-visible helper (screen-reader-only,
  * aria-hidden, or explicitly hidden) that should be skipped when resolving
  * the content root.
+ *
+ * @param el - The element to check.
+ * @returns Whether the element is a hidden helper.
  */
 const isHiddenHelper = (el: HTMLElement): boolean => {
   if (el.getAttribute('aria-hidden') === 'true') return true;
   if (el.hasAttribute('hidden')) return true;
-  // Emotion class names embed the original class: css-xxx-euiScreenReaderOnly
-  const cls = el.className;
-  if (typeof cls === 'string' && cls.includes('euiScreenReaderOnly')) return true;
+  if (isScreenReaderOnly(el)) return true;
   return false;
 };
 

@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useState } from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux-v7';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { getStore } from '../../../../../common/store';
@@ -101,6 +101,7 @@ export const IndicatorBarchartLegendAction: FC<IndicatorBarchartLegendActionProp
       closePopover={() => setPopover(false)}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={BUTTON_LABEL}
     >
       <ReduxProvider store={store}>
         <EuiContextMenuPanel items={popoverItems} />

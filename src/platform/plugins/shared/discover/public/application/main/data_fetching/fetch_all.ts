@@ -13,9 +13,11 @@ import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { i18n } from '@kbn/i18n';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import { DataViewSource, type EsqlSource } from '@kbn/data-source';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
@@ -34,6 +36,7 @@ import type {
   DataMsg,
   SavedSearchData,
 } from '../state_management/discover_data_state_container';
+import type { RecordsFetchResponse } from '../../types';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { InternalStateStore, TabState } from '../state_management/redux';
@@ -52,6 +55,7 @@ export interface CommonFetchParams {
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
   getCurrentTab: () => TabState;
+  esqlSource?: EsqlSource;
 }
 
 /**
@@ -79,6 +83,7 @@ export function fetchAll(
     abortController,
     getCurrentTab,
     onFetchRecordsComplete,
+    esqlSource,
   } = params;
   const { data, expressions } = services;
 
@@ -103,18 +108,26 @@ export function fetchAll(
       });
     }
 
+    const loadingDataSource = isEsqlQuery
+      ? esqlSource
+      : dataView.id
+      ? new DataViewSource(dataView)
+      : undefined;
+
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$);
-    sendLoadingMsg(dataSubjects.documents$, { query });
+    sendLoadingMsg(dataSubjects.documents$, {
+      query,
+      ...(loadingDataSource ? { dataSource: loadingDataSource } : {}),
+    });
     sendLoadingMsg(dataSubjects.totalHits$, {
       result: dataSubjects.totalHits$.getValue().result,
     });
 
-    // Start fetching all required requests
-    const response = isEsqlQuery
+    const response: Promise<RecordsFetchResponse> = isEsqlQuery
       ? fetchEsql({
           query,
-          dataView,
+          esqlSource,
           abortSignal: abortController.signal,
           inspectorAdapters,
           data,
@@ -123,42 +136,31 @@ export function fetchAll(
           timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
           esqlVariables: currentTab.esqlVariables,
           searchSessionId: params.searchSessionId,
+          esqlApproximation: currentTab.appState.esqlApproximation ?? false,
         })
       : fetchDocuments(searchSource, params);
-    const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
 
-    const fetchAllRequestOnlyTracker = scopedEbtManager.trackQueryPerformanceEvent(
-      'discoverFetchAllRequestsOnly'
-    );
-
-    // Calculate query range in seconds
-    const queryRangeSeconds = currentTab.dataRequestParams.timeRangeAbsolute
-      ? getTimeDifferenceInSeconds(currentTab.dataRequestParams.timeRangeAbsolute)
-      : 0;
+    const fetchAllRequestsOnlyTracker = scopedEbtManager.trackQueryPerformanceEvent({
+      eventName: 'discoverFetchAllRequestsOnly',
+      query,
+      timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
+    });
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
       .then(
         ({
           records,
-          esqlQueryColumns,
           interceptedWarnings = [],
           esqlHeaderWarning,
+          dataSource: fetchedDataSource,
+          approximationApplied,
           pagination,
         }) => {
-          fetchAllRequestOnlyTracker.reportEvent(
-            {
-              queryRangeSeconds,
-              requests: params.inspectorAdapters.requests?.getRequestsSince(
-                fetchAllRequestOnlyTracker.startTime
-              ),
-            },
-            {
-              meta: {
-                fetchType,
-              },
-            }
-          );
+          fetchAllRequestsOnlyTracker.reportEvent({
+            requestAdapter: inspectorAdapters.requests,
+            approximationApplied,
+          });
 
           if (isEsqlQuery) {
             const fetchStatus =
@@ -199,9 +201,14 @@ export function fetchAll(
           dataSubjects.documents$.next({
             fetchStatus,
             result: records,
-            esqlQueryColumns,
+            dataSource: isEsqlQuery
+              ? fetchedDataSource
+              : dataView.id
+              ? new DataViewSource(dataView)
+              : undefined,
             esqlHeaderWarning,
             interceptedWarnings,
+            approximationApplied,
             query,
             pagination,
           });
@@ -274,6 +281,9 @@ export async function fetchMoreDocuments(params: CommonFetchParams): Promise<voi
     const nextPageResult = await pagination.nextPage({
       abortSignal: abortController.signal,
       executionContext: { description: 'fetch more documents' },
+      inspectorTitle: i18n.translate('discover.inspectorRequestDataTitleMoreDocuments', {
+        defaultMessage: 'More documents',
+      }),
     });
 
     if (!nextPageResult) {
@@ -291,10 +301,20 @@ export async function fetchMoreDocuments(params: CommonFetchParams): Promise<voi
       processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
     });
 
+    // Intercept warnings from pagination request
+    const adapter = params.inspectorAdapters.requests;
+    const interceptedWarnings: SearchResponseWarning[] = [];
+    if (adapter) {
+      params.services.data.search.showWarnings(adapter, (warning) => {
+        interceptedWarnings.push(warning);
+        return true; // suppress the default behaviour
+      });
+    }
+
     // Update the state and finish the loading state
     sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
       moreRecords,
-      interceptedWarnings: undefined,
+      interceptedWarnings,
       pagination: nextPageResult.pagination,
     });
   } catch (error) {

@@ -18,9 +18,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo } from 'react';
 import { css } from '@emotion/css';
-import satisfies from 'semver/functions/satisfies';
 
 import type { AgentPolicy, Agent } from '../../common/types';
+import { getIncompatibleIntegrations } from '../../common/services';
 import { useLink } from '../hooks';
 
 const MIN_WIDTH = css`
@@ -32,7 +32,7 @@ export const AgentPolicySummaryLine = memo<{
   agent?: Agent;
   direction?: 'column' | 'row';
   withDescription?: boolean;
-  /** When true (e.g. in agent list/details), show policy id in parentheses: "Policy Name (policy_id)" */
+  /** When true (e.g. in agent list/details), show policy ID in a tooltip on hover instead of inline. */
   showPolicyId?: boolean;
   isVersionSpecific?: boolean;
 }>(
@@ -46,24 +46,20 @@ export const AgentPolicySummaryLine = memo<{
   }) => {
     const { getHref } = useLink();
     const { name, id, is_managed: isManaged, description } = policy;
-    const policyDisplayName = showPolicyId && name ? `${name} (${id})` : name || id;
+    const policyDisplayName = name || id;
 
     const revision = agent ? agent.policy_revision : policy.revision;
     const isOutdated = agent?.policy_revision && policy.revision > agent.policy_revision;
 
     const agentVersion: string | undefined = agent?.local_metadata?.elastic?.agent?.version;
-    const incompatibleIntegrations =
-      agentVersion && policy.package_agent_version_conditions
-        ? policy.package_agent_version_conditions.filter(({ version_condition }) => {
-            try {
-              return !satisfies(agentVersion, version_condition);
-            } catch {
-              return false;
-            }
-          })
-        : [];
+    const incompatibleIntegrations = getIncompatibleIntegrations({
+      agentVersion,
+      conditions: policy.package_agent_version_conditions,
+    });
     const showIncompatibilityBadge =
       incompatibleIntegrations.length > 0 && Boolean(policy.min_agent_version);
+
+    const showVersionSpecificTooltip = isVersionSpecific && incompatibleIntegrations.length > 0;
 
     if (agent?.type === 'OPAMP') {
       return <EuiText>-</EuiText>;
@@ -118,11 +114,11 @@ export const AgentPolicySummaryLine = memo<{
             justifyContent="flexStart"
             wrap={false}
           >
-            {(isVersionSpecific || isManaged) && (
+            {(showVersionSpecificTooltip || isManaged) && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                  {isVersionSpecific && (
-                    <EuiFlexItem grow={false}>
+                  {showVersionSpecificTooltip && (
+                    <EuiFlexItem grow={false} data-test-subj="agentPolicyVersionSpecificTooltip">
                       <EuiIconTip
                         type="info"
                         size="m"
@@ -157,14 +153,25 @@ export const AgentPolicySummaryLine = memo<{
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false} css={MIN_WIDTH}>
-              <EuiLink
-                className="eui-textBreakWord"
-                href={getHref('policy_details', { policyId: id })}
-                title={policyDisplayName}
-                data-test-subj="agentPolicyNameLink"
+              <EuiToolTip
+                content={
+                  showPolicyId && name ? (
+                    <FormattedMessage
+                      id="xpack.fleet.agentPolicySummaryLine.policyIdTooltip"
+                      defaultMessage="ID: {id}"
+                      values={{ id }}
+                    />
+                  ) : undefined
+                }
               >
-                {policyDisplayName}
-              </EuiLink>
+                <EuiLink
+                  className="eui-textBreakWord"
+                  href={getHref('policy_details', { policyId: id })}
+                  data-test-subj="agentPolicyNameLink"
+                >
+                  {policyDisplayName}
+                </EuiLink>
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -201,7 +208,12 @@ export const AgentPolicySummaryLine = memo<{
                       )
                     }
                   >
-                    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                    <EuiFlexGroup
+                      alignItems="center"
+                      gutterSize="xs"
+                      responsive={false}
+                      tabIndex={0}
+                    >
                       <EuiFlexItem grow={false}>
                         <EuiIcon size="m" type="warning" color="warning" aria-hidden={true} />
                       </EuiFlexItem>
@@ -228,9 +240,11 @@ export const AgentPolicySummaryLine = memo<{
 
         {withDescription && description && (
           <EuiFlexItem>
-            <EuiText color="subdued" title={description} size="xs">
-              {description}
-            </EuiText>
+            <EuiToolTip content={description}>
+              <EuiText color="subdued" size="xs" tabIndex={0}>
+                {description}
+              </EuiText>
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

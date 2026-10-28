@@ -53,7 +53,6 @@ export const OptInMessage: React.FC<OptInMessageProps> = ({
             </strong>
           ),
           privacyStatementLink: (
-            /* eslint-disable-next-line @elastic/eui/href-or-on-click */
             <EuiLink
               onClick={(e: React.MouseEvent) => {
                 if (hasActiveModifierKey(e)) return;
@@ -99,7 +98,6 @@ function renderTelemetryEnabledOrDisabledText(
   );
 
   return (
-    /* eslint-disable-next-line @elastic/eui/href-or-on-click */
     <EuiLink
       href={addBasePath(PATH_TO_ADVANCED_SETTINGS)}
       onClick={(e: React.MouseEvent) => {

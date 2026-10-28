@@ -14,8 +14,9 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getHighlightReact } from '../utils';
 import { FieldFormat } from '../field_format';
 import type {
-  ReactContextTypeSingleConvert,
+  ReactConvertFunction,
   TextContextTypeConvert,
+  FieldFormatsGetConfigFn,
   FieldFormatMetaParams,
   FieldFormatParams,
 } from '../types';
@@ -23,6 +24,16 @@ import { FIELD_FORMAT_IDS } from '../types';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const allowedUrlSchemes = ['http://', 'https://', 'mailto:'];
+
+/**
+ * Escapes a value for embedding inside a single-quoted rison string: rison
+ * protects its delimiters with `!`, so `'` becomes `!'` and `!` becomes `!!`.
+ * Composed with encodeURIComponent this reproduces exactly how Kibana itself
+ * encodes such values in its app URLs, making `{{risonValue}}` safe to place
+ * inside the rison state of a Kibana URL template (e.g. `query:'{{risonValue}}'`)
+ * where a plain `{{value}}` would break the rison parser.
+ */
+const risonEscape = (value: string): string => value.replace(/[!']/g, (char) => `!${char}`);
 
 const URL_TYPES = [
   {
@@ -64,8 +75,11 @@ export class UrlFormat extends FieldFormat {
   ];
   static urlTypes = URL_TYPES;
 
-  constructor(params: FieldFormatParams & FieldFormatMetaParams) {
-    super(params);
+  constructor(
+    params?: FieldFormatParams & FieldFormatMetaParams,
+    getConfig?: FieldFormatsGetConfigFn
+  ) {
+    super(params, getConfig);
     this.compileTemplate = memoize(this.compileTemplate);
   }
 
@@ -99,6 +113,7 @@ export class UrlFormat extends FieldFormat {
 
     return this.compileTemplate(template)({
       value: encodeURIComponent(strValue),
+      risonValue: encodeURIComponent(risonEscape(strValue)),
       rawValue: value,
     });
   }
@@ -135,14 +150,14 @@ export class UrlFormat extends FieldFormat {
     return this.formatLabel(value);
   };
 
-  reactConvertSingle: ReactContextTypeSingleConvert = (rawValue, options = {}) => {
+  reactConvert: ReactConvertFunction = (rawValue, options = {}) => {
     const missing = this.checkForMissingValueReact(rawValue);
     if (missing) return missing;
 
     // After the missing value check, rawValue is guaranteed to be a valid string or number
     const value = rawValue as string | number;
 
-    const { field, hit } = options;
+    const { field, hit, isInteractive = true } = options;
     const { parsedUrl } = this._params;
     const { basePath, pathname, origin } = parsedUrl || {};
 
@@ -191,7 +206,8 @@ export class UrlFormat extends FieldFormat {
          * This code attempts to convert a relative url into a kibana absolute url
          *
          * SUPPORTED:
-         *  - /app/kibana/
+         *  - /app/kibana/ (resolved against the base path, including the space prefix)
+         *  - /xyz/app/kibana (already includes the base path)
          *  - ../app/kibana
          *  - #/discover
          *
@@ -203,23 +219,30 @@ export class UrlFormat extends FieldFormat {
           if (url[0] === '#') {
             prefix = `${origin}${pathname}`;
           }
-          // Handle urls like: `/app/kibana` or `/xyz/app/kibana`
-          else if (url.indexOf(basePath || '/') === 0) {
+          // Handle urls that already include a non-empty base path, like: `/xyz/app/kibana`
+          else if (basePath && url.startsWith(basePath)) {
             prefix = `${origin}`;
+          }
+          // Handle urls like: `/app/kibana`, resolved against the base path so the same
+          // template works with an empty base path, a custom base path and inside a space
+          else if (url[0] === '/') {
+            prefix = `${origin}${basePath || ''}`;
           }
           // Handle urls like: `../app/kibana`
           else {
-            const prefixEnd = url[0] === '/' ? '' : '/';
-            prefix = `${origin}${basePath || ''}/app${prefixEnd}`;
+            prefix = `${origin}${basePath || ''}/app/`;
           }
         }
 
         const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
         const fieldName = field?.name;
-        const linkContent =
-          fieldName && hit?.highlight?.[fieldName]
-            ? getHighlightReact(label, hit.highlight[fieldName])
-            : label;
+        const linkContent = getHighlightReact(label, fieldName, hit);
+
+        // Non-interactive contexts (e.g. a non-interactive dashboard panel) must not expose a
+        // live navigation control, so render the same content without the anchor.
+        if (!isInteractive) {
+          return linkContent;
+        }
 
         return (
           <a href={`${prefix}${url}`} target={linkTarget} rel="noopener noreferrer">

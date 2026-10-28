@@ -8,32 +8,33 @@
 import React, { useCallback, useMemo } from 'react';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { TableId } from '@kbn/securitysolution-data-table';
+import type {
+  IndexPattern,
+  KubernetesPageHeaderProps,
+} from '@kbn/kubernetes-security-plugin/public/types';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
+import { SecurityAppHeader } from '../../common/components/app_header';
+import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useKibana } from '../../common/lib/kibana';
 import { SecurityPageName } from '../../../common/constants';
+import { DASHBOARDS, KUBERNETES } from '../../app/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { inputsSelectors } from '../../common/store';
-// import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { SessionsView } from '../../common/components/sessions_viewer';
 import { kubernetesSessionsHeaders } from './constants';
-import { dataViewSpecToIndexPattern } from './utils/data_view_spec_to_index_pattern';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export const KubernetesContainer = React.memo(() => {
   const { kubernetesSecurity, uiSettings } = useKibana().services;
 
-  // const { globalFullScreen } = useGlobalFullScreen();
-  const { sourcererDataView, dataViewId } = useSourcererDataView();
   const { from, to } = useGlobalTime();
-  const { dataView: experimentalDataView } = useDataView();
+  const { dataView } = useDataView();
 
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -47,12 +48,11 @@ export const KubernetesContainer = React.memo(() => {
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: sourcererDataView,
+        dataView,
         queries: [query],
         filters,
-        dataView: experimentalDataView,
       }),
-    [filters, sourcererDataView, uiSettings, query, experimentalDataView]
+    [dataView, filters, uiSettings, query]
   );
 
   useInvalidFilterQuery({
@@ -79,27 +79,51 @@ export const KubernetesContainer = React.memo(() => {
     [from, to]
   );
 
+  const indexPattern: IndexPattern = useMemo(
+    () => ({
+      fields: Object.values(dataView.toSpec().fields || {}),
+      title: dataView.title,
+    }),
+    [dataView]
+  );
+
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const back = useMemo(
+    () => ({
+      href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.dashboards }),
+      label: DASHBOARDS,
+    }),
+    [getSecuritySolutionUrl]
+  );
+
+  const renderHeader = useCallback(
+    ({ description, menu }: KubernetesPageHeaderProps) => (
+      <SecurityAppHeader
+        title={KUBERNETES}
+        spacing="largeBleed"
+        back={back}
+        description={description}
+        menu={menu}
+      />
+    ),
+    [back]
+  );
+
   return (
     <SecuritySolutionPageWrapper noPadding>
       {kubernetesSecurity.getKubernetesPage({
         filter: (
-          // <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId: undefined })}>
-          <FiltersGlobal>
-            <SiemSearchBar
-              id={InputsModelId.global}
-              sourcererDataViewSpec={sourcererDataView}
-              dataView={experimentalDataView}
-            />
-          </FiltersGlobal>
+          <SiemSearchBar dataView={dataView} displayStyle="inPage" id={InputsModelId.global} />
         ),
-        indexPattern: dataViewSpecToIndexPattern(sourcererDataView),
+        renderHeader,
+        indexPattern,
         globalFilter: {
           filterQuery,
           startDate: from,
           endDate: to,
         },
         renderSessionsView,
-        dataViewId: dataViewId ?? undefined,
+        dataViewId: dataView.id ?? undefined,
       })}
       <SpyRoute pageName={SecurityPageName.kubernetes} />
     </SecuritySolutionPageWrapper>

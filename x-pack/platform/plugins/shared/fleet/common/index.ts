@@ -32,6 +32,7 @@ export {
   PACKAGES_SAVED_OBJECT_TYPE,
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
   OUTPUT_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
@@ -55,6 +56,7 @@ export {
   AGENT_POLICY_API_ROUTES,
   AGENTS_SETUP_API_ROUTES,
   PACKAGE_POLICY_API_ROUTES,
+  DATA_STREAM_API_ROUTES,
   EPM_API_ROUTES,
   SETUP_API_ROUTE,
   // Should probably be removed
@@ -68,12 +70,19 @@ export {
   API_VERSIONS,
   APP_API_ROUTES,
   // Cloud Connector constants
+  AWS_IDENTITY_FEDERATION_ENABLED_FLAG,
   SINGLE_ACCOUNT,
   ORGANIZATION_ACCOUNT,
   AWS_ACCOUNT_TYPE_VAR_NAME,
   AZURE_ACCOUNT_TYPE_VAR_NAME,
   GCP_ACCOUNT_TYPE_VAR_NAME,
   FLEET_LOG_INDICES,
+  OBLT_DEFAULT_CATEGORIES,
+  displayedAssetTypes,
+  displayedAssetTypesLookup,
+  CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT,
+  // Download source constants
+  DEFAULT_DOWNLOAD_SOURCE_REFERENCE,
 } from './constants';
 export {
   // Route services
@@ -85,9 +94,13 @@ export {
   packagePolicyRouteService,
   fleetSetupRouteService,
   // Package policy helpers
+  getMaxPackageName,
   isValidNamespace,
   isValidDataset,
+  isValidDataStreamType,
+  isValidDataStreamIndexPattern,
   INVALID_NAMESPACE_CHARACTERS,
+  VALID_DATA_STREAM_TYPES,
   getFileMetadataIndexName,
   getFileDataIndexName,
   removeSOAttributes,
@@ -104,6 +117,18 @@ export {
   getAllVarKeys,
   getAllSupportedVarNames,
   findFirstVarEntry,
+  // Version-specific policies helpers
+  hasVersionSuffix,
+  hasAgentVersionSuffix,
+  hasSentinelVersionSuffix,
+  getSentinelVersionPolicyId,
+  removeVersionSuffixFromPolicyId,
+  buildPolicyIdOrVariantsKuery,
+  buildPolicyIdsOrVariantsKuery,
+  buildPolicyBaseIdWithFallbackKuery,
+  buildPolicyBaseIdsWithFallbackKuery,
+  extractAgentIdsWithData,
+  getIncompatibleIntegrations,
 } from './services';
 
 export type {
@@ -176,11 +201,14 @@ export type {
   TemplateAgentPolicyInput,
   DryRunPackagePolicy,
   AgentPolicy,
+  AgentlessAgentPolicyConfig,
+  AgentlessPolicy,
   Installation,
   NewPackagePolicy,
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
   UpdatePackagePolicy,
+  UpdatePackagePolicyWithId,
   PackagePolicy,
   PackagePolicyPackage,
   Installable,
@@ -228,6 +256,7 @@ export type {
   RegistryImage,
   RegistryDataStream,
   RegistryDataStreamPrivileges,
+  RegistryProviderPermissions,
   RegistryStream,
   RegistryInputGroup,
   BundledPackage,
@@ -249,6 +278,29 @@ export { ElasticsearchAssetType } from './types';
 
 export { FleetError } from './errors';
 
+export {
+  AWS_ONBOARDING_EVENTS,
+  AWS_ONBOARDING_TELEMETRY_STORAGE_KEY,
+  AWS_ONBOARDING_PACKAGE_NAME,
+  AWS_ONBOARDING_FLOW_ENTERED_EVENT,
+  AWS_ONBOARDING_CREDENTIALS_ADDED_EVENT,
+  AWS_ONBOARDING_DEPLOY_CLICKED_EVENT,
+  AWS_ONBOARDING_AGENTLESS_ENROLLMENT_SUCCEEDED_EVENT,
+  AWS_ONBOARDING_FIRST_DATA_ARRIVED_EVENT,
+  AWS_ONBOARDING_FIRST_DATA_TIMEOUT_EVENT,
+  registerAwsOnboardingEvents,
+  reportAwsOnboardingFlowEntered,
+  reportAwsOnboardingCredentialsAdded,
+  reportAwsOnboardingDeployClicked,
+  reportAwsOnboardingEnrollmentSucceeded,
+  reportAwsOnboardingFirstDataArrived,
+  reportAwsOnboardingFirstDataTimeout,
+} from './telemetry/aws_onboarding_events';
+export type {
+  AwsOnboardingDeployPath,
+  AwsOnboardingAnalyticsClient,
+} from './telemetry/aws_onboarding_events';
+
 // Cloud connector test subjects - needed by E2E tests and unit tests
 export {
   AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
@@ -261,3 +313,4 @@ export {
   AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ,
   AZURE_INPUT_FIELDS_TEST_SUBJECTS,
 } from './services/cloud_connectors/test_subjects';
+export { DATA_STREAM_DATASET_VAR, DATA_STREAM_TYPE_VAR } from './services/policy_template';

@@ -31,27 +31,17 @@ const runInWorktree = async (
   // Bootstrap if needed
   const nodeModulesExist = Fs.existsSync(resolve(wsRoot, 'node_modules'));
   if (!nodeModulesExist) {
-    log.info(`[${label}] Running yarn kbn bootstrap...`);
-    execSync('yarn kbn bootstrap', { cwd: wsRoot, stdio: 'inherit' });
+    log.info(`[${label}] Running node scripts/kbn bootstrap...`);
+    execSync('node scripts/kbn bootstrap', { cwd: wsRoot, stdio: 'inherit' });
   }
 
   // Build dist if requested
   if (dist) {
-    const useRspack = process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1';
-    if (useRspack) {
-      log.info(`[${label}] Building rspack dist bundles...`);
-      execSync('node scripts/build_rspack_bundles.js --dist', {
-        cwd: wsRoot,
-        stdio: 'inherit',
-        env: { ...process.env, KBN_USE_RSPACK: 'true' },
-      });
-    } else {
-      log.info(`[${label}] Building legacy dist bundles...`);
-      execSync('node scripts/build_kibana_platform_plugins.js --dist', {
-        cwd: wsRoot,
-        stdio: 'inherit',
-      });
-    }
+    log.info(`[${label}] Building dist bundles...`);
+    execSync('node scripts/build_kibana_platform_plugins.js --dist', {
+      cwd: wsRoot,
+      stdio: 'inherit',
+    });
   }
 
   // Find the spec file in the worktree

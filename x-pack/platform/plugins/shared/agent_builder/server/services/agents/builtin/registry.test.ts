@@ -127,5 +127,17 @@ describe('BuiltinAgentRegistry', () => {
       const listedAgents = registry.list();
       expect(listedAgents).toEqual(agents);
     });
+
+    it('should expose registered agent ids through listed agents', () => {
+      const agents = [
+        { ...mockAgent, id: 'agent-1', name: 'Agent 1' },
+        { ...mockAgent, id: 'agent-2', name: 'Agent 2' },
+      ];
+
+      agents.forEach((agent) => registry.register(agent));
+      const agentIds = registry.list().map(({ id }) => id);
+
+      expect(agentIds).toEqual(['agent-1', 'agent-2']);
+    });
   });
 });

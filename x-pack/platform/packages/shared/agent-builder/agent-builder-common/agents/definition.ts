@@ -5,13 +5,20 @@
  * 2.0.
  */
 
+import type { ChatCompletionReasoningEffort } from '@kbn/inference-common';
 import type { ToolSelection } from '../tools';
 import type { UserIdAndName } from '../base/users';
-import type { AgentVisibility } from './visibility';
+import type { AgentAccessControl } from './access_control';
+import type { ApiTarget } from '../apis';
 
 /**
- * The type of an agent.
- * Only one type for now, this enum is mostly here for future-proofing.
+ * ID of the default agent type
+ */
+export const chatAgentTypeId = 'chat';
+
+/**
+ * @deprecated agent types are now an open set of registered type ids. Use plain strings
+ * (e.g. {@link chatAgentTypeId}) instead.
  */
 export enum AgentType {
   chat = 'chat',
@@ -23,17 +30,29 @@ export enum AgentType {
 export const agentBuilderDefaultAgentId = 'elastic-ai-agent';
 
 /**
+ * ID of the AI index available to every chat agent by default.
+ */
+export const agentBuilderDefaultAiIndexId = 'elastic';
+
+/**
+ * ID of the Context Engine retrieval skill. Agent Builder grants it at runtime to any agent that
+ * can reach an AI Index; it is never part of the agent's own configuration.
+ */
+export const kiRetrievalSkillId = 'ki-retrieval';
+
+/**
  * Definition of a agentBuilder agent.
  */
 export interface AgentDefinition {
   /**
-   * Id of the agent
+   * ID of the agent
    */
   id: string;
   /**
-   * The type of the agent (only for type for now, here for future-proofing)
+   * ID of the agent type this agent derives from.
+   * Defaults to {@link chatAgentTypeId}, whose base is empty.
    */
-  type: AgentType;
+  type: string;
   /**
    * Human-readable name for the agent.
    */
@@ -48,13 +67,31 @@ export interface AgentDefinition {
    */
   readonly: boolean;
   /**
-   * Visibility controls who can read and write this agent.
+   * When true, the agent is hidden from UI listings (agent picker, management page) by default.
+   * Built-in agents must set this explicitly during registration; it defaults to false.
+   * Persisted agents derive it automatically: system-created non-chat agents are hidden.
    */
-  visibility?: AgentVisibility;
+  hidden?: boolean;
+  /**
+   * Access control controls who can read, run, write, delete, and manage this agent.
+   */
+  access_control?: AgentAccessControl;
   /**
    * Agent owner metadata.
    */
   created_by?: UserIdAndName;
+  /**
+   * ISO timestamp of when the agent was created.
+   */
+  created_at?: string;
+  /**
+   * Metadata for who last updated the agent.
+   */
+  updated_by?: UserIdAndName;
+  /**
+   * ISO timestamp of when the agent was last updated.
+   */
+  updated_at?: string;
   /**
    * Optional labels used to organize or filter agents
    */
@@ -80,15 +117,8 @@ export interface AgentDefinition {
 export interface AgentConfiguration {
   /**
    * Custom instruction for the agent.
-   *
-   * Instructions specified that way will be added to both the research and answer prompts.
-   * For custom per-step instructions, use the `research` and `answer` configuration fields instead.
    */
   instructions?: string;
-  /**
-   * @deprecated does nothing anymore - agent no longer have specific instructions to override
-   */
-  replace_default_instructions?: boolean;
 
   /**
    * List of tools exposed to the agent
@@ -97,7 +127,7 @@ export interface AgentConfiguration {
 
   /**
    * Optional list of skill IDs exposed to the agent.
-   * When undefined, all skills are available (backward compatibility).
+   * When undefined, no additional skills are granted beyond enable_elastic_capabilities/plugin_ids.
    */
   skill_ids?: string[];
 
@@ -110,6 +140,11 @@ export interface AgentConfiguration {
    * Optional list of workflow IDs. When set, these workflows run before the agent is executed.
    */
   workflow_ids?: string[];
+
+  /**
+   * Optional list of workflow IDs. When set, these workflows run after the agent finishes each execution.
+   */
+  post_execution_workflow_ids?: string[];
 
   /**
    * Optional list of plugin IDs assigned to this agent.
@@ -125,49 +160,69 @@ export interface AgentConfiguration {
   connector_ids?: string[];
 
   /**
-   * Custom configuration for the research step of the agent.
-   */
-  research?: AgentResearchStepConfiguration;
+   * Optional list of AI indices IDs associated with this agent.
+   * When set, if Context Engine is enabled, the agent will first search through these indices
+   * to answer questions before potentially querying the raw data, in order to improve
+   * the accuracy and token efficiency.
+   * */
+  ai_indices?: string[];
 
   /**
-   * Custom configuration for the answer step of the agent.
+   * Optional list of agent IDs this agent may spawn as sub-agents.
+   * Must use SELF_AGENT_ID (_self) to reference itself.
    */
-  answer?: AgentAnswerStepConfiguration;
+  subagent_ids?: string[];
+
+  /**
+   * Optional ID of the inference feature whose first model this agent runs on.
+   */
+  inference_feature_id?: string;
+
+  /**
+   * Optional default reasoning level for this agent's runs. A `reasoning_level` passed to the
+   * converse API or workflow step overrides it.
+   */
+  reasoning_level?: ChatCompletionReasoningEffort;
+
+  /**
+   * Destructive APIs pre-approved for every run of this agent.
+   */
+  approvals?: AgentApprovals;
 }
 
-export interface AgentResearchStepConfiguration {
+/**
+ * Agent-level destructive API auto-approval defaults.
+ */
+export interface AgentApprovals {
   /**
-   * Custom instruction for the agent's research step.
+   * API selectors keyed by backend. Each entry is an exact API identifier, a namespace
+   * wildcard (`indices.*`), or `*`.
    */
-  instructions?: string;
-  /**
-   * @deprecated does nothing anymore - agent no longer have specific instructions to override
-   */
-  replace_default_instructions?: boolean;
+  auto_approved_apis?: Partial<Record<ApiTarget, string[]>>;
 }
 
-export interface AgentAnswerStepConfiguration {
-  /**
-   * Custom instruction for the agent's answer step.
-   */
-  instructions?: string;
-  /**
-   * @deprecated does nothing anymore - agent no longer have specific instructions to override
-   */
-  replace_default_instructions?: boolean;
-}
+/**
+ * Agent configuration without the fields that only built-in agents can declare.
+ */
+export type AgentConfigurationInput = Omit<
+  AgentConfiguration,
+  'inference_feature_id' | 'reasoning_level'
+>;
 
 /**
  * Runtime configuration overrides for agent execution.
  * These override the stored agent configuration for a single execution instance.
  * Each field, if provided, completely replaces the corresponding field in the stored configuration.
+ *
+ * Excludes `approvals`, since per-run grants go through the execution's interactivity config, which
+ * adds to the stored defaults instead of replacing them.
  */
-export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
+export type AgentConfigurationOverrides = Partial<Omit<AgentConfigurationInput, 'approvals'>>;
 
 /**
  * Runtime configuration overrides exposed via the public API and persisted on conversation rounds.
- * Limited to `instructions` and `tools` - other fields from AgentConfigurationOverrides
- * (like research/answer step configs) are internal implementation details.
+ * Limited to `instructions`, `tools`, `skill_ids` and `enable_elastic_capabilities` - other fields from AgentConfigurationOverrides
+ * are internal implementation details.
  *
  * This type is used for:
  * - API input validation (converse endpoint)
@@ -175,5 +230,5 @@ export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
  */
 export type RuntimeAgentConfigurationOverrides = Pick<
   AgentConfigurationOverrides,
-  'instructions' | 'tools'
+  'instructions' | 'tools' | 'skill_ids' | 'enable_elastic_capabilities'
 >;

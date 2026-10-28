@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import type { z } from '@kbn/zod/v4';
-import { ZodError } from '@kbn/zod/v4';
+import { z, ZodError } from '@kbn/zod/v4';
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
@@ -16,9 +15,12 @@ import { getWidgetComponent } from './widgets';
 import { extractSchemaCore } from './schema_extract_core';
 import { getMeta as defaultGetMeta, setMeta as defaultSetMeta } from './schema_connector_metadata';
 
-const OPTIONAL_LABEL = i18n.translate('responseOps.formGenerator.fieldBuilder.optionalLabel', {
-  defaultMessage: 'Optional',
-});
+const OPTIONAL_LABEL = i18n.translate(
+  'responseOpsFormGenerator.formGenerator.fieldBuilder.optionalLabel',
+  {
+    defaultMessage: 'Optional',
+  }
+);
 
 export type FieldValidationFunc = (
   ...args: Parameters<ValidationFunc>
@@ -72,8 +74,15 @@ export const getFieldFromSchema = ({
         return undefined;
       }
 
+      if (schema instanceof z.ZodNumber && value === '') {
+        return undefined;
+      }
+
       try {
-        schema.parse(value);
+        // Coerce non-empty strings to numbers before validating numeric schemas.
+        const coerced =
+          schema instanceof z.ZodNumber && typeof value === 'string' ? Number(value) : value;
+        schema.parse(coerced);
         return undefined;
       } catch (error) {
         if (!(error instanceof ZodError)) {

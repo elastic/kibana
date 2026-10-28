@@ -26,7 +26,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { PluginDefinition } from '@kbn/agent-builder-common';
+import { type PluginDefinition, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
 import {
   useInstallPluginFromUrl,
@@ -119,6 +120,11 @@ export const InstallPluginFlyout: React.FC<InstallPluginFlyoutProps> = ({
             isSelected={activeTab === 'url'}
             onClick={() => setActiveTab('url')}
             disabled={isLoading}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.flyout,
+              action: AGENT_BUILDER_UI_EBT.action.libraryPanel.INSTALL_PLUGIN_TAB,
+              detail: 'url',
+            })}
           >
             {labels.agentPlugins.installPluginUrlTab}
           </EuiTab>
@@ -126,6 +132,11 @@ export const InstallPluginFlyout: React.FC<InstallPluginFlyoutProps> = ({
             isSelected={activeTab === 'upload'}
             onClick={() => setActiveTab('upload')}
             disabled={isLoading}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.flyout,
+              action: AGENT_BUILDER_UI_EBT.action.libraryPanel.INSTALL_PLUGIN_TAB,
+              detail: 'upload',
+            })}
           >
             {labels.agentPlugins.installPluginUploadTab}
           </EuiTab>
@@ -176,7 +187,15 @@ export const InstallPluginFlyout: React.FC<InstallPluginFlyoutProps> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} disabled={isLoading}>
+            <EuiButtonEmpty
+              onClick={onClose}
+              disabled={isLoading}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.flyout,
+                action: AGENT_BUILDER_UI_EBT.action.libraryPanel.FLYOUT_CANCEL,
+                detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+              })}
+            >
               {labels.plugins.cancelButton}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -187,6 +206,11 @@ export const InstallPluginFlyout: React.FC<InstallPluginFlyoutProps> = ({
               isLoading={isLoading}
               disabled={isInstallDisabled}
               data-test-subj="agentBuilderInstallPluginSubmitButton"
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.flyout,
+                action: AGENT_BUILDER_UI_EBT.action.libraryPanel.INSTALL_PLUGIN_SUBMIT,
+                detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+              })}
             >
               {labels.plugins.installButton}
             </EuiButton>

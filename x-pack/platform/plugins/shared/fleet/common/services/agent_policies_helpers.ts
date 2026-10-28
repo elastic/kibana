@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { NewAgentPolicy, AgentPolicy } from '../types';
 import {
@@ -22,10 +22,14 @@ export function getDefaultFleetServerpolicyId(spaceId?: string) {
 }
 
 export function policyHasFleetServer(
-  agentPolicy: Pick<AgentPolicy, 'package_policies' | 'has_fleet_server'>
+  agentPolicy: Pick<
+    AgentPolicy,
+    'package_policies' | 'package_policies_summary' | 'has_fleet_server'
+  >
 ) {
   return (
     agentPolicy.package_policies?.some((p) => p.package?.name === FLEET_SERVER_PACKAGE) ||
+    !!agentPolicy.package_policies_summary?.has_fleet_server ||
     !!agentPolicy.has_fleet_server
   );
 }

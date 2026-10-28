@@ -7,8 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import type { Logger } from '@kbn/core/server';
+import type {
+  EsWorkflowExecution,
+  EsWorkflowStepExecution,
+  StackFrame,
+  WorkflowStepTokenUsage,
+  WorkflowTokenUsage,
+} from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
+import { areParallelBranchesCompatible, getParallelBranchScopes } from './parallel_branch_scope';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { sumTokenUsage } from '../utils';
 
 /** Context for the step that failed during this run; used to build workflow_execution_failed event. */
 export interface FailedStepContext {
@@ -93,7 +103,8 @@ export class WorkflowExecutionState {
 
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
-    private workflowExecutionRepository: WorkflowExecutionRepository
+    private workflowExecutionRepository: WorkflowExecutionRepository,
+    private logger?: Logger
   ) {
     this.workflowExecution = initialWorkflowExecution;
   }
@@ -141,6 +152,34 @@ export class WorkflowExecutionState {
     };
   }
 
+  /**
+   * Accumulates a step's normalized token usage into the per-execution total.
+   * Called once per token-consuming step as it finishes (success or failure
+   * with partial counts). The new total is written through
+   * `updateWorkflowExecution`, so it is included in the next workflow-doc
+   * flush and persisted to `.workflows-executions`. No-op when `usage` is
+   * absent, so executions with zero `ai.*` steps keep `usage` unset.
+   */
+  public accumulateUsage(usage: WorkflowTokenUsage | undefined): void {
+    if (!usage) {
+      return;
+    }
+    const accumulated = sumTokenUsage(this.workflowExecution.usage, usage);
+    if (accumulated) {
+      this.updateWorkflowExecution({ usage: accumulated });
+    }
+  }
+
+  /**
+   * Appends one step's usage entry to the per-execution list in finish order.
+   * Unlike `accumulateUsage`, entries are never merged, so two steps on the
+   * same connector stay attributable to the step that produced each.
+   */
+  public recordStepUsage(stepUsage: WorkflowStepTokenUsage): void {
+    const stepUsages = [...(this.workflowExecution.stepUsage ?? []), stepUsage];
+    this.updateWorkflowExecution({ stepUsage: stepUsages });
+  }
+
   public getAllStepExecutions(): StepExecutionMetadata[] {
     return Array.from(this.stepExecutions.values());
   }
@@ -171,9 +210,31 @@ export class WorkflowExecutionState {
     return result;
   }
 
-  public getLatestStepExecution(stepId: string): StepExecutionMetadata | undefined {
+  /**
+   * Returns the most recent execution of `stepId`. When `stackFrames` are given, executions
+   * from a sibling `parallel` branch are skipped so concurrent branches never read each other.
+   */
+  public getLatestStepExecution(
+    stepId: string,
+    stackFrames?: readonly StackFrame[]
+  ): StepExecutionMetadata | undefined {
     const allExecutions = this.getStepExecutionsByStepId(stepId);
-    return allExecutions.length ? allExecutions[allExecutions.length - 1] : undefined;
+    const readerBranchScopes = stackFrames ? getParallelBranchScopes(stackFrames) : [];
+    if (readerBranchScopes.length === 0) {
+      return allExecutions.length ? allExecutions[allExecutions.length - 1] : undefined;
+    }
+    for (let index = allExecutions.length - 1; index >= 0; index--) {
+      const execution = allExecutions[index];
+      if (
+        areParallelBranchesCompatible(
+          readerBranchScopes,
+          getParallelBranchScopes(execution.scopeStack ?? [])
+        )
+      ) {
+        return execution;
+      }
+    }
+    return undefined;
   }
 
   /**
@@ -230,16 +291,62 @@ export class WorkflowExecutionState {
   }
 
   public async flushWorkflowDoc(): Promise<void> {
-    if (!this.workflowDocumentChanges) {
-      return;
-    }
     const changes = this.workflowDocumentChanges;
     this.workflowDocumentChanges = undefined;
 
-    await this.workflowExecutionRepository.updateWorkflowExecution({
-      ...changes,
-      id: this.workflowExecution.id,
-    });
+    if (changes) {
+      const queueConcurrencyStrategy =
+        this.workflowExecution.workflowDefinition?.settings?.concurrency?.strategy === 'queue';
+      const refreshForQueueDrainAfterTerminal =
+        Boolean(this.workflowExecution.concurrencyGroupKey) &&
+        queueConcurrencyStrategy &&
+        isTerminalStatus(this.workflowExecution.status);
+
+      await this.workflowExecutionRepository.updateWorkflowExecution(
+        {
+          ...changes,
+          id: this.workflowExecution.id,
+        },
+        refreshForQueueDrainAfterTerminal ? { refresh: 'wait_for' } : {}
+      );
+    }
+
+    await this.refreshCancelState();
+  }
+
+  /**
+   * The execution doc can be cancelled outside of this state (cancel API, concurrency manager).
+   * Pulls only the cancel fields and merges them in memory without marking the doc dirty, so
+   * concurrent in-memory updates are never overwritten by an older persisted snapshot.
+   * Best-effort: a failed read is logged and execution continues.
+   */
+  public async refreshCancelState(): Promise<void> {
+    const { id, spaceId } = this.workflowExecution;
+    let cancelState: Awaited<
+      ReturnType<WorkflowExecutionRepository['getWorkflowExecutionCancelState']>
+    >;
+    try {
+      cancelState = await this.workflowExecutionRepository.getWorkflowExecutionCancelState(
+        id,
+        spaceId
+      );
+    } catch (error) {
+      this.logger?.warn(
+        `Failed to check workflow cancellation status - continuing execution: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return;
+    }
+    if (!cancelState?.cancelRequested) {
+      return;
+    }
+    this.workflowExecution = {
+      ...this.workflowExecution,
+      cancelRequested: cancelState.cancelRequested,
+      cancelledAt: cancelState.cancelledAt ?? this.workflowExecution.cancelledAt,
+      cancelledBy: cancelState.cancelledBy ?? this.workflowExecution.cancelledBy,
+    };
   }
 
   private createStep(step: CreateStepInput) {
@@ -276,6 +383,7 @@ export class WorkflowExecutionState {
       workflowId: this.workflowExecution.workflowId,
       spaceId: this.workflowExecution.spaceId,
       isTestRun: Boolean(this.workflowExecution.isTestRun),
+      managed: Boolean(this.workflowExecution.managed),
     } as StepExecutionMetadata;
     this.stepExecutions.set(id, newStep);
     this.stepDocumentsChanges.set(id, newStep);

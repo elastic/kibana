@@ -16,6 +16,7 @@ import {
   EuiSelect,
   EuiFieldNumber,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { isNil } from 'lodash';
 import type { Comparator } from '@kbn/alerting-comparators';
@@ -47,6 +48,17 @@ export interface ThresholdExpressionProps {
     | 'rightDown';
   display?: 'fullWidth' | 'inline';
   unit?: string;
+  // Open the value popover as soon as this expression mounts, e.g. when a
+  // caller adds a new, previously-hidden threshold row and wants to guide
+  // the user straight to filling it in rather than leaving it looking like
+  // an unexplained invalid state. Only affects the initial render.
+  initialPopoverOpen?: boolean;
+  // Rendered immediately after the threshold value, inside the same
+  // expression button. Must not contain interactive elements (buttons,
+  // links) — EuiExpression renders as a native <button>, so anything
+  // clickable nested inside it is invalid HTML and won't get its own click
+  // handling; put a bare label/icon here, not controls.
+  badge?: React.ReactNode;
 }
 
 export const ThresholdExpression = ({
@@ -59,13 +71,26 @@ export const ThresholdExpression = ({
   threshold = [],
   popupPosition,
   unit = '',
+  initialPopoverOpen = false,
+  badge,
 }: ThresholdExpressionProps) => {
+  const { euiTheme } = useEuiTheme();
   const comparators = customComparators ?? builtInComparators;
-  const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(false);
+  const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(initialPopoverOpen);
   const [comparator, setComparator] = useState<string>(thresholdComparator);
   const [numRequiredThresholds, setNumRequiredThresholds] = useState<number>(
     comparators[thresholdComparator].requiredValues
   );
+  const hasThresholdError = Boolean(
+    (errors.threshold0 && errors.threshold0.length) ||
+      (errors.threshold1 && errors.threshold1.length)
+  );
+  // A badge (and, for the warning row, a remove button positioned over this
+  // expression) leaves no safe place for EuiExpression's own invalid icon to
+  // render without colliding with it. The description text is already
+  // colored red via `color`, so fall back to a border instead of the icon
+  // whenever a badge is present.
+  const hasBadge = Boolean(badge);
 
   const andThresholdText = i18n.translate(
     'xpack.triggersActionsUI.common.expressionItems.threshold.andLabel',
@@ -73,6 +98,9 @@ export const ThresholdExpression = ({
       defaultMessage: 'AND',
     }
   );
+
+  const thresholdText =
+    (threshold || []).slice(0, numRequiredThresholds).join(` ${andThresholdText} `) + unit;
 
   useEffect(() => {
     const updateThresholdValue = comparators[comparator].requiredValues !== numRequiredThresholds;
@@ -95,22 +123,29 @@ export const ThresholdExpression = ({
           data-test-subj="thresholdPopover"
           description={comparators[comparator].text}
           value={
-            (threshold || []).slice(0, numRequiredThresholds).join(` ${andThresholdText} `) + unit
+            hasBadge ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.xs }}>
+                {thresholdText}
+                {badge}
+              </span>
+            ) : (
+              thresholdText
+            )
           }
-          isActive={Boolean(
-            alertThresholdPopoverOpen ||
-              (errors.threshold0 && errors.threshold0.length) ||
-              (errors.threshold1 && errors.threshold1.length)
-          )}
+          isActive={Boolean(alertThresholdPopoverOpen || hasThresholdError)}
           onClick={() => {
             setAlertThresholdPopoverOpen(true);
           }}
           display={display === 'inline' ? 'inline' : 'columns'}
-          isInvalid={
-            (errors.threshold0 && errors.threshold0.length) ||
-            (errors.threshold1 && errors.threshold1.length)
-              ? true
-              : false
+          isInvalid={hasBadge ? false : hasThresholdError}
+          color={hasBadge && hasThresholdError ? 'danger' : undefined}
+          style={
+            hasBadge && hasThresholdError
+              ? {
+                  border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.danger}`,
+                  borderRadius: euiTheme.border.radius.medium,
+                }
+              : undefined
           }
         />
       }

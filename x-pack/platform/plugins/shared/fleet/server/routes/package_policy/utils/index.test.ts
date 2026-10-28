@@ -8,7 +8,12 @@
 import { agentPolicyService } from '../../../services';
 import { isAgentlessEnabled } from '../../../services/utils/agentless';
 
-import { alignInputsAndStreams, renameAgentlessAgentPolicy } from '.';
+import {
+  alignInputsAndStreams,
+  getAgentlessAgentPolicyIds,
+  haveAgentlessAgentPolicies,
+  renameAgentlessAgentPolicy,
+} from '.';
 
 jest.mock('../../../services/utils/agentless', () => ({
   isAgentlessEnabled: jest.fn(),
@@ -17,6 +22,7 @@ jest.mock('../../../services/utils/agentless', () => ({
 jest.mock('../../../services', () => ({
   agentPolicyService: {
     get: jest.fn(),
+    getByIds: jest.fn(),
     update: jest.fn(),
   },
 }));
@@ -41,6 +47,68 @@ function makeAgentPolicy(overrides: Record<string, any> = {}): any {
     ...overrides,
   };
 }
+
+describe('getAgentlessAgentPolicyIds', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns [] without a lookup when no ids are given', async () => {
+    expect(await getAgentlessAgentPolicyIds(mockSoClient, [])).toEqual([]);
+    expect(agentPolicyService.getByIds).not.toHaveBeenCalled();
+  });
+
+  it('returns only the ids of the agentless parents', async () => {
+    jest
+      .mocked(agentPolicyService.getByIds)
+      .mockResolvedValue([
+        makeAgentPolicy({ id: 'a', supports_agentless: false }),
+        makeAgentPolicy({ id: 'b', supports_agentless: true }),
+      ]);
+
+    expect(await getAgentlessAgentPolicyIds(mockSoClient, ['a', 'a', 'b'])).toEqual(['b']);
+    expect(agentPolicyService.getByIds).toHaveBeenCalledWith(mockSoClient, ['a', 'b'], {
+      ignoreMissing: true,
+    });
+  });
+});
+
+describe('haveAgentlessAgentPolicies', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns false without a lookup when no ids are given', async () => {
+    expect(await haveAgentlessAgentPolicies(mockSoClient, [])).toBe(false);
+    expect(agentPolicyService.getByIds).not.toHaveBeenCalled();
+  });
+
+  it('deduplicates ids and looks them up with ignoreMissing', async () => {
+    jest.mocked(agentPolicyService.getByIds).mockResolvedValue([makeAgentPolicy()]);
+
+    await haveAgentlessAgentPolicies(mockSoClient, ['a', 'a', 'b']);
+
+    expect(agentPolicyService.getByIds).toHaveBeenCalledWith(mockSoClient, ['a', 'b'], {
+      ignoreMissing: true,
+    });
+  });
+
+  it('returns true when any parent policy is agentless', async () => {
+    jest
+      .mocked(agentPolicyService.getByIds)
+      .mockResolvedValue([makeAgentPolicy({ supports_agentless: false }), makeAgentPolicy()]);
+
+    expect(await haveAgentlessAgentPolicies(mockSoClient, ['a', 'b'])).toBe(true);
+  });
+
+  it('returns false when no parent policy is agentless', async () => {
+    jest
+      .mocked(agentPolicyService.getByIds)
+      .mockResolvedValue([makeAgentPolicy({ supports_agentless: false })]);
+
+    expect(await haveAgentlessAgentPolicies(mockSoClient, ['a'])).toBe(false);
+  });
+});
 
 describe('renameAgentlessAgentPolicy', () => {
   beforeEach(() => {

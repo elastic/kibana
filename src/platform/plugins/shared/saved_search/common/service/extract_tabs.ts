@@ -8,21 +8,49 @@
  */
 
 import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
-import type { SavedObjectModelDataBackfillFn } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectModelDataBackfillFn,
+  SavedObjectModelUnsafeTransformFn,
+} from '@kbn/core-saved-objects-server';
 import type { TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import type {
+  SCHEMA_SEARCH_MODEL_VERSION_12_SO_API_WORKAROUND,
   SCHEMA_SEARCH_MODEL_VERSION_5,
   SCHEMA_SEARCH_MODEL_VERSION_6,
-} from '../../server/saved_objects/schema';
+} from '../../server/saved_objects/schema_legacy';
+import type { SCHEMA_DISCOVER_SESSION_V13 } from '../../server/saved_objects/schema';
 
-export const extractTabsBackfillFn: SavedObjectModelDataBackfillFn<
+export const extractTabsBackfillFnV6: SavedObjectModelDataBackfillFn<
   TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_5>,
   TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_6>
 > = (prevDoc) => {
   const attributes = extractTabs(prevDoc.attributes);
   return { attributes };
+};
+
+export const extractTabsTransformFnV13: SavedObjectModelUnsafeTransformFn<
+  TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_12_SO_API_WORKAROUND>,
+  TypeOf<typeof SCHEMA_DISCOVER_SESSION_V13>
+> = (prevDoc) => {
+  let attributes: TypeOf<typeof SCHEMA_DISCOVER_SESSION_V13>;
+
+  if (prevDoc.attributes.tabs) {
+    const { title, description, tabs: originalTabs } = prevDoc.attributes;
+    const tabs = originalTabs.map(
+      ({ attributes: { hits, version, ...tabAttributes }, ...tab }) => ({
+        ...tab,
+        attributes: tabAttributes,
+      })
+    );
+    attributes = { title, description, tabs };
+  } else {
+    const { title, description, tabs } = extractTabs(prevDoc.attributes, prevDoc.id);
+    attributes = { title, description, tabs };
+  }
+
+  return { document: { ...prevDoc, attributes } };
 };
 
 // Don't change this, it's used to generate deterministic UUIDs for
@@ -31,14 +59,15 @@ const DEFAULT_TAB_UUID_NAMESPACE = '617f8ea7-754a-4a75-86bf-58c4b2f99690';
 
 /**
  * Extract tab attributes into a separate array since multiple tabs are supported
- * @param attributes The previous attributes to be transformed (version 5)
+ * @param attributes The previous attributes to be transformed
  * @param discoverSessionId Optional Discover session ID used to generate a deterministic UUID for the default tab
  */
-export function extractTabs<T extends TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_5>>(
-  attributes: T,
-  discoverSessionId?: string
-) {
-  const { title, description, ...tabAttrs } = attributes;
+export function extractTabs<
+  T extends
+    | TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_5>
+    | TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_12_SO_API_WORKAROUND>
+>(attributes: T, discoverSessionId?: string) {
+  const { title, description, hits, version, ...tabAttrs } = attributes;
   const id = discoverSessionId ? uuidv5(discoverSessionId, DEFAULT_TAB_UUID_NAMESPACE) : uuidv4();
   const tabs = [
     {

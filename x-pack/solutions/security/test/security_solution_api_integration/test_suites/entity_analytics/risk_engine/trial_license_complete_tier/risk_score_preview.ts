@@ -67,7 +67,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return await previewRiskScores({ body: {} });
   };
 
-  describe('@ess @serverless Risk Scoring Preview API', () => {
+  describe('@ess @serverless @skipInServerlessMKI Risk Scoring Preview API', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -112,9 +112,9 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(score).to.eql({
             calculated_level: 'Unknown',
             calculated_score: 21,
-            calculated_score_norm: 8.100601759,
+            calculated_score_norm: 8.3234992887,
             category_1_count: 1,
-            category_1_score: 8.100601759,
+            category_1_score: 8.3234992887,
             id_field: 'host.name',
             id_value: 'host-1',
             modifiers: [],
@@ -145,9 +145,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Unknown',
               calculated_score: 21,
-              calculated_score_norm: 8.100601759,
+              calculated_score_norm: 8.3234992887,
               category_1_count: 1,
-              category_1_score: 8.100601759,
+              category_1_score: 8.3234992887,
               id_field: 'host.name',
               id_value: 'host-1',
               modifiers: [],
@@ -155,9 +155,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Unknown',
               calculated_score: 21,
-              calculated_score_norm: 8.100601759,
+              calculated_score_norm: 8.3234992887,
               category_1_count: 1,
-              category_1_score: 8.100601759,
+              category_1_score: 8.3234992887,
               id_field: 'host.name',
               id_value: 'host-2',
               modifiers: [],
@@ -180,9 +180,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Unknown',
               calculated_score: 28.4246212025,
-              calculated_score_norm: 10.9645969767,
+              calculated_score_norm: 11.2663006839,
               category_1_count: 2,
-              category_1_score: 10.9645969767,
+              category_1_score: 11.2663006839,
               id_field: 'host.name',
               id_value: 'host-1',
               modifiers: [],
@@ -203,9 +203,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Unknown',
               calculated_score: 47.2551350606,
-              calculated_score_norm: 18.2283347711,
+              calculated_score_norm: 18.7299087174,
               category_1_count: 30,
-              category_1_score: 18.2283347711,
+              category_1_score: 18.7299087174,
               id_field: 'host.name',
               id_value: 'host-1',
               modifiers: [],
@@ -229,9 +229,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Unknown',
               calculated_score: 47.2551350606,
-              calculated_score_norm: 18.2283347711,
+              calculated_score_norm: 18.7299087174,
               category_1_count: 30,
-              category_1_score: 18.2283347711,
+              category_1_score: 18.7299087174,
               id_field: 'host.name',
               id_value: 'host-1',
               modifiers: [],
@@ -239,9 +239,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Unknown',
               calculated_score: 21,
-              calculated_score_norm: 8.100601759,
+              calculated_score_norm: 8.3234992887,
               category_1_count: 1,
-              category_1_score: 8.100601759,
+              category_1_score: 8.3234992887,
               id_field: 'host.name',
               id_value: 'host-2',
               modifiers: [],
@@ -260,11 +260,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(sanitizeScores(body.scores.host!)).to.eql([
             {
-              calculated_level: 'Unknown',
+              calculated_level: 'Low',
               calculated_score: 50.6703560728,
-              calculated_score_norm: 19.5457321682,
+              calculated_score_norm: 20.0835558444,
               category_1_count: 100,
-              category_1_score: 19.5457321682,
+              category_1_score: 20.0835558444,
               id_field: 'host.name',
               id_value: 'host-1',
               modifiers: [],
@@ -288,9 +288,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Unknown',
               calculated_score: 41.9020663603,
-              calculated_score_norm: 16.1634263078,
+              calculated_score_norm: 16.6081818832,
               category_1_count: 10,
-              category_1_score: 16.1634263078,
+              category_1_score: 16.6081818832,
               id_field: 'host.name',
               id_value: 'host-1',
               modifiers: [],
@@ -318,9 +318,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Unknown',
               calculated_score: 41.9020663603,
-              calculated_score_norm: 16.1634263078,
+              calculated_score_norm: 16.6081818832,
               category_1_count: 10,
-              category_1_score: 16.1634263078,
+              category_1_score: 16.6081818832,
               id_field: 'host.name',
               id_value: 'host-1',
               modifiers: [],
@@ -344,9 +344,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Critical',
               calculated_score: 241.2874098704,
-              calculated_score_norm: 93.0749150865,
+              calculated_score_norm: 95.6359802114,
               category_1_count: 100,
-              category_1_score: 93.0749150865,
+              category_1_score: 95.6359802114,
               id_field: 'host.name',
               id_value: 'host-1',
               modifiers: [],
@@ -375,10 +375,10 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(sanitizeScores(body.scores.host!)).to.eql([
             {
               calculated_level: 'Critical',
-              calculated_score: 254.9145602918,
-              calculated_score_norm: 98.3314921662,
+              calculated_score: 252.2977328584,
+              calculated_score_norm: 100,
               category_1_count: 1000,
-              category_1_score: 98.3314921662,
+              category_1_score: 100,
               id_field: 'host.name',
               id_value: 'host-1',
               modifiers: [],
@@ -473,9 +473,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'High',
               calculated_score: 225.1106801443,
-              calculated_score_norm: 86.8348557878,
+              calculated_score_norm: 89.2242183843,
               category_1_count: 100,
-              category_1_score: 86.8348557878,
+              category_1_score: 89.2242183843,
               id_field: 'host.name',
               id_value: 'host-1',
               modifiers: [],
@@ -503,9 +503,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Moderate',
               calculated_score: 120.6437049352,
-              calculated_score_norm: 46.5374575433,
+              calculated_score_norm: 47.8179901057,
               category_1_count: 100,
-              category_1_score: 93.0749150865,
+              category_1_score: 95.6359802114,
               id_field: 'host.name',
               id_value: 'host-1',
               modifiers: [],
@@ -529,11 +529,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(sanitizeScores(scores.user!)).to.eql([
             {
+              // Displayed as 70, but the level comes from the unrounded 69.99...
               calculated_level: 'Moderate',
               calculated_score: 168.9011869093,
-              calculated_score_norm: 65.1524405606,
+              calculated_score_norm: 66.945186148,
               category_1_count: 100,
-              category_1_score: 93.0749150865,
+              category_1_score: 95.6359802114,
               id_field: 'user.name',
               id_value: 'user-1',
               modifiers: [],
@@ -561,9 +562,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Low',
               calculated_score: 93.2375911647,
-              calculated_score_norm: 35.9657426187,
+              calculated_score_norm: 36.9553820831,
               category_1_count: 50,
-              category_1_score: 89.9143565467,
+              category_1_score: 92.3884552076,
               id_field: 'host.name',
               id_value: 'host-1',
               modifiers: [],
@@ -574,9 +575,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'High',
               calculated_score: 186.4751823294,
-              calculated_score_norm: 71.9314852374,
+              calculated_score_norm: 73.9107641661,
               category_1_count: 50,
-              category_1_score: 89.9143565467,
+              category_1_score: 92.3884552076,
               id_field: 'user.name',
               id_value: 'user-1',
               modifiers: [],
@@ -622,14 +623,14 @@ export default ({ getService }: FtrProviderContext): void => {
               criticality_modifier: 2.0,
               calculated_level: 'Unknown',
               calculated_score: 21,
-              calculated_score_norm: 14.9871538681,
+              calculated_score_norm: 15.3678552547,
               category_1_count: 1,
-              category_1_score: 8.100601759,
+              category_1_score: 8.3234992887,
               id_field: 'host.name',
               id_value: 'host-1',
               modifiers: [
                 {
-                  contribution: 6.8865521091,
+                  contribution: 7.0443559659,
                   metadata: {
                     criticality_level: 'extreme_impact',
                   },
@@ -641,9 +642,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Unknown',
               calculated_score: 21,
-              calculated_score_norm: 8.100601759,
+              calculated_score_norm: 8.3234992887,
               category_1_count: 1,
-              category_1_score: 8.100601759,
+              category_1_score: 8.3234992887,
               id_field: 'host.name',
               id_value: 'host-2',
               modifiers: [],

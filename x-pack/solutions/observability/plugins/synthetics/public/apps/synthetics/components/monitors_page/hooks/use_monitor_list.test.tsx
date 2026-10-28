@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import * as redux from 'react-redux';
+import * as redux from 'react-redux-v7';
 import { MONITOR_ROUTE } from '../../../../../../common/constants';
 import { mockState } from '../../../utils/testing/__mocks__/synthetics_store.mock';
-import { WrappedHelper } from '../../../utils/testing';
+import { HookWrapper } from '../../../utils/testing/hook_helpers';
 import type { SyntheticsAppState } from '../../../state/root_reducer';
 import type { MonitorFilterState } from '../../../state';
 import {
@@ -49,6 +49,7 @@ describe('useMonitorList', () => {
       locations: [],
       monitorTypes: [],
       projects: [],
+      remoteNames: [],
       schedules: [],
       tags: [],
       useLogicalAndFor: [],
@@ -60,7 +61,7 @@ describe('useMonitorList', () => {
     const {
       result: { current: hookResult },
     } = renderHook(() => useMonitorList(), {
-      wrapper: ({ children }) => React.createElement(WrappedHelper, null, children),
+      wrapper: ({ children }) => React.createElement(HookWrapper, null, children),
     });
 
     expect(hookResult).toMatchObject({ ...initialState, handleFilterChange: expect.any(Function) });
@@ -72,9 +73,9 @@ describe('useMonitorList', () => {
 
     const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
-        <WrappedHelper url={url} path={MONITOR_ROUTE}>
+        <HookWrapper url={url} path={MONITOR_ROUTE}>
           {React.createElement(React.Fragment, {}, children)}
-        </WrappedHelper>
+        </HookWrapper>
       );
     };
 
@@ -104,9 +105,9 @@ describe('useMonitorList', () => {
 
     const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
-        <WrappedHelper url={url} path={MONITOR_ROUTE}>
+        <HookWrapper url={url} path={MONITOR_ROUTE}>
           {React.createElement(React.Fragment, {}, children)}
-        </WrappedHelper>
+        </HookWrapper>
       );
     };
 
@@ -118,7 +119,7 @@ describe('useMonitorList', () => {
   describe('initial mount fetch', () => {
     it('dispatches `fetchMonitorListAction.get` on initial mount when not yet loaded', () => {
       renderHook(() => useMonitorList(), {
-        wrapper: ({ children }) => React.createElement(WrappedHelper, null, children),
+        wrapper: ({ children }) => React.createElement(HookWrapper, null, children),
       });
 
       expect(dispatchMockFn).toHaveBeenCalledWith(
@@ -133,7 +134,7 @@ describe('useMonitorList', () => {
       renderHook(() => useMonitorList(), {
         wrapper: ({ children }) =>
           React.createElement(
-            WrappedHelper,
+            HookWrapper,
             { state: { monitorList: { ...state.monitorList, loaded: true } } },
             children
           ),
@@ -149,7 +150,7 @@ describe('useMonitorList', () => {
 
     it('dispatches the initial fetch exactly once on mount', () => {
       renderHook(() => useMonitorList(), {
-        wrapper: ({ children }) => React.createElement(WrappedHelper, null, children),
+        wrapper: ({ children }) => React.createElement(HookWrapper, null, children),
       });
 
       const initialFetchCalls = dispatchMockFn.mock.calls.filter(

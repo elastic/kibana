@@ -9,6 +9,7 @@
 
 import { createMockHoverContext, createMockStepContext } from './test_utils/mock_factories';
 import { WorkflowExecuteMonacoConnectorHandler } from './workflow_execute_handler';
+import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
 jest.mock('@kbn/workflows', () => ({
   getBuiltInStepStability: jest.fn().mockReturnValue(undefined),
@@ -21,6 +22,7 @@ describe('WorkflowExecuteMonacoConnectorHandler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    setMockStabilityBadgeThemeForTests();
     handler = new WorkflowExecuteMonacoConnectorHandler();
     getBuiltInStepStability.mockReturnValue(undefined);
   });
@@ -108,7 +110,10 @@ describe('WorkflowExecuteMonacoConnectorHandler', () => {
       const result = await handler.generateHoverContent(context);
 
       expect(result).not.toBeNull();
-      expect(result?.value).toContain('Tech Preview');
+      expect(result?.value).toContain('Tech preview');
+      expect(result?.value.indexOf('<img src="data:image/svg+xml,')).toBeLessThan(
+        result!.value.indexOf('**Step**')
+      );
     });
 
     it('should not include stability note when stability is GA or undefined', async () => {

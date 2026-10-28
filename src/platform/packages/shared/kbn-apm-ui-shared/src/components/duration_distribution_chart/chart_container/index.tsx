@@ -62,7 +62,7 @@ function LoadingChartPlaceholder({ height }: { height: number }) {
 function FailedChartPlaceholder({ height }: { height: number }) {
   return (
     <EuiText color="subdued" css={{ height }}>
-      {i18n.translate('kbnApmUiShared.chartContainerchart.error', {
+      {i18n.translate('apmUiShared.chartContainerchart.error', {
         defaultMessage: 'An error happened when trying to fetch data. Please try again',
       })}
     </EuiText>

@@ -495,6 +495,14 @@ describe('PUT role', () => {
               query: `{ "match": { "title": "foo" } }`,
             },
           ],
+          global: {
+            data_source: [
+              {
+                names: ['acme_*'],
+                privileges: ['read', 'manage'],
+              },
+            ],
+          },
           run_as: ['test-run-as-1', 'test-run-as-2'],
         },
         kibana: [
@@ -543,6 +551,14 @@ describe('PUT role', () => {
               ],
               cluster: ['test-cluster-privilege'],
               description: 'test description',
+              global: {
+                data_source: [
+                  {
+                    names: ['acme_*'],
+                    privileges: ['read', 'manage'],
+                  },
+                ],
+              },
               indices: [
                 {
                   field_security: {

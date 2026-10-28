@@ -59,7 +59,7 @@ steps:
  *
  * Run with:
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet workflows_oom_testing
- *   npx playwright test --project local --grep @stateful-classic \
+ *   node scripts/playwright test --project local --grep @stateful-classic \
  *     --config src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts
  */
 spaceTest.describe('Workflow schema OOM prevention', { tag: tags.deploymentAgnostic }, () => {

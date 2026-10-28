@@ -8,12 +8,20 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import {
+  buildDataViewMock,
   dataViewMock as dataViewMockWithoutTimeField,
   dataViewMockWithTimeField,
+  deepMockedFields,
 } from '../__mocks__';
 import { getVisibleColumns, canPrependTimeFieldColumn } from './get_visible_columns';
+
+const dataViewMockWithMissingTimeField = buildDataViewMock({
+  name: 'the-data-view-with-missing-time-field',
+  fields: deepMockedFields,
+  timeFieldName: 'missing_time_field',
+});
 
 describe('getVisibleColumns utils', function () {
   describe('getVisibleColumns', () => {
@@ -46,15 +54,12 @@ describe('getVisibleColumns utils', function () {
   });
 
   describe('canPrependTimeFieldColumn', () => {
-    function buildColumnTypes(dataView: DataView) {
-      const columnsMeta: Record<
-        string,
-        { type: DatatableColumnType; esType?: string | undefined }
-      > = {};
-      for (const field of dataView.fields) {
-        columnsMeta[field.name] = { type: field.type as DatatableColumnType };
-      }
-      return columnsMeta;
+    function buildEsqlSource(dataView: DataView, { except }: { except?: string } = {}) {
+      return createMockEsqlSource(
+        dataView.fields
+          .filter(({ name }) => name !== except)
+          .map(({ name, type }) => ({ name, type, source: 'index' as const }))
+      );
     }
 
     describe('dataView with timeField', () => {
@@ -63,26 +68,24 @@ describe('getVisibleColumns utils', function () {
           expect(
             canPrependTimeFieldColumn(
               ['extension', 'message'],
-              dataViewMockWithTimeField.timeFieldName,
-              buildColumnTypes(dataViewMockWithTimeField),
-              showTimeCol,
-              false
+              dataViewMockWithTimeField,
+              undefined,
+              showTimeCol
             )
           ).toBe(showTimeCol);
         }
       });
 
-      it('should return false if no _source columns is passed, text-based datasource', () => {
+      it('should forward showTimeCol if no _source columns is passed, text-based datasource', () => {
         for (const showTimeCol of [true, false]) {
           expect(
             canPrependTimeFieldColumn(
               ['extension', 'message'],
-              dataViewMockWithTimeField.timeFieldName,
-              buildColumnTypes(dataViewMockWithTimeField),
-              showTimeCol,
-              true
+              dataViewMockWithTimeField,
+              buildEsqlSource(dataViewMockWithTimeField),
+              showTimeCol
             )
-          ).toBe(false);
+          ).toBe(showTimeCol);
         }
       });
 
@@ -91,10 +94,9 @@ describe('getVisibleColumns utils', function () {
           expect(
             canPrependTimeFieldColumn(
               ['_source'],
-              dataViewMockWithTimeField.timeFieldName,
-              buildColumnTypes(dataViewMockWithTimeField),
-              showTimeCol,
-              false
+              dataViewMockWithTimeField,
+              undefined,
+              showTimeCol
             )
           ).toBe(showTimeCol);
         }
@@ -105,10 +107,9 @@ describe('getVisibleColumns utils', function () {
           expect(
             canPrependTimeFieldColumn(
               ['_source'],
-              dataViewMockWithTimeField.timeFieldName,
-              buildColumnTypes(dataViewMockWithTimeField),
-              showTimeCol,
-              true
+              dataViewMockWithTimeField,
+              buildEsqlSource(dataViewMockWithTimeField),
+              showTimeCol
             )
           ).toBe(showTimeCol);
         }
@@ -116,20 +117,68 @@ describe('getVisibleColumns utils', function () {
 
       it('should return false if _source column is passed but time field is not returned, text-based datasource', () => {
         // ... | DROP @timestamp test case
-        const columnsMeta = buildColumnTypes(dataViewMockWithTimeField);
-        if (dataViewMockWithTimeField.timeFieldName) {
-          delete columnsMeta[dataViewMockWithTimeField.timeFieldName];
-        }
+        const dataSource = buildEsqlSource(dataViewMockWithTimeField, {
+          except: dataViewMockWithTimeField.timeFieldName,
+        });
         for (const showTimeCol of [true, false]) {
           expect(
             canPrependTimeFieldColumn(
               ['_source'],
-              dataViewMockWithTimeField.timeFieldName,
-              columnsMeta,
-              showTimeCol,
-              true
+              dataViewMockWithTimeField,
+              dataSource,
+              showTimeCol
             )
           ).toBe(false);
+        }
+      });
+    });
+
+    describe('dataView with a timeField which is missing in the field list', () => {
+      it('should return false if no _source columns is passed', () => {
+        for (const showTimeCol of [true, false]) {
+          expect(
+            canPrependTimeFieldColumn(
+              ['extension', 'message'],
+              dataViewMockWithMissingTimeField,
+              undefined,
+              showTimeCol
+            )
+          ).toBe(false);
+        }
+      });
+
+      it('should forward showTimeCol if the field list is not loaded yet', () => {
+        const dataViewWithoutLoadedFields = {
+          ...dataViewMockWithMissingTimeField,
+          fields: undefined,
+          getFieldByName: () => undefined,
+        } as unknown as DataView;
+        for (const showTimeCol of [true, false]) {
+          expect(
+            canPrependTimeFieldColumn(
+              ['_source'],
+              dataViewWithoutLoadedFields,
+              undefined,
+              showTimeCol
+            )
+          ).toBe(showTimeCol);
+        }
+      });
+
+      it('should rely on the returned columns instead, text-based datasource', () => {
+        const dataSource = createMockEsqlSource([
+          { name: 'missing_time_field', type: 'date', source: 'index' },
+          { name: 'extension', type: 'string', source: 'index' },
+        ]);
+        for (const showTimeCol of [true, false]) {
+          expect(
+            canPrependTimeFieldColumn(
+              ['_source'],
+              dataViewMockWithMissingTimeField,
+              dataSource,
+              showTimeCol
+            )
+          ).toBe(showTimeCol);
         }
       });
     });
@@ -140,10 +189,9 @@ describe('getVisibleColumns utils', function () {
           expect(
             canPrependTimeFieldColumn(
               ['extension', 'message'],
-              dataViewMockWithoutTimeField.timeFieldName,
-              buildColumnTypes(dataViewMockWithoutTimeField),
-              showTimeCol,
-              false
+              dataViewMockWithoutTimeField,
+              undefined,
+              showTimeCol
             )
           ).toBe(false);
         }
@@ -154,10 +202,9 @@ describe('getVisibleColumns utils', function () {
           expect(
             canPrependTimeFieldColumn(
               ['extension', 'message'],
-              dataViewMockWithoutTimeField.timeFieldName,
-              buildColumnTypes(dataViewMockWithoutTimeField),
-              showTimeCol,
-              true
+              dataViewMockWithoutTimeField,
+              buildEsqlSource(dataViewMockWithoutTimeField),
+              showTimeCol
             )
           ).toBe(false);
         }
@@ -168,10 +215,9 @@ describe('getVisibleColumns utils', function () {
           expect(
             canPrependTimeFieldColumn(
               ['_source'],
-              dataViewMockWithoutTimeField.timeFieldName,
-              buildColumnTypes(dataViewMockWithoutTimeField),
-              showTimeCol,
-              false
+              dataViewMockWithoutTimeField,
+              undefined,
+              showTimeCol
             )
           ).toBe(false);
         }
@@ -182,10 +228,9 @@ describe('getVisibleColumns utils', function () {
           expect(
             canPrependTimeFieldColumn(
               ['_source'],
-              dataViewMockWithoutTimeField.timeFieldName,
-              buildColumnTypes(dataViewMockWithoutTimeField),
-              showTimeCol,
-              true
+              dataViewMockWithoutTimeField,
+              buildEsqlSource(dataViewMockWithoutTimeField),
+              showTimeCol
             )
           ).toBe(false);
         }

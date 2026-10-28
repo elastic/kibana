@@ -37,6 +37,7 @@
     "@kbn/licensing-types",
     "@kbn/data-view-validation",
     "@kbn/index-management-shared-types",
+    "@kbn/ui-callout",
 
   ],
   "exclude": [

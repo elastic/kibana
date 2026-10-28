@@ -77,6 +77,19 @@ fields:
     expect(result).toContain('default: 42');
   });
 
+  it('should handle boolean values', () => {
+    const toggleYaml = `name: Test
+fields:
+  - name: requires_escalation
+    control: TOGGLE
+    type: boolean
+`;
+
+    const result = updateYamlFieldDefault(toggleYaml, 'requires_escalation', true);
+
+    expect(result).toContain('default: true');
+  });
+
   it('should handle array values as a YAML sequence', () => {
     const checkboxYaml = `name: Test
 fields:

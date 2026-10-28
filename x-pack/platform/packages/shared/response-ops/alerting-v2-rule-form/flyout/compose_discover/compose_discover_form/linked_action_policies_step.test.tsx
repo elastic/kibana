@@ -1,0 +1,431 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { LinkedActionPoliciesStep } from './linked_action_policies_step';
+import { useWatch } from 'react-hook-form';
+import { useMatchedActionPolicies } from './use_matched_action_policies';
+import { useActionPolicyConnectorTypes } from './use_action_policy_connector_types';
+
+jest.mock('react-hook-form', () => ({
+  ...jest.requireActual('react-hook-form'),
+  useWatch: jest.fn().mockReturnValue({ name: '', routingTags: [] }),
+}));
+
+jest.mock('./use_matched_action_policies', () => ({
+  ...jest.requireActual('./use_matched_action_policies'),
+  useMatchedActionPolicies: jest.fn(),
+}));
+jest.mock('./use_action_policy_connector_types');
+jest.mock('../../../form/fields/routing_tags_field', () => ({
+  RoutingTagsField: () => <div data-test-subj="ruleRoutingTagsField" />,
+}));
+
+const mockInvalidateQueries = jest.fn();
+
+jest.mock('@kbn/react-query', () => ({
+  useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
+}));
+
+const mockUseMatchedActionPolicies = useMatchedActionPolicies as jest.MockedFunction<
+  typeof useMatchedActionPolicies
+>;
+
+const mockUseActionPolicyConnectorTypes = useActionPolicyConnectorTypes as jest.MockedFunction<
+  typeof useActionPolicyConnectorTypes
+>;
+
+const mockUseWatch = useWatch as jest.Mock;
+
+const defaultGetActionPolicyEditHref = (id: string) =>
+  `/app/observability/alerting/action-policies/edit/${id}`;
+
+const renderComponent = (
+  props?: Partial<React.ComponentProps<typeof LinkedActionPoliciesStep>>
+) => {
+  const http = httpServiceMock.createStartContract();
+  return render(
+    <IntlProvider locale="en">
+      <LinkedActionPoliciesStep
+        http={http}
+        getActionPolicyEditHref={defaultGetActionPolicyEditHref}
+        {...props}
+      />
+    </IntlProvider>
+  );
+};
+
+describe('LinkedActionPoliciesStep', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseActionPolicyConnectorTypes.mockReturnValue({
+      connectorTypesByPolicy: new Map(),
+      isLoading: false,
+    });
+  });
+
+  it('renders the title and description when policies are present', () => {
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      isPreviousData: false,
+      error: null,
+      items: [
+        {
+          action_policy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
+          category: 'catch_all',
+        },
+      ],
+      evaluatedCount: 1,
+      isTruncated: false,
+    });
+
+    renderComponent();
+
+    expect(screen.getByText('Action policies')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Routing tags determine which action policies apply. Catch-all action policies match all alerts.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('ruleRoutingTagsField')).toBeInTheDocument();
+    expect(screen.getByText('Applied policies')).toBeInTheDocument();
+    expect(screen.getByTestId('linkedActionPoliciesCount')).toHaveTextContent('1');
+  });
+
+  it('shows a loading spinner while fetching', () => {
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: true,
+      isPreviousData: false,
+      error: null,
+      items: [],
+      evaluatedCount: 0,
+      isTruncated: false,
+    });
+
+    renderComponent();
+
+    expect(screen.getByTestId('linkedActionPoliciesLoading')).toBeInTheDocument();
+  });
+
+  it('shows an empty state when no policies match', () => {
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      isPreviousData: false,
+      error: null,
+      items: [],
+      evaluatedCount: 0,
+      isTruncated: false,
+    });
+
+    renderComponent();
+
+    expect(screen.getByTestId('linkedActionPoliciesEmpty')).toBeInTheDocument();
+    expect(screen.getByText('No action policies match yet.')).toBeInTheDocument();
+  });
+
+  it('opens the create action policy flyout and refreshes matches after creation', async () => {
+    const user = userEvent.setup();
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      isPreviousData: false,
+      error: null,
+      items: [],
+      evaluatedCount: 0,
+      isTruncated: false,
+    });
+
+    const CreateActionPolicyFormFlyout = ({
+      onSuccess,
+    }: {
+      onClose: () => void;
+      onSuccess: () => void;
+    }) => (
+      <button type="button" onClick={onSuccess} data-test-subj="actionPolicyFormFlyout">
+        Save action policy
+      </button>
+    );
+
+    renderComponent({ CreateActionPolicyFormFlyout });
+
+    await user.click(screen.getByRole('button', { name: 'Create action policy' }));
+    expect(screen.getByTestId('actionPolicyFormFlyout')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('actionPolicyFormFlyout'));
+
+    expect(screen.queryByTestId('actionPolicyFormFlyout')).not.toBeInTheDocument();
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['matchedActionPolicies'] });
+  });
+
+  it('disables action policy creation with a keyboard-reachable reason', async () => {
+    const user = userEvent.setup();
+    const disabledReason = 'You do not have permission to create action policies';
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      isPreviousData: false,
+      error: null,
+      items: [],
+      evaluatedCount: 0,
+      isTruncated: false,
+    });
+
+    const CreateActionPolicyFormFlyout = () => <div data-test-subj="actionPolicyFormFlyout" />;
+
+    renderComponent({
+      createActionPolicyDisabledReason: disabledReason,
+      CreateActionPolicyFormFlyout,
+    });
+
+    const createButton = screen.getByRole('button', { name: 'Create action policy' });
+    expect(createButton).toHaveAttribute('aria-disabled', 'true');
+
+    await user.tab();
+    expect(createButton).toHaveFocus();
+    await waitFor(() => expect(createButton).toHaveAccessibleDescription(disabledReason));
+
+    await user.keyboard('{Enter}');
+    expect(screen.queryByTestId('actionPolicyFormFlyout')).not.toBeInTheDocument();
+  });
+
+  it('renders a catch-all badge for a global policy', () => {
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      isPreviousData: false,
+      error: null,
+      items: [
+        {
+          action_policy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
+          category: 'catch_all',
+        },
+      ],
+      evaluatedCount: 1,
+      isTruncated: false,
+    });
+
+    renderComponent();
+
+    expect(screen.getByText('Global Policy')).toBeInTheDocument();
+    expect(screen.getByTestId('matchedPolicyReasonCatchAll')).toBeInTheDocument();
+    expect(screen.queryByTestId('matchedPolicyReasonTags')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('matchedPolicyReasonExpression')).not.toBeInTheDocument();
+  });
+
+  it('renders a tags badge for a policy matched by tags', () => {
+    mockUseWatch.mockReturnValue({ name: 'My Rule', routingTags: ['env:prod', 'other'] });
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      isPreviousData: false,
+      error: null,
+      items: [
+        {
+          action_policy: {
+            id: 'ap-2',
+            name: 'Tag Policy',
+            matcher: { tags: ['env:prod', 'team:sre'] },
+          } as any,
+          category: 'tags',
+        },
+      ],
+      evaluatedCount: 1,
+      isTruncated: false,
+    });
+
+    renderComponent();
+
+    expect(screen.getByTestId('matchedPolicyReasonTags')).toBeInTheDocument();
+    expect(screen.getByTestId('matchedPolicyReasonTags')).toHaveAttribute(
+      'aria-label',
+      'Matching routing tags: env:prod'
+    );
+    expect(screen.queryByTestId('matchedPolicyReasonCatchAll')).not.toBeInTheDocument();
+  });
+
+  it('renders both tags and expression badges when the matcher has both clauses', () => {
+    mockUseWatch.mockReturnValue({ name: 'My Rule', routingTags: ['env:prod'] });
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      isPreviousData: false,
+      error: null,
+      items: [
+        {
+          action_policy: {
+            id: 'ap-4',
+            name: 'Combined Policy',
+            matcher: { tags: ['env:prod'], expression: 'data.error_count > 0' },
+          } as any,
+          category: 'tags',
+        },
+      ],
+      evaluatedCount: 1,
+      isTruncated: false,
+    });
+
+    renderComponent();
+
+    expect(screen.getByTestId('matchedPolicyReasonTags')).toBeInTheDocument();
+    expect(screen.getByTestId('matchedPolicyReasonExpression')).toBeInTheDocument();
+  });
+
+  it('renders the edit link for each policy row using the injected host-aware href builder', () => {
+    const http = httpServiceMock.createStartContract();
+    const getActionPolicyEditHref = jest.fn(
+      (id: string) => `/app/observability/alerting/action-policies/edit/${id}`
+    );
+
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      isPreviousData: false,
+      error: null,
+      items: [
+        {
+          action_policy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
+          category: 'catch_all',
+        },
+      ],
+      evaluatedCount: 1,
+      isTruncated: false,
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <LinkedActionPoliciesStep http={http} getActionPolicyEditHref={getActionPolicyEditHref} />
+      </IntlProvider>
+    );
+
+    expect(getActionPolicyEditHref).toHaveBeenCalledWith('ap-1');
+
+    const editLink = screen.getByTestId('linkedActionPolicyEdit-ap-1');
+    expect(editLink).toBeInTheDocument();
+    expect(editLink).toHaveTextContent('Global Policy');
+    expect(editLink).toHaveAttribute(
+      'href',
+      '/app/observability/alerting/action-policies/edit/ap-1'
+    );
+    expect(editLink).toHaveAttribute('target', '_blank');
+    expect(editLink).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+
+  it('renders the policy name as plain text when no href builder is injected', () => {
+    const http = httpServiceMock.createStartContract();
+
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      isPreviousData: false,
+      error: null,
+      items: [
+        {
+          action_policy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
+          category: 'catch_all',
+        },
+      ],
+      evaluatedCount: 1,
+      isTruncated: false,
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <LinkedActionPoliciesStep http={http} />
+      </IntlProvider>
+    );
+
+    expect(screen.queryByTestId('linkedActionPolicyEdit-ap-1')).not.toBeInTheDocument();
+    expect(screen.getByTestId('linkedActionPolicyName-ap-1')).toHaveTextContent('Global Policy');
+  });
+
+  it('renders connector icons for a policy from the batched connector-types hook', () => {
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      isPreviousData: false,
+      error: null,
+      items: [
+        {
+          action_policy: {
+            id: 'ap-1',
+            name: 'Global Policy',
+            matcher: null,
+            destinations: [{ type: 'workflow', id: 'wf-1' }],
+          } as any,
+          category: 'catch_all',
+        },
+      ],
+      evaluatedCount: 1,
+      isTruncated: false,
+    });
+    mockUseActionPolicyConnectorTypes.mockReturnValue({
+      connectorTypesByPolicy: new Map([['ap-1', ['email', 'slack']]]),
+      isLoading: false,
+    });
+
+    renderComponent();
+
+    expect(mockUseActionPolicyConnectorTypes).toHaveBeenCalledWith([
+      expect.objectContaining({ id: 'ap-1' }),
+    ]);
+    expect(screen.getByTestId('linkedActionPolicyConnectorIcons-ap-1')).toBeInTheDocument();
+  });
+
+  it('does not render a connector-icons row when the policy has no connector types', () => {
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      isPreviousData: false,
+      error: null,
+      items: [
+        {
+          action_policy: {
+            id: 'ap-1',
+            name: 'Global Policy',
+            matcher: null,
+            destinations: [],
+          } as any,
+          category: 'catch_all',
+        },
+      ],
+      evaluatedCount: 1,
+      isTruncated: false,
+    });
+
+    renderComponent();
+
+    expect(screen.queryByTestId('linkedActionPolicyConnectorIcons-ap-1')).not.toBeInTheDocument();
+  });
+
+  it('shows an error callout when the fetch fails', () => {
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      isPreviousData: false,
+      error: new Error('Network error'),
+      items: [],
+      evaluatedCount: 0,
+      isTruncated: false,
+    });
+
+    renderComponent();
+
+    expect(screen.getByTestId('linkedActionPoliciesError')).toBeInTheDocument();
+  });
+
+  it('passes the current form routing tags to the matcher hook so unsaved changes are reflected', () => {
+    mockUseWatch.mockReturnValue({ name: 'My Rule', routingTags: ['env:prod'] });
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      isPreviousData: false,
+      error: null,
+      items: [],
+      evaluatedCount: 0,
+      isTruncated: false,
+    });
+
+    renderComponent();
+
+    expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith(
+      expect.objectContaining({ routingTags: ['env:prod'] })
+    );
+  });
+});

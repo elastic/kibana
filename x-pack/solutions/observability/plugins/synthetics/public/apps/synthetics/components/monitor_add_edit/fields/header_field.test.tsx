@@ -61,7 +61,7 @@ describe('<HeaderField />', () => {
     fireEvent.change(value, { target: { value: newValue } });
 
     await waitFor(() => {
-      expect(onChange).toBeCalledWith({
+      expect(onChange).toHaveBeenCalledWith({
         [newKey]: newValue,
       });
     });
@@ -83,7 +83,7 @@ describe('<HeaderField />', () => {
     fireEvent.change(value, { target: { value: newValue } });
 
     await waitFor(() => {
-      expect(onChange).toBeCalledWith({
+      expect(onChange).toHaveBeenCalledWith({
         [newKey]: newValue,
       });
     });
@@ -101,7 +101,7 @@ describe('<HeaderField />', () => {
     );
 
     await waitFor(() => {
-      expect(onChange).toBeCalledWith({
+      expect(onChange).toHaveBeenCalledWith({
         'Content-Type': contentTypes[CodeEditorMode.PLAINTEXT],
       });
     });

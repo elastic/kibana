@@ -35,9 +35,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           'logs-apm*': { read: true },
           'metrics-apm*': { read: true },
           'traces-apm*': { read: true },
-          'logs-*.otel-*': { read: true },
+          'logs-*.otel-*,-logs-agent_builder.otel-*': { read: true },
           'metrics-*.otel-*': { read: true },
-          'traces-*.otel-*': { read: true },
+          'traces-*.otel-*,-traces-agent_builder.otel-*': { read: true },
         });
       });
 
@@ -73,9 +73,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           'logs-apm*': { read: true },
           'metrics-apm*': { read: true },
           'traces-apm*': { read: true },
-          'logs-*.otel-*': { read: true },
+          'logs-*.otel-*,-logs-agent_builder.otel-*': { read: true },
           'metrics-*.otel-*': { read: true },
-          'traces-*.otel-*': { read: true },
+          'traces-*.otel-*,-traces-agent_builder.otel-*': { read: true },
         });
       });
 

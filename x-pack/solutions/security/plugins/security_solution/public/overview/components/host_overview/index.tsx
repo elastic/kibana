@@ -11,6 +11,7 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { EntityTableLinkRenderer } from '../../../flyout/entity_details/shared/components/entity_table/types';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -62,6 +63,8 @@ interface HostSummaryProps {
   narrowDateRange: NarrowDateRange;
   jobNameById: Record<string, string | undefined>;
   isFlyoutOpen?: boolean;
+  /** When provided, replaces FlyoutLink for IP addresses (v2 system-flyout context). */
+  linkRenderer?: EntityTableLinkRenderer;
   /** When using Entity Store v2: pre-fetched risk state from entity store. */
   riskScoreState?: RiskScoreState<EntityType.host>;
   /** When using Entity Store v2: first seen from entity lifecycle. */
@@ -70,6 +73,12 @@ interface HostSummaryProps {
   lastSeenFromEntityStore?: string;
   /** When true, inspect button is always visible (e.g. in document details flyout). Default false = show on hover. */
   showInspectButtonAlways?: boolean;
+  /**
+   * Optional renderer for the host.ip value. Defaults to the expandable-flyout `FlyoutLink`.
+   * Callers rendering this overview outside the expandable-flyout system (e.g. the attack
+   * Entities tool) can supply a link that opens the network flyout via the new flyout system.
+   */
+  renderIpLink?: (ip: string) => React.ReactNode;
 }
 
 const HostRiskOverviewWrapper = styled(EuiFlexGroup, {
@@ -102,10 +111,12 @@ export const HostOverview = React.memo<HostSummaryProps>(
     hostName,
     jobNameById,
     isFlyoutOpen = false,
+    linkRenderer: LinkRenderer,
     riskScoreState: riskScoreStateFromEntityStore,
     firstSeenFromEntityStore,
     lastSeenFromEntityStore,
     showInspectButtonAlways = false,
+    renderIpLink,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -304,18 +315,26 @@ export const HostOverview = React.memo<HostSummaryProps>(
                 attrName={'host.ip'}
                 idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
                 scopeId={scopeId}
-                render={(ip) =>
-                  ip != null ? (
+                render={(ip) => {
+                  if (ip == null) {
+                    return getEmptyTagValue();
+                  }
+                  if (renderIpLink) {
+                    return renderIpLink(ip);
+                  }
+                  return LinkRenderer ? (
+                    <LinkRenderer field="host.ip" value={ip}>
+                      {ip}
+                    </LinkRenderer>
+                  ) : (
                     <FlyoutLink
                       field={'host.ip'}
                       value={ip}
                       scopeId={scopeId}
                       isFlyoutOpen={isFlyoutOpen}
                     />
-                  ) : (
-                    getEmptyTagValue()
-                  )
-                }
+                  );
+                }}
               />
             ),
           },
@@ -350,7 +369,16 @@ export const HostOverview = React.memo<HostSummaryProps>(
           },
         ],
       ],
-      [contextID, scopeId, data, firstColumn, getDefaultRenderer, isFlyoutOpen]
+      [
+        contextID,
+        scopeId,
+        data,
+        firstColumn,
+        getDefaultRenderer,
+        isFlyoutOpen,
+        renderIpLink,
+        LinkRenderer,
+      ]
     );
     return (
       <>

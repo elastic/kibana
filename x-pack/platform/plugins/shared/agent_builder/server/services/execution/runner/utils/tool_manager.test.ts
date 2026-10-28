@@ -661,9 +661,9 @@ describe('ToolManager', () => {
         logger: mockLogger,
       });
 
-      expect(toolManager.getToolOrigin('registry.tool')).toBe(ToolOrigin.registry);
-      expect(toolManager.getToolOrigin('inline.tool')).toBe(ToolOrigin.inline);
-      expect(toolManager.getToolOrigin('missing.tool')).toBeUndefined();
+      expect(toolManager.getToolMeta('registry.tool').origin).toBe(ToolOrigin.registry);
+      expect(toolManager.getToolMeta('inline.tool').origin).toBe(ToolOrigin.inline);
+      expect(toolManager.getToolMeta('missing.tool').origin).toBeUndefined();
     });
 
     it('overwrites existing entries when a newer origin is provided', async () => {
@@ -678,7 +678,7 @@ describe('ToolManager', () => {
         logger: mockLogger,
       });
 
-      expect(toolManager.getToolOrigin('tool.id')).toBe(ToolOrigin.registry);
+      expect(toolManager.getToolMeta('tool.id').origin).toBe(ToolOrigin.registry);
     });
   });
 
@@ -870,6 +870,321 @@ describe('ToolManager', () => {
       });
 
       expect(toolManager.getSummarizer('tool-1')).toBe(summarizer2);
+    });
+  });
+
+  describe('setMaxToolResultTokens', () => {
+    const hugeResults = [
+      { tool_result_id: 'r-1', type: 'other', data: { text: 'x'.repeat(100_000) } },
+    ];
+
+    const getBuildContent = () => {
+      const { toolToLangchain } = jest.requireMock('@kbn/agent-builder-genai-utils/langchain') as {
+        toolToLangchain: jest.Mock;
+      };
+      const lastCall = toolToLangchain.mock.calls[toolToLangchain.mock.calls.length - 1][0];
+      return lastCall.buildContent as (params: {
+        results: unknown[];
+        toolId: string;
+        toolCallId: string;
+      }) => string;
+    };
+
+    it('uses the default budget when setMaxToolResultTokens is never called', async () => {
+      const tool = createMockExecutableTool('tool-1');
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool,
+        logger: mockLogger,
+      });
+
+      const content = getBuildContent()({
+        results: hugeResults,
+        toolId: 'tool-1',
+        toolCallId: 'call-1',
+      });
+
+      // Asserts on the resolved budget (maxTokens), not the fixture's own token estimate —
+      // this test is about which budget got used, not exactly how large hugeResults is.
+      expect(content).toContain('Preview (first 20000 tokens):');
+    });
+
+    it('uses the configured budget for tools without their own override', async () => {
+      const tool = createMockExecutableTool('tool-1');
+
+      toolManager.setMaxToolResultTokens(10);
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool,
+        logger: mockLogger,
+      });
+
+      const content = getBuildContent()({
+        results: hugeResults,
+        toolId: 'tool-1',
+        toolCallId: 'call-1',
+      });
+
+      expect(content).toContain('Preview (first 10 tokens):');
+    });
+
+    it('uses the tool-level maxResultTokens override instead of the configured default', async () => {
+      const tool = {
+        ...createMockExecutableTool('tool-1'),
+        maxResultTokens: 5,
+      };
+
+      toolManager.setMaxToolResultTokens(10_000);
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool,
+        logger: mockLogger,
+      });
+
+      const content = getBuildContent()({
+        results: hugeResults,
+        toolId: 'tool-1',
+        toolCallId: 'call-1',
+      });
+
+      expect(content).toContain('Preview (first 5 tokens):');
+    });
+
+    it('never truncates a tool with maxResultTokens: Infinity, regardless of the configured default', async () => {
+      const tool = {
+        ...createMockExecutableTool('tool-1'),
+        maxResultTokens: Infinity,
+      };
+
+      toolManager.setMaxToolResultTokens(10);
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool,
+        logger: mockLogger,
+      });
+
+      const content = getBuildContent()({
+        results: hugeResults,
+        toolId: 'tool-1',
+        toolCallId: 'call-1',
+      });
+
+      expect(content).toEqual(JSON.stringify({ results: hugeResults }));
+    });
+
+    it('resolves maxResultTokens independently of summarizeToolReturn', async () => {
+      const tool = {
+        ...createMockExecutableTool('tool-1'),
+        summarizeToolReturn: jest.fn(),
+      };
+
+      toolManager.setMaxToolResultTokens(10);
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool,
+        logger: mockLogger,
+      });
+
+      const content = getBuildContent()({
+        results: hugeResults,
+        toolId: 'tool-1',
+        toolCallId: 'call-1',
+      });
+
+      // summarizeToolReturn being set has no bearing on the guardrail: it still applies.
+      expect(content).toContain('Preview (first 10 tokens):');
+    });
+  });
+
+  describe('dynamic tool registry', () => {
+    const addDynamic = (tools: ExecutableToolWithOrigin[]) =>
+      toolManager.addTools({ type: ToolManagerToolType.dynamic, tools });
+
+    it('registers tools without binding them to the model', async () => {
+      const tool = createMockExecutableTool('dynamic-1');
+
+      await addDynamic([tool]);
+
+      expect(toolManager.listDynamicTools()).toEqual([tool]);
+      expect(toolManager.getDynamicTool('dynamic-1')).toBe(tool);
+      expect(toolManager.list()).toEqual([]);
+      expect(toolManager.getDynamicToolIds()).toEqual([]);
+    });
+
+    it('skips ids already bound natively', async () => {
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: createMockExecutableTool('native-1'),
+        logger: mockLogger,
+      });
+      const shadowed = createMockExecutableTool('native-1', 'dynamic copy');
+      const dynamic = createMockExecutableTool('dynamic-1');
+
+      await addDynamic([shadowed, dynamic]);
+
+      expect(toolManager.listDynamicTools()).toEqual([dynamic]);
+      expect(toolManager.getDynamicTool('native-1')).toBeUndefined();
+      expect(toolManager.getExecutable('native-1')?.description).toBe('Test tool');
+    });
+
+    it('replaces a dynamic tool registered again under the same id', async () => {
+      await addDynamic([createMockExecutableTool('dynamic-1', 'first')]);
+      const second = createMockExecutableTool('dynamic-1', 'second');
+
+      await addDynamic([second]);
+
+      expect(toolManager.listDynamicTools()).toEqual([second]);
+    });
+
+    it('resolves executable, meta and summarizer from the registry when not bound natively', async () => {
+      const summarizer = jest.fn();
+      const tool = {
+        ...createMockExecutableTool('dynamic-1', 'Dynamic', ToolOrigin.inline),
+        summarizeToolReturn: summarizer,
+      };
+      await addDynamic([tool]);
+
+      expect(toolManager.getExecutable('dynamic-1')).toBe(tool);
+      expect(toolManager.getToolMeta('dynamic-1')).toEqual({
+        origin: ToolOrigin.inline,
+        type: 'builtin',
+      });
+      expect(toolManager.getSummarizer('dynamic-1')).toBe(summarizer);
+    });
+
+    it('resolves natively bound tools before the registry', async () => {
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: createMockExecutableTool('tool-1', 'Native', ToolOrigin.internal),
+        logger: mockLogger,
+      });
+
+      expect(toolManager.getExecutable('tool-1')?.description).toBe('Native');
+      expect(toolManager.getToolMeta('tool-1').origin).toBe(ToolOrigin.internal);
+      expect(toolManager.getDynamicTool('tool-1')).toBeUndefined();
+    });
+
+    it('returns undefined meta and executable for unknown ids', () => {
+      expect(toolManager.getExecutable('unknown')).toBeUndefined();
+      expect(toolManager.getToolMeta('unknown')).toEqual({ origin: undefined, type: undefined });
+      expect(toolManager.getSummarizer('unknown')).toBeUndefined();
+    });
+  });
+
+  describe('dynamic tool result content', () => {
+    const lastBuildContent = () => {
+      const { toolToLangchain } = jest.requireMock('@kbn/agent-builder-genai-utils/langchain') as {
+        toolToLangchain: jest.Mock;
+      };
+      const lastCall = toolToLangchain.mock.calls[toolToLangchain.mock.calls.length - 1][0];
+      return lastCall.buildContent as (params: {
+        results: unknown[];
+        toolId: string;
+        toolCallId: string;
+        dynamicToolId?: string;
+      }) => string;
+    };
+    const hugeResults = [{ type: 'other', data: 'word '.repeat(500) }];
+
+    beforeEach(async () => {
+      toolManager.setMaxToolResultTokens(10);
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: createMockExecutableTool('execute_dynamic_tool'),
+        logger: mockLogger,
+      });
+    });
+
+    it('applies the registered inner tool budget to a tagged return', async () => {
+      await toolManager.addTools({
+        type: ToolManagerToolType.dynamic,
+        tools: { ...createMockExecutableTool('inner.tool'), maxResultTokens: Infinity },
+      });
+
+      const content = lastBuildContent()({
+        results: hugeResults,
+        toolId: 'execute_dynamic_tool',
+        toolCallId: 'call-1',
+        dynamicToolId: 'inner.tool',
+      });
+
+      expect(content).toEqual(JSON.stringify({ results: hugeResults }));
+    });
+
+    it('names the inner tool in the recovery path of a truncated tagged return', async () => {
+      await toolManager.addTools({
+        type: ToolManagerToolType.dynamic,
+        tools: createMockExecutableTool('inner.tool'),
+      });
+
+      const content = lastBuildContent()({
+        results: hugeResults,
+        toolId: 'execute_dynamic_tool',
+        toolCallId: 'call-1',
+        dynamicToolId: 'inner.tool',
+      });
+
+      // the inner tool's own pipeline stored the result under the inner id, which is what the
+      // model must read back; the meta-tool itself is excluded from the filestore
+      expect(content).toContain('Preview (first 10 tokens):');
+      expect(content).toContain('/tool_calls/inner_tool_call-1/');
+      expect(content).not.toContain('not recoverable');
+    });
+
+    it('falls back to the outer tool budget for an unregistered or untagged return', () => {
+      const buildContent = lastBuildContent();
+
+      const unregistered = buildContent({
+        results: hugeResults,
+        toolId: 'execute_dynamic_tool',
+        toolCallId: 'call-1',
+        dynamicToolId: 'nope',
+      });
+      const untagged = buildContent({
+        results: hugeResults,
+        toolId: 'execute_dynamic_tool',
+        toolCallId: 'call-1',
+      });
+
+      expect(unregistered).toContain('Preview (first 10 tokens):');
+      expect(untagged).toContain('Preview (first 10 tokens):');
+      expect(untagged).toContain('not recoverable');
+    });
+
+    it('applies a natively bound tool budget when the meta-tool fell back to it', async () => {
+      // the meta-tool dispatches to a native tool called by the wrong path; its budget still applies
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: { ...createMockExecutableTool('native.tool'), maxResultTokens: Infinity },
+        logger: mockLogger,
+      });
+      // the meta-tool's own buildContent, not the native tool's
+      const metaBuildContent = (() => {
+        const { toolToLangchain } = jest.requireMock(
+          '@kbn/agent-builder-genai-utils/langchain'
+        ) as { toolToLangchain: jest.Mock };
+        // last one: mock calls accumulate across tests and each test has its own manager
+        const call = [...toolToLangchain.mock.calls]
+          .reverse()
+          .find(
+            ([params]: [{ tool: { id: string } }]) => params.tool.id === 'execute_dynamic_tool'
+          );
+        return call[0].buildContent as ReturnType<typeof lastBuildContent>;
+      })();
+
+      const content = metaBuildContent({
+        results: hugeResults,
+        toolId: 'execute_dynamic_tool',
+        toolCallId: 'call-1',
+        dynamicToolId: 'native.tool',
+      });
+
+      expect(content).toEqual(JSON.stringify({ results: hugeResults }));
     });
   });
 });

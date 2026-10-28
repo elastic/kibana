@@ -6,9 +6,12 @@
  */
 
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import { AvailabilityCache } from '../../common/availability_cache';
 import { createBuiltinSkillProvider } from './provider';
 
 describe('createBuiltinSkillProvider', () => {
+  const cache = new AvailabilityCache();
+
   const createMockSkillDefinition = (
     overrides: Partial<SkillDefinition> = {}
   ): SkillDefinition => ({
@@ -21,7 +24,7 @@ describe('createBuiltinSkillProvider', () => {
   });
 
   it('has id "builtin" and readonly true', () => {
-    const provider = createBuiltinSkillProvider([]);
+    const provider = createBuiltinSkillProvider([], cache);
 
     expect(provider.id).toBe('builtin');
     expect(provider.readonly).toBe(true);
@@ -29,19 +32,25 @@ describe('createBuiltinSkillProvider', () => {
 
   describe('has', () => {
     it('returns true for a registered skill', () => {
-      const provider = createBuiltinSkillProvider([createMockSkillDefinition({ id: 'skill-1' })]);
+      const provider = createBuiltinSkillProvider(
+        [createMockSkillDefinition({ id: 'skill-1' })],
+        cache
+      );
 
       expect(provider.has('skill-1')).toBe(true);
     });
 
     it('returns false for an unregistered skill', () => {
-      const provider = createBuiltinSkillProvider([createMockSkillDefinition({ id: 'skill-1' })]);
+      const provider = createBuiltinSkillProvider(
+        [createMockSkillDefinition({ id: 'skill-1' })],
+        cache
+      );
 
       expect(provider.has('non-existent')).toBe(false);
     });
 
     it('returns false when no skills are registered', () => {
-      const provider = createBuiltinSkillProvider([]);
+      const provider = createBuiltinSkillProvider([], cache);
 
       expect(provider.has('anything')).toBe(false);
     });
@@ -54,7 +63,7 @@ describe('createBuiltinSkillProvider', () => {
         name: 'my-skill' as any,
         description: 'My skill',
       });
-      const provider = createBuiltinSkillProvider([skill]);
+      const provider = createBuiltinSkillProvider([skill], cache);
 
       const result = await provider.get('skill-1');
 
@@ -66,7 +75,10 @@ describe('createBuiltinSkillProvider', () => {
     });
 
     it('returns undefined for a non-existent skill', async () => {
-      const provider = createBuiltinSkillProvider([createMockSkillDefinition({ id: 'skill-1' })]);
+      const provider = createBuiltinSkillProvider(
+        [createMockSkillDefinition({ id: 'skill-1' })],
+        cache
+      );
 
       expect(await provider.get('non-existent')).toBeUndefined();
     });
@@ -78,7 +90,7 @@ describe('createBuiltinSkillProvider', () => {
         createMockSkillDefinition({ id: 'skill-1' }),
         createMockSkillDefinition({ id: 'skill-2' }),
       ];
-      const provider = createBuiltinSkillProvider(skills);
+      const provider = createBuiltinSkillProvider(skills, cache);
 
       const result = await provider.list();
 
@@ -88,7 +100,7 @@ describe('createBuiltinSkillProvider', () => {
     });
 
     it('returns empty array when no skills are registered', async () => {
-      const provider = createBuiltinSkillProvider([]);
+      const provider = createBuiltinSkillProvider([], cache);
 
       expect(await provider.list()).toEqual([]);
     });
@@ -106,7 +118,7 @@ describe('createBuiltinSkillProvider', () => {
         }),
         createMockSkillDefinition({ id: 'skill-2' }),
       ];
-      const provider = createBuiltinSkillProvider(skills);
+      const provider = createBuiltinSkillProvider(skills, cache);
 
       const result = await provider.list({ summaryOnly: true });
 
@@ -120,7 +132,7 @@ describe('createBuiltinSkillProvider', () => {
     });
 
     it('returns empty array when no skills are registered', async () => {
-      const provider = createBuiltinSkillProvider([]);
+      const provider = createBuiltinSkillProvider([], cache);
 
       expect(await provider.list({ summaryOnly: true })).toEqual([]);
     });

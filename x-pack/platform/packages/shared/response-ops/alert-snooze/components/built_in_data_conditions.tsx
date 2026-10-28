@@ -6,82 +6,89 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
-import {
-  ALERT_SEVERITY_CRITICAL,
-  ALERT_SEVERITY_HIGH,
-  ALERT_SEVERITY_MEDIUM,
-  ALERT_SEVERITY_LOW,
-  ALERT_SEVERITY_INFO,
-} from '@kbn/rule-data-utils';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
+import { ALERT_SEVERITY_VALUES } from '@kbn/rule-data-utils';
 import {
   DataConditionType,
   type AlertSeverityLevel,
   type DataConditionTypeDescriptor,
 } from './types';
+import { FieldChangeFieldSelector } from './field_change_field_selector';
 import { truncateMiddle } from '../utils/truncate';
 import * as i18n from './translations';
 
 // Per-severity i18n labels and badge colors.
 const SEVERITY_LABELS: Record<AlertSeverityLevel, string> = {
   critical: i18n.SEVERITY_CRITICAL,
+  major: i18n.SEVERITY_MAJOR,
   high: i18n.SEVERITY_HIGH,
   medium: i18n.SEVERITY_MEDIUM,
+  minor: i18n.SEVERITY_MINOR,
   low: i18n.SEVERITY_LOW,
+  warning: i18n.SEVERITY_WARNING,
   info: i18n.SEVERITY_INFO,
 };
 
 // Mapped to EUI badge color tokens.
 const SEVERITY_COLORS: Record<AlertSeverityLevel, string> = {
   critical: 'danger',
+  major: 'danger',
   high: 'warning',
   medium: 'success',
+  minor: 'success',
   low: 'primary',
+  warning: 'default',
   info: 'default',
 };
 
-const SEVERITY_DROPDOWN_VALUES: readonly AlertSeverityLevel[] = [
-  ALERT_SEVERITY_CRITICAL,
-  ALERT_SEVERITY_HIGH,
-  ALERT_SEVERITY_MEDIUM,
-  ALERT_SEVERITY_LOW,
-  ALERT_SEVERITY_INFO,
-];
-const SEVERITY_OPTIONS = SEVERITY_DROPDOWN_VALUES.map((value) => ({
+const SEVERITY_OPTIONS = ALERT_SEVERITY_VALUES.map((value) => ({
   value,
   text: SEVERITY_LABELS[value],
 }));
 
+export interface CreateFieldChangeDescriptorParams {
+  /** Leaf-level scalar alert field names offered in the field dropdown. */
+  fields?: string[];
+  isLoading?: boolean;
+}
+
 /**
- * Built-in descriptor: matches when an alert's value for a user-supplied
- * field changes from one ingest to the next. Always available and not a
- * singleton — users can stack several `field_change` rows for different
- * fields.
+ * Builds the built-in `field_change` descriptor: matches when an alert's value
+ * for a user-selected field changes from one ingest to the next. Always
+ * available and not a singleton — users can stack several `field_change` rows
+ * for different fields.
+ *
+ * The selectable field names are injected here.
  */
-export const fieldChangeDescriptor: DataConditionTypeDescriptor = {
-  id: DataConditionType.FIELD_CHANGE,
-  label: i18n.CONDITION_TYPE_FIELD_CHANGE,
-  isComplete: (entry) => !!entry.field,
-  renderInput: (entry, onChange) => (
-    <EuiFieldText
-      value={entry.field}
-      onChange={(e) => onChange({ ...entry, field: e.target.value })}
-      placeholder={i18n.FIELD_NAME_PLACEHOLDER}
-      aria-label={i18n.CONDITION_VALUE_ARIA_LABEL}
-      data-test-subj={`dataConditionField-${entry.id}`}
-      compressed
-    />
-  ),
-  renderConfirmedSummary: (entry) => (
-    <EuiBadge color="hollow" title={entry.field}>
-      {truncateMiddle(entry.field)}
-    </EuiBadge>
-  ),
-  getPreviewText: (entry) => i18n.getPreviewFieldChange(truncateMiddle(entry.field)),
-  serialize: (entry) => ({
-    type: DataConditionType.FIELD_CHANGE,
-    field: entry.field,
-  }),
+export const createFieldChangeDescriptor = ({
+  fields = [],
+  isLoading = false,
+}: CreateFieldChangeDescriptorParams = {}): DataConditionTypeDescriptor => {
+  const options = fields.map((name) => ({ label: name, value: name }));
+
+  return {
+    id: DataConditionType.FIELD_CHANGE,
+    label: i18n.CONDITION_TYPE_FIELD_CHANGE,
+    isComplete: (entry) => !!entry.field,
+    renderInput: (entry, onChange) => (
+      <FieldChangeFieldSelector
+        entry={entry}
+        onChange={onChange}
+        options={options}
+        isLoading={isLoading}
+      />
+    ),
+    renderConfirmedSummary: (entry) => (
+      <EuiBadge color="hollow" title={entry.field}>
+        {truncateMiddle(entry.field)}
+      </EuiBadge>
+    ),
+    getPreviewText: (entry) => i18n.getPreviewFieldChange(truncateMiddle(entry.field)),
+    serialize: (entry) => ({
+      type: DataConditionType.FIELD_CHANGE,
+      field: entry.field,
+    }),
+  };
 };
 
 /**
@@ -151,10 +158,23 @@ export const severityEqualsDescriptor: DataConditionTypeDescriptor = {
 };
 
 /**
- * Default descriptor list shipped with the package.
+ * Builds the default descriptor list shipped with the package, wiring the
+ * `field_change` dropdown to the given (already-fetched) alert field names. The
+ * package itself never fetches — consumers pass field names via the snooze
+ * component's `fieldOptions` prop.
  */
-export const DEFAULT_DATA_CONDITION_TYPES: readonly DataConditionTypeDescriptor[] = [
-  fieldChangeDescriptor,
+export const buildDataConditionTypes = ({
+  fields = [],
+  isLoading = false,
+}: CreateFieldChangeDescriptorParams = {}): readonly DataConditionTypeDescriptor[] => [
+  createFieldChangeDescriptor({ fields, isLoading }),
   severityChangeDescriptor,
   severityEqualsDescriptor,
 ];
+
+/**
+ * Default descriptor list with an empty `field_change` dropdown, used as a
+ * fallback when no field names are supplied.
+ */
+export const DEFAULT_DATA_CONDITION_TYPES: readonly DataConditionTypeDescriptor[] =
+  buildDataConditionTypes();

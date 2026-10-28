@@ -7,14 +7,12 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSkeletonText,
   EuiSpacer,
-  EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,29 +20,34 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { WithHeaderLayout, fullWidthFormContentCss } from '../../../components/layouts';
-import { useRouterNavigate } from '../../../common/lib/kibana';
+import { fullWidthFormContentCss } from '../../../components/layouts';
+import { useOsquerySubpageTitle } from '../../../components/osquery_page_header_context';
+import { useKibana } from '../../../common/lib/kibana';
 import { PackForm } from '../../../packs/form';
 import { usePack } from '../../../packs/use_pack';
 import { useDeletePack } from '../../../packs/use_delete_pack';
 import { useCopyPack } from '../../../packs/use_copy_pack';
-import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
-
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useDuplicateGuard } from '../../../common/hooks/use_duplicate_guard';
 
 const EditPackPageComponent = () => {
   const confirmModalTitleId = useGeneratedHtmlId();
-  const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
+
+  const permissions = useKibana().services.application.capabilities.osquery;
+  const canWritePacks = !!permissions.writePacks;
 
   const { packId } = useParams<{ packId: string }>();
-  const queryDetailsLinkProps = useRouterNavigate(`packs/${packId}`);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
   const { isLoading, data, error } = usePack({ packId });
   const deletePackMutation = useDeletePack({ packId, withRedirect: true });
   const copyPackMutation = useCopyPack({ packId });
-  const isReadOnly = useMemo(() => !!data?.read_only, [data]);
+  // Full lockdown: a readPacks-only user can view but not edit anything.
+  const isReadOnly = !canWritePacks;
+  // Prebuilt (Elastic-managed) pack: queries/name/description are immutable, but
+  // a writePacks user may still re-target its scheduled agent policies/shards
+  // (see the prebuiltPackModeDescription callout below).
+  const isPrebuilt = !!data?.read_only;
 
   const { handleDuplicateClick, handleDirtyStateChange, duplicateModal } = useDuplicateGuard({
     copyMutation: copyPackMutation,
@@ -54,6 +57,7 @@ const EditPackPageComponent = () => {
   useBreadcrumbs('pack_edit', {
     packId: data?.id ?? '',
     packName: data?.name ?? '',
+    isReadOnly,
   });
 
   const handleCloseDeleteConfirmationModal = useCallback(() => {
@@ -70,52 +74,40 @@ const EditPackPageComponent = () => {
     });
   }, [deletePackMutation, handleCloseDeleteConfirmationModal]);
 
-  const backLink = useMemo(
-    () => (
-      <EuiButtonEmpty
-        iconType="chevronSingleLeft"
-        {...queryDetailsLinkProps}
-        flush="left"
-        size="xs"
-      >
-        <FormattedMessage
-          id="xpack.osquery.editPack.viewPackListTitle"
-          defaultMessage="View {queryName} details"
-          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-          values={{ queryName: data?.name }}
-        />
-      </EuiButtonEmpty>
-    ),
-    [data?.name, queryDetailsLinkProps]
-  );
+  const pageTitle = useMemo(() => {
+    if (error) {
+      return isReadOnly
+        ? i18n.translate('xpack.osquery.viewPack.loadError.pageTitle', {
+            defaultMessage: 'View pack',
+          })
+        : i18n.translate('xpack.osquery.editPack.loadError.pageTitle', {
+            defaultMessage: 'Edit pack',
+          });
+    }
 
-  const LeftColumn = useMemo(
-    () => (
-      <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
-        <EuiFlexItem>{backLink}</EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText>
-            <h1>
-              <FormattedMessage
-                id="xpack.osquery.editPack.pageTitle"
-                defaultMessage="Edit {queryName}"
-                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                values={{
-                  queryName: data?.name,
-                }}
-              />
-            </h1>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    [backLink, data?.name]
-  );
+    if (!data?.name) {
+      return undefined;
+    }
 
+    return isReadOnly
+      ? i18n.translate('xpack.osquery.viewPack.pageTitle', {
+          defaultMessage: 'View {queryName}',
+          values: { queryName: data.name },
+        })
+      : i18n.translate('xpack.osquery.editPack.pageTitle', {
+          defaultMessage: 'Edit {queryName}',
+          values: { queryName: data.name },
+        });
+  }, [data?.name, error, isReadOnly]);
+
+  useOsquerySubpageTitle(pageTitle);
+
+  // Write actions (duplicate, delete) are only available to users with
+  // writePacks. readPacks-only users see a fully read-only view.
   const RightColumn = useMemo(
-    () => (
-      <EuiFlexGroup gutterSize="s">
-        {queryHistoryRework && (
+    () =>
+      canWritePacks ? (
+        <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={handleDuplicateClick}
@@ -127,35 +119,46 @@ const EditPackPageComponent = () => {
               })}
             </EuiButton>
           </EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false}>
-          <EuiButton color="danger" onClick={handleDeleteClick} iconType="trash">
-            <FormattedMessage
-              id="xpack.osquery.editPack.deletePackButtonLabel"
-              defaultMessage="Delete pack"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    [queryHistoryRework, handleDuplicateClick, copyPackMutation.isLoading, handleDeleteClick]
+          <EuiFlexItem grow={false}>
+            <EuiButton color="danger" onClick={handleDeleteClick} iconType="trash">
+              <FormattedMessage
+                id="xpack.osquery.editPack.deletePackButtonLabel"
+                defaultMessage="Delete pack"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null,
+    [canWritePacks, handleDuplicateClick, copyPackMutation.isLoading, handleDeleteClick]
   );
 
-  const HeaderContent = useMemo(
-    () =>
-      isReadOnly ? (
+  const HeaderContent = useMemo(() => {
+    if (!canWritePacks) {
+      return (
         <>
           <EuiSpacer />
           <EuiCallOut announceOnMount>
             <FormattedMessage
-              id="xpack.osquery.editPack.prebuiltPackModeDescription"
-              defaultMessage="This is a prebuilt Elastic pack. You can modify the scheduled agent policies, but you cannot edit queries in the pack."
+              id="xpack.osquery.editPack.readOnlyModeDescription"
+              defaultMessage="You have read-only access to packs. You can view this pack but cannot make changes."
             />
           </EuiCallOut>
         </>
-      ) : null,
-    [isReadOnly]
-  );
+      );
+    }
+
+    return data?.read_only ? (
+      <>
+        <EuiSpacer />
+        <EuiCallOut announceOnMount>
+          <FormattedMessage
+            id="xpack.osquery.editPack.prebuiltPackModeDescription"
+            defaultMessage="This is a prebuilt Elastic pack. You can modify the scheduled agent policies, but you cannot edit queries in the pack."
+          />
+        </EuiCallOut>
+      </>
+    ) : null;
+  }, [canWritePacks, data?.read_only]);
 
   const titleProps = useMemo(() => ({ id: confirmModalTitleId }), [confirmModalTitleId]);
 
@@ -164,11 +167,13 @@ const EditPackPageComponent = () => {
       <EuiSkeletonText lines={10} />
     ) : (
       <PackForm
-        key={packId}
+        // updated_at in the key remounts the form after an update so it
+        // re-seeds from fresh data instead of the cached pre-update queries.
+        key={`${packId}-${data.updated_at}`}
         editMode={true}
         defaultValue={data}
         isReadOnly={isReadOnly}
-        packId={packId}
+        isPrebuilt={isPrebuilt}
         onDirtyStateChange={handleDirtyStateChange}
       />
     );
@@ -210,64 +215,11 @@ const EditPackPageComponent = () => {
 
   if (isLoading) return null;
 
-  if (queryHistoryRework) {
-    if (error) {
-      return (
-        <div css={fullWidthFormContentCss}>
-          <EuiSpacer size="l" />
-          {backLink}
-          <EuiSpacer size="m" />
-          <EuiCallOut
-            title={i18n.translate('xpack.osquery.editPack.loadError.title', {
-              defaultMessage: 'Failed to load pack',
-            })}
-            color="danger"
-            iconType="error"
-          >
-            <FormattedMessage
-              id="xpack.osquery.editPack.loadError.body"
-              defaultMessage="The pack could not be loaded. Please try again later."
-            />
-          </EuiCallOut>
-        </div>
-      );
-    }
-
-    return (
-      <div css={fullWidthFormContentCss}>
-        <EuiSpacer size="l" />
-        {backLink}
-        <EuiSpacer size="m" />
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <h1>
-                <FormattedMessage
-                  id="xpack.osquery.editPack.pageTitle"
-                  defaultMessage="Edit {queryName}"
-                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                  values={{
-                    queryName: data?.name,
-                  }}
-                />
-              </h1>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{RightColumn}</EuiFlexItem>
-        </EuiFlexGroup>
-        {HeaderContent}
-        <EuiSpacer size="l" />
-        {formContent}
-        {deleteModal}
-        {duplicateModal}
-      </div>
-    );
-  }
-
   if (error) {
     return (
-      <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
+      <div css={fullWidthFormContentCss}>
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.osquery.editPack.loadError.title', {
             defaultMessage: 'Failed to load pack',
           })}
@@ -279,21 +231,23 @@ const EditPackPageComponent = () => {
             defaultMessage="The pack could not be loaded. Please try again later."
           />
         </EuiCallOut>
-      </WithHeaderLayout>
+      </div>
     );
   }
 
   return (
-    <WithHeaderLayout
-      leftColumn={LeftColumn}
-      rightColumn={RightColumn}
-      rightColumnGrow={false}
-      headerChildren={HeaderContent}
-    >
+    <div css={fullWidthFormContentCss}>
+      {RightColumn && (
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>{RightColumn}</EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      {HeaderContent}
+      <EuiSpacer size="l" />
       {formContent}
       {deleteModal}
       {duplicateModal}
-    </WithHeaderLayout>
+    </div>
   );
 };
 

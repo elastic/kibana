@@ -91,7 +91,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const currentUserProfileText = await testSubjects.getVisibleText(
           'testEndpointsUserProfilesAppCurrentUserProfile'
         );
-        expect(currentUserProfileText).to.equal(`${adminTestUser.username}:{}`);
+        expect(currentUserProfileText).to.equal(
+          `${adminTestUser.username}:{"userSettings":{"lastSelectedSpaceId":"default","rememberSelectedSpace":true}}`
+        );
 
         for (const userPrefix of ['one', 'two', 'three']) {
           const userProfileText = await testSubjects.getVisibleText(

@@ -14,7 +14,6 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { i18n } from '@kbn/i18n';
 import type { StartServicesAccessor } from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { NoDataViewsPromptKibanaProvider } from '@kbn/shared-ux-prompt-no-data-views';
@@ -127,7 +126,7 @@ export async function mountManagementSection(
   const createEditPath = dataViews.scriptedFieldsEnabled ? [editPath, createPath] : [editPath];
 
   ReactDOM.render(
-    <KibanaRenderContextProvider {...startServices}>
+    startServices.rendering.addContext(
       <KibanaContextProvider services={deps}>
         <NoDataViewsPromptKibanaProvider
           coreStart={{ ...startServices, docLinks, application }}
@@ -153,7 +152,7 @@ export async function mountManagementSection(
           </Router>
         </NoDataViewsPromptKibanaProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
+    ),
     params.element
   );
 

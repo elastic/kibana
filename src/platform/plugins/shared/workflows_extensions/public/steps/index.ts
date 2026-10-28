@@ -29,13 +29,6 @@ export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry
   stepRegistry.register(() =>
     import('./data/data_aggregate_step').then((m) => m.dataAggregateStepDefinition)
   );
-  stepRegistry.register(() => import('./ai/ai_prompt_step').then((m) => m.AiPromptStepDefinition));
-  stepRegistry.register(() =>
-    import('./ai/ai_summarize_step').then((m) => m.AiSummarizeStepDefinition)
-  );
-  stepRegistry.register(() =>
-    import('./ai/ai_classify_step').then((m) => m.AiClassifyStepDefinition)
-  );
   stepRegistry.register(() =>
     import('./data/data_stringify_json_step').then((m) => m.dataStringifyJsonStepDefinition)
   );

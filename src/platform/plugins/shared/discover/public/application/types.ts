@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import type { IDSLPagination } from '@kbn/search-types';
+import type { IDslPagination } from '@kbn/search-types';
+import type { EsqlSource } from '@kbn/data-source';
 
 export enum FetchStatus {
   UNINITIALIZED = 'uninitialized',
@@ -23,10 +23,11 @@ export enum FetchStatus {
 
 export interface RecordsFetchResponse {
   records: DataTableRecord[];
-  esqlQueryColumns?: DatatableColumn[];
+  dataSource?: EsqlSource;
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[];
-  pagination?: IDSLPagination;
+  pagination?: IDslPagination;
+  approximationApplied?: boolean;
 }
 
 export interface SidebarToggleState {

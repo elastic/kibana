@@ -25,3 +25,20 @@ export const getAgentIdFromFields = (fields?: estypes.SearchHit['fields']): stri
   // Check ECS format first (preferred), then fall back to legacy format
   return (fields['agent.id']?.[0] as string) ?? (fields.agent_id?.[0] as string);
 };
+
+/**
+ * Extracts the agent hostname from Elasticsearch search hit fields.
+ * Only documents written to the action responses data stream carry these ECS
+ * fields; the legacy dotted index has neither, so callers still need their own
+ * fallback for those hits.
+ *
+ * @param fields - The fields object from an Elasticsearch SearchHit
+ * @returns The agent hostname if found, undefined otherwise
+ */
+export const getAgentNameFromFields = (
+  fields?: estypes.SearchHit['fields']
+): string | undefined => {
+  if (!fields) return undefined;
+
+  return (fields['agent.name']?.[0] as string) ?? (fields['host.name']?.[0] as string);
+};

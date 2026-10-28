@@ -6,14 +6,14 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: [
     '<rootDir>/x-pack/platform/plugins/shared/agent_builder/public',
     '<rootDir>/x-pack/platform/plugins/shared/agent_builder/server',
     '<rootDir>/x-pack/platform/plugins/shared/agent_builder/common',
   ],
-  setupFiles: [],
+  setupFiles: ['<rootDir>/x-pack/platform/plugins/shared/agent_builder/jest.setup.js'],
   collectCoverage: true,
   collectCoverageFrom: [
     '<rootDir>/x-pack/platform/plugins/shared/agent_builder/{public,server,common}/**/*.{js,ts,tsx}',

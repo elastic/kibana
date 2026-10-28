@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getAlertingSectionBreadcrumb } from './breadcrumb';
+import { getAlertingSectionBreadcrumb, getRulesBreadcrumbWithHref } from './breadcrumb';
 import { i18n } from '@kbn/i18n';
 import { routeToConnectors, routeToRules, routeToHome } from '../constants';
 
@@ -46,6 +46,17 @@ describe('getAlertingSectionBreadcrumb', () => {
       text: i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
         defaultMessage: 'Rules',
       }),
+    });
+  });
+});
+
+describe('getRulesBreadcrumbWithHref', () => {
+  test('returns the rules route relative to the management app', () => {
+    expect(getRulesBreadcrumbWithHref()).toEqual({
+      text: i18n.translate('xpack.triggersActionsUI.rules.breadcrumbTitle', {
+        defaultMessage: 'Rules',
+      }),
+      href: routeToHome,
     });
   });
 });

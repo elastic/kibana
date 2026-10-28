@@ -53,11 +53,32 @@ const baseWorkflowExecutionSchema: RootSchema<{
   triggerType: WellKnownWorkflowTriggerSource | 'event';
   eventTriggerId?: string;
   isTestRun: boolean;
+  isManaged: boolean;
+  managedBy?: string;
+  originManagedWorkflowId?: string;
+  managedVersion?: number;
   ruleId?: string;
   compositionDepth?: number;
   parentWorkflowId?: string;
   parentWorkflowInvocation?: 'sync' | 'async';
+  executionChain?: Array<{
+    executionId: string;
+    invocation: 'sync' | 'async';
+    workflowId: string;
+  }>;
   eventChainDepth?: number;
+  inputTokensUsed?: number;
+  outputTokensUsed?: number;
+  cachedTokensUsed?: number;
+  totalTokensUsed?: number;
+  aiStepsUsage?: Array<{
+    stepId: string;
+    connectorId?: string;
+    inputTokens: number;
+    outputTokens: number;
+    cachedTokens: number;
+    totalTokens: number;
+  }>;
 }> = {
   workflowExecutionId: {
     type: 'keyword',
@@ -103,6 +124,35 @@ const baseWorkflowExecutionSchema: RootSchema<{
       optional: false,
     },
   },
+  isManaged: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether this execution belongs to a managed workflow',
+      optional: false,
+    },
+  },
+  managedBy: {
+    type: 'keyword',
+    _meta: {
+      description: 'Owning plugin for managed workflow executions',
+      optional: true,
+    },
+  },
+  originManagedWorkflowId: {
+    type: 'keyword',
+    _meta: {
+      description: 'Registered managed workflow definition ID, when this execution came from one',
+      optional: true,
+    },
+  },
+  managedVersion: {
+    type: 'long',
+    _meta: {
+      description:
+        'Registered managed workflow definition version, when this execution came from one',
+      optional: true,
+    },
+  },
   ruleId: {
     type: 'keyword',
     _meta: {
@@ -135,11 +185,86 @@ const baseWorkflowExecutionSchema: RootSchema<{
       optional: true,
     },
   },
+  executionChain: {
+    type: 'array',
+    items: {
+      properties: {
+        executionId: {
+          type: 'keyword',
+          _meta: { description: 'The execution ID of this ancestor run.', optional: false },
+        },
+        invocation: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'How this ancestor started the next run down: workflow.execute (sync) or workflow.executeAsync (async).',
+            optional: false,
+          },
+        },
+        workflowId: {
+          type: 'keyword',
+          _meta: { description: 'The workflow ID of this ancestor run.', optional: false },
+        },
+      },
+    },
+    _meta: {
+      description:
+        'Every ancestor of a sub-workflow execution, root first and direct parent last. The last hop matches parentWorkflowId and parentWorkflowInvocation. Omitted for a top-level execution, and for a sub-workflow execution whose chain started before the chain was recorded. Its length is the composition depth.',
+      optional: true,
+    },
+  },
   eventChainDepth: {
     type: 'integer',
     _meta: {
       description:
         'Event-chain depth when this run was scheduled from event-driven emits. Distinct from compositionDepth.',
+      optional: true,
+    },
+  },
+  inputTokensUsed: {
+    type: 'long',
+    _meta: {
+      description:
+        'Total LLM input (prompt) tokens used by token-reporting steps in this execution.',
+      optional: true,
+    },
+  },
+  outputTokensUsed: {
+    type: 'long',
+    _meta: {
+      description:
+        'Total LLM output (completion) tokens used by token-reporting steps in this execution.',
+      optional: true,
+    },
+  },
+  cachedTokensUsed: {
+    type: 'long',
+    _meta: {
+      description:
+        'Total cached input tokens reused by token-reporting steps in this execution. This is a subset of inputTokensUsed.',
+      optional: true,
+    },
+  },
+  totalTokensUsed: {
+    type: 'long',
+    _meta: {
+      description:
+        'Total LLM tokens used by token-reporting steps in this execution. This is inputTokensUsed + outputTokensUsed.',
+      optional: true,
+    },
+  },
+  aiStepsUsage: {
+    type: 'array',
+    items: {
+      type: 'pass_through',
+      _meta: {
+        description:
+          'Per-step LLM usage entry: stepId, connectorId (optional), and inputTokens/outputTokens/cachedTokens/totalTokens.',
+      },
+    },
+    _meta: {
+      description:
+        'Per-step LLM usage broken down by step and resolved connector, in finish order. Complements the *TokensUsed totals. Omitted when no step reported usage.',
       optional: true,
     },
   },
@@ -149,6 +274,7 @@ const {
   compositionDepth: _compositionDepth,
   parentWorkflowId: _parentWorkflowId,
   parentWorkflowInvocation: _parentWorkflowInvocation,
+  executionChain: _executionChain,
   ...eventDrivenExecutionSuppressedBaseSchema
 } = baseWorkflowExecutionSchema;
 
@@ -959,6 +1085,13 @@ const triggerEventDispatchedSchema: RootSchema<TriggerEventDispatchedParams> = {
       optional: false,
     },
   },
+  connectorIdMismatchCount: {
+    type: 'integer',
+    _meta: {
+      description: 'Number of workflows filtered out because connector-id did not match',
+      optional: false,
+    },
+  },
   kqlFalseCount: {
     type: 'integer',
     _meta: { description: 'Number of workflows filtered out by KQL false result', optional: false },
@@ -973,7 +1106,7 @@ const triggerEventDispatchedSchema: RootSchema<TriggerEventDispatchedParams> = {
   matchedCount: {
     type: 'integer',
     _meta: {
-      description: 'Number of workflows matched after enabled + KQL checks',
+      description: 'Number of workflows matched after enabled, connector-id, and KQL checks',
       optional: false,
     },
   },

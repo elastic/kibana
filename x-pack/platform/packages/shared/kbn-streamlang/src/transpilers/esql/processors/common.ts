@@ -150,17 +150,28 @@ export function buildOverrideFilter(
 
 /**
  * Creates an EVAL command that conditionally routes the source expression through a CASE guard,
- * storing either the real value or a neutral fallback ("") in a temp column.
+ * storing either the real value or a fallback sentinel in a temp column.
+ *
+ * The default fallback is the empty string `""` — historically used because every command we
+ * route through this helper happened to short-circuit cleanly on an empty input. Callers whose
+ * downstream command does NOT short-circuit on `""` (e.g. `URI_PARTS`, which emits
+ * `path = ""` rather than NULL for an empty input and therefore leaks a non-null sub-field
+ * into the destructive-overwrite-merge step) should pass `Builder.expression.literal.nil()`
+ * so the temp column is NULL on gated rows. ES|QL's NULL propagation through commands then
+ * guarantees all output sub-fields are NULL, and the COALESCE merge naturally preserves
+ * prior `<to>.*` values.
  *
  * @param condition - The Streamlang condition that guards execution
  * @param sourceExpression - The field/expression to pass through when the condition is true
  * @param tempColumn - Name of the temporary output column
- * @returns EVAL command: `EVAL <tempColumn> = CASE(<condition>, <sourceExpression>, "")`
+ * @param fallback - Sentinel written when the condition is false (defaults to `""`)
+ * @returns EVAL command: `EVAL <tempColumn> = CASE(<condition>, <sourceExpression>, <fallback>)`
  */
 export function buildConditionalEval(
   condition: Condition,
   sourceExpression: string,
-  tempColumn: string
+  tempColumn: string,
+  fallback: ESQLAstItem = Builder.expression.literal.string('')
 ): ESQLAstCommand {
   return Builder.command({
     name: 'eval',
@@ -170,7 +181,7 @@ export function buildConditionalEval(
         Builder.expression.func.call('CASE', [
           conditionToESQLAst(condition),
           Builder.expression.column(sourceExpression),
-          Builder.expression.literal.string(''),
+          fallback,
         ]),
       ]),
     ],

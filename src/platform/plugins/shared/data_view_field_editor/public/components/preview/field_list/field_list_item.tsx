@@ -71,6 +71,8 @@ export interface PreviewListItemProps {
   hasScriptError?: boolean;
   /** Indicates whether the field list item comes from the Painless script */
   isFromScript?: boolean;
+  /** Display label of the field, falls back to the field key when not set */
+  label?: string;
 }
 
 const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview;
@@ -80,6 +82,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
   toggleIsPinned,
   hasScriptError,
   isFromScript = false,
+  label,
 }) => {
   const styles = useMemoCss(componentStyles);
 
@@ -110,7 +113,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
       );
     }
 
-    return key;
+    return label ?? key;
   };
 
   const withTooltip = (content: JSX.Element) => (
@@ -193,24 +196,31 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
         <EuiFlexItem css={styles.actions} grow={false}>
           {toggleIsPinned && (
-            <EuiButtonIcon
-              onClick={(e: { detail: number }) => {
-                const isKeyboardEvent = e.detail === 0; // Mouse = non-zero, Keyboard = 0
-                toggleIsPinned(key, { isKeyboardEvent, buttonId: pinButtonId });
-              }}
-              id={pinButtonId}
-              onFocus={() => setIsPinFocused(true)}
-              onBlur={() => setIsPinFocused(false)}
-              color="text"
-              iconType={showPinIcon ? 'pinFill' : 'empty'}
-              data-test-subj="pinFieldButton"
-              aria-label={i18n.translate(
-                'indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel',
-                {
-                  defaultMessage: 'Pin field',
-                }
-              )}
-            />
+            <EuiToolTip
+              content={i18n.translate('indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel', {
+                defaultMessage: 'Pin field',
+              })}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                onClick={(e: { detail: number }) => {
+                  const isKeyboardEvent = e.detail === 0; // Mouse = non-zero, Keyboard = 0
+                  toggleIsPinned(key, { isKeyboardEvent, buttonId: pinButtonId });
+                }}
+                id={pinButtonId}
+                onFocus={() => setIsPinFocused(true)}
+                onBlur={() => setIsPinFocused(false)}
+                color="text"
+                iconType={showPinIcon ? 'pinFill' : 'empty'}
+                data-test-subj="pinFieldButton"
+                aria-label={i18n.translate(
+                  'indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel',
+                  {
+                    defaultMessage: 'Pin field',
+                  }
+                )}
+              />
+            </EuiToolTip>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

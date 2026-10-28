@@ -9,6 +9,7 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import type { PolicyData } from '../../types';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
+  DISABLED_ARTIFACT_TAG,
   FILTER_PROCESS_DESCENDANTS_TAG,
   GLOBAL_ARTIFACT_TAG,
 } from './constants';
@@ -28,6 +29,9 @@ import {
   setArtifactOwnerSpaceId,
   removeGlobalPolicyTag,
   addGlobalPolicyTag,
+  isArtifactDisabled,
+  addDisabledArtifactTag,
+  removeDisabledArtifactTag,
 } from './utils';
 
 describe('Endpoint artifact utilities', () => {
@@ -177,6 +181,48 @@ describe('Endpoint artifact utilities', () => {
       const output = removeGlobalPolicyTag(['one', 'two']);
 
       expect(output).toEqual(['one', 'two']);
+    });
+  });
+
+  describe('when using `isArtifactDisabled()`', () => {
+    it('should return true when the disabled tag is present', () => {
+      expect(isArtifactDisabled({ tags: [GLOBAL_ARTIFACT_TAG, DISABLED_ARTIFACT_TAG] })).toBe(true);
+    });
+
+    it('should return false when the disabled tag is not present', () => {
+      expect(isArtifactDisabled({ tags: [GLOBAL_ARTIFACT_TAG] })).toBe(false);
+    });
+
+    it('should return false when tags is undefined', () => {
+      expect(isArtifactDisabled({})).toBe(false);
+    });
+  });
+
+  describe('when using `addDisabledArtifactTag()`', () => {
+    it('should add the disabled tag when it is not present', () => {
+      expect(addDisabledArtifactTag([GLOBAL_ARTIFACT_TAG])).toEqual([
+        GLOBAL_ARTIFACT_TAG,
+        DISABLED_ARTIFACT_TAG,
+      ]);
+    });
+
+    it('should not add the disabled tag if it already exists', () => {
+      expect(addDisabledArtifactTag([GLOBAL_ARTIFACT_TAG, DISABLED_ARTIFACT_TAG])).toEqual([
+        GLOBAL_ARTIFACT_TAG,
+        DISABLED_ARTIFACT_TAG,
+      ]);
+    });
+  });
+
+  describe('when using `removeDisabledArtifactTag()`', () => {
+    it('should remove the disabled tag', () => {
+      expect(removeDisabledArtifactTag([GLOBAL_ARTIFACT_TAG, DISABLED_ARTIFACT_TAG])).toEqual([
+        GLOBAL_ARTIFACT_TAG,
+      ]);
+    });
+
+    it('should do nothing if the disabled tag is not present', () => {
+      expect(removeDisabledArtifactTag([GLOBAL_ARTIFACT_TAG])).toEqual([GLOBAL_ARTIFACT_TAG]);
     });
   });
 

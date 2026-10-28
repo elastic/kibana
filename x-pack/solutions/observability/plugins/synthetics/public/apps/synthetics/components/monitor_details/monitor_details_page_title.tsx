@@ -9,21 +9,35 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { MonitorSelector } from './monitor_selector/monitor_selector';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
-import { useGetUrlParams } from '../../hooks';
+import {
+  isHeartbeatSyntheticsMonitor,
+  isRemoteSyntheticsMonitor,
+} from '../../../../../common/runtime_types';
 import { SyntheticsRemoteBadge } from '../common/components/synthetics_remote_badge';
+import { SyntheticsHeartbeatBadge } from '../common/components/synthetics_heartbeat_badge';
 
-export const MonitorDetailsPageTitle = () => {
+export const MonitorDetailsPageTitle = ({ hideName = false }: { hideName?: boolean } = {}) => {
   const { monitor } = useSelectedMonitor();
-  const { remoteName } = useGetUrlParams();
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false} data-test-subj="monitorNameTitle">
-        {monitor?.name}
-      </EuiFlexItem>
-      {remoteName && (
+      {hideName ? (
+        <span data-test-subj="monitorNameTitle" hidden>
+          {monitor?.name}
+        </span>
+      ) : (
+        <EuiFlexItem grow={false} data-test-subj="monitorNameTitle">
+          {monitor?.name}
+        </EuiFlexItem>
+      )}
+      {isRemoteSyntheticsMonitor(monitor) && (
         <EuiFlexItem grow={false}>
-          <SyntheticsRemoteBadge remote={{ remoteName }} />
+          <SyntheticsRemoteBadge remote={monitor.remote} />
+        </EuiFlexItem>
+      )}
+      {isHeartbeatSyntheticsMonitor(monitor) && (
+        <EuiFlexItem grow={false}>
+          <SyntheticsHeartbeatBadge origin={monitor.origin} />
         </EuiFlexItem>
       )}
       <EuiFlexItem>

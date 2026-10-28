@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import { getESQLSources, getEsqlColumns } from '@kbn/esql-utils';
+import { getESQLSources, getEsqlColumns, getDatasets, getViews } from '@kbn/esql-utils';
 
 export interface UseEsqlCallbacksParams {
   /** Application service for capabilities and navigation */
@@ -47,6 +47,8 @@ export const useEsqlCallbacks = ({
       getSources: async () => getESQLSources({ application, http }, undefined),
       getColumnsFor: async ({ query }: { query?: string } | undefined = {}) =>
         getEsqlColumns({ esqlQuery: query, search }),
+      getDatasets: async () => getDatasets(http),
+      getViews: async () => getViews(http),
     }),
     [application, http, search]
   );

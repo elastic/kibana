@@ -8,9 +8,6 @@
 import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
-const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
-  'securitySolution:enableAlertsAndAttacksAlignment';
-
 spaceTest.describe(
   'Attacks UI manual execution smoke',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
@@ -21,15 +18,8 @@ spaceTest.describe(
       await apiServices.attackDiscovery.seedAttackData();
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, scoutSpace }) => {
-      await scoutSpace.uiSettings.set({
-        [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: true,
-      });
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsPlatformEngineer();
-    });
-
-    spaceTest.afterEach(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -37,7 +27,7 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'successfully triggers generation via UI without error',
+      'successfully triggers generation via UI without error from Attacks page',
       async ({ pageObjects, page }) => {
         const { detectionsAttackDiscoveryPage } = pageObjects;
 
@@ -80,7 +70,7 @@ spaceTest.describe(
           });
         });
 
-        await detectionsAttackDiscoveryPage.navigateToAttackDiscoveryPage();
+        await detectionsAttackDiscoveryPage.navigateToAttacksPage();
 
         // Ensure the run button is enabled
         await expect(detectionsAttackDiscoveryPage.runButton).toBeEnabled({ timeout: 15000 });

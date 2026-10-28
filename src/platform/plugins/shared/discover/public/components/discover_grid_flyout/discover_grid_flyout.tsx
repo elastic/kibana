@@ -13,7 +13,7 @@ import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type { DataSource } from '@kbn/data-source';
 import type { DocViewerProps, DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { UnifiedDocViewerFlyoutProps } from '@kbn/unified-doc-viewer-plugin/public';
@@ -21,7 +21,6 @@ import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useFlyoutActions } from './use_flyout_actions';
 import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
-import type { DocViewerExtensionParams } from '../../context_awareness';
 import { DocumentType, useProfileAccessor } from '../../context_awareness';
 import { recordHasContext } from '../../context_awareness/profiles_manager/record_has_context';
 
@@ -30,19 +29,27 @@ export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
 export interface DiscoverGridFlyoutProps
   extends Pick<
     UnifiedDocViewerFlyoutProps,
-    'initialDocViewerState' | 'onInitialDocViewerStateChange' | 'onUpdateSelectedTabId'
+    | 'initialDocViewerState'
+    | 'onInitialDocViewerStateChange'
+    | 'onUpdateSelectedTabId'
+    | 'initialShareableState'
+    | 'onShareableStateChange'
+    | 'requestState'
+    | 'requestStateMeta'
+    | 'notice'
+    | 'flyoutMenuTrailingActions'
+    | 'flyoutType'
   > {
   savedSearchId?: string;
   filters?: Filter[];
   query?: Query | AggregateQuery;
   columns: string[];
-  columnsMeta?: DataTableColumnsMeta;
-  hit: DataTableRecord;
+  dataSource?: DataSource;
+  hit?: DataTableRecord;
   hits?: DataTableRecord[];
   dataView: DataView;
   initialTabId?: string;
   docViewerRef?: DocViewerProps['ref'];
-  docViewerExtensionActions?: DocViewerExtensionParams['actions'];
   onAddColumn: (column: string) => void;
   onClose: () => void;
   onFilter?: DocViewFilterFn;
@@ -54,7 +61,7 @@ export interface DiscoverGridFlyoutProps
   hideFilteringOnComputedColumns?: boolean;
 }
 
-const getOriginDocType = (record: DataTableRecord): DocumentType =>
+const getOriginDocType = (record: DataTableRecord | undefined): DocumentType =>
   recordHasContext(record) ? record.context.type : DocumentType.Default;
 
 /**
@@ -65,13 +72,12 @@ export function DiscoverGridFlyout({
   hits,
   dataView,
   columns,
-  columnsMeta,
+  dataSource,
   savedSearchId,
   filters,
   query,
   initialTabId,
   docViewerRef,
-  docViewerExtensionActions,
   onFilter,
   onClose,
   onRemoveColumn,
@@ -80,17 +86,24 @@ export function DiscoverGridFlyout({
   initialDocViewerState,
   onInitialDocViewerStateChange,
   onUpdateSelectedTabId,
+  initialShareableState,
+  onShareableStateChange,
   hideFilteringOnComputedColumns,
+  requestState,
+  requestStateMeta,
+  notice,
+  flyoutMenuTrailingActions,
+  flyoutType,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
-  const isESQLQuery = isOfAggregateQueryType(query);
+  const isEsqlQuery = isOfAggregateQueryType(query);
   // Get actual hit with updated highlighted searches
   const actualHit = useMemo(() => hits?.find(({ id }) => id === hit?.id) || hit, [hit, hits]);
 
   const { flyoutActions } = useFlyoutActions({
     dataView,
-    rowIndex: actualHit.raw._index,
-    rowId: actualHit.raw._id,
+    rowIndex: actualHit?.raw._index,
+    rowId: actualHit?.raw._id,
     columns,
     filters,
     savedSearchId,
@@ -105,8 +118,9 @@ export function DiscoverGridFlyout({
       docViewsRegistry: (registry: DocViewsRegistry) => registry,
     }));
 
-    return getDocViewer({ actions: docViewerExtensionActions ?? {}, record: actualHit });
-  }, [actualHit, docViewerExtensionActions, getDocViewerAccessor]);
+    // Document profiles cannot resolve a doc viewer until the record is available.
+    return actualHit ? getDocViewer({ record: actualHit }) : undefined;
+  }, [actualHit, getDocViewerAccessor]);
 
   useEffect(() => {
     dismissAllFlyoutsExceptFor(DiscoverFlyouts.docViewer);
@@ -117,23 +131,28 @@ export function DiscoverGridFlyout({
   return (
     <UnifiedDocViewerFlyout
       originDocType={originDocType}
-      flyoutTitle={docViewer.title}
+      flyoutTitle={docViewer?.title}
       flyoutActions={
-        !isESQLQuery && flyoutActions.length > 0 ? (
+        !isEsqlQuery && actualHit && flyoutActions.length > 0 ? (
           <DiscoverGridFlyoutActions flyoutActions={flyoutActions} />
         ) : null
       }
+      flyoutMenuTrailingActions={flyoutMenuTrailingActions}
       flyoutWidthLocalStorageKey={FLYOUT_WIDTH_KEY}
+      flyoutType={flyoutType}
       services={services}
-      docViewsRegistry={docViewer.docViewsRegistry}
-      renderCustomHeader={docViewer.renderHeader}
-      renderCustomFooter={docViewer.renderFooter}
-      isEsqlQuery={isESQLQuery}
+      docViewsRegistry={docViewer?.docViewsRegistry}
+      renderCustomHeader={docViewer?.renderHeader}
+      renderCustomFooter={docViewer?.renderFooter}
+      isEsqlQuery={isEsqlQuery}
       hit={hit}
+      requestState={requestState}
+      requestStateMeta={requestStateMeta}
+      notice={notice}
       hits={hits}
       dataView={dataView}
       columns={columns}
-      columnsMeta={columnsMeta}
+      dataSource={dataSource}
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
       onClose={onClose}
@@ -144,6 +163,8 @@ export function DiscoverGridFlyout({
       initialDocViewerState={initialDocViewerState}
       onInitialDocViewerStateChange={onInitialDocViewerStateChange}
       onUpdateSelectedTabId={onUpdateSelectedTabId}
+      initialShareableState={initialShareableState}
+      onShareableStateChange={onShareableStateChange}
       hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
     />
   );

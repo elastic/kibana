@@ -49,6 +49,11 @@ function getToolTip(key: string) {
       return i18n.translate('xpack.searchProfiler.advanceTimeDescription', {
         defaultMessage: 'The time taken to advance the iterator to the next document.',
       });
+    case 'into_bit_set':
+      return i18n.translate('xpack.searchProfiler.intoBitSetTimeDescription', {
+        defaultMessage:
+          'The time taken to collect matching document IDs into a bit set for a range of documents.',
+      });
     default:
       return '';
   }

@@ -10,12 +10,13 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFieldText,
-  EuiButtonIcon,
-  EuiButtonEmpty,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useStateSelector } from '../../state_utils';
 import type { PreviewState } from './types';
@@ -52,9 +53,13 @@ export const DocumentsNavPreview = () => {
 
   const isInvalid = fetchDocError?.code === 'DOC_NOT_FOUND';
 
+  // The user is in "custom document" mode as soon as a custom ID has been entered,
+  // including while the input is empty after clearing the ID
+  const isCustomMode = typeof customId === 'string';
+
   // We don't display the nav button when the user has entered a custom
   // document ID as at that point there is no more reference to what's "next"
-  const showNavButtons = !customId;
+  const showNavButtons = !isCustomMode;
 
   const onDocumentIdChange = useCallback(
     (e: React.SyntheticEvent<HTMLInputElement>) => {
@@ -83,7 +88,7 @@ export const DocumentsNavPreview = () => {
               data-test-subj="documentIdField"
             />
           </EuiFormRow>
-          {customId && (
+          {isCustomMode && (
             <span>
               <EuiButtonEmpty
                 color="primary"
@@ -107,34 +112,54 @@ export const DocumentsNavPreview = () => {
           <EuiFlexItem grow={false} data-test-subj="documentsNav">
             <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  display="base"
-                  size="m"
-                  onClick={prev}
-                  iconType="chevronSingleLeft"
-                  data-test-subj="goToPrevDocButton"
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'indexPatternFieldEditor.fieldPreview.documentNav.previousArialabel',
                     {
                       defaultMessage: 'Previous document',
                     }
                   )}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    display="base"
+                    size="m"
+                    onClick={prev}
+                    iconType="chevronSingleLeft"
+                    data-test-subj="goToPrevDocButton"
+                    aria-label={i18n.translate(
+                      'indexPatternFieldEditor.fieldPreview.documentNav.previousArialabel',
+                      {
+                        defaultMessage: 'Previous document',
+                      }
+                    )}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  display="base"
-                  size="m"
-                  onClick={next}
-                  iconType="chevronSingleRight"
-                  data-test-subj="goToNextDocButton"
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'indexPatternFieldEditor.fieldPreview.documentNav.nextArialabel',
                     {
                       defaultMessage: 'Next document',
                     }
                   )}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    display="base"
+                    size="m"
+                    onClick={next}
+                    iconType="chevronSingleRight"
+                    data-test-subj="goToNextDocButton"
+                    aria-label={i18n.translate(
+                      'indexPatternFieldEditor.fieldPreview.documentNav.nextArialabel',
+                      {
+                        defaultMessage: 'Next document',
+                      }
+                    )}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

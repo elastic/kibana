@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ESQLCallbacks } from '@kbn/esql-types';
+import { clearESQLSourceInfoCache } from '@kbn/esql-utils';
 import { ESQLLang, monaco, type MonacoMessage } from '@kbn/code-editor';
 import type { MapCache } from 'lodash';
 import {
@@ -32,7 +33,7 @@ interface ValidationLatencyTracking {
 
 export interface UseQueryValidationParams {
   code: string;
-  codeWhenSubmitted: string;
+  lastErroredCode: string | undefined;
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: React.MutableRefObject<monaco.editor.ITextModel | undefined>;
   esqlCallbacks: ESQLCallbacks;
@@ -54,7 +55,7 @@ export const VALIDATION_DEBOUNCE_MS = 256;
 
 export const useQueryValidation = ({
   code,
-  codeWhenSubmitted,
+  lastErroredCode,
   editorRef,
   editorModel,
   esqlCallbacks,
@@ -114,7 +115,19 @@ export const useQueryValidation = ({
     [esqlCallbacks, code, editorModel]
   );
 
+  const isFirstCacheEffectRunRef = useRef(true);
   useEffect(() => {
+    const isFirstRun = isFirstCacheEffectRunRef.current;
+    isFirstCacheEffectRunRef.current = false;
+
+    // On the very first render with no query in flight, skip the parseMessages() call —
+    // the debounced validation (skipFirstRender: false) already runs a full parse pass,
+    // so a second one here would duplicate every callback (getSources, getColumnsFor, etc.).
+    // If a query is already loading at mount we fall through so the entry is still recorded.
+    if (isFirstRun && !isQueryLoading && !isLoading) {
+      return;
+    }
+
     const setQueryToTheCache = async () => {
       if (editorRef?.current) {
         try {
@@ -271,9 +284,11 @@ export const useQueryValidation = ({
     queryValidationRef.current();
   }, [pickerProjectRouting]);
 
-  // Refresh the fields cache when a new field has been added to the lookup index
+  // Refresh the fields caches when a new field has been added to the lookup index; the
+  // editor's fields cache sits on top of the shared source info cache, so clear both.
   const onNewFieldsAddedToLookupIndex = useCallback(async () => {
     esqlFieldsCache.clear?.();
+    clearESQLSourceInfoCache();
 
     await queryValidation({ invalidateColumnsCache: true });
   }, [esqlFieldsCache, queryValidation]);
@@ -294,7 +309,7 @@ export const useQueryValidation = ({
 
       trackValidationLatencyStart(code);
       try {
-        if (code === codeWhenSubmitted && (serverErrors || serverWarning)) {
+        if (code === lastErroredCode && (serverErrors || serverWarning)) {
           resetValidationTracking();
 
           const parsedErrors = parseErrors(serverErrors || [], code);
@@ -323,7 +338,7 @@ export const useQueryValidation = ({
     },
     { skipFirstRender: false },
     VALIDATION_DEBOUNCE_MS,
-    [serverErrors, serverWarning, code, codeWhenSubmitted]
+    [serverErrors, serverWarning, code, lastErroredCode]
   );
 
   return {

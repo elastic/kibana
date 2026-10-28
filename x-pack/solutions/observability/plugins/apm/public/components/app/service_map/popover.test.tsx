@@ -14,18 +14,8 @@ import type {
   ServiceNodeData,
   DependencyNodeData,
   GroupedNodeData,
-  ServiceMapEdge,
 } from '../../../../common/service_map';
-import { MarkerType } from '@xyflow/react';
-import { MOCK_DEFAULT_COLOR, MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
-import {
-  AGENT_NAME,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_SUBTYPE,
-  SPAN_TYPE,
-} from '@kbn/observability-shared-plugin/common';
+import { MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -55,7 +45,7 @@ jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
 }));
 
 jest.mock('../../../hooks/use_apm_route_path', () => ({
-  useApmRoutePath: () => '/services/{serviceName}/service-map',
+  useApmRoutePath: () => '/service-map',
 }));
 
 // Mock APM router
@@ -118,15 +108,9 @@ jest.mock('@xyflow/react', () => {
   };
 });
 
-// Mock service map components
-jest.mock('./popover/edge_contents', () => ({
-  EdgeContents: jest.fn(() => <div data-testid="edge-contents" />),
-}));
-
 describe('MapPopover', () => {
   const defaultProps = {
     selectedNode: null,
-    selectedEdge: null,
     focusedServiceName: undefined,
     environment: 'ENVIRONMENT_ALL' as const,
     kuery: '',
@@ -275,49 +259,6 @@ describe('MapPopover', () => {
     expect(screen.getByTestId('serviceMapPopover')).toBeInTheDocument();
   });
 
-  it('renders popover when an edge is selected and shows display names without ">"', () => {
-    const edge: ServiceMapEdge = {
-      id: 'service-a~>postgresql',
-      source: 'service-a',
-      target: '>postgresql',
-      type: 'default',
-      style: { stroke: MOCK_DEFAULT_COLOR, strokeWidth: 1 },
-      markerEnd: { type: MarkerType.ArrowClosed, width: 18, height: 18, color: MOCK_DEFAULT_COLOR },
-      data: {
-        isBidirectional: false,
-        sourceLabel: 'Service A',
-        targetLabel: 'postgresql',
-        sourceData: {
-          id: 'service-a',
-          [SERVICE_NAME]: 'Service A',
-          [AGENT_NAME]: 'test-agent',
-          [SERVICE_ENVIRONMENT]: null,
-        },
-        targetData: {
-          id: '>postgresql',
-          [SPAN_DESTINATION_SERVICE_RESOURCE]: 'postgresql',
-          [SPAN_TYPE]: 'external',
-          [SPAN_SUBTYPE]: 'http',
-        },
-        resources: ['postgresql'],
-      },
-    };
-
-    mockGetNode.mockImplementation((id: string) => ({
-      id,
-      position: { x: id === 'service-a' ? 0 : 200, y: 100 },
-      measured: { width: 56, height: 56 },
-    }));
-
-    renderPopover({ selectedEdge: edge });
-
-    expect(screen.getByTestId('serviceMapPopover')).toBeInTheDocument();
-    expect(screen.getByTestId('serviceMapPopoverTitle')).toHaveTextContent(
-      'Service A → postgresql'
-    );
-    expect(screen.getByTestId('serviceMapPopoverTitle')).not.toHaveTextContent('>postgresql');
-  });
-
   it('does not show popover content when neither node nor edge is selected', () => {
     renderPopover();
     expect(screen.queryByTestId('serviceMapPopoverContent')).not.toBeInTheDocument();
@@ -367,59 +308,6 @@ describe('MapPopover', () => {
       const heading = screen.getByTestId('serviceMapPopoverTitle');
       expect(heading.tagName).toBe('H3');
       expect(heading).toHaveTextContent('postgresql');
-    });
-  });
-
-  describe('Focus map button click behaviour', () => {
-    function focusedServiceNode(name: string): ServiceMapNode {
-      return {
-        id: name,
-        type: 'service',
-        position: { x: 100, y: 100 },
-        data: {
-          id: name,
-          label: name,
-          isService: true,
-        } as ServiceNodeData,
-      };
-    }
-
-    function clickFocusButton() {
-      const button = screen.getByTestId('apmServiceContentsFocusMapButton');
-      const event = new MouseEvent('click', { bubbles: true, cancelable: true });
-      button.dispatchEvent(event);
-      return event;
-    }
-
-    it('re-centers the node (and prevents navigation) on the focused service by default', () => {
-      const onClose = jest.fn();
-      renderPopover({
-        selectedNode: focusedServiceNode('opbeans-go'),
-        focusedServiceName: 'opbeans-go',
-        onClose,
-        showFocusMap: true,
-      });
-
-      const event = clickFocusButton();
-      expect(event.defaultPrevented).toBe(true);
-      expect(mockSetCenter).toHaveBeenCalledTimes(1);
-      expect(onClose).not.toHaveBeenCalled();
-    });
-
-    it('navigates (closes popover, no preventDefault, no recentre) when alwaysNavigateOnFocus is set', () => {
-      const onClose = jest.fn();
-      renderPopover({
-        selectedNode: focusedServiceNode('opbeans-go'),
-        focusedServiceName: 'opbeans-go',
-        onClose,
-        showFocusMap: true,
-        alwaysNavigateOnFocus: true,
-      });
-
-      const event = clickFocusButton();
-      expect(event.defaultPrevented).toBe(false);
-      expect(mockSetCenter).not.toHaveBeenCalled();
-      expect(onClose).toHaveBeenCalledTimes(1);
     });
   });
 });

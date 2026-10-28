@@ -7,25 +7,25 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 export const InvalidCssVersionCallout: FC = () => {
   return (
-    <EuiCallOut
-      color="warning"
+    <KbnWarningCallout
       title={i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.invalidCssVersionCallout.title',
         {
           defaultMessage: 'The data view appears to be cross-cluster',
         }
       )}
-    >
-      <FormattedMessage
-        id="xpack.ml.newJob.wizard.pickFieldsStep.invalidCssVersionCallout.mesage"
-        defaultMessage="No example categories could be found, this could be due to one of the clusters being an unsupported version."
-      />
-    </EuiCallOut>
+      text={
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.pickFieldsStep.invalidCssVersionCallout.mesage"
+          defaultMessage="No example categories could be found, this could be due to one of the clusters being an unsupported version."
+        />
+      }
+    />
   );
 };

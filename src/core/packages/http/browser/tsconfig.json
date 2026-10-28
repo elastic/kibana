@@ -13,7 +13,8 @@
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/core-execution-context-common",
-    "@kbn/core-http-common"
+    "@kbn/core-http-common",
+    "@kbn/core-spaces-common"
   ],
   "exclude": [
     "target/**/*",

@@ -34,10 +34,10 @@ tags:
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-    - '!.storybook/**/*'
 tasks: {}

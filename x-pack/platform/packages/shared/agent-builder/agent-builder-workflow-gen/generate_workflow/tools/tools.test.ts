@@ -190,7 +190,7 @@ describe('dispatchToolCall', () => {
       baseDeps
     );
 
-    expect(mockLookupTriggerDefinitions).toHaveBeenCalledWith({ triggerType: 'alert' });
+    expect(mockLookupTriggerDefinitions).toHaveBeenCalledWith({ triggerType: 'alert' }, baseDeps);
     expect(result.yaml).toBeUndefined();
     expect(result.message.success).toBe(true);
     expect(result.message.data).toEqual({ count: 1, triggerTypes: ['alert'] });

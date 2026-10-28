@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# Release artifacts must not hydrate the shared webpack bundles from the remote cache
+export KBN_BOOTSTRAP_NO_PREBUILT=true
+
 .buildkite/scripts/bootstrap.sh
 
 source "$(dirname "$0")/../../common/util.sh"
@@ -11,6 +14,9 @@ if [[ "${DRY_RUN:-}" =~ ^(true|1)$ ]]; then
   echo "--- Nothing to do in DRY_RUN mode"
   exit 0
 fi
+
+echo "--- Clean up cached images"
+clean_cached_images
 
 KIBANA_MEMORY_SIZE=${KIBANA_MEMORY_SIZE:-2048}
 case "$KIBANA_MEMORY_SIZE" in
@@ -26,8 +32,9 @@ esac
 echo "--- Push docker image"
 mkdir -p target
 
-download_artifact "kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+download_artifact "kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz" ./target --build "$BUILDKITE_BUILD_ID"
 docker load < "target/kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz"
+rm -f "target/kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz"
 
 TAG="$FULL_VERSION-$GIT_COMMIT"
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$FULL_VERSION"

@@ -121,6 +121,7 @@ export function useNamespaceCustomization({
     },
     {
       enabled:
+        initialized &&
         showToggle &&
         !!packageInfo &&
         !isToggleDisabled &&

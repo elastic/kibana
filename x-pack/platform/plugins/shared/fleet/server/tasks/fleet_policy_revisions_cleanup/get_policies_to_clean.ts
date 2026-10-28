@@ -66,6 +66,6 @@ const queryMaxRevisionsAndCounts = async (esClient: ElasticsearchClient, context
         },
       },
     },
-    { signal: context.abortController?.signal }
+    { signal: context.signal }
   );
 };

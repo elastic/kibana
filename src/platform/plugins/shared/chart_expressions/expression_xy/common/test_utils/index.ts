@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Position } from '@elastic/charts';
+import { ChartPosition } from '@kbn/chart-expressions-common';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/common';
 import { LayerTypes } from '../constants';
@@ -129,7 +129,7 @@ export const createArgsWithLayers = (
   legend: {
     type: 'legendConfig',
     isVisible: false,
-    position: Position.Top,
+    position: ChartPosition.Top,
   },
   valueLabels: 'hide',
   xAxisConfig: {

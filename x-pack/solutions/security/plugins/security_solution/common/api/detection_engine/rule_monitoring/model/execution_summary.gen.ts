@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 import { RuleExecutionStatus, RuleExecutionStatusOrder } from './execution_status.gen';
 import { RuleExecutionMetrics } from './execution_metrics.gen';
@@ -31,11 +31,11 @@ export const RuleExecutionSummary = lazySchema(() =>
       /**
        * Date of the last execution
        */
-      date: z.string().datetime(),
+      date: isoDateTime().describe('Date of the last execution'),
       /**
        * Status of the last execution
        */
-      status: RuleExecutionStatus,
+      status: RuleExecutionStatus.describe('Status of the last execution'),
       status_order: RuleExecutionStatusOrder,
       message: z.string(),
       metrics: RuleExecutionMetrics,

@@ -38,9 +38,9 @@ const findItems = useCallback(
   async (searchTerm) => {
     return dashboardClient.search({
       query: searchTerm,
-    }).then(({ total, dashboards }) => ({
+    }).then(({ meta: { total }, data }) => ({
       total,
-      hits: dashboards.map(transformToDashboardUserContent),
+      hits: data.map(transformToDashboardUserContent),
     }));
   },
   []
@@ -76,9 +76,9 @@ const findItems = useCallback(
 | `labels`        | `ContentListLabels`           | Yes      | User-facing entity labels (should be i18n-translated).                         |
 | `findItems`     | `TableListViewFindItemsFn`    | Yes      | Your existing `TableListView` findItems function.                              |
 | `core`          | `ContentListKibanaCore`       | Yes      | Kibana `CoreStart` slice. Used to read `savedObjects:perPage` / `savedObjects:listingLimit` from `uiSettings`, and to power the internal `ContentEditorKibanaProvider` that backs the Content Editor flyout. A full `CoreStart` value satisfies this structurally. |
-| `features`      | `ContentListClientFeatures`   | No       | Feature configuration. Replaces the base provider's `contentEditor` with a Kibana-flavored config bag (`isReadonly`, `onSave`, `customValidators`, `appendRows`); the provider rebuilds it into the base shape's `features.contentEditor.open` callback so `<Action.ContentEditor />` can read it directly. |
+| `features`      | `ContentListClientFeatures`   | No       | Feature configuration. Replaces the base provider's `contentEditor` with a Kibana-flavored config bag (`isReadonly`, `readonlyReason`, `onSave`, `customValidators`, `appendRows`); the provider rebuilds it into the base shape's `features.contentEditor.open` callback so `<Action.ContentEditor />` can read it directly. |
 | `services`      | `ContentListClientServices`   | No       | Domain services. Extends `ContentListServices` with `savedObjectsTagging` (powers the Content Editor flyout's tag UI). |
-| `item`          | `ContentListItemConfig`       | No       | Per-item configuration for links.                                              |
+| `item`          | `ContentListItemConfig`       | No       | Per-item links and actions. Edit restrictions are also applied to the Content Editor flyout. |
 | `isReadOnly`    | `boolean`                     | No       | Disable mutation actions.                                                      |
 
 \*At least one of `id` or `queryKeyScope` is required.
@@ -124,7 +124,7 @@ Each subfolder is named after the `ContentListClientProvider` field it serves:
 | `createUserProfilesService(profile)`  | `services/user_profiles/`| `services.userProfiles`                        |
 | `createContentInsightsService(opts)` + `<SavedObjectActivityRow>` | `services/content_insights/` | `features.contentEditor.appendRows`            |
 | `createDuplicateTitleValidator(opts)` | `services/duplicate_title/` | `features.contentEditor.customValidators.title`|
-| `useRecentlyAccessedDecoration(src)`  | `services/recently_accessed/` | `findItems` decoration + `features.flags` + a closure-bound `RecentsFilter` |
+| `useRecentlyAccessedDecoration(src)`  | `services/recently_accessed/` | `findItems` decoration + `features.flags` + a closure-bound `RecentsFilter` + `sortFields` and `initialSort` for `features.sorting` |
 | `withPerformanceMetrics(fn, opts)`    | `services/performance_metrics/` | wraps `findItems` / `actions.delete.onBulkAction` |
 
 Each helper is tested in isolation and is independently optional. Use one, several, or none — `ContentListClientProvider` accepts the raw types either way.
@@ -176,6 +176,12 @@ return (
     findItems={async (q, opts) => recents.decorate(await search(q, opts))}
     features={{
       flags: [recents.flag],
+      sorting: {
+        // "Recently viewed" when there is history, otherwise your own default.
+        initialSort: recents.initialSort ?? { field: 'updatedAt', direction: 'desc' },
+        // Merged with the default fields; empty when there is no history.
+        fields: recents.sortFields,
+      },
       contentEditor: {
         onSave: updateItemMeta,
         customValidators: {
@@ -213,28 +219,128 @@ return (
 );
 ```
 
+### Recently accessed: filter vs sort
+
+`useRecentlyAccessedDecoration` returns two independent, opt-in features. Use either or both:
+
+- **Filter:** `recents.flag` and `<recents.RecentsFilter />` add an `is:recent` toggle that **narrows** the list to items in the history.
+- **Sort:** `recents.sortFields` adds a descending-only "Recently viewed" option, with a "?" tooltip explaining the history is stored in the browser. It **reorders** the full list: items in the history come first (most recent first), and the rest follow ordered by `updatedAt` descending. When the history has entries, `recents.initialSort` selects it by default. When the history is empty, `sortFields` is `{}` and `initialSort` is `undefined`, so the option is neither offered nor selected. Assign them into `features.sorting` and fall back to your own default with `??`.
+
+### Custom filters
+
+Registering a filter dimension and rendering its toolbar control are two separate steps:
+
+- **Register** with `features.filters` (a `ResolvedContentListFilter` from `defineContentListFilter`). This is all that KQL search and facet counts need — a registered dimension filters correctly through the search bar on its own, with no toolbar control.
+- **Place** a control explicitly with `createFilterControl(filterDefinition, opts?)`, which returns a declarative component for the `<Filters>` slot. This mirrors `<recents.RecentsFilter />`: registration never auto-renders a control, so you decide whether and where one appears.
+
+```tsx
+import {
+  ContentListClientProvider,
+  defineContentListFilter,
+  createFilterControl,
+} from '@kbn/content-list-provider-client';
+
+const typeFilter = defineContentListFilter({
+  id: 'contentType',
+  title: 'Type',
+  getItemValue: (item) => item.type,
+  options: [
+    { value: 'dashboard', label: 'Dashboard' },
+    { value: 'visualization', label: 'Visualization' },
+  ],
+});
+
+// Stable identity — define at module scope or memoize.
+const TypeFilter = createFilterControl(typeFilter, {
+  // Optional: render an icon/avatar/color instead of plain text.
+  renderOptionContent: ({ label, value }) => (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={iconByValue.get(value) ?? 'empty'} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+    </EuiFlexGroup>
+  ),
+});
+
+<ContentListClientProvider features={{ filters: { contentType: typeFilter } }} /* … */>
+  <ContentListToolbar>
+    <Filters>
+      <Filters.Tags />
+      <TypeFilter />
+      <Filters.Sort />
+    </Filters>
+  </ContentListToolbar>
+</ContentListClientProvider>;
+```
+
+Omit `options` to derive the option list from the values present in the current list (faceted), exactly like the built-in tag and created-by filters — the control then shows only the values that actually occur, each with its live count, instead of a fixed universe with zero-count noise. Provide `options` only when you want a fixed set (including values not currently present).
+
+For full control over the popover, drop `createFilterControl` and use `CustomFilterRenderer` (or `SelectableFilterPopover` from `@kbn/content-list-toolbar`) inside your own `filter.createComponent`.
+
 ### Rendering `<Action.ContentEditor />`
 
 `<Action.ContentEditor />` reads `open` from `features.contentEditor` on the active provider. When the consumer supplies a `contentEditor` config here, the client provider rebuilds it into a base `{ open }` callback so the action can wire itself; if no config is supplied, `open` is `undefined` and the action self-skips, dropping the row icon. Consumers therefore render the action unconditionally — there's no flag to gate on.
 
 ```tsx
-import { useContentListConfig } from '@kbn/content-list-provider';
-
-const MyList = () => {
-  const { isReadOnly } = useContentListConfig();
-  return (
-    <ContentListTable>
-      <Column.Name showDescription showTags />
-      {!isReadOnly && (
-        <Column.Actions>
-          <Action.ContentEditor />
-          <Action.Delete />
-        </Column.Actions>
-      )}
-    </ContentListTable>
-  );
-};
+const MyList = () => (
+  <ContentListTable>
+    <Column.Name showDescription showTags />
+    <Column.Actions>
+      <Action.ContentEditor />
+      <Action.Delete />
+    </Column.Actions>
+  </ContentListTable>
+);
 ```
+
+### Read-only Content Editor reasons
+
+Use `features.contentEditor.readonlyReason` for a reason that applies to the
+entire list, such as missing write privileges:
+
+```tsx
+<ContentListClientProvider
+  isReadOnly={!canEdit}
+  features={{
+    contentEditor: {
+      isReadonly: !canEdit,
+      readonlyReason: !canEdit
+        ? 'You do not have permission to edit dashboards.'
+        : undefined,
+      onSave: updateItemMetadata,
+    },
+  }}
+>
+  <MyList />
+</ContentListClientProvider>
+```
+
+Use `item.actions.edit.restriction` for item-specific restrictions:
+
+```tsx
+<ContentListClientProvider
+  features={{
+    contentEditor: {
+      isReadonly: false,
+      onSave: updateItemMetadata,
+    },
+  }}
+  item={{
+    actions: {
+      edit: {
+        onItemAction: editItem,
+        restriction: (item) =>
+          item.managed ? 'Managed dashboards cannot be edited.' : undefined,
+      },
+    },
+  }}
+>
+  <MyList />
+</ContentListClientProvider>
+```
+
+The Content Editor remains available for restricted items, but opens in read-only mode and displays the restriction reason. A configured list-wide reason takes precedence. If no list-wide reason is configured, an available item-specific reason is used; otherwise the flyout uses its generic read-only message.
 
 ## Exports
 

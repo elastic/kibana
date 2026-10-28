@@ -13,6 +13,7 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchGettingStartedPluginSetup {}
@@ -27,6 +28,7 @@ export interface SearchGettingStartedAppPluginStartDependencies {
   searchNavigation?: SearchNavigationPluginStart;
   serverless?: ServerlessPluginStart;
   share: SharePluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export type SearchGettingStartedServicesContextDeps =

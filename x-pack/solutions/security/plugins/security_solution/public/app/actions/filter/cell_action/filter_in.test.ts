@@ -173,5 +173,62 @@ describe('createFilterInCellActionFactory', () => {
         );
       });
     });
+
+    describe('includeNullValues', () => {
+      const includeNullContext = {
+        ...context,
+        metadata: { includeNullValues: true },
+      } as SecurityCellActionExecutionContext;
+
+      it('should add a bool.should filter covering both the value and missing field', async () => {
+        await filterInAction.execute(includeNullContext);
+        expect(mockGlobalFilterManager.addFilters).toHaveBeenCalledWith([
+          expect.objectContaining({
+            meta: expect.objectContaining({ type: 'custom', negate: false }),
+            query: {
+              bool: {
+                should: [
+                  { match_phrase: { 'user.name': 'the value' } },
+                  { bool: { must_not: { exists: { field: 'user.name' } } } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          }),
+        ]);
+      });
+
+      it('should use the global filterManager when not in timeline scope', async () => {
+        await filterInAction.execute(includeNullContext);
+        expect(mockGlobalFilterManager.addFilters).toHaveBeenCalled();
+        expect(services.timelineDataService.query.filterManager.addFilters).not.toHaveBeenCalled();
+      });
+
+      it('should use the timeline filterManager when in timeline scope', async () => {
+        await filterInAction.execute({
+          ...includeNullContext,
+          metadata: { includeNullValues: true, scopeId: TimelineId.active },
+        });
+        expect(services.timelineDataService.query.filterManager.addFilters).toHaveBeenCalled();
+        expect(mockGlobalFilterManager.addFilters).not.toHaveBeenCalled();
+      });
+
+      it('should set negate: false by default', async () => {
+        await filterInAction.execute(includeNullContext);
+        expect(mockGlobalFilterManager.addFilters).toHaveBeenCalledWith([
+          expect.objectContaining({ meta: expect.objectContaining({ negate: false }) }),
+        ]);
+      });
+
+      it('should set negate: true when negateFilters is true', async () => {
+        await filterInAction.execute({
+          ...includeNullContext,
+          metadata: { includeNullValues: true, negateFilters: true },
+        });
+        expect(mockGlobalFilterManager.addFilters).toHaveBeenCalledWith([
+          expect.objectContaining({ meta: expect.objectContaining({ negate: true }) }),
+        ]);
+      });
+    });
   });
 });

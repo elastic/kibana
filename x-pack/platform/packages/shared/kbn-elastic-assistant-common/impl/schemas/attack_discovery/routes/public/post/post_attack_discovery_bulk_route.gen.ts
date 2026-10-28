@@ -23,28 +23,52 @@ export const PostAttackDiscoveryBulkRequestBody = lazySchema(() =>
     /**
      * Configuration object containing all parameters for the bulk update operation
      */
-    update: z.object({
-      /**
-       * Array of Attack Discovery IDs to update
-       */
-      ids: z.array(z.string()),
-      /**
-       * When provided, update the kibana.alert.workflow_status of the attack discovery alerts
-       */
-      kibana_alert_workflow_status: z.enum(['open', 'acknowledged', 'closed']).optional(),
-      /**
-       * When provided, update the visibility of the alert, as determined by the kibana.alert.attack_discovery.users field
-       */
-      visibility: z.enum(['not_shared', 'shared']).optional(),
-      /**
-       * When true, returns the updated Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields. This substitutes anonymized values with human-readable equivalents. Defaults to `true`.
-       */
-      with_replacements: z.boolean().optional().default(true),
-      /**
-       * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
-       */
-      enable_field_rendering: z.boolean().optional().default(false),
-    }),
+    update: z
+      .object({
+        /**
+         * Array of Attack Discovery IDs to update
+         */
+        ids: z.array(z.string()).describe('Array of Attack Discovery IDs to update'),
+        /**
+         * When provided, update the kibana.alert.workflow_status of the attack discovery alerts
+         */
+        kibana_alert_workflow_status: z
+          .enum(['open', 'acknowledged', 'closed'])
+          .optional()
+          .describe(
+            'When provided, update the kibana.alert.workflow_status of the attack discovery alerts'
+          ),
+        /**
+         * When provided, update the visibility of the alert, as determined by the kibana.alert.attack_discovery.users field
+         */
+        visibility: z
+          .enum(['not_shared', 'shared'])
+          .optional()
+          .describe(
+            'When provided, update the visibility of the alert, as determined by the kibana.alert.attack_discovery.users field'
+          ),
+        /**
+         * When true, returns the updated Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields. This substitutes anonymized values with human-readable equivalents. Defaults to `true`.
+         */
+        with_replacements: z
+          .boolean()
+          .optional()
+          .default(true)
+          .describe(
+            'When true, returns the updated Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields. This substitutes anonymized values with human-readable equivalents. Defaults to `true`.'
+          ),
+        /**
+         * Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
+         */
+        enable_field_rendering: z
+          .boolean()
+          .optional()
+          .default(false)
+          .describe(
+            'Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.'
+          ),
+      })
+      .describe('Configuration object containing all parameters for the bulk update operation'),
   })
 );
 export type PostAttackDiscoveryBulkRequestBody = z.infer<typeof PostAttackDiscoveryBulkRequestBody>;
@@ -57,7 +81,11 @@ export const PostAttackDiscoveryBulkResponse = lazySchema(() =>
     /**
      * Array of updated Attack Discovery alert objects. Each item includes the applied modifications from the bulk update request.
      */
-    data: z.array(AttackDiscoveryApiAlert),
+    data: z
+      .array(AttackDiscoveryApiAlert)
+      .describe(
+        'Array of updated Attack Discovery alert objects. Each item includes the applied modifications from the bulk update request.'
+      ),
   })
 );
 export type PostAttackDiscoveryBulkResponse = z.infer<typeof PostAttackDiscoveryBulkResponse>;

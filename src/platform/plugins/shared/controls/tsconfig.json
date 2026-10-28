@@ -32,6 +32,8 @@
     "@kbn/esql-types",
     "@kbn/css-utils",
     "@kbn/esql-utils",
+    "@kbn/esql-controls-utils",
+    "@kbn/esql-browser",
     "@kbn/search-types",
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
@@ -39,7 +41,12 @@
     "@kbn/kql",
     "@kbn/control-group-renderer",
     "@kbn/utility-types",
-    "@kbn/esql-language"
+    "@kbn/esql-language",
+    "@kbn/es-types",
+    "@kbn/esql",
+    "@kbn/presentation-publishing-schemas",
+    "@kbn/controls-renderer",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

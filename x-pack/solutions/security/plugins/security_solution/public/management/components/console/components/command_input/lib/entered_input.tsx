@@ -303,6 +303,12 @@ export class EnteredInput {
     }
   }
 
+  /**
+   * Add the value provided to the left of the cursor - unless `replaceSelection` is provided, in
+   * which case the selection will be replaced with the value provided.
+   * @param value
+   * @param replaceSelection
+   */
   addValue(value: string, replaceSelection: string = '') {
     if (replaceSelection.length && value.length) {
       this.replaceSelection(replaceSelection, value);

@@ -11,7 +11,7 @@ import moment from 'moment';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { Duration, DurationUnit } from '../domain/models';
 import type { BurnRatesClient } from './burn_rates_client';
-import { createSLO } from './fixtures/slo';
+import { createSLO, createSyntheticsAvailabilityIndicator } from './fixtures/slo';
 import { sevenDaysRolling, weeklyCalendarAligned } from './fixtures/time_window';
 import { createBurnRatesClientMock } from './mocks';
 import { DefaultSummaryClient } from './summary_client';
@@ -226,6 +226,49 @@ describe('SummaryClient', () => {
           aggs: {
             good: { sum: { field: 'slo.numerator' } },
             total: { sum: { field: 'slo.denominator' } },
+          },
+        });
+      });
+
+      it('returns the Synthetics monitor config ID from the destination document', async () => {
+        const slo = createSLO({
+          indicator: createSyntheticsAvailabilityIndicator(),
+          groupBy: ['monitor.name', 'observer.geo.name', 'monitor.id'],
+        });
+        esClientMock.search.mockResolvedValueOnce({
+          ...createEsResponse(),
+          aggregations: {
+            ...createEsResponse().aggregations,
+            last_doc: {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      monitor: {
+                        config_id: 'synthetics-monitor-config-id',
+                        id: 'synthetics-monitor-id',
+                      },
+                      observer: { name: 'synthetics-location-id' },
+                      slo: { groupings: {} },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        } as any);
+        const summaryClient = new DefaultSummaryClient(esClientMock, burnRatesClientMock);
+
+        const result = await summaryClient.computeSummary({
+          slo,
+          instanceId: 'synthetics-instance-id',
+        });
+
+        expect(result.meta).toEqual({
+          synthetics: {
+            monitorId: 'synthetics-monitor-id',
+            locationId: 'synthetics-location-id',
+            configId: 'synthetics-monitor-config-id',
           },
         });
       });

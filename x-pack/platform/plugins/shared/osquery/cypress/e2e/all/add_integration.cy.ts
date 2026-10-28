@@ -15,6 +15,7 @@ import {
   SAVED_QUERY_DROPDOWN_SELECT,
   TABLE_ROWS,
 } from '../../screens/packs';
+import { selectPackPolicy } from '../../tasks/packs';
 import {
   cleanupPack,
   cleanupAgentPolicy,
@@ -71,6 +72,7 @@ describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => 
       cy.contains('Add this integration to run and schedule queries for Elastic Agent.');
       cy.contains('Add Osquery Manager');
       cy.getBySel('osquery-add-integration-button');
+      cy.getBySel('kbnChromeHeader-searchButton').click();
       cy.getBySel('nav-search-input').type('Osquery');
       cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGEMENT}"]`).should('exist');
       cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.LOGS}"]`).should('exist');
@@ -210,7 +212,7 @@ describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => 
       cy.getBySel('globalLoadingIndicator').should('not.exist');
 
       cy.get(formFieldInputSelector('name')).type(`${packName}{downArrow}{enter}`);
-      cy.getBySel('policyIdsComboBox').type(`${policyName} {downArrow}{enter}`);
+      selectPackPolicy(policyName);
 
       cy.getBySel(ADD_QUERY_BUTTON).click();
       cy.getBySel('globalLoadingIndicator').should('not.exist');

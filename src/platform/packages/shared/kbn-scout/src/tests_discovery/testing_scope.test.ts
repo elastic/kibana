@@ -38,7 +38,7 @@ describe('isScoutTestsOnlyDiff', () => {
   it('returns true when every non-noise file is in a Scout test scope', () => {
     const files = [
       'pkg/test/scout/ui/tests/a.spec.ts',
-      'pkg/test/scout/ui/fixtures/page_objects/foo.ts',
+      'pkg/test/scout/ui/helpers/foo.ts',
       'pkg/README.md', // noise — ignored
     ];
     expect(isScoutTestsOnlyDiff(files)).toBe(true);
@@ -47,6 +47,41 @@ describe('isScoutTestsOnlyDiff', () => {
   it('returns false when at least one non-noise file is outside Scout scope', () => {
     const files = ['pkg/test/scout/ui/tests/a.spec.ts', 'pkg/public/foo.ts'];
     expect(isScoutTestsOnlyDiff(files)).toBe(false);
+  });
+
+  it('returns false for a fixtures-only diff (cross-plugin importable surface)', () => {
+    expect(isScoutTestsOnlyDiff(['pkg/test/scout/ui/fixtures/page_objects/foo.ts'])).toBe(false);
+    expect(isScoutTestsOnlyDiff(['pkg/test/scout/api/fixtures/params.ts'])).toBe(false);
+  });
+
+  it('returns false when a fixtures file is mixed with in-scope test files', () => {
+    const files = [
+      'pkg/test/scout/ui/tests/a.spec.ts',
+      'pkg/test/scout/ui/fixtures/page_objects/foo.ts',
+    ];
+    expect(isScoutTestsOnlyDiff(files)).toBe(false);
+  });
+
+  it('returns false for namespaced fixtures (both namespace placements)', () => {
+    // namespace nested under fixtures/
+    expect(
+      isScoutTestsOnlyDiff(['pkg/test/scout/ui/fixtures/traces_experience/page_objects/apm.ts'])
+    ).toBe(false);
+    // namespace before the category
+    expect(isScoutTestsOnlyDiff(['pkg/test/scout/detection_engine/ui/fixtures/data.ts'])).toBe(
+      false
+    );
+  });
+
+  it('keeps non-fixtures scope files (helpers, configs) on the tests-only fast path', () => {
+    expect(
+      isScoutTestsOnlyDiff([
+        'pkg/test/scout/ui/helpers/foo.ts',
+        'pkg/test/scout/ui/constants.ts',
+        'pkg/test/scout/ui/playwright.config.ts',
+        'pkg/test/scout/ui/parallel.playwright.config.ts',
+      ])
+    ).toBe(true);
   });
 
   it('matches custom scout_<server> scopes', () => {
@@ -60,6 +95,21 @@ describe('isScoutTestsOnlyDiff', () => {
         'pkg/test/scout_examples/.meta/api/standard.json',
       ])
     ).toBe(true);
+  });
+
+  it('matches area-scoped spec files', () => {
+    expect(
+      isScoutTestsOnlyDiff([
+        'pkg/test/scout/detection_engine/ui/parallel_tests/foo.spec.ts',
+        'pkg/test/scout/entity_analytics/ui/parallel_tests/bar.spec.ts',
+      ])
+    ).toBe(true);
+  });
+
+  it('matches area-scoped .meta/ paths', () => {
+    expect(isScoutTestsOnlyDiff(['pkg/test/scout/detection_engine/.meta/ui/parallel.json'])).toBe(
+      true
+    );
   });
 });
 
@@ -76,7 +126,7 @@ describe('criticalScoutFilesTouched', () => {
 
   it('returns true for top-level dependency files', () => {
     expect(criticalScoutFilesTouched(['package.json'])).toBe(true);
-    expect(criticalScoutFilesTouched(['yarn.lock'])).toBe(true);
+    expect(criticalScoutFilesTouched(['pnpm-lock.yaml'])).toBe(true);
   });
 
   it('returns true for buildkite Scout step changes', () => {
@@ -93,6 +143,43 @@ describe('criticalScoutFilesTouched', () => {
         'pkg/test/scout/ui/tests/a.spec.ts',
       ])
     ).toBe(false);
+  });
+
+  it('returns false when all changed files are documentation noise (README, *.md, CHANGELOG)', () => {
+    // Noise files inside a critical package must not trigger a full suite run on their own.
+    expect(criticalScoutFilesTouched(['src/platform/packages/shared/kbn-scout/README.md'])).toBe(
+      false
+    );
+    expect(criticalScoutFilesTouched(['README.md', 'docs/CHANGELOG.md'])).toBe(false);
+  });
+
+  it('returns true when a critical source file is mixed with noise', () => {
+    expect(
+      criticalScoutFilesTouched([
+        'src/platform/packages/shared/kbn-scout/src/runner/index.ts',
+        'src/platform/packages/shared/kbn-scout/README.md',
+      ])
+    ).toBe(true);
+  });
+
+  it('returns false for Jest test files inside critical packages', () => {
+    // *.test.ts files cannot affect Playwright test execution — only Jest needs to run.
+    expect(
+      criticalScoutFilesTouched([
+        'src/platform/packages/shared/kbn-scout/src/tests_discovery/affected_modules.test.ts',
+        '.buildkite/pipeline-utils/affected-packages/module_lookup.test.ts',
+        '.buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/selective_testing.test.ts',
+      ])
+    ).toBe(false);
+  });
+
+  it('returns true when a critical source file is mixed with a Jest test file', () => {
+    expect(
+      criticalScoutFilesTouched([
+        'src/platform/packages/shared/kbn-scout/src/runner/index.ts',
+        'src/platform/packages/shared/kbn-scout/src/tests_discovery/affected_modules.test.ts',
+      ])
+    ).toBe(true);
   });
 });
 
@@ -222,6 +309,72 @@ describe('deriveScoutConfigsForFile', () => {
         tmpRoot
       )
     ).toEqual(['x-pack/solutions/observability/plugins/foo/test/scout/ui/playwright.config.ts']);
+  });
+
+  it('maps an area parallel spec to the area parallel config', () => {
+    touch('pkg/test/scout/detection_engine/ui/parallel.playwright.config.ts');
+    expect(
+      deriveScoutConfigsForFile(
+        'pkg/test/scout/detection_engine/ui/parallel_tests/a.spec.ts',
+        tmpRoot
+      )
+    ).toEqual(['pkg/test/scout/detection_engine/ui/parallel.playwright.config.ts']);
+  });
+
+  it('maps an area sequential spec to the area playwright.config.ts', () => {
+    touch('pkg/test/scout/detection_engine/ui/playwright.config.ts');
+    expect(
+      deriveScoutConfigsForFile('pkg/test/scout/detection_engine/ui/tests/a.spec.ts', tmpRoot)
+    ).toEqual(['pkg/test/scout/detection_engine/ui/playwright.config.ts']);
+  });
+
+  it('maps area shared fixtures to all area-scoped configs that exist', () => {
+    touch('pkg/test/scout/detection_engine/ui/playwright.config.ts');
+    touch('pkg/test/scout/detection_engine/ui/parallel.playwright.config.ts');
+
+    const configs = deriveScoutConfigsForFile(
+      'pkg/test/scout/detection_engine/ui/fixtures/page_objects/foo.ts',
+      tmpRoot
+    );
+    expect(configs.sort()).toEqual([
+      'pkg/test/scout/detection_engine/ui/parallel.playwright.config.ts',
+      'pkg/test/scout/detection_engine/ui/playwright.config.ts',
+    ]);
+  });
+
+  it('maps area .meta/ manifests to the area-scoped configs', () => {
+    touch('pkg/test/scout/detection_engine/ui/parallel.playwright.config.ts');
+    const configs = deriveScoutConfigsForFile(
+      'pkg/test/scout/detection_engine/.meta/ui/parallel.json',
+      tmpRoot
+    );
+    expect(configs).toEqual(['pkg/test/scout/detection_engine/ui/parallel.playwright.config.ts']);
+  });
+
+  it('never crosses area scopes — area A change does not affect area B config', () => {
+    touch('pkg/test/scout/detection_engine/ui/playwright.config.ts');
+    touch('pkg/test/scout/entity_analytics/ui/playwright.config.ts');
+
+    const de = deriveScoutConfigsForFile(
+      'pkg/test/scout/detection_engine/ui/tests/a.spec.ts',
+      tmpRoot
+    );
+    expect(de).toEqual(['pkg/test/scout/detection_engine/ui/playwright.config.ts']);
+
+    const ea = deriveScoutConfigsForFile(
+      'pkg/test/scout/entity_analytics/ui/tests/b.spec.ts',
+      tmpRoot
+    );
+    expect(ea).toEqual(['pkg/test/scout/entity_analytics/ui/playwright.config.ts']);
+  });
+
+  it('non-area spec is not matched to area configs', () => {
+    touch('pkg/test/scout/ui/playwright.config.ts');
+    touch('pkg/test/scout/detection_engine/ui/playwright.config.ts');
+
+    expect(deriveScoutConfigsForFile('pkg/test/scout/ui/tests/a.spec.ts', tmpRoot)).toEqual([
+      'pkg/test/scout/ui/playwright.config.ts',
+    ]);
   });
 });
 
@@ -355,9 +508,9 @@ describe('resolveScoutTestingScope', () => {
     expect(infoSpy).toHaveBeenCalledWith(expect.stringContaining('dependency-tree mode'));
   });
 
-  it('priorities critical-files over tests-only', () => {
-    // A diff that is BOTH a Scout-tests-only diff AND touches a critical file
-    // should fall through to critical-files (full suite).
+  it('returns full/critical-files when a mixed diff contains a critical source file alongside a Scout spec', () => {
+    // The diff is NOT tests-only (the source file fails isScoutTestsOnlyDiff),
+    // so the critical-files check fires and returns full suite.
     const scope = resolveScoutTestingScope(
       codeChanges([
         'pkg/test/scout/ui/tests/foo.spec.ts',
@@ -368,6 +521,48 @@ describe('resolveScoutTestingScope', () => {
       tmpRoot
     );
     expect(scope).toEqual({ kind: 'full', reason: 'critical-files' });
+  });
+
+  it('returns dependency-tree with no modules for Jest-test-only changes in critical packages', () => {
+    // *.test.ts files are excluded from the Scout module graph in resolve_selective_testing.ts,
+    // so affectedModules is empty — dependency-tree with zero modules selects no configs.
+    const scope = resolveScoutTestingScope(
+      codeChanges(
+        [
+          'src/platform/packages/shared/kbn-scout/src/tests_discovery/affected_modules.test.ts',
+          '.buildkite/pipeline-utils/affected-packages/module_lookup.test.ts',
+        ],
+        [] // @kbn/scout excluded by SCOUT_MODULE_GRAPH_IGNORE in the resolver
+      ),
+      true,
+      log,
+      tmpRoot
+    );
+    expect(scope.kind).toBe('dependency-tree');
+    if (scope.kind === 'dependency-tree') {
+      expect([...scope.affectedModuleIds]).toEqual([]);
+    }
+  });
+
+  it('returns tests-only for Scout spec files inside the kbn-scout package itself', () => {
+    // kbn-scout's own test specs must not be misclassified as critical-files
+    // just because the kbn-scout package appears in CRITICAL_FILES_SCOUT.
+    touch('src/platform/packages/shared/kbn-scout/test/scout/api/parallel.playwright.config.ts');
+    const scope = resolveScoutTestingScope(
+      codeChanges([
+        'src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/auth/saml_login.spec.ts',
+      ]),
+      true,
+      log,
+      tmpRoot
+    );
+    expect(scope.kind).toBe('tests-only');
+    if (scope.kind === 'tests-only') {
+      expect([...scope.affectedConfigPaths]).toEqual([
+        'src/platform/packages/shared/kbn-scout/test/scout/api/parallel.playwright.config.ts',
+      ]);
+    }
+    expect(infoSpy).toHaveBeenCalledWith(expect.stringContaining('tests-only fast path'));
   });
 });
 

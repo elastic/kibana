@@ -9,11 +9,60 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+import type { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { transformDashboardOut } from '../transforms';
+import type { DashboardDeleteResponseBody } from './types';
+import {
+  addToHistory,
+  getHistorySnapshot,
+  getNextHistorySequence,
+} from '../../change_history/utils';
 
 export async function deleteDashboard(
   requestCtx: RequestHandlerContext,
-  id: string
-): Promise<void> {
+  id: string,
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
+  spaceId?: string
+): Promise<DashboardDeleteResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
+  const savedObject = await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
+    'dashboard',
+    id
+  );
+  const {
+    dashboardState: { title, tags },
+  } = transformDashboardOut(
+    savedObject.attributes,
+    savedObject.references,
+    undefined,
+    strictValidationSchema
+  );
   await core.savedObjects.client.delete(DASHBOARD_SAVED_OBJECT_TYPE, id);
+  const deletedAt = new Date().toISOString(); // SO client does not provide deletedAt timestamp, so this is the next-best thing
+
+  const snapshot = getHistorySnapshot({
+    dashboardId: id,
+    attributes: savedObject.attributes,
+    references: savedObject.references,
+    strictValidationSchema,
+  });
+  if (snapshot) {
+    const sequence = await getNextHistorySequence({
+      spaceId,
+      dashboardId: id,
+      currentSequence: savedObject.attributes.historySequence,
+    });
+    await addToHistory({
+      ctx: requestCtx,
+      dashboardId: id,
+      snapshot,
+      spaceId,
+      sequence,
+      timestamp: deletedAt,
+      type: 'delete',
+    });
+  }
+
+  return { id, data: { title: title ?? '', tags: tags ?? [] } };
 }

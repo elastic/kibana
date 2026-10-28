@@ -9,11 +9,10 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { LensSeriesLayer, LensYBoundsConfig } from '@kbn/lens-embeddable-utils';
 import { useBoolean } from '@kbn/react-hooks';
-import React, { useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
-import { useLensProps } from './hooks/use_lens_props';
+import { useLensProps, type ChartLensConfig } from './hooks/use_lens_props';
 import type { LensWrapperProps } from './lens_wrapper';
 import { LensWrapper } from './lens_wrapper';
 import type { UnifiedMetricsGridProps } from '../../types';
@@ -28,16 +27,17 @@ export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
   Omit<LensWrapperProps, 'lensProps' | 'abortController'> & {
     size?: ChartSize;
     discoverFetch$: UnifiedMetricsGridProps['fetch$'];
-    esqlQuery: string;
-    title: string;
-    description?: string;
-    chartLayers: LensSeriesLayer[];
-    yBounds?: LensYBoundsConfig;
+    lensConfig: ChartLensConfig;
+    /**
+     * When true, a click does not create a filter. Brushing still uses onBrushEnd.
+     */
+    disableClickFilter?: boolean;
     isLoading?: boolean;
     error?: Error;
     userMessages?: EmbeddableComponentProps['userMessages'];
     profileId: string;
     id: string;
+    isSelected: boolean;
   };
 
 const LensWrapperMemo = React.memo(LensWrapper);
@@ -51,19 +51,18 @@ export const Chart = ({
   discoverFetch$,
   titleHighlight,
   size = 'm',
-  esqlQuery,
-  title,
-  description,
-  chartLayers,
+  lensConfig,
+  disableClickFilter = false,
   syncCursor,
   syncTooltips,
-  yBounds,
   extraDisabledActions,
+  quickActionIds,
   isLoading = false,
   error,
   userMessages,
   profileId,
   id,
+  isSelected,
 }: ChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -73,25 +72,34 @@ export const Chart = ({
 
   const lensProps = useLensProps({
     chartId: id,
-    title,
-    description,
-    query: esqlQuery,
+    lensConfig,
     services,
     fetchParams,
     discoverFetch$,
     chartRef,
-    chartLayers,
-    yBounds,
     error,
     userMessages,
     profileId,
   });
 
+  const handleFilter = useCallback<NonNullable<ChartProps['onFilter']>>(
+    (event) => {
+      if (disableClickFilter) {
+        event.preventDefault();
+        return;
+      }
+      onFilter?.(event);
+    },
+    [disableClickFilter, onFilter]
+  );
+
   return (
     <div
       css={css`
         height: ${ChartSizes[size]}px;
-        outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+        outline: ${isSelected
+          ? `${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0}`
+          : `${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade}`};
         border-radius: ${euiTheme.border.radius.medium};
       `}
       ref={chartRef}
@@ -102,7 +110,7 @@ export const Chart = ({
             lensProps={lensProps}
             services={services}
             onBrushEnd={onBrushEnd}
-            onFilter={onFilter}
+            onFilter={handleFilter}
             abortController={fetchParams.abortController}
             onViewDetails={onViewDetails}
             onCopyToDashboard={toggleSaveModalVisible}
@@ -111,6 +119,7 @@ export const Chart = ({
             titleHighlight={titleHighlight}
             syncTooltips={syncTooltips}
             extraDisabledActions={extraDisabledActions}
+            quickActionIds={quickActionIds}
           />
           {isSaveModalVisible && (
             <SaveModalComponent

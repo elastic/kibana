@@ -19,7 +19,6 @@ export {
   createBehavioralAnalysisModule,
 } from './observation_modules';
 export { entityRecordToLeadEntity, fetchCandidateEntities } from './entity_conversion';
-export { createLeadGenerationService } from './services/lead_generation_service';
 export type {
   Lead,
   LeadEntity,
@@ -31,11 +30,11 @@ export type {
   ObservationSeverity,
 } from './types';
 export { DEFAULT_ENGINE_CONFIG, STALENESS_THRESHOLDS_MS, computeStaleness } from './types';
+export { runLeadGenerationPipeline, type RunPipelineParams } from './run_pipeline';
 export {
-  runLeadGenerationPipeline,
-  type RunPipelineParams,
-  type RunPipelineResult,
-} from './run_pipeline';
+  runLeadGenerationInBackground,
+  type RunLeadGenerationInBackgroundArgs,
+} from './run_background_pipeline';
 export {
   registerLeadGenerationTask,
   startLeadGenerationTask,

@@ -19,6 +19,8 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { internalStateActions } from '../../state_management/redux';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
+import { createResolvedMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import * as resolveEsqlSourceModule from '../../data_fetching/resolve_esql_source';
 
 // Mock ControlGroupRendererApi
 class MockControlGroupRendererApi {
@@ -27,6 +29,7 @@ class MockControlGroupRendererApi {
   } | null>;
   esqlVariables$: BehaviorSubject<ESQLControlVariable[]>;
   addNewPanel: jest.Mock;
+  removePanel = jest.fn();
 
   constructor() {
     this.inputSubject = new BehaviorSubject<{
@@ -179,6 +182,72 @@ describe('useESQLVariables', () => {
       });
     });
 
+    it('resolves the ES|QL source with the new control value before fetching', async () => {
+      const nextVariables = [
+        { key: 'extension', type: 'values', value: 'png' },
+      ] as ESQLControlVariable[];
+      const { toolkit } = await renderUseESQLVariables({ isEsqlMode: true });
+      const resolveSpy = jest
+        .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
+        .mockResolvedValue(await createResolvedMockEsqlSource());
+
+      act(() => {
+        toolkit.internalState.dispatch(
+          toolkit.injectCurrentTab(internalStateActions.setAppState)({
+            appState: {
+              query: { esql: 'from logstash-* | where extension == ?extension' },
+            },
+          })
+        );
+      });
+
+      act(() => {
+        mockControlGroupAPI.simulateVariables(nextVariables);
+      });
+
+      await waitFor(() => {
+        expect(resolveSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            esql: 'from logstash-* | where extension == ?extension',
+            esqlVariables: nextVariables,
+          })
+        );
+      });
+      resolveSpy.mockRestore();
+    });
+
+    it('does not replace a saved control value with an empty variable list', async () => {
+      const savedVariables = [
+        { key: 'extension', type: 'values', value: 'png' },
+      ] as ESQLControlVariable[];
+      const { toolkit } = await renderUseESQLVariables({
+        isEsqlMode: true,
+        currentEsqlVariables: savedVariables,
+      });
+      const tabId = toolkit.getCurrentTab().id;
+      const resolveSpy = jest.spyOn(resolveEsqlSourceModule, 'resolveEsqlSource');
+
+      act(() => {
+        toolkit.internalState.dispatch(
+          toolkit.injectCurrentTab(internalStateActions.setEsqlVariables)({
+            esqlVariables: savedVariables,
+          })
+        );
+      });
+
+      act(() => {
+        mockControlGroupAPI.simulateVariables([]);
+      });
+
+      await act(() => setTimeout(() => {}, 0));
+
+      expect(resolveSpy).not.toHaveBeenCalled();
+      expect(toolkit.internalState.getState().tabs.byId[tabId].esqlVariables).toEqual(
+        savedVariables
+      );
+      resolveSpy.mockRestore();
+    });
+
     it('should unsubscribe on unmount', async () => {
       const mockUnsubscribeInput = jest.fn();
 
@@ -202,6 +271,87 @@ describe('useESQLVariables', () => {
 
       // Both subscriptions should be unsubscribed
       expect(mockUnsubscribeInput).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps input subscription stable when currentEsqlVariables changes', async () => {
+      const { toolkit } = await setup();
+      const getInputSpy = jest.spyOn(mockControlGroupAPI, 'getInput$');
+      const tabId = toolkit.getCurrentTab().id;
+      const mockOnUpdateESQLQuery = jest.fn();
+
+      const hook = renderHook(
+        ({ currentEsqlVariables }: { currentEsqlVariables: ESQLControlVariable[] }) =>
+          useESQLVariables({
+            isEsqlMode: true,
+            controlGroupApi: mockControlGroupAPI as unknown as ControlGroupRendererApi,
+            currentEsqlVariables,
+            onUpdateESQLQuery: mockOnUpdateESQLQuery,
+          }),
+        {
+          wrapper: ({ children }) => (
+            <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+          ),
+          initialProps: { currentEsqlVariables: [] as ESQLControlVariable[] },
+        }
+      );
+
+      await act(() => setTimeout(() => {}, 0));
+
+      const initialControlState = {
+        '123': { type: 'esqlControl' },
+      } as unknown as ControlPanelsState<OptionsListESQLControlState>;
+
+      act(() => {
+        mockControlGroupAPI.simulateInput({ initialChildControlState: initialControlState });
+      });
+
+      await waitFor(() => {
+        const tabState = toolkit.internalState.getState().tabs.byId[tabId];
+        expect(tabState.attributes.controlGroupState).toEqual(initialControlState);
+      });
+
+      const getInputCallsBeforeVariableRerender = getInputSpy.mock.calls.length;
+
+      hook.rerender({
+        currentEsqlVariables: [{ key: 'foo', type: 'values', value: 'bar' } as ESQLControlVariable],
+      });
+
+      await act(() => setTimeout(() => {}, 0));
+
+      const updatedControlState = {
+        '456': { type: 'esqlControl' },
+      } as unknown as ControlPanelsState<OptionsListESQLControlState>;
+
+      act(() => {
+        mockControlGroupAPI.simulateInput({ initialChildControlState: updatedControlState });
+      });
+
+      await waitFor(() => {
+        const tabState = toolkit.internalState.getState().tabs.byId[tabId];
+        expect(tabState.attributes.controlGroupState).toEqual(updatedControlState);
+      });
+
+      expect(getInputSpy.mock.calls.length).toBe(getInputCallsBeforeVariableRerender);
+    });
+
+    it.each([undefined, {}])('removes controls absent after a reset to %p', async (controls) => {
+      const { toolkit } = await renderUseESQLVariables({});
+      mockControlGroupAPI.updateInput.mockImplementation(() => {});
+
+      act(() => {
+        mockControlGroupAPI.simulateInput({ initialChildControlState: mockControlState });
+      });
+
+      act(() => {
+        toolkit.internalState.dispatch(
+          internalStateActions.updateAttributes({
+            tabId: toolkit.getCurrentTab().id,
+            attributes: { controlGroupState: controls },
+          })
+        );
+      });
+
+      expect(mockControlGroupAPI.removePanel).toHaveBeenCalledWith('panel1');
     });
 
     it('should reset control panels when tab attributes change', async () => {

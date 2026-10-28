@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { GrokExpressionsProvider, GrokSampleWithContext, useGrokExpressions } from '@kbn/grok-ui';
 import { i18n } from '@kbn/i18n';
 import type { GrokProcessor } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
@@ -25,7 +26,6 @@ import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useGrokExpressions, GrokExpressionsProvider, GrokSampleWithContext } from '@kbn/grok-ui';
 import { useDocViewerSetup } from '../../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../../hooks/use_document_expansion';
 import { useStreamDataViewFieldTypes } from '../../../../hooks/use_stream_data_view_field_types';
@@ -35,22 +35,23 @@ import { RowSelectionContext } from '../shared/preview_table';
 import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
 import { DOC_VIEW_DIFF_ID, DocViewerContext } from './doc_viewer_diff';
 import {
+  NoPreviewDocumentsEmptyPrompt,
+  NoProcessingDataAvailableEmptyPrompt,
+} from './empty_prompts';
+import {
   createOriginalGrokFieldValuesMap,
   getGrokFieldDisplayValue,
   grokExpressionOverwritesSourceField,
   hasPrecedingProcessorTouchedField,
 } from './processor_outcome_preview_helpers';
-import {
-  NoPreviewDocumentsEmptyPrompt,
-  NoProcessingDataAvailableEmptyPrompt,
-} from './empty_prompts';
 import { useDataSourceSelector } from './state_management/data_source_state_machine';
 import { selectDraftProcessor } from './state_management/interactive_mode_machine/selectors';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
   getAllFieldsInOrder,
+  getDestinationField,
   getOriginalSampleDocument,
-  getSourceField,
+  getSourceFields,
   getTableColumns,
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
@@ -107,6 +108,9 @@ export const ProcessorOutcomePreview = () => {
       ) : (
         <OutcomePreviewTable previewDocuments={previewDocuments} />
       )}
+      <EuiSpacer size="m" />
+      <FetchMoreMatchingSamples />
+      <EuiSpacer size="xxl" />
     </>
   );
 };
@@ -281,6 +285,62 @@ const PreviewDocumentsGroupBy = () => {
   );
 };
 
+const FETCH_MORE_THRESHOLD = 0.1;
+
+const FetchMoreMatchingSamples = () => {
+  const { fetchMoreMatchingSamples } = useStreamEnrichmentEvents();
+
+  const selectedConditionId = useSimulatorSelector((state) => state.context.selectedConditionId);
+
+  const conditionMatchRate = useSimulatorSelector((state) => {
+    const conditionId = state.context.selectedConditionId;
+    if (!conditionId) return undefined;
+    const metrics = state.context.simulation?.processors_metrics?.[conditionId];
+    if (!metrics) return undefined;
+    return 1 - (metrics.skipped_rate ?? 0);
+  });
+
+  const activeDataSourceRef = useStreamEnrichmentSelector((snapshot) =>
+    getActiveDataSourceRef(snapshot.context.dataSourcesRefs)
+  );
+
+  const isFetchingMore = useDataSourceSelector(activeDataSourceRef, (snapshot) =>
+    snapshot ? snapshot.context.isFetchingMore : false
+  );
+
+  const dataSourceType = useDataSourceSelector(activeDataSourceRef, (snapshot) =>
+    snapshot ? snapshot.context.dataSource.type : undefined
+  );
+
+  const supportsFetchMore = dataSourceType === 'latest-samples' || dataSourceType === 'kql-samples';
+
+  const shouldShow =
+    supportsFetchMore &&
+    selectedConditionId &&
+    conditionMatchRate !== undefined &&
+    conditionMatchRate < FETCH_MORE_THRESHOLD;
+
+  if (!shouldShow) return null;
+
+  return (
+    <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          size="s"
+          color="text"
+          onClick={fetchMoreMatchingSamples}
+          isLoading={isFetchingMore}
+          data-test-subj="streamsAppFetchMoreMatchingSamplesButton"
+        >
+          {i18n.translate('xpack.streams.enrichment.fetchMore.buttonLabel', {
+            defaultMessage: 'Load more matching samples',
+          })}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRecord[] }) => {
   const [userSelectedViewMode, setViewMode] = useLocalStorage<PreviewTableMode>(
     'streams:processorOutcomePreview:viewMode',
@@ -310,11 +370,16 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     selectHasSimulatedRecords(snapshot.context)
   );
 
-  const { currentProcessorSourceField, currentStepId, stepIds } = useStreamEnrichmentSelector(
-    (state) => {
+  const { currentProcessorSourceFields, currentProcessorDestinationField, currentStepId, stepIds } =
+    useStreamEnrichmentSelector((state) => {
       const isInteractiveMode = selectIsInteractiveMode(state);
       if (!isInteractiveMode || !state.context.interactiveModeRef) {
-        return { currentProcessorSourceField: undefined, currentStepId: undefined, stepIds: [] };
+        return {
+          currentProcessorSourceFields: [],
+          currentProcessorDestinationField: undefined,
+          currentStepId: undefined,
+          stepIds: [],
+        };
       }
 
       const stepRefs = state.context.interactiveModeRef.getSnapshot().context.stepRefs;
@@ -326,7 +391,8 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
         if (isActionBlock(step) && isStepUnderEdit(snapshot)) {
           return {
-            currentProcessorSourceField: getSourceField(step),
+            currentProcessorSourceFields: getSourceFields(step),
+            currentProcessorDestinationField: getDestinationField(step),
             currentStepId: stepRef.id,
             stepIds: allStepIds,
           };
@@ -334,12 +400,12 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       }
 
       return {
-        currentProcessorSourceField: undefined,
+        currentProcessorSourceFields: [],
+        currentProcessorDestinationField: undefined,
         currentStepId: undefined,
         stepIds: allStepIds,
       };
-    }
-  );
+    });
 
   const processorsMetrics = useSimulatorSelector(
     (snapshot) => snapshot.context.simulation?.processors_metrics
@@ -432,20 +498,30 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const validGrokField = grokMode ? validGrokSourceField : undefined;
 
-  const validCurrentProcessorSourceField =
-    currentProcessorSourceField && allColumns.includes(currentProcessorSourceField)
-      ? currentProcessorSourceField
+  const validCurrentProcessorSourceFields = useMemo(
+    () => currentProcessorSourceFields.filter((field) => allColumns.includes(field)),
+    [currentProcessorSourceFields, allColumns]
+  );
+
+  const validCurrentProcessorDestinationField =
+    currentProcessorDestinationField && allColumns.includes(currentProcessorDestinationField)
+      ? currentProcessorDestinationField
       : undefined;
 
   // Calculate if view mode should be forced to 'columns'
-  const isViewModeForced = Boolean(validGrokField || validCurrentProcessorSourceField);
+  const isViewModeForced = Boolean(
+    validGrokField ||
+      validCurrentProcessorSourceFields.length > 0 ||
+      validCurrentProcessorDestinationField
+  );
 
   // Determine the effective view mode (forced to 'columns' if needed, otherwise user's choice)
   const effectiveViewMode = isViewModeForced ? 'columns' : userSelectedViewMode ?? 'summary';
 
   const availableColumns = useMemo(() => {
     let cols = getTableColumns({
-      currentProcessorSourceField: validCurrentProcessorSourceField,
+      currentProcessorSourceFields: validCurrentProcessorSourceFields,
+      currentProcessorDestinationField: validCurrentProcessorDestinationField,
       detectedFields,
       previewDocsFilter,
     });
@@ -470,7 +546,8 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     explicitlyDisabledPreviewColumns,
     explicitlyEnabledPreviewColumns,
     previewDocsFilter,
-    validCurrentProcessorSourceField,
+    validCurrentProcessorSourceFields,
+    validCurrentProcessorDestinationField,
   ]);
 
   /**

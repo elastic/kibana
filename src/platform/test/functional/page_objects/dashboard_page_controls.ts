@@ -415,22 +415,23 @@ export class DashboardPageControls extends FtrService {
   }
 
   public async isOptionsListPopoverOpen(controlId: string) {
-    const isPopoverOpen = await this.find.existsByCssSelector(`#control-popover-${controlId}`);
+    const isPopoverOpen = await this.find.existsByCssSelector(`#control-popover-${controlId}`, 0);
     this.log.debug(`Is popover open: ${isPopoverOpen} for Options List: ${controlId}`);
     return isPopoverOpen;
   }
 
   public async optionsListOpenPopover(controlId: string, ignoreTopOffsetOrOptions?: boolean) {
     this.log.debug(`Opening popover for Options List: ${controlId}`);
-    await this.retry.try(async () => {
+    await this.retry.tryForTime(10000, async () => {
+      if (await this.isOptionsListPopoverOpen(controlId)) return;
       await this.testSubjects.click(
         `optionsList-control-${controlId}`,
         500,
         !ignoreTopOffsetOrOptions ? await this.panelActions.getContainerTopOffset() : undefined
       );
-      await this.retry.waitForWithTimeout('popover to open', 500, async () => {
-        return await this.testSubjects.exists(`optionsList-control-popover`);
-      });
+      if (!(await this.find.existsByCssSelector(`#control-popover-${controlId}`, 5000))) {
+        throw new Error(`Options List popover ${controlId} has not opened`);
+      }
     });
   }
 
@@ -525,11 +526,16 @@ export class DashboardPageControls extends FtrService {
     return cardinalityLabel.split(' ')[0];
   }
 
-  public async optionsListPopoverSearchForOption(search: string) {
+  public async optionsListPopoverSearchForOption(search: string, controlId?: string) {
     this.log.debug(`searching for ${search} in options list`);
-    await this.optionsListPopoverAssertOpen();
-    await this.testSubjects.setValue(`optionsList-control-search-input`, search, {
-      typeCharByChar: true,
+    await this.retry.tryForTime(10000, async () => {
+      if (controlId) await this.optionsListOpenPopover(controlId);
+      await this.testSubjects.existOrFail('optionsList-control-search-input', { timeout: 5000 });
+      // Type into the search input element itself, not whatever happens to hold focus,
+      // so a missed focus can't drop the search text on the wrong element.
+      const input = await this.testSubjects.find('optionsList-control-search-input');
+      await input.clearValue();
+      await input.type(search, { charByChar: true });
     });
     await this.optionsListPopoverWaitForLoading();
   }
@@ -566,9 +572,9 @@ export class DashboardPageControls extends FtrService {
     });
   }
 
-  public async optionsListPopoverSelectOption(availableOption: string) {
+  public async optionsListPopoverSelectOption(availableOption: string, controlId?: string) {
     this.log.debug(`selecting ${availableOption} from options list`);
-    await this.optionsListPopoverSearchForOption(availableOption);
+    await this.optionsListPopoverSearchForOption(availableOption, controlId);
 
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail(`optionsList-control-selection-${availableOption}`);
@@ -593,10 +599,7 @@ export class DashboardPageControls extends FtrService {
 
   public async optionsListWaitForLoading(controlId: string) {
     this.log.debug(`wait for ${controlId} to load`);
-    const enabled = await this.testSubjects.waitForEnabled(`optionsList-control-${controlId}`);
-    if (!enabled) {
-      throw new Error(`${controlId} did not finish loading within the given time limit`);
-    }
+    await this.testSubjects.waitForEnabled(`optionsList-control-${controlId}`);
   }
 
   public async optionsListPopoverWaitForLoading() {
@@ -804,25 +807,29 @@ export class DashboardPageControls extends FtrService {
 
   // Time slider functions
   public async gotoNextTimeSlice() {
-    await this.closeTimeSliderPopover(); // prevents the pin tooltip from getting in the way
+    // the next/previous buttons pause playback, which always opens the popover
     await this.testSubjects.click('timeSlider-nextTimeWindow');
+    await this.testSubjects.existOrFail('timeSlider-popoverContents', { timeout: 10_000 });
+  }
+
+  public async openTimeSliderPopover() {
+    if (await this.testSubjects.waitForExists('timeSlider-popoverContents')) {
+      return;
+    }
+    await this.testSubjects.click('timeSlider-popoverToggleButton');
+    await this.testSubjects.existOrFail('timeSlider-popoverContents', { timeout: 10_000 });
   }
 
   public async closeTimeSliderPopover() {
-    const isOpen = await this.testSubjects.exists('timeSlider-popoverContents');
-    if (isOpen) {
-      await this.testSubjects.click('timeSlider-popoverToggleButton');
+    if (!(await this.testSubjects.waitForExists('timeSlider-popoverContents'))) {
+      return;
     }
+    await this.testSubjects.click('timeSlider-popoverToggleButton');
+    await this.testSubjects.waitForDeleted('timeSlider-popoverContents');
   }
 
   public async getTimeSliceFromTimeSlider() {
-    const isOpen = await this.testSubjects.exists('timeSlider-popoverContents');
-    if (!isOpen) {
-      await this.testSubjects.click('timeSlider-popoverToggleButton');
-      await this.retry.try(async () => {
-        await this.testSubjects.existOrFail('timeSlider-popoverContents');
-      });
-    }
+    await this.openTimeSliderPopover();
     const popover = await this.testSubjects.find('timeSlider-popoverContents');
     const dualRangeSlider = await this.find.descendantDisplayedByCssSelector(
       '.euiRangeDraggable',

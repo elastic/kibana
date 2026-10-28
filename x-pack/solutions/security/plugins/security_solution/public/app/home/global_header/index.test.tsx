@@ -7,6 +7,7 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
+import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
 import { GlobalHeader } from '.';
 import {
   ADD_DATA_PATH,
@@ -16,7 +17,7 @@ import {
 } from '../../../../common/constants';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-import { sourcererPaths } from '../../../sourcerer/containers/sourcerer_paths';
+import { dataViewPickerPaths } from '../../../data_view_manager/utils/paths';
 
 import { DATA_VIEW_PICKER_TEST_ID } from '../../../data_view_manager/components/data_view_picker/constants';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
@@ -110,6 +111,26 @@ describe('global header', () => {
     expect(queryByTestId('add-data')).not.toBeInTheDocument();
   });
 
+  it('clears the legacy action menu on Cloud Security Posture pages', () => {
+    const setHeaderActionMenu = jest.fn();
+    (useKibana as jest.Mock).mockReturnValue({
+      ...mockUseKibana(),
+      services: { ...mockUseKibana().services, setHeaderActionMenu },
+    });
+    (useLocation as jest.Mock).mockReturnValue({
+      pathname: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/dashboard`,
+    });
+
+    render(
+      <TestProviders store={store}>
+        <GlobalHeader />
+      </TestProviders>
+    );
+
+    expect(setHeaderActionMenu).toHaveBeenCalledWith(undefined);
+    expect(setHeaderActionMenu).not.toHaveBeenCalledWith(expect.any(Function));
+  });
+
   it('points to the threat_intel Add data URL for threat_intelligence url', () => {
     (useLocation as jest.Mock).mockReturnValue({ pathname: THREAT_INTELLIGENCE_PATH });
     const { queryByTestId } = render(
@@ -121,21 +142,19 @@ describe('global header', () => {
     expect(link?.getAttribute('href')).toBe(ADD_THREAT_INTELLIGENCE_DATA_PATH);
   });
 
-  // TODO: Skipping until feature flag is enabled https://github.com/elastic/security-team/issues/11959 by default
-  // it.each(sourcererPaths)('shows data view manager on %s page', (pathname) => {
-  //   (useLocation as jest.Mock).mockReturnValue({ pathname });
-  //
-  //   const { getByTestId } = render(
-  //     <TestProviders store={store}>
-  //       <GlobalHeader />
-  //     </TestProviders>
-  //   );
-  //   expect(getByTestId(DATA_VIEW_PICKER_TEST_ID)).toBeInTheDocument();
-  // });
+  it.each(dataViewPickerPaths)('shows data view manager on %s page', (pathname) => {
+    (useLocation as jest.Mock).mockReturnValue({ pathname });
 
-  // TODO: Skipping until feature flag is enabled https://github.com/elastic/security-team/issues/11959 by default
-  it.skip('shows data view manager on rule details page', () => {
-    (useLocation as jest.Mock).mockReturnValue({ pathname: sourcererPaths[2] });
+    const { getByTestId } = render(
+      <TestProviders store={store}>
+        <GlobalHeader />
+      </TestProviders>
+    );
+    expect(getByTestId(DATA_VIEW_PICKER_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('shows data view manager on rule details page', () => {
+    (useLocation as jest.Mock).mockReturnValue({ pathname: dataViewPickerPaths[2] });
 
     const { getByTestId } = render(
       <TestProviders store={store}>
@@ -160,7 +179,7 @@ describe('global header', () => {
     };
     const mockStore = createMockStore(mockstate);
 
-    (useLocation as jest.Mock).mockReturnValue({ pathname: sourcererPaths[2] });
+    (useLocation as jest.Mock).mockReturnValue({ pathname: dataViewPickerPaths[2] });
 
     const { queryByTestId } = render(
       <TestProviders store={mockStore}>
@@ -169,6 +188,68 @@ describe('global header', () => {
     );
 
     expect(queryByTestId(DATA_VIEW_PICKER_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it.each([
+    '/rules/management',
+    '/rules/monitoring',
+    '/rules/updates',
+    '/rules/add_rules',
+    '/exceptions',
+    '/get_started',
+  ])(
+    'does not mount the header action menu on %s, where the page app header owns the actions',
+    (pathname) => {
+      (useLocation as jest.Mock).mockReturnValue({ pathname });
+      const setHeaderActionMenu = jest.fn();
+      (useKibana as jest.Mock).mockReturnValue({
+        ...mockUseKibana(),
+        services: { ...mockUseKibana().services, setHeaderActionMenu },
+      });
+
+      render(
+        <TestProviders store={store}>
+          <GlobalHeader />
+        </TestProviders>
+      );
+
+      expect(setHeaderActionMenu).toHaveBeenCalledWith(undefined);
+      expect(setHeaderActionMenu).not.toHaveBeenCalledWith(expect.any(Function));
+    }
+  );
+
+  it('mounts the header action menu on the exception list details page', () => {
+    (useLocation as jest.Mock).mockReturnValue({ pathname: '/exceptions/details/list-1' });
+    const setHeaderActionMenu = jest.fn();
+    (useKibana as jest.Mock).mockReturnValue({
+      ...mockUseKibana(),
+      services: { ...mockUseKibana().services, setHeaderActionMenu },
+    });
+
+    render(
+      <TestProviders store={store}>
+        <GlobalHeader />
+      </TestProviders>
+    );
+
+    expect(setHeaderActionMenu).toHaveBeenCalledWith(expect.any(Function));
+  });
+
+  it('mounts the header action menu on the rule details page', () => {
+    (useLocation as jest.Mock).mockReturnValue({ pathname: '/rules/id/123' });
+    const setHeaderActionMenu = jest.fn();
+    (useKibana as jest.Mock).mockReturnValue({
+      ...mockUseKibana(),
+      services: { ...mockUseKibana().services, setHeaderActionMenu },
+    });
+
+    render(
+      <TestProviders store={store}>
+        <GlobalHeader />
+      </TestProviders>
+    );
+
+    expect(setHeaderActionMenu).toHaveBeenCalledWith(expect.any(Function));
   });
 
   it('shows AI Assistant header link', () => {

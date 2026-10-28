@@ -10,6 +10,7 @@ export XPACK_DIR="$KIBANA_DIR/x-pack"
 
 export CACHE_DIR="$HOME/.kibana"
 export ES_CACHE_DIR="$HOME/.es-snapshot-cache"
+export NODE_CACHE_DIR="${NODE_CACHE_DIR:-$HOME/.cache/node}"
 PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR
 export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
@@ -48,6 +49,10 @@ export MERGE_QUEUE_TARGET_BRANCH
 # will fallback to BUILDKITE_BRANCH.
 BUILDKITE_BRANCH_MERGE_QUEUE="${MERGE_QUEUE_TARGET_BRANCH:-${BUILDKITE_BRANCH:-}}"
 export BUILDKITE_BRANCH_MERGE_QUEUE
+
+if [[ "$MERGE_QUEUE_TARGET_BRANCH" ]]; then
+  set_merge_queue_git_info
+fi
 
 BUILDKITE_AGENT_GCP_REGION=""
 if [[ "$(curl -is metadata.google.internal || true)" ]]; then
@@ -147,6 +152,9 @@ if should_enable_fips; then
   export ES_SECURITY_ENABLED
   # used by FIPS agents to link FIPS OpenSSL modules
   export OPENSSL_MODULES=$HOME/openssl/lib/ossl-modules
+  # Declares the FIPS test target attribute to Scout, so it can honor
+  # '@limit/only-fips' / '@limit/except-fips' tags when distributing and running tests
+  export SCOUT_TARGET_ATTRIBUTES=fips
 
   if [[ -f "$KIBANA_DIR/config/node.options" ]]; then
     echo -e '\n--enable-fips' >>"$KIBANA_DIR/config/node.options"

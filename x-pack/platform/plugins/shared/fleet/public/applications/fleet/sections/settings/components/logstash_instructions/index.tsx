@@ -8,14 +8,15 @@
 import React, { useState, useMemo } from 'react';
 
 import {
-  EuiCallOut,
   EuiButton,
-  EuiSpacer,
-  EuiLink,
+  EuiButtonIcon,
+  EuiCallOut,
   EuiCode,
   EuiCodeBlock,
   EuiCopy,
-  EuiButtonIcon,
+  EuiLink,
+  EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiCallOutProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -136,18 +137,28 @@ const LogstashInstructionSteps = ({ isSSLEnabled }: LogstashInstructionStepsProp
                   <div className="euiCodeBlock__copyButton">
                     <EuiCopy textToCopy={logstashApiKey.apiKey}>
                       {(copy) => (
-                        <EuiButtonIcon
-                          onClick={copy}
-                          iconType="copy"
-                          color="text"
-                          disabled={!hasAllSettings}
-                          aria-label={i18n.translate(
+                        <EuiToolTip
+                          content={i18n.translate(
                             'xpack.fleet.settings.logstashInstructions.copyApiKeyButtonLabel',
                             {
                               defaultMessage: 'Copy message',
                             }
                           )}
-                        />
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            onClick={copy}
+                            iconType="copy"
+                            color="text"
+                            disabled={!hasAllSettings}
+                            aria-label={i18n.translate(
+                              'xpack.fleet.settings.logstashInstructions.copyApiKeyButtonLabel',
+                              {
+                                defaultMessage: 'Copy message',
+                              }
+                            )}
+                          />
+                        </EuiToolTip>
                       )}
                     </EuiCopy>
                   </div>

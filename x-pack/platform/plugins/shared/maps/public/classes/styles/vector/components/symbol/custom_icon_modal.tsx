@@ -352,6 +352,7 @@ export class CustomIconModal extends Component<Props, State> {
                 helpText={strings.getImageInputDescription()}
               >
                 <EuiFilePicker
+                  aria-label={strings.getImageFilePickerPlaceholder()}
                   initialPromptText={strings.getImageFilePickerPlaceholder()}
                   onChange={this._onFileSelect}
                   className="mapsImageUpload"

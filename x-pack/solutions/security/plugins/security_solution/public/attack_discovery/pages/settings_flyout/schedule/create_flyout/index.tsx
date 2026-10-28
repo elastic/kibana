@@ -19,19 +19,20 @@ import {
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import React, { useCallback, useState } from 'react';
-
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ConfirmationModal } from '../confirmation_modal';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { Footer } from '../../footer';
 import { MIN_FLYOUT_WIDTH } from '../../constants';
 import { useEditForm } from '../edit_form';
 import type { AttackDiscoveryScheduleSchema } from '../edit_form/types';
-import { useCreateAttackDiscoverySchedule } from '../logic/use_create_schedule';
+import { useScheduleApi } from '../logic/use_schedule_api';
 import * as i18n from './translations';
-import { convertFormDataInBaseSchedule } from '../utils/convert_form_data';
+import {
+  convertFormDataInBaseSchedule,
+  convertFormDataToWorkflowSchedule,
+} from '../utils/convert_form_data';
 
 interface Props {
   onClose: () => void;
@@ -66,29 +67,44 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
     settings,
   });
 
-  const { sourcererDataView } = useSourcererDataView();
-  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
+  const { dataView, status } = useDataView(PageScope.alerts);
+
+  const { isWorkflowsEnabled, useCreateSchedule } = useScheduleApi();
 
   const { mutateAsync: createAttackDiscoverySchedule, isLoading: isLoadingQuery } =
-    useCreateAttackDiscoverySchedule();
+    useCreateSchedule();
 
   const onCreateSchedule = useCallback(
     async (scheduleData: AttackDiscoveryScheduleSchema) => {
+      if (status !== 'ready') {
+        return;
+      }
+
       const connector = aiConnectors?.find((item) => item.id === scheduleData.connectorId);
       if (!connector) {
         return;
       }
 
       try {
-        const scheduleToCreate = convertFormDataInBaseSchedule(
+        const convertFn = isWorkflowsEnabled
+          ? convertFormDataToWorkflowSchedule
+          : convertFormDataInBaseSchedule;
+
+        const scheduleToCreate = convertFn(
           scheduleData,
           alertsIndexPattern ?? '',
           connector,
-          sourcererDataView,
           uiSettings,
-          experimentalDataView
+          dataView
         );
-        await createAttackDiscoverySchedule({ scheduleToCreate });
+        // `createAttackDiscoverySchedule` is a union of public/workflow mutation
+        // functions with incompatible parameter types. `isWorkflowsEnabled`
+        // guarantees the correct converter was used above, making this safe.
+        await (
+          createAttackDiscoverySchedule as (params: {
+            scheduleToCreate: typeof scheduleToCreate;
+          }) => Promise<unknown>
+        )({ scheduleToCreate });
         onClose();
       } catch (err) {
         // Error is handled by the mutation's onError callback, so no need to do anything here
@@ -98,15 +114,17 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
       aiConnectors,
       alertsIndexPattern,
       createAttackDiscoverySchedule,
-      experimentalDataView,
+      dataView,
+      isWorkflowsEnabled,
       onClose,
-      sourcererDataView,
+      status,
       uiSettings,
     ]
   );
 
   const { editForm, actionButtons } = useEditForm({
-    isLoading: isLoadingConnectors || isLoadingQuery,
+    isLoading: isLoadingConnectors || isLoadingQuery || status !== 'ready',
+    isWorkflowsEnabled,
     onFormMutated,
     onSave: onCreateSchedule,
     saveButtonTitle: i18n.SCHEDULE_CREATE_BUTTON_TITLE,

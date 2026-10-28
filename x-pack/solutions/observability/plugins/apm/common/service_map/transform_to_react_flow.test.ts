@@ -160,6 +160,7 @@ describe('transformToReactFlow', () => {
             transactionType: 'request',
             actualValue: 100,
             anomalyScore: 75,
+            anomalyEnvironment: 'production',
           },
         ],
       };
@@ -176,6 +177,7 @@ describe('transformToReactFlow', () => {
         expect.objectContaining({
           serviceAnomalyStats: expect.objectContaining({
             anomalyScore: 75,
+            anomalyEnvironment: 'production',
           }),
         })
       );
@@ -417,6 +419,7 @@ describe('transformToReactFlow', () => {
               transactionType: 'request',
               actualValue: 500,
               anomalyScore: 95,
+              anomalyEnvironment: 'production',
             },
           ],
         },

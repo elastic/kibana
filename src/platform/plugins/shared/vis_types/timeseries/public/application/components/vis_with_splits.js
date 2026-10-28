@@ -164,6 +164,7 @@ export function visWithSplits(WrappedComponent) {
             backgroundColor={props.backgroundColor}
             getConfig={props.getConfig}
             fieldFormatMap={props.fieldFormatMap}
+            isInteractive={props.isInteractive}
             initialRender={arrayRef.length - 1 === index ? props.initialRender : undefined}
           />
         </div>

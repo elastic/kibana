@@ -14,7 +14,7 @@ import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public'
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApmPluginStartDeps } from '../../../plugin';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { TimeComparison } from '../../shared/time_comparison';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
@@ -23,7 +23,6 @@ import { ServiceMapControls } from './service_map_controls';
 import { SERVICE_MAP_CONTROLS_CONFIG } from './service_map_control_panels_config';
 import { useServiceMapSearchContext } from './service_map_search_context';
 import { useFilterUrlSync } from './use_filter_url_sync';
-import { useServiceName } from '../../../hooks/use_service_name';
 
 /**
  * Unified search bar for service map pages.
@@ -40,36 +39,44 @@ import { useServiceName } from '../../../hooks/use_service_name';
 export function ServiceMapSearchBar() {
   const {
     query: { rangeFrom, rangeTo, kuery, environment },
-  } = useAnyOfApmParams(
-    '/service-map',
-    '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
-  );
+  } = useApmParams('/service-map');
 
   const { dataView } = useAdHocApmDataView();
   const kibanaQuerySettings = useKibanaQuerySettings();
-  const { setEsQuery } = useServiceMapSearchContext();
+  const { setEsQuery, setHighlightedServiceNames } = useServiceMapSearchContext();
   const { services } = useKibana<ApmPluginStartDeps>();
   const { filterManager } = services.data.query;
   const location = useLocation();
   const history = useHistory();
-  const serviceName = useServiceName();
 
-  const controlsConfig = useMemo(
-    () =>
-      serviceName
-        ? SERVICE_MAP_CONTROLS_CONFIG.filter((c) => c.field_name !== 'service.name')
-        : SERVICE_MAP_CONTROLS_CONFIG,
-    [serviceName]
-  );
+  const controlsConfig = useMemo(() => {
+    const visible = dataView
+      ? SERVICE_MAP_CONTROLS_CONFIG.filter(
+          (c) => dataView.fields.getByName(c.field_name) !== undefined
+        )
+      : SERVICE_MAP_CONTROLS_CONFIG;
+
+    if (visible.length <= 2) {
+      return visible.map((c) => ({ ...c, width: 'medium' as const, grow: false }));
+    }
+
+    return visible;
+  }, [dataView]);
 
   // Persist filter-bar pills and control selections in the URL (_a) so they survive refresh.
-  const { persistControlSelections, getRestoredControlSelections } = useFilterUrlSync();
+  const { initialAppFilters, persistControlSelections, getRestoredControlSelections } =
+    useFilterUrlSync();
+
+  const getFilterBarFilters = useCallback(
+    () => [...filterManager.getGlobalFilters(), ...filterManager.getAppFilters()],
+    [filterManager]
+  );
 
   // Mirror filterManager state so filter-bar pill changes trigger a re-render.
-  const [filterBarFilters, setFilterBarFilters] = useState<Filter[]>(() =>
-    filterManager.getFilters()
-  );
+  const [filterBarFilters, setFilterBarFilters] = useState<Filter[]>(() => [
+    ...filterManager.getGlobalFilters(),
+    ...initialAppFilters,
+  ]);
 
   // Controls API selections — set by onFiltersChange.
   const [panelFilters, setPanelFilters] = useState<Filter[]>([]);
@@ -81,10 +88,10 @@ export function ServiceMapSearchBar() {
   // Keep filterBarFilters in sync with Kibana's filterManager.
   useEffect(() => {
     const sub = filterManager.getUpdates$().subscribe(() => {
-      setFilterBarFilters(filterManager.getFilters());
+      setFilterBarFilters(getFilterBarFilters());
     });
     return () => sub.unsubscribe();
-  }, [filterManager]);
+  }, [filterManager, getFilterBarFilters]);
 
   // When Controls fire, record that they have and update panel filters.
   const handlePanelFiltersChange = useCallback((filters: Filter[]) => {
@@ -141,9 +148,23 @@ export function ServiceMapSearchBar() {
     if (!hasControlsFired.current) return;
     const existing = toQuery(location.search);
     if (existing.environment === envFromControls) return;
+
+    // APM's typed router strips `_a` from location.search. Preserve it from the
+    // live browser URL so this replace doesn't drop controlSelections / filters.
+    const nextQuery: Record<string, string | undefined> = {
+      ...existing,
+      environment: envFromControls,
+    };
+    if (nextQuery._a === undefined) {
+      const match = window.location.href.match(/[?&]_a=([^&#]+)/);
+      if (match) {
+        nextQuery._a = decodeURIComponent(match[1]);
+      }
+    }
+
     history.replace({
       ...location,
-      search: fromQuery({ ...existing, environment: envFromControls }),
+      search: fromQuery(nextQuery),
     });
     // location.search as the dep (not the object) to avoid infinite loops.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -156,12 +177,50 @@ export function ServiceMapSearchBar() {
     [panelFilters]
   );
 
+  // Seed the Controls dropdowns from the URL on mount.
+  // Environment falls back to the dedicated `?environment=` URL param.
+  // Other controls restore from `_a.controlSelections`.
+  // Uses a ref so Controls don't re-initialise when the URL changes.
+  const [initialSelections] = useState<Record<string, string[]>>(() => {
+    const restored = getRestoredControlSelections() ?? {};
+    return {
+      ...restored,
+      'service.environment':
+        restored['service.environment'] ??
+        (environment !== ENVIRONMENT_ALL.value ? [environment] : []),
+    };
+  });
+
+  // Seed context highlight from restored URL selections immediately (before Controls fire).
+  useEffect(() => {
+    setHighlightedServiceNames(initialSelections['service.name'] ?? []);
+  }, [initialSelections, setHighlightedServiceNames]);
+
+  // Keep context highlight in sync with the active Service name control.
+  useEffect(() => {
+    if (!hasControlsFired.current) return;
+    const selections = extractSelectionsFromFilters(panelFilters);
+    setHighlightedServiceNames(selections['service.name'] ?? []);
+  }, [panelFilters, extractSelectionsFromFilters, setHighlightedServiceNames]);
+
+  // When the URL restores non-environment control selections (e.g. Explore →
+  // global map with service.name), wait for Controls to apply them before
+  // publishing esQuery. Otherwise we fetch the unfiltered map first, then
+  // refetch filtered — which flashes/reloads the graph.
+  const hasRestoredNonEnvControlSelections = useMemo(() => {
+    const { 'service.environment': _env, ...rest } = initialSelections;
+    return Object.values(rest).some((values) => values.length > 0);
+  }, [initialSelections]);
+
   // Rebuild esQuery whenever any input changes, but only propagate a new
   // reference when the serialized form actually differs (avoids refetches
   // from semantically identical object references).
   const prevEsQueryStringRef = useRef<string | undefined>(undefined);
   useEffect(() => {
     if (!dataView) return;
+    if (hasRestoredNonEnvControlSelections && !hasControlsFired.current) {
+      return;
+    }
     const built = buildEsQuery(
       dataView,
       [{ query: '', language: 'kuery' }],
@@ -173,21 +232,14 @@ export function ServiceMapSearchBar() {
       prevEsQueryStringRef.current = serialized;
       setEsQuery(built);
     }
-  }, [dataView, filterBarFilters, panelFiltersWithoutEnv, kibanaQuerySettings, setEsQuery]);
-
-  // Seed the Controls dropdowns from the URL on mount.
-  // Environment falls back to the dedicated `?environment=` URL param.
-  // Other controls restore from `_a.controlSelections`.
-  // Uses a ref so Controls don't re-initialise when the URL changes.
-  const [initialSelections] = useState(() => {
-    const restored = getRestoredControlSelections() ?? {};
-    return {
-      ...restored,
-      'service.environment':
-        restored['service.environment'] ??
-        (environment !== ENVIRONMENT_ALL.value ? [environment] : []),
-    };
-  });
+  }, [
+    dataView,
+    filterBarFilters,
+    panelFiltersWithoutEnv,
+    kibanaQuerySettings,
+    setEsQuery,
+    hasRestoredNonEnvControlSelections,
+  ]);
 
   return (
     <>

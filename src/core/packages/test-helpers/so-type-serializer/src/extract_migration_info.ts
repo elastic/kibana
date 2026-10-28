@@ -21,6 +21,7 @@ import { aggregateMappingAdditions } from '@kbn/core-saved-objects-base-server-i
 import type { SavedObjectsModelChange } from '@kbn/core-saved-objects-server';
 import { createHash } from 'crypto';
 import { type Type, isConfigSchema } from '@kbn/config-schema';
+import { flattenMappings } from './flatten_mappings';
 
 export interface SavedObjectTypeMigrationInfo {
   name: string;
@@ -44,6 +45,7 @@ export interface ModelVersionSummary {
   schemas: {
     create: false | string | Record<string, unknown>;
     forwardCompatibility: false | string | Record<string, unknown>;
+    update?: Record<string, unknown>;
   };
 }
 
@@ -95,7 +97,10 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
     convertToMultiNamespaceTypeVersion: soType.convertToMultiNamespaceTypeVersion,
     migrationVersions,
     schemaVersions,
-    mappings: getFlattenedObject(soType.mappings ?? {}),
+    // Preserve empty objects (e.g. `properties: {}`) so the flatten/unflatten
+    // round-trip used by the Saved Objects check is lossless. `getFlattenedObject`
+    // would drop them, producing invalid mappings that break the migrator.
+    mappings: flattenMappings(soType.mappings ?? {}),
     hasExcludeOnUpgrade: !!soType.excludeOnUpgrade,
     modelVersions,
   };
@@ -117,12 +122,13 @@ const getSerializedSchemas = (
       create: false as const,
     };
   }
-  const { forwardCompatibility, create } = schemas;
+  const { forwardCompatibility, create, update } = schemas;
   return {
     forwardCompatibility: forwardCompatibility
       ? serializeSchema(forwardCompatibility)
       : (false as const),
     create: create ? serializeSchema(create) : (false as const),
+    ...(update && { update: serializeSchema(update) }),
   };
 };
 

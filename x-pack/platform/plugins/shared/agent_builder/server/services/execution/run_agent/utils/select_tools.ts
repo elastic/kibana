@@ -8,26 +8,22 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { defaultAgentToolIds } from '@kbn/agent-builder-common';
 import { ToolOrigin, ToolType, filterToolsBySelection } from '@kbn/agent-builder-common';
+import { contextEngineMemoryTools } from '@kbn/agent-builder-common/tools';
 import type {
   ToolProvider,
   ExecutableTool,
   ScopedRunner,
-  BuiltinToolDefinition,
+  InternalBuiltinToolDefinition,
 } from '@kbn/agent-builder-server';
 import type { AgentConfiguration, ToolSelection } from '@kbn/agent-builder-common';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { AttachmentsService, SkillsService } from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
-import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { getLatestVersion, toAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
-import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
-import type { TodoStateManager } from '@kbn/agent-builder-server/runner';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
-import { createTodoTool } from '../../../tools/builtin/todo';
-import { getStoreTools } from '../../runner/store';
+import type { AiIndexCatalogEntry } from '../types';
 import type { ProcessedConversation } from './prepare_conversation';
 
 export interface SelectToolsResult {
@@ -43,12 +39,11 @@ export const selectTools = async ({
   request,
   toolProvider,
   agentConfiguration,
+  aiIndexCatalog,
+  aiIndicesEnabled,
   attachmentsService,
-  filestore,
   spaceId,
   runner,
-  experimentalFeatures,
-  todoStateManager,
 }: {
   conversation: ProcessedConversation;
   previousDynamicToolIds: string[];
@@ -57,12 +52,11 @@ export const selectTools = async ({
   request: KibanaRequest;
   toolProvider: ToolProvider;
   attachmentsService: AttachmentsService;
-  filestore: IFileStore;
   agentConfiguration: AgentConfiguration;
+  aiIndexCatalog?: AiIndexCatalogEntry[];
+  aiIndicesEnabled: boolean;
   spaceId: string;
   runner: ScopedRunner;
-  experimentalFeatures: ExperimentalFeatures;
-  todoStateManager: TodoStateManager;
 }): Promise<SelectToolsResult> => {
   const formatContext: AttachmentFormatContext = { request, spaceId };
 
@@ -86,14 +80,10 @@ export const selectTools = async ({
     runner,
   });
 
-  // create tools for filesystem (only if feature is enabled)
-  const filestoreTools = experimentalFeatures.filestore
-    ? getStoreTools({ filestore }).map((tool) => builtinToolToExecutable({ tool, runner }))
-    : [];
-
-  const todoTools = experimentalFeatures.todos
-    ? [builtinToolToExecutable({ tool: createTodoTool({ todoStateManager }), runner })]
-    : [];
+  // The read tools come from the `ki-retrieval` skill, which carries the guidance for using them.
+  // Memory tools have no skill of their own, so they stay static.
+  const hasMemoryEnabledAiIndex =
+    aiIndexCatalog?.some(({ memoryEnabled }) => memoryEnabled) ?? false;
 
   // pick tools from provider (from agent config and attachment-type tools)
   const staticRegistryTools = await pickTools({
@@ -102,6 +92,9 @@ export const selectTools = async ({
       ...agentConfiguration.tools,
       ...(agentConfiguration.enable_elastic_capabilities
         ? [{ tool_ids: defaultAgentToolIds }]
+        : []),
+      ...(aiIndicesEnabled && hasMemoryEnabledAiIndex
+        ? [{ tool_ids: Object.values(contextEngineMemoryTools) }]
         : []),
     ],
     toolProvider,
@@ -112,8 +105,6 @@ export const selectTools = async ({
     ...withOrigin(versionedAttachmentBoundTools, ToolOrigin.inline),
     ...withOrigin(versionedAttachmentTools, ToolOrigin.internal),
     ...withOrigin(staticRegistryTools, ToolOrigin.registry),
-    ...withOrigin(filestoreTools, ToolOrigin.internal),
-    ...withOrigin(todoTools, ToolOrigin.internal),
   ];
 
   const dedupedStaticTools = new Map<string, ExecutableToolWithOrigin>();
@@ -182,7 +173,7 @@ export const builtinToolToExecutable = ({
   tool,
   runner,
 }: {
-  tool: BuiltinToolDefinition;
+  tool: InternalBuiltinToolDefinition;
   runner: ScopedRunner;
 }): ExecutableTool => {
   return {
@@ -195,6 +186,7 @@ export const builtinToolToExecutable = ({
     experimental: tool.experimental ?? false,
     getSchema: () => tool.schema,
     summarizeToolReturn: tool.summarizeToolReturn,
+    maxResultTokens: tool.maxResultTokens,
     execute: async (params) => {
       return runner.runInternalTool({
         ...params,
@@ -238,15 +230,8 @@ const getVersionedAttachmentBoundTools = async ({
       continue;
     }
 
-    const input: Attachment = {
-      id: attachment.id,
-      type: attachment.type,
-      data: latest.data as Attachment['data'],
-      ...(attachment.hidden !== undefined ? { hidden: attachment.hidden } : {}),
-    };
-
     try {
-      const formatted = await definition.format(input, formatContext);
+      const formatted = await definition.format(toAttachment(attachment, latest), formatContext);
       const boundedTools = formatted.getBoundedTools ? await formatted.getBoundedTools() : [];
       for (const tool of boundedTools) {
         tools.push(attachmentsService.convertAttachmentTool(tool));

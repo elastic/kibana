@@ -14,7 +14,8 @@ import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import {
-  initializeUnsavedChanges,
+  apiHasDisableTriggers,
+  initializeStateApi,
   initializeTitleManager,
   titleComparators,
 } from '@kbn/presentation-publishing';
@@ -47,18 +48,14 @@ export const getImageEmbeddableFactory = () => {
       const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.image_config);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
-      function serializeState() {
-        return {
+      const stateApi = initializeStateApi<ImageEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           ...drilldownsManager.getLatestState(),
           image_config: imageConfig$.getValue(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<ImageEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           imageConfig$.pipe(
@@ -74,17 +71,17 @@ export const getImageEmbeddableFactory = () => {
             image_config: 'deepEquality',
           };
         },
-        onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
-          drilldownsManager.reinitializeState(lastSaved ?? {});
-          if (lastSaved) imageConfig$.next(lastSaved.image_config);
+        applySerializedState: (nextState) => {
+          titleManager.reinitializeState(nextState);
+          drilldownsManager.reinitializeState(nextState);
+          imageConfig$.next(nextState.image_config);
         },
       });
 
       const embeddableApi = finalizeApi({
         ...titleManager.api,
         ...drilldownsManager.api,
-        ...unsavedChangesApi,
+        ...stateApi,
         dataLoading$,
         supportedTriggers: () => IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS,
 
@@ -112,13 +109,15 @@ export const getImageEmbeddableFactory = () => {
           i18n.translate('imageEmbeddable.imageEmbeddableFactory.displayName.edit', {
             defaultMessage: 'image',
           }),
-        serializeState,
       });
 
       const privateImageEmbeddableApi = {
         ...embeddableApi,
         imageConfig$,
         setDataLoading: (loading: boolean | undefined) => dataLoading$.next(loading),
+        disableTriggers$: apiHasDisableTriggers(parentApi)
+          ? parentApi.disableTriggers$
+          : new BehaviorSubject<boolean>(false),
       };
 
       return {

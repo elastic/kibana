@@ -8,3 +8,4 @@
  */
 
 export { WorkflowExecutionDetail } from './ui/workflow_execution_detail';
+export { WorkflowExecutionFlyout } from './ui/workflow_execution_flyout';

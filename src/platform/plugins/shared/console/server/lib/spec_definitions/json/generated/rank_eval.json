@@ -19,6 +19,68 @@
         "dfs_query_then_fetch"
       ]
     },
+    "data_autocomplete_rules": {
+      "requests": [
+        {
+          "id": "",
+          "request": {
+            "__one_of": [
+              {
+                "query": {
+                  "__scope_link": "GLOBAL.query"
+                },
+                "size": ""
+              },
+              {
+                "__scope_link": "GLOBAL.query"
+              }
+            ]
+          },
+          "ratings": [
+            {
+              "_id": "",
+              "_index": "",
+              "rating": ""
+            }
+          ],
+          "template_id": "",
+          "params": {}
+        }
+      ],
+      "metric": {
+        "precision": {
+          "k": "",
+          "relevant_rating_threshold": "",
+          "ignore_unlabeled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
+        },
+        "recall": {
+          "k": "",
+          "relevant_rating_threshold": ""
+        },
+        "mean_reciprocal_rank": {
+          "k": "",
+          "relevant_rating_threshold": ""
+        },
+        "dcg": {
+          "k": "",
+          "normalize": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
+        },
+        "expected_reciprocal_rank": {
+          "k": "",
+          "maximum_relevance": ""
+        }
+      }
+    },
     "methods": [
       "GET",
       "POST"

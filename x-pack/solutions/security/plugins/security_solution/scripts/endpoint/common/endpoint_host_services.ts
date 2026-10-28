@@ -45,6 +45,7 @@ export interface CreateAndEnrollEndpointHostResponse {
 /**
  * Creates a new virtual machine (host) and enrolls that with Fleet
  */
+
 export const createAndEnrollEndpointHost = async ({
   kbnClient,
   log: _log,
@@ -71,8 +72,11 @@ export const createAndEnrollEndpointHost = async ({
   const isRunningInCI = Boolean(process.env.CI);
   const vmName =
     hostname ?? `test-host-${activeSpaceId}-${Math.random().toString().substring(2, 6)}`;
-  const { url: agentUrl } = await getAgentDownloadUrl(agentVersion, useClosestVersionMatch, log);
-  const agentDownload = isRunningInCI ? await downloadAndStoreAgent(agentUrl) : undefined;
+  const agentUrlInfo = await getAgentDownloadUrl(agentVersion, useClosestVersionMatch, log);
+  // Pass fileName so the Vagrant extract dir matches enroll's `./${dirName}/elastic-agent`.
+  const agentDownload = isRunningInCI
+    ? await downloadAndStoreAgent(agentUrlInfo.url, agentUrlInfo.fileName, agentUrlInfo.shaUrl)
+    : undefined;
 
   // TODO: remove dependency on env. var and keep function pure
   const hostVm = process.env.CI

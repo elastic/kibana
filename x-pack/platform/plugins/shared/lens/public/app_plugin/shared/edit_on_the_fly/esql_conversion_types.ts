@@ -9,13 +9,13 @@ import type { IconType } from '@elastic/eui';
 
 import type {
   DatasourceStates,
+  EsqlConversionFailureReason,
   FormBasedLayer,
   FramePublicAPI,
   LensLayerType,
+  OriginalColumn,
   TypedLensSerializedState,
 } from '@kbn/lens-common';
-
-import type { OriginalColumn } from '../../../../common/types';
 
 /**
  * Output from ES|QL query generation containing column mappings and partial row info.
@@ -43,6 +43,8 @@ export interface ConvertibleLayer {
   query: string;
   isConvertibleToEsql: boolean;
   conversionData: EsqlConversionData;
+  /** Why the layer could not be converted; only set when isConvertibleToEsql is false. */
+  failureReason?: EsqlConversionFailureReason;
 }
 
 /** Type alias for ES|QL query strings. */

@@ -15,21 +15,25 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 
-import type { IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-plugin/common';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { createVegaVisualization } from '../vega_visualization';
 import type { VegaVisualizationDependencies } from '../plugin';
-import type { VegaParser } from '../data_model/vega_parser';
+import type { VegaRenderDescriptor } from '../data_model/types';
+import type { VegaInspectorAdapters } from '../vega_inspector';
+import type { VegaEventHandler } from '../types';
 
 import { GlobalVegaVisStyles } from './vega_vis.styles';
 
 interface VegaVisComponentProps {
   deps: VegaVisualizationDependencies;
-  fireEvent: IInterpreterRenderHandlers['event'];
+  fireEvent: VegaEventHandler;
+  /** Receives the view's errors and inspectable data; owned by the parent, never by the view. */
+  inspectorAdapters?: VegaInspectorAdapters;
   renderComplete: () => void;
-  renderMode: RenderMode;
-  visData: VegaParser;
+  /** Whether runtime Vega warnings are surfaced in the panel. Enabled while authoring a spec. */
+  showWarnings: boolean;
+  visData: VegaRenderDescriptor;
 }
 
 type VegaVisController = InstanceType<ReturnType<typeof createVegaVisualization>>;
@@ -46,9 +50,10 @@ const vegaVisStyles = {
 export const VegaVisComponent = ({
   visData,
   fireEvent,
+  inspectorAdapters,
   renderComplete,
   deps,
-  renderMode,
+  showWarnings,
 }: VegaVisComponentProps) => {
   const styles = useMemoCss(vegaVisStyles);
   const chartDiv = useRef<HTMLDivElement>(null);
@@ -57,18 +62,18 @@ export const VegaVisComponent = ({
 
   useEffect(() => {
     if (chartDiv.current) {
-      const VegaVis = createVegaVisualization(deps, renderMode);
+      const VegaVis = createVegaVisualization(deps, showWarnings);
       visController.current = new VegaVis(chartDiv.current, fireEvent);
     }
     return () => {
       visController.current?.destroy();
       visController.current = null;
     };
-  }, [deps, fireEvent, renderMode]);
+  }, [deps, fireEvent, showWarnings]);
 
   useEffect(() => {
     const asyncRender = async (visCtrl: VegaVisController) => {
-      await visCtrl.render(visData);
+      await visCtrl.render(visData, inspectorAdapters);
       renderCompleted.current = true;
       renderComplete();
     };
@@ -76,7 +81,7 @@ export const VegaVisComponent = ({
     if (visController.current) {
       asyncRender(visController.current);
     }
-  }, [renderComplete, visData]);
+  }, [inspectorAdapters, renderComplete, visData]);
 
   const onContainerResize: EuiResizeObserverProps['onResize'] = useCallback((dimensions) => {
     if (renderCompleted.current) {

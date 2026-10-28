@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { AttachmentType, AttachmentDataOf } from './attachment_types';
+import type { Attachment } from './attachments';
 
 /**
  * Represents a single version of an attachment's content.
@@ -50,6 +51,8 @@ export interface VersionedAttachment<
   readonly?: boolean;
   /** The client-provided ID if this attachment was created with one (e.g., via flyout configuration) */
   client_id?: string;
+  /** Stable group identifier; shared by attachments submitted together as one logical entity. */
+  group_id?: string;
   /**
    * Origin/reference info for attachments created from external sources.
    * For saved-object-backed types this is the saved object ID.
@@ -81,6 +84,17 @@ export function isVersionedAttachmentWithOrigin<
   attachment: VersionedAttachment<Type, DataType>
 ): attachment is VersionedAttachmentWithOrigin<Type, DataType> {
   return attachment.origin !== undefined;
+}
+
+/**
+ * Returns true when `attachment.type` matches `type`. Narrows `attachment`'s data
+ * to the {@link AttachmentDataOf} type registered for that {@link AttachmentType}.
+ */
+export function isVersionedAttachmentOfType<Type extends AttachmentType>(
+  attachment: VersionedAttachment,
+  type: Type
+): attachment is VersionedAttachment<Type> {
+  return attachment.type === type;
 }
 
 /**
@@ -153,6 +167,8 @@ export interface AttachmentInput<
   hidden?: boolean;
   /** Whether the attachment should be read-only */
   readonly?: boolean;
+  /** Stable group identifier; set automatically by flattenAttachments when part of an AttachmentGroup. */
+  group_id?: string;
 }
 
 // Zod schemas for validation
@@ -198,6 +214,7 @@ export const versionedAttachmentSchema = z.object({
   client_id: z.string().optional(),
   origin: z.string().optional(),
   origin_snapshot_at: z.string().optional(),
+  group_id: z.string().max(256).optional(),
 });
 
 export const attachmentInputSchema = z.object({
@@ -208,7 +225,35 @@ export const attachmentInputSchema = z.object({
   description: z.string().optional(),
   hidden: z.boolean().optional(),
   readonly: z.boolean().optional(),
+  group_id: z.string().max(256).optional(),
 });
+
+/**
+ * A named group of attachments that appears as a single chip in the UI.
+ * The group is a client-side-only concept — it is flattened to individual
+ * AttachmentInput items at the serialization boundary before being sent to the server.
+ */
+export interface AttachmentGroup {
+  type: 'group';
+  /** Stable identifier for the group */
+  id: string;
+  /** Display label shown on the chip, e.g. "5 Alerts" */
+  label: string;
+  /** The individual attachment items that make up this group */
+  items: AttachmentInput[];
+}
+
+export const attachmentGroupSchema = z.object({
+  type: z.literal('group'),
+  id: z.string().max(256),
+  label: z.string().max(1024),
+  items: z.array(attachmentInputSchema),
+});
+
+export const isAttachmentGroup = (a: ConversationAttachment): a is AttachmentGroup =>
+  a.type === 'group';
+
+export type ConversationAttachment = AttachmentInput | AttachmentGroup;
 
 export const attachmentDiffSchema = z.object({
   change_type: z.enum(['create', 'update', 'delete', 'restore']),
@@ -238,6 +283,22 @@ export const getVersion = <T = unknown>(
 };
 
 /**
+ * The attachment as it was at one of its versions, the shape attachment types receive.
+ */
+export const toAttachment = <Type extends string, DataType>(
+  { id, type, description, hidden, origin, versions }: VersionedAttachment<Type, DataType>,
+  { version, data, created_at: createdAt }: AttachmentVersion<DataType>
+): Attachment<Type, DataType> => ({
+  id,
+  type,
+  data,
+  description,
+  hidden,
+  origin,
+  versionData: { version, versionCount: versions.length, createdAt },
+});
+
+/**
  * Creates a unique identifier for a specific attachment version.
  */
 export const createVersionId = (attachmentId: string, version: number): string => {
@@ -263,9 +324,7 @@ export const parseVersionId = (
 /**
  * Checks if an attachment's current version is active (not deleted).
  */
-export const isAttachmentActive = <T = unknown>(
-  attachment: VersionedAttachment<string, T>
-): boolean => {
+export const isAttachmentActive = (attachment: Pick<VersionedAttachment, 'active'>): boolean => {
   return attachment.active !== false;
 };
 
@@ -310,6 +369,8 @@ export const estimateTokens = (data: unknown): number => {
 export interface UpdateOriginResponse {
   success: boolean;
   attachment: VersionedAttachment;
+  /** Set when the origin was saved but a follow-up action for the attachment type failed. */
+  warnings?: string[];
 }
 
 /**

@@ -11,6 +11,7 @@ import { AGENTS_PREFIX } from '../../constants';
 
 import { getAgentsByKuery } from './crud';
 import { unenrollAgent } from './unenroll';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services/version_specific_policies_utils';
 
 export async function unenrollForAgentPolicyId(
   soClient: SavedObjectsClientContract,
@@ -23,7 +24,11 @@ export async function unenrollForAgentPolicyId(
   let page = 1;
   while (hasMore) {
     const { agents } = await getAgentsByKuery(esClient, soClient, {
-      kuery: `${AGENTS_PREFIX}.policy_id:"${policyId}"`,
+      kuery: buildPolicyBaseIdWithFallbackKuery(
+        policyId,
+        `${AGENTS_PREFIX}.policy_base_id`,
+        `${AGENTS_PREFIX}.policy_id`
+      ),
       showInactive: revoke,
       page: page++,
       perPage: 1000,

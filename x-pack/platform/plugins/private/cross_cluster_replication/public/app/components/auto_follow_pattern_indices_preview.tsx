@@ -7,9 +7,9 @@
 
 import React, { type FC } from 'react';
 
-import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { getPreviewIndicesFromAutoFollowPattern } from '../services/auto_follow_pattern';
 
 interface Props {
@@ -37,7 +37,7 @@ export const AutoFollowPatternIndicesPreview: FC<Props> = ({
   );
 
   return (
-    <EuiCallOut title={title} iconType="mapping" data-test-subj="autoFollowPatternIndicesPreview">
+    <KbnInfoCallout title={title} data-test-subj="autoFollowPatternIndicesPreview">
       <FormattedMessage
         id="xpack.crossClusterReplication.autoFollowPatternForm.indicesPreviewDescription"
         defaultMessage="The above settings will generate index names that look like this:"
@@ -53,6 +53,6 @@ export const AutoFollowPatternIndicesPreview: FC<Props> = ({
           )
         )}
       </ul>
-    </EuiCallOut>
+    </KbnInfoCallout>
   );
 };

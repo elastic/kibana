@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { disableSyncPrivateLocationTask } from '../../../tasks/sync_private_locations_monitors_task';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -14,8 +14,8 @@ export const syncParamsSettingsParamsRoute: SyntheticsRestApiRouteFactory = () =
   method: 'PUT',
   path: SYNTHETICS_API_URLS.SYNC_GLOBAL_PARAMS_SETTINGS,
   validate: {
-    body: schema.object({
-      enable: schema.boolean(),
+    body: z.strictObject({
+      enable: z.boolean(),
     }),
   },
   writeAccess: true,

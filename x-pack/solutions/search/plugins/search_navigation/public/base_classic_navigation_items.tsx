@@ -66,14 +66,6 @@ export const BaseClassicNavItems: ClassicNavItem[] = [
         id: 'index_management',
       },
       {
-        'data-test-subj': 'searchSideNav-Playground',
-        deepLink: {
-          link: 'searchPlayground',
-          shouldShowActiveForSubroutes: true,
-        },
-        id: 'playground',
-      },
-      {
         'data-test-subj': 'searchSideNav-SearchApplications',
         deepLink: {
           link: 'enterpriseSearchApplications:searchApplications',
@@ -86,6 +78,14 @@ export const BaseClassicNavItems: ClassicNavItem[] = [
           link: 'agent_builder',
         },
         id: 'agent_builder',
+      },
+      {
+        'data-test-subj': 'searchSideNav-Context',
+        deepLink: {
+          link: 'context_engine',
+          shouldShowActiveForSubroutes: true,
+        },
+        id: 'context_engine',
       },
     ],
     name: i18n.translate('xpack.searchNavigation.classicNav.applicationsTitle', {

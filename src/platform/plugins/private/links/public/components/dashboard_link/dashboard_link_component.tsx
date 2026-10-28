@@ -10,31 +10,36 @@
 import classNames from 'classnames';
 import React, { useMemo } from 'react';
 
-import type { UseEuiTheme } from '@elastic/eui';
-import { EuiListGroupItem } from '@elastic/eui';
+import { EuiListGroupItem, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
+import type { DashboardNavigationOptions } from '@kbn/dashboard-navigation-options-schema';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { isFilterPinned } from '@kbn/es-query';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import type { DashboardNavigationOptions } from '@kbn/dashboard-navigation-options-schema';
-import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
+import { useBatchedPublishingSubjects, type ViewMode } from '@kbn/presentation-publishing';
 
-import type { LinksLayoutType } from '../../../common/content_management';
-import { DASHBOARD_LINK_TYPE, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
+import { DASHBOARD_LINK_TYPE, LINKS_VERTICAL_LAYOUT } from '../../../common/constants';
+import type { LinksLayoutType } from '../../../common/types';
+import type { DashboardLink } from '../../../server';
 import { trackUiMetric } from '../../services/kibana_services';
 import type { LinksParentApi, ResolvedLink } from '../../types';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import type { DashboardLink } from '../../../server';
 
 export interface DashboardLinkProps {
   link: ResolvedLink;
   layout: LinksLayoutType;
+  viewMode: ViewMode;
   parentApi: LinksParentApi;
 }
 
-export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLinkProps) => {
+export const DashboardLinkComponent = ({
+  link,
+  layout,
+  viewMode,
+  parentApi,
+}: DashboardLinkProps) => {
   const [
     parentDashboardId,
     parentDashboardTitle,
@@ -163,7 +168,7 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
       }}
       iconType={link.error ? 'warning' : undefined}
       iconProps={{ className: 'dashboardLinkIcon' }}
-      isDisabled={Boolean(link.error)}
+      isDisabled={viewMode === 'non-interactive' || Boolean(link.error)}
       className={classNames('linksPanelLink', {
         linkCurrent: link.destination === parentDashboardId,
         dashboardLinkError: Boolean(link.error),
@@ -183,9 +188,14 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     '&.linkCurrent': {
       borderRadius: 0,
       cursor: 'default',
-      '& .euiListGroupItem__text': {
+      '& .euiListItemLayout__text': {
         color: euiTheme.colors.textPrimary,
       },
+    },
+
+    // vertical layout - current dashboard border offset styles
+    '.verticalLayoutWrapper & .euiListItemLayout__text': {
+      paddingInlineStart: euiTheme.size.s,
     },
 
     // vertical layout - current dashboard link styles
@@ -195,7 +205,7 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
         // add left border for current dashboard
         content: "''",
         position: 'absolute',
-        height: '75%',
+        height: '70%',
         width: `calc(.5 * ${euiTheme.size.xs})`,
         backgroundColor: euiTheme.colors.primary,
       },
@@ -204,16 +214,22 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     // horizontal layout - current dashboard link styles
     '.horizontalLayoutWrapper &.linkCurrent': {
       padding: `0 ${euiTheme.size.s}`,
-      '& .euiListGroupItem__text': {
+      '& .euiListItemLayout__text': {
         // add bottom border for current dashboard
         boxShadow: `${euiTheme.colors.textPrimary} 0 calc(-.5 * ${euiTheme.size.xs}) inset`,
         paddingInline: 0,
+        // EuiListGroupItem gives its label span 6px of block padding, and the inset box-shadow above
+        // is drawn at the bottom of that padding. Moving 2px of the bottom padding into margin raises
+        // the underline by 2px while keeping the item's outer height, so the label stays aligned with
+        // the other links.
+        paddingBlockEnd: euiTheme.size.xs,
+        marginBlockEnd: euiTheme.size.xxs,
       },
     },
 
     // dashboard not found error styles
     '&.dashboardLinkError': {
-      '&.dashboardLinkError--noLabel .euiListGroupItem__text': {
+      '&.dashboardLinkError--noLabel .euiListItemLayout__text': {
         fontStyle: 'italic',
       },
 

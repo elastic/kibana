@@ -12,7 +12,7 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import type { ParsedQuery } from 'query-string';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { RouteComponentProps } from 'react-router-dom';
@@ -34,8 +34,7 @@ import {
   createDashboardEditUrl,
   createDashboardListingFilterUrl,
 } from '../utils/urls';
-import { DASHBOARD_DURATION_START_MARK } from '../dashboard_api/performance/dashboard_duration_start_mark';
-import type { DashboardApi } from '../dashboard_api/types';
+import { DASHBOARD_DURATION_START_MARK } from '../dashboard_api/telemetry/dashboard_duration_start_mark';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -49,7 +48,6 @@ export interface DashboardMountProps {
   element: AppMountParameters['element'];
   coreStart: CoreStart;
   mountContext: DashboardMountContextProps;
-  setDashboardAppApi: (api: DashboardApi | undefined) => void;
 }
 
 export async function mountApp({
@@ -57,7 +55,6 @@ export async function mountApp({
   element,
   appUnMounted,
   mountContext,
-  setDashboardAppApi,
 }: DashboardMountProps) {
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
 
@@ -89,6 +86,7 @@ export async function mountApp({
     routeParams: ParsedQuery<string>
   ): DashboardEmbedSettings | undefined => {
     return {
+      isEmbeddedViaUrl: true,
       forceShowTopNavMenu: routeParams[dashboardUrlParams.showTopMenu] === 'true',
       forceShowQueryInput: routeParams[dashboardUrlParams.showQueryInput] === 'true',
       forceShowDatePicker: routeParams[dashboardUrlParams.showTimeFilter] === 'true',
@@ -106,7 +104,7 @@ export async function mountApp({
       performance.mark(DASHBOARD_DURATION_START_MARK);
     }
 
-    const routeParams = parse(routeProps.history.location.search);
+    const routeParams = queryString.parse(routeProps.history.location.search);
     if (routeParams.embed === 'true' && !globalEmbedSettings) {
       globalEmbedSettings = getDashboardEmbedSettings(routeParams);
     }
@@ -118,7 +116,6 @@ export async function mountApp({
         savedDashboardId={routeProps.match.params.id}
         redirectTo={redirect}
         expandedPanelId={routeProps.match.params.expandedPanelId}
-        setDashboardAppApi={setDashboardAppApi}
       />
     );
   };
@@ -130,7 +127,7 @@ export async function mountApp({
     embeddableService.getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true);
 
     coreServices.chrome.docTitle.change(getDashboardPageTitle());
-    const routeParams = parse(routeProps.history.location.search);
+    const routeParams = queryString.parse(routeProps.history.location.search);
     const title = (routeParams.title as string) || undefined;
     const filter = (routeParams.filter as string) || undefined;
     return (

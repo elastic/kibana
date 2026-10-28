@@ -11,6 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
+import { useSyntheticsDataViewIndexPatterns } from '../hooks/use_synthetics_data_view_index_patterns';
 import { MEDIAN_DURATION_LABEL } from './duration_panel';
 
 interface DurationSparklinesProps {
@@ -27,6 +28,7 @@ export const DurationSparklines = (props: DurationSparklinesProps) => {
   } = useKibana<ClientPluginsStart>();
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
   const { euiTheme } = useEuiTheme();
+  const dataTypesIndexPatterns = useSyntheticsDataViewIndexPatterns();
 
   if (!queryIdFilter) {
     return null;
@@ -40,6 +42,7 @@ export const DurationSparklines = (props: DurationSparklinesProps) => {
         axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
         legendIsVisible={false}
         hideTicks={true}
+        dataTypesIndexPatterns={dataTypesIndexPatterns}
         attributes={[
           {
             seriesType: 'area',

@@ -18,6 +18,7 @@ import type {
 } from '@kbn/unified-histogram/types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ParsedMetricItem, MetricUnit, Dimension } from '../../../types';
+import { METRICS_GRID_SETTINGS_DEFAULTS, METRICS_GRID_SORT_DEFAULTS } from '@kbn/discover-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 import { getFetch$Mock, getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
@@ -56,13 +57,16 @@ const useMetricsExperienceStateMock =
   >;
 
 const usePaginationMock = hooks.usePagination as jest.MockedFunction<typeof hooks.usePagination>;
+const useFetchHistogramBoundsMock = hooks.useFetchHistogramBounds as jest.MockedFunction<
+  typeof hooks.useFetchHistogramBounds
+>;
 
 const dimensions: Dimension[] = [{ name: 'foo' }, { name: 'qux' }];
 
 const metricItems: ParsedMetricItem[] = [
   {
     metricName: 'field1',
-    dataStream: 'metrics-*',
+    indexName: 'metrics-*',
     units: ['ms'],
     metricTypes: ['counter'],
     fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -70,7 +74,7 @@ const metricItems: ParsedMetricItem[] = [
   },
   {
     metricName: 'field2',
-    dataStream: 'metrics-*',
+    indexName: 'metrics-*',
     units: ['ms'],
     metricTypes: ['counter'],
     fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -87,7 +91,6 @@ describe('MetricsExperienceGridContent', () => {
     jest.clearAllMocks();
 
     fetchParams = getFetchParamsMock({
-      dataView: { getIndexPattern: () => 'metrics-*', isTimeBased: () => true } as any,
       filters: [],
       query: { esql: 'FROM metrics-*' },
       esqlVariables: [],
@@ -111,6 +114,7 @@ describe('MetricsExperienceGridContent', () => {
       },
       histogramCss: { name: '', styles: '' },
       isTabSelected: true,
+      isComponentVisible: true,
     };
 
     useMetricsExperienceStateMock.mockReturnValue({
@@ -122,10 +126,16 @@ describe('MetricsExperienceGridContent', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      onExitFullscreen: jest.fn(),
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
+      metricsSort: METRICS_GRID_SORT_DEFAULTS,
+      onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
+      gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramVisualization: 'lnsHeatmap' },
+      recentlyExploredMetrics: [],
+      onGridSettingsChange: jest.fn(),
     });
 
     usePaginationMock.mockReturnValue({
@@ -133,6 +143,8 @@ describe('MetricsExperienceGridContent', () => {
       totalPages: 1,
       totalCount: 1,
     });
+
+    useFetchHistogramBoundsMock.mockReturnValue({ loading: false, bounds: new Map() });
   });
 
   afterEach(() => {
@@ -170,7 +182,7 @@ describe('MetricsExperienceGridContent', () => {
     const allFieldsSomeWithCpu = Array.from({ length: 20 }, (_, i) => ({
       metricName: i % 2 === 0 ? `cpu_field_${i}` : `mem_field_${i}`,
       dimensionFields: [dimensions[0]],
-      dataStream: 'metrics-*',
+      indexName: 'metrics-*',
       units: ['ms'] as MetricUnit[],
       metricTypes: ['counter'] as MappingTimeSeriesMetricType[],
       fieldTypes: [ES_FIELD_TYPES.LONG] as ES_FIELD_TYPES[],
@@ -185,10 +197,16 @@ describe('MetricsExperienceGridContent', () => {
       searchTerm: 'cpu',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      onExitFullscreen: jest.fn(),
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
+      metricsSort: METRICS_GRID_SORT_DEFAULTS,
+      onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
+      gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramVisualization: 'lnsHeatmap' },
+      recentlyExploredMetrics: [],
+      onGridSettingsChange: jest.fn(),
     });
 
     const cpuMetricItems = allFieldsSomeWithCpu.filter((f) => f.metricName.includes('cpu'));
@@ -239,5 +257,115 @@ describe('MetricsExperienceGridContent', () => {
       (MetricsGrid as jest.Mock).mock.calls.length - 1
     ][0];
     expect(lastCall.dimensions).toEqual([dimensions[0]]);
+  });
+
+  it('fetches histogram bounds for the visible page from the loaded fetch params', () => {
+    const loadedFetchParams = {
+      ...fetchParams,
+      query: { esql: 'TS test-metrics-histograms | WHERE host.name == "a"' },
+    };
+
+    render(
+      <MetricsExperienceGridContent
+        {...defaultProps}
+        fetchParams={loadedFetchParams}
+        loadedFetchParams={loadedFetchParams}
+      />,
+      { wrapper: IntlProvider }
+    );
+
+    expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        enabled: true,
+        metricItems: [metricItems[0]],
+        fetchParams: loadedFetchParams,
+        originalSource: 'test-metrics-histograms',
+        whereStatements: ['host.name == "a"'],
+        profileId: 'test-profile-id',
+      })
+    );
+
+    const { MetricsGrid } = jest.requireMock('./metrics_grid');
+    expect(MetricsGrid).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        histogramBounds: expect.any(Map),
+        histogramBoundsLoading: false,
+      }),
+      expect.anything()
+    );
+  });
+
+  it('builds the histogram bounds fetch from the loaded fetch params, not the in-flight ones', () => {
+    const loadedFetchParams = {
+      ...fetchParams,
+      searchSessionId: 'loaded-session',
+      query: { esql: 'TS test-metrics-histograms | WHERE host.name == "a"' },
+    };
+
+    render(
+      <MetricsExperienceGridContent
+        {...defaultProps}
+        fetchParams={{
+          ...fetchParams,
+          searchSessionId: 'next-session',
+          query: { esql: 'TS in-flight-* | WHERE host.name == "b"' },
+        }}
+        loadedFetchParams={loadedFetchParams}
+      />,
+      { wrapper: IntlProvider }
+    );
+
+    expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        fetchParams: loadedFetchParams,
+        originalSource: 'test-metrics-histograms',
+        whereStatements: ['host.name == "a"'],
+      })
+    );
+  });
+
+  it('sends no fetch params to the histogram bounds hook before METRICS_INFO has landed', () => {
+    render(<MetricsExperienceGridContent {...defaultProps} />, { wrapper: IntlProvider });
+
+    expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        fetchParams: undefined,
+        whereStatements: [],
+        originalSource: undefined,
+      })
+    );
+  });
+
+  it('keeps the histogram bounds fetch enabled while Discover is loading so previous bounds survive', () => {
+    render(<MetricsExperienceGridContent {...defaultProps} isDiscoverLoading />, {
+      wrapper: IntlProvider,
+    });
+
+    expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: true })
+    );
+  });
+
+  it('skips the histogram bounds fetch when a percentile is selected', () => {
+    useMetricsExperienceStateMock.mockReturnValue({
+      ...useMetricsExperienceStateMock(),
+      gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramPercentile: 'p95' },
+    });
+
+    render(<MetricsExperienceGridContent {...defaultProps} />, { wrapper: IntlProvider });
+
+    expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
+  });
+
+  it('keeps the histogram bounds fetch disabled while the chart section is hidden', () => {
+    render(<MetricsExperienceGridContent {...defaultProps} isComponentVisible={false} />, {
+      wrapper: IntlProvider,
+    });
+
+    expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
   });
 });

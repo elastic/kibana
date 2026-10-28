@@ -109,8 +109,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
 
             it(`User ${user.username} cannot delete a case while on a specific case page`, async () => {
-              await testSubjects.click('property-actions-case-ellipses');
-              await testSubjects.missingOrFail('property-actions-case-trash');
+              await cases.singleCase.assertDeleteCaseAbsent();
             });
           });
 
@@ -149,10 +148,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it(`User ${user.username} can update settings`, async () => {
-            await cases.common.selectRadioGroupValue(
-              'closure-options-radio-group',
-              'close-by-pushing'
-            );
+            await cases.common.selectClosureOption('close-by-pushing');
             const toast = await toasts.getElementByIndex(1);
             expect(await toast.getVisibleText()).to.be('Settings successfully updated');
             await toasts.dismissAll();

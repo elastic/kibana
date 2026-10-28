@@ -18,6 +18,9 @@ export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
   job_id: {
     type: 'wildcard',
   },
+  retry_count: {
+    type: 'integer',
+  },
   build: {
     type: 'object',
     properties: {
@@ -140,7 +143,13 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
       mode: {
         type: 'keyword',
       },
+      attributes: {
+        type: 'keyword',
+      },
     },
+  },
+  scope: {
+    type: 'keyword',
   },
   fully_parallel: {
     type: 'boolean',
@@ -163,6 +172,9 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
       pending: {
         type: 'long',
       },
+      flaky: {
+        type: 'long',
+      },
       total: {
         type: 'long',
       },
@@ -176,6 +188,9 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
         properties: fileInfoProperties,
       },
       category: {
+        type: 'keyword',
+      },
+      namespace: {
         type: 'keyword',
       },
     },
@@ -220,6 +235,18 @@ export const testProperties: Record<PropertyName, MappingProperty> = {
   },
   status: {
     type: 'keyword',
+  },
+  attempt: {
+    type: 'short',
+  },
+  outcome: {
+    type: 'keyword',
+  },
+  attempts: {
+    type: 'short',
+  },
+  console_errors: {
+    type: 'match_only_text',
   },
   step: {
     type: 'object',

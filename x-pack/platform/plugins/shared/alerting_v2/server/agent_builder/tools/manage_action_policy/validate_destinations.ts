@@ -5,88 +5,107 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ActionPolicyDestination } from '@kbn/alerting-v2-schemas';
+import type { ValidateWorkflowResponseDto } from '@kbn/workflows';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
-import { ActionPolicyOperationValidationError } from './operations';
+import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
+import {
+  DestinationValidator,
+  type PersistedWorkflowLookup,
+  type ConnectorLookup,
+} from './destination_diagnostics';
 
-export interface WorkflowLookup {
-  getWorkflow: (id: string, spaceId: string) => Promise<{ id: string; name?: string } | null>;
-}
-
-export interface ConnectorLookup {
-  findConnectorById: (id: string) => Promise<{ id: string; name: string } | null>;
-}
+export type {
+  WorkflowDestinationDiagnostic,
+  ValidateDestinationsResult,
+  PersistedWorkflowLookup,
+  ConnectorLookup,
+} from './destination_diagnostics';
 
 export interface ValidateDestinationsDeps {
   attachments: AttachmentStateManager;
-  workflowLookup: WorkflowLookup;
+  persistedWorkflowLookup: PersistedWorkflowLookup;
   connectorLookup: ConnectorLookup;
   spaceId: string;
+  validateWorkflow?: (
+    yaml: string,
+    spaceId: string,
+    request: KibanaRequest
+  ) => Promise<ValidateWorkflowResponseDto>;
+  request?: KibanaRequest;
+  logger?: LoggerServiceContract;
+  /**
+   * Whether structural validation errors (missing manual trigger, wrong or
+   * missing payload `$ref`, alert-trigger alongside manual, invalid payload
+   * field paths) should hard-block (new policies or edits that
+   * introduce/change destinations via `set_destinations`) or surface as
+   * non-blocking warnings (edits that leave an already-persisted, invalid
+   * destination untouched — see #277569). Defaults to `true`.
+   */
+  blockOnStructuralErrors?: boolean;
 }
 
 /**
- * Validates that every destination references a valid workflow.
- * Throws {@link ActionPolicyOperationValidationError} for invalid destinations
- * (bare attachment IDs, connector IDs, or unknown IDs).
+ * Validates that every destination references a valid workflow, and that
+ * each resolved workflow is structurally suitable for action policy dispatch.
+ *
+ * Delegates all resolution, validation, and error formatting to
+ * {@link DestinationValidator}. Throws when any diagnostic is an error;
+ * returns warnings otherwise.
  */
 export async function validateDestinations(
   destinations: ActionPolicyDestination[],
-  { attachments, workflowLookup, connectorLookup, spaceId }: ValidateDestinationsDeps
-): Promise<void> {
-  const activeAttachments = attachments.getActive();
+  deps: ValidateDestinationsDeps
+) {
+  const {
+    attachments,
+    persistedWorkflowLookup,
+    connectorLookup,
+    spaceId,
+    validateWorkflow,
+    request,
+    logger,
+    blockOnStructuralErrors,
+  } = deps;
 
-  const workflowIds = new Set<string>();
+  const validator = new DestinationValidator({
+    blockOnStructuralErrors: blockOnStructuralErrors ?? true,
+    spaceId,
+    persistedWorkflowLookup,
+    connectorLookup,
+    attachmentIndex: buildAttachmentIndex(attachments),
+    validateWorkflow,
+    request,
+    logger,
+  });
+
+  for (const dest of destinations) {
+    await validator.resolveDestination(dest.id);
+  }
+
+  return validator.finalize();
+}
+
+/** Indexes workflow attachments by workflowId and attachment ID for fast lookup. */
+function buildAttachmentIndex(attachments: AttachmentStateManager) {
+  const inMemoryWorkflowIds = new Set<string>();
   const attachmentToWorkflowId = new Map<string, string | undefined>();
+  const inMemoryWorkflowIdToYaml = new Map<string, string>();
 
-  for (const att of activeAttachments) {
+  for (const att of attachments.getActive()) {
     if (att.type !== WORKFLOW_YAML_ATTACHMENT_TYPE) continue;
     const latestVersion = att.versions.at(-1);
-    const data = latestVersion?.data as { workflowId?: string } | undefined;
+    const data = latestVersion?.data as { workflowId?: string; yaml?: string } | undefined;
     if (data?.workflowId) {
-      workflowIds.add(data.workflowId);
+      inMemoryWorkflowIds.add(data.workflowId);
+      if (data.yaml) {
+        inMemoryWorkflowIdToYaml.set(data.workflowId, data.yaml);
+      }
     }
     attachmentToWorkflowId.set(att.id, data?.workflowId);
   }
 
-  for (const dest of destinations) {
-    if (workflowIds.has(dest.id)) {
-      continue;
-    }
-
-    if (attachmentToWorkflowId.has(dest.id)) {
-      const correctId = attachmentToWorkflowId.get(dest.id);
-      const hint = correctId
-        ? ` The correct workflow ID for this attachment is "${correctId}".`
-        : ` This workflow attachment has no workflowId — pass a \`workflowId\` when calling \`workflow_set_yaml\`.`;
-      throw new ActionPolicyOperationValidationError(
-        `Destination ID "${dest.id}" is a workflow attachment ID, not a workflow ID. ` +
-          `Use the \`workflowId\` value from the \`workflow_set_yaml\` tool result instead of the \`attachmentId\`.` +
-          hint
-      );
-    }
-
-    const workflow = await workflowLookup.getWorkflow(dest.id, spaceId);
-    if (workflow) {
-      continue;
-    }
-
-    const connector = await connectorLookup.findConnectorById(dest.id);
-    if (connector) {
-      throw new ActionPolicyOperationValidationError(
-        `Destination ID "${dest.id}" is a connector ("${connector.name}"), not a workflow. ` +
-          `Action policy destinations must reference workflow IDs. ` +
-          `To fix this: create a workflow that uses this connector via the workflow_set_yaml ` +
-          `tool, then use the workflow's \`workflowId\` as the destination.`
-      );
-    }
-
-    throw new ActionPolicyOperationValidationError(
-      `Destination ID "${dest.id}" is not a valid workflow in this space or conversation. ` +
-        `Each destination must reference either a persisted workflow ID from this Kibana space, ` +
-        `or a \`workflowId\` from the \`workflow_set_yaml\` tool result. ` +
-        `To create a workflow, use the workflow_set_yaml tool first, then use the returned ` +
-        `\`workflowId\` as the destination.`
-    );
-  }
+  return { inMemoryWorkflowIds, attachmentToWorkflowId, inMemoryWorkflowIdToYaml };
 }

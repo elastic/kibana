@@ -48,7 +48,8 @@ import {
 import { appContextService } from '../../../app_context';
 import type { AssetsMap, PackageInstallContext } from '../../../../../common/types';
 
-import { OTEL_COLLECTOR_INPUT_TYPE, OTEL_TEMPLATE_SUFFIX } from '../../../../../common/constants';
+import { OTEL_TEMPLATE_SUFFIX } from '../../../../../common/constants';
+import { dataStreamUsesOtelInput } from '../../../../../common/services';
 
 import {
   generateMappings,
@@ -643,10 +644,14 @@ export function prepareTemplate({
   const experimentalFeature = appContextService.getExperimentalFeatures();
   const isOtelInputType =
     experimentalFeature.enableOtelIntegrations &&
-    (dataStream?.streams || []).some((stream) => stream.input === OTEL_COLLECTOR_INPUT_TYPE);
+    dataStreamUsesOtelInput(packageInstallContext.packageInfo, dataStream);
+  // OTel metrics default to TSDS (parity with ES native metrics-*.otel-* templates and
+  // input-package applyTimeSeriesIndexMode). Integration packages never go through that
+  // input-package path, so the default must be applied here during template install.
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||
-    !!experimentalDataStreamFeature?.features.tsdb;
+    !!experimentalDataStreamFeature?.features.tsdb ||
+    (isOtelInputType && dataStream.type === 'metrics');
 
   const validFields = processFields(fields);
 

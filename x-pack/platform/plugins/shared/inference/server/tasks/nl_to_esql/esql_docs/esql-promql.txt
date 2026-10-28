@@ -1,0 +1,174 @@
+# PROMQL
+
+The PROMQL source command queries time series indices using Prometheus Query Language (PromQL). Like TS, it enables time series aggregation functions, but accepts PromQL syntax instead of ES|QL. It runs the query and returns the results as regular ES|QL columns, which can be processed further with other ES|QL commands.
+
+## Syntax
+
+`PROMQL [ <option>=<value> ... ] <result_name>=(<PromQL Expression>)`
+
+The PROMQL command accepts zero or more space-separated `<option>=<value>` pairs, followed by a named PromQL expression.
+
+### Options
+
+The options are inspired by the Prometheus HTTP API with some additions specific to ES|QL.
+
+#### index
+
+A list of indices, data streams, or aliases. Supports wildcards and date math. Defaults to `metrics-*`, querying matching indices with `index.mode: time_series`.
+
+#### step
+
+Query resolution step width (optional). Automatically determined given the number of target `buckets` and the selected time range.
+
+#### buckets
+
+Target number of buckets for auto-step derivation. Defaults to `100`. Mutually exclusive with `step`. Requires a known time range, either by setting `start` and `end` explicitly or implicitly through Kibana's time range filter.
+
+#### start
+
+Start time of the query, inclusive (optional). Uses the start based on Kibana's date picker if missing. Set together with `end`. Refer to Time range for queries without a time range.
+
+#### end
+
+End time of the query, inclusive (optional). Uses the end based on Kibana's date picker if missing. Set together with `start`, and not before it. Refer to Time range for queries without a time range.
+
+#### time
+
+Evaluation time of an instant query (optional). Evaluates the expression once, at this time, instead of at each step of a range query. Mutually exclusive with `start`, `end`, `step`, and `buckets`.
+
+#### scrape_interval
+
+The expected metric collection interval. Defaults to `1m`. Used to determine implicit range selector windows as `max(step, scrape_interval)`.
+
+#### <result_name>=(<PromQL Expression>)
+
+Name of the output column with the query result time series (optional). By default, the name of the output column is the PromQL expression itself.
+
+`start`, `end`, and `time` accept an RFC 3339 timestamp with a UTC offset, such as `"2026-04-01T00:00:00Z"`, or a Unix timestamp in seconds, which can be fractional, such as `1775001600`. Date math, such as `now-1h`, isn't supported. In Kibana, the `?_tstart` and `?_tend` parameters reference the time range of the date picker, such as `time=?_tend`. `step` and `scrape_interval` accept a PromQL duration, such as `30s` or `5m`, or a number of seconds.
+
+## Description
+
+### Time range
+
+A range query needs either `step`, or both `start` and `end`, from which the step is derived using `buckets`. In Kibana, the date picker provides `start` and `end`. Without a time range and without `step`, the query fails. With `step` but no time range, the query covers all data in the index.
+
+### Output columns
+
+- The PromQL expression (or `<result_name>` if specified), `double`: the computed metric value.
+- `step`, `date`: the timestamp for each evaluation step. For an instant query, the evaluation time.
+- Grouping labels (if any), `keyword`: one column per grouping label from `by` clauses.
+- `_timeseries` (if any), `keyword`: the labels of each series as a JSON string.
+
+The label columns depend on the outermost aggregation of the PromQL expression:
+
+- With a `by` grouping, such as `sum by (instance) (...)`, each grouping label gets its own output column.
+- With an aggregation without grouping, such as `sum(...)`, there are no label columns, and the result is a single series.
+- Without a cross-series aggregation, such as `rate(http_requests_total)`, or with a `without` grouping, such as `sum without (pod) (...)`, the remaining labels of each series are returned in a single `_timeseries` column as a JSON string.
+
+A range query returns one row per series and evaluation step. An instant query returns one row per series.
+
+### Index patterns
+
+The `index` parameter accepts the same patterns as `FROM` and `TS`, including wildcards and comma-separated lists. If omitted, it defaults to `metrics-*`.
+
+### Implicit range selectors
+
+In standard PromQL, functions like `rate` require a range selector: `rate(http_requests_total[5m])`. The PROMQL command allows omitting the range selector entirely. When the range selector is absent, the window is determined automatically as `max(step, scrape_interval)`. For example: `PROMQL scrape_interval=15s http_rate=(sum(rate(http_requests_total)))`.
+
+An implicit window adapts to the time range and step. A fixed window doesn't: when it's shorter than the step, such as `[5m]` with a step of `1h`, each step only reflects the last 5 minutes and ignores the samples in between. A fixed window is only useful when you need exactly that window, such as the rate over the last 5 minutes.
+
+## Best practices
+
+- Set `index` explicitly instead of relying on the `metrics-*` default, to narrow the data scanned.
+- Omit range selectors, also when porting a Prometheus query: write `rate(http_requests_total)` instead of `rate(http_requests_total[5m])`, so the window adapts to the time range and step. Refer to Implicit range selectors.
+- Name the result, such as `http_rate=(...)`. Otherwise, the value column is named after the expression text, which changes whenever the expression is reformatted, so later commands can't reliably reference it.
+- Match the function to the metric type: use `rate`, `irate`, or `increase` for counters, and functions such as `avg_over_time` or `max_over_time`, or the raw metric, for gauges. For native histograms, use `increase` instead of `rate`, and wrap the result in a histogram function, such as `histogram_quantile(0.99, sum by (job) (increase(http_request_duration_seconds)))`.
+- In Kibana, omit `start` and `end` so the query follows the date picker. Elsewhere, set `start` and `end` explicitly, rather than only `step`, which covers all data in the index.
+- Filter by labels in the PromQL selector, such as `network.cost{cluster!="prod"}`, rather than with `WHERE` after `PROMQL`. Selector filters reduce the data read, and a later `WHERE` doesn't.
+
+### Single-value results
+
+A range query returns a value for every step. To get a single value per series, such as for a metric or gauge chart or a ranking, use an instant query for the current value. In Kibana, set `time=?_tend` to evaluate the expression at the end of the time range of the date picker:
+
+```esql
+PROMQL index=metrics-generic.prometheus-* time=?_tend http_rate=(sum(rate(http_requests_total)))
+```
+
+There's no reliable way yet to get a value over the whole time range, such as a total. Summing the steps of a range query, such as with `STATS SUM(...)`, overstates it when the step is shorter than `scrape_interval`, as the windows of the steps overlap.
+
+## Limitations
+
+The majority of PromQL expressions run unchanged. The following constructs are not evaluated yet, so they return a client error (4xx):
+
+- Binary set operators: `and` and `unless`.
+- Binary set operator `or`, except at the top level of an expression. A top-level `or` chain supports at most 8 operands and can't use `on(...)` or `ignoring(...)`. A nested `or`, a chain of more than 8 operands, or an `or` with `on(...)` or `ignoring(...)` returns a client error (4xx).
+- Comparison operators: evaluated only at the top level of an expression and only with a scalar literal on the right-hand side. Comparisons between two instant vectors, and nested comparisons, return a client error (4xx).
+- Group modifiers: `on(...)`, `ignoring(...)`, `group_left`, `group_right`.
+- The `@` modifier.
+- Subqueries, such as `max_over_time(rate(http_requests_total)[1h:])`.
+- Selectors without a metric name, and regex matchers on `__name__`, such as `{__name__=~"node_.*"}`.
+- Binary expressions with a `without(...)` aggregation as an operand, and `without(...)` aggregations nested inside another `without(...)` aggregation, such as `sum without (pod) (max without (container) (...))`. Use `by(...)` instead.
+- Binary expressions whose operands use different `offset` values, such as `rate(http_requests_total) / rate(http_requests_total offset 1h)`. This restriction doesn't apply to `or`.
+- Binary expressions where both operands read metrics and one of them nests an aggregation inside another aggregation, such as `count(count by (pod) (up)) / sum(machine_count)`. Nested aggregations on their own, such as `sum(sum by (pod) (...))`, are supported.
+- Functions: refer to Not yet supported for the full list of recognized but unimplemented functions. Some supported functions have restrictions, which are listed under **Differences from Prometheus** on each function's reference entry.
+
+The following constructs return no results instead of an error:
+
+- Binary expressions between two operands that read different metrics without aggregating them, such as `node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes`. Unlike in Prometheus, the series of the two metrics aren't matched on their other labels. Aggregate both operands by the labels to keep instead, such as `avg by (instance) (node_memory_MemAvailable_bytes) / avg by (instance) (node_memory_MemTotal_bytes)`.
+
+For behavioral differences from Prometheus, refer to PromQL limitations.
+
+## Examples
+
+Rely on Kibana's date picker for the time range, and let `step` and range selectors be inferred automatically. This is the recommended pattern for Kibana dashboards:
+
+```esql
+PROMQL index=metrics-generic.prometheus-* http_rate=(sum(rate(http_requests_total)))
+```
+
+Evaluate the expression once, for example to get the current value of a metric:
+
+```esql
+PROMQL index=metrics-generic.prometheus-*
+  time="2026-04-01T01:00:00Z"
+  http_rate=(sum(rate(http_requests_total)))
+```
+
+Cross-series aggregation by label:
+
+```esql
+PROMQL index=k8s step=1h result=(sum by (cluster) (network.cost))
+| SORT result
+```
+
+Label filtering with a named result:
+
+```esql
+PROMQL index=k8s step=1h cost=(max by (cluster) (network.total_bytes_in{cluster!="prod"}))
+| SORT cluster
+```
+
+Pipe PromQL results into ES|QL commands for further aggregation:
+
+```esql
+PROMQL index=k8s step=1h bytes=(max by (cluster) (network.bytes_in))
+| STATS max_bytes=MAX(bytes) BY cluster
+| SORT cluster
+```
+
+For queries outside Kibana, set `start` and `end` explicitly. The step and range selector are still inferred automatically from the time range and the default `buckets` count:
+
+```esql
+PROMQL index=metrics-generic.prometheus-*
+  start="2026-04-01T00:00:00Z"
+  end="2026-04-01T01:00:00Z"
+  http_rate=(sum(rate(http_requests_total)))
+```
+
+Join PromQL results with external data using ES|QL commands:
+
+```esql
+PROMQL index=metrics-generic.prometheus-*
+  http_rate=(sum by (instance) (rate(http_requests_total)))
+| LOOKUP JOIN instance_metadata ON instance
+```

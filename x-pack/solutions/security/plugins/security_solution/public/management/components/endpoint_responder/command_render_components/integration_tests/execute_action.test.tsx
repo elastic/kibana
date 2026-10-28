@@ -26,7 +26,6 @@ import {
   INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
   UPGRADE_AGENT_FOR_RESPONDER,
 } from '../../../../../common/translations';
-import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
@@ -174,30 +173,20 @@ describe('When using execute action from response actions console', () => {
     );
   });
 
-  it('should display download link once action completes', async () => {
-    const actionDetailsApiResponseMock: ReturnType<typeof apiMocks.responseProvider.actionDetails> =
-      {
-        data: {
-          ...apiMocks.responseProvider.actionDetails({
-            path: '/1',
-          } as HttpFetchOptionsWithPath).data,
-
-          completedAt: new Date().toISOString(),
-          command: 'execute',
-          agents: ['a.b.c'],
-          agentState: {
-            'a.b.c': {
-              isCompleted: true,
-              wasSuccessful: true,
-              completedAt: '2025',
-              errors: undefined,
-            },
-          },
+  it('should display pending status while action is not yet complete', async () => {
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'execute',
+        agents: ['a.b.c'],
+        isCompleted: false,
+        wasSuccessful: false,
+        agentState: {
+          'a.b.c': { isCompleted: false, wasSuccessful: false },
         },
-      };
-    apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
+      }),
+    });
 
-    await render();
+    const { getByTestId } = await render();
     await enterConsoleCommand(renderResult, user, 'execute --command="ls -l"');
 
     await waitFor(() => {
@@ -205,16 +194,40 @@ describe('When using execute action from response actions console', () => {
     });
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('executeSuccess').textContent).toEqual(
-        'Command execution was successful.'
-      );
+      expect(getByTestId('execute-pending')).toBeTruthy();
+    });
+
+    expect(getByTestId('execute-actionResult-hostStatus')).toHaveTextContent('execute is pending');
+  });
+
+  it('should display download link once action completes', async () => {
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'execute',
+        agents: ['a.b.c'],
+      }),
+    });
+
+    const { getByTestId } = await render();
+    await enterConsoleCommand(renderResult, user, 'execute --command="ls -l"');
+
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
     });
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('executeSuccess').textContent).toEqual(
-        'Command execution was successful.Click here to download full output(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+      expect(getByTestId('execute-success')).toBeTruthy();
+    });
+
+    expect(getByTestId('execute-actionResult-hostStatus')).toHaveTextContent(
+      'execute completed successfully'
+    );
+    await waitFor(() => {
+      expect(getByTestId('execute-actionResult-executeResults-getExecuteLink')).toHaveTextContent(
+        'Click here to download full output(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
       );
     });
+    expect(getByTestId('execute-actionResult-executeResults-executeResponseOutput')).toBeTruthy();
   });
 
   it.each(
@@ -223,10 +236,17 @@ describe('When using execute action from response actions console', () => {
     apiMocks.responseProvider.actionDetails.mockReturnValue({
       data: new EndpointActionGenerator('seed').generateActionDetails({
         command: 'execute',
+        agents: ['a.b.c'],
         errors: ['some error happen in endpoint'],
         wasSuccessful: false,
+        agentState: {
+          'a.b.c': {
+            wasSuccessful: false,
+            errors: ['some error happen in endpoint'],
+          },
+        },
         outputs: {
-          'agent-a': {
+          'a.b.c': {
             content: {
               code: errorCode,
             },
@@ -243,9 +263,42 @@ describe('When using execute action from response actions console', () => {
     });
 
     await waitFor(() => {
-      expect(getByTestId('execute-actionFailure')).toHaveTextContent(
-        endpointActionResponseCodes[errorCode]
-      );
+      expect(getByTestId('execute-actionFailure')).toBeTruthy();
     });
+
+    expect(getByTestId('execute-actionResult-hostStatus')).toHaveTextContent('execute failed');
+    expect(
+      getByTestId(
+        'execute-actionResult-executeResults-outputFailureMessage-response-action-failure-info'
+      )
+    ).toHaveTextContent(endpointActionResponseCodes[errorCode]);
+  });
+
+  it('should display canceled status when action was canceled', async () => {
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'execute',
+        agents: ['a.b.c'],
+        wasSuccessful: false,
+        wasCanceled: true,
+        agentState: {
+          'a.b.c': { wasSuccessful: false, wasCanceled: true },
+        },
+      }),
+    });
+
+    const { getByTestId } = await render();
+    await enterConsoleCommand(renderResult, user, 'execute --command="ls -l"');
+
+    await waitFor(() => {
+      expect(getByTestId('execute-actionFailure')).toBeTruthy();
+    });
+
+    expect(getByTestId('execute-actionResult-hostStatus')).toHaveTextContent(
+      'execute was canceled'
+    );
+    expect(
+      getByTestId('execute-actionResult-executeResults-outputFailureMessage-canceledMessage')
+    ).toBeTruthy();
   });
 });

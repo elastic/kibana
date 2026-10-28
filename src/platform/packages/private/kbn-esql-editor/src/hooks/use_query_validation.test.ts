@@ -13,6 +13,12 @@ import type { monaco } from '@kbn/code-editor';
 import type { UseQueryValidationParams } from './use_query_validation';
 import { useQueryValidation, VALIDATION_DEBOUNCE_MS } from './use_query_validation';
 import type { MapCache } from 'lodash';
+import { clearESQLSourceInfoCache } from '@kbn/esql-utils';
+
+jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
+  clearESQLSourceInfoCache: jest.fn(),
+}));
 
 const mockValidate = jest.fn().mockResolvedValue({ errors: [], warnings: [] });
 const mockSetModelMarkers = jest.fn();
@@ -65,7 +71,7 @@ const defaultParams = (
   overrides: Partial<UseQueryValidationParams> = {}
 ): UseQueryValidationParams => ({
   code: 'FROM logs',
-  codeWhenSubmitted: '',
+  lastErroredCode: undefined,
   editorRef: createMockEditorRef(),
   editorModel: createMockEditorModelRef(),
   esqlCallbacks: {} as ESQLCallbacks,
@@ -158,14 +164,14 @@ describe('useQueryValidation debounced validation', () => {
     expect(mockValidate).toHaveBeenCalledTimes(1);
   });
 
-  it('skips client side validations and shows server errors when code matches codeWhenSubmitted', async () => {
+  it('skips client side validations and shows server errors when code matches lastErroredCode', async () => {
     const serverErrors = [new Error('boom')];
 
     renderHook(() =>
       useQueryValidation(
         defaultParams({
           code: 'FROM logs',
-          codeWhenSubmitted: 'FROM logs',
+          lastErroredCode: 'FROM logs',
           serverErrors,
         })
       )
@@ -206,5 +212,25 @@ describe('useQueryValidation debounced validation', () => {
 
     await waitFor(() => expect(pendingValidations).toHaveLength(2));
     expect(firstToken?.isCancellationRequested).toBe(true);
+  });
+});
+
+describe('useQueryValidation onNewFieldsAddedToLookupIndex', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockValidate.mockResolvedValue({ errors: [], warnings: [] });
+    window.performance.mark = jest.fn();
+  });
+
+  it('clears the editor fields cache and the shared source info cache', async () => {
+    const params = defaultParams();
+    const { result } = renderHook(() => useQueryValidation(params));
+
+    await act(async () => {
+      await result.current.onNewFieldsAddedToLookupIndex();
+    });
+
+    expect(params.esqlFieldsCache.clear).toHaveBeenCalled();
+    expect(clearESQLSourceInfoCache).toHaveBeenCalled();
   });
 });

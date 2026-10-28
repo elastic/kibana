@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { UserProfileService } from '../../services';
+import type { CasesWorkflowRunService } from '../../workflows/execution/service';
+import type { CasesWorkflowRunContext } from '../../client/workflows/operations';
 import { getConnectorsRoute } from './internal/get_connectors';
 import { getCaseUserActionStatsRoute } from './internal/get_case_user_actions_stats';
 import { bulkCreateAttachmentsRoute } from './internal/bulk_create_attachments';
@@ -13,6 +16,7 @@ import { bulkGetCasesRoute } from './internal/bulk_get_cases';
 import { suggestUserProfilesRoute } from './internal/suggest_user_profiles';
 import type { CaseRoute } from './types';
 import { bulkGetAttachmentsRoute } from './internal/bulk_get_attachments';
+import { bulkDeleteAttachmentsRoute } from './internal/bulk_delete_attachments';
 import { getCaseUsersRoute } from './internal/get_case_users';
 import { bulkDeleteFileAttachments } from './internal/bulk_delete_file_attachments';
 import { getCategoriesRoute } from './cases/categories/get_categories';
@@ -21,17 +25,26 @@ import { getCasesMetricRoute } from './internal/get_cases_metrics';
 import { searchCasesRoute } from './internal/search_cases';
 import { replaceCustomFieldRoute } from './internal/replace_custom_field';
 import { postObservableRoute } from './observables/post_observable';
-import { bulkPostObservableRoute } from './observables/bulk_post_observable';
 import { similarCaseRoute } from './cases/similar';
 import { patchObservableRoute } from './observables/patch_observable';
+import { bulkDeleteObservablesRoute } from './observables/bulk_delete_observables';
 import { deleteObservableRoute } from './observables/delete_observable';
 import { findUserActionsRoute } from './internal/find_user_actions';
 import { findCasesContainingAllDocumentsRoute } from './internal/find_cases_containing_all_documents';
 import type { ConfigType } from '../../config';
 import { getTemplateRoutes } from './templates';
 import { getFieldDefinitionRoutes } from './field_definitions';
+import { createRunWorkflowRoute } from './internal/run_workflow';
 
-export const getInternalRoutes = (userProfileService: UserProfileService, config: ConfigType) =>
+export const getInternalRoutes = (
+  userProfileService: UserProfileService,
+  config: ConfigType,
+  workflowRun?: {
+    service: CasesWorkflowRunService;
+    getSpaceId: (request: KibanaRequest) => string;
+    getWorkflowRunContext: (request: KibanaRequest) => Promise<CasesWorkflowRunContext>;
+  }
+) =>
   [
     bulkCreateAttachmentsRoute,
     suggestUserProfilesRoute(userProfileService),
@@ -39,6 +52,7 @@ export const getInternalRoutes = (userProfileService: UserProfileService, config
     bulkGetCasesRoute,
     getCaseUserActionStatsRoute,
     bulkGetAttachmentsRoute,
+    bulkDeleteAttachmentsRoute,
     getCaseUsersRoute,
     bulkDeleteFileAttachments,
     getCategoriesRoute,
@@ -47,7 +61,7 @@ export const getInternalRoutes = (userProfileService: UserProfileService, config
     searchCasesRoute,
     replaceCustomFieldRoute,
     postObservableRoute,
-    bulkPostObservableRoute,
+    bulkDeleteObservablesRoute,
     patchObservableRoute,
     deleteObservableRoute,
     similarCaseRoute,
@@ -55,4 +69,5 @@ export const getInternalRoutes = (userProfileService: UserProfileService, config
     findCasesContainingAllDocumentsRoute,
     ...getTemplateRoutes(config),
     ...getFieldDefinitionRoutes(config),
+    ...(workflowRun ? [createRunWorkflowRoute(workflowRun)] : []),
   ] as CaseRoute[];

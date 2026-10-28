@@ -6,11 +6,11 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_integration_node',
+  preset: '@kbn/jest/jest_integration_node',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution/server'],
   haste: {
-    throwOnCollision: false,
+    throwOnModuleCollision: false,
   },
   forceExit: true,
 };

@@ -7,7 +7,11 @@
 
 import expect from 'expect';
 import type { CasesTelemetry } from '@kbn/cases-plugin/server/telemetry/types';
-import { getPostCaseRequest, postCommentAlertReq } from '../../../common/lib/mock';
+import {
+  buildUnifiedAlertReq,
+  getPostCaseRequest,
+  postCommentAlertReq,
+} from '../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   createCase,
@@ -49,9 +53,8 @@ export default ({ getService }: FtrProviderContext): void => {
         space: 'space2',
       });
 
-      await runTelemetryTask(supertest);
-
       await retry.try(async () => {
+        await runTelemetryTask(supertest);
         const res = await getTelemetry(supertest);
         const casesTelemetry = getCasesTelemetry(res);
         expect(casesTelemetry.cases.all.total).toBe(2);
@@ -75,12 +78,10 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         caseId: firstCase.id,
         params: [
-          {
-            ...postCommentAlertReq,
+          buildUnifiedAlertReq('securitySolution', {
             alertId: firstCaseAlerts,
             index: firstCaseAlerts,
-            owner: 'securitySolution',
-          },
+          }),
         ],
         expectedHttpCode: 200,
       });
@@ -89,12 +90,10 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         caseId: firstCase.id,
         params: [
-          {
-            ...postCommentAlertReq,
+          buildUnifiedAlertReq('securitySolution', {
             alertId: secondCaseAlerts,
             index: secondCaseAlerts,
-            owner: 'securitySolution',
-          },
+          }),
         ],
         expectedHttpCode: 200,
       });
@@ -110,12 +109,35 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       });
 
-      await runTelemetryTask(supertest);
-
       await retry.try(async () => {
+        await runTelemetryTask(supertest);
         const res = await getTelemetry(supertest);
         const casesTelemetry = getCasesTelemetry(res);
         expect(casesTelemetry.alerts.all.total).toBe(6);
+      });
+    });
+
+    it('should count user actions by source and type per owner', async () => {
+      await createCase(supertest, getPostCaseRequest({ owner: 'securitySolution' }), 200, {
+        user: superUser,
+        space: 'space1',
+      });
+
+      await createCase(supertest, getPostCaseRequest({ owner: 'securitySolution' }), 200, {
+        user: superUser,
+        space: 'space2',
+      });
+
+      await retry.try(async () => {
+        await runTelemetryTask(supertest);
+        const res = await getTelemetry(supertest);
+        const { userActions } = getCasesTelemetry(res);
+        const createdByUser = { source: 'user', type: 'create_case', total: 2 };
+
+        expect(userActions.all.bySource).toContainEqual(createdByUser);
+        expect(userActions.sec.bySource).toContainEqual(createdByUser);
+        expect(userActions.obs.bySource).toEqual([]);
+        expect(userActions.main.bySource).toEqual([]);
       });
     });
 
@@ -130,9 +152,8 @@ export default ({ getService }: FtrProviderContext): void => {
         space: 'space2',
       });
 
-      await runTelemetryTask(supertest);
-
       await retry.try(async () => {
+        await runTelemetryTask(supertest);
         const res = await getTelemetry(supertest);
         const casesTelemetry = getCasesTelemetry(res);
         const allCasesTelemetry = casesTelemetry.cases.all;

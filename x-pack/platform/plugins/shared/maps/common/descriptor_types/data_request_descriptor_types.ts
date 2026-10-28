@@ -65,6 +65,7 @@ export type VectorStyleRequestMeta = DataFilters & {
 };
 
 export type ESSearchSourceResponseMeta = {
+  approximationApplied?: boolean;
   areResultsTrimmed?: boolean;
   resultsCount?: number;
   // results time extent, either Kibana time range or timeslider time slice

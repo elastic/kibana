@@ -79,18 +79,30 @@ describe('useFetchMoreRecords', () => {
 
   it('should be allowed when there are more records to load', async () => {
     const toolkit = await setup();
-    const {
-      result: { current },
-    } = await renderUseFetchMoreRecords({
-      toolkit,
-      fetchStatus: FetchStatus.COMPLETE,
-      loadedRecordsCount: 3,
-      totalRecordsCount: 5,
+    const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
     });
 
-    expect(current.onFetchMoreRecords).toBeDefined();
-    expect(current.isMoreDataLoading).toBe(false);
-    expect(current.totalHits).toBe(5);
+    dataStateContainer.data$.documents$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: records.slice(0, 3),
+      pagination: { hasNextPage: true, nextPage: jest.fn() },
+    });
+    dataStateContainer.data$.totalHits$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 5,
+    });
+
+    const { result } = renderHook(() => useFetchMoreRecords(), {
+      wrapper: ({ children }) => (
+        <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+      ),
+    });
+
+    expect(result.current.onFetchMoreRecords).toBeDefined();
+    expect(result.current.isMoreDataLoading).toBe(false);
+    expect(result.current.totalHits).toBe(5);
   });
 
   it('should not be allowed when there is no initial documents', async () => {
@@ -111,18 +123,30 @@ describe('useFetchMoreRecords', () => {
 
   it('should return loading status correctly', async () => {
     const toolkit = await setup();
-    const {
-      result: { current },
-    } = await renderUseFetchMoreRecords({
-      toolkit,
-      fetchStatus: FetchStatus.LOADING_MORE,
-      loadedRecordsCount: 3,
-      totalRecordsCount: 5,
+    const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
     });
 
-    expect(current.onFetchMoreRecords).toBeDefined();
-    expect(current.isMoreDataLoading).toBe(true);
-    expect(current.totalHits).toBe(5);
+    dataStateContainer.data$.documents$.next({
+      fetchStatus: FetchStatus.LOADING_MORE,
+      result: records.slice(0, 3),
+      pagination: { hasNextPage: true, nextPage: jest.fn() },
+    });
+    dataStateContainer.data$.totalHits$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 5,
+    });
+
+    const { result } = renderHook(() => useFetchMoreRecords(), {
+      wrapper: ({ children }) => (
+        <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+      ),
+    });
+
+    expect(result.current.onFetchMoreRecords).toBeDefined();
+    expect(result.current.isMoreDataLoading).toBe(true);
+    expect(result.current.totalHits).toBe(5);
   });
 
   it('should not be allowed for ES|QL queries', async () => {
@@ -145,5 +169,108 @@ describe('useFetchMoreRecords', () => {
     });
 
     expect(current.onFetchMoreRecords).toBeUndefined();
+  });
+
+  it('should be allowed when pagination.hasNextPage is true', async () => {
+    const toolkit = await setup();
+    const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+
+    dataStateContainer.data$.documents$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: records.slice(0, 3),
+      pagination: { hasNextPage: true, nextPage: jest.fn() },
+    });
+    dataStateContainer.data$.totalHits$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 5,
+    });
+
+    const { result } = renderHook(() => useFetchMoreRecords(), {
+      wrapper: ({ children }) => (
+        <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+      ),
+    });
+
+    expect(result.current.onFetchMoreRecords).toBeDefined();
+    expect(result.current.isMoreDataLoading).toBe(false);
+  });
+
+  it('should not be allowed when pagination.hasNextPage is false', async () => {
+    const toolkit = await setup();
+    const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+
+    dataStateContainer.data$.documents$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: records.slice(0, 3),
+      pagination: { hasNextPage: false, nextPage: jest.fn() },
+    });
+    dataStateContainer.data$.totalHits$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 3,
+    });
+
+    const { result } = renderHook(() => useFetchMoreRecords(), {
+      wrapper: ({ children }) => (
+        <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+      ),
+    });
+
+    expect(result.current.onFetchMoreRecords).toBeUndefined();
+  });
+
+  it('should not be allowed when pagination is undefined', async () => {
+    const toolkit = await setup();
+    const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+
+    dataStateContainer.data$.documents$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: records.slice(0, 3),
+    });
+    dataStateContainer.data$.totalHits$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 5,
+    });
+
+    const { result } = renderHook(() => useFetchMoreRecords(), {
+      wrapper: ({ children }) => (
+        <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+      ),
+    });
+
+    expect(result.current.onFetchMoreRecords).toBeUndefined();
+  });
+
+  it('should not be allowed when rows are empty even with hasNextPage true', async () => {
+    const toolkit = await setup();
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+
+    dataStateContainer.data$.documents$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: [],
+      pagination: { hasNextPage: true, nextPage: jest.fn() },
+    });
+    dataStateContainer.data$.totalHits$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 5,
+    });
+
+    const { result } = renderHook(() => useFetchMoreRecords(), {
+      wrapper: ({ children }) => (
+        <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+      ),
+    });
+
+    expect(result.current.onFetchMoreRecords).toBeUndefined();
   });
 });

@@ -8,8 +8,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { ConnectorContractUnion } from '../..';
-import { generateYamlSchemaFromConnectors } from '../..';
+import {
+  CONNECTOR_ID_MAX_LENGTH,
+  type ConnectorContractUnion,
+  type CustomTriggerSchemaInput,
+  generateYamlSchemaFromConnectors,
+  getWorkflowJsonSchema,
+} from '../..';
 
 const BASE_WORKFLOW = {
   name: 'test',
@@ -17,6 +22,40 @@ const BASE_WORKFLOW = {
 };
 
 describe('generateYamlSchemaFromConnectors', () => {
+  it.each<{ format: string; triggers: CustomTriggerSchemaInput[] }>([
+    {
+      format: 'strings',
+      triggers: ['cases.updated', 'slack.message', 'slack.reaction'],
+    },
+    {
+      format: 'objects',
+      triggers: [
+        { id: 'cases.updated' },
+        { id: 'slack.message', requiresConnectorId: true },
+        { id: 'slack.reaction', requiresConnectorId: true },
+      ],
+    },
+    {
+      format: 'mixed strings and objects',
+      triggers: [
+        'cases.updated',
+        { id: 'slack.message', requiresConnectorId: true },
+        { id: 'slack.reaction', requiresConnectorId: true },
+      ],
+    },
+  ])('generates identical JSON schemas regardless of trigger order for $format', ({ triggers }) => {
+    const reversedTriggers = triggers.toReversed();
+    const originalOrder = [...reversedTriggers];
+    const schema = getWorkflowJsonSchema(generateYamlSchemaFromConnectors([], triggers));
+    const reversedSchema = getWorkflowJsonSchema(
+      generateYamlSchemaFromConnectors([], reversedTriggers)
+    );
+
+    expect(schema).not.toBeNull();
+    expect(reversedSchema).toEqual(schema);
+    expect(reversedTriggers).toEqual(originalOrder);
+  });
+
   describe('strict mode', () => {
     it('should generate a valid YAML schema from connectors', () => {
       const connectors: ConnectorContractUnion[] = [
@@ -34,9 +73,27 @@ describe('generateYamlSchemaFromConnectors', () => {
       ];
       const schema = generateYamlSchemaFromConnectors(connectors);
       expect(schema).toBeDefined();
-      // strict mode should throw if required fields are missing
+    });
+
+    it('rejects an empty steps array when the other required fields are valid', () => {
+      const connectors: ConnectorContractUnion[] = [
+        {
+          summary: 'Console',
+          description: 'Console',
+          type: 'console',
+          paramsSchema: z.object({
+            message: z.string(),
+          }),
+          outputSchema: z.object({
+            message: z.string(),
+          }),
+        },
+      ];
+      const schema = generateYamlSchemaFromConnectors(connectors);
+
       expect(() =>
         schema.parse({
+          ...BASE_WORKFLOW,
           steps: [],
         })
       ).toThrow();
@@ -83,6 +140,46 @@ describe('generateYamlSchemaFromConnectors', () => {
       ).not.toThrow();
     });
 
+    it('rejects a step connector-id longer than CONNECTOR_ID_MAX_LENGTH', () => {
+      const connectors: ConnectorContractUnion[] = [
+        {
+          summary: 'Slack',
+          description: null,
+          type: 'slack',
+          hasConnectorId: 'required',
+          paramsSchema: z.object({ message: z.string().optional() }),
+          outputSchema: z.unknown(),
+        },
+      ];
+      const schema = generateYamlSchemaFromConnectors(connectors);
+
+      expect(
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [
+            {
+              name: 'notify',
+              type: 'slack',
+              'connector-id': 'x'.repeat(CONNECTOR_ID_MAX_LENGTH + 1),
+            },
+          ],
+        }).success
+      ).toBe(false);
+
+      expect(
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [
+            {
+              name: 'notify',
+              type: 'slack',
+              'connector-id': 'x'.repeat(CONNECTOR_ID_MAX_LENGTH),
+            },
+          ],
+        }).success
+      ).toBe(true);
+    });
+
     it('requires `with` for a step that has required params', () => {
       const connectors: ConnectorContractUnion[] = [
         {
@@ -100,6 +197,121 @@ describe('generateYamlSchemaFromConnectors', () => {
           steps: [{ name: 'step', type: 'my.requiredStep' }],
         })
       ).toThrow();
+    });
+  });
+
+  describe('lazy step union memoization', () => {
+    it('returns the same discriminated union instance across visits', () => {
+      const connectors: ConnectorContractUnion[] = [
+        {
+          summary: 'A',
+          description: null,
+          type: 'a.step',
+          paramsSchema: z.object({}),
+          outputSchema: z.unknown(),
+        },
+        {
+          summary: 'B',
+          description: null,
+          type: 'b.step',
+          paramsSchema: z.object({}),
+          outputSchema: z.unknown(),
+        },
+      ];
+
+      const schema = generateYamlSchemaFromConnectors(connectors) as z.ZodObject;
+      const stepsArray = schema.shape.steps as z.ZodArray<z.ZodLazy<z.ZodType>>;
+      const lazy = stepsArray.def.element as z.ZodLazy<z.ZodType>;
+      const getter = (lazy as unknown as { _def: { getter: () => z.ZodType } })._def.getter;
+
+      const first = getter();
+      const second = getter();
+      // Required for `z.toJSONSchema({ reused: 'ref' })` to dedupe via `$ref`.
+      expect(first).toBe(second);
+    });
+
+    it('rejects a malformed `steps` mapping quickly', () => {
+      const connectors: ConnectorContractUnion[] = Array.from({ length: 40 }, (_, i) => ({
+        summary: `Connector ${i}`,
+        description: null,
+        type: `conn.${i}`,
+        paramsSchema: z.object({ message: z.string().optional() }),
+        outputSchema: z.unknown(),
+      }));
+
+      const schema = generateYamlSchemaFromConnectors(connectors);
+
+      // Shape produced by pasting steps without a leading dash: `steps`
+      // becomes a map instead of an array.
+      const start = Date.now();
+      const result = schema.safeParse({
+        ...BASE_WORKFLOW,
+        steps: { name: 'filter_results', type: 'conn.0' },
+      });
+      const elapsed = Date.now() - start;
+
+      expect(result.success).toBe(false);
+      expect(elapsed).toBeLessThan(500);
+    });
+  });
+
+  describe('on-failure on built-in steps', () => {
+    const onFailure = {
+      continue: true,
+      fallback: [
+        {
+          name: 'record_expiry',
+          type: 'console',
+          with: { message: 'expired' },
+        },
+      ],
+    };
+    const schema = generateYamlSchemaFromConnectors([
+      {
+        summary: 'Console',
+        description: 'Console',
+        type: 'console',
+        paramsSchema: z.object({
+          message: z.string(),
+        }),
+        outputSchema: z.object({
+          message: z.string(),
+        }),
+      },
+    ]);
+
+    it.each([
+      {
+        name: 'gate',
+        type: 'waitForApproval',
+        with: { message: 'approve?' },
+      },
+      {
+        name: 'ask',
+        type: 'waitForInput',
+        with: { message: 'input?' },
+      },
+      {
+        name: 'run_child',
+        type: 'workflow.execute',
+        with: { 'workflow-id': 'child' },
+      },
+      {
+        name: 'start_child',
+        type: 'workflow.executeAsync',
+        with: { 'workflow-id': 'child' },
+      },
+    ])('keeps fallback `with` on $type', (step) => {
+      const result = schema.safeParse({
+        ...BASE_WORKFLOW,
+        steps: [{ ...step, 'on-failure': onFailure }],
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(result.success).toBe(true);
+      expect(
+        (result.data as { steps: Array<{ 'on-failure': unknown }> }).steps[0]['on-failure']
+      ).toEqual(onFailure);
     });
   });
 });

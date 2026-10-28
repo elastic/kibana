@@ -89,6 +89,8 @@ function ErrorsWarningsContent({
           return (
             <EuiDescriptionListDescription
               key={index}
+              role="button"
+              tabIndex={0}
               className={classNameCss`
                 &:hover {
                   cursor: pointer;
@@ -97,6 +99,9 @@ function ErrorsWarningsContent({
                 user-select: text;
               `}
               onClick={() => handleClick(item)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') handleClick(item);
+              }}
             >
               <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
                 <EuiFlexItem grow={false}>
@@ -181,7 +186,7 @@ export function ErrorsWarningsFooterPopover({
               {isSpaceReduced ? visibleItems.length : message}
             </EuiButtonEmpty>
           }
-          ownFocus={false}
+          ownFocus={true}
           isOpen={isPopoverOpen}
           closePopover={closePopover}
         >

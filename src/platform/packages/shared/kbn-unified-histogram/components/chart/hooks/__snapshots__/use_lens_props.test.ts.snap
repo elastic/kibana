@@ -124,7 +124,7 @@ Object {
       },
     },
     "title": "Edit visualization",
-    "version": 2,
+    "version": 3,
     "visualizationType": "lnsXY",
   },
   "esqlVariables": Array [],
@@ -132,6 +132,7 @@ Object {
     "description": "fetch chart data and total hits",
   },
   "id": "unifiedHistogramLensComponent",
+  "isApproximate": undefined,
   "lastReloadRequestTime": 1759320000000,
   "noPadding": true,
   "onLoad": [MockFunction],
@@ -255,10 +256,6 @@ Object {
         },
       },
       "filters": Array [],
-      "query": Object {
-        "esql": "FROM logs* | WHERE ??field >= ?otherVar
-| STATS results = COUNT(*) BY timestamp = BUCKET(timestamp, 10 minute)",
-      },
       "visualization": Object {
         "gridConfig": Object {
           "isCellLabelVisible": false,
@@ -281,7 +278,7 @@ Object {
       },
     },
     "title": "Heat map",
-    "version": 2,
+    "version": 3,
     "visualizationType": "lnsHeatmap",
   },
   "esqlVariables": Array [
@@ -300,6 +297,7 @@ Object {
     "description": "fetch chart data and total hits",
   },
   "id": "unifiedHistogramLensComponent",
+  "isApproximate": undefined,
   "lastReloadRequestTime": 1759320000000,
   "noPadding": true,
   "onLoad": [MockFunction],

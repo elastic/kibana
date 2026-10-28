@@ -18,16 +18,20 @@ import type {
   PublishesTitle,
   HasEditCapabilities,
   HasSupportedTriggers,
+  ViewMode,
+  CanCancelRequests,
 } from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
   useBatchedPublishingSubjects,
   fetch$,
   titleComparators,
+  getViewModeSubject,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import type { ClientPluginsStart } from '../../../plugin';
 import { StatsOverviewComponent } from './stats_overview_component';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
@@ -36,6 +40,7 @@ import {
   SYNTHETICS_STATS_SUPPORTED_TRIGGERS,
 } from '../../../../common/embeddables/stats_overview/constants';
 import type { MonitorFilters, OverviewStatsEmbeddableState } from '../../../../common/types';
+import { RequestCancellationManager } from '../../synthetics/state/request_cancellation_manager';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.statusOverview.list.displayName', {
@@ -55,7 +60,8 @@ export type StatsOverviewApi = DefaultEmbeddableApi<OverviewStatsEmbeddableState
   PublishesTitle &
   HasEditCapabilities &
   HasDrilldowns &
-  HasSupportedTriggers;
+  HasSupportedTriggers &
+  CanCancelRequests;
 
 export const getStatsOverviewEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
@@ -77,6 +83,7 @@ export const getStatsOverviewEmbeddableFactory = (
       const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
+      const requestCancellationManager = new RequestCancellationManager();
       const filters$ = new BehaviorSubject({
         ...DEFAULT_FILTERS,
         ...(initialState?.filters || {}),
@@ -84,18 +91,14 @@ export const getStatsOverviewEmbeddableFactory = (
 
       const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
-      function serializeState(): OverviewStatsEmbeddableState {
-        return {
+      const stateApi = initializeStateApi<OverviewStatsEmbeddableState>({
+        parentApi,
+        uuid,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           filters: filters$.getValue(),
           ...drilldownsManager.getLatestState(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<OverviewStatsEmbeddableState>({
-        parentApi,
-        uuid,
-        serializeState,
+        }),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           filters$.pipe(
@@ -106,25 +109,26 @@ export const getStatsOverviewEmbeddableFactory = (
         ),
         getComparators: () => ({
           ...titleComparators,
-          filters: 'referenceEquality',
+          filters: 'deepEquality',
           ...drilldownsManager.comparators,
         }),
         defaultState: {
           filters: DEFAULT_FILTERS,
         },
-        onReset: (lastSaved) => {
-          drilldownsManager.reinitializeState(lastSaved ?? {});
-          titleManager.reinitializeState(lastSaved);
-          filters$.next(lastSaved?.filters ?? DEFAULT_FILTERS);
+        applySerializedState: (nextState) => {
+          drilldownsManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
+          filters$.next(nextState.filters ?? DEFAULT_FILTERS);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
         ...drilldownsManager.api,
-        ...unsavedChangesApi,
+        ...stateApi,
         supportedTriggers: () => SYNTHETICS_STATS_SUPPORTED_TRIGGERS,
         defaultTitle$,
+        cancelRequests: (reason?: AbortReason) => requestCancellationManager.cancel(reason),
         getTypeDisplayName: () =>
           i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {
             defaultMessage: 'filters',
@@ -149,19 +153,21 @@ export const getStatsOverviewEmbeddableFactory = (
             return Promise.reject();
           }
         },
-        serializeState,
       });
+
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
 
       const fetchSubscription = fetch$(api)
         .pipe()
         .subscribe((next) => {
+          requestCancellationManager.startLoad();
           reload$.next(next.isReload);
         });
 
       return {
         api,
         Component: () => {
-          const [filters] = useBatchedPublishingSubjects(filters$);
+          const [filters, viewMode] = useBatchedPublishingSubjects(filters$, viewMode$);
 
           useEffect(() => {
             return () => {
@@ -174,9 +180,13 @@ export const getStatsOverviewEmbeddableFactory = (
               style={{
                 width: '100%',
               }}
-              data-shared-item="" // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
             >
-              <StatsOverviewComponent reload$={reload$} filters={filters || DEFAULT_FILTERS} />
+              <StatsOverviewComponent
+                reload$={reload$}
+                viewMode={viewMode}
+                filters={filters || DEFAULT_FILTERS}
+                requestCancellationManager={requestCancellationManager}
+              />
             </div>
           );
         },

@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
   closeFlyout,
   navigateToBlocklist,
-  navigateToThreatIntelligence,
   openFlyout,
   openFlyoutTakeAction,
   openIndicatorsTableMoreActions,
-  waitForViewToBeLoaded,
+  visitIndicatorsWithTimeRange,
 } from '../../../tasks/threat_intelligence/common';
 import {
   fillBlocklistForm,
@@ -29,8 +27,6 @@ import {
   SAVED_BLOCK_LIST_NAME,
 } from '../../../screens/threat_intelligence/blocklist';
 
-const URL = '/app/security/threat_intelligence/indicators';
-
 const FIRST_BLOCK_LIST_NEW_NAME = 'first blocklist entry';
 const FIRST_BLOCK_LIST_NEW_DESCRIPTION = 'the first description';
 const SECOND_BLOCK_LIST_NEW_NAME = 'second blocklist entry';
@@ -43,8 +39,7 @@ describe('Block list with invalid indicators', { tags: ['@ess'] }, () => {
 
   beforeEach(() => {
     login();
-    visitWithTimeRange(URL);
-    waitForViewToBeLoaded();
+    visitIndicatorsWithTimeRange();
   });
 
   it('should disabled blocklist in the indicators table context menu item and flyout context menu items', () => {
@@ -57,16 +52,14 @@ describe('Block list with invalid indicators', { tags: ['@ess'] }, () => {
   });
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/239150
-describe.skip('Block list interactions', { tags: ['@ess'] }, () => {
+describe('Block list interactions', { tags: ['@ess'] }, () => {
   before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_multiple' }));
 
   after(() => cy.task('esArchiverUnload', { archiveName: 'ti_indicators_data_multiple' }));
 
   beforeEach(() => {
     login();
-    visitWithTimeRange(URL);
-    waitForViewToBeLoaded();
+    visitIndicatorsWithTimeRange();
   });
 
   it('should add to block list from the indicators table and from flyout', () => {
@@ -88,7 +81,7 @@ describe.skip('Block list interactions', { tags: ['@ess'] }, () => {
       .eq(0)
       .should('have.text', FIRST_BLOCK_LIST_NEW_DESCRIPTION);
 
-    navigateToThreatIntelligence();
+    visitIndicatorsWithTimeRange();
 
     // second indicator is a valid indicator for add to blocklist feature
     const secondIndicatorId = 'd4ba36cfa7e4191199836b228f6d79bd74e86793bc183563b78591f508b066ed';

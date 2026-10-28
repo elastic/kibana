@@ -19,6 +19,9 @@ project:
 dependsOn:
   - '@kbn/scout'
   - '@kbn/es'
+  - '@kbn/test-subj-selector'
+  - '@kbn/core-http-common'
+  - '@kbn/core-saved-objects-server'
 tags:
   - test-helper
   - package
@@ -30,6 +33,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

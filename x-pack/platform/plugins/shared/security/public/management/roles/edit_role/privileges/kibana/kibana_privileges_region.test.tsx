@@ -9,6 +9,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Role } from '@kbn/security-plugin-types-common';
 import { KibanaPrivileges } from '@kbn/security-role-management-model';
@@ -49,13 +50,13 @@ const buildProps = () => {
     },
     spaces: [
       {
-        id: 'default',
+        id: asSpaceId('default'),
         name: 'Default Space',
         disabledFeatures: [],
         _reserved: true,
       },
       {
-        id: 'marketing',
+        id: asSpaceId('marketing'),
         name: 'Marketing',
         disabledFeatures: [],
       },

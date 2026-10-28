@@ -44,6 +44,7 @@ export function buildDependencies(services: StartServices): FileUploadStartDepen
       pricing: services.pricing,
       security: services.security,
       userProfile: services.userProfile,
+      userStorage: services.userStorage,
       rendering: services.rendering,
     },
   };

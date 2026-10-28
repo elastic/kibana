@@ -10,10 +10,11 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { FrameType } from '@kbn/profiling-utils';
-import { getLanguageType } from '@kbn/profiling-utils';
+import { getLanguageType, ProfilingSchema } from '@kbn/profiling-utils';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
-import { AddDataTabs } from '../../views/add_data_view';
+import { useSchemaQueryParam } from '../../hooks/use_schema_query_param';
+import { UniversalProfilingAddDataTabs } from '../../views/add_data_view/universal_profiling/types';
 
 interface Props {
   frameType: FrameType;
@@ -22,6 +23,7 @@ interface Props {
 export function MissingSymbolsCallout({ frameType }: Props) {
   const languageType = getLanguageType({ frameType });
   const router = useProfilingRouter();
+  const schema = useSchemaQueryParam();
   const { docLinks } = useProfilingDependencies().start.core;
 
   if (languageType === 'NATIVE') {
@@ -57,8 +59,12 @@ export function MissingSymbolsCallout({ frameType }: Props) {
         </p>
         <EuiButton
           data-test-subj="profilingMissingSymbolsCalloutUploadSymbolsButton"
+          // Only the Universal Profiling instructions explain how to upload symbols
           href={router.link('/add-data-instructions', {
-            query: { selectedTab: AddDataTabs.Symbols },
+            query:
+              schema === ProfilingSchema.ECS
+                ? { selectedTab: UniversalProfilingAddDataTabs.Symbols }
+                : {},
           })}
           color="warning"
         >

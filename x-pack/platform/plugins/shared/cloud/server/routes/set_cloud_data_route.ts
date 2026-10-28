@@ -10,6 +10,7 @@ import { ReservedPrivilegesSet } from '@kbn/core/server';
 import type { RouteOptions } from '.';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { persistTokenCloudData } from '../cloud_data';
+import { MAX_CLOUD_ONBOARDING_TOKEN_LENGTH } from '../route_length_limits';
 
 const createBodySchemaV1 = schema.object({
   onboardingData: schema.object({
@@ -19,7 +20,7 @@ const createBodySchemaV1 = schema.object({
       schema.literal('search'),
       schema.literal('elasticsearch'),
     ]),
-    token: schema.string(),
+    token: schema.string({ maxLength: MAX_CLOUD_ONBOARDING_TOKEN_LENGTH }),
   }),
 });
 

@@ -15,6 +15,7 @@ import {
   type EntityType,
 } from '../../../../common/search_strategy/security_solution';
 import { buildRiskScoreQuery } from '../../../search_strategy/security_solution/factory/risk_score/all/query.risk_score.dsl';
+import { toScoreTypeFilter, type RiskScoreType } from './score_type_filter';
 
 export const createGetRiskScores =
   ({
@@ -30,6 +31,7 @@ export const createGetRiskScores =
     entityIdentifier,
     entityType,
     pagination,
+    scoreType,
   }: {
     entityType: EntityType;
     entityIdentifier: string;
@@ -37,9 +39,15 @@ export const createGetRiskScores =
       querySize: number;
       cursorStart: number;
     };
+    /** Restrict to one `score_type`; when omitted any score type is returned (latest first). */
+    scoreType?: RiskScoreType;
   }): Promise<EntityRiskScoreRecord[]> => {
+    const nameFilter = buildEntityNameFilter(entityType, [entityIdentifier]);
+    const filterQuery = scoreType
+      ? { bool: { filter: [nameFilter, ...toScoreTypeFilter(`${entityType}.risk`, scoreType)] } }
+      : nameFilter;
     const query = buildRiskScoreQuery({
-      filterQuery: buildEntityNameFilter(entityType, [entityIdentifier]),
+      filterQuery,
       defaultIndex: [getRiskIndex(spaceId, false)],
       pagination,
       riskScoreEntity: entityType,

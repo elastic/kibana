@@ -1,0 +1,116 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import moment from 'moment';
+import { EuiToolTip } from '@elastic/eui';
+import { FormattedMessage, FormattedRelative, FormattedTime } from '@kbn/i18n-react';
+import { selectUnit } from '@formatjs/intl-utils';
+import { DATE_TIME_FORMAT } from './proposal_helpers';
+
+export interface ApprovalActorTimeProps {
+  actorName: string;
+  /**
+   * ISO 8601 timestamp. Omitted only when the record genuinely carries none — rendering "by
+   * {actorName}" alone rather than inventing a time, since a fabricated one would read as real
+   * audit attribution and would keep changing on every reopen.
+   */
+  at?: string;
+  /**
+   * Ages itself as a relative time ("8s ago") for a decision still being submitted. A settled
+   * decision shows the fixed clock time instead. It matches the time of the decision, not how long
+   * ago that was. A tooltip on the clock time shows the full date and time.
+   */
+  live?: boolean;
+  /** Prefixes "executed", for an approved action that ran and failed. */
+  executed?: boolean;
+  /**
+   * Leads the caption with the outcome in sentence case ("Approved by …"), for a caption that
+   * stands on its own rather than following other header text. Wins over `executed`.
+   */
+  outcome?: 'approved' | 'applied' | 'declined' | 'executed';
+}
+
+const UPDATE_INTERVAL_SECONDS = 1;
+
+/** react-intl throws rather than schedule an update once the unit passes an hour. */
+const INCREMENTABLE_UNITS: ReadonlyArray<ReturnType<typeof selectUnit>['unit']> = [
+  'second',
+  'minute',
+  'hour',
+];
+
+export const ApprovalActorTime = ({
+  actorName,
+  at,
+  live = false,
+  executed = false,
+  outcome,
+}: ApprovalActorTimeProps) => {
+  if (at === undefined) {
+    if (outcome) {
+      return (
+        <FormattedMessage
+          id="xpack.proposals.approvalActorTime.outcomeLabelWithoutTime"
+          defaultMessage="{outcome, select, approved {Approved} applied {Applied} declined {Declined} other {Executed}} by {actorName}"
+          values={{ outcome, actorName: <strong>{actorName}</strong> }}
+        />
+      );
+    }
+
+    return (
+      <FormattedMessage
+        id={
+          executed
+            ? 'xpack.proposals.approvalActorTime.executedLabelWithoutTime'
+            : 'xpack.proposals.approvalActorTime.labelWithoutTime'
+        }
+        defaultMessage={executed ? 'executed by {actorName}' : 'by {actorName}'}
+        values={{ actorName: <strong>{actorName}</strong> }}
+      />
+    );
+  }
+
+  const { unit } = selectUnit(new Date(at));
+
+  return (
+    <FormattedMessage
+      id={
+        outcome
+          ? 'xpack.proposals.approvalActorTime.outcomeLabel'
+          : executed
+          ? 'xpack.proposals.approvalActorTime.executedLabel'
+          : 'xpack.proposals.approvalActorTime.label'
+      }
+      defaultMessage={
+        outcome
+          ? '{outcome, select, approved {Approved} applied {Applied} declined {Declined} other {Executed}} by {actorName} at {time}'
+          : executed
+          ? 'executed by {actorName} at {time}'
+          : 'by {actorName} at {time}'
+      }
+      values={{
+        outcome,
+        actorName: <strong>{actorName}</strong>,
+        time: live ? (
+          <FormattedRelative
+            value={at}
+            updateIntervalInSeconds={
+              INCREMENTABLE_UNITS.includes(unit) ? UPDATE_INTERVAL_SECONDS : undefined
+            }
+          />
+        ) : (
+          <EuiToolTip content={moment(at).format(DATE_TIME_FORMAT)}>
+            <span tabIndex={0}>
+              <FormattedTime value={at} />
+            </span>
+          </EuiToolTip>
+        ),
+      }}
+    />
+  );
+};

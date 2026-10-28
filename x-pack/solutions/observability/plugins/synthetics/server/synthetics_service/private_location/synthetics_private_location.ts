@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import { buildPolicyBaseIdWithFallbackKuery } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
@@ -21,30 +23,71 @@ import {
   BROWSER_TEST_NOW_RUN,
   LIGHTWEIGHT_TEST_NOW_RUN,
 } from '../synthetics_monitor/synthetics_monitor_client';
-import { scheduleCleanUpTask } from './clean_up_task';
+import { scheduleTestNowCleanUp } from '../../tasks/clean_up_package_policies_task';
 import type { SyntheticsServerSetup } from '../../types';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
+import {
+  getSecretConnectionDelivery,
+  SecretConnectionError,
+  type HeartbeatVaultConfig,
+} from '../get_secret_connection';
 import type {
   HeartbeatConfig,
   MonitorFields,
   PrivateLocation,
+  ServiceLocationErrors,
 } from '../../../common/runtime_types';
 import {
   ConfigKey,
+  MonitorTypeEnum,
   SourceType,
   type SyntheticsPrivateLocations,
 } from '../../../common/runtime_types';
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { PackagePolicyService } from './package_policy_service';
+import { rebalanceByCost } from './assign_shards';
+import {
+  EMPTY_REBALANCE_RESULT,
+  summarizeRebalance,
+  type RebalanceShardsResult,
+} from './rebalance_stats';
+import {
+  toConditionUpdates,
+  toClearedConditionUpdates,
+  toMonitorPlacements,
+} from './rebalance_writes';
+import { getPrivateLocations } from '../get_private_locations';
+import {
+  agentIdFromCondition,
+  assignAgentById,
+  isEqlSafeLiteral,
+  UNASSIGNED_CONDITION,
+} from './assign_by_condition';
+import { isCompleteElasticAgent } from './get_agent_info';
+import { getAgentShardingMode, type AgentShardingMode } from './agent_sharding_license';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;
   globalParams: Record<string, string>;
 }
 
+interface EnrolledAgents {
+  agentIds: string[];
+  /** Enrolled agents on the elastic-agent-complete image. Browser monitors pin only to these. */
+  completeAgentIds?: string[];
+}
+
+type BulkCreatedPolicies = Awaited<ReturnType<PackagePolicyService['bulkCreate']>>;
+
+export type CreatePackagePoliciesResult = BulkCreatedPolicies & {
+  /** Test runs skipped because the location cannot run the monitor. */
+  errors?: ServiceLocationErrors;
+};
+
 export interface FailedPolicyUpdate {
-  packagePolicy: NewPackagePolicyWithId;
+  /** Absent when the policy could not be generated at all. */
+  packagePolicy?: NewPackagePolicyWithId;
   config?: HeartbeatConfig;
   error?: Error | SavedObjectError;
 }
@@ -196,7 +239,12 @@ export class SyntheticsPrivateLocation {
     globalParams: Record<string, string>,
     maintenanceWindows: MaintenanceWindow[],
     testRunId?: string,
-    runOnce?: boolean
+    runOnce?: boolean,
+    conditionHosts?: EnrolledAgents,
+    existingCondition?: string | null,
+    shardingMode: AgentShardingMode = 'inactive',
+    secretConnections?: HeartbeatVaultConfig[],
+    secretStorageEnabled = true
   ): Promise<NewPackagePolicy | null> {
     const { label: locName } = privateLocation;
 
@@ -206,9 +254,43 @@ export class SyntheticsPrivateLocation {
       newPolicy.is_managed = true;
       newPolicy.policy_id = privateLocation.agentPolicyId;
       newPolicy.policy_ids = [privateLocation.agentPolicyId];
+      if (shardingMode === 'active') {
+        const agentIds = conditionHosts?.agentIds ?? [];
+        const isBrowser = config.type === MonitorTypeEnum.BROWSER;
+        // An omitted condition runs the monitor on every agent. Browser monitors
+        // only run on elastic-agent-complete, so they must not use that fallback.
+        const eligibleAgentIds = isBrowser ? conditionHosts?.completeAgentIds ?? [] : agentIds;
+        const existingAgentId = agentIdFromCondition(existingCondition);
+
+        if (existingAgentId && eligibleAgentIds.includes(existingAgentId)) {
+          // Keep a valid existing pin during edits. Health and balancing moves
+          // belong to the rebalance task, not the monitor CRUD path.
+          newPolicy.condition = existingCondition;
+        } else if (eligibleAgentIds.length > 0) {
+          const assigned = assignAgentById(config.id, eligibleAgentIds);
+          if (assigned) {
+            newPolicy.condition = assigned.condition;
+          }
+        } else if (isBrowser) {
+          newPolicy.condition = UNASSIGNED_CONDITION;
+        }
+        // Lightweight with no agents: omit condition. Rebalance pins a real agent once someone enrolls.
+      } else if (shardingMode === 'unknown') {
+        // License unreadable: keep whatever pin exists until it can be read again.
+        if (existingCondition) {
+          newPolicy.condition = existingCondition;
+        }
+      } else if (existingCondition) {
+        // No Enterprise license, or shard rebalancing paused: drop any leftover pin.
+        newPolicy.condition = null;
+      }
       if (testRunId) {
+        // These names mark a policy as a Test Now run: the leftover scan skips
+        // them, and the daily clean up sweeps any whose own clean up never ran.
         newPolicy.name =
-          config.type === 'browser' ? BROWSER_TEST_NOW_RUN : LIGHTWEIGHT_TEST_NOW_RUN;
+          config.type === MonitorTypeEnum.BROWSER || config.type === MonitorTypeEnum.API
+            ? BROWSER_TEST_NOW_RUN
+            : LIGHTWEIGHT_TEST_NOW_RUN;
       } else {
         newPolicy.name = this.getPolicyName(config, locName);
       }
@@ -216,6 +298,15 @@ export class SyntheticsPrivateLocation {
 
       newPolicy.namespace = await this.getPolicyNamespace(configNamespace);
 
+      // `secretConnections` is fetched ONCE per space by the caller
+      // (createPackagePolicies / editMonitors) — E1 — and formatSyntheticsPolicy
+      // attaches only the ones THIS monitor references (A2), as a single Fleet
+      // secret. It is undefined on the inspect path (A1): Fleet's inspect()
+      // compiles vars verbatim (no secret-ization), so attaching them would return
+      // plaintext credentials to the caller.
+      //
+      // When Fleet secret storage is disabled the blob would be stored in plaintext,
+      // so formatSyntheticsPolicy refuses to attach it (`secretStorageEnabled`).
       const { formattedPolicy } = formatSyntheticsPolicy(
         newPolicy,
         config.type,
@@ -240,14 +331,95 @@ export class SyntheticsPrivateLocation {
           ...(config.fields?.kibanaUrl ? { kibanaUrl: config.fields.kibanaUrl } : {}),
         },
         globalParams,
-        maintenanceWindows
+        maintenanceWindows,
+        undefined,
+        secretConnections,
+        secretStorageEnabled
       );
 
       return formattedPolicy;
     } catch (e) {
       this.server.logger.error(e);
+      // Preserve actionable package-upgrade guidance; other failures fall through
+      // to the caller's generic "unable to create package policy" path.
+      if (
+        e instanceof Error &&
+        (e.message.includes('Synthetics integration version 1.12.0 or later') ||
+          e instanceof SecretConnectionError)
+      ) {
+        throw e;
+      }
       return null;
     }
+  }
+
+  /**
+   * Resolves enrolled Fleet agents for one scalable location policy. This is
+   * deliberately paginated: a large policy must not silently ignore agents
+   * beyond Fleet's first result page. Pagination stops on a short page
+   * (fewer than `perPage` results) rather than trusting `total`, which some
+   * callers may not populate.
+   */
+  private async getEnrolledAgents(agentPolicyId: string): Promise<EnrolledAgents> {
+    const agentIds = new Set<string>();
+    const completeAgentIds = new Set<string>();
+    const perPage = 1000;
+    let page = 1;
+
+    while (true) {
+      const { agents } = await this.server.fleet.agentService.asInternalUser.listAgents({
+        showInactive: false,
+        perPage,
+        page,
+        kuery: buildPolicyBaseIdWithFallbackKuery(agentPolicyId),
+      });
+
+      for (const agent of agents) {
+        if (agent.id && isEqlSafeLiteral(agent.id)) {
+          agentIds.add(agent.id);
+          if (isCompleteElasticAgent(agent.local_metadata)) {
+            completeAgentIds.add(agent.id);
+          }
+        }
+      }
+
+      if (agents.length < perPage) {
+        break;
+      }
+      page += 1;
+    }
+
+    return { agentIds: [...agentIds], completeAgentIds: [...completeAgentIds] };
+  }
+
+  /** Resolves each touched location at most once per monitor batch. */
+  private async getEnrolledAgentsByLocation(
+    locations: Array<{ id: string; agentPolicyId: string }>
+  ): Promise<Map<string, EnrolledAgents>> {
+    const uniqueLocations = [
+      ...new Map(locations.map((location) => [location.id, location])).values(),
+    ];
+    const entries = await Promise.all(
+      uniqueLocations.map(
+        async (location) =>
+          [location.id, await this.getEnrolledAgents(location.agentPolicyId)] as const
+      )
+    );
+
+    return new Map(entries);
+  }
+
+  private getReferencedPrivateLocations(
+    configs: Array<{ config: Pick<HeartbeatConfig, ConfigKey.LOCATIONS> }>,
+    privateLocations: SyntheticsPrivateLocations
+  ): SyntheticsPrivateLocations {
+    const locationIds = new Set(
+      configs.flatMap(({ config }) =>
+        config.locations.filter((location) => !location.isServiceManaged).map(({ id }) => id)
+      )
+    );
+
+    return privateLocations.filter((location) => locationIds.has(location.id));
   }
 
   async createPackagePolicies(
@@ -257,12 +429,31 @@ export class SyntheticsPrivateLocation {
     maintenanceWindows: MaintenanceWindow[],
     testRunId?: string,
     runOnce?: boolean
-  ) {
+  ): Promise<CreatePackagePoliciesResult> {
     if (configs.length === 0) {
       return { created: [], failed: [] };
     }
     const newPolicies: NewPackagePolicyWithId[] = [];
+    const locationErrors: ServiceLocationErrors = [];
     const newPolicyTemplate = await this.buildNewPolicy(spaceId);
+    // E1: fetch the space's vault connections ONCE (they're decrypted), not per
+    // monitor × location.
+    const { secretConnections, secretStorageEnabled } = await getSecretConnectionDelivery(
+      this.server,
+      spaceId
+    );
+    const referencedPrivateLocations = this.getReferencedPrivateLocations(
+      configs,
+      privateLocations
+    );
+    const shardingMode = await getAgentShardingMode(this.server);
+    // Test runs need the browser check in every sharding mode.
+    const needsEnrolledAgents =
+      shardingMode === 'active' ||
+      (Boolean(testRunId) && configs.some(({ config }) => config.type === MonitorTypeEnum.BROWSER));
+    const enrolledAgentsByLocation = needsEnrolledAgents
+      ? await this.getEnrolledAgentsByLocation(referencedPrivateLocations)
+      : new Map<string, EnrolledAgents>();
 
     for (const { config, globalParams } of configs) {
       try {
@@ -277,6 +468,20 @@ export class SyntheticsPrivateLocation {
             );
           }
 
+          const enrolledAgents = enrolledAgentsByLocation.get(location.id);
+          // No agent here can run the test, so it would wait forever for results.
+          if (
+            testRunId &&
+            config.type === MonitorTypeEnum.BROWSER &&
+            !enrolledAgents?.completeAgentIds?.length
+          ) {
+            locationErrors.push({
+              locationId: location.id,
+              error: { reason: browserNeedsCompleteAgentReason(location.label), status: 400 },
+            });
+            continue;
+          }
+
           const newPolicy = await this.generateNewPolicy(
             config,
             location,
@@ -285,7 +490,12 @@ export class SyntheticsPrivateLocation {
             globalParams,
             maintenanceWindows,
             testRunId,
-            runOnce
+            runOnce,
+            enrolledAgents,
+            undefined,
+            shardingMode,
+            secretConnections,
+            secretStorageEnabled
           );
 
           if (!newPolicy) {
@@ -313,6 +523,9 @@ export class SyntheticsPrivateLocation {
     }
 
     if (newPolicies.length === 0) {
+      if (locationErrors.length > 0) {
+        return { created: [], failed: [], errors: locationErrors };
+      }
       throw new Error('Failed to build package policies for all monitors');
     }
 
@@ -323,9 +536,9 @@ export class SyntheticsPrivateLocation {
       });
       if (result?.created && result?.created?.length > 0 && testRunId) {
         // ignore await here, we don't want to wait for this to finish
-        void scheduleCleanUpTask(this.server);
+        void scheduleTestNowCleanUp(this.server, result.created);
       }
-      return result;
+      return locationErrors.length > 0 ? { ...result, errors: locationErrors } : result;
     } catch (e) {
       this.server.logger.error(e);
       throw e;
@@ -355,6 +568,11 @@ export class SyntheticsPrivateLocation {
       const privateLocation = locations.find((loc) => !loc.isServiceManaged);
 
       const location = allPrivateLocations?.find((loc) => loc.id === privateLocation?.id)!;
+      const shardingMode = await getAgentShardingMode(this.server);
+      const conditionHosts =
+        shardingMode === 'active'
+          ? await this.getEnrolledAgents(location.agentPolicyId)
+          : undefined;
 
       const newPolicy = await this.generateNewPolicy(
         config,
@@ -362,7 +580,14 @@ export class SyntheticsPrivateLocation {
         newPolicyTemplate,
         spaceId,
         globalParams,
-        maintenanceWindows
+        maintenanceWindows,
+        undefined,
+        undefined,
+        conditionHosts,
+        undefined,
+        shardingMode
+        // secretConnections omitted (A1): never attach vault credentials to inspect
+        // output — Fleet's inspect() compiles vars verbatim, with no secret-ization.
       );
 
       const pkgPolicy = {
@@ -380,11 +605,25 @@ export class SyntheticsPrivateLocation {
     }
   }
 
+  /**
+   * Bumps the agent policies collected via `deferredBumps` passed to
+   * {@link editMonitors}; the caller must call this once done, also on failure.
+   */
+  async scheduleRevisionBumps(deferredBumps: Set<string>) {
+    await this.packagePolicyService.scheduleRevisionBumps(deferredBumps);
+  }
+
+  /**
+   * When `deferredBumps` is passed, scalable-location agent policy revision
+   * bumps are collected there instead of awaited per call — so a caller editing
+   * many batches in sequence can bump each agent policy once, not once per batch.
+   */
   async editMonitors(
     configs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }>,
     allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string,
-    maintenanceWindows: MaintenanceWindow[]
+    maintenanceWindows: MaintenanceWindow[],
+    deferredBumps?: Set<string>
   ) {
     if (configs.length === 0) {
       return {
@@ -392,23 +631,47 @@ export class SyntheticsPrivateLocation {
       };
     }
 
-    const [newPolicyTemplate, { policies: existingPolicies, allSpaces }] = await Promise.all([
+    // E1: fetch the space's vault connections ONCE, not per monitor × location.
+    const [
+      newPolicyTemplate,
+      { policies: existingPolicies, allSpaces },
+      { secretConnections, secretStorageEnabled },
+    ] = await Promise.all([
       this.buildNewPolicy(spaceId),
       this.getExistingPolicies(
         configs.map(({ config }) => config),
         allPrivateLocations,
         spaceId
       ),
+      getSecretConnectionDelivery(this.server, spaceId),
     ]);
 
-    const policiesToUpdate: NewPackagePolicyWithId[] = [];
+    const failedSecretConnectionUpdates: FailedPolicyUpdate[] = [];
+    const policiesToUpdate: UpdatePackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];
     const policiesToDelete: string[] = [];
+    const referencedPrivateLocations = this.getReferencedPrivateLocations(
+      configs,
+      allPrivateLocations
+    );
+    const shardingMode = await getAgentShardingMode(this.server);
+    const enrolledAgentsByLocation =
+      shardingMode === 'active'
+        ? await this.getEnrolledAgentsByLocation(referencedPrivateLocations)
+        : new Map<string, EnrolledAgents>();
+    const existingPolicyById = new Map(existingPolicies.map((policy) => [policy.id, policy]));
 
     for (const { config, globalParams } of configs) {
       const { locations } = config;
 
       const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
+
+      // Queued per monitor so a monitor that fails on a secret connection applies none of its
+      // policy changes — the caller reverts its saved object, and the two must stay in sync.
+      const monitorPoliciesToUpdate: UpdatePackagePolicyWithId[] = [];
+      const monitorPoliciesToCreate: NewPackagePolicyWithId[] = [];
+      const monitorPoliciesToDelete: string[] = [];
+      let secretConnectionError: SecretConnectionError | undefined;
 
       for (const privateLocation of allPrivateLocations) {
         const hasLocation = monitorPrivateLocations?.some((loc) => loc.id === privateLocation.id);
@@ -419,13 +682,32 @@ export class SyntheticsPrivateLocation {
 
         try {
           if (hasLocation) {
+            // Prefer the new-format policy's condition verbatim, including an
+            // explicit `null` left by a location that reverted to classic —
+            // falling back to `??` here would treat that `null` as absent and
+            // resurrect a stale legacy condition. Legacy ids predate condition
+            // sharding, so more than one holding a condition is unexpected; if
+            // it happens, we arbitrarily keep the first one found.
+            const newIdPolicy = existingPolicyById.get(newId);
+            const existingCondition = newIdPolicy
+              ? newIdPolicy.condition
+              : legacyPolicyIds
+                  .map((id) => existingPolicyById.get(id)?.condition)
+                  .find((condition) => condition != null);
             const newPolicy = await this.generateNewPolicy(
               config,
               privateLocation,
               newPolicyTemplate,
               spaceId,
               globalParams,
-              maintenanceWindows
+              maintenanceWindows,
+              undefined,
+              undefined,
+              enrolledAgentsByLocation.get(privateLocation.id),
+              existingCondition,
+              shardingMode,
+              secretConnections,
+              secretStorageEnabled
             );
 
             if (!newPolicy) {
@@ -433,25 +715,41 @@ export class SyntheticsPrivateLocation {
             }
 
             if (hasNewFormatPolicyId) {
-              policiesToUpdate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
-              policiesToDelete.push(...legacyPolicyIds);
+              monitorPoliciesToUpdate.push({
+                ...newPolicy,
+                id: newId,
+              } as UpdatePackagePolicyWithId);
+              monitorPoliciesToDelete.push(...legacyPolicyIds);
             } else if (hasAnyLegacyPolicyId) {
-              policiesToDelete.push(...legacyPolicyIds);
-              policiesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
+              monitorPoliciesToDelete.push(...legacyPolicyIds);
+              monitorPoliciesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
             } else {
-              policiesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
+              monitorPoliciesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
             }
           } else {
             if (hasNewFormatPolicyId) {
-              policiesToDelete.push(newId);
+              monitorPoliciesToDelete.push(newId);
             }
-            policiesToDelete.push(...legacyPolicyIds);
+            monitorPoliciesToDelete.push(...legacyPolicyIds);
           }
         } catch (e) {
           this.server.logger.error(e);
+          // One monitor's bad connection must not block the rest of the batch.
+          if (e instanceof SecretConnectionError) {
+            secretConnectionError = e;
+            break;
+          }
           throwAddEditError(hasPolicy, privateLocation.label, config[ConfigKey.NAME]);
         }
       }
+
+      if (secretConnectionError) {
+        failedSecretConnectionUpdates.push({ config, error: secretConnectionError });
+        continue;
+      }
+      policiesToUpdate.push(...monitorPoliciesToUpdate);
+      policiesToCreate.push(...monitorPoliciesToCreate);
+      policiesToDelete.push(...monitorPoliciesToDelete);
     }
 
     const uniqueToDelete = [...new Set(policiesToDelete)];
@@ -467,6 +765,7 @@ export class SyntheticsPrivateLocation {
     const createResponse = await this.packagePolicyService.bulkCreate({
       newPolicies: policiesToCreate,
       spaceId,
+      deferredBumps,
     });
 
     if (createResponse.failed.length > 0) {
@@ -486,10 +785,12 @@ export class SyntheticsPrivateLocation {
       this.packagePolicyService.bulkUpdate({
         policiesToUpdate,
         spaceId,
+        deferredBumps,
       }),
       this.packagePolicyService.bulkDelete({
         policyIdsToDelete: uniqueToDelete,
         spaceId,
+        deferredBumps,
       }),
     ]);
 
@@ -511,7 +812,7 @@ export class SyntheticsPrivateLocation {
     });
 
     return {
-      failedUpdates,
+      failedUpdates: [...(failedUpdates ?? []), ...failedSecretConnectionUpdates],
       failedCreates: createResponse.failed,
     };
   }
@@ -542,6 +843,7 @@ export class SyntheticsPrivateLocation {
     const policies = await this.packagePolicyService.getByIds({
       spaceId,
       packagePolicyIds: Array.from(policyIdsToFetch),
+      fields: ['name', 'condition'],
     });
 
     return { policies, allSpaces };
@@ -565,6 +867,7 @@ export class SyntheticsPrivateLocation {
     const existingPolicies = await this.packagePolicyService.getByIds({
       spaceId,
       packagePolicyIds: Array.from(policyIdsToFetch),
+      fields: ['name'],
     });
 
     const policyIdsToDelete = new Set<string>();
@@ -599,8 +902,138 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async getAgentPolicies() {
-    return getAgentPoliciesAsInternalUser({ server: this.server, spaceId: ALL_SPACES_ID });
+  async getAgentPolicies(spaceId: string = ALL_SPACES_ID) {
+    return getAgentPoliciesAsInternalUser({ server: this.server, spaceId });
+  }
+
+  /**
+   * Idempotent, minimal-churn rebalance for a scalable (condition-sharded)
+   * private location. Every monitor is pinned to the location's single agent
+   * policy; distribution is expressed as a per-monitor `${agent.id}` condition.
+   * This reads each monitor's current pin, runs the {@link rebalanceByCost}
+   * placement pass (failover of stale monitors + cost load-balancing onto
+   * stability-gated recovery agents, moving nothing else), and rewrites only the
+   * conditions of monitors whose agent actually changed — reusing the existing
+   * package-policy content and flipping only `condition`, never decrypting or
+   * regenerating monitor configs like {@link editMonitors}. Steady state
+   * performs zero writes.
+   *
+   * The two agent sets serve opposite goals. `recoveryAgentIds` (a
+   * stability-gated subset of `healthyAgentIds`) are the only agents eligible to
+   * *receive* load-balancing moves, so a freshly-recovered ("flapping") agent
+   * can't pull healthy monitors onto itself only to shed them on its next
+   * bounce. Failover is independent of that gate: a dead agent's monitors are
+   * placed on any of the full `healthyAgentIds`, so they evacuate immediately
+   * even when the only currently-live agents aren't stable yet.
+   *
+   * Browser monitors are placed only on `browserAgentIds` (elastic-agent-complete).
+   * An empty list pins them to a sentinel that matches no agent, so they do not
+   * run on the standard image.
+   */
+  async rebalanceShards({
+    location,
+    healthyAgentIds,
+    recoveryAgentIds,
+    browserAgentIds,
+    capacities,
+    signal,
+  }: {
+    location: { id: string; label?: string; agentPolicyId: string };
+    healthyAgentIds: string[];
+    recoveryAgentIds?: string[];
+    browserAgentIds: string[];
+    capacities?: ReadonlyMap<string, number>;
+    signal: AbortSignal;
+  }): Promise<RebalanceShardsResult> {
+    if (healthyAgentIds.length === 0) {
+      return EMPTY_REBALANCE_RESULT;
+    }
+    signal.throwIfAborted();
+    const pkgPolicies = await this.packagePolicyService.listByAgentPolicy({
+      agentPolicyId: location.agentPolicyId,
+      signal,
+    });
+    if (pkgPolicies.length === 0) {
+      return {
+        ...EMPTY_REBALANCE_RESULT,
+        monitorsPerAgent: Object.fromEntries(healthyAgentIds.map((agentId) => [agentId, 0])),
+      };
+    }
+
+    const monitors = toMonitorPlacements(pkgPolicies, location.id);
+    const assignment = rebalanceByCost(monitors, healthyAgentIds, {
+      capacities,
+      recoveryAgentIds,
+      browserAgentIds,
+    });
+    const updatesBySpace = toConditionUpdates(pkgPolicies, assignment, location.id);
+
+    let moved = 0;
+    let failedMoves = 0;
+    for (const [spaceId, policiesToUpdate] of updatesBySpace) {
+      signal.throwIfAborted();
+      // Update in the policy's own recorded space (grouped in toConditionUpdates),
+      // not via the agent-policy-derived routing — see bulkUpdateInSpace.
+      const failed = await this.packagePolicyService.bulkUpdateInSpace({
+        policiesToUpdate,
+        spaceId,
+      });
+      // Count only successful moves (a failed bulkUpdate leaves the old pin).
+      moved += policiesToUpdate.length - failed.length;
+      failedMoves += failed.length;
+      if (failed.length > 0) {
+        // Not terminal: the rebalance is idempotent and retried every cycle, so
+        // the next run re-attempts these same moves. warn (not error) — no
+        // operator action is needed unless it persists across cycles.
+        this.server.logger.warn(
+          `[rebalanceShards] Failed to move ${failed.length} monitors for location ${
+            location.label ?? location.id
+          }`
+        );
+      }
+    }
+
+    return {
+      total: pkgPolicies.length,
+      moved,
+      failed: failedMoves,
+      ...summarizeRebalance({ monitors, assignment, healthyAgentIds }),
+    };
+  }
+
+  /**
+   * Drops every `${agent.id}` pin on private-location package policies so
+   * monitors run unfiltered on every agent. Used when shard rebalancing is
+   * turned off or the license no longer covers sharding. Dedupes by agent
+   * policy so a shared policy is listed once.
+   */
+  async clearShardConditions(): Promise<{ cleared: number; failed: number }> {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const locations = await getPrivateLocations(soClient, ALL_SPACES_ID);
+    const agentPolicyIds = [...new Set(locations.map((location) => location.agentPolicyId))];
+
+    let cleared = 0;
+    let failed = 0;
+    for (const agentPolicyId of agentPolicyIds) {
+      const pkgPolicies = await this.packagePolicyService.listByAgentPolicy({ agentPolicyId });
+      const updatesBySpace = toClearedConditionUpdates(pkgPolicies);
+
+      for (const [spaceId, policiesToUpdate] of updatesBySpace) {
+        const failedBatch = await this.packagePolicyService.bulkUpdateInSpace({
+          policiesToUpdate,
+          spaceId,
+        });
+        cleared += policiesToUpdate.length - failedBatch.length;
+        failed += failedBatch.length;
+        if (failedBatch.length > 0) {
+          this.server.logger.warn(
+            `[clearShardConditions] Failed to clear ${failedBatch.length} monitor pin(s) on agent policy ${agentPolicyId}`
+          );
+        }
+      }
+    }
+
+    return { cleared, failed };
   }
 }
 
@@ -615,3 +1048,10 @@ const throwAddEditError = (hasPolicy: boolean, location?: string, name?: string)
 const deletePolicyError = (name: string, location?: string) => {
   return `Unable to delete Synthetics package policy for monitor ${name} with private location ${location}`;
 };
+
+const browserNeedsCompleteAgentReason = (locationLabel: string) =>
+  i18n.translate('xpack.synthetics.privateLocation.browserNeedsCompleteAgent', {
+    defaultMessage:
+      'Browser monitors run only on the elastic-agent-complete image, and no complete agent is enrolled in {locationLabel}.',
+    values: { locationLabel },
+  });

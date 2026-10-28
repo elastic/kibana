@@ -8,7 +8,7 @@
  */
 
 import { useCallback } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { v4 as generateUuid } from 'uuid';
 import { extractNormalizedInputsFromYaml } from '@kbn/workflows/spec/lib/field_conversion';
 import {

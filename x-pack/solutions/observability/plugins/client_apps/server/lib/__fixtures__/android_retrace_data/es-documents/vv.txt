@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "map_version": "2.2",
+  "obfuscated_class": "vv",
+  "original_class": "co.elastic.otel.android.internal.features.sessionmanager.samplerate.SampleRateManager",
+  "source_file": "SampleRateManager.kt",
+  "methods": {
+    "a": {
+      "mappings": [],
+      "default_mappings": [
+        {
+          "method": "evaluateSampleRate"
+        }
+      ]
+    }
+  }
+}

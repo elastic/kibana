@@ -9,16 +9,19 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import { fetchRelatedEpisodes } from '../apis/fetch_related_episodes';
+import { QUERY_STALE_TIME } from '../constants';
 import { useSpaceId } from './use_space_id';
 import {
   buildRelatedBaseQuery,
   finishRelatedEpisodesQuery,
+  getRelatedEpisodesScopeKey,
+  type RelatedEpisodesScope,
 } from '../queries/related_episodes_query';
 import { queryKeys } from '../query_keys';
 import { RELATED_EPISODES_LOAD_ERROR } from './translations';
 
 export interface UseFetchSameGroupEpisodesQueryOptions {
-  ruleId: string | undefined;
+  scope: RelatedEpisodesScope | undefined;
   excludeEpisodeId: string | undefined;
   pageSize: number;
   /** Required; hook stays idle when missing. */
@@ -28,26 +31,26 @@ export interface UseFetchSameGroupEpisodesQueryOptions {
 }
 
 /**
- * Other episodes for the same rule and same `group_hash` (excluding the current episode id).
+ * Other episodes in the same scope and same `group_hash` (excluding the current episode id).
  */
 const buildSameGroupRelatedAlertEpisodesEsqlQuery = (
   spaceId: string,
-  ruleId: string,
+  scope: RelatedEpisodesScope,
   groupHash: string,
   excludeEpisodeId: string
 ) => {
-  const query = buildRelatedBaseQuery(spaceId, ruleId, excludeEpisodeId);
+  const query = buildRelatedBaseQuery(spaceId, scope, excludeEpisodeId);
   query.where`group_hash == ${groupHash}`;
   return finishRelatedEpisodesQuery(query);
 };
 
 /**
- * Fetches other episodes for the same rule and same `group_hash` (excluding the current id).
+ * Fetches other episodes for the same rule (or source) and same `group_hash` (excluding the current id).
  * Builds `buildSameGroupRelatedAlertEpisodesEsqlQuery` and passes the printed query to
  * `fetchRelatedEpisodes`.
  */
 export const useFetchSameGroupEpisodesQuery = ({
-  ruleId,
+  scope,
   excludeEpisodeId,
   pageSize,
   groupHash,
@@ -58,20 +61,26 @@ export const useFetchSameGroupEpisodesQuery = ({
   const spaceId = useSpaceId(services.spaces);
 
   return useQuery({
-    queryKey: queryKeys.relatedSameGroupEpisodes(spaceId, ruleId ?? '', groupHash ?? '', pageSize),
+    queryKey: queryKeys.relatedSameGroupEpisodes(
+      spaceId,
+      getRelatedEpisodesScopeKey(scope),
+      groupHash ?? '',
+      pageSize
+    ),
     queryFn: ({ signal }) =>
       fetchRelatedEpisodes({
         abortSignal: signal,
         pageSize,
         query: buildSameGroupRelatedAlertEpisodesEsqlQuery(
           spaceId,
-          ruleId as string,
+          scope as RelatedEpisodesScope,
           groupHash as string,
           excludeEpisodeId as string
         ).print('basic'),
         expressions,
       }),
-    enabled: Boolean(ruleId && excludeEpisodeId && groupHash),
+    enabled: Boolean(scope && excludeEpisodeId && groupHash),
+    staleTime: QUERY_STALE_TIME,
     onError: () => {
       toastDanger?.(RELATED_EPISODES_LOAD_ERROR);
     },

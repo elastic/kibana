@@ -122,6 +122,7 @@ export async function sendEmailWithExchange(
     logger,
     configurationUtilities,
     credentials: {
+      type: 'client_secret',
       config: {
         clientId: clientId as string,
       },
@@ -203,7 +204,7 @@ async function sendEmailWithNodemailer(
 
   if (service === JSON_TRANSPORT_SERVICE) {
     try {
-      result.message = JSON.parse(result.message);
+      result.message = JSON.parse(result.message as string);
     } catch (err) {
       // try parsing the message for ease of debugging, on error, ignore
     }

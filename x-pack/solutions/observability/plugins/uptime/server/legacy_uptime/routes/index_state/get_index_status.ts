@@ -9,14 +9,15 @@ import { schema } from '@kbn/config-schema';
 import type { UMServerLibs } from '../../lib/lib';
 import type { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../../common/constants';
+import { MAX_DATE_RANGE_LENGTH, optionalBoundedString } from '../schema_limits';
 
 export const createGetIndexStatusRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: API_URLS.INDEX_STATUS,
   validate: {
     query: schema.object({
-      from: schema.maybe(schema.string()),
-      to: schema.maybe(schema.string()),
+      from: optionalBoundedString(MAX_DATE_RANGE_LENGTH),
+      to: optionalBoundedString(MAX_DATE_RANGE_LENGTH),
     }),
   },
   handler: async ({ uptimeEsClient, request, response }): Promise<any> => {

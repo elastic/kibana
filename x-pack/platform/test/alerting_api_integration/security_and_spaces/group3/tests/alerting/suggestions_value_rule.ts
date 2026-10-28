@@ -67,7 +67,7 @@ export default function createRuleSuggestionValuesTests({ getService }: FtrProvi
               expect(response.statusCode).toEqual(403);
               expect(response.body).toEqual({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               break;

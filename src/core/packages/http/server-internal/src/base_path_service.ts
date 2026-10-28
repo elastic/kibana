@@ -8,9 +8,7 @@
  */
 
 import { modifyUrl } from '@kbn/std';
-import type { Request } from '@hapi/hapi';
 import type { KibanaRequest, IBasePath } from '@kbn/core-http-server';
-import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 
 /**
  * Core internal implementation of {@link IBasePath}
@@ -18,8 +16,6 @@ import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
  * @internal
  */
 export class BasePath implements IBasePath {
-  private readonly basePathCache = new WeakMap<Request, string>();
-
   public readonly serverBasePath: string;
   public readonly publicBaseUrl?: string;
 
@@ -29,19 +25,7 @@ export class BasePath implements IBasePath {
   }
 
   public get = (request: KibanaRequest) => {
-    const requestScopePath = this.basePathCache.get(ensureRawRequest(request)) || '';
-    return `${this.serverBasePath}${requestScopePath}`;
-  };
-
-  public set = (request: KibanaRequest, requestSpecificBasePath: string) => {
-    const rawRequest = ensureRawRequest(request);
-
-    if (this.basePathCache.has(rawRequest)) {
-      throw new Error(
-        'Request basePath was previously set. Setting multiple times is not supported.'
-      );
-    }
-    this.basePathCache.set(rawRequest, requestSpecificBasePath);
+    return request.basePath;
   };
 
   public prepend = (path: string): string => {

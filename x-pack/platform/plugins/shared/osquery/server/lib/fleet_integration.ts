@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart, SavedObjectReference, SavedObjectsClient } from '@kbn/core/server';
+import type { CoreStart, SavedObjectReference } from '@kbn/core/server';
 import { filter, map } from 'lodash';
 import type { PostPackagePolicyPostDeleteCallback } from '@kbn/fleet-plugin/server';
 import type {
@@ -76,12 +76,24 @@ export const getAgentPolicyPostUpdateCallback =
   };
 
 export const getPackagePolicyDeleteCallback =
-  (packsClient: SavedObjectsClient): PostPackagePolicyPostDeleteCallback =>
-  async (deletedPackagePolicy) => {
+  (core: CoreStart): PostPackagePolicyPostDeleteCallback =>
+  async (deletedPackagePolicy, soClient) => {
     const deletedOsqueryManagerPolicies = filter(deletedPackagePolicy, [
       'package.name',
       OSQUERY_INTEGRATION_NAME,
     ]);
+
+    if (!deletedOsqueryManagerPolicies.length) {
+      return;
+    }
+
+    // Packs are `multiple-isolated`, so the cleanup must run in the same space the
+    // package policy (and its packs) live in. Deriving the space from the Fleet
+    // request-scoped `soClient` keeps the pack `find` and `update` in that space,
+    // mirroring the create callback (see create_package_policy_callback.ts).
+    const spaceId = soClient.getCurrentNamespace();
+    const packsClient = getInternalSavedObjectsClientForSpaceId(core, spaceId);
+
     await Promise.all(
       map(deletedOsqueryManagerPolicies, async (deletedOsqueryManagerPolicy) => {
         const policyIds = deletedOsqueryManagerPolicy.policy_ids?.length

@@ -24,31 +24,38 @@ export const ScheduledExecutionMetadata = lazySchema(() =>
     /**
      * The schedule ID for the scheduled query.
      */
-    scheduleId: z.string().optional(),
+    scheduleId: z.string().optional().describe('The schedule ID for the scheduled query.'),
     /**
      * The execution count for this scheduled query run.
      */
-    executionCount: z.number().int().optional(),
+    executionCount: z
+      .number()
+      .int()
+      .optional()
+      .describe('The execution count for this scheduled query run.'),
     /**
      * The ID of the pack containing the query.
      */
-    packId: z.string().optional(),
+    packId: z.string().optional().describe('The ID of the pack containing the query.'),
     /**
      * The name of the pack containing the query.
      */
-    packName: z.string().optional(),
+    packName: z.string().optional().describe('The name of the pack containing the query.'),
     /**
      * The name of the query within the pack.
      */
-    queryName: z.string().optional(),
+    queryName: z.string().optional().describe('The name of the query within the pack.'),
     /**
      * The SQL query that was executed.
      */
-    queryText: z.string().optional(),
+    queryText: z.string().optional().describe('The SQL query that was executed.'),
     /**
      * The timestamp of the most recent response for this execution.
      */
-    timestamp: z.string().optional(),
+    timestamp: z
+      .string()
+      .optional()
+      .describe('The timestamp of the most recent response for this execution.'),
   })
 );
 export type ScheduledExecutionMetadata = z.infer<typeof ScheduledExecutionMetadata>;
@@ -58,23 +65,35 @@ export const ScheduledActionResultsAggregations = lazySchema(() =>
     /**
      * The total number of result rows across all agents.
      */
-    totalRowCount: z.number().int().optional(),
+    totalRowCount: z
+      .number()
+      .int()
+      .optional()
+      .describe('The total number of result rows across all agents.'),
     /**
      * The total number of agents that responded.
      */
-    totalResponded: z.number().int().optional(),
+    totalResponded: z
+      .number()
+      .int()
+      .optional()
+      .describe('The total number of agents that responded.'),
     /**
      * The number of agents that completed successfully.
      */
-    successful: z.number().int().optional(),
+    successful: z
+      .number()
+      .int()
+      .optional()
+      .describe('The number of agents that completed successfully.'),
     /**
      * The number of agents that returned errors.
      */
-    failed: z.number().int().optional(),
+    failed: z.number().int().optional().describe('The number of agents that returned errors.'),
     /**
      * The number of agents with pending responses.
      */
-    pending: z.number().int().optional(),
+    pending: z.number().int().optional().describe('The number of agents with pending responses.'),
   })
 );
 export type ScheduledActionResultsAggregations = z.infer<typeof ScheduledActionResultsAggregations>;
@@ -85,28 +104,31 @@ export const GetScheduledActionResultsResponse = lazySchema(() =>
     /**
      * The paginated list of per-agent action results.
      */
-    edges: z.array(z.object({})).optional(),
+    edges: z
+      .array(z.object({}))
+      .optional()
+      .describe('The paginated list of per-agent action results.'),
     /**
      * The total number of action results.
      */
-    total: z.number().int().optional(),
+    total: z.number().int().optional().describe('The total number of action results.'),
     /**
      * The current page number (zero-based).
      */
-    currentPage: z.number().int().optional(),
+    currentPage: z.number().int().optional().describe('The current page number (zero-based).'),
     /**
      * The number of results per page.
      */
-    pageSize: z.number().int().optional(),
+    pageSize: z.number().int().optional().describe('The number of results per page.'),
     /**
      * The total number of pages.
      */
-    totalPages: z.number().int().optional(),
+    totalPages: z.number().int().optional().describe('The total number of pages.'),
     aggregations: ScheduledActionResultsAggregations.optional(),
     /**
      * Debug/inspection data for the search query.
      */
-    inspect: z.object({}).optional(),
+    inspect: z.object({}).optional().describe('Debug/inspection data for the search query.'),
   })
 );
 export type GetScheduledActionResultsResponse = z.infer<typeof GetScheduledActionResultsResponse>;

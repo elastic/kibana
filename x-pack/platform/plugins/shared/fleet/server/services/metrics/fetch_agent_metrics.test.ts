@@ -19,7 +19,7 @@ jest.mock('../../collectors/agent_collectors', () => {
 
 describe('fetchAgentMetrics', () => {
   const { createSetup: coreSetupMock } = coreMock;
-  const abortController = new AbortController();
+  const { signal } = new AbortController();
   let mockCore: CoreSetup;
   let esClient: ElasticsearchClientMock;
 
@@ -32,7 +32,7 @@ describe('fetchAgentMetrics', () => {
   it('should not fetch agent if .fleet-agents is not created', async () => {
     esClient.indices.exists.mockResolvedValue(false);
 
-    const result = await fetchAgentMetrics(mockCore, abortController);
+    const result = await fetchAgentMetrics(mockCore, signal);
 
     expect(result).toBeUndefined();
   });
@@ -90,7 +90,7 @@ describe('fetchAgentMetrics', () => {
       },
     });
 
-    const result = await fetchAgentMetrics(mockCore, abortController);
+    const result = await fetchAgentMetrics(mockCore, signal);
 
     expect(result).toEqual({
       agents: {},

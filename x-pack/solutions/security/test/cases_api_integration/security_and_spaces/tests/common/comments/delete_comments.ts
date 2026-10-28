@@ -15,14 +15,16 @@ import type { FtrProviderContext } from '@kbn/test-suites-xpack-platform/cases_a
 
 import {
   getPostCaseRequest,
-  persistableStateAttachment,
   postCaseReq,
-  postCommentActionsReleaseReq,
-  postCommentActionsReq,
-  postCommentAlertReq,
   postCommentUserReq,
-  postExternalReferenceESReq,
-  postExternalReferenceSOReq,
+  buildUnifiedAlertReq,
+  postUnifiedActionsReleaseReq,
+  postUnifiedActionsReq,
+  postUnifiedAlertReq,
+  postUnifiedCommentReq,
+  postUnifiedIndicatorReq,
+  getUnifiedFilesAttachmentReq,
+  postUnifiedLensReq,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -153,22 +155,20 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: [
-              {
-                ...postCommentAlertReq,
+              buildUnifiedAlertReq('securitySolutionFixture', {
                 alertId: alerts[0]._id,
                 index: alerts[0]._index,
-              },
-              {
-                ...postCommentAlertReq,
+              }),
+              buildUnifiedAlertReq('securitySolutionFixture', {
                 alertId: alerts[1]._id,
                 index: alerts[1]._index,
-              },
-              postCommentUserReq,
-              postCommentActionsReq,
-              postCommentActionsReleaseReq,
-              postExternalReferenceESReq,
-              postExternalReferenceSOReq,
-              persistableStateAttachment,
+              }),
+              postUnifiedCommentReq,
+              postUnifiedActionsReq,
+              postUnifiedActionsReleaseReq,
+              postUnifiedIndicatorReq,
+              getUnifiedFilesAttachmentReq(),
+              postUnifiedLensReq,
             ],
           });
 
@@ -286,22 +286,20 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: [
-              {
-                ...postCommentAlertReq,
+              buildUnifiedAlertReq('securitySolutionFixture', {
                 alertId: alerts[0]._id,
                 index: alerts[0]._index,
-              },
-              {
-                ...postCommentAlertReq,
+              }),
+              buildUnifiedAlertReq('securitySolutionFixture', {
                 alertId: alerts[1]._id,
                 index: alerts[1]._index,
-              },
-              postCommentUserReq,
-              postCommentActionsReq,
-              postCommentActionsReleaseReq,
-              postExternalReferenceESReq,
-              postExternalReferenceSOReq,
-              persistableStateAttachment,
+              }),
+              postUnifiedCommentReq,
+              postUnifiedActionsReq,
+              postUnifiedActionsReleaseReq,
+              postUnifiedIndicatorReq,
+              getUnifiedFilesAttachmentReq(),
+              postUnifiedLensReq,
             ],
           });
 
@@ -371,7 +369,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [postCommentUserReq, postCommentUserReq, postCommentAlertReq],
+          params: [postUnifiedCommentReq, postUnifiedCommentReq, postUnifiedAlertReq],
           expectedHttpCode: 200,
         });
 

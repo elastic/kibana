@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { encode } from '@kbn/rison';
 import { capitalize } from 'lodash';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import {
@@ -28,8 +27,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { buildEntityAlertsQuery } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { TableId } from '@kbn/securitysolution-data-table';
 import type { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import {
@@ -37,21 +34,24 @@ import {
   OPEN_IN_ALERTS_TITLE_STATUS,
   OPEN_IN_ALERTS_TITLE_USERNAME,
 } from '../../../overview/components/detection_response/translations';
-import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { useNavigateToAlertsPageWithFilters } from '../../../common/hooks/use_navigate_to_alerts_page_with_filters';
-import { DocumentDetailsPreviewPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
 import type { ESBoolQuery } from '../../../../common/typed_json';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useAlertTimeRange } from '../../../entity_analytics/hooks/use_alert_time_range';
+import { encodeGlobalTimerangeUrlParam } from '../../../common/utils/global_timerange_url_param';
 import { useUiSetting } from '../../../common/lib/kibana';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { getSeverityColor } from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import { SeverityBadge } from '../../../common/components/severity_badge';
-import { ALERT_PREVIEW_BANNER } from '../../../flyout/document_details/preview/constants';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
 import { useNonClosedAlerts } from '../../hooks/use_non_closed_alerts';
 import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import {
+  combineEntityGroupFilters,
+  getEntityGroupRecords,
+} from '../../../flyout/entity_details/shared/entity_store_group_utils';
+import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 enum KIBANA_ALERTS {
@@ -95,12 +95,25 @@ export const AlertsDetailsTable = memo(
     value,
     entityId,
     entityType,
+    mode,
+    onShowAlert,
+    scopeId,
   }: {
     field: CloudPostureEntityIdentifier;
     value: string;
     /** Canonical entity store id (`host.entity.id` / `user.entity.id`); when set with Entity Store v2, identity is loaded from the store for EUID DSL. */
     entityId?: string;
     entityType?: 'host' | 'user';
+    /** Entity-store lookup mode; in `resolved` mode alerts of the entities resolving to `entityId` are included. */
+    mode?: EntityViewMode;
+    /** Callback executed after opening the alert details for a row. */
+    onShowAlert: (eventId: string, indexName: string, ruleName?: string) => void;
+    /**
+     * Scope ID of the table or panel that opened this flyout. When the scope has
+     * a registered time-range override in {@link getScopeFlyoutTimeRange}
+     * that window is used for the alerts query instead of the global time range.
+     */
+    scopeId?: string;
   }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -142,34 +155,34 @@ export const AlertsDetailsTable = memo(
       };
     };
 
-    const { to, from } = useGlobalTime();
-    const timerange = encode({
-      global: {
-        [URL_PARAM_KEY.timerange]: {
-          kind: 'absolute',
-          from,
-          to,
-        },
-      },
-    });
+    const { from, to } = useAlertTimeRange(scopeId);
 
     const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
     const entityTypeResolved: 'host' | 'user' =
       entityType ?? (field === 'user.name' ? 'user' : 'host');
 
-    const { entityRecord, isLoading: entityFromStoreLoading } = useEntityFromStore({
+    const {
+      entityRecord,
+      aliasRecords,
+      isLoading: entityFromStoreLoading,
+    } = useEntityFromStore({
       entityId,
+      mode,
       entityType: entityTypeResolved,
       skip: !entityStoreV2Enabled || !entityId,
     });
 
     const euidApi = useEntityStoreEuidApi();
     const euidEntityFilter = useMemo((): QueryDslQueryContainer | undefined => {
-      if (!euidApi?.euid) {
+      if (!euidApi?.euid || entityRecord == null) {
         return undefined;
       }
-      return euidApi.euid.dsl.getEuidFilterBasedOnDocument(entityTypeResolved, entityRecord);
-    }, [euidApi?.euid, entityTypeResolved, entityRecord]);
+      const definition = euidApi.getBuiltInEntityDefinition(entityTypeResolved);
+      return combineEntityGroupFilters(
+        getEntityGroupRecords(entityRecord, aliasRecords),
+        (record) => euidApi.euid.dsl.getEuidFilterBasedOnDocument(definition, record)
+      );
+    }, [euidApi, entityTypeResolved, entityRecord, aliasRecords]);
 
     const filterAlertsByEuid = Boolean(euidApi?.euid && euidEntityFilter);
     /** Wait for entity-store lookup when `entityId` is set; after it finishes with no record, fall back to field/value filters. */
@@ -328,34 +341,17 @@ export const AlertsDetailsTable = memo(
       [buildAlertsListQuery, currentFilter, setQuery]
     );
 
-    const { openPreviewPanel } = useExpandableFlyoutApi();
-
-    const handleOnEventAlertDetailPanelOpened = useCallback(
-      (eventId: string, indexName: string, tableId: string) => {
-        openPreviewPanel({
-          id: DocumentDetailsPreviewPanelKey,
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: tableId,
-            isPreviewMode: true,
-            banner: ALERT_PREVIEW_BANNER,
-          },
-        });
-      },
-      [openPreviewPanel]
-    );
-
-    const tableId = TableId.alertsOnRuleDetailsPage;
-
     const columns: Array<EuiBasicTableColumn<ContextualFlyoutAlertsField>> = [
       {
         field: 'id',
         name: '',
         width: '5%',
         render: (id: string, alert: ContextualFlyoutAlertsField) => (
-          <EuiLink onClick={() => handleOnEventAlertDetailPanelOpened(id, alert.index, tableId)}>
-            <EuiIcon type={'expand'} aria-hidden={true} />
+          <EuiLink
+            data-test-subj="securitySolutionFlyoutAlertsFindingsTableExpandButton"
+            onClick={() => onShowAlert(id, alert.index, alert[KIBANA_ALERTS.RULE_NAME])}
+          >
+            <EuiIcon type={'maximize'} aria-hidden={true} />
           </EuiLink>
         ),
       },
@@ -422,14 +418,15 @@ export const AlertsDetailsTable = memo(
             },
           ],
           true,
-          timerange
+          // Encoded on click so relative bounds (e.g. `now-30d`) resolve against the current time.
+          encodeGlobalTimerangeUrlParam({ from, to })
         ),
-      [field, openAlertsPageWithFilters, timerange, value]
+      [field, from, openAlertsPageWithFilters, to, value]
     );
 
     return (
       <>
-        <EuiPanel hasShadow={false}>
+        <EuiPanel hasShadow={false} hasBorder={false}>
           <EuiLink onClick={() => openAlertsInAlertsPage()}>
             <h1 data-test-subj={'securitySolutionFlyoutInsightsAlertsCount'}>
               {i18n.translate('xpack.securitySolution.flyout.left.insights.alerts.tableTitle', {
@@ -448,7 +445,7 @@ export const AlertsDetailsTable = memo(
             columns={columns}
             pagination={pagination}
             onChange={onTableChange}
-            data-test-subj={'securitySolutionFlyoutMisconfigurationFindingsTable'}
+            data-test-subj={'securitySolutionFlyoutAlertsFindingsTable'}
             sorting={sorting}
             tableCaption={i18n.translate(
               'xpack.securitySolution.flyout.left.insights.alerts.tableCaption',

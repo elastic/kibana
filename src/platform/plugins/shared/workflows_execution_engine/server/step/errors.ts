@@ -8,8 +8,32 @@
  */
 
 import { ExecutionError } from '@kbn/workflows/server';
+import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 
 export const DEFAULT_MAX_STEP_SIZE = '10mb';
+
+/**
+ * Normalizes a thrown step error into an {@link ExecutionError} for persistence.
+ *
+ * Behaves like {@link ExecutionError.fromError} for everything except {@link KibanaApiCallError},
+ * which is enriched so an **uncaught** `callKibanaApi` failure persists a well-formed structured
+ * error (`type: 'KibanaApiCallError'`, `details: { status }`) instead of a flat `{ type, message }`.
+ *
+ * Safety: only the safe scalar `status` is lifted into `details`; the potentially large/sensitive
+ * `body` and `headers` are intentionally left off, so they are never written to ES.
+ * `KibanaApiCallError` is deliberately a plain `Error` (not an `ExecutionError`) to avoid a class
+ * init import cycle through the extensions server barrel — this is where the structured mapping lives.
+ */
+export function toExecutionError(error: Error): ExecutionError {
+  if (error instanceof KibanaApiCallError) {
+    return new ExecutionError({
+      type: 'KibanaApiCallError',
+      message: error.message,
+      details: { status: error.status },
+    });
+  }
+  return ExecutionError.fromError(error);
+}
 
 const BYTE_UNITS: Array<{ unit: string; size: number }> = [
   { unit: 'GB', size: 1024 * 1024 * 1024 },
@@ -96,16 +120,47 @@ export function safeOutputSize(output: unknown): number | null {
  * Used by both Layer 1 (pre-emptive I/O enforcement) and Layer 2 (base class output guard).
  */
 export class ResponseSizeLimitError extends ExecutionError {
-  constructor(limitBytes: number, stepName: string) {
+  constructor(
+    limitBytes: number,
+    stepName: string,
+    options: {
+      actualBytes?: number;
+      contentLengthBytes?: number;
+      estimatedOutputBytes?: number;
+    } = {}
+  ) {
+    const { actualBytes, contentLengthBytes, estimatedOutputBytes } = options;
+    const candidates = [actualBytes, estimatedOutputBytes, contentLengthBytes];
+    const suggestedLimitBytes = candidates.find(
+      (n): n is number => typeof n === 'number' && n > limitBytes
+    );
+    const actualSizeMessage = actualBytes
+      ? `Actual serialized output size was ${formatBytes(actualBytes)}. `
+      : '';
+    const contentLengthMessage =
+      contentLengthBytes !== undefined && contentLengthBytes >= limitBytes
+        ? `The response advertised a content length of ${formatBytes(contentLengthBytes)}. `
+        : '';
+    const estimatedOutputMessage = estimatedOutputBytes
+      ? `Estimated step output size is ${formatBytes(estimatedOutputBytes)}. `
+      : '';
+    const suggestedLimitMessage = suggestedLimitBytes
+      ? `Set 'max-step-size' to at least ${formatBytes(
+          suggestedLimitBytes
+        )}, or reduce the response size.`
+      : `Configure 'max-step-size' at the step or workflow level to increase the limit, or reduce the response size (e.g., filter fields, limit results).`;
+
     super({
       type: 'StepSizeLimitExceeded',
-      message:
-        `Step "${stepName}" output exceeded the ` +
-        `${formatBytes(limitBytes)} size limit. ` +
-        `Configure 'max-step-size' at the step or workflow level to increase the limit, ` +
-        `or reduce the response size (e.g., filter fields, limit results).`,
+      message: `Step "${stepName}" output exceeded the ${formatBytes(
+        limitBytes
+      )} size limit. ${actualSizeMessage}${contentLengthMessage}${estimatedOutputMessage}${suggestedLimitMessage}`,
       details: {
         limitBytes,
+        ...(actualBytes ? { actualBytes } : {}),
+        ...(contentLengthBytes ? { contentLengthBytes } : {}),
+        ...(estimatedOutputBytes ? { estimatedOutputBytes } : {}),
+        ...(suggestedLimitBytes ? { suggestedLimitBytes } : {}),
       },
     });
   }

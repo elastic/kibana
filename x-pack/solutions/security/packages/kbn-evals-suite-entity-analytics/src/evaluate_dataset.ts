@@ -260,7 +260,7 @@ export function createEvaluateDataset({
 
     await executorClient.runExperiment(
       {
-        dataset,
+        datasets: [dataset],
         concurrency,
         task: async ({ input, output, metadata }) => {
           const response = await chatClient.converse({ messages: [{ message: input.question }] });
@@ -338,6 +338,7 @@ const createCriteriaEvaluator = ({
   return {
     name: 'Criteria',
     kind: 'LLM' as const,
+    direction: 'maximize',
     evaluate: async ({ expected, ...rest }: EvaluateOpts) => {
       const criteria = expected.criteria ?? [];
 
@@ -358,6 +359,7 @@ const createToolCallsEvaluator = ({ evaluators }: { evaluators: DefaultEvaluator
   return {
     name: 'ToolCalls',
     kind: 'LLM' as const,
+    direction: 'maximize' as const,
     evaluate: async ({ input, output, expected, metadata }: EvaluateOpts) => {
       const toolCalls = expected.toolCalls ?? [];
       const steps = output.steps ?? [];
@@ -578,6 +580,7 @@ const createAttachmentsEvaluator = ({
   return {
     name: 'Attachments',
     kind: 'LLM' as const,
+    direction: 'maximize',
     evaluate: async ({ input, output, expected, metadata }: EvaluateOpts) => {
       const assertions = expected.attachments ?? [];
       if (assertions.length === 0) {

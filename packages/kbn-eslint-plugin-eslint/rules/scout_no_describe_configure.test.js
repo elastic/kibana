@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./scout_no_describe_configure');
+const rule = require('../oxlint_plugin').rules.scout_no_describe_configure;
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({

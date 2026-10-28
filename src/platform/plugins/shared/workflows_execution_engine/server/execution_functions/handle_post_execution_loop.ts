@@ -8,19 +8,25 @@
  */
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { isSyncParentInvocation, isTerminalStatus } from '@kbn/workflows';
+import type { Logger } from '@kbn/core/server';
+import { isTerminalStatus } from '@kbn/workflows';
+import { resumeSyncParentIfNeeded } from './resume_sync_parent_if_needed';
+import { drainConcurrencyQueueSlots } from '../concurrency/concurrency_queue_drainer';
 import type { WorkflowsMeteringService } from '../metering';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { InternalResumeWorkflowExecution } from '../types';
-import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import {
+  getWorkflowWakeTaskId,
+  type WorkflowTaskManager,
+} from '../workflow_task_manager/workflow_task_manager';
 
 export async function handlePostExecutionLoop({
   workflowRunId,
   spaceId,
   logger,
-  fakeRequest,
   workflowExecutionRepository,
+  stepExecutionRepository,
   internalResumeWorkflowExecution,
   workflowTaskManager,
   meteringService,
@@ -29,8 +35,8 @@ export async function handlePostExecutionLoop({
   workflowRunId: string;
   spaceId: string;
   logger: Logger;
-  fakeRequest: KibanaRequest;
   workflowExecutionRepository: WorkflowExecutionRepository;
+  stepExecutionRepository?: StepExecutionRepository;
   internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
   workflowTaskManager?: WorkflowTaskManager;
   meteringService?: WorkflowsMeteringService;
@@ -47,42 +53,44 @@ export async function handlePostExecutionLoop({
       return null;
     });
 
-  if (
-    internalResumeWorkflowExecution &&
-    finalExecution &&
-    isTerminalStatus(finalExecution.status) &&
-    isSyncParentInvocation(finalExecution.context)
-  ) {
-    const parentExecId = finalExecution.context.parentWorkflowExecutionId;
-    try {
-      await internalResumeWorkflowExecution(parentExecId, spaceId, undefined, fakeRequest);
-      logger.info(
-        `Child ${workflowRunId} completed (${finalExecution.status}), scheduled resume for parent ${parentExecId}`
-      );
-    } catch (err) {
-      const reason = err instanceof Error ? err.message : String(err);
-      logger.warn(
-        `Failed to resume parent after child completion (parent=${parentExecId}, child=${workflowRunId}): ${reason}`
-      );
-      if (workflowTaskManager) {
-        try {
-          await workflowTaskManager.scheduleImmediateResume({
-            executionId: parentExecId,
-            spaceId,
-            fakeRequest,
-          });
-          logger.info(
-            `Scheduled immediate Task Manager resume as fallback for parent ${parentExecId} after inline resume failure`
-          );
-        } catch (scheduleErr) {
-          const scheduleReason =
-            scheduleErr instanceof Error ? scheduleErr.message : String(scheduleErr);
-          logger.warn(
-            `Fallback scheduleImmediateResume also failed (parent=${parentExecId}): ${scheduleReason}`
-          );
-        }
+  if (!finalExecution) return;
+
+  let queueCleanupFailed = false;
+  if (finalExecution && isTerminalStatus(finalExecution.status)) {
+    const concurrency = finalExecution.workflowDefinition?.settings?.concurrency;
+    const groupKey = finalExecution.concurrencyGroupKey;
+    if (concurrency?.strategy === 'queue' && groupKey && workflowTaskManager) {
+      try {
+        await drainConcurrencyQueueSlots({
+          workflowExecutionRepository,
+          workflowTaskManager,
+          logger,
+          spaceId,
+          concurrencyGroupKey: groupKey,
+          concurrencySettings: concurrency,
+        });
+      } catch (drainErr) {
+        queueCleanupFailed = true;
+        logger.debug(
+          `Concurrency queue drain after terminal failed for execution ${workflowRunId}: ${
+            drainErr instanceof Error ? drainErr.message : String(drainErr)
+          }`
+        );
       }
     }
+  }
+
+  if (finalExecution) {
+    await resumeSyncParentIfNeeded({
+      childExecution: finalExecution,
+      throwOnFailure: finalExecution.context?.serviceAccountFailureCleanupPending === true,
+      spaceId,
+      internalResumeWorkflowExecution,
+      workflowExecutionRepository,
+      stepExecutionRepository,
+      workflowTaskManager,
+      logger,
+    });
   }
 
   if (meteringService && finalExecution) {
@@ -93,5 +101,32 @@ export async function handlePostExecutionLoop({
         }`
       );
     });
+  }
+  if (finalExecution.context?.serviceAccountFailureCleanupPending) {
+    if (queueCleanupFailed) {
+      throw new Error(
+        `Concurrency queue cleanup is still pending for workflow execution ${workflowRunId}.`
+      );
+    }
+    await workflowExecutionRepository.updateWorkflowExecution({
+      id: finalExecution.id,
+      context: { ...finalExecution.context, serviceAccountFailureCleanupPending: false },
+    });
+  }
+
+  if (isTerminalStatus(finalExecution.status) && workflowTaskManager) {
+    // Best-effort: the retained wake task removes anything left behind once the execution is terminal.
+    // It is left for its own run to delete, since removing it here races its Task Manager claim.
+    await workflowTaskManager
+      .removeTasksForExecution(workflowRunId, {
+        exceptTaskId: getWorkflowWakeTaskId(workflowRunId),
+      })
+      .catch((err) => {
+        logger.warn(
+          `Failed to remove Task Manager tasks for terminal execution ${workflowRunId}: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      });
   }
 }

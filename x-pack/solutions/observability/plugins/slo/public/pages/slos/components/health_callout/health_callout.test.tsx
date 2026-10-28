@@ -7,7 +7,7 @@
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { ALL_VALUE, type SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 import { baseSlo } from '../../../../data/slo';
@@ -49,9 +49,8 @@ describe('HealthCallout', () => {
         <HealthCallout sloList={[mockSlo1]} />
       </I18nProvider>
     );
-    fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
     expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
-      'The following SLO might have some operational problems. You can inspect it here:'
+      'The following SLO might have some operational problems.'
     );
   });
 
@@ -77,9 +76,8 @@ describe('HealthCallout', () => {
         <HealthCallout sloList={[mockSlo1]} />
       </I18nProvider>
     );
-    fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
     expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
-      'The following SLO might have some operational problems. You can inspect it here:'
+      'The following SLO might have some operational problems.'
     );
   });
 
@@ -105,9 +103,8 @@ describe('HealthCallout', () => {
         <HealthCallout sloList={[mockSlo1]} />
       </I18nProvider>
     );
-    fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
     expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
-      'The following SLO might have some operational problems. You can inspect it here:'
+      'The following SLO might have some operational problems.'
     );
   });
 
@@ -133,9 +130,8 @@ describe('HealthCallout', () => {
         <HealthCallout sloList={[mockSlo1]} />
       </I18nProvider>
     );
-    fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
     expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
-      'The following SLO might have some operational problems. You can inspect it here:'
+      'The following SLO might have some operational problems.'
     );
   });
 
@@ -199,9 +195,8 @@ describe('HealthCallout', () => {
       </I18nProvider>
     );
 
-    fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
     expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
-      'The following SLOs might have some operational problems. You can inspect each one here:'
+      'The following SLOs might have some operational problems.'
     );
   });
 });

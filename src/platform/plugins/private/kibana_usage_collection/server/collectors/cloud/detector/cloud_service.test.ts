@@ -10,9 +10,21 @@
 import { CloudService } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
 
+// The suite exercises protected members and intentionally calls them with invalid
+// arguments to verify runtime guards, so it works against a permissive view of the
+// instance (tsgo keeps the nominal type where tsc widened the errored `new` to any).
+interface CloudServiceTestHarness {
+  getName: () => string;
+  checkIfService: () => Promise<CloudServiceResponse>;
+  _checkIfService: (signal?: unknown) => Promise<CloudServiceResponse>;
+  _createUnconfirmedResponse: () => CloudServiceResponse;
+  _stringToJson: (value?: unknown) => unknown;
+  _parseResponse: (body?: unknown, parseBodyFn?: unknown) => CloudServiceResponse;
+}
+
 describe('CloudService', () => {
   // @ts-expect-error Creating an instance of an abstract class for testing
-  const service = new CloudService('xyz');
+  const service = new CloudService('xyz') as unknown as CloudServiceTestHarness;
 
   describe('getName', () => {
     it('is named by the constructor', () => {
@@ -116,15 +128,15 @@ describe('CloudService', () => {
       expect(() =>
         service._parseResponse(JSON.stringify(body), parseBody)
       ).toThrowErrorMatchingInlineSnapshot(`"Unable to handle body"`);
-      expect(parseBody).toBeCalledTimes(1);
-      expect(parseBody).toBeCalledWith(body);
+      expect(parseBody).toHaveBeenCalledTimes(1);
+      expect(parseBody).toHaveBeenCalledWith(body);
       parseBody.mockClear();
 
       expect(() => service._parseResponse(body, parseBody)).toThrowErrorMatchingInlineSnapshot(
         `"Unable to handle body"`
       );
-      expect(parseBody).toBeCalledTimes(1);
-      expect(parseBody).toBeCalledWith(body);
+      expect(parseBody).toHaveBeenCalledTimes(1);
+      expect(parseBody).toHaveBeenCalledWith(body);
     });
 
     it('uses parsed object to create response', async () => {
@@ -132,7 +144,7 @@ describe('CloudService', () => {
       const parseBody = jest.fn().mockReturnValue(serviceResponse);
 
       const response = await service._parseResponse(body, parseBody);
-      expect(parseBody).toBeCalledWith(body);
+      expect(parseBody).toHaveBeenCalledWith(body);
       expect(response).toBe(serviceResponse);
     });
 
@@ -141,7 +153,7 @@ describe('CloudService', () => {
       const parseBody = jest.fn().mockReturnValue(serviceResponse);
 
       const response = await service._parseResponse(JSON.stringify(body), parseBody);
-      expect(parseBody).toBeCalledWith(body);
+      expect(parseBody).toHaveBeenCalledWith(body);
       expect(response).toBe(serviceResponse);
     });
   });

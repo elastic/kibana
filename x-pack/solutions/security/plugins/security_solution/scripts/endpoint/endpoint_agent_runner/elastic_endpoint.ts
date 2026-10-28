@@ -40,7 +40,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
 
     const activeSpaceId = (await fetchActiveSpace(kbnClient)).id;
 
-    vmName = generateVmName(`dev-${activeSpaceId}`);
+    vmName = generateVmName(`endpoint-${activeSpaceId}`);
 
     log.info(`Creating VM named: ${vmName}`);
 
@@ -53,6 +53,30 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
       useClosestVersionMatch: false,
       disk: '8G',
     });
+
+    try {
+      log.info(
+        `Endpoint host status:\n${await hostVm
+          .exec('sudo /opt/Elastic/Endpoint/elastic-endpoint status', { silent: true })
+          .catch(() => {})
+          .then(
+            (response) =>
+              response?.stdout ?? 'Unable to get endpoint status - but it should be running.'
+          )}`
+      );
+    } catch (error) {
+      log.debug(`Attempt to get 'elastic-endpoint status' failed with: ${error.message}`);
+    }
+
+    // Trigger an alert for this Endpoint
+    try {
+      log.info(`Triggering alert on host [${hostVm.name}]`);
+      await hostVm.exec('curl -LO https://secure.eicar.org/eicar.com.txt', { silent: true });
+    } catch (error) {
+      log.warning(
+        `\nAttempted to trigger an alert on host [${hostVm.name}], but failed with: ${error.message}.\nHost, however, should still be functioning as expected\n`
+      );
+    }
 
     log.info(hostVm.info());
   } catch (error) {

@@ -9,20 +9,28 @@ import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { dateRangeQuery } from '@kbn/es-query';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 
 const NO_FIELDS_SENTINEL = '<no-fields>';
+
+const isTracedEsClient = (
+  esClient: ElasticsearchClient | TracedElasticsearchClient
+): esClient is TracedElasticsearchClient => typeof esClient.esql === 'function';
 
 export interface EsqlColumnSchema {
   name: string;
   type: string;
   originalTypes?: string[];
+  /** ES's `suggested_cast` for a union-typed column. */
+  suggestedCast?: string;
 }
 
 export interface GetEsqlColumnSchemaParams {
-  esClient: ElasticsearchClient;
+  esClient: ElasticsearchClient | TracedElasticsearchClient;
   index: string | string[];
   start?: number;
   end?: number;
+  signal?: AbortSignal;
 }
 
 export async function getEsqlColumnSchema({
@@ -30,6 +38,7 @@ export async function getEsqlColumnSchema({
   index,
   start,
   end,
+  signal,
 }: GetEsqlColumnSchemaParams): Promise<EsqlColumnSchema[]> {
   const indices = Array.isArray(index) ? index : [index];
   const filter =
@@ -37,10 +46,18 @@ export async function getEsqlColumnSchema({
       ? { bool: { filter: dateRangeQuery(start, end) } }
       : undefined;
 
-  const response = (await esClient.esql.query({
+  const queryParams = {
     query: esql.from(indices).limit(0).print('basic'),
     ...(filter ? { filter } : {}),
-  })) as unknown as ESQLSearchResponse;
+  };
+  const response = isTracedEsClient(esClient)
+    ? ((await esClient.esql(
+        'get_esql_column_schema',
+        queryParams
+      )) as unknown as ESQLSearchResponse)
+    : ((await esClient.esql.query(queryParams, {
+        signal,
+      })) as unknown as ESQLSearchResponse);
 
   return parseColumns(response);
 }
@@ -56,6 +73,7 @@ function parseColumns(response: ESQLSearchResponse): EsqlColumnSchema[] {
         name: column.name,
         type: column.type,
         ...(column.original_types ? { originalTypes: column.original_types } : {}),
+        ...(column.suggested_cast ? { suggestedCast: column.suggested_cast } : {}),
       },
     ];
   });

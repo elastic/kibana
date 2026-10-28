@@ -45,6 +45,8 @@ export const normalizeRedoclyPointer = (pointer?: string) => {
 export const parseRedoclyCompatibilityIssues = (stdout: string): CompatibilityIssue[] => {
   const { problems = [] } = JSON.parse(stdout) as RedoclyLintOutput;
 
+  // Redocly `warn` problems are intentionally dropped in policy v1; mapping them into
+  // the severity taxonomy is a follow-up.
   return problems
     .filter(({ severity }) => severity === 'error')
     .map(({ location, message, ruleId }) => ({

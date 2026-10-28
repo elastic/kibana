@@ -27,6 +27,7 @@ function createSetupMock() {
     authz: lazyObject({
       actions: mockAuthz.actions,
       checkPrivilegesWithRequest: mockAuthz.checkPrivilegesWithRequest,
+      checkUserProfilesPrivileges: mockAuthz.checkUserProfilesPrivileges,
       checkPrivilegesDynamicallyWithRequest: mockAuthz.checkPrivilegesDynamicallyWithRequest,
       checkSavedObjectsPrivilegesWithRequest: mockAuthz.checkSavedObjectsPrivilegesWithRequest,
       mode: mockAuthz.mode,
@@ -46,16 +47,19 @@ function createStartMock() {
     authc: lazyObject({
       apiKeys: mockAuthc.apiKeys,
       getCurrentUser: mockAuthc.getCurrentUser,
+      systemIdentity: mockAuthc.systemIdentity,
     }),
     authz: lazyObject({
       actions: mockAuthz.actions,
       checkPrivilegesWithRequest: mockAuthz.checkPrivilegesWithRequest,
+      checkUserProfilesPrivileges: mockAuthz.checkUserProfilesPrivileges,
       checkPrivilegesDynamicallyWithRequest: mockAuthz.checkPrivilegesDynamicallyWithRequest,
       checkSavedObjectsPrivilegesWithRequest: mockAuthz.checkSavedObjectsPrivilegesWithRequest,
       mode: mockAuthz.mode,
     }),
     userProfiles: lazyObject({
       getCurrent: mockUserProfiles.getCurrent,
+      getCurrentProfileId: mockUserProfiles.getCurrentProfileId,
       suggest: mockUserProfiles.suggest,
       bulkGet: mockUserProfiles.bulkGet,
     }),

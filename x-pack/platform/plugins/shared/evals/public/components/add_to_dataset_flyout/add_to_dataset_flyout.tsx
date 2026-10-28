@@ -9,7 +9,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCheckbox,
   EuiComboBox,
   type EuiComboBoxOptionOption,
@@ -29,7 +28,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { CodeEditor } from '@kbn/code-editor';
 import {
   API_VERSIONS,
@@ -38,7 +37,10 @@ import {
   type GetEvaluationDatasetsResponse,
 } from '@kbn/evals-common';
 import type { CoreStart } from '@kbn/core/public';
+import { PLUGIN_ID } from '../../../common';
 import type { AddToDatasetFlyoutOpenOptions } from '../../types';
+import { getErrorMessage } from '../../utils/get_error_message';
+import { getSharedNoticeCopy, isSharedAssignment } from '../dataset_spaces';
 
 const DEFAULT_TITLE = i18n.translate('xpack.evals.addToDatasetFlyout.title', {
   defaultMessage: 'Add to dataset',
@@ -274,7 +276,7 @@ export function AddToDatasetFlyout({
         }
       } catch (error) {
         if (!didCancel) {
-          setFormError(`${LOAD_DATASETS_ERROR}: ${String(error)}`);
+          setFormError(`${LOAD_DATASETS_ERROR}: ${getErrorMessage(error)}`);
           setDatasets([]);
         }
       } finally {
@@ -313,6 +315,16 @@ export function AddToDatasetFlyout({
     const match = datasetOptions.find((o) => o.value === selectedDatasetId);
     return match ? [match] : [];
   }, [datasetOptions, selectedDatasetId]);
+
+  // A remote deployment's spaces are its own, so its assignment says nothing
+  // about who here would see the example.
+  const selectedDatasetSpaceIds =
+    destinationType === 'local'
+      ? datasets.find((dataset) => dataset.id === selectedDatasetId)?.space_ids
+      : undefined;
+  // The flyout opens outside the app, so it can't look the spaces up by name.
+  const isSelectedDatasetShared = isSharedAssignment(selectedDatasetSpaceIds);
+  const sharedNotice = getSharedNoticeCopy(selectedDatasetSpaceIds, 'add-example');
 
   const remoteOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
     return remotes.map((r) => ({
@@ -424,21 +436,17 @@ export function AddToDatasetFlyout({
 
         const toast = coreStart.notifications.toasts.addSuccess({
           title,
-          text: toMountPoint(
-            <EuiButton
-              size="s"
-              onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-                ev.preventDefault();
-                coreStart.application.navigateToApp('management', {
-                  path: `ai/evals/datasets/${datasetId}`,
+          actionProps: {
+            primary: {
+              children: VIEW_DATASET_BUTTON,
+              onClick: () => {
+                coreStart.application.navigateToApp(PLUGIN_ID, {
+                  path: `datasets/${datasetId}`,
                 });
                 coreStart.notifications.toasts.remove(toast);
-              }}
-            >
-              {VIEW_DATASET_BUTTON}
-            </EuiButton>,
-            coreStart
-          ),
+              },
+            },
+          },
         });
       };
 
@@ -496,7 +504,7 @@ export function AddToDatasetFlyout({
       addSuccessToast(createdId, examples.length);
       onClose();
     } catch (error) {
-      setFormError(`${SUBMIT_ERROR}: ${String(error)}`);
+      setFormError(`${SUBMIT_ERROR}: ${getErrorMessage(error)}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -525,9 +533,12 @@ export function AddToDatasetFlyout({
       >
         {formError ? (
           <>
-            <EuiCallOut title={ERROR_CALLOUT_TITLE} color="danger" iconType="error" size="s">
-              <p>{formError}</p>
-            </EuiCallOut>
+            <KbnDangerCallout
+              announceOnMount
+              title={ERROR_CALLOUT_TITLE}
+              size="s"
+              text={<p>{formError}</p>}
+            />
             <EuiSpacer size="m" />
           </>
         ) : null}
@@ -586,19 +597,34 @@ export function AddToDatasetFlyout({
           </EuiFormRow>
 
           {mode === 'existing' ? (
-            <EuiFormRow label={DATASET_LABEL} fullWidth>
-              <EuiComboBox
-                fullWidth
-                isLoading={isLoadingDatasets}
-                options={datasetOptions}
-                selectedOptions={selectedOptions}
-                onChange={(items) => setSelectedDatasetId(items[0]?.value ?? null)}
-                singleSelection={{ asPlainText: true }}
-                placeholder={i18n.translate('xpack.evals.addToDatasetFlyout.datasetPlaceholder', {
-                  defaultMessage: 'Select a dataset',
-                })}
-              />
-            </EuiFormRow>
+            <>
+              <EuiFormRow label={DATASET_LABEL} fullWidth>
+                <EuiComboBox
+                  fullWidth
+                  isLoading={isLoadingDatasets}
+                  options={datasetOptions}
+                  selectedOptions={selectedOptions}
+                  onChange={(items) => setSelectedDatasetId(items[0]?.value ?? null)}
+                  singleSelection={{ asPlainText: true }}
+                  placeholder={i18n.translate('xpack.evals.addToDatasetFlyout.datasetPlaceholder', {
+                    defaultMessage: 'Select a dataset',
+                  })}
+                />
+              </EuiFormRow>
+              {isSelectedDatasetShared ? (
+                <>
+                  <EuiSpacer size="s" />
+                  <KbnWarningCallout
+                    announceOnMount
+                    size="s"
+                    title={sharedNotice.title}
+                    data-test-subj="addToDatasetSharedNotice"
+                    text={<p>{sharedNotice.message}</p>}
+                  />
+                  <EuiSpacer size="s" />
+                </>
+              ) : null}
+            </>
           ) : (
             <>
               <EuiFormRow label={NEW_DATASET_NAME_LABEL} fullWidth>

@@ -12,11 +12,20 @@ import { isLeft, isRight } from 'fp-ts/Either';
 import type { Location } from 'history';
 import type { Errors } from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { isZod } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { compact, findLastIndex, mapValues, merge, orderBy } from 'lodash';
 import qs from 'query-string';
 import type { MatchedRoute, RouteConfig as ReactRouterConfig } from 'react-router-config';
 import { matchRoutes as matchRoutesConfig } from 'react-router-config';
-import type { FlattenRoutesOf, Route, RouteMap, Router, RouteWithPath } from './types';
+import type {
+  FlattenRoutesOf,
+  Route,
+  RouteMap,
+  RouteParamsRT,
+  Router,
+  RouteWithPath,
+} from './types';
 import { encodePath } from './encode_path';
 import { InvalidRouteParamsException } from './errors/invalid_route_params_exception';
 import { NotFoundRouteException } from './errors';
@@ -51,6 +60,67 @@ function extractFailingQueryKeys(errors: Errors): Set<string> {
     }
   }
   return keys;
+}
+
+// zod counterpart of extractFailingQueryKeys: an issue path looks like
+// ['query', <key>, ...], so take the first non-numeric segment after 'query'.
+function extractFailingQueryKeysZod(error: z.ZodError): Set<string> {
+  const keys = new Set<string>();
+  for (const issue of error.issues) {
+    const queryIndex = issue.path.indexOf('query');
+    if (queryIndex === -1) {
+      continue;
+    }
+    for (let i = queryIndex + 1; i < issue.path.length; i++) {
+      const segment = issue.path[i];
+      if (typeof segment === 'string' && !Number.isInteger(Number(segment))) {
+        keys.add(segment);
+        break;
+      }
+    }
+  }
+  return keys;
+}
+
+interface DecodeSuccess {
+  ok: true;
+  value: any;
+}
+interface DecodeFailure {
+  ok: false;
+  failingQueryKeys: Set<string>;
+  report: string;
+}
+type DecodeResult = DecodeSuccess | DecodeFailure;
+
+// Validates {path, query} against a route's params codec, branching on whether
+// it's io-ts (default) or zod (io-ts -> zod migration). io-ts routes keep the
+// exact-decode behavior; zod routes use safeParse. On failure both surface the
+// query keys that failed, so matchRoutes can retry with defaults identically.
+function decodeRouteParams(params: RouteParamsRT, input: unknown): DecodeResult {
+  if (isZod(params)) {
+    const result = params.safeParse(input);
+    if (result.success) {
+      return { ok: true, value: result.data };
+    }
+    return {
+      ok: false,
+      failingQueryKeys: extractFailingQueryKeysZod(result.error),
+      report: result.error.issues
+        .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+        .join('\n'),
+    };
+  }
+
+  const decoded = deepExactRt(params).decode(input);
+  if (isRight(decoded)) {
+    return { ok: true, value: decoded.right };
+  }
+  return {
+    ok: false,
+    failingQueryKeys: extractFailingQueryKeys(decoded.left),
+    report: PathReporter.report(decoded).join('\n'),
+  };
 }
 
 export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<TRoutes> {
@@ -177,22 +247,23 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
         return decodeURIComponent(value);
       });
 
-      const decoded = deepExactRt(route.params).decode(
+      const decoded = decodeRouteParams(
+        route.params,
         merge({}, route.defaults ?? {}, {
           path: pathParams,
           query: parsedQuery,
         })
       );
 
-      if (isRight(decoded)) {
+      if (decoded.ok) {
         results.push({
-          match: { ...matchedRoute.match, params: decoded.right },
+          match: { ...matchedRoute.match, params: decoded.value },
           route,
         });
         continue;
       }
 
-      const failingKeys = extractFailingQueryKeys(decoded.left);
+      const failingKeys = decoded.failingQueryKeys;
       const defaultQuery = (route.defaults?.query as Record<string, string>) ?? {};
       const patchedQuery: Record<string, any> = { ...parsedQuery };
 
@@ -204,25 +275,26 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
         }
       }
 
-      const retryDecoded = deepExactRt(route.params).decode(
+      const retryDecoded = decodeRouteParams(
+        route.params,
         merge({}, route.defaults ?? {}, {
           path: pathParams,
           query: patchedQuery,
         })
       );
 
-      if (isRight(retryDecoded)) {
-        errorMessages.push(PathReporter.report(decoded).join('\n'));
+      if (retryDecoded.ok) {
+        errorMessages.push(decoded.report);
         for (const key of failingKeys) {
           allPatchedKeys.set(key, patchedQuery[key]);
         }
         results.push({
-          match: { ...matchedRoute.match, params: retryDecoded.right },
+          match: { ...matchedRoute.match, params: retryDecoded.value },
           route,
         });
       } else {
         hasUnrecoverableError = true;
-        errorMessages.push(PathReporter.report(decoded).join('\n'));
+        errorMessages.push(decoded.report);
       }
     }
 
@@ -257,13 +329,7 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
 
     const matchedRoutes = getRoutesToMatch(path);
 
-    const validationType = mergeRt(
-      ...(compact(
-        matchedRoutes.map((match) => {
-          return match.params;
-        })
-      ) as [any, any])
-    );
+    const matchedParams = compact(matchedRoutes.map((route) => route.params));
 
     const paramsWithRouteDefaults = merge(
       {},
@@ -271,10 +337,23 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
       paramsWithBuiltInDefaults
     );
 
-    const validation = validationType.decode(paramsWithRouteDefaults);
+    if (matchedParams.some((matchedParam) => isZod(matchedParam))) {
+      // Mixed or all-zod chain: validate each route's params independently
+      // (non-strict, so sibling routes' keys are ignored) instead of merging
+      // io-ts and zod codecs, which cannot be combined.
+      for (const matchedParam of matchedParams) {
+        const decoded = decodeRouteParams(matchedParam, paramsWithRouteDefaults);
+        if (!decoded.ok) {
+          throw new Error(decoded.report);
+        }
+      }
+    } else {
+      const validationType = mergeRt(...(matchedParams as [any, any]));
+      const validation = validationType.decode(paramsWithRouteDefaults);
 
-    if (isLeft(validation)) {
-      throw new Error(PathReporter.report(validation).join('\n'));
+      if (isLeft(validation)) {
+        throw new Error(PathReporter.report(validation).join('\n'));
+      }
     }
 
     return qs.stringifyUrl(

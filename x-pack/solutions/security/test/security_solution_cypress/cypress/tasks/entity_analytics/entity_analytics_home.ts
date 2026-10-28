@@ -6,19 +6,12 @@
  */
 
 import {
-  ENTITY_ANALYTICS_HOME_PAGE_LOADER,
-  IS_LOADING_GROUPING_TABLE,
-  GROUPING_LEVEL_0,
   GROUP_SELECTOR_DROPDOWN,
-  GLOBAL_LOADING_INDICATOR_HIDDEN,
-  GLOBAL_LOADING_INDICATOR,
-  PAGE_TITLE,
+  GROUPING_LEVEL_0,
+  IS_LOADING_GROUPING_TABLE,
 } from '../../screens/entity_analytics/entity_analytics_home';
 
 const ENTITY_STORE_SEARCH_API = '/internal/search/ese';
-
-/** Time for global nav, Entity Analytics shell, and sourcerer to settle (CI can be slow). */
-const ENTITY_ANALYTICS_HOME_READY_TIMEOUT_MS = 120_000;
 
 /**
  * Sets the grouping via localStorage before navigating to avoid flaky
@@ -32,22 +25,6 @@ export const setGrouping = (activeGroups: string[]) => {
       JSON.stringify({ 'entityAnalytics:grouping': { activeGroups } })
     )
   );
-};
-
-/**
- * Waits for Kibana global navigation loading to finish, the Entity Analytics home
- * shell to mount (past EmptyPrompt / data-view PageLoader), and the page-level
- * sourcerer spinner to disappear so charts and grid are in the DOM.
- */
-export const waitForEntityAnalyticsHomeShell = () => {
-  cy.get(GLOBAL_LOADING_INDICATOR_HIDDEN, {
-    timeout: ENTITY_ANALYTICS_HOME_READY_TIMEOUT_MS,
-  }).should('exist');
-  cy.get(GLOBAL_LOADING_INDICATOR).should('not.exist');
-  cy.get(PAGE_TITLE, { timeout: ENTITY_ANALYTICS_HOME_READY_TIMEOUT_MS }).should('exist');
-  cy.get(ENTITY_ANALYTICS_HOME_PAGE_LOADER, {
-    timeout: ENTITY_ANALYTICS_HOME_READY_TIMEOUT_MS,
-  }).should('not.exist');
 };
 
 /**
@@ -99,10 +76,8 @@ export const interceptEntityStoreStatus = (status: 'running' | 'not_installed') 
  * Waits for in-flight search requests via API intercept before interacting.
  */
 export const selectGroupingOption = (panelSelector: string) => {
-  cy.get(GLOBAL_LOADING_INDICATOR_HIDDEN).should('exist');
-  cy.get(GLOBAL_LOADING_INDICATOR).should('not.exist');
   cy.get(IS_LOADING_GROUPING_TABLE).should('not.exist');
 
-  cy.get(`${GROUP_SELECTOR_DROPDOWN}:visible`).click();
+  cy.get(`${GROUP_SELECTOR_DROPDOWN}:visible`).should('be.enabled').click();
   cy.get(panelSelector).should('be.visible').click();
 };

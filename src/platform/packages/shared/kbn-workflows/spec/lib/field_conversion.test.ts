@@ -15,7 +15,10 @@ import {
   extractNormalizedInputsFromYaml,
   getInputsFromDefinition,
   normalizeFieldsToJsonSchema,
+  omitRequiredWithDefaults,
+  resolveRef,
 } from './field_conversion';
+import { builtinWorkflowInputDefinitions } from '../builtin_workflow_input_definitions';
 import type { WorkflowYaml } from '../schema';
 import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
 import type { LegacyWorkflowInputSchema } from '../schema/triggers/manual_trigger_schema';
@@ -343,6 +346,91 @@ describe('applyInputDefaults', () => {
       name: 'Custom Name',
       age: 25,
     });
+  });
+
+  it('should render default values when a renderer is provided', () => {
+    const inputsSchema = normalizeFieldsToJsonSchema({
+      properties: {
+        name: { type: 'string', default: '{{ user }}' },
+      },
+    });
+
+    const result = applyInputDefaults(undefined, inputsSchema, (value) =>
+      value === '{{ user }}' ? 'Alice' : value
+    );
+
+    expect(result).toEqual({
+      name: 'Alice',
+    });
+  });
+
+  it('should render provided values when a renderer is provided', () => {
+    const inputsSchema = normalizeFieldsToJsonSchema({
+      properties: {
+        name: { type: 'string', default: 'Default Name' },
+        message: { type: 'string', default: '{{ greeting }}' },
+      },
+    });
+
+    const result = applyInputDefaults(
+      { name: '{{ user }}', message: 'custom' },
+      inputsSchema,
+      (value) => (value === '{{ user }}' ? 'Alice' : value)
+    );
+
+    expect(result).toEqual({
+      name: 'Alice',
+      message: 'custom',
+    });
+  });
+
+  it('should render provided nested object values when a renderer is provided', () => {
+    const inputsSchema = normalizeFieldsToJsonSchema({
+      properties: {
+        settings: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+          },
+        },
+      },
+    });
+
+    const result = applyInputDefaults({ settings: { name: '{{ user }}' } }, inputsSchema, (value) =>
+      value === '{{ user }}' ? 'Alice' : value
+    );
+
+    expect(result).toEqual({
+      settings: { name: 'Alice' },
+    });
+  });
+
+  it('should identify default and provided values when rendering', () => {
+    const inputsSchema = normalizeFieldsToJsonSchema({
+      properties: {
+        greeting: { type: 'string', default: '{{ default_greeting }}' },
+        name: { type: 'string' },
+        settings: {
+          type: 'object',
+          properties: {
+            theme: { type: 'string', default: '{{ default_theme }}' },
+            locale: { type: 'string' },
+          },
+        },
+      },
+    });
+
+    const renderer = jest.fn((value: unknown) => value);
+    applyInputDefaults(
+      { name: '{{ user }}', settings: { locale: '{{ locale }}' } },
+      inputsSchema,
+      renderer
+    );
+
+    expect(renderer).toHaveBeenCalledWith('{{ default_greeting }}', 'default');
+    expect(renderer).toHaveBeenCalledWith('{{ user }}', 'provided');
+    expect(renderer).toHaveBeenCalledWith('{{ default_theme }}', 'default');
+    expect(renderer).toHaveBeenCalledWith('{{ locale }}', 'provided');
   });
 
   it('should apply defaults for nested objects', () => {
@@ -715,6 +803,118 @@ describe('applyInputDefaults', () => {
   });
 });
 
+describe('omitRequiredWithDefaults', () => {
+  it('drops required inputs that have a default and keeps the rest', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        who: { type: 'string', default: 'world' },
+        name: { type: 'string' },
+        count: { type: 'number', default: 2 },
+      },
+      required: ['who', 'name'],
+    } as JsonModelSchemaType;
+
+    expect(omitRequiredWithDefaults(schema)).toEqual({ ...schema, required: ['name'] });
+  });
+
+  it('treats a $ref whose resolved definition has a default as optional', () => {
+    const schema = {
+      type: 'object',
+      properties: { level: { $ref: '#/definitions/level' } },
+      required: ['level'],
+      definitions: { level: { type: 'string', default: 'low' } },
+    } as JsonModelSchemaType;
+
+    expect(omitRequiredWithDefaults(schema).required).toEqual([]);
+  });
+
+  it('ignores a $ref sibling default when the resolved definition has none', () => {
+    const schema = {
+      type: 'object',
+      properties: { level: { $ref: '#/definitions/level', default: 'low' } },
+      required: ['level'],
+      definitions: { level: { type: 'string' } },
+    } as JsonModelSchemaType;
+
+    expect(omitRequiredWithDefaults(schema).required).toEqual(['level']);
+  });
+
+  it('uses the $ref sibling default when the reference cannot be resolved', () => {
+    const schema = {
+      type: 'object',
+      properties: { level: { $ref: '#/definitions/missing', default: 'low' } },
+      required: ['level'],
+    } as JsonModelSchemaType;
+
+    expect(omitRequiredWithDefaults(schema).required).toEqual([]);
+  });
+
+  it('returns the schema unchanged when nothing is required', () => {
+    const schema = {
+      type: 'object',
+      properties: { who: { type: 'string', default: 'world' } },
+    } as JsonModelSchemaType;
+
+    expect(omitRequiredWithDefaults(schema)).toBe(schema);
+  });
+});
+
+describe('resolveRef (#/kibana/definitions/...)', () => {
+  const testBuiltinId = 'TestBuiltinPayload';
+  let registrySnapshot: typeof builtinWorkflowInputDefinitions;
+
+  beforeEach(() => {
+    registrySnapshot = { ...builtinWorkflowInputDefinitions };
+  });
+
+  afterEach(() => {
+    for (const key of Object.keys(builtinWorkflowInputDefinitions)) {
+      delete builtinWorkflowInputDefinitions[key];
+    }
+    Object.assign(builtinWorkflowInputDefinitions, registrySnapshot);
+  });
+
+  it('resolves a registered built-in and applyInputDefaults uses it', () => {
+    builtinWorkflowInputDefinitions[testBuiltinId] = {
+      type: 'object',
+      properties: {
+        token: { type: 'string', default: 'abc' },
+      },
+      required: ['token'],
+      additionalProperties: false,
+    };
+
+    const inputsSchema = normalizeFieldsToJsonSchema({
+      properties: {
+        payload: { $ref: '#/kibana/definitions/TestBuiltinPayload' },
+      },
+      required: ['payload'],
+      additionalProperties: false,
+    });
+
+    expect(resolveRef('#/kibana/definitions/TestBuiltinPayload', inputsSchema)).toEqual(
+      builtinWorkflowInputDefinitions[testBuiltinId]
+    );
+    expect(applyInputDefaults(undefined, inputsSchema)).toEqual({
+      payload: { token: 'abc' },
+    });
+  });
+
+  it('returns null for an unknown built-in id', () => {
+    const inputsSchema = normalizeFieldsToJsonSchema({
+      properties: {
+        x: { $ref: '#/kibana/definitions/DoesNotExist' },
+      },
+    });
+    expect(resolveRef('#/kibana/definitions/DoesNotExist', inputsSchema)).toBeNull();
+  });
+
+  it('returns null when the id contains a slash (invalid ref shape)', () => {
+    expect(resolveRef('#/kibana/definitions/a/b', undefined)).toBeNull();
+  });
+});
+
 describe('normalizeFieldsToJsonSchema + buildFieldsZodValidator (integration)', () => {
   it('should normalize legacy array input defs and validate payloads like the execution engine', () => {
     const legacyInputs = [
@@ -743,6 +943,20 @@ describe('normalizeFieldsToJsonSchema + buildFieldsZodValidator (integration)', 
     const validator = buildFieldsZodValidator(normalizedSchema);
     expect(validator.safeParse({ name: 'hello' }).success).toBe(true);
     expect(validator.safeParse({}).success).toBe(false);
+  });
+
+  it('normalizes a map-only root and validates dynamic keys as strings', () => {
+    const inputs = {
+      type: 'object' as const,
+      additionalProperties: { type: 'string' as const },
+    };
+
+    const normalizedSchema = normalizeFieldsToJsonSchema(inputs);
+    expect(normalizedSchema?.additionalProperties).toEqual({ type: 'string' });
+
+    const validator = buildFieldsZodValidator(normalizedSchema);
+    expect(validator.safeParse({ anyKey: 'ok' }).success).toBe(true);
+    expect(validator.safeParse({ anyKey: 1 }).success).toBe(false);
   });
 });
 

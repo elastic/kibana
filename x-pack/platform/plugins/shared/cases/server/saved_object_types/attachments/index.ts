@@ -28,12 +28,15 @@ export const createCaseAttachmentSavedObjectType = (): SavedObjectsType => ({
     properties: {
       type: {
         type: 'keyword',
+        ignore_above: 1024,
       },
       attachmentId: {
         type: 'keyword',
+        ignore_above: 1024,
       },
       owner: {
         type: 'keyword',
+        ignore_above: 1024,
       },
       data: {
         properties: {
@@ -41,18 +44,11 @@ export const createCaseAttachmentSavedObjectType = (): SavedObjectsType => ({
             type: 'text',
           },
           /*
-          persistableState: {
+          state: {
             dynamic: false,
             properties: {},
           },
            */
-        },
-      },
-      metadata: {
-        properties: {
-          actionType: {
-            type: 'keyword',
-          },
         },
       },
       created_at: {
@@ -73,6 +69,7 @@ export const createCaseAttachmentSavedObjectType = (): SavedObjectsType => ({
            */
           username: {
             type: 'keyword',
+            ignore_above: 1024,
           },
         },
       },

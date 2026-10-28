@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import yaml from 'js-yaml';
+import { stringify } from 'yaml';
 
 const OTEL_DEMO_VERSION = '1.12.0';
 const NAMESPACE = 'otel-demo';
@@ -16,7 +16,7 @@ interface K8sManifestOptions {
   elasticsearchEndpoint: string;
   username: string;
   password: string;
-  logsIndex: string;
+  logsIndex?: string;
   collectorConfigYaml: string;
   /** Per-service environment variable overrides from failure scenarios */
   envOverrides?: Record<string, Record<string, string>>;
@@ -493,7 +493,7 @@ export function getKubernetesManifests(options: K8sManifestOptions): string {
     },
   });
 
-  return manifests.map((m) => yaml.dump(m)).join('---\n');
+  return manifests.map((m) => stringify(m)).join('---\n');
 }
 
 function createDeployment(opts: {

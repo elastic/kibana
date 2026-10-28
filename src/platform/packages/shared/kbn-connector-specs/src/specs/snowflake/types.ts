@@ -9,6 +9,18 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+// https://docs.snowflake.com/en/sql-reference/identifiers-syntax
+const MAX_IDENTIFIER_LENGTH = 255;
+const MAX_STATEMENT_LENGTH = 100_000;
+const MAX_BINDING_VALUE_LENGTH = 1_048_576;
+const MAX_BINDING_KEY_LENGTH = 10;
+// https://docs.snowflake.com/en/sql-reference/parameters#query-tag
+const MAX_QUERY_TAG_LENGTH = 2000;
+const STATEMENT_HANDLE_LENGTH = 36;
+const MAX_SEARCH_QUERY_LENGTH = 2000;
+const MAX_FILTER_OPERATOR_LENGTH = 50;
+const MAX_COLUMNS = 100;
+
 // ---------------------------------------------------------------------------
 // Snowflake SQL API binding types
 // https://docs.snowflake.com/en/developer-guide/sql-api/submitting-requests
@@ -37,6 +49,7 @@ const BindingValueSchema = lazySchema(() =>
       ),
     value: z
       .string()
+      .max(MAX_BINDING_VALUE_LENGTH)
       .describe(
         'String representation of the value. All values must be strings, e.g. "123" for integer 123, "true" for boolean true.'
       ),
@@ -52,6 +65,7 @@ export const ExecuteStatementInputSchema = lazySchema(() =>
     statement: z
       .string()
       .min(1)
+      .max(MAX_STATEMENT_LENGTH)
       .describe(
         'SQL statement to execute. Supports any Snowflake SQL including SELECT, INSERT, UPDATE, DELETE, CREATE, etc. Use "?" placeholders for bind variables and provide values via the bindings parameter. Multiple statements can be separated by semicolons when multiStatementCount is set.'
       ),
@@ -66,30 +80,34 @@ export const ExecuteStatementInputSchema = lazySchema(() =>
       ),
     database: z
       .string()
+      .max(MAX_IDENTIFIER_LENGTH)
       .optional()
       .describe(
         'Database to use for execution. Case-sensitive — must match the value returned by SHOW DATABASES. If omitted, uses the user default (DEFAULT_NAMESPACE).'
       ),
     schema: z
       .string()
+      .max(MAX_IDENTIFIER_LENGTH)
       .optional()
       .describe(
         'Schema to use for execution. Case-sensitive. If omitted, uses the user default (DEFAULT_NAMESPACE).'
       ),
     warehouse: z
       .string()
+      .max(MAX_IDENTIFIER_LENGTH)
       .optional()
       .describe(
         'Warehouse to use for execution. Case-sensitive. If omitted, uses the user default (DEFAULT_WAREHOUSE).'
       ),
     role: z
       .string()
+      .max(MAX_IDENTIFIER_LENGTH)
       .optional()
       .describe(
         'Role to use for execution. Case-sensitive. If omitted, uses the user default (DEFAULT_ROLE).'
       ),
     bindings: z
-      .record(z.string(), BindingValueSchema)
+      .record(z.string().max(MAX_BINDING_KEY_LENGTH), BindingValueSchema)
       .optional()
       .describe(
         'Bind variable values keyed by 1-based position (e.g. {"1": {"type": "FIXED", "value": "123"}}). Each key corresponds to a "?" placeholder in the SQL statement.'
@@ -104,6 +122,7 @@ export const ExecuteStatementInputSchema = lazySchema(() =>
       ),
     queryTag: z
       .string()
+      .max(MAX_QUERY_TAG_LENGTH)
       .optional()
       .describe(
         'Tag to associate with the query for tracking and filtering in Snowflake query history.'
@@ -121,6 +140,7 @@ export const RunQueryInputSchema = lazySchema(() =>
     statement: z
       .string()
       .min(1)
+      .max(MAX_STATEMENT_LENGTH)
       .describe(
         'Read-only SQL statement to run. Only SELECT, WITH (CTE), SHOW, DESCRIBE / DESC, and EXPLAIN are accepted. Write operations (INSERT, UPDATE, DELETE, MERGE), DDL (CREATE, ALTER, DROP, TRUNCATE), privilege changes (GRANT, REVOKE), stored procedure calls (CALL), and session state changes (USE, SET) are rejected. Use "?" placeholders for bind variables and provide values via the bindings parameter. Single-statement only — semicolon-delimited multi-statement submissions are rejected.'
       ),
@@ -135,36 +155,41 @@ export const RunQueryInputSchema = lazySchema(() =>
       ),
     database: z
       .string()
+      .max(MAX_IDENTIFIER_LENGTH)
       .optional()
       .describe(
         'Database to use for execution. Case-sensitive — must match the value returned by SHOW DATABASES. If omitted, uses the user default (DEFAULT_NAMESPACE).'
       ),
     schema: z
       .string()
+      .max(MAX_IDENTIFIER_LENGTH)
       .optional()
       .describe(
         'Schema to use for execution. Case-sensitive. If omitted, uses the user default (DEFAULT_NAMESPACE).'
       ),
     warehouse: z
       .string()
+      .max(MAX_IDENTIFIER_LENGTH)
       .optional()
       .describe(
         'Warehouse to use for execution. Case-sensitive. If omitted, uses the user default (DEFAULT_WAREHOUSE).'
       ),
     role: z
       .string()
+      .max(MAX_IDENTIFIER_LENGTH)
       .optional()
       .describe(
         'Role to use for execution. Case-sensitive. If omitted, uses the user default (DEFAULT_ROLE).'
       ),
     bindings: z
-      .record(z.string(), BindingValueSchema)
+      .record(z.string().max(MAX_BINDING_KEY_LENGTH), BindingValueSchema)
       .optional()
       .describe(
         'Bind variable values keyed by 1-based position (e.g. {"1": {"type": "FIXED", "value": "123"}}). Each key corresponds to a "?" placeholder in the SQL statement.'
       ),
     queryTag: z
       .string()
+      .max(MAX_QUERY_TAG_LENGTH)
       .optional()
       .describe(
         'Tag to associate with the query for tracking and filtering in Snowflake query history.'
@@ -182,6 +207,7 @@ export const GetStatementStatusInputSchema = lazySchema(() =>
     statementHandle: z
       .string()
       .min(1)
+      .max(STATEMENT_HANDLE_LENGTH)
       .describe(
         'The statement handle (UUID) returned by executeStatement. Used to poll for results or check execution progress.'
       ),
@@ -206,6 +232,7 @@ export const CancelStatementInputSchema = lazySchema(() =>
     statementHandle: z
       .string()
       .min(1)
+      .max(STATEMENT_HANDLE_LENGTH)
       .describe(
         'The statement handle (UUID) of the running statement to cancel. Obtain this from the executeStatement response.'
       ),
@@ -222,12 +249,14 @@ export const ListCommonQueryParamsSchema = lazySchema(() =>
   z.object({
     like: z
       .string()
+      .max(MAX_IDENTIFIER_LENGTH)
       .optional()
       .describe(
         'Case-insensitive SQL pattern to filter by object name. Supports "%" (any sequence) and "_" (single char) wildcards. Examples: "CUST%", "%_LOG", "ORDERS". Omit to return all visible objects.'
       ),
     startsWith: z
       .string()
+      .max(MAX_IDENTIFIER_LENGTH)
       .optional()
       .describe(
         'Case-sensitive prefix filter on the object name. Unlike like, this does not use wildcards. Example: "PROD_" returns only names starting with exactly "PROD_".'
@@ -243,6 +272,7 @@ export const ListCommonQueryParamsSchema = lazySchema(() =>
       ),
     fromName: z
       .string()
+      .max(MAX_IDENTIFIER_LENGTH)
       .optional()
       .describe(
         'Cursor for pagination. Returns only rows whose name sorts after this value (case-sensitive, alphabetical). Use the last name from a previous page to fetch the next page.'
@@ -275,6 +305,7 @@ export const ListSchemasInputSchema = lazySchema(() =>
     database: z
       .string()
       .min(1)
+      .max(MAX_IDENTIFIER_LENGTH)
       .describe(
         'Case-sensitive database name (e.g. "PROD_DB") whose schemas to list. Use listDatabases to discover available databases.'
       ),
@@ -291,12 +322,14 @@ export const ListTablesInputSchema = lazySchema(() =>
     database: z
       .string()
       .min(1)
+      .max(MAX_IDENTIFIER_LENGTH)
       .describe(
         'Case-sensitive database name containing the schema. Use listDatabases to discover available databases.'
       ),
     schema: z
       .string()
       .min(1)
+      .max(MAX_IDENTIFIER_LENGTH)
       .describe(
         'Case-sensitive schema name whose tables to list (e.g. "PUBLIC"). Use listSchemas to discover available schemas.'
       ),
@@ -319,12 +352,14 @@ export const ListViewsInputSchema = lazySchema(() =>
     database: z
       .string()
       .min(1)
+      .max(MAX_IDENTIFIER_LENGTH)
       .describe(
         'Case-sensitive database name containing the schema. Use listDatabases to discover available databases.'
       ),
     schema: z
       .string()
       .min(1)
+      .max(MAX_IDENTIFIER_LENGTH)
       .describe(
         'Case-sensitive schema name whose views to list (e.g. "PUBLIC"). Use listSchemas to discover available schemas.'
       ),
@@ -341,18 +376,21 @@ export const DescribeTableInputSchema = lazySchema(() =>
     database: z
       .string()
       .min(1)
+      .max(MAX_IDENTIFIER_LENGTH)
       .describe(
         'Case-sensitive database name containing the table (e.g. "PROD_DB"). Must match the value returned by listDatabases.'
       ),
     schema: z
       .string()
       .min(1)
+      .max(MAX_IDENTIFIER_LENGTH)
       .describe(
         'Case-sensitive schema name containing the table (e.g. "PUBLIC"). Must match the value returned by listSchemas.'
       ),
     name: z
       .string()
       .min(1)
+      .max(MAX_IDENTIFIER_LENGTH)
       .describe(
         'Case-sensitive table name (e.g. "ORDERS"). Must match the value returned by listTables. Returns columns (name, type, nullable, default, comment), clustering keys, row count, and other metadata.'
       ),
@@ -369,18 +407,21 @@ export const DescribeViewInputSchema = lazySchema(() =>
     database: z
       .string()
       .min(1)
+      .max(MAX_IDENTIFIER_LENGTH)
       .describe(
         'Case-sensitive database name containing the view. Must match the value returned by listDatabases.'
       ),
     schema: z
       .string()
       .min(1)
+      .max(MAX_IDENTIFIER_LENGTH)
       .describe(
         'Case-sensitive schema name containing the view. Must match the value returned by listSchemas.'
       ),
     name: z
       .string()
       .min(1)
+      .max(MAX_IDENTIFIER_LENGTH)
       .describe(
         'Case-sensitive view name. Must match the value returned by listViews. Returns the view definition, columns, and the underlying query text.'
       ),
@@ -400,12 +441,14 @@ export const ListCortexSearchServicesInputSchema = lazySchema(() =>
     database: z
       .string()
       .min(1)
+      .max(MAX_IDENTIFIER_LENGTH)
       .describe(
         'Case-sensitive database name containing the schema. Use listDatabases to discover available databases.'
       ),
     schema: z
       .string()
       .min(1)
+      .max(MAX_IDENTIFIER_LENGTH)
       .describe(
         'Case-sensitive schema name whose Cortex Search services to list. Use listSchemas to discover available schemas.'
       ),
@@ -418,35 +461,40 @@ export const CortexSearchInputSchema = lazySchema(() =>
     database: z
       .string()
       .min(1)
+      .max(MAX_IDENTIFIER_LENGTH)
       .describe(
         'Case-sensitive database name containing the Cortex Search service. Use listDatabases or listCortexSearchServices to discover.'
       ),
     schema: z
       .string()
       .min(1)
+      .max(MAX_IDENTIFIER_LENGTH)
       .describe(
         'Case-sensitive schema name containing the Cortex Search service. Use listCortexSearchServices to discover.'
       ),
     serviceName: z
       .string()
       .min(1)
+      .max(MAX_IDENTIFIER_LENGTH)
       .describe(
         'Case-sensitive name of the Cortex Search service to query. Use listCortexSearchServices to discover available services.'
       ),
     query: z
       .string()
       .min(1)
+      .max(MAX_SEARCH_QUERY_LENGTH)
       .describe(
         "Natural-language search query to run against the service's indexed search column. Cortex Search performs semantic + lexical matching automatically."
       ),
     columns: z
-      .array(z.string())
+      .array(z.string().max(MAX_IDENTIFIER_LENGTH))
+      .max(MAX_COLUMNS)
       .optional()
       .describe(
         "Additional columns to return for each result. Must be included in the service's source query. If omitted, only the indexed search column is returned."
       ),
     filter: z
-      .record(z.string(), z.unknown())
+      .record(z.string().max(MAX_FILTER_OPERATOR_LENGTH), z.unknown())
       .optional()
       .describe(
         'Filter object restricting results by ATTRIBUTES columns. Supported operators: @eq (text/numeric equality), @contains (array membership), @gte/@lte (numeric/date range), @and, @or, @not. Examples: {"@eq": {"REGION": "US"}}; {"@and": [{"@gte": {"LIKES": 50}}, {"@contains": {"TAGS": "ai"}}]}.'

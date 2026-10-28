@@ -26,6 +26,7 @@ import { EndzoneTooltipHeader } from './endzone_tooltip_header';
 import type { TooltipData } from './tooltip_row';
 import { TooltipRow } from './tooltip_row';
 import { isEndzoneBucket } from './utils';
+import type { GroupsConfiguration } from '../../helpers/axes_configuration';
 
 type Props = TooltipInfo & {
   xDomain?: XDomain;
@@ -38,6 +39,7 @@ type Props = TooltipInfo & {
     splitColumnAccessor?: string;
   };
   layers: CommonXYDataLayerConfig[];
+  axesConfiguration?: GroupsConfiguration;
 };
 
 export const Tooltip: FC<Props> = ({
@@ -50,6 +52,7 @@ export const Tooltip: FC<Props> = ({
   splitAccessors,
   xDomain,
   layers,
+  axesConfiguration,
 }) => {
   const pickedValue = values.find(({ isHighlighted }) => isHighlighted);
 
@@ -74,7 +77,7 @@ export const Tooltip: FC<Props> = ({
       : formatFactory(layerFormats.xAccessors[xAccessor]);
     data.push({
       label: layerTitles?.xTitles?.[xAccessor],
-      value: headerFormatter ? headerFormatter.convert(header.value) : `${header.value}`,
+      value: headerFormatter ? headerFormatter.convertToText(header.value) : `${header.value}`,
     });
   }
 
@@ -82,10 +85,13 @@ export const Tooltip: FC<Props> = ({
     ? (seriesIdentifier.yAccessor as string)
     : null;
   if (tooltipYAccessor) {
-    const yFormatter = formatFactory(layerFormats.yAccessors[tooltipYAccessor]);
+    const yFormatter =
+      axesConfiguration?.find(({ series }) =>
+        series.some(({ layer, accessor }) => layer === layerId && accessor === tooltipYAccessor)
+      )?.formatter ?? formatFactory(layerFormats.yAccessors[tooltipYAccessor]);
     data.push({
       label: layerTitles?.yTitles?.[tooltipYAccessor],
-      value: yFormatter ? yFormatter.convert(pickedValue.value) : `${pickedValue.value}`,
+      value: yFormatter ? yFormatter.convertToText(pickedValue.value) : `${pickedValue.value}`,
     });
   }
   if (markSizeColumnId && pickedValue.formattedMarkValue) {
@@ -100,7 +106,9 @@ export const Tooltip: FC<Props> = ({
       : layerFormats.splitSeriesAccessors[key].formatter;
 
     const label = layerTitles?.splitSeriesTitles?.[key];
-    const value = splitSeriesFormatter ? splitSeriesFormatter.convert(splitValue) : `${splitValue}`;
+    const value = splitSeriesFormatter
+      ? splitSeriesFormatter.convertToText(splitValue)
+      : `${splitValue}`;
     data.push({ label, value });
   });
 

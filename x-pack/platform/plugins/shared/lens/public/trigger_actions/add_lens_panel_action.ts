@@ -8,13 +8,15 @@
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiHasAppContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { LensPluginStartDependencies } from '../plugin';
 import { lensVisTypeAlias } from '../vis_type_alias';
+import { getParentContext } from '../react_embeddable/helper';
 
 export function getAddLensPanelAction(deps: LensPluginStartDependencies) {
   return {
     id: 'addLensPanelAction',
-    getIconType: () => lensVisTypeAlias.icon,
+    getIconType: () => 'chartBarVertical',
     order: lensVisTypeAlias.order,
     isCompatible: async () => true,
     execute: async ({ embeddable }: EmbeddableApiContext) => {
@@ -28,12 +30,19 @@ export function getAddLensPanelAction(deps: LensPluginStartDependencies) {
           originatingPath: apiHasAppContext(embeddable)
             ? embeddable.getAppContext().getCurrentPath?.()
             : undefined,
+          originatingContainer: getParentContext(embeddable)?.type,
           searchSessionId: deps.data.search.session.getSessionId(),
         },
       });
     },
     grouping: [ADD_PANEL_VISUALIZATION_GROUP],
-    getDisplayName: () => lensVisTypeAlias.title,
-    getDisplayNameTooltip: () => lensVisTypeAlias.description,
+    getDisplayName: () =>
+      i18n.translate('xpack.lens.app.createVisualizationTitle', {
+        defaultMessage: 'Create visualization',
+      }),
+    getDisplayNameTooltip: () =>
+      i18n.translate('xpack.lens.app.createVisualizationTooltip', {
+        defaultMessage: 'Build with the point-and-click editor',
+      }),
   };
 }

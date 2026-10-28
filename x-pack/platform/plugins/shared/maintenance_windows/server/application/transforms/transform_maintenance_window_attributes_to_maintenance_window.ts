@@ -6,6 +6,7 @@
  */
 import type { MaintenanceWindowAttributes } from '../../data/types/maintenance_window_attributes';
 import { getMaintenanceWindowDateAndStatus } from '../lib/get_maintenance_window_date_and_status';
+import { decodeScope } from '../lib/decode_scope';
 import type { MaintenanceWindow } from '../types';
 
 export interface TransformMaintenanceWindowAttributesMaintenanceWindowParams {
@@ -43,6 +44,8 @@ export const transformMaintenanceWindowAttributesToMaintenanceWindow = (
     ...(attributes.categoryIds !== undefined ? { categoryIds: attributes.categoryIds } : {}),
     ...(attributes.scopedQuery !== undefined ? { scopedQuery: attributes.scopedQuery } : {}),
     schedule: attributes.schedule,
-    ...(attributes.scope !== undefined ? { scope: attributes.scope } : {}),
+    // Always decode scope so filterMaintenanceWindows can read scope.alerting.enabled on legacy
+    // documents that never had a scope written to disk.
+    scope: decodeScope(attributes.scope),
   };
 };

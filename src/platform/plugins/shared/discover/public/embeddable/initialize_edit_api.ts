@@ -16,7 +16,7 @@ import type {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { apiHasAppContext, apiIsPresentationContainer } from '@kbn/presentation-publishing';
-import { getAllEsqlControls } from '@kbn/esql-utils';
+import { getAllEsqlControls } from '@kbn/esql-controls-utils';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DiscoverServices } from '../build_services';
@@ -84,11 +84,12 @@ export function initializeEditApi({
 
   const parentApiContext = parentApi.getAppContext();
 
+  const displayName = i18n.translate('discover.embeddable.search.displayName', {
+    defaultMessage: 'Discover session',
+  });
+
   return {
-    getTypeDisplayName: () =>
-      i18n.translate('discover.embeddable.search.displayName', {
-        defaultMessage: 'Discover session',
-      }),
+    getTypeDisplayName: () => displayName,
     onEdit: async () => {
       const stateTransfer = discoverServices.embeddable.getStateTransfer();
       const isByReference = Boolean(partialApi.savedObjectId$.getValue());
@@ -99,11 +100,7 @@ export function initializeEditApi({
             discoverSessionTab: fromSavedSearchToSavedObjectTab({
               tab: {
                 id: uuid,
-                label:
-                  getTitle() ||
-                  i18n.translate('discover.embeddable.byValueTabName', {
-                    defaultMessage: 'By-value Discover session',
-                  }),
+                label: getTitle() || displayName,
               },
               savedSearch: {
                 ...partialApi.savedSearch$.getValue(),

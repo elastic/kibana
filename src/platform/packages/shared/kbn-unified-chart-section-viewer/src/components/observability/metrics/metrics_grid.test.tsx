@@ -19,16 +19,41 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 import type { UnifiedMetricsGridProps } from '../../../types';
-import { createESQLQuery } from '../../../common/utils';
-import { dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
-import { MetricsExperienceStateProvider } from './context/metrics_experience_state_provider';
+import { createESQLQuery, getMetricUniqueKey } from '../../../common/utils';
+import { FEATURE_FLAGS } from '../../../common/constants';
+import { useFeatureFlag } from '../../../hooks/use_feature_flag';
+import { dismissAllFlyoutsExceptFor, METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
+import {
+  MetricsExperienceStateProvider,
+  useMetricsExperienceState,
+} from './context/metrics_experience_state_provider';
 import { withRestorableState } from '../../../restorable_state';
 import type { FlyoutState } from '../../../restorable_state';
 
-jest.mock('@kbn/discover-utils', () => ({
-  DiscoverFlyouts: { metricInsights: 'metricInsights' },
-  dismissAllFlyoutsExceptFor: jest.fn(),
+jest.mock('./hooks/use_fetch_exemplars', () => ({
+  useFetchExemplars: jest.fn(() => undefined),
 }));
+
+jest.mock('@kbn/discover-utils', () => {
+  const {
+    METRICS_GRID_HISTOGRAM_PERCENTILES,
+    METRICS_GRID_SETTINGS_DEFAULTS: metricsGridSettingsDefaults,
+    METRICS_GRID_SIMPLE_AGGREGATIONS,
+    METRICS_GRID_SORT_DEFAULTS,
+    isHistogramHeatmapVisualization,
+  } = jest.requireActual('@kbn/discover-utils/src/data_types/metrics');
+
+  return {
+    DiscoverFlyouts: { metricInsights: 'metricInsights' },
+    dismissAllFlyoutsExceptFor: jest.fn(),
+    fieldConstants: jest.requireActual('@kbn/discover-utils/src/field_constants'),
+    METRICS_GRID_HISTOGRAM_PERCENTILES,
+    METRICS_GRID_SETTINGS_DEFAULTS: metricsGridSettingsDefaults,
+    METRICS_GRID_SIMPLE_AGGREGATIONS,
+    METRICS_GRID_SORT_DEFAULTS,
+    isHistogramHeatmapVisualization,
+  };
+});
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -42,6 +67,14 @@ jest.mock('../../chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="chart" />),
 }));
 
+jest.mock('../../../hooks/use_feature_flag', () => {
+  const actual = jest.requireActual('../../../hooks/use_feature_flag');
+  return {
+    ...actual,
+    useFeatureFlag: jest.fn((_flag: string, fallback: boolean) => fallback),
+  };
+});
+
 jest.mock('../../../common/utils', () => ({
   ...jest.requireActual('../../../common/utils'),
   createESQLQuery: jest.fn((params) => {
@@ -50,7 +83,7 @@ jest.mock('../../../common/utils', () => ({
       splitAccessors.length > 0
         ? `, ${splitAccessors.map((field: string) => `\`${field}\``).join(', ')}`
         : '';
-    return `FROM ${metricItem.dataStream} | STATS AVG(${metricItem.metricName}) BY TBUCKET(100)${splitAccessorsStr}`;
+    return `FROM ${metricItem.indexName} | STATS AVG(${metricItem.metricName}) BY TBUCKET(100)${splitAccessorsStr}`;
   }),
 }));
 
@@ -78,7 +111,7 @@ describe('MetricsGrid', () => {
   const metricItems: MetricsGridProps['metricItems'] = [
     {
       metricName: 'system.cpu.utilization',
-      dataStream: 'metrics-*',
+      indexName: 'metrics-*',
       units: ['ms'],
       metricTypes: ['counter'],
       fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -86,7 +119,7 @@ describe('MetricsGrid', () => {
     },
     {
       metricName: 'system.memory.utilization',
-      dataStream: 'metrics-*',
+      indexName: 'metrics-*',
       units: ['ms'],
       metricTypes: ['counter'],
       fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -103,6 +136,7 @@ describe('MetricsGrid', () => {
     services,
     actions,
     isTabSelected: true,
+    isComponentVisible: true,
   };
 
   const renderMetricsGrid = (props: Partial<MetricsGridProps> = {}) => {
@@ -138,6 +172,7 @@ describe('MetricsGrid', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useFeatureFlag).mockImplementation((_flag, fallback) => fallback);
     discoverFetch$ = getFetch$Mock(fetchParams);
   });
 
@@ -162,6 +197,36 @@ describe('MetricsGrid', () => {
         expect.anything()
       );
     });
+  });
+
+  it('passes the effective aggregation label as yAxisTitle to each chart', () => {
+    renderMetricsGrid();
+
+    // Both metric items are counters; the default counter aggregation is SUM.
+    metricItems.forEach((_, index) => {
+      expect(Chart).toHaveBeenNthCalledWith(
+        index + 1,
+        expect.objectContaining({
+          lensConfig: expect.objectContaining({ yTitle: 'sum' }),
+        }),
+        expect.anything()
+      );
+    });
+  });
+
+  it.each([
+    ['system util', ['system', 'util']],
+    ['system*util', ['system', 'util']],
+    ['utilizaton', ['utilization']],
+    ['not-a-match', []],
+  ])('passes precise title highlights for the search term %s', (searchTerm, titleHighlight) => {
+    renderMetricsGrid({ searchTerm });
+
+    expect(Chart).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ titleHighlight }),
+      expect.anything()
+    );
   });
 
   it('passes the correct size prop', () => {
@@ -241,12 +306,16 @@ describe('MetricsGrid', () => {
 
     expect(Chart).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ description: descriptionForFirst }),
+      expect.objectContaining({
+        lensConfig: expect.objectContaining({ description: descriptionForFirst }),
+      }),
       expect.anything()
     );
     expect(Chart).toHaveBeenNthCalledWith(
       2,
-      expect.objectContaining({ description: undefined }),
+      expect.objectContaining({
+        lensConfig: expect.objectContaining({ description: undefined }),
+      }),
       expect.anything()
     );
   });
@@ -271,11 +340,13 @@ describe('MetricsGrid', () => {
 
     expect(Chart).toHaveBeenCalledWith(
       expect.objectContaining({
-        chartLayers: expect.arrayContaining([
-          expect.objectContaining({
-            breakdown: ['host.name'],
-          }),
-        ]),
+        lensConfig: expect.objectContaining({
+          layers: expect.arrayContaining([
+            expect.objectContaining({
+              breakdown: ['host.name'],
+            }),
+          ]),
+        }),
       }),
       expect.anything()
     );
@@ -285,7 +356,7 @@ describe('MetricsGrid', () => {
     const heterogeneousMetrics: MetricsGridProps['metricItems'] = [
       {
         metricName: 'fieldsense.energy.battery.voltage',
-        dataStream: 'fieldsense-station-metrics',
+        indexName: 'fieldsense-station-metrics',
         units: [null],
         metricTypes: ['gauge'],
         fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -293,7 +364,7 @@ describe('MetricsGrid', () => {
       },
       {
         metricName: 'system.cpu.utilization',
-        dataStream: 'metrics-hostmetricsreceiver.otel-default',
+        indexName: 'metrics-hostmetricsreceiver.otel-default',
         units: [null],
         metricTypes: ['gauge'],
         fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -324,8 +395,8 @@ describe('MetricsGrid', () => {
     );
   });
 
-  // Regression coverage for issue #262360: the user-typed source must be threaded
-  // from `fetchParams.query` through `MetricsGrid` into `createESQLQuery` as
+  // Regression coverage for issue #262360: the user-typed source, computed once
+  // by the parent and passed as `userSource`, must reach `createESQLQuery` as
   // `originalSource`, so backing-index queries stay at the same scope METRICS_INFO
   // scanned (avoiding cross-backing-index field-type conflicts being re-introduced
   // when the chart query widens back to the parent data stream).
@@ -339,7 +410,7 @@ describe('MetricsGrid', () => {
       relativeTimeRange: { from: 'now-1h', to: 'now' },
     });
 
-    const dataStreamFetchParams: MetricsGridProps['fetchParams'] = getFetchParamsMock({
+    const sourceFetchParams: MetricsGridProps['fetchParams'] = getFetchParamsMock({
       filters: [],
       query: { esql: 'TS edge-case-gauge-to-counter' },
       esqlVariables: [],
@@ -354,7 +425,7 @@ describe('MetricsGrid', () => {
     });
 
     it('forwards the user-typed backing index as originalSource', () => {
-      renderMetricsGrid({ fetchParams: backingIndexFetchParams });
+      renderMetricsGrid({ fetchParams: backingIndexFetchParams, userSource: backingIndex });
 
       expect(createESQLQuery).toHaveBeenCalledWith(
         expect.objectContaining({ originalSource: backingIndex })
@@ -362,15 +433,18 @@ describe('MetricsGrid', () => {
     });
 
     it('forwards the user-typed data stream as originalSource', () => {
-      renderMetricsGrid({ fetchParams: dataStreamFetchParams });
+      renderMetricsGrid({
+        fetchParams: sourceFetchParams,
+        userSource: 'edge-case-gauge-to-counter',
+      });
 
       expect(createESQLQuery).toHaveBeenCalledWith(
         expect.objectContaining({ originalSource: 'edge-case-gauge-to-counter' })
       );
     });
 
-    it('forwards the raw glob pattern as originalSource (createESQLQuery falls back to dataStream)', () => {
-      renderMetricsGrid({ fetchParams: globFetchParams });
+    it('forwards the raw glob pattern as originalSource (createESQLQuery falls back to indexName)', () => {
+      renderMetricsGrid({ fetchParams: globFetchParams, userSource: 'edge-case-*' });
 
       expect(createESQLQuery).toHaveBeenCalledWith(
         expect.objectContaining({ originalSource: 'edge-case-*' })
@@ -460,7 +534,7 @@ describe('MetricsGrid', () => {
         ...metricItems,
         {
           metricName: 'system.disk.utilization',
-          dataStream: 'metrics-*',
+          indexName: 'metrics-*',
           units: ['ms'],
           metricTypes: ['counter'],
           fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -468,7 +542,7 @@ describe('MetricsGrid', () => {
         },
         {
           metricName: 'system.network.utilization',
-          dataStream: 'metrics-*',
+          indexName: 'metrics-*',
           units: ['ms'],
           metricTypes: ['counter'],
           fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -572,9 +646,9 @@ describe('MetricsGrid', () => {
     });
   });
 
-  describe('flyout dismissal on view details', () => {
-    it('should call dismissAllFlyoutsExceptFor with metricInsights when handleViewDetails is triggered', () => {
-      renderMetricsGrid();
+  describe('flyout dismissal on open', () => {
+    it('dismisses the other flyouts when View details opens the insights flyout', () => {
+      const { queryByTestId } = renderMetricsGrid();
 
       // Get the onViewDetails callback passed to the first Chart
       const chartCalls = (Chart as jest.Mock).mock.calls;
@@ -583,7 +657,6 @@ describe('MetricsGrid', () => {
       const firstChartProps = chartCalls[0][0];
       expect(firstChartProps.onViewDetails).toBeDefined();
 
-      // Clear mock to isolate calls from handleViewDetails vs flyout mount useEffect
       (dismissAllFlyoutsExceptFor as jest.Mock).mockClear();
 
       // Trigger the onViewDetails callback
@@ -591,12 +664,46 @@ describe('MetricsGrid', () => {
         firstChartProps.onViewDetails();
       });
 
-      // Verify dismissAllFlyoutsExceptFor was called from handleViewDetails
-      // AND from the flyout's useEffect on mount (2 calls total).
-      // The first call is the early dismissal in handleViewDetails (before flyout mounts),
-      // the second is the safety-net useEffect inside MetricInsightsFlyout.
-      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledTimes(2);
+      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledTimes(1);
       expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledWith('metricInsights');
+      expect(queryByTestId('metricsExperienceFlyout')).toBeInTheDocument();
+    });
+
+    it('dismisses the other flyouts when a tab restores its insights flyout', () => {
+      (dismissAllFlyoutsExceptFor as jest.Mock).mockClear();
+
+      const initialFlyoutState: FlyoutState = {
+        gridPosition: 1,
+        metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
+        esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
+        selectedTabId: 'overview',
+      };
+
+      const { queryByTestId, rerender } = render(
+        <MetricsGridWithRestorableState
+          {...defaultProps}
+          discoverFetch$={discoverFetch$}
+          profileId="test-profile"
+          initialState={{ flyoutState: initialFlyoutState }}
+          isTabSelected={false}
+        />
+      );
+
+      expect(dismissAllFlyoutsExceptFor).not.toHaveBeenCalled();
+      expect(queryByTestId('metricsExperienceFlyout')).not.toBeInTheDocument();
+
+      rerender(
+        <MetricsGridWithRestorableState
+          {...defaultProps}
+          discoverFetch$={discoverFetch$}
+          profileId="test-profile"
+          initialState={{ flyoutState: initialFlyoutState }}
+          isTabSelected={true}
+        />
+      );
+
+      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledWith('metricInsights');
+      expect(queryByTestId('metricsExperienceFlyout')).toBeInTheDocument();
     });
   });
 
@@ -615,10 +722,61 @@ describe('MetricsGrid', () => {
       expect(queryByTestId('metricsExperienceFlyout')).toBeInTheDocument();
     });
 
+    it('marks the originating chart as selected when its flyout is open', () => {
+      const { getAllByRole } = renderMetricsGrid();
+
+      const firstChartProps = (Chart as jest.Mock).mock.calls[0][0];
+
+      act(() => {
+        firstChartProps.onViewDetails();
+      });
+
+      const cells = getAllByRole('gridcell');
+      expect(cells[0]).toHaveAttribute('aria-selected', 'true');
+      expect(cells[1]).toHaveAttribute('aria-selected', 'false');
+    });
+
+    it('marks the restored metric chart as selected', () => {
+      const { getAllByRole } = renderMetricsGridWithInitialFlyoutState({
+        gridPosition: 1,
+        metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
+        esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
+        selectedTabId: 'overview',
+      });
+
+      const cells = getAllByRole('gridcell');
+      expect(cells[0]).toHaveAttribute('aria-selected', 'false');
+      expect(cells[1]).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('does not mark any chart as selected when no flyout is open', () => {
+      const { getAllByRole } = renderMetricsGrid();
+
+      getAllByRole('gridcell').forEach((cell) => {
+        expect(cell).toHaveAttribute('aria-selected', 'false');
+      });
+    });
+
+    it('does not mark any chart as selected when the owning tab is not active', () => {
+      const { getAllByRole } = renderMetricsGridWithInitialFlyoutState(
+        {
+          gridPosition: 1,
+          metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
+          esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
+          selectedTabId: 'overview',
+        },
+        { isTabSelected: false }
+      );
+
+      getAllByRole('gridcell').forEach((cell) => {
+        expect(cell).toHaveAttribute('aria-selected', 'false');
+      });
+    });
+
     it('renders the flyout when initial restorable flyoutState references an existing metric', () => {
       const { queryByTestId } = renderMetricsGridWithInitialFlyoutState({
         gridPosition: 1,
-        metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+        metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
         esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
         selectedTabId: 'overview',
       });
@@ -641,7 +799,7 @@ describe('MetricsGrid', () => {
       const onInitialStateChange = jest.fn();
       const initialFlyoutState: FlyoutState = {
         gridPosition: 0,
-        metricUniqueKey: `${metricItems[0].dataStream}::${metricItems[0].metricName}`,
+        metricUniqueKey: `${metricItems[0].indexName}::${metricItems[0].metricName}`,
         esqlQuery: 'FROM metrics-* | STATS AVG(system.cpu.utilization) BY TBUCKET(100)',
         selectedTabId: 'overview',
       };
@@ -698,7 +856,7 @@ describe('MetricsGrid', () => {
           initialState={{
             flyoutState: {
               gridPosition: 0,
-              metricUniqueKey: `${metricItems[0].dataStream}::${metricItems[0].metricName}`,
+              metricUniqueKey: `${metricItems[0].indexName}::${metricItems[0].metricName}`,
               esqlQuery: 'FROM metrics-* | STATS AVG(system.cpu.utilization) BY TBUCKET(100)',
               selectedTabId: 'overview',
             },
@@ -727,7 +885,7 @@ describe('MetricsGrid', () => {
       const { queryByTestId } = renderMetricsGridWithInitialFlyoutState(
         {
           gridPosition: 1,
-          metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+          metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
           esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
           selectedTabId: 'overview',
         },
@@ -740,7 +898,7 @@ describe('MetricsGrid', () => {
     it('renders the restored flyout once the owning tab becomes active', () => {
       const initialFlyoutState: FlyoutState = {
         gridPosition: 1,
-        metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+        metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
         esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
         selectedTabId: 'overview',
       };
@@ -786,7 +944,7 @@ describe('MetricsGrid', () => {
           initialState={{
             flyoutState: {
               gridPosition: 1,
-              metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+              metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
               esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
               selectedTabId: 'overview',
             },
@@ -825,7 +983,7 @@ describe('MetricsGrid', () => {
           initialState={{
             flyoutState: {
               gridPosition: 0,
-              metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+              metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
               esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
               selectedTabId: 'overview',
             },
@@ -846,6 +1004,540 @@ describe('MetricsGrid', () => {
       expect(document.activeElement).toBe(gridCells[1]);
 
       (global.requestAnimationFrame as unknown as jest.SpyInstance).mockRestore();
+    });
+  });
+
+  describe('render efficiency', () => {
+    // Two metrics whose dimensionFields do NOT overlap.
+    // Selecting 'host.name' is only meaningful for the first metric.
+    const nonOverlappingMetrics: MetricsGridProps['metricItems'] = [
+      {
+        metricName: 'system.cpu.utilization',
+        indexName: 'metrics-system',
+        units: ['ms'],
+        metricTypes: ['counter'],
+        fieldTypes: [ES_FIELD_TYPES.LONG],
+        dimensionFields: [{ name: 'host.name' }],
+      },
+      {
+        metricName: 'k8s.container.cpu',
+        indexName: 'metrics-k8s',
+        units: ['ms'],
+        metricTypes: ['counter'],
+        fieldTypes: [ES_FIELD_TYPES.LONG],
+        dimensionFields: [{ name: 'container.id' }],
+      },
+    ];
+
+    it('recomputes esqlQuery only for metrics whose applicable dimensions changed', () => {
+      const { rerender } = render(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={nonOverlappingMetrics}
+            dimensions={[]}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledTimes(nonOverlappingMetrics.length);
+      (createESQLQuery as jest.Mock).mockClear();
+
+      // Select 'host.name'. Only system.cpu.utilization supports it —
+      // k8s.container.cpu stays at [] → [] with a stable empty array reference.
+      rerender(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={nonOverlappingMetrics}
+            dimensions={[{ name: 'host.name' }]}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not recompute esqlQuery when dimensions get a new array with identical content', () => {
+      const dimensions = [{ name: 'host.name' }];
+      const { rerender } = render(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={nonOverlappingMetrics}
+            dimensions={dimensions}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledTimes(nonOverlappingMetrics.length);
+      (createESQLQuery as jest.Mock).mockClear();
+
+      rerender(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={nonOverlappingMetrics}
+            dimensions={[{ name: 'host.name' }]}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).not.toHaveBeenCalled();
+    });
+
+    it('recomputes esqlQuery when a dimension type changes but the name stays the same', () => {
+      const hostMetric = nonOverlappingMetrics[0];
+      const { rerender } = render(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={[hostMetric]}
+            dimensions={[{ name: 'host.name', type: 'keyword' }]}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledTimes(1);
+      (createESQLQuery as jest.Mock).mockClear();
+
+      rerender(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={[hostMetric]}
+            dimensions={[{ name: 'host.name', type: 'ip' }]}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not re-render ChartItem when an unrelated context value changes', () => {
+      const CurrentPageControl = () => {
+        const { currentPage, onPageChange } = useMetricsExperienceState();
+
+        return (
+          <button
+            type="button"
+            data-test-subj="currentPageControl"
+            onClick={() => onPageChange(currentPage + 1)}
+          >
+            {currentPage}
+          </button>
+        );
+      };
+
+      render(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <CurrentPageControl />
+          <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(Chart).toHaveBeenCalledTimes(metricItems.length);
+      (Chart as jest.Mock).mockClear();
+
+      fireEvent.click(screen.getByTestId('currentPageControl'));
+
+      expect(screen.getByTestId('currentPageControl')).toHaveTextContent('1');
+      expect(Chart).not.toHaveBeenCalled();
+    });
+
+    it('re-renders ChartItem when a relevant context value changes', () => {
+      const { rerender } = render(
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          gridSettings={{
+            counterAggregation: 'max',
+            gaugeAggregation: 'avg',
+            histogramPercentile: 'p90',
+            histogramVisualization: 'lnsXY',
+            dimensions: [],
+            searchTerm: '',
+          }}
+        >
+          <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(Chart).toHaveBeenCalledTimes(metricItems.length);
+      (Chart as jest.Mock).mockClear();
+
+      rerender(
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          gridSettings={{
+            counterAggregation: 'max',
+            gaugeAggregation: 'avg',
+            histogramPercentile: 'p95',
+            histogramVisualization: 'lnsXY',
+            dimensions: [],
+            searchTerm: '',
+          }}
+        >
+          <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(Chart).toHaveBeenCalledTimes(metricItems.length);
+    });
+  });
+
+  describe('gridSettings', () => {
+    it('forwards gridSettings from context into createESQLQuery for each metric', () => {
+      render(
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          gridSettings={{
+            counterAggregation: 'max',
+            gaugeAggregation: 'avg',
+            histogramPercentile: 'p90',
+            histogramVisualization: 'lnsXY',
+            dimensions: [],
+            searchTerm: '',
+          }}
+        >
+          <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          gridSettings: {
+            counterAggregation: 'max',
+            gaugeAggregation: 'avg',
+            histogramPercentile: 'p90',
+            histogramVisualization: 'lnsXY',
+            dimensions: [],
+            searchTerm: '',
+          },
+        })
+      );
+    });
+  });
+
+  describe('recently explored', () => {
+    // The chart is mocked, so render a panel action control inside it to simulate the
+    // embeddable's quick-action buttons that the cell click handler looks for.
+    const renderChartWithPanelAction = () => {
+      (Chart as jest.Mock).mockImplementation(() => (
+        <div data-test-subj="chart">
+          <button type="button" data-test-subj="embeddablePanelAction-ACTION_INSPECT_PANEL" />
+        </div>
+      ));
+    };
+
+    afterEach(() => {
+      (Chart as jest.Mock).mockImplementation(() => <div data-test-subj="chart" />);
+    });
+
+    it('records the metric as explored when a panel action is clicked', () => {
+      renderChartWithPanelAction();
+      const onMetricExplored = jest.fn();
+      const { container } = render(
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          onMetricExplored={onMetricExplored}
+        >
+          <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
+        </MetricsExperienceStateProvider>
+      );
+
+      fireEvent.click(
+        container.querySelector(
+          '[data-chart-index="0"] [data-test-subj="embeddablePanelAction-ACTION_INSPECT_PANEL"]'
+        ) as HTMLElement
+      );
+
+      expect(onMetricExplored).toHaveBeenCalledTimes(1);
+      expect(onMetricExplored).toHaveBeenCalledWith('metrics-*::system.cpu.utilization');
+    });
+
+    it('does not record the metric when clicking outside panel actions', () => {
+      renderChartWithPanelAction();
+      const onMetricExplored = jest.fn();
+      const { container } = render(
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          onMetricExplored={onMetricExplored}
+        >
+          <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
+        </MetricsExperienceStateProvider>
+      );
+
+      fireEvent.click(container.querySelector('[data-chart-index="0"]') as HTMLElement);
+
+      expect(onMetricExplored).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('histogram heatmaps', () => {
+    const histogramItem: MetricsGridProps['metricItems'][number] = {
+      metricName: 'latency.exp',
+      indexName: 'metrics-a',
+      units: ['ms'],
+      metricTypes: ['histogram'],
+      fieldTypes: [ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM],
+      dimensionFields: [{ name: 'host.name' }],
+    };
+    const bounds = new Map([[getMetricUniqueKey(histogramItem), { bounds: { min: 1, max: 9 } }]]);
+    const distributionGridSettings = {
+      ...METRICS_GRID_SETTINGS_DEFAULTS,
+      histogramVisualization: 'lnsHeatmap' as const,
+    };
+
+    const renderMetricsGridWithHistDistributions = (props: Partial<MetricsGridProps> = {}) =>
+      render(
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          gridSettings={distributionGridSettings}
+        >
+          <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} {...props} />
+        </MetricsExperienceStateProvider>
+      );
+
+    const enableHeatmaps = () => {
+      jest
+        .mocked(useFeatureFlag)
+        .mockImplementation((flag, fallback) =>
+          flag === FEATURE_FLAGS.IS_HEATMAPS_ENABLED ? true : fallback
+        );
+    };
+
+    it('keeps the percentile chart when a percentile is selected and the flag is on', () => {
+      enableHeatmaps();
+      render(
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          gridSettings={{
+            counterAggregation: 'sum',
+            gaugeAggregation: 'avg',
+            histogramPercentile: 'p95',
+            histogramVisualization: 'lnsXY',
+            dimensions: [],
+            searchTerm: '',
+          }}
+        >
+          <MetricsGrid
+            {...defaultProps}
+            discoverFetch$={discoverFetch$}
+            metricItems={[histogramItem]}
+            histogramBounds={bounds}
+          />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(createESQLQuery).toHaveBeenCalled();
+      expect(Chart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          disableClickFilter: false,
+          lensConfig: expect.objectContaining({
+            chartType: 'xy',
+            yTitle: 'p95',
+            dataset: expect.objectContaining({
+              esql: expect.not.stringContaining('BUCKET(latency.exp'),
+            }),
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('keeps the percentile chart when the heatmaps flag is off', () => {
+      renderMetricsGridWithHistDistributions({
+        metricItems: [histogramItem],
+        histogramBounds: bounds,
+      });
+
+      expect(createESQLQuery).toHaveBeenCalled();
+      expect(Chart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isLoading: false,
+          disableClickFilter: false,
+          lensConfig: expect.objectContaining({ chartType: 'xy' }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('keeps the data stream description on the heatmap', () => {
+      enableHeatmaps();
+      const description = 'Data stream: metrics-a';
+      renderMetricsGridWithHistDistributions({
+        metricItems: [histogramItem],
+        histogramBounds: bounds,
+        getDescription: () => description,
+      });
+
+      expect(Chart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          lensConfig: expect.objectContaining({
+            chartType: 'heatmap',
+            description,
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('draws a heatmap from the distribution query when bounds exist', () => {
+      enableHeatmaps();
+      renderMetricsGridWithHistDistributions({
+        metricItems: [histogramItem],
+        histogramBounds: bounds,
+      });
+
+      expect(createESQLQuery).not.toHaveBeenCalled();
+      expect(Chart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          disableClickFilter: true,
+          lensConfig: expect.objectContaining({
+            chartType: 'heatmap',
+            title: histogramItem.metricName,
+            dataset: {
+              esql: expect.stringMatching(
+                /BUCKET\(latency\.exp, 10, 1, 9\)[\s\S]*SORT bucket DESC/
+              ),
+            },
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('draws a heatmap when the upper and lower bounds are the same', () => {
+      enableHeatmaps();
+      renderMetricsGridWithHistDistributions({
+        metricItems: [histogramItem],
+        histogramBounds: new Map([
+          [getMetricUniqueKey(histogramItem), { bounds: { min: 5, max: 5 } }],
+        ]),
+      });
+
+      expect(createESQLQuery).not.toHaveBeenCalled();
+      expect(Chart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          disableClickFilter: true,
+          lensConfig: expect.objectContaining({
+            chartType: 'heatmap',
+            dataset: {
+              esql: expect.stringContaining('BUCKET(latency.exp, 10, 5, 5.000005)'),
+            },
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('uses the series chart when a breakdown applies to the histogram', () => {
+      enableHeatmaps();
+      renderMetricsGridWithHistDistributions({
+        metricItems: [histogramItem],
+        dimensions: [{ name: 'host.name' }],
+        histogramBounds: bounds,
+      });
+
+      expect(createESQLQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ splitAccessors: ['host.name'] })
+      );
+      expect(Chart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          disableClickFilter: false,
+          lensConfig: expect.objectContaining({
+            chartType: 'xy',
+            dataset: expect.objectContaining({
+              esql: expect.stringContaining('`host.name`'),
+            }),
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('keeps gauge and counter charts on the percentile path while the flag is on', () => {
+      enableHeatmaps();
+      renderMetricsGridWithHistDistributions({
+        metricItems: [metricItems[0], histogramItem],
+        histogramBounds: bounds,
+      });
+
+      expect(createESQLQuery).toHaveBeenCalledTimes(1);
+      expect(Chart).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          disableClickFilter: true,
+          lensConfig: expect.objectContaining({ chartType: 'heatmap' }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('waits for bounds before drawing a histogram', () => {
+      enableHeatmaps();
+      renderMetricsGridWithHistDistributions({
+        metricItems: [histogramItem],
+        histogramBoundsLoading: true,
+      });
+
+      expect(createESQLQuery).not.toHaveBeenCalled();
+      expect(Chart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isLoading: true,
+          disableClickFilter: false,
+          lensConfig: expect.objectContaining({
+            chartType: 'xy',
+            layers: [],
+            dataset: { esql: '' },
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('uses the series chart when bounds are missing', () => {
+      enableHeatmaps();
+      renderMetricsGridWithHistDistributions({
+        metricItems: [histogramItem],
+        histogramBounds: new Map(),
+        histogramBoundsLoading: false,
+      });
+
+      expect(createESQLQuery).toHaveBeenCalled();
+      expect(Chart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isLoading: false,
+          error: undefined,
+          disableClickFilter: false,
+          lensConfig: expect.objectContaining({ chartType: 'xy' }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('passes a bounds error to the chart', () => {
+      enableHeatmaps();
+      const error = new Error('bounds failed');
+      renderMetricsGridWithHistDistributions({
+        metricItems: [histogramItem],
+        histogramBounds: new Map([[getMetricUniqueKey(histogramItem), { error }]]),
+      });
+
+      expect(Chart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error,
+          disableClickFilter: false,
+          lensConfig: expect.objectContaining({ chartType: 'xy', layers: [] }),
+        }),
+        expect.anything()
+      );
     });
   });
 });

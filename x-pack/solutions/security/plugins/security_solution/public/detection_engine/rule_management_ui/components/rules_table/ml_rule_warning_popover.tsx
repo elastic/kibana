@@ -13,6 +13,8 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
@@ -43,6 +45,7 @@ const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps
   jobs,
 }) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
+  const popoverTitleId = useGeneratedHtmlId();
   const jobIds = getMachineLearningJobId(rule);
   const ruleDetailsUrl = getRuleDetailsUrl(rule.id);
 
@@ -58,12 +61,15 @@ const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps
   }
 
   const button = (
-    <EuiButtonIcon
-      display={'empty'}
-      color={'warning'}
-      iconType={'warning'}
-      onClick={togglePopover}
-    />
+    <EuiToolTip content={i18n.ML_RULE_JOBS_WARNING_ICON_LABEL} disableScreenReaderOutput>
+      <EuiButtonIcon
+        display={'empty'}
+        color={'warning'}
+        iconType={'warning'}
+        onClick={togglePopover}
+        aria-label={i18n.ML_RULE_JOBS_WARNING_ICON_LABEL}
+      />
+    </EuiToolTip>
   );
   const popoverTitle = getCapitalizedStatusText(RuleExecutionStatusEnum['partial failure']);
 
@@ -73,8 +79,9 @@ const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       anchorPosition="leftCenter"
+      aria-labelledby={popoverTitleId}
     >
-      <EuiPopoverTitle>{popoverTitle}</EuiPopoverTitle>
+      <EuiPopoverTitle id={popoverTitleId}>{popoverTitle}</EuiPopoverTitle>
       <div css={{ width: POPOVER_WIDTH }}>
         <EuiText size="s">
           <p>{i18n.ML_RULE_JOBS_WARNING_DESCRIPTION}</p>

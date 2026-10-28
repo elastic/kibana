@@ -5,153 +5,505 @@
  * 2.0.
  */
 
-import type { Headers, FakeRawRequest } from '@kbn/core-http-server';
+import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { inject, injectable } from 'inversify';
-import pLimit from 'p-limit';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
 import type {
+  BulkScheduleWorkflowResult,
+  WorkflowDetailDto,
+  WorkflowExecutionEngineModel,
+} from '@kbn/workflows';
+import type {
+  BulkScheduleWorkflowItem,
+  WorkflowsServerPluginSetup,
+  WorkflowsManagementClient,
+} from '@kbn/workflows-management-plugin/server';
+import { getUiamApiKeySecret } from '@kbn/task-manager-plugin/server';
+import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { inject, injectable } from 'inversify';
+import { isError, uniqBy } from 'lodash';
+import { ACTION_POLICIES_REQUIRED_LICENSE } from '../../../../common/action_policies_license';
+import type { AlertActionDocument } from '../../../resources/datastreams/alert_actions';
+import { getActionPolicyLicenseNotSupportedMessage } from '../../errors/action_policy_error_messages';
+import { ALERTING_LOG_CODES, type AlertingV2LogCode } from '../../errors/error_codes';
+import type { EventLogServiceContract } from '../../services/event_log_service/event_log_service';
+import { EventLogServiceToken } from '../../services/event_log_service/tokens';
+import type {
+  ActionPoliciesLicenseState,
+  LicenseServiceContract,
+} from '../../services/license_service/license_service';
+import { LicenseServiceToken } from '../../services/license_service/tokens';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import type { StorageServiceContract } from '../../services/storage_service/storage_service';
+import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
+import { DISPATCH_CHUNK_SIZE } from '../constants';
+import type {
+  ActionGroup,
+  ActionGroupId,
+  ActionPolicyDestination,
+  ActionPolicyWorkflowPayload,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
-  ActionGroup,
-  ActionGroupId,
-  ActionPolicyId,
-  ActionPolicy,
-  ActionPolicyWorkflowPayload,
+  DispatchFailure,
 } from '../types';
+import { AlertTriage, DispatchOutcome, DispatchPlan, PolicyCatalog, RuleCatalog } from '../state';
+import { withDispatcherSpan } from '../with_dispatcher_span';
+import { DISPATCH_FAILURE_REASONS, type DispatchFailureReason } from './constants';
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
+import { toNotifiedActions } from './utils/action_documents';
+import { CommitFailedError } from './utils/commit_failed_error';
+import { emitExecutionHistory } from './utils/execution_history';
+import { SeriesLedger } from './utils/series_ledger';
 
 const ACTION_POLICY_TRIGGER = 'action_policy';
-const MAX_CONCURRENT_DISPATCHES = 3;
+
+interface DispatchBatch {
+  groups: ActionGroup[];
+  request: KibanaRequest;
+  workflowsBySpace: Map<string, Map<string, WorkflowDetailDto>>;
+  failedSpaces: Map<string, Error>;
+}
+
+interface PlannedSchedule {
+  group: ActionGroup;
+  workflowId: string;
+  item: BulkScheduleWorkflowItem;
+}
+
+/** What scheduling produced so far this tick; read into the tick's `DispatchOutcome`. */
+interface DispatchProgress {
+  readonly executionsByGroup: Map<ActionGroupId, string[]>;
+  readonly failures: DispatchFailure[];
+}
+
+const toError = (err: unknown): Error => (isError(err) ? err : new Error(String(err)));
+
+const workflowDestinations = (group: ActionGroup): ActionPolicyDestination[] =>
+  group.destinations.filter((destination) => destination.type === 'workflow');
+
+const pushMapList = <K, V>(map: Map<K, V[]>, key: K, value: V): void => {
+  const list = map.get(key);
+  if (list) {
+    list.push(value);
+  } else {
+    map.set(key, [value]);
+  }
+};
+
+const addMapSet = <K, V>(map: Map<K, Set<V>>, key: K, value: V): void => {
+  const set = map.get(key);
+  if (set) {
+    set.add(value);
+  } else {
+    map.set(key, new Set([value]));
+  }
+};
+
+/**
+ * Packs schedule items into chunks of at most `maxItems` without splitting a group: once a chunk
+ * returns, every destination of its groups has been attempted. A group with more destinations than
+ * `maxItems` gets a chunk of its own.
+ */
+const chunkByGroup = (
+  itemsByGroup: ReadonlyMap<ActionGroupId, PlannedSchedule[]>,
+  maxItems: number
+): PlannedSchedule[][] => {
+  const chunks: PlannedSchedule[][] = [];
+  let current: PlannedSchedule[] = [];
+  for (const groupItems of itemsByGroup.values()) {
+    if (current.length > 0 && current.length + groupItems.length > maxItems) {
+      chunks.push(current);
+      current = [];
+    }
+    current.push(...groupItems);
+  }
+  if (current.length > 0) chunks.push(current);
+  return chunks;
+};
 
 @injectable()
 export class DispatchStep implements DispatcherStep {
   public readonly name = 'dispatch';
 
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(WorkflowsManagementApiToken)
-    private readonly workflowsManagement: WorkflowsServerPluginSetup['management']
+    private readonly workflowsManagement: WorkflowsServerPluginSetup['management'],
+    @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract,
+    @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
+    @inject(EventLogServiceToken) private readonly eventLogService: EventLogServiceContract
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { dispatch = [], policies } = state;
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    logger: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
+    const {
+      plan = DispatchPlan.empty(),
+      triage = AlertTriage.empty(),
+      policies = PolicyCatalog.empty(),
+      rules = RuleCatalog.empty(),
+      input,
+    } = state;
 
-    const limiter = pLimit(MAX_CONCURRENT_DISPATCHES);
-
-    const groupResults = await Promise.allSettled(
-      dispatch.map((group) => limiter(() => this.dispatchGroup(group, policies)))
-    );
-
-    const dispatchedExecutions = new Map<ActionGroupId, string[]>();
-    for (const result of groupResults) {
-      if (result.status !== 'fulfilled') continue;
-      const { groupId, executionIds } = result.value;
-      if (executionIds.length > 0) {
-        dispatchedExecutions.set(groupId, executionIds);
-      }
+    const ledger = SeriesLedger.of({ triage, plan });
+    if (ledger.isEmpty()) {
+      return { type: 'halt', reason: 'no_actions' };
     }
 
-    return { type: 'continue', data: { dispatchedExecutions } };
-  }
+    const progress: DispatchProgress = { executionsByGroup: new Map(), failures: [] };
+    const outcome = () => DispatchOutcome.of(progress);
 
-  private async dispatchGroup(
-    group: ActionGroup,
-    policies?: Map<ActionPolicyId, ActionPolicy>
-  ): Promise<{ groupId: ActionGroupId; executionIds: string[] }> {
-    const executionIds: string[] = [];
     try {
-      const policy = policies?.get(group.policyId);
-      const apiKey = policy?.apiKey;
-
-      if (!apiKey) {
-        this.logger.warn({
-          message: () =>
-            `No API key found for policy ${group.policyId}, skipping dispatch of group ${group.id}`,
-        });
-        return { groupId: group.id, executionIds };
-      }
-
-      const fakeRequest = this.craftFakeRequest(apiKey);
-
-      for (const destination of group.destinations) {
-        if (destination.type !== 'workflow') {
-          continue;
-        }
-
-        try {
-          const executionId = await this.dispatchWorkflow(group, destination.id, fakeRequest);
-          if (executionId) {
-            executionIds.push(executionId);
-          }
-        } catch (err) {
-          this.logger.error({
-            error:
-              err instanceof Error
-                ? err
-                : new Error(
-                    `Failed to dispatch group ${group.id} to workflow ${destination.id}: ${String(
-                      err
-                    )}`
-                  ),
-          });
-        }
+      await this.commit(ledger.takeReady(), logger);
+      for await (const concluded of this.dispatchGroups(
+        plan.toDispatch,
+        policies,
+        input.signal,
+        progress,
+        logger
+      )) {
+        await this.commit(
+          [
+            ...concluded.flatMap((group) =>
+              toNotifiedActions(group, policies.groupingModeOf(group.policyId))
+            ),
+            ...ledger.conclude(concluded),
+          ],
+          logger
+        );
       }
     } catch (err) {
-      this.logger.error({
-        error:
-          err instanceof Error
-            ? err
-            : new Error(
-                `Failed to dispatch group ${group.id} for policy ${group.policyId}: ${String(err)}`
-              ),
+      if (err instanceof CommitFailedError) {
+        return { type: 'halt', reason: 'commit_failed' };
+      }
+      throw err;
+    } finally {
+      emitExecutionHistory({
+        eventLogService: this.eventLogService,
+        dispatched: ledger.concludedGroups(),
+        throttled: ledger.releasedGroups(plan.throttled),
+        unmatched: ledger.releasedAlerts(plan.unmatched),
+        outcome: outcome(),
+        rules,
+        timestamp: input.startedAt.toISOString(),
+        executionUuid: input.executionUuid,
       });
     }
-    return { groupId: group.id, executionIds };
+
+    // Completing with groups never attempted would let the watermark advance past their alerts.
+    if (ledger.hasUnattemptedGroups()) {
+      return { type: 'halt', reason: 'aborted' };
+    }
+
+    return { type: 'continue', data: { outcome: outcome() } };
   }
 
-  private craftFakeRequest(apiKey: string): KibanaRequest {
-    const requestHeaders: Headers = {
-      authorization: `ApiKey ${apiKey}`,
-    };
+  /**
+   * Writes the records the latest chunk made safe. Runs even after the tick signal fired: the
+   * workflows they describe are already scheduled. A write that records nothing throws
+   * `CommitFailedError` to stop scheduling: every workflow scheduled after it would also lack its
+   * record and be dispatched again next tick.
+   */
+  private async commit(docs: AlertActionDocument[], logger: LoggerServiceContract): Promise<void> {
+    if (docs.length === 0) {
+      return;
+    }
 
-    const fakeRawRequest: FakeRawRequest = {
-      headers: requestHeaders,
-      path: '/',
-    };
-
-    return kibanaRequestFactory(fakeRawRequest);
+    try {
+      const { errors } = await withDispatcherSpan('commit', () =>
+        this.storageService.bulkIndexDocs<AlertActionDocument>({
+          index: ALERT_ACTIONS_DATA_STREAM,
+          docs,
+        })
+      );
+      if (errors.length === docs.length) {
+        throw new Error(`${errors[0].code}: ${errors[0].message}`);
+      }
+      if (errors.length > 0) {
+        logger.warn({
+          code: ALERTING_LOG_CODES.DISPATCH_COMMIT_DEGRADED,
+          message: () =>
+            `${errors.length} of ${docs.length} alert action records were rejected; ` +
+            `their series are fetched again next tick. ${errors[0].message}`,
+        });
+      }
+    } catch (err) {
+      const error = toError(err);
+      logger.error({
+        error,
+        code: ALERTING_LOG_CODES.DISPATCH_COMMIT_FAILED,
+        message: () =>
+          `Failed to record ${docs.length} alert action records; scheduling stopped. ` +
+          `Groups dispatched in this chunk are dispatched again next tick. ${error.message}`,
+      });
+      throw new CommitFailedError(error);
+    }
   }
 
-  private async dispatchWorkflow(
+  /**
+   * Schedules the workflows of `groups` and yields each group once, after its last schedule
+   * attempt. Stops when the tick signal fires; groups not yielded by then were never attempted.
+   * Groups that cannot be scheduled (license, API key, workflow lookup) are yielded with their
+   * failures too: a group never yielded holds back its series' records and halts the tick as aborted.
+   */
+  private async *dispatchGroups(
+    groups: readonly ActionGroup[],
+    policies: PolicyCatalog,
+    signal: AbortSignal,
+    progress: DispatchProgress,
+    logger: LoggerServiceContract
+  ): AsyncGenerator<ActionGroup[]> {
+    if (groups.length === 0 || signal.aborted) {
+      return;
+    }
+
+    const { failures } = progress;
+    const licenseState = await this.licenseService.getActionPoliciesLicenseState();
+    if (!licenseState.isValid) {
+      this.recordLicenseNotSupported(groups, licenseState, failures, logger);
+      yield [...groups];
+      return;
+    }
+
+    const groupsByApiKey = new Map<string, ActionGroup[]>();
+    const groupsWithoutApiKey: ActionGroup[] = [];
+    for (const group of groups) {
+      const apiKey = policies.apiKeyOf(group.policyId);
+      if (!apiKey) {
+        this.recordMissingApiKey(group, failures, logger);
+        groupsWithoutApiKey.push(group);
+        continue;
+      }
+      pushMapList(groupsByApiKey, apiKey, group);
+    }
+
+    if (groupsWithoutApiKey.length > 0) {
+      yield groupsWithoutApiKey;
+    }
+
+    if (groupsByApiKey.size === 0) {
+      return;
+    }
+
+    const batches: DispatchBatch[] = [...groupsByApiKey].map(([apiKey, batchGroups]) => ({
+      groups: batchGroups,
+      request: this.craftFakeRequest(apiKey),
+      workflowsBySpace: new Map(),
+      failedSpaces: new Map(),
+    }));
+    await this.prefetchWorkflows(batches, logger);
+    for (const { groups: batchGroups, request, workflowsBySpace, failedSpaces } of batches) {
+      if (signal.aborted) return;
+      const schedulesByGroup = Map.groupBy(
+        this.planSchedules(batchGroups, workflowsBySpace, failedSpaces, failures, logger),
+        ({ group }) => group.id
+      );
+      const unscheduledGroups = batchGroups.filter(({ id }) => !schedulesByGroup.has(id));
+      if (unscheduledGroups.length > 0) {
+        yield unscheduledGroups;
+      }
+      for (const chunk of chunkByGroup(schedulesByGroup, DISPATCH_CHUNK_SIZE)) {
+        if (signal.aborted) return;
+        await withDispatcherSpan('dispatch_chunk', () =>
+          this.dispatchChunk(chunk, this.workflowsManagement.getClient(request), progress, logger)
+        );
+        yield uniqBy(
+          chunk.map(({ group }) => group),
+          ({ id }) => id
+        );
+      }
+    }
+  }
+
+  private recordLicenseNotSupported(
+    groups: readonly ActionGroup[],
+    { type, status }: ActionPoliciesLicenseState,
+    dispatchFailures: DispatchFailure[],
+    logger: LoggerServiceContract
+  ): void {
+    const message =
+      `${getActionPolicyLicenseNotSupportedMessage(ACTION_POLICIES_REQUIRED_LICENSE)} ` +
+      `(current: ${type ?? 'unknown'}, status: ${status ?? 'unknown'}); workflow not scheduled`;
+    logger.warn({
+      message: () => `${message} for ${groups.length} action group(s)`,
+      code: ALERTING_LOG_CODES.DISPATCH_LICENSE_NOT_SUPPORTED,
+    });
+    for (const group of groups) {
+      dispatchFailures.push(
+        ...this.buildGroupFailures(group, DISPATCH_FAILURE_REASONS.LICENSE_NOT_SUPPORTED, message)
+      );
+    }
+  }
+
+  private recordMissingApiKey(
+    group: ActionGroup,
+    dispatchFailures: DispatchFailure[],
+    logger: LoggerServiceContract
+  ): void {
+    const message = `No API key found for policy ${group.policyId}, skipping dispatch of group ${group.id}`;
+    logger.warn({
+      message: 'Action policy has no API key, skipping dispatch',
+      code: ALERTING_LOG_CODES.DISPATCH_POLICY_MISSING_API_KEY,
+      labels: { group_id: group.id, policy_id: group.policyId },
+    });
+    dispatchFailures.push(
+      ...this.buildGroupFailures(group, DISPATCH_FAILURE_REASONS.MISSING_API_KEY, message)
+    );
+  }
+
+  private async prefetchWorkflows(
+    batches: DispatchBatch[],
+    logger: LoggerServiceContract
+  ): Promise<void> {
+    const lookups: Array<{
+      batch: DispatchBatch;
+      ids: string[];
+      spaceId: string;
+      request: KibanaRequest;
+    }> = [];
+    for (const batch of batches) {
+      const idsBySpace = new Map<string, Set<string>>();
+      for (const group of batch.groups) {
+        for (const destination of workflowDestinations(group)) {
+          addMapSet(idsBySpace, group.spaceId, destination.id);
+        }
+      }
+      for (const [spaceId, ids] of idsBySpace) {
+        lookups.push({ batch, ids: [...ids], spaceId, request: batch.request });
+      }
+    }
+    const results = await this.workflowsManagement.getWorkflowsByIdsForRequests(
+      lookups.map(({ ids, spaceId, request }) => ({ ids, spaceId, request }))
+    );
+    results.forEach((result, index) => {
+      const { batch, ids, spaceId } = lookups[index];
+      if (result.status === 'rejected') {
+        const error = toError(result.reason);
+        batch.failedSpaces.set(spaceId, error);
+        logger.error({
+          error,
+          code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
+          message: () =>
+            `Failed to look up ${ids.length} workflow(s) in space ${spaceId}; ` +
+            `their action groups are not dispatched. ${error.message}`,
+          labels: { space_id: spaceId },
+        });
+      } else {
+        batch.workflowsBySpace.set(
+          spaceId,
+          new Map(result.value.map((workflow) => [workflow.id, workflow]))
+        );
+      }
+    });
+  }
+
+  private planSchedules(
+    groups: ActionGroup[],
+    workflowsBySpace: Map<string, Map<string, WorkflowDetailDto>>,
+    failedSpaces: Map<string, Error>,
+    dispatchFailures: DispatchFailure[],
+    logger: LoggerServiceContract
+  ): PlannedSchedule[] {
+    const schedules: PlannedSchedule[] = [];
+
+    for (const group of groups) {
+      const prefetchError = failedSpaces.get(group.spaceId);
+      if (prefetchError) {
+        dispatchFailures.push(
+          ...this.buildGroupFailures(
+            group,
+            DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
+            prefetchError.message
+          )
+        );
+        continue;
+      }
+
+      const workflows = workflowsBySpace.get(group.spaceId) ?? new Map<string, WorkflowDetailDto>();
+      for (const destination of workflowDestinations(group)) {
+        const workflow = workflows.get(destination.id);
+        if (!workflow) {
+          this.recordWarnFailure(
+            group,
+            destination.id,
+            DISPATCH_FAILURE_REASONS.WORKFLOW_NOT_FOUND,
+            ALERTING_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND,
+            'Workflow not found, skipping dispatch',
+            `Workflow ${destination.id} not found, skipping dispatch for group ${group.id}`,
+            dispatchFailures,
+            logger
+          );
+          continue;
+        }
+        if (!workflow.enabled) {
+          this.recordWarnFailure(
+            group,
+            destination.id,
+            DISPATCH_FAILURE_REASONS.WORKFLOW_DISABLED,
+            ALERTING_LOG_CODES.DISPATCH_WORKFLOW_DISABLED,
+            'Workflow is disabled, skipping dispatch',
+            `Workflow ${destination.id} is disabled, enable it to dispatch for group ${group.id}`,
+            dispatchFailures,
+            logger
+          );
+          continue;
+        }
+        schedules.push({
+          group,
+          workflowId: destination.id,
+          item: this.buildScheduleItem(group, workflow),
+        });
+      }
+    }
+
+    return schedules;
+  }
+
+  private recordWarnFailure(
     group: ActionGroup,
     workflowId: string,
-    request: KibanaRequest
-  ): Promise<string | undefined> {
-    const workflow = await this.workflowsManagement.getWorkflow(workflowId, group.spaceId);
+    reason: DispatchFailureReason,
+    code: AlertingV2LogCode,
+    logMessage: string,
+    message: string,
+    dispatchFailures: DispatchFailure[],
+    logger: LoggerServiceContract
+  ): void {
+    logger.warn({
+      message: logMessage,
+      code,
+      labels: { group_id: group.id, workflow_id: workflowId },
+    });
+    dispatchFailures.push(this.buildFailure(group, workflowId, reason, message));
+  }
 
-    if (!workflow) {
-      this.logger.warn({
-        message: () => `Workflow ${workflowId} not found, skipping dispatch for group ${group.id}`,
-      });
-      return undefined;
-    }
+  private recordScheduleError(
+    group: ActionGroup,
+    workflowId: string,
+    error: Error,
+    dispatchFailures: DispatchFailure[],
+    logger: LoggerServiceContract
+  ): void {
+    logger.error({
+      error,
+      code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
+      labels: {
+        group_id: group.id,
+        policy_id: group.policyId,
+        workflow_id: workflowId,
+        space_id: group.spaceId,
+      },
+    });
+    dispatchFailures.push(
+      this.buildFailure(group, workflowId, DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR, error.message)
+    );
+  }
 
-    if (!workflow.enabled) {
-      this.logger.warn({
-        message: () =>
-          `Workflow ${workflowId} is disabled, enable it to dispatch for group ${group.id}`,
-      });
-      return undefined;
-    }
-
+  private buildScheduleItem(
+    group: ActionGroup,
+    workflow: WorkflowDetailDto
+  ): BulkScheduleWorkflowItem {
     const model: WorkflowExecutionEngineModel = {
       id: workflow.id,
       name: workflow.name,
@@ -159,32 +511,132 @@ export class DispatchStep implements DispatcherStep {
       definition: workflow.definition ?? undefined,
       yaml: workflow.yaml,
     };
-
     const payload: ActionPolicyWorkflowPayload = {
       id: group.id,
       policyId: group.policyId,
       groupKey: group.groupKey,
-      episodes: group.episodes,
+      alerts: group.alerts,
+      rules: group.rules,
     };
 
-    this.logger.debug({
-      message: () =>
-        `Dispatching action group ${group.id} to workflow ${workflowId} for policy ${group.policyId}`,
-    });
+    return {
+      workflow: model,
+      spaceId: group.spaceId,
+      inputs: { payload },
+      triggeredBy: ACTION_POLICY_TRIGGER,
+    };
+  }
 
-    const executionId = await this.workflowsManagement.scheduleWorkflow(
-      model,
-      group.spaceId,
-      payload,
-      request,
-      ACTION_POLICY_TRIGGER
+  private async dispatchChunk(
+    chunk: PlannedSchedule[],
+    client: WorkflowsManagementClient,
+    progress: DispatchProgress,
+    logger: LoggerServiceContract
+  ): Promise<void> {
+    try {
+      const results = await client.bulkScheduleWorkflow(chunk.map(({ item }) => item));
+      for (let i = 0; i < chunk.length; i++) {
+        this.applyScheduleResult(chunk[i], results[i], progress, logger);
+      }
+    } catch (err) {
+      // Unlike a failed commit, a failed schedule leaves no workflow to record,
+      // so later chunks still run.
+      const error = toError(err);
+      const groupCount = new Set(chunk.map(({ group }) => group.id)).size;
+      logger.error({
+        error,
+        code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
+        message: () =>
+          `Failed to schedule ${chunk.length} workflow(s) for ${groupCount} action group(s). ` +
+          error.message,
+      });
+      for (const { group, workflowId } of chunk) {
+        progress.failures.push(
+          this.buildFailure(
+            group,
+            workflowId,
+            DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
+            error.message
+          )
+        );
+      }
+    }
+  }
+
+  private applyScheduleResult(
+    { group, workflowId }: PlannedSchedule,
+    result: BulkScheduleWorkflowResult[number] | undefined,
+    { executionsByGroup, failures }: DispatchProgress,
+    logger: LoggerServiceContract
+  ): void {
+    if (result?.status === 'scheduled' && result.workflowExecutionId) {
+      pushMapList(executionsByGroup, group.id, result.workflowExecutionId);
+      return;
+    }
+
+    if (result?.status === 'error') {
+      this.recordScheduleError(
+        group,
+        workflowId,
+        new Error(result.error.message),
+        failures,
+        logger
+      );
+      return;
+    }
+
+    this.recordWarnFailure(
+      group,
+      workflowId,
+      DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
+      ALERTING_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
+      'Workflow scheduling returned no execution id',
+      `Workflow ${workflowId} scheduling returned no execution id for group ${group.id}`,
+      failures,
+      logger
     );
+  }
 
-    this.logger.debug({
-      message: () =>
-        `Workflow ${workflowId} execution scheduled with id ${executionId} for group ${group.id}`,
-    });
+  private buildGroupFailures(
+    group: ActionGroup,
+    reason: DispatchFailureReason,
+    message: string
+  ): DispatchFailure[] {
+    return workflowDestinations(group).map((destination) =>
+      this.buildFailure(group, destination.id, reason, message)
+    );
+  }
 
-    return executionId;
+  private buildFailure(
+    group: ActionGroup,
+    workflowId: string,
+    reason: DispatchFailureReason,
+    message: string
+  ): DispatchFailure {
+    return {
+      policyId: group.policyId,
+      spaceId: group.spaceId,
+      actionGroupId: group.id,
+      workflowId,
+      alerts: group.alerts,
+      reason,
+      message,
+    };
+  }
+
+  /**
+   * Workflows are looked up and scheduled as the policy's API key owner, so a policy only reaches
+   * the workflows its owner may access.
+   */
+  private craftFakeRequest(apiKey: string): KibanaRequest {
+    const requestHeaders: Headers = {
+      authorization: `ApiKey ${getUiamApiKeySecret(apiKey)}`,
+    };
+
+    const fakeRawRequest: FakeRawRequest = {
+      headers: requestHeaders,
+    };
+
+    return kibanaRequestFactory(fakeRawRequest);
   }
 }

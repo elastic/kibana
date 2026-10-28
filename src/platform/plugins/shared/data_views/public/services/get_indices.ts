@@ -10,9 +10,7 @@
 import { sortBy } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { Tag } from '../types';
-import { INDEX_PATTERN_TYPE } from '../types';
-import type { MatchedItem, ResolveIndexResponse } from '../types';
+import type { Tag, MatchedItem, ResolveIndexResponse } from '../types';
 import { ResolveIndexResponseItemIndexAttrs } from '../types';
 
 const aliasLabel = i18n.translate('dataViews.aliasLabel', { defaultMessage: 'Alias' });
@@ -32,16 +30,18 @@ const rollupLabel = i18n.translate('dataViews.rollupLabel', {
   defaultMessage: 'Rollup (deprecated)',
 });
 
-const getIndexTags = (isRollupIndex: (indexName: string) => boolean) => (indexName: string) =>
-  isRollupIndex(indexName)
-    ? [
-        {
-          key: INDEX_PATTERN_TYPE.ROLLUP,
-          name: rollupLabel,
-          color: 'warning',
-        },
-      ]
-    : [];
+const getIndexTags =
+  (isRollupIndex: (indexName: string) => boolean) =>
+  (indexName: string): Tag[] =>
+    isRollupIndex(indexName)
+      ? [
+          {
+            key: 'rollup',
+            name: rollupLabel,
+            color: 'warning',
+          },
+        ]
+      : [];
 
 export const getIndicesViaResolve = async ({
   http,
@@ -86,12 +86,15 @@ export async function getIndices({
   showAllIndices = false,
   isRollupIndex,
   projectRouting,
+  throwOnError = false,
 }: {
   http: HttpStart;
   pattern: string;
   showAllIndices?: boolean;
   isRollupIndex: (indexName: string) => boolean;
   projectRouting?: string;
+  /** Rethrow request failures instead of resolving with an empty list */
+  throwOnError?: boolean;
 }): Promise<MatchedItem[]> {
   const pattern = rawPattern.trim();
 
@@ -113,13 +116,15 @@ export async function getIndices({
     return [];
   }
 
-  return getIndicesViaResolve({
+  const indices = getIndicesViaResolve({
     http,
     pattern,
     showAllIndices,
     isRollupIndex,
     projectRouting,
-  }).catch(() => []);
+  });
+
+  return throwOnError ? indices : indices.catch(() => []);
 }
 
 export const responseToItemArray = (
@@ -147,7 +152,7 @@ export const responseToItemArray = (
     });
   });
   (response.aliases || []).forEach((alias) => {
-    const item = {
+    const item: MatchedItem = {
       name: alias.name,
       tags: [{ key: 'alias', name: aliasLabel, color: 'default' }],
       item: alias,

@@ -180,8 +180,8 @@ const getTriggerDefinitionsTool = defineTool({
     triggerType: z.string().optional(),
   }),
   mutatesYaml: false,
-  execute: async (args) => ({
-    message: { success: true, data: await lookupTriggerDefinitions(args) },
+  execute: async (args, { deps }) => ({
+    message: { success: true, data: await lookupTriggerDefinitions(args, deps) },
   }),
 });
 

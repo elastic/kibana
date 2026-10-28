@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/pipeable';
 import { getOrElse, map } from 'fp-ts/Option';
 
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { getProxySettings } from '@kbn/actions-utils';
 import {
@@ -19,7 +20,13 @@ import {
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
-import type { ActionParamsType } from '@kbn/connector-schemas/http';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
+import type {
+  ActionParamsType,
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+} from '@kbn/connector-schemas/http';
 import {
   CONNECTOR_ID,
   CONNECTOR_ID_SYSTEM,
@@ -27,8 +34,11 @@ import {
   ConfigSchema,
   ParamsSchema,
 } from '@kbn/connector-schemas/http';
+import { AuthType } from '@kbn/connector-schemas/common/auth';
 import { z } from '@kbn/zod/v4';
+import type { QueryParamValue } from '@kbn/connector-schemas/http/schemas/v1';
 import { SecretsSchema } from '@kbn/connector-schemas/http/schemas/v1';
+import type { HttpFormDataField } from '@kbn/connector-schemas/http/types/v1';
 import { safeJsonStringify } from '@kbn/std';
 import type {
   HttpConnectorType,
@@ -40,7 +50,11 @@ import type { Result } from '../lib/result_type';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import { processBufferResponse, type ResponseBuffer } from '../lib/process_buffer_response';
 import { isOk, promiseResult } from '../lib/result_type';
-import { getAxiosConfig } from './get_axios_config';
+import {
+  getAxiosConfig,
+  getClientCredentialsAccessToken,
+  getPasswordAccessToken,
+} from './get_axios_config';
 import { ensureUriAllowed, validateConnectorTypeConfig } from './validations';
 import {
   errorResultRequestFailed,
@@ -75,6 +89,10 @@ const connectorTypeDefinition: Omit<HttpConnectorType, 'id' | 'validate'> = {
 export const getConnectorType = (): HttpConnectorType => ({
   id: CONNECTOR_ID,
   ...connectorTypeDefinition,
+  // Stack connector: sandbox injection uses config.authType plus secretHeaders
+  // rather than connector-spec auth type defs.
+  isSandboxCapable,
+  getSandboxAuthHeaders,
   validate: {
     config: {
       schema: ConfigSchema,
@@ -96,6 +114,9 @@ export const getConnectorType = (): HttpConnectorType => ({
       },
     },
     connector: (config, secrets) => {
+      if (config.authType === AuthType.OAuth2Password && (!secrets.user || !secrets.password)) {
+        return 'Username and password are required when OAuth2 password grant authentication is enabled';
+      }
       if (config.hasProxyAuth && !config.proxyUrl) {
         return 'proxyUrl is required when proxy authentication is enabled';
       }
@@ -129,6 +150,112 @@ export const getSystemConnectorType = (): HttpConnectorType => ({
 
 // Helper functions
 
+/** Normalizes secretHeaders from an object or the JSON string preconfigured connectors store. */
+function normalizeSecretHeaders(secretHeaders: unknown): Record<string, string> {
+  let record = secretHeaders;
+  if (typeof record === 'string') {
+    try {
+      record = JSON.parse(record);
+    } catch {
+      return {};
+    }
+  }
+  if (!record || typeof record !== 'object' || Array.isArray(record)) {
+    return {};
+  }
+
+  const headers: Record<string, string> = {};
+  for (const [key, value] of Object.entries(record)) {
+    if (typeof value === 'string') {
+      headers[key] = value;
+    }
+  }
+  return headers;
+}
+
+interface SandboxAuthHeadersOptions {
+  config: Record<string, unknown>;
+  secrets: Record<string, unknown>;
+  connectorId: string;
+  connectorTokenClient?: ConnectorTokenClientContract;
+  configurationUtilities: ActionsConfigurationUtilities;
+  logger: Logger;
+}
+
+// Works from config alone for persisted connectors because secrets are not decrypted when
+// listing them. Secrets are only populated for preconfigured connectors.
+function isSandboxCapable({
+  config,
+}: {
+  config: Record<string, unknown>;
+  secrets?: Record<string, unknown>;
+}): boolean {
+  const { hasAuth, authType } = config;
+  // No auth is still sandbox capable: callers may supply Authorization through
+  // secretHeaders, which getSandboxAuthHeaders merges.
+  if (hasAuth === false) return true;
+  // The config schema defaults a missing authType to basic auth.
+  return (
+    authType == null ||
+    authType === AuthType.Basic ||
+    authType === AuthType.OAuth2ClientCredentials ||
+    authType === AuthType.OAuth2Password
+  );
+}
+
+async function getSandboxAuthHeaders(
+  options: SandboxAuthHeadersOptions
+): Promise<Record<string, string>> {
+  const { secrets } = options;
+  const authHeaders = await getAuthTypeHeaders(options);
+  // secretHeaders go last so a user supplied Authorization wins. The generic merge in
+  // getSandboxCredentials collapses differing key case afterwards.
+  return { ...authHeaders, ...normalizeSecretHeaders(secrets.secretHeaders) };
+}
+
+async function getAuthTypeHeaders({
+  config,
+  secrets,
+  connectorId,
+  connectorTokenClient,
+  configurationUtilities,
+  logger,
+}: SandboxAuthHeadersOptions): Promise<Record<string, string>> {
+  const { hasAuth, authType } = config;
+  if (hasAuth === false) return {};
+
+  if (authType === AuthType.OAuth2ClientCredentials || authType === AuthType.OAuth2Password) {
+    const getAccessToken =
+      authType === AuthType.OAuth2ClientCredentials
+        ? getClientCredentialsAccessToken
+        : getPasswordAccessToken;
+    let accessToken;
+    try {
+      accessToken = await getAccessToken({
+        connectorId,
+        // Config and secrets were validated against the connector schemas by the caller.
+        config: config as ConnectorTypeConfigType,
+        secrets: secrets as ConnectorTypeSecretsType,
+        connectorTokenClient,
+        configurationUtilities,
+        logger,
+      });
+    } catch (error) {
+      throw new Error(`Unable to retrieve/refresh the access token: ${error.message}`);
+    }
+    if (!accessToken) {
+      throw new Error('Unable to retrieve new access token');
+    }
+    // The token already includes its scheme (for example "Bearer <token>"), as in get_axios_config.
+    return { Authorization: accessToken };
+  }
+
+  if (authType != null && authType !== AuthType.Basic) return {};
+  const { user, password } = secrets;
+  if (typeof user !== 'string' || typeof password !== 'string') return {};
+  return getBasicAuthHeader({ username: user, password });
+}
+
 function renderParameterTemplates(
   logger: Logger,
   params: ActionParamsType,
@@ -140,6 +267,18 @@ function renderParameterTemplates(
     renderedParams.body = renderMustacheString(logger, params.body, variables, 'json');
   }
 
+  if (params.form_data) {
+    const renderedFormData: HttpFormDataField = {};
+    for (const [key, entry] of Object.entries(params.form_data)) {
+      renderedFormData[key] = {
+        content: renderMustacheString(logger, entry.content, variables, 'json'),
+        filename: renderMustacheString(logger, entry.filename, variables, 'json'),
+        content_type: renderMustacheString(logger, entry.content_type, variables, 'json'),
+      };
+    }
+    renderedParams.form_data = renderedFormData;
+  }
+
   if (params.url) {
     renderedParams.url = renderMustacheString(logger, params.url, variables, 'json');
   }
@@ -149,9 +288,17 @@ function renderParameterTemplates(
   }
 
   if (params.query) {
-    const renderedQuery: Record<string, string> = {};
+    const renderedQuery: Record<string, QueryParamValue> = {};
     for (const [key, value] of Object.entries(params.query)) {
-      renderedQuery[key] = renderMustacheString(logger, value, variables, 'json');
+      if (Array.isArray(value)) {
+        renderedQuery[key] = value.map((v) =>
+          typeof v === 'string' ? renderMustacheString(logger, v, variables, 'json') : v
+        );
+      } else if (typeof value === 'string') {
+        renderedQuery[key] = renderMustacheString(logger, value, variables, 'json');
+      } else {
+        renderedQuery[key] = value;
+      }
     }
     renderedParams.query = renderedQuery;
   }
@@ -171,20 +318,57 @@ function combineUrl(basePath: string, path?: string): string {
   if (!path) return basePath;
   const url = new URL(basePath);
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  url.pathname = url.pathname.replace(/\/$/, '') + normalizedPath;
+  const queryIndex = normalizedPath.indexOf('?');
+  const pathname = queryIndex === -1 ? normalizedPath : normalizedPath.slice(0, queryIndex);
+  const pathQuery = queryIndex === -1 ? undefined : normalizedPath.slice(queryIndex + 1);
+  const baseQueryKeys = new Set(url.searchParams.keys());
+
+  // Keep the query out of URL.pathname, which would encode its `?` delimiter as `%3F`.
+  url.pathname = url.pathname.replace(/\/$/, '') + pathname;
+  if (pathQuery) {
+    const filteredPathQuery = pathQuery
+      .split('&')
+      .filter((queryPart) => {
+        const [key] = new URLSearchParams(queryPart).keys();
+        return key === undefined || !baseQueryKeys.has(key);
+      })
+      .join('&');
+
+    if (filteredPathQuery) {
+      const baseQuery = url.search.slice(1);
+      url.search = baseQuery ? `?${baseQuery}&${filteredPathQuery}` : `?${filteredPathQuery}`;
+    }
+  }
+
   return url.toString();
 }
 
-function appendQueryString(baseUrl: string, query?: Record<string, string>): string {
+function appendQueryString(baseUrl: string, query?: Record<string, QueryParamValue>): string {
   if (!query || Object.keys(query).length === 0) {
     return baseUrl;
   }
   const url = new URL(baseUrl);
-  for (const [key, value] of Object.entries(query)) {
-    if (!url.searchParams.has(key)) {
-      url.searchParams.set(key, value);
+  const existingQueryKeys = new Set(url.searchParams.keys());
+  const appendedQuery = new URLSearchParams();
+
+  for (const [key, val] of Object.entries(query)) {
+    if (!existingQueryKeys.has(key)) {
+      const values = Array.isArray(val) ? val : [val];
+      for (const v of values) {
+        appendedQuery.append(key, String(v));
+      }
     }
   }
+
+  const appendedQueryString = appendedQuery.toString();
+  if (appendedQueryString) {
+    // Avoid reserializing existing parameters, which would normalize their raw encoding.
+    const existingQuery = url.search.slice(1);
+    url.search = existingQuery
+      ? `?${existingQuery}&${appendedQueryString}`
+      : `?${appendedQueryString}`;
+  }
+
   return url.toString();
 }
 
@@ -197,6 +381,56 @@ function serializeHttpRequestBody(body: unknown): string {
   }) as string; // will return a string or throw an error if it fails
 }
 
+function checkFormDataMaxSize(formData: HttpFormDataField, maxSize: number | undefined): void {
+  if (maxSize != null) {
+    let total = 0;
+    for (const spec of Object.values(formData)) {
+      if (spec.encoding === 'base64') {
+        // estimate the size of the base64 encoded content using the 75% rule
+        total += Math.ceil(spec.content.length * 0.75);
+      } else {
+        total += spec.content.length;
+      }
+      if (total > maxSize) {
+        throw new Error(`form_data exceeds max_content_length (${maxSize} bytes)`);
+      }
+    }
+  }
+}
+
+function buildFormData(formData: HttpFormDataField, maxSize: number | undefined): FormData {
+  checkFormDataMaxSize(formData, maxSize);
+
+  const form = new FormData();
+  for (const [fieldName, spec] of Object.entries(formData)) {
+    if (spec.encoding === 'base64') {
+      // Binary field — always go through the Blob branch so the bytes round-trip intact.
+      // Wrap the Buffer in a Uint8Array so the underlying storage is an ArrayBuffer (Buffer's `.buffer` is typed as ArrayBufferLike).
+      const normalized = spec.content.replace(/\s+/g, '');
+      if (normalized.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(normalized)) {
+        throw new Error(`Invalid base64 content in form_data field "${fieldName}"`);
+      }
+      const buf = Buffer.from(normalized, 'base64');
+      const blob = new Blob([new Uint8Array(buf)], {
+        type: spec.content_type ?? 'application/octet-stream',
+      });
+      form.append(fieldName, blob, spec.filename); // filename optional
+    } else if (spec.filename !== undefined) {
+      const blob = new Blob([spec.content], {
+        type: spec.content_type ?? 'application/octet-stream',
+      });
+      form.append(fieldName, blob, spec.filename);
+    } else if (spec.content_type !== undefined) {
+      const blob = new Blob([spec.content], { type: spec.content_type });
+      form.append(fieldName, blob);
+    } else {
+      // Plain HTML-form text field — no per-part Content-Type.
+      form.append(fieldName, spec.content);
+    }
+  }
+  return form;
+}
+
 function processResponseHeaders(headers: object): Record<string, string> {
   return Object.entries(headers || {}).reduce<Record<string, string>>((acc, [key, value]) => {
     if (value != null) {
@@ -206,7 +440,11 @@ function processResponseHeaders(headers: object): Record<string, string> {
   }, {});
 }
 
-// action executor
+/*
+ * Action executor for the HTTP connector. Shared by the regular and system connector types.
+ * @param execOptions - The executor options
+ * @returns The HTTP connector execution response
+ */
 export async function executor(
   execOptions: HttpConnectorTypeExecutorOptions
 ): Promise<HttpConnectorTypeExecutorResult> {
@@ -221,12 +459,35 @@ export async function executor(
     signal,
   } = execOptions;
 
-  const { method, path, body, query, headers: paramsHeaders, fetcher } = params;
+  const {
+    method,
+    path,
+    body,
+    form_data: formData,
+    query,
+    headers: paramsHeaders,
+    fetcher,
+  } = params;
 
   // params always takes precedence over config
   const baseUrl = params.url || config.url;
   if (!baseUrl) {
     return errorResultInvalid(actionId, 'URL is required');
+  }
+
+  if (body != null && formData != null) {
+    return errorResultInvalid(actionId, 'Cannot set both body and form_data');
+  }
+
+  let requestData: unknown;
+  try {
+    if (formData) {
+      requestData = buildFormData(formData, fetcher?.max_content_length);
+    } else {
+      requestData = serializeHttpRequestBody(body);
+    }
+  } catch (error) {
+    return errorResultInvalid(actionId, error.message);
   }
 
   const [axiosConfig, axiosConfigError] = await getAxiosConfig({
@@ -260,8 +521,15 @@ export async function executor(
   const mergedQuery = { ...(secretQueryParams ?? {}), ...(query ?? {}) };
   const url = appendQueryString(combineUrl(baseUrl, path), mergedQuery);
 
-  // Merge headers: params headers take precedence over config headers
-  const finalHeaders = { ...configHeaders, ...(paramsHeaders || {}) };
+  // Merge headers: params headers take precedence over config headers. When
+  // sending multipart/form-data, strip any user-supplied Content-Type so axios
+  // can set the correct multipart Content-Type (with boundary) itself.
+  const mergedHeaders = { ...configHeaders, ...(paramsHeaders || {}) };
+  const finalHeaders = formData
+    ? Object.fromEntries(
+        Object.entries(mergedHeaders).filter(([key]) => key.toLowerCase() !== 'content-type')
+      )
+    : mergedHeaders;
 
   // Connector-level proxy overrides
   const proxyOverrides = getProxySettings({
@@ -299,7 +567,7 @@ export async function executor(
       url,
       logger,
       headers: finalHeaders,
-      data: serializeHttpRequestBody(body),
+      data: requestData,
       configurationUtilities,
       sslOverrides,
       proxyOverrides,

@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { useTraceMetricsContext } from './context/trace_metrics_context';
 import { Chart } from '../../chart';
+import { buildXySeriesConfig } from '../../chart/build_xy_series_config';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { getThroughputChart } from './trace_charts_definition';
+import { BREAKDOWN_LEGEND_CONFIG } from './constants';
 
 type ThroughputChartContentProps = NonNullable<ReturnType<typeof getThroughputChart>>;
 
@@ -24,8 +26,16 @@ const ThroughputChartContent = ({
   color,
   title,
 }: ThroughputChartContentProps) => {
-  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions, profileId } =
-    useTraceMetricsContext();
+  const {
+    services,
+    fetchParams,
+    discoverFetch$,
+    onBrushEnd,
+    onFilter,
+    actions,
+    profileId,
+    breakdownField,
+  } = useTraceMetricsContext();
 
   const chartLayers = useChartLayers({
     metricItem: {
@@ -37,12 +47,25 @@ const ThroughputChartContent = ({
     color,
     seriesType,
     customFunction: 'COUNT',
+    dimensions: breakdownField ? [{ name: breakdownField }] : [],
   });
+
+  const lensConfig = useMemo(
+    () =>
+      buildXySeriesConfig({
+        query: esqlQuery,
+        title,
+        chartLayers,
+        legend: breakdownField ? BREAKDOWN_LEGEND_CONFIG : undefined,
+      }),
+    [esqlQuery, title, chartLayers, breakdownField]
+  );
 
   return (
     <Chart
       id="throughput"
-      esqlQuery={esqlQuery}
+      isSelected={false}
+      lensConfig={lensConfig}
       size="s"
       discoverFetch$={discoverFetch$}
       fetchParams={fetchParams}
@@ -50,9 +73,6 @@ const ThroughputChartContent = ({
       onBrushEnd={onBrushEnd}
       onFilter={onFilter}
       onExploreInDiscoverTab={actions.openInNewTab}
-      title={title}
-      chartLayers={chartLayers}
-      syncTooltips
       syncCursor
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
       profileId={profileId}
@@ -61,11 +81,12 @@ const ThroughputChartContent = ({
 };
 
 export const ThroughputChart = () => {
-  const { filters, indexes, metadataFields } = useTraceMetricsContext();
+  const { filters, indexes, metadataFields, breakdownField } = useTraceMetricsContext();
   const throughputChart = getThroughputChart({
     indexes,
     filters,
     metadataFields,
+    breakdownField,
   });
 
   if (!throughputChart) {

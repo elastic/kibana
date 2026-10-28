@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector, defaultMemoize } from 'reselect';
+import { createSelector, defaultMemoize } from 'reselect-v4';
 import type { State } from '../../common/store/types';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
@@ -263,12 +263,24 @@ export const originID: (state: ResolverState) => string | undefined = composeSel
 );
 
 /**
+ * The origin node's collapsed lifecycle `@timestamp`, which is the process start time from the tree query that sorts
+ * `@timestamp` ascending. This approximates the analyzed-event time for ancestor labels, but it is not the alert
+ * document timestamp.
+ */
+export const originTimestamp: (state: ResolverState) => number | undefined = composeSelectors(
+  dataStateSelector,
+  dataSelectors.originTimestamp
+);
+
+/**
  * Takes a nodeID (aka entity_id) and returns the node ID of the node that aria should 'flowto' or null
  * If the node has a flowto candidate that is currently visible, that will be returned, otherwise null.
  */
 export const ariaFlowtoNodeID = createSelector(
-  visibleNodesAndEdgeLines,
-  composeSelectors(dataStateSelector, dataSelectors.ariaFlowtoCandidate),
+  visibleNodesAndEdgeLines as (state: ResolverState) => (time: number) => VisibleEntites,
+  composeSelectors(dataStateSelector, dataSelectors.ariaFlowtoCandidate) as (
+    state: ResolverState
+  ) => (nodeId: string) => string | null,
   function (
     visibleNodesAndEdgeLinesAtTime: (time: number) => VisibleEntites,
     ariaFlowtoCandidate: (nodeId: string) => string | null
@@ -386,8 +398,10 @@ export const graphNodeForID = composeSelectors(dataStateSelector, dataSelectors.
  */
 export const newIDsToRequest: (state: ResolverState) => (time: number) => Set<string> =
   createSelector(
-    composeSelectors(dataStateSelector, (dataState: DataState) => dataState.nodeData),
-    visibleNodesAndEdgeLines,
+    composeSelectors(dataStateSelector, (dataState: DataState) => dataState.nodeData) as (
+      state: ResolverState
+    ) => Map<string, NodeData> | undefined,
+    visibleNodesAndEdgeLines as (state: ResolverState) => (time: number) => VisibleEntites,
     function (
       nodeData: Map<string, NodeData> | undefined,
       visibleNodesAndEdgeLinesAtTime: (time: number) => VisibleEntites

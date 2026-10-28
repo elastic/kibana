@@ -11,13 +11,13 @@ import React from 'react';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import type { ValuesType } from 'utility-types';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { listMetricColumnPreset, impactColumnPreset } from '../../../utils/column_presets';
 import {
   asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../common/utils/formatters';
-import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
 import { ImpactBar } from '../impact_bar';
 import { TransactionDetailLink } from '../links/apm/transaction_detail_link';
@@ -85,7 +85,8 @@ export function getColumns({
                   content={i18n.translate(
                     'xpack.apm.home.transactionsTableColumnName.tooltip.activeAlertsExplanation',
                     {
-                      defaultMessage: 'Active alerts',
+                      defaultMessage:
+                        'Active alerts for this transaction, regardless of latency aggregation.',
                     }
                   )}
                 >
@@ -96,8 +97,10 @@ export function getColumns({
                       path: { serviceName },
                       query: {
                         ...query,
+                        rangeTo: 'now',
+                        // Badge counts ignore page kuery; scope click-through to
+                        // this transaction only so the Alerts list matches the badge.
                         kuery: [
-                          query.kuery,
                           ...fieldValuePairToKql(TRANSACTION_NAME, name),
                           ...fieldValuePairToKql(TRANSACTION_TYPE, transactionType),
                         ]

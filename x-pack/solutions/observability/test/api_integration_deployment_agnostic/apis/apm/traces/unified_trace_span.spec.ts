@@ -268,5 +268,103 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(response.body?.span?.name).to.equal('otel-unprocessed-db-query');
       });
     });
+
+    describe('when an OTel span has gen_ai messages exceeding ignore_above', () => {
+      let spanId: string;
+      let traceId: string;
+      let es: ReturnType<typeof getService<'es'>>;
+
+      // Exceeds the ignore_above: 1024 limit of the attributes.* keyword mapping,
+      // so the value is dropped from the index (flagged in _ignored) and can only
+      // be recovered from _source.
+      const longInputMessage = JSON.stringify({
+        role: 'user',
+        parts: [{ type: 'text', content: `long-genai-message-${'a'.repeat(1200)}` }],
+      });
+      const shortOutputMessage = JSON.stringify({
+        role: 'assistant',
+        parts: [{ type: 'text', content: 'Short reply' }],
+      });
+
+      before(async () => {
+        es = getService('es');
+
+        const otelInstance = apmOtel
+          .service({
+            name: 'otel-genai-service',
+            namespace: 'production',
+            sdkName: 'opentelemetry',
+            sdkLanguage: 'java',
+            distro: 'elastic',
+          })
+          .instance('otel-genai-instance');
+
+        const events = timerange(start, end)
+          .interval('1m')
+          .rate(1)
+          .generator((timestamp) => {
+            return [
+              otelInstance
+                .span({
+                  name: 'chat gpt-4o',
+                  kind: 'Internal',
+                })
+                .timestamp(timestamp)
+                .duration(500)
+                .success(),
+            ];
+          });
+
+        const serialized = Array.from(events).flatMap((event) => event.serialize());
+        const spanEvent = serialized.find((event) => event.name === 'chat gpt-4o');
+
+        traceId = spanEvent?.trace_id!;
+        spanId = spanEvent?.span_id!;
+
+        await es.index({
+          index: 'traces-generic.otel-default',
+          document: {
+            ...spanEvent!,
+            'attributes.gen_ai.operation.name': 'chat',
+            'attributes.gen_ai.request.model': 'gpt-4o',
+            'attributes.gen_ai.input.messages': [longInputMessage],
+            'attributes.gen_ai.output.messages': [shortOutputMessage],
+          },
+          refresh: 'wait_for',
+        });
+      });
+
+      after(async () => {
+        await es.deleteByQuery({
+          index: 'traces-generic.otel-default*',
+          query: {
+            term: { span_id: spanId },
+          },
+          refresh: true,
+          conflicts: 'proceed',
+        });
+      });
+
+      it('returns the full gen_ai messages, merging ignored values from _source', async () => {
+        const response = await fetchSpan(traceId, spanId);
+
+        expect(response.status).to.eql(200);
+
+        const body = response.body as typeof response.body & {
+          attributes?: {
+            gen_ai?: {
+              input?: { messages?: string[] };
+              output?: { messages?: string[] };
+            };
+          };
+        };
+
+        expect(body?.span?.id).to.equal(spanId);
+        // The long input message exceeds ignore_above and is only in _source.
+        expect(body?.attributes?.gen_ai?.input?.messages).to.eql([longInputMessage]);
+        // The short output message stays under the limit and comes from the fields API.
+        expect(body?.attributes?.gen_ai?.output?.messages).to.eql([shortOutputMessage]);
+      });
+    });
   });
 }

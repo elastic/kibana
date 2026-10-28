@@ -13,7 +13,7 @@ import { Client } from 'langsmith';
 import { evaluate } from 'langsmith/evaluation';
 import { asyncForEach } from '@kbn/std';
 
-import type { DefaultDefendInsightsGraph } from '../../graphs/default_defend_insights_graph';
+import type { DefaultDefendInsightsGraph } from '@kbn/discoveries';
 import { getDefendInsightsGraphInputOverrides } from '../helpers/get_graph_input_overrides';
 import { getDefendInsightsCustomEvaluator } from '../helpers/get_custom_evaluator';
 

@@ -5,33 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
 import { useMutation } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
-
-import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import type {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
 } from '../../../server/routes/api_schemas/stop_transforms';
-import { addInternalBasePath } from '../../../common/constants';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
-import { ToastNotificationText } from '../components';
+import { useToastNotificationText } from '../components';
 
 import { useRefreshTransformList } from './use_refresh_transform_list';
 
 export const useStopTransforms = () => {
-  const { http, ...startServices } = useAppDependencies();
+  const { http } = useAppDependencies();
   const refreshTransformList = useRefreshTransformList();
   const toastNotifications = useToastNotifications();
+  const getToastNotificationText = useToastNotificationText();
 
   const mutation = useMutation({
     mutationFn: (reqBody: StopTransformsRequestSchema) =>
-      http.post<StopTransformsResponseSchema>(addInternalBasePath('stop_transforms'), {
+      http.post<StopTransformsResponseSchema>('/internal/transform/stop_transforms', {
         body: JSON.stringify(reqBody),
         version: '1',
       }),
@@ -43,7 +40,7 @@ export const useStopTransforms = () => {
             defaultMessage: 'An error occurred called the stop transforms request.',
           }
         ),
-        text: toMountPoint(<ToastNotificationText text={getErrorMessage(error)} />, startServices),
+        ...getToastNotificationText(getErrorMessage(error)),
       }),
     onSuccess: (results) => {
       for (const transformId in results) {

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { MouseEvent } from 'react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiSpacer,
   EuiText,
@@ -15,20 +15,27 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
+  EuiButtonIcon,
   useIsWithinMinBreakpoint,
   EuiLink,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import moment from 'moment';
 import { css } from '@emotion/react';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { ErrorDetailsLink } from '../../common/links/error_details_link';
-import type { PingState } from '../../../../../../common/runtime_types';
+import type { PingState, ErrorGroupItem } from '../../../../../../common/runtime_types';
 import { useErrorFailedStep } from '../hooks/use_error_failed_step';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 import { useSyntheticsSettingsContext } from '../../../contexts';
+import { ErrorPreviewFlyout } from '../../monitors_page/errors/error_preview_flyout';
+import { getErrorDetailsUrl } from './error_details_url';
+
+export { getErrorDetailsUrl };
 
 export function getNextUpStateForResolvedError(
   errorState: PingState,
@@ -36,7 +43,12 @@ export function getNextUpStateForResolvedError(
   scopeByMonitor: boolean
 ) {
   for (const upState of upStates) {
-    if (scopeByMonitor && upState.config_id !== errorState.config_id) continue;
+    if (
+      scopeByMonitor &&
+      (upState.config_id ?? upState.monitor?.id) !==
+        (errorState.config_id ?? errorState.monitor?.id)
+    )
+      continue;
     if (upState.observer?.name !== errorState.observer?.name) continue;
     if (moment(upState.state.started_at).valueOf() > moment(errorState['@timestamp']).valueOf())
       return upState;
@@ -49,7 +61,7 @@ export function computeActiveErrorKeys(
 ): Set<string> {
   const latestErrorByMonitorAndLocation = new Map<string, PingState>();
   for (const err of errorStates) {
-    const key = `${err.config_id}:${err.observer?.name ?? ''}`;
+    const key = `${err.config_id ?? err.monitor?.id ?? ''}:${err.observer?.name ?? ''}`;
     const existing = latestErrorByMonitorAndLocation.get(key);
     if (!existing || moment(err['@timestamp']).isAfter(existing['@timestamp'])) {
       latestErrorByMonitorAndLocation.set(key, err);
@@ -60,7 +72,7 @@ export function computeActiveErrorKeys(
   for (const latestErr of latestErrorByMonitorAndLocation.values()) {
     const resolved = getNextUpStateForResolvedError(latestErr, upStates, true);
     if (!resolved) {
-      ids.add(`${latestErr.config_id}:${latestErr['@timestamp']}`);
+      ids.add(`${latestErr.config_id ?? latestErr.monitor?.id ?? ''}:${latestErr['@timestamp']}`);
     }
   }
   return ids;
@@ -78,6 +90,7 @@ export const ErrorsList = ({
   showMonitorName?: boolean;
 }) => {
   const { monitorId: configId } = useParams<{ monitorId: string }>();
+  const [previewItem, setPreviewItem] = useState<ErrorGroupItem | null>(null);
 
   const { basePath } = useSyntheticsSettingsContext();
 
@@ -89,13 +102,19 @@ export const ErrorsList = ({
 
   const { failedSteps } = useErrorFailedStep(checkGroups);
 
-  const hasBrowserErrors = errorStates.some((e) => e.monitor.type === 'browser');
+  // Both browser and API journeys emit `synthetics.step` events, so the
+  // "Failed step" column applies to either. HTTP/TCP/ICMP errors have no
+  // step concept and should drop the column.
+  const hasStepBasedErrors = errorStates.some(
+    (e) => e.monitor.type === 'browser' || e.monitor.type === 'api'
+  );
   const hasHttpStatusCodes = errorStates.some((e) => e.http?.response?.status_code);
 
   const history = useHistory();
 
   const formatter = useDateFormat();
   const selectedLocation = useSelectedLocation();
+  const spaceId = useUrlSpaceId();
 
   const { latestPing } = useMonitorLatestPing({
     monitorId: configId,
@@ -113,7 +132,7 @@ export const ErrorsList = ({
         (a, b) => moment(b.state.started_at).valueOf() - moment(a.state.started_at).valueOf()
       );
       if (sorted[0]) {
-        ids.add(`${sorted[0].config_id}:${sorted[0]['@timestamp']}`);
+        ids.add(`${sorted[0].config_id ?? sorted[0].monitor?.id ?? ''}:${sorted[0]['@timestamp']}`);
       }
     }
 
@@ -121,7 +140,7 @@ export const ErrorsList = ({
   }, [errorStates, upStates, isGlobalView, latestPing]);
 
   const isActive = (item: PingState) =>
-    activeErrorIds.has(`${item.config_id}:${item['@timestamp']}`);
+    activeErrorIds.has(`${item.config_id ?? item.monitor?.id ?? ''}:${item['@timestamp']}`);
 
   const isTabletOrGreater = useIsWithinMinBreakpoint('s');
 
@@ -135,7 +154,7 @@ export const ErrorsList = ({
       render: (_value: string, item: PingState) => {
         const link = (
           <ErrorDetailsLink
-            configId={item.config_id ?? configId}
+            configId={item.config_id ?? item.monitor?.id ?? configId}
             stateId={item.state.id}
             label={formatter(item.state.started_at)}
             locationId={item.observer?.name}
@@ -171,7 +190,9 @@ export const ErrorsList = ({
               return (
                 <EuiLink
                   data-test-subj="syntheticsColumnsLink"
-                  href={`${basePath}/app/synthetics/monitor/${error.config_id}`}
+                  href={`${basePath}/app/synthetics/monitor/${
+                    error.config_id ?? error.monitor?.id
+                  }`}
                 >
                   {monName}
                 </EuiLink>
@@ -180,7 +201,7 @@ export const ErrorsList = ({
           },
         ]
       : []),
-    ...(hasBrowserErrors
+    ...(hasStepBasedErrors
       ? [
           {
             field: 'monitor.check_group',
@@ -196,7 +217,7 @@ export const ErrorsList = ({
               return failedStep.synthetics?.step?.name;
             },
             render: (value: string, item: PingState) => {
-              if (item.monitor.type !== 'browser') {
+              if (item.monitor.type !== 'browser' && item.monitor.type !== 'api') {
                 return (
                   <>{i18n.translate('xpack.synthetics.columns.Label', { defaultMessage: '--' })}</>
                 );
@@ -275,6 +296,13 @@ export const ErrorsList = ({
         return resolvedState ? moment(resolvedState.state.started_at).valueOf() : 0;
       },
       render: (_value: string, item: PingState) => {
+        if (isActive(item)) {
+          return (
+            <EuiBadge color="danger" css={{ maxWidth: 'max-content' }}>
+              {ACTIVE_LABEL}
+            </EuiBadge>
+          );
+        }
         const resolvedState = getNextUpStateForResolvedError(item, upStates, isGlobalView);
         if (resolvedState) {
           return <EuiText size="s">{formatter(resolvedState.state.started_at)}</EuiText>;
@@ -282,18 +310,52 @@ export const ErrorsList = ({
         return <EuiText size="s">{'--'}</EuiText>;
       },
     },
+    {
+      name: '',
+      width: '40px',
+      render: (item: PingState) => (
+        <EuiToolTip content={PREVIEW_LABEL} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj={`syntheticsErrorPreview-${item.state?.id}`}
+            iconType="eye"
+            aria-label={PREVIEW_LABEL}
+            onClick={(evt: MouseEvent) => {
+              evt.stopPropagation();
+              setPreviewItem({
+                timestamp: item.state?.started_at ?? item['@timestamp'] ?? '',
+                monitorName: item.monitor?.name ?? '',
+                monitorType: item.monitor?.type ?? '',
+                configId: item.config_id ?? item.monitor?.id ?? configId ?? '',
+                stateId: item.state?.id ?? '',
+                checkGroup: item.monitor?.check_group ?? '',
+                locationName: item.observer?.geo?.name ?? item.observer?.name ?? '',
+                locationId: item.observer?.name ?? '',
+                durationMs: Number(item.state?.duration_ms) || 0,
+                errorMessage: item.error?.message ?? '',
+              });
+            }}
+            size="xs"
+          />
+        </EuiToolTip>
+      ),
+    },
   ];
 
   const getRowProps = (item: PingState) => {
     const { state } = item;
     if (state.id) {
-      const itemConfigId = item.config_id ?? configId;
+      const itemConfigId = item.config_id ?? item.monitor?.id ?? configId;
       const locationId = item.observer?.name ?? selectedLocation?.id;
       const locationQuery = locationId ? `?locationId=${encodeURIComponent(locationId)}` : '';
+      const spaceIdQuery = spaceId
+        ? `${locationQuery ? '&' : '?'}spaceId=${encodeURIComponent(spaceId)}`
+        : '';
       return {
         'data-test-subj': `row-${state.id}`,
         onClick: (evt: MouseEvent) => {
-          history.push(`/monitor/${itemConfigId}/errors/${state.id}${locationQuery}`);
+          history.push(
+            `/monitor/${itemConfigId}/errors/${state.id}${locationQuery}${spaceIdQuery}`
+          );
         },
       };
     }
@@ -318,14 +380,15 @@ export const ErrorsList = ({
           },
         }}
       />
+      {previewItem && (
+        <ErrorPreviewFlyout error={previewItem} onClose={() => setPreviewItem(null)} />
+      )}
     </div>
   );
 };
 
-export { getErrorDetailsUrl } from '../../common/links/error_details_url';
-
-const ERRORS_LIST_LABEL = i18n.translate('xpack.synthetics.errorsList.label', {
-  defaultMessage: 'Errors list',
+const ERRORS_LIST_LABEL = i18n.translate('xpack.synthetics.errorStatesList.label', {
+  defaultMessage: 'Error states list',
 });
 
 const ERROR_DURATION_LABEL = i18n.translate('xpack.synthetics.errorDuration.label', {
@@ -358,4 +421,8 @@ const MONITOR_NAME_LABEL = i18n.translate('xpack.synthetics.monitorName.label', 
 
 const RESULT_CODE_LABEL = i18n.translate('xpack.synthetics.resultCode.label', {
   defaultMessage: 'Result code',
+});
+
+const PREVIEW_LABEL = i18n.translate('xpack.synthetics.errorPreview.quickPreview', {
+  defaultMessage: 'Quick preview',
 });

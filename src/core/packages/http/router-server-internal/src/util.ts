@@ -8,6 +8,7 @@
  */
 
 import { once } from 'lodash';
+import { onceCacheOnSuccess } from '@kbn/std';
 import {
   isFullValidatorContainer,
   type RouteValidatorFullConfigResponse,
@@ -53,17 +54,28 @@ function prepareValidation<P, Q, B>(validator: RouteValidator<P, Q, B>) {
 export function prepareRouteConfigValidation<P, Q, B>(
   config: InternalRouteConfig<P, Q, B, RouteMethod>
 ): InternalRouteConfig<P, Q, B, RouteMethod> {
+  /*
+   * DI route handlers may pass a class constructor as the route config, with
+   * `options` / `validate` exposed as static getters on the prototype chain.
+   * Object spread only copies enumerable own properties, so those getters are
+   * dropped unless we read them explicitly before reconstructing the config.
+   * Without this, `access: 'public'` is lost and the route is omitted from OAS.
+   */
+  const { options } = config;
+
   // Calculating schema validation can be expensive so when it is provided lazily
   // we only want to instantiate it once. This also provides idempotency guarantees
   if (typeof config.validate === 'function') {
     const validate = config.validate;
     return {
       ...config,
-      validate: once(() => prepareValidation(validate())),
+      options,
+      validate: onceCacheOnSuccess(() => prepareValidation(validate())),
     };
-  } else if (typeof config.validate === 'object' && typeof config.validate !== null) {
+  } else if (typeof config.validate === 'object' && config.validate !== null) {
     return {
       ...config,
+      options,
       validate: prepareValidation(config.validate),
     };
   }
@@ -138,7 +150,14 @@ export function validOptions(
 ) {
   const shouldNotHavePayload = ['head', 'get'].includes(method);
   const { options = {}, validate } = routeConfig;
-  const shouldValidateBody = (validate && !!getRequestValidation(validate).body) || !!options.body;
+  // When `validate` is a function (thunk), it is deferred to first request time for schema
+  // construction. Calling `getRequestValidation(validate)` on a function would immediately trigger
+  // the thunk, breaking the deferral strategy. So we check if it's a function first, and if so,
+  // skip the inspection and assume body may exist. This is safe: body will be parsed, which is
+  // correct for routes with body schemas, and only minor overhead for routes without one.
+  const shouldValidateBody =
+    (validate && (typeof validate === 'function' || !!getRequestValidation(validate).body)) ||
+    !!options.body;
 
   const { output } = options.body || {};
   if (typeof output === 'string' && !validBodyOutput.includes(output)) {

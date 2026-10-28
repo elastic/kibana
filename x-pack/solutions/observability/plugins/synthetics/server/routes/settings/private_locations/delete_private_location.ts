@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import path from 'path';
+import { z } from '@kbn/zod';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { routeId } from '../../zod_query';
 import { getSavedObjectKqlFilter } from '../../common';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
@@ -16,12 +19,19 @@ import { privateLocationSavedObjectName } from '../../../../common/saved_objects
 
 export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined> = () => ({
   method: 'DELETE',
-  path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{locationId}',
+  path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{id}',
+  options: {
+    summary: 'Delete a private location',
+    description:
+      'You must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.\n\nA location cannot be deleted if it has associated monitors in use in any space. You must delete all monitors associated with the location before deleting the location.',
+    operationId: 'delete-private-location',
+    oasOperationObject: () => path.join(__dirname, 'examples/delete_private_location.yaml'),
+  },
   validate: {},
   validation: {
     request: {
-      params: schema.object({
-        locationId: schema.string({ minLength: 1, maxLength: 1024 }),
+      params: z.strictObject({
+        id: routeId.describe('The unique identifier of the private location to delete.'),
       }),
     },
   },
@@ -39,7 +49,7 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
 
     await migrateLegacyPrivateLocations(internalSOClient, server.logger);
 
-    const { locationId } = request.params as { locationId: string };
+    const { id: locationId } = request.params;
 
     const { locations } = await getPrivateLocationsAndAgentPolicies(
       savedObjectsClient,
@@ -57,10 +67,19 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
 
     const locationFilter = getSavedObjectKqlFilter({ field: 'locations.id', values: locationId });
 
-    const data = await monitorConfigRepository.find({
-      perPage: 0,
-      filter: locationFilter,
-    });
+    // Private locations are shared across spaces and deleted globally (force: true below),
+    // so the "in use" check must count monitors in every space — not just the caller's.
+    // The request-scoped client only sees the current space, so use the internal repository
+    // scoped to all spaces to avoid deleting a location still used by monitors elsewhere.
+    const data = await monitorConfigRepository.find(
+      {
+        perPage: 0,
+        filter: locationFilter,
+        namespaces: [ALL_SPACES_ID],
+      },
+      undefined,
+      internalSOClient
+    );
 
     if (data.total > 0) {
       return response.badRequest({

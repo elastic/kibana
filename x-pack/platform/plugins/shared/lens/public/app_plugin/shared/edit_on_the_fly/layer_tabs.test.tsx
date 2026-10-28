@@ -362,6 +362,7 @@ describe('LayerTabs', () => {
           columnId: 'myColumn',
           groupId: 'testGroup',
           staticValue: 100,
+          activeVisualizationTypeId: 'testVis',
           visualizationGroups: [
             expect.objectContaining({
               accessors: [],
@@ -452,17 +453,11 @@ describe('LayerTabs', () => {
       // The tab action button should exist
       expect(instance.find('[data-test-subj="lnsLayerActions"]').exists()).toBe(true);
 
-      // Click the tab action button to open the menu
-      act(() => {
-        instance.find('button[aria-label="Layer actions"]').first().simulate('click');
-      });
-      instance.update();
-
-      // The layer actions menu should exist (contains reset/remove buttons)
-      expect(instance.find('[data-test-subj="lnsLayerActionsMenu"]').exists()).toBe(true);
+      // A single compatible action renders directly as an icon button, without a context menu
+      expect(instance.find('button[aria-label="Layer actions"]').exists()).toBe(false);
 
       // The delete action should exist
-      expect(instance.find('button[title="Delete layer"]').exists()).toBe(true);
+      expect(instance.find('button[aria-label="Delete layer"]').exists()).toBe(true);
     });
 
     it('should call the remove callback when deleting layer', async () => {
@@ -498,15 +493,9 @@ describe('LayerTabs', () => {
 
       const { instance, lensStore } = await prepareAndMountComponent(props);
 
-      // Click the tab action button to open the menu
+      // Click the delete layer button (rendered directly, no context menu for a single action)
       act(() => {
-        instance.find('button[aria-label="Layer actions"]').first().simulate('click');
-      });
-      instance.update();
-
-      // Click the delete layer button
-      act(() => {
-        instance.find('button[title="Delete layer"]').first().simulate('click');
+        instance.find('button[aria-label="Delete layer"]').first().simulate('click');
       });
       instance.update();
 

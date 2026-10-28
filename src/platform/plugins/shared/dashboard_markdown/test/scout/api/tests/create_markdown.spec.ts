@@ -116,9 +116,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toBe(
-      '[request body.content]: expected value of type [string] but got [undefined]'
-    );
+    expect(response.body.message).toContain('"content"');
   });
 
   apiTest('validation - returns error when title is not provided', async ({ apiClient }) => {
@@ -134,9 +132,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toBe(
-      '[request body.title]: expected value of type [string] but got [undefined]'
-    );
+    expect(response.body.message).toContain('"title"');
   });
 
   apiTest(

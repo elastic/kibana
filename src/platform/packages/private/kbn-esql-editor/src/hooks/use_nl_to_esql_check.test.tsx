@@ -11,7 +11,7 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { useNlToEsqlCheck } from './use_nl_to_esql_check';
+import { clearNlToEsqlLicenseCache, useNlToEsqlCheck } from './use_nl_to_esql_check';
 
 describe('useNlToEsqlCheck', () => {
   const coreStart = coreMock.createStart();
@@ -39,6 +39,7 @@ describe('useNlToEsqlCheck', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    clearNlToEsqlLicenseCache();
     getLicenseMock.mockResolvedValue(validLicense);
   });
 
@@ -72,5 +73,17 @@ describe('useNlToEsqlCheck', () => {
     await act(async () => {});
 
     expect(result.current).toBe(false);
+  });
+
+  it('reuses the license result for the next editor', async () => {
+    const wrapper = createWrapper({ getLicense: getLicenseMock });
+    const first = renderHook(() => useNlToEsqlCheck(), { wrapper });
+
+    await act(async () => {});
+    expect(first.result.current).toBe(true);
+
+    const second = renderHook(() => useNlToEsqlCheck(), { wrapper });
+    expect(second.result.current).toBe(true);
+    expect(getLicenseMock).toHaveBeenCalledTimes(1);
   });
 });

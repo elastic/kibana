@@ -11,7 +11,12 @@ import type { BulkCreateCasesResponse } from '@kbn/cases-plugin/common/types/api
 import { CaseSeverity } from '@kbn/cases-plugin/common';
 import { CaseStatuses, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
 import type { User } from '../../../../common/lib/authentication/types';
-import { defaultUser, getPostCaseRequest, postCaseResp } from '../../../../common/lib/mock';
+import {
+  defaultUser,
+  getPostCaseRequest,
+  postCaseResp,
+  userActionSourceUser,
+} from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   findCaseUserActions,
@@ -195,6 +200,7 @@ export default ({ getService }: FtrProviderContext): void => {
         created_by: defaultUser,
         comment_id: null,
         owner: 'securitySolutionFixture',
+        source: userActionSourceUser,
         payload: {
           description: firstCase.description,
           title: firstCase.title,
@@ -216,6 +222,7 @@ export default ({ getService }: FtrProviderContext): void => {
         created_by: defaultUser,
         comment_id: null,
         owner: 'securitySolutionFixture',
+        source: userActionSourceUser,
         payload: {
           description: secondCase.description,
           title: secondCase.title,

@@ -146,10 +146,10 @@ function convertToSimpleCondition(storedFilter: StoredFilter): AsCodeConditionFi
       field,
       operator: ASCODE_FILTER_OPERATOR.RANGE,
       value: {
-        ...(range.gte !== undefined && { gte: range.gte as number | string }),
-        ...(range.lte !== undefined && { lte: range.lte as number | string }),
-        ...(range.gt !== undefined && { gt: range.gt as number | string }),
-        ...(range.lt !== undefined && { lt: range.lt as number | string }),
+        ...(range.gte != null && { gte: range.gte as number | string }),
+        ...(range.lte != null && { lte: range.lte as number | string }),
+        ...(range.gt != null && { gt: range.gt as number | string }),
+        ...(range.lt != null && { lt: range.lt as number | string }),
         ...(range.format !== undefined && { format: range.format as string }),
       },
       ...(meta.negate && { negate: true }),
@@ -288,7 +288,9 @@ function convertCustomFilter(
     ...baseProperties,
     type: ASCODE_FILTER_TYPE.DSL,
     dsl: convertToRawDSL(filter),
-    ...(meta?.field || meta?.key ? { field: meta.field || meta.key } : {}),
+    // Emit `field` only for a genuine field name (set via `meta.field`), not `meta.key`,
+    // which for custom/DSL filters is the "query" wrapper key artifact, not a field.
+    ...(meta?.field ? { field: meta.field } : {}),
     // Only preserve params for non-combined filters (combined filters use params differently)
     ...(meta?.params && meta?.type !== 'combined' ? { params: meta.params } : {}),
   };

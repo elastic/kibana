@@ -157,7 +157,7 @@ describe('starred column builder', () => {
       }
     );
 
-    expect(screen.getByText('Starred')).toHaveAttribute('data-euiicon-type', 'starFilled');
+    expect(screen.getByText('Starred')).toHaveAttribute('data-euiicon-type', 'starFill');
     expect(screen.getByTestId('mock-favorite-button')).toHaveAttribute('data-id', 'item-1');
   });
 });

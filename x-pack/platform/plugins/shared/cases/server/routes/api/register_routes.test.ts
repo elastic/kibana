@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 
 import type { CasesRequestHandlerContext, CasesRouter } from '../../types';
@@ -86,24 +86,26 @@ describe('registerRoutes', () => {
       method: keyof Pick<CasesRouter, 'get' | 'post'>;
       path: string;
       context?: CasesRequestHandlerContext;
-      headers?: Record<string, unknown>;
+      headers?: Record<string, string>;
     }) => {
+      const registeredRoute = router[method] as jest.Mock;
       const [, registeredRouteHandler] =
-        // @ts-ignore
-        router[method].mock.calls.find((call) => {
+        registeredRoute.mock.calls.find((call) => {
           return call[0].path === path;
         }) ?? [];
 
       if (!registeredRouteHandler) return;
 
-      const result = await registeredRouteHandler(
-        context,
-        // @ts-ignore we don't need to pass a real request object here
-        { headers },
-        { customError, badRequest }
-      );
+      const fakeRequest = httpServerMock.createKibanaRequest({
+        headers,
+        path,
+        method,
+      });
 
-      return result;
+      return registeredRouteHandler(context, fakeRequest, {
+        customError,
+        badRequest,
+      });
     };
 
     return {
@@ -129,7 +131,7 @@ describe('registerRoutes', () => {
     });
   };
 
-  const initAndSimulateDeprecationEndpoint = async (headers?: Record<string, unknown>) => {
+  const initAndSimulateDeprecationEndpoint = async (headers?: Record<string, string>) => {
     const { simulateRequest } = initApi([
       ...routes,
       createCasesRoute({
@@ -170,7 +172,7 @@ describe('registerRoutes', () => {
         const [method, path] = endpoint;
 
         expect(router[method]).toHaveBeenCalledTimes(1);
-        expect(router[method]).toBeCalledWith(
+        expect(router[method]).toHaveBeenCalledWith(
           { path, validate: expect.anything() },
           expect.anything()
         );
@@ -224,7 +226,7 @@ describe('registerRoutes', () => {
       await simulateRequest({
         method: 'get',
         path: '/foo/{case_id}',
-        headers: { 'kbn-version': '8.2.0', referer: 'https://example.com' },
+        headers: { 'kbn-version': '8.2.0', [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana' },
       });
       expect(telemetryUsageCounter.incrementCounter).toHaveBeenCalledWith({
         counterName: 'GET /foo/{case_id}',
@@ -263,6 +265,61 @@ describe('registerRoutes', () => {
       });
     });
 
+    it('increases the attachment type counters by the number of attachments per type', async () => {
+      const { simulateRequest } = initApi([
+        createCasesRoute({
+          method: 'post',
+          path: '/attachments',
+          handler: async ({ incrementAttachmentTypeCounters }) => {
+            incrementAttachmentTypeCounters(['comment', 'security.alert', 'comment']);
+            return response.ok();
+          },
+        }),
+      ]);
+
+      await simulateRequest({ method: 'post', path: '/attachments' });
+
+      expect(telemetryUsageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'POST /attachments',
+        counterType: 'attachment_type.comment',
+        incrementBy: 2,
+      });
+      expect(telemetryUsageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'POST /attachments',
+        counterType: 'attachment_type.security.alert',
+        incrementBy: 1,
+      });
+    });
+
+    it('does not increase the attachment type counters without a usage counter', async () => {
+      response.ok.mockReturnValue({ status: 200, options: {} });
+      registerRoutes({
+        router,
+        logger,
+        routes: [
+          createCasesRoute({
+            method: 'post',
+            path: '/attachments',
+            handler: async ({ incrementAttachmentTypeCounters }) => {
+              incrementAttachmentTypeCounters(['comment']);
+              return response.ok();
+            },
+          }),
+        ],
+        kibanaVersion: '8.2.0',
+      });
+
+      const [[, registeredRouteHandler]] = (router.post as jest.Mock).mock.calls;
+      await registeredRouteHandler(
+        { cases: {} },
+        httpServerMock.createKibanaRequest({ path: '/attachments', method: 'post' }),
+        { customError, badRequest }
+      );
+
+      expect(customError).not.toHaveBeenCalled();
+      expect(telemetryUsageCounter.incrementCounter).not.toHaveBeenCalled();
+    });
+
     it('increases the deprecation counters correctly', async () => {
       await initAndSimulateDeprecationEndpoint();
 
@@ -283,7 +340,7 @@ describe('registerRoutes', () => {
     it('does NOT log the deprecation message if it is a kibana request', async () => {
       await initAndSimulateDeprecationEndpoint({
         'kbn-version': '8.2.0',
-        referer: 'https://example.com',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
       });
 
       expect(logger.warn).not.toHaveBeenCalled();
@@ -292,9 +349,7 @@ describe('registerRoutes', () => {
     it('adds the warning header', async () => {
       response.ok.mockReturnValue({ status: 200, options: {} });
       const res = await initAndSimulateDeprecationEndpoint();
-      // @ts-expect-error upgrade typescript v5.4.5
       const warningHeader = res.options.headers.warning;
-      // @ts-expect-error upgrade typescript v5.4.5
       const warningValue = extractWarningValueFromWarningHeader(warningHeader);
       expect(warningValue).toBe('Deprecated endpoint');
     });
@@ -304,13 +359,13 @@ describe('registerRoutes', () => {
     it('logs the error', async () => {
       await initAndSimulateError();
 
-      expect(logger.error).toBeCalledWith('API error');
+      expect(logger.error).toHaveBeenCalledWith('API error');
     });
 
     it('returns an error response', async () => {
       await initAndSimulateError();
 
-      expect(customError).toBeCalledWith({
+      expect(customError).toHaveBeenCalledWith({
         body: expect.anything(),
         headers: {},
         statusCode: 500,
@@ -325,7 +380,7 @@ describe('registerRoutes', () => {
         context: {} as CasesRequestHandlerContext,
       });
 
-      expect(badRequest).toBeCalledWith({
+      expect(badRequest).toHaveBeenCalledWith({
         body: 'RouteHandlerContext is not registered for cases',
       });
     });

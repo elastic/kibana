@@ -8,11 +8,13 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
-import type { ProjectRouting } from '@kbn/es-query';
+import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLSearchParams } from '@kbn/es-types';
-import type { SanitizedConnectionRequestParams } from './types';
+import type { RequestAdapter, RequestStatistics } from '@kbn/inspector-plugin/common';
 
 /**
  * Base options shared across all typed search methods
@@ -34,6 +36,22 @@ export interface IBaseSearchOptions {
   executionContext?: KibanaExecutionContext;
 
   /**
+   * Inspector integration options for tracking requests
+   */
+  inspector?: {
+    /** Requests are not tracked when no adapter is provided */
+    adapter?: RequestAdapter;
+    title: string;
+    description?: string;
+    getRequestStats?: () => RequestStatistics;
+  };
+}
+
+/**
+ * Params shared by the DSL and ES|QL search methods
+ */
+export interface BaseSearchParams {
+  /**
    * Project routing configuration for cross-project search (CPS).
    */
   projectRouting?: ProjectRouting;
@@ -46,7 +64,7 @@ export interface IBaseSearchOptions {
 /**
  * Parameters for DSL (Elasticsearch Query DSL) search
  */
-export interface IDSLSearchParams {
+export interface IDslSearchParams extends BaseSearchParams {
   /**
    * Index pattern to search
    */
@@ -93,25 +111,36 @@ export interface IDSLSearchParams {
   highlight?: estypes.SearchHighlight;
 
   /**
+   * Kibana query context to apply. The time range, Kibana filters, and KQL/Lucene query are
+   * compiled into a DSL bool query and merged with `query`.
+   */
+  kibanaQueryContext?: KibanaQueryContext;
+
+  /**
+   * Control total hits counting precision
+   */
+  trackTotalHits?: boolean | number;
+
+  /**
    * Allow any additional SearchRequest body properties for maximum compatibility
    */
   [key: string]: unknown;
 }
 
 /**
- * Options specific to DSL search
+ * Options specific to DSL search. `params` shapes the query; `options` is Kibana plumbing
+ * (session, inspector, abort, execution context, project routing).
  */
-export interface IDSLSearchOptions extends IBaseSearchOptions {
-  /**
-   * Control total hits counting precision
-   */
-  trackTotalHits?: boolean | number;
-}
+export type IDslSearchOptions = IBaseSearchOptions;
+
+export type IDslPaginatedSearchParams = IDslSearchParams & Required<Pick<IDslSearchParams, 'sort'>>;
+
+export type IDslPaginatedSearchOptions = IBaseSearchOptions;
 
 /**
  * Pagination helpers for DSL search results
  */
-export interface IDSLPagination {
+export interface IDslPagination {
   /**
    * Whether more results are available
    */
@@ -120,46 +149,38 @@ export interface IDSLPagination {
   /**
    * Fetch the next page of results using search_after
    */
-  nextPage: (
-    options?: Pick<IBaseSearchOptions, 'abortSignal' | 'executionContext'>
-  ) => Promise<IDSLPaginatedSearchResult | null>;
-
-  /**
-   * Iterate through all pages (up to maxPages)
-   */
-  getAllPages: (maxPages?: number) => AsyncGenerator<IDSLPaginatedSearchResult>;
+  nextPage: (options?: {
+    abortSignal?: AbortSignal;
+    executionContext?: KibanaExecutionContext;
+    /** Override the inspector title for this pagination request */
+    inspectorTitle?: string;
+    /** Override the inspector description for this pagination request */
+    inspectorDescription?: string;
+  }) => Promise<IDslPaginatedSearchResult | null>;
 }
 
 /**
  * Result from a DSL search
  */
-export interface IDSLSearchResult {
+export interface IDslSearchResult {
   /**
    * Raw Elasticsearch search response
    */
   rawResponse: estypes.SearchResponse;
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
 }
 
 /**
  * Result from a paginated DSL search
  */
-export interface IDSLPaginatedSearchResult {
+export interface IDslPaginatedSearchResult {
   /**
    * Raw Elasticsearch search response
    */
   rawResponse: estypes.SearchResponse;
   /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
-  /**
    * Pagination helpers for navigating through result pages
    */
-  pagination: IDSLPagination;
+  pagination: IDslPagination;
 }
 
 // ============================================================================
@@ -167,9 +188,47 @@ export interface IDSLPaginatedSearchResult {
 // ============================================================================
 
 /**
+ * Kibana query context to apply when calling a search method. The shape matches the corresponding
+ * fields of a dashboard panel's fetch context, so it can be passed through directly.
+ */
+export interface KibanaQueryContext {
+  /**
+   * Time range to restrict the search to. Adds a range filter on `timeField`.
+   */
+  timeRange?: TimeRange;
+
+  /**
+   * The date field to filter `timeRange` on.
+   */
+  timeField?: string;
+
+  /**
+   * Kibana filters to apply.
+   */
+  kibanaFilters?: Filter[];
+
+  /**
+   * KQL or Lucene query to apply. ES|QL (aggregate) queries are ignored.
+   */
+  kqlQuery?: Query | Query[] | AggregateQuery;
+}
+
+/**
+ * ES|QL-specific extension of {@link KibanaQueryContext} that adds control variable support.
+ * For ES|QL, `timeRange` also fills the `?_tstart` and `?_tend` named params; without a
+ * `timeField` the time range is only applied through those params.
+ */
+export interface EsqlKibanaQueryContext extends KibanaQueryContext {
+  /**
+   * ES|QL control variables. Values for variables used in the query are added as named params.
+   */
+  esqlVariables?: ESQLControlVariable[];
+}
+
+/**
  * Parameters for ES|QL search
  */
-export interface IESQLSearchParams {
+export interface IEsqlSearchParams extends BaseSearchParams {
   /**
    * ES|QL query string
    */
@@ -181,12 +240,13 @@ export interface IESQLSearchParams {
   params?: ESQLSearchParams['params'];
 
   /**
-   * Additional filter to apply
+   * Raw DSL filter to apply. AND-combined with the filter built from `kibanaQueryContext`
+   * when that is provided.
    */
   filter?: estypes.QueryDslQueryContainer | estypes.QueryDslQueryContainer[];
 
   /**
-   * Time zone for date calculations
+   * Time zone for date calculations. Defaults to the `dateFormat:tz` advanced setting.
    */
   timeZone?: string;
 
@@ -194,35 +254,69 @@ export interface IESQLSearchParams {
    * Locale for string operations
    */
   locale?: string;
-}
 
-/**
- * Options specific to ES|QL search
- */
-export interface IESQLSearchOptions extends IBaseSearchOptions {
+  /**
+   * Kibana query context (time range, filters, query bar, ES|QL controls) to apply.
+   * These are Kibana abstractions that get compiled into the ES request body.
+   * Pass the matching fields from a dashboard panel's fetch context directly.
+   */
+  kibanaQueryContext?: EsqlKibanaQueryContext;
+
+  // ── ES|QL-specific request flags ──────────────────────────────────────────
+
   /**
    * Drop columns that only contain null values
    */
   dropNullColumns?: boolean;
 
   /**
-   * When set to true, the response will include an extra _clusters object with information about the clusters that participated in the search along with info such as shards count. This is similar to include_ccs_metadata, but it also returns metadata when the query is not CCS/CPS
+   * When set to true, the response will include an extra _clusters object with information about
+   * the clusters that participated in the search. Similar to `include_ccs_metadata`, but also
+   * returns metadata when the query is not CCS/CPS.
    */
   includeExecutionMetadata?: boolean;
+
+  /**
+   * When set to true, requests the `column_metadata` setting from Elasticsearch, which is required
+   * to receive the `_meta` field on columns in the response.
+   */
+  columnMetadata?: boolean;
+
+  /**
+   * When true, ES|QL queries use approximate execution for faster, estimated results.
+   */
+  approximation?: boolean;
+}
+
+/**
+ * Options specific to ES|QL search. `params` shapes the query; `options` is Kibana plumbing
+ * (session, inspector, abort, execution context, project routing).
+ */
+export interface IEsqlSearchOptions extends IBaseSearchOptions {
+  /**
+   * When true, the response is also mapped to an expressions `Datatable`, returned as `datatable`
+   * on the result. Defaults to false, so callers that only need `rawResponse` skip the mapping.
+   */
+  includeDataTable?: boolean;
 }
 
 /**
  * Result from an ES|QL search
  */
-export interface IESQLSearchResult {
+export interface IEsqlSearchResult {
   /**
    * Raw Elasticsearch ES|QL async query response
    */
   rawResponse: estypes.EsqlAsyncQueryResponse;
   /**
-   * Request parameters for inspector
+   * Warning message from the ES Warning HTTP response header
    */
-  requestParams?: SanitizedConnectionRequestParams;
+  warning?: string;
+  /**
+   * The response mapped to an expressions Datatable, ready for use in visualizations.
+   * Only present when `includeDataTable` is set.
+   */
+  datatable?: Datatable;
 }
 
 // ============================================================================
@@ -232,7 +326,7 @@ export interface IESQLSearchResult {
 /**
  * Parameters for EQL (Event Query Language) search
  */
-export interface IEQLSearchParams {
+export interface IEqlSearchParams {
   /**
    * Index to search
    */
@@ -267,7 +361,7 @@ export interface IEQLSearchParams {
 /**
  * Options specific to EQL search
  */
-export interface IEQLSearchOptions extends IBaseSearchOptions {
+export interface IEqlSearchOptions extends IBaseSearchOptions {
   /**
    * Field containing the event category
    */
@@ -287,15 +381,11 @@ export interface IEQLSearchOptions extends IBaseSearchOptions {
 /**
  * Result from an EQL search
  */
-export interface IEQLSearchResult {
+export interface IEqlSearchResult {
   /**
    * Raw Elasticsearch EQL search response
    */
   rawResponse: estypes.EqlSearchResponse;
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
 }
 
 // ============================================================================
@@ -305,7 +395,7 @@ export interface IEQLSearchResult {
 /**
  * Parameters for SQL search
  */
-export interface ISQLSearchParams {
+export interface ISqlSearchParams {
   /**
    * SQL query string
    */
@@ -330,7 +420,7 @@ export interface ISQLSearchParams {
 /**
  * Options specific to SQL search
  */
-export interface ISQLSearchOptions extends IBaseSearchOptions {
+export interface ISqlSearchOptions extends IBaseSearchOptions {
   /**
    * Time zone for date calculations
    */
@@ -340,7 +430,7 @@ export interface ISQLSearchOptions extends IBaseSearchOptions {
 /**
  * Result from a SQL search
  */
-export interface ISQLSearchResult {
+export interface ISqlSearchResult {
   /**
    * Raw Elasticsearch SQL query response
    */
@@ -350,11 +440,6 @@ export interface ISQLSearchResult {
    * Time in milliseconds the search took to execute
    */
   took: number;
-
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
 }
 
 // ============================================================================
@@ -369,28 +454,28 @@ export interface ISearchMethods {
   /**
    * Execute an ES|QL search
    */
-  esql: (params: IESQLSearchParams, options?: IESQLSearchOptions) => Promise<IESQLSearchResult>;
+  esql: (params: IEsqlSearchParams, options?: IEsqlSearchOptions) => Promise<IEsqlSearchResult>;
 
   /**
    * Execute a DSL (Elasticsearch Query DSL) search
    */
-  dsl: (params: IDSLSearchParams, options?: IDSLSearchOptions) => Promise<IDSLSearchResult>;
+  dsl: (params: IDslSearchParams, options?: IDslSearchOptions) => Promise<IDslSearchResult>;
 
   /**
    * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
    */
   dslPaginated: (
-    params: IDSLSearchParams,
-    options?: IDSLSearchOptions
-  ) => Promise<IDSLPaginatedSearchResult>;
+    params: IDslPaginatedSearchParams,
+    options?: IDslPaginatedSearchOptions
+  ) => Promise<IDslPaginatedSearchResult>;
 
   /**
    * Execute an EQL (Event Query Language) search
    */
-  eql: (params: IEQLSearchParams, options?: IEQLSearchOptions) => Promise<IEQLSearchResult>;
+  eql: (params: IEqlSearchParams, options?: IEqlSearchOptions) => Promise<IEqlSearchResult>;
 
   /**
    * Execute a SQL search
    */
-  sql: (params: ISQLSearchParams, options?: ISQLSearchOptions) => Promise<ISQLSearchResult>;
+  sql: (params: ISqlSearchParams, options?: ISqlSearchOptions) => Promise<ISqlSearchResult>;
 }

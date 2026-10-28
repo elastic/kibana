@@ -24,8 +24,8 @@ After a short pause (400 ms), an inline italic dimmed hint appears next to the c
 
 | When the cursor is on… | Hint shown |
 | --- | --- |
-| an empty line in a non-empty editor | `Type // and press ⌘+J to ask AI to add a step` |
-| a `//` line | `Press ⌘+J to generate` |
+| an empty line in a non-empty editor | `Type // and describe what you want, then press ⌘+J to generate it using AI` |
+| a `//` line | `Describe what you want, then press ⌘+J to generate it using AI` |
 
 Hints disappear on cursor move or edit, and stay hidden while a review is open or a generation is running. The empty-editor case is excluded — the editor's own placeholder covers it.
 
@@ -110,5 +110,6 @@ Both buttons fill into a stronger color on hover. They sit ~8 px below the inser
 
 ### Actions
 
-- **Keep / Replace** (⌘⇧↵ / Ctrl+Shift+Enter): keeps the generated code. In replace mode, also removes the original pipe. The comment stays in place so the user can iterate — tweak the instruction and press ⌘+J again.
+- **Keep / Replace** (⌘↵ / Ctrl+Enter, i.e. the editor's run shortcut, or the Run / Search button): keeps the generated code and runs the query. In replace mode, also removes the original pipe. The comment stays in place so the user can iterate — tweak the instruction and press ⌘+J again.
 - **Undo** (⌘⇧⌫ / Ctrl+Shift+Backspace): removes the generated code and restores the original state.
+- Picking another query (history, starred, quick search) discards the pending review without running it.

@@ -10,15 +10,21 @@ import {
   type FileAttachmentMetadata,
 } from '../../../../common/types/domain_zod/attachment/file/v2';
 
+import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
 import {
   compressionMimeTypes,
   IMAGE_MIME_TYPES,
   textMimeTypes,
   pdfMimeTypes,
 } from '../../../../common/constants/mime_types';
+import type { AttachmentUIV2, CaseUI } from '../../../../common/ui/types';
+import { resolveUnifiedAttachmentType } from '../../../../common/utils/attachments/migration_utils';
 import * as i18n from './translations';
 
 export const isImage = (file: { mimeType?: string }) => file.mimeType?.startsWith('image/');
+
+export const getFileDisplayName = (file: { name: string; extension?: string }) =>
+  file.extension !== undefined ? `${file.name}.${file.extension}` : file.name;
 
 export const parseMimeType = (mimeType: string | undefined) => {
   if (typeof mimeType === 'undefined') {
@@ -67,4 +73,60 @@ export const getFileFromReferenceMetadata = ({
     id: fileId,
     ...fileMetadata,
   };
+};
+
+const isFileAttachment = (comment: AttachmentUIV2, owner: string): boolean =>
+  resolveUnifiedAttachmentType(comment, owner) === FILE_ATTACHMENT_TYPE;
+
+/** Minimal identity of a file already attached to a case (name + extension). */
+export interface AttachedFile {
+  name: string;
+  extension: string;
+}
+
+/** Name + extension of every file already attached to a case. */
+export const getFilesFromComments = (
+  comments: CaseUI['comments'],
+  owner: string
+): AttachedFile[] => {
+  const files: AttachedFile[] = [];
+  for (const comment of comments) {
+    if (
+      isFileAttachment(comment, owner) &&
+      'metadata' in comment &&
+      isValidFileMetadata(comment.metadata)
+    ) {
+      for (const { name, extension } of comment.metadata.files) {
+        files.push({ name, extension });
+      }
+    }
+  }
+  return files;
+};
+
+const getCommentFileIds = (comment: AttachmentUIV2, owner: string): string[] => {
+  if (!isFileAttachment(comment, owner) || !('attachmentId' in comment)) {
+    return [];
+  }
+  return Array.isArray(comment.attachmentId) ? comment.attachmentId : [comment.attachmentId];
+};
+
+/**
+ * Collects the set of file ids referenced by a case's comments. Used by
+ * `CaseViewFiles` to intersect the files-API response against the (possibly
+ * filtered) comment list so the badge and the file table stay in sync.
+ */
+export const getFileIdsFromComments = (comments: CaseUI['comments'], owner: string): Set<string> =>
+  new Set(comments.flatMap((comment) => getCommentFileIds(comment, owner)));
+
+/** Ids of the file attachments that reference any of the file ids. */
+export const getFileAttachmentIds = (
+  comments: CaseUI['comments'],
+  owner: string,
+  fileIds: string[]
+): string[] => {
+  const requestedIds = new Set(fileIds);
+  return comments.flatMap((comment) =>
+    getCommentFileIds(comment, owner).some((id) => requestedIds.has(id)) ? [comment.id] : []
+  );
 };

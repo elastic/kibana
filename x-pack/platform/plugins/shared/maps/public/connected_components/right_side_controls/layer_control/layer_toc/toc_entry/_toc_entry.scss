@@ -6,7 +6,10 @@
 .mapTocEntry {
   position: relative;
   padding: $euiSizeS;
-  border-bottom: 1px solid $euiColorLightestShade;
+  // Divider color is applied reactively via Emotion (useEuiTheme) in
+  // map_container so it updates on reload-less light/dark theme toggles.
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
 
   &:hover,
   &:focus,
@@ -31,7 +34,8 @@
 }
 
 .mapTocEntry-isInEditingMode {
-  background-color: tintOrShade($euiColorPrimary, 90%, 70%) !important;
+  // Background color is themed reactively via Emotion (useEuiTheme) in
+  // map_container so it follows reload-less light/dark theme toggles.
   font-size: $euiFontSizeXS;
   font-weight: $euiFontWeightMedium;
 
@@ -56,19 +60,19 @@
 }
 
 .mapTocEntry-isDraggingOver {
-  background-color: $euiColorEmptyShade;
+  // Background color is themed reactively via Emotion (useEuiTheme) in map_container.
   // Don't allow interaction events while layer is being re-ordered
   // sass-lint:disable-block no-important
   pointer-events: none !important;
 }
 
 .mapTocEntry-isCombineLayer {
+  // Background color is themed reactively via Emotion (useEuiTheme) in map_container.
   transition: background-color $euiAnimSpeedExtraSlow ease;
-  background-color: transparentize($euiColorSuccess, .75);
 }
 
 .mapTocEntry-isSelected {
-  background-color: tintOrShade($euiColorLightShade, 60%, 20%);
+  // Background color is themed reactively via Emotion (useEuiTheme) in map_container.
 }
 
 .mapTocEntry-visible,
@@ -125,9 +129,10 @@
 }
 
 .mapTocEntry__detailsToggleButton {
-  background-color: $euiColorEmptyShade;
-  border: $euiBorderThin;
-  color: $euiTextColor;
+  // Background, border and text colors are themed reactively via Emotion
+  // (useEuiTheme) in map_container so they follow reload-less theme switches.
+  border-width: 1px;
+  border-style: solid;
   border-radius: calc($euiBorderRadius / 2);
   height: $euiSize;
   width: $euiSizeXL;

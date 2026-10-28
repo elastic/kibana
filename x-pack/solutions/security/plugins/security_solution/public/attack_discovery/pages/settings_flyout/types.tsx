@@ -14,3 +14,10 @@ export interface AlertsSelectionSettings {
   size: number;
   start: string;
 }
+
+export type ValidationLevel = 'error' | 'warning';
+
+export interface ValidationItem {
+  level: ValidationLevel;
+  message: string;
+}

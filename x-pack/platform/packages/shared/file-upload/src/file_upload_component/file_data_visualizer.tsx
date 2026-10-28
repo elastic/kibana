@@ -16,7 +16,7 @@ import type {
   ResultLinks,
 } from '@kbn/file-upload-common';
 
-import { FileUploadView } from './new/file_upload_view';
+import { FileUploadView } from './components/file_upload_view';
 import type { FileUploadStartDependencies } from './kibana_context';
 import { FileUploadManager } from '../../file_upload_manager';
 import { useFileUpload, FileUploadContext } from '../use_file_upload';

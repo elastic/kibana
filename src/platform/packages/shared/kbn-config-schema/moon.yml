@@ -16,6 +16,8 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   sourceRoot: src/platform/packages/shared/kbn-config-schema
+dependsOn:
+  - '@kbn/schema-string-helpers'
 tags:
   - shared-common
   - package
@@ -27,6 +29,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

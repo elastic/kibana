@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { VisIconType } from '@kbn/chart-icons';
 import type {
   MetricLayoutWithDefault,
   MetricStateDefaults,
@@ -15,6 +16,11 @@ import type {
 } from './types';
 
 export const LENS_METRIC_ID = 'lnsMetric';
+
+/**
+ * Default number of color bands (palette steps) for the metric color-by-value palette.
+ */
+export const LENS_METRIC_DEFAULT_COLOR_STEPS = 3;
 
 export const LENS_METRIC_GROUP_ID = {
   METRIC: 'metric',
@@ -69,7 +75,8 @@ export const LENS_METRIC_STATE_DEFAULTS: MetricStateDefaults = {
   ...LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
   iconAlign: 'right',
   valueFontMode: 'default',
-  secondaryLabelPosition: 'before',
+  density: 'default',
+  secondaryNameVisibility: 'hidden',
   applyColorTo: 'background',
 };
 
@@ -106,6 +113,6 @@ export const LENS_METRIC_AVAILABLE_METRIC_ICONS = {
   TAG: 'tag',
   GLOBE: 'globe',
   TEMPERATURE: 'temperature',
-} as const;
+} as const satisfies Record<string, VisIconType>;
 
 export const LENS_EXPRESSION_METRIC_TRENDLINE_NAME = 'metricTrendline';

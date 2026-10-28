@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { Writable } from '@kbn/utility-types';
+import type { z } from '@kbn/zod';
 import type {
   asCodeFilterSchema,
   asCodeConditionFilterSchema,
@@ -22,8 +21,8 @@ import type {
  *
  * These types are inferred from validation schemas and provide runtime validation compatibility.
  */
-export type AsCodeFilter = Writable<TypeOf<typeof asCodeFilterSchema>>;
-export type AsCodeConditionFilter = Writable<TypeOf<typeof asCodeConditionFilterSchema>>;
-export type AsCodeGroupFilter = Writable<TypeOf<typeof asCodeGroupFilterSchema>>;
-export type AsCodeDSLFilter = Writable<TypeOf<typeof asCodeDSLFilterSchema>>;
-export type AsCodeSpatialFilter = Writable<TypeOf<typeof asCodeSpatialFilterSchema>>;
+export type AsCodeFilter = z.output<typeof asCodeFilterSchema>;
+export type AsCodeConditionFilter = z.output<typeof asCodeConditionFilterSchema>;
+export type AsCodeGroupFilter = z.output<typeof asCodeGroupFilterSchema>;
+export type AsCodeDSLFilter = z.output<typeof asCodeDSLFilterSchema>;
+export type AsCodeSpatialFilter = z.output<typeof asCodeSpatialFilterSchema>;

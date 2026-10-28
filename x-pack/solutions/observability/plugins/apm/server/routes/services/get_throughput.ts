@@ -6,14 +6,14 @@
  */
 import type { BoolQuery } from '@kbn/es-query';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import type { ServiceThroughputResponse } from '@kbn/apm-api-shared';
 import type { ApmServiceTransactionDocumentType } from '../../../common/document_type';
 import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import type { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { nullifyLeadingTrailingEmptyRedMetricPoints } from '../../../common/utils/red_metric_value_for_histogram_bucket';
-import type { Maybe } from '../../../typings/common';
+import { nullifyEmptyRedMetricPoints } from '../../../common/utils/red_metric_value_for_histogram_bucket';
 
 interface Options {
   environment: string;
@@ -30,8 +30,6 @@ interface Options {
   rollupInterval: RollupInterval;
   bucketSizeInSeconds: number;
 }
-
-export type ServiceThroughputResponse = Array<{ x: number; y: Maybe<number> }>;
 
 export async function getThroughput({
   environment,
@@ -93,7 +91,7 @@ export async function getThroughput({
 
   const response = await apmEventClient.search('get_throughput_for_service', params);
 
-  return nullifyLeadingTrailingEmptyRedMetricPoints(
+  return nullifyEmptyRedMetricPoints(
     response.aggregations?.timeseries.buckets.map((bucket) => ({
       x: bucket.key,
       docCount: bucket.doc_count,

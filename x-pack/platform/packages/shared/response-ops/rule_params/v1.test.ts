@@ -44,13 +44,13 @@ describe('rule params schemas', () => {
         buildDiscriminatedUnion().validate({
           params: { searchType: 'searchSource' },
         })
-      ).toThrowError(`"rule_type_id" property is required`);
+      ).toThrow(`"rule_type_id" property is required`);
     });
 
     it('throws when rule_type_id is unknown', () => {
       expect(() =>
         buildDiscriminatedUnion().validate({ [RULE_TYPE_ID]: 'unknown', params: {} })
-      ).toThrowError(/expected "rule_type_id" to be one of/);
+      ).toThrow(/expected "rule_type_id" to be one of/);
     });
 
     it('throws when params are missing required fields for the matched rule type', () => {
@@ -66,9 +66,7 @@ describe('rule params schemas', () => {
             timeWindowUnit: 'm',
           },
         })
-      ).toThrowError(
-        `[params.timeWindowSize]: expected value of type [number] but got [undefined]`
-      );
+      ).toThrow(`[params.timeWindowSize]: expected value of type [number] but got [undefined]`);
     });
 
     it('throws when params contain unexpected fields for the matched rule type', () => {
@@ -85,7 +83,7 @@ describe('rule params schemas', () => {
             foo: 'bar',
           },
         })
-      ).toThrowError(`Additional properties are not allowed`);
+      ).toThrow(`Additional properties are not allowed`);
     });
 
     it('rejects params that are valid for a different rule type', () => {
@@ -101,7 +99,7 @@ describe('rule params schemas', () => {
             timeWindowSize: 5,
           },
         })
-      ).toThrowError(`[params.index]: expected at least one defined value but got [undefined]`);
+      ).toThrow(`[params.index]: expected at least one defined value but got [undefined]`);
     });
 
     it('includes common base fields in every variant', () => {

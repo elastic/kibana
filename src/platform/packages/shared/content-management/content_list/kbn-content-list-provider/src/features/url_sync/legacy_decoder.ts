@@ -9,9 +9,13 @@
 
 import { Query } from '@elastic/eui';
 import type { ParsedQuery, UrlStateSlices } from './types';
-import type { SortState } from './url_codec';
-
-const LEGACY_KEYS = ['s', 'title', 'sort', 'sortdir', 'created_by', 'favorites'] as const;
+import {
+  isAllowedSort,
+  isSortDirection,
+  type SortDirection,
+  type SortDirectionsByField,
+} from '../sorting';
+const LEGACY_KEYS = ['s', 'title', 'filter', 'sort', 'sortdir', 'created_by', 'favorites'] as const;
 
 export interface LegacyDecodeResult {
   state: UrlStateSlices;
@@ -34,22 +38,20 @@ const stringArray = (value: ParsedQuery[string]): string[] => {
 
 const resolveLegacySortField = (
   field: string,
-  validSortFields: ReadonlySet<string>
+  sortDirectionsByField: SortDirectionsByField
 ): string | undefined => {
   if (field === 'title') {
-    if (validSortFields.has('title')) {
+    if (sortDirectionsByField.has('title')) {
       return 'title';
     }
-    if (validSortFields.has('attributes.title')) {
+    if (sortDirectionsByField.has('attributes.title')) {
       return 'attributes.title';
     }
     return undefined;
   }
-
-  if ((field === 'updatedAt' || field === 'accessedAt') && validSortFields.has(field)) {
+  if ((field === 'updatedAt' || field === 'accessedAt') && sortDirectionsByField.has(field)) {
     return field;
   }
-
   return undefined;
 };
 
@@ -85,13 +87,13 @@ const buildQueryText = ({
  * Decodes legacy URL parameters into a {@link UrlStateSlices} object.
  *
  * @param params - The parsed URL parameters.
- * @param validSortFields - The valid sort fields.
+ * @param sortDirectionsByField - The directions offered for each sortable field.
  * @param onUnknownValue - A callback to call when an unknown value is encountered.
  * @returns A {@link LegacyDecodeResult} object.
  */
 export const decodeLegacyParams = (
   params: ParsedQuery,
-  validSortFields: ReadonlySet<string>,
+  sortDirectionsByField: SortDirectionsByField,
   onUnknownValue?: (key: string, value: unknown) => void
 ): LegacyDecodeResult | null => {
   const consumed = LEGACY_KEYS.filter((key) => params[key] !== undefined);
@@ -100,7 +102,10 @@ export const decodeLegacyParams = (
   }
 
   const state: UrlStateSlices = {};
-  const freeText = firstString(params.s) ?? firstString(params.title);
+  // Free-text precedence: prefer the modern `TableListView` key (`s`), fall back
+  // to its `title` alias, and finally accept the older `?filter=` bookmark seed
+  // some plugins (e.g. `graph`) used to feed `initialFilter` from the URL.
+  const freeText = firstString(params.s) ?? firstString(params.title) ?? firstString(params.filter);
   const createdBy = stringArray(params.created_by);
   const favorites = firstString(params.favorites) === 'true';
   const queryText = buildQueryText({ freeText, createdBy, favorites });
@@ -111,13 +116,13 @@ export const decodeLegacyParams = (
 
   const legacySort = firstString(params.sort);
   if (legacySort) {
-    const field = resolveLegacySortField(legacySort, validSortFields);
+    const field = resolveLegacySortField(legacySort, sortDirectionsByField);
     const directionParam = firstString(params.sortdir);
     const defaultDirection = legacySort === 'title' ? 'asc' : 'desc';
-    const direction: SortState['direction'] =
-      directionParam === 'asc' || directionParam === 'desc' ? directionParam : defaultDirection;
-
-    if (field) {
+    const direction: SortDirection = isSortDirection(directionParam)
+      ? directionParam
+      : defaultDirection;
+    if (field && isAllowedSort(sortDirectionsByField, { field, direction })) {
       state.sort = { field, direction };
     } else {
       onUnknownValue?.('sort', legacySort);

@@ -7,58 +7,67 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { FC } from 'react';
-import { EuiScreenReaderOnly, useEuiTheme } from '@elastic/eui';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import { DataGridDensity, getDataGridDensityPadding } from '@kbn/unified-data-table';
+import { mathWithUnits, useEuiTheme } from '@elastic/eui';
 import { SparklineChart } from './sparkline_chart';
+import type { ProfileProviderServices } from '../../profile_provider_services';
 
-interface Props {
+interface SparklineRendererProps {
   charts: ChartsPluginStart;
-  values: number[];
-  isDetails: boolean;
-  defaultRowHeight?: number;
+  values: unknown;
 }
 
-export const SparklineCellRenderer: FC<Props> = ({ charts, values, defaultRowHeight }) => {
-  const { euiTheme } = useEuiTheme();
+const isNumberArray = (values: unknown): values is number[] =>
+  Array.isArray(values) && values.every((item) => typeof item === 'number');
 
-  const containerStyle = useMemo(
-    () => ({
-      display: 'flex',
-      alignItems: 'center',
-      height: '100%',
-      boxSizing: 'border-box' as const,
-      paddingBlock: euiTheme.size.xs,
-    }),
-    [euiTheme.size.xs]
-  );
-
-  return (
-    <div css={containerStyle}>
-      <SparklineChart charts={charts} values={values} rowHeight={defaultRowHeight} />
-      <EuiScreenReaderOnly>
-        <span>{values.join(', ')}</span>
-      </EuiScreenReaderOnly>
-    </div>
-  );
+export const SparklineRenderer: FC<SparklineRendererProps> = ({ charts, values }) => {
+  const typedValues = useMemo(() => (isNumberArray(values) ? values : undefined), [values]);
+  return typedValues === undefined ? '-' : <SparklineChart charts={charts} values={typedValues} />;
 };
 
-export function getSparklineCellRenderer(
-  charts: ChartsPluginStart,
-  values: unknown,
-  isDetails: boolean,
-  defaultRowHeight?: number
-) {
-  if (values === undefined) {
-    return '-';
+export const SparklineCellRenderer: FC<
+  DataGridCellValueElementProps & {
+    services: ProfileProviderServices;
+    density: DataGridDensity | undefined;
+    isDetails: boolean;
   }
-  return (
-    <SparklineCellRenderer
-      charts={charts}
-      values={values as number[]}
-      isDetails={isDetails}
-      defaultRowHeight={defaultRowHeight}
-    />
+> = ({ services, row, columnId, density, setCellProps, isDetails }) => {
+  const { euiTheme } = useEuiTheme();
+  const cellPadding = getDataGridDensityPadding(euiTheme, density ?? DataGridDensity.COMPACT);
+
+  // In the details view, the chart renders at a fixed height.
+  // But needs to be made slightly taller to even the padding at the top and bottom.
+  const detailsHeight = useMemo(
+    () => mathWithUnits([euiTheme.size.xxxl, euiTheme.size.s], (xxxxl, s) => xxxxl + s),
+    [euiTheme.size.xxxl, euiTheme.size.s]
   );
-}
+
+  useEffect(() => {
+    setCellProps({
+      css: {
+        '.euiDataGridRowCell__content': {
+          overflow: 'visible',
+        },
+      },
+    });
+  }, [cellPadding, setCellProps]);
+
+  return (
+    <>
+      <div css={{ minHeight: euiTheme.size.xxxl }} />
+      <div
+        css={{
+          position: 'absolute',
+          inset: cellPadding,
+          ...(isDetails && { height: detailsHeight, bottom: 'auto' }),
+        }}
+      >
+        <SparklineRenderer charts={services.charts} values={row.flattened[columnId]} />
+      </div>
+    </>
+  );
+};

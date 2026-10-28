@@ -7,12 +7,14 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { Streams } from '@kbn/streams-schema';
+import { isDraftGetResponse, Streams } from '@kbn/streams-schema';
 import React, { type CSSProperties, type ReactNode, useMemo } from 'react';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
+import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { AboutPanel } from './about_panel';
 import { DataQualityCard } from './data_quality_card';
 import { IngestRateChart } from './ingest_rate_chart';
+import { ImportExportPanel } from './import_export_panel';
 
 interface OverviewSection {
   id: string;
@@ -21,9 +23,13 @@ interface OverviewSection {
 }
 
 export function StreamOverview() {
-  const { definition } = useStreamDetail();
+  const { definition, refresh } = useStreamDetail();
+  const {
+    features: { contentPacks },
+  } = useStreamsPrivileges();
 
   const isIngest = Streams.ingest.all.GetResponse.is(definition);
+  const isDraft = isDraftGetResponse(definition);
   /** Match EuiFlexGroup responsive `m` max-breakpoint so sidebar stacks above main when narrow. */
   const isStackedOverviewLayout = useIsWithinBreakpoints(['xs', 's', 'm']);
   const isMobileOverviewLayout = useIsWithinBreakpoints(['xs', 's']);
@@ -40,10 +46,17 @@ export function StreamOverview() {
 
   const mainSections: OverviewSection[] = [
     { id: 'ingest-rate-chart', node: <IngestRateChart />, show: true },
-    { id: 'dataset-quality', node: <DataQualityCard />, show: isIngest },
+    { id: 'dataset-quality', node: <DataQualityCard />, show: isIngest && !isDraft },
   ];
 
-  const sidebarSections: OverviewSection[] = [{ id: 'about', node: <AboutPanel />, show: true }];
+  const sidebarSections: OverviewSection[] = [
+    { id: 'about', node: <AboutPanel />, show: true },
+    {
+      id: 'import-export',
+      node: <ImportExportPanel definition={definition} refreshDefinition={refresh} />,
+      show: isIngest && contentPacks?.enabled === true,
+    },
+  ];
 
   return (
     <EuiFlexGroup

@@ -22,7 +22,10 @@ import { getConnectorType as getIndexConnectorType } from './es_index';
 import { getConnectorType as getOpenAIConnectorType } from './openai';
 import { getConnectorType as getBedrockConnectorType } from './bedrock';
 import { getConnectorType as getGeminiConnectorType } from './gemini';
-import { getConnectorType as getInferenceConnectorType } from './inference';
+import {
+  getConnectorType as getInferenceConnectorType,
+  type InferenceConnectorDependencies,
+} from './inference';
 import { getConnectorType as getPagerDutyConnectorType } from './pagerduty';
 import { getConnectorType as getSwimlaneConnectorType } from './swimlane';
 import { getConnectorType as getServerLogConnectorType } from './server_log';
@@ -50,12 +53,18 @@ export function registerConnectorTypes({
   actions,
   publicBaseUrl,
   experimentalFeatures,
+  isElasticCloudTrial,
+  getUiSettingsClient,
+  getInternalEsClient,
 }: {
   actions: ActionsPluginSetupContract;
   publicBaseUrl?: string;
   experimentalFeatures: ExperimentalFeatures;
+  isElasticCloudTrial?: () => Promise<boolean>;
+  getUiSettingsClient?: InferenceConnectorDependencies['getUiSettingsClient'];
+  getInternalEsClient?: InferenceConnectorDependencies['getInternalEsClient'];
 }) {
-  actions.registerType(getEmailConnectorType({ publicBaseUrl }));
+  actions.registerType(getEmailConnectorType({ publicBaseUrl, isElasticCloudTrial }));
   actions.registerType(getIndexConnectorType());
   actions.registerType(getPagerDutyConnectorType());
   actions.registerType(getSwimlaneConnectorType());
@@ -84,7 +93,9 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getResilientConnectorType());
   actions.registerSubActionConnectorType(getTheHiveConnectorType());
   actions.registerSubActionConnectorType(getXSOARConnectorType());
-  actions.registerSubActionConnectorType(getMcpConnectorType());
+  actions.registerSubActionConnectorType(
+    getMcpConnectorType({ getClientLeasePool: actions.getClientLeasePool })
+  );
 
   if (experimentalFeatures.sentinelOneConnectorOn) {
     actions.registerSubActionConnectorType(getSentinelOneConnectorType());
@@ -93,7 +104,9 @@ export function registerConnectorTypes({
     actions.registerSubActionConnectorType(getCrowdstrikeConnectorType(experimentalFeatures));
   }
   if (!experimentalFeatures.inferenceConnectorOff) {
-    actions.registerSubActionConnectorType(getInferenceConnectorType());
+    actions.registerSubActionConnectorType(
+      getInferenceConnectorType({ getUiSettingsClient, getInternalEsClient })
+    );
   }
   actions.registerSubActionConnectorType(getMicrosoftDefenderEndpointConnectorType());
 }

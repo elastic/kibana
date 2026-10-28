@@ -1332,6 +1332,8 @@ const expectAssetsInstalled = ({
         });
       const installedAsDependency = sortedRes.installed_as_dependency;
       delete sortedRes.installed_as_dependency;
+      // installed_kibana_version is asserted separately below, unrelated to this test's scope
+      delete sortedRes.installed_kibana_version;
       expect({ ...sortedRes, installed_es: [] }).eql({
         ...expectedSavedObject,
         installed_es: [],
@@ -1340,6 +1342,15 @@ const expectAssetsInstalled = ({
     }
 
     await verifySO();
+  });
+
+  it('should have set installed_kibana_version to the current Kibana version', async function () {
+    const kibanaVersion = await kibanaServer.version.get();
+    const res = await kibanaServer.savedObjects.get({
+      type: 'epm-packages',
+      id: 'all_assets',
+    });
+    expect(res.attributes.installed_kibana_version).equal(kibanaVersion);
   });
 
   // TODO enable when feature flag is turned on https://github.com/elastic/kibana/issues/244655

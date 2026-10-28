@@ -46,7 +46,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer }: P
               },
             })}
             color="warning"
-            iconType="flag"
+            iconType="pencil"
           >
             <p>
               {i18n.translate('xpack.monitoring.setupMode.detectedNodeDescription', {
@@ -72,7 +72,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer }: P
               identifier: getIdentifier(productName, true),
             },
           })}
-          iconType="flag"
+          iconType="pencil"
         >
           <p>
             {i18n.translate('xpack.monitoring.setupMode.netNewUserDescription', {
@@ -97,7 +97,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer }: P
             },
           })}
           color="success"
-          iconType="flag"
+          iconType="pencil"
         />
         <EuiSpacer size="m" />
       </Fragment>
@@ -113,7 +113,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer }: P
             defaultMessage: 'Disable self monitoring',
           })}
           color="warning"
-          iconType="flag"
+          iconType="pencil"
         >
           <p>
             {i18n.translate('xpack.monitoring.setupMode.disableInternalCollectionDescription', {
@@ -141,7 +141,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer }: P
             announceOnMount={false}
             title={MIGRATE_TO_MB_LABEL}
             color="danger"
-            iconType="flag"
+            iconType="pencil"
           >
             <p>
               {i18n.translate('xpack.monitoring.setupMode.migrateToMetricbeatDescription', {
@@ -165,7 +165,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer }: P
           announceOnMount={false}
           title={MIGRATE_TO_MB_LABEL}
           color="danger"
-          iconType="flag"
+          iconType="pencil"
         >
           <p>
             {i18n.translate('xpack.monitoring.setupMode.migrateSomeToMetricbeatDescription', {

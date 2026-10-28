@@ -37,6 +37,7 @@ describe('IlmPolicyJsonTab', () => {
       wrapper: EuiThemeProvider,
     });
 
+    expect(screen.getByTestId('ilmPolicyJsonTab')).toBeTruthy();
     expect(screen.getByTestId('ilmPolicyJsonTabCodeBlock')).toBeTruthy();
     const text = getCodeBlockText(container);
 

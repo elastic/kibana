@@ -1,0 +1,135 @@
+{
+  "sha1": "689feb591563fe2ed65ec5fcdbd302fe46d9e62c",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "09db0f9b251af6a-62e78b299821a45",
+      "title": "Global setup",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "0c8b03569042390-fb4eee45dcfb4b9",
+      "title": "Alert flyout automated response results shows the isolate action on the alert response details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/alert_flyout_results.spec.ts",
+        "line": 55,
+        "column": 35
+      }
+    },
+    {
+      "id": "cd5149de2565f1d-304c5df0555dbdc",
+      "title": "Automated response actions form RBAC rule_author cannot add an Elastic Defend response action while creating a rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/form_rbac.spec.ts",
+        "line": 50,
+        "column": 7
+      }
+    },
+    {
+      "id": "cd5149de2565f1d-8339d1821f3d70f",
+      "title": "Automated response actions form RBAC rule_author cannot edit or remove existing Elastic Defend response actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/form_rbac.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "09a79759062225a-c198245c2494f63",
+      "title": "Response console get-file from the endpoint list retrieves a file and shows the download link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/get_file_from_console.spec.ts",
+        "line": 45,
+        "column": 25
+      }
+    },
+    {
+      "id": "6226bf77440ddea-c74636a2cd0185d",
+      "title": "Response actions history page filters response actions by trigger type and opens the linked rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/history_log.spec.ts",
+        "line": 47,
+        "column": 7
+      }
+    },
+    {
+      "id": "18ecf87397f6650-e3c2619ee71c56e",
+      "title": "Isolate a host from an alert shows the host as isolated and clears that status after release",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/isolate_from_alert.spec.ts",
+        "line": 59,
+        "column": 31
+      }
+    },
+    {
+      "id": "b0dffb06abbb800-0ad39475aa1614d",
+      "title": "Isolate a host from a case adds the isolate and release comments to the case activity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/isolate_from_case.spec.ts",
+        "line": 72,
+        "column": 9
+      }
+    },
+    {
+      "id": "0777301b4e4271c-c239d1acb0f5178",
+      "title": "Response console from a case opens the console from the case alert and keeps the history date picker usable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/response_console_from_case.spec.ts",
+        "line": 48,
+        "column": 7
+      }
+    }
+  ]
+}

@@ -9,12 +9,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiStat, EuiText } from '
 import { i18n } from '@kbn/i18n';
 import { asDynamicBytes } from '@kbn/observability-plugin/common';
 import React from 'react';
-import { StackTracesDisplayOption, TopNType } from '@kbn/profiling-utils';
 import type { StorageExplorerSummaryAPIResponse } from '../../../common/storage_explorer';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { LabelWithHint } from '../../components/label_with_hint';
-import { useProfilingParams } from '../../hooks/use_profiling_params';
-import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 
 interface Props {
@@ -30,9 +27,6 @@ interface SummaryInfo {
 }
 
 export function Summary({ data, isLoading }: Props) {
-  const { query } = useProfilingParams('/storage-explorer');
-  const { rangeFrom, rangeTo, kuery } = query;
-  const profilingRouter = useProfilingRouter();
   const {
     start: { core },
   } = useProfilingDependencies();
@@ -115,39 +109,14 @@ export function Summary({ data, isLoading }: Props) {
           );
         })}
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={false}>
-              <EuiLink
-                data-test-subj="profilingSummaryGoToUniversalProfilingLink"
-                href={profilingRouter.link('/stacktraces/{topNType}', {
-                  path: { topNType: TopNType.Hosts },
-                  query: {
-                    rangeFrom,
-                    rangeTo,
-                    kuery,
-                    limit: 10,
-                    displayAs: StackTracesDisplayOption.StackTraces,
-                  },
-                })}
-              >
-                {i18n.translate('xpack.profiling.storageExplorer.summary.universalProfilingLink', {
-                  defaultMessage: 'Go to Universal Profiling',
-                })}
-              </EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiLink
-                data-test-subj="profilingSummaryGoToIndexManagementLink"
-                href={core.http.basePath.prepend(
-                  '/app/management/data/index_management/data_streams'
-                )}
-              >
-                {i18n.translate('xpack.profiling.storageExplorer.summary.indexManagement', {
-                  defaultMessage: 'Go to Index Management',
-                })}
-              </EuiLink>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiLink
+            data-test-subj="profilingSummaryGoToIndexManagementLink"
+            href={core.http.basePath.prepend('/app/management/data/index_management/data_streams')}
+          >
+            {i18n.translate('xpack.profiling.storageExplorer.summary.indexManagement', {
+              defaultMessage: 'Go to Index Management',
+            })}
+          </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

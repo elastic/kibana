@@ -8,9 +8,11 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
-import type { ESQLQueryParams } from './get_esql_query';
+import type { DiscoverIndexSource, ESQLQueryParams } from './get_esql_query';
 import { useDiscoverHref } from './use_discover_href';
 
 const linkStyle = css`
@@ -21,35 +23,61 @@ const linkStyle = css`
 
 type DiscoverButtonVariant = 'button' | 'emptyButton' | 'iconButton' | 'link';
 
-interface OpenInDiscoverProps {
-  dataTestSubj: string;
-  label: string;
-  variant: DiscoverButtonVariant;
-  indexType: 'traces' | 'error';
+type OpenInDiscoverLinkParams = DiscoverIndexSource & {
   rangeFrom: string;
   rangeTo: string;
   queryParams: ESQLQueryParams;
+  ebt: Partial<EbtClickAttrs> & Pick<EbtClickAttrs, 'element'>;
+};
+
+type OpenInDiscoverProps = OpenInDiscoverLinkParams & {
+  dataTestSubj: string;
+  label: string;
+  variant: DiscoverButtonVariant;
+};
+
+export interface OpenInDiscoverLink {
+  href: string | undefined;
+  isLoading: boolean;
+  isDisabled: boolean;
+  ebtProps: ReturnType<typeof getEbtProps> | {};
+}
+
+/** Resolves a Discover link's href, loading and disabled state, and EBT attributes. */
+export function useOpenInDiscoverLink({
+  rangeFrom,
+  rangeTo,
+  queryParams,
+  ebt,
+  ...source
+}: OpenInDiscoverLinkParams): OpenInDiscoverLink {
+  const { indexSettingsStatus } = useApmIndexSettingsContext();
+
+  const href = useDiscoverHref({
+    ...source,
+    rangeFrom,
+    rangeTo,
+    queryParams,
+  });
+
+  // For log-source links, the APM index settings are irrelevant — the link is gated only
+  // on whether the log-sources pattern resolved (which arrives via queryParams/indexPattern).
+  const usesApmIndexSettings = source.indexType !== 'logs';
+  const isLoading = usesApmIndexSettings && indexSettingsStatus === FETCH_STATUS.LOADING;
+  const isDisabled =
+    !href || (usesApmIndexSettings && indexSettingsStatus !== FETCH_STATUS.SUCCESS);
+  const ebtProps = ebt ? getEbtProps({ action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER, ...ebt }) : {};
+
+  return { href, isLoading, isDisabled, ebtProps };
 }
 
 export function OpenInDiscover({
   dataTestSubj,
   label,
   variant,
-  indexType,
-  rangeFrom,
-  rangeTo,
-  queryParams,
+  ...linkParams
 }: OpenInDiscoverProps) {
-  const { indexSettingsStatus } = useApmIndexSettingsContext();
-
-  const discoverHref = useDiscoverHref({
-    indexType,
-    rangeFrom,
-    rangeTo,
-    queryParams,
-  });
-
-  const isDisabled = !discoverHref || indexSettingsStatus !== FETCH_STATUS.SUCCESS;
+  const { href: discoverHref, isLoading, isDisabled, ebtProps } = useOpenInDiscoverLink(linkParams);
 
   switch (variant) {
     case 'button':
@@ -57,10 +85,11 @@ export function OpenInDiscover({
         <EuiButton
           data-test-subj={dataTestSubj}
           aria-label={label}
-          isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
+          isLoading={isLoading}
           isDisabled={isDisabled}
-          iconType="discoverApp"
+          iconType="productDiscover"
           href={discoverHref}
+          {...ebtProps}
         >
           {label}
         </EuiButton>
@@ -70,10 +99,11 @@ export function OpenInDiscover({
         <EuiButtonEmpty
           data-test-subj={dataTestSubj}
           aria-label={label}
-          isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
+          isLoading={isLoading}
           isDisabled={isDisabled}
-          iconType="discoverApp"
+          iconType="productDiscover"
           href={discoverHref}
+          {...ebtProps}
         >
           {label}
         </EuiButtonEmpty>
@@ -84,10 +114,11 @@ export function OpenInDiscover({
           <EuiButtonIcon
             data-test-subj={dataTestSubj}
             aria-label={label}
-            isLoading={indexSettingsStatus === FETCH_STATUS.LOADING}
+            isLoading={isLoading}
             isDisabled={isDisabled}
-            iconType="discoverApp"
+            iconType="productDiscover"
             href={discoverHref}
+            {...ebtProps}
           />
         </EuiToolTip>
       );
@@ -97,6 +128,7 @@ export function OpenInDiscover({
           data-test-subj={dataTestSubj}
           css={linkStyle}
           {...(isDisabled ? { disabled: true, color: 'subdued' } : { href: discoverHref })}
+          {...ebtProps}
         >
           {label}
         </EuiLink>
