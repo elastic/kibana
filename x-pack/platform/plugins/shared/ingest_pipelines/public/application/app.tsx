@@ -13,14 +13,11 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { useKibana } from '../shared_imports';
 
-import { APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../common/constants';
-
 import {
-  SectionError,
-  useAuthorizationContext,
-  WithPrivileges,
-  SectionLoading,
-} from '../shared_imports';
+  APP_CAPABILITIES,
+  APP_CLUSTER_REQUIRED_PRIVILEGE,
+  PLUGIN_ID,
+} from '../../common/constants';
 
 import {
   PipelinesList,
@@ -51,74 +48,39 @@ export const AppWithoutRouter = () => {
 };
 
 export const App: FunctionComponent = () => {
-  const { apiError } = useAuthorizationContext();
-  const { history } = useKibana().services;
+  const { history, application } = useKibana().services;
+  const canManage = application.capabilities[PLUGIN_ID]?.[APP_CAPABILITIES.manage] === true;
 
-  if (apiError) {
+  if (!canManage) {
     return (
-      <SectionError
+      <EuiPageTemplate.EmptyPrompt
+        iconType="securityApp"
         title={
-          <FormattedMessage
-            id="xpack.ingestPipelines.app.checkingPrivilegesErrorMessage"
-            defaultMessage="Error fetching user privileges from the server."
-          />
+          <h2>
+            <FormattedMessage
+              id="xpack.ingestPipelines.app.deniedPrivilegeTitle"
+              defaultMessage="Cluster privileges required"
+            />
+          </h2>
         }
-        error={apiError}
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.ingestPipelines.app.deniedPrivilegeDescription"
+              defaultMessage="To use Ingest Pipelines, you must have the {requiredPrivilege} cluster privilege."
+              values={{
+                requiredPrivilege: APP_CLUSTER_REQUIRED_PRIVILEGE,
+              }}
+            />
+          </p>
+        }
       />
     );
   }
 
   return (
-    <WithPrivileges
-      privileges={APP_CLUSTER_REQUIRED_PRIVILEGES.map((privilege) => `cluster.${privilege}`)}
-    >
-      {({ isLoading, hasPrivileges, privilegesMissing }) => {
-        if (isLoading) {
-          return (
-            <SectionLoading>
-              <FormattedMessage
-                id="xpack.ingestPipelines.app.checkingPrivilegesDescription"
-                defaultMessage="Checking privileges…"
-              />
-            </SectionLoading>
-          );
-        }
-
-        if (!hasPrivileges) {
-          return (
-            <EuiPageTemplate.EmptyPrompt
-              iconType="securityApp"
-              title={
-                <h2>
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.app.deniedPrivilegeTitle"
-                    defaultMessage="Cluster privileges required"
-                  />
-                </h2>
-              }
-              body={
-                <p>
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.app.deniedPrivilegeDescription"
-                    defaultMessage="To use Ingest Pipelines, you must have {privilegesCount,
-                      plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
-                    values={{
-                      missingPrivileges: privilegesMissing.cluster!.join(', '),
-                      privilegesCount: privilegesMissing.cluster!.length,
-                    }}
-                  />
-                </p>
-              }
-            />
-          );
-        }
-
-        return (
-          <Router history={history}>
-            <AppWithoutRouter />
-          </Router>
-        );
-      }}
-    </WithPrivileges>
+    <Router history={history}>
+      <AppWithoutRouter />
+    </Router>
   );
 };
