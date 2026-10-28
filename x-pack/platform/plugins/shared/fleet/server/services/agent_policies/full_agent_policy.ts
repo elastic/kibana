@@ -847,6 +847,11 @@ export function transformOutputToFullPolicyOutput(
   return newOutput;
 }
 
+type OutputSsl = NonNullable<FullAgentPolicyOutput['ssl']>;
+
+// ssl settings of the client certificate that Fleet Server presents to Elasticsearch
+const CLIENT_CERTIFICATE_SSL_KEYS = ['certificate', 'key', 'key_passphrase', 'key_passphrase_path'];
+
 // Generate the SSL configs for fleet server connection to ES
 // Corresponding to --fleet-server-es-ca, --fleet-server-es-cert, --fleet-server-es-cert-key cli options
 // This function generates a `bootstrap output` to be sent directly to elastic-agent
@@ -892,8 +897,8 @@ export function generateFleetServerOutputSSLConfig(
   // The Advanced YAML of an output (config_yaml) is copied as is into the compiled output, so its dotted
   // keys (e.g. `ssl.certificate`) are flat keys next to the nested `ssl`. Move them into `ssl`, otherwise the
   // output would have two definitions of the same setting once the ES ssl settings are layered on top.
-  const baseRest: Record<string, any> = {};
-  const baseDottedSsl: Record<string, any> = {};
+  const baseRest: Partial<FullAgentPolicyOutput> = {};
+  const baseDottedSsl: OutputSsl = {};
   for (const [key, value] of Object.entries(baseWithDottedSsl)) {
     if (key.startsWith('ssl.')) {
       set(baseDottedSsl, key.slice('ssl.'.length), value);
@@ -905,20 +910,28 @@ export function generateFleetServerOutputSSLConfig(
 
   const outputConfig: FullAgentPolicyOutput = { ...baseRest, type: 'elasticsearch' };
 
-  // the ES key of the fleet server host replaces the key of the base output, whether plain or secret
-  const ssl: Record<string, any> = { ...baseSsl, ...esSsl };
-  if (esSecretKey) delete ssl.key;
+  // The client certificate and its key (and passphrase) only work as a pair, so they are never mixed between the
+  // base output and the fleet server host: if the host sets the certificate or the key (plain or secret), the
+  // whole group comes from the host and the one of the base output is dropped.
+  const hostSetsClientCertificate = Boolean(esSsl.certificate || esSsl.key || esSecretKey);
+
+  const ssl: OutputSsl = {
+    ...(hostSetsClientCertificate ? omit(baseSsl, CLIENT_CERTIFICATE_SSL_KEYS) : baseSsl),
+    ...esSsl,
+  };
   if (Object.keys(ssl).length > 0) {
     outputConfig.ssl = ssl;
   }
 
-  const secrets: Record<string, any> = { ...baseSecrets };
-  if (esSecretKey) {
-    secrets.ssl = { ...secrets.ssl, key: esSecretKey };
-  } else if (esSsl.key && secrets.ssl?.key) {
-    secrets.ssl = omit(secrets.ssl, 'key');
-    if (Object.keys(secrets.ssl).length === 0) delete secrets.ssl;
-  }
+  const secretsSsl = {
+    ...(hostSetsClientCertificate ? omit(baseSecrets?.ssl, 'key') : baseSecrets?.ssl),
+    ...(esSecretKey ? { key: esSecretKey } : {}),
+  };
+  const secrets: { ssl?: { key?: NonNullable<typeof esSecretKey> } } = {
+    ...baseSecrets,
+    ssl: secretsSsl,
+  };
+  if (Object.keys(secretsSsl).length === 0) delete secrets.ssl;
   if (Object.keys(secrets).length > 0) {
     outputConfig.secrets = secrets;
   }

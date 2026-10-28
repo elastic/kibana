@@ -4010,10 +4010,65 @@ describe('generateFleetServerOutputSSLConfig', () => {
           ssl: {
             certificate_authorities: ['/tmp/ssl/es-ca.crt'],
             certificate: 'my-es-cert',
-            key: 'output-key',
           },
         },
       });
+    });
+
+    it('should keep the certificate and the key of the base output if the host only sets the CA', () => {
+      const res = generateFleetServerOutputSSLConfig(
+        { ...baseFleetServerHost, ssl: { es_certificate_authorities: ['/tmp/ssl/es-ca.crt'] } },
+        {
+          ...baseOutput,
+          ssl: { certificate: 'output-cert', key: 'output-key', key_passphrase: 'output-pass' },
+        } as any
+      );
+      expect(res?.[fleetServerOutputId].ssl).toEqual({
+        certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+        certificate: 'output-cert',
+        key: 'output-key',
+        key_passphrase: 'output-pass',
+      });
+    });
+
+    it('should drop the certificate and the passphrase of the base output if the host only sets the key', () => {
+      const res = generateFleetServerOutputSSLConfig(
+        { ...baseFleetServerHost, ssl: { es_key: 'my-es-key' } },
+        {
+          ...baseOutput,
+          ssl: {
+            certificate_authorities: ['/tmp/ssl/output-ca.crt'],
+            certificate: 'output-cert',
+            key: 'output-key',
+            key_passphrase: 'output-pass',
+            key_passphrase_path: '/tmp/ssl/pass',
+          },
+        } as any
+      );
+      expect(res?.[fleetServerOutputId].ssl).toEqual({
+        certificate_authorities: ['/tmp/ssl/output-ca.crt'],
+        key: 'my-es-key',
+      });
+    });
+
+    it('should drop the plain and the secret key of the base output if the host only sets the certificate', () => {
+      const res = generateFleetServerOutputSSLConfig(
+        { ...baseFleetServerHost, ssl: { es_certificate: 'my-es-cert' } },
+        {
+          ...baseOutput,
+          ssl: {
+            certificate_authorities: ['/tmp/ssl/output-ca.crt'],
+            certificate: 'output-cert',
+            key: 'output-key',
+          },
+          secrets: { ssl: { key: { id: 'output-secret-key' } } },
+        } as any
+      );
+      expect(res?.[fleetServerOutputId].ssl).toEqual({
+        certificate_authorities: ['/tmp/ssl/output-ca.crt'],
+        certificate: 'my-es-cert',
+      });
+      expect(res?.[fleetServerOutputId]).not.toHaveProperty('secrets');
     });
 
     it('should replace the plain key of the base output with the ES secret key', () => {
@@ -4065,7 +4120,6 @@ describe('generateFleetServerOutputSSLConfig', () => {
           ssl: {
             certificate: 'my-es-cert',
             certificate_authorities: ['/tmp/ssl/es-ca.crt'],
-            key: 'output-key',
             ca_trusted_fingerprint: 'abcdef',
           },
         },
@@ -4083,7 +4137,8 @@ describe('generateFleetServerOutputSSLConfig', () => {
         } as any
       );
       expect(res?.[fleetServerOutputId]).not.toHaveProperty(['ssl.key']);
-      expect(res?.[fleetServerOutputId].ssl).toEqual({ certificate: 'output-cert' });
+      // the certificate of the output is dropped too, it goes together with the key
+      expect(res?.[fleetServerOutputId]).not.toHaveProperty('ssl');
       expect(res?.[fleetServerOutputId].secrets).toEqual({ ssl: { key: { id: 'my-es-key' } } });
     });
 
