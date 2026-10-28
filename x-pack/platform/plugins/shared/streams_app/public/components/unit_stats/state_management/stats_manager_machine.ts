@@ -9,13 +9,14 @@ import type { StreamsUnit } from '@kbn/streams-schema';
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { fromCallback, fromEventObservable, setup } from 'xstate';
+import { assign, fromCallback, fromEventObservable, setup } from 'xstate';
 import type {
   MappedStatsResponse,
   StatsWindow,
   UnitStatsClient,
 } from '../../../services/unit_stats_client/types';
 import { STATS_BATCH_DEBOUNCE_MS, STATS_POLL_INTERVAL_MS } from './constants';
+import { registerComponent, unregisterComponent } from './stats_registration';
 import type { StatsBatch, StatsComponents } from './types';
 
 export interface StatsManagerInput {
@@ -153,6 +154,18 @@ export const statsManagerMachine = setup({
     fetchStats: getPlaceholderFor(createFetchStatsActor),
     timeUpdates: getPlaceholderFor(createTimeUpdatesActor),
   },
+  actions: {
+    register: assign(
+      ({ context }, params: { ref: StreamsUnit.StatsComponentRef; registrant: string }) => ({
+        components: registerComponent(context.components, params.ref, params.registrant),
+      })
+    ),
+    unregister: assign(
+      ({ context }, params: { ref: StreamsUnit.StatsComponentRef; registrant: string }) => ({
+        components: unregisterComponent(context.components, params.ref, params.registrant),
+      })
+    ),
+  },
   delays: {
     batchDebounce: STATS_BATCH_DEBOUNCE_MS,
     pollInterval: STATS_POLL_INTERVAL_MS,
@@ -168,12 +181,34 @@ export const statsManagerMachine = setup({
   }),
   invoke: { id: 'timeUpdates', src: 'timeUpdates' },
   type: 'parallel',
+  on: {
+    'stats.unregister': {
+      actions: {
+        type: 'unregister',
+        params: ({ event }) => ({ ref: event.ref, registrant: event.registrant }),
+      },
+    },
+  },
   states: {
     // Joins registrations that arrive close together into one request.
     batching: {
       initial: 'idle',
+      on: {
+        // Every registration restarts the debounce, so a burst of registrations is one flush.
+        'stats.register': {
+          target: '.debouncing',
+          reenter: true,
+          actions: {
+            type: 'register',
+            params: ({ event }) => ({ ref: event.ref, registrant: event.registrant }),
+          },
+        },
+      },
       states: {
         idle: {},
+        debouncing: {
+          after: { batchDebounce: 'idle' },
+        },
       },
     },
     // Refreshes on an interval, and stops after repeated failures until the user refreshes.
