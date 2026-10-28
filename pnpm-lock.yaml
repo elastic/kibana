@@ -332,7 +332,7 @@ importers:
         version: 2.0.10(react-router-dom@5.3.4(react@18.2.0))(react@18.2.0)
       '@elastic/charts':
         specifier: 71.5.4
-        version: 71.5.4(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment-timezone@0.6.1)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(reselect@4.1.8)
+        version: 71.5.4(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment-timezone@0.6.2)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(reselect@4.1.8)
       '@elastic/datemath':
         specifier: 5.0.3
         version: 5.0.3(moment@2.31.0)
@@ -4225,8 +4225,8 @@ importers:
         specifier: 2.3.2
         version: 2.3.2
       moment-timezone:
-        specifier: 0.6.1
-        version: 0.6.1
+        specifier: 0.6.2
+        version: 0.6.2
       monaco-editor:
         specifier: 0.44.0
         version: 0.44.0
@@ -6109,9 +6109,6 @@ importers:
       eslint-plugin-testing-library:
         specifier: 7.1.1
         version: 7.1.1(eslint@8.57.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
-      eslint-traverse:
-        specifier: 1.0.0
-        version: 1.0.0
       exit-hook:
         specifier: 2.2.0
         version: 2.2.0
@@ -6142,9 +6139,6 @@ importers:
       globby:
         specifier: 11.1.0
         version: 11.1.0
-      gulp-brotli:
-        specifier: 3.0.0
-        version: 3.0.0
       gulp-postcss:
         specifier: 10.0.0
         version: 10.0.0(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.13)
@@ -17840,9 +17834,6 @@ packages:
     resolution: {integrity: sha512-dOt21O7lTMhDM+X9mB4GX+DZrZtCUJPL/wlcTqxyrx5IvO0IYtILdtrQGQp+8n5S0gwSVmOf9NQrjMOgfQZlIg==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
-  eslint-traverse@1.0.0:
-    resolution: {integrity: sha512-bSp37rQs93LF8rZ409EI369DGCI4tELbFVmFNxI6QbuveS7VRxYVyUhwDafKN/enMyUh88HQQ7ZoGUHtPuGdcw==}
-
   eslint-utils@2.1.0:
     resolution: {integrity: sha512-w94dQYoauyvlDc43XnGB8lU3Zt713vNChgt4EWwhXAP2XkBvndfxF0AgIqKOOasjPIPzj9JqgwkwbCYD0/V3Zg==}
     engines: {node: '>=6'}
@@ -18623,10 +18614,6 @@ packages:
   graphql@16.13.2:
     resolution: {integrity: sha512-5bJ+nf/UCpAjHM8i06fl7eLyVC9iuNAjm9qzkiu2ZGhM0VscSvS6WDPfAwkdkBuoXGM9FJSbKl6wylMwP9Ktig==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
-
-  gulp-brotli@3.0.0:
-    resolution: {integrity: sha512-AkGR+FRn4Nrf9Ocx8/WXgNNX+owk4FN4xU4kRrso41DWWd9v1KXO8EyG1cGcwt4364Ax68b7ANcP9Em+/RM2OQ==}
-    engines: {node: '>=10.17.0'}
 
   gulp-postcss@10.0.0:
     resolution: {integrity: sha512-z1RF2RJEX/BvFsKN11PXai8lRmihZTiHnlJf7Zu8uHaA/Q7Om4IeN8z1NtMAW5OiLwUY02H0DIFl9tHl0CNSgA==}
@@ -20881,8 +20868,8 @@ packages:
   moment-duration-format@2.3.2:
     resolution: {integrity: sha512-cBMXjSW+fjOb4tyaVHuaVE/A5TqkukDWiOfxxAjY+PEqmmBQlLwn+8OzwPiG3brouXKY5Un4pBjAeB6UToXHaQ==}
 
-  moment-timezone@0.6.1:
-    resolution: {integrity: sha512-1B9lmAhB9D9/sHaPC1N7wLFEVUoFldxOpOO96lOD1PvJ43vCd0ozDPbu0FEL3++VvawOlDkq8YD373tJmP5JHw==}
+  moment-timezone@0.6.2:
+    resolution: {integrity: sha512-lDsQv8FoGdBUdf0+TjGsq2orxKuXdwFlQ6Zw6TX3xIcTwTfEpCLyKqvEauvCHJ8iu3KBV8+uPhlv70YsNGdUBQ==}
 
   moment@2.31.0:
     resolution: {integrity: sha512-0acOTfMiWOheYS4eoWb80yYMb/JLvVv9SHbs2PehaDzfUG0Bw855SKyk0IKTnPGa5+U2bmi3W68l1+sGLX/pvw==}
@@ -23970,9 +23957,6 @@ packages:
   through2@2.0.5:
     resolution: {integrity: sha512-/mrRod8xqpA+IHSLyGCQ2s8SPHiCDEeQJSep1jqLYeEUClOFG2Qsh+4FU6G9VeqpZnGW/Su8LQGc4YKni5rYSQ==}
 
-  through2@3.0.2:
-    resolution: {integrity: sha512-enaDQ4MUyP2W6ZyT6EsMzqBPZaM/avg8iuo+l2d3QCs0J+6RaqkHV/2/lOwDTueBHeJ/2LG9lrLW3d5rWPucuQ==}
-
   through2@4.0.2:
     resolution: {integrity: sha512-iOqSav00cVxEEICeD7TjLB1sueEL+81Wpzp2bY17uZjZN0pWZPuo4suZ/61VujxmqSGFfgOcNuTZ85QJwNZQpw==}
 
@@ -26842,7 +26826,7 @@ snapshots:
     dependencies:
       object-hash: 1.3.1
 
-  '@elastic/charts@71.5.4(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment-timezone@0.6.1)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(reselect@4.1.8)':
+  '@elastic/charts@71.5.4(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment-timezone@0.6.2)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(reselect@4.1.8)':
     dependencies:
       '@popperjs/core': 2.11.8
       '@reduxjs/toolkit': 1.9.7(react-redux@8.1.3(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@4.2.1))(react@18.2.0)
@@ -26858,7 +26842,7 @@ snapshots:
       immer: 9.0.21
       luxon: 1.28.1
       moment: 2.31.0
-      moment-timezone: 0.6.1
+      moment-timezone: 0.6.2
       prop-types: 15.8.1
       re-reselect: 4.0.1(reselect@4.1.8)
       react: 18.2.0
@@ -35814,8 +35798,6 @@ snapshots:
       esrecurse: 4.3.0
       estraverse: 5.3.0
 
-  eslint-traverse@1.0.0: {}
-
   eslint-utils@2.1.0:
     dependencies:
       eslint-visitor-keys: 1.3.0
@@ -36865,11 +36847,6 @@ snapshots:
       lodash: 4.18.1
 
   graphql@16.13.2: {}
-
-  gulp-brotli@3.0.0:
-    dependencies:
-      plugin-error: 1.0.1
-      through2: 3.0.2
 
   gulp-postcss@10.0.0(jiti@2.7.0)(postcss@8.5.26)(tsx@4.23.13):
     dependencies:
@@ -39769,7 +39746,7 @@ snapshots:
 
   moment-duration-format@2.3.2: {}
 
-  moment-timezone@0.6.1:
+  moment-timezone@0.6.2:
     dependencies:
       moment: 2.31.0
 
@@ -43456,11 +43433,6 @@ snapshots:
     dependencies:
       readable-stream: 2.3.8
       xtend: 4.0.2
-
-  through2@3.0.2:
-    dependencies:
-      inherits: 2.0.4
-      readable-stream: 3.6.2
 
   through2@4.0.2:
     dependencies:
