@@ -12,7 +12,7 @@ security-team#20315 cases: deleted rules (--deleted-check) and a disabled rule
 Password comes from ES_PASSWORD, or from a netrc file (machine <es host> login <user> password <pw>),
 or is prompted. Full ES|QL responses go to --out <dir> as JSON if you want the alert ids.
 """
-import argparse, base64, getpass, json, netrc, os, sys, time, urllib.error, urllib.parse, urllib.request
+import argparse, base64, getpass, json, netrc, os, statistics, sys, time, urllib.error, urllib.parse, urllib.request
 
 TAG = "detection-watch:tuning-reviewed"
 INDEX = ".alerts-security.alerts-default"
@@ -175,7 +175,19 @@ def run_pipeline(cluster, screen_q, harvest_q, label="pipeline"):
     for row in h["rows"]:
         t = totals[row[4]]
         print(f"     {row[0]}  fp={row[1]:>7}  total={t[1]:>7}  fp_rate_count={t[2]:>7}  ids={len(row[3]) if isinstance(row[3], list) else 1}")
-    return {"rows": h["rows"], "totals": totals, "enabled": set(ids), "took_s": total}
+    return {"rows": h["rows"], "totals": totals, "enabled": set(ids), "took_s": total,
+            "steps": {"find": find_s, "screen": s["took_s"], "harvest": h["took_s"], "pipeline": total}}
+
+
+def percentile(values, pct):
+    ordered = sorted(values)
+    return ordered[min(len(ordered) - 1, int(round(pct / 100 * (len(ordered) - 1))))]
+
+
+def summary(label, values):
+    if not values:
+        return
+    print(f"  {label:<16} n={len(values):<3} min={min(values):6.1f}s  median={statistics.median(values):6.1f}s  p90={percentile(values, 90):6.1f}s  max={max(values):6.1f}s")
 
 
 def compare(current, pipeline):
@@ -244,15 +256,27 @@ def main():
     print(f"kibana={cluster.kb}\nes={cluster.es}\nwindow={args.days}d min_fp={args.min_fp} min_rate={args.min_rate}% runs={args.runs}")
 
     current = None
+    timings = {"current": [], "find": [], "screen": [], "harvest": [], "pipeline": []}
     if not args.skip_current:
         print("\ncurrent single query:")
         for _ in range(args.runs):
             current = run_current(cluster, current_q)
+            if "error" not in current:
+                timings["current"].append(current["took_s"])
 
     pipeline = None
     for i in range(args.runs):
         print(f"\nenabled-first pipeline, run {i + 1}:")
-        pipeline = run_pipeline(cluster, screen_q, harvest_q) or pipeline
+        run = run_pipeline(cluster, screen_q, harvest_q)
+        if run:
+            pipeline = run
+            for step, took in run["steps"].items():
+                timings[step].append(took)
+
+    if args.runs > 1:
+        print(f"\ntimings over {args.runs} runs (first run cold):")
+        for step, values in timings.items():
+            summary(step, values)
 
     compare(current, pipeline)
     if pipeline and args.deleted_check:

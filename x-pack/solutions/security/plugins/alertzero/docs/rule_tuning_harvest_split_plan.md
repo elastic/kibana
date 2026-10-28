@@ -461,6 +461,23 @@ those rules executing on schedule, the whole set rerun with the script from
 An earlier pass right after the bulk enable, while 2,283 rules were still
 scheduling, had the `_find` at 4.1s / 2.1s and the pipeline at 5.5s / 3.7s.
 
+Ten runs of each (`--runs 10`, 2026-10-28, same cluster with the 2,283 rules
+executing on schedule; the first current-query run overlapped another client's
+benchmark for a few minutes, which is the 220.8s max):
+
+| step | n | min | median | p90 | max | docs read | CPU |
+|---|---|---|---|---|---|---|---|
+| current harvest | 10 | 131.8s | 181.4s | 188.5s | 220.8s | 16.2M (2 passes) | 265–363s |
+| alerting `_find`, 2,283 rules | 10 | 1.4s | 1.6s | 1.8s | 2.1s | | |
+| screen | 10 | 0.2s | 0.3s | 0.4s | 0.5s | 1.62M | 1.1–1.5s |
+| harvest | 10 | 0.5s | 0.7s | 1.0s | 1.0s | 890k | 2.3–3.1s |
+| **find + screen + harvest** | 10 | **2.4s** | **2.6s** | **3.0s** | **3.2s** | | 3.4–4.3s |
+
+Median to median the pipeline is 70× faster than the single query, and its
+worst run (3.2s) is 40× under the best run of the current query (131.8s). Every
+run returned the same 5 rules with the same `fp_count` and the same number of
+alert ids on both sides.
+
 All variants return the same 5 rules with the same counts (the top rule's
 `fp_count` drifts by a few dozen between runs because the 14-day window slides
 while the current query runs for three minutes). The current query is 6× over
