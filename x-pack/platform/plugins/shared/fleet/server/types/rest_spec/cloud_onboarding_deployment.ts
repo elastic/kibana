@@ -411,8 +411,18 @@ export const GetCloudOnboardingDeploymentsRequestSchema = {
       })
     ),
     provider: schema.maybe(CloudOnboardingDeploymentProviderSchema),
-    page: schema.number({ defaultValue: 1, min: 1, max: 1000 }),
-    perPage: schema.number({ defaultValue: 20, min: 1, max: 100 }),
+    page: schema.number({
+      defaultValue: 1,
+      min: 1,
+      max: 1000,
+      meta: { description: 'The page of deployments to return, starting at 1.' },
+    }),
+    perPage: schema.number({
+      defaultValue: 20,
+      min: 1,
+      max: 100,
+      meta: { description: 'The number of deployments per page.' },
+    }),
   }),
 };
 
