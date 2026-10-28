@@ -15,6 +15,8 @@ export const CORE_WEB_VITAL = {
   ttfb: 'ttfb',
 } as const satisfies Record<CoreWebVital, CoreWebVital>;
 
+export const CORE_WEB_VITALS: readonly CoreWebVital[] = Object.values(CORE_WEB_VITAL);
+
 export type VitalRating = 'good' | 'needsImprovement' | 'poor';
 
 export interface VitalThresholds {

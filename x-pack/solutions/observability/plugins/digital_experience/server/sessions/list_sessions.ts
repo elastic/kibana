@@ -12,9 +12,9 @@ import type {
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { CORE_WEB_VITALS } from '../../common/core_web_vitals';
 import {
   SESSIONS_INDEX_PATTERN,
-  WEB_VITAL_NAMES,
   emptyWebVitals,
   type FacetBucket,
   type SessionListFacets,
@@ -128,6 +128,14 @@ const facetFilters = (
 const allOf = (filters: QueryDslQueryContainer[]): QueryDslQueryContainer =>
   filters.length > 0 ? { bool: { filter: filters } } : { match_all: {} };
 
+/** Set by the dest pipeline when it couldn't summarize a session; its counts are missing. */
+const FAILED_SUMMARY: QueryDslQueryContainer = { exists: { field: 'error.message' } };
+
+/** The listed sessions: selected facets, and only summaries the pipeline completed. */
+const listedFilter = (facets: ListSessionsParams['facets'], exclude?: FacetName) => ({
+  bool: { filter: facetFilters(facets, exclude), must_not: [FAILED_SUMMARY] },
+});
+
 export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequest => {
   // Elasticsearch rejects `from + size` past the result window, so a later page is empty instead.
   const from = Math.min(params.page * params.perPage, MAX_RESULT_WINDOW);
@@ -137,7 +145,7 @@ export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequ
       name,
       {
         // Each facet ignores its own selection so its other values stay selectable.
-        filter: allOf(facetFilters(params.facets, name)),
+        filter: listedFilter(params.facets, name),
         aggs: { values: { terms: { field: SESSION_FACET_FIELDS[name], size: FACET_SIZE } } },
       },
     ])
@@ -145,10 +153,12 @@ export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequ
   const kpiAggs: Record<string, AggregationsAggregationContainer> = {
     median_duration: { percentiles: { field: 'duration_ms', percents: [50] } },
     avg_page_views: { avg: { field: 'page_view_count' } },
+    // Bounce rate is over sessions with a page view; without one there was no page to leave.
+    with_page_views: { filter: { range: { page_view_count: { gte: 1 } } } },
     bounced: { filter: { term: { bounced: true } } },
     with_errors: { filter: { term: { has_error: true } } },
     ...Object.fromEntries(
-      WEB_VITAL_NAMES.map((name) => [
+      CORE_WEB_VITALS.map((name) => [
         `vital_${name}`,
         { percentiles: { field: `web_vitals.${name}`, percents: [75] } },
       ])
@@ -164,10 +174,13 @@ export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequ
     size,
     sort: [{ [params.sortField]: params.sortDirection }, { 'session.id': 'asc' }],
     query: { bool: { filter: [...sessionScopeFilters(params), ...searchFilter(params.query)] } },
-    post_filter: allOf(facetFilters(params.facets)),
+    post_filter: listedFilter(params.facets),
     aggs: {
       ...facetAggs,
-      kpis: { filter: allOf(facetFilters(params.facets)), aggs: kpiAggs },
+      kpis: { filter: listedFilter(params.facets), aggs: kpiAggs },
+      failed_summaries: {
+        filter: allOf([...facetFilters(params.facets), FAILED_SUMMARY]),
+      },
     },
   };
 };
@@ -181,7 +194,7 @@ const stringOrNull = (value: unknown): string | null =>
 export const toSessionSummary = (doc: SessionDocument): SessionSummary => {
   const journey = Array.isArray(doc.journey) ? doc.journey : doc.journey ? [doc.journey] : [];
   const webVitals = emptyWebVitals();
-  for (const name of WEB_VITAL_NAMES) {
+  for (const name of CORE_WEB_VITALS) {
     webVitals[name] = numberOr(doc.web_vitals?.[name], null);
   }
   const pageViewCount = numberOr(doc.page_view_count, 0);
@@ -195,7 +208,7 @@ export const toSessionSummary = (doc: SessionDocument): SessionSummary => {
     pageViewCount,
     clickCount: numberOr(doc.click_count, 0),
     errorCount: numberOr(doc.error_count, 0),
-    bounced: doc.bounced ?? pageViewCount <= 1,
+    bounced: doc.bounced ?? pageViewCount === 1,
     entryPage: stringOrNull(doc.entry_page),
     exitPage: stringOrNull(doc.exit_page),
     journey,
@@ -225,9 +238,11 @@ export interface ListSessionsAggs {
     doc_count: number;
     median_duration?: { values?: Record<string, number | null> };
     avg_page_views?: { value: number | null };
+    with_page_views?: { doc_count: number };
     bounced?: { doc_count: number };
     with_errors?: { doc_count: number };
   } & Record<string, unknown>;
+  failed_summaries?: { doc_count: number };
   [facet: string]: unknown;
 }
 
@@ -250,8 +265,9 @@ export const parseListSessionsResponse = (
   const aggs = response.aggregations ?? {};
   const kpis = aggs.kpis;
   const totalSessions = kpis?.doc_count ?? 0;
+  const sessionsWithPageViews = kpis?.with_page_views?.doc_count ?? 0;
   const webVitals = emptyWebVitals();
-  for (const name of WEB_VITAL_NAMES) {
+  for (const name of CORE_WEB_VITALS) {
     webVitals[name] = percentileOf(kpis?.[`vital_${name}`], '75.0');
   }
 
@@ -263,6 +279,7 @@ export const parseListSessionsResponse = (
     total,
     page,
     perPage,
+    failedSummaries: aggs.failed_summaries?.doc_count ?? 0,
     facets: {
       browsers: facetBuckets(aggs.browsers),
       os: facetBuckets(aggs.os),
@@ -273,7 +290,8 @@ export const parseListSessionsResponse = (
       totalSessions,
       medianDurationMs: percentileOf(kpis?.median_duration, '50.0'),
       avgPageViews: numberOr(kpis?.avg_page_views?.value, null),
-      bounceRate: totalSessions > 0 ? (kpis?.bounced?.doc_count ?? 0) / totalSessions : null,
+      bounceRate:
+        sessionsWithPageViews > 0 ? (kpis?.bounced?.doc_count ?? 0) / sessionsWithPageViews : null,
       sessionsWithErrors: kpis?.with_errors?.doc_count ?? 0,
       webVitals,
     },

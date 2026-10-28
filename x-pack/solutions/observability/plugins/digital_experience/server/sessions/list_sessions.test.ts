@@ -6,6 +6,7 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { omit } from 'lodash';
 import { SESSIONS_INDEX_PATTERN } from '../../common/sessions';
 import {
   buildListSessionsRequest,
@@ -94,19 +95,36 @@ describe('buildListSessionsRequest', () => {
       ...baseParams,
       facets: { browsers: 'Chrome', countries: 'NL' },
     });
+    const failed = { exists: { field: 'error.message' } };
     expect(request.post_filter).toEqual({
       bool: {
         filter: [
           { term: { 'user_agent.browser': 'Chrome' } },
           { term: { 'geo.country_iso': 'NL' } },
         ],
+        must_not: [failed],
       },
     });
     expect(request.aggs?.browsers.filter).toEqual({
-      bool: { filter: [{ term: { 'geo.country_iso': 'NL' } }] },
+      bool: { filter: [{ term: { 'geo.country_iso': 'NL' } }], must_not: [failed] },
     });
     expect(request.aggs?.os.filter).toEqual(request.post_filter);
     expect(request.aggs?.kpis.filter).toEqual(request.post_filter);
+  });
+
+  it('leaves summaries the pipeline failed on out of the list and KPIs, and counts them', () => {
+    const request = buildListSessionsRequest(baseParams);
+    const failed = { exists: { field: 'error.message' } };
+    expect(request.post_filter).toEqual({ bool: { filter: [], must_not: [failed] } });
+    expect(request.aggs?.kpis.filter).toEqual(request.post_filter);
+    expect(request.aggs?.failed_summaries.filter).toEqual({ bool: { filter: [failed] } });
+  });
+
+  it('computes the bounce rate over sessions with a page view', () => {
+    const request = buildListSessionsRequest(baseParams);
+    expect(request.aggs?.kpis.aggs?.with_page_views).toEqual({
+      filter: { range: { page_view_count: { gte: 1 } } },
+    });
   });
 });
 
@@ -133,6 +151,12 @@ describe('toSessionSummary', () => {
     });
   });
 
+  it('derives bounced from exactly one page view when the document lacks it', () => {
+    const withoutBounced = omit(sessionDoc, 'bounced');
+    expect(toSessionSummary({ ...withoutBounced, page_view_count: 1 }).bounced).toBe(true);
+    expect(toSessionSummary({ ...withoutBounced, page_view_count: 0 }).bounced).toBe(false);
+  });
+
   it('normalizes a single-page journey stored as a string', () => {
     expect(toSessionSummary({ ...sessionDoc, journey: '/' }).journey).toEqual(['/']);
   });
@@ -157,16 +181,19 @@ describe('parseListSessionsResponse', () => {
           doc_count: 100,
           median_duration: { values: { '50.0': 60_000 } },
           avg_page_views: { value: 2.5 },
+          with_page_views: { doc_count: 80 },
           bounced: { doc_count: 40 },
           with_errors: { doc_count: 5 },
           vital_lcp: { values: { '75.0': 2100 } },
         },
+        failed_summaries: { doc_count: 3 },
       },
     } as unknown as SearchResponse<SessionDocument, ListSessionsAggs>;
 
     const parsed = parseListSessionsResponse(response, { page: 0, perPage: 25 });
 
     expect(parsed.total).toBe(120);
+    expect(parsed.failedSummaries).toBe(3);
     expect(parsed.sessions).toHaveLength(1);
     expect(parsed.facets.browsers).toEqual([{ key: 'Chrome', count: 80 }]);
     expect(parsed.facets.countries).toEqual([{ key: 'NL', count: 12 }]);
@@ -174,7 +201,8 @@ describe('parseListSessionsResponse', () => {
       totalSessions: 100,
       medianDurationMs: 60_000,
       avgPageViews: 2.5,
-      bounceRate: 0.4,
+      // 40 bounced of the 80 sessions with a page view.
+      bounceRate: 0.5,
       sessionsWithErrors: 5,
       webVitals: { lcp: 2100, inp: null, cls: null, fcp: null, ttfb: null },
     });
@@ -211,6 +239,7 @@ describe('parseListSessionsResponse', () => {
       expect.objectContaining({
         sessions: [],
         total: 0,
+        failedSummaries: 0,
         kpis: expect.objectContaining({ totalSessions: 0, bounceRate: null }),
       })
     );

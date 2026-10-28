@@ -24,6 +24,7 @@ import {
   indexPatternCovers,
   lagSecondsOf,
 } from './sessions_setup';
+import { SessionsNewerVersionError } from './sessions_newer_version_error';
 import { SessionsPrivilegesError } from './sessions_privileges_error';
 import { SessionsRestrictedReadError } from './sessions_restricted_read_error';
 import { buildSessionsTransform } from './sessions_spec';
@@ -307,6 +308,26 @@ describe('sessions setup', () => {
       ).toEqual([true, false]);
       expect(esClient.asSecondaryAuthUser.transform.putTransform).toHaveBeenCalled();
     });
+
+    it('refuses to replace transforms from a newer version, before writing anything', async () => {
+      grantAll(esClient.asCurrentUser);
+      const newerId = `digital-experience-sessions-${SESSIONS_VERSION + 1}`;
+      mockTransforms(esClient.asSecondaryAuthUser, [
+        managedTransform(newerId, { version: SESSIONS_VERSION + 1, destIndex: newerId }),
+      ]);
+
+      const error = await enableSessions({ ...enableArgs(), settings: oneTransform }).catch(
+        (e) => e
+      );
+
+      expect(error).toBeInstanceOf(SessionsNewerVersionError);
+      expect(error.installedVersion).toBe(SESSIONS_VERSION + 1);
+      const client = esClient.asSecondaryAuthUser;
+      expect(client.ingest.putPipeline).not.toHaveBeenCalled();
+      expect(client.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(client.transform.deleteTransform).not.toHaveBeenCalled();
+      expect(client.transform.putTransform).not.toHaveBeenCalled();
+    });
   });
 
   describe('lagSecondsOf', () => {
@@ -517,6 +538,23 @@ describe('sessions setup', () => {
           installedVersion: 0,
         })
       );
+    });
+
+    it('reports transforms from a newer version without asking to enable sessions again', async () => {
+      const newerId = `digital-experience-sessions-${SESSIONS_VERSION + 1}`;
+      mockTransforms(client, [managedTransform(newerId, { version: SESSIONS_VERSION + 1 })]);
+      mockStats(client, [idleStats(newerId)]);
+
+      const status = await getSessionsStatus(client, { settings: oneTransform, now: NOW });
+
+      expect(status).toEqual(
+        expect.objectContaining({
+          health: 'healthy',
+          needsUpdate: false,
+          installedVersion: SESSIONS_VERSION + 1,
+        })
+      );
+      expect(status.reason).toMatch(/newer than this Kibana supports.*upgrade Kibana/);
     });
 
     it('flags changed partition or frequency settings as needing an update', async () => {

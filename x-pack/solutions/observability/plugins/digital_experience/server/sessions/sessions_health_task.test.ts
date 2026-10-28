@@ -39,7 +39,7 @@ const healthyStatus: SessionsStatus = {
   transforms: [],
 };
 
-const setup = () => {
+const setup = (state: Record<string, unknown> = {}) => {
   const core = coreMock.createSetup();
   const logger = loggingSystemMock.createLogger();
   const taskManager = taskManagerMock.createSetup();
@@ -47,7 +47,8 @@ const setup = () => {
   const definitions: TaskDefinitionRegistry = taskManager.registerTaskDefinitions.mock.calls[0][0];
   const definition = definitions[SESSIONS_HEALTH_TASK_TYPE];
   const signal = new AbortController().signal;
-  const run = () => definition.createTaskRunner({ signal } as RunContext).run();
+  const run = () =>
+    definition.createTaskRunner({ signal, taskInstance: { state } } as unknown as RunContext).run();
   return { core, logger, definition, run, signal };
 };
 
@@ -73,7 +74,9 @@ describe('sessions health task', () => {
     const { core, logger, run, signal } = setup();
     const [coreStart] = await core.getStartServices();
 
-    expect(await run()).toEqual({ state: {} });
+    expect(await run()).toEqual({
+      state: { health: 'healthy', needsUpdate: false, newerVersion: false },
+    });
 
     expect(getSessionsStatus).toHaveBeenCalledWith(coreStart.elasticsearch.client.asInternalUser, {
       settings,
@@ -112,6 +115,45 @@ describe('sessions health task', () => {
         '"Set up and update session summaries" privilege must enable sessions again'
       )
     );
+  });
+
+  it('logs a problem once, not on every run while it lasts', async () => {
+    jest.mocked(getSessionsStatus).mockResolvedValue({ ...healthyStatus, health: 'lagging' });
+    const { logger, run } = setup({ health: 'lagging', needsUpdate: false, newerVersion: false });
+
+    await run();
+
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('logs when the transforms recover', async () => {
+    jest.mocked(getSessionsStatus).mockResolvedValue(healthyStatus);
+    const { logger, run } = setup({ health: 'degraded', needsUpdate: false, newerVersion: false });
+
+    expect(await run()).toEqual({
+      state: { health: 'healthy', needsUpdate: false, newerVersion: false },
+    });
+    expect(logger.info).toHaveBeenCalledWith('Sessions transforms are no longer degraded.');
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('warns once that a newer Kibana set sessions up', async () => {
+    const newer: SessionsStatus = {
+      ...healthyStatus,
+      installedVersion: 2,
+      reason: 'Sessions transforms are from version 2, newer than this Kibana supports.',
+    };
+    jest.mocked(getSessionsStatus).mockResolvedValue(newer);
+    const first = setup();
+
+    expect(await first.run()).toEqual({
+      state: { health: 'healthy', needsUpdate: false, newerVersion: true },
+    });
+    expect(first.logger.warn).toHaveBeenCalledWith(newer.reason);
+
+    const second = setup({ health: 'healthy', needsUpdate: false, newerVersion: true });
+    await second.run();
+    expect(second.logger.warn).not.toHaveBeenCalled();
   });
 
   it('only reads: never creates, updates or starts a transform', async () => {

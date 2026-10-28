@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CoreWebVital } from './core_web_vitals';
 import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from './otel_data';
 
 /** Bump when the transform pivot, dest pipeline, or dest mappings change. */
@@ -33,11 +34,6 @@ export const SESSIONS_JOURNEY_SIZE = 10;
  */
 export const SESSIONS_JOURNEY_URL_CANDIDATES = 3 * SESSIONS_JOURNEY_SIZE;
 
-/** EDOT Browser re-stamps `session.id` on every span and log after rotation. */
-export const SOURCE_SESSION_ID_FIELD = 'attributes.session.id';
-export const SOURCE_SERVICE_NAME_FIELD = 'resource.attributes.service.name';
-export const SOURCE_URL_FIELD = 'attributes.url.full';
-
 export const SESSION_SORT_FIELDS = [
   'start_time',
   'duration_ms',
@@ -47,9 +43,7 @@ export const SESSION_SORT_FIELDS = [
 ] as const;
 export type SessionSortField = (typeof SESSION_SORT_FIELDS)[number];
 
-export const WEB_VITAL_NAMES = ['lcp', 'inp', 'cls', 'fcp', 'ttfb'] as const;
-export type WebVitalName = (typeof WEB_VITAL_NAMES)[number];
-export type SessionWebVitals = Record<WebVitalName, number | null>;
+export type SessionWebVitals = Record<CoreWebVital, number | null>;
 
 export type SessionsTransformHealth = 'missing' | 'healthy' | 'lagging' | 'degraded' | 'outdated';
 
@@ -182,6 +176,11 @@ export interface SessionListResponse {
   total: number;
   page: number;
   perPage: number;
+  /**
+   * Sessions in range the dest pipeline couldn't summarize. They're left out of the list and
+   * KPIs, as their counts are missing; see `error.message` in the sessions index.
+   */
+  failedSummaries: number;
   facets: SessionListFacets;
   kpis: SessionListKpis;
 }
@@ -232,16 +231,34 @@ export const emptyWebVitals = (): SessionWebVitals => ({
   ttfb: null,
 });
 
-/** Page label used for journeys: the hash route when present, else the URL path. */
+/**
+ * Page label used for journeys: the hash route when present, else the URL path, without query
+ * or fragment. A line-by-line port of `pathOf` in the sessions dest pipeline, so the list and the
+ * detail label a URL alike; both are checked against `PAGE_PATH_CASES`.
+ */
 export const toPagePath = (raw: string | null | undefined): string | null => {
-  if (!raw) {
+  const trimmed = raw?.trim();
+  if (!trimmed || trimmed === 'null') {
     return null;
   }
-  try {
-    const url = new URL(raw, 'http://localhost');
-    const route = url.hash.replace(/^#/, '').split('?')[0];
-    return route.startsWith('/') ? route : url.pathname || '/';
-  } catch {
-    return raw.split(/[?#]/)[0] || null;
+  let path = trimmed;
+  const hash = path.indexOf('#');
+  if (hash >= 0) {
+    const route = path.substring(hash + 1);
+    if (route.startsWith('/')) {
+      const routeQuery = route.indexOf('?');
+      return routeQuery >= 0 ? route.substring(0, routeQuery) : route;
+    }
+    path = path.substring(0, hash);
   }
+  const query = path.indexOf('?');
+  if (query >= 0) {
+    path = path.substring(0, query);
+  }
+  const scheme = path.indexOf('://');
+  if (scheme >= 0) {
+    const slash = path.indexOf('/', scheme + 3);
+    path = slash >= 0 ? path.substring(slash) : '/';
+  }
+  return path === '' ? '/' : path;
 };

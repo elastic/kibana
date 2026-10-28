@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CORE_WEB_VITALS } from '../../common/core_web_vitals';
 import {
   SESSIONS_INDEX,
   SESSIONS_INDEX_PATTERN,
@@ -15,10 +16,6 @@ import {
   SESSIONS_PIPELINE_NAME,
   SESSIONS_TRANSFORM_ID,
   SESSIONS_VERSION,
-  SOURCE_SERVICE_NAME_FIELD,
-  SOURCE_SESSION_ID_FIELD,
-  SOURCE_URL_FIELD,
-  WEB_VITAL_NAMES,
 } from '../../common/sessions';
 import {
   SESSION_ATTRIBUTE_FIELDS,
@@ -28,6 +25,11 @@ import {
   sessionsIndexMappings,
   sessionsIndexTemplate,
 } from './sessions_spec';
+import {
+  SOURCE_SERVICE_NAME_FIELD,
+  SOURCE_SESSION_ID_FIELD,
+  SOURCE_URL_FIELD,
+} from './source_fields';
 
 describe('sessions transform spec', () => {
   const transform = buildSessionsTransform();
@@ -102,10 +104,24 @@ describe('sessions transform spec', () => {
     );
   });
 
-  it('groups by service.name and session.id', () => {
+  it('groups by the stored service.name and session.id fields, not their passthrough names', () => {
     expect(transform.pivot?.group_by).toEqual({
-      'service.name': { terms: { field: SOURCE_SERVICE_NAME_FIELD } },
-      'session.id': { terms: { field: SOURCE_SESSION_ID_FIELD } },
+      'service.name': { terms: { field: 'resource.attributes.service.name' } },
+      'session.id': { terms: { field: 'attributes.session.id' } },
+    });
+  });
+
+  it('matches EDOT Browser events by event or span name', () => {
+    expect(transform.pivot?.aggregations?.page_view_count.filter).toEqual({
+      bool: {
+        should: [
+          { term: { event_name: 'documentLoad' } },
+          { term: { name: 'documentLoad' } },
+          { term: { event_name: 'browser.navigation' } },
+          { term: { name: 'browser.navigation' } },
+        ],
+        minimum_should_match: 1,
+      },
     });
   });
 
@@ -124,7 +140,7 @@ describe('sessions transform spec', () => {
         'user_seen',
         'user_agent_seen',
         'geo_seen',
-        ...WEB_VITAL_NAMES,
+        ...CORE_WEB_VITALS,
       ])
     );
     // url.full is a wildcard field in the OTel templates: terms works, top_metrics does not.
@@ -195,7 +211,7 @@ describe('sessions transform spec', () => {
     const script = sessionsDestPipeline.processors?.[0]?.script;
     expect(script?.params).toEqual({
       fields: SESSION_ATTRIBUTE_FIELDS,
-      vitals: [...WEB_VITAL_NAMES],
+      vitals: [...CORE_WEB_VITALS],
       journeySize: SESSIONS_JOURNEY_SIZE,
     });
   });

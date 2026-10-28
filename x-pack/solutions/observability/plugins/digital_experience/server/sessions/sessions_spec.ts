@@ -11,8 +11,18 @@ import type {
   QueryDslQueryContainer,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { TELEMETRY_SDK_LANGUAGE } from '@kbn/apm-types';
-import { BROWSER_SDK_LANGUAGE } from '../../common/otel_data';
+import { OTEL_EVENT_NAME, SERVICE_NAME, SESSION_ID, TELEMETRY_SDK_LANGUAGE } from '@kbn/apm-types';
+import { CORE_WEB_VITALS, type CoreWebVital } from '../../common/core_web_vitals';
+import {
+  BROWSER_SDK_LANGUAGE,
+  EVENT_CLICK,
+  EVENT_DOCUMENT_LOAD,
+  EVENT_EXCEPTION,
+  EVENT_NAVIGATION,
+  EVENT_USER_ACTION_CLICK,
+  EVENT_WEB_VITAL,
+  OTEL_SPAN_NAME,
+} from '../../common/otel_data';
 import {
   SESSIONS_DEFAULT_FREQUENCY,
   SESSIONS_INDEX,
@@ -27,14 +37,17 @@ import {
   SESSIONS_SOURCE_INDICES,
   SESSIONS_SYNC_DELAY,
   SESSIONS_VERSION,
+  sessionsTransformId,
+} from '../../common/sessions';
+import { partitionFilters, type SessionsPartition } from './partitions';
+import {
+  SOURCE_EVENT_OUTCOME_FIELD,
   SOURCE_SERVICE_NAME_FIELD,
   SOURCE_SESSION_ID_FIELD,
   SOURCE_URL_FIELD,
-  WEB_VITAL_NAMES,
-  sessionsTransformId,
-  type WebVitalName,
-} from '../../common/sessions';
-import { partitionFilters, type SessionsPartition } from './partitions';
+  SOURCE_WEB_VITAL_NAME_FIELD,
+  SOURCE_WEB_VITAL_VALUE_FIELD,
+} from './source_fields';
 
 // `managed` makes the Transforms and Index Management UIs warn before editing or deleting these.
 const SESSIONS_META = { managed: true, managed_by: SESSIONS_MANAGED_BY, version: SESSIONS_VERSION };
@@ -44,17 +57,19 @@ const anyOf = (...clauses: QueryDslQueryContainer[]): QueryDslQueryContainer => 
 });
 
 const eventNamed = (...names: string[]): QueryDslQueryContainer =>
-  anyOf(...names.flatMap((name) => [{ term: { event_name: name } }, { term: { name } }]));
+  anyOf(
+    ...names.flatMap((name) => [
+      { term: { [OTEL_EVENT_NAME]: name } },
+      { term: { [OTEL_SPAN_NAME]: name } },
+    ])
+  );
 
-export const PAGE_VIEW_FILTER = eventNamed('documentLoad', 'browser.navigation');
-export const CLICK_FILTER = eventNamed('click', 'browser.user_action.click');
-export const ERROR_FILTER = anyOf(eventNamed('exception'), {
-  term: { 'attributes.event.outcome': 'failure' },
+export const PAGE_VIEW_FILTER = eventNamed(EVENT_DOCUMENT_LOAD, EVENT_NAVIGATION);
+export const CLICK_FILTER = eventNamed(EVENT_CLICK, EVENT_USER_ACTION_CLICK);
+export const ERROR_FILTER = anyOf(eventNamed(EVENT_EXCEPTION), {
+  term: { [SOURCE_EVENT_OUTCOME_FIELD]: 'failure' },
 });
-export const WEB_VITAL_FILTER = eventNamed('browser.web_vital');
-
-export const WEB_VITAL_NAME_FIELD = 'attributes.browser.web_vital.name';
-export const WEB_VITAL_VALUE_FIELD = 'attributes.browser.web_vital.value';
+export const WEB_VITAL_FILTER = eventNamed(EVENT_WEB_VITAL);
 
 /**
  * Candidate source fields per summarized attribute, in priority order. The dest
@@ -152,17 +167,17 @@ const pageUrls = (size: number, order: { first: 'asc' } | { last: 'desc' }) => (
 });
 
 // Names match in any case: semconv writes `cls`, the web-vitals library `CLS`.
-const webVitalAgg = (name: WebVitalName) => ({
+const webVitalAgg = (name: CoreWebVital) => ({
   filter: {
     bool: {
       filter: [
         WEB_VITAL_FILTER,
-        { term: { [WEB_VITAL_NAME_FIELD]: { value: name, case_insensitive: true } } },
+        { term: { [SOURCE_WEB_VITAL_NAME_FIELD]: { value: name, case_insensitive: true } } },
       ],
     },
   },
   aggs: {
-    p75: { percentiles: { field: WEB_VITAL_VALUE_FIELD, percents: [75] } },
+    p75: { percentiles: { field: SOURCE_WEB_VITAL_VALUE_FIELD, percents: [75] } },
   },
 });
 
@@ -202,7 +217,7 @@ export const sessionsIndexMappings = {
     },
     web_vitals: {
       properties: Object.fromEntries(
-        WEB_VITAL_NAMES.map((name) => [name, { type: 'double' as const }])
+        CORE_WEB_VITALS.map((name) => [name, { type: 'double' as const }])
       ),
     },
   },
@@ -233,7 +248,7 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
         lang: 'painless',
         params: {
           fields: SESSION_ATTRIBUTE_FIELDS,
-          vitals: [...WEB_VITAL_NAMES],
+          vitals: [...CORE_WEB_VITALS],
           journeySize: SESSIONS_JOURNEY_SIZE,
         },
         source: `
@@ -283,6 +298,7 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
             def value = values['75.0'] != null ? values['75.0'] : values['75'];
             return value instanceof Number ? value : null;
           }
+          // Mirrored by toPagePath in common/sessions.ts; both must match common/page_path_cases.ts.
           String pathOf(def raw) {
             String s = clean(raw);
             if (s == null) { return null; }
@@ -327,7 +343,8 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
           ctx.click_count = countOf(ctx.click_count);
           ctx.error_count = countOf(ctx.error_count);
           ctx.has_error = ctx.error_count > 0;
-          ctx.bounced = ctx.page_view_count <= 1;
+          // A session without a captured page view isn't a bounce: there was no page to leave.
+          ctx.bounced = ctx.page_view_count == 1;
 
           // Pages in first-view order, from the earliest page-view URLs only, so a page that
           // is missing from them is never skipped over by a later one.
@@ -394,7 +411,7 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
           'pages',
           'exit',
           ...Object.keys(SESSION_ATTRIBUTE_GROUPS),
-          ...WEB_VITAL_NAMES,
+          ...CORE_WEB_VITALS,
         ],
         ignore_missing: true,
       },
@@ -445,8 +462,8 @@ export const buildSessionsTransform = ({
   _meta: { ...SESSIONS_META, partition: partition.index, partitions: partition.count },
   pivot: {
     group_by: {
-      'service.name': { terms: { field: SOURCE_SERVICE_NAME_FIELD } },
-      'session.id': { terms: { field: SOURCE_SESSION_ID_FIELD } },
+      [SERVICE_NAME]: { terms: { field: SOURCE_SERVICE_NAME_FIELD } },
+      [SESSION_ID]: { terms: { field: SOURCE_SESSION_ID_FIELD } },
     },
     aggregations: {
       start_time: { min: { field: '@timestamp' } },
@@ -460,7 +477,7 @@ export const buildSessionsTransform = ({
       ...Object.fromEntries(
         Object.entries(SESSION_ATTRIBUTE_GROUPS).map(([name, fields]) => [name, latestOf(fields)])
       ),
-      ...Object.fromEntries(WEB_VITAL_NAMES.map((name) => [name, webVitalAgg(name)])),
+      ...Object.fromEntries(CORE_WEB_VITALS.map((name) => [name, webVitalAgg(name)])),
     },
   },
 });

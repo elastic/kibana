@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { SOURCE_SESSION_ID_FIELD } from '../../common/sessions';
+import { SOURCE_SESSION_ID_FIELD } from './source_fields';
 
 export interface SessionsPartition {
   index: number;

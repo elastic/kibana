@@ -22,7 +22,6 @@ import type {
 import type { DigitalExperienceConfig } from './config';
 import { registerDigitalExperienceFeature } from './register_feature';
 import { getGlobalDigitalExperienceServerRouteRepository } from './routes/get_global_digital_experience_route_repository';
-import { registerSessionsRoutes } from './routes/sessions_routes';
 import {
   registerSessionsHealthTask,
   scheduleSessionsHealthTask,
@@ -56,6 +55,7 @@ export class Plugin
     registerDigitalExperienceFeature(plugins.features);
 
     const { buildFlavor } = this.initializerContext.env.packageInfo;
+    const settings = this.config.sessions;
     registerRoutes({
       core,
       logger: this.logger,
@@ -64,12 +64,11 @@ export class Plugin
         plugins: { apmDataAccess: plugins.apmDataAccess },
         isServerless: buildFlavor === 'serverless',
         isUxEnabled: plugins.ux !== undefined,
+        sessionsSettings: settings,
       },
       runDevModeChecks: this.initializerContext.env.mode.dev,
     });
 
-    const settings = this.config.sessions;
-    registerSessionsRoutes({ router: core.http.createRouter(), logger: this.logger, settings });
     if (plugins.taskManager) {
       registerSessionsHealthTask({
         core,

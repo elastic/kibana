@@ -60,7 +60,11 @@ The journey lists distinct pages in first-view order (revisits are not repeated)
 page-view URLs. The OTel templates map `url.*` fields as `wildcard`, which `top_metrics` cannot
 collect, and `scripted_metric` is not available on serverless, so the pages come from `terms`
 buckets with first/last view times. If the dest pipeline fails on a summary, the session is still
-indexed, with the failure in `error.message`.
+indexed, with the failure in `error.message`. Its counts are missing, so the list and its KPIs leave
+it out and report how many there are (`failedSummaries`).
+
+A session bounced when it has exactly one page view. Sessions without a captured page view (only
+clicks or errors) aren't bounces, and the bounce rate is over sessions with at least one page view.
 
 ### Enabling sessions
 
@@ -95,8 +99,10 @@ not. The status route reports who last enabled sessions, and the roles or API ke
 run with, only to users who can set sessions up.
 
 Enabling again is safe. It refreshes the transforms' stored credentials to the enabling user,
-restarts failed transforms, replaces transforms left over from a previous version, and applies a
-changed `frequency` or partition count.
+restarts failed transforms, replaces transforms left over from an older version, and applies a
+changed `frequency` or partition count. It never replaces transforms from a newer version (after a
+Kibana rollback, or from an older node during a rolling upgrade): that would delete the newer
+summaries, so enabling fails with a 409 and the status asks to upgrade Kibana instead.
 
 The transforms, pipeline and index template are marked `managed`, so the Transforms and Index
 Management UIs warn before anyone edits or deletes them there. There is no disable action in
@@ -129,8 +135,9 @@ Settings changes take effect after a user with that privilege enables sessions a
 The status route reports the drift until then.
 
 A background task (`digital_experience:sessions-health`, every 5 minutes) only reads transform
-health, version and lag. It logs when transforms are degraded, lagging (more than three missed
-checkpoints plus the sync delay behind, at least 5 minutes) or need an update. It never creates or
+health, version and lag. It logs when transforms become degraded or lagging (more than three missed
+checkpoints plus the sync delay behind, at least 5 minutes), recover, need an update, or come from a
+newer Kibana: once per change, not on every run. It never creates or
 updates a transform: an update re-stamps the transform with the updater's privileges, which as the
 internal user would bypass the enabling user's index privileges. If transforms fall behind under
 peak traffic, they lag and then catch up; no data is lost.
@@ -144,7 +151,8 @@ peak traffic, they lag and then catch up; no data is lost.
 
 Session routes require `read_digital_experience` and query Elasticsearch as the current user, so
 readers also need `read` on `digital-experience-sessions-*` (and on the source indices for the
-session detail timeline):
+session detail timeline). Without it they answer 403 naming those privileges; other failures are
+logged and answer 500 without Elasticsearch details:
 
 - `GET /internal/digital_experience/sessions/status`
 - `GET /internal/digital_experience/applications/{serviceName}/sessions`: search, facets, sorting,
@@ -158,7 +166,7 @@ session detail timeline):
 - `server/routes/applications/`: the list's route, its merge step and one folder per source (`otel/`,
   `classic/`); helpers shared across features are in `server/lib/helpers/`.
 - `server/sessions/`: the sessions transform spec, setup, status and health task, with its routes in
-  `server/routes/sessions_routes.ts`.
+  `server/routes/sessions/`.
 - `public/pages/`: one folder per page (`applications_list/`, `application_details/`) with its own
   components, hooks and utils; what several pages share is in `public/components/`, `public/hooks/`
   and `public/utils/`. `public/application/` is the app shell.

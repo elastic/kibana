@@ -33,6 +33,7 @@ import {
   sessionsDestPipeline,
   sessionsIndexTemplate,
 } from './sessions_spec';
+import { SessionsNewerVersionError } from './sessions_newer_version_error';
 import { SessionsPrivilegesError } from './sessions_privileges_error';
 import { SessionsRestrictedReadError } from './sessions_restricted_read_error';
 
@@ -149,6 +150,11 @@ const versionOf = (transform: TransformGetTransformTransformSummary): number | n
   return Number.isFinite(version) ? version : null;
 };
 
+const newestVersionOf = (transforms: TransformGetTransformTransformSummary[]): number | null => {
+  const versions = transforms.map(versionOf).filter((v): v is number => v != null);
+  return versions.length > 0 ? Math.max(...versions) : null;
+};
+
 /** One transform per configured partition, all writing to the same dest index. */
 export const buildSessionsTransforms = ({ frequency, partitions }: SessionsSettings) =>
   Array.from({ length: partitions }, (_, index) =>
@@ -185,6 +191,13 @@ export const enableSessions = async ({
   }
 
   const client = esClient.asSecondaryAuthUser;
+  const installed = await managedTransforms(client);
+  // Never downgrade: that would delete the newer transforms and their summaries.
+  const newestVersion = newestVersionOf(installed);
+  if (newestVersion != null && newestVersion > SESSIONS_VERSION) {
+    throw new SessionsNewerVersionError(newestVersion, SESSIONS_VERSION);
+  }
+
   await client.ingest.putPipeline(sessionsDestPipeline);
   await client.indices.putIndexTemplate(sessionsIndexTemplate);
 
@@ -194,15 +207,14 @@ export const enableSessions = async ({
     _meta: { ...transform._meta, ...enabledMeta },
   }));
   const desiredIds = new Set(desired.map(({ transform_id: id }) => id));
-  const installed = await managedTransforms(client);
 
   // Same-version transforms share the dest index and write the same document ids, so a
-  // repartition keeps the index; a previous version's dest index is dropped once.
+  // repartition keeps the index; an older version's dest index is dropped once.
   const droppedDestIndices = new Set<string>();
   for (const stale of installed.filter(({ id }) => !desiredIds.has(id))) {
     const destIndex = stale.dest.index;
     const dropDest =
-      versionOf(stale) !== SESSIONS_VERSION &&
+      (versionOf(stale) ?? 0) < SESSIONS_VERSION &&
       destIndex != null &&
       !droppedDestIndices.has(destIndex);
     logger.info(
@@ -311,7 +323,7 @@ const transformStatus = (
     reason = `${Math.round(
       (lagSeconds ?? 0) / 60
     )} minutes behind; the transform can't keep up with session traffic`;
-  } else if (version !== SESSIONS_VERSION) {
+  } else if ((version ?? 0) < SESSIONS_VERSION) {
     health = 'outdated';
   }
 
@@ -391,8 +403,9 @@ export const getSessionsStatus = async (
     .sort((a, b) => (a.partition ?? 0) - (b.partition ?? 0));
   const current = statuses.filter(({ version }) => version === SESSIONS_VERSION);
   const worst = statuses.reduce((a, b) => (HEALTH_RANK[b.health] > HEALTH_RANK[a.health] ? b : a));
-  const versions = statuses.map(({ version }) => version).filter((v): v is number => v != null);
-  const installedVersion = versions.length > 0 ? Math.max(...versions) : null;
+  const installedVersion = newestVersionOf(installed);
+  // Set up by a newer Kibana (rollback, rolling upgrade): this one can't update it, only report.
+  const newer = installedVersion != null && installedVersion > SESSIONS_VERSION;
   const lags = statuses
     .map(({ lagSeconds }) => lagSeconds)
     .filter((lag): lag is number => lag != null);
@@ -401,8 +414,10 @@ export const getSessionsStatus = async (
   const configDrift =
     current.length !== settings.partitions ||
     current.some(({ frequency }) => frequency !== settings.frequency);
-  const needsUpdate = outdated || configDrift;
-  const updateReason = outdated
+  const needsUpdate = !newer && (outdated || configDrift);
+  const updateReason = newer
+    ? `Sessions transforms are from version ${installedVersion}, newer than this Kibana supports (version ${SESSIONS_VERSION}); upgrade Kibana to manage them.`
+    : outdated
     ? `Sessions transforms are from version ${installedVersion}; enable sessions again to update them to version ${SESSIONS_VERSION}.`
     : configDrift
     ? `Configured ${settings.partitions} partition(s) at ${settings.frequency}, installed ${current.length}; enable sessions again to apply.`

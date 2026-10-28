@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 /** Thrown before any setup write when the enabling user lacks a required privilege. */
 export class SessionsPrivilegesError extends Error {
   constructor(public readonly missingPrivileges: string[]) {
     super(
-      `Enabling sessions requires these Elasticsearch privileges: ${missingPrivileges.join(', ')}`
+      i18n.translate('xpack.digitalExperience.sessions.api.missingPrivileges', {
+        defaultMessage: 'Enabling sessions requires these Elasticsearch privileges: {privileges}',
+        values: { privileges: missingPrivileges.join(', ') },
+      })
     );
     this.name = 'SessionsPrivilegesError';
   }

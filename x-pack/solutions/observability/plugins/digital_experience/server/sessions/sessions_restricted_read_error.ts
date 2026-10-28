@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 /**
  * Thrown before any setup write when the enabling user's read on the source indices is filtered
  * by document- or field-level security, or can't be checked. The transforms summarize everything
@@ -16,14 +18,19 @@ export class SessionsRestrictedReadError extends Error {
     public readonly restrictedIndices: string[],
     public readonly reason: 'filtered' | 'unverifiable'
   ) {
+    const indices = restrictedIndices.join(', ');
     super(
       reason === 'filtered'
-        ? `Enabling sessions requires read on ${restrictedIndices.join(
-            ', '
-          )} without document- or field-level security, as the sessions transforms summarize what the enabling user can read for everyone who reads sessions.`
-        : `Elasticsearch can't report the index privileges of an API key with its own role descriptors, so enabling sessions can't confirm unrestricted read on ${restrictedIndices.join(
-            ', '
-          )}. Enable sessions as a user, or with an API key without role descriptors.`
+        ? i18n.translate('xpack.digitalExperience.sessions.api.filteredRead', {
+            defaultMessage:
+              'Enabling sessions requires read on {indices} without document- or field-level security, as the sessions transforms summarize what the enabling user can read for everyone who reads sessions.',
+            values: { indices },
+          })
+        : i18n.translate('xpack.digitalExperience.sessions.api.unverifiableRead', {
+            defaultMessage:
+              "Elasticsearch can't report the index privileges of an API key with its own role descriptors, so enabling sessions can't confirm unrestricted read on {indices}. Enable sessions as a user, or with an API key without role descriptors.",
+            values: { indices },
+          })
     );
     this.name = 'SessionsRestrictedReadError';
   }

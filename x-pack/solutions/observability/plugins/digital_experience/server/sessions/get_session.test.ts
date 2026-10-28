@@ -6,7 +6,7 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { SOURCE_SERVICE_NAME_FIELD, SOURCE_SESSION_ID_FIELD } from '../../common/sessions';
+import { SOURCE_SERVICE_NAME_FIELD, SOURCE_SESSION_ID_FIELD } from './source_fields';
 import { buildPageVisits, buildTimeline, getSession, type OtelSource } from './get_session';
 
 const START = '2026-10-20T10:00:00.000Z';

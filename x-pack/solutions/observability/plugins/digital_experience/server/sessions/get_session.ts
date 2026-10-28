@@ -5,13 +5,29 @@
  * 2.0.
  */
 
+import {
+  EVENT_OUTCOME,
+  EXCEPTION_MESSAGE,
+  EXCEPTION_TYPE,
+  OTEL_EVENT_NAME,
+  URL_FULL,
+} from '@kbn/apm-types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { CORE_WEB_VITALS, type CoreWebVital } from '../../common/core_web_vitals';
+import {
+  EVENT_CLICK,
+  EVENT_DOCUMENT_LOAD,
+  EVENT_EXCEPTION,
+  EVENT_NAVIGATION,
+  EVENT_USER_ACTION_CLICK,
+  EVENT_WEB_VITAL,
+  OTEL_SPAN_NAME,
+  WEB_VITAL_NAME,
+  WEB_VITAL_VALUE,
+} from '../../common/otel_data';
 import {
   SESSIONS_INDEX_PATTERN,
   SESSIONS_SOURCE_INDICES,
-  SOURCE_SERVICE_NAME_FIELD,
-  SOURCE_SESSION_ID_FIELD,
-  WEB_VITAL_NAMES,
   emptyWebVitals,
   toPagePath,
   type SessionDetailResponse,
@@ -19,9 +35,9 @@ import {
   type SessionSummary,
   type SessionTimelineEvent,
   type SessionTimelineEventKind,
-  type WebVitalName,
 } from '../../common/sessions';
 import { toSessionSummary, type SessionDocument } from './list_sessions';
+import { SOURCE_SERVICE_NAME_FIELD, SOURCE_SESSION_ID_FIELD } from './source_fields';
 
 /** Max raw events loaded for the session timeline. */
 export const SESSION_TIMELINE_SIZE = 1000;
@@ -30,8 +46,8 @@ const TIMELINE_SLACK_MS = 60_000;
 
 const TIMELINE_SOURCE = [
   '@timestamp',
-  'name',
-  'event_name',
+  OTEL_SPAN_NAME,
+  OTEL_EVENT_NAME,
   'duration',
   'trace_id',
   'span_id',
@@ -79,30 +95,30 @@ const attributeNumber = (source: OtelSource, key: string): number | null => {
 const eventNameOf = (source: OtelSource): string => source.event_name ?? source.name ?? '';
 
 const pageOf = (source: OtelSource): string | null =>
-  toPagePath(attributeString(source, 'url.full') ?? attributeString(source, 'http.url'));
+  toPagePath(attributeString(source, URL_FULL) ?? attributeString(source, 'http.url'));
 
-const webVitalOf = (source: OtelSource): { name: WebVitalName; value: number } | null => {
-  if (eventNameOf(source) !== 'browser.web_vital') {
+const webVitalOf = (source: OtelSource): { name: CoreWebVital; value: number } | null => {
+  if (eventNameOf(source) !== EVENT_WEB_VITAL) {
     return null;
   }
-  const name = attributeString(source, 'browser.web_vital.name')?.toLowerCase();
-  const value = attributeNumber(source, 'browser.web_vital.value');
-  const vital = WEB_VITAL_NAMES.find((candidate) => candidate === name);
+  const name = attributeString(source, WEB_VITAL_NAME)?.toLowerCase();
+  const value = attributeNumber(source, WEB_VITAL_VALUE);
+  const vital = CORE_WEB_VITALS.find((candidate) => candidate === name);
   return vital && value != null ? { name: vital, value } : null;
 };
 
 const classify = (source: OtelSource): SessionTimelineEventKind => {
   const name = eventNameOf(source);
-  if (name === 'browser.web_vital') {
+  if (name === EVENT_WEB_VITAL) {
     return 'web_vital';
   }
-  if (name === 'exception' || attributeString(source, 'event.outcome') === 'failure') {
+  if (name === EVENT_EXCEPTION || attributeString(source, EVENT_OUTCOME) === 'failure') {
     return 'error';
   }
-  if (name === 'click' || name === 'browser.user_action.click') {
+  if (name === EVENT_CLICK || name === EVENT_USER_ACTION_CLICK) {
     return 'click';
   }
-  if (name === 'documentLoad' || name === 'browser.navigation') {
+  if (name === EVENT_DOCUMENT_LOAD || name === EVENT_NAVIGATION) {
     return 'page_view';
   }
   return typeof source.duration === 'number' ? 'span' : 'log';
@@ -111,24 +127,24 @@ const classify = (source: OtelSource): SessionTimelineEventKind => {
 const detailOf = (kind: SessionTimelineEventKind, source: OtelSource): string | null => {
   switch (kind) {
     case 'error':
-      return attributeString(source, 'exception.message') ?? attributeString(source, 'error.type');
+      return attributeString(source, EXCEPTION_MESSAGE) ?? attributeString(source, 'error.type');
     case 'click':
       return (
         attributeString(source, 'browser.css_selector') ?? attributeString(source, 'target_xpath')
       );
     case 'web_vital':
-      return attributeString(source, 'browser.web_vital.value');
+      return attributeString(source, WEB_VITAL_VALUE);
     default:
-      return attributeString(source, 'url.full') ?? attributeString(source, 'http.url');
+      return attributeString(source, URL_FULL) ?? attributeString(source, 'http.url');
   }
 };
 
 const displayNameOf = (kind: SessionTimelineEventKind, source: OtelSource): string => {
   if (kind === 'web_vital') {
-    return attributeString(source, 'browser.web_vital.name')?.toUpperCase() ?? 'Web vital';
+    return attributeString(source, WEB_VITAL_NAME)?.toUpperCase() ?? 'Web vital';
   }
   if (kind === 'error') {
-    return attributeString(source, 'exception.type') ?? 'Error';
+    return attributeString(source, EXCEPTION_TYPE) ?? 'Error';
   }
   return eventNameOf(source) || kind;
 };
