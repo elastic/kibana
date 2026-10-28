@@ -22,6 +22,7 @@ import type {
   EvaluatorRegistry,
   RegisteredEvaluatorDefinition,
 } from './evaluators/types';
+import type { EvaluateFn } from './evaluation/create_evaluate_contract';
 import type { OnlineScoreService } from './storage/scores/online_score_service';
 import type { EvalsTaskProvider } from './task_providers/types';
 
@@ -63,6 +64,13 @@ export interface EvalsPluginStart {
 
   listModelConnectors?: (request: KibanaRequest) => Promise<ModelConnectorSummary[]>;
   onlineScoreService?: OnlineScoreService;
+  /**
+   * Grades a subject in-process with the same evaluator execution as `_evaluate`. Throws
+   * `EvaluationExecutionError` when the input, the trace, or the caller's privileges to read
+   * it rule out evaluating; failures of individual evaluators are returned as `error`
+   * results instead.
+   */
+  evaluate?: EvaluateFn;
 }
 
 export type EvalsWorkflowsManagementSetup = Pick<WorkflowsServerPluginSetup, 'management'>;
