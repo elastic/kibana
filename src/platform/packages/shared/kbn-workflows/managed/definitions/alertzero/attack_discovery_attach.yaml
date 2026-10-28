@@ -179,6 +179,7 @@ steps:
     on-failure:
       continue: true
 
+  # Counts only hosts and users: `collect_impact_entities` keeps the step's default entity types.
   - name: journal_impact_recorded
     type: workflow.execute
     with:
@@ -187,8 +188,15 @@ steps:
       inputs:
         conversation_id: "{{ inputs.investigation_id }}"
         message: >-
-          {% if steps.attach_impact.output.entities != blank %}Recorded impact:
-          {{ steps.collect_impact_entities.output.entities | size }} host(s) and user(s).{% elsif
+          {%- assign impact_hosts = steps.collect_impact_entities.output.entities | where:
+          'type', 'host' | size -%}{%- assign impact_users =
+          steps.collect_impact_entities.output.entities | where: 'type', 'user' | size
+          -%}{% if steps.attach_impact.output.entities != blank %}Recorded impact from
+          Attack Discovery {{ inputs.attack_discovery_id }}: {{ impact_hosts }} host{% if
+          impact_hosts != 1 %}s{% endif %}, {{ impact_users }} user{% if impact_users != 1
+          %}s{% endif %}{% if steps.collect_impact_entities.output.truncated == true %}
+          (only its most alerted were recorded){% endif %}, merged into this
+          Investigation's impact.{% elsif
           steps.attach_impact.error != blank %}Could not record impact. See attach execution
           {{ execution.id }}.{% elsif steps.collect_impact_entities.error != blank %}Could not read
           the correlated alerts' hosts and users, so no impact was recorded. See attach execution
