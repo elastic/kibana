@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { allOrAnyStringOrArray } from '../../schema/common';
 import { indicatorSchema } from '../../schema/indicators';
 import {
@@ -17,26 +17,30 @@ import {
 } from '../../schema/slo';
 import { timeWindowSchema } from '../../schema/time_window';
 
-const createSLOParamsSchema = z.object({
-  body: z.object({
-    name: z.string(),
-    description: z.string(),
-    indicator: indicatorSchema,
-    timeWindow: timeWindowSchema,
-    budgetingMethod: budgetingMethodSchema,
-    objective: objectiveSchema,
-    id: sloIdSchema.optional(),
-    settings: optionalSettingsSchema.optional(),
-    tags: tagsSchema.optional(),
-    groupBy: allOrAnyStringOrArray.optional(),
-    revision: z.number().optional(),
-    artifacts: dashboardsWithIdSchema.optional(),
-  }),
-});
+const createSLOParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.object({
+      name: z.string(),
+      description: z.string(),
+      indicator: indicatorSchema,
+      timeWindow: timeWindowSchema,
+      budgetingMethod: budgetingMethodSchema,
+      objective: objectiveSchema,
+      id: sloIdSchema.optional(),
+      settings: optionalSettingsSchema.optional(),
+      tags: tagsSchema.optional(),
+      groupBy: allOrAnyStringOrArray.optional(),
+      revision: z.number().optional(),
+      artifacts: dashboardsWithIdSchema.optional(),
+    }),
+  })
+);
 
-const createSLOResponseSchema = z.object({
-  id: sloIdSchema,
-});
+const createSLOResponseSchema = lazySchema(() =>
+  z.object({
+    id: sloIdSchema,
+  })
+);
 
 type CreateSLOInput = z.input<typeof createSLOParamsSchema.shape.body>;
 type CreateSLOParams = z.output<typeof createSLOParamsSchema.shape.body>;

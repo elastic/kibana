@@ -7,22 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { GraphNodeSchema } from './base';
 
 export const LoopBreakNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('loop-break'),
-  loopExitNodeId: z.string(),
-  loopStepId: z.string(),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('loop-break')),
+  loopExitNodeId: lazySchema(() => z.string()),
+  loopStepId: lazySchema(() => z.string()),
 });
 
 export type LoopBreakNode = z.infer<typeof LoopBreakNodeSchema>;
 
 export const LoopContinueNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('loop-continue'),
-  loopExitNodeId: z.string(),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('loop-continue')),
+  loopExitNodeId: lazySchema(() => z.string()),
 });
 
 export type LoopContinueNode = z.infer<typeof LoopContinueNodeSchema>;

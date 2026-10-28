@@ -6,7 +6,7 @@
  */
 
 import dedent from 'dedent';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
@@ -18,9 +18,9 @@ import { observabilityAttachmentDataSchema } from './observability_attachment_da
 const GET_HOST_DETAILS_TOOL_ID = 'get_host_details';
 
 const hostDataSchema = observabilityAttachmentDataSchema.extend({
-  hostName: z.string().max(MAX_SHORT_STRING_LENGTH),
-  start: z.string().max(MAX_SHORT_STRING_LENGTH),
-  end: z.string().max(MAX_SHORT_STRING_LENGTH),
+  hostName: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH)),
+  start: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH)),
+  end: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH)),
 });
 
 export type HostAttachmentData = z.infer<typeof hostDataSchema>;

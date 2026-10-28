@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type {
   BuiltinToolDefinition,
@@ -28,32 +28,34 @@ import {
 import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
 import type { ProposalsService } from '../services/proposals_service';
 
-export const createProposalToolSchema = z.object({
-  title: z
-    .string()
-    .min(1)
-    .max(MAX_TITLE_LENGTH)
-    .describe('Short plain-text label naming the proposed action, no Markdown.'),
-  comment: createProposalRequestSchema.shape.comment
-    .min(1)
-    .describe(
-      'What to do and why, as Markdown for the analyst who carries it out: the concrete steps, commands or config changes, and the findings that support them.'
+export const createProposalToolSchema = lazySchema(() =>
+  z.object({
+    title: z
+      .string()
+      .min(1)
+      .max(MAX_TITLE_LENGTH)
+      .describe('Short plain-text label naming the proposed action, no Markdown.'),
+    comment: createProposalRequestSchema.shape.comment
+      .min(1)
+      .describe(
+        'What to do and why, as Markdown for the analyst who carries it out: the concrete steps, commands or config changes, and the findings that support them.'
+      ),
+    origin: proposalOriginSchema.describe(
+      'The feature you are working for, as named in your instructions. It routes the proposal to that feature\'s queue; use "agent_builder" when none applies.'
     ),
-  origin: proposalOriginSchema.describe(
-    'The feature you are working for, as named in your instructions. It routes the proposal to that feature\'s queue; use "agent_builder" when none applies.'
-  ),
-  impact: proposalImpactSchema
-    .optional()
-    .describe('How disruptive carrying out the action is. Defaults to "low".'),
-  confidence: proposalConfidenceSchema
-    .optional()
-    .describe(
-      'How strongly the findings support that this action resolves the issue. Defaults to "medium".'
-    ),
-  category: proposalCategorySchema
-    .optional()
-    .describe('Grouping for the decision queue, when your instructions name one.'),
-});
+    impact: proposalImpactSchema
+      .optional()
+      .describe('How disruptive carrying out the action is. Defaults to "low".'),
+    confidence: proposalConfidenceSchema
+      .optional()
+      .describe(
+        'How strongly the findings support that this action resolves the issue. Defaults to "medium".'
+      ),
+    category: proposalCategorySchema
+      .optional()
+      .describe('Grouping for the decision queue, when your instructions name one.'),
+  })
+);
 
 export type CreateProposalToolParams = z.infer<typeof createProposalToolSchema>;
 

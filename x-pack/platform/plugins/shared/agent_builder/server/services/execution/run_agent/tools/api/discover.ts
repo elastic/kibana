@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { ApiTarget } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
@@ -21,17 +21,19 @@ export interface ApiDiscoverResultData {
   apis: ApiSummary[];
 }
 
-const discoverSchema = z.object({
-  target: targetSchema,
-  search: z
-    .string()
-    .optional()
-    .describe(
-      'Optional keyword to filter APIs by identifier, name, namespace, or description. ' +
-        'Leave empty to list all available APIs, though each target exposes hundreds of them, ' +
-        'so an unfiltered listing is large and may be truncated before you see it.'
-    ),
-});
+const discoverSchema = lazySchema(() =>
+  z.object({
+    target: targetSchema,
+    search: z
+      .string()
+      .optional()
+      .describe(
+        'Optional keyword to filter APIs by identifier, name, namespace, or description. ' +
+          'Leave empty to list all available APIs, though each target exposes hundreds of them, ' +
+          'so an unfiltered listing is large and may be truncated before you see it.'
+      ),
+  })
+);
 
 export const createDiscoverApisTool = (): InternalBuiltinToolDefinition<typeof discoverSchema> => {
   return {

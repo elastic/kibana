@@ -21,7 +21,7 @@ import {
   transformInternalReplacements,
 } from '@kbn/elastic-assistant-common';
 import { isResponseError } from '@kbn/es-errors';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { AttackAttachmentPayloadSchema } from '../../../common/cases/attachments/attack';
 import { validateAttackWorkflowTargets } from './workflow_validation';
 import { getCaseAlertAttachments, resolveRemovableAlertIds } from './resolve_removable_alerts';
@@ -43,11 +43,13 @@ interface AttackAlertIdsSource {
 }
 
 // Stored attributes carry more than the attach payload, so this does not reuse the strict schema.
-const StoredAttackAttachmentSchema = z.object({
-  type: z.literal(SECURITY_ATTACK_ATTACHMENT_TYPE),
-  attachmentId: z.string(),
-  metadata: z.object({ index: z.string() }),
-});
+const StoredAttackAttachmentSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(SECURITY_ATTACK_ATTACHMENT_TYPE),
+    attachmentId: z.string(),
+    metadata: z.object({ index: z.string() }),
+  })
+);
 
 /**
  * Stands in for the payload schema while `attackAttachments` is off, refusing every

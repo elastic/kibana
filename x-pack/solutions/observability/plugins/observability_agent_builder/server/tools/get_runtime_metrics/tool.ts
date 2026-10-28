@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -31,35 +31,37 @@ export type GetRuntimeMetricsToolResult = OtherResult<{
 
 const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 
-const getRuntimeMetricsToolSchema = z.object({
-  ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  serviceName: z
-    .string()
-    .max(MAX_SHORT_STRING_LENGTH)
-    .optional()
-    .describe('Filter to a specific service. If omitted, use kqlFilter to narrow results.'),
-  serviceEnvironment: z
-    .string()
-    .max(MAX_SHORT_STRING_LENGTH)
-    .optional()
-    .describe(
-      'The environment that the service is running in. Leave empty to query for all environments.'
-    ),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .default(20)
-    .describe('Maximum number of service nodes to return'),
-  kqlFilter: z
-    .string()
-    .max(MAX_KQL_FILTER_LENGTH)
-    .optional()
-    .describe(
-      'KQL filter to narrow down results. Examples: "service.name: ad", "host.name: web-*".'
-    ),
-});
+const getRuntimeMetricsToolSchema = lazySchema(() =>
+  z.object({
+    ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
+    serviceName: z
+      .string()
+      .max(MAX_SHORT_STRING_LENGTH)
+      .optional()
+      .describe('Filter to a specific service. If omitted, use kqlFilter to narrow results.'),
+    serviceEnvironment: z
+      .string()
+      .max(MAX_SHORT_STRING_LENGTH)
+      .optional()
+      .describe(
+        'The environment that the service is running in. Leave empty to query for all environments.'
+      ),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .default(20)
+      .describe('Maximum number of service nodes to return'),
+    kqlFilter: z
+      .string()
+      .max(MAX_KQL_FILTER_LENGTH)
+      .optional()
+      .describe(
+        'KQL filter to narrow down results. Examples: "service.name: ad", "host.name: web-*".'
+      ),
+  })
+);
 
 export function createGetRuntimeMetricsTool({
   core,

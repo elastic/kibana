@@ -5,32 +5,36 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 const commonDashboardSchema = {
-  id: z.string(),
-  title: z.string(),
-  description: z.string().optional(),
-  tags: z.array(z.string()).optional(),
+  id: lazySchema(() => z.string()),
+  title: lazySchema(() => z.string()),
+  description: lazySchema(() => z.string().optional()),
+  tags: lazySchema(() => z.array(z.string()).optional()),
 };
 
-export const linkedDashboardSchema = z.object({
-  ...commonDashboardSchema,
-  matchedBy: z.object({
-    fields: z.array(z.string()).optional(),
-    index: z.array(z.string()).optional(),
-    linked: z.boolean().optional(),
-  }),
-});
+export const linkedDashboardSchema = lazySchema(() =>
+  z.object({
+    ...commonDashboardSchema,
+    matchedBy: z.object({
+      fields: z.array(z.string()).optional(),
+      index: z.array(z.string()).optional(),
+      linked: z.boolean().optional(),
+    }),
+  })
+);
 
-export const suggestedDashboardSchema = z.object({
-  ...commonDashboardSchema,
-  matchedBy: z.object({
-    fields: z.array(z.string()).optional(),
-    index: z.array(z.string()).optional(),
-  }),
-  score: z.number(),
-});
+export const suggestedDashboardSchema = lazySchema(() =>
+  z.object({
+    ...commonDashboardSchema,
+    matchedBy: z.object({
+      fields: z.array(z.string()).optional(),
+      index: z.array(z.string()).optional(),
+    }),
+    score: z.number(),
+  })
+);
 
 export type LinkedDashboard = z.output<typeof linkedDashboardSchema>;
 export type SuggestedDashboard = z.output<typeof suggestedDashboardSchema>;

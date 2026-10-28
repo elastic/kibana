@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -18,39 +18,41 @@ import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-
 import { SmlSearchFilterType } from '@kbn/agent-builder-sml-plugin/server';
 import type { SmlToolsOptions } from './types';
 
-const smlSearchSchema = z.object({
-  query: z
-    .string()
-    .min(1)
-    .max(512)
-    .describe(
-      'Natural-language query describing what you are looking for. Combines BM25 (lexical) and semantic ' +
-        'retrieval via reciprocal rank fusion, so phrasing that does not literally appear in the asset can ' +
-        'still match. Pass "*" to return all available assets (e.g. for an inventory check).'
-    ),
-  size: z
-    .number()
-    .min(1)
-    .max(50)
-    .optional()
-    .describe('Maximum number of results to return (defaults to 10).'),
-  types: z
-    .array(z.string().max(200))
-    .max(20)
-    .optional()
-    .describe(
-      'Optional. Restrict results to one or more SML record types (e.g. ["dashboard", "lens"]). ' +
-        'ANY semantics — a record matches if its `type` is in this list. Omit to search all types.'
-    ),
-  tags: z
-    .array(z.string().max(200))
-    .max(20)
-    .optional()
-    .describe(
-      'Optional. Restrict results to records with any of these tags (e.g. ["production", "sales"]). ' +
-        'ANY semantics. Omit to ignore tags.'
-    ),
-});
+const smlSearchSchema = lazySchema(() =>
+  z.object({
+    query: z
+      .string()
+      .min(1)
+      .max(512)
+      .describe(
+        'Natural-language query describing what you are looking for. Combines BM25 (lexical) and semantic ' +
+          'retrieval via reciprocal rank fusion, so phrasing that does not literally appear in the asset can ' +
+          'still match. Pass "*" to return all available assets (e.g. for an inventory check).'
+      ),
+    size: z
+      .number()
+      .min(1)
+      .max(50)
+      .optional()
+      .describe('Maximum number of results to return (defaults to 10).'),
+    types: z
+      .array(z.string().max(200))
+      .max(20)
+      .optional()
+      .describe(
+        'Optional. Restrict results to one or more SML record types (e.g. ["dashboard", "lens"]). ' +
+          'ANY semantics — a record matches if its `type` is in this list. Omit to search all types.'
+      ),
+    tags: z
+      .array(z.string().max(200))
+      .max(20)
+      .optional()
+      .describe(
+        'Optional. Restrict results to records with any of these tags (e.g. ["production", "sales"]). ' +
+          'ANY semantics. Omit to ignore tags.'
+      ),
+  })
+);
 
 /**
  * Creates the sml_search tool.

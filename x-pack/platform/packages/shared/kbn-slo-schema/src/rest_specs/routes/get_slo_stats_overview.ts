@@ -4,27 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-const getSLOStatsOverviewParamsSchema = z.object({
-  query: z
-    .object({
-      kqlQuery: z.string().optional(),
-      filters: z.string().optional(),
-    })
-    .optional(),
-});
+const getSLOStatsOverviewParamsSchema = lazySchema(() =>
+  z.object({
+    query: z
+      .object({
+        kqlQuery: z.string().optional(),
+        filters: z.string().optional(),
+      })
+      .optional(),
+  })
+);
 
-const getSLOStatsOverviewResponseSchema = z.object({
-  violated: z.number(),
-  degrading: z.number(),
-  stale: z.number(),
-  healthy: z.number(),
-  noData: z.number(),
-  burnRateRules: z.number(),
-  burnRateActiveAlerts: z.number(),
-  burnRateRecoveredAlerts: z.number(),
-});
+const getSLOStatsOverviewResponseSchema = lazySchema(() =>
+  z.object({
+    violated: z.number(),
+    degrading: z.number(),
+    stale: z.number(),
+    healthy: z.number(),
+    noData: z.number(),
+    burnRateRules: z.number(),
+    burnRateActiveAlerts: z.number(),
+    burnRateRecoveredAlerts: z.number(),
+  })
+);
 
 type GetSLOStatsOverviewParams = NonNullable<
   z.output<typeof getSLOStatsOverviewParamsSchema.shape.query>

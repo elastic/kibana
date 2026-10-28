@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import type { ZodType } from '@kbn/zod';
 import {
   legacyMetricConfigSchemaNoESQL,
@@ -99,11 +99,13 @@ export const lensApiConfigLibItemSchemaNoESQL: ZodType<LensApiConfigLibItemNoESQ
 /**
  * The Lens response item returned from the server
  */
-export const lensResponseItemSchema = z
-  .object({
-    id: lensCommonSavedObjectSchemaV3.shape.id,
-    data: lensApiConfigLibItemSchemaNoESQL,
-    meta: asCodeMetaSchema,
-  })
-  .strict()
-  .meta({ id: 'visResponseItem', title: 'Visualization Response' });
+export const lensResponseItemSchema = lazySchema(() =>
+  z
+    .object({
+      id: lensCommonSavedObjectSchemaV3.shape.id,
+      data: lensApiConfigLibItemSchemaNoESQL,
+      meta: asCodeMetaSchema,
+    })
+    .strict()
+    .meta({ id: 'visResponseItem', title: 'Visualization Response' })
+);

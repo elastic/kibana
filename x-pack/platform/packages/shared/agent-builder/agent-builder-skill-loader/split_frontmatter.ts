@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { parse as parseYaml } from 'yaml';
 
 export type SplitFrontmatterResult =
@@ -15,7 +15,7 @@ export type SplitFrontmatterResult =
 const FRONTMATTER_REGEX = /^---[ \t]*\r?\n(?:([\s\S]*?)\r?\n)?---[ \t]*(?:\r?\n([\s\S]*))?$/;
 const BYTE_ORDER_MARK = '\uFEFF';
 
-const frontmatterObjectSchema = z.record(z.string(), z.unknown());
+const frontmatterObjectSchema = lazySchema(() => z.record(z.string(), z.unknown()));
 
 /**
  * Splits raw `SKILL.md` content into its YAML frontmatter object and the

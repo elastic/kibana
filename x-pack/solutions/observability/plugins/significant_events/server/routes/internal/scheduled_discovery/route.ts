@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
@@ -55,50 +55,54 @@ import {
   MIN_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
 } from '../../../../common/constants';
 
-const scheduledDiscoverySettingsSchema = z.object({
-  enabled: z.boolean().optional(),
-  detectionIntervalMinutes: z.number().min(MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES).optional(),
-  detectionBucketIntervalMinutes: z
-    .number()
-    .min(MIN_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES)
-    .max(MAX_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES)
-    .optional(),
-  detectionLookbackMinutes: z
-    .number()
-    .min(MIN_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES)
-    .optional(),
-  targetCoverageMinutes: z.number().min(MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES).optional(),
-  reviewIntervalMinutes: z.number().min(MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES).optional(),
-  discoveryBatchSize: z
-    .number()
-    .min(MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE)
-    .max(MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE)
-    .optional(),
-  maxReviewPasses: z
-    .number()
-    .min(MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES)
-    .max(MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES)
-    .optional(),
-  flakyRuleDetectionThreshold: z
-    .number()
-    .min(MIN_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD)
-    .max(MAX_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD)
-    .optional(),
-  flakyRuleProbeAfterMinutes: z
-    .number()
-    .min(MIN_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES)
-    .max(MAX_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES)
-    .optional(),
-  flakyRuleExemptSeverityScore: z
-    .number()
-    .min(MIN_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE)
-    .max(MAX_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE)
-    .optional(),
-});
+const scheduledDiscoverySettingsSchema = lazySchema(() =>
+  z.object({
+    enabled: z.boolean().optional(),
+    detectionIntervalMinutes: z.number().min(MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES).optional(),
+    detectionBucketIntervalMinutes: z
+      .number()
+      .min(MIN_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES)
+      .max(MAX_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES)
+      .optional(),
+    detectionLookbackMinutes: z
+      .number()
+      .min(MIN_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES)
+      .optional(),
+    targetCoverageMinutes: z.number().min(MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES).optional(),
+    reviewIntervalMinutes: z.number().min(MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES).optional(),
+    discoveryBatchSize: z
+      .number()
+      .min(MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE)
+      .max(MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE)
+      .optional(),
+    maxReviewPasses: z
+      .number()
+      .min(MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES)
+      .max(MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES)
+      .optional(),
+    flakyRuleDetectionThreshold: z
+      .number()
+      .min(MIN_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD)
+      .max(MAX_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD)
+      .optional(),
+    flakyRuleProbeAfterMinutes: z
+      .number()
+      .min(MIN_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES)
+      .max(MAX_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES)
+      .optional(),
+    flakyRuleExemptSeverityScore: z
+      .number()
+      .min(MIN_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE)
+      .max(MAX_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE)
+      .optional(),
+  })
+);
 
-const putScheduledDiscoverySettingsBodySchema = z.object({
-  scheduledDiscovery: scheduledDiscoverySettingsSchema,
-});
+const putScheduledDiscoverySettingsBodySchema = lazySchema(() =>
+  z.object({
+    scheduledDiscovery: scheduledDiscoverySettingsSchema,
+  })
+);
 
 // Maps each numeric `scheduledDiscovery` config field to its per-space UI setting
 // id and the default applied when neither the request nor the stored settings
@@ -168,9 +172,11 @@ const putScheduledDiscoverySettingsRoute = createServerRoute({
       requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
-  params: z.object({
-    body: putScheduledDiscoverySettingsBodySchema,
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: putScheduledDiscoverySettingsBodySchema,
+    })
+  ),
   handler: async ({
     params,
     request,

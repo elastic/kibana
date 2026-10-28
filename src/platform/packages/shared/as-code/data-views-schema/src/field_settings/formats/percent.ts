@@ -7,21 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { numeralPatternSchema } from './common';
 
-export const percentFormatSchema = z
-  .object({
-    type: z.literal('percent'),
-    params: z
-      .object({
-        pattern: numeralPatternSchema,
-      })
-      .optional(),
-  })
-  .meta({
-    id: 'kbn-field-format-percent',
-    title: 'Percent field format',
-    description:
-      'Formats a field into a percentage value following the defined pattern. The default pattern is defined by format:percent:defaultPattern advanced setting.',
-  });
+export const percentFormatSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('percent'),
+      params: z
+        .object({
+          pattern: numeralPatternSchema,
+        })
+        .optional(),
+    })
+    .meta({
+      id: 'kbn-field-format-percent',
+      title: 'Percent field format',
+      description:
+        'Formats a field into a percentage value following the defined pattern. The default pattern is defined by format:percent:defaultPattern advanced setting.',
+    })
+);

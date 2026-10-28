@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { withTimeout } from '@kbn/std';
 import type { Logger } from '@kbn/logging';
 import type { BaseMessageLike } from '@langchain/core/messages';
@@ -47,23 +47,25 @@ export interface SelectRelevantSkillsParams {
   timeoutMs?: number;
 }
 
-const selectionSchema = z
-  .object({
-    skills: z
-      .array(
-        z.object({
-          id: z.string().describe('The id of a relevant skill, copied exactly from the catalog'),
-          relevance_note: z
-            .string()
-            .optional()
-            .describe('One short sentence on why this skill is relevant to the request'),
-        })
-      )
-      .describe(
-        'Skills relevant to the request, most relevant first. Empty when none clearly apply.'
-      ),
-  })
-  .describe('Tool used to report which of the listed skills are relevant to the user request');
+const selectionSchema = lazySchema(() =>
+  z
+    .object({
+      skills: z
+        .array(
+          z.object({
+            id: z.string().describe('The id of a relevant skill, copied exactly from the catalog'),
+            relevance_note: z
+              .string()
+              .optional()
+              .describe('One short sentence on why this skill is relevant to the request'),
+          })
+        )
+        .describe(
+          'Skills relevant to the request, most relevant first. Empty when none clearly apply.'
+        ),
+    })
+    .describe('Tool used to report which of the listed skills are relevant to the user request')
+);
 
 const toRelevantSkill = (
   skill: InternalSkillDefinition,

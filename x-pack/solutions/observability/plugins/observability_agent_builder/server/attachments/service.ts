@@ -6,7 +6,7 @@
  */
 
 import dedent from 'dedent';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
@@ -18,10 +18,10 @@ import { observabilityAttachmentDataSchema } from './observability_attachment_da
 const GET_SERVICE_DETAILS_TOOL_ID = 'get_service_details';
 
 const serviceDataSchema = observabilityAttachmentDataSchema.extend({
-  serviceName: z.string().max(MAX_SHORT_STRING_LENGTH),
-  environment: z.string().max(MAX_SHORT_STRING_LENGTH),
-  start: z.string().max(MAX_SHORT_STRING_LENGTH),
-  end: z.string().max(MAX_SHORT_STRING_LENGTH),
+  serviceName: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH)),
+  environment: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH)),
+  start: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH)),
+  end: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH)),
 });
 
 export type ServiceAttachmentData = z.infer<typeof serviceDataSchema>;

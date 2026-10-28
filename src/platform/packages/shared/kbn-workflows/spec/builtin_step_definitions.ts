@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import {
   ConsoleStepInputSchema,
   DataSetStepInputSchema,
@@ -30,13 +30,13 @@ import {
   MAX_HITL_RESPONSE_FIELD_KEY_LENGTH,
 } from '../common/hitl';
 
-const EmptyObjectSchema = z.object({});
+const EmptyObjectSchema = lazySchema(() => z.object({}));
 
 /** Shared HITL audit fields on waitForInput / waitForApproval step output. */
 export const hitlAuditOutputFields = {
-  respondedBy: z.string().max(MAX_HITL_RESPONDED_BY_LENGTH),
-  channel: z.string().max(MAX_HITL_CHANNEL_LENGTH).optional(),
-  respondedAt: z.string().max(MAX_HITL_RESPONDED_AT_LENGTH).optional(),
+  respondedBy: lazySchema(() => z.string().max(MAX_HITL_RESPONDED_BY_LENGTH)),
+  channel: lazySchema(() => z.string().max(MAX_HITL_CHANNEL_LENGTH).optional()),
+  respondedAt: lazySchema(() => z.string().max(MAX_HITL_RESPONDED_AT_LENGTH).optional()),
 };
 
 export type BuiltInStepDefinition = BaseStepDefinition;
@@ -54,7 +54,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     description: 'Log a message for debugging and observability',
     category: StepCategory.Kibana,
     inputSchema: ConsoleStepInputSchema,
-    outputSchema: z.string(),
+    outputSchema: lazySchema(() => z.string()),
     documentation: {
       examples: [
         `- name: log_payload
@@ -291,10 +291,12 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     category: StepCategory.FlowControl,
     stability: 'tech_preview',
     inputSchema: WaitForInputStepInputSchema,
-    outputSchema: z.object({
-      response: z.record(z.string().max(MAX_HITL_RESPONSE_FIELD_KEY_LENGTH), z.unknown()),
-      ...hitlAuditOutputFields,
-    }),
+    outputSchema: lazySchema(() =>
+      z.object({
+        response: z.record(z.string().max(MAX_HITL_RESPONSE_FIELD_KEY_LENGTH), z.unknown()),
+        ...hitlAuditOutputFields,
+      })
+    ),
     documentation: {
       examples: [
         `- name: wait_for_approval
@@ -377,10 +379,12 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     category: StepCategory.FlowControl,
     stability: 'tech_preview',
     inputSchema: WaitForApprovalStepInputSchema,
-    outputSchema: z.object({
-      response: z.object({ approved: z.boolean() }),
-      ...hitlAuditOutputFields,
-    }),
+    outputSchema: lazySchema(() =>
+      z.object({
+        response: z.object({ approved: z.boolean() }),
+        ...hitlAuditOutputFields,
+      })
+    ),
     documentation: {
       examples: [
         `- name: request-approval

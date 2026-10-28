@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { queryNumber, routeId } from '../../zod_query';
 import { syntheticsMonitorSavedObjectType } from '../../../../common/types/saved_objects';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -13,10 +13,12 @@ import { ConfigKey } from '../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { MONITOR_SEARCH_FIELDS } from '../../common';
 
-const querySchema = z.strictObject({
-  search_after: z.string().max(4096).optional(),
-  per_page: queryNumber.optional(),
-});
+const querySchema = lazySchema(() =>
+  z.strictObject({
+    search_after: z.string().max(4096).optional(),
+    per_page: queryNumber.optional(),
+  })
+);
 
 export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',

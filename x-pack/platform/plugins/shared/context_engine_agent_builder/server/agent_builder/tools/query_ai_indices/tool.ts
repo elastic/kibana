@@ -17,41 +17,43 @@ import {
   MAX_AI_INDEX_QUERY_PARAM_KEY_LENGTH,
   MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH,
 } from '@kbn/context-engine-plugin/common/constants';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
 import { getErrorMessage, type AiIndexToolDeps } from '../ai_index_read_service';
 import { queryAiIndicesHandler } from './handler';
 
-const queryAiIndicesSchema = z.object({
-  query: z
-    .string()
-    .min(1)
-    .max(MAX_AI_INDEX_QUERY_LENGTH)
-    .describe(
-      'The ES|QL query to run. Its FROM decides which indices are read; use the esql_target from the list or describe AI Index tools. Do not add a space condition: the server adds the space filter.'
-    ),
-  params: z
-    .record(
-      z.string().min(1).max(MAX_AI_INDEX_QUERY_PARAM_KEY_LENGTH),
-      z.union([z.string().max(MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH), z.number(), z.boolean()])
-    )
-    .refine((params) => Object.keys(params).length <= MAX_AI_INDEX_QUERY_PARAMS, {
-      message: `params must not have more than ${MAX_AI_INDEX_QUERY_PARAMS} entries.`,
-    })
-    .optional()
-    .describe('(Optional) Values for ?named parameters in the query.'),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(MAX_AI_INDEX_QUERY_LIMIT)
-    .optional()
-    .default(DEFAULT_AI_INDEX_QUERY_LIMIT)
-    .describe(
-      `(Optional) Maximum rows to return. Defaults to ${DEFAULT_AI_INDEX_QUERY_LIMIT}, at most ${MAX_AI_INDEX_QUERY_LIMIT}. If the query has a smaller LIMIT, that smaller value is used.`
-    ),
-});
+const queryAiIndicesSchema = lazySchema(() =>
+  z.object({
+    query: z
+      .string()
+      .min(1)
+      .max(MAX_AI_INDEX_QUERY_LENGTH)
+      .describe(
+        'The ES|QL query to run. Its FROM decides which indices are read; use the esql_target from the list or describe AI Index tools. Do not add a space condition: the server adds the space filter.'
+      ),
+    params: z
+      .record(
+        z.string().min(1).max(MAX_AI_INDEX_QUERY_PARAM_KEY_LENGTH),
+        z.union([z.string().max(MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH), z.number(), z.boolean()])
+      )
+      .refine((params) => Object.keys(params).length <= MAX_AI_INDEX_QUERY_PARAMS, {
+        message: `params must not have more than ${MAX_AI_INDEX_QUERY_PARAMS} entries.`,
+      })
+      .optional()
+      .describe('(Optional) Values for ?named parameters in the query.'),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_AI_INDEX_QUERY_LIMIT)
+      .optional()
+      .default(DEFAULT_AI_INDEX_QUERY_LIMIT)
+      .describe(
+        `(Optional) Maximum rows to return. Defaults to ${DEFAULT_AI_INDEX_QUERY_LIMIT}, at most ${MAX_AI_INDEX_QUERY_LIMIT}. If the query has a smaller LIMIT, that smaller value is used.`
+      ),
+  })
+);
 
 export const createQueryAiIndicesTool = (
   deps: AiIndexToolDeps

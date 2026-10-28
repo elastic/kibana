@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { GetSandboxConnectorsResponse } from '../../common/sandbox_connectors';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
@@ -20,7 +20,7 @@ export const getSandboxConnectorsRoute = createNightshiftInvestigationsServerRou
       'space: the sandbox-capable connectors the caller can read.',
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read] } },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({ request, listSandboxConnectors }): Promise<GetSandboxConnectorsResponse> => ({
     connectors: await listSandboxConnectors(request),
   }),

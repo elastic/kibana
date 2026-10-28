@@ -9,7 +9,7 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import { lastValueFrom } from 'rxjs';
 import { fromPromise } from 'xstate';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import type { LogCategorizationParams } from './types';
 import { createCategorizationRequestParams } from './queries';
 import type { LogCategory, LogCategoryChange } from '../../types';
@@ -147,105 +147,113 @@ const mapChangePoint = ({ change, histogram }: EsCategoryBucket): LogCategoryCha
 /**
  * The official types are lacking the change_point aggregation
  */
-const esChangePointBucketSchema = z.object({
-  key: isoDateTime(),
-  doc_count: z.number(),
-});
+const esChangePointBucketSchema = lazySchema(() =>
+  z.object({
+    key: isoDateTime(),
+    doc_count: z.number(),
+  })
+);
 
-const esChangePointDetailsSchema = z.object({
-  p_value: z.number(),
-});
+const esChangePointDetailsSchema = lazySchema(() =>
+  z.object({
+    p_value: z.number(),
+  })
+);
 
-const esChangePointCorrelationSchema = esChangePointDetailsSchema.extend({
-  r_value: z.number(),
-});
+const esChangePointCorrelationSchema = lazySchema(() =>
+  esChangePointDetailsSchema.extend({
+    r_value: z.number(),
+  })
+);
 
-const esChangePointSchema = z.union([
-  z
-    .object({
-      bucket: esChangePointBucketSchema,
-      type: z.object({
-        dip: esChangePointDetailsSchema,
-      }),
-    })
-    .transform(({ bucket, type: { dip: details } }) => ({
-      type: 'dip' as const,
-      bucket,
-      details,
-    })),
-  z
-    .object({
-      bucket: esChangePointBucketSchema,
-      type: z.object({
-        spike: esChangePointDetailsSchema,
-      }),
-    })
-    .transform(({ bucket, type: { spike: details } }) => ({
-      type: 'spike' as const,
-      bucket,
-      details,
-    })),
-  z
-    .object({
-      bucket: esChangePointBucketSchema,
-      type: z.object({
-        step_change: esChangePointDetailsSchema,
-      }),
-    })
-    .transform(({ bucket, type: { step_change: details } }) => ({
-      type: 'step_change' as const,
-      bucket,
-      details,
-    })),
-  z
-    .object({
-      bucket: esChangePointBucketSchema,
-      type: z.object({
-        trend_change: esChangePointCorrelationSchema,
-      }),
-    })
-    .transform(({ bucket, type: { trend_change: details } }) => ({
-      type: 'trend_change' as const,
-      bucket,
-      details,
-    })),
-  z
-    .object({
-      bucket: esChangePointBucketSchema,
-      type: z.object({
-        distribution_change: esChangePointDetailsSchema,
-      }),
-    })
-    .transform(({ bucket, type: { distribution_change: details } }) => ({
-      type: 'distribution_change' as const,
-      bucket,
-      details,
-    })),
-  z
-    .object({
-      type: z.object({
-        non_stationary: esChangePointCorrelationSchema.extend({
-          trend: z.enum(['increasing', 'decreasing']),
+const esChangePointSchema = lazySchema(() =>
+  z.union([
+    z
+      .object({
+        bucket: esChangePointBucketSchema,
+        type: z.object({
+          dip: esChangePointDetailsSchema,
         }),
-      }),
-    })
-    .transform(({ type: { non_stationary: details } }) => ({
-      type: 'non_stationary' as const,
-      details,
-    })),
-  z
-    .object({
-      type: z.object({
-        stationary: z.object({}),
-      }),
-    })
-    .transform(() => ({ type: 'stationary' as const })),
-  z
-    .object({
-      type: z.object({}),
-    })
-    .transform((value) => ({ type: 'unknown' as const, rawChange: JSON.stringify(value) })),
-]);
+      })
+      .transform(({ bucket, type: { dip: details } }) => ({
+        type: 'dip' as const,
+        bucket,
+        details,
+      })),
+    z
+      .object({
+        bucket: esChangePointBucketSchema,
+        type: z.object({
+          spike: esChangePointDetailsSchema,
+        }),
+      })
+      .transform(({ bucket, type: { spike: details } }) => ({
+        type: 'spike' as const,
+        bucket,
+        details,
+      })),
+    z
+      .object({
+        bucket: esChangePointBucketSchema,
+        type: z.object({
+          step_change: esChangePointDetailsSchema,
+        }),
+      })
+      .transform(({ bucket, type: { step_change: details } }) => ({
+        type: 'step_change' as const,
+        bucket,
+        details,
+      })),
+    z
+      .object({
+        bucket: esChangePointBucketSchema,
+        type: z.object({
+          trend_change: esChangePointCorrelationSchema,
+        }),
+      })
+      .transform(({ bucket, type: { trend_change: details } }) => ({
+        type: 'trend_change' as const,
+        bucket,
+        details,
+      })),
+    z
+      .object({
+        bucket: esChangePointBucketSchema,
+        type: z.object({
+          distribution_change: esChangePointDetailsSchema,
+        }),
+      })
+      .transform(({ bucket, type: { distribution_change: details } }) => ({
+        type: 'distribution_change' as const,
+        bucket,
+        details,
+      })),
+    z
+      .object({
+        type: z.object({
+          non_stationary: esChangePointCorrelationSchema.extend({
+            trend: z.enum(['increasing', 'decreasing']),
+          }),
+        }),
+      })
+      .transform(({ type: { non_stationary: details } }) => ({
+        type: 'non_stationary' as const,
+        details,
+      })),
+    z
+      .object({
+        type: z.object({
+          stationary: z.object({}),
+        }),
+      })
+      .transform(() => ({ type: 'stationary' as const })),
+    z
+      .object({
+        type: z.object({}),
+      })
+      .transform((value) => ({ type: 'unknown' as const, rawChange: JSON.stringify(value) })),
+  ])
+);
 
 const esHistogramSchema = z
   .object({
@@ -265,12 +273,14 @@ const esHistogramSchema = z
 
 type EsHistogram = z.output<typeof esHistogramSchema>;
 
-const esCategoryBucketSchema = z.object({
-  key: z.string(),
-  doc_count: z.number(),
-  change: esChangePointSchema,
-  histogram: esHistogramSchema,
-});
+const esCategoryBucketSchema = lazySchema(() =>
+  z.object({
+    key: z.string(),
+    doc_count: z.number(),
+    change: esChangePointSchema,
+    histogram: esHistogramSchema,
+  })
+);
 
 type EsCategoryBucket = z.output<typeof esCategoryBucketSchema>;
 

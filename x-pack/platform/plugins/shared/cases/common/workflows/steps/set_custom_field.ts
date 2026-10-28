@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { Owner } from '../../bundled-types.gen';
@@ -20,8 +20,8 @@ export const SetCustomFieldStepTypeId = 'cases.setCustomField';
 
 export const InputSchema = CasesStepCaseIdVersionSchema.extend({
   owner: Owner,
-  field_name: z.string().min(1, 'field_name is required'),
-  value: z.union([z.string().min(1), z.boolean(), z.number().int(), z.null()]),
+  field_name: lazySchema(() => z.string().min(1, 'field_name is required')),
+  value: lazySchema(() => z.union([z.string().min(1), z.boolean(), z.number().int(), z.null()])),
 });
 
 export const OutputSchema = CasesStepSingleCaseOutputSchema;

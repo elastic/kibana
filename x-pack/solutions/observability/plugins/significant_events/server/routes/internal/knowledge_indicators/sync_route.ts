@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
@@ -41,7 +41,7 @@ export const streamsWithIndicatorsRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({
     request,
     getScopedClients,
@@ -86,10 +86,12 @@ const reconcileSourceRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{sourceId}/_reconcile_source',
   options: { access: 'internal', summary: 'Apply a source query or enablement change' },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
-  params: z.object({
-    path: z.object({ sourceId: z.string().min(1).max(255) }),
-    body: z.object({ sourceSlug: z.string().min(1).max(255) }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().min(1).max(255) }),
+      body: z.object({ sourceSlug: z.string().min(1).max(255) }),
+    })
+  ),
   handler: async ({
     params,
     request,

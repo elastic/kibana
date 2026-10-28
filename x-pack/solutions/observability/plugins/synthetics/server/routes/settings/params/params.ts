@@ -7,7 +7,7 @@
 
 import path from 'path';
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { routeId } from '../../zod_query';
 import type {
   RouteContext,
@@ -72,9 +72,11 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<ParamRespon
   handler: getParamListHandler,
 });
 
-const RequestParamsSchema = z.strictObject({
-  id: routeId.describe('The unique identifier for the parameter.'),
-});
+const RequestParamsSchema = lazySchema(() =>
+  z.strictObject({
+    id: routeId.describe('The unique identifier for the parameter.'),
+  })
+);
 
 export const getSyntheticsParamRoute: SyntheticsRestApiRouteFactory<
   ParamResponse,

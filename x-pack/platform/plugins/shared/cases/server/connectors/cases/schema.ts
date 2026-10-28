@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import dateMath from '@kbn/datemath';
 import {
   CASES_CONNECTOR_TIME_WINDOW_REGEX,
@@ -117,14 +117,16 @@ export const CasesConnectorRunParamsSchema = schema.object({
   internallyManagedAlerts: schema.maybe(schema.nullable(schema.boolean())),
 });
 
-const ZAlertSchema = z.record(z.string(), z.any()).superRefine((value, ctx) => {
-  if (!Object.hasOwn(value, '_id') || !Object.hasOwn(value, '_index')) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'Alert ID and index must be defined',
-    });
-  }
-});
+const ZAlertSchema = lazySchema(() =>
+  z.record(z.string(), z.any()).superRefine((value, ctx) => {
+    if (!Object.hasOwn(value, '_id') || !Object.hasOwn(value, '_index')) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Alert ID and index must be defined',
+      });
+    }
+  })
+);
 
 export const ZCasesGroupedAlertsSchema = z
   .object({
@@ -138,7 +140,7 @@ export const ZCasesGroupedAlertsSchema = z
   })
   .strict();
 
-const ZGroupingSchema = z.array(z.string()).min(0).max(1);
+const ZGroupingSchema = lazySchema(() => z.array(z.string()).min(0).max(1));
 const ZRuleSchema = z
   .object({
     id: z.string(),
@@ -148,49 +150,51 @@ const ZRuleSchema = z
   })
   .strict();
 
-const ZTimeWindowSchema = z
-  .string()
-  .default('7d')
-  .superRefine((value, ctx) => {
-    /**
-     * Validates the time window.
-     * Acceptable format:
-     * - First character should be a digit from 1 to 9
-     * - All next characters should be a digit from 0 to 9
-     * - The last character should be d (day), w (week), h (hour), m (minute)
-     *
-     * Example: 20d, 2w, etc
-     */
-    const timeWindowRegex = new RegExp(CASES_CONNECTOR_TIME_WINDOW_REGEX, 'g');
+const ZTimeWindowSchema = lazySchema(() =>
+  z
+    .string()
+    .default('7d')
+    .superRefine((value, ctx) => {
+      /**
+       * Validates the time window.
+       * Acceptable format:
+       * - First character should be a digit from 1 to 9
+       * - All next characters should be a digit from 0 to 9
+       * - The last character should be d (day), w (week), h (hour), m (minute)
+       *
+       * Example: 20d, 2w, etc
+       */
+      const timeWindowRegex = new RegExp(CASES_CONNECTOR_TIME_WINDOW_REGEX, 'g');
 
-    if (!timeWindowRegex.test(value)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Not a valid time window',
-      });
-    }
+      if (!timeWindowRegex.test(value)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Not a valid time window',
+        });
+      }
 
-    const date = dateMath.parse(`now-${value}`);
+      const date = dateMath.parse(`now-${value}`);
 
-    if (!date || !date.isValid()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Not a valid time window',
-      });
-    }
+      if (!date || !date.isValid()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Not a valid time window',
+        });
+      }
 
-    const timeSize = value.slice(0, -1);
-    const timeUnit = value.slice(-1);
-    const timeSizeAsNumber = Number(timeSize);
+      const timeSize = value.slice(0, -1);
+      const timeUnit = value.slice(-1);
+      const timeSizeAsNumber = Number(timeSize);
 
-    if (timeUnit === 'm' && timeSizeAsNumber < 5) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Time window should be at least 5 minutes',
-      });
-    }
-  });
-const ZReopenClosedCasesSchema = z.boolean().default(false);
+      if (timeUnit === 'm' && timeSizeAsNumber < 5) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Time window should be at least 5 minutes',
+        });
+      }
+    })
+);
+const ZReopenClosedCasesSchema = lazySchema(() => z.boolean().default(false));
 
 export const ZCasesConnectorRunParamsSchema = z
   .object({

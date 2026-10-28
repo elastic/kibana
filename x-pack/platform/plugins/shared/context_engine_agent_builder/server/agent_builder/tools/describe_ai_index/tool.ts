@@ -11,7 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { MAX_AI_INDEX_ID_LENGTH } from '@kbn/context-engine-plugin/common/constants';
 import { validateAiIndexId } from '@kbn/context-engine-plugin/common/validation';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
 import { getErrorMessage, type AiIndexToolDeps } from '../ai_index_read_service';
@@ -20,18 +20,20 @@ import { describeAiIndexHandler } from './handler';
 // Enough for MAX_AI_INDEX_DESCRIBE_FIELDS fields plus the counts and example queries.
 const MAX_DESCRIBE_RESULT_TOKENS = 16_000;
 
-const describeAiIndexSchema = z.object({
-  ai_index_id: z
-    .string()
-    .min(1)
-    .max(MAX_AI_INDEX_ID_LENGTH)
-    .refine((value) => validateAiIndexId(value) === undefined, {
-      message: 'Invalid AI index id.',
-    })
-    .describe(
-      'The AI-index registry ID, as shown in the agent AI INDICES configuration or returned by the list AI Indices tool. Do not use the backing Elasticsearch index or data stream name.'
-    ),
-});
+const describeAiIndexSchema = lazySchema(() =>
+  z.object({
+    ai_index_id: z
+      .string()
+      .min(1)
+      .max(MAX_AI_INDEX_ID_LENGTH)
+      .refine((value) => validateAiIndexId(value) === undefined, {
+        message: 'Invalid AI index id.',
+      })
+      .describe(
+        'The AI-index registry ID, as shown in the agent AI INDICES configuration or returned by the list AI Indices tool. Do not use the backing Elasticsearch index or data stream name.'
+      ),
+  })
+);
 
 export const createDescribeAiIndexTool = (
   deps: AiIndexToolDeps

@@ -48,25 +48,31 @@ export const policyExecutionOutcomeFilterSchema = lazySchema(() =>
 export type PolicyExecutionOutcomeFilter = z.infer<typeof policyExecutionOutcomeFilterSchema>;
 
 const sharedFilterFields = {
-  search: z
-    .string()
-    .trim()
-    .min(1)
-    .max(MAX_SEARCH_LENGTH)
-    .optional()
-    .describe(
-      'Free-text search. Matches policy name, rule name, policy/rule ID (case-insensitive).'
-    ),
-  rule_ids: idFilterArraySchema
-    .optional()
-    .describe(
-      'Explicit rule filter. Narrows events to those referencing at least one of the provided rule IDs. Also unions with the search filter if both are provided.'
-    ),
-  outcomes: policyExecutionOutcomeFilterSchema
-    .optional()
-    .describe(
-      'Outcome filter. When omitted matches all outcomes. Pass one or more of "success", "throttled", "failure" to narrow.'
-    ),
+  search: lazySchema(() =>
+    z
+      .string()
+      .trim()
+      .min(1)
+      .max(MAX_SEARCH_LENGTH)
+      .optional()
+      .describe(
+        'Free-text search. Matches policy name, rule name, policy/rule ID (case-insensitive).'
+      )
+  ),
+  rule_ids: lazySchema(() =>
+    idFilterArraySchema
+      .optional()
+      .describe(
+        'Explicit rule filter. Narrows events to those referencing at least one of the provided rule IDs. Also unions with the search filter if both are provided.'
+      )
+  ),
+  outcomes: lazySchema(() =>
+    policyExecutionOutcomeFilterSchema
+      .optional()
+      .describe(
+        'Outcome filter. When omitted matches all outcomes. Pass one or more of "success", "throttled", "failure" to narrow.'
+      )
+  ),
 };
 
 export const listPolicyExecutionHistoryRequestSchema = lazySchema(() =>

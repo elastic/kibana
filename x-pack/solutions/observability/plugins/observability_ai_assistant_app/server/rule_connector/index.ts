@@ -11,7 +11,7 @@ import dedent from 'dedent';
 import { i18n } from '@kbn/i18n';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type {
@@ -92,7 +92,7 @@ const RuleSchema = z
   })
   .strict();
 
-const AlertSchema = z.record(z.string(), z.any());
+const AlertSchema = lazySchema(() => z.record(z.string(), z.any()));
 
 const AlertSummarySchema = z
   .object({

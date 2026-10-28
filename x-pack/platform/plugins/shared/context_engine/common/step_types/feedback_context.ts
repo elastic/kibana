@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
@@ -13,35 +13,39 @@ import { aiIndexIdSchema } from './ki';
 
 export const FEEDBACK_CONTEXT_STEP_ID = 'context-engine.getFeedbackContext' as const;
 
-export const feedbackContextInputSchema = z.object({
-  ai_index_id: aiIndexIdSchema.describe('The AI index to analyze'),
-});
+export const feedbackContextInputSchema = lazySchema(() =>
+  z.object({
+    ai_index_id: aiIndexIdSchema.describe('The AI index to analyze'),
+  })
+);
 
-export const feedbackContextOutputSchema = z.object({
-  agent_id: z
-    .string()
-    .describe(
-      "The agent to run the analysis with, resolved from the AI index's feedback_analysis.agent_id or the default Elastic agent."
-    ),
-  briefing: z
-    .string()
-    .describe('The rendered prompt for the run: the index, its signal patterns, and prior work.'),
-  output_schema: z
-    .record(z.string(), z.unknown())
-    .describe(
-      "JSON Schema for the run's structured output, narrowed to the actions this AI index permits."
-    ),
-  has_signals: z
-    .boolean()
-    .describe(
-      'Whether any selected signal was classified as a problem. False means there is nothing to analyze and the agent should not be run.'
-    ),
-  signal_window: z
-    .object({ from: z.string(), to: z.string() })
-    .describe('The resolved window the signals were read from.'),
-  signal_spaces: z.array(z.string()).describe('The spaces the selected signals came from.'),
-  signal_count: z.number().describe('How many signals were selected.'),
-});
+export const feedbackContextOutputSchema = lazySchema(() =>
+  z.object({
+    agent_id: z
+      .string()
+      .describe(
+        "The agent to run the analysis with, resolved from the AI index's feedback_analysis.agent_id or the default Elastic agent."
+      ),
+    briefing: z
+      .string()
+      .describe('The rendered prompt for the run: the index, its signal patterns, and prior work.'),
+    output_schema: z
+      .record(z.string(), z.unknown())
+      .describe(
+        "JSON Schema for the run's structured output, narrowed to the actions this AI index permits."
+      ),
+    has_signals: z
+      .boolean()
+      .describe(
+        'Whether any selected signal was classified as a problem. False means there is nothing to analyze and the agent should not be run.'
+      ),
+    signal_window: z
+      .object({ from: z.string(), to: z.string() })
+      .describe('The resolved window the signals were read from.'),
+    signal_spaces: z.array(z.string()).describe('The spaces the selected signals came from.'),
+    signal_count: z.number().describe('How many signals were selected.'),
+  })
+);
 
 export const feedbackContextStepCommonDefinition: CommonStepDefinition<
   typeof feedbackContextInputSchema,

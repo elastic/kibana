@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { INSTRUCTION_VARIANT } from '../../app/onboarding/instruction_variants';
@@ -17,22 +17,24 @@ const Onboarding = dynamic(() =>
 export const onboarding = {
   '/onboarding': {
     element: <Onboarding />,
-    params: z.object({
-      query: z.object({
-        agent: z
-          .union([
-            z.literal(INSTRUCTION_VARIANT.NODE),
-            z.literal(INSTRUCTION_VARIANT.DJANGO),
-            z.literal(INSTRUCTION_VARIANT.FLASK),
-            z.literal(INSTRUCTION_VARIANT.RAILS),
-            z.literal(INSTRUCTION_VARIANT.RACK),
-            z.literal(INSTRUCTION_VARIANT.GO),
-            z.literal(INSTRUCTION_VARIANT.JAVA),
-            z.literal(INSTRUCTION_VARIANT.DOTNET),
-            z.literal(INSTRUCTION_VARIANT.PHP),
-          ])
-          .optional(),
-      }),
-    }),
+    params: lazySchema(() =>
+      z.object({
+        query: z.object({
+          agent: z
+            .union([
+              z.literal(INSTRUCTION_VARIANT.NODE),
+              z.literal(INSTRUCTION_VARIANT.DJANGO),
+              z.literal(INSTRUCTION_VARIANT.FLASK),
+              z.literal(INSTRUCTION_VARIANT.RAILS),
+              z.literal(INSTRUCTION_VARIANT.RACK),
+              z.literal(INSTRUCTION_VARIANT.GO),
+              z.literal(INSTRUCTION_VARIANT.JAVA),
+              z.literal(INSTRUCTION_VARIANT.DOTNET),
+              z.literal(INSTRUCTION_VARIANT.PHP),
+            ])
+            .optional(),
+        }),
+      })
+    ),
   },
 };

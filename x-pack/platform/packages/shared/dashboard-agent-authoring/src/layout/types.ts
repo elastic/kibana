@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/as-code-dashboard-schema';
 
 export interface LayoutGrid {
@@ -61,39 +61,43 @@ export interface LayoutRequest {
 }
 
 /** A panel answered as a compact `[id, x, y, w, h]` tuple, which keeps the answer short. */
-const arrangedPanelsSchema = z
-  .array(
-    z
-      .tuple([
-        z.string().max(256),
-        z
-          .number()
-          .int()
-          .min(0)
-          .max(DASHBOARD_GRID_COLUMN_COUNT - 1),
-        z.number().int().min(0).max(1000),
-        z.number().int().min(1).max(DASHBOARD_GRID_COLUMN_COUNT),
-        z.number().int().min(1).max(100),
-      ])
-      .transform(([id, x, y, w, h]) => ({ id, x, y, w, h }))
-  )
-  .max(500);
+const arrangedPanelsSchema = lazySchema(() =>
+  z
+    .array(
+      z
+        .tuple([
+          z.string().max(256),
+          z
+            .number()
+            .int()
+            .min(0)
+            .max(DASHBOARD_GRID_COLUMN_COUNT - 1),
+          z.number().int().min(0).max(1000),
+          z.number().int().min(1).max(DASHBOARD_GRID_COLUMN_COUNT),
+          z.number().int().min(1).max(100),
+        ])
+        .transform(([id, x, y, w, h]) => ({ id, x, y, w, h }))
+    )
+    .max(500)
+);
 
 /**
  * The answer of the layout call: grid positions in the containers of the request. Panels are
  * answered as `[id, x, y, w, h]` and sections as `[id, y, panels]`, and read into objects.
  */
-export const layoutArrangementSchema = z.object({
-  plan: z.string(),
-  panels: arrangedPanelsSchema,
-  sections: z
-    .array(
-      z
-        .tuple([z.string().max(256), z.number().int().min(0).max(1000), arrangedPanelsSchema])
-        .transform(([id, y, panels]) => ({ id, y, panels }))
-    )
-    .max(100),
-});
+export const layoutArrangementSchema = lazySchema(() =>
+  z.object({
+    plan: z.string(),
+    panels: arrangedPanelsSchema,
+    sections: z
+      .array(
+        z
+          .tuple([z.string().max(256), z.number().int().min(0).max(1000), arrangedPanelsSchema])
+          .transform(([id, y, panels]) => ({ id, y, panels }))
+      )
+      .max(100),
+  })
+);
 
 export type LayoutArrangement = z.output<typeof layoutArrangementSchema>;
 

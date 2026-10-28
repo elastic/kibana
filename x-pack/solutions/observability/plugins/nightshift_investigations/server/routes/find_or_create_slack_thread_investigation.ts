@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
 
@@ -45,27 +45,29 @@ export const findOrCreateSlackThreadInvestigationRoute = createNightshiftInvesti
       requiredPrivileges: ['agentBuilder:write'],
     },
   },
-  params: z.object({
-    body: z
-      .object({
-        workspace: z.string().min(1).max(MAX_SLACK_WORKSPACE_LENGTH),
-        channel: z.string().min(1).max(MAX_SLACK_CHANNEL_LENGTH),
-        thread_ts: z.string().min(1).max(MAX_SLACK_TS_LENGTH),
-        text: z.string().max(MAX_SLACK_TEXT_LENGTH).optional(),
-        create: z.boolean(),
-        status_message_ts: z.string().min(1).max(MAX_SLACK_TS_LENGTH).optional(),
-        event_id: z.string().min(1).max(MAX_SLACK_EVENT_ID_LENGTH).optional(),
-        /** The workflow execution handling `event_id`. */
-        execution_id: z.string().min(1).max(MAX_SLACK_EXECUTION_ID_LENGTH).optional(),
-        release_event: z.boolean().optional(),
-      })
-      .refine((body) => (body.event_id === undefined) === (body.execution_id === undefined), {
-        message: 'event_id and execution_id must be given together',
-      })
-      .refine((body) => !body.release_event || body.event_id !== undefined, {
-        message: 'release_event requires event_id',
-      }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z
+        .object({
+          workspace: z.string().min(1).max(MAX_SLACK_WORKSPACE_LENGTH),
+          channel: z.string().min(1).max(MAX_SLACK_CHANNEL_LENGTH),
+          thread_ts: z.string().min(1).max(MAX_SLACK_TS_LENGTH),
+          text: z.string().max(MAX_SLACK_TEXT_LENGTH).optional(),
+          create: z.boolean(),
+          status_message_ts: z.string().min(1).max(MAX_SLACK_TS_LENGTH).optional(),
+          event_id: z.string().min(1).max(MAX_SLACK_EVENT_ID_LENGTH).optional(),
+          /** The workflow execution handling `event_id`. */
+          execution_id: z.string().min(1).max(MAX_SLACK_EXECUTION_ID_LENGTH).optional(),
+          release_event: z.boolean().optional(),
+        })
+        .refine((body) => (body.event_id === undefined) === (body.execution_id === undefined), {
+          message: 'event_id and execution_id must be given together',
+        })
+        .refine((body) => !body.release_event || body.event_id !== undefined, {
+          message: 'release_event requires event_id',
+        }),
+    })
+  ),
   handler: async ({ request, params, getInvestigationsClient }) => {
     const client = getInvestigationsClient(request);
     const {

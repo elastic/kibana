@@ -6,7 +6,7 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
@@ -30,15 +30,17 @@ import {
   summarizeAgentState,
 } from '../types';
 
-const getResponseActionStatusSchema = z.object({
-  actionId: z
-    .string()
-    .min(1)
-    .max(256)
-    .describe(
-      'Any known response-action ID — from a prior action mentioned in this conversation or from Response Actions history in the UI.'
-    ),
-});
+const getResponseActionStatusSchema = lazySchema(() =>
+  z.object({
+    actionId: z
+      .string()
+      .min(1)
+      .max(256)
+      .describe(
+        'Any known response-action ID — from a prior action mentioned in this conversation or from Response Actions history in the UI.'
+      ),
+  })
+);
 
 /**
  * Read-only lookup of a previously dispatched response action by its action ID.

@@ -6,7 +6,7 @@
  */
 
 import { conflict, notFound } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { MemoryVersionConflictError, toMemoryDisplayTelemetry } from '../memory/page_store';
@@ -24,14 +24,16 @@ export const archiveMemoryPageRoute = createNightshiftInvestigationsServerRoute(
   security: {
     authz: { requiredPrivileges: memoryWritePrivileges },
   },
-  params: z.object({
-    path: z.object({
-      id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-    }),
-    body: z.object({
-      archived: z.boolean(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+      }),
+      body: z.object({
+        archived: z.boolean(),
+      }),
+    })
+  ),
   handler: async ({ request, params, context, getMemoryPageStore, isMemoryEnabled }) => {
     if (!isMemoryEnabled()) throw notFound('Semantic Memory is not enabled');
 

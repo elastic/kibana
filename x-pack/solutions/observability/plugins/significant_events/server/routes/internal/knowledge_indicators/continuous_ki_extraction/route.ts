@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
   OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
@@ -17,12 +17,14 @@ import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
 import { MIN_EXTRACTION_INTERVAL_HOURS } from '../../../../../common/constants';
 
-const putContinuousKiExtractionSettingsBodySchema = z.object({
-  continuousKiExtraction: z.object({
-    enabled: z.boolean().optional(),
-    intervalHours: z.number().min(MIN_EXTRACTION_INTERVAL_HOURS).optional(),
-  }),
-});
+const putContinuousKiExtractionSettingsBodySchema = lazySchema(() =>
+  z.object({
+    continuousKiExtraction: z.object({
+      enabled: z.boolean().optional(),
+      intervalHours: z.number().min(MIN_EXTRACTION_INTERVAL_HOURS).optional(),
+    }),
+  })
+);
 
 const putContinuousKIExtractionSettingsRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/_knowledge_indicators/continuous_ki_extraction/settings',
@@ -37,9 +39,11 @@ const putContinuousKIExtractionSettingsRoute = createServerRoute({
       requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
-  params: z.object({
-    body: putContinuousKiExtractionSettingsBodySchema,
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: putContinuousKiExtractionSettingsBodySchema,
+    })
+  ),
   handler: async ({
     params,
     request,

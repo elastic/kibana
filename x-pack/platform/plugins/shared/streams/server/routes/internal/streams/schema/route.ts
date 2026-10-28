@@ -19,7 +19,7 @@ import {
   LOGS_ROOT_STREAM_NAME,
   isDraftStream,
 } from '@kbn/streams-schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
@@ -49,7 +49,9 @@ import {
 } from '../../../../lib/streams/helpers/draft_helpers';
 const FIELD_SIMULATION_TIMEOUT = '1s';
 
-const boundedFieldDefinitionsArray = z.array(boundedNamedFieldDefinitionSchema).max(1000);
+const boundedFieldDefinitionsArray = lazySchema(() =>
+  z.array(boundedNamedFieldDefinitionSchema).max(1000)
+);
 
 const isFieldDefinitionType = (value: unknown): value is FieldDefinitionType =>
   typeof value === 'string' && (FIELD_DEFINITION_TYPES as readonly string[]).includes(value);
@@ -95,9 +97,11 @@ export const unmappedFieldsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients }): Promise<{ unmappedFields: string[] }> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
 
@@ -141,12 +145,14 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
-    body: z.object({
-      field_definitions: boundedFieldDefinitionsArray,
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+      body: z.object({
+        field_definitions: boundedFieldDefinitionsArray,
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -372,12 +378,14 @@ export const schemaFieldsConflictsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
-    body: z.object({
-      field_definitions: boundedFieldDefinitionsArray,
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+      body: z.object({
+        field_definitions: boundedFieldDefinitionsArray,
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients }): Promise<FieldsConflictsResponse> => {
     const { scopedClusterClient, streamsClient, isSecurityEnabled } = await getScopedClients({
       request,

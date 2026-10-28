@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -19,7 +19,7 @@ import { observabilityAttachmentDataSchema } from './observability_attachment_da
 const GET_ALERT_DETAILS_TOOL_ID = 'get_alert_details';
 
 const alertDataSchema = observabilityAttachmentDataSchema.extend({
-  alertId: z.string().max(MAX_SHORT_STRING_LENGTH),
+  alertId: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH)),
 });
 
 export type AlertAttachmentData = z.infer<typeof alertDataSchema>;

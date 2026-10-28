@@ -11,7 +11,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui'
 import React from 'react';
 import { createRestorableStateProvider } from '@kbn/restorable-state';
 import { KbnInfoCallout } from '@kbn/ui-callout';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 const RestorableStateDocViewBase: React.FC<{
   clickCount: number;
@@ -75,9 +75,11 @@ interface RestorableStateDocViewState {
 /**
  * Marks the doc view's `clickCount` as URL-shareable, so a shared document link restores the counter.
  */
-export const restorableStateDocViewShareableStateSchema = z.object({
-  clickCount: z.number().int().nonnegative().max(1_000_000),
-});
+export const restorableStateDocViewShareableStateSchema = lazySchema(() =>
+  z.object({
+    clickCount: z.number().int().nonnegative().max(1_000_000),
+  })
+);
 
 const { withRestorableState, useRestorableState } =
   createRestorableStateProvider<RestorableStateDocViewState>();

@@ -6,7 +6,7 @@
  */
 
 import type { BuildFlavor } from '@kbn/config/src/types';
-import { z } from '@kbn/zod';
+import { lazySchema, z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import type { ServiceAccountRoleLimits } from '../../../common/service_accounts';
@@ -67,22 +67,28 @@ export const getCreateServiceAccountBodySchema = (limits: ServiceAccountRoleLimi
     // derives both itself.
     .strict();
 
-export const listServiceAccountsQuerySchema = z.object({
-  // Defaulted rather than left optional, so the page size a caller gets is decided here and not
-  // again in each backend.
-  limit: z.coerce
-    .number()
-    .int()
-    .min(1)
-    .max(SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE)
-    .default(SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE),
-  after: z.string().min(1).max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
-});
+export const listServiceAccountsQuerySchema = lazySchema(() =>
+  z.object({
+    // Defaulted rather than left optional, so the page size a caller gets is decided here and not
+    // again in each backend.
+    limit: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE)
+      .default(SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE),
+    after: z.string().min(1).max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
+  })
+);
 
-export const serviceAccountIdParamsSchema = z.object({
-  id: serviceAccountIdSchema.min(1),
-});
+export const serviceAccountIdParamsSchema = lazySchema(() =>
+  z.object({
+    id: serviceAccountIdSchema.min(1),
+  })
+);
 
-export const deleteServiceAccountQuerySchema = z.object({
-  force: BooleanFromString.default(false),
-});
+export const deleteServiceAccountQuerySchema = lazySchema(() =>
+  z.object({
+    force: BooleanFromString.default(false),
+  })
+);

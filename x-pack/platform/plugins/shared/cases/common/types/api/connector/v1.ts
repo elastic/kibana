@@ -5,47 +5,59 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ExternalServiceSchema } from '../../domain/external_service/v1';
 import { CaseConnectorSchema, ConnectorMappingsSchema } from '../../domain/connector/v1';
 
-const PushDetailsSchema = z.object({
-  latestUserActionPushDate: z.string().max(50),
-  oldestUserActionPushDate: z.string().max(50),
-  externalService: ExternalServiceSchema,
-});
-
-const CaseConnectorPushInfoSchema = z.object({
-  needsToBePushed: z.boolean(),
-  hasBeenPushed: z.boolean(),
-  details: PushDetailsSchema.optional(),
-});
-
-export const GetCaseConnectorsResponseSchema = z.record(
-  z.string().max(512),
-  CaseConnectorSchema.and(z.object({ push: CaseConnectorPushInfoSchema }))
+const PushDetailsSchema = lazySchema(() =>
+  z.object({
+    latestUserActionPushDate: z.string().max(50),
+    oldestUserActionPushDate: z.string().max(50),
+    externalService: ExternalServiceSchema,
+  })
 );
 
-const ActionConnectorResultSchema = z.object({
-  id: z.string().max(512),
-  actionTypeId: z.string().max(256),
-  name: z.string(),
-  isDeprecated: z.boolean(),
-  isPreconfigured: z.boolean(),
-  isSystemAction: z.boolean(),
-  referencedByCount: z.number(),
-  isConnectorTypeDeprecated: z.boolean(),
-  config: z.record(z.string().max(256), z.unknown()).optional(),
-  isMissingSecrets: z.boolean().optional(),
-});
+const CaseConnectorPushInfoSchema = lazySchema(() =>
+  z.object({
+    needsToBePushed: z.boolean(),
+    hasBeenPushed: z.boolean(),
+    details: PushDetailsSchema.optional(),
+  })
+);
 
-export const FindActionConnectorResponseSchema = z.array(ActionConnectorResultSchema);
+export const GetCaseConnectorsResponseSchema = lazySchema(() =>
+  z.record(
+    z.string().max(512),
+    CaseConnectorSchema.and(z.object({ push: CaseConnectorPushInfoSchema }))
+  )
+);
 
-export const ConnectorMappingResponseSchema = z.object({
-  id: z.string().max(512),
-  version: z.string().max(512),
-  mappings: ConnectorMappingsSchema,
-});
+const ActionConnectorResultSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(512),
+    actionTypeId: z.string().max(256),
+    name: z.string(),
+    isDeprecated: z.boolean(),
+    isPreconfigured: z.boolean(),
+    isSystemAction: z.boolean(),
+    referencedByCount: z.number(),
+    isConnectorTypeDeprecated: z.boolean(),
+    config: z.record(z.string().max(256), z.unknown()).optional(),
+    isMissingSecrets: z.boolean().optional(),
+  })
+);
+
+export const FindActionConnectorResponseSchema = lazySchema(() =>
+  z.array(ActionConnectorResultSchema)
+);
+
+export const ConnectorMappingResponseSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(512),
+    version: z.string().max(512),
+    mappings: ConnectorMappingsSchema,
+  })
+);
 
 export type ConnectorMappingResponse = z.infer<typeof ConnectorMappingResponseSchema>;
 export type GetCaseConnectorsResponse = z.infer<typeof GetCaseConnectorsResponseSchema>;

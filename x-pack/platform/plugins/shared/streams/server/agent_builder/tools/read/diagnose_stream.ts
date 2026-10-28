@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -38,15 +38,17 @@ const MAX_DEGRADED_FIELDS = 25;
 const MAX_SAMPLE_DOC_FIELDS = 30;
 const MAX_SAMPLE_DOC_STRING_LENGTH = 200;
 
-const diagnoseStreamSchema = z.object({
-  name: z.string().describe('Exact stream name to diagnose, e.g. "logs.ecs.nginx"'),
-  time_range: z
-    .string()
-    .optional()
-    .describe(
-      'Lookback period for failed doc counts and error samples. Uses date math: "1h", "6h", "24h", "7d". Default: "24h". Use shorter ranges to check if issues are still active.'
-    ),
-});
+const diagnoseStreamSchema = lazySchema(() =>
+  z.object({
+    name: z.string().describe('Exact stream name to diagnose, e.g. "logs.ecs.nginx"'),
+    time_range: z
+      .string()
+      .optional()
+      .describe(
+        'Lookback period for failed doc counts and error samples. Uses date math: "1h", "6h", "24h", "7d". Default: "24h". Use shorter ranges to check if issues are still active.'
+      ),
+  })
+);
 
 export const createDiagnoseStreamTool = ({
   getScopedClients,

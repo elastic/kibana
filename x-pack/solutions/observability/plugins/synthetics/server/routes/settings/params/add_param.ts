@@ -6,7 +6,7 @@
  */
 
 import path from 'path';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
@@ -27,26 +27,28 @@ import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 import { findParamVaultReferenceError } from '../secret_connection/connection_utils';
 
-export const ParamsObjectSchema = z
-  .strictObject({
-    key: z.string().min(1).max(MAX_ROUTE_ID_LENGTH).describe('The key of the parameter.'),
-    value: z
-      .string()
-      .min(1)
-      .max(MAX_PARAM_VALUE_LENGTH)
-      .describe('The value associated with the parameter.'),
-    description: z.string().max(4096).optional().describe('A description of the parameter.'),
-    tags: z
-      .array(z.string().max(256))
-      .max(100)
-      .optional()
-      .describe('An array of tags to categorize the parameter.'),
-    share_across_spaces: z
-      .boolean()
-      .optional()
-      .describe('Specify whether the parameter should be shared across spaces.'),
-  })
-  .meta({ id: 'parameterRequest', title: 'Single parameter' });
+export const ParamsObjectSchema = lazySchema(() =>
+  z
+    .strictObject({
+      key: z.string().min(1).max(MAX_ROUTE_ID_LENGTH).describe('The key of the parameter.'),
+      value: z
+        .string()
+        .min(1)
+        .max(MAX_PARAM_VALUE_LENGTH)
+        .describe('The value associated with the parameter.'),
+      description: z.string().max(4096).optional().describe('A description of the parameter.'),
+      tags: z
+        .array(z.string().max(256))
+        .max(100)
+        .optional()
+        .describe('An array of tags to categorize the parameter.'),
+      share_across_spaces: z
+        .boolean()
+        .optional()
+        .describe('Specify whether the parameter should be shared across spaces.'),
+    })
+    .meta({ id: 'parameterRequest', title: 'Single parameter' })
+);
 
 export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   SyntheticsParams | SyntheticsParams[]

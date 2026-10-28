@@ -17,40 +17,44 @@ import {
   HttpMethodSchema,
   HttpRequestBodySchema,
 } from '@kbn/connector-schemas/http/schemas/v1';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 // HTTP connector parameter schema
-export const HttpParamsSchema = z.object({
-  url: z
-    .string()
-    .optional()
-    .describe(
-      'The base URL to send the request to. If `connector-id` is provided the configured URL will be used and this value will be ignored.'
+export const HttpParamsSchema = lazySchema(() =>
+  z.object({
+    url: z
+      .string()
+      .optional()
+      .describe(
+        'The base URL to send the request to. If `connector-id` is provided the configured URL will be used and this value will be ignored.'
+      ),
+    path: z.string().optional().describe('The path appended to the base URL.'),
+    method: HttpMethodSchema.describe('The HTTP method to use for the request.'),
+    body: HttpRequestBodySchema.optional().describe(
+      'The body of the request. Can be a raw string, a JSON object, or a JSON array.'
     ),
-  path: z.string().optional().describe('The path appended to the base URL.'),
-  method: HttpMethodSchema.describe('The HTTP method to use for the request.'),
-  body: HttpRequestBodySchema.optional().describe(
-    'The body of the request. Can be a raw string, a JSON object, or a JSON array.'
-  ),
-  form_data: HttpFormDataFieldSchema.optional().describe(
-    'The form data to send in the request. Can be a JSON object with the field name as the key and the field value as the value. Supports utf8 (default) and base64 encoding.'
-  ),
-  query: z.record(z.string(), z.string()).optional(),
-  headers: z.record(z.string(), z.string()).optional(),
-  fetcher: z
-    .object({
-      skip_ssl_verification: z.boolean().optional(),
-      follow_redirects: z.boolean().optional(),
-      max_redirects: z.number().optional(),
-      keep_alive: z.boolean().optional(),
-    })
-    .optional(),
-});
+    form_data: HttpFormDataFieldSchema.optional().describe(
+      'The form data to send in the request. Can be a JSON object with the field name as the key and the field value as the value. Supports utf8 (default) and base64 encoding.'
+    ),
+    query: z.record(z.string(), z.string()).optional(),
+    headers: z.record(z.string(), z.string()).optional(),
+    fetcher: z
+      .object({
+        skip_ssl_verification: z.boolean().optional(),
+        follow_redirects: z.boolean().optional(),
+        max_redirects: z.number().optional(),
+        keep_alive: z.boolean().optional(),
+      })
+      .optional(),
+  })
+);
 
 // HTTP connector response schema
-export const HttpResponseSchema = z.object({
-  status: z.number(),
-  statusText: z.string(),
-  data: z.any(),
-  headers: z.record(z.string(), z.string()),
-});
+export const HttpResponseSchema = lazySchema(() =>
+  z.object({
+    status: z.number(),
+    statusText: z.string(),
+    data: z.any(),
+    headers: z.record(z.string(), z.string()),
+  })
+);

@@ -7,21 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const numeralPatternSchema = z
-  .string()
-  .meta({
-    title: 'Numeral pattern',
-    description:
-      'Numeral.js format pattern. See https://www.elastic.co/docs/explore-analyze/numeral-formatting to learn more.',
-  })
-  .optional();
+export const numeralPatternSchema = lazySchema(() =>
+  z
+    .string()
+    .meta({
+      title: 'Numeral pattern',
+      description:
+        'Numeral.js format pattern. See https://www.elastic.co/docs/explore-analyze/numeral-formatting to learn more.',
+    })
+    .optional()
+);
 
-export const momentPatternSchema = z
-  .string()
-  .meta({
-    title: 'Moment.js pattern',
-    description: 'Moment.js format pattern. See https://momentjs.com/ to learn more.',
-  })
-  .optional();
+export const momentPatternSchema = lazySchema(() =>
+  z
+    .string()
+    .meta({
+      title: 'Moment.js pattern',
+      description: 'Moment.js format pattern. See https://momentjs.com/ to learn more.',
+    })
+    .optional()
+);

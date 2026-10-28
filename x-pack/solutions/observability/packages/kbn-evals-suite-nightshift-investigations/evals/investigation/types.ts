@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type {
   Hypothesis,
@@ -14,11 +14,13 @@ import type {
   InvestigationSeverity,
 } from '@kbn/agentic-investigations-plugin/common';
 
-export const investigationExampleSchema = z.object({
-  input: z.object({ question: z.string().trim().min(1).max(MAX_TEXT_LENGTH) }).catchall(z.json()),
-  output: z.record(z.string(), z.json()).optional(),
-  metadata: z.object({ case_id: z.string().trim().min(1).max(500) }).catchall(z.json()),
-});
+export const investigationExampleSchema = lazySchema(() =>
+  z.object({
+    input: z.object({ question: z.string().trim().min(1).max(MAX_TEXT_LENGTH) }).catchall(z.json()),
+    output: z.record(z.string(), z.json()).optional(),
+    metadata: z.object({ case_id: z.string().trim().min(1).max(500) }).catchall(z.json()),
+  })
+);
 
 export type InvestigationExample = z.infer<typeof investigationExampleSchema>;
 

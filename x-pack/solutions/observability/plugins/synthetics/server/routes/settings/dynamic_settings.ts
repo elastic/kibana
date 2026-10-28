@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { MAX_ROUTE_STRING_LENGTH } from '../zod_query';
 import {
   fromSettingsAttribute,
@@ -123,22 +123,24 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
   },
 });
 
-const emailList = z.array(z.string().max(MAX_ROUTE_STRING_LENGTH)).max(1000);
+const emailList = lazySchema(() => z.array(z.string().max(MAX_ROUTE_STRING_LENGTH)).max(1000));
 
-export const DynamicSettingsSchema = z.strictObject({
-  certAgeThreshold: z.number().int().min(1).optional(),
-  certExpirationThreshold: z.number().int().min(1).optional(),
-  defaultConnectors: z.array(z.string().max(MAX_ROUTE_STRING_LENGTH)).max(1000).optional(),
-  defaultStatusRuleEnabled: z.boolean().optional(),
-  defaultTLSRuleEnabled: z.boolean().optional(),
-  rebalancePrivateLocationShardsEnabled: z.boolean().optional(),
-  defaultEmail: z
-    .strictObject({
-      to: emailList,
-      cc: emailList.optional(),
-      bcc: emailList.optional(),
-    })
-    .optional(),
-  // Ignored: MW changes now wake the sync task via runSoon. Kept so older clients don't 400.
-  privateLocationsSyncInterval: z.number().max(1440).optional(),
-});
+export const DynamicSettingsSchema = lazySchema(() =>
+  z.strictObject({
+    certAgeThreshold: z.number().int().min(1).optional(),
+    certExpirationThreshold: z.number().int().min(1).optional(),
+    defaultConnectors: z.array(z.string().max(MAX_ROUTE_STRING_LENGTH)).max(1000).optional(),
+    defaultStatusRuleEnabled: z.boolean().optional(),
+    defaultTLSRuleEnabled: z.boolean().optional(),
+    rebalancePrivateLocationShardsEnabled: z.boolean().optional(),
+    defaultEmail: z
+      .strictObject({
+        to: emailList,
+        cc: emailList.optional(),
+        bcc: emailList.optional(),
+      })
+      .optional(),
+    // Ignored: MW changes now wake the sync task via runSoon. Kept so older clients don't 400.
+    privateLocationsSyncInterval: z.number().max(1440).optional(),
+  })
+);

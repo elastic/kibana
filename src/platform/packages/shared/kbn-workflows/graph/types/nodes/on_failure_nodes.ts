@@ -7,115 +7,121 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { GraphNodeSchema } from './base';
 import { WorkflowRetrySchema } from '../../../spec/schema';
 
 export const EnterContinueNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('enter-continue'),
-  configuration: z.object({
-    condition: z.union([z.string(), z.boolean()]),
-  }),
-  exitNodeId: z.string(),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('enter-continue')),
+  configuration: lazySchema(() =>
+    z.object({
+      condition: z.union([z.string(), z.boolean()]),
+    })
+  ),
+  exitNodeId: lazySchema(() => z.string()),
 });
 export type EnterContinueNode = z.infer<typeof EnterContinueNodeSchema>;
 
 export const ExitContinueNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('exit-continue'),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('exit-continue')),
 });
 export type ExitContinueNode = z.infer<typeof ExitContinueNodeSchema>;
 
 export const EnterRetryNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('enter-retry'),
-  exitNodeId: z.string(),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('enter-retry')),
+  exitNodeId: lazySchema(() => z.string()),
   configuration: WorkflowRetrySchema,
 });
 export type EnterRetryNode = z.infer<typeof EnterRetryNodeSchema>;
 
 export const ExitRetryNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('exit-retry'),
-  startNodeId: z.string(),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('exit-retry')),
+  startNodeId: lazySchema(() => z.string()),
 });
 export type ExitRetryNode = z.infer<typeof ExitRetryNodeSchema>;
 
 export const EnterTryBlockNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('enter-try-block'),
-  enterNormalPathNodeId: z.string(),
-  enterFallbackPathNodeId: z.string(),
-  exitNodeId: z.string(),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('enter-try-block')),
+  enterNormalPathNodeId: lazySchema(() => z.string()),
+  enterFallbackPathNodeId: lazySchema(() => z.string()),
+  exitNodeId: lazySchema(() => z.string()),
 });
 export type EnterTryBlockNode = z.infer<typeof EnterTryBlockNodeSchema>;
 
 export const ExitTryBlockNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('exit-try-block'),
-  enterNodeId: z.string(),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('exit-try-block')),
+  enterNodeId: lazySchema(() => z.string()),
 });
 export type ExitTryBlockNode = z.infer<typeof ExitTryBlockNodeSchema>;
 
 export const EnterNormalPathNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('enter-normal-path'),
-  enterZoneNodeId: z.string(),
-  enterFailurePathNodeId: z.string(),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('enter-normal-path')),
+  enterZoneNodeId: lazySchema(() => z.string()),
+  enterFailurePathNodeId: lazySchema(() => z.string()),
 });
 export type EnterNormalPathNode = z.infer<typeof EnterNormalPathNodeSchema>;
 
 export const ExitNormalPathNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('exit-normal-path'),
-  exitOnFailureZoneNodeId: z.string(),
-  enterNodeId: z.string(),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('exit-normal-path')),
+  exitOnFailureZoneNodeId: lazySchema(() => z.string()),
+  enterNodeId: lazySchema(() => z.string()),
 });
 export type ExitNormalPathNode = z.infer<typeof ExitNormalPathNodeSchema>;
 
 export const EnterFallbackPathNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('enter-fallback-path'),
-  enterZoneNodeId: z.string(),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('enter-fallback-path')),
+  enterZoneNodeId: lazySchema(() => z.string()),
 });
 export type EnterFallbackPathNode = z.infer<typeof EnterFallbackPathNodeSchema>;
 
 export const ExitFallbackPathNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('exit-fallback-path'),
-  exitOnFailureZoneNodeId: z.string(),
-  enterNodeId: z.string(),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('exit-fallback-path')),
+  exitOnFailureZoneNodeId: lazySchema(() => z.string()),
+  enterNodeId: lazySchema(() => z.string()),
 });
 export type ExitFallbackPathNode = z.infer<typeof ExitFallbackPathNodeSchema>;
 
 export const OnFailureNodeSchema = GraphNodeSchema.extend({
-  type: z.literal('on-failure'),
+  type: lazySchema(() => z.literal('on-failure')),
 });
 export type OnFailureNode = z.infer<typeof OnFailureNodeSchema>;
 
 export const StepLevelOnFailureNodeSchema = GraphNodeSchema.extend({
-  type: z.literal('step-level-on-failure'),
+  type: lazySchema(() => z.literal('step-level-on-failure')),
 });
 export type StepLevelOnFailureNode = z.infer<typeof StepLevelOnFailureNodeSchema>;
 
 export const WorkflowLevelOnFailureNodeSchema = GraphNodeSchema.extend({
-  type: z.literal('workflow-level-on-failure'),
+  type: lazySchema(() => z.literal('workflow-level-on-failure')),
 });
 export type WorkflowLevelOnFailureNode = z.infer<typeof WorkflowLevelOnFailureNodeSchema>;
 
 // Timeout handling nodes - stack-based timeout management
 export const EnterTimeoutZoneNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('enter-timeout-zone'),
-  timeout: z.string(),
-  stepType: z.union([z.literal('workflow_level_timeout'), z.literal('step_level_timeout')]),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('enter-timeout-zone')),
+  timeout: lazySchema(() => z.string()),
+  stepType: lazySchema(() =>
+    z.union([z.literal('workflow_level_timeout'), z.literal('step_level_timeout')])
+  ),
 });
 export type EnterTimeoutZoneNode = z.infer<typeof EnterTimeoutZoneNodeSchema>;
 
 export const ExitTimeoutZoneNodeSchema = GraphNodeSchema.extend({
-  id: z.string(),
-  type: z.literal('exit-timeout-zone'),
-  stepType: z.union([z.literal('workflow_level_timeout'), z.literal('step_level_timeout')]),
+  id: lazySchema(() => z.string()),
+  type: lazySchema(() => z.literal('exit-timeout-zone')),
+  stepType: lazySchema(() =>
+    z.union([z.literal('workflow_level_timeout'), z.literal('step_level_timeout')])
+  ),
 });
 export type ExitTimeoutZoneNode = z.infer<typeof ExitTimeoutZoneNodeSchema>;

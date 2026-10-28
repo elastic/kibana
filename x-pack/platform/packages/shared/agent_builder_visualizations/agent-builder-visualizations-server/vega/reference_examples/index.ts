@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { Logger } from '@kbn/logging';
 import type { ScopedModel } from '@kbn/agent-builder-server';
@@ -82,14 +82,16 @@ export const formatReferenceCatalog = (): string =>
     (example) => `- id: "${example.id}" — ${example.title}\n  ${example.description}`
   ).join('\n');
 
-const referenceSelectionSchema = z.object({
-  exampleIds: z
-    .array(z.string())
-    .default([])
-    .describe(
-      'IDs (from the catalog) of the reference examples whose STRUCTURE matches the request. Order by relevance. Use an empty array when none apply — e.g. a plain single-series bar/line chart, which needs no example.'
-    ),
-});
+const referenceSelectionSchema = lazySchema(() =>
+  z.object({
+    exampleIds: z
+      .array(z.string())
+      .default([])
+      .describe(
+        'IDs (from the catalog) of the reference examples whose STRUCTURE matches the request. Order by relevance. Use an empty array when none apply — e.g. a plain single-series bar/line chart, which needs no example.'
+      ),
+  })
+);
 
 export const createExampleSelectorPrompt = ({
   nlQuery,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
@@ -13,13 +13,15 @@ import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server/to
 import type { IBashService } from '@kbn/agent-builder-server/runner';
 import { SAFEGUARD_TOKEN_COUNT } from '../bash/output_truncation';
 
-const schema = z.object({
-  command: z
-    .string()
-    .describe(
-      'The bash command(s) to execute. Can be a single command, a pipeline, or a multi-line script.'
-    ),
-});
+const schema = lazySchema(() =>
+  z.object({
+    command: z
+      .string()
+      .describe(
+        'The bash command(s) to execute. Can be a single command, a pipeline, or a multi-line script.'
+      ),
+  })
+);
 
 const description = `Run a bash command in a sandboxed shell environment.
 

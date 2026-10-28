@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -55,36 +55,38 @@ const emitSearchAttachments = async (
 // array must stay bounded to avoid resource exhaustion.
 const MAX_ALERT_IDS = 100;
 
-const casesSchema = z.object({
-  mode: z
-    .enum(['get', 'bulk_get', 'similar', 'by_alert', 'search'])
-    .describe(
-      'Required fields per mode:\n' +
-        '- get: case_id\n' +
-        '- bulk_get: case_ids (keep ≤10)\n' +
-        '- similar: similar_to_case_id (+ optional page, perPage)\n' +
-        `- by_alert: alert_ids (max ${MAX_ALERT_IDS}) (+ optional owner)\n` +
-        '- search: owner (required) + optional search, severity, status, tags, assignees, reporters, category, from, to, searchFields, sortField, sortOrder, page, perPage'
-    ),
-  ...getCaseStepCommonDefinition.inputSchema.omit({ include_comments: true }).partial().shape,
-  ...getCasesStepCommonDefinition.inputSchema.partial().shape,
-  ...findCasesStepCommonDefinition.inputSchema.partial().shape,
-  // Custom fields not in any step schema:
-  similar_to_case_id: z
-    .string()
-    .optional()
-    .describe(
-      'Find cases similar to this case ID based on shared observables. Required for similar mode.'
-    ),
-  alert_ids: z
-    .array(z.string().min(1))
-    .max(MAX_ALERT_IDS)
-    .optional()
-    .describe(
-      `Array of alert IDs to find cases containing these alerts (max ${MAX_ALERT_IDS}). Required for by_alert mode.`
-    ),
-  // owner, assignees, from, to, search: descriptions inherited from step schemas
-});
+const casesSchema = lazySchema(() =>
+  z.object({
+    mode: z
+      .enum(['get', 'bulk_get', 'similar', 'by_alert', 'search'])
+      .describe(
+        'Required fields per mode:\n' +
+          '- get: case_id\n' +
+          '- bulk_get: case_ids (keep ≤10)\n' +
+          '- similar: similar_to_case_id (+ optional page, perPage)\n' +
+          `- by_alert: alert_ids (max ${MAX_ALERT_IDS}) (+ optional owner)\n` +
+          '- search: owner (required) + optional search, severity, status, tags, assignees, reporters, category, from, to, searchFields, sortField, sortOrder, page, perPage'
+      ),
+    ...getCaseStepCommonDefinition.inputSchema.omit({ include_comments: true }).partial().shape,
+    ...getCasesStepCommonDefinition.inputSchema.partial().shape,
+    ...findCasesStepCommonDefinition.inputSchema.partial().shape,
+    // Custom fields not in any step schema:
+    similar_to_case_id: z
+      .string()
+      .optional()
+      .describe(
+        'Find cases similar to this case ID based on shared observables. Required for similar mode.'
+      ),
+    alert_ids: z
+      .array(z.string().min(1))
+      .max(MAX_ALERT_IDS)
+      .optional()
+      .describe(
+        `Array of alert IDs to find cases containing these alerts (max ${MAX_ALERT_IDS}). Required for by_alert mode.`
+      ),
+    // owner, assignees, from, to, search: descriptions inherited from step schemas
+  })
+);
 
 async function fetchCaseById(
   caseId: string,

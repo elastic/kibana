@@ -7,7 +7,7 @@
 
 import type { KbnClient } from '@kbn/kbn-client';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   API_VERSIONS,
   DeleteEvaluationDatasetResponse,
@@ -127,7 +127,7 @@ const SPACES_URL = '/api/spaces/space';
 // was written against.
 const SPACES_HEADERS = { 'elastic-api-version': '2023-10-31' };
 
-const SpacesResponse = z.array(z.object({ id: z.string() }));
+const SpacesResponse = lazySchema(() => z.array(z.object({ id: z.string() })));
 
 const getResponseData = (response: unknown): unknown => {
   if (typeof response === 'object' && response !== null && 'data' in response) {

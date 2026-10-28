@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
@@ -22,29 +22,31 @@ import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID = 'observability.run_log_rate_analysis';
 
-const logRateAnalysisSchema = z.object({
-  index: z.string().max(MAX_INDEX_PATTERN_LENGTH).describe(indexDescription),
-  timeFieldName: z
-    .string()
-    .max(MAX_SHORT_STRING_LENGTH)
-    .default('@timestamp')
-    .describe('Timestamp field used to build the baseline/deviation windows.'),
-  baseline: z
-    .object(timeRangeSchemaRequired)
-    .describe(
-      'Time range representing "normal" behavior that the deviation window will be compared against.'
-    ),
-  deviation: z
-    .object(timeRangeSchemaRequired)
-    .describe('Time range representing the time period with unusual behavior.'),
-  kqlFilter: z
-    .string()
-    .max(MAX_KQL_FILTER_LENGTH)
-    .optional()
-    .describe(
-      'Optional KQL filter to narrow which documents are analyzed. Examples: "service.name: checkout", "log.level: error".'
-    ),
-});
+const logRateAnalysisSchema = lazySchema(() =>
+  z.object({
+    index: z.string().max(MAX_INDEX_PATTERN_LENGTH).describe(indexDescription),
+    timeFieldName: z
+      .string()
+      .max(MAX_SHORT_STRING_LENGTH)
+      .default('@timestamp')
+      .describe('Timestamp field used to build the baseline/deviation windows.'),
+    baseline: z
+      .object(timeRangeSchemaRequired)
+      .describe(
+        'Time range representing "normal" behavior that the deviation window will be compared against.'
+      ),
+    deviation: z
+      .object(timeRangeSchemaRequired)
+      .describe('Time range representing the time period with unusual behavior.'),
+    kqlFilter: z
+      .string()
+      .max(MAX_KQL_FILTER_LENGTH)
+      .optional()
+      .describe(
+        'Optional KQL filter to narrow which documents are analyzed. Examples: "service.name: checkout", "log.level: error".'
+      ),
+  })
+);
 
 export function createRunLogRateAnalysisTool({
   core,

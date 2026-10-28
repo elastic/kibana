@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export interface ElasticsearchAssets {
   ingestPipeline?: string | undefined;
@@ -14,9 +14,11 @@ export interface ElasticsearchAssets {
   dataStream: string;
 }
 
-export const elasticsearchAssetsSchema: z.Schema<ElasticsearchAssets> = z.object({
-  ingestPipeline: z.string().optional(),
-  componentTemplates: z.array(z.string()),
-  indexTemplate: z.string(),
-  dataStream: z.string(),
-});
+export const elasticsearchAssetsSchema: z.Schema<ElasticsearchAssets> = lazySchema(() =>
+  z.object({
+    ingestPipeline: z.string().optional(),
+    componentTemplates: z.array(z.string()),
+    indexTemplate: z.string(),
+    dataStream: z.string(),
+  })
+);

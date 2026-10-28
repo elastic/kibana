@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
@@ -42,25 +42,27 @@ interface ResolvedEntitiesState {
   unresolved: UnresolvedEntityResult[];
 }
 
-const schema = z.object({
-  targetId: z
-    .string()
-    .min(1)
-    .describe(
-      'The entity to link the others to (becomes the resolution group target). Accepts the id (EUID), canonical entity.name, or user.full_name. Set this ONLY when the user named the target. Omit it otherwise and the tool proposes one; never guess a value.'
-    )
-    .optional(),
-  targetType: IdentifierType.describe(
-    'The entity type of `targetId`: host, user, service, or generic. Optional — helps disambiguate when `targetId` is a bare name.'
-  ).optional(),
-  entityIds: z
-    .array(z.string().min(1))
-    .min(1)
-    .max(MAX_ENTITIES_PER_CALL)
-    .describe(
-      `Entities to link to the target, becoming its aliases. When \`targetId\` is omitted, list every entity to merge here (at least two) and the tool picks which one becomes the target. Accepts EUIDs, canonical entity.name, or user.full_name values. Up to ${MAX_ENTITIES_PER_CALL} per call; for larger bulk merges, direct the user to the CSV import in the UI.`
-    ),
-});
+const schema = lazySchema(() =>
+  z.object({
+    targetId: z
+      .string()
+      .min(1)
+      .describe(
+        'The entity to link the others to (becomes the resolution group target). Accepts the id (EUID), canonical entity.name, or user.full_name. Set this ONLY when the user named the target. Omit it otherwise and the tool proposes one; never guess a value.'
+      )
+      .optional(),
+    targetType: IdentifierType.describe(
+      'The entity type of `targetId`: host, user, service, or generic. Optional — helps disambiguate when `targetId` is a bare name.'
+    ).optional(),
+    entityIds: z
+      .array(z.string().min(1))
+      .min(1)
+      .max(MAX_ENTITIES_PER_CALL)
+      .describe(
+        `Entities to link to the target, becoming its aliases. When \`targetId\` is omitted, list every entity to merge here (at least two) and the tool picks which one becomes the target. Accepts EUIDs, canonical entity.name, or user.full_name values. Up to ${MAX_ENTITIES_PER_CALL} per call; for larger bulk merges, direct the user to the CSV import in the UI.`
+      ),
+  })
+);
 
 export const SECURITY_LINK_ENTITIES_TOOL_ID = securityTool('link_entities');
 

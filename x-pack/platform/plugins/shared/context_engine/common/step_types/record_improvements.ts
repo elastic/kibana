@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
@@ -16,49 +16,53 @@ export const RECORD_IMPROVEMENTS_STEP_ID = 'context-engine.recordImprovements' a
 
 const MAX_IMPROVEMENTS_PER_REQUEST = 200;
 
-export const recordImprovementsInputSchema = z.object({
-  ai_index_id: aiIndexIdSchema.describe('The AI index these improvements are proposed for'),
-  agent_run_id: z
-    .string()
-    .min(1)
-    .max(1024)
-    .describe('The workflow execution that produced these proposals'),
-  signal_window: z
-    .object({ from: z.string().min(1).max(256), to: z.string().min(1).max(256) })
-    .describe('The window the signals were read from, echoed from the context step'),
-  signal_spaces: z
-    .array(z.string().min(1).max(1024))
-    .max(1000)
-    .default([])
-    .describe('The spaces the signals came from, echoed from the context step'),
-  improvements: z
-    .array(z.unknown())
-    .max(MAX_IMPROVEMENTS_PER_REQUEST)
-    .default([])
-    .describe('What the run proposed, straight off the agent'),
-});
+export const recordImprovementsInputSchema = lazySchema(() =>
+  z.object({
+    ai_index_id: aiIndexIdSchema.describe('The AI index these improvements are proposed for'),
+    agent_run_id: z
+      .string()
+      .min(1)
+      .max(1024)
+      .describe('The workflow execution that produced these proposals'),
+    signal_window: z
+      .object({ from: z.string().min(1).max(256), to: z.string().min(1).max(256) })
+      .describe('The window the signals were read from, echoed from the context step'),
+    signal_spaces: z
+      .array(z.string().min(1).max(1024))
+      .max(1000)
+      .default([])
+      .describe('The spaces the signals came from, echoed from the context step'),
+    improvements: z
+      .array(z.unknown())
+      .max(MAX_IMPROVEMENTS_PER_REQUEST)
+      .default([])
+      .describe('What the run proposed, straight off the agent'),
+  })
+);
 
-export const recordImprovementsOutputSchema = z.object({
-  recorded: z
-    .array(
-      z.object({
-        improvement_id: z.string(),
-        action: z.string(),
-        title: z.string(),
-      })
-    )
-    .describe('The proposals that became revisions, with the ids the server derived for them'),
-  skipped: z
-    .array(
-      z.object({
-        action: z.string().optional(),
-        title: z.string().optional(),
-        reason: z.string(),
-        detail: z.string().optional(),
-      })
-    )
-    .describe('The proposals that were not recorded, each with why'),
-});
+export const recordImprovementsOutputSchema = lazySchema(() =>
+  z.object({
+    recorded: z
+      .array(
+        z.object({
+          improvement_id: z.string(),
+          action: z.string(),
+          title: z.string(),
+        })
+      )
+      .describe('The proposals that became revisions, with the ids the server derived for them'),
+    skipped: z
+      .array(
+        z.object({
+          action: z.string().optional(),
+          title: z.string().optional(),
+          reason: z.string(),
+          detail: z.string().optional(),
+        })
+      )
+      .describe('The proposals that were not recorded, each with why'),
+  })
+);
 
 export const recordImprovementsStepCommonDefinition: CommonStepDefinition<
   typeof recordImprovementsInputSchema,

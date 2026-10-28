@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import {
   SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS,
@@ -17,29 +17,33 @@ import {
 export const EVENT_CREATED_TRIGGER_ID = 'significant-events.eventCreated' as const;
 export const EVENT_STATUS_CHANGED_TRIGGER_ID = 'significant-events.eventStatusChanged' as const;
 
-const baseEventSchema = z.object({
-  event_id: z
-    .string()
-    .describe('Stable incident key shared across every version of this significant event.'),
-  title: z.string().describe('Human-readable incident label.'),
-  summary: z.string().describe('Short human-readable description of what is happening.'),
-  status: z
-    .enum(SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS)
-    .describe(
-      'Current lifecycle status: "active" or "inactive". An event winding down ("recovering") is still live and is reported as "active".'
-    ),
-  severity: severitySchema.describe('Severity: "critical", "high", "medium", or "low".'),
-  source_ids: z.array(z.string()).describe('Nightshift source ids associated with this event.'),
-  occurred_at: z.string().describe('When the triggered event happened (ISO 8601 timestamp).'),
-});
+const baseEventSchema = lazySchema(() =>
+  z.object({
+    event_id: z
+      .string()
+      .describe('Stable incident key shared across every version of this significant event.'),
+    title: z.string().describe('Human-readable incident label.'),
+    summary: z.string().describe('Short human-readable description of what is happening.'),
+    status: z
+      .enum(SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS)
+      .describe(
+        'Current lifecycle status: "active" or "inactive". An event winding down ("recovering") is still live and is reported as "active".'
+      ),
+    severity: severitySchema.describe('Severity: "critical", "high", "medium", or "low".'),
+    source_ids: z.array(z.string()).describe('Nightshift source ids associated with this event.'),
+    occurred_at: z.string().describe('When the triggered event happened (ISO 8601 timestamp).'),
+  })
+);
 
 export type SignificantEventTriggerBasePayload = z.infer<typeof baseEventSchema>;
 
-const eventStatusChangedSchema = baseEventSchema.extend({
-  previous_status: z
-    .enum(SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS)
-    .describe('The status the event had before this change.'),
-});
+const eventStatusChangedSchema = lazySchema(() =>
+  baseEventSchema.extend({
+    previous_status: z
+      .enum(SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS)
+      .describe('The status the event had before this change.'),
+  })
+);
 
 export type EventStatusChangedTriggerPayload = z.infer<typeof eventStatusChangedSchema>;
 

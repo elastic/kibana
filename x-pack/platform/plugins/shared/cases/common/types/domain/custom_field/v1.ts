@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export enum CustomFieldTypes {
   TEXT = 'text',
@@ -13,35 +13,39 @@ export enum CustomFieldTypes {
   NUMBER = 'number',
 }
 
-export const CustomFieldTextTypeSchema = z.literal(CustomFieldTypes.TEXT);
-export const CustomFieldToggleTypeSchema = z.literal(CustomFieldTypes.TOGGLE);
-export const CustomFieldNumberTypeSchema = z.literal(CustomFieldTypes.NUMBER);
+export const CustomFieldTextTypeSchema = lazySchema(() => z.literal(CustomFieldTypes.TEXT));
+export const CustomFieldToggleTypeSchema = lazySchema(() => z.literal(CustomFieldTypes.TOGGLE));
+export const CustomFieldNumberTypeSchema = lazySchema(() => z.literal(CustomFieldTypes.NUMBER));
 
-const CaseCustomFieldTextSchema = z.object({
-  key: z.string(),
-  type: CustomFieldTextTypeSchema,
-  value: z.string().nullable(),
-});
+const CaseCustomFieldTextSchema = lazySchema(() =>
+  z.object({
+    key: z.string(),
+    type: CustomFieldTextTypeSchema,
+    value: z.string().nullable(),
+  })
+);
 
-export const CaseCustomFieldToggleSchema = z.object({
-  key: z.string(),
-  type: CustomFieldToggleTypeSchema,
-  value: z.boolean().nullable(),
-});
+export const CaseCustomFieldToggleSchema = lazySchema(() =>
+  z.object({
+    key: z.string(),
+    type: CustomFieldToggleTypeSchema,
+    value: z.boolean().nullable(),
+  })
+);
 
-export const CaseCustomFieldNumberSchema = z.object({
-  key: z.string(),
-  type: CustomFieldNumberTypeSchema,
-  value: z.number().nullable(),
-});
+export const CaseCustomFieldNumberSchema = lazySchema(() =>
+  z.object({
+    key: z.string(),
+    type: CustomFieldNumberTypeSchema,
+    value: z.number().nullable(),
+  })
+);
 
-export const CaseCustomFieldSchema = z.union([
-  CaseCustomFieldTextSchema,
-  CaseCustomFieldToggleSchema,
-  CaseCustomFieldNumberSchema,
-]);
+export const CaseCustomFieldSchema = lazySchema(() =>
+  z.union([CaseCustomFieldTextSchema, CaseCustomFieldToggleSchema, CaseCustomFieldNumberSchema])
+);
 
-export const CaseCustomFieldsSchema = z.array(CaseCustomFieldSchema);
+export const CaseCustomFieldsSchema = lazySchema(() => z.array(CaseCustomFieldSchema));
 
 export type CaseCustomFields = z.infer<typeof CaseCustomFieldsSchema>;
 export type CaseCustomField = z.infer<typeof CaseCustomFieldSchema>;

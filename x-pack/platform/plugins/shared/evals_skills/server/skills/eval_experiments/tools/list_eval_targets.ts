@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { MAX_NAME_LENGTH } from '@kbn/evals-plugin/common';
@@ -13,20 +13,24 @@ import { errorResult, evalsExperimentTools, otherResult, toErrorResult } from '.
 import { hasReadEvalsPrivilege } from '../../common/check_privileges';
 import type { EvalExperimentsToolDeps } from './deps';
 
-const schema = z.object({
-  search: z
-    .string()
-    .max(MAX_NAME_LENGTH)
-    .optional()
-    .describe('Optional case-insensitive substring to filter agents by id, name, or description.'),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(200)
-    .optional()
-    .describe('Maximum number of agents to return. Defaults to 100.'),
-});
+const schema = lazySchema(() =>
+  z.object({
+    search: z
+      .string()
+      .max(MAX_NAME_LENGTH)
+      .optional()
+      .describe(
+        'Optional case-insensitive substring to filter agents by id, name, or description.'
+      ),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(200)
+      .optional()
+      .describe('Maximum number of agents to return. Defaults to 100.'),
+  })
+);
 
 const matches = (search: string | undefined, ...fields: Array<string | undefined>): boolean => {
   if (!search) {

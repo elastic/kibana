@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IngestBaseStream } from './base';
 import {
   IngestBase,
@@ -47,9 +47,11 @@ export interface IngestClassic {
 }
 
 const ingestClassicShape = {
-  classic: z.object({
-    field_overrides: z.optional(classicFieldDefinitionSchema),
-  }),
+  classic: lazySchema(() =>
+    z.object({
+      field_overrides: z.optional(classicFieldDefinitionSchema),
+    })
+  ),
 };
 
 export type ClassicIngest = Omit<IngestBase, 'processing'> &
@@ -57,11 +59,13 @@ export type ClassicIngest = Omit<IngestBase, 'processing'> &
     processing: ClassicIngestStreamProcessing;
   };
 
-const classicIngestSchemaObject = z.object({
-  ...ingestBaseSchemaFields,
-  processing: classicIngestStreamProcessingSchema,
-  ...ingestClassicShape,
-});
+const classicIngestSchemaObject = lazySchema(() =>
+  z.object({
+    ...ingestBaseSchemaFields,
+    processing: classicIngestStreamProcessingSchema,
+    ...ingestClassicShape,
+  })
+);
 
 export const ClassicIngest: Validation<IngestBase, ClassicIngest> = validation(
   IngestBase.right,
@@ -70,11 +74,13 @@ export const ClassicIngest: Validation<IngestBase, ClassicIngest> = validation(
 
 export type ClassicIngestUpsertRequest = IngestBaseUpsertRequest & IngestClassic;
 
-const classicIngestUpsertSchemaObject = z.object({
-  ...ingestBaseUpsertSchemaFields,
-  processing: classicIngestStreamProcessingUpsertSchema,
-  ...ingestClassicShape,
-});
+const classicIngestUpsertSchemaObject = lazySchema(() =>
+  z.object({
+    ...ingestBaseUpsertSchemaFields,
+    processing: classicIngestStreamProcessingUpsertSchema,
+    ...ingestClassicShape,
+  })
+);
 
 export const ClassicIngestUpsertRequest: Validation<
   IngestBaseUpsertRequest,
@@ -123,7 +129,7 @@ export namespace ClassicStream {
 
 const classicStreamDefinitionSchema = ingestBaseStreamDefinitionSchema
   .extend({
-    type: z.literal('classic'),
+    type: lazySchema(() => z.literal('classic')),
     ingest: classicIngestSchemaObject,
   })
   .meta({ id: 'ClassicStreamDefinition' });
@@ -131,8 +137,8 @@ const classicStreamDefinitionSchema = ingestBaseStreamDefinitionSchema
 const classicStreamGetResponseSchema = ingestBaseStreamGetResponseSchema
   .extend({
     stream: classicStreamDefinitionSchema,
-    elasticsearch_assets: z.optional(elasticsearchAssetsSchema),
-    data_stream_exists: z.boolean(),
+    elasticsearch_assets: lazySchema(() => z.optional(elasticsearchAssetsSchema)),
+    data_stream_exists: lazySchema(() => z.boolean()),
     effective_lifecycle: classicIngestStreamEffectiveLifecycleSchema,
     effective_settings: ingestStreamSettingsSchema,
     effective_failure_store: effectiveFailureStoreSchema,
@@ -142,7 +148,7 @@ const classicStreamGetResponseSchema = ingestBaseStreamGetResponseSchema
 const classicStreamUpsertRequestSchema = ingestBaseStreamUpsertRequestSchema
   .extend({
     stream: ingestBaseStreamUpsertDefinitionSchema.extend({
-      type: z.literal('classic'),
+      type: lazySchema(() => z.literal('classic')),
       ingest: classicIngestUpsertSchemaObject,
     }),
   })

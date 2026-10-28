@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export interface ContentPackIncludeAll {
   objects: { all: {} };
@@ -20,9 +20,11 @@ export type ContentPackIncludedObjects =
       };
     };
 
-const includeAllSchema = z.object({
-  objects: z.object({ all: z.strictObject({}) }),
-});
+const includeAllSchema = lazySchema(() =>
+  z.object({
+    objects: z.object({ all: z.strictObject({}) }),
+  })
+);
 
 export const isIncludeAll = (value: ContentPackIncludedObjects): value is ContentPackIncludeAll => {
   return includeAllSchema.safeParse(value).success;

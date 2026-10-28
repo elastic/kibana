@@ -23,7 +23,7 @@ import {
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
 import { notFound, serverUnavailable } from '@hapi/boom';
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
@@ -110,35 +110,37 @@ const collectEmbeddedDetections = (events: SignificantEvent[]) => {
   return result;
 };
 
-const investigationStateSchema = z.enum(SIGNIFICANT_EVENT_INVESTIGATION_STATES);
+const investigationStateSchema = lazySchema(() => z.enum(SIGNIFICANT_EVENT_INVESTIGATION_STATES));
 
 /** Filters shared by the list and facet reads, so their counts always describe the same set. */
-const eventsFilterQuerySchema = z.object({
-  from: isoDateTime().optional(),
-  to: isoDateTime().optional(),
-  status: z
-    .union([
-      significantEventStatusSchema,
-      z.array(significantEventStatusSchema).max(SIGNIFICANT_EVENT_STATUS_OPTIONS.length),
-    ])
-    .optional(),
-  source_id: sourceIdsQuerySchema(MAX_SOURCE_IDS_PER_REQUEST).describe(
-    'Source ids to filter events by. One id or a repeated list.'
-  ),
-  search: z.string().max(MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH).optional(),
-  severity: z.union([severitySchema, z.array(severitySchema).max(4)]).optional(),
-  // Same cap as the agent `event_search` tool; the UI lets users select any number of services.
-  topology_feature_id: z
-    .union([z.string().max(255), z.array(z.string().max(255)).max(100)])
-    .optional(),
-  unassigned_entities: BooleanFromString.optional(),
-  investigation_state: z
-    .union([
-      investigationStateSchema,
-      z.array(investigationStateSchema).max(SIGNIFICANT_EVENT_INVESTIGATION_STATES.length),
-    ])
-    .optional(),
-});
+const eventsFilterQuerySchema = lazySchema(() =>
+  z.object({
+    from: isoDateTime().optional(),
+    to: isoDateTime().optional(),
+    status: z
+      .union([
+        significantEventStatusSchema,
+        z.array(significantEventStatusSchema).max(SIGNIFICANT_EVENT_STATUS_OPTIONS.length),
+      ])
+      .optional(),
+    source_id: sourceIdsQuerySchema(MAX_SOURCE_IDS_PER_REQUEST).describe(
+      'Source ids to filter events by. One id or a repeated list.'
+    ),
+    search: z.string().max(MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH).optional(),
+    severity: z.union([severitySchema, z.array(severitySchema).max(4)]).optional(),
+    // Same cap as the agent `event_search` tool; the UI lets users select any number of services.
+    topology_feature_id: z
+      .union([z.string().max(255), z.array(z.string().max(255)).max(100)])
+      .optional(),
+    unassigned_entities: BooleanFromString.optional(),
+    investigation_state: z
+      .union([
+        investigationStateSchema,
+        z.array(investigationStateSchema).max(SIGNIFICANT_EVENT_INVESTIGATION_STATES.length),
+      ])
+      .optional(),
+  })
+);
 
 const toEventsFilterOptions = async (
   {
@@ -226,15 +228,17 @@ const eventsSearchRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    query: eventsFilterQuerySchema.extend({
-      page: z.coerce.number().int().min(1).optional(),
-      perPage: z.coerce.number().int().min(1).max(1000).optional(),
-      event_id: z.string().max(255).optional(),
-      sort_field: z.enum(SIGNIFICANT_EVENTS_SORT_FIELDS).optional(),
-      sort_order: z.enum(SIGNIFICANT_EVENTS_SORT_ORDERS).optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: eventsFilterQuerySchema.extend({
+        page: z.coerce.number().int().min(1).optional(),
+        perPage: z.coerce.number().int().min(1).max(1000).optional(),
+        event_id: z.string().max(255).optional(),
+        sort_field: z.enum(SIGNIFICANT_EVENTS_SORT_FIELDS).optional(),
+        sort_order: z.enum(SIGNIFICANT_EVENTS_SORT_ORDERS).optional(),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -280,9 +284,11 @@ const eventsFacetsRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    query: eventsFilterQuerySchema,
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: eventsFilterQuerySchema,
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -312,21 +318,23 @@ const eventsLifecycleRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    path: z.object({
-      id: z.string().max(255),
-    }),
-    query: z
-      .object({
-        include_skipped: z
-          .enum(['true', 'false'])
-          .optional()
-          .describe(
-            'Also list the detections the classifier closed without the agent, with why. Off by default.'
-          ),
-      })
-      .optional(),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().max(255),
+      }),
+      query: z
+        .object({
+          include_skipped: z
+            .enum(['true', 'false'])
+            .optional()
+            .describe(
+              'Also list the detections the classifier closed without the agent, with why. Off by default.'
+            ),
+        })
+        .optional(),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -391,12 +399,14 @@ const eventsAttachInvestigationRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({
-      id: z.string().max(255),
-    }),
-    body: significantEventInvestigationSchema.required({ completed_at: true }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().max(255),
+      }),
+      body: significantEventInvestigationSchema.required({ completed_at: true }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
     const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } =
       await getScopedClients({ request });
@@ -427,11 +437,13 @@ const eventsTriggerInvestigationRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({
-      id: z.string().max(255),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().max(255),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -504,11 +516,13 @@ const eventsGetRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    path: z.object({
-      id: z.string().max(255),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().max(255),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -542,15 +556,17 @@ const eventsUpdateRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({
-      id: z.string().max(255),
-    }),
-    body: z.object({
-      status: significantEventManualStatusSchema,
-      assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().max(255),
+      }),
+      body: z.object({
+        status: significantEventManualStatusSchema,
+        assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
     const { getEventSearchClient, licensing } = await getScopedClients({ request });
 
@@ -576,13 +592,15 @@ const cleanupStaleEventsRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    body: z
-      .object({
-        candidateRuleIds: z.array(z.string().max(MAX_ID_LENGTH)).max(1000).optional(),
-      })
-      .nullish(),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z
+        .object({
+          candidateRuleIds: z.array(z.string().max(MAX_ID_LENGTH)).max(1000).optional(),
+        })
+        .nullish(),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -618,11 +636,13 @@ const investigationStatusesRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    body: z.object({
-      workflow_execution_ids: z.array(z.string().max(MAX_ID_LENGTH)).max(1000),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        workflow_execution_ids: z.array(z.string().max(MAX_ID_LENGTH)).max(1000),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,

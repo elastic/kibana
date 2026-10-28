@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { generateStreamDescription, overviewDescriptionPrompt } from '@kbn/streams-ai';
 import { STREAMS_TIERED_ML_FEATURE } from '../../../../../common';
@@ -14,14 +14,16 @@ import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { createServerRoute } from '../../../create_server_route';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 
-const suggestDescriptionSchema = z.object({
-  path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
-  body: z.object({
-    connector_id: z.string().max(256),
-    start: z.number(),
-    end: z.number(),
-  }),
-});
+const suggestDescriptionSchema = lazySchema(() =>
+  z.object({
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+    body: z.object({
+      connector_id: z.string().max(256),
+      start: z.number(),
+      end: z.number(),
+    }),
+  })
+);
 
 export const suggestDescriptionRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/_suggest_description',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -18,67 +18,73 @@ import { hasMlCapabilitiesProvider } from '../../lib/capabilities/check_capabili
 import type { BuildMlClientFn } from '../ml_client_factory';
 import { AD_UPDATE_JOB_CONFIG_TOOL_ID } from './tool_ids';
 
-const calendarEventSchema = z.object({
-  start_time: z.string().describe('ISO 8601 start time.'),
-  end_time: z.string().describe('ISO 8601 end time.'),
-  description: z.string().describe('Description of the scheduled event.'),
-});
+const calendarEventSchema = lazySchema(() =>
+  z.object({
+    start_time: z.string().describe('ISO 8601 start time.'),
+    end_time: z.string().describe('ISO 8601 end time.'),
+    description: z.string().describe('Description of the scheduled event.'),
+  })
+);
 
 type CalendarEventInput = z.infer<typeof calendarEventSchema>;
 
-const delayedDataCheckSchema = z.object({
-  enabled: z.boolean(),
-  check_window: z.string().optional().describe('Duration string, e.g. "2h".'),
-});
+const delayedDataCheckSchema = lazySchema(() =>
+  z.object({
+    enabled: z.boolean(),
+    check_window: z.string().optional().describe('Duration string, e.g. "2h".'),
+  })
+);
 
-const schema = z.object({
-  operation: z.enum([
-    'update_memory_limit',
-    'update_query_delay',
-    'update_delayed_data_check',
-    'create_calendar_event',
-  ]),
-  job_id: z
-    .string()
-    .optional()
-    .describe(
-      'Required for update_* operations (or pass job_ids with exactly one entry). For create_calendar_event, prefer job_ids when attaching multiple jobs to one calendar. If omitted and job_ids has one entry, that entry is used as job_id.'
-    ),
-  job_ids: z
-    .array(z.string())
-    .optional()
-    .describe(
-      'For create_calendar_event: all job IDs that should share this calendar. Pass every job in one call so events are created once. A single-entry array is treated as job_id. Empty array with no job_id is an error.'
-    ),
-  memory_limit: z
-    .string()
-    .optional()
-    .describe('Required for update_memory_limit. New model memory limit, e.g. "512mb".'),
-  query_delay: z
-    .string()
-    .optional()
-    .describe('Required for update_query_delay. New datafeed query delay, e.g. "120s".'),
-  delayed_data_check: delayedDataCheckSchema
-    .optional()
-    .describe('Required for update_delayed_data_check.'),
-  calendar_event: calendarEventSchema
-    .optional()
-    .describe(
-      'Single event for create_calendar_event. Prefer calendar_events when adding multiple events.'
-    ),
-  calendar_events: z
-    .array(calendarEventSchema)
-    .optional()
-    .describe(
-      'Required for create_calendar_event (or provide calendar_event). One or more scheduled events to add.'
-    ),
-  calendar_id: z
-    .string()
-    .optional()
-    .describe(
-      'Optional for create_calendar_event. Calendar ID to create or update. Defaults to "calendar-{first_job_id}".'
-    ),
-});
+const schema = lazySchema(() =>
+  z.object({
+    operation: z.enum([
+      'update_memory_limit',
+      'update_query_delay',
+      'update_delayed_data_check',
+      'create_calendar_event',
+    ]),
+    job_id: z
+      .string()
+      .optional()
+      .describe(
+        'Required for update_* operations (or pass job_ids with exactly one entry). For create_calendar_event, prefer job_ids when attaching multiple jobs to one calendar. If omitted and job_ids has one entry, that entry is used as job_id.'
+      ),
+    job_ids: z
+      .array(z.string())
+      .optional()
+      .describe(
+        'For create_calendar_event: all job IDs that should share this calendar. Pass every job in one call so events are created once. A single-entry array is treated as job_id. Empty array with no job_id is an error.'
+      ),
+    memory_limit: z
+      .string()
+      .optional()
+      .describe('Required for update_memory_limit. New model memory limit, e.g. "512mb".'),
+    query_delay: z
+      .string()
+      .optional()
+      .describe('Required for update_query_delay. New datafeed query delay, e.g. "120s".'),
+    delayed_data_check: delayedDataCheckSchema
+      .optional()
+      .describe('Required for update_delayed_data_check.'),
+    calendar_event: calendarEventSchema
+      .optional()
+      .describe(
+        'Single event for create_calendar_event. Prefer calendar_events when adding multiple events.'
+      ),
+    calendar_events: z
+      .array(calendarEventSchema)
+      .optional()
+      .describe(
+        'Required for create_calendar_event (or provide calendar_event). One or more scheduled events to add.'
+      ),
+    calendar_id: z
+      .string()
+      .optional()
+      .describe(
+        'Optional for create_calendar_event. Calendar ID to create or update. Defaults to "calendar-{first_job_id}".'
+      ),
+  })
+);
 
 const isAlreadyExistsError = (err: unknown): boolean => {
   if (!err || typeof err !== 'object') {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
@@ -29,41 +29,43 @@ import { getFieldValuesHandler } from './get_field_values_handler';
 
 export const OBSERVABILITY_GET_INDEX_INFO_TOOL_ID = 'observability.get_index_info';
 
-const getIndexInfoSchema = z.object({
-  operation: z.enum(['get-index-patterns', 'list-fields', 'get-field-values']).describe(
-    dedent(`Operation to perform:
+const getIndexInfoSchema = lazySchema(() =>
+  z.object({
+    operation: z.enum(['get-index-patterns', 'list-fields', 'get-field-values']).describe(
+      dedent(`Operation to perform:
         - "get-index-patterns": Get observability index patterns and discovered data streams 
         - "list-fields": List names of populated fields in an index (requires: index)
         - "get-field-values": Get values for specific fields (requires: index, fields)`)
-  ),
-  index: z
-    .string()
-    .max(MAX_INDEX_PATTERN_LENGTH)
-    .optional()
-    .describe(
-      'Index pattern. Examples: "logs-*", "metrics-*". Required for "list-fields" and "get-field-values".'
     ),
-  fields: z
-    .array(z.string().max(MAX_SHORT_STRING_LENGTH))
-    .max(10)
-    .optional()
-    .describe(
-      'Array of field names or wildcard patterns to get values for. Examples: ["host.name"], ["attributes.app.*"]. Required for "get-field-values".'
-    ),
-  ...timeRangeSchemaOptional({ start: 'now-24h', end: 'now' }),
-  kqlFilter: z
-    .string()
-    .max(MAX_KQL_FILTER_LENGTH)
-    .optional()
-    .describe('KQL filter to scope field discovery. Examples: \'service.name: "checkout"\'.'),
-  intent: z
-    .string()
-    .max(MAX_SHORT_STRING_LENGTH)
-    .optional()
-    .describe(
-      'Investigation focus to filter relevant fields. Examples: "memory issues", "high latency".'
-    ),
-});
+    index: z
+      .string()
+      .max(MAX_INDEX_PATTERN_LENGTH)
+      .optional()
+      .describe(
+        'Index pattern. Examples: "logs-*", "metrics-*". Required for "list-fields" and "get-field-values".'
+      ),
+    fields: z
+      .array(z.string().max(MAX_SHORT_STRING_LENGTH))
+      .max(10)
+      .optional()
+      .describe(
+        'Array of field names or wildcard patterns to get values for. Examples: ["host.name"], ["attributes.app.*"]. Required for "get-field-values".'
+      ),
+    ...timeRangeSchemaOptional({ start: 'now-24h', end: 'now' }),
+    kqlFilter: z
+      .string()
+      .max(MAX_KQL_FILTER_LENGTH)
+      .optional()
+      .describe('KQL filter to scope field discovery. Examples: \'service.name: "checkout"\'.'),
+    intent: z
+      .string()
+      .max(MAX_SHORT_STRING_LENGTH)
+      .optional()
+      .describe(
+        'Investigation focus to filter relevant fields. Examples: "memory issues", "high latency".'
+      ),
+  })
+);
 
 export function createGetIndexInfoTool({
   core,

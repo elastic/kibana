@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { createGenAiSettingsServerRoute } from '../create_gen_ai_settings_server_route';
 
@@ -33,9 +33,11 @@ const getConnectorByIdRoute = createGenAiSettingsServerRoute({
       reason: 'The route is protected by the actions plugin',
     },
   },
-  params: z.object({
-    path: z.object({ connectorId: z.string() }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ connectorId: z.string() }),
+    })
+  ),
   handler: async (resources): Promise<InferenceConnector> => {
     const { request, params, plugins } = resources;
 

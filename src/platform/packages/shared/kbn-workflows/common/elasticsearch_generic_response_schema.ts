@@ -7,22 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 /**
  * Basic _shards info, appears in many responses
  */
-export const EsShardsInfoSchema = z.object({
-  total: z.number(),
-  successful: z.number(),
-  failed: z.number(),
-  skipped: z.number().optional(),
-});
+export const EsShardsInfoSchema = lazySchema(() =>
+  z.object({
+    total: z.number(),
+    successful: z.number(),
+    failed: z.number(),
+    skipped: z.number().optional(),
+  })
+);
 
 /**
  * A generic document source – override with your own schema
  */
-export const EsHitSourceSchema = z.record(z.string(), z.unknown());
+export const EsHitSourceSchema = lazySchema(() => z.record(z.string(), z.unknown()));
 
 /**
  * Generic hit (for search, msearch, etc.)
@@ -43,19 +45,21 @@ export const EsHitSchema = z
 /**
  * `hits` container used in search-like APIs
  */
-export const EsHitsSchema = z.object({
-  total: z
-    .union([
-      z.number(),
-      z.object({
-        value: z.number(),
-        relation: z.enum(['eq', 'gte']).optional(),
-      }),
-    ])
-    .optional(),
-  max_score: z.number().nullable().optional(),
-  hits: z.array(EsHitSchema),
-});
+export const EsHitsSchema = lazySchema(() =>
+  z.object({
+    total: z
+      .union([
+        z.number(),
+        z.object({
+          value: z.number(),
+          relation: z.enum(['eq', 'gte']).optional(),
+        }),
+      ])
+      .optional(),
+    max_score: z.number().nullable().optional(),
+    hits: z.array(EsHitSchema),
+  })
+);
 
 /**
  * Single bucket; appears inside many agg responses
@@ -76,27 +80,29 @@ export const EsAggregationBucketSchema = z
  * - or “thing with buckets”
  * - or fallback to unknown
  */
-export const EsAggregationsSchema = z
-  .record(
-    z.string(),
-    z.union([
-      EsAggregationBucketSchema,
-      z
-        .object({
-          buckets: z
-            .array(
-              z.union([
-                EsAggregationBucketSchema,
-                z.record(z.string(), z.unknown()), // filters, range, etc. with extra fields
-              ])
-            )
-            .optional(),
-        })
-        .passthrough(),
-      z.unknown(),
-    ])
-  )
-  .optional();
+export const EsAggregationsSchema = lazySchema(() =>
+  z
+    .record(
+      z.string(),
+      z.union([
+        EsAggregationBucketSchema,
+        z
+          .object({
+            buckets: z
+              .array(
+                z.union([
+                  EsAggregationBucketSchema,
+                  z.record(z.string(), z.unknown()), // filters, range, etc. with extra fields
+                ])
+              )
+              .optional(),
+          })
+          .passthrough(),
+        z.unknown(),
+      ])
+    )
+    .optional()
+);
 
 /**
  * A generic Elasticsearch JSON response.

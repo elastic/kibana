@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core/server';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -50,11 +50,15 @@ const cancelLaunchedExecutions = async (
 };
 
 const runSchema = evalExperimentConfigSchema.extend({
-  workflow_id: z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .optional()
-    .describe('Optional saved workflow id to associate this run with (for correlation in the UI).'),
+  workflow_id: lazySchema(() =>
+    z
+      .string()
+      .max(MAX_ID_LENGTH)
+      .optional()
+      .describe(
+        'Optional saved workflow id to associate this run with (for correlation in the UI).'
+      )
+  ),
 });
 
 /**

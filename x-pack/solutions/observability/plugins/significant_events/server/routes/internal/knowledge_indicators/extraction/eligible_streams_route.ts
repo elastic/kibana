@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
   OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
@@ -72,15 +72,17 @@ const eligibleStreamsRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    query: z
-      .object({
-        maxScheduledStreams: NumberFromString.pipe(z.number().positive().optional()),
-        extractionIntervalHours: NumberFromString.pipe(z.number().min(0).optional()),
-        lookbackHours: NumberFromString.pipe(z.number().positive().optional()),
-      })
-      .optional(),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({
+          maxScheduledStreams: NumberFromString.pipe(z.number().positive().optional()),
+          extractionIntervalHours: NumberFromString.pipe(z.number().min(0).optional()),
+          lookbackHours: NumberFromString.pipe(z.number().positive().optional()),
+        })
+        .optional(),
+    })
+  ),
   handler: async ({
     params,
     request,

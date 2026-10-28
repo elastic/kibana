@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { createPrompt } from '@kbn/inference-common';
 import { Streams } from '@kbn/streams-schema';
 import systemPromptTemplate from './system_prompt.text';
@@ -14,22 +14,24 @@ import taskPromptTemplate from './task_prompt.text';
 export const SuggestIngestPipelinePrompt = createPrompt({
   name: 'suggest_ingest_pipeline_prompt',
   description: 'Suggest ingest pipeline based on stream analysis',
-  input: z.object({
-    stream: Streams.all.Definition.right,
-    pipeline_schema: z.string(),
-    fields_schema: z.string(),
-    content_field: z.string(),
-    severity_field: z.string(),
-    /** JSON summary of sample document structure (fields, example values, schema hints) */
-    initial_dataset_analysis: z.string(),
-    /**
-     * When set, explains an upstream grok/dissect step already applied before these samples.
-     * Empty when the agent may propose grok/dissect (full pipeline schema).
-     */
-    upstream_extraction_context: z.string(),
-    /** Conditional field examples for ECS or OTel, injected into system prompt based on stream type */
-    field_examples: z.string(),
-  }),
+  input: lazySchema(() =>
+    z.object({
+      stream: Streams.all.Definition.right,
+      pipeline_schema: z.string(),
+      fields_schema: z.string(),
+      content_field: z.string(),
+      severity_field: z.string(),
+      /** JSON summary of sample document structure (fields, example values, schema hints) */
+      initial_dataset_analysis: z.string(),
+      /**
+       * When set, explains an upstream grok/dissect step already applied before these samples.
+       * Empty when the agent may propose grok/dissect (full pipeline schema).
+       */
+      upstream_extraction_context: z.string(),
+      /** Conditional field examples for ECS or OTel, injected into system prompt based on stream type */
+      field_examples: z.string(),
+    })
+  ),
 })
   .version({
     system: {

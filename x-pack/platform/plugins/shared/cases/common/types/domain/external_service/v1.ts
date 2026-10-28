@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { UserSchema } from '../user/v1';
 
-export const ExternalServiceBasicSchema = z.object({
-  connector_name: z.string(),
-  external_id: z.string(),
-  external_title: z.string(),
-  external_url: z.string(),
-  pushed_at: z.string(),
-  pushed_by: UserSchema,
-});
+export const ExternalServiceBasicSchema = lazySchema(() =>
+  z.object({
+    connector_name: z.string(),
+    external_id: z.string(),
+    external_title: z.string(),
+    external_url: z.string(),
+    pushed_at: z.string(),
+    pushed_by: UserSchema,
+  })
+);
 
-export const ExternalServiceSchema = ExternalServiceBasicSchema.extend({
-  connector_id: z.string(),
-});
+export const ExternalServiceSchema = lazySchema(() =>
+  ExternalServiceBasicSchema.extend({
+    connector_id: z.string(),
+  })
+);
 
 export type ExternalService = z.infer<typeof ExternalServiceSchema>;

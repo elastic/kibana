@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { toBooleanFromString } from '../../../../common/utils/to_boolean_from_string';
@@ -142,22 +142,24 @@ export const mobileServiceDetailRoute = {
             showMobileFilters: true,
           },
         }),
-        params: z
-          .object({
-            query: z
-              .object({
-                page: z.coerce.number().optional(),
-                pageSize: z.coerce.number().optional(),
-                sortField: z.string().optional(),
-                sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
-                device: z.string().optional(),
-                osVersion: z.string().optional(),
-                appVersion: z.string().optional(),
-                netConnectionType: z.string().optional(),
-              })
-              .optional(),
-          })
-          .optional(),
+        params: lazySchema(() =>
+          z
+            .object({
+              query: z
+                .object({
+                  page: z.coerce.number().optional(),
+                  pageSize: z.coerce.number().optional(),
+                  sortField: z.string().optional(),
+                  sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+                  device: z.string().optional(),
+                  osVersion: z.string().optional(),
+                  appVersion: z.string().optional(),
+                  netConnectionType: z.string().optional(),
+                })
+                .optional(),
+            })
+            .optional()
+        ),
       },
       '/mobile-services/{serviceName}/transactions': {
         ...page({
@@ -171,44 +173,48 @@ export const mobileServiceDetailRoute = {
             showMobileFilters: true,
           },
         }),
-        params: z
-          .object({
-            query: z
-              .object({
-                page: z.coerce.number().optional(),
-                pageSize: z.coerce.number().optional(),
-                sortField: z.string().optional(),
-                sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
-                device: z.string().optional(),
-                osVersion: z.string().optional(),
-                appVersion: z.string().optional(),
-                netConnectionType: z.string().optional(),
-                mobileSelectedTab: z.string().optional(),
-              })
-              .optional(),
-          })
-          .optional(),
+        params: lazySchema(() =>
+          z
+            .object({
+              query: z
+                .object({
+                  page: z.coerce.number().optional(),
+                  pageSize: z.coerce.number().optional(),
+                  sortField: z.string().optional(),
+                  sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+                  device: z.string().optional(),
+                  osVersion: z.string().optional(),
+                  appVersion: z.string().optional(),
+                  netConnectionType: z.string().optional(),
+                  mobileSelectedTab: z.string().optional(),
+                })
+                .optional(),
+            })
+            .optional()
+        ),
         children: {
           '/mobile-services/{serviceName}/transactions/view': {
             element: <TransactionDetails />,
-            params: z.object({
-              query: z
-                .object({
-                  comparisonEnabled: toBooleanFromString,
-                  showCriticalPath: toBooleanFromString,
-                })
-                .merge(z.object({ transactionName: z.string().optional() }))
-                .merge(
-                  z.object({
-                    traceId: z.string().optional(),
-                    transactionId: z.string().optional(),
-                    flyoutDetailTab: z.string().optional(),
-                    sampleRangeTo: z.coerce.number().optional(),
-                    sampleRangeFrom: z.coerce.number().optional(),
+            params: lazySchema(() =>
+              z.object({
+                query: z
+                  .object({
+                    comparisonEnabled: toBooleanFromString,
+                    showCriticalPath: toBooleanFromString,
                   })
-                )
-                .merge(offsetSchema),
-            }),
+                  .merge(z.object({ transactionName: z.string().optional() }))
+                  .merge(
+                    z.object({
+                      traceId: z.string().optional(),
+                      transactionId: z.string().optional(),
+                      flyoutDetailTab: z.string().optional(),
+                      sampleRangeTo: z.coerce.number().optional(),
+                      sampleRangeFrom: z.coerce.number().optional(),
+                    })
+                  )
+                  .merge(offsetSchema),
+              })
+            ),
             defaults: {
               query: {
                 showCriticalPath: '',
@@ -232,44 +238,50 @@ export const mobileServiceDetailRoute = {
             showMobileFilters: true,
           },
         }),
-        params: z
-          .object({
-            query: z
-              .object({
-                page: z.coerce.number().optional(),
-                pageSize: z.coerce.number().optional(),
-                sortField: z.string().optional(),
-                sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
-                mobileErrorTabId: z.string().optional(),
-                device: z.string().optional(),
-                osVersion: z.string().optional(),
-                appVersion: z.string().optional(),
-                netConnectionType: z.string().optional(),
-              })
-              .optional(),
-          })
-          .optional(),
+        params: lazySchema(() =>
+          z
+            .object({
+              query: z
+                .object({
+                  page: z.coerce.number().optional(),
+                  pageSize: z.coerce.number().optional(),
+                  sortField: z.string().optional(),
+                  sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+                  mobileErrorTabId: z.string().optional(),
+                  device: z.string().optional(),
+                  osVersion: z.string().optional(),
+                  appVersion: z.string().optional(),
+                  netConnectionType: z.string().optional(),
+                })
+                .optional(),
+            })
+            .optional()
+        ),
         children: {
           '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}': {
             element: <ErrorGroupDetails />,
-            params: z.object({
-              path: z.object({
-                groupId: z.string(),
-              }),
-              query: z.object({ errorId: z.string().optional() }),
-            }),
+            params: lazySchema(() =>
+              z.object({
+                path: z.object({
+                  groupId: z.string(),
+                }),
+                query: z.object({ errorId: z.string().optional() }),
+              })
+            ),
           },
           '/mobile-services/{serviceName}/errors-and-crashes/': {
             element: <MobileErrorCrashesOverview />,
           },
           '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}': {
             element: <CrashGroupDetails />,
-            params: z.object({
-              path: z.object({
-                groupId: z.string(),
-              }),
-              query: z.object({ errorId: z.string().optional() }),
-            }),
+            params: lazySchema(() =>
+              z.object({
+                path: z.object({
+                  groupId: z.string(),
+                }),
+                query: z.object({ errorId: z.string().optional() }),
+              })
+            ),
           },
         },
       },
@@ -315,15 +327,17 @@ export const mobileServiceDetailRoute = {
           bottomHeaderContent: AlertsHeaderSearchBar,
           contentWrapper: AlertsSearchBarContextProvider,
         }),
-        params: z
-          .object({
-            query: z
-              .object({
-                alertStatus: z.string().optional(),
-              })
-              .optional(),
-          })
-          .optional(),
+        params: lazySchema(() =>
+          z
+            .object({
+              query: z
+                .object({
+                  alertStatus: z.string().optional(),
+                })
+                .optional(),
+            })
+            .optional()
+        ),
       },
       '/mobile-services/{serviceName}/dashboards': {
         ...page({
@@ -333,15 +347,17 @@ export const mobileServiceDetailRoute = {
           }),
           element: <ServiceDashboards />,
         }),
-        params: z
-          .object({
-            query: z
-              .object({
-                dashboardId: z.string().optional(),
-              })
-              .optional(),
-          })
-          .optional(),
+        params: lazySchema(() =>
+          z
+            .object({
+              query: z
+                .object({
+                  dashboardId: z.string().optional(),
+                })
+                .optional(),
+            })
+            .optional()
+        ),
       },
       '/mobile-services/{serviceName}/': {
         element: <RedirectToDefaultServiceRouteView />,

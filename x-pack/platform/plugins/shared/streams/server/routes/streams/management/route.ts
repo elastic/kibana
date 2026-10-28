@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isNeverCondition } from '@kbn/streamlang';
 import { MAX_STREAM_NAME_LENGTH, routingStatus } from '@kbn/streams-schema';
 import { boundedConditionSchema } from '../../utils/bounded_condition_schema';
@@ -46,20 +46,22 @@ export const forkStreamsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({
-      name: z
-        .string()
-        .max(MAX_STREAM_NAME_LENGTH)
-        .describe('The name of the parent stream to fork from.'),
-    }),
-    body: z.object({
-      stream: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
-      where: boundedConditionSchema,
-      status: routingStatus.optional(),
-      draft: z.boolean().optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        name: z
+          .string()
+          .max(MAX_STREAM_NAME_LENGTH)
+          .describe('The name of the parent stream to fork from.'),
+      }),
+      body: z.object({
+        stream: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+        where: boundedConditionSchema,
+        status: routingStatus.optional(),
+        draft: z.boolean().optional(),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {
     const { streamsClient } = await getScopedClients({
       request,
@@ -111,7 +113,7 @@ export const resyncStreamsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({ request, getScopedClients }): Promise<ResyncStreamsResponse> => {
     const { streamsClient } = await getScopedClients({ request });
 

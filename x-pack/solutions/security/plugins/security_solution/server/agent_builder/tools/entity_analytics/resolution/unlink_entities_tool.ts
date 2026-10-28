@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
@@ -42,19 +42,20 @@ interface ResolvedEntitiesState {
   nonAliases: NonAliasEntity[];
 }
 
-const schema = z.object({
-  entityIds: z
-    .array(z.string().min(1))
-    .min(1)
-    .max(MAX_ENTITIES_PER_CALL)
-    .describe(
-      `Entities (aliases) to unlink from their resolution group, making them standalone entities again. Accepts EUIDs, canonical entity.name, or user.full_name values. Up to ${MAX_ENTITIES_PER_CALL} per call.`
-    ),
-  groupEntityId: z
-    .string()
-    .min(1)
-    .describe(
-      `
+const schema = lazySchema(() =>
+  z.object({
+    entityIds: z
+      .array(z.string().min(1))
+      .min(1)
+      .max(MAX_ENTITIES_PER_CALL)
+      .describe(
+        `Entities (aliases) to unlink from their resolution group, making them standalone entities again. Accepts EUIDs, canonical entity.name, or user.full_name values. Up to ${MAX_ENTITIES_PER_CALL} per call.`
+      ),
+    groupEntityId: z
+      .string()
+      .min(1)
+      .describe(
+        `
       The entity ID of another entity from the group every entity in \`entityIds\` is expected to be unlinked from.
       Set this ONLY when the user explicitly named it. Omit it entirely when the user just said "unlink X"; never guess a value.
       Examples:
@@ -63,9 +64,10 @@ const schema = z.object({
         3. "unlink X": entityId = ["X"] and omit groupEntityId
       \`groupEntityId\` can be any member of the entity resolution group; it does not have to be the group target.
     `
-    )
-    .optional(),
-});
+      )
+      .optional(),
+  })
+);
 
 export const SECURITY_UNLINK_ENTITIES_TOOL_ID = securityTool('unlink_entities');
 

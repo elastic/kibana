@@ -9,7 +9,7 @@ import { notFound } from '@hapi/boom';
 import { isNotFoundError } from '@kbn/es-errors';
 import { OBSERVABILITY_STREAMS_ENABLE_CANVAS } from '@kbn/management-settings-ids';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IndexMetadataResponse } from '../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { getDataStreamLifecycle, getFailureStore } from '../../../lib/streams/stream_crud';
@@ -57,15 +57,17 @@ export const indexMetadataRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    path: z.object({
-      name: z
-        .string()
-        .min(1)
-        .max(MAX_INDEX_NAME_LENGTH)
-        .regex(CONCRETE_INDEX_NAME_PATTERN, 'Must be a single index or data stream name.'),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        name: z
+          .string()
+          .min(1)
+          .max(MAX_INDEX_NAME_LENGTH)
+          .regex(CONCRETE_INDEX_NAME_PATTERN, 'Must be a single index or data stream name.'),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients }): Promise<IndexMetadataResponse> => {
     const { scopedClusterClient, streamsClient, uiSettingsClient } = await getScopedClients({
       request,

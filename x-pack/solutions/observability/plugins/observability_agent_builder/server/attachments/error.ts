@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
@@ -19,11 +19,11 @@ import { observabilityAttachmentDataSchema } from './observability_attachment_da
 const GET_ERROR_DETAILS_TOOL_ID = 'get_error_details';
 
 const errorDataSchema = observabilityAttachmentDataSchema.extend({
-  errorId: z.string().max(MAX_SHORT_STRING_LENGTH),
-  serviceName: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
-  environment: z.string().max(MAX_SHORT_STRING_LENGTH).nullable().optional(),
-  start: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
-  end: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
+  errorId: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH)),
+  serviceName: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH).optional()),
+  environment: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH).nullable().optional()),
+  start: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH).optional()),
+  end: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH).optional()),
 });
 
 export type ErrorAttachmentData = z.infer<typeof errorDataSchema>;

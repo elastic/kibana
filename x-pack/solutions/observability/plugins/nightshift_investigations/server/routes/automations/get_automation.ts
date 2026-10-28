@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
@@ -21,9 +21,11 @@ export const getAutomationRoute = createNightshiftInvestigationsServerRoute({
   security: {
     authz: { requiredPrivileges: ['read_nightshift'] },
   },
-  params: z.object({
-    path: z.object({ id: z.string().min(1).max(512) }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ id: z.string().min(1).max(512) }),
+    })
+  ),
   handler: async ({ request, params, getAutomationsSoClient, context }) => {
     const spaceId =
       (await context.core).savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;

@@ -14,7 +14,7 @@ import type {
 } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus, toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { WORKFLOW_VERIFIER_ID_PREFIX } from '../../../common/ki_verification';
 import {
   DEFAULT_KI_VERIFIER_TIMEOUT_SEC,
@@ -90,10 +90,12 @@ export const resolveKiVerifierChain = async ({
   return [...lineage, ...readKiVerifierChain(metadata), workflowId];
 };
 
-const workflowVerifierOutputSchema = z.object({
-  passed: z.boolean(),
-  reason: z.string().optional(),
-});
+const workflowVerifierOutputSchema = lazySchema(() =>
+  z.object({
+    passed: z.boolean(),
+    reason: z.string().optional(),
+  })
+);
 
 /** Defined here instead of importing from the workflows plugin to avoid a circular dependency. */
 export interface KiVerifierWorkflowRunner {

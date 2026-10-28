@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
 import { esqlDataSourceSchema, dataViewSchema } from '@kbn/as-code-data-views-schema';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
@@ -29,18 +29,19 @@ export const discoverSessionApiClassicTabBaseSchema = z
   })
   .strict();
 
-export const discoverSessionApiEsqlTabBaseSchema = z
-  .object({
-    ...dataTableSchema.shape,
-    ...dataTableLimitsSchema.shape,
-    data_source: esqlDataSourceSchema,
-  })
-  .strict()
-  .meta({
-    description: 'ES|QL (Elasticsearch Query Language) data source.',
-  });
+export const discoverSessionApiEsqlTabBaseSchema = lazySchema(() =>
+  z
+    .object({
+      ...dataTableSchema.shape,
+      ...dataTableLimitsSchema.shape,
+      data_source: esqlDataSourceSchema,
+    })
+    .strict()
+    .meta({
+      description: 'ES|QL (Elasticsearch Query Language) data source.',
+    })
+);
 
-export const discoverSessionApiTabBaseSchema = z.union([
-  discoverSessionApiClassicTabBaseSchema,
-  discoverSessionApiEsqlTabBaseSchema,
-]);
+export const discoverSessionApiTabBaseSchema = lazySchema(() =>
+  z.union([discoverSessionApiClassicTabBaseSchema, discoverSessionApiEsqlTabBaseSchema])
+);

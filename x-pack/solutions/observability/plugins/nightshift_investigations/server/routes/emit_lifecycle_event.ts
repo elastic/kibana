@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   EMITTED_INVESTIGATION_STATUSES,
   INVESTIGATION_COMPLETED_TRIGGER_ID,
@@ -29,14 +29,16 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
       requiredPrivileges: ['agentBuilder:write'],
     },
   },
-  params: z.object({
-    path: z.object({
-      id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-    }),
-    body: z.object({
-      status: z.enum(EMITTED_INVESTIGATION_STATUSES),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+      }),
+      body: z.object({
+        status: z.enum(EMITTED_INVESTIGATION_STATUSES),
+      }),
+    })
+  ),
   handler: async ({ request, params, getInvestigationsClient, getTriggerEmitter }) => {
     const emitter = getTriggerEmitter(request);
     if (!emitter) {

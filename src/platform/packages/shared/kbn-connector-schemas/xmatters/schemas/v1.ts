@@ -9,15 +9,15 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 const configSchemaProps = {
-  configUrl: z.string().nullable().default(null),
-  usesBasic: z.boolean().default(true),
+  configUrl: lazySchema(() => z.string().nullable().default(null)),
+  usesBasic: lazySchema(() => z.boolean().default(true)),
 };
 export const ConfigSchema = lazySchema(() => z.object(configSchemaProps).strict());
 
 const secretSchemaProps = {
-  user: z.string().nullable().default(null),
-  password: z.string().nullable().default(null),
-  secretsUrl: z.string().nullable().default(null),
+  user: lazySchema(() => z.string().nullable().default(null)),
+  password: lazySchema(() => z.string().nullable().default(null)),
+  secretsUrl: lazySchema(() => z.string().nullable().default(null)),
 };
 export const SecretsSchema = lazySchema(() => z.object(secretSchemaProps).strict());
 

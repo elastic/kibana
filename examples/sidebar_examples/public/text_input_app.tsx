@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { EuiPanel, EuiSpacer, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { createSidebarStore, type SidebarComponentProps } from '@kbn/core-chrome-sidebar';
 import { SidebarHeader, SidebarBody, useSidebarApp } from '@kbn/core-chrome-sidebar-components';
 
@@ -17,9 +17,11 @@ export const textInputAppId = 'sidebarExampleText';
 
 /** Store for text input sidebar app */
 export const textInputStore = createSidebarStore({
-  schema: z.object({
-    userName: z.string().default(''),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      userName: z.string().default(''),
+    })
+  ),
   actions: (set, get, { close }) => ({
     setUserName: (userName: string) => set({ userName }),
     clear: () => set({ userName: '' }),

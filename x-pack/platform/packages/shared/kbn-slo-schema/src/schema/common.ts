@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { ALL_VALUE, SLO_STATUS } from '../constants';
 import { MAX_DATE_STRING_LENGTH } from './limits';
 
-const allOrAnyString = z.union([z.literal(ALL_VALUE), z.string()]);
+const allOrAnyString = lazySchema(() => z.union([z.literal(ALL_VALUE), z.string()]));
 
-const allOrAnyStringOrArray = z.union([allOrAnyString, z.array(allOrAnyString)]);
+const allOrAnyStringOrArray = lazySchema(() => z.union([allOrAnyString, z.array(allOrAnyString)]));
 
 /**
  * Codec between a wire-form date string and a `Date` instance.
@@ -43,76 +43,88 @@ const dateType = z.codec(
   }
 );
 
-const errorBudgetSchema = z
-  .object({
-    initial: z.number().describe('The initial error budget, as 1 - objective'),
-    consumed: z
-      .number()
-      .describe('The error budget consummed, as a percentage of the initial value.'),
-    remaining: z
-      .number()
-      .describe('The error budget remaining, as a percentage of the initial value.'),
-    isEstimated: z
-      .boolean()
-      .describe(
-        'Only for SLO defined with occurrences budgeting method and calendar aligned time window.'
-      ),
-  })
-  .meta({ id: 'SLOErrorBudget' });
-
-const statusSchema = z.enum(SLO_STATUS).meta({ id: 'SLOSummaryStatus' });
-
-const summarySchema = z
-  .object({
-    status: statusSchema,
-    sliValue: z.number(),
-    errorBudget: errorBudgetSchema,
-    fiveMinuteBurnRate: z.number(),
-    oneHourBurnRate: z.number(),
-    oneDayBurnRate: z.number(),
-    summaryUpdatedAt: z.string().nullable().optional(),
-  })
-  .meta({ id: 'SLOSummary', description: 'The SLO computed data' });
-
-const groupingsSchema = z.record(z.string(), z.union([z.string(), z.number()]));
-
-const metaSchema = z.object({
-  synthetics: z
+const errorBudgetSchema = lazySchema(() =>
+  z
     .object({
-      monitorId: z.string(),
-      locationId: z.string(),
-      configId: z.string(),
+      initial: z.number().describe('The initial error budget, as 1 - objective'),
+      consumed: z
+        .number()
+        .describe('The error budget consummed, as a percentage of the initial value.'),
+      remaining: z
+        .number()
+        .describe('The error budget remaining, as a percentage of the initial value.'),
+      isEstimated: z
+        .boolean()
+        .describe(
+          'Only for SLO defined with occurrences budgeting method and calendar aligned time window.'
+        ),
     })
-    .optional(),
-});
+    .meta({ id: 'SLOErrorBudget' })
+);
 
-const remoteSchema = z.object({
-  remoteName: z.string(),
-  kibanaUrl: z.string(),
-});
+const statusSchema = lazySchema(() => z.enum(SLO_STATUS).meta({ id: 'SLOSummaryStatus' }));
 
-const groupSummarySchema = z.object({
-  total: z.number(),
-  worst: z.object({
-    sliValue: z.number(),
-    status: z.string(),
-    slo: z.object({
-      id: z.string(),
-      instanceId: z.string(),
-      name: z.string(),
-      groupings: z.record(z.string(), z.unknown()).optional(),
+const summarySchema = lazySchema(() =>
+  z
+    .object({
+      status: statusSchema,
+      sliValue: z.number(),
+      errorBudget: errorBudgetSchema,
+      fiveMinuteBurnRate: z.number(),
+      oneHourBurnRate: z.number(),
+      oneDayBurnRate: z.number(),
+      summaryUpdatedAt: z.string().nullable().optional(),
+    })
+    .meta({ id: 'SLOSummary', description: 'The SLO computed data' })
+);
+
+const groupingsSchema = lazySchema(() => z.record(z.string(), z.union([z.string(), z.number()])));
+
+const metaSchema = lazySchema(() =>
+  z.object({
+    synthetics: z
+      .object({
+        monitorId: z.string(),
+        locationId: z.string(),
+        configId: z.string(),
+      })
+      .optional(),
+  })
+);
+
+const remoteSchema = lazySchema(() =>
+  z.object({
+    remoteName: z.string(),
+    kibanaUrl: z.string(),
+  })
+);
+
+const groupSummarySchema = lazySchema(() =>
+  z.object({
+    total: z.number(),
+    worst: z.object({
+      sliValue: z.number(),
+      status: z.string(),
+      slo: z.object({
+        id: z.string(),
+        instanceId: z.string(),
+        name: z.string(),
+        groupings: z.record(z.string(), z.unknown()).optional(),
+      }),
     }),
-  }),
-  violated: z.number(),
-  healthy: z.number(),
-  degrading: z.number(),
-  noData: z.number(),
-});
+    violated: z.number(),
+    healthy: z.number(),
+    degrading: z.number(),
+    noData: z.number(),
+  })
+);
 
-const dateRangeSchema = z.object({
-  from: dateType,
-  to: dateType,
-});
+const dateRangeSchema = lazySchema(() =>
+  z.object({
+    from: dateType,
+    to: dateType,
+  })
+);
 
 export {
   allOrAnyString,

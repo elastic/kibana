@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, ZodIssueCode } from '@kbn/zod/v4';
+import { z, ZodIssueCode, lazySchema } from '@kbn/zod/v4';
 import type { RefinementCtx } from '@kbn/zod/v4';
 
 export function isNonEmptyString(input: string, ctx: RefinementCtx): void {
@@ -19,11 +19,9 @@ export function isNonEmptyString(input: string, ctx: RefinementCtx): void {
   }
 }
 
-export const NonEmptyString = z
-  .string()
-  .min(1)
-  .superRefine(isNonEmptyString)
-  .describe('A non-empty string.');
+export const NonEmptyString = lazySchema(() =>
+  z.string().min(1).superRefine(isNonEmptyString).describe('A non-empty string.')
+);
 
 /**
  * Checks that the input is a string that is not empty while allowing whitespace.
@@ -37,8 +35,10 @@ export function isNonEmptyOrWhitespace(input: string, ctx: RefinementCtx): void 
   }
 }
 
-export const NonEmptyOrWhitespaceString = z
-  .string()
-  .min(1)
-  .superRefine(isNonEmptyOrWhitespace)
-  .describe('A non-empty string or string with whitespace.');
+export const NonEmptyOrWhitespaceString = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .superRefine(isNonEmptyOrWhitespace)
+    .describe('A non-empty string or string with whitespace.')
+);

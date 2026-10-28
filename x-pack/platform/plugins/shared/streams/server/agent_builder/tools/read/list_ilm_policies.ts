@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -22,7 +22,7 @@ import { processAsyncInChunks } from '../../../utils/process_async_in_chunks';
 import { STREAMS_LIST_ILM_POLICIES_TOOL_ID as LIST_ILM_POLICIES } from '../tool_ids';
 import { classifyError } from '../../utils/error_utils';
 
-const listIlmPoliciesSchema = z.object({});
+const listIlmPoliciesSchema = lazySchema(() => z.object({}));
 
 const getDataStreamByBackingIndices = async (
   scopedClusterClient: IScopedClusterClient,

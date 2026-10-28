@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { EuiPanel, EuiSpacer, EuiButtonGroup, EuiText, EuiFormRow, EuiTitle } from '@elastic/eui';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { createSidebarStore, type SidebarComponentProps } from '@kbn/core-chrome-sidebar';
 import { SidebarHeader, SidebarBody, useSidebarApp } from '@kbn/core-chrome-sidebar-components';
 
@@ -17,9 +17,11 @@ export const tabSelectionAppId = 'sidebarExampleTabs';
 
 /** Store for tab selection sidebar app */
 export const tabSelectionStore = createSidebarStore({
-  schema: z.object({
-    selectedTab: z.string().default('overview'),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      selectedTab: z.string().default('overview'),
+    })
+  ),
   actions: (set, get, sidebar) => ({
     selectTab: (tabId: string) => set({ selectedTab: tabId }),
   }),

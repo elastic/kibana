@@ -5,48 +5,50 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { createPrompt } from '@kbn/inference-common';
 import reviewFieldsPromptTemplate from './review_fields_prompt_template.text';
 
 export const ReviewFieldsPrompt = createPrompt({
   name: 'review_fields_prompt',
   description: 'Review and map structured fields to ECS-compliant fields',
-  input: z.object({
-    /**
-     * Raw log messages to pass to LLM
-     */
-    sample_messages: z.array(z.string()),
-    /**
-     * Fields to review (as JSON string)
-     *
-     * ```json
-     * {
-     *     "field_1": {
-     *         "grok_component": "DAY",
-     *         "example_values": ["Mon", "Tue", "Wed", "Thu", "Fri"]
-     *     },
-     *     "field_2": {
-     *         "grok_component": "SYSLOGTIMESTAMP",
-     *         "example_values": ["Jul 14 13:45:31", "Jul 14 13:45:30", "Jul 14 13:45:22", "Jul 14 13:45:21", "Jul 14 13:45:20"]
-     *     },
-     *     "field_3": {
-     *         "grok_component": "INT",
-     *         "example_values": ["2025"]
-     *     },
-     *     "field_4": {
-     *         "grok_component": "LOGLEVEL",
-     *         "example_values": ["error", "notice"]
-     *     },
-     *     "field_5": {
-     *         "grok_component": "GREEDYDATA",
-     *         "example_values": []
-     *     }
-     * }
-     * ```
-     */
-    review_fields: z.string(),
-  }),
+  input: lazySchema(() =>
+    z.object({
+      /**
+       * Raw log messages to pass to LLM
+       */
+      sample_messages: z.array(z.string()),
+      /**
+       * Fields to review (as JSON string)
+       *
+       * ```json
+       * {
+       *     "field_1": {
+       *         "grok_component": "DAY",
+       *         "example_values": ["Mon", "Tue", "Wed", "Thu", "Fri"]
+       *     },
+       *     "field_2": {
+       *         "grok_component": "SYSLOGTIMESTAMP",
+       *         "example_values": ["Jul 14 13:45:31", "Jul 14 13:45:30", "Jul 14 13:45:22", "Jul 14 13:45:21", "Jul 14 13:45:20"]
+       *     },
+       *     "field_3": {
+       *         "grok_component": "INT",
+       *         "example_values": ["2025"]
+       *     },
+       *     "field_4": {
+       *         "grok_component": "LOGLEVEL",
+       *         "example_values": ["error", "notice"]
+       *     },
+       *     "field_5": {
+       *         "grok_component": "GREEDYDATA",
+       *         "example_values": []
+       *     }
+       * }
+       * ```
+       */
+      review_fields: z.string(),
+    })
+  ),
 })
   .version({
     template: {

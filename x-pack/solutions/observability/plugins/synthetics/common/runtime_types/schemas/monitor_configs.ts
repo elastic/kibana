@@ -20,17 +20,17 @@ import {
   VerificationMode,
 } from '../monitor_management/monitor_configs';
 
-export const MonitorTypeCodec = z.enum(MonitorTypeEnum);
-export const ResponseBodyIndexPolicyCodec = z.enum(ResponseBodyIndexPolicy);
-export const CodeEditorModeCodec = z.enum(CodeEditorMode);
-export const ScheduleUnitCodec = z.enum(ScheduleUnit);
-export const VerificationModeCodec = z.enum(VerificationMode);
-export const TLSVersionCodec = z.enum(TLSVersion);
-export const ScreenshotOptionCodec = z.enum(ScreenshotOption);
-export const SourceTypeCodec = z.enum(SourceType);
-export const FormMonitorTypeCodec = z.enum(FormMonitorType);
-export const ModeCodec = z.enum(Mode);
-export const KerberosAuthTypeCodec = z.enum(KerberosAuthType);
+export const MonitorTypeCodec = lazySchema(() => z.enum(MonitorTypeEnum));
+export const ResponseBodyIndexPolicyCodec = lazySchema(() => z.enum(ResponseBodyIndexPolicy));
+export const CodeEditorModeCodec = lazySchema(() => z.enum(CodeEditorMode));
+export const ScheduleUnitCodec = lazySchema(() => z.enum(ScheduleUnit));
+export const VerificationModeCodec = lazySchema(() => z.enum(VerificationMode));
+export const TLSVersionCodec = lazySchema(() => z.enum(TLSVersion));
+export const ScreenshotOptionCodec = lazySchema(() => z.enum(ScreenshotOption));
+export const SourceTypeCodec = lazySchema(() => z.enum(SourceType));
+export const FormMonitorTypeCodec = lazySchema(() => z.enum(FormMonitorType));
+export const ModeCodec = lazySchema(() => z.enum(Mode));
+export const KerberosAuthTypeCodec = lazySchema(() => z.enum(KerberosAuthType));
 
 // Bounds limit request/policy amplification for nested auth payloads.
 const AUTH_STRING_MAX = 4096;

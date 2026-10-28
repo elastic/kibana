@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import {
@@ -35,99 +35,103 @@ export class EvalExperimentConfigError extends Error {
   }
 }
 
-export const evaluatorInputSchema = z.object({
-  name: z
-    .string()
-    .min(1)
-    .max(MAX_NAME_LENGTH)
-    .describe('Evaluator name, as returned by list_evaluators.'),
-  version: z
-    .string()
-    .max(MAX_NAME_LENGTH)
-    .optional()
-    .describe('Optional evaluator version. Defaults to the latest registered version.'),
-  connector_id: z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .optional()
-    .describe(
-      'Judge model connector id. REQUIRED for `llm` evaluators (needsJudgeConnector=true); omit for `code` evaluators. Ask the user to pick it from list_connectors; do not guess or default to the first one.'
-    ),
-});
+export const evaluatorInputSchema = lazySchema(() =>
+  z.object({
+    name: z
+      .string()
+      .min(1)
+      .max(MAX_NAME_LENGTH)
+      .describe('Evaluator name, as returned by list_evaluators.'),
+    version: z
+      .string()
+      .max(MAX_NAME_LENGTH)
+      .optional()
+      .describe('Optional evaluator version. Defaults to the latest registered version.'),
+    connector_id: z
+      .string()
+      .max(MAX_ID_LENGTH)
+      .optional()
+      .describe(
+        'Judge model connector id. REQUIRED for `llm` evaluators (needsJudgeConnector=true); omit for `code` evaluators. Ask the user to pick it from list_connectors; do not guess or default to the first one.'
+      ),
+  })
+);
 
 /**
  * The shared "experiment configuration" accepted by the preview/save/run tools.
  * Mirrors the evals "new experiment" form. The workflow topology (single,
  * dataset fan-out, or cross-model) is inferred by the generator from these inputs.
  */
-export const evalExperimentConfigSchema = z
-  .object({
-    name: z
-      .string()
-      .max(MAX_NAME_LENGTH)
-      .optional()
-      .describe(
-        'Human-readable experiment name. A default is derived from the target when omitted.'
-      ),
-    target: z
-      .enum(['inference', 'agent'])
-      .describe(
-        'What is being evaluated: `inference` invokes the model connector(s) directly, `agent` runs an Agent Builder agent via converse. Ask the user which one they mean; do not assume.'
-      ),
-    connector_ids: z
-      .array(z.string().min(1).max(MAX_ID_LENGTH))
-      .min(1)
-      .max(EXPERIMENT_LIMITS.maxConnectorIds)
-      .describe(
-        'Model connector id(s) under evaluation, resolved from list_connectors. Providing two or more triggers a cross-model comparison. Do not guess or default these — ask the user if unspecified.'
-      ),
-    agent_id: z
-      .string()
-      .max(MAX_ID_LENGTH)
-      .optional()
-      .describe(
-        'Agent Builder agent id to evaluate. Required when `target` is `agent`; omit it entirely when `target` is `inference`.'
-      ),
-    dataset_ids: z
-      .array(z.string().min(1).max(MAX_ID_LENGTH))
-      .min(1)
-      .max(EXPERIMENT_LIMITS.maxDatasetIds)
-      .describe('Dataset id(s) to evaluate against, as returned by list_eval_datasets.'),
-    evaluators: z
-      .array(evaluatorInputSchema)
-      .min(1)
-      .max(EXPERIMENT_LIMITS.maxEvaluators)
-      .describe('Evaluators used to score each example.'),
-    repetitions: z
-      .number()
-      .int()
-      .min(1)
-      .max(EXPERIMENT_LIMITS.maxRepetitions)
-      .optional()
-      .describe('How many times to run each example. Defaults to 1.'),
-    concurrency: z
-      .number()
-      .int()
-      .min(1)
-      .max(EXPERIMENT_LIMITS.maxConcurrency)
-      .optional()
-      .describe('Maximum number of examples evaluated in parallel. Defaults to 5.'),
-    compare: z
-      .boolean()
-      .optional()
-      .describe(
-        'Only for saved cross-model workflows: append an ai.evals.compareExperiments step after the per-model runs.'
-      ),
-  })
-  .refine((config) => config.target !== 'agent' || !!config.agent_id, {
-    message: 'agent_id is required when target is `agent`. Ask the user which agent to evaluate.',
-    path: ['agent_id'],
-  })
-  .refine((config) => config.target !== 'inference' || !config.agent_id, {
-    message:
-      'agent_id must be omitted when target is `inference`. Set target to `agent` to evaluate an Agent Builder agent.',
-    path: ['agent_id'],
-  });
+export const evalExperimentConfigSchema = lazySchema(() =>
+  z
+    .object({
+      name: z
+        .string()
+        .max(MAX_NAME_LENGTH)
+        .optional()
+        .describe(
+          'Human-readable experiment name. A default is derived from the target when omitted.'
+        ),
+      target: z
+        .enum(['inference', 'agent'])
+        .describe(
+          'What is being evaluated: `inference` invokes the model connector(s) directly, `agent` runs an Agent Builder agent via converse. Ask the user which one they mean; do not assume.'
+        ),
+      connector_ids: z
+        .array(z.string().min(1).max(MAX_ID_LENGTH))
+        .min(1)
+        .max(EXPERIMENT_LIMITS.maxConnectorIds)
+        .describe(
+          'Model connector id(s) under evaluation, resolved from list_connectors. Providing two or more triggers a cross-model comparison. Do not guess or default these — ask the user if unspecified.'
+        ),
+      agent_id: z
+        .string()
+        .max(MAX_ID_LENGTH)
+        .optional()
+        .describe(
+          'Agent Builder agent id to evaluate. Required when `target` is `agent`; omit it entirely when `target` is `inference`.'
+        ),
+      dataset_ids: z
+        .array(z.string().min(1).max(MAX_ID_LENGTH))
+        .min(1)
+        .max(EXPERIMENT_LIMITS.maxDatasetIds)
+        .describe('Dataset id(s) to evaluate against, as returned by list_eval_datasets.'),
+      evaluators: z
+        .array(evaluatorInputSchema)
+        .min(1)
+        .max(EXPERIMENT_LIMITS.maxEvaluators)
+        .describe('Evaluators used to score each example.'),
+      repetitions: z
+        .number()
+        .int()
+        .min(1)
+        .max(EXPERIMENT_LIMITS.maxRepetitions)
+        .optional()
+        .describe('How many times to run each example. Defaults to 1.'),
+      concurrency: z
+        .number()
+        .int()
+        .min(1)
+        .max(EXPERIMENT_LIMITS.maxConcurrency)
+        .optional()
+        .describe('Maximum number of examples evaluated in parallel. Defaults to 5.'),
+      compare: z
+        .boolean()
+        .optional()
+        .describe(
+          'Only for saved cross-model workflows: append an ai.evals.compareExperiments step after the per-model runs.'
+        ),
+    })
+    .refine((config) => config.target !== 'agent' || !!config.agent_id, {
+      message: 'agent_id is required when target is `agent`. Ask the user which agent to evaluate.',
+      path: ['agent_id'],
+    })
+    .refine((config) => config.target !== 'inference' || !config.agent_id, {
+      message:
+        'agent_id must be omitted when target is `inference`. Set target to `agent` to evaluate an Agent Builder agent.',
+      path: ['agent_id'],
+    })
+);
 
 export type EvalExperimentConfig = z.infer<typeof evalExperimentConfigSchema>;
 

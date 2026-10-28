@@ -6,7 +6,7 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { escapeQuotes } from '@kbn/es-query';
@@ -47,28 +47,30 @@ export interface AmbiguousHostnameResult {
   message: string;
 }
 
-const getEndpointStatusSchema = z
-  .object({
-    hostName: z
-      .string()
-      .min(1)
-      .max(MAX_HOSTNAME_LENGTH)
-      .optional()
-      .describe(
-        'The hostname of the endpoint to check status for. Optional when agentId is supplied; pass both to confirm a specific host.'
-      ),
-    agentId: z
-      .string()
-      .min(1)
-      .max(MAX_AGENT_ID_LENGTH)
-      .optional()
-      .describe(
-        'The endpoint/agent ID. Pass it with hostName to select one specific host when several share the name, or on its own to look a host up by ID (for example, from an action record).'
-      ),
-  })
-  .refine((value) => Boolean(value.hostName || value.agentId), {
-    message: 'Provide hostName, agentId, or both.',
-  });
+const getEndpointStatusSchema = lazySchema(() =>
+  z
+    .object({
+      hostName: z
+        .string()
+        .min(1)
+        .max(MAX_HOSTNAME_LENGTH)
+        .optional()
+        .describe(
+          'The hostname of the endpoint to check status for. Optional when agentId is supplied; pass both to confirm a specific host.'
+        ),
+      agentId: z
+        .string()
+        .min(1)
+        .max(MAX_AGENT_ID_LENGTH)
+        .optional()
+        .describe(
+          'The endpoint/agent ID. Pass it with hostName to select one specific host when several share the name, or on its own to look a host up by ID (for example, from an action record).'
+        ),
+    })
+    .refine((value) => Boolean(value.hostName || value.agentId), {
+      message: 'Provide hostName, agentId, or both.',
+    })
+);
 
 export const getEndpointStatusTool = (
   endpointAppContextService: EndpointAppContextService

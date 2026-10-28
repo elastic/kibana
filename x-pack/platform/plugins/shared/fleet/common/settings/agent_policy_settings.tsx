@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import type { DocLinks } from '@kbn/doc-links';
 
@@ -18,16 +18,16 @@ import { isValidDuration } from '../services/validate_duration';
 
 import type { SettingsConfig } from './types';
 
-export const zodStringWithDurationValidation = z
-  .string()
-  .refine((val) => !val || isValidDuration(val), {
+export const zodStringWithDurationValidation = lazySchema(() =>
+  z.string().refine((val) => !val || isValidDuration(val), {
     message: i18n.translate(
       'xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutValidationMessage',
       {
         defaultMessage: 'Must be a string with a time unit, e.g. 30s, 5m, 2h',
       }
     ),
-  });
+  })
+);
 
 export const zodStringWithYamlValidation = z.string().refine(
   async (val) => {

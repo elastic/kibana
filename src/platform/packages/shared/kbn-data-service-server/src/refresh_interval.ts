@@ -7,20 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const refreshIntervalSchema = z
-  .object({
-    pause: z.boolean().meta({
-      description: 'When `true`, auto-refresh is paused.',
-    }),
-    value: z.number().meta({
-      description: 'The refresh interval in milliseconds.',
-    }),
-  })
-  .strict()
-  .meta({
-    id: 'kbn-data-service-server-refreshIntervalSchema',
-    title: 'Refresh interval',
-    description: 'Specifies the auto-refresh interval for the object.',
-  });
+export const refreshIntervalSchema = lazySchema(() =>
+  z
+    .object({
+      pause: z.boolean().meta({
+        description: 'When `true`, auto-refresh is paused.',
+      }),
+      value: z.number().meta({
+        description: 'The refresh interval in milliseconds.',
+      }),
+    })
+    .strict()
+    .meta({
+      id: 'kbn-data-service-server-refreshIntervalSchema',
+      title: 'Refresh interval',
+      description: 'Specifies the auto-refresh interval for the object.',
+    })
+);

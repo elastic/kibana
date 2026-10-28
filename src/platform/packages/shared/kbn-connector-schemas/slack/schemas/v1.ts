@@ -11,7 +11,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 export const ConfigSchema = lazySchema(() => z.object({}).strict().default({}));
 
 const secretsSchemaProps = {
-  webhookUrl: z.string(),
+  webhookUrl: lazySchema(() => z.string()),
 };
 export const SecretsSchema = lazySchema(() => z.object(secretsSchemaProps).strict());
 

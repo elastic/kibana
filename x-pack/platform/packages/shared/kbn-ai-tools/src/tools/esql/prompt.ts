@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { createPrompt } from '@kbn/inference-common';
 import systemPromptTemplate from './system_prompt_template.text';
 import contentPromptTemplate from './content_prompt_template.text';
@@ -13,10 +13,12 @@ import contentPromptTemplate from './content_prompt_template.text';
 export const EsqlPrompt = createPrompt({
   name: 'esql_prompt',
   description: 'Answer ES|QL related questions',
-  input: z.object({
-    prompt: z.string(),
-    esql_system_prompt: z.string(),
-  }),
+  input: lazySchema(() =>
+    z.object({
+      prompt: z.string(),
+      esql_system_prompt: z.string(),
+    })
+  ),
 })
   .version({
     system: {

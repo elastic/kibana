@@ -8,16 +8,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
 export const LOOP_TRIGGER_ID = 'example.loopTrigger' as const;
 
-export const loopTriggerEventSchema = z.object({
-  iteration: z
-    .number()
-    .describe('Current iteration in the event chain (for depth guardrail demo).'),
-});
+export const loopTriggerEventSchema = lazySchema(() =>
+  z.object({
+    iteration: z
+      .number()
+      .describe('Current iteration in the event chain (for depth guardrail demo).'),
+  })
+);
 
 export type LoopTriggerEvent = z.infer<typeof loopTriggerEventSchema>;
 

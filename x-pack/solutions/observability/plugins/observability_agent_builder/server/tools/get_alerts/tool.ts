@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
@@ -52,26 +52,28 @@ export const defaultFields = [
   'transaction.name',
 ];
 
-const getAlertsSchema = z.object({
-  ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  kqlFilter: z
-    .string()
-    .max(MAX_KQL_FILTER_LENGTH)
-    .optional()
-    .describe(
-      'KQL filter to narrow down alerts. Examples: \'service.name: "frontend"\', \'kibana.alert.rule.name: "High CPU"\'.'
-    ),
-  includeRecovered: z
-    .boolean()
-    .default(false)
-    .describe('Whether to include recovered/closed alerts alongside active ones.'),
-  fields: z
-    .array(z.string().max(MAX_SHORT_STRING_LENGTH))
-    .optional()
-    .describe(
-      'Fields to include in the alert documents. Use to request specific fields like "error.message" or "url.full".'
-    ),
-});
+const getAlertsSchema = lazySchema(() =>
+  z.object({
+    ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
+    kqlFilter: z
+      .string()
+      .max(MAX_KQL_FILTER_LENGTH)
+      .optional()
+      .describe(
+        'KQL filter to narrow down alerts. Examples: \'service.name: "frontend"\', \'kibana.alert.rule.name: "High CPU"\'.'
+      ),
+    includeRecovered: z
+      .boolean()
+      .default(false)
+      .describe('Whether to include recovered/closed alerts alongside active ones.'),
+    fields: z
+      .array(z.string().max(MAX_SHORT_STRING_LENGTH))
+      .optional()
+      .describe(
+        'Fields to include in the alert documents. Use to request specific fields like "error.message" or "url.full".'
+      ),
+  })
+);
 
 export function createGetAlertsTool({
   core,

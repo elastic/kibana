@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   skillIdMaxLength,
   skillNameMaxLength,
@@ -121,43 +121,51 @@ export interface ReferencedContentItem {
   content: string;
 }
 
-const referencedContentItemSchema: z.ZodType<ReferencedContentItem> = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, { message: validationMessages.referencedContentName.required })
-    .max(skillNameMaxLength, { message: validationMessages.referencedContentName.tooLong })
-    .regex(skillNameRegexp, { message: validationMessages.referencedContentName.format }),
-  relativePath: z.string().trim(),
-  content: z.string(),
-});
+const referencedContentItemSchema: z.ZodType<ReferencedContentItem> = lazySchema(() =>
+  z.object({
+    name: z
+      .string()
+      .trim()
+      .min(1, { message: validationMessages.referencedContentName.required })
+      .max(skillNameMaxLength, { message: validationMessages.referencedContentName.tooLong })
+      .regex(skillNameRegexp, { message: validationMessages.referencedContentName.format }),
+    relativePath: z.string().trim(),
+    content: z.string(),
+  })
+);
 
-const skillFormObjectSchema = z.object({
-  name: z
-    .string()
-    .min(1, { message: validationMessages.name.required })
-    .max(skillIdMaxLength, { message: validationMessages.name.tooLong })
-    .regex(skillIdRegexp, { message: validationMessages.name.format }),
-  description: z
-    .string()
-    .min(1, { message: validationMessages.description.required })
-    .max(1024, { message: validationMessages.description.tooLong }),
-  content: z.string().min(1, { message: validationMessages.content.required }),
-  tool_ids: z.array(z.string()).max(maxToolsPerSkill, { message: validationMessages.toolIds.max }),
-  referenced_content: z
-    .array(referencedContentItemSchema)
-    .max(maxReferencedContentItems, { message: validationMessages.referencedContent.maxItems }),
-});
+const skillFormObjectSchema = lazySchema(() =>
+  z.object({
+    name: z
+      .string()
+      .min(1, { message: validationMessages.name.required })
+      .max(skillIdMaxLength, { message: validationMessages.name.tooLong })
+      .regex(skillIdRegexp, { message: validationMessages.name.format }),
+    description: z
+      .string()
+      .min(1, { message: validationMessages.description.required })
+      .max(1024, { message: validationMessages.description.tooLong }),
+    content: z.string().min(1, { message: validationMessages.content.required }),
+    tool_ids: z
+      .array(z.string())
+      .max(maxToolsPerSkill, { message: validationMessages.toolIds.max }),
+    referenced_content: z
+      .array(referencedContentItemSchema)
+      .max(maxReferencedContentItems, { message: validationMessages.referencedContent.maxItems }),
+  })
+);
 
-export const skillFormValidationSchema = skillFormObjectSchema.superRefine((data, ctx) => {
-  for (const issue of collectReferencedContentRefineIssues(data.referenced_content)) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: referencedContentSuperRefineMessages[issue.code],
-      path: ['referenced_content', issue.itemIndex, issue.field],
-    });
-  }
-});
+export const skillFormValidationSchema = lazySchema(() =>
+  skillFormObjectSchema.superRefine((data, ctx) => {
+    for (const issue of collectReferencedContentRefineIssues(data.referenced_content)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: referencedContentSuperRefineMessages[issue.code],
+        path: ['referenced_content', issue.itemIndex, issue.field],
+      });
+    }
+  })
+);
 
 export type SkillFormData = z.infer<typeof skillFormObjectSchema>;
 

@@ -8,7 +8,7 @@ import {
   MAX_ID_LENGTH,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
@@ -18,19 +18,21 @@ import { assertNotPaused } from '../../utils/assert_not_paused';
 
 const discoveryExecuteRoute = createServerRoute({
   endpoint: 'POST /internal/streams/significant_events/discovery/_execute',
-  params: z.object({
-    body: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('trigger'),
-        connector_id: z
-          .string()
-          .max(MAX_ID_LENGTH)
-          .optional()
-          .describe('Optional chat model connector or inference endpoint ID for this run.'),
-      }),
-      z.object({ action: z.literal('cancel') }),
-    ]),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.discriminatedUnion('action', [
+        z.object({
+          action: z.literal('trigger'),
+          connector_id: z
+            .string()
+            .max(MAX_ID_LENGTH)
+            .optional()
+            .describe('Optional chat model connector or inference endpoint ID for this run.'),
+        }),
+        z.object({ action: z.literal('cancel') }),
+      ]),
+    })
+  ),
   options: {
     access: 'internal',
     summary: 'Manually trigger the Significant Events pipeline',
@@ -99,7 +101,7 @@ const discoveryExecuteRoute = createServerRoute({
 
 const discoveryStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/significant_events/discovery/_status',
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   options: {
     access: 'internal',
     summary: 'Get the status of the Significant Events discovery pipeline',

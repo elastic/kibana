@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { optionalQueryString, routeId, MAX_DATE_RANGE_LENGTH } from '../zod_query';
 import type { Ping } from '../../../common/runtime_types';
 import { getLatestTestRun } from '../../queries/get_latest_test_run';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
-export const getLatestTestRunRouteQuerySchema = z.strictObject({
-  from: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
-  to: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
-  locationLabel: optionalQueryString,
-  locationId: optionalQueryString,
-  monitorId: routeId,
-  remoteName: z.string().max(256).optional(),
-});
+export const getLatestTestRunRouteQuerySchema = lazySchema(() =>
+  z.strictObject({
+    from: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
+    to: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
+    locationLabel: optionalQueryString,
+    locationId: optionalQueryString,
+    monitorId: routeId,
+    remoteName: z.string().max(256).optional(),
+  })
+);
 
 type GetPingsRouteRequest = z.infer<typeof getLatestTestRunRouteQuerySchema>;
 

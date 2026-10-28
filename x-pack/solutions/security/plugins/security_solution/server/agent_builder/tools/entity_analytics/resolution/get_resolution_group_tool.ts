@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -20,18 +20,20 @@ import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import { checkResolutionAccess } from './check_resolution_access';
 import { getResolutionToolAvailability } from './resolution_availability';
 
-const schema = z.object({
-  entityType: IdentifierType.describe(
-    'The type of entity: host, user, service, or generic'
-  ).optional(),
-  entityId: z
-    .string()
-    .min(1)
-    .describe(
-      'The entity id (EUID), canonical entity.name, or user.full_name to look up the resolution group for. ' +
-        'Examples: "host:server1" (prefixed EUID), "server1" (non-prefixed), "John Doe" (user.full_name).'
-    ),
-});
+const schema = lazySchema(() =>
+  z.object({
+    entityType: IdentifierType.describe(
+      'The type of entity: host, user, service, or generic'
+    ).optional(),
+    entityId: z
+      .string()
+      .min(1)
+      .describe(
+        'The entity id (EUID), canonical entity.name, or user.full_name to look up the resolution group for. ' +
+          'Examples: "host:server1" (prefixed EUID), "server1" (non-prefixed), "John Doe" (user.full_name).'
+      ),
+  })
+);
 
 export const SECURITY_GET_RESOLUTION_GROUP_TOOL_ID = securityTool('get_resolution_group');
 

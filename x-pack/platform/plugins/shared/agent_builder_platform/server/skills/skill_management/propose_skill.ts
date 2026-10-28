@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { skillCreateRequestSchema } from '@kbn/agent-builder-common';
@@ -14,49 +14,53 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { SKILL_ATTACHMENT_TYPE, type SkillAttachmentData } from '../../../common/attachments';
 import { validateToolIdsAgainstRegistry, formatInvalidToolIdsMessage } from './validate_tool_ids';
 
-const referencedContentSchema = z.object({
-  name: z
-    .string()
-    .describe(
-      'File name (without extension). Lowercase letters, numbers, underscores, and hyphens. Forms `[name].md` in the skill folder.'
-    ),
-  relativePath: z
-    .string()
-    .describe(
-      'Folder relative to the skill, must start with `./`. Use `./` for the skill root or `./examples` (single segment) for a subfolder. Avoid `../`.'
-    ),
-  content: z.string().describe('Markdown content for this referenced file.'),
-});
+const referencedContentSchema = lazySchema(() =>
+  z.object({
+    name: z
+      .string()
+      .describe(
+        'File name (without extension). Lowercase letters, numbers, underscores, and hyphens. Forms `[name].md` in the skill folder.'
+      ),
+    relativePath: z
+      .string()
+      .describe(
+        'Folder relative to the skill, must start with `./`. Use `./` for the skill root or `./examples` (single segment) for a subfolder. Avoid `../`.'
+      ),
+    content: z.string().describe('Markdown content for this referenced file.'),
+  })
+);
 
-const proposeSkillSchema = z.object({
-  id: z
-    .string()
-    .describe(
-      'Stable slug identifier for the skill. Lowercase letters, numbers, hyphens, and underscores; must start and end with a letter or number. Max 64 characters.'
-    ),
-  name: z.string().describe('Skill name. Use the same value as `id`. Max 64 characters.'),
-  description: z
-    .string()
-    .describe(
-      'One-line summary of when to use this skill. Surfaced in the skill catalog and presented to other agents. Max 1024 characters.'
-    ),
-  content: z
-    .string()
-    .describe(
-      'Full markdown body of `SKILL.md`. Begin with a "When to Use" section, then list available tools, then describe the workflow with concrete examples. Do NOT include YAML front matter; the runtime injects it from `name`/`description`.'
-    ),
-  tool_ids: z
-    .array(z.string())
-    .describe(
-      'Up to 5 registry tool IDs this skill needs access to. Each ID must already exist in the tool registry — call `list_tools` first to enumerate valid ids and copy them verbatim. Inventing ids will cause this call to fail.'
-    ),
-  referenced_content: z
-    .array(referencedContentSchema)
-    .optional()
-    .describe(
-      'Optional supporting markdown files (examples, reference snippets). Up to 100 entries. Each entry resolves to `[basePath]/[skill-name]/[relativePath]/[name].md` in the agent filestore.'
-    ),
-});
+const proposeSkillSchema = lazySchema(() =>
+  z.object({
+    id: z
+      .string()
+      .describe(
+        'Stable slug identifier for the skill. Lowercase letters, numbers, hyphens, and underscores; must start and end with a letter or number. Max 64 characters.'
+      ),
+    name: z.string().describe('Skill name. Use the same value as `id`. Max 64 characters.'),
+    description: z
+      .string()
+      .describe(
+        'One-line summary of when to use this skill. Surfaced in the skill catalog and presented to other agents. Max 1024 characters.'
+      ),
+    content: z
+      .string()
+      .describe(
+        'Full markdown body of `SKILL.md`. Begin with a "When to Use" section, then list available tools, then describe the workflow with concrete examples. Do NOT include YAML front matter; the runtime injects it from `name`/`description`.'
+      ),
+    tool_ids: z
+      .array(z.string())
+      .describe(
+        'Up to 5 registry tool IDs this skill needs access to. Each ID must already exist in the tool registry — call `list_tools` first to enumerate valid ids and copy them verbatim. Inventing ids will cause this call to fail.'
+      ),
+    referenced_content: z
+      .array(referencedContentSchema)
+      .optional()
+      .describe(
+        'Optional supporting markdown files (examples, reference snippets). Up to 100 entries. Each entry resolves to `[basePath]/[skill-name]/[relativePath]/[name].md` in the agent filestore.'
+      ),
+  })
+);
 
 export type ProposeSkillInput = z.infer<typeof proposeSkillSchema>;
 

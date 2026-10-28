@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { CaseResponseProperties } from '../../bundled-types.gen';
 
 export const CASE_ATTACHMENT_TYPE = 'case' as const;
@@ -28,17 +28,19 @@ export const caseAttachmentDataSchema = CaseResponseProperties.pick({
   updated_at: true,
   total_observables: true,
 }).extend({
-  url: z.string().max(1000).nullable().optional(),
-  totalAttachments: z.number().int().optional(),
-  connector_name: z.string().max(500).nullable().optional(),
+  url: lazySchema(() => z.string().max(1000).nullable().optional()),
+  totalAttachments: lazySchema(() => z.number().int().optional()),
+  connector_name: lazySchema(() => z.string().max(500).nullable().optional()),
 });
 export type CaseAttachmentData = z.infer<typeof caseAttachmentDataSchema>;
 
 export const CASES_ATTACHMENT_MAX = 20;
 
-export const casesAttachmentDataSchema = z.object({
-  cases: z.array(caseAttachmentDataSchema).max(CASES_ATTACHMENT_MAX),
-  total: z.number().int(),
-  url: z.string().max(1000).nullable().optional(),
-});
+export const casesAttachmentDataSchema = lazySchema(() =>
+  z.object({
+    cases: z.array(caseAttachmentDataSchema).max(CASES_ATTACHMENT_MAX),
+    total: z.number().int(),
+    url: z.string().max(1000).nullable().optional(),
+  })
+);
 export type CasesAttachmentData = z.infer<typeof casesAttachmentDataSchema>;

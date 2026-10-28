@@ -6,7 +6,7 @@
  */
 
 import { expectAssignable, expectType } from 'tsd';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Assign } from 'utility-types';
 import type {
   PromptAPI,
@@ -26,9 +26,11 @@ import type {
 
 declare const mockApi: PromptAPI;
 
-const MinimalPromptInputSchema = z.object({
-  query: z.string(),
-});
+const MinimalPromptInputSchema = lazySchema(() =>
+  z.object({
+    query: z.string(),
+  })
+);
 type MinimalPromptInput = z.input<typeof MinimalPromptInputSchema>;
 const minimalInput: MinimalPromptInput = { query: 'test' };
 

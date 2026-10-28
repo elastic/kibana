@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { load } from 'cheerio';
 import type { BaseParams } from '@kbn/reporting-common/types';
 
@@ -61,9 +61,11 @@ export function validateTimezone(timezone: string) {
   return 'string is not a valid timezone: ' + timezone;
 }
 
-const timezoneSchema = z.string().refine((val) => validateTimezone(val) === undefined, {
-  message: 'Invalid timezone',
-});
+const timezoneSchema = lazySchema(() =>
+  z.string().refine((val) => validateTimezone(val) === undefined, {
+    message: 'Invalid timezone',
+  })
+);
 
 const dimensionsSchema = z
   .object({
@@ -85,7 +87,7 @@ const dimensionsSchema = z
   })
   .strict();
 
-export const idSchema = z.enum(['preserve_layout', 'print', 'canvas', 'png']); // "png" is used in some tests, could be a legacy value
+export const idSchema = lazySchema(() => z.enum(['preserve_layout', 'print', 'canvas', 'png'])); // "png" is used in some tests, could be a legacy value
 
 const layoutSchema = z
   .object({
@@ -125,18 +127,20 @@ const forceNowSchema = z
   .max(32)
   .transform((forceNow) => sanitizeString(forceNow));
 
-export const pagingStrategySchema = z.enum(['pit', 'scroll']);
+export const pagingStrategySchema = lazySchema(() => z.enum(['pit', 'scroll']));
 
-const locatorObjectSchema = z.object({
-  id: z.string().max(1024).optional(),
-  version: z.string().max(32).optional(),
-  params: z.record(z.any(), z.any()).optional(),
-});
+const locatorObjectSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(1024).optional(),
+    version: z.string().max(32).optional(),
+    params: z.record(z.any(), z.any()).optional(),
+  })
+);
 
 const locatorParamsSchema = z.array(locatorObjectSchema).max(100).or(locatorObjectSchema);
 
-const relativeUrlSchema = z.string().max(4096);
-const relativeUrlsSchema = z.array(relativeUrlSchema).max(100);
+const relativeUrlSchema = lazySchema(() => z.string().max(4096));
+const relativeUrlsSchema = lazySchema(() => z.array(relativeUrlSchema).max(100));
 
 const jobParamsSchema = z
   .object({

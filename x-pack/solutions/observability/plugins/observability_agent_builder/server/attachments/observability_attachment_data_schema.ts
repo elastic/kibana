@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_SHORT_STRING_LENGTH } from '../utils/schema_limits';
 
 /**
  * Base schema for all Observability agent-builder attachments.
  * Each attachment can override its UI label by providing an `attachmentLabel`,
  */
-export const observabilityAttachmentDataSchema = z.object({
-  attachmentLabel: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
-});
+export const observabilityAttachmentDataSchema = lazySchema(() =>
+  z.object({
+    attachmentLabel: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
+  })
+);

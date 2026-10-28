@@ -6,7 +6,7 @@
  */
 
 import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { WrongStreamTypeError } from '../../../../lib/streams/errors/wrong_stream_type_error';
@@ -28,9 +28,11 @@ export const unmanagedAssetsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients }) => {
     const { scopedClusterClient, streamsClient, isSecurityEnabled } = await getScopedClients({
       request,

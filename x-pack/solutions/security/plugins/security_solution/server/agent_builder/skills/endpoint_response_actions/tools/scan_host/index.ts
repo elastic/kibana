@@ -6,7 +6,7 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
@@ -24,26 +24,28 @@ import {
 import { hostTargetFields, requireHostTarget } from '../services/resolve_target';
 import { buildDispatchConfirmation, prepareDispatch } from '../services/dispatch_action';
 
-const scanHostSchema = z
-  .object({
-    ...hostTargetFields('The hostname of the endpoint to scan for malware.'),
-    path: z
-      .string()
-      .min(1)
-      .max(MAX_FILE_PATH_LENGTH)
-      // Mirrors the HTTP route (`ScanActionRequestSchema`): reject whitespace-only
-      // input but keep the path literal. No `.trim()`: a trailing space names a
-      // different file on Linux/macOS.
-      .refine((value) => value.trim().length > 0, 'path cannot be an empty string')
-      .describe('The absolute file or folder path on the endpoint to scan for malware.'),
-    comment: z
-      .string()
-      .min(1)
-      .max(MAX_ACTION_COMMENT_LENGTH)
-      .optional()
-      .describe('An optional comment explaining why the scan is being performed.'),
-  })
-  .refine(requireHostTarget.check, { message: requireHostTarget.message });
+const scanHostSchema = lazySchema(() =>
+  z
+    .object({
+      ...hostTargetFields('The hostname of the endpoint to scan for malware.'),
+      path: z
+        .string()
+        .min(1)
+        .max(MAX_FILE_PATH_LENGTH)
+        // Mirrors the HTTP route (`ScanActionRequestSchema`): reject whitespace-only
+        // input but keep the path literal. No `.trim()`: a trailing space names a
+        // different file on Linux/macOS.
+        .refine((value) => value.trim().length > 0, 'path cannot be an empty string')
+        .describe('The absolute file or folder path on the endpoint to scan for malware.'),
+      comment: z
+        .string()
+        .min(1)
+        .max(MAX_ACTION_COMMENT_LENGTH)
+        .optional()
+        .describe('An optional comment explaining why the scan is being performed.'),
+    })
+    .refine(requireHostTarget.check, { message: requireHostTarget.message })
+);
 
 /**
  * Malware scan action. `scan` only detects malware on the provided path using

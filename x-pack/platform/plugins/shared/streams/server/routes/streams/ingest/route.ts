@@ -6,7 +6,7 @@
  */
 
 import { badData, badRequest } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
 import { WiredIngestUpsertRequest, IngestUpsertRequest } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
@@ -51,11 +51,13 @@ const readIngestRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    path: z.object({
-      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -109,14 +111,16 @@ const upsertIngestRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({
-      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
-    }),
-    body: z.object({
-      ingest: IngestUpsertRequest.right,
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
+      }),
+      body: z.object({
+        ingest: IngestUpsertRequest.right,
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients }) => {
     const { streamsClient, attachmentClient } = await getScopedClients({
       request,

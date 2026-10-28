@@ -6,18 +6,20 @@
  */
 
 import { createPrompt } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import systemPromptText from './system_prompt.text';
 import userPromptText from './user_prompt.text';
 
 export const LlmCorrectnessEvaluationPrompt = createPrompt({
   name: 'llm_correctness_evaluation',
   description: 'Prompt for evaluating the correctness of LLM responses',
-  input: z.object({
-    user_query: z.string(),
-    agent_response: z.string(),
-    ground_truth_response: z.string().optional(),
-  }),
+  input: lazySchema(() =>
+    z.object({
+      user_query: z.string(),
+      agent_response: z.string(),
+      ground_truth_response: z.string().optional(),
+    })
+  ),
 })
   .version({
     system: {

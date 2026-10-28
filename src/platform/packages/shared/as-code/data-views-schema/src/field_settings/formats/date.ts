@@ -7,20 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { momentPatternSchema } from './common';
 
-export const dateFormatSchema = z
-  .object({
-    type: z.literal('date'),
-    params: z
-      .object({
-        pattern: momentPatternSchema.default('MMM D, YYYY @ HH:mm:ss.SSS'),
-      })
-      .optional(),
-  })
-  .meta({
-    id: 'kbn-field-format-date',
-    title: 'Date field format',
-    description: 'Formats a field into a date value following the defined pattern.',
-  });
+export const dateFormatSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('date'),
+      params: z
+        .object({
+          pattern: momentPatternSchema.default('MMM D, YYYY @ HH:mm:ss.SSS'),
+        })
+        .optional(),
+    })
+    .meta({
+      id: 'kbn-field-format-date',
+      title: 'Date field format',
+      description: 'Formats a field into a date value following the defined pattern.',
+    })
+);

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { StepCategory } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
@@ -20,30 +20,36 @@ export const ExternalStepTypeId = 'example.externalStep';
 /**
  * Input schema for the external step.
  */
-export const InputSchema = z.object({
-  input: z.string(),
-});
+export const InputSchema = lazySchema(() =>
+  z.object({
+    input: z.string(),
+  })
+);
 
 /**
  * Output schema for the external step.
  * Returns simple string response.
  */
-export const OutputSchema = z.object({
-  response: z.string(),
-});
+export const OutputSchema = lazySchema(() =>
+  z.object({
+    response: z.string(),
+  })
+);
 
 /**
  * Config schema for the external step.
  * Defines config properties that appear at the step level (outside the `with` block).
  * Example: `proxy.id` or `proxy.url`.
  */
-export const ConfigSchema = z.object({
-  proxy: z.object({
-    id: z.string(),
-    url: z.string().optional(),
-    ssl: z.boolean().optional().describe('When true, only HTTPS proxies are shown'),
-  }),
-});
+export const ConfigSchema = lazySchema(() =>
+  z.object({
+    proxy: z.object({
+      id: z.string(),
+      url: z.string().optional(),
+      ssl: z.boolean().optional().describe('When true, only HTTPS proxies are shown'),
+    }),
+  })
+);
 
 export type ExternalStepInputSchema = typeof InputSchema;
 export type ExternalStepOutputSchema = typeof OutputSchema;

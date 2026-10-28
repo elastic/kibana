@@ -7,11 +7,11 @@
 
 import { isPlainObject } from 'lodash';
 import type { ApiRegistry, ApiRegistryMeta } from '@elastic/schemas/es/tools/types.js';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { apiTargets } from '@kbn/agent-builder-common';
 
 // The backend an API operation belongs to.
-export const targetSchema = z.enum(apiTargets);
+export const targetSchema = lazySchema(() => z.enum(apiTargets));
 
 export const BODY_ROOT_KEY = 'x-body-root';
 

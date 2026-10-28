@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
 import { getVersion } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
 
-const attachmentDiffSchema = z.object({
-  attachment_id: z.string().describe('ID of the attachment to compare versions'),
-  from_version: z.number().min(1).describe('Starting version number'),
-  to_version: z.number().min(1).describe('Ending version number'),
-});
+const attachmentDiffSchema = lazySchema(() =>
+  z.object({
+    attachment_id: z.string().describe('ID of the attachment to compare versions'),
+    from_version: z.number().min(1).describe('Starting version number'),
+    to_version: z.number().min(1).describe('Ending version number'),
+  })
+);
 
 /**
  * Creates the attachment_diff tool.

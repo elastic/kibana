@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { StepCategory } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
@@ -17,24 +17,28 @@ import { i18n } from '@kbn/i18n';
  */
 export const DurablePollStepTypeId = 'example.durablePollDemo';
 
-export const InputSchema = z.object({
-  /**
-   * Index pattern the “report” targets (mirrors a real saved search / data view).
-   */
-  indexPattern: z.string().min(1).default('logs-*'),
-  /**
-   * How many poll wake-ups are needed before the simulated backend marks the export ready
-   * (including the poll that returns `{ output }`). Kept small so demos finish quickly.
-   */
-  simulatedRenderPolls: z.coerce.number().int().min(1).max(10).default(3),
-});
+export const InputSchema = lazySchema(() =>
+  z.object({
+    /**
+     * Index pattern the “report” targets (mirrors a real saved search / data view).
+     */
+    indexPattern: z.string().min(1).default('logs-*'),
+    /**
+     * How many poll wake-ups are needed before the simulated backend marks the export ready
+     * (including the poll that returns `{ output }`). Kept small so demos finish quickly.
+     */
+    simulatedRenderPolls: z.coerce.number().int().min(1).max(10).default(3),
+  })
+);
 
-export const OutputSchema = z.object({
-  requestId: z.string(),
-  documentDownloadPath: z.string(),
-  totalHits: z.number().int(),
-  generatedAt: z.string(),
-});
+export const OutputSchema = lazySchema(() =>
+  z.object({
+    requestId: z.string(),
+    documentDownloadPath: z.string(),
+    totalHits: z.number().int(),
+    generatedAt: z.string(),
+  })
+);
 
 export type DurablePollStepInputSchema = typeof InputSchema;
 export type DurablePollStepOutputSchema = typeof OutputSchema;

@@ -6,7 +6,7 @@
  */
 
 import dedent from 'dedent';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -19,9 +19,9 @@ import { observabilityAttachmentDataSchema } from './observability_attachment_da
 const GET_MONITOR_DETAILS_TOOL_ID = 'get_monitor_details';
 
 const monitorDataSchema = observabilityAttachmentDataSchema.extend({
-  configId: z.string().max(MAX_SHORT_STRING_LENGTH),
-  monitorName: z.string().max(MAX_SHORT_STRING_LENGTH),
-  monitorType: z.string().max(MAX_SHORT_STRING_LENGTH),
+  configId: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH)),
+  monitorName: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH)),
+  monitorType: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH)),
 });
 
 export type MonitorAttachmentData = z.infer<typeof monitorDataSchema>;

@@ -6,7 +6,7 @@
  */
 
 import { Readable } from 'stream';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type {
   ContentPack,
   ContentPackStream,
@@ -86,20 +86,22 @@ const exportContentRoute = createServerRoute({
       },
     }),
   },
-  params: z.object({
-    path: z.object({
-      name: z
-        .string()
-        .max(MAX_STREAM_NAME_LENGTH)
-        .describe('The name of the stream to export content from.'),
-    }),
-    body: z.object({
-      name: z.string().max(256),
-      description: z.string().max(1000),
-      version: z.string().max(100),
-      include: boundedIncludedObjectsSchema,
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        name: z
+          .string()
+          .max(MAX_STREAM_NAME_LENGTH)
+          .describe('The name of the stream to export content from.'),
+      }),
+      body: z.object({
+        name: z.string().max(256),
+        description: z.string().max(1000),
+        version: z.string().max(100),
+        include: boundedIncludedObjectsSchema,
+      }),
+    })
+  ),
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
@@ -221,21 +223,23 @@ const importContentRoute = createServerRoute({
       },
     }),
   },
-  params: z.object({
-    path: z.object({
-      name: z
-        .string()
-        .max(MAX_STREAM_NAME_LENGTH)
-        .describe('The name of the stream to import content into.'),
-    }),
-    body: z.object({
-      include: z
-        .string()
-        .max(MAX_CONTENT_PACK_SIZE_BYTES)
-        .transform((value) => boundedIncludedObjectsSchema.parse(JSON.parse(value))),
-      content: z.instanceof(Readable),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        name: z
+          .string()
+          .max(MAX_STREAM_NAME_LENGTH)
+          .describe('The name of the stream to import content into.'),
+      }),
+      body: z.object({
+        include: z
+          .string()
+          .max(MAX_CONTENT_PACK_SIZE_BYTES)
+          .transform((value) => boundedIncludedObjectsSchema.parse(JSON.parse(value))),
+        content: z.instanceof(Readable),
+      }),
+    })
+  ),
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
@@ -293,14 +297,16 @@ const previewContentRoute = createServerRoute({
       output: 'stream',
     },
   },
-  params: z.object({
-    path: z.object({
-      name: z.string().max(MAX_STREAM_NAME_LENGTH),
-    }),
-    body: z.object({
-      content: z.instanceof(Readable),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        name: z.string().max(MAX_STREAM_NAME_LENGTH),
+      }),
+      body: z.object({
+        content: z.instanceof(Readable),
+      }),
+    })
+  ),
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],

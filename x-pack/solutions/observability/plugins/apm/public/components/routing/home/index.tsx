@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
@@ -41,9 +41,11 @@ const TraceOverview = dynamic(() =>
   import('../../app/trace_overview').then((mod) => ({ default: mod.TraceOverview }))
 );
 
-const serviceGroupPageParamsSchema = z.object({
-  query: z.object({ serviceGroup: z.string() }),
-});
+const serviceGroupPageParamsSchema = lazySchema(() =>
+  z.object({
+    query: z.object({ serviceGroup: z.string() }),
+  })
+);
 
 function serviceGroupPage<TPath extends string>({
   path,
@@ -114,28 +116,30 @@ export const homeRoute = {
         <Outlet />
       </ApmTimeRangeMetadataContextProvider>
     ),
-    params: z.object({
-      query: environmentSchema
-        .merge(
-          z.object({
-            rangeFrom: z.string(),
-            rangeTo: z.string(),
-            kuery: z.string(),
-            comparisonEnabled: toBooleanFromString,
-          })
-        )
-        .merge(
-          z.object({
-            refreshPaused: z.union([z.literal('true'), z.literal('false')]).optional(),
-            refreshInterval: z.string().optional(),
-            page: z.coerce.number().optional(),
-            pageSize: z.coerce.number().optional(),
-            sortField: z.string().optional(),
-            sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
-          })
-        )
-        .merge(offsetSchema),
-    }),
+    params: lazySchema(() =>
+      z.object({
+        query: environmentSchema
+          .merge(
+            z.object({
+              rangeFrom: z.string(),
+              rangeTo: z.string(),
+              kuery: z.string(),
+              comparisonEnabled: toBooleanFromString,
+            })
+          )
+          .merge(
+            z.object({
+              refreshPaused: z.union([z.literal('true'), z.literal('false')]).optional(),
+              refreshInterval: z.string().optional(),
+              page: z.coerce.number().optional(),
+              pageSize: z.coerce.number().optional(),
+              sortField: z.string().optional(),
+              sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+            })
+          )
+          .merge(offsetSchema),
+      })
+    ),
     defaults: {
       query: {
         environment: ENVIRONMENT_ALL.value,

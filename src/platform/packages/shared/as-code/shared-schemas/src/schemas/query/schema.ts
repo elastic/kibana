@@ -7,24 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const asCodeQuerySchema = z
-  .object({
-    expression: z.string().meta({
-      description: 'A query expression in KQL or Lucene syntax.',
-    }),
-    language: z.enum(['kql', 'lucene']).meta({
+export const asCodeQuerySchema = lazySchema(() =>
+  z
+    .object({
+      expression: z.string().meta({
+        description: 'A query expression in KQL or Lucene syntax.',
+      }),
+      language: z.enum(['kql', 'lucene']).meta({
+        description:
+          'Query language. Use `kql` for Kibana Query Language (KQL) or `lucene` for Lucene query syntax.',
+      }),
+    })
+    .strict()
+    .meta({
+      id: 'kbn-as-code-query',
+      title: 'Query',
       description:
-        'Query language. Use `kql` for Kibana Query Language (KQL) or `lucene` for Lucene query syntax.',
-    }),
-  })
-  .strict()
-  .meta({
-    id: 'kbn-as-code-query',
-    title: 'Query',
-    description:
-      'A search query consisting of an expression and its language. Supports KQL and Lucene syntax.',
-  });
+        'A search query consisting of an expression and its language. Supports KQL and Lucene syntax.',
+    })
+);
 
 export type AsCodeQuery = z.output<typeof asCodeQuerySchema>;

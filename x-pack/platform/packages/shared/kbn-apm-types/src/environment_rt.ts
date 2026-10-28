@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED } from './environment_filter_values';
 
 // Bounds the free-form branch to satisfy the CodeQL "unbounded string in route
@@ -12,14 +12,18 @@ import { ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED } from './environment_filter_v
 // environment names.
 const MAX_ENVIRONMENT_LENGTH = 1_024;
 
-export const environmentStringSchema = z.union([
-  z.literal(ENVIRONMENT_NOT_DEFINED.value),
-  z.literal(ENVIRONMENT_ALL.value),
-  z.string().max(MAX_ENVIRONMENT_LENGTH),
-]);
+export const environmentStringSchema = lazySchema(() =>
+  z.union([
+    z.literal(ENVIRONMENT_NOT_DEFINED.value),
+    z.literal(ENVIRONMENT_ALL.value),
+    z.string().max(MAX_ENVIRONMENT_LENGTH),
+  ])
+);
 
-export const environmentSchema = z.object({
-  environment: environmentStringSchema,
-});
+export const environmentSchema = lazySchema(() =>
+  z.object({
+    environment: environmentStringSchema,
+  })
+);
 
 export type Environment = z.infer<typeof environmentSchema>['environment'];

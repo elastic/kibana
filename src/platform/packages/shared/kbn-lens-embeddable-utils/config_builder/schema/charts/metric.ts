@@ -153,14 +153,14 @@ const metricConfigBackgroundChartShapeNoESQL = {
   /**
    * Complementary visualization
    */
-  background_chart: complementaryVizSchemaNoESQL.optional(),
+  background_chart: lazySchema(() => complementaryVizSchemaNoESQL.optional()),
 };
 
 const metricConfigBackgroundChartShapeESQL = {
   /**
    * Complementary visualization
    */
-  background_chart: complementaryVizSchemaESQL.optional(),
+  background_chart: lazySchema(() => complementaryVizSchemaESQL.optional()),
 };
 
 const visMetricIconConfigSchema = lazySchema(() =>
@@ -365,19 +365,23 @@ const metricConfigPrimaryMetricOptionsShape = {
   // this is used to differentiate primary and secondary metrics
   // unfortunately given the lack of tuple schema support we need to have some way
   // to avoid default injection in the wrong type
-  type: z.literal('primary'),
+  type: lazySchema(() => z.literal('primary')),
   /**
    * Subtitle
    */
-  subtitle: z.string().optional().meta({ description: 'Subtitle below the primary metric value.' }),
+  subtitle: lazySchema(() =>
+    z.string().optional().meta({ description: 'Subtitle below the primary metric value.' })
+  ),
   /**
    * Color configuration
    */
-  color: z
-    .union([colorByValueSchema, staticColorSchema, autoColorSchema])
-    .default(AUTO_COLOR)
-    .optional()
-    .meta({ description: 'Color configuration for the primary metric value or background.' }),
+  color: lazySchema(() =>
+    z
+      .union([colorByValueSchema, staticColorSchema, autoColorSchema])
+      .default(AUTO_COLOR)
+      .optional()
+      .meta({ description: 'Color configuration for the primary metric value or background.' })
+  ),
   /**
    * Where to apply the color (background or value)
    */
@@ -388,42 +392,46 @@ const metricConfigSecondaryMetricOptionsShape = {
   // this is used to differentiate primary and secondary metrics
   // unfortunately given the lack of tuple schema support we need to have some way
   // to avoid default injection in the wrong type
-  type: z.literal('secondary'),
+  type: lazySchema(() => z.literal('secondary')),
   /**
    * Compare to
    */
-  compare: z
-    .union([
-      compareToSchemaShared
-        .extend({
-          to: z.literal('baseline'),
-          baseline: z.number().default(0).meta({ description: 'Baseline value.' }),
-        })
-        .meta({ id: 'visMetricCompareToBaseline', title: 'Compare To Baseline' }),
-      compareToSchemaShared
-        .extend({
-          to: z.literal('primary'),
-        })
-        .meta({ id: 'visMetricCompareToPrimary', title: 'Compare To Primary' }),
-    ])
-    .optional()
-    .meta({
-      description: 'Compare the secondary metric to a baseline value or to the primary metric.',
-    }),
+  compare: lazySchema(() =>
+    z
+      .union([
+        compareToSchemaShared
+          .extend({
+            to: z.literal('baseline'),
+            baseline: z.number().default(0).meta({ description: 'Baseline value.' }),
+          })
+          .meta({ id: 'visMetricCompareToBaseline', title: 'Compare To Baseline' }),
+        compareToSchemaShared
+          .extend({
+            to: z.literal('primary'),
+          })
+          .meta({ id: 'visMetricCompareToPrimary', title: 'Compare To Primary' }),
+      ])
+      .optional()
+      .meta({
+        description: 'Compare the secondary metric to a baseline value or to the primary metric.',
+      })
+  ),
   /**
    * Color configuration
    */
-  color: z.union([staticColorSchema, noColorSchema]).default(NO_COLOR).optional(),
+  color: lazySchema(() => z.union([staticColorSchema, noColorSchema]).default(NO_COLOR).optional()),
 };
 
 const metricConfigBreakdownByOptionsShape = {
   /**
    * Number of columns
    */
-  columns: z
-    .number()
-    .default(LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS)
-    .meta({ description: 'Number of columns.' }),
+  columns: lazySchema(() =>
+    z
+      .number()
+      .default(LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS)
+      .meta({ description: 'Number of columns.' })
+  ),
   /**
    * Collapse by function. This parameter is used to collapse the
    * metric chart when the number of columns is bigger than the

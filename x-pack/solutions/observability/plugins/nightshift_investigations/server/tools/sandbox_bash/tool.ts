@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -63,31 +63,33 @@ const capOutput = async (
 const RESOURCE_EXHAUSTED_HINT =
   ' The output was too large for the sandbox transport; redirect it to a file, then grep or summarize it.';
 
-const sandboxBashSchema = z.object({
-  command: z
-    .string()
-    .describe('Bash command to execute in the sandbox (runs as: bash -c <command>)'),
-  working_directory: z
-    .string()
-    .optional()
-    .describe('Working directory inside the sandbox (default: /workspace)'),
-  env: z
-    .record(z.string(), z.string())
-    .optional()
-    .describe('Additional environment variables to set for this command'),
-  timeout_seconds: z
-    .number()
-    .optional()
-    .describe(
-      `Timeout in seconds; 0 or omitted uses ${MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS}s, which is also the maximum`
-    ),
-  connector_id: z
-    .string()
-    .optional()
-    .describe(
-      'Connector whose credentials this command needs (see /workspace/connectors.md). Its config and auth headers are exposed to this command only, as CONNECTOR_CONFIG_<KEY> / CONNECTOR_HEADER_<NAME> environment variables, and are gone when the command exits.'
-    ),
-});
+const sandboxBashSchema = lazySchema(() =>
+  z.object({
+    command: z
+      .string()
+      .describe('Bash command to execute in the sandbox (runs as: bash -c <command>)'),
+    working_directory: z
+      .string()
+      .optional()
+      .describe('Working directory inside the sandbox (default: /workspace)'),
+    env: z
+      .record(z.string(), z.string())
+      .optional()
+      .describe('Additional environment variables to set for this command'),
+    timeout_seconds: z
+      .number()
+      .optional()
+      .describe(
+        `Timeout in seconds; 0 or omitted uses ${MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS}s, which is also the maximum`
+      ),
+    connector_id: z
+      .string()
+      .optional()
+      .describe(
+        'Connector whose credentials this command needs (see /workspace/connectors.md). Its config and auth headers are exposed to this command only, as CONNECTOR_CONFIG_<KEY> / CONNECTOR_HEADER_<NAME> environment variables, and are gone when the command exits.'
+      ),
+  })
+);
 
 export const createSandboxBashTool = ({
   getSandboxStart,

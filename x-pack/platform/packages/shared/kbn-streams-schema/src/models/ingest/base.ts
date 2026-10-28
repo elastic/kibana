@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Validation } from '../validation/validation';
 import { validation } from '../validation/validation';
 import type { IngestStreamLifecycle } from './lifecycle';
@@ -44,17 +44,19 @@ interface IngestStreamPrivileges {
   create_snapshot_repository: boolean;
 }
 
-const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object({
-  manage: z.boolean(),
-  monitor: z.boolean(),
-  view_index_metadata: z.boolean(),
-  lifecycle: z.boolean(),
-  simulate: z.boolean(),
-  text_structure: z.boolean(),
-  read_failure_store: z.boolean(),
-  manage_failure_store: z.boolean(),
-  create_snapshot_repository: z.boolean(),
-});
+const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = lazySchema(() =>
+  z.object({
+    manage: z.boolean(),
+    monitor: z.boolean(),
+    view_index_metadata: z.boolean(),
+    lifecycle: z.boolean(),
+    simulate: z.boolean(),
+    text_structure: z.boolean(),
+    read_failure_store: z.boolean(),
+    manage_failure_store: z.boolean(),
+    create_snapshot_repository: z.boolean(),
+  })
+);
 
 export interface IngestBase {
   lifecycle: IngestStreamLifecycle;
@@ -91,12 +93,9 @@ export const IngestBaseUpsertRequest: Validation<unknown, IngestBaseUpsertReques
 
 export type IngestStreamIndexMode = 'standard' | 'time_series' | 'logsdb' | 'lookup';
 
-const ingestStreamIndexModeSchema: z.Schema<IngestStreamIndexMode> = z.enum([
-  'standard',
-  'time_series',
-  'logsdb',
-  'lookup',
-]);
+const ingestStreamIndexModeSchema: z.Schema<IngestStreamIndexMode> = lazySchema(() =>
+  z.enum(['standard', 'time_series', 'logsdb', 'lookup'])
+);
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace IngestBaseStream {
@@ -147,8 +146,8 @@ export const ingestBaseStreamDefinitionSchema = baseStreamDefinitionSchema.exten
 export const ingestBaseStreamGetResponseSchema = baseStreamGetResponseSchema.extend({
   stream: ingestBaseStreamDefinitionSchema,
   privileges: ingestStreamPrivilegesSchema,
-  index_mode: z.optional(ingestStreamIndexModeSchema),
-  replicated: z.optional(z.boolean()),
+  index_mode: lazySchema(() => z.optional(ingestStreamIndexModeSchema)),
+  replicated: lazySchema(() => z.optional(z.boolean())),
 });
 
 export const ingestBaseStreamUpsertDefinitionSchema = baseStreamUpsertDefinitionSchema.extend({

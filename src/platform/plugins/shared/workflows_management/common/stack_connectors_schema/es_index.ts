@@ -12,43 +12,47 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 // Elasticsearch Index connector parameter schema
-export const EsIndexParamsSchema = z.object({
-  documents: z.array(z.record(z.string(), z.any())),
-  indexOverride: z.string().optional(),
-});
+export const EsIndexParamsSchema = lazySchema(() =>
+  z.object({
+    documents: z.array(z.record(z.string(), z.any())),
+    indexOverride: z.string().optional(),
+  })
+);
 
 // Elasticsearch Index connector response schema
-export const EsIndexResponseSchema = z.object({
-  took: z.number(),
-  errors: z.boolean(),
-  items: z.array(
-    z.object({
-      index: z
-        .object({
-          _index: z.string(),
-          _id: z.string(),
-          _version: z.number(),
-          result: z.string(),
-          _shards: z.object({
-            total: z.number(),
-            successful: z.number(),
-            failed: z.number(),
-          }),
-          status: z.number(),
-        })
-        .optional(),
-      create: z
-        .object({
-          _index: z.string(),
-          _id: z.string(),
-          _version: z.number(),
-          result: z.string(),
-          status: z.number(),
-        })
-        .optional(),
-    })
-  ),
-});
+export const EsIndexResponseSchema = lazySchema(() =>
+  z.object({
+    took: z.number(),
+    errors: z.boolean(),
+    items: z.array(
+      z.object({
+        index: z
+          .object({
+            _index: z.string(),
+            _id: z.string(),
+            _version: z.number(),
+            result: z.string(),
+            _shards: z.object({
+              total: z.number(),
+              successful: z.number(),
+              failed: z.number(),
+            }),
+            status: z.number(),
+          })
+          .optional(),
+        create: z
+          .object({
+            _index: z.string(),
+            _id: z.string(),
+            _version: z.number(),
+            result: z.string(),
+            status: z.number(),
+          })
+          .optional(),
+      })
+    ),
+  })
+);

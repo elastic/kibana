@@ -10,7 +10,7 @@ import { createPrompt } from '@kbn/inference-common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { VisualizationRenderer } from '@kbn/agent-builder-visualizations-common';
 import type { ExtractedVisualization } from '../extract_visualization';
 import { isRecord, skippedResult, type JudgeModel } from '../evaluator_utils';
@@ -90,11 +90,13 @@ const ChartIntentPrompt = createPrompt({
   name: 'chart_type_vs_intent',
   description:
     'Judges whether the produced chart type / series type / Vega mark satisfies the user request, using the gold chart form as a reference for intent.',
-  input: z.object({
-    question: z.string(),
-    gold: z.string(),
-    actual: z.string(),
-  }),
+  input: lazySchema(() =>
+    z.object({
+      question: z.string(),
+      gold: z.string(),
+      actual: z.string(),
+    })
+  ),
 })
   .version({
     system: { mustache: { template: SYSTEM_PROMPT } },

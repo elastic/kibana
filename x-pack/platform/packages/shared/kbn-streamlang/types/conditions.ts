@@ -6,12 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { createIsNarrowSchema, DeepStrict, NonEmptyString } from '@kbn/zod-helpers/v4';
 
-export const stringOrNumberOrBoolean = z
-  .union([z.string(), z.number(), z.boolean()])
-  .describe('A value that can be a string, number, or boolean.');
+export const stringOrNumberOrBoolean = lazySchema(() =>
+  z
+    .union([z.string(), z.number(), z.boolean()])
+    .describe('A value that can be a string, number, or boolean.')
+);
 
 export type StringOrNumberOrBoolean = string | number | boolean;
 
@@ -79,39 +81,43 @@ export const operatorToHumanReadableNameMap = {
   includes: i18n.translate('xpack.streamlang.filter.includes', { defaultMessage: 'includes' }),
 };
 
-export const rangeConditionSchema = z
-  .object({
-    gt: stringOrNumberOrBoolean.optional(),
-    gte: stringOrNumberOrBoolean.optional(),
-    lt: stringOrNumberOrBoolean.optional(),
-    lte: stringOrNumberOrBoolean.optional(),
-  })
-  .describe('A condition specifying a range of values.');
+export const rangeConditionSchema = lazySchema(() =>
+  z
+    .object({
+      gt: stringOrNumberOrBoolean.optional(),
+      gte: stringOrNumberOrBoolean.optional(),
+      lt: stringOrNumberOrBoolean.optional(),
+      lte: stringOrNumberOrBoolean.optional(),
+    })
+    .describe('A condition specifying a range of values.')
+);
 // Shorthand binary: field + one of the operator keys
-export const shorthandBinaryFilterConditionSchema = z
-  .object({
-    field: NonEmptyString.describe('The document field to filter on.'),
-    eq: stringOrNumberOrBoolean.optional().describe('Equality comparison value.'),
-    neq: stringOrNumberOrBoolean.optional().describe('Inequality comparison value.'),
-    lt: stringOrNumberOrBoolean.optional().describe('Less-than comparison value.'),
-    lte: stringOrNumberOrBoolean.optional().describe('Less-than-or-equal comparison value.'),
-    gt: stringOrNumberOrBoolean.optional().describe('Greater-than comparison value.'),
-    gte: stringOrNumberOrBoolean.optional().describe('Greater-than-or-equal comparison value.'),
-    contains: stringOrNumberOrBoolean.optional().describe('Contains comparison value.'),
-    startsWith: stringOrNumberOrBoolean.optional().describe('Starts-with comparison value.'),
-    endsWith: stringOrNumberOrBoolean.optional().describe('Ends-with comparison value.'),
-    range: rangeConditionSchema.optional().describe('Range comparison values.'),
-    includes: stringOrNumberOrBoolean
-      .optional()
-      .describe('Checks if multivalue field includes the value.'),
-  })
-  .refine(
-    (obj) =>
-      // At least one operator must be present
-      Object.keys(obj).some((key) => BINARY_OPERATORS.includes(key as BinaryOperatorKeys)),
-    { message: 'At least one operator must be specified' }
-  )
-  .describe('A condition that compares a field to a value or range using an operator as the key.');
+export const shorthandBinaryFilterConditionSchema = lazySchema(() =>
+  z
+    .object({
+      field: NonEmptyString.describe('The document field to filter on.'),
+      eq: stringOrNumberOrBoolean.optional().describe('Equality comparison value.'),
+      neq: stringOrNumberOrBoolean.optional().describe('Inequality comparison value.'),
+      lt: stringOrNumberOrBoolean.optional().describe('Less-than comparison value.'),
+      lte: stringOrNumberOrBoolean.optional().describe('Less-than-or-equal comparison value.'),
+      gt: stringOrNumberOrBoolean.optional().describe('Greater-than comparison value.'),
+      gte: stringOrNumberOrBoolean.optional().describe('Greater-than-or-equal comparison value.'),
+      contains: stringOrNumberOrBoolean.optional().describe('Contains comparison value.'),
+      startsWith: stringOrNumberOrBoolean.optional().describe('Starts-with comparison value.'),
+      endsWith: stringOrNumberOrBoolean.optional().describe('Ends-with comparison value.'),
+      range: rangeConditionSchema.optional().describe('Range comparison values.'),
+      includes: stringOrNumberOrBoolean
+        .optional()
+        .describe('Checks if multivalue field includes the value.'),
+    })
+    .refine(
+      (obj) =>
+        // At least one operator must be present
+        Object.keys(obj).some((key) => BINARY_OPERATORS.includes(key as BinaryOperatorKeys)),
+      { message: 'At least one operator must be specified' }
+    )
+    .describe('A condition that compares a field to a value or range using an operator as the key.')
+);
 
 export interface ShorthandUnaryFilterCondition {
   field: string;
@@ -119,19 +125,23 @@ export interface ShorthandUnaryFilterCondition {
 }
 
 // Shorthand unary
-export const shorthandUnaryFilterConditionSchema = z
-  .object({
-    field: NonEmptyString.describe('The document field to check.'),
-    exists: z.boolean().optional().describe('Indicates whether the field exists or not.'),
-  })
-  .describe('A condition that checks for the existence or non-existence of a field.');
+export const shorthandUnaryFilterConditionSchema = lazySchema(() =>
+  z
+    .object({
+      field: NonEmptyString.describe('The document field to check.'),
+      exists: z.boolean().optional().describe('Indicates whether the field exists or not.'),
+    })
+    .describe('A condition that checks for the existence or non-existence of a field.')
+);
 
 export type FilterCondition = ShorthandBinaryFilterCondition | ShorthandUnaryFilterCondition;
 
-export const filterConditionSchema = z
-  .union([shorthandBinaryFilterConditionSchema, shorthandUnaryFilterConditionSchema])
-  .describe('A basic filter condition, either unary or binary.')
-  .meta({ id: 'FilterCondition' });
+export const filterConditionSchema = lazySchema(() =>
+  z
+    .union([shorthandBinaryFilterConditionSchema, shorthandUnaryFilterConditionSchema])
+    .describe('A basic filter condition, either unary or binary.')
+    .meta({ id: 'FilterCondition' })
+);
 
 export interface AndCondition {
   and: Condition[];
@@ -177,41 +187,51 @@ export const conditionSchema: z.Schema<Condition> = z
   )
   .meta({ id: 'Condition' });
 
-export const andConditionSchema = z
-  .object({
-    and: z
-      .array(conditionSchema)
-      .describe(
-        'An array of conditions. All sub-conditions must be true for this condition to be true.'
-      ),
-  })
-  .describe('A logical AND that groups multiple conditions.');
-export const orConditionSchema = z
-  .object({
-    or: z
-      .array(conditionSchema)
-      .describe(
-        'An array of conditions. At least one sub-condition must be true for this condition to be true.'
-      ),
-  })
-  .describe('A logical OR that groups multiple conditions.');
-export const neverConditionSchema = z
-  .object({
-    never: z.strictObject({}).describe('An empty object. This condition never matches.'),
-  })
-  .describe('A condition that always evaluates to false.');
-export const alwaysConditionSchema = z
-  .object({
-    always: z.strictObject({}).describe('An empty object. This condition always matches.'),
-  })
-  .describe(
-    'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
-  );
-export const notConditionSchema = z
-  .object({
-    not: z.lazy(() => conditionSchema).describe('A condition that negates another condition.'),
-  })
-  .describe('A logical NOT that negates a condition.');
+export const andConditionSchema = lazySchema(() =>
+  z
+    .object({
+      and: z
+        .array(conditionSchema)
+        .describe(
+          'An array of conditions. All sub-conditions must be true for this condition to be true.'
+        ),
+    })
+    .describe('A logical AND that groups multiple conditions.')
+);
+export const orConditionSchema = lazySchema(() =>
+  z
+    .object({
+      or: z
+        .array(conditionSchema)
+        .describe(
+          'An array of conditions. At least one sub-condition must be true for this condition to be true.'
+        ),
+    })
+    .describe('A logical OR that groups multiple conditions.')
+);
+export const neverConditionSchema = lazySchema(() =>
+  z
+    .object({
+      never: z.strictObject({}).describe('An empty object. This condition never matches.'),
+    })
+    .describe('A condition that always evaluates to false.')
+);
+export const alwaysConditionSchema = lazySchema(() =>
+  z
+    .object({
+      always: z.strictObject({}).describe('An empty object. This condition always matches.'),
+    })
+    .describe(
+      'A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.'
+    )
+);
+export const notConditionSchema = lazySchema(() =>
+  z
+    .object({
+      not: z.lazy(() => conditionSchema).describe('A condition that negates another condition.'),
+    })
+    .describe('A logical NOT that negates a condition.')
+);
 
 export const isBinaryFilterCondition = createIsNarrowSchema(
   conditionSchema,

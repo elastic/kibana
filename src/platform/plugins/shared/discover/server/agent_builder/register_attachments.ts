@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
@@ -15,32 +15,40 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { ESQL_QUERY_RESULTS_ATTACHMENT_TYPE } from '../../common/agent_builder';
 import { createDiscoverSessionAttachmentType } from './create_discover_session_attachment';
 
-const columnSchema = z.object({
-  name: z.string(),
-  type: z.string(),
-});
+const columnSchema = lazySchema(() =>
+  z.object({
+    name: z.string(),
+    type: z.string(),
+  })
+);
 
-const timeRangeSchema = z.object({
-  from: z.string(),
-  to: z.string(),
-});
+const timeRangeSchema = lazySchema(() =>
+  z.object({
+    from: z.string(),
+    to: z.string(),
+  })
+);
 
-const playbookContributionSchema = z.object({
-  shapeId: z.string(),
-  shapeLabel: z.string(),
-  characteristicFields: z.array(z.string()),
-  guidance: z.string().max(600),
-  interestingSignals: z.array(z.string()).max(5).optional(),
-});
+const playbookContributionSchema = lazySchema(() =>
+  z.object({
+    shapeId: z.string(),
+    shapeLabel: z.string(),
+    characteristicFields: z.array(z.string()),
+    guidance: z.string().max(600),
+    interestingSignals: z.array(z.string()).max(5).optional(),
+  })
+);
 
-const esqlQueryResultsDataSchema = z.object({
-  query: z.string(),
-  columns: z.array(columnSchema),
-  sampleRows: z.array(z.record(z.string(), z.unknown())),
-  totalHits: z.number(),
-  timeRange: timeRangeSchema.optional(),
-  playbookContribution: playbookContributionSchema.optional(),
-});
+const esqlQueryResultsDataSchema = lazySchema(() =>
+  z.object({
+    query: z.string(),
+    columns: z.array(columnSchema),
+    sampleRows: z.array(z.record(z.string(), z.unknown())),
+    totalHits: z.number(),
+    timeRange: timeRangeSchema.optional(),
+    playbookContribution: playbookContributionSchema.optional(),
+  })
+);
 
 type EsqlQueryResultsData = z.infer<typeof esqlQueryResultsDataSchema>;
 

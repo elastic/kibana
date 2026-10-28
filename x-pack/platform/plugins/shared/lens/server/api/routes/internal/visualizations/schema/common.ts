@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   lensCommonSavedObjectSchemaV3,
   lensItemDataSchemaV3,
@@ -31,11 +31,13 @@ export const lensItemMetaSchema = lensCommonSavedObjectSchemaV3
 /**
  * The Lens response item returned from the server
  */
-export const lensResponseItemSchema = z
-  .object({
-    id: lensSavedObjectSchemaV3.shape.id,
-    data: z.union([lensApiConfigLibItemSchemaNoESQL, lensItemDataSchemaV3]),
-    meta: lensItemMetaSchema,
-  })
-  .strict()
-  .meta({ id: 'visualizationResponse' });
+export const lensResponseItemSchema = lazySchema(() =>
+  z
+    .object({
+      id: lensSavedObjectSchemaV3.shape.id,
+      data: z.union([lensApiConfigLibItemSchemaNoESQL, lensItemDataSchemaV3]),
+      meta: lensItemMetaSchema,
+    })
+    .strict()
+    .meta({ id: 'visualizationResponse' })
+);

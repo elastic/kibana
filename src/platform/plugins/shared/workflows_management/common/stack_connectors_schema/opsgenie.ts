@@ -12,53 +12,59 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 // Opsgenie connector parameter schemas for different sub-actions
-export const OpsgenieCreateAlertParamsSchema = z.object({
-  message: z.string(),
-  alias: z.string().optional(),
-  description: z.string().optional(),
-  responders: z
-    .array(
-      z.object({
-        type: z.enum(['team', 'user', 'escalation', 'schedule']),
-        name: z.string().optional(),
-        id: z.string().optional(),
-        username: z.string().optional(),
-      })
-    )
-    .optional(),
-  visibleTo: z
-    .array(
-      z.object({
-        type: z.enum(['team', 'user']),
-        name: z.string().optional(),
-        id: z.string().optional(),
-        username: z.string().optional(),
-      })
-    )
-    .optional(),
-  actions: z.array(z.string()).optional(),
-  tags: z.array(z.string()).optional(),
-  details: z.record(z.string(), z.string()).optional(),
-  entity: z.string().optional(),
-  source: z.string().optional(),
-  priority: z.enum(['P1', 'P2', 'P3', 'P4', 'P5']).optional(),
-  user: z.string().optional(),
-  note: z.string().optional(),
-});
+export const OpsgenieCreateAlertParamsSchema = lazySchema(() =>
+  z.object({
+    message: z.string(),
+    alias: z.string().optional(),
+    description: z.string().optional(),
+    responders: z
+      .array(
+        z.object({
+          type: z.enum(['team', 'user', 'escalation', 'schedule']),
+          name: z.string().optional(),
+          id: z.string().optional(),
+          username: z.string().optional(),
+        })
+      )
+      .optional(),
+    visibleTo: z
+      .array(
+        z.object({
+          type: z.enum(['team', 'user']),
+          name: z.string().optional(),
+          id: z.string().optional(),
+          username: z.string().optional(),
+        })
+      )
+      .optional(),
+    actions: z.array(z.string()).optional(),
+    tags: z.array(z.string()).optional(),
+    details: z.record(z.string(), z.string()).optional(),
+    entity: z.string().optional(),
+    source: z.string().optional(),
+    priority: z.enum(['P1', 'P2', 'P3', 'P4', 'P5']).optional(),
+    user: z.string().optional(),
+    note: z.string().optional(),
+  })
+);
 
-export const OpsgenieCloseAlertParamsSchema = z.object({
-  alias: z.string(),
-  user: z.string().optional(),
-  source: z.string().optional(),
-  note: z.string().optional(),
-});
+export const OpsgenieCloseAlertParamsSchema = lazySchema(() =>
+  z.object({
+    alias: z.string(),
+    user: z.string().optional(),
+    source: z.string().optional(),
+    note: z.string().optional(),
+  })
+);
 
 // Opsgenie connector response schema
-export const OpsgenieResponseSchema = z.object({
-  result: z.string(),
-  took: z.number(),
-  requestId: z.string(),
-});
+export const OpsgenieResponseSchema = lazySchema(() =>
+  z.object({
+    result: z.string(),
+    took: z.number(),
+    requestId: z.string(),
+  })
+);

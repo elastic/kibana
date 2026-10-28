@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformCoreCasesTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -24,18 +24,20 @@ import { emitFromStepResult, injectAttachmentIds } from '../attachments/emit_att
 
 type GetCasesClientFn = (request: KibanaRequest) => Promise<CasesClient>;
 
-const observablesSchema = z.object({
-  mode: z
-    .enum(['add', 'update', 'delete'])
-    .describe(
-      'Required fields per mode:\n' +
-        '- add: case_id, observables ({typeKey, value, description?}[])\n' +
-        '- update: case_id, observable_id, value (description optional)\n' +
-        '- delete: case_id, observable_id'
-    ),
-  ...addObservablesStepCommonDefinition.inputSchema.partial().shape,
-  ...updateObservableStepCommonDefinition.inputSchema.partial().shape,
-});
+const observablesSchema = lazySchema(() =>
+  z.object({
+    mode: z
+      .enum(['add', 'update', 'delete'])
+      .describe(
+        'Required fields per mode:\n' +
+          '- add: case_id, observables ({typeKey, value, description?}[])\n' +
+          '- update: case_id, observable_id, value (description optional)\n' +
+          '- delete: case_id, observable_id'
+      ),
+    ...addObservablesStepCommonDefinition.inputSchema.partial().shape,
+    ...updateObservableStepCommonDefinition.inputSchema.partial().shape,
+  })
+);
 
 export const observablesTool = (
   getCasesClientFn: GetCasesClientFn

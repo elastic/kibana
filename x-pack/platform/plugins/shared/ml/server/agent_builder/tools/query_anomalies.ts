@@ -6,7 +6,7 @@
  */
 
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -171,25 +171,27 @@ export const resolveParamDates = (
   return result;
 };
 
-const schema = z.object({
-  query: z
-    .string()
-    .min(1)
-    .describe(
-      'The ES|QL query to execute against ML system indices. Copy a template verbatim from one of the referenced content files: esql-read-queries (records/timeline/influencers/RCA), esql-metadata-queries (job config/memory/datafeed/annotations), or esql-score-queries (model plots/forecasts/score reassessment). Do not construct a query from memory — always read the file first.'
-    ),
-  params: z
-    .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
-    .optional()
-    .describe(
-      '(Optional) Bound values for ?param placeholders (keys without ?), e.g. { "job_id_pattern": "*", "min_score": 25 }. Omit this field entirely when the query has no placeholders — do not pass an empty object.'
-    ),
-  limit: z
-    .number()
-    .optional()
-    .default(DEFAULT_LIMIT)
-    .describe(`(Optional) Max rows to return. Defaults to ${DEFAULT_LIMIT}.`),
-});
+const schema = lazySchema(() =>
+  z.object({
+    query: z
+      .string()
+      .min(1)
+      .describe(
+        'The ES|QL query to execute against ML system indices. Copy a template verbatim from one of the referenced content files: esql-read-queries (records/timeline/influencers/RCA), esql-metadata-queries (job config/memory/datafeed/annotations), or esql-score-queries (model plots/forecasts/score reassessment). Do not construct a query from memory — always read the file first.'
+      ),
+    params: z
+      .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+      .optional()
+      .describe(
+        '(Optional) Bound values for ?param placeholders (keys without ?), e.g. { "job_id_pattern": "*", "min_score": 25 }. Omit this field entirely when the query has no placeholders — do not pass an empty object.'
+      ),
+    limit: z
+      .number()
+      .optional()
+      .default(DEFAULT_LIMIT)
+      .describe(`(Optional) Max rows to return. Defaults to ${DEFAULT_LIMIT}.`),
+  })
+);
 
 const stripEsqlComments = (query: string): string => {
   const withoutBlockComments = query.replace(/\/\*[\s\S]*?\*\//g, ' ');

@@ -15,7 +15,7 @@ import {
   isInProtectedNamespace,
   hasNamespaceName,
 } from '@kbn/agent-builder-common/base/namespaces';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isValidAgentAvatarColor } from '../../../utils/color';
 
 const isEmoji = (str: string): boolean =>
@@ -54,111 +54,113 @@ export const truncateAvatarSymbol = (value: string): string => {
   return graphemes.slice(0, 2).join('');
 };
 
-export const agentFormSchema = z.object({
-  id: z
-    .string()
-    .min(1, {
-      message: i18n.translate('xpack.agentBuilder.agents.form.idRequired', {
-        defaultMessage: 'Agent ID is required.',
-      }),
-    })
-    .max(agentIdMaxLength, {
-      message: i18n.translate('xpack.agentBuilder.agents.form.id.tooLongError', {
-        defaultMessage: 'Agent ID must be 63 characters or less.',
-      }),
-    })
-    .regex(agentIdRegexp, {
-      message: i18n.translate('xpack.agentBuilder.agents.form.idInvalid', {
-        defaultMessage:
-          'Agent ID must start and end with a letter or number, and can only contain lowercase letters, numbers, hyphens, and underscores.',
-      }),
-    })
-    .check((ctx) => {
-      const name = ctx.value as string;
-      if (isInProtectedNamespace(name) || hasNamespaceName(name)) {
-        ctx.issues.push({
-          code: 'custom',
-          message: i18n.translate('xpack.agentBuilder.agents.form.id.protectedNamespaceError', {
-            defaultMessage: 'Agent ID "{name}" uses a protected namespace.',
-            values: { name },
-          }),
-          input: name,
-        });
-      }
-    }),
-  name: z.string().min(1, {
-    message: i18n.translate('xpack.agentBuilder.agents.form.nameRequired', {
-      defaultMessage: 'Agent name is required.',
-    }),
-  }),
-  description: z.string().min(1, {
-    message: i18n.translate('xpack.agentBuilder.agents.form.descriptionRequired', {
-      defaultMessage: 'Agent description is required.',
-    }),
-  }),
-  access_control: z.object({
-    access_mode: z.enum(['private', 'public', 'shared']),
-    entries: z.array(
-      z
-        .object({
-          type: z.literal('user'),
-          id: z.string().min(1).max(AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH).optional(),
-          name: z.string().min(1).max(AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH).optional(),
-          role: z.enum(['user', 'editor', 'manager']),
-        })
-        .refine((entry) => entry.id !== undefined || entry.name !== undefined, {
-          message: 'Access-control entry requires either `id` or `name`.',
-        })
-    ),
-  }),
-  labels: z.array(z.string()).optional(),
-  avatar_color: z
-    .string()
-    .optional()
-    .refine(
-      (value) => {
-        if (!value) return true;
-        return isValidAgentAvatarColor(value);
-      },
-      {
-        message: i18n.translate('xpack.agentBuilder.agents.form.avatarColorInvalidError', {
-          defaultMessage:
-            'Please enter a valid hex color code. This can either be a three or six character hex value.',
+export const agentFormSchema = lazySchema(() =>
+  z.object({
+    id: z
+      .string()
+      .min(1, {
+        message: i18n.translate('xpack.agentBuilder.agents.form.idRequired', {
+          defaultMessage: 'Agent ID is required.',
         }),
-      }
-    ),
-  avatar_symbol: z
-    .string()
-    .optional()
-    .refine((value) => !value || isValidAvatarSymbol(value), {
-      message: i18n.translate('xpack.agentBuilder.agents.form.avatarSymbolMaxLengthError', {
-        defaultMessage: 'Avatar symbol must be a single emoji or up to 2 letters.',
+      })
+      .max(agentIdMaxLength, {
+        message: i18n.translate('xpack.agentBuilder.agents.form.id.tooLongError', {
+          defaultMessage: 'Agent ID must be 63 characters or less.',
+        }),
+      })
+      .regex(agentIdRegexp, {
+        message: i18n.translate('xpack.agentBuilder.agents.form.idInvalid', {
+          defaultMessage:
+            'Agent ID must start and end with a letter or number, and can only contain lowercase letters, numbers, hyphens, and underscores.',
+        }),
+      })
+      .check((ctx) => {
+        const name = ctx.value as string;
+        if (isInProtectedNamespace(name) || hasNamespaceName(name)) {
+          ctx.issues.push({
+            code: 'custom',
+            message: i18n.translate('xpack.agentBuilder.agents.form.id.protectedNamespaceError', {
+              defaultMessage: 'Agent ID "{name}" uses a protected namespace.',
+              values: { name },
+            }),
+            input: name,
+          });
+        }
+      }),
+    name: z.string().min(1, {
+      message: i18n.translate('xpack.agentBuilder.agents.form.nameRequired', {
+        defaultMessage: 'Agent name is required.',
       }),
     }),
-  configuration: z.object({
-    instructions: z.string().optional(),
-    tools: z.array(
-      z.object({
-        tool_ids: z.array(z.string()),
-      })
-    ),
-    skill_ids: z.array(z.string()).optional(),
-    enable_elastic_capabilities: z.boolean().optional(),
-    workflow_ids: z.array(z.string()).optional(),
-    post_execution_workflow_ids: z.array(z.string()).optional(),
-    plugin_ids: z.array(z.string()).optional(),
-    connector_ids: z.array(z.string()).optional(),
-    ai_indices: z.array(z.string()).optional(),
-    subagent_ids: z.array(z.string()).default([]),
-    approvals: z
-      .object({
-        auto_approved_apis: z
+    description: z.string().min(1, {
+      message: i18n.translate('xpack.agentBuilder.agents.form.descriptionRequired', {
+        defaultMessage: 'Agent description is required.',
+      }),
+    }),
+    access_control: z.object({
+      access_mode: z.enum(['private', 'public', 'shared']),
+      entries: z.array(
+        z
           .object({
-            elasticsearch: z.array(z.string()).optional(),
-            kibana: z.array(z.string()).optional(),
+            type: z.literal('user'),
+            id: z.string().min(1).max(AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH).optional(),
+            name: z.string().min(1).max(AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH).optional(),
+            role: z.enum(['user', 'editor', 'manager']),
           })
-          .optional(),
-      })
-      .optional(),
-  }),
-});
+          .refine((entry) => entry.id !== undefined || entry.name !== undefined, {
+            message: 'Access-control entry requires either `id` or `name`.',
+          })
+      ),
+    }),
+    labels: z.array(z.string()).optional(),
+    avatar_color: z
+      .string()
+      .optional()
+      .refine(
+        (value) => {
+          if (!value) return true;
+          return isValidAgentAvatarColor(value);
+        },
+        {
+          message: i18n.translate('xpack.agentBuilder.agents.form.avatarColorInvalidError', {
+            defaultMessage:
+              'Please enter a valid hex color code. This can either be a three or six character hex value.',
+          }),
+        }
+      ),
+    avatar_symbol: z
+      .string()
+      .optional()
+      .refine((value) => !value || isValidAvatarSymbol(value), {
+        message: i18n.translate('xpack.agentBuilder.agents.form.avatarSymbolMaxLengthError', {
+          defaultMessage: 'Avatar symbol must be a single emoji or up to 2 letters.',
+        }),
+      }),
+    configuration: z.object({
+      instructions: z.string().optional(),
+      tools: z.array(
+        z.object({
+          tool_ids: z.array(z.string()),
+        })
+      ),
+      skill_ids: z.array(z.string()).optional(),
+      enable_elastic_capabilities: z.boolean().optional(),
+      workflow_ids: z.array(z.string()).optional(),
+      post_execution_workflow_ids: z.array(z.string()).optional(),
+      plugin_ids: z.array(z.string()).optional(),
+      connector_ids: z.array(z.string()).optional(),
+      ai_indices: z.array(z.string()).optional(),
+      subagent_ids: z.array(z.string()).default([]),
+      approvals: z
+        .object({
+          auto_approved_apis: z
+            .object({
+              elasticsearch: z.array(z.string()).optional(),
+              kibana: z.array(z.string()).optional(),
+            })
+            .optional(),
+        })
+        .optional(),
+    }),
+  })
+);

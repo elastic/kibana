@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { sharedValidationSchemas } from './shared_tool_validation';
 
@@ -29,9 +29,11 @@ const mcpI18nMessages = {
   },
 };
 
-export const mcpToolFormValidationSchema = z.object({
-  ...sharedValidationSchemas,
-  connectorId: z.string().min(1, { message: mcpI18nMessages.connector.requiredError }),
-  mcpToolName: z.string().min(1, { message: mcpI18nMessages.mcpTool.requiredError }),
-  type: z.literal(ToolType.mcp),
-});
+export const mcpToolFormValidationSchema = lazySchema(() =>
+  z.object({
+    ...sharedValidationSchemas,
+    connectorId: z.string().min(1, { message: mcpI18nMessages.connector.requiredError }),
+    mcpToolName: z.string().min(1, { message: mcpI18nMessages.mcpTool.requiredError }),
+    type: z.literal(ToolType.mcp),
+  })
+);

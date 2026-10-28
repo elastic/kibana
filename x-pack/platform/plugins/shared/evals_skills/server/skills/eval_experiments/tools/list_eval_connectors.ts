@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { errorResult, evalsExperimentTools, otherResult, toErrorResult } from './tool_utils';
 import { hasReadEvalsPrivilege } from '../../common/check_privileges';
 import type { EvalExperimentsToolDeps } from './deps';
 
-const schema = z.object({});
+const schema = lazySchema(() => z.object({}));
 
 /**
  * Lists genAI/model connectors so the agent can resolve a mentioned model name to its connector

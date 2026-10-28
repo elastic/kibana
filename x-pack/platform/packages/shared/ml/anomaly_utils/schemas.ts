@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ML_ENTITY_FIELD_OPERATIONS, ML_ENTITY_FIELD_TYPE } from './anomaly_utils';
 
 // Persisted embeddable / saved-object state historically accepted entity values
@@ -14,9 +14,9 @@ import { ML_ENTITY_FIELD_OPERATIONS, ML_ENTITY_FIELD_TYPE } from './anomaly_util
 const MAX_ENTITY_FIELD_NAME_LENGTH = 10000;
 const MAX_ENTITY_FIELD_VALUE_LENGTH = 10000;
 
-const mlEntityFieldTypeSchema = z.enum(ML_ENTITY_FIELD_TYPE);
+const mlEntityFieldTypeSchema = lazySchema(() => z.enum(ML_ENTITY_FIELD_TYPE));
 
-const mlEntityFieldOperationSchema = z.enum(ML_ENTITY_FIELD_OPERATIONS);
+const mlEntityFieldOperationSchema = lazySchema(() => z.enum(ML_ENTITY_FIELD_OPERATIONS));
 
 export const influencerSchema = z
   .object({
@@ -33,10 +33,9 @@ export const criteriaFieldSchema = z
   })
   .strict();
 
-export const mlEntityFieldValueSchema = z.union([
-  z.string().max(MAX_ENTITY_FIELD_VALUE_LENGTH),
-  z.number(),
-]);
+export const mlEntityFieldValueSchema = lazySchema(() =>
+  z.union([z.string().max(MAX_ENTITY_FIELD_VALUE_LENGTH), z.number()])
+);
 
 export const mlEntityFieldSchema = z
   .object({

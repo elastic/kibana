@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -41,70 +41,78 @@ import {
 
 const DEFAULT_RANGE = { start: 'now-10d', end: 'now' };
 
-const baseSchema = z.object({
-  watchlistId: z
-    .string()
-    .min(1)
-    .describe(
-      'The id of the watchlist to attach the rule-based data source to. Use `security.get_watchlist_id` to resolve a watchlist name to its id first when the user named the watchlist.'
-    ),
-  queryRule: z
-    .string()
-    .min(1)
-    .max(4096)
-    .describe(
-      'KQL filter query. Matches are added to the watchlist automatically, and re-evaluated on a schedule (about every 10 minutes) — entities/documents that stop matching are removed. For `store` sources, this queries the entity store directly, which holds every entity type (`user`, `host`, `service`, `generic`) in one index — a query with no entity-type clause matches across all of them, so if the user\'s request implies a specific type (e.g. "critical-risk users", "Ubuntu hosts"), add an `entity.EngineMetadata.Type: "user"` / `"host"` / `"service"` / `"generic"` clause (same field and values `security.search_entities`\' `entityTypes` filters on) — do NOT use `entity.type` for this, its value is an inconsistent per-source fallback (e.g. `"Identity"` for users, not `"user"`) and can be missing entirely. Example: `entity.risk.calculated_level: "Critical" and entity.EngineMetadata.Type: "user"`. For `index` sources, this queries the target `indexPattern` instead (e.g. raw Okta logs) using that index\'s own fields (e.g. `event.action: "user.session.start"`) — the entity type is implied by `identifierField` there, so an entity-type clause does not apply. In both cases, only write a clause for a condition the user named concretely (a real field, or a value they gave/confirmed) — if they described the condition only in human/conceptual terms (e.g. "contract terminated", "flagged as risky") without saying which field or value means that, ask them what field/value to filter on; do not invent one, since a plausible-sounding guess can silently match nothing or the wrong entities.'
-    ),
-});
-
-const rangeSchema = z.object({
-  start: z.string().min(1).max(256).describe('Lookback start, e.g. "now-10d".'),
-  end: z.string().min(1).max(256).describe('Lookback end, e.g. "now".'),
-});
-const indexPatternSchema = z.object({
-  indexPattern: z
-    .string()
-    .min(1)
-    .max(1000)
-    .describe(
-      'Required when `type` is `index`. Index pattern to correlate against (e.g. "logs-okta.system-*"). Must be a concrete index pattern — if the user only described the source conceptually (e.g. "our HR index", "the vulnerability scanner data") without naming the actual pattern, ask them for it; do not guess one.'
-    ),
-  identifierField: z
-    .enum(WATCHLIST_IDENTIFIER_FIELDS)
-    .describe(
-      'Required when `type` is `index`. Field used both to scan the entity store (stage 1) and to aggregate matches on the target index (stage 2) — same field name on both sides, hence the fixed list. Pick based on the entity type the watchlist tracks: `host.name`/`host.id` for hosts, `user.name`/`user.email` for users, `service.name` for services.'
-    ),
-  range: rangeSchema.describe(
-    'Only used when `type` is `index`. Lookback window applied to the target index. Defaults to the last 10 days.'
-  ),
-});
-
-const schema = baseSchema
-  .extend(indexPatternSchema.partial().shape)
-  .extend({
-    type: z
-      .enum(RULE_BASED_SOURCE_TYPES)
+const baseSchema = lazySchema(() =>
+  z.object({
+    watchlistId: z
+      .string()
+      .min(1)
       .describe(
-        'Which kind of rule-based data source. `store` (Entity Store): query the entity store directly — use when the desired field is already a collected attribute on the entity (e.g. `host.os.name`). Requires no index pattern, identifier field, or API key. `index` (Index Pattern): correlate a user-owned index against the entity store — use when the matching evidence lives in raw logs (e.g. an okta event index). Only identities already present in the entity store can match; it filters existing entities using external evidence, it does not discover new ones.'
+        'The id of the watchlist to attach the rule-based data source to. Use `security.get_watchlist_id` to resolve a watchlist name to its id first when the user named the watchlist.'
+      ),
+    queryRule: z
+      .string()
+      .min(1)
+      .max(4096)
+      .describe(
+        'KQL filter query. Matches are added to the watchlist automatically, and re-evaluated on a schedule (about every 10 minutes) — entities/documents that stop matching are removed. For `store` sources, this queries the entity store directly, which holds every entity type (`user`, `host`, `service`, `generic`) in one index — a query with no entity-type clause matches across all of them, so if the user\'s request implies a specific type (e.g. "critical-risk users", "Ubuntu hosts"), add an `entity.EngineMetadata.Type: "user"` / `"host"` / `"service"` / `"generic"` clause (same field and values `security.search_entities`\' `entityTypes` filters on) — do NOT use `entity.type` for this, its value is an inconsistent per-source fallback (e.g. `"Identity"` for users, not `"user"`) and can be missing entirely. Example: `entity.risk.calculated_level: "Critical" and entity.EngineMetadata.Type: "user"`. For `index` sources, this queries the target `indexPattern` instead (e.g. raw Okta logs) using that index\'s own fields (e.g. `event.action: "user.session.start"`) — the entity type is implied by `identifierField` there, so an entity-type clause does not apply. In both cases, only write a clause for a condition the user named concretely (a real field, or a value they gave/confirmed) — if they described the condition only in human/conceptual terms (e.g. "contract terminated", "flagged as risky") without saying which field or value means that, ask them what field/value to filter on; do not invent one, since a plausible-sounding guess can silently match nothing or the wrong entities.'
       ),
   })
-  .superRefine((data, ctx) => {
-    if (data.type !== RuleBasedSourceType.index) return;
-    if (!data.indexPattern) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['indexPattern'],
-        message: 'indexPattern is required when type is "index".',
-      });
-    }
-    if (!data.identifierField) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['identifierField'],
-        message: 'identifierField is required when type is "index".',
-      });
-    }
-  });
+);
+
+const rangeSchema = lazySchema(() =>
+  z.object({
+    start: z.string().min(1).max(256).describe('Lookback start, e.g. "now-10d".'),
+    end: z.string().min(1).max(256).describe('Lookback end, e.g. "now".'),
+  })
+);
+const indexPatternSchema = lazySchema(() =>
+  z.object({
+    indexPattern: z
+      .string()
+      .min(1)
+      .max(1000)
+      .describe(
+        'Required when `type` is `index`. Index pattern to correlate against (e.g. "logs-okta.system-*"). Must be a concrete index pattern — if the user only described the source conceptually (e.g. "our HR index", "the vulnerability scanner data") without naming the actual pattern, ask them for it; do not guess one.'
+      ),
+    identifierField: z
+      .enum(WATCHLIST_IDENTIFIER_FIELDS)
+      .describe(
+        'Required when `type` is `index`. Field used both to scan the entity store (stage 1) and to aggregate matches on the target index (stage 2) — same field name on both sides, hence the fixed list. Pick based on the entity type the watchlist tracks: `host.name`/`host.id` for hosts, `user.name`/`user.email` for users, `service.name` for services.'
+      ),
+    range: rangeSchema.describe(
+      'Only used when `type` is `index`. Lookback window applied to the target index. Defaults to the last 10 days.'
+    ),
+  })
+);
+
+const schema = lazySchema(() =>
+  baseSchema
+    .extend(indexPatternSchema.partial().shape)
+    .extend({
+      type: z
+        .enum(RULE_BASED_SOURCE_TYPES)
+        .describe(
+          'Which kind of rule-based data source. `store` (Entity Store): query the entity store directly — use when the desired field is already a collected attribute on the entity (e.g. `host.os.name`). Requires no index pattern, identifier field, or API key. `index` (Index Pattern): correlate a user-owned index against the entity store — use when the matching evidence lives in raw logs (e.g. an okta event index). Only identities already present in the entity store can match; it filters existing entities using external evidence, it does not discover new ones.'
+        ),
+    })
+    .superRefine((data, ctx) => {
+      if (data.type !== RuleBasedSourceType.index) return;
+      if (!data.indexPattern) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['indexPattern'],
+          message: 'indexPattern is required when type is "index".',
+        });
+      }
+      if (!data.identifierField) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['identifierField'],
+          message: 'identifierField is required when type is "index".',
+        });
+      }
+    })
+);
 
 export const SECURITY_SET_WATCHLIST_RULE_BASED_DATA_SOURCE_TOOL_ID = securityTool(
   'set_watchlist_rule_based_data_source'

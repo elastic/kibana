@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { anomalyThresholdSchema, environmentSchema } from '@kbn/apm-types';
 import type { Environment } from '../../common/environment_rt';
 import { apmRouter } from '../components/routing/apm_route_config';
@@ -28,42 +28,44 @@ const SERVICE_OVERVIEW_TAB_PATHS = {
   errors: { regular: '/services/{serviceName}/errors' },
 } as const;
 
-export const APMLocatorPayloadValidator = z.union([
-  z.object({ serviceName: z.undefined().optional() }),
-  z
-    .object({ serviceName: z.string() })
-    .merge(z.object({ dashboardId: z.string() }))
-    .merge(z.object({ query: environmentSchema })),
-  z
-    .object({
-      serviceName: z.string(),
-    })
-    .merge(z.object({ dashboardId: z.undefined().optional() }))
-    .merge(z.object({ isMobileAgentName: z.boolean().optional() }))
-    .merge(
-      z.object({
-        serviceOverviewTab: z
-          .enum(['alerts', 'traces', 'metrics', 'logs', 'errors', 'transactions'])
-          .optional(),
-        errorGroupId: z.string().optional(),
+export const APMLocatorPayloadValidator = lazySchema(() =>
+  z.union([
+    z.object({ serviceName: z.undefined().optional() }),
+    z
+      .object({ serviceName: z.string() })
+      .merge(z.object({ dashboardId: z.string() }))
+      .merge(z.object({ query: environmentSchema })),
+    z
+      .object({
+        serviceName: z.string(),
       })
-    )
-    .merge(
-      z.object({
-        query: environmentSchema.merge(
-          z.object({
-            kuery: z.string().optional(),
-            rangeFrom: z.string().optional(),
-            rangeTo: z.string().optional(),
-            transactionType: z.string().optional(),
-            anomalyThreshold: anomalyThresholdSchema.optional(),
-            comparisonEnabled: z.boolean().optional(),
-            offset: z.string().optional(),
-          })
-        ),
-      })
-    ),
-]);
+      .merge(z.object({ dashboardId: z.undefined().optional() }))
+      .merge(z.object({ isMobileAgentName: z.boolean().optional() }))
+      .merge(
+        z.object({
+          serviceOverviewTab: z
+            .enum(['alerts', 'traces', 'metrics', 'logs', 'errors', 'transactions'])
+            .optional(),
+          errorGroupId: z.string().optional(),
+        })
+      )
+      .merge(
+        z.object({
+          query: environmentSchema.merge(
+            z.object({
+              kuery: z.string().optional(),
+              rangeFrom: z.string().optional(),
+              rangeTo: z.string().optional(),
+              transactionType: z.string().optional(),
+              anomalyThreshold: anomalyThresholdSchema.optional(),
+              comparisonEnabled: z.boolean().optional(),
+              offset: z.string().optional(),
+            })
+          ),
+        })
+      ),
+  ])
+);
 
 export type APMLocatorPayload = z.infer<typeof APMLocatorPayloadValidator>;
 

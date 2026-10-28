@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { stringify as stringifyYaml } from 'yaml';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { ApiTarget } from '@kbn/agent-builder-common';
@@ -25,25 +25,27 @@ export interface ApiDescribeTypeResultData {
   expandable_types: string[];
 }
 
-const describeApiTypeSchema = z.object({
-  target: targetSchema,
-  api: z
-    .string()
-    .describe(
-      `The identifier of the API whose schema referenced the types, as passed to the ` +
-        `${internalTools.describeApi} tool (e.g. "search", "indices.create").`
-    ),
-  types: z
-    .array(z.string())
-    .min(1)
-    .max(20)
-    .describe(
-      `The names of the types to expand, each taken verbatim from a stub's \`${EXPANDABLE_KEY}\` ` +
-        `or from the \`expandable_types\` list of the ${internalTools.describeApi} result ` +
-        '(e.g. ["_types.query_dsl__QueryContainer", "_types.aggregations__AggregationContainer"]). ' +
-        'Pass every type you still need in one call rather than calling this tool repeatedly.'
-    ),
-});
+const describeApiTypeSchema = lazySchema(() =>
+  z.object({
+    target: targetSchema,
+    api: z
+      .string()
+      .describe(
+        `The identifier of the API whose schema referenced the types, as passed to the ` +
+          `${internalTools.describeApi} tool (e.g. "search", "indices.create").`
+      ),
+    types: z
+      .array(z.string())
+      .min(1)
+      .max(20)
+      .describe(
+        `The names of the types to expand, each taken verbatim from a stub's \`${EXPANDABLE_KEY}\` ` +
+          `or from the \`expandable_types\` list of the ${internalTools.describeApi} result ` +
+          '(e.g. ["_types.query_dsl__QueryContainer", "_types.aggregations__AggregationContainer"]). ' +
+          'Pass every type you still need in one call rather than calling this tool repeatedly.'
+      ),
+  })
+);
 
 export const createDescribeApiTypeTool = ({
   discoveryEnabled,

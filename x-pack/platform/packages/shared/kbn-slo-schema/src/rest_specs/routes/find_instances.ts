@@ -4,19 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-const findSLOInstancesParamsSchema = z.object({
-  path: z.object({ id: z.string() }),
-  query: z
-    .object({
-      search: z.string().optional(),
-      size: z.coerce.number().optional(),
-      searchAfter: z.string().optional(),
-      remoteName: z.string().optional(),
-    })
-    .optional(),
-});
+const findSLOInstancesParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({ id: z.string() }),
+    query: z
+      .object({
+        search: z.string().optional(),
+        size: z.coerce.number().optional(),
+        searchAfter: z.string().optional(),
+        remoteName: z.string().optional(),
+      })
+      .optional(),
+  })
+);
 
 interface FindSLOInstancesResponse {
   results: Array<{ instanceId: string; groupings: Record<string, string | number> }>;

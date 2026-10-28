@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { notFound } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -27,17 +27,18 @@ import {
   type SourceTypeSlug,
 } from './helpers';
 
-export const sourceTypeSlugSchema = z.enum([
-  ...MANAGED_SOURCE_TYPE_SLUGS,
-  ...DIRECT_SOURCE_TYPE_SLUGS,
-]);
+export const sourceTypeSlugSchema = lazySchema(() =>
+  z.enum([...MANAGED_SOURCE_TYPE_SLUGS, ...DIRECT_SOURCE_TYPE_SLUGS])
+);
 
-export const sourceIdSchema = z
-  .string()
-  .max(256)
-  .regex(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/);
+export const sourceIdSchema = lazySchema(() =>
+  z
+    .string()
+    .max(256)
+    .regex(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/)
+);
 
-const apiKeyIdSchema = z.string().min(1).max(256);
+const apiKeyIdSchema = lazySchema(() => z.string().min(1).max(256));
 
 /**
  * Lists all API keys for a particular source.
@@ -52,12 +53,14 @@ const listSourceApiKeysRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    query: z.object({
-      sourceId: sourceIdSchema,
-      unitId: streamsUnitIdentifierSchema.optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: z.object({
+        sourceId: sourceIdSchema,
+        unitId: streamsUnitIdentifierSchema.optional(),
+      }),
+    })
+  ),
   handler: async ({ getScopedClients, request, params }) => {
     const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
     const {
@@ -106,12 +109,14 @@ const getSourceApiKeyPrivilegesRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    query: z.object({
-      sourceId: sourceIdSchema,
-      sourceTypeSlug: sourceTypeSlugSchema,
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: z.object({
+        sourceId: sourceIdSchema,
+        sourceTypeSlug: sourceTypeSlugSchema,
+      }),
+    })
+  ),
   handler: async ({ getScopedClients, request, params }) => {
     const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
     const {
@@ -140,13 +145,15 @@ const createSourceApiKeyRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    body: z.object({
-      sourceTypeSlug: sourceTypeSlugSchema,
-      sourceId: sourceIdSchema,
-      unitId: streamsUnitIdentifierSchema.optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        sourceTypeSlug: sourceTypeSlugSchema,
+        sourceId: sourceIdSchema,
+        unitId: streamsUnitIdentifierSchema.optional(),
+      }),
+    })
+  ),
   handler: async ({ getScopedClients, request, params }) => {
     const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
     const {
@@ -204,13 +211,15 @@ const deleteSourceApiKeyRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    body: z.object({
-      sourceId: sourceIdSchema,
-      apiKeyId: apiKeyIdSchema,
-      unitId: streamsUnitIdentifierSchema.optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        sourceId: sourceIdSchema,
+        apiKeyId: apiKeyIdSchema,
+        unitId: streamsUnitIdentifierSchema.optional(),
+      }),
+    })
+  ),
   handler: async ({ getScopedClients, request, params }) => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const {

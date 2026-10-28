@@ -6,7 +6,7 @@
  */
 
 import path from 'path';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
@@ -29,31 +29,35 @@ import type { PrivateLocation } from '../../../../common/runtime_types';
 import { parseArrayFilters } from '../../common';
 import { syntheticsMonitorSOTypes } from '../../../../common/types/saved_objects';
 
-export const EditPrivateLocationSchema = z.strictObject({
-  label: z
-    .string()
-    .min(1, { error: minLengthMessage(1) })
-    .max(MAX_ROUTE_ID_LENGTH)
-    .optional()
-    .describe(
-      'A new label for the private location. Monitors using this location are updated to match.'
-    ),
-  tags: z
-    .array(z.string().max(256))
-    .max(100)
-    .optional()
-    .describe('An array of tags to categorize the private location.'),
-  agentPolicyId: z
-    .string()
-    .min(1, { error: minLengthMessage(1) })
-    .max(MAX_ROUTE_ID_LENGTH)
-    .optional()
-    .describe('The ID of the Fleet agent policy to move the private location to.'),
-});
+export const EditPrivateLocationSchema = lazySchema(() =>
+  z.strictObject({
+    label: z
+      .string()
+      .min(1, { error: minLengthMessage(1) })
+      .max(MAX_ROUTE_ID_LENGTH)
+      .optional()
+      .describe(
+        'A new label for the private location. Monitors using this location are updated to match.'
+      ),
+    tags: z
+      .array(z.string().max(256))
+      .max(100)
+      .optional()
+      .describe('An array of tags to categorize the private location.'),
+    agentPolicyId: z
+      .string()
+      .min(1, { error: minLengthMessage(1) })
+      .max(MAX_ROUTE_ID_LENGTH)
+      .optional()
+      .describe('The ID of the Fleet agent policy to move the private location to.'),
+  })
+);
 
-const EditPrivateLocationQuery = z.strictObject({
-  id: routeId.describe('The unique identifier of the private location to update.'),
-});
+const EditPrivateLocationQuery = lazySchema(() =>
+  z.strictObject({
+    id: routeId.describe('The unique identifier of the private location to update.'),
+  })
+);
 
 export type EditPrivateLocationAttributes = Pick<PrivateLocationAttributes, 'label' | 'tags'> &
   Partial<Pick<PrivateLocationAttributes, 'agentPolicyId'>>;

@@ -6,7 +6,7 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CaseAttributes, Observable } from '../../../common/types/domain';
 import { CaseAttributesSchema } from '../../../common/types/domain';
 import type { ConnectorPersisted } from './connectors';
@@ -92,4 +92,4 @@ export const getPartialCaseTransformedAttributesSchema = () =>
 export type CaseSavedObject = SavedObject<CasePersistedAttributes>;
 export type CaseSavedObjectTransformed = SavedObject<CaseTransformedAttributes>;
 
-export const OwnerSchema = z.object({ owner: z.string() });
+export const OwnerSchema = lazySchema(() => z.object({ owner: z.string() }));

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export const floatFourDecimalPlacesSchema = z.string().refine(
-  (inputAsString) => {
-    const inputAsFloat = parseFloat(inputAsString);
-    const maxFourDecimals = parseFloat(inputAsFloat.toFixed(4)) === inputAsFloat;
-    return inputAsFloat >= 0 && inputAsFloat <= 1 && maxFourDecimals;
-  },
-  { message: 'Must be a number between 0.0000 and 1' }
+export const floatFourDecimalPlacesSchema = lazySchema(() =>
+  z.string().refine(
+    (inputAsString) => {
+      const inputAsFloat = parseFloat(inputAsString);
+      const maxFourDecimals = parseFloat(inputAsFloat.toFixed(4)) === inputAsFloat;
+      return inputAsFloat >= 0 && inputAsFloat <= 1 && maxFourDecimals;
+    },
+    { message: 'Must be a number between 0.0000 and 1' }
+  )
 );

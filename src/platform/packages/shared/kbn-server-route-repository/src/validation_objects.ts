@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { PassThroughAny } from '@kbn/zod-helpers/v4';
 
 export const passThroughValidationObject = {
@@ -19,11 +19,13 @@ export const passThroughValidationObject = {
 export const noParamsValidationObject = {
   params: z.object({}).strict(),
   query: z.object({}).strict(),
-  body: z.union([
-    // If the route uses POST, the body should be empty object or null
-    z.object({}).strict(),
-    z.null(),
-    // If the route uses GET, body is undefined,
-    z.undefined(),
-  ]),
+  body: lazySchema(() =>
+    z.union([
+      // If the route uses POST, the body should be empty object or null
+      z.object({}).strict(),
+      z.null(),
+      // If the route uses GET, body is undefined,
+      z.undefined(),
+    ])
+  ),
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
@@ -13,24 +13,28 @@ import { CONVERSATION_ID_MAX_LENGTH } from '@kbn/agent-builder-common';
 
 export const DeleteAttachmentStepTypeId = 'ai.attachment.delete';
 
-const InputSchema = z.object({
-  conversation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH).meta({
-    description: 'The ID of the conversation the attachment belongs to.',
-  }),
-  attachment_id: z.string().min(1).max(256).meta({
-    description: 'The ID of the attachment to delete.',
-  }),
-  permanent: z.boolean().optional().meta({
-    description: 'When true, permanently removes the attachment. Defaults to soft delete.',
-  }),
-});
+const InputSchema = lazySchema(() =>
+  z.object({
+    conversation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH).meta({
+      description: 'The ID of the conversation the attachment belongs to.',
+    }),
+    attachment_id: z.string().min(1).max(256).meta({
+      description: 'The ID of the attachment to delete.',
+    }),
+    permanent: z.boolean().optional().meta({
+      description: 'When true, permanently removes the attachment. Defaults to soft delete.',
+    }),
+  })
+);
 
-const OutputSchema = z.object({
-  success: z.boolean().meta({ description: 'Always true on success.' }),
-  permanent: z.boolean().meta({
-    description: 'Whether the delete was permanent.',
-  }),
-});
+const OutputSchema = lazySchema(() =>
+  z.object({
+    success: z.boolean().meta({ description: 'Always true on success.' }),
+    permanent: z.boolean().meta({
+      description: 'Whether the delete was permanent.',
+    }),
+  })
+);
 
 type DeleteAttachmentInputSchema = typeof InputSchema;
 type DeleteAttachmentOutputSchema = typeof OutputSchema;

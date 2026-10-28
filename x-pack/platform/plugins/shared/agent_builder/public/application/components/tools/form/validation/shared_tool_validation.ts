@@ -11,7 +11,7 @@ import {
   isInProtectedNamespace,
   hasNamespaceName,
 } from '@kbn/agent-builder-common/base/namespaces';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export const sharedI18nMessages = {
   toolId: {
@@ -77,9 +77,11 @@ export const sharedValidationSchemas = {
       }
     }),
 
-  description: z.string().min(1, { message: sharedI18nMessages.description.requiredError }),
+  description: lazySchema(() =>
+    z.string().min(1, { message: sharedI18nMessages.description.requiredError })
+  ),
 
-  labels: z.array(z.string()),
+  labels: lazySchema(() => z.array(z.string())),
 
-  confirmation_ask_user: z.optional(z.literal(['never', 'once', 'always'])),
+  confirmation_ask_user: lazySchema(() => z.optional(z.literal(['never', 'once', 'always']))),
 };

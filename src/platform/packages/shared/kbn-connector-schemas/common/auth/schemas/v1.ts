@@ -30,23 +30,23 @@ const HeadersSchema = lazySchema(() => z.record(z.string(), z.string()));
 export const AuthConfiguration = {
   hasAuth: hasAuthSchema,
   authType: authTypeSchema,
-  certType: z.enum([SSLCertType.CRT, SSLCertType.PFX]).optional(),
-  ca: z.string().optional(),
-  verificationMode: z.enum(['none', 'certificate', 'full']).optional(),
-  accessTokenUrl: z.string().optional(),
-  clientId: z.string().optional(),
-  scope: z.string().optional(),
+  certType: lazySchema(() => z.enum([SSLCertType.CRT, SSLCertType.PFX]).optional()),
+  ca: lazySchema(() => z.string().optional()),
+  verificationMode: lazySchema(() => z.enum(['none', 'certificate', 'full']).optional()),
+  accessTokenUrl: lazySchema(() => z.string().optional()),
+  clientId: lazySchema(() => z.string().optional()),
+  scope: lazySchema(() => z.string().optional()),
   additionalFields: z.string().nullish(),
 };
 
 export const SecretConfiguration = {
-  user: z.string().nullable().default(null),
-  password: z.string().nullable().default(null),
-  crt: z.string().nullable().default(null),
-  key: z.string().nullable().default(null),
-  pfx: z.string().nullable().default(null),
-  clientSecret: z.string().nullable().default(null),
-  secretHeaders: HeadersSchema.nullable().default(null),
+  user: lazySchema(() => z.string().nullable().default(null)),
+  password: lazySchema(() => z.string().nullable().default(null)),
+  crt: lazySchema(() => z.string().nullable().default(null)),
+  key: lazySchema(() => z.string().nullable().default(null)),
+  pfx: lazySchema(() => z.string().nullable().default(null)),
+  clientSecret: lazySchema(() => z.string().nullable().default(null)),
+  secretHeaders: lazySchema(() => HeadersSchema.nullable().default(null)),
 };
 
 export const SecretConfigurationSchemaValidation = {

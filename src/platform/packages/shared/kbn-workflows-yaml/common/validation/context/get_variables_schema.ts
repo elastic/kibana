@@ -10,12 +10,12 @@
 import { getStepId } from '@kbn/workflows';
 import { isDataSet, type GraphNodeUnion, type WorkflowGraph } from '@kbn/workflows/graph';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isDynamicValue, matchVariable } from '../../regex';
 import { inferZodType } from '../../zod/infer_zod_type';
 import { parseVariablePath } from '../parse_variable_path';
 
-const EMPTY_VARIABLES_SCHEMA = z.object({}).optional();
+const EMPTY_VARIABLES_SCHEMA = lazySchema(() => z.object({}).optional());
 
 /**
  * Infers the type of a data.set value. `${{ path }}` keeps the type of the referenced

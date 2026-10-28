@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
 import type { ScopedModel } from '@kbn/agent-builder-server';
@@ -23,30 +23,37 @@ import { loadDocumentation, EsqlDocEntry, type EsqlLoadedDocumentation } from '.
 
 const COMPLETION_FROM_PLACEHOLDER = 'FROM _completion_dummy_';
 
-const CompletionGenerationSchema = z
-  .object({
-    replacesNext: z
-      .boolean()
-      .describe(
-        'true if the generated code is a modified version of the pipe directly after the marked comment and should replace it; false if the generated code is a new pipe to insert without removing any existing pipe.'
-      ),
-    code: z
-      .string()
-      .describe(
-        'Only the ES|QL pipe(s) that should replace the marked comment. Do not include the full query. Do not wrap in markdown fences.'
-      ),
-  })
-  .describe('ES|QL completion fragment to insert into the editor.');
+const CompletionGenerationSchema = lazySchema(() =>
+  z
+    .object({
+      replacesNext: z
+        .boolean()
+        .describe(
+          'true if the generated code is a modified version of the pipe directly after the marked comment and should replace it; false if the generated code is a new pipe to insert without removing any existing pipe.'
+        ),
+      code: z
+        .string()
+        .describe(
+          'Only the ES|QL pipe(s) that should replace the marked comment. Do not include the full query. Do not wrap in markdown fences.'
+        ),
+    })
+    .describe('ES|QL completion fragment to insert into the editor.')
+);
 
-const RequestDocsSchema = z
-  .object({
-    commands: z
-      .array(z.string())
-      .optional()
-      .describe('ES|QL source and processing commands to get documentation for.'),
-    functions: z.array(z.string()).optional().describe('ES|QL functions to get documentation for.'),
-  })
-  .describe('Tool to use to request ES|QL documentation');
+const RequestDocsSchema = lazySchema(() =>
+  z
+    .object({
+      commands: z
+        .array(z.string())
+        .optional()
+        .describe('ES|QL source and processing commands to get documentation for.'),
+      functions: z
+        .array(z.string())
+        .optional()
+        .describe('ES|QL functions to get documentation for.'),
+    })
+    .describe('Tool to use to request ES|QL documentation')
+);
 
 const formatFetchedDocs = (fetchedDocs: Record<string, string>): string => {
   const entries = Object.values(fetchedDocs);

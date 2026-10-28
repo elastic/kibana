@@ -8,14 +8,16 @@
  */
 
 import { createPollServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { pollOnlyJobStepCommonDefinition } from '../../common/step_types/poll_only_job_step';
 
-const authorStateSchema = z.object({
-  lastKnownStatus: z.enum(['pending', 'running']),
-  firstCheckedAt: z.string(),
-  pollsSeen: z.number().int(),
-});
+const authorStateSchema = lazySchema(() =>
+  z.object({
+    lastKnownStatus: z.enum(['pending', 'running']),
+    firstCheckedAt: z.string(),
+    pollsSeen: z.number().int(),
+  })
+);
 
 export const pollOnlyJobStepDefinition = createPollServerStepDefinition({
   ...pollOnlyJobStepCommonDefinition,

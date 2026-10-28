@@ -6,7 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AvailabilityConfig } from '../availability';
 import type { SkillBoundedTool } from './tools';
 import type {
@@ -203,25 +203,27 @@ export interface ReferencedContent {
   content: string;
 }
 
-export const referencedContentSchema = z.array(
-  z.object({
-    name: z
-      .string()
-      .min(1, 'Name must be non-empty')
-      .max(64, 'Name must be at most 64 characters')
-      .regex(
-        /^[a-zA-Z0-9-_]+$/,
-        'Reference name must contain only letters, numbers, underscores, and hyphens'
-      ),
-    relativePath: z
-      .string()
-      .min(1, 'Relative path must be non-empty')
-      .regex(
-        /^\.(?:\/[a-zA-Z0-9-_]+)*$/,
-        'Relative path must start with a dot and may contain "/"-separated segments of letters, numbers, underscores, and hyphens (no "../")'
-      ),
-    content: z.string().min(1, 'Content must be non-empty'),
-  })
+export const referencedContentSchema = lazySchema(() =>
+  z.array(
+    z.object({
+      name: z
+        .string()
+        .min(1, 'Name must be non-empty')
+        .max(64, 'Name must be at most 64 characters')
+        .regex(
+          /^[a-zA-Z0-9-_]+$/,
+          'Reference name must contain only letters, numbers, underscores, and hyphens'
+        ),
+      relativePath: z
+        .string()
+        .min(1, 'Relative path must be non-empty')
+        .regex(
+          /^\.(?:\/[a-zA-Z0-9-_]+)*$/,
+          'Relative path must start with a dot and may contain "/"-separated segments of letters, numbers, underscores, and hyphens (no "../")'
+        ),
+      content: z.string().min(1, 'Content must be non-empty'),
+    })
+  )
 );
 /**
  * Zod schema for validating SkillTypeDefinition name and description fields.
@@ -229,23 +231,25 @@ export const referencedContentSchema = z.array(
  * - name: max 64 characters, lowercase letters, numbers, and hyphens only
  * - description: max 1024 characters, non-empty
  */
-export const skillDefinitionSchema = z.object({
-  id: z.string().min(1, 'ID must be non-empty'),
-  basePath: z.string().min(1, 'Base path must be non-empty'),
-  name: z
-    .string()
-    .max(64, 'Name must be at most 64 characters')
-    .regex(
-      /^[a-z0-9-_]+$/,
-      'Name must contain only lowercase letters, numbers, underscores, and hyphens'
-    ),
-  description: z
-    .string()
-    .min(1, 'Description must be non-empty')
-    .max(1024, 'Description must be at most 1024 characters'),
-  content: z.string().min(1, 'Content must be non-empty'),
-  referencedContent: referencedContentSchema.optional(),
-});
+export const skillDefinitionSchema = lazySchema(() =>
+  z.object({
+    id: z.string().min(1, 'ID must be non-empty'),
+    basePath: z.string().min(1, 'Base path must be non-empty'),
+    name: z
+      .string()
+      .max(64, 'Name must be at most 64 characters')
+      .regex(
+        /^[a-z0-9-_]+$/,
+        'Name must contain only lowercase letters, numbers, underscores, and hyphens'
+      ),
+    description: z
+      .string()
+      .min(1, 'Description must be non-empty')
+      .max(1024, 'Description must be at most 1024 characters'),
+    content: z.string().min(1, 'Content must be non-empty'),
+    referencedContent: referencedContentSchema.optional(),
+  })
+);
 
 /**
  * Validates a SkillTypeDefinition against the schema constraints.

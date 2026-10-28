@@ -6,7 +6,7 @@
  */
 
 import { serverUnavailable } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
@@ -43,15 +43,17 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
   security: {
     authz: { requiredPrivileges: ['read_nightshift'] },
   },
-  params: z.object({
-    path: z.object({ id: z.string().min(1).max(512) }),
-    query: z.object({
-      page: z.coerce.number().int().min(1).optional().default(1),
-      size: z.coerce.number().int().min(1).max(100).optional().default(20),
-      startedAfter: z.string().max(64).optional(),
-      startedBefore: z.string().max(64).optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ id: z.string().min(1).max(512) }),
+      query: z.object({
+        page: z.coerce.number().int().min(1).optional().default(1),
+        size: z.coerce.number().int().min(1).max(100).optional().default(20),
+        startedAfter: z.string().max(64).optional(),
+        startedBefore: z.string().max(64).optional(),
+      }),
+    })
+  ),
   handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {

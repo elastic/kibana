@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformCoreCasesTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -83,7 +83,7 @@ const buildManageAttachmentsSchema = (authorableTypeIds: string[]) =>
 // Static schema used only for typing; the tool builds a schema with the
 // registry-derived type list at construction time (same shape, so the inferred
 // type is identical).
-const manageAttachmentsSchema = buildManageAttachmentsSchema([]);
+const manageAttachmentsSchema = lazySchema(() => buildManageAttachmentsSchema([]));
 
 /**
  * Authorable attachment type IDs registered so far — those exposing a

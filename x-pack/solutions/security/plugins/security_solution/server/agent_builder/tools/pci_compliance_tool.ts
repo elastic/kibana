@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -38,57 +38,61 @@ import {
 
 const REPORT_FORMATS = ['summary', 'detailed', 'executive'] as const;
 
-const pciComplianceSchema = z
-  .object({
-    mode: z
-      .enum(['check', 'report'])
-      .describe(
-        '`check` runs violation + coverage + preflight for one or more requirements and returns findings with evidence. ' +
-          '`report` produces a roll-up scorecard (RED/AMBER/GREEN + confidence + score) across the requested set. ' +
-          'Use `check` when you need actionable findings; use `report` when you need a posture snapshot.'
-      ),
-    requirements: z
-      .array(pciRequirementIdSchema)
-      .min(1)
-      .optional()
-      .describe(
-        'Requirement identifiers to evaluate. Accepts "all", top-level ("1".."12"), or sub-requirements ("8.3.4"). ' +
-          'Defaults to ["all"].'
-      ),
-    timeRange: pciTimeRangeSchema
-      .optional()
-      .describe(
-        'Optional ISO-8601 time range (`from` must be <= `to`). If omitted, each requirement ' +
-          'uses its recommended lookback window (e.g. 7 days for brute-force, 365 days for stale accounts).'
-      ),
-    indices: z
-      .array(pciIndexPatternSchema)
-      .min(1)
-      .optional()
-      .describe(
-        'Index patterns to query. Specify exact patterns to avoid overlap/double-counting during ' +
-          're-indexing. Defaults to logs-*, metrics-*, endgame-*.'
-      ),
-    includeEvidence: z
-      .boolean()
-      .optional()
-      .default(true)
-      .describe('[check mode] Include tabular ES|QL evidence in findings. Ignored in report mode.'),
-    format: z
-      .enum(REPORT_FORMATS)
-      .optional()
-      .default('summary')
-      .describe('[report mode] Report depth: summary, detailed, or executive.'),
-    includeRecommendations: z
-      .boolean()
-      .optional()
-      .default(true)
-      .describe('[report mode] Include recommendation text on each requirement row.'),
-  })
-  .describe(
-    'Run PCI DSS v4.0.1 compliance checks (`mode: check`) or generate a compliance report (`mode: report`). ' +
-      'One tool replaces the prior pci_compliance_check / pci_compliance_report pair.'
-  );
+const pciComplianceSchema = lazySchema(() =>
+  z
+    .object({
+      mode: z
+        .enum(['check', 'report'])
+        .describe(
+          '`check` runs violation + coverage + preflight for one or more requirements and returns findings with evidence. ' +
+            '`report` produces a roll-up scorecard (RED/AMBER/GREEN + confidence + score) across the requested set. ' +
+            'Use `check` when you need actionable findings; use `report` when you need a posture snapshot.'
+        ),
+      requirements: z
+        .array(pciRequirementIdSchema)
+        .min(1)
+        .optional()
+        .describe(
+          'Requirement identifiers to evaluate. Accepts "all", top-level ("1".."12"), or sub-requirements ("8.3.4"). ' +
+            'Defaults to ["all"].'
+        ),
+      timeRange: pciTimeRangeSchema
+        .optional()
+        .describe(
+          'Optional ISO-8601 time range (`from` must be <= `to`). If omitted, each requirement ' +
+            'uses its recommended lookback window (e.g. 7 days for brute-force, 365 days for stale accounts).'
+        ),
+      indices: z
+        .array(pciIndexPatternSchema)
+        .min(1)
+        .optional()
+        .describe(
+          'Index patterns to query. Specify exact patterns to avoid overlap/double-counting during ' +
+            're-indexing. Defaults to logs-*, metrics-*, endgame-*.'
+        ),
+      includeEvidence: z
+        .boolean()
+        .optional()
+        .default(true)
+        .describe(
+          '[check mode] Include tabular ES|QL evidence in findings. Ignored in report mode.'
+        ),
+      format: z
+        .enum(REPORT_FORMATS)
+        .optional()
+        .default('summary')
+        .describe('[report mode] Report depth: summary, detailed, or executive.'),
+      includeRecommendations: z
+        .boolean()
+        .optional()
+        .default(true)
+        .describe('[report mode] Include recommendation text on each requirement row.'),
+    })
+    .describe(
+      'Run PCI DSS v4.0.1 compliance checks (`mode: check`) or generate a compliance report (`mode: report`). ' +
+        'One tool replaces the prior pci_compliance_check / pci_compliance_report pair.'
+    )
+);
 
 export const PCI_COMPLIANCE_TOOL_ID = securityTool('pci_compliance');
 

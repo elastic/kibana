@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { Outlet } from '@kbn/typed-react-router-config';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import qs from 'query-string';
@@ -33,25 +33,29 @@ function RedirectBackendsOverviewToDependenciesOverview() {
 export const legacyBackends = {
   '/backends/inventory': {
     element: <RedirectBackends to="/dependencies/inventory" />,
-    params: z.object({
-      query: z.object({ comparisonEnabled: toBooleanFromString }).merge(offsetSchema).optional(),
-    }),
+    params: lazySchema(() =>
+      z.object({
+        query: z.object({ comparisonEnabled: toBooleanFromString }).merge(offsetSchema).optional(),
+      })
+    ),
   },
   '/backends/{dependencyName}/overview': {
     element: <RedirectBackendsOverviewToDependenciesOverview />,
-    params: z.object({ path: z.object({ dependencyName: z.string() }) }),
+    params: lazySchema(() => z.object({ path: z.object({ dependencyName: z.string() }) })),
   },
   '/backends': {
     element: <Outlet />,
-    params: z.object({
-      query: z
-        .object({
-          comparisonEnabled: toBooleanFromString,
-          dependencyName: z.string(),
-        })
-        .merge(offsetSchema)
-        .optional(),
-    }),
+    params: lazySchema(() =>
+      z.object({
+        query: z
+          .object({
+            comparisonEnabled: toBooleanFromString,
+            dependencyName: z.string(),
+          })
+          .merge(offsetSchema)
+          .optional(),
+      })
+    ),
     children: {
       '/backends': {
         element: <RedirectBackends to="/dependencies" />,
@@ -60,14 +64,16 @@ export const legacyBackends = {
         element: <RedirectBackends to="/dependencies/operations" />,
       },
       '/backends/operation': {
-        params: z.object({
-          query: z.object({ spanName: z.string() }).merge(
-            z.object({
-              sampleRangeFrom: z.coerce.number().optional(),
-              sampleRangeTo: z.coerce.number().optional(),
-            })
-          ),
-        }),
+        params: lazySchema(() =>
+          z.object({
+            query: z.object({ spanName: z.string() }).merge(
+              z.object({
+                sampleRangeFrom: z.coerce.number().optional(),
+                sampleRangeTo: z.coerce.number().optional(),
+              })
+            ),
+          })
+        ),
         element: <RedirectBackends to="/dependencies/operation" />,
       },
       '/backends/overview': {

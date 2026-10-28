@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   ExceptionListHumanId,
   ExceptionListItemHumanId,
@@ -22,23 +22,25 @@ import {
 
 export const CreateExceptionListItemStepId = 'security.createExceptionListItem' as const;
 
-export const createExceptionListItemInputSchema = z
-  .object({
-    list_id: ExceptionListHumanId,
-    namespace_type: ExceptionNamespaceType.optional().default('single'),
-    item_id: ExceptionListItemHumanId.optional(),
-    overwrite: z.boolean().optional().default(false),
-    ...exceptionItemBaseSchema.shape,
-  })
-  .superRefine((input, ctx) => {
-    if (input.overwrite && input.item_id === undefined) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['overwrite'],
-        message: OVERWRITE_REQUIRES_ITEM_ID_MESSAGE,
-      });
-    }
-  });
+export const createExceptionListItemInputSchema = lazySchema(() =>
+  z
+    .object({
+      list_id: ExceptionListHumanId,
+      namespace_type: ExceptionNamespaceType.optional().default('single'),
+      item_id: ExceptionListItemHumanId.optional(),
+      overwrite: z.boolean().optional().default(false),
+      ...exceptionItemBaseSchema.shape,
+    })
+    .superRefine((input, ctx) => {
+      if (input.overwrite && input.item_id === undefined) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['overwrite'],
+          message: OVERWRITE_REQUIRES_ITEM_ID_MESSAGE,
+        });
+      }
+    })
+);
 
 export const createExceptionListItemOutputSchema = exceptionItemOutputSchema;
 

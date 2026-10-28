@@ -14,7 +14,7 @@
  *   version: 2026-02-10
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ReplacementsSetResponse,
@@ -38,9 +38,11 @@ export const DeanonymizeWithReplacementsResponse = DeanonymizeResponse;
 export type GetAnonymizationReplacementsRequestParams = z.infer<
   typeof GetAnonymizationReplacementsRequestParams
 >;
-export const GetAnonymizationReplacementsRequestParams = z.object({
-  id: z.string(),
-});
+export const GetAnonymizationReplacementsRequestParams = lazySchema(() =>
+  z.object({
+    id: z.string(),
+  })
+);
 export type GetAnonymizationReplacementsRequestParamsInput = z.input<
   typeof GetAnonymizationReplacementsRequestParams
 >;

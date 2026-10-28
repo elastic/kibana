@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export type Primitive = string | number | boolean | null | undefined;
 
-export const primitive: z.ZodType<Primitive> = z.union([
-  z.string().max(65535),
-  z.number(),
-  z.boolean(),
-  z.null(),
-  z.undefined(),
-]);
+export const primitive: z.ZodType<Primitive> = lazySchema(() =>
+  z.union([z.string().max(65535), z.number(), z.boolean(), z.null(), z.undefined()])
+);
 
 export interface RecursiveRecord {
   [key: PropertyKey]: Primitive | Primitive[] | unknown[] | RecursiveRecord;
@@ -42,9 +38,11 @@ export const recursiveRecord: z.ZodType<RecursiveRecord> = z
 export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[] | unknown[]>;
 
 // Persisted-definition schema — same backward-compat rationale as recursiveRecord above.
-export const flattenRecord: z.ZodType<FlattenRecord> = z.record(
-  z.string().max(1000),
-  z.union([primitive, z.array(primitive), z.array(z.union([primitive, recursiveRecord]))])
+export const flattenRecord: z.ZodType<FlattenRecord> = lazySchema(() =>
+  z.record(
+    z.string().max(1000),
+    z.union([primitive, z.array(primitive), z.array(z.union([primitive, recursiveRecord]))])
+  )
 );
 
 export const sampleDocument = recursiveRecord;

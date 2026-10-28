@@ -12,34 +12,38 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 // Gemini connector parameter schema
-export const GeminiParamsSchema = z.object({
-  body: z.string(),
-  model: z.string().optional(),
-});
+export const GeminiParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.string(),
+    model: z.string().optional(),
+  })
+);
 
 // Gemini connector response schema
-export const GeminiResponseSchema = z.object({
-  candidates: z.array(
-    z.object({
-      content: z.object({
-        parts: z.array(
-          z.object({
-            text: z.string(),
-          })
-        ),
-        role: z.string(),
-      }),
-      finishReason: z.string().optional(),
-    })
-  ),
-  usageMetadata: z
-    .object({
-      promptTokenCount: z.number(),
-      candidatesTokenCount: z.number(),
-      totalTokenCount: z.number(),
-    })
-    .optional(),
-});
+export const GeminiResponseSchema = lazySchema(() =>
+  z.object({
+    candidates: z.array(
+      z.object({
+        content: z.object({
+          parts: z.array(
+            z.object({
+              text: z.string(),
+            })
+          ),
+          role: z.string(),
+        }),
+        finishReason: z.string().optional(),
+      })
+    ),
+    usageMetadata: z
+      .object({
+        promptTokenCount: z.number(),
+        candidatesTokenCount: z.number(),
+        totalTokenCount: z.number(),
+      })
+      .optional(),
+  })
+);

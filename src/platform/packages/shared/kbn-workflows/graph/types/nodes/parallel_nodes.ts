@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { GraphNodeSchema } from './base';
 import { ParallelStepObjectSchema } from '../../../spec/schema';
 
@@ -24,28 +24,30 @@ export type EnterParallelNodeConfiguration = z.infer<typeof EnterParallelNodeCon
 
 // Descriptor for one static branch, carried on the enter node so the executor
 // can advance each named branch through its own subgraph start node.
-export const ParallelBranchDescriptorSchema = z.object({
-  name: z.string().max(GRAPH_STRING_MAX_LENGTH),
-  startNodeId: z.string().max(GRAPH_STRING_MAX_LENGTH),
-});
+export const ParallelBranchDescriptorSchema = lazySchema(() =>
+  z.object({
+    name: z.string().max(GRAPH_STRING_MAX_LENGTH),
+    startNodeId: z.string().max(GRAPH_STRING_MAX_LENGTH),
+  })
+);
 
 export const EnterParallelNodeSchema = GraphNodeSchema.extend({
-  id: z.string().max(GRAPH_STRING_MAX_LENGTH),
-  type: z.literal('enter-parallel'),
-  exitNodeId: z.string().max(GRAPH_STRING_MAX_LENGTH),
+  id: lazySchema(() => z.string().max(GRAPH_STRING_MAX_LENGTH)),
+  type: lazySchema(() => z.literal('enter-parallel')),
+  exitNodeId: lazySchema(() => z.string().max(GRAPH_STRING_MAX_LENGTH)),
   // Dynamic fan-out: the single shared branch body's start node. The durable-tick
   // node runs this subgraph once per fan-out item. Undefined for static mode.
-  branchStartNodeId: z.string().max(GRAPH_STRING_MAX_LENGTH).optional(),
+  branchStartNodeId: lazySchema(() => z.string().max(GRAPH_STRING_MAX_LENGTH).optional()),
   // Static scatter-gather: one descriptor per named branch, each pointing at its
   // own subgraph start node. Undefined for dynamic mode.
-  branches: z.array(ParallelBranchDescriptorSchema).optional(),
+  branches: lazySchema(() => z.array(ParallelBranchDescriptorSchema).optional()),
   configuration: EnterParallelNodeConfigurationSchema,
 });
 export type EnterParallelNode = z.infer<typeof EnterParallelNodeSchema>;
 
 export const ExitParallelNodeSchema = GraphNodeSchema.extend({
-  id: z.string().max(GRAPH_STRING_MAX_LENGTH),
-  type: z.literal('exit-parallel'),
-  startNodeId: z.string().max(GRAPH_STRING_MAX_LENGTH),
+  id: lazySchema(() => z.string().max(GRAPH_STRING_MAX_LENGTH)),
+  type: lazySchema(() => z.literal('exit-parallel')),
+  startNodeId: lazySchema(() => z.string().max(GRAPH_STRING_MAX_LENGTH)),
 });
 export type ExitParallelNode = z.infer<typeof ExitParallelNodeSchema>;

@@ -6,7 +6,7 @@
  */
 
 import { createPrompt } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import systemPromptText from './system_prompt.text';
 import userPromptText from './user_prompt.text';
 
@@ -50,11 +50,13 @@ const SEMANTIC_UNIQUENESS_OUTPUT_SCHEMA = {
 export const SemanticUniquenessPrompt = createPrompt({
   name: 'semantic_uniqueness_analysis',
   description: 'Evaluate semantic uniqueness of extracted KIs',
-  input: z.object({
-    source_id: z.string(),
-    totals: z.string(),
-    unique_kis_by_id: z.string(),
-  }),
+  input: lazySchema(() =>
+    z.object({
+      source_id: z.string(),
+      totals: z.string(),
+      unique_kis_by_id: z.string(),
+    })
+  ),
 })
   .version({
     system: {

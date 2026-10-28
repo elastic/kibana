@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { optionalStepInput } from './optional_step_input';
 
 export const CheckDecidePrivilegesStepId = 'proposals.checkDecidePrivileges' as const;
@@ -33,17 +33,21 @@ const EXTERNAL_RESUME_PRINCIPAL_PREFIX = 'external_resume:' as const;
 export const isExternalResumePrincipal = (respondedBy: string | undefined): boolean =>
   respondedBy?.startsWith(EXTERNAL_RESUME_PRINCIPAL_PREFIX) ?? false;
 
-export const checkDecidePrivilegesStepInputSchema = z.object({
-  proposalId: z.string().describe('Proposal the decision would apply to.'),
-  respondedBy: optionalStepInput(z.string()).describe(
-    'Who answered the gate, from its own output. Required to tell an authenticated resume apart from an external one, whose execution identity says nothing about the human.'
-  ),
-});
+export const checkDecidePrivilegesStepInputSchema = lazySchema(() =>
+  z.object({
+    proposalId: z.string().describe('Proposal the decision would apply to.'),
+    respondedBy: optionalStepInput(z.string()).describe(
+      'Who answered the gate, from its own output. Required to tell an authenticated resume apart from an external one, whose execution identity says nothing about the human.'
+    ),
+  })
+);
 
-export const checkDecidePrivilegesStepOutputSchema = z.object({
-  /** False for a refusal. The step does not fail, so the caller can re-park. */
-  canDecide: z.boolean(),
-});
+export const checkDecidePrivilegesStepOutputSchema = lazySchema(() =>
+  z.object({
+    /** False for a refusal. The step does not fail, so the caller can re-park. */
+    canDecide: z.boolean(),
+  })
+);
 
 export const checkDecidePrivilegesStepCommonDefinition: BaseStepDefinition<
   typeof checkDecidePrivilegesStepInputSchema,

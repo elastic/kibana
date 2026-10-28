@@ -6,7 +6,7 @@
  */
 
 import { v4 } from 'uuid';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { generateWorkflow, type GenerateWorkflowEdit } from '@kbn/agent-builder-workflow-gen';
@@ -19,34 +19,38 @@ import type { WorkflowsAiTelemetryClient } from '../telemetry/workflows_ai_telem
 import { workflowTools } from '../../common/constants';
 import { emitWorkflowDiff, extractConversationId } from './utils/workflow_attachments';
 
-const generateWorkflowSchema = z.object({
-  query: z
-    .string()
-    .describe('A natural-language description of the workflow to generate or what to update.'),
-  attachmentId: z
-    .string()
-    .optional()
-    .describe(
-      '(optional) When updating a workflow attached to the conversation, the ID of the corresponding workflow **attachment**.'
-    ),
-  context: z
-    .string()
-    .optional()
-    .describe(
-      '(optional) Specific grounding facts needed to generate the workflow — e.g. index names, field names/mappings, connector IDs, space IDs, alert field paths, time ranges, logical flow and/or filter requirements, etc.'
-    ),
-  instructions: z
-    .string()
-    .optional()
-    .describe('(optional) Additional instructions to steer the generation (system-prompt extras).'),
-  workflowId: workflowIdSchema
-    .optional()
-    .describe(
-      '(optional) A unique workflow ID (lowercase alphanumeric and hyphens, 3-255 chars, matching /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/). ' +
-        'Only used on creation (when no `attachmentId` is provided). When set, this ID is stored with the attachment and used as the persisted workflow ID on save. ' +
-        'Use this when the workflow will be referenced by other resources (e.g. action policy destinations). On edits, the existing attachment workflowId is preserved.'
-    ),
-});
+const generateWorkflowSchema = lazySchema(() =>
+  z.object({
+    query: z
+      .string()
+      .describe('A natural-language description of the workflow to generate or what to update.'),
+    attachmentId: z
+      .string()
+      .optional()
+      .describe(
+        '(optional) When updating a workflow attached to the conversation, the ID of the corresponding workflow **attachment**.'
+      ),
+    context: z
+      .string()
+      .optional()
+      .describe(
+        '(optional) Specific grounding facts needed to generate the workflow — e.g. index names, field names/mappings, connector IDs, space IDs, alert field paths, time ranges, logical flow and/or filter requirements, etc.'
+      ),
+    instructions: z
+      .string()
+      .optional()
+      .describe(
+        '(optional) Additional instructions to steer the generation (system-prompt extras).'
+      ),
+    workflowId: workflowIdSchema
+      .optional()
+      .describe(
+        '(optional) A unique workflow ID (lowercase alphanumeric and hyphens, 3-255 chars, matching /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/). ' +
+          'Only used on creation (when no `attachmentId` is provided). When set, this ID is stored with the attachment and used as the persisted workflow ID on save. ' +
+          'Use this when the workflow will be referenced by other resources (e.g. action policy destinations). On edits, the existing attachment workflowId is preserved.'
+      ),
+  })
+);
 
 export const generateWorkflowTool = ({
   workflowsManagement,

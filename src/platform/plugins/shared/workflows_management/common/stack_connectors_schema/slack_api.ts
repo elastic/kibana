@@ -12,39 +12,41 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 // Slack API connector response schema
-export const SlackApiResponseSchema = z.object({
-  ok: z.boolean(),
-  channel: z.string().optional(),
-  ts: z.string().optional(),
-  message: z
-    .object({
-      text: z.string(),
-      user: z.string(),
-      ts: z.string(),
-      type: z.string(),
-    })
-    .optional(),
-  channels: z
-    .array(
-      z.object({
-        id: z.string(),
-        name: z.string(),
-        is_channel: z.boolean(),
-        is_archived: z.boolean(),
+export const SlackApiResponseSchema = lazySchema(() =>
+  z.object({
+    ok: z.boolean(),
+    channel: z.string().optional(),
+    ts: z.string().optional(),
+    message: z
+      .object({
+        text: z.string(),
+        user: z.string(),
+        ts: z.string(),
+        type: z.string(),
       })
-    )
-    .optional(),
-  members: z
-    .array(
-      z.object({
-        id: z.string(),
-        name: z.string(),
-        real_name: z.string().optional(),
-      })
-    )
-    .optional(),
-  error: z.string().optional(),
-});
+      .optional(),
+    channels: z
+      .array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          is_channel: z.boolean(),
+          is_archived: z.boolean(),
+        })
+      )
+      .optional(),
+    members: z
+      .array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          real_name: z.string().optional(),
+        })
+      )
+      .optional(),
+    error: z.string().optional(),
+  })
+);

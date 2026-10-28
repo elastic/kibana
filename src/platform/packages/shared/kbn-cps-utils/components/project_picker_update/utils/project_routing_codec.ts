@@ -19,7 +19,7 @@ import {
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ProjectRouting } from '@kbn/es-query';
 import { uniq } from 'lodash';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   FilterExpressionSchema,
   FilterOperator,
@@ -33,15 +33,19 @@ export const ROUTING_WILDCARD = '*';
 /** Reserved routing dimension for project selection/exclusion — never a filter badge. */
 export const PROJECT_SELECTION_DIMENSION = '_id' as const;
 
-export const ProjectRoutingStrategySchema = z.enum(['dynamic', 'snapshot', 'unknown']);
+export const ProjectRoutingStrategySchema = lazySchema(() =>
+  z.enum(['dynamic', 'snapshot', 'unknown'])
+);
 export type ProjectRoutingStrategy = z.output<typeof ProjectRoutingStrategySchema>;
 
-export const ProjectRoutingExpressionSchema = z.strictObject({
-  filterExpressions: z.array(FilterExpressionSchema).max(100),
-  excludedProjectIds: z.array(z.string().max(256)).max(1000),
-  selectedProjectIds: z.array(z.string().max(256)).max(1000),
-  projectRoutingStrategy: ProjectRoutingStrategySchema,
-});
+export const ProjectRoutingExpressionSchema = lazySchema(() =>
+  z.strictObject({
+    filterExpressions: z.array(FilterExpressionSchema).max(100),
+    excludedProjectIds: z.array(z.string().max(256)).max(1000),
+    selectedProjectIds: z.array(z.string().max(256)).max(1000),
+    projectRoutingStrategy: ProjectRoutingStrategySchema,
+  })
+);
 
 export type ProjectRoutingExpression = z.output<typeof ProjectRoutingExpressionSchema>;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformCoreCasesTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -19,9 +19,11 @@ import {
 
 type GetCasesClientFn = (request: KibanaRequest) => Promise<CasesClient>;
 
-const getAttachmentsSchema = z.object({
-  case_id: z.string().min(1).describe('The case ID to retrieve attachments for.'),
-});
+const getAttachmentsSchema = lazySchema(() =>
+  z.object({
+    case_id: z.string().min(1).describe('The case ID to retrieve attachments for.'),
+  })
+);
 
 export const getAttachmentsTool = (
   getCasesClientFn: GetCasesClientFn

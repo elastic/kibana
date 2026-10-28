@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod';
+import { z, isoDateTime, lazySchema } from '@kbn/zod';
 import { notificationIdSchema } from '../../common/notification_schema';
 import type { NotificationUnreadStatus } from '../../common/types';
 import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
 import type { NotificationQueryDeps } from './query_notifications';
 import { isReadAt, type NotificationReadState } from './read_state';
 
-const unreadStatusSourceSchema = z.object({
-  notification_id: notificationIdSchema,
-  '@timestamp': isoDateTime(),
-});
+const unreadStatusSourceSchema = lazySchema(() =>
+  z.object({
+    notification_id: notificationIdSchema,
+    '@timestamp': isoDateTime(),
+  })
+);
 
 type UnreadStatusSource = z.infer<typeof unreadStatusSourceSchema>;
 

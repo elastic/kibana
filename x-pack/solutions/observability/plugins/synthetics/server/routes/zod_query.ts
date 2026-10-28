@@ -6,7 +6,7 @@
  */
 
 import type { RouteValidationFunction } from '@kbn/core-http-server';
-import { isZod, z } from '@kbn/zod';
+import { isZod, z, lazySchema } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
 import { flattenZodIssues, formatZodIssue } from '../../common/runtime_types/schemas/format_errors';
 
@@ -54,9 +54,11 @@ export const queryBoolean = z.preprocess(
   (value) => (typeof value === 'string' ? value.toLowerCase() : value),
   BooleanFromString
 );
-export const routeId = z.string().min(1).max(MAX_ROUTE_ID_LENGTH);
-export const optionalRouteId = z.string().max(MAX_ROUTE_ID_LENGTH).optional();
-export const optionalQueryString = z.string().max(MAX_ROUTE_STRING_LENGTH).optional();
+export const routeId = lazySchema(() => z.string().min(1).max(MAX_ROUTE_ID_LENGTH));
+export const optionalRouteId = lazySchema(() => z.string().max(MAX_ROUTE_ID_LENGTH).optional());
+export const optionalQueryString = lazySchema(() =>
+  z.string().max(MAX_ROUTE_STRING_LENGTH).optional()
+);
 
 /** Match config-schema `schema.string({ minLength })` 400 copy. */
 export const minLengthMessage = (minLength: number) => (issue: { input?: unknown }) => {

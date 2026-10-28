@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const booleanFormatSchema = z
-  .object({
-    type: z.literal('boolean'),
-  })
-  .meta({
-    id: 'kbn-field-format-boolean',
-    title: 'Boolean field format',
-    description: 'Formats a field into a true/false value.',
-  });
+export const booleanFormatSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('boolean'),
+    })
+    .meta({
+      id: 'kbn-field-format-boolean',
+      title: 'Boolean field format',
+      description: 'Formats a field into a true/false value.',
+    })
+);

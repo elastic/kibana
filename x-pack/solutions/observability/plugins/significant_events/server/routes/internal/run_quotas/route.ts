@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   NIGHTSHIFT_API_PRIVILEGES,
   NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
@@ -31,65 +31,73 @@ import {
   type RunQuotaSettingsAttributes,
 } from '../../../lib/run_quotas';
 
-const limitsUpdateSchema = z
-  .object({
-    detection: z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).optional(),
-    investigation: z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).optional(),
-    ki_extraction: z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).optional(),
-  })
-  .strict()
-  .refine((limits) => Object.values(limits).some((limit) => limit !== undefined), {
-    message: 'At least one run limit is required',
-  });
-
-const activateLimitsSchema = z
-  .object({
-    detection: z
-      .number()
-      .int()
-      .min(MIN_RUN_LIMIT + 1)
-      .max(MAX_RUN_LIMIT)
-      .optional(),
-    investigation: z
-      .number()
-      .int()
-      .min(MIN_RUN_LIMIT + 1)
-      .max(MAX_RUN_LIMIT)
-      .optional(),
-    ki_extraction: z
-      .number()
-      .int()
-      .min(MIN_RUN_LIMIT + 1)
-      .max(MAX_RUN_LIMIT)
-      .optional(),
-  })
-  .strict()
-  .refine((limits) => Object.values(limits).some((limit) => limit !== undefined), {
-    message: 'At least one run limit to activate is required',
-  });
-
-const settingsUpdateSchema = z.union([
+const limitsUpdateSchema = lazySchema(() =>
   z
     .object({
-      enabled: z.boolean().optional(),
-      limits: limitsUpdateSchema.optional(),
+      detection: z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).optional(),
+      investigation: z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).optional(),
+      ki_extraction: z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).optional(),
     })
     .strict()
-    .refine((update) => update.enabled !== undefined || update.limits !== undefined, {
-      message: 'At least one run quota setting is required',
-    }),
+    .refine((limits) => Object.values(limits).some((limit) => limit !== undefined), {
+      message: 'At least one run limit is required',
+    })
+);
+
+const activateLimitsSchema = lazySchema(() =>
   z
     .object({
-      activateLimits: activateLimitsSchema,
+      detection: z
+        .number()
+        .int()
+        .min(MIN_RUN_LIMIT + 1)
+        .max(MAX_RUN_LIMIT)
+        .optional(),
+      investigation: z
+        .number()
+        .int()
+        .min(MIN_RUN_LIMIT + 1)
+        .max(MAX_RUN_LIMIT)
+        .optional(),
+      ki_extraction: z
+        .number()
+        .int()
+        .min(MIN_RUN_LIMIT + 1)
+        .max(MAX_RUN_LIMIT)
+        .optional(),
     })
-    .strict(),
-]);
+    .strict()
+    .refine((limits) => Object.values(limits).some((limit) => limit !== undefined), {
+      message: 'At least one run limit to activate is required',
+    })
+);
 
-const consumeRequestSchema = z.discriminatedUnion('group', [
-  z.object({ group: z.literal('detection') }).strict(),
-  z.object({ group: z.literal('ki_extraction') }).strict(),
-  z.object({ group: z.literal('investigation') }).strict(),
-]);
+const settingsUpdateSchema = lazySchema(() =>
+  z.union([
+    z
+      .object({
+        enabled: z.boolean().optional(),
+        limits: limitsUpdateSchema.optional(),
+      })
+      .strict()
+      .refine((update) => update.enabled !== undefined || update.limits !== undefined, {
+        message: 'At least one run quota setting is required',
+      }),
+    z
+      .object({
+        activateLimits: activateLimitsSchema,
+      })
+      .strict(),
+  ])
+);
+
+const consumeRequestSchema = lazySchema(() =>
+  z.discriminatedUnion('group', [
+    z.object({ group: z.literal('detection') }).strict(),
+    z.object({ group: z.literal('ki_extraction') }).strict(),
+    z.object({ group: z.literal('investigation') }).strict(),
+  ])
+);
 
 const readRunQuotaSnapshot = async ({
   internalRepository,
@@ -138,7 +146,7 @@ const getRunQuotasRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({ request, server, getScopedClients }) => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
@@ -164,9 +172,11 @@ const putRunQuotasRoute = createServerRoute({
       requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
-  params: z.object({
-    body: settingsUpdateSchema,
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: settingsUpdateSchema,
+    })
+  ),
   handler: async ({ params, request, server, getScopedClients }) => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
@@ -195,9 +205,11 @@ const consumeRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    body: consumeRequestSchema,
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: consumeRequestSchema,
+    })
+  ),
   handler: async ({ params, request, server, getScopedClients }) => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });

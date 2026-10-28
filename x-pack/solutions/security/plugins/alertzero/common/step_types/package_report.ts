@@ -9,7 +9,7 @@ import { getAiIndexDest } from '@kbn/context-engine-plugin/common/ai_index_dest'
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { convergedProposalSchema, mintSuppressionSchema } from './resolve_proposals';
 
 export const PACKAGE_REPORT_STEP_ID = 'hunt.packageReport' as const;
@@ -35,211 +35,223 @@ export const MAX_SUMMARY_PROPOSAL_BULLETS = 20;
  */
 export const MAX_SUMMARY_BULLETS_CHARS = 5000;
 
-const boundedId = z.string().trim().min(1).max(256);
+const boundedId = lazySchema(() => z.string().trim().min(1).max(256));
 
-export const packageReportInputSchema = z.object({
-  spaceId: boundedId.describe(
-    'Space the Investigation lives in (S1; must match the workflow space).'
-  ),
-  reportId: boundedId.describe('Threat report id this Investigation is bound to.'),
-  investigationConversationId: boundedId.describe(
-    'Investigation conversation id; must equal uuidv5(hunt:report:{spaceId}|{reportId}).'
-  ),
-  runId: boundedId.describe('Current-run id; packaging reads only attachments scoped to this run.'),
-  /**
-   * The hunt child's own verdict, threaded through so packaging can tell a run that found
-   * nothing from one that could not finish. Without it, both look identical here: neither
-   * leaves a current-run SSE attachment behind, because the coordinator only emits one for a
-   * confirmed hit.
-   */
-  huntStatus: z
-    .enum(['success', 'partial', 'failed'])
-    .describe(
-      "Hunt child's result status: `success` when the run covered what it was asked to, `partial` when a tier could not finish, `failed` when the coordinator call failed or was skipped."
+export const packageReportInputSchema = lazySchema(() =>
+  z.object({
+    spaceId: boundedId.describe(
+      'Space the Investigation lives in (S1; must match the workflow space).'
     ),
-  hasConfirmedHit: z
-    .boolean()
-    .describe(
-      "Whether the hunt cleared the confirmed-hit bar (the coordinator's top-level `has_confirmed_hit`: a required-or-baseline index hit from Tier 1, or a Tier 2 behavior that executed and hit). False covers both an environment that is clean and one where nothing was searchable."
+    reportId: boundedId.describe('Threat report id this Investigation is bound to.'),
+    investigationConversationId: boundedId.describe(
+      'Investigation conversation id; must equal uuidv5(hunt:report:{spaceId}|{reportId}).'
     ),
-  /**
-   * Number of SSE attachments the hunt child prepared for this run (`hunt.yaml`'s `sse_count`
-   * output). Compared against the current-run SSE attachments packaging actually finds: the
-   * hunt's `attach_sse` foreach swallows a per-item attach failure with `continue`, so without
-   * this count a shortfall is invisible and packaging would read a partial finding set as
-   * complete.
-   *
-   * Optional, not required: this workflow is a plain `yaml` definition, so its own content
-   * hash propagates to every space on the next reconciliation regardless of version, but the
-   * Worker that calls it (`hunt_continuous_threat_hunt.ts`) is a `yamlTemplate` definition,
-   * whose hash covers only the function source, not the imported YAML it renders -- an
-   * already-installed Worker only picks up the call site that supplies this field once its own
-   * `version` bumps. Making it required here would fail every such Worker's packaging call in
-   * the gap between the two. Omitting it instead skips the shortfall check below, which is the
-   * same as not having this fix yet -- never a hard failure.
-   */
-  expectedSseCount: z
-    .number()
-    .int()
-    .min(0)
-    .optional()
-    .describe(
-      'Number of significant security event attachments the hunt child prepared for this run (its `sse_count` output). A packaging read that finds fewer than this is a partial attach, reported as `run_incomplete` rather than packaged. Omit to skip the shortfall check (e.g. an already-installed Worker that does not supply it yet).'
+    runId: boundedId.describe(
+      'Current-run id; packaging reads only attachments scoped to this run.'
     ),
-  /**
-   * The coordinator result a clean run cannot carry on an attachment: the coordinator attaches
-   * an SSE only for a confirmed hit, so on a clean run `tier2_targets`, `actionable_indices`
-   * and the executed Tier 2 behaviors exist only on `hunt.yaml`'s coordinator step output.
-   * Optional for the same staleness reason as `expectedSseCount`: omitting them degrades the
-   * coverage KI's `data_sources` / `validated_esql`, never fails packaging.
-   */
-  reportIntentTargets: z
-    .array(z.string().max(512))
-    .max(200)
-    .optional()
-    .describe(
-      "The coordinator's `report_intent_targets`: the datasets the report itself points at, without Tier 1 hit indices or the process-bearing streams. Coverage KIs without hit events name these as `data_sources`."
-    ),
-  behaviors: z
-    .array(
-      z.object({
-        technique_id: z.string().max(64),
-        technique_name: z.string().max(256).optional(),
-        title: z.string().max(512).optional(),
-        evidence_quote: z.string().max(2000).optional(),
-        confidence: z.number(),
-        severity: z.string().max(32).optional(),
-        validated_esql: z.string().max(32_000),
-        execution: z
-          .object({
-            executed: z.boolean(),
-            row_count: z.number(),
-            hit: z.boolean(),
-            inconclusive_reason: z.string().max(64).optional(),
-          })
-          .optional(),
-      })
-    )
-    .max(20)
-    .optional()
-    .describe(
-      "The coordinator's `tier2.behaviors`. Clean-run coverage KIs carry the executed query as `validated_esql` with `esql_status: executed_no_rows`."
-    ),
-});
+    /**
+     * The hunt child's own verdict, threaded through so packaging can tell a run that found
+     * nothing from one that could not finish. Without it, both look identical here: neither
+     * leaves a current-run SSE attachment behind, because the coordinator only emits one for a
+     * confirmed hit.
+     */
+    huntStatus: z
+      .enum(['success', 'partial', 'failed'])
+      .describe(
+        "Hunt child's result status: `success` when the run covered what it was asked to, `partial` when a tier could not finish, `failed` when the coordinator call failed or was skipped."
+      ),
+    hasConfirmedHit: z
+      .boolean()
+      .describe(
+        "Whether the hunt cleared the confirmed-hit bar (the coordinator's top-level `has_confirmed_hit`: a required-or-baseline index hit from Tier 1, or a Tier 2 behavior that executed and hit). False covers both an environment that is clean and one where nothing was searchable."
+      ),
+    /**
+     * Number of SSE attachments the hunt child prepared for this run (`hunt.yaml`'s `sse_count`
+     * output). Compared against the current-run SSE attachments packaging actually finds: the
+     * hunt's `attach_sse` foreach swallows a per-item attach failure with `continue`, so without
+     * this count a shortfall is invisible and packaging would read a partial finding set as
+     * complete.
+     *
+     * Optional, not required: this workflow is a plain `yaml` definition, so its own content
+     * hash propagates to every space on the next reconciliation regardless of version, but the
+     * Worker that calls it (`hunt_continuous_threat_hunt.ts`) is a `yamlTemplate` definition,
+     * whose hash covers only the function source, not the imported YAML it renders -- an
+     * already-installed Worker only picks up the call site that supplies this field once its own
+     * `version` bumps. Making it required here would fail every such Worker's packaging call in
+     * the gap between the two. Omitting it instead skips the shortfall check below, which is the
+     * same as not having this fix yet -- never a hard failure.
+     */
+    expectedSseCount: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe(
+        'Number of significant security event attachments the hunt child prepared for this run (its `sse_count` output). A packaging read that finds fewer than this is a partial attach, reported as `run_incomplete` rather than packaged. Omit to skip the shortfall check (e.g. an already-installed Worker that does not supply it yet).'
+      ),
+    /**
+     * The coordinator result a clean run cannot carry on an attachment: the coordinator attaches
+     * an SSE only for a confirmed hit, so on a clean run `tier2_targets`, `actionable_indices`
+     * and the executed Tier 2 behaviors exist only on `hunt.yaml`'s coordinator step output.
+     * Optional for the same staleness reason as `expectedSseCount`: omitting them degrades the
+     * coverage KI's `data_sources` / `validated_esql`, never fails packaging.
+     */
+    reportIntentTargets: z
+      .array(z.string().max(512))
+      .max(200)
+      .optional()
+      .describe(
+        "The coordinator's `report_intent_targets`: the datasets the report itself points at, without Tier 1 hit indices or the process-bearing streams. Coverage KIs without hit events name these as `data_sources`."
+      ),
+    behaviors: z
+      .array(
+        z.object({
+          technique_id: z.string().max(64),
+          technique_name: z.string().max(256).optional(),
+          title: z.string().max(512).optional(),
+          evidence_quote: z.string().max(2000).optional(),
+          confidence: z.number(),
+          severity: z.string().max(32).optional(),
+          validated_esql: z.string().max(32_000),
+          execution: z
+            .object({
+              executed: z.boolean(),
+              row_count: z.number(),
+              hit: z.boolean(),
+              inconclusive_reason: z.string().max(64).optional(),
+            })
+            .optional(),
+        })
+      )
+      .max(20)
+      .optional()
+      .describe(
+        "The coordinator's `tier2.behaviors`. Clean-run coverage KIs carry the executed query as `validated_esql` with `esql_status: executed_no_rows`."
+      ),
+  })
+);
 
 /** One Tier 2 behavior as passed into packaging, for runs that left no SSE. */
 export type PackageReportBehavior = NonNullable<
   z.infer<typeof packageReportInputSchema>['behaviors']
 >[number];
 
-const coverageWrittenSchema = z.object({
-  kiId: z.string(),
-  subject: z.string(),
-});
-
-const coverageSkippedSchema = z.object({
-  kiId: z.string(),
-  subject: z.string(),
-  reason: z.enum(['disabled', 'denied', 'storage_failure', 'already_processed']),
-});
-
-export const packageReportMintPayloadSchema = z.object({
-  /**
-   * What is being proposed: uuidv5(subjectId, actionWorkflowId[, processKey]). No Investigation in
-   * it, so two Investigations that reach the same host share it; the recommendation, which has no
-   * host or action, is the one key that is per Investigation.
-   */
-  subjectKey: z.string(),
-  /**
-   * The id the gate creates the Proposal under: `buildProposalId` over the subject key, at the
-   * first generation no live Proposal holds. Resolved by packaging, which has the Proposals
-   * service; `decidePackageReport` stays pure and never sees it. The service refuses an id that
-   * already exists, which is what makes two runs that race over one subject create one Proposal.
-   */
-  proposalId: z.uuid(),
-  conversationId: z.string(),
-  /** Short plain-text label naming what is proposed; omitting it falls back to the action's own name. */
-  title: z.string().max(256).optional(),
-  comment: z.string(),
-  category: z.string(),
-  impact: z.string().optional(),
-  actionWorkflowId: z.string().optional(),
-  actionInput: z.record(z.string(), z.unknown()).optional(),
-  /** Host name when the mint is host-scoped; absent on the analyst recommendation. */
-  hostName: z.string().optional(),
-  /** What the proposal acts on; absent on the analyst recommendation. `hostName` is set whenever it is present. */
-  subject: z
-    .object({
-      kind: z.enum(['host', 'process']),
-      value: z.string().max(2048),
-    })
-    .optional(),
-  confidence: z.enum(['low', 'medium', 'high']).optional(),
-});
-
-export const packageReportOutputSchema = z.discriminatedUnion('status', [
+const coverageWrittenSchema = lazySchema(() =>
   z.object({
-    status: z.literal('packaged'),
-    coverage: z.object({
-      written: z.array(coverageWrittenSchema),
-      skipped: z.array(coverageSkippedSchema),
+    kiId: z.string(),
+    subject: z.string(),
+  })
+);
+
+const coverageSkippedSchema = lazySchema(() =>
+  z.object({
+    kiId: z.string(),
+    subject: z.string(),
+    reason: z.enum(['disabled', 'denied', 'storage_failure', 'already_processed']),
+  })
+);
+
+export const packageReportMintPayloadSchema = lazySchema(() =>
+  z.object({
+    /**
+     * What is being proposed: uuidv5(subjectId, actionWorkflowId[, processKey]). No Investigation in
+     * it, so two Investigations that reach the same host share it; the recommendation, which has no
+     * host or action, is the one key that is per Investigation.
+     */
+    subjectKey: z.string(),
+    /**
+     * The id the gate creates the Proposal under: `buildProposalId` over the subject key, at the
+     * first generation no live Proposal holds. Resolved by packaging, which has the Proposals
+     * service; `decidePackageReport` stays pure and never sees it. The service refuses an id that
+     * already exists, which is what makes two runs that race over one subject create one Proposal.
+     */
+    proposalId: z.uuid(),
+    conversationId: z.string(),
+    /** Short plain-text label naming what is proposed; omitting it falls back to the action's own name. */
+    title: z.string().max(256).optional(),
+    comment: z.string(),
+    category: z.string(),
+    impact: z.string().optional(),
+    actionWorkflowId: z.string().optional(),
+    actionInput: z.record(z.string(), z.unknown()).optional(),
+    /** Host name when the mint is host-scoped; absent on the analyst recommendation. */
+    hostName: z.string().optional(),
+    /** What the proposal acts on; absent on the analyst recommendation. `hostName` is set whenever it is present. */
+    subject: z
+      .object({
+        kind: z.enum(['host', 'process']),
+        value: z.string().max(2048),
+      })
+      .optional(),
+    confidence: z.enum(['low', 'medium', 'high']).optional(),
+  })
+);
+
+export const packageReportOutputSchema = lazySchema(() =>
+  z.discriminatedUnion('status', [
+    z.object({
+      status: z.literal('packaged'),
+      coverage: z.object({
+        written: z.array(coverageWrittenSchema),
+        skipped: z.array(coverageSkippedSchema),
+      }),
+      proposals: z.array(packageReportMintPayloadSchema),
+      /**
+       * What this run found that a live Proposal already covers, so it minted nothing for it. Each
+       * entry carries the journal line `hunt_package_report.yaml` writes on this Investigation.
+       */
+      converged: z.array(convergedProposalSchema),
+      /**
+       * Findings this run minted nothing for because a live Proposal this Investigation already
+       * holds covers them: a rerun landing on its own pending or executing Proposal. Not in
+       * `converged`, which is for what another Investigation holds and is what the journal reports,
+       * but it still means "this run created nothing", and the Investigation stays open for it, so
+       * the run's summary has to be able to say so.
+       */
+      alreadyOpenCount: z.number().int().min(0),
+      /**
+       * Bounded markdown bullets, one per proposal up to `MAX_SUMMARY_PROPOSAL_BULLETS`, for the run
+       * conclusion's prose. `proposals` itself stays complete because it drives the gate fan-out; this
+       * is only what gets embedded in the journal note, whose `message` is capped at 8,000 characters.
+       */
+      proposalBullets: z
+        .array(z.string().max(MAX_SUMMARY_BULLETS_CHARS))
+        .max(MAX_SUMMARY_PROPOSAL_BULLETS),
+      /** Proposals past the bullet cap that the prose states as a count instead of listing. */
+      omittedProposalCount: z.number().int().min(0),
+      dismiss: z.boolean(),
+      closureSummary: z.string(),
+      expectedProposalCount: z.number().int().min(0),
+      /**
+       * `none` unless packaging could not tell what already exists for this run's subjects, or what
+       * the Investigation already carries (the baseline the settlement barrier is counted from), so
+       * it minted nothing rather than risk a duplicate: `check_failed`. A Proposal that already
+       * holds a subject is not a suppression, it is `converged`.
+       */
+      mintSuppression: mintSuppressionSchema,
+      /**
+       * `none` unless this run was a clean one (no confirmed hit) whose dismissal was withheld
+       * because the Investigation still carries an open (`pending`/`executing`) Proposal from an
+       * earlier run: closing it as benign would strand a decision or an in-flight action.
+       * `open_proposal` means the lookup found one; `check_failed` means the lookup itself failed,
+       * so the dismissal fails closed without asserting a Proposal exists. Either way `dismiss` is
+       * `false` and the Investigation stays open. Narrower than `mintSuppression` on purpose: settled
+       * Proposals never hold a dismissal.
+       *
+       * Not airtight: a gate's Proposal is created asynchronously, after the packaging workflow has
+       * released its concurrency slot, so a clean run that lands in that create window sees no open
+       * Proposal and still dismisses. The per-subject ids that keep two runs from creating one
+       * Proposal twice do not apply: this asks whether anything is open on the Investigation, of a
+       * search that lags a write.
+       */
+      dismissHold: z.enum(['none', 'open_proposal', 'check_failed']),
     }),
-    proposals: z.array(packageReportMintPayloadSchema),
-    /**
-     * What this run found that a live Proposal already covers, so it minted nothing for it. Each
-     * entry carries the journal line `hunt_package_report.yaml` writes on this Investigation.
-     */
-    converged: z.array(convergedProposalSchema),
-    /**
-     * Findings this run minted nothing for because a live Proposal this Investigation already
-     * holds covers them: a rerun landing on its own pending or executing Proposal. Not in
-     * `converged`, which is for what another Investigation holds and is what the journal reports,
-     * but it still means "this run created nothing", and the Investigation stays open for it, so
-     * the run's summary has to be able to say so.
-     */
-    alreadyOpenCount: z.number().int().min(0),
-    /**
-     * Bounded markdown bullets, one per proposal up to `MAX_SUMMARY_PROPOSAL_BULLETS`, for the run
-     * conclusion's prose. `proposals` itself stays complete because it drives the gate fan-out; this
-     * is only what gets embedded in the journal note, whose `message` is capped at 8,000 characters.
-     */
-    proposalBullets: z
-      .array(z.string().max(MAX_SUMMARY_BULLETS_CHARS))
-      .max(MAX_SUMMARY_PROPOSAL_BULLETS),
-    /** Proposals past the bullet cap that the prose states as a count instead of listing. */
-    omittedProposalCount: z.number().int().min(0),
-    dismiss: z.boolean(),
-    closureSummary: z.string(),
-    expectedProposalCount: z.number().int().min(0),
-    /**
-     * `none` unless packaging could not tell what already exists for this run's subjects, or what
-     * the Investigation already carries (the baseline the settlement barrier is counted from), so
-     * it minted nothing rather than risk a duplicate: `check_failed`. A Proposal that already
-     * holds a subject is not a suppression, it is `converged`.
-     */
-    mintSuppression: mintSuppressionSchema,
-    /**
-     * `none` unless this run was a clean one (no confirmed hit) whose dismissal was withheld
-     * because the Investigation still carries an open (`pending`/`executing`) Proposal from an
-     * earlier run: closing it as benign would strand a decision or an in-flight action.
-     * `open_proposal` means the lookup found one; `check_failed` means the lookup itself failed,
-     * so the dismissal fails closed without asserting a Proposal exists. Either way `dismiss` is
-     * `false` and the Investigation stays open. Narrower than `mintSuppression` on purpose: settled
-     * Proposals never hold a dismissal.
-     *
-     * Not airtight: a gate's Proposal is created asynchronously, after the packaging workflow has
-     * released its concurrency slot, so a clean run that lands in that create window sees no open
-     * Proposal and still dismisses. The per-subject ids that keep two runs from creating one
-     * Proposal twice do not apply: this asks whether anything is open on the Investigation, of a
-     * search that lags a write.
-     */
-    dismissHold: z.enum(['none', 'open_proposal', 'check_failed']),
-  }),
-  z.object({
-    status: z.literal('run_incomplete'),
-    reason: z.string(),
-  }),
-]);
+    z.object({
+      status: z.literal('run_incomplete'),
+      reason: z.string(),
+    }),
+  ])
+);
 
 export type PackageReportInput = z.infer<typeof packageReportInputSchema>;
 export type PackageReportOutput = z.infer<typeof packageReportOutputSchema>;

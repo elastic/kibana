@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, internalTools } from '@kbn/agent-builder-common';
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createOtherResult } from '@kbn/agent-builder-server';
@@ -14,9 +14,11 @@ export const SleepToolName = internalTools.sleep;
 
 const MAX_SLEEP_SECONDS = 120;
 
-const schema = z.object({
-  duration: z.number().describe('Duration to sleep for, in seconds'),
-});
+const schema = lazySchema(() =>
+  z.object({
+    duration: z.number().describe('Duration to sleep for, in seconds'),
+  })
+);
 
 const description = `Wait for a specified duration.
 

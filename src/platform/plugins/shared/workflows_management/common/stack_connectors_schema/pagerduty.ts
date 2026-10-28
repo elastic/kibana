@@ -12,42 +12,46 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 // PagerDuty connector parameter schema
-export const PagerDutyParamsSchema = z.object({
-  eventAction: z.enum(['trigger', 'acknowledge', 'resolve']),
-  dedupKey: z.string().optional(),
-  summary: z.string().optional(),
-  source: z.string().optional(),
-  severity: z.enum(['critical', 'error', 'warning', 'info']).optional(),
-  timestamp: z.string().optional(),
-  component: z.string().optional(),
-  group: z.string().optional(),
-  class: z.string().optional(),
-  customDetails: z.record(z.string(), z.any()).optional(),
-  links: z
-    .array(
-      z.object({
-        href: z.string(),
-        text: z.string().optional(),
-      })
-    )
-    .optional(),
-  images: z
-    .array(
-      z.object({
-        src: z.string(),
-        href: z.string().optional(),
-        alt: z.string().optional(),
-      })
-    )
-    .optional(),
-});
+export const PagerDutyParamsSchema = lazySchema(() =>
+  z.object({
+    eventAction: z.enum(['trigger', 'acknowledge', 'resolve']),
+    dedupKey: z.string().optional(),
+    summary: z.string().optional(),
+    source: z.string().optional(),
+    severity: z.enum(['critical', 'error', 'warning', 'info']).optional(),
+    timestamp: z.string().optional(),
+    component: z.string().optional(),
+    group: z.string().optional(),
+    class: z.string().optional(),
+    customDetails: z.record(z.string(), z.any()).optional(),
+    links: z
+      .array(
+        z.object({
+          href: z.string(),
+          text: z.string().optional(),
+        })
+      )
+      .optional(),
+    images: z
+      .array(
+        z.object({
+          src: z.string(),
+          href: z.string().optional(),
+          alt: z.string().optional(),
+        })
+      )
+      .optional(),
+  })
+);
 
 // PagerDuty connector response schema
-export const PagerDutyResponseSchema = z.object({
-  status: z.string(),
-  message: z.string(),
-  dedup_key: z.string().optional(),
-});
+export const PagerDutyResponseSchema = lazySchema(() =>
+  z.object({
+    status: z.string(),
+    message: z.string(),
+    dedup_key: z.string().optional(),
+  })
+);

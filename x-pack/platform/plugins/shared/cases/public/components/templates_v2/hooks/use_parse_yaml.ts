@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { FieldSchema } from '../../../../common/types/domain/template/fields';
 import { TemplateSettingsSchema } from '../../../../common/types/domain/template/v1';
 import { CaseSeverity as CaseSeveritySchema } from '../../../../common/bundled-types.gen';
@@ -17,54 +17,58 @@ import { checkTemplateExists } from '../utils';
 import type { ValidatedFile } from './use_validate_yaml';
 import * as i18n from '../translations';
 
-const ImportedDefinitionSchema = z.object({
-  fields: z.array(FieldSchema).refine(
-    (fields) => {
-      const fieldNames = new Set(
-        fields.map((field) => ('$ref' in field ? field.name ?? field.$ref : field.name))
-      );
-      return fieldNames.size === fields.length;
-    },
-    { message: 'Field names must be unique.' }
-  ),
-});
-
-const ImportedTemplateSchema = z
-  .object({
-    templateId: z.string().optional(),
-    // `.trim().min(1)` so a whitespace-only name (e.g. `name: '  '`) is rejected rather than
-    // producing a blank template; the trimmed value is what we persist.
-    template_name: z.string().trim().min(1).optional(),
-    // Legacy support for early preview builds before the snake_case convention.
-    templateName: z.string().trim().min(1).optional(),
-    name: z.string().trim().min(1).optional(),
-    template_description: z.string().optional(),
-    templateDescription: z.string().optional(),
-    template_tags: z.array(z.string()).nullable().optional(),
-    templateTags: z.array(z.string()).nullable().optional(),
-    title: z.string().optional(),
-    owner: z.string().optional(),
-    description: z.string().optional(),
-    tags: z.array(z.string()).nullable().optional(),
-    // Legacy top-level import shape support.
-    severity: CaseSeveritySchema.optional(),
-    category: z.string().nullable().optional(),
-    assignees: CaseUserProfilesSchema.optional(),
-    connector: CaseConnectorWithoutNameSchema.optional(),
-    settings: TemplateSettingsSchema.optional(),
-    author: z.string().optional(),
-    templateVersion: z.number().optional(),
-    isDefault: z.boolean().optional(),
-    definition: ImportedDefinitionSchema.optional(),
+const ImportedDefinitionSchema = lazySchema(() =>
+  z.object({
+    fields: z.array(FieldSchema).refine(
+      (fields) => {
+        const fieldNames = new Set(
+          fields.map((field) => ('$ref' in field ? field.name ?? field.$ref : field.name))
+        );
+        return fieldNames.size === fields.length;
+      },
+      { message: 'Field names must be unique.' }
+    ),
   })
-  .refine(
-    (template) =>
-      template.template_name != null || template.templateName != null || template.name != null,
-    {
-      message: 'Either template_name or name is required',
-      path: ['template_name'],
-    }
-  );
+);
+
+const ImportedTemplateSchema = lazySchema(() =>
+  z
+    .object({
+      templateId: z.string().optional(),
+      // `.trim().min(1)` so a whitespace-only name (e.g. `name: '  '`) is rejected rather than
+      // producing a blank template; the trimmed value is what we persist.
+      template_name: z.string().trim().min(1).optional(),
+      // Legacy support for early preview builds before the snake_case convention.
+      templateName: z.string().trim().min(1).optional(),
+      name: z.string().trim().min(1).optional(),
+      template_description: z.string().optional(),
+      templateDescription: z.string().optional(),
+      template_tags: z.array(z.string()).nullable().optional(),
+      templateTags: z.array(z.string()).nullable().optional(),
+      title: z.string().optional(),
+      owner: z.string().optional(),
+      description: z.string().optional(),
+      tags: z.array(z.string()).nullable().optional(),
+      // Legacy top-level import shape support.
+      severity: CaseSeveritySchema.optional(),
+      category: z.string().nullable().optional(),
+      assignees: CaseUserProfilesSchema.optional(),
+      connector: CaseConnectorWithoutNameSchema.optional(),
+      settings: TemplateSettingsSchema.optional(),
+      author: z.string().optional(),
+      templateVersion: z.number().optional(),
+      isDefault: z.boolean().optional(),
+      definition: ImportedDefinitionSchema.optional(),
+    })
+    .refine(
+      (template) =>
+        template.template_name != null || template.templateName != null || template.name != null,
+      {
+        message: 'Either template_name or name is required',
+        path: ['template_name'],
+      }
+    )
+);
 
 type ImportedTemplate = z.infer<typeof ImportedTemplateSchema>;
 

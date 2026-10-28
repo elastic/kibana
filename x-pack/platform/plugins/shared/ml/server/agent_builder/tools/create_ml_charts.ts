@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -26,90 +26,94 @@ import {
 } from '../attachment_types/constants';
 import { CREATE_ML_CHARTS_TOOL_ID } from './tool_ids';
 
-const schema = z.object({
-  chart_type: z
-    .enum(['anomaly_swimlane', 'anomaly_charts', 'single_metric_viewer'])
-    .describe(
-      'Which ML chart to render. "anomaly_swimlane": heatmap overview of which entity was anomalous and when. "anomaly_charts": multi-series time series showing actual values vs model bounds for several entities. "single_metric_viewer": one entity, one detector — actual metric with confidence bounds, anomaly markers, optional forecast.'
-    ),
-  job_ids: z
-    .array(z.string().min(1).max(1000))
-    .min(1)
-    .max(10000)
-    .describe(
-      'IDs of the anomaly detection jobs or groups. Must be verified to exist via ml.ad_get_job_info before calling. For single_metric_viewer, exactly one job ID is required.'
-    ),
-  swimlane_type: z
-    .enum(['overall', 'viewBy'])
-    .optional()
-    .describe(
-      '(anomaly_swimlane only) "overall" for a single aggregated heatmap row. "viewBy" to split by a field — requires view_by. Default: derive from job config (prefer viewBy when a partition/by/over field exists).'
-    ),
-  view_by: z
-    .string()
-    .min(1)
-    .max(1000)
-    .optional()
-    .describe(
-      '(anomaly_swimlane viewBy only) Exact field name used to split anomalies (e.g. "host.name"). Derive from job config (partition_field_name → by_field_name → over_field_name).'
-    ),
-  per_page: z
-    .number()
-    .min(1)
-    .optional()
-    .describe('(anomaly_swimlane viewBy only) Number of rows to display per page.'),
-  max_series_to_plot: z
-    .number()
-    .min(1)
-    .max(50)
-    .optional()
-    .describe('(anomaly_charts only) Maximum number of anomaly series to plot. Defaults to 6.'),
-  selected_detector_index: z
-    .number()
-    .min(0)
-    .optional()
-    .describe(
-      '(single_metric_viewer only) Zero-based index of the detector within the job. Use the detector_index from the anomaly record. Defaults to 0.'
-    ),
-  selected_entities: z
-    .record(z.string().max(MAX_STRING_LENGTH), mlEntityFieldValueSchema.optional())
-    .optional()
-    .describe(
-      '(single_metric_viewer only) Required when the chosen detector has partition_field_name, by_field_name, or over_field_name set. Key-value map of field name → value (e.g. {"host.name": "web-01"}). ALWAYS source these from a prior ml.query_anomalies call using the ad_query_anomaly_records reference query — extract partition_field_value / by_field_value / over_field_value from a returned record. Do not guess or omit.'
-    ),
-  function_description: z
-    .string()
-    .max(1000)
-    .optional()
-    .describe(
-      '(single_metric_viewer only) For metric-function detectors: which value to plot — "min", "max", or "mean". Omit for other functions.'
-    ),
-  forecast_id: z
-    .string()
-    .max(1000)
-    .optional()
-    .describe('(single_metric_viewer only) Identifier of a forecast to overlay on the chart.'),
-  severity_threshold: z
-    .number()
-    .min(0)
-    .max(100)
-    .optional()
-    .describe(
-      'Minimum anomaly score (0–100) to show. Typical values: 25 (minor+), 50 (major+), 75 (critical only). Omit to show all anomalies.'
-    ),
-  time_range: z
-    .object({
-      from: z
-        .string()
-        .describe('Start of the time range (ISO 8601 or Kibana date math, e.g. "now-7d").'),
-      to: z.string().describe('End of the time range (ISO 8601 or Kibana date math, e.g. "now").'),
-    })
-    .optional()
-    .describe(
-      'Time range for the chart. Set to the analysis window for historical/batch jobs — omitting defaults to "last 15 minutes" which shows no data for historical jobs. Omit only for realtime jobs that should track the current time range.'
-    ),
-  title: z.string().max(500).optional().describe('Descriptive panel title.'),
-});
+const schema = lazySchema(() =>
+  z.object({
+    chart_type: z
+      .enum(['anomaly_swimlane', 'anomaly_charts', 'single_metric_viewer'])
+      .describe(
+        'Which ML chart to render. "anomaly_swimlane": heatmap overview of which entity was anomalous and when. "anomaly_charts": multi-series time series showing actual values vs model bounds for several entities. "single_metric_viewer": one entity, one detector — actual metric with confidence bounds, anomaly markers, optional forecast.'
+      ),
+    job_ids: z
+      .array(z.string().min(1).max(1000))
+      .min(1)
+      .max(10000)
+      .describe(
+        'IDs of the anomaly detection jobs or groups. Must be verified to exist via ml.ad_get_job_info before calling. For single_metric_viewer, exactly one job ID is required.'
+      ),
+    swimlane_type: z
+      .enum(['overall', 'viewBy'])
+      .optional()
+      .describe(
+        '(anomaly_swimlane only) "overall" for a single aggregated heatmap row. "viewBy" to split by a field — requires view_by. Default: derive from job config (prefer viewBy when a partition/by/over field exists).'
+      ),
+    view_by: z
+      .string()
+      .min(1)
+      .max(1000)
+      .optional()
+      .describe(
+        '(anomaly_swimlane viewBy only) Exact field name used to split anomalies (e.g. "host.name"). Derive from job config (partition_field_name → by_field_name → over_field_name).'
+      ),
+    per_page: z
+      .number()
+      .min(1)
+      .optional()
+      .describe('(anomaly_swimlane viewBy only) Number of rows to display per page.'),
+    max_series_to_plot: z
+      .number()
+      .min(1)
+      .max(50)
+      .optional()
+      .describe('(anomaly_charts only) Maximum number of anomaly series to plot. Defaults to 6.'),
+    selected_detector_index: z
+      .number()
+      .min(0)
+      .optional()
+      .describe(
+        '(single_metric_viewer only) Zero-based index of the detector within the job. Use the detector_index from the anomaly record. Defaults to 0.'
+      ),
+    selected_entities: z
+      .record(z.string().max(MAX_STRING_LENGTH), mlEntityFieldValueSchema.optional())
+      .optional()
+      .describe(
+        '(single_metric_viewer only) Required when the chosen detector has partition_field_name, by_field_name, or over_field_name set. Key-value map of field name → value (e.g. {"host.name": "web-01"}). ALWAYS source these from a prior ml.query_anomalies call using the ad_query_anomaly_records reference query — extract partition_field_value / by_field_value / over_field_value from a returned record. Do not guess or omit.'
+      ),
+    function_description: z
+      .string()
+      .max(1000)
+      .optional()
+      .describe(
+        '(single_metric_viewer only) For metric-function detectors: which value to plot — "min", "max", or "mean". Omit for other functions.'
+      ),
+    forecast_id: z
+      .string()
+      .max(1000)
+      .optional()
+      .describe('(single_metric_viewer only) Identifier of a forecast to overlay on the chart.'),
+    severity_threshold: z
+      .number()
+      .min(0)
+      .max(100)
+      .optional()
+      .describe(
+        'Minimum anomaly score (0–100) to show. Typical values: 25 (minor+), 50 (major+), 75 (critical only). Omit to show all anomalies.'
+      ),
+    time_range: z
+      .object({
+        from: z
+          .string()
+          .describe('Start of the time range (ISO 8601 or Kibana date math, e.g. "now-7d").'),
+        to: z
+          .string()
+          .describe('End of the time range (ISO 8601 or Kibana date math, e.g. "now").'),
+      })
+      .optional()
+      .describe(
+        'Time range for the chart. Set to the analysis window for historical/batch jobs — omitting defaults to "last 15 minutes" which shows no data for historical jobs. Omit only for realtime jobs that should track the current time range.'
+      ),
+    title: z.string().max(500).optional().describe('Descriptive panel title.'),
+  })
+);
 
 /**
  * Maps a minimum score (0–100) to the SeverityThreshold[] format expected by

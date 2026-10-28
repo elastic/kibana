@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { MAX_ID_LENGTH, type QueryOccurrencesResponse } from '@kbn/significant-events-schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/significant_events/helpers/fill_bucket_gaps';
 import { createSignificantEventsTracedEsClient } from '../../../../lib/significant_events/create_significant_events_traced_es_client';
@@ -24,32 +24,34 @@ const dateFromString = makeIsoDateFromString('ISO 8601 datetime');
 
 const readQueryOccurrencesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_query_occurrences',
-  params: z.object({
-    query: z.object({
-      from: dateFromString.describe('Start of the time range'),
-      to: dateFromString.describe('End of the time range'),
-      bucketSize: z
-        .string()
-        .max(20)
-        .regex(BUCKET_SIZE_PATTERN)
-        .describe('Size of time buckets for aggregation'),
-      query: z.string().max(4096).optional().describe('Query string to filter source queries'),
-      sourceIds: sourceIdsQuerySchema(MAX_SOURCE_IDS_PER_REQUEST).describe(
-        'Source ids to filter results by'
-      ),
-      rule_uuid: z
-        .union([
-          z
-            .string()
-            .max(MAX_ID_LENGTH)
-            .transform((value) => [value]),
-          z.array(z.string().max(MAX_ID_LENGTH)),
-        ])
-        .optional()
-        .describe('Alerting rule UUIDs to include in the occurrence response'),
-      searchMode: searchModeSchema,
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: z.object({
+        from: dateFromString.describe('Start of the time range'),
+        to: dateFromString.describe('End of the time range'),
+        bucketSize: z
+          .string()
+          .max(20)
+          .regex(BUCKET_SIZE_PATTERN)
+          .describe('Size of time buckets for aggregation'),
+        query: z.string().max(4096).optional().describe('Query string to filter source queries'),
+        sourceIds: sourceIdsQuerySchema(MAX_SOURCE_IDS_PER_REQUEST).describe(
+          'Source ids to filter results by'
+        ),
+        rule_uuid: z
+          .union([
+            z
+              .string()
+              .max(MAX_ID_LENGTH)
+              .transform((value) => [value]),
+            z.array(z.string().max(MAX_ID_LENGTH)),
+          ])
+          .optional()
+          .describe('Alerting rule UUIDs to include in the occurrence response'),
+        searchMode: searchModeSchema,
+      }),
+    })
+  ),
   options: {
     access: 'internal',
     summary: 'Read query occurrences',

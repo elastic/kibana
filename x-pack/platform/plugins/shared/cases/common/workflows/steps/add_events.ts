@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import * as i18n from '../translations';
@@ -18,13 +18,15 @@ import { MAX_BULK_CREATE_ATTACHMENTS } from '../../constants';
 
 export const AddEventsStepTypeId = 'cases.addEvents';
 
-const EventInputSchema = z.object({
-  eventId: z.string().min(1, 'eventId is required'),
-  index: z.string().min(1, 'index is required'),
-});
+const EventInputSchema = lazySchema(() =>
+  z.object({
+    eventId: z.string().min(1, 'eventId is required'),
+    index: z.string().min(1, 'index is required'),
+  })
+);
 
 const InputSchema = CasesStepCaseIdSchema.extend({
-  events: z.array(EventInputSchema).min(1).max(MAX_BULK_CREATE_ATTACHMENTS),
+  events: lazySchema(() => z.array(EventInputSchema).min(1).max(MAX_BULK_CREATE_ATTACHMENTS)),
 });
 
 const OutputSchema = CasesStepSingleCaseOutputSchema;

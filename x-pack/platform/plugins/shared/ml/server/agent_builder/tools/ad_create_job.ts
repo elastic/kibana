@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -25,64 +25,68 @@ import { getMessages } from '../../../common/constants/messages';
 import type { BuildMlClientFn, BuildDataRecognizerFn } from '../ml_client_factory';
 import { AD_CREATE_JOB_TOOL_ID } from './tool_ids';
 
-const schema = z.object({
-  operation: z.enum([
-    'validate_spec',
-    'estimate_memory',
-    'create_job',
-    'create_datafeed',
-    'validate_full',
-    'preview_datafeed_config',
-    'estimate_bucket_span',
-    'recognize_modules',
-    'get_module',
-  ]),
-  job_id: z.string().optional().describe('Job ID. Required for create_job and create_datafeed.'),
-  job_config: z
-    .record(z.string(), z.unknown())
-    .optional()
-    .describe(
-      'Full job configuration body. Required for create_job, validate_spec, estimate_memory, validate_full, and preview_datafeed_config.'
-    ),
-  datafeed_config: z
-    .record(z.string(), z.unknown())
-    .optional()
-    .describe(
-      'Full datafeed configuration body. Required for create_datafeed, validate_full, and preview_datafeed_config.'
-    ),
-  duration: z
-    .object({
-      start: z.number().optional().describe('Start epoch ms.'),
-      end: z.number().optional().describe('End epoch ms.'),
-    })
-    .optional()
-    .describe(
-      'Time range in epoch ms. Providing it skips the internal time-range lookup in validate_full and scopes the datafeed preview.'
-    ),
-  estimator_params: z
-    .record(z.string(), z.unknown())
-    .optional()
-    .describe(
-      'Bucket span estimator parameters. Required for estimate_bucket_span. Must include index, aggTypes, fields, duration {start, end}. Optionally timeField, splitField, query.'
-    ),
-  index_pattern: z
-    .string()
-    .optional()
-    .describe('Index pattern to match against installed modules. Required for recognize_modules.'),
-  module_id: z.string().optional().describe('Module ID to retrieve. Required for get_module.'),
-  module_tag_filters: z
-    .array(z.string())
-    .optional()
-    .describe(
-      'Optional tag filters for recognize_modules and get_module (e.g. ["security", "observability"]).'
-    ),
-  include_configs: z
-    .boolean()
-    .optional()
-    .describe(
-      'For get_module: return full job and datafeed configs. Default false returns a slim projection (id, detectors, bucket_span, influencers) to avoid large context.'
-    ),
-});
+const schema = lazySchema(() =>
+  z.object({
+    operation: z.enum([
+      'validate_spec',
+      'estimate_memory',
+      'create_job',
+      'create_datafeed',
+      'validate_full',
+      'preview_datafeed_config',
+      'estimate_bucket_span',
+      'recognize_modules',
+      'get_module',
+    ]),
+    job_id: z.string().optional().describe('Job ID. Required for create_job and create_datafeed.'),
+    job_config: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe(
+        'Full job configuration body. Required for create_job, validate_spec, estimate_memory, validate_full, and preview_datafeed_config.'
+      ),
+    datafeed_config: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe(
+        'Full datafeed configuration body. Required for create_datafeed, validate_full, and preview_datafeed_config.'
+      ),
+    duration: z
+      .object({
+        start: z.number().optional().describe('Start epoch ms.'),
+        end: z.number().optional().describe('End epoch ms.'),
+      })
+      .optional()
+      .describe(
+        'Time range in epoch ms. Providing it skips the internal time-range lookup in validate_full and scopes the datafeed preview.'
+      ),
+    estimator_params: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe(
+        'Bucket span estimator parameters. Required for estimate_bucket_span. Must include index, aggTypes, fields, duration {start, end}. Optionally timeField, splitField, query.'
+      ),
+    index_pattern: z
+      .string()
+      .optional()
+      .describe(
+        'Index pattern to match against installed modules. Required for recognize_modules.'
+      ),
+    module_id: z.string().optional().describe('Module ID to retrieve. Required for get_module.'),
+    module_tag_filters: z
+      .array(z.string())
+      .optional()
+      .describe(
+        'Optional tag filters for recognize_modules and get_module (e.g. ["security", "observability"]).'
+      ),
+    include_configs: z
+      .boolean()
+      .optional()
+      .describe(
+        'For get_module: return full job and datafeed configs. Default false returns a slim projection (id, detectors, bucket_span, influencers) to avoid large context.'
+      ),
+  })
+);
 
 export const createAdCreateJobTool = (
   resolveMlCapabilities: ResolveMlCapabilities,

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { budgetingMethodSchema, objectiveSchema, sloIdSchema } from '../../schema/slo';
 import { timeWindowSchema } from '../../schema/time_window';
@@ -17,37 +17,43 @@ import {
   statusSchema,
 } from '../../schema/common';
 
-const fetchHistoricalSummaryParamsSchema = z.object({
-  body: z.object({
-    list: z.array(
-      z.object({
-        sloId: sloIdSchema,
-        instanceId: z.string(),
-        timeWindow: timeWindowSchema,
-        budgetingMethod: budgetingMethodSchema,
-        objective: objectiveSchema,
-        groupBy: allOrAnyStringOrArray,
-        revision: z.number(),
-        remoteName: z.string().optional(),
-        range: dateRangeSchema.optional(),
-      })
-    ),
-  }),
-});
-
-const historicalSummarySchema = z.object({
-  date: dateType,
-  status: statusSchema,
-  sliValue: z.number(),
-  errorBudget: errorBudgetSchema,
-});
-
-const fetchHistoricalSummaryResponseSchema = z.array(
+const fetchHistoricalSummaryParamsSchema = lazySchema(() =>
   z.object({
-    sloId: sloIdSchema,
-    instanceId: allOrAnyString,
-    data: z.array(historicalSummarySchema),
+    body: z.object({
+      list: z.array(
+        z.object({
+          sloId: sloIdSchema,
+          instanceId: z.string(),
+          timeWindow: timeWindowSchema,
+          budgetingMethod: budgetingMethodSchema,
+          objective: objectiveSchema,
+          groupBy: allOrAnyStringOrArray,
+          revision: z.number(),
+          remoteName: z.string().optional(),
+          range: dateRangeSchema.optional(),
+        })
+      ),
+    }),
   })
+);
+
+const historicalSummarySchema = lazySchema(() =>
+  z.object({
+    date: dateType,
+    status: statusSchema,
+    sliValue: z.number(),
+    errorBudget: errorBudgetSchema,
+  })
+);
+
+const fetchHistoricalSummaryResponseSchema = lazySchema(() =>
+  z.array(
+    z.object({
+      sloId: sloIdSchema,
+      instanceId: allOrAnyString,
+      data: z.array(historicalSummarySchema),
+    })
+  )
 );
 
 type FetchHistoricalSummaryParams = z.output<typeof fetchHistoricalSummaryParamsSchema.shape.body>;

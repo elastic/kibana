@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { AlertRuleTriggerSchema } from './alert_trigger_schema';
 import { ManualTriggerSchema } from './manual_trigger_schema';
 import { ScheduledTriggerSchema } from './scheduled_trigger_schema';
@@ -21,11 +21,13 @@ export {
   SCHEDULED_INTERVAL_PATTERN,
 } from './scheduled_trigger_schema';
 
-export const TriggerSchema = z.discriminatedUnion('type', [
-  AlertRuleTriggerSchema,
-  ScheduledTriggerSchema,
-  ManualTriggerSchema,
-]);
+export const TriggerSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    AlertRuleTriggerSchema,
+    ScheduledTriggerSchema,
+    ManualTriggerSchema,
+  ])
+);
 
 export type Trigger = z.infer<typeof TriggerSchema>;
 
@@ -33,35 +35,41 @@ export type Trigger = z.infer<typeof TriggerSchema>;
 const WORKFLOW_EVENTS_VALUES = ['ignore', 'allow-all', 'avoid-loop'] as const;
 export type WorkflowEventsValue = (typeof WORKFLOW_EVENTS_VALUES)[number];
 export const WORKFLOW_EVENTS_VALUES_SET = new Set<string>(WORKFLOW_EVENTS_VALUES);
-export const WorkflowEventsSchema = z.enum(WORKFLOW_EVENTS_VALUES);
+export const WorkflowEventsSchema = lazySchema(() => z.enum(WORKFLOW_EVENTS_VALUES));
 
 /** Schema for the `on` block of custom triggers (KQL condition to filter when the workflow runs). */
-const CustomTriggerOnObjectSchema = z.object({
-  condition: z.string().max(IF_CONDITION_MAX_LENGTH).optional(),
-  /**
-   * How this trigger responds when the event was emitted from a workflow-attributed chain:
-   * `ignore` — do not schedule;
-   * `avoid-loop` — schedule with cycle guard (default when omitted);
-   * `allow-all` — schedule without cycle guard (max chain depth still applies).
-   */
-  workflowEvents: WorkflowEventsSchema.optional(),
-});
-const CustomTriggerOnSchema = CustomTriggerOnObjectSchema.optional();
+const CustomTriggerOnObjectSchema = lazySchema(() =>
+  z.object({
+    condition: z.string().max(IF_CONDITION_MAX_LENGTH).optional(),
+    /**
+     * How this trigger responds when the event was emitted from a workflow-attributed chain:
+     * `ignore` — do not schedule;
+     * `avoid-loop` — schedule with cycle guard (default when omitted);
+     * `allow-all` — schedule without cycle guard (max chain depth still applies).
+     */
+    workflowEvents: WorkflowEventsSchema.optional(),
+  })
+);
+const CustomTriggerOnSchema = lazySchema(() => CustomTriggerOnObjectSchema.optional());
 export type CustomTriggerOn = z.infer<typeof CustomTriggerOnObjectSchema>;
 
 const CONNECTOR_ID_REQUIRED_ERROR = 'connector-id is required and must not be empty';
 
-const connectorIdSchema = z
-  .string()
-  .min(1, CONNECTOR_ID_REQUIRED_ERROR)
-  .max(CONNECTOR_ID_MAX_LENGTH)
-  .regex(/^\S(?:.*\S)?$/, CONNECTOR_ID_REQUIRED_ERROR);
+const connectorIdSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1, CONNECTOR_ID_REQUIRED_ERROR)
+    .max(CONNECTOR_ID_MAX_LENGTH)
+    .regex(/^\S(?:.*\S)?$/, CONNECTOR_ID_REQUIRED_ERROR)
+);
 
-const CustomTriggerShapeSchema = z.object({
-  type: z.string(),
-  'connector-id': z.string().optional(),
-  on: CustomTriggerOnSchema,
-});
+const CustomTriggerShapeSchema = lazySchema(() =>
+  z.object({
+    type: z.string(),
+    'connector-id': z.string().optional(),
+    on: CustomTriggerOnSchema,
+  })
+);
 
 /**
  * Runtime YAML shape for a registered (non-built-in) trigger.

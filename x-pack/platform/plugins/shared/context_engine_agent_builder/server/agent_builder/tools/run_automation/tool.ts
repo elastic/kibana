@@ -15,7 +15,7 @@ import {
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { MAX_AI_INDEX_AUTOMATION_LENGTH } from '@kbn/context-engine-plugin/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -27,25 +27,27 @@ import { tryResolveSavedWorkflowById } from '../save_automation/handler';
 
 const MAX_PILOT_SIZE = 10;
 
-const runAutomationSchema = z.object({
-  workflowId: z
-    .string()
-    .min(1)
-    .max(MAX_AI_INDEX_AUTOMATION_LENGTH)
-    .describe('Id of the saved workflow automation to run.'),
-  pilotSize: z
-    .number()
-    .int()
-    .min(1)
-    .max(MAX_PILOT_SIZE)
-    .optional()
-    .describe(
-      'Run a pilot over only this many items (documents, units or sources) instead of the full ' +
-        'corpus, and wait for it to finish so the result reports its duration. Works on ' +
-        'automations installed from the document_orchestration, unit_profile or index_metadata ' +
-        'template. Omit for a full run.'
-    ),
-});
+const runAutomationSchema = lazySchema(() =>
+  z.object({
+    workflowId: z
+      .string()
+      .min(1)
+      .max(MAX_AI_INDEX_AUTOMATION_LENGTH)
+      .describe('Id of the saved workflow automation to run.'),
+    pilotSize: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_PILOT_SIZE)
+      .optional()
+      .describe(
+        'Run a pilot over only this many items (documents, units or sources) instead of the full ' +
+          'corpus, and wait for it to finish so the result reports its duration. Works on ' +
+          'automations installed from the document_orchestration, unit_profile or index_metadata ' +
+          'template. Omit for a full run.'
+      ),
+  })
+);
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 

@@ -7,41 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const asCodeMetaSchema = z
-  .object({
-    created_at: z
-      .string()
-      .optional()
-      .meta({ description: 'Timestamp when the object was created (ISO 8601).' }),
-    created_by: z
-      .string()
-      .optional()
-      .meta({ description: 'User profile ID of the user who created the object.' }),
-    managed: z.boolean().optional().meta({
-      description: 'When `true`, the object is managed by Kibana and cannot be edited by users.',
-    }),
-    owner: z
-      .string()
-      .optional()
-      .meta({ description: 'Identifier of the plugin or team that owns this object.' }),
-    updated_at: z
-      .string()
-      .optional()
-      .meta({ description: 'Timestamp when the object was last updated (ISO 8601).' }),
-    updated_by: z
-      .string()
-      .optional()
-      .meta({ description: 'User profile ID of the user who last updated the object.' }),
-    version: z
-      .string()
-      .optional()
-      .meta({ description: 'Internal version identifier for optimistic concurrency control.' }),
-  })
-  .strict()
-  .meta({
-    id: 'kbn-as-code-meta',
-  });
+export const asCodeMetaSchema = lazySchema(() =>
+  z
+    .object({
+      created_at: z
+        .string()
+        .optional()
+        .meta({ description: 'Timestamp when the object was created (ISO 8601).' }),
+      created_by: z
+        .string()
+        .optional()
+        .meta({ description: 'User profile ID of the user who created the object.' }),
+      managed: z.boolean().optional().meta({
+        description: 'When `true`, the object is managed by Kibana and cannot be edited by users.',
+      }),
+      owner: z
+        .string()
+        .optional()
+        .meta({ description: 'Identifier of the plugin or team that owns this object.' }),
+      updated_at: z
+        .string()
+        .optional()
+        .meta({ description: 'Timestamp when the object was last updated (ISO 8601).' }),
+      updated_by: z
+        .string()
+        .optional()
+        .meta({ description: 'User profile ID of the user who last updated the object.' }),
+      version: z
+        .string()
+        .optional()
+        .meta({ description: 'Internal version identifier for optimistic concurrency control.' }),
+    })
+    .strict()
+    .meta({
+      id: 'kbn-as-code-meta',
+    })
+);
 
 export type AsCodeMeta = z.output<typeof asCodeMetaSchema>;

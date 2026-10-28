@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   investigationNotificationDestinationSchema,
   MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
@@ -18,24 +18,28 @@ import {
  */
 export const MAX_PROMPT_TEMPLATE_LENGTH = MAX_AUTOMATION_INSTRUCTIONS_LENGTH;
 
-export const promptTemplateSchema = z.string().max(MAX_PROMPT_TEMPLATE_LENGTH);
+export const promptTemplateSchema = lazySchema(() => z.string().max(MAX_PROMPT_TEMPLATE_LENGTH));
 
-export const automationCompletionInputSchema = z.object({
-  action: z.enum(['create_investigation', 'post_to_slack', 'silent']).optional(),
-  targetMode: z.enum(['thread', 'channel', 'self']).optional(),
-  destination: z.string().max(500).optional(),
-  connectorId: investigationNotificationDestinationSchema.shape.connector_id.optional(),
-});
+export const automationCompletionInputSchema = lazySchema(() =>
+  z.object({
+    action: z.enum(['create_investigation', 'post_to_slack', 'silent']).optional(),
+    targetMode: z.enum(['thread', 'channel', 'self']).optional(),
+    destination: z.string().max(500).optional(),
+    connectorId: investigationNotificationDestinationSchema.shape.connector_id.optional(),
+  })
+);
 
-export const automationCompletionUpdateSchema = automationCompletionInputSchema.extend({
-  action: automationCompletionInputSchema.shape.action.nullable(),
-  targetMode: automationCompletionInputSchema.shape.targetMode.nullable(),
-  destination: automationCompletionInputSchema.shape.destination.nullable(),
-  connectorId: automationCompletionInputSchema.shape.connectorId.nullable(),
-});
+export const automationCompletionUpdateSchema = lazySchema(() =>
+  automationCompletionInputSchema.extend({
+    action: automationCompletionInputSchema.shape.action.nullable(),
+    targetMode: automationCompletionInputSchema.shape.targetMode.nullable(),
+    destination: automationCompletionInputSchema.shape.destination.nullable(),
+    connectorId: automationCompletionInputSchema.shape.connectorId.nullable(),
+  })
+);
 
-export const automationCompletionSchema = automationCompletionInputSchema.superRefine(
-  (completion, context) => {
+export const automationCompletionSchema = lazySchema(() =>
+  automationCompletionInputSchema.superRefine((completion, context) => {
     if (
       completion.action === 'post_to_slack' &&
       completion.targetMode === 'channel' &&
@@ -47,5 +51,5 @@ export const automationCompletionSchema = automationCompletionInputSchema.superR
         message: 'A Slack channel destination is required',
       });
     }
-  }
+  })
 );

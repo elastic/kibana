@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
@@ -16,9 +16,11 @@ import {
 } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { IFilesystemService } from '@kbn/agent-builder-server/runner';
 
-const schema = z.object({
-  path: z.string().describe('Absolute path of the file to read'),
-});
+const schema = lazySchema(() =>
+  z.object({
+    path: z.string().describe('Absolute path of the file to read'),
+  })
+);
 
 const SAFEGUARD_TOKEN_COUNT = 10_000;
 

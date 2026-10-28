@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type {
   CoreSetup,
   CoreStart,
@@ -25,15 +25,17 @@ import type {
 import { getUiSettings } from './ui_settings';
 import { NAV_CUSTOMIZATION_STORAGE_KEY } from '../common/constants';
 
-const navCustomizationSchema = z.object({
-  moves: z.array(
-    z.object({
-      id: z.string().max(100),
-      afterId: z.string().max(100).nullable(),
-    })
-  ),
-  hidden: z.array(z.string().max(100)),
-});
+const navCustomizationSchema = lazySchema(() =>
+  z.object({
+    moves: z.array(
+      z.object({
+        id: z.string().max(100),
+        afterId: z.string().max(100).nullable(),
+      })
+    ),
+    hidden: z.array(z.string().max(100)),
+  })
+);
 
 export class NavigationServerPlugin
   implements

@@ -6,7 +6,7 @@
  */
 
 import { createPrompt } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import systemPromptText from './system_prompt.text';
 import userPromptText from './user_prompt.text';
 
@@ -50,10 +50,12 @@ const MERGE_CORRECTNESS_OUTPUT_SCHEMA = {
 export const MergeCorrectnessPrompt = createPrompt({
   name: 'merge_correctness_analysis',
   description: 'Evaluate whether feature merges based on shared id are semantically correct',
-  input: z.object({
-    source_id: z.string(),
-    merge_events: z.string(),
-  }),
+  input: lazySchema(() =>
+    z.object({
+      source_id: z.string(),
+      merge_events: z.string(),
+    })
+  ),
 })
   .version({
     system: {

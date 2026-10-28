@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { omit, isEmpty } from 'lodash';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { AlertConfigSchema } from '../../../common/runtime_types/schemas/alert_config_schema';
 import { formatZodErrors } from '../../../common/runtime_types/schemas/format_errors';
 import { isJsonObjectString } from '../../../common/utils/is_json_object_string';
@@ -530,7 +530,7 @@ export const normalizeAPIConfig = (
   }
   return { formattedConfig };
 };
-const RecordSchema = z.record(z.string(), z.string());
+const RecordSchema = lazySchema(() => z.record(z.string(), z.string()));
 
 const validateParams = (jsonString: string | any, previousParams?: string) => {
   if (typeof jsonString === 'string') {

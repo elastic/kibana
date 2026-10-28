@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, type ZodType } from '@kbn/zod/v4';
+import { z, type ZodType, lazySchema } from '@kbn/zod/v4';
 import type { UserStorageDefinition } from '@kbn/core-user-storage-common';
 import {
   DATE_RANGE_PICKER_PRESETS_KEY,
@@ -16,23 +16,27 @@ import {
   type StoredPresets,
 } from '@kbn/date-range-picker-presets-common';
 
-const presetItemSchema = z.object({
-  start: z.string().max(200),
-  end: z.string().max(200),
-  label: z.string().max(255).optional(),
-});
+const presetItemSchema = lazySchema(() =>
+  z.object({
+    start: z.string().max(200),
+    end: z.string().max(200),
+    label: z.string().max(255).optional(),
+  })
+);
 
 // v1 stays accepted so legacy documents keep validating; writes always emit v2.
-const storedPresetsSchema: ZodType<StoredPresets> = z.discriminatedUnion('version', [
-  z.object({
-    version: z.literal(1),
-    presets: z.array(presetItemSchema).max(MAX_PRESETS).nullable(),
-  }),
-  z.object({
-    version: z.literal(2),
-    presets: z.array(presetItemSchema).max(MAX_PRESETS),
-  }),
-]);
+const storedPresetsSchema: ZodType<StoredPresets> = lazySchema(() =>
+  z.discriminatedUnion('version', [
+    z.object({
+      version: z.literal(1),
+      presets: z.array(presetItemSchema).max(MAX_PRESETS).nullable(),
+    }),
+    z.object({
+      version: z.literal(2),
+      presets: z.array(presetItemSchema).max(MAX_PRESETS),
+    }),
+  ])
+);
 
 export const dateRangePickerPresetsStorageDefinition: UserStorageDefinition<StoredPresets> = {
   schema: storedPresetsSchema,

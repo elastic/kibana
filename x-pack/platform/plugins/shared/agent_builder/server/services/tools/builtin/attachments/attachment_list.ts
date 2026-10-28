@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 
-const attachmentListSchema = z.object({
-  include_deleted: z
-    .boolean()
-    .optional()
-    .describe('Whether to include deleted attachments in the list (default: false)'),
-});
+const attachmentListSchema = lazySchema(() =>
+  z.object({
+    include_deleted: z
+      .boolean()
+      .optional()
+      .describe('Whether to include deleted attachments in the list (default: false)'),
+  })
+);
 
 /**
  * Creates the attachment_list tool.

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isEmpty } from 'lodash';
 import type { LoghubSystem } from './read_loghub_system_files';
 import { getFileOrThrow } from '../utils';
@@ -40,52 +40,56 @@ export interface LoghubQuery {
   query: DslQuery;
 }
 
-export const querySchema: z.ZodType<LoghubQuery> = z.object({
-  id: z.string(),
-  title: z.string(),
-  description: z.string(),
-  query: z
-    .union([
-      z.object({}, {}).passthrough(),
-      z.string().transform((arg) => JSON.parse(arg) as object),
-    ])
-    .refine(
-      (arg): arg is Record<string, unknown> => {
-        return !isEmpty(arg);
-      },
-      { message: `Object cannot be empty` }
-    )
-    .pipe(
-      z.object({
-        bool: z.object({
-          filter: z.array(
-            z.union([
-              z.object({ regexp: z.object({ message: z.string() }) }),
-              z.object({
-                match: z.object({
-                  message: z.union([
-                    z.string(),
-                    z.object({
-                      query: z.string(),
-                      operator: z
-                        .string()
-                        .toUpperCase()
-                        .pipe(z.union([z.literal('AND'), z.literal('OR')]))
-                        .optional(),
-                    }),
-                  ]),
+export const querySchema: z.ZodType<LoghubQuery> = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    title: z.string(),
+    description: z.string(),
+    query: z
+      .union([
+        z.object({}, {}).passthrough(),
+        z.string().transform((arg) => JSON.parse(arg) as object),
+      ])
+      .refine(
+        (arg): arg is Record<string, unknown> => {
+          return !isEmpty(arg);
+        },
+        { message: `Object cannot be empty` }
+      )
+      .pipe(
+        z.object({
+          bool: z.object({
+            filter: z.array(
+              z.union([
+                z.object({ regexp: z.object({ message: z.string() }) }),
+                z.object({
+                  match: z.object({
+                    message: z.union([
+                      z.string(),
+                      z.object({
+                        query: z.string(),
+                        operator: z
+                          .string()
+                          .toUpperCase()
+                          .pipe(z.union([z.literal('AND'), z.literal('OR')]))
+                          .optional(),
+                      }),
+                    ]),
+                  }),
                 }),
-              }),
-            ])
-          ),
-        }),
-      })
-    ),
-});
+              ])
+            ),
+          }),
+        })
+      ),
+  })
+);
 
-export const queryFileSchema = z.object({
-  queries: z.array(querySchema),
-});
+export const queryFileSchema = lazySchema(() =>
+  z.object({
+    queries: z.array(querySchema),
+  })
+);
 
 export function tokenize(text: string): string[] {
   return text

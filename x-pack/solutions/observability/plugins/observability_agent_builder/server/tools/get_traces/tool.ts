@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
@@ -31,45 +31,47 @@ import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_GET_TRACES_TOOL_ID = 'observability.get_traces';
 
-const getTracesSchema = z.object({
-  ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  index: z.string().max(MAX_INDEX_PATTERN_LENGTH).describe(indexDescription).optional(),
-  kqlFilter: z
-    .string()
-    .max(MAX_KQL_FILTER_LENGTH)
-    .describe(
-      'KQL filter used to find seed Observability documents (logs, transactions, spans, and errors) within the selected time range. Examples: \'service.name: "payment-service"\', \'trace.id: "abc123"\', \'_id: "a1b2c3"\'. The tool discovers one or more `trace.id` values from matching documents (up to `maxTraces`) and returns Observability documents grouped by trace.id.'
-    ),
-  maxTraces: z
-    .number()
-    .int()
-    .min(1)
-    .max(DEFAULT_MAX_TRACES * 2)
-    .optional()
-    .default(DEFAULT_MAX_TRACES)
-    .describe(
-      `Maximum number of traces to return. Defaults to ${DEFAULT_MAX_TRACES}. Hard limit: ${
-        DEFAULT_MAX_TRACES * 2
-      }.`
-    ),
-  maxDocsPerTrace: z
-    .number()
-    .int()
-    .min(1)
-    .max(DEFAULT_MAX_DOCS_PER_TRACE * 2)
-    .optional()
-    .default(DEFAULT_MAX_DOCS_PER_TRACE)
-    .describe(
-      `Maximum number of documents to return per trace. Defaults to ${DEFAULT_MAX_DOCS_PER_TRACE}. Hard limit: ${
-        DEFAULT_MAX_DOCS_PER_TRACE * 2
-      }.`
-    ),
+const getTracesSchema = lazySchema(() =>
+  z.object({
+    ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
+    index: z.string().max(MAX_INDEX_PATTERN_LENGTH).describe(indexDescription).optional(),
+    kqlFilter: z
+      .string()
+      .max(MAX_KQL_FILTER_LENGTH)
+      .describe(
+        'KQL filter used to find seed Observability documents (logs, transactions, spans, and errors) within the selected time range. Examples: \'service.name: "payment-service"\', \'trace.id: "abc123"\', \'_id: "a1b2c3"\'. The tool discovers one or more `trace.id` values from matching documents (up to `maxTraces`) and returns Observability documents grouped by trace.id.'
+      ),
+    maxTraces: z
+      .number()
+      .int()
+      .min(1)
+      .max(DEFAULT_MAX_TRACES * 2)
+      .optional()
+      .default(DEFAULT_MAX_TRACES)
+      .describe(
+        `Maximum number of traces to return. Defaults to ${DEFAULT_MAX_TRACES}. Hard limit: ${
+          DEFAULT_MAX_TRACES * 2
+        }.`
+      ),
+    maxDocsPerTrace: z
+      .number()
+      .int()
+      .min(1)
+      .max(DEFAULT_MAX_DOCS_PER_TRACE * 2)
+      .optional()
+      .default(DEFAULT_MAX_DOCS_PER_TRACE)
+      .describe(
+        `Maximum number of documents to return per trace. Defaults to ${DEFAULT_MAX_DOCS_PER_TRACE}. Hard limit: ${
+          DEFAULT_MAX_DOCS_PER_TRACE * 2
+        }.`
+      ),
 
-  fields: z
-    .array(z.string().max(MAX_SHORT_STRING_LENGTH))
-    .default(DEFAULT_TRACE_FIELDS)
-    .describe('Fields to include in the returned documents.'),
-});
+    fields: z
+      .array(z.string().max(MAX_SHORT_STRING_LENGTH))
+      .default(DEFAULT_TRACE_FIELDS)
+      .describe('Fields to include in the returned documents.'),
+  })
+);
 
 export function createGetTracesTool({
   core,

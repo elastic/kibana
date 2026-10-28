@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { internalTools, ToolType } from '@kbn/agent-builder-common';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type {
@@ -21,9 +21,11 @@ import {
   getSkillReferencedContentAbsolutePath,
 } from '../../runner/store/volumes/skills/utils';
 
-const schema = z.object({
-  skill: z.string().describe('The skill name or path'),
-});
+const schema = lazySchema(() =>
+  z.object({
+    skill: z.string().describe('The skill name or path'),
+  })
+);
 
 /**
  * Identity transform. Returning the original results unchanged causes the

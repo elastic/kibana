@@ -13,7 +13,7 @@ import {
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
@@ -26,7 +26,9 @@ import type {
 } from '../../../common/experiments/run_experiment';
 import type { RouteDependencies } from '../register_routes';
 
-const executionParamsSchema = z.object({ workflowExecutionId: z.string().max(MAX_ID_LENGTH) });
+const executionParamsSchema = lazySchema(() =>
+  z.object({ workflowExecutionId: z.string().max(MAX_ID_LENGTH) })
+);
 
 const WORKFLOWS_UNAVAILABLE = {
   statusCode: 501 as const,

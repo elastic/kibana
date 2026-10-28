@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import {
@@ -29,24 +29,27 @@ export { errorResult, otherResult, toErrorResult } from '../../common/tool_resul
 /** How many examples `get_dataset` returns. The rest are reported as omitted. */
 export const MAX_RETURNED_DATASET_EXAMPLES = 50;
 
-export const datasetNameSchema = z
-  .string()
-  .min(1)
-  .max(MAX_DATASET_NAME_LENGTH)
-  .describe('Dataset name. Unique within the current space.');
+export const datasetNameSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(MAX_DATASET_NAME_LENGTH)
+    .describe('Dataset name. Unique within the current space.')
+);
 
-export const datasetDescriptionSchema = z
-  .string()
-  .max(MAX_DATASET_DESCRIPTION_LENGTH)
-  .describe('What the dataset is for.');
+export const datasetDescriptionSchema = lazySchema(() =>
+  z.string().max(MAX_DATASET_DESCRIPTION_LENGTH).describe('What the dataset is for.')
+);
 
-export const datasetIdSchema = z
-  .string()
-  .min(1)
-  .max(MAX_ID_LENGTH)
-  .describe(
-    `Dataset id, as returned by ${evalsDatasetTools.listDatasets} or ${evalsDatasetTools.getDataset}.`
-  );
+export const datasetIdSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(MAX_ID_LENGTH)
+    .describe(
+      `Dataset id, as returned by ${evalsDatasetTools.listDatasets} or ${evalsDatasetTools.getDataset}.`
+    )
+);
 
 export const datasetTagsSchema = DatasetTags.describe(
   'Labels for what the dataset is about, for example "esql". Lowercased on write. Letters, numbers, and : . _ - only.'
@@ -66,12 +69,14 @@ export const datasetExampleSchema = AddExamplesPayload.extend({
   metadata: examplePayloadShape.metadata.describe('Optional extra fields stored with the example.'),
 });
 
-export const datasetExamplesSchema = z
-  .array(datasetExampleSchema)
-  .max(MAX_EXAMPLES_PER_DATASET)
-  .describe(
-    `Examples to store. A dataset holds at most ${MAX_EXAMPLES_PER_DATASET} examples. input is what is sent to the target; output is the expected output.`
-  );
+export const datasetExamplesSchema = lazySchema(() =>
+  z
+    .array(datasetExampleSchema)
+    .max(MAX_EXAMPLES_PER_DATASET)
+    .describe(
+      `Examples to store. A dataset holds at most ${MAX_EXAMPLES_PER_DATASET} examples. input is what is sent to the target; output is the expected output.`
+    )
+);
 
 export type DatasetClient = ReturnType<
   NonNullable<EvalsPluginStart['datasetService']>['getClient']

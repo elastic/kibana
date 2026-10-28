@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import qs from 'query-string';
@@ -59,14 +59,16 @@ export const dependencies = {
     title: DependenciesInventoryTitle,
     element: <DependenciesInventoryTable />,
     searchBar: <DependenciesInventorySearchBar />,
-    params: z.object({
-      query: z
-        .object({
-          comparisonEnabled: toBooleanFromString,
-        })
-        .merge(offsetSchema)
-        .optional(),
-    }),
+    params: lazySchema(() =>
+      z.object({
+        query: z
+          .object({
+            comparisonEnabled: toBooleanFromString,
+          })
+          .merge(offsetSchema)
+          .optional(),
+      })
+    ),
   }),
   '/dependencies': {
     element: (
@@ -74,15 +76,17 @@ export const dependencies = {
         <Outlet />
       </DependencyDetailView>
     ),
-    params: z.object({
-      query: z
-        .object({
-          comparisonEnabled: toBooleanFromString,
-          dependencyName: z.string(),
-        })
-        .merge(offsetSchema)
-        .optional(),
-    }),
+    params: lazySchema(() =>
+      z.object({
+        query: z
+          .object({
+            comparisonEnabled: toBooleanFromString,
+            dependencyName: z.string(),
+          })
+          .merge(offsetSchema)
+          .optional(),
+      })
+    ),
     children: {
       '/dependencies': {
         element: <RedirectDependenciesToDependenciesOverview />,
@@ -91,28 +95,30 @@ export const dependencies = {
         element: <DependencyDetailOperations />,
       },
       '/dependencies/operation': {
-        params: z.object({
-          query: z
-            .object({
-              spanName: z.string(),
-              detailTab: z.union([
-                z.literal(TransactionTab.timeline),
-                z.literal(TransactionTab.metadata),
-                z.literal(TransactionTab.logs),
-                z.literal(TransactionTab.genAi),
-              ]),
-              showCriticalPath: toBooleanFromString,
-            })
-            .merge(
-              z.object({
-                spanId: z.string().optional(),
-                sampleRangeFrom: z.coerce.number().optional(),
-                sampleRangeTo: z.coerce.number().optional(),
-                waterfallItemId: z.string().optional(),
-                flyoutDetailTab: z.string().optional(),
+        params: lazySchema(() =>
+          z.object({
+            query: z
+              .object({
+                spanName: z.string(),
+                detailTab: z.union([
+                  z.literal(TransactionTab.timeline),
+                  z.literal(TransactionTab.metadata),
+                  z.literal(TransactionTab.logs),
+                  z.literal(TransactionTab.genAi),
+                ]),
+                showCriticalPath: toBooleanFromString,
               })
-            ),
-        }),
+              .merge(
+                z.object({
+                  spanId: z.string().optional(),
+                  sampleRangeFrom: z.coerce.number().optional(),
+                  sampleRangeTo: z.coerce.number().optional(),
+                  waterfallItemId: z.string().optional(),
+                  flyoutDetailTab: z.string().optional(),
+                })
+              ),
+          })
+        ),
         defaults: {
           query: {
             detailTab: TransactionTab.timeline,

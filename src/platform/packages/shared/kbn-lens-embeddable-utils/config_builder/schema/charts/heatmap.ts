@@ -164,11 +164,13 @@ const heatmapAxesConfigESQLShape = {
 };
 
 const heatmapConfigMetricOptionsShape = {
-  color: z
-    .union([colorByValueSchema, autoColorSchema])
-    .default(AUTO_COLOR)
-    .optional()
-    .meta({ description: 'Color scale configuration for the heatmap cells.' }),
+  color: lazySchema(() =>
+    z
+      .union([colorByValueSchema, autoColorSchema])
+      .default(AUTO_COLOR)
+      .optional()
+      .meta({ description: 'Color scale configuration for the heatmap cells.' })
+  ),
 };
 
 export const heatmapConfigSchemaNoESQL = lazySchema(() =>

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { AnomalyDetectorType, Environment, SloStatus } from '@kbn/apm-types';
@@ -41,22 +41,24 @@ export interface ServicesItemsResponse {
 
 export const servicesListRoute = defineRoute<ServicesItemsResponse>()({
   endpoint: 'GET /internal/apm/services',
-  params: z.object({
-    query: z
-      .object({
-        searchQuery: z.string(),
-        serviceGroup: z.string(),
-      })
-      .partial()
-      .merge(probabilitySchema)
-      .merge(serviceTransactionDataSourceSchema)
-      .merge(
-        z.object({
-          useDurationSummary: BooleanFromString.default(false),
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({
+          searchQuery: z.string(),
+          serviceGroup: z.string(),
         })
-      )
-      .merge(environmentSchema)
-      .merge(kuerySchema)
-      .merge(rangeSchema),
-  }),
+        .partial()
+        .merge(probabilitySchema)
+        .merge(serviceTransactionDataSourceSchema)
+        .merge(
+          z.object({
+            useDurationSummary: BooleanFromString.default(false),
+          })
+        )
+        .merge(environmentSchema)
+        .merge(kuerySchema)
+        .merge(rangeSchema),
+    })
+  ),
 });

@@ -13,7 +13,7 @@ import {
   type Detection,
 } from '@kbn/significant-events-schema';
 import { badRequest, notFound } from '@hapi/boom';
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { DetectionClient, StoredDetection } from '../../../lib/significant_events/detections';
@@ -41,42 +41,44 @@ const detectionsSearchRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    query: z.object({
-      from: isoDateTime().optional(),
-      to: isoDateTime().optional(),
-      page: z.coerce.number().int().min(1).optional(),
-      perPage: z.coerce.number().int().min(1).max(1000).optional(),
-      rule_uuid: z
-        .union([
-          z
-            .string()
-            .max(MAX_ID_LENGTH)
-            .transform((value) => [value]),
-          z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_DETECTION_RULE_UUIDS),
-        ])
-        .optional(),
-      rule_name: z.string().max(MAX_RULE_NAME_LENGTH).optional(),
-      search: z.string().max(MAX_RULE_NAME_LENGTH).optional(),
-      change_point_type: z
-        .union([
-          z.enum(CHANGE_POINT_TYPES).transform((value) => [value]),
-          z.array(z.enum(CHANGE_POINT_TYPES)).max(CHANGE_POINT_TYPES.length),
-        ])
-        .optional(),
-      entityIds: z
-        .union([
-          z
-            .string()
-            .min(1)
-            .max(MAX_ID_LENGTH)
-            .transform((id) => [id]),
-          z.array(z.string().min(1).max(MAX_ID_LENGTH)).max(MAX_DETECTION_ENTITY_IDS),
-        ])
-        .optional(),
-      unassignedEntities: BooleanFromString.optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: z.object({
+        from: isoDateTime().optional(),
+        to: isoDateTime().optional(),
+        page: z.coerce.number().int().min(1).optional(),
+        perPage: z.coerce.number().int().min(1).max(1000).optional(),
+        rule_uuid: z
+          .union([
+            z
+              .string()
+              .max(MAX_ID_LENGTH)
+              .transform((value) => [value]),
+            z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_DETECTION_RULE_UUIDS),
+          ])
+          .optional(),
+        rule_name: z.string().max(MAX_RULE_NAME_LENGTH).optional(),
+        search: z.string().max(MAX_RULE_NAME_LENGTH).optional(),
+        change_point_type: z
+          .union([
+            z.enum(CHANGE_POINT_TYPES).transform((value) => [value]),
+            z.array(z.enum(CHANGE_POINT_TYPES)).max(CHANGE_POINT_TYPES.length),
+          ])
+          .optional(),
+        entityIds: z
+          .union([
+            z
+              .string()
+              .min(1)
+              .max(MAX_ID_LENGTH)
+              .transform((id) => [id]),
+            z.array(z.string().min(1).max(MAX_ID_LENGTH)).max(MAX_DETECTION_ENTITY_IDS),
+          ])
+          .optional(),
+        unassignedEntities: BooleanFromString.optional(),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -141,11 +143,13 @@ const detectionByIdRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    path: z.object({
-      id: z.string().min(1).max(MAX_ID_LENGTH),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().min(1).max(MAX_ID_LENGTH),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, server }): Promise<Detection> => {
     const { getDetectionClient, licensing } = await getScopedClients({ request });
 
@@ -173,11 +177,13 @@ const detectionsHistoryRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    path: z.object({
-      id: z.string().max(255),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().max(255),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -196,19 +202,21 @@ const detectionsHistoryRoute = createServerRoute({
 // Bounds one request; a Detection run writes at most one document per scanned rule.
 const MAX_DETECTIONS_PER_REQUEST = 1000;
 
-const createDetectionSchema = z.object({
-  detection_id: z.string().max(MAX_ID_LENGTH),
-  rule_uuid: z.string().max(MAX_ID_LENGTH),
-  rule_name: z.string().max(MAX_RULE_NAME_LENGTH).optional(),
-  source_id: z.string().max(MAX_ID_LENGTH).optional(),
-  // Not narrowed to CHANGE_POINT_TYPES: Elasticsearch can also report `indeterminable`,
-  // which the Detection workflow persists like any other non-stationary observation.
-  change_point_type: z.string().min(1).max(64),
-  p_value: z.number(),
-  severity_score: z.number().min(0).max(100).optional(),
-  alert_index: z.string().max(MAX_ID_LENGTH).optional(),
-  workflow_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
-});
+const createDetectionSchema = lazySchema(() =>
+  z.object({
+    detection_id: z.string().max(MAX_ID_LENGTH),
+    rule_uuid: z.string().max(MAX_ID_LENGTH),
+    rule_name: z.string().max(MAX_RULE_NAME_LENGTH).optional(),
+    source_id: z.string().max(MAX_ID_LENGTH).optional(),
+    // Not narrowed to CHANGE_POINT_TYPES: Elasticsearch can also report `indeterminable`,
+    // which the Detection workflow persists like any other non-stationary observation.
+    change_point_type: z.string().min(1).max(64),
+    p_value: z.number(),
+    severity_score: z.number().min(0).max(100).optional(),
+    alert_index: z.string().max(MAX_ID_LENGTH).optional(),
+    workflow_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
+  })
+);
 
 /** Stamps server-side `@timestamp` and appends to the current space; Kibana writes as its internal user. */
 const appendDetectionDocuments = async ({
@@ -239,11 +247,13 @@ const createDetectionsRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    body: z.object({
-      detections: z.array(createDetectionSchema).min(1).max(MAX_DETECTIONS_PER_REQUEST),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        detections: z.array(createDetectionSchema).min(1).max(MAX_DETECTIONS_PER_REQUEST),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -273,14 +283,19 @@ const markDetectionsProcessedRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    body: z.object({
-      detection_ids: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(MAX_DETECTIONS_PER_REQUEST),
-      processed_by: z.string().max(MAX_ID_LENGTH),
-      /** Set when the classifier, not the agent, closed these detections; names the event it rests on. */
-      skip: skipMarkerSchema.optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        detection_ids: z
+          .array(z.string().max(MAX_ID_LENGTH))
+          .min(1)
+          .max(MAX_DETECTIONS_PER_REQUEST),
+        processed_by: z.string().max(MAX_ID_LENGTH),
+        /** Set when the classifier, not the agent, closed these detections; names the event it rests on. */
+        skip: skipMarkerSchema.optional(),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -318,12 +333,14 @@ const markRulesScannedRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    body: z.object({
-      rule_uuids: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(MAX_DETECTIONS_PER_REQUEST),
-      scanned_by: z.string().max(MAX_ID_LENGTH),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        rule_uuids: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(MAX_DETECTIONS_PER_REQUEST),
+        scanned_by: z.string().max(MAX_ID_LENGTH),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,

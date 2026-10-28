@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import { investigationEvidenceSchema, MAX_EVIDENCE_TEXT_LENGTH } from '../../../common/evidence';
 import {
@@ -22,60 +22,64 @@ import { attachImpactFromTool } from '../attachments/attach_impact_from_tool';
 import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
 import type { ImpactService } from '../services/impact_service';
 
-const setImpactEntitySchema = z.object({
-  name: z
-    .string()
-    .min(1)
-    .max(MAX_ENTITY_NAME_LENGTH)
-    .describe('Human-readable name: service, host, or component. Prefer service names.'),
-  id: z
-    .string()
-    .min(1)
-    .max(MAX_ENTITY_ID_LENGTH)
-    .optional()
-    .describe('Stable entity id, when you have one. Defaults to the name.'),
-  type: z
-    .string()
-    .min(1)
-    .max(MAX_ENTITY_ID_LENGTH)
-    .optional()
-    .describe('Entity category. Prefer "service"; use "host", "database", etc. otherwise.'),
-  feature_id: z
-    .string()
-    .min(1)
-    .max(MAX_ENTITY_ID_LENGTH)
-    .optional()
-    .describe('Knowledge Indicator feature id, when this entity is backed by one.'),
-  stream_name: z.string().min(1).max(MAX_ENTITY_ID_LENGTH).optional(),
-  evidence: investigationEvidenceSchema
-    .optional()
-    .describe("Evidence of this entity's impact, ideally a chart of its failure signal."),
-});
+const setImpactEntitySchema = lazySchema(() =>
+  z.object({
+    name: z
+      .string()
+      .min(1)
+      .max(MAX_ENTITY_NAME_LENGTH)
+      .describe('Human-readable name: service, host, or component. Prefer service names.'),
+    id: z
+      .string()
+      .min(1)
+      .max(MAX_ENTITY_ID_LENGTH)
+      .optional()
+      .describe('Stable entity id, when you have one. Defaults to the name.'),
+    type: z
+      .string()
+      .min(1)
+      .max(MAX_ENTITY_ID_LENGTH)
+      .optional()
+      .describe('Entity category. Prefer "service"; use "host", "database", etc. otherwise.'),
+    feature_id: z
+      .string()
+      .min(1)
+      .max(MAX_ENTITY_ID_LENGTH)
+      .optional()
+      .describe('Knowledge Indicator feature id, when this entity is backed by one.'),
+    stream_name: z.string().min(1).max(MAX_ENTITY_ID_LENGTH).optional(),
+    evidence: investigationEvidenceSchema
+      .optional()
+      .describe("Evidence of this entity's impact, ideally a chart of its failure signal."),
+  })
+);
 
-export const setImpactToolSchema = z.object({
-  summary: z
-    .string()
-    .min(1)
-    .max(MAX_EVIDENCE_TEXT_LENGTH)
-    .nullable()
-    .optional()
-    .describe(
-      'Business-facing account of the impact: what was affected, how badly, for how long, and how broadly (users, requests, regions). Pass null to remove it.'
-    ),
-  evidence: investigationEvidenceSchema
-    .nullable()
-    .optional()
-    .describe(
-      'Evidence backing the summary when you do not report entities, ideally a chart of the user-facing failure signal. Pass null to remove it.'
-    ),
-  entities: z
-    .array(setImpactEntitySchema)
-    .max(MAX_IMPACT_TOOL_ENTITIES)
-    .optional()
-    .describe(
-      'Only when two or more entities were affected in different ways, each with its own evidence. Replaces the stored list; pass [] to remove entities.'
-    ),
-});
+export const setImpactToolSchema = lazySchema(() =>
+  z.object({
+    summary: z
+      .string()
+      .min(1)
+      .max(MAX_EVIDENCE_TEXT_LENGTH)
+      .nullable()
+      .optional()
+      .describe(
+        'Business-facing account of the impact: what was affected, how badly, for how long, and how broadly (users, requests, regions). Pass null to remove it.'
+      ),
+    evidence: investigationEvidenceSchema
+      .nullable()
+      .optional()
+      .describe(
+        'Evidence backing the summary when you do not report entities, ideally a chart of the user-facing failure signal. Pass null to remove it.'
+      ),
+    entities: z
+      .array(setImpactEntitySchema)
+      .max(MAX_IMPACT_TOOL_ENTITIES)
+      .optional()
+      .describe(
+        'Only when two or more entities were affected in different ways, each with its own evidence. Replaces the stored list; pass [] to remove entities.'
+      ),
+  })
+);
 
 export type SetImpactToolParams = z.infer<typeof setImpactToolSchema>;
 

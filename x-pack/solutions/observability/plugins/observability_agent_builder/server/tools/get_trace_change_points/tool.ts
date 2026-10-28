@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -22,32 +22,34 @@ import { getToolHandler } from './handler';
 export const OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID =
   'observability.get_trace_change_points';
 
-const getTraceChangePointsSchema = z.object({
-  ...timeRangeSchemaRequired,
-  kqlFilter: z
-    .string()
-    .max(MAX_KQL_FILTER_LENGTH)
-    .optional()
-    .describe(
-      'KQL filter for traces. Examples: \'service.name: "my-service"\', \'host.name: "web-*"\'.'
-    ),
-  groupBy: z
-    .string()
-    .max(MAX_SHORT_STRING_LENGTH)
-    .default('service.name')
-    .describe(
-      dedent(`Field to group results by. Use low-cardinality fields. 
+const getTraceChangePointsSchema = lazySchema(() =>
+  z.object({
+    ...timeRangeSchemaRequired,
+    kqlFilter: z
+      .string()
+      .max(MAX_KQL_FILTER_LENGTH)
+      .optional()
+      .describe(
+        'KQL filter for traces. Examples: \'service.name: "my-service"\', \'host.name: "web-*"\'.'
+      ),
+    groupBy: z
+      .string()
+      .max(MAX_SHORT_STRING_LENGTH)
+      .default('service.name')
+      .describe(
+        dedent(`Field to group results by. Use low-cardinality fields. 
       Examples:
         - Service level: service.name, service.environment, service.version
         - Transaction level: transaction.name, transaction.type
         - Infrastructure level: host.name, container.id, kubernetes.pod.name       
       `)
-    ),
-  latencyType: z
-    .enum(['avg', 'p95', 'p99'])
-    .default('avg')
-    .describe('Aggregation type for latency change points analysis.'),
-});
+      ),
+    latencyType: z
+      .enum(['avg', 'p95', 'p99'])
+      .default('avg')
+      .describe('Aggregation type for latency change points analysis.'),
+  })
+);
 
 export function createGetTraceChangePointsTool({
   core,

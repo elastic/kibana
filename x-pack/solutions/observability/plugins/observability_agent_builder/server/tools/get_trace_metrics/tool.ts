@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -22,31 +22,33 @@ import { OBSERVABILITY_GET_HOSTS_TOOL_ID, OBSERVABILITY_GET_SERVICES_TOOL_ID } f
 
 export const OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID = 'observability.get_trace_metrics';
 
-const getTraceMetricsSchema = z.object({
-  ...timeRangeSchemaRequired,
-  kqlFilter: z
-    .string()
-    .max(MAX_KQL_FILTER_LENGTH)
-    .optional()
-    .describe(
-      'KQL filter to scope the data. Examples: \'service.name: "frontend"\', \'service.name: "checkout" AND transaction.name: "POST /api/cart"\', \'host.name: "web-*"\'.'
-    ),
-  groupBy: z
-    .string()
-    .max(MAX_SHORT_STRING_LENGTH)
-    .default('service.name')
-    .describe(
-      'Field to group results by. Common fields: "service.name", "transaction.name", "host.name", "container.id". Use low-cardinality fields for meaningful aggregations.'
-    ),
-  latencyType: z
-    .enum(['avg', 'p95', 'p99'])
-    .describe('Aggregation type for latency metric.')
-    .default('avg'),
-  sortBy: z
-    .enum(['latency', 'throughput', 'failureRate'])
-    .describe('Metric to sort the results by.')
-    .default('latency'),
-});
+const getTraceMetricsSchema = lazySchema(() =>
+  z.object({
+    ...timeRangeSchemaRequired,
+    kqlFilter: z
+      .string()
+      .max(MAX_KQL_FILTER_LENGTH)
+      .optional()
+      .describe(
+        'KQL filter to scope the data. Examples: \'service.name: "frontend"\', \'service.name: "checkout" AND transaction.name: "POST /api/cart"\', \'host.name: "web-*"\'.'
+      ),
+    groupBy: z
+      .string()
+      .max(MAX_SHORT_STRING_LENGTH)
+      .default('service.name')
+      .describe(
+        'Field to group results by. Common fields: "service.name", "transaction.name", "host.name", "container.id". Use low-cardinality fields for meaningful aggregations.'
+      ),
+    latencyType: z
+      .enum(['avg', 'p95', 'p99'])
+      .describe('Aggregation type for latency metric.')
+      .default('avg'),
+    sortBy: z
+      .enum(['latency', 'throughput', 'failureRate'])
+      .describe('Metric to sort the results by.')
+      .default('latency'),
+  })
+);
 
 export function createGetTraceMetricsTool({
   core,

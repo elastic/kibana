@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { MAX_ID_LENGTH, isEvalsOwnedWorkflow } from '@kbn/evals-plugin/common';
@@ -24,13 +24,15 @@ import { hasManageEvalsPrivilege } from '../../common/check_privileges';
 import type { EvalExperimentsToolDeps } from './deps';
 
 const saveSchema = evalExperimentConfigSchema.extend({
-  workflow_id: z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .optional()
-    .describe(
-      'Existing saved workflow id to update in place. Omit to create a new workflow (pass it to avoid duplicates when re-saving).'
-    ),
+  workflow_id: lazySchema(() =>
+    z
+      .string()
+      .max(MAX_ID_LENGTH)
+      .optional()
+      .describe(
+        'Existing saved workflow id to update in place. Omit to create a new workflow (pass it to avoid duplicates when re-saving).'
+      )
+  ),
 });
 
 /**

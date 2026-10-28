@@ -7,30 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   UnifiedHistogramSuggestionType,
   MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH,
 } from '@kbn/discover-session-constants';
 
-export const visContextSchema = z
-  .object({
-    suggestion_type: z
-      .enum([
-        UnifiedHistogramSuggestionType.lensSuggestion,
-        UnifiedHistogramSuggestionType.histogramForESQL,
-        UnifiedHistogramSuggestionType.histogramForDataView,
-      ])
-      .meta({
-        description:
-          'Chart suggestion type used by Discover to generate this histogram configuration.',
+export const visContextSchema = lazySchema(() =>
+  z
+    .object({
+      suggestion_type: z
+        .enum([
+          UnifiedHistogramSuggestionType.lensSuggestion,
+          UnifiedHistogramSuggestionType.histogramForESQL,
+          UnifiedHistogramSuggestionType.histogramForDataView,
+        ])
+        .meta({
+          description:
+            'Chart suggestion type used by Discover to generate this histogram configuration.',
+        }),
+      attributes: z.record(z.string().max(MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH), z.any()).meta({
+        description: 'Lens visualization attributes used to render the Discover chart.',
       }),
-    attributes: z.record(z.string().max(MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH), z.any()).meta({
-      description: 'Lens visualization attributes used to render the Discover chart.',
-    }),
-  })
-  .strict()
-  .meta({
-    description:
-      'The saved chart configuration. Discover reuses it when compatible with the tab’s current settings and query results; otherwise, it rebuilds the chart.',
-  });
+    })
+    .strict()
+    .meta({
+      description:
+        'The saved chart configuration. Discover reuses it when compatible with the tab’s current settings and query results; otherwise, it rebuilds the chart.',
+    })
+);

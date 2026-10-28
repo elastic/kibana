@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 /**
  * Zod schema for the LLM-generated portion of the compaction summary.
@@ -14,47 +14,49 @@ import { z } from '@kbn/zod';
  * Deterministic fields (tool_calls_summary, agent_actions) are extracted
  * programmatically and merged afterward.
  */
-export const llmCompactionSchema = z.object({
-  discussion_summary: z
-    .string()
-    .describe(
-      'A 2-6 sentence narrative summary of the conversation so far. Capture the main goal, progress made, and current state.'
-    ),
-  user_intent: z
-    .string()
-    .describe(
-      "A clear statement of what the user is trying to achieve. Start with a verb, e.g., 'Investigate slow query performance on the orders index'."
-    ),
-  entities: z
-    .array(
-      z.object({
-        type: z
-          .string()
-          .describe(
-            "The entity type. Currently only 'index' is supported — extract Elasticsearch index names, data views, or index patterns mentioned in the conversation."
-          ),
-        name: z.string().describe('The entity value, e.g. the index name or pattern.'),
-      })
-    )
-    .describe(
-      "Structured entities referenced in the conversation. Extract only supported entity types. Currently the only supported type is 'index' (Elasticsearch index names, data views, and index patterns). Deduplicate entries."
-    ),
-  key_topics: z
-    .array(z.string())
-    .describe(
-      "Primary subjects discussed, e.g., 'Elasticsearch indexing', 'API authentication', 'dashboard configuration'."
-    ),
-  outcomes_and_decisions: z
-    .array(z.string())
-    .describe(
-      "Key conclusions, resolutions, or decisions made. Be specific and factual, e.g., 'The slow queries were caused by missing keyword mappings on the status field'."
-    ),
-  unanswered_questions: z
-    .array(z.string())
-    .describe(
-      'Important questions the user asked that were not fully resolved. May be empty if everything was addressed.'
-    ),
-});
+export const llmCompactionSchema = lazySchema(() =>
+  z.object({
+    discussion_summary: z
+      .string()
+      .describe(
+        'A 2-6 sentence narrative summary of the conversation so far. Capture the main goal, progress made, and current state.'
+      ),
+    user_intent: z
+      .string()
+      .describe(
+        "A clear statement of what the user is trying to achieve. Start with a verb, e.g., 'Investigate slow query performance on the orders index'."
+      ),
+    entities: z
+      .array(
+        z.object({
+          type: z
+            .string()
+            .describe(
+              "The entity type. Currently only 'index' is supported — extract Elasticsearch index names, data views, or index patterns mentioned in the conversation."
+            ),
+          name: z.string().describe('The entity value, e.g. the index name or pattern.'),
+        })
+      )
+      .describe(
+        "Structured entities referenced in the conversation. Extract only supported entity types. Currently the only supported type is 'index' (Elasticsearch index names, data views, and index patterns). Deduplicate entries."
+      ),
+    key_topics: z
+      .array(z.string())
+      .describe(
+        "Primary subjects discussed, e.g., 'Elasticsearch indexing', 'API authentication', 'dashboard configuration'."
+      ),
+    outcomes_and_decisions: z
+      .array(z.string())
+      .describe(
+        "Key conclusions, resolutions, or decisions made. Be specific and factual, e.g., 'The slow queries were caused by missing keyword mappings on the status field'."
+      ),
+    unanswered_questions: z
+      .array(z.string())
+      .describe(
+        'Important questions the user asked that were not fully resolved. May be empty if everything was addressed.'
+      ),
+  })
+);
 
 export type LlmCompactionOutput = z.infer<typeof llmCompactionSchema>;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
 import {
   ToolResultType,
@@ -16,14 +16,16 @@ import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
 
-const attachmentReadSchema = z.object({
-  attachment_id: z.string().describe('ID of the attachment to read'),
-  version: z
-    .number()
-    .min(1)
-    .optional()
-    .describe('Specific version to read (defaults to current version)'),
-});
+const attachmentReadSchema = lazySchema(() =>
+  z.object({
+    attachment_id: z.string().describe('ID of the attachment to read'),
+    version: z
+      .number()
+      .min(1)
+      .optional()
+      .describe('Specific version to read (defaults to current version)'),
+  })
+);
 
 /**
  * Creates the attachment_read tool.

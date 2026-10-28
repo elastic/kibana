@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { createGenAiSettingsServerRoute } from '../create_gen_ai_settings_server_route';
 
 const tracingDashboardRoute = createGenAiSettingsServerRoute({
@@ -15,9 +15,11 @@ const tracingDashboardRoute = createGenAiSettingsServerRoute({
       requiredPrivileges: ['manage_advanced_settings'],
     },
   },
-  params: z.object({
-    body: z.object({ enabled: z.boolean() }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({ enabled: z.boolean() }),
+    })
+  ),
   handler: async (resources): Promise<{ success: boolean }> => {
     const { request, params, plugins } = resources;
 

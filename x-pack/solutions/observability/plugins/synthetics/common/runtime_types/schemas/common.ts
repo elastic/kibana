@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import {
   inlineScriptIsFullJourneyMessage,
@@ -16,20 +16,22 @@ import {
 } from '../validation_messages';
 
 /** Applies Fleet namespace rules, not merely `typeof === 'string'`. */
-export const NameSpaceString = z.string().superRefine((input, ctx) => {
-  const { error, valid } = isValidNamespace(input, true);
-  if (!valid) {
-    ctx.addIssue({ code: 'custom', message: invalidNamespaceMessage(error) });
-  }
-});
+export const NameSpaceString = lazySchema(() =>
+  z.string().superRefine((input, ctx) => {
+    const { error, valid } = isValidNamespace(input, true);
+    if (!valid) {
+      ctx.addIssue({ code: 'custom', message: invalidNamespaceMessage(error) });
+    }
+  })
+);
 
 /**
  * A numeric string. Whitespace-only is rejected before the numeric check
  * because `Number('   ')` is `0`, not `NaN`.
  */
-export const TimeoutString = z
-  .string()
-  .refine((input) => input.trim() !== '' && !isNaN(Number(input)));
+export const TimeoutString = lazySchema(() =>
+  z.string().refine((input) => input.trim() !== '' && !isNaN(Number(input)))
+);
 
 /**
  * Trims before the emptiness check, so `z.string().min(1)` is **not** an
@@ -45,9 +47,8 @@ export const getNonEmptyStringCodec = (fieldName: string) =>
  * yet"); a non-blank one must contain step definitions and must not be a full
  * journey script.
  */
-export const InlineScriptString = z
-  .string({ error: inlineScriptNotAStringMessage() })
-  .superRefine((input, ctx) => {
+export const InlineScriptString = lazySchema(() =>
+  z.string({ error: inlineScriptNotAStringMessage() }).superRefine((input, ctx) => {
     if (input.trim() === '') {
       return;
     }
@@ -60,10 +61,11 @@ export const InlineScriptString = z
     if (!input.includes('step(')) {
       ctx.addIssue({ code: 'custom', message: inlineScriptMissingStepMessage() });
     }
-  });
+  })
+);
 
 /** Matches `@kbn/securitysolution-io-ts-types` `NonEmptyString`, which trims. */
-export const NonEmptyString = z.string().refine((input) => input.trim() !== '');
+export const NonEmptyString = lazySchema(() => z.string().refine((input) => input.trim() !== ''));
 
 /**
  * Matches `@kbn/securitysolution-io-ts-types` `NonEmptyArray`, which fails an
@@ -72,28 +74,38 @@ export const NonEmptyString = z.string().refine((input) => input.trim() !== '');
  */
 export const nonEmptyArray = <T extends z.ZodType>(schema: T) => z.array(schema).min(1);
 
-export const LocationType = z.looseObject({
-  lat: z.string(),
-  lon: z.string(),
-});
+export const LocationType = lazySchema(() =>
+  z.looseObject({
+    lat: z.string(),
+    lon: z.string(),
+  })
+);
 
-export const CheckGeoType = z.looseObject({
-  name: z.string(),
-  location: LocationType.optional(),
-});
+export const CheckGeoType = lazySchema(() =>
+  z.looseObject({
+    name: z.string(),
+    location: LocationType.optional(),
+  })
+);
 
-export const SummaryType = z.looseObject({
-  up: z.number().optional(),
-  down: z.number().optional(),
-  geo: CheckGeoType.optional(),
-});
+export const SummaryType = lazySchema(() =>
+  z.looseObject({
+    up: z.number().optional(),
+    down: z.number().optional(),
+    geo: CheckGeoType.optional(),
+  })
+);
 
-export const StatesIndexStatusType = z.looseObject({
-  indexExists: z.boolean(),
-  indices: z.string(),
-});
+export const StatesIndexStatusType = lazySchema(() =>
+  z.looseObject({
+    indexExists: z.boolean(),
+    indices: z.string(),
+  })
+);
 
-export const DateRangeType = z.looseObject({
-  from: z.string(),
-  to: z.string(),
-});
+export const DateRangeType = lazySchema(() =>
+  z.looseObject({
+    from: z.string(),
+    to: z.string(),
+  })
+);

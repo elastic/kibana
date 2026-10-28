@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
@@ -16,46 +16,50 @@ import {
 
 export const UpdateConversationMetadataStepTypeId = 'ai.conversation.metadata.patch';
 
-const InputSchema = z.object({
-  conversation_id: z
-    .string()
-    .meta({
-      description: 'The unique identifier of the conversation to update.',
-    })
-    .min(1)
-    .max(CONVERSATION_ID_MAX_LENGTH),
-  updates: z
-    .record(
-      z.string().max(256),
-      z.union([
-        z.string().max(10_000),
-        z.number(),
-        z.boolean(),
-        z.array(z.string().max(2_000)).max(100),
-      ])
-    )
-    .refine((val) => Object.keys(val).length > 0, {
-      message: 'updates must include at least one field',
-    })
-    .refine((val) => Object.keys(val).length <= 100, {
-      message: 'updates may not have more than 100 keys',
-    })
-    .meta({
-      description:
-        'Key/value pairs to merge into the conversation metadata. Only keys defined by the active template are accepted. Existing keys not included here are left unchanged.',
-    }),
-});
+const InputSchema = lazySchema(() =>
+  z.object({
+    conversation_id: z
+      .string()
+      .meta({
+        description: 'The unique identifier of the conversation to update.',
+      })
+      .min(1)
+      .max(CONVERSATION_ID_MAX_LENGTH),
+    updates: z
+      .record(
+        z.string().max(256),
+        z.union([
+          z.string().max(10_000),
+          z.number(),
+          z.boolean(),
+          z.array(z.string().max(2_000)).max(100),
+        ])
+      )
+      .refine((val) => Object.keys(val).length > 0, {
+        message: 'updates must include at least one field',
+      })
+      .refine((val) => Object.keys(val).length <= 100, {
+        message: 'updates may not have more than 100 keys',
+      })
+      .meta({
+        description:
+          'Key/value pairs to merge into the conversation metadata. Only keys defined by the active template are accepted. Existing keys not included here are left unchanged.',
+      }),
+  })
+);
 
-const OutputSchema = z.object({
-  conversation_id: z.string().meta({ description: 'The ID of the updated conversation.' }),
-  changed_fields: z.array(z.string()).meta({
-    description:
-      'Names of the metadata fields whose values actually changed. Empty when the patch was a no-op.',
-  }),
-  metadata: z.record(z.string(), z.unknown()).meta({
-    description: 'The full conversation metadata after applying the patch.',
-  }),
-});
+const OutputSchema = lazySchema(() =>
+  z.object({
+    conversation_id: z.string().meta({ description: 'The ID of the updated conversation.' }),
+    changed_fields: z.array(z.string()).meta({
+      description:
+        'Names of the metadata fields whose values actually changed. Empty when the patch was a no-op.',
+    }),
+    metadata: z.record(z.string(), z.unknown()).meta({
+      description: 'The full conversation metadata after applying the patch.',
+    }),
+  })
+);
 
 type UpdateConversationMetadataInputSchema = typeof InputSchema;
 type UpdateConversationMetadataOutputSchema = typeof OutputSchema;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
@@ -21,18 +21,20 @@ const MAX_FRAGMENTS_PER_DOC = 5;
 // Fallback: maximum content length when highlights unavailable
 const MAX_CONTENT_LENGTH = 4000;
 
-const integrationKnowledgeSchema = z.object({
-  query: z
-    .string()
-    .describe(
-      'Search query to retrieve knowledge about Fleet-installed integrations, like specific integration names, configuration questions, or data ingestion topics. Rewrite the query to English and incorporate relevant context from the conversation history.'
-    ),
-  max: z
-    .number()
-    .optional()
-    .default(5)
-    .describe('Maximum number of documents to return. Defaults to 5.'),
-});
+const integrationKnowledgeSchema = lazySchema(() =>
+  z.object({
+    query: z
+      .string()
+      .describe(
+        'Search query to retrieve knowledge about Fleet-installed integrations, like specific integration names, configuration questions, or data ingestion topics. Rewrite the query to English and incorporate relevant context from the conversation history.'
+      ),
+    max: z
+      .number()
+      .optional()
+      .default(5)
+      .describe('Maximum number of documents to return. Defaults to 5.'),
+  })
+);
 
 interface IntegrationKnowledgeDoc {
   package_name: string;

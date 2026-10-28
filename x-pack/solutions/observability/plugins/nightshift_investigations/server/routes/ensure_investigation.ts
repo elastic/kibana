@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
@@ -28,17 +28,19 @@ export const ensureInvestigationRoute = createNightshiftInvestigationsServerRout
       requiredPrivileges: ['agentBuilder:write'],
     },
   },
-  params: z.object({
-    path: z.object({
-      id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-    }),
-    body: z
-      .object({
-        /** The calling run's own execution; it differs from the ID when the run continues one. */
-        execution_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
-      })
-      .nullish(),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+      }),
+      body: z
+        .object({
+          /** The calling run's own execution; it differs from the ID when the run continues one. */
+          execution_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
+        })
+        .nullish(),
+    })
+  ),
   handler: async ({ request, params, getInvestigationsClient }) => {
     const client = getInvestigationsClient(request);
     try {

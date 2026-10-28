@@ -6,16 +6,18 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import { z as z4 } from '@kbn/zod/v4';
+import { z as z4, lazySchema } from '@kbn/zod/v4';
 
 import type { ActionTypeParams, ValidatorType } from '../../types';
 
-const fetchOptionsSchema = z4
-  .object({
-    max_content_length: z4.number().positive().optional(),
-  })
-  .strict()
-  .optional();
+const fetchOptionsSchema = lazySchema(() =>
+  z4
+    .object({
+      max_content_length: z4.number().positive().optional(),
+    })
+    .strict()
+    .optional()
+);
 
 export const generateParamsSchema = (
   actions: ConnectorSpec['actions']

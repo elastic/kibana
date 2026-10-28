@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
   ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
@@ -24,9 +24,9 @@ import {
   OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
 } from '../../../constants';
 
-const idField = z.string().min(1).max(MAX_CASE_WORKFLOW_RUN_ID_LENGTH);
-const attachmentIdField = z.string().min(1).max(MAX_ATTACHMENT_ID_LENGTH);
-const attachmentTypeField = z.string().min(1).max(MAX_ATTACHMENT_TYPE_LENGTH);
+const idField = lazySchema(() => z.string().min(1).max(MAX_CASE_WORKFLOW_RUN_ID_LENGTH));
+const attachmentIdField = lazySchema(() => z.string().min(1).max(MAX_ATTACHMENT_ID_LENGTH));
+const attachmentTypeField = lazySchema(() => z.string().min(1).max(MAX_ATTACHMENT_TYPE_LENGTH));
 
 /**
  * Identifies where the user was when they triggered the workflow run.
@@ -50,44 +50,46 @@ const attachmentTypeField = z.string().min(1).max(MAX_ATTACHMENT_TYPE_LENGTH);
  * Registered attachment types use the generic attachment variants. Their server registration
  * validates and enriches the origin, while their public registration supplies activity UI.
  */
-export const CaseWorkflowRunOriginSchema = z.discriminatedUnion('type', [
-  z
-    .object({
-      type: z.literal(CASE_WORKFLOW_ORIGIN_TYPE),
-      caseId: idField,
-    })
-    .strict(),
-  z
-    .object({
-      type: z.literal(OBSERVABLE_WORKFLOW_ORIGIN_TYPE),
-      caseId: idField,
-      observableId: idField,
-    })
-    .strict(),
-  z
-    .object({
-      type: z.literal(OBSERVABLES_WORKFLOW_ORIGIN_TYPE),
-      caseId: idField,
-      observableIds: z.array(idField).min(1).max(MAX_OBSERVABLES_PER_CASE),
-    })
-    .strict(),
-  z
-    .object({
-      type: z.literal(ATTACHMENT_WORKFLOW_ORIGIN_TYPE),
-      caseId: idField,
-      attachmentType: attachmentTypeField,
-      attachmentId: attachmentIdField,
-    })
-    .strict(),
-  z
-    .object({
-      type: z.literal(ATTACHMENTS_WORKFLOW_ORIGIN_TYPE),
-      caseId: idField,
-      attachmentType: attachmentTypeField,
-      attachmentIds: z.array(attachmentIdField).min(1).max(MAX_ATTACHMENTS_PER_WORKFLOW_RUN),
-    })
-    .strict(),
-]);
+export const CaseWorkflowRunOriginSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    z
+      .object({
+        type: z.literal(CASE_WORKFLOW_ORIGIN_TYPE),
+        caseId: idField,
+      })
+      .strict(),
+    z
+      .object({
+        type: z.literal(OBSERVABLE_WORKFLOW_ORIGIN_TYPE),
+        caseId: idField,
+        observableId: idField,
+      })
+      .strict(),
+    z
+      .object({
+        type: z.literal(OBSERVABLES_WORKFLOW_ORIGIN_TYPE),
+        caseId: idField,
+        observableIds: z.array(idField).min(1).max(MAX_OBSERVABLES_PER_CASE),
+      })
+      .strict(),
+    z
+      .object({
+        type: z.literal(ATTACHMENT_WORKFLOW_ORIGIN_TYPE),
+        caseId: idField,
+        attachmentType: attachmentTypeField,
+        attachmentId: attachmentIdField,
+      })
+      .strict(),
+    z
+      .object({
+        type: z.literal(ATTACHMENTS_WORKFLOW_ORIGIN_TYPE),
+        caseId: idField,
+        attachmentType: attachmentTypeField,
+        attachmentIds: z.array(attachmentIdField).min(1).max(MAX_ATTACHMENTS_PER_WORKFLOW_RUN),
+      })
+      .strict(),
+  ])
+);
 
 export type CaseWorkflowRunOrigin = z.infer<typeof CaseWorkflowRunOriginSchema>;
 

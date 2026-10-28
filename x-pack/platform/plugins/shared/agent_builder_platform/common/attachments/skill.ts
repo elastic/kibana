@@ -5,24 +5,26 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { skillCreateRequestSchema } from '@kbn/agent-builder-common';
 
 export const SKILL_ATTACHMENT_TYPE = 'skill' as const;
 
-export const skillAttachmentDataSchema = z.object({
-  mode: z.enum(['create', 'edit']),
-  skill: skillCreateRequestSchema,
-  /**
-   * Snapshot of the skill content this draft is being diffed against.
-   * - `mode: 'create'`: the first draft's content (set by `propose_skill`).
-   * - `mode: 'edit'`: the persisted skill's content at the time the draft was
-   *   opened (set by `load_skill_for_editing`).
-   * Preserved across `patch_skill` calls.
-   */
-  originalContent: z.string().optional(),
-});
+export const skillAttachmentDataSchema = lazySchema(() =>
+  z.object({
+    mode: z.enum(['create', 'edit']),
+    skill: skillCreateRequestSchema,
+    /**
+     * Snapshot of the skill content this draft is being diffed against.
+     * - `mode: 'create'`: the first draft's content (set by `propose_skill`).
+     * - `mode: 'edit'`: the persisted skill's content at the time the draft was
+     *   opened (set by `load_skill_for_editing`).
+     * Preserved across `patch_skill` calls.
+     */
+    originalContent: z.string().optional(),
+  })
+);
 
 /**
  * Data shape stored on a `skill` attachment version.

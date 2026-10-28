@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { ConversationMetadataUpdatedTriggerId } from '@kbn/agent-builder-common';
 
@@ -31,44 +31,46 @@ export {
 export { conversationUpdatedTriggerCommonDefinition } from './conversation_updated';
 export type { ConversationUpdatedTriggerEvent } from '@kbn/agent-builder-common';
 
-const conversationMetadataUpdatedEventSchema = z.object({
-  conversationId: z.string().meta({
-    description: i18n.translate(
-      'xpack.agentBuilder.workflowTriggers.conversationMetadataUpdated.eventSchema.conversationId',
-      { defaultMessage: 'The ID of the conversation whose metadata was updated.' }
-    ),
-  }),
-  templateId: z
-    .string()
-    .optional()
-    .meta({
+const conversationMetadataUpdatedEventSchema = lazySchema(() =>
+  z.object({
+    conversationId: z.string().meta({
       description: i18n.translate(
-        'xpack.agentBuilder.workflowTriggers.conversationMetadataUpdated.eventSchema.templateId',
-        { defaultMessage: 'The template that defines the metadata schema for this conversation.' }
+        'xpack.agentBuilder.workflowTriggers.conversationMetadataUpdated.eventSchema.conversationId',
+        { defaultMessage: 'The ID of the conversation whose metadata was updated.' }
       ),
     }),
-  parentId: z
-    .string()
-    .optional()
-    .meta({
+    templateId: z
+      .string()
+      .optional()
+      .meta({
+        description: i18n.translate(
+          'xpack.agentBuilder.workflowTriggers.conversationMetadataUpdated.eventSchema.templateId',
+          { defaultMessage: 'The template that defines the metadata schema for this conversation.' }
+        ),
+      }),
+    parentId: z
+      .string()
+      .optional()
+      .meta({
+        description: i18n.translate(
+          'xpack.agentBuilder.workflowTriggers.conversationMetadataUpdated.eventSchema.parentId',
+          {
+            defaultMessage:
+              'The ID of the parent conversation, when this conversation is a child (e.g. a sub-agent).',
+          }
+        ),
+      }),
+    changedFields: z.array(z.string()).meta({
       description: i18n.translate(
-        'xpack.agentBuilder.workflowTriggers.conversationMetadataUpdated.eventSchema.parentId',
+        'xpack.agentBuilder.workflowTriggers.conversationMetadataUpdated.eventSchema.changedFields',
         {
           defaultMessage:
-            'The ID of the parent conversation, when this conversation is a child (e.g. a sub-agent).',
+            'Names of the metadata fields that changed in this write. Use this to subscribe only to specific fields such as `status`, `decision`, or `severity`.',
         }
       ),
     }),
-  changedFields: z.array(z.string()).meta({
-    description: i18n.translate(
-      'xpack.agentBuilder.workflowTriggers.conversationMetadataUpdated.eventSchema.changedFields',
-      {
-        defaultMessage:
-          'Names of the metadata fields that changed in this write. Use this to subscribe only to specific fields such as `status`, `decision`, or `severity`.',
-      }
-    ),
-  }),
-});
+  })
+);
 
 export type { ConversationMetadataUpdatedEvent } from '@kbn/agent-builder-common';
 

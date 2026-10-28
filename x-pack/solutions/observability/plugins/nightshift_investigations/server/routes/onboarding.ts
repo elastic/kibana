@@ -6,7 +6,7 @@
  */
 
 import { serverUnavailable } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type {
   EnableOnboardingResponse,
@@ -32,7 +32,7 @@ const getOnboardingRoute = createNightshiftInvestigationsServerRoute({
       "Returns the space's latest onboarding suggestions workflow execution and the first investigations it suggested.",
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read] } },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({ request, onboardingClient }): Promise<GetOnboardingResponse> => {
     try {
       return await onboardingClient.get(request);
@@ -52,7 +52,7 @@ const enableOnboardingRoute = createNightshiftInvestigationsServerRoute({
       'can be configured in Agent Builder and run investigations there. Idempotent.',
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({ request, onboardingClient }): Promise<EnableOnboardingResponse> => {
     try {
       return await onboardingClient.enable(request);
@@ -71,7 +71,7 @@ const startOnboardingSuggestionsRoute = createNightshiftInvestigationsServerRout
       'Starts the onboarding suggestions workflow: the investigation agent explores the space from its sandbox and suggests first investigations.',
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({ request, onboardingClient }): Promise<StartOnboardingSuggestionsResponse> => {
     try {
       return await onboardingClient.start(request);

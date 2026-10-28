@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { Owner, UpdateCaseRequest as UpdateCaseRequestSchema } from '../../bundled-types.gen';
@@ -19,11 +19,13 @@ const OverwritesSchema = UpdateCaseRequestSchema.shape.cases.element.omit({
   version: true,
 });
 
-const InputSchema = z.object({
-  owner: Owner,
-  case_template_id: z.string().min(1, 'case_template_id is required'),
-  overwrites: OverwritesSchema.optional(),
-});
+const InputSchema = lazySchema(() =>
+  z.object({
+    owner: Owner,
+    case_template_id: z.string().min(1, 'case_template_id is required'),
+    overwrites: OverwritesSchema.optional(),
+  })
+);
 
 const OutputSchema = CasesStepSingleCaseOutputSchema;
 

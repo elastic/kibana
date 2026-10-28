@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { badGateway, conflict, forbidden, notFound } from '@hapi/boom';
 import { RelayRequestError } from '@kbn/actions-plugin/server';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
@@ -34,7 +34,7 @@ const connectSlackAppRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     },
   },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({ request, server }): Promise<SlackAppConnectResponse> => {
     try {
       return await new SlackAppService(server).connect(request);
@@ -63,7 +63,7 @@ const statusSlackAppRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({ request, server }): Promise<SlackAppStatusResponse> => {
     return new SlackAppService(server).getStatus(request);
   },
@@ -82,9 +82,11 @@ const confirmSlackAppRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     },
   },
-  params: z.object({
-    body: z.object({ tenantKey: z.string().min(1).max(64) }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({ tenantKey: z.string().min(1).max(64) }),
+    })
+  ),
   handler: async ({ params, request, server }): Promise<SlackAppConfirmResponse> => {
     return new SlackAppService(server).confirm(request, params.body.tenantKey);
   },
@@ -103,9 +105,11 @@ const disconnectSlackAppRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     },
   },
-  params: z.object({
-    body: z.object({ tenantKey: z.string().min(1).max(64).optional() }).nullish(),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({ tenantKey: z.string().min(1).max(64).optional() }).nullish(),
+    })
+  ),
   handler: async ({ params, request, server }): Promise<SlackAppDisconnectResponse> => {
     try {
       return await new SlackAppService(server).disconnect(request, params?.body?.tenantKey);
@@ -129,12 +133,14 @@ const bindingsSlackAppRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    query: z.object({
-      cursor: z.string().max(1024).optional(),
-      perPage: z.coerce.number().int().min(1).max(200).optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: z.object({
+        cursor: z.string().max(1024).optional(),
+        perPage: z.coerce.number().int().min(1).max(200).optional(),
+      }),
+    })
+  ),
   handler: async ({ params, request, server }): Promise<SlackAppBindingsResponse> => {
     try {
       return await new SlackAppService(server).listBindings(request, params.query);
@@ -168,9 +174,11 @@ const bindChannelSlackAppRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     },
   },
-  params: z.object({
-    path: z.object({ channelId: z.string().max(32) }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ channelId: z.string().max(32) }),
+    })
+  ),
   handler: async ({ params, request, server }): Promise<SlackAppBindChannelResponse> => {
     try {
       await new SlackAppService(server).bindChannel(request, params.path.channelId);
@@ -195,9 +203,11 @@ const unbindChannelSlackAppRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
     },
   },
-  params: z.object({
-    path: z.object({ channelId: z.string().max(32) }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ channelId: z.string().max(32) }),
+    })
+  ),
   handler: async ({ params, request, server }): Promise<SlackAppUnbindChannelResponse> => {
     try {
       await new SlackAppService(server).unbindChannel(request, params.path.channelId);

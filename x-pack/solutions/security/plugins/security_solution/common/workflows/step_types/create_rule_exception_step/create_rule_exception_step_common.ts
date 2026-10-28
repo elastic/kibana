@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ExceptionListItemHumanId } from '@kbn/securitysolution-exceptions-common/api';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
@@ -18,22 +18,24 @@ import {
 
 export const CreateRuleExceptionStepId = 'security.createRuleException' as const;
 
-export const createRuleExceptionInputSchema = z
-  .object({
-    rule_id: z.string().min(1).max(36),
-    item_id: ExceptionListItemHumanId.optional(),
-    overwrite: z.boolean().optional().default(false),
-    ...exceptionItemBaseSchema.shape,
-  })
-  .superRefine((input, ctx) => {
-    if (input.overwrite && input.item_id === undefined) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['overwrite'],
-        message: OVERWRITE_REQUIRES_ITEM_ID_MESSAGE,
-      });
-    }
-  });
+export const createRuleExceptionInputSchema = lazySchema(() =>
+  z
+    .object({
+      rule_id: z.string().min(1).max(36),
+      item_id: ExceptionListItemHumanId.optional(),
+      overwrite: z.boolean().optional().default(false),
+      ...exceptionItemBaseSchema.shape,
+    })
+    .superRefine((input, ctx) => {
+      if (input.overwrite && input.item_id === undefined) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['overwrite'],
+          message: OVERWRITE_REQUIRES_ITEM_ID_MESSAGE,
+        });
+      }
+    })
+);
 
 export const createRuleExceptionOutputSchema = exceptionItemOutputSchema;
 

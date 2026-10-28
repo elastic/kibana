@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import {
@@ -21,17 +21,21 @@ export const GetAllAttachmentsStepTypeId = 'cases.getAllAttachments';
 
 // The workflow step parses this schema with a safeParse fallback
 // so unsupported variants flow through untouched instead of throwing.
-const AttachmentSchema = z.discriminatedUnion('type', [
-  AlertCommentResponseProperties,
-  EventCommentResponseProperties,
-  UserCommentResponseProperties,
-]);
+const AttachmentSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    AlertCommentResponseProperties,
+    EventCommentResponseProperties,
+    UserCommentResponseProperties,
+  ])
+);
 
 const InputSchema = CasesStepCaseIdSchema;
 
-const OutputSchema = z.object({
-  attachments: z.array(AttachmentSchema).max(MAX_DOCS_PER_PAGE),
-});
+const OutputSchema = lazySchema(() =>
+  z.object({
+    attachments: z.array(AttachmentSchema).max(MAX_DOCS_PER_PAGE),
+  })
+);
 
 type GetAllAttachmentsStepInputSchema = typeof InputSchema;
 type GetAllAttachmentsStepOutputSchema = typeof OutputSchema;

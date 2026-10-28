@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
@@ -14,15 +14,17 @@ import { notificationPhaseSchema } from '../lib/notifications/notification_routi
 import { sendInvestigationNotifications } from '../lib/notifications/send_investigation_notifications';
 import type { InvestigationNotificationDeps } from '../lib/notifications/send_investigation_notifications';
 
-const inputSchema = z.object({
-  investigation_id: z
-    .string()
-    .min(1)
-    .max(MAX_KEYWORD_LENGTH)
-    .describe('The investigation receiving lifecycle notifications'),
-  phase: notificationPhaseSchema,
-  reason: z.string().max(MAX_TEXT_LENGTH).optional(),
-});
+const inputSchema = lazySchema(() =>
+  z.object({
+    investigation_id: z
+      .string()
+      .min(1)
+      .max(MAX_KEYWORD_LENGTH)
+      .describe('The investigation receiving lifecycle notifications'),
+    phase: notificationPhaseSchema,
+    reason: z.string().max(MAX_TEXT_LENGTH).optional(),
+  })
+);
 
 export const sendNotificationsStepDefinition = (deps: InvestigationNotificationDeps) =>
   createServerStepDefinition({

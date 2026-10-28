@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { VIEW_MODE } from '@kbn/discover-session-constants';
 
-export const viewModeSchema = z
-  .enum([VIEW_MODE.DOCUMENT_LEVEL, VIEW_MODE.PATTERN_LEVEL, VIEW_MODE.AGGREGATED_LEVEL])
-  .default(VIEW_MODE.DOCUMENT_LEVEL)
-  .meta({
-    description:
-      'The Discover view mode: `documents` (search hits), `patterns` (pattern analysis), or `aggregated` (field statistics).',
-  });
+export const viewModeSchema = lazySchema(() =>
+  z
+    .enum([VIEW_MODE.DOCUMENT_LEVEL, VIEW_MODE.PATTERN_LEVEL, VIEW_MODE.AGGREGATED_LEVEL])
+    .default(VIEW_MODE.DOCUMENT_LEVEL)
+    .meta({
+      description:
+        'The Discover view mode: `documents` (search hits), `patterns` (pattern analysis), or `aggregated` (field statistics).',
+    })
+);

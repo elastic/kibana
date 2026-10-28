@@ -8,21 +8,25 @@
  */
 
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const DataDedupeStepTypeId = 'data.dedupe' as const;
 
-export const ConfigSchema = z.object({
-  items: z.array(z.unknown()),
-  strategy: z.enum(['keep_first', 'keep_last']).optional().default('keep_first'),
-});
+export const ConfigSchema = lazySchema(() =>
+  z.object({
+    items: z.array(z.unknown()),
+    strategy: z.enum(['keep_first', 'keep_last']).optional().default('keep_first'),
+  })
+);
 
-export const InputSchema = z.object({
-  keys: z.array(z.string()),
-});
+export const InputSchema = lazySchema(() =>
+  z.object({
+    keys: z.array(z.string()),
+  })
+);
 
-export const OutputSchema = z.array(z.unknown());
+export const OutputSchema = lazySchema(() => z.array(z.unknown()));
 
 export type DataDedupeStepConfigSchema = typeof ConfigSchema;
 export type DataDedupeStepInputSchema = typeof InputSchema;

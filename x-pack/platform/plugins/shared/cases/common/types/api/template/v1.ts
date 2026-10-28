@@ -5,51 +5,55 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { TemplateSchema } from '../../domain/template/v1';
 /**
  * Sort field for templates.
  *
  * Keep this list aligned with indexed scalar mapping fields in the template SO type.
  */
-export const TemplateSortFieldSchema = z.enum([
-  'templateId',
-  'name',
-  'templateVersion',
-  'owner',
-  'deletedAt',
-  'author',
-  'usageCount',
-  'fieldCount',
-  'lastUsedAt',
-  'isDefault',
-  'isLatest',
-]);
+export const TemplateSortFieldSchema = lazySchema(() =>
+  z.enum([
+    'templateId',
+    'name',
+    'templateVersion',
+    'owner',
+    'deletedAt',
+    'author',
+    'usageCount',
+    'fieldCount',
+    'lastUsedAt',
+    'isDefault',
+    'isLatest',
+  ])
+);
 
 export type TemplateSortField = z.infer<typeof TemplateSortFieldSchema>;
 
 /**
  * Sort order
  */
-export const SortOrderSchema = z.enum(['asc', 'desc']);
+export const SortOrderSchema = lazySchema(() => z.enum(['asc', 'desc']));
 
 export type SortOrder = z.infer<typeof SortOrderSchema>;
 
 /**
  * Request schema for finding/listing templates
  */
-export const TemplatesFindRequestSchema = z.object({
-  page: z.number(),
-  perPage: z.number(),
-  sortField: z.optional(TemplateSortFieldSchema).default('name'),
-  sortOrder: z.optional(SortOrderSchema).default('asc'),
-  search: z.optional(z.string()).default(''),
-  tags: z.optional(z.array(z.string())).default([]),
-  author: z.optional(z.array(z.string())).default([]),
-  owner: z.optional(z.array(z.string())).default([]),
-  isDeleted: z.optional(z.boolean()).default(false),
-  isEnabled: z.optional(z.boolean()),
-});
+export const TemplatesFindRequestSchema = lazySchema(() =>
+  z.object({
+    page: z.number(),
+    perPage: z.number(),
+    sortField: z.optional(TemplateSortFieldSchema).default('name'),
+    sortOrder: z.optional(SortOrderSchema).default('asc'),
+    search: z.optional(z.string()).default(''),
+    tags: z.optional(z.array(z.string())).default([]),
+    author: z.optional(z.array(z.string())).default([]),
+    owner: z.optional(z.array(z.string())).default([]),
+    isDeleted: z.optional(z.boolean()).default(false),
+    isEnabled: z.optional(z.boolean()),
+  })
+);
 
 export type TemplatesFindRequest = z.infer<typeof TemplatesFindRequestSchema>;
 
@@ -57,21 +61,23 @@ export type TemplatesFindRequest = z.infer<typeof TemplatesFindRequestSchema>;
  * Response schema for finding/listing templates
  */
 const TemplateWithSearchMetaSchema = TemplateSchema.extend({
-  fieldSearchMatches: z.boolean(),
+  fieldSearchMatches: lazySchema(() => z.boolean()),
   /**
    * Raw YAML definition string added by the route handler (via parseTemplate). Always present in
    * HTTP responses; callers should prefer this over `definition` when passing to YAML utilities.
    */
-  definitionString: z.string().optional(),
+  definitionString: lazySchema(() => z.string().optional()),
 });
 
 export type TemplateListItem = z.infer<typeof TemplateWithSearchMetaSchema>;
 
-export const TemplatesFindResponseSchema = z.object({
-  templates: z.array(TemplateWithSearchMetaSchema),
-  page: z.number(),
-  perPage: z.number(),
-  total: z.number(),
-});
+export const TemplatesFindResponseSchema = lazySchema(() =>
+  z.object({
+    templates: z.array(TemplateWithSearchMetaSchema),
+    page: z.number(),
+    perPage: z.number(),
+    total: z.number(),
+  })
+);
 
 export type TemplatesFindResponse = z.infer<typeof TemplatesFindResponseSchema>;

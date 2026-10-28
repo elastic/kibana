@@ -5,27 +5,31 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, internalTools, TODOS_UPDATED_UI_EVENT } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { TodoStateManager } from '@kbn/agent-builder-server/runner';
 
-const todoItemSchema = z.object({
-  content: z.string().describe('The task description'),
-  status: z
-    .enum(['pending', 'in_progress', 'completed', 'cancelled'])
-    .describe('Current status of the task'),
-});
+const todoItemSchema = lazySchema(() =>
+  z.object({
+    content: z.string().describe('The task description'),
+    status: z
+      .enum(['pending', 'in_progress', 'completed', 'cancelled'])
+      .describe('Current status of the task'),
+  })
+);
 
-const todoWriteSchema = z.object({
-  todos: z
-    .array(todoItemSchema)
-    .describe(
-      'Complete updated todo list. Always pass the full list — previous items are replaced.'
-    ),
-});
+const todoWriteSchema = lazySchema(() =>
+  z.object({
+    todos: z
+      .array(todoItemSchema)
+      .describe(
+        'Complete updated todo list. Always pass the full list — previous items are replaced.'
+      ),
+  })
+);
 
 const toolDescription = `Manage the plan for this conversation by creating and tracking tasks. Use this tool frequently so the user can see what you are doing and how you are progressing.
 

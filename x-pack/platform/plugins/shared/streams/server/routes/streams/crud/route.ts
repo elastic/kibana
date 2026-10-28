@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { badData } from '@hapi/boom';
 import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
@@ -61,11 +61,13 @@ export const readStreamRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    path: z.object({
-      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -126,7 +128,7 @@ export const listStreamsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({
     request,
     getScopedClients,
@@ -173,12 +175,14 @@ export const editStreamRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({
-      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
-    }),
-    body: Streams.all.UpsertRequest.right,
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
+      }),
+      body: Streams.all.UpsertRequest.right,
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -251,11 +255,13 @@ export const deleteStreamRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({
-      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {
     const { streamsClient } = await getScopedClients({
       request,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { limitedStringSchema, mimeTypeString, jsonValueSchema } from '../../../schema';
 import { UserSchema } from '../user/v1';
 import { MAX_FILENAME_LENGTH } from '../../../constants';
@@ -27,51 +27,63 @@ export enum ExternalReferenceStorageType {
 /**
  * Files
  */
-export const SingleFileAttachmentMetadataSchema = z.object({
-  name: z.string(),
-  extension: z.string(),
-  mimeType: z.string(),
-  created: z.string(),
-});
+export const SingleFileAttachmentMetadataSchema = lazySchema(() =>
+  z.object({
+    name: z.string(),
+    extension: z.string(),
+    mimeType: z.string(),
+    created: z.string(),
+  })
+);
 
-export const FileAttachmentMetadataSchema = z.object({
-  files: z.array(SingleFileAttachmentMetadataSchema),
-});
+export const FileAttachmentMetadataSchema = lazySchema(() =>
+  z.object({
+    files: z.array(SingleFileAttachmentMetadataSchema),
+  })
+);
 
 export type FileAttachmentMetadata = z.infer<typeof FileAttachmentMetadataSchema>;
 
-export const AttachmentAttributesBasicSchema = z.object({
-  created_at: z.string(),
-  created_by: UserSchema,
-  owner: z.string(),
-  pushed_at: z.string().nullable(),
-  pushed_by: UserSchema.nullable(),
-  updated_at: z.string().nullable(),
-  updated_by: UserSchema.nullable(),
-});
+export const AttachmentAttributesBasicSchema = lazySchema(() =>
+  z.object({
+    created_at: z.string(),
+    created_by: UserSchema,
+    owner: z.string(),
+    pushed_at: z.string().nullable(),
+    pushed_by: UserSchema.nullable(),
+    updated_at: z.string().nullable(),
+    updated_by: UserSchema.nullable(),
+  })
+);
 
-export const FileAttachmentMetadataPayloadSchema = z.object({
-  mimeType: mimeTypeString,
-  filename: limitedStringSchema({ fieldName: 'filename', min: 1, max: MAX_FILENAME_LENGTH }),
-});
+export const FileAttachmentMetadataPayloadSchema = lazySchema(() =>
+  z.object({
+    mimeType: mimeTypeString,
+    filename: limitedStringSchema({ fieldName: 'filename', min: 1, max: MAX_FILENAME_LENGTH }),
+  })
+);
 
 /**
  * User comment
  */
-export const UserCommentAttachmentPayloadSchema = z.object({
-  comment: z.string(),
-  type: z.literal(AttachmentType.user),
-  owner: z.string(),
-});
+export const UserCommentAttachmentPayloadSchema = lazySchema(() =>
+  z.object({
+    comment: z.string(),
+    type: z.literal(AttachmentType.user),
+    owner: z.string(),
+  })
+);
 
 const UserCommentAttachmentAttributesSchema = UserCommentAttachmentPayloadSchema.merge(
   AttachmentAttributesBasicSchema
 );
 
-export const UserCommentAttachmentSchema = UserCommentAttachmentAttributesSchema.extend({
-  id: z.string(),
-  version: z.string(),
-});
+export const UserCommentAttachmentSchema = lazySchema(() =>
+  UserCommentAttachmentAttributesSchema.extend({
+    id: z.string(),
+    version: z.string(),
+  })
+);
 
 export type UserCommentAttachmentPayload = z.infer<typeof UserCommentAttachmentPayloadSchema>;
 export type UserCommentAttachmentAttributes = z.infer<typeof UserCommentAttachmentAttributesSchema>;
@@ -80,26 +92,30 @@ export type UserCommentAttachment = z.infer<typeof UserCommentAttachmentSchema>;
 /**
  * Generic event
  */
-export const EventAttachmentPayloadSchema = z.object({
-  type: z.literal(AttachmentType.event),
-  eventId: z.union([z.array(z.string()), z.string()]),
-  index: z.union([z.array(z.string()), z.string()]),
-  owner: z.string(),
-});
+export const EventAttachmentPayloadSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(AttachmentType.event),
+    eventId: z.union([z.array(z.string()), z.string()]),
+    index: z.union([z.array(z.string()), z.string()]),
+    owner: z.string(),
+  })
+);
 
 /**
  * Alerts
  */
-export const AlertAttachmentPayloadSchema = z.object({
-  type: z.literal(AttachmentType.alert),
-  alertId: z.union([z.array(z.string()), z.string()]),
-  index: z.union([z.array(z.string()), z.string()]),
-  rule: z.object({
-    id: z.string().nullable(),
-    name: z.string().nullable(),
-  }),
-  owner: z.string(),
-});
+export const AlertAttachmentPayloadSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(AttachmentType.alert),
+    alertId: z.union([z.array(z.string()), z.string()]),
+    index: z.union([z.array(z.string()), z.string()]),
+    rule: z.object({
+      id: z.string().nullable(),
+      name: z.string().nullable(),
+    }),
+    owner: z.string(),
+  })
+);
 
 export const AlertAttachmentAttributesSchema = AlertAttachmentPayloadSchema.merge(
   AttachmentAttributesBasicSchema
@@ -109,15 +125,19 @@ export const EventAttachmentAttributesSchema = EventAttachmentPayloadSchema.merg
   AttachmentAttributesBasicSchema
 );
 
-export const AlertAttachmentSchema = AlertAttachmentAttributesSchema.extend({
-  id: z.string(),
-  version: z.string(),
-});
+export const AlertAttachmentSchema = lazySchema(() =>
+  AlertAttachmentAttributesSchema.extend({
+    id: z.string(),
+    version: z.string(),
+  })
+);
 
-export const EventAttachmentSchema = EventAttachmentAttributesSchema.extend({
-  id: z.string(),
-  version: z.string(),
-});
+export const EventAttachmentSchema = lazySchema(() =>
+  EventAttachmentAttributesSchema.extend({
+    id: z.string(),
+    version: z.string(),
+  })
+);
 
 export type AlertAttachmentPayload = z.infer<typeof AlertAttachmentPayloadSchema>;
 export type AlertAttachmentAttributes = z.infer<typeof AlertAttachmentAttributesSchema>;
@@ -127,10 +147,9 @@ export type EventAttachmentPayload = z.infer<typeof EventAttachmentPayloadSchema
 export type EventAttachmentAttributes = z.infer<typeof EventAttachmentAttributesSchema>;
 export type EventAttachment = z.infer<typeof EventAttachmentSchema>;
 
-export const DocumentAttachmentAttributesSchema = z.union([
-  AlertAttachmentAttributesSchema,
-  EventAttachmentAttributesSchema,
-]);
+export const DocumentAttachmentAttributesSchema = lazySchema(() =>
+  z.union([AlertAttachmentAttributesSchema, EventAttachmentAttributesSchema])
+);
 export type DocumentAttachmentAttributes = z.infer<typeof DocumentAttachmentAttributesSchema>;
 
 /**
@@ -141,29 +160,33 @@ export enum IsolateHostActionType {
   unisolate = 'unisolate',
 }
 
-export const ActionsAttachmentPayloadSchema = z.object({
-  type: z.literal(AttachmentType.actions),
-  comment: z.string(),
-  actions: z.object({
-    targets: z.array(
-      z.object({
-        hostname: z.string(),
-        endpointId: z.string(),
-      })
-    ),
-    type: z.string(),
-  }),
-  owner: z.string(),
-});
+export const ActionsAttachmentPayloadSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(AttachmentType.actions),
+    comment: z.string(),
+    actions: z.object({
+      targets: z.array(
+        z.object({
+          hostname: z.string(),
+          endpointId: z.string(),
+        })
+      ),
+      type: z.string(),
+    }),
+    owner: z.string(),
+  })
+);
 
 const ActionsAttachmentAttributesSchema = ActionsAttachmentPayloadSchema.merge(
   AttachmentAttributesBasicSchema
 );
 
-export const ActionsAttachmentSchema = ActionsAttachmentAttributesSchema.extend({
-  id: z.string(),
-  version: z.string(),
-});
+export const ActionsAttachmentSchema = lazySchema(() =>
+  ActionsAttachmentAttributesSchema.extend({
+    id: z.string(),
+    version: z.string(),
+  })
+);
 
 export type ActionsAttachmentPayload = z.infer<typeof ActionsAttachmentPayloadSchema>;
 export type ActionsAttachmentAttributes = z.infer<typeof ActionsAttachmentAttributesSchema>;
@@ -172,48 +195,61 @@ export type ActionsAttachment = z.infer<typeof ActionsAttachmentSchema>;
 /**
  * External reference
  */
-const ExternalReferenceStorageNoSOSchema = z.object({
-  type: z.literal(ExternalReferenceStorageType.elasticSearchDoc),
-});
+const ExternalReferenceStorageNoSOSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(ExternalReferenceStorageType.elasticSearchDoc),
+  })
+);
 
-const ExternalReferenceStorageSOSchema = z.object({
-  type: z.literal(ExternalReferenceStorageType.savedObject),
-  soType: z.string(),
-});
+const ExternalReferenceStorageSOSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(ExternalReferenceStorageType.savedObject),
+    soType: z.string(),
+  })
+);
 
-const ExternalReferenceBaseAttachmentPayloadSchema = z.object({
-  externalReferenceAttachmentTypeId: z.string(),
-  externalReferenceMetadata: z.record(z.string(), jsonValueSchema).nullable(),
-  type: z.literal(AttachmentType.externalReference),
-  owner: z.string(),
-});
+const ExternalReferenceBaseAttachmentPayloadSchema = lazySchema(() =>
+  z.object({
+    externalReferenceAttachmentTypeId: z.string(),
+    externalReferenceMetadata: z.record(z.string(), jsonValueSchema).nullable(),
+    type: z.literal(AttachmentType.externalReference),
+    owner: z.string(),
+  })
+);
 
-export const ExternalReferenceNoSOAttachmentPayloadSchema =
+export const ExternalReferenceNoSOAttachmentPayloadSchema = lazySchema(() =>
   ExternalReferenceBaseAttachmentPayloadSchema.extend({
     externalReferenceId: z.string(),
     externalReferenceStorage: ExternalReferenceStorageNoSOSchema,
-  });
+  })
+);
 
-export const ExternalReferenceSOAttachmentPayloadSchema =
+export const ExternalReferenceSOAttachmentPayloadSchema = lazySchema(() =>
   ExternalReferenceBaseAttachmentPayloadSchema.extend({
     externalReferenceId: z.string(),
     externalReferenceStorage: ExternalReferenceStorageSOSchema,
-  });
+  })
+);
 
-export const ExternalReferenceSOWithoutRefsAttachmentPayloadSchema =
+export const ExternalReferenceSOWithoutRefsAttachmentPayloadSchema = lazySchema(() =>
   ExternalReferenceBaseAttachmentPayloadSchema.extend({
     externalReferenceStorage: ExternalReferenceStorageSOSchema,
-  });
+  })
+);
 
-export const ExternalReferenceAttachmentPayloadSchema = z.union([
-  ExternalReferenceNoSOAttachmentPayloadSchema,
-  ExternalReferenceSOAttachmentPayloadSchema,
-]);
+export const ExternalReferenceAttachmentPayloadSchema = lazySchema(() =>
+  z.union([
+    ExternalReferenceNoSOAttachmentPayloadSchema,
+    ExternalReferenceSOAttachmentPayloadSchema,
+  ])
+);
 
-export const ExternalReferenceWithoutRefsAttachmentPayloadSchema = z.union([
-  ExternalReferenceNoSOAttachmentPayloadSchema,
-  ExternalReferenceSOWithoutRefsAttachmentPayloadSchema,
-]);
+export const ExternalReferenceWithoutRefsAttachmentPayloadSchema = lazySchema(() =>
+  z.union([
+    ExternalReferenceNoSOAttachmentPayloadSchema,
+    ExternalReferenceSOWithoutRefsAttachmentPayloadSchema,
+  ])
+);
 
 const ExternalReferenceAttachmentAttributesSchema = ExternalReferenceAttachmentPayloadSchema.and(
   AttachmentAttributesBasicSchema
@@ -258,21 +294,25 @@ export type ExternalReferenceAttachment = z.infer<typeof ExternalReferenceAttach
 /**
  * Persistable state
  */
-export const PersistableStateAttachmentPayloadSchema = z.object({
-  type: z.literal(AttachmentType.persistableState),
-  owner: z.string(),
-  persistableStateAttachmentTypeId: z.string(),
-  persistableStateAttachmentState: z.record(z.string(), jsonValueSchema),
-});
+export const PersistableStateAttachmentPayloadSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(AttachmentType.persistableState),
+    owner: z.string(),
+    persistableStateAttachmentTypeId: z.string(),
+    persistableStateAttachmentState: z.record(z.string(), jsonValueSchema),
+  })
+);
 
 const PersistableStateAttachmentAttributesSchema = PersistableStateAttachmentPayloadSchema.merge(
   AttachmentAttributesBasicSchema
 );
 
-export const PersistableStateAttachmentSchema = PersistableStateAttachmentAttributesSchema.extend({
-  id: z.string(),
-  version: z.string(),
-});
+export const PersistableStateAttachmentSchema = lazySchema(() =>
+  PersistableStateAttachmentAttributesSchema.extend({
+    id: z.string(),
+    version: z.string(),
+  })
+);
 
 export type PersistableStateAttachmentPayload = z.infer<
   typeof PersistableStateAttachmentPayloadSchema
@@ -285,58 +325,68 @@ export type PersistableStateAttachmentAttributes = z.infer<
 /**
  * Common
  */
-export const AttachmentPayloadSchema = z.union([
-  UserCommentAttachmentPayloadSchema,
-  AlertAttachmentPayloadSchema,
-  EventAttachmentPayloadSchema,
-  ActionsAttachmentPayloadSchema,
-  ExternalReferenceNoSOAttachmentPayloadSchema,
-  ExternalReferenceSOAttachmentPayloadSchema,
-  PersistableStateAttachmentPayloadSchema,
-]);
+export const AttachmentPayloadSchema = lazySchema(() =>
+  z.union([
+    UserCommentAttachmentPayloadSchema,
+    AlertAttachmentPayloadSchema,
+    EventAttachmentPayloadSchema,
+    ActionsAttachmentPayloadSchema,
+    ExternalReferenceNoSOAttachmentPayloadSchema,
+    ExternalReferenceSOAttachmentPayloadSchema,
+    PersistableStateAttachmentPayloadSchema,
+  ])
+);
 
-export const AttachmentPayloadWithoutRefsSchema = z.union([
-  UserCommentAttachmentPayloadSchema,
-  AlertAttachmentPayloadSchema,
-  EventAttachmentPayloadSchema,
-  ActionsAttachmentPayloadSchema,
-  ExternalReferenceNoSOAttachmentPayloadSchema,
-  ExternalReferenceSOWithoutRefsAttachmentPayloadSchema,
-  PersistableStateAttachmentPayloadSchema,
-]);
+export const AttachmentPayloadWithoutRefsSchema = lazySchema(() =>
+  z.union([
+    UserCommentAttachmentPayloadSchema,
+    AlertAttachmentPayloadSchema,
+    EventAttachmentPayloadSchema,
+    ActionsAttachmentPayloadSchema,
+    ExternalReferenceNoSOAttachmentPayloadSchema,
+    ExternalReferenceSOWithoutRefsAttachmentPayloadSchema,
+    PersistableStateAttachmentPayloadSchema,
+  ])
+);
 
-export const AttachmentAttributesSchema = z.union([
-  UserCommentAttachmentAttributesSchema,
-  AlertAttachmentAttributesSchema,
-  EventAttachmentAttributesSchema,
-  ActionsAttachmentAttributesSchema,
-  ExternalReferenceAttachmentAttributesSchema,
-  PersistableStateAttachmentAttributesSchema,
-]);
+export const AttachmentAttributesSchema = lazySchema(() =>
+  z.union([
+    UserCommentAttachmentAttributesSchema,
+    AlertAttachmentAttributesSchema,
+    EventAttachmentAttributesSchema,
+    ActionsAttachmentAttributesSchema,
+    ExternalReferenceAttachmentAttributesSchema,
+    PersistableStateAttachmentAttributesSchema,
+  ])
+);
 
-const AttachmentAttributesNoSOSchema = z.union([
-  UserCommentAttachmentAttributesSchema,
-  AlertAttachmentAttributesSchema,
-  EventAttachmentAttributesSchema,
-  ActionsAttachmentAttributesSchema,
-  ExternalReferenceNoSOAttachmentAttributesSchema,
-  PersistableStateAttachmentAttributesSchema,
-]);
+const AttachmentAttributesNoSOSchema = lazySchema(() =>
+  z.union([
+    UserCommentAttachmentAttributesSchema,
+    AlertAttachmentAttributesSchema,
+    EventAttachmentAttributesSchema,
+    ActionsAttachmentAttributesSchema,
+    ExternalReferenceNoSOAttachmentAttributesSchema,
+    PersistableStateAttachmentAttributesSchema,
+  ])
+);
 
-const AttachmentAttributesWithoutRefsSchema = z.union([
-  UserCommentAttachmentAttributesSchema,
-  AlertAttachmentAttributesSchema,
-  EventAttachmentAttributesSchema,
-  ActionsAttachmentAttributesSchema,
-  ExternalReferenceWithoutRefsAttachmentAttributesSchema,
-  PersistableStateAttachmentAttributesSchema,
-]);
+const AttachmentAttributesWithoutRefsSchema = lazySchema(() =>
+  z.union([
+    UserCommentAttachmentAttributesSchema,
+    AlertAttachmentAttributesSchema,
+    EventAttachmentAttributesSchema,
+    ActionsAttachmentAttributesSchema,
+    ExternalReferenceWithoutRefsAttachmentAttributesSchema,
+    PersistableStateAttachmentAttributesSchema,
+  ])
+);
 
 export const AttachmentSchema = AttachmentAttributesSchema.and(
   z.object({ id: z.string(), version: z.string() })
 );
 
-export const AttachmentsSchema = z.array(AttachmentSchema);
+export const AttachmentsSchema = lazySchema(() => z.array(AttachmentSchema));
 
 /**
  * This type is used by the CaseService.

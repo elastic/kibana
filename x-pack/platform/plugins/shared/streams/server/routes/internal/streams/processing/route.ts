@@ -14,7 +14,7 @@ import {
   isEnabledFailureStore,
 } from '@kbn/streams-schema';
 import type { DataStreamWithFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { streamlangDSLSchema, isConditionBlock } from '@kbn/streamlang';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import { from, map } from 'rxjs';
@@ -47,8 +47,10 @@ import { isNoLLMSuggestionsError } from './no_llm_suggestions_error';
 type StreamlangStep = StreamlangDSL['steps'][number];
 
 const simulationBaseBodySchema = {
-  documents: z.array(boundedFlattenRecord).max(1000),
-  detected_fields: z.array(boundedNamedFieldDefinitionSchema).max(1000).optional(),
+  documents: lazySchema(() => z.array(boundedFlattenRecord).max(1000)),
+  detected_fields: lazySchema(() =>
+    z.array(boundedNamedFieldDefinitionSchema).max(1000).optional()
+  ),
 };
 
 const PROCESSOR_TYPE_NAME_MAX_LENGTH = 128;
@@ -351,16 +353,18 @@ export const processingDateSuggestionsRoute = createServerRoute({
   },
 });
 
-const failureStoreSamplesParamsSchema = z.object({
-  path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
-  query: z
-    .object({
-      size: z.coerce.number().optional(),
-      start: z.string().max(64).optional(),
-      end: z.string().max(64).optional(),
-    })
-    .optional(),
-});
+const failureStoreSamplesParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+    query: z
+      .object({
+        size: z.coerce.number().optional(),
+        start: z.string().max(64).optional(),
+        end: z.string().max(64).optional(),
+      })
+      .optional(),
+  })
+);
 
 export const failureStoreSamplesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/processing/_failure_store_samples',

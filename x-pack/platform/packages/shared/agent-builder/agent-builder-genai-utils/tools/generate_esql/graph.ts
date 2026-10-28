@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { TimeRange } from '@kbn/agent-builder-common';
 import type { ScopedModel } from '@kbn/agent-builder-server';
@@ -46,15 +46,20 @@ import type { EsqlLoadedDocumentation } from './documentation';
 import { hasRejectedJoinTarget } from './join_errors';
 import { withPromqlKeyword } from './promql_keyword';
 
-export const requestDocumentationSchema = z
-  .object({
-    commands: z
-      .array(z.string())
-      .optional()
-      .describe('ES|QL source and processing commands to get documentation for.'),
-    functions: z.array(z.string()).optional().describe('ES|QL functions to get documentation for.'),
-  })
-  .describe('Tool to use to request ES|QL documentation');
+export const requestDocumentationSchema = lazySchema(() =>
+  z
+    .object({
+      commands: z
+        .array(z.string())
+        .optional()
+        .describe('ES|QL source and processing commands to get documentation for.'),
+      functions: z
+        .array(z.string())
+        .optional()
+        .describe('ES|QL functions to get documentation for.'),
+    })
+    .describe('Tool to use to request ES|QL documentation')
+);
 
 const StateAnnotation = Annotation.Root({
   // inputs

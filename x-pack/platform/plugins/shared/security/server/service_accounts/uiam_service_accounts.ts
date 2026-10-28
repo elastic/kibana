@@ -17,7 +17,7 @@ import type {
   AuditServiceSetup,
   CheckPrivilegesWithRequest,
 } from '@kbn/security-plugin-types-server';
-import { z } from '@kbn/zod';
+import { lazySchema, z } from '@kbn/zod';
 
 import { buildAssumableBy } from './assumable_by';
 import { ensureClusterPrivilege } from './cluster_privilege';
@@ -108,14 +108,18 @@ const toDirectoryEntry = (
  * plus an `expires_in` ISO-8601 duration (currently `PT5M`) that is intentionally stripped:
  * token freshness is managed locally and nothing should key off the upstream TTL.
  */
-const exchangeTokenResponseSchema = z.object({
-  // codeql[js/kibana/unbounded-string-in-schema] upstream response — not caller-controlled input
-  token: z.string().min(1).max(SERVICE_ACCOUNT_TOKEN_MAX_LENGTH),
-});
+const exchangeTokenResponseSchema = lazySchema(() =>
+  z.object({
+    // codeql[js/kibana/unbounded-string-in-schema] upstream response — not caller-controlled input
+    token: z.string().min(1).max(SERVICE_ACCOUNT_TOKEN_MAX_LENGTH),
+  })
+);
 
-const uiamErrorResponseSchema = z.object({
-  error: z.object({ code: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH) }),
-});
+const uiamErrorResponseSchema = lazySchema(() =>
+  z.object({
+    error: z.object({ code: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH) }),
+  })
+);
 
 /**
  * UIAM refusals of a create request that are the caller's to fix, keyed by UIAM error code and

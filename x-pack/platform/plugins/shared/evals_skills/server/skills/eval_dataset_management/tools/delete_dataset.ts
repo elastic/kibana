@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { EvalDatasetManagementToolDeps } from './deps';
@@ -22,9 +22,11 @@ import {
 } from './tool_utils';
 import type { DatasetDocument } from './tool_utils';
 
-const schema = z.object({
-  dataset_id: datasetIdSchema,
-});
+const schema = lazySchema(() =>
+  z.object({
+    dataset_id: datasetIdSchema,
+  })
+);
 
 const countOtherSpaces = ({ space_ids: spaceIds }: DatasetDocument, spaceId: string): number =>
   spaceIds.filter((id) => id !== spaceId).length;

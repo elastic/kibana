@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
@@ -21,18 +21,20 @@ import type { EngineDescriptor, EngineStatus } from '../../domain/saved_objects'
 import { pairedQualifies } from './utils/process_status';
 
 /** `both` reproduces the public start/stop behaviour; the other two toggle a single task. */
-const ProcessParam = z.enum(['priority', 'nonPriority', 'both']).default('both');
+const ProcessParam = lazySchema(() => z.enum(['priority', 'nonPriority', 'both']).default('both'));
 
-const bodySchema = z.object({
-  entityTypes: z
-    .array(EntityType)
-    .max(ALL_ENTITY_TYPES.length)
-    .optional()
-    .describe('Entity types to act on. Defaults to every type the process applies to.'),
-  process: ProcessParam.describe(
-    'Which extraction process to act on. Defaults to both, matching the public start/stop APIs.'
-  ),
-});
+const bodySchema = lazySchema(() =>
+  z.object({
+    entityTypes: z
+      .array(EntityType)
+      .max(ALL_ENTITY_TYPES.length)
+      .optional()
+      .describe('Entity types to act on. Defaults to every type the process applies to.'),
+    process: ProcessParam.describe(
+      'Which extraction process to act on. Defaults to both, matching the public start/stop APIs.'
+    ),
+  })
+);
 
 type StartStopRequestBody = z.infer<typeof bodySchema>;
 type Process = z.infer<typeof ProcessParam>;

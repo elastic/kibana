@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { tool } from '@langchain/core/tools';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import type { ToolCall } from '@kbn/agent-builder-genai-utils/langchain';
@@ -81,23 +81,27 @@ const stepDefinitionSchema = z
   .passthrough();
 
 // Typed so the JSON schema has a type: with `z.unknown()`, models send objects and arrays as strings.
-const jsonValueSchema = z.union([
-  z.array(z.unknown()),
-  z.record(z.string(), z.unknown()),
-  z.string(),
-  z.number(),
-  z.boolean(),
-  z.null(),
-]);
+const jsonValueSchema = lazySchema(() =>
+  z.union([
+    z.array(z.unknown()),
+    z.record(z.string(), z.unknown()),
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.null(),
+  ])
+);
 
 /* ---------- Tool definitions ---------- */
 
 const setYamlTool = defineTool({
   name: 'set_yaml',
   description: 'Replace the entire workflow YAML with a new version',
-  schema: z.object({
-    yaml: z.string().describe('Complete workflow YAML content'),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      yaml: z.string().describe('Complete workflow YAML content'),
+    })
+  ),
   mutatesYaml: true,
   execute: async ({ yaml }) => ({
     yaml,
@@ -108,13 +112,15 @@ const setYamlTool = defineTool({
 const insertStepTool = defineTool({
   name: 'insert_step',
   description: 'Insert a new step into the workflow',
-  schema: z.object({
-    step: stepDefinitionSchema.describe('Step definition to insert'),
-    insertAfterStep: z
-      .string()
-      .optional()
-      .describe('Name of an existing step to insert after; appends to root steps if omitted'),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      step: stepDefinitionSchema.describe('Step definition to insert'),
+      insertAfterStep: z
+        .string()
+        .optional()
+        .describe('Name of an existing step to insert after; appends to root steps if omitted'),
+    })
+  ),
   mutatesYaml: true,
   execute: async ({ step, insertAfterStep }, { state }) => {
     const result = insertStep(state.yaml, step as StepDefinition, insertAfterStep);
@@ -127,10 +133,12 @@ const insertStepTool = defineTool({
 const modifyStepTool = defineTool({
   name: 'modify_step',
   description: 'Replace an existing step by name',
-  schema: z.object({
-    stepName: z.string(),
-    updatedStep: stepDefinitionSchema,
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      stepName: z.string(),
+      updatedStep: stepDefinitionSchema,
+    })
+  ),
   mutatesYaml: true,
   execute: async ({ stepName, updatedStep }, { state }) => {
     const result = modifyStep(state.yaml, stepName, updatedStep as StepDefinition);
@@ -144,11 +152,13 @@ const modifyStepPropertyTool = defineTool({
   name: 'modify_step_property',
   description:
     'Set one property of an existing step by dot path. Missing keys are created; list indexes must exist.',
-  schema: z.object({
-    stepName: z.string(),
-    property: z.string().describe('Dot path (e.g. "type", "with.message", "with.inputs.owner")'),
-    value: jsonValueSchema,
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      stepName: z.string(),
+      property: z.string().describe('Dot path (e.g. "type", "with.message", "with.inputs.owner")'),
+      value: jsonValueSchema,
+    })
+  ),
   mutatesYaml: true,
   execute: async ({ stepName, property, value }, { state }) => {
     const result = modifyStepProperty(state.yaml, stepName, property, value);
@@ -163,10 +173,12 @@ const modifyWorkflowPropertyTool = defineTool({
   description: `Set a workflow property by dot path (e.g. "description", "consts.url", "triggers.0.with.every"). The first segment must be a top-level key: ${WORKFLOW_PROPERTY_KEYS.join(
     ', '
   )}. Missing keys are created; list indexes must exist. Not for steps.`,
-  schema: z.object({
-    property: z.string().describe('Dot path starting with a top-level key'),
-    value: jsonValueSchema.describe('New value at that path'),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      property: z.string().describe('Dot path starting with a top-level key'),
+      value: jsonValueSchema.describe('New value at that path'),
+    })
+  ),
   mutatesYaml: true,
   execute: async ({ property, value }, { state }) => {
     const result = modifyWorkflowProperty(state.yaml, property, value);
@@ -179,9 +191,11 @@ const modifyWorkflowPropertyTool = defineTool({
 const deleteStepTool = defineTool({
   name: 'delete_step',
   description: 'Delete a step by name',
-  schema: z.object({
-    stepName: z.string(),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      stepName: z.string(),
+    })
+  ),
   mutatesYaml: true,
   execute: async ({ stepName }, { state }) => {
     const result = deleteStep(state.yaml, stepName);
@@ -194,10 +208,12 @@ const deleteStepTool = defineTool({
 const getStepDefinitionsTool = defineTool({
   name: 'get_step_definitions',
   description: 'Fetch the full schema for one or more step types (input/config params, examples)',
-  schema: z.object({
-    stepType: z.string().optional().describe('Exact step type id to fetch the full schema for'),
-    search: z.string().optional().describe('Keyword to filter step types'),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      stepType: z.string().optional().describe('Exact step type id to fetch the full schema for'),
+      search: z.string().optional().describe('Keyword to filter step types'),
+    })
+  ),
   mutatesYaml: false,
   execute: async (args, { deps }) => ({
     message: { success: true, data: await lookupStepDefinitions(args, deps) },
@@ -207,9 +223,11 @@ const getStepDefinitionsTool = defineTool({
 const getTriggerDefinitionsTool = defineTool({
   name: 'get_trigger_definitions',
   description: 'Fetch the full schema for one or more trigger types',
-  schema: z.object({
-    triggerType: z.string().optional(),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      triggerType: z.string().optional(),
+    })
+  ),
   mutatesYaml: false,
   execute: async (args, { deps }) => ({
     message: { success: true, data: await lookupTriggerDefinitions(args, deps) },

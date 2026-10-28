@@ -12,29 +12,35 @@ import { AuthConfiguration, SecretConfigurationSchema, WebhookMethods } from '..
 const HeadersSchema = lazySchema(() => z.record(z.string(), z.string()));
 
 export const ExternalIncidentServiceConfiguration = {
-  createIncidentUrl: z.string(),
-  createIncidentMethod: z
-    .enum([WebhookMethods.POST, WebhookMethods.PUT])
-    .default(WebhookMethods.POST),
-  createIncidentJson: z.string(), // stringified object
-  createIncidentResponseKey: z.string(),
-  getIncidentMethod: z.enum([WebhookMethods.GET, WebhookMethods.POST]).default(WebhookMethods.GET),
-  getIncidentUrl: z.string(),
-  getIncidentJson: z.string().nullable().default(null),
-  getIncidentResponseExternalTitleKey: z.string(),
-  viewIncidentUrl: z.string(),
-  updateIncidentUrl: z.string(),
-  updateIncidentMethod: z
-    .enum([WebhookMethods.POST, WebhookMethods.PATCH, WebhookMethods.PUT])
-    .default(WebhookMethods.PUT),
-  updateIncidentJson: z.string(),
-  createCommentUrl: z.string().nullable().default(null),
-  createCommentMethod: z
-    .enum([WebhookMethods.POST, WebhookMethods.PUT, WebhookMethods.PATCH])
-    .default(WebhookMethods.PUT)
-    .nullable(),
-  createCommentJson: z.string().nullable().default(null),
-  headers: HeadersSchema.nullable().default(null),
+  createIncidentUrl: lazySchema(() => z.string()),
+  createIncidentMethod: lazySchema(() =>
+    z.enum([WebhookMethods.POST, WebhookMethods.PUT]).default(WebhookMethods.POST)
+  ),
+  createIncidentJson: lazySchema(() => z.string()), // stringified object
+  createIncidentResponseKey: lazySchema(() => z.string()),
+  getIncidentMethod: lazySchema(() =>
+    z.enum([WebhookMethods.GET, WebhookMethods.POST]).default(WebhookMethods.GET)
+  ),
+  getIncidentUrl: lazySchema(() => z.string()),
+  getIncidentJson: lazySchema(() => z.string().nullable().default(null)),
+  getIncidentResponseExternalTitleKey: lazySchema(() => z.string()),
+  viewIncidentUrl: lazySchema(() => z.string()),
+  updateIncidentUrl: lazySchema(() => z.string()),
+  updateIncidentMethod: lazySchema(() =>
+    z
+      .enum([WebhookMethods.POST, WebhookMethods.PATCH, WebhookMethods.PUT])
+      .default(WebhookMethods.PUT)
+  ),
+  updateIncidentJson: lazySchema(() => z.string()),
+  createCommentUrl: lazySchema(() => z.string().nullable().default(null)),
+  createCommentMethod: lazySchema(() =>
+    z
+      .enum([WebhookMethods.POST, WebhookMethods.PUT, WebhookMethods.PATCH])
+      .default(WebhookMethods.PUT)
+      .nullable()
+  ),
+  createCommentJson: lazySchema(() => z.string().nullable().default(null)),
+  headers: lazySchema(() => HeadersSchema.nullable().default(null)),
   hasAuth: AuthConfiguration.hasAuth,
   authType: AuthConfiguration.authType,
   certType: AuthConfiguration.certType,

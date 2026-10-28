@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
@@ -20,8 +20,8 @@ import { observabilityAttachmentDataSchema } from './observability_attachment_da
 const GET_LOG_DOCUMENT_TOOL_ID = 'get_log_document';
 
 const logDataSchema = observabilityAttachmentDataSchema.extend({
-  id: z.string().max(MAX_SHORT_STRING_LENGTH),
-  index: z.string().max(MAX_INDEX_PATTERN_LENGTH),
+  id: lazySchema(() => z.string().max(MAX_SHORT_STRING_LENGTH)),
+  index: lazySchema(() => z.string().max(MAX_INDEX_PATTERN_LENGTH)),
 });
 
 export type LogAttachmentData = z.infer<typeof logDataSchema>;

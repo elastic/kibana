@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { conflict } from '@hapi/boom';
 import { STREAMS_API_PRIVILEGES, STREAMS_SETTINGS_DOCUMENT_ID } from '../../../../common/constants';
 import { NameTakenError } from '../../../lib/streams/errors/name_taken_error';
@@ -14,7 +14,7 @@ import { createServerRoute } from '../../create_server_route';
 
 export const enableStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/_enable 2023-10-31',
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   options: {
     access: 'public',
     summary: 'Enable streams',
@@ -64,7 +64,7 @@ export const enableStreamsRoute = createServerRoute({
 
 export const disableStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/_disable 2023-10-31',
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   options: {
     access: 'public',
     summary: 'Disable streams',
