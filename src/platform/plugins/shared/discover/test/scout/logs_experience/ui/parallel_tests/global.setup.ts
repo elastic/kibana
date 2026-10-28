@@ -79,6 +79,50 @@ globalSetupHook('Setup logs experience tests data', async ({ esClient, log, conf
   ]);
   log.debug('[setup:logs] synthtrace no-message data indexed');
 
+  // Three documents, one per minute, with the `log.level` / `service.name` pairs the row-indicator
+  // and cell-renderer specs assert on. `SYNTH_CONTEXT_ROWS` is in grid order (newest first), so it
+  // is walked backwards here: the generator emits oldest first.
+  const contextRows = LOGS.SYNTH_CONTEXT_ROWS;
+  await logsEsClient.index([
+    timerange(from, from + contextRows.length * 60_000)
+      .interval('1m')
+      .rate(1)
+      .generator((timestamp: number, index: number) =>
+        logDoc
+          .create()
+          .message(LOGS.SYNTH_LOGS_MESSAGE)
+          .hostName(LOGS.SYNTH_LOGS_HOST)
+          .timestamp(timestamp)
+          .dataset(LOGS.SYNTH_CONTEXT_DATASET)
+          .namespace(LOGS.SYNTH_LOGS_NAMESPACE)
+          .logLevel(contextRows[contextRows.length - 1 - index].logLevel)
+          .service(contextRows[contextRows.length - 1 - index].serviceName)
+      ),
+  ]);
+  log.debug('[setup:logs] synthtrace context-awareness data indexed');
+
+  // More documents than two sample sizes, so "Load more" can be exercised twice: the footer reports
+  // 500 loaded rows, then 1,000, and disappears once every document is loaded.
+  const fetchMoreRate = LOGS.SYNTH_FETCH_MORE_DOCUMENT_COUNT / ((to - from) / 60_000);
+  await logsEsClient.index([
+    timerange(from, to)
+      .interval('1m')
+      .rate(fetchMoreRate)
+      .generator((timestamp: number) =>
+        logDoc
+          .create()
+          .message(LOGS.SYNTH_LOGS_MESSAGE)
+          .hostName(LOGS.SYNTH_LOGS_HOST)
+          .timestamp(timestamp)
+          .dataset(LOGS.SYNTH_FETCH_MORE_DATASET)
+          .namespace(LOGS.SYNTH_LOGS_NAMESPACE)
+          .logLevel('info')
+      ),
+  ]);
+  log.debug(
+    `[setup:logs] synthtrace fetch-more data indexed (${LOGS.SYNTH_FETCH_MORE_DOCUMENT_COUNT} docs)`
+  );
+
   // Metric-shaped data for the negative cases: a data source that must NOT match the logs
   // profile. Indexed directly rather than via `infraEsClient`, whose `metrics-*` data streams
   // are TSDB and reject timestamps outside a moving window around now.
@@ -112,4 +156,64 @@ globalSetupHook('Setup logs experience tests data', async ({ esClient, log, conf
     operations: documents.flatMap((doc) => [{ create: {} }, doc]),
   });
   log.debug(`[setup:logs] indexed ${documents.length} docs into ${LOGS.NON_LOGS_INDEX}`);
+
+  // Non-logs documents with the fields the logs profile renders specially; see
+  // `NON_LOGS_FIELDS_INDEX` for why they live apart from the metric-shaped index.
+  await esClient.indices.create({
+    index: LOGS.NON_LOGS_FIELDS_INDEX,
+    mappings: {
+      properties: {
+        '@timestamp': { type: 'date' },
+        'host.name': { type: 'keyword' },
+        'log.level': { type: 'keyword' },
+        'service.name': { type: 'keyword' },
+        message: { type: 'text' },
+      },
+    },
+  });
+
+  const nonLogsFieldsDocuments = Array.from({ length: 10 }, (_, i) => ({
+    '@timestamp': new Date(from + i * intervalMs).toISOString(),
+    'host.name': LOGS.NON_LOGS_HOST,
+    'log.level': LOGS.NON_LOGS_LOG_LEVEL,
+    'service.name': LOGS.NON_LOGS_SERVICE_NAME,
+    message: LOGS.NON_LOGS_MESSAGE,
+  }));
+
+  await esClient.bulk({
+    index: LOGS.NON_LOGS_FIELDS_INDEX,
+    refresh: true,
+    operations: nonLogsFieldsDocuments.flatMap((doc) => [{ create: {} }, doc]),
+  });
+  log.debug(
+    `[setup:logs] indexed ${nonLogsFieldsDocuments.length} docs into ${LOGS.NON_LOGS_FIELDS_INDEX}`
+  );
+
+  // Logs with a message but no `log.level` anywhere in the mapping, the negative case for the row
+  // colour indicator. A plain index again, for the reason given on `NO_LOG_LEVEL_INDEX`.
+  await esClient.indices.create({
+    index: LOGS.NO_LOG_LEVEL_INDEX,
+    mappings: {
+      properties: {
+        '@timestamp': { type: 'date' },
+        'host.name': { type: 'keyword' },
+        message: { type: 'text' },
+      },
+    },
+  });
+
+  const noLogLevelDocuments = Array.from({ length: 10 }, (_, i) => ({
+    '@timestamp': new Date(from + i * intervalMs).toISOString(),
+    'host.name': LOGS.SYNTH_LOGS_HOST,
+    message: LOGS.SYNTH_LOGS_MESSAGE,
+  }));
+
+  await esClient.bulk({
+    index: LOGS.NO_LOG_LEVEL_INDEX,
+    refresh: true,
+    operations: noLogLevelDocuments.flatMap((doc) => [{ create: {} }, doc]),
+  });
+  log.debug(
+    `[setup:logs] indexed ${noLogLevelDocuments.length} docs into ${LOGS.NO_LOG_LEVEL_INDEX}`
+  );
 });
