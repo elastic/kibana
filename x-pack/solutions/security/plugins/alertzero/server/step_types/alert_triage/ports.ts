@@ -449,16 +449,22 @@ export const readKeyHistory = async (
   };
 };
 
+/** With `fields`, only those `_source` paths are returned, which keeps a read of many alerts small. */
 export const loadAlertsByIds = async (
   { callKibanaApi }: KibanaApi,
-  alertIds: readonly string[]
+  alertIds: readonly string[],
+  fields?: readonly string[]
 ): Promise<LoadedAlerts> => {
   const { body } = await callKibanaApi<{
     hits?: { hits?: Array<AlertHit & { _index?: string }> };
   }>({
     method: 'POST',
     path: SIGNALS_SEARCH_PATH,
-    body: { size: alertIds.length, query: { ids: { values: alertIds } } },
+    body: {
+      size: alertIds.length,
+      query: { ids: { values: alertIds } },
+      ...(fields && { _source: fields }),
+    },
   });
   const hits = body.hits?.hits ?? [];
   const found = new Set(hits.map(({ _id }) => _id));

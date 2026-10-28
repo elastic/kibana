@@ -69,6 +69,20 @@ const RULE_UUID = 'kibana.alert.rule.uuid';
 const RULE_REVISION = 'kibana.alert.rule.revision';
 const NAME_OVERRIDE = 'kibana.alert.rule.rule_name_override';
 
+/** Every field `buildPatternKeys` reads, so a caller that only needs keys can load just these. */
+export const PATTERN_KEY_FIELDS: readonly string[] = [
+  ...new Set([
+    ...Object.values(FIELD_SETS).flatMap(({ fields, hash }) => (hash ? [...fields, hash] : fields)),
+    RULE_UUID,
+    RULE_REVISION,
+    NAME_OVERRIDE,
+    'rule.id',
+    'event.code',
+    'event.category',
+    'host.os.type',
+  ]),
+];
+
 /** Reads `a.b.c` from a flat dotted key or a nested object. A list resolves to its first element. */
 export const getField = (doc: AlertDocument, path: string): unknown => {
   const first = (value: unknown): unknown => (Array.isArray(value) ? value[0] : value);

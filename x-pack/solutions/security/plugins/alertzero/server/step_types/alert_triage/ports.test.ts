@@ -176,6 +176,16 @@ describe('loadAlertsByIds', () => {
     ]);
   });
 
+  it('asks only for the given fields', async () => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValue({ status: 200, headers: {}, body: { hits: { hits: [] } } });
+    await loadAlertsByIds({ callKibanaApi }, ['a1'], ['host.name']);
+    await loadAlertsByIds({ callKibanaApi }, ['a1']);
+    expect(callKibanaApi.mock.calls[0][0].body._source).toEqual(['host.name']);
+    expect(callKibanaApi.mock.calls[1][0].body).not.toHaveProperty('_source');
+  });
+
   it('reports the ids that could not be loaded', async () => {
     const { missingAlertIds } = await loadWith([{ _id: 'a1', _index: 'i', _source: {} }]);
 
