@@ -342,10 +342,12 @@ apiTest.describe(
     let expectedStatusRule: DefaultRuleBody;
     let expectedTlsRule: DefaultRuleBody;
 
+    // The settings PUT merges with stored values, so start from defaults to ignore
+    // flags (e.g. `defaultStatusRuleEnabled: false`) left behind by earlier specs.
     const putDynamicSettings = (apiClient: ApiClientFixture, body: Record<string, unknown>) =>
       apiClient.put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS, {
         headers: editorHeaders,
-        body,
+        body: { ...DYNAMIC_SETTINGS_DEFAULTS, ...body },
         responseType: 'json',
       });
 
