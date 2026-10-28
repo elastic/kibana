@@ -61,8 +61,7 @@ export class DataFederationPlugin
     }
 
     this.isManagementUiEnabled = core.settings.globalClient.get<boolean>(
-      DATA_FEDERATION_ENABLED_SETTING_ID,
-      false
+      DATA_FEDERATION_ENABLED_SETTING_ID
     );
 
     const enableGoogleCloudStorageDataSourceType = this.enableGoogleCloudStorageDataSourceType;
